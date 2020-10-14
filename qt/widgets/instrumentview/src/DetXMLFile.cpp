@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/DetXMLFile.h"
 
@@ -28,7 +28,7 @@ DetXMLFile::DetXMLFile(const std::vector<int> &detector_list,
   std::ofstream out(m_fileName.toStdString().c_str());
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?> \n<detector-grouping> \n";
   out << R"(<group name="sum"> <detids val=")";
-  std::vector<int>::const_iterator idet = detector_list.begin();
+  auto idet = detector_list.begin();
   for (; idet != detector_list.end(); ++idet) {
     if (!exclude.contains(*idet)) {
       out << *idet << ',';

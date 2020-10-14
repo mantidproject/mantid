@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_PEAKSHAPESPHERICALFACTORY_H_
-#define MANTID_DATAOBJECTS_PEAKSHAPESPHERICALFACTORY_H_
+#pragma once
 
 #include "MantidDataObjects/PeakShapeFactory.h"
 #include "MantidKernel/System.h"
@@ -35,5 +34,3 @@ private:
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_PEAKSHAPESPHERICALFACTORY_H_ */

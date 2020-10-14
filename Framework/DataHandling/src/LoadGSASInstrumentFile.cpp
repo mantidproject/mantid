@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadGSASInstrumentFile.h"
 #include "MantidAPI/FileProperty.h"
@@ -193,7 +193,7 @@ void LoadGSASInstrumentFile::exec() {
       int bankId = bankIds[i];
       size_t wsId = workspaceOfBank[bankId];
       Workspace_sptr wsi = wsg->getItem(wsId - 1);
-      auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(wsi);
+      auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(wsi);
       // Get column from table workspace
       API::Column_const_sptr OutTabColumn = outTabWs->getColumn(i + 1);
       std::string parameterXMLString;
@@ -214,7 +214,8 @@ void LoadGSASInstrumentFile::exec() {
  * @param filename :: string for name of the .prm file
  * @param lines :: vector of strings for each non-empty line in .prm file
  */
-void LoadGSASInstrumentFile::loadFile(string filename, vector<string> &lines) {
+void LoadGSASInstrumentFile::loadFile(const string &filename,
+                                      vector<string> &lines) {
   string line;
 
   // the variable of type ifstream:
@@ -232,7 +233,7 @@ void LoadGSASInstrumentFile::loadFile(string filename, vector<string> &lines) {
       // display the line we gathered:
       boost::algorithm::trim(line);
       if (!line.empty())
-        lines.push_back(line);
+        lines.emplace_back(line);
     }
 
     // close the stream:
@@ -254,7 +255,7 @@ LoadGSASInstrumentFile::getHistogramType(const vector<string> &lines) {
   // We assume there is just one HTYPE line, look for it from beginning and
   // return its value.
   std::string lookFor = "INS   HTYPE";
-  for (size_t i = 0; i <= lines.size(); ++i) {
+  for (size_t i = 0; i < lines.size(); ++i) {
     if (lines[i].substr(0, lookFor.size()) == lookFor) {
       if (lines[i].size() < lookFor.size() + 7) {
         // line too short
@@ -274,7 +275,7 @@ size_t LoadGSASInstrumentFile::getNumberOfBanks(const vector<string> &lines) {
   // We assume there is just one BANK line, look for it from beginning and
   // return its value.
   std::string lookFor = "INS   BANK";
-  for (size_t i = 0; i <= lines.size(); ++i) {
+  for (size_t i = 0; i < lines.size(); ++i) {
     if (lines[i].substr(0, lookFor.size()) == lookFor) {
       if (lines[i].size() < lookFor.size() + 3) {
         // line too short
@@ -304,7 +305,7 @@ void LoadGSASInstrumentFile::scanBanks(const std::vector<std::string> &lines,
         "INS") { // Ignore all lines that don't begin with INS
       if (line.find("BNKPAR") !=
           string::npos) { // We've found start of a new bank
-        bankStartIndex.push_back(i);
+        bankStartIndex.emplace_back(i);
       }
     } // INS
   }   // for(i)
@@ -412,13 +413,13 @@ TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
   for (parmapiter = bankmapiter->second.begin();
        parmapiter != bankmapiter->second.end(); ++parmapiter) {
     string parname = parmapiter->first;
-    vec_parname.push_back(parname);
+    vec_parname.emplace_back(parname);
   }
 
   for (bankmapiter = bankparammap.begin(); bankmapiter != bankparammap.end();
        ++bankmapiter) {
     size_t bankid = bankmapiter->first;
-    vec_bankids.push_back(bankid);
+    vec_bankids.emplace_back(bankid);
   }
 
   g_log.debug() << "[DBx240] Number of imported parameters is " << numparams
@@ -426,7 +427,7 @@ TableWorkspace_sptr LoadGSASInstrumentFile::genTableWorkspace(
                 << "\n";
 
   // Create TableWorkspace
-  auto tablews = boost::make_shared<TableWorkspace>();
+  auto tablews = std::make_shared<TableWorkspace>();
 
   // set columns :
   // Any 2 columns cannot have the same name.

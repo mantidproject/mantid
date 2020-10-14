@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -128,7 +128,7 @@ void IkedaCarpenterPV::init() {
   this->lowerConstraint0("X0");
 }
 
-void IkedaCarpenterPV::lowerConstraint0(std::string paramName) {
+void IkedaCarpenterPV::lowerConstraint0(const std::string &paramName) {
   auto mixingConstraint =
       std::make_unique<BoundaryConstraint>(this, paramName, 0.0, true);
   mixingConstraint->setPenaltyFactor(1e9);
@@ -408,6 +408,27 @@ double IkedaCarpenterPV::intensity() const {
       integrator.integrate(*this, interval.first, interval.second);
 
   return result.result;
+}
+
+void IkedaCarpenterPV::setMatrixWorkspace(
+    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
+    double startX, double endX) {
+  if (workspace) {
+    // convert inital parameters that depend on x axis to correct units so
+    // inital guess is reasonable
+    auto tof = Mantid::Kernel::UnitFactory::Instance().create("TOF");
+    const auto centre = getParameter("X0");
+    const auto scaleFactor = centre / convertValue(centre, tof, workspace, wi);
+    if (scaleFactor != 0) {
+      if (isActive(parameterIndex("Alpha0")))
+        setParameter("Alpha0", getParameter("Alpha0") * scaleFactor);
+      if (isActive(parameterIndex("Alpha1")))
+        setParameter("Alpha1", getParameter("Alpha1") * scaleFactor);
+      if (isActive(parameterIndex("Beta0")))
+        setParameter("Beta0", getParameter("Beta0") * scaleFactor);
+    }
+  }
+  IFunctionMW::setMatrixWorkspace(workspace, wi, startX, endX);
 }
 
 } // namespace Functions

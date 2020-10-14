@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVEISAWDETCALTEST_H_
-#define MANTID_DATAHANDLING_SAVEISAWDETCALTEST_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/SaveIsawDetCal.h"
@@ -44,7 +43,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("Filename", "SaveIsawDetCalTest.DetCal"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws)));
+        "InputWorkspace", std::dynamic_pointer_cast<MatrixWorkspace>(ws)));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -54,5 +53,3 @@ public:
       Poco::File(filename).remove();
   }
 };
-
-#endif /* MANTID_DATAHANDLING_SAVEISAWDETCALTEST_H_ */

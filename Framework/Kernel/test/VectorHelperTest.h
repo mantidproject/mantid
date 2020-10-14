@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_VECTORHELPERTEST_H_
-#define MANTID_KERNEL_VECTORHELPERTEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -37,7 +36,7 @@ public:
     TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromEdges(single, 7.1),
                             const std::out_of_range &e, std::string(e.what()),
                             "indexOfValue - vector is empty");
-    single.push_back(1.7);
+    single.emplace_back(1.7);
     TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromEdges(single, 4.8),
                             const std::out_of_range &e, std::string(e.what()),
                             "indexOfValue - requires at least two bin edges");
@@ -60,7 +59,7 @@ public:
     TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 5.9),
                             const std::out_of_range &e, std::string(e.what()),
                             "indexOfValue - vector is empty");
-    single.push_back(2.5);
+    single.emplace_back(2.5);
     TS_ASSERT_THROWS_EQUALS(VectorHelper::indexOfValueFromCenters(single, 6.1),
                             const std::out_of_range &e, std::string(e.what()),
                             "indexOfValue - value out of range");
@@ -315,8 +314,8 @@ public:
 
     y = VectorHelper::normalizeVector(x);
     TSM_ASSERT_EQUALS("Pass-through empty vectors", y.size(), 0);
-    x.push_back(3.0);
-    x.push_back(4.0);
+    x.emplace_back(3.0);
+    x.emplace_back(4.0);
     TS_ASSERT_DELTA(VectorHelper::lengthVector(x), 5.0, 1e-5);
     y = VectorHelper::normalizeVector(x);
     TS_ASSERT_EQUALS(y.size(), 2);
@@ -398,7 +397,7 @@ public:
     TS_ASSERT_THROWS(
         VectorHelper::smoothInRange(inputData, output, 6, &inputBoundaries),
         const std::invalid_argument &);
-    inputBoundaries.push_back(6);
+    inputBoundaries.emplace_back(6);
     VectorHelper::smoothInRange(inputData, output, 6, &inputBoundaries);
 
     TS_ASSERT_DELTA(output[1] - output[0], 0.492, 1.e-3);
@@ -611,5 +610,3 @@ private:
       largerBinEdges[i] = binEdges[(2 * i)];
   }
 };
-
-#endif /* MANTID_KERNEL_VECTORHELPERTEST_H_ */

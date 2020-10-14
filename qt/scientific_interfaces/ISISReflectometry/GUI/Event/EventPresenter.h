@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H
+#pragma once
 
 #include "../../Reduction/Slicing.h"
 #include "Common/DllConfig.h"
@@ -28,10 +27,10 @@ public:
   explicit EventPresenter(IEventView *view);
 
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
-  void reductionPaused() override;
-  void reductionResumed() override;
-  void autoreductionPaused() override;
-  void autoreductionResumed() override;
+  void notifyReductionPaused() override;
+  void notifyReductionResumed() override;
+  void notifyAutoreductionPaused() override;
+  void notifyAutoreductionResumed() override;
 
   void notifySliceTypeChanged(SliceType newSliceType) override;
   void notifyUniformSliceCountChanged(int sliceCount) override;
@@ -62,4 +61,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_REFLEVENTPRESENTER_H */

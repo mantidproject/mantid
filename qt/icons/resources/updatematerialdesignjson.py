@@ -1,3 +1,9 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
 # Script from https://github.com/spyder-ide/qtawesome/commit/4985bd6e9bb75824de2d2f789fe5fbbf4016b823
 # script used to create charmap
 import re

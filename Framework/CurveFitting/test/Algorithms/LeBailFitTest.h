@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_LEBAILFITTEST_H_
-#define MANTID_CURVEFITTING_LEBAILFITTEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include <cxxtest/TestSuite.h>
@@ -29,8 +28,8 @@ using namespace WorkspaceCreationHelper;
 using namespace std;
 
 using Mantid::CurveFitting::Algorithms::LeBailFit;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Points;
 
 namespace {
@@ -287,7 +286,7 @@ API::MatrixWorkspace_sptr generateSeparateTwoPeaksData2() {
   const size_t size = 127;
 
   // b) Get workspace
-  auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+  auto dataws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // c) Input data
@@ -323,7 +322,7 @@ API::MatrixWorkspace_sptr generateTwinPeakData() {
   const size_t size = 23;
 
   // b) Get workspace
-  auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+  auto dataws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // c) Input data
@@ -381,7 +380,7 @@ API::MatrixWorkspace_sptr generate1PeakDataPlusBackground() {
 
   // b) Get workspace
   const size_t size = 73;
-  auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+  auto dataws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // c) Input data
@@ -416,53 +415,13 @@ API::MatrixWorkspace_sptr generateArgSiPeak220() {
 
   // b) Get workspace
   size_t size = 26;
-  auto dataws = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+  auto dataws = std::dynamic_pointer_cast<API::MatrixWorkspace>(
       API::WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
   // c) Input data
   dataws->setHistogram(0, vecx, vecy, vece);
 
   return dataws;
-}
-
-//----------------------------------------------------------------------------------------------
-/** Import data from a column data file
- */
-void importDataFromColumnFile(std::string filename, std::string wsname) {
-  DataHandling::LoadAscii2 load;
-  load.initialize();
-
-  load.setProperty("FileName", filename);
-  load.setProperty("OutputWorkspace", wsname);
-  load.setProperty("Separator", "Automatic");
-  load.setProperty("Unit", "TOF");
-
-  load.execute();
-  if (!load.isExecuted()) {
-    stringstream errss;
-    errss << "Data file " << filename << " cannot be opened. ";
-    std::cout << errss.str() << '\n';
-    throw std::runtime_error(errss.str());
-  }
-
-  MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      AnalysisDataService::Instance().retrieve(wsname));
-  if (!ws) {
-    stringstream errss;
-    errss << "LoadAscii failed to generate workspace";
-    std::cout << errss.str() << '\n';
-    throw std::runtime_error(errss.str());
-  }
-
-  // Set error
-  const MantidVec &vecY = ws->readY(0);
-  MantidVec &vecE = ws->dataE(0);
-  size_t numpts = vecY.size();
-  for (size_t i = 0; i < numpts; ++i) {
-    vecE[i] = std::max(1.0, sqrt(vecY[i]));
-  }
-
-  return;
 }
 
 //----------------------------------------------------------------------------------------------
@@ -500,17 +459,9 @@ API::MatrixWorkspace_sptr createInputDataWorkspace(int option) {
       break;
     }
 
-  } else if (option == 4) {
+  } else {
     // Load from column file
     throw runtime_error("Using .dat file is not allowed for committing. ");
-    string datafilename("PG3_4862_Bank7.dat");
-    string wsname("Data");
-    importDataFromColumnFile(datafilename, wsname);
-    dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(wsname));
-  } else {
-    // not supported
-    throw std::invalid_argument("Logic error. ");
   }
 
   return dataws;
@@ -644,19 +595,19 @@ public:
     double h110 = 660.0 / 0.0064;
     double h111 = 1370.0 / 0.008;
     std::vector<double> peakheights;
-    peakheights.push_back(h111);
-    peakheights.push_back(h110);
+    peakheights.emplace_back(h111);
+    peakheights.emplace_back(h110);
     std::vector<std::vector<int>> hkls;
     std::vector<int> p111;
-    p111.push_back(1);
-    p111.push_back(1);
-    p111.push_back(1);
-    hkls.push_back(p111);
+    p111.emplace_back(1);
+    p111.emplace_back(1);
+    p111.emplace_back(1);
+    hkls.emplace_back(p111);
     std::vector<int> p110;
-    p110.push_back(1);
-    p110.push_back(1);
-    p110.push_back(0);
-    hkls.push_back(p110);
+    p110.emplace_back(1);
+    p110.emplace_back(1);
+    p110.emplace_back(0);
+    hkls.emplace_back(p110);
     hklws = createInputHKLWorkspace(hkls, peakheights);
 
     AnalysisDataService::Instance().addOrReplace("Data", dataws);
@@ -699,7 +650,7 @@ public:
 
     // 5. Get output
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
     TS_ASSERT(outws);
     if (!outws) {
@@ -752,12 +703,12 @@ public:
     TableWorkspace_sptr hklws;
     double h220 = 660.0 / 0.0064;
     std::vector<double> peakheights;
-    peakheights.push_back(h220);
+    peakheights.emplace_back(h220);
 
     std::vector<std::vector<int>> hkls;
     std::vector<int> p220(3, 2);
     p220[2] = 0;
-    hkls.push_back(p220);
+    hkls.emplace_back(p220);
 
     hklws = createInputHKLWorkspace(hkls, peakheights);
 
@@ -801,7 +752,7 @@ public:
 
     // 5. Get output
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
     TS_ASSERT(outws);
     if (!outws) {
@@ -855,19 +806,19 @@ public:
     double h110 = 660.0 / 0.0064;
     double h111 = 1370.0 / 0.008;
     std::vector<double> peakheights;
-    peakheights.push_back(h111);
-    peakheights.push_back(h110);
+    peakheights.emplace_back(h111);
+    peakheights.emplace_back(h110);
     std::vector<std::vector<int>> hkls;
     std::vector<int> p111;
-    p111.push_back(1);
-    p111.push_back(1);
-    p111.push_back(1);
-    hkls.push_back(p111);
+    p111.emplace_back(1);
+    p111.emplace_back(1);
+    p111.emplace_back(1);
+    hkls.emplace_back(p111);
     std::vector<int> p110;
-    p110.push_back(1);
-    p110.push_back(1);
-    p110.push_back(0);
-    hkls.push_back(p110);
+    p110.emplace_back(1);
+    p110.emplace_back(1);
+    p110.emplace_back(0);
+    hkls.emplace_back(p110);
     hklws = createInputHKLWorkspace(hkls, peakheights);
 
     AnalysisDataService::Instance().addOrReplace("Data", dataws);
@@ -902,7 +853,7 @@ public:
 
     // 5. Get output & Test
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("CalculatedPeaks"));
     TS_ASSERT(outws);
 
@@ -956,19 +907,19 @@ public:
     double h110 = 1.0;
     double h111 = 1.0;
     std::vector<double> peakheights;
-    peakheights.push_back(h111);
-    peakheights.push_back(h110);
+    peakheights.emplace_back(h111);
+    peakheights.emplace_back(h110);
     std::vector<std::vector<int>> hkls;
     std::vector<int> p111;
-    p111.push_back(1);
-    p111.push_back(1);
-    p111.push_back(1);
-    hkls.push_back(p111);
+    p111.emplace_back(1);
+    p111.emplace_back(1);
+    p111.emplace_back(1);
+    hkls.emplace_back(p111);
     std::vector<int> p110;
-    p110.push_back(1);
-    p110.push_back(1);
-    p110.push_back(0);
-    hkls.push_back(p110);
+    p110.emplace_back(1);
+    p110.emplace_back(1);
+    p110.emplace_back(0);
+    hkls.emplace_back(p110);
     hklws = createInputHKLWorkspace(hkls, peakheights);
 
     AnalysisDataService::Instance().addOrReplace("Data", dataws);
@@ -999,7 +950,7 @@ public:
 
     // 4. Get output
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("FitResultWS"));
     TS_ASSERT(outws);
     if (!outws) {
@@ -1013,7 +964,7 @@ public:
 
     // 5. Check fit result
     DataObjects::TableWorkspace_sptr paramws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("PeakParameters"));
     TS_ASSERT(paramws);
     if (!paramws) {
@@ -1066,22 +1017,22 @@ public:
     std::vector<std::vector<int>> hkls;
     // (222)
     vector<int> r222(3, 2);
-    hkls.push_back(r222);
+    hkls.emplace_back(r222);
     // (311)
     vector<int> r311(3, 1);
     r311[0] = 3;
-    hkls.push_back(r311);
+    hkls.emplace_back(r311);
     // (220)
     vector<int> r220(3, 2);
     r220[2] = 0;
-    hkls.push_back(r220);
+    hkls.emplace_back(r220);
     // (200)
     vector<int> r200(3, 0);
     r200[0] = 2;
-    hkls.push_back(r200);
+    hkls.emplace_back(r200);
     // (111)
     vector<int> r111(3, 1);
-    hkls.push_back(r111);
+    hkls.emplace_back(r111);
 
     size_t numpeaks = hkls.size();
     std::cout << "[TESTx349] Nmber of (file imported) peaks = " << hkls.size()
@@ -1107,8 +1058,8 @@ public:
 
     // 2. Other properties
     std::vector<double> fitregion;
-    fitregion.push_back(56198.0);
-    fitregion.push_back(151239.0);
+    fitregion.emplace_back(56198.0);
+    fitregion.emplace_back(151239.0);
 
     // 3. Genearte LeBailFit algorithm and set it up
     LeBailFit lbfit;
@@ -1140,7 +1091,7 @@ public:
     // 5. Exam
     // Take the output data:
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("FittedData"));
     TS_ASSERT(outws);
     if (!outws)
@@ -1151,7 +1102,7 @@ public:
 
     // Peaks table
     DataObjects::TableWorkspace_sptr peakparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedPeaks"));
     TS_ASSERT(peakparamws);
     if (!peakparamws) {
@@ -1164,7 +1115,7 @@ public:
 
     // Parameters table
     DataObjects::TableWorkspace_sptr instrparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedParameters"));
     TS_ASSERT(instrparamws);
     if (!instrparamws)
@@ -1216,8 +1167,8 @@ public:
     p211[0] = 2;
     p211[1] = 1;
     p211[2] = 1;
-    peakhkls.push_back(p211);
-    peakheights.push_back(1.0);
+    peakhkls.emplace_back(p211);
+    peakheights.emplace_back(1.0);
 
     DataObjects::TableWorkspace_sptr hklws;
     hklws = createInputHKLWorkspace(peakhkls, peakheights);
@@ -1256,7 +1207,7 @@ public:
 
     // 5. Get output
     DataObjects::Workspace2D_sptr outws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("RefinedBackground"));
     TS_ASSERT(outws);
     if (!outws) {
@@ -1296,7 +1247,7 @@ public:
    * Parse parameter table workspace to 2 map
    */
   void
-  parseParameterTableWorkspace(DataObjects::TableWorkspace_sptr paramws,
+  parseParameterTableWorkspace(const DataObjects::TableWorkspace_sptr &paramws,
                                std::map<std::string, double> &paramvalues,
                                std::map<std::string, char> &paramfitstatus) {
 
@@ -1484,5 +1435,3 @@ private:
   TableWorkspace_sptr hkl220ws;
   TableWorkspace_sptr hkl111110ws;
 };
-
-#endif /* MANTID_CURVEFITTING_LEBAILFITTEST_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidBeamline/ComponentInfo.h"
@@ -225,7 +225,7 @@ double DetectorInfo::l1() const {
   return m_componentInfo->l1();
 }
 
-Eigen::Vector3d DetectorInfo::sourcePosition() const {
+const Eigen::Vector3d &DetectorInfo::sourcePosition() const {
   // TODO Not scan safe yet for scanning ComponentInfo
   if (!hasComponentInfo()) {
     throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "
@@ -234,7 +234,7 @@ Eigen::Vector3d DetectorInfo::sourcePosition() const {
   return m_componentInfo->sourcePosition();
 }
 
-Eigen::Vector3d DetectorInfo::samplePosition() const {
+const Eigen::Vector3d &DetectorInfo::samplePosition() const {
   // TODO Not scan safe yet for scanning ComponentInfo
   if (!hasComponentInfo()) {
     throw std::runtime_error("DetectorInfo has no valid ComponentInfo thus "

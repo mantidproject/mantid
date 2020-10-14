@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -12,6 +12,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/LibraryManager.h"
 #include <boost/algorithm/string.hpp>
+#include <memory>
 #include <sstream>
 
 #include "MantidKernel/StringTokenizer.h"
@@ -24,7 +25,7 @@ Kernel::Logger g_log("AlgorithmFactory");
 } // namespace
 
 AlgorithmFactoryImpl::AlgorithmFactoryImpl()
-    : Kernel::DynamicFactory<Algorithm>(), m_vmap() {
+    : Kernel::DynamicFactory<Algorithm>(), m_vmap(), m_amap() {
   // we need to make sure the library manager has been loaded before we
   // are constructed so that it is destroyed after us and thus does
   // not close any loaded DLLs with loaded algorithms in them
@@ -39,38 +40,42 @@ AlgorithmFactoryImpl::~AlgorithmFactoryImpl() = default;
  * @param version :: the version of the algroithm to create
  * @returns a shared pointer to the created algorithm
  */
-boost::shared_ptr<Algorithm>
+std::shared_ptr<Algorithm>
 AlgorithmFactoryImpl::create(const std::string &name,
                              const int &version) const {
   int local_version = version;
-  if (version < 0) {
-    if (version == -1) // get latest version since not supplied
-    {
-      auto it = m_vmap.find(name);
-      if (!name.empty()) {
-        if (it == m_vmap.end())
-          throw std::runtime_error("Algorithm not registered " + name);
-        else
-          local_version = it->second;
-      } else
-        throw std::runtime_error(
-            "Algorithm not registered (empty algorithm name)");
-    }
+  // Version not supplied
+  if (version == -1) {
+    local_version = highestVersion(name); // throws if not found
   }
+
+  // Try create from given name
   try {
     return this->createAlgorithm(name, local_version);
   } catch (Kernel::Exception::NotFoundError &) {
-    auto it = m_vmap.find(name);
-    if (it == m_vmap.end())
-      throw std::runtime_error("algorithm not registered " + name);
-    else {
+  }
+
+  // Fallback, name might be an alias
+  // Try get real name and create from that instead
+  const auto realName = getRealNameFromAlias(name);
+  if (realName) {
+    // Try create algorithm again with real name
+    try {
+      return this->createAlgorithm(realName.get(), local_version);
+    } catch (Kernel::Exception::NotFoundError &) {
+      // Get highest registered version
+      const auto hVersion =
+          highestVersion(realName.get()); // Throws if not found
+
+      // The version registered does not match version supplied
       g_log.error() << "algorithm " << name << " version " << version
                     << " is not registered \n";
-      g_log.error() << "the latest registered version is " << it->second
-                    << '\n';
+      g_log.error() << "the latest registered version is " << hVersion << '\n';
       throw std::runtime_error("algorithm not registered " +
                                createName(name, local_version));
     }
+  } else {
+    throw std::runtime_error("algorithm not registered " + name);
   }
 }
 
@@ -153,10 +158,9 @@ AlgorithmFactoryImpl::decodeName(const std::string &mangledName) const {
   return std::pair<std::string, int>(name, version);
 }
 
-/** Return the keys used for identifying algorithms. This includes those within
- * the Factory itself and
- * any cleanly constructed algorithms stored here.
- * Hidden algorithms are excluded.
+/** Return the keys used for identifying algorithms. This includes those
+ * within the Factory itself and any cleanly constructed algorithms stored
+ * here. Hidden algorithms are excluded.
  * @returns The strings used to identify individual algorithms
  */
 const std::vector<std::string> AlgorithmFactoryImpl::getKeys() const {
@@ -171,8 +175,8 @@ const std::vector<std::string> AlgorithmFactoryImpl::getKeys() const {
  * Return the keys used for identifying algorithms. This includes those within
  * the Factory itself and
  * any cleanly constructed algorithms stored here.
- * @param includeHidden true includes the hidden algorithm names and is faster,
- * the default is false
+ * @param includeHidden true includes the hidden algorithm names and is
+ * faster, the default is false
  * @returns The strings used to identify individual algorithms
  */
 const std::vector<std::string>
@@ -196,8 +200,7 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
       std::string name = *itr;
       // check the categories
       std::pair<std::string, int> namePair = decodeName(name);
-      boost::shared_ptr<IAlgorithm> alg =
-          create(namePair.first, namePair.second);
+      std::shared_ptr<IAlgorithm> alg = create(namePair.first, namePair.second);
       std::vector<std::string> categories = alg->categories();
       bool toBeRemoved = true;
 
@@ -214,13 +217,27 @@ AlgorithmFactoryImpl::getKeys(bool includeHidden) const {
       }
 
       if (!toBeRemoved) {
-        // just mark them to be removed as we are iterating around the vector at
-        // the moment
-        validNames.push_back(name);
+        // just mark them to be removed as we are iterating around the vector
+        // at the moment
+        validNames.emplace_back(name);
       }
     }
     return validNames;
   }
+}
+
+/**
+ * @param alias The name of the algorithm to look up in the alias map
+ * @return Real name of algroithm if found
+ */
+boost::optional<std::string>
+AlgorithmFactoryImpl::getRealNameFromAlias(const std::string &alias) const
+    noexcept {
+  auto a_it = m_amap.find(alias);
+  if (a_it == m_amap.end())
+    return boost::none;
+  else
+    return a_it->second;
 }
 
 /**
@@ -234,9 +251,19 @@ int AlgorithmFactoryImpl::highestVersion(
   if (viter != m_vmap.end())
     return viter->second;
   else {
-    throw std::invalid_argument(
-        "AlgorithmFactory::highestVersion() - Unknown algorithm '" +
-        algorithmName + "'");
+    // Fall back, algorithmName might be an alias
+    // Check alias map, then find version from real name
+    const auto realName = getRealNameFromAlias(algorithmName);
+    if (realName != boost::none) {
+      viter = m_vmap.find(realName.get());
+    }
+    if (viter != m_vmap.end())
+      return viter->second;
+    else {
+      throw std::runtime_error(
+          "AlgorithmFactory::highestVersion() - Unknown algorithm '" +
+          algorithmName + "'");
+    }
   }
 }
 
@@ -255,8 +282,8 @@ AlgorithmFactoryImpl::getCategoriesWithState() const {
   std::unordered_set<std::string> hiddenCategories;
   fillHiddenCategories(&hiddenCategories);
 
-  // get all of the algorithm keys, including the hidden ones for speed purposes
-  // we will filter later if required
+  // get all of the algorithm keys, including the hidden ones for speed
+  // purposes we will filter later if required
   std::vector<std::string> names = getKeys(true);
 
   std::vector<std::string>::const_iterator itr_end = names.end();
@@ -266,7 +293,7 @@ AlgorithmFactoryImpl::getCategoriesWithState() const {
     std::string name = *itr;
     // decode the name and create an instance
     std::pair<std::string, int> namePair = decodeName(name);
-    boost::shared_ptr<IAlgorithm> alg = create(namePair.first, namePair.second);
+    std::shared_ptr<IAlgorithm> alg = create(namePair.first, namePair.second);
     // extract out the categories
     std::vector<std::string> categories = alg->categories();
 
@@ -290,8 +317,8 @@ AlgorithmFactoryImpl::getCategoriesWithState() const {
  * Return the categories of the algorithms. This includes those within the
  * Factory itself and
  * any cleanly constructed algorithms stored here.
- * @param includeHidden true includes the hidden algorithm names and is faster,
- * the default is false
+ * @param includeHidden true includes the hidden algorithm names and is
+ * faster, the default is false
  * @returns The category strings
  */
 const std::unordered_set<std::string>
@@ -317,12 +344,15 @@ AlgorithmFactoryImpl::getCategories(bool includeHidden) const {
  * map
  * where an algorithm has multiple categories it will be represented using
  * multiple descriptors.
- * @param includeHidden true includes the hidden algorithm names and is faster,
- * the default is false
+ * @param includeHidden true includes the hidden algorithm names and is
+ * faster, the default is false
+ * @param includeAliases true includes alias names of algorithms which aren't
+ * empty to the vector of descriptors, the default is true
  * @returns A vector of descriptor objects
  */
 std::vector<AlgorithmDescriptor>
-AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
+AlgorithmFactoryImpl::getDescriptors(bool includeHidden,
+                                     bool includeAliases) const {
   // algorithm names
   auto sv = getKeys(true);
 
@@ -350,7 +380,7 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
     } else
       continue;
 
-    boost::shared_ptr<IAlgorithm> alg = create(desc.name, desc.version);
+    std::shared_ptr<IAlgorithm> alg = create(desc.name, desc.version);
     auto categories = alg->categories();
     desc.alias = alg->alias();
 
@@ -382,8 +412,19 @@ AlgorithmFactoryImpl::getDescriptors(bool includeHidden) const {
         currentLayer.append("\\");
       }
 
-      if (!categoryIsHidden)
-        res.push_back(desc);
+      if (!categoryIsHidden) {
+        res.emplace_back(desc);
+        // Add alias to results if included
+        if (!desc.alias.empty() && includeAliases) {
+          /*AlgorithmDescriptor aliasDesc;
+          aliasDesc.name = desc.alias;
+          aliasDesc.category = desc.category;
+          aliasDesc.version = desc.version;
+          res.emplace_back(aliasDesc);*/
+          res.emplace_back(
+              AlgorithmDescriptor{desc.alias, desc.version, desc.category, ""});
+        }
+      }
     }
   }
   return res;
@@ -406,7 +447,7 @@ void AlgorithmFactoryImpl::fillHiddenCategories(
  * @returns the name of the algroithm
  */
 const std::string AlgorithmFactoryImpl::extractAlgName(
-    const boost::shared_ptr<IAlgorithm> alg) const {
+    const std::shared_ptr<IAlgorithm> &alg) const {
   return alg->name();
 }
 
@@ -415,19 +456,28 @@ const std::string AlgorithmFactoryImpl::extractAlgName(
  * @returns the version of the algroithm
  */
 int AlgorithmFactoryImpl::extractAlgVersion(
-    const boost::shared_ptr<IAlgorithm> alg) const {
+    const std::shared_ptr<IAlgorithm> &alg) const {
   return alg->version();
+}
+
+/** Extract the alias of an algorithm
+ * @param alg :: the Algorithm to use
+ * @returns the alias of the algorithm
+ */
+const std::string AlgorithmFactoryImpl::extractAlgAlias(
+    const std::shared_ptr<IAlgorithm> &alg) const {
+  return alg->alias();
 }
 
 /**
  * Create a shared pointer to an algorithm object with the given name and
- * version. If the algorithm is one registered with a clean pointer rather than
- * an instantiator then a clone is returned.
+ * version. If the algorithm is one registered with a clean pointer rather
+ * than an instantiator then a clone is returned.
  * @param name :: Algorithm name
  * @param version :: Algorithm version
  * @returns A shared pointer to the algorithm object
  */
-boost::shared_ptr<Algorithm>
+std::shared_ptr<Algorithm>
 AlgorithmFactoryImpl::createAlgorithm(const std::string &name,
                                       const int version) const {
   return Kernel::DynamicFactory<Algorithm>::create(createName(name, version));

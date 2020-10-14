@@ -1,16 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ComptonScatteringCountRate.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidCurveFitting/AugmentedLagrangianOptimizer.h"
 #include "MantidKernel/Math/Optimization/SLSQPMinimizer.h"
-
-#include <boost/bind.hpp>
 
 #include <sstream>
 
@@ -166,8 +164,9 @@ void ComptonScatteringCountRate::iterationStarting() {
 
   if (m_bkgdPolyN > 0) {
     BkgdNorm2 objf(m_cmatrix, m_dataErrorRatio);
+    using namespace std::placeholders;
     AugmentedLagrangianOptimizer::ObjFunction objfunc =
-        boost::bind(&BkgdNorm2::eval, objf, _1, _2);
+        std::bind(&BkgdNorm2::eval, objf, _1, _2);
     AugmentedLagrangianOptimizer lsqmin(nparams, objfunc, m_eqMatrix,
                                         m_cmatrix);
     lsqmin.minimize(x0);
@@ -242,12 +241,12 @@ void ComptonScatteringCountRate::updateCMatrixValues() const {
  * @param endX Ending x-value (unused).
  */
 void ComptonScatteringCountRate::setMatrixWorkspace(
-    boost::shared_ptr<const API::MatrixWorkspace> matrix, size_t wsIndex,
+    std::shared_ptr<const API::MatrixWorkspace> matrix, size_t wsIndex,
     double startX, double endX) {
   CompositeFunction::setMatrixWorkspace(matrix, wsIndex, startX, endX);
 
   this->m_hist =
-      boost::make_shared<HistogramData::Histogram>(matrix->histogram(wsIndex));
+      std::make_shared<HistogramData::Histogram>(matrix->histogram(wsIndex));
   this->wsIndex = wsIndex;
   const auto &values = m_hist->y();
   const auto &errors = m_hist->e();
@@ -286,12 +285,12 @@ void ComptonScatteringCountRate::cacheFunctions() {
     const size_t paramsOffset =
         this->paramOffset(i); // offset for ith function inside composite
 
-    if (auto profile = boost::dynamic_pointer_cast<ComptonProfile>(func)) {
+    if (auto profile = std::dynamic_pointer_cast<ComptonProfile>(func)) {
       this->cacheComptonProfile(profile, paramsOffset);
       continue;
     }
 
-    auto function1D = boost::dynamic_pointer_cast<API::IFunction1D>(func);
+    auto function1D = std::dynamic_pointer_cast<API::IFunction1D>(func);
     if (!foundBkgd) {
       this->cacheBackground(function1D, paramsOffset);
       foundBkgd = true;
@@ -312,14 +311,13 @@ void ComptonScatteringCountRate::cacheFunctions() {
  * composite
  */
 void ComptonScatteringCountRate::cacheComptonProfile(
-    const boost::shared_ptr<ComptonProfile> &profile,
-    const size_t paramsOffset) {
-  m_profiles.push_back(profile.get());
+    const std::shared_ptr<ComptonProfile> &profile, const size_t paramsOffset) {
+  m_profiles.emplace_back(profile.get());
   auto fixedParams = profile->intensityParameterIndices();
   for (auto fixedParam : fixedParams) {
     const size_t indexOfFixed = paramsOffset + fixedParam;
     this->setParameterStatus(indexOfFixed, Tied);
-    m_fixedParamIndices.push_back(indexOfFixed);
+    m_fixedParamIndices.emplace_back(indexOfFixed);
   }
 }
 
@@ -340,7 +338,7 @@ void ComptonScatteringCountRate::cacheBackground(
     {
       const size_t indexOfFixed = paramsOffset + (i - 1);
       this->setParameterStatus(indexOfFixed, Tied);
-      m_fixedParamIndices.push_back(indexOfFixed);
+      m_fixedParamIndices.emplace_back(indexOfFixed);
     }
   } else {
     std::ostringstream os;

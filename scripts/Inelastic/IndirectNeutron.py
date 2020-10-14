@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,too-many-arguments, redefined-builtin, too-many-locals
 
@@ -10,7 +10,6 @@
 Force for ILL backscattering raw
 """
 
-from __future__ import (absolute_import, division, print_function)
 from IndirectImport import *
 from mantid.simpleapi import *
 from mantid import config, logger, mtd, FileFinder
@@ -234,8 +233,8 @@ def IbackStart(instr, run, ana, refl, rejectZ, useM, mapPath, Plot, Save):  # As
     for n in range(0, nsp):
         next, _xd, yd, ed = ReadIbackGroup(asc, next)
         tot.append(sum(yd))
-        logger.information('Spectrum ' + str(n + 1) + ' at angle ' + str(theta[n]) +
-                           ' ; Total counts = ' + str(sum(yd)))
+        logger.information('Spectrum ' + str(n + 1) + ' at angle ' + str(theta[n])
+                           + ' ; Total counts = ' + str(sum(yd)))
         for m in range(0, new + 1):
             mm = m + imin
             xDat.append(xMon[m])
@@ -519,10 +518,8 @@ def IN13Read(instr, run, ana, refl, Plot, Save):  # Ascii start routine
 
     logger.information('No. sub-spectra : ' + str(nsubsp))
     logger.information('No. spectra : ' + str(nspec))
-    logger.information('Scan type : ' + str(int(Fval[8])) +
-                       ' ; Average energy : ' + str(Fval[9]))
-    logger.information('CaF2 lattice : ' + str(Fval[81]) +
-                       ' ; Graphite lattice : ' + str(Fval[82]))
+    logger.information('Scan type : ' + str(int(Fval[8])) + ' ; Average energy : ' + str(Fval[9]))
+    logger.information('CaF2 lattice : ' + str(Fval[81]) + ' ; Graphite lattice : ' + str(Fval[82]))
     logger.information('Wavelength : ' + str(wave))
     logger.information('No. temperatures : ' + str(ntemp))
     logger.information('No. temperature lines : ' + str(ltemp))

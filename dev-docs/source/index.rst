@@ -29,7 +29,6 @@ Guides
    Standards/index
    Testing/index
    DoxygenSetup
-   Python3
 
 :doc:`DeveloperAccounts`
    Details of the accounts required for developers.
@@ -46,9 +45,6 @@ Guides
 :doc:`DoxygenSetup`
    Configure a doxygen build locally.
 
-:doc:`Python3`
-   Building with Python 3 (Linux only).
-
 `C++ Introduction <https://www.mantidproject.org/New_Starter_C%2B%2B_introduction>`_
    Exercises for learning C++.
 
@@ -62,6 +58,7 @@ Development Process
    DevelopmentAndReleaseCycle
    Communication
    IssueTracking
+   UserSupport
    GitWorkflow
    AutomatedBuildProcess
    JenkinsConfiguration
@@ -78,6 +75,9 @@ Development Process
 
 :doc:`IssueTracking`
    Describes how issues are tracked over the project.
+
+:doc:`UserSupport`
+   Procedures for User Problems to be tested and passed to the Development Team.
 
 :doc:`GitWorkflow`
    Details the workflow used development with git and GitHub.
@@ -111,7 +111,7 @@ Tools
    ProfilingWithValgrind
    FlowchartCreation
    VisualStudioBuildImpact
-   GettingStartedWithPyCharm
+   PyCharm
    VSCode
    Eclipse
 
@@ -127,7 +127,7 @@ Tools
 :doc:`VisualStudioBuildImpact`
    Provides a script to reduce the impact of Visual Studio on machine performance.
 
-:doc:`GettingStartedWithPyCharm`
+:doc:`PyCharm`
    Describes how to set up the PyCharm interpreter, and debug python code (Windows/Linux only).
 
 :doc:`VSCode`
@@ -151,6 +151,7 @@ Testing
    SystemTests
    DataFilesForTesting
    TestingUtilities
+   RunningSanitizers
 
 :doc:`RunningTheUnitTests`
    Details on how to run the suite of unit tests.
@@ -176,6 +177,9 @@ Testing
 :doc:`TestingUtilities`
    Helper utlities used for testing.
 
+:doc:`RunningSanitizers`
+   How to run the various sanitizers locally.
+
 ===============
 GUI Development
 ===============
@@ -183,12 +187,13 @@ GUI Development
 .. toctree::
    :hidden:
 
-   GUIDesignGuidelines
+   MVPDesign
    MVPTutorial/index
    QtDesignerForPython
    MantidUsedIconsTable
+   ISISReflectometryInterface
 
-:doc:`GUIDesignGuidelines`
+:doc:`MVPDesign`
    Gives some guidelines to consider when developing a new graphical user interface.
 
 :doc:`MVP Tutorial <MVPTutorial/index>`
@@ -199,6 +204,9 @@ GUI Development
 
 :doc:`MantidUsedIconsTable`
    The currently used Icons in Mantid and what they are used for.
+
+:doc:`ISISReflectometryInterface`
+   An example of a complex C++ interface that uses MVP.
 
 =========
 Workbench
@@ -229,6 +237,7 @@ Component Overviews
    HandlingXML
    IndexProperty
    InstrumentViewer
+   ISISReflectometryInterface
    ISISSANSReductionBackend
    LoadAlgorithmHook
    Logging

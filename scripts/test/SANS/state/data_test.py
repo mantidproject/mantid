@@ -1,16 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
 
-from sans.state.data import (StateData, get_data_builder)
-from state_test_helper import (assert_validate_error, assert_raises_nothing)
 from sans.common.enums import (SANSFacility, SANSInstrument)
+from sans.state.StateObjects.StateData import (StateData, get_data_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -36,11 +33,12 @@ class StateDataTest(unittest.TestCase):
                                                                       data_entries_good):
         # Bad values
         state = StateDataTest._get_data_state(**data_entries_bad)
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
 
         # Good values
         state = StateDataTest._get_data_state(**data_entries_good)
-        assert_raises_nothing(self, state)
+        self.assertIsNone(state.validate())
 
     def test_that_raises_when_sample_scatter_is_missing(self):
         self.assert_raises_for_bad_value_and_raises_nothing_for_good_value({"sample_scatter": None},
@@ -78,7 +76,7 @@ class StateDataBuilderTest(unittest.TestCase):
     def test_that_data_state_can_be_built(self):
         # Arrange
         facility = SANSFacility.ISIS
-        file_information = SANSFileInformationMock(run_number=74044)
+        file_information = SANSFileInformationMock(run_number=74044, file_name="LOQ74044")
         # Act
         data_builder = get_data_builder(facility, file_information)
 

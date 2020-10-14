@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantiddoc.directives.base import AlgorithmBaseDirective #pylint: disable=unused-import
 
@@ -31,8 +31,11 @@ class relatedalgorithmsDirective(AlgorithmBaseDirective):
                     link_rst += ":ref:`%s <algm-%s>`, " % (alg.name(), alg.name())
                 except RuntimeError:
                     env = self.state.document.settings.env
-                    env.app.warn('relatedalgorithms - Could not find algorithm "{0}" listed in the seeAlso for {1}.v{2}'.format(
-                                 seeAlsoEntry,self.algorithm_name(), self.algorithm_version()))
+                    try:
+                        env.app.warn('relatedalgorithms - Could not find algorithm "{0}" listed in the seeAlso for {1}.v{2}'.format(
+                                     seeAlsoEntry,self.algorithm_name(), self.algorithm_version()))
+                    except AttributeError:
+                        pass
                       
         if link_rst or alias:
             self.add_rst(self.make_header("See Also",level=3))

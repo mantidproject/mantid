@@ -45,7 +45,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'MantidProject'
-copyright = u'2007-2018, Mantid'
+copyright = u'2007-2020, Mantid'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -168,7 +168,7 @@ epub_uid = "Mantid Reference: " + version
 # -- Link to other projects ----------------------------------------------------
 
 intersphinx_mapping = {
-    'h5py': ('http://docs.h5py.org/en/latest/', None),
+    'h5py': ('https://h5py.readthedocs.io/en/stable/', None),
     'matplotlib': ('http://matplotlib.org', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
     'python': ('https://docs.python.org/3/', None),

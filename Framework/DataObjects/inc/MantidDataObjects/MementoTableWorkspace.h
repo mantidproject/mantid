@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Column.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -48,8 +48,8 @@ private:
     return new MementoTableWorkspace();
   }
 
-  static bool expectedColumn(Mantid::API::Column_const_sptr expected,
-                             Mantid::API::Column_const_sptr candidate);
+  static bool expectedColumn(const Mantid::API::Column_const_sptr &expected,
+                             const Mantid::API::Column_const_sptr &candidate);
 };
 } // namespace DataObjects
 } // namespace Mantid

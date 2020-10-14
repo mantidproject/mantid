@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_XVALIDATIONTEST_H_
-#define MANTID_HISTOGRAMDATA_XVALIDATIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -17,8 +16,8 @@
 
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::HistogramX;
-using Mantid::HistogramData::Points;
 using Mantid::HistogramData::isValid;
+using Mantid::HistogramData::Points;
 
 class XValidationTest : public CxxTest::TestSuite {
 public:
@@ -115,5 +114,3 @@ public:
     TS_ASSERT(!isValid(makeX({DBL_MIN / 2.0, DBL_MIN})));
   }
 };
-
-#endif /* MANTID_HISTOGRAMDATA_XVALIDATIONTEST_H_ */

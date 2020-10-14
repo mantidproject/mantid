@@ -1,33 +1,34 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ A Test director """
-from __future__ import (absolute_import, division, print_function)
-from sans.state.state import get_state_builder
-from sans.state.data import get_data_builder
-from sans.state.move import get_move_builder
-from sans.state.reduction_mode import get_reduction_mode_builder
-from sans.state.slice_event import get_slice_event_builder
-from sans.state.mask import get_mask_builder
-from sans.state.wavelength import get_wavelength_builder
-from sans.state.save import get_save_builder
-from sans.state.normalize_to_monitor import get_normalize_to_monitor_builder
-from sans.state.scale import get_scale_builder
-from sans.state.calculate_transmission import get_calculate_transmission_builder
-from sans.state.wavelength_and_pixel_adjustment import get_wavelength_and_pixel_adjustment_builder
-from sans.state.adjustment import get_adjustment_builder
-from sans.state.convert_to_q import get_convert_to_q_builder
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateMoveDetectors import get_move_builder
+from sans.state.StateObjects.StateReductionMode import StateReductionMode
+from sans.state.StateObjects.StateSliceEvent import get_slice_event_builder
+from sans.state.StateObjects.StateMaskDetectors import get_mask_builder
+from sans.state.AllStates import get_all_states_builder
+from sans.state.StateObjects.StateWavelength import get_wavelength_builder
+from sans.state.StateObjects.StateSave import get_save_builder
+from sans.state.StateObjects.StateNormalizeToMonitor import get_normalize_to_monitor_builder
+from sans.state.StateObjects.StateScale import get_scale_builder
+from sans.state.StateObjects.StateCalculateTransmission import get_calculate_transmission
+from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import get_wavelength_and_pixel_adjustment_builder
+from sans.state.StateObjects.StateAdjustment import get_adjustment_builder
+from sans.state.StateObjects.StateConvertToQ import get_convert_to_q_builder
 
-from sans.common.enums import (SANSFacility, ISISReductionMode, ReductionDimensionality,
-                               FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape, SANSInstrument)
+from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality,
+                               FitModeForMerge, RebinType, RangeStepType, SaveType, FitType, SampleShape,
+                               SANSInstrument)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
 class TestDirector(object):
     """ The purpose of this builder is to create a valid state object for tests"""
+
     def __init__(self):
         super(TestDirector, self).__init__()
         self.data_state = None
@@ -77,13 +78,13 @@ class TestDirector(object):
 
         # Build the SANSStateReduction
         if self.reduction_state is None:
-            reduction_builder = get_reduction_mode_builder(self.data_state)
-            reduction_builder.set_reduction_mode(ISISReductionMode.Merged)
-            reduction_builder.set_reduction_dimensionality(ReductionDimensionality.OneDim)
-            reduction_builder.set_merge_fit_mode(FitModeForMerge.Both)
-            reduction_builder.set_merge_shift(324.2)
-            reduction_builder.set_merge_scale(3420.98)
-            self.reduction_state = reduction_builder.build()
+            state_reduction = StateReductionMode()
+            state_reduction.reduction_dimensionality = ReductionDimensionality.ONE_DIM
+            state_reduction.merge_fit_mode = FitModeForMerge.BOTH
+            state_reduction.merge_shift = 324.2
+            state_reduction.merge_scale = 3420.98
+            state_reduction.reduction_mode = ReductionMode.MERGED
+            self.reduction_state = state_reduction
 
         # Build the SANSStateSliceEvent
         if self.slice_state is None:
@@ -105,26 +106,28 @@ class TestDirector(object):
             wavelength_builder.set_wavelength_low([1.0])
             wavelength_builder.set_wavelength_high([10.0])
             wavelength_builder.set_wavelength_step(2.0)
-            wavelength_builder.set_wavelength_step_type(RangeStepType.Lin)
-            wavelength_builder.set_rebin_type(RebinType.Rebin)
+            wavelength_builder.set_wavelength_step_type(RangeStepType.LIN)
+            wavelength_builder.set_rebin_type(RebinType.REBIN)
             self.wavelength_state = wavelength_builder.build()
 
         # Build the SANSStateSave
         if self.save_state is None:
             save_builder = get_save_builder(self.data_state)
             save_builder.set_user_specified_output_name("test_file_name")
-            save_builder.set_file_format([SaveType.Nexus])
+            save_builder.set_file_format([SaveType.NEXUS])
             self.save_state = save_builder.build()
 
         # Build the SANSStateScale
         if self.scale_state is None:
             scale_builder = get_scale_builder(self.data_state, file_information)
-            scale_builder.set_shape(SampleShape.FlatPlate)
+            scale_builder.set_shape(SampleShape.FLAT_PLATE)
             scale_builder.set_width(1.0)
             scale_builder.set_height(2.0)
             scale_builder.set_thickness(3.0)
             scale_builder.set_scale(4.0)
             self.scale_state = scale_builder.build()
+
+        instrument = self.data_state.instrument
 
         # Build the SANSAdjustmentState
         if self.adjustment_state is None:
@@ -133,54 +136,53 @@ class TestDirector(object):
             normalize_to_monitor_builder.set_wavelength_low([1.0])
             normalize_to_monitor_builder.set_wavelength_high([10.0])
             normalize_to_monitor_builder.set_wavelength_step(2.0)
-            normalize_to_monitor_builder.set_wavelength_step_type(RangeStepType.Lin)
-            normalize_to_monitor_builder.set_rebin_type(RebinType.Rebin)
+            normalize_to_monitor_builder.set_wavelength_step_type(RangeStepType.LIN)
+            normalize_to_monitor_builder.set_rebin_type(RebinType.REBIN)
             normalize_to_monitor_builder.set_background_TOF_general_start(1000.)
             normalize_to_monitor_builder.set_background_TOF_general_stop(2000.)
             normalize_to_monitor_builder.set_incident_monitor(1)
             normalize_to_monitor = normalize_to_monitor_builder.build()
 
             # CalculateTransmission
-            calculate_transmission_builder = get_calculate_transmission_builder(self.data_state)
-            calculate_transmission_builder.set_transmission_monitor(3)
-            calculate_transmission_builder.set_incident_monitor(2)
-            calculate_transmission_builder.set_wavelength_low([1.0])
-            calculate_transmission_builder.set_wavelength_high([10.0])
-            calculate_transmission_builder.set_wavelength_step(2.0)
-            calculate_transmission_builder.set_wavelength_step_type(RangeStepType.Lin)
-            calculate_transmission_builder.set_rebin_type(RebinType.Rebin)
-            calculate_transmission_builder.set_background_TOF_general_start(1000.)
-            calculate_transmission_builder.set_background_TOF_general_stop(2000.)
+            calculate_transmission_obj = get_calculate_transmission(instrument=instrument)
+            calculate_transmission_obj.transmission_monitor = 3
+            calculate_transmission_obj.incident_monitor = 2
+            calculate_transmission_obj.wavelength_low = [1.0]
+            calculate_transmission_obj.wavelength_high = [10.0]
+            calculate_transmission_obj.wavelength_step = 2.0
+            calculate_transmission_obj.wavelength_step_type = RangeStepType.LIN
+            calculate_transmission_obj.rebin_type = RebinType.REBIN
+            calculate_transmission_obj.background_TOF_general_start = 1000.
+            calculate_transmission_obj.background_TOF_general_stop = 2000.
 
-            calculate_transmission_builder.set_Sample_fit_type(FitType.Linear)
-            calculate_transmission_builder.set_Sample_polynomial_order(0)
-            calculate_transmission_builder.set_Sample_wavelength_low(1.0)
-            calculate_transmission_builder.set_Sample_wavelength_high(10.0)
-            calculate_transmission_builder.set_Can_fit_type(FitType.Polynomial)
-            calculate_transmission_builder.set_Can_polynomial_order(3)
-            calculate_transmission_builder.set_Can_wavelength_low(10.0)
-            calculate_transmission_builder.set_Can_wavelength_high(20.0)
-            calculate_transmission = calculate_transmission_builder.build()
+            calculate_transmission_obj.set_sample_fit_type(FitType.LINEAR)
+            calculate_transmission_obj.set_sample_polynomial_order(0)
+            calculate_transmission_obj.set_sample_wavelength_low(1.0)
+            calculate_transmission_obj.set_sample_wavelength_high(10.0)
+            calculate_transmission_obj.set_can_fit_type(FitType.POLYNOMIAL)
+            calculate_transmission_obj.set_can_polynomial_order(3)
+            calculate_transmission_obj.set_can_wavelength_low(10.0)
+            calculate_transmission_obj.set_can_wavelength_high(20.0)
 
             # Wavelength and pixel adjustment
             wavelength_and_pixel_builder = get_wavelength_and_pixel_adjustment_builder(self.data_state)
             wavelength_and_pixel_builder.set_wavelength_low([1.0])
             wavelength_and_pixel_builder.set_wavelength_high([10.0])
             wavelength_and_pixel_builder.set_wavelength_step(2.0)
-            wavelength_and_pixel_builder.set_wavelength_step_type(RangeStepType.Lin)
+            wavelength_and_pixel_builder.set_wavelength_step_type(RangeStepType.LIN)
             wavelength_and_pixel = wavelength_and_pixel_builder.build()
 
             # Adjustment
             adjustment_builder = get_adjustment_builder(self.data_state)
             adjustment_builder.set_normalize_to_monitor(normalize_to_monitor)
-            adjustment_builder.set_calculate_transmission(calculate_transmission)
+            adjustment_builder.set_calculate_transmission(calculate_transmission_obj)
             adjustment_builder.set_wavelength_and_pixel_adjustment(wavelength_and_pixel)
             self.adjustment_state = adjustment_builder.build()
 
         # SANSStateConvertToQ
         if self.convert_to_q_state is None:
             convert_to_q_builder = get_convert_to_q_builder(self.data_state)
-            convert_to_q_builder.set_reduction_dimensionality(ReductionDimensionality.OneDim)
+            convert_to_q_builder.set_reduction_dimensionality(ReductionDimensionality.ONE_DIM)
             convert_to_q_builder.set_use_gravity(False)
             convert_to_q_builder.set_radius_cutoff(0.002)
             convert_to_q_builder.set_wavelength_cutoff(12.)
@@ -191,7 +193,7 @@ class TestDirector(object):
             self.convert_to_q_state = convert_to_q_builder.build()
 
         # Set the sub states on the SANSState
-        state_builder = get_state_builder(self.data_state)
+        state_builder = get_all_states_builder(self.data_state)
         state_builder.set_data(self.data_state)
         state_builder.set_move(self.move_state)
         state_builder.set_reduction(self.reduction_state)

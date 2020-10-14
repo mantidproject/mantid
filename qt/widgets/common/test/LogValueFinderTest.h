@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDERTEST_H_
-#define MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDERTEST_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
@@ -21,8 +20,8 @@
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::API::ScopedWorkspace;
 using Mantid::API::WorkspaceFactory;
-using Mantid::Kernel::Math::StatisticType;
 using Mantid::Kernel::TimeSeriesProperty;
+using Mantid::Kernel::Math::StatisticType;
 using Mantid::Types::Core::DateAndTime;
 using MantidQt::MantidWidgets::LogValueFinder;
 
@@ -157,13 +156,11 @@ private:
       DateAndTime t;
       const std::string &time = "2016-08-24T14:26:0" + std::to_string(i);
       t.setFromISO8601(time);
-      times.push_back(t);
-      values.push_back(static_cast<double>(i + logValue));
+      times.emplace_back(t);
+      values.emplace_back(static_cast<double>(i + logValue));
     }
     tsp->addValues(times, values);
     run.addLogData(std::move(tsp));
     return ws;
   }
 };
-
-#endif /* MANTIDQT_CUSTOMINTERFACES_MDFLOGVALUEFINDERTEST_H_ */

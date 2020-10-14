@@ -1,9 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidAPI/FunctionGenerator.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
@@ -14,7 +16,7 @@ namespace API {
 using namespace Kernel;
 
 /// Constructor
-FunctionGenerator::FunctionGenerator(IFunction_sptr source)
+FunctionGenerator::FunctionGenerator(const IFunction_sptr &source)
     : m_source(source), m_dirty(true) {
   if (source) {
     m_nOwnParams = source->nParams();
@@ -27,7 +29,7 @@ void FunctionGenerator::init() {}
 /// Set the source function
 /// @param source :: New source function.
 void FunctionGenerator::setSource(IFunction_sptr source) const {
-  m_source = source;
+  m_source = std::move(source);
 }
 
 /// Set i-th parameter

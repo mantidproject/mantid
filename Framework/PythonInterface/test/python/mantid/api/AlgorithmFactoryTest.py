@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import testhelpers
 
@@ -38,6 +36,12 @@ class AlgorithmFactoryTest(unittest.TestCase):
         self.assertTrue(hasattr(d, 'alias'))
         self.assertTrue(hasattr(d, 'category'))
         self.assertTrue(hasattr(d, 'version'))
+
+    def test_getDescriptorsWithAlias(self):
+
+        descriptors = AlgorithmFactory.getDescriptors(True, True)
+        result = [d for d in descriptors if (d.name == 'Subtract')]
+        self.assertEqual(1, len(result))
 
     def test_exists_returns_correct_value_for_given_args(self):
         self.assertTrue(AlgorithmFactory.exists('ConvertUnits')) #any version

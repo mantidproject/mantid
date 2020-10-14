@@ -1,5 +1,4 @@
-#ifndef __ADARA_H
-#define __ADARA_H
+#pragma once
 
 //
 // SNS ADARA SYSTEM - Common Library
@@ -205,5 +204,3 @@ public:
 enum { EPICS_EPOCH_OFFSET = 631152000 };
 
 } /* namespace ADARA */
-
-#endif /* __ADARA_H */

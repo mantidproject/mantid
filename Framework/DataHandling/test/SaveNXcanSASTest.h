@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVENXCANSASTEST_H_
-#define MANTID_DATAHANDLING_SAVENXCANSASTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -85,8 +84,8 @@ public:
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
     parameters.sampleDirectRun = "5";
     parameters.canDirectRun = "6";
@@ -121,8 +120,8 @@ public:
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
     parameters.sampleDirectRun = "5";
     parameters.canDirectRun = "6";
@@ -158,8 +157,8 @@ public:
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
     parameters.sampleDirectRun = "5";
     parameters.canDirectRun = "6";
@@ -204,8 +203,8 @@ public:
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
 
     auto ws = provide1DWorkspace(parameters);
@@ -228,8 +227,8 @@ public:
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
-    parameters.detectors.push_back("wrong-detector1");
-    parameters.detectors.push_back("wrong-detector2");
+    parameters.detectors.emplace_back("wrong-detector1");
+    parameters.detectors.emplace_back("wrong-detector2");
     parameters.invalidDetectors = true;
 
     auto ws = provide1DWorkspace(parameters);
@@ -254,8 +253,8 @@ public:
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
 
     parameters.hasDx = false;
@@ -280,8 +279,8 @@ public:
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
 
     parameters.hasDx = true;
@@ -324,8 +323,8 @@ public:
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
 
     parameters.is2dData = true;
@@ -350,8 +349,8 @@ public:
     NXcanSASTestParameters parameters;
     removeFile(parameters.filename);
 
-    parameters.detectors.push_back("front-detector");
-    parameters.detectors.push_back("rear-detector");
+    parameters.detectors.emplace_back("front-detector");
+    parameters.detectors.emplace_back("rear-detector");
     parameters.invalidDetectors = false;
 
     parameters.is2dData = true;
@@ -374,10 +373,10 @@ public:
 
 private:
   void save_file_no_issues(
-      Mantid::API::MatrixWorkspace_sptr workspace,
+      const Mantid::API::MatrixWorkspace_sptr &workspace,
       NXcanSASTestParameters &parameters,
-      Mantid::API::MatrixWorkspace_sptr transmission = nullptr,
-      Mantid::API::MatrixWorkspace_sptr transmissionCan = nullptr) {
+      const Mantid::API::MatrixWorkspace_sptr &transmission = nullptr,
+      const Mantid::API::MatrixWorkspace_sptr &transmissionCan = nullptr) {
     auto saveAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
         "SaveNXcanSAS");
     saveAlg->initialize();
@@ -473,7 +472,7 @@ private:
   }
 
   void do_assert_detector(H5::Group &instrument,
-                          std::vector<std::string> detectors) {
+                          const std::vector<std::string> &detectors) {
     for (auto &detector : detectors) {
       std::string detectorName = sasInstrumentDetectorGroupName + detector;
       auto detectorNameSanitized =
@@ -617,7 +616,7 @@ private:
   void do_assert_process_note(H5::Group &note, const bool &hasSampleRuns,
                               const bool &hasCanRuns,
                               const std::string &sampleDirectRun,
-                              const std::string canDirectRun) {
+                              const std::string &canDirectRun) {
     auto numAttributes = note.getNumAttrs();
     TSM_ASSERT_EQUALS("Should have 2 attributes", 2, numAttributes);
 
@@ -1005,5 +1004,3 @@ private:
     file.close();
   }
 };
-
-#endif /* MANTID_DATAHANDLING_SAVENXCANSASTEST_H_ */

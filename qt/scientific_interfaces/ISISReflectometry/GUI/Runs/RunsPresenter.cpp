@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsPresenter.h"
 #include "CatalogRunNotifier.h"
@@ -40,22 +40,18 @@ namespace ISISReflectometry {
  * summed in a reduction.
  * @param instruments The names of the instruments to show as options for the
  * search.
- * @param defaultInstrumentIndex The index of the instrument to have selected by
- * default.
  * @param messageHandler :: A handler to pass messages to the user
  */
 RunsPresenter::RunsPresenter(
     IRunsView *mainView, ProgressableView *progressableView,
     const RunsTablePresenterFactory &makeRunsTablePresenter,
     double thetaTolerance, std::vector<std::string> const &instruments,
-    int defaultInstrumentIndex, IMessageHandler *messageHandler)
+    IMessageHandler *messageHandler)
     : m_runNotifier(std::make_unique<CatalogRunNotifier>(mainView)),
       m_searcher(std::make_unique<QtCatalogSearcher>(mainView)),
       m_view(mainView), m_progressView(progressableView),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_instruments(instruments),
-      m_defaultInstrumentIndex(defaultInstrumentIndex),
-      m_thetaTolerance(thetaTolerance) {
+      m_instruments(instruments), m_thetaTolerance(thetaTolerance) {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -77,9 +73,10 @@ RunsPresenter::~RunsPresenter() {
  */
 void RunsPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
-  // Must do this after setting main presenter or notifications don't get
-  // through
-  m_view->setInstrumentList(m_instruments, m_defaultInstrumentIndex);
+}
+
+void RunsPresenter::initInstrumentList() {
+  m_view->setInstrumentList(m_instruments);
 }
 
 RunsTable const &RunsPresenter::runsTable() const {
@@ -114,7 +111,7 @@ void RunsPresenter::notifySearchComplete() {
 
 void RunsPresenter::notifySearchFailed() {
   if (isAutoreducing()) {
-    notifyAutoreductionPaused();
+    notifyPauseAutoreductionRequested();
   }
 }
 
@@ -123,31 +120,30 @@ void RunsPresenter::notifyTransfer() {
   notifyRowStateChanged();
 }
 
-void RunsPresenter::notifyInstrumentChanged() {
+void RunsPresenter::notifyChangeInstrumentRequested() {
   auto const instrumentName = m_view->getSearchInstrument();
-  m_searcher->reset();
-  if (m_mainPresenter)
-    m_mainPresenter->notifyInstrumentChanged(instrumentName);
+  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
-void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
-  m_mainPresenter->notifyInstrumentChanged(instrumentName);
+void RunsPresenter::notifyChangeInstrumentRequested(
+    std::string const &instrumentName) {
+  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
-void RunsPresenter::notifyReductionResumed() {
-  m_mainPresenter->notifyReductionResumed();
+void RunsPresenter::notifyResumeReductionRequested() {
+  m_mainPresenter->notifyResumeReductionRequested();
 }
 
-void RunsPresenter::notifyReductionPaused() {
-  m_mainPresenter->notifyReductionPaused();
+void RunsPresenter::notifyPauseReductionRequested() {
+  m_mainPresenter->notifyPauseReductionRequested();
 }
 
-void RunsPresenter::notifyAutoreductionResumed() {
-  m_mainPresenter->notifyAutoreductionResumed();
+void RunsPresenter::notifyResumeAutoreductionRequested() {
+  m_mainPresenter->notifyResumeAutoreductionRequested();
 }
 
-void RunsPresenter::notifyAutoreductionPaused() {
-  m_mainPresenter->notifyAutoreductionPaused();
+void RunsPresenter::notifyPauseAutoreductionRequested() {
+  m_mainPresenter->notifyPauseAutoreductionRequested();
 }
 
 void RunsPresenter::notifyStartMonitor() { startMonitor(); }
@@ -173,15 +169,15 @@ void RunsPresenter::notifyRowOutputsChanged(
   tablePresenter()->notifyRowOutputsChanged(item);
 }
 
-void RunsPresenter::reductionResumed() {
+void RunsPresenter::notifyReductionResumed() {
   updateWidgetEnabledState();
-  tablePresenter()->reductionResumed();
+  tablePresenter()->notifyReductionResumed();
   notifyRowStateChanged();
 }
 
-void RunsPresenter::reductionPaused() {
+void RunsPresenter::notifyReductionPaused() {
   updateWidgetEnabledState();
-  tablePresenter()->reductionPaused();
+  tablePresenter()->notifyReductionPaused();
 }
 
 /** Resume autoreduction. Clears any existing table data first and then
@@ -190,6 +186,7 @@ void RunsPresenter::reductionPaused() {
 bool RunsPresenter::resumeAutoreduction() {
   auto const searchString = m_view->getSearchString();
   auto const instrument = m_view->getSearchInstrument();
+  auto const cycle = m_view->getSearchCycle();
 
   if (searchString == "") {
     m_messageHandler->giveUserInfo("Search field is empty", "Search Issue");
@@ -198,15 +195,11 @@ bool RunsPresenter::resumeAutoreduction() {
 
   // Check if starting an autoreduction with new settings, reset the previous
   // search results and clear the main table
-  if (m_searcher->searchSettingsChanged(searchString, instrument,
+  if (m_searcher->searchSettingsChanged(searchString, instrument, cycle,
                                         ISearcher::SearchType::AUTO)) {
     // If there are unsaved changes, ask the user first
-    auto ok = true;
-    if (hasGroupsWithContent(runsTable().reductionJobs())) {
-      ok = m_messageHandler->askUserYesNo(
-          "There are unsaved changes in the table. Continue?", "Warning");
-      if (!ok)
-        return false;
+    if (isOverwritingTablePrevented()) {
+      return false;
     }
     m_searcher->reset();
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
@@ -216,25 +209,37 @@ bool RunsPresenter::resumeAutoreduction() {
   return true;
 }
 
-void RunsPresenter::autoreductionResumed() {
+void RunsPresenter::notifyAutoreductionResumed() {
   updateWidgetEnabledState();
-  tablePresenter()->autoreductionResumed();
+  tablePresenter()->notifyAutoreductionResumed();
   m_progressView->setAsEndlessIndicator();
 }
 
-void RunsPresenter::autoreductionPaused() {
+void RunsPresenter::notifyAutoreductionPaused() {
   m_runNotifier->stopPolling();
   m_progressView->setAsPercentageIndicator();
   updateWidgetEnabledState();
-  tablePresenter()->autoreductionPaused();
+  tablePresenter()->notifyAutoreductionPaused();
 }
 
-void RunsPresenter::anyBatchAutoreductionResumed() {
+void RunsPresenter::notifyAnyBatchReductionResumed() {
   updateWidgetEnabledState();
+  tablePresenter()->notifyAnyBatchReductionResumed();
 }
 
-void RunsPresenter::anyBatchAutoreductionPaused() {
+void RunsPresenter::notifyAnyBatchReductionPaused() {
   updateWidgetEnabledState();
+  tablePresenter()->notifyAnyBatchReductionPaused();
+}
+
+void RunsPresenter::notifyAnyBatchAutoreductionResumed() {
+  updateWidgetEnabledState();
+  tablePresenter()->notifyAnyBatchAutoreductionResumed();
+}
+
+void RunsPresenter::notifyAnyBatchAutoreductionPaused() {
+  updateWidgetEnabledState();
+  tablePresenter()->notifyAnyBatchAutoreductionPaused();
 }
 
 void RunsPresenter::autoreductionCompleted() {
@@ -243,10 +248,13 @@ void RunsPresenter::autoreductionCompleted() {
   updateWidgetEnabledState();
 }
 
-void RunsPresenter::instrumentChanged(std::string const &instrumentName) {
+void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
+  m_searcher->reset();
   m_view->setSearchInstrument(instrumentName);
-  tablePresenter()->instrumentChanged(instrumentName);
+  tablePresenter()->notifyInstrumentChanged(instrumentName);
 }
+
+void RunsPresenter::notifyTableChanged() { m_mainPresenter->setBatchUnsaved(); }
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 
@@ -260,8 +268,8 @@ bool RunsPresenter::search(ISearcher::SearchType searchType) {
     return false;
 
   if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
-                                    searchType)) {
-    m_messageHandler->giveUserCritical("Catalog login failed", "Error");
+                                    m_view->getSearchCycle(), searchType)) {
+    m_messageHandler->giveUserCritical("Error starting search", "Error");
     return false;
   }
 
@@ -289,7 +297,7 @@ void RunsPresenter::autoreduceNewRuns() {
   if (rowsToTransfer.size() > 0)
     transfer(rowsToTransfer, TransferMatch::Strict);
 
-  m_mainPresenter->notifyReductionResumed();
+  m_mainPresenter->notifyResumeReductionRequested();
 }
 
 bool RunsPresenter::isProcessing() const {
@@ -300,8 +308,21 @@ bool RunsPresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
 }
 
+bool RunsPresenter::isAnyBatchProcessing() const {
+  return m_mainPresenter->isAnyBatchProcessing();
+}
+
 bool RunsPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();
+}
+
+bool RunsPresenter::isOverwritingTablePrevented() const {
+  return m_mainPresenter->isBatchUnsaved() && isOverwriteBatchPrevented();
+}
+
+bool RunsPresenter::isOverwriteBatchPrevented() const {
+  return m_mainPresenter->isWarnDiscardChangesChecked() &&
+         !m_messageHandler->askUserDiscardChanges();
 }
 
 bool RunsPresenter::searchInProgress() const {
@@ -312,6 +333,14 @@ int RunsPresenter::percentComplete() const {
   if (!m_mainPresenter)
     return 0;
   return m_mainPresenter->percentComplete();
+}
+
+void RunsPresenter::setRoundPrecision(int &precision) {
+  m_tablePresenter->setTablePrecision(precision);
+}
+
+void RunsPresenter::resetRoundPrecision() {
+  m_tablePresenter->resetTablePrecision();
 }
 
 IRunsTablePresenter *RunsPresenter::tablePresenter() const {
@@ -367,14 +396,11 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
 
     for (auto rowIndex : rowsToTransfer) {
       auto const &result = m_searcher->getSearchResult(rowIndex);
+      if (result.hasError())
+        continue;
       auto row = validateRowFromRunAndTheta(result.runNumber(), result.theta());
-      if (row.is_initialized()) {
-        mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance,
-                          result.groupName());
-      } else {
-        m_searcher->setSearchResultError(
-            rowIndex, "Theta was not specified in the description.");
-      }
+      assert(row.is_initialized());
+      mergeRowIntoGroup(jobs, row.get(), m_thetaTolerance, result.groupName());
     }
 
     tablePresenter()->mergeAdditionalJobs(jobs);
@@ -389,7 +415,8 @@ void RunsPresenter::updateWidgetEnabledState() const {
   m_view->updateMenuEnabledState(isProcessing());
 
   // Update components
-  m_view->setInstrumentComboEnabled(!isProcessing() && !isAutoreducing());
+  m_view->setInstrumentComboEnabled(!isAnyBatchProcessing() &&
+                                    !isAnyBatchAutoreducing());
   m_view->setSearchTextEntryEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setSearchButtonEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setAutoreduceButtonEnabled(!isAnyBatchAutoreducing() &&
@@ -433,11 +460,12 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
   alg->setLogging(false);
   auto const instrument = m_view->getSearchInstrument();
   auto const inputWorkspace = "TOF_live";
+  auto const updateInterval = m_view->getLiveDataUpdateInterval();
   alg->setProperty("Instrument", instrument);
   alg->setProperty("OutputWorkspace", "IvsQ_binned_live");
   alg->setProperty("AccumulationWorkspace", inputWorkspace);
   alg->setProperty("AccumulationMethod", "Replace");
-  alg->setProperty("UpdateEvery", "20");
+  alg->setProperty("UpdateEvery", static_cast<double>(updateInterval));
   alg->setProperty("PostProcessingAlgorithm", liveDataReductionAlgorithm());
   alg->setProperty("PostProcessingProperties",
                    liveDataReductionOptions(inputWorkspace, instrument));
@@ -456,16 +484,19 @@ IAlgorithm_sptr RunsPresenter::setupLiveDataMonitorAlgorithm() {
 void RunsPresenter::updateViewWhenMonitorStarting() {
   m_view->setStartMonitorButtonEnabled(false);
   m_view->setStopMonitorButtonEnabled(false);
+  m_view->setUpdateIntervalSpinBoxEnabled(false);
 }
 
 void RunsPresenter::updateViewWhenMonitorStarted() {
   m_view->setStartMonitorButtonEnabled(false);
   m_view->setStopMonitorButtonEnabled(true);
+  m_view->setUpdateIntervalSpinBoxEnabled(false);
 }
 
 void RunsPresenter::updateViewWhenMonitorStopped() {
   m_view->setStartMonitorButtonEnabled(true);
   m_view->setStopMonitorButtonEnabled(false);
+  m_view->setUpdateIntervalSpinBoxEnabled(true);
 }
 
 /** Start live data monitoring

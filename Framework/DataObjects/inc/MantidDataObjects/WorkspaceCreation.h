@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_WORKSPACECREATION_H_
-#define MANTID_DATAOBJECTS_WORKSPACECREATION_H_
+#pragma once
 
 #include "MantidDataObjects/DllConfig.h"
 #include "MantidHistogramData/Histogram.h"
@@ -194,12 +193,12 @@ template <class T, class IndexArg, class HistArg,
           typename std::enable_if<!std::is_base_of<
               API::MatrixWorkspace, IndexArg>::value>::type * = nullptr>
 std::unique_ptr<T>
-create(const boost::shared_ptr<const Geometry::Instrument> instrument,
+create(const std::shared_ptr<const Geometry::Instrument> &instrument,
        const IndexArg &indexArg, const HistArg &histArg) {
   auto ws = std::make_unique<T>();
   ws->setInstrument(std::move(instrument));
   ws->initialize(indexArg, HistogramData::Histogram(histArg));
-  return std::move(ws);
+  return ws;
 }
 
 template <class T, class P,
@@ -244,5 +243,3 @@ std::unique_ptr<T> create(const P &parent,
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_WORKSPACECREATION_H_ */

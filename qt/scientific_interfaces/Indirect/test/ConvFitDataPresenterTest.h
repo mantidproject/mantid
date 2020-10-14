@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CONVFITDATAPRESENTERTEST_H_
-#define MANTIDQT_CONVFITDATAPRESENTERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -72,9 +71,12 @@ public:
 
   MOCK_METHOD1(readSettings, void(QSettings const &settings));
   MOCK_METHOD1(validate, UserInputValidator &(UserInputValidator &validator));
+  MOCK_METHOD1(setXRange, void(std::pair<double, double> const &range));
 
   /// Public slots
   MOCK_METHOD1(displayWarning, void(std::string const &warning));
+  MOCK_METHOD1(setStartX, void(double));
+  MOCK_METHOD1(setEndX, void(double));
 };
 
 /// Mock object to mock the model
@@ -136,7 +138,7 @@ public:
 
   void
   test_that_the_model_contains_the_correct_number_of_workspace_after_instantiation() {
-    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), 1);
+    TS_ASSERT_EQUALS(m_model->numberOfWorkspaces(), TableDatasetIndex{1});
   }
 
   ///----------------------------------------------------------------------
@@ -150,4 +152,3 @@ private:
   std::unique_ptr<MockConvFitModel> m_model;
   std::unique_ptr<ConvFitDataPresenter> m_presenter;
 };
-#endif

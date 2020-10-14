@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IFUNCTION1DSPECTRUMTEST_H_
-#define MANTID_API_IFUNCTION1DSPECTRUMTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -29,11 +28,11 @@ public:
 
   void testFunctionCorrectDomain() {
     std::vector<double> xValues;
-    xValues.push_back(1.0);
-    xValues.push_back(2.0);
-    xValues.push_back(3.0);
-    xValues.push_back(4.0);
-    xValues.push_back(5.0);
+    xValues.emplace_back(1.0);
+    xValues.emplace_back(2.0);
+    xValues.emplace_back(3.0);
+    xValues.emplace_back(4.0);
+    xValues.emplace_back(5.0);
 
     FunctionDomain1DSpectrum domain(0, xValues);
     FunctionValues values(domain);
@@ -48,11 +47,11 @@ public:
 
   void testFunctionIncorrectDomain() {
     std::vector<double> xValues;
-    xValues.push_back(1.0);
-    xValues.push_back(2.0);
-    xValues.push_back(3.0);
-    xValues.push_back(4.0);
-    xValues.push_back(5.0);
+    xValues.emplace_back(1.0);
+    xValues.emplace_back(2.0);
+    xValues.emplace_back(3.0);
+    xValues.emplace_back(4.0);
+    xValues.emplace_back(5.0);
 
     FunctionDomain1DVector domain(xValues);
     FunctionValues values(domain);
@@ -79,5 +78,3 @@ private:
     }
   };
 };
-
-#endif /* MANTID_API_IFUNCTION1DSPECTRUMTEST_H_ */

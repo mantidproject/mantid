@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspaceMDIterator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -57,7 +57,7 @@ MatrixWorkspaceMDIterator::MatrixWorkspaceMDIterator(
   m_max = 0;
   m_startIndices.reserve(m_endWI - m_beginWI);
   for (size_t i = m_beginWI; i < m_endWI; ++i) {
-    m_startIndices.push_back(m_max);
+    m_startIndices.emplace_back(m_max);
     m_max += m_ws->readY(i).size();
   }
 

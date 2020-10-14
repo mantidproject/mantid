@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SampleCorrections/MCInteractionVolume.h"
 #include "MantidAPI/Sample.h"
@@ -11,6 +11,7 @@
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
+#include <iomanip>
 
 namespace Mantid {
 using Geometry::Track;
@@ -20,31 +21,44 @@ namespace Algorithms {
 
 /**
  * Construct the volume encompassing the sample + any environment kit. The
- * beam profile defines a bounding region for the sampling of the scattering
+ * active region defines a bounding region for the sampling of the scattering
  * position.
  * @param sample A reference to a sample object that defines a valid shape
  * & material
- * @param activeRegion Restrict scattering point sampling to this region
  * @param maxScatterAttempts The maximum number of tries to generate a random
  * point within the object. [Default=5000]
+ * @param pointsIn Where to generate the scattering point in
  */
 MCInteractionVolume::MCInteractionVolume(
-    const API::Sample &sample, const Geometry::BoundingBox &activeRegion,
-    const size_t maxScatterAttempts)
+    const API::Sample &sample, const size_t maxScatterAttempts,
+    const MCInteractionVolume::ScatteringPointVicinity pointsIn)
     : m_sample(sample.getShape().clone()), m_env(nullptr),
-      m_activeRegion(activeRegion), m_maxScatterAttempts(maxScatterAttempts) {
-  if (!m_sample->hasValidShape()) {
-    throw std::invalid_argument(
-        "MCInteractionVolume() - Sample shape does not have a valid shape.");
-  }
+      m_activeRegion(getFullBoundingBox()),
+      m_maxScatterAttempts(maxScatterAttempts), m_pointsIn(pointsIn) {
   try {
     m_env = &sample.getEnvironment();
+    assert(m_env);
     if (m_env->nelements() == 0) {
       throw std::invalid_argument(
           "MCInteractionVolume() - Sample enviroment has zero components.");
     }
   } catch (std::runtime_error &) {
     // swallow this as no defined environment from getEnvironment
+  }
+
+  bool atLeastOneValidShape = m_sample->hasValidShape();
+  if (!atLeastOneValidShape && m_env) {
+    for (size_t i = 0; i < m_env->nelements(); i++) {
+      if (m_env->getComponent(i).hasValidShape()) {
+        atLeastOneValidShape = true;
+        break;
+      }
+    }
+  }
+  if (!atLeastOneValidShape) {
+    throw std::invalid_argument(
+        "MCInteractionVolume() - Either the Sample or one of the "
+        "environment parts must have a valid shape.");
   }
 }
 
@@ -57,37 +71,119 @@ const Geometry::BoundingBox &MCInteractionVolume::getBoundingBox() const {
 }
 
 /**
- * Calculate the attenuation correction factor the volume given a start and
- * end point.
+ * Returns the axis-aligned bounding box for the volume including env
+ * @return A reference to the bounding box
+ */
+const Geometry::BoundingBox MCInteractionVolume::getFullBoundingBox() const {
+  auto sampleBox = m_sample->getBoundingBox();
+  if (m_env) {
+    const auto &envBox = m_env->boundingBox();
+    sampleBox.grow(envBox);
+  }
+  return sampleBox;
+}
+
+void MCInteractionVolume::setActiveRegion(const Geometry::BoundingBox &region) {
+  m_activeRegion = region;
+}
+
+/**
+ * Randomly select a component across the sample/environment
+ * @param rng A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @return The randomly selected component index
+ */
+int MCInteractionVolume::getComponentIndex(
+    Kernel::PseudoRandomNumberGenerator &rng) const {
+  // the sample has componentIndex -1, env components are number 0 upwards
+  int componentIndex = -1;
+  if (m_pointsIn != ScatteringPointVicinity::SAMPLEONLY && m_env) {
+    const int randomStart =
+        (m_pointsIn == ScatteringPointVicinity::ENVIRONMENTONLY) ? 1 : 0;
+    componentIndex =
+        rng.nextInt(randomStart, static_cast<int>(m_env->nelements())) - 1;
+  }
+  return componentIndex;
+}
+
+/**
+ * Generate a point in an object identified by an index
+ * @param componentIndex Index of the sample/environment component where
+ * the sample is -1
+ * @param rng A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @return The generated point
+ */
+
+boost::optional<Kernel::V3D> MCInteractionVolume::generatePointInObjectByIndex(
+    int componentIndex, Kernel::PseudoRandomNumberGenerator &rng) const {
+  boost::optional<Kernel::V3D> pointGenerated{boost::none};
+  if (componentIndex == -1) {
+    pointGenerated = m_sample->generatePointInObject(rng, m_activeRegion, 1);
+  } else {
+    pointGenerated = m_env->getComponent(componentIndex)
+                         .generatePointInObject(rng, m_activeRegion, 1);
+  }
+  return pointGenerated;
+}
+
+/**
+ * Generate point randomly across one of the components of the environment
+ * including the sample itself in the selection. The method first selects
+ * a random component and then selects a random point within that component
+ * using Object::generatePointObject
+ * @param rng A reference to a PseudoRandomNumberGenerator where
+ * nextValue should return a flat random number between 0.0 & 1.0
+ * @return A struct containing the generated point and the index of the
+ * component containing the scatter point
+ */
+ComponentScatterPoint MCInteractionVolume::generatePoint(
+    Kernel::PseudoRandomNumberGenerator &rng) const {
+  for (size_t i = 0; i < m_maxScatterAttempts; i++) {
+    int componentIndex = getComponentIndex(rng);
+    boost::optional<Kernel::V3D> pointGenerated =
+        generatePointInObjectByIndex(componentIndex, rng);
+    if (pointGenerated) {
+      return {componentIndex, *pointGenerated};
+    }
+  }
+  throw std::runtime_error("MCInteractionVolume::generatePoint() - Unable to "
+                           "generate point in object after " +
+                           std::to_string(m_maxScatterAttempts) + " attempts");
+}
+
+/**
+ * Calculate a before scatter and after scatter track based on a scatter point
+ * in the volume given a start and end point.
  * @param rng A reference to a PseudoRandomNumberGenerator producing
  * random number between [0,1]
  * @param startPos Origin of the initial track
  * @param endPos Final position of neutron after scattering (assumed to be
  * outside of the "volume")
- * @param lambdaBefore Wavelength, in \f$\\A^-1\f$, before scattering
- * @param lambdaAfter Wavelength, in \f$\\A^-1\f$, after scattering
- * @return The fraction of the beam that has been attenuated. A negative number
- * indicates the track was not valid.
+ * @param beforeScatter Out parameter to return generated before scatter track
+ * @param afterScatter Out parameter to return generated after scatter track
+ * @param stats A statistics class to hold the statistics on the generated
+ * tracks such as the scattering angle and count of scatter points generated in
+ * each sample or environment part
+ * @return Whether before/after tracks were successfully generated
  */
-double MCInteractionVolume::calculateAbsorption(
+bool MCInteractionVolume::calculateBeforeAfterTrack(
     Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
-    const Kernel::V3D &endPos, double lambdaBefore, double lambdaAfter) const {
+    const Kernel::V3D &endPos, Geometry::Track &beforeScatter,
+    Geometry::Track &afterScatter, MCInteractionStatistics &stats) const {
   // Generate scatter point. If there is an environment present then
   // first select whether the scattering occurs on the sample or the
   // environment. The attenuation for the path leading to the scatter point
   // is calculated in reverse, i.e. defining the track from the scatter pt
   // backwards for simplicity with how the Track object works. This avoids
   // having to understand exactly which object the scattering occurred in.
-  V3D scatterPos;
-  if (m_env && (rng.nextValue() > 0.5)) {
-    scatterPos =
-        m_env->generatePoint(rng, m_activeRegion, m_maxScatterAttempts);
-  } else {
-    scatterPos = m_sample->generatePointInObject(rng, m_activeRegion,
-                                                 m_maxScatterAttempts);
-  }
-  const auto toStart = normalize(startPos - scatterPos);
-  Track beforeScatter(scatterPos, toStart);
+  ComponentScatterPoint scatterPos;
+
+  scatterPos = generatePoint(rng);
+  stats.UpdateScatterPointCounts(scatterPos.componentIndex, false);
+
+  const auto toStart = normalize(startPos - scatterPos.scatterPoint);
+  beforeScatter = Track(scatterPos.scatterPoint, toStart);
   int nlinks = m_sample->interceptSurface(beforeScatter);
   if (m_env) {
     nlinks += m_env->interceptSurfaces(beforeScatter);
@@ -95,8 +191,34 @@ double MCInteractionVolume::calculateAbsorption(
   // This should not happen but numerical precision means that it can
   // occasionally occur with tracks that are very close to the surface
   if (nlinks == 0) {
-    return -1.0;
+    return false;
   }
+  stats.UpdateScatterPointCounts(scatterPos.componentIndex, true);
+
+  // Now track to final destination
+  const V3D scatteredDirec = normalize(endPos - scatterPos.scatterPoint);
+  afterScatter = Track(scatterPos.scatterPoint, scatteredDirec);
+  m_sample->interceptSurface(afterScatter);
+  if (m_env) {
+    m_env->interceptSurfaces(afterScatter);
+  }
+  stats.UpdateScatterAngleStats(toStart, scatteredDirec);
+  return true;
+}
+
+/**
+ * Calculate the attenuation correction factor the volume given a before
+ * and after track.
+ * @param beforeScatter Before scatter track
+ * @param afterScatter After scatter track
+ * @param lambdaBefore Lambda before scattering
+ * @param lambdaAfter Lambda after scattering
+ * @return Absorption factor
+ */
+double MCInteractionVolume::calculateAbsorption(const Track &beforeScatter,
+                                                const Track &afterScatter,
+                                                double lambdaBefore,
+                                                double lambdaAfter) const {
 
   // Function to calculate total attenuation for a track
   auto calculateAttenuation = [](const Track &path, double lambda) {
@@ -109,13 +231,6 @@ double MCInteractionVolume::calculateAbsorption(
     return factor;
   };
 
-  // Now track to final destination
-  const V3D scatteredDirec = normalize(endPos - scatterPos);
-  Track afterScatter(scatterPos, scatteredDirec);
-  m_sample->interceptSurface(afterScatter);
-  if (m_env) {
-    m_env->interceptSurfaces(afterScatter);
-  }
   return calculateAttenuation(beforeScatter, lambdaBefore) *
          calculateAttenuation(afterScatter, lambdaAfter);
 }

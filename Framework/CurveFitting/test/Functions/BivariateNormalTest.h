@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * BivariateNormalTest.h
@@ -11,8 +11,7 @@
  *      Author: Ruth Mikkelson
  */
 
-#ifndef BIVARIATENORMALTEST_H_
-#define BIVARIATENORMALTEST_H_
+#pragma once
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Jacobian.h"
@@ -90,7 +89,7 @@ public:
     const int nCells = 30;
     MatrixWorkspace_sptr ws1 =
         WorkspaceFactory::Instance().create("Workspace2D", 3, nCells, nCells);
-    Workspace2D_sptr ws = boost::dynamic_pointer_cast<Workspace2D>(ws1);
+    Workspace2D_sptr ws = std::dynamic_pointer_cast<Workspace2D>(ws1);
 
     const double background = 0.05;
     const double intensity = 562.95;
@@ -119,12 +118,12 @@ public:
         sgn1 = -sgn1 + 1;
         sgn2 = sgn1;
       }
-      xvals.push_back(x);
-      yvals.push_back(y);
+      xvals.emplace_back(x);
+      yvals.emplace_back(y);
       const double val =
           NormVal(background, intensity, Mcol, Mrow, Vx, Vy, Vxy, y, x);
 
-      data.push_back(val);
+      data.emplace_back(val);
     }
 
     double xx[nCells];
@@ -155,7 +154,7 @@ public:
 
     std::vector<double> out(nCells);
 
-    boost::shared_ptr<Jacob> Jac = boost::make_shared<Jacob>(7, nCells);
+    std::shared_ptr<Jacob> Jac = std::make_shared<Jacob>(7, nCells);
 
     NormalFit.functionDeriv1D(Jac.get(), xx, nCells);
 
@@ -198,4 +197,3 @@ public:
     TS_ASSERT(categories[0] == "Peak");
   }
 };
-#endif /* BIVARIATENORMALTEST_H_ */

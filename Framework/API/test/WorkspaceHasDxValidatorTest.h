@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_WORKSPACEHASDXVALIDATORTEST_H_
-#define MANTID_API_WORKSPACEHASDXVALIDATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -25,7 +24,7 @@ public:
   static void destroySuite(WorkspaceHasDxValidatorTest *suite) { delete suite; }
 
   void test_returns_empty_string_for_valid_workspaces() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(1, 1, 1);
     auto dx = Kernel::make_cow<HistogramData::HistogramDx>(1, 0.);
     ws->setSharedDx(0, std::move(dx));
@@ -34,12 +33,10 @@ public:
   }
 
   void test_returns_message_for_invalid_workspaces() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(1, 1, 1);
     WorkspaceHasDxValidator validator;
     TS_ASSERT_EQUALS(validator.isValid(ws),
                      "The workspace must have Dx values set")
   }
 };
-
-#endif /* MANTID_API_WORKSPACEHASDXVALIDATORTEST_H_ */

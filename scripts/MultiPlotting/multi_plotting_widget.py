@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets, QtCore
 from copy import deepcopy
 from MultiPlotting.subplot.subplot import subplot
@@ -41,7 +39,7 @@ class MultiPlotWidget(QtWidgets.QWidget):
         self._context = context
         layout = QtWidgets.QVBoxLayout()
         splitter = QtWidgets.QSplitter(QtCore.Qt.Vertical)
-        self.quickEdit = QuickEditWidget(self)
+        self.quickEdit = QuickEditWidget(self, auto_btn = True)
         self.quickEdit.connect_x_range_changed(self._x_range_changed)
         self.quickEdit.connect_y_range_changed(self._y_range_changed)
         self.quickEdit.connect_errors_changed(self._errors_changed)

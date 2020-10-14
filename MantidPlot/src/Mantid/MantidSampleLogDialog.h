@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDSAMPLELOGDIALOG_H_
-#define MANTIDSAMPLELOGDIALOG_H_
+#pragma once
 
 //----------------------------------
 // Includes
@@ -40,7 +39,7 @@ class MantidSampleLogDialog : public SampleLogDialogBase {
 public:
   /// Constructor
   MantidSampleLogDialog(const QString &wsname, MantidUI *mui,
-                        Qt::WFlags flags = nullptr,
+                        const Qt::WFlags &flags = nullptr,
                         size_t experimentInfoIndex = 0);
 
   /// Destructor
@@ -66,5 +65,3 @@ protected:
   /// A pointer to the MantidUI object
   MantidUI *m_mantidUI;
 };
-
-#endif // MANTIDSAMPLELOGDIALOG_H_

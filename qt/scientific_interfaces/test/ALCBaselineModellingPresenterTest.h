@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ALCBASELINEMODELLINGTEST_H_
-#define MANTIDQT_CUSTOMINTERFACES_ALCBASELINEMODELLINGTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -24,11 +23,11 @@
 using namespace Mantid::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace testing;
-using Mantid::HistogramData::CountStandardDeviations;
+using boost::scoped_ptr;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
-using boost::scoped_ptr;
 
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
@@ -365,5 +364,3 @@ public:
     m_view->help();
   }
 };
-
-#endif /* MANTIDQT_CUSTOMINTERFACES_ALCBASELINEMODELLINGTEST_H_ */

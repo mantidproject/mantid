@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_CONVERTTOMDHELPER2TEST_H_
-#define MANTID_MDALGORITHMS_CONVERTTOMDHELPER2TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -225,8 +224,8 @@ private:
     testInst->add(source);
     testInst->markAsSource(source);
     // Define a sample as a simple sphere
-    Mantid::Geometry::ObjComponent *sample = new Mantid::Geometry::ObjComponent(
-        "samplePos", Mantid::Geometry::IObject_sptr(), testInst.get());
+    Mantid::Geometry::Component *sample =
+        new Mantid::Geometry::Component("samplePos", testInst.get());
     testInst->setPos(0.0, 0.0, 0.0);
     testInst->add(sample);
     testInst->markAsSamplePos(sample);
@@ -245,8 +244,9 @@ private:
           new Mantid::Kernel::PropertyWithValue<double>("Ei", Ei));
     }
 
-    Mantid::Geometry::OrientedLattice latt(2, 3, 4, 90, 90, 90);
-    ws->mutableSample().setOrientedLattice(&latt);
+    ws->mutableSample().setOrientedLattice(
+        std::make_unique<Mantid::Geometry::OrientedLattice>(2, 3, 4, 90, 90,
+                                                            90));
 
     // time average value of this is the simple average
     // of the first three values = 7.69667
@@ -262,5 +262,3 @@ private:
     return ws;
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_CONVERTTOMDHELPERTEST_H_ */

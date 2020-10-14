@@ -1,5 +1,4 @@
-#ifndef __cxxtest__TestListener_h__
-#define __cxxtest__TestListener_h__
+#pragma once
 
 //
 // TestListener is the base class for all "listeners",
@@ -70,8 +69,6 @@ namespace CxxTest
         virtual void leaveWorld( const WorldDescription & /*desc*/ ) {}
     };
 }
-
-#endif // __cxxtest__TestListener_h__
 
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government

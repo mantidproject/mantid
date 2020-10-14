@@ -68,9 +68,9 @@ set_target_properties(Parallel
                                  COMPILE_DEFINITIONS
                                  IN_MANTID_PARALLEL)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Parallel
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(Parallel
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
@@ -83,7 +83,6 @@ target_include_directories(Parallel SYSTEM
                            PRIVATE ${HDF5_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
 target_link_libraries(Parallel
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
                       ${MANTIDLIBS}
                       ${HDF5_LIBRARIES}
@@ -103,9 +102,9 @@ set_target_properties(EventParallelLoader
                                  COMPILE_DEFINITIONS
                                  IN_MANTID_PARALLEL)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(EventParallelLoader
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(EventParallelLoader
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
@@ -119,7 +118,6 @@ target_include_directories(EventParallelLoader SYSTEM
 
 target_link_libraries(EventParallelLoader
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
                       ${MANTIDLIBS}
                       ${HDF5_LIBRARIES}

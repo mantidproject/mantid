@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FilterByTime.h"
 #include "MantidAPI/Run.h"
@@ -38,7 +38,7 @@ void FilterByTime::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "The name to use for the output workspace");
 
-  auto min = boost::make_shared<BoundedValidator<double>>();
+  auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(0.0);
   declareProperty("StartTime", 0.0, min,
                   "The start time, in seconds, since the start of the run. "
@@ -47,7 +47,7 @@ void FilterByTime::init() {
                   "sample log) is used as the zero. " +
                       commonHelp);
 
-  declareProperty("StopTime", 0.0,
+  declareProperty("StopTime", 0.0, min,
                   "The stop time, in seconds, since the start of the run. "
                   "Events at or after this time are filtered out. \nThe time "
                   "of the first pulse (i.e. the first entry in the "

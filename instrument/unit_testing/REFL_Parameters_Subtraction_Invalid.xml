@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="REFL" valid-from="forever">
+
+<component-link name="REFL" >
+
+  <parameter name="BackgroundCalculationMethod" type="string">
+      <value val="badSubtractionMethod"/>
+  </parameter>
+
+  <parameter name="DegreeOfPolynomial" type="string">
+      <value val="badPolynomialType"/>
+  </parameter>
+
+  <parameter name="CostFunction" type="string">
+      <value val="badCostFunction"/>
+  </parameter>
+
+</component-link>
+
+</parameter-file>

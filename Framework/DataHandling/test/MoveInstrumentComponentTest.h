@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MOVEINSTRUMENTCOMPONENTTEST_H_
-#define MOVEINSTRUMENTCOMPONENTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -69,9 +68,9 @@ public:
 
     Instrument_const_sptr inst = WS->getInstrument();
     // get pointer to the first detector in the bank
-    boost::shared_ptr<const IComponent> comp =
-        (*boost::dynamic_pointer_cast<const ICompAssembly>(
-            (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
+    std::shared_ptr<const IComponent> comp =
+        (*std::dynamic_pointer_cast<const ICompAssembly>(
+            (*std::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
 
     V3D pos = comp->getPos();
     TS_ASSERT_EQUALS(pos, det1->getPos() + V3D(10, 20, 30))
@@ -90,9 +89,9 @@ public:
 
     Instrument_const_sptr inst = WS->getInstrument();
     // get pointer to the first detector in the bank
-    boost::shared_ptr<const IComponent> comp =
-        (*boost::dynamic_pointer_cast<const ICompAssembly>(
-            (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
+    std::shared_ptr<const IComponent> comp =
+        (*std::dynamic_pointer_cast<const ICompAssembly>(
+            (*std::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
 
     V3D pos = comp->getPos();
     TS_ASSERT_EQUALS(pos, V3D(10, 20, 30))
@@ -111,9 +110,9 @@ public:
 
     Instrument_const_sptr inst = WS->getInstrument();
     // get pointer to the first detector in the bank
-    boost::shared_ptr<const IComponent> comp =
-        (*boost::dynamic_pointer_cast<const ICompAssembly>(
-            (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
+    std::shared_ptr<const IComponent> comp =
+        (*std::dynamic_pointer_cast<const ICompAssembly>(
+            (*std::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
 
     V3D pos = comp->getPos();
     TS_ASSERT_EQUALS(pos, V3D(10, 20, 30))
@@ -132,9 +131,9 @@ public:
 
     Instrument_const_sptr inst = WS->getInstrument();
     // get pointer to the first detector in the bank
-    boost::shared_ptr<const IComponent> comp =
-        (*boost::dynamic_pointer_cast<const ICompAssembly>(
-            (*boost::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
+    std::shared_ptr<const IComponent> comp =
+        (*std::dynamic_pointer_cast<const ICompAssembly>(
+            (*std::dynamic_pointer_cast<const ICompAssembly>(inst))[0]))[0];
 
     V3D pos = comp->getPos();
     TS_ASSERT_EQUALS(pos, V3D(10, 20, 30))
@@ -143,8 +142,6 @@ public:
 private:
   std::string wsName;
   Detector *det1;
-  boost::shared_ptr<Instrument> instrument;
+  std::shared_ptr<Instrument> instrument;
   MatrixWorkspace_sptr WS;
 };
-
-#endif /*MOVEINSTRUMENTCOMPONENTTEST_H_*/

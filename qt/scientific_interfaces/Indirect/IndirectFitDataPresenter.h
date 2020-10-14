@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATAPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATAPRESENTER_H_
+#pragma once
 
 #include "IAddWorkspaceDialog.h"
 #include "IIndirectFitDataView.h"
+#include "IndexTypes.h"
 #include "IndirectDataTablePresenter.h"
 #include "IndirectFittingModel.h"
 
@@ -29,9 +29,6 @@ class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter
 public:
   IndirectFitDataPresenter(IndirectFittingModel *model,
                            IIndirectFitDataView *view);
-  IndirectFitDataPresenter(
-      IndirectFittingModel *model, IIndirectFitDataView *view,
-      std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
   ~IndirectFitDataPresenter();
 
   void setSampleWSSuffices(const QStringList &suffices);
@@ -43,25 +40,32 @@ public:
   void setMultiInputResolutionWSSuffixes();
   void setMultiInputResolutionFBSuffixes();
 
-  void setStartX(double startX, std::size_t dataIndex, int spectrumIndex);
-  void setEndX(double endX, std::size_t dataIndex, int spectrumIndex);
-  void setExclude(const std::string &exclude, std::size_t dataIndex,
-                  int spectrumIndex);
+  void setStartX(double startX, TableDatasetIndex dataIndex,
+                 WorkspaceIndex spectrumIndex);
+  void setStartX(double startX, TableDatasetIndex dataIndex);
+  void setEndX(double endX, TableDatasetIndex dataIndex,
+               WorkspaceIndex spectrumIndex);
+  void setEndX(double endX, TableDatasetIndex dataIndex);
+  void setExclude(const std::string &exclude, TableDatasetIndex dataIndex,
+                  WorkspaceIndex spectrumIndex);
 
   void loadSettings(const QSettings &settings);
   UserInputValidator &validate(UserInputValidator &validator);
 
   void replaceHandle(const std::string &workspaceName,
                      const Workspace_sptr &workspace) override;
+  DataForParameterEstimationCollection
+  getDataForParameterEstimation(const EstimationDataSelector &selector) const;
 
 public slots:
-  void updateSpectraInTable(std::size_t dataIndex);
+  void updateSpectraInTable(TableDatasetIndex dataIndex);
 
 protected slots:
   void setModelWorkspace(const QString &name);
   void setModelFromSingleData();
   void setModelFromMultipleData();
   void showAddWorkspaceDialog();
+  virtual void handleSampleLoaded(const QString &);
 
   virtual void closeDialog();
 
@@ -70,20 +74,26 @@ signals:
   void dataAdded();
   void dataRemoved();
   void dataChanged();
-  void startXChanged(double /*_t1*/, std::size_t /*_t2*/, std::size_t /*_t3*/);
-  void endXChanged(double /*_t1*/, std::size_t /*_t2*/, std::size_t /*_t3*/);
-  void excludeRegionChanged(const std::string & /*_t1*/, std::size_t /*_t2*/,
-                            std::size_t /*_t3*/);
+  void startXChanged(double, TableDatasetIndex, WorkspaceIndex);
+  void startXChanged(double);
+  void endXChanged(double, TableDatasetIndex, WorkspaceIndex);
+  void endXChanged(double);
+  void excludeRegionChanged(const std::string &, TableDatasetIndex,
+                            WorkspaceIndex);
   void multipleDataViewSelected();
   void singleDataViewSelected();
   void requestedAddWorkspaceDialog();
   void updateAvailableFitTypes();
 
 protected:
+  IndirectFitDataPresenter(
+      IndirectFittingModel *model, IIndirectFitDataView *view,
+      std::unique_ptr<IndirectDataTablePresenter> tablePresenter);
   IIndirectFitDataView const *getView() const;
   void addData(IAddWorkspaceDialog const *dialog);
   virtual void addDataToModel(IAddWorkspaceDialog const *dialog);
   void setSingleModelData(const std::string &name);
+  void updateRanges();
   virtual void addModelData(const std::string &name);
   void setResolutionHidden(bool hide);
   void displayWarning(const std::string &warning);
@@ -94,8 +104,7 @@ private slots:
 private:
   virtual std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const;
-  void updateDataInTable(std::size_t dataIndex);
-
+  void updateDataInTable(TableDatasetIndex dataIndex);
   void selectReplacedWorkspace(const QString &workspaceName);
 
   virtual void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog);
@@ -103,8 +112,6 @@ private:
 
   std::unique_ptr<IAddWorkspaceDialog> m_addWorkspaceDialog;
   IndirectFittingModel *m_model;
-  PrivateFittingData m_singleData;
-  PrivateFittingData m_multipleData;
   IIndirectFitDataView *m_view;
   std::unique_ptr<IndirectDataTablePresenter> m_tablePresenter;
 };
@@ -112,5 +119,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_INDIRECTFITDATAPRESENTER_H_ */

@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, unicode_literals)
-
 import unittest
 
 from qtpy.QtWidgets import QApplication
@@ -30,22 +28,22 @@ class MultiPythonFileInterpreterDeletionTest(unittest.TestCase, QtWidgetFinder):
 
         widget.close_tab(0)
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 2)
         widget.close_tab(0)
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 1)
 
         widget.close_all()
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         # there should be zero interpreters
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 0)
 
         # close the whole widget, this should delete everything from the QApplication
         widget.close()
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 0)
         self.assert_no_toplevel_widgets()
 
@@ -59,14 +57,14 @@ class MultiPythonFileInterpreterDeletionTest(unittest.TestCase, QtWidgetFinder):
 
         widget.close_tab(1)
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         # there will always be 1, because we never allow an empty editor widget
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 1)
         self.assert_number_of_widgets_matching("Embedded", 0)
 
         # close the whole widget, this should delete everything from the QApplication
         widget.close()
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 0)
         self.assert_no_toplevel_widgets()
 
@@ -79,14 +77,14 @@ class MultiPythonFileInterpreterDeletionTest(unittest.TestCase, QtWidgetFinder):
 
         widget.close_tab(1)
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         # there will always be 1, because we never allow an empty editor widget
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 1)
         self.assert_number_of_widgets_matching("Embedded", 0)
 
         # close the whole widget, this should delete everything from the QApplication
         widget.close()
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         self.assert_number_of_widgets_matching(".interpreter.PythonFileInterpreter", 0)
         self.assert_no_toplevel_widgets()
 

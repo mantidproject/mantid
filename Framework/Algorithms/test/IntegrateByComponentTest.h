@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_IntegrateByComponentTEST_H_
-#define MANTID_ALGORITHMS_IntegrateByComponentTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -241,7 +240,7 @@ public:
   }
 
 private:
-  void ABCtestWorkspace(std::string inputWSname, bool mask) {
+  void ABCtestWorkspace(const std::string &inputWSname, bool mask) {
     int nSpectra(12);
     Workspace2D_sptr ws2D =
         WorkspaceCreationHelper::create2DWorkspaceWhereYIsWorkspaceIndex(
@@ -260,5 +259,3 @@ private:
     AnalysisDataService::Instance().add(inputWSname, ws2D);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_IntegrateByComponentTEST_H_ */

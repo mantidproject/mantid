@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_EXCITATIONSDIAGRESULTS_H_
-#define MANTIDQTCUSTOMINTERFACES_EXCITATIONSDIAGRESULTS_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/MantidDialog.h"
@@ -29,8 +28,8 @@ signals:
   void died();
 
 private:
-  void updateRow(int row, QString text);
-  int addRow(QString firstColumn, QString secondColumn);
+  void updateRow(int row, const QString &text);
+  int addRow(const QString &firstColumn, const QString &secondColumn);
   void closeEvent(QCloseEvent *event) override;
 
 private:
@@ -39,5 +38,3 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_EXCITATIONSDIAGRESULTS_H_

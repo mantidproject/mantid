@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WRAPPEDTESTSUITE_H_
-#define WRAPPEDTESTSUITE_H_
+#pragma once
 
 /**
  * This file is present so that the TestSuite.h header can be included in a precompiled 
@@ -20,5 +19,3 @@
 #undef _CXXTEST_LONGLONG // Avoid a warning
 #undef _CXXTEST_HAVE_STD
 #undef _CXXTEST_HAVE_EH
-
-#endif //WRAPPEDTESTSUITE_H_

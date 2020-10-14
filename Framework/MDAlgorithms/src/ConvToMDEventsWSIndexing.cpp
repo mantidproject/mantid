@@ -1,10 +1,16 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvToMDEventsWSIndexing.h"
 
 namespace Mantid {
 namespace MDAlgorithms {
 
 size_t ConvToMDEventsWSIndexing::initialize(
-    const MDWSDescription &WSD, boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
+    const MDWSDescription &WSD, std::shared_ptr<MDEventWSWrapper> inWSWrapper,
     bool ignoreZeros) {
   size_t numSpec = ConvToMDEventsWS::initialize(WSD, inWSWrapper, ignoreZeros);
 

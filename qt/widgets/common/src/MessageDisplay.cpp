@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //-------------------------------------------
 // Includes
@@ -11,9 +11,13 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+#include "MantidQtWidgets/Common/NotificationService.h"
+#endif
 
 #include <QAction>
 #include <QActionGroup>
+#include <QCoreApplication>
 #include <QHBoxLayout>
 #include <QInputDialog>
 #include <QMenu>
@@ -26,6 +30,7 @@
 #include <Poco/Logger.h>
 #include <Poco/Message.h>
 #include <Poco/SplitterChannel.h>
+#include <Poco/Version.h>
 
 namespace {
 // Track number of attachments to generate a unique channel name
@@ -99,8 +104,6 @@ MessageDisplay::MessageDisplay(const QFont &font, QWidget *parent)
   setupTextArea(font);
 }
 
-/**
- */
 MessageDisplay::~MessageDisplay() {
   // The Channel class is ref counted and will
   // delete itself when required
@@ -118,9 +121,15 @@ void MessageDisplay::attachLoggingChannel(int logLevel) {
   // Setup logging. ConfigService needs to be started
   auto &configSvc = ConfigService::Instance();
   auto &rootLogger = Poco::Logger::root();
-  auto *rootChannel = Poco::Logger::root().getChannel();
   // The root channel might be a SplitterChannel
+  auto rootChannel = Poco::Logger::root().getChannel();
+#if POCO_VERSION > 0x01090400
+  // getChannel changed to return an AutoPtr
+  if (auto *splitChannel =
+          dynamic_cast<Poco::SplitterChannel *>(rootChannel.get())) {
+#else
   if (auto *splitChannel = dynamic_cast<Poco::SplitterChannel *>(rootChannel)) {
+#endif
     splitChannel->addChannel(m_logChannel);
   } else {
     Poco::Logger::setChannel(rootLogger.name(), m_logChannel);
@@ -139,6 +148,46 @@ void MessageDisplay::attachLoggingChannel(int logLevel) {
  */
 void MessageDisplay::setSource(const QString &source) {
   m_logChannel->setSource(source);
+}
+
+/**
+ * Filter messages, either by Framework or all/individual scripts
+ */
+void MessageDisplay::filterMessages() {
+  m_textDisplay->clear();
+  for (auto &msg : getHistory()) {
+    if (shouldBeDisplayed(msg)) {
+      m_textDisplay->textCursor().insertText(msg.text(),
+                                             format(msg.priority()));
+    }
+  }
+  moveCursorToEnd();
+}
+
+/**
+ * Method to be called when a file's path is modified. Each Message object
+ * associated with the file has its scriptPath attribute updated.
+ * @param oldPath The path of the file being renamed
+ * @param newPath The new path of the file
+ */
+void MessageDisplay::filePathModified(const QString &oldPath,
+                                      const QString &newPath) {
+  for (auto &msg : m_messageHistory) {
+    if (msg.scriptPath() == oldPath)
+      msg.setScriptPath(newPath);
+  }
+}
+
+/**
+ * Append a message to the message history. If the length of the history exceeds
+ * the max line count, remove entries from the start until it does not.
+ * @param msg The Message object to append
+ */
+void MessageDisplay::appendToHistory(const Message &msg) {
+  m_messageHistory.append(msg);
+  while (m_messageHistory.size() > maximumLineCount() && maximumLineCount() > 0)
+    // Use .removeAt(0) since .removeFirst asserts a !.isEmpty() check
+    m_messageHistory.removeAt(0);
 }
 
 //----------------------------------------------------------------------------------------
@@ -191,14 +240,40 @@ void MessageDisplay::appendDebug(const QString &text) {
  * current text
  */
 void MessageDisplay::append(const Message &msg) {
-  QTextCursor cursor = moveCursorToEnd();
-  cursor.insertText(msg.text(), format(msg.priority()));
-  moveCursorToEnd();
+  appendToHistory(msg);
+  if (shouldBeDisplayed(msg) ||
+      msg.priority() <= Message::Priority::PRIO_WARNING) {
+    QTextCursor cursor = moveCursorToEnd();
+    cursor.insertText(msg.text(), format(msg.priority()));
+    moveCursorToEnd();
 
-  if (msg.priority() <= Message::Priority::PRIO_ERROR)
-    emit errorReceived(msg.text());
-  if (msg.priority() <= Message::Priority::PRIO_WARNING)
-    emit warningReceived(msg.text());
+    if (msg.priority() <= Message::Priority::PRIO_ERROR) {
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+      NotificationService::showMessage(
+          parentWidget() ? parentWidget()->windowTitle() : "Mantid",
+          "Sorry, there was an error, please look at the message display for "
+          "details.",
+          NotificationService::MessageIcon::Critical);
+#endif
+      emit errorReceived(msg.text());
+    }
+    if (msg.priority() <= Message::Priority::PRIO_WARNING)
+      emit warningReceived(msg.text());
+  }
+}
+
+/**
+ * Append a message to the message window, adding the script name associated
+ * with the message.
+ * @param text The message to display in the window
+ * @param priority The priority level of the message
+ * @param filePath The path of the Python script being executed
+ */
+void MessageDisplay::appendPython(const QString &text, const int &priority,
+                                  const QString &filePath) {
+  Message msg =
+      Message(text, static_cast<Message::Priority>(priority), filePath);
+  append(msg);
 }
 
 /**
@@ -212,7 +287,10 @@ void MessageDisplay::replace(const Message &msg) {
 /**
  * Clear all of the text
  */
-void MessageDisplay::clear() { m_textDisplay->clear(); }
+void MessageDisplay::clear() {
+  m_textDisplay->clear();
+  m_messageHistory.clear();
+}
 
 /**
  * @returns The cursor at the end of the text
@@ -265,35 +343,7 @@ void MessageDisplay::scrollToBottom() {
 //-----------------------------------------------------------------------------
 
 void MessageDisplay::showContextMenu(const QPoint &mousePos) {
-  QMenu *menu = m_textDisplay->createStandardContextMenu();
-  menu->addSeparator();
-  if (!m_textDisplay->document()->isEmpty()) {
-    menu->addAction("Clear", m_textDisplay, SLOT(clear()));
-    menu->addSeparator();
-  }
-  menu->addAction("&Scrollback limit", this, SLOT(setScrollbackLimit()));
-  menu->addSeparator();
-
-  QMenu *logLevelMenu = menu->addMenu("&Log Level");
-  logLevelMenu->addAction(m_error);
-  logLevelMenu->addAction(m_warning);
-  logLevelMenu->addAction(m_notice);
-  logLevelMenu->addAction(m_information);
-  logLevelMenu->addAction(m_debug);
-
-  // check the right level
-  int level = Poco::Logger::root().getLevel();
-  if (level == Poco::Message::PRIO_ERROR)
-    m_error->setChecked(true);
-  if (level == Poco::Message::PRIO_WARNING)
-    m_warning->setChecked(true);
-  if (level == Poco::Message::PRIO_NOTICE)
-    m_notice->setChecked(true);
-  if (level == Poco::Message::PRIO_INFORMATION)
-    m_information->setChecked(true);
-  if (level >= Poco::Message::PRIO_DEBUG)
-    m_debug->setChecked(true);
-
+  QMenu *menu{generateContextMenu()};
   menu->exec(this->mapToGlobal(mousePos));
   delete menu;
 }
@@ -341,6 +391,38 @@ void MessageDisplay::setMaximumLineCount(int count) {
 //-----------------------------------------------------------------------------
 // Private non-slot member functions
 //-----------------------------------------------------------------------------
+QMenu *MessageDisplay::generateContextMenu() {
+  QMenu *menu = m_textDisplay->createStandardContextMenu();
+  menu->addSeparator();
+  if (!m_textDisplay->document()->isEmpty()) {
+    menu->addAction("Clear All", this, SLOT(clear()));
+    menu->addSeparator();
+  }
+  menu->addAction("&Scrollback limit", this, SLOT(setScrollbackLimit()));
+  menu->addSeparator();
+
+  QMenu *logLevelMenu = menu->addMenu("&Log Level");
+  logLevelMenu->addAction(m_error);
+  logLevelMenu->addAction(m_warning);
+  logLevelMenu->addAction(m_notice);
+  logLevelMenu->addAction(m_information);
+  logLevelMenu->addAction(m_debug);
+
+  // check the right level
+  int level = Poco::Logger::root().getLevel();
+  if (level == Poco::Message::PRIO_ERROR)
+    m_error->setChecked(true);
+  if (level == Poco::Message::PRIO_WARNING)
+    m_warning->setChecked(true);
+  if (level == Poco::Message::PRIO_NOTICE)
+    m_notice->setChecked(true);
+  if (level == Poco::Message::PRIO_INFORMATION)
+    m_information->setChecked(true);
+  if (level >= Poco::Message::PRIO_DEBUG)
+    m_debug->setChecked(true);
+  return menu;
+}
+
 void MessageDisplay::initActions() {
   m_error->setCheckable(true);
   m_warning->setCheckable(true);
@@ -419,6 +501,19 @@ void MessageDisplay::setupTextArea(const QFont &font) {
  */
 QTextCharFormat MessageDisplay::format(const Message::Priority priority) const {
   return m_formats.value(priority, QTextCharFormat());
+}
+
+/** Returns true if the given message should be displayed given the current
+ * settings.
+ * @param msg A Message object
+ */
+bool MessageDisplay::shouldBeDisplayed(const Message &msg) {
+  if (((msg.scriptPath().isEmpty() && showFrameworkOutput()) ||
+       (!msg.scriptPath().isEmpty() && showAllScriptOutput()) ||
+       (showActiveScriptOutput() && (msg.scriptPath() == activeScript()))) &&
+      !QCoreApplication::closingDown())
+    return true;
+  return false;
 }
 } // namespace MantidWidgets
 } // namespace MantidQt

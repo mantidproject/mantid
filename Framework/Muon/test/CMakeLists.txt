@@ -1,8 +1,7 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR})
+)
   check_include_files(stdint.h stdint)
   if(stdint)
     add_definitions(-DHAVE_STDINT_H)
@@ -34,14 +33,13 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(MuonTest ${TEST_FILES})
   target_link_libraries(MuonTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         Algorithms
                         DataHandling
                         Muon
                         Nexus
-                        ${GMOCK_LIBRARIES}
-                        ${GTEST_LIBRARIES})
+                        gmock
+)
   add_dependencies(MuonTest Crystal CurveFitting)
   add_dependencies(FrameworkTests MuonTest)
   # Test data

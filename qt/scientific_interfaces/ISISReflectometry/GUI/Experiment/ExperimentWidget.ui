@@ -40,7 +40,7 @@
     <number>5</number>
    </property>
    <item>
-    <layout class="QGridLayout" name="expSettingsGrid" rowstretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0,0">
+    <layout class="QGridLayout" name="expSettingsGrid" rowstretch="0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0" columnstretch="0,0,0,0">
      <property name="leftMargin">
       <number>10</number>
      </property>
@@ -53,287 +53,6 @@
      <property name="bottomMargin">
       <number>10</number>
      </property>
-     <item row="9" column="3">
-      <widget class="QCheckBox" name="transScaleRHSCheckBox">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="13" column="0">
-      <widget class="QLabel" name="stitchLabel">
-       <property name="minimumSize">
-        <size>
-         <width>117</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Output Stitch Params</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="2">
-      <widget class="QLabel" name="debugLabel">
-       <property name="minimumSize">
-        <size>
-         <width>117</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Debug</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="summationTypeLabel">
-       <property name="minimumSize">
-        <size>
-         <width>117</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>SummationType</string>
-       </property>
-      </widget>
-     </item>
-     <item row="14" column="3">
-      <widget class="QPushButton" name="getExpDefaultsButton">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>71</width>
-         <height>32</height>
-        </size>
-       </property>
-       <property name="layoutDirection">
-        <enum>Qt::RightToLeft</enum>
-       </property>
-       <property name="text">
-        <string>Restore Defaults</string>
-       </property>
-       <property name="fixedWidth" stdset="0">
-        <number>70</number>
-       </property>
-       <property name="fixedHeight" stdset="0">
-        <number>100</number>
-       </property>
-       <layout class="QHBoxLayout" name="getExpDefaultsButtonLayout"/>
-      </widget>
-     </item>
-     <item row="10" column="1">
-      <widget class="QCheckBox" name="polCorrCheckBox">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="1">
-      <widget class="QDoubleSpinBox" name="startOverlapEdit">
-       <property name="decimals">
-        <number>5</number>
-       </property>
-       <property name="maximum">
-        <double>100000.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="11" column="3">
-      <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="floodWorkspaceWsSelector">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
-     </item>
-     <item row="11" column="0">
-      <widget class="QLabel" name="floodCorLabel">
-       <property name="minimumSize">
-        <size>
-         <width>117</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Flood Correction</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="analysisModeComboBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <item>
-        <property name="text">
-         <string>PointDetectorAnalysis</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>MultiDetectorAnalysis</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="8" column="3">
-      <widget class="QDoubleSpinBox" name="endOverlapEdit">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="decimals">
-        <number>5</number>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="0">
-      <widget class="QLabel" name="startOverlapLabel">
-       <property name="minimumSize">
-        <size>
-         <width>117</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Transmission Run Overlap Start</string>
-       </property>
-      </widget>
-     </item>
-     <item row="11" column="2">
-      <widget class="QLabel" name="floodWorkspaceWsSelectorLabel">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>117</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Flood Workspace</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QPushButton" name="addPerAngleOptionsButton">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="toolTip">
-        <string>Add another row to the per-angle options table</string>
-       </property>
-       <property name="whatsThis">
-        <string>Adds another row to the per-angle options table so that additional angles can be added</string>
-       </property>
-       <property name="text">
-        <string>Add row</string>
-       </property>
-      </widget>
-     </item>
-     <item row="10" column="0">
-      <widget class="QLabel" name="polCorrLabel">
-       <property name="minimumSize">
-        <size>
-         <width>117</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Polarisation Corrections</string>
-       </property>
-      </widget>
-     </item>
-     <item row="3" column="1">
-      <widget class="QComboBox" name="reductionTypeComboBox">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <item>
-        <property name="text">
-         <string>Normal</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>DivergentBeam</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>NonFlatSample</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="3" column="3">
-      <widget class="QCheckBox" name="includePartialBinsCheckBox">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="analysisModeLabel">
-       <property name="minimumSize">
-        <size>
-         <width>117</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>AnalysisMode</string>
-       </property>
-      </widget>
-     </item>
      <item row="2" column="1">
       <widget class="QComboBox" name="summationTypeComboBox">
        <property name="sizePolicy">
@@ -354,16 +73,16 @@
        </item>
       </widget>
      </item>
-     <item row="8" column="2">
-      <widget class="QLabel" name="endOverlapLabel">
+     <item row="9" column="3">
+      <widget class="QCheckBox" name="transScaleRHSCheckBox">
        <property name="minimumSize">
         <size>
-         <width>117</width>
+         <width>50</width>
          <height>0</height>
         </size>
        </property>
        <property name="text">
-        <string>Overlap End</string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -380,63 +99,8 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="perAngleTableLabel">
-       <property name="minimumSize">
-        <size>
-         <width>117</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Per-angle defaults</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
-       </property>
-      </widget>
-     </item>
-     <item row="11" column="1">
-      <widget class="QComboBox" name="floodCorComboBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <item>
-        <property name="text">
-         <string>Workspace</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>ParameterFile</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-     <item row="3" column="0">
-      <widget class="QLabel" name="reductionTypeLabel">
-       <property name="minimumSize">
-        <size>
-         <width>117</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>ReductionType</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="3">
-      <widget class="QCheckBox" name="debugCheckBox">
-       <property name="minimumSize">
-        <size>
-         <width>50</width>
-         <height>0</height>
-        </size>
-       </property>
+     <item row="12" column="1">
+      <widget class="QCheckBox" name="polCorrCheckBox">
        <property name="text">
         <string/>
        </property>
@@ -472,7 +136,7 @@
         <number>3</number>
        </property>
        <property name="columnCount">
-        <number>9</number>
+        <number>10</number>
        </property>
        <attribute name="horizontalHeaderVisible">
         <bool>true</bool>
@@ -546,13 +210,18 @@
        </column>
        <column>
         <property name="text">
-         <string>Run Spectra</string>
+         <string>ROI</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Background</string>
         </property>
        </column>
       </widget>
      </item>
-     <item row="9" column="2">
-      <widget class="QLabel" name="transmissionScaleRHSLabel">
+     <item row="8" column="2">
+      <widget class="QLabel" name="endOverlapLabel">
        <property name="minimumSize">
         <size>
          <width>117</width>
@@ -560,7 +229,123 @@
         </size>
        </property>
        <property name="text">
-        <string>Scale RHS Transmission</string>
+        <string>Overlap End</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="3">
+      <widget class="QCheckBox" name="debugCheckBox">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="12" column="0">
+      <widget class="QLabel" name="polCorrLabel">
+       <property name="minimumSize">
+        <size>
+         <width>117</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Polarisation Corrections</string>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <widget class="QDoubleSpinBox" name="startOverlapEdit">
+       <property name="decimals">
+        <number>5</number>
+       </property>
+       <property name="maximum">
+        <double>100000.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="reductionTypeLabel">
+       <property name="minimumSize">
+        <size>
+         <width>117</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>ReductionType</string>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="0">
+      <widget class="QLabel" name="floodCorLabel">
+       <property name="minimumSize">
+        <size>
+         <width>117</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Flood Correction</string>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="3">
+      <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="floodWorkspaceWsSelector">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item row="13" column="2">
+      <widget class="QLabel" name="floodWorkspaceWsSelectorLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>117</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Flood Workspace</string>
+       </property>
+      </widget>
+     </item>
+     <item row="7" column="1">
+      <widget class="QPushButton" name="addPerAngleOptionsButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Add another row to the per-angle options table</string>
+       </property>
+       <property name="whatsThis">
+        <string>Adds another row to the per-angle options table so that additional angles can be added</string>
+       </property>
+       <property name="text">
+        <string>Add row</string>
        </property>
       </widget>
      </item>
@@ -577,6 +362,180 @@
        </property>
       </widget>
      </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="analysisModeLabel">
+       <property name="minimumSize">
+        <size>
+         <width>117</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>AnalysisMode</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="analysisModeComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <item>
+        <property name="text">
+         <string>PointDetectorAnalysis</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>MultiDetectorAnalysis</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QLabel" name="debugLabel">
+       <property name="minimumSize">
+        <size>
+         <width>117</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Debug</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="perAngleTableLabel">
+       <property name="minimumSize">
+        <size>
+         <width>117</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Per-angle defaults</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QComboBox" name="reductionTypeComboBox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <item>
+        <property name="text">
+         <string>Normal</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>DivergentBeam</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>NonFlatSample</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="16" column="3">
+      <widget class="QPushButton" name="getExpDefaultsButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>71</width>
+         <height>32</height>
+        </size>
+       </property>
+       <property name="layoutDirection">
+        <enum>Qt::RightToLeft</enum>
+       </property>
+       <property name="text">
+        <string>Restore Defaults</string>
+       </property>
+       <property name="fixedWidth" stdset="0">
+        <number>70</number>
+       </property>
+       <property name="fixedHeight" stdset="0">
+        <number>100</number>
+       </property>
+       <layout class="QHBoxLayout" name="getExpDefaultsButtonLayout"/>
+      </widget>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="startOverlapLabel">
+       <property name="minimumSize">
+        <size>
+         <width>117</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Transmission Run Overlap Start</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="3">
+      <widget class="QCheckBox" name="includePartialBinsCheckBox">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="summationTypeLabel">
+       <property name="minimumSize">
+        <size>
+         <width>117</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>SummationType</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="2">
+      <widget class="QLabel" name="transmissionScaleRHSLabel">
+       <property name="minimumSize">
+        <size>
+         <width>117</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Scale RHS Transmission</string>
+       </property>
+      </widget>
+     </item>
      <item row="9" column="1">
       <widget class="QLineEdit" name="transStitchParamsEdit">
        <property name="sizePolicy">
@@ -585,6 +544,123 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+      </widget>
+     </item>
+     <item row="13" column="1">
+      <widget class="QComboBox" name="floodCorComboBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <item>
+        <property name="text">
+         <string>Workspace</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>ParameterFile</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="8" column="3">
+      <widget class="QDoubleSpinBox" name="endOverlapEdit">
+       <property name="minimumSize">
+        <size>
+         <width>50</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="decimals">
+        <number>5</number>
+       </property>
+      </widget>
+     </item>
+     <item row="15" column="0">
+      <widget class="QLabel" name="stitchLabel">
+       <property name="minimumSize">
+        <size>
+         <width>117</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Output Stitch Properties</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="1">
+      <widget class="QCheckBox" name="subtractBackgroundCheckBox">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="0">
+      <widget class="QLabel" name="subtractBackgroundLabel">
+       <property name="text">
+        <string>Subtract Background</string>
+       </property>
+      </widget>
+     </item>
+     <item row="10" column="3">
+      <widget class="QComboBox" name="backgroundMethodComboBox">
+       <item>
+        <property name="text">
+         <string>PerDetectorAverage</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Polynomial</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>AveragePixelFit</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="10" column="2">
+      <widget class="QLabel" name="backgroundMethodLabel">
+       <property name="text">
+        <string>Subtraction method</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="1">
+      <widget class="QSpinBox" name="polynomialDegreeSpinBox"/>
+     </item>
+     <item row="11" column="0">
+      <widget class="QLabel" name="polynomialDegreeLabel">
+       <property name="text">
+        <string>Polynomial Degree</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="2">
+      <widget class="QLabel" name="costFunctionLabel">
+       <property name="text">
+        <string>Cost Function</string>
+       </property>
+      </widget>
+     </item>
+     <item row="11" column="3">
+      <widget class="QComboBox" name="costFunctionComboBox">
+       <item>
+        <property name="text">
+         <string>Least squares</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Unweighted least squares</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>

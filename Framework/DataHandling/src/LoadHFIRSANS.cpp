@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadHFIRSANS.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -24,10 +24,8 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <MantidKernel/StringTokenizer.h>
 #include <Poco/DOM/DOMParser.h>
@@ -43,6 +41,7 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -114,7 +113,7 @@ void LoadHFIRSANS::init() {
   // Optionally, we can specify the wavelength and wavelength spread and
   // overwrite the value in the data file (used when the data file is not
   // populated)
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("Wavelength", EMPTY_DBL(), mustBePositive,
                   "Optional wavelength value to use when loading the data file "
@@ -299,7 +298,7 @@ std::vector<int> LoadHFIRSANS::readData(const std::string &dataXpath) {
     std::stringstream iss(data_str);
     double number;
     while (iss >> number) {
-      data.push_back(static_cast<int>(number));
+      data.emplace_back(static_cast<int>(number));
     }
     g_log.debug() << "Detector XPath: " << detectorXpath
                   << " parsed. Total size of data processed up to now = "
@@ -384,7 +383,7 @@ void LoadHFIRSANS::createWorkspace() {
 
   int numSpectra = static_cast<int>(data.size()) + m_nMonitors;
 
-  m_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+  m_workspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra, 2,
                                                1));
   m_workspace->setTitle(m_metadata["Header/Scan_Title"]);
@@ -455,13 +454,13 @@ void LoadHFIRSANS::setBeamTrapRunProperty() {
   double trapDiameterInUse = trapDiameters[1];
 
   std::vector<double> trapMotorPositions;
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(m_metadata["Motor_Positions/trap_y_25mm"]));
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(m_metadata["Motor_Positions/trap_y_50mm"]));
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(m_metadata["Motor_Positions/trap_y_76mm"]));
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(m_metadata["Motor_Positions/trap_y_101mm"]));
 
   // Check how many traps are in use (store indexes):
@@ -469,7 +468,7 @@ void LoadHFIRSANS::setBeamTrapRunProperty() {
   for (size_t i = 0; i < trapMotorPositions.size(); i++) {
     if (trapMotorPositions[i] > 26.0) {
       // Resting positions are below 25. Make sure we have one trap in use!
-      trapIndexInUse.push_back(i);
+      trapIndexInUse.emplace_back(i);
     }
   }
 
@@ -479,7 +478,7 @@ void LoadHFIRSANS::setBeamTrapRunProperty() {
   std::vector<double> trapDiametersInUse;
   trapDiametersInUse.reserve(trapIndexInUse.size());
   for (auto index : trapIndexInUse) {
-    trapDiametersInUse.push_back(trapDiameters[index]);
+    trapDiametersInUse.emplace_back(trapDiameters[index]);
   }
 
   g_log.debug() << "trapDiametersInUse length:" << trapDiametersInUse.size()
@@ -539,9 +538,19 @@ void LoadHFIRSANS::storeMetaDataIntoWS() {
       boost::lexical_cast<double>(m_metadata["Header/source_aperture_size"]),
       "mm");
   addRunProperty<double>(
+      "source_aperture_diameter",
+      boost::lexical_cast<double>(m_metadata["Header/source_aperture_size"]),
+      "mm");
+
+  addRunProperty<double>(
       "sample-aperture-diameter",
       boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]),
       "mm");
+  addRunProperty<double>(
+      "sample_aperture_diameter",
+      boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]),
+      "mm");
+
   addRunProperty<double>(
       "number-of-guides",
       boost::lexical_cast<double>(m_metadata["Motor_Positions/nguides"]));
@@ -629,6 +638,9 @@ void LoadHFIRSANS::setDetectorDistance() {
                 << " mm." << '\n';
   addRunProperty<double>("sample-detector-distance", m_sampleDetectorDistance,
                          "mm");
+  addRunProperty<double>("sample_detector_distance", m_sampleDetectorDistance,
+                         "mm");
+
   addRunTimeSeriesProperty<double>("sdd", m_sampleDetectorDistance);
 }
 
@@ -736,6 +748,9 @@ void LoadHFIRSANS::setBeamDiameter() {
   double sourceToSampleDistance = getSourceToSampleDistance();
   addRunProperty<double>("source-sample-distance", sourceToSampleDistance,
                          "mm");
+  addRunProperty<double>("source_sample_distance", sourceToSampleDistance,
+                         "mm");
+
   const auto sampleAperture =
       boost::lexical_cast<double>(m_metadata["Header/sample_aperture_size"]);
   const auto sourceAperture =

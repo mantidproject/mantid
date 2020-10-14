@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/SingletonHolder.h"
 #include <list>
@@ -36,7 +36,7 @@ void cleanupSingletons() {
 /// functions are added to the start of the list so on deletion it is last in,
 /// first out
 /// @param func :: Exit function to call - the singleton destructor function
-void deleteOnExit(SingletonDeleterFn func) {
+void deleteOnExit(const SingletonDeleterFn &func) {
   auto &deleters = cleanupList();
   if (deleters.empty()) {
     atexit(&cleanupSingletons);

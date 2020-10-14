@@ -10,16 +10,18 @@
 Description
 -----------
 
-Calculates the Lorentz correction for time-of-flight diffraction and
-and multiplies the input workspace by it. The Lorentz correction,
-``L``, is calculated according to:
+Multiply the input workspace by the calculated Lorentz factor.
+The Lorentz correction for time-of-flight single crystal diffraction, ``L``, is calculated according to:
 
 .. math::
    L = \frac{\sin^{2}\theta}{\lambda^{4}}
 
-Where :math:`\theta` is the scattering angle.
+Where :math:`\theta` is the scattering angle. For time-of-flight powder diffraction it is calculated according to
 
-The calculations performed in this Algorithm are a subset of those performed by the :ref:`algm-AnvredCorrection`
+.. math::
+   L = \sin{theta}
+
+The calculations performed in this Algorithm are a subset of those performed by the :ref:`algm-AnvredCorrection` for single crystal measurements
 
 Usage
 -----

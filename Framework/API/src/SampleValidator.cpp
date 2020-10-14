@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/SampleValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -31,7 +31,7 @@ std::string SampleValidator::getType() const { return "Sample"; }
  * @return A copy of the current state of the object
  */
 Kernel::IValidator_sptr SampleValidator::clone() const {
-  return boost::make_shared<SampleValidator>(*this);
+  return std::make_shared<SampleValidator>(*this);
 }
 
 /**

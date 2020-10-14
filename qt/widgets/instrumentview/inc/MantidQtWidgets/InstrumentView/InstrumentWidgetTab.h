@@ -1,16 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENTWIDGETTAB_H
-#define INSTRUMENTWIDGETTAB_H
+#pragma once
 
 #include "InstrumentWidgetTypes.h"
 
 #include <QFrame>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 //--------------------------------------------------
 //  Forward declarations
@@ -44,7 +43,7 @@ public:
     return false;
   }
   /// Get the projection surface
-  boost::shared_ptr<ProjectionSurface> getSurface() const;
+  std::shared_ptr<ProjectionSurface> getSurface() const;
   /// Load state for the widget tab from a project file
   virtual void loadFromProject(const std::string &lines) = 0;
   /// Save state for the widget tab to a project file
@@ -56,5 +55,3 @@ protected:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // INSTRUMENTWIDGETTAB_H

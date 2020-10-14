@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from itertools import groupby
 from operator import itemgetter
 import functools
@@ -13,9 +11,9 @@ import re
 
 delimiter = ","
 range_separator = "-"
-run_string_regex = "^[0-9]*([0-9]+\s*[,-]{0,1}\s*)*[0-9]*$"
+run_string_regex = r"^[0-9]*([0-9]+\s*[,-]{0,1}\s*)*[0-9]*$"
 valid_float_regex = "^[0-9]+([.][0-9]*)?$"
-valid_name_regex = "^\w+$"
+valid_name_regex = r"^\w+$"
 valid_alpha_regex = "^[0-9]*[.]?[0-9]+$"
 
 

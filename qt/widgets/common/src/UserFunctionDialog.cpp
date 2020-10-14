@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/UserFunctionDialog.h"
 #include "MantidAPI/Expression.h"
@@ -332,8 +332,7 @@ void UserFunctionDialog::saveFunction() {
     cur_category = "";
   }
 
-  InputFunctionNameDialog *dlg =
-      new InputFunctionNameDialog(this, cur_category);
+  auto *dlg = new InputFunctionNameDialog(this, cur_category);
   if (dlg->exec() == QDialog::Accepted) {
     QString cat;
     QString fun;
@@ -423,7 +422,7 @@ QStringList UserFunctionDialog::categories() const {
 
 bool UserFunctionDialog::eventFilter(QObject *obj, QEvent *ev) {
   if (ev->type() == QEvent::KeyPress) {
-    QKeyEvent *keyEvent = static_cast<QKeyEvent *>(ev);
+    auto *keyEvent = static_cast<QKeyEvent *>(ev);
     if (keyEvent->key() == Qt::Key_Return) {
       return true;
     }
@@ -520,7 +519,7 @@ void UserFunctionDialog::helpClicked() {
 InputFunctionNameDialog::InputFunctionNameDialog(QWidget *parent,
                                                  const QString &category)
     : QDialog(parent) {
-  QVBoxLayout *layout = new QVBoxLayout();
+  auto *layout = new QVBoxLayout();
   layout->addWidget(new QLabel("Enter new or select a category"));
   QStringList cats = ((UserFunctionDialog *)parent)->categories();
   cats.removeOne("Base");
@@ -542,7 +541,7 @@ InputFunctionNameDialog::InputFunctionNameDialog(QWidget *parent,
   m_comment = new QTextEdit();
   layout->addWidget(m_comment);
 
-  QDialogButtonBox *buttons = new QDialogButtonBox();
+  auto *buttons = new QDialogButtonBox();
   buttons->addButton("OK", QDialogButtonBox::AcceptRole);
   buttons->addButton("Cancel", QDialogButtonBox::RejectRole);
   buttons->setCenterButtons(true);

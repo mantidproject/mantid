@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import *
 from mantid.api import (MatrixWorkspaceProperty, DataProcessorAlgorithm, PropertyMode)
@@ -74,14 +73,16 @@ class ExtractMonitors(DataProcessorAlgorithm):
 
         if detector_ws_name:
             if detectors:
-                detector_ws = ExtractSpectra(InputWorkspace=in_ws, WorkspaceIndexList=detectors, StoreInADS=False)
+                detector_ws = ExtractSpectra(InputWorkspace=in_ws, WorkspaceIndexList=detectors, StoreInADS=False,
+                                             OutputWorkspace=self.getPropertyValue("DetectorWorkspace"))
                 self.setProperty("DetectorWorkspace", detector_ws)
             else:
                 self.log().error("No detectors found in input workspace. No detector output workspace created.")
 
         if monitor_ws_name:
             if monitors:
-                monitor_ws = ExtractSpectra(InputWorkspace=in_ws, WorkspaceIndexList=monitors, StoreInADS=False)
+                monitor_ws = ExtractSpectra(InputWorkspace=in_ws, WorkspaceIndexList=monitors, StoreInADS=False,
+                                            OutputWorkspace=self.getPropertyValue("MonitorWorkspace"))
                 self.setProperty("MonitorWorkspace", monitor_ws)
             else:
                 self.log().error("No monitors found in input workspace. No monitor output workspace created.")

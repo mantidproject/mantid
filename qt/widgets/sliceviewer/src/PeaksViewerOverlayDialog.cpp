@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/PeaksViewerOverlayDialog.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
@@ -62,7 +62,7 @@ QString formattedPercentageValue(double fraction) {
  * @param parent : Parent widget
  */
 PeaksViewerOverlayDialog::PeaksViewerOverlayDialog(
-    PeaksPresenter_sptr peaksPresenter, QWidget *parent)
+    const PeaksPresenter_sptr &peaksPresenter, QWidget *parent)
     : QDialog(parent), ui(new Ui::PeaksViewerOverlayDialog),
       m_peaksPresenter(peaksPresenter) {
   ui->setupUi(this);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/RepoModel.h"
 
@@ -11,6 +11,7 @@
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidQtIcons/Icon.h"
 #include <QIcon>
 #include <QPixmap>
 
@@ -164,8 +165,8 @@ RepoModel::RepoModel(QObject *parent) : QAbstractItemModel(parent) {
   repo_path = QString::fromStdString(config.getString("ScriptLocalRepository"));
   rootItem = new RepoItem("/");
   using Mantid::API::ScriptRepository;
-  using Mantid::API::ScriptRepositoryFactory;
   using Mantid::API::ScriptRepository_sptr;
+  using Mantid::API::ScriptRepositoryFactory;
   repo_ptr = ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
   connect(&download_watcher, SIGNAL(finished()), this,
           SLOT(downloadFinished()));
@@ -197,7 +198,7 @@ RepoModel::~RepoModel() { delete rootItem; }
    ScriptRepository
    entries. Currently, an entry may be found on the following states:
      - LOCAL_ONLY: The file only exists locally.
-     - REMTOE_ONLY: The file has not been downloaded.
+     - REMOTE_ONLY: The file has not been downloaded.
      - REMOTE_CHANGED: A new version of the file is available.
      - LOCAL_CHANGED: The file has been changed from the original one.
      - BOTH_CHANGED: Locally and remotelly changed.
@@ -222,7 +223,7 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
   using namespace Mantid::API;
   if (!index.isValid())
     return QVariant();
-  RepoItem *item = static_cast<RepoItem *>(index.internalPointer());
+  auto *item = static_cast<RepoItem *>(index.internalPointer());
   try {
     const QString &path = item->path();
     Mantid::API::ScriptInfo inf;
@@ -264,6 +265,7 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
     if (role == Qt::DecorationRole) {
       if (index.column() == 0) {
         inf = repo_ptr->fileInfo(path.toStdString());
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
         if (inf.directory) {
           status = repo_ptr->fileStatus(path.toStdString());
           if (status == Mantid::API::REMOTE_ONLY)
@@ -300,6 +302,35 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const {
           else
             return QIcon::fromTheme("unknown", QIcon(QPixmap(":/win/unknown")));
         }
+#else
+        if (inf.directory) {
+          status = repo_ptr->fileStatus(path.toStdString());
+          if (status == Mantid::API::REMOTE_ONLY) {
+            return Icons::getIcon("mdi.folder-network-outline", "black", 1.2);
+          } else
+            return Icons::getIcon("mdi.folder-open-outline", "black", 1.2);
+        } else {
+          int pos = QString(path).lastIndexOf('.');
+          if (pos < 0)
+            return Icons::getIcon("mdi.file-question", "black", 1.2);
+          if (path.contains("readme", Qt::CaseInsensitive))
+            return Icons::getIcon("mdi.file-document-outline", "black", 1.2);
+
+          QString extension = QString(path).remove(0, pos);
+          if (extension == ".py" || extension == ".PY")
+            return Icons::getIcon("mdi.language-python", "black", 1.2);
+          else if (extension == ".ui")
+            return Icons::getIcon("mdi.file-document-box-outline", "black",
+                                  1.2);
+          else if (extension == ".docx" || extension == ".doc" ||
+                   extension == ".odf")
+            return Icons::getIcon("mdi.file-outline", "black", 1.2);
+          else if (extension == ".pdf")
+            return Icons::getIcon("mdi.file-pdf-outline", "black", 1.2);
+          else
+            return Icons::getIcon("mdi.file-question", "black", 1.2);
+        }
+#endif
       }
     } // end decorationRole
 
@@ -415,7 +446,7 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value,
     // the path can not be changed
     return false;
   int count_changed = 0;
-  RepoItem *item = static_cast<RepoItem *>(index.internalPointer());
+  auto *item = static_cast<RepoItem *>(index.internalPointer());
   std::string path = item->path().toStdString();
 
   bool ret = false;
@@ -463,7 +494,7 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value,
         return false;
       };
 
-      UploadForm *form = new UploadForm(QString::fromStdString(path), father);
+      auto *form = new UploadForm(QString::fromStdString(path), father);
       QSettings settings;
       settings.beginGroup("Mantid/ScriptRepository");
       QString email = settings.value("UploadEmail", QString()).toString();
@@ -524,8 +555,7 @@ bool RepoModel::setData(const QModelIndex &index, const QVariant &value,
       return false;
     }
     // query the user if he wants to delete only locally or remote as well.
-    DeleteQueryBox *box =
-        new DeleteQueryBox(QString::fromStdString(path), father);
+    auto *box = new DeleteQueryBox(QString::fromStdString(path), father);
 
     if (box->exec() != QMessageBox::Yes) {
       // the user gave up deleting this entry, release memory
@@ -687,7 +717,7 @@ QModelIndex RepoModel::parent(const QModelIndex &index) const {
   if (!index.isValid())
     return QModelIndex();
   // the child is the RepoItem pointed by the index.
-  RepoItem *childItem = static_cast<RepoItem *>(index.internalPointer());
+  auto *childItem = static_cast<RepoItem *>(index.internalPointer());
   // the parent is the parent of the RepoItem.
   RepoItem *parentItem = childItem->parent();
   // the root item does not have a parent
@@ -717,8 +747,8 @@ int RepoModel::rowCount(const QModelIndex &parent) const {
 }
 
 /** Return the number of columns defined for the given index.
- * But, for all the index, the number of columns will be always 3.
- * (path, status, autoupdate)
+ * But, for all the index, the number of columns will be always 4.
+ * (path, status, autoupdate, delete)
  *
  * @return 4.
  */
@@ -727,7 +757,7 @@ int RepoModel::columnCount(const QModelIndex & /*parent*/) const { return 4; }
 /** Return the description of the file for a defined entry
  **/
 QString RepoModel::fileDescription(const QModelIndex &index) {
-  RepoItem *item = static_cast<RepoItem *>(index.internalPointer());
+  auto *item = static_cast<RepoItem *>(index.internalPointer());
   if (!item)
     return "";
   QString desc;
@@ -741,7 +771,7 @@ QString RepoModel::fileDescription(const QModelIndex &index) {
 }
 
 QString RepoModel::author(const QModelIndex &index) {
-  RepoItem *item = static_cast<RepoItem *>(index.internalPointer());
+  auto *item = static_cast<RepoItem *>(index.internalPointer());
   QString author = "Not defined";
   if (!item)
     return author;
@@ -759,7 +789,7 @@ QString RepoModel::author(const QModelIndex &index) {
     @return The operative system path or empty string
 */
 QString RepoModel::filePath(const QModelIndex &index) {
-  RepoItem *item = static_cast<RepoItem *>(index.internalPointer());
+  auto *item = static_cast<RepoItem *>(index.internalPointer());
   //   qDebug() << "Get file path from : " <<  item->path()<< '\n';
   Mantid::API::SCRIPTSTATUS state =
       repo_ptr->fileStatus(item->path().toStdString());
@@ -927,8 +957,7 @@ void RepoModel::downloadFinished(void) {
         QString("<html><body><p>%1</p></body></html>").arg(info));
   }
   downloading_path = nofile_flag;
-  RepoItem *repo_item =
-      static_cast<RepoItem *>(download_index.internalPointer());
+  auto *repo_item = static_cast<RepoItem *>(download_index.internalPointer());
   QModelIndex top_left = createIndex(0, 0, repo_item);
   QModelIndex bottom_right = createIndex(0, 3, repo_item);
   emit dataChanged(top_left, bottom_right);
@@ -936,7 +965,7 @@ void RepoModel::downloadFinished(void) {
 }
 
 bool RepoModel::isDownloading(const QModelIndex &index) const {
-  RepoItem *item = static_cast<RepoItem *>(index.internalPointer());
+  auto *item = static_cast<RepoItem *>(index.internalPointer());
   if (item)
     return item->path() == downloading_path;
   return false;
@@ -957,7 +986,7 @@ void RepoModel::uploadFinished(void) {
   }
 
   uploading_path = nofile_flag;
-  RepoItem *repo_item = static_cast<RepoItem *>(upload_index.internalPointer());
+  auto *repo_item = static_cast<RepoItem *>(upload_index.internalPointer());
   QModelIndex top_left = createIndex(0, 0, repo_item);
   QModelIndex bottom_right = createIndex(0, 3, repo_item);
   emit dataChanged(top_left, bottom_right);
@@ -965,7 +994,7 @@ void RepoModel::uploadFinished(void) {
 }
 
 bool RepoModel::isUploading(const QModelIndex &index) const {
-  RepoItem *item = static_cast<RepoItem *>(index.internalPointer());
+  auto *item = static_cast<RepoItem *>(index.internalPointer());
   if (item)
     return item->path() == uploading_path;
   return false;
@@ -999,21 +1028,21 @@ RepoModel::UploadForm::UploadForm(const QString &file2upload, QWidget *parent)
 
   // setup the layout
 
-  QGroupBox *personalGroupBox = new QGroupBox("Personal Group Box");
-  QFormLayout *personalLayout = new QFormLayout();
+  auto *personalGroupBox = new QGroupBox("Personal Group Box");
+  auto *personalLayout = new QFormLayout();
   personalLayout->addRow("Author", author_le);
   personalLayout->addRow("Email", email_le);
-  QVBoxLayout *gpBox = new QVBoxLayout();
+  auto *gpBox = new QVBoxLayout();
   gpBox->addWidget(save_ck);
   gpBox->addLayout(personalLayout);
   personalGroupBox->setLayout(gpBox);
 
   QLabel *cmLabel = new QLabel("Comment");
-  QDialogButtonBox *buttonBox = new QDialogButtonBox();
+  auto *buttonBox = new QDialogButtonBox();
   buttonBox->setStandardButtons(QDialogButtonBox::Cancel |
                                 QDialogButtonBox::Ok);
 
-  QVBoxLayout *layout = new QVBoxLayout();
+  auto *layout = new QVBoxLayout();
   layout->addWidget(personalGroupBox);
   layout->addWidget(cmLabel);
   layout->addWidget(comment_te);

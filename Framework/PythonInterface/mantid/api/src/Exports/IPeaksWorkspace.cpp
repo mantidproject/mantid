@@ -1,20 +1,22 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/Converters/PyObjectToV3D.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 #include <boost/none.hpp>
 #include <boost/optional.hpp>
 #include <boost/python/class.hpp>
+#include <boost/python/iterator.hpp>
 #include <boost/python/manage_new_object.hpp>
 #include <boost/python/return_internal_reference.hpp>
+#include <utility>
 
 using namespace boost::python;
 using namespace Mantid::Geometry;
@@ -29,22 +31,28 @@ namespace {
 
 /// Create a peak via it's HKL value from a list or numpy array
 IPeak *createPeakHKL(IPeaksWorkspace &self, const object &data) {
-  return self.createPeakHKL(
+  auto peak = self.createPeakHKL(
       Mantid::PythonInterface::Converters::PyObjectToV3D(data)());
+  // Python will manage it
+  return peak.release();
 }
 
 /// Create a peak via it's QLab value from a list or numpy array
 IPeak *createPeakQLab(IPeaksWorkspace &self, const object &data) {
-  return self.createPeak(
+  auto peak = self.createPeak(
       Mantid::PythonInterface::Converters::PyObjectToV3D(data)(), boost::none);
+  // Python will manage it
+  return peak.release();
 }
 
 /// Create a peak via it's QLab value from a list or numpy array
 IPeak *createPeakQLabWithDistance(IPeaksWorkspace &self, const object &data,
                                   double detectorDistance) {
-  return self.createPeak(
+  auto peak = self.createPeak(
       Mantid::PythonInterface::Converters::PyObjectToV3D(data)(),
       detectorDistance);
+  // Python will manage the object
+  return peak.release();
 }
 /// Create a peak via it's QLab value from a list or numpy array
 void addPeak(IPeaksWorkspace &self, const IPeak &peak) { self.addPeak(peak); }
@@ -95,7 +103,7 @@ public:
       throw std::runtime_error(columnName +
                                " is a read only column of a peaks workspace");
     }
-    m_setterMap[columnName](peak, value);
+    m_setterMap[columnName](peak, std::move(value));
   }
 
 private:
@@ -115,7 +123,7 @@ private:
    * setter's value type
    */
   template <typename T> SetterType setterFunction(MemberFunc<T> func) {
-    return [func](IPeak &peak, const object value) {
+    return [func](IPeak &peak, const object &value) {
       extract<T> extractor{value};
       if (!extractor.check()) {
         throw std::runtime_error(
@@ -136,7 +144,7 @@ private:
    * setter's value type
    */
   SetterType setterFunction(MemberFuncV3D func) {
-    return [func](IPeak &peak, const object value) {
+    return [func](IPeak &peak, const object &value) {
       extract<const V3D &> extractor{value};
       if (!extractor.check()) {
         throw std::runtime_error(
@@ -200,7 +208,48 @@ void setCell(IPeaksWorkspace &self, const object &col_or_row,
   PeakWorkspaceTableAdaptor tableMap{self};
   tableMap.setProperty(columnName, rowIndex, value);
 }
+
+/// Internal helper to support iteration on PeaksWorkspace in Python
+struct IPeaksWorkspaceIterator {
+  explicit IPeaksWorkspaceIterator(IPeaksWorkspace *const workspace)
+      : m_workspace{workspace}, m_numPeaks{workspace->getNumberPeaks()},
+        m_rowIndex{-1} {
+    assert(workspace);
+  }
+  IPeak *next() {
+    ++m_rowIndex;
+    if (m_rowIndex >= m_numPeaks) {
+      objects::stop_iteration_error();
+    }
+    return m_workspace->getPeakPtr(m_rowIndex);
+  }
+
+private:
+  IPeaksWorkspace *const m_workspace;
+  const int m_numPeaks;
+  int m_rowIndex;
+};
+
+// Create an iterator from the given workspace
+IPeaksWorkspaceIterator makePyIterator(IPeaksWorkspace &self) {
+  return IPeaksWorkspaceIterator(&self);
+}
+
 } // namespace
+
+void export_IPeaksWorkspaceIterator() {
+  class_<IPeaksWorkspaceIterator>("IPeaksWorkspaceIterator", no_init)
+      .def(
+#if PY_VERSION_HEX >= 0x03000000
+          "__next__"
+#else
+          "next"
+#endif
+          ,
+          &IPeaksWorkspaceIterator::next,
+          return_value_policy<reference_existing_object>())
+      .def("__iter__", objects::identity_function());
+}
 
 void export_IPeaksWorkspace() {
   // IPeaksWorkspace class
@@ -239,8 +288,8 @@ void export_IPeaksWorkspace() {
             arg("value")),
            "Sets the value of a given cell. If the row_or_column argument is a "
            "number then it is interpreted as a row otherwise it "
-           "is interpreted as a column name.");
-
+           "is interpreted as a column name.")
+      .def("__iter__", makePyIterator);
   //-------------------------------------------------------------------------------------------------
 
   RegisterWorkspacePtrToPython<IPeaksWorkspace>();

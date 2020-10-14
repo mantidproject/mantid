@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RebinByTimeBase.h"
 #include "MantidAPI/Axis.h"
@@ -15,7 +15,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/VectorHelper.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Algorithms {
@@ -28,9 +28,7 @@ using Types::Core::DateAndTime;
  Helper method to transform a MantidVector containing absolute times in
  nanoseconds to relative times in seconds given an offset.
  */
-class ConvertToRelativeTime
-    : public std::unary_function<const MantidVec::value_type &,
-                                 MantidVec::value_type> {
+class ConvertToRelativeTime {
 private:
   double m_offSet;
 
@@ -51,7 +49,7 @@ void RebinByTimeBase::init() {
       "An input workspace containing TOF events.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "Params", boost::make_shared<RebinParamsValidator>()),
+                      "Params", std::make_shared<RebinParamsValidator>()),
                   "A comma separated list of first bin boundary, width, last "
                   "bin boundary. Optionally\n"
                   "this can be followed by a comma and more widths and last "
@@ -70,7 +68,7 @@ void RebinByTimeBase::exec() {
   using Mantid::DataObjects::EventWorkspace;
   IEventWorkspace_sptr inWS = getProperty("InputWorkspace");
 
-  if (!boost::dynamic_pointer_cast<EventWorkspace>(inWS)) {
+  if (!std::dynamic_pointer_cast<EventWorkspace>(inWS)) {
     const std::string algName = this->name();
     throw std::invalid_argument(
         algName + " Algorithm requires an EventWorkspace as an input.");
@@ -94,19 +92,20 @@ void RebinByTimeBase::exec() {
     const DateAndTime startTime = runStartTime + inParams[0];
     const DateAndTime endTime = runStartTime + inParams[2];
     // Rebinning params in nanoseconds.
-    rebinningParams.push_back(
+    rebinningParams.emplace_back(
         static_cast<double>(startTime.totalNanoseconds()));
     tStep = inParams[1] * nanoSecondsInASecond;
-    rebinningParams.push_back(tStep);
-    rebinningParams.push_back(static_cast<double>(endTime.totalNanoseconds()));
+    rebinningParams.emplace_back(tStep);
+    rebinningParams.emplace_back(
+        static_cast<double>(endTime.totalNanoseconds()));
   } else if (inParams.size() == 1) {
     const uint64_t xmin = getMinX(inWS);
     const uint64_t xmax = getMaxX(inWS);
 
-    rebinningParams.push_back(static_cast<double>(xmin));
+    rebinningParams.emplace_back(static_cast<double>(xmin));
     tStep = inParams[0] * nanoSecondsInASecond;
-    rebinningParams.push_back(tStep);
-    rebinningParams.push_back(static_cast<double>(xmax));
+    rebinningParams.emplace_back(tStep);
+    rebinningParams.emplace_back(static_cast<double>(xmax));
   }
 
   // Validate the timestep.
@@ -141,7 +140,7 @@ void RebinByTimeBase::exec() {
   }
 
   // X-unit is relative time since the start of the run.
-  outputWS->getAxis(0)->unit() = boost::make_shared<Units::Time>();
+  outputWS->getAxis(0)->unit() = std::make_shared<Units::Time>();
 
   // Copy the units over too.
   for (int i = 1; i < outputWS->axes(); ++i) {

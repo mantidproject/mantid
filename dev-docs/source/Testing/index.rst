@@ -20,10 +20,14 @@ creation is outlined in :ref:`issue_tracking`.
 .. toctree::
    :maxdepth: 1
 
+   MuonAnalysis_test_guides/index
    MuonInterface/MuonTesting
    IndirectInelastic/IndirectInelasticAcceptanceTests
+   EngineeringDiffraction/EngineeringDiffractionTestGuide
    ErrorReporter-ProjectRecovery/ErrorReporterTesting
    ErrorReporter-ProjectRecovery/ProjectRecoveryTesting
+   LiveData/LiveDataTests
+   ReflectometryGUI/ReflectometryGUITests
    SANSGUI/SANSGUITests
    VSI/VSITesting
 

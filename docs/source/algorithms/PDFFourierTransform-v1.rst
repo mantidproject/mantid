@@ -12,7 +12,9 @@ Description
 The algorithm transforms a single spectrum workspace containing 
 spectral density :math:`S(Q)`, :math:`S(Q)-1`, or :math:`Q[S(Q)-1]` 
 (as a function of **MomentumTransfer** or **dSpacing** :ref:`units <Unit Factory>`) to a PDF 
-(pair distribution function) as described below.
+(pair distribution function) as described below. The available output types are the reduced pair
+distribution function :math:`G(r)`, the pair distribution function :math:`g(r)`, and the radial distribution
+function :math:`RDF(r)`.
 
 The input Workspace spectrum should be in the Q-space (\ **MomentumTransfer**\ ) :ref:`units <Unit Factory>` .
 (d-spacing is not supported any more. Contact development team to fix that and enable **dSpacing** again)
@@ -142,14 +144,14 @@ Usage
 
 **Example - PDF transformation examples:**
 
-.. testcode:: ExPDFFouurierTransform
+.. testcode:: ExPDFFourierTransform
 
     # Simulates Load of a workspace with all necessary parameters
     import numpy as np;
     xx = np.array(range(0,100))*0.1
     yy = np.exp(-(2.0 * xx)**2)
     ws = CreateWorkspace(DataX=xx, DataY=yy, UnitX='MomentumTransfer')
-    Rt = PDFFourierTransform(ws, InputSofQType='S(Q)', PDFType='g(r)')   
+    Rt = PDFFourierTransform(ws, InputSofQType='S(Q)', PDFType='g(r)', Version=1)
 
     # Look at sample results:
     print('part of S(Q) and its correlation function')
@@ -157,14 +159,14 @@ Usage
        print('! {0:4.2f} ! {1:5f} ! {2:f} ! {3:5f} !'.format(xx[i], yy[i], Rt.readX(0)[i], Rt.readY(0)[i]))
 
 
-.. testcleanup:: ExPDFFouurierTransform
+.. testcleanup:: ExPDFFourierTransform
 
    DeleteWorkspace(ws)
    DeleteWorkspace(Rt)   
 
 **Output:**
 
-.. testoutput:: ExPDFFouurierTransform
+.. testoutput:: ExPDFFourierTransform
 
    part of S(Q) and its correlation function
    ! 0.00 ! 1.000000 ! 0.317333 ! -3.977330 !

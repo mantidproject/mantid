@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Mpl/RangeSelector.h"
 #include "MantidQtWidgets/Plotting/Mpl/PreviewPlot.h"
@@ -76,7 +76,7 @@ void RangeSelector::setRange(const std::pair<double, double> &range) {
   setRange(range.first, range.second);
 }
 
-void RangeSelector::setRange(const double min, const double max) {
+void RangeSelector::setRange(double min, double max) {
   m_rangeMarker->setRange(min, max);
   emit selectionChanged(min, max);
   emit minValueChanged(min);
@@ -89,13 +89,13 @@ std::pair<double, double> RangeSelector::getRange() const {
   return std::make_pair(std::get<0>(range), std::get<1>(range));
 }
 
-void RangeSelector::setMinimum(const double min) {
+void RangeSelector::setMinimum(double min) {
   m_rangeMarker->setMinimum(min);
   emit minValueChanged(min);
   m_plot->replot();
 }
 
-void RangeSelector::setMaximum(const double max) {
+void RangeSelector::setMaximum(double max) {
   m_rangeMarker->setMaximum(max);
   emit maxValueChanged(max);
   m_plot->replot();

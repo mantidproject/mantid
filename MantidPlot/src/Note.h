@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef NOTE_H
-#define NOTE_H
+#pragma once
 
 #include "MantidQtWidgets/Common/IProjectSerialisable.h"
 #include "MdiSubWindow.h"
@@ -46,7 +45,7 @@ class Note : public MdiSubWindow {
 
 public:
   Note(const QString &label, QWidget *parent, const QString &name = QString(),
-       Qt::WFlags f = nullptr);
+       const Qt::WFlags &f = nullptr);
   ~Note() override{};
 
   static MantidQt::API::IProjectSerialisable *
@@ -72,5 +71,3 @@ public slots:
 private:
   QTextEdit *te;
 };
-
-#endif

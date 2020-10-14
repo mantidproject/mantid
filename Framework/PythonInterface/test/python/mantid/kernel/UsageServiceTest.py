@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import unittest
 
-from mantid.kernel import (UsageService, UsageServiceImpl)
+from mantid.kernel import (UsageService, UsageServiceImpl, FeatureType)
 
 
 class UsageServiceTest(unittest.TestCase):
@@ -43,7 +41,10 @@ class UsageServiceTest(unittest.TestCase):
     def test_registerFeatureUsage(self):
         UsageService.setEnabled(False)
         #this will do nothing as it is disabled
-        UsageService.registerFeatureUsage("Algorithm", "Test.v1", True)
+        UsageService.registerFeatureUsage(FeatureType.Algorithm, "testv1", True)
+        UsageService.setEnabled(True)
+        UsageService.registerFeatureUsage(FeatureType.Algorithm, "testv1", True)
+        UsageService.registerFeatureUsage(FeatureType.Algorithm, ["testv1","level2feature"], True)
 
 
     def test_Flush(self):

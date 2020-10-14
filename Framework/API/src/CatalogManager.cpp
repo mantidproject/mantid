@@ -1,17 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CatalogManager.h"
 #include "MantidAPI/CatalogFactory.h"
 #include "MantidAPI/CompositeCatalog.h"
+#include "MantidAPI/FunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
-#include <boost/make_shared.hpp>
 #include <map>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -56,7 +57,7 @@ ICatalog_sptr CatalogManagerImpl::getCatalog(const std::string &sessionID) {
     throw std::runtime_error("You are not currently logged into a catalog.");
 
   if (sessionID.empty()) {
-    auto composite = boost::make_shared<CompositeCatalog>();
+    auto composite = std::make_shared<CompositeCatalog>();
     for (auto &activeCatalog : m_activeCatalogs) {
       composite->add(activeCatalog.second);
     }
@@ -105,9 +106,10 @@ void CatalogManagerImpl::destroyCatalog(const std::string &sessionID) {
 std::vector<CatalogSession_sptr> CatalogManagerImpl::getActiveSessions() {
   std::vector<CatalogSession_sptr> sessions;
   sessions.reserve(m_activeCatalogs.size());
-  for (const auto &activeCatalog : m_activeCatalogs) {
-    sessions.emplace_back(activeCatalog.first);
-  }
+
+  std::transform(m_activeCatalogs.begin(), m_activeCatalogs.end(),
+                 std::back_inserter(sessions),
+                 [](const auto &activeCatalog) { return activeCatalog.first; });
   return sessions;
 }
 

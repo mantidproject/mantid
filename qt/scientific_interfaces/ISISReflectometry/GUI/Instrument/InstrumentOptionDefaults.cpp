@@ -1,10 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InstrumentOptionDefaults.h"
+
+#include <utility>
+
 #include "Common/OptionDefaults.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "Reduction/Instrument.h"
@@ -19,7 +22,7 @@ Mantid::Kernel::Logger g_log("Reflectometry GUI");
 
 Instrument
 getInstrumentDefaults(Mantid::Geometry::Instrument_const_sptr instrument) {
-  auto defaults = OptionDefaults(instrument);
+  auto defaults = OptionDefaults(std::move(instrument));
 
   auto wavelengthRange =
       RangeInLambda(defaults.getValue<double>("WavelengthMin", "LambdaMin"),

@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_RESETNEGATIVES_H_
-#define MANTID_ALGORITHMS_RESETNEGATIVES_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,7 +16,7 @@ namespace Algorithms {
 
   @date 2012-02-01
 */
-class DLLExport ResetNegatives : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ResetNegatives : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -31,14 +30,13 @@ public:
 private:
   void init() override;
   void exec() override;
-  void pushMinimum(API::MatrixWorkspace_const_sptr minWS,
-                   API::MatrixWorkspace_sptr wksp, API::Progress &prog);
-  void changeNegatives(API::MatrixWorkspace_const_sptr minWS,
+  void pushMinimum(const API::MatrixWorkspace_const_sptr &minWS,
+                   const API::MatrixWorkspace_sptr &wksp, API::Progress &prog);
+  void changeNegatives(const API::MatrixWorkspace_const_sptr &minWS,
                        const double spectrumNegativeValues,
-                       API::MatrixWorkspace_sptr wksp, API::Progress &prog);
+                       const API::MatrixWorkspace_sptr &wksp,
+                       API::Progress &prog);
 };
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_RESETNEGATIVES_H_ */

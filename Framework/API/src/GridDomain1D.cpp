@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -17,7 +17,7 @@ namespace Mantid {
 namespace API {
 
 void GridDomain1D::initialize(double &startX, double &endX, size_t &n,
-                              const std::string scaling) {
+                              const std::string &scaling) {
   m_points.resize(n);
   m_points.front() = startX;
   m_points.back() = endX;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <cmath>
 #include <stdexcept>
@@ -73,7 +73,7 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
 
   xnew.clear();
   if (resize_xnew)
-    xnew.push_back(xcurr);
+    xnew.emplace_back(xcurr);
 
   while ((ibound <= ibounds) && (istep <= isteps)) {
     // if step is negative then it is logarithmic step
@@ -111,7 +111,7 @@ int DLLExport createAxisFromRebinParams(const std::vector<double> &params,
       istep += 2;
     }
     if (resize_xnew)
-      xnew.push_back(xcurr);
+      xnew.emplace_back(xcurr);
     inew++;
   }
 
@@ -553,7 +553,7 @@ std::vector<NumT> splitStringIntoVector(std::string listString) {
       std::stringstream oneNumber(str);
       NumT num;
       oneNumber >> num;
-      values.push_back(num);
+      values.emplace_back(num);
     }
   }
   return values;

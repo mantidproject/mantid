@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------
 // Includes
@@ -66,7 +66,7 @@ GenericDialog::~GenericDialog() {}
 void GenericDialog::initLayout() {
 
   // Add a layout for QDialog
-  QVBoxLayout *dialog_layout = new QVBoxLayout();
+  auto *dialog_layout = new QVBoxLayout();
   setLayout(dialog_layout);
   // Add the helpful summary message
   if (isMessageAvailable())

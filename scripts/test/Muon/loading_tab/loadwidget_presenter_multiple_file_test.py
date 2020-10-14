@@ -1,14 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import time
 
 from mantid import ConfigService
 from mantid.api import FileFinder
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication, QWidget
 
@@ -28,9 +29,10 @@ from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
 @start_qapplication
 class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
-        if thread_model:
-            thread_model._thread.wait()
-            QApplication.instance().processEvents()
+        while(thread_model._thread.isRunning()):
+            QApplication.sendPostedEvents()
+            time.sleep(0.1)
+        QApplication.sendPostedEvents()
 
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly

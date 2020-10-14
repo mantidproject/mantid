@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/ComponentVisitor.h"
@@ -49,7 +49,7 @@ DetectorGroup::DetectorGroup(const std::vector<IDetector_const_sptr> &dets)
 /** Add a detector to the collection
  *  @param det ::  A pointer to the detector to add
  */
-void DetectorGroup::addDetector(IDetector_const_sptr det) {
+void DetectorGroup::addDetector(const IDetector_const_sptr &det) {
   // the topology of the group become undefined and needs recalculation if new
   // detector has been added to the group
   group_topology = undef;
@@ -172,7 +172,7 @@ std::vector<detid_t> DetectorGroup::getDetectorIDs() const {
   result.reserve(m_detectors.size());
   DetCollection::const_iterator it;
   for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    result.push_back((*it).first);
+    result.emplace_back((*it).first);
   }
   return result;
 }
@@ -186,7 +186,7 @@ std::vector<IDetector_const_sptr> DetectorGroup::getDetectors() const {
   result.reserve(m_detectors.size());
   DetCollection::const_iterator it;
   for (it = m_detectors.begin(); it != m_detectors.end(); ++it) {
-    result.push_back((*it).second);
+    result.emplace_back((*it).second);
   }
   return result;
 }

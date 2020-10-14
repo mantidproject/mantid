@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOGPARSERTEST_H_
-#define LOGPARSERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -70,10 +69,10 @@ public:
     const auto &ti_data1 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data1.tm_hour, 12);
     TS_ASSERT_EQUALS(ti_data1.tm_min, 22);
-    v++;
-    v++;
-    v++;
-    v++;
+    ++v;
+    ++v;
+    ++v;
+    ++v;
     // time 5
     const auto &ti_data5 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data5.tm_hour, 12);
@@ -120,10 +119,10 @@ public:
     const auto &ti_data1 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data1.tm_hour, 12);
     TS_ASSERT_EQUALS(ti_data1.tm_min, 22);
-    v++;
-    v++;
-    v++;
-    v++;
+    ++v;
+    ++v;
+    ++v;
+    ++v;
     // time 5
     const auto &ti_data5 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data5.tm_hour, 12);
@@ -157,10 +156,10 @@ public:
     const auto &ti_data1 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data1.tm_hour, 12);
     TS_ASSERT_EQUALS(ti_data1.tm_min, 22);
-    v++;
-    v++;
-    v++;
-    v++;
+    ++v;
+    ++v;
+    ++v;
+    ++v;
     // time 5
     const auto &ti_data5 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data5.tm_hour, 12);
@@ -217,9 +216,9 @@ public:
     const auto &ti_data1 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data1.tm_hour, 12);
     TS_ASSERT_EQUALS(ti_data1.tm_min, 22);
-    v++;
-    v++;
-    v++;
+    ++v;
+    ++v;
+    ++v;
     // time 4
     TS_ASSERT_EQUALS(v->second, "   line 4");
     const auto &ti_data4 = v->first.to_tm();
@@ -382,10 +381,10 @@ public:
     const auto &ti_data1 = v->first.to_tm();
     TS_ASSERT_EQUALS(ti_data1.tm_hour, 12);
     TS_ASSERT_EQUALS(ti_data1.tm_min, 22);
-    v++;
-    v++;
-    v++;
-    v++;
+    ++v;
+    ++v;
+    ++v;
+    ++v;
     // time 5
     // TS_ASSERT(!isNaN(v->second));
     // last time
@@ -855,5 +854,3 @@ private:
   TmpFile log_num_repeat;        // num log with repeating lines
   TmpFile log_str_continuations; // string log with continuation lines
 };
-
-#endif /*LOGPARSERTEST_H_*/

@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef MANTIDQT_MANTIDWIDGETS_QTJSONUTILSTEST_H
-#define MANTIDQT_MANTIDWIDGETS_QTJSONUTILSTEST_H
+#pragma once
 
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 
 #include <cxxtest/TestSuite.h>
 
+#include <Poco/TemporaryFile.h>
 #include <QFile>
 #include <QMap>
 #include <QString>
@@ -30,7 +29,8 @@ public:
   static void destroySuite(QtJSONUtilsTest *suite) { delete suite; }
 
   void test_saveJSONToFile_and_loadJSONFromFile() {
-    QString filename("/tmp/tempFile");
+    Poco::TemporaryFile tmpFile;
+    QString filename(tmpFile.path().data());
     auto map1 = constructJSONMap();
     MantidQt::API::saveJSONToFile(filename, map1);
 
@@ -38,7 +38,6 @@ public:
     testMaps(map1, map2);
 
     QFile file(filename);
-    file.remove();
   }
 
   void test_loadJSONFromString() {
@@ -77,5 +76,3 @@ private:
                      map1[QString("list")].toList())
   }
 };
-
-#endif /* MANTIDQT_MANTIDWIDGETS_QTJSONUTILSTEST_H */

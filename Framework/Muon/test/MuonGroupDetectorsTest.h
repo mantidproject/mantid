@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MUONGROUPDETECTORSTEST_H_
-#define MANTID_ALGORITHMS_MUONGROUPDETECTORSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -100,25 +99,23 @@ public:
 
 private:
   TableWorkspace_sptr createDetectorGroupingTable() {
-    auto t = boost::make_shared<TableWorkspace>();
+    auto t = std::make_shared<TableWorkspace>();
 
     t->addColumn("vector_int", "Detectors");
 
     std::vector<int> group1;
-    group1.push_back(1);
-    group1.push_back(2);
+    group1.emplace_back(1);
+    group1.emplace_back(2);
     TableRow row1 = t->appendRow();
     row1 << group1;
 
     std::vector<int> group2;
-    group2.push_back(3);
-    group2.push_back(4);
-    group2.push_back(5);
+    group2.emplace_back(3);
+    group2.emplace_back(4);
+    group2.emplace_back(5);
     TableRow row2 = t->appendRow();
     row2 << group2;
 
     return t;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_MUONGROUPDETECTORSTEST_H_ */

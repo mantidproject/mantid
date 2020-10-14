@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef LineNumberDisplay_H
-#define LineNumberDisplay_H
+#pragma once
 
 #include <QTextEdit>
 
@@ -58,4 +57,3 @@ private:
   void showEvent(QShowEvent *) override;
   QTextEdit *d_text_edit;
 };
-#endif

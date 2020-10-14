@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVERTFITFUNCTIONFORMUONTFASYMETRYTEST_H_
-#define CONVERTFITFUNCTIONFORMUONTFASYMETRYTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -60,8 +59,8 @@ ITableWorkspace_sptr genTable() {
   return table;
 }
 
-IAlgorithm_sptr setUpAlg(std::vector<std::string> wsNames,
-                         const IFunction_sptr &func) {
+IAlgorithm_sptr setUpAlg(const std::vector<std::string> &wsNames,
+                         const IFunction_sptr &func, bool copyTies = true) {
   IAlgorithm_sptr asymmAlg = AlgorithmManager::Instance().create(
       "ConvertFitFunctionForMuonTFAsymmetry");
   asymmAlg->initialize();
@@ -70,6 +69,7 @@ IAlgorithm_sptr setUpAlg(std::vector<std::string> wsNames,
   ITableWorkspace_sptr table = genTable();
   asymmAlg->setProperty("NormalizationTable", table);
   asymmAlg->setProperty("InputFunction", func);
+  asymmAlg->setProperty("CopyTies", copyTies);
   return asymmAlg;
 }
 
@@ -187,6 +187,19 @@ public:
                       func->getParameter("f0.A0"));
     TS_ASSERT_DIFFERS(outFunc->getParameter(USER_FUNC + "f1.A0"),
                       func->getParameter("f1.A0"));
+  }
+  void test_1DTieWithoutCopyTies() {
+    genData();
+    std::vector<std::string> wsNames = {"ws1"};
+    IFunction_sptr func = FunctionFactory::Instance().createInitialized(
+        "name=LinearBackground,A0=0,A1=2;name=LinearBackground,A0=0,A1=4;ties "
+        "=(f0.A1=f1.A1)");
+    IAlgorithm_sptr alg = setUpAlg(wsNames, func);
+    TS_ASSERT(alg->isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT(alg->isExecuted());
+    IFunction_sptr normFunc = alg->getProperty("OutputFunction");
+    TS_ASSERT_EQUALS(normFunc->getTie(0), nullptr);
   }
   // tests for multi domain
   void test_2D() {
@@ -365,6 +378,7 @@ public:
     TS_ASSERT_DIFFERS(extractFunc->getParameter("f1.A0"),
                       func->getParameter("f1.A0"));
   }
+
   // tests for multi domain
   void test_2DExtract() {
     genData();
@@ -461,4 +475,3 @@ public:
 private:
   MatrixWorkspace_sptr input;
 };
-#endif /*ESTIMATEMUONASYMMETRYFROMCOUNTSTEST_H_*/

@@ -2,6 +2,9 @@
 Reflectometry Changes
 =====================
 
+ISIS Reflectometry Interface
+----------------------------
+
 .. figure:: ../../images/ISISReflectometryInterface/runs_tab_processing.png
   :class: screenshot
   :width: 700px
@@ -12,9 +15,6 @@ Reflectometry Changes
 
 .. contents:: Table of Contents
    :local:
-
-ISIS Reflectometry Interface
-----------------------------
 
 Workbench Support
 #################
@@ -35,7 +35,8 @@ The rest of this section describes the changes in more detail.
 Significant under-the-hood changes have also taken place to update the interface to modern design and engineering standards, resulting in a much more stable, extensible interface.
 
 Batches and Settings
-^^^^^^^^^^^^^^^^^^^^
+####################
+
 .. figure:: ../../images/ISISReflectometryInterface/batches.png
   :class: screenshot
   :width: 700px
@@ -50,7 +51,7 @@ Batches and Settings
 - Default values for the Experiment and Instrument Settings tabs are automatically populated for the selected instrument.
 
 Transmission Runs
-^^^^^^^^^^^^^^^^^
+#################
 
 .. figure:: ../../images/ISISReflectometryInterface/transmission_runs.png
   :class: screenshot
@@ -67,7 +68,7 @@ Transmission Runs
 - A new ``Scale RHS transmission workspace`` check box allows you to control which workspace is scaled when stitching transmission runs.
 
 The Toolbar
-^^^^^^^^^^^
+###########
 
 .. |filldown| image:: ../../images/icons/arrow-expand-down.png
 
@@ -83,7 +84,7 @@ The Toolbar
   *The new toolbar icons and filter box*
 
 Keyboard shortcuts
-^^^^^^^^^^^^^^^^^^
+##################
 
 Additional keyboard shortcuts have been added to aid navigation/editing in the runs table.
 
@@ -125,7 +126,7 @@ Additional keyboard shortcuts have been added to aid navigation/editing in the r
   *Editing the Runs table*
 
 Processing and highlighting
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+###########################
 
 .. figure:: ../../images/ISISReflectometryInterface/processing_table.png
   :class: screenshot

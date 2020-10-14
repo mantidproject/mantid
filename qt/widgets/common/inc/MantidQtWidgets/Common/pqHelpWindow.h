@@ -29,8 +29,7 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ========================================================================*/
-#ifndef __pqHelpWindow_h
-#define __pqHelpWindow_h
+#pragma once
 
 #include "DllOption.h"
 #include <QMainWindow>
@@ -79,7 +78,7 @@ class EXPORT_OPT_MANTIDQT_COMMON pqHelpWindow : public QMainWindow {
 
 public:
   pqHelpWindow(QHelpEngine *engine, QWidget *parent = nullptr,
-               Qt::WindowFlags flags = nullptr);
+               const Qt::WindowFlags &flags = nullptr);
 
 public slots:
   /// Requests showing of a particular page. The url must begin with "qthelp:"
@@ -96,6 +95,9 @@ public slots:
 
   /// Prints the current open page
   virtual void printPage();
+
+  /// Check if the url is an existing page
+  bool isExistingPage(const QUrl &url);
 
 signals:
   /// fired to relay warning messages from the help system.
@@ -120,5 +122,3 @@ private:
   class pqNetworkAccessManager;
   friend class pqNetworkAccessManager;
 };
-
-#endif

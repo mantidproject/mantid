@@ -1,50 +1,54 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
-
 import Muon.GUI.Common.utilities.algorithm_utils as algorithm_utils
+from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
+from Muon.GUI.Common.muon_pair import MuonPair
+from typing import Iterable
 
 
-def calculate_group_data(context, group_name, run, rebin):
-    processed_data = _run_pre_processing(context, run, rebin)
+def calculate_group_data(context, group, run, rebin, workspace_name, periods):
+    processed_data = get_pre_process_workspace_name(run, context.data_context.instrument)
 
-    params = _get_MuonGroupingCounts_parameters(context, group_name, run)
+    params = _get_MuonGroupingCounts_parameters(group, periods)
     params["InputWorkspace"] = processed_data
 
-    group_data = algorithm_utils.run_MuonGroupingCounts(params)
+    group_data = algorithm_utils.run_MuonGroupingCounts(params, workspace_name)
 
     return group_data
 
 
-def calculate_pair_data(context, pair_name, run, rebin):
-    processed_data = _run_pre_processing(context, run, rebin)
-
-    params = _get_MuonPairingAsymmetry_parameters(context, pair_name, run)
-    params["InputWorkspace"] = processed_data
-    pair_data = algorithm_utils.run_MuonPairingAsymmetry(params)
+def calculate_pair_data(pair: MuonPair, forward_group: str, backward_group: str, output_workspace_name: str):
+    params = _get_MuonPairingAsymmetry_parameters(pair, forward_group, backward_group)
+    pair_data = algorithm_utils.run_MuonPairingAsymmetry(params, output_workspace_name)
 
     return pair_data
 
 
-def estimate_group_asymmetry_data(context, group_name, run, rebin):
-    processed_data = _run_pre_processing(context, run, rebin)
+def estimate_group_asymmetry_data(context, group, run, rebin, workspace_name, unormalised_workspace_name, periods):
+    processed_data = get_pre_process_workspace_name(run, context.data_context.instrument)
 
-    params = _get_MuonGroupingAsymmetry_parameters(context, group_name, run)
+    params = _get_MuonGroupingAsymmetry_parameters(context, group, run, periods)
     params["InputWorkspace"] = processed_data
-    group_asymmetry, group_asymmetry_unnorm = algorithm_utils.run_MuonGroupingAsymmetry(params)
+    group_asymmetry, group_asymmetry_unnorm = algorithm_utils.run_MuonGroupingAsymmetry(params, workspace_name,
+                                                                                        unormalised_workspace_name)
 
     return group_asymmetry, group_asymmetry_unnorm
 
 
-def _run_pre_processing(context, run, rebin):
+def run_pre_processing(context, run, rebin):
     params = _get_pre_processing_params(context, run, rebin)
     params["InputWorkspace"] = context.data_context.loaded_workspace_as_group(run)
     processed_data = algorithm_utils.run_MuonPreProcess(params)
     return processed_data
+
+
+def get_pre_process_workspace_name(run: Iterable[int], instrument: str) -> str:
+    workspace_name = "".join(["__", instrument, run_list_to_string(run), "_pre_processed_data"])
+    return workspace_name
 
 
 def _get_pre_processing_params(context, run, rebin):
@@ -63,7 +67,8 @@ def _get_pre_processing_params(context, run, rebin):
         if context.gui_context['TimeZeroFromFile']:
             time_offset = 0.0
         else:
-            time_offset = context.data_context.get_loaded_data_for_run(run)["TimeZero"] - context.gui_context['TimeZero']
+            time_offset = context.data_context.get_loaded_data_for_run(run)["TimeZero"] - context.gui_context[
+                'TimeZero']
         pre_process_params["TimeOffset"] = time_offset
     except KeyError:
         pass
@@ -83,6 +88,8 @@ def _get_pre_processing_params(context, run, rebin):
             pre_process_params["DeadTimeTable"] = dead_time_table
     except KeyError:
         pass
+
+    pre_process_params["OutputWorkspace"] = get_pre_process_workspace_name(run, context.data_context.instrument)
 
     return pre_process_params
 
@@ -104,29 +111,18 @@ def _setup_rebin_options(context, pre_process_params, run):
         pass
 
 
-def _get_MuonGroupingCounts_parameters(context, group_name, run):
+def _get_MuonGroupingCounts_parameters(group, periods):
     params = {}
-    if context.data_context.is_multi_period() and 'SummedPeriods' in context.gui_context:
-        summed_periods = context.gui_context["SummedPeriods"]
-        params["SummedPeriods"] = summed_periods
-    else:
-        params["SummedPeriods"] = "1"
+    params["SummedPeriods"] = periods
 
-    if context.data_context.is_multi_period() and 'SubtractedPeriods' in context.gui_context:
-        subtracted_periods = context.gui_context["SubtractedPeriods"]
-        params["SubtractedPeriods"] = subtracted_periods
-    else:
-        params["SubtractedPeriods"] = ""
-
-    group = context.group_pair_context[group_name]
     if group:
-        params["GroupName"] = group_name
+        params["GroupName"] = group.name
         params["Grouping"] = ",".join([str(i) for i in group.detectors])
 
     return params
 
 
-def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
+def _get_MuonGroupingAsymmetry_parameters(context, group, run, periods):
     params = {}
 
     if 'GroupRangeMin' in context.gui_context:
@@ -137,51 +133,26 @@ def _get_MuonGroupingAsymmetry_parameters(context, group_name, run):
     if 'GroupRangeMax' in context.gui_context:
         params['AsymmetryTimeMax'] = context.gui_context['GroupRangeMax']
     else:
-        params['AsymmetryTimeMax'] = max(context.data_context.get_loaded_data_for_run(run)['OutputWorkspace'][0].workspace.dataX(0))
+        params['AsymmetryTimeMax'] = max(
+            context.data_context.get_loaded_data_for_run(run)['OutputWorkspace'][0].workspace.dataX(0))
 
-    if context.data_context.is_multi_period() and 'SummedPeriods' in context.gui_context:
-        summed_periods = context.gui_context["SummedPeriods"]
-        params["SummedPeriods"] = summed_periods
-    else:
-        params["SummedPeriods"] = "1"
+    params["SummedPeriods"] = periods
 
-    if context.data_context.is_multi_period() and 'SubtractedPeriods' in context.gui_context:
-        subtracted_periods = context.gui_context["SubtractedPeriods"]
-        params["SubtractedPeriods"] = subtracted_periods
-    else:
-        params["SubtractedPeriods"] = ""
-
-    group = context.group_pair_context[group_name]
     if group:
-        params["GroupName"] = group_name
+        params["GroupName"] = group.name
         params["Grouping"] = ",".join([str(i) for i in group.detectors])
 
     return params
 
 
-def _get_MuonPairingAsymmetry_parameters(context, pair_name, run):
+def _get_MuonPairingAsymmetry_parameters(pair: MuonPair, forward_group: str, backward_group: str):
     params = {}
-    if context.data_context.is_multi_period() and 'SummedPeriods' in context.gui_context:
-        summed_periods = context.gui_context["SummedPeriods"]
-        params["SummedPeriods"] = summed_periods
-    else:
-        params["SummedPeriods"] = "1"
-
-    if context.data_context.is_multi_period() and 'SubtractedPeriods' in context.gui_context:
-        subtracted_periods = context.gui_context["SubtractedPeriods"]
-        params["SubtractedPeriods"] = subtracted_periods
-    else:
-        params["SubtractedPeriods"] = ""
-
-    pair = context.group_pair_context[pair_name]
 
     if pair:
-        params["SpecifyGroupsManually"] = True
-        params["PairName"] = str(pair_name)
-        detectors1 = ",".join([str(i) for i in context.group_pair_context[pair.forward_group].detectors])
-        detectors2 = ",".join([str(i) for i in context.group_pair_context[pair.backward_group].detectors])
-        params["Group1"] = detectors1
-        params["Group2"] = detectors2
+        params["SpecifyGroupsManually"] = False
+        params["PairName"] = pair.name
+        params["InputWorkspace1"] = forward_group
+        params["InputWorkspace2"] = backward_group
         params["Alpha"] = str(pair.alpha)
 
     return params

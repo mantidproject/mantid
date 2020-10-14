@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef _vtkMDHWNexusReader_h
-#define _vtkMDHWNexusReader_h
+#pragma once
 
 #include "MantidVatesAPI/MDHWNexusLoadingPresenter.h"
 #include "MantidVatesAPI/Normalization.h"
@@ -77,4 +76,3 @@ private:
   /// Normalization Option
   Mantid::VATES::VisualNormalization m_normalizationOption;
 };
-#endif

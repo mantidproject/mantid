@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_PEAKSWORKSPACETEST_H_
-#define MANTID_DATAOBJECTS_PEAKSWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FileProperty.h"
@@ -18,8 +17,6 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Timer.h"
 #include "MantidKernel/V3D.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/NexusTestHelper.h"
@@ -27,7 +24,6 @@
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
-#include <stdio.h>
 
 #include <Poco/File.h>
 
@@ -36,33 +32,42 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+/** Build a test PeaksWorkspace with one peak (others peaks can be added)
+ *
+ * @return PeaksWorkspace
+ */
+PeaksWorkspace_sptr buildPW() {
+  Instrument_sptr inst =
+      ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
+  inst->setName("SillyInstrument");
+  auto pw = std::make_shared<PeaksWorkspace>();
+  pw->setInstrument(inst);
+  std::string val = "value";
+  pw->mutableRun().addProperty("TestProp", val);
+  Peak p(inst, 1, 3.0);
+  pw->addPeak(p);
+  return pw;
+}
+
 class PeaksWorkspaceTest : public CxxTest::TestSuite {
+private:
+  class TestablePeaksWorkspace : public PeaksWorkspace {
+  public:
+    TestablePeaksWorkspace(const PeaksWorkspace &other)
+        : PeaksWorkspace(other) {}
+
+    using ExperimentInfo::numberOfDetectorGroups;
+  };
+
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
   static PeaksWorkspaceTest *createSuite() { return new PeaksWorkspaceTest(); }
   static void destroySuite(PeaksWorkspaceTest *suite) { delete suite; }
 
-  /** Build a test PeaksWorkspace with one peak (others peaks can be added)
-   *
-   * @return PeaksWorkspace
-   */
-  PeaksWorkspace_sptr buildPW() {
-    Instrument_sptr inst =
-        ComponentCreationHelper::createTestInstrumentRectangular2(1, 10);
-    inst->setName("SillyInstrument");
-    auto pw = PeaksWorkspace_sptr(new PeaksWorkspace);
-    pw->setInstrument(inst);
-    std::string val = "value";
-    pw->mutableRun().addProperty("TestProp", val);
-    Peak p(inst, 1, 3.0);
-    pw->addPeak(p);
-    return pw;
-  }
-
   /** Check that the PeaksWorkspace build by buildPW() is correct */
   void checkPW(const PeaksWorkspace &pw) {
-    TS_ASSERT_EQUALS(pw.columnCount(), 18);
+    TS_ASSERT_EQUALS(pw.columnCount(), 20);
     TS_ASSERT_EQUALS(pw.rowCount(), 1);
     TS_ASSERT_EQUALS(pw.getNumberPeaks(), 1);
     if (pw.getNumberPeaks() != 1)
@@ -78,16 +83,11 @@ public:
     checkPW(*pw);
   }
 
-  class TestablePeaksWorkspace : public PeaksWorkspace {
-  public:
-    TestablePeaksWorkspace(const PeaksWorkspace &other)
-        : PeaksWorkspace(other) {}
-  };
-
   void test_copyConstructor() {
     auto pw = buildPW();
-    auto pw2 = PeaksWorkspace_sptr(new TestablePeaksWorkspace(*pw));
+    auto pw2 = std::make_shared<TestablePeaksWorkspace>(*pw);
     checkPW(*pw2);
+    TS_ASSERT_EQUALS(0, pw2->numberOfDetectorGroups());
   }
 
   void test_clone() {
@@ -96,9 +96,67 @@ public:
     checkPW(*pw2);
   }
 
+  void test_column_access() {
+    auto pw = buildPW();
+    auto &peak0 = pw->getPeak(0);
+    const int runNo(1000), detID(10), row(0), col(1), peakNumber(1);
+    const double h(1.), k(-1.), l(2.), lambda(3.5), energy(6.67789),
+        tof(9733.13), dspacing(2.51539), intensity(2.3), sigInt(0.1),
+        binCount(100), tbar(0.4);
+    const V3D q(-1.79284, 0.0717138, 1.73782);
+    const std::string bankName("bank1");
+
+    peak0.setRunNumber(runNo);
+    peak0.setDetectorID(detID);
+    peak0.setH(h);
+    peak0.setK(k);
+    peak0.setL(l);
+    peak0.setWavelength(lambda);
+    peak0.setFinalEnergy(energy);
+    peak0.setIntensity(intensity);
+    peak0.setSigmaIntensity(sigInt);
+    peak0.setBinCount(binCount);
+    peak0.setPeakNumber(peakNumber);
+    peak0.setAbsorptionWeightedPathLength(tbar);
+
+    auto floatToStr = [](const double d, const int precision = -1) {
+      std::stringstream ss;
+      if (precision >= 0)
+        ss << std::fixed << std::setprecision(precision);
+      ss << d;
+      return ss.str();
+    };
+    auto v3dToStr = [](const V3D &pt) {
+      std::stringstream ss;
+      pt.printSelf(ss);
+      return ss.str();
+    };
+    using std::to_string;
+    // clang-format off
+    const std::array<std::string, 20> expected = {\
+      to_string(runNo), to_string(detID),  floatToStr(h, 2), floatToStr(k, 2),
+      floatToStr(l, 2), floatToStr(lambda), floatToStr(energy), floatToStr(tof, 2), floatToStr(dspacing),
+      floatToStr(intensity), floatToStr(sigInt), floatToStr(intensity/sigInt), floatToStr(binCount), bankName,
+      to_string(row), to_string(col),
+      v3dToStr(q), v3dToStr(q),
+      to_string(peakNumber),
+      floatToStr(tbar)
+    };
+    // clang-format on
+
+    for (int i = 0; i < 20; ++i) {
+      const auto column = pw->getColumn(i);
+      TS_ASSERT_EQUALS(1, column->size());
+      std::stringstream os;
+      column->print(0, os);
+      TSM_ASSERT_EQUALS("Mismatch in column " + column->name(), expected[i],
+                        os.str());
+    }
+  }
+
   void test_sort() {
     auto pw = buildPW();
-    Instrument_const_sptr inst = pw->getInstrument();
+    const auto inst = pw->getInstrument();
     Peak p0 = Peak(pw->getPeak(0)); // Peak(inst, 1, 3.0)
     Peak p1(inst, 1, 4.0);
     Peak p2(inst, 1, 5.0);
@@ -111,8 +169,8 @@ public:
 
     std::vector<std::pair<std::string, bool>> criteria;
     // Sort by detector ID then descending wavelength
-    criteria.push_back(std::pair<std::string, bool>("detid", true));
-    criteria.push_back(std::pair<std::string, bool>("wavelength", false));
+    criteria.emplace_back(std::pair<std::string, bool>("detid", true));
+    criteria.emplace_back(std::pair<std::string, bool>("wavelength", false));
     pw->sort(criteria);
     TS_ASSERT_EQUALS(pw->getPeak(0).getDetectorID(), 1);
     TS_ASSERT_DELTA(pw->getPeak(0).getWavelength(), 5.0, 1e-5);
@@ -125,8 +183,8 @@ public:
 
     // Sort by wavelength ascending then detID
     criteria.clear();
-    criteria.push_back(std::pair<std::string, bool>("wavelength", true));
-    criteria.push_back(std::pair<std::string, bool>("detid", true));
+    criteria.emplace_back(std::pair<std::string, bool>("wavelength", true));
+    criteria.emplace_back(std::pair<std::string, bool>("detid", true));
     pw->sort(criteria);
     TS_ASSERT_EQUALS(pw->getPeak(0).getDetectorID(), 1);
     TS_ASSERT_DELTA(pw->getPeak(0).getWavelength(), 3.0, 1e-5);
@@ -141,9 +199,6 @@ public:
   }
 
   void test_Save_Unmodified_PeaksWorkspace_Nexus() {
-
-    const std::string filename =
-        "test_Save_Unmodified_PeaksWorkspace_Nexus.nxs";
     auto testPWS = createSaveTestPeaksWorkspace();
     NexusTestHelper nexusHelper(true);
     nexusHelper.createFile("testSavePeaksWorkspace.nxs");
@@ -367,7 +422,7 @@ public:
     const auto params = makePeakParameters();
     auto ws = makeWorkspace(params);
     // Create the peak
-    Peak *peak = ws->createPeakHKL(params.hkl);
+    auto peak = ws->createPeakHKL(params.hkl);
 
     /*
      Now we check we have made a self - consistent peak
@@ -388,9 +443,6 @@ public:
                       params.detectorPosition, detector->getPos());
     TSM_ASSERT_EQUALS("Goniometer has not been set properly",
                       params.goniometer.getR(), peak->getGoniometerMatrix());
-
-    // Clean up.
-    delete peak;
   }
 
   void test_create_peak_with_position_hkl() {
@@ -612,10 +664,10 @@ private:
   }
 
   PeaksWorkspace_sptr makeWorkspace(const PeakParameters &params) {
-    auto lattice = new OrientedLattice(params.lattice);
-    auto ws = boost::make_shared<PeaksWorkspace>();
+    auto ws = std::make_shared<PeaksWorkspace>();
     ws->setInstrument(params.instrument);
-    ws->mutableSample().setOrientedLattice(lattice);
+    ws->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(params.lattice));
     ws->mutableRun().setGoniometer(params.goniometer, false);
     return ws;
   }
@@ -652,5 +704,3 @@ private:
     TS_ASSERT_EQUALS("DetectorID", column1->name());
   }
 };
-
-#endif /* MANTID_DATAOBJECTS_PEAKSWORKSPACETEST_H_ */

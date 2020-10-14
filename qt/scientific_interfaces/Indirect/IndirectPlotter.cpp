@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectPlotter.h"
 #include "IndirectSettingsHelper.h"
@@ -12,12 +12,14 @@
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 #include "MantidKernel/Strings.h"
 #else
+#include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/MplCpp/Plot.h"
 
 #include <QHash>
 #include <QString>
 #include <QStringList>
 #include <QVariant>
+#include <utility>
 
 using namespace MantidQt::Widgets::MplCpp;
 #endif
@@ -25,6 +27,12 @@ using namespace MantidQt::Widgets::MplCpp;
 using namespace Mantid::API;
 
 namespace {
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+auto constexpr ERROR_CAPSIZE = 3;
+
+Mantid::Kernel::Logger g_log("IndirectPlotter");
+#endif
 
 template <typename BeginIter, typename Iterable>
 void removeFromIterable(BeginIter const &beginIter, Iterable &iterable) {
@@ -160,9 +168,10 @@ std::string createPlotTiledString(std::string const &workspaceName,
  * @param kwargs Other arguments for plotting
  * @param figure The figure to plot on top of
  */
+using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
 
-Python::Object
+boost::optional<Python::Object>
 workbenchPlot(QStringList const &workspaceNames,
               std::vector<int> const &indices, bool errorBars,
               boost::optional<QHash<QString, QVariant>> kwargs = boost::none,
@@ -171,11 +180,16 @@ workbenchPlot(QStringList const &workspaceNames,
   if (kwargs)
     plotKwargs = kwargs.get();
   if (errorBars)
-    plotKwargs["capsize"] = 3;
+    plotKwargs["capsize"] = ERROR_CAPSIZE;
 
   using MantidQt::Widgets::MplCpp::plot;
-  return plot(workspaceNames, boost::none, indices, figure, plotKwargs,
-              boost::none, boost::none, errorBars);
+  try {
+    return plot(workspaceNames, boost::none, indices, std::move(figure),
+                plotKwargs, boost::none, boost::none, errorBars);
+  } catch (PythonException const &ex) {
+    g_log.error() << ex.what();
+    return boost::none;
+  }
 }
 #endif
 
@@ -254,9 +268,10 @@ void IndirectPlotter::plotCorrespondingSpectra(
       workbenchPlot(QStringList(QString::fromStdString(workspaceNames[0])),
                     {workspaceIndices[0]}, errorBars);
   for (auto i = 1u; i < workspaceNames.size(); ++i) {
-    figure =
-        workbenchPlot(QStringList(QString::fromStdString(workspaceNames[i])),
-                      {workspaceIndices[i]}, errorBars, boost::none, figure);
+    if (figure)
+      figure = workbenchPlot(
+          QStringList(QString::fromStdString(workspaceNames[i])),
+          {workspaceIndices[i]}, errorBars, boost::none, figure.get());
   }
 #endif
 }
@@ -309,14 +324,18 @@ void IndirectPlotter::plotContour(std::string const &workspaceName) {
 void IndirectPlotter::plotTiled(std::string const &workspaceName,
                                 std::string const &workspaceIndices) {
   if (validate(workspaceName, workspaceIndices, MantidAxis::Spectrum)) {
+    auto const errorBars = IndirectSettingsHelper::externalPlotErrorBars();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+    UNUSED_ARG(errorBars);
     runPythonCode(createPlotTiledString(
         workspaceName, createIndicesVector<std::size_t>(workspaceIndices)));
 #else
-    UNUSED_ARG(workspaceName);
-    UNUSED_ARG(workspaceIndices);
-    std::runtime_error(
-        "Tiled plotting for the Workbench has not been implemented.");
+    QHash<QString, QVariant> plotKwargs;
+    if (errorBars)
+      plotKwargs["capsize"] = ERROR_CAPSIZE;
+    plot(QStringList(QString::fromStdString(workspaceName)), boost::none,
+         createIndicesVector<int>(workspaceIndices), boost::none, plotKwargs,
+         boost::none, "Tiled Plot: " + workspaceName, errorBars, false, true);
 #endif
   }
 }
@@ -352,7 +371,7 @@ bool IndirectPlotter::validate(
  * @return True if the data is valid
  */
 bool IndirectPlotter::validate(
-    MatrixWorkspace_const_sptr workspace,
+    const MatrixWorkspace_const_sptr &workspace,
     boost::optional<std::string> const &workspaceIndices,
     boost::optional<MantidAxis> const &axisType) const {
   if (workspaceIndices && axisType && axisType.get() == MantidAxis::Spectrum)
@@ -371,7 +390,7 @@ bool IndirectPlotter::validate(
  * @return True if the indices exist
  */
 bool IndirectPlotter::validateSpectra(
-    MatrixWorkspace_const_sptr workspace,
+    const MatrixWorkspace_const_sptr &workspace,
     std::string const &workspaceIndices) const {
   auto const numberOfHistograms = workspace->getNumberHistograms();
   auto const lastIndex =
@@ -387,7 +406,7 @@ bool IndirectPlotter::validateSpectra(
  * '0-2,5,7-10')
  * @return True if the bin indices exist
  */
-bool IndirectPlotter::validateBins(MatrixWorkspace_const_sptr workspace,
+bool IndirectPlotter::validateBins(const MatrixWorkspace_const_sptr &workspace,
                                    std::string const &binIndices) const {
   auto const numberOfBins = workspace->y(0).size();
   auto const lastIndex = std::stoul(splitStringBy(binIndices, ",-").back());

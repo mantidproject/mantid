@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_
-#define MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_
+#pragma once
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
 #include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
@@ -19,9 +18,14 @@
 #include <QApplication>
 #include <cxxtest/TestSuite.h>
 
+#include <gmock/gmock.h>
+
 using namespace MantidQt::MantidWidgets;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace testing;
+
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockFunctionView : public IFunctionView {
 public:
@@ -37,7 +41,7 @@ public:
   void setParameter(const QString &paramName, double value) override {
     m_function->setParameter(paramName.toStdString(), value);
   }
-  void setParamError(const QString &paramName, double error) override {
+  void setParameterError(const QString &paramName, double error) override {
     auto const i = m_function->parameterIndex(paramName.toStdString());
     m_function->setError(i, error);
   }
@@ -62,9 +66,15 @@ public:
     }
   }
 
+  void setParameterConstraint(const QString & /*paramName*/,
+                              const QString & /*constraint*/) override {}
+
   void setGlobalParameters(const QStringList &globals) override {
     m_globals = globals;
   }
+  void functionHelpRequested() { emit functionHelpRequest(); }
+  MOCK_METHOD0(getSelectedFunction, IFunction_sptr());
+  MOCK_CONST_METHOD1(showFunctionHelp, void(const QString &));
 
   // Mock user action
   void addFunction(const QString &prefix, const QString &funStr) {
@@ -74,7 +84,7 @@ public:
       m_function = FunctionFactory::Instance().createInitialized(
           fun + funStr.toStdString());
     } else {
-      auto parentFun = boost::dynamic_pointer_cast<CompositeFunction>(
+      auto parentFun = std::dynamic_pointer_cast<CompositeFunction>(
           getFunctionWithPrefix(prefix, m_function));
       parentFun->addFunction(
           FunctionFactory::Instance().createInitialized(funStr.toStdString()));
@@ -91,7 +101,7 @@ public:
     QString parentPrefix;
     int i;
     std::tie(parentPrefix, i) = splitFunctionPrefix(prefix);
-    auto fun = boost::dynamic_pointer_cast<CompositeFunction>(
+    auto fun = std::dynamic_pointer_cast<CompositeFunction>(
         getFunctionWithPrefix(parentPrefix, m_function));
     if (i >= 0)
       fun->removeFunction(i);
@@ -512,6 +522,31 @@ public:
     locals = presenter.getLocalParameters();
     TS_ASSERT_EQUALS(locals[0], "A1");
   }
+  void test_open_function_help_window() {
+    auto func =
+        FunctionFactory::Instance().createInitialized("name=LinearBackground");
+    QString functionName = QString::fromStdString(func->name());
+    auto view = std::make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+
+    EXPECT_CALL(*view, getSelectedFunction())
+        .Times(Exactly(1))
+        .WillOnce(Return(func));
+    EXPECT_CALL(*view, showFunctionHelp(functionName)).Times(Exactly(1));
+
+    view->functionHelpRequested();
+  }
+  void test_open_function_help_window_no_function() {
+    auto view = std::make_unique<MockFunctionView>();
+    FunctionMultiDomainPresenter presenter(view.get());
+
+    EXPECT_CALL(*view, getSelectedFunction())
+        .Times(Exactly(1))
+        .WillOnce(Return(IFunction_sptr()));
+    EXPECT_CALL(*view, showFunctionHelp(_)).Times(Exactly(0));
+
+    view->functionHelpRequested();
+  }
 };
 
-#endif // MANTIDWIDGETS_FUNCTIONMULTIDOMAINPRESENTERTEST_H_
+GNU_DIAG_ON_SUGGEST_OVERRIDE

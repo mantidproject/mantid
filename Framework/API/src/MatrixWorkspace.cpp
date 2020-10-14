@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Algorithm.h"
@@ -41,6 +41,18 @@
 
 using Mantid::Kernel::TimeSeriesProperty;
 using Mantid::Types::Core::DateAndTime;
+
+namespace {
+/** Simple method which will accumulate a value as long as it is Finite */
+auto accumulate_if_finite = [](const double accumulator,
+                               const double newValue) {
+  if (std::isfinite(newValue)) {
+    return accumulator + newValue;
+  } else {
+    return accumulator;
+  }
+};
+} // namespace
 
 namespace Mantid {
 namespace API {
@@ -143,7 +155,7 @@ const Indexing::IndexInfo &MatrixWorkspace::indexInfo() const {
   if (m_indexInfoNeedsUpdate) {
     std::vector<Indexing::SpectrumNumber> spectrumNumbers;
     for (size_t i = 0; i < getNumberHistograms(); ++i)
-      spectrumNumbers.push_back(getSpectrum(i).getSpectrumNo());
+      spectrumNumbers.emplace_back(getSpectrum(i).getSpectrumNo());
     m_indexInfo->setSpectrumNumbers(std::move(spectrumNumbers));
     m_indexInfoNeedsUpdate = false;
   }
@@ -364,8 +376,11 @@ void MatrixWorkspace::updateSpectraUsing(const SpectrumDetectorMapping &map) {
  * the same ID. If an empty instrument is set then a 1:1 map from 1->NHistograms
  * is created.
  * @param includeMonitors :: If false the monitors are not included
+ * @param specNumOffset :: Constant offset from detector ID used to derive
+ *                         spectrum number
  */
-void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
+void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors,
+                                            const specnum_t specNumOffset) {
   if (sptr_instrument->nelements() == 0) {
     return;
   }
@@ -380,8 +395,7 @@ void MatrixWorkspace::rebuildSpectraMapping(const bool includeMonitors) {
          ++it) {
       // The detector ID
       const detid_t detId = *it;
-      // By default: Spectrum number = index +  1
-      const auto specNo = specnum_t(index + 1);
+      const auto specNo = specnum_t(index + specNumOffset);
 
       if (index < this->getNumberHistograms()) {
         auto &spec = getSpectrum(index);
@@ -592,7 +606,7 @@ std::vector<size_t> MatrixWorkspace::getIndicesFromSpectra(
   while (iter != spectraList.cend()) {
     for (size_t i = 0; i < this->getNumberHistograms(); ++i) {
       if (this->getSpectrum(i).getSpectrumNo() == *iter) {
-        indexList.push_back(i);
+        indexList.emplace_back(i);
         break;
       }
     }
@@ -680,7 +694,7 @@ std::vector<specnum_t> MatrixWorkspace::getSpectraFromDetectorIDs(
     }
 
     if (foundDet)
-      spectraList.push_back(foundSpecNum);
+      spectraList.emplace_back(foundSpecNum);
   } // for each detector ID in the list
   return spectraList;
 }
@@ -729,6 +743,7 @@ void MatrixWorkspace::getXMinMax(double &xmin, double &xmax) const {
 }
 
 /** Integrate all the spectra in the matrix workspace within the range given.
+ * NaN and Infinite values are ignored.
  * Default implementation, can be overridden by base classes if they know
  *something smarter!
  *
@@ -780,7 +795,8 @@ void MatrixWorkspace::getIntegratedSpectra(std::vector<double> &out,
       double sum(0.0);
       if (distmin <= distmax) {
         // Integrate
-        sum = std::accumulate(y.begin() + distmin, y.begin() + distmax, 0.0);
+        sum = std::accumulate(y.begin() + distmin, y.begin() + distmax, 0.0,
+                              accumulate_if_finite);
       }
       // Save it in the vector
       out[wksp_index] = sum;
@@ -818,7 +834,7 @@ MatrixWorkspace::getDetector(const size_t workspaceIndex) const {
   }
   // Else need to construct a DetectorGroup and return that
   auto dets_ptr = localInstrument->getDetectors(dets);
-  return boost::make_shared<Geometry::DetectorGroup>(dets_ptr);
+  return std::make_shared<Geometry::DetectorGroup>(dets_ptr);
 }
 
 /** Returns the signed 2Theta scattering angle for a detector
@@ -1037,16 +1053,26 @@ void MatrixWorkspace::setDistribution(bool newValue) {
  */
 bool MatrixWorkspace::isHistogramData() const {
   // all spectra *should* have the same behavior
-  bool isHist = (x(0).size() != y(0).size());
+  return isHistogramDataByIndex(0);
+}
+
+/**
+ *  Whether the specified histogram contains histogram data (ie bins)
+ *  @param index :: Index of the histogram to be checked
+ *  @return whether the histogram contains histogram data
+ */
+bool MatrixWorkspace::isHistogramDataByIndex(const std::size_t index) const {
+  bool isHist = (x(index).size() != y(index).size());
+
   // TODOHIST temporary sanity check
   if (isHist) {
-    if (getSpectrum(0).histogram().xMode() !=
+    if (getSpectrum(index).histogram().xMode() !=
         HistogramData::Histogram::XMode::BinEdges) {
       throw std::logic_error("In MatrixWorkspace::isHistogramData(): "
                              "Histogram::Xmode is not BinEdges");
     }
   } else {
-    if (getSpectrum(0).histogram().xMode() !=
+    if (getSpectrum(index).histogram().xMode() !=
         HistogramData::Histogram::XMode::Points) {
       throw std::logic_error("In MatrixWorkspace::isHistogramData(): "
                              "Histogram::Xmode is not Points");
@@ -1198,6 +1224,11 @@ bool MatrixWorkspace::hasMaskedBins(const size_t &workspaceIndex) const {
   return m_masks.find(workspaceIndex) != m_masks.end();
 }
 
+/** Does this workspace contain any masked bins
+ *  @return True if there are masked bins somewhere in this workspace
+ */
+bool MatrixWorkspace::hasAnyMaskedBins() const { return !m_masks.empty(); }
+
 /** Returns the list of masked bins for a spectrum.
  *  @param  workspaceIndex
  *  @return A const reference to the list of masked bins
@@ -1230,9 +1261,10 @@ MatrixWorkspace::maskedBinsIndices(const size_t &workspaceIndex) const {
   auto maskedBins = it->second;
   std::vector<size_t> maskedIds;
   maskedIds.reserve(maskedBins.size());
-  for (const auto &mb : maskedBins) {
-    maskedIds.emplace_back(mb.first);
-  }
+
+  std::transform(maskedBins.begin(), maskedBins.end(),
+                 std::back_inserter(maskedIds),
+                 [](const auto &mb) { return mb.first; });
   return maskedIds;
 }
 
@@ -1256,7 +1288,7 @@ void MatrixWorkspace::setMaskedBins(const size_t workspaceIndex,
  *  @param monitorWS The workspace containing the monitor data.
  */
 void MatrixWorkspace::setMonitorWorkspace(
-    const boost::shared_ptr<MatrixWorkspace> &monitorWS) {
+    const std::shared_ptr<MatrixWorkspace> &monitorWS) {
   if (monitorWS.get() == this) {
     throw std::runtime_error(
         "To avoid memory leak, monitor workspace"
@@ -1267,7 +1299,7 @@ void MatrixWorkspace::setMonitorWorkspace(
 
 /** Returns a pointer to the internal monitor workspace.
  */
-boost::shared_ptr<MatrixWorkspace> MatrixWorkspace::monitorWorkspace() const {
+std::shared_ptr<MatrixWorkspace> MatrixWorkspace::monitorWorkspace() const {
   return m_monitorWorkspace;
 }
 
@@ -1363,7 +1395,7 @@ std::size_t MatrixWorkspace::yIndexOfX(const double xValue,
     throw std::out_of_range("MatrixWorkspace::yIndexOfX - X value is greater"
                             " than the highest in the current range.");
 
-  if (this->isHistogramData())
+  if (isHistogramDataByIndex(index))
     return binIndexOfValue(xValues, xValue, ascendingOrder, tolerance);
   else
     return xIndexOfValue(xValues, xValue, tolerance);
@@ -1616,25 +1648,25 @@ private:
   const Geometry::MDFrame_const_uptr m_frame;
 };
 
-boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+std::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimension(size_t index) const {
   if (index == 0) {
-    return boost::make_shared<MWXDimension>(this, xDimensionId);
+    return std::make_shared<MWXDimension>(this, xDimensionId);
   } else if (index == 1) {
     Axis *yAxis = this->getAxis(1);
-    return boost::make_shared<MWDimension>(yAxis, yDimensionId);
+    return std::make_shared<MWDimension>(yAxis, yDimensionId);
   } else
     throw std::invalid_argument("MatrixWorkspace only has 2 dimensions.");
 }
 
-boost::shared_ptr<const Mantid::Geometry::IMDDimension>
+std::shared_ptr<const Mantid::Geometry::IMDDimension>
 MatrixWorkspace::getDimensionWithId(std::string id) const {
   int nAxes = this->axes();
-  boost::shared_ptr<IMDDimension> dim;
+  std::shared_ptr<IMDDimension> dim;
   for (int i = 0; i < nAxes; i++) {
     const std::string knownId = getDimensionIdFromAxis(i);
     if (knownId == id) {
-      dim = boost::make_shared<MWDimension>(this->getAxis(i), id);
+      dim = std::make_shared<MWDimension>(this->getAxis(i), id);
       break;
     }
   }
@@ -1673,8 +1705,8 @@ std::vector<std::unique_ptr<IMDIterator>> MatrixWorkspace::createIterators(
     size_t end = ((i + 1) * numElements) / numCores;
     if (end > numElements)
       end = numElements;
-    out.push_back(std::make_unique<MatrixWorkspaceMDIterator>(this, function,
-                                                              begin, end));
+    out.emplace_back(std::make_unique<MatrixWorkspaceMDIterator>(this, function,
+                                                                 begin, end));
   }
   return out;
 }
@@ -1891,7 +1923,7 @@ MantidImage_sptr MatrixWorkspace::getImage(
   }
 
   // initialize the image
-  auto image = boost::make_shared<MantidImage>(height);
+  auto image = std::make_shared<MantidImage>(height);
   if (!isHisto)
     ++indexEnd;
 
@@ -1922,6 +1954,34 @@ MantidImage_sptr MatrixWorkspace::getImage(
   }
 
   return image;
+}
+
+std::pair<int64_t, int64_t>
+MatrixWorkspace::findY(double value,
+                       const std::pair<int64_t, int64_t> &idx) const {
+  std::pair<int64_t, int64_t> out(-1, -1);
+  const int64_t numHists = static_cast<int64_t>(this->getNumberHistograms());
+  if (std::isnan(value)) {
+    for (int64_t i = idx.first; i < numHists; ++i) {
+      const auto &Y = this->y(i);
+      if (auto it = std::find_if(std::next(Y.begin(), idx.second), Y.end(),
+                                 [](double v) { return std::isnan(v); });
+          it != Y.end()) {
+        out = {i, std::distance(Y.begin(), it)};
+        break;
+      }
+    }
+  } else {
+    for (int64_t i = idx.first; i < numHists; ++i) {
+      const auto &Y = this->y(i);
+      if (auto it = std::find(std::next(Y.begin(), idx.second), Y.end(), value);
+          it != Y.end()) {
+        out = {i, std::distance(Y.begin(), it)};
+        break;
+      }
+    }
+  }
+  return out;
 }
 
 /**

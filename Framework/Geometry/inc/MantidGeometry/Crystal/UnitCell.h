@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_UNITCELL_H_
-#define MANTID_GEOMETRY_UNITCELL_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/DllConfig.h"
@@ -162,6 +161,8 @@ public:
   double volume() const;
   double recVolume() const;
   virtual void recalculateFromGstar(const Kernel::Matrix<double> &NewGstar);
+  bool operator==(const UnitCell &other) const;
+  bool operator!=(const UnitCell &other) const;
 
 protected:
   /// Lattice parameter a,b,c,alpha,beta,gamma (in \f$ \mbox{ \AA } \f$ and
@@ -223,5 +224,3 @@ MANTID_GEOMETRY_DLL std::string unitCellToStr(const UnitCell &unitCell);
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_UNITCELL_H_ */

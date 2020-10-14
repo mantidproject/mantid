@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_BRAGGSCATTERERINCRYSTALSTRUCTURE_H_
-#define MANTID_GEOMETRY_BRAGGSCATTERERINCRYSTALSTRUCTURE_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/BraggScatterer.h"
 #include "MantidGeometry/Crystal/SpaceGroup.h"
@@ -60,7 +59,7 @@ protected:
 };
 
 using BraggScattererInCrystalStructure_sptr =
-    boost::shared_ptr<BraggScattererInCrystalStructure>;
+    std::shared_ptr<BraggScattererInCrystalStructure>;
 
 /**
  * Helper class for validating unit cell strings.
@@ -81,5 +80,3 @@ getTokenizedPositionString(const std::string &position);
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_BRAGGSCATTERERINCRYSTALSTRUCTURE_H_ */

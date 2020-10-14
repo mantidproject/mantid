@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import copy
 import matplotlib.axes
 import matplotlib.cm as cm
@@ -16,6 +14,8 @@ from matplotlib import axis, ticker  # noqa
 
 from mantid import logger
 from mantid.api import AnalysisDataService as ADS
+from mantid.plots.legend import LegendProperties
+from mantid.plots.plotfunctions import create_subplots
 # Constants set in workbench.plotting.functions but would cause backwards reliability
 from mantidqt.plotting.functions import pcolormesh
 
@@ -46,9 +46,7 @@ class PlotsLoader(object):
         :param plot_dict: dictionary; A dictionary of various items intended to recreate a figure
         :param create_plot: Bool; whether or not to make the plot, or to return the figure.
         :return: matplotlib.figure; Only returns if create_plot=False
-        """
-        import matplotlib.pyplot as plt
-        # Grab creation arguments
+        """        # Grab creation arguments
         creation_args = plot_dict["creationArguments"]
 
         if len(creation_args) == 0:
@@ -57,21 +55,16 @@ class PlotsLoader(object):
                 "The original plot title was: {}".format(plot_dict["label"]))
             return
 
-        # Make a copy so it can be applied to the axes, of the plot once created.
-        creation_args_copy = copy.deepcopy(creation_args[0])
-
-        # Make initial plot
-        fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
-
-        # If an overplot is necessary plot onto the same figure
-        for cargs in creation_args[0]:
-            if "workspaces" in cargs:
-                workspace_name = cargs.pop('workspaces')
-                workspace = ADS.retrieve(workspace_name)
-                self.plot_func(workspace, ax, ax.figure, cargs)
-
-        # Make sure that the axes gets it's creation_args as loading doesn't add them
-        ax.creation_args = creation_args_copy
+        fig, axes_matrix, _, _ = create_subplots(len(creation_args))
+        axes_list = axes_matrix.flatten().tolist()
+        for ax, cargs_list in zip(axes_list, creation_args):
+            creation_args_copy = copy.deepcopy(cargs_list)
+            for cargs in cargs_list:
+                if "workspaces" in cargs:
+                    workspace_name = cargs.pop("workspaces")
+                    workspace = ADS.retrieve(workspace_name)
+                    self.plot_func(workspace, ax, ax.figure, cargs)
+            ax.creation_args = creation_args_copy
 
         # Update the fig
         fig._label = plot_dict["label"]
@@ -100,10 +93,20 @@ class PlotsLoader(object):
         if "cmap" in creation_arg:
             creation_arg["cmap"] = getattr(matplotlib.cm, creation_arg["cmap"])
 
-        function_dict = {"plot": axes.plot, "scatter": axes.scatter, "errorbar": axes.errorbar,
-                         "pcolor": axes.pcolor, "pcolorfast": axes.pcolorfast, "pcolormesh": pcolormesh,
-                         "imshow": pcolormesh, "contour": axes.contour, "contourf": axes.contourf,
-                         "tripcolor": axes.tripcolor, "tricontour": axes.tricontour, "tricontourf": axes.tricontourf}
+        function_dict = {
+            "plot": axes.plot,
+            "scatter": axes.scatter,
+            "errorbar": axes.errorbar,
+            "pcolor": axes.pcolor,
+            "pcolorfast": axes.pcolorfast,
+            "pcolormesh": pcolormesh,
+            "imshow": pcolormesh,
+            "contour": axes.contour,
+            "contourf": axes.contourf,
+            "tripcolor": axes.tripcolor,
+            "tricontour": axes.tricontour,
+            "tricontourf": axes.tricontourf
+        }
 
         func = function_dict[function_to_call]
         # Plotting is done via an Axes object unless a colorbar needs to be added
@@ -122,6 +125,8 @@ class PlotsLoader(object):
             except IndexError as e:
                 if not self.color_bar_remade:
                     raise IndexError(e)
+            except KeyError:
+                logger.notice("Not adding data to blank axis.")
 
     @staticmethod
     def restore_fig_properties(fig, dic):
@@ -157,12 +162,7 @@ class PlotsLoader(object):
             self.create_text_from_dict(ax, artist)
 
         # Update Legend
-        legend = ax.get_legend()
-        if legend is not None:
-            self.update_legend(ax, dic["legend"])
-        else:
-            ax.legend()
-            self.update_legend(ax, dic["legend"])
+        self.update_legend(ax, dic["legend"])
 
         # Update colorbar if present
         if self.color_bar_remade and dic["colorbar"]["exists"]:
@@ -181,14 +181,16 @@ class PlotsLoader(object):
         ax.text(x=dic["position"][0],
                 y=dic["position"][1],
                 s=dic["text"],
-                fontdict={u'alpha': style_dic["alpha"],
-                          u'color': style_dic["color"],
-                          u'rotation': style_dic["rotation"],
-                          u'fontsize': style_dic["textSize"],
-                          u'zorder': style_dic["zOrder"],
-                          u'usetex': dic["useTeX"],
-                          u'horizontalalignment': style_dic["hAlign"],
-                          u'verticalalignment': style_dic["vAlign"]})
+                fontdict={
+                    u'alpha': style_dic["alpha"],
+                    u'color': style_dic["color"],
+                    u'rotation': style_dic["rotation"],
+                    u'fontsize': style_dic["textSize"],
+                    u'zorder': style_dic["zOrder"],
+                    u'usetex': dic["useTeX"],
+                    u'horizontalalignment': style_dic["hAlign"],
+                    u'verticalalignment': style_dic["vAlign"]
+                })
 
     @staticmethod
     def update_lines(ax, line):
@@ -218,13 +220,12 @@ class PlotsLoader(object):
 
     @staticmethod
     def update_legend(ax, legend):
-        if not legend["exists"]:
+        if not legend["exists"] and ax.get_legend():
             ax.get_legend().remove()
             return
-        ax.legend().set_visible(legend["visible"])
 
-        # Ensure that legend is draggable
-        ax.get_legend().draggable()
+        if legend["exists"]:
+            LegendProperties.create_legend(legend, ax)
 
     def update_properties(self, ax, properties):
         ax.set_position(properties["bounds"])
@@ -243,22 +244,23 @@ class PlotsLoader(object):
         ax.set_yscale(properties["yAxisScale"])
         ax.set_xlim(properties["xLim"])
         ax.set_ylim(properties["yLim"])
+        ax.show_minor_gridlines = properties["showMinorGrid"]
 
     def update_axis(self, axis_, properties):
         if isinstance(axis_, matplotlib.axis.XAxis):
-            if properties["position"] is "top":
+            if properties["position"] == "top":
                 axis_.tick_top()
             else:
                 axis_.tick_bottom()
 
         if isinstance(axis_, matplotlib.axis.YAxis):
-            if properties["position"] is "right":
+            if properties["position"] == "right":
                 axis_.tick_right()
             else:
                 axis_.tick_left()
 
         labels = axis_.get_ticklabels()
-        if properties["fontSize"] is not "":
+        if properties["fontSize"] != "":
             for label in labels:
                 label.set_fontsize(properties["fontSize"])
 
@@ -275,7 +277,8 @@ class PlotsLoader(object):
         grid_dict = properties["gridStyle"]
         grid_lines = axis_.get_gridlines()
         if grid_dict["gridOn"]:
-            axis_._gridOnMajor = True
+            which = 'both' if grid_dict["minorGridOn"] else "major"
+            axis_.axes.grid(True, axis=axis_.axis_name, which=which)
             for grid_line in grid_lines:
                 grid_line.set_alpha(grid_dict["alpha"])
                 grid_line.set_color(grid_dict["color"])
@@ -283,17 +286,19 @@ class PlotsLoader(object):
     @staticmethod
     def update_axis_ticks(axis_, properties):
         # Update Major and Minor Locator
-        if properties["majorTickLocator"] is "FixedLocator":
+        if properties["majorTickLocator"] == "FixedLocator":
             axis_.set_major_locator(ticker.FixedLocator(properties["majorTickLocatorValues"]))
 
-        if properties["minorTickLocator"] is "FixedLocator":
+        if properties["minorTickLocator"] == "FixedLocator":
             axis_.set_minor_locator(ticker.FixedLocator(properties["minorTickLocatorValues"]))
+        elif properties["minorTickLocator"] == "AutoMinorLocator":
+            axis_.set_minor_locator(ticker.AutoMinorLocator())
 
         # Update Major and Minor Formatter
-        if properties["majorTickFormatter"] is "FixedFormatter":
+        if properties["majorTickFormatter"] == "FixedFormatter":
             axis_.set_major_formatter(ticker.FixedFormatter(properties["majorTickFormat"]))
 
-        if properties["minorTickFormatter"] is "FixedFormatter":
+        if properties["minorTickFormatter"] == "FixedFormatter":
             axis_.set_major_formatter(ticker.FixedLocator(properties["minorTickFormat"]))
 
     @staticmethod
@@ -307,8 +312,9 @@ class PlotsLoader(object):
         try:
             image.axes.set_cmap(cm.get_cmap(dic["cmap"]))
         except AttributeError as e:
-            logger.debug("PlotsLoader - The Image accessed did not have an axes with the ability to set the cmap: "
-                         + str(e))
+            logger.debug(
+                "PlotsLoader - The Image accessed did not have an axes with the ability to set the cmap: "
+                + str(e))
 
         # Redraw
         image.axes.figure.canvas.draw()

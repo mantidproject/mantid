@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ADSVALIDATORTEST_H_
-#define MANTID_API_ADSVALIDATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/ADSValidator.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Workspace.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using Mantid::API::ADSValidator;
 using Mantid::API::AnalysisDataService;
@@ -58,14 +57,14 @@ public:
   void test_SingleValue() {
     const std::string wsName = "ADSValidatorTest_w1";
     auto &ads = AnalysisDataService::Instance();
-    ads.addOrReplace(wsName, boost::make_shared<MockWorkspace>());
+    ads.addOrReplace(wsName, std::make_shared<MockWorkspace>());
 
     ADSValidator adsValidator(false);
 
     StringVector sv;
-    sv.push_back(wsName);
+    sv.emplace_back(wsName);
     TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
-    sv.push_back(wsName);
+    sv.emplace_back(wsName);
     TS_ASSERT_DIFFERS(adsValidator.isValid(sv), "");
 
     ads.remove(wsName);
@@ -77,23 +76,23 @@ public:
     const std::string ws3Name = "ADSValidatorTest_w3";
     const std::string wsInvalidName = "ADSValidatorTest_wInvalid";
     auto &ads = AnalysisDataService::Instance();
-    ads.addOrReplace(ws1Name, boost::make_shared<MockWorkspace>());
-    ads.addOrReplace(ws2Name, boost::make_shared<MockWorkspace>());
-    ads.addOrReplace(ws3Name, boost::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws1Name, std::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws2Name, std::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws3Name, std::make_shared<MockWorkspace>());
 
     ADSValidator adsValidator(true);
 
     // all valid options
     StringVector sv;
-    sv.push_back(ws1Name);
+    sv.emplace_back(ws1Name);
     TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
-    sv.push_back(ws2Name);
+    sv.emplace_back(ws2Name);
     TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
-    sv.push_back(ws3Name);
+    sv.emplace_back(ws3Name);
     TS_ASSERT_EQUALS(adsValidator.isValid(sv), "");
 
     // invalid ws in string
-    sv.push_back(wsInvalidName);
+    sv.emplace_back(wsInvalidName);
     TS_ASSERT_DIFFERS(adsValidator.isValid(sv), "");
 
     ads.remove(ws1Name);
@@ -107,9 +106,9 @@ public:
     const std::string ws3Name = "ADSValidatorTest_w3";
     const std::string wsInvalidName = "ADSValidatorTest_wInvalid";
     auto &ads = AnalysisDataService::Instance();
-    ads.addOrReplace(ws1Name, boost::make_shared<MockWorkspace>());
-    ads.addOrReplace(ws2Name, boost::make_shared<MockWorkspace>());
-    ads.addOrReplace(ws3Name, boost::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws1Name, std::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws2Name, std::make_shared<MockWorkspace>());
+    ads.addOrReplace(ws3Name, std::make_shared<MockWorkspace>());
 
     ADSValidator adsValidator(true);
 
@@ -128,5 +127,3 @@ public:
     ads.remove(ws3Name);
   }
 };
-
-#endif /* MANTID_API_ADSVALIDATORTEST_H_ */

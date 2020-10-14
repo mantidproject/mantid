@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOM_DIALOGS_FITDIALOG_H
-#define MANTIDQT_CUSTOM_DIALOGS_FITDIALOG_H
+#pragma once
 
 //------------------------------------------------------------------------------
 // Includes
@@ -24,7 +23,7 @@ namespace MantidQt {
 // Mantid Forward declarations
 //------------------------------------------------------------------------------
 namespace MantidWidgets {
-class MWRunFiles;
+class FileFinderWidget;
 }
 
 namespace CustomDialogs {
@@ -206,5 +205,3 @@ protected:
 };
 } // namespace CustomDialogs
 } // namespace MantidQt
-
-#endif // MANTIDQT_CUSTOM_DIALOGS_FITDIALOG_H

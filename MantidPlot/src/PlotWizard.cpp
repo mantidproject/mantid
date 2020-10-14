@@ -37,7 +37,8 @@
 #include <QGroupBox>
 #include <QListWidget>
 
-PlotWizard::PlotWizard(QWidget *parent, Qt::WFlags fl) : QDialog(parent, fl) {
+PlotWizard::PlotWizard(QWidget *parent, const Qt::WFlags &fl)
+    : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot - Select Columns to Plot"));
 
   setSizeGripEnabled(true);

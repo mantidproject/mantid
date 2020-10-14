@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_REGROUP_H_
-#define MANTID_ALGORITHM_REGROUP_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace HistogramData {
@@ -34,7 +34,7 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 16/07/2008
  */
-class DLLExport Regroup : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL Regroup : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "Regroup"; }
@@ -67,5 +67,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_REGROUP_H_*/

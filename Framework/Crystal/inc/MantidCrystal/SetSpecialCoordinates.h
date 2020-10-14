@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SETSPECIALCOORDINATES_H_
-#define MANTID_CRYSTAL_SETSPECIALCOORDINATES_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 #include <string>
 #include <vector>
 
@@ -22,7 +21,7 @@ namespace Crystal {
   Set the special coordinates on an IMDWorspace or peaksworkspace. Also print
  out any existing special coordinates.
 */
-class DLLExport SetSpecialCoordinates : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SetSpecialCoordinates : public API::Algorithm {
 public:
   SetSpecialCoordinates();
 
@@ -49,17 +48,15 @@ private:
   static const std::string QSampleOption();
   static const std::string HKLOption();
   bool writeCoordinatesToMDEventWorkspace(
-      Mantid::API::Workspace_sptr inWS,
+      const Mantid::API::Workspace_sptr &inWS,
       Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
   bool writeCoordinatesToMDHistoWorkspace(
-      Mantid::API::Workspace_sptr inWS,
+      const Mantid::API::Workspace_sptr &inWS,
       Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
   bool writeCoordinatesToPeaksWorkspace(
-      Mantid::API::Workspace_sptr inWS,
+      const Mantid::API::Workspace_sptr &inWS,
       Mantid::Kernel::SpecialCoordinateSystem coordinateSystem);
 };
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_SETSPECIALCOORDINATES_H_ */

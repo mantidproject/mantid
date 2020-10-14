@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDWIDGETS_PROCESSINGALGOWIDGET_H_
-#define MANTIDWIDGETS_PROCESSINGALGOWIDGET_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/Algorithm.h"
@@ -35,7 +34,7 @@ public:
   /// @return the info string displayed at the top
   QString infoString() { return ui.lblInfo->text(); }
   /// Sets the info string displayed at the top
-  void infoString(QString text) { return ui.lblInfo->setText(text); }
+  void infoString(const QString &text) { return ui.lblInfo->setText(text); }
 
   /// @return true if the script editor is visible
   bool editorVisible() { return ui.editorContainer->isVisible(); }
@@ -56,7 +55,7 @@ public:
   /// @return the text in the script editor
   QString getScriptText();
   /// Set the script editor text
-  void setScriptText(QString text);
+  void setScriptText(const QString &text);
 
   void saveInput();
   /// Sets the AlgorithmInputHistory object recording the algorithm properties
@@ -93,4 +92,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif

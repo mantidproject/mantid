@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_MANTIDQWTWORKSPACESPECTRUMDATA_H_
-#define MANTIDQT_API_MANTIDQWTWORKSPACESPECTRUMDATA_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Plotting/Qwt/QwtWorkspaceSpectrumData.h"
@@ -58,8 +57,7 @@ public:
 
   void test_copy() {
     QwtWorkspaceSpectrumData data1(*ws, 1, false, false);
-    QwtWorkspaceSpectrumData *data2 =
-        dynamic_cast<QwtWorkspaceSpectrumData *>(data1.copy());
+    auto *data2 = dynamic_cast<QwtWorkspaceSpectrumData *>(data1.copy());
     checkHistogramData(*data2, 1.0);
   }
 
@@ -74,5 +72,3 @@ public:
     TS_ASSERT_DELTA(data.e(2), 0.0, 1e-6);
   }
 };
-
-#endif /* MANTIDQT_API_MANTIDQWTWORKSPACESPECTRUMDATA_H_ */

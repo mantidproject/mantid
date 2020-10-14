@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * Helper file to gather common routines to the Loaders
@@ -21,11 +21,6 @@
 
 namespace Mantid {
 namespace DataHandling {
-
-namespace {
-/// static logger
-Kernel::Logger g_log("LoadHelper");
-} // namespace
 
 using namespace Kernel;
 using namespace API;
@@ -119,14 +114,12 @@ double LoadHelper::calculateTOF(double distance, double wavelength) {
  */
 double
 LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &workspace,
-                                  std::string s) {
+                                  const std::string &s) {
   std::vector<std::string> prop =
       workspace->getInstrument()->getStringParameter(s);
   if (prop.empty()) {
-    g_log.debug("Property <" + s + "> doesn't exist!");
     return EMPTY_DBL();
   } else {
-    g_log.debug() << "Property <" + s + "> = " << prop[0] << '\n';
     return boost::lexical_cast<double>(prop[0]);
   }
 }
@@ -140,30 +133,30 @@ LoadHelper::getInstrumentProperty(const API::MatrixWorkspace_sptr &workspace,
  * @param nxfileID    :: Nexus file handle to be parsed, just after an
  *NXopengroup
  * @param runDetails  :: where to add properties
+ * @param entryName :: entry name to load properties from
  *
  */
-void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID,
-                                       API::Run &runDetails) {
+void LoadHelper::addNexusFieldsToWsRun(NXhandle nxfileID, API::Run &runDetails,
+                                       const std::string &entryName) {
   std::string emptyStr; // needed for first call
   int datatype;
   char nxname[NX_MAXNAMELEN], nxclass[NX_MAXNAMELEN];
+  if (!entryName.empty()) {
+    strcpy(nxname, entryName.c_str());
+  }
 
   // As a workaround against some "not so good" old ILL nexus files
   // (ILLIN5_Vana_095893.nxs for example)
-  // we begin the parse on the first entry (entry0). This allow to avoid the
+  // by default we begin the parse on the first entry (entry0),
+  // or from a chosen entryName. This allow to avoid the
   // bogus entries that follows.
 
   NXstatus getnextentry_status =
       NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
   if (getnextentry_status == NX_OK) {
     if ((NXopengroup(nxfileID, nxname, nxclass)) == NX_OK) {
-      if (std::string(nxname) == "entry0") {
-        recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, emptyStr,
-                                        emptyStr, 1 /* level */);
-      } else {
-        g_log.debug() << "Unexpected group name in nexus file : " << nxname
-                      << '\n';
-      }
+      recurseAndAddNexusFieldsToWsRun(nxfileID, runDetails, emptyStr, emptyStr,
+                                      1 /* level */);
       NXclosegroup(nxfileID);
     }
   }
@@ -206,9 +199,6 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
     getnextentry_status = NXgetnextentry(nxfileID, nxname, nxclass, &datatype);
 
     if (getnextentry_status == NX_OK) {
-      g_log.debug() << indent_str << parent_name << "." << nxname << " ; "
-                    << nxclass << '\n';
-
       NXstatus opengroup_status;
       NXstatus opendata_status;
       NXstatus getinfo_status;
@@ -230,35 +220,17 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
         NXclosegroup(nxfileID);
       } // if(NXopengroup
       else if ((opendata_status = NXopendata(nxfileID, nxname)) == NX_OK) {
-        // dump_attributes(nxfileID, indent_str);
-        g_log.debug() << indent_str << nxname << " opened.\n";
-
-        if (parent_class == "NXData" || parent_class == "NXMonitor" ||
-            std::string(nxname) == "data") {
-          g_log.debug() << indent_str << "skipping " << parent_class << " ("
-                        << nxname << ")\n";
-          /* nothing */
-        } else { // create a property
+        if (parent_class != "NXData" && parent_class != "NXMonitor" &&
+            std::string(nxname) != "data") { // create a property
           int rank = 0;
           int dims[4] = {0, 0, 0, 0};
           int type;
 
           std::string property_name =
               (parent_name.empty() ? nxname : parent_name + "." + nxname);
-
-          g_log.debug() << indent_str << "considering property "
-                        << property_name << '\n';
-
           // Get the value
           if ((getinfo_status = NXgetinfo(nxfileID, &rank, dims, &type)) ==
               NX_OK) {
-
-            g_log.debug() << indent_str << "Rank of " << property_name << " is "
-                          << rank << "\n"
-                          << indent_str << "Dimensions are " << dims[0] << ", "
-                          << dims[1] << ", " << dims[2] << ", " << dims[3]
-                          << "\n";
-
             // Note, we choose to only build properties on small float arrays
             // filter logic is below
             bool build_small_float_array = false; // default
@@ -268,25 +240,16 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
               if ((rank == 1) && (dims[0] <= 9)) {
                 build_small_float_array = true;
               } else {
-                g_log.debug() << indent_str
-                              << "ignored multi dimensional number "
-                                 "data with more than 10 elements "
-                              << property_name << '\n';
                 read_property = false;
               }
             } else if (type != NX_CHAR) {
               if ((rank > 1) || (dims[0] > 1) || (dims[1] > 1) ||
                   (dims[2] > 1) || (dims[3] > 1)) {
-                g_log.debug()
-                    << indent_str << "ignored non-scalar numeric data on "
-                    << property_name << '\n';
                 read_property = false;
               }
             } else {
               if ((rank > 1) || (dims[1] > 1) || (dims[2] > 1) ||
                   (dims[3] > 1)) {
-                g_log.debug() << indent_str << "ignored string array data on "
-                              << property_name << '\n';
                 read_property = false;
               }
             }
@@ -320,11 +283,6 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
                   char unitsAttrName[] = "units";
                   units_status = NXgetattr(nxfileID, unitsAttrName, units_sbuf,
                                            &units_len, &units_type);
-                  if (units_status != NX_ERROR) {
-                    g_log.debug() << indent_str << "[ " << property_name
-                                  << " has unit " << units_sbuf << " ]\n";
-                  }
-
                   if ((type == NX_FLOAT32) || (type == NX_FLOAT64)) {
                     // Mantid numerical properties are double only.
                     double property_double_value = 0.0;
@@ -392,41 +350,20 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
                       runDetails.addProperty(property_name, property_int_value);
 
                   } // if (type==...
-
-                } else {
-                  g_log.debug() << indent_str << "unexpected data on "
-                                << property_name << '\n';
-                } // test on nxdata type
-
-              } else {
-                g_log.debug() << indent_str << "could not read the value of "
-                              << property_name << '\n';
+                }
               }
-
               NXfree(&dataBuffer);
               dataBuffer = nullptr;
             }
 
           } // if NXgetinfo OK
-          else {
-            g_log.debug() << indent_str << "unexpected status ("
-                          << getinfo_status << ") on " << nxname << '\n';
-          }
-
-        } // if (parent_class == "NXData" || parent_class == "NXMonitor") else
+        }   // if (parent_class == "NXData" || parent_class == "NXMonitor") else
 
         NXclosedata(nxfileID);
-      } else {
-        g_log.debug() << indent_str << "unexpected status (" << opendata_status
-                      << ") on " << nxname << '\n';
       }
-
     } else if (getnextentry_status == NX_EOD) {
-      g_log.debug() << indent_str << "End of Dir\n";
       has_entry = false; // end of loop
     } else {
-      g_log.debug() << indent_str << "unexpected status ("
-                    << getnextentry_status << ")\n";
       has_entry = false; // end of loop
     }
 
@@ -438,11 +375,9 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
  * Show attributes attached to the current Nexus entry
  *
  * @param nxfileID The Nexus entry
- * @param indentStr Indent spaces do display nexus entries as a tree
  *
  */
-void LoadHelper::dumpNexusAttributes(NXhandle nxfileID,
-                                     std::string &indentStr) {
+void LoadHelper::dumpNexusAttributes(NXhandle nxfileID) {
   // Attributes
   NXname pName;
   int iLength, iType;
@@ -450,14 +385,12 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID,
   int rank;
   int dims[4];
 #endif
-  int nbuff = 127;
-  boost::shared_array<char> buff(new char[nbuff + 1]);
+  std::vector<char> buff(128);
 
 #ifdef NEXUS43
   while (NXgetnextattr(nxfileID, pName, &iLength, &iType) != NX_EOD) {
 #else
   while (NXgetnextattra(nxfileID, pName, &rank, dims, &iType) != NX_EOD) {
-    g_log.debug() << indentStr << '@' << pName << " = ";
     if (rank > 1) { // mantid only supports single value attributes
       throw std::runtime_error(
           "Encountered attribute with multi-dimensional array value");
@@ -470,31 +403,26 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID,
 
     switch (iType) {
     case NX_CHAR: {
-      if (iLength > nbuff + 1) {
-        nbuff = iLength;
-        buff.reset(new char[nbuff + 1]);
+      if (iLength > static_cast<int>(buff.size())) {
+        buff.resize(iLength);
       }
       int nz = iLength + 1;
-      NXgetattr(nxfileID, pName, buff.get(), &nz, &iType);
-      g_log.debug() << indentStr << buff.get() << '\n';
+      NXgetattr(nxfileID, pName, buff.data(), &nz, &iType);
       break;
     }
     case NX_INT16: {
       short int value;
       NXgetattr(nxfileID, pName, &value, &iLength, &iType);
-      g_log.debug() << indentStr << value << '\n';
       break;
     }
     case NX_INT32: {
       int value;
       NXgetattr(nxfileID, pName, &value, &iLength, &iType);
-      g_log.debug() << indentStr << value << '\n';
       break;
     }
     case NX_UINT16: {
       short unsigned int value;
       NXgetattr(nxfileID, pName, &value, &iLength, &iType);
-      g_log.debug() << indentStr << value << '\n';
       break;
     }
     } // switch
@@ -509,7 +437,7 @@ void LoadHelper::dumpNexusAttributes(NXhandle nxfileID,
  *  @param dateToParse :: date as string
  *  @return date as required in Mantid
  */
-std::string LoadHelper::dateTimeInIsoFormat(std::string dateToParse) {
+std::string LoadHelper::dateTimeInIsoFormat(const std::string &dateToParse) {
   namespace bt = boost::posix_time;
   // parsing format
   const std::locale format = std::locale(
@@ -535,7 +463,7 @@ std::string LoadHelper::dateTimeInIsoFormat(std::string dateToParse) {
  * @param componentName The name of the component of the instrument
  * @param newPos New position of the component
  */
-void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws,
+void LoadHelper::moveComponent(const API::MatrixWorkspace_sptr &ws,
                                const std::string &componentName,
                                const V3D &newPos) {
   Geometry::IComponent_const_sptr component =
@@ -557,7 +485,7 @@ void LoadHelper::moveComponent(API::MatrixWorkspace_sptr ws,
  * @param rot Rotations defined by setting a quaternion from an angle in degrees
  * and an axis
  */
-void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws,
+void LoadHelper::rotateComponent(const API::MatrixWorkspace_sptr &ws,
                                  const std::string &componentName,
                                  const Kernel::Quat &rot) {
   Geometry::IComponent_const_sptr component =
@@ -578,7 +506,7 @@ void LoadHelper::rotateComponent(API::MatrixWorkspace_sptr ws,
  * @param componentName The Name of the component of the instrument
  * @return The position of the component
  */
-V3D LoadHelper::getComponentPosition(API::MatrixWorkspace_sptr ws,
+V3D LoadHelper::getComponentPosition(const API::MatrixWorkspace_sptr &ws,
                                      const std::string &componentName) {
   Geometry::IComponent_const_sptr component =
       ws->getInstrument()->getComponentByName(componentName);

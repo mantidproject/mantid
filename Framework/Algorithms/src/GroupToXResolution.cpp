@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GroupToXResolution.h"
 
@@ -51,11 +51,11 @@ const std::string GroupToXResolution::summary() const {
 /** Initialize the algorithm's properties.
  */
 void GroupToXResolution::init() {
-  auto inputValidator = boost::make_shared<Kernel::CompositeValidator>();
-  inputValidator->add(boost::make_shared<API::WorkspaceHasDxValidator>());
+  auto inputValidator = std::make_shared<Kernel::CompositeValidator>();
+  inputValidator->add(std::make_shared<API::WorkspaceHasDxValidator>());
   constexpr bool acceptHistograms{false};
   inputValidator->add(
-      boost::make_shared<API::HistogramValidator>(acceptHistograms));
+      std::make_shared<API::HistogramValidator>(acceptHistograms));
   declareProperty(
       std::make_unique<API::WorkspaceProperty<>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input, inputValidator),
@@ -63,7 +63,7 @@ void GroupToXResolution::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       Prop::OUTPUT_WS, "", Kernel::Direction::Output),
                   "The grouped workspace.");
-  auto positive = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto positive = std::make_shared<Kernel::BoundedValidator<double>>();
   positive->setLower(0.);
   positive->setLowerExclusive(true);
   declareProperty(Prop::FRACTION, 0.2, positive,

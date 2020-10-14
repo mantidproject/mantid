@@ -1,5 +1,4 @@
-#ifndef GLOBALS_H
-#define GLOBALS_H
+#pragma once
 /***************************************************************************
     File                 : globals.h
     Project              : QtiPlot
@@ -42,5 +41,3 @@ extern const char *extra_version;
 extern const char *copyright_string;
 /// Release date as a string
 extern const char *release_date;
-
-#endif /* GLOBALS_H */

@@ -1,22 +1,28 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Colors.h"
+#include "MantidPythonInterface/core/Converters/ToPyList.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+
 #include <boost/optional.hpp>
+
+#include <algorithm>
+#include <numeric>
 #include <tuple>
 
-using Mantid::PythonInterface::GlobalInterpreterLock;
-using Mantid::PythonInterface::PythonException;
 using boost::none;
 using boost::optional;
+using Mantid::PythonInterface::GlobalInterpreterLock;
+using Mantid::PythonInterface::PythonException;
 
 using OptionalTupleDouble = optional<std::tuple<double, double>>;
 
+using namespace Mantid::PythonInterface;
 using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
@@ -173,8 +179,16 @@ Python::Object SymLogNorm::tickLocator() const {
   // Create log transform with base=10
   auto transform = scaleModule().attr("SymmetricalLogTransform")(
       10, Python::Object(pyobj().attr("linthresh")), m_linscale);
+
+  // Sets the subs parameter to be [1,2,...,10]. The parameter determines where
+  // the ticks on the colorbar are placed and setting it to this ensures that
+  // any range of values will have ticks.
+  std::vector<float> subsVector(10);
+  std::iota(subsVector.begin(), subsVector.end(), 1.f);
+  auto subs = Converters::ToPyList<float>()(subsVector);
+
   return Python::Object(
-      tickerModule().attr("SymmetricalLogLocator")(transform));
+      tickerModule().attr("SymmetricalLogLocator")(transform, subs));
 }
 
 /**
@@ -183,7 +197,7 @@ Python::Object SymLogNorm::tickLocator() const {
  */
 Python::Object SymLogNorm::labelFormatter() const {
   GlobalInterpreterLock lock;
-  return Python::Object(tickerModule().attr("LogFormatterMathtext")());
+  return Python::Object(tickerModule().attr("LogFormatterSciNotation")());
 }
 
 // ------------------------ PowerNorm ------------------------------------------
@@ -204,6 +218,15 @@ PowerNorm::PowerNorm(double gamma) : NormalizeBase(createPowerNorm(gamma)) {}
  */
 PowerNorm::PowerNorm(double gamma, double vmin, double vmax)
     : NormalizeBase(createPowerNorm(gamma, std::make_tuple(vmin, vmax))) {}
+
+std::tuple<double, double>
+PowerNorm::autoscale(std::tuple<double, double> clim) {
+  // Clipping was removed in matplotlib v3.2.0rc2 (Upstream PR #10234) so
+  // autoscale will now map [-x,y] -> [0,1] which causes weird color bar scales
+  // We now manually clamp min value to 0 so we map from [0,n]->[0,1]
+  std::get<0>(clim) = std::max(0., std::get<0>(clim));
+  return NormalizeBase::autoscale(clim);
+}
 
 } // namespace MplCpp
 } // namespace Widgets

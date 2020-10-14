@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef MANTID_CUSTOMINTERFACES_IBATCHVIEW_H_
-#define MANTID_CUSTOMINTERFACES_IBATCHVIEW_H_
+#pragma once
 #include "Common/DllConfig.h"
 #include "MantidQtWidgets/Common/Batch/IJobTreeView.h"
 
@@ -17,14 +15,14 @@ namespace ISISReflectometry {
 class RunsTableViewSubscriber
     : public MantidQt::MantidWidgets::Batch::JobTreeViewSubscriber {
 public:
-  virtual void notifyReductionResumed() = 0;
-  virtual void notifyReductionPaused() = 0;
+  virtual void notifyResumeReductionRequested() = 0;
+  virtual void notifyPauseReductionRequested() = 0;
   virtual void notifyInsertRowRequested() = 0;
   virtual void notifyInsertGroupRequested() = 0;
   virtual void notifyDeleteRowRequested() = 0;
   virtual void notifyDeleteGroupRequested() = 0;
   virtual void notifyFilterChanged(std::string const &filterValue) = 0;
-  virtual void notifyInstrumentChanged() = 0;
+  virtual void notifyChangeInstrumentRequested() = 0;
   virtual void notifyExpandAllRequested() = 0;
   virtual void notifyCollapseAllRequested() = 0;
   virtual void notifyPlotSelectedPressed() = 0;
@@ -85,4 +83,3 @@ public:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_IBATCHVIEW_H_

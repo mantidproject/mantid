@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -74,7 +74,7 @@ boost::python::list runningInstancesOf(AlgorithmManagerImpl &self,
     // boost 1.41 (RHEL6) can't handle registering IAlgorithm_const_sptr so we
     // have to cast to IAlgorithm_sptr and then convert to Python
     // The constness is pretty-irrelevant by this point anyway
-    algs.append(boost::const_pointer_cast<IAlgorithm>(mgrAlg));
+    algs.append(std::const_pointer_cast<IAlgorithm>(mgrAlg));
   }
 
   return algs;
@@ -109,16 +109,10 @@ void export_AlgorithmManager() {
                                      "Creates an unmanaged algorithm."))
       .def("size", &AlgorithmManagerImpl::size, arg("self"),
            "Returns the number of managed algorithms")
-      .def("setMaxAlgorithms", &AlgorithmManagerImpl::setMaxAlgorithms,
-           (arg("self"), arg("n")),
-           "Set the maximum number of allowed managed algorithms")
       .def("getAlgorithm", &getAlgorithm, (arg("self"), arg("id_holder")),
            "Return the algorithm instance identified by the given id.")
       .def("removeById", &removeById, (arg("self"), arg("id_holder")),
            "Remove an algorithm from the managed list")
-      .def("newestInstanceOf", &AlgorithmManagerImpl::newestInstanceOf,
-           (arg("self"), arg("algorithm_name")),
-           "Returns the newest created instance of the named algorithm")
       .def("runningInstancesOf", &runningInstancesOf,
            (arg("self"), arg("algorithm_name")),
            "Returns a list of managed algorithm instances that are "

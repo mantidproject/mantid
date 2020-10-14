@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_MDHISTOWORKSPACETEST_H_
-#define MANTID_DATAOBJECTS_MDHISTOWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IMDIterator.h"
@@ -38,7 +37,7 @@ class MDHistoWorkspaceTest : public CxxTest::TestSuite {
 private:
   /// Helper function to return the number of masked bins in a workspace. TODO:
   /// move helper into test helpers
-  size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws) {
+  size_t getNumberMasked(const Mantid::API::IMDWorkspace_sptr &ws) {
     auto it = ws->createIterator(nullptr);
     size_t numberMasked = 0;
     size_t counter = 0;
@@ -94,7 +93,7 @@ public:
   }
 
   /** Check that a workspace has the right signal/error*/
-  void checkWorkspace(MDHistoWorkspace_sptr ws, double expectedSignal,
+  void checkWorkspace(const MDHistoWorkspace_sptr &ws, double expectedSignal,
                       double expectedErrorSquared,
                       double expectedNumEvents = 1.0) {
     for (size_t i = 0; i < ws->getNPoints(); i++) {
@@ -221,7 +220,7 @@ public:
     std::vector<MDHistoDimension_sptr> dimensions;
     Mantid::Geometry::GeneralFrame frame("m", "m");
     for (size_t i = 0; i < 7; i++) {
-      dimensions.push_back(MDHistoDimension_sptr(
+      dimensions.emplace_back(MDHistoDimension_sptr(
           new MDHistoDimension("Dim", "Dim", frame, -10, 10, 3)));
     }
 
@@ -441,6 +440,8 @@ public:
         new MDHistoDimension("T", "t", frame, -10, 10, 10));
 
     MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
+    TSM_ASSERT_EQUALS("Only 3 of the 4 dimensions should be non-integrated",
+                      ws.getNumNonIntegratedDims(), 3);
     Mantid::Geometry::VecIMDDimension_const_sptr vecNonIntegratedDims =
         ws.getNonIntegratedDimensions();
     TSM_ASSERT_EQUALS("Only 3 of the 4 dimensions should be non-integrated", 3,
@@ -561,10 +562,10 @@ public:
 
     std::vector<coord_t> min;
     std::vector<coord_t> max;
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(5);
-    max.push_back(5);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(5.f);
+    max.emplace_back(5.f);
 
     // Mask part of the workspace
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -982,12 +983,12 @@ public:
     std::vector<coord_t> max;
 
     // Make the box that covers the whole workspace.
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(10);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
 
     // Create an function that encompases ALL of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -1114,12 +1115,12 @@ public:
     std::vector<coord_t> max;
 
     // Make the box that covers half the bins in the workspace.
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(10);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
 
     // Create an function that encompases ALL of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -1131,12 +1132,12 @@ public:
     std::vector<coord_t> max;
 
     // Make the box that covers half the bins in the workspace.
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(4.99f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
+    max.emplace_back(4.99f);
 
     // Create an function that encompases 1/2 of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -1147,12 +1148,12 @@ public:
     // Create a function that masks everything.
     std::vector<coord_t> min;
     std::vector<coord_t> max;
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(10);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
     MDEventWorkspace3Lean::sptr ws =
@@ -1179,11 +1180,11 @@ public:
     Mantid::coord_t min = 0;
     Mantid::coord_t max = 10;
     size_t bins = 2;
-    auto dimension1 = boost::make_shared<MDHistoDimension>(
+    auto dimension1 = std::make_shared<MDHistoDimension>(
         "QSampleX", "QSampleX", frame1, min, max, bins);
-    auto dimension2 = boost::make_shared<MDHistoDimension>(
+    auto dimension2 = std::make_shared<MDHistoDimension>(
         "QSampleY", "QSampleY", frame2, min, max, bins);
-    auto ws = boost::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
+    auto ws = std::make_shared<Mantid::DataObjects::MDHistoWorkspace>(
         dimension1, dimension2);
 
     // Act
@@ -1280,5 +1281,3 @@ public:
     TS_ASSERT_EQUALS(wsCastConst, wsCastNonConst);
   }
 };
-
-#endif /* MANTID_DATAOBJECTS_MDHISTOWORKSPACETEST_H_ */

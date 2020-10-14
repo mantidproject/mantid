@@ -1,30 +1,19 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_PEAKSPACE_H_
-#define MANTID_DATAOBJECTS_PEAKSPACE_H_ 1
+#pragma once
 
-#include "MantidAPI/Column.h"
-#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakColumn.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
-#include <boost/optional.hpp>
-#include <string>
-#include <utility>
-#include <vector>
 
 // IsamplePosition should be IsampleOrientation
 namespace Mantid {
@@ -44,12 +33,17 @@ namespace DataObjects {
     @author Ruth Mikkelson, SNS ORNL
     @date 3/10/2010
  */
-class DLLExport PeaksWorkspace : public Mantid::API::IPeaksWorkspace {
+class MANTID_DATAOBJECTS_DLL PeaksWorkspace
+    : public Mantid::API::IPeaksWorkspace {
+public:
+  using ColumnAndDirection = std::pair<std::string, bool>;
+
 public:
   const std::string id() const override { return "PeaksWorkspace"; }
 
   PeaksWorkspace();
   PeaksWorkspace &operator=(const PeaksWorkspace &other) = delete;
+
   /** Get access to shared pointer containing workspace porperties. This
    function is there to provide common interface of iTableWorkspace
     * Despite it is non-constant method, one should be very carefull using it to
@@ -93,7 +87,7 @@ public:
   Peak &getPeak(int peakNum) override;
   const Peak &getPeak(int peakNum) const override;
 
-  Geometry::IPeak *createPeak(
+  std::unique_ptr<Geometry::IPeak> createPeak(
       const Kernel::V3D &QLabFrame,
       boost::optional<double> detectorDistance = boost::none) const override;
 
@@ -104,7 +98,8 @@ public:
   std::vector<std::pair<std::string, std::string>>
   peakInfo(const Kernel::V3D &qFrame, bool labCoords) const override;
 
-  Peak *createPeakHKL(const Kernel::V3D &HKL) const override;
+  std::unique_ptr<Geometry::IPeak>
+  createPeakHKL(const Kernel::V3D &HKL) const override;
 
   int peakInfoNumber(const Kernel::V3D &qFrame, bool labCoords) const override;
 
@@ -136,13 +131,13 @@ public:
   size_t rowCount() const override { return getNumberPeaks(); }
 
   /// Gets the shared pointer to a column by name.
-  boost::shared_ptr<Mantid::API::Column>
+  std::shared_ptr<Mantid::API::Column>
   getColumn(const std::string &name) override {
     return getColumn(getColumnIndex(name));
   }
 
   /// Gets the shared pointer to a column by name.
-  boost::shared_ptr<const Mantid::API::Column>
+  std::shared_ptr<const Mantid::API::Column>
   getColumn(const std::string &name) const override {
     return getColumn(getColumnIndex(name));
   }
@@ -151,7 +146,7 @@ public:
   virtual size_t getColumnIndex(const std::string &name) const;
 
   /// Gets the shared pointer to a column by index.
-  boost::shared_ptr<Mantid::API::Column> getColumn(size_t index) override;
+  std::shared_ptr<Mantid::API::Column> getColumn(size_t index) override;
 
   /// Gets the shared pointer to a column by index - return none-modifyable
   /// column.
@@ -186,7 +181,8 @@ private:
   /// Adds a new PeakColumn of the given type
   void addPeakColumn(const std::string &name);
   /// Create a peak from a QSample position
-  Peak *createPeakQSample(const Kernel::V3D &position) const;
+  std::unique_ptr<Geometry::IPeak>
+  createPeakQSample(const Kernel::V3D &position) const;
 
   // ====================================== ITableWorkspace Methods
   // ==================================
@@ -271,7 +267,7 @@ private:
   std::vector<Peak> peaks;
 
   /** Column shared pointers. */
-  std::vector<boost::shared_ptr<Mantid::DataObjects::PeakColumn>> columns;
+  std::vector<std::shared_ptr<Mantid::DataObjects::PeakColumn>> columns;
 
   /** Column names */
   std::vector<std::string> columnNames;
@@ -281,10 +277,9 @@ private:
 };
 
 /// Typedef for a shared pointer to a peaks workspace.
-using PeaksWorkspace_sptr = boost::shared_ptr<PeaksWorkspace>;
+using PeaksWorkspace_sptr = std::shared_ptr<PeaksWorkspace>;
 
 /// Typedef for a shared pointer to a const peaks workspace.
-using PeaksWorkspace_const_sptr = boost::shared_ptr<const PeaksWorkspace>;
+using PeaksWorkspace_const_sptr = std::shared_ptr<const PeaksWorkspace>;
 } // namespace DataObjects
 } // namespace Mantid
-#endif

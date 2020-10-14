@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_EQUALBINSIZESVALIDATORTEST_H_
-#define MANTID_API_EQUALBINSIZESVALIDATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -30,7 +29,7 @@ public:
 
   void test_noBins() {
     using namespace Mantid::HistogramData;
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(1, 1, 1);
     ws->setHistogram(0, Points(0), Counts(0));
     EqualBinSizesValidator val(0.1);
@@ -38,7 +37,7 @@ public:
   }
 
   void test_noCommonBins() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 3, 3);
     Mantid::MantidVec xData{1, 2, 3};
     ws->setPoints(1, xData);
@@ -49,14 +48,14 @@ public:
   }
 
   void test_equalBinSizes() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(1, 3, 3);
     EqualBinSizesValidator val(0.1);
     TS_ASSERT_EQUALS(val.isValid(ws), "");
   }
 
   void test_unequalBinSizes() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(1, 3, 3);
     Mantid::MantidVec xData{1, 2, 5};
     ws->setPoints(0, xData);
@@ -66,5 +65,3 @@ public:
         "X axis must be linear (all bins must have the same width)");
   }
 };
-
-#endif /* MANTID_API_EQUALBINSIZESVALIDATORTEST_H_ */

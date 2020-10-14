@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_MDGEOMETRYTEST_H_
-#define MANTID_API_MDGEOMETRYTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -37,11 +36,12 @@ public:
     const Mantid::Geometry::QSample frame;
     IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 10));
     IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", frame, -1, +1, 20));
-    dims.push_back(dim1);
-    dims.push_back(dim2);
+    dims.emplace_back(dim1);
+    dims.emplace_back(dim2);
     g.initGeometry(dims);
 
     TS_ASSERT_EQUALS(g.getNumDims(), 2);
+    TS_ASSERT_EQUALS(g.getNumNonIntegratedDims(), 2);
     TS_ASSERT_EQUALS(g.getDimension(0)->getName(), "Qx");
     TS_ASSERT_EQUALS(g.getDimension(1)->getName(), "Qy");
     // Now set the basis vectors
@@ -81,10 +81,8 @@ public:
 
   void test_clear_original_workspaces() {
     MDGeometry geometry;
-    boost::shared_ptr<WorkspaceTester> ws0 =
-        boost::make_shared<WorkspaceTester>();
-    boost::shared_ptr<WorkspaceTester> ws1 =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws0 = std::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws1 = std::make_shared<WorkspaceTester>();
     geometry.setOriginalWorkspace(ws0, 0);
     geometry.setOriginalWorkspace(ws1, 1);
     TS_ASSERT_EQUALS(2, geometry.numOriginalWorkspaces());
@@ -98,16 +96,14 @@ public:
     const Mantid::Geometry::QSample frame;
     IMDDimension_sptr dim0(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 0));
     IMDDimension_sptr dim1(new MDHistoDimension("Qy", "Qy", frame, -1, +1, 0));
-    dims.push_back(dim0);
-    dims.push_back(dim1);
+    dims.emplace_back(dim0);
+    dims.emplace_back(dim1);
     g.initGeometry(dims);
     g.setBasisVector(0, VMD(1.2, 3.4));
     g.setBasisVector(1, VMD(1.2, 3.4));
     g.setOrigin(VMD(4, 5));
-    boost::shared_ptr<WorkspaceTester> ws0 =
-        boost::make_shared<WorkspaceTester>();
-    boost::shared_ptr<WorkspaceTester> ws1 =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws0 = std::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws1 = std::make_shared<WorkspaceTester>();
     g.setOriginalWorkspace(ws0, 0);
     g.setOriginalWorkspace(ws1, 1);
     g.setTransformFromOriginal(new NullCoordTransform(5), 0);
@@ -119,6 +115,7 @@ public:
     MDGeometry g2(g);
 
     TS_ASSERT_EQUALS(g2.getNumDims(), 2);
+    TS_ASSERT_EQUALS(g2.getNumNonIntegratedDims(), 2);
     TS_ASSERT_EQUALS(g2.getBasisVector(0), VMD(1.2, 3.4));
     TS_ASSERT_EQUALS(g2.getBasisVector(1), VMD(1.2, 3.4));
     TS_ASSERT_EQUALS(g2.getOrigin(), VMD(4, 5));
@@ -156,6 +153,7 @@ public:
         new MDHistoDimension("Qy", "Qy", frame, -1, +1, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim2);)
     TS_ASSERT_EQUALS(g.getNumDims(), 2);
+    TS_ASSERT_EQUALS(g.getNumNonIntegratedDims(), 2);
     TS_ASSERT_EQUALS(g.getDimension(0)->getName(), "Qx");
     TS_ASSERT_EQUALS(g.getDimension(1)->getName(), "Qy");
     TS_ASSERT_EQUALS(g.getDimensionIndexByName("Qx"), 0);
@@ -173,8 +171,8 @@ public:
         new MDHistoDimension("Qy", "Qy", frame, -2, +2, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim2);)
     TS_ASSERT_EQUALS(g.getNumDims(), 2);
-    boost::shared_ptr<WorkspaceTester> ws =
-        boost::make_shared<WorkspaceTester>();
+    TS_ASSERT_EQUALS(g.getNumNonIntegratedDims(), 2);
+    std::shared_ptr<WorkspaceTester> ws = std::make_shared<WorkspaceTester>();
     g.setOriginalWorkspace(ws);
     TS_ASSERT(g.hasOriginalWorkspace());
 
@@ -197,7 +195,7 @@ public:
     TS_ASSERT_DELTA(g.getDimension(1)->getMaximum(), +5., 1e-4);
 
     // Bad size throws
-    scaling.push_back(123);
+    scaling.emplace_back(123);
     TS_ASSERT_THROWS_ANYTHING(g.transformDimensions(scaling, offset));
   }
 
@@ -210,8 +208,7 @@ public:
   void test_OriginalWorkspace() {
     MDGeometry g;
     TS_ASSERT(!g.hasOriginalWorkspace());
-    boost::shared_ptr<WorkspaceTester> ws =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws = std::make_shared<WorkspaceTester>();
     g.setOriginalWorkspace(ws);
     TS_ASSERT(g.hasOriginalWorkspace());
   }
@@ -219,10 +216,8 @@ public:
   void test_OriginalWorkspace_multiple() {
     MDGeometry g;
     TS_ASSERT(!g.hasOriginalWorkspace());
-    boost::shared_ptr<WorkspaceTester> ws0 =
-        boost::make_shared<WorkspaceTester>();
-    boost::shared_ptr<WorkspaceTester> ws1 =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws0 = std::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws1 = std::make_shared<WorkspaceTester>();
     g.setOriginalWorkspace(ws0);
     g.setOriginalWorkspace(ws1, 1);
     TS_ASSERT(g.hasOriginalWorkspace());
@@ -236,8 +231,7 @@ public:
   void test_OriginalWorkspace_gets_deleted() {
     MDGeometry g;
     {
-      boost::shared_ptr<WorkspaceTester> ws =
-          boost::make_shared<WorkspaceTester>();
+      std::shared_ptr<WorkspaceTester> ws = std::make_shared<WorkspaceTester>();
       AnalysisDataService::Instance().addOrReplace("MDGeometryTest_originalWS",
                                                    ws);
       g.setOriginalWorkspace(ws);
@@ -247,8 +241,7 @@ public:
     TS_ASSERT(g.getOriginalWorkspace())
 
     // Create a different workspace and delete that
-    boost::shared_ptr<WorkspaceTester> ws2 =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws2 = std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("MDGeometryTest_some_other_ws",
                                                  ws2);
     AnalysisDataService::Instance().remove("MDGeometryTest_some_other_ws");
@@ -285,8 +278,8 @@ public:
     const Mantid::Geometry::QSample frame;
     IMDDimension_sptr dim1(new MDHistoDimension("Qx", "Qx", frame, -1, +1, 10));
     IMDDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", frame, -1, +1, 20));
-    dims.push_back(dim1);
-    dims.push_back(dim2);
+    dims.emplace_back(dim1);
+    dims.emplace_back(dim2);
     geometry.initGeometry(dims);
 
     //  Both basis vectors are not normalized
@@ -307,5 +300,3 @@ public:
                geometry.allBasisNormalized());
   }
 };
-
-#endif /* MANTID_API_MDGEOMETRYTEST_H_ */

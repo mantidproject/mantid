@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VTK_MD_QUAD_FACTORY_TEST
-#define VTK_MD_QUAD_FACTORY_TEST
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -46,7 +45,7 @@ public:
     factory.setSuccessor(std::move(uniqueSuccessor));
 
     ITableWorkspace_sptr ws =
-        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+        std::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
 
     TSM_ASSERT("Successor has not been used properly.",
@@ -69,7 +68,7 @@ public:
     factory.setSuccessor(std::move(uniqueSuccessor));
 
     ITableWorkspace_sptr ws =
-        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+        std::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(factory.initialize(ws));
     TS_ASSERT_THROWS_NOTHING(factory.create(progressUpdate));
 
@@ -80,7 +79,7 @@ public:
   void testOnInitaliseCannotDelegateToSuccessor() {
     vtkMDQuadFactory factory(Mantid::VATES::VolumeNormalization);
     ITableWorkspace_sptr ws =
-        boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+        std::make_shared<Mantid::DataObjects::TableWorkspace>();
     TS_ASSERT_THROWS(factory.initialize(ws), const std::runtime_error &);
   }
 
@@ -100,7 +99,7 @@ public:
     EXPECT_CALL(mockProgressAction, eventRaised(AllOf(Le(100), Ge(0))))
         .Times(AtLeast(1));
 
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
         Mantid::DataObjects::MDEvent<2>, 2>>
         ws = MDEventsTestHelper::makeMDEWFull<2>(10, 10, 10, 10);
 
@@ -142,7 +141,7 @@ class vtkMDQuadFactoryTestPerformance : public CxxTest::TestSuite {
 
 public:
   void setUp() override {
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<
         Mantid::DataObjects::MDEvent<2>, 2>>
         input = MDEventsTestHelper::makeMDEWFull<2>(10, 10, 10, 1000);
     // Rebin it to make it possible to compare cells to bins.
@@ -175,5 +174,3 @@ public:
     TS_ASSERT_EQUALS(640000, product->GetNumberOfPoints());
   }
 };
-
-#endif

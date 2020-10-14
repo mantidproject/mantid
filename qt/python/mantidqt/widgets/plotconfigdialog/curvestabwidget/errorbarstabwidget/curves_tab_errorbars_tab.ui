@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>391</width>
+    <width>416</width>
     <height>274</height>
    </rect>
   </property>
@@ -28,97 +28,28 @@
      <property name="topMargin">
       <number>5</number>
      </property>
-     <item row="3" column="0">
-      <widget class="QLabel" name="draw_style_label_3">
-       <property name="text">
-        <string>Capsize</string>
+     <item row="6" column="2">
+      <widget class="QPushButton" name="apply_to_all_button">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
-      </widget>
-     </item>
-     <item row="2" column="2">
-      <widget class="QDoubleSpinBox" name="width_spin_box">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-         <horstretch>190</horstretch>
-         <verstretch>20</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>190</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="decimals">
-        <number>2</number>
-       </property>
-       <property name="value">
-        <double>1.500000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="2">
-      <widget class="QDoubleSpinBox" name="cap_thickness_spin_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
        <property name="minimumSize">
         <size>
-         <width>190</width>
+         <width>200</width>
          <height>20</height>
         </size>
        </property>
-       <property name="decimals">
-        <number>2</number>
-       </property>
-       <property name="value">
-        <double>1.500000000000000</double>
-       </property>
-      </widget>
-     </item>
-     <item row="4" column="0">
-      <widget class="QLabel" name="width_label_3">
        <property name="text">
-        <string>Cap Thickness</string>
+        <string>Apply to All</string>
        </property>
-      </widget>
-     </item>
-     <item row="6" column="0">
-      <widget class="QLabel" name="color_label_3">
-       <property name="text">
-        <string>Color (RGBA)</string>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <spacer name="horizontalSpacer_18">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeType">
-        <enum>QSizePolicy::Fixed</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item row="2" column="0">
-      <widget class="QLabel" name="line_style_label_3">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Width</string>
+       <property name="checkable">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -138,6 +69,13 @@
        </property>
       </spacer>
      </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="color_label_3">
+       <property name="text">
+        <string>Color (RGBA)</string>
+       </property>
+      </widget>
+     </item>
      <item row="3" column="1">
       <spacer name="horizontalSpacer_19">
        <property name="orientation">
@@ -154,27 +92,8 @@
        </property>
       </spacer>
      </item>
-     <item row="5" column="2">
-      <widget class="QSpinBox" name="error_every_spin_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>190</width>
-         <height>20</height>
-        </size>
-       </property>
-       <property name="minimum">
-        <number>1</number>
-       </property>
-      </widget>
-     </item>
-     <item row="6" column="1">
-      <spacer name="horizontalSpacer_21">
+     <item row="2" column="1">
+      <spacer name="horizontalSpacer_18">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -188,6 +107,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="draw_style_label_3">
+       <property name="text">
+        <string>Capsize</string>
+       </property>
+      </widget>
      </item>
      <item row="0" column="0" colspan="2">
       <widget class="QLabel" name="errorbar_options_label">
@@ -206,6 +132,45 @@
        </property>
        <property name="text">
         <string>Errorbar Options</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="width_label_3">
+       <property name="text">
+        <string>Cap Thickness</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="line_style_label_3">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Width</string>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="2">
+      <widget class="QSpinBox" name="error_every_spin_box">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>190</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="minimum">
+        <number>1</number>
        </property>
       </widget>
      </item>
@@ -238,7 +203,67 @@
        </property>
       </widget>
      </item>
-     <item row="6" column="2">
+     <item row="2" column="2">
+      <widget class="QDoubleSpinBox" name="width_spin_box">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <horstretch>190</horstretch>
+         <verstretch>20</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>190</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="decimals">
+        <number>2</number>
+       </property>
+       <property name="value">
+        <double>1.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="1">
+      <spacer name="horizontalSpacer_21">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="4" column="2">
+      <widget class="QDoubleSpinBox" name="cap_thickness_spin_box">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>190</width>
+         <height>20</height>
+        </size>
+       </property>
+       <property name="decimals">
+        <number>2</number>
+       </property>
+       <property name="value">
+        <double>1.500000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="8" column="2">
       <widget class="QWidget" name="color_dummy_widget" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
@@ -276,6 +301,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item row="7" column="0" colspan="3">
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

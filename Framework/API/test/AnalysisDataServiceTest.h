@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ANALYSISDATASERVICETEST_H_
-#define ANALYSISDATASERVICETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -30,7 +29,7 @@ private:
     throw std::runtime_error("Cloning of MockWorkspace is not implemented.");
   }
 };
-using MockWorkspace_sptr = boost::shared_ptr<MockWorkspace>;
+using MockWorkspace_sptr = std::shared_ptr<MockWorkspace>;
 } // namespace
 
 class AnalysisDataServiceTest : public CxxTest::TestSuite {
@@ -107,7 +106,7 @@ public:
                                          "test_all_items_present_2"};
     std::vector<Workspace_sptr> expected;
     for (const auto &name : names) {
-      expected.push_back(addToADS(name));
+      expected.emplace_back(addToADS(name));
     }
     std::vector<Workspace_sptr> items;
     TS_ASSERT_THROWS_NOTHING(items = ads.retrieveWorkspaces(names));
@@ -122,11 +121,11 @@ public:
     const std::vector<std::string> names{"test_all_items_present_unroll_1",
                                          "test_all_items_present_unroll_2"};
     std::vector<Workspace_sptr> expected;
-    expected.push_back(addToADS(names[0]));
+    expected.emplace_back(addToADS(names[0]));
     const size_t nitems{4u};
     WorkspaceGroup_sptr groupWS{addGroupToADS(names[1], nitems)};
     for (auto i = 0u; i < nitems; ++i) {
-      expected.push_back(groupWS->getItem(i));
+      expected.emplace_back(groupWS->getItem(i));
     }
     std::vector<Workspace_sptr> items;
     TS_ASSERT_THROWS_NOTHING(items = ads.retrieveWorkspaces(names, true));
@@ -568,9 +567,9 @@ private:
   /// Add a group with N simple workspaces to the ADS
   WorkspaceGroup_sptr addGroupToADS(const std::string &name,
                                     const size_t nitems = 2) {
-    auto group(boost::make_shared<WorkspaceGroup>());
+    auto group(std::make_shared<WorkspaceGroup>());
     for (auto i = 0u; i < nitems; ++i) {
-      group->addWorkspace(boost::make_shared<MockWorkspace>());
+      group->addWorkspace(std::make_shared<MockWorkspace>());
     }
     ads.add(name, group);
     return group;
@@ -579,9 +578,9 @@ private:
   /// Add a group with N simple workspaces to the ADS
   WorkspaceGroup_sptr addOrReplaceGroupToADS(const std::string &name,
                                              const size_t nitems = 2) {
-    auto group(boost::make_shared<WorkspaceGroup>());
+    auto group(std::make_shared<WorkspaceGroup>());
     for (auto i = 0u; i < nitems; ++i) {
-      group->addWorkspace(boost::make_shared<MockWorkspace>());
+      group->addWorkspace(std::make_shared<MockWorkspace>());
     }
     ads.addOrReplace(name, group);
     return group;
@@ -605,5 +604,3 @@ private:
     ads.addOrReplace(name, Workspace_sptr(new MockWorkspace));
   }
 };
-
-#endif /*ANALYSISDATASERVICETEST_H_*/

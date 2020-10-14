@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FindPeakBackground.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -54,7 +54,7 @@ void FindPeakBackground::init() {
 
   std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
-                  boost::make_shared<StringListValidator>(bkgdtypes),
+                  std::make_shared<StringListValidator>(bkgdtypes),
                   "Type of Background.");
 
   // The found peak in a table
@@ -152,7 +152,7 @@ int FindPeakBackground::findBackground(
   auto in = std::min_element(inpY.cbegin(), inpY.cend());
   double bkg0 = inpY[in - inpY.begin()];
   for (size_t l = l0; l < n; ++l) {
-    maskedY.push_back(inpY[l] - bkg0);
+    maskedY.emplace_back(inpY[l] - bkg0);
   }
   MantidVec mask(n - l0, 0.0);
   auto xn = static_cast<double>(n - l0);
@@ -374,7 +374,7 @@ void FindPeakBackground::setFitWindow(const std::vector<double> &fitwindow) {
  */
 void FindPeakBackground::createOutputWorkspaces() {
   // Set up output table workspace
-  m_outPeakTableWS = boost::make_shared<TableWorkspace>();
+  m_outPeakTableWS = std::make_shared<TableWorkspace>();
   m_outPeakTableWS->addColumn("int", "wksp_index");
   m_outPeakTableWS->addColumn("int", "peak_min_index");
   m_outPeakTableWS->addColumn("int", "peak_max_index");

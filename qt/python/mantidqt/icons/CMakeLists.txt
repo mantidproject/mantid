@@ -13,17 +13,16 @@ if(ENABLE_MANTIDPLOT)
                      PYQT_VERSION 4
                      INCLUDE_DIRS
                       ${COMMON_SIP_DIR}
-                      ${PYTHON_INCLUDE_PATH}
-                      ${ICONS_INC_DIR}
                       ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
+                      ${ICONS_INC_DIR}
                      LINK_LIBS
                       MantidQtIconsQt4
                       Qt4::QtCore
                       Qt4::QtGui
                       Qt4::QtScript
-                      ${PYTHON_LIBRARIES}
+                      Python::Python
                      INSTALL_DIR
-                      ${LIB_DIR}/mantidqt/icons
+                      ${SITE_PACKAGES}/mantidqt/icons
                      LINUX_INSTALL_RPATH
                       "\$ORIGIN/../.."
                      OSX_INSTALL_RPATH
@@ -40,16 +39,15 @@ if(ENABLE_WORKBENCH)
                      PYQT_VERSION 5
                      INCLUDE_DIRS
                       ${COMMON_SIP_DIR}
-                      ${PYTHON_INCLUDE_PATH}
                       ${ICONS_INC_DIR}
                       ${CMAKE_SOURCE_DIR}/Framework/PythonInterface/core/inc
                      LINK_LIBS
                       MantidQtIconsQt5
                       Qt5::Core
                       Qt5::Gui
-                      ${PYTHON_LIBRARIES}
+                      Python::Python
                      INSTALL_DIR
-                      ${WORKBENCH_LIB_DIR}/mantidqt/icons
+                      ${WORKBENCH_SITE_PACKAGES}/mantidqt/icons
                      LINUX_INSTALL_RPATH
                       "\$ORIGIN/../.."
                      OSX_INSTALL_RPATH

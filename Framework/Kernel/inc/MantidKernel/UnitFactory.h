@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_UNITFACTORYIMPL_H_
-#define MANTID_KERNEL_UNITFACTORYIMPL_H_
+#pragma once
 
 /* Used to register unit classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator
@@ -18,9 +17,9 @@
 #define DECLARE_UNIT(classname)                                                \
   namespace {                                                                  \
   Mantid::Kernel::RegistrationHelper                                           \
-      register_alg_##classname(((Mantid::Kernel::UnitFactory::Instance()       \
-                                     .subscribe<classname>(#classname)),       \
-                                0));                                           \
+      register_unit_##classname(((Mantid::Kernel::UnitFactory::Instance()      \
+                                      .subscribe<classname>(#classname)),      \
+                                 0));                                          \
   }                                                                            \
   const std::string Mantid::Kernel::Units::classname::unitID() const {         \
     return #classname;                                                         \
@@ -32,14 +31,10 @@
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/Unit.h"
 
 namespace Mantid {
 namespace Kernel {
-
-//----------------------------------------------------------------------
-// Forward declaration
-//----------------------------------------------------------------------
-class Unit;
 
 /** Creates instances of concrete units.
     The factory is a singleton that hands out shared pointers to the base Unit
@@ -58,6 +53,21 @@ public:
   UnitFactoryImpl(const UnitFactoryImpl &) = delete;
   UnitFactoryImpl &operator=(const UnitFactoryImpl &) = delete;
 
+  /// Returns the names of the convertible units in the factory
+  /// @return A string vector of keys
+  const std::vector<std::string> getConvertibleUnits() const {
+    std::vector<std::string> convertibleUnits;
+
+    for (const auto &unitKey : getKeys()) {
+      const auto unit_sptr = create(unitKey);
+      if (unit_sptr->isConvertible()) {
+        convertibleUnits.emplace_back(unitKey);
+      }
+    }
+
+    return convertibleUnits;
+  }
+
 private:
   friend struct CreateUsingNew<UnitFactoryImpl>;
 
@@ -75,5 +85,3 @@ using UnitFactory = SingletonHolder<UnitFactoryImpl>;
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /*MANTID_KERNEL_UNITFACTORYIMPL_H_*/

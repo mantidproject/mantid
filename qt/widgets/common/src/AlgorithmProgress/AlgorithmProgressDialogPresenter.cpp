@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressDialogPresenter.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressModel.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/IAlgorithmProgressDialogWidget.h"
 
@@ -19,6 +19,18 @@ AlgorithmProgressDialogPresenter::AlgorithmProgressDialogPresenter(
     : AlgorithmProgressPresenterBase(parent), m_view{view}, m_model{model},
       m_progressBars{RunningAlgorithms()} {
   model.setDialog(this);
+
+  // Intital setup of any running algorithms
+  auto runningAlgorithms =
+      Mantid::API::AlgorithmManager::Instance().runningInstances();
+
+  for (const auto &alg : runningAlgorithms) {
+    if ((alg) && (alg->isRunning())) {
+      if (m_progressBars.count(alg->getAlgorithmID()) == 0) {
+        algorithmStartedSlot(alg->getAlgorithmID());
+      }
+    }
+  }
 }
 
 /// This slot is triggered whenever an algorithm has started executing
@@ -34,9 +46,11 @@ void AlgorithmProgressDialogPresenter::algorithmStartedSlot(
   // original algorithm has already finished, before we got a shared pointer.
   // This ensures that the tracking only looks after an algorithm that has not
   // finished
-  if (algInstance) {
-    auto treeItem = m_view->addAlgorithm(algInstance);
-    m_progressBars.insert(std::make_pair(alg, treeItem));
+  if (m_progressBars.find(alg) == m_progressBars.end()) {
+    if (algInstance) {
+      auto treeItem = m_view->addAlgorithm(algInstance);
+      m_progressBars.insert(std::make_pair(alg, treeItem));
+    }
   }
 }
 /// This slot is triggered whenever an algorithm reports progress.
@@ -47,8 +61,11 @@ void AlgorithmProgressDialogPresenter::algorithmStartedSlot(
 /// @param progress The progress that the algorithm has reported
 /// @param message The message that the algorithm has reported. It can be
 /// emitted from another thread, so a copy of the message is forced
+/// @param estimatedTime :: estimated time to completion in seconds
+/// @param progressPrecision :: number of digits after the decimal
 void AlgorithmProgressDialogPresenter::updateProgressBarSlot(
-    Mantid::API::AlgorithmID alg, double progress, QString message) {
+    Mantid::API::AlgorithmID alg, const double progress, const QString message,
+    const double estimatedTime, const int progressPrecision) {
   // if the algorithm isn't contained in the progress bar tree, then pretend it
   // just started
   if (m_progressBars.count(alg) == 0) {
@@ -60,7 +77,8 @@ void AlgorithmProgressDialogPresenter::updateProgressBarSlot(
       return;
     }
   }
-  setProgressBar(m_progressBars.at(alg).second, progress, message);
+  setProgressBar(m_progressBars.at(alg).second, progress, message,
+                 estimatedTime, progressPrecision);
 }
 
 /// This slot is triggered whenever an algorithms ends. If the algorithm is not

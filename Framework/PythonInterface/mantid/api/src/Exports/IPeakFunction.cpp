@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidPythonInterface/api/FitFunctions/IPeakFunctionAdapter.h"
@@ -15,7 +15,7 @@ using namespace boost::python;
 
 void export_IPeakFunction() {
   class_<IPeakFunction, bases<IFunction1D>,
-         boost::shared_ptr<IPeakFunctionAdapter>, boost::noncopyable>(
+         std::shared_ptr<IPeakFunctionAdapter>, boost::noncopyable>(
       "IPeakFunction", "Base class for peak Fit functions")
       .def("functionLocal",
            (object(IPeakFunctionAdapter::*)(const object &) const) &

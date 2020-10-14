@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FINDDIALOG_H
-#define FINDDIALOG_H
+#pragma once
 
 #include <QDialog>
 #include <QLabel>
@@ -43,7 +42,7 @@ class FindDialog : public QDialog {
   Q_OBJECT
 
 public:
-  FindDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  FindDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
   ~FindDialog() override;
 
 private:
@@ -71,5 +70,3 @@ protected slots:
 
   void accept() override;
 };
-
-#endif // exportDialog_H

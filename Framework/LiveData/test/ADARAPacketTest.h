@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_ADARAPACKETTEST_H_
-#define MANTID_LIVEDATA_ADARAPACKETTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -13,7 +12,7 @@
 #include <Poco/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h> // for parsing the XML device descriptions
 #include <Poco/DOM/Document.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // All of the sample packets that we need to run the tests are defined in the
 // following
@@ -44,7 +43,7 @@ public:
   }
 
   void testBankedEventPacketParser() {
-    boost::shared_ptr<ADARA::BankedEventPkt> pkt =
+    std::shared_ptr<ADARA::BankedEventPkt> pkt =
         basicPacketTests<ADARA::BankedEventPkt>(
             bankedEventPacket, sizeof(bankedEventPacket), 728504567, 761741666);
     if (pkt != nullptr) {
@@ -77,7 +76,7 @@ public:
   }
 
   void testBeamMonitorPacketParser() {
-    boost::shared_ptr<ADARA::BeamMonitorPkt> pkt =
+    std::shared_ptr<ADARA::BeamMonitorPkt> pkt =
         basicPacketTests<ADARA::BeamMonitorPkt>(
             beamMonitorPacket, sizeof(beamMonitorPacket), 728504567, 761741666);
     if (pkt != nullptr) {
@@ -91,7 +90,7 @@ public:
   }
 
   void testDeviceDescriptorPacketParser() {
-    boost::shared_ptr<ADARA::DeviceDescriptorPkt> pkt =
+    std::shared_ptr<ADARA::DeviceDescriptorPkt> pkt =
         basicPacketTests<ADARA::DeviceDescriptorPkt>(
             devDesPacket, sizeof(devDesPacket), 726785379, 0);
     if (pkt != nullptr) {
@@ -104,7 +103,7 @@ public:
   }
 
   void testRunStatusPacketParser() {
-    boost::shared_ptr<ADARA::RunStatusPkt> pkt =
+    std::shared_ptr<ADARA::RunStatusPkt> pkt =
         basicPacketTests<ADARA::RunStatusPkt>(
             runStatusPacket, sizeof(runStatusPacket), 728504568, 5625794);
 
@@ -121,7 +120,7 @@ public:
   }
 
   void testRTDLPacketParser() {
-    boost::shared_ptr<ADARA::RTDLPkt> pkt = basicPacketTests<ADARA::RTDLPkt>(
+    std::shared_ptr<ADARA::RTDLPkt> pkt = basicPacketTests<ADARA::RTDLPkt>(
         rtdlPacket, sizeof(rtdlPacket), 728504567, 761741666);
 
     if (pkt != nullptr) {
@@ -144,7 +143,7 @@ public:
   }
 
   void testVariableDoublePacketParser() {
-    boost::shared_ptr<ADARA::VariableDoublePkt> pkt =
+    std::shared_ptr<ADARA::VariableDoublePkt> pkt =
         basicPacketTests<ADARA::VariableDoublePkt>(
             variableDoublePacket, sizeof(variableDoublePacket), 728281149, 0);
 
@@ -160,7 +159,7 @@ public:
   }
 
   void testVariableU32PacketParser() {
-    boost::shared_ptr<ADARA::VariableU32Pkt> pkt =
+    std::shared_ptr<ADARA::VariableU32Pkt> pkt =
         basicPacketTests<ADARA::VariableU32Pkt>(
             variableU32Packet, sizeof(variableU32Packet), 728281149, 0);
 
@@ -215,19 +214,19 @@ protected:
 
 private:
   unsigned char *m_initialBufferAddr;
-  boost::shared_ptr<ADARA::Packet> m_pkt;
+  std::shared_ptr<ADARA::Packet> m_pkt;
 
   // A template function that covers the basic tests all packet
   // types have to pass.
   // Returns a shared pointer to the packet so further tests can
   // be conducted.
   template <class T>
-  boost::shared_ptr<T> basicPacketTests(const unsigned char *data, unsigned len,
-                                        unsigned pulseHigh, unsigned pulseLow) {
+  std::shared_ptr<T> basicPacketTests(const unsigned char *data, unsigned len,
+                                      unsigned pulseHigh, unsigned pulseLow) {
     parseOnePacket(data, len);
 
     // verify that we can cast the packet to the type we expect it to be
-    boost::shared_ptr<T> pkt = boost::dynamic_pointer_cast<T>(m_pkt);
+    std::shared_ptr<T> pkt = std::dynamic_pointer_cast<T>(m_pkt);
     TS_ASSERT(pkt != nullptr);
 
     // Make sure we have a valid packet before attempting the remaining tests
@@ -274,7 +273,7 @@ private:
     TS_ASSERT(packetsParsed == 1);
     TS_ASSERT(
         m_pkt !=
-        boost::shared_ptr<ADARA::Packet>()); // verify m_pkt has been updated
+        std::shared_ptr<ADARA::Packet>()); // verify m_pkt has been updated
 
     TS_ASSERT(bufferParse(bufferParseLog, 0) ==
               0); // try to parse again, make sure there's nothing to parse
@@ -288,5 +287,3 @@ private:
     return (((pulseId >> 32) == high) && ((pulseId & 0xFFFFFFFF) == low));
   }
 };
-
-#endif /* MANTID_LIVEDATA_ADARAPACKETTEST_H_ */

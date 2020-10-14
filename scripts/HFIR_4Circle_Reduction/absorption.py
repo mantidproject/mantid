@@ -1,18 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=R0913,W0403,R0903,C0103
-from __future__ import (absolute_import, division, print_function)
 import HFIR_4Circle_Reduction.fourcircle_utility as util4
 import math
 from mantid.api import AnalysisDataService
 import numpy
 import numpy.linalg
-from six.moves import range
-
 # This module does absorption correction
 
 
@@ -234,10 +231,10 @@ def calculate_reciprocal_lattice(lattice):
 
     # calculate volume
     volume = 2 * lattice.get_a() * lattice.get_b() * lattice.get_c() * numpy.sqrt(
-        m_sin((lattice.get_alpha() + lattice.get_beta() + lattice.get_gamma()) / 2) *
-        m_sin((-lattice.get_alpha() + lattice.get_beta() + lattice.get_gamma()) / 2) *
-        m_sin((lattice.get_alpha() - lattice.get_beta() + lattice.get_gamma()) / 2) *
-        m_sin((lattice.get_alpha() + lattice.get_beta() - lattice.get_gamma()) / 2))
+        m_sin((lattice.get_alpha() + lattice.get_beta() + lattice.get_gamma()) / 2)
+        * m_sin((-lattice.get_alpha() + lattice.get_beta() + lattice.get_gamma()) / 2)
+        * m_sin((lattice.get_alpha() - lattice.get_beta() + lattice.get_gamma()) / 2)
+        * m_sin((lattice.get_alpha() + lattice.get_beta() - lattice.get_gamma()) / 2))
     #  v_start = (2 * numpy.pi) ** 3. / volume
 
     # calculate a*, b*, c*
@@ -245,12 +242,12 @@ def calculate_reciprocal_lattice(lattice):
     lattice_star.set_b(2 * numpy.pi * lattice.get_a() * lattice.get_c() * m_sin(lattice.get_beta()) / volume)
     lattice_star.set_c(2 * numpy.pi * lattice.get_b() * lattice.get_a() * m_sin(lattice.get_gamma()) / volume)
 
-    lattice_star.set_alpha(math.acos((m_cos(lattice.get_beta()) * m_cos(lattice.get_gamma()) - m_cos(lattice.get_alpha())) /
-                                     (m_sin(lattice.get_beta()) * m_sin(lattice.get_gamma()))) * 180. / numpy.pi)
-    lattice_star.set_beta(math.acos((m_cos(lattice.get_alpha()) * m_cos(lattice.get_gamma()) - m_cos(lattice.get_beta())) /
-                                    (m_sin(lattice.get_alpha()) * m_sin(lattice.get_gamma()))) * 180. / numpy.pi)
-    lattice_star.set_gamma(math.acos((m_cos(lattice.get_alpha()) * m_cos(lattice.get_beta()) - m_cos(lattice.get_gamma())) /
-                                     (m_sin(lattice.get_alpha()) * m_sin(lattice.get_beta()))) * 180. / numpy.pi)
+    lattice_star.set_alpha(math.acos((m_cos(lattice.get_beta()) * m_cos(lattice.get_gamma()) - m_cos(lattice.get_alpha()))
+                                     / (m_sin(lattice.get_beta()) * m_sin(lattice.get_gamma()))) * 180. / numpy.pi)
+    lattice_star.set_beta(math.acos((m_cos(lattice.get_alpha()) * m_cos(lattice.get_gamma()) - m_cos(lattice.get_beta()))
+                                    / (m_sin(lattice.get_alpha()) * m_sin(lattice.get_gamma()))) * 180. / numpy.pi)
+    lattice_star.set_gamma(math.acos((m_cos(lattice.get_alpha()) * m_cos(lattice.get_beta()) - m_cos(lattice.get_gamma()))
+                                     / (m_sin(lattice.get_alpha()) * m_sin(lattice.get_beta()))) * 180. / numpy.pi)
 
     return lattice_star
 

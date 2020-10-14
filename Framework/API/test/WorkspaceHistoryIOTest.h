@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WORKSPACEHISTORYIOTEST_H_
-#define WORKSPACEHISTORYIOTEST_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -218,17 +217,17 @@ public:
           "History" + boost::lexical_cast<std::string>(i), 1,
           boost::uuids::to_string(boost::uuids::random_generator()()),
           DateAndTime::defaultTime(), -1.0, i);
-      testHistory.addHistory(boost::make_shared<AlgorithmHistory>(algHist));
+      testHistory.addHistory(std::make_shared<AlgorithmHistory>(algHist));
     }
 
     // clang-format off
-    auto savehandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
+    auto savehandle = std::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
     // clang-format on
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 
     // clang-format off
-    auto loadhandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs");
+    auto loadhandle = std::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs");
     // clang-format on
     std::string rootstring = "/process/";
     for (int i = 1; i < 5; i++) {
@@ -262,17 +261,17 @@ public:
         boost::uuids::to_string(boost::uuids::random_generator()()),
         DateAndTime::defaultTime(), -1.0, 1);
 
-    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(childHist));
-    testHistory.addHistory(boost::make_shared<AlgorithmHistory>(algHist));
+    algHist.addChildHistory(std::make_shared<AlgorithmHistory>(childHist));
+    testHistory.addHistory(std::make_shared<AlgorithmHistory>(algHist));
 
     // clang-format off
-    auto savehandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
+    auto savehandle = std::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
     // clang-format on
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 
     // clang-format off
-    auto loadhandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs");
+    auto loadhandle = std::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs");
     // clang-format on
     std::string rootstring = "/process/";
     TS_ASSERT_THROWS_NOTHING(
@@ -301,13 +300,13 @@ public:
     WorkspaceHistory testHistory;
 
     // clang-format off
-    auto savehandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
+    auto savehandle = std::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs",NXACC_CREATE5);
     // clang-format on
     TS_ASSERT_THROWS_NOTHING(testHistory.saveNexus(savehandle.get()));
     savehandle->close();
 
     // clang-format off
-    auto loadhandle = boost::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs");
+    auto loadhandle = std::make_shared< ::NeXus::File >("WorkspaceHistoryTest_test_SaveNexus.nxs");
     // clang-format on
     std::string rootstring = "/process/";
     TS_ASSERT_THROWS_NOTHING(loadhandle->openPath(rootstring));
@@ -324,7 +323,7 @@ public:
     std::string filename =
         FileFinder::Instance().getFullPath("GEM38370_Focussed_Legacy.nxs");
     // clang-format off
-    auto loadhandle = boost::make_shared< ::NeXus::File >(filename);
+    auto loadhandle = std::make_shared< ::NeXus::File >(filename);
     // clang-format on
     loadhandle->openPath("/mantid_workspace_1");
 
@@ -348,7 +347,7 @@ public:
     std::string filename = FileFinder::Instance().getFullPath(
         "HistoryTest_CreateTransmissionAuto.nxs");
     // clang-format off
-    auto loadhandle = boost::make_shared< ::NeXus::File >(filename);
+    auto loadhandle = std::make_shared< ::NeXus::File >(filename);
     // clang-format on
     loadhandle->openPath("/mantid_workspace_1");
 
@@ -473,5 +472,3 @@ public:
     TS_ASSERT_EQUALS(1, histories.size());
   }
 };
-
-#endif

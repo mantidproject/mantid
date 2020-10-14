@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MUONFITPROPERTYBROWSER_H_
-#define MUONFITPROPERTYBROWSER_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/IMuonFitDataModel.h"
@@ -129,8 +128,8 @@ public:
   void setChosenGroup(const QString &group);
   void setAllPeriods();
   void setChosenPeriods(const QString &period);
-  void setSingleFitLabel(std::string name);
-  void setNormalization(const std::string name);
+  void setSingleFitLabel(const std::string &name);
+  void setNormalization(const std::string &name);
   void checkFitEnabled();
 public slots:
   /// Perform the fit algorithm
@@ -186,8 +185,8 @@ private:
   void finishAfterSimultaneousFit(const Mantid::API::IAlgorithm *fitAlg,
                                   const int nWorkspaces) const;
   void finishAfterTFSimultaneousFit(const Mantid::API::IAlgorithm *alg,
-                                    const std::string baseName) const;
-  void setFitWorkspaces(const std::string input);
+                                    const std::string &baseName) const;
+  void setFitWorkspaces(const std::string &input);
   std::string getUnnormName(const std::string wsName);
   void ConvertFitFunctionForMuonTFAsymmetry(bool enabled);
   void setTFAsymmMode(bool state);
@@ -251,5 +250,3 @@ private:
 std::map<std::string, double> readMultipleNormalization();
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*MUONFITPROPERTYBROWSER_H_*/

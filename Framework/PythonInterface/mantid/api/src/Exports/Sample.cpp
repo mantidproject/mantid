@@ -1,14 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/Sample.h"
 
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidKernel/Material.h"
+#include "MantidPythonInterface/core/Copyable.h"
 #include "MantidPythonInterface/core/GetPointer.h"
 
 #include <boost/python/class.hpp>
@@ -26,9 +27,9 @@ GET_POINTER_SPECIALIZATION(Sample)
 
 void export_Sample() {
   register_ptr_to_python<Sample *>();
-  register_ptr_to_python<boost::shared_ptr<Sample>>();
+  register_ptr_to_python<std::shared_ptr<Sample>>();
 
-  class_<Sample, boost::noncopyable>("Sample", no_init)
+  class_<Sample, boost::noncopyable>("Sample")
       .def("getName", &Sample::getName,
            return_value_policy<copy_const_reference>(), arg("self"),
            "Returns the string name of the sample")
@@ -40,6 +41,8 @@ void export_Sample() {
       .def("hasOrientedLattice", &Sample::hasOrientedLattice, arg("self"),
            "Returns True if this sample has an oriented lattice, false "
            "otherwise")
+      .def("clearOrientedLattice", &Sample::clearOrientedLattice, arg("self"),
+           "Clears any attached lattice information")
       .def("getCrystalStructure", &Sample::getCrystalStructure, arg("self"),
            return_value_policy<reference_existing_object>(),
            "Get the crystal structure for this sample")
@@ -81,5 +84,9 @@ void export_Sample() {
       .def("__len__", &Sample::size, arg("self"),
            "Gets the number of samples in this collection")
       .def("__getitem__", &Sample::operator[],(arg("self"), arg("index")),
-           return_internal_reference<>());
+           return_internal_reference<>())
+      .def("__copy__", &Mantid::PythonInterface::generic__copy__<Sample>)
+      .def("__deepcopy__",
+           &Mantid::PythonInterface::generic__deepcopy__<Sample>)
+      .def("__eq__", &Sample::operator==,(arg("self"), arg("other")));
 }

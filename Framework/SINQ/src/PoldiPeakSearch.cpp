@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiPeakSearch.h"
 
@@ -18,11 +18,11 @@
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 
-#include "boost/bind.hpp"
 #include <algorithm>
 #include <list>
 #include <numeric>
 #include <queue>
+#include <utility>
 
 #include "boost/math/distributions.hpp"
 
@@ -82,9 +82,9 @@ PoldiPeakSearch::getNeighborSums(const HistogramY &correlationCounts) const {
 
   for (std::vector<size_t>::const_iterator index = validIndices.begin();
        index != validIndices.end(); ++index) {
-    summedNeighborCounts.push_back(correlationCounts[(*index) - 1] +
-                                   correlationCounts[*index] +
-                                   correlationCounts[(*index) + 1]);
+    summedNeighborCounts.emplace_back(correlationCounts[(*index) - 1] +
+                                      correlationCounts[*index] +
+                                      correlationCounts[(*index) + 1]);
   }
 
   return summedNeighborCounts;
@@ -157,7 +157,7 @@ PoldiPeakSearch::findPeaksRecursive(MantidVec::const_iterator begin,
   auto maxInRange = std::max_element(begin, end);
 
   std::list<MantidVec::const_iterator> peaks;
-  peaks.push_back(maxInRange);
+  peaks.emplace_back(maxInRange);
 
   // ...and perform same search on sub-list left of maximum...
   if (std::distance(begin, maxInRange) > m_minimumDistance) {
@@ -201,7 +201,7 @@ PoldiPeakSearch::mapPeakPositionsToCorrelationData(
   for (std::list<MantidVec::const_iterator>::const_iterator peakPosition =
            peakPositions.begin();
        peakPosition != peakPositions.end(); ++peakPosition) {
-    transformedIndices.push_back(
+    transformedIndices.emplace_back(
         originalDataStart + std::distance(baseDataStart, *peakPosition) + 1);
   }
 
@@ -211,14 +211,14 @@ PoldiPeakSearch::mapPeakPositionsToCorrelationData(
 /// Converts the value-parameter to d-spacing. Assumes unit to be Q if empty.
 double PoldiPeakSearch::getTransformedCenter(double value,
                                              const Unit_sptr &unit) const {
-  if (boost::dynamic_pointer_cast<Units::dSpacing>(unit)) {
+  if (std::dynamic_pointer_cast<Units::dSpacing>(unit)) {
     return value;
   }
 
   // This is required to preserve default behavior which assumes Q.
   Unit_sptr transformUnit = unit;
 
-  if (!unit || boost::dynamic_pointer_cast<Units::Empty>(unit)) {
+  if (!unit || std::dynamic_pointer_cast<Units::Empty>(unit)) {
     transformUnit = UnitFactory::Instance().create("MomentumTransfer");
   }
 
@@ -262,7 +262,7 @@ PoldiPeakSearch::getPeaks(const MantidVec::const_iterator &baseListStart,
 
     PoldiPeak_sptr newPeak = PoldiPeak::create(
         MillerIndices(), UncertainValue(xDataD), UncertainValue(**peak), fwhm);
-    peakData.push_back(newPeak);
+    peakData.emplace_back(newPeak);
   }
 
   return peakData;
@@ -315,7 +315,7 @@ PoldiPeakSearch::getFWHMEstimate(const MantidVec::const_iterator &baseListStart,
  * @param error :: Error that is set on the workspace.
  */
 void PoldiPeakSearch::setErrorsOnWorkspace(
-    Workspace2D_sptr correlationWorkspace, double error) const {
+    const Workspace2D_sptr &correlationWorkspace, double error) const {
   MantidVec &errors = correlationWorkspace->dataE(0);
 
   std::fill(errors.begin(), errors.end(), error);
@@ -333,7 +333,7 @@ void PoldiPeakSearch::setErrorsOnWorkspace(
  * @return Vector only with counts that belong to the background.
  */
 MantidVec PoldiPeakSearch::getBackground(
-    std::list<MantidVec::const_iterator> peakPositions,
+    const std::list<MantidVec::const_iterator> &peakPositions,
     const MantidVec &correlationCounts) const {
   size_t backgroundPoints =
       getNumberOfBackgroundPoints(peakPositions, correlationCounts);
@@ -344,7 +344,7 @@ MantidVec PoldiPeakSearch::getBackground(
   for (auto point = correlationCounts.cbegin() + 1;
        point != correlationCounts.cend() - 1; ++point) {
     if (distanceToPeaksGreaterThanMinimum(peakPositions, point)) {
-      background.push_back(*point);
+      background.emplace_back(*point);
     }
   }
 
@@ -367,9 +367,10 @@ MantidVec PoldiPeakSearch::getBackground(
  * @return Background estimation with error.
  */
 UncertainValue PoldiPeakSearch::getBackgroundWithSigma(
-    std::list<MantidVec::const_iterator> peakPositions,
+    const std::list<MantidVec::const_iterator> &peakPositions,
     const MantidVec &correlationCounts) const {
-  MantidVec background = getBackground(peakPositions, correlationCounts);
+  MantidVec background =
+      getBackground(std::move(peakPositions), correlationCounts);
 
   /* Instead of using Mean and Standard deviation, which are appropriate
    * for data originating from a normal distribution (which is not the case
@@ -421,7 +422,7 @@ bool PoldiPeakSearch::distanceToPeaksGreaterThanMinimum(
  * @return Number of background points.
  */
 size_t PoldiPeakSearch::getNumberOfBackgroundPoints(
-    std::list<MantidVec::const_iterator> peakPositions,
+    const std::list<MantidVec::const_iterator> &peakPositions,
     const MantidVec &correlationCounts) const {
   /* subtracting 2, to match original algorithm, where
    * the first and the last point of the spectrum are not
@@ -477,7 +478,7 @@ double PoldiPeakSearch::getSn(MantidVec::const_iterator begin,
     temp.reserve(numberOfPoints - 1);
     for (int j = 0; j < static_cast<int>(numberOfPoints); ++j) {
       if (j != i) {
-        temp.push_back(fabs(*(begin + j) - currentValue));
+        temp.emplace_back(fabs(*(begin + j) - currentValue));
       }
     }
     std::sort(temp.begin(), temp.end());
@@ -529,7 +530,7 @@ bool PoldiPeakSearch::vectorElementGreaterThan(
   return *first > *second;
 }
 
-bool PoldiPeakSearch::isLessThanMinimum(PoldiPeak_sptr peak) {
+bool PoldiPeakSearch::isLessThanMinimum(const PoldiPeak_sptr &peak) {
   return peak->intensity().value() <= m_minimumPeakHeight;
 }
 
@@ -538,16 +539,16 @@ void PoldiPeakSearch::init() {
                       "InputWorkspace", "", Direction::InOut),
                   "Workspace containing a POLDI auto-correlation spectrum.");
 
-  boost::shared_ptr<BoundedValidator<int>> minPeakSeparationValidator =
-      boost::make_shared<BoundedValidator<int>>();
+  std::shared_ptr<BoundedValidator<int>> minPeakSeparationValidator =
+      std::make_shared<BoundedValidator<int>>();
   minPeakSeparationValidator->setLower(1);
   declareProperty("MinimumPeakSeparation", 15, minPeakSeparationValidator,
                   "Minimum number of points in the spectrum by which two peaks "
                   "have to be separated.",
                   Direction::Input);
 
-  boost::shared_ptr<BoundedValidator<int>> maxPeakNumberValidator =
-      boost::make_shared<BoundedValidator<int>>();
+  std::shared_ptr<BoundedValidator<int>> maxPeakNumberValidator =
+      std::make_shared<BoundedValidator<int>>();
   maxPeakNumberValidator->setLower(1);
   declareProperty("MaximumPeakNumber", 24, maxPeakNumberValidator,
                   "Maximum number of peaks to be detected.", Direction::Input);
@@ -634,10 +635,11 @@ void PoldiPeakSearch::exec() {
   }
 
   std::vector<PoldiPeak_sptr> intensityFilteredPeaks(peakCoordinates.size());
+  using namespace std::placeholders;
   auto newEnd = std::remove_copy_if(
       peakCoordinates.begin(), peakCoordinates.end(),
       intensityFilteredPeaks.begin(),
-      boost::bind(&PoldiPeakSearch::isLessThanMinimum, this, _1));
+      std::bind(&PoldiPeakSearch::isLessThanMinimum, this, _1));
   intensityFilteredPeaks.resize(
       std::distance(intensityFilteredPeaks.begin(), newEnd));
 
@@ -646,8 +648,7 @@ void PoldiPeakSearch::exec() {
                       << "): " << intensityFilteredPeaks.size() << '\n';
 
   std::sort(intensityFilteredPeaks.begin(), intensityFilteredPeaks.end(),
-            boost::bind<bool>(&PoldiPeak::greaterThan, _1, _2,
-                              &PoldiPeak::intensity));
+            std::bind(&PoldiPeak::greaterThan, _1, _2, &PoldiPeak::intensity));
 
   for (std::vector<PoldiPeak_sptr>::const_iterator peak =
            intensityFilteredPeaks.begin();

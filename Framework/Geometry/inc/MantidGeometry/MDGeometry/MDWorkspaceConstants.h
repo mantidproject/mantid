@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef H_MD_WORKSPACE_CONSTANTS
-#define H_MD_WORKSPACE_CONSTANTS
+#pragma once
 //
 #include <string>
 
@@ -35,5 +34,3 @@ will be replaced by proper class
 /// (in case of wrong word padding or -int casted to unsigned int)
 #define MAX_REASONABLE_BIN_NUMBER 1000000
 //***********************************************************************************************************************************
-
-#endif

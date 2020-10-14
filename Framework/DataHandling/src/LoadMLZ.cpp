@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMLZ.h"
 #include "MantidAPI/Axis.h"
@@ -135,7 +135,7 @@ void LoadMLZ::maskDetectors(NeXus::NXEntry &entry) {
     g_log.debug() << masked_detector;
     g_log.debug() << ", ";
     try {
-      indicesToMask.push_back(detInfo.indexOf(masked_detector));
+      indicesToMask.emplace_back(detInfo.indexOf(masked_detector));
     } catch (std::out_of_range &) {
       g_log.warning() << "Invalid detector ID " << masked_detector
                       << ". Found while running LoadMLZ\n";

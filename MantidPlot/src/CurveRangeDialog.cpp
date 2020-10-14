@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : CurveRangeDialog.cpp
@@ -27,7 +27,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 
-CurveRangeDialog::CurveRangeDialog(QWidget *parent, Qt::WFlags fl)
+CurveRangeDialog::CurveRangeDialog(QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl), d_curve(nullptr), d_graph(nullptr) {
   setWindowTitle(tr("MantidPlot - Plot range"));
   setObjectName("CurveRangeDialog");

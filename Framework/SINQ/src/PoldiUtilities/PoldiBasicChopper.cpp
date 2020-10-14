@@ -1,13 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiBasicChopper.h"
 
 #include "MantidGeometry/ICompAssembly.h"
-#include "boost/bind.hpp"
 
 namespace Mantid {
 namespace Poldi {
@@ -24,7 +23,7 @@ PoldiBasicChopper::PoldiBasicChopper()
 void PoldiBasicChopper::loadConfiguration(
     Geometry::Instrument_const_sptr poldiInstrument) {
   Geometry::ICompAssembly_const_sptr chopperGroup =
-      boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+      std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
           poldiInstrument->getComponentByName(std::string("chopper")));
 
   size_t numberOfSlits = chopperGroup->nelements();
@@ -80,9 +79,10 @@ void PoldiBasicChopper::initializeVariableParameters(double rotationSpeed) {
   m_zeroOffset = m_rawt0 * m_cycleTime + m_rawt0const;
 
   m_slitTimes.resize(m_slitPositions.size());
+  using namespace std::placeholders;
   std::transform(
       m_slitPositions.begin(), m_slitPositions.end(), m_slitTimes.begin(),
-      boost::bind(&PoldiBasicChopper::slitPositionToTimeFraction, this, _1));
+      std::bind(&PoldiBasicChopper::slitPositionToTimeFraction, this, _1));
 }
 
 double PoldiBasicChopper::slitPositionToTimeFraction(double slitPosition) {

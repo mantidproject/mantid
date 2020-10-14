@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
@@ -398,7 +398,7 @@ SimulationAggregator::SimulationAggregator(const size_t nruns) {
  */
 Simulation &SimulationAggregator::newSimulation(const size_t order,
                                                 const size_t ntimes) {
-  results.push_back(Simulation(order, ntimes));
+  results.emplace_back(Simulation(order, ntimes));
   return results.back();
 }
 

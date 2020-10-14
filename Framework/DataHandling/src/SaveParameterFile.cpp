@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveParameterFile.h"
 
@@ -52,7 +52,7 @@ const std::string SaveParameterFile::category() const {
 void SaveParameterFile::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "Workspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "Workspace to save the instrument parameters from.");
 
   declareProperty(
@@ -112,11 +112,11 @@ void SaveParameterFile::exec() {
         V3D pos;
         std::istringstream pValueSS(pValue);
         pos.readPrinted(pValueSS);
-        toSave[cID].push_back(boost::make_tuple(
+        toSave[cID].emplace_back(boost::make_tuple(
             "x", "double", boost::lexical_cast<std::string>(pos.X())));
-        toSave[cID].push_back(boost::make_tuple(
+        toSave[cID].emplace_back(boost::make_tuple(
             "y", "double", boost::lexical_cast<std::string>(pos.Y())));
-        toSave[cID].push_back(boost::make_tuple(
+        toSave[cID].emplace_back(boost::make_tuple(
             "z", "double", boost::lexical_cast<std::string>(pos.Z())));
       }
     } else if (pName == "rot") {
@@ -124,11 +124,11 @@ void SaveParameterFile::exec() {
         V3D rot;
         std::istringstream pValueSS(pValue);
         rot.readPrinted(pValueSS);
-        toSave[cID].push_back(boost::make_tuple(
+        toSave[cID].emplace_back(boost::make_tuple(
             "rotx", "double", boost::lexical_cast<std::string>(rot.X())));
-        toSave[cID].push_back(boost::make_tuple(
+        toSave[cID].emplace_back(boost::make_tuple(
             "roty", "double", boost::lexical_cast<std::string>(rot.Y())));
-        toSave[cID].push_back(boost::make_tuple(
+        toSave[cID].emplace_back(boost::make_tuple(
             "rotz", "double", boost::lexical_cast<std::string>(rot.Z())));
       }
     }
@@ -148,10 +148,10 @@ void SaveParameterFile::exec() {
         fpValue << " unit=\"" << fitParam.getFormulaUnit() << "\"";
         fpValue << " result-unit=\"" << fitParam.getResultUnit() << "\"";
         fpValue << "/>";
-        toSave[cID].push_back(
+        toSave[cID].emplace_back(
             boost::make_tuple(fpName, "fitting", fpValue.str()));
       } else
-        toSave[cID].push_back(boost::make_tuple(pName, pType, pValue));
+        toSave[cID].emplace_back(boost::make_tuple(pName, pType, pValue));
     }
   }
 

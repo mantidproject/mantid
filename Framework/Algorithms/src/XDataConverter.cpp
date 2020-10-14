@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------
 // Includes
@@ -90,7 +90,7 @@ void XDataConverter::exec() {
 }
 
 std::size_t
-XDataConverter::getNewYSize(const API::MatrixWorkspace_sptr inputWS) {
+XDataConverter::getNewYSize(const API::MatrixWorkspace_sptr &inputWS) {
   // this is the old behavior of MatrixWorkspace::blocksize()
   return inputWS->y(0).size();
 }
@@ -101,8 +101,8 @@ XDataConverter::getNewYSize(const API::MatrixWorkspace_sptr inputWS) {
  * @param inputWS :: The input workspace
  * @param index :: The index
  */
-void XDataConverter::setXData(API::MatrixWorkspace_sptr outputWS,
-                              const API::MatrixWorkspace_sptr inputWS,
+void XDataConverter::setXData(const API::MatrixWorkspace_sptr &outputWS,
+                              const API::MatrixWorkspace_sptr &inputWS,
                               const int index) {
   if (m_sharedX) {
     PARALLEL_CRITICAL(XDataConverter_para) {

@@ -1,17 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SHIFTLOGTIMETEST_H_
-#define MANTID_ALGORITHMS_SHIFTLOGTIMETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAlgorithms/ShiftLogTime.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
@@ -63,7 +61,7 @@ private:
    * @param in_name Name of the input workspace.
    * @param out_name Name of the output workspace.
    */
-  void verify(const std::string in_name, const std::string out_name,
+  void verify(const std::string &in_name, const std::string &out_name,
               const int shift) {
     DateAndTime start(start_str);
 
@@ -128,5 +126,3 @@ private:
       AnalysisDataService::Instance().remove(out_name);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_SHIFTLOGTIMETEST_H_ */

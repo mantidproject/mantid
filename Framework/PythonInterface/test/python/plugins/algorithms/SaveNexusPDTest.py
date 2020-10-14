@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,too-many-public-methods,too-many-arguments
-from __future__ import (absolute_import, division, print_function)
-
 import mantid
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import CreateWorkspace, SaveNexusPD
@@ -21,12 +19,13 @@ try:
 except ImportError:
     runTests = False
 
+
 class SaveNexusPDTest(unittest.TestCase):
     def saveFilePath(self, wkspname):
         dataDir = mantid.config.getString('defaultsave.directory')
         return os.path.join(dataDir, wkspname+'.h5')
 
-    def cleanup(self, wkspname, filename):
+    def cleanup(self, filename, wkspname):
         if os.path.exists(filename):
             os.remove(filename)
         if mantid.mtd.doesExist(wkspname):

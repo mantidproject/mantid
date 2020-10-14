@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,protected-access
-from __future__ import (absolute_import, division, print_function)
-import six
 import os
 from qtpy.QtWidgets import (QFrame, QGroupBox, QMessageBox)  # noqa
 from qtpy.QtGui import (QDoubleValidator)  # noqa
@@ -20,8 +18,7 @@ except ImportError:
     Logger("DirectBeam").information('Using legacy ui importer')
     from mantidplot import load_ui
 
-if six.PY3:
-    unicode = str
+unicode = str
 
 
 class DirectBeam(BaseWidget):
@@ -61,7 +58,7 @@ class DirectBeam(BaseWidget):
         self._content.sample_plot.clicked.connect(self._sample_plot_clicked)
         self._content.direct_plot.clicked.connect(self._direct_plot_clicked)
 
-        if not self._has_instrumentview:
+        if not self._has_instrument_view:
             self._content.sample_plot.hide()
             self._content.direct_plot.hide()
 

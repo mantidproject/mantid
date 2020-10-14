@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REBINTOWORKSPACETEST_H_
-#define REBINTOWORKSPACETEST_H_
+#pragma once
 
 //-------------------
 // Includes
@@ -99,7 +98,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         workspace = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(workspace);
+        std::dynamic_pointer_cast<Workspace2D>(workspace);
 
     // Test x-vectors from this and "matchToThis" are the same
     TS_ASSERT_EQUALS(output2D->x(0).size(), matchToThis->x(0).size());
@@ -112,5 +111,3 @@ public:
 private:
   Mantid::Algorithms::RebinToWorkspace rebinToWS;
 };
-
-#endif // REBINTOWORKSPACETEST_H_

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/StripPeaks.h"
 
@@ -32,7 +32,7 @@ void StripPeaks::init() {
                                                         Direction::Output),
                   "The name to use for the output workspace.");
 
-  auto min = boost::make_shared<BoundedValidator<int>>();
+  auto min = std::make_shared<BoundedValidator<int>>();
   min->setLower(1);
   // The estimated width of a peak in terms of number of channels
   declareProperty("FWHM", 7, min,
@@ -59,7 +59,7 @@ void StripPeaks::init() {
   std::vector<std::string> bkgdtypes{"Linear", "Quadratic"};
   declareProperty(
       "BackgroundType", "Linear",
-      boost::make_shared<StringListValidator>(bkgdtypes),
+      std::make_shared<StringListValidator>(bkgdtypes),
       "Type of Background. Present choices include 'Linear' and 'Quadratic'");
 
   declareProperty("HighBackground", true,
@@ -67,13 +67,13 @@ void StripPeaks::init() {
                   "relatively weak comparing to "
                   "background.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex", EMPTY_INT(), mustBePositive,
                   "If set, will remove peaks only in the given spectrum of the "
                   "workspace. Otherwise, all spectra will be searched.");
 
-  auto mustBePositiveDbl = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositiveDbl = std::make_shared<BoundedValidator<double>>();
   mustBePositiveDbl->setLower(0.);
   declareProperty(
       "MaximumChisq", 100., mustBePositiveDbl,
@@ -107,7 +107,8 @@ void StripPeaks::exec() {
  *  @param WS :: The workspace to search
  *  @return list of found peaks
  */
-API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS) {
+API::ITableWorkspace_sptr
+StripPeaks::findPeaks(const API::MatrixWorkspace_sptr &WS) {
   g_log.debug("Calling FindPeaks as a Child Algorithm");
 
   // Read from properties
@@ -172,8 +173,8 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS) {
  *  @return A workspace containing the peak-subtracted data
  */
 API::MatrixWorkspace_sptr
-StripPeaks::removePeaks(API::MatrixWorkspace_const_sptr input,
-                        API::ITableWorkspace_sptr peakslist) {
+StripPeaks::removePeaks(const API::MatrixWorkspace_const_sptr &input,
+                        const API::ITableWorkspace_sptr &peakslist) {
   g_log.debug("Subtracting peaks");
   // Create an output workspace - same size as input one
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(input);

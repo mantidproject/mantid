@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Logger.h"
@@ -126,8 +126,8 @@ void process_mem_usage(size_t &vm_usage, size_t &resident_set) {
 #endif
 }
 
-  // ----------------------- functions associated with getting the memory of the
-  // system
+// ----------------------- functions associated with getting the memory of the
+// system
 
 #ifdef __linux__
 /**

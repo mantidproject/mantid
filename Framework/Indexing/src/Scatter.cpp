@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidIndexing/Scatter.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
@@ -27,7 +27,7 @@ IndexInfo scatter(const Indexing::IndexInfo &indexInfo) {
 
   std::vector<SpectrumNumber> spectrumNumbers;
   for (size_t i = 0; i < indexInfo.size(); ++i)
-    spectrumNumbers.push_back(indexInfo.spectrumNumber(i));
+    spectrumNumbers.emplace_back(indexInfo.spectrumNumber(i));
   IndexInfo scattered(spectrumNumbers, Parallel::StorageMode::Distributed,
                       indexInfo.communicator());
   const auto &globalSpectrumDefinitions = indexInfo.spectrumDefinitions();

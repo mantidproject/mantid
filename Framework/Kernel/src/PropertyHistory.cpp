@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -72,15 +72,15 @@ bool PropertyHistory::isEmptyDefault() const {
   static std::vector<std::string> numberTypes, emptyValues;
   // Type strings corresponding to numbers
   if (numberTypes.empty()) {
-    numberTypes.push_back(getUnmangledTypeName(typeid(int)));
-    numberTypes.push_back(getUnmangledTypeName(typeid(int64_t)));
-    numberTypes.push_back(getUnmangledTypeName(typeid(double)));
+    numberTypes.emplace_back(getUnmangledTypeName(typeid(int)));
+    numberTypes.emplace_back(getUnmangledTypeName(typeid(int64_t)));
+    numberTypes.emplace_back(getUnmangledTypeName(typeid(double)));
   }
   // Empty values
   if (emptyValues.empty()) {
-    emptyValues.push_back(std::to_string(EMPTY_INT()));
-    emptyValues.push_back(boost::lexical_cast<std::string>(EMPTY_DBL()));
-    emptyValues.push_back(std::to_string(EMPTY_LONG()));
+    emptyValues.emplace_back(std::to_string(EMPTY_INT()));
+    emptyValues.emplace_back(boost::lexical_cast<std::string>(EMPTY_DBL()));
+    emptyValues.emplace_back(std::to_string(EMPTY_LONG()));
   }
 
   // If default, input, number type and matches empty value then return true

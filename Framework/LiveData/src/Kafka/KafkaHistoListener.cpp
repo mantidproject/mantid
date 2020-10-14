@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/KafkaHistoListener.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -77,7 +77,7 @@ void KafkaHistoListener::start(Types::Core::DateAndTime startTime) {
 }
 
 /// @copydoc ILiveListener::extractData
-boost::shared_ptr<API::Workspace> KafkaHistoListener::extractData() {
+std::shared_ptr<API::Workspace> KafkaHistoListener::extractData() {
   if (!m_decoder) {
     g_log.error("KafkaHistoListener::extractData(): Kafka is not connected");
     throw Kernel::Exception::InternetError("Kafka is not connected");

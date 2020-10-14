@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*******************************************************************
   A cross-platform JSON parser that uses nothing more than C++ and
@@ -399,7 +399,7 @@ void initArrayFromStream(JSONArray &arr, istream &istr) {
     // We expect to start the loop with the stream pointing to the
     // first character of the value
     // Add the value to our array
-    arr.push_back(initValueFromStream(istr));
+    arr.emplace_back(initValueFromStream(istr));
 
     istr >> nextChar;
     // nextChar is guaranteed to be either a comma, close brace or close

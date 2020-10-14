@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/CSGObject.h"
 
@@ -32,17 +32,22 @@
 #include <boost/accumulators/statistics/error_of_mean.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <array>
 #include <deque>
 #include <random>
 #include <stack>
+#include <utility>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
 namespace {
+
+/// A shift to add/subtract to a point to test if it is an entry/exit point
+constexpr double VALID_INTERCEPT_POINT_SHIFT{2.5e-05};
+
 /**
  * Find the solid angle of a triangle defined by vectors a,b,c from point
  *"observer"
@@ -99,19 +104,19 @@ double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre,
   const Quat transform(initial_axis, axis_direction);
 
   // Do the base cap which is a point at the centre and nslices points around it
-  constexpr double angle_step = 2 * M_PI / Mantid::Geometry::Cone::g_nslices;
+  constexpr double angle_step = 2 * M_PI / Mantid::Geometry::Cone::g_NSLICES;
   // Store the (x,y) points as they are used quite frequently
-  std::array<double, Mantid::Geometry::Cone::g_nslices> cos_table;
-  std::array<double, Mantid::Geometry::Cone::g_nslices> sin_table;
+  std::array<double, Mantid::Geometry::Cone::g_NSLICES> cos_table;
+  std::array<double, Mantid::Geometry::Cone::g_NSLICES> sin_table;
 
   double solid_angle(0.0);
-  for (int sl = 0; sl < Mantid::Geometry::Cone::g_nslices; ++sl) {
+  for (int sl = 0; sl < Mantid::Geometry::Cone::g_NSLICES; ++sl) {
     int vertex = sl;
     cos_table[vertex] = std::cos(angle_step * vertex);
     sin_table[vertex] = std::sin(angle_step * vertex);
     V3D pt2 = V3D(radius * cos_table[vertex], radius * sin_table[vertex], 0.0);
 
-    if (sl < Mantid::Geometry::Cone::g_nslices - 1) {
+    if (sl < Mantid::Geometry::Cone::g_NSLICES - 1) {
       vertex = sl + 1;
       cos_table[vertex] = std::cos(angle_step * vertex);
       sin_table[vertex] = std::sin(angle_step * vertex);
@@ -132,16 +137,16 @@ double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre,
   }
 
   // Now the main section
-  const double z_step = height / Cone::g_nstacks;
-  const double r_step = height / Cone::g_nstacks;
+  const double z_step = height / Cone::g_NSTACKS;
+  const double r_step = height / Cone::g_NSTACKS;
   double z0(0.0), z1(z_step);
   double r0(radius), r1(r0 - r_step);
 
-  for (int st = 1; st < Cone::g_nstacks; ++st) {
-    for (int sl = 0; sl < Cone::g_nslices; ++sl) {
+  for (int st = 1; st < Cone::g_NSTACKS; ++st) {
+    for (int sl = 0; sl < Cone::g_NSLICES; ++sl) {
       int vertex = sl;
       V3D pt1 = V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], z0);
-      if (sl < Mantid::Geometry::Cone::g_nslices - 1)
+      if (sl < Mantid::Geometry::Cone::g_NSLICES - 1)
         vertex = sl + 1;
       else
         vertex = 0;
@@ -149,7 +154,7 @@ double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre,
 
       vertex = sl;
       V3D pt2 = V3D(r1 * cos_table[vertex], r1 * sin_table[vertex], z1);
-      if (sl < Mantid::Geometry::Cone::g_nslices - 1)
+      if (sl < Mantid::Geometry::Cone::g_NSLICES - 1)
         vertex = sl + 1;
       else
         vertex = 0;
@@ -185,11 +190,11 @@ double coneSolidAngle(const V3D &observer, const Mantid::Kernel::V3D &centre,
   transform.rotate(top_centre);
   top_centre += centre;
 
-  for (int sl = 0; sl < Cone::g_nslices; ++sl) {
+  for (int sl = 0; sl < Cone::g_NSLICES; ++sl) {
     int vertex = sl;
     V3D pt2 = V3D(r0 * cos_table[vertex], r0 * sin_table[vertex], height);
 
-    if (sl < Mantid::Geometry::Cone::g_nslices - 1)
+    if (sl < Mantid::Geometry::Cone::g_NSLICES - 1)
       vertex = sl + 1;
     else
       vertex = 0;
@@ -312,21 +317,21 @@ double cylinderSolidAngle(const V3D &observer, const V3D &centre,
 
   // Do the base cap which is a point at the centre and nslices points around it
   constexpr double angle_step =
-      2 * M_PI / static_cast<double>(Cylinder::g_nslices);
+      2 * M_PI / static_cast<double>(Cylinder::g_NSLICES);
 
-  const double z_step = height / Cylinder::g_nstacks;
+  const double z_step = height / Cylinder::g_NSTACKS;
   double z0(0.0), z1(z_step);
   double solid_angle(0.0);
-  for (int st = 1; st <= Cylinder::g_nstacks; ++st) {
-    if (st == Cylinder::g_nstacks)
+  for (int st = 1; st <= Cylinder::g_NSTACKS; ++st) {
+    if (st == Cylinder::g_NSTACKS)
       z1 = height;
 
-    for (int sl = 0; sl < Cylinder::g_nslices; ++sl) {
+    for (int sl = 0; sl < Cylinder::g_NSLICES; ++sl) {
       double x = radius * std::cos(angle_step * sl);
       double y = radius * std::sin(angle_step * sl);
       V3D pt1 = V3D(x, y, z0);
       V3D pt2 = V3D(x, y, z1);
-      int vertex = (sl + 1) % Cylinder::g_nslices;
+      int vertex = (sl + 1) % Cylinder::g_NSLICES;
       x = radius * std::cos(angle_step * vertex);
       y = radius * std::sin(angle_step * vertex);
       V3D pt3 = V3D(x, y, z0);
@@ -395,14 +400,14 @@ CSGObject::CSGObject() : CSGObject("") {}
  *  @param shapeXML : string with original shape xml.
  */
 CSGObject::CSGObject(const std::string &shapeXML)
-    : TopRule(nullptr), m_boundingBox(), AABBxMax(0), AABByMax(0), AABBzMax(0),
-      AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false), ObjNum(0),
-      m_handler(), bGeometryCaching(false),
-      vtkCacheReader(boost::shared_ptr<vtkGeometryCacheReader>()),
-      vtkCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>()),
+    : m_topRule(nullptr), m_boundingBox(), AABBxMax(0), AABByMax(0),
+      AABBzMax(0), AABBxMin(0), AABByMin(0), AABBzMin(0), boolBounded(false),
+      m_objNum(0), m_handler(), bGeometryCaching(false),
+      vtkCacheReader(std::shared_ptr<vtkGeometryCacheReader>()),
+      vtkCacheWriter(std::shared_ptr<vtkGeometryCacheWriter>()),
       m_shapeXML(shapeXML), m_id(), m_material() // empty by default
 {
-  m_handler = boost::make_shared<GeometryHandler>(this);
+  m_handler = std::make_shared<GeometryHandler>(this);
 }
 
 /**
@@ -418,7 +423,7 @@ CSGObject::CSGObject(const CSGObject &A) : CSGObject() { *this = A; }
  */
 CSGObject &CSGObject::operator=(const CSGObject &A) {
   if (this != &A) {
-    TopRule = (A.TopRule) ? A.TopRule->clone() : nullptr;
+    m_topRule = (A.m_topRule) ? A.m_topRule->clone() : nullptr;
     AABBxMax = A.AABBxMax;
     AABByMax = A.AABByMax;
     AABBzMax = A.AABBzMax;
@@ -426,7 +431,7 @@ CSGObject &CSGObject::operator=(const CSGObject &A) {
     AABByMin = A.AABByMin;
     AABBzMin = A.AABBzMin;
     boolBounded = A.boolBounded;
-    ObjNum = A.ObjNum;
+    m_objNum = A.m_objNum;
     m_handler = A.m_handler->clone();
     bGeometryCaching = A.bGeometryCaching;
     vtkCacheReader = A.vtkCacheReader;
@@ -435,7 +440,7 @@ CSGObject &CSGObject::operator=(const CSGObject &A) {
     m_id = A.m_id;
     m_material = std::make_unique<Material>(A.material());
 
-    if (TopRule)
+    if (m_topRule)
       createSurfaceList();
   }
   return *this;
@@ -464,30 +469,30 @@ const Kernel::Material &CSGObject::material() const {
 /**
  * Returns whether this object has a valid shape
  * @returns True if the surface list is populated and there is a
- * defined TopRule, false otherwise.
+ * defined m_topRule, false otherwise.
  */
 bool CSGObject::hasValidShape() const {
-  // Assume invalid shape if object has no 'TopRule' or surfaces
-  return (TopRule != nullptr && !m_SurList.empty());
+  // Assume invalid shape if object has no 'm_topRule' or surfaces
+  return (m_topRule != nullptr && !m_surList.empty());
 }
 
 /**
  * Object line ==  cell
- * @param ON :: Object name
- * @param Ln :: Input string must be :  {rules}
+ * @param objName :: Object name
+ * @param lineStr :: Input string must be :  {rules}
  * @returns 1 on success and zero on failure
  */
-int CSGObject::setObject(const int ON, const std::string &Ln) {
+int CSGObject::setObject(const int objName, const std::string &lineStr) {
   // Split line
   // Does the string now contain junk...
   static const boost::regex letters("[a-zA-Z]");
-  if (Mantid::Kernel::Strings::StrLook(Ln, letters))
+  if (Mantid::Kernel::Strings::StrLook(lineStr, letters))
     return 0;
 
-  if (procString(Ln)) // this currently does not fail:
+  if (procString(lineStr)) // this currently does not fail:
   {
-    m_SurList.clear();
-    ObjNum = ON;
+    m_surList.clear();
+    m_objNum = objName;
     return 1;
   }
 
@@ -498,7 +503,7 @@ int CSGObject::setObject(const int ON, const std::string &Ln) {
 /**
  * Returns just the cell string object
  * @param MList :: List of indexable Hulls
- * @return Cell String (from TopRule)
+ * @return Cell String (from m_topRule)
  * @todo Break infinite recusion
  */
 void CSGObject::convertComplement(const std::map<int, CSGObject> &MList)
@@ -510,7 +515,7 @@ void CSGObject::convertComplement(const std::map<int, CSGObject> &MList)
 /**
  * Returns just the cell string object
  * @param MList :: List of indexable Hulls
- * @return Cell String (from TopRule)
+ * @return Cell String (from m_topRule)
  * @todo Break infinite recusion
  */
 std::string CSGObject::cellStr(const std::map<int, CSGObject> &MList) const {
@@ -546,43 +551,43 @@ std::string CSGObject::cellStr(const std::map<int, CSGObject> &MList) const {
  * Calcluate if there are any complementary components in
  * the object. That is lines with #(....)
  * @throw ColErr::ExBase :: Error with processing
- * @param Ln :: Input string must:  ID Mat {Density}  {rules}
- * @param Cnum :: Number for cell since we don't have one
+ * @param lineStr :: Input string must:  ID Mat {Density}  {rules}
+ * @param cellNum :: Number for cell since we don't have one
  * @retval 0 on no work to do
  * @retval 1 :: A (maybe there are many) #(...) object found
  */
-int CSGObject::complementaryObject(const int Cnum, std::string &Ln) {
-  std::string::size_type posA = Ln.find("#(");
+int CSGObject::complementaryObject(const int cellNum, std::string &lineStr) {
+  std::string::size_type posA = lineStr.find("#(");
   // No work to do ?
   if (posA == std::string::npos)
     return 0;
   posA += 2;
 
   // First get the area to be removed
-  int brackCnt;
+  int numBrackets;
   std::string::size_type posB;
-  posB = Ln.find_first_of("()", posA);
+  posB = lineStr.find_first_of("()", posA);
   if (posB == std::string::npos)
-    throw std::runtime_error("Object::complement :: " + Ln);
+    throw std::runtime_error("Object::complement :: " + lineStr);
 
-  brackCnt = (Ln[posB] == '(') ? 1 : 0;
-  while (posB != std::string::npos && brackCnt) {
-    posB = Ln.find_first_of("()", posB);
+  numBrackets = (lineStr[posB] == '(') ? 1 : 0;
+  while (posB != std::string::npos && numBrackets) {
+    posB = lineStr.find_first_of("()", posB);
     if (posB == std::string::npos)
       break;
-    brackCnt += (Ln[posB] == '(') ? 1 : -1;
+    numBrackets += (lineStr[posB] == '(') ? 1 : -1;
     posB++;
   }
 
-  std::string Part = Ln.substr(posA, posB - (posA + 1));
+  std::string Part = lineStr.substr(posA, posB - (posA + 1));
 
-  ObjNum = Cnum;
+  m_objNum = cellNum;
   if (procString(Part)) {
-    m_SurList.clear();
-    Ln.erase(posA - 1, posB + 1); // Delete brackets ( Part ) .
+    m_surList.clear();
+    lineStr.erase(posA - 1, posB + 1); // Delete brackets ( Part ) .
     std::ostringstream CompCell;
-    CompCell << Cnum << " ";
-    Ln.insert(posA - 1, CompCell.str());
+    CompCell << cellNum << " ";
+    lineStr.insert(posA - 1, CompCell.str());
     return 1;
   }
 
@@ -597,35 +602,36 @@ int CSGObject::complementaryObject(const int Cnum, std::string &Ln) {
  */
 int CSGObject::hasComplement() const {
 
-  if (TopRule)
-    return TopRule->isComplementary();
+  if (m_topRule)
+    return m_topRule->isComplementary();
   return 0;
 }
 
 /**
  * Goes through the cell objects and adds the pointers
  * to the SurfPoint keys (using their keyN)
- * @param Smap :: Map of surface Keys and Surface Pointers
+ * @param surfMap :: Map of surface Keys and Surface Pointers
  * @retval 1000+ keyNumber :: Error with keyNumber
  * @retval 0 :: successfully populated all the whole Object.
  */
-int CSGObject::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
-  std::deque<Rule *> Rst;
-  Rst.push_back(TopRule.get());
-  while (!Rst.empty()) {
-    Rule *T1 = Rst.front();
-    Rst.pop_front();
+int CSGObject::populate(
+    const std::map<int, std::shared_ptr<Surface>> &surfMap) {
+  std::deque<Rule *> rules;
+  rules.emplace_back(m_topRule.get());
+  while (!rules.empty()) {
+    Rule *T1 = rules.front();
+    rules.pop_front();
     if (T1) {
       // if an actual surface process :
-      auto *KV = dynamic_cast<SurfPoint *>(T1);
-      if (KV) {
+      auto *surface = dynamic_cast<SurfPoint *>(T1);
+      if (surface) {
         // Ensure that we have a it in the surface list:
-        auto mf = Smap.find(KV->getKeyN());
-        if (mf != Smap.end()) {
-          KV->setKey(mf->second);
+        auto mapFound = surfMap.find(surface->getKeyN());
+        if (mapFound != surfMap.end()) {
+          surface->setKey(mapFound->second);
         } else {
           throw Kernel::Exception::NotFoundError("Object::populate",
-                                                 KV->getKeyN());
+                                                 surface->getKeyN());
         }
       }
       // Not a surface : Determine leaves etc and add to stack:
@@ -633,9 +639,9 @@ int CSGObject::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
         Rule *TA = T1->leaf(0);
         Rule *TB = T1->leaf(1);
         if (TA)
-          Rst.push_back(TA);
+          rules.emplace_back(TA);
         if (TB)
-          Rst.push_back(TB);
+          rules.emplace_back(TB);
       }
     }
   }
@@ -644,18 +650,18 @@ int CSGObject::populate(const std::map<int, boost::shared_ptr<Surface>> &Smap) {
 }
 
 /**
- * This takes a string Ln, finds the first two
+ * This takes a string lineStr, finds the first two
  * Rxxx function, determines their join type
  * make the rule,  adds to vector then removes two old rules from
  * the vector, updates string
- * @param Ln :: String to porcess
- * @param Rlist :: Map of rules (added to)
+ * @param lineStr :: String to process
+ * @param ruleMap :: Map of rules (added to)
  * @param compUnit :: Last computed unit
  * @retval 0 :: No rule to find
  * @retval 1 :: A rule has been combined
  */
-int CSGObject::procPair(std::string &Ln,
-                        std::map<int, std::unique_ptr<Rule>> &Rlist,
+int CSGObject::procPair(std::string &lineStr,
+                        std::map<int, std::unique_ptr<Rule>> &ruleMap,
                         int &compUnit) const
 
 {
@@ -663,71 +669,76 @@ int CSGObject::procPair(std::string &Ln,
   unsigned int Rend;
   int Ra, Rb;
 
-  for (Rstart = 0; Rstart < Ln.size() && Ln[Rstart] != 'R'; Rstart++)
+  for (Rstart = 0; Rstart < lineStr.size() && lineStr[Rstart] != 'R'; Rstart++)
     ;
 
   int type = 0; // intersection
 
   // plus 1 to skip 'R'
-  if (Rstart == Ln.size() ||
-      !Mantid::Kernel::Strings::convert(Ln.c_str() + Rstart + 1, Ra) ||
-      Rlist.find(Ra) == Rlist.end())
+  if (Rstart == lineStr.size() ||
+      !Mantid::Kernel::Strings::convert(lineStr.c_str() + Rstart + 1, Ra) ||
+      ruleMap.find(Ra) == ruleMap.end())
     return 0;
 
-  for (Rend = Rstart + 1; Rend < Ln.size() && Ln[Rend] != 'R'; Rend++) {
-    if (Ln[Rend] == ':')
+  for (Rend = Rstart + 1; Rend < lineStr.size() && lineStr[Rend] != 'R';
+       Rend++) {
+    if (lineStr[Rend] == ':')
       type = 1; // make union
   }
-  if (Rend == Ln.size() ||
-      !Mantid::Kernel::Strings::convert(Ln.c_str() + Rend + 1, Rb) ||
-      Rlist.find(Rb) == Rlist.end()) {
+  if (Rend == lineStr.size() ||
+      !Mantid::Kernel::Strings::convert(lineStr.c_str() + Rend + 1, Rb) ||
+      ruleMap.find(Rb) == ruleMap.end()) {
     // No second rule but we did find the first one
     compUnit = Ra;
     return 0;
   }
   // Get end of number (digital)
-  for (Rend++; Rend < Ln.size() && Ln[Rend] >= '0' && Ln[Rend] <= '9'; Rend++)
+  for (Rend++;
+       Rend < lineStr.size() && lineStr[Rend] >= '0' && lineStr[Rend] <= '9';
+       Rend++)
     ;
 
   // Get rules
-  auto RRA = std::move(Rlist[Ra]);
-  auto RRB = std::move(Rlist[Rb]);
+  auto RRA = std::move(ruleMap[Ra]);
+  auto RRB = std::move(ruleMap[Rb]);
   auto Join = (type) ? std::unique_ptr<Rule>(std::make_unique<Union>(
                            std::move(RRA), std::move(RRB)))
                      : std::unique_ptr<Rule>(std::make_unique<Intersection>(
                            std::move(RRA), std::move(RRB)));
-  Rlist[Ra] = std::move(Join);
-  Rlist.erase(Rlist.find(Rb));
+  ruleMap[Ra] = std::move(Join);
+  ruleMap.erase(ruleMap.find(Rb));
 
   // Remove space round pair
-  int fb;
-  for (fb = Rstart - 1; fb >= 0 && Ln[fb] == ' '; fb--)
+  int strPos;
+  for (strPos = Rstart - 1; strPos >= 0 && lineStr[strPos] == ' '; strPos--)
     ;
-  Rstart = (fb < 0) ? 0 : fb;
-  for (fb = Rend; fb < static_cast<int>(Ln.size()) && Ln[fb] == ' '; fb++)
+  Rstart = (strPos < 0) ? 0 : strPos;
+  for (strPos = Rend;
+       strPos < static_cast<int>(lineStr.size()) && lineStr[strPos] == ' ';
+       strPos++)
     ;
-  Rend = fb;
+  Rend = strPos;
 
-  std::stringstream cx;
-  cx << " R" << Ra << " ";
-  Ln.replace(Rstart, Rend, cx.str());
+  std::stringstream newRuleStr;
+  newRuleStr << " R" << Ra << " ";
+  lineStr.replace(Rstart, Rend, newRuleStr.str());
   compUnit = Ra;
   return 1;
 }
 
 /**
  * Takes a Rule item and makes it a complementary group
- * @param RItem :: to encapsulate
+ * @param ruleItem :: to encapsulate
  * @returns the complementary group
  */
 std::unique_ptr<CompGrp>
-CSGObject::procComp(std::unique_ptr<Rule> RItem) const {
-  if (!RItem)
+CSGObject::procComp(std::unique_ptr<Rule> ruleItem) const {
+  if (!ruleItem)
     return std::make_unique<CompGrp>();
 
-  Rule *Pptr = RItem->getParent();
-  Rule *RItemptr = RItem.get();
-  auto CG = std::make_unique<CompGrp>(Pptr, std::move(RItem));
+  Rule *Pptr = ruleItem->getParent();
+  Rule *RItemptr = ruleItem.get();
+  auto CG = std::make_unique<CompGrp>(Pptr, std::move(ruleItem));
   if (Pptr) {
     const int Ln = Pptr->findLeaf(RItemptr);
     Pptr->setLeaf(std::move(CG), Ln);
@@ -757,9 +768,9 @@ CSGObject::procComp(std::unique_ptr<Rule> RItem) const {
 */
 bool CSGObject::isOnSide(const Kernel::V3D &point) const {
   std::vector<Kernel::V3D> Snorms; // Normals from the contact surface.
-  Snorms.reserve(m_SurList.size());
+  Snorms.reserve(m_surList.size());
 
-  for (auto vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
+  for (auto vc = m_surList.begin(); vc != m_surList.end(); ++vc) {
     if ((*vc)->onSurface(point)) {
       Snorms.emplace_back((*vc)->surfaceNormal(point));
       // can check direct normal here since one success
@@ -787,18 +798,18 @@ bool CSGObject::isOnSide(const Kernel::V3D &point) const {
  * Determine if a point is valid by checking both
  * directions of the normal away from the line
  * A good point will have one valid and one invalid.
- * @param C :: Point on a basic surface to check
- * @param Nm :: Direction +/- to be checked
+ * @param point :: Point on a basic surface to check
+ * @param direction :: Direction +/- to be checked
  * @retval +1 ::  Point outlayer (ie not in object)
  * @retval -1 :: Point included (e.g at convex intersection)
  * @retval 0 :: success
  */
-int CSGObject::checkSurfaceValid(const Kernel::V3D &C,
-                                 const Kernel::V3D &Nm) const {
+int CSGObject::checkSurfaceValid(const Kernel::V3D &point,
+                                 const Kernel::V3D &direction) const {
   int status(0);
-  Kernel::V3D tmp = C + Nm * (Kernel::Tolerance * 5.0);
+  Kernel::V3D tmp = point + direction * (Kernel::Tolerance * 5.0);
   status = (!isValid(tmp)) ? 1 : -1;
-  tmp -= Nm * (Kernel::Tolerance * 10.0);
+  tmp -= direction * (Kernel::Tolerance * 10.0);
   status += (!isValid(tmp)) ? 1 : -1;
   return status / 2;
 }
@@ -809,9 +820,9 @@ int CSGObject::checkSurfaceValid(const Kernel::V3D &C,
  * @returns 1 if true and 0 if false
  */
 bool CSGObject::isValid(const Kernel::V3D &point) const {
-  if (!TopRule)
+  if (!m_topRule)
     return false;
-  return TopRule->isValid(point);
+  return m_topRule->isValid(point);
 }
 
 /**
@@ -820,9 +831,9 @@ bool CSGObject::isValid(const Kernel::V3D &point) const {
  * @returns 1 if true and 0 if false
  */
 bool CSGObject::isValid(const std::map<int, int> &SMap) const {
-  if (!TopRule)
+  if (!m_topRule)
     return false;
-  return TopRule->isValid(SMap);
+  return m_topRule->isValid(SMap);
 }
 
 /**
@@ -832,9 +843,9 @@ bool CSGObject::isValid(const std::map<int, int> &SMap) const {
  * @return 1 (should be number of surfaces)
  */
 int CSGObject::createSurfaceList(const int outFlag) {
-  m_SurList.clear();
+  m_surList.clear();
   std::stack<const Rule *> TreeLine;
-  TreeLine.push(TopRule.get());
+  TreeLine.push(m_topRule.get());
   while (!TreeLine.empty()) {
     const Rule *tmpA = TreeLine.top();
     TreeLine.pop();
@@ -848,20 +859,20 @@ int CSGObject::createSurfaceList(const int outFlag) {
     } else {
       const auto *SurX = dynamic_cast<const SurfPoint *>(tmpA);
       if (SurX) {
-        m_SurList.push_back(SurX->getKey());
+        m_surList.emplace_back(SurX->getKey());
       }
     }
   }
   // Remove duplicates
-  sort(m_SurList.begin(), m_SurList.end());
-  auto sc = unique(m_SurList.begin(), m_SurList.end());
-  if (sc != m_SurList.end()) {
-    m_SurList.erase(sc, m_SurList.end());
+  sort(m_surList.begin(), m_surList.end());
+  auto sc = unique(m_surList.begin(), m_surList.end());
+  if (sc != m_surList.end()) {
+    m_surList.erase(sc, m_surList.end());
   }
   if (outFlag) {
 
     std::vector<const Surface *>::const_iterator vc;
-    for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
+    for (vc = m_surList.begin(); vc != m_surList.end(); ++vc) {
       logger.debug() << "Point == " << *vc << '\n';
       logger.debug() << (*vc)->getName() << '\n';
     }
@@ -875,9 +886,9 @@ int CSGObject::createSurfaceList(const int outFlag) {
  */
 std::vector<int> CSGObject::getSurfaceIndex() const {
   std::vector<int> out;
-  transform(m_SurList.begin(), m_SurList.end(),
+  transform(m_surList.begin(), m_surList.end(),
             std::insert_iterator<std::vector<int>>(out, out.begin()),
-            std::mem_fun(&Surface::getName));
+            std::mem_fn(&Surface::getName));
   return out;
 }
 
@@ -885,30 +896,30 @@ std::vector<int> CSGObject::getSurfaceIndex() const {
  * Removes a surface and then re-builds the
  * cell. This could be done by just removing
  * the surface from the object.
- * @param SurfN :: Number for the surface
- * @return number of surfaces removes
+ * @param surfNum :: Number for the surface
+ * @return number of surfaces removed
  */
-int CSGObject::removeSurface(const int SurfN) {
-  if (!TopRule)
+int CSGObject::removeSurface(const int surfNum) {
+  if (!m_topRule)
     return -1;
-  const int cnt = Rule::removeItem(TopRule, SurfN);
-  if (cnt)
+  const int nRemoved = Rule::removeItem(m_topRule, surfNum);
+  if (nRemoved)
     createSurfaceList();
-  return cnt;
+  return nRemoved;
 }
 
 /**
  * Removes a surface and then re-builds the cell.
- * @param SurfN :: Number for the surface
- * @param NsurfN :: New surface number
- * @param SPtr :: Surface pointer for surface NsurfN
+ * @param surfNum :: Number for the surface
+ * @param newSurfNum :: New surface number
+ * @param surfPtr :: Surface pointer for surface NsurfN
  * @return number of surfaces substituted
  */
-int CSGObject::substituteSurf(const int SurfN, const int NsurfN,
-                              const boost::shared_ptr<Surface> &SPtr) {
-  if (!TopRule)
+int CSGObject::substituteSurf(const int surfNum, const int newSurfNum,
+                              const std::shared_ptr<Surface> &surfPtr) {
+  if (!m_topRule)
     return 0;
-  const int out = TopRule->substituteSurf(SurfN, NsurfN, SPtr);
+  const int out = m_topRule->substituteSurf(surfNum, newSurfNum, surfPtr);
   if (out)
     createSurfaceList();
   return out;
@@ -918,32 +929,32 @@ int CSGObject::substituteSurf(const int SurfN, const int NsurfN,
  * Prints almost everything
  */
 void CSGObject::print() const {
-  std::deque<Rule *> Rst;
+  std::deque<Rule *> rst;
   std::vector<int> Cells;
   int Rcount(0);
-  Rst.push_back(TopRule.get());
+  rst.emplace_back(m_topRule.get());
   Rule *TA, *TB; // Temp. for storage
 
-  while (!Rst.empty()) {
-    Rule *T1 = Rst.front();
-    Rst.pop_front();
+  while (!rst.empty()) {
+    Rule *T1 = rst.front();
+    rst.pop_front();
     if (T1) {
       Rcount++;
-      auto *KV = dynamic_cast<SurfPoint *>(T1);
-      if (KV)
-        Cells.push_back(KV->getKeyN());
+      auto *surface = dynamic_cast<SurfPoint *>(T1);
+      if (surface)
+        Cells.emplace_back(surface->getKeyN());
       else {
         TA = T1->leaf(0);
         TB = T1->leaf(1);
         if (TA)
-          Rst.push_back(TA);
+          rst.emplace_back(TA);
         if (TB)
-          Rst.push_back(TB);
+          rst.emplace_back(TB);
       }
     }
   }
 
-  logger.debug() << "Name == " << ObjNum << '\n';
+  logger.debug() << "Name == " << m_objNum << '\n';
   logger.debug() << "Rules == " << Rcount << '\n';
   std::vector<int>::const_iterator mc;
   logger.debug() << "Surface included == ";
@@ -957,16 +968,16 @@ void CSGObject::print() const {
  * Takes the complement of a group
  */
 void CSGObject::makeComplement() {
-  std::unique_ptr<Rule> NCG = procComp(std::move(TopRule));
-  TopRule = std::move(NCG);
+  std::unique_ptr<Rule> NCG = procComp(std::move(m_topRule));
+  m_topRule = std::move(NCG);
 }
 
 /**
  * Displays the rule tree
  */
 void CSGObject::printTree() const {
-  logger.debug() << "Name == " << ObjNum << '\n';
-  logger.debug() << TopRule->display() << '\n';
+  logger.debug() << "Name == " << m_objNum << '\n';
+  logger.debug() << m_topRule->display() << '\n';
 }
 
 /**
@@ -975,10 +986,10 @@ void CSGObject::printTree() const {
  * @return Object Line
  */
 std::string CSGObject::cellCompStr() const {
-  std::ostringstream cx;
-  if (TopRule)
-    cx << TopRule->display();
-  return cx.str();
+  std::ostringstream objStr;
+  if (m_topRule)
+    objStr << m_topRule->display();
+  return objStr.str();
 }
 
 /**
@@ -987,34 +998,34 @@ std::string CSGObject::cellCompStr() const {
  * @return Object Line
  */
 std::string CSGObject::str() const {
-  std::ostringstream cx;
-  if (TopRule) {
-    cx << ObjNum << " ";
-    cx << TopRule->display();
+  std::ostringstream objStr;
+  if (m_topRule) {
+    objStr << m_objNum << " ";
+    objStr << m_topRule->display();
   }
-  return cx.str();
+  return objStr.str();
 }
 
 /**
  * Write the object to a standard stream
  * in standard MCNPX output format.
- * @param OX :: Output stream (required for multiple std::endl)
+ * @param outStream :: Output stream (required for multiple std::endl)
  */
-void CSGObject::write(std::ostream &OX) const {
-  std::ostringstream cx;
-  cx.precision(10);
-  cx << str();
-  Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
+void CSGObject::write(std::ostream &outStream) const {
+  std::ostringstream objStr;
+  objStr.precision(10);
+  objStr << str();
+  Mantid::Kernel::Strings::writeMCNPX(objStr.str(), outStream);
 }
 
 /**
  * Processes the cell string. This is an internal function
  * to process a string with - String type has #( and ( )
- * @param Line :: String value
+ * @param lineStr :: String value
  * @returns 1 on success
  */
-int CSGObject::procString(const std::string &Line) {
-  TopRule = nullptr;
+int CSGObject::procString(const std::string &lineStr) {
+  m_topRule = nullptr;
   std::map<int, std::unique_ptr<Rule>> RuleList; // List for the rules
   int Ridx = 0; // Current index (not necessary size of RuleList
   // SURFACE REPLACEMENT
@@ -1022,7 +1033,7 @@ int CSGObject::procString(const std::string &Line) {
   std::unique_ptr<SurfPoint> TmpR; // Tempory Rule storage position
   std::unique_ptr<CompObj> TmpO;   // Tempory Rule storage position
 
-  std::string Ln = Line;
+  std::string Ln = lineStr;
   // Remove all surfaces :
   std::ostringstream cx;
   const std::string::size_type length = Ln.length();
@@ -1032,7 +1043,7 @@ int CSGObject::procString(const std::string &Line) {
       int nLen = Mantid::Kernel::Strings::convPartNum(Ln.substr(i), SN);
       if (!nLen)
         throw std::invalid_argument(
-            "Invalid surface string in Object::ProcString : " + Line);
+            "Invalid surface string in Object::ProcString : " + lineStr);
       // Process #Number
       if (i != 0 && Ln[i - 1] == '#') {
         TmpO = std::make_unique<CompObj>();
@@ -1083,7 +1094,7 @@ int CSGObject::procString(const std::string &Line) {
   }
 
   if (RuleList.size() == 1) {
-    TopRule = std::move((RuleList.begin())->second);
+    m_topRule = std::move((RuleList.begin())->second);
   } else {
     throw std::logic_error("Object::procString() - Unexpected number of "
                            "surface rules found. Expected=1, found=" +
@@ -1094,16 +1105,15 @@ int CSGObject::procString(const std::string &Line) {
 
 /**
  * Given a track, fill the track with valid section
- * @param UT :: Initial track
+ * @param track :: Initial track
  * @return Number of segments added
  */
-int CSGObject::interceptSurface(Geometry::Track &UT) const {
-  int originalCount = UT.count(); // Number of intersections original track
+int CSGObject::interceptSurface(Geometry::Track &track) const {
+  int originalCount = track.count(); // Number of intersections original track
   // Loop over all the surfaces.
-  LineIntersectVisit LI(UT.startPoint(), UT.direction());
-  std::vector<const Surface *>::const_iterator vc;
-  for (vc = m_SurList.begin(); vc != m_SurList.end(); ++vc) {
-    (*vc)->acceptVisitor(LI);
+  LineIntersectVisit LI(track.startPoint(), track.direction());
+  for (auto &surface : m_surList) {
+    surface->acceptVisitor(LI);
   }
   const auto &IPoints(LI.getPoints());
   const auto &dPoints(LI.getDistance());
@@ -1114,14 +1124,37 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
     if (*ditr > 0.0) // only interested in forward going points
     {
       // Is the point and enterance/exit Point
-      const TrackDirection flag = calcValidType(*iitr, UT.direction());
+      const TrackDirection flag = calcValidType(*iitr, track.direction());
       if (flag != TrackDirection::INVALID)
-        UT.addPoint(flag, *iitr, *this);
+        track.addPoint(flag, *iitr, *this);
     }
   }
-  UT.buildLink();
+  track.buildLink();
   // Return number of track segments added
-  return (UT.count() - originalCount);
+  return (track.count() - originalCount);
+}
+
+/**
+ * Compute the distance to the first point of intersection with the surface
+ * @param track Track defining start/direction
+ * @return The distance to the object
+ * @throws std::runtime_error if no intersection was found
+ */
+double CSGObject::distance(const Geometry::Track &track) const {
+  LineIntersectVisit LI(track.startPoint(), track.direction());
+  for (auto &surface : m_surList) {
+    surface->acceptVisitor(LI);
+  }
+  const auto &distances(LI.getDistance());
+  if (!distances.empty()) {
+    return std::abs(
+        *std::min_element(std::begin(distances), std::end(distances)));
+  } else {
+    std::ostringstream os;
+    os << "Unable to find intersection with object with track starting at "
+       << track.startPoint() << " in direction " << track.direction() << "\n";
+    throw std::runtime_error(os.str());
+  }
 }
 
 /**
@@ -1134,11 +1167,9 @@ int CSGObject::interceptSurface(Geometry::Track &UT) const {
  */
 TrackDirection CSGObject::calcValidType(const Kernel::V3D &point,
                                         const Kernel::V3D &uVec) const {
-  const Kernel::V3D shift(uVec * Kernel::Tolerance * 25.0);
-  const Kernel::V3D testA(point - shift);
-  const Kernel::V3D testB(point + shift);
-  const int flagA = isValid(testA);
-  const int flagB = isValid(testB);
+  const Kernel::V3D shift(uVec * VALID_INTERCEPT_POINT_SHIFT);
+  const int flagA = isValid(point - shift);
+  const int flagB = isValid(point + shift);
   if (!(flagA ^ flagB))
     return Geometry::TrackDirection::INVALID;
   return (flagA) ? Geometry::TrackDirection::LEAVING
@@ -1569,6 +1600,7 @@ double CSGObject::singleShotMonteCarloVolume(const int shotSize,
     const auto threadCount = PARALLEL_NUMBER_OF_THREADS;
     const auto currentThreadNum = PARALLEL_THREAD_NUMBER;
     size_t blocksize = shotSize / threadCount;
+    // cppcheck-suppress knownConditionTrueFalse
     if (currentThreadNum == threadCount - 1) {
       // Last thread may have to do threadCount extra iterations in
       // the worst case.
@@ -1616,7 +1648,7 @@ const BoundingBox &CSGObject::getBoundingBox() const {
 
   // If we don't know the extent of the object, the bounding box doesn't mean
   // anything
-  if (!TopRule) {
+  if (!m_topRule) {
     const_cast<CSGObject *>(this)->setNullBoundingBox();
     return m_boundingBox;
   }
@@ -1658,7 +1690,7 @@ const BoundingBox &CSGObject::getBoundingBox() const {
  */
 void CSGObject::calcBoundingBoxByRule() {
   // Must have a top rule for this to work
-  if (!TopRule)
+  if (!m_topRule)
     return;
 
   // Set up some unreasonable values that will be refined
@@ -1668,7 +1700,7 @@ void CSGObject::calcBoundingBoxByRule() {
   double maxX(huge), maxY(huge), maxZ(huge);
 
   // Try to use the Rule system to derive the box
-  TopRule->getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
+  m_topRule->getBoundingBox(maxX, maxY, maxZ, minX, minY, minZ);
 
   // Check whether values are reasonable now. Rule system will fail to produce
   // a reasonable box if the shape is not axis-aligned.
@@ -1756,10 +1788,10 @@ void CSGObject::calcBoundingBoxByGeometry() {
     auto rbb = lbb + (rfb - lfb); // Right-Back-Bottom
     auto rbt = rbb + (rft - rfb); // Right-Back-Top
 
-    vectors.push_back(lbt);
-    vectors.push_back(rft);
-    vectors.push_back(rbb);
-    vectors.push_back(rbt);
+    vectors.emplace_back(lbt);
+    vectors.emplace_back(rft);
+    vectors.emplace_back(rbb);
+    vectors.emplace_back(rbt);
 
     // Unreasonable extents to be replaced by first loop cycle
     constexpr double huge = 1e10;
@@ -1857,7 +1889,7 @@ void CSGObject::calcBoundingBoxByGeometry() {
  */
 void CSGObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
                                double &xmin, double &ymin, double &zmin) const {
-  if (!TopRule) { // If no rule defined then return zero boundbing box
+  if (!m_topRule) { // If no rule defined then return zero boundbing box
     xmax = ymax = zmax = xmin = ymin = zmin = 0.0;
     return;
   }
@@ -1868,8 +1900,8 @@ void CSGObject::getBoundingBox(double &xmax, double &ymax, double &zmax,
     AABBxMin = xmin;
     AABByMin = ymin;
     AABBzMin = zmin;
-    TopRule->getBoundingBox(AABBxMax, AABByMax, AABBzMax, AABBxMin, AABByMin,
-                            AABBzMin);
+    m_topRule->getBoundingBox(AABBxMax, AABByMax, AABBzMax, AABBxMin, AABByMin,
+                              AABBzMin);
     if (AABBxMax >= xmax || AABBxMin <= xmin || AABByMax >= ymax ||
         AABByMin <= ymin || AABBzMax >= zmax || AABBzMin <= zmin)
       boolBounded = false;
@@ -1958,11 +1990,12 @@ int CSGObject::getPointInObject(Kernel::V3D &point) const {
  * @param rng  A reference to a PseudoRandomNumberGenerator where
  * nextValue should return a flat random number between 0.0 & 1.0
  * @param maxAttempts The maximum number of attempts at generating a point
- * @return The generated point
+ * @return whether a point was generated in the object or not
  */
-V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
-                                     const size_t maxAttempts) const {
-  V3D point;
+boost::optional<Kernel::V3D>
+CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
+                                 const size_t maxAttempts) const {
+  boost::optional<V3D> point{boost::none};
   // If the shape fills its bounding box well enough then the most efficient
   // way to get the point is just brute force. We'll try that first with
   // just a few attempts.
@@ -1975,7 +2008,7 @@ V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
   boost::optional<V3D> maybePoint{
       RandomPoint::inGenericShape(*this, rng, bruteForceAttempts)};
   if (maybePoint) {
-    point = *maybePoint;
+    point = maybePoint;
   } else {
     switch (shape()) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
@@ -1993,12 +2026,7 @@ V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
     default:
       maybePoint = RandomPoint::inGenericShape(
           *this, rng, maxAttempts - bruteForceAttempts);
-      if (!maybePoint) {
-        throw std::runtime_error("Unable to generate point in object after " +
-                                 std::to_string(maxAttempts) + " attempts");
-      }
-      point = *maybePoint;
-      break;
+      point = maybePoint;
     }
   }
   return point;
@@ -2012,11 +2040,12 @@ V3D CSGObject::generatePointInObject(PseudoRandomNumberGenerator &rng,
  * @param activeRegion Restrict point generation to this sub-region of the
  * object
  * @param maxAttempts The maximum number of attempts at generating a point
- * @return The newly generated point
+ * @return whether a point was generated in the object or not
  */
-V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                     const BoundingBox &activeRegion,
-                                     const size_t maxAttempts) const {
+boost::optional<Kernel::V3D>
+CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                                 const BoundingBox &activeRegion,
+                                 const size_t maxAttempts) const {
   boost::optional<V3D> point{boost::none};
   // We'll first try brute force. If the shape fills its bounding box
   // well enough, this should be the fastest method.
@@ -2037,19 +2066,23 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
     switch (shape) {
     case detail::ShapeInfo::GeometryShape::CUBOID:
       point = RandomPoint::bounded<RandomPoint::inCuboid>(
-          m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
+          m_handler->shapeInfo(), rng, activeRegion,
+          maxAttempts - bruteForceAttempts);
       break;
     case detail::ShapeInfo::GeometryShape::CYLINDER:
       point = RandomPoint::bounded<RandomPoint::inCylinder>(
-          m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
+          m_handler->shapeInfo(), rng, activeRegion,
+          maxAttempts - bruteForceAttempts);
       break;
     case detail::ShapeInfo::GeometryShape::HOLLOWCYLINDER:
       point = RandomPoint::bounded<RandomPoint::inHollowCylinder>(
-          m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
+          m_handler->shapeInfo(), rng, activeRegion,
+          maxAttempts - bruteForceAttempts);
       break;
     case detail::ShapeInfo::GeometryShape::SPHERE:
       point = RandomPoint::bounded<RandomPoint::inSphere>(
-          m_handler->shapeInfo(), rng, activeRegion, maxAttempts);
+          m_handler->shapeInfo(), rng, activeRegion,
+          maxAttempts - bruteForceAttempts);
       break;
     default:
       point = RandomPoint::bounded(*this, rng, activeRegion,
@@ -2057,11 +2090,7 @@ V3D CSGObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
       break;
     }
   }
-  if (!point) {
-    throw std::runtime_error("Unable to generate point in object after " +
-                             std::to_string(maxAttempts) + " attempts");
-  }
-  return *point;
+  return point;
 }
 
 /**
@@ -2092,7 +2121,7 @@ int CSGObject::searchForObject(Kernel::V3D &point) const {
  * Set the geometry handler for Object
  * @param[in] h is pointer to the geometry handler.
  */
-void CSGObject::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
+void CSGObject::setGeometryHandler(const std::shared_ptr<GeometryHandler> &h) {
   if (h)
     m_handler = h;
 }
@@ -2123,8 +2152,8 @@ void CSGObject::initDraw() const {
  * set vtkGeometryCache writer
  */
 void CSGObject::setVtkGeometryCacheWriter(
-    boost::shared_ptr<vtkGeometryCacheWriter> writer) {
-  vtkCacheWriter = writer;
+    std::shared_ptr<vtkGeometryCacheWriter> writer) {
+  vtkCacheWriter = std::move(writer);
   updateGeometryHandler();
 }
 
@@ -2132,15 +2161,15 @@ void CSGObject::setVtkGeometryCacheWriter(
  * set vtkGeometryCache reader
  */
 void CSGObject::setVtkGeometryCacheReader(
-    boost::shared_ptr<vtkGeometryCacheReader> reader) {
-  vtkCacheReader = reader;
+    std::shared_ptr<vtkGeometryCacheReader> reader) {
+  vtkCacheReader = std::move(reader);
   updateGeometryHandler();
 }
 
 /**
  * Returns the geometry handler
  */
-boost::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() const {
+std::shared_ptr<GeometryHandler> CSGObject::getGeometryHandler() const {
   // Check if the geometry handler is upto dated with the cache, if not then
   // cache it now.
   return m_handler;

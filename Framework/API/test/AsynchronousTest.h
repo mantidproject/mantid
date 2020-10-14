@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ASYNCHRONOUSTEST_H_
-#define ASYNCHRONOUSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -238,13 +237,11 @@ private:
   }
 
   WorkspaceGroup_sptr makeGroupWorkspace() {
-    boost::shared_ptr<WorkspaceTester> ws0 =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws0 = std::make_shared<WorkspaceTester>();
     ws0->initialize(2, 4, 3);
     AnalysisDataService::Instance().addOrReplace("ws0", ws0);
 
-    boost::shared_ptr<WorkspaceTester> ws1 =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws1 = std::make_shared<WorkspaceTester>();
     ws1->initialize(2, 4, 3);
     AnalysisDataService::Instance().addOrReplace("ws1", ws1);
 
@@ -294,5 +291,3 @@ std::condition_variable AsynchronousTest::g_condition2;
 std::mutex AsynchronousTest::g_mtx;
 bool AsynchronousTest::g_testStarted = false;
 bool AsynchronousTest::g_execStarted = false;
-
-#endif /*ASYNCHRONOUSTEST_H_*/

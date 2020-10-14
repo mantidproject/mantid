@@ -1,5 +1,4 @@
-#ifndef __cxxtest__StdTestSuite_h__
-#define __cxxtest__StdTestSuite_h__
+#pragma once
 
 //
 // This provides explicit partial specializations for STL-based
@@ -45,8 +44,6 @@ struct delta<std::list<X>, std::list<Y>, D>
 #endif
 
 } // namespace CxxTest
-
-#endif // __cxxtest__StdTestSuite_h__
 
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government

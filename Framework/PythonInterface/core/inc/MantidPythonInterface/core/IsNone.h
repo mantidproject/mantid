@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_KERNEL_ISNONE_H_
-#define MANTID_PYTHONINTERFACE_KERNEL_ISNONE_H_
+#pragma once
 
 #include <boost/python/object.hpp>
 
@@ -39,5 +38,3 @@ inline bool isNone(const boost::python::object &obj) {
 }
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* #ifndef MANTID_PYTHONINTERFACE_KERNEL_ISNONE_H_ */

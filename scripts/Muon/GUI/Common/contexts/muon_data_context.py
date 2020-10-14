@@ -1,12 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
-
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
@@ -15,9 +12,9 @@ from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 from Muon.GUI.Common.utilities.muon_file_utils import allowed_instruments
 
-from mantid.api import WorkspaceGroup
+from mantid.simpleapi import GroupWorkspaces
 from mantid.kernel import ConfigService
-from Muon.GUI.Common.observer_pattern import Observable
+from mantidqt.utils.observer_pattern import Observable
 
 
 def construct_empty_group(group_names, group_index=0):
@@ -87,7 +84,11 @@ class MuonDataContext(object):
         return self._loaded_data.num_items() > 0
 
     def is_multi_period(self):
-        return len(self.current_data["OutputWorkspace"]) > 1
+        for run in self.current_runs:
+            if self.num_periods(run) > 1:
+                return True
+
+        return False
 
     @property
     def instrument(self):
@@ -164,10 +165,9 @@ class MuonDataContext(object):
 
     def loaded_workspace_as_group(self, run):
         if self.is_multi_period():
-            workspace_group = WorkspaceGroup()
-            for workspace_wrapper in self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace']:
-                workspace_group.addWorkspace(workspace_wrapper.workspace)
-            return workspace_group
+            workspace_list = [wrapper._workspace_name for wrapper in self._loaded_data.get_data(
+                run=run, instrument=self.instrument)['workspace']['OutputWorkspace']]
+            return GroupWorkspaces(InputWorkspaces=workspace_list, OutputWorkspace='__temp_group')
         else:
             return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']['OutputWorkspace'][0].workspace
 

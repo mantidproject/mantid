@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_ADDPEAKHKLTEST_H_
-#define MANTID_CRYSTAL_ADDPEAKHKLTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
@@ -71,27 +70,26 @@ public:
         Mantid::PhysicalConstants::h_bar;
     V3D qLab = qLabDir * wavenumber_in_angstrom_times_tof_in_microsec;
 
-    Mantid::Geometry::OrientedLattice orientedLattice(
-        1, 1, 1, 90, 90, 90); // U is identity, real and reciprocal lattice
-                              // vectors are identical.
     Mantid::Geometry::Goniometer goniometer; // identity
     V3D hkl = qLab / (2 * M_PI); // Given our settings above, this is the
                                  // simplified relationship between qLab and
                                  // hkl.
 
     // Now create a peaks workspace around the simple fictional instrument
-    PeaksWorkspace_sptr ws = boost::make_shared<PeaksWorkspace>();
+    PeaksWorkspace_sptr ws = std::make_shared<PeaksWorkspace>();
     ws->setInstrument(minimalInstrument);
-    ws->mutableSample().setOrientedLattice(&orientedLattice);
+    ws->mutableSample().setOrientedLattice(
+        std::make_unique<Mantid::Geometry::OrientedLattice>(1, 1, 1, 90, 90,
+                                                            90));
     ws->mutableRun().setGoniometer(goniometer, false);
 
     AddPeakHKL alg;
     alg.setChild(true);
     alg.initialize();
     std::vector<double> hklVec;
-    hklVec.push_back(hkl.X());
-    hklVec.push_back(hkl.Y());
-    hklVec.push_back(hkl.Z());
+    hklVec.emplace_back(hkl.X());
+    hklVec.emplace_back(hkl.Y());
+    hklVec.emplace_back(hkl.Z());
     alg.setProperty("HKL", hklVec);
     alg.setProperty("Workspace", ws);
     alg.execute();
@@ -121,5 +119,3 @@ public:
                       peak.getGoniometerMatrix());
   }
 };
-
-#endif /* MANTID_CRYSTAL_ADDPEAKHKLTEST_H_ */

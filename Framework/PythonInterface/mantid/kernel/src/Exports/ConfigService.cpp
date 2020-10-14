@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
@@ -61,7 +61,7 @@ GNU_DIAG_OFF("conversion")
 // Overload generator for getInstrument
 BOOST_PYTHON_FUNCTION_OVERLOADS(getInstrument_Overload, getInstrument, 1, 2)
 // Overload generator for getString
-BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getStringOverload,
+BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(getString_Overload,
                                        ConfigServiceImpl::getString, 1, 2)
 
 GNU_DIAG_ON("conversion")
@@ -122,11 +122,12 @@ void export_ConfigService() {
                "default.instrument is returned",
                (arg("self"), arg("instrumentName") = boost::python::object()))
                [return_value_policy<copy_const_reference>()])
-      .def(
-          "getString", &ConfigServiceImpl::getString,
-          getStringOverload("Returns the named key's value. If use_cache = "
-                            "true [default] then relative paths->absolute",
-                            (arg("self"), arg("key"), arg("use_cache") = true)))
+      .def("getString", &ConfigServiceImpl::getString,
+           getString_Overload(
+               "Returns the named key's value. If use_cache = "
+               "true [default] then relative paths->absolute",
+               (arg("self"), arg("key"), arg("pathAbsolute") = true)))
+
       .def("setString", &ConfigServiceImpl::setString,
            (arg("self"), arg("key"), arg("value")),
            "Set the given property name. "

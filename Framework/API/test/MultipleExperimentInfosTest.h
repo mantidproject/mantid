@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_MULTIPLEEXPERIMENTINFOSTEST_H_
-#define MANTID_API_MULTIPLEEXPERIMENTINFOSTEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -51,13 +50,12 @@ public:
     MultipleExperimentInfos mei;
     TS_ASSERT_EQUALS(mei.hasOrientedLattice(), false);
 
-    OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
-
     // add some oriented lattices to the multiple experiment info
     for (uint16_t i = 0; i < nExperimentInfosToAdd; ++i) {
-      ExperimentInfo_sptr experimentInfo = boost::make_shared<ExperimentInfo>();
+      ExperimentInfo_sptr experimentInfo = std::make_shared<ExperimentInfo>();
       mei.addExperimentInfo(experimentInfo);
-      mei.getExperimentInfo(i)->mutableSample().setOrientedLattice(latt);
+      mei.getExperimentInfo(i)->mutableSample().setOrientedLattice(
+          std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
       TS_ASSERT_EQUALS(mei.hasOrientedLattice(), true);
     }
 
@@ -72,9 +70,5 @@ public:
         ->mutableSample()
         .clearOrientedLattice();
     TS_ASSERT_EQUALS(mei.hasOrientedLattice(), false);
-
-    delete latt;
   }
 };
-
-#endif /* MANTID_API_MULTIPLEEXPERIMENTINFOSTEST_H_ */

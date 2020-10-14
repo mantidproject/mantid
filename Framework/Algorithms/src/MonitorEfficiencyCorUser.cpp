@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidAlgorithms/MonitorEfficiencyCorUser.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -37,7 +36,7 @@ DECLARE_ALGORITHM(MonitorEfficiencyCorUser)
 void MonitorEfficiencyCorUser::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "The workspace to correct for monitor efficiency");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),

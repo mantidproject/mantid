@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_TESTREGEXSUPPORT__
-#define MANTID_TESTREGEXSUPPORT__
+#pragma once
 
 #include <algorithm>
 #include <cmath>
@@ -145,7 +144,6 @@ public:
   }
 
   void testStrFullCut() {
-    std::vector<double> dblresult;
     double sgldblResult;
     std::string input("100.01 101.02 103.04 105.06 Remainder of string");
     TS_ASSERT_EQUALS(
@@ -174,5 +172,3 @@ public:
     TS_ASSERT_EQUALS(output, "2007-11-16T13:32:38 BEGIN");
   }
 };
-
-#endif

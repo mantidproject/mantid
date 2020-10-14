@@ -61,6 +61,39 @@ std::vector<R> convertVector(const std::vector<T> &toConvert) {
   return target;
 }
 
+template <typename ExpectedT> void validateStorageType(const DataSet &data) {
+
+  const auto typeClass = data.getTypeClass();
+  const size_t sizeOfType = data.getDataType().getSize();
+  // Early check to prevent reinterpretation of underlying data.
+  if (std::is_floating_point<ExpectedT>::value) {
+    if (H5T_FLOAT != typeClass) {
+      throw std::runtime_error("Storage type mismatch. Expecting to extract a "
+                               "floating point number from " +
+                               H5_OBJ_NAME(data));
+    }
+    if (sizeOfType != sizeof(ExpectedT)) {
+      throw std::runtime_error(
+          "Storage type mismatch for floats. This operation "
+          "is dangerous. Nexus stored has byte size:" +
+          std::to_string(sizeOfType) + " in " + H5_OBJ_NAME(data));
+    }
+  } else if (std::is_integral<ExpectedT>::value) {
+    if (H5T_INTEGER != typeClass) {
+      throw std::runtime_error(
+          "Storage type mismatch. Expecting to extract a integer from " +
+          H5_OBJ_NAME(data));
+    }
+    if (sizeOfType > sizeof(ExpectedT)) {
+      // endianness not checked
+      throw std::runtime_error(
+          "Storage type mismatch for integer. Result "
+          "would result in truncation. Nexus stored has byte size:" +
+          std::to_string(sizeOfType) + " in " + H5_OBJ_NAME(data));
+    }
+  }
+}
+  
 template <typename ValueType>
 std::vector<ValueType> extractVector(const DataSet &data) {
 
@@ -470,8 +503,9 @@ private:
         Eigen::AngleAxisd rotation(angle, transformVector);
         transforms = rotation * transforms;
       } else {
-        throw std::runtime_error(
-            "Unknown Transform type in Nexus Geometry Parsing");
+        throw std::runtime_error("Unknown Transform type \"" + transformType +
+                                 "\" found in " + H5_OBJ_NAME(transformation) +
+                                 " when parsing Nexus geometry");
       }
     }
     return transforms;
@@ -562,11 +596,10 @@ private:
   // Parse OFF (mesh) nexus geometry
   std::shared_ptr<const Geometry::IObject>
   parseNexusMesh(const Group &shapeGroup) {
-    const std::vector<uint32_t> faceIndices = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>(shapeGroup, "faces"));
-    const std::vector<uint32_t> windingOrder = convertVector<int32_t, uint32_t>(
-        get1DDataset<int32_t>(shapeGroup, "winding_order"));
-    const auto vertices = toNexusFloat(shapeGroup, VERTICES);
+
+    const auto faceIndices = readNXUInts32(shapeGroup, "faces");
+    const auto windingOrder = readNXUInts32(shapeGroup, "winding_order");
+    const auto vertices = readNXFloats(shapeGroup, "vertices");
     return NexusShapeFactory::createFromOFFMesh(faceIndices, windingOrder,
                                                 vertices);
   }
@@ -661,7 +694,8 @@ private:
       throw std::runtime_error("Expect to have as many detector_face entries "
                                "as detector_number entries");
     if (detFaces.size() % 2 != 0)
-      throw std::runtime_error("Unequal pairs of face incides to detector "
+
+      throw std::runtime_error("Unequal pairs of face indices to detector "
                                "indices in detector_faces");
     if (detFaces.size() / 2 > faceIndices.size())
       throw std::runtime_error(

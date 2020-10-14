@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTADDWORKSPACEDIALOG_H_
-#define MANTIDQTCUSTOMINTERFACES_INDIRECTADDWORKSPACEDIALOG_H_
+#pragma once
 
 #include "ui_IndirectEditResultsDialog.h"
 
@@ -45,5 +44,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACES_INDIRECTADDWORKSPACEDIALOG_H_ */

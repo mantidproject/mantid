@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_IFUNCTIONBROWSER_H_
-#define MANTID_MANTIDWIDGETS_IFUNCTIONBROWSER_H_
+#pragma once
 
 #include "DllOption.h"
-#include "MantidAPI/IFunction.h"
+#include "MantidAPI/IFunction_fwd.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include <QString>
 
 namespace MantidQt {
@@ -32,6 +32,8 @@ public:
   virtual Mantid::API::IFunction_sptr getGlobalFunction() = 0;
   virtual void
   updateMultiDatasetParameters(const Mantid::API::IFunction &fun) = 0;
+  virtual void updateMultiDatasetParameters(
+      const Mantid::API::ITableWorkspace &paramTable) = 0;
   virtual bool isLocalParameterFixed(const QString &parName, int i) const = 0;
   virtual double getLocalParameterValue(const QString &parName,
                                         int i) const = 0;
@@ -50,5 +52,3 @@ public:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTID_MANTIDWIDGETS_IFUNCTIONBROWSER_H

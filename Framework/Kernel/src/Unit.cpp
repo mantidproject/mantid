@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -102,12 +102,6 @@ void Unit::addConversion(std::string to, const double &factor,
   // Add the conversion to the map (does nothing if it's already there)
   s_conversionFactors[unitID()][to] = std::make_pair(factor, power);
 }
-
-//---------------------------------------------------------------------------------------
-/** Removes all registered 'quick conversions' from the unit class on which this
- * method is called.
- */
-void Unit::clearConversions() const { s_conversionFactors.clear(); }
 
 //---------------------------------------------------------------------------------------
 /** Initialize the unit to perform conversion using singleToTof() and
@@ -1068,7 +1062,7 @@ DECLARE_UNIT(SpinEchoLength)
 
 const UnitLabel SpinEchoLength::label() const { return Symbol::Nanometre; }
 
-SpinEchoLength::SpinEchoLength() : Wavelength() { clearConversions(); }
+SpinEchoLength::SpinEchoLength() : Wavelength() {}
 
 void SpinEchoLength::init() {
   // Efixed must be set to something
@@ -1119,7 +1113,7 @@ DECLARE_UNIT(SpinEchoTime)
 
 const UnitLabel SpinEchoTime::label() const { return Symbol::Nanosecond; }
 
-SpinEchoTime::SpinEchoTime() : Wavelength() { clearConversions(); }
+SpinEchoTime::SpinEchoTime() : Wavelength() {}
 
 void SpinEchoTime::init() {
   // Efixed must be set to something
@@ -1222,6 +1216,9 @@ double Degrees::conversionTOFMin() const {
 
 Unit *Degrees::clone() const { return new Degrees(*this); }
 
+// Phi
+DECLARE_UNIT(Phi)
+
 // ================================================================================
 /* Temperature in kelvin
  * ================================================================================
@@ -1259,9 +1256,46 @@ double Temperature::conversionTOFMax() const {
 
 Unit *Temperature::clone() const { return new Temperature(*this); }
 
+// =====================================================================================================
+/* Atomic Distance in units of Angstroms
+ * =====================================================================================================
+ *
+ * The distance from the center of an atom in Angstroms
+ */
+DECLARE_UNIT(AtomicDistance)
+
+AtomicDistance::AtomicDistance() : Empty(), m_label("Atomic Distance") {}
+
+const UnitLabel AtomicDistance::label() const { return Symbol::Angstrom; }
+
+void AtomicDistance::init() {}
+
+Unit *AtomicDistance::clone() const { return new AtomicDistance(*this); }
+
+double AtomicDistance::singleToTOF(const double x) const {
+  UNUSED_ARG(x);
+  throw std::runtime_error(
+      "Atomic Distance is not allowed to be converted to TOF. ");
+}
+
+double AtomicDistance::singleFromTOF(const double tof) const {
+  UNUSED_ARG(tof);
+  throw std::runtime_error(
+      "Atomic Distance is not allowed to be converted from TOF. ");
+}
+
+double AtomicDistance::conversionTOFMin() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
+double AtomicDistance::conversionTOFMax() const {
+  return std::numeric_limits<double>::quiet_NaN();
+}
+
 // ================================================================================
 
-double timeConversionValue(std::string input_unit, std::string output_unit) {
+double timeConversionValue(const std::string &input_unit,
+                           const std::string &output_unit) {
   std::map<std::string, double> timesList;
   double seconds = 1.0e9;
   double milliseconds = 1.0e-3 * seconds;

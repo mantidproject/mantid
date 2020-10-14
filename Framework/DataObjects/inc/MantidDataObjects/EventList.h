@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_EVENTLIST_H_
-#define MANTID_DATAOBJECTS_EVENTLIST_H_ 1
+#pragma once
 
 #include "MantidAPI/IEventList.h"
 #include "MantidDataObjects/Events.h"
@@ -105,7 +104,7 @@ public:
    * @param event :: TofEvent to add at the end of the list.
    * */
   inline void addEventQuickly(const Types::Event::TofEvent &event) {
-    this->events.push_back(event);
+    this->events.emplace_back(event);
     this->order = UNSORTED;
   }
 
@@ -115,7 +114,7 @@ public:
    * @param event :: WeightedEvent to add at the end of the list.
    * */
   inline void addEventQuickly(const WeightedEvent &event) {
-    this->weightedEvents.push_back(event);
+    this->weightedEvents.emplace_back(event);
     this->order = UNSORTED;
   }
 
@@ -125,7 +124,7 @@ public:
    * @param event :: WeightedEventNoTime to add at the end of the list.
    * */
   inline void addEventQuickly(const WeightedEventNoTime &event) {
-    this->weightedEventsNoTime.push_back(event);
+    this->weightedEventsNoTime.emplace_back(event);
     this->order = UNSORTED;
   }
 
@@ -242,6 +241,8 @@ public:
   void addTof(const double offset) override;
 
   void addPulsetime(const double seconds) override;
+
+  void addPulsetimes(const std::vector<double> &seconds) override;
 
   void maskTof(const double tofMin, const double tofMax) override;
   void maskCondition(const std::vector<bool> &mask) override;
@@ -446,13 +447,16 @@ private:
                                 const double maxX, const bool entireRange);
   template <class T>
   void convertTofHelper(std::vector<T> &events,
-                        std::function<double(double)> func);
+                        const std::function<double(double)> &func);
 
   template <class T>
   void convertTofHelper(std::vector<T> &events, const double factor,
                         const double offset);
   template <class T>
   void addPulsetimeHelper(std::vector<T> &events, const double seconds);
+  template <class T>
+  void addPulsetimesHelper(std::vector<T> &events,
+                           const std::vector<double> &seconds);
   template <class T>
   static std::size_t maskTofHelper(std::vector<T> &events, const double tofMin,
                                    const double tofMax);
@@ -561,4 +565,3 @@ DLLExport void getEventsFrom(const EventList &el,
 
 } // namespace DataObjects
 } // namespace Mantid
-#endif /// MANTID_DATAOBJECTS_EVENTLIST_H_

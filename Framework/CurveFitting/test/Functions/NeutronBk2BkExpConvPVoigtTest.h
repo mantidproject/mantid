@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_NEUTRONBK2BKEXPCONVPVOIGTTEST_H_
-#define MANTID_CURVEFITTING_NEUTRONBK2BKEXPCONVPVOIGTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -255,7 +254,7 @@ public:
     vector<double> vecX;
     double tof = tofh1 - 10 * fwhm;
     while (tof < tofh1 + 10 * fwhm) {
-      vecX.push_back(tof);
+      vecX.emplace_back(tof);
       tof += fwhm * 0.1;
     }
     vector<double> vecY(vecX.size(), 0.0);
@@ -267,5 +266,3 @@ public:
     }
   }
 };
-
-#endif /* MANTID_CURVEFITTING_NEUTRONBK2BKEXPCONVPVOIGTTEST_H_ */

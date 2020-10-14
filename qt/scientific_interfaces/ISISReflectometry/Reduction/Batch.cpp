@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Batch.h"
 namespace MantidQt {
@@ -27,6 +27,10 @@ Slicing const &Batch::slicing() const { return m_slicing; }
 std::vector<MantidWidgets::Batch::RowLocation>
 Batch::selectedRowLocations() const {
   return m_runsTable.selectedRowLocations();
+}
+
+std::vector<Group> Batch::selectedGroups() const {
+  return m_runsTable.selectedGroups();
 }
 
 PerThetaDefaults const *Batch::defaultsForTheta(double thetaAngle) const {

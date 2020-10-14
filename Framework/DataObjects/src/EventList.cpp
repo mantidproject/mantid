@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/EventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -63,9 +63,7 @@ int64_t calculateCorrectedFullTime(const EventType &event,
 /**
  * Type for comparing events in terms of time at sample
  */
-template <typename EventType>
-class CompareTimeAtSample
-    : public std::binary_function<EventType, EventType, bool> {
+template <typename EventType> class CompareTimeAtSample {
 private:
   const double m_tofFactor;
   const double m_tofShift;
@@ -355,7 +353,7 @@ EventList &EventList::operator+=(const TofEvent &event) {
   switch (this->eventType) {
   case TOF:
     // Simply push the events
-    this->events.push_back(event);
+    this->events.emplace_back(event);
     break;
 
   case WEIGHTED:
@@ -420,7 +418,7 @@ EventList &EventList::operator+=(const std::vector<TofEvent> &more_events) {
  * */
 EventList &EventList::operator+=(const WeightedEvent &event) {
   this->switchTo(WEIGHTED);
-  this->weightedEvents.push_back(event);
+  this->weightedEvents.emplace_back(event);
   this->order = UNSORTED;
   return *this;
 }
@@ -934,16 +932,26 @@ void EventList::clearData() { this->clear(false); }
  */
 void EventList::setMRU(EventWorkspaceMRU *newMRU) { mru = newMRU; }
 
-/** Reserve a certain number of entries in the (NOT-WEIGHTED) event list. Do NOT
- *call
- * on weighted events!
+/** Reserve a certain number of entries in event list of the specified eventType
  *
  * Calls std::vector<>::reserve() in order to pre-allocate the length of the
  *event list vector.
  *
  * @param num :: number of events that will be in this EventList
  */
-void EventList::reserve(size_t num) { this->events.reserve(num); }
+void EventList::reserve(size_t num) {
+  switch (this->eventType) {
+  case TOF:
+    this->events.reserve(num);
+    break;
+  case WEIGHTED:
+    this->weightedEvents.reserve(num);
+    break;
+  case WEIGHTED_NOTIME:
+    this->weightedEventsNoTime.reserve(num);
+    break;
+  }
+}
 
 // ==============================================================================================
 // --- Sorting functions -----------------------------------------------------
@@ -1690,8 +1698,8 @@ inline void EventList::compressFatEventsHelper(
       // Track the average tof
       totalTof += it->m_tof * norm;
       // Accumulate the pulse times
-      pulsetimes.push_back(it->m_pulsetime);
-      pulsetimeWeights.push_back(norm);
+      pulsetimes.emplace_back(it->m_pulsetime);
+      pulsetimeWeights.emplace_back(norm);
     } else {
       // We exceeded the tolerance
       if (!pulsetimes.empty()) {
@@ -1715,9 +1723,9 @@ inline void EventList::compressFatEventsHelper(
       lastTof = it->m_tof;
       lastPulseBin = eventPulseBin;
       pulsetimes.clear();
-      pulsetimes.push_back(it->m_pulsetime);
+      pulsetimes.emplace_back(it->m_pulsetime);
       pulsetimeWeights.clear();
-      pulsetimeWeights.push_back(norm);
+      pulsetimeWeights.emplace_back(norm);
     }
   }
 
@@ -2547,7 +2555,7 @@ void EventList::convertTof(std::function<double(double)> func,
  */
 template <class T>
 void EventList::convertTofHelper(std::vector<T> &events,
-                                 std::function<double(double)> func) {
+                                 const std::function<double(double)> &func) {
   // iterate through all events
   for (auto &ev : events)
     ev.m_tof = func(ev.m_tof);
@@ -2634,6 +2642,23 @@ void EventList::addPulsetimeHelper(std::vector<T> &events,
   }
 }
 
+/** Add an offset per event to the pulsetime (wall-clock time) of each event in
+ * the list. It is assumed that the vector sizes match.
+ *
+ * @param events :: reference to a vector of events to change.
+ * @param seconds :: The set of values to shift the pulsetime by, in seconds
+ */
+template <class T>
+void EventList::addPulsetimesHelper(std::vector<T> &events,
+                                    const std::vector<double> &seconds) {
+  auto eventIterEnd{events.end()};
+  auto secondsIter{seconds.cbegin()};
+  for (auto eventIter = events.begin(); eventIter < eventIterEnd;
+       ++eventIter, ++secondsIter) {
+    eventIter->m_pulsetime += *secondsIter;
+  }
+}
+
 // --------------------------------------------------------------------------
 /** Add an offset to the pulsetime (wall-clock time) of each event in the list.
  *
@@ -2650,6 +2675,34 @@ void EventList::addPulsetime(const double seconds) {
     break;
   case WEIGHTED:
     this->addPulsetimeHelper(this->weightedEvents, seconds);
+    break;
+  case WEIGHTED_NOTIME:
+    throw std::runtime_error("EventList::addPulsetime() called on an event "
+                             "list with no pulse times. You must call this "
+                             "algorithm BEFORE CompressEvents.");
+    break;
+  }
+}
+
+// --------------------------------------------------------------------------
+/** Add an offset to the pulsetime (wall-clock time) of each event in the list.
+ *
+ * @param seconds :: A set of values to shift the pulsetime by, in seconds
+ */
+void EventList::addPulsetimes(const std::vector<double> &seconds) {
+  if (this->getNumberEvents() <= 0)
+    return;
+  if (this->getNumberEvents() != seconds.size()) {
+    throw std::runtime_error("");
+  }
+
+  // Convert the list
+  switch (eventType) {
+  case TOF:
+    this->addPulsetimesHelper(this->events, seconds);
+    break;
+  case WEIGHTED:
+    this->addPulsetimesHelper(this->weightedEvents, seconds);
     break;
   case WEIGHTED_NOTIME:
     throw std::runtime_error("EventList::addPulsetime() called on an event "
@@ -2819,7 +2872,7 @@ void EventList::getTofsHelper(const std::vector<T> &events,
                               std::vector<double> &tofs) {
   tofs.clear();
   for (auto itev = events.cbegin(); itev != events.cend(); ++itev)
-    tofs.push_back(itev->m_tof);
+    tofs.emplace_back(itev->m_tof);
 }
 
 /** Fill a vector with the list of TOFs
@@ -3793,7 +3846,7 @@ void EventList::filterByPulseTimeHelper(std::vector<T> &events,
 
   while ((itev != itev_end) && (itev->m_pulsetime < stop)) {
     // Add the copy to the output
-    output.push_back(*itev);
+    output.emplace_back(*itev);
     ++itev;
   }
 }
@@ -3824,7 +3877,7 @@ void EventList::filterByTimeAtSampleHelper(std::vector<T> &events,
          (calculateCorrectedFullTime(*itev, tofFactor, tofOffset) <
           stop.totalNanoseconds())) {
     // Add the copy to the output
-    output.push_back(*itev);
+    output.emplace_back(*itev);
     ++itev;
   }
 }

@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import mantid.simpleapi as mantid
 
 from Muon.GUI.Common import thread_model
@@ -16,7 +14,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import get_fft_workspace_name, 
     get_group_or_pair_from_name
 import re
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from Muon.GUI.Common.observer_pattern import GenericObservable
+from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FREQUENCY_EXTENSIONS
 
 
@@ -181,14 +179,14 @@ class FFTPresenter(object):
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
-        self.calculation_finished_notifier.notify_subscribers()
+        self.calculation_finished_notifier.notify_subscribers(self._output_workspace_name)
 
     def calculate_FFT(self):
         imaginary_workspace_index = 0
         real_workspace_padding_parameters = self.get_pre_inputs()
         imaginary_workspace_padding_parameters = self.get_imaginary_inputs()
 
-        real_workspace_input = run_PaddingAndApodization(real_workspace_padding_parameters)
+        real_workspace_input = run_PaddingAndApodization(real_workspace_padding_parameters, '__real')
 
         if self.view.imaginary_data:
             if 'PhaseQuad' in self.view.workspace:
@@ -197,7 +195,7 @@ class FFTPresenter(object):
                     'InputWorkspace']
                 imaginary_workspace_index = 1
             else:
-                imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters)
+                imaginary_workspace_input = run_PaddingAndApodization(imaginary_workspace_padding_parameters, '__Imag')
         else:
             imaginary_workspace_input = None
             imaginary_workspace_padding_parameters['InputWorkspace'] = ""
@@ -209,8 +207,9 @@ class FFTPresenter(object):
                                       imaginary_workspace_padding_parameters['InputWorkspace'],
                                       frequency_domain_workspace)
 
-    def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace):
+    def add_fft_workspace_to_ADS(self, input_workspace, imaginary_input_workspace, fft_workspace_label):
         run = re.search('[0-9]+', input_workspace).group()
+        fft_workspace = mantid.AnalysisDataService.retrieve(fft_workspace_label)
         Im_run = ""
         if imaginary_input_workspace != "":
             Im_run = re.search('[0-9]+', imaginary_input_workspace).group()
@@ -222,8 +221,9 @@ class FFTPresenter(object):
         shift = 3 if fft_workspace.getNumberHistograms() == 6 else 0
         spectra = {"_" + FREQUENCY_EXTENSIONS["RE"]: 0 + shift, "_" + FREQUENCY_EXTENSIONS["IM"]: 1 + shift,
                    "_" + FREQUENCY_EXTENSIONS["MOD"]: 2 + shift}
+
         for spec_type in list(spectra.keys()):
-            extracted_ws = extract_single_spec(fft_workspace, spectra[spec_type])
+            extracted_ws = extract_single_spec(fft_workspace, spectra[spec_type], fft_workspace_name + spec_type)
 
             if 'PhaseQuad' in self.view.workspace:
                 self.load._frequency_context.add_FFT(fft_workspace_name + spec_type, run, Re, Im_run, Im,
@@ -231,8 +231,12 @@ class FFTPresenter(object):
             else:
                 self.load._frequency_context.add_FFT(fft_workspace_name + spec_type, run, Re, Im_run, Im)
 
-            muon_workspace_wrapper = MuonWorkspaceWrapper(extracted_ws, directory + fft_workspace_name + spec_type)
-            muon_workspace_wrapper.show()
+            muon_workspace_wrapper = MuonWorkspaceWrapper(extracted_ws)
+            muon_workspace_wrapper.show(directory + fft_workspace_name + spec_type)
+
+        # This is a small hack to get the output name to a location where it can be part of the calculation finished
+        # signal.
+        self._output_workspace_name = fft_workspace_name + '_mod'
 
     def update_view_from_model(self):
         self.getWorkspaceNames()

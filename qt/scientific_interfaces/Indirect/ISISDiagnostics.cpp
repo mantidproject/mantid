@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISDiagnostics.h"
 
@@ -39,8 +39,8 @@ ISISDiagnostics::ISISDiagnostics(IndirectDataReduction *idrUI, QWidget *parent)
   m_uiForm.properties->addWidget(m_propTrees["SlicePropTree"]);
 
   // Editor Factories
-  DoubleEditorFactory *doubleEditorFactory = new DoubleEditorFactory();
-  QtCheckBoxFactory *checkboxFactory = new QtCheckBoxFactory();
+  auto *doubleEditorFactory = new DoubleEditorFactory();
+  auto *checkboxFactory = new QtCheckBoxFactory();
   m_propTrees["SlicePropTree"]->setFactoryForManager(m_dblManager,
                                                      doubleEditorFactory);
   m_propTrees["SlicePropTree"]->setFactoryForManager(m_blnManager,
@@ -158,14 +158,14 @@ void ISISDiagnostics::run() {
   QString filenames = m_uiForm.dsInputFiles->getFilenames().join(",");
 
   std::vector<long> spectraRange;
-  spectraRange.push_back(
+  spectraRange.emplace_back(
       static_cast<long>(m_dblManager->value(m_properties["SpecMin"])));
-  spectraRange.push_back(
+  spectraRange.emplace_back(
       static_cast<long>(m_dblManager->value(m_properties["SpecMax"])));
 
   std::vector<double> peakRange;
-  peakRange.push_back(m_dblManager->value(m_properties["PeakStart"]));
-  peakRange.push_back(m_dblManager->value(m_properties["PeakEnd"]));
+  peakRange.emplace_back(m_dblManager->value(m_properties["PeakStart"]));
+  peakRange.emplace_back(m_dblManager->value(m_properties["PeakEnd"]));
 
   IAlgorithm_sptr sliceAlg = AlgorithmManager::Instance().create("TimeSlice");
   sliceAlg->initialize();
@@ -183,9 +183,9 @@ void ISISDiagnostics::run() {
 
   if (m_blnManager->value(m_properties["UseTwoRanges"])) {
     std::vector<double> backgroundRange;
-    backgroundRange.push_back(
+    backgroundRange.emplace_back(
         m_dblManager->value(m_properties["BackgroundStart"]));
-    backgroundRange.push_back(
+    backgroundRange.emplace_back(
         m_dblManager->value(m_properties["BackgroundEnd"]));
     sliceAlg->setProperty("BackgroundRange", backgroundRange);
   }
@@ -199,9 +199,9 @@ bool ISISDiagnostics::validate() {
   UserInputValidator uiv;
 
   // Check raw input
-  uiv.checkMWRunFilesIsValid("Input", m_uiForm.dsInputFiles);
+  uiv.checkFileFinderWidgetIsValid("Input", m_uiForm.dsInputFiles);
   if (m_uiForm.ckUseCalibration->isChecked())
-    uiv.checkMWRunFilesIsValid("Calibration", m_uiForm.dsInputFiles);
+    uiv.checkFileFinderWidgetIsValid("Calibration", m_uiForm.dsInputFiles);
 
   // Check peak range
   auto rangeOne = std::make_pair(m_dblManager->value(m_properties["PeakStart"]),
@@ -474,8 +474,8 @@ void ISISDiagnostics::sliceAlgDone(bool error) {
     return;
   }
 
-  MatrixWorkspace_sptr sliceWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
-      sliceOutputGroup->getItem(0));
+  MatrixWorkspace_sptr sliceWs =
+      std::dynamic_pointer_cast<MatrixWorkspace>(sliceOutputGroup->getItem(0));
   if (!sliceWs) {
     g_log.warning("No result workspaces, cannot plot preview.");
     return;
@@ -561,8 +561,8 @@ void ISISDiagnostics::setSaveEnabled(bool enabled) {
 
 void ISISDiagnostics::updateRunButton(bool enabled,
                                       std::string const &enableOutputButtons,
-                                      QString const message,
-                                      QString const tooltip) {
+                                      QString const &message,
+                                      QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);

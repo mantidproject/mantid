@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDWIDGETS_FUNCTIONBROWSER_H_
-#define MANTIDWIDGETS_FUNCTIONBROWSER_H_
+#pragma once
 
 #include "DllOption.h"
 
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
 
 #include <QMap>
@@ -67,7 +67,7 @@ public:
   /// Update the function parameter value
   void setParameter(const QString &paramName, double value);
   /// Update the function parameter error
-  void setParamError(const QString &paramName, double error);
+  void setParameterError(const QString &paramName, double error);
   /// Get a value of a parameter
   double getParameter(const QString &paramName) const;
   /// Update parameter values in the browser to match those of a function.
@@ -79,7 +79,7 @@ public:
   QStringList getLocalParameters() const;
   /// Get the number of datasets
   int getNumberOfDatasets() const override;
-  /// Get list of dataset names
+  /// Get the names of datasets
   QStringList getDatasetNames() const override;
   /// Get value of a local parameter
   double getLocalParameterValue(const QString &parName, int i) const override;
@@ -105,6 +105,9 @@ public:
   IFunction_sptr getGlobalFunction() override;
   /// Update parameter values in the browser to match those of a function.
   void updateMultiDatasetParameters(const IFunction &fun) override;
+  /// Update parameter values in the browser to match those in a table
+  /// workspace.
+  void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
   /// Get the index of the current dataset.
   int getCurrentDataset() const override;
   /// Resize the browser's columns
@@ -113,6 +116,12 @@ public:
   void setErrorsEnabled(bool enabled) override;
   /// Clear all errors
   void clearErrors() override;
+  /// Set a parameter that is responsible for the background level
+  void setBackgroundA0(double value);
+  // hide the global options
+  void hideGlobalCheckbox();
+  // show the global options
+  void showGlobalCheckbox();
 
 signals:
   void parameterChanged(const QString &funcIndex, const QString &paramName);
@@ -133,7 +142,7 @@ public slots:
   void setDatasetNames(const QStringList &names) override;
   void resetLocalParameters();
   void setCurrentDataset(int i) override;
-  void removeDatasets(QList<int> indices);
+  void removeDatasets(const QList<int> &indices);
   void addDatasets(const QStringList &names);
 
 protected:
@@ -147,5 +156,3 @@ public:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*MANTIDWIDGETS_FUNCTIONBROWSER_H_*/

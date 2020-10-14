@@ -1,13 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SORTHKL_H_
-#define MANTID_CRYSTAL_SORTHKL_H_
-
-#include "MantidKernel/System.h"
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
@@ -32,7 +29,7 @@ namespace Crystal {
  * @author Vickie Lynch, SNS
  * @date 2012-01-20
  */
-class DLLExport SortHKL : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SortHKL : public API::Algorithm {
 public:
   SortHKL();
   ~SortHKL() override;
@@ -81,7 +78,8 @@ private:
   DataObjects::PeaksWorkspace_sptr getOutputPeaksWorkspace(
       const DataObjects::PeaksWorkspace_sptr &inputPeaksWorkspace) const;
 
-  void sortOutputPeaksByHKL(API::IPeaksWorkspace_sptr outputPeaksWorkspace);
+  void
+  sortOutputPeaksByHKL(const API::IPeaksWorkspace_sptr &outputPeaksWorkspace);
 
   /// Point Groups possible
   std::vector<Mantid::Geometry::PointGroup_sptr> m_pointGroups;
@@ -92,5 +90,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_SORTHKL_H_ */

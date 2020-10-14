@@ -5,7 +5,20 @@
 # running environment
 
 # clang-format executable
-CLANG_FORMAT_EXE=clang-format-5.0
+
+SCRIPT_DIR=$(dirname "$0")
+if [[ ${JOB_NAME} == *pull_requests* ]]; then
+    # This relies on the fact pull requests use pull/$PR-NAME
+    # which squashes the branch into a single merge commit
+    cd $WORKSPACE
+
+    if ${SCRIPT_DIR}/check_for_changes cpp; then
+        echo "No C++ files have changed. Skipping check."
+        exit 0
+    fi
+fi
+
+CLANG_FORMAT_EXE=clang-format-6.0
 CLANG_FORMAT=$(which $CLANG_FORMAT_EXE)
 if [ -z "$CLANG_FORMAT" ]; then
   echo "Cannot find ${CLANG_FORMAT_EXE} executable"
@@ -22,12 +35,19 @@ if [ "$(git config user.email)" == "" ]; then
   git config user.email "mantid-buildserver@mantidproject.org"
 fi
 
-# sources to format
-sources=`find Framework MantidPlot qt \( -name '*.cpp' -o -name '*.h' -o -name '*.tcc' \)`
 sha=`git rev-parse --short HEAD`
 
+if [ -x "$(command -v parallel)" ]; then
+  echo "Using GNU parallel"
+  runner="parallel ${CLANG_FORMAT} -i {}"
+else
+  echo "Using xargs"
+  runner="xargs ${CLANG_FORMAT} -i"
+fi
+
 # format
-${CLANG_FORMAT} -i $sources
+find Framework MantidPlot qt \( -name '*.cpp' -o -name '*.h' -o -name '*.tcc' \) | ${runner}
+
 git add -A
 echo
 if git diff --cached --quiet

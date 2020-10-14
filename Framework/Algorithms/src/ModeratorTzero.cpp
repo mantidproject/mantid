@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ModeratorTzero.h"
 #include "MantidAPI/Axis.h"
@@ -44,7 +44,7 @@ void ModeratorTzero::setFormula(const std::string &formula) {
 
 void ModeratorTzero::init() {
 
-  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("TOF");
+  auto wsValidator = std::make_shared<WorkspaceUnitValidator>("TOF");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace, containing events and/or "
@@ -57,7 +57,7 @@ void ModeratorTzero::init() {
   // declare the instrument scattering mode
   std::vector<std::string> EModeOptions{"Indirect", "Direct", "Elastic"};
   this->declareProperty("EMode", "Indirect",
-                        boost::make_shared<StringListValidator>(EModeOptions),
+                        std::make_shared<StringListValidator>(EModeOptions),
                         "The energy mode (default: Indirect)");
 
   declareProperty(std::make_unique<Kernel::PropertyWithValue<double>>(
@@ -94,7 +94,7 @@ void ModeratorTzero::exec() {
 
   // Run execEvent if eventWorkSpace
   EventWorkspace_const_sptr eventWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (eventWS != nullptr) {
     execEvent(emode);
     return;
@@ -233,7 +233,7 @@ void ModeratorTzero::execEvent(const std::string &emode) {
     matrixOutputWS = matrixInputWS->clone();
     setProperty("OutputWorkspace", matrixOutputWS);
   }
-  auto outputWS = boost::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
+  auto outputWS = std::dynamic_pointer_cast<EventWorkspace>(matrixOutputWS);
 
   // calculate tof shift once for all neutrons if emode==Direct
   double t0_direct(-1);
@@ -354,9 +354,9 @@ void ModeratorTzero::execEvent(const std::string &emode) {
           evlist.mutableX() -= t0_direct;
 
           MantidVec tofs = evlist.getTofs();
-          for (double &tof : tofs) {
-            tof -= t0_direct;
-          }
+
+          std::transform(tofs.begin(), tofs.end(), tofs.begin(),
+                         [&t0_direct](double tof) { return tof - t0_direct; });
           evlist.setTofs(tofs);
           evlist.setSortOrder(Mantid::DataObjects::EventSortType::UNSORTED);
         } // end of else if(emode=="Direct")

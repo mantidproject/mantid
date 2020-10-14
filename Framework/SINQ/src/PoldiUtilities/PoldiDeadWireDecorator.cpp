@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiDeadWireDecorator.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 
-#include "boost/bind.hpp"
 #include <algorithm>
+#include <utility>
 
 namespace Mantid {
 namespace Poldi {
@@ -17,15 +17,15 @@ using namespace Geometry;
 
 PoldiDeadWireDecorator::PoldiDeadWireDecorator(
     std::set<int> deadWires,
-    boost::shared_ptr<Poldi::PoldiAbstractDetector> detector)
-    : PoldiDetectorDecorator(detector), m_deadWireSet(deadWires),
+    const std::shared_ptr<Poldi::PoldiAbstractDetector> &detector)
+    : PoldiDetectorDecorator(detector), m_deadWireSet(std::move(deadWires)),
       m_goodElements() {
   setDecoratedDetector(detector);
 }
 
 PoldiDeadWireDecorator::PoldiDeadWireDecorator(
     const Geometry::DetectorInfo &poldiDetectorInfo,
-    boost::shared_ptr<PoldiAbstractDetector> detector)
+    const std::shared_ptr<PoldiAbstractDetector> &detector)
     : PoldiDetectorDecorator(detector), m_deadWireSet(), m_goodElements() {
   setDecoratedDetector(detector);
 
@@ -43,7 +43,7 @@ PoldiDeadWireDecorator::PoldiDeadWireDecorator(
 }
 
 void PoldiDeadWireDecorator::setDeadWires(std::set<int> deadWires) {
-  m_deadWireSet = deadWires;
+  m_deadWireSet = std::move(deadWires);
 
   detectorSetHook();
 }
@@ -74,9 +74,10 @@ PoldiDeadWireDecorator::getGoodElements(std::vector<int> rawElements) {
     size_t newElementCount = rawElements.size() - m_deadWireSet.size();
 
     std::vector<int> goodElements(newElementCount);
+    using namespace std::placeholders;
     std::remove_copy_if(
         rawElements.begin(), rawElements.end(), goodElements.begin(),
-        boost::bind(&PoldiDeadWireDecorator::isDeadElement, this, _1));
+        std::bind(&PoldiDeadWireDecorator::isDeadElement, this, _1));
 
     return goodElements;
   }

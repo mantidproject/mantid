@@ -173,41 +173,6 @@ font-size: 28px</string>
            </property>
           </widget>
          </item>
-         <item row="13" column="0">
-          <widget class="QCommandLinkButton" name="clbExtendingMantid">
-           <property name="font">
-            <font>
-             <family>Open Sans</family>
-             <pointsize>-1</pointsize>
-             <weight>50</weight>
-             <italic>false</italic>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="layoutDirection">
-            <enum>Qt::LeftToRight</enum>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">color: rgb(0, 0, 0);</string>
-           </property>
-           <property name="text">
-            <string>Extending Mantid with Python</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../../../images/images.qrc">
-             <normaloff>:/Icons/Plugin-Python-icon-48x48.png</normaloff>:/Icons/Plugin-Python-icon-48x48.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>40</width>
-             <height>40</height>
-            </size>
-           </property>
-           <property name="checkable">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
          <item row="12" column="0">
           <widget class="QCommandLinkButton" name="clbPythonInMantid">
            <property name="font">
@@ -231,41 +196,6 @@ font-size: 28px</string>
            <property name="icon">
             <iconset resource="../../../images/images.qrc">
              <normaloff>:/Icons/Circle_cog_48x48.png</normaloff>:/Icons/Circle_cog_48x48.png</iconset>
-           </property>
-           <property name="iconSize">
-            <size>
-             <width>40</width>
-             <height>40</height>
-            </size>
-           </property>
-           <property name="checkable">
-            <bool>false</bool>
-           </property>
-          </widget>
-         </item>
-         <item row="11" column="0">
-          <widget class="QCommandLinkButton" name="clbPythonIntroduction">
-           <property name="font">
-            <font>
-             <family>Open Sans</family>
-             <pointsize>-1</pointsize>
-             <weight>50</weight>
-             <italic>false</italic>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="layoutDirection">
-            <enum>Qt::LeftToRight</enum>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">color: rgb(0, 0, 0);</string>
-           </property>
-           <property name="text">
-            <string>Introduction to Python</string>
-           </property>
-           <property name="icon">
-            <iconset resource="../../../images/images.qrc">
-             <normaloff>:/Icons/Python-icon-48x48.png</normaloff>:/Icons/Python-icon-48x48.png</iconset>
            </property>
            <property name="iconSize">
             <size>
@@ -313,26 +243,6 @@ font-size: 28px</string>
            </property>
           </widget>
          </item>
-         <item row="6" column="0">
-          <widget class="QLabel" name="lblTutorials">
-           <property name="font">
-            <font>
-             <family>Open Sans</family>
-             <pointsize>-1</pointsize>
-             <weight>50</weight>
-             <italic>false</italic>
-             <bold>false</bold>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">color: rgb(45, 105, 45);
-font-size: 28px;</string>
-           </property>
-           <property name="text">
-            <string>Tutorials</string>
-           </property>
-          </widget>
-         </item>
          <item row="4" column="0">
           <widget class="QCommandLinkButton" name="clbReleaseNotes">
            <property name="font">
@@ -369,6 +279,96 @@ color: rgb(0, 0, 0);</string>
            </property>
            <property name="default">
             <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="13" column="0">
+          <widget class="QCommandLinkButton" name="clbExtendingMantid">
+           <property name="font">
+            <font>
+             <family>Open Sans</family>
+             <pointsize>-1</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(0, 0, 0);</string>
+           </property>
+           <property name="text">
+            <string>Extending Mantid with Python</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../../images/images.qrc">
+             <normaloff>:/Icons/Plugin-Python-icon-48x48.png</normaloff>:/Icons/Plugin-Python-icon-48x48.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>40</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
+         <item row="6" column="0">
+          <widget class="QLabel" name="lblTutorials">
+           <property name="font">
+            <font>
+             <family>Open Sans</family>
+             <pointsize>-1</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(45, 105, 45);
+font-size: 28px;</string>
+           </property>
+           <property name="text">
+            <string>Tutorials</string>
+           </property>
+          </widget>
+         </item>
+         <item row="11" column="0">
+          <widget class="QCommandLinkButton" name="clbPythonIntroduction">
+           <property name="font">
+            <font>
+             <family>Open Sans</family>
+             <pointsize>-1</pointsize>
+             <weight>50</weight>
+             <italic>false</italic>
+             <bold>false</bold>
+            </font>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">color: rgb(0, 0, 0);</string>
+           </property>
+           <property name="text">
+            <string>Introduction to Python</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../../../images/images.qrc">
+             <normaloff>:/Icons/Python-icon-48x48.png</normaloff>:/Icons/Python-icon-48x48.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>40</width>
+             <height>40</height>
+            </size>
+           </property>
+           <property name="checkable">
+            <bool>false</bool>
            </property>
           </widget>
          </item>
@@ -656,10 +656,134 @@ background-color: qlineargradient(spread:pad, x1:0, y1:1, x2:0, y2:0, stop:0 rgb
            <property name="orientation">
             <enum>Qt::Vertical</enum>
            </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::MinimumExpanding</enum>
+           </property>
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>40</height>
+             <height>30</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <item>
+            <widget class="QGroupBox" name="grpEndOfLife">
+             <property name="styleSheet">
+              <string notr="true">QGroupBox {
+     border: 3px solid  rgb(38, 128, 20);;
+     border-radius: 10px;
+	background-color: rgb(240, 240, 240);
+ }
+QGroupBox#grpEndOfLife QLabel{
+	font: 12px &quot;Open Sans&quot;;
+}
+</string>
+             </property>
+             <property name="title">
+              <string/>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_10">
+              <item>
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string/>
+                </property>
+                <property name="pixmap">
+                 <pixmap resource="../../../images/images.qrc">:/end-of-life.png</pixmap>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_5">
+                <property name="styleSheet">
+                 <string notr="true"/>
+                </property>
+                <property name="text">
+                 <string>Please upgrade to Workbench</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_6">
+                <property name="styleSheet">
+                 <string notr="true"/>
+                </property>
+                <property name="text">
+                 <string>which is replacing MantidPlot.</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_7">
+                <property name="styleSheet">
+                 <string notr="true"/>
+                </property>
+                <property name="text">
+                 <string>Future releases beyond v5.1</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_8">
+                <property name="styleSheet">
+                 <string notr="true"/>
+                </property>
+                <property name="text">
+                 <string>will not include MantidPlot.</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignCenter</set>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>140</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <spacer name="verticalSpacer">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeType">
+            <enum>QSizePolicy::Expanding</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>55</height>
             </size>
            </property>
           </spacer>

@@ -2,15 +2,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 Plot data in SCDcalib.log file from Mantid SCD Calibration.
 A. J. Schultz, V. E. Lynch, August 2015
 """
 
-from __future__ import (absolute_import, division, print_function)
 import pylab
 import os
 import math

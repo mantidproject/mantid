@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from numpy import array
 
 general_params = {
@@ -23,8 +21,8 @@ general_params = {
          "nxs_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}.nxs",
          "gss_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}.gsas",
          "dat_files_directory": "",
-         "tof_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_tof_xye.dat",
-         "dspacing_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_d_xye.dat"
+         "tof_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_tof.xye",
+         "dspacing_xye_filename": "{instshort}{runno}{suffix}_{tt_mode}{_long_mode}_d.xye"
     },
 
     "subtract_empty_instrument": True,

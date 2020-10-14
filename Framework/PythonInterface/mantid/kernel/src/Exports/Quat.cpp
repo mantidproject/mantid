@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
@@ -13,19 +13,19 @@
 #include <boost/python/return_arg.hpp>
 #include <boost/python/return_value_policy.hpp>
 
-using Mantid::Kernel::Quat;
-using Mantid::Kernel::V3D;
 using boost::python::arg;
 using boost::python::class_;
 using boost::python::copy_const_reference;
 using boost::python::init;
 using boost::python::return_value_policy;
+using Mantid::Kernel::Quat;
+using Mantid::Kernel::V3D;
 
 /**
  * Python exports of the Mantid::Kernel::Quat class.
  */
 void export_Quat() {
-  boost::python::register_ptr_to_python<boost::shared_ptr<Quat>>();
+  boost::python::register_ptr_to_python<std::shared_ptr<Quat>>();
 
   // Quat class
   class_<Quat>(

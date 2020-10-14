@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADINSTRUMENTTEST_H_
-#define LOADINSTRUMENTTEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/FileFinder.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -23,6 +23,9 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+
+#include <Poco/File.h>
+#include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
 
 #include <string>
@@ -44,6 +47,86 @@ public:
     TS_ASSERT(!loader.isInitialized());
     loader.initialize();
     TS_ASSERT(loader.isInitialized());
+  }
+
+  void testInstNameIsCaseInsensitive() {
+    LoadInstrument loader;
+    loader.initialize();
+    loader.setChild(true);
+
+    // create a workspace with some sample data
+    int histogramNumber = 2584;
+    int timechannels = 100;
+    MatrixWorkspace_sptr ws2D = DataObjects::create<Workspace2D>(
+        histogramNumber, HistogramData::Points(timechannels, timechannels));
+
+    Points timeChannelsVec(timechannels, LinearGenerator(0.0, 100.0));
+    // loop to create data
+    for (int i = 0; i < histogramNumber; i++) {
+      std::vector<double> v(timechannels);
+      std::vector<double> e(timechannels);
+      // timechannels
+      for (int j = 0; j < timechannels; j++) {
+        v[j] = (i + j) % 256;
+        e[j] = (i + j) % 78;
+      }
+      // Populate the workspace.
+      ws2D->setPoints(i, timeChannelsVec);
+      ws2D->dataY(i) = v;
+      ws2D->dataE(i) = e;
+    }
+
+    // We want to test if the spectra mapping changes
+    TS_ASSERT_EQUALS(ws2D->getSpectrum(0).getSpectrumNo(), 1);
+    TS_ASSERT_EQUALS(ws2D->getSpectrum(256).getSpectrumNo(), 257);
+    TS_ASSERT_EQUALS(ws2D->getNumberHistograms(), 2584);
+
+    const auto &fileFinder = Mantid::API::FileFinder::Instance();
+    const std::string originalFilePath =
+        fileFinder.getFullPath("HET_Definition.xml");
+
+    const std::string tmpDir = Poco::Path::temp();
+    auto generateFiles = [&tmpDir, &originalFilePath](const std::string &name) {
+      Poco::Path tmpFilePath(tmpDir, name);
+
+      Poco::File originalFile(originalFilePath);
+      originalFile.copyTo(tmpFilePath.toString());
+
+      Poco::File tmpFile(tmpFilePath);
+      return tmpFile;
+    };
+
+    auto runAlg = [&generateFiles, &loader, &ws2D](
+                      const std::string &name, const std::string &expected) {
+      auto fileHandle = generateFiles(name);
+      const std::string path = fileHandle.path();
+
+      loader.setPropertyValue("Filename", path);
+      loader.setProperty("RewriteSpectraMap", OptionalBool(true));
+      loader.setProperty("Workspace", ws2D);
+
+      loader.execute();
+      TS_ASSERT(loader.isExecuted());
+
+      fileHandle.remove();
+
+      MatrixWorkspace_sptr output = loader.getProperty("Workspace");
+      const std::string loadedName = output->getInstrument()->getName();
+      TS_ASSERT_EQUALS(expected, loadedName);
+    };
+
+    const std::string allLowerInstrFilename = "het_definition.xml";
+    const std::string mixCaseInstrFilename = "Het_definition.xml";
+    const std::string uppercaseInstrFilename = "HET_DEFINITION.xml";
+    const std::string normalInstrFilename = "HET_Definition.xml";
+
+    // Something internal will always convert to lowercase
+    const std::string expectedName = "het";
+
+    runAlg(allLowerInstrFilename, expectedName);
+    runAlg(mixCaseInstrFilename, expectedName);
+    runAlg(uppercaseInstrFilename, expectedName);
+    runAlg(normalInstrFilename, expectedName);
   }
 
   void testExecHET() {
@@ -96,13 +179,13 @@ public:
     // Get back the saved workspace
     MatrixWorkspace_sptr output = loader.getProperty("Workspace");
 
-    boost::shared_ptr<const Instrument> i =
+    std::shared_ptr<const Instrument> i =
         output->getInstrument()->baseInstrument();
-    boost::shared_ptr<const IComponent> source = i->getSource();
+    std::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS(source->getName(), "undulator");
     TS_ASSERT_DELTA(source->getPos().Y(), 0.0, 0.01);
 
-    boost::shared_ptr<const IComponent> samplepos = i->getSample();
+    std::shared_ptr<const IComponent> samplepos = i->getSample();
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Z(), 0.0, 0.01);
 
@@ -144,13 +227,13 @@ public:
 
     // Test input data is unchanged
     Workspace2D_sptr output2DInst =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+        std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584
     TS_ASSERT_EQUALS(output2DInst->getNumberHistograms(), histogramNumber);
 
     // Check running algorithm for same XML file leads to same instrument object
     // being attached
-    boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
+    std::shared_ptr<Instrument> instr = std::make_shared<Instrument>();
     output->setInstrument(instr);
     TS_ASSERT_EQUALS(output->getInstrument()->baseInstrument(), instr);
     LoadInstrument loadAgain;
@@ -193,13 +276,13 @@ public:
     // Get back the saved workspace
     MatrixWorkspace_sptr output = loaderSLS.getProperty("Workspace");
 
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
-    boost::shared_ptr<const IComponent> source = i->getSource();
+    std::shared_ptr<const Instrument> i = output->getInstrument();
+    std::shared_ptr<const IComponent> source = i->getSource();
     TS_ASSERT_EQUALS(source->getName(), "undulator");
     TS_ASSERT_DELTA(source->getPos().Z(), -11.016, 0.01);
 
-    boost::shared_ptr<const IObjComponent> samplepos =
-        boost::dynamic_pointer_cast<const IObjComponent>(i->getSample());
+    std::shared_ptr<const IComponent> samplepos =
+        std::dynamic_pointer_cast<const IComponent>(i->getSample());
     TS_ASSERT_EQUALS(samplepos->getName(), "nickel-holder");
     TS_ASSERT_DELTA(samplepos->getPos().Y(), 0.0, 0.01);
 
@@ -215,10 +298,6 @@ public:
         ptrDetShape.isValid(V3D(0.0, 0.0, 0.000001) + ptrDetShape.getPos()));
     TS_ASSERT(
         ptrDetShape.isValid(V3D(0.005, 0.1, 0.000002) + ptrDetShape.getPos()));
-
-    // test of sample shape
-    TS_ASSERT(samplepos->isValid(V3D(0.0, 0.0, 0.005) + samplepos->getPos()));
-    TS_ASSERT(!samplepos->isValid(V3D(0.0, 0.0, 0.05) + samplepos->getPos()));
   }
 
   void testExecNIMROD() {
@@ -230,7 +309,7 @@ public:
     MatrixWorkspace_sptr ws2D =
         DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
-    const std::string instrFilename = "NIM_Definition.xml";
+    const std::string instrFilename = "NIMROD_Definition.xml";
     loaderNIMROD.setPropertyValue("Filename", instrFilename);
     loaderNIMROD.setProperty("RewriteSpectraMap", OptionalBool(true));
     loaderNIMROD.setProperty("Workspace", ws2D);
@@ -244,12 +323,12 @@ public:
     TS_ASSERT(loaderNIMROD.isExecuted());
 
     const auto &detectorInfo = ws2D->detectorInfo();
-    const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(20201001));
-    TS_ASSERT_EQUALS(ptrDet.getName(), "det 1");
-    TS_ASSERT_EQUALS(ptrDet.getID(), 20201001);
-    TS_ASSERT_DELTA(ptrDet.getPos().X(), -0.0909, 0.0001);
-    TS_ASSERT_DELTA(ptrDet.getPos().Y(), 0.3983, 0.0001);
-    TS_ASSERT_DELTA(ptrDet.getPos().Z(), 4.8888, 0.0001);
+    const auto &ptrDet = detectorInfo.detector(detectorInfo.indexOf(20103001));
+    TS_ASSERT_EQUALS(ptrDet.getName(), "pixel");
+    TS_ASSERT_EQUALS(ptrDet.getID(), 20103001);
+    TS_ASSERT_DELTA(ptrDet.getPos().X(), 0.0254, 0.0001);
+    TS_ASSERT_DELTA(ptrDet.getPos().Y(), -0.2084, 0.0001);
+    TS_ASSERT_DELTA(ptrDet.getPos().Z(), 5.5258, 0.0001);
   }
 
   void testExecNIMRODandRetrieveFromIDS() {
@@ -265,7 +344,7 @@ public:
     MatrixWorkspace_sptr ws2D =
         DataObjects::create<Workspace2D>(1, HistogramData::Points(1));
 
-    const std::string instrFilename = "NIM_Definition.xml";
+    const std::string instrFilename = "NIMROD_Definition.xml";
     loaderNIMROD.setPropertyValue("Filename", instrFilename);
     loaderNIMROD.setProperty("RewriteSpectraMap", OptionalBool(true));
     loaderNIMROD.setProperty("Workspace", ws2D);
@@ -277,17 +356,17 @@ public:
       return;
     // Retrieve the instrument from the InstrumentDataService
     Instrument_const_sptr nimrodInst = IDS.getObjects()[0];
-    TS_ASSERT_EQUALS(nimrodInst->getName(), "NIM");
-    TS_ASSERT_EQUALS(nimrodInst->getNumberDetectors(), 1521);
-    int a_random_id = 20201001;
+    TS_ASSERT_EQUALS(nimrodInst->getName(), "NIMROD");
+    TS_ASSERT_EQUALS(nimrodInst->getNumberDetectors(), 2337);
+    int a_random_id = 20103001;
     TS_ASSERT_EQUALS((nimrodInst->getDetector(a_random_id))->getID(),
                      a_random_id);
     TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().X(),
-                    -0.0909, 0.0001);
+                    0.0254, 0.0001);
     TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().Y(),
-                    0.3983, 0.0001);
+                    -0.2084, 0.0001);
     TS_ASSERT_DELTA((nimrodInst->getDetector(a_random_id))->getPos().Z(),
-                    4.8888, 0.0001);
+                    5.5258, 0.0001);
   }
 
   void testExecMARIFromInstrName() {
@@ -335,7 +414,7 @@ public:
   }
 
   /// Common initialisation for Nexus loading tests
-  MatrixWorkspace_sptr doLoadNexus(const std::string filename) {
+  MatrixWorkspace_sptr doLoadNexus(const std::string &filename) {
     LoadInstrument nexusLoader;
     nexusLoader.initialize();
     nexusLoader.setChild(true);
@@ -777,9 +856,9 @@ private:
   // @param paramFilename Expected parameter file to be loaded as part of
   // LoadInstrument
   // @param par A specific parameter to check if have been loaded
-  void doTestParameterFileSelection(std::string filename,
-                                    std::string paramFilename,
-                                    std::string par) {
+  void doTestParameterFileSelection(const std::string &filename,
+                                    const std::string &paramFilename,
+                                    const std::string &par) {
     InstrumentDataService::Instance().clear();
 
     LoadInstrument loader;
@@ -800,10 +879,10 @@ private:
     // Get back the saved workspace
     MatrixWorkspace_sptr output = loader.getProperty("Workspace");
 
-    boost::shared_ptr<const Instrument> i = output->getInstrument();
+    std::shared_ptr<const Instrument> i = output->getInstrument();
 
     // test if a dummy parameter has been read in
-    boost::shared_ptr<const IComponent> comp =
+    std::shared_ptr<const IComponent> comp =
         i->getComponentByName("bank_90degnew");
     TS_ASSERT_EQUALS(comp->getName(), "bank_90degnew");
 
@@ -831,7 +910,7 @@ public:
     ws = WorkspaceCreationHelper::create2DWorkspace(1, 2);
   }
 
-  void doTest(std::string filename, size_t numTimes = 1) {
+  void doTest(const std::string &filename, size_t numTimes = 1) {
     for (size_t i = 0; i < numTimes; ++i) {
       // Remove any existing instruments, so each time they are loaded.
       InstrumentDataService::Instance().clear();
@@ -864,5 +943,3 @@ public:
 
   void test_SNAP() { doTest("SNAP_Definition.xml", 1); }
 };
-
-#endif /*LOADINSTRUMENTTEST_H_*/

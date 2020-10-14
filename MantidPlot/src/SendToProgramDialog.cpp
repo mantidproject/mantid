@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SendToProgramDialog.h"
 #include "ConfigDialog.h"
@@ -31,7 +31,7 @@ using namespace MantidQt::API;
 /**
  * Constructor when adding a new program to the send to list
  */
-SendToProgramDialog::SendToProgramDialog(QWidget *parent, Qt::WFlags fl)
+SendToProgramDialog::SendToProgramDialog(QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl), validName(false), validTarget(false),
       validSaveUsing(false) {
   m_uiform.setupUi(this);
@@ -61,8 +61,9 @@ SendToProgramDialog::SendToProgramDialog(QWidget *parent, Qt::WFlags fl)
  * Constructor when editing a program settings
  */
 SendToProgramDialog::SendToProgramDialog(
-    QWidget *parent, QString programName,
-    std::map<std::string, std::string> programKeysAndDetails, Qt::WFlags fl)
+    QWidget *parent, const QString &programName,
+    std::map<std::string, std::string> programKeysAndDetails,
+    const Qt::WFlags &fl)
     : QDialog(parent, fl), validName(true), validTarget(true),
       validSaveUsing(true) {
   m_uiform.setupUi(this);

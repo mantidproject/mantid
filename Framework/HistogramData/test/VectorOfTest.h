@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_VECTOROFTEST_H_
-#define MANTID_HISTOGRAMDATA_VECTOROFTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -101,7 +100,6 @@ public:
     TS_ASSERT_EQUALS(src.size(), 2);
     TS_ASSERT(src);
     const VectorOfTester dest(std::move(src));
-    TS_ASSERT(!src);
     TS_ASSERT_EQUALS(dest[0], 0.1);
     TS_ASSERT_EQUALS(dest[1], 0.1);
   }
@@ -109,7 +107,6 @@ public:
   void test_move_from_null_constructor() {
     VectorOfTester src{};
     const VectorOfTester dest(std::move(src));
-    TS_ASSERT(!src);
     TS_ASSERT(!dest);
   }
 
@@ -161,7 +158,6 @@ public:
     TS_ASSERT_EQUALS(dest[0], 0.0);
     TS_ASSERT(src);
     dest = std::move(src);
-    TS_ASSERT(!src);
     TS_ASSERT_EQUALS(dest[0], 0.1);
     TS_ASSERT_EQUALS(dest[1], 0.1);
   }
@@ -170,7 +166,6 @@ public:
     VectorOfTester src{};
     VectorOfTester dest(1);
     dest = std::move(src);
-    TS_ASSERT(!src);
     TS_ASSERT(!dest);
   }
 
@@ -220,7 +215,7 @@ public:
   }
 
   void test_shared_ptr_constructor() {
-    auto shared = boost::make_shared<std::vector<double>>(2, 0.1);
+    auto shared = std::make_shared<std::vector<double>>(2, 0.1);
     VectorOfTester values(shared);
     TS_ASSERT(values);
     TS_ASSERT_EQUALS(values.size(), 2);
@@ -230,7 +225,7 @@ public:
   }
 
   void test_null_shared_ptr_constructor() {
-    boost::shared_ptr<std::vector<double>> shared;
+    std::shared_ptr<std::vector<double>> shared;
     VectorOfTester values(shared);
     TS_ASSERT(!values);
   }
@@ -287,7 +282,7 @@ public:
   }
 
   void test_shared_ptr_assignment() {
-    auto shared = boost::make_shared<std::vector<double>>(2, 0.1);
+    auto shared = std::make_shared<std::vector<double>>(2, 0.1);
     VectorOfTester values(1);
     values = shared;
     TS_ASSERT(values);
@@ -298,14 +293,14 @@ public:
   }
 
   void test_null_shared_ptr_assignment() {
-    boost::shared_ptr<std::vector<double>> shared;
+    std::shared_ptr<std::vector<double>> shared;
     VectorOfTester values(1);
     values = shared;
     TS_ASSERT(!values);
   }
 
   void test_shared_ptr_self_assignment() {
-    auto shared = boost::make_shared<std::vector<double>>(2, 0.1);
+    auto shared = std::make_shared<std::vector<double>>(2, 0.1);
     VectorOfTester values(1);
     values = shared;
     TS_ASSERT_THROWS_NOTHING(values = shared);
@@ -414,5 +409,3 @@ public:
     TS_ASSERT_EQUALS(data.size(), 2);
   }
 };
-
-#endif /* MANTID_HISTOGRAMDATA_VECTOROFTEST_H_ */

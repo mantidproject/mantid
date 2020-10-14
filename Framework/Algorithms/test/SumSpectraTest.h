@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SUMSPECTRATEST_H_
-#define SUMSPECTRATEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -151,7 +150,7 @@ public:
         output = AnalysisDataService::Instance().retrieve(outputSpace1));
 
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
     size_t max = 0;
     TS_ASSERT_EQUALS(max = inputSpace->blocksize(), output2D->blocksize());
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
@@ -212,7 +211,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace2));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -278,8 +277,8 @@ public:
                      const std::runtime_error &);
   }
 
-  void dotestExecEvent(std::string inName, std::string outName,
-                       std::string indices_list) {
+  void dotestExecEvent(const std::string &inName, const std::string &outName,
+                       const std::string &indices_list) {
     int numPixels = 100;
     int numBins = 20;
     int numEvents = 20;
@@ -342,28 +341,52 @@ public:
     RebinnedOutput_sptr output;
     output =
         AnalysisDataService::Instance().retrieveWS<RebinnedOutput>(outName);
-    TS_ASSERT(output);
-    TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
-    TS_ASSERT_EQUALS(output->blocksize(), 6);
-    // Row with full acceptance
-    TS_ASSERT_EQUALS(output->y(0)[1], 1.);
-    TS_ASSERT_DELTA(output->e(0)[1], 0.40824829046386296, 1.e-5);
-    TS_ASSERT_EQUALS(output->dataF(0)[1], 6.);
-    // Row with limited, but non-zero acceptance, shouldn't have nans!
-    TS_ASSERT_DELTA(output->y(0)[5], 0.66666, 1.e-5);
-    TS_ASSERT_DELTA(output->e(0)[5], 0.47140452079103173, 1.e-5);
-    TS_ASSERT_EQUALS(output->dataF(0)[5], 3.);
 
-    TS_ASSERT(output->run().hasProperty("NumAllSpectra"))
-    TS_ASSERT(output->run().hasProperty("NumMaskSpectra"))
-    TS_ASSERT(output->run().hasProperty("NumZeroSpectra"))
+    auto evaluate = [&, nHist](RebinnedOutput_sptr &output) {
+      TS_ASSERT(output);
+      TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
+      TS_ASSERT_EQUALS(output->blocksize(), 6);
+      // Row with full acceptance
+      TS_ASSERT_EQUALS(output->y(0)[1], 1.);
+      TS_ASSERT_DELTA(output->e(0)[1], 0.40824829046386296, 1.e-5);
+      TS_ASSERT_EQUALS(output->dataF(0)[1], 6.);
+      // Row with limited, but non-zero acceptance, shouldn't have nans!
+      TS_ASSERT_DELTA(output->y(0)[5], 0.66666, 1.e-5);
+      TS_ASSERT_DELTA(output->e(0)[5], 0.47140452079103173, 1.e-5);
+      TS_ASSERT_EQUALS(output->dataF(0)[5], 3.);
 
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(nHist),
-                     output->run().getLogData("NumAllSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
-                     output->run().getLogData("NumMaskSpectra")->value())
-    TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
-                     output->run().getLogData("NumZeroSpectra")->value())
+      TS_ASSERT(output->run().hasProperty("NumAllSpectra"))
+      TS_ASSERT(output->run().hasProperty("NumMaskSpectra"))
+      TS_ASSERT(output->run().hasProperty("NumZeroSpectra"))
+
+      TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(nHist),
+                       output->run().getLogData("NumAllSpectra")->value())
+      TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
+                       output->run().getLogData("NumMaskSpectra")->value())
+      TS_ASSERT_EQUALS(boost::lexical_cast<std::string>(0),
+                       output->run().getLogData("NumZeroSpectra")->value())
+    };
+
+    evaluate(output);
+
+    // unfinalize the workspace and confirm it gives the same results
+    // using a clean algorithm
+    ws->unfinalize();
+    AnalysisDataService::Instance().addOrReplace(inName, ws);
+    Mantid::Algorithms::SumSpectra alg3a;
+    if (!alg3a.isInitialized()) {
+      alg3a.initialize();
+    }
+    // Set the properties
+    alg3a.setPropertyValue("InputWorkspace", inName);
+    alg3a.setPropertyValue("OutputWorkspace", outName);
+    alg3a.setProperty("IncludeMonitors", false);
+    alg3a.setProperty("RemoveSpecialValues", true);
+    alg3a.execute();
+    TS_ASSERT(alg3a.isExecuted());
+    output =
+        AnalysisDataService::Instance().retrieveWS<RebinnedOutput>(outName);
+    evaluate(output);
   }
   void testExecNoLimitsWeighted() {
     Mantid::Algorithms::SumSpectra alg2;
@@ -387,7 +410,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace2));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -460,7 +483,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace2));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -545,7 +568,6 @@ public:
     testSig = std::sqrt(testSig);
     // Set the properties
     alg2.setProperty("InputWorkspace", tws);
-    const std::string outputSpace2 = "SumSpectraOut2";
     alg2.setPropertyValue("OutputWorkspace", outName);
     alg2.setProperty("IncludeMonitors", false);
     alg2.setProperty("WeightedSum", true);
@@ -558,7 +580,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outName));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 1);
 
@@ -620,7 +642,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outWsName));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     const auto &outYVals = output2D->y(0);
     // We expect one less because of inf and NaN
@@ -657,7 +679,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outWsName));
     Workspace2D_const_sptr output2D =
-        boost::dynamic_pointer_cast<const Workspace2D>(output);
+        std::dynamic_pointer_cast<const Workspace2D>(output);
 
     const auto &outYVals = output2D->y(0);
     // We expect a NaN and an Inf to propagate here
@@ -715,5 +737,3 @@ private:
   MatrixWorkspace_sptr input;
   EventWorkspace_sptr inputEvent;
 };
-
-#endif /*SUMSPECTRATEST_H_*/

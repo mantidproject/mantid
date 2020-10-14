@@ -26,8 +26,7 @@ Description          : Preferences dialog
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef ConfigDialog_H
-#define ConfigDialog_H
+#pragma once
 
 #include "MantidQtWidgets/Common/MantidDialog.h"
 #include "MantidQtWidgets/Common/MdSettings.h"
@@ -179,7 +178,7 @@ private:
   void updateMdPlottingSettings();
   void setupMdPlottingConnections();
 
-  QTreeWidgetItem *createCheckedTreeItem(QString name,
+  QTreeWidgetItem *createCheckedTreeItem(const QString &name,
                                          Qt::CheckState checkBoxState);
   QStringList buildHiddenCategoryString(QTreeWidgetItem *parent = nullptr);
 
@@ -324,5 +323,3 @@ public slots:
   void changeUsageGeneralMdColorMap();
   void changeUsageLastSession();
 };
-
-#endif // CONFIGDIALOG_H

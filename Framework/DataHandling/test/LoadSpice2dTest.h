@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADSPICE2DTEST_H
-#define LOADSPICE2DTEST_H
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -77,7 +76,7 @@ public:
         ws =
             Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
     Mantid::DataObjects::Workspace2D_sptr ws2d =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
 
     // We have 192*192 + 2 channels, for the PSD + timer + monitor
     TS_ASSERT_EQUALS(ws2d->getNumberHistograms(),
@@ -116,8 +115,7 @@ public:
     // properly
     //----------------------------------------------------------------------
     Mantid::Geometry::Instrument_const_sptr i = ws2d->getInstrument();
-    boost::shared_ptr<const Mantid::Geometry::IComponent> source =
-        i->getSource();
+    std::shared_ptr<const Mantid::Geometry::IComponent> source = i->getSource();
 
     TS_ASSERT_EQUALS(i->getName(), "GPSANS");
     TS_ASSERT_EQUALS(source->getName(), "source");
@@ -131,7 +129,7 @@ public:
     const auto *m_paraMap = &(ws2d->constInstrumentParameters());
 
     // Check that we can get a parameter
-    boost::shared_ptr<Mantid::Geometry::Parameter> sample_aperture_size =
+    std::shared_ptr<Mantid::Geometry::Parameter> sample_aperture_size =
         m_paraMap->get(sample_aperture.get(), "Size");
     TS_ASSERT_EQUALS(sample_aperture_size->type(), "double");
     TS_ASSERT_EQUALS(sample_aperture_size->value<double>(), 14.0);
@@ -209,7 +207,7 @@ public:
         ws =
             Mantid::API::AnalysisDataService::Instance().retrieve(outputSpace));
     Mantid::DataObjects::Workspace2D_sptr ws2d =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(ws);
 
     // Test the size of the data vectors
     TS_ASSERT_EQUALS((ws2d->x(0).size()), 2);
@@ -223,7 +221,8 @@ public:
     TS_ASSERT_DELTA(ws2d->x(192 + nmon)[0], 4.5, tolerance);
   }
 
-  void assertDetectorDistances(Mantid::DataObjects::Workspace2D_sptr ws2d) {
+  void
+  assertDetectorDistances(const Mantid::DataObjects::Workspace2D_sptr &ws2d) {
     Mantid::Kernel::Property *prop =
         ws2d->run().getProperty("sample-detector-distance");
     Mantid::Kernel::PropertyWithValue<double> *sdd =
@@ -247,4 +246,3 @@ private:
   std::string inputFile;
   Mantid::DataHandling::LoadSpice2D spice2d;
 };
-#endif

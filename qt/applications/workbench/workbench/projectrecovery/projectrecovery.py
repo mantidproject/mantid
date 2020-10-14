@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-
-from __future__ import (absolute_import, unicode_literals)
 
 import os
 import shutil
@@ -17,7 +15,7 @@ from glob import glob
 
 import psutil
 
-from mantid.kernel import ConfigService
+from mantid.kernel import ConfigService, logger
 from workbench.projectrecovery.projectrecoveryloader import ProjectRecoveryLoader
 from workbench.projectrecovery.projectrecoverysaver import ProjectRecoverySaver
 
@@ -136,7 +134,11 @@ class ProjectRecovery(object):
         if self.recovery_directory not in directory:
             raise RuntimeError("Project Recovery: Only allowed to delete trees in the recovery directory")
 
-        shutil.rmtree(directory)
+        try:
+            shutil.rmtree(directory)
+        except FileNotFoundError:
+            # Doesn't matter if the file is deleted by another process as we are trying to do that anyway
+            return
 
     @staticmethod
     def sort_by_last_modified(paths):
@@ -163,8 +165,15 @@ class ProjectRecovery(object):
             pids.append(int(os.path.basename(path)))
 
         for pid in pids:
-            if not psutil.pid_exists(pid) or \
-                    not self._is_mantid_workbench_process(self._make_process_from_pid(pid=pid).cmdline()):
+            return_current_pid = True
+            if psutil.pid_exists(pid):
+                try:
+                    return_current_pid = not self._is_mantid_workbench_process(self._make_process_from_pid(pid=pid).cmdline())
+                except psutil.AccessDenied:
+                    # if we can't access the process properties then we assume it is not a mantid process
+                    pass
+
+            if return_current_pid:
                 return os.path.join(self.recovery_directory_hostname, str(pid))
 
     @staticmethod
@@ -217,10 +226,12 @@ class ProjectRecovery(object):
             pid_checkpoints = self.listdir_fullpath(self.recovery_directory_hostname)
             num_of_other_mantid_processes = self._number_of_other_workbench_processes()
             return len(pid_checkpoints) != 0 and len(pid_checkpoints) > num_of_other_mantid_processes
-        except Exception as e:
-            if isinstance(e, KeyboardInterrupt):
+        except Exception as exc:
+            if isinstance(exc, KeyboardInterrupt):
                 raise
-            # fail silently and return false
+
+            # log and return no recovery possible
+            logger.warning("Error checking if project can be recovered: {}".format(str(exc)))
             return False
 
     def _number_of_other_workbench_processes(self):
@@ -233,8 +244,8 @@ class ProjectRecovery(object):
             try:
                 if self._is_mantid_workbench_process(proc.cmdline()):
                     total_mantids += 1
-            except IndexError:
-                # Ignore these errors as it's checking the cmdline which causes this on process with no args
+            except Exception:
+                # if we can't access the process properties then we assume it is not a mantid process
                 pass
 
         # One of these will be the mantid process running the information

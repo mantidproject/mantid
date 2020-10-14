@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // clang-format off
 #include "PythonScripting.h"
@@ -56,7 +56,7 @@ std::vector<std::string> splitByDelim(const std::string &s, const char delim) {
   // Split by \t char
   while (std::getline(sstream, wsName, delim)) {
     if (!wsName.empty()) {
-      foundWsNames.push_back(wsName);
+      foundWsNames.emplace_back(wsName);
     }
   }
   return foundWsNames;
@@ -220,7 +220,7 @@ bool ProjectSerialiser::save(const QString &projectName, bool compress,
  * 		folder. (Default True)
  * @return True is loading was successful, otherwise false
  */
-bool ProjectSerialiser::load(std::string filepath, const int fileVersion,
+bool ProjectSerialiser::load(const std::string &filepath, const int fileVersion,
                              const bool isTopLevel) {
   // We have to accept std::string to maintain Python compatibility
   auto qfilePath = QString::fromStdString(filepath);
@@ -650,7 +650,7 @@ QString ProjectSerialiser::saveWorkspaces() {
 
     auto ws = AnalysisDataService::Instance().retrieveWS<Workspace>(
         wsName.toStdString());
-    auto group = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
+    auto group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(ws);
 
     // We don't split up multiperiod workspaces for performance reasons.
     // There's significant optimisations we can perform on load if they're a
@@ -943,7 +943,7 @@ void ProjectSerialiser::loadWorkspacesIntoMantid(
         // execute the algorithm
         alg->execute();
 
-        workspaceList.push_back(unusedName);
+        workspaceList.emplace_back(unusedName);
       }
 
       // Group the workspaces as they were when the project was saved
@@ -1140,7 +1140,7 @@ MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
 
     if (workspaceName.find(groupWorkspaceChar) == std::string::npos) {
       // Normal workspace
-      allWsNames[ALL_WS].push_back(workspaceName);
+      allWsNames[ALL_WS].emplace_back(workspaceName);
       continue;
     }
 
@@ -1154,8 +1154,8 @@ MantidQt::API::ProjectSerialiser::parseWsNames(const std::string &wsNames) {
 
     for (auto end = groupWorkspaceElements.end(); groupMember != end;
          ++groupMember) {
-      allWsNames[*groupName].push_back(*groupMember);
-      allWsNames[ALL_GROUP_NAMES].push_back(*groupName);
+      allWsNames[*groupName].emplace_back(*groupMember);
+      allWsNames[ALL_GROUP_NAMES].emplace_back(*groupName);
     }
   }
 

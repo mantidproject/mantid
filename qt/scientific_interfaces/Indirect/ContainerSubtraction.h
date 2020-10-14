@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_CONTAINERSUBTRACTION_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_CONTAINERSUBTRACTION_H_
+#pragma once
 
 #include "CorrectionsTab.h"
 #include "ui_ContainerSubtraction.h"
@@ -21,7 +20,8 @@ public:
 
   void setTransformedContainer(Mantid::API::MatrixWorkspace_sptr workspace,
                                const std::string &name);
-  void setTransformedContainer(Mantid::API::MatrixWorkspace_sptr workspace);
+  void
+  setTransformedContainer(const Mantid::API::MatrixWorkspace_sptr &workspace);
 
 private slots:
   /// Handles a new sample being loaded
@@ -58,36 +58,36 @@ private:
   requestRebinToSample(Mantid::API::MatrixWorkspace_sptr workspace) const;
 
   Mantid::API::MatrixWorkspace_sptr
-  shiftWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
+  shiftWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
                  double shiftValue) const;
   Mantid::API::MatrixWorkspace_sptr
-  scaleWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
+  scaleWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace,
                  double scaleValue) const;
   Mantid::API::MatrixWorkspace_sptr
-  minusWorkspace(Mantid::API::MatrixWorkspace_sptr lhsWorkspace,
-                 Mantid::API::MatrixWorkspace_sptr rhsWorkspace) const;
+  minusWorkspace(const Mantid::API::MatrixWorkspace_sptr &lhsWorkspace,
+                 const Mantid::API::MatrixWorkspace_sptr &rhsWorkspace) const;
+  Mantid::API::MatrixWorkspace_sptr rebinToWorkspace(
+      const Mantid::API::MatrixWorkspace_sptr &workspaceToRebin,
+      const Mantid::API::MatrixWorkspace_sptr &workspaceToMatch) const;
   Mantid::API::MatrixWorkspace_sptr
-  rebinToWorkspace(Mantid::API::MatrixWorkspace_sptr workspaceToRebin,
-                   Mantid::API::MatrixWorkspace_sptr workspaceToMatch) const;
-  Mantid::API::MatrixWorkspace_sptr
-  convertToHistogram(Mantid::API::MatrixWorkspace_sptr workspace) const;
+  convertToHistogram(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
 
   Mantid::API::IAlgorithm_sptr
-  shiftAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace,
+  shiftAlgorithm(const Mantid::API::MatrixWorkspace_sptr &workspace,
                  double shiftValue) const;
   Mantid::API::IAlgorithm_sptr
-  scaleAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace,
+  scaleAlgorithm(const Mantid::API::MatrixWorkspace_sptr &workspace,
                  double scaleValue) const;
   Mantid::API::IAlgorithm_sptr
-  minusAlgorithm(Mantid::API::MatrixWorkspace_sptr lhsWorkspace,
-                 Mantid::API::MatrixWorkspace_sptr rhsWorkspace) const;
+  minusAlgorithm(const Mantid::API::MatrixWorkspace_sptr &lhsWorkspace,
+                 const Mantid::API::MatrixWorkspace_sptr &rhsWorkspace) const;
   Mantid::API::IAlgorithm_sptr rebinToWorkspaceAlgorithm(
-      Mantid::API::MatrixWorkspace_sptr workspaceToRebin,
-      Mantid::API::MatrixWorkspace_sptr workspaceToMatch) const;
+      const Mantid::API::MatrixWorkspace_sptr &workspaceToRebin,
+      const Mantid::API::MatrixWorkspace_sptr &workspaceToMatch) const;
   Mantid::API::IAlgorithm_sptr convertToHistogramAlgorithm(
-      Mantid::API::MatrixWorkspace_sptr workspace) const;
+      const Mantid::API::MatrixWorkspace_sptr &workspace) const;
   Mantid::API::IAlgorithm_sptr
-  addSampleLogAlgorithm(Mantid::API::MatrixWorkspace_sptr workspace,
+  addSampleLogAlgorithm(const Mantid::API::MatrixWorkspace_sptr &workspace,
                         const std::string &name, const std::string &type,
                         const std::string &value) const;
 
@@ -110,5 +110,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_CONTAINERSUBTRACTION_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_REMOTEALGORITHMS_DOWNLOADREMOTEFILE2TEST_H_
-#define MANTID_REMOTEALGORITHMS_DOWNLOADREMOTEFILE2TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -35,8 +34,8 @@ public:
 
   void test_castAlgorithm() {
     // can create
-    boost::shared_ptr<DownloadRemoteFile2> a;
-    TS_ASSERT(a = boost::make_shared<DownloadRemoteFile2>());
+    std::shared_ptr<DownloadRemoteFile2> a;
+    TS_ASSERT(a = std::make_shared<DownloadRemoteFile2>());
 
     // can cast to inherited interfaces and base classes
     TS_ASSERT(
@@ -138,5 +137,3 @@ private:
   Mantid::API::IAlgorithm_sptr testAlg;
   std::vector<std::pair<std::string, std::string>> testFacilities;
 };
-
-#endif // MANTID_REMOTEALGORITHMS_DOWNLOADREMOTEFILE2TEST_H_

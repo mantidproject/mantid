@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertAxisByFormula.h"
 #include "MantidAPI/RefAxis.h"
@@ -14,8 +14,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <algorithm>
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <sstream>
 
 namespace Mantid {
@@ -52,7 +51,7 @@ void ConvertAxisByFormula::init() {
   axisOptions.emplace_back("X");
   axisOptions.emplace_back("Y");
   declareProperty("Axis", "X",
-                  boost::make_shared<StringListValidator>(axisOptions),
+                  std::make_shared<StringListValidator>(axisOptions),
                   "The axis to modify");
 
   declareProperty("Formula", "",
@@ -87,10 +86,10 @@ void ConvertAxisByFormula::exec() {
         createChildAlgorithm("CloneWorkspace", 0.0, 0.6);
     duplicate->initialize();
     duplicate->setProperty<Workspace_sptr>(
-        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inputWs));
+        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWs));
     duplicate->execute();
     Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
-    outputWs = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    outputWs = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
     setProperty("OutputWorkspace", outputWs);
   }
@@ -120,15 +119,15 @@ void ConvertAxisByFormula::exec() {
   std::vector<Variable_ptr> variables;
   variables.reserve(8);
   // axis value lookups
-  variables.push_back(boost::make_shared<Variable>("x", false));
-  variables.push_back(boost::make_shared<Variable>("X", false));
-  variables.push_back(boost::make_shared<Variable>("y", false));
-  variables.push_back(boost::make_shared<Variable>("Y", false));
+  variables.emplace_back(std::make_shared<Variable>("x", false));
+  variables.emplace_back(std::make_shared<Variable>("X", false));
+  variables.emplace_back(std::make_shared<Variable>("y", false));
+  variables.emplace_back(std::make_shared<Variable>("Y", false));
   // geometry lookups
-  variables.push_back(boost::make_shared<Variable>("twotheta", true));
-  variables.push_back(boost::make_shared<Variable>("signedtwotheta", true));
-  variables.push_back(boost::make_shared<Variable>("l1", true));
-  variables.push_back(boost::make_shared<Variable>("l2", true));
+  variables.emplace_back(std::make_shared<Variable>("twotheta", true));
+  variables.emplace_back(std::make_shared<Variable>("signedtwotheta", true));
+  variables.emplace_back(std::make_shared<Variable>("l1", true));
+  variables.emplace_back(std::make_shared<Variable>("l2", true));
 
   bool isGeometryRequired = false;
   for (auto variablesIter = variables.begin();
@@ -157,19 +156,12 @@ void ConvertAxisByFormula::exec() {
       p.DefineVar(variable->name, &(variable->value));
     }
     // set some constants
-    double pi = M_PI;
-    p.DefineVar("pi", &pi);
-    double h = PhysicalConstants::h;
-    p.DefineVar("h", &h);
-    double hBar = PhysicalConstants::h_bar;
-    p.DefineVar("h_bar", &hBar);
-    double g = PhysicalConstants::g;
-    p.DefineVar("g", &g);
-    double mN = PhysicalConstants::NeutronMass;
-    p.DefineVar("mN", &mN);
-    double mNAMU = PhysicalConstants::NeutronMassAMU;
-    p.DefineVar("mNAMU", &mNAMU);
-
+    p.DefineConst("pi", M_PI);
+    p.DefineConst("h", PhysicalConstants::h);
+    p.DefineConst("h_bar", PhysicalConstants::h_bar);
+    p.DefineConst("g", PhysicalConstants::g);
+    p.DefineConst("mN", PhysicalConstants::NeutronMass);
+    p.DefineConst("mNAMU", PhysicalConstants::NeutronMassAMU);
     p.SetExpr(formula);
   } catch (mu::Parser::exception_type &e) {
     std::stringstream ss;
@@ -258,7 +250,7 @@ void ConvertAxisByFormula::exec() {
       if (axisUnits.empty()) {
         axisUnits = axisPtr->unit()->label();
       }
-      axisPtr->unit() = boost::make_shared<Units::Label>(axisTitle, axisUnits);
+      axisPtr->unit() = std::make_shared<Units::Label>(axisTitle, axisUnits);
     }
   }
 }

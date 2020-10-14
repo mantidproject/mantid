@@ -1,19 +1,18 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
-from sans.common.enums import BinningType
-from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
-from sans.gui_logic.models.summation_settings import SummationSettings
-from ui.sans_isis.summation_settings_widget import SummationSettingsWidget
-from fake_signal import FakeSignal
-
 from assert_called import assert_called
+from fake_signal import FakeSignal
+from unittest import mock
+from sans.common.enums import BinningType
+from sans.gui_logic.models.SummationSettingsModel import SummationSettingsModel
+from sans.gui_logic.presenter.summation_settings_presenter import SummationSettingsPresenter
+from ui.sans_isis.summation_settings_widget import SummationSettingsWidget
 
 
 class SummationSettingsPresenterTest(unittest.TestCase):
@@ -31,7 +30,7 @@ class SummationSettingsPresenterTest(unittest.TestCase):
         return mock_view
 
     def _make_mock_settings(self):
-        return mock.create_autospec(SummationSettings)
+        return mock.create_autospec(SummationSettingsModel)
 
     def _make_presenter(self, summation_settings, view):
         return SummationSettingsPresenter(summation_settings, view, None)
@@ -39,7 +38,7 @@ class SummationSettingsPresenterTest(unittest.TestCase):
     def test_sets_binning_type_when_changed(self):
         new_binning_type = 0
         self.view.binningTypeChanged.emit(new_binning_type)
-        self.summation_settings.set_histogram_binning_type.assert_called_with(BinningType.Custom)
+        self.summation_settings.set_histogram_binning_type.assert_called_with(BinningType.CUSTOM)
 
     def test_retrieves_additional_time_shifts_when_changed(self):
         self.view.additionalTimeShiftsChanged.emit()
@@ -80,4 +79,6 @@ class SummationSettingsPresenterTest(unittest.TestCase):
         self.view.preserveEventsChanged.emit(False)
         assert_called(self.summation_settings.disable_overlay_event_workspaces)
 
-if __name__ == '__main__': unittest.main()
+
+if __name__ == '__main__':
+    unittest.main()

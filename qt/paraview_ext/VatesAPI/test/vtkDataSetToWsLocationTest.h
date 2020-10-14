@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VTK_DATASET_TO_WS_LOCATION_TEST
-#define VTK_DATASET_TO_WS_LOCATION_TEST
+#pragma once
 
 #include "MantidVatesAPI/vtkDataSetToWsLocation.h"
 #include "MantidVatesAPI/vtkStructuredGrid_Silent.h"
@@ -54,5 +53,3 @@ public:
                      vtkDataSetToWsLocation::exec(ds.GetPointer()));
   }
 };
-
-#endif

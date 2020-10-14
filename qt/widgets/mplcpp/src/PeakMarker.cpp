@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/PeakMarker.h"
 #include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/Common/Python/Sip.h"
 
-using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::callMethodNoCheck;
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
 using namespace MantidQt::Widgets::MplCpp;
 

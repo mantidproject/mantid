@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ConvertDiffCal.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -69,7 +69,8 @@ void ConvertDiffCal::init() {
  * @param index
  * @return The proper detector id.
  */
-detid_t getDetID(OffsetsWorkspace_const_sptr offsetsWS, const size_t index) {
+detid_t getDetID(const OffsetsWorkspace_const_sptr &offsetsWS,
+                 const size_t index) {
   auto detIDs = offsetsWS->getSpectrum(index).getDetectorIDs();
   if (detIDs.size() != 1) {
     std::stringstream msg;
@@ -86,7 +87,8 @@ detid_t getDetID(OffsetsWorkspace_const_sptr offsetsWS, const size_t index) {
  * @param detid
  * @return The offset value or zero if not specified.
  */
-double getOffset(OffsetsWorkspace_const_sptr offsetsWS, const detid_t detid) {
+double getOffset(const OffsetsWorkspace_const_sptr &offsetsWS,
+                 const detid_t detid) {
   const double offset = offsetsWS->getValue(detid, 0.0);
   if (offset <= -1.) { // non-physical
     std::stringstream msg;
@@ -104,7 +106,8 @@ double getOffset(OffsetsWorkspace_const_sptr offsetsWS, const detid_t detid) {
  * @param spectrumInfo
  * @return The offset adjusted value of DIFC
  */
-double calculateDIFC(OffsetsWorkspace_const_sptr offsetsWS, const size_t index,
+double calculateDIFC(const OffsetsWorkspace_const_sptr &offsetsWS,
+                     const size_t index,
                      const Mantid::API::SpectrumInfo &spectrumInfo) {
   const detid_t detid = getDetID(offsetsWS, index);
   const double offset = getOffset(offsetsWS, detid);
@@ -129,7 +132,7 @@ void ConvertDiffCal::exec() {
   OffsetsWorkspace_const_sptr offsetsWS = getProperty("OffsetsWorkspace");
 
   // initial setup of new style config
-  ITableWorkspace_sptr configWksp = boost::make_shared<TableWorkspace>();
+  ITableWorkspace_sptr configWksp = std::make_shared<TableWorkspace>();
   configWksp->addColumn("int", "detid");
   configWksp->addColumn("double", "difc");
   configWksp->addColumn("double", "difa");

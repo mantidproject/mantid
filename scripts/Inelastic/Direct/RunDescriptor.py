@@ -1,15 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=too-many-lines
 #pylint: disable=invalid-name
 #pylint: disable=attribute-defined-outside-init
 """ File contains Descriptors used describe run for direct inelastic reduction """
 
-from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.kernel import funcinspect
 from Direct.PropertiesDescriptors import *
@@ -53,7 +52,7 @@ class RunList(object):
             local_fext=[]
 
         for item in runs_to_add:
-            if isinstance(item,str):
+            if isinstance(item, str):
                 file_path,run_num,fext = prop_helpers.parse_run_file_name(item)
                 runs.append(run_num)
                 if not fnames_given:
@@ -451,7 +450,7 @@ class RunDescriptor(PropDescriptor):
                 self._set_ws_as_source(value)
             return
 
-        if isinstance(value,str): # it may be run number as string or it may be a workspace name
+        if isinstance(value, str): # it may be run number as string or it may be a workspace name
             if value in mtd: # workspace name
                 ws = mtd[value]
                 self.__set__(instance,ws)
@@ -503,7 +502,7 @@ class RunDescriptor(PropDescriptor):
                 self._fext = fext
             else: # nothing to do, there is workspace, which corresponds to this run number
                 # and it may be already loaded (may be not).  Just nullify run list
-                                 # in case of previous workspace name came from a list.
+                # in case of previous workspace name came from a list.
                 self._run_list = None
                 if self._ws_name not in mtd:
                     # Change existing file path and file extension if alternatives are provided
@@ -742,7 +741,7 @@ class RunDescriptor(PropDescriptor):
         return self._build_ws_name()
 #--------------------------------------------------------------------------------------------------------------------
 
-    def synchronize_ws(self,workspace=None):
+    def synchronize_ws(self,workspace=None,new_ws_name = None):
         """Synchronize workspace name (after workspace may have changed due to algorithm)
            with internal run holder name. Accounts for the situation when
 
@@ -753,8 +752,10 @@ class RunDescriptor(PropDescriptor):
         """
         if not workspace:
             workspace = mtd[self._ws_name]
-
-        new_name = self._build_ws_name()
+        if new_ws_name:
+            new_name = new_ws_name
+        else:
+            new_name = self._build_ws_name()
         old_name = workspace.name()
         if new_name != old_name:
             # Compatibility with old test code comes here:
@@ -767,6 +768,8 @@ class RunDescriptor(PropDescriptor):
                     workspace.setMonitorWorkspace(mon_ws)
             RenameWorkspace(InputWorkspace=old_name,OutputWorkspace=new_name,RenameMonitors=True)
         self._ws_name = new_name
+
+        return mtd[new_name]
 #--------------------------------------------------------------------------------------------------------------------
 
     @staticmethod
@@ -988,7 +991,7 @@ class RunDescriptor(PropDescriptor):
 
     def set_file_ext(self,val):
         """Set non-default file extension """
-        if isinstance(val,str):
+        if isinstance(val, str):
             if val[0] != '.':
                 value = '.' + val
             else:
@@ -1147,7 +1150,7 @@ class RunDescriptor(PropDescriptor):
                 ws_calibration = prop_helpers.get_default_parameter(loaded_ws.getInstrument(),'det_cal_file')
                 if ws_calibration is None:
                     ws_calibration = calibration
-                if isinstance(ws_calibration,str) and ws_calibration.lower() == 'none':
+                if isinstance(ws_calibration, str) and ws_calibration.lower() == 'none':
                     ws_calibration = calibration
                 if ws_calibration :
                     test_name = ws_calibration
@@ -1352,7 +1355,7 @@ class RunDescriptor(PropDescriptor):
 # Hell knows how to redefine these warnings or if they are valid or not
 #pylint: disable=W0141
 #pylint: disable=W0110
-            self._ws_cname = part_ind + ''.join(re.findall('\D+', name))
+            self._ws_cname = part_ind + ''.join(re.findall(r'\D+', name))
         else:
 #pylint: disable=attribute-defined-outside-init
             self._ws_cname = part_ind + name
@@ -1665,7 +1668,7 @@ def build_run_file_name(run_num,inst,file_path='',fext=''):
     """Build the full name of a runfile from all possible components"""
     if fext is None:
         fext = ''
-    if isinstance(run_num,str):
+    if isinstance(run_num, str):
         run_num_str = run_num
     else:
 #pylint: disable=protected-access

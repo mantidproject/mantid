@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_
-#define MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_
+#pragma once
 
 #include "MantidDataObjects/MDBox.h"
 #include "MantidDataObjects/MDBoxIterator.h"
@@ -26,7 +25,6 @@ using namespace Mantid::API;
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using Mantid::Geometry::MDBoxImplicitFunction;
-using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDPlane;
 
@@ -608,6 +606,9 @@ public:
     it->getBox()->mask();
     // For masked boxes, getNormalizedSignal() should return NaN.
     TS_ASSERT(std::isnan(it->getNormalizedSignal()));
+
+    delete A->getBoxController();
+    delete A;
   }
 };
 
@@ -682,10 +683,10 @@ public:
     std::vector<MDBoxBase<MDLeanEvent<3>, 3> *> boxes;
 
     // Iterate and fill the vector as you go.
-    boxes.push_back(it.getBox());
+    boxes.emplace_back(it.getBox());
     while (it.next()) {
       box = it.getBox();
-      boxes.push_back(box);
+      boxes.emplace_back(box);
     }
     TS_ASSERT(box);
     size_t expected = 125 * 125 * 125 + 125 * 125 + 125 + 1;
@@ -771,6 +772,4 @@ public:
     do_test_getBoxes(true, 3, 125 * 125 * 125);
   }
 };
-
-#endif /* MANTID_DATAOBJECTS_MDBOXITERATORTEST_H_ */
 #undef RUN_CXX_PERFORMANCE_TEST_EMBEDDED

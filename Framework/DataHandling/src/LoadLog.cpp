@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -28,6 +28,7 @@
 #include <boost/algorithm/string.hpp>
 #include <fstream> // used to get ifstream
 #include <sstream>
+#include <utility>
 
 using Mantid::Types::Core::DateAndTime;
 
@@ -202,8 +203,8 @@ void LoadLog::loadTwoColumnLogFile(std::ifstream &logFileStream,
     }
 
     try {
-      Property *log =
-          LogParser::createLogProperty(m_filename, stringToLower(logFileName));
+      Property *log = LogParser::createLogProperty(
+          m_filename, stringToLower(std::move(logFileName)));
       if (log) {
         run.addLogData(log);
       }
@@ -220,7 +221,8 @@ void LoadLog::loadTwoColumnLogFile(std::ifstream &logFileStream,
  * @param run :: The run information object
  */
 void LoadLog::loadThreeColumnLogFile(std::ifstream &logFileStream,
-                                     std::string logFileName, API::Run &run) {
+                                     const std::string &logFileName,
+                                     API::Run &run) {
   std::string str;
   std::string propname;
   std::map<std::string, std::unique_ptr<Kernel::TimeSeriesProperty<double>>>
@@ -374,7 +376,7 @@ bool LoadLog::LoadSNSText() {
     auto p = new TimeSeriesProperty<double>(names[i]);
     if (units.size() == numCols)
       p->setUnits(units[i]);
-    props.push_back(p);
+    props.emplace_back(p);
   }
   // Go back to start
   inLogFile.seekg(0);
@@ -506,7 +508,7 @@ bool LoadLog::SNSTextFormatColumns(const std::string &str,
     if (!Strings::convert<double>(str, val))
       return false;
     else
-      out.push_back(val);
+      out.emplace_back(val);
   }
   // Nothing failed = it is that format.
   return true;

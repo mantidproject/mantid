@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VIEWPORT_H_
-#define VIEWPORT_H_
+#pragma once
 
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
+#include <QSize>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -47,12 +47,12 @@ transformation to the model.
 class Viewport {
 public:
   enum ProjectionType { ORTHO, PERSPECTIVE };
-  Viewport(int w,
-           int h); ///< Constructor with Width (w) and Height(h) as inputs
-                   /// Called by the display device when viewport is resized
-  void resize(int /*w*/, int /*h*/);
+  /// Constructor with Width (w) and Height(h) as inputs
+  /// Called by the display device when viewport is resized
+  explicit Viewport(QSize glWidgetDimensions);
+  void resize(QSize glWidgetDimensions);
   /// Get the viewport width and height.
-  void getViewport(int &w, int &h) const;
+  QSize dimensions() const;
   /// Return the projection type.
   ProjectionType getProjectionType() const;
   /// Set a projection.
@@ -139,8 +139,7 @@ protected:
   /* Projection */
 
   ProjectionType m_projectionType; ///< Type of display projection
-  int m_width;                     ///< Width of the viewport in pixels
-  int m_height;                    ///< Height of the viewport in pixels
+  QSize m_dimensions;
   double m_left; ///< Ortho/Prespective Projection xmin value (Left side of the
   /// x axis)
   double m_right; ///< Ortho/Prespective Projection xmax value (Right side of
@@ -183,5 +182,3 @@ protected:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*VIEWPORT_H_*/

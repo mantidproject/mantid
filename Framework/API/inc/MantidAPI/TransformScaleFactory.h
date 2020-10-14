@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_TRANSFORMSCALEFACTORY_H_
-#define MANTID_API_TRANSFORMSCALEFACTORY_H_
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
@@ -32,7 +31,7 @@ class MANTID_API_DLL TransformScaleFactoryImpl
     : public Kernel::DynamicFactory<ITransformScale> {
 public:
   /// Returns scaling transform
-  boost::shared_ptr<ITransformScale>
+  std::shared_ptr<ITransformScale>
   create(const std::string &type) const override;
   TransformScaleFactoryImpl(const TransformScaleFactoryImpl &) = delete;
   TransformScaleFactoryImpl &
@@ -63,5 +62,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::TransformScaleFactoryImpl>;
 }
 } // namespace Mantid
-
-#endif /* MANTID_API_TRANSFORMSCALEFACTORY_H_ */

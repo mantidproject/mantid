@@ -1,16 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDFPLOTCONTROLLER_H_
-#define MDFPLOTCONTROLLER_H_
+#pragma once
 
 #include <QMap>
 #include <QObject>
 #include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 // Forward declarations
 class QwtPlot;
@@ -90,7 +89,7 @@ private:
   MultiDatasetFit *owner() const;
   void disableAllTools();
   template <class Tool> void enableTool(Tool *tool, int cursor);
-  boost::shared_ptr<DatasetPlotData> getData(int i);
+  std::shared_ptr<DatasetPlotData> getData(int i);
   void exportPlot(int index);
   QString makePyPlotSource(int index) const;
   void plotGuess();
@@ -116,7 +115,7 @@ private:
   QComboBox *m_plotSelector;
   QPushButton *m_prevPlot;
   QPushButton *m_nextPlot;
-  QMap<int, boost::shared_ptr<DatasetPlotData>> m_plotData;
+  QMap<int, std::shared_ptr<DatasetPlotData>> m_plotData;
   int m_currentIndex;
   bool m_showDataErrors;
 
@@ -128,5 +127,3 @@ private:
 } // namespace MDF
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*MDFPLOTCONTROLLER_H_*/

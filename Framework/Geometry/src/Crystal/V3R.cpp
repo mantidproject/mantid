@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/V3R.h"
 namespace Mantid {
@@ -314,9 +314,9 @@ V3R V3R::getPositiveVector() const {
 /// Returns an std::vector<double> with approximations of the components.
 V3R::operator std::vector<double>() const {
   std::vector<double> vector;
-  vector.push_back(boost::rational_cast<double>(m_x));
-  vector.push_back(boost::rational_cast<double>(m_y));
-  vector.push_back(boost::rational_cast<double>(m_z));
+  vector.emplace_back(boost::rational_cast<double>(m_x));
+  vector.emplace_back(boost::rational_cast<double>(m_y));
+  vector.emplace_back(boost::rational_cast<double>(m_z));
 
   return vector;
 }

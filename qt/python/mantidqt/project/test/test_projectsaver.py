@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
@@ -16,7 +16,7 @@ from shutil import rmtree
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.simpleapi import CreateSampleWorkspace
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.project import projectsaver
 
 

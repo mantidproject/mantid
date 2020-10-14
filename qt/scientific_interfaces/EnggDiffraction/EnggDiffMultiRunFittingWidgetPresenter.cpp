@@ -33,7 +33,7 @@ generateFocusedRunName(const MantidQt::CustomInterfaces::RunLabel &runLabel) {
          "_external_plot";
 }
 
-size_t guessBankID(Mantid::API::MatrixWorkspace_const_sptr ws) {
+size_t guessBankID(const Mantid::API::MatrixWorkspace_const_sptr &ws) {
   const static std::string bankIDName = "bankid";
   if (ws->run().hasProperty(bankIDName)) {
     const auto log = dynamic_cast<Mantid::Kernel::PropertyWithValue<int> *>(

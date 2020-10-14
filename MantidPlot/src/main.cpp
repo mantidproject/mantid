@@ -207,7 +207,7 @@ int main(int argc, char **argv) {
   try {
     // Splash
     QPixmap pixmap;
-    if (!pixmap.load(":/MantidSplashScreen.png"))
+    if (!pixmap.load(":/MantidPlotSplashScreen-Deprecated.png"))
       std::cerr << "Couldn't load splashscreen\n";
     QSplashScreen splash(pixmap);
     const QString releaseDateTime(Mantid::Kernel::MantidVersion::releaseDate());

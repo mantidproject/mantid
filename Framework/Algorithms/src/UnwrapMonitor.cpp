@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/UnwrapMonitor.h"
 #include "MantidAPI/Axis.h"
@@ -34,7 +34,7 @@ UnwrapMonitor::UnwrapMonitor()
 
 /// Initialisation method
 void UnwrapMonitor::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
   wsValidator->add<HistogramValidator>();
   wsValidator->add<RawCountValidator>();
@@ -48,7 +48,7 @@ void UnwrapMonitor::init() {
           "OutputWorkspace", "", Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
-  auto validator = boost::make_shared<BoundedValidator<double>>();
+  auto validator = std::make_shared<BoundedValidator<double>>();
   validator->setLower(0.01);
   declareProperty("LRef", 0.0, validator,
                   "The length of the reference flight path (in metres)");
@@ -209,7 +209,7 @@ const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
     // First deal with bins where m_Tmin < tof < T2
     if (tof < T2) {
       const double wavelength = (m_conversionConstant * tof) / Ld;
-      tempX_L.push_back(wavelength);
+      tempX_L.emplace_back(wavelength);
       // Record the bins that fall in this range for copying over the data &
       // errors
       if (binRange[0] == -1)
@@ -220,7 +220,7 @@ const std::vector<int> UnwrapMonitor::unwrapX(std::vector<double> &newX,
     else if (tof > T1) {
       const double velocity = Ld / (tof - m_Tmax + m_Tmin);
       const double wavelength = m_conversionConstant / velocity;
-      newX.push_back(wavelength);
+      newX.emplace_back(wavelength);
       // Remove the duplicate boundary bin
       if (tof == m_Tmax && std::abs(wavelength - tempX_L.front()) < 1.0e-5)
         newX.pop_back();

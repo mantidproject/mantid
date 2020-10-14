@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadRawSpectrum0.h"
 #include "LoadRaw/isisraw2.h"
@@ -16,9 +16,9 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <cstdio> //Required for gcc 4.4
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {
@@ -98,7 +98,7 @@ void LoadRawSpectrum0::exec() {
   // separate workspace
   for (int period = 0; period < m_numberOfPeriods; ++period) {
     if (period > 0) {
-      localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+      localWorkspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
           WorkspaceFactory::Instance().create(localWorkspace));
 
       if (bLoadlogFiles) {

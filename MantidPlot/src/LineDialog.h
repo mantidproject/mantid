@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : LineDialog.h
@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef LINEDIALOG_H
-#define LINEDIALOG_H
+#pragma once
 
 #include <qdialog.h>
 
@@ -37,7 +36,7 @@ class LineDialog : public QDialog {
 
 public:
   LineDialog(ArrowMarker *line, QWidget *parent = nullptr,
-             Qt::WFlags fl = nullptr);
+             const Qt::WFlags &fl = nullptr);
 
   enum Unit { ScaleCoordinates, Pixels };
 
@@ -71,5 +70,3 @@ private:
   QSpinBox *xStartPixelBox, *yStartPixelBox, *xEndPixelBox, *yEndPixelBox;
   QSpinBox *boxHeadAngle, *boxHeadLength;
 };
-
-#endif // LINEDIALOG_H

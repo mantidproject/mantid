@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MedianDetectorTest.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -33,7 +33,7 @@ const std::string MedianDetectorTest::category() const { return "Diagnostics"; }
 void MedianDetectorTest::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<HistogramValidator>()),
+                      std::make_shared<HistogramValidator>()),
                   "Name of the input workspace");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
@@ -41,9 +41,9 @@ void MedianDetectorTest::init() {
       "A MaskWorkspace where 0 denotes a masked spectra. Any spectra containing"
       "a zero is also masked on the output");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
-  auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   declareProperty(
       "LevelsUp", 0, mustBePosInt,
@@ -238,7 +238,8 @@ API::MatrixWorkspace_sptr MedianDetectorTest::getSolidAngles(int firstSpec,
  * @returns The number failed.
  */
 int MedianDetectorTest::maskOutliers(
-    const std::vector<double> medianvec, API::MatrixWorkspace_sptr countsWS,
+    const std::vector<double> &medianvec,
+    const API::MatrixWorkspace_sptr &countsWS,
     std::vector<std::vector<size_t>> indexmap) {
 
   // Fractions of the median
@@ -300,10 +301,10 @@ int MedianDetectorTest::maskOutliers(
  * skipped.
  */
 int MedianDetectorTest::doDetectorTests(
-    const API::MatrixWorkspace_sptr countsWS,
-    const std::vector<double> medianvec,
+    const API::MatrixWorkspace_sptr &countsWS,
+    const std::vector<double> &medianvec,
     std::vector<std::vector<size_t>> indexmap,
-    API::MatrixWorkspace_sptr maskWS) {
+    const API::MatrixWorkspace_sptr &maskWS) {
   g_log.debug("Applying the criteria to find failing detectors");
 
   // A spectra can't fail if the statistics show its value is consistent with

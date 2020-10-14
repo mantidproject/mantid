@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_DYNAMICKUBOTOYABE_H_
-#define MANTID_CURVEFITTING_DYNAMICKUBOTOYABE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -13,6 +12,7 @@
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IFunctionWithLocation.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include <cmath>
 
 namespace Mantid {
@@ -26,15 +26,15 @@ namespace Functions {
  @date 18/02/2015
  */
 
-class DLLExport DynamicKuboToyabe : public API::ParamFunction,
-                                    public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL DynamicKuboToyabe : public API::ParamFunction,
+                                                  public API::IFunction1D {
 public:
   /// Constructor
   DynamicKuboToyabe();
 
   /// overwrite base class methods
   std::string name() const override { return "DynamicKuboToyabe"; }
-  const std::string category() const override { return "Muon"; }
+  const std::string category() const override { return "Muon\\MuonGeneric"; }
 
   /// Returns the number of attributes associated with the function
   size_t nAttributes() const override { return 1; }
@@ -73,5 +73,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_DYNAMICKUBOTOYABE_H_*/

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FITTESTHELPERS_H_
-#define FITTESTHELPERS_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 
@@ -27,8 +26,8 @@ static API::MatrixWorkspace_sptr generateSmoothCurveWorkspace();
 /// Run fit on a (single spectrum) matrix workspace, using the given type
 /// of function and minimizer option
 static Mantid::API::IAlgorithm_sptr
-runFitAlgorithm(MatrixWorkspace_sptr dataToFit, CurveBenchmarks ctype,
-                const std::string minimizer = "Levenberg-MarquardtMD") {
+runFitAlgorithm(const MatrixWorkspace_sptr &dataToFit, CurveBenchmarks ctype,
+                const std::string &minimizer = "Levenberg-MarquardtMD") {
 
   auto fit = AlgorithmManager::Instance().create("Fit");
   fit->initialize();
@@ -133,5 +132,3 @@ static API::MatrixWorkspace_sptr generateSmoothCurveWorkspace() {
   return ws;
 }
 } // namespace FitTestHelpers
-
-#endif /* FITTESTHELPERS_H_ */

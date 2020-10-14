@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVEReflectometryAsciiTEST_H_
-#define MANTID_DATAHANDLING_SAVEReflectometryAsciiTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -18,10 +17,10 @@
 #include "MantidKernel/PropertyWithValue.h"
 #include <Poco/File.h>
 #include <Poco/TemporaryFile.h>
-#include <boost/make_shared.hpp>
 #include <cmath>
 #include <cxxtest/TestSuite.h>
 #include <iterator>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
@@ -90,6 +89,8 @@ public:
         TS_ASSERT_EQUALS(fullline, *(it++));
     }
     TS_ASSERT(in.eof())
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_histogram_data() {
@@ -127,10 +128,12 @@ public:
         TS_ASSERT_EQUALS(fullline, *(it++))
     }
     TS_ASSERT(in.eof())
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_empty_workspace() {
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
     SaveReflectometryAscii alg;
@@ -148,7 +151,7 @@ public:
     const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
@@ -168,6 +171,8 @@ public:
                                 std::istreambuf_iterator<char>(),
                                 in.widen('\n')),
                      25)
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_dx_values() {
@@ -208,6 +213,8 @@ public:
       if (fullline.find(" : ") == std::string::npos)
         TS_ASSERT_EQUALS(fullline, *(it++))
     }
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_txt() {
@@ -229,10 +236,10 @@ public:
     TS_ASSERT(Poco::File(filename.append(".txt")).exists())
     std::vector<std::string> data;
     data.reserve(2);
-    data.emplace_back("\t3.300000000000000e-01\t"
+    data.emplace_back("3.300000000000000e-01\t"
                       "3.000000000000000e+00\t1.732050807568877e+00\t"
                       "6.502941176470588e-01");
-    data.emplace_back("\t3.400000000000000e-01\t"
+    data.emplace_back("3.400000000000000e-01\t"
                       "6.600000000000000e+00\t2.569046515733026e+00\t"
                       "6.700000000000000e-01");
     std::ifstream in(filename);
@@ -243,6 +250,9 @@ public:
       TS_ASSERT_EQUALS(fullline, *(it++))
     }
     TS_ASSERT(in.eof())
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_override_existing_file_txt() {
@@ -273,10 +283,10 @@ public:
     TS_ASSERT(Poco::File(filename.append(".txt")).exists())
     std::vector<std::string> data;
     data.reserve(2);
-    data.emplace_back("\t3.300000000000000e-01\t"
+    data.emplace_back("3.300000000000000e-01\t"
                       "3.000000000000000e+00\t1.732050807568877e+00\t"
                       "6.502941176470588e-01");
-    data.emplace_back("\t3.400000000000000e-01\t"
+    data.emplace_back("3.400000000000000e-01\t"
                       "6.600000000000000e+00\t2.569046515733026e+00\t"
                       "6.700000000000000e-01");
     std::ifstream in(filename);
@@ -287,13 +297,16 @@ public:
       TS_ASSERT_EQUALS(fullline, *(it++));
     }
     TS_ASSERT(in.eof())
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_more_than_nine_logs() {
     const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
     auto outputFileHandle = Poco::TemporaryFile();
     const std::string file = outputFileHandle.path();
@@ -342,13 +355,16 @@ public:
     TS_ASSERT_EQUALS(line, "Number of file format : 40")
     std::getline(in, line);
     TS_ASSERT_EQUALS(line, "Number of data points : 2")
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_user_log() {
     const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
     Mantid::Kernel::PropertyWithValue<int> *a =
         new Mantid::Kernel::PropertyWithValue<int>("a", 5);
@@ -403,13 +419,16 @@ public:
     TS_ASSERT_EQUALS(line, "Number of file format : 40")
     std::getline(in, line);
     TS_ASSERT_EQUALS(line, "Number of data points : 2")
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_user_log_overrides_fixed_log() {
     const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
     // User wants to add the Instrument name header line
     Mantid::Kernel::PropertyWithValue<std::string> *a =
@@ -465,13 +484,16 @@ public:
     TS_ASSERT_EQUALS(line, "Number of file format : 40")
     std::getline(in, line);
     TS_ASSERT_EQUALS(line, "Number of data points : 2")
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_automatic_log_filling() {
     const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
     const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
     Mantid::HistogramData::Histogram histogram(x1, y1);
-    auto ws = boost::make_shared<Mantid::DataObjects::Workspace2D>();
+    auto ws = std::make_shared<Mantid::DataObjects::Workspace2D>();
     ws->initialize(1, histogram);
     // Should use this instrument name
     Mantid::Kernel::PropertyWithValue<std::string> *a =
@@ -519,6 +541,9 @@ public:
     TS_ASSERT_EQUALS(line, "Number of file format : 40")
     std::getline(in, line);
     TS_ASSERT_EQUALS(line, "Number of data points : 2")
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_group_workspaces() {
@@ -552,10 +577,10 @@ public:
     TS_ASSERT(Poco::File(f1).exists())
     std::vector<std::string> data1;
     data1.reserve(2);
-    data1.emplace_back("\t4.360000000000000e+00\t"
+    data1.emplace_back("4.360000000000000e+00\t"
                        "4.000000000000000e+00\t2.000000000000000e+00\t"
                        "7.367848101265823e+00");
-    data1.emplace_back("\t6.320000000000000e+00\t"
+    data1.emplace_back("6.320000000000000e+00\t"
                        "7.600000000000000e+00\t2.756809750418044e+00\t"
                        "1.068000000000000e+01");
     std::ifstream in1(f1);
@@ -569,10 +594,10 @@ public:
     TS_ASSERT(Poco::File(f2).exists())
     std::vector<std::string> data2;
     data2.reserve(2);
-    data2.emplace_back("\t3.300000000000000e-01\t"
+    data2.emplace_back("3.300000000000000e-01\t"
                        "3.000000000000000e+00\t1.732050807568877e+00\t"
                        "6.502941176470588e-01");
-    data2.emplace_back("\t3.400000000000000e-01\t"
+    data2.emplace_back("3.400000000000000e-01\t"
                        "6.600000000000000e+00\t2.569046515733026e+00\t"
                        "6.700000000000000e-01");
     std::ifstream in2(f2);
@@ -582,6 +607,11 @@ public:
       TS_ASSERT_EQUALS(fullline, *(it2++));
     }
     TS_ASSERT(in2.eof())
+
+    in1.close();
+    Poco::File(f1).remove();
+    in2.close();
+    Poco::File(f2).remove();
   }
 
   void test_point_data_dat() {
@@ -616,6 +646,9 @@ public:
       TS_ASSERT_EQUALS(fullline, *(it++));
     }
     TS_ASSERT(in.eof())
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_dx_values_with_header_custom() {
@@ -641,13 +674,11 @@ public:
     data.reserve(5);
     data.emplace_back("MFT");
     data.emplace_back("");
-    data.emplace_back("                           q                        "
-                      "refl                    refl_err                q_res "
-                      "(FWHM)");
-    data.emplace_back("\t3.300000000000000e-01\t"
+    data.emplace_back("q\trefl\trefl_err\tq_res (FWHM)");
+    data.emplace_back("3.300000000000000e-01\t"
                       "3.000000000000000e+00\t1.732050807568877e+00\t"
                       "1.100000000000000e+00");
-    data.emplace_back("\t3.400000000000000e-01\t"
+    data.emplace_back("3.400000000000000e-01\t"
                       "6.600000000000000e+00\t2.569046515733026e+00\t"
                       "1.300000000000000e+00");
     std::ifstream in(filename);
@@ -658,6 +689,51 @@ public:
       if (fullline.find(" : ") == std::string::npos)
         TS_ASSERT_EQUALS(fullline, *(it++))
     }
+
+    in.close();
+    Poco::File(filename).remove();
+  }
+
+  void test_calculated_dx_values_with_header_custom() {
+    const auto &x1 = Mantid::HistogramData::Points({0.33, 0.34});
+    const auto &y1 = Mantid::HistogramData::Counts({3., 6.6});
+    Mantid::HistogramData::Histogram histogram(x1, y1);
+    const Workspace_sptr ws = create<Workspace2D>(1, histogram);
+    auto outputFileHandle = Poco::TemporaryFile();
+    const std::string file = outputFileHandle.path();
+    SaveReflectometryAscii alg;
+    alg.initialize();
+    alg.setRethrows(true);
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("Filename", file))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("FileExtension", "custom"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("WriteHeader", true))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted());
+    std::string filename = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(filename).exists())
+    std::vector<std::string> data;
+    data.reserve(5);
+    data.emplace_back("MFT");
+    data.emplace_back("");
+    data.emplace_back("q\trefl\trefl_err\tq_res (FWHM)");
+    data.emplace_back("3.300000000000000e-01\t"
+                      "3.000000000000000e+00\t1.732050807568877e+00\t"
+                      "6.502941176470588e-01");
+    data.emplace_back("3.400000000000000e-01\t"
+                      "6.600000000000000e+00\t2.569046515733026e+00\t"
+                      "6.700000000000000e-01");
+    std::ifstream in(filename);
+    TS_ASSERT(not_empty(in))
+    std::string fullline;
+    auto it = data.begin();
+    while (std::getline(in, fullline)) {
+      if (fullline.find(" : ") == std::string::npos)
+        TS_ASSERT_EQUALS(fullline, *(it++))
+    }
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_dx_values_no_header_custom() {
@@ -681,10 +757,10 @@ public:
     TS_ASSERT(Poco::File(filename).exists())
     std::vector<std::string> data;
     data.reserve(2);
-    data.emplace_back("\t3.300000000000000e-01\t"
+    data.emplace_back("3.300000000000000e-01\t"
                       "3.000000000000000e+00\t1.732050807568877e+00\t"
                       "1.100000000000000e+00");
-    data.emplace_back("\t3.400000000000000e-01\t"
+    data.emplace_back("3.400000000000000e-01\t"
                       "6.600000000000000e+00\t2.569046515733026e+00\t"
                       "1.300000000000000e+00");
     std::ifstream in(filename);
@@ -694,6 +770,9 @@ public:
     while (std::getline(in, fullline)) {
       TS_ASSERT_EQUALS(fullline, *(it++))
     }
+
+    in.close();
+    Poco::File(filename).remove();
   }
 
   void test_no_header_no_resolution_separator_custom() {
@@ -719,9 +798,9 @@ public:
     TS_ASSERT(Poco::File(filename).exists())
     std::vector<std::string> data;
     data.reserve(2);
-    data.emplace_back(" 3.300000000000000e-01 "
+    data.emplace_back("3.300000000000000e-01 "
                       "3.000000000000000e+00 1.732050807568877e+00");
-    data.emplace_back(" 3.400000000000000e-01 "
+    data.emplace_back("3.400000000000000e-01 "
                       "6.600000000000000e+00 2.569046515733026e+00");
     std::ifstream in(filename);
     TS_ASSERT(not_empty(in))
@@ -730,6 +809,8 @@ public:
     while (std::getline(in, fullline)) {
       TS_ASSERT_EQUALS(fullline, *(it++))
     }
+    in.close();
+    Poco::File(filename).remove();
   }
 
 private:
@@ -737,4 +818,3 @@ private:
     return in.peek() != std::ifstream::traits_type::eof();
   }
 };
-#endif /*MANTID_DATAHANDLING_SAVEReflectometryAsciiTEST_H_*/

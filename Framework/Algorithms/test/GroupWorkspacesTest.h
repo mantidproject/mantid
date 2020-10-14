@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GROUPWORKSPACESTEST_H_
-#define GROUPWORKSPACESTEST_H_
+#pragma once
 
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -38,9 +37,9 @@ public:
   }
 
   void testInit() {
+    using Mantid::Algorithms::GroupWorkspaces;
     using Mantid::API::WorkspaceGroup;
     using Mantid::API::WorkspaceProperty;
-    using Mantid::Algorithms::GroupWorkspaces;
 
     GroupWorkspaces alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -135,7 +134,7 @@ public:
 
     // Assert
     groupNames.reserve(4);
-    groupNames.push_back(singleWS);
+    groupNames.emplace_back(singleWS);
     checkGroupExistsWithMembers(finalGroupName, groupNames);
     TS_ASSERT_EQUALS(
         false,
@@ -525,4 +524,3 @@ private:
       ads.remove(groupName);
   }
 };
-#endif

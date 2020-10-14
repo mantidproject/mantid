@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_PARCOMPONENTFACTORYTEST_H_
-#define MANTID_GEOMETRY_PARCOMPONENTFACTORYTEST_H_
+#pragma once
 
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
@@ -22,11 +21,10 @@ public:
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(1);
     IDetector_const_sptr idet = inst->getDetector(1);
-    const Detector *det =
-        boost::dynamic_pointer_cast<const Detector>(idet).get();
+    const Detector *det = std::dynamic_pointer_cast<const Detector>(idet).get();
     ParameterMap *map = new ParameterMap();
 
-    boost::shared_ptr<IDetector> pdet;
+    std::shared_ptr<IDetector> pdet;
     TS_ASSERT_THROWS_NOTHING(pdet =
                                  ParComponentFactory::createDetector(det, map));
     TS_ASSERT(pdet);
@@ -41,9 +39,7 @@ public:
     Instrument_sptr pinst;
     TS_ASSERT_THROWS_NOTHING(
         pinst = ParComponentFactory::createInstrument(
-            boost::dynamic_pointer_cast<Instrument>(inst), map));
+            std::dynamic_pointer_cast<Instrument>(inst), map));
     TS_ASSERT(pinst);
   }
 };
-
-#endif /* MANTID_GEOMETRY_PARCOMPONENTFACTORYTEST_H_ */

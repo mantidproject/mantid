@@ -41,7 +41,7 @@ Usage
   # Run ConvolutionFitSequential algorithm
   ConvolutionFitSequential(InputWorkspace=sample, Function=function,
                            PassWSIndexToFunction=True, StartX=startX, EndX=endX,
-                           SpecMin=specMin, SpecMax=specMax, ConvolveMembers=convolve,
+                           SpecMin=specMin, SpecMax=specMax, OutputCompositeMembers=convolve, ConvolveMembers=convolve,
                            Minimizer=minimizer, MaxIterations=maxIt,
                            OutputWorkspace=output_ws_name)
 
@@ -96,7 +96,7 @@ Output:
 
   # Run ConvolutionFitSequential algorithm with ExtractMembers property
   ConvolutionFitSequential(InputWorkspace=sample, Function=function, PassWSIndexToFunction=True,
-                           StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax,
+                           StartX=startX, EndX=endX, SpecMin=specMin, SpecMax=specMax, OutputCompositeMembers=convolve,
                            ConvolveMembers=convolve, Minimizer=minimizer, MaxIterations=maxIt,
                            ExtractMembers=True, OutputWorkspace=output_ws_name)
 

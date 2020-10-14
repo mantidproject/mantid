@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 import mantid.simpleapi as mantid
 
@@ -62,8 +61,8 @@ def read_in_expected_peaks(filename, expected_peaks):
         if not ex_peak_array:
             # "File could not be read. Defaults in alternative option used."
             if not expected_peaks:
-                raise ValueError("Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '" +
-                                 filename + "', and no expected peaks were given in the property "
+                raise ValueError("Could not read any peaks from the file given in 'ExpectedPeaksFromFile: '"
+                                 + filename + "', and no expected peaks were given in the property "
                                  "'ExpectedPeaks' either. Cannot continue without a list of expected peaks.")
             expected_peaks_d = sorted(expected_peaks)
 
@@ -132,8 +131,8 @@ def parse_spectrum_indices(workspace, spectrum_numbers):
     max_index = workspace.getNumberHistograms()
     if indices[-1] >= max_index:
         raise ValueError("A workspace index equal or bigger than the number of histograms available in the "
-                         "workspace '" + workspace.name() + "' (" + str(workspace.getNumberHistograms()) +
-                         ") has been given. Please check the list of indices.")
+                         "workspace '" + workspace.name() + "' (" + str(workspace.getNumberHistograms())
+                         + ") has been given. Please check the list of indices.")
     # and finally translate from 'spectrum numbers' to 'workspace indices'
     return [workspace.getIndexFromSpectrumNumber(sn) for sn in indices]
 
@@ -206,8 +205,7 @@ def get_detector_ids_for_bank(bank):
     mantid.DeleteWorkspace(grouping)
 
     if len(detector_ids) == 0:
-        raise ValueError('Could not find any detector for this bank: ' + bank +
-                         '. This looks like an unknown bank')
+        raise ValueError('Could not find any detector for this bank: ' + bank + '. This looks like an unknown bank')
 
     return detector_ids
 
@@ -328,10 +326,9 @@ def crop_data(parent, ws, indices):
     @returns cropped workspace, with only the spectra corresponding to the indices requested
     """
     # Leave only spectra between min and max
-    alg = parent.createChildAlgorithm('CropWorkspace')
+    alg = parent.createChildAlgorithm('ExtractSpectra')
     alg.setProperty('InputWorkspace', ws)
-    alg.setProperty('StartWorkspaceIndex', min(indices))
-    alg.setProperty('EndWorkspaceIndex', max(indices))
+    alg.setProperty('WorkspaceIndexList', indices)
     alg.execute()
 
     return alg.getProperty('OutputWorkspace').value
@@ -354,7 +351,7 @@ def sum_spectra(parent, ws):
     return alg.getProperty('OutputWorkspace').value
 
 
-def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None, ceria_run=241391, vanadium_run=236516,
+def write_ENGINX_GSAS_iparam_file(output_file, difa, difc, tzero, bank_names=None, ceria_run=241391, vanadium_run=236516,
                                   template_file=None):
     """
     Produces and writes an ENGIN-X instrument parameter file for GSAS
@@ -367,10 +364,12 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None, cer
     .prm, .ipar, etc.
 
     @param output_file :: name of the file where to write the output
+    @param difa :: list of DIFA values, one per bank, to pass on to GSAS
     @param difc :: list of DIFC values, one per bank, to pass on to GSAS
                    (as produced by EnggCalibrate)
     @param tzero :: list of TZERO values, one per bank, to pass on to GSAS
                     (also from EnggCalibrate)
+    @param bank_names :: Names of each bank to be added to the file
     @param ceria_run :: number of the ceria (CeO2) run used for this calibration.
                         this number goes in the file and should also be used to
                         name the file
@@ -386,8 +385,8 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None, cer
         raise ValueError("The parameters difc and tzero must be lists, with as many elements as "
                          "banks")
 
-    if len(difc) != len(tzero):
-        raise ValueError("The lengths of the difc and tzero lists must be the same")
+    if len(difc) != len(tzero) and len(difc) != len(difa):
+        raise ValueError("The lengths of the difa, difc and tzero lists must be the same")
 
     # Defaults for a "both banks" file
     if not template_file:
@@ -398,7 +397,7 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None, cer
         bank_names = ["North", "South"]
 
     with open(template_file) as tf:
-        temp_lines = tf.readlines()
+        output_lines = tf.readlines()
 
     def replace_patterns(line, patterns, replacements):
         """
@@ -414,22 +413,20 @@ def write_ENGINX_GSAS_iparam_file(output_file, difc, tzero, bank_names=None, cer
     # need to replace two types of lines/patterns:
     # - instrument constants/parameters (ICONS)
     # - instrument calibration comment with run numbers (CALIB)
-    output_lines = []
     for b_idx, _bank_name in enumerate(bank_names):
         patterns = ["INS  %d ICONS" % (b_idx + 1),  # bank calibration parameters: DIFC, DIFA, TZERO
                     "INS    CALIB",  # calibration run numbers (Vanadium and Ceria)
                     "INS    INCBM"   # A his file for open genie (with ceria run number in the name)
                     ]
-        difa = 0.0
         # the ljust(80) ensures a length of 80 characters for the lines (GSAS rules...)
         replacements = [("INS  {0} ICONS  {1:.2f}    {2:.2f}    {3:.2f}".
-                         format(b_idx + 1, difc[b_idx], difa, tzero[b_idx])).ljust(80) + '\n',
+                         format(b_idx + 1, difc[b_idx], difa[b_idx], tzero[b_idx])).ljust(80) + '\n',
                         ("INS    CALIB   {0}   {1} ceo2".
                          format(ceria_run, vanadium_run)).ljust(80) + '\n',
                         ("INS    INCBM  ob+mon_{0}_North_and_South_banks.his".
                          format(ceria_run)).ljust(80) + '\n']
 
-        output_lines = [replace_patterns(line, patterns, replacements) for line in temp_lines]
+        output_lines = [replace_patterns(line, patterns, replacements) for line in output_lines]
 
     with open(output_file, 'w') as of:
         of.writelines(output_lines)

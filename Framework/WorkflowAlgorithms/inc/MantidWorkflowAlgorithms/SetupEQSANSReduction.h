@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SETUPEQSANSREDUCTION_H_
-#define MANTID_ALGORITHMS_SETUPEQSANSREDUCTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -40,15 +39,13 @@ private:
   /// Execution code
   void exec() override;
   std::string _findFile(std::string dataRun);
-  void
-  setupSensitivity(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
+  void setupSensitivity(
+      const std::shared_ptr<Kernel::PropertyManager> &reductionManager);
   void setupTransmission(
-      boost::shared_ptr<Kernel::PropertyManager> reductionManager);
-  void
-  setupBackground(boost::shared_ptr<Kernel::PropertyManager> reductionManager);
+      const std::shared_ptr<Kernel::PropertyManager> &reductionManager);
+  void setupBackground(
+      const std::shared_ptr<Kernel::PropertyManager> &reductionManager);
 };
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_SETUPEQSANSREDUCTION_H_*/

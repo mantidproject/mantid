@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CONJOINXRUNSTEST_H_
-#define MANTID_ALGORITHMS_CONJOINXRUNSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -395,7 +394,7 @@ public:
           create2DWorkspace123(2000, 100, false, std::set<int64_t>(), true);
       std::string name = "ws" + std::to_string(i);
       storeWS(name, ws);
-      m_ws.push_back(name);
+      m_ws.emplace_back(name);
     }
     m_alg.initialize();
     m_alg.isChild();
@@ -416,5 +415,3 @@ private:
   ConjoinXRuns m_alg;
   std::vector<std::string> m_ws;
 };
-
-#endif /* MANTID_ALGORITHMS_CONJOINXRUNSTEST_H_ */

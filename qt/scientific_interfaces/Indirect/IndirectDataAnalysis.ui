@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>799</width>
-    <height>764</height>
+    <width>1100</width>
+    <height>1100</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -97,13 +97,6 @@
           <width>25</width>
           <height>25</height>
          </size>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../../MantidPlot/icons/icons.qrc">
-          <normaloff>:/configure.png</normaloff>:/configure.png</iconset>
         </property>
        </widget>
       </item>

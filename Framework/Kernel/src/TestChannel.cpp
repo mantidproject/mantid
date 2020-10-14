@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------
 // Includes
@@ -11,7 +11,7 @@
 
 namespace Mantid {
 
-void TestChannel::log(const Poco::Message &msg) { _msgList.push_back(msg); }
+void TestChannel::log(const Poco::Message &msg) { _msgList.emplace_back(msg); }
 
 TestChannel::MsgList &TestChannel::list() { return _msgList; }
 

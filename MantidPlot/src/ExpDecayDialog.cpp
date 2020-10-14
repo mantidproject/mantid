@@ -43,7 +43,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-ExpDecayDialog::ExpDecayDialog(int type, QWidget *parent, Qt::WFlags fl)
+ExpDecayDialog::ExpDecayDialog(int type, QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl), fitter(nullptr), graph(nullptr), buttonFit(nullptr),
       buttonCancel(nullptr), boxName(nullptr), boxAmplitude(nullptr),
       boxFirst(nullptr), boxSecond(nullptr), boxThird(nullptr),

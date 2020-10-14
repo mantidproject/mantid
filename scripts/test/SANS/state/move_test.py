@@ -1,18 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
+from unittest import mock
 
-from sans.state.move import (StateMoveLOQ, StateMoveSANS2D, StateMoveLARMOR, StateMoveZOOM, StateMove,
-                             StateMoveDetector, get_move_builder)
-from sans.state.data import get_data_builder
 from sans.common.enums import (CanonicalCoordinates, SANSFacility, DetectorType, SANSInstrument)
-from state_test_helper import assert_validate_error, assert_raises_nothing
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateMoveDetectors import (StateMoveLOQ, StateMoveSANS2D, StateMoveLARMOR, StateMoveZOOM, StateMove,
+                                                        StateMoveDetectors, get_move_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -22,43 +20,47 @@ from sans.test_helper.file_information_mock import SANSFileInformationMock
 class StateMoveWorkspaceTest(unittest.TestCase):
     def test_that_raises_if_the_detector_name_is_not_set_up(self):
         state = StateMove()
-        state.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
-                           DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
-        state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name = "test"
-        state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short = "test"
-        state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short = "test"
-        assert_validate_error(self, ValueError, state)
-        state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name = "test"
-        assert_raises_nothing(self, state)
+        state.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
+                           DetectorType.HAB.value: StateMoveDetectors()}
+        state.detectors[DetectorType.LAB.value].detector_name = "test"
+        state.detectors[DetectorType.HAB.value].detector_name_short = "test"
+        state.detectors[DetectorType.LAB.value].detector_name_short = "test"
+        with self.assertRaises(ValueError):
+            state.validate()
+
+        state.detectors[DetectorType.HAB.value].detector_name = "test"
+        self.assertIsNone(state.validate())
 
     def test_that_raises_if_the_short_detector_name_is_not_set_up(self):
         state = StateMove()
-        state.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
-                           DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
-        state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name = "test"
-        state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name = "test"
-        state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short = "test"
-        assert_validate_error(self, ValueError, state)
-        state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name_short = "test"
-        assert_raises_nothing(self, state)
+        state.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
+                           DetectorType.HAB.value: StateMoveDetectors()}
+        state.detectors[DetectorType.HAB.value].detector_name = "test"
+        state.detectors[DetectorType.LAB.value].detector_name = "test"
+        state.detectors[DetectorType.HAB.value].detector_name_short = "test"
+        with self.assertRaises(ValueError):
+            state.validate()
+
+        state.detectors[DetectorType.LAB.value].detector_name_short = "test"
+        self.assertIsNone(state.validate())
 
     def test_that_general_isis_default_values_are_set_up(self):
         state = StateMove()
-        state.detectors = {DetectorType.to_string(DetectorType.LAB): StateMoveDetector(),
-                           DetectorType.to_string(DetectorType.HAB): StateMoveDetector()}
+        state.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
+                           DetectorType.HAB.value: StateMoveDetectors()}
         self.assertEqual(state.sample_offset,  0.0)
         self.assertEqual(state.sample_offset_direction, CanonicalCoordinates.Z)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].y_translation_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].z_translation_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].rotation_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].side_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].radius_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_tilt_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].y_tilt_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].z_tilt_correction,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos1,  0.0)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].sample_centre_pos2,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.value].x_translation_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.value].y_translation_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.value].z_translation_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.value].rotation_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.value].side_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.value].radius_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.value].x_tilt_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.value].y_tilt_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.value].z_tilt_correction,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.value].sample_centre_pos1,  0.0)
+        self.assertEqual(state.detectors[DetectorType.HAB.value].sample_centre_pos2,  0.0)
 
 
 class StateMoveWorkspaceLOQTest(unittest.TestCase):
@@ -90,7 +92,7 @@ class StateMoveWorkspaceSANS2DTest(unittest.TestCase):
         self.assertEqual(state.lab_detector_x,  0.0)
         self.assertEqual(state.lab_detector_z,  0.0)
         self.assertEqual(state.monitor_names,  {})
-        self.assertEqual(state.monitor_n_offset,  0.0)
+        self.assertEqual(state.monitor_4_offset,  0.0)
 
 
 class StateMoveWorkspaceLARMORTest(unittest.TestCase):
@@ -120,7 +122,6 @@ class StateMoveWorkspaceZOOMTest(unittest.TestCase):
 # ----------------------------------------------------------------------------------------------------------------------
 class StateMoveBuilderTest(unittest.TestCase):
     def test_that_state_for_loq_can_be_built(self):
-        # Arrange
         facility = SANSFacility.ISIS
         file_information = SANSFileInformationMock(instrument=SANSInstrument.LOQ, run_number=74044)
         data_builder = get_data_builder(facility, file_information)
@@ -139,12 +140,12 @@ class StateMoveBuilderTest(unittest.TestCase):
         # Assert
         state = builder.build()
         self.assertEqual(state.center_position,  value)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction,  value)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short,  "HAB")
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name,  "main-detector-bank")
+        self.assertEqual(state.detectors[DetectorType.HAB.value].x_translation_correction,  value)
+        self.assertEqual(state.detectors[DetectorType.HAB.value].detector_name_short,  "HAB")
+        self.assertEqual(state.detectors[DetectorType.LAB.value].detector_name,  "main-detector-bank")
         self.assertEqual(state.monitor_names[str(2)],  "monitor2")
         self.assertEqual(len(state.monitor_names),  2)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.LAB)].sample_centre_pos1,  value)
+        self.assertEqual(state.detectors[DetectorType.LAB.value].sample_centre_pos1,  value)
 
     def test_that_state_for_sans2d_can_be_built(self):
         # Arrange
@@ -162,11 +163,22 @@ class StateMoveBuilderTest(unittest.TestCase):
 
         # Assert
         state = builder.build()
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].x_translation_correction,  value)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.HAB)].detector_name_short,  "front")
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name,  "rear-detector")
+        self.assertEqual(state.detectors[DetectorType.HAB.value].x_translation_correction,  value)
+        self.assertEqual(state.detectors[DetectorType.HAB.value].detector_name_short,  "front")
+        self.assertEqual(state.detectors[DetectorType.LAB.value].detector_name,  "rear-detector")
         self.assertEqual(state.monitor_names[str(4)],  "monitor4")
         self.assertEqual(len(state.monitor_names),  4)
+
+    def test_state_with_no_file_info_can_be_built(self):
+        data_info = mock.NonCallableMock()
+        data_info.instrument = SANSInstrument.LARMOR
+        data_info.idf_file_path = None
+        data_info.ipf_file_path = None
+        # This will happen if the user has not selected a run number
+        data_info.sample_scatter_run_number = None
+
+        builder = get_move_builder(data_info)
+        self.assertEqual(1., builder.conversion_value)
 
     def test_that_state_for_larmor_can_be_built(self):
         # Arrange
@@ -184,9 +196,9 @@ class StateMoveBuilderTest(unittest.TestCase):
 
         # Assert
         state = builder.build()
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.LAB)].x_translation_correction,  value)
-        self.assertEqual(state.detectors[DetectorType.to_string(DetectorType.LAB)].detector_name,  "DetectorBench")
-        self.assertTrue(DetectorType.to_string(DetectorType.HAB) not in state.detectors)
+        self.assertEqual(state.detectors[DetectorType.LAB.value].x_translation_correction,  value)
+        self.assertEqual(state.detectors[DetectorType.LAB.value].detector_name,  "DetectorBench")
+        self.assertTrue(DetectorType.HAB.value not in state.detectors)
         self.assertEqual(state.monitor_names[str(5)],  "monitor5")
         self.assertEqual(len(state.monitor_names),  5)
 

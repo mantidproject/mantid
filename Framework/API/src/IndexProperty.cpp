@@ -1,23 +1,27 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidAPI/IndexProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumNumber.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 namespace Mantid {
 namespace API {
 IndexProperty::IndexProperty(const std::string &name,
                              const IWorkspaceProperty &workspaceProp,
                              const IndexTypeProperty &indexTypeProp,
-                             Kernel::IValidator_sptr validator)
-    : ArrayProperty(name, "", validator), m_workspaceProp(workspaceProp),
-      m_indexTypeProp(indexTypeProp), m_indices(0), m_indicesExtracted(false) {}
+                             const Kernel::IValidator_sptr &validator)
+    : ArrayProperty(name, "", std::move(validator)),
+      m_workspaceProp(workspaceProp), m_indexTypeProp(indexTypeProp),
+      m_indices(0), m_indicesExtracted(false) {}
 
 IndexProperty *IndexProperty::clone() const { return new IndexProperty(*this); }
 
@@ -33,8 +37,9 @@ std::string IndexProperty::isValid() const {
     getIndices();
   } catch (std::runtime_error &e) {
     error = e.what();
-  } catch (std::out_of_range &) {
-    error = "Indices provided to IndexProperty are out of range.";
+  } catch (std::out_of_range &e) {
+    error = "Indices provided to IndexProperty are out of range: ";
+    error.append(e.what());
   } catch (std::logic_error &) {
     error = "Duplicate indices supplied to IndexProperty.";
   }
@@ -73,6 +78,7 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
             static_cast<Indexing::SpectrumNumber>(static_cast<int32_t>(max)));
       }
     } else {
+      MSVC_DIAG_OFF(4244);
       switch (type) {
       case IndexType::WorkspaceIndex:
         return indexInfo.makeIndexSet(
@@ -84,6 +90,7 @@ Indexing::SpectrumIndexSet IndexProperty::getIndices() const {
         return indexInfo.makeIndexSet(spectrumNumbers);
       }
       }
+      MSVC_DIAG_ON(4244);
     }
   }
 
@@ -122,7 +129,7 @@ std::string IndexProperty::generatePropertyName(const std::string &name) {
 }
 
 const Indexing::IndexInfo &IndexProperty::getIndexInfoFromWorkspace() const {
-  auto wksp = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  auto wksp = std::dynamic_pointer_cast<MatrixWorkspace>(
       m_workspaceProp.getWorkspace());
   if (!wksp)
     throw std::runtime_error("Invalid workspace type provided to "

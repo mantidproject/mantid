@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Mpl/PreviewPlot.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -19,6 +19,7 @@
 #include <QVBoxLayout>
 
 #include <algorithm>
+#include <utility>
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace;
@@ -40,7 +41,8 @@ constexpr auto PLOT_TOOL_ZOOM = "Zoom";
 constexpr auto LINEAR_SCALE = "Linear";
 constexpr auto LOG_SCALE = "Log";
 constexpr auto SQUARE_SCALE = "Square";
-
+constexpr auto SHOWALLERRORS = "Show all errors";
+constexpr auto HIDEALLERRORS = "Hide all errors";
 } // namespace
 
 namespace MantidQt {
@@ -62,6 +64,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
   createActions();
 
   m_selectorActive = false;
+  m_context_enabled = true;
 
   m_canvas->installEventFilterToMplCanvas(this);
   watchADS(observeADS);
@@ -126,7 +129,8 @@ void PreviewPlot::addSpectrum(const QString &lineName,
   removeSpectrum(lineName);
 
   auto axes = m_canvas->gca<MantidAxes>();
-  if (linesWithErrors().contains(lineName)) {
+  if (m_linesErrorsCache.value(lineName)) {
+    m_lines[lineName] = true;
     axes.errorbar(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName,
                   plotKwargs);
   } else {
@@ -134,6 +138,17 @@ void PreviewPlot::addSpectrum(const QString &lineName,
     axes.plot(ws, wsIndex, lineColour.name(QColor::HexRgb), lineName,
               plotKwargs);
   }
+
+  // Add line to stored line data
+  auto plotCurveConfig =
+      QSharedPointer<PlotCurveConfiguration>(new PlotCurveConfiguration(
+          ws, lineName, wsIndex, lineColour, plotKwargs));
+  m_plottedLines.insert(lineName, plotCurveConfig);
+
+  if (auto const xLabel = overrideAxisLabel(AxisID::XBottom))
+    setAxisLabel(AxisID::XBottom, xLabel.get());
+  if (auto const yLabel = overrideAxisLabel(AxisID::YLeft))
+    setAxisLabel(AxisID::YLeft, yLabel.get());
 
   regenerateLegend();
   axes.relim();
@@ -167,6 +182,7 @@ void PreviewPlot::removeSpectrum(const QString &lineName) {
   auto axes = m_canvas->gca();
   axes.removeArtists("lines", lineName);
   m_lines.remove(lineName);
+  regenerateLegend();
 }
 
 /**
@@ -238,6 +254,56 @@ void PreviewPlot::setSelectorActive(bool active) { m_selectorActive = active; }
 bool PreviewPlot::selectorActive() const { return m_selectorActive; }
 
 /**
+ * Sets tight layout properties of the plot
+ * @param args A hash of tight layout properties ("pad", "w_pad", "h_pad",
+ * "rect")
+ */
+void PreviewPlot::setTightLayout(QHash<QString, QVariant> const &args) {
+  m_canvas->setTightLayout(args);
+}
+
+/**
+ * Sets an override label for an axis.
+ * @param axisID The axis ID (XBottom or YLeft).
+ * @param label The override label.
+ */
+void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID,
+                                       char const *const label) {
+  m_axisLabels[axisID] = label;
+}
+
+/**
+ * Returns the override label.
+ * @param axisID The axis ID (XBottom or YLeft).
+ * @return True if the axis should display an axis label.
+ */
+boost::optional<char const *>
+PreviewPlot::overrideAxisLabel(AxisID const &axisID) {
+  auto const iter = m_axisLabels.find(axisID);
+  if (iter != m_axisLabels.end())
+    return iter.value();
+  return boost::none;
+}
+
+/**
+ * Sets the axis label on an axis.
+ * @param axisID The axis ID (XBottom or YLeft).
+ * @param label The label to place on a plots axis.
+ */
+void PreviewPlot::setAxisLabel(AxisID const &axisID, char const *const label) {
+  switch (axisID) {
+  case AxisID::XBottom:
+    m_canvas->gca().setXLabel(label);
+    return;
+  case AxisID::YLeft:
+    m_canvas->gca().setYLabel(label);
+    return;
+  }
+  throw std::runtime_error(
+      "Incorrect AxisID provided. Axis types are XBottom and YLeft");
+}
+
+/**
  * Set the range of the specified axis
  * @param range The new range
  * @param axisID An enumeration defining the axis
@@ -253,7 +319,6 @@ void PreviewPlot::setAxisRange(const QPair<double, double> &range,
     break;
   }
 }
-
 /**
  * Gets the range of the specified axis
  * @param axisID An enumeration defining the axis
@@ -271,14 +336,33 @@ std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) {
 }
 
 void PreviewPlot::replot() {
-  m_canvas->draw();
-  emit redraw();
+  if (m_allowRedraws) {
+    m_canvas->draw();
+    emit redraw();
+  }
 }
+
+// Called when the user turns errors on/off
+void PreviewPlot::replotData() {
+  m_allowRedraws = false;
+  clear();
+  for (const auto &curveConfig : m_plottedLines) {
+    addSpectrum(curveConfig->lineName, curveConfig->ws, curveConfig->wsIndex,
+                curveConfig->lineColour, curveConfig->plotKwargs);
+  }
+  m_allowRedraws = true;
+  replot();
+}
+
+void PreviewPlot::allowRedraws(bool state) { m_allowRedraws = state; }
 
 /**
  * Clear all lines from the plot
  */
-void PreviewPlot::clear() { m_canvas->gca().clear(); }
+void PreviewPlot::clear() {
+  m_canvas->gca().clear();
+  m_lines.clear();
+}
 
 /**
  * Resize the X axis to encompass all of the data
@@ -298,17 +382,26 @@ void PreviewPlot::resetView() {
  * Set the face colour for the canvas
  * @param colour A new colour for the figure facecolor
  */
-void PreviewPlot::setCanvasColour(QColor colour) {
-  m_canvas->gcf().setFaceColor(colour);
+void PreviewPlot::setCanvasColour(const QColor &colour) {
+  m_canvas->gcf().setFaceColor(std::move(colour));
 }
 
 /**
  * @brief PreviewPlot::setLinesWithErrors
- * @param labels A list of line labels where error bars should be shown
+ * @param labels A list of line labels for which error should be shown
  */
-void PreviewPlot::setLinesWithErrors(QStringList labels) {
+void PreviewPlot::setLinesWithErrors(const QStringList &labels) {
   for (const QString &label : labels) {
-    m_lines[label] = true;
+    m_linesErrorsCache[label] = true;
+  }
+}
+/**
+ * @brief PreviewPlot::setLinesWithoutErrors
+ * @param labels A list of line labels for which error bars should not be shown
+ */
+void PreviewPlot::setLinesWithoutErrors(const QStringList &labels) {
+  for (const QString &label : labels) {
+    m_linesErrorsCache[label] = false;
   }
 }
 
@@ -387,7 +480,9 @@ bool PreviewPlot::handleMouseReleaseEvent(QMouseEvent *evt) {
   bool stopEvent(false);
   if (evt->button() == Qt::RightButton) {
     stopEvent = true;
-    showContextMenu(evt);
+    if (m_context_enabled) {
+      showContextMenu(evt);
+    }
   } else if (evt->button() == Qt::LeftButton) {
     const auto position = evt->pos();
     if (!position.isNull())
@@ -435,6 +530,11 @@ void PreviewPlot::showContextMenu(QMouseEvent *evt) {
   xscale->addActions(m_contextXScale->actions());
   auto yScale = contextMenu.addMenu("Y Scale");
   yScale->addActions(m_contextYScale->actions());
+
+  // Create the error bars option
+  contextMenu.addSeparator();
+  auto errors = contextMenu.addMenu("Error Bars:");
+  errors->addActions(m_contextErrorBars->actions());
 
   contextMenu.addSeparator();
   contextMenu.addAction(m_contextLegend);
@@ -489,6 +589,12 @@ void PreviewPlot::createActions() {
   m_contextXScale->actions()[0]->setChecked(true);
   m_contextYScale->actions()[0]->setChecked(true);
 
+  // Error bars
+  m_contextErrorBars =
+      createExclusiveActionGroup({SHOWALLERRORS, HIDEALLERRORS});
+  connect(m_contextErrorBars, &QActionGroup::triggered, this,
+          &PreviewPlot::setErrorBars);
+
   // legend
   m_contextLegend = new QAction("Legend", this);
   m_contextLegend->setCheckable(true);
@@ -530,15 +636,21 @@ QStringList PreviewPlot::linesWithErrors() const {
  */
 void PreviewPlot::onWorkspaceRemoved(
     Mantid::API::WorkspacePreDeleteNotification_ptr nf) {
+  if (m_lines.isEmpty()) {
+    return;
+  }
   // Ignore non matrix workspaces
-  if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
+  if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(nf->object())) {
     // the artist may have already been removed. ignore the event is that is the
     // case
+    bool removed = false;
     try {
-      m_canvas->gca<MantidAxes>().removeWorkspaceArtists(ws);
+      removed = m_canvas->gca<MantidAxes>().removeWorkspaceArtists(ws);
     } catch (Mantid::PythonInterface::PythonException &) {
     }
-    this->replot();
+    if (removed) {
+      this->replot();
+    }
   }
 }
 
@@ -548,13 +660,17 @@ void PreviewPlot::onWorkspaceRemoved(
  */
 void PreviewPlot::onWorkspaceReplaced(
     Mantid::API::WorkspaceBeforeReplaceNotification_ptr nf) {
+  if (m_lines.isEmpty()) {
+    return;
+  }
   // Ignore non matrix workspaces
   if (auto oldWS =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
+          std::dynamic_pointer_cast<MatrixWorkspace>(nf->oldObject())) {
     if (auto newWS =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
-      m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS);
-      this->replot();
+            std::dynamic_pointer_cast<MatrixWorkspace>(nf->newObject())) {
+      if (m_canvas->gca<MantidAxes>().replaceWorkspaceArtists(newWS)) {
+        this->replot();
+      }
     }
   }
 }
@@ -564,7 +680,9 @@ void PreviewPlot::onWorkspaceReplaced(
  */
 void PreviewPlot::regenerateLegend() {
   if (legendIsVisible()) {
-    m_canvas->gca().legend(DRAGGABLE_LEGEND);
+    if (!m_lines.isEmpty()) {
+      m_canvas->gca().legend(DRAGGABLE_LEGEND);
+    }
   }
 }
 
@@ -610,6 +728,19 @@ void PreviewPlot::setXScaleType(QAction *selected) {
 }
 
 /**
+ * Set the error bars based on the given QAction
+ * @param selected The action that triggered the slot
+ */
+void PreviewPlot::setErrorBars(QAction *selected) {
+  if (selected->text().toStdString() == SHOWALLERRORS) {
+    setLinesWithErrors(m_lines.keys());
+  } else {
+    setLinesWithoutErrors(m_lines.keys());
+  }
+  replotData();
+}
+
+/**
  * Set the X scale based on the given QAction
  * @param selected The action that triggered the slot
  */
@@ -617,7 +748,7 @@ void PreviewPlot::setYScaleType(QAction *selected) {
   setScaleType(AxisID::YLeft, selected->text());
 }
 
-void PreviewPlot::setScaleType(AxisID id, QString actionName) {
+void PreviewPlot::setScaleType(AxisID id, const QString &actionName) {
   auto scaleType = actionName.toLower().toLatin1();
   auto axes = m_canvas->gca();
   switch (id) {
@@ -638,12 +769,24 @@ void PreviewPlot::setScaleType(AxisID id, QString actionName) {
  * @param checked True if the state should be visible, false otherwise
  */
 void PreviewPlot::toggleLegend(const bool checked) {
+  if (m_lines.isEmpty()) {
+    return;
+  }
   if (checked) {
     regenerateLegend();
   } else {
     removeLegend();
   }
   this->replot();
+}
+
+void PreviewPlot::disableContextMenu() {
+  // Disable the context menu signal
+  // TODO Currently when changes are made to the plot through the context menu
+  // it is not communicated through to the parent GUI which can cause issues,
+  // for now we are disabling the context menu but is should be made to
+  // communicate so it can be reactivated.
+  m_context_enabled = false;
 }
 
 } // namespace MantidWidgets

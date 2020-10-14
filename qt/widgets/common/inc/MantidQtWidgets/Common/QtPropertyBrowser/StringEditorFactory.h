@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef STRINGEDITORFACTORY_H
-#define STRINGEDITORFACTORY_H
+#pragma once
 
 #include "qtpropertymanager.h"
 #include <QLineEdit>
@@ -38,5 +37,3 @@ protected slots:
 private:
   QtProperty *m_property;
 };
-
-#endif // STRINGEDITORFACTORY_H

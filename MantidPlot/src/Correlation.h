@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef CORRELATION_H
-#define CORRELATION_H
+#pragma once
 
 #include "Filter.h"
 
@@ -49,5 +48,3 @@ protected:
 private:
   void output() override;
 };
-
-#endif

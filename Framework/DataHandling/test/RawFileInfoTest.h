@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef RAWFILEINFOTEST_H_
-#define RAWFILEINFOTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -76,7 +75,7 @@ private:
       TS_ASSERT(workspace.get());
 
       Mantid::API::ITableWorkspace_sptr run_table =
-          boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(workspace);
+          std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(workspace);
       TS_ASSERT(run_table.get());
 
       // Check a couple of things
@@ -102,7 +101,7 @@ private:
       TS_ASSERT(workspace.get());
 
       Mantid::API::ITableWorkspace_sptr sample_table =
-          boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(workspace);
+          std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(workspace);
       TS_ASSERT(sample_table.get());
 
       // Sample type
@@ -135,5 +134,3 @@ private:
   // buildserver)
   const std::string m_filetotest;
 };
-
-#endif

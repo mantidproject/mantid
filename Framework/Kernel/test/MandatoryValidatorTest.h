@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANDATORYVALIDATORTEST_H_
-#define MANDATORYVALIDATORTEST_H_
+#pragma once
 
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/OptionalBool.h"
@@ -24,32 +23,32 @@ public:
   }
 
   void testClone() {
-    IValidator_sptr v = boost::make_shared<MandatoryValidator<std::string>>();
+    IValidator_sptr v = std::make_shared<MandatoryValidator<std::string>>();
     IValidator_sptr vv = v->clone();
     TS_ASSERT_DIFFERS(v, vv);
-    TS_ASSERT(boost::dynamic_pointer_cast<MandatoryValidator<std::string>>(vv));
+    TS_ASSERT(std::dynamic_pointer_cast<MandatoryValidator<std::string>>(vv));
 
     IValidator_sptr i =
-        boost::make_shared<MandatoryValidator<std::vector<int>>>();
+        std::make_shared<MandatoryValidator<std::vector<int>>>();
     IValidator_sptr ii = i->clone();
     TS_ASSERT_DIFFERS(i, ii)
     TS_ASSERT(
-        boost::dynamic_pointer_cast<MandatoryValidator<std::vector<int>>>(ii))
+        std::dynamic_pointer_cast<MandatoryValidator<std::vector<int>>>(ii))
 
     IValidator_sptr d =
-        boost::make_shared<MandatoryValidator<std::vector<double>>>();
+        std::make_shared<MandatoryValidator<std::vector<double>>>();
     IValidator_sptr dd = d->clone();
     TS_ASSERT_DIFFERS(d, dd);
     TS_ASSERT(
-        boost::dynamic_pointer_cast<MandatoryValidator<std::vector<double>>>(
-            dd));
+        std::dynamic_pointer_cast<MandatoryValidator<std::vector<double>>>(dd));
 
     IValidator_sptr s =
-        boost::make_shared<MandatoryValidator<std::vector<std::string>>>();
+        std::make_shared<MandatoryValidator<std::vector<std::string>>>();
     IValidator_sptr ss = s->clone();
     TS_ASSERT_DIFFERS(s, ss);
-    TS_ASSERT(boost::dynamic_pointer_cast<
-              MandatoryValidator<std::vector<std::string>>>(ss));
+    TS_ASSERT(
+        std::dynamic_pointer_cast<MandatoryValidator<std::vector<std::string>>>(
+            ss));
   }
 
   void testMandatoryValidator() {
@@ -65,7 +64,7 @@ public:
     TS_ASSERT(ivec.empty())
     TS_ASSERT_EQUALS(i.isValid(ivec),
                      "A value must be entered for this parameter")
-    ivec.push_back(1);
+    ivec.emplace_back(1);
     TS_ASSERT_EQUALS(i.isValid(ivec), "")
 
     MandatoryValidator<std::vector<double>> d;
@@ -73,7 +72,7 @@ public:
     TS_ASSERT(dvec.empty())
     TS_ASSERT_EQUALS(d.isValid(dvec),
                      "A value must be entered for this parameter")
-    dvec.push_back(1.1);
+    dvec.emplace_back(1.1);
     TS_ASSERT_EQUALS(d.isValid(dvec), "")
 
     MandatoryValidator<std::vector<std::string>> s;
@@ -107,5 +106,3 @@ public:
     TS_ASSERT(validator.isValid(notDefaultIsFalse).empty());
   }
 };
-
-#endif /*MANDATORYVALIDATORTEST_H_*/

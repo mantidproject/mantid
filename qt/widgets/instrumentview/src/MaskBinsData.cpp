@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/MaskBinsData.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -87,7 +87,7 @@ void MaskBinsData::loadFromProject(const std::string &lines) {
     for (size_t i = 0; i < numSpectra; ++i) {
       size_t spectrum;
       mask >> spectrum;
-      spectra.push_back(spectrum);
+      spectra.emplace_back(spectrum);
     }
 
     addXRange(start, end, spectra);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Statistics.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -87,8 +87,8 @@ public:
  */
 Statistics getStatisticsNumpy(const NDArray &data, const bool sorted = false) {
   using Converters::NDArrayToVector;
-  using Mantid::Kernel::StatOptions;
   using Mantid::Kernel::getStatistics;
+  using Mantid::Kernel::StatOptions;
 
   if (isFloatArray(data.ptr())) {
     unsigned int flags = StatOptions::AllStats;

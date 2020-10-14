@@ -1,15 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 MantidPlot module to gain access to plotting functions etc.
 Requires that the main script be run from within MantidPlot
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+
 # Requires MantidPlot
 try:
     import _qti
@@ -34,8 +33,6 @@ import mantidqtpython
 from mantidqtpython import GraphOptions # noqa
 # historical names in MantidPlot
 from mantidqtpython import MantidQt as _MantidQt
-from six.moves import range
-
 #   (a) don't need a proxy & (b) can be constructed from python or (c) have enumerations within them
 from _qti import (PlotSymbol, ImageSymbol, ArrowMarker, ImageMarker, InstrumentView) # noqa
 
@@ -62,6 +59,7 @@ def _get_analysis_data_service():
     return mantid.AnalysisDataService.Instance()
 
 # -------------------------- Wrapped MantidPlot functions -----------------
+
 
 def runPythonScript(code, asynchronous=False, quiet=False, redirect=True):
     """
@@ -413,8 +411,8 @@ def plotMD(source, plot_axis=-2, normalization=DEFAULT_MD_NORMALIZATION, error_b
     __checkPlotMDWorkspaces(workspace_names)
 
     for name in workspace_names:
-        non_integrated_dims = mantid.api.mtd[name].getNonIntegratedDimensions()
-        if not len(non_integrated_dims) == 1:
+        non_integrated_dims = mantid.api.mtd[name].getNumNonIntegratedDims()
+        if not non_integrated_dims == 1:
             raise ValueError(
                 "'%s' must have a single non-integrated dimension in order to be rendered via plotMD" % name)
 

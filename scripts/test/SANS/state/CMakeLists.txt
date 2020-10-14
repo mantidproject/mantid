@@ -2,7 +2,7 @@
 
 set(TEST_PY_FILES
     adjustment_test.py
-    state_base_test.py
+    JsonSerializerTest.py
     calculate_transmission_test.py
     convert_to_q_test.py
     data_test.py
@@ -16,10 +16,12 @@ set(TEST_PY_FILES
     save_test.py
     state_test.py
     wavelength_test.py
-    wavelength_and_pixel_adjustment_test.py)
+    wavelength_and_pixel_adjustment_test.py
+)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 
 # Prefix for test name=PythonAlgorithms
-pyunittest_add_test(${CMAKE_CURRENT_SOURCE_DIR} python.SANS.state
-                    ${TEST_PY_FILES})
+pyunittest_add_test(
+  ${CMAKE_CURRENT_SOURCE_DIR} python.SANS.state ${TEST_PY_FILES}
+)

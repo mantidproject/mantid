@@ -29,8 +29,7 @@ Description          : QtiPlot's main window
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef APPLICATION_H
-#define APPLICATION_H
+#pragma once
 
 #include <QBuffer>
 #include <QFile>
@@ -234,7 +233,7 @@ public slots:
   /// Load mantid data files using generic load algorithm, opening user dialog
   void loadDataFile();
   /// Load mantid data files (generic load algorithm)
-  void loadDataFileByName(QString fn);
+  void loadDataFileByName(const QString &fn);
   /// Open from the list of recent files
   void openRecentFile(QAction *action);
 
@@ -493,7 +492,7 @@ public slots:
                    int local_ignored_lines, bool local_rename_columns,
                    bool local_strip_spaces, bool local_simplify_spaces,
                    bool local_import_comments, bool update_dec_separators,
-                   QLocale local_separators,
+                   const QLocale &local_separators,
                    const QString &local_comment_string, bool import_read_only,
                    int endLineChar, const QString &sepforloadAscii);
   void exportAllTables(const QString &sep, bool colNames, bool colComments,
@@ -504,7 +503,7 @@ public slots:
   //! recalculate selected cells of current table
   void recalculateTable();
 
-  TableStatistics *newTableStatistics(Table *base, int type, QList<int>,
+  TableStatistics *newTableStatistics(Table *base, int type, const QList<int> &,
                                       const QString &caption = QString::null);
   //@}
 
@@ -917,7 +916,7 @@ public slots:
   void updateRecentProjectsList();
   //! Inserts file name in the list of recent files (if fname not empty) and
   // updates the "recent files" menu
-  void updateRecentFilesList(QString fname = "");
+  void updateRecentFilesList(const QString &fname = "");
   //! Open QtiPlot homepage in external browser
   void showHomePage();
   //! Open bug tracking system at berliOS in external browser
@@ -1124,11 +1123,12 @@ public slots:
 
   bool isOfType(const QObject *obj, const char *toCompare) const;
 
-  bool loadProjectRecovery(std::string sourceFile, std::string recoveryFolder);
+  bool loadProjectRecovery(const std::string &sourceFile,
+                           const std::string &recoveryFolder);
 
   // The string must be copied from the other thread in saveProjectRecovery
   /// Saves the current project as part of recovery auto saving
-  bool saveProjectRecovery(std::string destination);
+  bool saveProjectRecovery(const std::string &destination);
 
   /// Checks for and attempts project recovery if required
   void checkForProjectRecovery();
@@ -1666,4 +1666,3 @@ public:
   MantidUI *mantidUI;
   QSettings settings;
 };
-#endif

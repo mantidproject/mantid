@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SPLINETEST_H_
-#define MANTID_ALGORITHMS_SPLINETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -92,8 +91,7 @@ public:
 
     for (size_t i = 0; i < ows->getNumberHistograms(); ++i) {
       MatrixWorkspace_const_sptr derivsWs =
-          boost::dynamic_pointer_cast<const MatrixWorkspace>(
-              derivs->getItem(i));
+          std::dynamic_pointer_cast<const MatrixWorkspace>(derivs->getItem(i));
       const auto &xs = ows->x(i);
       const auto &ys = ows->y(i);
       const auto &d1 = derivsWs->y(0);
@@ -125,5 +123,3 @@ public:
     TS_ASSERT(alg.isExecuted());
   }
 };
-
-#endif /* MANTID_ALGORITHMS_SPLINETEST_H_ */

@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CONVOLUTIONTEST_H_
-#define CONVOLUTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidCurveFitting/Functions/Convolution.h"
 #include "MantidCurveFitting/Functions/DeltaFunction.h"
 
@@ -181,8 +181,7 @@ public:
     linear->setParameter(0, 0.1);
     linear->setParameter(1, 0.2);
 
-    size_t iFun = 10000;
-    iFun = conv.addFunction(linear);
+    size_t iFun = conv.addFunction(linear);
     TS_ASSERT_EQUALS(iFun, 0);
     iFun = conv.addFunction(gauss1);
     TS_ASSERT_EQUALS(iFun, 1);
@@ -260,8 +259,8 @@ public:
 
     double a = 1.3;
     double h = 3.;
-    boost::shared_ptr<ConvolutionTest_Gauss> res =
-        boost::make_shared<ConvolutionTest_Gauss>();
+    std::shared_ptr<ConvolutionTest_Gauss> res =
+        std::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", 0);
     res->setParameter("h", h);
     res->setParameter("s", a);
@@ -310,8 +309,8 @@ public:
     double c1 = 0.;     // center of the gaussian
     double h1 = 3;      // intensity
     double s1 = pi / 2; // standard deviation
-    boost::shared_ptr<ConvolutionTest_Gauss> res =
-        boost::make_shared<ConvolutionTest_Gauss>();
+    std::shared_ptr<ConvolutionTest_Gauss> res =
+        std::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", c1);
     res->setParameter("h", h1);
     res->setParameter("s", s1);
@@ -328,8 +327,8 @@ public:
     double c2 = x0 + Dx / 2;
     double h2 = 10.;
     double s2 = pi / 3;
-    boost::shared_ptr<ConvolutionTest_Gauss> fun =
-        boost::make_shared<ConvolutionTest_Gauss>();
+    std::shared_ptr<ConvolutionTest_Gauss> fun =
+        std::make_shared<ConvolutionTest_Gauss>();
     fun->setParameter("c", c2);
     fun->setParameter("h", h2);
     fun->setParameter("s", s2);
@@ -367,14 +366,14 @@ public:
     double c1 = 0.0; // center of the gaussian
     double h1 = 1.0; // intensity
     double s1 = 1.0; // rate
-    auto res = boost::make_shared<ConvolutionTest_Gauss>();
+    auto res = std::make_shared<ConvolutionTest_Gauss>();
     res->setParameter("c", c1);
     res->setParameter("h", h1);
     res->setParameter("s", s1);
     conv.addFunction(res);
     // Add Delta Dirac function
     double h2 = 1.0;
-    auto fun = boost::make_shared<DeltaFunction>();
+    auto fun = std::make_shared<DeltaFunction>();
     fun->setParameter("Height", h2);
     conv.addFunction(fun);
     // Define domains
@@ -402,6 +401,53 @@ public:
     }
   }
 
+  void test_convoluting_two_composite_functions() {
+    Convolution conv;
+    auto compositeFunction1 = std::make_shared<CompositeFunction>();
+    auto compositeFunction2 = std::make_shared<CompositeFunction>();
+    auto deltaFunction1 =
+        Mantid::API::FunctionFactory::Instance().createInitialized(
+            "name=DeltaFunction, Centre=0.0, Height=3");
+    auto deltaFunction2 =
+        Mantid::API::FunctionFactory::Instance().createInitialized(
+            "name=DeltaFunction, Centre=1.0, Height=5");
+    auto background1 =
+        Mantid::API::FunctionFactory::Instance().createInitialized(
+            "name=LinearBackground, A0=0.0, A1=1.0");
+    auto background2 =
+        Mantid::API::FunctionFactory::Instance().createInitialized(
+            "name=LinearBackground, A0=1.0, A1=2.0");
+
+    compositeFunction1->addFunction(deltaFunction1);
+    compositeFunction1->addFunction(deltaFunction2);
+    compositeFunction2->addFunction(background1);
+    compositeFunction2->addFunction(background2);
+    conv.addFunction(compositeFunction2);
+    conv.addFunction(compositeFunction1);
+
+    // Define domains
+    const int N = 116;
+    double xs[N]; // symmetric range
+    double xa[N]; // asymmetric range
+    double xm{-4.0}, xMs{4.0}, xMa{8.0};
+    double dxs{(xMs - xm) / (N - 1)}, dxa{(xMa - xm) / (N - 1)};
+    for (int i = 0; i < N; i++) {
+      xs[i] = xm + i * dxs;
+      xa[i] = xm + i * dxa;
+    }
+    // Carry out the convolution
+    FunctionDomain1DView ds(&xs[0], N); // symmetric domain
+    FunctionDomain1DView da(&xa[0], N); // asymmetric domain
+    FunctionValues outs(ds), outa(da);
+    conv.function(ds, outs);
+    conv.function(da, outa);
+
+    for (int i = 0; i < N; i++) {
+      TS_ASSERT_DELTA(outs.getCalculated(i), 24.0 * xs[i] - 7.0, 1e-10);
+      TS_ASSERT_DELTA(outa.getCalculated(i), 24.0 * xa[i] - 7.0, 1e-10);
+    }
+  }
+
   void testForCategories() {
     Convolution forCat;
     const std::vector<std::string> categories = forCat.categories();
@@ -409,5 +455,3 @@ public:
     TS_ASSERT(categories[0] == "General");
   }
 };
-
-#endif /*CONVOLUTIONTEST_H_*/

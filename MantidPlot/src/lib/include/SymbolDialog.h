@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SYMBOLDIALOG_H
-#define SYMBOLDIALOG_H
+#pragma once
 
 #include <QDialog>
 class QPushButton;
@@ -63,7 +62,7 @@ public:
    * \param fl window flags
    */
   SymbolDialog(CharSet charSet, QWidget *parent = nullptr,
-               Qt::WFlags fl = nullptr);
+               const Qt::WFlags &fl = nullptr);
 
 private:
   //! Show lowercase Greek characters
@@ -104,5 +103,3 @@ signals:
   //! Emitted when a letter is to be added
   void addLetter(const QString &);
 };
-
-#endif // exportDialog_H

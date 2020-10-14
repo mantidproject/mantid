@@ -27,12 +27,13 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef BOXCURVE_H
-#define BOXCURVE_H
+#pragma once
 
 #include "PlotCurve.h"
 #include <qwt_plot.h>
 #include <qwt_symbol.h>
+
+#include <utility>
 
 //! Box curve
 class BoxCurve : public DataCurve {
@@ -98,7 +99,7 @@ private:
 class QwtSingleArrayData : public QwtData {
 public:
   QwtSingleArrayData(const double x, QwtArray<double> y, size_t) {
-    d_y = y;
+    d_y = std::move(y);
     d_x = x;
   };
 
@@ -114,5 +115,3 @@ private:
   QwtArray<double> d_y;
   double d_x;
 };
-
-#endif

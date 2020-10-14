@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // Includes
 //----------------------------------------------------------------------
@@ -82,8 +82,8 @@ void joinOverlappingRanges(std::vector<double> &exclude) {
   std::vector<RangePoint> points;
   points.reserve(exclude.size());
   for (auto point = exclude.begin(); point != exclude.end(); point += 2) {
-    points.push_back(RangePoint{RangePoint::Openning, *point});
-    points.push_back(RangePoint{RangePoint::Closing, *(point + 1)});
+    points.emplace_back(RangePoint{RangePoint::Openning, *point});
+    points.emplace_back(RangePoint{RangePoint::Closing, *(point + 1)});
   }
   // Sort the points according to the operator defined in RangePoint.
   std::sort(points.begin(), points.end());
@@ -97,14 +97,14 @@ void joinOverlappingRanges(std::vector<double> &exclude) {
     if (point.kind == RangePoint::Openning) {
       if (level == 0) {
         // First openning bracket starts a new exclusion range.
-        exclude.push_back(point.value);
+        exclude.emplace_back(point.value);
       }
       // Each openning bracket increases the level
       ++level;
     } else {
       if (level == 1) {
         // The bracket that makes level 0 is an end of a range.
-        exclude.push_back(point.value);
+        exclude.emplace_back(point.value);
       }
       // Each closing bracket decreases the level
       --level;
@@ -177,7 +177,7 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
   if (addProp) {
     if (m_domainType != Simple &&
         !m_manager->existsProperty(m_maxSizePropertyName)) {
-      auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+      auto mustBePositive = std::make_shared<BoundedValidator<int>>();
       mustBePositive->setLower(0);
       declareProperty(
           new PropertyWithValue<int>(m_maxSizePropertyName, 1, mustBePositive),
@@ -191,7 +191,7 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
     }
     if (!m_manager->existsProperty(m_excludePropertyName)) {
       auto mustBeOrderedPairs =
-          boost::make_shared<ArrayOrderedPairsValidator<double>>();
+          std::make_shared<ArrayOrderedPairsValidator<double>>();
       declareProperty(
           new ArrayProperty<double>(m_excludePropertyName, mustBeOrderedPairs),
           "A list of pairs of doubles that specify ranges that "
@@ -201,8 +201,8 @@ void FitMW::declareDatasetProperties(const std::string &suffix, bool addProp) {
 }
 
 /// Create a domain from the input workspace
-void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
-                         boost::shared_ptr<API::FunctionValues> &values,
+void FitMW::createDomain(std::shared_ptr<API::FunctionDomain> &domain,
+                         std::shared_ptr<API::FunctionValues> &values,
                          size_t i0) {
   setParameters();
 
@@ -312,7 +312,7 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
     values->setFitData(j, y);
     values->setFitWeight(j, weight);
   }
-  m_domain = boost::dynamic_pointer_cast<API::FunctionDomain1D>(domain);
+  m_domain = std::dynamic_pointer_cast<API::FunctionDomain1D>(domain);
   m_values = values;
 }
 
@@ -324,11 +324,11 @@ void FitMW::createDomain(boost::shared_ptr<API::FunctionDomain> &domain,
  * @param values :: A API::FunctionValues instance containing the fitting data
  * @param outputWorkspacePropertyName :: The property name
  */
-boost::shared_ptr<API::Workspace>
+std::shared_ptr<API::Workspace>
 FitMW::createOutputWorkspace(const std::string &baseName,
                              API::IFunction_sptr function,
-                             boost::shared_ptr<API::FunctionDomain> domain,
-                             boost::shared_ptr<API::FunctionValues> values,
+                             std::shared_ptr<API::FunctionDomain> domain,
+                             std::shared_ptr<API::FunctionValues> values,
                              const std::string &outputWorkspacePropertyName) {
   auto ws = IMWDomainCreator::createOutputWorkspace(
       baseName, function, domain, values, outputWorkspacePropertyName);
@@ -342,6 +342,9 @@ FitMW::createOutputWorkspace(const std::string &baseName,
       auto &Y = mws.mutableY(ispec);
       std::transform(binWidths.begin() + 1, binWidths.end(), Y.begin(),
                      Y.begin(), std::multiplies<double>());
+      auto &E = mws.mutableE(ispec);
+      std::transform(binWidths.begin() + 1, binWidths.end(), E.begin(),
+                     E.begin(), std::multiplies<double>());
     }
   }
   return ws;

@@ -1,14 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.api import (WorkspaceFactory, WorkspaceFactoryImpl, MatrixWorkspace,
                     ITableWorkspace, IPeaksWorkspace)
+
 
 class WorkspaceFactoryTest(unittest.TestCase):
 
@@ -20,9 +19,9 @@ class WorkspaceFactoryTest(unittest.TestCase):
         return WorkspaceFactory.create("Workspace2D", NVectors=nhist,
                                        XLength=xlength, YLength=ylength)
 
-    def _verify(self, wksp, nhist, xlength, ylength):
+    def _verify(self, wksp, nhist, xlength, ylength, wsId="Workspace2D"):
         self.assertTrue(isinstance(wksp, MatrixWorkspace))
-        self.assertEqual(wksp.id(), "Workspace2D")
+        self.assertEqual(wksp.id(), wsId)
         self.assertEqual(wksp.getNumberHistograms(), nhist)
         self.assertEqual(len(wksp.readX(0)), xlength)
         self.assertEqual(wksp.blocksize(), ylength)
@@ -57,6 +56,13 @@ class WorkspaceFactoryTest(unittest.TestCase):
     def test_creating_a_peaksworkspace(self):
         peaks = WorkspaceFactory.createPeaks()
         self.assertTrue(isinstance(peaks, IPeaksWorkspace))
+
+    def test_creating_rebinnedoutput(self):
+        rebin = WorkspaceFactory.create("RebinnedOutput", 2, 6, 5)
+        self._verify(rebin, 2, 6, 5, wsId="RebinnedOutput")
+        fv = rebin.readF(1)
+        self.assertEqual(len(fv), 5)
+
 
 if __name__ == '__main__':
     unittest.main()

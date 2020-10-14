@@ -40,9 +40,12 @@ test, implement the method ``requiredFiles`` which should return a list of
 filenames without paths. The file to validate against should be included as 
 well. If any of those files are missing the test will be marked as skipped.
 
-The tests should be added to the ``Testing/SystemTests/tests/analysis``,
+The tests should be added to the ``Testing/SystemTests/tests/framework``,
 with the template result going in the ``reference`` sub-folder. It will
 then be included in the suite of tests from the following night.
+
+Alternatively, any tests relating to testing qt interfaces should be added to
+the ``Testing/SystemTests/tests/qt`` directory.
 
 Specifying Validation
 ---------------------
@@ -201,6 +204,22 @@ fixed when running CMake, e.g.
    cd build
    systemtest
 
+
+Selecting Tests to Run From IDE
+-------------------------------
+
+System tests can be ran from the MSVC IDE using the ``SystemTests`` target,
+which behaves in a similar way to unit test targets. One key advantage is
+that it allows you to start Mantid in a debug environment rather than attach
+to one midway through.
+
+To select an individual test, or range of tests, go to the ``SystemTests``
+properties, go to ```Command Arguments``` and append flags as appropriate.
+
+For example, adding ``-R ISIS`` will run any tests which match the regular
+expression ``ISIS``.
+
+
 Selecting Tests To Run
 ----------------------
 
@@ -216,6 +235,7 @@ e.g.
    systemtest -C <cfg> -R SNS
 
 would run all of the tests whose name contains SNS.
+
 
 Running the tests on multiple cores
 -----------------------------------

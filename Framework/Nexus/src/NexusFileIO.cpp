@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // NexusFileIO
 // @author Ronald Fowler
@@ -81,7 +81,8 @@ void NexusFileIO::resetProgress(Progress *prog) { m_progress = prog; }
 // </NXentry>
 
 void NexusFileIO::openNexusWrite(const std::string &fileName,
-                                 NexusFileIO::optional_size_t entryNumber) {
+                                 NexusFileIO::optional_size_t entryNumber,
+                                 const bool append_to_file) {
   // open named file and entry - file may exist
   // @throw Exception::FileError if cannot open Nexus file for writing
   //
@@ -93,7 +94,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
   // if so open as xml
   // format otherwise as compressed hdf5
   //
-  if (Poco::File(m_filename).exists())
+  if ((Poco::File(m_filename).exists() && append_to_file) || m_filehandle)
     mode = NXACC_RDWR;
 
   else {
@@ -124,7 +125,7 @@ void NexusFileIO::openNexusWrite(const std::string &fileName,
     }
     auto file = new ::NeXus::File(fileID, true);
     // clang-format off
-    m_filehandle = boost::shared_ptr< ::NeXus::File>(file);
+    m_filehandle = std::shared_ptr< ::NeXus::File>(file);
     // clang-format on
   }
 
@@ -273,7 +274,7 @@ bool NexusFileIO::writeNxNote(const std::string &noteName,
   std::vector<std::string> attributes, avalues;
   if (!date.empty()) {
     attributes.emplace_back("date");
-    avalues.push_back(date);
+    avalues.emplace_back(date);
   }
   if (!writeNxValue<std::string>("author", author, NX_CHAR, attributes,
                                  avalues))
@@ -339,10 +340,10 @@ int NexusFileIO::writeNexusProcessedData2D(
   std::vector<double> axis2;
   if (nSpect < nHist)
     for (size_t i = 0; i < nSpect; i++)
-      axis2.push_back((*sAxis)(spec[i]));
+      axis2.emplace_back((*sAxis)(spec[i]));
   else
     for (size_t i = 0; i < sAxis->length(); i++)
-      axis2.push_back((*sAxis)(i));
+      axis2.emplace_back((*sAxis)(i));
 
   int start[2] = {0, 0};
   int asize[2] = {1, dims_array[1]};
@@ -392,7 +393,7 @@ int NexusFileIO::writeNexusProcessedData2D(
     // Fractional area for RebinnedOutput
     if (localworkspace->id() == "RebinnedOutput") {
       RebinnedOutput_const_sptr rebin_workspace =
-          boost::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
+          std::dynamic_pointer_cast<const RebinnedOutput>(localworkspace);
       name = "frac_area";
       NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,
                      m_nexuscompression, asize);
@@ -403,6 +404,12 @@ int NexusFileIO::writeNexusProcessedData2D(
         NXputslab(fileID, rebin_workspace->readF(s).data(), start, asize);
         start[0]++;
       }
+
+      std::string finalized = (rebin_workspace->isFinalized()) ? "1" : "0";
+      NXputattr(fileID, "finalized", finalized.c_str(), 2, NX_CHAR);
+      std::string sqrdErrs = (rebin_workspace->hasSqrdErrors()) ? "1" : "0";
+      NXputattr(fileID, "sqrd_errors", sqrdErrs.c_str(), 2, NX_CHAR);
+
       if (m_progress != nullptr)
         m_progress->reportIncrement(1, "Writing data");
     }
@@ -453,7 +460,7 @@ int NexusFileIO::writeNexusProcessedData2D(
             NX_CHAR);
 
   auto label =
-      boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(xAxis->unit());
+      std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(xAxis->unit());
   if (label) {
     NXputattr(fileID, "caption", label->caption().c_str(),
               static_cast<int>(label->caption().size()), NX_CHAR);
@@ -473,8 +480,8 @@ int NexusFileIO::writeNexusProcessedData2D(
     NXputattr(fileID, "units", sLabel.c_str(), static_cast<int>(sLabel.size()),
               NX_CHAR);
 
-    auto unitLabel = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
-        sAxis->unit());
+    auto unitLabel =
+        std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(sAxis->unit());
     if (unitLabel) {
       NXputattr(fileID, "caption", unitLabel->caption().c_str(),
                 static_cast<int>(unitLabel->caption().size()), NX_CHAR);
@@ -495,8 +502,8 @@ int NexusFileIO::writeNexusProcessedData2D(
     NXputdata(fileID, textAxis.c_str());
     NXputattr(fileID, "units", "TextAxis", 8, NX_CHAR);
 
-    auto unitLabel = boost::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(
-        sAxis->unit());
+    auto unitLabel =
+        std::dynamic_pointer_cast<Mantid::Kernel::Units::Label>(sAxis->unit());
     if (unitLabel) {
       NXputattr(fileID, "caption", unitLabel->caption().c_str(),
                 static_cast<int>(unitLabel->caption().size()), NX_CHAR);
@@ -567,7 +574,7 @@ size_t getSizeOf(const Kernel::V3D & /*unused*/) { return 3; }
  */
 template <typename VecType, typename ElemType>
 void NexusFileIO::writeNexusVectorColumn(
-    Column_const_sptr col, const std::string &columnName, int nexusType,
+    const Column_const_sptr &col, const std::string &columnName, int nexusType,
     const std::string &interpret_as) const {
   ConstColumnVector<VecType> column(col);
   size_t rowCount = column.size();
@@ -634,10 +641,10 @@ int NexusFileIO::writeNexusTableWorkspace(
     const char *group_name) const {
   NXstatus status = NX_ERROR;
 
-  boost::shared_ptr<const TableWorkspace> tableworkspace =
-      boost::dynamic_pointer_cast<const TableWorkspace>(itableworkspace);
-  boost::shared_ptr<const PeaksWorkspace> peakworkspace =
-      boost::dynamic_pointer_cast<const PeaksWorkspace>(itableworkspace);
+  std::shared_ptr<const TableWorkspace> tableworkspace =
+      std::dynamic_pointer_cast<const TableWorkspace>(itableworkspace);
+  std::shared_ptr<const PeaksWorkspace> peakworkspace =
+      std::dynamic_pointer_cast<const PeaksWorkspace>(itableworkspace);
 
   if (!tableworkspace && !peakworkspace)
     return 3;
@@ -886,7 +893,7 @@ void NexusFileIO::writeEventListData(std::vector<T> events, bool writeTOF,
  * @param group_name :: group_name to create.
  * */
 int NexusFileIO::writeEventList(const DataObjects::EventList &el,
-                                std::string group_name) const {
+                                const std::string &group_name) const {
   // write data entry
   NXstatus status = NXmakegroup(fileID, group_name.c_str(), "NXdata");
   if (status == NX_ERROR)
@@ -1155,7 +1162,7 @@ bool NexusFileIO::checkEntryAtLevelByAttribute(const std::string &attribute,
  * @return true for OK, false for error
  */
 bool NexusFileIO::writeNexusBinMasking(
-    API::MatrixWorkspace_const_sptr ws) const {
+    const API::MatrixWorkspace_const_sptr &ws) const {
   std::vector<int> spectra;
   std::vector<std::size_t> bins;
   std::vector<double> weights;
@@ -1164,11 +1171,11 @@ bool NexusFileIO::writeNexusBinMasking(
   for (std::size_t i = 0; i < ws->getNumberHistograms(); ++i) {
     if (ws->hasMaskedBins(i)) {
       const API::MatrixWorkspace::MaskList &mList = ws->maskedBins(i);
-      spectra.push_back(spectra_count);
-      spectra.push_back(offset);
+      spectra.emplace_back(spectra_count);
+      spectra.emplace_back(offset);
       for (const auto &mask : mList) {
-        bins.push_back(mask.first);
-        weights.push_back(mask.second);
+        bins.emplace_back(mask.first);
+        weights.emplace_back(mask.second);
       }
       ++spectra_count;
       offset += static_cast<int>(mList.size());
@@ -1264,7 +1271,7 @@ int getNexusEntryTypes(const std::string &fileName,
          NX_OK) {
     std::string nxc(nxclass);
     if (nxc == "NXentry")
-      entryList.push_back(nxname);
+      entryList.emplace_back(nxname);
   }
   // for each entry found, look for "analysis" or "definition" text data fields
   // and return value plus entry name
@@ -1287,8 +1294,8 @@ int getNexusEntryTypes(const std::string &fileName,
             continue;
           value[dims[0]] = '\0';
           // return e.g entryName "analysis"/definition "muonTD"
-          definition.push_back(value);
-          entryName.push_back(entry);
+          definition.emplace_back(value);
+          entryName.emplace_back(entry);
           delete[] value;
           NXclosegroup(fileH); // close data group, then entry
           NXclosegroup(fileH);

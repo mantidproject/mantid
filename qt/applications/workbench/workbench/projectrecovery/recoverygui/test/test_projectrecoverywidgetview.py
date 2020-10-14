@@ -1,17 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
 
-from __future__ import (absolute_import, unicode_literals)
-
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from workbench.projectrecovery.recoverygui.projectrecoverywidgetview import ProjectRecoveryWidgetView
 
@@ -56,3 +54,21 @@ class ProjectRecoveryWidgetViewTest(unittest.TestCase):
         self.prw.onClickStartMantidNormally()
 
         self.assertEqual(1, self.prw.presenter.start_mantid_normally.call_count)
+
+    def test_progress_bar_connection_is_attempted(self):
+        self.prw.connect_progress_bar()
+
+        self.assertEqual(1,
+                         self.prw.presenter.project_recovery.loader.multi_file_interpreter.current_editor.call_count)
+        self.prw.editor.connect_to_progress_reports.assert_called_once_with(self.prw.update_progress_bar)
+
+    def test_progress_bar_disconnect_is_attempted_on_exit_if_editor_present(self):
+        self.prw.editor = mock.MagicMock()
+        self.prw.close()
+
+        self.assertEqual(1, self.prw.editor.disconnect_from_progress_reports.call_count)
+
+    def test_progress_bar_disconnect_is_not_attempted_on_exit_if_editor_is_not_present(self):
+        # This would test would raise an AttributeError if it attempted to make a call on None
+        self.prw.editor = None
+        self.prw.close()

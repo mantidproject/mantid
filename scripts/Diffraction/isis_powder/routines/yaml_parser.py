@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import os
 import yaml
 from isis_powder.routines import common as common
@@ -21,8 +19,8 @@ def get_run_dictionary(run_number_string, file_path):
     run_key = _find_dictionary_key(dict_to_search=config_file, run_number=run_number_string)
 
     if not run_key:
-        raise ValueError("Run number " + str(run_number_string) +
-                         " not recognised in cycle mapping file at " + str(file_path))
+        raise ValueError("Run number " + str(run_number_string)
+                         + " not recognised in cycle mapping file at " + str(file_path))
 
     return config_file[run_key]
 
@@ -42,7 +40,7 @@ def open_yaml_file_as_dictionary(file_path):
 
     with open(file_path, 'r') as input_stream:
         try:
-            read_config = yaml.load(input_stream)
+            read_config = yaml.safe_load(input_stream)
         except yaml.YAMLError as exception:
             print(exception)
             raise RuntimeError("Failed to parse YAML file: " + str(file_path))

@@ -1,15 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidPythonInterface/core/CallMethod.h"
+#include "MantidQtWidgets/Common/Python/QHashToDict.h"
 #include "MantidQtWidgets/MplCpp/ColorConverter.h"
 
-using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::callMethodNoCheck;
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {
@@ -57,7 +58,7 @@ QColor Figure::faceColor() const {
  * @param color A character string indicating the color.
  * See https://matplotlib.org/api/colors_api.html
  */
-void Figure::setFaceColor(const QColor color) {
+void Figure::setFaceColor(const QColor &color) {
   callMethodNoCheck<void, const char *>(
       pyobj(), "set_facecolor",
       color.name(QColor::HexRgb).toLatin1().constData());
@@ -70,6 +71,15 @@ void Figure::setFaceColor(const QColor color) {
  */
 void Figure::setFaceColor(const char *color) {
   callMethodNoCheck<void, const char *>(pyobj(), "set_facecolor", color);
+}
+
+/**
+ * Sets how tight_layout is called when drawing. ("pad", "w_pad", "h_pad",
+ * "rect", etc.)
+ * @param args A hash of parameters to pass to set_tight_layout
+ */
+void Figure::setTightLayout(QHash<QString, QVariant> const &args) {
+  pyobj().attr("set_tight_layout")(Python::qHashToDict(args));
 }
 
 /**
@@ -93,7 +103,7 @@ Axes Figure::addAxes(double left, double bottom, double width, double height) {
  * @param projection An optional string denoting the projection type
  * @return A wrapper around the Axes object
  */
-Axes Figure::addSubPlot(const int subplotspec, const QString projection) {
+Axes Figure::addSubPlot(const int subplotspec, const QString &projection) {
   GlobalInterpreterLock lock;
   if (projection.isEmpty())
     return Axes{pyobj().attr("add_subplot")(subplotspec)};

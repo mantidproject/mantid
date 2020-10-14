@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_IREFLWINDOWVIEW_H
-#define MANTID_ISISREFLECTOMETRY_IREFLWINDOWVIEW_H
+#pragma once
 
 #include "GUI/Batch/IBatchView.h"
 #include <string>
@@ -29,6 +28,8 @@ public:
   virtual void notifyCloseBatchRequested(int) = 0;
   virtual void notifySaveBatchRequested(int) = 0;
   virtual void notifyLoadBatchRequested(int) = 0;
+  virtual void notifyShowOptionsRequested() = 0;
+  virtual void notifyShowSlitCalculatorRequested() = 0;
   virtual ~MainWindowSubscriber() = default;
 };
 
@@ -46,4 +47,3 @@ public:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_IREFLWINDOWVIEW_H */

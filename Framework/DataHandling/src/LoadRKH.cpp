@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------------------
 // Includes
@@ -95,15 +95,15 @@ void LoadRKH::readLinesForRKH1D(std::istream &stream, int readStart,
     std::istringstream datastr(fileline);
     datastr >> xValue >> yValue >> yErrorValue;
 
-    xData.push_back(xValue);
-    yData.push_back(yValue);
-    yError.push_back(yErrorValue);
+    xData.emplace_back(xValue);
+    yData.emplace_back(yValue);
+    yError.emplace_back(yErrorValue);
 
     // check if we need to read in x error values
     if (readXError) {
       double xErrorValue(0.);
       datastr >> xErrorValue;
-      xError.push_back(xErrorValue);
+      xError.emplace_back(xErrorValue);
     }
 
     prog.report();
@@ -200,7 +200,7 @@ void LoadRKH::init() {
 
   declareProperty(
       "FirstColumnValue", "Wavelength",
-      boost::make_shared<Kernel::StringListValidator>(propOptions),
+      std::make_shared<Kernel::StringListValidator>(propOptions),
       "Only used for 1D files, the units of the first column in the RKH "
       "file (default Wavelength)");
 }
@@ -585,7 +585,7 @@ void LoadRKH::skipLines(std::istream &strm, int nlines) {
  *  @param[out] toCenter an array that is one shorter than oldBoundaries, the
  * values of the means of pairs of values from the input
  */
-void LoadRKH::binCenter(const MantidVec oldBoundaries,
+void LoadRKH::binCenter(const MantidVec &oldBoundaries,
                         MantidVec &toCenter) const {
   VectorHelper::convertToBinCentre(oldBoundaries, toCenter);
 }

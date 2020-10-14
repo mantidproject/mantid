@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSER_H_
-#define MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSER_H_
+#pragma once
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/IDFObject.h"
@@ -48,8 +47,8 @@ public:
   InstrumentDefinitionParser(const std::string &filename,
                              const std::string &instName,
                              const std::string &xmlText);
-  InstrumentDefinitionParser(const IDFObject_const_sptr xmlFile,
-                             const IDFObject_const_sptr expectedCacheFile,
+  InstrumentDefinitionParser(const IDFObject_const_sptr &xmlFile,
+                             const IDFObject_const_sptr &expectedCacheFile,
                              const std::string &instName,
                              const std::string &xmlText);
   ~InstrumentDefinitionParser() = default;
@@ -64,12 +63,11 @@ public:
   };
 
   /// Parse XML contents
-  boost::shared_ptr<Instrument>
-  parseXML(Kernel::ProgressBase *progressReporter);
+  std::shared_ptr<Instrument> parseXML(Kernel::ProgressBase *progressReporter);
 
   /// Add/overwrite any parameters specified in instrument with param values
   /// specified in <component-link> XML elements
-  void setComponentLinks(boost::shared_ptr<Geometry::Instrument> &instrument,
+  void setComponentLinks(std::shared_ptr<Geometry::Instrument> &instrument,
                          Poco::XML::Element *pRootElem,
                          Kernel::ProgressBase *progress = nullptr);
 
@@ -154,7 +152,7 @@ private:
                       const Poco::XML::Element *pCompElem, IdList &idList);
   /// Return true if assembly, false if not assembly and throws exception if
   /// string not in assembly
-  bool isAssembly(std::string) const;
+  bool isAssembly(const std::string &) const;
 
   /// Add XML element to parent assuming the element contains no other component
   /// elements
@@ -264,7 +262,7 @@ private:
       Poco::XML::Element *pRootElem);
 
   /// Check IdList
-  void checkIdListExistsAndDefinesEnoughIDs(IdList idList,
+  void checkIdListExistsAndDefinesEnoughIDs(const IdList &idList,
                                             Poco::XML::Element *pElem,
                                             const std::string &filename) const;
 
@@ -291,7 +289,7 @@ public: // for testing
 
 private:
   /// Reads from a cache file.
-  void applyCache(IDFObject_const_sptr cacheToApply);
+  void applyCache(const IDFObject_const_sptr &cacheToApply);
 
   /// Write out a cache file.
   CachingOption writeAndApplyCache(IDFObject_const_sptr firstChoiceCache,
@@ -351,8 +349,7 @@ private:
    */
   std::map<std::string, bool> isTypeAssembly;
   /// map which maps the type name to a shared pointer to a geometric shape
-  std::map<std::string, boost::shared_ptr<Geometry::IObject>>
-      mapTypeNameToShape;
+  std::map<std::string, std::shared_ptr<Geometry::IObject>> mapTypeNameToShape;
   /// Container to hold all detectors and monitors added to the instrument. Used
   /// for 'facing' these to component specified under \<defaults\>. NOTE: Seems
   /// unused, ever.
@@ -366,7 +363,7 @@ private:
   std::map<std::string, Poco::XML::Element *> getTypeElement;
 
   /// For convenience added pointer to instrument here
-  boost::shared_ptr<Geometry::Instrument> m_instrument;
+  std::shared_ptr<Geometry::Instrument> m_instrument;
 
   /// Flag to indicate whether offsets given in spherical coordinates are to be
   /// added to the current
@@ -408,5 +405,3 @@ private:
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_INSTRUMENTDEFINITIONPARSER_H_ */

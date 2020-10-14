@@ -1,11 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QWidget
 
@@ -67,10 +67,10 @@ class GroupSelectorTest(unittest.TestCase):
         self.presenter.add_pair(pair2)
 
     def get_group_1_selector_from_pair(self, row):
-        return self.view.pairing_table.cellWidget(row, 1)
+        return self.view.pairing_table.cellWidget(row, 2)
 
     def get_group_2_selector_from_pair(self, row):
-        return self.view.pairing_table.cellWidget(row, 2)
+        return self.view.pairing_table.cellWidget(row, 3)
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS : test the functionality around the combo boxes which allow the user to select the two groups that
@@ -123,18 +123,19 @@ class GroupSelectorTest(unittest.TestCase):
         self.get_group_1_selector_from_pair(0).setCurrentIndex(1)
 
         self.assertEqual(self.view.on_cell_changed.call_count, 1)
-        self.assertEqual(self.view.on_cell_changed.call_args_list[0][0], (0, 1))
+        self.assertEqual(self.view.on_cell_changed.call_args_list[0][0], (0, 2))
 
     def test_that_removing_groups_and_then_calling_update_removes_groups_from_selections(self):
-        self.presenter.handle_add_pair_button_clicked()
-        self.group_context.remove_group("my_group_1")
-        self.group_context.remove_group('my_group_2')
+        pair = MuonPair(pair_name="my_pair_1", forward_group_name="my_group_1", backward_group_name="my_group_2",
+                        alpha=1.0)
+        self.presenter.add_pair(pair)
+        self.group_context.remove_group("my_group_0")
         self.presenter.update_view_from_model()
 
-        self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 1)
-        self.assertEqual(self.get_group_2_selector_from_pair(0).count(), 1)
-        self.assertNotEqual(self.get_group_1_selector_from_pair(0).findText("my_group_0"), -1)
-        self.assertNotEqual(self.get_group_2_selector_from_pair(0).findText("my_group_0"), -1)
+        self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 2)
+        self.assertEqual(self.get_group_2_selector_from_pair(0).count(), 2)
+        self.assertEqual(self.get_group_1_selector_from_pair(0).findText("my_group_0"), -1)
+        self.assertEqual(self.get_group_2_selector_from_pair(0).findText("my_group_0"), -1)
 
     def test_adding_new_group_does_not_change_pair_selection(self):
         self.presenter.handle_add_pair_button_clicked()
@@ -154,15 +155,16 @@ class GroupSelectorTest(unittest.TestCase):
         self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_1')
 
     def test_removing_group_used_in_pair_handled_gracefully(self):
-        self.presenter.handle_add_pair_button_clicked()
+        self.add_two_pairs_to_table()
 
         self.group_context.remove_group("my_group_0")
+        self.group_context.remove_pair("my_pair_0")
         self.presenter.update_view_from_model()
 
         self.assertEqual(self.get_group_1_selector_from_pair(0).count(), 2)
         self.assertEqual(self.get_group_2_selector_from_pair(0).count(), 2)
         self.assertEqual(self.get_group_1_selector_from_pair(0).currentText(), 'my_group_1')
-        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_1')
+        self.assertEqual(self.get_group_2_selector_from_pair(0).currentText(), 'my_group_2')
 
     def test_group_changed_to_other_group_switches_groups(self):
         self.presenter.handle_add_pair_button_clicked()

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_DISPLAYCONTROL_H_
-#define MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_DISPLAYCONTROL_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -65,7 +64,7 @@ private:
   /// handy pointer to the fit-range selector
   MantidQt::MantidWidgets::RangeSelector *m_fitRangeSelector;
   /// workspace holding the cropped slice being displayed
-  boost::shared_ptr<Mantid::API::MatrixWorkspace> m_dataShown;
+  std::shared_ptr<Mantid::API::MatrixWorkspace> m_dataShown;
   /// name of the workspace holding the cropped slice being displayed
   const std::string m_dataShownName;
 
@@ -73,5 +72,3 @@ private:
 } // namespace DynamicPDF
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_DYNAMICPDF_INPUTDATACONTROL_H_

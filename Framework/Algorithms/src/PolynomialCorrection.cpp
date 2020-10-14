@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -31,13 +31,13 @@ void PolynomialCorrection::defineProperties() {
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
           "Coefficients",
-          boost::make_shared<MandatoryValidator<std::vector<double>>>()),
+          std::make_shared<MandatoryValidator<std::vector<double>>>()),
       "Array Property containing the coefficients of the polynomial correction "
       "function in ascending powers of X. Can be given as a comma separated "
       "list in string form.");
   std::vector<std::string> propOptions{"Multiply", "Divide"};
   declareProperty("Operation", "Multiply",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The operation with which the correction is applied to the "
                   "data (default: Multiply)");
 }

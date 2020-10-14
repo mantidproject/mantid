@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MASKBINSIFTEST_H_
-#define MANTID_ALGORITHMS_MASKBINSIFTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -15,10 +14,10 @@
 #include "MantidAlgorithms/CreateWorkspace.h"
 #include "MantidAlgorithms/MaskBinsIf.h"
 
-using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::CreateWorkspace;
 using Mantid::Algorithms::MaskBinsIf;
+using Mantid::API::MatrixWorkspace_sptr;
 
 class MaskBinsIfTest : public CxxTest::TestSuite {
 private:
@@ -132,5 +131,3 @@ public:
 private:
   MaskBinsIf m_alg;
 };
-
-#endif /* MANTID_ALGORITHMS_MASKBINSIFTEST_H_ */

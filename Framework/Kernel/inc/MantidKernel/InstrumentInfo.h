@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_INSTRUMENTINFO_H_
-#define MANTID_KERNEL_INSTRUMENTINFO_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/LiveListenerInfo.h"
+#include "MantidKernel/TopicInfo.h"
 
 #include <map>
 #include <set>
@@ -68,6 +68,7 @@ public:
   bool hasLiveListenerInfo() const;
   /// Returns all available LiveListenerInfos as a vector
   const std::vector<LiveListenerInfo> &liveListenerInfoList() const;
+  const std::vector<TopicInfo> &topicInfoList() const { return m_kafkaTopics; }
 
 private:
   void fillTechniques(const Poco::XML::Element *elem);
@@ -95,6 +96,7 @@ private:
       m_technique; ///< List of techniques the instrument can do
 
   std::vector<LiveListenerInfo> m_listeners; ///< LiveListener connections
+  std::vector<TopicInfo> m_kafkaTopics;      ///< Kafka topics
   std::string m_defaultListener; ///< Default LiveListener connection to use
 };
 
@@ -104,5 +106,3 @@ operator<<(std::ostream &buffer, const InstrumentInfo &instrumentDescriptor);
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_INSTRUMENTINFO_H_ */

@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef PLUGINFIT_H
-#define PLUGINFIT_H
+#pragma once
 
 #include "Fit.h"
 
@@ -52,4 +51,3 @@ private:
   void calculateFitCurveData(double *X, double *Y) override;
   fitFunctionEval f_eval;
 };
-#endif

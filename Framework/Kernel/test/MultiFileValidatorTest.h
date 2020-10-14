@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MULTIFILEVALIDATORTEST_H_
-#define MULTIFILEVALIDATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -20,7 +19,7 @@ namespace {
 void addSingleFile(std::vector<std::vector<std::string>> &fileNames,
                    const std::string &fileNameToAdd) {
   const std::vector<std::string> fileNameList(1, fileNameToAdd);
-  fileNames.push_back(fileNameList);
+  fileNames.emplace_back(fileNameList);
 }
 } // namespace
 
@@ -146,5 +145,3 @@ public:
     TS_ASSERT(file_val.isValid(file).empty());
   }
 };
-
-#endif /*MULTIFILEVALIDATORTEST_H_*/

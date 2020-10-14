@@ -1,16 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 """
     This module defines the interface control for HFIR SANS.
     Each reduction method tab that needs to be presented is defined here.
     The actual view/layout is define in .ui files. The state of the reduction
     process is kept elsewhere (HFIRReduction object)
 """
+import sys
 from reduction_gui.instruments.interface import InstrumentInterface
 from reduction_gui.widgets.sans.hfir_instrument import SANSInstrumentWidget
 from reduction_gui.widgets.sans.hfir_detector import DetectorWidget
@@ -24,13 +24,17 @@ from reduction_gui.reduction.sans.hfir_catalog import DataCatalog
 
 from reduction_gui.reduction.sans.hfir_data_proxy import DataProxy
 
-IS_IN_MANTIDPLOT = False
-try:
-    import mantidplot # noqa
+IS_IN_MANTIDGUI = False
+if "workbench.app.mainwindow" in sys.modules:
+    IS_IN_MANTIDGUI = True
+else:
+    try:
+        import mantidplot # noqa
+        IS_IN_MANTIDGUI = True
+    except:
+        pass
+if IS_IN_MANTIDGUI:
     from reduction_gui.widgets.sans.stitcher import StitcherWidget
-    IS_IN_MANTIDPLOT = True
-except:
-    pass
 
 
 class HFIRInterface(InstrumentInterface):
@@ -67,5 +71,5 @@ class HFIRInterface(InstrumentInterface):
         self.attach(SANSCatalogWidget(settings = self._settings, catalog_cls=DataCatalog))
 
         # Stitcher
-        if IS_IN_MANTIDPLOT:
+        if IS_IN_MANTIDGUI:
             self.attach(StitcherWidget(settings = self._settings))

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_PAWLEYFUNCTIONTEST_H_
-#define MANTID_CURVEFITTING_PAWLEYFUNCTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -321,7 +320,7 @@ public:
     PawleyFunction fn;
     fn.initialize();
 
-    TS_ASSERT(boost::dynamic_pointer_cast<CompositeFunction>(
+    TS_ASSERT(std::dynamic_pointer_cast<CompositeFunction>(
         fn.getDecoratedFunction()));
 
     // The base parameters of PawleyParameterFunction
@@ -442,5 +441,3 @@ private:
     TS_ASSERT_DELTA(cell.gamma(), gamma, 1e-9);
   }
 };
-
-#endif /* MANTID_CURVEFITTING_PAWLEYFUNCTIONTEST_H_ */

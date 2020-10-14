@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/ColumnFactory.h"
@@ -41,11 +41,11 @@ TableWorkspace::TableWorkspace(const TableWorkspace &other)
 
   auto it = other.m_columns.cbegin();
   while (it != other.m_columns.cend()) {
-    addColumn(boost::shared_ptr<API::Column>((*it)->clone()));
+    addColumn(std::shared_ptr<API::Column>((*it)->clone()));
     ++it;
   }
   // copy logs/properties.
-  m_LogManager = boost::make_shared<API::LogManager>(*(other.m_LogManager));
+  m_LogManager = std::make_shared<API::LogManager>(*(other.m_LogManager));
 }
 
 size_t TableWorkspace::getMemorySize() const {
@@ -83,7 +83,7 @@ API::Column_sptr TableWorkspace::addColumn(const std::string &type,
   }
   try {
     c = API::ColumnFactory::Instance().create(type);
-    m_columns.push_back(c);
+    m_columns.emplace_back(c);
     c->setName(name);
     resizeColumn(c.get(), rowCount());
   } catch (Kernel::Exception::NotFoundError &e) {
@@ -200,7 +200,7 @@ std::vector<std::string> TableWorkspace::getColumnNames() const {
   return nameList;
 }
 
-void TableWorkspace::addColumn(boost::shared_ptr<API::Column> column) {
+void TableWorkspace::addColumn(const std::shared_ptr<API::Column> &column) {
   auto ci = std::find_if(m_columns.begin(), m_columns.end(),
                          FindName(column->name()));
   if (ci != m_columns.end()) {
@@ -209,7 +209,7 @@ void TableWorkspace::addColumn(boost::shared_ptr<API::Column> column) {
     throw std::invalid_argument(ss.str());
   } else {
     modified();
-    m_columns.push_back(column);
+    m_columns.emplace_back(column);
   }
 }
 
@@ -301,12 +301,12 @@ TableWorkspace::doCloneColumns(const std::vector<std::string> &colNames) const {
   while (it != m_columns.cend()) {
     if (colNames.end() !=
         std::find(colNames.begin(), colNames.end(), (**it).name())) {
-      ws->addColumn(boost::shared_ptr<API::Column>((*it)->clone()));
+      ws->addColumn(std::shared_ptr<API::Column>((*it)->clone()));
     }
     ++it;
   }
   // copy logs/properties.
-  ws->m_LogManager = boost::make_shared<API::LogManager>(*(m_LogManager));
+  ws->m_LogManager = std::make_shared<API::LogManager>(*(m_LogManager));
   return ws;
 }
 

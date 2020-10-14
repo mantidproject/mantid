@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SetGoniometer.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MultipleExperimentInfos.h"
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ListValidator.h"
@@ -34,13 +35,14 @@ const size_t NUM_AXES = 6;
  */
 void SetGoniometer::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("Workspace", "", Direction::InOut),
+      std::make_unique<WorkspaceProperty<Workspace>>("Workspace", "",
+                                                     Direction::InOut),
       "An workspace that will be modified with the new goniometer created.");
 
   std::vector<std::string> gonOptions{"None, Specify Individually",
                                       "Universal"};
   declareProperty("Goniometers", gonOptions[0],
-                  boost::make_shared<StringListValidator>(gonOptions),
+                  std::make_shared<StringListValidator>(gonOptions),
                   "Set the axes and motor names according to goniometers that "
                   "we define in the code (Universal defined for SNS)");
 
@@ -59,7 +61,23 @@ void SetGoniometer::init() {
 /** Execute the algorithm.
  */
 void SetGoniometer::exec() {
-  MatrixWorkspace_sptr ws = getProperty("Workspace");
+  Workspace_sptr ws = getProperty("Workspace");
+  auto ei = std::dynamic_pointer_cast<ExperimentInfo>(ws);
+
+  if (!ei) {
+    // We're dealing with an MD workspace which has multiple experiment infos
+    auto infos = std::dynamic_pointer_cast<MultipleExperimentInfos>(ws);
+    if (!infos) {
+      throw std::invalid_argument(
+          "Input workspace does not support Goniometer");
+    }
+    if (infos->getNumExperimentInfo() < 1) {
+      ExperimentInfo_sptr info(new ExperimentInfo());
+      infos->addExperimentInfo(info);
+    }
+    ei = infos->getExperimentInfo(0);
+  }
+
   std::string gonioDefined = getPropertyValue("Goniometers");
   // Create the goniometer
   Goniometer gon;
@@ -99,10 +117,10 @@ void SetGoniometer::exec() {
             auto tsp = new Kernel::TimeSeriesProperty<double>(axisName);
             tsp->addValue(now, angle);
             tsp->setUnits("degree");
-            if (ws->mutableRun().hasProperty(axisName)) {
-              ws->mutableRun().removeLogData(axisName);
+            if (ei->mutableRun().hasProperty(axisName)) {
+              ei->mutableRun().removeLogData(axisName);
             }
-            ws->mutableRun().addLogData(tsp);
+            ei->mutableRun().addLogData(tsp);
           } catch (...) {
             g_log.error("Could not add axis");
           }
@@ -140,7 +158,7 @@ void SetGoniometer::exec() {
   // All went well, copy the goniometer into it. It will throw if the log values
   // cannot be found
   try {
-    ws->mutableRun().setGoniometer(gon, true);
+    ei->mutableRun().setGoniometer(gon, true);
   } catch (std::runtime_error &) {
     g_log.error("No log values for goniometers");
   }

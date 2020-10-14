@@ -1,17 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, unicode_literals)
-
 import sys
 import unittest
 
 from matplotlib.figure import Figure
 from mantid import WorkspaceFactory, plots
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 
 from Muon.GUI.ElementalAnalysis.Plotting.subPlot_object import subPlot
@@ -30,7 +28,7 @@ def get_subPlot(name):
     # create real lines
     fig = Figure()
     sub = fig.add_subplot(1, 1, 1)
-    line1 = plots.plotfunctions.plot(sub, ws1, specNum=1)
+    line1 = plots.axesfunctions.plot(sub, ws1, specNum=1)
     # add them both
     subplot = subPlot(name)
     subplot.addLine(label1, line1, ws1, 2)

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SYMMETRYOPERATIONTEST_H_
-#define MANTID_GEOMETRY_SYMMETRYOPERATIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -16,7 +15,7 @@
 #include "MantidKernel/V3D.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -43,10 +42,10 @@ public:
       : m_h(3.0), m_k(2.0), m_l(4.0), m_hkl(m_h, m_k, m_l),
         m_hhl(m_h, m_h, m_l), m_hk0(m_h, m_k, 0.0), m_h00(m_h, 0.0, 0.0),
         m_allHkl() {
-    m_allHkl.push_back(m_hkl);
-    m_allHkl.push_back(m_hhl);
-    m_allHkl.push_back(m_hk0);
-    m_allHkl.push_back(m_h00);
+    m_allHkl.emplace_back(m_hkl);
+    m_allHkl.emplace_back(m_hhl);
+    m_allHkl.emplace_back(m_hk0);
+    m_allHkl.emplace_back(m_h00);
   }
 
   void testDefaultConstructor() {
@@ -468,5 +467,3 @@ private:
 
   std::vector<V3D> m_allHkl;
 };
-
-#endif /* MANTID_GEOMETRY_SYMMETRYOPERATIONTEST_H_ */

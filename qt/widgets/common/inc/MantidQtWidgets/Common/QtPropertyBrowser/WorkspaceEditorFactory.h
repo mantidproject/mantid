@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef STRINGEDITORFACTORY_H
-#define STRINGEDITORFACTORY_H
+#pragma once
 
 #include "MantidQtWidgets/Common/QtPropertyBrowser/qtpropertymanager.h"
 #include "MantidQtWidgets/Common/WorkspaceSelector.h"
@@ -34,14 +33,14 @@ protected:
 class WorkspaceEditor : public WorkspaceSelector {
   Q_OBJECT
 public:
-  WorkspaceEditor(QtProperty *property, QWidget *parent);
+  WorkspaceEditor(QtProperty *property, QtStringPropertyManager *manager,
+                  QWidget *parent);
 protected slots:
   void updateProperty(const QString &text);
 
 private:
   QtProperty *m_property;
+  QtStringPropertyManager *m_manager;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // STRINGEDITORFACTORY_H

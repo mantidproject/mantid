@@ -4,7 +4,7 @@
 MVP Calculator GUI Example
 ==========================
 
-See the following files for the calculator GUI described in :ref:`GuiDesignGuidelinesMVPIntro`.
+See the following files for the calculator GUI described in :ref:`MVPDesignIntro`.
 
 - :download:`Main module <Calculator.py>`
 - :download:`Model.py <Model.py>`

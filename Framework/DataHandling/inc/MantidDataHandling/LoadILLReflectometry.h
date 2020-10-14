@@ -1,16 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADILLREFLECTOMETRY_H_
-#define MANTID_DATAHANDLING_LOADILLREFLECTOMETRY_H_
+#pragma once
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidDataHandling/LoadHelper.h"
+#include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -30,6 +31,7 @@ public:
   const std::vector<std::string> seeAlso() const override {
     return {"LoadNexus"};
   }
+  std::map<std::string, std::string> validateInputs() override;
   /// Algorithm's category for search and find. @see Algorithm::category
   const std::string category() const override {
     return "DataHandling\\Nexus;ILL\\Reflectometry";
@@ -91,13 +93,12 @@ private:
   std::string m_chopper2Name;
   double m_detectorAngle{0.0};
   double m_detectorDistance{0.0};
-  const static double PIXEL_CENTER;
   double m_pixelWidth{0.0};
   double m_sampleZOffset{0.0};
+  double m_sourceDistance{0.0};
   Mantid::DataHandling::LoadHelper m_loader;
+  Mantid::Types::Core::DateAndTime m_startTime;
 };
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_LOADILLREFLECTOMETRY_H_ */

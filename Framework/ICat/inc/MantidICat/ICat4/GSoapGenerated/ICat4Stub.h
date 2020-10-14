@@ -8,8 +8,7 @@ This program is released under the GPL with the additional exemption that
 compiling, linking, and/or using OpenSSL is allowed.
 */
 
-#ifndef ICat4Stub_H
-#define ICat4Stub_H
+#pragma once
 #include <vector>
 #define SOAP_NAMESPACE_OF_ns1 "http://icatproject.org"
 #define SOAP_NAMESPACE_OF_ns2 ""
@@ -3280,7 +3279,3 @@ using _XML = char *;
 \******************************************************************************/
 
 } // namespace ICat4
-
-#endif
-
-/* End of ICat4Stub.h */

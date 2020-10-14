@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTWIDGETS_CATALOGSEARCH_H_
-#define MANTIDQTWIDGETS_CATALOGSEARCH_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -101,7 +100,7 @@ private:
   /// Obtain all file extensions from the provided column (dataFileResults ->
   /// File name).
   std::unordered_set<std::string>
-  getDataFileExtensions(Mantid::API::Column_sptr column);
+  getDataFileExtensions(const Mantid::API::Column_sptr &column);
   /// Add the list of file extensions to the "Filter type..." drop-down.
   void populateDataFileType(const std::unordered_set<std::string> &extensions);
   /// Disable the download button if user can access the files locally from the
@@ -198,8 +197,7 @@ private:
   /// The current page the user is on in the results window. Used for paging.
   int m_currentPageNumber;
   // Ensure tooltip uses visible color on current OS
-  void correctedToolTip(std::string toolTip, QLabel *label);
+  void correctedToolTip(const std::string &toolTip, QLabel *label);
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQTWIDGETS_CATALOGSEARCH_H_

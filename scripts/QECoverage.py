@@ -1,12 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=line-too-long, too-many-instance-attributes, invalid-name, missing-docstring, too-many-statements
 # pylint: disable= too-many-branches, no-self-use
-from __future__ import (absolute_import, division, print_function)
 from mantidqt.gui_helper import get_qapplication, show_interface_help
 import numpy as np
 import os
@@ -69,7 +68,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.tab_direct = QtWidgets.QWidget(self.tabs)
         self.direct_grid = QtWidgets.QVBoxLayout()
         self.tab_direct.setLayout(self.direct_grid)
-        self.direct_inst_list = ['LET', 'MAPS', 'MARI', 'MERLIN', 'ARCS', 'CNCS', 'HYSPEC', 'SEQUOIA',
+        self.direct_inst_list = ['LET', 'MAPS', 'MARI', 'MERLIN', 'ARCS', 'CHESS', 'CNCS', 'HYSPEC', 'SEQUOIA',
                                  'IN4', 'IN5', 'IN6', 'FOCUS', 'MIBEMOL', 'DNS', 'TOFTOF']
         self.direct_inst_box = QtWidgets.QComboBox(self.tab_direct)
         for inst in self.direct_inst_list:
@@ -214,7 +213,7 @@ class QECoverageGUI(QtWidgets.QWidget):
         self.qt_url = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/QE Coverage.html'
         self.external_url = 'http://docs.mantidproject.org/nightly/interfaces/QE Coverage.html'
         #register startup
-        mantid.UsageService.registerFeatureUsage("Interface","QECoverage",False)
+        mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface,"QECoverage",False)
 
     def onHelp(self):
         show_interface_help(self.mantidplot_name,
@@ -253,6 +252,8 @@ class QECoverageGUI(QtWidgets.QWidget):
             self.tthlims = [2.838, 135.69]
         elif Inst == 'ARCS':
             self.tthlims = [2.373, 135.955]
+        elif Inst == 'CHESS':
+            self.tthlims = [0.0, 140.0]
         elif Inst == 'CNCS':
             self.tthlims = [3.806, 132.609]
         # HYSPEC special case - detectors can rotate about sample. Coverage is approximately +/-30deg either
@@ -469,9 +470,9 @@ class QECoverageGUI(QtWidgets.QWidget):
             Emax_min = -4896
 
         self.emaxfield_msgbox.setText("Invalid input has been provided for Emax. "
-                                      "Emax cannot be less than " +
-                                      str(Emax_min) + ", when Ef is set as " +
-                                      ana + "! Please try again.")
+                                      "Emax cannot be less than "
+                                      + str(Emax_min) + ", when Ef is set as "
+                                      + ana + "! Please try again.")
 
         if float(self.indirect_emax_input.text()) < Emax_min:
             self.indirect_emax_input.setText(str(Emax_min))

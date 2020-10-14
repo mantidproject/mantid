@@ -31,9 +31,10 @@ to be one.
 :math:`A_{c,sc}` container    sample and container ``acsc``
 ================ ============ ==================== ==============
 
-This algorithm can be used to apply absorption corrections calculated
+This algorithm can be used to apply absorption corrections calculated with :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`.
+It can also be used to apply absorption corrections calculated
 with either the :ref:`CylinderPaalmanPingsCorrection
-<algm-CylinderPaalmanPingsCorrection>` and
+<algm-CylinderPaalmanPingsCorrection>` or
 :ref:`FlatPlatePaalmanPingsCorrection
 <algm-FlatPlatePaalmanPingsCorrection>` algorithms as well as the
 legacy indirect calculate corrections routine, providing that the
@@ -161,11 +162,14 @@ Output:
 Related Algorithms
 ------------------
 
+:ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`
+calculates the partial absorption factors for simple shapes using Monte Carlo simulation.
+
 :ref:`FlatPlatePaalmanPingsCorrection <algm-FlatPlatePaalmanPingsCorrection>`
-calculates the partial absorption factors in flat plate geometry
+calculates the partial absorption factors in flat plate geometry using numerical integration.
 
 :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
-calculates the partial absorption factors in cylindrical plate geometry
+calculates the partial absorption factors in cylindrical geometry using numerical integration.
 
 References
 ----------

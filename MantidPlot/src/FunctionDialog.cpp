@@ -44,7 +44,8 @@
 #include <QTextEdit>
 #include <QWidget>
 
-FunctionDialog::FunctionDialog(ApplicationWindow *app, Graph *g, Qt::WFlags fl)
+FunctionDialog::FunctionDialog(ApplicationWindow *app, Graph *g,
+                               const Qt::WFlags &fl)
     : QDialog(g, fl), d_app(app), graph(g) {
   setObjectName("FunctionDialog");
   setWindowTitle(tr("MantidPlot - Add function curve"));

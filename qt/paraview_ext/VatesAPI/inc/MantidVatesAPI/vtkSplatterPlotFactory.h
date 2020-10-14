@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_vtkSplatterPlotFactory_H_
-#define MANTID_VATES_vtkSplatterPlotFactory_H_
+#pragma once
 
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
@@ -17,7 +16,7 @@
 #include "MantidVatesAPI/VatesConfigurations.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vtkPoints.h>
 
 namespace Mantid {
@@ -121,7 +120,7 @@ private:
   mutable std::unique_ptr<bool[]> sliceMask;
 
   /// Implicit function to define which boxes to render.
-  mutable boost::shared_ptr<Mantid::Geometry::MDImplicitFunction>
+  mutable std::shared_ptr<Mantid::Geometry::MDImplicitFunction>
       sliceImplicitFunction;
 
   /// Variable to hold sorted list, so sort doesn't have to be repeated
@@ -147,5 +146,3 @@ private:
 };
 } // namespace VATES
 } // namespace Mantid
-
-#endif

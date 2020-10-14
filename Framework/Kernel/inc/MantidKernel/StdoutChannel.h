@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //
 // StdoutChannel.h
@@ -15,8 +15,7 @@
 //
 //
 
-#ifndef STDOUTCHANNEL_H
-#define STDOUTCHANNEL_H
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include <Poco/ConsoleChannel.h>
@@ -27,4 +26,3 @@ public:
   StdoutChannel();
 };
 } // namespace Poco
-#endif // STDOUTCHANNEL_H

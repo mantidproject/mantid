@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDGEOMETRYXMLBUILDER_H_
-#define MDGEOMETRYXMLBUILDER_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -42,19 +41,19 @@ public:
   bool addOrdinaryDimension(IMDDimension_const_sptr dimensionToAdd) const;
 
   /// Add many ordinary dimensions.
-  void addManyOrdinaryDimensions(VecIMDDimension_sptr manyDims) const;
+  void addManyOrdinaryDimensions(const VecIMDDimension_sptr &manyDims) const;
 
   /// Add x dimension.
-  bool addXDimension(IMDDimension_const_sptr dimension) const;
+  bool addXDimension(const IMDDimension_const_sptr &dimension) const;
 
   /// Add y dimension.
-  bool addYDimension(IMDDimension_const_sptr dimension) const;
+  bool addYDimension(const IMDDimension_const_sptr &dimension) const;
 
   /// Add z dimension.
-  bool addZDimension(IMDDimension_const_sptr dimension) const;
+  bool addZDimension(const IMDDimension_const_sptr &dimension) const;
 
   /// Add t dimension.
-  bool addTDimension(IMDDimension_const_sptr dimension) const;
+  bool addTDimension(const IMDDimension_const_sptr &dimension) const;
 
   /// Copy constructor
   MDGeometryBuilderXML(const MDGeometryBuilderXML &);
@@ -139,5 +138,3 @@ struct MANTID_GEOMETRY_DLL NoDimensionPolicy {
 };
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* GEOMETRYXMLBUILDER_H_ */

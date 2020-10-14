@@ -45,7 +45,8 @@
 #include <QSpinBox>
 #include <QTextEdit>
 
-TableDialog::TableDialog(Table *t, Qt::WFlags fl) : QDialog(t, fl), d_table(t) {
+TableDialog::TableDialog(Table *t, const Qt::WFlags &fl)
+    : QDialog(t, fl), d_table(t) {
   setObjectName("TableDialog");
   setWindowTitle(tr("MantidPlot - Column options"));
   setSizeGripEnabled(true);

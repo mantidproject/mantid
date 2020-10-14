@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SORTPEAKSWORKSPACETEST_H_
-#define MANTID_CRYSTAL_SORTPEAKSWORKSPACETEST_H_
+#pragma once
 
+#include "MantidAPI/TableRow.h"
 #include "MantidCrystal/SortPeaksWorkspace.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
@@ -26,7 +26,8 @@ private:
    * @param inWS : Input workspace to sort
    * @param columnName : Column name to sort by
    */
-  void doExecute(IPeaksWorkspace_sptr inWS, const std::string &columnName,
+  void doExecute(const IPeaksWorkspace_sptr &inWS,
+                 const std::string &columnName,
                  const bool sortAscending = true) {
     std::string outWSName("SortPeaksWorkspaceTest_OutputWS");
 
@@ -51,7 +52,7 @@ private:
     std::vector<double> potentiallySorted;
     for (size_t rowIndex = 0; rowIndex < outWS->rowCount(); ++rowIndex) {
       TableRow row = outWS->getRow(rowIndex);
-      potentiallySorted.push_back(row.Double(columnIndex));
+      potentiallySorted.emplace_back(row.Double(columnIndex));
     }
 
     // Compare the contents of the container to determine how the column has
@@ -117,7 +118,7 @@ public:
     // Name of the output workspace.
     std::string outWSName("SortPeaksWorkspaceTest_OutputWS");
 
-    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     SortPeaksWorkspace alg;
     alg.setRethrows(true);
@@ -135,7 +136,7 @@ public:
     // Name of the output workspace.
     std::string outWSName("SortPeaksWorkspaceTest_OutputWS");
 
-    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     SortPeaksWorkspace alg;
     alg.setRethrows(true);
@@ -152,7 +153,7 @@ public:
     const std::string columnOfInterestName = "h";
 
     // Create a peaks workspace and add some peaks with unordered H values.
-    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
     Peak peak1;
     peak1.setH(1);
     Peak peak2;
@@ -170,7 +171,7 @@ public:
     const std::string columnOfInterestName = "h";
 
     // Create a peaks workspace and add some peaks with unordered H values.
-    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
     Peak peak1;
     peak1.setH(0);
     Peak peak2;
@@ -186,7 +187,7 @@ public:
   }
 
   void test_modify_workspace_in_place() {
-    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     SortPeaksWorkspace alg;
     alg.setChild(true);
@@ -207,5 +208,3 @@ public:
                       outWS, inWS);
   }
 };
-
-#endif /* MANTID_CRYSTAL_SORTPEAKSWORKSPACETEST_H_ */

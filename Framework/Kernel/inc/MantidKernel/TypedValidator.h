@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_TYPEDVALIDATOR_H_
-#define MANTID_KERNEL_TYPEDVALIDATOR_H_
+#pragma once
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -21,7 +20,7 @@ and passed down to the concrete validator instance. Most validators
 will probably want to inherit from this rather than IValidator
 directly.
 
-A specialised type exists for boost::shared_ptr types
+A specialised type exists for std::shared_ptr types
  */
 template <typename HeldType>
 class DLLExport TypedValidator : public IValidator {
@@ -47,7 +46,7 @@ private:
 };
 
 /**
- * Specialization for boost::shared_ptr<T> types.
+ * Specialization for std::shared_ptr<T> types.
  * boost::any_cast cannot convert between types, the type extracted must match
  * the
  * the stored type. In our case IValidator ensures that all items that inherit
@@ -59,10 +58,10 @@ private:
  * their types exactly.
  */
 template <typename ElementType>
-class DLLExport TypedValidator<boost::shared_ptr<ElementType>>
+class DLLExport TypedValidator<std::shared_ptr<ElementType>>
     : public IValidator {
   /// Shared ptr type
-  using ElementType_sptr = boost::shared_ptr<ElementType>;
+  using ElementType_sptr = std::shared_ptr<ElementType>;
 
 protected:
   /// Override this function to check the validity of the type
@@ -113,8 +112,7 @@ private:
   ElementType_sptr extractFromDataItem(const boost::any &value) const {
     const DataItem_sptr data = boost::any_cast<DataItem_sptr>(value);
     // First try and push it up to the type of the validator
-    ElementType_sptr typedValue =
-        boost::dynamic_pointer_cast<ElementType>(data);
+    ElementType_sptr typedValue = std::dynamic_pointer_cast<ElementType>(data);
     if (!typedValue) {
       throw std::invalid_argument("DataItem \"" + data->getName() +
                                   "\" is not of the expected type.");
@@ -143,10 +141,8 @@ private:
 /** Intialize the DataItem_sptr typeinfo
  */
 template <typename T>
-const std::type_info &TypedValidator<boost::shared_ptr<T>>::m_dataitemTypeID =
-    typeid(boost::shared_ptr<DataItem>);
+const std::type_info &TypedValidator<std::shared_ptr<T>>::m_dataitemTypeID =
+    typeid(std::shared_ptr<DataItem>);
 } // namespace Kernel
 /// @endcond
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_TYPEDVALIDATOR_H_ */

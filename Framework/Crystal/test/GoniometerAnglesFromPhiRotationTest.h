@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * GoniometerAnglesFromPhiRotation.h
@@ -11,8 +11,7 @@
  *      Author: ruth
  */
 
-#ifndef GoniometerAnglesFromPhiRotationTest_H_
-#define GoniometerAnglesFromPhiRotationTest_H_
+#pragma once
 
 #include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
 
@@ -50,7 +49,7 @@ public:
     try {
       API::Workspace_sptr ows = loadPeaks.getProperty("OutputWorkspace");
       PeaksWorkspace_sptr Peak5637 =
-          boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
+          std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
     } catch (...) {
       PeaksWorkspace_sptr Peak5637 = loadPeaks.getProperty("OutputWorkspace");
     }
@@ -65,7 +64,7 @@ public:
     try {
       API::Workspace_sptr ows = loadPeaks2.getProperty("OutputWorkspace");
       PeaksWorkspace_sptr Peak5643 =
-          boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
+          std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
     } catch (...) {
       PeaksWorkspace_sptr Peak5643 = loadPeaks.getProperty("OutputWorkspace");
     }
@@ -89,5 +88,3 @@ public:
     TS_ASSERT_DELTA((double)Gonr.getProperty("Omega2"), -3.0035, .5);
   }
 };
-
-#endif /* GoniometerAnglesFromPhiRotationTest_H_ */

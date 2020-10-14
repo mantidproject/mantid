@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_
-#define MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -55,10 +54,10 @@ public:
     std::vector<int> group1, group2;
 
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
 
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
@@ -84,7 +83,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -111,10 +110,10 @@ public:
     std::vector<int> group1, group2;
 
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
 
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
@@ -142,7 +141,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -160,10 +159,10 @@ public:
     std::vector<int> group1, group2;
 
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
 
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
@@ -191,7 +190,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -209,9 +208,9 @@ public:
     std::vector<int> group1, group2;
 
     for (int i = 33; i <= 64; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 1; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
@@ -236,7 +235,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -263,9 +262,9 @@ public:
     std::vector<int> group1, group2;
 
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
@@ -295,7 +294,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -322,13 +321,13 @@ public:
     std::vector<int> group1, group2;
 
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
 
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
-    auto deadTimes = boost::make_shared<TableWorkspace>();
+    auto deadTimes = std::make_shared<TableWorkspace>();
     deadTimes->addColumn("int", "spectrum");
     deadTimes->addColumn("double", "dead-time");
 
@@ -361,7 +360,7 @@ public:
 
     // Retrieve the workspace from data service.
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (ws) {
@@ -431,14 +430,14 @@ public:
     ScopedWorkspace output;
     std::vector<int> group1, group2;
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
     MuonProcess alg;
     alg.setRethrows(true);
-    Workspace_sptr badWS = boost::make_shared<TableWorkspace>();
+    Workspace_sptr badWS = std::make_shared<TableWorkspace>();
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", badWS));
@@ -461,9 +460,9 @@ public:
     ScopedWorkspace output;
     std::vector<int> group1, group2;
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
     MuonProcess alg;
@@ -492,9 +491,9 @@ public:
     ScopedWorkspace output;
     std::vector<int> group1, group2;
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
     MuonProcess alg;
@@ -521,9 +520,9 @@ public:
     ScopedWorkspace output;
     std::vector<int> group1, group2;
     for (int i = 1; i <= 16; ++i)
-      group1.push_back(i);
+      group1.emplace_back(i);
     for (int i = 17; i <= 32; ++i)
-      group2.push_back(i);
+      group2.emplace_back(i);
     TableWorkspace_sptr grouping = createGroupingTable(group1, group2);
 
     MuonProcess alg;
@@ -572,7 +571,7 @@ public:
     }
 
     MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
+        std::dynamic_pointer_cast<MatrixWorkspace>(output.retrieve());
 
     TS_ASSERT(ws);
     if (!ws)
@@ -588,7 +587,7 @@ public:
 private:
   TableWorkspace_sptr createGroupingTable(const std::vector<int> &group1,
                                           const std::vector<int> &group2) {
-    auto t = boost::make_shared<TableWorkspace>();
+    auto t = std::make_shared<TableWorkspace>();
 
     t->addColumn("vector_int", "Detectors");
 
@@ -635,5 +634,3 @@ private:
     return loadData("MUSR00015189.nxs");
   }
 };
-
-#endif /* MANTID_WORKFLOWALGORITHMS_MUONPROCESSTEST_H_ */

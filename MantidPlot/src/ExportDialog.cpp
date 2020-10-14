@@ -39,7 +39,7 @@
 #include <QPushButton>
 
 ExportDialog::ExportDialog(const QString &tableName, QWidget *parent,
-                           Qt::WFlags fl)
+                           const Qt::WFlags &fl)
     : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot - Export ASCII"));
   setSizeGripEnabled(true);

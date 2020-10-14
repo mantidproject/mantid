@@ -1,16 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_MULTIPERIODGROUPWORKER_H_
-#define MANTID_API_MULTIPERIODGROUPWORKER_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -28,7 +27,7 @@ namespace API {
  *
  *
  */
-class DLLExport MultiPeriodGroupWorker {
+class MANTID_API_DLL MultiPeriodGroupWorker {
 public:
   /// Convenience typdef for workspace names.
   using VecWSGroupType = std::vector<WorkspaceGroup_sptr>;
@@ -53,7 +52,7 @@ private:
 
   /// Try ot add a workspace to the group of input workspaces.
   void tryAddInputWorkspaceToInputGroups(
-      Workspace_sptr ws, VecWSGroupType &vecMultiPeriodWorkspaceGroups,
+      const Workspace_sptr &ws, VecWSGroupType &vecMultiPeriodWorkspaceGroups,
       VecWSGroupType &vecWorkspaceGroups) const;
 
   /// Copy input workspace properties to spawned algorithm.
@@ -76,5 +75,3 @@ private:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_MULTIPERIODGROUPWORKER_H_ */

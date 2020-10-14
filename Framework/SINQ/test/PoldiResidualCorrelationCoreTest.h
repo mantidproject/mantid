@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDIRESIDUALCORRELATIONCORETEST_H_
-#define MANTID_SINQ_POLDIRESIDUALCORRELATIONCORETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -94,8 +93,8 @@ public:
     UncertainValue pair1(3.0, 2.0);
 
     std::vector<UncertainValue> goodList;
-    goodList.push_back(pair0);
-    goodList.push_back(pair1);
+    goodList.emplace_back(pair0);
+    goodList.emplace_back(pair1);
 
     TS_ASSERT_EQUALS(core.reduceChopperSlitList(goodList, 1.0), 3.0625);
   }
@@ -152,5 +151,3 @@ private:
         : PoldiResidualCorrelationCore(logger) {}
   };
 };
-
-#endif /* MANTID_SINQ_POLDIRESIDUALCORRELATIONCORETEST_H_ */

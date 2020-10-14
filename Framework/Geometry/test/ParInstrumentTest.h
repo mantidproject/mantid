@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PARINSTRUMENTTEST_H_
-#define PARINSTRUMENTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -13,7 +12,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidKernel/Exception.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -31,7 +30,7 @@ public:
     source->setPos(0.0, 0.0, -10.0);
     instrument->add(source);
     instrument->markAsSource(source);
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
     det = new Detector("det1", 1, nullptr);
@@ -49,15 +48,14 @@ public:
   }
 
   void test_Constructor_Throws_With_Invalid_Pointers() {
-    TS_ASSERT_THROWS(Instrument(boost::shared_ptr<Instrument>(),
-                                boost::shared_ptr<ParameterMap>()),
+    TS_ASSERT_THROWS(Instrument(std::shared_ptr<Instrument>(),
+                                std::shared_ptr<ParameterMap>()),
                      const std::invalid_argument &);
-    // boost::shared_ptr<Instrument> instr = boost::make_shared<Instrument>();
-    // TS_ASSERT_THROWS(Instrument(instr,boost::shared_ptr<ParameterMap>()),const
+    // std::shared_ptr<Instrument> instr = std::make_shared<Instrument>();
+    // TS_ASSERT_THROWS(Instrument(instr,std::shared_ptr<ParameterMap>()),const
     // std::invalid_argument &);
-    boost::shared_ptr<ParameterMap> paramMap =
-        boost::make_shared<ParameterMap>();
-    TS_ASSERT_THROWS(Instrument(boost::shared_ptr<Instrument>(), paramMap),
+    std::shared_ptr<ParameterMap> paramMap = std::make_shared<ParameterMap>();
+    TS_ASSERT_THROWS(Instrument(std::shared_ptr<Instrument>(), paramMap),
                      const std::invalid_argument &);
   }
 
@@ -108,11 +106,9 @@ public:
   }
 
 private:
-  boost::shared_ptr<Instrument> instrument;
+  std::shared_ptr<Instrument> instrument;
   Mantid::Geometry::ParameterMap_sptr pmap;
   Detector *det;
   Detector *det2;
   Detector *det3;
 };
-
-#endif /*INSTRUMENTTEST_H_*/

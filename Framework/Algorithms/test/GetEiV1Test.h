@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GETEIV1TEST_H_
-#define GETEIV1TEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -19,9 +18,9 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using Mantid::MantidVecPtr;
 using Mantid::HistogramData::BinEdges;
 using Mantid::HistogramData::LinearGenerator;
-using Mantid::MantidVecPtr;
 
 class GetEiV1Test : public CxxTest::TestSuite {
 public:
@@ -207,5 +206,3 @@ private:
     return alg;
   }
 };
-
-#endif /*GETEITEST_H_*/

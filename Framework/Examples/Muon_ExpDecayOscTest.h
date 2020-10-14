@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_Muon_ExpDecayOscTest_H_
-#define MANTID_CURVEFITTING_Muon_ExpDecayOscTest_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -63,5 +62,3 @@ protected:
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_Muon_ExpDecayOscTest_H_*/

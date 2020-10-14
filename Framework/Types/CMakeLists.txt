@@ -34,9 +34,10 @@ set_target_properties(Types
 set_property(TARGET Types PROPERTY FOLDER "MantidFramework")
 target_link_libraries(Types LINK_PUBLIC ${Boost_LIBRARIES})
 target_include_directories(Types SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
-target_include_directories(Types PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
+
 # Auto-generate exports header
-generate_mantid_export_header(Types)
+target_include_directories(Types PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
+generate_mantid_export_header(Types FALSE)
 
 # Installation settings
 mtd_install_targets(TARGETS Types INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})

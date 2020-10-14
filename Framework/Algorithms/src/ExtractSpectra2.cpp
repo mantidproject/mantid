@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ExtractSpectra2.h"
 #include "MantidAPI/Algorithm.tcc"
@@ -53,7 +53,7 @@ void ExtractSpectra2::init() {
 
 /// Executes the algorithm
 void ExtractSpectra2::exec() {
-  boost::shared_ptr<MatrixWorkspace> inputWS;
+  std::shared_ptr<MatrixWorkspace> inputWS;
   Indexing::SpectrumIndexSet indexSet;
   std::tie(inputWS, indexSet) =
       getWorkspaceAndIndices<MatrixWorkspace>("InputWorkspace");

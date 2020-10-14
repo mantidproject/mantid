@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ERRORSERVICETEST_H_
-#define MANTID_API_ERRORSERVICETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -20,7 +19,7 @@ public:
   using ErrorReporter::ErrorReporter;
 
   /// generates the message body for a error message
-  std::string generateErrorMessage() override {
+  std::string generateErrorMessage() const override {
     return ErrorReporter::generateErrorMessage();
   }
 
@@ -100,7 +99,7 @@ public:
     const std::string name = "My testing application name";
     const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
     TestableErrorReporter errorService(name, upTime, "0", true, "name", "email",
-                                       "textBox", "fileHash");
+                                       "textBox", "stacktrace");
     const std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
@@ -111,7 +110,7 @@ public:
         "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
         "osArch",   "osName",      "osReadable", "osVersion",  "uid",
         "facility", "upTime",      "exitCode",   "textBox",    "name",
-        "email",    "fileHash"};
+        "email",    "stacktrace"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
                  std::find(members.begin(), members.end(), expectedMember) !=
@@ -124,14 +123,14 @@ public:
     TS_ASSERT_EQUALS(root["name"].asString(), "name");
     TS_ASSERT_EQUALS(root["email"].asString(), "email");
     TS_ASSERT_EQUALS(root["textBox"].asString(), "textBox");
-    TS_ASSERT_EQUALS(root["fileHash"].asString(), "fileHash");
+    TS_ASSERT_EQUALS(root["stacktrace"].asString(), "stacktrace");
   }
 
   void test_errorMessageWithNoShareAndRecoveryFileHash() {
     const std::string name = "My testing application name";
     const Mantid::Types::Core::time_duration upTime(5, 0, 7, 0);
     TestableErrorReporter errorService(name, upTime, "0", false, "name",
-                                       "email", "textBox", "fileHash");
+                                       "email", "textBox", "stacktrace");
     const std::string message = errorService.generateErrorMessage();
 
     ::Json::Reader reader;
@@ -142,7 +141,7 @@ public:
         "ParaView", "application", "host",       "mantidSha1", "mantidVersion",
         "osArch",   "osName",      "osReadable", "osVersion",  "uid",
         "facility", "upTime",      "exitCode",   "textBox",    "name",
-        "email",    "fileHash"};
+        "email",    "stacktrace"};
     for (auto expectedMember : expectedMembers) {
       TSM_ASSERT(expectedMember + " not found",
                  std::find(members.begin(), members.end(), expectedMember) !=
@@ -155,8 +154,6 @@ public:
     TS_ASSERT_EQUALS(root["name"].asString(), "");
     TS_ASSERT_EQUALS(root["email"].asString(), "");
     TS_ASSERT_EQUALS(root["textBox"].asString(), "");
-    TS_ASSERT_EQUALS(root["fileHash"].asString(), "");
+    TS_ASSERT_EQUALS(root["stacktrace"].asString(), "");
   }
 };
-
-#endif /* MANTID_API_USAGESERVICETEST_H_ */

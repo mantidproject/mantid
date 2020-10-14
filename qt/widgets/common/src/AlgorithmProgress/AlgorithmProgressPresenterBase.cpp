@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenterBase.h"
 #include <QProgressBar>
@@ -45,19 +45,37 @@ void AlgorithmProgressPresenterBase::algorithmEnded(
 /// @param progress The progress that an algorithm has reported
 /// @param message The message that an algorithm has sent. The object will
 /// already have been copied into the GUI thread, so it is safe to receive it by
-/// const ref
-void AlgorithmProgressPresenterBase::setProgressBar(QProgressBar *progressBar,
-                                                    double progress,
-                                                    const QString &message) {
+/// @param estimatedTime :: estimated time to completion in seconds
+/// @param progressPrecision :: number of digits after the decimal
+void AlgorithmProgressPresenterBase::setProgressBar(
+    QProgressBar *progressBar, const double progress, const QString &message,
+    const double estimatedTime, const int progressPrecision) {
   progressBar->setValue(static_cast<int>(progress * 100));
-
-  // If the progress reporter has sent a message, format the bar to display that
-  // as well as the % done
+  // Make the progress string
+  std::ostringstream mess;
   if (!message.isEmpty()) {
-    progressBar->setFormat(QString("%1 - %2").arg(message, "%p%"));
-  } else {
-    progressBar->setFormat("%p%");
+    mess << message.toStdString() << " ";
   }
+  mess.precision(progressPrecision);
+  mess << std::fixed << progress * 100 << "%";
+  if (estimatedTime > 0.5) {
+    mess.precision(0);
+    mess << " (~";
+    if (estimatedTime < 60)
+      mess << static_cast<int>(estimatedTime) << "s";
+    else if (estimatedTime < 60 * 60) {
+      int min = static_cast<int>(estimatedTime / 60);
+      int sec = static_cast<int>(estimatedTime - min * 60);
+      mess << min << "m" << std::setfill('0') << std::setw(2) << sec << "s";
+    } else {
+      int hours = static_cast<int>(estimatedTime / 3600);
+      int min = static_cast<int>((estimatedTime - hours * 3600) / 60);
+      mess << hours << "h" << std::setfill('0') << std::setw(2) << min << "m";
+    }
+    mess << ")";
+  }
+  QString formatStr = QString::fromStdString(mess.str());
+  progressBar->setFormat(formatStr);
 }
 /// This function is called whenever an algorithm reports progress. It emits a
 /// signal triggering the slot inside the GUI thread. It is safe to call this
@@ -65,9 +83,13 @@ void AlgorithmProgressPresenterBase::setProgressBar(QProgressBar *progressBar,
 /// @param alg The ID of the algorithm that has started executing
 /// @param progress The progress that the algorithm has reported
 /// @param msg The message that the algorithm has sent
+/// @param estimatedTime :: estimated time to completion in seconds
+/// @param progressPrecision :: number of digits after the decimal
 void AlgorithmProgressPresenterBase::updateProgressBar(
-    Mantid::API::AlgorithmID alg, double progress, const std::string &msg) {
-  emit updateProgressBarSignal(alg, progress, QString::fromStdString(msg));
+    Mantid::API::AlgorithmID alg, double progress, const std::string &msg,
+    const double estimatedTime, const int progressPrecision) {
+  emit updateProgressBarSignal(alg, progress, QString::fromStdString(msg),
+                               estimatedTime, progressPrecision);
 }
 } // namespace MantidWidgets
 } // namespace MantidQt

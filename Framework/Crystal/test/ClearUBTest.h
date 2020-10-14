@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_CLEARUBTEST_H_
-#define MANTID_CRYSTAL_CLEARUBTEST_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
@@ -40,8 +39,8 @@ private:
   std::string createMatrixWorkspace(const bool withOrientedLattice = true) {
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 2);
     if (withOrientedLattice) {
-      OrientedLattice latt(1.0, 2.0, 3.0, 90, 90, 90);
-      ws->mutableSample().setOrientedLattice(&latt);
+      ws->mutableSample().setOrientedLattice(
+          std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
     }
     const std::string wsName = "TestWorkspace";
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
@@ -54,13 +53,14 @@ private:
     const std::string wsName = "TestWorkspace";
     auto ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1, 1, 10, 10, 1, wsName);
-    OrientedLattice latt(1.0, 2.0, 3.0, 90, 90, 90);
-    ws->getExperimentInfo(0)->mutableSample().setOrientedLattice(&latt);
+    ws->getExperimentInfo(0)->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
 
     for (uint16_t i = 1; i < nExperimentInfosToAdd; ++i) {
-      ExperimentInfo_sptr experimentInfo = boost::make_shared<ExperimentInfo>();
+      ExperimentInfo_sptr experimentInfo = std::make_shared<ExperimentInfo>();
       ws->addExperimentInfo(experimentInfo);
-      ws->getExperimentInfo(i)->mutableSample().setOrientedLattice(&latt);
+      ws->getExperimentInfo(i)->mutableSample().setOrientedLattice(
+          std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90));
     }
 
     AnalysisDataService::Instance().addOrReplace(wsName, ws);
@@ -182,7 +182,7 @@ public:
 
   void test_throw_if_not_experimentinfo_workspace() {
     using Mantid::DataObjects::TableWorkspace;
-    Workspace_sptr inws = boost::make_shared<TableWorkspace>();
+    Workspace_sptr inws = std::make_shared<TableWorkspace>();
     const std::string wsName = "tablews";
     AnalysisDataService::Instance().addOrReplace(wsName, inws);
 
@@ -192,5 +192,3 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 };
-
-#endif /* MANTID_CRYSTAL_CLEARUBTEST_H_ */

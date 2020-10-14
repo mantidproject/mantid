@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TIMESERIESPROPERTYTEST_H_
-#define TIMESERIESPROPERTYTEST_H_
+#pragma once
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -14,11 +13,10 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include <boost/make_shared.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <json/value.h>
+#include <memory>
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -265,9 +263,9 @@ public:
     std::vector<double> replacementValues;
     double offset = 100.0;
     for (size_t i = 0; i < num; i++) {
-      times.push_back(first + double(i));
-      values.push_back(double(i));
-      replacementValues.push_back(double(i) + offset);
+      times.emplace_back(first + double(i));
+      values.emplace_back(double(i));
+      replacementValues.emplace_back(double(i) + offset);
     }
     TimeSeriesProperty<double> tsp("test");
     tsp.addValues(times, values);
@@ -290,8 +288,8 @@ public:
 
     std::vector<double> values;
     for (size_t i = 0; i < num; i++) {
-      times.push_back(first + double(i));
-      values.push_back(double(i));
+      times.emplace_back(first + double(i));
+      values.emplace_back(double(i));
     }
     TimeSeriesProperty<double> tsp("test");
     tsp.addValues(times, values);
@@ -410,7 +408,7 @@ public:
         0);
 
     Mantid::Kernel::TimeSplitterType splitters;
-    splitters.push_back(interval0);
+    splitters.emplace_back(interval0);
 
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
@@ -435,8 +433,8 @@ public:
         0);
 
     Mantid::Kernel::TimeSplitterType splitters;
-    splitters.push_back(interval0);
-    splitters.push_back(interval1);
+    splitters.emplace_back(interval0);
+    splitters.emplace_back(interval1);
 
     // Since the filter is < stop, the last one is not counted, so there are  3
     // taken out.
@@ -633,8 +631,8 @@ public:
 
     // Test a filter that's fully within the range of both properties
     TimeSplitterType filter;
-    filter.push_back(SplittingInterval(DateAndTime("2007-11-30T16:17:05"),
-                                       DateAndTime("2007-11-30T16:17:29")));
+    filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:05"),
+                                          DateAndTime("2007-11-30T16:17:29")));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 7.308, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 2.167, 0.001);
 
@@ -655,8 +653,8 @@ public:
     // the log
     filter[0] = SplittingInterval(DateAndTime("2007-11-30T16:17:05"),
                                   DateAndTime("2007-11-30T16:17:15"));
-    filter.push_back(SplittingInterval(DateAndTime("2007-11-30T16:17:25"),
-                                       DateAndTime("2007-11-30T16:17:45")));
+    filter.emplace_back(SplittingInterval(DateAndTime("2007-11-30T16:17:25"),
+                                          DateAndTime("2007-11-30T16:17:45")));
     TS_ASSERT_DELTA(dblLog->averageValueInFilter(filter), 9.123, 0.001);
     TS_ASSERT_DELTA(intLog->averageValueInFilter(filter), 3.167, 0.001);
 
@@ -717,7 +715,7 @@ public:
     std::vector<Property *> outputs;
     for (std::size_t i = 0; i < 5; i++) {
       TimeSeriesProperty<int> *newlog = new TimeSeriesProperty<int>("MyIntLog");
-      outputs.push_back(newlog);
+      outputs.emplace_back(newlog);
     }
 
     // Make a splitter
@@ -725,23 +723,23 @@ public:
     TimeSplitterType splitter;
     start = DateAndTime("2007-11-30T16:17:10");
     stop = DateAndTime("2007-11-30T16:17:40");
-    splitter.push_back(SplittingInterval(start, stop, 0));
+    splitter.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:55");
     stop = DateAndTime("2007-11-30T16:17:56");
-    splitter.push_back(SplittingInterval(start, stop, 1));
+    splitter.emplace_back(SplittingInterval(start, stop, 1));
 
     start = DateAndTime("2007-11-30T16:17:56");
     stop = DateAndTime("2007-11-30T16:18:01");
-    splitter.push_back(SplittingInterval(start, stop, 2)); // just one entry
+    splitter.emplace_back(SplittingInterval(start, stop, 2)); // just one entry
 
     start = DateAndTime("2007-11-30T16:18:09");
     stop = DateAndTime("2007-11-30T16:18:21");
-    splitter.push_back(SplittingInterval(start, stop, 3));
+    splitter.emplace_back(SplittingInterval(start, stop, 3));
 
     start = DateAndTime("2007-11-30T16:18:45");
     stop = DateAndTime("2007-11-30T16:22:50");
-    splitter.push_back(SplittingInterval(start, stop, 4));
+    splitter.emplace_back(SplittingInterval(start, stop, 4));
 
     log->splitByTime(splitter, outputs, false);
 
@@ -772,7 +770,7 @@ public:
     std::vector<Property *> outputs;
     for (std::size_t i = 0; i < 1; i++) {
       TimeSeriesProperty<int> *newlog = new TimeSeriesProperty<int>("MyIntLog");
-      outputs.push_back(newlog);
+      outputs.emplace_back(newlog);
     }
 
     // Make a splitter
@@ -780,11 +778,11 @@ public:
     TimeSplitterType splitter;
     start = DateAndTime("2007-11-30T16:17:10");
     stop = DateAndTime("2007-11-30T16:17:40");
-    splitter.push_back(SplittingInterval(start, stop, 0));
+    splitter.emplace_back(SplittingInterval(start, stop, 0));
 
     start = DateAndTime("2007-11-30T16:17:35");
     stop = DateAndTime("2007-11-30T16:17:59");
-    splitter.push_back(SplittingInterval(start, stop, 0));
+    splitter.emplace_back(SplittingInterval(start, stop, 0));
 
     log->splitByTime(splitter, outputs, false);
 
@@ -806,21 +804,21 @@ public:
   void test_splitByTimeVector() {
     // create the splitters
     std::vector<DateAndTime> split_time_vec;
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:17:10"));
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:17:40"));
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:17:55"));
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:17:56"));
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:18:09"));
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:18:45"));
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:22:50"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:17:10"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:17:40"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:17:55"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:17:56"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:18:09"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:18:45"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:22:50"));
 
     std::vector<int> split_target_vec;
-    split_target_vec.push_back(1);
-    split_target_vec.push_back(0);
-    split_target_vec.push_back(2);
-    split_target_vec.push_back(0);
-    split_target_vec.push_back(1);
-    split_target_vec.push_back(3);
+    split_target_vec.emplace_back(1);
+    split_target_vec.emplace_back(0);
+    split_target_vec.emplace_back(2);
+    split_target_vec.emplace_back(0);
+    split_target_vec.emplace_back(1);
+    split_target_vec.emplace_back(3);
 
     TimeSeriesProperty<int> log("test log");
     log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
@@ -837,7 +835,7 @@ public:
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 4; ++itarget) {
       TimeSeriesProperty<int> *tsp = new TimeSeriesProperty<int>("target");
-      outputs.push_back(tsp);
+      outputs.emplace_back(tsp);
     }
 
     log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
@@ -882,21 +880,21 @@ public:
   void test_splitByTimeVectorEarlySplitter() {
     // create the splitters
     std::vector<DateAndTime> split_time_vec;
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:00:10"));
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:00:40"));
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:07:55"));
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:07:56"));
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:08:09"));
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:08:45"));
-    split_time_vec.push_back(DateAndTime("2007-11-30T16:12:50"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:00:10"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:00:40"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:07:55"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:07:56"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:08:09"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:08:45"));
+    split_time_vec.emplace_back(DateAndTime("2007-11-30T16:12:50"));
 
     std::vector<int> split_target_vec;
-    split_target_vec.push_back(1);
-    split_target_vec.push_back(0);
-    split_target_vec.push_back(2);
-    split_target_vec.push_back(0);
-    split_target_vec.push_back(1);
-    split_target_vec.push_back(3);
+    split_target_vec.emplace_back(1);
+    split_target_vec.emplace_back(0);
+    split_target_vec.emplace_back(2);
+    split_target_vec.emplace_back(0);
+    split_target_vec.emplace_back(1);
+    split_target_vec.emplace_back(3);
 
     TimeSeriesProperty<int> log("test log");
     log.addValue(DateAndTime("2007-11-30T16:17:00"), 1);
@@ -913,7 +911,7 @@ public:
     // Initialze the 4 splitters
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 4; ++itarget) {
-      outputs.push_back(new TimeSeriesProperty<int>("target"));
+      outputs.emplace_back(new TimeSeriesProperty<int>("target"));
     }
 
     log.splitByTimeVector(split_time_vec, split_target_vec, outputs);
@@ -936,21 +934,21 @@ public:
   void test_splitByTimeVectorLaterSplitter() {
     // create the splitters
     std::vector<DateAndTime> split_time_vec;
-    split_time_vec.push_back(DateAndTime("2007-12-30T16:00:10"));
-    split_time_vec.push_back(DateAndTime("2007-12-30T16:00:40"));
-    split_time_vec.push_back(DateAndTime("2007-12-30T16:07:55"));
-    split_time_vec.push_back(DateAndTime("2007-12-30T16:07:56"));
-    split_time_vec.push_back(DateAndTime("2007-12-30T16:08:09"));
-    split_time_vec.push_back(DateAndTime("2007-12-30T16:08:45"));
-    split_time_vec.push_back(DateAndTime("2007-12-30T16:12:50"));
+    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:00:10"));
+    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:00:40"));
+    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:07:55"));
+    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:07:56"));
+    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:08:09"));
+    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:08:45"));
+    split_time_vec.emplace_back(DateAndTime("2007-12-30T16:12:50"));
 
     std::vector<int> split_target_vec;
-    split_target_vec.push_back(1);
-    split_target_vec.push_back(0);
-    split_target_vec.push_back(2);
-    split_target_vec.push_back(0);
-    split_target_vec.push_back(1);
-    split_target_vec.push_back(3);
+    split_target_vec.emplace_back(1);
+    split_target_vec.emplace_back(0);
+    split_target_vec.emplace_back(2);
+    split_target_vec.emplace_back(0);
+    split_target_vec.emplace_back(1);
+    split_target_vec.emplace_back(3);
 
     // create test log
     TimeSeriesProperty<int> log("test log");
@@ -1009,19 +1007,19 @@ public:
 
     for (int i = 0; i < 10; ++i) {
       for (int j = 0; j < 10; ++j) {
-        vec_split_times.push_back(split_time);
+        vec_split_times.emplace_back(split_time);
         split_time += dt;
-        vec_split_target.push_back(j);
+        vec_split_target.emplace_back(j);
       }
     }
 
     // push back last split-time (split stop)
-    vec_split_times.push_back(split_time);
+    vec_split_times.emplace_back(split_time);
 
     // Initialze the 10 splitters
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 10; ++itarget) {
-      outputs.push_back(new TimeSeriesProperty<int>("target"));
+      outputs.emplace_back(new TimeSeriesProperty<int>("target"));
     }
 
     // split time series property
@@ -1055,12 +1053,12 @@ public:
 
     // create the splitters
     std::vector<DateAndTime> split_time_vec;
-    split_time_vec.push_back(DateAndTime("2017-11-10T03:13:06.814538624"));
-    split_time_vec.push_back(DateAndTime("2017-11-10T03:14:07.764311936"));
-    split_time_vec.push_back(DateAndTime("2017-11-10T03:15:07.697312000"));
-    split_time_vec.push_back(DateAndTime("2017-11-10T03:16:08.827971840"));
-    split_time_vec.push_back(DateAndTime("2017-11-10T03:17:08.745746688"));
-    split_time_vec.push_back(DateAndTime("2017-11-10T03:20:10.757950208"));
+    split_time_vec.emplace_back(DateAndTime("2017-11-10T03:13:06.814538624"));
+    split_time_vec.emplace_back(DateAndTime("2017-11-10T03:14:07.764311936"));
+    split_time_vec.emplace_back(DateAndTime("2017-11-10T03:15:07.697312000"));
+    split_time_vec.emplace_back(DateAndTime("2017-11-10T03:16:08.827971840"));
+    split_time_vec.emplace_back(DateAndTime("2017-11-10T03:17:08.745746688"));
+    split_time_vec.emplace_back(DateAndTime("2017-11-10T03:20:10.757950208"));
 
     // create the target vector
     std::vector<int> split_target_vec(5);
@@ -1071,7 +1069,7 @@ public:
     // Initialze the 2 splitters
     std::vector<TimeSeriesProperty<int> *> outputs;
     for (int itarget = 0; itarget < 2; ++itarget) {
-      outputs.push_back(new TimeSeriesProperty<int>("target"));
+      outputs.emplace_back(new TimeSeriesProperty<int>("target"));
     }
 
     // split
@@ -1546,15 +1544,15 @@ public:
 
     // 2. Create method 1
     std::vector<Mantid::Types::Core::DateAndTime> times;
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
     std::vector<double> values;
-    values.push_back(1.00);
-    values.push_back(3.00);
-    values.push_back(2.00);
-    values.push_back(4.00);
+    values.emplace_back(1.00);
+    values.emplace_back(3.00);
+    values.emplace_back(2.00);
+    values.emplace_back(4.00);
 
     TimeSeriesProperty<double> *p1 =
         new TimeSeriesProperty<double>("Property2");
@@ -1578,8 +1576,8 @@ public:
     std::vector<double> valueXs;
 
     for (int i = 0; i < 4; i++) {
-      deltaTs.push_back(static_cast<double>(i) * 10.0);
-      valueXs.push_back(static_cast<double>(i) + 1.0);
+      deltaTs.emplace_back(static_cast<double>(i) * 10.0);
+      valueXs.emplace_back(static_cast<double>(i) + 1.0);
     }
 
     TimeSeriesProperty<double> *p2 =
@@ -1657,15 +1655,15 @@ public:
 
     // 3. Check
     std::vector<Mantid::Types::Core::DateAndTime> times;
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
     std::vector<double> values;
-    values.push_back(1.00);
-    values.push_back(2.00);
-    values.push_back(3.00);
-    values.push_back(4.00);
+    values.emplace_back(1.00);
+    values.emplace_back(2.00);
+    values.emplace_back(3.00);
+    values.emplace_back(4.00);
 
     std::map<Mantid::Types::Core::DateAndTime, double>::iterator tit;
     size_t index = 0;
@@ -1697,17 +1695,17 @@ public:
 
     // 3. Check
     std::vector<Mantid::Types::Core::DateAndTime> times;
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
     std::vector<double> values;
-    values.push_back(1.00);
-    values.push_back(1.99);
-    values.push_back(2.00);
-    values.push_back(3.00);
-    values.push_back(4.00);
+    values.emplace_back(1.00);
+    values.emplace_back(1.99);
+    values.emplace_back(2.00);
+    values.emplace_back(3.00);
+    values.emplace_back(4.00);
 
     size_t index = 0;
     for (auto it = tmap.begin(); it != tmap.end(); ++it) {
@@ -1739,15 +1737,15 @@ public:
 
     // 3. Check
     std::vector<Mantid::Types::Core::DateAndTime> times;
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
-    times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:15"));
+    times.emplace_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
     std::vector<double> values;
-    values.push_back(1.00);
-    values.push_back(2.00);
-    values.push_back(3.00);
-    values.push_back(4.00);
+    values.emplace_back(1.00);
+    values.emplace_back(2.00);
+    values.emplace_back(3.00);
+    values.emplace_back(4.00);
 
     std::map<Mantid::Types::Core::DateAndTime, double>::iterator tit;
     size_t index = 0;
@@ -1785,15 +1783,19 @@ public:
 
     if (tmap.size() == 4) {
       std::vector<Mantid::Types::Core::DateAndTime> times;
-      times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
-      times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
-      times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
-      times.push_back(Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
+      times.emplace_back(
+          Mantid::Types::Core::DateAndTime("2007-11-30T16:17:00"));
+      times.emplace_back(
+          Mantid::Types::Core::DateAndTime("2007-11-30T16:17:10"));
+      times.emplace_back(
+          Mantid::Types::Core::DateAndTime("2007-11-30T16:17:20"));
+      times.emplace_back(
+          Mantid::Types::Core::DateAndTime("2007-11-30T16:17:30"));
       std::vector<double> values;
-      values.push_back(1.00);
-      values.push_back(2.00);
-      values.push_back(3.00);
-      values.push_back(4.00);
+      values.emplace_back(1.00);
+      values.emplace_back(2.00);
+      values.emplace_back(3.00);
+      values.emplace_back(4.00);
 
       std::map<Mantid::Types::Core::DateAndTime, double>::iterator tit;
       size_t index = 0;
@@ -1905,8 +1907,8 @@ public:
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
-      deltaTs.push_back(static_cast<double>(i) * 10.0);
-      valueXs.push_back(static_cast<double>(i) + 1.0);
+      deltaTs.emplace_back(static_cast<double>(i) * 10.0);
+      valueXs.emplace_back(static_cast<double>(i) + 1.0);
     }
     TimeSeriesProperty<double> *p1 =
         new TimeSeriesProperty<double>("BaseProperty");
@@ -1920,7 +1922,7 @@ public:
     std::vector<Mantid::Kernel::TimeInterval> dts;
 
     for (size_t i = 0; i < origsize; i++) {
-      dts.push_back(p1->nthInterval(static_cast<int>(i)));
+      dts.emplace_back(p1->nthInterval(static_cast<int>(i)));
     }
 
     // 2. Create a filter
@@ -1971,11 +1973,11 @@ public:
   }
 
   void test_filter_with_single_value_in_series() {
-    auto p1 = boost::make_shared<TimeSeriesProperty<double>>("SingleValueTSP");
+    auto p1 = std::make_shared<TimeSeriesProperty<double>>("SingleValueTSP");
     p1->addValue("2007-11-30T16:17:00", 1.5);
 
     auto filterEndsBefore =
-        boost::make_shared<TimeSeriesProperty<bool>>("EndsBefore");
+        std::make_shared<TimeSeriesProperty<bool>>("EndsBefore");
     filterEndsBefore->addValue("2007-11-30T16:16:30", false);
     filterEndsBefore->addValue("2007-11-30T16:16:58", true);
     p1->filterWith(filterEndsBefore.get());
@@ -1983,7 +1985,7 @@ public:
 
     p1->clearFilter();
     auto filterEndsAfter =
-        boost::make_shared<TimeSeriesProperty<bool>>("EndsAfter");
+        std::make_shared<TimeSeriesProperty<bool>>("EndsAfter");
     filterEndsAfter->addValue("2007-11-30T16:16:30", false);
     filterEndsAfter->addValue("2007-11-30T16:17:01", true);
     p1->filterWith(filterEndsAfter.get());
@@ -2001,8 +2003,8 @@ public:
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
-      deltaTs.push_back(static_cast<double>(i) * 10.0);
-      valueXs.push_back(static_cast<double>(i) + 1.0);
+      deltaTs.emplace_back(static_cast<double>(i) * 10.0);
+      valueXs.emplace_back(static_cast<double>(i) + 1.0);
     }
     TimeSeriesProperty<double> *p1 =
         new TimeSeriesProperty<double>("BaseProperty");
@@ -2077,8 +2079,8 @@ public:
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
-      deltaTs.push_back(static_cast<double>(i) * 10.0);
-      valueXs.push_back(static_cast<double>(i) + 1.0);
+      deltaTs.emplace_back(static_cast<double>(i) * 10.0);
+      valueXs.emplace_back(static_cast<double>(i) + 1.0);
     }
     TimeSeriesProperty<double> *p1 =
         new TimeSeriesProperty<double>("BaseProperty");
@@ -2129,8 +2131,8 @@ public:
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
-      deltaTs.push_back(static_cast<double>(i) * 10.0);
-      valueXs.push_back(static_cast<double>(i) + 1.0);
+      deltaTs.emplace_back(static_cast<double>(i) * 10.0);
+      valueXs.emplace_back(static_cast<double>(i) + 1.0);
     }
     TimeSeriesProperty<double> *p1 =
         new TimeSeriesProperty<double>("BaseProperty");
@@ -2190,8 +2192,8 @@ public:
     std::vector<double> deltaTs;
     std::vector<double> valueXs;
     for (int i = 0; i < 20; i++) {
-      deltaTs.push_back(static_cast<double>(i) * 10.0);
-      valueXs.push_back(static_cast<double>(i) + 1.0);
+      deltaTs.emplace_back(static_cast<double>(i) * 10.0);
+      valueXs.emplace_back(static_cast<double>(i) + 1.0);
     }
     TimeSeriesProperty<double> *p1 =
         new TimeSeriesProperty<double>("BaseProperty");
@@ -2501,5 +2503,3 @@ private:
   TimeSeriesProperty<double> *dProp;
   TimeSeriesProperty<std::string> *sProp;
 };
-
-#endif /*TIMESERIESPROPERTYTEST_H_*/

@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_REPLICATEMDTEST_H_
-#define MANTID_MDALGORITHMS_REPLICATEMDTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -28,8 +27,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
                                          bool transpose = false,
                                          double value = 0.0) {
 
-  IAlgorithm *create =
-      FrameworkManager::Instance().createAlgorithm("CreateMDHistoWorkspace");
+  auto create = AlgorithmManager::Instance().create("CreateMDHistoWorkspace");
   create->setChild(true);
   create->initialize();
 
@@ -42,17 +40,17 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
   std::vector<double> extents;
   for (size_t i = 0; i < shape.size(); ++i) {
     flatSize *= shape[i];
-    names.push_back(allNames[i]);
-    units.push_back(allUnits[i]);
-    extents.push_back(-10);
-    extents.push_back(10);
+    names.emplace_back(allNames[i]);
+    units.emplace_back(allUnits[i]);
+    extents.emplace_back(-10);
+    extents.emplace_back(10);
   }
 
   if (value == 0.0) {
     std::vector<double> signalArray;
     signalArray.reserve(flatSize);
     for (size_t i = 0; i < flatSize; ++i) {
-      signalArray.push_back(static_cast<double>(i + 1));
+      signalArray.emplace_back(static_cast<double>(i + 1));
     }
     create->setProperty("SignalInput", signalArray);
   } else {
@@ -87,8 +85,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
       axis = static_cast<int>(op());
     }
 
-    IAlgorithm *transpose =
-        FrameworkManager::Instance().createAlgorithm("TransposeMD");
+    auto transpose = AlgorithmManager::Instance().create("TransposeMD");
     transpose->setChild(true);
     transpose->initialize();
     transpose->setProperty("InputWorkspace", outWs);
@@ -98,7 +95,7 @@ MDHistoWorkspace_sptr makeHistoWorkspace(const std::vector<int> &shape,
     outWs = transpose->getProperty("OutputWorkspace");
   }
 
-  return boost::dynamic_pointer_cast<MDHistoWorkspace>(outWs);
+  return std::dynamic_pointer_cast<MDHistoWorkspace>(outWs);
 }
 } // namespace
 
@@ -122,19 +119,19 @@ public:
   void test_size_check_on_dimensionality() {
 
     std::vector<int> badDataShape;
-    badDataShape.push_back(3);
-    badDataShape.push_back(3);
-    badDataShape.push_back(3); // 3rd dimension given
+    badDataShape.emplace_back(3);
+    badDataShape.emplace_back(3);
+    badDataShape.emplace_back(3); // 3rd dimension given
 
     std::vector<int> goodDataShape;
-    goodDataShape.push_back(3);
-    goodDataShape.push_back(3);
-    goodDataShape.push_back(1); // Integrate so should be OK
+    goodDataShape.emplace_back(3);
+    goodDataShape.emplace_back(3);
+    goodDataShape.emplace_back(1); // Integrate so should be OK
 
     std::vector<int> shapeShape;
-    shapeShape.push_back(3);
-    shapeShape.push_back(3);
-    shapeShape.push_back(3);
+    shapeShape.emplace_back(3);
+    shapeShape.emplace_back(3);
+    shapeShape.emplace_back(3);
 
     auto dataWSGood = makeHistoWorkspace(goodDataShape);
     auto dataWSBad = makeHistoWorkspace(badDataShape);
@@ -446,5 +443,3 @@ public:
     TS_ASSERT(outWS);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_REPLICATEMDTEST_H_ */

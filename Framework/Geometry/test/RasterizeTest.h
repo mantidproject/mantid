@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_RASTERIZETEST_H_
-#define MANTID_GEOMETRY_RASTERIZETEST_H_
+#pragma once
 
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Rasterize.h"
@@ -44,7 +43,7 @@ private:
       symmetryAxis = V3D(0., 0., 1.);
     }
 
-    boost::shared_ptr<CSGObject> result =
+    std::shared_ptr<CSGObject> result =
         ComponentCreationHelper::createCappedCylinder(
             CYLINDER_RADIUS, CYLINDER_HEIGHT, baseCenter, symmetryAxis,
             "shape");
@@ -63,7 +62,7 @@ private:
       symmetryAxis = V3D(0., 0., 1.);
     }
 
-    boost::shared_ptr<CSGObject> result =
+    std::shared_ptr<CSGObject> result =
         ComponentCreationHelper::createHollowCylinder(
             CYLINDER_INNER_RADIUS, CYLINDER_RADIUS, CYLINDER_HEIGHT, baseCenter,
             symmetryAxis, "shape");
@@ -78,7 +77,7 @@ private:
     else
       center = V3D(4., 4., 4.);
 
-    boost::shared_ptr<CSGObject> result =
+    std::shared_ptr<CSGObject> result =
         ComponentCreationHelper::createSphere(SPHERE_RADIUS, center, "shape");
     TS_ASSERT(result);
     return *result;
@@ -216,5 +215,3 @@ public:
     simpleRasterChecks(raster, sphere, 912, SPHERE_VOLUME, .01);
   }
 };
-
-#endif /* MANTID_GEOMETRY_RASTERIZETEST_H_ */

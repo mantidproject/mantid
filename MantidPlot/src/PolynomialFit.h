@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef POLYNOMIALFIT_H
-#define POLYNOMIALFIT_H
+#pragma once
 
 #include "Fit.h"
 
@@ -102,4 +101,3 @@ private:
   void init();
   void calculateFitCurveData(double *X, double *Y) override;
 };
-#endif

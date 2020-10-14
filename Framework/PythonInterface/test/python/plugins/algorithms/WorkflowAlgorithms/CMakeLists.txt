@@ -13,6 +13,7 @@ set(TEST_PY_FILES
     DirectILLIntegrateVanadiumTest.py
     DirectILLReductionTest.py
     DirectILLSelfShieldingTest.py
+    ElasticWindowMultipleTest.py
     EnergyWindowScanTest.py
     FitGaussianPeaksTest.py
     FindPeakAutomaticTest.py
@@ -32,6 +33,7 @@ set(TEST_PY_FILES
     IndirectResolutionTest.py
     IndirectSampleChangerTest.py
     IndirectTransmissionMonitorTest.py
+    IndirectTwoPeakFitTest.py
     IqtFitMultipleTest.py
     IqtFitSequentialTest.py
     ISISIndirectDiffractionReductionTest.py
@@ -42,8 +44,11 @@ set(TEST_PY_FILES
     MolDynTest.py
     MSDFitTest.py
     OSIRISDiffractionReductionTest.py
+    PaalmanPingsMonteCarloAbsorptionTest.py
     PowderILLDetectorScanTest.py
     PowderILLParameterScanTest.py
+    ReflectometryILLAutoProcessTest.py
+    ReflectometryILL_commonTest.py
     ReflectometryILLConvertToQTest.py
     ReflectometryILLPolarizationCorTest.py
     ReflectometryILLPreprocessTest.py
@@ -52,8 +57,10 @@ set(TEST_PY_FILES
     ResNorm2Test.py
     SANSDarkRunBackgroundCorrectionTest.py
     SANSFitShiftScaleTest.py
+    SANSILLAutoProcessTest.py
     SANSILLIntegrationTest.py
     SANSILLReductionTest.py
+    SANSILLParameterScanTest.py
     SANSMaskTest.py
     SANSStitchTest.py
     SavePlot1DTest.py

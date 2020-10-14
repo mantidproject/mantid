@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, unicode_literals)
-
 from qtpy.QtCore import QObject, Signal, Slot
-from qtpy.QtWidgets import QInputDialog
 
 from mantidqt.plotting.markers import PeakMarker, RangeMarker
 from .mouse_state_machine import StateMachine
+from .addfunctiondialog.presenter import AddFunctionDialog
 
 
 class FitInteractiveTool(QObject):
@@ -28,7 +26,7 @@ class FitInteractiveTool(QObject):
 
     default_background = 'LinearBackground'
 
-    def __init__(self, canvas, toolbar_manager, current_peak_type):
+    def __init__(self, canvas, toolbar_manager, current_peak_type, default_background=None):
         """
         Create an instance of FitInteractiveTool.
         :param canvas: A MPL canvas to draw on.
@@ -65,6 +63,9 @@ class FitInteractiveTool(QObject):
         self.background_names = []
         # A cache for names of function that are neither peaks or backgrounds to use in the add function dialog
         self.other_names = []
+        # The name of the default background type
+        if default_background:
+            self.default_background = default_background
 
         # Connect MPL events to callbacks and store connection ids in a cache
         self._cids = []
@@ -72,9 +73,15 @@ class FitInteractiveTool(QObject):
         self._cids.append(canvas.mpl_connect('motion_notify_event', self.motion_notify_callback))
         self._cids.append(canvas.mpl_connect('button_press_event', self.button_press_callback))
         self._cids.append(canvas.mpl_connect('button_release_event', self.button_release_callback))
+        self._cids.append(canvas.mpl_connect('figure_leave_event', self.stop_add_peak))
 
         # The mouse state machine that handles responses to the mouse events.
         self.mouse_state = StateMachine(self)
+
+    def set_visible(self, visible):
+        self.fit_range.set_visible(visible)
+        for marker in self.peak_markers:
+            marker.set_visible(visible)
 
     def disconnect(self):
         """
@@ -194,33 +201,33 @@ class FitInteractiveTool(QObject):
         A QAction callback. Start a dialog to choose a peak function name. After that the tool will expect the user
         to click on the canvas to where the peak should be placed.
         """
-        selected_name = QInputDialog.getItem(self.canvas, 'Fit', 'Select peak function', self.peak_names,
-                                             self.peak_names.index(self.current_peak_type), False)
-        if selected_name[1]:
-            self.peak_type_changed.emit(selected_name[0])
-            self.mouse_state.transition_to('add_peak')
+        dialog = AddFunctionDialog(parent=self.canvas,
+                                   function_names=self.peak_names,
+                                   default_function_name=self.current_peak_type)
+        dialog.view.function_added.connect(self.action_peak_added)
+        dialog.view.open()
+
+    def action_peak_added(self, function_name):
+        self.peak_type_changed.emit(function_name)
+        self.mouse_state.transition_to('add_peak')
 
     def add_background_dialog(self):
         """
         A QAction callback. Start a dialog to choose a background function name. The new function is added to the
         browser.
         """
-        current_index = self.background_names.index(self.default_background)
-        if current_index < 0:
-            current_index = 0
-        selected_name = QInputDialog.getItem(self.canvas, 'Fit', 'Select background function', self.background_names,
-                                             current_index, False)
-        if selected_name[1]:
-            self.add_background_requested.emit(selected_name[0])
+        dialog = AddFunctionDialog(self.canvas, self.background_names)
+        dialog.view.function_added.connect(self.add_background_requested)
+        dialog.view.open()
 
     def add_other_dialog(self):
         """
         A QAction callback. Start a dialog to choose a name of a function except a peak or a background. The new
         function is added to the browser.
         """
-        selected_name = QInputDialog.getItem(self.canvas, 'Fit', 'Select function', self.other_names, 0, False)
-        if selected_name[1]:
-            self.add_other_requested.emit(selected_name[0])
+        dialog = AddFunctionDialog(self.canvas, self.other_names)
+        dialog.view.function_added.connect(self.add_other_requested)
+        dialog.view.open()
 
     def add_peak_marker(self, x, y_top, y_bottom=0.0, fwhm=None):
         """
@@ -251,6 +258,9 @@ class FitInteractiveTool(QObject):
         self.select_peak(peak)
         self.canvas.draw()
         self.peak_added.emit(peak.peak_id, x, peak.height(), peak.fwhm())
+
+    def stop_add_peak(self, event):
+        self.mouse_state.state = self.mouse_state.state.transition()
 
     def update_peak(self, peak_id, centre, height, fwhm):
         """
@@ -347,8 +357,7 @@ class FitInteractiveTool(QObject):
         """
         return self.fit_range.patch.get_transform()
 
-    def add_to_menu(self, menu, peak_names, current_peak_type, background_names,
-                    other_names):
+    def add_to_menu(self, menu, peak_names, current_peak_type, background_names, other_names):
         """
         Adds the fit tool menu actions to the given menu and returns the menu
 

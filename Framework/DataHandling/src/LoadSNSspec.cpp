@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -100,7 +100,7 @@ void LoadSNSspec::init() {
 
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
   declareProperty("Unit", "Energy",
-                  boost::make_shared<Kernel::StringListValidator>(units),
+                  std::make_shared<Kernel::StringListValidator>(units),
                   "The unit to assign to the X axis (anything known to the "
                   "[[Unit Factory]] or \"Dimensionless\") (default: Energy)");
 }

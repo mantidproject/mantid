@@ -1,21 +1,23 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SEQUENTIALFITDIALOG_H
-#define SEQUENTIALFITDIALOG_H
+#pragma once
 
 //----------------------------
 //   Includes
 //----------------------------
 
+#include "DllOption.h"
 #include "MantidAPI/AlgorithmObserver.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 #include "ui_SequentialFitDialog.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
+class PropertyHandler;
 class FitPropertyBrowser;
 /**
     This is a dialog for doing sequential fit.
@@ -24,8 +26,9 @@ class FitPropertyBrowser;
     @author Roman Tolchenov, Tessella plc
     @date 4/06/2010
 */
-class SequentialFitDialog : public QDialog,
-                            public Mantid::API::AlgorithmObserver {
+class EXPORT_OPT_MANTIDQT_COMMON SequentialFitDialog
+    : public MantidQt::API::MantidDialog,
+      public Mantid::API::AlgorithmObserver {
   Q_OBJECT
 
 public:
@@ -34,7 +37,7 @@ public:
 
   /// Add a list of workspace names to the data list
   /// Returns false if neither of the workspaces can be loaded
-  bool addWorkspaces(const QStringList wsNames);
+  bool addWorkspaces(const QStringList &wsNames);
 
 private:
   /// The form generated with Qt Designer
@@ -50,6 +53,11 @@ signals:
   void needShowPlot(Ui::SequentialFitDialog * /*_t1*/,
                     MantidQt::MantidWidgets::FitPropertyBrowser * /*_t2*/);
 
+public slots:
+
+  /// Start the fit and close dialog
+  void accept() override;
+
 private slots:
 
   /// Add a workspace to the data list
@@ -60,9 +68,6 @@ private slots:
   void removeItem();
   /// Actions in response to change of function
   void functionChanged();
-
-  /// Start the fit and close dialog
-  void accept() override;
 
   /// Show the result plot
   // void showPlot();
@@ -79,13 +84,16 @@ private slots:
 private:
   /// Checks that the logs in workspace wsName are consistent
   /// with logs of other workspaces
-  bool validateLogs(const QString wsName);
+  bool validateLogs(const QString &wsName);
 
   /// Populate parameter combo box with possible parameter names
   void populateParameters();
 
   /// Called when the fit is finished
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
+
+  /// Set the parameters to the fit outcome
+  void getFitResults();
 
   /// set spectrum value for workspace/file in row row
   void setSpectrum(int row, int spec);
@@ -107,8 +115,9 @@ private:
   int defaultSpectrum() const;
 
   QString name(int row) const;
+
+  // name of the output wokrspace
+  std::string m_outputName;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /* SEQUENTIALFITDIALOG_H */

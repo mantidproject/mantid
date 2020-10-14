@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <algorithm>
 #include <cmath>
@@ -426,7 +426,7 @@ int Rule::removeItem(std::unique_ptr<Rule> &TRule, const int SurfN)
         throw std::logic_error("Failed to cast Rule object to SurfPoint");
       }
       SX->setKeyN(0);
-      SX->setKey(boost::shared_ptr<Surface>());
+      SX->setKey(std::shared_ptr<Surface>());
       return cnt + 1;
     }
     Ptr = TRule->findKey(SurfN);
@@ -575,7 +575,7 @@ int Rule::commonType() const
 }
 
 int Rule::substituteSurf(const int SurfN, const int newSurfN,
-                         const boost::shared_ptr<Surface> &SPtr)
+                         const std::shared_ptr<Surface> &SPtr)
 /**
   Substitues a surface item if within a rule
   @param SurfN :: Number number to change
@@ -620,7 +620,7 @@ int Rule::getKeyList(std::vector<int> &IList) const
     } else {
       const auto *SurX = dynamic_cast<const SurfPoint *>(tmpA);
       if (SurX)
-        IList.push_back(SurX->getKeyN());
+        IList.emplace_back(SurX->getKeyN());
       else {
         logger.error() << "Error with surface List\n";
         return static_cast<int>(IList.size());
@@ -649,7 +649,7 @@ int Rule::Eliminate()
   getKeyList(baseKeys);
   std::vector<int>::const_iterator xv;
   for (xv = baseKeys.begin(); xv != baseKeys.end(); ++xv) {
-    baseVal.push_back(0);
+    baseVal.emplace_back(0);
     Base[(*xv)] = 1;
   }
 
@@ -685,7 +685,7 @@ int Rule::Eliminate()
       }
     }
     if (keyChange < 0) // Success !!!!!
-      deadKeys.push_back(targetKey);
+      deadKeys.emplace_back(targetKey);
   }
   return static_cast<int>(deadKeys.size());
 }

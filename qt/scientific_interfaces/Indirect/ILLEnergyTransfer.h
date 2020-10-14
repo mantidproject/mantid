@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ILLENERGYTRANSFER_H_
-#define MANTIDQTCUSTOMINTERFACES_ILLENERGYTRANSFER_H_
+#pragma once
 
 #include "IndirectDataReductionTab.h"
 
@@ -40,8 +39,8 @@ private slots:
   void setRunEnabled(bool enabled);
   void updateRunButton(bool enabled = true,
                        std::string const &enableOutputButtons = "unchanged",
-                       QString const message = "Run",
-                       QString const tooltip = "");
+                       QString const &message = "Run",
+                       QString const &tooltip = "");
 
 private:
   Ui::ILLEnergyTransfer m_uiForm;
@@ -55,5 +54,3 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_ILLENERGYTRANSFER_H_

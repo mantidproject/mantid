@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_SAVEISAWQVECTOR_H_
-#define MANTID_MDALGORITHMS_SAVEISAWQVECTOR_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -33,10 +32,8 @@ private:
 
   MDWSDescription m_targWSDescr;
 
-  void initTargetWSDescr(DataObjects::EventWorkspace_sptr wksp);
+  void initTargetWSDescr(const DataObjects::EventWorkspace_sptr &wksp);
 };
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_SAVEISAWQVECTOR_H_ */

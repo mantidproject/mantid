@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ThermalNeutronDtoTOFFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -67,7 +67,7 @@ void ThermalNeutronDtoTOFFunction::function1D(double *out,
  * xValues containing the d-space value of peaks centres
  */
 void ThermalNeutronDtoTOFFunction::function1D(
-    vector<double> &out, const vector<double> xValues) const {
+    vector<double> &out, const vector<double> &xValues) const {
   double dtt1 = getParameter(0);
   double dtt1t = getParameter(1);
   double dtt2t = getParameter(2);

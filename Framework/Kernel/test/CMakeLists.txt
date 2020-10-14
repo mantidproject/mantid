@@ -1,9 +1,4 @@
 if(CXXTEST_FOUND)
-  include_directories(SYSTEM
-                      ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR}
-                      ../../TestHelpers/inc)
 
   # This is required to pick up NexusTestHelper
   include_directories(../../TestHelpers/inc)
@@ -14,17 +9,17 @@ if(CXXTEST_FOUND)
       ../../TestHelpers/src/LoggingCleaner.cpp)
 
   cxxtest_add_test(KernelTest ${TEST_FILES})
-
+  target_include_directories(KernelTest SYSTEM PRIVATE
+                             ${CXXTEST_INCLUDE_DIR}
+                             ../../TestHelpers/inc)
   target_link_libraries(KernelTest
-                        LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
+                        PRIVATE
                         Types
                         Kernel
                         ${NEXUS_LIBRARIES}
                         ${Boost_LIBRARIES}
                         ${POCO_LIBRARIES}
-                        ${GMOCK_LIBRARIES}
-                        ${GTEST_LIBRARIES}
+                        gmock
                         ${JSONCPP_LIBRARIES}
                         ${TBB_LIBRARIES}
                         ${TBB_MALLOC_LIBRARIES})

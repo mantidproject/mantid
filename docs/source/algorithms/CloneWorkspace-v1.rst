@@ -16,6 +16,8 @@ workspace. It maintains events if the input is an
 :ref:`MDHistoWorkspace <MDHistoWorkspace>`. It can also clone a
 :ref:`PeaksWorkspace <PeaksWorkspace>`.
 
+If in-place operation is requested (e.g. ``InputWorkspace==OutputWorkspace``) this algorithm does nothing.
+
 .. categories::
 
 .. sourcelink::

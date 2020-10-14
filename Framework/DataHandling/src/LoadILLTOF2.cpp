@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLTOF2.h"
 
@@ -72,6 +72,8 @@ void LoadILLTOF2::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "The name to use for the output workspace");
+  declareProperty("ConvertToTOF", false,
+                  "Convert the bin edges to time-of-flight", Direction::Input);
 }
 
 /**
@@ -80,6 +82,7 @@ void LoadILLTOF2::init() {
 void LoadILLTOF2::exec() {
   // Retrieve filename
   const std::string filenameData = getPropertyValue("Filename");
+  bool convertToTOF = getProperty("convertToTOF");
 
   // open the root node
   NeXus::NXRoot dataRoot(filenameData);
@@ -97,7 +100,7 @@ void LoadILLTOF2::exec() {
 
   runLoadInstrument(); // just to get IDF contents
 
-  loadDataIntoTheWorkSpace(dataFirstEntry, monitors);
+  loadDataIntoTheWorkSpace(dataFirstEntry, monitors, convertToTOF);
 
   addEnergyToRun();
   addPulseInterval();
@@ -136,7 +139,7 @@ LoadILLTOF2::getMonitorInfo(NeXus::NXEntry &firstEntry) {
       data.load();
 
       std::vector<int> thisMonitor(data(), data() + data.size());
-      monitorList.push_back(thisMonitor);
+      monitorList.emplace_back(thisMonitor);
     }
   }
   return monitorList;
@@ -163,6 +166,16 @@ void LoadILLTOF2::loadInstrumentDetails(NeXus::NXEntry &firstEntry) {
                 m_instrumentName) == SUPPORTED_INSTRUMENTS.end()) {
     std::string message =
         "The instrument " + m_instrumentName + " is not valid for this loader!";
+    throw std::runtime_error(message);
+  }
+
+  // Monitor can be monitor (IN5, PANTHER) or monitor1 (IN6)
+  if (firstEntry.containsGroup("monitor"))
+    m_monitorName = "monitor";
+  else if (firstEntry.containsGroup("monitor1"))
+    m_monitorName = "monitor1";
+  else {
+    std::string message("Cannot find monitor[1] in the Nexus file!");
     throw std::runtime_error(message);
   }
 
@@ -214,8 +227,18 @@ void LoadILLTOF2::initWorkSpace(NeXus::NXEntry &entry,
   m_localWorkspace = WorkspaceFactory::Instance().create(
       "Workspace2D", m_numberOfHistograms + numberOfMonitors,
       m_numberOfChannels + 1, m_numberOfChannels);
-  m_localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
-  m_localWorkspace->setYUnitLabel("Counts");
+
+  NXClass monitor = entry.openNXGroup(m_monitorName);
+  if (monitor.containsDataSet("time_of_flight")) {
+    m_localWorkspace->getAxis(0)->unit() =
+        UnitFactory::Instance().create("TOF");
+    m_localWorkspace->setYUnitLabel("Counts");
+  } else {
+    g_log.debug("PANTHER diffraction mode");
+    m_localWorkspace->getAxis(0)->unit() =
+        UnitFactory::Instance().create("Wavelength");
+    m_localWorkspace->setYUnitLabel("Counts");
+  }
 }
 
 /**
@@ -227,31 +250,25 @@ void LoadILLTOF2::loadTimeDetails(NeXus::NXEntry &entry) {
 
   m_wavelength = entry.getFloat("wavelength");
 
-  // Monitor can be monitor (IN5) or monitor1 (IN6)
-  std::string monitorName;
-  if (entry.containsGroup("monitor"))
-    monitorName = "monitor";
-  else if (entry.containsGroup("monitor1"))
-    monitorName = "monitor1";
-  else {
-    std::string message("Cannot find monitor[1] in the Nexus file!");
-    g_log.error(message);
-    throw std::runtime_error(message);
-  }
+  NeXus::NXClass monitorEntry = entry.openNXGroup(m_monitorName);
 
-  NXFloat time_of_flight_data =
-      entry.openNXFloat(monitorName + "/time_of_flight");
-  time_of_flight_data.load();
+  if (monitorEntry.containsDataSet("time_of_flight")) {
 
-  // The entry "monitor/time_of_flight", has 3 fields:
-  // channel width , number of channels, Time of flight delay
-  m_channelWidth = time_of_flight_data[0];
-  m_timeOfFlightDelay = time_of_flight_data[2];
+    NXFloat time_of_flight_data =
+        entry.openNXFloat(m_monitorName + "/time_of_flight");
+    time_of_flight_data.load();
 
-  g_log.debug("Nexus Data:");
-  g_log.debug() << " ChannelWidth: " << m_channelWidth << '\n';
-  g_log.debug() << " TimeOfFlightDealy: " << m_timeOfFlightDelay << '\n';
-  g_log.debug() << " Wavelength: " << m_wavelength << '\n';
+    // The entry "monitor/time_of_flight", has 3 fields:
+    // channel width , number of channels, Time of flight delay
+    m_channelWidth = time_of_flight_data[0];
+    m_timeOfFlightDelay = time_of_flight_data[2];
+
+    g_log.debug("Nexus Data:");
+    g_log.debug() << " ChannelWidth: " << m_channelWidth << '\n';
+    g_log.debug() << " TimeOfFlightDelay: " << m_timeOfFlightDelay << '\n';
+    g_log.debug() << " Wavelength: " << m_wavelength << '\n';
+  } // the other case is the diffraction mode for PANTHER, where nothing is
+    // needed here
 }
 
 /**
@@ -339,9 +356,12 @@ void LoadILLTOF2::addPulseInterval() {
  *
  * @param entry The Nexus entry
  * @param monitors List of monitor data
+ * @param convertToTOF Should the bin edges be converted to time of flight or
+ * keep the channel indexes
  */
 void LoadILLTOF2::loadDataIntoTheWorkSpace(
-    NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitors) {
+    NeXus::NXEntry &entry, const std::vector<std::vector<int>> &monitors,
+    bool convertToTOF) {
 
   g_log.debug() << "Loading data into the workspace...\n";
   // read in the data
@@ -350,13 +370,26 @@ void LoadILLTOF2::loadDataIntoTheWorkSpace(
   // load the counts from the file into memory
   data.load();
 
+  NXClass monitor = entry.openNXGroup(m_monitorName);
+
   // Put tof in an array
   auto &X0 = m_localWorkspace->mutableX(0);
-  for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
-    X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
-            m_channelWidth / 2; // to make sure the bin centre is correct
+  if (monitor.containsDataSet("time_of_flight")) {
+    if (convertToTOF) {
+      for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
+        X0[i] = m_timeOfFlightDelay + m_channelWidth * static_cast<double>(i) -
+                m_channelWidth / 2; // to make sure the bin centre is correct
+      }
+    } else {
+      for (size_t i = 0; i < m_numberOfChannels + 1; ++i) {
+        X0[i] = static_cast<double>(i); // just take the channel index
+      }
+    }
+  } else {
+    // Diffraction PANTHER
+    X0[0] = m_wavelength * 0.9;
+    X0[1] = m_wavelength * 1.1;
   }
-
   // The binning for monitors is considered the same as for detectors
   size_t spec = 0;
 
@@ -416,7 +449,7 @@ void LoadILLTOF2::loadSpectra(size_t &spec, const size_t numberOfTubes,
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
   for (int i = 0; i < static_cast<int>(numberOfTubes); ++i) {
     for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      const int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
       const size_t currentSpectrum = spec + i * m_numberOfPixelsPerTube + j;
       m_localWorkspace->setHistogram(
           currentSpectrum, m_localWorkspace->binEdges(0),

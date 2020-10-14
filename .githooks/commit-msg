@@ -66,8 +66,8 @@ msg_first() {
 	if test $len -eq 0; then
 		# not yet first line
 		return
-	elif test $len -lt 20; then
-		die 'Please make the first line at least 20 characters (yours is '$len'):
+	elif test $len -lt 10; then
+		die 'Please make the first line at least 10 characters (yours is '$len'):
 -------------------|
 '"$line"'
 -------------------|'

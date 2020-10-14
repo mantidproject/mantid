@@ -18,6 +18,7 @@
 #include <boost/lexical_cast.hpp>
 #include <cctype>
 #include <fstream>
+#include <utility>
 
 #include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
@@ -78,7 +79,7 @@ std::string stripExtraCommas(std::string &expectedPeaks) {
   return expectedPeaks;
 }
 
-std::string generateXAxisLabel(Mantid::Kernel::Unit_const_sptr unit) {
+std::string generateXAxisLabel(const Mantid::Kernel::Unit_const_sptr &unit) {
   std::string label = unit->unitID();
   if (label == "TOF") {
     label += " (us)";
@@ -100,11 +101,11 @@ std::string generateXAxisLabel(Mantid::Kernel::Unit_const_sptr unit) {
  */
 EnggDiffFittingPresenter::EnggDiffFittingPresenter(
     IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
-    boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
-    boost::shared_ptr<IEnggDiffractionParam> mainParam)
+    std::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+    std::shared_ptr<IEnggDiffractionParam> mainParam)
     : m_fittingFinishedOK(false), m_workerThread(nullptr),
-      m_mainCalib(mainCalib), m_mainParam(mainParam), m_view(view),
-      m_model(std::move(model)), m_viewHasClosed(false) {}
+      m_mainCalib(std::move(mainCalib)), m_mainParam(std::move(mainParam)),
+      m_view(view), m_model(std::move(model)), m_viewHasClosed(false) {}
 
 EnggDiffFittingPresenter::~EnggDiffFittingPresenter() { cleanup(); }
 
@@ -596,7 +597,8 @@ void EnggDiffFittingPresenter::savePeakList() {
   }
 }
 
-std::string EnggDiffFittingPresenter::readPeaksFile(std::string fileDir) {
+std::string
+EnggDiffFittingPresenter::readPeaksFile(const std::string &fileDir) {
   std::string fileData = "";
   std::string line;
   std::string comma = ", ";
@@ -668,7 +670,7 @@ void EnggDiffFittingPresenter::warnFileNotFound(const std::exception &ex) {
 }
 
 void EnggDiffFittingPresenter::plotFocusedFile(
-    bool plotSinglePeaks, MatrixWorkspace_sptr focusedPeaksWS) {
+    bool plotSinglePeaks, const MatrixWorkspace_sptr &focusedPeaksWS) {
 
   try {
     auto focusedData = QwtHelper::curveDataFromWs(focusedPeaksWS);

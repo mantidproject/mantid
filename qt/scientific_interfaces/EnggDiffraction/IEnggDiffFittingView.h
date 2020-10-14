@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_
-#define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_
+#pragma once
 
 #include "IEnggDiffractionPythonRunner.h"
 #include "IEnggDiffractionSettings.h"
@@ -194,7 +193,7 @@ public:
    * @param plotSinglePeaks whether to plot single peak fitting ws
    * @param xAxisLabel Label specifying the x axis units
    */
-  virtual void setDataVector(std::vector<boost::shared_ptr<QwtData>> &data,
+  virtual void setDataVector(std::vector<std::shared_ptr<QwtData>> &data,
                              bool focused, bool plotSinglePeaks,
                              const std::string &xAxisLabel) = 0;
 
@@ -234,5 +233,3 @@ public:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFFITTINGVIEW_H_

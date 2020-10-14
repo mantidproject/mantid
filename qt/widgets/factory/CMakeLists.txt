@@ -29,6 +29,7 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsFactory
                      ${POCO_LIBRARIES}
                      ${Boost_LIBRARIES}
                    QT4_LINK_LIBS
+		     Qt4::Qscintilla
                      Qwt5
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon

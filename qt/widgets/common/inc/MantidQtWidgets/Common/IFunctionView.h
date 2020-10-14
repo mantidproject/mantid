@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDWIDGETS_IFUNCTIONVIEW_H_
-#define MANTIDWIDGETS_IFUNCTIONVIEW_H_
+#pragma once
 
 #include "DllOption.h"
 
@@ -31,15 +30,19 @@ public:
   virtual void clear() = 0;
   virtual void setFunction(IFunction_sptr fun) = 0;
   virtual bool hasFunction() const = 0;
+  virtual IFunction_sptr getSelectedFunction() = 0;
   virtual void setParameter(const QString &paramName, double value) = 0;
-  virtual void setParamError(const QString &paramName, double error) = 0;
+  virtual void setParameterError(const QString &paramName, double error) = 0;
   virtual double getParameter(const QString &paramName) const = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clearErrors() = 0;
   virtual boost::optional<QString> currentFunctionIndex() const = 0;
   virtual void setParameterTie(const QString &paramName,
                                const QString &tie) = 0;
+  virtual void setParameterConstraint(const QString &paramName,
+                                      const QString &constraint) = 0;
   virtual void setGlobalParameters(const QStringList &) = 0;
+  virtual void showFunctionHelp(const QString &) const = 0;
 
 signals:
   /// User replaces the whole function (eg, by pasting it from clipboard)
@@ -63,11 +66,11 @@ signals:
   void parameterConstraintRemoved(const QString &paramName);
   /// User requested copy function to clipboard
   void copyToClipboardRequest();
+  /// User requested function help
+  void functionHelpRequest();
   /// User changed the list of global parameters.
   void globalsChanged(const QStringList &);
 };
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*MANTIDWIDGETS_IFUNCTIONVIEW_H_*/

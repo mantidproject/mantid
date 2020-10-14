@@ -1,39 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_ICONS_ICONTEST_H
-#define MANTIDQT_ICONS_ICONTEST_H
+#pragma once
 
 #include "MantidQtIcons/Icon.h"
 
-#include <QApplication>
 #include <cxxtest/TestSuite.h>
 
 using namespace MantidQt::Icons;
-
-/// This QApplication object is required to construct the view
-class QApplicationHolder : CxxTest::GlobalFixture {
-public:
-  bool setUpWorld() override {
-    int argc(0);
-    char **argv = {};
-    m_app = new QApplication(argc, argv);
-    return true;
-  }
-
-  bool tearDownWorld() override {
-    delete m_app;
-    return true;
-  }
-
-private:
-  QApplication *m_app;
-};
-
-static QApplicationHolder MAIN_QAPPLICATION;
 
 class IconTest : public CxxTest::TestSuite {
 public:
@@ -82,5 +59,3 @@ public:
                      const std::invalid_argument &);
   }
 };
-
-#endif

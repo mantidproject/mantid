@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_COMPAREMDWORKSPACESTEST_H_
-#define MANTID_MDALGORITHMS_COMPAREMDWORKSPACESTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDNode.h"
@@ -32,9 +31,9 @@ public:
     TS_ASSERT(alg.isInitialized())
   }
 
-  void doTest(std::string ws1, std::string ws2,
-              std::string resultExpected = "Success!", bool CheckEvents = true,
-              bool IgnoreDifferentID = false) {
+  void doTest(const std::string &ws1, const std::string &ws2,
+              const std::string &resultExpected = "Success!",
+              bool CheckEvents = true, bool IgnoreDifferentID = false) {
 
     CompareMDWorkspaces alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -113,5 +112,3 @@ public:
     doTest("A", "A1", "Success!", true, true);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_COMPAREMDWORKSPACESTEST_H_ */

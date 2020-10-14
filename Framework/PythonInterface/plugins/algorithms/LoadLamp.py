@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import FileProperty, WorkspaceProperty, PythonAlgorithm, AlgorithmFactory, FileAction
 from mantid.kernel import Direction
 from mantid.simpleapi import CreateWorkspace, AddSampleLogMultiple
@@ -69,5 +68,6 @@ class LoadLamp(PythonAlgorithm):
                     self.log().warning('Unable to set the sample logs, reason: '+str(e))
 
         self.setProperty('OutputWorkspace', output_ws)
+
 
 AlgorithmFactory.subscribe(LoadLamp)

@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtRunsTableView.h"
 #include "Common/IndexOf.h"
-#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/UsageService.h"
 #include "MantidQtIcons/Icon.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
@@ -16,8 +16,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-QtRunsTableView::QtRunsTableView(std::vector<std::string> const &instruments,
-                                 int defaultInstrumentIndex)
+QtRunsTableView::QtRunsTableView(std::vector<std::string> const &instruments)
     : m_jobs(), m_instruments(instruments) {
   m_ui.setupUi(this);
   m_ui.progressBar->setRange(0, 100);
@@ -32,7 +31,6 @@ QtRunsTableView::QtRunsTableView(std::vector<std::string> const &instruments,
 
   for (auto &&instrument : m_instruments)
     m_ui.instrumentSelector->addItem(QString::fromStdString(instrument));
-  m_ui.instrumentSelector->setCurrentIndex(defaultInstrumentIndex);
 
   connect(m_ui.filterBox, SIGNAL(textChanged(QString const &)), this,
           SLOT(onFilterChanged(QString const &)));
@@ -87,7 +85,10 @@ void QtRunsTableView::onFilterChanged(QString const &filter) {
 
 void QtRunsTableView::onInstrumentChanged(int index) {
   UNUSED_ARG(index);
-  m_notifyee->notifyInstrumentChanged();
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "InstrumentChanged"}, false);
+  m_notifyee->notifyChangeInstrumentRequested();
 }
 
 std::string QtRunsTableView::getInstrumentName() const {
@@ -241,11 +242,17 @@ void QtRunsTableView::onCollapseAllGroupsPressed(bool) {
 }
 
 void QtRunsTableView::onProcessPressed(bool) {
-  m_notifyee->notifyReductionResumed();
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "StartProcessing"}, false);
+  m_notifyee->notifyResumeReductionRequested();
 }
 
 void QtRunsTableView::onPausePressed(bool) {
-  m_notifyee->notifyReductionPaused();
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "PauseProcessing"}, false);
+  m_notifyee->notifyPauseReductionRequested();
 }
 
 void QtRunsTableView::onInsertRowPressed(bool) {
@@ -277,10 +284,16 @@ void QtRunsTableView::onPastePressed(bool) {
 }
 
 void QtRunsTableView::onPlotSelectedPressed(bool) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "PlotRows"}, false);
   m_notifyee->notifyPlotSelectedPressed();
 }
 
 void QtRunsTableView::onPlotSelectedStitchedOutputPressed(bool) {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "RunsTable", "PlotGroups"}, false);
   m_notifyee->notifyPlotSelectedStitchedOutputPressed();
 }
 
@@ -299,7 +312,7 @@ RunsTableViewFactory::RunsTableViewFactory(
     : m_instruments(instruments) {}
 
 QtRunsTableView *RunsTableViewFactory::operator()() const {
-  return new QtRunsTableView(m_instruments, defaultInstrumentFromConfig());
+  return new QtRunsTableView(m_instruments);
 }
 
 int RunsTableViewFactory::indexOfElseFirst(
@@ -309,11 +322,6 @@ int RunsTableViewFactory::indexOfElseFirst(
                    return instrument == inst;
                  })
       .get_value_or(0);
-}
-
-int RunsTableViewFactory::defaultInstrumentFromConfig() const {
-  return indexOfElseFirst(Mantid::Kernel::ConfigService::Instance().getString(
-      "default.instrument"));
 }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

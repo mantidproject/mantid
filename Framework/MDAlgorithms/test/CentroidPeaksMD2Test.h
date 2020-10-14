@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_MDCENTROIDPEAKS2TEST_H_
-#define MANTID_MDEVENTS_MDCENTROIDPEAKS2TEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -44,7 +43,7 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Create the (blank) MDEW */
-  static void createMDEW(std::string CoordinatesToUse) {
+  static void createMDEW(const std::string &CoordinatesToUse) {
     // ---- Start with empty MDEW ----
     std::string frames;
     if (CoordinatesToUse == "Q (lab frame)") {
@@ -99,9 +98,10 @@ public:
 
   //-------------------------------------------------------------------------------
   /** Run the CentroidPeaksMD2 with the given peak radius param */
-  void doRun(V3D startPos, double PeakRadius, double binCount,
-             V3D expectedResult, std::string message,
-             std::string OutputWorkspace = "CentroidPeaksMD2Test_Peaks") {
+  void
+  doRun(V3D startPos, double PeakRadius, double binCount, V3D expectedResult,
+        const std::string &message,
+        const std::string &OutputWorkspace = "CentroidPeaksMD2Test_Peaks") {
     // Make a fake instrument - doesn't matter, we won't use it really
     Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentCylindrical(5);
@@ -135,7 +135,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    peakWS = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    peakWS = std::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve(OutputWorkspace));
     TS_ASSERT(peakWS);
     if (!peakWS)
@@ -231,5 +231,3 @@ public:
 private:
   std::string CoordinatesToUse;
 };
-
-#endif /* MANTID_MDEVENTS_MDCENTROIDPEAKS2TEST_H_ */

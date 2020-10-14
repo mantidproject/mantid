@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef NONLINEARFIT_H
-#define NONLINEARFIT_H
+#pragma once
 
 #include "Fit.h"
 
@@ -52,4 +51,3 @@ private:
   void calculateFitCurveData(double *X, double *Y) override;
   void init();
 };
-#endif

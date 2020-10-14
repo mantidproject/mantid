@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ParameterTie.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -202,9 +202,8 @@ bool ParameterTie::isConstant() const { return m_varMap.empty(); }
 std::vector<ParameterReference> ParameterTie::getRHSParameters() const {
   std::vector<ParameterReference> out;
   out.reserve(m_varMap.size());
-  for (auto &&varPair : m_varMap) {
-    out.emplace_back(varPair.second);
-  }
+  std::transform(m_varMap.begin(), m_varMap.end(), std::back_inserter(out),
+                 [](auto &&varPair) { return varPair.second; });
   return out;
 }
 

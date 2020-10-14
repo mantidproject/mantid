@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadPreNexusMonitors.h"
 
@@ -15,7 +15,7 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/shared_array.hpp>
+#include <memory>
 
 #include <Poco/DOM/AutoPtr.h>
 #include <Poco/DOM/DOMParser.h>
@@ -143,9 +143,9 @@ void LoadPreNexusMonitors::exec() {
         if (pDataListChildren->item(i)->nodeName() == "monitor") {
           auto *element =
               static_cast<Poco::XML::Element *>(pDataListChildren->item(i));
-          monitorIDs.push_back(
+          monitorIDs.emplace_back(
               boost::lexical_cast<int>(element->getAttribute("id")));
-          monitorFilenames.push_back(element->getAttribute("name"));
+          monitorFilenames.emplace_back(element->getAttribute("name"));
         }
       }
     }
@@ -226,7 +226,7 @@ void LoadPreNexusMonitors::exec() {
  * geometry
  */
 void LoadPreNexusMonitors::runLoadInstrument(
-    const std::string &instrument, MatrixWorkspace_sptr localWorkspace) {
+    const std::string &instrument, const MatrixWorkspace_sptr &localWorkspace) {
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 

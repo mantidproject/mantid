@@ -1,11 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef H_IBOXCONTROLLER_IO
-#define H_IBOXCONTROLLER_IO
+#pragma once
+#include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DiskBuffer.h"
 #include "MantidKernel/System.h"
 
@@ -23,7 +23,7 @@ namespace API {
 
  */
 
-class DLLExport IBoxControllerIO : public Kernel::DiskBuffer {
+class MANTID_API_DLL IBoxControllerIO : public Kernel::DiskBuffer {
 public:
   /** open file for i/o operations
    * @param fileName -- the name of the file to open
@@ -72,4 +72,3 @@ public:
 };
 } // namespace API
 } // namespace Mantid
-#endif

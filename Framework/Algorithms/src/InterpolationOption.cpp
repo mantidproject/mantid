@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/InterpolationOption.h"
-#include "MantidHistogramData/Histogram.h"
 #include "MantidHistogramData/Interpolate.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/PropertyWithValue.h"
@@ -54,6 +53,14 @@ void InterpolationOption::set(const std::string &kind) {
 }
 
 /**
+ * Sets whether the errors in the spectra should be considered to be independent
+ * or not when interpolating between them
+ */
+void InterpolationOption::setIndependentErrors(const bool independent) {
+  m_independentErrors = independent;
+}
+
+/**
  * Create a property suitable to attach to an algorithm to support interpolation
  * @return A new Property containing the valid list of interpolation methods
  */
@@ -63,7 +70,7 @@ std::unique_ptr<Property> InterpolationOption::property() const {
   using StringProperty = Kernel::PropertyWithValue<std::string>;
 
   return std::make_unique<StringProperty>(
-      PROP_NAME, LINEAR_OPT, boost::make_shared<StringListValidator>(OPTIONS));
+      PROP_NAME, LINEAR_OPT, std::make_shared<StringListValidator>(OPTIONS));
 }
 
 /**
@@ -108,10 +115,10 @@ void InterpolationOption::applyInplace(HistogramData::Histogram &inOut,
                                        size_t stepSize) const {
   switch (m_value) {
   case Value::Linear:
-    interpolateLinearInplace(inOut, stepSize);
+    interpolateLinearInplace(inOut, stepSize, true, m_independentErrors);
     return;
   case Value::CSpline:
-    interpolateCSplineInplace(inOut, stepSize);
+    interpolateCSplineInplace(inOut, stepSize, true, m_independentErrors);
     return;
   default:
     throw std::runtime_error("InterpolationOption::applyInplace() - "
@@ -129,10 +136,10 @@ void InterpolationOption::applyInPlace(const HistogramData::Histogram &in,
                                        HistogramData::Histogram &out) const {
   switch (m_value) {
   case Value::Linear:
-    interpolateLinearInplace(in, out);
+    interpolateLinearInplace(in, out, true, m_independentErrors);
     return;
   case Value::CSpline:
-    interpolateCSplineInplace(in, out);
+    interpolateCSplineInplace(in, out, true, m_independentErrors);
     return;
   default:
     throw std::runtime_error("InterpolationOption::applyInplace() - "

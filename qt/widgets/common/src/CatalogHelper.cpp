@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/CatalogHelper.h"
 #include "MantidAPI/CatalogManager.h"
@@ -176,8 +176,8 @@ const std::vector<std::string> CatalogHelper::downloadDataFiles(
   // For each pair in userSelectedFiles we want to add them to their related
   // vector to pass to the algorithm.
   for (const auto &userSelectedFile : userSelectedFiles) {
-    fileIDs.push_back(userSelectedFile.first);
-    fileNames.push_back(userSelectedFile.second);
+    fileIDs.emplace_back(userSelectedFile.first);
+    fileNames.emplace_back(userSelectedFile.second);
   }
 
   // End of the ugly!

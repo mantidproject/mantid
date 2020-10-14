@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/Container.h"
 #include "MantidGeometry/Objects/CSGObject.h"
@@ -15,7 +15,8 @@
 #include "Poco/DOM/NodeIterator.h"
 #include "Poco/SAX/InputSource.h"
 #include "Poco/SAX/SAXException.h"
-#include <boost/make_shared.hpp>
+#include <memory>
+#include <utility>
 
 namespace Mantid {
 namespace Geometry {
@@ -53,25 +54,35 @@ void updateTreeValues(Poco::XML::Element *root,
 //------------------------------------------------------------------------------
 // Public methods
 //------------------------------------------------------------------------------
-Container::Container() : m_shape(boost::make_shared<CSGObject>()) {}
+Container::Container() : m_shape(std::make_shared<CSGObject>()) {}
 
-Container::Container(IObject_sptr shape) : m_shape(shape) {}
+Container::Container(IObject_sptr shape) : m_shape(std::move(shape)) {}
 
 Container::Container(const Container &container)
     : m_shape(IObject_sptr(container.m_shape->clone())),
-      m_sampleShapeXML(container.m_sampleShapeXML) {}
+      m_sampleShapeXML(container.m_sampleShapeXML),
+      m_sampleShape(container.m_sampleShape) {}
 
 /**
  * Construct a container providing an XML definition shape
  * @param xml Definition of the shape in xml
  */
 Container::Container(std::string xml)
-    : m_shape(boost::make_shared<CSGObject>(xml)) {}
+    : m_shape(std::make_shared<CSGObject>(xml)) {}
 
 /**
- * @return True if the can contains a defintion of the sample shape
+ * @return True if the can contains a definition of the sample shape
+ * with dimensions that can be overridden
  */
-bool Container::hasSampleShape() const { return !m_sampleShapeXML.empty(); }
+bool Container::hasCustomizableSampleShape() const {
+  return !m_sampleShapeXML.empty();
+}
+
+/**
+ * @return True if the can contains a definition of the sample shape
+ * with dimensions that cannot be overridden
+ */
+bool Container::hasFixedSampleShape() const { return m_sampleShape != nullptr; }
 
 /**
  * Return an object that represents the sample shape from the current
@@ -83,7 +94,7 @@ bool Container::hasSampleShape() const { return !m_sampleShapeXML.empty(); }
 IObject_sptr
 Container::createSampleShape(const Container::ShapeArgs &args) const {
   using namespace Poco::XML;
-  if (!hasSampleShape()) {
+  if (!hasCustomizableSampleShape()) {
     throw std::runtime_error("Can::createSampleShape() - No definition found "
                              "for the sample geometry.");
   }
@@ -106,6 +117,8 @@ Container::createSampleShape(const Container::ShapeArgs &args) const {
   ShapeFactory factory;
   return factory.createShape(root);
 }
+
+IObject_sptr Container::getSampleShape() const { return m_sampleShape; }
 
 /**
  * Set the definition of the sample shape for this can
@@ -134,7 +147,7 @@ void Container::setSampleShape(const std::string &sampleShapeXML) {
  */
 void Container::setID(const std::string &id) {
   // We only do anything if the contained shape is a CSGObject
-  if (auto csgObj = boost::dynamic_pointer_cast<CSGObject>(m_shape)) {
+  if (auto csgObj = std::dynamic_pointer_cast<CSGObject>(m_shape)) {
     csgObj->setID(id);
   }
 }

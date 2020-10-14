@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SCRIPTING_LANG_DIALOG_H
-#define SCRIPTING_LANG_DIALOG_H
+#pragma once
 
 #include "Scripted.h"
 #include "ScriptingEnv.h"
@@ -44,7 +43,7 @@ class ScriptingLangDialog : public QDialog, public Scripted {
 
 public:
   ScriptingLangDialog(ScriptingEnv *env, ApplicationWindow *parent,
-                      Qt::WFlags fl = nullptr);
+                      const Qt::WFlags &fl = nullptr);
 
 public slots:
   void updateLangList();
@@ -54,5 +53,3 @@ private:
   QListWidget *langList;
   QPushButton *btnOK, *btnCancel;
 };
-
-#endif

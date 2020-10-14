@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
 
@@ -25,7 +25,7 @@ DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent,
                                        bool hasOption, bool isOptionSet)
     : QWidget(parent), m_property(property), m_hasOption(hasOption),
       m_isOptionSet(isOptionSet) {
-  QHBoxLayout *layout = new QHBoxLayout;
+  auto *layout = new QHBoxLayout;
   m_editor = new DoubleEditor(property, this);
   layout->addWidget(m_editor);
   setFocusProxy(m_editor);
@@ -35,14 +35,15 @@ DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent,
   m_button->setMaximumSize(20, 1000000);
   connect(m_button, SIGNAL(clicked()), this, SLOT(runDialog()));
   layout->addWidget(m_button);
-  if (hasOption) {
-    m_checkBox = new QCheckBox;
-    m_checkBox->setChecked(isOptionSet);
-    connect(m_checkBox, SIGNAL(toggled(bool)), this, SLOT(optionToggled(bool)));
-    layout->addWidget(m_checkBox);
-    if (isOptionSet) {
-      m_button->hide();
-    }
+  m_checkBox = new QCheckBox;
+  m_checkBox->setChecked(isOptionSet);
+  connect(m_checkBox, SIGNAL(toggled(bool)), this, SLOT(optionToggled(bool)));
+  layout->addWidget(m_checkBox);
+  if (isOptionSet) {
+    m_button->hide();
+  }
+  if (!hasOption) {
+    m_checkBox->hide();
   }
 
   layout->setContentsMargins(0, 0, 0, 0);
@@ -52,17 +53,23 @@ DoubleDialogEditor::DoubleDialogEditor(QtProperty *property, QWidget *parent,
 
   m_editor->installEventFilter(this);
   m_button->installEventFilter(this);
+  m_checkBox->installEventFilter(this);
 }
 
 bool DoubleDialogEditor::eventFilter(QObject *obj, QEvent *evt) {
   if (evt->type() == QEvent::FocusOut) {
     if (obj == m_editor) {
-      if (!m_button->hasFocus()) {
+      if (!m_button->hasFocus() && !m_checkBox->hasFocus()) {
         updateProperty();
         emit closeEditor();
       }
     } else if (obj == m_button) {
-      if (!m_editor->hasFocus()) {
+      if (!m_editor->hasFocus() && !m_checkBox->hasFocus()) {
+        updateProperty();
+        emit closeEditor();
+      }
+    } else if (obj == m_checkBox) {
+      if (!m_editor->hasFocus() && !m_button->hasFocus()) {
         updateProperty();
         emit closeEditor();
       }

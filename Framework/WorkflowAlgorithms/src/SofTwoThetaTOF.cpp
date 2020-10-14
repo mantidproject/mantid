@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/SofTwoThetaTOF.h"
 
@@ -112,10 +112,10 @@ const std::string SofTwoThetaTOF::summary() const {
 /** Initialize the algorithm's properties.
  */
 void SofTwoThetaTOF::init() {
-  auto histogrammedTOF = boost::make_shared<Kernel::CompositeValidator>();
-  histogrammedTOF->add(boost::make_shared<API::WorkspaceUnitValidator>("TOF"));
-  histogrammedTOF->add(boost::make_shared<API::HistogramValidator>());
-  histogrammedTOF->add(boost::make_shared<API::InstrumentValidator>());
+  auto histogrammedTOF = std::make_shared<Kernel::CompositeValidator>();
+  histogrammedTOF->add(std::make_shared<API::WorkspaceUnitValidator>("TOF"));
+  histogrammedTOF->add(std::make_shared<API::HistogramValidator>());
+  histogrammedTOF->add(std::make_shared<API::InstrumentValidator>());
   declareProperty(
       std::make_unique<API::WorkspaceProperty<>>(
           Prop::INPUT_WS, "", Kernel::Direction::Input, histogrammedTOF),
@@ -123,7 +123,7 @@ void SofTwoThetaTOF::init() {
   declareProperty(std::make_unique<API::WorkspaceProperty<>>(
                       Prop::OUTPUT_WS, "", Kernel::Direction::Output),
                   "A workspace with (2theta, TOF) units.");
-  auto positiveDouble = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLowerExclusive(0.);
   declareProperty(Prop::ANGLE_STEP, EMPTY_DBL(), positiveDouble,
                   "The angle step for detector grouping, in degrees.");
@@ -198,13 +198,7 @@ SofTwoThetaTOF::groupByTwoTheta(API::MatrixWorkspace_sptr &ws,
     auto tempPath = boost::filesystem::temp_directory_path();
     tempPath /= boost::filesystem::unique_path(
         "detector-grouping-%%%%-%%%%-%%%%-%%%%.xml");
-#ifdef _WIN32
-    // A dirty way to convert a wstring to string.
-    auto const wfilename = tempPath.native();
-    filename = std::string(wfilename.cbegin(), wfilename.cend());
-#else
-    filename = tempPath.native();
-#endif
+    filename = tempPath.string();
     generateGrouping->setProperty("GenerateParFile", false);
     // Make sure the file gets deleted at scope exit.
     // enable cppcheck-suppress unreadVariable if needed

@@ -3,13 +3,15 @@ set(
   TEST_FILES
   ConvFitDataPresenterTest.h
   ConvFitModelTest.h
-  IndirectDataTablePresenterTest.h
+  ConvFunctionModelTest.h
   IndirectDataValidationHelperTest.h
+  IndirectDataTablePresenterTest.h
+  IndirectFitAnalysisTabTest.h
   IndirectFitDataPresenterTest.h
   IndirectFitDataTest.h
+  IndirectFitDataModelTest.h
   IndirectFitOutputOptionsModelTest.h
   IndirectFitOutputOptionsPresenterTest.h
-  IndirectFitOutputTest.h
   IndirectFitPlotModelTest.h
   IndirectFitPlotPresenterTest.h
   IndirectFittingModelTest.h
@@ -22,8 +24,11 @@ set(
   IqtFitModelTest.h
   JumpFitDataPresenterTest.h
   JumpFitModelTest.h
-  MSDFitModelTest.h
+  IDAFunctionParameterEstimationTest.h
 )
+
+set(CXXTEST_EXTRA_HEADER_INCLUDE
+    ${CMAKE_CURRENT_LIST_DIR}/InterfacesIndirectTestInitialization.h)
 
 mtd_add_qt_tests(
   TARGET_NAME MantidQtInterfacesIndirectTest
@@ -42,12 +47,10 @@ mtd_add_qt_tests(
     ../../../../Framework/TestHelpers/src/TearDownWorld.cpp
     ../IndirectDataValidationHelper.cpp
   LINK_LIBS
-    ${TCMALLOC_LIBRARIES_LINKTIME}
     ${CORE_MANTIDLIBS}
     CurveFitting
     DataObjects
-    ${GMOCK_LIBRARIES}
-    ${GTEST_LIBRARIES}
+    gmock
     ${POCO_LIBRARIES}
     ${Boost_LIBRARIES}
   QT4_LINK_LIBS

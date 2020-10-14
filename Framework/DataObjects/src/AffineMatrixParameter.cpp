@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/AffineMatrixParameter.h"
 
@@ -162,7 +162,7 @@ AffineMatrixParameter::AffineMatrixParameter(const AffineMatrixParameter &other)
  *
  * @param newMatrix : new matrix to use.
  */
-void AffineMatrixParameter::setMatrix(const AffineMatrixType newMatrix) {
+void AffineMatrixParameter::setMatrix(const AffineMatrixType &newMatrix) {
   if (newMatrix.numRows() != this->m_affineMatrix.numRows())
     throw std::runtime_error("setMatrix(): Number of rows must match!");
   if (newMatrix.numCols() != this->m_affineMatrix.numCols())

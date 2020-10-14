@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/Shape2DCollection.h"
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -28,7 +28,8 @@ namespace MantidWidgets {
 
 Shape2DCollection::Shape2DCollection()
     : Shape2D(), m_wx(0), m_wy(0), m_h(0), m_currentShape(nullptr),
-      m_currentCP(0), m_overridingCursor(false) {}
+      m_currentCP(0), m_copiedShapes(QList<Shape2D *>()),
+      m_overridingCursor(false) {}
 
 Shape2DCollection::~Shape2DCollection() {
   foreach (Shape2D *shape, m_shapes) { delete shape; }
@@ -128,8 +129,6 @@ void Shape2DCollection::removeShapes(const QList<Shape2D *> &shapeList) {
   }
 }
 
-/**
- */
 void Shape2DCollection::setWindow(const RectF &surface,
                                   const QRect &viewport) const {
   m_viewport = viewport;
@@ -180,6 +179,8 @@ Shape2D *Shape2DCollection::createShape(const QString &type, int x,
     return new Shape2DEllipse(p, 0.0);
   } else if (type.toLower() == "rectangle") {
     return new Shape2DRectangle(p, QSizeF(0, 0));
+  } else if (type.toLower() == "sector") {
+    return new Shape2DSector(0.001, 0.002, 0, M_PI / 2, p);
   } else if (type.toLower() == "free") {
     return new Shape2DFree(p);
   }
@@ -533,6 +534,43 @@ void Shape2DCollection::removeSelectedShapes() {
 }
 
 /**
+ * @brief Shape2DCollection::copySelectedShapes
+ * Add the selected shapes to a copy buffer. Remove those previously stored.
+ */
+void Shape2DCollection::copySelectedShapes() {
+  m_copiedShapes.clear();
+  foreach (auto shape, m_selectedShapes) {
+    Shape2D *newShape = shape->clone();
+    newShape->setFillColor(shape->getFillColor());
+    // the fill color is not transmitted by the clone operator
+    m_copiedShapes.push_back(newShape);
+  }
+}
+
+/**
+ * @brief Shape2DCollection::pasteCopiedShapes
+ * Add a copy of the shapes stored in the copy buffer to the collection.
+ */
+void Shape2DCollection::pasteCopiedShapes() {
+  foreach (auto shape, m_copiedShapes) {
+    Shape2D *newShape;
+    if (shape->type() == "sector") {
+      double angleOffset =
+          shape->getDouble("endAngle") - shape->getDouble("startAngle");
+      shape->setDouble("startAngle",
+                       shape->getDouble("startAngle") + angleOffset);
+
+      shape->setDouble("endAngle", shape->getDouble("endAngle") + angleOffset);
+    } else {
+      shape->moveBy(QPointF(0.1, -0.1));
+    }
+    newShape = shape->clone();
+    newShape->setFillColor(shape->getFillColor());
+    addShape(newShape, false);
+  }
+}
+
+/**
  * Restore the cursor image to default.
  */
 void Shape2DCollection::restoreOverrideCursor() {
@@ -566,7 +604,8 @@ double Shape2DCollection::getCurrentDouble(const QString &prop) const {
 
 void Shape2DCollection::setCurrentDouble(const QString &prop, double value) {
   if (m_currentShape) {
-    return m_currentShape->setDouble(prop, value);
+    m_currentShape->setDouble(prop, value);
+    emit shapeChanged();
   }
 }
 
@@ -587,7 +626,8 @@ QPointF Shape2DCollection::getCurrentPoint(const QString &prop) const {
 void Shape2DCollection::setCurrentPoint(const QString &prop,
                                         const QPointF &value) {
   if (m_currentShape) {
-    return m_currentShape->setPoint(prop, value);
+    m_currentShape->setPoint(prop, value);
+    emit shapeChanged();
   }
 }
 
@@ -601,6 +641,7 @@ RectF Shape2DCollection::getCurrentBoundingRect() const {
 void Shape2DCollection::setCurrentBoundingRect(const RectF &rect) {
   if (m_currentShape) {
     m_currentShape->setBoundingRect(rect);
+    emit shapeChanged();
   }
 }
 
@@ -679,7 +720,7 @@ void Shape2DCollection::saveToTableWorkspace() {
  * @param ws :: table workspace to load shapes from.
  */
 void Shape2DCollection::loadFromTableWorkspace(
-    Mantid::API::ITableWorkspace_const_sptr ws) {
+    const Mantid::API::ITableWorkspace_const_sptr &ws) {
   using namespace Mantid::API;
   auto columnNames = ws->getColumnNames();
 

@@ -128,7 +128,7 @@ step 5. See figure
 .. figure:: ../images/Satellite.png
       :alt: Satellite.png
 
-For step 6, algorithm :ref:`IndexPeaksWithSatellites <algm-IndexPeaksWithSatellites>` is created, parallel to
+For step 6, algorithm :ref:`IndexPeaks <algm-IndexPeaks>` is created, parallel to
 the algorithm IndexPeaks for regular crystal structures. The inputs for
 this algorithm include the PeaksWorkspace to be indexed, tolerance for
 main and satellite reflections respectively, up to 3 modulation vectors,

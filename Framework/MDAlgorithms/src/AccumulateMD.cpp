@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/AccumulateMD.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -196,9 +196,9 @@ void insertDataSources(
   boost::split(data_split, data_sources, boost::is_any_of(","));
 
   // Trim any whitespace from ends of each data source string
-  std::for_each(
-      data_split.begin(), data_split.end(),
-      boost::bind(boost::algorithm::trim<std::string>, _1, std::locale()));
+  std::for_each(data_split.begin(), data_split.end(),
+                std::bind(boost::algorithm::trim<std::string>,
+                          std::placeholders::_1, std::locale()));
 
   // Insert each data source into our complete set of historical data sources
   historical_data_sources.insert(data_split.begin(), data_split.end());
@@ -236,7 +236,7 @@ void AccumulateMD::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
           "DataSources",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>(),
+          std::make_shared<MandatoryValidator<std::vector<std::string>>>(),
           Direction::Input),
       "Input workspaces to process, or filenames to load and process");
 
@@ -247,32 +247,30 @@ void AccumulateMD::init() {
   std::vector<std::string> e_mode_options{"Elastic", "Direct", "Indirect"};
 
   declareProperty("Emode", "Direct",
-                  boost::make_shared<StringListValidator>(e_mode_options),
+                  std::make_shared<StringListValidator>(e_mode_options),
                   "Analysis mode ['Elastic', 'Direct', 'Indirect'].");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "Alatt",
-          boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          "Alatt", std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice parameters");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "Angdeg",
-          boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          "Angdeg", std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice angles");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "u", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          "u", std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector parallel to neutron beam");
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "v", boost::make_shared<MandatoryValidator<std::vector<double>>>(),
+          "v", std::make_shared<MandatoryValidator<std::vector<double>>>(),
           Direction::Input),
       "Lattice vector perpendicular to neutron beam in the horizontal plane");
 

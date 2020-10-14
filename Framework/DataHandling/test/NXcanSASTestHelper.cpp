@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "NXcanSASTestHelper.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/InstrumentFileFinder.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/NXcanSASDefinitions.h"
@@ -18,7 +19,8 @@
 
 namespace NXcanSASTestHelper {
 
-std::string concatenateStringVector(std::vector<std::string> stringVector) {
+std::string
+concatenateStringVector(const std::vector<std::string> &stringVector) {
   std::ostringstream os;
   for (auto &element : stringVector) {
     os << element;
@@ -28,15 +30,17 @@ std::string concatenateStringVector(std::vector<std::string> stringVector) {
   return os.str();
 }
 
-std::string getIDFfromWorkspace(Mantid::API::MatrixWorkspace_sptr workspace) {
+std::string
+getIDFfromWorkspace(const Mantid::API::MatrixWorkspace_sptr &workspace) {
   auto instrument = workspace->getInstrument();
   auto name = instrument->getFullName();
   auto date = workspace->getWorkspaceStartDate();
-  return workspace->getInstrumentFilename(name, date);
+  return Mantid::API::InstrumentFileFinder::getInstrumentFilename(name, date);
 }
 
 void setXValuesOn1DWorkspaceWithPointData(
-    Mantid::API::MatrixWorkspace_sptr workspace, double xmin, double xmax) {
+    const Mantid::API::MatrixWorkspace_sptr &workspace, double xmin,
+    double xmax) {
   auto &xValues = workspace->dataX(0);
   auto size = xValues.size();
   double binWidth = (xmax - xmin) / static_cast<double>(size - 1);
@@ -46,7 +50,7 @@ void setXValuesOn1DWorkspaceWithPointData(
   }
 }
 
-void add_sample_log(Mantid::API::MatrixWorkspace_sptr workspace,
+void add_sample_log(const Mantid::API::MatrixWorkspace_sptr &workspace,
                     const std::string &logName, const std::string &logValue) {
   auto logAlg =
       Mantid::API::AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
@@ -58,7 +62,7 @@ void add_sample_log(Mantid::API::MatrixWorkspace_sptr workspace,
   logAlg->execute();
 }
 
-void set_logs(Mantid::API::MatrixWorkspace_sptr workspace,
+void set_logs(const Mantid::API::MatrixWorkspace_sptr &workspace,
               const std::string &runNumber, const std::string &userFile) {
   if (!runNumber.empty()) {
     add_sample_log(workspace, "run_number", runNumber);
@@ -69,7 +73,7 @@ void set_logs(Mantid::API::MatrixWorkspace_sptr workspace,
   }
 }
 
-void set_instrument(Mantid::API::MatrixWorkspace_sptr workspace,
+void set_instrument(const Mantid::API::MatrixWorkspace_sptr &workspace,
                     const std::string &instrumentName) {
   auto instAlg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
       "LoadInstrument");
@@ -205,7 +209,7 @@ provide2DWorkspace(NXcanSASTestParameters &parameters) {
   return ws;
 }
 
-void set2DValues(Mantid::API::MatrixWorkspace_sptr ws) {
+void set2DValues(const Mantid::API::MatrixWorkspace_sptr &ws) {
   const auto numberOfHistograms = ws->getNumberHistograms();
 
   for (size_t index = 0; index < numberOfHistograms; ++index) {
@@ -214,7 +218,7 @@ void set2DValues(Mantid::API::MatrixWorkspace_sptr ws) {
   }
 }
 
-void removeFile(std::string filename) {
+void removeFile(const std::string &filename) {
   if (Poco::File(filename).exists())
     Poco::File(filename).remove();
 }

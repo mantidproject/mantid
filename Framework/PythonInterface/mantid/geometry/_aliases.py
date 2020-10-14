@@ -1,15 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
     Defines a set of aliases to make accessing certain objects easier,
     like in mantid.api.
 """
-from __future__ import (absolute_import, division,
-                        print_function)
+
 
 from mantid.kernel._aliases import lazy_instance_access
 from mantid.geometry import (SpaceGroupFactoryImpl, SymmetryOperationFactoryImpl,

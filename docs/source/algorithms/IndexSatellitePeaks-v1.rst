@@ -73,10 +73,9 @@ Usage
     nuclear_peaks = Load('WISH_peak_hkl_small.nxs')
     satellite_peaks = Load("refine_satellites_fixed_q_test.nxs")
     indexed_peaks = IndexSatellitePeaks(nuclear_peaks, satellite_peaks, tolerance=0.1, NumOfQs=2)
-    index_values = np.array(indexed_peaks.column("m1"))
 
     for peak in indexed_peaks:
-        print("H: {h:>5} K: {k:>5} L: {l:>5} M1: {m1:>5}".format(**peak))
+        print("H: {:>5} K: {:>5} L: {:>5} M1: {:>5}".format(peak.getH(),peak.getK(),peak.getL(),peak.getIntMNP()[0]))
 
 Output:
 

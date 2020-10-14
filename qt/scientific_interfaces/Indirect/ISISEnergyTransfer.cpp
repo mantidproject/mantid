@@ -1,12 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
 #include "IndirectDataValidationHelper.h"
-
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
@@ -115,7 +114,7 @@ void deleteWorkspace(std::string const &name) {
   deleter->execute();
 }
 
-double getSampleLog(MatrixWorkspace_const_sptr workspace,
+double getSampleLog(const MatrixWorkspace_const_sptr &workspace,
                     std::string const &logName, double const &defaultValue) {
   try {
     return workspace->getLogAsSingleValue(logName);
@@ -124,7 +123,7 @@ double getSampleLog(MatrixWorkspace_const_sptr workspace,
   }
 }
 
-double getSampleLog(MatrixWorkspace_const_sptr workspace,
+double getSampleLog(const MatrixWorkspace_const_sptr &workspace,
                     std::vector<std::string> const &logNames,
                     double const &defaultValue) {
   double value(defaultValue);
@@ -144,8 +143,12 @@ double loadSampleLog(std::string const &filename,
   auto loader = loadAlgorithm(filename, temporaryWorkspace);
   loader->execute();
 
-  return getSampleLog(getADSMatrixWorkspace(temporaryWorkspace), logNames,
-                      defaultValue);
+  if (doesExistInADS(temporaryWorkspace)) {
+    return getSampleLog(getADSMatrixWorkspace(temporaryWorkspace), logNames,
+                        defaultValue);
+  } else {
+    return defaultValue;
+  }
 }
 
 void convertSpectrumAxis(std::string const &inputWorkspace,
@@ -369,20 +372,12 @@ bool ISISEnergyTransfer::validate() {
     int detectorMax = m_uiForm.spPlotTimeSpecMax->value();
 
     const QString rawFile = m_uiForm.dsRunFiles->getFirstFilename();
-    const auto pos = rawFile.lastIndexOf(".");
-    const auto extension = rawFile.right(rawFile.length() - pos);
     const QFileInfo rawFileInfo(rawFile);
     const std::string name = rawFileInfo.baseName().toStdString();
 
     auto loadAlg = loadAlgorithm(rawFile.toStdString(), name);
-    if (extension.compare(".nxs") == 0) {
-      loadAlg->setProperty("SpectrumMin", static_cast<int64_t>(detectorMin));
-      loadAlg->setProperty("SpectrumMax", static_cast<int64_t>(detectorMax));
-    } else {
-      loadAlg->setProperty("SpectrumMin", detectorMin);
-      loadAlg->setProperty("SpectrumMax", detectorMax);
-    }
-
+    loadAlg->setPropertyValue("SpectrumMin", std::to_string(detectorMin));
+    loadAlg->setPropertyValue("SpectrumMax", std::to_string(detectorMax));
     loadAlg->execute();
 
     if (m_uiForm.ckBackgroundRemoval->isChecked()) {
@@ -483,14 +478,14 @@ void ISISEnergyTransfer::run() {
   }
 
   std::vector<long> detectorRange;
-  detectorRange.push_back(m_uiForm.spSpectraMin->value());
-  detectorRange.push_back(m_uiForm.spSpectraMax->value());
+  detectorRange.emplace_back(m_uiForm.spSpectraMin->value());
+  detectorRange.emplace_back(m_uiForm.spSpectraMax->value());
   reductionAlg->setProperty("SpectraRange", detectorRange);
 
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {
     std::vector<double> backgroundRange;
-    backgroundRange.push_back(m_uiForm.spBackgroundStart->value());
-    backgroundRange.push_back(m_uiForm.spBackgroundEnd->value());
+    backgroundRange.emplace_back(m_uiForm.spBackgroundStart->value());
+    backgroundRange.emplace_back(m_uiForm.spBackgroundEnd->value());
     reductionAlg->setProperty("BackgroundRange", backgroundRange);
   }
 
@@ -831,12 +826,12 @@ void ISISEnergyTransfer::plotRaw() {
 
   std::vector<specnum_t> detectorList;
   for (specnum_t i = detectorMin; i <= detectorMax; i++)
-    detectorList.push_back(i);
+    detectorList.emplace_back(i);
 
   if (m_uiForm.ckBackgroundRemoval->isChecked()) {
     std::vector<double> range;
-    range.push_back(m_uiForm.spBackgroundStart->value());
-    range.push_back(m_uiForm.spBackgroundEnd->value());
+    range.emplace_back(m_uiForm.spBackgroundStart->value());
+    range.emplace_back(m_uiForm.spBackgroundEnd->value());
 
     IAlgorithm_sptr calcBackAlg =
         AlgorithmManager::Instance().create("CalculateFlatBackground");
@@ -1014,8 +1009,8 @@ void ISISEnergyTransfer::setSaveEnabled(bool enable) {
 
 void ISISEnergyTransfer::updateRunButton(bool enabled,
                                          std::string const &enableOutputButtons,
-                                         QString const message,
-                                         QString const tooltip) {
+                                         QString const &message,
+                                         QString const &tooltip) {
   setRunEnabled(enabled);
   m_uiForm.pbRun->setText(message);
   m_uiForm.pbRun->setToolTip(tooltip);

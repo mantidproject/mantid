@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import absolute_import
-
 from qtpy.QtCore import Qt
 from qtpy.QtWidgets import QMessageBox
 
@@ -21,7 +19,7 @@ class WorkbenchErrorMessageBox(QMessageBox):
 
         self.setText("""Sorry, Mantid Workbench has caught an unexpected exception:\n
 {0}
-Would you like to terminate MantidPlot or try to continue working?
+Would you like to terminate Mantid Workbench or try to continue working?
 If you choose to continue it is advisable to save your data and restart the application.""".format(exception_message))
 
         self.terminate_button = self.addButton("Terminate", QMessageBox.ActionRole)

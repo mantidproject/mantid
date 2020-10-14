@@ -2,11 +2,14 @@
 #include "MantidQtWidgets/Common/Message.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
+#include "frameobject.h"
+
 // Allows suppression of namespaces within the module
 using namespace MantidQt::MantidWidgets;
 using namespace MantidQt::MantidWidgets::Batch;
 %End
 
+%Include ../common_sip/exceptions.sip
 %Include ../common_sip/string.sip
 %Include ../common_sip/vector.sip
 
@@ -16,23 +19,7 @@ qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 qRegisterMetaType<Message>("Message");
 %End
 
-// ----------------------------------------------------------------------------
-// Exceptions
-// ----------------------------------------------------------------------------
 
-%Exception std::invalid_argument(SIP_Exception) /PyName=ValueError/
-{
-%TypeHeaderCode
-#include <stdexcept>
-%End
-%RaiseCode
-    const char *detail = sipExceptionRef.what();
-
-    SIP_BLOCK_THREADS
-    PyErr_SetString(PyExc_ValueError, detail);
-    SIP_UNBLOCK_THREADS
-%End
-};
 // ----------------------------------------------------------------------------
 // Classes
 // ----------------------------------------------------------------------------
@@ -80,6 +67,19 @@ public:
   MessageDisplay(QWidget *parent = 0);
   MessageDisplay(const QFont &font, QWidget *parent = 0);
   void attachLoggingChannel(int logLevel = -1);
+  QPlainTextEdit *getTextEdit();
+  void filterMessages();
+  QMenu *generateContextMenu();
+  void filePathModified(const QString &oldPath, const QString &newPath);
+
+  bool showFrameworkOutput();
+  void setShowFrameworkOutput(const bool &show);
+  bool showAllScriptOutput();
+  void setShowAllScriptOutput(const bool &show);
+  bool showActiveScriptOutput();
+  void setShowActiveScriptOutput(const bool &show);
+  QString activeScript();
+  void setActiveScript(const QString &scriptPath);
 
   void appendFatal(const QString &text);
   void appendError(const QString &text);
@@ -87,20 +87,9 @@ public:
   void appendNotice(const QString &text);
   void appendInformation(const QString &text);
   void appendDebug(const QString &text);
+  void appendPython(const QString &text, const int &priority, const QString &fileName);
   void setSource(const QString &source);
 };
-
-%If (Qt_5_0_0 -)
-class AlgorithmProgressWidget : QWidget {
-%TypeHeaderCode
-#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
-%End
-
-public:
-    AlgorithmProgressWidget(QWidget *parent /TransferThis/ = 0);
-    void blockUpdates(bool block = true);
-};
-%End
 
 class ScriptEditor : QWidget {
 %TypeHeaderCode
@@ -138,6 +127,7 @@ public:
   sipRes = sipBuildResult(nullptr, "(iiii)", lineFrom, indexFrom,
                           lineTo, indexTo);
 %End
+  int getZoom() const;
   bool hasSelectedText() const;
   bool isModified() const;
   bool isReadOnly() const;
@@ -160,6 +150,7 @@ public:
   void setSelection(int lineFrom, int indexFrom, int lineTo, int indexTo);
   void setTabWidth(int width);
   void setText(const QString &text);
+  void setEolVisibility(bool state);
   void setWhitespaceVisibility(WhitespaceVisibility mode);
   void updateCompletionAPI(const QStringList & completions);
 
@@ -169,18 +160,47 @@ public:
   void replaceAll(const QString &search, const QString &replace,
                               bool regex, bool caseSensitive, bool matchWords,
                               bool wrap, bool backward);
-
-
 public slots:
   void updateProgressMarker(int lineno, bool error);
+  void zoomTo(int level);
 
 signals:
   void fileNameChanged(const QString &fileName);
   void modificationChanged(bool m);
+  void textZoomedIn();
+  void textZoomedOut();
+  void progressMade(const int);
 
 private:
   ScriptEditor(const ScriptEditor&);
 };
+
+%If (Qt_5_0_0 -)
+
+class AlgorithmProgressWidget : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
+%End
+
+public:
+  AlgorithmProgressWidget(QWidget *parent /TransferThis/ = 0);
+  void blockUpdates(bool block = true);
+};
+
+class CodeExecution {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/Python/CodeExecution.h"
+using MantidQt::Widgets::Common::Python::CodeExecution;
+%End
+
+public:
+  CodeExecution(ScriptEditor*);
+  SIP_PYOBJECT execute(const QString &, const QString &, int, SIP_PYOBJECT, int);
+private:
+  CodeExecution(const CodeExecution&);
+};
+
+%End // end >= Qt5
 
 
 class AlgorithmDialog: QDialog {
@@ -252,7 +272,7 @@ class BaseDecoder {
 %End
 public:
   virtual QWidget * decode(const QMap<QString, QVariant> &map,
-                          const std::string &directory) = 0;
+                           const std::string &directory) = 0;
   virtual QList<QString> tags() = 0;
 private:
   BaseDecoder();
@@ -353,6 +373,7 @@ class WorkspaceTreeWidgetSimple : WorkspaceTreeWidget {
 public:
   WorkspaceTreeWidgetSimple(bool viewOnly=false, QWidget *parent /TransferThis/ = nullptr);
   void refreshWorkspaces();
+  void enableDeletePrompt(bool enable);
 
 signals:
   void plotSpectrumClicked(const QStringList & workspaceNames);
@@ -364,6 +385,10 @@ signals:
   void sliceViewerClicked(const QStringList &workspaceNames);
   void showInstrumentClicked(const QStringList &workspaceNames);
   void showAlgorithmHistoryClicked(const QStringList &workspaceNames);
+  void plotMDHistoClicked(const QStringList &workspaceNames);
+  void overplotMDHistoClicked(const QStringList &workspaceNames);
+  void plotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
+  void overplotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
 };
 
 class AlgorithmHistoryWindow : public QDialog {
@@ -384,8 +409,67 @@ class ManageUserDirectories : QDialog {
 %End
 public:
   ManageUserDirectories(QWidget *parent /TransferThis/ = nullptr);
-  static void openUserDirsDialog(QWidget *parent);
-  void setHelpButtonVisible(const bool &visible /TransferThis/ );
+  static void openManageUserDirectories();
+};
+
+// ---------------------------------
+// Script Repository
+// ---------------------------------
+
+class ScriptRepositoryView : QDialog {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ScriptRepositoryView.h"
+%End
+public:
+    ScriptRepositoryView(QWidget *parent = nullptr);
+};
+
+// ---------------------------------
+// Instrument Selector
+// ---------------------------------
+
+class InstrumentSelector : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/InstrumentSelector.h"
+%End
+public:
+  InstrumentSelector(QWidget *parent /TransferThis/ = nullptr);
+  void setTechniques(const QStringList &techniques);
+  void setCurrentIndex(int);
+  QString currentText();
+  int count();
+};
+
+// ---------------------------------
+// Property Handler
+// ---------------------------------
+class PropertyHandler
+    : public QObject {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/PropertyHandler.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
+#include <boost/python/extract.hpp>
+#include <boost/python/to_python_value.hpp>
+%End
+public:
+    PropertyHandler(SIP_PYOBJECT, SIP_PYOBJECT, FitPropertyBrowser *)[(const Mantid::API::IFunction_sptr &,
+ Mantid::API::CompositeFunction_sptr,  FitPropertyBrowser *)];
+    %MethodCode
+    auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
+    auto compositeFunction = boost::python::extract<Mantid::API::CompositeFunction_sptr>(a1)();
+    sipCpp = new sipPropertyHandler(function, compositeFunction,  a2);
+    %End
+    SIP_PYOBJECT ifun();
+    %MethodCode
+    sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->ifun());
+    %End
+    void setHasPlot(bool);
+    QString functionPrefix() const;
+    PropertyHandler * findHandler(SIP_PYOBJECT);
+    %MethodCode
+    auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
+    sipRes = sipCpp->findHandler(function);
+    %End
 };
 
 // ---------------------------------
@@ -414,13 +498,28 @@ public:
     double endX() const;
     void setEndX(double end);
     void setXRange(double start, double end);
+    QVector<double> getXRange() throw(std::invalid_argument);
+    QString getXColumnName() const;
+    QString getYColumnName() const;
+    QString getErrColumnName() const;
     int workspaceIndex() const;
     void setWorkspaceIndex(int i);
     QStringList getWorkspaceNames();
     void fit();
+    void toggleSettingsBrowserVisible();
+    void removePropertiesFromSettingsBrowser(const QStringList &propsToRemove);
+    void toggleWsListVisible();
     void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+    void addAllowedTableWorkspace(const QString &wsName);
     void setTextPlotGuess(const QString);
     bool plotDiff() const;
+    std::string outputName() const;
+    void addFitResultWorkspacesToTableWidget();
+    void setWorkspaceName(const QString &wsName);
+    void postDeleteHandle(const std::string &wsName);
+    void removeWorkspaceAndSpectra(const std::string &wsName);
+    std::string getFitAlgorithmParameters() const;
+    PropertyHandler * currentHandler() const;
 
     SIP_PYOBJECT defaultPeakType();
 %MethodCode
@@ -430,6 +529,11 @@ public:
     void setDefaultPeakType(SIP_PYOBJECT);
 %MethodCode
     sipCpp->setDefaultPeakType(TO_CSTRING(a0));
+%End
+SIP_PYOBJECT defaultBackgroundType();
+%MethodCode
+    auto f = sipCpp->defaultBackgroundType();
+    sipRes = FROM_CSTRING(f.c_str());
 %End
     QStringList registeredPeaks() const;
     QStringList registeredBackgrounds() const;
@@ -444,6 +548,7 @@ public:
     void setPeakFwhmOf(QString, double);
     void normaliseData(bool on);
     QMenu *getFitMenu() const;
+    QListWidget* getWorkspaceList() const;
 
     SIP_PYOBJECT workspaceName() const;
 %MethodCode
@@ -466,12 +571,19 @@ public:
 
 signals:
     void functionChanged();
+    void functionRemoved();
     void startXChanged(double);
     void endXChanged(double);
     void changedParameterOf(const QString &prefix);
     void algorithmFinished(const QString &);
     void removeFitCurves();
+    void removeGuess();
+    void removeCurrentGuess();
     void plotGuess();
+    void plotCurrentGuess();
+    void sequentialFitDone() const;
+    void workspaceClicked(const QString &);
+    void removePlotSignal(PropertyHandler *);
 
 };
 
@@ -758,6 +870,9 @@ public:
     void removeDatasets(QList<int> indices);
     QStringList getDatasetNames() const;
     void setErrorsEnabled(bool enabled);
+    void hideGlobalCheckbox();
+    void showGlobalCheckbox();
+
     QStringList getGlobalParameters() const;
     void setGlobalParameters(const QStringList &globals);
     void clear();
@@ -831,4 +946,114 @@ public:
     QTreeWidget *treeWidget() const;
     QWidget *getParamWidget(const QString &paramName) const;
     double getParameter(const QString &paramName) const;
+};
+
+// ---------------------------------
+// FileFinderWidget
+// ---------------------------------
+class FileFinderWidget : QWidget
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
+%End
+public:
+    FileFinderWidget(QWidget *parent = nullptr) /KeywordArgs="All"/;
+
+    QString getText();
+    QString getFirstFilename() const;
+    QStringList getFilenames() const;
+    void isForRunFiles(bool /*mode*/);
+    void isForDirectory(bool /*mode*/);
+    void allowMultipleFiles(bool /*allow*/);
+    bool isSearching() const;
+    bool isValid();
+    void liveButtonSetChecked(bool);
+    bool liveButtonIsChecked();
+    void setInstrumentOverride(const QString &instName);
+    void setLabelText(const QString &text);
+    void setLabelMinWidth(const int);
+    void setText(const QString&);
+    void setUserInput(const QVariant &);
+    QVariant getUserInput() const;
+    void setReadOnly(bool readOnly);
+    void setFileExtensions(const QStringList &extensions);
+    void findFiles(bool isModified);
+    void isOptional(bool);
+
+signals:
+    void fileTextChanged(const QString & /*_t1*/);
+    void fileEditingFinished();
+    void fileFindingFinished();
+    void liveButtonPressed(bool);
+    void findingFiles();
+    void filesFound();
+};
+
+// ---------------------------------
+// ImageInformationWidget
+// ---------------------------------
+class ImageInfoWidget : public QTableWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/ImageInfoWidget.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
+#include <boost/python/object.hpp>
+#include <boost/python/handle.hpp>
+%End
+public:
+    ImageInfoWidget(QWidget *parent = nullptr);
+    void cursorAt(const double x, const double y, const double signal);
+    %MethodCode
+    try {
+      sipCpp->cursorAt(a0, a1, a2);
+    } catch(const std::exception & exc) {
+      SIP_BLOCK_THREADS
+      PyErr_SetString(PyExc_RuntimeError, exc.what());
+      SIP_UNBLOCK_THREADS
+      return NULL;
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
+    void setWorkspace(SIP_PYOBJECT);
+    %MethodCode
+    try {
+      using boost::python::extract;
+      using Mantid::PythonInterface::ExtractSharedPtr;
+      sipCpp->setWorkspace(ExtractSharedPtr<Mantid::API::Workspace>(a0)());
+    } catch(const std::exception & exc) {
+      SIP_BLOCK_THREADS
+      PyErr_SetString(PyExc_RuntimeError, exc.what());
+      SIP_UNBLOCK_THREADS
+      return NULL;
+    } catch(...) {
+      sipRaiseUnknownException();
+      return NULL;
+    }
+    %End
+};
+
+// ---------------------------------
+// DataSelector
+// ---------------------------------
+class DataSelector : QWidget
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/DataSelector.h"
+%End
+public:
+    DataSelector(QWidget *parent = nullptr) /KeywordArgs="All"/;
+};
+
+// ---------------------------------
+// WorkspaceSelector
+// ---------------------------------
+class WorkspaceSelector : QComboBox
+{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/WorkspaceSelector.h"
+%End
+public:
+    WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
+    void setOptional(bool optional);
 };

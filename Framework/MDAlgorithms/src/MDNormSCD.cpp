@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MDNormSCD.h"
 
@@ -93,7 +93,7 @@ void MDNormSCD::init() {
             "'name,minimum,maximum,number_of_bins'. Leave blank for NONE.");
   }
 
-  auto fluxValidator = boost::make_shared<CompositeValidator>();
+  auto fluxValidator = std::make_shared<CompositeValidator>();
   fluxValidator->add<WorkspaceUnitValidator>("Momentum");
   fluxValidator->add<InstrumentValidator>();
   fluxValidator->add<CommonBinsValidator>();
@@ -256,7 +256,7 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
   }
   binMD->executeAsChildAlg();
   Workspace_sptr outputWS = binMD->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+  return std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
 
 /**
@@ -265,9 +265,9 @@ MDHistoWorkspace_sptr MDNormSCD::binInputWS() {
  */
 void MDNormSCD::createNormalizationWS(const MDHistoWorkspace &dataWS) {
   // Copy the MDHisto workspace, and change signals and errors to 0.
-  boost::shared_ptr<IMDHistoWorkspace> tmp =
+  std::shared_ptr<IMDHistoWorkspace> tmp =
       this->getProperty("TemporaryNormalizationWorkspace");
-  m_normWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
+  m_normWS = std::dynamic_pointer_cast<MDHistoWorkspace>(tmp);
   if (!m_normWS) {
     m_normWS = dataWS.clone();
     m_normWS->setTo(0., 0., 0.);
@@ -298,7 +298,7 @@ MDNormSCD::getValuesFromOtherDimensions(bool &skipNormalization,
         currentRun.getProperty(dimension->getName()));
     if (dimProp) {
       auto value = static_cast<coord_t>(dimProp->firstValue());
-      otherDimValues.push_back(value);
+      otherDimValues.emplace_back(value);
       // in the original MD data no time was spent measuring between dimMin and
       // dimMax
       if (value < dimMin || value > dimMax) {
@@ -495,7 +495,7 @@ for (int64_t i = 0; i < ndets; i++) {
   // pre-allocate for efficiency and copy non-hkl dim values into place
   pos.resize(vmdDims + otherValues.size());
   std::copy(otherValues.begin(), otherValues.end(), pos.begin() + vmdDims - 1);
-  pos.push_back(1.);
+  pos.emplace_back(1.f);
 
   for (auto it = intersectionsBegin + 1; it != intersections.end(); ++it) {
     const auto &curIntSec = *it;
@@ -531,11 +531,11 @@ PARALLEL_CHECK_INTERUPT_REGION
 if (m_accumulate) {
   std::transform(
       signalArray.cbegin(), signalArray.cend(), m_normWS->getSignalArray(),
-      m_normWS->getSignalArray(),
+      m_normWS->mutableSignalArray(),
       [](const std::atomic<signal_t> &a, const signal_t &b) { return a + b; });
 } else {
   std::copy(signalArray.cbegin(), signalArray.cend(),
-            m_normWS->getSignalArray());
+            m_normWS->mutableSignalArray());
 }
 }
 

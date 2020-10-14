@@ -1,22 +1,23 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
-import os
-from mantid.simpleapi import *
+
 from isis_reflectometry import settings
+
+from mantid.simpleapi import *
 
 '''
 RAII Test helper class. Equivalent to the ScopedFileHelper.
 
 If this proves useful. It would be sensible to make it more accessible for other testing classes.
 '''
-class TempFile(object):
 
+
+class TempFile(object):
     __tempFile = None
 
     def __init__(self, contents, extension):
@@ -35,13 +36,16 @@ class TempFile(object):
     def pathToFile(self):
         return self.__tempFile.name
 
+
 '''
 Determine if all tests should be skipped. Check for the expat module to decide.
 '''
+
+
 def skipAllTests():
     skiptests = False
     try:
-        import xml.parsers.expat
+        import xml.parsers.expat  # noqa
     except ImportError:
         skiptests = True
     return skiptests
@@ -51,18 +55,21 @@ if not skipAllTests():
     '''
     Test suite for the Settings
     '''
+
     class SettingsTest(unittest.TestCase):
 
         def test_avalid_file(self):
-            fileObject = TempFile(contents=b"<SettingList><Setting name='test_setting'>test</Setting></SettingList>", extension=".xml")
-            configuration = settings.Settings( fileObject.pathToFile() )
+            fileObject = TempFile(contents=b"<SettingList><Setting name='test_setting'>test</Setting></SettingList>",
+                                  extension=".xml")
+            configuration = settings.Settings(fileObject.pathToFile())
             entries = configuration.get_all_entries()
-            self.assertEqual(len(entries), 1, "There is only one setting entry") # Quick check
+            self.assertEqual(len(entries), 1, "There is only one setting entry")  # Quick check
 
         def test_bad_file_extension_throws(self):
             bad_extension = ".txt "
-            fileObject = TempFile(contents=b"<SettingList><Setting name='test_setting'>test</Setting></SettingList>", extension=bad_extension)
-            self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile() )
+            fileObject = TempFile(contents=b"<SettingList><Setting name='test_setting'>test</Setting></SettingList>",
+                                  extension=bad_extension)
+            self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile())
 
         def test_bad_file_location_throws(self):
             missing_file = "fictional_file.xml"
@@ -70,19 +77,22 @@ if not skipAllTests():
 
         def test_bad_xml_format_throws(self):
             fileObject = TempFile(contents=b"<SettingList>invalid xml", extension=".xml")
-            self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile() )
+            self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile())
 
         def test_sanity_check_missing_attribute_name_throws(self):
             fileObject = TempFile(contents=b"<SettingList><Setting>test</Setting></SettingList>", extension=".xml")
-            self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile() )
+            self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile())
 
         def test_sanity_check_missing_attribute_value_throws(self):
-            fileObject = TempFile(contents=b"<SettingList><Setting name='test_setting'></Setting></SettingList>", extension=".xml")
-            self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile() )
+            fileObject = TempFile(contents=b"<SettingList><Setting name='test_setting'></Setting></SettingList>",
+                                  extension=".xml")
+            self.assertRaises(ValueError, settings.Settings, fileObject.pathToFile())
 
         def test_get_entries(self):
-            fileObject = TempFile(contents=b"<SettingList><Setting name='a'>1</Setting><Setting name='b'>2</Setting></SettingList>", extension=".xml")
-            configuration = settings.Settings( fileObject.pathToFile() )
+            fileObject = TempFile(
+                contents=b"<SettingList><Setting name='a'>1</Setting><Setting name='b'>2</Setting></SettingList>",
+                extension=".xml")
+            configuration = settings.Settings(fileObject.pathToFile())
             entries = configuration.get_all_entries()
             self.assertEqual(len(entries), 2)
             self.assertEqual(int(entries['a']), 1)
@@ -90,12 +100,13 @@ if not skipAllTests():
 
         def test_get_filename(self):
             fileObject = TempFile(contents=b"<SettingList></SettingList>", extension=".xml")
-            configuration = settings.Settings( fileObject.pathToFile() )
+            configuration = settings.Settings(fileObject.pathToFile())
             self.assertEqual(configuration.get_contents_file(), fileObject.pathToFile())
 
         def test_get_named_setting(self):
-            fileObject = TempFile(contents=b"<SettingList><Setting name='a'>1</Setting></SettingList>", extension=".xml")
-            configuration = settings.Settings( fileObject.pathToFile() )
+            fileObject = TempFile(contents=b"<SettingList><Setting name='a'>1</Setting></SettingList>",
+                                  extension=".xml")
+            configuration = settings.Settings(fileObject.pathToFile())
             self.assertEqual(configuration.get_named_setting('a'), '1')
             self.assertRaises(KeyError, configuration.get_named_setting, 'b')
 

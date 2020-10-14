@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "EventPresenter.h"
 #include "Common/Parse.h"
@@ -75,13 +75,15 @@ void EventPresenter::updateWidgetEnabledState() const {
   }
 }
 
-void EventPresenter::reductionPaused() { updateWidgetEnabledState(); }
+void EventPresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
 
-void EventPresenter::reductionResumed() { updateWidgetEnabledState(); }
+void EventPresenter::notifyReductionResumed() { updateWidgetEnabledState(); }
 
-void EventPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
+void EventPresenter::notifyAutoreductionPaused() { updateWidgetEnabledState(); }
 
-void EventPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
+void EventPresenter::notifyAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
 
 void EventPresenter::setUniformSlicingByTimeFromView() {
   m_slicing = UniformSlicingByTime(m_view->uniformSliceLength());

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADNEXUSPROCESSED2TEST_H_
-#define MANTID_DATAHANDLING_LOADNEXUSPROCESSED2TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -40,7 +39,7 @@ Mantid::API::MatrixWorkspace_sptr do_load(const std::string &filename) {
   loader.execute();
   Workspace_sptr out = loader.getProperty("OutputWorkspace");
   auto matrixWSOut =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(out);
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(out);
   return matrixWSOut;
 }
 
@@ -53,7 +52,7 @@ Mantid::API::MatrixWorkspace_sptr do_load_v1(const std::string &filename) {
 }
 
 namespace test_utility {
-template <typename T> void save(const std::string filename, T &ws) {
+template <typename T> void save(const std::string &filename, T &ws) {
   SaveNexusESS alg;
   alg.setChild(true);
   alg.setRethrows(true);
@@ -133,8 +132,8 @@ public:
     std::vector<SpectrumNumber> spectrumNumbers;
     size_t i = wsIn->getNumberHistograms() - 1;
     for (size_t j = 0; j < wsIn->getNumberHistograms(); --i, ++j) {
-      specDefinitions.push_back(SpectrumDefinition(i));
-      spectrumNumbers.push_back(SpectrumNumber(static_cast<int>(j)));
+      specDefinitions.emplace_back(SpectrumDefinition(i));
+      spectrumNumbers.emplace_back(SpectrumNumber(static_cast<int>(j)));
     }
     IndexInfo info(spectrumNumbers);
     info.setSpectrumDefinitions(specDefinitions);
@@ -178,7 +177,6 @@ public:
     using Mantid::SpectrumDefinition;
     using namespace Mantid::Indexing;
     FileResource fileInfo("test_spectra_miss_detectors.nxs");
-    fileInfo.setDebugMode(true);
 
     auto instr = ComponentCreationHelper::createTestInstrumentRectangular(
         2 /*numBanks*/, 10 /*numPixels*/); // 200 detectors in instrument
@@ -191,8 +189,8 @@ public:
     std::vector<SpectrumNumber> spectrumNumbers;
     // We add a single detector index 0 to a single spectrum with number (1). No
     // other mappings provided!
-    specDefinitions.push_back(SpectrumDefinition(0));
-    spectrumNumbers.push_back(SpectrumNumber(1));
+    specDefinitions.emplace_back(SpectrumDefinition(0));
+    spectrumNumbers.emplace_back(SpectrumNumber(1));
     IndexInfo info(spectrumNumbers);
     info.setSpectrumDefinitions(specDefinitions);
     wsIn->setIndexInfo(info);
@@ -253,13 +251,13 @@ public:
       SpectrumDefinition def;
       def.add(i);
       def.add(i - 1);
-      specDefinitions.push_back(def);
-      spectrumNumbers.push_back(SpectrumNumber(static_cast<int>(j)));
+      specDefinitions.emplace_back(def);
+      spectrumNumbers.emplace_back(SpectrumNumber(static_cast<int>(j)));
     }
     IndexInfo info(spectrumNumbers);
     info.setSpectrumDefinitions(specDefinitions);
     // Create a workspace, data is not important
-    auto wsIn = boost::make_shared<Workspace2D>();
+    auto wsIn = std::make_shared<Workspace2D>();
     Histogram histogram(BinEdges{1.0, 2.0}, Counts(), CountVariances());
     wsIn->setInstrument(instrument);
     wsIn->initialize(info, histogram);
@@ -311,5 +309,3 @@ public:
     TS_ASSERT(!wsOut->detectorInfo().isEquivalent(wsIn->detectorInfo()));
   }
 };
-
-#endif /* MANTID_DATAHANDLING_LOADNEXUSPROCESSED2TEST_H_ */

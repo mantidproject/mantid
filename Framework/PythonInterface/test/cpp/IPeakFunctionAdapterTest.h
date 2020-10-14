@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IPEAKFUNCTIONADAPTERTEST_H
-#define IPEAKFUNCTIONADAPTERTEST_H
+#pragma once
 
 #include "FunctionAdapterTestCommon.h"
 #include "MantidPythonInterface/api/FitFunctions/IPeakFunctionAdapter.h"
@@ -60,8 +59,8 @@ public:
 
   void testfunction_Uses_Numerical_Deriv_When_Deriv_NotSupplied() {
     using Mantid::API::IPeakFunction_sptr;
-    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     using Mantid::PythonInterface::createTestFunction;
+    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     IPeakFunction_sptr noDerivPeakFunction;
     TS_ASSERT_THROWS_NOTHING(
         noDerivPeakFunction =
@@ -81,8 +80,8 @@ public:
 
   void testfunction_Uses_Supplied_Deriv() {
     using Mantid::API::IPeakFunction_sptr;
-    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     using Mantid::PythonInterface::createTestFunction;
+    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     IPeakFunction_sptr peakFuncWithDeriv;
     TS_ASSERT_THROWS_NOTHING(
         peakFuncWithDeriv =
@@ -101,5 +100,3 @@ public:
     TS_ASSERT_DELTA(2000, jacobian.get(0, 0), 1e-05);
   }
 };
-
-#endif // IPEAKFUNCTIONADAPTERTEST_H

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MaskBinsFromTable.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -38,7 +38,7 @@ MaskBinsFromTable::MaskBinsFromTable()
 void MaskBinsFromTable::init() {
   this->declareProperty(std::make_unique<WorkspaceProperty<>>(
                             "InputWorkspace", "", Direction::Input,
-                            boost::make_shared<HistogramValidator>()),
+                            std::make_shared<HistogramValidator>()),
                         "Input Workspace to mask bins. ");
   this->declareProperty(std::make_unique<WorkspaceProperty<>>(
                             "OutputWorkspace", "", Direction::Output),
@@ -68,7 +68,7 @@ void MaskBinsFromTable::exec() {
 /** Call MaskBins
  * @param dataws :: MatrixWorkspace to mask bins for
  */
-void MaskBinsFromTable::maskBins(API::MatrixWorkspace_sptr dataws) {
+void MaskBinsFromTable::maskBins(const API::MatrixWorkspace_sptr &dataws) {
   bool firstloop = true;
   API::MatrixWorkspace_sptr outputws;
 
@@ -134,7 +134,8 @@ void MaskBinsFromTable::maskBins(API::MatrixWorkspace_sptr dataws) {
  * @param dataws :: MatrixWorkspace to mask
  */
 void MaskBinsFromTable::processMaskBinWorkspace(
-    TableWorkspace_sptr masktblws, API::MatrixWorkspace_sptr dataws) {
+    const TableWorkspace_sptr &masktblws,
+    const API::MatrixWorkspace_sptr &dataws) {
   // Check input
   if (!masktblws)
     throw std::invalid_argument("Input workspace is not a table workspace.");
@@ -199,9 +200,9 @@ void MaskBinsFromTable::processMaskBinWorkspace(
                   << " SpectraList = " << spectralist << ".\n";
 
     // Store to class variables
-    m_xminVec.push_back(xmin);
-    m_xmaxVec.push_back(xmax);
-    m_spectraVec.push_back(spectralist);
+    m_xminVec.emplace_back(xmin);
+    m_xmaxVec.emplace_back(xmax);
+    m_spectraVec.emplace_back(spectralist);
   }
 }
 
@@ -213,15 +214,15 @@ void MaskBinsFromTable::processMaskBinWorkspace(
  * @return :: list of spectra/workspace index IDs in string format
  */
 std::string
-MaskBinsFromTable::convertToSpectraList(API::MatrixWorkspace_sptr dataws,
-                                        std::string detidliststr) {
+MaskBinsFromTable::convertToSpectraList(const API::MatrixWorkspace_sptr &dataws,
+                                        const std::string &detidliststr) {
   // Use array property to get a list of detectors
   vector<int> detidvec;
   ArrayProperty<int> parser("detids", detidliststr);
 
   size_t numitems = parser.size();
   for (size_t i = 0; i < numitems; ++i) {
-    detidvec.push_back(parser.operator()()[i]);
+    detidvec.emplace_back(parser.operator()()[i]);
     g_log.debug() << "[DB] DetetorID = " << detidvec.back() << " to mask.";
   }
 
@@ -234,7 +235,7 @@ MaskBinsFromTable::convertToSpectraList(API::MatrixWorkspace_sptr dataws,
     detid2index_map::const_iterator fiter = refermap.find(detid);
     if (fiter != refermap.end()) {
       size_t wsindex = fiter->second;
-      wsindexvec.push_back(wsindex);
+      wsindexvec.emplace_back(wsindex);
     } else {
       g_log.warning() << "Detector ID " << detid
                       << " cannot be mapped to any workspace index/spectrum."

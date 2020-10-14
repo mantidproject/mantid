@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_CONVERTTOYSPACE_H_
-#define MANTID_CURVEFITTING_CONVERTTOYSPACE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
 
@@ -41,7 +41,7 @@ struct DetectorParams {
   transformation is defined
   by equation (7) in http://link.aip.org/link/doi/10.1063/1.3561493?ver=pdfcov
 */
-class DLLExport ConvertToYSpace : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL ConvertToYSpace : public API::Algorithm {
 public:
   /// Constructor
   ConvertToYSpace();
@@ -100,5 +100,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_CONVERTTOYSPACE_H_ */

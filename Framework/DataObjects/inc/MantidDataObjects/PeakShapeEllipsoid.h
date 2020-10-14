@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOID_H_
-#define MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOID_H_
+#pragma once
 
 #include "MantidDataObjects/PeakShapeBase.h"
 #include "MantidKernel/Matrix.h"
@@ -64,11 +63,8 @@ private:
   std::vector<double> m_abc_radiiBackgroundOuter;
 };
 
-using PeakShapeEllipsoid_sptr = boost::shared_ptr<PeakShapeEllipsoid>;
-using PeakShapeEllipsoid_const_sptr =
-    boost::shared_ptr<const PeakShapeEllipsoid>;
+using PeakShapeEllipsoid_sptr = std::shared_ptr<PeakShapeEllipsoid>;
+using PeakShapeEllipsoid_const_sptr = std::shared_ptr<const PeakShapeEllipsoid>;
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOID_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BOXCONTROLLER_NEXUS_IO_TEST_H
-#define BOXCONTROLLER_NEXUS_IO_TEST_H
+#pragma once
 
 #include "MantidAPI/FileFinder.h"
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
@@ -75,10 +74,10 @@ public:
   }
 
   void test_CreateOrOpenFile() {
+    using Mantid::coord_t;
     using Mantid::API::FileFinder;
     using Mantid::DataObjects::BoxControllerNeXusIO;
     using Mantid::Kernel::Exception::FileError;
-    using Mantid::coord_t;
 
     BoxControllerNeXusIO *pSaver(nullptr);
     TS_ASSERT_THROWS_NOTHING(pSaver = createTestBoxController());
@@ -129,7 +128,7 @@ public:
 
     std::vector<uint64_t> freeSpaceVectorToSet;
     for (uint64_t i = 0; i < 20; i++) {
-      freeSpaceVectorToSet.push_back(i);
+      freeSpaceVectorToSet.emplace_back(i);
     }
     pSaver->setFreeSpaceVector(freeSpaceVectorToSet);
 
@@ -240,4 +239,3 @@ private:
     return new Mantid::DataObjects::BoxControllerNeXusIO(sc.get());
   }
 };
-#endif

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENTWIDGETMASKTAB_H_
-#define INSTRUMENTWIDGETMASKTAB_H_
+#pragma once
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
@@ -14,7 +13,7 @@
 #include <QFrame>
 #include <QMap>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class Instrument3DWidget;
 
@@ -67,6 +66,9 @@ public:
     DrawRectangle,
     DrawEllipticalRing,
     DrawRectangularRing,
+    DrawSector,
+    Pixel,
+    Tube,
     DrawFree
   };
 
@@ -95,7 +97,9 @@ protected slots:
   void clearShapes();
   void applyMask();
   void applyMaskToView();
-  void storeDetectorMask(bool isROI = false);
+  void
+  storeDetectorMask(bool isROI = false,
+                    const std::vector<size_t> &dets = std::vector<size_t>());
   void storeBinMask();
   void storeMask();
   void clearMask();
@@ -115,13 +119,14 @@ protected slots:
   void toggleMaskGroup();
   void enableApplyButtons();
   void doubleChanged(QtProperty * /*prop*/);
+  void singlePixelPicked(size_t);
 
 protected:
   void showEvent(QShowEvent * /*unused*/) override;
 
   void clearProperties();
   void setProperties();
-  boost::shared_ptr<Mantid::API::MatrixWorkspace>
+  std::shared_ptr<Mantid::API::MatrixWorkspace>
   createMaskWorkspace(bool invertMask, bool temp = false) const;
   void saveMaskingToWorkspace(bool invertMask = false);
   void saveMaskingToFile(bool invertMask = false);
@@ -144,7 +149,7 @@ private:
   /// Load masks applied to the view but not to the workspace
   void loadMaskViewFromProject(const std::string &name);
   /// Run the LoadMask algorithm to get a MaskWorkspace
-  boost::shared_ptr<Mantid::API::MatrixWorkspace>
+  std::shared_ptr<Mantid::API::MatrixWorkspace>
   loadMask(const std::string &fileName);
 
 protected:
@@ -152,6 +157,7 @@ protected:
   Activity m_activity;
   /// True if there is a mask not applied to the data workspace
   bool m_hasMaskToApply;
+  QList<Mantid::detid_t> m_detectorsToGroup;
 
   QRadioButton *m_masking_on;
   QRadioButton *m_grouping_on;
@@ -166,7 +172,10 @@ protected:
   QPushButton *m_rectangle;
   QPushButton *m_ring_ellipse;
   QPushButton *m_ring_rectangle;
+  QPushButton *m_pixel;
+  QPushButton *m_sector;
   QPushButton *m_free_draw;
+  QPushButton *m_tube;
 
   QPushButton *m_applyToData;
   QPushButton *m_applyToView;
@@ -214,5 +223,3 @@ protected:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*INSTRUMENTWIDGETMASKTAB_H_*/

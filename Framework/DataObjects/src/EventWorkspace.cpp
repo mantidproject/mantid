@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/Algorithm.h"
@@ -55,7 +55,7 @@ EventWorkspace::EventWorkspace(const EventWorkspace &other)
     auto newel = std::make_unique<EventList>(*el);
     // Make sure to update the MRU to point to THIS event workspace.
     newel->setMRU(this->mru.get());
-    this->data.push_back(std::move(newel));
+    this->data.emplace_back(std::move(newel));
   }
 }
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_V2D_H_
-#define MANTID_KERNEL_V2D_H_
+#pragma once
 
 //-----------------------------------------------------------------------------
 // Includes
@@ -172,5 +171,3 @@ MANTID_KERNEL_DLL std::ostream &operator<<(std::ostream &, const V2D &);
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif // MANTID_KERNEL_V2D_H_

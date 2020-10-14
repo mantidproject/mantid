@@ -1,17 +1,19 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SortHKL.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Crystal/PointGroupFactory.h"
@@ -59,13 +61,13 @@ void SortHKL::init() {
                  std::back_inserter(pgOptions),
                  [](const auto &group) { return group->getName(); });
   // Scripts may have Orthorhombic misspelled from past bug in PointGroupFactory
-  pgOptions.push_back("222 (Orthorombic)");
-  pgOptions.push_back("mm2 (Orthorombic)");
-  pgOptions.push_back("2mm (Orthorombic)");
-  pgOptions.push_back("m2m (Orthorombic)");
-  pgOptions.push_back("mmm (Orthorombic)");
+  pgOptions.emplace_back("222 (Orthorombic)");
+  pgOptions.emplace_back("mm2 (Orthorombic)");
+  pgOptions.emplace_back("2mm (Orthorombic)");
+  pgOptions.emplace_back("m2m (Orthorombic)");
+  pgOptions.emplace_back("mmm (Orthorombic)");
   declareProperty("PointGroup", pgOptions[0],
-                  boost::make_shared<StringListValidator>(pgOptions),
+                  std::make_shared<StringListValidator>(pgOptions),
                   "Which point group applies to this crystal?");
 
   std::vector<std::string> centeringOptions;
@@ -77,7 +79,7 @@ void SortHKL::init() {
                  std::back_inserter(centeringOptions),
                  [](const auto &condition) { return condition->getName(); });
   declareProperty("LatticeCentering", centeringOptions[0],
-                  boost::make_shared<StringListValidator>(centeringOptions),
+                  std::make_shared<StringListValidator>(centeringOptions),
                   "Appropriate lattice centering for the peaks.");
 
   declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
@@ -96,7 +98,7 @@ void SortHKL::init() {
                   "If false, new output table workspace (default).");
   const std::vector<std::string> equivTypes{"Mean", "Median"};
   declareProperty("EquivalentIntensities", equivTypes.front(),
-                  boost::make_shared<StringListValidator>(equivTypes),
+                  std::make_shared<StringListValidator>(equivTypes),
                   "Replace intensities by mean(default), "
                   "or median.");
   declareProperty(std::make_unique<PropertyWithValue<double>>(
@@ -297,7 +299,7 @@ SortHKL::getUniqueReflections(const std::vector<Peak> &peaks,
 /// Returns the centering extracted from the user-supplied property.
 ReflectionCondition_sptr SortHKL::getCentering() const {
   ReflectionCondition_sptr centering =
-      boost::make_shared<ReflectionConditionPrimitive>();
+      std::make_shared<ReflectionConditionPrimitive>();
 
   const std::string refCondName = getPropertyValue("LatticeCentering");
   const auto found = std::find_if(m_refConds.crbegin(), m_refConds.crend(),
@@ -361,7 +363,7 @@ SortHKL::getStatisticsTable(const std::string &name) const {
   if (append && AnalysisDataService::Instance().doesExist(name)) {
     tablews = AnalysisDataService::Instance().retrieveWS<TableWorkspace>(name);
   } else {
-    tablews = boost::make_shared<TableWorkspace>();
+    tablews = std::make_shared<TableWorkspace>();
     tablews->addColumn("str", "Resolution Shell");
     tablews->addColumn("int", "No. of Unique Reflections");
     tablews->addColumn("double", "Resolution Min");
@@ -412,7 +414,8 @@ PeaksWorkspace_sptr SortHKL::getOutputPeaksWorkspace(
 }
 
 /// Sorts the peaks in the workspace by H, K and L.
-void SortHKL::sortOutputPeaksByHKL(IPeaksWorkspace_sptr outputPeaksWorkspace) {
+void SortHKL::sortOutputPeaksByHKL(
+    const IPeaksWorkspace_sptr &outputPeaksWorkspace) {
   // Sort by HKL
   std::vector<std::pair<std::string, bool>> criteria{
       {"H", true}, {"K", true}, {"L", true}};

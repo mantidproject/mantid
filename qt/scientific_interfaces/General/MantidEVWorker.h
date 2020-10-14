@@ -1,16 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <vector>
 
-#ifndef INTERFACES_MANTID_EV_WORKER_H
-#define INTERFACES_MANTID_EV_WORKER_H
+#pragma once
 
 /**
    @class MantidEVWorker
@@ -168,5 +166,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // INTERFACES_MANTID_EV_WORKER_H

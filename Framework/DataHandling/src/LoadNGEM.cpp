@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidDataHandling/LoadNGEM.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/Run.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/BoundedValidator.h"
@@ -52,9 +52,9 @@ uint64_t swapUint64(uint64_t word) {
  * @param bigEndian The big endian formatted event.
  * @param smallEndian The resulting small endian formatted event.
  */
-void correctForBigEndian(EventUnion *&bigEndian, EventUnion &smallEndian) {
-  smallEndian.splitWord.words[0] = swapUint64(bigEndian->splitWord.words[1]);
-  smallEndian.splitWord.words[1] = swapUint64(bigEndian->splitWord.words[0]);
+void correctForBigEndian(EventUnion &bigEndian, EventUnion &smallEndian) {
+  smallEndian.splitWord.words[0] = swapUint64(bigEndian.splitWord.words[1]);
+  smallEndian.splitWord.words[1] = swapUint64(bigEndian.splitWord.words[0]);
 }
 
 /**
@@ -99,20 +99,18 @@ void addFrameToOutputWorkspace(
  * @param events The main events data.
  * @param dataWorkspace The workspace to add the data to.
  */
-void createEventWorkspace(const int &maxToF, const double &binWidth,
+void createEventWorkspace(const double &maxToF, const double &binWidth,
                           std::vector<DataObjects::EventList> &events,
                           DataObjects::EventWorkspace_sptr &dataWorkspace) {
-  std::vector<double> xAxis;
-  // Round up number of bins needed and reserve the space in the vector.
-  xAxis.reserve(int(std::ceil(maxToF / binWidth)));
-  for (auto i = 0; i < (maxToF / binWidth); i++) {
-    xAxis.push_back(i * binWidth);
-  }
+  // Round up number of bins needed
+  std::vector<double> xAxis(int(std::ceil(maxToF / binWidth)));
+  std::generate(xAxis.begin(), xAxis.end(),
+                [i = 0, &binWidth]() mutable { return binWidth * i++; });
 
   dataWorkspace = DataObjects::create<DataObjects::EventWorkspace>(
       NUM_OF_SPECTRA, HistogramData::Histogram(HistogramData::BinEdges(xAxis)));
   PARALLEL_FOR_NO_WSP_CHECK()
-  for (auto i = 0; i < events.size(); ++i) {
+  for (int i = 0; i < NUM_OF_SPECTRA; ++i) {
     dataWorkspace->getSpectrum(i) = events[i];
     dataWorkspace->getSpectrum(i).setSpectrumNo(i + 1);
     dataWorkspace->getSpectrum(i).setDetectorID(i + 1);
@@ -122,6 +120,20 @@ void createEventWorkspace(const int &maxToF, const double &binWidth,
       Kernel::UnitFactory::Instance().create("TOF");
   dataWorkspace->setYUnit("Counts");
 }
+
+/**
+ * @brief Add a value to the sample logs.
+ *
+ * @param name The name of the log.
+ * @param value The content of the log.
+ * @param ws The workspace to add the log to.
+ */
+template <typename ValueType>
+void addToSampleLog(const std::string &name, const ValueType &value,
+                    DataObjects::EventWorkspace &ws) {
+  ws.mutableRun().addProperty(name, value, false);
+}
+
 } // namespace
 
 /**
@@ -154,11 +166,10 @@ void LoadNGEM::init() {
                       "OutputWorkspace", "", Kernel::Direction::Output),
                   "The output workspace");
 
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<int>>();
   mustBePositive->setLower(0);
 
-  auto mustBePositiveDbl =
-      boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto mustBePositiveDbl = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositiveDbl->setLower(0.0);
 
   // Bin Width
@@ -189,8 +200,8 @@ void LoadNGEM::exec() {
   const int minEventsReq(getProperty("MinEventsPerFrame"));
   const int maxEventsReq(getProperty("MaxEventsPerFrame"));
 
-  int maxToF = -1;
-  int minToF = 2147483647;
+  double maxToF{-std::numeric_limits<double>::max()},
+      minToF{std::numeric_limits<double>::max()};
   const double binWidth(getProperty("BinWidth"));
 
   int rawFrames = 0;
@@ -219,10 +230,10 @@ void LoadNGEM::exec() {
   DataObjects::EventWorkspace_sptr dataWorkspace;
   createEventWorkspace(maxToF, binWidth, events, dataWorkspace);
 
-  addToSampleLog("raw_frames", rawFrames, dataWorkspace);
-  addToSampleLog("good_frames", goodFrames, dataWorkspace);
-  addToSampleLog("max_ToF", maxToF, dataWorkspace);
-  addToSampleLog("min_ToF", minToF, dataWorkspace);
+  addToSampleLog("raw_frames", rawFrames, *dataWorkspace);
+  addToSampleLog("good_frames", goodFrames, *dataWorkspace);
+  addToSampleLog("max_ToF", maxToF, *dataWorkspace);
+  addToSampleLog("min_ToF", minToF, *dataWorkspace);
 
   loadInstrument(dataWorkspace);
 
@@ -252,7 +263,7 @@ void LoadNGEM::exec() {
  */
 void LoadNGEM::loadSingleFile(
     const std::vector<std::string> &filePath, int &eventCountInFrame,
-    int &maxToF, int &minToF, int &rawFrames, int &goodFrames,
+    double &maxToF, double &minToF, int &rawFrames, int &goodFrames,
     const int &minEventsReq, const int &maxEventsReq,
     MantidVec &frameEventCounts, std::vector<DataObjects::EventList> &events,
     std::vector<DataObjects::EventList> &eventsInFrame,
@@ -265,25 +276,34 @@ void LoadNGEM::loadSingleFile(
   if (!file.is_open()) {
     throw std::runtime_error("File could not be found.");
   }
-  std::array<char, 16> buffer;
 
   const size_t totalNumEvents = verifyFileSize(file) / 16;
+  constexpr size_t SKIP_WORD_SIZE = 4;
   size_t numProcessedEvents = 0;
+  size_t numWordsSkipped = 0;
 
-  while (!file.eof()) {
+  while (true) {
     // Load an event into the variable.
-    file.read(buffer.data(), 16);
-    auto eventBigEndian = reinterpret_cast<EventUnion *>(buffer.data());
-
-    // Correct for the big endian format.
-    EventUnion event;
-    correctForBigEndian(eventBigEndian, event);
-
+    // Occasionally we may get a file where the first event has been chopped,
+    // so we seek to the start of a valid event.
+    // Chopping only seems to occur on a 4 byte word, hence seekg() of 4
+    EventUnion event, eventBigEndian;
+    do {
+      file.read(reinterpret_cast<char *>(&eventBigEndian),
+                sizeof(eventBigEndian));
+      // Correct for the big endian format of nGEM datafile.
+      correctForBigEndian(eventBigEndian, event);
+    } while (!event.generic.check() &&
+             !file.seekg(SKIP_WORD_SIZE, std::ios_base::cur).eof() &&
+             ++numWordsSkipped);
+    if (file.eof()) {
+      break; // we have either not read an event, or only read part of one
+    }
     if (event.coincidence.check()) { // Check for coincidence event.
       ++eventCountInFrame;
       uint64_t pixel = event.coincidence.getPixel();
-      int tof =
-          event.coincidence.timeOfFlight / 1000; // Convert to microseconds (us)
+      // Convert to microseconds (us)
+      const double tof = event.coincidence.timeOfFlight / 1000.0;
 
       if (tof > maxToF) {
         maxToF = tof;
@@ -302,47 +322,20 @@ void LoadNGEM::loadSingleFile(
                                        fileCount)) {
         return;
       }
-    } else { // Catch all other events and notify.
-      g_log.warning() << "Unexpected event type loaded.\n";
+    } else if (event.generic.check()) { // match all other events and notify.
+      g_log.warning() << "Unexpected event type ID=" << event.generic.id
+                      << " loaded.\n";
+    } else { // if we were to get to here, must be a corrupt event
+      g_log.warning() << "Corrupt event detected.\n";
     }
+  }
+  if (numWordsSkipped > 0) {
+    g_log.warning()
+        << SKIP_WORD_SIZE * numWordsSkipped
+        << " bytes of file data were skipped when locating valid events.\n";
   }
   g_log.information() << "Finished loading a file.\n";
   ++fileCount;
-}
-
-/**
- * @brief Add a string value to the sample logs.
- *
- * @param logName The name of the log.
- * @param logText The content of the log.
- * @param ws The workspace to add the log to.
- */
-void LoadNGEM::addToSampleLog(const std::string &logName,
-                              const std::string &logText,
-                              DataObjects::EventWorkspace_sptr &ws) {
-  API::Algorithm_sptr sampLogAlg = createChildAlgorithm("AddSampleLog");
-  sampLogAlg->setProperty("Workspace", ws);
-  sampLogAlg->setProperty("LogType", "String");
-  sampLogAlg->setProperty("LogName", logName);
-  sampLogAlg->setProperty("LogText", logText);
-  sampLogAlg->executeAsChildAlg();
-}
-
-/**
- * @brief Add a number value to the sample logs.
- *
- * @param logName Name of the log.
- * @param logNumber The value of the log.
- * @param ws The workspace to add the log to.
- */
-void LoadNGEM::addToSampleLog(const std::string &logName, const int &logNumber,
-                              DataObjects::EventWorkspace_sptr &ws) {
-  API::Algorithm_sptr sampLogAlg = createChildAlgorithm("AddSampleLog");
-  sampLogAlg->setProperty("Workspace", ws);
-  sampLogAlg->setProperty("LogType", "Number");
-  sampLogAlg->setProperty("LogName", logName);
-  sampLogAlg->setProperty("LogText", std::to_string(logNumber));
-  sampLogAlg->executeAsChildAlg();
 }
 
 /**
@@ -412,8 +405,8 @@ void LoadNGEM::createCountWorkspace(
   std::string countsWorkspaceName(this->getProperty("OutputWorkspace"));
   countsWorkspaceName.append("_event_counts");
   countsWorkspace->setYUnit("Counts");
-  boost::shared_ptr<Kernel::Units::Label> XLabel =
-      boost::dynamic_pointer_cast<Kernel::Units::Label>(
+  std::shared_ptr<Kernel::Units::Label> XLabel =
+      std::dynamic_pointer_cast<Kernel::Units::Label>(
           Kernel::UnitFactory::Instance().create("Label"));
   XLabel->setLabel("Frame");
   countsWorkspace->getAxis(0)->unit() = XLabel;

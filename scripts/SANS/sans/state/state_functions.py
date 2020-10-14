@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """Set of general purpose functions which are related to the SANSState approach."""
-
-from __future__ import (absolute_import, division, print_function)
 
 from sans.common.enums import (DetectorType)
 from sans.common.xml_parsing import (get_monitor_names_from_idf_file, get_named_elements_from_ipf_file)
@@ -81,8 +79,8 @@ def set_detector_names(state, ipf_path, invalid_detector_types=None):
     if invalid_detector_types is None:
         invalid_detector_types = []
 
-    lab_keyword = DetectorType.to_string(DetectorType.LAB)
-    hab_keyword = DetectorType.to_string(DetectorType.HAB)
+    lab_keyword = DetectorType.LAB.value
+    hab_keyword = DetectorType.HAB.value
     detector_names = {lab_keyword: "low-angle-detector-name",
                       hab_keyword: "high-angle-detector-name"}
     detector_names_short = {lab_keyword: "low-angle-detector-short-name",
@@ -96,7 +94,7 @@ def set_detector_names(state, ipf_path, invalid_detector_types=None):
 
     for detector_type in state.detectors:
         try:
-            if DetectorType.from_string(detector_type) in invalid_detector_types:
+            if DetectorType(detector_type) in invalid_detector_types:
                 continue
             detector_name_tag = detector_names[detector_type]
             detector_name_short_tag = detector_names_short[detector_type]

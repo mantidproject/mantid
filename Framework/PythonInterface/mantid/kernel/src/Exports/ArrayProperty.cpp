@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/NullValidator.h"
@@ -114,7 +114,7 @@ template <> std::string dtype(ArrayProperty<std::string> &self) {
 template <typename T>
 ArrayProperty<T> *createArrayPropertyFromList(const std::string &name,
                                               const boost::python::list &values,
-                                              IValidator_sptr validator,
+                                              const IValidator_sptr &validator,
                                               const unsigned int direction) {
   return new ArrayProperty<T>(name, Converters::PySequenceToVector<T>(values)(),
                               validator, direction);
@@ -130,10 +130,10 @@ ArrayProperty<T> *createArrayPropertyFromList(const std::string &name,
  * @return
  */
 template <typename T>
-ArrayProperty<T> *createArrayPropertyFromNDArray(const std::string &name,
-                                                 const NDArray &values,
-                                                 IValidator_sptr validator,
-                                                 const unsigned int direction) {
+ArrayProperty<T> *
+createArrayPropertyFromNDArray(const std::string &name, const NDArray &values,
+                               const IValidator_sptr &validator,
+                               const unsigned int direction) {
   return new ArrayProperty<T>(name, Converters::NDArrayToVector<T>(values)(),
                               validator, direction);
 }

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVEFullprofRESOLUTION_H_
-#define MANTID_DATAHANDLING_SAVEFullprofRESOLUTION_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -58,7 +57,7 @@ private:
   void parseTableWorkspace();
 
   /// Check wether a profile parameter map has the parameter
-  bool has_key(std::map<std::string, double> profmap, std::string key);
+  bool has_key(std::map<std::string, double> profmap, const std::string &key);
 
   /// Map containing the name of value of each parameter required by .irf file
   std::map<std::string, double> m_profileParamMap;
@@ -81,5 +80,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_SAVEFullprofRESOLUTION_H_ */

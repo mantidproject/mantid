@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """Tests the construction of the various workspace
 property types
 """
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import testhelpers
 from mantid.api import (WorkspaceProperty, WorkspaceGroupProperty, MatrixWorkspaceProperty,
@@ -16,6 +14,7 @@ from mantid.api import (WorkspaceProperty, WorkspaceGroupProperty, MatrixWorkspa
                         IMDWorkspaceProperty, IMDHistoWorkspaceProperty, IMDEventWorkspaceProperty,
                         PropertyMode, LockMode)
 from mantid.kernel import Direction, Property
+
 
 class WorkspacePropertiesTest(unittest.TestCase):
 

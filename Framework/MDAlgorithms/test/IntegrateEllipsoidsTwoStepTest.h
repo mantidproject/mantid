@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegrateEllipsoidsTwoStep.h"
 
@@ -176,7 +176,7 @@ public:
     cloneWorkspace->setPropertyValue("OutputWorkspace", "dist_workspace");
     cloneWorkspace->execute();
     Workspace_sptr temp = cloneWorkspace->getProperty("OutputWorkspace");
-    auto distWS = boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+    auto distWS = std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 
     auto convertToDist = algManager.createUnmanaged("ConvertToDistribution");
     convertToDist->setChild(true);

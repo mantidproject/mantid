@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MantidTreeWidgetItem.h"
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
@@ -25,7 +25,7 @@ MantidTreeWidgetItem::MantidTreeWidgetItem(MantidTreeWidget *parent)
 /**Constructor.
  * Must be passed its parent MantidTreeWidget, to facilitate correct sorting.
  */
-MantidTreeWidgetItem::MantidTreeWidgetItem(QStringList list,
+MantidTreeWidgetItem::MantidTreeWidgetItem(const QStringList &list,
                                            MantidTreeWidget *parent)
     : QTreeWidgetItem(list), m_parent(parent), m_sortPos(0) {}
 
@@ -38,8 +38,7 @@ bool MantidTreeWidgetItem::operator<(const QTreeWidgetItem &other) const {
   // what the user has seletected in terms of order or scheme.
 
   bool thisShouldBeSorted = m_sortPos == 0;
-  const MantidTreeWidgetItem *mantidOther =
-      dynamic_cast<const MantidTreeWidgetItem *>(&other);
+  const auto *mantidOther = dynamic_cast<const MantidTreeWidgetItem *>(&other);
   int otherSortPos = mantidOther ? mantidOther->getSortPos() : 0;
   bool otherShouldBeSorted = otherSortPos == 0;
 

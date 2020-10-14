@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,no-init,too-many-lines
-from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import Direction, FloatArrayProperty, IntArrayBoundedValidator, \
     IntArrayProperty, Property, StringListValidator
 from mantid.api import AlgorithmFactory, DataProcessorAlgorithm, FileAction, FileProperty, \
@@ -26,6 +25,7 @@ class SNAPReduce(DataProcessorAlgorithm):
         if self.IPTS_dir is None:
             self.IPTS_dir = GetIPTS(Instrument='SNAP',
                                     RunNumber=str(run))
+
         return self.IPTS_dir
 
     def smooth(self, data, order):
@@ -87,7 +87,7 @@ class SNAPReduce(DataProcessorAlgorithm):
                     win_array = temp[i - w:i + w + 1].copy()
                     win_array_reversed = win_array[::-1]
                     average = (win_array + win_array_reversed) / 2
-                    temp[i] = np.min(average[:len(average) / 2])
+                    temp[i] = np.min(average[:int(len(average) / 2)])
 
         if LLS:
             temp = self.Inv_LLS_transformation(temp)
@@ -338,9 +338,15 @@ class SNAPReduce(DataProcessorAlgorithm):
         else:  # other values are already held in normWS
             return normWS
 
-    def _save(self, saveDir, basename, outputWksp):
+    def _save(self, runnumber, basename, outputWksp):
         if not self.getProperty("SaveData").value:
             return
+
+        # determine where to save the data
+        saveDir = self.getPropertyValue("OutputDirectory").strip()
+        if len(saveDir) <= 0:
+            self.log().notice('Using default save location')
+            saveDir = os.path.join(self.get_IPTS_Local(runnumber), 'shared', 'data')
 
         self.log().notice('Writing to \'' + saveDir + '\'')
 
@@ -397,7 +403,7 @@ class SNAPReduce(DataProcessorAlgorithm):
             progEnd = progStart + .9 * progDelta
             # pass all of the work to the child algorithm
             AlignAndFocusPowderFromFiles(Filename=filename, OutputWorkspace=wkspname ,
-                                         MaxChunkSize=self.chunksize,
+                                         MaxChunkSize=self.chunkSize,
                                          UnfocussedWorkspace=unfocussed,  # can be empty string
                                          startProgress=progStart,
                                          endProgress=progEnd,
@@ -491,7 +497,6 @@ class SNAPReduce(DataProcessorAlgorithm):
 
         for i, runnumber in enumerate(in_Runs):
             self.log().notice("processing run %s" % runnumber)
-            self.log().information(str(self.get_IPTS_Local(runnumber)))
 
             # put together output names
             new_Tag = Tag
@@ -557,15 +562,11 @@ class SNAPReduce(DataProcessorAlgorithm):
                 outputWksp = normalizedWS
 
                 if norm == "Extracted from Data" and Process_Mode == "Production":
-                        DeleteWorkspace(Workspace=redWS)
-                        DeleteWorkspace(Workspace=normalizationWS)
+                    DeleteWorkspace(Workspace=redWS)
+                    DeleteWorkspace(Workspace=normalizationWS)
 
-            # Save requested formats
-            saveDir = self.getPropertyValue("OutputDirectory").strip()
-            if len(saveDir) <= 0:
-                self.log().notice('Using default save location')
-                saveDir = os.path.join(self.get_IPTS_Local(runnumber), 'shared', 'data')
-            self._save(saveDir, basename, outputWksp)
+            # Save requested formats - function checks that saving is requested
+            self._save(runnumber, basename, outputWksp)
 
             # set workspace as an output so it gets history
             ConvertUnits(InputWorkspace=str(outputWksp), OutputWorkspace=str(outputWksp), Target=finalUnits,

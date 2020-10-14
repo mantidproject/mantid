@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGER_H
-#define MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGER_H
+#pragma once
 
 #include "MantidAPI/IRemoteJobManager.h"
 #include "MantidRemoteJobManagers/MantidWebServiceAPIHelper.h"
@@ -85,5 +84,3 @@ private:
 
 } // namespace RemoteJobManagers
 } // namespace Mantid
-
-#endif // MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGER_H

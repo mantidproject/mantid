@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_ANVREDCORRECTION_H_
-#define MANTID_CRYSTAL_ANVREDCORRECTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -58,7 +58,7 @@ const double radtodeg_half = 180.0 / M_PI / 2.;
     @author Vickie Lynch, Dennis Mikkelson SNS
     @date 06/14/2011
 */
-class DLLExport AnvredCorrection : public API::Algorithm {
+class MANTID_CRYSTAL_DLL AnvredCorrection : public API::Algorithm {
 public:
   /// (Empty) Constructor
   AnvredCorrection();
@@ -112,11 +112,11 @@ private:
   void BuildLamdaWeights();
   double absor_sphere(double &twoth, double &wl);
   void scale_init(const Geometry::IDetector &det,
-                  Geometry::Instrument_const_sptr inst, double &L2,
+                  const Geometry::Instrument_const_sptr &inst, double &L2,
                   double &depth, double &pathlength, std::string &bankName);
   void scale_exec(std::string &bankName, double &lambda, double &depth,
-                  Geometry::Instrument_const_sptr inst, double &pathlength,
-                  double &value);
+                  const Geometry::Instrument_const_sptr &inst,
+                  double &pathlength, double &value);
 
   double m_smu;                       ///< linear scattering coefficient in 1/cm
   double m_amu;                       ///< linear absoprtion coefficient in 1/cm
@@ -130,5 +130,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_ANVREDCORRECTION_H_*/

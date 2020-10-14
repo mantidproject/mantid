@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // This code was originally translated from Fortran code on
 // https://ccpforge.cse.rl.ac.uk/gf/project/ral_nlls June 2016
@@ -43,7 +43,7 @@ std::string TrustRegionMinimizer::name() const { return "Trust Region"; }
 void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
                                       size_t maxIterations) {
   m_leastSquares =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
+      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
           costFunction);
   if (!m_leastSquares) {
     throw std::runtime_error(
@@ -65,10 +65,10 @@ void TrustRegionMinimizer::initialize(API::ICostFunction_sptr costFunction,
   int j = 0;
   for (size_t i = 0; i < m_function->nParams(); ++i) {
     if (m_function->isActive(i)) {
-      m_J.m_index.push_back(j);
+      m_J.m_index.emplace_back(j);
       j++;
     } else
-      m_J.m_index.push_back(-1);
+      m_J.m_index.emplace_back(-1);
   }
   m_options.initial_radius = getProperty("InitialRadius");
 }
@@ -1056,7 +1056,7 @@ void solveSubproblemMain(int n, double radius, double f,
       history_type history_item;
       history_item.lambda = lambda;
       history_item.x_norm = inform.x_norm;
-      inform.history.push_back(history_item);
+      inform.history.emplace_back(history_item);
       inform.len_history = inform.len_history + 1;
     }
 

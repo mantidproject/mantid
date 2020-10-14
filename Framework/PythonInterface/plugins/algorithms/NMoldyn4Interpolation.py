@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # Author: Alex Phimister 08/2016
 # pylint: disable=invalid-name
 import math
 import numpy as np
 import scipy as sc
-
-from sys import version_info
 
 from mantid.simpleapi import *
 from mantid.kernel import *
@@ -48,8 +46,6 @@ class NMoldyn4Interpolation(PythonAlgorithm):
                              doc='Output Workspace of remapped simulation data')
 
     def PyExec(self):
-        self.validate_environment()
-
         e_fixed = float(self.getPropertyValue('EFixed'))
         # Loads simulated workspace
         simulation = self.getPropertyValue('InputWorkspace')
@@ -79,14 +75,6 @@ class NMoldyn4Interpolation(PythonAlgorithm):
                         NSpec=len(ref_Q), VerticalAxisUnit='MomentumTransfer',
                         VerticalAxisValues=ref_Q, WorkspaceTitle=output_ws)
         self.setProperty('OutputWorkspace', output_ws)
-
-    def validate_environment(self):
-        # RHEL 6 produces spurious results because it runs on Python 2.6.X
-        # test and warn for this. When RHEL6 is no longer supported this check
-        # can be removed
-        python_version = version_info
-        if python_version < (2, 7, 0):
-            logger.warning("NMoldyn4Interpolation may not run correctly on Python 2.6 and below")
 
     def validate_bounds(self, sim_X, ref_X, sim_Q, ref_Q):
         if min(sim_X) > min(ref_X):

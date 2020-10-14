@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -18,7 +18,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(CSGObject)
 
 void export_Object() {
-  register_ptr_to_python<boost::shared_ptr<CSGObject>>();
+  register_ptr_to_python<std::shared_ptr<CSGObject>>();
 
   class_<CSGObject, boost::python::bases<IObject>, boost::noncopyable>(
       "CSGObject", no_init)

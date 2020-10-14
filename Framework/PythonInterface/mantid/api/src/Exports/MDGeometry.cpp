@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MDGeometry.h"
 #include "MantidAPI/Workspace.h"
@@ -33,7 +33,7 @@ boost::python::list getNonIntegratedDimensionsAsPyList(const MDGeometry &self) {
   boost::python::list nonIntegrated;
   for (auto &dimension : dimensions) {
     nonIntegrated.append(
-        boost::const_pointer_cast<Mantid::Geometry::IMDDimension>(dimension));
+        std::const_pointer_cast<Mantid::Geometry::IMDDimension>(dimension));
   }
   return nonIntegrated;
 }
@@ -43,7 +43,8 @@ void export_MDGeometry() {
   class_<MDGeometry, boost::noncopyable>("MDGeometry", no_init)
       .def("getNumDims", &MDGeometry::getNumDims, arg("self"),
            "Returns the number of dimensions present")
-
+      .def("getNumNonIntegratedDims", &MDGeometry::getNumDims, arg("self"),
+           "Returns the number of non-integrated dimensions present")
       .def("getDimension", &MDGeometry::getDimension,
            (arg("self"), arg("index")),
            return_value_policy<RemoveConstSharedPtr>(),
@@ -112,6 +113,9 @@ void export_MDGeometry() {
            "Returns a :class:`~mantid.kernel.VMD` object defining the basis "
            "vector for the specified "
            "dimension")
+
+      .def("clearOriginalWorkspaces", &MDGeometry::clearOriginalWorkspaces,
+           (arg("self")), "Clear any attached original workspaces")
 
       .def("hasOriginalWorkspace", &MDGeometry::hasOriginalWorkspace,
            (arg("self"), arg("index")),

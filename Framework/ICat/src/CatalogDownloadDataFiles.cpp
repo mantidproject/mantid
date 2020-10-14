@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidICat/CatalogDownloadDataFiles.h"
 #include "MantidAPI/CatalogManager.h"
@@ -51,17 +51,15 @@ void CatalogDownloadDataFiles::init() {
                   "The session information of the catalog to use.");
   declareProperty(std::make_unique<ArrayProperty<std::string>>(
                       "FileLocations", std::vector<std::string>(),
-                      boost::make_shared<NullValidator>(), Direction::Output),
+                      std::make_shared<NullValidator>(), Direction::Output),
                   "A list of file locations to the catalog datafiles.");
 }
 
 /// Execute the algorithm
 void CatalogDownloadDataFiles::exec() {
   // Cast a catalog to a catalogInfoService to access downloading functionality.
-  auto catalogInfoService =
-      boost::dynamic_pointer_cast<API::ICatalogInfoService>(
-          API::CatalogManager::Instance().getCatalog(
-              getPropertyValue("Session")));
+  auto catalogInfoService = std::dynamic_pointer_cast<API::ICatalogInfoService>(
+      API::CatalogManager::Instance().getCatalog(getPropertyValue("Session")));
   // Check if the catalog created supports publishing functionality.
   if (!catalogInfoService)
     throw std::runtime_error("The catalog that you are using does not support "
@@ -109,7 +107,7 @@ void CatalogDownloadDataFiles::exec() {
     if (hasAccessToArchives) {
       g_log.information() << "File (" << *fileName << ") located in archives ("
                           << fileLocation << ").\n";
-      fileLocations.push_back(fileLocation);
+      fileLocations.emplace_back(fileLocation);
     } else {
       g_log.information()
           << "Unable to open file (" << *fileName
@@ -120,7 +118,7 @@ void CatalogDownloadDataFiles::exec() {
       progress(prog, "downloading over internet...");
       const std::string fullPathDownloadedFile =
           doDownloadandSavetoLocalDrive(url, *fileName);
-      fileLocations.push_back(fullPathDownloadedFile);
+      fileLocations.emplace_back(fullPathDownloadedFile);
     }
   }
 

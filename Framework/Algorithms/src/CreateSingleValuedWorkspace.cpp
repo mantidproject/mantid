@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateSingleValuedWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -23,7 +23,7 @@ void CreateSingleValuedWorkspace::init() {
                                                         Direction::Output),
                   "Name to use for the output workspace");
   declareProperty("DataValue", 0.0, "The value to place in the workspace");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("ErrorValue", 0.0, mustBePositive,
                   "The error value to place in the workspace (default 0.0)");

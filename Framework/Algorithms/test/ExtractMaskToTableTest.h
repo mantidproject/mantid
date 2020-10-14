@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_EXTRACTMASKTOTABLETEST_H_
-#define MANTID_ALGORITHMS_EXTRACTMASKTOTABLETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -50,7 +49,7 @@ public:
     // Case: A constains B
     vecA.reserve(20);
     for (size_t i = 0; i < 20; ++i) {
-      vecA.push_back(static_cast<int>(i) + 5);
+      vecA.emplace_back(static_cast<int>(i) + 5);
     }
 
     vector<int> vecB{6, 10, 14, 18};
@@ -65,10 +64,10 @@ public:
     vecB.clear();
 
     for (int i = 0; i < 10; ++i)
-      vecA.push_back(i * 3);
+      vecA.emplace_back(i * 3);
 
     for (int i = 0; i < 10; ++i)
-      vecB.push_back(i + 10);
+      vecB.emplace_back(i + 10);
 
     vecC = alg.subtractVector(vecA, vecB);
 
@@ -79,14 +78,14 @@ public:
     vecB.clear();
 
     for (int i = 0; i < 10; ++i)
-      vecA.push_back(5 + i * 2);
+      vecA.emplace_back(5 + i * 2);
 
     for (int i = 0; i < 3; ++i)
-      vecB.push_back(i + 1);
+      vecB.emplace_back(i + 1);
     for (int i = 0; i < 10; ++i)
-      vecB.push_back(i + 10);
-    vecB.push_back(25);
-    vecB.push_back(30);
+      vecB.emplace_back(i + 10);
+    vecB.emplace_back(25);
+    vecB.emplace_back(30);
 
     vecC = alg.subtractVector(vecA, vecB);
 
@@ -141,7 +140,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Validate
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("MaskTable1"));
     TS_ASSERT(outws);
     if (!outws)
@@ -190,7 +189,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("TestWorkspace2", inputws);
 
     // Create a table workspace to append to
-    auto existtablews = boost::make_shared<TableWorkspace>();
+    auto existtablews = std::make_shared<TableWorkspace>();
     existtablews->addColumn("double", "XMin");
     existtablews->addColumn("double", "XMax");
     existtablews->addColumn("str", "DetectorIDsList");
@@ -217,7 +216,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Validate
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("MaskTable2"));
     TS_ASSERT(outws);
     if (!outws)
@@ -296,7 +295,7 @@ public:
     AnalysisDataService::Instance().addOrReplace("TestWorkspace2", inputws);
 
     // Create a table workspace to append to
-    auto existtablews = boost::make_shared<TableWorkspace>();
+    auto existtablews = std::make_shared<TableWorkspace>();
     existtablews->addColumn("double", "XMin");
     existtablews->addColumn("double", "XMax");
     existtablews->addColumn("str", "DetectorIDsList");
@@ -323,7 +322,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Validate
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("MaskTable2"));
     TS_ASSERT(outws);
     if (!outws)
@@ -428,7 +427,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Validate
-    TableWorkspace_sptr outws = boost::dynamic_pointer_cast<TableWorkspace>(
+    TableWorkspace_sptr outws = std::dynamic_pointer_cast<TableWorkspace>(
         AnalysisDataService::Instance().retrieve("MaskTable3"));
     TS_ASSERT(outws);
     if (!outws)
@@ -457,5 +456,3 @@ public:
     return;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_EXTRACTMASKTOTABLETEST_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_FILEDIALOGHANDLER_H_
-#define MANTIDQT_API_FILEDIALOGHANDLER_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include <QFileDialog>
@@ -38,7 +37,7 @@ namespace FileDialogHandler {
 DLLExport QString
 getSaveFileName(QWidget *parent = nullptr,
                 const Mantid::Kernel::Property *baseProp = nullptr,
-                QFileDialog::Options options = nullptr);
+                const QFileDialog::Options &options = nullptr);
 
 /**
  * For file dialogs. This will add the selected extension if an extension
@@ -68,5 +67,3 @@ DLLExport QString getCaption(const std::string &dialogName,
 } // namespace FileDialogHandler
 } // namespace API
 } // namespace MantidQt
-
-#endif // MANTIDQT_API_FILEDIALOGHANDLER_H_

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_CONV_TOMD_HISTOWS_H
-#define MANTID_MDALGORITHMS_CONV_TOMD_HISTOWS_H
+#pragma once
 
 #include "MantidDataObjects/MDEvent.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -39,7 +38,7 @@ public:
   ConvToMDHistoWS();
 
   size_t initialize(const MDWSDescription &WSD,
-                    boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
+                    std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                     bool ignoreZeros) override;
 
   void runConversion(API::Progress *pProgress) override;
@@ -59,5 +58,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif

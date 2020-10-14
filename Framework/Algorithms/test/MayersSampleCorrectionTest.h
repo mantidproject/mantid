@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONTEST_H_
-#define MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -16,9 +15,9 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
+using Mantid::Algorithms::MayersSampleCorrection;
 using Mantid::API::IAlgorithm_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::Algorithms::MayersSampleCorrection;
 
 class MayersSampleCorrectionTest : public CxxTest::TestSuite {
 public:
@@ -96,7 +95,7 @@ public:
 private:
   IAlgorithm_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS,
                                bool mscatOn) {
-    auto alg = boost::make_shared<MayersSampleCorrection>();
+    auto alg = std::make_shared<MayersSampleCorrection>();
     // Don't put output in ADS by default
     alg->setChild(true);
     alg->setRethrows(true);
@@ -177,5 +176,3 @@ private:
     return testWS;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_MAYERSSAMPLECORRECTIONTEST_H_ */

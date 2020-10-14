@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Stitch1D.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -139,7 +139,7 @@ void Stitch1D::init() {
                       "EndOverlap", Mantid::EMPTY_DBL(), Direction::Input),
                   "End overlap x-value in units of x-axis.");
   declareProperty(std::make_unique<ArrayProperty<double>>(
-                      "Params", boost::make_shared<RebinParamsValidator>(true)),
+                      "Params", std::make_shared<RebinParamsValidator>(true)),
                   "Rebinning Parameters. See Rebin for format. If only a "
                   "single value is provided, start and end are taken from "
                   "input workspaces.");
@@ -151,7 +151,7 @@ void Stitch1D::init() {
                       "UseManualScaleFactor", false, Direction::Input),
                   "True to use a provided value for the scale factor.");
   auto manualScaleFactorValidator =
-      boost::make_shared<BoundedValidator<double>>();
+      std::make_shared<BoundedValidator<double>>();
   manualScaleFactorValidator->setLower(0);
   manualScaleFactorValidator->setExclusive(true);
   declareProperty(std::make_unique<PropertyWithValue<double>>(
@@ -289,16 +289,17 @@ std::vector<double> Stitch1D::getRebinParams(MatrixWorkspace_const_sptr &lhsWS,
       calculatedStep = rhsX[1] - rhsX[0];
     }
 
-    calculatedParams.push_back(minLHSX);
-    calculatedParams.push_back(calculatedStep);
-    calculatedParams.push_back(maxRHSX);
+    calculatedParams.emplace_back(minLHSX);
+    calculatedParams.emplace_back(calculatedStep);
+    calculatedParams.emplace_back(maxRHSX);
     result = calculatedParams;
   } else {
     if (inputParams.size() == 1) {
       std::vector<double> calculatedParams;
-      calculatedParams.push_back(minLHSX);
-      calculatedParams.push_back(inputParams.front()); // Use the step supplied.
-      calculatedParams.push_back(maxRHSX);
+      calculatedParams.emplace_back(minLHSX);
+      calculatedParams.emplace_back(
+          inputParams.front()); // Use the step supplied.
+      calculatedParams.emplace_back(maxRHSX);
       result = calculatedParams;
     } else {
       result = inputParams; // user has provided params. Use those.
@@ -341,19 +342,19 @@ MatrixWorkspace_sptr Stitch1D::rebin(MatrixWorkspace_sptr &input,
     for (size_t j = 0; j < sourceY.size(); ++j) {
       const double value = sourceY[j];
       if (std::isnan(value)) {
-        nanYIndexes.push_back(j);
+        nanYIndexes.emplace_back(j);
         sourceY[j] = 0;
       } else if (std::isinf(value)) {
-        infYIndexes.push_back(j);
+        infYIndexes.emplace_back(j);
         sourceY[j] = 0;
       }
 
       const double eValue = sourceE[j];
       if (std::isnan(eValue)) {
-        nanEIndexes.push_back(j);
+        nanEIndexes.emplace_back(j);
         sourceE[j] = 0;
       } else if (std::isinf(eValue)) {
-        infEIndexes.push_back(j);
+        infEIndexes.emplace_back(j);
         sourceE[j] = 0;
       }
     }
@@ -420,22 +421,8 @@ MatrixWorkspace_sptr Stitch1D::conjoinXAxis(MatrixWorkspace_sptr &inOne,
   Mantid::API::AnalysisDataService::Instance().remove(in1);
   Mantid::API::AnalysisDataService::Instance().remove(in2);
   API::Workspace_sptr ws = conjoinX->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+  return std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
 }
-
-/** Runs the CreateSingleValuedWorkspace Algorithm as a child
- @param val :: The double to convert to a single value workspace
- @return A shared pointer to the resulting MatrixWorkspace
- */
-MatrixWorkspace_sptr Stitch1D::singleValueWS(const double val) {
-  auto singleValueWS =
-      this->createChildAlgorithm("CreateSingleValuedWorkspace");
-  singleValueWS->initialize();
-  singleValueWS->setProperty("DataValue", val);
-  singleValueWS->execute();
-  return singleValueWS->getProperty("OutputWorkspace");
-}
-
 /** Finds the bins containing the ends of the overlapping region
  @param startOverlap :: The start of the overlapping region
  @param endOverlap :: The end of the overlapping region
@@ -508,8 +495,7 @@ void Stitch1D::scaleWorkspace(MatrixWorkspace_sptr &ws,
       std::isnan(m_scaleFactor)) {
     std::stringstream messageBuffer;
     messageBuffer << "Stitch1D calculated scale factor is: " << m_scaleFactor
-                  << ". Check that in both input workspaces the integrated "
-                     "overlap region is non-zero.";
+                  << ". Check the overlap region is non-zero.";
     g_log.warning(messageBuffer.str());
   }
 }
@@ -578,11 +564,10 @@ void Stitch1D::exec() {
   m_errorScaleFactor = m_scaleFactor;
   const bool useManualScaleFactor = this->getProperty("UseManualScaleFactor");
   if (useManualScaleFactor) {
-    MatrixWorkspace_sptr manualScaleFactorWS = singleValueWS(m_scaleFactor);
     if (scaleRHS)
-      rhs *= manualScaleFactorWS;
+      rhs *= m_scaleFactor;
     else
-      lhs *= manualScaleFactorWS;
+      lhs *= m_scaleFactor;
   } else {
     auto rhsOverlapIntegrated = integration(rhs, startOverlap, endOverlap);
     auto lhsOverlapIntegrated = integration(lhs, startOverlap, endOverlap);
@@ -620,8 +605,7 @@ void Stitch1D::exec() {
     } else {
       g_log.information("Using un-weighted mean for Stitch1D overlap mean");
       MatrixWorkspace_sptr sum = overlap1 + overlap2;
-      MatrixWorkspace_sptr denominator = singleValueWS(2.0);
-      overlapave = sum / denominator;
+      overlapave = sum * 0.5;
     }
     result = lhs + overlapave + rhs;
     reinsertSpecialValues(result);
@@ -643,7 +627,7 @@ void Stitch1D::exec() {
 /** Put special values back.
  * @param ws : MatrixWorkspace to resinsert special values into.
  */
-void Stitch1D::reinsertSpecialValues(MatrixWorkspace_sptr ws) {
+void Stitch1D::reinsertSpecialValues(const MatrixWorkspace_sptr &ws) {
   auto histogramCount = static_cast<int>(ws->getNumberHistograms());
   PARALLEL_FOR_IF(Kernel::threadSafe(*ws))
   for (int i = 0; i < histogramCount; ++i) {

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Processes.h"
 
@@ -24,7 +24,7 @@
 
 namespace {
 
-bool isOtherInstance(int64_t otherPID, QString otherExeName) {
+bool isOtherInstance(int64_t otherPID, const QString &otherExeName) {
   static const int64_t ourPID(QCoreApplication::applicationPid());
   if (otherPID == ourPID)
     return false;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/ISIS/ISISHistoDataListener.h"
 #include "MantidAPI/Algorithm.h"
@@ -31,7 +31,7 @@ GNU_DIAG_OFF("unused-variable")
 #endif
 #include "DAE/idc.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <algorithm>
 #include <numeric>
@@ -59,7 +59,7 @@ ISISHistoDataListener::ISISHistoDataListener()
       "An optional list of spectra to load. If blank, all "
       "available spectra will be loaded.");
 
-  auto validator = boost::make_shared<Kernel::ArrayBoundedValidator<int>>();
+  auto validator = std::make_shared<Kernel::ArrayBoundedValidator<int>>();
   validator->setLower(1);
   declareProperty(
       std::make_unique<Kernel::ArrayProperty<int>>("PeriodList", validator),
@@ -169,7 +169,7 @@ void ISISHistoDataListener::start(
  * Read the data from the DAE.
  * @return :: A workspace with the data.
  */
-boost::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
+std::shared_ptr<Workspace> ISISHistoDataListener::extractData() {
 
   if (m_timeRegime < 0) {
     m_timeRegime = getTimeRegimeToLoad();
@@ -382,12 +382,12 @@ void ISISHistoDataListener::calculateIndicesForReading(
     int n = numberOfSpectra;
     while (n > 0) {
       if (n < maxNumberOfSpectra) {
-        index.push_back(spec);
-        count.push_back(n);
+        index.emplace_back(spec);
+        count.emplace_back(n);
         break;
       } else {
-        index.push_back(spec);
-        count.push_back(maxNumberOfSpectra);
+        index.emplace_back(spec);
+        count.emplace_back(maxNumberOfSpectra);
         n -= maxNumberOfSpectra;
         spec += maxNumberOfSpectra;
       }
@@ -401,15 +401,15 @@ void ISISHistoDataListener::calculateIndicesForReading(
       if (next - m_specList[i - 1] > 1 ||
           static_cast<int>(i - i0) >= maxNumberOfSpectra) {
         auto n = static_cast<int>(i - i0);
-        index.push_back(spec);
-        count.push_back(n);
+        index.emplace_back(spec);
+        count.emplace_back(n);
         i0 = i;
         spec = next;
       }
     }
     auto n = static_cast<int>(m_specList.size() - i0);
-    index.push_back(spec);
-    count.push_back(n);
+    index.emplace_back(spec);
+    count.emplace_back(n);
   }
 }
 
@@ -422,7 +422,7 @@ void ISISHistoDataListener::calculateIndicesForReading(
  * @param workspaceIndex :: index in workspace to store data
  */
 void ISISHistoDataListener::getData(int period, int index, int count,
-                                    API::MatrixWorkspace_sptr workspace,
+                                    const API::MatrixWorkspace_sptr &workspace,
                                     size_t workspaceIndex) {
   const int numberOfBins = m_numberOfBins[m_timeRegime];
   const size_t bufferSize = count * (numberOfBins + 1) * sizeof(int);
@@ -466,7 +466,7 @@ void ISISHistoDataListener::loadSpectraMap() {
  *  @param iName :: The instrument name
  */
 void ISISHistoDataListener::runLoadInstrument(
-    MatrixWorkspace_sptr localWorkspace, const std::string &iName) {
+    const MatrixWorkspace_sptr &localWorkspace, const std::string &iName) {
   auto loadInst =
       API::AlgorithmFactory::Instance().create("LoadInstrument", -1);
   if (!loadInst)
@@ -531,8 +531,8 @@ void ISISHistoDataListener::loadTimeRegimes() {
 
     // if it's first call of this method populate the member variables
     if (m_bins.size() == tr) {
-      m_numberOfBins.push_back(nbins);
-      m_numberOfSpectra.push_back(nspec);
+      m_numberOfBins.emplace_back(nbins);
+      m_numberOfSpectra.emplace_back(nspec);
       // buffer to read float values in
       std::vector<float> floatBuffer;
 

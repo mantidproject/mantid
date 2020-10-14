@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDEVENTWORKSPACETEST_H
-#define MDEVENTWORKSPACETEST_H
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/BoxController.h"
@@ -41,7 +40,7 @@ class MDEventWorkspaceTest : public CxxTest::TestSuite {
 private:
   /// Helper function to return the number of masked bins in a workspace. TODO:
   /// move helper into test helpers
-  size_t getNumberMasked(Mantid::API::IMDWorkspace_sptr ws) {
+  size_t getNumberMasked(const Mantid::API::IMDWorkspace_sptr &ws) {
     auto it = ws->createIterator(nullptr);
     size_t numberMasked = 0;
     size_t counter = 0;
@@ -154,7 +153,7 @@ public:
   }
 
   void test_clone_clear_workspace_name() {
-    auto ws = boost::make_shared<MDEventWorkspace<MDLeanEvent<3>, 3>>();
+    auto ws = std::make_shared<MDEventWorkspace<MDLeanEvent<3>, 3>>();
     Mantid::Geometry::GeneralFrame frame("m", "m");
     for (size_t i = 0; i < 3; i++) {
       ws->addDimension(MDHistoDimension_sptr(
@@ -237,7 +236,7 @@ public:
   //-------------------------------------------------------------------------------------
   /** Create an IMDIterator */
   void test_createIterator() {
-    auto ew = boost::make_shared<MDEventWorkspace3>();
+    auto ew = std::make_shared<MDEventWorkspace3>();
     BoxController_sptr bc = ew->getBoxController();
     bc->setSplitInto(4);
     ew->splitBox();
@@ -255,7 +254,7 @@ public:
   //-------------------------------------------------------------------------------------
   /** Create several IMDIterators to run them in parallel */
   void test_createIterators() {
-    auto ew = boost::make_shared<MDEventWorkspace3>();
+    auto ew = std::make_shared<MDEventWorkspace3>();
     BoxController_sptr bc = ew->getBoxController();
     bc->setSplitInto(4);
     ew->splitBox();
@@ -408,12 +407,12 @@ public:
     std::vector<coord_t> min;
     std::vector<coord_t> max;
 
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(1.5);
-    max.push_back(1.5);
-    max.push_back(1.5);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(1.5f);
+    max.emplace_back(1.5f);
+    max.emplace_back(1.5f);
 
     // Create a function to mask some of the workspace.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -480,7 +479,7 @@ public:
     TS_ASSERT_DELTA(ext[1].getMax(), ymax, 1e-4);
   }
 
-  void addEvent(MDEventWorkspace2Lean::sptr b, double x, double y) {
+  void addEvent(const MDEventWorkspace2Lean::sptr &b, double x, double y) {
     coord_t centers[2] = {static_cast<coord_t>(x), static_cast<coord_t>(y)};
     b->addEvent(MDLeanEvent<2>(2.0, 2.0, centers));
   }
@@ -502,7 +501,7 @@ public:
     for (double x = 4.0005; x < 7; x += 1.0)
       for (double y = 4.0005; y < 7; y += 1.0) {
         double centers[2] = {x, y};
-        events.push_back(MDLeanEvent<2>(2.0, 2.0, centers));
+        events.emplace_back(MDLeanEvent<2>(2.0, 2.0, centers));
       }
     // So it doesn't split
     ws->getBoxController()->setSplitThreshold(1000);
@@ -570,12 +569,12 @@ public:
     std::vector<coord_t> min;
     std::vector<coord_t> max;
 
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(10);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
 
     // Create an function that encompases 1/4 of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -593,12 +592,12 @@ public:
     std::vector<coord_t> max;
 
     // Make the box lay over a non-intersecting region of space.
-    min.push_back(-1);
-    min.push_back(-1);
-    min.push_back(-1);
-    max.push_back(-0.01f);
-    max.push_back(-0.01f);
-    max.push_back(-0.01f);
+    min.emplace_back(-1.f);
+    min.emplace_back(-1.f);
+    min.emplace_back(-1.f);
+    max.emplace_back(-0.01f);
+    max.emplace_back(-0.01f);
+    max.emplace_back(-0.01f);
 
     // Create an function that encompases 1/4 of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -611,12 +610,12 @@ public:
     std::vector<coord_t> max;
 
     // Make the box that covers half the bins in the workspace.
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(4.99f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
+    max.emplace_back(4.99f);
 
     // Create an function that encompases 1/4 of the total bins.
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
@@ -628,12 +627,12 @@ public:
     // Create a function that masks everything.
     std::vector<coord_t> min;
     std::vector<coord_t> max;
-    min.push_back(0);
-    min.push_back(0);
-    min.push_back(0);
-    max.push_back(10);
-    max.push_back(10);
-    max.push_back(10);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    min.emplace_back(0.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
+    max.emplace_back(10.f);
     auto function = std::make_unique<MDBoxImplicitFunction>(min, max);
 
     MDEventWorkspace3Lean::sptr ws =
@@ -733,7 +732,7 @@ public:
     auto eventSetting = Mantid::API::NoNormalization;
     auto histoSetting = Mantid::API::NumEventsNormalization;
     // Act
-    boost::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDLeanEvent<3>, 3>>
+    std::shared_ptr<Mantid::DataObjects::MDEventWorkspace<MDLeanEvent<3>, 3>>
         ew(new Mantid::DataObjects::MDEventWorkspace<MDLeanEvent<3>, 3>(
             eventSetting, histoSetting));
     // Assert
@@ -865,5 +864,3 @@ public:
               << clock.elapsed() << " sec\n";
   }
 };
-
-#endif

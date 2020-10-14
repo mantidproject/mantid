@@ -50,7 +50,7 @@
 #include <gsl/gsl_math.h>
 
 ImportASCIIDialog::ImportASCIIDialog(bool new_windows_only, QWidget *parent,
-                                     bool extended, Qt::WFlags flags)
+                                     bool extended, const Qt::WFlags &flags)
     : ExtensibleFileDialog(parent, extended, flags) {
   setWindowTitle(tr("MantidPlot - Import ASCII File(s)"));
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_SANSDIAGNOSTICS_H_
-#define MANTIDQTCUSTOMINTERFACES_SANSDIAGNOSTICS_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -81,7 +80,7 @@ private:
   void setToolTips();
   /// execute sumrowcolumn algorithm
   bool executeSumRowColumn(const std::vector<unsigned int> &values,
-                           const QString ipws, const QString &op,
+                           const QString &ipws, const QString &op,
                            const QString &orientation);
   /// load the settings from the registry
   void loadSettings();
@@ -100,11 +99,11 @@ private:
   bool runLoadAlgorithm(const QString &fileName, const QString &specMin = "-1",
                         const QString &specMax = "-1");
   /// returns sumrowcolumn script
-  bool runsumRowColumn(const QString ipwsName, const QString &opwsName,
+  bool runsumRowColumn(const QString &ipwsName, const QString &opwsName,
                        const QString &orientation, const QString &hvMin,
                        const QString &hvMax);
   // get rectangular detector details
-  std::vector<boost::shared_ptr<RectDetectorDetails>>
+  std::vector<std::shared_ptr<RectDetectorDetails>>
   rectangularDetectorDetails(Mantid::API::Workspace_sptr &ws_sptr);
   /// returns sumspectra script
   bool runsumSpectra(const QString &ipwsName, const QString &opwsName,
@@ -174,10 +173,10 @@ private:
   void HVMinHVMaxStringValues(const int minVal, const int maxVal,
                               QString &hvMin, QString &hvMax);
   /// Create the name for the outputworkspace
-  QString createOutputWorkspaceName(QString originalWorkspaceName,
-                                    QString detectorName,
-                                    QString integrationType, QString min,
-                                    QString max);
+  QString createOutputWorkspaceName(const QString &originalWorkspaceName,
+                                    const QString &detectorName,
+                                    const QString &integrationType,
+                                    const QString &min, const QString &max);
 
 private:
   QString m_dataDir;       ///< default data search directory
@@ -196,7 +195,7 @@ private:
   int m_totalPeriods;               ///< total periods
   int m_Period;                     ///< Current period
   std::vector<std::string> m_wsVec; ///< workspace vector
-  std::vector<boost::shared_ptr<RectDetectorDetails>> m_rectDetectors;
+  std::vector<std::shared_ptr<RectDetectorDetails>> m_rectDetectors;
 
 private slots:
 
@@ -223,5 +222,3 @@ private slots:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_SANSADDFILES_H_

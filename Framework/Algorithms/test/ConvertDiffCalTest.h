@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CONVERTDIFFCALTEST_H_
-#define MANTID_ALGORITHMS_CONVERTDIFFCALTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -40,7 +39,7 @@ public:
         V3D(0., 0., -10.), // source
         V3D(0., 0., 0.),   // sample
         V3D(1., 0., 0.));  // detector
-    OffsetsWorkspace_sptr offsets = boost::make_shared<OffsetsWorkspace>(instr);
+    OffsetsWorkspace_sptr offsets = std::make_shared<OffsetsWorkspace>(instr);
     offsets->setValue(1, 0.); // wksp_index=0, detid=1
 
     // Name of the output workspace.
@@ -65,7 +64,7 @@ public:
       return;
 
     // test various  values
-    auto table = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
+    auto table = std::dynamic_pointer_cast<ITableWorkspace>(ws);
     TS_ASSERT(table);
 
     std::vector<std::string> columnNames = table->getColumnNames();
@@ -93,5 +92,3 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_CONVERTDIFFCALTEST_H_ */

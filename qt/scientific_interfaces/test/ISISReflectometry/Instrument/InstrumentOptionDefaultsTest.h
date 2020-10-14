@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_INSTRUMENTOPTIONDEFAULTSTEST_H_
-#define MANTID_CUSTOMINTERFACES_INSTRUMENTOPTIONDEFAULTSTEST_H_
+#pragma once
 
 #include "../../../ISISReflectometry/GUI/Instrument/InstrumentOptionDefaults.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -18,11 +17,11 @@
 #include <gtest/gtest.h>
 
 using namespace MantidQt::CustomInterfaces::ISISReflectometry;
+using testing::_;
 using testing::AtLeast;
 using testing::Mock;
 using testing::NiceMock;
 using testing::Return;
-using testing::_;
 
 class InstrumentOptionDefaultsTest : public CxxTest::TestSuite {
 public:
@@ -143,5 +142,3 @@ private:
                      const std::invalid_argument &);
   }
 };
-
-#endif // MANTID_CUSTOMINTERFACES_INSTRUMENTOPTIONDEFAULTSTEST_H_

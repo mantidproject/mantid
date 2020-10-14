@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-
-from __future__ import (absolute_import, unicode_literals)
 
 from workbench.projectrecovery.recoverygui.projectrecoverymodel import ProjectRecoveryModel
 from workbench.projectrecovery.recoverygui.projectrecoverywidgetview import ProjectRecoveryWidgetView
@@ -62,6 +60,8 @@ class ProjectRecoveryPresenter(object):
 
         # Reset whether model believes recovery has been started.
         rows = self.model.rows
+        if len(rows) == 0:
+            return True
         self.model = ProjectRecoveryModel(self.project_recovery, self)
         self._set_checkpoint_tried_values_from_rows(rows)
 

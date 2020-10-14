@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import math
 import numpy
@@ -35,7 +35,7 @@ def parse_mask(xml_name):
     det_range_list = re.split(',', det_list_str)
 
     for det_range in det_range_list:
-        print det_range
+        print(det_range)
 
     # int_count = 0
 

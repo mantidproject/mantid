@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_MUONFITDATASELECTOR_H_
-#define MANTID_MANTIDWIDGETS_MUONFITDATASELECTOR_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
@@ -49,8 +48,12 @@ public:
   /// Get names of chosen groups
   QStringList getChosenGroups() const override;
   /// Set chosen group/period
-  void setGroupsSelected(QStringList groups) { m_chosenGroups = groups; };
-  void setPeriodsSelected(QStringList periods) { m_chosenPeriods = periods; };
+  void setGroupsSelected(const QStringList &groups) {
+    m_chosenGroups = groups;
+  };
+  void setPeriodsSelected(const QStringList &periods) {
+    m_chosenPeriods = periods;
+  };
   /// Get selected periods
   QStringList getPeriodSelections() const override;
   /// Get type of fit
@@ -130,5 +133,3 @@ private slots:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /* MANTID_MANTIDWIDGETS_MUONFITDATASELECTOR_H_ */

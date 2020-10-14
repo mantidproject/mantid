@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOM_DIALOGSLPLOTASYMMETRYBYLOGVALUEDIALOG_H
-#define MANTIDQT_CUSTOM_DIALOGSLPLOTASYMMETRYBYLOGVALUEDIALOG_H
+#pragma once
 
 //----------------------
 // Includes
@@ -55,7 +54,7 @@ private slots:
   /// Opens a file dialog. Updates the QLineEdit provided when the dialog is
   /// closed.
   void openFileDialog(const QString &filePropName);
-  void fillLogBox(const QString & /*unused*/);
+  void fillLogBox();
 
   /// Show or hide Dead Time file widget depending on which Dead Time type is
   /// selected.
@@ -70,5 +69,3 @@ private:
 };
 } // namespace CustomDialogs
 } // namespace MantidQt
-
-#endif // MANTIDQT_CUSTOM_DIALOGSLPLOTASYMMETRYBYLOGVALUEDIALOG_H

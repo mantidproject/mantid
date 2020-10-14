@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SCRIPTREPOSITORYIMPLTEST_H_
-#define SCRIPTREPOSITORYIMPLTEST_H_
+#pragma once
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidScriptRepository/ScriptRepositoryImpl.h"
@@ -84,7 +83,8 @@ to simulate changes and new values for the downloading.
 
 class ScriptRepositoryImplLocal : public ScriptRepositoryImpl {
 public:
-  ScriptRepositoryImplLocal(std::string a = "", std::string b = "")
+  ScriptRepositoryImplLocal(const std::string &a = "",
+                            const std::string &b = "")
       : ScriptRepositoryImpl(a, b) {
     repository_json_content = REPOSITORYJSON;
     tofconv_readme_content = TOFCONV_README;
@@ -955,5 +955,3 @@ public:
     TS_ASSERT(repo->fileStatus(file_name) == Mantid::API::REMOTE_ONLY);
   }
 };
-
-#endif

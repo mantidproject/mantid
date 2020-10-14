@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/TransformHKL.h"
 #include "MantidAPI/Sample.h"
@@ -37,7 +37,7 @@ void TransformHKL::init() {
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
   this->declareProperty(
@@ -50,7 +50,7 @@ void TransformHKL::init() {
   identity_matrix[4] = 1;
   identity_matrix[8] = 1;
   // clang-format off
-  auto threeBythree = boost::make_shared<ArrayLengthValidator<double> >(9);
+  auto threeBythree = std::make_shared<ArrayLengthValidator<double> >(9);
   // clang-format on
   this->declareProperty(
       std::make_unique<ArrayProperty<double>>(
@@ -123,7 +123,8 @@ void TransformHKL::exec() {
   SelectCellWithForm::DetermineErrors(sigabc, UB, ws, tolerance);
   o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
                      sigabc[5]);
-  ws->mutableSample().setOrientedLattice(&o_lattice);
+  ws->mutableSample().setOrientedLattice(
+      std::make_unique<OrientedLattice>(o_lattice));
 
   std::vector<Peak> &peaks = ws->getPeaks();
   size_t n_peaks = ws->getNumberPeaks();
@@ -135,13 +136,12 @@ void TransformHKL::exec() {
   std::vector<V3D> q_vectors;
   for (size_t i = 0; i < n_peaks; i++) {
     V3D hkl(peaks[i].getHKL());
-    if (IndexingUtils::ValidIndex(hkl, tolerance)) {
-      num_indexed++;
-      miller_indices.push_back(hkl_tran * hkl);
-      q_vectors.push_back(peaks[i].getQSampleFrame());
-      peaks[i].setHKL(hkl_tran * hkl);
-    } else // mark as NOT indexed
-      peaks[i].setHKL(V3D(0.0, 0.0, 0.0));
+    V3D ihkl(peaks[i].getIntHKL());
+    peaks[i].setIntHKL(hkl_tran * ihkl);
+    miller_indices.emplace_back(hkl_tran * ihkl);
+    peaks[i].setHKL(hkl_tran * hkl);
+    q_vectors.emplace_back(peaks[i].getQSampleFrame());
+    num_indexed++;
   }
 
   double average_error =

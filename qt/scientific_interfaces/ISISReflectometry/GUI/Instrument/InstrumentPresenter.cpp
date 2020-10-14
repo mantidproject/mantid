@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "InstrumentPresenter.h"
 #include "GUI/Batch/IBatchPresenter.h"
@@ -36,7 +36,6 @@ InstrumentPresenter::InstrumentPresenter(
 
 void InstrumentPresenter::acceptMainPresenter(IBatchPresenter *mainPresenter) {
   m_mainPresenter = mainPresenter;
-  notifySettingsChanged();
 }
 
 void InstrumentPresenter::notifySettingsChanged() {
@@ -45,8 +44,8 @@ void InstrumentPresenter::notifySettingsChanged() {
 }
 
 void InstrumentPresenter::notifyRestoreDefaultsRequested() {
-  // Notify main presenter first to make sure instrument is up to date
-  m_mainPresenter->notifyRestoreDefaultsRequested();
+  // Trigger a reload of the instrument to get up-to-date settings.
+  m_mainPresenter->notifyUpdateInstrumentRequested();
   restoreDefaults();
 }
 
@@ -100,15 +99,24 @@ void InstrumentPresenter::updateWidgetValidState() {
     m_view->showMonitorIntegralRangeInvalid();
 }
 
-void InstrumentPresenter::reductionPaused() { updateWidgetEnabledState(); }
+void InstrumentPresenter::notifyReductionPaused() {
+  updateWidgetEnabledState();
+}
 
-void InstrumentPresenter::reductionResumed() { updateWidgetEnabledState(); }
+void InstrumentPresenter::notifyReductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void InstrumentPresenter::autoreductionPaused() { updateWidgetEnabledState(); }
+void InstrumentPresenter::notifyAutoreductionPaused() {
+  updateWidgetEnabledState();
+}
 
-void InstrumentPresenter::autoreductionResumed() { updateWidgetEnabledState(); }
+void InstrumentPresenter::notifyAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void InstrumentPresenter::instrumentChanged(std::string const &instrumentName) {
+void InstrumentPresenter::notifyInstrumentChanged(
+    std::string const &instrumentName) {
   UNUSED_ARG(instrumentName);
   restoreDefaults();
 }

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_ESTIMATEDIVERGENCETEST_H_
-#define MANTID_ALGORITHMS_ESTIMATEDIVERGENCETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -76,11 +75,9 @@ public:
     loader.execute();
     TS_ASSERT(loader.isExecuted());
 
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("PG3_EstimateDivergence"));
 
     return ws;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_ESTIMATEDIVERGENCETEST_H_ */

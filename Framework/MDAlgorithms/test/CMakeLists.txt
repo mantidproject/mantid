@@ -1,8 +1,6 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR}
                       ${HDF5_INCLUDE_DIRS})
 
   include_directories(../../TestHelpers/inc ../../DataHandling/inc
@@ -24,15 +22,13 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
   target_link_libraries(MDAlgorithmsTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         DataHandling
                         CurveFitting
                         MDAlgorithms
                         Nexus
                         ${MUPARSER_LIBRARIES}
-                        ${GMOCK_LIBRARIES}
-                        ${GTEST_LIBRARIES}
+                        gmock
                         ${NEXUS_LIBRARIES}
                         ${HDF5_LIBRARIES})
 

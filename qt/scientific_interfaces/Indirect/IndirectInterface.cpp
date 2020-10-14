@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectInterface.h"
 
@@ -17,7 +17,7 @@ namespace CustomInterfaces {
 IndirectInterface::IndirectInterface(QWidget *parent)
     : UserSubWindow(parent),
       m_settings(dynamic_cast<IndirectSettings *>(
-          InterfaceManager().createSubWindow("Settings"))) {
+          InterfaceManager().createSubWindow("Settings", this))) {
 
   connect(m_settings.get(), SIGNAL(applySettings()), this,
           SLOT(applySettings()));
@@ -30,7 +30,7 @@ void IndirectInterface::help() {
 
 void IndirectInterface::settings() {
   m_settings->loadSettings();
-  m_settings->setWindowModality(Qt::ApplicationModal);
+  m_settings->setWindowModality(Qt::WindowModal);
   m_settings->show();
 }
 
@@ -49,12 +49,7 @@ IndirectInterface::getInterfaceSettings() const {
 }
 
 void IndirectInterface::manageUserDirectories() {
-  if (!m_manageUserDirectories) {
-    m_manageUserDirectories = std::make_unique<ManageUserDirectories>(this);
-    m_manageUserDirectories->setAttribute(Qt::WA_DeleteOnClose, false);
-  }
-  m_manageUserDirectories->setModal(true);
-  m_manageUserDirectories->show();
+  ManageUserDirectories::openManageUserDirectories();
 }
 
 void IndirectInterface::showMessageBox(QString const &message) {

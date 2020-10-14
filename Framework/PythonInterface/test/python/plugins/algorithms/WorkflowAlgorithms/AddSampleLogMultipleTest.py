@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
@@ -52,7 +50,7 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                 idx = names.index(log.name)
 
                 self.assertEqual(log.value, values[idx])
-                self.assertEqual(log.type, types[idx])
+                self.assertEqual(log.type, types[idx].lower())
                 self.assertEqual(log.units, units[idx])
 
         self.assertEqual(matched_logs, names)
@@ -71,6 +69,24 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                              LogValues=values)
 
         self._validate_sample_logs(names, values, types)
+        
+
+    def test_strings_with_types(self):
+        """
+        Tests adding multiple strings.
+        """
+        names = ['a', 'b', 'c']
+        values = ['one', 'two', 'three']
+        types = ['String', 'String', 'String']
+
+        AddSampleLogMultiple(Workspace=self._workspace,
+                             LogNames=names,
+                             LogValues=values,
+                             ParseType=False,
+                             LogTypes=types
+                             )
+
+        self._validate_sample_logs(names, values, types)
 
 
     def test_strings_and_numbers(self):
@@ -86,6 +102,24 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                              LogValues=values)
 
         self._validate_sample_logs(names, values, types)
+
+
+    def test_strings_and_numbers(self):
+        """
+        Tests adding multiple strings and numbers.
+        """
+        names = ['a', 'b', 'c', 'd', 'e', 'f']
+        values = ['one', 'two', 'three', 4, 5.5, 6e2]
+        types = ['String', 'String', 'String', 'Number', 'Number', 'Number']
+
+        AddSampleLogMultiple(Workspace=self._workspace,
+                             LogNames=names,
+                             LogValues=values,
+                             ParseType=False,
+                             LogTypes=types)
+
+        self._validate_sample_logs(names, values, types)
+
 
     def test_units(self):
         """
@@ -157,6 +191,56 @@ class AddSampleLogMultipleTest(unittest.TestCase):
                           Workspace=self._workspace,
                           LogNames=names,
                           LogValues=values)
+
+
+    def test_validation_differing_types(self):
+        """
+        Test validation for differing numbers of log names and log types.
+        """
+        names = ['a', 'b', 'c']
+        values = ['one', 'two', 'three']
+        types = ['String', 'String', 'String']
+        self.assertRaises(RuntimeError,
+                          AddSampleLogMultiple,
+                          Workspace=self._workspace,
+                          LogNames=names,
+                          LogValues=values,
+                          ParseType=True,
+                          LogTypes=types)
+
+
+    def test_validation_differing_types(self):
+        """
+        Test validation for differing numbers of log names and log types.
+        """
+        names = ['a', 'b', 'c']
+        values = ['one', 'two', 'three']
+        types = ['String', 'String']
+
+        self.assertRaises(RuntimeError,
+                          AddSampleLogMultiple,
+                          Workspace=self._workspace,
+                          LogNames=names,
+                          LogValues=values,
+                          ParseType=False,
+                          LogTypes=types)
+
+
+    def test_validation_invalid_types(self):
+        """
+        Test validation for differing numbers of log names and log types.
+        """
+        names = ['a', 'b', 'c']
+        values = ['one', 'two', 'three']
+        types = ['String', 'String', 'String Series']
+
+        self.assertRaises(RuntimeError,
+                          AddSampleLogMultiple,
+                          Workspace=self._workspace,
+                          LogNames=names,
+                          LogValues=values,
+                          ParseType=False,
+                          LogTypes=types)
 
 
 if __name__ == '__main__':

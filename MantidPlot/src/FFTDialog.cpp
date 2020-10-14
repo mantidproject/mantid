@@ -49,7 +49,7 @@
 #include <QPushButton>
 #include <QRadioButton>
 
-FFTDialog::FFTDialog(int type, QWidget *parent, Qt::WFlags fl)
+FFTDialog::FFTDialog(int type, QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl), buttonOK(nullptr), buttonCancel(nullptr),
       forwardBtn(nullptr), backwardBtn(nullptr), boxName(nullptr),
       boxReal(nullptr), boxImaginary(nullptr), boxSampling(nullptr),

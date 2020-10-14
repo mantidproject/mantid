@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_COUNTSTEST_H_
-#define MANTID_HISTOGRAMDATA_COUNTSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -98,7 +97,6 @@ public:
     const BinEdges edges{1.0, 2.0};
     auto old_ptr = &frequencies[0];
     const Counts counts(std::move(frequencies), edges);
-    TS_ASSERT(!frequencies);
     TS_ASSERT_EQUALS(&counts[0], old_ptr);
   }
 
@@ -108,11 +106,7 @@ public:
     const BinEdges edges{1.0, 2.0};
     auto old_ptr = &frequencies[0];
     const Counts counts(std::move(frequencies), edges);
-    // Moved from frequencies...
-    TS_ASSERT(!frequencies);
     // ... but made a copy of data, since "copy" also held a reference.
     TS_ASSERT_DIFFERS(&counts[0], old_ptr);
   }
 };
-
-#endif /* MANTID_HISTOGRAMDATA_COUNTSTEST_H_ */

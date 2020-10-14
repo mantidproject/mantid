@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef UNWRAPPEDDETECTOR_H
-#define UNWRAPPEDDETECTOR_H
+#pragma once
 
 #include "MantidGeometry/IDTypes.h"
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
 #include "MantidQtWidgets/InstrumentView/GLColor.h"
-#include <boost/shared_ptr.hpp>
 #include <limits>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -35,7 +34,7 @@ This class keeps information used to draw a detector on an unwrapped surface.
 class UnwrappedDetector {
 public:
   UnwrappedDetector();
-  UnwrappedDetector(GLColor color, size_t detIndex);
+  UnwrappedDetector(const GLColor &color, size_t detIndex);
   UnwrappedDetector(const UnwrappedDetector &other);
   UnwrappedDetector &operator=(const UnwrappedDetector &other);
   bool empty() const;
@@ -51,4 +50,3 @@ public:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif

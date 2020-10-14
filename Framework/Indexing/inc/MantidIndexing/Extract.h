@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDEXING_EXTRACT_H_
-#define MANTID_INDEXING_EXTRACT_H_
+#pragma once
 
 #include "MantidIndexing/DllConfig.h"
 
@@ -25,12 +24,10 @@ class SpectrumIndexSet;
 MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source,
                                       const SpectrumIndexSet &indices);
 MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source,
-                                      const std::vector<size_t> &indices);
+                                      const std::vector<std::size_t> &indices);
 MANTID_INDEXING_DLL IndexInfo extract(const IndexInfo &source,
-                                      const size_t minIndex,
-                                      const size_t maxIndex);
+                                      const std::size_t minIndex,
+                                      const std::size_t maxIndex);
 
 } // namespace Indexing
 } // namespace Mantid
-
-#endif /* MANTID_INDEXING_EXTRACT_H_ */

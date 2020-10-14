@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_PEAK_H_
-#define MANTID_DATAOBJECTS_PEAK_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakShape.h"
@@ -16,7 +15,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 
@@ -104,17 +103,19 @@ public:
   double getK() const override;
   double getL() const override;
   Mantid::Kernel::V3D getHKL() const override;
+  bool isIndexed() const override;
   Mantid::Kernel::V3D getIntHKL() const override;
+  Mantid::Kernel::V3D getIntMNP() const override;
   void setH(double m_H) override;
   void setK(double m_K) override;
   void setL(double m_L) override;
   void setBankName(std::string m_bankName);
   void setHKL(double H, double K, double L) override;
   void setHKL(const Mantid::Kernel::V3D &HKL) override;
-  void setIntHKL(const Mantid::Kernel::V3D HKL) override;
+  void setIntHKL(const Kernel::V3D &HKL) override;
+  void setIntMNP(const Mantid::Kernel::V3D &MNP) override;
   void setSamplePos(double samX, double samY, double samZ) override;
   void setSamplePos(const Mantid::Kernel::V3D &XYZ) override;
-  void resetHKL();
 
   Mantid::Kernel::V3D getQLabFrame() const override;
   Mantid::Kernel::V3D getQSampleFrame() const override;
@@ -125,7 +126,7 @@ public:
       const Mantid::Kernel::V3D &QSampleFrame,
       boost::optional<double> detectorDistance = boost::none) override;
   void
-  setQLabFrame(const Mantid::Kernel::V3D &QLabFrame,
+  setQLabFrame(const Mantid::Kernel::V3D &qLab,
                boost::optional<double> detectorDistance = boost::none) override;
 
   void setWavelength(double wavelength) override;
@@ -162,15 +163,13 @@ public:
   void setCol(int m_col);
   void setPeakNumber(int m_peakNumber) override;
   int getPeakNumber() const override;
-  void setIntMNP(const Mantid::Kernel::V3D MNP) override;
-  Mantid::Kernel::V3D getIntMNP() const override;
 
   virtual Mantid::Kernel::V3D getDetPos() const override;
   virtual Mantid::Kernel::V3D getSamplePos() const override;
   double getL1() const override;
   double getL2() const override;
 
-  double getValueByColName(const std::string &name_in) const;
+  double getValueByColName(std::string colName) const;
 
   /// Get the peak shape.
   const Mantid::Geometry::PeakShape &getPeakShape() const override;
@@ -186,6 +185,9 @@ public:
 
   /// Get the approximate position of a peak that falls off the detectors
   Kernel::V3D getVirtualDetectorPosition(const Kernel::V3D &detectorDir) const;
+
+  void setAbsorptionWeightedPathLength(double pathLength) override;
+  double getAbsorptionWeightedPathLength() const override;
 
 private:
   bool findDetector(const Mantid::Kernel::V3D &beam,
@@ -227,6 +229,9 @@ private:
   /// Final energy of the neutrons at peak (normally same as m_InitialEnergy)
   double m_finalEnergy;
 
+  /// absorption weighted path length (aka t bar)
+  double m_absorptionWeightedPathLength;
+
   /// Orientation matrix of the goniometer angles.
   Mantid::Kernel::Matrix<double> m_GoniometerMatrix;
 
@@ -253,17 +258,9 @@ private:
   /// Cached detector position
   Mantid::Kernel::V3D detPos;
 
-  /// save values before setHKL is called for use in SortHKL
-  double m_orig_H;
-  double m_orig_K;
-  double m_orig_L;
-
-  // keep peak number
   int m_peakNumber;
-  Mantid::Kernel::V3D m_IntHKL;
-  Mantid::Kernel::V3D m_IntMNP;
-
-  /// integer HKL of the peak
+  Mantid::Kernel::V3D m_intHKL;
+  Mantid::Kernel::V3D m_intMNP;
 
   /// List of contributing detectors IDs
   std::set<int> m_detIDs;
@@ -280,5 +277,3 @@ private:
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_PEAK_H_ */

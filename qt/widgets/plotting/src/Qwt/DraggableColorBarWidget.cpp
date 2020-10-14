@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Qwt/DraggableColorBarWidget.h"
 #include "MantidQtWidgets/Plotting/Qwt/MantidColorMap.h"
@@ -55,7 +55,7 @@ DraggableColorBarWidget::DraggableColorBarWidget(QWidget *parent,
   connect(m_maxValueBox, SIGNAL(editingFinished()), this,
           SLOT(maxValueChanged()));
 
-  QVBoxLayout *lColormapLayout = new QVBoxLayout;
+  auto *lColormapLayout = new QVBoxLayout;
   lColormapLayout->addWidget(m_maxValueBox);
   lColormapLayout->addWidget(m_scaleWidget);
   lColormapLayout->addWidget(m_minValueBox);
@@ -76,7 +76,7 @@ DraggableColorBarWidget::DraggableColorBarWidget(QWidget *parent,
   connect(m_dspnN, SIGNAL(valueChanged(double)), this,
           SLOT(nPowerChanged(double)));
 
-  QGridLayout *options_layout = new QGridLayout;
+  auto *options_layout = new QGridLayout;
   options_layout->addWidget(m_scaleOptions, 1, 0, 1, 2);
   options_layout->addWidget(m_lblN, 2, 0);
   options_layout->addWidget(m_dspnN, 2, 1);
@@ -84,7 +84,7 @@ DraggableColorBarWidget::DraggableColorBarWidget(QWidget *parent,
   options_layout->setRowStretch(1, 1);
   options_layout->setRowStretch(2, 1);
 
-  QHBoxLayout *colourmap_layout = new QHBoxLayout;
+  auto *colourmap_layout = new QHBoxLayout;
   colourmap_layout->addLayout(lColormapLayout);
   colourmap_layout->addLayout(options_layout);
   this->setLayout(colourmap_layout);

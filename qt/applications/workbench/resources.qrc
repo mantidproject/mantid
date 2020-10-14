@@ -3,5 +3,21 @@
     <file alias="MantidSplashScreen.png">../../../images/MantidSplashScreen.png</file>
     <file alias="MantidSplashScreen_4k.jpg">../../../images/MantidSplashScreen_4k.jpg</file>
     <file alias="MantidIcon.ico">../../../images/mantid_workbench.ico</file>
+    <file alias="CSNS_Logo_Short.png">../../../images/CSNS_Logo_Short.png</file>
+    <file alias="download-icon-48x48.png">../../../images/download-icon-48x48.png</file>
+    <file alias="Circle_cog_48x48.png">../../../images/Circle_cog_48x48.png</file>
+    <file alias="First_use_Background.png">../../../images/First_use_Background.png</file>
+    <file alias="ILL_logo.png">../../../images/ILL_logo.png</file>
+    <file alias="ISIS_Logo_Transparent.gif">../../../images/ISIS_Logo_Transparent.gif</file>
+    <file alias="mantid.png">../../../images/mantid.png</file>
+    <file alias="mantid_smaller.png">../../../images/mantid_smaller.png</file>
+    <file alias="Misc-Tutorial-icon-48x48.png">../../../images/Misc-Tutorial-icon-48x48.png</file>
+    <file alias="Notepad-Bloc-notes-icon-48x48.png">../../../images/Notepad-Bloc-notes-icon-48x48.png</file>
+    <file alias="Plugin-Python-icon-48x48.png">../../../images/Plugin-Python-icon-48x48.png</file>
+    <file alias="Python-icon-48x48.png">../../../images/Python-icon-48x48.png</file>
+    <file alias="Ornl_hfir_sns_logo_small.png">../../../images/Ornl_hfir_sns_logo_small.png</file>
+    <file alias="Tessella_Logo_Transparent.gif">../../../images/Tessella_Logo_Transparent.gif</file>
+    <file alias="ess_logo_transparent_small.png">../../../images/ess_logo_transparent_small.png</file>
+    <file alias="crying_mantid.png">../../../images/crying_mantid.png</file>
 </qresource>
 </RCC>

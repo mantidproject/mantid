@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENTWIDGETPICKTAB_H_
-#define INSTRUMENTWIDGETPICKTAB_H_
+#pragma once
 
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTab.h"
 #include "MantidQtWidgets/InstrumentView/MantidGLWidget.h"
@@ -31,6 +30,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 class InstrumentActor;
 class CollapsiblePanel;
+class CollapsibleStack;
 class ProjectionSurface;
 class ComponentInfoController;
 class DetectorPlotController;
@@ -78,6 +78,7 @@ public:
     PeakAlign,
     DrawEllipse,
     DrawRectangle,
+    DrawSector,
     DrawFree,
     EditShape
   };
@@ -89,16 +90,20 @@ public:
   void loadSettings(const QSettings &settings) override;
   bool addToDisplayContextMenu(QMenu & /*unused*/) const override;
   void selectTool(const ToolType tool);
-  boost::shared_ptr<ProjectionSurface> getSurface() const;
+  std::shared_ptr<ProjectionSurface> getSurface() const;
   const InstrumentWidget *getInstrumentWidget() const;
   /// Load settings for the pick tab from a project file
   virtual void loadFromProject(const std::string &lines) override;
   /// Save settings for the pick tab to a project file
   virtual std::string saveToProject() const override;
-
+  void addToContextMenu(
+      QAction *action,
+      std::function<bool(std::map<std::string, bool>)> &actionCondition);
 public slots:
   void setTubeXUnits(int units);
   void changedIntegrationRange(double /*unused*/, double /*unused*/);
+  void savePlotToWorkspace();
+
 private slots:
   void plotContextMenu();
   void sumDetectors();
@@ -117,11 +122,11 @@ private slots:
   void updateSelectionInfoDisplay();
   void shapeCreated();
   void updatePlotMultipleDetectors();
-  void savePlotToWorkspace();
 
 private:
   void showEvent(QShowEvent * /*unused*/) override;
   QColor getShapeBorderColor() const;
+  void collapsePlotPanel();
 
   /* Pick tab controls */
   MiniPlot *m_plot;     ///< Miniplot to display data in the detectors
@@ -141,6 +146,7 @@ private:
   /// ring selection region
   QPushButton *m_ring_rectangle; ///< Button switching on drawing a rectangular
   /// ring selection region
+  QPushButton *m_sector; ///< Button switching on drawing a circular sector
   QPushButton
       *m_free_draw; ///< Button switching on drawing a region of arbitrary shape
   QPushButton *m_edit; ///< Button switching on edditing the selection region
@@ -179,7 +185,10 @@ private:
   // Temporary caches for values from settings
   int m_tubeXUnitsCache;
   int m_plotTypeCache;
-
+  // store added actions and conditions
+  std::vector<
+      std::pair<QAction *, std::function<bool(std::map<std::string, bool>)>>>
+      m_addedActions;
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
 };
@@ -293,5 +302,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*INSTRUMENTWIDGETPICKTAB_H_*/

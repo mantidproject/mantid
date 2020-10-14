@@ -146,7 +146,7 @@ set_target_properties(SINQ
                                  COMPILE_DEFINITIONS
                                  "IN_MANTID_SINQ")
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(SINQ
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")
@@ -167,7 +167,6 @@ endif()
 target_include_directories (SINQ SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(SINQ
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${NEXUS_LIBRARIES}
                       ${WINSOCK})

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/CrystalFieldMagnetisation.h"
 #include "MantidAPI/FunctionDomain.h"
@@ -28,7 +28,7 @@ namespace {
 // Does the actual calculation of the magnetisation
 void calculate(double *out, const double *xValues, const size_t nData,
                const ComplexFortranMatrix &ham, const int nre,
-               const DoubleFortranVector Hmag, const double T,
+               const DoubleFortranVector &Hmag, const double T,
                const double convfact, const bool iscgs) {
   const double beta = 1 / (PhysicalConstants::BoltzmannConstant * T);
   // x-data is the applied field magnitude. We need to recalculate

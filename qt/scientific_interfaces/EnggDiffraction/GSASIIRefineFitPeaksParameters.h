@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASIIREFINEFITPEAKSPARAMETERS_H_
-#define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASIIREFINEFITPEAKSPARAMETERS_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "EnggDiffGSASRefinementMethod.h"
@@ -25,10 +24,11 @@ struct MANTIDQT_ENGGDIFFRACTION_DLL GSASIIRefineFitPeaksParameters {
       const RunLabel &_runLabel, const GSASRefinementMethod &_refinementMethod,
       const std::string &_instParamsFile,
       const std::vector<std::string> &_phaseFiles, const std::string &_gsasHome,
-      const std::string &_gsasProjectFile, const boost::optional<double> _dMin,
-      const boost::optional<double> _negativeWeight,
-      const boost::optional<double> _xMin, const boost::optional<double> _xMax,
-      const bool _refineSigma, const bool _refineGamma);
+      const std::string &_gsasProjectFile, const boost::optional<double> &_dMin,
+      const boost::optional<double> &_negativeWeight,
+      const boost::optional<double> &_xMin,
+      const boost::optional<double> &_xMax, const bool _refineSigma,
+      const bool _refineGamma);
 
   const Mantid::API::MatrixWorkspace_sptr inputWorkspace;
   const RunLabel runLabel;
@@ -57,5 +57,3 @@ operator!=(const GSASIIRefineFitPeaksParameters &lhs,
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_GSASIIREFINEFITPEAKSPARAMETERS_H_

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ThresholdMD.h"
 #include "MantidAPI/Progress.h"
@@ -11,7 +11,6 @@
 #include "MantidKernel/EnabledWhenProperty.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/MultiThreaded.h"
-#include <boost/bind.hpp>
 #include <boost/function.hpp>
 
 using namespace Mantid::Kernel;
@@ -51,11 +50,11 @@ void ThresholdMD::init() {
                   "An input workspace.");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back(LessThan());
-  propOptions.push_back(GreaterThan());
+  propOptions.emplace_back(LessThan());
+  propOptions.emplace_back(GreaterThan());
 
   declareProperty("Condition", LessThan(),
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Selected threshold condition. Any value which does meet "
                   "this condition with respect to the ReferenceValue will be "
                   "overwritten.");
@@ -99,15 +98,16 @@ void ThresholdMD::exec() {
     alg->setProperty("InputWorkspace", inputWS);
     alg->executeAsChildAlg();
     IMDWorkspace_sptr temp = alg->getProperty("OutputWorkspace");
-    outWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
+    outWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(temp);
   }
 
   const int64_t nPoints = inputWS->getNPoints();
 
+  using namespace std::placeholders;
   boost::function<bool(double)> comparitor =
-      boost::bind(std::less<double>(), _1, referenceValue);
+      std::bind(std::less<double>(), _1, referenceValue);
   if (condition == GreaterThan()) {
-    comparitor = boost::bind(std::greater<double>(), _1, referenceValue);
+    comparitor = std::bind(std::greater<double>(), _1, referenceValue);
   }
 
   Progress prog(this, 0.0, 1.0, 100);

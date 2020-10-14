@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_MDEW_IN_MEMORY_LOADING_PRESENTER
-#define MANTID_VATES_MDEW_IN_MEMORY_LOADING_PRESENTER
+#pragma once
 
 #include "MantidVatesAPI/MDEWLoadingPresenter.h"
 #include <boost/scoped_ptr.hpp>
@@ -50,5 +49,3 @@ private:
 };
 } // namespace VATES
 } // namespace Mantid
-
-#endif

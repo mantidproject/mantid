@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import, division, print_function
 from mantid.simpleapi import LoadWAND
 import unittest
 
@@ -21,6 +20,7 @@ class LoadWANDTest(unittest.TestCase):
         self.assertAlmostEqual(ws.run().getGoniometer().getEulerAngles()[0], -142.6)
         self.assertEqual(ws.run().getLogData('Wavelength').value, 1.488)
         self.assertAlmostEqual(ws.run().getLogData('Ei').value, 36.94619794)
+        self.assertAlmostEqual(ws.run().getLogData('duration').value, 40.05)
 
         # Check masking
         self.assertTrue(ws.detectorInfo().isMasked(0))

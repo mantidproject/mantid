@@ -17,8 +17,7 @@
 
 ///@cond nodoc
 
-#ifndef ISISDS_COMMAND_H
-#define ISISDS_COMMAND_H
+#pragma once
 
 using isisds_error_report_t = void (*)(int, int, const char *);
 
@@ -71,5 +70,3 @@ int isisds_report(int status, int code, const char *format, ...);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-
-#endif /* ISISDS_COMMAND_H */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/QPeaksTableModel.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -14,6 +14,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include <QString>
 #include <boost/lexical_cast.hpp>
+#include <utility>
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -151,8 +152,8 @@ Constructor
 @param peaksWS : Workspace model.
 */
 QPeaksTableModel::QPeaksTableModel(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS)
-    : QAbstractTableModel(nullptr), m_peaksWS(peaksWS) {
+    std::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS)
+    : QAbstractTableModel(nullptr), m_peaksWS(std::move(peaksWS)) {
   m_columnNameMap = {{0, RUNNUMBER},
                      {1, DETID},
                      {2, H},
@@ -261,10 +262,10 @@ QPeaksTableModel::QPeaksTableModel(
 }
 
 void QPeaksTableModel::setPeaksWorkspace(
-    boost::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) {
+    std::shared_ptr<const Mantid::API::IPeaksWorkspace> peaksWS) {
   beginResetModel();
   emit layoutAboutToBeChanged();
-  m_peaksWS = peaksWS;
+  m_peaksWS = std::move(peaksWS);
   emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
   emit layoutChanged();
   endResetModel();
@@ -365,7 +366,7 @@ std::vector<int> QPeaksTableModel::defaultHideCols() {
     Mantid::Kernel::InstrumentInfo instrInfo =
         Mantid::Kernel::ConfigService::Instance().getInstrument(instrName);
     if (instrInfo.facility().name() != "SNS")
-      result.push_back(COL_BANKNAME);
+      result.emplace_back(COL_BANKNAME);
 
     // hide some columns based on the techniques
     { // shrink variable scope
@@ -376,15 +377,15 @@ std::vector<int> QPeaksTableModel::defaultHideCols() {
       const std::string DGS("TOF Direct Geometry Spectroscopy");
       bool showEnergy(false);
       if (techniques.find(DGS) == techniques.end())
-        result.push_back(COL_FINAL_ENERGY);
+        result.emplace_back(COL_FINAL_ENERGY);
       else
         showEnergy = true;
       if (techniques.find(IGS) == techniques.end())
-        result.push_back(COL_INITIAL_ENERGY);
+        result.emplace_back(COL_INITIAL_ENERGY);
       else
         showEnergy = true;
       if (!showEnergy)
-        result.push_back(COL_ENERGY_TRANSFER);
+        result.emplace_back(COL_ENERGY_TRANSFER);
     }
   } catch (Mantid::Kernel::Exception::NotFoundError &) {
     // Unable to fetch instrument info, so continue without it.

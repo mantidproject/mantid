@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/MeshObject.h"
 #include "MantidGeometry/Objects/MeshObjectCommon.h"
@@ -14,14 +14,14 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Material.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
 
 MeshObject::MeshObject(const std::vector<uint32_t> &faces,
                        const std::vector<Kernel::V3D> &vertices,
-                       const Kernel::Material material)
+                       const Kernel::Material &material)
     : m_boundingBox(), m_id("MeshObject"), m_triangles(faces),
       m_vertices(vertices), m_material(material) {
 
@@ -41,13 +41,20 @@ MeshObject::MeshObject(std::vector<uint32_t> &&faces,
 void MeshObject::initialize() {
 
   MeshObjectCommon::checkVertexLimit(m_vertices.size());
-  m_handler = boost::make_shared<GeometryHandler>(*this);
+  m_handler = std::make_shared<GeometryHandler>(*this);
 }
 
 /**
  * @return The Material that the object is composed from
  */
 const Kernel::Material &MeshObject::material() const { return m_material; }
+
+/**
+ * @param material :: material that is being set for the object
+ */
+void MeshObject::setMaterial(const Kernel::Material &material) {
+  m_material = material;
+}
 
 /**
  * Returns whether this object has a valid shape
@@ -143,7 +150,6 @@ bool MeshObject::isOnSide(const Kernel::V3D &point) const {
  * @return Number of segments added
  */
 int MeshObject::interceptSurface(Geometry::Track &UT) const {
-
   int originalCount = UT.count(); // Number of intersections original track
   BoundingBox bb = getBoundingBox();
   if (!bb.doesLineIntersect(UT)) {
@@ -168,6 +174,28 @@ int MeshObject::interceptSurface(Geometry::Track &UT) const {
 }
 
 /**
+ * Compute the distance to the first point of intersection with the surface
+ * @param track Track defining start/direction
+ * @return The distance to the object
+ * @throws std::runtime_error if no intersection was found
+ */
+double MeshObject::distance(const Track &track) const {
+  Kernel::V3D vertex1, vertex2, vertex3, intersection;
+  TrackDirection unused;
+  for (size_t i = 0; getTriangle(i, vertex1, vertex2, vertex3); ++i) {
+    if (MeshObjectCommon::rayIntersectsTriangle(
+            track.startPoint(), track.direction(), vertex1, vertex2, vertex3,
+            intersection, unused)) {
+      return track.startPoint().distance(intersection);
+    }
+  }
+  std::ostringstream os;
+  os << "Unable to find intersection with object with track starting at "
+     << track.startPoint() << " in direction " << track.direction() << "\n";
+  throw std::runtime_error(os.str());
+}
+
+/**
  * Get intersection points and their in out directions on the given ray
  * @param start :: Start point of ray
  * @param direction :: Direction of ray
@@ -185,8 +213,8 @@ void MeshObject::getIntersections(
     if (MeshObjectCommon::rayIntersectsTriangle(start, direction, vertex1,
                                                 vertex2, vertex3, intersection,
                                                 entryExit)) {
-      intersectionPoints.push_back(intersection);
-      entryExitFlags.push_back(entryExit);
+      intersectionPoints.emplace_back(intersection);
+      entryExitFlags.emplace_back(entryExit);
     }
   }
   // still need to deal with edge cases
@@ -364,7 +392,7 @@ int MeshObject::getPointInObject(Kernel::V3D &point) const {
  * @param maxAttempts The maximum number of attempts at generating a point
  * @return The generated point
  */
-Kernel::V3D
+boost::optional<Kernel::V3D>
 MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                   const size_t maxAttempts) const {
   const auto &bbox = getBoundingBox();
@@ -383,21 +411,17 @@ MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
  * @param activeRegion Restrict point generation to this sub-region of the
  * object
  * @param maxAttempts The maximum number of attempts at generating a point
- * @return The newly generated point
+ * @return The generated point
  */
-Kernel::V3D
+boost::optional<Kernel::V3D>
 MeshObject::generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                                   const BoundingBox &activeRegion,
                                   const size_t maxAttempts) const {
 
   const auto point =
       RandomPoint::bounded(*this, rng, activeRegion, maxAttempts);
-  if (!point) {
-    throw std::runtime_error("Object::generatePointInObject() - Unable to "
-                             "generate point in object after " +
-                             std::to_string(maxAttempts) + " attempts");
-  }
-  return *point;
+
+  return point;
 }
 
 /**
@@ -429,7 +453,7 @@ bool MeshObject::searchForObject(Kernel::V3D &point) const {
  * @param[in] h is pointer to the geometry handler. don't delete this pointer in
  * the calling function.
  */
-void MeshObject::setGeometryHandler(boost::shared_ptr<GeometryHandler> h) {
+void MeshObject::setGeometryHandler(const std::shared_ptr<GeometryHandler> &h) {
   if (h == nullptr)
     return;
   m_handler = h;
@@ -461,21 +485,64 @@ void MeshObject::initDraw() const {
 /**
  * Returns the geometry handler
  */
-boost::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
+std::shared_ptr<GeometryHandler> MeshObject::getGeometryHandler() const {
   // Check if the geometry handler is upto dated with the cache, if not then
   // cache it now.
   return m_handler;
 }
 
+/**
+ * Rotate the mesh according to the supplied rotation matrix
+ * @param rotationMatrix Rotation matrix to be applied
+ */
 void MeshObject::rotate(const Kernel::Matrix<double> &rotationMatrix) {
   for (Kernel::V3D &vertex : m_vertices) {
     vertex.rotate(rotationMatrix);
   }
 }
 
+/**
+ * Translate the mesh according to the supplied x, y, z vector
+ * @param translationVector Translation vector to be applied
+ */
 void MeshObject::translate(const Kernel::V3D &translationVector) {
   for (Kernel::V3D &vertex : m_vertices) {
     vertex += translationVector;
+  }
+}
+
+/**
+ * Scale the mesh according to the supplied scale factor
+ * @param scaleFactor Scale factor
+ */
+void MeshObject::scale(const double scaleFactor) {
+  for (Kernel::V3D &vertex : m_vertices) {
+    vertex *= scaleFactor;
+  }
+}
+
+/**
+ * Transform the mesh (scale, translate, rotate) according to the
+ * supplied transformation matrix
+ * @param matrix 4 x 4 transformation matrix
+ */
+void MeshObject::multiply(const Kernel::Matrix<double> &matrix) {
+  if ((matrix.numCols() != 4) || (matrix.numRows() != 4)) {
+    throw "Transformation matrix must be 4 x 4";
+  }
+
+  // create homogenous coordinates for the input vector with 4th element
+  // equal to 1 (position)
+  for (Kernel::V3D &vertex : m_vertices) {
+    std::vector<double> vertexin(4);
+    vertexin[0] = vertex.X();
+    vertexin[1] = vertex.Y();
+    vertexin[2] = vertex.Z();
+    vertexin[3] = 1;
+    std::vector<double> vertexout(4);
+    matrix.multiplyPoint(vertexin, vertexout);
+    Kernel::V3D newvertex(vertexout[0], vertexout[1], vertexout[2]);
+    vertex = newvertex;
   }
 }
 

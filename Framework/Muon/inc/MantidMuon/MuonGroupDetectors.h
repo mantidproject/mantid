@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MUONGROUPDETECTORS_H_
-#define MANTID_ALGORITHMS_MUONGROUPDETECTORS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,7 +15,7 @@ namespace Algorithms {
 /** MuonGroupDetectors : applies detector grouping to a workspace. (Muon
   version)
 */
-class DLLExport MuonGroupDetectors : public API::Algorithm {
+class MANTID_MUON_DLL MuonGroupDetectors : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -34,5 +33,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_MUONGROUPDETECTORS_H_ */

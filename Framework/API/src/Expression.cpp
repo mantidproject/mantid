@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <locale>
 #include <sstream>
@@ -117,8 +117,8 @@ Expression &Expression::operator=(const Expression &expr) {
   m_funct = expr.m_funct;
   m_op = expr.m_op;
   m_terms = expr.m_terms;
-  // m_expr = expr.m_expr;
-  // m_tokens = expr.m_tokens;
+  m_expr = expr.m_expr;
+  m_tokens = expr.m_tokens;
   return *this;
 }
 
@@ -205,7 +205,7 @@ void Expression::parse(const std::string &str) {
   setFunct(*tkz.begin());
 
   for (size_t i = 0; i <= m_tokens.size(); i++) {
-    m_terms.push_back(Expression(this));
+    m_terms.emplace_back(Expression(this));
     Expression &t = m_terms.back();
     if (i)
       t.m_op = GetOp(i - 1);
@@ -330,7 +330,7 @@ void Expression::tokenize() {
           if (prec < min_prec)
             min_prec = prec;
           Token tok(is, i - 1, is1, prec);
-          tokens.push_back(tok);
+          tokens.emplace_back(tok);
           is = is1;
         }
 
@@ -429,7 +429,7 @@ void Expression::setFunct(const std::string &name) {
       m_funct = op;
       Expression tmp(this);
       tmp.parse(name.substr(op.size()));
-      m_terms.push_back(tmp);
+      m_terms.emplace_back(tmp);
       return;
     }
   }
@@ -473,7 +473,7 @@ void Expression::setFunct(const std::string &name) {
       tmp.parse(args);
       if (tmp.name() != EMPTY_EXPRESSION_NAME &&
           (!tmp.isFunct() || tmp.name() != ",")) {
-        m_terms.push_back(tmp);
+        m_terms.emplace_back(tmp);
       } else {
         if (f.empty() && tmp.name() == ",") {
           f = ",";

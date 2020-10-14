@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SAMPLE_H_
-#define MANTID_API_SAMPLE_H_
+#pragma once
 
 //-----------------------------------------------------------------------------
 // Includes
@@ -46,7 +45,7 @@ public:
   /// the number of samples
   std::size_t size() const;
   /// Adds a sample to the list
-  void addSample(boost::shared_ptr<Sample> childSample);
+  void addSample(const std::shared_ptr<Sample> &childSample);
 
   /// Returns the name of the sample
   const std::string &getName() const;
@@ -78,11 +77,9 @@ public:
   const Geometry::OrientedLattice &getOrientedLattice() const;
   /// Get a reference to the sample's OrientedLattice
   Geometry::OrientedLattice &getOrientedLattice();
-  /** Set the pointer to OrientedLattice defining the sample's lattice and
-     orientation.
-      No copying is done in the class, but the class deletes pointer on
-     destruction so the application, providing the pointer should not do it*/
-  void setOrientedLattice(Geometry::OrientedLattice *latt);
+  /// Set the pointer to OrientedLattice defining the sample's lattice and
+  /// orientation
+  void setOrientedLattice(std::unique_ptr<Geometry::OrientedLattice> lattice);
   bool hasOrientedLattice() const;
   //@}
 
@@ -119,13 +116,16 @@ public:
   /// Delete the oriented lattice
   void clearOrientedLattice();
 
+  bool operator==(const Sample &other) const;
+  bool operator!=(const Sample &other) const;
+
 private:
   /// The sample name
   std::string m_name;
   /// The sample shape object
   Geometry::IObject_sptr m_shape;
   /// An owned pointer to the SampleEnvironment object
-  boost::shared_ptr<Geometry::SampleEnvironment> m_environment;
+  std::shared_ptr<Geometry::SampleEnvironment> m_environment;
   /// Pointer to the OrientedLattice of the sample, NULL if not set.
   std::unique_ptr<Geometry::OrientedLattice> m_lattice;
 
@@ -133,7 +133,7 @@ private:
   std::unique_ptr<Geometry::CrystalStructure> m_crystalStructure;
 
   /// Vector of child samples
-  std::vector<boost::shared_ptr<Sample>> m_samples;
+  std::vector<std::shared_ptr<Sample>> m_samples;
 
   /// The sample geometry flag
   int m_geom_id;
@@ -147,5 +147,3 @@ private:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_SAMPLE_H_*/

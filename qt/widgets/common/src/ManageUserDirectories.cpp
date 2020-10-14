@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MantidKernel/ConfigService.h"
@@ -13,6 +13,16 @@
 #include <QUrl>
 
 using namespace MantidQt::API;
+
+namespace {
+std::unique_ptr<ManageUserDirectories> CURRENTLY_OPEN_MUD;
+} // namespace
+
+namespace ButtonPrefix {
+const std::string DATA{"pbData"};
+const std::string SCRIPT{"pbScript"};
+const std::string EXTENSIONS{"pbExt"};
+} // namespace ButtonPrefix
 
 ManageUserDirectories::ManageUserDirectories(QWidget *parent)
     : MantidDialog(parent) {
@@ -31,27 +41,28 @@ void ManageUserDirectories::initLayout() {
   connect(m_uiForm.pbCancel, SIGNAL(clicked()), this, SLOT(cancelClicked()));
   connect(m_uiForm.pbConfirm, SIGNAL(clicked()), this, SLOT(confirmClicked()));
 
-  connect(m_uiForm.pbAddDirectory, SIGNAL(clicked()), this,
+  connect(m_uiForm.pbDataAddDirectory, SIGNAL(clicked()), this,
           SLOT(addDirectory()));
-  connect(m_uiForm.pbAddDirectoryPython, SIGNAL(clicked()), this,
+  connect(m_uiForm.pbScriptAddDirectory, SIGNAL(clicked()), this,
           SLOT(addDirectory()));
-  connect(m_uiForm.pbBrowseToDir, SIGNAL(clicked()), this,
+  connect(m_uiForm.pbDataBrowseToDir, SIGNAL(clicked()), this,
           SLOT(browseToDirectory()));
-  connect(m_uiForm.pbBrowseToDirPython, SIGNAL(clicked()), this,
+  connect(m_uiForm.pbScriptBrowseToDir, SIGNAL(clicked()), this,
           SLOT(browseToDirectory()));
-  connect(m_uiForm.pbRemDir, SIGNAL(clicked()), this, SLOT(remDir()));
-  connect(m_uiForm.pbRemDirPython, SIGNAL(clicked()), this, SLOT(remDir()));
-  connect(m_uiForm.pbMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
-  connect(m_uiForm.pbMoveUpPython, SIGNAL(clicked()), this, SLOT(moveUp()));
-  connect(m_uiForm.pbMoveDown, SIGNAL(clicked()), this, SLOT(moveDown()));
-  connect(m_uiForm.pbMoveDownPython, SIGNAL(clicked()), this, SLOT(moveDown()));
+  connect(m_uiForm.pbExtBrowseToDir, SIGNAL(clicked()), this,
+          SLOT(browseToDirectory()));
+  connect(m_uiForm.pbDataRemDir, SIGNAL(clicked()), this, SLOT(remDir()));
+  connect(m_uiForm.pbScriptRemDir, SIGNAL(clicked()), this, SLOT(remDir()));
+  connect(m_uiForm.pbExtRemoveDir, SIGNAL(clicked()), this, SLOT(remDir()));
+  connect(m_uiForm.pbDataMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
+  connect(m_uiForm.pbScriptMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
+  connect(m_uiForm.pbExtMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
+  connect(m_uiForm.pbDataMoveDown, SIGNAL(clicked()), this, SLOT(moveDown()));
+  connect(m_uiForm.pbScriptMoveDown, SIGNAL(clicked()), this, SLOT(moveDown()));
+  connect(m_uiForm.pbExtMoveDown, SIGNAL(clicked()), this, SLOT(moveDown()));
 
   connect(m_uiForm.pbSaveBrowse, SIGNAL(clicked()), this,
           SLOT(selectSaveDir()));
-}
-
-void ManageUserDirectories::setHelpButtonVisible(const bool &visible) {
-  m_uiForm.pbHelp->setVisible(visible);
 }
 
 void ManageUserDirectories::loadProperties() {
@@ -75,8 +86,16 @@ void ManageUserDirectories::loadProperties() {
                         "pythonscripts.directories"))
                     .trimmed();
   list = directories.split(";", QString::SkipEmptyParts);
-  m_uiForm.lwUserSearchDirs->clear();
-  m_uiForm.lwUserSearchDirs->addItems(list);
+  m_uiForm.lwScriptSearchDirs->clear();
+  m_uiForm.lwScriptSearchDirs->addItems(list);
+
+  directories = QString::fromStdString(
+                    Mantid::Kernel::ConfigService::Instance().getString(
+                        "user.python.plugins.directories"))
+                    .trimmed();
+  list = directories.split(";", QString::SkipEmptyParts);
+  m_uiForm.lwExtSearchDirs->clear();
+  m_uiForm.lwExtSearchDirs->addItems(list);
 
   // set flag of whether to search the data archive
   QString archive = QString::fromStdString(
@@ -130,6 +149,7 @@ void ManageUserDirectories::saveProperties() {
 
   QStringList dataDirs;
   QStringList userDirs;
+  QStringList extensionDirs;
 
   for (int i = 0; i < m_uiForm.lwDataSearchDirs->count(); i++) {
     QString dir = m_uiForm.lwDataSearchDirs->item(i)->text();
@@ -137,20 +157,30 @@ void ManageUserDirectories::saveProperties() {
     dataDirs.append(dir);
   }
 
-  for (int i = 0; i < m_uiForm.lwUserSearchDirs->count(); i++) {
-    QString dir = m_uiForm.lwUserSearchDirs->item(i)->text();
+  for (int i = 0; i < m_uiForm.lwScriptSearchDirs->count(); i++) {
+    QString dir = m_uiForm.lwScriptSearchDirs->item(i)->text();
     appendSlashIfNone(dir);
     userDirs.append(dir);
   }
 
+  for (int i = 0; i < m_uiForm.lwExtSearchDirs->count(); i++) {
+    QString dir = m_uiForm.lwExtSearchDirs->item(i)->text();
+    appendSlashIfNone(dir);
+    extensionDirs.append(dir);
+  }
   QString newDataDirs;
   QString newUserDirs;
   QString newSaveDir;
+  QString newExtensionDirs;
 
   newDataDirs = dataDirs.join(";");
   newUserDirs = userDirs.join(";");
   newDataDirs.replace('\\', '/');
   newUserDirs.replace('\\', '/');
+
+  // Extensions dirs
+  newExtensionDirs = extensionDirs.join(";");
+  newExtensionDirs.replace('\\', '/');
 
   newSaveDir = m_uiForm.leDefaultSave->text();
   newSaveDir.replace('\\', '/');
@@ -163,6 +193,8 @@ void ManageUserDirectories::saveProperties() {
   config.setString("datasearch.directories", newDataDirs.toStdString());
   config.setString("defaultsave.directory", newSaveDir.toStdString());
   config.setString("pythonscripts.directories", newUserDirs.toStdString());
+  config.setString("user.python.plugins.directories",
+                   newExtensionDirs.toStdString());
   config.saveConfig(m_userPropFile.toStdString());
 }
 
@@ -181,12 +213,14 @@ void ManageUserDirectories::appendSlashIfNone(QString &path) const {
   }
 }
 
-QListWidget *ManageUserDirectories::listWidget() {
-  if (m_uiForm.tabWidget->currentWidget() == m_uiForm.tabDataSearch) {
+QListWidget *ManageUserDirectories::listWidget(QObject *sender) {
+  std::string objectName = sender->objectName().toStdString();
+  if (objectName.find(ButtonPrefix::DATA) != std::string::npos) {
     return m_uiForm.lwDataSearchDirs;
-  } else if (m_uiForm.tabWidget->currentWidget() ==
-             m_uiForm.tabPythonDirectories) {
-    return m_uiForm.lwUserSearchDirs;
+  } else if (objectName.find(ButtonPrefix::SCRIPT) != std::string::npos) {
+    return m_uiForm.lwScriptSearchDirs;
+  } else if (objectName.find(ButtonPrefix::EXTENSIONS) != std::string::npos) {
+    return m_uiForm.lwExtSearchDirs;
   } else {
     return nullptr;
   }
@@ -194,7 +228,7 @@ QListWidget *ManageUserDirectories::listWidget() {
 
 // SLOTS
 void ManageUserDirectories::helpClicked() {
-  HelpWindow::showCustomInterface(this, QString("ManageUserDirectories"));
+  HelpWindow::showCustomInterface(nullptr, QString("ManageUserDirectories"));
 }
 void ManageUserDirectories::cancelClicked() { this->close(); }
 void ManageUserDirectories::confirmClicked() {
@@ -213,7 +247,7 @@ void ManageUserDirectories::addDirectory() {
   }
 
   if (input && input->text() != "") {
-    listWidget()->addItem(input->text());
+    listWidget(sender())->addItem(input->text());
     input->clear();
   }
 }
@@ -229,17 +263,17 @@ void ManageUserDirectories::browseToDirectory() {
 
   if (newDir != "") {
     settings.setValue("ManageUserSettings/last_directory", newDir);
-    listWidget()->addItem(newDir);
+    listWidget(sender())->addItem(newDir);
   }
 }
 void ManageUserDirectories::remDir() {
-  QList<QListWidgetItem *> selected = listWidget()->selectedItems();
+  QList<QListWidgetItem *> selected = listWidget(sender())->selectedItems();
   for (auto &i : selected) {
     delete i;
   }
 }
 void ManageUserDirectories::moveUp() {
-  QListWidget *list = listWidget();
+  QListWidget *list = listWidget(sender());
   QList<QListWidgetItem *> selected = list->selectedItems();
   for (auto &i : selected) {
     int index = list->row(i);
@@ -251,7 +285,7 @@ void ManageUserDirectories::moveUp() {
   }
 }
 void ManageUserDirectories::moveDown() {
-  QListWidget *list = listWidget();
+  QListWidget *list = listWidget(sender());
   int count = list->count();
   QList<QListWidgetItem *> selected = list->selectedItems();
   for (auto &i : selected) {
@@ -281,11 +315,17 @@ void ManageUserDirectories::selectSaveDir() {
     m_uiForm.leDefaultSave->setText(path);
   }
 }
-/** Opens a manage directories dialog and gives it focus
- *  @param parent :: the parent window, probably the window that called it
- */
-void ManageUserDirectories::openUserDirsDialog(QWidget *parent) {
-  ManageUserDirectories *ad = new ManageUserDirectories(parent);
-  ad->show();
-  ad->setFocus();
+
+void ManageUserDirectories::openManageUserDirectories() {
+  if (CURRENTLY_OPEN_MUD) {
+    CURRENTLY_OPEN_MUD->raise();
+  } else {
+    CURRENTLY_OPEN_MUD = std::make_unique<ManageUserDirectories>();
+    CURRENTLY_OPEN_MUD->show();
+  }
+}
+
+void ManageUserDirectories::closeEvent(QCloseEvent *event) {
+  CURRENTLY_OPEN_MUD.reset();
+  QWidget::closeEvent(event);
 }

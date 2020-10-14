@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """  The GuiStateDirector generates the state object from the models.
 
@@ -10,76 +10,98 @@ The GuiStateDirector gets the information from the table and state model and gen
 the main part of the work to an StateDirectorISIS object.
 """
 
-from __future__ import (absolute_import, division, print_function)
-
 import copy
+import os
 
-from sans.state.data import get_data_builder
-from sans.user_file.state_director import StateDirectorISIS
-from sans.common.enums import (SANSInstrument)
-from sans.test_helper.file_information_mock import SANSFileInformationMock
+from mantid import FileFinder
+from sans.common.file_information import SANSFileInformationBlank
+from sans.gui_logic.models.RowEntries import RowEntries
+from sans.gui_logic.models.file_loading import FileLoading
+from sans.gui_logic.models.state_gui_model import StateGuiModel
+from sans.state.StateObjects.StateData import get_data_builder
 
 
 class GuiStateDirector(object):
-    def __init__(self, table_model, state_gui_model, facility):
-        self._table_model = table_model
+    def __init__(self, state_gui_model: StateGuiModel, facility):
         self._state_gui_model = state_gui_model
         self._facility = facility
 
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
 
-    def create_state(self, row, file_lookup=True, instrument=SANSInstrument.SANS2D,
-                     user_file=""):
+    def create_state(self, row_entry: RowEntries, file_lookup=True, row_user_file: str = None) -> StateGuiModel:
+        """
+        Packs the current GUI options (e.g. settings selection) into a state object for the current row
+        :param row_entry: The associated row entry
+        :param file_lookup: Whether to lookup file information whilst creating state
+        :param row_user_file: (Optional) The name of an overriding user file if one is provided. In this case the
+        GUI options selected will be ignored.
+        :return: A populated StateGuiModel
+        """
+
         # 1. Get the data settings, such as sample_scatter, etc... and create the data state.
-        table_index_model = self._table_model.get_table_entry(row)
         if file_lookup:
-            file_information = table_index_model.file_information
+            file_information = row_entry.file_information
         else:
-            file_information = SANSFileInformationMock(instrument=instrument, facility=self._facility)
+            file_information = SANSFileInformationBlank()
 
-        data_builder = get_data_builder(self._facility, file_information, user_file)
+        gui_state = self._load_current_state(file_information, row_user_file)
 
-        self._set_data_entry(data_builder.set_sample_scatter, table_index_model.sample_scatter)
-        self._set_data_period_entry(data_builder.set_sample_scatter_period, table_index_model.sample_scatter_period)
-        self._set_data_entry(data_builder.set_sample_transmission, table_index_model.sample_transmission)
-        self._set_data_period_entry(data_builder.set_sample_transmission_period, table_index_model.sample_transmission_period)  # noqa
-        self._set_data_entry(data_builder.set_sample_direct, table_index_model.sample_direct)
-        self._set_data_period_entry(data_builder.set_sample_direct_period, table_index_model.sample_direct_period)
-        self._set_data_entry(data_builder.set_can_scatter, table_index_model.can_scatter)
-        self._set_data_period_entry(data_builder.set_can_scatter_period, table_index_model.can_scatter_period)
-        self._set_data_entry(data_builder.set_can_transmission, table_index_model.can_transmission)
-        self._set_data_period_entry(data_builder.set_can_transmission_period, table_index_model.can_transmission_period)
-        self._set_data_entry(data_builder.set_can_direct, table_index_model.can_direct)
-        self._set_data_period_entry(data_builder.set_can_direct_period, table_index_model.can_direct_period)
-
-        data = data_builder.build()
+        data_builder = get_data_builder(self._facility, file_information)
+        self._populate_row_entries(data_builder, row_entry)
 
         # 2. Add elements from the options column
-        state_gui_model = copy.deepcopy(self._state_gui_model)
-        options_column_model = table_index_model.options_column_model
-        self._apply_column_options_to_state(options_column_model, state_gui_model)
+        self._apply_column_options_to_state(row_entry, gui_state)
 
         # 3. Add other columns
-        output_name = table_index_model.output_name
-        if output_name:
-            state_gui_model.output_name = output_name
+        gui_state.all_states.save = self._state_gui_model.all_states.save
 
-        if table_index_model.sample_thickness:
-            state_gui_model.sample_thickness = float(table_index_model.sample_thickness)
-        if table_index_model.sample_height:
-            state_gui_model.sample_height = float(table_index_model.sample_height)
-        if table_index_model.sample_width:
-            state_gui_model.sample_width = float(table_index_model.sample_width)
-        if table_index_model.sample_shape:
-            state_gui_model.sample_shape = table_index_model.sample_shape
+        output_name = row_entry.output_name
+        if output_name:
+            gui_state.output_name = output_name
+        gui_state.reduction_dimensionality = self._state_gui_model.reduction_dimensionality
+
+        if row_entry.sample_thickness:
+            gui_state.sample_thickness = float(row_entry.sample_thickness)
+        if row_entry.sample_height:
+            gui_state.sample_height = float(row_entry.sample_height)
+        if row_entry.sample_width:
+            gui_state.sample_width = float(row_entry.sample_width)
+        if row_entry.sample_shape:
+            gui_state.sample_shape = row_entry.sample_shape
 
         # 4. Create the rest of the state based on the builder.
-        user_file_state_director = StateDirectorISIS(data, file_information)
-        settings = copy.deepcopy(state_gui_model.settings)
-        user_file_state_director.add_state_settings(settings)
+        gui_state.all_states.data = data_builder.build()
+        return gui_state
 
-        return user_file_state_director.construct()
+    def _populate_row_entries(self, data_builder, row_entry):
+        self._set_data_entry(data_builder.set_sample_scatter, row_entry.sample_scatter)
+        self._set_data_period_entry(data_builder.set_sample_scatter_period, row_entry.sample_scatter_period)
+        self._set_data_entry(data_builder.set_sample_transmission, row_entry.sample_transmission)
+        self._set_data_period_entry(data_builder.set_sample_transmission_period,
+                                    row_entry.sample_transmission_period)  # noqa
+        self._set_data_entry(data_builder.set_sample_direct, row_entry.sample_direct)
+        self._set_data_period_entry(data_builder.set_sample_direct_period, row_entry.sample_direct_period)
+        self._set_data_entry(data_builder.set_can_scatter, row_entry.can_scatter)
+        self._set_data_period_entry(data_builder.set_can_scatter_period, row_entry.can_scatter_period)
+        self._set_data_entry(data_builder.set_can_transmission, row_entry.can_transmission)
+        self._set_data_period_entry(data_builder.set_can_transmission_period, row_entry.can_transmission_period)
+        self._set_data_entry(data_builder.set_can_direct, row_entry.can_direct)
+        self._set_data_period_entry(data_builder.set_can_direct_period, row_entry.can_direct_period)
+
+    def _load_current_state(self, file_information, row_user_file):
+        if row_user_file:
+            # Has a custom user file so ignore any settings from GUI
+            user_file_path = FileFinder.getFullPath(row_user_file)
+            if not os.path.exists(user_file_path):
+                raise ValueError(f"The user path {user_file_path}\n"
+                                 " does not exist. Make sure a valid user file has been specified.")
+            state = FileLoading.load_user_file(user_file_path, file_information=file_information)
+            gui_state = StateGuiModel(state)
+        else:
+            # We want to copy our master GUI state to set any row options (see prototype pattern)
+            gui_state = copy.deepcopy(self._state_gui_model)
+        return gui_state
 
     @staticmethod
     def _set_data_entry(func, entry):
@@ -98,7 +120,7 @@ class GuiStateDirector(object):
                 pass
 
     @staticmethod
-    def _apply_column_options_to_state(options_column_model, state_gui_model):
+    def _apply_column_options_to_state(table_index_model, state_gui_model):
         """
         Apply the column setting of the user to the state for that particular row.
 
@@ -106,7 +128,7 @@ class GuiStateDirector(object):
         :param options_column_model: the option column model with the row specific settings
         :param state_gui_model: the state gui model
         """
-        options = options_column_model.get_options()
+        options = table_index_model.options.get_options_dict()
 
         # Here we apply the correction to the state depending on the settings in the options. This is not very nice,
         # but currently it is not clear how to solve this differently.

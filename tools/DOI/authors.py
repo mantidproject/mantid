@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 from itertools import ifilterfalse
@@ -45,6 +45,7 @@ _translations = {
     'Doucet, Mathieu'         : 'Doucet, Mathieu',
     'Nick Draper'             : 'Draper, Nick',
     'NickDraper'              : 'Draper, Nick',
+    'Nicholas Draper'         : 'Draper, Nick',
     'Ronald Fowler'           : 'Fowler, Ronald',
     'Martyn Gigg'             : 'Gigg, Martyn A.',
     'Samuel Jackson'          : 'Jackson, Samuel',
@@ -211,7 +212,50 @@ _translations = {
     'Adam J. Jackson'         : 'Jackson, Adam J.',
     'LolloB'                  : 'Basso, Lorenzo',
     'Lorenzo Basso'           : 'Basso, Lorenzo',
-    'SOKOLOVA'                : 'Sokolova, Anna'
+    'SOKOLOVA'                : 'Sokolova, Anna',
+    'Conor Finn'              : 'Finn, Conor',
+    'StephenSmith25'           : 'Smith, Stephen',
+    'Stephen'                 : 'Smith, Stephen',
+    'Stephen Smith'           : 'Smith, Stephen',
+    'Gabriele Sala'           : 'Sala, Gabriele',
+    'Hank Wu'                 : 'Wu, Hank',
+    'hankwustfc'              : 'Wu, Hank',
+    'Wu'                      : 'Wu, Hank',
+    'PhilColebrooke'          : 'Colebrooke, Phil',
+    'Phil'                    : 'Colebrooke, Phil',
+    'Phil Colebrooke'         : 'Colebrooke, Phil',
+    'DanielMurphy22'          : 'Murphy, Daniel',
+    'Richard'                 : 'Waite, Richard',
+    'RichardWaiteSTFC'        : 'Waite, Richard',
+    'Richard Waite'           : 'Waite, Richard',
+    'Ciara Nightingale'       : 'Nightingale, Ciara',
+    'ciaranightingale'        : 'Nightingale, Ciara',
+    'Danny Hindson'           : 'Hindson, Danny',
+    'DannyHindson'            : 'Hindson, Dannny',
+    'Fahima-Islam'            : 'Islam, Fahima',
+    'giovannidisiena'         : 'Di Siena, Giovanni',
+    'Giovanni Di Siena'       : 'Di Siena, Giovanni',
+    'Takudzwa Makoni'         : 'Makoni, Takudzwa',
+    'Daniel Murphy'           : 'Murphy, Daniel',
+    'William F Godoy'         : 'Godoy, William F',
+    'Islam, Fahima F'         : 'Islam, Fahima',
+    'Mathieu Tillet'          : 'Tillet, Mathieu',
+    'MathieuTillet'           : 'Tillet, Mathieu',
+    'StephenSmith'            : 'Smith, Stephen',
+    'Toluwalase Agoro'        : 'Agoro, Toluwalase',
+    'tolu28-coder'            : 'Agoro, Toluwalase',
+    'joseph-torsney'          : 'Torsney, Joesph',
+    'Joseph Torsney'          : 'Torsney, Joesph',
+    'YannickMeinerzhagen'     : 'Meinerzhagen, Yannick',
+    'Du Rong'                 : 'Rong, Du',
+    'durong'                  : 'Rong, Du',
+    'durong24'                : 'Rong, Du',
+    'Matt Cumber'             : 'Cumber, Matthew',
+    'Matthew Cumber'          : 'Cumber, Matthew',
+    'Tom Clayton'             : 'Clayton, Tom',
+    'Chen Zhang'              : 'Zhang, Chen',
+    'Guillaume Communie'      : 'Communie, Guillaume',
+    'Dominik Arominski'       : 'Arominski, Dominik'
 }
 
 # Used to ensure a Git author does not appear in any of the DOIs.  This is NOT
@@ -230,7 +274,8 @@ _blacklist = [
     'dpaj',
     'Daniel Pajerowski',
     'thomueller',
-    'luz.paz'
+    'luz.paz',
+    'davidvoneshen'
 ]
 
 # The whitelist is used for sponsors / contributors who should be included,
@@ -290,9 +335,9 @@ def _clean_up_author_list(author_list):
     untranslated = set(ifilterfalse(_translations.keys().__contains__, result))
     if untranslated:
         raise Exception(
-            'No translation exists for the following Git author(s): \n' +
-            '\n'.join(untranslated) + '\n' +
-            'Please edit the translations table accordingly.')
+            'No translation exists for the following Git author(s): \n'
+            + '\n'.join(untranslated) + '\n'
+            + 'Please edit the translations table accordingly.')
 
     # Translate all remaining names.
     result = [_translations[a] for a in result]

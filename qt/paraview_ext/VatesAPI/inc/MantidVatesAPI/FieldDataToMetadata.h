@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FIELDDATA_TO_METADATA_H_
-#define FIELDDATA_TO_METADATA_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include <functional>
@@ -22,8 +21,7 @@ namespace VATES {
  @date 09/02/2011
  */
 
-class DLLExport FieldDataToMetadata
-    : public std::binary_function<vtkFieldData *, std::string, std::string> {
+class DLLExport FieldDataToMetadata {
 public:
   /// Act as Functor.
   std::string operator()(vtkFieldData *fieldData, const std::string &id) const;
@@ -33,5 +31,3 @@ public:
 };
 } // namespace VATES
 } // namespace Mantid
-
-#endif

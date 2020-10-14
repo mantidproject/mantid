@@ -1,5 +1,10 @@
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=C0103
-from __future__ import (absolute_import, division, print_function)
 from HFIR_4Circle_Reduction.hfctables import SinglePtIntegrationTable
 from HFIR_4Circle_Reduction.integratedpeakview import SinglePtIntegrationView
 import HFIR_4Circle_Reduction.guiutility as guiutility

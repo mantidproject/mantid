@@ -130,11 +130,11 @@ public:
   constexpr wide_integer<Bits, Signed> &
   operator++() noexcept(is_same<Signed, unsigned>::value);
   constexpr wide_integer<Bits, Signed>
-  operator++(int)noexcept(is_same<Signed, unsigned>::value);
+  operator++(int) noexcept(is_same<Signed, unsigned>::value);
   constexpr wide_integer<Bits, Signed> &
   operator--() noexcept(is_same<Signed, unsigned>::value);
   constexpr wide_integer<Bits, Signed>
-  operator--(int)noexcept(is_same<Signed, unsigned>::value);
+  operator--(int) noexcept(is_same<Signed, unsigned>::value);
 
   // observers
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -25,7 +25,7 @@ using std::size_t;
  */
 SpectraAxis::SpectraAxis(const MatrixWorkspace *const parentWorkspace)
     : Axis(), m_parentWS(parentWorkspace), m_edges() {
-  this->unit() = boost::make_shared<Kernel::Units::Label>("Spectrum", "");
+  this->unit() = std::make_shared<Kernel::Units::Label>("Spectrum", "");
 }
 
 /** Virtual constructor

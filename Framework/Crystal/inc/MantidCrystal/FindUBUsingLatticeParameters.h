@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_H_
-#define MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -18,7 +17,7 @@ namespace Crystal {
     @author Dennis Mikkelson(adapted from Andrei Savici's CalculateUMatrix)
     @date   2011-08-17
   */
-class DLLExport FindUBUsingLatticeParameters : public API::Algorithm {
+class MANTID_CRYSTAL_DLL FindUBUsingLatticeParameters : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override {
@@ -51,5 +50,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_FIND_UB_USING_LATTICE_PARAMETERS */

@@ -5,6 +5,7 @@ set(SRC_FILES
     src/ArrayOrderedPairsValidator.cpp
     src/ArrayProperty.cpp
     src/Atom.cpp
+    src/AttenuationProfile.cpp
     src/BinFinder.cpp
     src/BinaryStreamReader.cpp
     src/BinaryStreamWriter.cpp
@@ -13,11 +14,11 @@ set(SRC_FILES
     src/ChecksumHelper.cpp
     src/CompositeValidator.cpp
     src/ComputeResourceInfo.cpp
-    src/ConfigService.cpp
     src/ConfigObserver.cpp
     src/ConfigPropertyObserver.cpp
-    src/DateAndTime.cpp
+    src/ConfigService.cpp
     src/DataItem.cpp
+    src/DateAndTime.cpp
     src/DateAndTimeHelpers.cpp
     src/DateTimeValidator.cpp
     src/DateValidator.cpp
@@ -76,6 +77,7 @@ set(SRC_FILES
     src/NDRandomNumberGenerator.cpp
     src/NeutronAtom.cpp
     src/NexusDescriptor.cpp
+    src/NexusHDF5Descriptor.cpp
     src/NullValidator.cpp
     src/OptionalBool.cpp
     src/ParaViewVersion.cpp
@@ -112,6 +114,7 @@ set(SRC_FILES
     src/TimeSeriesProperty.cpp
     src/TimeSplitter.cpp
     src/Timer.cpp
+    src/TopicInfo.cpp
     src/Unit.cpp
     src/UnitConversion.cpp
     src/UnitLabel.cpp
@@ -146,6 +149,7 @@ set(INC_FILES
     inc/MantidKernel/ArrayOrderedPairsValidator.h
     inc/MantidKernel/ArrayProperty.h
     inc/MantidKernel/Atom.h
+    inc/MantidKernel/AttenuationProfile.h
     inc/MantidKernel/BinFinder.h
     inc/MantidKernel/BinaryFile.h
     inc/MantidKernel/BinaryStreamReader.h
@@ -160,12 +164,12 @@ set(INC_FILES
     inc/MantidKernel/ChecksumHelper.h
     inc/MantidKernel/CompositeValidator.h
     inc/MantidKernel/ComputeResourceInfo.h
-    inc/MantidKernel/ConfigService.h
     inc/MantidKernel/ConfigObserver.h
     inc/MantidKernel/ConfigPropertyObserver.h
-    inc/MantidKernel/DateAndTime.h
+    inc/MantidKernel/ConfigService.h
     inc/MantidKernel/DataItem.h
     inc/MantidKernel/DataService.h
+    inc/MantidKernel/DateAndTime.h
     inc/MantidKernel/DateAndTimeHelpers.h
     inc/MantidKernel/DateTimeValidator.h
     inc/MantidKernel/DateValidator.h
@@ -181,8 +185,8 @@ set(INC_FILES
     inc/MantidKernel/EmptyValues.h
     inc/MantidKernel/EnabledWhenProperty.h
     inc/MantidKernel/EnvironmentHistory.h
-    inc/MantidKernel/ErrorReporter.h
     inc/MantidKernel/EqualBinsChecker.h
+    inc/MantidKernel/ErrorReporter.h
     inc/MantidKernel/Exception.h
     inc/MantidKernel/FacilityInfo.h
     inc/MantidKernel/Fast_Exponential.h
@@ -240,7 +244,7 @@ set(INC_FILES
     inc/MantidKernel/NetworkProxy.h
     inc/MantidKernel/NeutronAtom.h
     inc/MantidKernel/NexusDescriptor.h
-    inc/MantidKernel/normal_distribution.h
+    inc/MantidKernel/NexusHDF5Descriptor.h
     inc/MantidKernel/NullValidator.h
     inc/MantidKernel/OptionalBool.h
     inc/MantidKernel/ParaViewVersion.h
@@ -289,6 +293,7 @@ set(INC_FILES
     inc/MantidKernel/TimeSplitter.h
     inc/MantidKernel/Timer.h
     inc/MantidKernel/Tolerance.h
+    inc/MantidKernel/TopicInfo.h
     inc/MantidKernel/TypedValidator.h
     inc/MantidKernel/Unit.h
     inc/MantidKernel/UnitConversion.h
@@ -306,9 +311,9 @@ set(INC_FILES
     inc/MantidKernel/VisibleWhenProperty.h
     inc/MantidKernel/WarningSuppressions.h
     inc/MantidKernel/WriteLock.h
-    inc/MantidKernel/XMLInstantiator.h
     inc/MantidKernel/cow_ptr.h
-    inc/MantidKernel/make_cow.h)
+    inc/MantidKernel/make_cow.h
+    inc/MantidKernel/normal_distribution.h)
 
 set(TEST_FILES
     ArrayBoundedValidatorTest.h
@@ -316,6 +321,7 @@ set(TEST_FILES
     ArrayOrderedPairsValidatorTest.h
     ArrayPropertyTest.h
     AtomTest.h
+    AttenuationProfileTest.h
     BinFinderTest.h
     BinaryFileTest.h
     BinaryStreamReaderTest.h
@@ -330,9 +336,9 @@ set(TEST_FILES
     ChecksumHelperTest.h
     CompositeValidatorTest.h
     ComputeResourceInfoTest.h
-    ConfigServiceTest.h
     ConfigObserverTest.h
     ConfigPropertyObserverTest.h
+    ConfigServiceTest.h
     CowPtrTest.h
     DataServiceTest.h
     DateAndTimeHelpersTest.h
@@ -348,8 +354,8 @@ set(TEST_FILES
     EigenConversionHelpersTest.h
     EnabledWhenPropertyTest.h
     EnvironmentHistoryTest.h
-    ErrorReporterTest.h
     EqualBinsCheckerTest.h
+    ErrorReporterTest.h
     FacilitiesTest.h
     FileDescriptorTest.h
     FileValidatorTest.h
@@ -394,6 +400,7 @@ set(TEST_FILES
     NearestNeighboursTest.h
     NeutronAtomTest.h
     NexusDescriptorTest.h
+    NexusHDF5DescriptorTest.h
     NullValidatorTest.h
     OptionalBoolTest.h
     ProgressBaseTest.h
@@ -403,8 +410,8 @@ set(TEST_FILES
     PropertyManagerTest.h
     PropertyNexusTest.h
     PropertyTest.h
-    PropertyWithValueTest.h
     PropertyWithValueJSONTest.h
+    PropertyWithValueTest.h
     ProxyInfoTest.h
     QuatTest.h
     ReadLockTest.h
@@ -430,6 +437,7 @@ set(TEST_FILES
     TimeSeriesPropertyTest.h
     TimeSplitterTest.h
     TimerTest.h
+    TopicInfoTest.h
     TypedValidatorTest.h
     UnitConversionTest.h
     UnitFactoryTest.h
@@ -486,12 +494,12 @@ set_target_properties(Kernel
 
 target_include_directories(Kernel SYSTEM
                            PUBLIC ${Boost_INCLUDE_DIRS} ${POCO_INCLUDE_DIRS}
-                                  ${JSONCPP_INCLUDE_DIR}
-                           PRIVATE ${NEXUS_INCLUDE_DIR} ${GSL_INCLUDE_DIR}
-                                   ${OPENSSL_INCLUDE_DIR} ${SPAN_INCLUDE_DIR})
+                                  ${JSONCPP_INCLUDE_DIR} ${NEXUS_INCLUDE_DIR}
+                           PRIVATE ${GSL_INCLUDE_DIR}
+			   ${OPENSSL_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
 
-if(OSX_VERSION VERSION_GREATER 10.8)
-  set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set_target_properties(Kernel PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(Kernel
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
@@ -500,23 +508,20 @@ endif()
 # Add to the 'Framework' group in VS
 set_property(TARGET Kernel PROPERTY FOLDER "MantidFramework")
 
-# For older gcc versions (<4.5) if we do not put stdc++ first then things crash
-# when an exceptions are thrown in Python.
-if(GCC_COMPILER_VERSION AND GCC_COMPILER_VERSION VERSION_LESS "4.5")
-  target_link_libraries(Kernel LINK_PRIVATE stdc++)
-endif()
 target_link_libraries(Kernel
-                      LINK_PUBLIC
+                      PUBLIC
                       ${NEXUS_LIBRARIES}
                       Eigen3::Eigen
                       ${JSONCPP_LIBRARIES}
                       ${TBB_LIBRARIES}
                       ${TBB_MALLOC_LIBRARIES}
-                      LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
+                      PRIVATE
                       ${GSL_LIBRARIES}
                       ${MANTIDLIBS}
-                      ${NETWORK_LIBRARIES})
+                      ${NETWORK_LIBRARIES}
+                      span
+                      ${HDF5_LIBRARIES}
+                      )
 if(WIN32)
   target_link_libraries(Kernel LINK_PRIVATE Psapi.lib) # For memory usage
                                                        # queries
@@ -589,6 +594,7 @@ set(UPDATE_INSTRUMENT_DEFINTITIONS "0")
 set(CHECK_FOR_NEW_MANTID_VERSION "0")
 set(ENABLE_USAGE_REPORTS "0")
 set(PYTHONPLUGIN_DIRS "${MANTID_ROOT}/Framework/PythonInterface/plugins")
+set(PYTHONPLUGIN_MANIFEST "${CMAKE_BINARY_DIR}/Framework/PythonInterface/plugins/python-plugin-manifest.txt")
 set(
   DATADIRS
   ${ExternalData_BINARY_ROOT}/Testing/Data/UnitTest;${ExternalData_BINARY_ROOT}/Testing/Data/DocTest;${MANTID_ROOT}/instrument
@@ -633,11 +639,7 @@ mtd_install_targets(TARGETS Kernel INSTALL_DIRS ${LIB_DIR} ${WORKBENCH_LIB_DIR})
 
 # Create the properties file for the installer
 set(MANTID_ROOT_BUILD ${MANTID_ROOT})
-if(APPLE AND ENABLE_MANTIDPLOT)
-  set(MANTID_ROOT ../..)
-else()
-  set(MANTID_ROOT ..)
-endif()
+set(MANTID_ROOT ..)
 
 # Log to file for installed packages but not mpi
 if(MPI_BUILD OR MPI_EXPERIMENTAL)
@@ -647,6 +649,7 @@ else()
 endif()
 set(FRAMEWORK_PLUGINS_DIR ${MANTID_ROOT}/plugins)
 set(PYTHONPLUGIN_DIRS "${FRAMEWORK_PLUGINS_DIR}/python")
+set(PYTHONPLUGIN_MANIFEST "${PYTHONPLUGIN_DIRS}/python-plugin-manifest.txt")
 if(MAKE_VATES)
   if(APPLE)
     set(PARAVIEW_PYTHON_PATHS "../Libraries;../Python;")
@@ -684,10 +687,8 @@ endif()
 set(CONSOLECHANNELCLASS "StdoutChannel")
 configure_file(../Properties/Mantid.properties.template
                ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
-        DESTINATION ${BIN_DIR}
-        RENAME Mantid.properties)
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
-        DESTINATION ${WORKBENCH_BIN_DIR}
-        RENAME Mantid.properties)
+mtd_install_files(FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
+                  INSTALL_DIRS ${BIN_DIR} ${WORKBENCH_BIN_DIR}
+                  RENAME Mantid.properties)
+

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_DETECTORGRIDDEFINITIONTEST_H_
-#define MANTID_ALGORITHMS_DETECTORGRIDDEFINITIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -67,6 +66,30 @@ public:
     TS_ASSERT(inArray(indices, 45))
   }
 
+  void test_grid_too_small() {
+    TS_ASSERT_THROWS(
+        DetectorGridDefinition(minLat(), maxLat(), 1, minLong(), maxLong(), 1),
+        const std::runtime_error &);
+  }
+
+  void test_getNearestVertex() {
+    const auto def = makeTestDefinition();
+    auto index = def.getNearestVertex(minLat(), minLong());
+    TS_ASSERT_EQUALS(index.first, 0)
+    TS_ASSERT_EQUALS(index.second, 0)
+    index = def.getNearestVertex(maxLat(), maxLong());
+    TS_ASSERT_EQUALS(index.first, nLat() - 2)
+    TS_ASSERT_EQUALS(index.second, nLong() - 2)
+    const auto dLat = (maxLat() - minLat()) / static_cast<double>(nLat() - 1);
+    const auto lat = (maxLat() + minLat() - dLat) / 2.0;
+    const auto dLong =
+        (maxLong() - minLong()) / static_cast<double>(nLong() - 1);
+    const auto lon = (maxLong() + minLong() - dLong) / 2.0;
+    index = def.getNearestVertex(lat, lon);
+    TS_ASSERT_EQUALS(index.first, 2)
+    TS_ASSERT_EQUALS(index.second, 5)
+  }
+
   void test_size() {
     const auto def = makeTestDefinition();
     TS_ASSERT_EQUALS(def.numberColumns(), nLong())
@@ -109,5 +132,3 @@ private:
     return std::count(a.cbegin(), a.cend(), i) == 1;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_DETECTORGRIDDEFINITIONTEST_H_ */

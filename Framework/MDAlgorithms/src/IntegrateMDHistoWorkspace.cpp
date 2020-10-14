@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegrateMDHistoWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -23,7 +23,7 @@
 #include <map>
 #include <utility>
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -194,7 +194,7 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
   for (size_t i = 0; i < nDims; ++i) {
 
     IMDDimension_const_sptr inDim = inWS->getDimension(i);
-    auto outDim = boost::make_shared<MDHistoDimension>(inDim.get());
+    auto outDim = std::make_shared<MDHistoDimension>(inDim.get());
     // Apply dimensions as inputs.
     if (i < pbins.size() && integrationBinning(pbins[i])) {
       auto binning = pbins[i];
@@ -218,7 +218,7 @@ MDHistoWorkspace_sptr createShapedOutput(IMDHistoWorkspace const *const inWS,
     }
     dimensions[i] = outDim;
   }
-  return boost::make_shared<MDHistoWorkspace>(dimensions);
+  return std::make_shared<MDHistoWorkspace>(dimensions);
 }
 
 /**
@@ -322,7 +322,7 @@ void IntegrateMDHistoWorkspace::exec() {
     // No work to do.
     g_log.information(this->name() + " Direct clone of input.");
     this->setProperty("OutputWorkspace",
-                      boost::shared_ptr<IMDHistoWorkspace>(inWS->clone()));
+                      std::shared_ptr<IMDHistoWorkspace>(inWS->clone()));
   } else {
 
     /* Create the output workspace in the right shape. This allows us to iterate

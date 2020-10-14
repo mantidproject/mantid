@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/MonitorLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -11,7 +11,6 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/WriteLock.h"
 #include "MantidLiveData/LoadLiveData.h"
 
@@ -70,7 +69,7 @@ void MonitorLiveData::doClone(const std::string &originalName,
 
         // Clone the monitor workspace, if there is one
         auto originalMatrix =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(original);
+            std::dynamic_pointer_cast<MatrixWorkspace>(original);
         MatrixWorkspace_sptr monitorWS, newMonitorWS;
         if (originalMatrix &&
             (monitorWS = originalMatrix->monitorWorkspace())) {
@@ -80,7 +79,7 @@ void MonitorLiveData::doClone(const std::string &originalName,
           monitorsCloner->executeAsChildAlg();
           Workspace_sptr outputWS =
               monitorsCloner->getProperty("OutputWorkspace");
-          newMonitorWS = boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
+          newMonitorWS = std::dynamic_pointer_cast<MatrixWorkspace>(outputWS);
         }
 
         Algorithm_sptr cloner =
@@ -152,15 +151,21 @@ void MonitorLiveData::exec() {
     // Exit if the user presses cancel
     this->interruption_point();
 
+    DateAndTime now = DateAndTime::getCurrentTime();
+    double seconds = DateAndTime::secondsFromDuration(now - lastTime);
+
+    // Report progress and exit if the user presses cancel
+    progress(0.0, "Live Waiting " + Strings::toString((int)seconds) + " of " +
+                      Strings::toString((int)UpdateEvery) + "s");
+
     // Sleep for 50 msec
     Poco::Thread::sleep(50);
 
-    DateAndTime now = DateAndTime::getCurrentTime();
-    double seconds = DateAndTime::secondsFromDuration(now - lastTime);
     if (seconds > UpdateEvery) {
       lastTime = now;
       g_log.notice() << "Loading live data chunk " << m_chunkNumber << " at "
                      << now.toFormattedString("%H:%M:%S") << '\n';
+      progress(0.0, "Live Data " + Strings::toString(m_chunkNumber));
 
       // Time to run LoadLiveData again
       Algorithm_sptr alg = createChildAlgorithm("LoadLiveData");

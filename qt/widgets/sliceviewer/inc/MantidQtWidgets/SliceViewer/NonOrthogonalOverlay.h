@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_NONORTHOGONALOVERLAY_H_
-#define MANTID_SLICEVIEWER_NONORTHOGONALOVERLAY_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -53,10 +52,10 @@ private:
   QPointF invTransform(QPoint pixels) const;
 
   void drawYLines(QPainter &painter, QPen &gridPen, int widthScreen,
-                  QwtValueList yAxisTicks, double yAngle);
+                  const QwtValueList &yAxisTicks, double yAngle);
 
   void drawXLines(QPainter &painter, QPen &gridPen, int heightScreen,
-                  QwtValueList xAxisTicks, double xAngle);
+                  const QwtValueList &xAxisTicks, double xAngle);
 
   void paintEvent(QPaintEvent *event) override;
 
@@ -73,5 +72,3 @@ private:
 
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif /* MANTID_SLICEVIEWER_NONORTHOGONALOVERLAY_H_ */

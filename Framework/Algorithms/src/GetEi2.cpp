@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetEi2.h"
 
@@ -24,6 +24,7 @@
 #include <boost/lexical_cast.hpp>
 #include <cmath>
 #include <sstream>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -50,7 +51,7 @@ GetEi2::GetEi2()
 void GetEi2::init()
 
 { // Declare required input parameters for algorithm and do some validation here
-  auto validator = boost::make_shared<CompositeValidator>();
+  auto validator = std::make_shared<CompositeValidator>();
   validator->add<WorkspaceUnitValidator>("TOF");
   validator->add<HistogramValidator>();
   validator->add<InstrumentValidator>();
@@ -60,7 +61,7 @@ void GetEi2::init()
                                             Direction::InOut, validator),
       "The X units of this workspace must be time of flight with times in\n"
       "microseconds");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("Monitor1Spec", EMPTY_INT(), mustBePositive,
                   "The spectrum number of the output of the first monitor, "
@@ -70,7 +71,7 @@ void GetEi2::init()
                   "The spectrum number of the output of the second monitor "
                   "e.g. MAPS 41475, MARI 3, MERLIN 69638.\n If empty, it will "
                   "be read from the instrument file.\n");
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0.0);
   declareProperty(
       "EnergyEstimate", EMPTY_DBL(), positiveDouble,
@@ -102,7 +103,7 @@ void GetEi2::init()
 
   declareProperty("Tzero", 0.0, "", Direction::Output);
 
-  auto inRange0toOne = boost::make_shared<BoundedValidator<double>>();
+  auto inRange0toOne = std::make_shared<BoundedValidator<double>>();
   inRange0toOne->setLower(0.0);
   inRange0toOne->setUpper(1.0);
   declareProperty("PeakSearchRange", 0.1, inRange0toOne,
@@ -369,7 +370,7 @@ GetEi2::extractSpectrum(size_t ws_index, const double start, const double end) {
   childAlg->setProperty("XMax", end);
   childAlg->executeAsChildAlg();
   MatrixWorkspace_sptr monitors = childAlg->getProperty("OutputWorkspace");
-  if (boost::dynamic_pointer_cast<API::IEventWorkspace>(m_input_ws)) {
+  if (std::dynamic_pointer_cast<API::IEventWorkspace>(m_input_ws)) {
     // Convert to a MatrixWorkspace representation
     childAlg = createChildAlgorithm("ConvertToMatrixWorkspace");
     childAlg->setProperty("InputWorkspace", monitors);
@@ -395,7 +396,7 @@ GetEi2::extractSpectrum(size_t ws_index, const double start, const double end) {
  * @returns The width of the peak at half height
  */
 double GetEi2::calculatePeakWidthAtHalfHeight(
-    API::MatrixWorkspace_sptr data_ws, const double prominence,
+    const API::MatrixWorkspace_sptr &data_ws, const double prominence,
     std::vector<double> &peak_x, std::vector<double> &peak_y,
     std::vector<double> &peak_e) const {
   // Use WS->points() to create a temporary vector of bin_centre values to work
@@ -622,11 +623,11 @@ double GetEi2::calculatePeakWidthAtHalfHeight(
  * considered a "real" peak
  *  @return The calculated first moment
  */
-double GetEi2::calculateFirstMoment(API::MatrixWorkspace_sptr monitor_ws,
+double GetEi2::calculateFirstMoment(const API::MatrixWorkspace_sptr &monitor_ws,
                                     const double prominence) {
   std::vector<double> peak_x, peak_y, peak_e;
-  calculatePeakWidthAtHalfHeight(monitor_ws, prominence, peak_x, peak_y,
-                                 peak_e);
+  calculatePeakWidthAtHalfHeight(std::move(monitor_ws), prominence, peak_x,
+                                 peak_y, peak_e);
 
   // Area
   double area(0.0), dummy(0.0);
@@ -649,9 +650,9 @@ double GetEi2::calculateFirstMoment(API::MatrixWorkspace_sptr monitor_ws,
  * @param end :: The maximum value for the new bin range
  * @returns The rebinned workspace
 */
-API::MatrixWorkspace_sptr GetEi2::rebin(API::MatrixWorkspace_sptr monitor_ws,
-                                        const double first, const double width,
-                                        const double end) {
+API::MatrixWorkspace_sptr
+GetEi2::rebin(const API::MatrixWorkspace_sptr &monitor_ws, const double first,
+              const double width, const double end) {
   IAlgorithm_sptr childAlg = createChildAlgorithm("Rebin");
   childAlg->setProperty("InputWorkspace", monitor_ws);
   std::ostringstream binParams;

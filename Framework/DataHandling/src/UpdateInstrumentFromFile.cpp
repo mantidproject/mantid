@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/UpdateInstrumentFromFile.h"
 #include "LoadRaw/isisraw2.h"
@@ -96,13 +96,21 @@ void UpdateInstrumentFromFile::exec() {
   m_ignoreMonitors = (!moveMonitors);
 
   // Check file type
-  if (NexusDescriptor::isHDF(filename)) {
+  if (NexusDescriptor::isReadable(filename)) {
     LoadISISNexus2 isisNexus;
     LoadEventNexus eventNexus;
+
+    // we open and close the HDF5 file.
+    // there is an issue with how HDF5 files are opened (only one at a time)
+    // swap the order of descriptors
+    boost::scoped_ptr<Kernel::NexusHDF5Descriptor> descriptorNexusHDF5(
+        new Kernel::NexusHDF5Descriptor(filename));
+
     boost::scoped_ptr<Kernel::NexusDescriptor> descriptor(
         new Kernel::NexusDescriptor(filename));
+
     if (isisNexus.confidence(*descriptor) > 0 ||
-        eventNexus.confidence(*descriptor) > 0) {
+        eventNexus.confidence(*descriptorNexusHDF5) > 0) {
       auto &nxFile = descriptor->data();
       const auto &rootEntry = descriptor->firstEntryNameType();
       nxFile.openGroup(rootEntry.first, rootEntry.second);

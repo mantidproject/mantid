@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ALGORITHMFACTORY_H_
-#define MANTID_API_ALGORITHMFACTORY_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -13,7 +12,10 @@
 #include "MantidAPI/DllConfig.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include <boost/optional.hpp>
+#include <memory>
 #include <sstream>
+#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -51,7 +53,7 @@ public:
   // Unhide the base class version (to satisfy the intel compiler)
   using Kernel::DynamicFactory<Algorithm>::create;
   /// Creates an instance of an algorithm
-  boost::shared_ptr<Algorithm> create(const std::string &, const int &) const;
+  std::shared_ptr<Algorithm> create(const std::string &, const int &) const;
 
   /// algorithm factory specific function to subscribe algorithms, calls the
   /// dynamic factory subscribe function internally
@@ -73,9 +75,10 @@ public:
   std::pair<std::string, int>
   subscribe(std::unique_ptr<Kernel::AbstractInstantiator<T>> instantiator,
             const SubscribeAction replaceExisting = ErrorIfExists) {
-    boost::shared_ptr<IAlgorithm> tempAlg = instantiator->createInstance();
+    const auto tempAlg = instantiator->createInstance();
     const int version = extractAlgVersion(tempAlg);
     const std::string className = extractAlgName(tempAlg);
+    const std::string alias = extractAlgAlias(tempAlg);
     typename VersionMap::const_iterator it = m_vmap.find(className);
     if (!className.empty()) {
       const std::string key = createName(className, version);
@@ -97,6 +100,10 @@ public:
     } else {
       throw std::invalid_argument("Cannot register empty algorithm name");
     }
+
+    if (!alias.empty())
+      m_amap[alias] = className;
+
     return std::make_pair(className, version);
   }
   /// Unsubscribe the given algorithm
@@ -107,6 +114,10 @@ public:
   /// Get the algorithm names and version - mangled use decodeName to separate
   const std::vector<std::string> getKeys() const override;
   const std::vector<std::string> getKeys(bool includeHidden) const;
+
+  /// Get an algorithms name from the alias map
+  boost::optional<std::string>
+  getRealNameFromAlias(const std::string &alias) const noexcept;
 
   /// Returns the highest version of the algorithm currently registered
   int highestVersion(const std::string &algorithmName) const;
@@ -120,7 +131,7 @@ public:
 
   /// Returns algorithm descriptors.
   std::vector<AlgorithmDescriptor>
-  getDescriptors(bool includeHidden = false) const;
+  getDescriptors(bool includeHidden = false, bool includeAliases = false) const;
 
   /// unmangles the names used as keys into the name and version
   std::pair<std::string, int> decodeName(const std::string &mangledName) const;
@@ -130,13 +141,16 @@ private:
 
   /// Extract the name of an algorithm
   const std::string
-  extractAlgName(const boost::shared_ptr<IAlgorithm> alg) const;
+  extractAlgName(const std::shared_ptr<IAlgorithm> &alg) const;
   /// Extract the version of an algorithm
-  int extractAlgVersion(const boost::shared_ptr<IAlgorithm> alg) const;
+  int extractAlgVersion(const std::shared_ptr<IAlgorithm> &alg) const;
+  /// Extract the alias of an algorithm
+  const std::string
+  extractAlgAlias(const std::shared_ptr<IAlgorithm> &alg) const;
 
   /// Create an algorithm object with the specified name
-  boost::shared_ptr<Algorithm> createAlgorithm(const std::string &name,
-                                               const int version) const;
+  std::shared_ptr<Algorithm> createAlgorithm(const std::string &name,
+                                             const int version) const;
 
   /// Private Constructor for singleton class
   AlgorithmFactoryImpl();
@@ -151,6 +165,10 @@ private:
   using VersionMap = std::map<std::string, int>;
   /// The map holding the registered class names and their highest versions
   VersionMap m_vmap;
+  /// A typedef for the map of algorithm aliases
+  using AliasMap = std::unordered_map<std::string, std::string>;
+  /// The map holding the alias names of registered algorithms
+  AliasMap m_amap;
 };
 
 using AlgorithmFactory = Mantid::Kernel::SingletonHolder<AlgorithmFactoryImpl>;
@@ -170,5 +188,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
     Mantid::Kernel::SingletonHolder<Mantid::API::AlgorithmFactoryImpl>;
 }
 } // namespace Mantid
-
-#endif /*MANTID_API_ALGORITHMFACTORY_H_*/

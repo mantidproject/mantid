@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MUON_APPLYMUONDETECTORGROUPPAIRINGTEST_H_
-#define MANTID_MUON_APPLYMUONDETECTORGROUPPAIRINGTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -37,8 +36,8 @@ namespace {
 // Set algorithm properties to sensible defaults (assuming data with 10 groups)
 // Use when specifying groups manually
 void setPairAlgorithmProperties(ApplyMuonDetectorGroupPairing &alg,
-                                std::string inputWSName,
-                                std::string wsGroupName) {
+                                const std::string &inputWSName,
+                                const std::string &wsGroupName) {
   alg.setProperty("SpecifyGroupsManually", true);
   alg.setProperty("PairName", "test");
   alg.setProperty("Alpha", 1.0);
@@ -59,8 +58,8 @@ void setPairAlgorithmProperties(ApplyMuonDetectorGroupPairing &alg,
 // Set algorithm properties to sensible defaults (assuming data with 10 groups)
 // Use when entering workspaces to pair
 void setPairAlgorithmPropertiesForInputWorkspace(
-    ApplyMuonDetectorGroupPairing &alg, std::string inputWSName,
-    std::string wsGroupName) {
+    ApplyMuonDetectorGroupPairing &alg, const std::string &inputWSName,
+    const std::string &wsGroupName) {
   alg.setProperty("SpecifyGroupsManually", false);
   alg.setProperty("PairName", "test");
   alg.setProperty("Alpha", 1.0);
@@ -73,9 +72,9 @@ void setPairAlgorithmPropertiesForInputWorkspace(
 // algorithm (a MatrixWorkspace and an empty group).
 class setUpADSWithWorkspace {
 public:
-  setUpADSWithWorkspace(Workspace_sptr ws) {
+  setUpADSWithWorkspace(const Workspace_sptr &ws) {
     AnalysisDataService::Instance().addOrReplace(inputWSName, ws);
-    wsGroup = boost::make_shared<WorkspaceGroup>();
+    wsGroup = std::make_shared<WorkspaceGroup>();
     AnalysisDataService::Instance().addOrReplace(groupWSName, wsGroup);
   };
 
@@ -250,7 +249,7 @@ public:
     alg.initialize();
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
     alg.execute();
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Current behaviour is to convert bin edge x-values to bin centre x-values
@@ -278,7 +277,7 @@ public:
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
     alg.setProperty("TimeOffset", 0.2);
     alg.execute();
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Account for the bin edges to point data conversion
@@ -313,7 +312,7 @@ public:
     setPairAlgorithmProperties(alg, setup.inputWSName, setup.groupWSName);
     alg.setProperty("SummedPeriods", "1,2");
     alg.execute();
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Summation of periods occurs before asymmetry calculation
@@ -343,7 +342,7 @@ public:
     alg.setProperty("SummedPeriods", "1,2");
     alg.setProperty("SubtractedPeriods", "3");
     alg.execute();
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     // Summation of periods occurs before asymmetry calculation
@@ -383,7 +382,7 @@ public:
 
     alg.execute();
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
@@ -424,7 +423,7 @@ public:
     alg.setProperty("InputWorkspace2", groupWS2Name);
     alg.execute();
 
-    auto wsOut = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto wsOut = std::dynamic_pointer_cast<MatrixWorkspace>(
         setup.wsGroup->getItem("inputGroup; Pair; test; Asym; #1_Raw"));
 
     TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.050, 0.001);
@@ -496,5 +495,3 @@ public:
     TS_ASSERT_THROWS(alg.execute(), const std::runtime_error &);
   }
 };
-
-#endif /* MANTID_MUON_APPLYMUONDETECTORGROUPPAIRINGTEST_H_ */

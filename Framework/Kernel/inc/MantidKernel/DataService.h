@@ -1,25 +1,23 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_DATASERVICE_H_
-#define MANTID_KERNEL_DATASERVICE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #ifndef Q_MOC_RUN
 #include <boost/algorithm/string.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
 #include <Poco/Notification.h>
 #include <Poco/NotificationCenter.h>
-
 #include <mutex>
 
 #ifdef _WIN32
@@ -60,8 +58,7 @@ struct CaseInsensitiveCmp {
 template <typename T> class DLLExport DataService {
 private:
   /// Typedef for the map holding the names of and pointers to the data objects
-  using svcmap =
-      std::map<std::string, boost::shared_ptr<T>, CaseInsensitiveCmp>;
+  using svcmap = std::map<std::string, std::shared_ptr<T>, CaseInsensitiveCmp>;
   /// Iterator for the data store map
   using svc_it = typename svcmap::iterator;
   /// Const iterator for the data store map
@@ -75,7 +72,7 @@ public:
         : Poco::Notification(), m_name(name) {}
 
     /// Returns the name of the object
-    std::string objectName() const { return m_name; }
+    const std::string &objectName() const { return m_name; }
 
   private:
     std::string m_name; ///< object's name
@@ -87,21 +84,21 @@ public:
   public:
     /// Constructor
     DataServiceNotification(const std::string &name,
-                            const boost::shared_ptr<T> obj)
+                            const std::shared_ptr<T> &obj)
         : NamedObjectNotification(name), m_object(obj) {}
     /// Returns the const pointer to the object concerned or 0 if it is a
     /// general notification
-    const boost::shared_ptr<T> object() const { return m_object; }
+    const std::shared_ptr<T> &object() const { return m_object; }
 
   private:
-    boost::shared_ptr<T> m_object; ///< shared pointer to the object
+    std::shared_ptr<T> m_object; ///< shared pointer to the object
   };
 
   /// AddNotification is sent after an new object is added to the data service.
   /// name() and object() return name and pointer to the new object.
   class AddNotification : public DataServiceNotification {
   public:
-    AddNotification(const std::string &name, const boost::shared_ptr<T> obj)
+    AddNotification(const std::string &name, const std::shared_ptr<T> &obj)
         : DataServiceNotification(name, obj) {} ///< Constructor
   };
 
@@ -119,18 +116,18 @@ public:
        receives the notification.
     */
     BeforeReplaceNotification(const std::string &name,
-                              const boost::shared_ptr<T> obj,
-                              const boost::shared_ptr<T> newObj)
+                              const std::shared_ptr<T> &obj,
+                              const std::shared_ptr<T> &newObj)
         : DataServiceNotification(name, obj), m_newObject(newObj),
           m_oldObject(obj) {}
-    const boost::shared_ptr<T> newObject() const {
+    const std::shared_ptr<T> &newObject() const {
       return m_newObject;
     } ///< Returns the pointer to the new object.
-    const boost::shared_ptr<T> oldObject() const { return m_oldObject; }
+    const std::shared_ptr<T> &oldObject() const { return m_oldObject; }
 
   private:
-    boost::shared_ptr<T> m_newObject; ///< shared pointer to the object
-    boost::shared_ptr<T> m_oldObject;
+    std::shared_ptr<T> m_newObject; ///< shared pointer to the object
+    std::shared_ptr<T> m_oldObject;
   };
 
   /// AfterReplaceNotification is sent after an object is replaced in the
@@ -144,7 +141,7 @@ public:
      * notification.
      */
     AfterReplaceNotification(const std::string &name,
-                             const boost::shared_ptr<T> newObj)
+                             const std::shared_ptr<T> &newObj)
         : DataServiceNotification(name, newObj) {}
   };
 
@@ -156,7 +153,7 @@ public:
   public:
     /// Constructor
     PreDeleteNotification(const std::string &name,
-                          const boost::shared_ptr<T> obj)
+                          const std::shared_ptr<T> &obj)
         : DataServiceNotification(name, obj) {}
   };
 
@@ -200,8 +197,7 @@ public:
    * @throw std::runtime_error if name exists in the map
    * @throw std::runtime_error if a null pointer is passed for the object
    */
-  virtual void add(const std::string &name,
-                   const boost::shared_ptr<T> &Tobject) {
+  virtual void add(const std::string &name, const std::shared_ptr<T> &Tobject) {
     checkForEmptyName(name);
     checkForNullPointer(Tobject);
 
@@ -235,7 +231,7 @@ public:
    * @throw std::runtime_error if name is empty
    */
   virtual void addOrReplace(const std::string &name,
-                            const boost::shared_ptr<T> &Tobject) {
+                            const std::shared_ptr<T> &Tobject) {
     checkForNullPointer(Tobject);
 
     // Make DataService access thread-safe
@@ -321,14 +317,17 @@ public:
     if (targetNameIter != datamap.end()) {
       auto targetNameObject = targetNameIter->second;
       // As we are renaming the existing name turns into the new name
+      lock.unlock();
       notificationCenter.postNotification(new BeforeReplaceNotification(
           newName, targetNameObject, existingNameObject));
+      lock.lock();
     }
 
     datamap.erase(existingNameIter);
 
     if (targetNameIter != datamap.end()) {
       targetNameIter->second = std::move(existingNameObject);
+      lock.unlock();
       notificationCenter.postNotification(
           new AfterReplaceNotification(newName, targetNameIter->second));
     } else {
@@ -339,9 +338,10 @@ public:
             " add : Unable to insert Data Object : '" + newName + "'";
         g_log.error(error);
         throw std::runtime_error(error);
+      } else {
+        lock.unlock();
       }
     }
-    lock.unlock();
     g_log.debug("Data Object '" + oldName + "' renamed to '" + newName + "'");
     notificationCenter.postNotification(
         new RenameNotification(oldName, newName));
@@ -365,7 +365,7 @@ public:
   //--------------------------------------------------------------------------
   /** Get a shared pointer to a stored data object
    * @param name :: name of the object */
-  boost::shared_ptr<T> retrieve(const std::string &name) const {
+  std::shared_ptr<T> retrieve(const std::string &name) const {
     // Make DataService access thread-safe
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
@@ -442,7 +442,7 @@ public:
       std::lock_guard<std::recursive_mutex> _lock(m_mutex);
       foundNames.reserve(datamap.size());
       for (const auto &item : datamap) {
-        foundNames.push_back(item.first);
+        foundNames.emplace_back(item.first);
       }
       // Lock released at end of scope here
     } else {
@@ -451,7 +451,7 @@ public:
       for (const auto &item : datamap) {
         if (!isHiddenDataServiceObject(item.first)) {
           // This item is not hidden add it
-          foundNames.push_back(item.first);
+          foundNames.emplace_back(item.first);
         }
       }
       // Lock released at end of scope here
@@ -466,7 +466,7 @@ public:
   }
 
   /// Get a vector of the pointers to the data objects stored by the service
-  std::vector<boost::shared_ptr<T>>
+  std::vector<std::shared_ptr<T>>
   getObjects(DataServiceHidden includeHidden = DataServiceHidden::Auto) const {
     std::lock_guard<std::recursive_mutex> _lock(m_mutex);
 
@@ -477,11 +477,11 @@ public:
 
     const bool showingHidden = alwaysIncludeHidden || usingAuto;
 
-    std::vector<boost::shared_ptr<T>> objects;
+    std::vector<std::shared_ptr<T>> objects;
     objects.reserve(datamap.size());
     for (const auto &it : datamap) {
       if (showingHidden || !isHiddenDataServiceObject(it.first)) {
-        objects.push_back(it.second);
+        objects.emplace_back(it.second);
       }
     }
     return objects;
@@ -523,7 +523,7 @@ private:
     }
   }
 
-  void checkForNullPointer(const boost::shared_ptr<T> &Tobject) {
+  void checkForNullPointer(const std::shared_ptr<T> &Tobject) {
     if (!Tobject) {
       const std::string error = "Attempt to add empty shared pointer";
       g_log.debug() << error << '\n';
@@ -544,5 +544,3 @@ private:
 
 } // Namespace Kernel
 } // Namespace Mantid
-
-#endif /*MANTID_KERNEL_DATASERVICE_H_*/

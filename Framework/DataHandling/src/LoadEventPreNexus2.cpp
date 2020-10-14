@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadEventPreNexus2.h"
 #include "MantidAPI/Axis.h"
@@ -58,13 +58,13 @@ using namespace DataObjects;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
-using Types::Core::DateAndTime;
-using Types::Event::TofEvent;
 using std::ifstream;
 using std::runtime_error;
 using std::string;
 using std::stringstream;
 using std::vector;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 //------------------------------------------------------------------------------------------------
 // constants for locating the parameters to use in execution
@@ -185,7 +185,7 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
                              .append("/calibrations/")
                              .append(mapping);
       if (Poco::File(path).exists())
-        files.push_back(path);
+        files.emplace_back(path);
     }
   }
 
@@ -245,11 +245,6 @@ LoadEventPreNexus2::LoadEventPreNexus2()
       m_dbOpBlockNumber(0), m_dbOpNumEvents(0), m_dbOpNumPulses(0) {}
 
 //----------------------------------------------------------------------------------------------
-/** Desctructor
- */
-LoadEventPreNexus2::~LoadEventPreNexus2() { delete this->eventfile; }
-
-//----------------------------------------------------------------------------------------------
 /** Initialize the algorithm, i.e, declare properties
  */
 void LoadEventPreNexus2::init() {
@@ -278,7 +273,7 @@ void LoadEventPreNexus2::init() {
                   "A list of individual spectra (pixel IDs) to read, specified "
                   "as e.g. 10:20. Only used if set.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
                   "If loading the file by sections ('chunks'), this is the "
@@ -294,7 +289,7 @@ void LoadEventPreNexus2::init() {
 
   std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"
                   "  Auto: Use serial loading for small data sets, parallel "
                   "for large data sets.\n"
@@ -314,7 +309,7 @@ void LoadEventPreNexus2::init() {
                   "Workspace with number of events per pulse");
 
   // Some debugging options
-  auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
+  auto mustBeNonNegative = std::make_shared<BoundedValidator<int>>();
   mustBeNonNegative->setLower(0);
   declareProperty("DBOutputBlockNumber", EMPTY_INT(), mustBeNonNegative,
                   "Index of the loading block for debugging output. ");
@@ -410,7 +405,7 @@ void LoadEventPreNexus2::exec() {
 /** Create and set up output Event Workspace
  */
 void LoadEventPreNexus2::createOutputWorkspace(
-    const std::string event_filename) {
+    const std::string &event_filename) {
   // Create the output workspace
   localWorkspace = EventWorkspace_sptr(new EventWorkspace());
 
@@ -507,7 +502,7 @@ LoadEventPreNexus2::generateEventDistribtionWorkspace() {
   size_t nspec = 2;
   size_t sizex = event_indices.size();
   size_t sizey = sizex;
-  MatrixWorkspace_sptr disws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr disws = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", nspec, sizex, sizey));
 
   g_log.debug() << "Event indexes size = " << event_indices.size() << ", "
@@ -575,7 +570,7 @@ void LoadEventPreNexus2::processImbedLogs() {
  * @param mindex :: index of the log in pulse time ...
  * - mindex:  index of the the series in the list
  */
-void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle,
+void LoadEventPreNexus2::addToWorkspaceLog(const std::string &logtitle,
                                            size_t mindex) {
   // Create TimeSeriesProperty
   auto property = new TimeSeriesProperty<double>(logtitle);
@@ -606,7 +601,8 @@ void LoadEventPreNexus2::addToWorkspaceLog(std::string logtitle,
  * geometry
  */
 void LoadEventPreNexus2::runLoadInstrument(
-    const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace) {
+    const std::string &eventfilename,
+    const MatrixWorkspace_sptr &localWorkspace) {
   // start by getting just the filename
   string instrument = Poco::Path(eventfilename).getFileName();
 
@@ -762,7 +758,6 @@ void LoadEventPreNexus2::procEvents(
   partWorkspaces.resize(numThreads);
   buffers.resize(numThreads);
   eventVectors = new EventVector_pt *[numThreads];
-
   // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for if (parallelProcessing) )
     for (int i = 0; i < int(numThreads); i++) {
@@ -785,7 +780,7 @@ void LoadEventPreNexus2::procEvents(
       // value = pointer to the events vector
       eventVectors[i] = new EventVector_pt[detid_max + 1];
       EventVector_pt *theseEventVectors = eventVectors[i];
-      for (detid_t j = 0; j < detid_max + 1; j++) {
+      for (detid_t j = 0; j < detid_max + 1; ++j) {
         size_t wi = pixel_to_wkspindex[j];
         // Save a POINTER to the vector<tofEvent>
         if (wi != static_cast<size_t>(-1))
@@ -1095,8 +1090,8 @@ void LoadEventPreNexus2::procEventsLinear(
 
         std::vector<Types::Core::DateAndTime> tempvectime;
         std::vector<double> temptofs;
-        local_pulsetimes.push_back(tempvectime);
-        local_tofs.push_back(temptofs);
+        local_pulsetimes.emplace_back(tempvectime);
+        local_tofs.emplace_back(temptofs);
 
         theindex = newindex;
 
@@ -1110,8 +1105,8 @@ void LoadEventPreNexus2::procEventsLinear(
 
       // ii. calculate and add absolute time
       // int64_t abstime = (pulsetime.totalNanoseconds()+int64_t(tof*1000));
-      local_pulsetimes[theindex].push_back(pulsetime);
-      local_tofs[theindex].push_back(tof);
+      local_pulsetimes[theindex].emplace_back(pulsetime);
+      local_tofs[theindex].emplace_back(tof);
 
     } // END-IF-ELSE: On Event's Pixel's Nature
 
@@ -1144,8 +1139,8 @@ void LoadEventPreNexus2::procEventsLinear(
 
         std::vector<Types::Core::DateAndTime> temppulsetimes;
         std::vector<double> temptofs;
-        this->wrongdetid_pulsetimes.push_back(temppulsetimes);
-        this->wrongdetid_tofs.push_back(temptofs);
+        this->wrongdetid_pulsetimes.emplace_back(temppulsetimes);
+        this->wrongdetid_tofs.emplace_back(temptofs);
 
         mindex = newindex;
       } else {
@@ -1157,9 +1152,9 @@ void LoadEventPreNexus2::procEventsLinear(
       size_t localindex = lit->second;
 
       for (size_t iv = 0; iv < local_pulsetimes[localindex].size(); iv++) {
-        this->wrongdetid_pulsetimes[mindex].push_back(
+        this->wrongdetid_pulsetimes[mindex].emplace_back(
             local_pulsetimes[localindex][iv]);
-        this->wrongdetid_tofs[mindex].push_back(local_tofs[localindex][iv]);
+        this->wrongdetid_tofs[mindex].emplace_back(local_tofs[localindex][iv]);
       }
       // std::sort(this->wrongdetid_abstimes[mindex].begin(),
       // this->wrongdetid_abstimes[mindex].end());
@@ -1261,7 +1256,7 @@ void LoadEventPreNexus2::loadPixelMap(const std::string &filename) {
  */
 void LoadEventPreNexus2::openEventFile(const std::string &filename) {
   // Open the file
-  eventfile = new BinaryFile<DasEvent>(filename);
+  eventfile = std::make_unique<BinaryFile<DasEvent>>(filename);
   num_events = eventfile->getNumElements();
   g_log.debug() << "File contains " << num_events << " event records.\n";
 
@@ -1327,22 +1322,21 @@ void LoadEventPreNexus2::readPulseidFile(const std::string &filename,
   }
 
   if (num_pulses > 0) {
-    double temp;
     DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(num_pulses);
     for (const auto &pulse : pulses) {
       DateAndTime pulseDateTime(static_cast<int64_t>(pulse.seconds),
                                 static_cast<int64_t>(pulse.nanoseconds));
-      this->pulsetimes.push_back(pulseDateTime);
-      this->event_indices.push_back(pulse.event_index);
+      this->pulsetimes.emplace_back(pulseDateTime);
+      this->event_indices.emplace_back(pulse.event_index);
 
       if (pulseDateTime < lastPulseDateTime)
         this->pulsetimesincreasing = false;
       else
         lastPulseDateTime = pulseDateTime;
 
-      temp = pulse.pCurrent;
-      this->proton_charge.push_back(temp);
+      double temp = pulse.pCurrent;
+      this->proton_charge.emplace_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
       else

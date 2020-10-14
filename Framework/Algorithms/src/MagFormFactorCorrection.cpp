@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MagFormFactorCorrection.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -39,8 +39,7 @@ void MagFormFactorCorrection::init() {
                                                         Direction::Output),
                   "Output workspace name.");
   std::vector<std::string> keys = getMagneticIonList();
-  declareProperty("IonName", "Cu2",
-                  boost::make_shared<StringListValidator>(keys),
+  declareProperty("IonName", "Cu2", std::make_shared<StringListValidator>(keys),
                   "The name of the ion: an element symbol with a number "
                   "indicating the valence, e.g. Fe2 for Fe2+ / Fe(II)");
   declareProperty(std::make_unique<WorkspaceProperty<>>("FormFactorWorkspace",
@@ -72,13 +71,14 @@ void MagFormFactorCorrection::exec() {
       if (isHist || iax > 0) {
         int64_t nQ = QAxis->length() - 1;
         for (int64_t iQ = 0; iQ < nQ; iQ++) {
-          Qvals.push_back(0.5 * (QAxis->getValue(static_cast<size_t>(iQ)) +
-                                 QAxis->getValue(static_cast<size_t>(iQ + 1))));
+          Qvals.emplace_back(0.5 *
+                             (QAxis->getValue(static_cast<size_t>(iQ)) +
+                              QAxis->getValue(static_cast<size_t>(iQ + 1))));
         }
       } else {
         int64_t nQ = QAxis->length();
         for (int64_t iQ = 0; iQ < nQ; iQ++) {
-          Qvals.push_back(QAxis->getValue(static_cast<size_t>(iQ)));
+          Qvals.emplace_back(QAxis->getValue(static_cast<size_t>(iQ)));
         }
       }
       break;
@@ -95,9 +95,11 @@ void MagFormFactorCorrection::exec() {
   // Gets the vector of form factor values
   std::vector<double> FF;
   FF.reserve(Qvals.size());
-  for (double Qval : Qvals) {
-    FF.emplace_back(ion.analyticalFormFactor(Qval * Qval));
-  }
+
+  std::transform(
+      Qvals.begin(), Qvals.end(), std::back_inserter(FF),
+      [&ion](double qval) { return ion.analyticalFormFactor(qval * qval); });
+
   if (!ffwsStr.empty()) {
     HistogramBuilder builder;
     builder.setX(Qvals.size());

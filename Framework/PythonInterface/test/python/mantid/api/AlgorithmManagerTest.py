@@ -1,14 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 import testhelpers
-from mantid.api import (AlgorithmManager, Algorithm, AlgorithmProxy,
+from mantid.api import (AlgorithmManager, Algorithm,
                         FrameworkManagerImpl, IAlgorithm)
 
 
@@ -35,19 +33,16 @@ class AlgorithmManagerTest(unittest.TestCase):
         alg = AlgorithmManager.create("ConvertUnits")
         self.assertTrue(isinstance(alg, IAlgorithm))
 
-    def test_managed_cppalg_isinstance_of_AlgorithmProxy(self):
-        alg = AlgorithmManager.create("ConvertUnits")
-        self.assertTrue(isinstance(alg, AlgorithmProxy))
-
     def test_unmanaged_cppalg_isinstance_of_Algorithm(self):
         alg = AlgorithmManager.createUnmanaged("ConvertUnits")
         self.assertTrue(isinstance(alg, Algorithm))
 
     def test_size_reports_number_of_managed_algorithms(self):
-        old_size = AlgorithmManager.size()
-        new_alg = AlgorithmManager.create("ConvertUnits")
-        new_size = AlgorithmManager.size()
-        self.assertEqual(new_size,  old_size + 1)
+        # no longer deterministically possible to have a correct answer for size
+        # if test are run multi threaded
+        # just check we got an integer back
+        size = AlgorithmManager.size()
+        self.assertTrue(isinstance(size, int))
 
     def test_getAlgorithm_returns_correct_instance(self):
         returned_instance = AlgorithmManager.create("ConvertUnits")
@@ -61,14 +56,6 @@ class AlgorithmManagerTest(unittest.TestCase):
         AlgorithmManager.removeById(alg.getAlgorithmID())
         self.assertEqual(None, AlgorithmManager.getAlgorithm(alg.getAlgorithmID()))
         self.assertNotEqual(None, AlgorithmManager.getAlgorithm(alg2.getAlgorithmID()))
-
-    def test_newestInstanceOf_returns_correct_instance(self):
-        alg = AlgorithmManager.create("ConvertUnits")
-        alg2 = AlgorithmManager.create("ConvertUnits")
-        alg3 = AlgorithmManager.newestInstanceOf("ConvertUnits")
-
-        self.assertEqual(alg2.getAlgorithmID(), alg3.getAlgorithmID())
-        self.assertNotEqual(alg.getAlgorithmID(), alg3.getAlgorithmID())
 
     def test_runningInstancesOf_returns_python_list(self):
         algs = AlgorithmManager.runningInstancesOf("ConvertUnits")

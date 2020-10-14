@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/Algorithm.h"
@@ -16,6 +16,12 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 #include <boost/functional/hash.hpp>
+#if BOOST_VERSION == 106900
+#ifndef BOOST_PENDING_INTEGER_LOG2_HPP
+#define BOOST_PENDING_INTEGER_LOG2_HPP
+#include <boost/integer/integer_log2.hpp>
+#endif /* BOOST_PENDING_INTEGER_LOG2_HPP */
+#endif /* BOOST_VERSION */
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
@@ -23,8 +29,8 @@
 #include "Poco/DateTime.h"
 #include <Poco/DateTimeParser.h>
 
-using Mantid::Kernel::EnvironmentHistory;
 using boost::algorithm::split;
+using Mantid::Kernel::EnvironmentHistory;
 
 namespace Mantid {
 namespace API {
@@ -54,18 +60,6 @@ struct AlgorithmHistoryComparator {
 
 /// Default Constructor
 WorkspaceHistory::WorkspaceHistory() : m_environment() {}
-
-/// Destructor
-WorkspaceHistory::~WorkspaceHistory() = default;
-
-/**
-  Standard Copy Constructor
-  @param A :: WorkspaceHistory Item to copy
- */
-WorkspaceHistory::WorkspaceHistory(const WorkspaceHistory &A)
-    : m_environment(A.m_environment) {
-  m_algorithms = A.m_algorithms;
-}
 
 /// Returns a const reference to the algorithmHistory
 const Mantid::API::AlgorithmHistories &
@@ -164,7 +158,7 @@ operator[](const size_t index) const {
  * @param index ::  An index within the workspace history
  * @returns A shared pointer to an algorithm object
  */
-boost::shared_ptr<IAlgorithm>
+std::shared_ptr<IAlgorithm>
 WorkspaceHistory::getAlgorithm(const size_t index) const {
   return Algorithm::fromHistory(*(this->getAlgorithmHistory(index)));
 }
@@ -173,7 +167,7 @@ WorkspaceHistory::getAlgorithm(const size_t index) const {
  * Convenience function for retrieving the last algorithm
  * @returns A shared pointer to the algorithm
  */
-boost::shared_ptr<IAlgorithm> WorkspaceHistory::lastAlgorithm() const {
+std::shared_ptr<IAlgorithm> WorkspaceHistory::lastAlgorithm() const {
   if (m_algorithms.empty()) {
     throw std::out_of_range(
         "WorkspaceHistory::lastAlgorithm() - History contains no algorithms.");
@@ -472,16 +466,15 @@ WorkspaceHistory::parseAlgorithmHistory(const std::string &rawData) {
     alg_hist.addProperty(prop_name, prop_value, (is_def[0] == 'Y'), direc);
   }
 
-  AlgorithmHistory_sptr history =
-      boost::make_shared<AlgorithmHistory>(alg_hist);
+  AlgorithmHistory_sptr history = std::make_shared<AlgorithmHistory>(alg_hist);
   return history;
 }
 
 //-------------------------------------------------------------------------------------------------
 /** Create a flat view of the workspaces algorithm history
  */
-boost::shared_ptr<HistoryView> WorkspaceHistory::createView() const {
-  return boost::make_shared<HistoryView>(*this);
+std::shared_ptr<HistoryView> WorkspaceHistory::createView() const {
+  return std::make_shared<HistoryView>(*this);
 }
 
 //------------------------------------------------------------------------------------------------

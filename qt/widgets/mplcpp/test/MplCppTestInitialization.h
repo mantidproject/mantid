@@ -1,88 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPPTESTGLOBALINITIALIZATION_H
-#define MPLCPPTESTGLOBALINITIALIZATION_H
+#pragma once
 
-#include <cxxtest/GlobalFixture.h>
-
-#include "MantidKernel/ConfigService.h"
-#include "MantidKernel/WarningSuppressions.h"
-#include "MantidPythonInterface/core/NDArray.h"
-#include "MantidPythonInterface/core/VersionCompat.h"
-#include "MantidQtWidgets/Common/Python/Object.h"
-#include <QApplication>
-
-/**
- * PythonInterpreter
- *
- * Uses setUpWorld/tearDownWorld to initialize & finalize
- * Python
- */
-class PythonInterpreter : CxxTest::GlobalFixture {
-public:
-  bool setUpWorld() override {
-    using Mantid::Kernel::ConfigService;
-    namespace Python = MantidQt::Widgets::Common::Python;
-
-    Py_Initialize();
-    PyEval_InitThreads();
-    Mantid::PythonInterface::importNumpy();
-    // Insert the directory of the properties file as a sitedir
-    // to ensure the built copy of mantid gets picked up
-    const Python::Object siteModule{
-        Python::NewRef(PyImport_ImportModule("site"))};
-    siteModule.attr("addsitedir")(ConfigService::Instance().getPropertiesDir());
-
-    // Use Agg backend for matplotlib
-    auto mpl = Python::NewRef(PyImport_ImportModule("matplotlib"));
-    mpl.attr("use")("Agg");
-
-    return Py_IsInitialized();
-  }
-
-  bool tearDown() override {
-    // Some test methods may leave the Python error handler with an error
-    // set that confuse other tests when the executable is run as a whole
-    // Clear the errors after each suite method is run
-    PyErr_Clear();
-    return CxxTest::GlobalFixture::tearDown();
-  }
-
-  bool tearDownWorld() override {
-    Py_Finalize();
-    return true;
-  }
-};
-
-/**
- * QApplication
- *
- * Uses setUpWorld/tearDownWorld to initialize & finalize
- * QApplication object
- */
-class QApplicationHolder : CxxTest::GlobalFixture {
-public:
-  bool setUpWorld() override {
-    m_app = new QApplication(m_argc, m_argv);
-
-    return true;
-  }
-
-  bool tearDownWorld() override {
-    delete m_app;
-    return true;
-  }
-
-  int m_argc = 1;
-  GNU_DIAG_OFF("pedantic")
-  char *m_argv[1] = {"MplCppTest"};
-  GNU_DIAG_ON("pedantic")
-  QApplication *m_app;
-};
+#include "MantidPythonInterface/core/Testing/PythonInterpreterGlobalFixture.h"
+#include "MantidQtWidgets/Common/Testing/QApplicationGlobalFixture.h"
 
 //------------------------------------------------------------------------------
 // Static definitions
@@ -90,7 +15,5 @@ public:
 // We rely on cxxtest only including this file once so that the following
 // statements do not cause multiple-definition errors.
 //------------------------------------------------------------------------------
-static PythonInterpreter PYTHON_INTERPRETER;
-static QApplicationHolder MAIN_QAPPLICATION;
-
-#endif // MPLCPPTESTGLOBALINITIALIZATION_H
+static PythonInterpreterGlobalFixture PYTHON_INTERPRETER;
+static QApplicationGlobalFixture MAIN_QAPPLICATION;

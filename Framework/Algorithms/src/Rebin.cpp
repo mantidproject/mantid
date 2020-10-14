@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidHistogramData/Exception.h"
@@ -31,10 +31,10 @@ using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_const_sptr;
 using DataObjects::EventWorkspace_sptr;
 using HistogramData::BinEdges;
-using HistogramData::Exception::InvalidBinEdgesError;
 using HistogramData::Frequencies;
 using HistogramData::FrequencyStandardDeviations;
 using HistogramData::Histogram;
+using HistogramData::Exception::InvalidBinEdgesError;
 
 //---------------------------------------------------------------------------------------------
 // Public static methods
@@ -95,7 +95,7 @@ void Rebin::init() {
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "Params", boost::make_shared<RebinParamsValidator>()),
+          "Params", std::make_shared<RebinParamsValidator>()),
       "A comma separated list of first bin boundary, width, last bin boundary. "
       "Optionally "
       "this can be followed by a comma and more widths and last boundary "
@@ -161,7 +161,7 @@ void Rebin::exec() {
 
   // Now, determine if the input workspace is actually an EventWorkspace
   EventWorkspace_const_sptr eventInputWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
   if (eventInputWS != nullptr) {
     //------- EventWorkspace as input -------------------------------------
@@ -170,8 +170,7 @@ void Rebin::exec() {
       if (!inPlace) {
         outputWS = inputWS->clone();
       }
-      auto eventOutputWS =
-          boost::dynamic_pointer_cast<EventWorkspace>(outputWS);
+      auto eventOutputWS = std::dynamic_pointer_cast<EventWorkspace>(outputWS);
       // This only sets the X axis. Actual rebinning will be done upon data
       // access.
       eventOutputWS->setAllX(XValues_new);
@@ -309,8 +308,9 @@ void Rebin::exec() {
  *  @param outputWS :: The output workspace
  *  @param hist ::    The index of the current histogram
  */
-void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
-                           API::MatrixWorkspace_sptr outputWS, int hist) {
+void Rebin::propagateMasks(const API::MatrixWorkspace_const_sptr &inputWS,
+                           const API::MatrixWorkspace_sptr &outputWS,
+                           int hist) {
   // Not too happy with the efficiency of this way of doing it, but it's a lot
   // simpler to use the
   // existing rebin algorithm to distribute the weights than to re-implement it
@@ -322,19 +322,19 @@ void Rebin::propagateMasks(API::MatrixWorkspace_const_sptr inputWS,
   // Now iterate over the list, building up a vector of the masked bins
   auto it = mask.cbegin();
   auto &XValues = inputWS->x(hist);
-  masked_bins.push_back(XValues[(*it).first]);
-  weights.push_back((*it).second);
-  masked_bins.push_back(XValues[(*it).first + 1]);
+  masked_bins.emplace_back(XValues[(*it).first]);
+  weights.emplace_back((*it).second);
+  masked_bins.emplace_back(XValues[(*it).first + 1]);
   for (++it; it != mask.end(); ++it) {
     const double currentX = XValues[(*it).first];
     // Add an intermediate bin with zero weight if masked bins aren't
     // consecutive
     if (masked_bins.back() != currentX) {
-      weights.push_back(0.0);
-      masked_bins.push_back(currentX);
+      weights.emplace_back(0.0);
+      masked_bins.emplace_back(currentX);
     }
-    weights.push_back((*it).second);
-    masked_bins.push_back(XValues[(*it).first + 1]);
+    weights.emplace_back((*it).second);
+    masked_bins.emplace_back(XValues[(*it).first + 1]);
   }
 
   //// Create a zero vector for the errors because we don't care about them here

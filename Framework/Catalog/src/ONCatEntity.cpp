@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCatalog/ONCatEntity.h"
 #include "MantidCatalog/Exception.h"
@@ -83,7 +83,7 @@ ONCatEntity::vectorFromJSONStream(std::istream &streamContent) {
           "were not found.");
     }
 
-    entities.push_back(
+    entities.emplace_back(
         ONCatEntity(id, type, std::make_unique<Content>(subContent)));
   }
 

@@ -1,14 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name
 """
     Data catalog for HFIR SANS
 """
-from __future__ import (absolute_import, division, print_function)
 from reduction_gui.reduction.sans.data_cat import DataCatalog as BaseCatalog
 from reduction_gui.reduction.sans.data_cat import DataSet, DataType
 from reduction_gui.reduction.scripter import execute_script

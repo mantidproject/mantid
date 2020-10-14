@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiPeak.h"
 
-#include "boost/bind.hpp"
 #include <cmath>
 #include <stdexcept>
+#include <utility>
 
 namespace Mantid {
 namespace Poldi {
@@ -19,7 +19,7 @@ PoldiPeak_sptr PoldiPeak::clone() const {
 
 const MillerIndices &PoldiPeak::hkl() const { return m_hkl; }
 
-void PoldiPeak::setHKL(MillerIndices hkl) { m_hkl = hkl; }
+void PoldiPeak::setHKL(MillerIndices hkl) { m_hkl = std::move(hkl); }
 
 UncertainValue PoldiPeak::d() const { return m_d; }
 
@@ -119,33 +119,35 @@ PoldiPeak_sptr PoldiPeak::create(double qValue, double intensity) {
 }
 
 PoldiPeak_sptr PoldiPeak::create(MillerIndices hkl, double dValue) {
-  return PoldiPeak_sptr(new PoldiPeak(
-      UncertainValue(dValue), UncertainValue(0.0), UncertainValue(0.0), hkl));
+  return PoldiPeak_sptr(new PoldiPeak(UncertainValue(dValue),
+                                      UncertainValue(0.0), UncertainValue(0.0),
+                                      std::move(hkl)));
 }
 
 PoldiPeak_sptr PoldiPeak::create(MillerIndices hkl, UncertainValue dValue,
                                  UncertainValue intensity,
                                  UncertainValue fwhmRelative) {
-  return PoldiPeak_sptr(new PoldiPeak(dValue, intensity, fwhmRelative, hkl));
+  return PoldiPeak_sptr(
+      new PoldiPeak(dValue, intensity, fwhmRelative, std::move(hkl)));
 }
 
 bool PoldiPeak::greaterThan(const PoldiPeak_sptr &first,
                             const PoldiPeak_sptr &second,
                             UncertainValue (PoldiPeak::*function)() const) {
-  return static_cast<double>(boost::bind(function, first.get())()) >
-         static_cast<double>(boost::bind(function, second.get())());
+  return static_cast<double>(std::bind(function, first.get())()) >
+         static_cast<double>(std::bind(function, second.get())());
 }
 
 bool PoldiPeak::lessThan(const PoldiPeak_sptr &first,
                          const PoldiPeak_sptr &second,
                          UncertainValue (PoldiPeak::*function)() const) {
-  return static_cast<double>(boost::bind(function, first.get())()) <
-         static_cast<double>(boost::bind(function, second.get())());
+  return static_cast<double>(std::bind(function, first.get())()) <
+         static_cast<double>(std::bind(function, second.get())());
 }
 
 PoldiPeak::PoldiPeak(UncertainValue d, UncertainValue intensity,
                      UncertainValue fwhm, MillerIndices hkl)
-    : m_hkl(hkl), m_intensity(intensity) {
+    : m_hkl(std::move(hkl)), m_intensity(intensity) {
   setD(d);
   setFwhm(fwhm, Relative);
 }

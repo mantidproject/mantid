@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef LOADMCSTASTEST_H_
-#define LOADMCSTASTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -84,6 +82,10 @@ public:
                     1.0e-5);
     TS_ASSERT_DELTA(run.getPropertyValueAsType<double>("bm_counts"), 0.0800,
                     1.0e-5);
+
+    // test string log properties
+    TS_ASSERT(run.getProperty("rough_40")->value().compare("moving") == 0);
+    TS_ASSERT(run.getProperty("rough_100")->value().compare("moving") == 0);
 
     // test instrument setup
     TS_ASSERT_DELTA(dynamic_cast<TimeSeriesProperty<double> *>(
@@ -181,5 +183,3 @@ public:
     TS_ASSERT_LESS_THAN(0.0399999, minTime);
   }
 };
-
-#endif /*LoadBBYTEST_H_*/

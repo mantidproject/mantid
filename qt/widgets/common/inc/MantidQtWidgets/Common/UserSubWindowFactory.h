@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef MANTIDQT_API_USERSUBWINDOWFACTORYIMPL_H_
-#define MANTIDQT_API_USERSUBWINDOWFACTORYIMPL_H_
+#pragma once
 
 //------------------------
 // Includes
@@ -160,5 +158,3 @@ EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON
     Mantid::Kernel::SingletonHolder<MantidQt::API::UserSubWindowFactoryImpl>;
 } // namespace Kernel
 } // namespace Mantid
-
-#endif

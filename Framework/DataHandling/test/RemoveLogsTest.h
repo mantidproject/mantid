@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REMOVELOGSTEST_H_
-#define REMOVELOGSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -134,10 +133,10 @@ private:
     std::vector<double> dbl1, dbl2;
     DateAndTime startTime("2010-01-01T00:00:00");
     for (int i = 0; i < 100; ++i) {
-      times.push_back(startTime + i * 10.0);
-      index.push_back(i);
-      dbl1.push_back(i * 0.1);
-      dbl2.push_back(6.0);
+      times.emplace_back(startTime + i * 10.0);
+      index.emplace_back(i);
+      dbl1.emplace_back(i * 0.1);
+      dbl2.emplace_back(6.0);
     }
 
     auto scan_index = new TimeSeriesProperty<int>("scan_index");
@@ -163,5 +162,3 @@ private:
   RemoveLogs m_remover;
   std::string m_sampleWorkspace;
 };
-
-#endif /*REMOVELOGSTEST_H_*/

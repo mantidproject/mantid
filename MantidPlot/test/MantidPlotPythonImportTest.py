@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Test script to see if Mantid starts Python correctly
 
@@ -30,7 +30,7 @@ class MantidPlotPythonImportTest(unittest.TestCase):
     def test_ConjoinFilesExistsAsAFunction(self):
         # This means the Python algs were loaded
         self.assertTrue('ConjoinFiles' in globals())
-        self.assertEqual(type(ConjoinFiles),types.FunctionType)
+        self.assertTrue(callable(ConjoinFiles))
 
     def test_V3D_is_New_API_Version(self):
         import mantid

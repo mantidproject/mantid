@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/TOFSANSResolutionByPixel.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -37,14 +37,14 @@ TOFSANSResolutionByPixel::TOFSANSResolutionByPixel()
 void TOFSANSResolutionByPixel::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
+                      std::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Name the workspace to calculate the resolution for, for "
                   "each pixel and wavelength");
   declareProperty(
       std::make_unique<WorkspaceProperty<Workspace>>("OutputWorkspace", "",
                                                      Direction::Output),
       "Name of the newly created workspace which contains the Q resolution.");
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty("DeltaR", 0.0, positiveDouble,
                   "Virtual ring width on the detector (mm).");
@@ -54,7 +54,7 @@ void TOFSANSResolutionByPixel::init() {
                   "Source aperture radius, R1 (mm).");
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "SigmaModerator", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("Wavelength")),
+                      std::make_shared<WorkspaceUnitValidator>("Wavelength")),
                   "Moderator time spread (microseconds) as a"
                   "function of wavelength (Angstroms).");
   declareProperty("CollimationLength", 0.0, positiveDouble,
@@ -209,13 +209,13 @@ void TOFSANSResolutionByPixel::exec() {
  * @returns a copy of the input workspace
  */
 MatrixWorkspace_sptr TOFSANSResolutionByPixel::setupOutputWorkspace(
-    MatrixWorkspace_sptr inputWorkspace) {
+    const MatrixWorkspace_sptr &inputWorkspace) {
   IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
   duplicate->initialize();
   duplicate->setProperty<Workspace_sptr>("InputWorkspace", inputWorkspace);
   duplicate->execute();
   Workspace_sptr temp = duplicate->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(temp);
+  return std::dynamic_pointer_cast<MatrixWorkspace>(temp);
 }
 
 /**
@@ -224,7 +224,7 @@ MatrixWorkspace_sptr TOFSANSResolutionByPixel::setupOutputWorkspace(
  * @returns the moderator workspace wiht the correct wavelength binning
  */
 MatrixWorkspace_sptr TOFSANSResolutionByPixel::getModeratorWorkspace(
-    Mantid::API::MatrixWorkspace_sptr inputWorkspace) {
+    const Mantid::API::MatrixWorkspace_sptr &inputWorkspace) {
 
   MatrixWorkspace_sptr sigmaModerator = getProperty("SigmaModerator");
   IAlgorithm_sptr rebinned = createChildAlgorithm("RebinToWorkspace");
@@ -242,7 +242,7 @@ MatrixWorkspace_sptr TOFSANSResolutionByPixel::getModeratorWorkspace(
  * @param inWS: the input workspace
  */
 void TOFSANSResolutionByPixel::checkInput(
-    Mantid::API::MatrixWorkspace_sptr inWS) {
+    const Mantid::API::MatrixWorkspace_sptr &inWS) {
   // Make sure that input workspace has an instrument as we rely heavily on
   // thisa
   auto inst = inWS->getInstrument();

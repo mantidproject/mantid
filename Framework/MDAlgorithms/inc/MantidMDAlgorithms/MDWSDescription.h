@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_WS_DESCRIPTION_H
-#define MANTID_MDALGORITHMS_WS_DESCRIPTION_H
+#pragma once
 
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidAPI/LogManager.h"
@@ -91,7 +90,7 @@ public: // for the time being
   bool isQ3DMode() const;
   bool hasLattice() const;
 
-  boost::shared_ptr<Geometry::OrientedLattice> getLattice() const {
+  std::shared_ptr<Geometry::OrientedLattice> getLattice() const {
     return getOrientedLattice(m_InWS);
   }
   Kernel::Matrix<double> getGoniometerMatr() const;
@@ -109,7 +108,7 @@ public: // for the time being
   /// method builds MD Event ws description from a matrix workspace and the
   /// transformations, requested to be performed on the workspace
   void buildFromMatrixWS(const API::MatrixWorkspace_sptr &pWS,
-                         const std::string &QMode, const std::string dEMode,
+                         const std::string &QMode, const std::string &dEMode,
                          const std::vector<std::string> &dimPropertyNames =
                              std::vector<std::string>());
 
@@ -133,12 +132,12 @@ public: // for the time being
   /** function extracts the coordinates from additional workspace properties and
    * places them to AddCoord vector for further usage*/
   static void
-  fillAddProperties(Mantid::API::MatrixWorkspace_const_sptr inWS2D,
+  fillAddProperties(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D,
                     const std::vector<std::string> &dimPropertyNames,
                     std::vector<coord_t> &AddCoord);
 
-  static boost::shared_ptr<Geometry::OrientedLattice>
-  getOrientedLattice(Mantid::API::MatrixWorkspace_const_sptr inWS2D);
+  static std::shared_ptr<Geometry::OrientedLattice>
+  getOrientedLattice(const Mantid::API::MatrixWorkspace_const_sptr &inWS2D);
 
   /// Set the special coordinate system if any.
   void
@@ -146,7 +145,7 @@ public: // for the time being
   /// @return the special coordinate system if any.
   Mantid::Kernel::SpecialCoordinateSystem getCoordinateSystem() const;
   /// Set the md frame
-  void setFrame(const std::string frameKey);
+  void setFrame(const std::string &frameKey);
   /// Retrieve the md frame
   Geometry::MDFrame_uptr getFrame(size_t d) const;
 
@@ -197,4 +196,3 @@ private:
 };
 } // namespace MDAlgorithms
 } // namespace Mantid
-#endif

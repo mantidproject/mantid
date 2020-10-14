@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FILTER_H
-#define FILTER_H
+#pragma once
 
 #include <QObject>
 
@@ -200,5 +199,3 @@ protected:
 
   QString d_y_col_name;
 };
-
-#endif

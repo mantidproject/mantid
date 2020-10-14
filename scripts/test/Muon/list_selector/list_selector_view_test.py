@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 import unittest
 
 from mantidqt.utils.qt.testing import start_qapplication
@@ -38,6 +37,7 @@ class TestListSelectorView(unittest.TestCase):
         self.view.clearItems()
 
         self.assertEqual(self.view.item_table_widget.rowCount(), 0)
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

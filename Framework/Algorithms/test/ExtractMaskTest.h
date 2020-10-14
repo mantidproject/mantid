@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef EXTRACTMASKINGTEST_H_
-#define EXTRACTMASKINGTEST_H_
+#pragma once
 
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAlgorithms/ExtractMask.h"
@@ -142,7 +141,7 @@ private:
     if (workspace) {
       // output should be a MaskWorkspace
       MaskWorkspace_sptr outputWS =
-          boost::dynamic_pointer_cast<MaskWorkspace>(workspace);
+          std::dynamic_pointer_cast<MaskWorkspace>(workspace);
       return outputWS;
     } else {
       return MaskWorkspace_sptr();
@@ -164,8 +163,8 @@ private:
     return detectorList;
   }
 
-  void doTest(MatrixWorkspace_const_sptr inputWS,
-              MaskWorkspace_const_sptr outputWS) {
+  void doTest(const MatrixWorkspace_const_sptr &inputWS,
+              const MaskWorkspace_const_sptr &outputWS) {
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
     size_t nOutputHists(outputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(nOutputHists, inputWS->getNumberHistograms());
@@ -198,5 +197,3 @@ private:
     }
   }
 };
-
-#endif // EXTRACTMASKINGTEST_H_

@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef PLOTCURVE_H
-#define PLOTCURVE_H
+#pragma once
 
 #include "Table.h"
 #include <qwt_plot_curve.h>
@@ -110,8 +109,8 @@ protected:
   int d_skip_symbols;
   bool m_isDistribution;
   // x and y units
-  boost::shared_ptr<Mantid::Kernel::Unit> m_xUnits;
-  boost::shared_ptr<Mantid::Kernel::Unit> m_yUnits;
+  std::shared_ptr<Mantid::Kernel::Unit> m_xUnits;
+  std::shared_ptr<Mantid::Kernel::Unit> m_yUnits;
 };
 
 class DataCurve : public PlotCurve {
@@ -279,4 +278,3 @@ protected:
   //! y coordinate offset
   double d_label_y_offset;
 };
-#endif

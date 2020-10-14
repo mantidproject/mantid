@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CONVERTAXISBYFORMULATEST_H_
-#define MANTID_ALGORITHMS_CONVERTAXISBYFORMULATEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -56,10 +55,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
     Axis *ax = result->getAxis(0);
@@ -113,10 +112,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
     Axis *ax = result->getAxis(0);
@@ -157,10 +156,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
     Axis *ax = result->getAxis(1);
@@ -198,8 +197,9 @@ public:
     cleanupWorkspaces(std::vector<std::string>{inputWs});
   }
 
-  bool runConvertAxisByFormula(std::string testName, std::string formula,
-                               std::string axis, std::string &inputWs,
+  bool runConvertAxisByFormula(const std::string &testName,
+                               const std::string &formula,
+                               const std::string &axis, std::string &inputWs,
                                std::string &resultWs) {
     Mantid::Algorithms::ConvertAxisByFormula alg;
     alg.initialize();
@@ -243,10 +243,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
     double l1 = in->spectrumInfo().l1();
@@ -272,10 +272,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
     const auto &spectrumInfo = in->spectrumInfo();
@@ -313,10 +313,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
     const auto &spectrumInfo = in->spectrumInfo();
@@ -355,10 +355,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
     const auto &spectrumInfo = in->spectrumInfo();
@@ -396,10 +396,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
     const size_t xsize = result->blocksize();
@@ -435,10 +435,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(inputWs)));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(resultWs)));
 
     const size_t xsize = result->blocksize();
@@ -459,5 +459,3 @@ public:
     cleanupWorkspaces(std::vector<std::string>{inputWs, resultWs});
   }
 };
-
-#endif /* MANTID_ALGORITHMS_CONVERTAXISBYFORMULATEST_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveBankScatteringAngles.h"
 
@@ -80,7 +80,7 @@ void SaveBankScatteringAngles::exec() {
   const API::WorkspaceGroup_sptr inputWS = getProperty(PROP_INPUT_WS);
   for (int i = 0; i < inputWS->getNumberOfEntries(); ++i) {
     const auto ws = inputWS->getItem(i);
-    const auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    const auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
     const auto &instrument = matrixWS->getInstrument();
     const auto &samplePosition = instrument->getSample()->getPos();
     const auto &sourcePosition = instrument->getSource()->getPos();
@@ -112,7 +112,7 @@ std::map<std::string, std::string> SaveBankScatteringAngles::validateInputs() {
 
   const API::WorkspaceGroup_sptr inputWS = getProperty(PROP_INPUT_WS);
   for (const auto &ws : *inputWS) {
-    const auto matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    const auto matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
     if (matrixWS) {
       if (matrixWS->getNumberHistograms() != 1) {
         issues[PROP_INPUT_WS] = "The workspace " + matrixWS->getName() +

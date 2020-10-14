@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifdef _MSC_VER
 #pragma warning(disable : 4250) // Disable warning regarding inheritance via
@@ -35,7 +35,16 @@ void export_PropertyManager() {
   // that it can always extract a shared_ptr type
   class_<PropertyManager, PropertyManager_sptr, bases<IPropertyManager>,
          boost::noncopyable>("PropertyManager")
-      .def("__init__", make_constructor(&createPropertyManager));
+      .def("__init__", make_constructor(&createPropertyManager))
+      .def("getInvalidValuesFilterLogName",
+           &PropertyManager::getInvalidValuesFilterLogName)
+      .staticmethod("getInvalidValuesFilterLogName")
+      .def("getLogNameFromInvalidValuesFilter",
+           &PropertyManager::getLogNameFromInvalidValuesFilter)
+      .staticmethod("getLogNameFromInvalidValuesFilter")
+      .def("isAnInvalidValuesFilterLog",
+           &PropertyManager::isAnInvalidValuesFilterLog)
+      .staticmethod("isAnInvalidValuesFilterLog");
 }
 
 #ifdef _MSC_VER

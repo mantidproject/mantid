@@ -1,27 +1,23 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 
 # need to write tests for new GUI
 
-from Muon.GUI.Common.utilities import load_utils
-from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter_new
 from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget_new import FFTWidget
-from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter_new
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt.maxent_widget_new import MaxEntWidget
 from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_view
 from Muon.GUI.FrequencyDomainAnalysis.Transform import transform_widget
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_view
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection import transform_selection_widget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from Muon.GUI.Common.observer_pattern import GenericObservable
 
 
 # pass the call not the object to widget
@@ -80,7 +76,7 @@ class Transform2Test(unittest.TestCase):
 
         self.widget.handle_new_instrument()
         self.widget._maxent.clear.assert_called_once_with()
- 
+
     def test_handle_new_group_pair(self):
         self.mock_widgets()
         self.widget.handle_new_group_pair()
@@ -97,14 +93,14 @@ class Transform2Test(unittest.TestCase):
     def test_set_up_calculation_observers(self):
         enable = mock.Mock()
         disable = mock.Mock()
-        
+
         self.widget.set_up_calculation_observers(enable, disable)
         self.widget._maxent._presenter.calculation_finished_notifier.add_subscriber.assert_called_once_with(enable)
         self.widget._maxent._presenter.calculation_started_notifier.add_subscriber.assert_called_once_with(disable)
 
     def test_new_data_observers(self):
         observer = mock.Mock()
-        
+
         self.widget.new_data_observer(observer)
         self.widget._maxent._presenter.calculation_finished_notifier.add_subscriber.assert_called_once_with(observer)
         self.widget._fft._presenter.calculation_finished_notifier.add_subscriber.assert_called_once_with(observer)

@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADILLDIFFRACTIONTEST_H_
-#define MANTID_DATAHANDLING_LOADILLDIFFRACTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidDataHandling/Load.h"
@@ -17,6 +17,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
+#include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
 
 using namespace Mantid::API;
@@ -32,10 +33,12 @@ public:
   }
   static void destroySuite(LoadILLDiffractionTest *suite) { delete suite; }
 
-  void setUp() override {
+  LoadILLDiffractionTest() {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D20/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D2B/");
+  }
 
+  void setUp() override {
     m_oldFacility = ConfigService::Instance().getFacility().name();
     ConfigService::Instance().setFacility("ILL");
 
@@ -57,6 +60,28 @@ public:
     LoadILLDiffraction alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
+  }
+
+  void test_D20_transposed_2theta() {
+    // Tests the axis conversion and transposition
+    // for non-detector scan D20 data from cycle 203
+    LoadILLDiffraction alg;
+    alg.setChild(true);
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "170607.nxs"))
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", "_unused_for_child"))
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("ConvertAxisAndTranspose", true))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1)
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 3072)
+    TS_ASSERT(!outputWS->isHistogramData())
+    TS_ASSERT(!outputWS->isDistribution())
+    TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "Degrees")
   }
 
   void test_D20_no_scan() {
@@ -326,7 +351,7 @@ public:
     TS_ASSERT_DELTA(theta, 147.55, 0.001)
   }
 
-  void do_test_D2B_single_file(std::string dataType) {
+  void do_test_D2B_single_file(const std::string &dataType) {
     // Test a D2B detector scan file with 25 detector positions
 
     const int NUMBER_OF_TUBES = 128;
@@ -488,5 +513,3 @@ public:
 private:
   LoadILLDiffraction m_alg;
 };
-
-#endif /* MANTID_DATAHANDLING_LOADILLDIFFRACTIONTEST_H_ */

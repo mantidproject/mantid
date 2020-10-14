@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SETGONIOMETERTEST_H_
-#define MANTID_CRYSTAL_SETGONIOMETERTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidCrystal/SetGoniometer.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/Matrix.h"
@@ -152,12 +152,48 @@ public:
     AnalysisDataService::Instance().remove("SetUnivGoniometerTest_ws");
   }
 
+  void test_PeaksWorkspace() {
+    PeaksWorkspace_sptr ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
+    AnalysisDataService::Instance().addOrReplace(
+        "SetPeaksWorkspaceGoniometerTest_ws", ws);
+    FrameworkManager::Instance().exec(
+        "AddSampleLog", 8, "Workspace", "SetPeaksWorkspaceGoniometerTest_ws",
+        "LogName", "phi", "LogType", "Number Series", "LogText", "1.234");
+
+    FrameworkManager::Instance().exec(
+        "AddSampleLog", 8, "Workspace", "SetPeaksWorkspaceGoniometerTest_ws",
+        "LogName", "chi", "LogType", "Number Series", "LogText", "1.234");
+
+    FrameworkManager::Instance().exec(
+        "AddSampleLog", 8, "Workspace", "SetPeaksWorkspaceGoniometerTest_ws",
+        "LogName", "omega", "LogType", "Number Series", "LogText", "1.234");
+
+    SetGoniometer alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
+        "Workspace", "SetPeaksWorkspaceGoniometerTest_ws"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Goniometers", "Universal"));
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted()); // no log values
+
+    // Check the results
+    const Goniometer &G = ws->mutableRun().getGoniometer();
+    TS_ASSERT_EQUALS(G.getNumberAxes(), 3);
+    TS_ASSERT_EQUALS(G.getAxis(2).name, "phi");
+    TS_ASSERT_EQUALS(G.getAxis(1).name, "chi");
+    TS_ASSERT_EQUALS(G.getAxis(0).name, "omega");
+
+    AnalysisDataService::Instance().remove(
+        "SetPeaksWorkspaceGoniometerTest_ws");
+  }
+
   /** Do a test with a single param
    *
    * @param axis0 :: string to pass
    * @param numExpected :: how many axes should be created (0 or 1)
    */
-  void do_test_param(std::string axis0, size_t numExpected = 0) {
+  void do_test_param(const std::string &axis0, size_t numExpected = 0) {
     Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspace(10, 10);
     AnalysisDataService::Instance().addOrReplace("SetGoniometerTest_ws", ws);
     FrameworkManager::Instance().exec(
@@ -198,5 +234,3 @@ public:
 
   void test_ok() { do_test_param("name, 1.0, 2.0, 3.0, 1", 1); }
 };
-
-#endif /* MANTID_CRYSTAL_SETGONIOMETERTEST_H_ */

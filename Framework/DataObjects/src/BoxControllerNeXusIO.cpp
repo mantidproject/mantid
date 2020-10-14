@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/BoxControllerNeXusIO.h"
 
@@ -38,7 +38,7 @@ BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
   m_BlockSize[1] = 4 + m_bc->getNDims();
 
   for (auto &EventHeader : EventHeaders) {
-    m_EventsTypeHeaders.push_back(EventHeader);
+    m_EventsTypeHeaders.emplace_back(EventHeader);
   }
 
   m_EventsTypesSupported.resize(2);
@@ -48,7 +48,7 @@ BoxControllerNeXusIO::BoxControllerNeXusIO(API::BoxController *const bc)
 /**get event type form its string representation*/
 BoxControllerNeXusIO::EventType BoxControllerNeXusIO::TypeFromString(
     const std::vector<std::string> &typesSupported,
-    const std::string typeName) {
+    const std::string &typeName) {
   auto it = std::find(typesSupported.begin(), typesSupported.end(), typeName);
   if (it == typesSupported.end())
     throw std::invalid_argument("Unsupported event type: " + typeName +
@@ -405,7 +405,7 @@ template <typename FROM, typename TO>
 void convertFormats(const std::vector<FROM> &inData, std::vector<TO> &outData) {
   outData.reserve(inData.size());
   for (size_t i = 0; i < inData.size(); i++) {
-    outData.push_back(static_cast<TO>(inData[i]));
+    outData.emplace_back(static_cast<TO>(inData[i]));
   }
 }
 /** Load float  data block from the opened NeXus file.

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LINEINTERSECTVISITTEST__
-#define MANTID_LINEINTERSECTVISITTEST__
+#pragma once
 
 #include "MantidGeometry/Surfaces/Cone.h"
 #include "MantidGeometry/Surfaces/Cylinder.h"
@@ -56,7 +55,7 @@ public:
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
     std::vector<double> Dist;
-    Dist.push_back(2.0);
+    Dist.emplace_back(2.0);
     TS_ASSERT_EQUALS(A.getDistance(), Dist);
   }
 
@@ -96,8 +95,8 @@ public:
     TS_ASSERT_EQUALS(A.getNPoints(), 1);
     TS_ASSERT_EQUALS(A.getPoints(), pntOut);
     std::vector<double> Dist;
-    // Dist.push_back(1.0);
-    Dist.push_back(1.0);
+    // Dist.emplace_back(1.0);
+    Dist.emplace_back(1.0);
     TS_ASSERT_EQUALS(A.getDistance(), Dist);
 
     LineIntersectVisit C(V3D(1.1, 0.0, 0.0), V3D(-1.0, 0.0, 0.0));
@@ -116,4 +115,3 @@ private:
     return output.str();
   }
 };
-#endif

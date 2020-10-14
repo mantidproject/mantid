@@ -187,8 +187,7 @@ set_target_properties(VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI)
 set_property(TARGET VatesAPI PROPERTY FOLDER "MantidVates")
 
 target_link_libraries(VatesAPI
-                      PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
-                              ${MANTID_SUBPROJECT_LIBS}
+                      PRIVATE ${MANTID_SUBPROJECT_LIBS}
                               vtkCommonCore
                               vtkCommonDataModel
                               vtkIOLegacy
@@ -218,10 +217,10 @@ if(MSVC)
   unset(_src_dir)
 endif()
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(
     VatesAPI
-    PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Libraries")
+    PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(VatesAPI
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
@@ -230,8 +229,7 @@ endif()
 # Create test file projects
 include_directories(SYSTEM
                     ${CXXTEST_INCLUDE_DIR}
-                    ${GMOCK_INCLUDE_DIR}
-                    ${GTEST_INCLUDE_DIR})
+)
 
 include_directories(inc
                     ../../../Framework/TestHelpers/inc
@@ -247,7 +245,6 @@ set(TESTHELPER_SRCS
 cxxtest_add_test(VatesAPITest ${TEST_FILES})
 target_link_libraries(VatesAPITest
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTID_SUBPROJECT_LIBS}
                       VatesAPI
                       DataHandling
@@ -263,8 +260,8 @@ target_link_libraries(VatesAPITest
                       ${vtkjsoncpp_LIBRARIES}
                       ${POCO_LIBRARIES}
                       ${Boost_LIBRARIES}
-                      ${GMOCK_LIBRARIES}
-                      ${GTEST_LIBRARIES})
+                      gmock
+)
 add_dependencies(AllTests VatesAPITest)
 # Add to the 'UnitTests' group in VS
 set_property(TARGET VatesAPITest PROPERTY FOLDER "UnitTests")

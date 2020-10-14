@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectInstrumentConfig.h"
 
@@ -300,7 +300,8 @@ void IndirectInstrumentConfig::updateInstrumentConfigurations(
  * @param ws Instrument workspace
  * @return If the workspace contained valid analysers
  */
-bool IndirectInstrumentConfig::updateAnalysersList(MatrixWorkspace_sptr ws) {
+bool IndirectInstrumentConfig::updateAnalysersList(
+    const MatrixWorkspace_sptr &ws) {
   if (!ws)
     return false;
 

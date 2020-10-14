@@ -28,8 +28,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef MANTIDQT_API_PIXMAPS_H
-#define MANTIDQT_API_PIXMAPS_H
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "qpixmap.h"
@@ -40,5 +39,3 @@ namespace API {
 EXPORT_OPT_MANTIDQT_COMMON QPixmap getQPixmap(const std::string &name);
 } // namespace API
 } // namespace MantidQt
-
-#endif // MANTIDQT_API_PIXMAPS_H

@@ -1,14 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------
 // Includes
 //-----------------------------------
-#include "MantidQtWidgets/Common/WorkspaceObserver.h"
+#include <utility>
+
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 namespace MantidQt {
 namespace API {
@@ -18,7 +20,7 @@ namespace API {
 //---------------------------------------------------------------------------
 void ObserverCallback::handlePreDelete(const std::string &name,
                                        Mantid::API::Workspace_sptr workspace) {
-  m_observer->preDeleteHandle(name, workspace);
+  m_observer->preDeleteHandle(name, std::move(workspace));
 }
 
 void ObserverCallback::handlePostDelete(const std::string &name) {
@@ -27,12 +29,12 @@ void ObserverCallback::handlePostDelete(const std::string &name) {
 
 void ObserverCallback::handleAdd(const std::string &name,
                                  Mantid::API::Workspace_sptr workspace) {
-  m_observer->addHandle(name, workspace);
+  m_observer->addHandle(name, std::move(workspace));
 }
 
 void ObserverCallback::handleAfterReplace(
     const std::string &name, Mantid::API::Workspace_sptr workspace) {
-  m_observer->afterReplaceHandle(name, workspace);
+  m_observer->afterReplaceHandle(name, std::move(workspace));
 }
 
 void ObserverCallback::handleRename(const std::string &oldName,

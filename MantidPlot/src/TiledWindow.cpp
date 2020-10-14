@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "TiledWindow.h"
 #include "ApplicationWindow.h"
@@ -76,8 +76,6 @@ void Tile::removeWidget() {
   m_widget = nullptr;
 }
 
-/**
- */
 void Tile::paintEvent(QPaintEvent *ev) {
   QPainter painter(this);
   QRect bkGround = this->rect().adjusted(0, 0, -1, -1);
@@ -217,7 +215,7 @@ InnerWidget *getInnerWidget(QWidget *w) {
  */
 TiledWindow::TiledWindow(QWidget *parent, const QString &label,
                          const QString &name, int nrows, int ncols,
-                         Qt::WFlags f)
+                         const Qt::WFlags &f)
     : MdiSubWindow(parent, label, name, f), m_scrollArea(nullptr),
       m_layout(nullptr), m_buttonPressed(false) {
   connect(this, SIGNAL(dropAtPositionQueued(MdiSubWindow *, QPoint, bool)),

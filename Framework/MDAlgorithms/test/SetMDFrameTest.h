@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_SETMDFRAMETEST_H_
-#define MANTID_MDALGORITHMS_SETMDFRAMETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -59,7 +58,7 @@ public:
             1.0, 2, 10, 10.0, 1.0, "A");
 
     std::vector<int> axes;
-    axes.push_back(1);
+    axes.emplace_back(1);
 
     SetMDFrame alg;
     alg.setChild(true);
@@ -87,8 +86,8 @@ public:
             1.0, 1, 10, 10.0, 1.0, "A");
 
     std::vector<int> axes;
-    axes.push_back(0);
-    axes.push_back(7);
+    axes.emplace_back(0);
+    axes.emplace_back(7);
 
     SetMDFrame alg;
     alg.setChild(true);
@@ -109,14 +108,16 @@ public:
     // Arrange
     const size_t numberOfDimensions = 2;
     std::vector<Mantid::Geometry::MDFrame_sptr> frames;
-    frames.push_back(std::make_shared<Mantid::Geometry::UnknownFrame>("test"));
-    frames.push_back(std::make_shared<Mantid::Geometry::UnknownFrame>("test"));
+    frames.emplace_back(
+        std::make_shared<Mantid::Geometry::UnknownFrame>("test"));
+    frames.emplace_back(
+        std::make_shared<Mantid::Geometry::UnknownFrame>("test"));
     auto inputWorkspace =
         Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithIndividualFrames<
             numberOfDimensions>(5, -2, 2, frames, 3);
 
     std::vector<int> axes;
-    axes.push_back(0);
+    axes.emplace_back(0);
 
     // Act
     SetMDFrame alg;
@@ -155,17 +156,17 @@ public:
     auto unit0 = unitFactory->create(unitString0);
     auto unit1 = unitFactory->create(unitString1);
 
-    frames.push_back(
+    frames.emplace_back(
         std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit0)));
-    frames.push_back(
+    frames.emplace_back(
         std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit1)));
     auto inputWorkspace =
         Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithIndividualFrames<
             numberOfDimensions>(5, -2, 2, frames, 3);
 
     std::vector<int> axes;
-    axes.push_back(0);
-    axes.push_back(1);
+    axes.emplace_back(0);
+    axes.emplace_back(1);
 
     // Act
     SetMDFrame alg;
@@ -208,16 +209,16 @@ public:
     auto unit0 = unitFactory->create(unitString0);
     auto unit1 = unitFactory->create(unitString1);
 
-    frames.push_back(
+    frames.emplace_back(
         std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit0)));
-    frames.push_back(
+    frames.emplace_back(
         std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit1)));
     auto inputWorkspace =
         Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithIndividualFrames<
             numberOfDimensions>(5, -2, 2, frames, 3);
 
     std::vector<int> axes;
-    axes.push_back(1);
+    axes.emplace_back(1);
 
     // Act
     SetMDFrame alg;
@@ -247,17 +248,17 @@ public:
     auto unit0 = unitFactory->create(unitString0);
     auto unit1 = unitFactory->create(unitString1);
 
-    frames.push_back(
+    frames.emplace_back(
         std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit0)));
-    frames.push_back(
+    frames.emplace_back(
         std::make_shared<Mantid::Geometry::UnknownFrame>(std::move(unit1)));
     auto inputWorkspace =
         Mantid::DataObjects::MDEventsTestHelper::makeMDEWWithIndividualFrames<
             numberOfDimensions>(5, -2, 2, frames, 3);
 
     std::vector<int> axes;
-    axes.push_back(0);
-    axes.push_back(1);
+    axes.emplace_back(0);
+    axes.emplace_back(1);
 
     // Act
     SetMDFrame alg;
@@ -288,5 +289,3 @@ public:
                       dimension1->getMDFrame().getUnitLabel(), unitString1);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_SetMDFrameTEST_H_ */

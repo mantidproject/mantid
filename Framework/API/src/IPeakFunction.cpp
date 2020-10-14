@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -15,9 +15,9 @@
 #include "MantidAPI/PeakFunctionIntegrator.h"
 #include "MantidKernel/Exception.h"
 
-#include <boost/make_shared.hpp>
 #include <cmath>
 #include <limits>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -218,7 +218,7 @@ void IPeakFunction::setIntensity(const double newIntensity) {
 
 std::string IPeakFunction::getCentreParameterName() const {
   FunctionParameterDecorator_sptr fn =
-      boost::dynamic_pointer_cast<FunctionParameterDecorator>(
+      std::dynamic_pointer_cast<FunctionParameterDecorator>(
           FunctionFactory::Instance().createFunction("PeakParameterFunction"));
 
   if (!fn) {

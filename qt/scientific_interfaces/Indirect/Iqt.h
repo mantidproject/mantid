@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_IQT_H_
+#pragma once
 
 #include "IndirectDataAnalysisTab.h"
 #include "ui_Iqt.h"
@@ -25,7 +24,6 @@ private:
   bool validate() override;
   void loadSettings(const QSettings &settings) override;
   void setFileExtensionsByName(bool filter) override;
-  void setBrowserWorkspace() override{};
 
   bool isErrorsEnabled();
 
@@ -38,9 +36,8 @@ private slots:
   void algorithmComplete(bool error);
   void plotInput();
   void plotInput(const QString &wsname);
-  void rsRangeChangedLazy(double min, double max);
-  void updateRS(QtProperty *prop, double val);
-  void updatePropertyValues(QtProperty *prop, double val);
+  void rangeChanged(double min, double max);
+  void updateRangeSelector(QtProperty *prop, double val);
   void updateDisplayedBinParameters();
   void runClicked();
   void saveClicked();
@@ -57,5 +54,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_IQT_H_ */

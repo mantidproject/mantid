@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidSINQ/PoldiUtilities/PoldiSpectrumLinearBackground.h"
 
@@ -22,9 +22,9 @@ PoldiSpectrumLinearBackground::PoldiSpectrumLinearBackground()
       m_timeBinCount(0) {}
 
 void PoldiSpectrumLinearBackground::setWorkspace(
-    boost::shared_ptr<const Workspace> ws) {
+    std::shared_ptr<const Workspace> ws) {
   MatrixWorkspace_const_sptr matrixWs =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
 
   if (matrixWs && matrixWs->getNumberHistograms() > 0) {
     m_timeBinCount = matrixWs->x(0).size();

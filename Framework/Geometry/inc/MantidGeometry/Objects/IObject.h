@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_IOBJECT_H_
-#define MANTID_GEOMETRY_IOBJECT_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Rendering/ShapeInfo.h"
-#include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace Mantid {
@@ -53,6 +53,7 @@ public:
   virtual int getName() const = 0;
 
   virtual int interceptSurface(Geometry::Track &) const = 0;
+  virtual double distance(const Geometry::Track &) const = 0;
   // Solid angle
   virtual double solidAngle(const Kernel::V3D &observer) const = 0;
   // Solid angle with a scaling of the object
@@ -68,10 +69,11 @@ public:
   virtual double volume() const = 0;
 
   virtual int getPointInObject(Kernel::V3D &point) const = 0;
-  virtual Kernel::V3D
+
+  virtual boost::optional<Kernel::V3D>
   generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                         const size_t) const = 0;
-  virtual Kernel::V3D
+  virtual boost::optional<Kernel::V3D>
   generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
                         const BoundingBox &activeRegion,
                         const size_t) const = 0;
@@ -87,15 +89,17 @@ public:
   virtual void initDraw() const = 0;
 
   virtual const Kernel::Material &material() const = 0;
+  virtual void setMaterial(const Kernel::Material &material) = 0;
   virtual const std::string &id() const = 0;
+  virtual void setID(const std::string &id) = 0;
 
-  virtual boost::shared_ptr<GeometryHandler> getGeometryHandler() const = 0;
+  virtual std::shared_ptr<GeometryHandler> getGeometryHandler() const = 0;
 };
 
 /// Typdef for a shared pointer
-using IObject_sptr = boost::shared_ptr<IObject>;
+using IObject_sptr = std::shared_ptr<IObject>;
 /// Typdef for a shared pointer to a const object
-using IObject_const_sptr = boost::shared_ptr<const IObject>;
+using IObject_const_sptr = std::shared_ptr<const IObject>;
 /// Typdef for a unique pointer
 using IObject_uptr = std::unique_ptr<IObject>;
 /// Typdef for a unique pointer to a const object
@@ -103,5 +107,3 @@ using IObject_const_uptr = std::unique_ptr<const IObject>;
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_IOBJECT_H_ */

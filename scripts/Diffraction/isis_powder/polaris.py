@@ -1,15 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
+import os
 
 from isis_powder.routines import absorb_corrections, common, instrument_settings
 from isis_powder.abstract_inst import AbstractInst
 from isis_powder.polaris_routines import polaris_advanced_config, polaris_algs, polaris_param_mapping
+from mantid.kernel import logger
 
 
 class Polaris(AbstractInst):
@@ -49,13 +49,26 @@ class Polaris(AbstractInst):
         return vanadium_d
 
     def create_total_scattering_pdf(self, **kwargs):
+        if 'pdf_type' not in kwargs or kwargs['pdf_type'] not in ['G(r)', 'g(r)', 'RDF(r)']:
+            kwargs['pdf_type'] = 'G(r)'
+            logger.warning('PDF type not specified or is invalid, defaulting to G(r)')
         self._inst_settings.update_attributes(kwargs=kwargs)
         # Generate pdf
         run_details = self._get_run_details(self._inst_settings.run_number)
         focus_file_path = self._generate_out_file_paths(run_details)["nxs_filename"]
+        cal_file_name = os.path.join(self._inst_settings.calibration_dir, self._inst_settings.grouping_file_name)
         pdf_output = polaris_algs.generate_ts_pdf(run_number=self._inst_settings.run_number,
                                                   focus_file_path=focus_file_path,
-                                                  merge_banks=self._inst_settings.merge_banks)
+                                                  merge_banks=self._inst_settings.merge_banks,
+                                                  q_lims=self._inst_settings.q_lims,
+                                                  cal_file_name=cal_file_name,
+                                                  sample_details=self._sample_details,
+                                                  delta_r=self._inst_settings.delta_r,
+                                                  delta_q=self._inst_settings.delta_q,
+                                                  pdf_type=self._inst_settings.pdf_type,
+                                                  lorch_filter=self._inst_settings.lorch_filter,
+                                                  freq_params=self._inst_settings.freq_params,
+                                                  debug=self._inst_settings.debug)
         return pdf_output
 
     def set_sample_details(self, **kwargs):

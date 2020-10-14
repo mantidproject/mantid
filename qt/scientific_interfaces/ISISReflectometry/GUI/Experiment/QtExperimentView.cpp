@@ -1,15 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "QtExperimentView.h"
+#include "MantidKernel/UsageService.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/AlgorithmHintStrategy.h"
 #include <QMessageBox>
 #include <QScrollBar>
 #include <boost/algorithm/string/join.hpp>
+#include <utility>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -45,13 +47,18 @@ void showAsValid(QLineEdit &lineEdit) {
  * @param parent :: [input] The parent of this widget
  */
 QtExperimentView::QtExperimentView(
-    Mantid::API::IAlgorithm_sptr algorithmForTooltips, QWidget *parent)
-    : QWidget(parent) {
-  initLayout();
+    const Mantid::API::IAlgorithm_sptr &algorithmForTooltips, QWidget *parent)
+    : QWidget(parent), m_stitchEdit(nullptr), m_deleteShortcut(),
+      m_notifyee(nullptr), m_columnToolTips() {
+  initLayout(algorithmForTooltips);
   registerSettingsWidgets(algorithmForTooltips);
 }
 
 void QtExperimentView::onRemovePerThetaDefaultsRequested() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "ExperimentTab", "RemovePerThetaDefaultsRow"},
+      false);
   auto index = m_ui.optionsTable->currentIndex();
   if (index.isValid()) {
     m_notifyee->notifyRemovePerAngleDefaultsRequested(index.row());
@@ -85,13 +92,14 @@ void QtExperimentView::subscribe(ExperimentViewSubscriber *notifyee) {
 /**
 Initialise the Interface
 */
-void QtExperimentView::initLayout() {
+void QtExperimentView::initLayout(
+    Mantid::API::IAlgorithm_sptr algorithmForTooltips) {
   m_ui.setupUi(this);
   m_deleteShortcut = std::make_unique<QShortcut>(QKeySequence(tr("Delete")),
                                                  m_ui.optionsTable);
   connect(m_deleteShortcut.get(), SIGNAL(activated()), this,
           SLOT(onRemovePerThetaDefaultsRequested()));
-  initOptionsTable();
+  initOptionsTable(std::move(algorithmForTooltips));
   initFloodControls();
 
   auto blacklist =
@@ -108,6 +116,24 @@ void QtExperimentView::initLayout() {
           SLOT(onNewPerThetaDefaultsRowRequested()));
 }
 
+void QtExperimentView::initializeTableColumns(
+    QTableWidget &table,
+    const Mantid::API::IAlgorithm_sptr &algorithmForTooltips) {
+  for (auto column = 0; column < table.columnCount(); ++column) {
+    // Get the tooltip for this column based on the algorithm property
+    auto const propertyName = PerThetaDefaults::ColumnPropertyName[column];
+    auto const toolTip = QString::fromStdString(
+        algorithmForTooltips->getPointerToProperty(propertyName)
+            ->documentation());
+    // We could set the tooltip for the column header here using
+    // horizontalHeaderItem(column)->setToolTip(). However, then we lose the
+    // tooltip about the purpose of the table as a whole. So we set the tooltip
+    // on the table cells instead. They are created dynamically, so for now
+    // just cache the tooltip.
+    m_columnToolTips[column] = toolTip;
+  }
+}
+
 void QtExperimentView::initializeTableItems(QTableWidget &table) {
   for (auto row = 0; row < table.rowCount(); ++row)
     initializeTableRow(table, row);
@@ -115,28 +141,34 @@ void QtExperimentView::initializeTableItems(QTableWidget &table) {
 
 void QtExperimentView::initializeTableRow(QTableWidget &table, int row) {
   m_ui.optionsTable->blockSignals(true);
-  for (auto column = 0; column < table.columnCount(); ++column)
-    table.setItem(row, column, new QTableWidgetItem());
+  for (auto column = 0; column < table.columnCount(); ++column) {
+    auto item = new QTableWidgetItem();
+    table.setItem(row, column, item);
+    item->setToolTip(m_columnToolTips[column]);
+  }
   m_ui.optionsTable->blockSignals(false);
 }
 
 void QtExperimentView::initializeTableRow(
     QTableWidget &table, int row, PerThetaDefaults::ValueArray rowValues) {
   m_ui.optionsTable->blockSignals(true);
-  for (auto column = 0; column < table.columnCount(); ++column)
-    table.setItem(
-        row, column,
-        new QTableWidgetItem(QString::fromStdString(rowValues[column])));
+  for (auto column = 0; column < table.columnCount(); ++column) {
+    auto item = new QTableWidgetItem(QString::fromStdString(rowValues[column]));
+    table.setItem(row, column, item);
+    item->setToolTip(m_columnToolTips[column]);
+  }
   m_ui.optionsTable->blockSignals(false);
 }
 
-void QtExperimentView::initOptionsTable() {
+void QtExperimentView::initOptionsTable(
+    const Mantid::API::IAlgorithm_sptr &algorithmForTooltips) {
   auto table = m_ui.optionsTable;
 
   // Set angle and scale columns to a small width so everything fits
   table->resizeColumnsToContents();
   table->setColumnCount(PerThetaDefaults::OPTIONS_TABLE_COLUMN_COUNT);
   table->setRowCount(1);
+  initializeTableColumns(*table, std::move(algorithmForTooltips));
   initializeTableItems(*table);
 
   auto header = table->horizontalHeader();
@@ -156,6 +188,11 @@ void QtExperimentView::initFloodControls() {
 
 void QtExperimentView::connectSettingsChange(QLineEdit &edit) {
   connect(&edit, SIGNAL(textChanged(QString const &)), this,
+          SLOT(onSettingsChanged()));
+}
+
+void QtExperimentView::connectSettingsChange(QSpinBox &edit) {
+  connect(&edit, SIGNAL(valueChanged(QString const &)), this,
           SLOT(onSettingsChanged()));
 }
 
@@ -180,6 +217,10 @@ void QtExperimentView::connectSettingsChange(QTableWidget &edit) {
 
 void QtExperimentView::disconnectSettingsChange(QLineEdit &edit) {
   disconnect(&edit, SIGNAL(textChanged(QString const &)), 0, 0);
+}
+
+void QtExperimentView::disconnectSettingsChange(QSpinBox &edit) {
+  disconnect(&edit, SIGNAL(valueChanged(QString const &)), 0, 0);
 }
 
 void QtExperimentView::disconnectSettingsChange(QDoubleSpinBox &edit) {
@@ -217,6 +258,10 @@ void QtExperimentView::setEnabledStateForAllWidgets(bool enabled) {
   m_ui.floodCorComboBox->setEnabled(enabled);
   m_ui.floodWorkspaceWsSelector->setEnabled(enabled);
   m_ui.debugCheckBox->setEnabled(enabled);
+  m_ui.subtractBackgroundCheckBox->setEnabled(enabled);
+  m_ui.backgroundMethodComboBox->setEnabled(enabled);
+  m_ui.polynomialDegreeSpinBox->setEnabled(enabled);
+  m_ui.costFunctionComboBox->setEnabled(enabled);
 }
 
 void QtExperimentView::disableAll() { setEnabledStateForAllWidgets(false); }
@@ -224,20 +269,19 @@ void QtExperimentView::disableAll() { setEnabledStateForAllWidgets(false); }
 void QtExperimentView::enableAll() { setEnabledStateForAllWidgets(true); }
 
 void QtExperimentView::registerSettingsWidgets(
-    Mantid::API::IAlgorithm_sptr alg) {
-  registerExperimentSettingsWidgets(alg);
+    const Mantid::API::IAlgorithm_sptr &alg) {
+  registerExperimentSettingsWidgets(std::move(alg));
   connectExperimentSettingsWidgets();
 }
 
 void QtExperimentView::registerExperimentSettingsWidgets(
-    Mantid::API::IAlgorithm_sptr alg) {
+    const Mantid::API::IAlgorithm_sptr &alg) {
   registerSettingWidget(*m_ui.analysisModeComboBox, "AnalysisMode", alg);
   registerSettingWidget(*m_ui.startOverlapEdit, "StartOverlap", alg);
   registerSettingWidget(*m_ui.endOverlapEdit, "EndOverlap", alg);
   registerSettingWidget(*m_ui.transStitchParamsEdit, "Params", alg);
   registerSettingWidget(*m_ui.transScaleRHSCheckBox, "ScaleRHSWorkspace", alg);
   registerSettingWidget(*m_ui.polCorrCheckBox, "PolarizationAnalysis", alg);
-  registerSettingWidget(stitchOptionsLineEdit(), "Params", alg);
   registerSettingWidget(*m_ui.reductionTypeComboBox, "ReductionType", alg);
   registerSettingWidget(*m_ui.summationTypeComboBox, "SummationType", alg);
   registerSettingWidget(*m_ui.includePartialBinsCheckBox, "IncludePartialBins",
@@ -245,6 +289,19 @@ void QtExperimentView::registerExperimentSettingsWidgets(
   registerSettingWidget(*m_ui.floodCorComboBox, "FloodCorrection", alg);
   registerSettingWidget(*m_ui.floodWorkspaceWsSelector, "FloodWorkspace", alg);
   registerSettingWidget(*m_ui.debugCheckBox, "Debug", alg);
+  registerSettingWidget(*m_ui.subtractBackgroundCheckBox, "SubtractBackground",
+                        alg);
+  registerSettingWidget(*m_ui.backgroundMethodComboBox,
+                        "BackgroundCalculationMethod", alg);
+  registerSettingWidget(*m_ui.polynomialDegreeSpinBox, "DegreeOfPolynomial",
+                        alg);
+  registerSettingWidget(*m_ui.costFunctionComboBox, "CostFunction", alg);
+
+  registerSettingWidget(stitchOptionsLineEdit(),
+                        "Properties to use for stitching the output workspaces "
+                        "in Q. Only required for groups containing multiple "
+                        "rows. Start typing to see property hints or see "
+                        "Stitch1DMany for details.");
 }
 
 void QtExperimentView::connectExperimentSettingsWidgets() {
@@ -263,6 +320,10 @@ void QtExperimentView::connectExperimentSettingsWidgets() {
   connectSettingsChange(*m_ui.floodCorComboBox);
   connectSettingsChange(*m_ui.floodWorkspaceWsSelector);
   connectSettingsChange(*m_ui.debugCheckBox);
+  connectSettingsChange(*m_ui.subtractBackgroundCheckBox);
+  connectSettingsChange(*m_ui.backgroundMethodComboBox);
+  connectSettingsChange(*m_ui.polynomialDegreeSpinBox);
+  connectSettingsChange(*m_ui.costFunctionComboBox);
 }
 
 void QtExperimentView::disconnectExperimentSettingsWidgets() {
@@ -280,9 +341,16 @@ void QtExperimentView::disconnectExperimentSettingsWidgets() {
   disconnectSettingsChange(*m_ui.floodCorComboBox);
   disconnectSettingsChange(*m_ui.floodWorkspaceWsSelector);
   disconnectSettingsChange(*m_ui.debugCheckBox);
+  disconnectSettingsChange(*m_ui.subtractBackgroundCheckBox);
+  disconnectSettingsChange(*m_ui.backgroundMethodComboBox);
+  disconnectSettingsChange(*m_ui.polynomialDegreeSpinBox);
+  disconnectSettingsChange(*m_ui.costFunctionComboBox);
 }
 
 void QtExperimentView::onRestoreDefaultsRequested() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "ExperimentTab", "RestoreDefaults"}, false);
   m_notifyee->notifyRestoreDefaultsRequested();
 }
 
@@ -308,15 +376,21 @@ void QtExperimentView::disableIncludePartialBins() {
 }
 
 template <typename Widget>
-void QtExperimentView::registerSettingWidget(Widget &widget,
-                                             std::string const &propertyName,
-                                             Mantid::API::IAlgorithm_sptr alg) {
+void QtExperimentView::registerSettingWidget(
+    Widget &widget, std::string const &propertyName,
+    const Mantid::API::IAlgorithm_sptr &alg) {
   setToolTipAsPropertyDocumentation(widget, propertyName, alg);
+}
+
+template <typename Widget>
+void QtExperimentView::registerSettingWidget(Widget &widget,
+                                             std::string const &tooltip) {
+  widget.setToolTip(QString::fromStdString(tooltip));
 }
 
 void QtExperimentView::setToolTipAsPropertyDocumentation(
     QWidget &widget, std::string const &propertyName,
-    Mantid::API::IAlgorithm_sptr alg) {
+    const Mantid::API::IAlgorithm_sptr &alg) {
   widget.setToolTip(QString::fromStdString(
       alg->getPointerToProperty(propertyName)->documentation()));
 }
@@ -416,6 +490,63 @@ void QtExperimentView::setChecked(QCheckBox &checkBox, bool checked) {
   checkBox.setCheckState(checkedAsCheckState);
 }
 
+bool QtExperimentView::getSubtractBackground() const {
+  return m_ui.subtractBackgroundCheckBox->isChecked();
+}
+
+void QtExperimentView::setSubtractBackground(bool enable) {
+  setChecked(*m_ui.subtractBackgroundCheckBox, enable);
+}
+
+std::string QtExperimentView::getBackgroundSubtractionMethod() const {
+  return getText(*m_ui.backgroundMethodComboBox);
+}
+
+void QtExperimentView::setBackgroundSubtractionMethod(
+    std::string const &method) {
+  return setSelected(*m_ui.backgroundMethodComboBox, method);
+}
+
+void QtExperimentView::enableBackgroundSubtractionMethod() {
+  m_ui.backgroundMethodComboBox->setEnabled(true);
+}
+
+void QtExperimentView::disableBackgroundSubtractionMethod() {
+  m_ui.backgroundMethodComboBox->setEnabled(false);
+}
+
+int QtExperimentView::getPolynomialDegree() const {
+  return m_ui.polynomialDegreeSpinBox->value();
+}
+
+void QtExperimentView::setPolynomialDegree(int polynomialDegree) {
+  m_ui.polynomialDegreeSpinBox->setValue(polynomialDegree);
+}
+
+void QtExperimentView::enablePolynomialDegree() {
+  m_ui.polynomialDegreeSpinBox->setEnabled(true);
+}
+
+void QtExperimentView::disablePolynomialDegree() {
+  m_ui.polynomialDegreeSpinBox->setEnabled(false);
+}
+
+std::string QtExperimentView::getCostFunction() const {
+  return getText(*m_ui.costFunctionComboBox);
+}
+
+void QtExperimentView::setCostFunction(std::string const &costFunction) {
+  setSelected(*m_ui.costFunctionComboBox, costFunction);
+}
+
+void QtExperimentView::enableCostFunction() {
+  m_ui.costFunctionComboBox->setEnabled(true);
+}
+
+void QtExperimentView::disableCostFunction() {
+  m_ui.costFunctionComboBox->setEnabled(false);
+}
+
 void QtExperimentView::enablePolarizationCorrections() {
   m_ui.polCorrCheckBox->setEnabled(true);
   m_ui.polCorrLabel->setEnabled(true);
@@ -442,6 +573,9 @@ void QtExperimentView::onPerAngleDefaultsChanged(int row, int column) {
 
 /** Add a new row to the transmission runs table **/
 void QtExperimentView::onNewPerThetaDefaultsRowRequested() {
+  Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
+      Mantid::Kernel::FeatureType::Feature,
+      {"ISIS Reflectometry", "ExperimentTab", "AddPerThetaDefaultsRow"}, false);
   m_notifyee->notifyNewPerAngleDefaultsRequested();
 }
 
@@ -610,7 +744,7 @@ QtExperimentView::getPerAngleOptions() const {
         textFromCell(table.item(row, 2)), textFromCell(table.item(row, 3)),
         textFromCell(table.item(row, 4)), textFromCell(table.item(row, 5)),
         textFromCell(table.item(row, 6)), textFromCell(table.item(row, 7)),
-        textFromCell(table.item(row, 8))});
+        textFromCell(table.item(row, 8)), textFromCell(table.item(row, 9))});
   }
   return rows;
 }

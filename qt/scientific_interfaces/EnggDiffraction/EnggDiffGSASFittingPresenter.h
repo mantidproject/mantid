@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFGSASFITTINGPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFGSASFITTINGPRESENTER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "GSASIIRefineFitPeaksOutputProperties.h"
@@ -17,7 +16,6 @@
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
-#include <boost/shared_ptr.hpp>
 #include <memory>
 
 namespace MantidQt {
@@ -31,8 +29,8 @@ public:
   EnggDiffGSASFittingPresenter(
       std::unique_ptr<IEnggDiffGSASFittingModel> model,
       IEnggDiffGSASFittingView *view,
-      boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
-      boost::shared_ptr<IEnggDiffractionParam> mainSettings);
+      std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> multiRunWidget,
+      std::shared_ptr<IEnggDiffractionParam> mainSettings);
 
   EnggDiffGSASFittingPresenter(EnggDiffGSASFittingPresenter &&other) = default;
 
@@ -71,7 +69,7 @@ private:
   /// presenter's various children
   GSASIIRefineFitPeaksParameters
   collectInputParameters(const RunLabel &runLabel,
-                         const Mantid::API::MatrixWorkspace_sptr ws) const;
+                         const Mantid::API::MatrixWorkspace_sptr &ws) const;
 
   /**
    Perform refinements on a number of runs
@@ -88,9 +86,9 @@ private:
 
   std::unique_ptr<IEnggDiffGSASFittingModel> m_model;
 
-  boost::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_multiRunWidget;
+  std::shared_ptr<IEnggDiffMultiRunFittingWidgetPresenter> m_multiRunWidget;
 
-  boost::shared_ptr<IEnggDiffractionParam> m_mainSettings;
+  std::shared_ptr<IEnggDiffractionParam> m_mainSettings;
 
   IEnggDiffGSASFittingView *m_view;
 
@@ -99,5 +97,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFGSASFITTINGPRESENTER_H_

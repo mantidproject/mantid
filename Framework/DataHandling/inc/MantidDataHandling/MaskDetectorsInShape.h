@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_MASKDETECTORSINSHAPE_H_
-#define MANTID_DATAHANDLING_MASKDETECTORSINSHAPE_H_
+#pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
 
@@ -59,15 +58,14 @@ private:
   void exec() override;
 
   // internal functions
-  std::vector<int> runFindDetectorsInShape(API::MatrixWorkspace_sptr workspace,
-                                           const std::string shapeXML,
-                                           const bool includeMonitors);
+  std::vector<int>
+  runFindDetectorsInShape(const API::MatrixWorkspace_sptr &workspace,
+                          const std::string &shapeXML,
+                          const bool includeMonitors);
   /// Calls MaskDetectors as a Child Algorithm
-  void runMaskDetectors(API::MatrixWorkspace_sptr workspace,
+  void runMaskDetectors(const API::MatrixWorkspace_sptr &workspace,
                         const std::vector<int> &detectorIds);
 };
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_MASKDETECTORSINSHAPE_H_*/

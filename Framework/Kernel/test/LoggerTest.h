@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_LOGGERTEST_H_
-#define MANTID_KERNEL_LOGGERTEST_H_
+#pragma once
 
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Logger.h"
@@ -19,6 +18,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
+#include <iostream>
 
 using namespace Mantid::Kernel;
 using Poco::AutoPtr;
@@ -94,8 +94,35 @@ public:
     ThreadPool tp;
     for (int i = 0; i < 1000; i++)
       tp.schedule(std::make_shared<FunctionTask>(
-          boost::bind(&LoggerTest::doLogInParallel, &*this, i)));
+          std::bind(&LoggerTest::doLogInParallel, &*this, i)));
     tp.joinAll();
+  }
+
+  /** Accumulates in parallel with a lot of OpenMP threads*/
+  void test_accumulate_OpenMP_Parallel() {
+      PRAGMA_OMP(parallel for)
+      for (int i = 0; i < 100; i++) {
+        log.accumulate(std::to_string(i) + "\n");
+      }
+      log.flush();
+  }
+
+  /** This will be called from the ThreadPool */
+  void accumulateParallel(int num) {
+    log.accumulate(std::to_string(num) + "\n");
+  }
+
+  //---------------------------------------------------------------------------
+  /** Log very quickly from a lot of Poco Threads.
+   * The test passes if it does not segfault. */
+  void test_ThreadPool_ParallelAccumulation() {
+    log.purge();
+    ThreadPool tp;
+    for (int i = 0; i < 100; i++)
+      tp.schedule(std::make_shared<FunctionTask>(
+          std::bind(&LoggerTest::accumulateParallel, &*this, i)));
+    tp.joinAll();
+    log.flush();
   }
 };
 
@@ -150,5 +177,3 @@ public:
     }
   }
 };
-
-#endif /* MANTID_KERNEL_LOGGERTEST_H_ */

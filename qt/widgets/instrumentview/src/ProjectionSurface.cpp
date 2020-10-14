@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/Common/InputController.h"
@@ -33,6 +33,7 @@
 #include <cfloat>
 #include <cmath>
 #include <limits>
+#include <utility>
 
 using Mantid::Kernel::V3D;
 
@@ -100,6 +101,10 @@ ProjectionSurface::ProjectionSurface(const InstrumentActor *rootActor)
           SLOT(selectMultipleMasks(QRect)));
   connect(drawController, SIGNAL(finishSelection(QRect)), this,
           SIGNAL(shapeChangeFinished()));
+  connect(drawController, SIGNAL(copySelectedShapes()), &m_maskShapes,
+          SLOT(copySelectedShapes()));
+  connect(drawController, SIGNAL(pasteCopiedShapes()), &m_maskShapes,
+          SLOT(pasteCopiedShapes()));
 
   InputControllerDrawAndErase *freeDrawController =
       new InputControllerDrawAndErase(this);
@@ -380,10 +385,10 @@ QRect ProjectionSurface::selectionRect() const {
 }
 
 RectF ProjectionSurface::selectionRectUV() const {
-  double left = static_cast<double>(m_selectRect.left());
-  double right = static_cast<double>(m_selectRect.right());
-  double top = static_cast<double>(m_selectRect.top());
-  double bottom = static_cast<double>(m_selectRect.bottom());
+  auto left = static_cast<double>(m_selectRect.left());
+  auto right = static_cast<double>(m_selectRect.right());
+  auto top = static_cast<double>(m_selectRect.top());
+  auto bottom = static_cast<double>(m_selectRect.bottom());
 
   if (left > right) {
     std::swap(left, right);
@@ -467,7 +472,8 @@ QString ProjectionSurface::getInfoText() const {
     return "Click on a detector then click on the mini-plot to add a peak.";
   case DrawRegularMode:
     return "Select a tool button to draw a new shape. "
-           "Click on shapes to select. Click and move to edit.";
+           "Click on shapes to select. Click and move to edit. Press Ctrl+C "
+           "/ Ctrl+V to copy/paste";
   case DrawFreeMode:
     return "Draw by holding the left button down. "
            "Erase with the right button.";
@@ -689,8 +695,8 @@ void ProjectionSurface::saveShapesToTableWorkspace() {
  * @param ws :: table workspace to load shapes from
  */
 void ProjectionSurface::loadShapesFromTableWorkspace(
-    Mantid::API::ITableWorkspace_const_sptr ws) {
-  m_maskShapes.loadFromTableWorkspace(ws);
+    const Mantid::API::ITableWorkspace_const_sptr &ws) {
+  m_maskShapes.loadFromTableWorkspace(std::move(ws));
 }
 
 /**
@@ -708,12 +714,12 @@ QList<PeakMarker2D *> ProjectionSurface::getMarkersWithID(int detID) const {
 /**
  * Get peaks workspace for manually editing.
  */
-boost::shared_ptr<Mantid::API::IPeaksWorkspace>
+std::shared_ptr<Mantid::API::IPeaksWorkspace>
 ProjectionSurface::getEditPeaksWorkspace() const {
   if (!m_peakShapes.isEmpty()) {
     return m_peakShapes.last()->getPeaksWorkspace();
   }
-  return boost::shared_ptr<Mantid::API::IPeaksWorkspace>();
+  return std::shared_ptr<Mantid::API::IPeaksWorkspace>();
 }
 
 /**
@@ -721,7 +727,7 @@ ProjectionSurface::getEditPeaksWorkspace() const {
  * @param ws :: Shared pointer to the deleted peaks workspace.
  */
 void ProjectionSurface::deletePeaksWorkspace(
-    boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws) {
+    const std::shared_ptr<Mantid::API::IPeaksWorkspace> &ws) {
   const int npeaks = m_peakShapes.size();
   for (int i = 0; i < npeaks; ++i) {
     if (m_peakShapes[i]->getPeaksWorkspace() == ws) {
@@ -777,7 +783,7 @@ void ProjectionSurface::clearComparisonPeaks() {
  */
 void ProjectionSurface::setPeakLabelPrecision(int n) {
   if (n < 1) {
-    QMessageBox::critical(nullptr, "MantidPlot - Error",
+    QMessageBox::critical(nullptr, "Mantid - Error",
                           "Precision must be a positive number");
     return;
   }
@@ -848,7 +854,11 @@ void ProjectionSurface::selectMultipleMasks(const QRect &rect) {
  */
 void ProjectionSurface::pickComponentAt(int x, int y) {
   size_t pickID = getPickID(x, y);
-  emit singleComponentPicked(pickID);
+  if (m_currentTab == "Draw") {
+    emit singleComponentPickedForMasking(pickID);
+  } else {
+    emit singleComponentPicked(pickID);
+  }
 }
 
 void ProjectionSurface::touchComponentAt(int x, int y) {
@@ -908,7 +918,7 @@ void ProjectionSurface::comparePeaks(const QRect &rect) {
       // only collect peaks in the same detector & with the same origin
       if (marker->origin() == origin) {
         auto peak = po->getPeaksWorkspace()->getPeakPtr(marker->getRow());
-        peaks.push_back(peak);
+        peaks.emplace_back(peak);
       }
     }
   }
@@ -968,7 +978,7 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
         });
 
     if (result == m_selectedAlignmentPlane.cend()) {
-      m_selectedAlignmentPlane.push_back(
+      m_selectedAlignmentPlane.emplace_back(
           std::make_pair(peak->getQSampleFrame(), origin));
     }
   } else {

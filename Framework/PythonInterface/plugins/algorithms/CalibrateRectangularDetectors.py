@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import *
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -92,8 +90,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                              "CrossCorrelation if True; minimize using many peaks if False.")
         validator = FloatArrayBoundedValidator(lower=0.)
         self.declareProperty(FloatArrayProperty("PeakPositions", []),
-                             "Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  "+
-                             "Unlimited for many peaks option.")
+                             "Comma delimited d-space positions of reference peaks.  Use 1-3 for Cross Correlation.  "
+                             + "Unlimited for many peaks option.")
         self.declareProperty("PeakWindowMax", 0.,
                              "Maximum window around a peak to search for it. Optional.")
         self.declareProperty(ITableWorkspaceProperty("FitwindowTableWorkspace", "", Direction.Input, PropertyMode.Optional),
@@ -112,8 +110,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareProperty("BackgroundType", "Flat", StringListValidator(['Flat', 'Linear', 'Quadratic']),
                              "Used only with CrossCorrelation=False")
         self.declareProperty(IntArrayProperty("DetectorsPeaks", []),
-                             "Comma delimited numbers of detector banks for each peak if using 2-3 peaks for Cross Correlation. "+
-                             "Default is all.")
+                             "Comma delimited numbers of detector banks for each peak if using 2-3 peaks for Cross Correlation. "
+                             + "Default is all.")
         self.declareProperty("PeakHalfWidth", 0.05,
                              "Half width of d-space around peaks for Cross Correlation. Default is 0.05")
         self.declareProperty("CrossCorrelationPoints", 100,
@@ -123,8 +121,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareProperty("DiffractionFocusWorkspace", False, "Diffraction focus by detectors.  Default is False")
         grouping = ["All", "Group", "Column", "bank"]
         self.declareProperty("GroupDetectorsBy", "All", StringListValidator(grouping),
-                             "Detector groups to use for future focussing: All detectors as one group, "+
-                             "Groups (East,West for SNAP), Columns for SNAP, detector banks")
+                             "Detector groups to use for future focussing: All detectors as one group, "
+                             + "Groups (East,West for SNAP), Columns for SNAP, detector banks")
         self.declareProperty("FilterBadPulses", True, "Filter out events measured while proton charge is more than 5% below average")
         self.declareProperty("FilterByTimeMin", 0.,
                              "Relative time to start filtering by in seconds. Applies only to sample.")
@@ -342,13 +340,13 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if resws is not None:
             resrange = self.getProperty("AllowedResRange").value
             if len(resrange) < 2:
-                raise NotImplementedError("With input of 'DetectorResolutionWorkspace', "+
-                                          "number of allowed resolution range must be equal to 2.")
+                raise NotImplementedError("With input of 'DetectorResolutionWorkspace', "
+                                          + "number of allowed resolution range must be equal to 2.")
             reslowf = resrange[0]
             resupf = resrange[1]
             if reslowf >= resupf:
-                raise NotImplementedError("Allowed resolution range factor, lower boundary "+
-                                          "(%f) must be smaller than upper boundary (%f)."
+                raise NotImplementedError("Allowed resolution range factor, lower boundary "
+                                          + "(%f) must be smaller than upper boundary (%f)."
                                           % (reslowf, resupf))
         else:
             reslowf = 0.0

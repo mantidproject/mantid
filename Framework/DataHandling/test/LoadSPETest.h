@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADSPETEST_H_
-#define LOADSPETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
@@ -53,7 +52,7 @@ public:
 
     MatrixWorkspace_const_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        ws = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(outWS)));
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 32);
@@ -90,5 +89,3 @@ public:
 private:
   Mantid::DataHandling::LoadSPE loader;
 };
-
-#endif /*LoadSPETEST_H_*/

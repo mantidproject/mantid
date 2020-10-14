@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "DensityOfStates.h"
 
@@ -130,7 +130,7 @@ void DensityOfStates::run() {
     std::vector<std::string> selectedIons;
     auto items = m_uiForm.lwIons->selectedItems();
     for (auto &item : items)
-      selectedIons.push_back(item->text().toStdString());
+      selectedIons.emplace_back(item->text().toStdString());
     dosAlgo->setProperty("Ions", selectedIons);
   } else if (specType == "IR") {
     dosAlgo->setProperty("SpectrumType", "IR_Active");

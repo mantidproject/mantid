@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_DETECTORDIAGNOSTIC_H_
-#define MANTID_ALGORITHMS_DETECTORDIAGNOSTIC_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/MaskWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 
@@ -27,7 +27,7 @@ namespace Algorithms {
   @author Martyn Gigg, Tessella plc
   @date 2010-12-09
 */
-class DLLExport DetectorDiagnostic : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL DetectorDiagnostic : public API::Algorithm {
 public:
   /// Default constructor
   DetectorDiagnostic();
@@ -54,21 +54,21 @@ private:
   void init() override;
   void exec() override;
   /// Apply a given mask
-  void applyMask(API::MatrixWorkspace_sptr inputWS,
-                 API::MatrixWorkspace_sptr maskWS);
+  void applyMask(const API::MatrixWorkspace_sptr &inputWS,
+                 const API::MatrixWorkspace_sptr &maskWS);
   /// Perform checks on detector vanadium
-  API::MatrixWorkspace_sptr doDetVanTest(API::MatrixWorkspace_sptr inputWS,
-                                         int &nFails);
+  API::MatrixWorkspace_sptr
+  doDetVanTest(const API::MatrixWorkspace_sptr &inputWS, int &nFails);
 
 protected:
   /// Get the total counts for each spectra
   API::MatrixWorkspace_sptr
-  integrateSpectra(API::MatrixWorkspace_sptr inputWS, const int indexMin,
+  integrateSpectra(const API::MatrixWorkspace_sptr &inputWS, const int indexMin,
                    const int indexMax, const double lower, const double upper,
                    const bool outputWorkspace2D = false);
 
   DataObjects::MaskWorkspace_sptr
-  generateEmptyMask(API::MatrixWorkspace_const_sptr inputWS);
+  generateEmptyMask(const API::MatrixWorkspace_const_sptr &inputWS);
 
   /// Calculate the median of the given workspace. This assumes that the input
   /// workspace contains
@@ -80,7 +80,8 @@ protected:
   API::MatrixWorkspace_sptr convertToRate(API::MatrixWorkspace_sptr workspace);
   /// method to check which spectra should be grouped when calculating the
   /// median
-  std::vector<std::vector<size_t>> makeMap(API::MatrixWorkspace_sptr countsWS);
+  std::vector<std::vector<size_t>>
+  makeMap(const API::MatrixWorkspace_sptr &countsWS);
   /// method to create the map with all spectra
   std::vector<std::vector<size_t>>
   makeInstrumentMap(const API::MatrixWorkspace &countsWS);
@@ -137,5 +138,3 @@ protected:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_DETECTORDIAGNOSTIC_H_*/

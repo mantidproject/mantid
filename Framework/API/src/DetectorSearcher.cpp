@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/DetectorSearcher.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
@@ -30,8 +30,9 @@ double getQSign() {
  * @param instrument :: the instrument to find detectors in
  * @param detInfo :: the Geometry::DetectorInfo object for this instrument
  */
-DetectorSearcher::DetectorSearcher(Geometry::Instrument_const_sptr instrument,
-                                   const Geometry::DetectorInfo &detInfo)
+DetectorSearcher::DetectorSearcher(
+    const Geometry::Instrument_const_sptr &instrument,
+    const Geometry::DetectorInfo &detInfo)
     : m_usingFullRayTrace(instrument->containsRectDetectors() ==
                           Geometry::Instrument::ContainsState::Full),
       m_crystallography_convention(getQSign()), m_detInfo(detInfo),
@@ -86,8 +87,8 @@ void DetectorSearcher::createDetectorCache() {
     if (point.hasNaN() || up.coLinear(beam, pos))
       continue;
 
-    points.push_back(point);
-    m_indexMap.push_back(pointNo);
+    points.emplace_back(point);
+    m_indexMap.emplace_back(pointNo);
   }
 
   // create KDtree of cached detector Q vectors

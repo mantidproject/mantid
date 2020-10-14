@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>622</width>
+    <height>747</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QGroupBox {
+border: 1px solid grey;border-radius: 10px;margin-top: 1ex; margin-right: 0ex
+}
+QGroupBox:title {
+                           subcontrol-origin: margin;
+                           padding: 0 3px;
+                           subcontrol-position: top center;
+                           padding-top: 0px;
+                          padding-bottom: 0px;
+                           padding-right: 10px;
+                            color: rgb(56, 56, 56)
+}</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QScrollArea" name="scrollArea">
+       <property name="widgetResizable">
+        <bool>true</bool>
+       </property>
+       <widget class="QWidget" name="scrollAreaWidgetContents">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>600</width>
+          <height>725</height>
+         </rect>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <widget class="FittingDataView" name="widget_data" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>0</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="FittingPlotView" name="widget_plot" native="true">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>400</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FittingDataView</class>
+   <extends>QWidget</extends>
+   <header>Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_view</header>
+  </customwidget>
+  <customwidget>
+   <class>FittingPlotView</class>
+   <extends>QWidget</extends>
+   <header>Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_view</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

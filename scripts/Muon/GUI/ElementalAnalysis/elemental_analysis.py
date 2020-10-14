@@ -1,16 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import, print_function
-
 from qtpy import QtWidgets
 from copy import deepcopy
 import matplotlib as mpl
-from six import iteritems
-import sys
 
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_presenter import PeriodicTablePresenter
 from Muon.GUI.ElementalAnalysis.PeriodicTable.periodic_table_view import PeriodicTableView
@@ -20,6 +16,8 @@ from MultiPlotting.multi_plotting_widget import MultiPlotWindow
 from MultiPlotting.label import Label
 
 from Muon.GUI.ElementalAnalysis.LoadWidget.load_model import LoadModel, CoLoadModel
+from Muon.GUI.ElementalAnalysis.LoadWidget.load_utils import spectrum_index
+
 from Muon.GUI.Common.load_widget.load_view import LoadView
 from Muon.GUI.Common.load_widget.load_presenter import LoadPresenter
 
@@ -44,9 +42,6 @@ offset = 0.9
 def is_string(value):
     if isinstance(value, str):
         return True
-    elif sys.version_info[:2] < (3, 0):
-        if isinstance(value, unicode):
-            return True
 
     return False
 
@@ -108,6 +103,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.peaks.gamma.on_checkbox_unchecked(self.gammas_changed)
         self.peaks.electron.on_checkbox_checked(self.electrons_changed)
         self.peaks.electron.on_checkbox_unchecked(self.electrons_changed)
+        self.peaks.set_deselect_elements_slot(self.deselect_elements)
 
         # Line type boxes
         self.lines = LineSelectorPresenter(LineSelectorView())
@@ -177,7 +173,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
             self.plot_window.closeEvent(event)
         super(ElementalAnalysisGui, self).closeEvent(event)
 
-# general functions
+    # general functions
 
     def _gen_label(self, name, x_value_in, element=None):
         if element is None:
@@ -236,7 +232,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         # Select a different color, if all used then use the first
         color = self.get_color(element)
 
-        for name, x_value in iteritems(data):
+        for name, x_value in data.items():
             try:
                 x_value = float(x_value)
             except ValueError:
@@ -286,6 +282,16 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         last_run = self.load_widget.last_loaded_run()
         if last_run is None:
             return
+        # check all detectors are loaded
+        num_detectors = self.load_widget.get_run_num_loaded_detectors(last_run)
+        for j, detector in enumerate(self.detectors.getNames()):
+            if j < num_detectors:
+                self.detectors.enableDetector(detector)
+            else:
+                # disable checkbox and uncheck box
+                self.detectors.disableDetector(detector)
+                self.detectors.setStateQuietly(detector, False)
+
         to_plot = deepcopy([det.isChecked() for det in self.detectors.detectors])
         if self.plot_window is None and any(to_plot) is False:
             return
@@ -303,14 +309,16 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     # detectors
     def add_detector_to_plot(self, detector, name):
         self.plotting.add_subplot(detector)
-        for ws in mantid.mtd[name]:
-            ws.setYUnit('Counts')
-            if self.lines.total.isChecked() and 'Total' in ws.getName():
-                self.plotting.plot(detector, ws.getName(), color=self.BLUE)
-            if self.lines.prompt.isChecked() and 'Prompt' in ws.getName():
-                self.plotting.plot(detector, ws.getName(), color=self.ORANGE)
-            if self.lines.delayed.isChecked() and 'Delayed' in ws.getName():
-                self.plotting.plot(detector, ws.getName(), color=self.GREEN)
+        ws = mantid.mtd[name]
+        ws.setYUnit('Counts')
+        # find correct detector number from the workspace group run
+        if self.lines.total.isChecked():
+            self.plotting.plot(detector, ws.name(), spec_num=spectrum_index["Total"], color=self.BLUE)
+        if self.lines.prompt.isChecked():
+            self.plotting.plot(detector, ws.name(), spec_num=spectrum_index["Prompt"], color=self.ORANGE)
+        if self.lines.delayed.isChecked():
+            self.plotting.plot(detector, ws.name(), spec_num=spectrum_index["Delayed"], color=self.GREEN)
+
         # add current selection of lines
         for element in self.ptable.selection:
             self.add_peak_data(element.symbol, detector)
@@ -328,7 +336,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         if data is None:
             data = self.element_widgets[element].get_checked()
         color = self.get_color(element)
-        for name, x_value in iteritems(data):
+        for name, x_value in data.items():
             if isinstance(x_value, float):
                 full_name = gen_name(element, name)
                 label = self._gen_label(full_name, x_value, element)
@@ -406,26 +414,35 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self._update_peak_data(element)
 
     def electrons_changed(self, electron_peaks):
-        for element, selector in iteritems(self.element_widgets):
+        for element, selector in self.element_widgets.items():
             self.checked_data(element, selector.electron_checkboxes, electron_peaks.isChecked())
 
     def gammas_changed(self, gamma_peaks):
-        for element, selector in iteritems(self.element_widgets):
+        for element, selector in self.element_widgets.items():
             self.checked_data(element, selector.gamma_checkboxes, gamma_peaks.isChecked())
 
     def major_peaks_changed(self, major_peaks):
-        for element, selector in iteritems(self.element_widgets):
+        for element, selector in self.element_widgets.items():
             self.checked_data(element, selector.primary_checkboxes, major_peaks.isChecked())
 
     def minor_peaks_changed(self, minor_peaks):
-        for element, selector in iteritems(self.element_widgets):
+        for element, selector in self.element_widgets.items():
             self.checked_data(element, selector.secondary_checkboxes, minor_peaks.isChecked())
+
+    def deselect_elements(self):
+        self.peaks.disable_deselect_elements_btn()
+        for element in self.element_widgets.keys():
+            self.ptable.deselect_element(element)
+            self._remove_element_lines(element)
+        self.peaks.enable_deselect_elements_btn()
 
     def add_line_by_type(self, run, _type):
         # Ensure all detectors are enabled
-        for detector in self.detectors.detectors:
-            if not detector.isEnabled():
-                detector.setEnabled(True)
+        last_run = self.load_widget.last_loaded_run()
+        for i, detector in enumerate(self.detectors.detectors):
+            if i < self.load_widget.get_run_num_loaded_detectors(last_run):
+                if not detector.isEnabled():
+                    detector.setEnabled(True)
 
         if self.plot_window is None:
             return
@@ -438,9 +455,9 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         else:
             color = self.GREEN
         for subplot in self.plotting.get_subplots():
-            for ws in mantid.mtd['{}; Detector {}'.format(run, subplot[-1])]:
-                if _type in ws.getName():
-                    self.plotting.plot(subplot, ws.getName(), color=color)
+            name = '{}; Detector {}'.format(run, subplot[-1])
+            ws = mantid.mtd[name]
+            self.plotting.plot(subplot, ws.name(), spec_num=spectrum_index[_type], color=color)
 
     def remove_line_type(self, run, _type):
         if self.plot_window is None:
@@ -449,21 +466,23 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         # Remove the correct line type on all open subplots
         for subplot in self.plotting.get_subplots():
-            for ws in mantid.mtd['{}; Detector {}'.format(run, subplot[-1])]:
-                if _type in ws.getName():
-                    self.plotting.remove_line(subplot, ws.getName())
+            name = '{}; Detector {}'.format(run, subplot[-1])
+            ws = mantid.mtd[name]
+            self.plotting.remove_line(subplot, ws.name(), spec=spectrum_index[_type])
 
         # If no line type is selected do not allow plotting
         self.uncheck_detectors_if_no_line_plotted()
 
     def uncheck_detectors_if_no_line_plotted(self):
+        last_run = self.load_widget.last_loaded_run()
         if not any([
-                self.lines.total.isChecked(),
-                self.lines.prompt.isChecked(),
-                self.lines.delayed.isChecked()
+            self.lines.total.isChecked(),
+            self.lines.prompt.isChecked(),
+            self.lines.delayed.isChecked()
         ]):
-            for detector in self.detectors.detectors:
-                detector.setEnabled(False)
+            for i, detector in enumerate(self.detectors.detectors):
+                if i < self.load_widget.get_run_num_loaded_detectors(last_run):
+                    detector.setEnabled(False)
 
     # When removing a line with the remove window uncheck the line here
     def uncheck_on_removed(self, removed_lines):

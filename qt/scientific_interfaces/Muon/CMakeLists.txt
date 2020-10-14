@@ -98,7 +98,6 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesMuon
                    DEFS IN_MANTIDQT_MUONINTERFACE
                    PRECOMPILED PrecompiledHeader.h
                    LINK_LIBS
-                     ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      ${POCO_LIBRARIES}
                      ${Boost_LIBRARIES}
@@ -113,6 +112,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesMuon
                      ${PLUGINS_DIR}
                    OSX_INSTALL_RPATH
                      @loader_path/../../Contents/MacOS
+                     @loader_path/../../Contents/Frameworks
                      @loader_path/../../plugins/qt4
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../plugins/qt4/")
@@ -185,10 +185,8 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesMuon
                    DEFS IN_MANTIDQT_MUONINTERFACE
                    PRECOMPILED PrecompiledHeader.h
                    LINK_LIBS
-                     ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      ${POCO_LIBRARIES}
-                     ${PYTHON_LIBRARIES}
                      ${Boost_LIBRARIES}
                      ${JSONCPP_LIBRARIES}
                    MTD_QT_LINK_LIBS

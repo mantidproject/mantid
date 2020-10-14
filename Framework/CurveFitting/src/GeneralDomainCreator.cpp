@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/GeneralDomainCreator.h"
 #include "MantidAPI/FunctionDomainGeneral.h"
@@ -35,21 +35,21 @@ GeneralDomainCreator::GeneralDomainCreator(
 
   auto nDomainColumns = fun.getNumberDomainColumns();
   if (nDomainColumns > 0) {
-    m_domainColumnNames.push_back("ArgumentColumn");
+    m_domainColumnNames.emplace_back("ArgumentColumn");
     for (size_t i = 1; i < nDomainColumns; ++i) {
-      m_domainColumnNames.push_back(m_domainColumnNames.front() + "_" +
-                                    std::to_string(i));
+      m_domainColumnNames.emplace_back(m_domainColumnNames.front() + "_" +
+                                       std::to_string(i));
     }
   }
 
   auto nDataColumns = fun.getNumberValuesPerArgument();
   if (nDataColumns > 0) {
-    m_dataColumnNames.push_back("DataColumn");
-    m_weightsColumnNames.push_back("WeightsColumn");
+    m_dataColumnNames.emplace_back("DataColumn");
+    m_weightsColumnNames.emplace_back("WeightsColumn");
     for (size_t i = 1; i < nDataColumns; ++i) {
       auto si = "_" + std::to_string(i);
-      m_dataColumnNames.push_back(m_dataColumnNames.front() + si);
-      m_weightsColumnNames.push_back(m_weightsColumnNames.front() + si);
+      m_dataColumnNames.emplace_back(m_dataColumnNames.front() + si);
+      m_weightsColumnNames.emplace_back(m_weightsColumnNames.front() + si);
     }
   }
 }
@@ -79,14 +79,14 @@ void GeneralDomainCreator::declareDatasetProperties(const std::string &suffix,
 }
 
 /// Retrive the input workspace from the property manager.
-boost::shared_ptr<API::ITableWorkspace>
+std::shared_ptr<API::ITableWorkspace>
 GeneralDomainCreator::getInputWorkspace() const {
   auto workspacePropertyName = m_workspacePropertyNames.front();
   if (!m_manager->existsProperty(workspacePropertyName)) {
     return API::ITableWorkspace_sptr();
   }
   API::Workspace_sptr ws = m_manager->getProperty(workspacePropertyName);
-  auto tableWorkspace = boost::dynamic_pointer_cast<API::ITableWorkspace>(ws);
+  auto tableWorkspace = std::dynamic_pointer_cast<API::ITableWorkspace>(ws);
   if (!tableWorkspace) {
     throw std::invalid_argument("InputWorkspace must be a TableWorkspace.");
   }
@@ -100,9 +100,9 @@ GeneralDomainCreator::getInputWorkspace() const {
  * @param values :: Pointer to outgoing FunctionValues object.
  * @param i0 :: Size offset for values object if it already contains data.
  */
-void GeneralDomainCreator::createDomain(
-    boost::shared_ptr<FunctionDomain> &domain,
-    boost::shared_ptr<FunctionValues> &values, size_t i0) {
+void GeneralDomainCreator::createDomain(std::shared_ptr<FunctionDomain> &domain,
+                                        std::shared_ptr<FunctionValues> &values,
+                                        size_t i0) {
 
   // Create the values object
   if (!values) {
@@ -182,8 +182,8 @@ void GeneralDomainCreator::createDomain(
 
 Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
     const std::string &baseName, IFunction_sptr function,
-    boost::shared_ptr<FunctionDomain> domain,
-    boost::shared_ptr<FunctionValues> values,
+    std::shared_ptr<FunctionDomain> domain,
+    std::shared_ptr<FunctionValues> values,
     const std::string &outputWorkspacePropertyName) {
   if (function->getValuesSize(*domain) != values->size()) {
     throw std::runtime_error("Failed to create output workspace: domain and "
@@ -204,11 +204,11 @@ Workspace_sptr GeneralDomainCreator::createOutputWorkspace(
     std::vector<std::string> columnsToClone;
     for (auto &propName : m_domainColumnNames) {
       auto columnName = m_manager->getPropertyValue(propName);
-      columnsToClone.push_back(columnName);
+      columnsToClone.emplace_back(columnName);
     }
     for (auto &propName : m_dataColumnNames) {
       auto columnName = m_manager->getPropertyValue(propName);
-      columnsToClone.push_back(columnName);
+      columnsToClone.emplace_back(columnName);
     }
     outputWorkspace = inputWorkspace->cloneColumns(columnsToClone);
     if (rowCount != outputWorkspace->rowCount()) {

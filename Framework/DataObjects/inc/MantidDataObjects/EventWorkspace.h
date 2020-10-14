@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_EVENTWORKSPACE_H_
-#define MANTID_DATAOBJECTS_EVENTWORKSPACE_H_ 1
+#pragma once
 
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ISpectrum.h"
@@ -177,11 +176,9 @@ private:
 };
 
 /// shared pointer to the EventWorkspace class
-using EventWorkspace_sptr = boost::shared_ptr<EventWorkspace>;
+using EventWorkspace_sptr = std::shared_ptr<EventWorkspace>;
 /// shared pointer to a const Workspace2D
-using EventWorkspace_const_sptr = boost::shared_ptr<const EventWorkspace>;
+using EventWorkspace_const_sptr = std::shared_ptr<const EventWorkspace>;
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_EVENTWORKSPACE_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CreateUserDefinedBackground.h"
 #include "MantidAPI/Axis.h"
@@ -107,7 +107,7 @@ void CreateUserDefinedBackground::cleanUpTable(
     if (!isZero(x)) {
       break;
     } else if (isZero(y)) {
-      blankRows.push_back(i);
+      blankRows.emplace_back(i);
     }
   }
   for (const auto &row : blankRows) {
@@ -168,7 +168,7 @@ CreateUserDefinedBackground::createBackgroundWorkspace(
   const auto &lerp = getInterpolator(background, data);
   for (const auto &x : xPoints) {
     const double y = lerp.value(x);
-    yBackground.push_back(y);
+    yBackground.emplace_back(y);
   }
 
   auto histogram = outputWS->histogram(0);

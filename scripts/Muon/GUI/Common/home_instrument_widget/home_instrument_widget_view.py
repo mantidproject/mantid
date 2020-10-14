@@ -1,12 +1,10 @@
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-# -*- coding: utf8 -*-
 
-from __future__ import (absolute_import, division, print_function)
 
 from qtpy import QtWidgets, QtCore, QtGui
 from qtpy.QtCore import Signal
@@ -54,12 +52,14 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.time_zero_edit_enabled(True)
         self.first_good_data_edit_enabled(True)
         self.last_good_data_edit_enabled(True)
+        self.double_pulse_edit_enabled(False)
 
         self._on_time_zero_changed = lambda: 0
         self._on_first_good_data_changed = lambda: 0
         self._on_dead_time_from_file_selected = lambda: 0
         self._on_dead_time_file_option_selected = lambda: 0
         self._on_dead_time_unselected = lambda: 0
+        self._on_double_pulse_time_changed = lambda: 0
 
         self.time_zero_edit.editingFinished.connect(
             lambda: self._on_time_zero_changed() if not self.is_time_zero_checked() else None)
@@ -69,6 +69,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
             lambda: self._on_last_good_data_changed() if not self.is_last_good_data_checked() else None)
         self.dead_time_file_selector.currentIndexChanged.connect(
             self.on_dead_time_file_combo_changed)
+        self.double_pulse_data_edit.editingFinished.connect(lambda: self._on_double_pulse_time_changed())
 
     def setup_interface(self):
         self.setObjectName("InstrumentWidget")
@@ -79,6 +80,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.setup_last_good_data_row()
         self.setup_dead_time_row()
         self.setup_rebin_row()
+        self.setup_double_pulse_row()
 
         self.group = QtWidgets.QGroupBox("Instrument")
         self.group.setFlat(False)
@@ -377,6 +379,54 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         return float(self.last_good_data_edit.text())
 
     # ------------------------------------------------------------------------------------------------------------------
+    # Double Pulse Options
+    # -------------------------------------------------------------------------------------------------------------------
+
+    def setup_double_pulse_row(self):
+        self.double_pulse_data_edit = QtWidgets.QLineEdit(self)
+
+        double_pulse_data_validator = QtGui.QRegExpValidator(
+            QtCore.QRegExp(valid_float_regex),
+            self.double_pulse_data_edit)
+        self.double_pulse_data_edit.setValidator(double_pulse_data_validator)
+        self.double_pulse_data_edit.setText("0.33")
+
+        self.double_pulse_data_unit_label = QtWidgets.QLabel(self)
+        self.double_pulse_data_unit_label.setText(u" \u03BCs")
+
+        self.double_pulse_data_combobox = QtWidgets.QComboBox(self)
+        self.double_pulse_data_combobox.addItem('Single Pulse')
+        self.double_pulse_data_combobox.addItem('Double Pulse')
+
+        self.double_pulse_data_layout = QtWidgets.QHBoxLayout()
+        self.double_pulse_data_layout.addSpacing(10)
+        self.double_pulse_data_layout.addWidget(self.double_pulse_data_unit_label)
+        self.double_pulse_data_layout.addStretch(0)
+
+        self.layout.addWidget(self.double_pulse_data_combobox, 4, 0)
+        self.layout.addWidget(self.double_pulse_data_edit, 4, 1)
+        self.layout.addItem(self.double_pulse_data_layout, 4, 2)
+
+    def on_double_pulse_time_changed(self, slot):
+        self._on_double_pulse_time_changed = slot
+
+    def set_double_pulse_data(self, double_pulse_time):
+        self.double_pulse_data_edit.setText(
+            "{0:.3f}".format(round(float(double_pulse_time), 3)))
+
+    def on_double_pulse_checkState_changed(self, slot):
+        self.double_pulse_data_combobox.currentIndexChanged.connect(slot)
+
+    def double_pulse_state(self):
+        return self.double_pulse_data_combobox.currentText()
+
+    def double_pulse_edit_enabled(self, enabled):
+        self.double_pulse_data_edit.setEnabled(enabled)
+
+    def get_double_pulse_time(self):
+        return float(self.double_pulse_data_edit.text())
+
+    # ------------------------------------------------------------------------------------------------------------------
     # Dead time correction
     # ------------------------------------------------------------------------------------------------------------------
 
@@ -419,13 +469,13 @@ class InstrumentWidgetView(QtWidgets.QWidget):
         self.dead_time_other_file_label = QtWidgets.QLabel(self)
         self.dead_time_other_file_label.setText("From other file : ")
 
-        self.layout.addWidget(self.dead_time_label, 4, 0)
-        self.layout.addWidget(self.dead_time_selector, 4, 1)
-        self.layout.addItem(self.dead_time_layout, 4, 2)
-        self.layout.addWidget(self.dead_time_label_2, 5, 0)
-        self.layout.addWidget(self.dead_time_file_selector, 5, 1)
-        self.layout.addWidget(self.dead_time_other_file_label, 6, 0)
-        self.layout.addWidget(self.dead_time_browse_button, 6, 1)
+        self.layout.addWidget(self.dead_time_label, 5, 0)
+        self.layout.addWidget(self.dead_time_selector, 5, 1)
+        self.layout.addItem(self.dead_time_layout, 5, 2)
+        self.layout.addWidget(self.dead_time_label_2, 6, 0)
+        self.layout.addWidget(self.dead_time_file_selector, 6, 1)
+        self.layout.addWidget(self.dead_time_other_file_label, 7, 0)
+        self.layout.addWidget(self.dead_time_browse_button, 7, 1)
 
     def on_dead_time_file_option_changed(self, slot):
         self._on_dead_time_file_option_selected = slot
@@ -554,7 +604,7 @@ class InstrumentWidgetView(QtWidgets.QWidget):
                                             '2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n'
                                             '0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then steps of 200 to 20,000')
         variable_validator = QtGui.QRegExpValidator(
-            QtCore.QRegExp('^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
+            QtCore.QRegExp(r'^(\s*-?\d+(\.\d+)?)(\s*,\s*-?\d+(\.\d+)?)*$'))
         self.rebin_variable_edit.setValidator(variable_validator)
 
         self.rebin_layout = QtWidgets.QHBoxLayout()

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FindUBUsingLatticeParameters.h"
 #include "MantidAPI/Sample.h"
@@ -28,13 +28,13 @@ void FindUBUsingLatticeParameters::init() {
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  auto moreThan2Int = boost::make_shared<BoundedValidator<int>>();
+  auto moreThan2Int = std::make_shared<BoundedValidator<int>>();
   moreThan2Int->setLower(2);
 
-  auto reasonable_angle = boost::make_shared<BoundedValidator<double>>();
+  auto reasonable_angle = std::make_shared<BoundedValidator<double>>();
   reasonable_angle->setLower(5.0);
   reasonable_angle->setUpper(175.0);
 
@@ -78,14 +78,14 @@ void FindUBUsingLatticeParameters::exec() {
   if (!ws)
     throw std::runtime_error("Could not read the peaks workspace");
 
-  std::vector<Peak> &peaks = ws->getPeaks();
-  size_t n_peaks = ws->getNumberPeaks();
+  const std::vector<Peak> &peaks = ws->getPeaks();
+  const int n_peaks = ws->getNumberPeaks();
 
   std::vector<V3D> q_vectors;
   q_vectors.reserve(n_peaks);
 
-  for (size_t i = 0; i < n_peaks; i++)
-    q_vectors.push_back(peaks[i].getQSampleFrame());
+  for (int i = 0; i < n_peaks; i++)
+    q_vectors.emplace_back(peaks[i].getQSampleFrame());
 
   Matrix<double> UB(3, 3, false);
   OrientedLattice lattice(a, b, c, alpha, beta, gamma);
@@ -104,11 +104,11 @@ void FindUBUsingLatticeParameters::exec() {
   } else // tell user how many would be indexed
   {      // and save the UB in the sample
     char logInfo[200];
-    int num_indexed = IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
+    const int num_indexed =
+        IndexingUtils::NumberIndexed(UB, q_vectors, tolerance);
     sprintf(logInfo,
-            std::string(
-                "New UB will index %1d Peaks out of %1d with tolerance %5.3f")
-                .c_str(),
+            "New UB will index %1d Peaks out of %1d with tolerance "
+            "%5.3f",
             num_indexed, n_peaks, tolerance);
     g_log.notice(std::string(logInfo));
 
@@ -122,13 +122,13 @@ void FindUBUsingLatticeParameters::exec() {
     g_log.notice() << lattice << "\n";
 
     sprintf(logInfo,
-            std::string("Lattice Parameters (Refined - Input): %11.6f "
-                        "%11.6f %11.6f %11.6f %11.6f %11.6f")
-                .c_str(),
+            "Lattice Parameters (Refined - Input): %11.6f "
+            "%11.6f %11.6f %11.6f %11.6f %11.6f",
             calc_a - a, calc_b - b, calc_c - c, calc_alpha - alpha,
             calc_beta - beta, calc_gamma - gamma);
     g_log.notice(std::string(logInfo));
-    ws->mutableSample().setOrientedLattice(&lattice);
+    ws->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(lattice));
   }
 }
 

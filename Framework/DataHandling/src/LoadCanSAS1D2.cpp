@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadCanSAS1D2.h"
 #include "MantidAPI/Axis.h"
@@ -223,7 +223,7 @@ LoadCanSAS1D2::loadEntry(Poco::XML::Node *const workspaceData,
     dataWS->getAxis(0)->setUnit("Wavelength");
 
     // add to group
-    group.push_back(dataWS);
+    group.emplace_back(dataWS);
   }
   return main_out;
 }

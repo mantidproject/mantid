@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUP_H_
-#define MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUP_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataHandling/DllConfig.h"
@@ -29,7 +28,7 @@ class MANTID_DATAHANDLING_DLL LoadEventNexusIndexSetup {
 public:
   LoadEventNexusIndexSetup(
       API::MatrixWorkspace_const_sptr instrumentWorkspace, const int32_t min,
-      const int32_t max, const std::vector<int32_t> range,
+      const int32_t max, const std::vector<int32_t> &range,
       const Parallel::Communicator &communicator = Parallel::Communicator());
 
   std::pair<int32_t, int32_t> eventIDLimits() const;
@@ -53,5 +52,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_LOADEVENTNEXUSINDEXSETUP_H_ */

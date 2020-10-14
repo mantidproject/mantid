@@ -1,18 +1,27 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/AlgorithmHistory.h"
 #include "MantidAPI/Algorithm.h"
+
+#if BOOST_VERSION == 106900
+#ifndef BOOST_PENDING_INTEGER_LOG2_HPP
+#define BOOST_PENDING_INTEGER_LOG2_HPP
+#include <boost/integer/integer_log2.hpp>
+#endif /* BOOST_PENDING_INTEGER_LOG2_HPP */
+#endif /* BOOST_VERSION */
+
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp>
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -77,7 +86,7 @@ AlgorithmHistory::AlgorithmHistory(const std::string &name, int vers,
                                    std::size_t uexeccount)
     : m_name(name), m_version(vers), m_executionDate(start),
       m_executionDuration(duration), m_execCount(uexeccount),
-      m_childHistories(), m_uuid(uuid) {}
+      m_childHistories(), m_uuid(std::move(uuid)) {}
 
 /**
  *  Set the history properties for an algorithm pointer
@@ -91,8 +100,8 @@ void AlgorithmHistory::setProperties(const Algorithm *const alg) {
   // objects.
   const std::vector<Property *> &properties = alg->getProperties();
   for (const auto &property : properties) {
-    m_properties.push_back(
-        boost::make_shared<PropertyHistory>(property->createHistory()));
+    m_properties.emplace_back(
+        std::make_shared<PropertyHistory>(property->createHistory()));
   }
 }
 
@@ -147,14 +156,14 @@ void AlgorithmHistory::addExecutionInfo(const DateAndTime &start,
 void AlgorithmHistory::addProperty(const std::string &name,
                                    const std::string &value, bool isdefault,
                                    const unsigned int &direction) {
-  m_properties.push_back(boost::make_shared<PropertyHistory>(
-      name, value, "", isdefault, direction));
+  m_properties.emplace_back(
+      std::make_shared<PropertyHistory>(name, value, "", isdefault, direction));
 }
 
 /** Add a child algorithm history to history
  *  @param childHist :: The child history
  */
-void AlgorithmHistory::addChildHistory(AlgorithmHistory_sptr childHist) {
+void AlgorithmHistory::addChildHistory(const AlgorithmHistory_sptr &childHist) {
   // Don't copy one's own history onto oneself
   if (this == &(*childHist)) {
     return;
@@ -218,7 +227,7 @@ AlgorithmHistory::getPropertyValue(const std::string &name) const {
  * @param index :: An index within the workspace history
  * @returns A shared pointer to an algorithm object
  */
-boost::shared_ptr<IAlgorithm>
+std::shared_ptr<IAlgorithm>
 AlgorithmHistory::getChildAlgorithm(const size_t index) const {
   return Algorithm::fromHistory(*(this->getChildAlgorithmHistory(index)));
 }
@@ -252,7 +261,7 @@ void AlgorithmHistory::printSelf(std::ostream &os, const int indent,
  * Create a concrete algorithm based on a history record
  * @returns An algorithm object constructed from this history record
  */
-boost::shared_ptr<IAlgorithm> AlgorithmHistory::createAlgorithm() const {
+std::shared_ptr<IAlgorithm> AlgorithmHistory::createAlgorithm() const {
   return Algorithm::fromHistory(*this);
 }
 

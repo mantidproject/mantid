@@ -1,17 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
 
-from sans.state.wavelength import (StateWavelength, get_wavelength_builder)
-from sans.state.data import get_data_builder
 from sans.common.enums import (SANSFacility, SANSInstrument, RebinType, RangeStepType)
-from state_test_helper import assert_validate_error, assert_raises_nothing
+from sans.state.StateObjects.StateData import get_data_builder
+from sans.state.StateObjects.StateWavelength import (StateWavelength, get_wavelength_builder)
 from sans.test_helper.file_information_mock import SANSFileInformationMock
 
 
@@ -27,20 +24,52 @@ class StateWavelengthTest(unittest.TestCase):
     def test_that_raises_when_wavelength_entry_is_missing(self):
         # Arrange
         state = StateWavelength()
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
+
         state.wavelength_low = [1.]
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
+
         state.wavelength_high = [2.]
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
+
         state.wavelength_step = 2.
-        assert_raises_nothing(self, state)
+        self.assertIsNone(state.validate())
 
     def test_that_raises_when_lower_wavelength_is_smaller_than_high_wavelength(self):
         state = StateWavelength()
         state.wavelength_low = [2.]
         state.wavelength_high = [1.]
         state.wavelength_step = 2.
-        assert_validate_error(self, ValueError, state)
+        with self.assertRaises(ValueError):
+            state.validate()
+
+    def test_convert_step_type_from_RANGE_LIN_to_LIN(self):
+        state = StateWavelength()
+        state.wavelength_step_type = RangeStepType.RANGE_LIN
+        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LIN)
+
+    def test_convert_step_type_from_RANGE_LOG_to_LOG(self):
+        state = StateWavelength()
+        state.wavelength_step_type = RangeStepType.RANGE_LOG
+        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LOG)
+
+    def test_convert_step_type_does_not_change_LIN(self):
+        state = StateWavelength()
+        state.wavelength_step_type = RangeStepType.LIN
+        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LIN)
+
+    def test_convert_step_type_does_not_change_LOG(self):
+        state = StateWavelength()
+        state.wavelength_step_type = RangeStepType.LOG
+        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.LOG)
+
+    def test_convert_step_type_does_not_change_NOT_SET(self):
+        state = StateWavelength()
+        state.wavelength_step_type = RangeStepType.NOT_SET
+        self.assertEqual(state.wavelength_step_type_lin_log,  RangeStepType.NOT_SET)
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -63,16 +92,16 @@ class StateSliceEventBuilderTest(unittest.TestCase):
         builder.set_wavelength_low([10.0])
         builder.set_wavelength_high([20.0])
         builder.set_wavelength_step(3.0)
-        builder.set_wavelength_step_type(RangeStepType.Lin)
-        builder.set_rebin_type(RebinType.Rebin)
+        builder.set_wavelength_step_type(RangeStepType.LIN)
+        builder.set_rebin_type(RebinType.REBIN)
 
         # Assert
         state = builder.build()
 
         self.assertEqual(state.wavelength_low,  [10.0])
         self.assertEqual(state.wavelength_high,  [20.0])
-        self.assertEqual(state.wavelength_step_type, RangeStepType.Lin)
-        self.assertEqual(state.rebin_type, RebinType.Rebin)
+        self.assertEqual(state.wavelength_step_type, RangeStepType.LIN)
+        self.assertEqual(state.rebin_type, RebinType.REBIN)
 
 
 if __name__ == '__main__':

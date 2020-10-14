@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidQtWidgets/SpectrumViewer/SliderHandler.h"
 #include "MantidQtWidgets/SpectrumViewer/SVUtils.h"
 #include <QScrollBar>
@@ -28,8 +27,8 @@ SliderHandler::SliderHandler(Ui_SpectrumViewer *svUI)
  *                    be drawn
  * @param dataSource  SpectrumDataSource that provides the data to be drawn
  */
-void SliderHandler::reConfigureSliders(QRect drawArea,
-                                       SpectrumDataSource_sptr dataSource) {
+void SliderHandler::reConfigureSliders(
+    QRect drawArea, const SpectrumDataSource_sptr &dataSource) {
   QScrollBar *vScroll = m_svUI->imageVerticalScrollBar;
 
   int oldVValue = vScroll->value();

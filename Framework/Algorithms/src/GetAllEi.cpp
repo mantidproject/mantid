@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetAllEi.h"
 #include "MantidAPI/Axis.h"
@@ -52,7 +52,7 @@ void GetAllEi::init() {
           "Workspace", "", Kernel::Direction::Input),
       "The input workspace containing the monitor's spectra "
       "measured after the last chopper");
-  auto nonNegative = boost::make_shared<Kernel::BoundedValidator<int>>();
+  auto nonNegative = std::make_shared<Kernel::BoundedValidator<int>>();
   nonNegative->setLower(0);
 
   declareProperty(
@@ -98,7 +98,7 @@ void GetAllEi::init() {
                           Kernel::ePropertyCriterion::IS_EQUAL_TO,
                           "Defined in IDF"));
 
-  auto maxInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto maxInRange = std::make_shared<Kernel::BoundedValidator<double>>();
   maxInRange->setLower(1.e-6);
   maxInRange->setUpper(0.1);
 
@@ -108,7 +108,7 @@ void GetAllEi::init() {
                   "maximum). \nPeaks, sharper then "
                   "this width are rejected. Accepted limits are: 1e^(-6)-0.1");
 
-  auto minInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto minInRange = std::make_shared<Kernel::BoundedValidator<double>>();
   minInRange->setLower(0.001);
   minInRange->setUpper(0.5);
   declareProperty(
@@ -118,7 +118,7 @@ void GetAllEi::init() {
       "Peaks broader then this width are rejected. Accepted limits are: "
       "0.001-0.5");
 
-  auto peakInRange = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto peakInRange = std::make_shared<Kernel::BoundedValidator<double>>();
   peakInRange->setLower(0.0);
   minInRange->setUpper(1.);
   declareProperty(
@@ -160,7 +160,7 @@ void removeInvalidValues(const std::vector<bool> &guessValid,
 
   for (size_t i = 0; i < guessValid.size(); i++) {
     if (guessValid[i]) {
-      new_guess.push_back(guess[i]);
+      new_guess.emplace_back(guess[i]);
     }
   }
   new_guess.swap(guess);
@@ -292,7 +292,7 @@ void GetAllEi::exec() {
   for (double time : guess_opening) {
     double eGuess = destUnit->singleFromTOF(time);
     if (eGuess > eMin && eGuess < eMax) {
-      guess_ei.push_back(eGuess);
+      guess_ei.emplace_back(eGuess);
     }
   }
   g_log.debug() << "*From all chopper opening only: " +
@@ -412,7 +412,7 @@ void GetAllEi::exec() {
  */
 void GetAllEi::printDebugModeInfo(const std::vector<double> &guess_opening,
                                   const std::pair<double, double> &TOF_range,
-                                  boost::shared_ptr<Kernel::Unit> &destUnit) {
+                                  std::shared_ptr<Kernel::Unit> &destUnit) {
 
   g_log.debug() << "*Found : " << guess_opening.size()
                 << " chopper prospective opening within time frame: "
@@ -738,12 +738,12 @@ size_t GetAllEi::calcDerivativeAndCountZeros(const std::vector<double> &bins,
 
     if (signChanged(deriv[i], prevSign)) {
       nZeros++;
-      zeros.push_back(0.5 * (bins[i - 1] + bins[i]));
+      zeros.emplace_back(0.5 * (bins[i - 1] + bins[i]));
     }
   }
   deriv[nPoints - 1] = 2 * (f1 - f0) / (bin1 + bin0);
   if (signChanged(deriv[nPoints - 1], prevSign)) {
-    zeros.push_back(bins[nPoints - 1]);
+    zeros.emplace_back(bins[nPoints - 1]);
     nZeros++;
   }
 
@@ -857,8 +857,8 @@ void GetAllEi::findBinRanges(const HistogramX &eBins, const HistogramY &signal,
           std::max(guess_peak[nGuess].right_rng,
                    eGuess * (1 + 3 * eResolution)),
           ind_min, ind_max);
-      irangeMin.push_back(ind_min);
-      irangeMax.push_back(ind_max);
+      irangeMin.emplace_back(ind_min);
+      irangeMax.emplace_back(ind_max);
       guessValid[nGuess] = true;
     } else {
       guessValid[nGuess] = false;
@@ -896,7 +896,7 @@ GetAllEi::buildWorkspaceToFit(const API::MatrixWorkspace_sptr &inputWS,
   size_t wsIndex1 = inputWS->getIndexFromSpectrumNumber(specNum2);
 
   // assuming equally binned ws.
-  boost::shared_ptr<API::HistoWorkspace> working_ws =
+  std::shared_ptr<API::HistoWorkspace> working_ws =
       DataObjects::create<API::HistoWorkspace>(
           *inputWS,
           Indexing::extract(inputWS->indexInfo(),
@@ -1106,7 +1106,7 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
         startTime = inputWS->run().startTime();
         endTime = inputWS->run().endTime();
         Kernel::SplittingInterval interval(startTime, endTime, 0);
-        splitter.push_back(interval);
+        splitter.emplace_back(interval);
       } else {
         throw std::runtime_error("filtered all data points. Nothing to do");
       }
@@ -1122,14 +1122,14 @@ void GetAllEi::findChopSpeedAndDelay(const API::MatrixWorkspace_sptr &inputWS,
       if (SelectInterval(it->first, next->first, itder->second, inSelection,
                          startTime, endTime)) {
         Kernel::SplittingInterval interval(startTime, endTime, 0);
-        splitter.push_back(interval);
+        splitter.emplace_back(interval);
       }
       it = next;
     }
     // final interval
     if (inSelection && (endTime > startTime)) {
       Kernel::SplittingInterval interval(startTime, endTime, 0);
-      splitter.push_back(interval);
+      splitter.emplace_back(interval);
     }
   } // End of USE filter log.
 
@@ -1176,7 +1176,7 @@ and if it's present, it is a time-series property
 */
 bool check_time_series_property(
     const GetAllEi *algo, const API::MatrixWorkspace_sptr &inputWS,
-    const boost::shared_ptr<const Geometry::IComponent> &chopper,
+    const std::shared_ptr<const Geometry::IComponent> &chopper,
     const std::string &prop_name, const std::string &err_presence,
     const std::string &err_type, bool fail,
     std::map<std::string, std::string> &result) {

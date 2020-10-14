@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHMTEST_H
-#define MANTID_MANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHMTEST_H
+#pragma once
 
 #include <QStringList>
 #include <cxxtest/TestSuite.h>
@@ -68,21 +67,22 @@ public:
     prefixes.emplace_back("IvsQ_");
     // This should throw
     TS_ASSERT_THROWS(
-        ProcessingAlgorithm(algName, prefixes, 0, std::set<QString>()),
+        ProcessingAlgorithm(algName, prefixes, 0, std::set<QString>(), 2),
         const std::invalid_argument &);
 
     // This should also throw
     TS_ASSERT_THROWS(
-        ProcessingAlgorithm(algName, prefixes, 0, std::set<QString>()),
+        ProcessingAlgorithm(algName, prefixes, 0, std::set<QString>(), 2),
         const std::invalid_argument &);
     // But this should be OK
     prefixes.emplace_back("IvsLam_");
     TS_ASSERT_THROWS_NOTHING(
-        ProcessingAlgorithm(algName, prefixes, 0, std::set<QString>()));
+        ProcessingAlgorithm(algName, prefixes, 0, std::set<QString>(), 2));
 
     auto const postprocessedOutputPrefixIndex = 1;
-    auto alg = ProcessingAlgorithm(
-        algName, prefixes, postprocessedOutputPrefixIndex, std::set<QString>());
+    auto alg =
+        ProcessingAlgorithm(algName, prefixes, postprocessedOutputPrefixIndex,
+                            std::set<QString>(), 2);
     TS_ASSERT_EQUALS(alg.name(), "ReflectometryReductionOneAuto");
     TS_ASSERT_EQUALS(alg.numberOfOutputProperties(), 3);
     TS_ASSERT_EQUALS(alg.prefix(0), "IvsQ_binned_");
@@ -99,4 +99,3 @@ public:
 
   // Add more tests for specific algorithms here
 };
-#endif /* MANTID_MANTIDWIDGETS_DATAPROCESSORPROCESSINGALGORITHMTEST_H */

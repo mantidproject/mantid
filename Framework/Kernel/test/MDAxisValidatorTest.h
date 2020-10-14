@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_MDAXISVALIDATORTEST_H_
-#define MANTID_KERNEL_MDAXISVALIDATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -17,7 +16,7 @@
 #include <vector>
 
 using Mantid::Kernel::MDAxisValidator;
-using MDAxisValidator_sptr = boost::shared_ptr<MDAxisValidator>;
+using MDAxisValidator_sptr = std::shared_ptr<MDAxisValidator>;
 
 class MDAxisValidatorTest : public CxxTest::TestSuite {
 public:
@@ -73,9 +72,9 @@ public:
     int nAxes = 3;
     std::vector<int> axes;
     for (int i = 0; i < nAxes - 1; i++) {
-      axes.push_back(i);
+      axes.emplace_back(i);
     }
-    axes.push_back(99); // a dimension out of the real dimension range
+    axes.emplace_back(99); // a dimension out of the real dimension range
     MDAxisValidator checker(axes, nAxes, true);
     auto errors = checker.validate();
     TS_ASSERT_EQUALS(errors.size(), 1);
@@ -95,12 +94,10 @@ private:
                                        bool checkIfEmpty) const {
     std::vector<int> axes;
     for (int i = 0; i < nAxes; i++) {
-      axes.push_back(i);
+      axes.emplace_back(i);
     }
     auto checker =
-        boost::make_shared<MDAxisValidator>(axes, nDimensions, checkIfEmpty);
+        std::make_shared<MDAxisValidator>(axes, nDimensions, checkIfEmpty);
     return checker;
   }
 };
-
-#endif /* MANTID_KERNEL_MDAXISVALIDATORTEST_H_ */

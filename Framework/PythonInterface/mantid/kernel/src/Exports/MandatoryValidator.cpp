@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/MandatoryValidator.h"
 #include <boost/python/class.hpp>
@@ -17,7 +17,7 @@ namespace {
 #define EXPORT_MANDATORYVALIDATOR(ElementType, prefix)                         \
   class_<MandatoryValidator<ElementType>, bases<IValidator>,                   \
          boost::noncopyable>(#prefix "MandatoryValidator");
-}
+} // namespace
 
 void export_MandatoryValidator() {
   EXPORT_MANDATORYVALIDATOR(double, Float);

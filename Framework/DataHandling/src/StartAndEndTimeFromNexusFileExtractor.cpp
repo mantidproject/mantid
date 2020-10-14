@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/StartAndEndTimeFromNexusFileExtractor.h"
 #include "MantidAPI/FileFinder.h"
@@ -24,8 +24,8 @@ namespace DataHandling {
 enum class NexusType { Muon, Processed, ISIS, TofRaw };
 enum class TimeType : unsigned char { StartTime, EndTime };
 
-Mantid::Types::Core::DateAndTime handleMuonNexusFile(TimeType type,
-                                                     std::string filename) {
+Mantid::Types::Core::DateAndTime
+handleMuonNexusFile(TimeType type, const std::string &filename) {
   Mantid::NeXus::NXRoot root(filename);
   if (type == TimeType::StartTime) {
     return Mantid::Types::Core::DateAndTime(root.getString("run/start_time"));
@@ -35,7 +35,7 @@ Mantid::Types::Core::DateAndTime handleMuonNexusFile(TimeType type,
 }
 
 Mantid::Types::Core::DateAndTime
-handleProcessedNexusFile(TimeType type, std::string filename) {
+handleProcessedNexusFile(TimeType type, const std::string &filename) {
   Mantid::NeXus::NXRoot root(filename);
   if (type == TimeType::StartTime) {
     return Mantid::Types::Core::DateAndTime(
@@ -46,8 +46,8 @@ handleProcessedNexusFile(TimeType type, std::string filename) {
   }
 }
 
-Mantid::Types::Core::DateAndTime handleISISNexusFile(TimeType type,
-                                                     std::string filename) {
+Mantid::Types::Core::DateAndTime
+handleISISNexusFile(TimeType type, const std::string &filename) {
   Mantid::NeXus::NXRoot root(filename);
   if (type == TimeType::StartTime) {
     return Mantid::Types::Core::DateAndTime(
@@ -58,8 +58,8 @@ Mantid::Types::Core::DateAndTime handleISISNexusFile(TimeType type,
   }
 }
 
-Mantid::Types::Core::DateAndTime handleTofRawNexusFile(TimeType type,
-                                                       std::string filename) {
+Mantid::Types::Core::DateAndTime
+handleTofRawNexusFile(TimeType type, const std::string &filename) {
   Mantid::NeXus::NXRoot root(filename);
   if (type == TimeType::StartTime) {
     return Mantid::Types::Core::DateAndTime(root.getString("entry/start_time"));
@@ -68,7 +68,7 @@ Mantid::Types::Core::DateAndTime handleTofRawNexusFile(TimeType type,
   }
 }
 
-NexusType whichNexusType(std::string filename) {
+NexusType whichNexusType(const std::string &filename) {
   std::vector<std::string> entryName;
   std::vector<std::string> definition;
   auto count =
@@ -112,8 +112,8 @@ NexusType whichNexusType(std::string filename) {
   return nexusType;
 }
 
-Mantid::Types::Core::DateAndTime extractDateAndTime(TimeType type,
-                                                    std::string filename) {
+Mantid::Types::Core::DateAndTime
+extractDateAndTime(TimeType type, const std::string &filename) {
   auto fullFileName = Mantid::API::FileFinder::Instance().getFullPath(filename);
   // Figure out the type of the Nexus file. We need to handle them individually
   // since they store the datetime differently

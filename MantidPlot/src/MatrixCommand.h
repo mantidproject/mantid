@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : MatrixCommand.h
@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MATRIX_COMMAND_H
-#define MATRIX_COMMAND_H
+#pragma once
 
 #include "Matrix.h"
 #include "MatrixModel.h"
@@ -289,4 +288,3 @@ private:
       d_old_rows, d_old_cols;
   double *d_clipboard_data, *d_backup_data;
 };
-#endif

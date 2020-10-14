@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_SIMPLECHEBFUN_H_
-#define MANTID_CURVEFITTING_SIMPLECHEBFUN_H_
+#pragma once
 
 #include "MantidCurveFitting/Functions/ChebfunBase.h"
 #include "MantidKernel/System.h"
@@ -19,14 +18,14 @@ namespace Functions {
 
   Main functionality is implemented in ChebfunBase class.
 */
-class DLLExport SimpleChebfun {
+class MANTID_CURVEFITTING_DLL SimpleChebfun {
 public:
   /// Constructor.
   SimpleChebfun(size_t n, ChebfunFunctionType fun, double start, double end);
   /// Constructor.
   SimpleChebfun(size_t n, const API::IFunction &fun, double start, double end);
   /// Constructor.
-  SimpleChebfun(ChebfunFunctionType fun, double start, double end,
+  SimpleChebfun(const ChebfunFunctionType &fun, double start, double end,
                 double accuracy = 0.0, size_t badSize = 10);
   /// Constructor.
   SimpleChebfun(const API::IFunction &fun, double start, double end,
@@ -68,11 +67,11 @@ public:
   /// Integrate the function on its interval
   double integrate() const;
   /// Add a C++ function to the function
-  SimpleChebfun &operator+=(ChebfunFunctionType fun);
+  SimpleChebfun &operator+=(const ChebfunFunctionType &fun);
 
 private:
   /// Constructor
-  SimpleChebfun(ChebfunBase_sptr base);
+  SimpleChebfun(const ChebfunBase_sptr &base);
   /// Underlying base that does actual job.
   ChebfunBase_sptr m_base;
   /// Function values at the chebfun x-points.
@@ -87,5 +86,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_SIMPLECHEBFUN_H_ */

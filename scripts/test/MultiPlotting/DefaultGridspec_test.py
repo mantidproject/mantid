@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
@@ -16,7 +16,7 @@ class DefaultGridSpecTest(unittest.TestCase):
         for root in roots:
             result = defaultGridspecGrid(root*root)
             self.assertEqual(result, [root, root])
- 
+
     def test_notSquares(self):
         roots = [3, 4, 5, 123]
         for root in roots:

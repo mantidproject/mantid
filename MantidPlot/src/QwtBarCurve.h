@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef BARCURVE_H
-#define BARCURVE_H
+#pragma once
 
 #include "PlotCurve.h"
 #include <qwt_plot.h>
@@ -63,5 +62,3 @@ private:
   int bar_gap, bar_offset;
   BarStyle bar_style;
 };
-
-#endif

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDISPECTRUMPAWLEYFUNCTION_H_
-#define MANTID_SINQ_POLDISPECTRUMPAWLEYFUNCTION_H_
+#pragma once
 
 #include "MantidAPI/IPawleyFunction.h"
 #include "MantidSINQ/DllConfig.h"
@@ -23,9 +22,8 @@ public:
 
   std::string name() const override { return "PoldiSpectrumPawleyFunction"; }
 
-  void
-  setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,
-                     size_t wi, double startX, double endX) override;
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
+                          size_t wi, double startX, double endX) override;
 
   void function1DSpectrum(const API::FunctionDomain1DSpectrum &domain,
                           API::FunctionValues &values) const override;
@@ -45,5 +43,3 @@ protected:
 
 } // namespace Poldi
 } // namespace Mantid
-
-#endif /* MANTID_SINQ_POLDISPECTRUMPAWLEYFUNCTION_H_ */

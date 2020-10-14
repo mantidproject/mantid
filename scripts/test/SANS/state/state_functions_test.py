@@ -1,18 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
 
+from sans.common.enums import (ReductionDimensionality)
+from sans.state.StateObjects.StateData import StateData
 from sans.state.state_functions import (is_pure_none_or_not_none, one_is_none,
                                         validation_message, is_not_none_and_first_larger_than_second)
 from sans.test_helper.test_director import TestDirector
-from sans.state.data import StateData
-from sans.common.enums import (ReductionDimensionality, ISISReductionMode, OutputParts)
 
 
 class StateFunctionsTest(unittest.TestCase):
@@ -22,9 +20,9 @@ class StateFunctionsTest(unittest.TestCase):
         state = test_director.construct()
 
         state.data.sample_scatter_run_number = 12345
-        state.data.sample_scatter_period = StateData.ALL_PERIODS 
+        state.data.sample_scatter_period = StateData.ALL_PERIODS
 
-        state.reduction.dimensionality = ReductionDimensionality.OneDim
+        state.reduction.dimensionality = ReductionDimensionality.ONE_DIM
 
         state.wavelength.wavelength_low = 12.0
         state.wavelength.wavelength_high = 34.0
@@ -64,8 +62,8 @@ class StateFunctionsTest(unittest.TestCase):
         expected_text = "var1: 12\n" \
                         "var2: test\n" \
                         "" + instruction
-        self.assertEqual(list(val_message.keys())[0],  error_message)
-        self.assertEqual(val_message[error_message],  expected_text)
+        self.assertEqual(list(val_message.keys())[0], error_message)
+        self.assertEqual(val_message[error_message], expected_text)
 
 
 if __name__ == '__main__':

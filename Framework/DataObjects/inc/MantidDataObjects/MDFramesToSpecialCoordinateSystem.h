@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_MDFRAMESTOSPECIALCOORDINATESYTEM_H_
-#define MANTID_DATAOBJECTS_MDFRAMESTOSPECIALCOORDINATESYTEM_H_
+#pragma once
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -28,11 +27,9 @@ private:
       Mantid::Kernel::SpecialCoordinateSystem specialCoordinateSystem,
       boost::optional<Mantid::Kernel::SpecialCoordinateSystem> qFrameType)
       const;
-  bool
-  isUnknownFrame(Mantid::Geometry::IMDDimension_const_sptr dimension) const;
+  bool isUnknownFrame(
+      const Mantid::Geometry::IMDDimension_const_sptr &dimension) const;
 };
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_MDFRAMESTOSPECIALCOORDINATESYTEM_H_ */

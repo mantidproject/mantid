@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
 from qtpy import QtWidgets, QtCore
 
-from six import iteritems
 import numpy as np
 
 from Muon.GUI.Common.checkbox import Checkbox
@@ -90,7 +88,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
             electrons = peak_data["Electrons"]
             electron_data = {}
             for xpos, int in electrons.items():
-                name = '$e^-\quad$  {}'.format(xpos)
+                name = r'$e^-\quad$  {}'.format(xpos)
                 electron_data[name] = float(xpos)
             self.electron_checkboxes = self._create_checkbox_list("Electrons",
                                                                   electron_data,
@@ -120,7 +118,7 @@ class PeakSelectorView(QtWidgets.QListWidget):
         return self.new_data
 
     def update_new_data(self, data):
-        for el, values in iteritems(data):
+        for el, values in data.items():
             if values is None:
                 data[el] = {}
         new_data = data["Primary"].copy()
@@ -139,17 +137,18 @@ class PeakSelectorView(QtWidgets.QListWidget):
         _heading = QtWidgets.QLabel(heading)
         self.list.addWidget(_heading)
         checkboxes = []
-        for peak_type, value in iteritems(checkbox_data):
+        for peak_type, value in checkbox_data.items():
             checkboxes.append(self._setup_checkbox("{}: {}".format(peak_type, value), checked))
         return checkboxes
 
     def _parse_checkbox_name(self, name):
-        peak_type, value = name.replace(" ", "").split(":")
+        peak_type, value = name.split(":")
         return peak_type, value
 
     def _remove_value_from_new_data(self, checkbox):
         peak_type, _ = self._parse_checkbox_name(checkbox.name)
-        del self.new_data[peak_type]
+        if peak_type in self.new_data:
+            del self.new_data[peak_type]
 
     def _add_value_to_new_data(self, checkbox):
         peak_type, value = self._parse_checkbox_name(checkbox.name)

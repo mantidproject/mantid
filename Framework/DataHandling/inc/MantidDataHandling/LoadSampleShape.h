@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DATAHANDLING_LOAD_SHAPE_H_
-#define DATAHANDLING_LOAD_SHAPE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidDataHandling/LoadShape.h"
+#include "MantidAPI/ExperimentInfo.h"
+#include "MantidDataHandling/MeshFileIO.h"
 #include "MantidGeometry/Objects/MeshObject.h"
 
 namespace Mantid {
@@ -18,6 +18,7 @@ namespace DataHandling {
      The following file types are supported
 
        STL file with suffix .stl
+       OFF file with suffix .off
 
 
 @author Karl Palmen ISIS;
@@ -51,11 +52,6 @@ private:
   void init() override;
   void exec() override;
 };
-void DLLExport rotate(Geometry::MeshObject &sampleMesh,
-                      API::MatrixWorkspace_const_sptr inputWS);
-boost::shared_ptr<Geometry::MeshObject> DLLExport loadStl(std::string filename,
-                                                          ScaleUnits scaleType);
 
 } // namespace DataHandling
 } // namespace Mantid
-#endif /* DATAHANDLING_LOAD_SHAPE_H_ */

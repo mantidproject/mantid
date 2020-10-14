@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/FilterEventsByLogValuePreNexus.h"
 #include "MantidAPI/Axis.h"
@@ -60,13 +60,13 @@ using namespace Geometry;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
 using DataObjects::EventWorkspace_sptr;
-using Types::Core::DateAndTime;
-using Types::Event::TofEvent;
 using std::ifstream;
 using std::runtime_error;
 using std::string;
 using std::stringstream;
 using std::vector;
+using Types::Core::DateAndTime;
+using Types::Event::TofEvent;
 
 //----------------------------------------------------------------------------------------------
 // constants for locating the parameters to use in execution
@@ -188,7 +188,7 @@ static string generateMappingfileName(EventWorkspace_sptr &wksp) {
                              .append("/calibrations/")
                              .append(mapping);
       if (Poco::File(path).exists()) {
-        files.push_back(path);
+        files.emplace_back(path);
       }
     }
   }
@@ -285,7 +285,7 @@ void FilterEventsByLogValuePreNexus::init() {
                   "A list of individual spectra (pixel IDs) to read, specified "
                   "as e.g. 10:20. Only used if set.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
                   "If loading the file by sections ('chunks'), this is the "
@@ -302,7 +302,7 @@ void FilterEventsByLogValuePreNexus::init() {
   // Loading option
   std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"
                   "  Auto: Use serial loading for small data sets, parallel "
                   "for large data sets.\n"
@@ -325,7 +325,7 @@ void FilterEventsByLogValuePreNexus::init() {
   //
   std::vector<std::string> vecfunmode{"LoadData", "Filter", "ExamineEventLog"};
   declareProperty("FunctionMode", "LoadData",
-                  boost::make_shared<StringListValidator>(vecfunmode),
+                  std::make_shared<StringListValidator>(vecfunmode),
                   "Function mode for different purpose. ");
 
   declareProperty("PixelIDtoExamine", EMPTY_INT(),
@@ -644,7 +644,7 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
   std::string evlog = getPropertyValue("EventLogTableWorkspace");
   if (!evlog.empty()) {
     // Initialize table workspace
-    TableWorkspace_sptr evtablews = boost::make_shared<TableWorkspace>();
+    TableWorkspace_sptr evtablews = std::make_shared<TableWorkspace>();
     evtablews->addColumn("int", "Pixel-ID");
     evtablews->addColumn("int", "NumberOfEvents");
 
@@ -662,7 +662,7 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
 
     // Set property
     setProperty("EventLogTableWorkspace",
-                boost::dynamic_pointer_cast<ITableWorkspace>(evtablews));
+                std::dynamic_pointer_cast<ITableWorkspace>(evtablews));
   }
 }
 
@@ -671,8 +671,8 @@ void FilterEventsByLogValuePreNexus::processEventLogs() {
  * @param logtitle :: title of the log to be inserted to workspace
  * @param mindex ::  index of the the series in the wrong detectors map
  */
-void FilterEventsByLogValuePreNexus::addToWorkspaceLog(std::string logtitle,
-                                                       size_t mindex) {
+void FilterEventsByLogValuePreNexus::addToWorkspaceLog(
+    const std::string &logtitle, size_t mindex) {
   // Create TimeSeriesProperty
   auto property = new TimeSeriesProperty<double>(logtitle);
 
@@ -770,7 +770,8 @@ void FilterEventsByLogValuePreNexus::doStatToEventLog(size_t mindex) {
  *  geometry
  */
 void FilterEventsByLogValuePreNexus::runLoadInstrument(
-    const std::string &eventfilename, MatrixWorkspace_sptr localWorkspace) {
+    const std::string &eventfilename,
+    const MatrixWorkspace_sptr &localWorkspace) {
   // start by getting just the filename
   string instrument = Poco::Path(eventfilename).getFileName();
 
@@ -930,7 +931,6 @@ void FilterEventsByLogValuePreNexus::procEvents(
                       << " threads"
                       << " in " << numBlocks << " blocks. "
                       << "\n";
-
   // cppcheck-suppress syntaxError
     PRAGMA_OMP( parallel for schedule(dynamic, 1) if (m_parallelProcessing) )
     for (int i = 0; i < int(numThreads); i++) {
@@ -954,7 +954,7 @@ void FilterEventsByLogValuePreNexus::procEvents(
       // value = pointer to the events vector
       eventVectors[i] = new EventVector_pt[m_detid_max + 1];
       EventVector_pt *theseEventVectors = eventVectors[i];
-      for (detid_t j = 0; j < m_detid_max + 1; j++) {
+      for (detid_t j = 0; j < m_detid_max + 1; ++j) {
         size_t wi = m_pixelToWkspindex[j];
         // Save a POINTER to the vector<tofEvent>
         theseEventVectors[j] = &partWS->getSpectrum(wi).getEvents();
@@ -1133,15 +1133,13 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
                 << m_maxNumEvents << "\n";
   maxeventid = m_maxNumEvents + 1;
 
-  size_t numbadeventindex = 0;
-
   int numeventswritten = 0;
 
   // Declare local statistic parameters
   size_t local_numErrorEvents = 0;
   size_t local_numBadEvents = 0;
-  size_t local_numWrongdetidEvents = 0;
   size_t local_numIgnoredEvents = 0;
+  size_t local_numWrongdetidEvents = 0;
   size_t local_numGoodEvents = 0;
   double local_m_shortestTof =
       static_cast<double>(MAX_TOF_UINT32) * TOF_CONVERSION;
@@ -1161,8 +1159,6 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
   int64_t i_pulse = 0;
 
   for (size_t ievent = 0; ievent < current_event_buffer_size; ++ievent) {
-    bool iswrongdetid = false;
-
     // Load DasEvent
     DasEvent &tempevent = *(event_buffer + ievent);
 
@@ -1186,6 +1182,7 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
         pixelid = this->m_pixelmap[unmapped_pid];
       }
 
+      bool iswrongdetid = false;
       // Check special/wrong pixel IDs against max Detector ID
       if (pixelid > static_cast<PixelType>(m_detid_max)) {
         // Record the wrong/special ID
@@ -1295,8 +1292,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
 
           std::vector<Types::Core::DateAndTime> tempvectime;
           std::vector<double> temptofs;
-          local_pulsetimes.push_back(tempvectime);
-          local_tofs.push_back(temptofs);
+          local_pulsetimes.emplace_back(tempvectime);
+          local_tofs.emplace_back(temptofs);
 
           theindex = newindex;
 
@@ -1307,8 +1304,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
         }
 
         // Store pulse time and tof of this event
-        local_pulsetimes[theindex].push_back(pulsetime);
-        local_tofs[theindex].push_back(tof);
+        local_pulsetimes[theindex].emplace_back(pulsetime);
+        local_tofs[theindex].emplace_back(tof);
       } // END-IF-ELSE: On Event's Pixel's Nature
 
     } // ENDIF (event is masked error)
@@ -1341,8 +1338,8 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
 
         std::vector<Types::Core::DateAndTime> vec_pulsetimes;
         std::vector<double> vec_tofs;
-        this->wrongdetid_pulsetimes.push_back(vec_pulsetimes);
-        this->wrongdetid_tofs.push_back(vec_tofs);
+        this->wrongdetid_pulsetimes.emplace_back(vec_pulsetimes);
+        this->wrongdetid_tofs.emplace_back(vec_tofs);
 
         mindex = newindex;
       } else {
@@ -1356,9 +1353,9 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
       // Append local (thread) loaded events (pulse + tof) to global wrong detid
       // data structure
       for (size_t iv = 0; iv < local_pulsetimes[localindex].size(); iv++) {
-        this->wrongdetid_pulsetimes[mindex].push_back(
+        this->wrongdetid_pulsetimes[mindex].emplace_back(
             local_pulsetimes[localindex][iv]);
-        this->wrongdetid_tofs[mindex].push_back(local_tofs[localindex][iv]);
+        this->wrongdetid_tofs[mindex].emplace_back(local_tofs[localindex][iv]);
       }
     }
 
@@ -1366,12 +1363,6 @@ void FilterEventsByLogValuePreNexus::procEventsLinear(
       m_shortestTof = local_m_shortestTof;
     if (local_m_longestTof > m_longestTof)
       m_longestTof = local_m_longestTof;
-  }
-
-  if (numbadeventindex > 0) {
-    g_log.notice() << "Single block: Encountered " << numbadeventindex
-                   << " bad event indexes"
-                   << "\n";
   }
 }
 
@@ -1558,7 +1549,7 @@ void FilterEventsByLogValuePreNexus::filterEvents() {
       // value = pointer to the events vector
       eventVectors[i] = new EventVector_pt[m_detid_max + 1];
       EventVector_pt *theseEventVectors = eventVectors[i];
-      for (detid_t j = 0; j < m_detid_max + 1; j++) {
+      for (detid_t j = 0; j < m_detid_max + 1; ++j) {
         size_t wi = m_pixelToWkspindex[j];
         // Save a POINTER to the vector<tofEvent>
         if (wi != static_cast<size_t>(-1))
@@ -1737,8 +1728,6 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
                  << m_maxNumEvents << "\n";
   maxeventid = m_maxNumEvents + 1;
 
-  size_t numbadeventindex = 0;
-
   // Declare local statistic parameters
   size_t local_numErrorEvents = 0;
   size_t local_numBadEvents = 0;
@@ -1803,7 +1792,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
   if (!instrument)
     throw std::runtime_error("Instrument is not setup in m_localWorkspace.");
   IComponent_const_sptr source =
-      boost::dynamic_pointer_cast<const IComponent>(instrument->getSource());
+      std::dynamic_pointer_cast<const IComponent>(instrument->getSource());
   if (!source)
     throw std::runtime_error("Source is not set up in local workspace.");
 
@@ -1824,8 +1813,6 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
   g_log.notice() << "[DB] L1 = " << l1 << "\n";
 
   for (size_t ievent = 0; ievent < current_event_buffer_size; ++ievent) {
-    bool iswrongdetid = false;
-    bool islogevent = false;
 
     // Load DasEvent
     DasEvent &tempevent = *(event_buffer + ievent);
@@ -1840,6 +1827,9 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
       local_numBadEvents++;
       continue;
     } else {
+      bool islogevent = false;
+      bool iswrongdetid = false;
+
       // Covert DAS Pixel ID to Mantid Pixel ID
       if (pixelid == 1073741843) {
         // downstream monitor pixel for SNAP
@@ -2070,8 +2060,8 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
 
           std::vector<Types::Core::DateAndTime> tempvectime;
           std::vector<double> temptofs;
-          local_pulsetimes.push_back(tempvectime);
-          local_tofs.push_back(temptofs);
+          local_pulsetimes.emplace_back(tempvectime);
+          local_tofs.emplace_back(temptofs);
 
           theindex = newindex;
 
@@ -2082,8 +2072,8 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
         }
 
         // Store pulse time and tof of this event
-        local_pulsetimes[theindex].push_back(pulsetime);
-        local_tofs[theindex].push_back(tof);
+        local_pulsetimes[theindex].emplace_back(pulsetime);
+        local_tofs[theindex].emplace_back(tof);
 #else
         // Ignore all operation
         ;
@@ -2107,8 +2097,6 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
       m_longestTof = local_m_longestTof;
   }
 
-  g_log.notice() << "Encountered " << numbadeventindex << " bad event indexes"
-                 << "\n";
 } // FilterEventsLinearly
 
 //----------------------------------------------------------------------------------------------
@@ -2118,7 +2106,7 @@ void FilterEventsByLogValuePreNexus::filterEventsLinear(
  * We want to pad out empty pixels: monitor
  */
 size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
-    DataObjects::EventWorkspace_sptr eventws) {
+    const DataObjects::EventWorkspace_sptr &eventws) {
   const auto &detectorInfo = eventws->detectorInfo();
   const auto &detIDs = detectorInfo.detectorIDs();
 
@@ -2158,7 +2146,7 @@ size_t FilterEventsByLogValuePreNexus::padOutEmptyPixels(
  * pixel-spectrum map
  */
 void FilterEventsByLogValuePreNexus::setupPixelSpectrumMap(
-    DataObjects::EventWorkspace_sptr eventws) {
+    const DataObjects::EventWorkspace_sptr &eventws) {
   const auto &detectorInfo = eventws->detectorInfo();
   const auto &detIDs = detectorInfo.detectorIDs();
 
@@ -2368,24 +2356,22 @@ void FilterEventsByLogValuePreNexus::readPulseidFile(
     }
   }
 
-  double temp;
-
   if (m_numPulses > 0) {
     DateAndTime lastPulseDateTime(0, 0);
     this->pulsetimes.reserve(m_numPulses);
     for (const auto &pulse : pulses) {
       DateAndTime pulseDateTime(static_cast<int64_t>(pulse.seconds),
                                 static_cast<int64_t>(pulse.nanoseconds));
-      this->pulsetimes.push_back(pulseDateTime);
-      this->m_vecEventIndex.push_back(pulse.event_index);
+      this->pulsetimes.emplace_back(pulseDateTime);
+      this->m_vecEventIndex.emplace_back(pulse.event_index);
 
       if (pulseDateTime < lastPulseDateTime)
         this->m_pulseTimesIncreasing = false;
       else
         lastPulseDateTime = pulseDateTime;
 
-      temp = pulse.pCurrent;
-      this->m_protonCharge.push_back(temp);
+      double temp = pulse.pCurrent;
+      this->m_protonCharge.emplace_back(temp);
       if (temp < 0.)
         this->g_log.warning("Individual proton charge < 0 being ignored");
       else

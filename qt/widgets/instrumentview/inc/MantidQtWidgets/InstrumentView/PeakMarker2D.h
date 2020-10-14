@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDPLOT_PEAKMARKER2D_H_
-#define MANTIDPLOT_PEAKMARKER2D_H_
+#pragma once
+
+#include <utility>
 
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "Shape2D.h"
@@ -24,8 +25,9 @@ class PeakMarker2D : public Shape2D {
 public:
   enum Symbol { Circle = 0, Diamond, Square };
   struct Style {
-    Style(Symbol sb = Circle, QColor c = Qt::red, int sz = g_defaultMarkerSize)
-        : symbol(sb), color(c), size(sz) {}
+    Style(Symbol sb = Circle, const QColor &c = Qt::red,
+          int sz = g_defaultMarkerSize)
+        : symbol(sb), color(std::move(c)), size(sz) {}
     Symbol symbol;
     QColor color;
     int size;
@@ -86,5 +88,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*MANTIDPLOT_PEAKMARKER2D_H_*/

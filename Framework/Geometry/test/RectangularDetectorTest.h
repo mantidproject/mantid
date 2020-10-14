@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef RECTANGULAR_DETECTOR_TEST_H
-#define RECTANGULAR_DETECTOR_TEST_H
+#pragma once
 
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -179,7 +178,7 @@ public:
     TS_ASSERT_DELTA(box.zMax(), 3000.5, 1e-08);
 
     // Pull out a component and check that
-    boost::shared_ptr<Detector> pixelDet = det->getAtXY(1, 2);
+    std::shared_ptr<Detector> pixelDet = det->getAtXY(1, 2);
     box = BoundingBox();
     pixelDet->getBoundingBox(box);
     TS_ASSERT_DELTA(box.xMin(), 950.5, 1e-08);
@@ -231,5 +230,3 @@ public:
     delete parDet;
   }
 };
-
-#endif

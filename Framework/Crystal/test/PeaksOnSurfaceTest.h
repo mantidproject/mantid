@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_PEAKSONSURFACETEST_H_
-#define MANTID_CRYSTAL_PEAKSONSURFACETEST_H_
+#pragma once
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidCrystal/PeaksOnSurface.h"
@@ -28,7 +27,7 @@ private:
 Helper function. Creates a peaksworkspace with a single peak
 */
   PeaksWorkspace_sptr
-  createPeaksWorkspace(const std::string coordFrame,
+  createPeaksWorkspace(const std::string &coordFrame,
                        const Mantid::Kernel::V3D &peakPosition) {
     PeaksWorkspace_sptr ws = WorkspaceCreationHelper::createPeaksWorkspace(1);
     auto detectorIds = ws->getInstrument()->getDetectorIDs();
@@ -59,7 +58,7 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
     alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace());
+                    WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Vertex1", vertex1);
     alg.setPropertyValue("Vertex2", vertex2);
@@ -98,7 +97,7 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
     alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace());
+                    WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Vertex1", "0,0,0");
     alg.setPropertyValue("Vertex2", "0,1,0");
@@ -114,7 +113,7 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
     alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace());
+                    WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Vertex1", "0,0,0");
     alg.setPropertyValue("Vertex2", "0,1,0");
@@ -132,7 +131,7 @@ public:
     alg.initialize();
     TS_ASSERT(alg.isInitialized());
     alg.setProperty("InputWorkspace",
-                    WorkspaceCreationHelper::createPeaksWorkspace());
+                    WorkspaceCreationHelper::createPeaksWorkspace(2));
     alg.setPropertyValue("CoordinateFrame", "Q (lab frame)");
     alg.setPropertyValue("Vertex1", "0,0,0");
     alg.setPropertyValue("Vertex2", "0,1,0");
@@ -372,7 +371,7 @@ public:
 
   PeaksOnSurfaceTestPerformance() {
     int numPeaks = 4000;
-    inputWS = boost::make_shared<PeaksWorkspace>();
+    inputWS = std::make_shared<PeaksWorkspace>();
     Mantid::Geometry::Instrument_sptr inst =
         ComponentCreationHelper::createTestInstrumentRectangular2(1, 200);
     inputWS->setInstrument(inst);
@@ -407,5 +406,3 @@ public:
     TS_ASSERT_EQUALS(inputWS->rowCount(), outWS->rowCount());
   }
 };
-
-#endif /* MANTID_CRYSTAL_PEAKSONSURFACETEST_H_ */

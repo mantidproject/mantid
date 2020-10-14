@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadAsciiStl.h"
 #include "MantidGeometry/Objects/MeshObject.h"
@@ -11,7 +11,7 @@
 namespace Mantid {
 namespace DataHandling {
 
-bool LoadAsciiStl::isAsciiSTL(std::string filename) {
+bool LoadAsciiStl::isAsciiSTL(const std::string &filename) {
   std::ifstream file(filename.c_str());
   if (!file) {
     // if the file cannot be read then it is not a valid asciiStl File
@@ -23,14 +23,13 @@ bool LoadAsciiStl::isAsciiSTL(std::string filename) {
   return (line.size() >= 5 && line.substr(0, 5) == "solid");
 }
 
-std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readStl() {
-  std::ifstream file(m_filename.c_str());
+std::unique_ptr<Geometry::MeshObject> LoadAsciiStl::readShape() {
   std::string line;
-  getline(file, line);
+  getline(m_file, line);
   m_lineNumber++;
   Kernel::V3D t1, t2, t3;
   uint32_t vertexCount = 0;
-  while (readSTLTriangle(file, t1, t2, t3)) {
+  while (readSTLTriangle(m_file, t1, t2, t3)) {
     // Add triangle if all 3 vertices are distinct
     if (!areEqualVertices(t1, t2) && !areEqualVertices(t1, t3) &&
         !areEqualVertices(t2, t3)) {

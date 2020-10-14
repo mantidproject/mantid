@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALGORITHMTEST_H_
-#define ALGORITHMTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -28,6 +27,7 @@
 #include "MantidTestHelpers/FakeObjects.h"
 #include "PropertyManagerHelper.h"
 #include <map>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -63,13 +63,13 @@ public:
     const std::string outName = getPropertyValue("InputWorkspace1") + "+" +
                                 getPropertyValue("InputWorkspace2") + "+" +
                                 getPropertyValue("InOutWorkspace");
-    auto out1 = boost::make_shared<WorkspaceTester>();
+    auto out1 = std::make_shared<WorkspaceTester>();
     out1->initialize(10, 10, 10);
     out1->setTitle(outName);
     out1->dataY(0)[0] = getProperty("Number");
     setProperty("OutputWorkspace1", out1);
     if (!getPropertyValue("OutputWorkspace2").empty()) {
-      auto out2 = boost::make_shared<WorkspaceTester>();
+      auto out2 = std::make_shared<WorkspaceTester>();
       out2->initialize(10, 10, 10);
       out2->setTitle(outName);
       setProperty("OutputWorkspace2", out2);
@@ -187,7 +187,7 @@ public:
         "InputWorkspace3", "");
     declareWorkspaceInputProperties<
         MatrixWorkspace, IndexType::SpectrumNum | IndexType::WorkspaceIndex>(
-        "InputWorkspace4", "", boost::make_shared<HistogramValidator>());
+        "InputWorkspace4", "", std::make_shared<HistogramValidator>());
   }
 
   void exec() override {}
@@ -292,11 +292,16 @@ public:
 
   void testExecute() {
     ToyAlgorithm myAlg;
+    TS_ASSERT_EQUALS(ExecutionState::Uninitialized, myAlg.executionState());
     TS_ASSERT_THROWS(myAlg.execute(), const std::runtime_error &);
     TS_ASSERT(!myAlg.isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Uninitialized, myAlg.executionState());
     TS_ASSERT_THROWS_NOTHING(myAlg.initialize());
+    TS_ASSERT_EQUALS(ExecutionState::Initialized, myAlg.executionState());
     TS_ASSERT_THROWS_NOTHING(myAlg.execute());
     TS_ASSERT(myAlg.isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Finished, myAlg.executionState());
+    TS_ASSERT_EQUALS(ResultState::Success, myAlg.resultState());
   }
 
   void testSetPropertyValue() {
@@ -333,11 +338,16 @@ public:
     alg.setProperty("PropertyA", 12);
     alg.setProperty("PropertyB", 5);
     TS_ASSERT_THROWS_ANYTHING(alg.execute());
+    // Algoritm never executed as property validation failed
     TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Initialized, alg.executionState());
+    TS_ASSERT_EQUALS(ResultState::NotFinished, alg.resultState());
 
     alg.setProperty("PropertyB", 15);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
+    TS_ASSERT_EQUALS(ExecutionState::Finished, alg.executionState());
+    TS_ASSERT_EQUALS(ResultState::Success, alg.resultState());
   }
 
   void test_WorkspaceMethodFunctionsReturnEmptyByDefault() {
@@ -502,11 +512,11 @@ public:
   /** Test of setting read and/or write locks
    * for various combinations of input/output workspaces.
    */
-  void do_test_locking(std::string in1, std::string in2, std::string inout,
-                       std::string out1, std::string out2) {
+  void do_test_locking(const std::string &in1, const std::string &in2,
+                       const std::string &inout, const std::string &out1,
+                       const std::string &out2) {
     for (size_t i = 0; i < 6; i++) {
-      boost::shared_ptr<WorkspaceTester> ws =
-          boost::make_shared<WorkspaceTester>();
+      std::shared_ptr<WorkspaceTester> ws = std::make_shared<WorkspaceTester>();
       AnalysisDataService::Instance().addOrReplace("ws" + Strings::toString(i),
                                                    ws);
     }
@@ -542,8 +552,7 @@ public:
   /** Have a workspace property that does NOT lock the workspace.
    * The failure mode of this test is HANGING. */
   void test_workspace_notLocking() {
-    boost::shared_ptr<WorkspaceTester> ws1 =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> ws1 = std::make_shared<WorkspaceTester>();
     AnalysisDataService::Instance().addOrReplace("ws1", ws1);
 
     {
@@ -569,6 +578,53 @@ public:
     }
   }
 
+  void test_Algorithm_Drops_Workspace_References_When_Stored_In_ADS() {
+    // create an input workspace, add it to the ADS
+    auto inputWorkspace = std::make_shared<WorkspaceTester>();
+    const std::string inputName("testIn"), outputName("testOut");
+    auto &ads = AnalysisDataService::Instance();
+    ads.addOrReplace(inputName, inputWorkspace);
+
+    auto workspaceAlg = std::make_unique<StubbedWorkspaceAlgorithm>();
+    workspaceAlg->initialize();
+    workspaceAlg->setProperty("InputWorkspace1", inputName);
+    workspaceAlg->setProperty("OutputWorkspace1", outputName);
+    workspaceAlg->execute();
+
+    // The input workspace should have references from the local inputWorkspace
+    // variable and in the ADS but nothing else
+    TS_ASSERT_EQUALS(2, inputWorkspace.use_count());
+
+    // dropping algorithm shouldn't alter the use count
+    workspaceAlg.reset();
+    TS_ASSERT_EQUALS(2, inputWorkspace.use_count());
+
+    // drop ADS reference and left with local
+    ads.remove(inputName);
+    TS_ASSERT_EQUALS(1, inputWorkspace.use_count());
+  }
+
+  void test_Algorithm_Keeps_Only_WorkspaceProperty_Ref_If_Not_Stored_In_ADS() {
+    // create an input workspace, add it to the ADS
+    auto inputWorkspace = std::make_shared<WorkspaceTester>();
+    const std::string inputName("testIn"), outputName("testOut");
+
+    auto workspaceAlg = std::make_unique<StubbedWorkspaceAlgorithm>();
+    workspaceAlg->initialize();
+    workspaceAlg->setAlwaysStoreInADS(false);
+    workspaceAlg->setProperty("InputWorkspace1", inputWorkspace);
+    workspaceAlg->setProperty("OutputWorkspace1", outputName);
+    workspaceAlg->execute();
+
+    // The input workspace should have references from the algorithm
+    // and the local variable
+    TS_ASSERT_EQUALS(2, inputWorkspace.use_count());
+
+    // dropping algorithm should leave the local variable
+    workspaceAlg.reset();
+    TS_ASSERT_EQUALS(1, inputWorkspace.use_count());
+  }
+
   //------------------------------------------------------------------------
   /** Make a workspace group with:
    *
@@ -577,12 +633,13 @@ public:
    *        Make no group if blank, just 1 workspace
    * @return The new WorkspaceGroup object
    */
-  Workspace_sptr makeWorkspaceGroup(std::string group1, std::string contents1) {
+  Workspace_sptr makeWorkspaceGroup(const std::string &group1,
+                                    std::string contents1) {
     auto &ads = AnalysisDataService::Instance();
     if (contents1.empty()) {
       if (group1.empty())
         return Workspace_sptr();
-      auto ws = boost::make_shared<WorkspaceTester>();
+      auto ws = std::make_shared<WorkspaceTester>();
       ads.addOrReplace(group1, ws);
       return ws;
     }
@@ -594,7 +651,7 @@ public:
       auto wsGroup = WorkspaceGroup_sptr(new WorkspaceGroup());
       ads.addOrReplace(group1, wsGroup);
       for (const auto &name : names) {
-        auto ws = boost::make_shared<WorkspaceTester>();
+        auto ws = std::make_shared<WorkspaceTester>();
         ws->initialize(10, 10, 10);
         ads.addOrReplace(name, ws);
         wsGroup->add(name);
@@ -605,14 +662,14 @@ public:
   }
 
   //------------------------------------------------------------------------
-  WorkspaceGroup_sptr do_test_groups(std::string group1, std::string contents1,
-                                     std::string group2, std::string contents2,
-                                     std::string group3, std::string contents3,
-                                     bool expectFail = false,
-                                     int expectedNumber = 3) {
-    makeWorkspaceGroup(group1, contents1);
-    makeWorkspaceGroup(group2, contents2);
-    makeWorkspaceGroup(group3, contents3);
+  WorkspaceGroup_sptr
+  do_test_groups(const std::string &group1, std::string contents1,
+                 const std::string &group2, std::string contents2,
+                 const std::string &group3, std::string contents3,
+                 bool expectFail = false, int expectedNumber = 3) {
+    makeWorkspaceGroup(group1, std::move(contents1));
+    makeWorkspaceGroup(group2, std::move(contents2));
+    makeWorkspaceGroup(group3, std::move(contents3));
 
     StubbedWorkspaceAlgorithm alg;
     alg.initialize();
@@ -629,20 +686,19 @@ public:
     }
     TS_ASSERT(alg.isExecuted())
     Workspace_sptr out1 = AnalysisDataService::Instance().retrieve("D");
-    WorkspaceGroup_sptr group =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(out1);
+    WorkspaceGroup_sptr group = std::dynamic_pointer_cast<WorkspaceGroup>(out1);
 
     TS_ASSERT_EQUALS(group->getName(), "D")
     TS_ASSERT_EQUALS(group->getNumberOfEntries(), expectedNumber)
     if (group->getNumberOfEntries() < 1)
       return group;
-    ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     if (group->getNumberOfEntries() < 2)
       return group;
-    ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    ws2 = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
     if (group->getNumberOfEntries() < 3)
       return group;
-    ws3 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(2));
+    ws3 = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(2));
     return group;
   }
 
@@ -807,8 +863,8 @@ public:
 
   void doHistoryCopyTest(const std::string &inputWSName,
                          const std::string &outputWSName) {
-    auto inputWS = boost::make_shared<WorkspaceTester>();
-    inputWS->history().addHistory(boost::make_shared<AlgorithmHistory>(
+    auto inputWS = std::make_shared<WorkspaceTester>();
+    inputWS->history().addHistory(std::make_shared<AlgorithmHistory>(
         "Load", 1, "b5b65a94-e656-468e-987c-644288fac655"));
     auto &ads = AnalysisDataService::Instance();
     ads.addOrReplace(inputWSName, inputWS);
@@ -839,12 +895,12 @@ public:
                                  const std::string &outputWSName) {
     using Mantid::Types::Core::DateAndTime;
     const auto group =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(makeWorkspaceGroup(
+        std::dynamic_pointer_cast<WorkspaceGroup>(makeWorkspaceGroup(
             inputWSName, inputWSName + "_1," + inputWSName + "_2"));
     const DateAndTime execDate{
         Mantid::Types::Core::DateAndTime::getCurrentTime()};
     for (auto &item : *group) {
-      item->history().addHistory(boost::make_shared<AlgorithmHistory>(
+      item->history().addHistory(std::make_shared<AlgorithmHistory>(
           "Load", 1, "49ea7cb9-6172-4e5c-acf5-c3edccd0bb27", execDate));
     }
     auto &ads = AnalysisDataService::Instance();
@@ -1022,5 +1078,3 @@ private:
   MatrixWorkspace_sptr ws2;
   MatrixWorkspace_sptr ws3;
 };
-
-#endif /*ALGORITHMTEST_H_*/

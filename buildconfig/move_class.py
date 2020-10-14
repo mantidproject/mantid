@@ -6,8 +6,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Utility for moving a class file to a different project."""
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import argparse
 import datetime
 import os
@@ -17,6 +15,8 @@ import sys
 from cmakelists_utils import *
 
 #======================================================================
+
+
 def move_one(subproject, classname, newproject, newclassname, oldfilename, newfilename, args):
     """Move one file """
 

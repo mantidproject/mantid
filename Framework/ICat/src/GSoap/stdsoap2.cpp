@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2000 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidKernel/WarningSuppressions.h"
 // ignore warnings in gSOAP
 // Long-term solution is to use gSOAP as an external library or external
@@ -14,6 +13,7 @@ GNU_DIAG_OFF("format-overflow")
 GNU_DIAG_OFF("format-truncation")
 GNU_DIAG_OFF("implicit-fallthrough")
 GNU_DIAG_OFF("cast-align")
+GNU_DIAG_OFF("deprecated-copy")
 
 /*
   stdsoap2.c[pp] 2.8.15
@@ -2882,11 +2882,11 @@ int SOAP_FMAC2 soap_match_array(struct soap *soap, const char *type) {
 }
 #endif
 
-  /******************************************************************************\
-   *
-   *  SSL/TLS
-   *
-  \******************************************************************************/
+/******************************************************************************\
+ *
+ *  SSL/TLS
+ *
+\******************************************************************************/
 
 #ifdef WITH_OPENSSL
 #ifndef PALM_2
@@ -3599,11 +3599,11 @@ int SOAP_FMAC2 soap_ssl_accept(struct soap *soap) {
 #endif
 #endif
 
-  /******************************************************************************\
-   *
-   *  TCP/UDP [SSL/TLS] IPv4 and IPv6
-   *
-  \******************************************************************************/
+/******************************************************************************\
+ *
+ *  TCP/UDP [SSL/TLS] IPv4 and IPv6
+ *
+\******************************************************************************/
 
 #ifndef WITH_NOIO
 #ifndef PALM_1
@@ -5385,11 +5385,11 @@ void SOAP_FMAC2 soap_done(struct soap *soap) {
 }
 #endif
 
-  /******************************************************************************\
-   *
-   *  HTTP
-   *
-  \******************************************************************************/
+/******************************************************************************\
+ *
+ *  HTTP
+ *
+\******************************************************************************/
 
 #ifndef WITH_NOHTTP
 #ifndef PALM_1
@@ -6177,11 +6177,11 @@ const char *SOAP_FMAC2 soap_encode_url_string(struct soap *soap,
 }
 #endif
 
-  /******************************************************************************\
-   *
-   *  HTTP Cookies
-   *
-  \******************************************************************************/
+/******************************************************************************\
+ *
+ *  HTTP Cookies
+ *
+\******************************************************************************/
 
 #ifdef WITH_COOKIES
 
@@ -16139,9 +16139,8 @@ int SOAP_FMAC2 soap_recv_fault(struct soap *soap, int check) {
              0) /* check == 1 but no SOAP: do not parse SOAP Fault */
     return SOAP_OK;
   soap->error = SOAP_OK;
-  if (soap_getfault(
-          soap)) { /* check flag set: check if SOAP Fault is present, if not
-                      just return */
+  if (soap_getfault(soap)) { /* check flag set: check if SOAP Fault is present,
+                                if not just return */
     if (check && soap->error == SOAP_TAG_MISMATCH && soap->level == 2)
       return soap->error = SOAP_OK;
     DBGLOG(TEST,
@@ -16593,3 +16592,4 @@ GNU_DIAG_ON("format-overflow")
 GNU_DIAG_ON("format-truncation")
 GNU_DIAG_ON("implicit-fallthrough")
 GNU_DIAG_ON("cast-align")
+GNU_DIAG_OFF("deprecated-copy")

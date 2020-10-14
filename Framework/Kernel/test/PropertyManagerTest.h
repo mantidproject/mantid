@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROPERTYMANAGERTEST_H_
-#define PROPERTYMANAGERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -77,6 +76,31 @@ public:
     manager->declareProperty(std::move(p));
     manager->declareProperty("anotherProp", 1.11);
     manager->declareProperty("yetAnotherProp", "itsValue");
+  }
+
+  void testStaticMethods() {
+    const std::string expected_suffix = "_invalid_values";
+    TSM_ASSERT_EQUALS(
+        "The expected suffix does not match to the line above this assert",
+        PropertyManager::INVALID_VALUES_SUFFIX, expected_suffix);
+
+    const std::string test_log_name = "testLog";
+    TS_ASSERT(!PropertyManager::isAnInvalidValuesFilterLog(test_log_name));
+    TS_ASSERT_EQUALS(
+        PropertyManager::getInvalidValuesFilterLogName(test_log_name),
+        test_log_name + expected_suffix);
+
+    TS_ASSERT(PropertyManager::isAnInvalidValuesFilterLog(
+        PropertyManager::getInvalidValuesFilterLogName(test_log_name)));
+
+    // not a valid invalid values log
+    TS_ASSERT_EQUALS(
+        PropertyManager::getLogNameFromInvalidValuesFilter(test_log_name), "");
+    // A valid invalid values log
+    TS_ASSERT_EQUALS(
+        PropertyManager::getLogNameFromInvalidValuesFilter(
+            PropertyManager::getInvalidValuesFilterLogName(test_log_name)),
+        test_log_name);
   }
 
   void testConstructor() {
@@ -181,8 +205,8 @@ public:
 
   void testdeclareProperty_double() {
     PropertyManagerHelper mgr;
-    boost::shared_ptr<BoundedValidator<double>> v =
-        boost::make_shared<BoundedValidator<double>>(1, 5);
+    std::shared_ptr<BoundedValidator<double>> v =
+        std::make_shared<BoundedValidator<double>>(1, 5);
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty("myProp", 9.99, v));
     // Note that some versions of boost::lexical_cast > 1.34 give a string such
     // as
@@ -205,7 +229,7 @@ public:
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING(mgr.declareProperty(
         "myProp", "theValue",
-        boost::make_shared<MandatoryValidator<std::string>>(), "hello"));
+        std::make_shared<MandatoryValidator<std::string>>(), "hello"));
     TS_ASSERT_EQUALS(mgr.getPropertyValue("myProp"), "theValue");
     Property *p = nullptr;
     TS_ASSERT_THROWS_NOTHING(p = mgr.getProperty("myProp"));
@@ -335,7 +359,7 @@ public:
     TS_ASSERT(manager->validateProperties());
     PropertyManagerHelper mgr;
     mgr.declareProperty("someProp", "",
-                        boost::make_shared<MandatoryValidator<std::string>>());
+                        std::make_shared<MandatoryValidator<std::string>>());
     TS_ASSERT(!mgr.validateProperties());
   }
 
@@ -600,7 +624,7 @@ public:
   void test_char_array() {
     PropertyManagerHelper mgr;
 
-    auto nonEmptyString = boost::make_shared<MandatoryValidator<std::string>>();
+    auto nonEmptyString = std::make_shared<MandatoryValidator<std::string>>();
     mgr.declareProperty("SampleChemicalFormula", "",
                         "Chemical composition of the sample material",
                         nonEmptyString, Direction::Input);
@@ -617,7 +641,7 @@ public:
     mgr.declareProperty(
         std::make_unique<PropertyWithValue<OptionalBool>>(
             "PropertyX", OptionalBool::Unset,
-            boost::make_shared<MandatoryValidator<OptionalBool>>(),
+            std::make_shared<MandatoryValidator<OptionalBool>>(),
             Direction::Input),
         "Custom property");
 
@@ -660,6 +684,43 @@ public:
     TS_ASSERT_EQUALS(i, 33);
   }
 
+  void test_operator_equals_same_contents() {
+    PropertyManager a;
+    PropertyManager b;
+
+    a.declareProperty("Prop1", 10);
+    b.declareProperty("Prop1", 10);
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_operator_not_equals_different_sizes() {
+    PropertyManager a;
+    PropertyManager b;
+
+    b.declareProperty("Prop1", 10);
+    TSM_ASSERT_DIFFERS("Unequal sizes", a, b);
+    TSM_ASSERT("Unequal sizes", !(a == b));
+  }
+
+  void test_operator_not_equals_different_keys() {
+    PropertyManager a;
+    PropertyManager b;
+    a.declareProperty("Prop1", 1);
+    b.declareProperty("Prop2", 1);
+    TSM_ASSERT_DIFFERS("Different Keys", a, b);
+    TSM_ASSERT("Different Keys", !(a == b));
+  }
+
+  void test_operator_not_equals_different_vaues() {
+    PropertyManager a;
+    PropertyManager b;
+    a.declareProperty("Prop1", 1);
+    b.declareProperty("Prop1", 2);
+    TSM_ASSERT_DIFFERS("Different Values", a, b);
+    TSM_ASSERT("Different Values", !(a == b));
+  }
+
 private:
   std::unique_ptr<PropertyManagerHelper> manager;
 };
@@ -697,5 +758,3 @@ private:
   /// Test filter
   boost::scoped_ptr<TimeSeriesProperty<bool>> m_filter;
 };
-
-#endif /*PROPERTYMANAGERTEST_H_*/

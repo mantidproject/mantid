@@ -1,13 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+
 
 # system imports
 import unittest
@@ -16,19 +15,23 @@ import unittest
 import matplotlib
 
 matplotlib.use('AGG')  # noqa
+import matplotlib.pyplot as plt
 import numpy as np
 from qtpy.QtCore import Qt
+from qtpy.QtWidgets import QMenu
 from testhelpers import assert_almost_equal
 
 # local package imports
 from mantid.plots import MantidAxes
-from mantid.py3compat.mock import MagicMock, PropertyMock, call, patch
+from unittest.mock import MagicMock, PropertyMock, call, patch
 from mantid.simpleapi import CreateWorkspace
 from mantidqt.plotting.figuretype import FigureType
-from mantidqt.plotting.functions import plot
-from workbench.plotting.figureinteraction import FigureInteraction
+from mantidqt.plotting.functions import plot, pcolormesh_from_names, plot_contour, pcolormesh
+from mantidqt.utils.qt.testing import start_qapplication
+from workbench.plotting.figureinteraction import FigureInteraction, LogNorm
 
 
+@start_qapplication
 class FigureInteractionTest(unittest.TestCase):
 
     @classmethod
@@ -49,6 +52,8 @@ class FigureInteractionTest(unittest.TestCase):
             UnitX='Wavelength',
             YUnitLabel='Counts',
             OutputWorkspace='ws1')
+        # initialises the QApplication
+        super(cls, FigureInteractionTest).setUpClass()
 
     @classmethod
     def tearDownClass(cls):
@@ -59,6 +64,13 @@ class FigureInteractionTest(unittest.TestCase):
         fig_manager = self._create_mock_fig_manager_to_accept_right_click()
         fig_manager.fit_browser.tool = None
         self.interactor = FigureInteraction(fig_manager)
+        self.fig, self.ax = plt.subplots()  # type: matplotlib.figure.Figure, MantidAxes
+
+    def tearDown(self):
+        plt.close('all')
+        del self.fig
+        del self.ax
+        del self.interactor
 
     # Success tests
     def test_construction_registers_handler_for_button_press_event(self):
@@ -73,6 +85,7 @@ class FigureInteractionTest(unittest.TestCase):
             call('resize_event', interactor.mpl_redraw_annotations),
             call('figure_leave_event', interactor.on_leave),
             call('axis_leave_event', interactor.on_leave),
+            call('scroll_event', interactor.on_scroll)
         ]
         fig_manager.canvas.mpl_connect.assert_has_calls(expected_call)
         self.assertEqual(len(expected_call), fig_manager.canvas.mpl_connect.call_count)
@@ -105,17 +118,38 @@ class FigureInteractionTest(unittest.TestCase):
            autospec=True)
     @patch('workbench.plotting.figureinteraction.figure_type',
            autospec=True)
-    def test_right_click_gives_no_context_menu_for_color_plot(self, mocked_figure_type,
-                                                              mocked_qmenu):
+    def test_right_click_gives_context_menu_for_color_plot(self, mocked_figure_type,
+                                                           mocked_qmenu):
         fig_manager = self._create_mock_fig_manager_to_accept_right_click()
         interactor = FigureInteraction(fig_manager)
         mouse_event = self._create_mock_right_click()
         mocked_figure_type.return_value = FigureType.Image
 
-        with patch.object(interactor.toolbar_manager, 'is_tool_active',
-                          lambda: False):
-            interactor.on_mouse_button_press(mouse_event)
-            self.assertEqual(0, mocked_qmenu.call_count)
+        # Expect a call to QMenu() for the outer menu followed by three more calls
+        # for the Axes, Normalization and Colorbar menus
+        qmenu_call1 = MagicMock()
+        qmenu_call2 = MagicMock()
+        qmenu_call3 = MagicMock()
+        qmenu_call4 = MagicMock()
+        mocked_qmenu.side_effect = [qmenu_call1, qmenu_call2, qmenu_call3, qmenu_call4]
+
+        with patch('workbench.plotting.figureinteraction.QActionGroup',
+                   autospec=True):
+            with patch.object(interactor.toolbar_manager, 'is_tool_active',
+                              lambda: False):
+                interactor.on_mouse_button_press(mouse_event)
+                self.assertEqual(0, qmenu_call1.addAction.call_count)
+                expected_qmenu_calls = [call(),
+                                        call("Axes", qmenu_call1),
+                                        call("Normalization", qmenu_call1),
+                                        call("Color bar", qmenu_call1)]
+                self.assertEqual(expected_qmenu_calls, mocked_qmenu.call_args_list)
+                # 4 actions in Axes submenu
+                self.assertEqual(4, qmenu_call2.addAction.call_count)
+                # 2 actions in Normalization submenu
+                self.assertEqual(2, qmenu_call3.addAction.call_count)
+                # 2 actions in Colorbar submenu
+                self.assertEqual(2, qmenu_call4.addAction.call_count)
 
     @patch('workbench.plotting.figureinteraction.QMenu',
            autospec=True)
@@ -129,6 +163,7 @@ class FigureInteractionTest(unittest.TestCase):
         mouse_event = self._create_mock_right_click()
         mouse_event.inaxes.get_xlim.return_value = (1, 2)
         mouse_event.inaxes.get_ylim.return_value = (1, 2)
+        mouse_event.inaxes.lines = []
         mocked_figure_type.return_value = FigureType.Line
 
         # Expect a call to QMenu() for the outer menu followed by two more calls
@@ -143,7 +178,7 @@ class FigureInteractionTest(unittest.TestCase):
                    autospec=True):
             with patch.object(interactor.toolbar_manager, 'is_tool_active',
                               lambda: False):
-                with patch.object(interactor.errors_manager, 'add_error_bars_menu', MagicMock()):
+                with patch.object(interactor, 'add_error_bars_menu', MagicMock()):
                     interactor.on_mouse_button_press(mouse_event)
                     self.assertEqual(0, qmenu_call1.addSeparator.call_count)
                     self.assertEqual(0, qmenu_call1.addAction.call_count)
@@ -165,8 +200,16 @@ class FigureInteractionTest(unittest.TestCase):
     def test_toggle_normalization_with_errorbars(self):
         self._test_toggle_normalization(errorbars_on=True, plot_kwargs={'distribution': True})
 
-    def test_correct_yunit_label_when_overplotting_after_normaliztion_toggle(self):
-        fig = plot([self.ws], spectrum_nums=[1], errors=True,
+    def test_correct_yunit_label_when_overplotting_after_normalization_toggle(self):
+        # The earlier version of Matplotlib on RHEL throws an error when performing the second
+        # plot in this test, if the lines have errorbars. The error occurred when it attempted
+        # to draw an interactive legend. Plotting without errors still fulfills the purpose of this
+        # test, so turn them off for old Matplotlib versions.
+        errors = True
+        if int(matplotlib.__version__[0]) < 2:
+            errors = False
+
+        fig = plot([self.ws], spectrum_nums=[1], errors=errors,
                    plot_kwargs={'distribution': True})
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)
@@ -174,9 +217,9 @@ class FigureInteractionTest(unittest.TestCase):
 
         ax = fig.axes[0]
         fig_interactor._toggle_normalization(ax)
-        self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
-        plot([self.ws1], spectrum_nums=[1], errors=True, overplot=True, fig=fig)
-        self.assertEqual("Counts ($\AA$)$^{-1}$", ax.get_ylabel())
+        self.assertEqual(r"Counts ($\AA$)$^{-1}$", ax.get_ylabel())
+        plot([self.ws1], spectrum_nums=[1], errors=errors, overplot=True, fig=fig)
+        self.assertEqual(r"Counts ($\AA$)$^{-1}$", ax.get_ylabel())
 
     def test_normalization_toggle_with_no_autoscale_on_update_no_errors(self):
         self._test_toggle_normalization(errorbars_on=False,
@@ -185,6 +228,127 @@ class FigureInteractionTest(unittest.TestCase):
     def test_normalization_toggle_with_no_autoscale_on_update_with_errors(self):
         self._test_toggle_normalization(errorbars_on=True,
                                         plot_kwargs={'distribution': True, 'autoscale_on_update': False})
+
+    def test_add_error_bars_menu(self):
+        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
+        main_menu = QMenu()
+        self.interactor.add_error_bars_menu(main_menu, self.ax)
+
+        # Check the expected sub-menu with buttons is added
+        added_menu = main_menu.children()[1]
+        self.assertTrue(
+            any(FigureInteraction.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
+        self.assertTrue(
+            any(FigureInteraction.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
+
+    def test_context_menu_not_added_for_scripted_plot_without_errors(self):
+        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
+        self.ax.plot([0, 15000], [0, 14000], label='MyLabel 2')
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        # plot above doesn't have errors, nor is a MantidAxes
+        # so no context menu will be added
+        self.interactor.add_error_bars_menu(main_menu, self.ax)
+
+        # number of children should remain unchanged
+        self.assertEqual(1, len(main_menu.children()))
+
+    def test_scripted_plot_line_without_label_handled_properly(self):
+        # having the special nolabel is usually present on lines with errors,
+        # but sometimes can be present on lines without errors, this test covers that case
+        self.ax.plot([0, 15000], [0, 15000], label='_nolegend_')
+        self.ax.plot([0, 15000], [0, 15000], label='_nolegend_')
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        # plot above doesn't have errors, nor is a MantidAxes
+        # so no context menu will be added for error bars
+        self.interactor.add_error_bars_menu(main_menu, self.ax)
+
+        # number of children should remain unchanged
+        self.assertEqual(1, len(main_menu.children()))
+
+    def test_context_menu_added_for_scripted_plot_with_errors(self):
+        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
+        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        # plot above doesn't have errors, nor is a MantidAxes
+        # so no context menu will be added
+        self.interactor.add_error_bars_menu(main_menu, self.ax)
+
+        added_menu = main_menu.children()[1]
+
+        # actions should have been added now, which for this case are only `Show all` and `Hide all`
+        self.assertTrue(
+            any(FigureInteraction.SHOW_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
+        self.assertTrue(
+            any(FigureInteraction.HIDE_ERROR_BARS_BUTTON_TEXT == child.text() for child in added_menu.children()))
+
+    def test_context_menu_includes_plot_type_if_plot_has_multiple_lines(self):
+        fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.ax.plot([0, 1], [0, 1])
+        self.ax.plot([0, 1], [0, 1])
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        self.interactor._add_plot_type_option_menu(main_menu, self.ax)
+
+        added_menu = main_menu.children()[1]
+        self.assertEqual(added_menu.children()[0].text(), "Plot Type")
+
+    def test_context_menu_does_not_include_plot_type_if_plot_has_one_line(self):
+        fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.ax.errorbar([0, 1], [0, 1], capsize=1)
+
+        main_menu = QMenu()
+        # QMenu always seems to have 1 child when empty,
+        # but just making sure the count as expected at this point in the test
+        self.assertEqual(1, len(main_menu.children()))
+
+        self.interactor._add_plot_type_option_menu(main_menu, self.ax)
+
+        # Number of children should remain unchanged
+        self.assertEqual(1, len(main_menu.children()))
+
+    def test_scripted_plot_show_and_hide_all(self):
+        self.ax.plot([0, 15000], [0, 15000], label='MyLabel')
+        self.ax.errorbar([0, 15000], [0, 14000], yerr=[10, 10000], label='MyLabel 2')
+
+        anonymous_menu = QMenu()
+        # this initialises some of the class internals
+        self.interactor.add_error_bars_menu(anonymous_menu, self.ax)
+
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+        self.interactor.errors_manager.toggle_all_errors(self.ax, make_visible=False)
+        self.assertFalse(self.ax.containers[0][2][0].get_visible())
+
+        # make the menu again, this updates the internal state of the errors manager
+        # and is what actually happens when the user opens the menu again
+        self.interactor.add_error_bars_menu(anonymous_menu, self.ax)
+        self.interactor.errors_manager.toggle_all_errors(self.ax, make_visible=True)
+        self.assertTrue(self.ax.containers[0][2][0].get_visible())
+
+    def test_no_normalisation_options_on_non_workspace_plot(self):
+        fig, self.ax = plt.subplots(subplot_kw={'projection': 'mantid'})
+        self.ax.plot([1, 2], [1, 2], label="myLabel")
+
+        anonymous_menu = QMenu()
+        self.assertEqual(None, self.interactor._add_normalization_option_menu(anonymous_menu, self.ax))
 
     # Failure tests
     def test_construction_with_non_qt_canvas_raises_exception(self):
@@ -214,43 +378,30 @@ class FigureInteractionTest(unittest.TestCase):
         current_scale_types2 = (ax.get_xscale(), ax.get_yscale())
         self.assertNotEqual(current_scale_types2, current_scale_types1)
 
-    # Private methods
-    def _create_mock_fig_manager_to_accept_right_click(self):
-        fig_manager = MagicMock()
-        canvas = MagicMock()
-        type(canvas).buttond = PropertyMock(return_value={Qt.RightButton: 3})
-        fig_manager.canvas = canvas
-        return fig_manager
-
-    def _create_mock_right_click(self):
-        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes))
-        type(mouse_event).button = PropertyMock(return_value=3)
-        return mouse_event
-
-    def _test_toggle_normalization(self, errorbars_on, plot_kwargs):
-        fig = plot([self.ws], spectrum_nums=[1], errors=errorbars_on,
-                   plot_kwargs=plot_kwargs)
+    def test_scale_on_ragged_workspaces_maintained_when_toggling_normalisation(self):
+        ws = CreateWorkspace(DataX=[1, 2, 3, 4, 2, 4, 6, 8], DataY=[2] * 8, NSpec=2, OutputWorkspace="ragged_ws")
+        fig = pcolormesh_from_names([ws])
         mock_canvas = MagicMock(figure=fig)
         fig_manager_mock = MagicMock(canvas=mock_canvas)
         fig_interactor = FigureInteraction(fig_manager_mock)
+        fig_interactor._toggle_normalization(fig.axes[0])
 
-        # Earlier versions of matplotlib do not store the data assciated with a
-        # line with high precision and hence we need to set a lower tolerance
-        # when making comparisons of this data
-        if matplotlib.__version__ < "2":
-            decimal_tol = 1
-        else:
-            decimal_tol = 7
+        clim = fig.axes[0].images[0].get_clim()
+        fig_interactor._toggle_normalization(fig.axes[0])
+        self.assertEqual(clim, fig.axes[0].images[0].get_clim())
+        self.assertNotEqual((-0.1, 0.1), fig.axes[0].images[0].get_clim())
 
-        ax = fig.axes[0]
-        fig_interactor._toggle_normalization(ax)
-        assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
-        assert_almost_equal(ax.lines[0].get_ydata(), [0.2, 0.3], decimal=decimal_tol)
-        self.assertEqual("Counts ($\\AA$)$^{-1}$", ax.get_ylabel())
-        fig_interactor._toggle_normalization(ax)
-        assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
-        assert_almost_equal(ax.lines[0].get_ydata(), [2, 3], decimal=decimal_tol)
-        self.assertEqual("Counts", ax.get_ylabel())
+    def test_log_maintained_when_normalisation_toggled(self):
+        ws = CreateWorkspace(DataX=[1, 2, 3, 4, 2, 4, 6, 8], DataY=[2] * 8, NSpec=2, OutputWorkspace="ragged_ws")
+        fig = pcolormesh_from_names([ws])
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+        fig_interactor._change_colorbar_axes(LogNorm)
+
+        fig_interactor._toggle_normalization(fig.axes[0])
+
+        self.assertTrue(isinstance(fig.axes[0].images[-1].norm, LogNorm))
 
     @patch('workbench.plotting.figureinteraction.QMenu', autospec=True)
     @patch('workbench.plotting.figureinteraction.figure_type', autospec=True)
@@ -276,7 +427,7 @@ class FigureInteractionTest(unittest.TestCase):
 
         with patch('workbench.plotting.figureinteraction.QActionGroup', autospec=True):
             with patch.object(self.interactor.toolbar_manager, 'is_tool_active', lambda: False):
-                with patch.object(self.interactor.errors_manager, 'add_error_bars_menu', MagicMock()):
+                with patch.object(self.interactor, 'add_error_bars_menu', MagicMock()):
                     self.interactor.on_mouse_button_press(mouse_event)
                     self.assertEqual(0, qmenu_call1.addSeparator.call_count)
                     self.assertEqual(0, qmenu_call1.addAction.call_count)
@@ -296,7 +447,7 @@ class FigureInteractionTest(unittest.TestCase):
         data = MagicMock()
         axis = MagicMock()
         self.interactor._add_horizontal_marker(data, y0, y1, axis)
-        expected_call = call(self.interactor.canvas, 'C2', data, y0, y1,
+        expected_call = call(self.interactor.canvas, '#2ca02c', data, y0, y1,
                              name='marker 0',
                              marker_type='YSingle',
                              line_style='dashed',
@@ -311,7 +462,7 @@ class FigureInteractionTest(unittest.TestCase):
         data = MagicMock()
         axis = MagicMock()
         self.interactor._add_vertical_marker(data, x0, x1, axis)
-        expected_call = call(self.interactor.canvas, 'C2', data, x0, x1,
+        expected_call = call(self.interactor.canvas, '#2ca02c', data, x0, x1,
                              name='marker 0',
                              marker_type='XSingle',
                              line_style='dashed',
@@ -375,6 +526,13 @@ class FigureInteractionTest(unittest.TestCase):
 
         self.assertEqual(0, self.interactor._set_hover_cursor.call_count)
 
+    def test_motion_event_returns_if_fit_active(self):
+        self.interactor.toolbar_manager.is_fit_active = MagicMock(return_value=True)
+        self.interactor._set_hover_cursor = MagicMock()
+        self.interactor.motion_event(MagicMock())
+
+        self.assertEqual(0, self.interactor._set_hover_cursor.call_count)
+
     def test_motion_event_changes_cursor_and_draws_canvas_if_any_marker_is_moving(self):
         markers = [MagicMock(), MagicMock(), MagicMock()]
         for marker in markers:
@@ -384,6 +542,7 @@ class FigureInteractionTest(unittest.TestCase):
         event.ydata = 2
         self.interactor.markers = markers
         self.interactor.toolbar_manager.is_tool_active = MagicMock(return_value=False)
+        self.interactor.toolbar_manager.is_fit_active = MagicMock(return_value=False)
         self.interactor._set_hover_cursor = MagicMock()
 
         self.interactor.motion_event(event)
@@ -400,6 +559,7 @@ class FigureInteractionTest(unittest.TestCase):
         event.ydata = 2
         self.interactor.markers = markers
         self.interactor.toolbar_manager.is_tool_active = MagicMock(return_value=False)
+        self.interactor.toolbar_manager.is_fit_active = MagicMock(return_value=False)
         self.interactor._set_hover_cursor = MagicMock()
 
         self.interactor.motion_event(event)
@@ -436,6 +596,78 @@ class FigureInteractionTest(unittest.TestCase):
         event = MagicMock()
         self.interactor.mpl_redraw_annotations(event)
         self.assertEqual(1, self.interactor.redraw_annotations.call_count)
+
+    def test_toggle_normalisation_on_contour_plot_maintains_contour_line_colour(self):
+        from mantid.plots.legend import convert_color_to_hex
+        ws = CreateWorkspace(DataX=[1, 2, 3, 4, 2, 4, 6, 8], DataY=[2] * 8, NSpec=2, OutputWorkspace="test_ws")
+        fig = plot_contour([ws])
+
+        for col in fig.get_axes()[0].collections:
+            col.set_color("#ff9900")
+
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+        fig_interactor._toggle_normalization(fig.axes[0])
+
+        self.assertTrue(all(convert_color_to_hex(col.get_color()[0]) == "#ff9900"
+                            for col in fig.get_axes()[0].collections))
+
+    def test_toggle_normalisation_applies_to_all_images_if_one_colorbar(self):
+        fig = pcolormesh([self.ws, self.ws])
+
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+
+        # there should be 3 axes, 2 colorplots and 1 colorbar
+        self.assertEqual(3, len(fig.axes))
+        fig.axes[0].tracked_workspaces.values()
+        self.assertTrue(fig.axes[0].tracked_workspaces['ws'][0].is_normalized)
+        self.assertTrue(fig.axes[1].tracked_workspaces['ws'][0].is_normalized)
+
+        fig_interactor._toggle_normalization(fig.axes[0])
+
+        self.assertFalse(fig.axes[0].tracked_workspaces['ws'][0].is_normalized)
+        self.assertFalse(fig.axes[1].tracked_workspaces['ws'][0].is_normalized)
+
+ # Private methods
+    def _create_mock_fig_manager_to_accept_right_click(self):
+        fig_manager = MagicMock()
+        canvas = MagicMock()
+        type(canvas).buttond = PropertyMock(return_value={Qt.RightButton: 3})
+        fig_manager.canvas = canvas
+        return fig_manager
+
+    def _create_mock_right_click(self):
+        mouse_event = MagicMock(inaxes=MagicMock(spec=MantidAxes, collections = [], creation_args = [{}]))
+        type(mouse_event).button = PropertyMock(return_value=3)
+        return mouse_event
+
+    def _test_toggle_normalization(self, errorbars_on, plot_kwargs):
+        fig = plot([self.ws], spectrum_nums=[1], errors=errorbars_on,
+                   plot_kwargs=plot_kwargs)
+        mock_canvas = MagicMock(figure=fig)
+        fig_manager_mock = MagicMock(canvas=mock_canvas)
+        fig_interactor = FigureInteraction(fig_manager_mock)
+
+        # Earlier versions of matplotlib do not store the data assciated with a
+        # line with high precision and hence we need to set a lower tolerance
+        # when making comparisons of this data
+        if matplotlib.__version__ < "2":
+            decimal_tol = 1
+        else:
+            decimal_tol = 7
+
+        ax = fig.axes[0]
+        fig_interactor._toggle_normalization(ax)
+        assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
+        assert_almost_equal(ax.lines[0].get_ydata(), [0.2, 0.3], decimal=decimal_tol)
+        self.assertEqual("Counts ($\\AA$)$^{-1}$", ax.get_ylabel())
+        fig_interactor._toggle_normalization(ax)
+        assert_almost_equal(ax.lines[0].get_xdata(), [15, 25])
+        assert_almost_equal(ax.lines[0].get_ydata(), [2, 3], decimal=decimal_tol)
+        self.assertEqual("Counts", ax.get_ylabel())
 
 
 if __name__ == '__main__':

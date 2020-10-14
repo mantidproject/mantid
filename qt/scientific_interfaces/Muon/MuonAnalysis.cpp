@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MuonAnalysis.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -60,6 +60,7 @@
 #include <QVariant>
 
 #include <fstream>
+#include <utility>
 
 // Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt {
@@ -85,7 +86,7 @@ void zoomYAxis(const QString &wsName, QMap<QString, QString> &params) {
   Workspace_sptr ws_ptr =
       AnalysisDataService::Instance().retrieve(wsName.toStdString());
   MatrixWorkspace_sptr matrix_workspace =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
+      std::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
   const auto &xData = matrix_workspace->x(0);
 
   const auto xMin = *min_element(xData.begin(), xData.end());
@@ -98,8 +99,8 @@ void zoomYAxis(const QString &wsName, QMap<QString, QString> &params) {
     for (size_t index = 0; index < matrix_workspace->e(0).size(); index++) {
       const auto &yData = matrix_workspace->y(0)[index];
       const auto &eData = matrix_workspace->e(0)[index];
-      yPlusEData.push_back(yData + eData);
-      yMinusEData.push_back(yData - eData);
+      yPlusEData.emplace_back(yData + eData);
+      yMinusEData.emplace_back(yData - eData);
     }
 
     auto xN = std::distance(xData.begin(),
@@ -146,7 +147,10 @@ MuonAnalysis::MuonAnalysis(QWidget *parent)
       m_dataLoader(Muon::DeadTimesType::None, // will be replaced by correct
                                               // instruments later
                    {"MUSR", "HIFI", "EMU", "ARGUS", "CHRONUS"}),
-      m_deadTimeIndex(-1), m_useDeadTime(true) {}
+      m_deadTimeIndex(-1), m_useDeadTime(true) {
+  g_log.warning(
+      "This interface is deprecated, please use Muon Analysis instead");
+}
 
 /**
  * Destructor
@@ -325,7 +329,7 @@ void MuonAnalysis::initLayout() {
 
   // file input
   connect(m_uiForm.mwRunFiles, SIGNAL(fileFindingFinished()), this,
-          SLOT(inputFileChanged_MWRunFiles()));
+          SLOT(inputFileChanged_FileFinderWidget()));
 
   connect(m_uiForm.timeZeroAuto, SIGNAL(stateChanged(int)), this,
           SLOT(setTimeZeroState(int)));
@@ -483,7 +487,7 @@ void MuonAnalysis::moveUnNormWS(const std::string &name,
   }
   if (ads.doesExist("tmp_unNorm")) {
     ads.rename("tmp_unNorm", name + unnorm);
-    wsNames.push_back(name + unnorm);
+    wsNames.emplace_back(name + unnorm);
   }
 }
 /**
@@ -601,7 +605,7 @@ Workspace_sptr MuonAnalysis::createAnalysisWorkspace(ItemType itemType,
   options.timeLimits.second = finishTime();
   options.rebinArgs = isRaw ? "" : rebinParams(loadedWS);
   options.plotType = plotType;
-  options.wsName = wsName;
+  options.wsName = std::move(wsName);
   const auto *table =
       itemType == ItemType::Group ? m_uiForm.groupTable : m_uiForm.pairTable;
   options.groupPairName = table->item(tableRow, 0)->text().toStdString();
@@ -1086,8 +1090,7 @@ void MuonAnalysis::updatePairTable() {
   }
 
   // get previous number of groups as listed in the pair comboboxes
-  QComboBox *qwF =
-      static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(0, 1));
+  auto *qwF = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(0, 1));
   int previousNumGroups =
       qwF->count(); // how many groups listed in pair combobox
   int newNumGroups = numGroups();
@@ -1095,8 +1098,7 @@ void MuonAnalysis::updatePairTable() {
   // reset context of combo boxes
   for (int i = 0; i < m_uiForm.pairTable->rowCount(); i++) {
     qwF = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 1));
-    QComboBox *qwB =
-        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 2));
+    auto *qwB = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 2));
 
     if (previousNumGroups < newNumGroups) {
       // then need to increase the number of entrees in combo box
@@ -1137,7 +1139,7 @@ void MuonAnalysis::updatePairTable() {
 /**
  * Slot called when the input file is changed.
  */
-void MuonAnalysis::inputFileChanged_MWRunFiles() {
+void MuonAnalysis::inputFileChanged_FileFinderWidget() {
   // Handle changed input, then turn buttons back on.
   handleInputFileChanges();
   allowLoading(true);
@@ -1179,11 +1181,11 @@ void MuonAnalysis::handleInputFileChanges() {
  * @param loadResult :: Various loaded parameters as returned by load()
  * @return Used grouping for populating grouping table
  */
-boost::shared_ptr<GroupResult>
-MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
-  auto result = boost::make_shared<GroupResult>();
+std::shared_ptr<GroupResult>
+MuonAnalysis::getGrouping(const std::shared_ptr<LoadResult> &loadResult) const {
+  auto result = std::make_shared<GroupResult>();
 
-  boost::shared_ptr<Mantid::API::Grouping> groupingToUse;
+  std::shared_ptr<Mantid::API::Grouping> groupingToUse;
   Instrument_const_sptr instr =
       firstPeriod(loadResult->loadedWorkspace)->getInstrument();
 
@@ -1201,7 +1203,7 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
   if (!reloadNecessary && isGroupingSet()) {
     // Use grouping currently set
     result->usedExistGrouping = true;
-    groupingToUse = boost::make_shared<Mantid::API::Grouping>(
+    groupingToUse = std::make_shared<Mantid::API::Grouping>(
         m_groupingHelper.parseGroupingTable());
   } else {
     // Need to load a new grouping
@@ -1220,15 +1222,14 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
         g_log.warning("Using grouping loaded from NeXus file.");
         ITableWorkspace_sptr groupingTable;
 
-        if (!(groupingTable = boost::dynamic_pointer_cast<ITableWorkspace>(
+        if (!(groupingTable = std::dynamic_pointer_cast<ITableWorkspace>(
                   loadResult->loadedGrouping))) {
-          auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(
+          auto group = std::dynamic_pointer_cast<WorkspaceGroup>(
               loadResult->loadedGrouping);
           groupingTable =
-              boost::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
+              std::dynamic_pointer_cast<ITableWorkspace>(group->getItem(0));
         }
-        groupingToUse =
-            boost::make_shared<Mantid::API::Grouping>(groupingTable);
+        groupingToUse = std::make_shared<Mantid::API::Grouping>(groupingTable);
         groupingToUse->description = "Grouping from Nexus file";
       } else {
         g_log.warning(
@@ -1246,8 +1247,8 @@ MuonAnalysis::getGrouping(boost::shared_ptr<LoadResult> loadResult) const {
 /**
  * Input file changed. Update GUI accordingly. Note this method does no check of
  * input filename assumed
- * done elsewhere depending on e.g. whether filename came from MWRunFiles or
- * 'get current run' button.
+ * done elsewhere depending on e.g. whether filename came from FileFinderWidget
+ * or 'get current run' button.
  *
  * @param files :: All file names for the files loading.
  */
@@ -1264,14 +1265,14 @@ void MuonAnalysis::inputFileChanged(const QStringList &files) {
   m_updating = true;
   m_uiForm.tabWidget->setTabEnabled(3, false);
 
-  boost::shared_ptr<LoadResult> loadResult;
-  boost::shared_ptr<GroupResult> groupResult;
+  std::shared_ptr<LoadResult> loadResult;
+  std::shared_ptr<GroupResult> groupResult;
   ITableWorkspace_sptr deadTimes;
   Workspace_sptr correctedGroupedWS;
 
   try {
     // Load the new file(s)
-    loadResult = boost::make_shared<LoadResult>(m_dataLoader.loadFiles(files));
+    loadResult = std::make_shared<LoadResult>(m_dataLoader.loadFiles(files));
 
     try // to get the dead time correction
     {
@@ -1465,9 +1466,9 @@ void MuonAnalysis::guessAlphaClicked() {
   m_updating = true;
 
   if (getPairNumberFromRow(m_pairTableRowInFocus) >= 0) {
-    QComboBox *qwF = static_cast<QComboBox *>(
+    auto *qwF = static_cast<QComboBox *>(
         m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus, 1));
-    QComboBox *qwB = static_cast<QComboBox *>(
+    auto *qwB = static_cast<QComboBox *>(
         m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus, 2));
 
     if (!qwF || !qwB)
@@ -1509,7 +1510,7 @@ void MuonAnalysis::guessAlphaClicked() {
 
     const QString alpha = QString::number(alphaValue);
 
-    QComboBox *qwAlpha = static_cast<QComboBox *>(
+    auto *qwAlpha = static_cast<QComboBox *>(
         m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus, 3));
     if (qwAlpha)
       m_uiForm.pairTable->item(m_pairTableRowInFocus, 3)->setText(alpha);
@@ -1939,7 +1940,7 @@ QMap<QString, QString> MuonAnalysis::getPlotStyleParams(const QString &wsName) {
   Workspace_const_sptr ws_ptr =
       AnalysisDataService::Instance().retrieve(wsName.toStdString());
   MatrixWorkspace_const_sptr matrix_workspace =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(ws_ptr);
+      std::dynamic_pointer_cast<const MatrixWorkspace>(ws_ptr);
   const auto &xData = matrix_workspace->x(0);
 
   auto lower = m_uiForm.timeAxisStartAtInput->text().toDouble();
@@ -2186,7 +2187,7 @@ void MuonAnalysis::startUpLook() {
   for (int i = 0; i < m_uiForm.groupTable->rowCount(); i++) {
     QTableWidgetItem *item = m_uiForm.groupTable->item(i, 2);
     if (!item) {
-      QTableWidgetItem *it = new QTableWidgetItem("");
+      auto *it = new QTableWidgetItem("");
       it->setFlags(it->flags() & (~Qt::ItemIsEditable));
       m_uiForm.groupTable->setItem(i, 2, it);
     } else {
@@ -2194,7 +2195,7 @@ void MuonAnalysis::startUpLook() {
     }
     item = m_uiForm.groupTable->item(i, 0);
     if (!item) {
-      QTableWidgetItem *it = new QTableWidgetItem("");
+      auto *it = new QTableWidgetItem("");
       m_uiForm.groupTable->setItem(i, 0, it);
     }
   }
@@ -2219,13 +2220,13 @@ double MuonAnalysis::timeZero() {
  * size
  * @return Params string to pass to rebin
  */
-std::string MuonAnalysis::rebinParams(Workspace_sptr wsForRebin) {
+std::string MuonAnalysis::rebinParams(const Workspace_sptr &wsForRebin) {
   MuonAnalysisOptionTab::RebinType rebinType = m_optionTab->getRebinType();
 
   if (rebinType == MuonAnalysisOptionTab::NoRebin) {
     return "";
   } else if (rebinType == MuonAnalysisOptionTab::FixedRebin) {
-    MatrixWorkspace_sptr ws = firstPeriod(wsForRebin);
+    MatrixWorkspace_sptr ws = firstPeriod(std::move(wsForRebin));
     double binSize = ws->x(0)[1] - ws->x(0)[0];
 
     double stepSize = m_optionTab->getRebinStep();
@@ -2748,7 +2749,7 @@ void MuonAnalysis::changeTab(int newTabIndex) {
 
   m_currentTab = newTab;
 }
-void MuonAnalysis::updateNormalization(QString name) {
+void MuonAnalysis::updateNormalization(const QString &name) {
   m_uiForm.fitBrowser->setNormalization(name.toStdString());
 }
 
@@ -3215,9 +3216,7 @@ void MuonAnalysis::nowDataAvailable() {
 }
 
 void MuonAnalysis::openDirectoryDialog() {
-  auto ad = new MantidQt::API::ManageUserDirectories(this);
-  ad->show();
-  ad->setFocus();
+  MantidQt::API::ManageUserDirectories::openManageUserDirectories();
 }
 
 /**

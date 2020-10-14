@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/OptimizeLatticeForCellType.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -41,15 +41,15 @@ void OptimizeLatticeForCellType::init() {
                       "PeaksWorkspace", "", Direction::InOut),
                   "An input PeaksWorkspace with an instrument.");
   std::vector<std::string> cellTypes;
-  cellTypes.push_back(ReducedCell::CUBIC());
-  cellTypes.push_back(ReducedCell::TETRAGONAL());
-  cellTypes.push_back(ReducedCell::ORTHORHOMBIC());
-  cellTypes.push_back(ReducedCell::HEXAGONAL());
-  cellTypes.push_back(ReducedCell::RHOMBOHEDRAL());
-  cellTypes.push_back(ReducedCell::MONOCLINIC());
-  cellTypes.push_back(ReducedCell::TRICLINIC());
+  cellTypes.emplace_back(ReducedCell::CUBIC());
+  cellTypes.emplace_back(ReducedCell::TETRAGONAL());
+  cellTypes.emplace_back(ReducedCell::ORTHORHOMBIC());
+  cellTypes.emplace_back(ReducedCell::HEXAGONAL());
+  cellTypes.emplace_back(ReducedCell::RHOMBOHEDRAL());
+  cellTypes.emplace_back(ReducedCell::MONOCLINIC());
+  cellTypes.emplace_back(ReducedCell::TRICLINIC());
   declareProperty("CellType", cellTypes[0],
-                  boost::make_shared<StringListValidator>(cellTypes),
+                  std::make_shared<StringListValidator>(cellTypes),
                   "Select the cell type.");
   declareProperty("Apply", false, "Re-index the peaks");
   declareProperty("PerRun", false, "Make per run orientation matrices");
@@ -90,17 +90,17 @@ void OptimizeLatticeForCellType::exec() {
       const std::vector<Peak> &peaks = ws->getPeaks();
       if (edgePixel(inst, peaks[i].getBankName(), peaks[i].getCol(),
                     peaks[i].getRow(), edge)) {
-        badPeaks.push_back(i);
+        badPeaks.emplace_back(i);
       }
     }
     ws->removePeaks(std::move(badPeaks));
   }
-  runWS.push_back(ws);
+  runWS.emplace_back(ws);
 
   if (perRun) {
     std::vector<std::pair<std::string, bool>> criteria;
     // Sort by run number
-    criteria.push_back(std::pair<std::string, bool>("runnumber", true));
+    criteria.emplace_back(std::pair<std::string, bool>("runnumber", true));
     ws->sort(criteria);
     const std::vector<Peak> &peaks_all = ws->getPeaks();
     int run = 0;
@@ -108,10 +108,10 @@ void OptimizeLatticeForCellType::exec() {
     for (const auto &peak : peaks_all) {
       if (peak.getRunNumber() != run) {
         count++; // first entry in runWS is input workspace
-        auto cloneWS = boost::make_shared<PeaksWorkspace>();
+        auto cloneWS = std::make_shared<PeaksWorkspace>();
         cloneWS->setInstrument(inst);
         cloneWS->copyExperimentInfoFrom(ws.get());
-        runWS.push_back(cloneWS);
+        runWS.emplace_back(cloneWS);
         runWS[count]->addPeak(peak);
         run = peak.getRunNumber();
         AnalysisDataService::Instance().addOrReplace(
@@ -126,6 +126,11 @@ void OptimizeLatticeForCellType::exec() {
     DataObjects::PeaksWorkspace_sptr peakWS(i_run->clone());
     AnalysisDataService::Instance().addOrReplace("_peaks", peakWS);
     const DblMatrix UB = peakWS->sample().getOrientedLattice().getUB();
+    auto ol = peakWS->sample().getOrientedLattice();
+    DblMatrix modUB = peakWS->mutableSample().getOrientedLattice().getModUB();
+    int maxOrder = peakWS->mutableSample().getOrientedLattice().getMaxOrder();
+    bool crossTerms =
+        peakWS->mutableSample().getOrientedLattice().getCrossTerm();
     std::vector<double> lat(6);
     IndexingUtils::GetLatticeParameters(UB, lat);
 
@@ -140,8 +145,8 @@ void OptimizeLatticeForCellType::exec() {
       throw;
     }
 
-    fit_alg->setProperty(
-        "Function", boost::static_pointer_cast<IFunction>(latticeFunction));
+    fit_alg->setProperty("Function",
+                         std::static_pointer_cast<IFunction>(latticeFunction));
     fit_alg->setProperty("Ties", "ZeroShift=0.0");
     fit_alg->setProperty("InputWorkspace", peakWS);
     fit_alg->setProperty("CostFunction", "Unweighted least squares");
@@ -168,18 +173,24 @@ void OptimizeLatticeForCellType::exec() {
     ub_alg->setProperty("gamma", refinedCell.gamma());
     ub_alg->executeAsChildAlg();
     DblMatrix UBnew = peakWS->mutableSample().getOrientedLattice().getUB();
-    OrientedLattice o_lattice;
-    o_lattice.setUB(UBnew);
-    o_lattice.set(refinedCell.a(), refinedCell.b(), refinedCell.c(),
-                  refinedCell.alpha(), refinedCell.beta(), refinedCell.gamma());
-    o_lattice.setError(refinedCell.errora(), refinedCell.errorb(),
-                       refinedCell.errorc(), refinedCell.erroralpha(),
-                       refinedCell.errorbeta(), refinedCell.errorgamma());
+    auto o_lattice = std::make_unique<OrientedLattice>();
+    o_lattice->setUB(UBnew);
+    if (maxOrder > 0) {
+      o_lattice->setModUB(modUB);
+      o_lattice->setMaxOrder(maxOrder);
+      o_lattice->setCrossTerm(crossTerms);
+    }
+    o_lattice->set(refinedCell.a(), refinedCell.b(), refinedCell.c(),
+                   refinedCell.alpha(), refinedCell.beta(),
+                   refinedCell.gamma());
+    o_lattice->setError(refinedCell.errora(), refinedCell.errorb(),
+                        refinedCell.errorc(), refinedCell.erroralpha(),
+                        refinedCell.errorbeta(), refinedCell.errorgamma());
 
     // Show the modified lattice parameters
-    g_log.notice() << i_run->getName() << "  " << o_lattice << "\n";
+    g_log.notice() << i_run->getName() << "  " << *o_lattice << "\n";
 
-    i_run->mutableSample().setOrientedLattice(&o_lattice);
+    i_run->mutableSample().setOrientedLattice(std::move(o_lattice));
 
     setProperty("OutputChi2", chisq);
 
@@ -234,7 +245,7 @@ OptimizeLatticeForCellType::getLatticeFunction(const std::string &cellType,
   API::IFunction_sptr rawFunction =
       API::FunctionFactory::Instance().createInitialized(fun_str.str());
   API::ILatticeFunction_sptr latticeFunction =
-      boost::dynamic_pointer_cast<API::ILatticeFunction>(rawFunction);
+      std::dynamic_pointer_cast<API::ILatticeFunction>(rawFunction);
   if (latticeFunction) {
     latticeFunction->setUnitCell(cell);
   }

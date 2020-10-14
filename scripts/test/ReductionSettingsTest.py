@@ -1,12 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.simpleapi import *
 from reduction_settings import *
+
 
 class BasicSettingsObjectUsageTest(unittest.TestCase):
     def setUp(self):
@@ -79,6 +80,6 @@ class BasicSettingsObjectUsageTest(unittest.TestCase):
 
         self.assertFalse("a" in c)
 
+
 if __name__ == '__main__':
     unittest.main()
-

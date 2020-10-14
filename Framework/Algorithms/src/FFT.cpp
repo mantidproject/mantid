@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -19,8 +19,6 @@
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
-
-#include <boost/shared_array.hpp>
 
 #include <gsl/gsl_errno.h>
 
@@ -56,7 +54,7 @@ void FFT::init() {
                   "The name of the input workspace for the imaginary part. "
                   "Leave blank if same as InputWorkspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("Real", 0, mustBePositive,
                   "Spectrum number to use as real part for transform");
@@ -65,7 +63,7 @@ void FFT::init() {
 
   std::vector<std::string> fft_dir{"Forward", "Backward"};
   declareProperty("Transform", "Forward",
-                  boost::make_shared<StringListValidator>(fft_dir),
+                  std::make_shared<StringListValidator>(fft_dir),
                   "Direction of the transform: forward or backward");
   declareProperty("Shift", 0.0,
                   "Apply an extra phase equal to this quantity "
@@ -103,7 +101,7 @@ void FFT::exec() {
   const auto &xPoints = m_inWS->points(iReal);
   const auto nPoints = static_cast<int>(xPoints.size());
 
-  boost::shared_array<double> data(new double[2 * nPoints]);
+  std::vector<double> data(2 * nPoints);
   const std::string transform = getProperty("Transform");
 
   // The number of spectra in the output workspace
@@ -160,7 +158,7 @@ void FFT::exec() {
   setProperty("OutputWorkspace", m_outWS);
 }
 
-void FFT::transformForward(boost::shared_array<double> &data, const int xSize,
+void FFT::transformForward(std::vector<double> &data, const int xSize,
                            const int ySize, const int dys,
                            const bool addPositiveOnly, const bool centerShift,
                            const bool isComplex, const int iReal,
@@ -189,7 +187,7 @@ void FFT::transformForward(boost::shared_array<double> &data, const int xSize,
   double shift = getPhaseShift(
       m_inWS->points(iReal)); // extra phase to be applied to the transform
 
-  gsl_fft_complex_forward(data.get(), 1, ySize, m_wavetable, m_workspace);
+  gsl_fft_complex_forward(data.data(), 1, ySize, m_wavetable, m_workspace);
 
   /* The Fourier transform overwrites array 'data'. Recall that the Fourier
    * transform is
@@ -240,7 +238,7 @@ void FFT::transformForward(boost::shared_array<double> &data, const int xSize,
   }
 }
 
-void FFT::transformBackward(boost::shared_array<double> &data, const int xSize,
+void FFT::transformBackward(std::vector<double> &data, const int xSize,
                             const int ySize, const int dys,
                             const bool centerShift, const bool isComplex,
                             const int iReal, const int iImag, const double df) {
@@ -250,7 +248,7 @@ void FFT::transformBackward(boost::shared_array<double> &data, const int xSize,
     data[2 * i + 1] = isComplex ? m_inImagWS->y(iImag)[j] : 0.;
   }
 
-  gsl_fft_complex_inverse(data.get(), 1, ySize, m_wavetable, m_workspace);
+  gsl_fft_complex_inverse(data.data(), 1, ySize, m_wavetable, m_workspace);
 
   for (int i = 0; i < ySize; i++) {
     double x = df * i;
@@ -294,8 +292,8 @@ void FFT::createUnitsLabels(double &df) {
 
   auto inputUnit = m_inWS->getAxis(0)->unit();
   if (inputUnit) {
-    boost::shared_ptr<Kernel::Units::Label> lblUnit =
-        boost::dynamic_pointer_cast<Kernel::Units::Label>(
+    std::shared_ptr<Kernel::Units::Label> lblUnit =
+        std::dynamic_pointer_cast<Kernel::Units::Label>(
             UnitFactory::Instance().create("Label"));
     if (lblUnit) {
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PeakClusterProjection.h"
 
@@ -29,11 +29,11 @@ PeakTransform_sptr makePeakTransform(IMDWorkspace const *const mdWS) {
       mdWS->getSpecialCoordinateSystem();
   PeakTransformFactory_sptr peakTransformFactory;
   if (mdCoordinates == QLab) {
-    peakTransformFactory = boost::make_shared<PeakTransformQLabFactory>();
+    peakTransformFactory = std::make_shared<PeakTransformQLabFactory>();
   } else if (mdCoordinates == QSample) {
-    peakTransformFactory = boost::make_shared<PeakTransformQSampleFactory>();
+    peakTransformFactory = std::make_shared<PeakTransformQSampleFactory>();
   } else if (mdCoordinates == Mantid::Kernel::HKL) {
-    peakTransformFactory = boost::make_shared<PeakTransformHKLFactory>();
+    peakTransformFactory = std::make_shared<PeakTransformHKLFactory>();
   }
   if (!peakTransformFactory) {
     throw std::runtime_error("Failed to get a valid PeakTransformFactory");
@@ -72,7 +72,7 @@ namespace Crystal {
  coordinate system from.
  */
 PeakClusterProjection::PeakClusterProjection(
-    boost::shared_ptr<Mantid::API::IMDWorkspace> &mdWS)
+    std::shared_ptr<Mantid::API::IMDWorkspace> &mdWS)
     : m_mdWS(mdWS) {
   validate(mdWS.get());
 
@@ -87,8 +87,8 @@ PeakClusterProjection::PeakClusterProjection(
  coordinate system from.
  */
 PeakClusterProjection::PeakClusterProjection(
-    boost::shared_ptr<Mantid::API::IMDHistoWorkspace> &mdWS)
-    : m_mdWS(boost::static_pointer_cast<IMDWorkspace>(mdWS)) {
+    std::shared_ptr<Mantid::API::IMDHistoWorkspace> &mdWS)
+    : m_mdWS(std::static_pointer_cast<IMDWorkspace>(mdWS)) {
   validate(mdWS.get());
 
   // Make a peak transform so that we can understand a peak in the context of
@@ -102,8 +102,8 @@ PeakClusterProjection::PeakClusterProjection(
  coordinate system from.
  */
 PeakClusterProjection::PeakClusterProjection(
-    boost::shared_ptr<Mantid::API::IMDEventWorkspace> &mdWS)
-    : m_mdWS(boost::static_pointer_cast<IMDWorkspace>(mdWS)) {
+    std::shared_ptr<Mantid::API::IMDEventWorkspace> &mdWS)
+    : m_mdWS(std::static_pointer_cast<IMDWorkspace>(mdWS)) {
   validate(mdWS.get());
 
   // Make a peak transform so that we can understand a peak in the context of

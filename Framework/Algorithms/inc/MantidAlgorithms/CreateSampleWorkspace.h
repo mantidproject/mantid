@@ -1,19 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CREATESAMPLEWORKSPACE_H_
-#define MANTID_ALGORITHMS_CREATESAMPLEWORKSPACE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidKernel/PseudoRandomNumberGenerator.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -21,7 +20,7 @@ namespace Algorithms {
 /** CreateSampleWorkspace : This algorithm is intended for the creation of
   sample workspaces for usage examples and other situations
 */
-class DLLExport CreateSampleWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateSampleWorkspace : public API::Algorithm {
 public:
   CreateSampleWorkspace();
 
@@ -43,16 +42,18 @@ private:
   DataObjects::EventWorkspace_sptr
   createEventWorkspace(int numPixels, int numBins, int numMonitors,
                        int numEvents, double x0, double binDelta,
-                       Geometry::Instrument_sptr inst,
+                       const Geometry::Instrument_sptr &inst,
                        const std::string &functionString, bool isRandom);
   API::MatrixWorkspace_sptr
   createHistogramWorkspace(int numPixels, int numBins, int numMonitors,
                            double x0, double binDelta,
-                           Geometry::Instrument_sptr inst,
+                           const Geometry::Instrument_sptr &inst,
                            const std::string &functionString, bool isRandom);
-  API::MatrixWorkspace_sptr createScanningWorkspace(
-      int numBins, double x0, double binDelta, Geometry::Instrument_sptr inst,
-      const std::string &functionString, bool isRandom, int numScanPoints);
+  API::MatrixWorkspace_sptr
+  createScanningWorkspace(int numBins, double x0, double binDelta,
+                          const Geometry::Instrument_sptr &inst,
+                          const std::string &functionString, bool isRandom,
+                          int numScanPoints);
   Geometry::Instrument_sptr createTestInstrumentRectangular(
       API::Progress &progress, int numBanks, int numMonitors, int pixels,
       double pixelSpacing, const double bankDistanceFromSample,
@@ -77,5 +78,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CREATESAMPLEWORKSPACE_H_ */

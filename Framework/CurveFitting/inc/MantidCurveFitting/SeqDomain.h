@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_SEQDOMAIN_H_
-#define MANTID_CURVEFITTING_SEQDOMAIN_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -13,7 +12,7 @@
 #include "MantidAPI/FunctionDomain.h"
 #include "MantidAPI/FunctionValues.h"
 #include "MantidAPI/IDomainCreator.h"
-#include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
+#include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
 #include "MantidCurveFitting/CostFunctions/CostFuncRwp.h"
 #include "MantidCurveFitting/DllConfig.h"
 
@@ -39,14 +38,14 @@ public:
   virtual void getDomainAndValues(size_t i, API::FunctionDomain_sptr &domain,
                                   API::FunctionValues_sptr &values) const;
   /// Add new domain creator
-  void addCreator(API::IDomainCreator_sptr creator);
-  /// Calculate the value of a least squares cost function
+  void addCreator(const API::IDomainCreator_sptr &creator);
+  /// Calculate the value of an additive cost function
   virtual void
-  leastSquaresVal(const CostFunctions::CostFuncLeastSquares &leastSquares);
-  /// Calculate the value, first and second derivatives of a least squares cost
-  /// function
-  virtual void leastSquaresValDerivHessian(
-      const CostFunctions::CostFuncLeastSquares &leastSquares, bool evalDeriv,
+  additiveCostFunctionVal(const CostFunctions::CostFuncFitting &costFunction);
+  /// Calculate the value, first and second derivatives of an additive cost
+  /// function.
+  virtual void additiveCostFunctionValDerivHessian(
+      const CostFunctions::CostFuncFitting &costFunction, bool evalDeriv,
       bool evalHessian);
   /// Calculate the value of a Rwp cost function
   void rwpVal(const CostFunctions::CostFuncRwp &rwp);
@@ -67,10 +66,8 @@ protected:
   /// Currently active values.
   mutable std::vector<API::FunctionValues_sptr> m_values;
   /// Domain creators.
-  std::vector<boost::shared_ptr<API::IDomainCreator>> m_creators;
+  std::vector<std::shared_ptr<API::IDomainCreator>> m_creators;
 };
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_SEQDOMAIN_H_*/

@@ -1,0 +1,630 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>error_bar_box</class>
+ <widget class="QWidget" name="error_bar_box">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>922</width>
+    <height>704</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_5">
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Sunken</enum>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAsNeeded</enum>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>-126</y>
+        <width>885</width>
+        <height>810</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout">
+         <property name="sizeConstraint">
+          <enum>QLayout::SetMaximumSize</enum>
+         </property>
+         <item>
+          <widget class="QGroupBox" name="general_box">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="title">
+            <string>General</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_3">
+            <item>
+             <widget class="QCheckBox" name="normalize_to_bin_width">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Normalize to bin width on 1D and 2D plots</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="show_title">
+              <property name="text">
+               <string>Show Title</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="show_minor_ticks">
+              <property name="text">
+               <string>Show Minor Ticks</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="show_minor_gridlines">
+              <property name="text">
+               <string>Show Minor Gridlines</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_14">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="plot_font_label">
+                <property name="text">
+                 <string>Default font</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="plot_font">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="axes_box">
+           <property name="title">
+            <string>Axes</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="y_axes_scale_label">
+                <property name="text">
+                 <string>Default X Axes Scale</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="x_axes_scale">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="x_axes_scale_label">
+                <property name="text">
+                 <string>Default Y Axes Scale</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="y_axes_scale">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="line_options_box">
+           <property name="title">
+            <string>Line Options</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_7">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_2">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="line_style_label">
+                <property name="text">
+                 <string>Line Style</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="line_style">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_12">
+              <item>
+               <widget class="QLabel" name="draw_style_label">
+                <property name="text">
+                 <string>Draw Syle</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="draw_style">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="line_width_label">
+                <property name="text">
+                 <string>Width</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="line_width">
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox">
+           <property name="title">
+            <string>Marker Options</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_10">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="marker_style_label">
+                <property name="text">
+                 <string>Marker Style</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="marker_style">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="marker_size_label">
+                <property name="text">
+                 <string>Marker Size</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="marker_size">
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="error_bars">
+           <property name="title">
+            <string>Error Bars</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_8">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_9">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="error_width_label">
+                <property name="text">
+                 <string>Width</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="error_width">
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_6">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="capsize_label">
+                <property name="text">
+                 <string>Capsize</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="capsize">
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="cap_thickness_label">
+                <property name="text">
+                 <string>Cap Thickness</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="cap_thickness">
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_8">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="error_every_label">
+                <property name="text">
+                 <string>Error Every</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QSpinBox" name="error_every">
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="legend_box">
+           <property name="title">
+            <string>Legend</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_9">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_13">
+              <item>
+               <widget class="QLabel" name="legend_size_label">
+                <property name="text">
+                 <string>Legend font size</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QDoubleSpinBox" name="legend_font_size">
+                <property name="minimumSize">
+                 <size>
+                  <width>0</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="minimum">
+                 <double>0.500000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>20.000000000000000</double>
+                </property>
+                <property name="singleStep">
+                 <double>0.500000000000000</double>
+                </property>
+                <property name="value">
+                 <double>8.000000000000000</double>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_11">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="legend_location_label">
+                <property name="text">
+                 <string>Default legend location</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="legend_location">
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="images_box">
+           <property name="title">
+            <string>Images</string>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_16">
+              <item>
+               <widget class="QLabel" name="colorbar_scale_label">
+                <property name="text">
+                 <string>Colorbar Scale</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="colorbar_scale">
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_13">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <widget class="QLabel" name="default_colormap_label">
+                <property name="text">
+                 <string>Default Colormap</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="default_colormap_combo_box">
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_15">
+              <property name="spacing">
+               <number>3</number>
+              </property>
+              <item>
+               <spacer name="horizontalSpacer">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="reverse_colormap_check_box">
+                <property name="layoutDirection">
+                 <enum>Qt::LeftToRight</enum>
+                </property>
+                <property name="text">
+                 <string>Reverse Colormap</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

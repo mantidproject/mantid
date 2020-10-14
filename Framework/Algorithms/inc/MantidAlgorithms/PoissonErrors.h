@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_POISSONERRORS_H_
-#define MANTID_ALGORITHMS_POISSONERRORS_H_
+#pragma once
 
 #include "MantidAlgorithms/BinaryOperation.h"
 
@@ -30,7 +29,7 @@ namespace Algorithms {
     @author Nick Draper, Tessella Support Services plc
     @date 03/02/2009
  */
-class DLLExport PoissonErrors : public BinaryOperation {
+class MANTID_ALGORITHMS_DLL PoissonErrors : public BinaryOperation {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "PoissonErrors"; }
@@ -71,5 +70,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_POISSONERRORS_H_*/

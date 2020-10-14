@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef ERRORBARS_H
-#define ERRORBARS_H
+#pragma once
 
 #include "Mantid/ErrorBarSettings.h"
 #include "PlotCurve.h"
@@ -93,5 +92,3 @@ private:
   //! Reference to the master curve to which this error bars curve is attached.
   DataCurve *d_master_curve;
 };
-
-#endif

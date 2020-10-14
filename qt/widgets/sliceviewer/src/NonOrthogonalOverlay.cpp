@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/NonOrthogonalOverlay.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -127,7 +127,8 @@ void NonOrthogonalOverlay::paintEvent(QPaintEvent * /*event*/) {
 }
 
 void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &gridPen,
-                                      int widthScreen, QwtValueList yAxisTicks,
+                                      int widthScreen,
+                                      const QwtValueList &yAxisTicks,
                                       double yAngle) {
 
   auto offset = yAngle == 0. ? 0. : widthScreen * tan(yAngle);
@@ -141,7 +142,8 @@ void NonOrthogonalOverlay::drawYLines(QPainter &painter, QPen &gridPen,
 }
 
 void NonOrthogonalOverlay::drawXLines(QPainter &painter, QPen &gridPen,
-                                      int heightScreen, QwtValueList xAxisTicks,
+                                      int heightScreen,
+                                      const QwtValueList &xAxisTicks,
                                       double xAngle) {
   xAngle *= -1.f;
   auto offset = xAngle == 0. ? 0. : heightScreen * tan(xAngle);

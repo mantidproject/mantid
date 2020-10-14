@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_DIALOGMANAGER_H_
-#define MANTIDQT_API_DIALOGMANAGER_H_
+#pragma once
 
 //----------------------------------
 // Includes
@@ -59,8 +58,8 @@ class EXPORT_OPT_MANTIDQT_COMMON InterfaceManager {
 public:
   /// Create a new instance of the correct type of AlgorithmDialog
   AlgorithmDialog *createDialog(
-      boost::shared_ptr<Mantid::API::IAlgorithm> alg, QWidget *parent = nullptr,
-      bool forScript = false,
+      const std::shared_ptr<Mantid::API::IAlgorithm> &alg,
+      QWidget *parent = nullptr, bool forScript = false,
       const QHash<QString, QString> &presetValues = (QHash<QString, QString>()),
       const QString &optional_msg = QString(),
       const QStringList &enabled = QStringList(),
@@ -77,7 +76,8 @@ public:
 
   /// Create a new instance of the correct type of UserSubWindow
   UserSubWindow *createSubWindow(const QString &interface_name,
-                                 QWidget *parent = nullptr);
+                                 QWidget *parent = nullptr,
+                                 bool isWindow = true);
 
   /**
    * Function that instantiates the Vates simple user interface.
@@ -171,4 +171,3 @@ private:
            new Mantid::Kernel::Instantiator<TYPE, MantidHelpInterface>())),    \
        0));                                                                    \
   }
-#endif // MANTIDQT_API_DIALOGMANAGER

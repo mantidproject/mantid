@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "StepScan.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -248,7 +248,8 @@ void StepScan::loadFileComplete(bool error) {
 namespace {
 class ScopedStatusText {
 public:
-  ScopedStatusText(QLabel *label, QString labelText) : status_label(label) {
+  ScopedStatusText(QLabel *label, const QString &labelText)
+      : status_label(label) {
     status_label->setText("<i><font color='darkblue'>" + labelText +
                           "</font></i>");
   }
@@ -298,7 +299,7 @@ bool StepScan::mergeRuns() {
   for (size_t i = 0; i < wsGroup->size(); ++i) {
     // Add a scan_index variable to each workspace, counting from 1
     MatrixWorkspace_sptr ws =
-        boost::static_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
+        std::static_pointer_cast<MatrixWorkspace>(wsGroup->getItem(i));
     if (!ws)
       return true; // Again, shouldn't be possible (unless there's a group
                    // within a group?)
@@ -549,7 +550,7 @@ void StepScan::runStepScanAlg() {
   generateCurve(m_uiForm.plotVariable->currentText());
 }
 
-bool StepScan::runStepScanAlgLive(std::string stepScanProperties) {
+bool StepScan::runStepScanAlgLive(const std::string &stepScanProperties) {
   // First stop the currently running live algorithm
   IAlgorithm_const_sptr oldMonitorLiveData =
       m_uiForm.mWRunFiles->stopLiveAlgorithm();

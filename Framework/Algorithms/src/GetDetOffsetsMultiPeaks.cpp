@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/GetDetOffsetsMultiPeaks.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -150,7 +150,7 @@ GetDetOffsetsMultiPeaks::GetDetOffsetsMultiPeaks()
 void GetDetOffsetsMultiPeaks::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("dSpacing")),
+                      std::make_shared<WorkspaceUnitValidator>("dSpacing")),
                   "A 2D matrix workspace with X values of d-spacing");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("DReference"),
@@ -171,13 +171,13 @@ void GetDetOffsetsMultiPeaks::init() {
   std::vector<std::string> peaktypes =
       FunctionFactory::Instance().getFunctionNames<API::IPeakFunction>();
   declareProperty("PeakFunction", "Gaussian",
-                  boost::make_shared<StringListValidator>(peaktypes),
+                  std::make_shared<StringListValidator>(peaktypes),
                   "Type of peak to fit");
 
   std::vector<std::string> bkgdtypes{"Flat", "Linear", "Quadratic"};
   declareProperty(
       "BackgroundType", "Linear",
-      boost::make_shared<StringListValidator>(bkgdtypes),
+      std::make_shared<StringListValidator>(bkgdtypes),
       "Type of Background. The choice can be either Linear or Quadratic");
 
   declareProperty("HighBackground", true,
@@ -346,7 +346,7 @@ void GetDetOffsetsMultiPeaks::processProperties() {
   }
 
   // Some shortcuts for event workspaces
-  m_eventW = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
+  m_eventW = std::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
   // bool m_isEvent = false;
   m_isEvent = false;
   if (m_eventW)
@@ -364,10 +364,10 @@ void GetDetOffsetsMultiPeaks::processProperties() {
   m_leastMaxObsY = getProperty("MinimumPeakHeightObs");
 
   // Create output workspaces
-  m_outputW = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
-  m_outputNP = boost::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
+  m_outputW = std::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
+  m_outputNP = std::make_shared<OffsetsWorkspace>(m_inputWS->getInstrument());
   MatrixWorkspace_sptr tempmaskws =
-      boost::make_shared<MaskWorkspace>(m_inputWS->getInstrument());
+      std::make_shared<MaskWorkspace>(m_inputWS->getInstrument());
   m_maskWS = tempmaskws;
 
   // Input resolution
@@ -399,7 +399,7 @@ void GetDetOffsetsMultiPeaks::processProperties() {
  *  @throw Exception::RuntimeError If ... ...
  */
 void GetDetOffsetsMultiPeaks::importFitWindowTableWorkspace(
-    TableWorkspace_sptr windowtablews) {
+    const TableWorkspace_sptr &windowtablews) {
   // Check number of columns matches number of peaks
   size_t numcols = windowtablews->columnCount();
   size_t numpeaks = m_peakPositions.size();
@@ -721,7 +721,7 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
 
   // Set up GSL minimzer
   const gsl_multimin_fminimizer_type *T = gsl_multimin_fminimizer_nmsimplex;
-  gsl_multimin_fminimizer *s = nullptr;
+
   gsl_vector *ss, *x;
   gsl_multimin_function minex_func;
 
@@ -729,7 +729,6 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
   size_t nopt = 1;
   size_t iter = 0;
   int status = 0;
-  double size;
 
   /* Starting point */
   x = gsl_vector_alloc(nopt);
@@ -744,7 +743,7 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
   minex_func.f = &gsl_costFunction;
   minex_func.params = &params;
 
-  s = gsl_multimin_fminimizer_alloc(T, nopt);
+  gsl_multimin_fminimizer *s = gsl_multimin_fminimizer_alloc(T, nopt);
   gsl_multimin_fminimizer_set(s, &minex_func, x, ss);
 
   do {
@@ -753,7 +752,7 @@ void GetDetOffsetsMultiPeaks::fitPeaksOffset(
     if (status)
       break;
 
-    size = gsl_multimin_fminimizer_size(s);
+    double size = gsl_multimin_fminimizer_size(s);
     status = gsl_multimin_test_size(size, 1e-4);
 
   } while (status == GSL_CONTINUE && iter < 50);
@@ -831,7 +830,7 @@ void deletePeaks(std::vector<size_t> &banned, std::vector<double> &peakPosToFit,
  * @return The number of peaks in range
  */
 int GetDetOffsetsMultiPeaks::fitSpectra(
-    const int64_t wi, MatrixWorkspace_sptr inputW,
+    const int64_t wi, const MatrixWorkspace_sptr &inputW,
     const std::vector<double> &peakPositions,
     const std::vector<double> &fitWindows, size_t &nparams, double &minD,
     double &maxD, std::vector<double> &peakPosToFit,
@@ -878,14 +877,14 @@ int GetDetOffsetsMultiPeaks::fitSpectra(
   for (int i = 0; i < static_cast<int>(peakPositions.size()); ++i) {
     if ((peakPositions[i] > minD) && (peakPositions[i] < maxD)) {
       if (m_useFitWindowTable) {
-        fitWindowsToUse.push_back(std::max(m_vecFitWindow[wi][2 * i], minD));
-        fitWindowsToUse.push_back(
+        fitWindowsToUse.emplace_back(std::max(m_vecFitWindow[wi][2 * i], minD));
+        fitWindowsToUse.emplace_back(
             std::min(m_vecFitWindow[wi][2 * i + 1], maxD));
       } else if (useFitWindows) {
-        fitWindowsToUse.push_back(std::max(fitWindows[2 * i], minD));
-        fitWindowsToUse.push_back(std::min(fitWindows[2 * i + 1], maxD));
+        fitWindowsToUse.emplace_back(std::max(fitWindows[2 * i], minD));
+        fitWindowsToUse.emplace_back(std::min(fitWindows[2 * i + 1], maxD));
       }
-      peakPosToFit.push_back(peakPositions[i]);
+      peakPosToFit.emplace_back(peakPositions[i]);
     }
   }
   auto numPeaksInRange = static_cast<int>(peakPosToFit.size());
@@ -1078,12 +1077,12 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
       g_log.debug(dbss.str());
       continue;
     } else
-      vec_offsets.push_back(offset);
+      vec_offsets.emplace_back(offset);
 
     // (g) calculate width/pos as to determine the (z-value) for constant
     // "width" - (delta d)/d
     // double widthdevpos = width/centre;
-    vec_widthDivPos.push_back(widthdevpos);
+    vec_widthDivPos.emplace_back(widthdevpos);
 
     // g_log.debug() << " h:" << height << " c:" << centre << " w:" <<
     // (width/(2.*std::sqrt(2.*M_LN2)))
@@ -1091,10 +1090,10 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
 
     // Add peak to vectors
     double refcentre = peakPositionRef[i];
-    peakPosFitted.push_back(centre);
-    peakPosToFit.push_back(refcentre);
-    peakHeightFitted.push_back(height);
-    chisq.push_back(chi2);
+    peakPosFitted.emplace_back(centre);
+    peakPosToFit.emplace_back(refcentre);
+    peakHeightFitted.emplace_back(height);
+    chisq.emplace_back(chi2);
   }
 
   // Remove by Z-score on delta d/d
@@ -1106,7 +1105,7 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
       g_log.debug() << "Banning peak at " << peakPosFitted[i]
                     << " in wkspindex = (no show)" // << wi
                     << " sigma/d = " << vec_widthDivPos[i] << "\n";
-      banned.push_back(i);
+      banned.emplace_back(i);
       continue;
     }
   }
@@ -1127,14 +1126,13 @@ void GetDetOffsetsMultiPeaks::generatePeaksList(
 }
 
 //----------------------------------------------------------------------------------------------
-/**
- */
+
 void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
   // Init
   size_t numspec = m_inputWS->getNumberHistograms();
 
   // Create output offset calculation status table
-  m_infoTableWS = boost::make_shared<TableWorkspace>();
+  m_infoTableWS = std::make_shared<TableWorkspace>();
 
   // set up columns
   m_infoTableWS->addColumn("int", "WorkspaceIndex");
@@ -1153,7 +1151,7 @@ void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
   }
 
   // Create output peak fitting information table
-  m_peakOffsetTableWS = boost::make_shared<TableWorkspace>();
+  m_peakOffsetTableWS = std::make_shared<TableWorkspace>();
 
   // set up columns
   m_peakOffsetTableWS->addColumn("int", "WorkspaceIndex");
@@ -1179,7 +1177,7 @@ void GetDetOffsetsMultiPeaks::createInformationWorkspaces() {
  * (thread-safe)
  */
 void GetDetOffsetsMultiPeaks::addInfoToReportWS(
-    int wi, FitPeakOffsetResult offsetresult,
+    int wi, const FitPeakOffsetResult &offsetresult,
     const std::vector<double> &tofitpeakpositions,
     const std::vector<double> &fittedpeakpositions) {
   // Offset calculation status

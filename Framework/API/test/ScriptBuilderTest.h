@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SCRIPTBUILDERTEST_H_
-#define MANTID_SCRIPTBUILDERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -115,7 +114,7 @@ public:
           "OutputWorkspace", "", Direction::Output));
     }
     void exec() override {
-      setProperty("OutputWorkspace", boost::make_shared<WorkspaceTester>());
+      setProperty("OutputWorkspace", std::make_shared<WorkspaceTester>());
     }
   };
 
@@ -145,8 +144,8 @@ public:
       declareProperty("DynamicProperty1", "value", Direction::Output);
       setPropertyValue("DynamicProperty1", "outputValue");
 
-      boost::shared_ptr<MatrixWorkspace> output =
-          boost::make_shared<WorkspaceTester>();
+      std::shared_ptr<MatrixWorkspace> output =
+          std::make_shared<WorkspaceTester>();
       setProperty("OutputWorkspace", output);
     }
   };
@@ -223,8 +222,8 @@ public:
       alg->initialize();
       alg->execute();
 
-      boost::shared_ptr<MatrixWorkspace> output =
-          boost::make_shared<WorkspaceTester>();
+      std::shared_ptr<MatrixWorkspace> output =
+          std::make_shared<WorkspaceTester>();
       setProperty("OutputWorkspace", output);
     }
   };
@@ -258,8 +257,8 @@ public:
       declareProperty("DynamicProperty1", "value", Direction::Output);
       setPropertyValue("DynamicProperty1", "outputValue");
 
-      boost::shared_ptr<MatrixWorkspace> output =
-          boost::make_shared<WorkspaceTester>();
+      std::shared_ptr<MatrixWorkspace> output =
+          std::make_shared<WorkspaceTester>();
       setProperty("OutputWorkspace", output);
     }
   };
@@ -267,7 +266,7 @@ public:
   ScriptBuilderTest()
       : m_algFactory(AlgorithmFactory::Instance()),
         m_ads(AnalysisDataService::Instance()),
-        m_testWS(boost::make_shared<WorkspaceTester>()) {
+        m_testWS(std::make_shared<WorkspaceTester>()) {
     m_algFactory.subscribe<TopLevelAlgorithm>();
     m_algFactory.subscribe<NestedAlgorithm>();
     m_algFactory.subscribe<BasicAlgorithm>();
@@ -318,7 +317,7 @@ public:
 
   void test_Build_With_PropertyManagerProperty() {
     auto alg = m_algFactory.create("PropertyManagerInputAlgorithm", 1);
-    auto propMgr = boost::make_shared<PropertyManager>();
+    auto propMgr = std::make_shared<PropertyManager>();
     alg->initialize();
     alg->setRethrows(true);
     alg->setProperty("InputWorkspace", m_testWS);
@@ -516,8 +515,8 @@ public:
                             "workspace', "
                             "OutputWorkspace='test_output_workspace')",
                             ""};
-    boost::shared_ptr<WorkspaceTester> backSlashName =
-        boost::make_shared<WorkspaceTester>();
+    std::shared_ptr<WorkspaceTester> backSlashName =
+        std::make_shared<WorkspaceTester>();
     m_ads.addOrReplace("test_inp\\ut_workspace", backSlashName);
 
     auto alg = m_algFactory.create("TopLevelAlgorithm", 1);
@@ -590,5 +589,3 @@ private:
   AnalysisDataServiceImpl &m_ads;
   MatrixWorkspace_sptr m_testWS;
 };
-
-#endif // MANTID_SCRIPTBUILDERTEST_H_

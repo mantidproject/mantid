@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/MantidTreeModel.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -33,7 +33,7 @@ void MantidTreeModel::deleteWorkspaces(const QStringList &wsNames) {
       std::vector<std::string> vecWsNames;
       vecWsNames.reserve(wsNames.size());
       foreach (auto wsName, wsNames) {
-        vecWsNames.push_back(wsName.toStdString());
+        vecWsNames.emplace_back(wsName.toStdString());
       }
       alg->setProperty("WorkspaceList", vecWsNames);
       executeAlgorithmAsync(alg);
@@ -97,9 +97,15 @@ void MantidTreeModel::showAlgorithmDialog(const QString &algName,
   if (!alg)
     return;
 
-  for (QHash<QString, QString>::Iterator it = paramList.begin();
-       it != paramList.end(); ++it) {
-    alg->setPropertyValue(it.key().toStdString(), it.value().toStdString());
+  try {
+    for (QHash<QString, QString>::Iterator it = paramList.begin();
+         it != paramList.end(); ++it) {
+      alg->setPropertyValue(it.key().toStdString(), it.value().toStdString());
+    }
+  } catch (std::exception &ex) {
+    g_log.error() << "Error setting the properties for algotithm "
+                  << algName.toStdString() << ": " << ex.what() << '\n';
+    return;
   }
   MantidQt::API::AlgorithmDialog *dlg = createAlgorithmDialog(alg);
   if (obs) {
@@ -115,8 +121,8 @@ void MantidTreeModel::showAlgorithmDialog(const QString &algName,
  * This creates an algorithm dialog (the default property entry thingie).
  * Helper function not required by interface
  */
-MantidQt::API::AlgorithmDialog *
-MantidTreeModel::createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg) {
+MantidQt::API::AlgorithmDialog *MantidTreeModel::createAlgorithmDialog(
+    const Mantid::API::IAlgorithm_sptr &alg) {
   QHash<QString, QString> presets;
   QStringList enabled;
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_INDIRECTSETTINGSPRESENTERTEST_H_
-#define MANTIDQT_INDIRECTSETTINGSPRESENTERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -163,5 +162,3 @@ private:
   MockIndirectSettingsModel *m_model;
   std::unique_ptr<IndirectSettingsPresenter> m_presenter;
 };
-
-#endif /* MANTIDQT_INDIRECTSETTINGSPRESENTERTEST_H_ */

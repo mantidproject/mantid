@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_LISTVALIDATOR_H_
-#define MANTID_KERNEL_LISTVALIDATOR_H_
+#pragma once
 
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/TypedValidator.h"
 #ifndef Q_MOC_RUN
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 #endif
 #include <map>
 #include <set>
@@ -63,7 +62,7 @@ public:
 
   /// Clone the validator
   IValidator_sptr clone() const override {
-    return boost::make_shared<ListValidator<TYPE>>(*this);
+    return std::make_shared<ListValidator<TYPE>>(*this);
   }
   /**
    * Returns the set of allowed values currently defined
@@ -75,7 +74,7 @@ public:
     allowedStrings.reserve(m_allowedValues.size());
     auto cend = m_allowedValues.end();
     for (auto cit = m_allowedValues.begin(); cit != cend; ++cit) {
-      allowedStrings.push_back(boost::lexical_cast<std::string>(*cit));
+      allowedStrings.emplace_back(boost::lexical_cast<std::string>(*cit));
     }
     return allowedStrings;
   }
@@ -88,7 +87,7 @@ public:
     // add only new values
     if (std::find(m_allowedValues.begin(), m_allowedValues.end(), value) ==
         m_allowedValues.end()) {
-      m_allowedValues.push_back(value);
+      m_allowedValues.emplace_back(value);
     }
   }
 
@@ -185,5 +184,3 @@ using StringListValidator = ListValidator<std::string>;
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /*MANTID_KERNEL_LISTVALIDATOR_H_*/

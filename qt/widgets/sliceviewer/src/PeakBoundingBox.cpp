@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/PeakBoundingBox.h"
 #include <boost/format.hpp>
@@ -213,7 +213,7 @@ std::string PeakBoundingBox::toExtentsString() const {
  * @param transform : Transform to use.
  */
 void PeakBoundingBox::transformBox(
-    Mantid::Geometry::PeakTransform_sptr transform) {
+    const Mantid::Geometry::PeakTransform_sptr &transform) {
   using Mantid::Kernel::V3D;
   // Front bottom left
   V3D newBottomLeft =

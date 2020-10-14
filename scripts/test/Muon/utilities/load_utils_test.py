@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import Muon.GUI.Common.utilities.load_utils as utils
 import os
@@ -60,10 +60,9 @@ class MuonFileUtilsTest(unittest.TestCase):
         filename = 'MUSR00022725.nsx'
 
         name = utils.load_dead_time_from_filename(filename)
-        dead_time_table = AnalysisDataService.retrieve(name)
+        dead_time_table = AnalysisDataService.retrieve('MUSR00022725.nsx_deadtime_table')
 
-        self.assertEqual(name, 'MUSR00022725_deadTimes')
-        self.assertTrue(AnalysisDataService.doesExist(name))
+        self.assertEqual(name, 'MUSR00022725.nsx_deadtime_table')
         self.assertTrue(isinstance(dead_time_table, ITableWorkspace))
 
     def test_load_workspace_from_filename_for_existing_file(self):
@@ -71,10 +70,19 @@ class MuonFileUtilsTest(unittest.TestCase):
         load_result, run, filename, _ = utils.load_workspace_from_filename(filename)
 
         self.assertEqual(load_result['DeadTimeTable'], None)
-        self.assertEqual(load_result['FirstGoodData'], 0.11)
+        self.assertEqual(load_result['FirstGoodData'], 0.106)
         self.assertEqual(load_result['MainFieldDirection'], 'Transverse')
         self.assertAlmostEqual(load_result['TimeZero'], 0.55000, 5)
         self.assertEqual(run, 22725)
+
+    def test_load_workspace_from_filename_for_file_path(self):
+        filename = 'PSI'+ os.sep + 'run_1529_templs0.mon'
+        inputs = {
+              "DeadTimeTable": "__notUsed",
+              "DetectorGroupingTable": "__notUsed"}
+
+        alg, _ = utils.create_load_algorithm(filename,inputs)
+        self.assertTrue(filename in alg.getProperty("Filename").value)
 
 
 if __name__ == '__main__':

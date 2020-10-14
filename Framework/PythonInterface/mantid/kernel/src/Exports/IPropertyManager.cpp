@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/IPropertySettings.h"
@@ -76,7 +76,7 @@ void setProperties(IPropertyManager &self, const boost::python::dict &kwargs) {
  * @param value :: The value of the property as a bpl object
  */
 void declareProperty(IPropertyManager &self, const std::string &name,
-                     boost::python::object value) {
+                     const boost::python::object &value) {
   auto p = std::unique_ptr<Property>(
       Registry::PropertyWithValueFactory::create(name, value, 0));
   self.declareProperty(std::move(p));
@@ -91,7 +91,7 @@ void declareProperty(IPropertyManager &self, const std::string &name,
  * @param value :: The value of the property as a bpl object
  */
 void declareOrSetProperty(IPropertyManager &self, const std::string &name,
-                          boost::python::object value) {
+                          const boost::python::object &value) {
   bool propExists = self.existsProperty(name);
   if (propExists) {
     setProperty(self, name, value);

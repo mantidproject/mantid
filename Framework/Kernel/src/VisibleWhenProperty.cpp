@@ -1,11 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/VisibleWhenProperty.h"
+
 #include <memory>
+#include <stdexcept>
 
 namespace Mantid {
 namespace Kernel {
@@ -16,9 +18,9 @@ namespace Kernel {
  * @param value :: For the IS_EQUAL_TO or IS_NOT_EQUAL_TO condition, the value
  * (as string) to check for
  */
-VisibleWhenProperty::VisibleWhenProperty(std::string otherPropName,
+VisibleWhenProperty::VisibleWhenProperty(const std::string &otherPropName,
                                          ePropertyCriterion when,
-                                         std::string value)
+                                         const std::string &value)
     : EnabledWhenProperty(otherPropName, when, value) {}
 
 /** Multiple conditions constructor - takes two  VisibleWhenProperty

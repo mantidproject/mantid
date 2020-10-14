@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/EQSANSDarkCurrentSubtraction.h"
 #include "MantidAPI/AlgorithmProperty.h"
@@ -29,7 +29,7 @@ using namespace Geometry;
 using namespace DataObjects;
 
 void EQSANSDarkCurrentSubtraction::init() {
-  auto wsValidator = boost::make_shared<WorkspaceUnitValidator>("Wavelength");
+  auto wsValidator = std::make_shared<WorkspaceUnitValidator>("Wavelength");
   declareProperty(std::make_unique<WorkspaceProperty<>>(
       "InputWorkspace", "", Direction::Input, wsValidator));
 
@@ -55,12 +55,12 @@ void EQSANSDarkCurrentSubtraction::exec() {
   std::string output_message;
   // Reduction property manager
   const std::string reductionManagerName = getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
+  std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
     reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);
   } else {
-    reductionManager = boost::make_shared<PropertyManager>();
+    reductionManager = std::make_shared<PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
                                                         reductionManager);
   }

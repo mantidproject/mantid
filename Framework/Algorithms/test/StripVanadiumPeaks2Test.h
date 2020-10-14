@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef STRIPVANADIUMPEAKSTEST_H_
-#define STRIPVANADIUMPEAKSTEST_H_
+#pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAlgorithms/StripVanadiumPeaks2.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidKernel/UnitFactory.h"
@@ -20,8 +19,8 @@
 using namespace Mantid::API;
 using namespace Mantid::HistogramData;
 using namespace Mantid::Kernel::VectorHelper;
-using Mantid::Algorithms::StripVanadiumPeaks2;
 using Mantid::MantidVec;
+using Mantid::Algorithms::StripVanadiumPeaks2;
 
 class StripVanadiumPeaks2Test : public CxxTest::TestSuite {
 public:
@@ -42,8 +41,7 @@ public:
     std::string outputWSName("PG3_733_stripped");
 
     // Start by loading our NXS file
-    IAlgorithm *loader =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("LoadNexus");
+    auto loader = Mantid::API::AlgorithmManager::Instance().create("LoadNexus");
     loader->setPropertyValue("Filename", "PG3_733.nxs");
     loader->setPropertyValue("OutputWorkspace", inputWSName);
     loader->execute();
@@ -95,9 +93,8 @@ public:
     // known positions and expected values
     const std::vector<double> PEAK_X{1.2356, 1.5133,
                                      2.1401}; // peak positions in d-spacing
-    const std::vector<double> PEAK_Y{28.5, 37.8,
-                                     12.3}; // low precision results of
-                                            // stripped peaks
+    const std::vector<double> PEAK_Y{28.5, 37.8, 12.3}; // low precision results
+                                                        // of stripped peaks
     // something is wrong with the second peak on windows
     const std::vector<double> TOL{.1, 10., .1};
 
@@ -711,8 +708,6 @@ private:
                 0.06281112, 0.06287284, 0.06251089, 0.06240202, 0.06257857}));
     space2D->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    return std::move(space2D);
+    return space2D;
   }
 };
-
-#endif /*STRIPVANADIUMPEAKSTEST_H_*/

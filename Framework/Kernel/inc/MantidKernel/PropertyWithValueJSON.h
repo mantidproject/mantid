@@ -1,19 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROPERTYWITHVALUEJSON_H
-#define PROPERTYWITHVALUEJSON_H
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Matrix.h"
 #include "PropertyManager_fwd.h"
 
-#include <boost/shared_ptr.hpp>
 #include <json/value.h>
+#include <memory>
 
 #include <memory>
 #include <vector>
@@ -38,11 +37,11 @@ template <> struct ToCpp<int> {
 };
 /// Specialization of ToCpp for long long
 template <> struct ToCpp<long long> {
-  long operator()(const Json::Value &value) { return value.asInt64(); }
+  long long operator()(const Json::Value &value) { return value.asInt64(); }
 };
 /// Specialization of ToCpp for long
 template <> struct ToCpp<long> {
-  Json::Int64 operator()(const Json::Value &value) { return value.asInt64(); }
+  long operator()(const Json::Value &value) { return value.asInt(); }
 };
 /// Specialization of ToCpp for unsigned int
 template <> struct ToCpp<unsigned int> {
@@ -150,7 +149,7 @@ Json::Value encodeAsJson(const std::vector<ValueType> &vectorValue) {
  * @throws std::runtime_error for all inputs
  */
 template <typename ValueType>
-Json::Value encodeAsJson(const boost::shared_ptr<ValueType> &) {
+Json::Value encodeAsJson(const std::shared_ptr<ValueType> &) {
   throw std::runtime_error("Unable to encode shared_ptr<T> as Json::Value.");
 }
 
@@ -167,5 +166,3 @@ Json::Value encodeAsJson(const Kernel::Matrix<ValueType> &) {
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif // PROPERTYWITHVALUEJSON_H

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_SANSBACKGROUNDCORRECTIONSETTINGS_H_
-#define MANTIDQT_CUSTOMINTERFACES_SANSBACKGROUNDCORRECTIONSETTINGS_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "MantidKernel/System.h"
@@ -20,8 +19,8 @@ the SANSBackgroundCorrectionWidget
 */
 class MANTIDQT_ISISSANS_DLL SANSBackgroundCorrectionSettings {
 public:
-  SANSBackgroundCorrectionSettings(QString runNumber, bool useMean, bool useMon,
-                                   QString monNumber);
+  SANSBackgroundCorrectionSettings(const QString &runNumber, bool useMean,
+                                   bool useMon, const QString &monNumber);
 
   bool hasValidSettings();
 
@@ -40,5 +39,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*  MANTIDQT_CUSTOMINTERFACES_SANSBACKGROUNDCORRECTIONSETTINGS_H_ */

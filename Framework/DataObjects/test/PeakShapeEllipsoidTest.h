@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOIDTEST_H_
-#define MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOIDTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -206,13 +205,13 @@ public:
                          frame, algorithmName, algorithmVersion);
     Mantid::Kernel::Matrix<double> matrix(3, 2);
     std::vector<double> column1;
-    column1.push_back(1.0);
-    column1.push_back(1.0);
-    column1.push_back(1.0);
+    column1.emplace_back(1.0);
+    column1.emplace_back(1.0);
+    column1.emplace_back(1.0);
     std::vector<double> column2;
-    column2.push_back(1.0);
-    column2.push_back(1.0);
-    column2.push_back(1.0);
+    column2.emplace_back(1.0);
+    column2.emplace_back(1.0);
+    column2.emplace_back(1.0);
 
     matrix.setColumn(0, column1);
     matrix.setColumn(1, column2);
@@ -238,18 +237,18 @@ public:
     // 90 degree rotation around the z axis
     Mantid::Kernel::Matrix<double> matrix(3, 3);
     std::vector<double> column1;
-    column1.push_back(0.0);
-    column1.push_back(1.0);
-    column1.push_back(0.0);
+    column1.emplace_back(0.0);
+    column1.emplace_back(1.0);
+    column1.emplace_back(0.0);
     std::vector<double> column2;
-    column2.push_back(-1.0);
-    column2.push_back(0.0);
-    column2.push_back(0.0);
+    column2.emplace_back(-1.0);
+    column2.emplace_back(0.0);
+    column2.emplace_back(0.0);
 
     std::vector<double> column3;
-    column3.push_back(0.0);
-    column3.push_back(0.0);
-    column3.push_back(1.0);
+    column3.emplace_back(0.0);
+    column3.emplace_back(0.0);
+    column3.emplace_back(1.0);
 
     matrix.setColumn(0, column1);
     matrix.setColumn(1, column2);
@@ -283,5 +282,3 @@ public:
                      delta);
   }
 };
-
-#endif /* MANTID_DATAOBJECTS_PEAKSHAPEELLIPSOIDTEST_H_ */

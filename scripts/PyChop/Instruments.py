@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 This module is a wrapper around a set of instrument parameters (to be read from a YAML file)
 and methods which then call either Chop.py or MulpyRep.py to do the resolution calculations.
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six import string_types
 import numpy as np
 import yaml
 import warnings
@@ -670,7 +668,7 @@ class Instrument(object):
     __known_instruments = ['let', 'maps', 'mari', 'merlin']
 
     def __init__(self, instrument, chopper=None, freq=None):
-        if isinstance(instrument, string_types):
+        if isinstance(instrument, str):
             # check if it is a file or instrument name we want
             if instrument.lower() in self.__known_instruments:
                 import os.path
@@ -682,8 +680,8 @@ class Instrument(object):
                     instrument = yaml.safe_load(f)
             except (OSError, IOError) as e:
                 raise RuntimeError('Cannot open file %s . Error is %s' % (instrument, e))
-        if ((hasattr(instrument, 'moderator') or hasattr(instrument, 'chopper_system')) or
-           ('moderator' in instrument or 'chopper_system' in instrument)):
+        if ((hasattr(instrument, 'moderator') or hasattr(instrument, 'chopper_system'))
+                or ('moderator' in instrument or 'chopper_system' in instrument)):
             wrap_attributes(self, instrument, self.__allowed_var_names)
             if isinstance(self.moderator, dict) and isinstance(self.chopper_system, dict):
                 for key in ['source_rep', 'n_frame', 'emission_time']:

@@ -1,7 +1,6 @@
 // Licensed under the LGPL, see http://www.gnu.org/licenses/lgpl.html
 
-#ifndef __CXXTEST__XMLFORMATTER_H
-#define __CXXTEST__XMLFORMATTER_H
+#pragma once
 
 //
 // The XmlFormatter is a TestListener that
@@ -648,8 +647,6 @@ namespace CxxTest
         TeeOutputStreams *stream_redirect;
     };
 }
-
-#endif // __CXXTEST__XMLFORMATTER_H
 
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government

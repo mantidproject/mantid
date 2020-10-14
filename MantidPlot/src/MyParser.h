@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : MyParser.h
@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MYPARSER_H
-#define MYPARSER_H
+#pragma once
 
 #include "MantidGeometry/muParser_Silent.h"
 #include <gsl/gsl_math.h>
@@ -65,5 +64,3 @@ public:
   static double gammaln(double x) { return gsl_sf_lngamma(x); }
   static double hazard(double x) { return gsl_sf_hazard(x); }
 };
-
-#endif

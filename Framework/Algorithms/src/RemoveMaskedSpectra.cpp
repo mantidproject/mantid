@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RemoveMaskedSpectra.h"
 
@@ -97,7 +97,7 @@ void RemoveMaskedSpectra::makeIndexList(
   if (mask) {
     for (size_t i = 0; i < mask->getNumberHistograms(); ++i) {
       if (mask->y(i)[0] == 0.0) {
-        indices.push_back(i);
+        indices.emplace_back(i);
       }
     }
   } else {
@@ -106,7 +106,7 @@ void RemoveMaskedSpectra::makeIndexList(
       if (!spectrumInfo.hasDetectors(i))
         continue;
       if (!spectrumInfo.isMasked(i))
-        indices.push_back(i);
+        indices.emplace_back(i);
     }
   }
 }

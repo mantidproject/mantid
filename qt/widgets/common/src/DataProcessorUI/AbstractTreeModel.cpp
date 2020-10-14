@@ -1,12 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
+#include <utility>
+
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/TableRow.h"
+#include "MantidQtWidgets/Common/DataProcessorUI/AbstractTreeModel.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -21,7 +23,7 @@ using namespace Mantid::API;
  */
 AbstractTreeModel::AbstractTreeModel(ITableWorkspace_sptr tableWorkspace,
                                      const WhiteList &whitelist)
-    : m_tWS(tableWorkspace), m_whitelist(whitelist) {}
+    : m_tWS(std::move(tableWorkspace)), m_whitelist(whitelist) {}
 
 AbstractTreeModel::~AbstractTreeModel() {}
 

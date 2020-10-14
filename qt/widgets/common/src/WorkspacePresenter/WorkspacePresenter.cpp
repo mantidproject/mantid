@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h"
 
@@ -79,6 +80,9 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
     break;
   case ViewNotifiable::Flag::DeleteWorkspaces:
     deleteWorkspaces();
+    break;
+  case ViewNotifiable::Flag::ClearWorkspaces:
+    clearWorkspaces();
     break;
   case ViewNotifiable::Flag::SaveSingleWorkspace:
     saveSingleWorkspace();
@@ -197,11 +201,11 @@ void WorkspacePresenter::groupWorkspaces() {
     // execute the algorithm
     bool bStatus = alg->execute();
     if (!bStatus) {
-      m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
+      m_view->showCriticalUserMessage("Mantid - Algorithm error",
                                       " Error in GroupWorkspaces algorithm");
     }
   } catch (...) {
-    m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
+    m_view->showCriticalUserMessage("Mantid - Algorithm error",
                                     " Error in GroupWorkspaces algorithm");
   }
 }
@@ -228,11 +232,11 @@ void WorkspacePresenter::ungroupWorkspaces() {
     // execute the algorithm
     bool bStatus = alg->execute();
     if (!bStatus) {
-      m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
+      m_view->showCriticalUserMessage("Mantid - Algorithm error",
                                       " Error in UnGroupWorkspace algorithm");
     }
   } catch (...) {
-    m_view->showCriticalUserMessage("MantidPlot - Algorithm error",
+    m_view->showCriticalUserMessage("Mantid - Algorithm error",
                                     " Error in UnGroupWorkspace algorithm");
   }
 }
@@ -252,7 +256,7 @@ void WorkspacePresenter::deleteWorkspaces() {
                    })) {
     m_view->showCriticalUserMessage(
         "Delete Workspaces",
-        "Unabel to delete workspaces. Invalid workspace names provided.");
+        "Unable to delete workspaces. Invalid workspace names provided.");
     return;
   }
 
@@ -261,6 +265,13 @@ void WorkspacePresenter::deleteWorkspaces() {
 
   if (deleteWs)
     m_view->deleteWorkspaces(selected);
+}
+
+void WorkspacePresenter::clearWorkspaces() {
+  if (m_view->clearWorkspacesConfirmation()) {
+    Mantid::API::AnalysisDataService::Instance().clear();
+    m_view->enableClearButton(false);
+  }
 }
 
 void WorkspacePresenter::saveSingleWorkspace() {

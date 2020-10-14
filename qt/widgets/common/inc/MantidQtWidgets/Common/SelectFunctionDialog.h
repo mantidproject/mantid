@@ -1,18 +1,19 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_
-#define MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_
+#pragma once
 
 //--------------------------------------------------
 // Includes
 //--------------------------------------------------
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 
 #include <QDialog>
+#include <QTreeWidgetItem>
 #include <map>
 
 namespace Ui {
@@ -25,7 +26,8 @@ namespace MantidWidgets {
 /**
  * Select a function type out of a list of available ones.
  */
-class EXPORT_OPT_MANTIDQT_COMMON SelectFunctionDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON SelectFunctionDialog
+    : public API::MantidDialog {
   Q_OBJECT
 
 public:
@@ -37,6 +39,8 @@ public:
   ~SelectFunctionDialog() override;
   /// Return selected function
   QString getFunction() const;
+  /// Clear the text in the search box
+  void clearSearchBoxText() const;
 
 protected:
   /// Ui elements form
@@ -48,9 +52,14 @@ private:
   constructFunctionTree(const std::map<std::string, std::vector<std::string>>
                             &categoryFunctionsMap,
                         const std::vector<std::string> &restrictions);
+
+private slots:
+  void searchBoxChanged(const QString &text);
+  void functionDoubleClicked(QTreeWidgetItem *item);
+  void acceptFunction();
+  void rejectFunction();
+  void helpClicked() const;
 };
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDWIDGETS_SELECTFUNCTIONDIALOG_H_

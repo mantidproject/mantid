@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-
-from __future__ import (absolute_import, unicode_literals)
 
 import os
 import shutil
@@ -16,10 +14,12 @@ import sys
 import tempfile
 import time
 import unittest
+import datetime
+import psutil
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
-from mantid.py3compat import mock
+from unittest import mock
 from workbench.projectrecovery.projectrecovery import ProjectRecovery, SAVING_TIME_KEY, NO_OF_CHECKPOINTS_KEY, \
     RECOVERY_ENABLED_KEY
 
@@ -36,6 +36,21 @@ class ProjectRecoveryTest(unittest.TestCase):
         self.multifileinterpreter = mock.MagicMock()
         self.pr = ProjectRecovery(self.multifileinterpreter)
         self.working_directory = tempfile.mkdtemp()
+        # Make sure there is actually a different modified time on the files
+        self.firstPath = tempfile.mkdtemp()
+        self.secondPath = tempfile.mkdtemp()
+        self.thirdPath = tempfile.mkdtemp()
+
+        # offset the date modified stamps in the past in case future modified dates
+        # cause any problems
+        finalFileDateTime = datetime.datetime.fromtimestamp(os.path.getmtime(self.thirdPath))
+
+        dateoffset = finalFileDateTime - datetime.timedelta(hours=2)
+        modTime = time.mktime(dateoffset.timetuple())
+        os.utime(self.firstPath, (modTime, modTime))
+        dateoffset = finalFileDateTime - datetime.timedelta(hours=1)
+        modTime = time.mktime(dateoffset.timetuple())
+        os.utime(self.secondPath, (modTime, modTime))
 
     def tearDown(self):
         ADS.clear()
@@ -44,6 +59,15 @@ class ProjectRecoveryTest(unittest.TestCase):
 
         if os.path.exists(self.working_directory):
             shutil.rmtree(self.working_directory)
+
+        if os.path.exists(self.firstPath):
+            shutil.rmtree(self.firstPath)
+
+        if os.path.exists(self.secondPath):
+            shutil.rmtree(self.secondPath)
+
+        if os.path.exists(self.thirdPath):
+            shutil.rmtree(self.thirdPath)
 
     def test_constructor_settings_are_set(self):
         # Test the paths set in the constructor that are generated.
@@ -101,16 +125,10 @@ class ProjectRecoveryTest(unittest.TestCase):
 
     @unittest.skipIf(is_macOS(), "Can be unreliable on macOS and is a test of logic not OS capability")
     def test_sort_paths_by_last_modified(self):
-        # Make sure there is actually a different modified time on the files by using sleeps
-        first = tempfile.mkdtemp()
-        time.sleep(0.5)
-        second = tempfile.mkdtemp()
-        time.sleep(0.5)
-        third = tempfile.mkdtemp()
-        paths = [second, third, first]
+        paths = [self.secondPath, self.thirdPath, self.firstPath]
         paths = self.pr.sort_by_last_modified(paths)
 
-        self.assertListEqual(paths, [first, second, third])
+        self.assertListEqual(paths, [self.firstPath, self.secondPath, self.thirdPath])
 
     def test_get_pid_folder_to_be_used_to_load_a_checkpoint_from(self):
         self.pr._make_process_from_pid = mock.MagicMock()
@@ -126,6 +144,13 @@ class ProjectRecoveryTest(unittest.TestCase):
 
         result = self.pr.get_pid_folder_to_load_a_checkpoint_from()
         self.assertEqual(one, result)
+
+    def test_get_pid_folder_returns_pid_if_access_denied(self):
+        pid = os.path.join(self.pr.recovery_directory_hostname, "10000000")
+        os.makedirs(pid)
+        with mock.patch('psutil.Process.cmdline', side_effect=psutil.AccessDenied()):
+            result = self.pr.get_pid_folder_to_load_a_checkpoint_from()
+        self.assertEqual(pid, result)
 
     def test_list_dir_full_path(self):
         one = os.path.join(self.working_directory, "10000000")

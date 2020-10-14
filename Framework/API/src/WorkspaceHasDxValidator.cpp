@@ -1,3 +1,9 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceHasDxValidator.h"
 
 namespace Mantid {
@@ -5,7 +11,7 @@ namespace API {
 
 /// Return a deep clone of this validator.
 Kernel::IValidator_sptr WorkspaceHasDxValidator::clone() const {
-  return boost::make_shared<WorkspaceHasDxValidator>(*this);
+  return std::make_shared<WorkspaceHasDxValidator>(*this);
 }
 
 /// Return an error string if not all histograms in ws have Dx, otherwise an

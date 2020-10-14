@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -77,8 +77,8 @@ void LoadInstrumentFromRaw::exec() {
   // The L2 and 2-theta values from Raw file assumed to be relative to sample
   // position
 
-  Geometry::ObjComponent *samplepos =
-      new Geometry::ObjComponent("Sample", instrument.get());
+  Geometry::Component *samplepos =
+      new Geometry::Component("Sample", instrument.get());
   instrument->add(samplepos);
   instrument->markAsSamplePos(samplepos);
   samplepos->setPos(0.0, 0.0, 0.0);

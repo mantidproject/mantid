@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef Algebra_h
-#define Algebra_h
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Math/Acomp.h"
@@ -69,5 +68,3 @@ std::ostream &operator<<(std::ostream &, const Algebra &);
 } // NAMESPACE Geometry
 
 } // NAMESPACE Mantid
-
-#endif

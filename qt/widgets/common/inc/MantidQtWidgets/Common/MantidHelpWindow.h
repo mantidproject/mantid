@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDHELPWINDOW_H
-#define MANTIDHELPWINDOW_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/MantidHelpInterface.h"
@@ -28,7 +27,8 @@ class EXPORT_OPT_MANTIDQT_COMMON MantidHelpWindow
 public:
   static bool helpWindowExists() { return g_helpWindow != nullptr; }
 
-  MantidHelpWindow(QWidget *parent = nullptr, Qt::WindowFlags flags = nullptr);
+  MantidHelpWindow(QWidget *parent = nullptr,
+                   const Qt::WindowFlags &flags = nullptr);
   ~MantidHelpWindow() override;
 
   void showPage(const std::string &url = std::string()) override;
@@ -69,9 +69,8 @@ private:
 public slots:
   /// Perform any clean up on main window shutdown
   void shutdown() override;
-  void warning(QString msg);
+  void warning(const QString &msg);
 };
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDHELPWINDOW_H

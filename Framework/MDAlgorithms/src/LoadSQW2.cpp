@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/LoadSQW2.h"
 #include "MantidMDAlgorithms/MDWSTransform.h"
@@ -114,7 +114,7 @@ void LoadSQW2::init() {
                   "MDEventWorkspace");
   std::vector<std::string> allowed = {"Q_sample", "HKL"};
   declareProperty("Q3DFrames", allowed[0],
-                  boost::make_shared<StringListValidator>(allowed),
+                  std::make_shared<StringListValidator>(allowed),
                   "The required frame for the output workspace");
 
   // Outputs
@@ -192,7 +192,7 @@ void LoadSQW2::throwIfUnsupportedFileType(int32_t sqwType) {
 
 /// Create the output workspace object
 void LoadSQW2::createOutputWorkspace() {
-  m_outputWS = boost::make_shared<SQWWorkspace>();
+  m_outputWS = std::make_shared<SQWWorkspace>();
 }
 
 /**
@@ -216,8 +216,8 @@ void LoadSQW2::readAllSPEHeadersToWorkspace() {
  * this section
  * @return A new ExperimentInfo object storing the data
  */
-boost::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
-  auto experiment = boost::make_shared<ExperimentInfo>();
+std::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
+  auto experiment = std::make_shared<ExperimentInfo>();
   auto &sample = experiment->mutableSample();
   auto &run = experiment->mutableRun();
 
@@ -238,8 +238,6 @@ boost::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
   V3D uVec(floats[6], floats[7], floats[8]),
       vVec(floats[9], floats[10], floats[11]);
   lattice->setUFromVectors(uVec, vVec);
-  // Lattice is copied into the Sample object
-  sample.setOrientedLattice(lattice.get());
   if (g_log.is(Logger::Priority::PRIO_DEBUG)) {
     std::stringstream os;
     os << "Lattice:"
@@ -255,6 +253,7 @@ boost::shared_ptr<API::ExperimentInfo> LoadSQW2::readSingleSPEHeader() {
        << "Inverse B matrix (calculated): " << lattice->getBinv() << "\n";
     g_log.debug(os.str());
   }
+  sample.setOrientedLattice(std::move(lattice));
 
   // goniometer angles
   float psi(0.0f), omega(0.0f), dpsi(0.0f), gl(0.0f), gs(0.0f);
@@ -596,7 +595,7 @@ void LoadSQW2::setupBoxController() {
  * box controller has already been initialized
  * @param filebackPath Path to the file used for backend storage
  */
-void LoadSQW2::setupFileBackend(std::string filebackPath) {
+void LoadSQW2::setupFileBackend(const std::string &filebackPath) {
   using DataObjects::BoxControllerNeXusIO;
   auto savemd = this->createChildAlgorithm("SaveMD", 0.01, 0.05, true);
   savemd->setProperty("InputWorkspace", m_outputWS);
@@ -608,7 +607,7 @@ void LoadSQW2::setupFileBackend(std::string filebackPath) {
   // create file-backed box controller
   auto boxControllerMem = m_outputWS->getBoxController();
   auto boxControllerIO =
-      boost::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
+      std::make_shared<BoxControllerNeXusIO>(boxControllerMem.get());
   boxControllerMem->setFileBacked(boxControllerIO, filebackPath);
   m_outputWS->getBox()->setFileBacked();
   boxControllerMem->getFileIO()->setWriteBufferSize(1000000);

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -12,14 +12,14 @@
 #include "MantidGeometry/Rendering/GeometryTriangulator.h"
 #include "MantidGeometry/Rendering/RenderingHelpers.h"
 #include "MantidGeometry/Rendering/RenderingMesh.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
 
 GeometryHandler::GeometryHandler(IObjComponent *comp) : m_objComp(comp) {}
 
-GeometryHandler::GeometryHandler(boost::shared_ptr<CSGObject> obj)
+GeometryHandler::GeometryHandler(const std::shared_ptr<CSGObject> &obj)
     : m_triangulator(new detail::GeometryTriangulator(obj.get())),
       m_csgObj(obj.get()) {}
 
@@ -49,8 +49,8 @@ GeometryHandler::GeometryHandler(const GeometryHandler &handler) {
 /// Destructor
 GeometryHandler::~GeometryHandler() {}
 
-boost::shared_ptr<GeometryHandler> GeometryHandler::clone() const {
-  return boost::make_shared<GeometryHandler>(*this);
+std::shared_ptr<GeometryHandler> GeometryHandler::clone() const {
+  return std::make_shared<GeometryHandler>(*this);
 }
 
 void GeometryHandler::render() const {

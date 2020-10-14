@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FINDDETECTORSOUTSIDELIMITSTEST_H_
-#define FINDDETECTORSOUTSIDELIMITSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -23,8 +22,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::Types::Core::DateAndTime;
 using Mantid::Types::Event::TofEvent;
 
@@ -200,5 +199,3 @@ public:
     AnalysisDataService::Instance().remove("testdead_out");
   }
 };
-
-#endif /*FINDDETECTORSOUTSIDELIMITSTEST_H_*/

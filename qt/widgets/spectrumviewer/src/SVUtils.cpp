@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <cmath>
 #include <sstream>
@@ -50,11 +50,11 @@ void SVUtils::Format(int width, int precision, double value, std::string &str) {
  */
 void SVUtils::PushNameValue(const std::string &name, int width, int precision,
                             double value, std::vector<std::string> &list) {
-  list.push_back(name);
+  list.emplace_back(name);
 
   std::string value_str;
   Format(width, precision, value, value_str);
-  list.push_back(value_str);
+  list.emplace_back(value_str);
 }
 
 /**

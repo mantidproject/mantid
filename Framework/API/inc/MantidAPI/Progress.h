@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_PROGRESS_H_
-#define MANTID_API_PROGRESS_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -35,10 +34,7 @@ public:
 private:
   /// Owning algorithm
   Algorithm *const m_alg;
-  Progress &operator=(const Progress &);
 };
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_PROGRESS_H_*/

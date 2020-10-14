@@ -1,16 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_SAFEQWTPLOT_H_
-#define MANTID_MANTIDWIDGETS_SAFEQWTPLOT_H_
+#pragma once
 
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include "qwt_text.h"
+MSVC_DIAG_OFF(4244)
 #include <QPainter>
+MSVC_DIAG_ON(4244)
 #include <qwt_plot.h>
 
 namespace MantidQt {
@@ -47,5 +49,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /* MANTID_MANTIDWIDGETS_SAFEQWTPLOT_H_ */

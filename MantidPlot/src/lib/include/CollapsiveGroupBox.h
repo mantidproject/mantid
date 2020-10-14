@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
         File                 : CollapsiveGroupBox.h
@@ -16,8 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef COLLAPSIVE_GROUP_BOX__H
-#define COLLAPSIVE_GROUP_BOX__H
+#pragma once
 
 #include <QGroupBox>
 
@@ -38,5 +37,3 @@ public slots:
   void setCollapsed(bool collapsed = true);
   void setExpanded(bool expanded = true);
 };
-
-#endif

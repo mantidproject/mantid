@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORALGORITHMBASE_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORALGORITHMBASE_H
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidQtWidgets/Common/DllOption.h"
@@ -33,7 +32,8 @@ public:
   // Constructor
   ProcessingAlgorithmBase(
       const QString &name,
-      const std::set<QString> &blacklist = std::set<QString>());
+      const std::set<QString> &blacklist = std::set<QString>(),
+      const int version = -1);
 
   // Destructor
   ~ProcessingAlgorithmBase();
@@ -59,6 +59,8 @@ private:
 
   // The name of this algorithm
   QString m_algName;
+  // The version of this algorithm
+  int m_version;
   // The blacklist
   std::set<QString> m_blacklist;
   // Input ws properties
@@ -77,4 +79,3 @@ protected:
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORALGORITHMBASE_H*/

@@ -2,8 +2,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=line-too-long, invalid-name, unused-argument, unused-import, multiple-statements
 # pylint: disable=attribute-defined-outside-init, protected-access, super-on-old-class, redefined-outer-name
@@ -14,8 +14,6 @@
 This module contains a class to create a graphical user interface for PyChop.
 """
 
-from __future__ import (absolute_import, division, print_function)
-from six import string_types
 import sys
 import re
 import numpy as np
@@ -27,6 +25,7 @@ from qtpy.QtCore import (QEventLoop, Qt)  # noqa
 from qtpy.QtWidgets import (QAction, QCheckBox, QComboBox, QDialog, QFileDialog, QGridLayout, QHBoxLayout, QMenu, QLabel,
                             QLineEdit, QMainWindow, QMessageBox, QPushButton, QSizePolicy, QSpacerItem, QTabWidget,
                             QTextEdit, QVBoxLayout, QWidget)  # noqa
+from mantid.plots.utility import legend_set_draggable
 from mantidqt.MPLwidgets import FigureCanvasQTAgg as FigureCanvas
 from mantidqt.MPLwidgets import NavigationToolbar2QT as NavigationToolbar
 import matplotlib
@@ -161,7 +160,7 @@ class PyChopGui(QMainWindow):
             freq_in = [freq_in, freqpr]
         if not self.widgets['Chopper2Phase']['Label'].isHidden():
             chop2phase = self.widgets['Chopper2Phase']['Edit'].text()
-            if isinstance(self.engine.chopper_system.defaultPhase[0], string_types):
+            if isinstance(self.engine.chopper_system.defaultPhase[0], str):
                 chop2phase = str(chop2phase)
             else:
                 chop2phase = float(chop2phase) % (1e6 / self.engine.moderator.source_rep)
@@ -280,7 +279,7 @@ class PyChopGui(QMainWindow):
                 self.plot_qe(ei, label_text, overplot)
             self.resaxes_xlim = max(ei, self.resaxes_xlim)
         self.resaxes.set_xlim([0, self.resaxes_xlim])
-        self.resaxes.legend().draggable()
+        legend_set_draggable(self.resaxes.legend(), True)
         self.resaxes.set_xlabel('Energy Transfer (meV)')
         self.resaxes.set_ylabel(r'$\Delta$E (meV FWHM)')
         self.rescanvas.draw()
@@ -299,7 +298,7 @@ class PyChopGui(QMainWindow):
         line, = self.qeaxes.plot(np.hstack(q2), np.concatenate((np.flipud(en), en)).tolist() * len(self.engine.detector.tthlims))
         line.set_label(label_text)
         self.qeaxes.set_xlim([0, self.qeaxes_xlim])
-        self.qeaxes.legend().draggable()
+        legend_set_draggable(self.qeaxes.legend(), True)
         self.qeaxes.set_xlabel(r'$|Q| (\mathrm{\AA}^{-1})$')
         self.qeaxes.set_ylabel('Energy Transfer (meV)')
         self.qecanvas.draw()
@@ -371,7 +370,7 @@ class PyChopGui(QMainWindow):
         self.flxaxes1.set_xlabel('Incident Energy (meV)')
         self.flxaxes2.set_ylabel('Elastic Resolution FWHM (meV)')
         lg = self.flxaxes2.legend()
-        lg.draggable()
+        legend_set_draggable(lg, True)
         self.flxcanvas.draw()
 
     def update_slider(self, val=None):
@@ -438,7 +437,7 @@ class PyChopGui(QMainWindow):
         line, = self.frqaxes2.plot(freqs, elres, 'o-')
         line.set_label('%s "%s" Ei = %5.3f meV' % (inst, chop, ei))
         lg = self.frqaxes2.legend()
-        lg.draggable()
+        legend_set_draggable(lg, True)
         self.frqaxes2.set_xlim([0, np.max(freqs)])
         self.frqcanvas.draw()
 

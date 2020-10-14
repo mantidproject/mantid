@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateEfficiency.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -42,7 +42,7 @@ void CalculateEfficiency::init() {
                                             Direction::Output),
       "The name of the workspace to be created as the output of the algorithm");
 
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty(
       "MinEfficiency", EMPTY_DBL(), positiveDouble,
@@ -100,7 +100,7 @@ void CalculateEfficiency::exec() {
   MatrixWorkspace_sptr outputWS; // = getProperty("OutputWorkspace");
 
   // DataObjects::EventWorkspace_const_sptr inputEventWS =
-  // boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  // std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
 
   // Sum up all the wavelength bins
   IAlgorithm_sptr childAlg = createChildAlgorithm("Integration", 0.0, 0.2);
@@ -156,9 +156,9 @@ void CalculateEfficiency::exec() {
  * @param error: error on sum (counts)
  * @param nPixels: number of unmasked detector pixels that contributed to sum
  */
-void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
-                                               double &sum, double &error,
-                                               int &nPixels) {
+void CalculateEfficiency::sumUnmaskedDetectors(
+    const MatrixWorkspace_sptr &rebinnedWS, double &sum, double &error,
+    int &nPixels) {
   // Number of spectra
   const auto numberOfSpectra =
       static_cast<int>(rebinnedWS->getNumberHistograms());
@@ -200,11 +200,10 @@ void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
  * @param nPixels: number of unmasked detector pixels that contributed to sum
  */
 
-void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
-                                             MatrixWorkspace_sptr outputWS,
-                                             double sum, double error,
-                                             int nPixels, double min_eff,
-                                             double max_eff) {
+void CalculateEfficiency::normalizeDetectors(
+    const MatrixWorkspace_sptr &rebinnedWS,
+    const MatrixWorkspace_sptr &outputWS, double sum, double error, int nPixels,
+    double min_eff, double max_eff) {
   // Number of spectra
   const size_t numberOfSpectra = rebinnedWS->getNumberHistograms();
 
@@ -242,9 +241,9 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
 
     // Mask this detector if the signal is outside the acceptable band
     if (!isEmpty(min_eff) && YOut[0] < min_eff)
-      dets_to_mask.push_back(i);
+      dets_to_mask.emplace_back(i);
     if (!isEmpty(max_eff) && YOut[0] > max_eff)
-      dets_to_mask.push_back(i);
+      dets_to_mask.emplace_back(i);
   }
 
   g_log.debug() << "normalizeDetectors: Masked pixels outside the acceptable "
@@ -294,8 +293,8 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
                                         const std::string &componentName) {
   auto instrument = ws.getInstrument();
   try {
-    boost::shared_ptr<const Geometry::ICompAssembly> component =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+    std::shared_ptr<const Geometry::ICompAssembly> component =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
             instrument->getComponentByName(componentName));
     if (!component) {
       g_log.warning("Component " + componentName +
@@ -305,14 +304,14 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
     }
     std::vector<detid_t> detectorList;
     for (int x = 0; x < component->nelements(); x++) {
-      boost::shared_ptr<Geometry::ICompAssembly> xColumn =
-          boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*component)[x]);
+      std::shared_ptr<Geometry::ICompAssembly> xColumn =
+          std::dynamic_pointer_cast<Geometry::ICompAssembly>((*component)[x]);
       for (int y = 0; y < xColumn->nelements(); y++) {
-        boost::shared_ptr<Geometry::Detector> detector =
-            boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+        std::shared_ptr<Geometry::Detector> detector =
+            std::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
         if (detector) {
           auto detID = detector->getID();
-          detectorList.push_back(detID);
+          detectorList.emplace_back(detID);
         }
       }
     }
@@ -337,19 +336,17 @@ void CalculateEfficiency::maskComponent(MatrixWorkspace &ws,
  * @param low :: number of rows to mask Bottom
  * @param componentName :: Must be a RectangularDetector
  */
-void CalculateEfficiency::maskEdges(MatrixWorkspace_sptr ws, int left,
+void CalculateEfficiency::maskEdges(const MatrixWorkspace_sptr &ws, int left,
                                     int right, int high, int low,
                                     const std::string &componentName) {
 
   auto instrument = ws->getInstrument();
 
-  boost::shared_ptr<Mantid::Geometry::RectangularDetector> component;
+  std::shared_ptr<Mantid::Geometry::RectangularDetector> component;
   try {
-    component =
-        boost::const_pointer_cast<Mantid::Geometry::RectangularDetector>(
-            boost::dynamic_pointer_cast<
-                const Mantid::Geometry::RectangularDetector>(
-                instrument->getComponentByName(componentName)));
+    component = std::const_pointer_cast<Mantid::Geometry::RectangularDetector>(
+        std::dynamic_pointer_cast<const Mantid::Geometry::RectangularDetector>(
+            instrument->getComponentByName(componentName)));
   } catch (std::exception &) {
     g_log.warning("Expecting the component " + componentName +
                   " to be a RectangularDetector. maskEdges not executed.");
@@ -365,13 +362,13 @@ void CalculateEfficiency::maskEdges(MatrixWorkspace_sptr ws, int left,
   int i = 0;
 
   while (i < left * component->idstep()) {
-    IDs.push_back(component->idstart() + i);
+    IDs.emplace_back(component->idstart() + i);
     i += 1;
   }
   // right
   i = component->maxDetectorID() - right * component->idstep();
   while (i < component->maxDetectorID()) {
-    IDs.push_back(i);
+    IDs.emplace_back(i);
     i += 1;
   }
   // low: 0,256,512,768,..,1,257,513
@@ -379,7 +376,7 @@ void CalculateEfficiency::maskEdges(MatrixWorkspace_sptr ws, int left,
     i = row + component->idstart();
     while (i < component->nelements() * component->idstep() -
                    component->idstep() + low + component->idstart()) {
-      IDs.push_back(i);
+      IDs.emplace_back(i);
       i += component->idstep();
     }
   }
@@ -388,7 +385,7 @@ void CalculateEfficiency::maskEdges(MatrixWorkspace_sptr ws, int left,
     i = component->idstep() + component->idstart() - row - 1;
     while (i < component->nelements() * component->idstep() +
                    component->idstart()) {
-      IDs.push_back(i);
+      IDs.emplace_back(i);
       i += component->idstep();
     }
   }

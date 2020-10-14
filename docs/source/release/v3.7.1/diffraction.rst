@@ -59,7 +59,7 @@ Engineering Diffraction
   parameters (whole pattern refinement) and/or fit peaks.
 
 - New algorithm added:
-  :ref:`EnggFitDIFCFromPeaks<algm-EnggFitDIFCFromPeaks>`, which forks
+  :ref:`EnggFitDIFCFromPeaks<algm-EnggFitTOFFromPeaks>`, which forks
   from the old
   :ref:`EnggFitPeaks<algm-EnggFitPeaks>`. :ref:`EnggFitPeaks<algm-EnggFitPeaks>`
   modified to fit peaks but not calibration parameters.
@@ -94,14 +94,13 @@ Graphical user interface
   found within working directory and user can also select file now by providing
   a run-number.
 
-- Improvements to the :ref:`Preview-Engineering_Diffraction-ref` section
-  for Fitting tab, the zoom-in or zoom-out feature on to the data plot
-  is enabled. As well as option to select peak, add peak or save peaks
-  from the data plot is now supported.
+- Improvements to the Preview section for Fitting tab, the zoom-in or zoom-out
+  feature on to the data plot is enabled. As well as option to select peak, add
+  peak or save peaks from the data plot is now supported.
 
-- :ref:`Preview-Engineering_Diffraction-ref` under Fitting tab, you can
-  now view the plot in `dSpacing` instead `ToF`, which enables you to
-  rerun the fitting process after selecting peaks from the interface.
+- Preview under Fitting tab, you can now view the plot in `dSpacing` instead
+  `ToF`, which enables you to rerun the fitting process after selecting peaks
+  from the interface.
 
 
 - The output calibration files will be written with the extension

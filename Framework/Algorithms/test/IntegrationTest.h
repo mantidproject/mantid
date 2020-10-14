@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INTEGRATIONTEST_H_
-#define INTEGRATIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -97,8 +96,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace));
 
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     size_t max = 0;
     TS_ASSERT_EQUALS(max = output2D->getNumberHistograms(), 3);
     double yy[3] = {36, 51, 66};
@@ -140,8 +138,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve("out2"));
 
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 5);
     TS_ASSERT_EQUALS(output2D->dataX(0)[0], 0);
     TS_ASSERT_EQUALS(output2D->dataX(0)[1], 5);
@@ -153,7 +150,7 @@ public:
   void testRangeWithPartialBins() {
     Workspace2D_sptr input;
     TS_ASSERT_THROWS_NOTHING(
-        input = boost::dynamic_pointer_cast<Workspace2D>(
+        input = std::dynamic_pointer_cast<Workspace2D>(
             AnalysisDataService::Instance().retrieve("testSpace")))
     assertRangeWithPartialBins(input);
   }
@@ -161,13 +158,13 @@ public:
   void testRangeWithPartialBinsAndDistributionData() {
     Workspace2D_sptr input;
     TS_ASSERT_THROWS_NOTHING(
-        input = boost::dynamic_pointer_cast<Workspace2D>(
+        input = std::dynamic_pointer_cast<Workspace2D>(
             AnalysisDataService::Instance().retrieve("testSpace")))
     input->setDistribution(true);
     assertRangeWithPartialBins(input);
   }
 
-  void doTestEvent(std::string inName, std::string outName,
+  void doTestEvent(const std::string &inName, const std::string &outName,
                    int StartWorkspaceIndex, int EndWorkspaceIndex) {
     int numPixels = 100;
     int numBins = 50;
@@ -191,8 +188,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outName));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
 
     // Check that it is a matrix workspace
     TS_ASSERT(output);
@@ -230,8 +226,8 @@ public:
     doTestEvent("inWS", "inWS", 10, 29);
   }
 
-  void doTestRebinned(const std::string RangeLower,
-                      const std::string RangeUpper,
+  void doTestRebinned(const std::string &RangeLower,
+                      const std::string &RangeUpper,
                       const int StartWorkspaceIndex,
                       const int EndWorkspaceIndex,
                       const bool IncludePartialBins, const int expectedNumHists,
@@ -258,8 +254,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outName));
-    Workspace2D_sptr outputWS =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr outputWS = std::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT_EQUALS(outputWS->id(), "RebinnedOutput");
 
     double tol = 1.e-5;
@@ -291,12 +286,12 @@ public:
     doTestRebinned("-1.5", "1.75", 0, 3, true, 4, truth);
   }
 
-  void makeRealBinBoundariesWorkspace(const std::string inWsName) {
+  void makeRealBinBoundariesWorkspace(const std::string &inWsName) {
     const unsigned int lenX = 11, lenY = 10, lenE = lenY;
 
     Workspace_sptr wsAsWs =
         WorkspaceFactory::Instance().create("Workspace2D", 1, lenX, lenY);
-    Workspace2D_sptr ws = boost::dynamic_pointer_cast<Workspace2D>(wsAsWs);
+    Workspace2D_sptr ws = std::dynamic_pointer_cast<Workspace2D>(wsAsWs);
 
     double x[lenX] = {-1,  -0.8, -0.6, -0.4, -0.2, -2.22045e-16,
                       0.2, 0.4,  0.6,  0.8,  1};
@@ -327,16 +322,16 @@ public:
     AnalysisDataService::Instance().add(inWsName, ws);
   }
 
-  void doTestRealBinBoundaries(const std::string inWsName,
-                               const std::string rangeLower,
-                               const std::string rangeUpper,
+  void doTestRealBinBoundaries(const std::string &inWsName,
+                               const std::string &rangeLower,
+                               const std::string &rangeUpper,
                                const double expectedVal,
                                const bool checkRanges = false,
                                const bool IncPartialBins = false) {
     Workspace_sptr auxWs;
     TS_ASSERT_THROWS_NOTHING(
         auxWs = AnalysisDataService::Instance().retrieve(inWsName));
-    Workspace2D_sptr inWs = boost::dynamic_pointer_cast<Workspace2D>(auxWs);
+    Workspace2D_sptr inWs = std::dynamic_pointer_cast<Workspace2D>(auxWs);
 
     std::string outWsName = "out_real_boundaries_ws";
 
@@ -352,7 +347,7 @@ public:
     // should have created output work space
     TS_ASSERT_THROWS_NOTHING(
         auxWs = AnalysisDataService::Instance().retrieve(outWsName));
-    Workspace2D_sptr outWs = boost::dynamic_pointer_cast<Workspace2D>(auxWs);
+    Workspace2D_sptr outWs = std::dynamic_pointer_cast<Workspace2D>(auxWs);
     TS_ASSERT_EQUALS(inWs->getNumberHistograms(), outWs->getNumberHistograms());
 
     if (checkRanges) {
@@ -394,7 +389,7 @@ public:
     const size_t nspec = 5;
     Workspace_sptr space =
         WorkspaceFactory::Instance().create("Workspace2D", nspec, 5, 5);
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
+    Workspace2D_sptr space2D = std::dynamic_pointer_cast<Workspace2D>(space);
 
     for (int j = 0; j < 5; ++j) {
       for (int k = 0; k < 5; ++k) {
@@ -442,7 +437,7 @@ public:
     const size_t nspec = 5;
     Workspace_sptr space =
         WorkspaceFactory::Instance().create("Workspace2D", nspec, 5, 5);
-    Workspace2D_sptr space2D = boost::dynamic_pointer_cast<Workspace2D>(space);
+    Workspace2D_sptr space2D = std::dynamic_pointer_cast<Workspace2D>(space);
 
     for (int j = 0; j < 5; ++j) {
       for (int k = 0; k < 5; ++k) {
@@ -708,7 +703,7 @@ public:
   }
 
   template <typename F>
-  void wsBoundsTest(std::string workspace, int startIndex, int endIndex,
+  void wsBoundsTest(const std::string &workspace, int startIndex, int endIndex,
                     F boundsAssert) {
     MatrixWorkspace_sptr input;
     TS_ASSERT_THROWS_NOTHING(
@@ -733,8 +728,9 @@ public:
   }
 
   void testStartWsIndexOutOfBounds() {
-    auto boundsAssert = [](MatrixWorkspace_sptr, MatrixWorkspace_sptr output,
-                           int, int endIndex) {
+    auto boundsAssert = [](const MatrixWorkspace_sptr &,
+                           const MatrixWorkspace_sptr &output, int,
+                           int endIndex) {
       TS_ASSERT_EQUALS(output->getNumberHistograms(), endIndex + 1);
     };
 
@@ -742,8 +738,9 @@ public:
   }
 
   void testStartWSIndexGreaterThanEnd() {
-    auto boundsAssert = [](MatrixWorkspace_sptr input,
-                           MatrixWorkspace_sptr output, int startIndex, int) {
+    auto boundsAssert = [](const MatrixWorkspace_sptr &input,
+                           const MatrixWorkspace_sptr &output, int startIndex,
+                           int) {
       TS_ASSERT_EQUALS(output->getNumberHistograms(),
                        input->getNumberHistograms() - startIndex);
     };
@@ -752,8 +749,8 @@ public:
   }
 
   void testStartWSIndexEqualsEnd() {
-    auto boundsAssert = [](MatrixWorkspace_sptr, MatrixWorkspace_sptr output,
-                           int, int) {
+    auto boundsAssert = [](const MatrixWorkspace_sptr &,
+                           const MatrixWorkspace_sptr &output, int, int) {
       TS_ASSERT_EQUALS(output->getNumberHistograms(), 1);
     };
 
@@ -781,7 +778,7 @@ public:
   }
 
 private:
-  void assertRangeWithPartialBins(Workspace_sptr input) {
+  void assertRangeWithPartialBins(const Workspace_sptr &input) {
     Integration alg;
     alg.setRethrows(false);
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -803,8 +800,7 @@ private:
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve("out"));
 
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     size_t max = 0;
     TS_ASSERT_EQUALS(max = output2D->getNumberHistograms(), 3);
     const double yy[3] = {52., 74., 96.};
@@ -825,5 +821,3 @@ private:
     }
   }
 };
-
-#endif /*INTEGRATIONTEST_H_*/

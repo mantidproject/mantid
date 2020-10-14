@@ -40,7 +40,7 @@ Usage
        'HighAngleBkgOffset': 10,
        'HighAngleBkgWidth': 50,
    }
-   
+
    # Direct beam
    direct = ReflectometryILLPreprocess(
        Run='ILL/D17/317369.nxs',
@@ -48,14 +48,14 @@ Usage
    )
 
    directFgd = ReflectometryILLSumForeground(direct)
-   
+
    # Reflected beam. Flippers set to '++'
    reflected11 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
-       DirectLineWorkspace=direct,
+       Measurement='ReflectedBeam',
        **settings
    )
-   
+
    reflectivity11 = ReflectometryILLSumForeground(
        InputWorkspace=reflected11,
        DirectForegroundWorkspace=directFgd,
@@ -65,9 +65,10 @@ Usage
    # Reload the reflected be. We will fake the '--' flipper settings
    reflected00 = ReflectometryILLPreprocess(
        Run='ILL/D17/317370.nxs',
+       Measurement='ReflectedBeam',
        **settings
    )
-   
+
    reflectivity00 = ReflectometryILLSumForeground(
        InputWorkspace=reflected00,
        DirectForegroundWorkspace=directFgd,
@@ -81,7 +82,7 @@ Usage
    logs.addProperty('Flipper1.stateint', 0, replace)
    logs.addProperty('Flipper2.state', '-', replace)
    logs.addProperty('Flipper2.stateint', 0, replace)
-   
+
    # Polarization efficiency correction
    # The algorithm will think that the analyzer was off.
    ReflectometryILLPolarizationCor(

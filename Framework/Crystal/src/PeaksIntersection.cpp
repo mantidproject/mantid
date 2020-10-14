@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PeaksIntersection.h"
 #include "MantidAPI/TableRow.h"
@@ -38,14 +38,14 @@ void PeaksIntersection::initBaseProperties() {
                   "An input peaks workspace.");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back(detectorSpaceFrame());
-  propOptions.push_back(qLabFrame());
-  propOptions.push_back(qSampleFrame());
-  propOptions.push_back(hklFrame());
+  propOptions.emplace_back(detectorSpaceFrame());
+  propOptions.emplace_back(qLabFrame());
+  propOptions.emplace_back(qSampleFrame());
+  propOptions.emplace_back(hklFrame());
 
   declareProperty(
       "CoordinateFrame", "DetectorSpace",
-      boost::make_shared<StringListValidator>(propOptions),
+      std::make_shared<StringListValidator>(propOptions),
       "What coordinate system to use for intersection criteria?\n"
       "  DetectorSpace: Real-space coordinates.\n"
       "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
@@ -117,7 +117,7 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
   }
 
   Mantid::DataObjects::TableWorkspace_sptr outputWorkspace =
-      boost::make_shared<Mantid::DataObjects::TableWorkspace>(ws->rowCount());
+      std::make_shared<Mantid::DataObjects::TableWorkspace>(ws->rowCount());
   outputWorkspace->addColumn("int", "PeakIndex");
   outputWorkspace->addColumn("bool", "Intersecting");
   outputWorkspace->addColumn("double", "Distance");
@@ -154,10 +154,9 @@ void PeaksIntersection::executePeaksIntersection(const bool checkPeakExtents) {
                                                   // the box faces.
           {
             // Check that it is actually within the face boundaries.
-            const V3D touchPoint =
-                (normals[j] * distance) +
-                peakCenter; // Vector equation of line give touch
-                            // point on plane.
+            const V3D touchPoint = (normals[j] * distance) +
+                                   peakCenter; // Vector equation of line give
+                                               // touch point on plane.
 
             // checkTouchPoint(touchPoint, normals[i], faces[i][0]); //
             // Debugging line.

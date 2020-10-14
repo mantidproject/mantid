@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_ReadMaterial_H_
-#define MANTID_DATAHANDLING_ReadMaterial_H_
+#pragma once
 
 #include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/MaterialBuilder.h"
@@ -37,17 +36,17 @@ public:
     /// The mass number to set, defaults to 0
     int massNumber = 0;
     /// The sample number density to set, defaults to EMPTY_DBL()
-    double sampleNumberDensity = EMPTY_DBL();
+    double numberDensity = EMPTY_DBL();
     /// The zParameter to set, defaults to EMPTY_DBL()
     double zParameter = EMPTY_DBL();
     /// The unit cell volume to set, defaults to EMPTY_DBL()
     double unitCellVolume = EMPTY_DBL();
     /// The sample mass density to set, defaults to EMPTY_DBL()
-    double sampleMassDensity = EMPTY_DBL();
+    double massDensity = EMPTY_DBL();
     /// The sample mass to set, defaults to EMPTY_DBL()
-    double sampleMass = EMPTY_DBL();
+    double mass = EMPTY_DBL();
     /// The sample volume to set, defaults to EMPTY_DBL()
-    double sampleVolume = EMPTY_DBL();
+    double volume = EMPTY_DBL();
     /// The coherent scattering cross section to set, defaults to EMPTY_DBL()
     double coherentXSection = EMPTY_DBL();
     /// The incoherent scattering cross section to set, defaults to EMPTY_DBL()
@@ -56,6 +55,8 @@ public:
     double attenuationXSection = EMPTY_DBL();
     /// The total scattering cross section to set, defaults to EMPTY_DBL()
     double scatteringXSection = EMPTY_DBL();
+    /// The name or path of a file containing an attenuation profile
+    std::string attenuationProfileFileName = "";
     /// A flag indicating the unit of sampleNumberDensity
     Kernel::MaterialBuilder::NumberDensityUnit numberDensityUnit =
         Kernel::MaterialBuilder::NumberDensityUnit::Atoms;
@@ -89,7 +90,7 @@ private:
    */
   Kernel::MaterialBuilder builder;
 
-  void setMaterial(const std::string chemicalSymbol, const int atomicNumber,
+  void setMaterial(const std::string &chemicalSymbol, const int atomicNumber,
                    const int massNumber);
 
   void
@@ -97,11 +98,10 @@ private:
                    const Kernel::MaterialBuilder::NumberDensityUnit rhoUnit,
                    const double zParameter, const double unitCellVolume);
   void setScatteringInfo(double coherentXSection, double incoherentXSection,
-                         double attenuationXSection, double scatteringXSection);
+                         double attenuationXSection, double scatteringXSection,
+                         std::string attenuationProfileFileName);
 
   static bool isEmpty(const double toCheck);
 };
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_ReadMaterial_H_*/

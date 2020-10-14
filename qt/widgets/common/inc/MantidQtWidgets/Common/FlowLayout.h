@@ -38,8 +38,7 @@
 **
 ****************************************************************************/
 
-#ifndef FLOWLAYOUT_H
-#define FLOWLAYOUT_H
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include <QLayout>
@@ -79,5 +78,3 @@ private:
 };
 } // namespace API
 } // namespace MantidQt
-
-#endif

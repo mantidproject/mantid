@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/ApplyMuonDetectorGrouping.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <cctype>
 #include <string>
+#include <utility>
+
 #include <vector>
 
 const std::vector<std::string> g_analysisTypes = {"Counts", "Asymmetry"};
@@ -44,15 +46,15 @@ Mantid::Muon::PlotType getPlotType(const std::string &plotType) {
  * single period otherwise leave it alone.
  */
 Mantid::API::WorkspaceGroup_sptr
-convertInputWStoWSGroup(Mantid::API::Workspace_sptr inputWS) {
+convertInputWStoWSGroup(const Mantid::API::Workspace_sptr &inputWS) {
 
   // Cast input WS to a WorkspaceGroup
-  auto muonWS = boost::make_shared<Mantid::API::WorkspaceGroup>();
+  auto muonWS = std::make_shared<Mantid::API::WorkspaceGroup>();
   if (auto test =
-          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(inputWS)) {
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(inputWS)) {
     muonWS->addWorkspace(test);
   } else {
-    muonWS = boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(inputWS);
+    muonWS = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(inputWS);
   }
   return muonWS;
 }
@@ -97,7 +99,7 @@ void ApplyMuonDetectorGrouping::init() {
 
   declareProperty(
       "AnalysisType", "Counts",
-      boost::make_shared<Kernel::ListValidator<std::string>>(g_analysisTypes),
+      std::make_shared<Kernel::ListValidator<std::string>>(g_analysisTypes),
       "The type of analysis to perform on the spectra.", Direction::Input);
 
   declareProperty(
@@ -296,7 +298,7 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
     const WorkspaceGroup &ws, Muon::AnalysisOptions &options) {
 
   MatrixWorkspace_sptr clipWS;
-  clipWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ws.getItem(0));
+  clipWS = std::dynamic_pointer_cast<MatrixWorkspace>(ws.getItem(0));
   double dataXMin;
   double dataXMax;
   clipWS->getXMinMax(dataXMin, dataXMax);
@@ -317,7 +319,8 @@ void ApplyMuonDetectorGrouping::clipXRangeToWorkspace(
  * Creates workspace, processing the data using the MuonProcess algorithm.
  */
 Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
-    Workspace_sptr inputWS, bool noRebin, Muon::AnalysisOptions options) {
+    const Workspace_sptr &inputWS, bool noRebin,
+    Muon::AnalysisOptions options) {
 
   IAlgorithm_sptr alg = Algorithm::createChildAlgorithm("MuonProcess");
 
@@ -325,7 +328,7 @@ Workspace_sptr ApplyMuonDetectorGrouping::createAnalysisWorkspace(
     options.rebinArgs = "";
   }
 
-  setMuonProcessPeriodProperties(*alg, inputWS, options);
+  setMuonProcessPeriodProperties(*alg, std::move(inputWS), options);
   setMuonProcessAlgorithmProperties(*alg, options);
   alg->setPropertyValue("OutputWorkspace", "__NotUsed__");
   alg->execute();
@@ -350,19 +353,19 @@ bool ApplyMuonDetectorGrouping::renameAndMoveUnNormWorkspace(
  * to the given options. For use with MuonProcess.
  */
 void ApplyMuonDetectorGrouping::setMuonProcessPeriodProperties(
-    IAlgorithm &alg, Workspace_sptr inputWS,
+    IAlgorithm &alg, const Workspace_sptr &inputWS,
     const Muon::AnalysisOptions &options) const {
 
-  auto inputGroup = boost::make_shared<WorkspaceGroup>();
+  auto inputGroup = std::make_shared<WorkspaceGroup>();
   // If is a group, will need to handle periods
-  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
+  if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
     for (int i = 0; i < group->getNumberOfEntries(); i++) {
-      auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
+      auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i));
       inputGroup->addWorkspace(ws);
     }
     alg.setProperty("SummedPeriodSet", options.summedPeriods);
     alg.setProperty("SubtractedPeriodSet", options.subtractedPeriods);
-  } else if (auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
+  } else if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
     // Put this single WS into a group and set it as the input property
     inputGroup->addWorkspace(ws);
     alg.setProperty("SummedPeriodSet", "1");

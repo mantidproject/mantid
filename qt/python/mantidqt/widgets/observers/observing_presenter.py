@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from __future__ import (absolute_import, division, print_function)
 
 
 class ObservingPresenter(object):
@@ -52,7 +50,8 @@ class ObservingPresenter(object):
         return self.model.workspace_equals(name)
 
     def replace_workspace(self, workspace_name, workspace):
-        raise NotImplementedError("This method must be overridden.")
+        if self.model.workspace_equals(workspace_name):
+            self.container.emit_replace(workspace_name, workspace)
 
     def rename_workspace(self, old_name, new_name):
         if self.model.workspace_equals(old_name):

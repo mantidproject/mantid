@@ -2,15 +2,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 Wraps a call to the sip code generation executable to strip any throw specifications
 from the generated code as these have been removed from C++17.
 """
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 # system imports
 import argparse
 import logging
@@ -66,7 +64,7 @@ def parse_arguments(argv):
     known_args, _ = parser.parse_known_args(argv)
     sip_cmd_line = argv[1:]
     if sys.platform == 'win32':
-        sip_cmd_line = map(lambda s: s.replace('\\', '\\\\'), sip_cmd_line)
+        sip_cmd_line = list(map(lambda s: s.replace('\\', '\\\\'), sip_cmd_line))
         # the executable may need .exe appending to be run with the cmd
         # processor
         sip_exe = sip_cmd_line[0] + '.exe'

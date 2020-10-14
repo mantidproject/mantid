@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FUNCTIONTASKTEST_H_
-#define FUNCTIONTASKTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -42,18 +41,16 @@ public:
   }
 
   void test_Function_using_bind() {
-    FunctionTask mytask(boost::bind<void, int>(my_int_function, 34));
+    FunctionTask mytask(std::bind(my_int_function, 34));
     TS_ASSERT_DIFFERS(my_check_value, 34);
     TS_ASSERT_THROWS_NOTHING(mytask.run());
     TS_ASSERT_EQUALS(my_check_value, 34);
   }
 
   void test_Function_using_bind_complicated() {
-    FunctionTask mytask(boost::bind(my_complicated_function, 56, 12.0));
+    FunctionTask mytask(std::bind(my_complicated_function, 56, 12.0));
     TS_ASSERT_DIFFERS(my_check_value, 68);
     TS_ASSERT_THROWS_NOTHING(mytask.run());
     TS_ASSERT_EQUALS(my_check_value, 68);
   }
 };
-
-#endif

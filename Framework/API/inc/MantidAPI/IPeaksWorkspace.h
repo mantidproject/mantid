@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IPEAKSWORKSPACE_H_
-#define MANTID_API_IPEAKSWORKSPACE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -105,7 +104,7 @@ public:
    * detector. Calculated if not provided.
    * @return a pointer to a new Peak object.
    */
-  virtual Mantid::Geometry::IPeak *
+  virtual std::unique_ptr<Geometry::IPeak>
   createPeak(const Mantid::Kernel::V3D &QLabFrame,
              boost::optional<double> detectorDistance = boost::none) const = 0;
 
@@ -124,7 +123,7 @@ public:
    * @param HKL V3D
    * @return a pointer to a new Peak object.
    */
-  virtual Mantid::Geometry::IPeak *
+  virtual std::unique_ptr<Geometry::IPeak>
   createPeakHKL(const Mantid::Kernel::V3D &HKL) const = 0;
 
   //---------------------------------------------------------------------------------------------
@@ -177,4 +176,3 @@ private:
 };
 } // namespace API
 } // namespace Mantid
-#endif

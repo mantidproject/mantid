@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisTab.h"
 
@@ -15,8 +15,7 @@
 
 #include <QSettings>
 #include <QString>
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
+#include <utility>
 
 using namespace Mantid::API;
 
@@ -74,11 +73,6 @@ void IndirectDataAnalysisTab::filterInputData(bool filter) {
 }
 
 /**
- * Sets the active browser workspace when the tab is changed
- */
-void IndirectDataAnalysisTab::setActiveWorkspace() { setBrowserWorkspace(); }
-
-/**
  * Slot that can be called when a user edits an input.
  */
 void IndirectDataAnalysisTab::inputChanged() { validate(); }
@@ -99,7 +93,7 @@ MatrixWorkspace_sptr IndirectDataAnalysisTab::inputWorkspace() const {
  */
 void IndirectDataAnalysisTab::setInputWorkspace(
     MatrixWorkspace_sptr inputWorkspace) {
-  m_inputWorkspace = inputWorkspace;
+  m_inputWorkspace = std::move(inputWorkspace);
 }
 
 /**
@@ -120,7 +114,7 @@ MatrixWorkspace_sptr IndirectDataAnalysisTab::previewPlotWorkspace() {
  * @param previewPlotWorkspace The workspace to set.
  */
 void IndirectDataAnalysisTab::setPreviewPlotWorkspace(
-    MatrixWorkspace_sptr previewPlotWorkspace) {
+    const MatrixWorkspace_sptr &previewPlotWorkspace) {
   m_previewPlotWorkspace = previewPlotWorkspace;
 }
 
@@ -269,14 +263,14 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param diffPreviewPlot   The difference preview plot.
  */
 void IndirectDataAnalysisTab::updatePlot(
-    WorkspaceGroup_sptr outputWS, size_t index,
+    const WorkspaceGroup_sptr &outputWS, size_t index,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   // Check whether the specified index is within the bounds of the
   // fitted spectrum.
   if (outputWS && index < outputWS->size()) {
     auto workspace =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
+        std::dynamic_pointer_cast<MatrixWorkspace>(outputWS->getItem(index));
     updatePlot(workspace, fitPreviewPlot, diffPreviewPlot);
   } else
     clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
@@ -325,7 +319,7 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param diffPreviewPlot   The difference preview plot.
  */
 void IndirectDataAnalysisTab::updatePlot(
-    WorkspaceGroup_sptr outputWS,
+    const WorkspaceGroup_sptr &outputWS,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   if (outputWS && selectedSpectrum() >= minimumSpectrum() &&
@@ -346,7 +340,7 @@ void IndirectDataAnalysisTab::updatePlot(
  * @param diffPreviewPlot   The difference preview plot.
  */
 void IndirectDataAnalysisTab::updatePlot(
-    MatrixWorkspace_sptr outputWS,
+    const MatrixWorkspace_sptr &outputWS,
     MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   fitPreviewPlot->clear();
@@ -377,13 +371,12 @@ void IndirectDataAnalysisTab::updatePlotRange(
     const QString &rangeName, MantidQt::MantidWidgets::PreviewPlot *previewPlot,
     const QString &startRangePropName, const QString &endRangePropName) {
 
-  if (inputWorkspace()) {
+  if (auto const workspace = inputWorkspace()) {
     try {
-      const QPair<double, double> curveRange =
-          previewPlot->getCurveRange("Sample");
+      auto const xRange = getXRangeFromWorkspace(workspace);
       auto rangeSelector = previewPlot->getRangeSelector(rangeName);
       setPlotPropertyRange(rangeSelector, m_properties[startRangePropName],
-                           m_properties[endRangePropName], curveRange);
+                           m_properties[endRangePropName], xRange);
     } catch (std::exception &exc) {
       showMessageBox(exc.what());
     }

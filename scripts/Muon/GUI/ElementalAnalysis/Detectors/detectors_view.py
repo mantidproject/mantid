@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
-
 from qtpy import QtWidgets
 
 from collections import OrderedDict
@@ -33,3 +31,9 @@ class DetectorsView(QtWidgets.QWidget):
         self.widgets[name].blockSignals(True)
         self.widgets[name].setChecked(state)
         self.widgets[name].blockSignals(False)
+
+    def enableDetector(self, name):
+        self.widgets[name].setEnabled(True)
+
+    def disableDetector(self, name):
+        self.widgets[name].setEnabled(False)

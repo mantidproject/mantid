@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------
 // Includes
@@ -74,7 +74,7 @@ Mantid::Kernel::AbstractInstantiator<MantidHelpInterface>
  * @returns An AlgorithmDialog object
  */
 AlgorithmDialog *InterfaceManager::createDialog(
-    boost::shared_ptr<Mantid::API::IAlgorithm> alg, QWidget *parent,
+    const std::shared_ptr<Mantid::API::IAlgorithm> &alg, QWidget *parent,
     bool forScript, const QHash<QString, QString> &presetValues,
     const QString &optionalMsg, const QStringList &enabled,
     const QStringList &disabled) {
@@ -156,9 +156,11 @@ AlgorithmDialog *InterfaceManager::createDialogFromName(
  * Create a new instance of the correct type of UserSubWindow
  * @param interface_name :: The registered name of the interface
  * @param parent :: The parent widget
+ * @param isWindow :: Should the widget be an independent window
  */
 UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name,
-                                                 QWidget *parent) {
+                                                 QWidget *parent,
+                                                 bool isWindow) {
   UserSubWindow *user_win = nullptr;
   std::string iname = interface_name.toStdString();
   try {
@@ -168,7 +170,15 @@ UserSubWindow *InterfaceManager::createSubWindow(const QString &interface_name,
   }
   if (user_win) {
     g_log.debug() << "Created a specialised interface for " << iname << '\n';
-    user_win->setParent(parent);
+
+    // set the parent. Note - setParent without flags parameter resets the flags
+    // ie window becomes a child widget
+    if (isWindow) {
+      user_win->setParent(parent, user_win->windowFlags());
+    } else {
+      user_win->setParent(parent);
+    }
+
     user_win->setInterfaceName(interface_name);
     user_win->initializeLayout();
 

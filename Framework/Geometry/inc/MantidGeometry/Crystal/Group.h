@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_GROUP_H_
-#define MANTID_GEOMETRY_GROUP_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/SymmetryOperation.h"
 #include "MantidGeometry/DllConfig.h"
@@ -14,8 +13,7 @@
 #include <set>
 #include <vector>
 
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -181,15 +179,15 @@ protected:
   CoordinateSystem m_axisSystem;
 };
 
-using Group_sptr = boost::shared_ptr<Group>;
-using Group_const_sptr = boost::shared_ptr<const Group>;
+using Group_sptr = std::shared_ptr<Group>;
+using Group_const_sptr = std::shared_ptr<const Group>;
 
 namespace GroupFactory {
 /// Creates a Group sub-class of type T if T has a constructor that takes a
 /// string.
 template <typename T>
 Group_const_sptr create(const std::string &initializationString) {
-  return boost::make_shared<const T>(initializationString);
+  return std::make_shared<const T>(initializationString);
 }
 
 /// Creates a Group sub-class of type T if T has a constructor that takes a
@@ -197,7 +195,7 @@ Group_const_sptr create(const std::string &initializationString) {
 template <typename T>
 Group_const_sptr
 create(const std::vector<SymmetryOperation> &symmetryOperations) {
-  return boost::make_shared<const T>(symmetryOperations);
+  return std::make_shared<const T>(symmetryOperations);
 }
 } // namespace GroupFactory
 
@@ -212,5 +210,3 @@ MANTID_GEOMETRY_DLL bool operator!=(const Group_const_sptr &lhs,
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_GROUP_H_ */

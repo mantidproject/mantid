@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_VOIGTTEST_H_
-#define MANTID_CURVEFITTING_VOIGTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -15,8 +14,8 @@
 #include "MantidAPI/FunctionValues.h"
 #include "MantidCurveFitting/Jacobian.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/scoped_ptr.hpp>
+#include <memory>
 
 using Mantid::API::IFunction;
 using Mantid::API::IPeakFunction;
@@ -31,7 +30,7 @@ public:
 
   VoigtTest() {
     using namespace Mantid::API;
-    m_domain = boost::shared_ptr<FunctionDomain1DVector>(
+    m_domain = std::shared_ptr<FunctionDomain1DVector>(
         new FunctionDomain1DVector(-5.5, 3.5, g_domainSize));
   }
 
@@ -100,7 +99,7 @@ public:
     auto voigtFn = createFunction(a_L, pos, gamma_L, gamma_G);
 
     auto peakFn =
-        boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
+        std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
     TSM_ASSERT("Voigt function should be a PeakFunction", peakFn);
   }
 
@@ -108,7 +107,7 @@ public:
     const double a_L(5), pos(-1), gamma_L(0.9), gamma_G(0.1);
     auto voigtFn = createFunction(a_L, pos, gamma_L, gamma_G);
     auto peakFn =
-        boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
+        std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
 
     TS_ASSERT_DELTA(peakFn->centre(), pos, 1e-12);
     TS_ASSERT_DELTA(peakFn->height(), 4.9570, 1e-4);
@@ -119,7 +118,7 @@ public:
     double a_L(5), pos(-1), gamma_L(0.9), gamma_G(0.1);
     auto voigtFn = createFunction(a_L, pos, gamma_L, gamma_G);
     auto peakFn =
-        boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
+        std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
 
     pos = 1.2;
     peakFn->setCentre(pos);
@@ -273,12 +272,12 @@ public:
   }
 
 private:
-  boost::shared_ptr<Mantid::API::IPeakFunction>
+  std::shared_ptr<Mantid::API::IPeakFunction>
   createFunction(const double a_L, const double pos, const double gamma_L,
                  const double gamma_G) {
-    boost::shared_ptr<IFunction> voigtFn = boost::make_shared<Voigt>();
+    std::shared_ptr<IFunction> voigtFn = std::make_shared<Voigt>();
     auto peakFn =
-        boost::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
+        std::dynamic_pointer_cast<Mantid::API::IPeakFunction>(voigtFn);
     voigtFn->initialize();
 
     voigtFn->setParameter("LorentzAmp", a_L);
@@ -291,7 +290,5 @@ private:
 
   enum { g_domainSize = 10 };
   /// Input domain
-  boost::shared_ptr<Mantid::API::FunctionDomain1DVector> m_domain;
+  std::shared_ptr<Mantid::API::FunctionDomain1DVector> m_domain;
 };
-
-#endif /* MANTID_CURVEFITTING_VOIGTTEST_H_ */

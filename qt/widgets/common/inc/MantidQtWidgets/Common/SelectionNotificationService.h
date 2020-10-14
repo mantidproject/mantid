@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTAPI_SELECTION_NOTIFICATION_SERVICE_H_
-#define MANTIDQTAPI_SELECTION_NOTIFICATION_SERVICE_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -59,5 +58,3 @@ EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON Mantid::
     Kernel::SingletonHolder<MantidQt::API::SelectionNotificationServiceImpl>;
 }
 } // namespace Mantid
-
-#endif // MANTIDQTAPI_SELECTION_NOTIFICATION_SERVICE_H_

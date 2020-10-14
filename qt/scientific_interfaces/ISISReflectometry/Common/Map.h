@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_MAP_H
-#define MANTID_ISISREFLECTOMETRY_MAP_H
+#pragma once
 #include <algorithm>
 #include <boost/optional.hpp>
 #include <iterator>
+#include <sstream>
 #include <type_traits>
 #include <vector>
 
@@ -35,6 +35,12 @@ boost::optional<Out> map(boost::optional<In> const &in, Transform transform) {
     return boost::none;
 }
 
+/** Converts an optional value to string
+ *
+ * @param maybeValue optional value
+ * @return The value as a string or an empty string
+ *
+ */
 template <typename T>
 std::string optionalToString(boost::optional<T> maybeValue) {
   return map(maybeValue,
@@ -43,7 +49,54 @@ std::string optionalToString(boost::optional<T> maybeValue) {
              })
       .get_value_or(std::string());
 }
+
+/** Converts value to string with specified precision
+ *
+ * @param value input value
+ * @param precision desired precision
+ * @return The value as a string with specified precision
+ *
+ */
+template <typename T> std::string valueToString(T value, int precision) {
+  std::ostringstream result;
+  result.precision(precision);
+  result << std::fixed << value;
+  return result.str();
+}
+
+/** Converts value to string with optional precision
+ *
+ * @param value input value
+ * @param precision optional precision
+ * @return The value as a string (with specified precision if given)
+ *
+ */
+template <typename T>
+std::string valueToString(T value, boost::optional<int> precision) {
+  if (precision.is_initialized())
+    return valueToString(value, precision.get());
+  return std::to_string(value);
+}
+
+/** Converts optional value to string with optional precision
+ *
+ * @param maybeValue optional input value
+ * @param precision optional output precision
+ * @return The value as a string (with specified precision if given) or empty
+ * string
+ *
+ */
+template <typename T>
+std::string optionalToString(boost::optional<T> maybeValue,
+                             boost::optional<int> precision) {
+  if (maybeValue.is_initialized()) {
+    if (precision.is_initialized()) {
+      return valueToString(maybeValue.get(), precision.get());
+    }
+    return optionalToString(maybeValue);
+  }
+  return std::string();
+}
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_ISISREFLECTOMETRY_MAP_H

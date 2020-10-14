@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NEXUSFILEIO_H
-#define NEXUSFILEIO_H
+#pragma once
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/Progress.h"
@@ -18,8 +17,8 @@
 #include <boost/scoped_array.hpp>
 
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
 #include <climits>
+#include <memory>
 #include <nexus/NeXusFile.hpp>
 
 namespace Mantid {
@@ -53,7 +52,8 @@ public:
 
   /// open the nexus file for writing
   void openNexusWrite(const std::string &fileName,
-                      optional_size_t entryNumber = optional_size_t());
+                      optional_size_t entryNumber = optional_size_t(),
+                      const bool append_to_file = true);
   /// write the header ifon for the Mantid workspace format
   int writeNexusProcessedHeader(const std::string &title,
                                 const std::string &wsName = "") const;
@@ -83,7 +83,7 @@ public:
       float *errorSquareds, int64_t *pulsetimes, bool compress) const;
 
   int writeEventList(const DataObjects::EventList &el,
-                     std::string group_name) const;
+                     const std::string &group_name) const;
 
   template <class T>
   void writeEventListData(std::vector<T> events, bool writeTOF,
@@ -103,7 +103,7 @@ public:
                  const int &spectra) const;
 
   /// write bin masking information
-  bool writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const;
+  bool writeNexusBinMasking(const API::MatrixWorkspace_const_sptr &ws) const;
 
   /// Reset the pointer to the progress object.
   void resetProgress(Mantid::API::Progress *prog);
@@ -114,7 +114,7 @@ public:
 private:
   /// C++ API file handle
   // clang-format off
-  boost::shared_ptr< ::NeXus::File> m_filehandle;
+  std::shared_ptr< ::NeXus::File> m_filehandle;
   // clang-format on
   /// Nexus compression method
   int m_nexuscompression;
@@ -171,7 +171,7 @@ private:
   int findMantidWSEntries() const;
   /// convert posix time to time_t
   std::time_t
-  to_time_t(boost::posix_time::ptime t) ///< convert posix time to time_t
+  to_time_t(const boost::posix_time::ptime &t) ///< convert posix time to time_t
   {
     /**
     Take the input Posix time, subtract the unix epoch, and return the seconds
@@ -202,7 +202,7 @@ private:
 
   /// Writes given vector column to the currently open Nexus file
   template <typename VecType, typename ElemType>
-  void writeNexusVectorColumn(API::Column_const_sptr col,
+  void writeNexusVectorColumn(const API::Column_const_sptr &col,
                               const std::string &columnName, int nexusType,
                               const std::string &interpret_as) const;
 
@@ -382,12 +382,13 @@ void NexusFileIO::writeNumericTimeLog(
        dv != dV.end(); dv++) {
     T val = dv->second;
     Types::Core::DateAndTime time = dv->first;
-    values.push_back(val);
+    values.emplace_back(val);
     if (first) {
       t0 = time; // start time of log
       first = false;
     }
-    times.push_back(Types::Core::DateAndTime::secondsFromDuration(time - t0));
+    times.emplace_back(
+        Types::Core::DateAndTime::secondsFromDuration(time - t0));
   }
   // create log
   status = NXmakegroup(fileID, logName.c_str(), "NXlog");
@@ -398,22 +399,20 @@ void NexusFileIO::writeNumericTimeLog(
   // write log data
   std::vector<std::string> attributes, avalues;
   attributes.emplace_back("type");
-  avalues.push_back(logValueType<T>());
+  avalues.emplace_back(logValueType<T>());
   writeNxFloatArray("value", values, attributes, avalues);
   attributes.clear();
   avalues.clear();
   // get ISO time, and save it as an attribute
   attributes.emplace_back("start");
-  avalues.push_back(t0.toISO8601String());
+  avalues.emplace_back(t0.toISO8601String());
 
   writeNxFloatArray("time", times, attributes, avalues);
   status = NXclosegroup(fileID);
 }
 
 /// Helper typedef for a shared pointer of a NexusFileIO.
-using NexusFileIO_sptr = boost::shared_ptr<NexusFileIO>;
+using NexusFileIO_sptr = std::shared_ptr<NexusFileIO>;
 
 } // namespace NeXus
 } // namespace Mantid
-
-#endif /* NEXUSFILEIO_H */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/CalculateChiSquared.h"
 #include "MantidAPI/Column.h"
@@ -253,7 +253,7 @@ public:
                                                  1.0, 1e-4, 129);
     ok = bool(base);
     if (!base) {
-      base = boost::make_shared<ChebfunBase>(10, lBound, rBound, 1e-4);
+      base = std::make_shared<ChebfunBase>(10, lBound, rBound, 1e-4);
       P = base->fit(*this);
       A = base->calcA(P);
     }
@@ -463,7 +463,7 @@ void CalculateChiSquared::estimateErrors() {
     // Find the roots of the derivative polynomial
     std::vector<double> minima = base->roots(AD);
     if (minima.empty()) {
-      minima.push_back(par0);
+      minima.emplace_back(par0);
     }
 
     if (g_log.is(Kernel::Logger::Priority::PRIO_DEBUG)) {
@@ -507,7 +507,7 @@ void CalculateChiSquared::estimateErrors() {
     } else if (roots.size() == 1) {
       // Only one root found; use a bound for the other root.
       if (roots.front() < 0) {
-        roots.push_back(rBound);
+        roots.emplace_back(rBound);
       } else {
         roots.insert(roots.begin(), lBound);
       }
@@ -626,7 +626,7 @@ void CalculateChiSquared::estimateErrors() {
       if (roots.front() > 0.0) {
         roots.insert(roots.begin(), 0.0);
       } else {
-        roots.push_back(0.0);
+        roots.emplace_back(0.0);
       }
     } else if (nRoots > 2) {
       roots[1] = roots.back();
@@ -669,7 +669,7 @@ void CalculateChiSquared::unfixParameters() {
   for (size_t i = 0; i < m_function->nParams(); ++i) {
     if (!m_function->isActive(i)) {
       m_function->unfix(i);
-      m_fixedParameters.push_back(i);
+      m_fixedParameters.emplace_back(i);
     }
   }
 }

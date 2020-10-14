@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SUMEVENTSBYLOGVALUETEST_H_
-#define MANTID_ALGORITHMS_SUMEVENTSBYLOGVALUETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -104,7 +103,7 @@ public:
 
     Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
     MatrixWorkspace_const_sptr outWS =
-        boost::dynamic_pointer_cast<const MatrixWorkspace>(out);
+        std::dynamic_pointer_cast<const MatrixWorkspace>(out);
     TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 1);
     TS_ASSERT_EQUALS(outWS->y(0)[0], 300);
   }
@@ -121,7 +120,7 @@ public:
     TS_ASSERT(alg->execute());
 
     Workspace_sptr out = alg->getProperty("OutputWorkspace");
-    auto outWS = boost::dynamic_pointer_cast<ITableWorkspace>(out);
+    auto outWS = std::dynamic_pointer_cast<ITableWorkspace>(out);
     TS_ASSERT_EQUALS(outWS->rowCount(), 2);
     // TS_ASSERT_EQUALS( outWS->columnCount(), 4 );
     TS_ASSERT_EQUALS(outWS->Int(0, 0), 1);
@@ -141,7 +140,7 @@ public:
 
 private:
   IAlgorithm_sptr setupAlg(const std::string &logName) {
-    IAlgorithm_sptr alg = boost::make_shared<SumEventsByLogValue>();
+    IAlgorithm_sptr alg = std::make_shared<SumEventsByLogValue>();
     alg->initialize();
     TS_ASSERT_THROWS_NOTHING(
         alg->setProperty("InputWorkspace", createWorkspace()));
@@ -201,10 +200,10 @@ public:
     std::vector<double> dbl1, dbl2;
     DateAndTime startTime("2010-01-01T00:00:00");
     for (int i = 0; i < 100; ++i) {
-      times.push_back(startTime + i * 10.0);
-      index.push_back(i);
-      dbl1.push_back(i * 0.1);
-      dbl2.push_back(6.0);
+      times.emplace_back(startTime + i * 10.0);
+      index.emplace_back(i);
+      dbl1.emplace_back(i * 0.1);
+      dbl2.emplace_back(6.0);
     }
 
     auto scan_index = new TimeSeriesProperty<int>("scan_index");
@@ -236,5 +235,3 @@ public:
 private:
   EventWorkspace_sptr ws;
 };
-
-#endif /* MANTID_ALGORITHMS_SUMEVENTSBYLOGVALUETEST_H_ */

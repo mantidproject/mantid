@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import FunctionFactory, Workspace, AlgorithmManager, IFunction1D
 
@@ -100,7 +100,10 @@ class FunctionWrapper(object):
         if type(name) == type('string') and self.fun.hasAttribute(name):
             return self.fun.getAttributeValue(name)
         else:
-            return self.fun.getParameterValue(name)
+            if self.fun.hasParameter(name):
+                return self.fun.getParameterValue(name)
+            else:
+                raise AttributeError("Parameter %s not found" % name)
 
     def __setitem__ (self, name, value):
         """
@@ -370,7 +373,7 @@ class FunctionWrapper(object):
         # to pass InputWorkspace into EvaluateFunction before Function.
         # As a special case has been made for this. This case can be removed
         # with ordered kwargs change in Python 3.6.
-        if name is 'EvaluateFunction':
+        if name == 'EvaluateFunction':
             alg.setProperty('Function', kwargs['Function'])
             del kwargs['Function']
             alg.setProperty('InputWorkspace', kwargs['InputWorkspace'])
@@ -501,6 +504,9 @@ class CompositeFunctionWrapper(FunctionWrapper):
         """
 
         comp = self.fun
+        if (isinstance(nameorindex, str) and not comp.hasParameter(nameorindex)) \
+                or (isinstance(nameorindex, int) and nameorindex >= comp.nParams()):
+            raise AttributeError("Parameter %s not found" % nameorindex)
         item = comp[nameorindex]
         if isinstance(item, float):
             return  item

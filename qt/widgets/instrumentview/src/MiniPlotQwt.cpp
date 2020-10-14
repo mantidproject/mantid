@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/MiniPlotQwt.h"
 #include "MantidKernel/Logger.h"
@@ -24,6 +24,7 @@
 #include <QPainter>
 
 #include <cmath>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("MiniPlotQwt");
@@ -72,7 +73,7 @@ MiniPlotQwt::~MiniPlotQwt() { clearAll(); }
  * @param xunit
  */
 void MiniPlotQwt::setXLabel(QString xunit) {
-  m_xUnits = xunit;
+  m_xUnits = std::move(xunit);
   this->setAxisTitle(xBottom, m_xUnits);
 }
 
@@ -238,8 +239,8 @@ void MiniPlotQwt::setData(std::vector<double> x, std::vector<double> y,
     return;
   }
 
-  m_xUnits = xunit;
-  m_label = curveLabel;
+  m_xUnits = std::move(xunit);
+  m_label = std::move(curveLabel);
   if (!m_curve) {
     m_curve = new QwtPlotCurve();
     m_curve->attach(this);
@@ -368,7 +369,7 @@ void MiniPlotQwt::setYLogScale() {
   const QwtScaleDiv *div = axisScaleDiv(QwtPlot::yLeft);
   double from = div->lBound();
   double to = div->hBound();
-  QwtLog10ScaleEngine *logEngine = new QwtLog10ScaleEngine();
+  auto *logEngine = new QwtLog10ScaleEngine();
   setAxisScaleEngine(yLeft, logEngine);
   setYScale(from, to);
   recalcYAxisDivs();
@@ -379,7 +380,7 @@ void MiniPlotQwt::setYLogScale() {
  * Set the linear scale on the y axis
  */
 void MiniPlotQwt::setYLinearScale() {
-  QwtLinearScaleEngine *engine = new QwtLinearScaleEngine();
+  auto *engine = new QwtLinearScaleEngine();
   setAxisScaleEngine(yLeft, engine);
   replot();
 }
@@ -389,7 +390,7 @@ void MiniPlotQwt::setYLinearScale() {
  * @param marker :: A pointer to a PeakLabel, becomes owned by MiniPlotQwt
  */
 void MiniPlotQwt::addPeakLabel(const PeakMarker2D *marker) {
-  PeakLabel *label = new PeakLabel(marker, this);
+  auto *label = new PeakLabel(marker, this);
   label->attach(this);
   m_peakLabels.append(label);
 }

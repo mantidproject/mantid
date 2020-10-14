@@ -1,18 +1,19 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-from six import with_metaclass
 from abc import (ABCMeta, abstractmethod)
-from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (SANSInstrument, DetectorType)
-from sans.common.general_functions import create_unmanaged_algorithm
-from sans.common.file_information import (find_full_file_path, get_instrument_paths_for_sans_file)
+
+from mantid.kernel import Logger
+
+from sans.algorithm_detail.mask_functions import SpectraBlock
 from sans.algorithm_detail.xml_shapes import (add_cylinder, add_outside_cylinder, create_phi_mask, create_line_mask)
-from sans.algorithm_detail.mask_functions import (SpectraBlock)
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import SANSInstrument
+from sans.common.file_information import (find_full_file_path, get_instrument_paths_for_sans_file)
+from sans.common.general_functions import create_unmanaged_algorithm
 
 
 # ------------------------------------------------------------------
@@ -35,8 +36,8 @@ def mask_bins(mask_info, workspace, detector_type):
     bin_mask_general_start = mask_info.bin_mask_general_start
     bin_mask_general_stop = mask_info.bin_mask_general_stop
     # Mask the bins with the detector-specific setting
-    bin_mask_start = mask_info.detectors[DetectorType.to_string(detector_type)].bin_mask_start
-    bin_mask_stop = mask_info.detectors[DetectorType.to_string(detector_type)].bin_mask_stop
+    bin_mask_start = mask_info.detectors[detector_type.value].bin_mask_start
+    bin_mask_stop = mask_info.detectors[detector_type.value].bin_mask_stop
 
     # Combine the settings and run the binning
     start_mask = []
@@ -124,9 +125,7 @@ def mask_with_mask_files(mask_info, workspace):
         load_options = {"Instrument": idf_path,
                         "OutputWorkspace": EMPTY_NAME}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
-        dummy_params = {"OutputWorkspace": EMPTY_NAME}
-        mask_alg = create_unmanaged_algorithm("MaskInstrument", **dummy_params)
-        clear_alg = create_unmanaged_algorithm("ClearMaskedSpectra", **dummy_params)
+        mask_alg = create_unmanaged_algorithm("MaskDetectors")
 
         # Masker
         for mask_file in mask_files:
@@ -137,20 +136,14 @@ def mask_with_mask_files(mask_info, workspace):
             load_alg.execute()
             masking_workspace = load_alg.getProperty("OutputWorkspace").value
             # Could use MaskDetectors directly with masking_workspace but it does not
-            # support MPI. Use a three step approach via a, b, and c instead.
+            # support MPI. Use a two step approach via a and b instead.
             # a) Extract detectors to mask from MaskWorkspace
             det_ids = masking_workspace.getMaskedDetectors()
             # b) Mask the detector ids on the instrument
-            mask_alg.setProperty("InputWorkspace", workspace)
-            mask_alg.setProperty("OutputWorkspace", workspace)
-            mask_alg.setProperty("DetectorIDs", det_ids)
+            mask_alg.setProperty("Workspace", workspace)
+            mask_alg.setProperty("DetectorList", det_ids)
             mask_alg.execute()
-            workspace = mask_alg.getProperty("OutputWorkspace").value
-        # c) Clear data in all spectra associated with masked detectors
-        clear_alg.setProperty("InputWorkspace", workspace)
-        clear_alg.setProperty("OutputWorkspace", workspace)
-        clear_alg.execute()
-        workspace = clear_alg.getProperty("OutputWorkspace").value
+            workspace = mask_alg.getProperty("Workspace").value
     return workspace
 
 
@@ -178,7 +171,7 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
     total_spectra = []
 
     # All masks are detector-specific, hence we pull out only the relevant part
-    detector = mask_info.detectors[DetectorType.to_string(detector_type)]
+    detector = mask_info.detectors[detector_type.value]
 
     # ----------------------
     # Single spectra
@@ -257,17 +250,31 @@ def mask_spectra(mask_info, workspace, spectra_block, detector_type):
         for horizontal, vertical in zip(block_cross_horizontal, block_cross_vertical):
             total_spectra.extend(spectra_block.get_block(horizontal, vertical, 1, 1))
 
+    if not total_spectra:
+        return workspace
+
     # Perform the masking
-    if total_spectra:
-        mask_name = "MaskSpectra"
-        mask_options = {"InputWorkspace": workspace,
-                        "InputWorkspaceIndexType": "SpectrumNumber",
-                        "OutputWorkspace": "__dummy"}
-        mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
-        mask_alg.setProperty("InputWorkspaceIndexSet", list(set(total_spectra)))
-        mask_alg.setProperty("OutputWorkspace", workspace)
-        mask_alg.execute()
-        workspace = mask_alg.getProperty("OutputWorkspace").value
+    ws_spectra_list = workspace.getSpectrumNumbers()
+    # Any gaps in the spectra list we skip over attempting to mask
+    filtered_mask_spectra = [spec for spec in total_spectra if spec in ws_spectra_list]
+
+    if len(filtered_mask_spectra) != len(total_spectra):
+        log = Logger("SANS - Mask Workspace")
+        log.warning("Skipped masking some spectrum numbers that do not exist in the workspace. Re-run"
+                    " with logging set to information for more details")
+        log.information("The following spectrum numbers do not exist in the ws (cropped to component):")
+        for i in list(set(total_spectra) - set(filtered_mask_spectra)):
+            log.information(str(i))
+
+    mask_name = "MaskSpectra"
+    mask_options = {"InputWorkspace": workspace,
+                    "InputWorkspaceIndexType": "SpectrumNumber",
+                    "OutputWorkspace": "__dummy"}
+    mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
+    mask_alg.setProperty("InputWorkspaceIndexSet", list(set(filtered_mask_spectra)))
+    mask_alg.setProperty("OutputWorkspace", workspace)
+    mask_alg.execute()
+    workspace = mask_alg.getProperty("OutputWorkspace").value
     return workspace
 
 
@@ -305,31 +312,43 @@ def mask_angle(mask_info, workspace):
     return workspace
 
 
-def mask_beam_stop(mask_info, workspace, instrument, detector_names):
+def mask_beam_stop(mask_info, workspace):
     """
     The beam stop is being masked here.
 
     :param mask_info: a SANSStateMask object.
     :param workspace: the workspace which is to be masked.
-    :param instrument: the instrument associated with the current workspace.
     :return: a masked workspace
     """
     beam_stop_arm_width = mask_info.beam_stop_arm_width
     beam_stop_arm_angle = mask_info.beam_stop_arm_angle
     beam_stop_arm_pos1 = mask_info.beam_stop_arm_pos1
     beam_stop_arm_pos2 = mask_info.beam_stop_arm_pos2
-    if beam_stop_arm_width is not None and beam_stop_arm_angle is not None:
-        detector = workspace.getInstrument().getComponentByName(detector_names['LAB'])
-        z_position = detector.getPos().getZ()
-        start_point = [beam_stop_arm_pos1, beam_stop_arm_pos2, z_position]
-        line_mask = create_line_mask(start_point, 100., beam_stop_arm_width, beam_stop_arm_angle)
 
-        mask_name = "MaskDetectorsInShape"
-        mask_options = {"Workspace": workspace,
-                        "ShapeXML": line_mask}
-        mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
-        mask_alg.execute()
-        workspace = mask_alg.getProperty("Workspace").value
+    if not beam_stop_arm_width or not beam_stop_arm_angle:
+        return workspace
+
+    lab_ipf_key = "low-angle-detector-name"
+
+    lab_component_name = workspace.getInstrument().getStringParameter(lab_ipf_key)
+    if not lab_component_name:
+        raise KeyError("{0} was not found in the IPF file for this instrument")
+    lab_component_name = lab_component_name[0]
+
+    comp_info = workspace.componentInfo()
+    detector_index = comp_info.indexOfAny(lab_component_name)
+    detector_pos = comp_info.position(detector_index)
+    z_position = detector_pos.getZ()
+
+    start_point = [beam_stop_arm_pos1, beam_stop_arm_pos2, z_position]
+    line_mask = create_line_mask(start_point, 100., beam_stop_arm_width, beam_stop_arm_angle)
+
+    mask_name = "MaskDetectorsInShape"
+    mask_options = {"Workspace": workspace,
+                    "ShapeXML": line_mask}
+    mask_alg = create_unmanaged_algorithm(mask_name, **mask_options)
+    mask_alg.execute()
+    workspace = mask_alg.getProperty("Workspace").value
     return workspace
 
 
@@ -337,12 +356,12 @@ def mask_beam_stop(mask_info, workspace, instrument, detector_names):
 # Masker classes
 # ------------------------------------------------------------------
 
-class Masker(with_metaclass(ABCMeta, object)):
+class Masker(metaclass=ABCMeta):
     def __init__(self):
         super(Masker, self).__init__()
 
     @abstractmethod
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
+    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
         pass
 
 
@@ -350,19 +369,16 @@ class NullMasker(Masker):
     def __init__(self):
         super(NullMasker, self).__init__()
 
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
-        _ = mask_info  # noqa
+    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
         return workspace_to_mask
 
 
 class MaskerISIS(Masker):
-    def __init__(self, spectra_block, instrument, detector_names):
+    def __init__(self, spectra_block):
         super(MaskerISIS, self).__init__()
         self._spectra_block = spectra_block
-        self._instrument = instrument
-        self._detector_names = detector_names
 
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type, progress):
+    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
         """
         Performs the different types of masks that are currently available for ISIS reductions.
 
@@ -373,28 +389,22 @@ class MaskerISIS(Masker):
         :return: a masked workspace.
         """
         # Perform bin masking
-        progress.report("Performing bin masking.")
         workspace_to_mask = mask_bins(mask_info, workspace_to_mask, detector_type)
 
         # Perform cylinder masking
-        progress.report("Performing cylinder masking.")
         workspace_to_mask = mask_cylinder(mask_info, workspace_to_mask)
 
         # Apply the xml mask files
-        progress.report("Applying mask files.")
         workspace_to_mask = mask_with_mask_files(mask_info, workspace_to_mask)
 
         # Mask spectrum list
-        progress.report("Applying spectrum masks.")
         workspace_to_mask = mask_spectra(mask_info, workspace_to_mask, self._spectra_block, detector_type)
 
         # Mask angle
-        progress.report("Applying angle mask.")
         workspace_to_mask = mask_angle(mask_info, workspace_to_mask)
 
         # Mask beam stop
-        progress.report("Masking beam stop.")
-        return mask_beam_stop(mask_info, workspace_to_mask, self._instrument, self._detector_names)
+        return mask_beam_stop(mask_info, workspace_to_mask)
 
 
 def create_masker(state, detector_type):
@@ -407,14 +417,16 @@ def create_masker(state, detector_type):
     """
     data_info = state.data
     instrument = data_info.instrument
-    detector_names = state.reduction.detector_names
+
+    # TODO remove this shim
+
     if instrument is SANSInstrument.LARMOR or instrument is SANSInstrument.LOQ or\
                     instrument is SANSInstrument.SANS2D or instrument is SANSInstrument.ZOOM:  # noqa
         run_number = data_info.sample_scatter_run_number
         file_name = data_info.sample_scatter
         _, ipf_path = get_instrument_paths_for_sans_file(file_name)
         spectra_block = SpectraBlock(ipf_path, run_number, instrument, detector_type)
-        masker = MaskerISIS(spectra_block, instrument, detector_names)
+        masker = MaskerISIS(spectra_block)
     else:
         masker = NullMasker()
         NotImplementedError("create_masker: Other instruments are not implemented yet.")

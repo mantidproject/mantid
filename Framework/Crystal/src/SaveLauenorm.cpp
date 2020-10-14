@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SaveLauenorm.h"
 #include "MantidAPI/FileProperty.h"
@@ -46,7 +46,7 @@ void SaveLauenorm::init() {
   declareProperty(std::make_unique<API::FileProperty>("Filename", "",
                                                       API::FileProperty::Save),
                   "Select the directory and base name for the output files.");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("ScalePeaks", 1.0, mustBePositive,
                   "Multiply FSQ and sig(FSQ) by scaleFactor");
@@ -57,7 +57,7 @@ void SaveLauenorm::init() {
   std::vector<std::string> histoTypes{"Bank", "RunNumber",
                                       "Both Bank and RunNumber"};
   declareProperty("SortFilesBy", histoTypes[0],
-                  boost::make_shared<StringListValidator>(histoTypes),
+                  std::make_shared<StringListValidator>(histoTypes),
                   "Sort into files by bank(default), run number or both.");
   declareProperty("MinIsigI", EMPTY_DBL(), mustBePositive,
                   "The minimum I/sig(I) ratio");
@@ -76,12 +76,12 @@ void SaveLauenorm::init() {
   declareProperty("LaueScaleFormat", false, "New format for Lauescale");
 
   declareProperty("CrystalSystem", m_typeList[0],
-                  boost::make_shared<Kernel::StringListValidator>(m_typeList),
+                  std::make_shared<Kernel::StringListValidator>(m_typeList),
                   "The conventional cell type to use");
 
   declareProperty(
       "Centering", m_centeringList[0],
-      boost::make_shared<Kernel::StringListValidator>(m_centeringList),
+      std::make_shared<Kernel::StringListValidator>(m_centeringList),
       "The centering for the conventional cell");
 }
 
@@ -119,16 +119,16 @@ void SaveLauenorm::exec() {
   // We must sort the peaks
   std::vector<std::pair<std::string, bool>> criteria;
   if (type.compare(0, 2, "Ba") == 0)
-    criteria.push_back(std::pair<std::string, bool>("BankName", true));
+    criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
   else if (type.compare(0, 2, "Ru") == 0)
-    criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
+    criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
   else {
-    criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-    criteria.push_back(std::pair<std::string, bool>("BankName", true));
+    criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
+    criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
   }
-  criteria.push_back(std::pair<std::string, bool>("h", true));
-  criteria.push_back(std::pair<std::string, bool>("k", true));
-  criteria.push_back(std::pair<std::string, bool>("l", true));
+  criteria.emplace_back(std::pair<std::string, bool>("h", true));
+  criteria.emplace_back(std::pair<std::string, bool>("k", true));
+  criteria.emplace_back(std::pair<std::string, bool>("l", true));
   ws->sort(criteria);
 
   std::vector<Peak> peaks = ws->getPeaks();
@@ -194,9 +194,9 @@ void SaveLauenorm::exec() {
          p.getRow() > (nRows - widthBorder)))
       continue;
     // Take out the "bank" part of the bank name and convert to an int
-    bankName.erase(remove_if(bankName.begin(), bankName.end(),
-                             not1(std::ptr_fun(::isdigit))),
-                   bankName.end());
+    bankName.erase(
+        remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
+        bankName.end());
     if (type.compare(0, 2, "Ba") == 0) {
       Strings::convert(bankName, sequence);
     }
@@ -224,11 +224,11 @@ void SaveLauenorm::exec() {
 
     if (sequence != oldSequence) {
       oldSequence = sequence;
-      numPeaks.push_back(count);
-      maxLamVec.push_back(maxLam);
-      minLamVec.push_back(minLam);
-      sumLamVec.push_back(sumLam);
-      minDVec.push_back(minD);
+      numPeaks.emplace_back(count);
+      maxLamVec.emplace_back(maxLam);
+      minLamVec.emplace_back(minLam);
+      sumLamVec.emplace_back(sumLam);
+      minDVec.emplace_back(minD);
       count = 0;
       maxLam = 0;
       minLam = EMPTY_DBL();
@@ -244,11 +244,11 @@ void SaveLauenorm::exec() {
       minD = dsp;
     sumLam += lambda;
   }
-  numPeaks.push_back(count);
-  maxLamVec.push_back(maxLam);
-  minLamVec.push_back(minLam);
-  sumLamVec.push_back(sumLam);
-  minDVec.push_back(minD);
+  numPeaks.emplace_back(count);
+  maxLamVec.emplace_back(maxLam);
+  minLamVec.emplace_back(minLam);
+  sumLamVec.emplace_back(sumLam);
+  minDVec.emplace_back(minD);
   oldSequence = -1;
   // Go through each peak at this run / bank
   for (int wi = 0; wi < ws->getNumberPeaks(); wi++) {
@@ -270,9 +270,9 @@ void SaveLauenorm::exec() {
          p.getRow() > (nRows - widthBorder)))
       continue;
     // Take out the "bank" part of the bank name and convert to an int
-    bankName.erase(remove_if(bankName.begin(), bankName.end(),
-                             not1(std::ptr_fun(::isdigit))),
-                   bankName.end());
+    bankName.erase(
+        remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
+        bankName.end());
     if (type.compare(0, 2, "Ba") == 0) {
       Strings::convert(bankName, sequence);
     }
@@ -499,26 +499,27 @@ void SaveLauenorm::exec() {
   out.flush();
   out.close();
 }
-void SaveLauenorm::sizeBanks(std::string bankName, int &nCols, int &nRows) {
+void SaveLauenorm::sizeBanks(const std::string &bankName, int &nCols,
+                             int &nRows) {
   if (bankName == "None")
     return;
-  boost::shared_ptr<const IComponent> parent =
+  std::shared_ptr<const IComponent> parent =
       ws->getInstrument()->getComponentByName(bankName);
   if (!parent)
     return;
   if (parent->type() == "RectangularDetector") {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet =
+        std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     nCols = RDet->xpixels();
     nRows = RDet->ypixels();
   } else {
     std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
     nRows = static_cast<int>(grandchildren.size());

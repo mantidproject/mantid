@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PeakIntegration.h"
 #include "MantidAPI/FileProperty.h"
@@ -12,6 +12,7 @@
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -42,7 +43,7 @@ void PeakIntegration::init() {
                   "Name of the peaks workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<InstrumentValidator>()),
+                      std::make_shared<InstrumentValidator>()),
                   "A 2D workspace with X values of time of flight");
   declareProperty(
       std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
@@ -92,7 +93,7 @@ void PeakIntegration::exec() {
 
   // Sort events if EventWorkspace so it will run in parallel
   EventWorkspace_const_sptr inWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
+      std::dynamic_pointer_cast<const EventWorkspace>(inputW);
   if (inWS) {
     inWS->sortAll(TOF_SORT, nullptr);
   }
@@ -119,7 +120,7 @@ void PeakIntegration::exec() {
       size_t wi = wiEntry->second;
       if ((matchRun && peak.getRunNumber() != inputW->getRunNumber()) ||
           wi >= Numberwi)
-        badPeaks.push_back(i);
+        badPeaks.emplace_back(i);
     } else // This is for appending peak workspaces when running
            // SNSSingleCrystalReduction one bank at at time
         if (i + 1 > MinPeaks)
@@ -152,7 +153,7 @@ void PeakIntegration::exec() {
     double TOFPeakd = peak.getTOF();
     std::string bankName = peak.getBankName();
 
-    boost::shared_ptr<const IComponent> parent =
+    std::shared_ptr<const IComponent> parent =
         inputW->getInstrument()->getComponentByName(bankName);
 
     if (!parent)
@@ -293,16 +294,16 @@ void PeakIntegration::retrieveProperties() {
     throw std::runtime_error("Must Rebin data with more than 1 bin");
   // Check if detectors are RectangularDetectors
   Instrument_const_sptr inst = inputW->getInstrument();
-  boost::shared_ptr<RectangularDetector> det;
+  std::shared_ptr<RectangularDetector> det;
   for (int i = 0; i < inst->nelements(); i++) {
-    det = boost::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
+    det = std::dynamic_pointer_cast<RectangularDetector>((*inst)[i]);
     if (det)
       break;
   }
 }
 
-int PeakIntegration::fitneighbours(int ipeak, std::string det_name, int x0,
-                                   int y0, int idet, double qspan,
+int PeakIntegration::fitneighbours(int ipeak, const std::string &det_name,
+                                   int x0, int y0, int idet, double qspan,
                                    PeaksWorkspace_sptr &Peaks,
                                    const detid2index_map &pixel_to_wi) {
   UNUSED_ARG(ipeak);

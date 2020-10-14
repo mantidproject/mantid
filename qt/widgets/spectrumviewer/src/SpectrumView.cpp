@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SpectrumViewer/SpectrumView.h"
 
@@ -20,7 +20,7 @@
 
 #include <QDropEvent>
 #include <QSettings>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace SpectrumView {
@@ -56,7 +56,7 @@ SpectrumView::SpectrumView(QWidget *parent)
   observePreDelete();
   observeADSClear();
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Interface", "SpectrumView", false);
+      Mantid::Kernel::FeatureType::Interface, "SpectrumView", false);
 
 #ifdef Q_OS_MAC
   // Work around to ensure that floating windows remain on top of the main
@@ -99,14 +99,14 @@ void SpectrumView::resizeEvent(QResizeEvent *event) {
  * @param wksp The matrix workspace to render
  */
 void SpectrumView::renderWorkspace(
-    Mantid::API::MatrixWorkspace_const_sptr wksp) {
+    const Mantid::API::MatrixWorkspace_const_sptr &wksp) {
 
   // Handle rendering of a workspace we already track
   if (replaceExistingWorkspace(wksp->getName(), wksp))
     return;
 
   auto dataSource = MatrixWSDataSource_sptr(new MatrixWSDataSource(wksp));
-  m_dataSource.push_back(dataSource);
+  m_dataSource.emplace_back(dataSource);
 
   // If we have a MatrixWSDataSource give it the handler for the
   // EMode, so the user can set EMode and EFixed.  NOTE: we could avoid
@@ -130,10 +130,10 @@ void SpectrumView::renderWorkspace(
     m_ui->imageTabs->setTabText(
         m_ui->imageTabs->indexOf(m_ui->imageTabs->currentWidget()),
         QString::fromStdString(wksp->getName()));
-    m_hGraph = boost::make_shared<GraphDisplay>(m_ui->h_graphPlot,
-                                                m_ui->h_graph_table, false);
-    m_vGraph = boost::make_shared<GraphDisplay>(m_ui->v_graphPlot,
-                                                m_ui->v_graph_table, true);
+    m_hGraph = std::make_shared<GraphDisplay>(m_ui->h_graphPlot,
+                                              m_ui->h_graph_table, false);
+    m_vGraph = std::make_shared<GraphDisplay>(m_ui->v_graphPlot,
+                                              m_ui->v_graph_table, true);
   } else {
     spectrumPlot = new QwtPlot(this);
     auto widget = new QWidget();
@@ -145,19 +145,19 @@ void SpectrumView::renderWorkspace(
     m_ui->imageTabs->setTabsClosable(true);
   }
 
-  auto spectrumDisplay = boost::make_shared<SpectrumDisplay>(
+  auto spectrumDisplay = std::make_shared<SpectrumDisplay>(
       spectrumPlot, m_sliderHandler, m_rangeHandler, m_hGraph.get(),
       m_vGraph.get(), m_ui->image_table, isTrackingOn());
   spectrumDisplay->setDataSource(dataSource);
 
   if (isFirstPlot) {
-    m_svConnections = boost::make_shared<SVConnections>(
+    m_svConnections = std::make_shared<SVConnections>(
         m_ui, this, spectrumDisplay.get(), m_hGraph.get(), m_vGraph.get());
     connect(this, SIGNAL(spectrumDisplayChanged(SpectrumDisplay *)),
             m_svConnections.get(), SLOT(setSpectrumDisplay(SpectrumDisplay *)));
     m_svConnections->imageSplitterMoved();
   } else {
-    foreach (boost::shared_ptr<SpectrumDisplay> sd, m_spectrumDisplay) {
+    foreach (std::shared_ptr<SpectrumDisplay> sd, m_spectrumDisplay) {
       sd->addOther(spectrumDisplay);
     }
     spectrumDisplay->addOthers(m_spectrumDisplay);
@@ -202,7 +202,7 @@ void SpectrumView::closeWindow() { close(); }
  */
 void SpectrumView::preDeleteHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   if (m_spectrumDisplay.front()->hasData(wsName, ws)) {
     emit needToClose();
   }
@@ -217,10 +217,10 @@ void SpectrumView::preDeleteHandle(
  */
 void SpectrumView::afterReplaceHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   // We would only ever be replacing a workspace here
   replaceExistingWorkspace(
-      wsName, boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
+      wsName, std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws));
 }
 
 /**
@@ -234,7 +234,7 @@ void SpectrumView::afterReplaceHandle(
  */
 bool SpectrumView::replaceExistingWorkspace(
     const std::string &wsName,
-    boost::shared_ptr<const Mantid::API::MatrixWorkspace> matrixWorkspace) {
+    std::shared_ptr<const Mantid::API::MatrixWorkspace> matrixWorkspace) {
 
   bool replacementMade = false;
 
@@ -249,8 +249,7 @@ bool SpectrumView::replaceExistingWorkspace(
     // Keep the current coordinates
     const auto xPoint = targetSpectrumDisplay->getPointedAtX();
     const auto yPoint = targetSpectrumDisplay->getPointedAtY();
-    auto newDataSource =
-        boost::make_shared<MatrixWSDataSource>(matrixWorkspace);
+    auto newDataSource = std::make_shared<MatrixWSDataSource>(matrixWorkspace);
     targetSpectrumDisplay->setDataSource(newDataSource);
     targetSpectrumDisplay->setPointedAtXY(xPoint, yPoint);
     // Handle range and image updates
@@ -261,12 +260,12 @@ bool SpectrumView::replaceExistingWorkspace(
 }
 
 void SpectrumView::dropEvent(QDropEvent *de) {
-  auto words = de->mimeData()->text().split('"');
-  auto ws =
-      Mantid::API::AnalysisDataService::Instance()
-          .retrieveWS<Mantid::API::MatrixWorkspace>(words[1].toStdString());
-
-  renderWorkspace(ws);
+  std::string workspaceName{de->mimeData()->text().toStdString()};
+  auto matrixWs = Mantid::API::AnalysisDataService::Instance()
+                      .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
+  if (matrixWs) {
+    renderWorkspace(matrixWs);
+  }
 }
 
 void SpectrumView::dragMoveEvent(QDragMoveEvent *de) {
@@ -471,7 +470,7 @@ std::string SpectrumView::getWindowName() {
 std::vector<std::string> SpectrumView::getWorkspaceNames() {
   std::vector<std::string> names;
   for (const auto &source : m_dataSource) {
-    names.push_back(source->getWorkspace()->getName());
+    names.emplace_back(source->getWorkspace()->getName());
   }
   return names;
 }

@@ -1,17 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from testhelpers import run_algorithm
 from mantid.kernel import std_vector_str
 from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory
 from mantid.dataobjects import TableWorkspace
 import numpy
+
 
 class ITableWorkspaceTest(unittest.TestCase):
 
@@ -35,8 +34,8 @@ class ITableWorkspaceTest(unittest.TestCase):
         self.assertEqual(type(column_names), list)
 
     def test_cell_access_returns_variables_as_native_python_types(self):
-        self.assertAlmostEquals(self._test_ws.cell('r_gd_prtn_chrg',0), 10.040912628173828, 15)
-        self.assertAlmostEquals(self._test_ws.cell(0, 7), 10.040912628173828, 15)
+        self.assertAlmostEqual(self._test_ws.cell('r_gd_prtn_chrg',0), 10.040912628173828, 15)
+        self.assertAlmostEqual(self._test_ws.cell(0, 7), 10.040912628173828, 15)
 
         self.assertEqual(self._test_ws.cell('r_goodfrm', 0), 9229)
         self.assertEqual(self._test_ws.cell(0, 9), 9229)

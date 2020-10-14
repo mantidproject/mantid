@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -35,7 +35,7 @@ void SortEvents::init() {
   std::vector<std::string> propOptions{"X Value", "Pulse Time",
                                        "Pulse Time + TOF"};
   declareProperty("SortBy", "X Value",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "How to sort the events:\n"
                   "  X Value: the x-position of the event in each pixel "
                   "(typically Time of Flight).\n"

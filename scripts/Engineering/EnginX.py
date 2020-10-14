@@ -1,19 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import csv
 import matplotlib.pyplot as plt
 import numpy as np
 import os
 from platform import system
 from shutil import copy2
-import six
-
 import mantid.plots  # noqa
 import Engineering.EnggUtils as Utils
 import mantid.simpleapi as simple
@@ -220,9 +216,9 @@ def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, cali
         tzero = [output.TZERO]
         difa = [output.DIFA]
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [param_tbl_name],
-                         tzero, difc)
+                         tzero, difc, difa)
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
-                         "bank_{}".format(param_tbl_name), [param_tbl_name], tzero, difc)
+                         "bank_{}".format(param_tbl_name), [param_tbl_name], tzero, difc, difa)
     else:
         # work out which bank number to crop on, then calibrate
         if spec_nos.lower() == "north":
@@ -239,9 +235,9 @@ def create_calibration_cropped_file(ceria_run, van_run, curve_van, int_van, cali
         tzero = [output.TZERO]
         difa = [output.DIFA]
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", [spec_nos], tzero,
-                         difc)
+                         difc, difa)
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "bank_{}".format(spec_nos),
-                         [spec_nos], tzero, difc)
+                         [spec_nos], tzero, difc, difa)
     # create the table workspace containing the parameters
     create_params_table(difc, tzero, difa)
     create_difc_zero_workspace(difc, tzero, spec_nos, param_tbl_name)
@@ -263,7 +259,7 @@ def create_calibration_files(ceria_run, van_run, curve_van, int_van, calibration
     ceria_ws = simple.Load(Filename="ENGINX" + ceria_run, OutputWorkspace="eng_calib")
     difcs = []
     tzeros = []
-    difa = []
+    difas = []
     banks = 3
     bank_names = ["North", "South"]
     # loop through the banks, calibrating both
@@ -275,15 +271,15 @@ def create_calibration_files(ceria_run, van_run, curve_van, int_van, calibration
         # add the needed outputs to a list
         difcs.append(output.DIFC)
         tzeros.append(output.TZERO)
-        difa.append(output.DIFA)
+        difas.append(output.DIFA)
         # save out the ones needed for this loop
         save_calibration(ceria_run, van_run, calibration_directory, calibration_general,
                          "bank_{}".format(bank_names[i - 1]), [bank_names[i - 1]],
-                         [tzeros[i - 1]], [difcs[i - 1]])
+                         [tzeros[i - 1]], [difcs[i - 1]], [difas[i - 1]])
     # save out the total version, then create the table of params
     save_calibration(ceria_run, van_run, calibration_directory, calibration_general, "all_banks", bank_names, tzeros,
-                     difcs)
-    create_params_table(difcs, tzeros, difa)
+                     difcs, difas)
+    create_params_table(difcs, tzeros, difas)
     create_difc_zero_workspace(difcs, tzeros, "", None)
 
 
@@ -300,7 +296,8 @@ def load_van_files(curves_van, ints_van):
     return van_curves_ws, van_integrated_ws
 
 
-def save_calibration(ceria_run, van_run, calibration_directory, calibration_general, name, bank_names, zeros, difcs):
+def save_calibration(ceria_run, van_run, calibration_directory, calibration_general, name, bank_names, zeros, difcs,
+                     difas):
     """
     save the calibration data
 
@@ -310,6 +307,7 @@ def save_calibration(ceria_run, van_run, calibration_directory, calibration_gene
     @param calibration_general :: the general calibration directory to save to
     @param name ::  the name of the banks being saved
     @param bank_names :: the list of banks to save
+    @param difas :: the list of difa values to save
     @param difcs :: the list of difc values to save
     @param zeros :: the list of tzero values to save
 
@@ -325,8 +323,8 @@ def save_calibration(ceria_run, van_run, calibration_directory, calibration_gene
         template_file = "template_ENGINX_241391_236516_North_bank.prm"
     # write out the param file to the users directory
 
-    Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname, bank_names=bank_names, difc=difcs, tzero=zeros,
-                                        ceria_run=ceria_run, vanadium_run=van_run,
+    Utils.write_ENGINX_GSAS_iparam_file(output_file=gsas_iparm_fname, bank_names=bank_names, difa=difas, difc=difcs,
+                                        tzero=zeros, ceria_run=ceria_run, vanadium_run=van_run,
                                         template_file=template_file)
     if not calibration_general == calibration_directory:
         # copy the param file to the general directory
@@ -574,18 +572,11 @@ def focus_texture_mode(run_number, van_curves, van_int, focus_directory, focus_g
     banks = {}
     # read the csv file to work out the banks
     # ensure csv reading works on python 2 or 3
-    if not six.PY2:
-        with open(dg_file, 'r', newline='', encoding='utf-8') as grouping_file:
-            group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
+    with open(dg_file, 'r', newline='', encoding='utf-8') as grouping_file:
+        group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
 
-            for row in group_reader:
-                banks.update({row[0]: ','.join(row[1:])})
-    else:
-        with open(dg_file, 'r') as grouping_file:
-            group_reader = csv.reader(_decomment_csv(grouping_file), delimiter=',')
-
-            for row in group_reader:
-                banks.update({row[0]: ','.join(row[1:])})
+        for row in group_reader:
+            banks.update({row[0]: ','.join(row[1:])})
 
     # loop through the banks described in the csv, focusing and saing them out
     for bank in banks:
@@ -633,7 +624,7 @@ def _save_out(run_number, focus_directory, focus_general, output, enginx_file_na
     dat_name, genie_filename, gss_name, hdf5_name, nxs_name = _find_focus_file_location(bank_id, focus_directory,
                                                                                         enginx_file_name_format,
                                                                                         run_number)
-    if not six.u(bank_id).isnumeric():
+    if not str(bank_id).isnumeric():
         bank_id = 0
     # save the files out to the user directory
     simple.SaveFocusedXYE(InputWorkspace=output, Filename=dat_name, SplitFiles=False,

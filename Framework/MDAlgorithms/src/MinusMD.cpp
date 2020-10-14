@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MinusMD.h"
 #include "MantidDataObjects/MDBox.h"
@@ -59,7 +59,7 @@ void MinusMD::checkInputs() {
 template <typename MDE, size_t nd>
 void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
   typename MDEventWorkspace<MDE, nd>::sptr ws2 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(m_operand_event);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(m_operand_event);
   if (!ws1 || !ws2)
     throw std::runtime_error("Incompatible workspace types passed to MinusMD.");
 
@@ -86,7 +86,7 @@ void MinusMD::doMinus(typename MDEventWorkspace<MDE, nd>::sptr ws1) {
       for (auto it = events.begin(); it != events.end(); it++) {
         MDE eventCopy(*it);
         eventCopy.setSignal(-eventCopy.getSignal());
-        eventsCopy.push_back(eventCopy);
+        eventsCopy.emplace_back(eventCopy);
       }
       // Add events, with bounds checking
       box1->addEvents(eventsCopy);

@@ -6,7 +6,6 @@ set(SRC_FILES
     src/BinMD.cpp
     src/BinaryOperationMD.cpp
     src/BooleanBinaryOperationMD.cpp
-    src/BoxControllerSettingsAlgorithm.cpp
     src/CalculateCoverageDGS.cpp
     src/CentroidPeaksMD.cpp
     src/CentroidPeaksMD2.cpp
@@ -32,7 +31,7 @@ set(SRC_FILES
     src/ConvertToMDMinMaxGlobal.cpp
     src/ConvertToMDMinMaxLocal.cpp
     src/ConvertToMDParent.cpp
-    src/ConvertToReflectometryQ.cpp
+    src/ConvertHFIRSCDtoMDE.cpp
     src/CreateMD.cpp
     src/CreateMDHistoWorkspace.cpp
     src/CreateMDWorkspace.cpp
@@ -93,9 +92,6 @@ set(SRC_FILES
     src/PreprocessDetectorsToMD.cpp
     src/QueryMDWorkspace.cpp
     src/RecalculateTrajectoriesExtents.cpp
-    src/ReflectometryTransformKiKf.cpp
-    src/ReflectometryTransformP.cpp
-    src/ReflectometryTransformQxQz.cpp
     src/ReplicateMD.cpp
     src/SaveIsawQvector.cpp
     src/SaveMD.cpp
@@ -125,7 +121,6 @@ set(
   inc/MantidMDAlgorithms/BinMD.h
   inc/MantidMDAlgorithms/BinaryOperationMD.h
   inc/MantidMDAlgorithms/BooleanBinaryOperationMD.h
-  inc/MantidMDAlgorithms/BoxControllerSettingsAlgorithm.h
   inc/MantidMDAlgorithms/CalculateCoverageDGS.h
   inc/MantidMDAlgorithms/CentroidPeaksMD.h
   inc/MantidMDAlgorithms/CentroidPeaksMD2.h
@@ -148,7 +143,7 @@ set(
   inc/MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h
   inc/MantidMDAlgorithms/ConvertToMDMinMaxLocal.h
   inc/MantidMDAlgorithms/ConvertToMDParent.h
-  inc/MantidMDAlgorithms/ConvertToReflectometryQ.h
+  inc/MantidMDAlgorithms/ConvertHFIRSCDtoMDE.h
   inc/MantidMDAlgorithms/CreateMD.h
   inc/MantidMDAlgorithms/CreateMDHistoWorkspace.h
   inc/MantidMDAlgorithms/CreateMDWorkspace.h
@@ -187,6 +182,7 @@ set(
   inc/MantidMDAlgorithms/LoadSQW.h
   inc/MantidMDAlgorithms/LoadSQW2.h
   inc/MantidMDAlgorithms/LogarithmMD.h
+  inc/MantidMDAlgorithms/MDBoxMaskFunction.h
   inc/MantidMDAlgorithms/MDEventTreeBuilder.h
   inc/MantidMDAlgorithms/MDEventWSWrapper.h
   inc/MantidMDAlgorithms/MDNorm.h
@@ -213,9 +209,6 @@ set(
   inc/MantidMDAlgorithms/PreprocessDetectorsToMD.h
   inc/MantidMDAlgorithms/QueryMDWorkspace.h
   inc/MantidMDAlgorithms/RecalculateTrajectoriesExtents.h
-  inc/MantidMDAlgorithms/ReflectometryTransformKiKf.h
-  inc/MantidMDAlgorithms/ReflectometryTransformP.h
-  inc/MantidMDAlgorithms/ReflectometryTransformQxQz.h
   inc/MantidMDAlgorithms/ReplicateMD.h
   inc/MantidMDAlgorithms/SaveIsawQvector.h
   inc/MantidMDAlgorithms/SaveMD.h
@@ -242,7 +235,6 @@ set(TEST_FILES
     AccumulateMDTest.h
     AndMDTest.h
     BooleanBinaryOperationMDTest.h
-    BoxControllerSettingsAlgorithmTest.h
     CalculateCoverageDGSTest.h
     CentroidPeaksMD2Test.h
     CentroidPeaksMDTest.h
@@ -266,7 +258,7 @@ set(TEST_FILES
     ConvertToMDMinMaxLocalTest.h
     ConvertToMDTest.h
     ConvertToQ3DdETest.h
-    ConvertToReflectometryQTest.h
+    ConvertHFIRSCDtoMDETest.h
     CreateMDHistoWorkspaceTest.h
     CreateMDTest.h
     CreateMDWorkspaceTest.h
@@ -302,6 +294,7 @@ set(TEST_FILES
     LoadSQW2Test.h
     LoadSQWTest.h
     LogarithmMDTest.h
+    MDBoxMaskFunctionTest.h
     MDEventWSWrapperTest.h
     MDNormDirectSCTest.h
     MDNormSCDTest.h
@@ -324,9 +317,6 @@ set(TEST_FILES
     PreprocessDetectorsToMDTest.h
     QueryMDWorkspaceTest.h
     RecalculateTrajectoriesExtentsTest.h
-    ReflectometryTransformKiKfTest.h
-    ReflectometryTransformPTest.h
-    ReflectometryTransformQxQzTest.h
     ReplicateMDTest.h
     SaveIsawQvectorTest.h
     SaveMD2Test.h
@@ -375,7 +365,7 @@ if(MSVC)
   set_target_properties(MDAlgorithms PROPERTIES COMPILE_FLAGS "/bigobj")
 endif()
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(MDAlgorithms
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")
@@ -390,7 +380,6 @@ set_property(TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework")
 target_include_directories(MDAlgorithms PUBLIC inc SYSTEM ${Boost_INCLUDE_DIRS})
 target_link_libraries(MDAlgorithms
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${GSL_LIBRARIES}
                       ${NEXUS_LIBRARIES})

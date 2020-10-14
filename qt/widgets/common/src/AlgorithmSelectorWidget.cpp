@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AlgorithmSelectorWidget.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -33,7 +33,7 @@ AlgorithmSelectorWidget::AlgorithmSelectorWidget(QWidget *parent)
       m_updateObserver(*this,
                        &AlgorithmSelectorWidget::handleAlgorithmFactoryUpdate),
       m_updateInProgress(false) {
-  QHBoxLayout *buttonLayout = new QHBoxLayout();
+  auto *buttonLayout = new QHBoxLayout();
 
   m_tree = new AlgorithmTreeWidget(this);
   m_tree->setHeaderLabel("Algorithms");
@@ -249,7 +249,7 @@ void AlgorithmTreeWidget::mouseMoveEvent(QMouseEvent *e) {
 
   // Start dragging
   QDrag *drag = new QDrag(this);
-  QMimeData *mimeData = new QMimeData;
+  auto *mimeData = new QMimeData;
 
   mimeData->setText("Algorithm");
   drag->setMimeData(mimeData);
@@ -276,7 +276,8 @@ void AlgorithmTreeWidget::update() {
   this->clear();
 
   using AlgNamesType = std::vector<AlgorithmDescriptor>;
-  AlgNamesType names = AlgorithmFactory::Instance().getDescriptors();
+  AlgNamesType names =
+      AlgorithmFactory::Instance().getDescriptors(false, false);
 
   // sort by category/name/version to fill QTreeWidget
   sort(names.begin(), names.end(), AlgorithmDescriptorLess);
@@ -349,7 +350,7 @@ void FindAlgComboBox::keyPressEvent(QKeyEvent *e) {
 /** Update the list of algos in the combo box */
 void FindAlgComboBox::update() {
   // include hidden categories in the combo list box
-  AlgNamesType names = AlgorithmFactory::Instance().getDescriptors(true);
+  AlgNamesType names = AlgorithmFactory::Instance().getDescriptors(true, false);
   addAliases(names);
 
   // sort by algorithm names only to fill this combobox
@@ -374,7 +375,7 @@ void FindAlgComboBox::addAliases(AlgNamesType &algNamesList) {
     if ((!i->alias.empty()) && (!boost::iequals(i->alias, i->name))) {
       AlgorithmDescriptor newAlias(*i);
       newAlias.name = i->alias + " [" + i->name + "]";
-      aliasList.push_back(newAlias);
+      aliasList.emplace_back(newAlias);
     }
   }
   // add them to the list - unsorted

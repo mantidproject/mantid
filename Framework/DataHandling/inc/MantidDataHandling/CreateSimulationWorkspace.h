@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACE_H_
-#define MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument.h"
@@ -55,10 +54,10 @@ private:
   /// Apply any instrument adjustments from the file
   void adjustInstrument(const std::string &filename);
   /// Set start date for dummy workspace
-  void setStartDate(API::MatrixWorkspace_sptr workspace);
+  void setStartDate(const API::MatrixWorkspace_sptr &workspace);
 
   /// Pointer to a progress object
-  boost::shared_ptr<API::Progress> m_progress;
+  std::shared_ptr<API::Progress> m_progress;
   /// Pointer to the new instrument
   Geometry::Instrument_const_sptr m_instrument;
   /// Pointer to the new workspace
@@ -69,5 +68,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_CREATESIMULATIONWORKSPACE_H_ */

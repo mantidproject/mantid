@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ICAT_CATALOGMANAGERIMPL_H_
-#define MANTID_ICAT_CATALOGMANAGERIMPL_H_
+#pragma once
 
 #include "MantidAPI/ICatalog.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -63,4 +62,3 @@ EXTERN_MANTID_API template class MANTID_API_DLL
     Kernel::SingletonHolder<Mantid::API::CatalogManagerImpl>;
 }
 } // namespace Mantid
-#endif /* MANTID_ICAT_CATALOGMANAGERIMPL_H_ */

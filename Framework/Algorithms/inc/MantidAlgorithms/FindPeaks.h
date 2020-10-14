@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_FINDPEAKS_H_
-#define MANTID_ALGORITHMS_FINDPEAKS_H_
+#pragma once
 
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParallelAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidIndexing/SpectrumIndexSet.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/cow_ptr.h"
 
 namespace Mantid {
@@ -48,7 +47,7 @@ namespace Algorithms {
     @date 25/11/2008
 */
 
-class DLLExport FindPeaks : public API::ParallelAlgorithm {
+class MANTID_ALGORITHMS_DLL FindPeaks : public API::ParallelAlgorithm {
 public:
   /// Constructor
   FindPeaks();
@@ -171,8 +170,8 @@ private:
 
   /// Fit peak by calling 'FitPeak'
   double callFitPeak(const API::MatrixWorkspace_sptr &dataws, int wsindex,
-                     const API::IPeakFunction_sptr peakfunction,
-                     const API::IBackgroundFunction_sptr backgroundfunction,
+                     const API::IPeakFunction_sptr &peakfunction,
+                     const API::IBackgroundFunction_sptr &backgroundfunction,
                      const std::vector<double> &vec_fitwindow,
                      const std::vector<double> &vec_peakrange, int minGuessFWHM,
                      int maxGuessFWHM, int guessedFWHMStep,
@@ -239,5 +238,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_FINDPEAKS_H_*/

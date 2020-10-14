@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ROCKINGCURVE_H_
-#define MANTIDQTCUSTOMINTERFACES_ROCKINGCURVE_H_
+#pragma once
 
 //----------------------
 // Includes
@@ -46,7 +45,7 @@ private slots:
   void expandPlotVarCombobox(const Mantid::API::MatrixWorkspace_const_sptr &ws);
   void fillNormalizationCombobox();
   void runStepScanAlg();
-  bool runStepScanAlgLive(std::string stepScanProperties);
+  bool runStepScanAlgLive(const std::string &stepScanProperties);
 
   void updateForNormalizationChange();
   void generateCurve(const QString &var);
@@ -86,5 +85,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_ROCKINGCURVE_H_

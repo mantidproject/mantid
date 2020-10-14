@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-
-from __future__ import absolute_import, division, print_function
 
 import numpy
 import os
@@ -744,9 +742,9 @@ class _CalibrationParameterHelper(object):
 
     @staticmethod
     def validate_known_positions(known_positions):
-        if not (isinstance(known_positions, list) or
-                isinstance(known_positions, tuple) or
-                isinstance(known_positions, numpy.ndarray)):
+        if not (isinstance(known_positions, list)
+                or isinstance(known_positions, tuple)
+                or isinstance(known_positions, numpy.ndarray)):
             raise RuntimeError(
                 "Wrong argument knownPositions. It expects a list of values for the positions expected for the peaks in"
                 "relation to the center of the tube")
@@ -943,8 +941,9 @@ class _CalibrationParameterHelper(object):
     def _get_fit_par(self, args, tube_set, ideal_tube):
         if self.FITPAR in args:
             fit_par = args[self.FITPAR]
-            # fitPar must be a TubeCalibFitParams
-            if not isinstance(fit_par, TubeCalibFitParams):
+            try:
+                assert getattr(fit_par, 'setAutomatic')  # duck typing check for correct type
+            except AssertionError:
                 raise RuntimeError(
                     "Wrong argument {0}. This argument, when given, must be a valid TubeCalibFitParams object".
                     format(self.FITPAR))

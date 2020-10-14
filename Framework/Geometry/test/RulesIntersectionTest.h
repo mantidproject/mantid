@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_RULESINTERSECTIONTEST__
-#define MANTID_RULESINTERSECTIONTEST__
+#pragma once
 #include "MantidGeometry/Objects/CSGObject.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Surfaces/Cone.h"
@@ -50,8 +49,8 @@ public:
   }
 
   void testTwoRuleConstructor() { // Creating a half sphere
-    auto P1 = boost::make_shared<Plane>();
-    auto Sp1 = boost::make_shared<Sphere>();
+    auto P1 = std::make_shared<Plane>();
+    auto Sp1 = std::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -70,8 +69,8 @@ public:
   }
 
   void testThreeRuleConstructor() {
-    auto P1 = boost::make_shared<Plane>();
-    auto Sp1 = boost::make_shared<Sphere>();
+    auto P1 = std::make_shared<Plane>();
+    auto Sp1 = std::make_shared<Sphere>();
 
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
@@ -93,8 +92,8 @@ public:
   }
 
   void testClone() {
-    auto P1 = boost::make_shared<Plane>();
-    auto Sp1 = boost::make_shared<Sphere>();
+    auto P1 = std::make_shared<Plane>();
+    auto Sp1 = std::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -118,8 +117,8 @@ public:
   }
 
   void testIntersectionConstructor() {
-    auto P1 = boost::make_shared<Plane>();
-    auto Sp1 = boost::make_shared<Sphere>();
+    auto P1 = std::make_shared<Plane>();
+    auto Sp1 = std::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -139,8 +138,8 @@ public:
   }
 
   void testAssignment() {
-    auto P1 = boost::make_shared<Plane>();
-    auto Sp1 = boost::make_shared<Sphere>();
+    auto P1 = std::make_shared<Plane>();
+    auto Sp1 = std::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -162,8 +161,8 @@ public:
 
   void testFindLeaf() {
     SurfPoint S3;
-    auto P1 = boost::make_shared<Plane>();
-    auto Sp1 = boost::make_shared<Sphere>();
+    auto P1 = std::make_shared<Plane>();
+    auto Sp1 = std::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -187,8 +186,8 @@ public:
 
   void testFindKey() {
     SurfPoint S3;
-    auto P1 = boost::make_shared<Plane>();
-    auto Sp1 = boost::make_shared<Sphere>();
+    auto P1 = std::make_shared<Plane>();
+    auto Sp1 = std::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -211,8 +210,8 @@ public:
   }
 
   void testIsComplementary() {
-    auto P1 = boost::make_shared<Plane>();
-    auto Sp1 = boost::make_shared<Sphere>();
+    auto P1 = std::make_shared<Plane>();
+    auto Sp1 = std::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -240,8 +239,8 @@ public:
 
   void testIsValid() {
     SurfPoint S3;
-    auto P1 = boost::make_shared<Plane>();
-    auto Sp1 = boost::make_shared<Sphere>();
+    auto P1 = std::make_shared<Plane>();
+    auto Sp1 = std::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -269,8 +268,8 @@ public:
 
   void testBoundingBox() {
     SurfPoint S3;
-    auto P1 = boost::make_shared<Plane>();
-    auto Sp1 = boost::make_shared<Sphere>();
+    auto P1 = std::make_shared<Plane>();
+    auto Sp1 = std::make_shared<Sphere>();
     P1->setSurface("px 5");             // yz plane with x=5
     Sp1->setSurface("s 5.0 0.0 0.0 5"); // a sphere with center (5,0,0) and
                                         // radius 5. this will touch origin
@@ -296,5 +295,3 @@ public:
 };
 //-----------------------------------------------End of
 // Intersection---------------------------------------
-
-#endif

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/ExtractSingleSpectrum.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -26,7 +26,7 @@ void ExtractSingleSpectrum::init() {
                                                         Direction::Output),
                   "The name under which to store the output workspace.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex", -1, mustBePositive,
                   "The workspace index number of the spectrum to extract.");

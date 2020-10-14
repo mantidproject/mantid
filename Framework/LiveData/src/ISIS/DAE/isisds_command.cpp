@@ -86,10 +86,10 @@ typedef struct {
 /* wait until read len bytes, return <=0 on error */
 static int recv_all(SOCKET s, void *buffer, int len, int flags) {
   auto *cbuffer = reinterpret_cast<char *>(buffer);
-  int n, ntot;
+  int ntot;
   ntot = 0;
   while (len > 0) {
-    n = recv(s, cbuffer, len, flags);
+    int n = recv(s, cbuffer, len, flags);
     if (n <= 0) {
       return n; /* error */
     }
@@ -283,7 +283,7 @@ int isisds_send_command(SOCKET s, const char *command, const void *data,
 static int isisds_recv_command_helper(SOCKET s, char **command, void **data,
                                       ISISDSDataType *type, int dims_array[],
                                       int *ndims, int do_alloc) {
-  int n, len_data, size_in, i;
+  int n, len_data, i;
   isisds_command_header_t comm;
   n = recv_all(s, reinterpret_cast<char *>(&comm), sizeof(comm), 0);
   if (n != sizeof(comm)) {
@@ -308,7 +308,7 @@ static int isisds_recv_command_helper(SOCKET s, char **command, void **data,
     *data = malloc(len_data + 1);
     (reinterpret_cast<char *>(*data))[len_data] = '\0';
   } else {
-    size_in = 1;
+    int size_in = 1;
     for (i = 0; i < *ndims; i++) {
       size_in *= dims_array[i];
     }

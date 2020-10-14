@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_INPUTCONTROLLER_H
-#define MANTID_MANTIDWIDGETS_INPUTCONTROLLER_H
+#pragma once
 
 #include "DllOption.h"
 #include <QColor>
@@ -169,6 +168,10 @@ signals:
   void setSelection(const QRect & /*_t1*/);
   /// Rubber band selection is done
   void finishSelection(const QRect & /*_t1*/);
+  /// Copy the selected shapes.
+  void copySelectedShapes();
+  /// Paste previously copied shapes.
+  void pasteCopiedShapes();
 
 public slots:
   void startCreatingShape2D(const QString &type, const QColor &borderColor,
@@ -306,5 +309,3 @@ private:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTID_MANTIDWIDGETS_INPUTCONTROLLER_H

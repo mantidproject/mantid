@@ -1,25 +1,21 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_FFT_H_
-#define MANTID_ALGORITHM_FFT_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Workspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/BinEdges.h"
 #include "MantidHistogramData/Points.h"
 #include "MantidKernel/cow_ptr.h"
 #include <gsl/gsl_fft_complex.h>
-
-namespace boost {
-template <typename T> class shared_array;
-}
 
 namespace Mantid {
 
@@ -34,7 +30,7 @@ namespace Algorithms {
     @author Roman Tolchenov
     @date 07/07/2009
  */
-class DLLExport FFT : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL FFT : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FFT"; }
@@ -64,13 +60,13 @@ private:
   void createUnitsLabels(double &df);
 
   // Perform forward transformation
-  void transformForward(boost::shared_array<double> &data, const int xSize,
+  void transformForward(std::vector<double> &data, const int xSize,
                         const int ySize, const int dys,
                         const bool addPositiveOnly, const bool centerShift,
                         const bool isComplex, const int iReal, const int iImag,
                         const double df, const double dx);
   // Perform backward transformation
-  void transformBackward(boost::shared_array<double> &data, const int xSize,
+  void transformBackward(std::vector<double> &data, const int xSize,
                          const int ySize, const int dys, const bool centerShift,
                          const bool isComplex, const int iReal, const int iImag,
                          const double df);
@@ -94,5 +90,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_FFT_H_*/

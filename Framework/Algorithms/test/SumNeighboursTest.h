@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SumNeighboursTEST_H_
-#define SumNeighboursTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -60,5 +59,3 @@ private:
   std::string outputSpace2;
   std::string inputSpace;
 };
-
-#endif /*SumNeighboursTEST_H_*/

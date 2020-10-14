@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import Muon.GUI.Common.utilities.load_utils as load_utils
 
 
@@ -141,7 +139,8 @@ class MuonLoadData:
     def remove_workspace_by_name(self, workspace_name, instrument=''):
         list_of_workspace_names_to_remove = []
         for entry in self.params:
-            if any([workspace.workspace_name == workspace_name for workspace in entry['workspace']['OutputWorkspace']]):
+            if any([workspace.workspace_name == workspace_name for workspace in entry['workspace']['OutputWorkspace']])\
+                    or entry['workspace']['DataDeadTimeTable'] == workspace_name:
                 list_of_workspace_names_to_remove.append(entry)
 
         runs_removed = []

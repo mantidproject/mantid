@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDICALCULATESPECTRUM2DTEST_H_
-#define MANTID_SINQ_POLDICALCULATESPECTRUM2DTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -244,15 +243,15 @@ public:
     PoldiPeakCollection_sptr peaks =
         PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
 
-    boost::shared_ptr<Poldi2DFunction> poldi2DFunction =
+    std::shared_ptr<Poldi2DFunction> poldi2DFunction =
         spectrumCalculator.getFunctionFromPeakCollection(peaks);
 
     TS_ASSERT_EQUALS(poldi2DFunction->nFunctions(), peaks->peakCount());
 
     for (size_t i = 0; i < poldi2DFunction->nFunctions(); ++i) {
       IFunction_sptr rawFunction = poldi2DFunction->getFunction(i);
-      boost::shared_ptr<PoldiSpectrumDomainFunction> poldiFunction =
-          boost::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(rawFunction);
+      std::shared_ptr<PoldiSpectrumDomainFunction> poldiFunction =
+          std::dynamic_pointer_cast<PoldiSpectrumDomainFunction>(rawFunction);
 
       TS_ASSERT(poldiFunction);
 
@@ -271,7 +270,7 @@ public:
     // Create a function with some peaks
     PoldiPeakCollection_sptr peaks =
         PoldiPeakCollectionHelpers::createPoldiPeakCollectionNormalized();
-    boost::shared_ptr<Poldi2DFunction> poldi2DFunction =
+    std::shared_ptr<Poldi2DFunction> poldi2DFunction =
         spectrumCalculator.getFunctionFromPeakCollection(peaks);
 
     // Make "Height" global, i.e. the same for all peaks
@@ -322,8 +321,8 @@ public:
     size_t nParams = poldi2DFunction->nParams();
 
     // Make a matrix with diagonal elements = 0.05 and set as covariance matrix
-    boost::shared_ptr<DblMatrix> matrix =
-        boost::make_shared<DblMatrix>(nParams, nParams, true);
+    std::shared_ptr<DblMatrix> matrix =
+        std::make_shared<DblMatrix>(nParams, nParams, true);
     matrix->operator*=(0.05);
     poldi2DFunction->setCovarianceMatrix(matrix);
 
@@ -351,11 +350,11 @@ public:
 
   void testAssignMillerIndices() {
     PoldiPeak_sptr peak1 = PoldiPeak::create(MillerIndices(1, 1, 1), 2.0);
-    PoldiPeakCollection_sptr from = boost::make_shared<PoldiPeakCollection>();
+    PoldiPeakCollection_sptr from = std::make_shared<PoldiPeakCollection>();
     from->addPeak(peak1);
 
     PoldiPeak_sptr peak2 = PoldiPeak::create(Conversions::dToQ(2.0));
-    PoldiPeakCollection_sptr to = boost::make_shared<PoldiPeakCollection>();
+    PoldiPeakCollection_sptr to = std::make_shared<PoldiPeakCollection>();
     to->addPeak(peak2);
 
     PoldiPeakCollection_sptr invalid;
@@ -384,8 +383,8 @@ public:
     TestablePoldiFitPeaks2D spectrumCalculator;
     spectrumCalculator.initialize();
 
-    boost::shared_ptr<Poldi2DFunction> funDefault =
-        boost::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> funDefault =
+        std::make_shared<Poldi2DFunction>();
     TS_ASSERT_EQUALS(funDefault->nParams(), 0);
     TS_ASSERT_EQUALS(funDefault->nFunctions(), 0);
 
@@ -393,8 +392,8 @@ public:
     TS_ASSERT_EQUALS(funDefault->nParams(), 2);
     TS_ASSERT_EQUALS(funDefault->nFunctions(), 2);
 
-    boost::shared_ptr<Poldi2DFunction> funLinear =
-        boost::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> funLinear =
+        std::make_shared<Poldi2DFunction>();
     spectrumCalculator.setProperty("FitConstantBackground", false);
     spectrumCalculator.addBackgroundTerms(funLinear);
 
@@ -403,8 +402,8 @@ public:
     TS_ASSERT_EQUALS(funLinear->parameterName(0), "f0.A1");
     TS_ASSERT_EQUALS(funLinear->nFunctions(), 1);
 
-    boost::shared_ptr<Poldi2DFunction> funConstant =
-        boost::make_shared<Poldi2DFunction>();
+    std::shared_ptr<Poldi2DFunction> funConstant =
+        std::make_shared<Poldi2DFunction>();
     spectrumCalculator.setProperty("FitConstantBackground", true);
     spectrumCalculator.setProperty("FitLinearBackground", false);
     spectrumCalculator.addBackgroundTerms(funConstant);
@@ -482,8 +481,8 @@ private:
   PoldiInstrumentAdapter_sptr m_instrument;
   PoldiTimeTransformer_sptr m_timeTransformer;
 
-  void compareIntensities(PoldiPeakCollection_sptr first,
-                          PoldiPeakCollection_sptr second,
+  void compareIntensities(const PoldiPeakCollection_sptr &first,
+                          const PoldiPeakCollection_sptr &second,
                           double relativePrecision) {
     for (size_t i = 0; i < first->peakCount(); ++i) {
       PoldiPeak_sptr peak = first->peak(i);
@@ -509,5 +508,3 @@ private:
     ~TestablePoldiFitPeaks2D() override {}
   };
 };
-
-#endif // MANTID_SINQ_POLDICALCULATESPECTRUM2DTEST_H_

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef RemoveBinsTest_H_
-#define RemoveBinsTest_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -267,7 +266,7 @@ public:
   static void destroySuite(RemoveBinsTestPerformance *suite) { delete suite; }
 
   RemoveBinsTestPerformance() {
-    auto wksp = boost::make_shared<Workspace2D>();
+    auto wksp = std::make_shared<Workspace2D>();
     wksp->setTitle("input");
     wksp->initialize(numHists, 10000, 9999);
     BinEdges edges(10000, LinearGenerator(0, 10));
@@ -311,4 +310,3 @@ private:
   const size_t numHists = 10000;
   RemoveBins alg;
 };
-#endif /*RemoveBinsTest_H_*/

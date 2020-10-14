@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_EQSANSTOFSTRUCTURE_H_
-#define MANTID_ALGORITHMS_EQSANSTOFSTRUCTURE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -36,7 +36,7 @@ const double CHOPPER_ANGLE[4] = {129.605, 179.989, 230.010, 230.007};
 // Chopper location (mm)
 const double CHOPPER_LOCATION[4] = {5700., 7800., 9497., 9507.};
 
-class DLLExport EQSANSTofStructure : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL EQSANSTofStructure : public API::Algorithm {
 public:
   /// Default constructor
   EQSANSTofStructure();
@@ -60,12 +60,12 @@ private:
   void exec() override;
   // void execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS, bool
   // frame_skipping);
-  void execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS,
+  void execEvent(const Mantid::DataObjects::EventWorkspace_sptr &inputWS,
                  double threshold, double frame_offset, double tof_frame_width,
                  double tmp_frame_width, bool frame_skipping);
 
   /// Compute TOF offset
-  double getTofOffset(DataObjects::EventWorkspace_const_sptr inputWS,
+  double getTofOffset(const DataObjects::EventWorkspace_const_sptr &inputWS,
                       bool frame_skipping);
   double frame_tof0;
   bool flight_path_correction;
@@ -75,5 +75,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_EQSANSTOFSTRUCTURE_H_*/

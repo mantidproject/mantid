@@ -1,16 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MUON_LOADANDAPPLYMUONDETECTORGROUPING_H_
-#define MANTID_MUON_LOADANDAPPLYMUONDETECTORGROUPING_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/System.h"
+#include "MantidMuon/DllConfig.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
 namespace Mantid {
@@ -21,7 +20,7 @@ namespace Muon {
 @date 2018-05-31
 */
 
-class DLLExport LoadAndApplyMuonDetectorGrouping : public API::Algorithm {
+class MANTID_MUON_DLL LoadAndApplyMuonDetectorGrouping : public API::Algorithm {
 public:
   /// (Empty) Constructor
   LoadAndApplyMuonDetectorGrouping() : API::Algorithm() {}
@@ -62,14 +61,14 @@ private:
   /// Add all the supplied groups to the ADS, inside wsGrouped, by
   /// executing the ApplyMuonDetectorGrouping algorithm
   void addGroupingToADS(const Mantid::Muon::AnalysisOptions &options,
-                        Mantid::API::Workspace_sptr ws,
-                        Mantid::API::WorkspaceGroup_sptr wsGrouped);
+                        const Mantid::API::Workspace_sptr &ws,
+                        const Mantid::API::WorkspaceGroup_sptr &wsGrouped);
 
   /// Add all the supplied pairs to the ADS, inside wsGrouped, by
   /// executing the ApplyMuonDetectorGroupPairing algorithm
   void addPairingToADS(const Mantid::Muon::AnalysisOptions &options,
-                       Mantid::API::Workspace_sptr ws,
-                       Mantid::API::WorkspaceGroup_sptr wsGrouped);
+                       const Mantid::API::Workspace_sptr &ws,
+                       const Mantid::API::WorkspaceGroup_sptr &wsGrouped);
 
   void addGroupingInformationToADS(const Mantid::API::Grouping &grouping);
 
@@ -88,13 +87,12 @@ private:
   /// are paired are also included as groups.
   void CheckValidGroupsAndPairs(const Mantid::API::Grouping &grouping);
 
-  void getTimeLimitsFromInputWorkspace(Mantid::API::Workspace_sptr inputWS,
-                                       Mantid::Muon::AnalysisOptions &options);
+  void
+  getTimeLimitsFromInputWorkspace(const Mantid::API::Workspace_sptr &inputWS,
+                                  Mantid::Muon::AnalysisOptions &options);
 
   void getTimeLimitsFromInputs(AnalysisOptions &options);
 };
 
 } // namespace Muon
 } // namespace Mantid
-
-#endif

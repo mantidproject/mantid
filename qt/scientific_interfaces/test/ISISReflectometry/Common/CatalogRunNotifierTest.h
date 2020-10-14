@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "../../../ISISReflectometry/GUI/Runs/CatalogRunNotifier.h"
 #include "../ReflMockObjects.h"
 #include "../Runs/MockRunsView.h"
@@ -13,9 +12,9 @@
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 
+using testing::_;
 using testing::Mock;
 using testing::NiceMock;
-using testing::_;
 
 class CatalogRunNotifierTest : public CxxTest::TestSuite {
 public:

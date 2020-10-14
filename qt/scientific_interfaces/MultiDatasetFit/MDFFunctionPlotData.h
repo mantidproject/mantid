@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDFFUNCTIONPLOTDATA_H_
-#define MDFFUNCTIONPLOTDATA_H_
+#pragma once
 
 #include <QString>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <qwt_double_rect.h>
 
 // Forward declarations
@@ -31,7 +30,7 @@ namespace MDF {
  */
 class MDFFunctionPlotData {
 public:
-  MDFFunctionPlotData(boost::shared_ptr<Mantid::API::IFunction> fun,
+  MDFFunctionPlotData(const std::shared_ptr<Mantid::API::IFunction> &fun,
                       double startX, double endX,
                       size_t nX = g_defaultDomainSize);
   ~MDFFunctionPlotData();
@@ -49,7 +48,7 @@ private:
   MDFFunctionPlotData &operator=(const MDFFunctionPlotData &);
 
   /// The function
-  boost::shared_ptr<Mantid::API::IFunction> m_function;
+  std::shared_ptr<Mantid::API::IFunction> m_function;
   /// Curve object to plot the function.
   QwtPlotCurve *m_functionCurve;
 
@@ -60,5 +59,3 @@ private:
 } // namespace MDF
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /*MDFFUNCTIONPLOTDATA_H_*/

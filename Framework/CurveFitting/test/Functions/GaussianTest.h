@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GAUSSIANTEST_H_
-#define GAUSSIANTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -69,14 +68,14 @@ public:
     values->setFitWeights(1.0);
 
     // set up Gaussian fitting function
-    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
+    std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
     fn->initialize();
     fn->setParameter("PeakCentre", 79440.0);
     fn->setParameter("Height", 200.0);
     fn->setParameter("Sigma", 30.0);
 
-    boost::shared_ptr<CostFuncLeastSquares> costFun =
-        boost::make_shared<CostFuncLeastSquares>();
+    std::shared_ptr<CostFuncLeastSquares> costFun =
+        std::make_shared<CostFuncLeastSquares>();
     costFun->setFittingFunction(fn, domain, values);
 
     FuncMinimisers::LevenbergMarquardtMDMinimizer s;
@@ -87,7 +86,7 @@ public:
   }
 
   void testIntensity() {
-    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
+    std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
     fn->initialize();
     fn->setHeight(2.0);
     fn->setFwhm(0.125);
@@ -98,7 +97,7 @@ public:
   }
 
   void testSetIntensity() {
-    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
+    std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
     fn->initialize();
     fn->setHeight(2.0);
     fn->setFwhm(0.125);
@@ -116,7 +115,7 @@ public:
   }
 
   void testSetIntensityDefault() {
-    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
+    std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
     fn->initialize();
 
     TS_ASSERT_EQUALS(fn->intensity(), 0.0);
@@ -132,7 +131,7 @@ public:
   }
 
   void testGetCentreParameterName() {
-    boost::shared_ptr<Gaussian> fn = boost::make_shared<Gaussian>();
+    std::shared_ptr<Gaussian> fn = std::make_shared<Gaussian>();
     fn->initialize();
 
     TS_ASSERT_THROWS_NOTHING(fn->getCentreParameterName());
@@ -172,5 +171,3 @@ public:
     TS_ASSERT_DELTA(fn.getParameter("Height"), 0.398942, 1e-6);
   }
 };
-
-#endif /*GAUSSIANTEST_H_*/

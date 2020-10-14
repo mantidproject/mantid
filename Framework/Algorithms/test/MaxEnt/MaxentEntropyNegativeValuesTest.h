@@ -1,17 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUESTEST_H_
-#define MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUESTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAlgorithms/MaxEnt/MaxentEntropyNegativeValues.h"
-#include <boost/make_shared.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 using Mantid::Algorithms::MaxentEntropyNegativeValues;
 
@@ -69,5 +67,3 @@ public:
     TS_ASSERT_DELTA(result[2], 10, 1E-6);
   }
 };
-
-#endif /* MANTID_ALGORITHMS_MAXENTENTROPYNEGATIVEVALUESTEST_H_ */

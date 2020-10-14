@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TESTTABLEWORKSPACEPROPERTY_
-#define TESTTABLEWORKSPACEPROPERTY_
+#pragma once
 
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 #include <vector>
 
 #include "MantidAPI/Algorithm.h"
@@ -55,7 +54,7 @@ void TableWorkspaceAlgorithm::init() {
 
 void TableWorkspaceAlgorithm::exec() {
   Workspace_sptr b = getProperty("Table");
-  TableWorkspace_sptr t = boost::dynamic_pointer_cast<TableWorkspace>(b);
+  TableWorkspace_sptr t = std::dynamic_pointer_cast<TableWorkspace>(b);
   TableRow r = t->getFirstRow();
   r << "FIRST" << 11;
   r.next();
@@ -76,7 +75,7 @@ public:
     t->addColumn("str", "Name");
     t->addColumn("int", "Nunber");
     AnalysisDataService::Instance().add(
-        "tst", boost::dynamic_pointer_cast<Workspace>(t));
+        "tst", std::dynamic_pointer_cast<Workspace>(t));
   }
 
   void testProperty() {
@@ -103,6 +102,5 @@ public:
   }
 
 private:
-  boost::shared_ptr<TableWorkspace> t;
+  std::shared_ptr<TableWorkspace> t;
 };
-#endif /*TESTTABLEWORKSPACE_*/

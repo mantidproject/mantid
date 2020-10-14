@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_CONTAINER_H_
-#define MANTID_GEOMETRY_CONTAINER_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -31,10 +30,15 @@ public:
   Container(const Container &container);
   Container(std::string xml);
 
-  bool hasSampleShape() const;
+  bool hasCustomizableSampleShape() const;
+  bool hasFixedSampleShape() const;
   IObject_sptr createSampleShape(const ShapeArgs &args) const;
+  IObject_sptr getSampleShape() const;
 
   void setSampleShape(const std::string &sampleShapeXML);
+  void setSampleShape(IObject_sptr sampleShape) {
+    m_sampleShape = std::move(sampleShape);
+  };
 
   const IObject &getShape() const { return *m_shape; }
 
@@ -57,6 +61,9 @@ public:
   int interceptSurface(Geometry::Track &t) const override {
     return m_shape->interceptSurface(t);
   }
+  double distance(const Geometry::Track &t) const override {
+    return m_shape->distance(t);
+  }
   double solidAngle(const Kernel::V3D &observer) const override {
     return m_shape->solidAngle(observer);
   }
@@ -76,13 +83,15 @@ public:
   int getPointInObject(Kernel::V3D &point) const override {
     return m_shape->getPointInObject(point);
   }
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const size_t i) const override {
+  boost::optional<Kernel::V3D>
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const size_t i) const override {
     return m_shape->generatePointInObject(rng, i);
   }
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const BoundingBox &activeRegion,
-                                    const size_t i) const override {
+  boost::optional<Kernel::V3D>
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const BoundingBox &activeRegion,
+                        const size_t i) const override {
     return m_shape->generatePointInObject(rng, activeRegion, i);
   }
 
@@ -99,7 +108,7 @@ public:
                      double &radius, double &height) const override {
     m_shape->GetObjectGeom(type, vectors, innerRadius, radius, height);
   }
-  boost::shared_ptr<GeometryHandler> getGeometryHandler() const override {
+  std::shared_ptr<GeometryHandler> getGeometryHandler() const override {
     return m_shape->getGeometryHandler();
   }
 
@@ -109,20 +118,22 @@ public:
   const Kernel::Material &material() const override {
     return m_shape->material();
   }
-  void setID(const std::string &id);
+  virtual void setMaterial(const Kernel::Material &material) override {
+    m_shape->setMaterial(material);
+  };
+  void setID(const std::string &id) override;
   const std::string &id() const override { return m_shape->id(); }
 
 private:
   IObject_sptr m_shape;
   std::string m_sampleShapeXML;
+  IObject_sptr m_sampleShape = nullptr;
 };
 
 /// Typdef for a shared pointer
-using Container_sptr = boost::shared_ptr<Container>;
+using Container_sptr = std::shared_ptr<Container>;
 /// Typdef for a shared pointer to a const object
-using Container_const_sptr = boost::shared_ptr<const Container>;
+using Container_const_sptr = std::shared_ptr<const Container>;
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_CONTAINER_H_ */

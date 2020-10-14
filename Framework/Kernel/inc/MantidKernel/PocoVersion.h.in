@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_POCOVERSION_H_
-#define MANTID_KERNEL_POCOVERSION_H_
+#pragma once
 
 /**  Macros defining Poco version used to compile Mantid.
  */
@@ -15,4 +14,3 @@
 #define POCO_VERSION_MINOR @POCO_VERSION_MINOR@
 /// Patch version of Poco used to build Mantid.
 #define POCO_VERSION_PATCH @POCO_VERSION_PATCH@
-#endif /* MANTID_KERNEL_POCOVERSION_H_ */

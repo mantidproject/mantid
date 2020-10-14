@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
 
@@ -11,7 +11,6 @@
 @date October 06, 2013
 """
 
-from __future__ import (absolute_import, division, print_function)
 import numpy as np
 
 from mantid.api import IFunction1D, FunctionFactory
@@ -49,10 +48,12 @@ class StretchedExpFT(IFunction1D):
             F(E) is normalized:
                 \int_{-infty}^{infty} dE F(E) = 1
         """
-        parms, de, energies, fourier = function1Dcommon(self, xvals, **optparms)
+        parms, de, energies, fourier = function1Dcommon(
+            self, xvals, **optparms)
         if parms is None:
-            return fourier  #return zeros if parameters not valid
-        transform = parms['Height'] * np.interp(xvals-parms['Centre'], energies, fourier)
+            return fourier  # return zeros if parameters not valid
+        transform = parms['Height'] * \
+            np.interp(xvals-parms['Centre'], energies, fourier)
         return transform
 
     @surrogate

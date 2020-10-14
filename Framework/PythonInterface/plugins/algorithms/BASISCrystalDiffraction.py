@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-branches
-
-from __future__ import (absolute_import, division, print_function)
 
 import os
 import tempfile
@@ -14,7 +12,7 @@ from collections import namedtuple
 from contextlib import contextmanager
 import numpy as np
 
-from mantid.py3compat.enum import Enum
+from enum import Enum
 from mantid import config as mantid_config
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, FileProperty,
                         WorkspaceProperty, FileAction, PropertyMode, mtd,
@@ -178,9 +176,9 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
-                             doc='Output Workspace. If background is ' +
-                                 'subtracted, _data and _background ' +
-                                 'workspaces will also be generated')
+                             doc='Output Workspace. If background is '
+                                 + 'subtracted, _data and _background '
+                                 + 'workspaces will also be generated')
 
         #
         # Background for the sample runs
@@ -189,8 +187,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
         self.declareProperty('BackgroundRuns', '', 'Background run numbers')
         self.setPropertyGroup('BackgroundRuns', background_title)
         self.declareProperty("BackgroundScale", 1.0,
-                             doc='The background will be scaled by this ' +
-                                 'number before being subtracted.')
+                             doc='The background will be scaled by this ' + 'number before being subtracted.')
         self.setPropertyGroup('BackgroundScale', background_title)
         #
         # Vanadium
@@ -218,8 +215,7 @@ class BASISCrystalDiffraction(DataProcessorAlgorithm):
                                                 [90.0, 90.0, 90.0],
                                                 array_length_three,
                                                 direction=Direction.Input),
-                             doc='three item comma-separated ' +
-                                 'list "alpha, beta, gamma"')
+                             doc='three item comma-separated ' + 'list "alpha, beta, gamma"')
         #    Reciprocal vector to be aligned with incoming beam
         self.declareProperty(FloatArrayProperty('VectorU', [1, 0, 0],
                                                 array_length_three,

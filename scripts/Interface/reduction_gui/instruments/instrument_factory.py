@@ -1,15 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
     Instrument interface factory.
     This module is responsible for the association between an instrument name
     and its corresponding interface class.
 """
-from __future__ import (absolute_import, division, print_function)
 from reduction_gui.instruments.hfir_interface_dev import HFIRInterface
 from reduction_gui.instruments.eqsans_interface_dev import EQSANSInterface
 from reduction_gui.instruments.dgs_interface_dev import DgsInterface

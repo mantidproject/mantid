@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef WORKSPACEOPOVERLOADSTEST_H_
-#define WORKSPACEOPOVERLOADSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -22,15 +21,15 @@ public:
   //-------------------------------------------------------------------------------------------
 
   void test_matchingBins() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 2, 1);
     TSM_ASSERT("Passing it the same workspace twice had better work!",
                WorkspaceHelpers::matchingBins(*ws, *ws));
 
     // Different size workspaces fail of course
-    auto ws2 = boost::make_shared<WorkspaceTester>();
+    auto ws2 = std::make_shared<WorkspaceTester>();
     ws2->initialize(3, 2, 1);
-    auto ws3 = boost::make_shared<WorkspaceTester>();
+    auto ws3 = std::make_shared<WorkspaceTester>();
     ws3->initialize(2, 3, 2);
     TSM_ASSERT("Different size workspaces should always fail",
                !WorkspaceHelpers::matchingBins(*ws, *ws2));
@@ -44,20 +43,20 @@ public:
 
     // Check it fails if the sum is zero but the boundaries differ, both for 1st
     // & later spectra.
-    auto ws4 = boost::make_shared<WorkspaceTester>();
+    auto ws4 = std::make_shared<WorkspaceTester>();
     ws4->initialize(2, 3, 2);
     ws4->dataX(0)[0] = -1;
     ws4->dataX(0)[1] = 0;
-    auto ws5 = boost::make_shared<WorkspaceTester>();
+    auto ws5 = std::make_shared<WorkspaceTester>();
     ws5->initialize(2, 3, 2);
     ws5->dataX(0)[0] = -1;
     ws5->dataX(0)[2] = 0;
     TS_ASSERT(!WorkspaceHelpers::matchingBins(*ws4, *ws5, true))
-    auto ws6 = boost::make_shared<WorkspaceTester>();
+    auto ws6 = std::make_shared<WorkspaceTester>();
     ws6->initialize(2, 3, 2);
     ws6->dataX(1)[0] = -1;
     ws6->dataX(1)[1] = 0;
-    auto ws7 = boost::make_shared<WorkspaceTester>();
+    auto ws7 = std::make_shared<WorkspaceTester>();
     ws7->initialize(2, 3, 2);
     ws7->dataX(1)[0] = -1;
     ws7->dataX(1)[2] = 0;
@@ -75,12 +74,12 @@ public:
 
   void test_matchingBins_negative_sum() // Added in response to bug #7391
   {
-    auto ws1 = boost::make_shared<WorkspaceTester>();
+    auto ws1 = std::make_shared<WorkspaceTester>();
     ws1->initialize(2, 2, 1);
     ws1->getSpectrum(1).dataX()[0] = -2.5;
     ws1->getSpectrum(1).dataX()[1] = -1.5;
 
-    auto ws2 = boost::make_shared<WorkspaceTester>();
+    auto ws2 = std::make_shared<WorkspaceTester>();
     ws2->initialize(2, 2, 1);
     ws2->getSpectrum(1).dataX()[0] = -2.7;
     ws2->getSpectrum(1).dataX()[1] = -1.7;
@@ -97,7 +96,7 @@ public:
   }
 
   void test_sharedXData() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 2, 1);
     // By default the X vectors are different ones
     TS_ASSERT(!WorkspaceHelpers::sharedXData(*ws));
@@ -110,7 +109,7 @@ public:
     // N.B. This is also tested in the tests for the
     // Convert[To/From]Distribution algorithms.
     // Test only on tiny data here.
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 2, 1);
     ws->dataX(0)[1] = 3.0;
     ws->dataX(1)[1] = 1.5;
@@ -165,7 +164,7 @@ public:
   }
 
   void test_makeDistribution_fails_for_point_data() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 2, 2);
     TS_ASSERT(!ws->isDistribution());
 
@@ -173,5 +172,3 @@ public:
                      const std::runtime_error &);
   }
 };
-
-#endif

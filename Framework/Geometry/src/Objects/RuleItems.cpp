@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <algorithm>
 #include <cfloat>
@@ -755,7 +755,7 @@ void SurfPoint::setKeyN(const int Ky)
   keyN = sign * Ky;
 }
 
-void SurfPoint::setKey(const boost::shared_ptr<Surface> &Spoint)
+void SurfPoint::setKey(const std::shared_ptr<Surface> &Spoint)
 /**
   Sets the key pointer. The class takes ownership.
   @param Spoint :: new key values

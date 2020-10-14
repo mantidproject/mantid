@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_COORDTRANSFORMPARSER_H_
-#define MANTID_DATAOBJECTS_COORDTRANSFORMPARSER_H_
+#pragma once
 
 #include "MantidKernel/System.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Poco {
 namespace XML {
@@ -38,8 +37,8 @@ public:
   virtual void setSuccessor(CoordTransformAffineParser *other);
   virtual ~CoordTransformAffineParser() = default;
   using SuccessorType_sptr =
-      boost::shared_ptr<CoordTransformAffineParser>; ///< successor parser
-                                                     ///< shared ptr typedef
+      std::shared_ptr<CoordTransformAffineParser>; ///< successor parser
+                                                   ///< shared ptr typedef
 protected:
   SuccessorType_sptr m_successor; ///< successor parser
 private:
@@ -50,5 +49,3 @@ private:
 };
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif

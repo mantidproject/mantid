@@ -1315,7 +1315,7 @@ void QtAbstractPropertyBrowserPrivate::createBrowserIndexes(
 QtBrowserItem *QtAbstractPropertyBrowserPrivate::createBrowserIndex(
     QtProperty *property, QtBrowserItem *parentIndex,
     QtBrowserItem *afterIndex) {
-  QtBrowserItem *newIndex = new QtBrowserItem(q_ptr, property, parentIndex);
+  auto *newIndex = new QtBrowserItem(q_ptr, property, parentIndex);
   if (parentIndex) {
     parentIndex->d_ptr->addChild(newIndex, afterIndex);
   } else {

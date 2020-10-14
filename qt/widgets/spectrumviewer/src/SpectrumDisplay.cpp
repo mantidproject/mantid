@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <cfloat>
 #include <sstream>
@@ -10,6 +10,8 @@
 #include <QImage>
 #include <QString>
 #include <QVector>
+#include <utility>
+
 #include <qwt_scale_engine.h>
 
 #include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
@@ -74,7 +76,7 @@ SpectrumDisplay::~SpectrumDisplay() { delete m_spectrumPlotItem; }
 
 bool SpectrumDisplay::hasData(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   return m_dataSource->hasData(wsName, ws);
 }
 
@@ -97,7 +99,7 @@ void SpectrumDisplay::setupSpectrumPlotItem() {
  *                    and information for the table.
  */
 void SpectrumDisplay::setDataSource(SpectrumDataSource_sptr dataSource) {
-  m_dataSource = dataSource;
+  m_dataSource = std::move(dataSource);
 
   m_hGraphDisplay->setDataSource(m_dataSource);
   m_vGraphDisplay->setDataSource(m_dataSource);
@@ -174,7 +176,7 @@ void SpectrumDisplay::handleResize() {
   getDisplayRectangle(draw_area);
 
   // Notify the sliders of the resize
-  SliderHandler *sliderHandler = dynamic_cast<SliderHandler *>(m_sliderHandler);
+  auto *sliderHandler = dynamic_cast<SliderHandler *>(m_sliderHandler);
   if (sliderHandler)
     sliderHandler->reConfigureSliders(draw_area, m_dataSource);
 }
@@ -279,10 +281,10 @@ void SpectrumDisplay::updateImage() {
                                m_dataArray->getXMax());
 
   if (is_log_x) {
-    QwtLog10ScaleEngine *log_engine = new QwtLog10ScaleEngine();
+    auto *log_engine = new QwtLog10ScaleEngine();
     m_spectrumPlot->setAxisScaleEngine(QwtPlot::xBottom, log_engine);
   } else {
-    QwtLinearScaleEngine *linear_engine = new QwtLinearScaleEngine();
+    auto *linear_engine = new QwtLinearScaleEngine();
     m_spectrumPlot->setAxisScaleEngine(QwtPlot::xBottom, linear_engine);
   }
 
@@ -390,7 +392,7 @@ void SpectrumDisplay::setPointedAtXY(double x, double y, bool isFront) {
 
   if (isFront) {
     showInfoList(x, y);
-    foreach (boost::weak_ptr<SpectrumDisplay> sd, m_otherDisplays) {
+    foreach (std::weak_ptr<SpectrumDisplay> sd, m_otherDisplays) {
       if (auto display = sd.lock()) {
         display->setPointedAtXY(x, y, false);
       }
@@ -572,20 +574,19 @@ bool SpectrumDisplay::dataSourceRangeChanged() {
           m_totalXMax != m_dataSource->getXMax());
 }
 
-void SpectrumDisplay::addOther(
-    const boost::shared_ptr<SpectrumDisplay> &other) {
+void SpectrumDisplay::addOther(const std::shared_ptr<SpectrumDisplay> &other) {
   m_otherDisplays.append(other);
 }
 
 void SpectrumDisplay::addOthers(
-    const QList<boost::shared_ptr<SpectrumDisplay>> &others) {
-  foreach (boost::shared_ptr<SpectrumDisplay> sd, others) {
+    const QList<std::shared_ptr<SpectrumDisplay>> &others) {
+  foreach (std::shared_ptr<SpectrumDisplay> sd, others) {
     m_otherDisplays.append(sd);
   }
 }
 
 void SpectrumDisplay::removeOther(
-    const boost::shared_ptr<SpectrumDisplay> &other) {
+    const std::shared_ptr<SpectrumDisplay> &other) {
   QList<int> toRemove;
   for (int i = 0; i < m_otherDisplays.size(); ++i) {
     auto ds = m_otherDisplays[i].lock();

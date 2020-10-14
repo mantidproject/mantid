@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CHECKWORKSPACESMATCH_H_
-#define MANTID_ALGORITHMS_CHECKWORKSPACESMATCH_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -13,6 +12,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 
 namespace Mantid {
@@ -57,8 +57,9 @@ namespace Algorithms {
  *
  *
  */
-class DLLExport CheckWorkspacesMatch : public API::Algorithm,
-                                       public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL CheckWorkspacesMatch
+    : public API::Algorithm,
+      public API::DeprecatedAlgorithm {
 public:
   CheckWorkspacesMatch();
 
@@ -100,5 +101,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_CHECKWORKSPACESMATCH_H_*/

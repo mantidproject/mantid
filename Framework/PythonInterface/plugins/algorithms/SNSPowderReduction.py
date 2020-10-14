@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init,too-many-lines
-from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import os
 
@@ -16,8 +15,6 @@ from mantid.api import mtd, AlgorithmFactory, AnalysisDataService, DistributedDa
 from mantid.kernel import ConfigService, Direction, FloatArrayProperty, FloatBoundedValidator, \
     IntArrayBoundedValidator, IntArrayProperty, Property, PropertyManagerDataService, StringListValidator
 from mantid.dataobjects import SplittersWorkspace  # SplittersWorkspace
-from six.moves import range #pylint: disable=redefined-builtin
-
 if AlgorithmFactory.exists('GatherWorkspaces'):
     HAVE_MPI = True
     from mpi4py import MPI
@@ -181,8 +178,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty(FileProperty(name="ExpIniFilename", defaultValue="", action=FileAction.OptionalLoad,
                                           extensions=[".ini"]))
         self.copyProperties('AlignAndFocusPowderFromFiles',
-                            ['UnwrapRef', 'LowResRef', 'CropWavelengthMin', 'CropWavelengthMax', 'RemovePromptPulseWidth',
-                             'MaxChunkSize'])
+                            ['LorentzCorrection', 'UnwrapRef', 'LowResRef', 'CropWavelengthMin', 'CropWavelengthMax',
+                             'RemovePromptPulseWidth', 'MaxChunkSize'])
         self.declareProperty(FloatArrayProperty("Binning", values=[0., 0., 0.],
                                                 direction=Direction.Input),
                              "Positive is linear bins, negative is logorithmic")  # Params
@@ -258,6 +255,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._bin_in_dspace = self.getProperty("BinInDspace").value
         self._filterBadPulses = self.getProperty("FilterBadPulses").value
         self._removePromptPulseWidth = self.getProperty("RemovePromptPulseWidth").value
+        self._lorentz = self.getProperty("LorentzCorrection").value
         self._LRef = self.getProperty("UnwrapRef").value
         self._DIFCref = self.getProperty("LowResRef").value
         self._wavelengthMin = self.getProperty("CropWavelengthMin").value
@@ -712,6 +710,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                          PreserveEvents=preserveEvents,
                                          RemovePromptPulseWidth=self._removePromptPulseWidth,
                                          CompressTolerance=self.COMPRESS_TOL_TOF,
+                                         LorentzCorrection=self._lorentz,
                                          UnwrapRef=self._LRef,
                                          LowResRef=self._DIFCref,
                                          LowResSpectrumOffset=self._lowResTOFoffset,
@@ -823,6 +822,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                         PreserveEvents=preserveEvents,
                                         RemovePromptPulseWidth=self._removePromptPulseWidth,
                                         CompressTolerance=self.COMPRESS_TOL_TOF,
+                                        LorentzCorrection=self._lorentz,
                                         UnwrapRef=self._LRef,
                                         LowResRef=self._DIFCref,
                                         LowResSpectrumOffset=self._lowResTOFoffset,

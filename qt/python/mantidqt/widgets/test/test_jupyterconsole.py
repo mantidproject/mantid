@@ -1,17 +1,18 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #    This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import)
-
 # system imports
-# import readline before QApplication starts to avoid segfault with IPython 5 and Python 3
-import readline  # noqa
+# import readline (if available) before QApplication starts to avoid segfault with IPython 5 and Python 3
+try:
+    import readline  # noqa
+except ImportError:
+    pass
 import unittest
 
 # third-party library imports
@@ -30,12 +31,14 @@ class InProcessJupyterConsoleTest(unittest.TestCase):
         self.assertTrue(hasattr(widget, "kernel_client"))
         self.assertGreater(len(widget.banner), 0)
         self._pre_delete_console_cleanup(widget)
+        widget.kernel_manager.shutdown_kernel()
         del widget
 
     def test_construction_with_startup_code_adds_to_banner_and_executes(self):
         widget = InProcessJupyterConsole(startup_code="x = 1")
         self.assertEqual(1, widget.kernel_manager.kernel.shell.user_ns['x'])
         self._pre_delete_console_cleanup(widget)
+        widget.kernel_manager.shutdown_kernel()
         del widget
 
     def _pre_delete_console_cleanup(self, console):

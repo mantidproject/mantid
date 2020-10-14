@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H
-#define MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/MantidTreeWidget.h"
@@ -25,8 +24,8 @@
 #include <QMap>
 #include <QMetaType>
 #include <QMutex>
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 
 class QMainWindow;
 class QLabel;
@@ -95,6 +94,8 @@ public:
   bool deleteConfirmation() const override;
   void
   deleteWorkspaces(const MantidQt::MantidWidgets::StringList &wsNames) override;
+  bool clearWorkspacesConfirmation() const override;
+  void enableClearButton(bool enable) override;
   void clearView() override;
   std::string getFilterText() const override;
   SaveFileType getSaveFileType() const override;
@@ -132,7 +133,8 @@ public:
 
 private:
   bool hasUBMatrix(const std::string &wsName);
-  void addSaveMenuOption(QString algorithmString, QString menuEntryName = "");
+  void addSaveMenuOption(const QString &algorithmString,
+                         QString menuEntryName = "");
   void setTreeUpdating(const bool state);
   inline bool isTreeUpdating() const { return m_treeUpdating; }
   void updateTree(const TopLevelItems &items) override;
@@ -141,7 +143,7 @@ private:
   MantidTreeWidgetItem *
   addTreeEntry(const std::pair<std::string, Mantid::API::Workspace_sptr> &item,
                QTreeWidgetItem *parent = nullptr);
-  bool shouldBeSelected(QString name) const;
+  bool shouldBeSelected(const QString &name) const;
   void createWorkspaceMenuActions();
   void createSortMenuActions();
   void setItemIcon(QTreeWidgetItem *item, const std::string &wsID);
@@ -174,6 +176,7 @@ public slots:
   void clickedWorkspace(QTreeWidgetItem * /*item*/, int /*unused*/);
   void saveWorkspaceCollection();
   void onClickDeleteWorkspaces();
+  void onClickClearWorkspaces();
   void renameWorkspace();
   void populateChildData(QTreeWidgetItem *item);
   void onClickSaveToProgram(const QString &name);
@@ -190,7 +193,7 @@ protected slots:
 
 private slots:
   void handleShowSaveAlgorithm();
-  void treeSelectionChanged();
+  void onTreeSelectionChanged();
   void onClickGroupButton();
   void onClickLoad();
   void onLoadAccept();
@@ -238,6 +241,7 @@ private:
   QPushButton *m_loadButton;
   QPushButton *m_saveButton;
   QPushButton *m_deleteButton;
+  QPushButton *m_clearButton;
   QPushButton *m_groupButton;
   QPushButton *m_sortButton;
   QLineEdit *m_workspaceFilter;
@@ -278,4 +282,3 @@ signals:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif // MANTIDQT_MANTIDWIDGETS_WORKSPACETREEWIDGET_H

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_KERNEL_DLLCONFIG_H_
-#define MANTID_PYTHONINTERFACE_KERNEL_DLLCONFIG_H_
+#pragma once
 
 /*
     This file contains the DLLExport/DLLImport linkage configuration for the
@@ -20,5 +19,3 @@
 #else
 #define PYTHON_KERNEL_DLL DLLImport
 #endif
-
-#endif // MANTID_PYTHONINTERFACE_KERNEL_DLLCONFIG_H_

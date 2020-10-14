@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef THREADPOOLTEST_H_
-#define THREADPOOLTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -18,9 +17,8 @@
 
 #include <Poco/Thread.h>
 
-#include <boost/bind.hpp>
-#include <boost/make_shared.hpp>
 #include <cstdlib>
+#include <memory>
 
 using namespace Mantid::Kernel;
 
@@ -76,7 +74,7 @@ void threadpooltest_function() { threadpooltest_check = 12; }
 std::vector<int> threadpooltest_vec;
 void threadpooltest_adding_stuff(int val) {
   // TODO: Mutex
-  threadpooltest_vec.push_back(val);
+  threadpooltest_vec.emplace_back(val);
 }
 
 // Counter for the test.
@@ -133,7 +131,7 @@ public:
       double cost = i; // time is exactly i
       // Bind to a member function of mywaster
       p.schedule(std::make_shared<FunctionTask>(
-          boost::bind(&TimeWaster::waste_time_with_lock, &mywaster, i), cost));
+          std::bind(&TimeWaster::waste_time_with_lock, &mywaster, i), cost));
     }
 
     Timer overall;
@@ -281,7 +279,7 @@ public:
     for (int i = 0; i < 10; i++) {
       double cost = i;
       p.schedule(std::make_shared<FunctionTask>(
-          boost::bind(threadpooltest_adding_stuff, i), cost));
+          std::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -300,7 +298,7 @@ public:
     for (int i = 0; i < 10; i++) {
       double cost = i;
       p.schedule(std::make_shared<FunctionTask>(
-          boost::bind(threadpooltest_adding_stuff, i), cost));
+          std::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -318,7 +316,7 @@ public:
     for (int i = 0; i < 10; i++) {
       double cost = i;
       p.schedule(std::make_shared<FunctionTask>(
-          boost::bind(threadpooltest_adding_stuff, i), cost));
+          std::bind(threadpooltest_adding_stuff, i), cost));
     }
     TS_ASSERT_THROWS_NOTHING(p.joinAll());
     TS_ASSERT_EQUALS(threadpooltest_vec.size(), 10);
@@ -339,15 +337,15 @@ public:
     TimeWaster mywaster;
     size_t num = 30000;
     mywaster.total = 0;
-    boost::shared_ptr<std::mutex> lastMutex;
+    std::shared_ptr<std::mutex> lastMutex;
     for (size_t i = 0; i <= num; i++) {
       auto task = std::make_shared<FunctionTask>(
-          boost::bind(&TimeWaster::add_to_number, &mywaster, i),
+          std::bind(&TimeWaster::add_to_number, &mywaster, i),
           static_cast<double>(i));
       // Create a new mutex every 1000 tasks. This is more relevant to the
       // ThreadSchedulerMutexes; others ignore it.
       if (i % 1000 == 0)
-        lastMutex = boost::make_shared<std::mutex>();
+        lastMutex = std::make_shared<std::mutex>();
       task->setMutex(lastMutex);
       p.schedule(task);
     }
@@ -438,5 +436,3 @@ public:
     TS_ASSERT_EQUALS(ThreadPoolTest_TaskThatThrows_counter, 1);
   }
 };
-
-#endif

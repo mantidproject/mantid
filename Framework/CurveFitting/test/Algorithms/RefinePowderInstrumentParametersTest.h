@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_REFINEPOWDERINSTRUMENTPARAMETERSTEST_H_
-#define MANTID_CURVEFITTING_REFINEPOWDERINSTRUMENTPARAMETERSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -106,7 +105,7 @@ public:
 
     // 3. Check result
     DataObjects::TableWorkspace_sptr newgeomparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve(
                 "InstrumentParameterTable"));
 
@@ -182,17 +181,17 @@ public:
 
     // 4. Check result
     DataObjects::TableWorkspace_sptr newgeomparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedParameters"));
 
     DataObjects::Workspace2D_sptr dataws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("FittedPeakPositions"));
     TS_ASSERT(dataws);
     TS_ASSERT_EQUALS(dataws->getNumberHistograms(), 21);
 
     DataObjects::TableWorkspace_sptr mcresultws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("BestMCResults"));
     TS_ASSERT_EQUALS(mcresultws->rowCount(), 10);
 
@@ -258,11 +257,11 @@ public:
 
     // 4. Check result
     DataObjects::TableWorkspace_sptr newgeomparamws =
-        boost::dynamic_pointer_cast<DataObjects::TableWorkspace>(
+        std::dynamic_pointer_cast<DataObjects::TableWorkspace>(
             AnalysisDataService::Instance().retrieve("FittedParameters"));
 
     DataObjects::Workspace2D_sptr dataws =
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<DataObjects::Workspace2D>(
             AnalysisDataService::Instance().retrieve("FittedPeakPositions"));
     TS_ASSERT(dataws);
     TS_ASSERT_EQUALS(dataws->getNumberHistograms(), 3);
@@ -328,7 +327,7 @@ public:
    * BETA, ...
    */
   void
-  importPeakParametersFile(std::string filename,
+  importPeakParametersFile(const std::string &filename,
                            std::vector<std::vector<int>> &hkls,
                            std::vector<std::vector<double>> &peakparameters) {
     // 1. Open file
@@ -353,22 +352,22 @@ public:
         std::stringstream ss;
         ss.str(line);
         ss >> h >> k >> l;
-        hkl.push_back(h);
-        hkl.push_back(k);
-        hkl.push_back(l);
-        hkls.push_back(hkl);
+        hkl.emplace_back(h);
+        hkl.emplace_back(k);
+        hkl.emplace_back(l);
+        hkls.emplace_back(hkl);
 
         double d_h, tof_h, height, alpha, beta, sigma2, chi2;
         std::vector<double> params;
         ss >> d_h >> tof_h >> height >> alpha >> beta >> sigma2 >> chi2;
-        params.push_back(d_h);
-        params.push_back(tof_h);
-        params.push_back(height);
-        params.push_back(alpha);
-        params.push_back(beta);
-        params.push_back(sigma2);
-        params.push_back(chi2);
-        peakparameters.push_back(params);
+        params.emplace_back(d_h);
+        params.emplace_back(tof_h);
+        params.emplace_back(height);
+        params.emplace_back(alpha);
+        params.emplace_back(beta);
+        params.emplace_back(sigma2);
+        params.emplace_back(chi2);
+        peakparameters.emplace_back(params);
       }
     }
 
@@ -442,7 +441,7 @@ public:
    * Input:  a text based file
    * Output: a map for (parameter name, parameter value)
    */
-  void importInstrumentTxtFile(std::string filename,
+  void importInstrumentTxtFile(const std::string &filename,
                                std::map<std::string, double> &parameters,
                                std::map<string, vector<double>> &parametermcs) {
     // 1. Open file
@@ -463,19 +462,19 @@ public:
     while (ins.getline(line, 256)) {
       if (line[0] != '#') {
         std::string parname;
-        double parvalue, parmin, parmax, parstepsize;
-
+        double parvalue;
         std::stringstream ss;
         ss.str(line);
         ss >> parname >> parvalue;
         parameters.emplace(parname, parvalue);
 
         try {
+          double parmin, parmax, parstepsize;
           ss >> parmin >> parmax >> parstepsize;
           vector<double> mcpars;
-          mcpars.push_back(parmin);
-          mcpars.push_back(parmax);
-          mcpars.push_back(parstepsize);
+          mcpars.emplace_back(parmin);
+          mcpars.emplace_back(parmax);
+          mcpars.emplace_back(parstepsize);
           parametermcs.emplace(parname, mcpars);
         } catch (const std::runtime_error &) {
           ;
@@ -489,9 +488,9 @@ public:
   }
 
   /// =================  Check Output ================ ///
-  void
-  parseParameterTableWorkspace(Mantid::DataObjects::TableWorkspace_sptr paramws,
-                               std::map<std::string, double> &paramvalues) {
+  void parseParameterTableWorkspace(
+      const Mantid::DataObjects::TableWorkspace_sptr &paramws,
+      std::map<std::string, double> &paramvalues) {
 
     for (size_t irow = 0; irow < paramws->rowCount(); ++irow) {
       Mantid::API::TableRow row = paramws->getRow(irow);
@@ -505,5 +504,3 @@ public:
     return;
   }
 };
-
-#endif /* MANTID_CURVEFITTING_REFINEPOWDERINSTRUMENTPARAMETERSTEST_H_ */

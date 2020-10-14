@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/FindPeaksMD.h"
 #include "MantidAPI/Run.h"
@@ -148,7 +148,7 @@ void FindPeaksMD::init() {
                                        numberOfEventsNormalization};
   declareProperty(
       "PeakFindingStrategy", volumeNormalization,
-      boost::make_shared<StringListValidator>(strategy),
+      std::make_shared<StringListValidator>(strategy),
       "Strategy for finding peaks in an MD workspace."
       "1. VolumeNormalization: This is the default strategy. It will sort "
       "all boxes in the workspace by deacresing order of signal density "
@@ -201,13 +201,29 @@ void FindPeaksMD::init() {
                   "only) for a constant wavelength. This only works for Q "
                   "sample workspaces.");
 
-  auto nonNegativeDbl = boost::make_shared<BoundedValidator<double>>();
+  auto nonNegativeDbl = std::make_shared<BoundedValidator<double>>();
   nonNegativeDbl->setLower(0);
   declareProperty("Wavelength", DBL_MAX, nonNegativeDbl,
                   "Wavelength to use when calculating goniometer angle. If not"
                   "set will use the wavelength parameter on the instrument.");
-
   setPropertySettings("Wavelength",
+                      std::make_unique<EnabledWhenProperty>(
+                          "CalculateGoniometerForCW",
+                          Mantid::Kernel::ePropertyCriterion::IS_NOT_DEFAULT));
+
+  declareProperty("InnerGoniometer", false,
+                  "Whether the goniometer to be calculated is the most inner "
+                  "(phi) or most outer (omega)");
+  setPropertySettings("InnerGoniometer",
+                      std::make_unique<EnabledWhenProperty>(
+                          "CalculateGoniometerForCW",
+                          Mantid::Kernel::ePropertyCriterion::IS_NOT_DEFAULT));
+
+  declareProperty("FlipX", false,
+                  "Used when calculating goniometer angle if the q_lab x value "
+                  "should be negative, hence the detector of the other side "
+                  "(right) of the beam");
+  setPropertySettings("FlipX",
                       std::make_unique<EnabledWhenProperty>(
                           "CalculateGoniometerForCW",
                           Mantid::Kernel::ePropertyCriterion::IS_NOT_DEFAULT));
@@ -221,7 +237,7 @@ void FindPeaksMD::init() {
                   "if it exists. \n"
                   "If unchecked, the output workspace is replaced (Default).");
 
-  auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
+  auto nonNegativeInt = std::make_shared<BoundedValidator<int>>();
   nonNegativeInt->setLower(0);
   declareProperty("EdgePixels", 0, nonNegativeInt,
                   "Remove peaks that are at pixels this close to edge. ");
@@ -288,13 +304,13 @@ void FindPeaksMD::addPeak(const V3D &Q, const double binCount,
 /**
  * Creates a Peak object from Q & bin count
  * */
-boost::shared_ptr<DataObjects::Peak>
+std::shared_ptr<DataObjects::Peak>
 FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
                         const Geometry::InstrumentRayTracer &tracer) {
-  boost::shared_ptr<DataObjects::Peak> p;
+  std::shared_ptr<DataObjects::Peak> p;
   if (dimType == QLAB) {
     // Build using the Q-lab-frame constructor
-    p = boost::make_shared<Peak>(inst, Q);
+    p = std::make_shared<Peak>(inst, Q);
     // Save gonio matrix for later
     p->setGoniometerMatrix(m_goniometer);
   } else if (dimType == QSAMPLE) {
@@ -314,15 +330,18 @@ FindPeaksMD::createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
         }
       }
 
-      Geometry::Goniometer goniometer;
-      goniometer.calcFromQSampleAndWavelength(Q, wavelength);
-      g_log.information() << "Found goniometer rotation to be "
-                          << goniometer.getEulerAngles()[0]
-                          << " degrees for Q sample = " << Q << "\n";
-      p = boost::make_shared<Peak>(inst, Q, goniometer.getR());
+      Geometry::Goniometer goniometer(m_goniometer);
+      goniometer.calcFromQSampleAndWavelength(
+          Q, wavelength, getProperty("FlipX"), getProperty("InnerGoniometer"));
+      std::vector<double> angles = goniometer.getEulerAngles("YZY");
+      g_log.information()
+          << "Found goniometer rotation to be in YZY convention [" << angles[0]
+          << ", " << angles[1] << ". " << angles[2]
+          << "] degrees for Q sample = " << Q << "\n";
+      p = std::make_shared<Peak>(inst, Q, goniometer.getR());
 
     } else {
-      p = boost::make_shared<Peak>(inst, Q, m_goniometer);
+      p = std::make_shared<Peak>(inst, Q, m_goniometer);
     }
   } else {
     throw std::invalid_argument(
@@ -373,7 +392,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
     ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
-    this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+    this->readExperimentInfo(ei, std::dynamic_pointer_cast<IMDWorkspace>(ws));
 
     Geometry::InstrumentRayTracer tracer(inst);
     // Copy the instrument, sample, run to the peaks workspace.
@@ -483,7 +502,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
           break;
         }
 
-        peakBoxes.push_back(box);
+        peakBoxes.emplace_back(box);
         g_log.debug() << "Found box at ";
         for (size_t d = 0; d < nd; d++)
           g_log.debug() << (d > 0 ? "," : "") << boxCenter[d];
@@ -508,7 +527,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
                          }))
           continue;
       }
-        // The center of the box = Q in the lab frame
+      // The center of the box = Q in the lab frame
 
 #ifndef MDBOX_TRACK_CENTROID
       coord_t boxCenter[nd];
@@ -567,7 +586,7 @@ void FindPeaksMD::findPeaks(typename MDEventWorkspace<MDE, nd>::sptr ws) {
  * @param ws :: MDHistoWorkspace
  */
 void FindPeaksMD::findPeaksHisto(
-    Mantid::DataObjects::MDHistoWorkspace_sptr ws) {
+    const Mantid::DataObjects::MDHistoWorkspace_sptr &ws) {
   size_t nd = ws->getNumDims();
   if (nd < 3)
     throw std::invalid_argument("Workspace must have at least 3 dimensions.");
@@ -581,7 +600,7 @@ void FindPeaksMD::findPeaksHisto(
 
   for (uint16_t iexp = 0; iexp < ws->getNumExperimentInfo(); iexp++) {
     ExperimentInfo_sptr ei = ws->getExperimentInfo(iexp);
-    this->readExperimentInfo(ei, boost::dynamic_pointer_cast<IMDWorkspace>(ws));
+    this->readExperimentInfo(ei, std::dynamic_pointer_cast<IMDWorkspace>(ws));
     Geometry::InstrumentRayTracer tracer(inst);
 
     // Copy the instrument, sample, run to the peaks workspace.
@@ -667,7 +686,7 @@ void FindPeaksMD::findPeaksHisto(
           break;
         }
 
-        peakBoxes.push_back(index);
+        peakBoxes.emplace_back(index);
         g_log.debug() << "Found box at index " << index;
         g_log.debug() << "; Density = " << density << '\n';
         // Report progres for each box found.
@@ -712,9 +731,9 @@ void FindPeaksMD::exec() {
   // The MDEventWorkspace as input
   IMDWorkspace_sptr inWS = getProperty("InputWorkspace");
   MDHistoWorkspace_sptr inMDHW =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(inWS);
+      std::dynamic_pointer_cast<MDHistoWorkspace>(inWS);
   IMDEventWorkspace_sptr inMDEW =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
 
   // Other parameters
   double PeakDistanceThreshold = getProperty("PeakDistanceThreshold");
@@ -743,9 +762,9 @@ void FindPeaksMD::exec() {
 
   // Do a sort by bank name and then descending bin count (intensity)
   std::vector<std::pair<std::string, bool>> criteria;
-  criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.push_back(std::pair<std::string, bool>("BankName", true));
-  criteria.push_back(std::pair<std::string, bool>("bincount", false));
+  criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
+  criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
+  criteria.emplace_back(std::pair<std::string, bool>("bincount", false));
   peakWS->sort(criteria);
 
   for (auto i = 0; i != peakWS->getNumberPeaks(); ++i) {
@@ -768,7 +787,7 @@ std::map<std::string, std::string> FindPeaksMD::validateInputs() {
       strategy == numberOfEventsNormalization;
   IMDWorkspace_sptr inWS = getProperty("InputWorkspace");
   IMDEventWorkspace_sptr inMDEW =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
 
   if (useNumberOfEventsNormalization && !inMDEW) {
     result["PeakFindingStrategy"] = "The NumberOfEventsNormalization selection "

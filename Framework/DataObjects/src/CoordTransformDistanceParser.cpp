@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/CoordTransformDistanceParser.h"
 #include "MantidAPI/SingleValueParameterParser.h"
@@ -56,26 +56,26 @@ Mantid::API::CoordTransform *CoordTransformDistanceParser::createTransform(
   // Parse the in dimension parameter.
   InDimParameterParser inDimParamParser;
   auto *parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(0));
-  boost::shared_ptr<Mantid::API::InDimParameter> inDimParameter(
+  std::shared_ptr<Mantid::API::InDimParameter> inDimParameter(
       inDimParamParser.createWithoutDelegation(parameter));
 
   // Parse the out dimension parameter.
   OutDimParameterParser outDimParamParser;
   parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(1));
-  boost::shared_ptr<Mantid::API::OutDimParameter> outDimParameter(
+  std::shared_ptr<Mantid::API::OutDimParameter> outDimParameter(
       outDimParamParser.createWithoutDelegation(parameter));
   UNUSED_ARG(outDimParameter); // not actually used as an input.
 
   // Parse the coordinate centre parameter.
   CoordCenterParser coordCenterParser;
   parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(2));
-  boost::shared_ptr<Mantid::DataObjects::CoordCenterVectorParam>
-      coordCenterParam(coordCenterParser.createWithoutDelegation(parameter));
+  std::shared_ptr<Mantid::DataObjects::CoordCenterVectorParam> coordCenterParam(
+      coordCenterParser.createWithoutDelegation(parameter));
 
   // Parse the dimensions used parameter.
   DimsUsedParser dimsUsedParser;
   parameter = dynamic_cast<Poco::XML::Element *>(parameters->item(3));
-  boost::shared_ptr<Mantid::DataObjects::DimensionsUsedVectorParam>
+  std::shared_ptr<Mantid::DataObjects::DimensionsUsedVectorParam>
       dimsUsedVecParm(dimsUsedParser.createWithoutDelegation(parameter));
 
   ////Generate the coordinate transform and return

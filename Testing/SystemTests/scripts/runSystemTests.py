@@ -1,34 +1,15 @@
 #!/usr/bin/env python
-
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import argparse
 import os
 import sys
 import time
 from multiprocessing import Process, Array, Manager, Value, Lock
-
-from six import itervalues
-try:
-    # If any tests happen to hit a PyQt4 import make sure item uses version 2 of the api
-    # Remove this when everything is switched to qtpy
-    import sip
-    sip.setapi('QString', 2)
-    sip.setapi('QVariant', 2)
-    sip.setapi('QDate', 2)
-    sip.setapi('QDateTime', 2)
-    sip.setapi('QTextStream', 2)
-    sip.setapi('QTime', 2)
-    sip.setapi('QUrl', 2)
-except (AttributeError, ImportError):
-    # PyQt < v4.6
-    pass
 
 # Prevents erros in systemtests that use matplotlib directly
 os.environ['MPLBACKEND'] = 'Agg'
@@ -55,7 +36,7 @@ def kill_children(processes):
 def main():
     info = [
         "This program will configure mantid run all of the system tests located in",
-        "the 'tests/analysis' directory.",
+        "the 'tests/<sub_directory>' directory.",
         "This program will create a temporary 'Mantid.user.properties' file which",
         "it will rename to 'Mantid.user.properties.systest' upon completion. The",
         "current version of the code does not print to stdout while the test is",
@@ -200,7 +181,7 @@ def main():
                                       exec_args=options.execargs.lstrip(),
                                       escape_quotes=True)
 
-    tmgr = systemtesting.TestManager(test_loc=mtdconf.testDir,
+    tmgr = systemtesting.TestManager(mantid_config=mtdconf,
                                      runner=runner,
                                      quiet=options.quiet,
                                      testsInclude=options.testsInclude,
@@ -208,8 +189,8 @@ def main():
                                      exclude_in_pr_builds=options.exclude_in_pr_builds,
                                      ignore_failed_imports=options.ignore_failed_imports)
 
-    test_counts, test_list, test_stats, files_required_by_test_module, data_file_lock_status = \
-        tmgr.generateMasterTestList()
+    test_counts, test_list, test_sub_directories, test_stats, files_required_by_test_module, data_file_lock_status = \
+        tmgr.generateMasterTestList(["framework", "qt"])
 
     number_of_test_modules = len(test_list.keys())
     total_number_of_tests = test_stats[0]
@@ -261,7 +242,7 @@ def main():
                                for k in sorted(test_counts, key=test_counts.get, reverse=True)]
         counter = 0
         for key, value in reverse_sorted_dict:
-            tests_dict[str(counter)] = test_list[key]
+            tests_dict[str(counter)] = tuple([test_sub_directories[key], test_list[key]])
             counter += 1
             if not options.quiet:
                 print("Test module {} has {} tests:".format(key, value))
@@ -276,10 +257,9 @@ def main():
         for ip in range(options.ncores):
             processes.append(
                 Process(target=systemtesting.testThreadsLoop,
-                        args=(mtdconf.testDir, mtdconf.saveDir, mtdconf.dataDir, options,
-                              tests_dict, tests_lock, tests_left, results_array, status_dict,
-                              total_number_of_tests, maximum_name_length, tests_done, ip, lock,
-                              required_files_dict, locked_files_dict)))
+                        args=(mtdconf, options, tests_dict, tests_lock, tests_left, results_array,
+                              status_dict, total_number_of_tests, maximum_name_length, tests_done,
+                              ip, lock, required_files_dict, locked_files_dict)))
         # Start and join processes
         exitcodes = []
         try:
@@ -327,7 +307,7 @@ def main():
     if options.dry_run:
         print()
         print("Tests that would be executed:")
-        for suites in itervalues(test_list):
+        for suites in test_list.values():
             for suite in suites:
                 print('  ' + suite.name)
     elif not options.clean:

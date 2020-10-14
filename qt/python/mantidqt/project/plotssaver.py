@@ -1,18 +1,17 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import matplotlib.axis
 from matplotlib import ticker
 from matplotlib.image import AxesImage
 
 from mantid import logger
+from mantid.plots.legend import LegendProperties
 
 try:
     from matplotlib.colors import to_hex
@@ -27,7 +26,7 @@ class PlotsSaver(object):
     def __init__(self):
         self.figure_creation_args = {}
 
-    def save_plots(self, plot_dict):
+    def save_plots(self, plot_dict, is_project_recovery=False):
         # if arguement is none return empty dictionary
         if plot_dict is None:
             return []
@@ -41,7 +40,12 @@ class PlotsSaver(object):
                 # have built your project.
                 if isinstance(e, KeyboardInterrupt):
                     raise KeyboardInterrupt
-                logger.warning("A plot was unable to be saved")
+
+                error_string = "Plot: " + str(index) + " was not saved. Error: " + str(e)
+                if not is_project_recovery:
+                    logger.warning(error_string)
+                else:
+                    logger.debug(error_string)
         return plot_list
 
     def get_dict_from_fig(self, fig):
@@ -113,8 +117,8 @@ class PlotsSaver(object):
         legend_dict = {}
         legend = ax.get_legend()
         if legend is not None:
-            legend_dict["visible"] = legend.get_visible()
             legend_dict["exists"] = True
+            legend_dict.update(LegendProperties.from_legend(legend))
         else:
             legend_dict["exists"] = False
         ax_dict["legend"] = legend_dict
@@ -132,7 +136,8 @@ class PlotsSaver(object):
                 "xAxisScale": ax.xaxis.get_scale(),
                 "xLim": ax.get_xlim(),
                 "yAxisScale": ax.yaxis.get_scale(),
-                "yLim": ax.get_ylim()}
+                "yLim": ax.get_ylim(),
+                "showMinorGrid": hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines}
 
     def get_dict_from_axis_properties(self, ax):
         prop_dict = {"majorTickLocator": type(ax.get_major_locator()).__name__,
@@ -194,6 +199,7 @@ class PlotsSaver(object):
             grid_style["color"] = to_hex(gridlines[0].get_color())
             grid_style["alpha"] = gridlines[0].get_alpha()
             grid_style["gridOn"] = True
+            grid_style["minorGridOn"] = ax._gridOnMinor
         else:
             grid_style["gridOn"] = False
         return grid_style

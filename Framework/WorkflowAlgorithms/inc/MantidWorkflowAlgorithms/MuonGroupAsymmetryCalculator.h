@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_WORKFLOWALGORITHMS_MUONGROUPASYMMETRYCALCULATOR_H_
-#define MANTID_WORKFLOWALGORITHMS_MUONGROUPASYMMETRYCALCULATOR_H_
+#pragma once
 
 #include "MantidWorkflowAlgorithms/MuonGroupCalculator.h"
 
@@ -17,12 +16,12 @@ namespace WorkflowAlgorithms {
 */
 class DLLExport MuonGroupAsymmetryCalculator : public MuonGroupCalculator {
 public:
-  MuonGroupAsymmetryCalculator(const API::WorkspaceGroup_sptr inputWS,
-                               const std::vector<int> summedPeriods,
-                               const std::vector<int> subtractedPeriods,
+  MuonGroupAsymmetryCalculator(const API::WorkspaceGroup_sptr &inputWS,
+                               const std::vector<int> &summedPeriods,
+                               const std::vector<int> &subtractedPeriods,
                                const int groupIndex, const double start = 0.0,
                                const double end = 30.0,
-                               const std::string wsName = "");
+                               const std::string &wsName = "");
   /// Performs group asymmetry calculation
   API::MatrixWorkspace_sptr calculate() const override;
 
@@ -36,5 +35,3 @@ private:
 double getStoredNorm();
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_WORKFLOWALGORITHMS_MUONGROUPASYMMETRYCALCULATOR_H_ */

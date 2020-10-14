@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REBINNEDSOURCESMANAGER_H_
-#define REBINNEDSOURCESMANAGER_H_
+#pragma once
 
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
@@ -79,15 +78,15 @@ signals:
 protected:
   void
   addHandle(const std::string &workspaceName,
-            const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
+            const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
 
   void
   preDeleteHandle(const std::string &wsName,
-                  const boost::shared_ptr<Mantid::API::Workspace>) override;
+                  const std::shared_ptr<Mantid::API::Workspace> &) override;
 
   void afterReplaceHandle(
       const std::string &workspaceName,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace) override;
+      const std::shared_ptr<Mantid::API::Workspace> &workspace) override;
 
 private slots:
   void onRebinnedSourceDestroyed();
@@ -157,5 +156,3 @@ private:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-
-#endif

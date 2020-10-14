@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_MANTIDWIDGETS_WORKSPACEDOCKMOCKOBJECTS_H
-#define MANTIDQT_MANTIDWIDGETS_WORKSPACEDOCKMOCKOBJECTS_H
+#pragma once
 
 #include "MantidKernel/WarningSuppressions.h"
 
@@ -13,8 +12,8 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 #include <boost/enable_shared_from_this.hpp>
-#include <boost/make_shared.hpp>
 #include <gmock/gmock.h>
+#include <memory>
 
 using namespace MantidQt::MantidWidgets;
 
@@ -25,8 +24,8 @@ class MockMantidDisplayBase;
 class MockWorkspaceDockView : public IWorkspaceDockView {
 public:
   MockWorkspaceDockView() {
-    auto presenter = boost::make_shared<WorkspacePresenter>(this);
-    m_presenter = boost::dynamic_pointer_cast<ViewNotifiable>(presenter);
+    auto presenter = std::make_shared<WorkspacePresenter>(this);
+    m_presenter = std::dynamic_pointer_cast<ViewNotifiable>(presenter);
     presenter->init();
   }
   ~MockWorkspaceDockView() override {}
@@ -41,6 +40,8 @@ public:
   MOCK_CONST_METHOD0(isPromptDelete, bool());
   MOCK_CONST_METHOD0(deleteConfirmation, bool());
   MOCK_METHOD1(deleteWorkspaces, void(const StringList &wsNames));
+  MOCK_CONST_METHOD0(clearWorkspacesConfirmation, bool());
+  MOCK_METHOD1(enableClearButton, void(bool enable));
   MOCK_METHOD0(clearView, void());
   MOCK_METHOD2(recordWorkspaceRename,
                void(const std::string &oldName, const std::string &newName));
@@ -93,7 +94,7 @@ public:
   // Methods which are not to be mocked
   void enableDeletePrompt(bool) override {}
   WorkspacePresenterWN_wptr getPresenterWeakPtr() override {
-    return boost::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
+    return std::dynamic_pointer_cast<WorkspacePresenter>(m_presenter);
   }
 
   void refreshWorkspaces() override {}
@@ -111,5 +112,3 @@ public:
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-
-#endif // MANTIDQT_MANTIDWIDGETS_WORKSPACEDOCKMOCKOBJECTS_H

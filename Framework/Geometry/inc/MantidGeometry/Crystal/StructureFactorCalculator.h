@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_STRUCTUREFACTORCALCULATOR_H_
-#define MANTID_GEOMETRY_STRUCTUREFACTORCALCULATOR_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/CrystalStructure.h"
 #include "MantidGeometry/DllConfig.h"
@@ -45,7 +44,7 @@ protected:
 };
 
 using StructureFactorCalculator_sptr =
-    boost::shared_ptr<StructureFactorCalculator>;
+    std::shared_ptr<StructureFactorCalculator>;
 
 namespace StructureFactorCalculatorFactory {
 /// Small templated factory function that creates the desired calculator
@@ -53,7 +52,7 @@ namespace StructureFactorCalculatorFactory {
 template <typename T>
 StructureFactorCalculator_sptr
 create(const CrystalStructure &crystalStructure) {
-  boost::shared_ptr<T> calculator = boost::make_shared<T>();
+  std::shared_ptr<T> calculator = std::make_shared<T>();
   calculator->setCrystalStructure(crystalStructure);
 
   return calculator;
@@ -62,5 +61,3 @@ create(const CrystalStructure &crystalStructure) {
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_STRUCTUREFACTORCALCULATOR_H_ */

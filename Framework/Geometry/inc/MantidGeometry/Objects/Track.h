@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_TRACK_H_
-#define MANTID_GEOMETRY_TRACK_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -15,6 +14,9 @@
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidKernel/Tolerance.h"
+
+#include <boost/container/small_vector.hpp>
+
 #include <iosfwd>
 #include <list>
 
@@ -59,6 +61,27 @@ struct MANTID_GEOMETRY_DLL Link {
     return distFromStart < other;
   }
 
+  inline bool operator==(const Link &other) const {
+    if (componentID != other.componentID) {
+      return false;
+    }
+
+    if (object != other.object) {
+      return false;
+    }
+
+    // Need a bit wider tolerance than Kernel::Tolerance for comparing exitPoint
+    //  Although this is due to very slight numerical changes for some reason.
+    // The entryPoint seems to be identical among duplicated Links, so the
+    //  built-in V3D == operator is used in for that case.
+    const double tolerance = 1.0e-5;
+    bool isExitSame =
+        !(std::abs(exitPoint[0] - other.exitPoint[0]) > tolerance ||
+          std::abs(exitPoint[1] - other.exitPoint[1]) > tolerance ||
+          std::abs(exitPoint[2] - other.exitPoint[2]) > tolerance);
+    return isExitSame && (entryPoint == other.entryPoint);
+  }
+
   /** @name Attributes. */
   //@{
   Kernel::V3D entryPoint;  ///< Entry point
@@ -79,7 +102,7 @@ inline bool operator<(const TrackDirection left, const TrackDirection right) {
 }
 
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &os,
-                                             TrackDirection direction);
+                                             const TrackDirection &direction);
 
 /**
  * Stores a point of intersection along a track. The component intersected
@@ -124,6 +147,19 @@ struct IntersectionPoint {
                                       : direction < other.direction;
   }
 
+  inline bool operator==(const IntersectionPoint &other) const {
+    if (direction != other.direction) {
+      return false;
+    }
+
+    const double diff = fabs(distFromStart - other.distFromStart);
+    if (diff > Kernel::Tolerance) {
+      return false;
+    }
+
+    return endPoint == other.endPoint;
+  }
+
   /** @name Attributes. */
   //@{
   TrackDirection direction; ///< Directional flag
@@ -142,8 +178,8 @@ struct IntersectionPoint {
  */
 class MANTID_GEOMETRY_DLL Track {
 public:
-  using LType = std::vector<Link>;
-  using PType = std::vector<IntersectionPoint>;
+  using LType = boost::container::small_vector<Link, 5>;
+  using PType = boost::container::small_vector<IntersectionPoint, 5>;
 
 public:
   /// Default constructor
@@ -161,7 +197,6 @@ public:
   void removeCojoins();
   /// Construct links between added points
   void buildLink();
-
   /// Set a starting point and direction
   void reset(const Kernel::V3D &startPoint, const Kernel::V3D &direction);
   /// Clear the current set of intersection results
@@ -170,6 +205,8 @@ public:
   const Kernel::V3D &startPoint() const { return m_line.getOrigin(); }
   /// Returns the direction as a unit vector
   const Kernel::V3D &direction() const { return m_line.getDirect(); }
+  /// Returns the sum of all the links distInsideObject in the track
+  double totalDistInsideObject() const;
   /// Returns an interator to the start of the set of links
   LType::iterator begin() { return m_links.begin(); }
   /// Returns an interator to one-past-the-end of the set of links
@@ -205,5 +242,3 @@ private:
 
 } // NAMESPACE Geometry
 } // NAMESPACE Mantid
-
-#endif /*MANTID_GEOMETRY_TRACK_H_*/

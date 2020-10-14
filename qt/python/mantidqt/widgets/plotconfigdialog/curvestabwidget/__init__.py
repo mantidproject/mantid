@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-
-from __future__ import (absolute_import, unicode_literals)
 
 from matplotlib import rcParams
 from matplotlib.axes import ErrorbarContainer
@@ -14,8 +12,8 @@ from matplotlib.lines import Line2D
 from numpy import isclose
 from qtpy.QtCore import Qt
 
-from mantid.plots import MantidAxes
-from mantid.plots.helperfunctions import errorbars_hidden
+from mantid.plots.mantidaxes import MantidAxes
+from mantid.plots.datafunctions import errorbars_hidden
 from mantidqt.widgets.plotconfigdialog.colorselector import convert_color_to_hex
 
 LINESTYLE_MAP = {'-': 'solid', '--': 'dashed', '-.': 'dashdot', ':': 'dotted',
@@ -58,26 +56,6 @@ def curve_hidden(curve):
         return line_hidden and bars_hidden
     else:
         return not curve.get_visible()
-
-
-def set_errorbars_hidden(container, hide):
-    """
-    Set the visibility on all lines in an ErrorbarContainer.
-
-    :param hide: Whether or not to hide the errors.
-    :type hide: bool
-    """
-    if not isinstance(container, ErrorbarContainer):
-        return
-
-    # hide gets inverted below, as matplotlib uses `visible`, which has the opposite logic:
-    # if hide is True, visible must be False, and vice-versa
-    if container[1]:
-        for caps in container[1]:
-            caps.set_visible(not hide)
-    if container[2]:
-        for bars in container[2]:
-            bars.set_visible(not hide)
 
 
 def remove_curve_from_ax(curve):
@@ -139,6 +117,12 @@ class CurveProperties(dict):
             if k not in ['hide', 'hide_errors']:
                 kwargs[k] = v
         kwargs['visible'] = not self.hide
+
+        # If the long form of the marker name is currently being used, it is changed to the short form which is
+        # understood by matplotlib.
+        if kwargs['marker'] in MARKER_MAP:
+            kwargs['marker'] = MARKER_MAP[kwargs['marker']]
+
         return kwargs
 
     @classmethod
@@ -158,14 +142,15 @@ class CurveProperties(dict):
         props['markerfacecolor'] = view.marker.get_face_color()
         props['markeredgecolor'] = view.marker.get_edge_color()
         # Errorbar props
-        props['hide_errors'] = view.errorbars.get_hide()
-        props['errorevery'] = view.errorbars.get_error_every()
-        props['capsize'] = view.errorbars.get_capsize()
-        props['capthick'] = view.errorbars.get_cap_thickness()
-        props['ecolor'] = view.errorbars.get_color()
-        # setting errorbar line width to 0 sets width to default, so add a
-        # little bit on to avoid this
-        props['elinewidth'] = view.errorbars.get_width() + 1e-6
+        if view.errorbars.isEnabled():
+            props['hide_errors'] = view.errorbars.get_hide()
+            props['errorevery'] = view.errorbars.get_error_every()
+            props['capsize'] = view.errorbars.get_capsize()
+            props['capthick'] = view.errorbars.get_cap_thickness()
+            props['ecolor'] = view.errorbars.get_color()
+            # setting errorbar line width to 0 sets width to default, so add a
+            # little bit on to avoid this
+            props['elinewidth'] = view.errorbars.get_width() + 1e-6
         return cls(props)
 
     @classmethod

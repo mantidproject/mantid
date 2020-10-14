@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/EstimatePeakErrors.h"
 #include "MantidCurveFitting/Functions/PeakParameterFunction.h"
@@ -91,7 +91,7 @@ GSLMatrix makeJacobian(IPeakFunction &peak, double &centre, double &height,
 /// @param covariance :: The covariance matrix for the parameters of the peak.
 /// @param prefix :: A prefix for the parameter names.
 void calculatePeakValues(IPeakFunction &peak, ITableWorkspace &results,
-                         const GSLMatrix covariance,
+                         const GSLMatrix &covariance,
                          const std::string &prefix) {
   double centre, height, fwhm, intensity;
   GSLMatrix J = makeJacobian(peak, centre, height, fwhm, intensity);

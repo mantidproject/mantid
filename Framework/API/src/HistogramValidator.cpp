@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/HistogramValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -21,7 +21,7 @@ HistogramValidator::HistogramValidator(const bool &mustBeHistogram)
 
 /// Clone the current state
 Kernel::IValidator_sptr HistogramValidator::clone() const {
-  return boost::make_shared<HistogramValidator>(*this);
+  return std::make_shared<HistogramValidator>(*this);
 }
 
 /** Checks if the workspace contains a histogram when it shouldn't and

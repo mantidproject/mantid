@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATORTEST_H_
-#define MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATORTEST_H_
+#pragma once
 
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidDataObjects/MDHistoWorkspaceIterator.h"
@@ -16,10 +15,10 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/VMD.h"
 #include "MantidTestHelpers/MDEventsTestHelper.h"
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <cmath>
+#include <utility>
+
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
@@ -30,7 +29,6 @@ using Mantid::Geometry::MDHistoDimension;
 using Mantid::Geometry::MDHistoDimension_sptr;
 using Mantid::Geometry::MDImplicitFunction;
 using Mantid::Geometry::MDPlane;
-using Mantid::Geometry::MDPlane;
 using Mantid::Kernel::VMD;
 
 class MDHistoWorkspaceIteratorTest : public CxxTest::TestSuite {
@@ -40,7 +38,7 @@ private:
   class WritableHistoWorkspace : public Mantid::DataObjects::MDHistoWorkspace {
   public:
     WritableHistoWorkspace(MDHistoDimension_sptr x)
-        : Mantid::DataObjects::MDHistoWorkspace(x) {}
+        : Mantid::DataObjects::MDHistoWorkspace(std::move(x)) {}
     void setMaskValueAt(size_t at, bool value) { m_masks[at] = value; }
   };
 
@@ -107,8 +105,8 @@ public:
 
     std::vector<coord_t> normal_vector;
     std::vector<coord_t> bound_vector;
-    normal_vector.push_back(1.);
-    bound_vector.push_back(3.);
+    normal_vector.emplace_back(1.f);
+    bound_vector.emplace_back(3.f);
 
     MDImplicitFunction *function = new MDImplicitFunction();
     function->addPlane(MDPlane(normal_vector, bound_vector));
@@ -370,8 +368,8 @@ public:
   }
 
   void do_test_neighbours_1d(
-      boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)>
-          findNeighbourMemberFunction) {
+      const boost::function<std::vector<size_t>(MDHistoWorkspaceIterator *)>
+          &findNeighbourMemberFunction) {
     const size_t nd = 1;
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 10);
@@ -930,8 +928,8 @@ public:
   void test_neighbours_2d_vertex_touching_by_width_vector() {
     const size_t nd = 2;
     std::vector<int> widthVector;
-    widthVector.push_back(5);
-    widthVector.push_back(3);
+    widthVector.emplace_back(5);
+    widthVector.emplace_back(3);
 
     MDHistoWorkspace_sptr ws =
         MDEventsTestHelper::makeFakeMDHistoWorkspace(1.0, nd, 4);
@@ -1525,5 +1523,3 @@ public:
     } while (iterator.next());
   }
 };
-
-#endif /* MANTID_DATAOBJECTS_MDHISTOWORKSPACEITERATORTEST_H_ */

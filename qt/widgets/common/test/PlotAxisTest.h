@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_PLOTAXISLABELTEST_H_
-#define MANTID_API_PLOTAXISLABELTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -111,7 +110,7 @@ public:
     using Mantid::Kernel::Units::Degrees;
     using MantidQt::API::PlotAxis;
     auto ws = WorkspaceCreationHelper::create2DWorkspace(1, 1);
-    ws->getAxis(0)->unit() = boost::make_shared<EmptyUtf8Label>();
+    ws->getAxis(0)->unit() = std::make_shared<EmptyUtf8Label>();
     TS_ASSERT_EQUALS("Caption (unittext)", PlotAxis(*ws, 0).title());
   }
 
@@ -198,5 +197,3 @@ public:
     TS_ASSERT_THROWS(PlotAxis(*ws, -1), const std::invalid_argument &);
   }
 };
-
-#endif /* MANTID_API_PLOTAXISLABELTEST_H_ */

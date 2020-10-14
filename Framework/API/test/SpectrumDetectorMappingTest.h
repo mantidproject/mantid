@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SPECTRUMDETECTORMAPPINGTEST_H_
-#define MANTID_API_SPECTRUMDETECTORMAPPINGTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -33,7 +32,7 @@ public:
   }
 
   void test_workspace_constructor_fills_map() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(3, 1, 1);
     // Override some of the default detector numbers to make it more interesting
     ws->getSpectrum(0).setDetectorIDs(std::set<detid_t>());
@@ -80,12 +79,12 @@ public:
 
     // Now fill the vectors and test again
     for (int i = 1; i < 4; ++i) {
-      specs.push_back(i);
-      detids.push_back(i * 10);
+      specs.emplace_back(i);
+      detids.emplace_back(i * 10);
     }
     // Add a second entry to one
-    specs.push_back(2);
-    detids.push_back(99);
+    specs.emplace_back(2);
+    detids.emplace_back(99);
 
     SpectrumDetectorMapping map2(specs, detids);
     check_the_map(map2);
@@ -152,7 +151,7 @@ public:
   }
 
   void test_getDetectorIDsForSpectrumNo() {
-    MatrixWorkspace_const_sptr ws = boost::make_shared<WorkspaceTester>();
+    MatrixWorkspace_const_sptr ws = std::make_shared<WorkspaceTester>();
     SpectrumDetectorMapping map(ws);
     // The happy path is tested in the methods above. Just test invalid entry
     // here.
@@ -164,5 +163,3 @@ public:
                      const std::out_of_range &);
   }
 };
-
-#endif /* MANTID_API_SPECTRUMDETECTORMAPPINGTEST_H_ */

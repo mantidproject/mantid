@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_MDHW_IN_MEMORY_LOADING_PRESENTER
-#define MANTID_VATES_MDHW_IN_MEMORY_LOADING_PRESENTER
+#pragma once
 
 #include "MantidVatesAPI/MDHWLoadingPresenter.h"
 #include <boost/scoped_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 
 class vtkDataSet;
@@ -56,9 +55,7 @@ private:
   int m_specialCoords;
   /// Cached visual histogram workspace. Post transpose. Avoids repeating
   /// transpose.
-  boost::shared_ptr<Mantid::API::IMDHistoWorkspace> m_cachedVisualHistoWs;
+  std::shared_ptr<Mantid::API::IMDHistoWorkspace> m_cachedVisualHistoWs;
 };
 } // namespace VATES
 } // namespace Mantid
-
-#endif

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PolarizationCorrectionWildes.h"
 
@@ -98,6 +98,7 @@ void fourInputsCorrectedAndErrors(
   Eigen::Matrix4d F1m;
   F1m << 1., 0., 0., 0., 0., 1., 0., 0., off1, 0., diag1, 0., 0., off1, 0.,
       diag1;
+
   const auto diag2 = 1. / f2;
   const auto off2 = (f2 - 1.) / f2;
   Eigen::Matrix4d F2m;
@@ -357,8 +358,8 @@ double twoInputsErrorEstimate10(const double i00, const double e00,
   return std::sqrt(e10_I00 + e10_I11 + e10_F1 + e10_F2 + e10_P1 + e10_P2);
 }
 
-Mantid::API::MatrixWorkspace_sptr
-createWorkspaceWithHistory(Mantid::API::MatrixWorkspace_const_sptr inputWS) {
+Mantid::API::MatrixWorkspace_sptr createWorkspaceWithHistory(
+    const Mantid::API::MatrixWorkspace_const_sptr &inputWS) {
   Mantid::API::MatrixWorkspace_sptr outputWS =
       Mantid::DataObjects::create<Mantid::DataObjects::Workspace2D>(*inputWS);
   outputWS->history().addHistory(inputWS->getHistory());
@@ -406,8 +407,7 @@ size_t PolarizationCorrectionWildes::WorkspaceMap::size() const noexcept {
  */
 void PolarizationCorrectionWildes::init() {
   declareProperty(std::make_unique<Kernel::ArrayProperty<std::string>>(
-                      Prop::INPUT_WS, "",
-                      boost::make_shared<API::ADSValidator>(),
+                      Prop::INPUT_WS, "", std::make_shared<API::ADSValidator>(),
                       Kernel::Direction::Input),
                   "A list of workspaces to be corrected corresponding to the "
                   "flipper configurations.");
@@ -425,10 +425,9 @@ void PolarizationCorrectionWildes::init() {
   const std::string directBeam = Flippers::Off;
   const std::vector<std::string> setups{
       {full, missing01, missing10, missing0110, noAnalyzer, directBeam}};
-  declareProperty(
-      Prop::FLIPPERS, full,
-      boost::make_shared<Kernel::ListValidator<std::string>>(setups),
-      "Flipper configurations of the input workspaces.");
+  declareProperty(Prop::FLIPPERS, full,
+                  std::make_shared<Kernel::ListValidator<std::string>>(setups),
+                  "Flipper configurations of the input workspaces.");
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           Prop::EFFICIENCIES, "", Kernel::Direction::Input),

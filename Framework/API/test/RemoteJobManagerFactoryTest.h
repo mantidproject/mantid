@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REMOTEJOBMANAGERFACTORYTEST_H_
-#define REMOTEJOBMANAGERFACTORYTEST_H_
+#pragma once
 
 #include "MantidAPI/RemoteJobManagerFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -225,5 +224,3 @@ private:
 const std::string RemoteJobManagerFactoryTest::SNSFac = "SNS";
 const std::string RemoteJobManagerFactoryTest::ISISFac = "ISIS";
 const std::string RemoteJobManagerFactoryTest::FermiName = "Fermi";
-
-#endif /* REMOTEJOBMANAGERFACTORYTEST_H_ */

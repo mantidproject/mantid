@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-name-in-module,too-many-public-methods
-from __future__ import (absolute_import, division, print_function)
 from qtpy import QtCore, QtGui, QtWidgets
 import sys
 import mantid
@@ -57,9 +56,9 @@ class UBTableModel(QtCore.QAbstractTableModel):
             row = index.row()
             column = index.column()
             try:
-                val=value.toFloat()[0] #QVariant
-            except AttributeError:
-                val=float(value) #string
+                val=float(value)
+            except ValueError:
+                return False
             self.__UB[row][column]=val
             self.dataChanged.emit(index, index)
             if ValidateUB(self.__UB):
@@ -143,6 +142,7 @@ class MatrixUBInputWidget(QtWidgets.QWidget):
             self.UBmodel.sendSignal()
         except Exception as e:
             mantid.logger.error("Could not open the Nexus file, or could not find UB matrix: {}".format(e))
+
 
 if __name__ == '__main__':
     app = QtWidgets.QApplication(sys.argv)

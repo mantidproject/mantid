@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_VTKPEAKMARKER_FACTORY_H_
-#define MANTID_VATES_VTKPEAKMARKER_FACTORY_H_
+#pragma once
 
 /**
   Create markers that will highlight the position of a Peak
@@ -44,14 +43,12 @@ public:
                        ePeakDimensions dimensions = Peak_in_Q_lab);
 
   /// Initialize the object with a workspace.
-  virtual void initialize(Mantid::API::Workspace_sptr workspace);
+  void initialize(Mantid::API::Workspace_sptr workspace);
 
   /// Factory method
   vtkSmartPointer<vtkPolyData> create(ProgressAction &progressUpdating) const;
 
-  virtual std::string getFactoryTypeName() const {
-    return "vtkPeakMarkerFactory";
-  }
+  std::string getFactoryTypeName() const { return "vtkPeakMarkerFactory"; }
 
   /// Getter for the peak workspace integration radius
   double getIntegrationRadius() const;
@@ -60,7 +57,7 @@ public:
   bool isPeaksWorkspaceIntegrated() const;
 
 protected:
-  virtual void validate() const;
+  void validate() const;
 
 private:
   void validateWsNotNull() const;
@@ -94,5 +91,3 @@ private:
 };
 } // namespace VATES
 } // namespace Mantid
-
-#endif

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_BASICHKLFILTERSTEST_H_
-#define MANTID_GEOMETRY_BASICHKLFILTERSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -22,9 +21,9 @@
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
+using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
-using ::testing::_;
 
 class BasicHKLFiltersTest : public CxxTest::TestSuite {
 public:
@@ -34,6 +33,15 @@ public:
     return new BasicHKLFiltersTest();
   }
   static void destroySuite(BasicHKLFiltersTest *suite) { delete suite; }
+
+  void testHKLFilterNone() {
+    HKLFilterNone filter;
+
+    TS_ASSERT(filter.isAllowed(V3D(1, 2, 3)))
+    TS_ASSERT(filter.isAllowed(V3D(-1, -2, 3)))
+    TS_ASSERT(filter.isAllowed(V3D(-1, -2, -3)))
+    TS_ASSERT(filter.isAllowed(V3D(120380123, 4012983, -131233)))
+  }
 
   void testHKLFilterDRangeConstructors() {
     UnitCell cell(10., 10., 10.);
@@ -115,7 +123,7 @@ public:
                      const std::runtime_error &);
 
     StructureFactorCalculator_sptr mock =
-        boost::make_shared<MockStructureFactorCalculator>();
+        std::make_shared<MockStructureFactorCalculator>();
     TS_ASSERT_THROWS_NOTHING(HKLFilterStructureFactor sfFilter(mock));
     TS_ASSERT_THROWS_NOTHING(HKLFilterStructureFactor sfFilter(mock, 12.0));
   }
@@ -125,14 +133,14 @@ public:
     reference << "(F^2 > " << 1.0 << ")";
 
     StructureFactorCalculator_sptr mock =
-        boost::make_shared<MockStructureFactorCalculator>();
+        std::make_shared<MockStructureFactorCalculator>();
     HKLFilterStructureFactor sfFilter(mock, 1.0);
     TS_ASSERT_EQUALS(sfFilter.getDescription(), reference.str());
   }
 
   void testHKLFilterStructureFactorIsAllowed() {
-    boost::shared_ptr<MockStructureFactorCalculator> mock =
-        boost::make_shared<MockStructureFactorCalculator>();
+    std::shared_ptr<MockStructureFactorCalculator> mock =
+        std::make_shared<MockStructureFactorCalculator>();
 
     EXPECT_CALL(*mock, getFSquared(_))
         .WillOnce(Return(2.0))
@@ -155,4 +163,3 @@ private:
   };
 };
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-#endif /* MANTID_GEOMETRY_BASICHKLFILTERSTEST_H_ */

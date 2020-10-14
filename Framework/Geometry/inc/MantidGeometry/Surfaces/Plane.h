@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PLANE_H
-#define PLANE_H
+#pragma once
 
 #include "MantidGeometry/Surfaces/Quadratic.h"
 #include "MantidKernel/V3D.h"
@@ -35,8 +34,8 @@ the origin
 */
 class MANTID_GEOMETRY_DLL Plane : public Quadratic {
 private:
-  Kernel::V3D NormV; ///< Normal vector
-  double Dist;       ///< Distance
+  Kernel::V3D m_normVec; ///< Normal vector
+  double m_distance;     ///< Distance from origin
 
   std::size_t planeType() const; ///< are we alined on an axis
   Plane *doClone() const override;
@@ -64,9 +63,9 @@ public:
   double
   distance(const Kernel::V3D &) const override; ///< distance from a point
 
-  double getDistance() const { return Dist; } ///< Distance from origin
+  double getDistance() const { return m_distance; } ///< Distance from origin
   const Kernel::V3D &getNormal() const {
-    return NormV;
+    return m_normVec;
   } ///< Normal to plane (+ve surface)
 
   void rotate(const Kernel::Matrix<double> &) override;
@@ -90,5 +89,3 @@ public:
 } // NAMESPACE Geometry
 
 } // NAMESPACE Mantid
-
-#endif

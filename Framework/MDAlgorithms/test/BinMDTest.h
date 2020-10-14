@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
-#define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -27,6 +26,7 @@
 #include "MantidTestHelpers/MDEventsTestHelper.h"
 
 #include <cmath>
+#include <utility>
 
 #include <cxxtest/TestSuite.h>
 
@@ -133,8 +133,9 @@ public:
     AnalysisDataService::Instance().addOrReplace("BinMDTest_ws", in_ws);
 
     execute_bin(functionXML, name1, name2, name3, name4, expected_signal,
-                expected_numBins, IterateEvents, numEventsPerBox, expectBasisX,
-                expectBasisY, expectBasisZ, in_ws);
+                expected_numBins, IterateEvents, numEventsPerBox,
+                std::move(expectBasisX), std::move(expectBasisY),
+                std::move(expectBasisZ), in_ws);
   }
 
   MDHistoWorkspace_sptr
@@ -143,7 +144,7 @@ public:
               const std::string &name4, const double expected_signal,
               const size_t expected_numBins, bool IterateEvents,
               size_t numEventsPerBox, VMD expectBasisX, VMD expectBasisY,
-              VMD expectBasisZ, IMDEventWorkspace_sptr in_ws) {
+              VMD expectBasisZ, const IMDEventWorkspace_sptr &in_ws) {
     BinMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -174,7 +175,7 @@ public:
 
     MDHistoWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<MDHistoWorkspace>(
+        out = std::dynamic_pointer_cast<MDHistoWorkspace>(
             AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
     TS_ASSERT(out);
     if (!out)
@@ -317,7 +318,7 @@ public:
     // 0.0, 10.0, 0);
     auto a_ws = createSimple3DWorkspace();
     MDEventWorkspace3Lean::sptr in_ws =
-        boost::dynamic_pointer_cast<MDEventWorkspace3Lean>(a_ws);
+        std::dynamic_pointer_cast<MDEventWorkspace3Lean>(a_ws);
     TS_ASSERT(in_ws);
     if (!in_ws)
       return;
@@ -361,7 +362,7 @@ public:
 
     MDHistoWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<MDHistoWorkspace>(
+        out = std::dynamic_pointer_cast<MDHistoWorkspace>(
             AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
     TSM_ASSERT("can not retrieve binned workspace from analysis data service",
                out);
@@ -512,7 +513,7 @@ public:
 
     MDHistoWorkspace_sptr out;
     TS_ASSERT_THROWS_NOTHING(
-        out = boost::dynamic_pointer_cast<MDHistoWorkspace>(
+        out = std::dynamic_pointer_cast<MDHistoWorkspace>(
             AnalysisDataService::Instance().retrieve("BinMDTest_ws"));)
     TS_ASSERT(out);
     if (!out)
@@ -542,11 +543,10 @@ public:
       return;
 
     // Round-trip transform
-    coord_t originalPoint[3] = {1.0, 2.0, 3.0};
-    coord_t *transformedPoint = new coord_t[3];
-    coord_t *originalBack = new coord_t[3];
-    ctFrom->apply(originalPoint, transformedPoint);
-    ctTo->apply(transformedPoint, originalBack);
+    std::vector<coord_t> originalPoint = {1.0, 2.0, 3.0};
+    std::vector<coord_t> transformedPoint(3), originalBack(3);
+    ctFrom->apply(originalPoint.data(), transformedPoint.data());
+    ctTo->apply(transformedPoint.data(), originalBack.data());
     for (size_t d = 0; d < 3; d++) {
       TS_ASSERT_DELTA(originalPoint[d], originalBack[d], 1e-5);
     }
@@ -586,9 +586,9 @@ public:
    * @param origWS :: both should have this as its originalWorkspace
    * @return binned2 shared pointer
    */
-  MDHistoWorkspace_sptr do_compare_histo(std::string binned1Name,
-                                         std::string binned2Name,
-                                         std::string origWS) {
+  MDHistoWorkspace_sptr do_compare_histo(const std::string &binned1Name,
+                                         const std::string &binned2Name,
+                                         const std::string &origWS) {
     MDHistoWorkspace_sptr binned1 =
         AnalysisDataService::Instance().retrieveWS<MDHistoWorkspace>(
             binned1Name);
@@ -923,9 +923,8 @@ public:
         "BasisVector1", "tty,m, 0.0, 2.0", "NormalizeBasisVectors", "0",
         "ForceOrthogonal", "0", "Translation",
         "-1, -1", /* coords in B = (-4,-4) in A */
-        "OutputExtents",
-        "-1.5, 3.5, -1.5, 3.5", /* size of 5 in C = size of 10 in B = size
-                                   of 20 in A */
+        "OutputExtents", "-1.5, 3.5, -1.5, 3.5", /* size of 5 in C = size of 10
+                                                    in B = size of 20 in A */
         "OutputBins", "10,10");
 
     // Finally, C maps back onto A (mdew) binned as reference
@@ -1026,7 +1025,7 @@ public:
     in_ws->setDisplayNormalizationHisto(histoNorm);
 
     // Use an instrument name which does not match any actual instrument
-    auto inst = boost::make_shared<Mantid::Geometry::Instrument>();
+    auto inst = std::make_shared<Mantid::Geometry::Instrument>();
     inst->setName("TestName");
 
     auto exp_info = in_ws->getExperimentInfo(0);
@@ -1081,7 +1080,7 @@ public:
     return outWSName;
   }
 
-  std::string saveWorkspace(IMDEventWorkspace_sptr in_ws) {
+  std::string saveWorkspace(const IMDEventWorkspace_sptr &in_ws) {
     SaveMD2 saver;
     saver.setChild(true);
     saver.setRethrows(true);
@@ -1131,7 +1130,7 @@ public:
     AnalysisDataService::Instance().remove("BinMDTest_ws");
   }
 
-  void do_test(std::string binParams, bool IterateEvents) {
+  void do_test(const std::string &binParams, bool IterateEvents) {
     BinMD alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
@@ -1166,5 +1165,3 @@ public:
       do_test("2.0,8.0, 1", true);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_BINTOMDHISTOWORKSPACETEST_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_LOADPEAKSFILETEST_H_
-#define MANTID_CRYSTAL_LOADPEAKSFILETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
@@ -54,7 +53,7 @@ public:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve("TOPAZ_1241")));
     TS_ASSERT(ws);
     if (!ws)
@@ -95,7 +94,7 @@ public:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve("TOPAZ_2479")));
     TS_ASSERT(ws);
     if (!ws)
@@ -153,7 +152,7 @@ public:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve("calibrated")));
     TS_ASSERT(ws);
     if (!ws)
@@ -192,7 +191,7 @@ public:
 
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve("peaks")));
     TS_ASSERT(ws);
     if (!ws)
@@ -220,5 +219,3 @@ public:
     TS_ASSERT_DELTA(ws->getPeaks()[2].getDSpacing(), 2.9677, 0.001);
   }
 };
-
-#endif /* MANTID_CRYSTAL_LOADPEAKSFILETEST_H_ */

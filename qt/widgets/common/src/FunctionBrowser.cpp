@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/Common/FunctionMultiDomainPresenter.h"
@@ -12,6 +12,7 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/ParameterTie.h"
 
@@ -24,6 +25,7 @@
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("Function Browser");
@@ -80,7 +82,7 @@ void FunctionBrowser::setFunction(const QString &funStr) {
  * @param fun :: A function
  */
 void FunctionBrowser::setFunction(IFunction_sptr fun) {
-  m_presenter->setFunction(fun);
+  m_presenter->setFunction(std::move(fun));
 }
 
 /**
@@ -91,7 +93,6 @@ void FunctionBrowser::setFunction(IFunction_sptr fun) {
 IFunction_sptr FunctionBrowser::getFunctionByIndex(const QString &index) {
   return m_presenter->getFunctionByIndex(index);
 }
-
 /**
  * Updates the function parameter value
  * @param paramName :: Fully qualified parameter name (includes function index)
@@ -106,8 +107,9 @@ void FunctionBrowser::setParameter(const QString &paramName, double value) {
  * @param paramName :: Fully qualified parameter name (includes function index)
  * @param error :: New error
  */
-void FunctionBrowser::setParamError(const QString &paramName, double error) {
-  m_presenter->setParamError(paramName, error);
+void FunctionBrowser::setParameterError(const QString &paramName,
+                                        double error) {
+  m_presenter->setParameterError(paramName, error);
 }
 
 /**
@@ -143,6 +145,11 @@ bool FunctionBrowser::hasFunction() const { return m_presenter->hasFunction(); }
 /// Get the number of datasets
 int FunctionBrowser::getNumberOfDatasets() const {
   return m_presenter->getNumberOfDatasets();
+}
+
+/// Get the names of datasets
+QStringList FunctionBrowser::getDatasetNames() const {
+  return m_presenter->getDatasetNames();
 }
 
 /// Set new number of the datasets
@@ -193,13 +200,8 @@ void FunctionBrowser::setCurrentDataset(int i) {
 
 /// Remove local parameter values for a number of datasets.
 /// @param indices :: A list of indices of datasets to remove.
-void FunctionBrowser::removeDatasets(QList<int> indices) {
-  m_presenter->removeDatasets(indices);
-}
-
-/// Get a list of dataset names.
-QStringList FunctionBrowser::getDatasetNames() const {
-  return m_presenter->getDatasetNames();
+void FunctionBrowser::removeDatasets(const QList<int> &indices) {
+  m_presenter->removeDatasets(std::move(indices));
 }
 
 /// Add some datasets to those already set.
@@ -252,9 +254,40 @@ void FunctionBrowser::setLocalParameterTie(const QString &parName, int i,
 
 /// Update the interface to have the same parameter values as in a function.
 /// @param fun :: A function to get parameter values from.
-void FunctionBrowser::updateMultiDatasetParameters(
-    const Mantid::API::IFunction &fun) {
+void FunctionBrowser::updateMultiDatasetParameters(const IFunction &fun) {
   m_presenter->updateMultiDatasetParameters(fun);
+}
+
+void FunctionBrowser::updateMultiDatasetParameters(
+    const ITableWorkspace &paramTable) {
+  auto const nRows = paramTable.rowCount();
+  if (nRows == 0)
+    return;
+
+  auto const globalParameterNames = getGlobalParameters();
+  for (auto &&name : globalParameterNames) {
+    auto valueColumn = paramTable.getColumn(name.toStdString());
+    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
+    setParameter(name, valueColumn->toDouble(0));
+    setParameterError(name, errorColumn->toDouble(0));
+  }
+
+  auto const localParameterNames = getLocalParameters();
+  for (auto &&name : localParameterNames) {
+    auto valueColumn = paramTable.getColumn(name.toStdString());
+    auto errorColumn = paramTable.getColumn((name + "_Err").toStdString());
+    if (nRows > 1) {
+      for (size_t i = 0; i < nRows; ++i) {
+        setLocalParameterValue(name, static_cast<int>(i),
+                               valueColumn->toDouble(i),
+                               errorColumn->toDouble(i));
+      }
+    } else {
+      auto const i = getCurrentDataset();
+      setLocalParameterValue(name, i, valueColumn->toDouble(0),
+                             errorColumn->toDouble(0));
+    }
+  }
 }
 
 /// Get the index of the current dataset.
@@ -288,7 +321,7 @@ QStringList FunctionBrowser::getGlobalParameters() const {
 }
 
 QStringList FunctionBrowser::getLocalParameters() const {
-  return QStringList();
+  return m_presenter->getLocalParameters();
 }
 
 void FunctionBrowser::setGlobalParameters(const QStringList &globals) {
@@ -306,6 +339,14 @@ FunctionTreeView *FunctionBrowser::view() const {
 QString FunctionBrowser::getFitFunctionString() const {
   return m_presenter->getFitFunctionString();
 }
+
+void FunctionBrowser::setBackgroundA0(double value) {
+  m_presenter->setBackgroundA0(value);
+}
+
+void FunctionBrowser::hideGlobalCheckbox() { m_presenter->hideGlobals(); }
+
+void FunctionBrowser::showGlobalCheckbox() { m_presenter->showGlobals(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

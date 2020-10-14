@@ -12,7 +12,7 @@ set(DOCTREE_DIR ${CMAKE_CURRENT_BINARY_DIR}/doctree)
 # in these cases
 if(EXISTS ${SPHINX_PACKAGE_DIR}/__main__.py)
   add_custom_target(dev-docs-${BUILDER}
-                    COMMAND ${PYTHON_EXECUTABLE} -m sphinx -b ${BUILDER} -d
+                    COMMAND ${Python_EXECUTABLE} -m sphinx -b ${BUILDER} -d
                             ${DOCTREE_DIR} ${CMAKE_CURRENT_LIST_DIR}/source
                             ${OUT_DIR}
                     COMMENT "Building html developer documentation")

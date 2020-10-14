@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // WorkspaceFactory include must be first otherwise you get a bizarre
 // Poco-related compilation error on Windows
@@ -37,7 +37,7 @@ CICatHelper::CICatHelper() : m_session() {}
  * @param response :: response object
  */
 int CICatHelper::doSearch(ICATPortBindingProxy &icat,
-                          boost::shared_ptr<ns1__searchByAdvanced> &request,
+                          std::shared_ptr<ns1__searchByAdvanced> &request,
                           ns1__searchByAdvancedResponse &response) {
   setICATProxySettings(icat);
 
@@ -382,8 +382,8 @@ void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr &ws_sptr) {
   std::string sessionID = m_session->getSessionId();
   request.sessionId = &sessionID;
   // investigation include
-  boost::shared_ptr<ns1__investigationInclude> invstInculde_sptr =
-      boost::make_shared<ns1__investigationInclude>();
+  std::shared_ptr<ns1__investigationInclude> invstInculde_sptr =
+      std::make_shared<ns1__investigationInclude>();
   request.investigationInclude = invstInculde_sptr.get();
   *request.investigationInclude =
       ns1__investigationInclude__INVESTIGATORS_USCORESHIFTS_USCOREAND_USCORESAMPLES;
@@ -516,12 +516,12 @@ CICatHelper::buildSearchQuery(const CatalogSearchParam &inputs) {
 
   // instrument name
   if (!inputs.getInstrument().empty()) {
-    advancedSearchDetails->instruments.push_back(inputs.getInstrument());
+    advancedSearchDetails->instruments.emplace_back(inputs.getInstrument());
   }
 
   // keywords
   if (!inputs.getKeywords().empty()) {
-    advancedSearchDetails->keywords.push_back(inputs.getKeywords());
+    advancedSearchDetails->keywords.emplace_back(inputs.getKeywords());
   }
 
   std::string investigationName, investigationType, datafileName, sampleName;
@@ -552,7 +552,7 @@ CICatHelper::buildSearchQuery(const CatalogSearchParam &inputs) {
 
   // investigator's surname
   if (!inputs.getInvestigatorSurName().empty()) {
-    advancedSearchDetails->investigators.push_back(
+    advancedSearchDetails->investigators.emplace_back(
         inputs.getInvestigatorSurName());
   }
 
@@ -604,7 +604,7 @@ API::CatalogSession_sptr CICatHelper::doLogin(const std::string &username,
                                               const std::string &password,
                                               const std::string &endpoint,
                                               const std::string &facility) {
-  m_session = boost::make_shared<API::CatalogSession>("", facility, endpoint);
+  m_session = std::make_shared<API::CatalogSession>("", facility, endpoint);
 
   // Obtain the ICAT proxy that has been securely set, including soap-endpoint.
   ICATPortBindingProxy icat;

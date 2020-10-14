@@ -13,6 +13,7 @@ This algorithms performs integration of corrected SANS data.
 The input workspace must be processed by :ref:`SANSILLReduction <algm-SANSILLReduction>` as **Sample**.
 That is, it has to have instrument associated with it, and be in units of Wavelength.
 The output can be chosen among :math:`I(Q)` (default), :math:`I(Phi,Q)` or :math:`I(Qx,Qy)`.
+Separate outputs can be generated for each of the detector components, if so desired.
 
 OutputBinning
 -------------

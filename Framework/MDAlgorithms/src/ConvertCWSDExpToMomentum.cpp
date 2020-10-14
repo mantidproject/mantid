@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertCWSDExpToMomentum.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -342,7 +342,8 @@ void ConvertCWSDExpToMomentum::addMDEvents(bool usevirtual) {
  * Q-sample
  */
 void ConvertCWSDExpToMomentum::setupTransferMatrix(
-    API::MatrixWorkspace_sptr dataws, Kernel::DblMatrix &rotationMatrix) {
+    const API::MatrixWorkspace_sptr &dataws,
+    Kernel::DblMatrix &rotationMatrix) {
   // Check sample logs
   if (!dataws->run().hasProperty("_omega") ||
       !dataws->run().hasProperty("_chi") || !dataws->run().hasProperty("_phi"))
@@ -384,9 +385,9 @@ void ConvertCWSDExpToMomentum::setupTransferMatrix(
  * workspace
  */
 void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
-    MatrixWorkspace_sptr dataws, bool usevirtual, const detid_t &startdetid,
-    const int scannumber, const int runnumber, double measuretime,
-    int monitor_counts) {
+    const MatrixWorkspace_sptr &dataws, bool usevirtual,
+    const detid_t &startdetid, const int scannumber, const int runnumber,
+    double measuretime, int monitor_counts) {
   // Create transformation matrix from which the transformation is
   Kernel::DblMatrix rotationMatrix;
   setupTransferMatrix(dataws, rotationMatrix);
@@ -396,7 +397,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
 
   // Creates a new instance of the MDEventInserte to output workspace
   MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(m_outputWS);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(m_outputWS);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   // Calcualte k_i: it is assumed that all k_i are same for one Pt.
@@ -458,7 +459,7 @@ void ConvertCWSDExpToMomentum::convertSpiceMatrixToMomentumMDEvents(
                       << "\n";
 
   // Add experiment info including instrument, goniometer and run number
-  ExperimentInfo_sptr expinfo = boost::make_shared<ExperimentInfo>();
+  ExperimentInfo_sptr expinfo = std::make_shared<ExperimentInfo>();
   if (usevirtual)
     expinfo->setInstrument(m_virtualInstrument);
   else {
@@ -696,7 +697,7 @@ void ConvertCWSDExpToMomentum::updateQRange(
  * @param dataws
  */
 void ConvertCWSDExpToMomentum::removeBackground(
-    API::MatrixWorkspace_sptr dataws) {
+    const API::MatrixWorkspace_sptr &dataws) {
   if (dataws->getNumberHistograms() != m_backgroundWS->getNumberHistograms())
     throw std::runtime_error("Impossible to have this situation");
 

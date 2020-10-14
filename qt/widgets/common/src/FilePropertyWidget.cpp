@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FilePropertyWidget.h"
 #include "MantidKernel/Property.h"
@@ -90,8 +90,7 @@ void FilePropertyWidget::browseClicked() {
  * @return full path to the file(s) to load/save
  */
 QString FilePropertyWidget::openFileDialog(Mantid::Kernel::Property *baseProp) {
-  Mantid::API::FileProperty *prop =
-      dynamic_cast<Mantid::API::FileProperty *>(baseProp);
+  auto *prop = dynamic_cast<Mantid::API::FileProperty *>(baseProp);
   if (!prop)
     return "";
 
@@ -139,8 +138,7 @@ QStringList
 FilePropertyWidget::openMultipleFileDialog(Mantid::Kernel::Property *baseProp) {
   if (!baseProp)
     return QStringList();
-  Mantid::API::MultipleFileProperty *prop =
-      dynamic_cast<Mantid::API::MultipleFileProperty *>(baseProp);
+  auto *prop = dynamic_cast<Mantid::API::MultipleFileProperty *>(baseProp);
   if (!prop)
     return QStringList();
 

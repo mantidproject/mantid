@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_CONVERTTOYSPACETEST_H_
-#define MANTID_CURVEFITTING_CONVERTTOYSPACETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -22,7 +21,7 @@ namespace {
  * @return ConvertToYSpace alg
  */
 IAlgorithm_sptr createAlgorithm() {
-  IAlgorithm_sptr alg = boost::make_shared<ConvertToYSpace>();
+  IAlgorithm_sptr alg = std::make_shared<ConvertToYSpace>();
   alg->initialize();
   alg->setChild(true);
   alg->setPropertyValue("OutputWorkspace", "__UNUSED__");
@@ -187,5 +186,3 @@ public:
 private:
   IAlgorithm_sptr convertToYSpaceAlg;
 };
-
-#endif /* MANTID_CURVEFITTING_CONVERTTOYSPACETEST_H_ */

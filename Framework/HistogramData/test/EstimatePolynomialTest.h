@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_ESTIMATEPOLYNOMIALTEST_H_
-#define MANTID_HISTOGRAMDATA_ESTIMATEPOLYNOMIALTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -15,12 +14,12 @@
 #include "MantidHistogramData/QuadraticGenerator.h"
 
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::estimateBackground;
+using Mantid::HistogramData::estimatePolynomial;
 using Mantid::HistogramData::Histogram;
 using Mantid::HistogramData::LinearGenerator;
 using Mantid::HistogramData::Points;
 using Mantid::HistogramData::QuadraticGenerator;
-using Mantid::HistogramData::estimateBackground;
-using Mantid::HistogramData::estimatePolynomial;
 
 class EstimatePolynomialTest : public CxxTest::TestSuite {
 public:
@@ -128,5 +127,3 @@ public:
     TS_ASSERT_EQUALS(bg2, -3.);
   }
 };
-
-#endif /* MANTID_HISTOGRAMDATA_ESTIMATEPOLYNOMIALTEST_H_ */

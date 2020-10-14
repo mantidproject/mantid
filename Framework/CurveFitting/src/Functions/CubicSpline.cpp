@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -106,7 +106,7 @@ void CubicSpline::setupInput(boost::scoped_array<double> &x,
     std::vector<point> pairs;
     pairs.reserve(n);
     for (int i = 0; i < n; ++i) {
-      pairs.push_back(std::make_pair(x[i], y[i]));
+      pairs.emplace_back(std::make_pair(x[i], y[i]));
     }
 
     std::sort(pairs.begin(), pairs.end(),

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SINGLECOUNTVALIDATORTEST_H_
-#define MANTID_API_SINGLECOUNTVALIDATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -27,14 +26,14 @@ public:
   static void destroySuite(SingleCountValidatorTest *suite) { delete suite; }
 
   void test_single_count_workspace_success() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 2, 1);
     SingleCountValidator validator(true);
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
   }
 
   void test_non_single_count_workspace_failure() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 3, 2);
     SingleCountValidator validator(true);
     TS_ASSERT_EQUALS(
@@ -43,7 +42,7 @@ public:
   }
 
   void test_single_count_workspace_failure() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 2, 1);
     SingleCountValidator validator(false);
     TS_ASSERT_EQUALS(validator.isValid(ws),
@@ -51,7 +50,7 @@ public:
   }
 
   void test_non_single_count_workspace_success() {
-    auto ws = boost::make_shared<WorkspaceTester>();
+    auto ws = std::make_shared<WorkspaceTester>();
     ws->initialize(2, 3, 2);
     SingleCountValidator validator(false);
     TS_ASSERT_EQUALS(validator.isValid(ws), "");
@@ -59,7 +58,7 @@ public:
 
   // The next two tests serve as a warning - only the first bin is checked!
   void test_variable_bin_workspace_actually_succeeds() {
-    auto ws = boost::make_shared<VariableBinThrowingTester>();
+    auto ws = std::make_shared<VariableBinThrowingTester>();
     ws->initialize(2, 3, 2);
     BinEdges bins{-1.0, 1.0};
     Counts counts{1.0};
@@ -72,7 +71,7 @@ public:
   }
 
   void test_variable_bin_workspace_actually_fails() {
-    auto ws = boost::make_shared<VariableBinThrowingTester>();
+    auto ws = std::make_shared<VariableBinThrowingTester>();
     ws->initialize(2, 3, 2);
     BinEdges bins{-1.0, 1.0};
     Counts counts{1.0};
@@ -85,5 +84,3 @@ public:
                      "The workspace must not contain single counts");
   }
 };
-
-#endif /* MANTID_API_SINGLECOUNTVALIDATORTEST_H_ */

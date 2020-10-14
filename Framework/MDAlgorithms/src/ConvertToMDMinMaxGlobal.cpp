@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ConvertToMDMinMaxGlobal.h"
 
@@ -49,7 +49,7 @@ const std::string ConvertToMDMinMaxGlobal::category() const {
 /** Initialize the algorithm's properties.
  */
 void ConvertToMDMinMaxGlobal::init() {
-  auto ws_valid = boost::make_shared<CompositeValidator>();
+  auto ws_valid = std::make_shared<CompositeValidator>();
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis and any units
   ws_valid->add<WorkspaceUnitValidator>("");
@@ -69,8 +69,7 @@ void ConvertToMDMinMaxGlobal::init() {
 
   /// this variable describes default possible ID-s for Q-dimensions
   declareProperty(
-      "QDimensions", Q_modes[0],
-      boost::make_shared<StringListValidator>(Q_modes),
+      "QDimensions", Q_modes[0], std::make_shared<StringListValidator>(Q_modes),
       "String, describing MD-analysis modes, this algorithm can process. "
       "There are 3 modes currently available and described in details on"
       "*MD Transformation factory* page. "
@@ -79,7 +78,7 @@ void ConvertToMDMinMaxGlobal::init() {
   /// temporary, until dEMode is not properly defined on Workspace
   std::vector<std::string> dE_modes = Kernel::DeltaEMode::availableTypes();
   declareProperty("dEAnalysisMode", dE_modes[Kernel::DeltaEMode::Direct],
-                  boost::make_shared<StringListValidator>(dE_modes),
+                  std::make_shared<StringListValidator>(dE_modes),
                   "You can analyze neutron energy transfer in **Direct**, "
                   "**Indirect** or **Elastic** mode. "
                   "The analysis mode has to correspond to experimental set up. "
@@ -95,7 +94,7 @@ void ConvertToMDMinMaxGlobal::init() {
   std::vector<std::string> TargFrames{"AutoSelect", "Q", "HKL"};
   declareProperty(
       "Q3DFrames", "AutoSelect",
-      boost::make_shared<StringListValidator>(TargFrames),
+      std::make_shared<StringListValidator>(TargFrames),
       "What will be the Q-dimensions of the output workspace in **Q3D** case?"
       "  **AutoSelect**: **Q** by default, **HKL** if sample has a UB matrix."
       "  **Q** - momentum in inverse angstroms. Can be used for both "
@@ -139,8 +138,8 @@ void ConvertToMDMinMaxGlobal::exec() {
   if (QDimension == "CopyToMD") {
     double xmin, xmax;
     ws->getXMinMax(xmin, xmax);
-    MinValues.push_back(xmin);
-    MaxValues.push_back(xmax);
+    MinValues.emplace_back(xmin);
+    MaxValues.emplace_back(xmax);
   } else // need to calculate the appropriate q values
   {
     double qmax, deltaEmax, deltaEmin;
@@ -154,7 +153,7 @@ void ConvertToMDMinMaxGlobal::exec() {
       conv->executeAsChildAlg();
 
       wstemp = conv->getProperty("OutputWorkspace");
-      evWS = boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
+      evWS = std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
           wstemp);
       if (evWS)
         qmax = evWS->getTofMax() *
@@ -168,7 +167,7 @@ void ConvertToMDMinMaxGlobal::exec() {
       conv->setProperty("Emode", GeometryMode);
       conv->executeAsChildAlg();
       wstemp = conv->getProperty("OutputWorkspace");
-      evWS = boost::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
+      evWS = std::dynamic_pointer_cast<Mantid::DataObjects::EventWorkspace>(
           wstemp);
       if (evWS) {
         deltaEmin = evWS->getTofMin();
@@ -214,19 +213,19 @@ void ConvertToMDMinMaxGlobal::exec() {
     }
     // Calculate limits from qmax
     if (QDimension == "|Q|") {
-      MinValues.push_back(0.);
-      MaxValues.push_back(qmax);
+      MinValues.emplace_back(0.);
+      MaxValues.emplace_back(qmax);
     } else // Q3D
     {
       // Q in angstroms
       if ((Q3DFrames == "Q") || ((Q3DFrames == "AutoSelect") &&
                                  (!ws->sample().hasOrientedLattice()))) {
-        MinValues.push_back(-qmax);
-        MinValues.push_back(-qmax);
-        MinValues.push_back(-qmax);
-        MaxValues.push_back(qmax);
-        MaxValues.push_back(qmax);
-        MaxValues.push_back(qmax);
+        MinValues.emplace_back(-qmax);
+        MinValues.emplace_back(-qmax);
+        MinValues.emplace_back(-qmax);
+        MaxValues.emplace_back(qmax);
+        MaxValues.emplace_back(qmax);
+        MaxValues.emplace_back(qmax);
       } else // HKL
       {
         if (!ws->sample().hasOrientedLattice()) {
@@ -236,19 +235,19 @@ void ConvertToMDMinMaxGlobal::exec() {
         Mantid::Geometry::OrientedLattice ol =
             ws->sample().getOrientedLattice();
         qmax /= (2. * M_PI);
-        MinValues.push_back(-qmax * ol.a());
-        MinValues.push_back(-qmax * ol.b());
-        MinValues.push_back(-qmax * ol.c());
-        MaxValues.push_back(qmax * ol.a());
-        MaxValues.push_back(qmax * ol.b());
-        MaxValues.push_back(qmax * ol.c());
+        MinValues.emplace_back(-qmax * ol.a());
+        MinValues.emplace_back(-qmax * ol.b());
+        MinValues.emplace_back(-qmax * ol.c());
+        MaxValues.emplace_back(qmax * ol.a());
+        MaxValues.emplace_back(qmax * ol.b());
+        MaxValues.emplace_back(qmax * ol.c());
       }
     }
 
     // Push deltaE if necessary
     if (GeometryMode != "Elastic") {
-      MinValues.push_back(deltaEmin);
-      MaxValues.push_back(deltaEmax);
+      MinValues.emplace_back(deltaEmin);
+      MaxValues.emplace_back(deltaEmax);
     }
   }
 
@@ -261,8 +260,8 @@ void ConvertToMDMinMaxGlobal::exec() {
     Kernel::Property *pProperty = (ws->run().getProperty(OtherDimension));
     auto *p = dynamic_cast<TimeSeriesProperty<double> *>(pProperty);
     if (p) {
-      MinValues.push_back(p->getStatistics().minimum);
-      MaxValues.push_back(p->getStatistics().maximum);
+      MinValues.emplace_back(p->getStatistics().minimum);
+      MaxValues.emplace_back(p->getStatistics().maximum);
     } else // it may be not a time series property but just number property
     {
       auto *property =
@@ -276,8 +275,8 @@ void ConvertToMDMinMaxGlobal::exec() {
         throw(std::invalid_argument(ERR));
       }
       double val = *property;
-      MinValues.push_back(val);
-      MaxValues.push_back(val);
+      MinValues.emplace_back(val);
+      MaxValues.emplace_back(val);
     }
   }
 

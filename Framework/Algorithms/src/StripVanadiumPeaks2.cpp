@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/StripVanadiumPeaks2.h"
 
@@ -37,7 +37,7 @@ void StripVanadiumPeaks2::init() {
       "If the input workspace is an EventWorkspace, then the output must be "
       "different (and will be made into a Workspace2D).");
 
-  auto min = boost::make_shared<BoundedValidator<int>>();
+  auto min = std::make_shared<BoundedValidator<int>>();
   min->setLower(1);
   // The estimated width of a peak in terms of number of channels
   declareProperty("FWHM", 7, min,
@@ -54,7 +54,7 @@ void StripVanadiumPeaks2::init() {
 
   std::vector<std::string> bkgdtypes{"Linear", "Quadratic"};
   declareProperty("BackgroundType", "Linear",
-                  boost::make_shared<StringListValidator>(bkgdtypes),
+                  std::make_shared<StringListValidator>(bkgdtypes),
                   "The type of background of the histogram. Present choices "
                   "include Linear and Quadratic. ");
 
@@ -68,7 +68,7 @@ void StripVanadiumPeaks2::init() {
                   "peak positions. A non-positive value turns this option "
                   "off. ");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex", EMPTY_INT(), mustBePositive,
                   "If set, peaks will only be removed from this workspace "

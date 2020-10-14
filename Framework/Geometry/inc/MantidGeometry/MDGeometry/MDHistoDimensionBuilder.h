@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_MDHISTODIMENSION_BUILDER_H_
-#define MANTID_GEOMETRY_MDHISTODIMENSION_BUILDER_H_
+#pragma once
 
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/UnitLabel.h"
@@ -51,7 +50,7 @@ public:
   }
 
   MDHistoDimensionBuilder();
-  void setName(std::string name);
+  void setName(const std::string &name);
   void setId(std::string id);
   void setUnits(const Kernel::UnitLabel &units);
   void setMin(double min);
@@ -88,5 +87,3 @@ private:
 using Vec_MDHistoDimensionBuilder = std::vector<MDHistoDimensionBuilder>;
 } // namespace Geometry
 } // namespace Mantid
-
-#endif

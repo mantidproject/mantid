@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_MODQ_TRANSF_H
-#define MANTID_MDALGORITHMS_MODQ_TRANSF_H
+#pragma once
 //
 #include "MantidMDAlgorithms/MDTransfFactory.h"
 #include "MantidMDAlgorithms/MDTransfInterface.h"
@@ -39,7 +38,7 @@ public:
 
   bool calcGenericVariables(std::vector<coord_t> &Coord, size_t nd) override;
   bool calcYDepCoordinates(std::vector<coord_t> &Coord, size_t i) override;
-  bool calcMatrixCoord(const double &x, std::vector<coord_t> &Coord,
+  bool calcMatrixCoord(const double &deltaEOrK0, std::vector<coord_t> &Coord,
                        double &signal, double &ErrSq) const override;
   // constructor;
   MDTransfModQ();
@@ -108,9 +107,9 @@ protected:
   //************* The variables below are relevant to inelastic modes only and
   // will be used in inelastic cases:
   // the wavevector of incident neutrons
-  double m_Ki;
+  double m_kFixed;
   // the energy of the incident neutrons
-  double m_Ei;
+  double m_eFixed;
   // pointer to detector specific input energy (eFixed) defined for indirect
   // instruments; This one is relewant to indirect instruments only;
   float *m_pEfixedArray;
@@ -124,11 +123,9 @@ private:
   inline bool calcMatrixCoordElastic(const double &k0,
                                      std::vector<coord_t> &Coord) const;
   /// how to transform workspace data in inelastic case
-  inline bool calcMatrixCoordInelastic(const double &E_tr,
+  inline bool calcMatrixCoordInelastic(const double &deltaE,
                                        std::vector<coord_t> &Coord) const;
 };
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif

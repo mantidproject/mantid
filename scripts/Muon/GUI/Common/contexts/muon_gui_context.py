@@ -1,12 +1,22 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
+from mantidqt.utils.observer_pattern import Observable
 
-from Muon.GUI.Common.observer_pattern import Observable
+from enum import Enum
+
+PlotModeStrings = ['Plot Data', 'Plot Fits']
+
+
+class PlotMode(Enum):
+    Data = 0
+    Fitting = 1
+
+    def __str__(self):
+        return PlotModeStrings[self.value]
 
 
 class GuiVariablesNotifier(Observable):
@@ -26,7 +36,15 @@ class MuonGuiContext(dict):
 
     def update_and_send_signal(self, *args, **kwargs):
         updated_items = {k: kwargs[k] for k in kwargs if k in self and kwargs[k] != self[k] or k not in self}
-        if not updated_items and kwargs:
+        equal_entries = 0
+        for key, value in updated_items.items():
+            try:
+                if self[key].id() == value.id():
+                    equal_entries += 1
+            except (AttributeError, KeyError, RuntimeError):
+                pass
+
+        if (not updated_items and kwargs) or equal_entries == len(updated_items):
             return
 
         super(MuonGuiContext, self).update(*args, **kwargs)
@@ -46,10 +64,10 @@ class MuonGuiContext(dict):
     def add_non_calc_subscriber(self, observer):
         self.gui_variable_non_calulation_notifier.add_subscriber(observer)
 
-    def period_string(self, run=None):
-        summed_periods = self["SummedPeriods"] if 'SummedPeriods' in self else [1]
-        subtracted_periods = self["SubtractedPeriods"] if 'SubtractedPeriods' in self else []
-        if subtracted_periods:
-            return '+'.join([str(period) for period in summed_periods]) + '-' + '-'.join([str(period) for period in subtracted_periods])
-        else:
-            return '+'.join([str(period) for period in summed_periods])
+    def remove_workspace_by_name(self, workspace_name):
+        try:
+            if self['DeadTimeTable'].name() == workspace_name:
+                self.pop('DeadTimeTable')
+                self['DeadTimeSource'] = 'FromFile'
+        except KeyError:
+            pass

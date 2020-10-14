@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NDRandomNumberGeneratorTEST_H_
-#define NDRandomNumberGeneratorTEST_H_
+#pragma once
 
 #include "MantidKernel/NDRandomNumberGenerator.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -50,5 +49,3 @@ public:
     TS_ASSERT_EQUALS(randGen.nextPoint().size(), randGen.numberOfDimensions());
   }
 };
-
-#endif

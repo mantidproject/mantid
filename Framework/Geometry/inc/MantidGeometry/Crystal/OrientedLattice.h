@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_ORIENTEDLATTICE_H_
-#define MANTID_GEOMETRY_ORIENTEDLATTICE_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include <nexus/NeXusFile.hpp>
@@ -42,7 +41,7 @@ public:
   // Access private variables
   const Kernel::DblMatrix &getU() const;
   const Kernel::DblMatrix &getUB() const;
-  Kernel::DblMatrix &getModUB();
+  const Kernel::DblMatrix &getModUB() const;
   void setU(const Kernel::DblMatrix &newU, const bool force = true);
   void setUB(const Kernel::DblMatrix &newUB);
   void setModUB(const Kernel::DblMatrix &newModUB);
@@ -68,6 +67,9 @@ public:
   static bool GetABC(const Kernel::DblMatrix &UB, Kernel::V3D &a_dir,
                      Kernel::V3D &b_dir, Kernel::V3D &c_dir);
 
+  bool operator==(const OrientedLattice &other) const;
+  bool operator!=(const OrientedLattice &other) const;
+
 private:
   Kernel::DblMatrix U;
   Kernel::DblMatrix UB;
@@ -81,4 +83,3 @@ private:
 };
 } // namespace Geometry
 } // namespace Mantid
-#endif /* MANTID_GEOMETRY_UNITCELL_H_ */

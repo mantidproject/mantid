@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SaveReflectometryAscii_H_
-#define MANTID_DATAHANDLING_SaveReflectometryAscii_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -50,26 +49,24 @@ private:
   /// Algorithm execution for WorkspaceGroups
   bool processGroups() override;
   /// Check file validity
-  void checkFile(const std::string filename);
+  void checkFile(const std::string &filename);
   /// Write the data
   void data();
-  /// Print a double value to file
-  void outputval(double val);
-  /// Write a string value
-  bool writeString(bool write, std::string s);
-  /// Print a string value to file
-  void outputval(std::string val);
+  /// Print a value to file
+  template <typename T> void outputval(const T &val, bool firstColumn = false);
   /// Retrieve sample log value
   std::string sampleLogValue(const std::string &logName);
   /// Retrieve sample log unit
   std::string sampleLogUnit(const std::string &logName);
   /// Write one header line
-  void writeInfo(const std::string logName,
-                 const std::string logNameFixed = "");
+  void writeInfo(const std::string &logName,
+                 const std::string &logNameFixed = "");
   /// Write header
   void header();
   /// Determine the separator
   void separator();
+  /// Whether the Q resolution should be included in the output
+  bool includeQResolution() const;
   /// Separator
   char m_sep{'\t'};
   /// Filename
@@ -87,5 +84,3 @@ private:
 };
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*  MANTID_DATAHANDLING_SaveReflectometryAscii_H_  */

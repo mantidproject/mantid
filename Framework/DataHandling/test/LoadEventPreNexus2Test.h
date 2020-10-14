@@ -1,18 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-/*
- * LoadEventPreNexusTest.h
- *
- *  Created on: Jun 23, 2010
- *      Author: janik zikovsky
- */
-
-#ifndef LOADEVENTPRENEXUSTEST_H_
-#define LOADEVENTPRENEXUSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -49,7 +41,7 @@ using std::vector;
 //==========================================================================================
 class LoadEventPreNexus2Test : public CxxTest::TestSuite {
 public:
-  LoadEventPreNexus2 *eventLoader;
+  std::unique_ptr<LoadEventPreNexus2> eventLoader;
 
   static LoadEventPreNexus2Test *createSuite() {
     return new LoadEventPreNexus2Test();
@@ -59,7 +51,7 @@ public:
   LoadEventPreNexus2Test() {}
 
   void setUp() override {
-    eventLoader = new LoadEventPreNexus2();
+    eventLoader = std::make_unique<LoadEventPreNexus2>();
     eventLoader->initialize();
   }
 
@@ -77,7 +69,7 @@ public:
     TS_ASSERT_EQUALS(sizeof(DasEvent), 8);
   }
 
-  void checkWorkspace(std::string eventfile, std::string WSName,
+  void checkWorkspace(const std::string &eventfile, const std::string &WSName,
                       int numpixels_with_events) {
     // Get the event file size
     struct stat filestatus;
@@ -127,7 +119,7 @@ public:
     // std::cout << "***** executing *****\n";
     TS_ASSERT(eventLoader->execute());
 
-    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr ew = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs"));
 
     // Get the start time of all pulses
@@ -151,7 +143,7 @@ public:
     do_test_LoadPreNeXus_CNCS("Parallel");
   }
 
-  void do_test_LoadPreNeXus_CNCS(std::string parallel) {
+  void do_test_LoadPreNeXus_CNCS(const std::string &parallel) {
     std::string eventfile("CNCS_7860_neutron_event.dat");
     eventLoader->setPropertyValue("EventFilename", eventfile);
     eventLoader->setPropertyValue("MappingFilename", "CNCS_TS_2008_08_18.dat");
@@ -165,8 +157,14 @@ public:
     // std::cout << "***** executing *****\n";
     TS_ASSERT(eventLoader->execute());
 
-    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr ew = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs"));
+    /*
+     * LoadEventPreNexusTest.h
+     *
+     *  Created on: Jun 23, 2010
+     *      Author: janik zikovsky
+     */
 
     // The # of events = size of the file / 8 bytes (per event)
     // This fails cause of errors in events
@@ -177,7 +175,7 @@ public:
     TS_ASSERT_EQUALS(ew->getNumberHistograms(), numpixels_with_events);
 
     // Check if the instrument was loaded correctly
-    boost::shared_ptr<const Instrument> inst = ew->getInstrument();
+    std::shared_ptr<const Instrument> inst = ew->getInstrument();
     TS_ASSERT_EQUALS(inst->getName(), "CNCS");
 
     // Mapping between workspace index and spectrum number
@@ -238,7 +236,7 @@ public:
 
     TS_ASSERT(eventLoader->execute());
 
-    EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr ew = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("LoadPreNexus2_cncs_skipped"));
 
     // Only some of the pixels weretof loaded, because of lot of them are empty
@@ -278,7 +276,7 @@ public:
     eventLoader->setPropertyValue("TotalChunks", "2");
     eventLoader->setPropertyValue("OutputWorkspace", "LoadPreNexus2_chunk1");
     TS_ASSERT(eventLoader->execute());
-    EventWorkspace_sptr chunk1 = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr chunk1 = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("LoadPreNexus2_chunk1"));
 
     // Load chunk 2 of 2
@@ -288,7 +286,7 @@ public:
     eventLoader->setPropertyValue("TotalChunks", "2");
     eventLoader->setPropertyValue("OutputWorkspace", "LoadPreNexus2_chunk2");
     TS_ASSERT(eventLoader->execute());
-    EventWorkspace_sptr chunk2 = boost::dynamic_pointer_cast<EventWorkspace>(
+    EventWorkspace_sptr chunk2 = std::dynamic_pointer_cast<EventWorkspace>(
         AnalysisDataService::Instance().retrieve("LoadPreNexus2_chunk2"));
 
     // The number of events should be roughly equal and the sum should be 112266
@@ -311,5 +309,3 @@ public:
     TS_ASSERT(loader.execute());
   }
 };
-
-#endif /* LOADEVENTPRENEXUSTEST_H_ */

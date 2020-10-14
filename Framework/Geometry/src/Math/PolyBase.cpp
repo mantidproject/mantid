@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <algorithm>
 #include <cmath>
@@ -428,7 +428,7 @@ std::vector<double> PolyBase::realRoots(const double epsilon)
   std::vector<std::complex<double>>::const_iterator vc;
   for (vc = Croots.begin(); vc != Croots.end(); ++vc) {
     if (fabs(vc->imag()) < eps)
-      Out.push_back(vc->real());
+      Out.emplace_back(vc->real());
   }
   return Out;
 }

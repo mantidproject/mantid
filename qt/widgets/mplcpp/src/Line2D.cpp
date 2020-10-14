@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Line2D.h"
 #include "MantidPythonInterface/core/Converters/VectorToNDArray.h"
@@ -11,9 +11,9 @@
 
 #include <QColor>
 
+using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::Converters::VectorToNDArray;
 using Mantid::PythonInterface::Converters::WrapReadOnly;
-using Mantid::PythonInterface::GlobalInterpreterLock;
 using MantidQt::Widgets::MplCpp::ColorConverter;
 using namespace MantidQt::Widgets::Common;
 

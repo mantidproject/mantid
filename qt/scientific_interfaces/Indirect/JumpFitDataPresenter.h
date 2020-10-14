@@ -1,15 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_JUMPFITDATAPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_JUMPFITDATAPRESENTER_H_
+#pragma once
 
+#include "FQFitConstants.h"
+#include "IFQFitObserver.h"
 #include "IndirectFitDataPresenter.h"
+#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "JumpFitAddWorkspaceDialog.h"
 #include "JumpFitModel.h"
+#include "Notifier.h"
 
 #include <QComboBox>
 #include <QSpacerItem>
@@ -24,7 +27,8 @@ class MANTIDQT_INDIRECT_DLL JumpFitDataPresenter
 public:
   JumpFitDataPresenter(JumpFitModel *model, IIndirectFitDataView *view,
                        QComboBox *cbParameterType, QComboBox *cbParameter,
-                       QLabel *lbParameterType, QLabel *lbParameter);
+                       QLabel *lbParameterType, QLabel *lbParameter,
+                       IFQFitObserver *SingleFunctionTemplateBrowser);
 
 private slots:
   void hideParameterComboBoxes();
@@ -40,7 +44,18 @@ private slots:
                                const std::string &workspace);
   void setActiveParameterType(const std::string &type);
   void updateActiveDataIndex();
+  void updateActiveDataIndex(int index);
   void setSingleModelSpectrum(int index);
+  void handleParameterTypeChanged(const QString &parameter);
+  void handleSpectrumSelectionChanged(int parameterIndex);
+  void handleMultipleInputSelected();
+  void handleSingleInputSelected();
+
+signals:
+  void spectrumChanged(WorkspaceIndex);
+
+protected slots:
+  void handleSampleLoaded(const QString &) override;
 
 private:
   void setAvailableParameters(const std::vector<std::string> &parameters);
@@ -50,25 +65,25 @@ private:
   getAddWorkspaceDialog(QWidget *parent) const override;
   void updateParameterOptions(JumpFitAddWorkspaceDialog *dialog);
   void updateParameterTypes(JumpFitAddWorkspaceDialog *dialog);
-  std::vector<std::string> getParameterTypes(std::size_t dataIndex) const;
+  std::vector<std::string> getParameterTypes(TableDatasetIndex dataIndex) const;
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
+  void setDataIndexToCurrentWorkspace(IAddWorkspaceDialog const *dialog);
 
   void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;
   void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) override;
 
   std::string m_activeParameterType;
-  std::size_t m_dataIndex;
+  TableDatasetIndex m_dataIndex;
 
   QComboBox *m_cbParameterType;
   QComboBox *m_cbParameter;
   QLabel *m_lbParameterType;
   QLabel *m_lbParameter;
   JumpFitModel *m_jumpModel;
+  Notifier<IFQFitObserver> m_notifier;
 };
 
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_JUMPFITDATAPRESENTER_H_ */

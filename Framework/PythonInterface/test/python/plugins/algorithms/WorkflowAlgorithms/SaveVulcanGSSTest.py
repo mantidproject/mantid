@@ -1,12 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-from six.moves import range
-
 import unittest
 import math
 import numpy
@@ -34,11 +31,14 @@ class SaveVulcanGSSTest(unittest.TestCase):
         bin_table = self._create_simple_binning_table(bin_ws_name)
 
         # Execute
+        import tempfile
+        tempDir = tempfile.gettempdir()
+        filename=os.path.join(tempDir, "tempout.gda")
         alg_test = run_algorithm("SaveVulcanGSS",
                                  InputWorkspace=data_ws_name,
                                  BinningTable=bin_ws_name,
                                  OutputWorkspace=data_ws_name + "_rebinned",
-                                 GSSFilename="/tmp/tempout.gda",
+                                 GSSFilename=filename,
                                  IPTS=12345,
                                  GSSParmFileName='test.prm')
 
@@ -55,6 +55,8 @@ class SaveVulcanGSSTest(unittest.TestCase):
         AnalysisDataService.remove("InputWorkspace")
         AnalysisDataService.remove(bin_ws_name)
         AnalysisDataService.remove(data_ws_name+"_rebinned")
+
+        os.remove(filename)
 
         return
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef RECTANGULAR_DETECTOR_H
-#define RECTANGULAR_DETECTOR_H
+#pragma once
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
@@ -48,7 +47,7 @@ public:
   static bool compareName(const std::string &proposedMatch);
 
   /// Create all the detector pixels of this rectangular detector.
-  void initialize(boost::shared_ptr<IObject> shape, int xpixels, double xstart,
+  void initialize(std::shared_ptr<IObject> shape, int xpixels, double xstart,
                   double xstep, int ypixels, double ystart, double ystep,
                   int idstart, bool idfillbyfirst_y, int idstepbyrow,
                   int idstep = 1);
@@ -56,7 +55,7 @@ public:
   //! Make a clone of the present component
   RectangularDetector *clone() const override;
 
-  boost::shared_ptr<Detector> getAtXY(const int X, const int Y) const;
+  std::shared_ptr<Detector> getAtXY(const int X, const int Y) const;
 
   detid_t getDetectorIDAtXY(const int X, const int Y) const;
   std::pair<int, int> getXYForDetectorID(const int detectorID) const;
@@ -98,11 +97,9 @@ private:
 MANTID_GEOMETRY_DLL std::ostream &operator<<(std::ostream &,
                                              const RectangularDetector &);
 
-using RectangularDetector_sptr = boost::shared_ptr<RectangularDetector>;
+using RectangularDetector_sptr = std::shared_ptr<RectangularDetector>;
 using RectangularDetector_const_sptr =
-    boost::shared_ptr<const RectangularDetector>;
+    std::shared_ptr<const RectangularDetector>;
 
 } // Namespace Geometry
 } // Namespace Mantid
-
-#endif

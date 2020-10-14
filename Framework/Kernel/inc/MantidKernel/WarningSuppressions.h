@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_WARNINGSUPPRESSIONS_H_
-#define MANTID_KERNEL_WARNINGSUPPRESSIONS_H_
+#pragma once
 
 /*  A system-wide file to contain, e.g., useful system-dependent macros
     for suppressing compiler warnings.
@@ -76,6 +75,19 @@
 #define GNU_DIAG_ON(x)
 #endif
 
+// Similar macros for MSVC
+#if defined(_MSC_VER)
+// clang-format off
+#define MSVC_DIAG_OFF(id)                                                        \
+  __pragma(warning(push))                                                        \
+  __pragma(warning(disable : id))
+#define MSVC_DIAG_ON(id) __pragma(warning(pop))
+// clang-format on
+#else
+#define MSVC_DIAG_OFF(x)
+#define MSVC_DIAG_ON(x)
+#endif
+
 // Defining this macro separately since clang-tidy tries to add spaces around
 // the hyphen and we use it in a lot of test files.
 // clang-format off
@@ -96,5 +108,3 @@
 #else
 #define GNU_UNUSED_FUNCTION
 #endif
-
-#endif /*MANTID_KERNEL_WARNINGSUPPRESSIONS_H_*/

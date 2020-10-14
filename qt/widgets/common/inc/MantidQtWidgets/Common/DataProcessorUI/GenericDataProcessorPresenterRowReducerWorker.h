@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_GENERICDATAPROCESSORPRESENTERROWREDUCERWORKER_H
-#define MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_GENERICDATAPROCESSORPRESENTERROWREDUCERWORKER_H
+#pragma once
 
 #include "MantidQtWidgets/Common/DataProcessorUI/GenericDataProcessorPresenter.h"
 
 #include <QThread>
+#include <utility>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -28,8 +28,8 @@ public:
   GenericDataProcessorPresenterRowReducerWorker(
       GenericDataProcessorPresenter *presenter, RowData_sptr rowData,
       const int rowIndex, const int groupIndex)
-      : m_presenter(presenter), m_rowData(rowData), m_rowIndex(rowIndex),
-        m_groupIndex(groupIndex) {}
+      : m_presenter(presenter), m_rowData(std::move(rowData)),
+        m_rowIndex(rowIndex), m_groupIndex(groupIndex) {}
 
 private slots:
   void startWorker() {
@@ -69,5 +69,3 @@ private:
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // MANTIDQTMANTIDWIDGETS_GENERICDATAPROCESSORPRESENTER_GENERICDATAPROCESSORPRESENTERROWREDUCERWORKER_H

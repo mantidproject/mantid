@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FilterByLogValue.h"
 #include "MantidAPI/Run.h"
@@ -39,7 +39,7 @@ void FilterByLogValue::init() {
                   "The name to use for the output workspace");
 
   declareProperty(
-      "LogName", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "LogName", "", std::make_shared<MandatoryValidator<std::string>>(),
       "Name of the sample log to use to filter.\n"
       "For example, the pulse charge is recorded in 'ProtonCharge'.");
 
@@ -49,7 +49,7 @@ void FilterByLogValue::init() {
   declareProperty("MaximumValue", Mantid::EMPTY_DBL(),
                   "Maximum log value for which to keep events.");
 
-  auto min = boost::make_shared<BoundedValidator<double>>();
+  auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(0.0);
   declareProperty("TimeTolerance", 0.0, min,
                   "Tolerance, in seconds, for the event times to keep. A good "
@@ -64,7 +64,7 @@ void FilterByLogValue::init() {
   types[0] = CENTRE;
   types[1] = LEFT;
   declareProperty("LogBoundary", types[0],
-                  boost::make_shared<StringListValidator>(types),
+                  std::make_shared<StringListValidator>(types),
                   "How to treat log values as being measured in the centre of "
                   "the time, or beginning (left) boundary");
 
@@ -153,7 +153,7 @@ void FilterByLogValue::exec() {
         SplittingInterval interval(lastTime, *it - tolerance, 0);
         // Leave a gap +- tolerance
         lastTime = (*it + tolerance);
-        splitter.push_back(interval);
+        splitter.emplace_back(interval);
       }
       // And the last one
       splitter.emplace_back(lastTime, run_stop, 0);
@@ -201,12 +201,11 @@ void FilterByLogValue::exec() {
 
     // To split/filter the runs, first you make a vector with just the one
     // output run
-    std::vector<LogManager *> output_runs;
-    LogManager *output_run = new Run(inputWS->mutableRun());
-    output_runs.push_back(output_run);
-    inputWS->run().splitByTime(splitter, output_runs);
+    auto newRun = Kernel::make_cow<Run>(inputWS->run());
+    std::vector<LogManager *> splitRuns = {&newRun.access()};
+    inputWS->run().splitByTime(splitter, splitRuns);
     // Set the output back in the input
-    inputWS->mutableRun() = *(static_cast<Run *>(output_runs[0]));
+    inputWS->setSharedRun(newRun);
     inputWS->mutableRun().integrateProtonCharge();
 
     // Cast the outputWS to the matrixOutputWS and save it
@@ -238,7 +237,7 @@ void FilterByLogValue::exec() {
     // To split/filter the runs, first you make a vector with just the one
     // output run
     std::vector<LogManager *> output_runs;
-    output_runs.push_back(&outputWS->mutableRun());
+    output_runs.emplace_back(&outputWS->mutableRun());
     inputWS->run().splitByTime(splitter, output_runs);
 
     // Cast the outputWS to the matrixOutputWS and save it

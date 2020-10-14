@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDPLOTTINGCMAPSPROVIDER_H_
-#define MDPLOTTINGCMAPSPROVIDER_H_
+#pragma once
 
 #include <QString>
 #include <vector>
@@ -53,8 +52,8 @@ private:
    */
   void appendAllFileNamesForFileType(QStringList &colorMapNames,
                                      QStringList &colorMapFiles,
-                                     QString colorMapDirectory,
-                                     QString fileType);
+                                     const QString &colorMapDirectory,
+                                     const QString &fileType);
 
   /**
    * Compare the colormap names of the Slice Viewer and the VSI and extract all
@@ -66,7 +65,5 @@ private:
    */
   std::vector<int>
   getSliceViewerIndicesForCommonColorMaps(QStringList colorMapNamesSliceViewer,
-                                          QStringList colorMapNamesVsi);
+                                          const QStringList &colorMapNamesVsi);
 };
-
-#endif

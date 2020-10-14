@@ -1,11 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication, QWidget
 
@@ -29,7 +29,7 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            QApplication.instance().processEvents()
+            QApplication.sendPostedEvents()
 
     def create_fake_workspace(self, name):
         workspace_mock = CreateSampleWorkspace(StoreInADS=False)

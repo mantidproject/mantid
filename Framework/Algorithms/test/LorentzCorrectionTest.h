@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_LORENTZCORRECTIONTEST_H_
-#define MANTID_ALGORITHMS_LORENTZCORRECTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -34,7 +33,7 @@ private:
   /*
    * Calculate what the weight should be.
    */
-  double calculate_weight_at(double xMin, double xMax, double twotheta) {
+  double calculate_scd_weight_at(double xMin, double xMax, double twotheta) {
 
     double lam = 0.5 * (xMin + xMax);
     double weight = std::sin(0.5 * twotheta);
@@ -43,21 +42,25 @@ private:
     return weight;
   }
 
+  double calculate_pd_weight_at(double twotheta) {
+    return std::sin(0.5 * twotheta);
+  }
+
   /**
    Create a workspace in wavelength with a simple instrument defined with a
    single detector.
    */
   MatrixWorkspace_sptr create_workspace(const int nBins) {
-    Instrument_sptr instrument = boost::make_shared<Instrument>();
+    Instrument_sptr instrument = std::make_shared<Instrument>();
     instrument->setReferenceFrame(
-        boost::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
+        std::make_shared<ReferenceFrame>(Y, X, Left, "0,0,0"));
 
     ObjComponent *source = new ObjComponent("source");
     source->setPos(V3D(0, 0, 0));
     instrument->add(source);
     instrument->markAsSource(source);
 
-    ObjComponent *sample = new ObjComponent("some-surface-holder");
+    Component *sample = new Component("some-surface-holder");
     source->setPos(V3D(15, 0, 0));
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
@@ -104,9 +107,10 @@ public:
     LorentzCorrection alg;
     alg.setChild(true);
     alg.initialize();
-    TSM_ASSERT_THROWS("Workspace must be in units of wavelength",
-                      alg.setProperty("InputWorkspace", ws_tof),
-                      std::invalid_argument &);
+    alg.setProperty("InputWorkspace", ws_tof);
+
+    TSM_ASSERT_THROWS("Workspace must be in units of wavelength", alg.execute(),
+                      std::runtime_error &);
   }
 
   void test_throws_if_wavelength_zero() {
@@ -122,7 +126,7 @@ public:
                       alg.execute(), std::runtime_error &);
   }
 
-  void test_execute() {
+  void test_execute_scd() {
     auto ws_lam = this->create_workspace(2 /*nBins*/);
 
     LorentzCorrection alg;
@@ -142,18 +146,38 @@ public:
     const auto &eData = out_ws->e(0);
     const auto &spectrumInfo = out_ws->spectrumInfo();
 
-    int index = 0;
-    double weight = calculate_weight_at(xData[index], xData[index + 1],
-                                        spectrumInfo.twoTheta(0));
-    TS_ASSERT_EQUALS(yData[index], weight);
-    TS_ASSERT_EQUALS(eData[index], weight);
+    for (int index = 0; index < 2; ++index) {
+      const double weight = calculate_scd_weight_at(
+          xData[index], xData[index + 1], spectrumInfo.twoTheta(0));
+      TS_ASSERT_EQUALS(yData[index], weight);
+      TS_ASSERT_EQUALS(eData[index], weight);
+    }
+  }
 
-    index++; // go to 1
-    weight = calculate_weight_at(xData[index], xData[index + 1],
-                                 spectrumInfo.twoTheta(0));
-    TS_ASSERT_EQUALS(yData[index], weight);
-    TS_ASSERT_EQUALS(eData[index], weight);
+  void test_execute_pd() {
+    auto ws_lam = this->create_workspace(2 /*nBins*/);
+
+    LorentzCorrection alg;
+    alg.initialize();
+    alg.setChild(true);
+    alg.setProperty("InputWorkspace", ws_lam);
+    alg.setPropertyValue("OutputWorkspace", "temp");
+    alg.setPropertyValue("Type", "PowderTOF");
+    alg.execute();
+    MatrixWorkspace_sptr out_ws = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(out_ws != nullptr);
+
+    const std::string unitID = out_ws->getAxis(0)->unit()->unitID();
+    TS_ASSERT_EQUALS(unitID, "Wavelength");
+
+    const auto &yData = out_ws->y(0);
+    const auto &eData = out_ws->e(0);
+    const auto &spectrumInfo = out_ws->spectrumInfo();
+
+    for (int index = 0; index < 2; ++index) {
+      const double weight = calculate_pd_weight_at(spectrumInfo.twoTheta(0));
+      TS_ASSERT_EQUALS(yData[index], weight);
+      TS_ASSERT_EQUALS(eData[index], weight);
+    }
   }
 };
-
-#endif /* MANTID_ALGORITHMS_LORENTZCORRECTIONTEST_H_ */

@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidMDAlgorithms/ConvToMDEventsWS.h"
 
 #include "MantidMDAlgorithms/UnitsConversionHelper.h"
@@ -61,10 +60,10 @@ size_t ConvToMDEventsWS::convertEventList(size_t workspaceIndex) {
     if (!m_QConverter->calcMatrixCoord(val, locCoord, signal, errorSq))
       continue; // skip ND outside the range
 
-    sig_err.push_back(static_cast<float>(signal));
-    sig_err.push_back(static_cast<float>(errorSq));
-    run_index.push_back(runIndexLoc);
-    det_ids.push_back(detID);
+    sig_err.emplace_back(static_cast<float>(signal));
+    sig_err.emplace_back(static_cast<float>(errorSq));
+    run_index.emplace_back(runIndexLoc);
+    det_ids.emplace_back(detID);
     allCoord.insert(allCoord.end(), locCoord.begin(), locCoord.end());
   }
 
@@ -104,12 +103,12 @@ workspaces
 */
 size_t
 ConvToMDEventsWS::initialize(const MDWSDescription &WSD,
-                             boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
+                             std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                              bool ignoreZeros) {
   size_t numSpec = ConvToMDBase::initialize(WSD, inWSWrapper, ignoreZeros);
 
   m_EventWS =
-      boost::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_InWS2D);
+      std::dynamic_pointer_cast<const DataObjects::EventWorkspace>(m_InWS2D);
   if (!m_EventWS)
     throw(std::logic_error(
         " ConvertToMDEventWS should work with defined event workspace"));

@@ -8,8 +8,7 @@ This program is released under the GPL with the additional exemption that
 compiling, linking, and/or using OpenSSL is allowed.
 */
 
-#ifndef ICat3H_H
-#define ICat3H_H
+#pragma once
 #include "ICat3Stub.h"
 
 namespace ICat3 {
@@ -58732,7 +58731,3 @@ SOAP_FMAC3 void SOAP_FMAC4 soap_copy_std__vectorTemplateOfPointerToxsd__anyType(
     struct soap *, int, int, void *, size_t, const void *, size_t);
 
 } // namespace ICat3
-
-#endif
-
-/* End of ICat3H.h */

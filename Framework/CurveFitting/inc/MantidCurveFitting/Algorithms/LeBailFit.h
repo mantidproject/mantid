@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_LEBAILFIT_H_
-#define MANTID_CURVEFITTING_LEBAILFIT_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -38,29 +37,29 @@ namespace Algorithms {
 struct Parameter {
   // Regular
   std::string name;
-  double curvalue;
-  double prevalue;
-  double minvalue;
-  double maxvalue;
-  bool fit;
-  double stepsize;
-  double fiterror;
+  double curvalue = 0;
+  double prevalue = 0;
+  double minvalue = 0;
+  double maxvalue = 0;
+  bool fit = false;
+  double stepsize = 0;
+  double fiterror = 0;
   // Monte Carlo
-  bool nonnegative;
-  double mcA0;
-  double mcA1;
+  bool nonnegative = false;
+  double mcA0 = 0;
+  double mcA1 = 0;
   // Monte Carlo record
-  double sumstepsize;
-  double maxabsstepsize;
-  double maxrecordvalue;
-  double minrecordvalue;
-  size_t numpositivemove;
-  size_t numnegativemove;
-  size_t numnomove;
-  int movedirection;
+  double sumstepsize = 0;
+  double maxabsstepsize = 0;
+  double maxrecordvalue = 0;
+  double minrecordvalue = 0;
+  size_t numpositivemove = 0;
+  size_t numnegativemove = 0;
+  size_t numnomove = 0;
+  int movedirection = 0;
 };
 
-class DLLExport LeBailFit : public API::Algorithm {
+class MANTID_CURVEFITTING_DLL LeBailFit : public API::Algorithm {
 public:
   /// Enumerate
   enum FunctionMode { CALCULATION, FIT, BACKGROUNDPROCESS, MONTECARLO };
@@ -104,8 +103,8 @@ private:
   void createLeBailFunction();
 
   /// Crop the workspace for better usage
-  API::MatrixWorkspace_sptr cropWorkspace(API::MatrixWorkspace_sptr inpws,
-                                          size_t wsindex);
+  API::MatrixWorkspace_sptr
+  cropWorkspace(const API::MatrixWorkspace_sptr &inpws, size_t wsindex);
 
   /// Process and calculate input background
   void processInputBackground();
@@ -124,10 +123,10 @@ private:
   void parseBraggPeaksParametersTable();
 
   /// Parse content in a table workspace to vector for background parameters
-  void
-  parseBackgroundTableWorkspace(DataObjects::TableWorkspace_sptr bkgdparamws,
-                                std::vector<std::string> &bkgdparnames,
-                                std::vector<double> &bkgdorderparams);
+  void parseBackgroundTableWorkspace(
+      const DataObjects::TableWorkspace_sptr &bkgdparamws,
+      std::vector<std::string> &bkgdparnames,
+      std::vector<double> &bkgdorderparams);
 
   /// Create and set up output table workspace for peaks
   void exportBraggPeakParameterToTable();
@@ -154,12 +153,12 @@ private:
   /// Set up Monte Carlo random walk strategy
   void setupBuiltInRandomWalkStrategy();
 
-  void
-  setupRandomWalkStrategyFromTable(DataObjects::TableWorkspace_sptr tablews);
+  void setupRandomWalkStrategyFromTable(
+      const DataObjects::TableWorkspace_sptr &tablews);
 
   /// Add parameter (to a vector of string/name) for MC random walk
   void addParameterToMCMinimize(std::vector<std::string> &parnamesforMC,
-                                std::string parname);
+                                const std::string &parname);
 
   /// Calculate diffraction pattern in Le Bail algorithm for MC Random walk
   bool calculateDiffractionPattern(
@@ -172,7 +171,8 @@ private:
   bool acceptOrDeny(Kernel::Rfactor currR, Kernel::Rfactor newR);
 
   /// Propose new parameters
-  bool proposeNewValues(std::vector<std::string> mcgroup, Kernel::Rfactor r,
+  bool proposeNewValues(const std::vector<std::string> &mcgroup,
+                        Kernel::Rfactor r,
                         std::map<std::string, Parameter> &curparammap,
                         std::map<std::string, Parameter> &newparammap,
                         bool prevBetterRwp);
@@ -309,10 +309,8 @@ private:
 /// Write a set of (XY) data to a column file
 void writeRfactorsToFile(std::vector<double> vecX,
                          std::vector<Kernel::Rfactor> vecR,
-                         std::string filename);
+                         const std::string &filename);
 
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_LEBAILFIT_H_ */

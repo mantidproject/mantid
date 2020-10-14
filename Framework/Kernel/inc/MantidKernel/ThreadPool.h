@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef THREADPOOL_H_
-#define THREADPOOL_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/ThreadScheduler.h"
@@ -43,7 +42,7 @@ public:
 
   void start(double waitSec = 0.0);
 
-  void schedule(std::shared_ptr<Task> task, bool start = false);
+  void schedule(const std::shared_ptr<Task> &task, bool start = false);
 
   void joinAll();
 
@@ -86,5 +85,3 @@ private:
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* THREADPOOL_H_ */

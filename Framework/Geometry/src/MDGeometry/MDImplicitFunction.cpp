@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/System.h"
@@ -28,7 +28,7 @@ void MDImplicitFunction::addPlane(const MDPlane &plane) {
                                   "a plane with different number of dimensions "
                                   "as the previous ones.");
   }
-  m_planes.push_back(plane);
+  m_planes.emplace_back(plane);
   m_nd = plane.getNumDims();
   m_numPlanes = m_planes.size();
 }

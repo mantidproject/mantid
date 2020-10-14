@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_EVENTLOADERTEST_H_
-#define MANTID_PARALLEL_EVENTLOADERTEST_H_
+#pragma once
 
 #include "MantidTestHelpers/ParallelRunner.h"
 #include <cxxtest/TestSuite.h>
@@ -56,7 +55,7 @@ public:
                                       700 * static_cast<int64_t>(m_bank + 1)};
     std::vector<double> time_zero;
     for (size_t i = 0; i < index.size(); ++i)
-      time_zero.push_back(static_cast<double>(10 * i + bank));
+      time_zero.emplace_back(static_cast<double>(10 * i + bank));
 
     // Drift depening on bank to ensure correct offset is used for every bank.
     int64_t time_zero_offset = 123456789 + 1000000 * m_bank;
@@ -202,5 +201,3 @@ public:
     }
   }
 };
-
-#endif /* MANTID_PARALLEL_EVENTLOADERTEST_H_ */

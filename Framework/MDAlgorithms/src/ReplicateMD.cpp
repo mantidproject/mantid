@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ReplicateMD.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -86,7 +86,7 @@ std::vector<int> findAxes(const IMDHistoWorkspace &shapeWS,
     if (!dataDim->getIsIntegrated()) {
       auto index = static_cast<int>(
           shapeWS.getDimensionIndexById(dataDim->getDimensionId()));
-      axes.push_back(index);
+      axes.emplace_back(index);
     }
   }
   return axes;
@@ -169,7 +169,7 @@ ReplicateMD::transposeMD(MDHistoWorkspace_sptr &toTranspose,
   transposeMD->setProperty("Axes", axes);
   transposeMD->execute();
   IMDHistoWorkspace_sptr outputWS = transposeMD->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<const MDHistoWorkspace>(outputWS);
+  return std::dynamic_pointer_cast<const MDHistoWorkspace>(outputWS);
 }
 
 /**
@@ -181,8 +181,8 @@ std::map<std::string, std::string> ReplicateMD::validateInputs() {
   std::map<std::string, std::string> errorMap;
   IMDHistoWorkspace_sptr shapeWS = this->getProperty("ShapeWorkspace");
   IMDHistoWorkspace_sptr dataWS = this->getProperty("DataWorkspace");
-  if (shapeWS->getNonIntegratedDimensions().size() !=
-      dataWS->getNonIntegratedDimensions().size() + 1) {
+  if (shapeWS->getNumNonIntegratedDims() !=
+      dataWS->getNumNonIntegratedDims() + 1) {
     errorMap.emplace(
         "DataWorkspace",
         "Expect to have n-1 non-interated dimensions of ShapeWorkspace");
@@ -261,7 +261,7 @@ MDHistoWorkspace_sptr ReplicateMD::getShapeWorkspace() const {
   MDHistoWorkspace_sptr shapeWS;
   {
     IMDHistoWorkspace_sptr temp = this->getProperty("ShapeWorkspace");
-    shapeWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(temp);
+    shapeWS = std::dynamic_pointer_cast<MDHistoWorkspace>(temp);
   }
 
   return shapeWS;
@@ -275,7 +275,7 @@ MDHistoWorkspace_sptr ReplicateMD::getDataWorkspace() const {
   MDHistoWorkspace_sptr dataWS;
   {
     IMDHistoWorkspace_sptr temp = this->getProperty("DataWorkspace");
-    dataWS = boost::dynamic_pointer_cast<MDHistoWorkspace>(temp);
+    dataWS = std::dynamic_pointer_cast<MDHistoWorkspace>(temp);
   }
 
   return dataWS;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #ifdef _MSC_VER
 #pragma warning(disable : 4250) // Disable warning regarding inheritance via
@@ -90,16 +90,16 @@ void translateCancel(const Algorithm::CancelException &exc) {
 } // namespace
 
 void export_leaf_classes() {
-  register_ptr_to_python<boost::shared_ptr<Algorithm>>();
+  register_ptr_to_python<std::shared_ptr<Algorithm>>();
   register_exception_translator<Algorithm::CancelException>(&translateCancel);
 
   // Export Algorithm but the actual held type in Python is
-  // boost::shared_ptr<AlgorithmAdapter>
+  // std::shared_ptr<AlgorithmAdapter>
   // See
   // http://wiki.python.org/moin/boost.python/HowTo#ownership_of_C.2B-.2B-_object_extended_in_Python
 
   class_<Algorithm, bases<Mantid::API::IAlgorithm>,
-         boost::shared_ptr<PythonAlgorithm>, boost::noncopyable>(
+         std::shared_ptr<PythonAlgorithm>, boost::noncopyable>(
       "Algorithm", "Base class for all algorithms")
       .def("fromString", &Algorithm::fromString,
            "Initialize the algorithm from a string representation")
@@ -163,31 +163,31 @@ void export_leaf_classes() {
 }
 
 void export_SerialAlgorithm() {
-  register_ptr_to_python<boost::shared_ptr<SerialAlgorithm>>();
+  register_ptr_to_python<std::shared_ptr<SerialAlgorithm>>();
   register_exception_translator<SerialAlgorithm::CancelException>(
       &translateCancel);
   class_<SerialAlgorithm, bases<Mantid::API::Algorithm>,
-         boost::shared_ptr<PythonSerialAlgorithm>, boost::noncopyable>(
+         std::shared_ptr<PythonSerialAlgorithm>, boost::noncopyable>(
       "SerialAlgorithm", "Base class for simple serial algorithms");
   scope().attr("PythonSerialAlgorithm") = scope().attr("SerialAlgorithm");
 }
 
 void export_ParallelAlgorithm() {
-  register_ptr_to_python<boost::shared_ptr<ParallelAlgorithm>>();
+  register_ptr_to_python<std::shared_ptr<ParallelAlgorithm>>();
   register_exception_translator<ParallelAlgorithm::CancelException>(
       &translateCancel);
   class_<ParallelAlgorithm, bases<Mantid::API::Algorithm>,
-         boost::shared_ptr<PythonParallelAlgorithm>, boost::noncopyable>(
+         std::shared_ptr<PythonParallelAlgorithm>, boost::noncopyable>(
       "ParallelAlgorithm", "Base class for simple parallel algorithms");
   scope().attr("PythonParallelAlgorithm") = scope().attr("ParallelAlgorithm");
 }
 
 void export_DistributedAlgorithm() {
-  register_ptr_to_python<boost::shared_ptr<DistributedAlgorithm>>();
+  register_ptr_to_python<std::shared_ptr<DistributedAlgorithm>>();
   register_exception_translator<DistributedAlgorithm::CancelException>(
       &translateCancel);
   class_<DistributedAlgorithm, bases<Mantid::API::Algorithm>,
-         boost::shared_ptr<PythonDistributedAlgorithm>, boost::noncopyable>(
+         std::shared_ptr<PythonDistributedAlgorithm>, boost::noncopyable>(
       "DistributedAlgorithm", "Base class for simple distributed algorithms");
   scope().attr("PythonDistributedAlgorithm") =
       scope().attr("DistributedAlgorithm");

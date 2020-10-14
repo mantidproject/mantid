@@ -1,20 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
-import six
+
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 import mantid.simpleapi as simpleapi
-import mantid.api as api
-from mantid.api import ITableWorkspace, WorkspaceGroup
+from mantid.api import ITableWorkspace
 from mantid.dataobjects import Workspace2D
-
-from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper, add_directory_structure
 
 
 def create_simple_workspace(data_x, data_y):
@@ -90,16 +86,6 @@ class MuonWorkspaceTest(unittest.TestCase):
 
         MuonWorkspaceWrapper(workspace=table_workspace)
 
-    def test_that_cannot_initialize_with_non_workspace_objects(self):
-        with self.assertRaises(AttributeError):
-            MuonWorkspaceWrapper(workspace="string")
-
-        with self.assertRaises(AttributeError):
-            MuonWorkspaceWrapper(workspace=1234)
-
-        with self.assertRaises(AttributeError):
-            MuonWorkspaceWrapper(workspace=5.5)
-
     def test_that_initialized_object_is_not_in_ADS_by_default(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
 
@@ -135,8 +121,8 @@ class MuonWorkspaceTest(unittest.TestCase):
 
         self.assertTrue(simpleapi.mtd.doesExist("test"))
         ads_workspace = simpleapi.mtd["test"]
-        six.assertCountEqual(self, ads_workspace.readX(0), [1, 2, 3, 4])
-        six.assertCountEqual(self, ads_workspace.readY(0), [10, 10, 10, 10])
+        self.assertCountEqual(ads_workspace.readX(0), [1, 2, 3, 4])
+        self.assertCountEqual(ads_workspace.readY(0), [10, 10, 10, 10])
 
     def test_that_hiding_the_workspace_removes_it_from_ADS(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
@@ -152,8 +138,8 @@ class MuonWorkspaceTest(unittest.TestCase):
 
         ws_property = workspace_handle.workspace
 
-        six.assertCountEqual(self, ws_property.readX(0), [1, 2, 3, 4])
-        six.assertCountEqual(self, ws_property.readY(0), [10, 10, 10, 10])
+        self.assertCountEqual(ws_property.readX(0), [1, 2, 3, 4])
+        self.assertCountEqual(ws_property.readY(0), [10, 10, 10, 10])
 
     def test_that_workspace_property_returns_workspace_when_in_ADS(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
@@ -161,8 +147,8 @@ class MuonWorkspaceTest(unittest.TestCase):
         workspace_handle.show("arbitrary_name")
         ws_property = workspace_handle.workspace
 
-        six.assertCountEqual(self, ws_property.readX(0), [1, 2, 3, 4])
-        six.assertCountEqual(self, ws_property.readY(0), [10, 10, 10, 10])
+        self.assertCountEqual(ws_property.readX(0), [1, 2, 3, 4])
+        self.assertCountEqual(ws_property.readY(0), [10, 10, 10, 10])
 
     def test_that_can_change_name_when_workspace_not_in_ADS(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
@@ -170,14 +156,6 @@ class MuonWorkspaceTest(unittest.TestCase):
         workspace_handle.name = "new_name"
 
         self.assertEqual(workspace_handle.name, "new_name")
-
-    def test_that_cannot_change_name_when_workspace_in_ADS(self):
-        workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
-
-        workspace_handle.show("name1")
-
-        with self.assertRaises(ValueError):
-            workspace_handle.name = "new_name"
 
     def test_that_hiding_workspace_more_than_once_has_no_effect(self):
         workspace_handle = MuonWorkspaceWrapper(workspace=self.workspace)
@@ -212,150 +190,6 @@ class MuonWorkspaceTest(unittest.TestCase):
         self.assertTrue(simpleapi.mtd.doesExist("name1"))
         workspace_handle.workspace = workspace2
         self.assertFalse(simpleapi.mtd.doesExist("name1"))
-
-
-class MuonWorkspaceAddDirectoryTest(unittest.TestCase):
-    """
-    Test the functionality surrounding adding "directory structures" to the ADS, in other words
-    adding nested structures of WorkspaceGroups to help structure the data.
-    """
-
-    def setUp(self):
-        assert simpleapi.mtd.size() == 0
-
-    def tearDown(self):
-        # clear the ADS
-        simpleapi.mtd.clear()
-
-    def assert_group_workspace_exists(self, name):
-        self.assertTrue(simpleapi.mtd.doesExist(name))
-        self.assertEqual(type(simpleapi.mtd.retrieve(name)), WorkspaceGroup)
-
-    def assert_group1_is_inside_group2(self, group1_name, group2_name):
-        group2 = simpleapi.mtd.retrieve(group2_name)
-        self.assertIn(group1_name, group2.getNames())
-
-    def assert_workspace_in_group(self, workspace_name, group_name):
-        group = simpleapi.mtd.retrieve(group_name)
-        self.assertIn(workspace_name, group.getNames())
-
-    # ----------------------------------------------------------------------------------------------
-    # Test add_directory_structure function
-    # ----------------------------------------------------------------------------------------------
-
-    def test_that_passing_empty_list_has_no_effect(self):
-        add_directory_structure([])
-
-        self.assertEqual(simpleapi.mtd.size(), 0)
-
-    def test_that_passing_a_list_of_a_single_string_creates_an_empty_group_in_ADS(self):
-        add_directory_structure(["testGroup"])
-
-        self.assertEqual(simpleapi.mtd.size(), 1)
-        self.assertTrue(simpleapi.mtd.doesExist("testGroup"))
-        self.assertEqual(type(simpleapi.mtd.retrieve("testGroup")), WorkspaceGroup)
-
-        group = simpleapi.mtd.retrieve("testGroup")
-        self.assertEqual(group.getNumberOfEntries(), 0)
-
-    def test_that_passing_a_list_of_strings_creates_a_group_for_each_string(self):
-        add_directory_structure(["testGroup1", "testGroup2", "testGroup3"])
-
-        self.assertEqual(simpleapi.mtd.size(), 3)
-        self.assert_group_workspace_exists("testGroup1")
-        self.assert_group_workspace_exists("testGroup2")
-        self.assert_group_workspace_exists("testGroup3")
-
-    def test_raises_ValueError_if_duplicate_names_given(self):
-        # this is necessary due to the ADS requiring all names to be unique irrespectie of object
-        # type or nesting
-
-        with self.assertRaises(ValueError):
-            add_directory_structure(["testGroup1", "testGroup2", "testGroup2"])
-
-    def test_that_for_two_names_the_second_group_is_nested_inside_the_first(self):
-        add_directory_structure(["testGroup1", "testGroup2"])
-
-        self.assert_group_workspace_exists("testGroup1")
-        self.assert_group_workspace_exists("testGroup2")
-
-        self.assert_group1_is_inside_group2("testGroup2", "testGroup1")
-
-    def test_that_nested_groups_up_to_four_layers_are_possible(self):
-        add_directory_structure(["testGroup1", "testGroup2", "testGroup3", "testGroup4"])
-
-        self.assert_group1_is_inside_group2("testGroup2", "testGroup1")
-        self.assert_group1_is_inside_group2("testGroup3", "testGroup2")
-        self.assert_group1_is_inside_group2("testGroup4", "testGroup3")
-
-    def test_that_overwriting_previous_structure_with_a_permutation_works(self):
-        add_directory_structure(["testGroup1", "testGroup2", "testGroup3", "testGroup4"])
-
-        add_directory_structure(["testGroup4", "testGroup3", "testGroup2", "testGroup1"])
-
-        self.assert_group1_is_inside_group2("testGroup1", "testGroup2")
-        self.assert_group1_is_inside_group2("testGroup2", "testGroup3")
-        self.assert_group1_is_inside_group2("testGroup3", "testGroup4")
-
-    def test_that_if_workspace_already_exists_it_is_removed(self):
-        workspace = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 10, 10, 10])
-        simpleapi.mtd.add("testGroup1", workspace)
-
-        add_directory_structure(["testGroup1", "testGroup2"])
-
-        self.assert_group_workspace_exists("testGroup1")
-        self.assert_group_workspace_exists("testGroup2")
-        self.assert_group1_is_inside_group2("testGroup2", "testGroup1")
-
-    # ----------------------------------------------------------------------------------------------
-    # Test directory structure functionality in MuonWorkspaceWrapper
-    # ----------------------------------------------------------------------------------------------
-
-    def test_that_if_workspace_exists_with_same_name_as_group_then_it_is_replaced(self):
-        workspace = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 10, 10, 10])
-        simpleapi.mtd.add("group", workspace)
-
-        workspace_handle = MuonWorkspaceWrapper(workspace=workspace)
-        workspace_handle.show("group/ws1")
-
-        self.assert_group_workspace_exists("group")
-
-    def test_that_workspace_added_correctly_for_single_nested_structure(self):
-        workspace = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 10, 10, 10])
-        workspace_handle = MuonWorkspaceWrapper(workspace=workspace)
-
-        workspace_handle.show("group1/ws1")
-
-        self.assert_group_workspace_exists("group1")
-        self.assert_workspace_in_group("ws1", "group1")
-
-    def test_that_workspace_added_correctly_for_doubly_nested_structure(self):
-        workspace = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 10, 10, 10])
-        workspace_handle = MuonWorkspaceWrapper(workspace=workspace)
-
-        workspace_handle.show("group1/group2/ws1")
-
-        self.assert_group_workspace_exists("group1")
-        self.assert_group_workspace_exists("group2")
-        self.assert_group1_is_inside_group2("group2", "group1")
-        self.assert_workspace_in_group("ws1", "group2")
-
-    def test_that_workspaces_in_existing_folders_are_not_moved_by_directory_manipulation(self):
-        workspace1 = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 10, 10, 10])
-        workspace2 = create_simple_workspace(data_x=[1, 2, 3, 4], data_y=[10, 10, 10, 10])
-        workspace_handle1 = MuonWorkspaceWrapper(workspace=workspace1)
-        workspace_handle2 = MuonWorkspaceWrapper(workspace=workspace2)
-
-        workspace_handle1.show("group1/group2/ws1")
-        workspace_handle2.show("group1/group2/group3/ws2")
-
-        self.assert_group_workspace_exists("group1")
-        self.assert_group_workspace_exists("group2")
-        self.assert_group_workspace_exists("group3")
-        self.assert_group1_is_inside_group2("group2", "group1")
-        self.assert_group1_is_inside_group2("group3", "group2")
-        self.assert_workspace_in_group("ws1", "group2")
-        self.assert_workspace_in_group("ws2", "group3")
 
 
 if __name__ == '__main__':

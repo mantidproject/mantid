@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef IMAGEMARKER_H
-#define IMAGEMARKER_H
+#pragma once
 
 #include <QPixmap>
 #include <qwt_plot.h>
@@ -127,5 +126,3 @@ private:
   double d_x_right;    //!< The right side position in scale coordinates.
   double d_y_bottom;   //!< The bottom side position in scale coordinates.
 };
-
-#endif

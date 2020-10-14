@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 /* SaveNexusGeometry : A thin Algorithm wrapper over
  * NexusGeometry::saveInstrument allowing user to save the geometry from
  * instrument attached to a workspace.
@@ -75,7 +74,7 @@ void SaveNexusGeometry::init() {
                       "Filename", "", API::FileProperty::OptionalSave),
                   "Full path to save destination file");
 
-  declareProperty("H5Path", "entry" /*default*/,
+  declareProperty("EntryName", "entry" /*default*/,
                   "(optional) Name of the H5 root group in which the "
                   "Instrument is to be saved. Default name: 'entry'.");
 }
@@ -86,7 +85,7 @@ void SaveNexusGeometry::init() {
 void SaveNexusGeometry::exec() {
   API::MatrixWorkspace_const_sptr workspace = getProperty("InputWorkspace");
   std::string destinationFile = getPropertyValue("FileName");
-  std::string rootFileName = getPropertyValue("H5Path");
+  std::string rootFileName = getPropertyValue("EntryName");
 
   auto ws = workspace.get();
   const auto &compInfo = ws->componentInfo();

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DiffractionFocussing.h"
 #include "MantidAPI/Axis.h"
@@ -100,7 +100,7 @@ void DiffractionFocussing::exec() {
     auto to = detectorGroups.upper_bound(groupNumber);
     std::vector<detid_t> detectorList;
     for (auto d = from; d != to; ++d)
-      detectorList.push_back(static_cast<detid_t>(d->second));
+      detectorList.emplace_back(static_cast<detid_t>(d->second));
     // Want version 1 of GroupDetectors here
     API::IAlgorithm_sptr childAlg =
         createChildAlgorithm("GroupDetectors", -1.0, -1.0, true, 1);
@@ -111,7 +111,7 @@ void DiffractionFocussing::exec() {
       // get the index of the combined spectrum
       int ri = childAlg->getProperty("ResultIndex");
       if (ri >= 0) {
-        resultIndeces.push_back(ri);
+        resultIndeces.emplace_back(ri);
       }
     } catch (...) {
       throw std::runtime_error(
@@ -146,7 +146,7 @@ void DiffractionFocussing::exec() {
        hist++) {
     int64_t i = resultIndeces[hist];
     outputW->setHistogram(hist, tmpW->histogram(i));
-    specNums.push_back(tmpIndices.spectrumNumber(i));
+    specNums.emplace_back(tmpIndices.spectrumNumber(i));
   }
   auto outputIndices = outputW->indexInfo();
   outputIndices.setSpectrumNumbers(std::move(specNums));
@@ -241,7 +241,7 @@ void DiffractionFocussing::calculateRebinParams(
  * @throws FileError if can't read the file
  */
 std::multimap<int64_t, int64_t>
-DiffractionFocussing::readGroupingFile(std::string groupingFileName) {
+DiffractionFocussing::readGroupingFile(const std::string &groupingFileName) {
   std::ifstream grFile(groupingFileName.c_str());
   if (!grFile) {
     g_log.error() << "Unable to open grouping file " << groupingFileName

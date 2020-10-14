@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ImportMDHistoWorkspaceBase.h"
 
@@ -29,7 +29,7 @@ namespace MDAlgorithms {
 /**
 Functor to compute the product of the set.
 */
-struct Product : public std::unary_function<size_t, void> {
+struct Product {
   Product() : result(1) {}
   size_t result;
   void operator()(size_t x) { result *= x; }
@@ -39,9 +39,9 @@ struct Product : public std::unary_function<size_t, void> {
 /** Initalise generic importing properties.
  */
 void ImportMDHistoWorkspaceBase::initGenericImportProps() {
-  auto validator = boost::make_shared<CompositeValidator>();
-  validator->add(boost::make_shared<BoundedValidator<int>>(1, 9));
-  validator->add(boost::make_shared<MandatoryValidator<int>>());
+  auto validator = std::make_shared<CompositeValidator>();
+  validator->add(std::make_shared<BoundedValidator<int>>(1, 9));
+  validator->add(std::make_shared<MandatoryValidator<int>>());
 
   declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "Dimensionality", -1, validator, Direction::Input),
@@ -126,7 +126,7 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
   std::vector<MDHistoDimension_sptr> dimensions;
   for (size_t k = 0; k < ndims; ++k) {
     auto frame = createMDFrame(frames[k], units[k]);
-    dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension(
+    dimensions.emplace_back(MDHistoDimension_sptr(new MDHistoDimension(
         names[k], names[k], *frame, static_cast<coord_t>(extents[k * 2]),
         static_cast<coord_t>(extents[(k * 2) + 1]), nbins[k])));
   }
@@ -145,8 +145,9 @@ MDHistoWorkspace_sptr ImportMDHistoWorkspaceBase::createEmptyOutputWorkspace() {
  * @param unit: the selected unit
  * @returns a unique pointer to an MDFrame
  */
-MDFrame_uptr ImportMDHistoWorkspaceBase::createMDFrame(std::string frame,
-                                                       std::string unit) {
+MDFrame_uptr
+ImportMDHistoWorkspaceBase::createMDFrame(const std::string &frame,
+                                          const std::string &unit) {
   auto frameFactory = makeMDFrameFactoryChain();
   MDFrameArgument frameArg(frame, unit);
   return frameFactory->create(frameArg);
@@ -162,10 +163,10 @@ ImportMDHistoWorkspaceBase::validateInputs() {
   auto ndims = static_cast<size_t>(ndims_prop);
 
   std::vector<std::string> targetFrames;
-  targetFrames.push_back(Mantid::Geometry::GeneralFrame::GeneralFrameName);
-  targetFrames.push_back(Mantid::Geometry::HKL::HKLName);
-  targetFrames.push_back(Mantid::Geometry::QLab::QLabName);
-  targetFrames.push_back(Mantid::Geometry::QSample::QSampleName);
+  targetFrames.emplace_back(Mantid::Geometry::GeneralFrame::GeneralFrameName);
+  targetFrames.emplace_back(Mantid::Geometry::HKL::HKLName);
+  targetFrames.emplace_back(Mantid::Geometry::QLab::QLabName);
+  targetFrames.emplace_back(Mantid::Geometry::QSample::QSampleName);
 
   auto isValidFrame = true;
   for (auto &frame : frames) {

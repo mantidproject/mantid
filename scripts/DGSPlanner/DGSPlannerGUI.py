@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name,relative-import
-from __future__ import (absolute_import, division, print_function)
 from . import InstrumentSetupWidget
 from . import ClassicUBInputWidget
 from . import MatrixUBInputWidget
@@ -55,15 +54,23 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.instrumentWidget = InstrumentSetupWidget.InstrumentSetupWidget(self)
         self.setLayout(QtWidgets.QHBoxLayout())
         controlLayout = QtWidgets.QVBoxLayout()
-        controlLayout.addWidget(self.instrumentWidget)
+        geometryBox = QtWidgets.QGroupBox("Instrument Geometry")
+        plotBox = QtWidgets.QGroupBox("Plot Axes")
+        geometryBoxLayout = QtWidgets.QVBoxLayout()
+        geometryBoxLayout.addWidget(self.instrumentWidget)
+        geometryBox.setLayout(geometryBoxLayout)
+        controlLayout.addWidget(geometryBox)
         self.ublayout = QtWidgets.QHBoxLayout()
         self.classic = ClassicUBInputWidget.ClassicUBInputWidget(self.ol)
         self.ublayout.addWidget(self.classic, alignment=QtCore.Qt.AlignTop, stretch=1)
         self.matrix = MatrixUBInputWidget.MatrixUBInputWidget(self.ol)
         self.ublayout.addWidget(self.matrix, alignment=QtCore.Qt.AlignTop, stretch=1)
-        controlLayout.addLayout(self.ublayout)
+        sampleBox = QtWidgets.QGroupBox("Sample")
+        sampleBox.setLayout(self.ublayout)
+        controlLayout.addWidget(sampleBox)
         self.dimensionWidget = DimensionSelectorWidget.DimensionSelectorWidget(self)
-        controlLayout.addWidget(self.dimensionWidget)
+        plotBoxLayout = QtWidgets.QVBoxLayout()
+        plotBoxLayout.addWidget(self.dimensionWidget)
         plotControlLayout = QtWidgets.QGridLayout()
         self.plotButton = QtWidgets.QPushButton("Plot", self)
         self.oplotButton = QtWidgets.QPushButton("Overplot", self)
@@ -82,7 +89,10 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         plotControlLayout.addWidget(self.aspectButton, 0, 5)
         plotControlLayout.addWidget(self.helpButton, 0, 6)
         plotControlLayout.addWidget(self.saveButton, 0, 7)
-        controlLayout.addLayout(plotControlLayout)
+        plotBoxLayout.addLayout(plotControlLayout)
+        plotBox = QtWidgets.QGroupBox("Plot Axes")
+        plotBox.setLayout(plotBoxLayout)
+        controlLayout.addWidget(plotBox)
         self.layout().addLayout(controlLayout)
 
         # figure
@@ -91,13 +101,13 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.canvas = FigureCanvas(self.figure)
         self.grid_helper = GridHelperCurveLinear((self.tr, self.inv_tr))
         self.trajfig = Subplot(self.figure, 1, 1, 1, grid_helper=self.grid_helper)
-        if matplotlib.compare_versions('2.1.0',matplotlib.__version__):
-            self.trajfig.hold(True) # hold is deprecated since 2.1.0, true by default
+        if matplotlib.compare_versions('2.1.0', matplotlib.__version__):
+            self.trajfig.hold(True)  # hold is deprecated since 2.1.0, true by default
         self.figure.add_subplot(self.trajfig)
         self.toolbar = CustomNavigationToolbar(self.canvas, self)
         figureLayout = QtWidgets.QVBoxLayout()
-        figureLayout.addWidget(self.toolbar,0)
-        figureLayout.addWidget(self.canvas,1)
+        figureLayout.addWidget(self.toolbar, 0)
+        figureLayout.addWidget(self.canvas, 1)
         self.layout().addLayout(figureLayout)
         self.needToClear = False
         self.saveDir = ''
@@ -119,7 +129,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         # help
         self.assistant_process = QtCore.QProcess(self)
         # pylint: disable=protected-access
-        self.mantidplot_name='DGS Planner'
+        self.mantidplot_name = 'DGS Planner'
         self.collection_file = os.path.join(mantid._bindir, '../docs/qthelp/MantidProject.qhc')
         version = ".".join(mantid.__version__.split(".")[:2])
         self.qt_url = 'qthelp://org.sphinx.mantidproject.' + version + '/doc/interfaces/DGS Planner.html'
@@ -129,7 +139,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
         self.progress_canceled = False
 
         # register startup
-        mantid.UsageService.registerFeatureUsage("Interface", "DGSPlanner", False)
+        mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "DGSPlanner", False)
 
     @QtCore.Slot(mantid.geometry.OrientedLattice)
     def updateUB(self, ol):
@@ -178,12 +188,12 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                     groupingStrings.append(name)
                     mantid.simpleapi.CloneWorkspace("__temp_instrument", OutputWorkspace=name)
                     mantid.simpleapi.SetGoniometer(Workspace=name,
-                                                   Axis0=str(g0) + "," + self.masterDict['gonioDirs'][0] +
-                                                   "," + str(self.masterDict['gonioSenses'][0]),
-                                                   Axis1=str(g1) + "," + self.masterDict['gonioDirs'][1] +
-                                                   "," + str(self.masterDict['gonioSenses'][1]),
-                                                   Axis2=str(g2) + "," + self.masterDict['gonioDirs'][2] +
-                                                   "," + str(self.masterDict['gonioSenses'][2]))
+                                                   Axis0=str(g0) + "," + self.masterDict['gonioDirs'][0]
+                                                   + "," + str(self.masterDict['gonioSenses'][0]),
+                                                   Axis1=str(g1) + "," + self.masterDict['gonioDirs'][1]
+                                                   + "," + str(self.masterDict['gonioSenses'][1]),
+                                                   Axis2=str(g2) + "," + self.masterDict['gonioDirs'][2]
+                                                   + "," + str(self.masterDict['gonioSenses'][2]))
         return groupingStrings
 
     # pylint: disable=too-many-locals
@@ -237,8 +247,8 @@ class DGSPlannerGUI(QtWidgets.QWidget):
                     mantid.simpleapi.MaskDetectors(Workspace="__temp_instrument", MaskedWorkspace=__maskWS)
                 except (ValueError, RuntimeError) as e:
                     reply = QtWidgets.QMessageBox.critical(self, 'Error',
-                                                           "The following error has occurred in loading the mask:\n" +
-                                                           str(e) + "\nDo you want to continue without mask?",
+                                                           "The following error has occurred in loading the mask:\n"
+                                                           + str(e) + "\nDo you want to continue without mask?",
                                                            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
                                                            QtWidgets.QMessageBox.No)
                     if reply == QtWidgets.QMessageBox.No:
@@ -339,7 +349,7 @@ class DGSPlannerGUI(QtWidgets.QWidget):
 
     def save(self):
         fileName = QtWidgets.QFileDialog.getSaveFileName(self, 'Save Plot', self.saveDir, '*.png')
-        if isinstance(fileName,tuple):
+        if isinstance(fileName, tuple):
             fileName = fileName[0]
         if not fileName:
             return

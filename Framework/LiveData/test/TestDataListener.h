@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_TESTDATALISTENER_H_
-#define MANTID_LIVEDATA_TESTDATALISTENER_H_
+#pragma once
 
 #include "MantidAPI/LiveListener.h"
 #include "MantidAPI/Run.h"
@@ -30,7 +29,7 @@ public:
   bool connect(const Poco::Net::SocketAddress &address) override;
   void start(
       Types::Core::DateAndTime startTime = Types::Core::DateAndTime()) override;
-  boost::shared_ptr<API::Workspace> extractData() override;
+  std::shared_ptr<API::Workspace> extractData() override;
 
   bool isConnected() override;
   bool dataReset() override;
@@ -60,5 +59,3 @@ private:
 
 } // namespace LiveData
 } // namespace Mantid
-
-#endif /* MANTID_LIVEDATA_TESTDATALISTENER_H_ */

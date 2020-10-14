@@ -1,19 +1,20 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_FUNCTIONTASK_H_
-#define MANTID_KERNEL_FUNCTIONTASK_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Task.h"
+#include <functional>
 #include <stdexcept>
 
 #ifndef Q_MOC_RUN
-#include <boost/bind.hpp>
 #include <boost/function.hpp>
+#include <utility>
+
 #endif
 
 namespace Mantid {
@@ -35,12 +36,12 @@ public:
   //---------------------------------------------------------------------------------------------
   /** Constructor for a simple void function.
    *
-   * Pro-tip: use boost::bind(f, argument1, argument2) (for example) to turn a
+   * Pro-tip: use std::bind(f, argument1, argument2) (for example) to turn a
    *function that takes
    * an argument into a argument-less function pointer.
    *
-   * Use boost::bind(&ClassName::function, &*this, arg1, arg2) to bind to a
-   *class method of this.
+   * Use std::bind(&ClassName::function, &*this, arg1, arg2) to bind to a
+   * class method of this.
    *
    * @param func :: pointer to a void function()
    * @param cost :: computational cost
@@ -51,18 +52,18 @@ public:
   //---------------------------------------------------------------------------------------------
   /** Constructor for a simple boost bound function.
    *
-   * Pro-tip: use boost::bind(f, argument1, argument2) (for example) to turn a
+   * Pro-tip: use std::bind(f, argument1, argument2) (for example) to turn a
    *function that takes
    * an argument into a argument-less function pointer.
    *
-   * Use boost::bind(&ClassName::function, &*this, arg1, arg2) to bind to a
+   * Use std::bind(&ClassName::function, &*this, arg1, arg2) to bind to a
    *class method of this.
    *
-   * @param func :: boost::function<> returned by boost::bind()
+   * @param func :: std::function<> returned by std::bind()
    * @param cost :: computational cost
    */
-  FunctionTask(boost::function<void()> func, double cost = 1.0)
-      : Task(cost), m_voidFunc(func) {}
+  FunctionTask(std::function<void()> func, double cost = 1.0)
+      : Task(cost), m_voidFunc(std::move(func)) {}
 
   //---------------------------------------------------------------------------------------------
   /** Main method that performs the work for the task. */
@@ -74,10 +75,8 @@ public:
   }
 
 protected:
-  boost::function<void()> m_voidFunc;
+  std::function<void()> m_voidFunc;
 };
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_FUNCTIONTASK_H_ */

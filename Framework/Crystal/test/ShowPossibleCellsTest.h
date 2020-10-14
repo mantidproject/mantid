@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SHOW_POSSIBLE_CELLS_TEST_H_
-#define MANTID_CRYSTAL_SHOW_POSSIBLE_CELLS_TEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -48,7 +47,7 @@ public:
     TS_ASSERT(loader.isExecuted());
     PeaksWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
-        ws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+        ws = std::dynamic_pointer_cast<PeaksWorkspace>(
             AnalysisDataService::Instance().retrieve(WSName)));
     TS_ASSERT(ws);
     // set a Niggli UB in the
@@ -62,12 +61,12 @@ public:
     UB.setRow(1, row_1);
     UB.setRow(2, row_2);
 
-    OrientedLattice o_lattice;
-    o_lattice.setUB(UB);
-    ws->mutableSample().setOrientedLattice(&o_lattice);
+    auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
+    lattice->setUB(UB);
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
 
     // now get the UB back from the WS
-    UB = o_lattice.getUB();
+    UB = ws->sample().getOrientedLattice().getUB();
 
     ShowPossibleCells alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
@@ -107,5 +106,3 @@ public:
     AnalysisDataService::Instance().remove(WSName);
   }
 };
-
-#endif /* MANTID_CRYSTAL_SHOW_POSSIBLE_CELLS_TEST_H_ */

@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CREATEFLOODWORKSPACE_H_
-#define MANTID_ALGORITHMS_CREATEFLOODWORKSPACE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -17,7 +17,7 @@ namespace Algorithms {
  Algorithm to create a flood correction workspace for reflectometry
  data reduction.
  */
-class DLLExport CreateFloodWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateFloodWorkspace : public API::Algorithm {
 public:
   const std::string name() const override;
   const std::string summary() const override;
@@ -30,8 +30,8 @@ private:
   void exec() override;
   API::MatrixWorkspace_sptr getInputWorkspace();
   std::string getBackgroundFunction();
-  API::MatrixWorkspace_sptr integrate(API::MatrixWorkspace_sptr ws);
-  API::MatrixWorkspace_sptr transpose(API::MatrixWorkspace_sptr ws);
+  API::MatrixWorkspace_sptr integrate(const API::MatrixWorkspace_sptr &ws);
+  API::MatrixWorkspace_sptr transpose(const API::MatrixWorkspace_sptr &ws);
   bool shouldRemoveBackground();
   void collectExcludedSpectra();
   bool isExcludedSpectrum(double spec) const;
@@ -43,5 +43,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CREATEFLOODWORKSPACE_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : ImageDialog.cpp
@@ -21,7 +21,7 @@
 #include <QLabel>
 #include <QLayout>
 
-ImageDialog::ImageDialog(QWidget *parent, Qt::WFlags fl)
+ImageDialog::ImageDialog(QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl), aspect_ratio(1.) {
   setObjectName("ImageDialog");
   setWindowTitle(tr("MantidPlot - Image Geometry"));

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_EXPONENTIAL_H_
-#define MANTID_ALGORITHM_EXPONENTIAL_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -30,7 +29,7 @@ data </LI>
 @author Ron Fowler
 @date 12/05/2010
 */
-class DLLExport Exponential : public UnaryOperation {
+class MANTID_ALGORITHMS_DLL Exponential : public UnaryOperation {
 public:
   /// Default constructor
   Exponential();
@@ -71,5 +70,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_EXPONENTIAL_H_*/

@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import os
 
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
@@ -14,12 +12,12 @@ from Muon.GUI.Common.muon_pair import MuonPair
 
 from mantid.api import WorkspaceGroup
 from mantid.kernel import ConfigServiceImpl
-from Muon.GUI.Common.observer_pattern import Observable
+from mantidqt.utils.observer_pattern import Observable
 
 
 def get_incremental_number_for_value_in_list(name, list_copy, current_number=1):
     if name + str(current_number) in list_copy:
-        return get_incremental_number_for_value_in_list(name, list_copy, current_number+1)
+        return get_incremental_number_for_value_in_list(name, list_copy, current_number + 1)
     else:
         return str(current_number)
 
@@ -34,10 +32,10 @@ def get_grouping_psi(workspace):
         if workspace_run.hasProperty(sample_log_label_name):
             sample_log_value = workspace_run.getProperty(sample_log_label_name).value
             if sample_log_value not in sample_log_value_list:
-                grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
+                grouping_list.append(MuonGroup(sample_log_value, [ii + 1]))
             else:
                 sample_log_value += get_incremental_number_for_value_in_list(sample_log_value, sample_log_value_list)
-                grouping_list.append(MuonGroup(sample_log_value, [ii+1]))
+                grouping_list.append(MuonGroup(sample_log_value, [ii + 1]))
             sample_log_value_list.append(sample_log_value)
 
     return grouping_list, [], ''
@@ -54,6 +52,7 @@ def get_default_grouping(workspace, instrument, main_field_direction):
                 grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
             else:
                 grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
+
         except IndexError:
             return [], [], ''
     else:
@@ -108,10 +107,13 @@ class MessageNotifier(Observable):
 
 
 class MuonGroupPairContext(object):
-    def __init__(self, check_group_contains_valid_detectors=lambda x : True):
+    def __init__(self, check_group_contains_valid_detectors=lambda x: True):
         self._groups = []
         self._pairs = []
         self._selected = ''
+        self._selected_type = ''
+        self._selected_pairs = []
+        self._selected_groups = []
 
         self.message_notifier = MessageNotifier(self)
 
@@ -131,6 +133,14 @@ class MuonGroupPairContext(object):
     def pairs(self):
         return self._pairs
 
+    @property
+    def selected_pairs(self):
+        return self._selected_pairs
+
+    @property
+    def selected_groups(self):
+        return self._selected_groups
+
     def clear(self):
         self.clear_groups()
         self.clear_pairs()
@@ -141,14 +151,29 @@ class MuonGroupPairContext(object):
     def clear_pairs(self):
         self._pairs = []
 
+    def clear_selected_pairs(self):
+        self._selected_pairs = []
+
+    def clear_selected_groups(self):
+        self._selected_groups = []
+
     @property
     def selected(self):
         return self._selected
+
+    @property
+    def selected_type(self):
+        return self._selected_type
 
     @selected.setter
     def selected(self, value):
         if value in self.group_names + self.pair_names and self._selected != value:
             self._selected = value
+
+    @selected_type.setter
+    def selected_type(self, value):
+        if value in ["Pair", "Group"] and self._selected_type != value:
+            self._selected_type = value
 
     @property
     def group_names(self):
@@ -187,11 +212,26 @@ class MuonGroupPairContext(object):
         else:
             raise ValueError('Groups and pairs must have unique names')
 
-    def show(self, name, run):
-        self[name].show(str(run))
+    def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction, num_periods):
+        default_groups, default_pairs, default_selected = get_default_grouping(workspace, instrument, main_field_direction)
+        if num_periods == 1:
+            self._groups = default_groups
+            self._pairs = default_pairs
+            self._selected = default_selected
+        else:
+            periods = range(num_periods + 1)[1:]
+            self._groups = []
+            self._pairs = []
+            for period in periods:
+                for group in default_groups:
+                    self._groups.append(MuonGroup(group.name + str(period), group.detectors, [period]))
 
-    def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction):
-        self._groups, self._pairs, self._selected = get_default_grouping(workspace, instrument, main_field_direction)
+            for period in periods:
+                for pair in default_pairs:
+                    self._pairs.append(MuonPair(pair.name + str(period), pair.forward_group + str(period),
+                                       pair.backward_group + str(period), pair.alpha))
+
+            self._selected = self.pair_names[0]
 
     def _check_name_unique(self, name):
         for item in self._groups + self.pairs:
@@ -235,6 +275,32 @@ class MuonGroupPairContext(object):
 
         return None
 
+    # selected groups to analyse
+    def set_selected_groups_to_all(self):
+        self.clear_groups()
+        for group in self.group_names:
+            self._selected_groups.append(group)
+
+    def reset_selected_groups_and_pairs(self):
+        self.clear_selected_pairs()
+        self.clear_selected_groups()
+
+    def add_group_to_selected_groups(self, group):
+        if group in self.group_names and group not in self.selected_groups:
+            self._selected_groups.append(str(group))
+
+    def remove_group_from_selected_groups(self, group):
+        if group in self.group_names and group in self.selected_groups:
+            self._selected_groups.remove(str(group))
+
+    def add_pair_to_selected_pairs(self, pair):
+        if pair in self.pair_names and pair not in self.selected_pairs:
+            self._selected_pairs.append(str(pair))
+
+    def remove_pair_from_selected_pairs(self, pair):
+        if pair in self.pair_names and pair in self.selected_pairs:
+            self._selected_pairs.remove(str(pair))
+
     def remove_workspace_by_name(self, workspace_name):
         for item in self.groups + self.pairs:
             item.remove_workspace_by_name(workspace_name)
@@ -247,3 +313,11 @@ class MuonGroupPairContext(object):
             unnormalised_workspace = group.find_unormalised(workspace)
             if unnormalised_workspace:
                 return unnormalised_workspace
+
+    def get_group_pair_name_and_run_from_workspace_name(self, workspace_name):
+        for group_pair in self.groups + self.pairs:
+            run = group_pair.get_run_for_workspace(workspace_name)
+            if(run):
+                return group_pair.name, str(run)
+
+        return None, None

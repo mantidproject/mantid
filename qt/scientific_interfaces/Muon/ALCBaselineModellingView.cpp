@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCBaselineModellingView.h"
 
@@ -91,6 +91,8 @@ void ALCBaselineModellingView::setDataCurve(MatrixWorkspace_sptr workspace,
 void ALCBaselineModellingView::setCorrectedCurve(
     MatrixWorkspace_sptr workspace, std::size_t const &workspaceIndex) {
   const auto kwargs = getPlotKwargs(m_ui.correctedPlot, "Corrected");
+
+  m_ui.correctedPlot->clear();
   m_ui.correctedPlot->addSpectrum("Corrected", workspace, workspaceIndex,
                                   Qt::blue, kwargs);
 }
@@ -135,7 +137,7 @@ void ALCBaselineModellingView::setFunction(IFunction_const_sptr func) {
       double error = func->getError(i);
 
       m_ui.function->setParameter(name, value);
-      m_ui.function->setParamError(name, error);
+      m_ui.function->setParameterError(name, error);
     }
   }
 }
@@ -157,7 +159,7 @@ void ALCBaselineModellingView::setSectionRow(
 
 void ALCBaselineModellingView::addSectionSelector(
     int index, IALCBaselineModellingView::SectionSelector values) {
-  RangeSelector *newSelector = new RangeSelector(m_ui.dataPlot);
+  auto *newSelector = new RangeSelector(m_ui.dataPlot);
 
   if (index % 3 == 0) {
     newSelector->setColour(Qt::blue);

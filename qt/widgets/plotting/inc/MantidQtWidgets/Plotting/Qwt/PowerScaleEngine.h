@@ -27,8 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef POWER_SCALE_ENGINE_H
-#define POWER_SCALE_ENGINE_H
+#pragma once
 
 #include "MantidQtWidgets/Plotting/DllOption.h"
 #include "ScaleEngine.h"
@@ -84,5 +83,3 @@ private:
   QwtValueList buildMajorTicks(const QwtDoubleInterval &interval,
                                double stepSize) const;
 };
-
-#endif

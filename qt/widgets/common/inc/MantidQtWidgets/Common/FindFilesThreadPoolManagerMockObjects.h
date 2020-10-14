@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTESTMOCKOBJECTS_H_
-#define MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTESTMOCKOBJECTS_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/FindFilesThreadPoolManager.h"
@@ -60,7 +59,7 @@ private:
   int m_milliseconds;
 };
 
-/** FakeMWRunFiles
+/** FakeFileFinderWidget
  *
  * This implements the slots required to listen to a FindFilesWorker
  * and will simply capture the result produced by the worker.
@@ -68,11 +67,11 @@ private:
  * It will also capture if the worker notified that the search was
  * finished.
  */
-class EXPORT_OPT_MANTIDQT_COMMON FakeMWRunFiles : public QObject {
+class EXPORT_OPT_MANTIDQT_COMMON FakeFileFinderWidget : public QObject {
   Q_OBJECT
 
 public:
-  FakeMWRunFiles() : m_results(), m_finishedSignalRecieved(false) {
+  FakeFileFinderWidget() : m_results(), m_finishedSignalRecieved(false) {
     connect(this, SIGNAL(fileFindingFinished()), this,
             SLOT(setSignalRecieved()));
   }
@@ -104,5 +103,3 @@ private:
 
 } // namespace API
 } // namespace MantidQt
-
-#endif /* MANTIDQT_API_FINDFILESTHREADPOOLMANAGERTESTMOCKOBJECTS_H_ */

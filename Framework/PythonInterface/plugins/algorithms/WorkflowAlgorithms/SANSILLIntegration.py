@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, MatrixWorkspaceProperty, WorkspaceUnitValidator, WorkspaceGroupProperty, \
     PropertyMode, MatrixWorkspace, NumericAxis
 from mantid.kernel import EnabledWhenProperty, FloatArrayProperty, Direction, StringListValidator, \
@@ -79,7 +78,7 @@ class SANSILLIntegration(PythonAlgorithm):
                              doc='Choose the output type.')
 
         self.declareProperty(name='CalculateResolution',
-                             defaultValue='MildnerCarpenter',
+                             defaultValue='None',
                              validator=StringListValidator(['MildnerCarpenter', 'None']),
                              doc='Choose to calculate the Q resolution.')
 
@@ -136,11 +135,13 @@ class SANSILLIntegration(PythonAlgorithm):
         self.setPropertyGroup('WedgeOffset', 'I(Q) Options')
         self.setPropertyGroup('AsymmetricWedges', 'I(Q) Options')
 
-        self.declareProperty(name='MaxQxy', defaultValue=0., validator=FloatBoundedValidator(lower=0.),
+        self.declareProperty(name='MaxQxy', defaultValue=-1.0,
+                             validator=FloatBoundedValidator(lower=-1.0),
                              doc='Maximum of absolute Qx and Qy.')
         self.setPropertySettings('MaxQxy', output_iqxy)
 
-        self.declareProperty(name='DeltaQ', defaultValue=0., validator=FloatBoundedValidator(lower=0),
+        self.declareProperty(name='DeltaQ', defaultValue=-1.0,
+                             validator=FloatBoundedValidator(lower=-1.0),
                              doc='The dimension of a Qx-Qy cell.')
         self.setPropertySettings('DeltaQ', output_iqxy)
 
@@ -157,6 +158,12 @@ class SANSILLIntegration(PythonAlgorithm):
                                  ' for example to discard high and low lambda ranges;'
                                  'see MaskBinsIf algorithm for details.')
 
+        self.declareProperty(WorkspaceGroupProperty('PanelOutputWorkspaces', '',
+                                                    direction=Direction.Output,
+                                                    optional=PropertyMode.Optional),
+                             doc='The name of the output workspace group for detector panels (D33).')
+        self.setPropertyGroup('PanelOutputWorkspaces', 'I(Q) Options')
+
     def PyExec(self):
         self._input_ws = self.getPropertyValue('InputWorkspace')
         self._output_type = self.getPropertyValue('OutputType')
@@ -166,11 +173,28 @@ class SANSILLIntegration(PythonAlgorithm):
         if self._masking_criterion:
             MaskBinsIf(InputWorkspace=self._input_ws, OutputWorkspace=self._input_ws+'_masked', Criterion=self._masking_criterion)
             self._input_ws = self._input_ws+'_masked'
-        if self._output_type == 'I(Q)' or self._output_type == 'I(Phi,Q)':
-            self._integrate_iq()
-        elif self._output_type == 'I(Qx,Qy)':
-            self._integrate_iqxy()
+        self._integrate(self._input_ws, self._output_ws)
         self.setProperty('OutputWorkspace', self._output_ws)
+        panels_out_ws = self.getPropertyValue('PanelOutputWorkspaces')
+        if mtd[self._output_ws].getInstrument().getName() == 'D33' and panels_out_ws:
+            panel_names = mtd[self._output_ws].getInstrument().getStringParameter('detector_panels')[0].split(',')
+            panel_outputs = []
+            for panel in panel_names:
+                in_ws = self._input_ws + '_' + panel
+                out_ws = panels_out_ws + '_' + panel
+                CropToComponent(InputWorkspace=self._input_ws, OutputWorkspace=in_ws, ComponentNames=panel)
+                self._integrate(in_ws, out_ws, panel)
+                DeleteWorkspace(in_ws)
+                ReplaceSpecialValues(InputWorkspace=out_ws, OutputWorkspace=out_ws, NaNValue=0, NaNError=0)
+                panel_outputs.append(out_ws)
+            GroupWorkspaces(InputWorkspaces=panel_outputs, OutputWorkspace=panels_out_ws)
+            self.setProperty('PanelOutputWorkspaces', mtd[panels_out_ws])
+
+    def _integrate(self, in_ws, out_ws, panel=None):
+        if self._output_type == 'I(Q)' or self._output_type == 'I(Phi,Q)':
+            self._integrate_iq(in_ws, out_ws, panel)
+        elif self._output_type == 'I(Qx,Qy)':
+            self._integrate_iqxy(in_ws, out_ws)
 
     def _get_iq_binning(self, q_min, q_max, pixel_size, wavelength, l2, binning_factor, offset):
         """
@@ -187,7 +211,18 @@ class SANSILLIntegration(PythonAlgorithm):
                 q_binning = self._mildner_carpenter_q_binning(q_min, q_max, binning_factor)
             else:
                 if wavelength != 0:
-                    q_binning = self._pixel_q_binning(q_min, q_max, pixel_size * binning_factor, wavelength, l2, offset)
+                    run = mtd[self._input_ws].getRun()
+                    instrument = mtd[self._input_ws].getInstrument()
+                    if instrument.getName() == "D16" and run.hasProperty("Gamma.value") \
+                            and run.getLogData("Gamma.value") != 0:
+                        if instrument.hasParameter('detector-width'):
+                            pixel_nb = instrument.getNumberParameter('detector-width')[0]
+                        else:
+                            self.log().warning("Width of the instrument not found. Assuming 320 pixels.")
+                            pixel_nb = 320
+                        q_binning = self._pixel_q_binning_non_aligned(q_min, q_max, pixel_nb, binning_factor)
+                    else:
+                        q_binning = self._pixel_q_binning(q_min, q_max, pixel_size * binning_factor, wavelength, l2, offset)
                 else:
                     q_binning = self._tof_default_q_binning(q_min, q_max)
         elif len(binning) == 1:
@@ -209,6 +244,13 @@ class SANSILLIntegration(PythonAlgorithm):
         Returns default q binning for tof mode
         """
         return [q_min, -0.05, q_max]
+
+    def _pixel_q_binning_non_aligned(self, q_min, q_max, pixel_nb, binning_factor):
+        """
+        Returns q binning based on q_min, q_max. Used when the detector is not aligned with axis Z.
+        """
+        step = (q_max - q_min) * binning_factor / pixel_nb
+        return [q_min, step, q_max]
 
     def _pixel_q_binning(self, q_min, q_max, pixel_size, wavelength, l2, offset):
         """
@@ -294,24 +336,42 @@ class SANSILLIntegration(PythonAlgorithm):
             else:
                 self._deltaQ = MonochromaticScalarQCylindric(wavelength, delta_wavelength, r1, r2, x3, y3, l1, l2)
 
-    def _integrate_iqxy(self):
+    def _integrate_iqxy(self, ws_in, ws_out):
         """
         Calls Qxy
         """
         max_qxy = self.getProperty('MaxQxy').value
         delta_q = self.getProperty('DeltaQ').value
         log_binning = self.getProperty('IQxQyLogBinning').value
-        Qxy(InputWorkspace=self._input_ws, OutputWorkspace=self._output_ws, MaxQxy=max_qxy, DeltaQ=delta_q, IQxQyLogBinning=log_binning)
+        if max_qxy == -1:
+            qmax = mtd[ws_in].getRun().getLogData("qmax").value
+            max_qxy = qmax * 0.7071 # np.sqrt(2) / 2
+            self.log().information("Nothing ptovided for MaxQxy. Using a "
+                                   "calculated value: {0}".format(max_qxy))
+        if delta_q == -1:
+            if log_binning:
+                delta_q = max_qxy / 10
+            else:
+                delta_q = max_qxy / 64
+            self.log().information("Nothing provided for DeltaQ. Using a "
+                                   "calculated value: {0}".format(delta_q))
+        Qxy(InputWorkspace=ws_in, OutputWorkspace=ws_out, MaxQxy=max_qxy,
+            DeltaQ=delta_q, IQxQyLogBinning=log_binning)
 
-    def _integrate_iq(self):
+    def _integrate_iq(self, ws_in, ws_out, panel=None):
         """
         Produces I(Q) or I(Phi,Q) using Q1DWeighted
         """
         if self._resolution == 'MildnerCarpenter':
             self._setup_mildner_carpenter()
-        run = mtd[self._input_ws].getRun()
-        q_min = run.getLogData('qmin').value
-        q_max = run.getLogData('qmax').value
+        run = mtd[ws_in].getRun()
+        q_min_name = 'qmin'
+        q_max_name = 'qmax'
+        if panel:
+            q_min_name += ('_' + panel)
+            q_max_name += ('_' + panel)
+        q_min = run.getLogData(q_min_name).value
+        q_max = run.getLogData(q_max_name).value
         self.log().information('Using qmin={0:.2f}, qmax={1:.2f}'.format(q_min, q_max))
         pixel_height = run.getLogData('pixel_height').value
         pixel_width = run.getLogData('pixel_width').value
@@ -329,45 +389,53 @@ class SANSILLIntegration(PythonAlgorithm):
         pixel_division = self.getProperty('NPixelDivision').value
         gravity = wavelength == 0.
         if self._output_type == 'I(Q)':
+            if panel:
+                # do not process wedges for panels
+                n_wedges = 0
             wedge_ws = self.getPropertyValue('WedgeWorkspace')
             wedge_angle = self.getProperty('WedgeAngle').value
             wedge_offset = self.getProperty('WedgeOffset').value
             asymm_wedges = self.getProperty('AsymmetricWedges').value
-            Q1DWeighted(InputWorkspace=self._input_ws, OutputWorkspace=self._output_ws,
-                        NumberOfWedges=n_wedges, OutputBinning=q_binning, AccountForGravity=gravity,
-                        WedgeWorkspace=wedge_ws, WedgeAngle=wedge_angle, WedgeOffset=wedge_offset,
-                        AsymmetricWedges=asymm_wedges, NPixelDivision=pixel_division)
+            Q1DWeighted(InputWorkspace=ws_in, OutputWorkspace=ws_out,
+                        NumberOfWedges=n_wedges, OutputBinning=q_binning,
+                        AccountForGravity=gravity, WedgeWorkspace=wedge_ws,
+                        WedgeAngle=wedge_angle, WedgeOffset=wedge_offset,
+                        AsymmetricWedges=asymm_wedges,
+                        NPixelDivision=pixel_division)
             if self._resolution == 'MildnerCarpenter':
-                x = mtd[self._output_ws].readX(0)
+                x = mtd[ws_out].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)
-                mtd[self._output_ws].setDx(0, res)
+                mtd[ws_out].setDx(0, res)
                 if n_wedges != 0:
                     for wedge in range(n_wedges):
                         mtd[wedge_ws].getItem(wedge).setDx(0, res)
             if n_wedges != 0:
                 self.setProperty('WedgeWorkspace', mtd[wedge_ws])
         elif self._output_type == 'I(Phi,Q)':
-            wedge_ws = '__wedges' + self._input_ws
-            iq_ws = '__iq' + self._input_ws
+            wedge_ws = '__wedges' + ws_in
+            iq_ws = '__iq' + ws_in
             wedge_angle = 360./n_wedges
             azimuth_axis = NumericAxis.create(n_wedges)
-            azimuth_axis.setUnit("Degrees")
+            azimuth_axis.setUnit("Phi")
             for i in range(n_wedges):
                 azimuth_axis.setValue(i, i * wedge_angle)
-            Q1DWeighted(InputWorkspace=self._input_ws, OutputWorkspace=iq_ws, NumberOfWedges=n_wedges,
-                        NPixelDivision=pixel_division, OutputBinning=q_binning, WedgeWorkspace=wedge_ws,
-                        WedgeAngle=wedge_angle, AsymmetricWedges=True, AccountForGravity=gravity)
+            Q1DWeighted(InputWorkspace=ws_in, OutputWorkspace=iq_ws,
+                        NumberOfWedges=n_wedges, NPixelDivision=pixel_division,
+                        OutputBinning=q_binning, WedgeWorkspace=wedge_ws,
+                        WedgeAngle=wedge_angle, AsymmetricWedges=True,
+                        AccountForGravity=gravity)
             DeleteWorkspace(iq_ws)
-            ConjoinSpectra(InputWorkspaces=wedge_ws, OutputWorkspace=self._output_ws)
-            mtd[self._output_ws].replaceAxis(1, azimuth_axis)
+            ConjoinSpectra(InputWorkspaces=wedge_ws, OutputWorkspace=ws_out)
+            mtd[ws_out].replaceAxis(1, azimuth_axis)
             DeleteWorkspace(wedge_ws)
             if self._resolution == 'MildnerCarpenter':
-                x = mtd[self._output_ws].readX(0)
+                x = mtd[ws_out].readX(0)
                 mid_x = (x[1:] + x[:-1]) / 2
                 res = self._deltaQ(mid_x)
-                for i in range(mtd[self._output_ws].getNumberHistograms()):
-                    mtd[self._output_ws].setDx(i, res)
+                for i in range(mtd[ws_out].getNumberHistograms()):
+                    mtd[ws_out].setDx(i, res)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(SANSILLIntegration)

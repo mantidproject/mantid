@@ -200,13 +200,29 @@ batch to reduce runs in that batch's processing table.
 Menu Bar
 ~~~~~~~~
 
-The main menu currently just contains options for managing batches via the
-**Batch** menu:
+Batch Menu
+^^^^^^^^^^
+
+The **Batch** menu contains options for managing the Batch tabs:
 
 +------------------+----------------------------------------------------------+
 | Action           | Effect                                                   |
 +==================+==========================================================+
 | New              | Add a new Batch tab                                      |
+| Load             | Load settings for the current Batch tab from a file      |
+| Save             | Save settings for the current Batch to a file            |
++------------------+----------------------------------------------------------+
+
+Tools Menu
+^^^^^^^^^^
+
+The **Tools** menu provides access to options and utilities:
+
++------------------+----------------------------------------------------------+
+| Action           | Effect                                                   |
++==================+==========================================================+
+| Slit Calculator  | Tool for calculating approximate slit widths             |
+| Options          | Tool for controlling warnings and rounding precision     |
 +------------------+----------------------------------------------------------+
 
 Runs Tab
@@ -471,8 +487,11 @@ Search Interface
 
   *The search interface*
 
-To search for runs, select the instrument the runs are from, enter the id of
-the investigation the runs are part of, and click on **Search**.
+To search for runs, select the instrument the runs are from, enter the
+experiment ID and cycle name of the investigation the runs are part of, and
+click on **Search**. Note that the cycle name is optional but it is recommended
+to use it to avoid requiring an ICat login. At the time of writing, the ICat
+search is also less reliable.
 
 In the table below, valid runs and their descriptions will be listed. You can
 then transfer runs to the processing table by selecting the runs you wish to
@@ -585,9 +604,16 @@ this will cause unsaved changes to be lost.
 
 Live Data Monitoring
 ^^^^^^^^^^^^^^^^^^^^
+.. figure:: /images/ISISReflectometryInterface/live_data_section.png
+  :class: screenshot
+  :width: 400px
+  :align: center
+  :alt: The event handling tab
+
+  *The live data section*
 
 The *Live data* section on the *Runs* tab allows you to start a monitoring
-algorithm that will periodically load live data from the instrument and reduce
+algorithm that will periodically load live data from the instrument, given by the update interval spin box, and reduce
 it with :ref:`ReflectometryReductionOneAuto
 <algm-ReflectometryReductionOneAuto>`. It outputs two workspaces, `TOF_live`
 for the original data and `IvsQ_binned_live` for the reduced data.
@@ -733,7 +759,9 @@ exist.
   *The per-angle defaults table*
 
 Entries in the per-angle defaults table are similar to the table on the Runs
-tab. Default transmission runs can be specified and each input can take a
+tab. Hover over a table cell to see a tooltip describing what the value is for.
+
+Default transmission runs can be specified and each input can take a
 single run/workspace or a number of runs/workspaces that will be summed before
 processing. Specific spectra of interest can be specified for the input runs
 and separate spectra, if required, can be specified for the transmission runs -
@@ -754,6 +782,7 @@ Save ASCII Tab
 
 The **Save ASCII** tab allows for processed workspaces to be saved in specific
 ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext].
+See :ref:`algm-SaveReflectometryAscii` for a description of the formats.
 
 .. figure:: /images/ISISReflectometryInterface/save_tab.png
   :class: screenshot
@@ -806,7 +835,7 @@ ASCII formats. The filenames are saved in the form [Prefix][Workspace Name].[ext
 |                               | available as save algorithms from mantid itself.     |
 +-------------------------------+------------------------------------------------------+
 | Custom Format Options         | When saving in 'Custom' this section allows you      |
-|                               | to specify if you want a Title and/or Q Resolution   |
+|                               | to specify if you want a Header and/or Q Resolution  |
 |                               | column as well as specifying the delimiter.          |
 +-------------------------------+------------------------------------------------------+
 | Automatic Save                | Automatically save the main output workspace for     |

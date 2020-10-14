@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FOLDER_H
-#define FOLDER_H
+#pragma once
 
 #include <QEvent>
 #include <QObject>
@@ -220,5 +219,3 @@ protected slots:
 signals:
   void deleteSelection();
 };
-
-#endif

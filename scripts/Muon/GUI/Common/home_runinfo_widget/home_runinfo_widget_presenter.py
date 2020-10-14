@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from Muon.GUI.Common.home_tab.home_tab_presenter import HomeTabSubWidget
 
 
@@ -32,8 +30,8 @@ class HomeRunInfoWidgetPresenter(HomeTabSubWidget):
         self._view.add_text_line("Counts (MEv)              : " + str(self._model.get_counts_in_MeV(counts)))
         self._view.add_text_line(self.create_text_line("Good Frames              ", "goodfrm"))
         self._view.add_text_line("Counts per Good Frame     : " + str(self._model.get_counts_per_good_frame(counts)))
-        self._view.add_text_line("Counts per Good Frame per det : " +
-                                 str(self._model.get_counts_per_good_frame_per_detector(counts)))
+        self._view.add_text_line("Counts per Good Frame per det : "
+                                 + str(self._model.get_counts_per_good_frame_per_detector(counts)))
         self._view.add_text_line("Average Temperature (K)   : "+str(self._model.get_average_temperature()))
         self._view.add_text_line(self.create_text_line("Sample Temperature (K)   ", "sample_temp"))
         self._view.add_text_line(self.create_text_line("Sample Magnetic Field (G)", "sample_magn_field"))

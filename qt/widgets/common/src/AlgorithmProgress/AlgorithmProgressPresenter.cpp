@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressPresenter.h"
 #include "MantidQtWidgets/Common/AlgorithmProgress/AlgorithmProgressWidget.h"
@@ -13,7 +13,7 @@ AlgorithmProgressPresenter::AlgorithmProgressPresenter(
     QWidget *parent, IAlgorithmProgressWidget *view)
     : AlgorithmProgressPresenterBase(parent), m_model{AlgorithmProgressModel(
                                                   this)},
-      m_algorithm(nullptr), m_view(view) {}
+      m_algorithm(nullptr), m_view(view), m_timer() {}
 
 void AlgorithmProgressPresenter::algorithmStartedSlot(
     Mantid::API::AlgorithmID alg) {
@@ -43,13 +43,22 @@ void AlgorithmProgressPresenter::algorithmEndedSlot(
 /// @param progress The progress that the algorithm has reported
 /// @param message The message that the algorithm has reported. It can be
 /// emitted from another thread, so a copy of the message is forced
+/// @param estimatedTime :: estimated time to completion in seconds
+/// @param progressPrecision :: number of digits after the decimal
 void AlgorithmProgressPresenter::updateProgressBarSlot(
     Mantid::API::AlgorithmID algorithm, const double progress,
-    QString message) {
+    const QString message, const double estimatedTime,
+    const int progressPrecision) {
   if (algorithm == this->m_algorithm) {
     // this needs to be a call to the view
     // so that it can be mocked out for testing
-    m_view->updateProgress(progress, message);
+    constexpr float maxRefreshInterval{0.1f};
+    float timeInterval = m_timer.elapsed_no_reset();
+    if (timeInterval > maxRefreshInterval) {
+      m_timer.reset();
+      m_view->updateProgress(progress, message, estimatedTime,
+                             progressPrecision);
+    }
   }
 }
 

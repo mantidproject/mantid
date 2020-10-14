@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -41,8 +41,7 @@ DampedGaussNewtonMinimizer::DampedGaussNewtonMinimizer(double relTol)
 void DampedGaussNewtonMinimizer::initialize(API::ICostFunction_sptr function,
                                             size_t /*maxIterations*/) {
   m_leastSquares =
-      boost::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(
-          function);
+      std::dynamic_pointer_cast<CostFunctions::CostFuncLeastSquares>(function);
   if (!m_leastSquares) {
     throw std::invalid_argument(
         "Damped Gauss-Newton minimizer works only with least "

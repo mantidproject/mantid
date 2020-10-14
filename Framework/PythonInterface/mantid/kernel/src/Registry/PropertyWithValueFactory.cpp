@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
@@ -15,12 +15,12 @@
 #include "MantidPythonInterface/kernel/Registry/SequenceTypeHandler.h"
 #include "MantidPythonInterface/kernel/Registry/TypedPropertyValueHandler.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/python.hpp>
 #include <boost/python/class.hpp>
 #include <boost/python/extract.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/object.hpp>
+#include <memory>
 
 #include <cassert>
 
@@ -36,7 +36,7 @@ namespace Registry {
 namespace {
 /// Lookup map type
 using PyTypeIndex =
-    std::map<const PyTypeObject *, boost::shared_ptr<PropertyValueHandler>>;
+    std::map<const PyTypeObject *, std::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Initialize lookup map
@@ -46,33 +46,33 @@ void initTypeLookup(PyTypeIndex &index) {
 
   // Map the Python types to the best match in C++
   using FloatHandler = TypedPropertyValueHandler<double>;
-  index.emplace(&PyFloat_Type, boost::make_shared<FloatHandler>());
+  index.emplace(&PyFloat_Type, std::make_shared<FloatHandler>());
 
   using BoolHandler = TypedPropertyValueHandler<bool>;
-  index.emplace(&PyBool_Type, boost::make_shared<BoolHandler>());
+  index.emplace(&PyBool_Type, std::make_shared<BoolHandler>());
 
   // Python 2/3 have an arbitrary-sized long type. The handler
   // will raise an error if the input value overflows a C long
   using IntHandler = TypedPropertyValueHandler<long>;
-  index.emplace(&PyLong_Type, boost::make_shared<IntHandler>());
+  index.emplace(&PyLong_Type, std::make_shared<IntHandler>());
 
   // In Python 3 all strings are unicode but in Python 2 unicode strings
   // must be explicitly requested. The C++ string handler will accept both
   // but throw and error if the unicode string contains non-ascii characters
   using AsciiStrHandler = TypedPropertyValueHandler<std::string>;
   // Both versions have unicode objects
-  index.emplace(&PyUnicode_Type, boost::make_shared<AsciiStrHandler>());
+  index.emplace(&PyUnicode_Type, std::make_shared<AsciiStrHandler>());
 
 #if PY_MAJOR_VERSION < 3
   // Version < 3 had separate fixed-precision long and arbitrary precision
   // long objects. Handle these too
-  index.emplace(&PyInt_Type, boost::make_shared<IntHandler>());
+  index.emplace(&PyInt_Type, std::make_shared<IntHandler>());
   // Version 2 also has the PyString_Type
-  index.emplace(&PyString_Type, boost::make_shared<AsciiStrHandler>());
+  index.emplace(&PyString_Type, std::make_shared<AsciiStrHandler>());
 #endif
 
   // Handle a dictionary type
-  index.emplace(&PyDict_Type, boost::make_shared<MappingTypeHandler>());
+  index.emplace(&PyDict_Type, std::make_shared<MappingTypeHandler>());
 }
 
 /**
@@ -87,7 +87,7 @@ const PyTypeIndex &getTypeIndex() {
 
 // Lookup map for arrays
 using PyArrayIndex =
-    std::map<std::string, boost::shared_ptr<PropertyValueHandler>>;
+    std::map<std::string, std::shared_ptr<PropertyValueHandler>>;
 
 /**
  * Initialize lookup map
@@ -97,18 +97,18 @@ void initArrayLookup(PyArrayIndex &index) {
 
   // Map the Python array types to the best match in C++
   using FloatArrayHandler = SequenceTypeHandler<std::vector<double>>;
-  index.emplace("FloatArray", boost::make_shared<FloatArrayHandler>());
+  index.emplace("FloatArray", std::make_shared<FloatArrayHandler>());
 
   using StringArrayHandler = SequenceTypeHandler<std::vector<std::string>>;
-  index.emplace("StringArray", boost::make_shared<StringArrayHandler>());
+  index.emplace("StringArray", std::make_shared<StringArrayHandler>());
 
   using LongIntArrayHandler = SequenceTypeHandler<std::vector<long>>;
-  index.emplace("LongIntArray", boost::make_shared<LongIntArrayHandler>());
+  index.emplace("LongIntArray", std::make_shared<LongIntArrayHandler>());
 
 #if PY_MAJOR_VERSION < 3
   // Backwards compatible behaviour
   using IntArrayHandler = SequenceTypeHandler<std::vector<int>>;
-  index.emplace("IntArray", boost::make_shared<IntArrayHandler>());
+  index.emplace("IntArray", std::make_shared<IntArrayHandler>());
 #endif
 }
 

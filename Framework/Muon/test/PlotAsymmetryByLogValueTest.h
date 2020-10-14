@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PLOTASYMMETRYBYLOGVALUTEST_H_
-#define PLOTASYMMETRYBYLOGVALUTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -122,7 +121,7 @@ public:
   /// Clear the ADS at the end of every test
   void tearDown() override { AnalysisDataService::Instance().clear(); }
 
-  void testExec() {
+  void test_exec_with_first_and_last() {
     PlotAsymmetryByLogValue alg;
     alg.initialize();
     alg.setPropertyValue("FirstRun", firstRun);
@@ -135,7 +134,43 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve(
+            "PlotAsymmetryByLogValueTest_WS"));
+
+    TS_ASSERT(outWS);
+    TS_ASSERT_EQUALS(outWS->blocksize(), 2);
+    TS_ASSERT_EQUALS(outWS->getNumberHistograms(), 4);
+    const auto &Y = outWS->y(0);
+    TS_ASSERT_DELTA(Y[0], 0.0128845, 0.001);
+    TS_ASSERT_DELTA(Y[1], 0.0224898, 0.00001);
+
+    const TextAxis *axis = dynamic_cast<const TextAxis *>(outWS->getAxis(1));
+    TS_ASSERT(axis);
+    if (axis) {
+      TS_ASSERT_EQUALS(axis->length(), 4);
+      TS_ASSERT_EQUALS(axis->label(0), "Red-Green");
+      TS_ASSERT_EQUALS(axis->label(1), "Red");
+      TS_ASSERT_EQUALS(axis->label(2), "Green");
+      TS_ASSERT_EQUALS(axis->label(3), "Red+Green");
+    }
+  }
+
+  void test_exec_with_workspacenames() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    const std::vector<std::string> names{firstRun, lastRun};
+
+    alg.setProperty("WorkspaceNames", names);
+    alg.setPropertyValue("OutputWorkspace", "PlotAsymmetryByLogValueTest_WS");
+    alg.setPropertyValue("LogValue", "Field_Danfysik");
+    alg.setPropertyValue("Red", "2");
+    alg.setPropertyValue("Green", "1");
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -171,7 +206,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -196,7 +231,7 @@ public:
 
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -216,7 +251,7 @@ public:
 
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -279,7 +314,7 @@ public:
     if (!alg.isExecuted())
       return;
 
-    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
@@ -312,7 +347,7 @@ public:
     if (!alg.isExecuted())
       return;
 
-    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
@@ -346,7 +381,7 @@ public:
     if (!alg.isExecuted())
       return;
 
-    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -387,7 +422,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
@@ -419,7 +454,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWs = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWs = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWs);
@@ -466,7 +501,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(ws));
 
     TS_ASSERT(outWS);
@@ -491,7 +526,7 @@ public:
 
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -518,7 +553,7 @@ public:
 
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
 
@@ -546,7 +581,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
-    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outWS = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(
             "PlotAsymmetryByLogValueTest_WS"));
     TS_ASSERT(outWS);
@@ -582,6 +617,78 @@ public:
     TS_ASSERT(alg.isExecuted());
     TS_ASSERT_EQUALS(watcher.getLoadedCount(), 3); // i.e. not 5 loads
     TS_ASSERT_EQUALS(watcher.getFoundCount(), 2);  // reused 2
+  }
+
+  void
+  test_validate_inputs_fails_if_neither_first_and_last_or_workspacenames_is_defined() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    auto result = alg.validateInputs();
+    const auto expected = "Must either supply WorkspaceNames or FirstRun and "
+                          "LastRun";
+    TS_ASSERT_EQUALS(result["FirstRun"], expected);
+    TS_ASSERT_EQUALS(result["LastRun"], expected);
+    TS_ASSERT_EQUALS(result["WorkspaceNames"], expected);
+  }
+
+  void test_input_passes_with_first_and_last() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    alg.setProperty("FirstRun", firstRun);
+    alg.setProperty("LastRun", lastRun);
+    auto result = alg.validateInputs();
+    TS_ASSERT(result.empty());
+  }
+
+  void test_input_passes_with_workspacenames() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    std::vector<std::string> input{firstRun, lastRun};
+    alg.setProperty("WorkspaceNames", input);
+    auto result = alg.validateInputs();
+    std::vector<std::string> propertyValue = alg.getProperty("WorkspaceNames");
+    TS_ASSERT(result.empty());
+    TS_ASSERT_EQUALS(input, propertyValue);
+  }
+
+  void test_input_passes_with_both_file_input_methods_used() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    std::vector<std::string> input{firstRun, lastRun};
+    alg.setProperty("WorkspaceNames", input);
+    alg.setProperty("FirstRun", firstRun);
+    alg.setProperty("LastRun", lastRun);
+    auto result = alg.validateInputs();
+    TS_ASSERT(result.empty());
+  }
+
+  void test_input_fails_with_only_first_supplied() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    alg.setProperty("FirstRun", firstRun);
+    auto result = alg.validateInputs();
+    const auto expected = "Must supply both FirstRun and LastRun";
+    TS_ASSERT_EQUALS(result["FirstRun"], expected);
+    TS_ASSERT_EQUALS(result["LastRun"], expected);
+  }
+
+  void test_input_fails_with_only_last_supplied() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    alg.setProperty("LastRun", lastRun);
+    auto result = alg.validateInputs();
+    const auto expected = "Must supply both FirstRun and LastRun";
+    TS_ASSERT_EQUALS(result["FirstRun"], expected);
+    TS_ASSERT_EQUALS(result["LastRun"], expected);
+  }
+
+  void test_extract_run_number_from_run_name() {
+    PlotAsymmetryByLogValue alg;
+    alg.initialize();
+    const int firstRunNumber = alg.extractRunNumberFromRunName(firstRun);
+    const int lastRunNumber = alg.extractRunNumberFromRunName(lastRun);
+    TS_ASSERT_EQUALS(firstRunNumber, 15189);
+    TS_ASSERT_EQUALS(lastRunNumber, 15190);
   }
 
 private:
@@ -624,5 +731,3 @@ private:
   PlotAsymmetryByLogValue alg;
   std::string firstRun, lastRun;
 };
-
-#endif /*PLOTASYMMETRYBYLOGVALUTEST_H_*/

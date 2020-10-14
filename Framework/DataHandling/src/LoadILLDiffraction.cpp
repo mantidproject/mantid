@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadILLDiffraction.h"
 #include "MantidAPI/FileProperty.h"
@@ -64,7 +64,7 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
 int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
-  if (descriptor.pathExists("/entry0/data_scan")) {
+  if (descriptor.pathExists("/entry0/instrument/2theta")) {
     return 80;
   } else {
     return 0;
@@ -107,7 +107,7 @@ void LoadILLDiffraction::init() {
                   "The output workspace.");
   std::vector<std::string> calibrationOptions{"Auto", "Raw", "Calibrated"};
   declareProperty("DataType", "Auto",
-                  boost::make_shared<StringListValidator>(calibrationOptions),
+                  std::make_shared<StringListValidator>(calibrationOptions),
                   "Select the type of data, with or without calibration "
                   "already applied. If Auto then the calibrated data is "
                   "loaded if available, otherwise the raw data is loaded.");
@@ -115,6 +115,9 @@ void LoadILLDiffraction::init() {
       std::make_unique<PropertyWithValue<bool>>("AlignTubes", true,
                                                 Direction::Input),
       "Apply vertical and horizontal alignment of tubes as defined in IPF");
+  declareProperty("ConvertAxisAndTranspose", false,
+                  "Whether to convert the spectrum axis to 2theta and "
+                  "transpose (for 1D detector and no-scan configuration)");
 }
 
 std::map<std::string, std::string> LoadILLDiffraction::validateInputs() {
@@ -148,6 +151,10 @@ void LoadILLDiffraction::exec() {
 
   progress.report("Setting additional sample logs");
   setSampleLogs();
+
+  if (m_instName != "D2B" && m_scanType != DetectorScan &&
+      getProperty("ConvertAxisAndTranspose"))
+    convertAxisAndTranspose();
 
   setProperty("OutputWorkspace", m_outWorkspace);
 }
@@ -622,7 +629,7 @@ std::vector<double> LoadILLDiffraction::getScannedVaribleByPropertyName(
   for (size_t i = 0; i < m_scanVar.size(); ++i) {
     if (m_scanVar[i].property == propertyName) {
       for (size_t j = 0; j < m_numberScanPoints; ++j) {
-        scannedVariable.push_back(
+        scannedVariable.emplace_back(
             scan(static_cast<int>(i), static_cast<int>(j)));
       }
       break;
@@ -710,7 +717,7 @@ LoadILLDiffraction::getAbsoluteTimes(const NXDouble &scan) const {
   size_t timeIndex = 1;
   while (timeIndex < m_numberScanPoints) {
     time += durations[timeIndex - 1];
-    times.push_back(time);
+    times.emplace_back(time);
     ++timeIndex;
   }
   return times;
@@ -899,6 +906,32 @@ bool LoadILLDiffraction::containsCalibratedData(
 void LoadILLDiffraction::computeThetaOffset() {
   m_offsetTheta = static_cast<double>(D20_NUMBER_DEAD_PIXELS) * D20_PIXEL_SIZE -
                   D20_PIXEL_SIZE / (static_cast<double>(m_resolutionMode) * 2);
+}
+
+/**
+ * Converts the spectrum axis to 2theta and transposes the workspace.
+ */
+void LoadILLDiffraction::convertAxisAndTranspose() {
+  auto extractor = createChildAlgorithm("ExtractSpectra");
+  extractor->setProperty("InputWorkspace", m_outWorkspace);
+  extractor->setProperty("StartWorkspaceIndex", 1);
+  extractor->setProperty("OutputWorkspace", "__unused");
+  extractor->execute();
+  API::MatrixWorkspace_sptr det = extractor->getProperty("OutputWorkspace");
+  auto converter = createChildAlgorithm("ConvertSpectrumAxis");
+  converter->setProperty("InputWorkspace", det);
+  converter->setProperty("OutputWorkspace", "__unused");
+  converter->setProperty("Target", "SignedTheta");
+  converter->execute();
+  API::MatrixWorkspace_sptr converted =
+      converter->getProperty("OutputWorkspace");
+  auto transposer = createChildAlgorithm("Transpose");
+  transposer->setProperty("InputWorkspace", converted);
+  transposer->setProperty("OutputWorkspace", "__unused");
+  transposer->execute();
+  API::MatrixWorkspace_sptr transposed =
+      transposer->getProperty("OutputWorkspace");
+  m_outWorkspace = transposed;
 }
 
 } // namespace DataHandling

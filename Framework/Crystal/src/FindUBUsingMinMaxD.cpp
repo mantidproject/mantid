@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FindUBUsingMinMaxD.h"
 #include "MantidAPI/Sample.h"
@@ -45,10 +45,10 @@ void FindUBUsingMinMaxD::init() {
                             "PeaksWorkspace", "", Direction::InOut),
                         "Input Peaks Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
 
-  auto atLeast3Int = boost::make_shared<BoundedValidator<int>>();
+  auto atLeast3Int = std::make_shared<BoundedValidator<int>>();
   atLeast3Int->setLower(3);
 
   // use negative values, force user to input all parameters
@@ -93,7 +93,7 @@ void FindUBUsingMinMaxD::exec() {
   q_vectors.reserve(n_peaks);
 
   for (size_t i = 0; i < n_peaks; i++)
-    q_vectors.push_back(peaks[i].getQSampleFrame());
+    q_vectors.emplace_back(peaks[i].getQSampleFrame());
 
   Matrix<double> UB(3, 3, false);
   double error =
@@ -130,15 +130,13 @@ void FindUBUsingMinMaxD::exec() {
             num_indexed, n_peaks, tolerance);
     g_log.notice(std::string(logInfo));
 
-    OrientedLattice o_lattice;
-    o_lattice.setUB(UB);
-    o_lattice.setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
-                       sigabc[5]);
-
+    auto lattice = std::make_unique<OrientedLattice>();
+    lattice->setUB(UB);
+    lattice->setError(sigabc[0], sigabc[1], sigabc[2], sigabc[3], sigabc[4],
+                      sigabc[5]);
     // Show the modified lattice parameters
-    g_log.notice() << o_lattice << "\n";
-
-    ws->mutableSample().setOrientedLattice(&o_lattice);
+    g_log.notice() << *lattice << "\n";
+    ws->mutableSample().setOrientedLattice(std::move(lattice));
   }
 }
 

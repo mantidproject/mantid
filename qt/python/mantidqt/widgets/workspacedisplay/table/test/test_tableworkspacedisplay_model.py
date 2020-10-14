@@ -1,19 +1,18 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import, division, print_function)
-
 import functools
 import unittest
 
+from mantid.dataobjects import PeaksWorkspace
 from mantid.kernel import V3D
-from mantid.py3compat.mock import Mock
+from unittest.mock import Mock
 from mantidqt.utils.testing.mocks.mock_mantid import MockWorkspace
 from mantidqt.utils.testing.strict_mock import StrictMock
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceColumnTypeMapping, TableWorkspaceDisplayModel
@@ -89,6 +88,29 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
         # -> the one for the column for which the data is being set
         model.ws.setCell.assert_called_once_with(expected_row, expected_col, V3D(1, 2, 3), notify_replace=False)
 
+    @with_mock_workspace
+    def test_set_cell_data_hkl(self, model):
+        """
+        :type model: TableWorkspaceDisplayModel
+        """
+        mock_peaksWorkspace = Mock(spec=PeaksWorkspace)
+        mock_peaksWorkspace.getColumnNames.return_value = ['h', 'k', 'l']
+        mock_peak = Mock()
+        mock_peaksWorkspace.getPeak.return_value = mock_peak
+        model.ws = mock_peaksWorkspace
+
+        row = 1
+        HKL = [4, 3, 2]
+        for col in range(0, len(HKL)):
+            model.set_cell_data(row, col, HKL[col], False)
+
+        # check the correct index was set
+        mock_peak.setH.assert_called_once_with(HKL[0])
+        mock_peak.setK.assert_called_once_with(HKL[1])
+        mock_peak.setL.assert_called_once_with(HKL[2])
+        # check setCell not called
+        model.ws.setCell.assert_not_called()
+
     def test_no_raise_with_supported_workspace(self):
         from mantid.simpleapi import CreateEmptyTableWorkspace
         ws = MockWorkspace()
@@ -110,6 +132,7 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
         mock_column_types = [TableWorkspaceColumnTypeMapping.X, TableWorkspaceColumnTypeMapping.Y,
                              TableWorkspaceColumnTypeMapping.YERR] * num_of_repeated_columns
         ws.getPlotType = lambda i: mock_column_types[i]
+        ws.getLinkedYCol = lambda i: i - 1
         model = TableWorkspaceDisplayModel(ws)
 
         self.assertEqual(num_of_repeated_columns, len(model.marked_columns.as_x))
@@ -118,27 +141,6 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
 
         for i, col in enumerate(range(2, 30, 3)):
             self.assertEqual(col - 1, model.marked_columns.as_y_err[i].related_y_column)
-
-    def test_initialise_marked_columns_yerr_before_y_doesnt_mark_yerr(self):
-        """
-        Test if there are column marking such as [X, Y, YERR, X, YERR, Y]
-                                                                   ^ this YErr
-        won't be associated with any Y column, as there isn't one at the time of adding the YErr column
-        :return:
-        """
-        ws = MockWorkspace()
-        # add 5 columns as that is how many the default mock WS has
-        mock_column_types = [TableWorkspaceColumnTypeMapping.X, TableWorkspaceColumnTypeMapping.YERR,
-                             TableWorkspaceColumnTypeMapping.Y, TableWorkspaceColumnTypeMapping.X,
-                             TableWorkspaceColumnTypeMapping.Y]
-        ws.getPlotType = lambda i: mock_column_types[i]
-        model = TableWorkspaceDisplayModel(ws)
-
-        self.assertEqual(2, len(model.marked_columns.as_x))
-        self.assertEqual(2, len(model.marked_columns.as_y))
-        # no YErr is added because the Y column hasn't been added yet,
-        # and there isn't anything to associate the error with
-        self.assertEqual(0, len(model.marked_columns.as_y_err))
 
     def test_initialise_marked_columns_multiple_y_before_yerr(self):
         ws = MockWorkspace()
@@ -150,16 +152,14 @@ class TableWorkspaceDisplayModelTest(unittest.TestCase):
         ws.columnCount = StrictMock(return_value=len(mock_column_types))
 
         ws.getPlotType = lambda i: mock_column_types[i]
+        ws.getLinkedYCol = StrictMock(side_effect=[1, 3, 4])
         model = TableWorkspaceDisplayModel(ws)
 
         self.assertEqual(2, len(model.marked_columns.as_x))
         self.assertEqual(3, len(model.marked_columns.as_y))
-        # no YErr is added because the Y column hasn't been added yet,
-        # and there isn't anything to associate the error with
         self.assertEqual(3, len(model.marked_columns.as_y_err))
 
         self.assertEqual(1, model.marked_columns.as_y_err[0].related_y_column)
-        # the YErr associates with the FIRST Y column that doesn't have a Y Err
         self.assertEqual(3, model.marked_columns.as_y_err[1].related_y_column)
         self.assertEqual(4, model.marked_columns.as_y_err[2].related_y_column)
 

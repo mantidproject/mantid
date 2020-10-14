@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveReflectometryAscii.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -20,11 +20,11 @@
 
 #include <Poco/File.h>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <cmath>
 #include <iomanip>
 #include <limits>
 #include <map>
+#include <memory>
 #include <stdexcept>
 
 namespace Mantid {
@@ -47,7 +47,7 @@ void SaveReflectometryAscii::init() {
       "The output filename");
   std::vector<std::string> extension = {".mft", ".txt", ".dat", "custom"};
   declareProperty("FileExtension", ".mft",
-                  boost::make_shared<StringListValidator>(extension),
+                  std::make_shared<StringListValidator>(extension),
                   "Choose the file extension according to the file format.");
   auto mft = std::make_unique<VisibleWhenProperty>("FileExtension", IS_EQUAL_TO,
                                                    "mft");
@@ -70,7 +70,7 @@ void SaveReflectometryAscii::init() {
                       std::make_unique<VisibleWhenProperty>(
                           "FileExtension", IS_EQUAL_TO, "custom"));
   declareProperty("Separator", "tab",
-                  boost::make_shared<StringListValidator>(separator),
+                  std::make_shared<StringListValidator>(separator),
                   "The separator used for splitting data columns.");
   setPropertySettings("Separator", std::make_unique<VisibleWhenProperty>(
                                        "FileExtension", IS_EQUAL_TO, "custom"));
@@ -110,17 +110,14 @@ void SaveReflectometryAscii::data() {
   const auto &yData = m_ws->y(0);
   const auto &eData = m_ws->e(0);
   for (size_t i = 0; i < m_ws->y(0).size(); ++i) {
-    outputval(points[i]);
+    outputval(points[i], true);
     outputval(yData[i]);
     outputval(eData[i]);
-    if ((m_ext == "custom" && getProperty("WriteResolution")) ||
-        (m_ext == ".mft") || (m_ext == ".txt")) {
+    if (includeQResolution()) {
       if (m_ws->hasDx(0))
         outputval(m_ws->dx(0)[i]);
-      else {
-        if (m_ext != ".mft")
-          outputval(points[i] * ((points[1] + points[0]) / points[1]));
-      }
+      else
+        outputval(points[i] * ((points[1] + points[0]) / points[1]));
     }
     m_file << '\n';
   }
@@ -137,43 +134,42 @@ void SaveReflectometryAscii::separator() {
   }
 }
 
-/** Write string value
- * @param write :: if true, write string
- * @param s :: string
- */
-bool SaveReflectometryAscii::writeString(bool write, std::string s) {
-  if (write) {
-    if (m_ext == "custom" || m_ext == ".txt")
-      m_file << m_sep << s;
-    else {
-      m_file << std::setw(28);
-      m_file << s;
-    }
-  }
-  return write;
+/// Determine whether to include the Q resolution column in the output
+bool SaveReflectometryAscii::includeQResolution() const {
+  // Always include the resolution for txt format
+  if (m_ext == ".txt")
+    return true;
+  // Only include the resolution for the Custom format if the option is set
+  if (m_ext == "custom" && getProperty("WriteResolution"))
+    return true;
+  // Only include the resolution for MFT if the workspace contains it
+  if (m_ext == ".mft" && m_ws->hasDx(0))
+    return true;
+
+  return false;
 }
 
 /** Write formatted line of data
- *  @param val :: the double value to be written
+ *  @param val :: a value to be written
+ *  @param firstColumn :: true if the value is the first column in the output
  */
-void SaveReflectometryAscii::outputval(double val) {
-  bool inf = writeString(std::isinf(val), "inf");
-  bool nan = writeString(std::isnan(val), "nan");
-  if (!inf && !nan) {
-    if (m_ext == "custom" || m_ext == ".txt")
-      m_file << m_sep << val;
-    else {
-      m_file << std::setw(28);
-      m_file << val;
-    }
+template <typename T>
+void SaveReflectometryAscii::outputval(const T &val, bool firstColumn) {
+  // cppcheck-suppress syntaxError
+  if constexpr (std::is_floating_point<T>::value) {
+    if (std::isinf(val))
+      return outputval("inf", firstColumn);
+    if (std::isnan(val))
+      return outputval("nan", firstColumn);
   }
-}
 
-/** Write formatted line of data
- *  @param val :: a string value to be written
- */
-void SaveReflectometryAscii::outputval(std::string val) {
-  m_file << std::setw(28) << val;
+  if (m_ext == "custom" || m_ext == ".txt") {
+    if (!firstColumn)
+      m_file << m_sep;
+    m_file << val;
+  } else {
+    m_file << std::setw(28) << val;
+  }
 }
 
 /// Retrieve sample log value
@@ -201,8 +197,8 @@ std::string SaveReflectometryAscii::sampleLogUnit(const std::string &logName) {
  *  @param logName :: the name of a SampleLog entry to get its value from
  *  @param logNameFixed :: the name of the SampleLog entry defined by the header
  */
-void SaveReflectometryAscii::writeInfo(const std::string logName,
-                                       const std::string logNameFixed) {
+void SaveReflectometryAscii::writeInfo(const std::string &logName,
+                                       const std::string &logNameFixed) {
   const std::string logValue = sampleLogValue(logName);
   const std::string logUnit = sampleLogUnit(logName);
   if (!logNameFixed.empty()) {
@@ -246,16 +242,16 @@ void SaveReflectometryAscii::header() {
          << "40\n";
   m_file << "Number of data points : " << m_ws->y(0).size() << '\n';
   m_file << '\n';
-  outputval("q");
+  outputval("q", true);
   outputval("refl");
   outputval("refl_err");
-  if (m_ws->hasDx(0))
+  if (includeQResolution())
     outputval("q_res (FWHM)");
   m_file << "\n";
 }
 
 /// Check file
-void SaveReflectometryAscii::checkFile(const std::string filename) {
+void SaveReflectometryAscii::checkFile(const std::string &filename) {
   if (Poco::File(filename).exists()) {
     g_log.warning("File already exists and will be overwritten");
     try {
@@ -295,7 +291,7 @@ bool SaveReflectometryAscii::checkGroups() {
       if (i->getName().empty())
         g_log.warning("InputWorkspace must have a name, skip");
       else {
-        const auto ws = boost::dynamic_pointer_cast<MatrixWorkspace>(i);
+        const auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(i);
         if (!ws)
           g_log.warning("WorkspaceGroup must contain MatrixWorkspaces, skip");
         else {

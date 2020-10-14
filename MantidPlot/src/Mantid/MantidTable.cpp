@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <iomanip>
 #include <limits>
@@ -34,7 +34,7 @@ using namespace MantidQt::API;
  * @return the MantidTable created
  */
 MantidTable::MantidTable(ScriptingEnv *env,
-                         Mantid::API::ITableWorkspace_sptr ws,
+                         const Mantid::API::ITableWorkspace_sptr &ws,
                          const QString &label, ApplicationWindow *parent,
                          bool transpose)
     : Table(env,
@@ -264,7 +264,7 @@ void MantidTable::closeTable() {
 //------------------------------------------------------------------------------------------------
 void MantidTable::preDeleteHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   Mantid::API::ITableWorkspace *ws_ptr =
       dynamic_cast<Mantid::API::ITableWorkspace *>(ws.get());
   if (!ws_ptr)
@@ -277,9 +277,9 @@ void MantidTable::preDeleteHandle(
 //------------------------------------------------------------------------------------------------
 void MantidTable::afterReplaceHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   Mantid::API::ITableWorkspace_sptr new_ws =
-      boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
+      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(ws);
   if (!new_ws)
     return;
   if (new_ws.get() == m_ws.get() || wsName == m_wsName) {
@@ -403,7 +403,7 @@ void MantidTable::sortColumn(int col, int order) {
     // Customized sorting routine for this TableWorkspace
     std::vector<std::pair<std::string, bool>> criteria;
     // Only one criterion in sorting
-    criteria.push_back(std::pair<std::string, bool>(
+    criteria.emplace_back(std::pair<std::string, bool>(
         m_ws->getColumn(col)->name(), (order == 0)));
     m_ws->sort(criteria);
     // Refresh the table
@@ -437,7 +437,7 @@ void MantidTable::sortColumns(const QStringList &s, int type, int order,
     if (n != std::string::npos && n < col.size() - 1)
       col = col.substr(n + 1, col.size() - n - 1);
     // Only one criterion in sorting
-    criteria.push_back(std::pair<std::string, bool>(col, (order == 0)));
+    criteria.emplace_back(std::pair<std::string, bool>(col, (order == 0)));
     m_ws->sort(criteria);
     // Refresh the table
     this->fillTable();

@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef MUPARSER_SCRIPTING_H
-#define MUPARSER_SCRIPTING_H
+#pragma once
 
 #include "Script.h"
 #include "ScriptingEnv.h"
@@ -116,5 +115,3 @@ class EmptySourceError : public mu::ParserError {
 public:
   EmptySourceError() {}
 };
-
-#endif

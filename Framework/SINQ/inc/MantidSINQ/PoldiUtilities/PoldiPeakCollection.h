@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_POLDIPEAKCOLLECTION_H
-#define MANTID_SINQ_POLDIPEAKCOLLECTION_H
+#pragma once
 
 #include "MantidDataObjects/TableWorkspace.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
@@ -28,7 +27,7 @@ namespace Poldi {
 
 class PoldiPeakCollection;
 
-using PoldiPeakCollection_sptr = boost::shared_ptr<PoldiPeakCollection>;
+using PoldiPeakCollection_sptr = std::shared_ptr<PoldiPeakCollection>;
 
 class MANTID_SINQ_DLL PoldiPeakCollection {
 public:
@@ -85,7 +84,7 @@ protected:
   std::string getUnitCellStringFromLog(const API::LogManager_sptr &tableLog);
 
   std::string getStringValueFromLog(const API::LogManager_sptr &logManager,
-                                    std::string valueName);
+                                    const std::string &valueName);
 
   std::string intensityTypeToString(IntensityType type) const;
   IntensityType intensityTypeFromString(std::string typeString) const;
@@ -107,5 +106,3 @@ protected:
 };
 } // namespace Poldi
 } // namespace Mantid
-
-#endif // MANTID_SINQ_POLDIPEAKCOLLECTION_H

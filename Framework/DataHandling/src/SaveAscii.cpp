@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -34,8 +34,8 @@ SaveAscii::SaveAscii() : m_separatorIndex() {}
 /// Initialisation method.
 void SaveAscii::init() {
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
-                                            Direction::Input),
+      std::make_unique<WorkspaceProperty<MatrixWorkspace>>("InputWorkspace", "",
+                                                           Direction::Input),
       "The name of the workspace containing the data you want to save to a "
       "Ascii file.");
   const std::vector<std::string> asciiExts{".dat", ".txt", ".csv"};
@@ -43,7 +43,7 @@ void SaveAscii::init() {
                                                  FileProperty::Save, asciiExts),
                   "The filename of the output Ascii file.");
 
-  auto mustBeNonNegative = boost::make_shared<BoundedValidator<int>>();
+  auto mustBeNonNegative = std::make_shared<BoundedValidator<int>>();
   mustBeNonNegative->setLower(0);
   declareProperty("WorkspaceIndexMin", 0, mustBeNonNegative,
                   "The starting workspace index.");
@@ -69,11 +69,11 @@ void SaveAscii::init() {
     std::string option = spacer[0];
     m_separatorIndex.insert(
         std::pair<std::string, std::string>(option, spacer[1]));
-    sepOptions.push_back(option);
+    sepOptions.emplace_back(option);
   }
 
   declareProperty("Separator", "CSV",
-                  boost::make_shared<StringListValidator>(sepOptions),
+                  std::make_shared<StringListValidator>(sepOptions),
                   "Character(s) to put as separator between X, Y, E values.");
 
   declareProperty(

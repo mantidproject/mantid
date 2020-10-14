@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "Decoder.h"
 #include "../../Reduction/Group.h"
 #include "../../Reduction/ReductionJobs.h"
@@ -29,8 +28,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
+
 BatchPresenter *Decoder::findBatchPresenter(const QtBatchView *gui,
-                                            const QtMainWindowView *mwv) {
+                                            const IMainWindowView *view) {
+  auto mwv = dynamic_cast<const QtMainWindowView *>(view);
   for (auto &ipresenter : mwv->m_presenter->m_batchPresenters) {
     auto presenter = dynamic_cast<BatchPresenter *>(ipresenter.get());
     if (presenter->m_view == gui) {
@@ -53,9 +54,8 @@ QWidget *Decoder::decode(const QMap<QString, QVariant> &map,
        ++batchIndex) {
     mwv->newBatch();
   }
-  for (auto ii = 0; ii < batches.size(); ++ii) {
-    decodeBatch(dynamic_cast<QtBatchView *>(mwv->m_batchViews[ii]), mwv,
-                batches[ii].toMap());
+  for (auto batchIndex = 0; batchIndex < batches.size(); ++batchIndex) {
+    decodeBatch(mwv, batchIndex, batches[batchIndex].toMap());
   }
   return mwv;
 }
@@ -64,13 +64,10 @@ QList<QString> Decoder::tags() {
   return QList<QString>({QString("ISIS Reflectometry")});
 }
 
-void Decoder::decodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
-                          const QMap<QString, QVariant> &map,
-                          const BatchPresenter *presenter) {
-  auto batchPresenter = presenter;
-  if (!batchPresenter) {
-    batchPresenter = findBatchPresenter(gui, mwv);
-  }
+void Decoder::decodeBatch(const IMainWindowView *mwv, int batchIndex,
+                          const QMap<QString, QVariant> &map) {
+  auto gui = dynamic_cast<const QtBatchView *>(mwv->batches()[batchIndex]);
+  auto batchPresenter = findBatchPresenter(gui, mwv);
   if (!batchPresenter) {
     throw std::runtime_error(
         "BatchPresenter could not be found during decode.");
@@ -80,22 +77,19 @@ void Decoder::decodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
   auto runsTablePresenter =
       dynamic_cast<RunsTablePresenter *>(runsPresenter->m_tablePresenter.get());
   auto reductionJobs = &runsTablePresenter->m_model.m_reductionJobs;
+  auto destinationPrecision = batchPresenter->m_mainPresenter->roundPrecision();
+  // We must do the Runs tab first because this sets the instrument, which
+  // other settings may need to be correct. There is also a notification to set
+  // defaults for this instrument so we need to do that before other settings
+  // or it will override them.
+  decodeRuns(gui->m_runs.get(), reductionJobs, runsTablePresenter,
+             map[QString("runsView")].toMap(), destinationPrecision);
   decodeEvent(gui->m_eventHandling.get(), map[QString("eventView")].toMap());
   decodeExperiment(gui->m_experiment.get(),
                    map[QString("experimentView")].toMap());
   decodeInstrument(gui->m_instrument.get(),
                    map[QString("instrumentView")].toMap());
   decodeSave(gui->m_save.get(), map[QString("saveView")].toMap());
-  decodeRuns(gui->m_runs.get(), reductionJobs, runsTablePresenter,
-             map[QString("runsView")].toMap());
-}
-
-void Decoder::decodeBatch(const IBatchPresenter *presenter,
-                          const IMainWindowView *mwv,
-                          const QMap<QString, QVariant> &map) {
-  auto batchPresenter = dynamic_cast<const BatchPresenter *>(presenter);
-  decodeBatch(dynamic_cast<QtBatchView *>(batchPresenter->m_view),
-              dynamic_cast<const QtMainWindowView *>(mwv), map, batchPresenter);
 }
 
 void Decoder::decodeExperiment(const QtExperimentView *gui,
@@ -118,6 +112,14 @@ void Decoder::decodeExperiment(const QtExperimentView *gui,
       map[QString("transStitchParamsEdit")].toString());
   gui->m_ui.transScaleRHSCheckBox->setChecked(
       map[QString("transScaleRHSCheckBox")].toBool());
+  gui->m_ui.subtractBackgroundCheckBox->setChecked(
+      map[QString("subtractBackgroundCheckBox")].toBool());
+  gui->m_ui.backgroundMethodComboBox->setCurrentIndex(
+      map[QString("backgroundMethodComboBox")].toInt());
+  gui->m_ui.polynomialDegreeSpinBox->setValue(
+      map[QString("polynomialDegreeSpinBox")].toInt());
+  gui->m_ui.costFunctionComboBox->setCurrentIndex(
+      map[QString("costFunctionComboBox")].toInt());
   gui->m_ui.polCorrCheckBox->setChecked(
       map[QString("polCorrCheckBox")].toBool());
   gui->m_ui.floodCorComboBox->setCurrentIndex(
@@ -153,8 +155,13 @@ void Decoder::decodePerAngleDefaultsRow(QTableWidget *tab, int rowIndex,
                                         int columnsNum,
                                         const QList<QVariant> &list) {
   MantidQt::API::SignalBlocker blocker(tab);
-  for (auto columnIndex = 0; columnIndex < columnsNum; ++columnIndex) {
-    auto tableWidgetItem = new QTableWidgetItem(list[columnIndex].toString());
+  // Loop all columns in the table
+  for (auto columnIndex = 0; columnIndex < tab->columnCount(); ++columnIndex) {
+    // Old files may not include all of the columns so add an empty cell if it
+    // doesn't exist in the file
+    auto const columnValue =
+        columnIndex < columnsNum ? list[columnIndex].toString() : QString();
+    auto tableWidgetItem = new QTableWidgetItem(columnValue);
     tab->setItem(rowIndex, columnIndex, tableWidgetItem);
   }
 }
@@ -178,35 +185,43 @@ void Decoder::decodeInstrument(const QtInstrumentView *gui,
 
 void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs,
                          RunsTablePresenter *presenter,
-                         const QMap<QString, QVariant> &map) {
+                         const QMap<QString, QVariant> &map,
+                         boost::optional<int> precision) {
   decodeRunsTable(gui->m_tableView, redJobs, presenter,
-                  map[QString("runsTable")].toMap());
+                  map[QString("runsTable")].toMap(), precision);
   gui->m_ui.comboSearchInstrument->setCurrentIndex(
       map[QString("comboSearchInstrument")].toInt());
   gui->m_ui.textSearch->setText(map[QString("textSearch")].toString());
+  gui->m_ui.textCycle->setText(map[QString("textCycle")].toString());
 }
 
 namespace HIDDEN_LOCAL {
-std::vector<MantidQt::MantidWidgets::Batch::Cell> cellsFromRow(Row const &row) {
+std::vector<MantidQt::MantidWidgets::Batch::Cell>
+cellsFromRow(Row const &row, boost::optional<int> precision) {
   return std::vector<MantidQt::MantidWidgets::Batch::Cell>(
       {MantidQt::MantidWidgets::Batch::Cell(boost::join(row.runNumbers(), "+")),
-       MantidQt::MantidWidgets::Batch::Cell(std::to_string(row.theta())),
+       MantidQt::MantidWidgets::Batch::Cell(
+           valueToString(row.theta(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(
            row.transmissionWorkspaceNames().firstRunList()),
        MantidQt::MantidWidgets::Batch::Cell(
            row.transmissionWorkspaceNames().secondRunList()),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max),
-       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::min,
+                           precision),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::max,
+                           precision),
+       qRangeCellOrDefault(row.qRange(), row.qRangeOutput(), &RangeInQ::step,
+                           precision),
        MantidQt::MantidWidgets::Batch::Cell(
-           optionalToString(row.scaleFactor())),
+           optionalToString(row.scaleFactor(), precision)),
        MantidQt::MantidWidgets::Batch::Cell(
            MantidWidgets::optionsToString(row.reductionOptions()))});
 }
 } // namespace HIDDEN_LOCAL
 
 void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view,
-                                           const ReductionJobs *model) {
+                                           const ReductionJobs *model,
+                                           boost::optional<int> precision) {
   auto jobTreeView = view->m_jobs.get();
   auto groups = model->groups();
   for (auto groupIndex = 0u; groupIndex < groups.size(); ++groupIndex) {
@@ -231,8 +246,8 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view,
       if (row) {
         MantidQt::MantidWidgets::Batch::RowLocation location(
             {static_cast<int>(groupIndex), static_cast<int>(rowIndex)});
-        jobTreeView->setCellsAt({location},
-                                HIDDEN_LOCAL::cellsFromRow(row.get()));
+        jobTreeView->setCellsAt(
+            {location}, HIDDEN_LOCAL::cellsFromRow(row.get(), precision));
       }
     }
   }
@@ -240,7 +255,8 @@ void Decoder::updateRunsTableViewFromModel(QtRunsTableView *view,
 
 void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
                               RunsTablePresenter *presenter,
-                              const QMap<QString, QVariant> &map) {
+                              const QMap<QString, QVariant> &map,
+                              boost::optional<int> precision) {
   MantidQt::API::SignalBlocker signalBlockerView(gui);
 
   m_projectSave = map[QString("projectSave")].toBool();
@@ -269,7 +285,7 @@ void Decoder::decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
   decodeRunsTableModel(redJobs, runsTable);
 
   // Still need to do this for groups
-  updateRunsTableViewFromModel(gui, redJobs);
+  updateRunsTableViewFromModel(gui, redJobs, precision);
 
   if (m_projectSave) {
     // Apply styling and restore completed state for output range values
@@ -425,7 +441,7 @@ void Decoder::decodeSave(const QtSaveView *gui,
                          const QMap<QString, QVariant> &map) {
   gui->m_ui.savePathEdit->setText(map[QString("savePathEdit")].toString());
   gui->m_ui.prefixEdit->setText(map[QString("prefixEdit")].toString());
-  gui->m_ui.titleCheckBox->setChecked(map[QString("titleCheckBox")].toBool());
+  gui->m_ui.headerCheckBox->setChecked(map[QString("headerCheckBox")].toBool());
   gui->m_ui.qResolutionCheckBox->setChecked(
       map[QString("qResolutionCheckBox")].toBool());
   gui->m_ui.commaRadioButton->setChecked(

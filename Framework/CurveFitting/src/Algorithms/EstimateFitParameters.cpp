@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/EstimateFitParameters.h"
 
@@ -84,7 +84,7 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
     bool fix = false;
     if (!base) {
       fun.setParameter(i, storedParam);
-      base = boost::make_shared<Functions::ChebfunBase>(
+      base = std::make_shared<Functions::ChebfunBase>(
           MAX_APPROX_SIZE, lBound, rBound, MIN_APPROX_TOLERANCE);
       P = base->fit(slice);
       A = base->calcA(P);
@@ -103,7 +103,7 @@ void fixBadParameters(CostFunctions::CostFuncFitting &costFunction,
     if (fix) {
       // Parameter is bad - fix it. Delay actual fixing until all bad ones
       // found.
-      indicesOfFixed.push_back(i);
+      indicesOfFixed.emplace_back(i);
     }
     ++j;
   }
@@ -138,9 +138,8 @@ public:
   std::vector<GSLVector> getParams() const {
     std::vector<GSLVector> res;
     res.reserve(m_params.size());
-    for (auto &it : m_params) {
-      res.emplace_back(it.second);
-    }
+    std::transform(m_params.begin(), m_params.end(), std::back_inserter(res),
+                   [](const auto &it) { return it.second; });
     return res;
   }
 };
@@ -231,7 +230,7 @@ void runCrossEntropy(
   for (auto &range : ranges) {
     auto mean = (range.first + range.second) / 2;
     auto sigma = std::fabs(range.first - range.second) / 2;
-    distributionParams.push_back(std::make_pair(mean, sigma));
+    distributionParams.emplace_back(std::make_pair(mean, sigma));
   }
 
   auto nParams = costFunction.nParams();
@@ -371,7 +370,7 @@ void EstimateFitParameters::execConcrete() {
     for (auto &term : expr.terms()) {
       IConstraint *c =
           ConstraintFactory::Instance().createInitialized(func.get(), term);
-      constraints.push_back(std::unique_ptr<IConstraint>(c));
+      constraints.emplace_back(std::unique_ptr<IConstraint>(c));
     }
   }
 
@@ -383,12 +382,12 @@ void EstimateFitParameters::execConcrete() {
       continue;
     }
     auto constraint = func->getConstraint(i);
-    if (constraint == nullptr) {
+    if (!constraint) {
       func->fix(i);
       continue;
     }
     auto boundary = dynamic_cast<Constraints::BoundaryConstraint *>(constraint);
-    if (boundary == nullptr) {
+    if (!boundary) {
       throw std::runtime_error("Parameter " + func->parameterName(i) +
                                " must have a boundary constraint. ");
     }
@@ -402,7 +401,7 @@ void EstimateFitParameters::execConcrete() {
     }
     // Use the lower and upper bounds of the constraint to set the range
     // of a generator with uniform distribution.
-    ranges.push_back(std::make_pair(boundary->lower(), boundary->upper()));
+    ranges.emplace_back(std::make_pair(boundary->lower(), boundary->upper()));
   }
   // Number of parameters could have changed
   costFunction->reset();

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/PDDetermineCharacterizations.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -397,7 +397,7 @@ void PDDetermineCharacterizations::overrideRunNumProperty(
   if ((!runnumbers.empty()) && (runnumbers[0] != 0)) {
     if (runnumbers[0] < 0) {
       runnumbers.erase(runnumbers.begin(), runnumbers.end());
-      runnumbers.push_back(0);
+      runnumbers.emplace_back(0);
     }
     m_propertyManager->setProperty(propName, runnumbers);
   }
@@ -411,7 +411,7 @@ void PDDetermineCharacterizations::exec() {
     m_propertyManager =
         PropertyManagerDataService::Instance().retrieve(managerName);
   } else {
-    m_propertyManager = boost::make_shared<Kernel::PropertyManager>();
+    m_propertyManager = std::make_shared<Kernel::PropertyManager>();
     PropertyManagerDataService::Instance().addOrReplace(managerName,
                                                         m_propertyManager);
   }

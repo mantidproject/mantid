@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import os
 
 from isis_powder.abstract_inst import AbstractInst
@@ -75,14 +73,20 @@ class HRPD(AbstractInst):
         :param vanadium: The vanadium used to create this
         :param run_details: the run details of to use
         """
-        if not self._inst_settings.do_solid_angle:
+        settings = self._inst_settings
+        if not settings.do_solid_angle:
             return
         solid_angle = mantid.SolidAngle(InputWorkspace=vanadium)
         solid_angle = mantid.Scale(InputWorkspace=solid_angle, Factor=100, Operation='Multiply')
 
         eff = mantid.Divide(LHSWorkspace=vanadium, RHSWorkspace=solid_angle)
         eff = mantid.ConvertUnits(InputWorkspace=eff, Target='Wavelength')
-        eff = mantid.Integration(InputWorkspace=eff, RangeLower=1.4, RangeUpper=3)
+        integration_range = settings.eff_integration_range
+        # use full range if no range is supplied
+        integration_range = integration_range if integration_range is not None else (None, None)
+        eff = mantid.Integration(InputWorkspace=eff,
+                                 RangeLower=integration_range[0],
+                                 RangeUpper=integration_range[1])
 
         correction = mantid.Multiply(LHSWorkspace=solid_angle, RHSWorkspace=eff)
         correction = mantid.Scale(InputWorkspace=correction, Factor=1e-5,

@@ -8,8 +8,8 @@ What are they?
 
 Shared pointers are used extensively within the Mantid Framework to
 simplify memory management and reduce memory leaks. We use the Shared
-Pointer `definition from the Boost
-library <http://www.boost.org/doc/libs/1_35_0/libs/smart_ptr/smart_ptr.htm>`__.
+Pointer `definition from the Standard Template
+Library <https://en.cppreference.com/w/cpp/memory/shared_ptr>`__.
 
 Shared pointers are objects which store pointers to dynamically
 allocated (heap) objects. They behave much like built-in C++ pointers
@@ -28,14 +28,14 @@ Declaring a shared pointer
 
 creating a shared pointer to a new object
 
-``boost::shared_ptr``\ \ `` ptr(new C);``
+``std::shared_ptr``\ \ `` ptr(new C);``
 
 assigning a shared pointer
 
-``boost::shared_ptr``\ \ `` instrument = workspace->getInstrument();``
+``std::shared_ptr``\ \ `` instrument = workspace->getInstrument();``
 
 Several of our shared pointers have typedefs to give them much shorter
-definitions. For example instead of boost::shared\_ptr you can just type
+definitions. For example instead of std::shared\_ptr you can just type
 workspace\_sptr (where sptr stands for shared pointer).
 
 Using a shared pointer
@@ -51,7 +51,7 @@ The only real differences are when casting the pointer instead of
 
 you would use
 
-``Workspace2D_sptr input2D = boost::dynamic_pointer_cast``\ \ ``(input);``
+``Workspace2D_sptr input2D = std::dynamic_pointer_cast``\ \ ``(input);``
 
 and that you should not delete a shared pointer, it will take care of
 itself.

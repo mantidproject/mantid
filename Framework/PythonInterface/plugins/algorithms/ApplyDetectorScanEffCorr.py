@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import print_function
-
 from mantid.simpleapi import CreateWorkspace, Transpose, Multiply, MaskDetectors
 from mantid.api import AlgorithmFactory, PropertyMode, PythonAlgorithm, WorkspaceProperty
 from mantid.kernel import Direction
@@ -65,5 +63,6 @@ class ApplyDetectorScanEffCorr(PythonAlgorithm):
         if det_IDs:
             MaskDetectors(Workspace=output, DetectorList=det_IDs[:-1])
         self.setProperty("OutputWorkspace", output)
+
 
 AlgorithmFactory.subscribe(ApplyDetectorScanEffCorr)

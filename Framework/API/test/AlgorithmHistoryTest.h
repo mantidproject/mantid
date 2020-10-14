@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ALGORITHMHISTORYTEST_H_
-#define ALGORITHMHISTORYTEST_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmHistory.h"
@@ -102,19 +101,19 @@ public:
     // create some nested history records
     auto child1 = createFromTestAlg("child1");
     auto subChild11 = createFromTestAlg("subChild11");
-    child1.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild11));
+    child1.addChildHistory(std::make_shared<AlgorithmHistory>(subChild11));
 
     auto child2 = createFromTestAlg("child2");
     auto subChild21 = createFromTestAlg("subChild21");
     auto subChild22 = createFromTestAlg("subChild22");
-    child2.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild21));
-    child2.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild22));
+    child2.addChildHistory(std::make_shared<AlgorithmHistory>(subChild21));
+    child2.addChildHistory(std::make_shared<AlgorithmHistory>(subChild22));
 
     auto child3 = createFromTestAlg("child3");
 
-    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child1));
-    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child2));
-    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child3));
+    algHist.addChildHistory(std::make_shared<AlgorithmHistory>(child1));
+    algHist.addChildHistory(std::make_shared<AlgorithmHistory>(child2));
+    algHist.addChildHistory(std::make_shared<AlgorithmHistory>(child3));
 
     // check parent algorithm matches
     std::ostringstream output;
@@ -165,19 +164,19 @@ public:
     // create some nested history records
     auto child1 = createFromTestAlg("child1");
     auto subChild11 = createFromTestAlg("subChild11");
-    child1.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild11));
+    child1.addChildHistory(std::make_shared<AlgorithmHistory>(subChild11));
 
     auto child2 = createFromTestAlg("child2");
     auto subChild21 = createFromTestAlg("subChild21");
     auto subChild22 = createFromTestAlg("subChild22");
-    child2.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild21));
-    child2.addChildHistory(boost::make_shared<AlgorithmHistory>(subChild22));
+    child2.addChildHistory(std::make_shared<AlgorithmHistory>(subChild21));
+    child2.addChildHistory(std::make_shared<AlgorithmHistory>(subChild22));
 
     auto child3 = createFromTestAlg("child3");
 
-    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child1));
-    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child2));
-    algHist.addChildHistory(boost::make_shared<AlgorithmHistory>(child3));
+    algHist.addChildHistory(std::make_shared<AlgorithmHistory>(child1));
+    algHist.addChildHistory(std::make_shared<AlgorithmHistory>(child2));
+    algHist.addChildHistory(std::make_shared<AlgorithmHistory>(child3));
 
     IAlgorithm_sptr alg = algHist.getChildAlgorithm(0);
     TS_ASSERT_EQUALS(alg->name(), testInput->name());
@@ -240,7 +239,7 @@ private:
     return AlgorithmHistory(&alg, execTime, 14.0, m_execCount++);
   }
 
-  AlgorithmHistory createFromTestAlg(std::string paramValue) {
+  AlgorithmHistory createFromTestAlg(const std::string &paramValue) {
     Algorithm *testInput = new testalg;
     testInput->initialize();
     testInput->setPropertyValue("arg1_param", paramValue);
@@ -253,5 +252,3 @@ private:
   std::string m_correctOutput;
   size_t m_execCount;
 };
-
-#endif /* ALGORITHMHISTORYTEST_H_*/

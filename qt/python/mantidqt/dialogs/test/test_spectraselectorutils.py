@@ -1,16 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-from __future__ import absolute_import
-
 import unittest
 
 from mantid.api import WorkspaceFactory
-from mantid.py3compat import mock
+from unittest import mock
+from mantid.simpleapi import ExtractSpectra
 from mantidqt.dialogs.spectraselectorutils import get_spectra_selection
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtGui import QIcon
@@ -45,6 +44,7 @@ class SpectraSelectionUtilsTest(unittest.TestCase):
         mock_SpectraSelectionDialog.exec_.return_value = mock_SpectraSelectionDialog.Rejected
         mock_SpectraSelectionDialog.decision = QDialog.Rejected
         mock_SpectraSelectionDialog.selection = None
+        mock_SpectraSelectionDialog.get_compatible_workspaces.return_value = [self._multi_spec_ws]
 
         selection = get_spectra_selection([self._multi_spec_ws])
 
@@ -53,8 +53,24 @@ class SpectraSelectionUtilsTest(unittest.TestCase):
 
     @mock.patch('mantidqt.dialogs.spectraselectorutils.SpectraSelectionDialog')
     def test_get_spectra_selection_does_not_use_dialog_for_single_spectrum(self, dialog_mock):
+        dialog_mock.get_compatible_workspaces.return_value = [self._single_spec_ws]
         selection = get_spectra_selection([self._single_spec_ws])
 
         dialog_mock.assert_not_called()
         self.assertEqual([0], selection.wksp_indices)
         self.assertEqual([self._single_spec_ws], selection.workspaces)
+
+    @mock.patch('mantidqt.dialogs.spectraselectorutils.SpectraSelectionDialog')
+    def test_get_spectra_selection_does_not_use_dialog_for_multiple__single_spectrum(self, dialog_mock):
+        spectra_1 = ExtractSpectra(InputWorkspace=self._multi_spec_ws, StartWorkspaceIndex=0, EndWorkspaceIndex=0)
+        spectra_2 = ExtractSpectra(InputWorkspace=self._multi_spec_ws, StartWorkspaceIndex=1, EndWorkspaceIndex=1)
+        dialog_mock.get_compatible_workspaces.return_value = [spectra_1, spectra_2]
+        selection = get_spectra_selection([spectra_1, spectra_2])
+
+        dialog_mock.assert_not_called()
+        self.assertEqual([0], selection.wksp_indices)
+        self.assertEqual([spectra_1, spectra_2], selection.workspaces)
+
+
+if __name__ == '__main__':
+    unittest.main()

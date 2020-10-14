@@ -1,17 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench
-from __future__ import absolute_import, unicode_literals
-
 import unittest
 
 from qtpy.QtWidgets import QApplication, QWidget
 
-from mantid.py3compat.mock import MagicMock
+from unittest.mock import MagicMock
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from workbench.widgets.settings.presenter import SettingsPresenter
@@ -27,10 +25,14 @@ class MockWorkspaceWidget(QWidget):
     def __init__(self):
         super(MockWorkspaceWidget, self).__init__(None)
         self.workspacewidget = MagicMock()
+        self.interface_list = MagicMock()
 
     def closeEvent(self, event):
         self.deleteLater()
         super(MockWorkspaceWidget, self).closeEvent(event)
+
+    def config_updated(self):
+        return self
 
     def __enter__(self):
         return self
@@ -52,6 +54,6 @@ class SettingsViewTest(unittest.TestCase, QtWidgetFinder):
 
             widget.view.close()
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()

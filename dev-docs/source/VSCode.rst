@@ -1,9 +1,5 @@
 .. _VSCode:
 
-.. |extensions| image:: /images/VSCode/extension-button.png
-.. |debug| image:: /images/VSCode/debug-button.png
-.. |debug-cog| image:: /images/VSCode/debug-cog-button.png
-
 ======
 VSCode
 ======
@@ -38,7 +34,7 @@ All Extensions have been tested working on Ubuntu 18.04 and Ubuntu 19.04,
 however most, if not all, extensions should be cross-platform.
 
 Install extensions either by running the commands given on the marketplace or by
-clicking on this Icon |extensions|.
+clicking `the Extension Marketplace icon. <https://code.visualstudio.com/docs/editor/extension-gallery#_browse-for-extensions>`_
 
 Required
 --------
@@ -149,8 +145,8 @@ To get to this file:
 - Hit Enter.
 
 If this fails
-- Click on the debug icon on the left hand side of VSCode |debug|
-- Click on the cod icon at the top of this newly opened side window |debug-cog|
+- Click on `the debug icon <https://code.visualstudio.com/docs/editor/debugging#_start-debugging>`_ on the left hand side of VSCode.
+- Click `the cog icon at the top <https://code.visualstudio.com/docs/editor/debugging#_launch-configurations>`_ of this newly opened side window
 - Select "(GDB) Launch" or "(msvc) Launch"
 
 **Linux/OSX**
@@ -187,6 +183,7 @@ you will want to make your file look something a little like this:
             }
         ]
     }
+
 
 *Workbench*
 
@@ -243,7 +240,7 @@ The launch.json should end up looking a little like this:
         ]
     }
 
-To actually start the debug session, switch to the debug tab (clicking |debug|)
+To actually start the debug session, switch to `the debug tab <https://code.visualstudio.com/docs/editor/debugging#_start-debugging>`_
 and select "(GDB) Launch" from the drop down and click the play button.
 
 Debugging C++ called from Workbench
@@ -333,6 +330,64 @@ Then pass as an argument the specific test you want to be debugging. As an examp
         ]
     }
 
+Debugging Python
+-----------------
+Visual Studio Code can be remotely attached to any running Python targets
+using `debugpy`.
+Whilst this "just works" for the majority of cases, it will not allow you to
+debug both C++ and Python at the same time. It also will not work with
+PyQt listeners, as the debugger must be attached to the main thread.
+
+**Setting up debugpy**
+
+*Linux/OSX*
+
+Install `debugpy` using pip within the terminal
+
+.. code-block:: bash
+
+   python3 -m pip install --user debugpy
+
+*Windows*
+
+- Go to your source folder with Mantid (not the build folder)
+- Go to external/src/ThirdParty/lib/python3.8
+- Open a command prompt here (shift + right click in empty space)
+- Run the following: `python -m pip install --user debugpy`
+
+**Setting up VS Code**
+- Ensure the Python extension is installed
+- Open `launch.json` through either the debug tab or the file finder
+- Add the following target
+
+.. code-block:: javascript
+
+    {
+        "name": "Python Attach",
+        "type": "python"
+        "request": "attach"
+        "port" : 5678,
+        "host": "localhost"
+    }
+
+**Attaching the debugger**
+- Go to the location where you would like Mantid to first trigger a breakpoint
+- Insert the following code:
+
+.. code-block:: python
+
+    import debugpy
+    debugpy.listen(('127.0.0.1', 5678))
+    debugpy.wait_for_client()
+    debugpy.breakpoint()
+
+- When Mantid appears to freeze. Open the debug tab and start the "Python Attach" Target
+- Any additional breakpoints using the IDE are added automatically
+  (i.e. don't add `debugpy.breakpoint()`
+- If you'd like the code to not break at that location, but would like the
+  debugger to attach only remove `wait_for_client()`
+
+
 Keybindings
 -----------
 
@@ -355,3 +410,55 @@ Reference" and hit Enter.
 +-------------------+---------------+---------------+---------------+
 | Launch            | F5            | F5            | F5            |
 +-------------------+---------------+---------------+---------------+
+
+Remote Development
+------------------
+VSCode supports the ability to open and work from directories on a remote machine using SSH.
+
+Detailed instructions on how to set this up can be found `here <https://code.visualstudio.com/docs/remote/ssh>`_.
+
+(Advanced) Getting Live Warnings and Errors with Clangd
+=======================================================
+(Linux only)
+
+The C++ extension in VS Code provides limited inspection: it (currently) has
+warnings disabled and will only emit errors.
+
+Clang can be used to provide live warnings and will notify on common bugs, like
+implicit casts, which are normally only detected whilst building.
+
+Future versions of clangd (>=10) will also emit clang-tidy warnings as you
+work.
+
+**Setup**
+
+- Remove the C++ Intellisense extension
+- Remove the C++ extension and install Native Debug to keep C++ debugging OR
+-  Go to the C++ extension settings and disable the following:
+
+  Autocomplete, Enhanced Colorization, Error Squiggles,
+  Experimental Features, IntelliSense Engine, IntelliSense Engine Fallback
+
+- Install the official clangd extension: `vscode-clangd`
+- Install clangd >= 8 which is part of `clang-tools-n`
+  (where n is the latest version)
+- Create a folder for a clang build separate to your main Mantid build.
+  One recommended location is to create it in a folder called **build**
+  within the source folder since this will also be rebuilt by the
+  *CMakeTools* extension, if you have it.
+- Configure this separate folder to use the clang compiler:
+
+.. code-block:: sh
+
+    cd *path/to/clang_build*
+    CXX=clang++ CC=clang cmake *path/to/src* -DPYTHON_EXECTUABLE=/usr/bin/python2  # (or 3)
+    # Note this does not have to build unless you want to!
+
+- Go to the clangd setting in VS Code and add the following argument:
+  `--compile-commands-dir=/path/to/your/clang-build` ensuring that build
+  folder is related to the source folder. This allows clangd to understand
+  the structure of Mantid.
+- Restart VS Code - attempt to write: `int i = (size_t) 1;` and check a warning
+  appears.
+- Any errors about unknown types can usually be resolved by briefly opening
+  that header to force clangd to parse the type.

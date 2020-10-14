@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_PROPERTYMANAGERPROPERTYTEST_H_
-#define MANTID_KERNEL_PROPERTYMANAGERPROPERTYTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -91,7 +90,7 @@ public:
     using Mantid::Kernel::PropertyManager_sptr;
     // Create a top-level PropertyManager, add a PropertyManagerProperty
     // as a nested PropertyManager
-    auto topMgr = boost::make_shared<PropertyManager>();
+    auto topMgr = std::make_shared<PropertyManager>();
     topMgr->declareProperty(std::make_unique<PropertyManagerProperty>("Args"));
     topMgr->setProperty("Args", createPropMgrWithInt());
 
@@ -202,7 +201,7 @@ public:
 
   void test_asJson_Gives_Json_ObjectValue() {
     using Mantid::Kernel::PropertyManager;
-    auto propMgr = boost::make_shared<PropertyManager>();
+    auto propMgr = std::make_shared<PropertyManager>();
     propMgr->declareProperty("IntProp", 1);
     propMgr->declareProperty("DoubleProp", 15.1);
     PropertyManagerProperty prop("PMDSTest", propMgr);
@@ -217,10 +216,10 @@ public:
   void test_Encode_Nested_PropertyManager_As_Nested_Json_Objects() {
     using Mantid::Kernel::PropertyManager;
     using Mantid::Kernel::PropertyManagerProperty;
-    auto inner = boost::make_shared<PropertyManager>();
+    auto inner = std::make_shared<PropertyManager>();
     inner->declareProperty("IntProp", 2);
     inner->declareProperty("DoubleProp", 16.1);
-    auto outer = boost::make_shared<PropertyManager>();
+    auto outer = std::make_shared<PropertyManager>();
     outer->declareProperty("IntProp", 1);
     outer->declareProperty(
         std::make_unique<PropertyManagerProperty>("PropMgr", inner));
@@ -259,12 +258,10 @@ private:
     using Mantid::Kernel::PropertyManager;
     using Mantid::Kernel::PropertyWithValue;
 
-    auto testMgr = boost::make_shared<PropertyManager>();
+    auto testMgr = std::make_shared<PropertyManager>();
     testMgr->declareProperty(
         std::make_unique<PropertyWithValue<int>>("Prop1", 1));
 
     return testMgr;
   }
 };
-
-#endif /* MANTID_KERNEL_PROPERTYMANAGERPROPERTYTEST_H_ */

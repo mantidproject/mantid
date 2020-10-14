@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -256,10 +256,8 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
   if (!periods) {
     throw std::logic_error("Failed to cast periods to TimeSeriesProperty");
   }
-  std::ostringstream ostr;
-  ostr << period;
-  Kernel::TimeSeriesProperty<bool> *p =
-      new Kernel::TimeSeriesProperty<bool>("period " + ostr.str());
+  Kernel::TimeSeriesProperty<bool> *p = new Kernel::TimeSeriesProperty<bool>(
+      LogParser::currentPeriodLogName(period));
   std::map<Types::Core::DateAndTime, int> pMap = periods->valueAsMap();
   auto it = pMap.begin();
   if (it->second != period)
@@ -268,6 +266,12 @@ Kernel::TimeSeriesProperty<bool> *LogParser::createPeriodLog(int period) const {
     p->addValue(it->first, (it->second == period));
 
   return p;
+}
+
+const std::string LogParser::currentPeriodLogName(const int period) {
+  std::ostringstream ostr;
+  ostr << period;
+  return "period " + ostr.str();
 }
 
 /**

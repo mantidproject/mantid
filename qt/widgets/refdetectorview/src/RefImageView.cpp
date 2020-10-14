@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/RefDetectorView/RefImageView.h"
 #include "MantidQtWidgets/SpectrumViewer/ColorMaps.h"
@@ -15,6 +15,7 @@
 
 #include <sstream>
 #include <string>
+#include <utility>
 
 namespace MantidQt {
 namespace RefDetectorViewer {
@@ -56,7 +57,7 @@ RefImageView::RefImageView(SpectrumView::SpectrumDataSource_sptr dataSource,
   // Create the handler for comminicating peak/background/tof values to/from the
   // ui
   // This ends up being owned by the RefImagePlotItem instance
-  RefLimitsHandler *limits_handler = new RefLimitsHandler(m_ui);
+  auto *limits_handler = new RefLimitsHandler(m_ui);
 
   m_hGraph = new SpectrumView::GraphDisplay(m_ui->h_graphPlot, nullptr, false);
   m_vGraph = new SpectrumView::GraphDisplay(m_ui->v_graphPlot, nullptr, true);
@@ -65,7 +66,7 @@ RefImageView::RefImageView(SpectrumView::SpectrumDataSource_sptr dataSource,
                                        m_rangeHandler, limits_handler, m_hGraph,
                                        m_vGraph, m_ui->image_table);
 
-  RefIVConnections *iv_connections =
+  auto *iv_connections =
       new RefIVConnections(m_ui, this, m_imageDisplay, m_hGraph, m_vGraph);
 
   // Set validators on the QLineEdits to restrict them to integers
@@ -89,7 +90,7 @@ RefImageView::RefImageView(SpectrumView::SpectrumDataSource_sptr dataSource,
   m_imageDisplay->updateImage();
   iv_connections->peakBackTofRangeUpdate();
 
-  m_imageDisplay->setDataSource(dataSource);
+  m_imageDisplay->setDataSource(std::move(dataSource));
 }
 
 RefImageView::~RefImageView() {

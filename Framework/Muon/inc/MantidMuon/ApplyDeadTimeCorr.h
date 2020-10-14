@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_APPLYDEADTIMECORR_H_
-#define MANTID_ALGORITHMS_APPLYDEADTIMECORR_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -19,7 +18,7 @@ namespace Algorithms {
   @author Robert Whitley, RAL
   @date 2011-11-30
 */
-class DLLExport ApplyDeadTimeCorr : public API::Algorithm {
+class MANTID_MUON_DLL ApplyDeadTimeCorr : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "ApplyDeadTimeCorr"; };
@@ -47,5 +46,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_APPLYDEADTIMECORR_H_ */

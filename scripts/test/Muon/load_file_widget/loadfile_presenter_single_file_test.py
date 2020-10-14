@@ -1,12 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication
 
@@ -31,7 +31,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            QApplication.instance().processEvents()
+            QApplication.sendPostedEvents()
 
     def setUp(self):
         self.view = BrowseFileWidgetView()
@@ -230,7 +230,7 @@ class LoadFileWidgetPresenterTest(unittest.TestCase):
         self.load_workspaces_into_model_and_view_from_browse([workspace], [1234], ["C:/dir1/EMU0001234.nxs"])
 
         self.load_utils_patcher.side_effect = self.load_failure
-        self.view.set_file_edit("C:\dir2\EMU000123.nxs")
+        self.view.set_file_edit(r"C:\dir2\EMU000123.nxs")
 
         self.presenter.handle_file_changed_by_user()
         self.wait_for_thread(self.presenter._load_thread)

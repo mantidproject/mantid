@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGY_H_
-#define MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGY_H_
+#pragma once
 
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -29,7 +29,7 @@ struct Correction {
 
   SampleT = PulseT + [TOF to sample]
 */
-class DLLExport TimeAtSampleStrategy {
+class MANTID_ALGORITHMS_DLL TimeAtSampleStrategy {
 public:
   virtual Correction calculate(const size_t &workspace_index) const = 0;
   virtual ~TimeAtSampleStrategy() = default;
@@ -37,5 +37,3 @@ public:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_TIMEATSAMPLESTRATEGY_H_ */

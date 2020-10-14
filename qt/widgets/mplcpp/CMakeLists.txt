@@ -52,8 +52,6 @@ set(
 
 set(UI_FILES inc/MantidQtWidgets/MplCpp/Colorbar.ui)
 
-find_package(BoostPython REQUIRED)
-
 # Target
 mtd_add_qt_library(
   TARGET_NAME MantidQtWidgetsMplCpp
@@ -65,14 +63,8 @@ mtd_add_qt_library(
   DEFS IN_MANTIDQT_MPLCPP
   INCLUDE_DIRS
     inc
-    ../../../Framework/PythonInterface/core/inc
     ${Boost_INCLUDE_DIRS}
-    ${PYTHON_INCLUDE_PATH}
-    ${PYTHON_NUMPY_INCLUDE_DIR}
   LINK_LIBS
-    ${TCMALLOC_LIBRARIES_LINKTIME}
-    ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
     PythonInterfaceCore
   MTD_QT_LINK_LIBS
     MantidQtWidgetsCommon
@@ -80,7 +72,7 @@ mtd_add_qt_library(
     ${WORKBENCH_LIB_DIR}
   OSX_INSTALL_RPATH
     @loader_path/../MacOS
-    @loader_path/../Libraries
+    @loader_path/../Frameworks
   LINUX_INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}"
 )
 

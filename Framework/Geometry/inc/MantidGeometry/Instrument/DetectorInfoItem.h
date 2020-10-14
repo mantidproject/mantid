@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_DETECTORINFOITEM_H_
-#define MANTID_GEOMETRY_DETECTORINFOITEM_H_
+#pragma once
 
 #include "MantidKernel/Quat.h"
 #include "MantidKernel/V3D.h"
@@ -22,7 +21,7 @@ DetectorInfoItem is only created by DetectorInfoIterator and allows users of
 the DetectorInfoIterator object access to data from DetectorInfo. The available
 methods include:
   - isMonitor()
-  - isMaksed()
+  - isMasked()
   - twoTheta()
   - position()
   - rotation()
@@ -68,5 +67,3 @@ public:
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_DETECTORINFOITEM_H_ */

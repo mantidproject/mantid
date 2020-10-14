@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import functools
 import math
 import re
@@ -15,7 +13,7 @@ import mantid.simpleapi as mantid
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_maxent_workspace_group_name, get_maxent_workspace_name
-from Muon.GUI.Common.observer_pattern import GenericObserver, GenericObservable
+from mantidqt.utils.observer_pattern import GenericObserver, GenericObservable
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.algorithm_utils import run_MuonMaxent
 
@@ -44,6 +42,7 @@ class MaxEntPresenter(object):
         self.phase_table_observer = GenericObserver(self.update_phase_table_options)
         self.calculation_finished_notifier = GenericObservable()
         self.calculation_started_notifier = GenericObservable()
+        self.update_phase_table_options()
 
     @property
     def widget(self):
@@ -54,7 +53,7 @@ class MaxEntPresenter(object):
 
     def clear(self):
         self.view.addItems([])
-        self.view.update_phase_table_combo([])
+        self.view.update_phase_table_combo(['Construct'])
 
     # functions
     def getWorkspaceNames(self):
@@ -69,6 +68,10 @@ class MaxEntPresenter(object):
     def cancel(self):
         if self.maxent_alg is not None:
             self.maxent_alg.cancel()
+
+            # Need to set this as sent as part of calculation finished signal
+            self._maxent_output_workspace_name = get_maxent_workspace_name(
+                self.get_parameters_for_maxent_calculation()['InputWorkspace'])
 
     # turn on button
     def activate(self):
@@ -97,7 +100,7 @@ class MaxEntPresenter(object):
     # kills the thread at end of execution
     def handleFinished(self):
         self.activate()
-        self.calculation_finished_notifier.notify_subscribers()
+        self.calculation_finished_notifier.notify_subscribers(self._maxent_output_workspace_name)
 
     def handle_error(self, error):
         self.activate()
@@ -105,8 +108,9 @@ class MaxEntPresenter(object):
 
     def calculate_maxent(self, alg):
         maxent_parameters = self.get_parameters_for_maxent_calculation()
+        base_name = get_maxent_workspace_name(maxent_parameters['InputWorkspace'])
 
-        maxent_workspace = run_MuonMaxent(maxent_parameters, alg)
+        maxent_workspace = run_MuonMaxent(maxent_parameters, alg, base_name)
 
         self.add_maxent_workspace_to_ADS(maxent_parameters['InputWorkspace'], maxent_workspace, alg)
 
@@ -155,12 +159,16 @@ class MaxEntPresenter(object):
         base_name = get_maxent_workspace_name(input_workspace)
         directory = get_maxent_workspace_group_name(base_name, self.load.data_context.instrument, self.load.workspace_suffix)
 
-        muon_workspace_wrapper = MuonWorkspaceWrapper(maxent_workspace, directory + base_name)
+        muon_workspace_wrapper = MuonWorkspaceWrapper(directory + base_name)
         muon_workspace_wrapper.show()
 
         maxent_output_options = self.get_maxent_output_options()
         self.load._frequency_context.add_maxEnt(run, maxent_workspace)
         self.add_optional_outputs_to_ADS(alg, maxent_output_options, base_name, directory)
+
+        # Storing this on the class so it can be sent as part of the calculation
+        # finished signal.
+        self._maxent_output_workspace_name = base_name
 
     def get_maxent_output_options(self):
         output_options = {}
@@ -175,8 +183,11 @@ class MaxEntPresenter(object):
     def add_optional_outputs_to_ADS(self, alg, output_options, base_name, directory):
         for key in output_options:
             if output_options[key]:
-                output = alg.getProperty(key).value
-                MuonWorkspaceWrapper(output, directory + base_name + optional_output_suffixes[key]).show()
+                output = alg.getProperty(key).valueAsStr
+                self.load.ads_observer.observeRename(False)
+                wrapped_workspace = MuonWorkspaceWrapper(output)
+                wrapped_workspace.show(directory + base_name + optional_output_suffixes[key])
+                self.load.ads_observer.observeRename(True)
 
     def update_view_from_model(self):
         self.getWorkspaceNames()

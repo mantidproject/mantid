@@ -1,16 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_StatisticsOfPeaksWorkspace_H_
-#define MANTID_CRYSTAL_StatisticsOfPeaksWorkspace_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/Crystal/PointGroup.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -20,7 +19,7 @@ namespace Crystal {
  * @date 2015-01-05
  */
 
-class DLLExport StatisticsOfPeaksWorkspace : public API::Algorithm {
+class MANTID_CRYSTAL_DLL StatisticsOfPeaksWorkspace : public API::Algorithm {
 public:
   StatisticsOfPeaksWorkspace();
   /// Algorithm's name for identification
@@ -50,12 +49,11 @@ private:
   /// Run the algorithm
   void exec() override;
   /// Runs SortHKL on workspace
-  void doSortHKL(Mantid::API::Workspace_sptr ws, std::string runName);
+  void doSortHKL(const Mantid::API::Workspace_sptr &ws,
+                 const std::string &runName);
 
   DataObjects::PeaksWorkspace_sptr ws;
 };
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_StatisticsOfPeaksWorkspace_H_ */

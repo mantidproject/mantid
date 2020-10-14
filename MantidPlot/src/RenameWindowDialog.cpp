@@ -37,7 +37,7 @@
 #include <QMessageBox>
 #include <QRadioButton>
 
-RenameWindowDialog::RenameWindowDialog(QWidget *parent, Qt::WFlags fl)
+RenameWindowDialog::RenameWindowDialog(QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl) {
   setWindowTitle(tr("MantidPlot - Rename Window"));
 

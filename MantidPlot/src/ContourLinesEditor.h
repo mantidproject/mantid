@@ -25,8 +25,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef CONTOURLINESEDITOR_H
-#define CONTOURLINESEDITOR_H
+#pragma once
 
 #include <QLocale>
 #include <QWidget>
@@ -101,5 +100,3 @@ private:
   int d_pen_index;
   QList<QPen> d_pen_list;
 };
-
-#endif

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_MERGEMDEWTEST_H_
-#define MANTID_MDEVENTS_MERGEMDEWTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -33,7 +32,7 @@ public:
 
   void test_exec_fileBacked() { do_test_exec("MergeMDFilesTest_OutputWS.nxs"); }
 
-  void do_test_exec(std::string OutputFilename) {
+  void do_test_exec(const std::string &OutputFilename) {
     if (OutputFilename != "") {
       if (Poco::File(OutputFilename).exists())
         Poco::File(OutputFilename).remove();
@@ -53,8 +52,8 @@ public:
       MDEventWorkspace3Lean::sptr ws =
           MDAlgorithmsTestHelper::makeFileBackedMDEWwithMDFrame(
               mess.str(), true, frame, -nFileEvents, appliedCoord);
-      inWorkspaces.push_back(ws);
-      filenames.push_back(
+      inWorkspaces.emplace_back(ws);
+      filenames.emplace_back(
           std::vector<std::string>(1, ws->getBoxController()->getFilename()));
     }
 
@@ -121,5 +120,3 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 };
-
-#endif /* MANTID_MDEVENTS_MERGEMDEWTEST_H_ */

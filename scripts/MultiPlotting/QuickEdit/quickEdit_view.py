@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import, print_function
 from qtpy import QtWidgets, QtCore
 import qtpy
 from MultiPlotting.AxisChanger.axis_changer_presenter import AxisChangerPresenter
@@ -14,7 +13,7 @@ from MultiPlotting.AxisChanger.axis_changer_view import AxisChangerView
 class QuickEditView(QtWidgets.QWidget):
     error_signal = QtCore.Signal(object)
 
-    def __init__(self, subcontext, parent=None):
+    def __init__(self, subcontext, parent=None, auto_btn = False):
         super(QuickEditView, self).__init__(parent)
 
         button_layout = QtWidgets.QHBoxLayout()
@@ -27,10 +26,16 @@ class QuickEditView(QtWidgets.QWidget):
                 QtCore.Qt.MatchContains)
 
         self.plot_selector.addItem("All")
+        self.plot_selector.setEditable(False)
         self.x_axis_changer = AxisChangerPresenter(AxisChangerView("X"))
 
-        self.autoscale = QtWidgets.QPushButton("Autoscale y")
-        self.autoscale.setStyleSheet("background-color:lightgrey")
+        self.autoscale = None
+        if auto_btn:
+            self.autoscale = QtWidgets.QPushButton("Autoscale y")
+            self.autoscale.setStyleSheet("background-color:lightgrey")
+        else:
+            self.autoscale = QtWidgets.QCheckBox("Autoscale y")
+            self.autoscale.setToolTip("While pan or zoom are enabled autoscale is disabled")
 
         self.y_axis_changer = AxisChangerPresenter(AxisChangerView("Y"))
 
@@ -62,10 +67,19 @@ class QuickEditView(QtWidgets.QWidget):
         return self.plot_selector.count()
 
     def add_subplot(self, name):
+        self.plot_selector.blockSignals(True)
         self.plot_selector.addItem(name)
+        self.plot_selector.blockSignals(False)
 
     def rm_subplot(self, index):
+
         self.plot_selector.removeItem(index)
+
+    def clear_subplots(self):
+        self.plot_selector.blockSignals(True)
+        self.plot_selector.clear()
+        self.plot_selector.addItem("All")
+        self.plot_selector.blockSignals(False)
 
     def connect_plot_selection(self, slot):
         self.plot_selector.currentIndexChanged.connect(slot)
@@ -78,6 +92,9 @@ class QuickEditView(QtWidgets.QWidget):
     def set_plot_x_range(self, range):
         self.x_axis_changer.set_bounds(range)
 
+    def get_x_bounds(self):
+        return self.x_axis_changer.get_bounds()
+
     """ y axis selection """
 
     def connect_y_range_changed(self, slot):
@@ -89,10 +106,29 @@ class QuickEditView(QtWidgets.QWidget):
     def get_y_bounds(self):
         return self.y_axis_changer.get_bounds()
 
+    def disable_yaxis_changer(self):
+        self.y_axis_changer.view.setEnabled(False)
+
+    def enable_yaxis_changer(self):
+        self.y_axis_changer.view.setEnabled(True)
+
     """ auto scale selection """
 
     def connect_autoscale_changed(self, slot):
         self.autoscale.clicked.connect(slot)
+
+    @property
+    def autoscale_state(self):
+        return self.autoscale.checkState()
+
+    def disable_autoscale(self):
+        self.autoscale.setEnabled(False)
+
+    def enable_autoscale(self):
+        self.autoscale.setEnabled(True)
+
+    def uncheck_autoscale(self):
+        self.autoscale.setChecked(False)
 
     """ errors selection """
 

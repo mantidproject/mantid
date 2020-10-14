@@ -1,18 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
-from __future__ import (absolute_import)
-
 from qtpy.QtCore import QCoreApplication, QObject
 import unittest
 
-from mantid.py3compat.mock import patch
+from unittest.mock import patch
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.writetosignal import WriteToSignal
 
@@ -49,7 +47,7 @@ class WriteToSignalTest(unittest.TestCase):
             writer.sig_write_received.connect(recv.capture_text)
             txt = "I expect to see this"
             writer.write(txt)
-            QCoreApplication.processEvents()
+            QCoreApplication.sendPostedEvents()
             self.assertEqual(txt, recv.captured_txt)
             mock_stdout.fileno.assert_called_once_with()
 

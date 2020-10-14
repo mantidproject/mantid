@@ -1,19 +1,20 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import copy
 
 from mantid.kernel import Logger
+from sans.gui_logic.models.beam_centre_model import BeamCentreModel
 from ui.sans_isis.beam_centre import BeamCentre
 from ui.sans_isis.work_handler import WorkHandler
 
 
 class BeamCentrePresenter(object):
+    DECIMAL_PLACES_CENTRE_POS = 3
+
     class ConcreteBeamCentreListener(BeamCentre.BeamCentreListener):
         def __init__(self, presenter):
             self._presenter = presenter
@@ -26,18 +27,18 @@ class BeamCentrePresenter(object):
             super(BeamCentrePresenter.CentreFinderListener, self).__init__()
             self._presenter = presenter
 
-        def on_processing_finished(self, result):
-            self._presenter.on_processing_finished_centre_finder(result)
+        def on_processing_finished(self, _):
+            self._presenter.on_processing_finished_centre_finder()
 
         def on_processing_error(self, error):
             self._presenter.on_processing_error_centre_finder(error)
 
-    def __init__(self, parent_presenter, WorkHandler, BeamCentreModel, SANSCentreFinder):
+    def __init__(self, parent_presenter, SANSCentreFinder, work_handler=None, beam_centre_model=None):
         self._view = None
         self._parent_presenter = parent_presenter
-        self._work_handler = WorkHandler()
+        self._work_handler = WorkHandler() if not work_handler else work_handler
         self._logger = Logger("SANS")
-        self._beam_centre_model = BeamCentreModel(SANSCentreFinder)
+        self._beam_centre_model = BeamCentreModel(SANSCentreFinder) if not beam_centre_model else beam_centre_model
 
     def set_view(self, view):
         if view:
@@ -58,29 +59,19 @@ class BeamCentrePresenter(object):
         self._view.r_max_line_edit.textChanged.connect(self._validate_radius_values)
 
     def on_update_instrument(self, instrument):
-        self._beam_centre_model.set_scaling(instrument)
         self._view.on_update_instrument(instrument)
 
     def on_update_rows(self):
-        file_information = self._parent_presenter._table_model.get_file_information_for_row(0)
-        if file_information:
-            self._beam_centre_model.reset_to_defaults_for_instrument(file_information=file_information)
-        self._view.set_options(self._beam_centre_model)
+        self._beam_centre_model.reset_inst_defaults(self._parent_presenter.instrument)
 
-    def on_processing_finished_centre_finder(self, result):
+    def on_processing_finished_centre_finder(self):
         # Enable button
         self._view.set_run_button_to_normal()
         # Update Centre Positions in model and GUI
-        if self._beam_centre_model.update_lab:
-            self._beam_centre_model.lab_pos_1 = result['pos1']
-            self._beam_centre_model.lab_pos_2 = result['pos2']
-            self._view.lab_pos_1 = self._beam_centre_model.lab_pos_1 * self._beam_centre_model.scale_1
-            self._view.lab_pos_2 = self._beam_centre_model.lab_pos_2 * self._beam_centre_model.scale_2
-        if self._beam_centre_model.update_hab:
-            self._beam_centre_model.hab_pos_1 = result['pos1']
-            self._beam_centre_model.hab_pos_2 = result['pos2']
-            self._view.hab_pos_1 = self._beam_centre_model.hab_pos_1 * self._beam_centre_model.scale_1
-            self._view.hab_pos_2 = self._beam_centre_model.hab_pos_2 * self._beam_centre_model.scale_2
+        self._view.lab_pos_1 = round(self._beam_centre_model.lab_pos_1, self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.lab_pos_2 = round(self._beam_centre_model.lab_pos_2, self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.hab_pos_1 = round(self._beam_centre_model.hab_pos_1, self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.hab_pos_2 = round(self._beam_centre_model.hab_pos_2, self.DECIMAL_PLACES_CENTRE_POS)
 
     def on_processing_error_centre_finder(self, error):
         self._logger.warning("There has been an error. See more: {}".format(error))
@@ -90,6 +81,8 @@ class BeamCentrePresenter(object):
         self._view.set_run_button_to_normal()
 
     def on_run_clicked(self):
+        self._work_handler.wait_for_done()
+
         # Get the state information for the first row.
         state = self._parent_presenter.get_state_for_row(0)
 
@@ -119,10 +112,10 @@ class BeamCentrePresenter(object):
         self._beam_centre_model.verbose = self._view.verbose
         self._beam_centre_model.COM = self._view.COM
         self._beam_centre_model.up_down = self._view.up_down
-        self._beam_centre_model.lab_pos_1 = self._view.lab_pos_1 / self._beam_centre_model.scale_1
-        self._beam_centre_model.lab_pos_2 = self._view.lab_pos_2 / self._beam_centre_model.scale_2
-        self._beam_centre_model.hab_pos_1 = self._view.hab_pos_1 / self._beam_centre_model.scale_1
-        self._beam_centre_model.hab_pos_2 = self._view.hab_pos_2 / self._beam_centre_model.scale_2
+        self._beam_centre_model.lab_pos_1 = self._view.lab_pos_1
+        self._beam_centre_model.lab_pos_2 = self._view.lab_pos_2
+        self._beam_centre_model.hab_pos_1 = self._view.hab_pos_1
+        self._beam_centre_model.hab_pos_2 = self._view.hab_pos_2
         self._beam_centre_model.q_min = self._view.q_min
         self._beam_centre_model.q_max = self._view.q_max
         self._beam_centre_model.component = self._view.component
@@ -136,11 +129,11 @@ class BeamCentrePresenter(object):
         hab_pos_1 = getattr(state_model, 'hab_pos_1') if getattr(state_model, 'hab_pos_1') else lab_pos_1
         hab_pos_2 = getattr(state_model, 'hab_pos_2') if getattr(state_model, 'hab_pos_2') else lab_pos_2
 
-        self._view.lab_pos_1 = lab_pos_1
-        self._view.lab_pos_2 = lab_pos_2
+        self._view.lab_pos_1 = round(lab_pos_1, self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.lab_pos_2 = round(lab_pos_2, self.DECIMAL_PLACES_CENTRE_POS)
 
-        self._view.hab_pos_1 = hab_pos_1
-        self._view.hab_pos_2 = hab_pos_2
+        self._view.hab_pos_1 = round(hab_pos_1, self.DECIMAL_PLACES_CENTRE_POS)
+        self._view.hab_pos_2 = round(hab_pos_2, self.DECIMAL_PLACES_CENTRE_POS)
 
     def update_hab_selected(self):
         self._beam_centre_model.update_hab = True
@@ -188,6 +181,10 @@ class BeamCentrePresenter(object):
             # one of the values is empty
             pass
         else:
+            if min_value == max_value == 0:
+                self._view.run_button.setEnabled(False)
+                return
+
             if min_value >= max_value:
                 if self._view.run_button.isEnabled():
                     # Only post to logger once per disabling

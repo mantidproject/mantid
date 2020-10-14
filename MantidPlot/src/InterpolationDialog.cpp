@@ -42,7 +42,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 
-InterpolationDialog::InterpolationDialog(QWidget *parent, Qt::WFlags fl)
+InterpolationDialog::InterpolationDialog(QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl), graph(nullptr) {
   setObjectName("InterpolationDialog");
   setWindowTitle(tr("MantidPlot - Interpolation Options"));

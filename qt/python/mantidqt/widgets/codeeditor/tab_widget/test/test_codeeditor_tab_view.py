@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-from __future__ import absolute_import
-
 import unittest
 
 from qtpy.QtWidgets import QAction, QApplication, QWidget
@@ -49,12 +47,12 @@ class CodeEditorTabWidgetTest(unittest.TestCase, QtWidgetFinder, QtAssertionsHel
 
         view.close()
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         self.assert_widget_not_present(CodeEditorTabWidget.__name__)
 
         # closing our local mock should leave the QApplication without any widgets
         mock_mfp.close()
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         self.assert_no_toplevel_widgets()
 
     def test_widget_connections_exist(self):
@@ -73,12 +71,12 @@ class CodeEditorTabWidgetTest(unittest.TestCase, QtWidgetFinder, QtAssertionsHel
 
         view.close()
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         self.assert_widget_not_present(CodeEditorTabWidget.__name__)
 
         # closing our local mock should leave the QApplication without any widgets
         mock_mfp.close()
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         self.assert_no_toplevel_widgets()
 
 

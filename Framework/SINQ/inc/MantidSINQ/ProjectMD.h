@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
  * This is a little algorithm which can sum a MD dataset along one direction,
@@ -12,8 +12,7 @@
  *
  *
  */
-#ifndef PROJECTMD_H_
-#define PROJECTMD_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
@@ -44,16 +43,16 @@ private:
   /// Execution code
   void exec() override;
 
-  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
-                    Mantid::API::IMDHistoWorkspace_sptr outws);
-  void sumData(Mantid::API::IMDHistoWorkspace_sptr inws,
-               Mantid::API::IMDHistoWorkspace_sptr outws, int *sourceDim,
+  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
+                    const Mantid::API::IMDHistoWorkspace_sptr &outws);
+  void sumData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
+               const Mantid::API::IMDHistoWorkspace_sptr &outws, int *sourceDim,
                int *targetDim, int targetDimCount, int dimNo, int start,
                int end, int currentDim);
 
-  double getValue(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
-  void putValue(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim, double val);
-  unsigned int calcIndex(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
+  double getValue(const Mantid::API::IMDHistoWorkspace_sptr &ws, int *dim);
+  void putValue(const Mantid::API::IMDHistoWorkspace_sptr &ws, int *dim,
+                double val);
+  unsigned int calcIndex(const Mantid::API::IMDHistoWorkspace_sptr &ws,
+                         int *dim);
 };
-
-#endif /*PROJECTMD_H_*/

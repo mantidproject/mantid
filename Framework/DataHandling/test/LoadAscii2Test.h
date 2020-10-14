@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADASCIITEST_H_
-#define LOADASCIITEST_H_
+#pragma once
 
 #include "MantidDataHandling/LoadAscii2.h"
+#include "SaveAscii2Test.h"
 #include "cxxtest/TestSuite.h"
 
 #include "MantidAPI/AnalysisDataService.h"
@@ -15,6 +15,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveAscii2.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/Unit.h"
 
@@ -154,8 +155,8 @@ public:
 
   void test_fail_five_columns() {
     m_testno++;
-    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
+    std::ofstream file(m_abspath.c_str());
     file << std::scientific;
     file << "# X , Y, E, DX, Z\n";
     for (int i = 0; i < 5; i++) {
@@ -174,8 +175,8 @@ public:
 
   void test_fail_one_column() {
     m_testno++;
-    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
+    std::ofstream file(m_abspath.c_str());
     file << std::scientific;
     file << "# X\n";
     for (int i = 0; i < 5; i++) {
@@ -192,8 +193,8 @@ public:
 
   void test_fail_mismatching_bins() {
     m_testno++;
-    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
+    std::ofstream file(m_abspath.c_str());
     file << std::scientific;
     file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
@@ -213,8 +214,8 @@ public:
 
   void test_fail_mismatching_columns() {
     m_testno++;
-    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
+    std::ofstream file(m_abspath.c_str());
     file << std::scientific;
     file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
@@ -237,8 +238,8 @@ public:
 
   void test_fail_line_start_letter() {
     m_testno++;
-    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
+    std::ofstream file(m_abspath.c_str());
     file << std::scientific;
     file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
@@ -263,8 +264,8 @@ public:
 
   void test_fail_line_start_noncomment_symbol() {
     m_testno++;
-    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
+    std::ofstream file(m_abspath.c_str());
     file << std::scientific;
     file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
@@ -288,8 +289,8 @@ public:
 
   void test_fail_line_mixed_letter_number() {
     m_testno++;
-    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
+    std::ofstream file(m_abspath.c_str());
     file << std::scientific;
     file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
@@ -314,8 +315,8 @@ public:
 
   void test_fail_line_mixed_symbol_number() {
     m_testno++;
-    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
+    std::ofstream file(m_abspath.c_str());
     file << std::scientific;
     file << "# X , Y, E, DX\n";
     for (int i = 0; i < 5; i++) {
@@ -339,8 +340,8 @@ public:
 
   void test_fail_spectra_ID_inclusion_inconisitant() {
     m_testno++;
-    std::ofstream file(getTestFileName().c_str());
     m_abspath = getAbsPath();
+    std::ofstream file(m_abspath.c_str());
 
     file << std::scientific;
     file << "# X , Y, E, DX\n";
@@ -361,6 +362,45 @@ public:
     TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
   }
 
+  void test_tableworkspace() {
+    m_testno++;
+    m_abspath = writeTableTestFile("Tab");
+
+    LoadAscii2 loader;
+    loader.initialize();
+    loader.setRethrows(true);
+
+    const std::string outputName(getTestFileName());
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", m_abspath));
+    TS_ASSERT_THROWS_NOTHING(
+        loader.setPropertyValue("OutputWorkspace", outputName));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Separator", "Tab"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("CustomSeparator", ""));
+
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+
+    TS_ASSERT_EQUALS(loader.isExecuted(), true);
+
+    // Check the workspace
+    AnalysisDataServiceImpl &dataStore = AnalysisDataService::Instance();
+    if (dataStore.doesExist(outputName)) {
+      TS_ASSERT_EQUALS(dataStore.doesExist(outputName), true);
+      Workspace_sptr output;
+      TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputName));
+      TableWorkspace_sptr outputWS =
+          std::dynamic_pointer_cast<TableWorkspace>(output);
+      if (outputWS) {
+        checkTableData(outputWS);
+      } else {
+        TS_FAIL("Workspace is not a table workspace");
+      }
+    } else {
+      TS_FAIL(outputName + " does not exist.");
+    }
+    dataStore.remove(outputName);
+    TS_ASSERT_THROWS_NOTHING(Poco::File(m_abspath).remove());
+  }
+
 private:
   const std::string getTestFileName() const {
     return m_filename + boost::lexical_cast<std::string>(m_testno) + m_ext;
@@ -371,6 +411,54 @@ private:
     save.setPropertyValue("Filename", getTestFileName());
     return save.getPropertyValue("Filename");
   }
+
+  // Write the test file for a table workspace
+  std::string writeTableTestFile(const std::string &sep = "CSV",
+                                 const std::string &custsep = "") {
+    SaveAscii2 save;
+    save.initialize();
+    save.setPropertyValue("Filename", getTestFileName());
+
+    const std::string name = "SaveTableAsciiWS";
+    auto wsToSave = SaveAscii2Test::writeTableWS(name);
+
+    save.initialize();
+    save.isInitialized();
+    save.setPropertyValue("InputWorkspace", name);
+    save.setPropertyValue("Separator", sep);
+    save.setPropertyValue("CustomSeparator", custsep);
+    save.execute();
+
+    AnalysisDataService::Instance().remove(name);
+
+    return save.getPropertyValue("Filename");
+  }
+
+  void checkTableData(const Mantid::API::ITableWorkspace_sptr &outputWS) {
+
+    const std::string name = "Compare_SaveAsciiWS";
+    auto wsToCompare = SaveAscii2Test::writeTableWS(name);
+    TS_ASSERT_EQUALS(outputWS->columnCount(), wsToCompare->columnCount());
+    TS_ASSERT_EQUALS(outputWS->rowCount(), wsToCompare->rowCount());
+
+    for (size_t colIndex = 0; colIndex < outputWS->columnCount(); colIndex++) {
+      auto outputCol = outputWS->getColumn(colIndex);
+      auto compareCol = wsToCompare->getColumn(colIndex);
+      TS_ASSERT_EQUALS(outputCol->name(), compareCol->name());
+      TS_ASSERT_EQUALS(outputCol->type(), compareCol->type());
+      for (size_t rowIndex = 0; rowIndex < outputWS->rowCount(); rowIndex++) {
+
+        std::stringstream ssOutput;
+        std::stringstream ssCompare;
+        outputCol->print(rowIndex, ssOutput);
+        compareCol->print(rowIndex, ssCompare);
+        TS_ASSERT_EQUALS(ssOutput.str(), ssCompare.str());
+      }
+    }
+
+    AnalysisDataService::Instance().remove(name);
+  }
+
   // Write the test file
   std::string writeTestFile(const int cols, const bool header = true,
                             const std::string &comment = "#",
@@ -381,9 +469,10 @@ private:
     SaveAscii2 save;
     save.initialize();
     save.setPropertyValue("Filename", getTestFileName());
+    std::string filePath = save.getPropertyValue("Filename");
     if (cols < 3) {
       // saveascii2 doens't save 2 column files it has to be made manually
-      std::ofstream file(getTestFileName().c_str());
+      std::ofstream file(filePath.c_str());
       if (scientific) {
         file << std::scientific;
       }
@@ -401,7 +490,7 @@ private:
       file.close();
     } else {
       Mantid::DataObjects::Workspace2D_sptr wsToSave =
-          boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+          std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
               WorkspaceFactory::Instance().create("Workspace2D", 5, 4, 4));
       for (int i = 0; i < 5; i++) {
         auto &X = wsToSave->mutableX(i);
@@ -435,10 +524,12 @@ private:
       save.setPropertyValue("Separator", sep);
       save.setPropertyValue("CustomSeparator", custsep);
       save.execute();
-
+      TSM_ASSERT("Failed to save test data using SaveAscii2.",
+                 save.isExecuted());
       AnalysisDataService::Instance().remove(name);
     }
-    return save.getPropertyValue("Filename");
+
+    return filePath;
   }
 
   Mantid::API::MatrixWorkspace_sptr
@@ -475,7 +566,7 @@ private:
         Workspace_sptr output;
         TS_ASSERT_THROWS_NOTHING(output = dataStore.retrieve(outputName));
         MatrixWorkspace_sptr outputWS =
-            boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+            std::dynamic_pointer_cast<MatrixWorkspace>(output);
         if (outputWS) {
           if (dataCheck) {
             checkData(outputWS, cols);
@@ -499,7 +590,7 @@ private:
     return outputWS;
   }
 
-  void checkData(const Mantid::API::MatrixWorkspace_sptr outputWS,
+  void checkData(const Mantid::API::MatrixWorkspace_sptr &outputWS,
                  const int cols) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 5);
     TS_ASSERT_EQUALS(outputWS->blocksize(), 4);
@@ -588,7 +679,7 @@ private:
     constexpr int xyLen = 100;
 
     Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", numVecs, xyLen,
                                                 xyLen));
 
@@ -622,5 +713,3 @@ private:
     filename = save.getPropertyValue("Filename");
   }
 };
-
-#endif // LOADASCIITEST_H_

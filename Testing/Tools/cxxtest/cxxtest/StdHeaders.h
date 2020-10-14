@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef __cxxtest_StdHeaders_h__
-#define __cxxtest_StdHeaders_h__
+#pragma once
 
 //
 // This file basically #includes the STL headers.
@@ -27,5 +26,3 @@
 #ifdef _MSC_VER
 #   pragma warning( pop )
 #endif // _MSC_VER
-
-#endif // __cxxtest_StdHeaders_h__

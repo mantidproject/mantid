@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
 import ILL_utilities as utils
@@ -92,8 +89,7 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
                                  common.SUBALG_LOGGING_OFF,
                                  common.SUBALG_LOGGING_ON]),
                              direction=Direction.Input,
-                             doc='Enable or disable subalgorithms to ' +
-                                 'print in the logs.')
+                             doc='Enable or disable subalgorithms to ' + 'print in the logs.')
         self.declareProperty(ITableWorkspaceProperty(
             name=common.PROP_EPP_WS,
             defaultValue='',
@@ -111,8 +107,8 @@ class DirectILLIntegrateVanadium(DataProcessorAlgorithm):
                              defaultValue=Property.EMPTY_DBL,
                              validator=positiveFloat,
                              direction=Direction.Input,
-                             doc='Vanadium temperature in Kelvin for Debye-Waller correction, ' +
-                                 'overrides the default value from the sample logs.')
+                             doc='Vanadium temperature in Kelvin for Debye-Waller correction, '
+                                 + 'overrides the default value from the sample logs.')
         self.setPropertySettings(common.PROP_TEMPERATURE, EnabledWhenProperty(common.PROP_DWF_CORRECTION,
                                                                               PropertyCriterion.IsDefault))
 

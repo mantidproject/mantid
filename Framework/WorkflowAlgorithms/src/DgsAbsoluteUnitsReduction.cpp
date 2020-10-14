@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/DgsAbsoluteUnitsReduction.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -88,7 +88,7 @@ void DgsAbsoluteUnitsReduction::exec() {
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
+  std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
     reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);

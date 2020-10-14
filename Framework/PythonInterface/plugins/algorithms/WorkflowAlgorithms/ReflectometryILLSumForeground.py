@@ -1,23 +1,19 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
-
-import ILL_utilities as utils
 from mantid.api import (AlgorithmFactory, DataProcessorAlgorithm, MatrixWorkspaceProperty, PropertyMode,
                         WorkspaceUnitValidator)
 from mantid.kernel import (CompositeValidator, Direction, FloatArrayBoundedValidator, FloatArrayProperty,
                            IntArrayBoundedValidator, IntArrayLengthValidator, IntArrayProperty, Property,
                            StringListValidator)
-from mantid.simpleapi import (AddSampleLog, CropWorkspace, Divide, ExtractSingleSpectrum, RebinToWorkspace,
-                              ReflectometryBeamStatistics, ReflectometrySumInQ)
-import numpy
+from mantid.simpleapi import (CropWorkspace, Divide, ExtractSingleSpectrum, MoveInstrumentComponent, RebinToWorkspace,
+                              ReflectometryBeamStatistics, ReflectometrySumInQ, RotateInstrumentComponent)
 import ReflectometryILL_common as common
+import ILL_utilities as utils
+import numpy
 
 
 class Prop:
@@ -58,7 +54,8 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
 
     def seeAlso(self):
         """Return a list of related algorithm names."""
-        return ['ReflectometryILLConvertToQ', 'ReflectometryILLPolarizationCor', 'ReflectometryILLPreprocess']
+        return ['ReflectometryILLConvertToQ', 'ReflectometryILLPolarizationCor',
+                'ReflectometryILLPreprocess', 'ReflectometryILLAutoProcess']
 
     def version(self):
         """Return the version of the algorithm."""
@@ -73,6 +70,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         self._names = utils.NameSource(wsPrefix, cleanupMode)
 
         ws = self._inputWS()
+
         processReflected = not self._directOnly()
         if processReflected:
             self._addBeamStatisticsToLogs(ws)
@@ -80,13 +78,12 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         sumType = self._sumType()
         if sumType == SumType.IN_LAMBDA:
             ws = self._sumForegroundInLambda(ws)
-            self._addSumTypeToLogs(ws, SumType.IN_LAMBDA)
             if processReflected:
                 ws = self._rebinToDirect(ws)
         else:
             ws = self._divideByDirect(ws)
             ws = self._sumForegroundInQ(ws)
-            self._addSumTypeToLogs(ws, SumType.IN_Q)
+        ws.run().addProperty(common.SampleLogs.SUM_TYPE, sumType, True)
         ws = self._applyWavelengthRange(ws)
 
         self._finalize(ws)
@@ -159,6 +156,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
     def validateInputs(self):
         """Validate the algorithm's input properties."""
         issues = dict()
+        ws = self.getProperty(Prop.INPUT_WS).value
+        if not ws.run().hasProperty(common.SampleLogs.LINE_POSITION):
+            issues[Prop.INPUT_WS] = 'Must have a sample log entry called {}'.format(common.SampleLogs.LINE_POSITION)
         if self.getProperty(Prop.DIRECT_FOREGROUND_WS).isDefault:
             if self.getProperty(Prop.SUM_TYPE).value == SumType.IN_Q:
                 issues[Prop.DIRECT_FOREGROUND_WS] = 'Direct foreground workspace is needed for summing in Q.'
@@ -183,8 +183,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         instrumentName = common.instrumentName(ws)
         pixelSize = common.pixelSize(instrumentName)
         detResolution = common.detectorResolution()
-        firstSlitSizeLog = common.slitSizeLogEntry(instrumentName, 1)
-        secondSlitSizeLog = common.slitSizeLogEntry(instrumentName, 2)
         ReflectometryBeamStatistics(
             ReflectedBeamWorkspace=ws,
             ReflectedForeground=reflectedForeground,
@@ -193,18 +191,9 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             PixelSize=pixelSize,
             DetectorResolution=detResolution,
             FirstSlitName='slit2',
-            FirstSlitSizeSampleLog=firstSlitSizeLog,
+            FirstSlitSizeSampleLog=common.SampleLogs.SLIT2WIDTH,
             SecondSlitName='slit3',
-            SecondSlitSizeSampleLog=secondSlitSizeLog,
-            EnableLogging=self._subalgLogging)
-
-    def _addSumTypeToLogs(self, ws, sumType):
-        """Add a sum type entry to sample logs."""
-        AddSampleLog(
-            Workspace=ws,
-            LogName=common.SampleLogs.SUM_TYPE,
-            LogText=sumType,
-            LogType='String',
+            SecondSlitSizeSampleLog=common.SampleLogs.SLIT3WIDTH,
             EnableLogging=self._subalgLogging)
 
     def _applyWavelengthRange(self, ws):
@@ -237,7 +226,6 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             OutputWorkspace=reflectivityWSName,
             EnableLogging=self._subalgLogging)
         self._cleanup.cleanup(ws)
-        reflectivityWS = common.correctForChopperOpenings(reflectivityWS, directWS, self._names, self._cleanup, self._subalgLogging)
         reflectivityWS.setYUnit('Reflectivity')
         reflectivityWS.setYUnitLabel('Reflectivity')
         return reflectivityWS
@@ -288,7 +276,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
         foreground = self._foregroundIndices(ws)
         sumIndices = [i for i in range(foreground[0], foreground[2] + 1)]
         beamPosIndex = foreground[1]
-        foregroundWSName = self._names.withSuffix('foreground_grouped')
+        foregroundWSName = self._names.withSuffix('grouped')
         foregroundWS = ExtractSingleSpectrum(
             InputWorkspace=ws,
             OutputWorkspace=foregroundWSName,
@@ -303,7 +291,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
                 continue
             if i < 0 or i > maxIndex:
                 self.log().warning('Foreground partially out of the workspace.')
-            addeeWSName = self._names.withSuffix('foreground_addee')
+            addeeWSName = self._names.withSuffix('addee')
             addeeWS = ExtractSingleSpectrum(
                 InputWorkspace=ws,
                 OutputWorkspace=addeeWSName,
@@ -319,9 +307,73 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             es = addeeWS.readE(0)
             foregroundEs += es**2
             self._cleanup.cleanup(addeeWS)
-        self._cleanup.cleanup(ws)
         numpy.sqrt(foregroundEs, out=foregroundEs)
+        foregroundWS = self._correctForFractionalForegroundCentre(ws, foregroundWS)
+        self._cleanup.cleanup(ws)
         return foregroundWS
+
+    def _correctForFractionalForegroundCentre(self, ws, summedForeground):
+        """
+        This needs to be called after having summed the foreground but before transfering to momentum transfer.
+        This needs to be called in both coherent and incoherent cases, regardless the angle calibration option.
+        The reason for this is that up to this point is the fractional workspace index that correponds to the calibrated 2theta.
+        However the momentum transfer calculation, which normally comes after summing the foreground,
+        takes the 2theta from the spectrumInfo of the summed foreground workspace.
+        Hence this code below translated the detector by the difference of the
+        fractional and integer foreground centre along the detector plane.
+        It also applies local rotation so that the detector continues to face the sample.
+        Note that this translation has nothing to do with the difference of foreground centres in direct and reflected beams,
+        which is handled already in pre-process algorithm.
+        Here it's only about the difference of the fractional and integer foreground centre of the reflected beam
+        with already calibrated angle no matter the option.
+        Note also, that this could probably be avoided, if the loader placed
+        the integer foreground at the given angle and not the fractional one.
+        Fractional foreground centre only matter when calculating the difference between direct and reflected beams.
+        But for the final Q (and sigma) calculation, it takes the position/angle from spectrumInfo()...(0),
+        which corresponds to the centre of the pixel."""
+        foreground = self._foregroundIndices(ws)
+        # integer foreground centre
+        beamPosIndex = foreground[1]
+        # fractional foreground centre
+        linePosition = ws.run().getProperty(common.SampleLogs.LINE_POSITION).value
+        l2 = ws.run().getProperty('L2').value
+        instr = common.instrumentName(ws)
+        pixelSize = common.pixelSize(instr)
+        # the distance between the fractional and integer foreground centres along the detector plane
+        dist = pixelSize * (linePosition - beamPosIndex)
+        if dist != 0.:
+            detPoint1 = ws.spectrumInfo().position(0)
+            detPoint2 = ws.spectrumInfo().position(20)
+            beta = numpy.math.atan2((detPoint2[0] - detPoint1[0]), (detPoint2[2] - detPoint1[2]))
+            xvsy = numpy.math.sin(beta) * dist
+            mz = numpy.math.cos(beta) * dist
+            if instr == 'D17':
+                mx = xvsy
+                my = 0.0
+                rotationAxis = [0, 1, 0]
+            else:
+                mx = 0.0
+                my = xvsy
+                rotationAxis = [-1, 0, 0]
+            MoveInstrumentComponent(
+                Workspace=summedForeground,
+                ComponentName='detector',
+                X=mx,
+                Y=my,
+                Z=mz,
+                RelativePosition=True
+            )
+            angle_corr = numpy.arctan2(dist, l2) * 180 / numpy.pi
+            RotateInstrumentComponent(
+                Workspace=summedForeground,
+                ComponentName='detector',
+                X=rotationAxis[0],
+                Y=rotationAxis[1],
+                Z=rotationAxis[2],
+                Angle=angle_corr,
+                RelativeRotation=True
+            )
+        return summedForeground
 
     def _sumForegroundInQ(self, ws):
         """Sum the foreground region into a single histogram using the coherent method."""
@@ -337,6 +389,7 @@ class ReflectometryILLSumForeground(DataProcessorAlgorithm):
             BeamCentre=linePosition,
             FlatSample=isFlatSample,
             EnableLogging=self._subalgLogging)
+        sumWS = self._correctForFractionalForegroundCentre(ws, sumWS)
         self._cleanup.cleanup(ws)
         return sumWS
 

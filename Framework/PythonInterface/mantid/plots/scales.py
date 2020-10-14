@@ -1,15 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid package
 """
 Defines a set of custom axis scales
 """
-from __future__ import (absolute_import, division, unicode_literals)
-
+from mantid.plots.utility import mpl_version_info
 from matplotlib.scale import ScaleBase
 from matplotlib.ticker import (AutoLocator, NullFormatter,
                                NullLocator, ScalarFormatter)
@@ -24,7 +23,7 @@ class PowerScale(ScaleBase):
     # commands
     name = 'power'
 
-    def __init__(self, _, **kwargs):
+    def __init__(self, _axis, **kwargs):
         """
         Any keyword arguments passed to ``set_xscale`` and
         ``set_yscale`` will be passed along to the scale's
@@ -32,7 +31,10 @@ class PowerScale(ScaleBase):
 
         gamma: The power used to scale the data.
         """
-        super(PowerScale, self).__init__()
+        if mpl_version_info() > (3,):
+            super(PowerScale, self).__init__(_axis)
+        else:
+            super(PowerScale, self).__init__()
         gamma = kwargs.pop("gamma", None)
         if gamma is None:
             raise ValueError("power scale must specify gamma value")

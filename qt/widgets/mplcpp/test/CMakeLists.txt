@@ -18,6 +18,7 @@ set(TEST_FILES
 
 set(CXXTEST_EXTRA_HEADER_INCLUDE
     ${CMAKE_CURRENT_LIST_DIR}/MplCppTestInitialization.h)
+
 mtd_add_qt_tests(TARGET_NAME MantidQtWidgetsMplCppTest
                  QT_VERSION 5
                  INCLUDE_DIRS
@@ -32,8 +33,6 @@ mtd_add_qt_tests(TARGET_NAME MantidQtWidgetsMplCppTest
                    PythonInterfaceCore
                    Types
                    ${Boost_LIBRARIES}
-                   ${POCO_LIBRARIES}
-                   ${PYTHON_LIBRARIES}
                    ${POCO_LIBRARIES}
                  MTD_QT_LINK_LIBS
                    MantidQtWidgetsMplCpp

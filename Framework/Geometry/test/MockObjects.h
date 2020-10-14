@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * MockObjects.h
@@ -11,8 +11,7 @@
  *      Author: spu92482
  */
 
-#ifndef MANTIDGEOMETRYTEST_MOCKOBJECTS_H_
-#define MANTIDGEOMETRYTEST_MOCKOBJECTS_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/IPeak.h"
 #include "MantidGeometry/Crystal/PeakTransform.h"
@@ -76,13 +75,14 @@ public:
   MOCK_CONST_METHOD0(getIntMNP, Mantid::Kernel::V3D());
   MOCK_METHOD1(setRunNumber, void(int m_RunNumber));
   MOCK_METHOD1(setPeakNumber, void(int m_PeakNumber));
-  MOCK_METHOD1(setIntMNP, void(const Mantid::Kernel::V3D m_modStru));
+  MOCK_METHOD1(setIntMNP, void(const Mantid::Kernel::V3D &m_modStru));
   MOCK_CONST_METHOD0(getMonitorCount, double());
   MOCK_METHOD1(setMonitorCount, void(double m_MonitorCount));
   MOCK_CONST_METHOD0(getH, double());
   MOCK_CONST_METHOD0(getK, double());
   MOCK_CONST_METHOD0(getL, double());
   MOCK_CONST_METHOD0(getHKL, Mantid::Kernel::V3D());
+  MOCK_CONST_METHOD0(isIndexed, bool());
   MOCK_CONST_METHOD0(getIntHKL, Mantid::Kernel::V3D());
   MOCK_CONST_METHOD0(getSamplePos, Mantid::Kernel::V3D());
   MOCK_METHOD1(setH, void(double m_H));
@@ -90,7 +90,7 @@ public:
   MOCK_METHOD1(setL, void(double m_L));
   MOCK_METHOD3(setHKL, void(double H, double K, double L));
   MOCK_METHOD1(setHKL, void(const Mantid::Kernel::V3D &HKL));
-  MOCK_METHOD1(setIntHKL, void(const Mantid::Kernel::V3D HKL));
+  MOCK_METHOD1(setIntHKL, void(const Mantid::Kernel::V3D &HKL));
   MOCK_METHOD3(setSamplePos, void(double samX, double samY, double samZ));
   MOCK_METHOD1(setSamplePos, void(const Mantid::Kernel::V3D &XYZ));
   MOCK_CONST_METHOD0(getQLabFrame, Mantid::Kernel::V3D());
@@ -116,8 +116,11 @@ public:
   MOCK_CONST_METHOD0(getIntensity, double());
   MOCK_CONST_METHOD0(getSigmaIntensity, double());
   MOCK_CONST_METHOD0(getIntensityOverSigma, double());
+  MOCK_CONST_METHOD0(getAbsorptionWeightedPathLength, double());
   MOCK_METHOD1(setIntensity, void(double m_Intensity));
   MOCK_METHOD1(setSigmaIntensity, void(double m_SigmaIntensity));
+  MOCK_METHOD1(setAbsorptionWeightedPathLength,
+               void(double m_AbsorptionWeightedPathLength));
   MOCK_CONST_METHOD0(getBinCount, double());
   MOCK_METHOD1(setBinCount, void(double m_BinCount));
   MOCK_CONST_METHOD0(getGoniometerMatrix, Mantid::Kernel::Matrix<double>());
@@ -135,4 +138,3 @@ public:
 };
 } // namespace
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-#endif /* MANTIDGEOMETRYTEST_MOCKOBJECTS_H_ */

@@ -37,7 +37,7 @@
 
 ScriptingLangDialog::ScriptingLangDialog(ScriptingEnv *env,
                                          ApplicationWindow *parent,
-                                         Qt::WFlags fl)
+                                         const Qt::WFlags &fl)
     : QDialog(parent, fl), Scripted(env) {
   setWindowTitle(tr("MantidPlot - Select scripting language"));
 

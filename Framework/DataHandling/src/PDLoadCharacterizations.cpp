@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/PDLoadCharacterizations.h"
 #include "MantidAPI/FileProperty.h"
@@ -298,7 +298,7 @@ std::vector<std::string> PDLoadCharacterizations::getFilenames() {
  * @returns line number that file was read to
  */
 int PDLoadCharacterizations::readFocusInfo(std::ifstream &file,
-                                           const std::string filename) {
+                                           const std::string &filename) {
   // end early if already at the end of the file
   if (file.eof())
     return 0;
@@ -335,17 +335,18 @@ int PDLoadCharacterizations::readFocusInfo(std::ifstream &file,
           lexical_cast<double>(splitted[1], filename, linenum, "l1"));
       break;
     } else if (splitted.size() >= 3) { // specid, L2, theta
-      specIds.push_back(lexical_cast<int32_t>(splitted[0], filename, linenum,
-                                              "spectrum number"));
-      l2.push_back(lexical_cast<double>(splitted[1], filename, linenum, "l2"));
-      polar.push_back(
+      specIds.emplace_back(lexical_cast<int32_t>(splitted[0], filename, linenum,
+                                                 "spectrum number"));
+      l2.emplace_back(
+          lexical_cast<double>(splitted[1], filename, linenum, "l2"));
+      polar.emplace_back(
           lexical_cast<double>(splitted[2], filename, linenum, "polar"));
       if (splitted.size() >= 4 &&
           (!splitted[3].empty())) { // azimuthal was specified
-        azi.push_back(
+        azi.emplace_back(
             lexical_cast<double>(splitted[3], filename, linenum, "azimuthal"));
       } else { // just set it to zero
-        azi.push_back(0.);
+        azi.emplace_back(0.);
       }
     }
   }
@@ -402,7 +403,7 @@ void PDLoadCharacterizations::readCharInfo(std::ifstream &file,
     boost::split(splitted, line, boost::is_any_of("\t "),
                  boost::token_compress_on);
     while (splitted.size() < 12)
-      splitted.push_back(ZERO); // extra values default to zero
+      splitted.emplace_back(ZERO); // extra values default to zero
 
     // add the row
     API::TableRow row = wksp->appendRow();

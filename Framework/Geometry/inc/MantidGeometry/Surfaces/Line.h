@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_LINE_H
-#define MANTID_GEOMETRY_LINE_H
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
@@ -43,8 +42,8 @@ changed to normal destructor
 class MANTID_GEOMETRY_DLL Line {
 
 private:
-  Kernel::V3D Origin; ///< Orign point (on plane)
-  Kernel::V3D Direct; ///< Direction of outer surface (Unit Vector)
+  Kernel::V3D m_origin;    ///< Orign point (on plane)
+  Kernel::V3D m_direction; ///< Direction of outer surface (Unit Vector)
 
   int lambdaPair(
       const int ix,
@@ -58,10 +57,10 @@ public:
 
   Kernel::V3D getPoint(const double lambda) const; ///< gets the point O+lam*N
   const Kernel::V3D &getOrigin() const {
-    return Origin;
+    return m_origin;
   } ///< returns the origin
   const Kernel::V3D &getDirect() const {
-    return Direct;
+    return m_direction;
   }                                           ///< returns the direction
   double distance(const Kernel::V3D &) const; ///< distance from line
   int isValid(const Kernel::V3D &) const;     ///< Is the point on the line
@@ -82,5 +81,3 @@ public:
 } // namespace Geometry
 
 } // NAMESPACE Mantid
-
-#endif

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDCOLORMAP_H_
-#define MANTIDCOLORMAP_H_
+#pragma once
 
 //---------------------------------------------
 // Includes
@@ -120,5 +119,3 @@ private:
 
   double m_nth_power;
 };
-
-#endif // MANTIDCOLORMAP_H_

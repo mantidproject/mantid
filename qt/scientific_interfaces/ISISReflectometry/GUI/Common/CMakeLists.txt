@@ -7,6 +7,7 @@ set(COMMON_SRC_FILES
 # Include files aren't required, but this makes them appear in Visual Studio
 set(
   COMMON_INC_FILES
+  IFileHandler.h
   IMessageHandler.h
   IPythonRunner.h
   IPlotter.h

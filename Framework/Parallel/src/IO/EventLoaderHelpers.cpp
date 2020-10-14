@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidParallel/IO/EventLoaderHelpers.h"
 
@@ -17,7 +17,7 @@ std::vector<size_t> readBankSizes(const H5::Group &group,
   for (const auto &bankName : bankNames) {
     const H5::DataSet dataset = group.openDataSet(bankName + "/event_id");
     const H5::DataSpace dataSpace = dataset.getSpace();
-    bankSizes.push_back(dataSpace.getSelectNpoints());
+    bankSizes.emplace_back(dataSpace.getSelectNpoints());
   }
   return bankSizes;
 }

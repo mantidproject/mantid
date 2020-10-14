@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Clipboard.h"
 #include "MantidQtWidgets/Common/Batch/Cell.h"
@@ -100,7 +100,7 @@ std::vector<boost::optional<Row>> Clipboard::createRowsForAllRoots() const {
   for (auto const &subtree : subtrees()) {
     auto rowsToAdd = createRowsForSubtree(subtree);
     for (auto &row : rowsToAdd)
-      result.push_back(row);
+      result.emplace_back(row);
   }
   return result;
 }
@@ -156,6 +156,9 @@ Clipboard::mutableSubtreeRoots() {
 }
 
 bool containsGroups(Clipboard const &clipboard) {
+  if (!clipboard.isInitialized())
+    throw std::runtime_error("Attempted to access invalid value in clipboard");
+
   return containsGroups(clipboard.subtreeRoots());
 }
 } // namespace ISISReflectometry

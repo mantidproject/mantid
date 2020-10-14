@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LIVELISTENERFACTORYTEST_H_
-#define LIVELISTENERFACTORYTEST_H_
+#pragma once
 
 #include "LiveListenerTest.h"
 #include "MantidAPI/Algorithm.h"
@@ -14,6 +13,8 @@
 #include "MantidKernel/Instantiator.h"
 #include <Poco/Path.h>
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -29,11 +30,10 @@ class MockLiveListenerInstantiator
                                           Mantid::API::ILiveListener> {
 public:
   MockLiveListenerInstantiator(
-      boost::shared_ptr<Mantid::API::ILiveListener> product)
-      : product(product) {}
+      std::shared_ptr<Mantid::API::ILiveListener> product)
+      : product(std::move(product)) {}
 
-  boost::shared_ptr<Mantid::API::ILiveListener>
-  createInstance() const override {
+  std::shared_ptr<Mantid::API::ILiveListener> createInstance() const override {
     return product;
   }
 
@@ -42,7 +42,7 @@ public:
   }
 
 private:
-  boost::shared_ptr<Mantid::API::ILiveListener> product;
+  std::shared_ptr<Mantid::API::ILiveListener> product;
 };
 
 /**
@@ -87,8 +87,8 @@ public:
     // Check that we can successfully create a registered class
     LiveListenerFactoryImpl &factory = LiveListenerFactory::Instance();
     // Subscribe the mock implementation created in ILiveListenerTest.h
-    boost::shared_ptr<ILiveListener> l;
-    auto product = boost::make_shared<MockLiveListener>();
+    std::shared_ptr<ILiveListener> l;
+    auto product = std::make_shared<MockLiveListener>();
     factory.subscribe("MockLiveListener",
                       std::make_unique<MockLiveListenerInstantiator>(product));
 
@@ -99,7 +99,7 @@ public:
         .Times(0); // We do not ask this to connect see false below.
     TS_ASSERT_THROWS_NOTHING(l = factory.create("MockLiveListener", false))
     // Check it's really the right class
-    TS_ASSERT(boost::dynamic_pointer_cast<MockLiveListener>(l))
+    TS_ASSERT(std::dynamic_pointer_cast<MockLiveListener>(l))
 
     // Check that unregistered class request throws
     TS_ASSERT_THROWS(factory.create("fdsfds", false),
@@ -112,8 +112,8 @@ public:
     // Check that we can successfully create a registered class
     LiveListenerFactoryImpl &factory = LiveListenerFactory::Instance();
     // Subscribe the mock implementation created in ILiveListenerTest.h
-    boost::shared_ptr<ILiveListener> l;
-    auto product = boost::make_shared<MockLiveListener>();
+    std::shared_ptr<ILiveListener> l;
+    auto product = std::make_shared<MockLiveListener>();
     factory.subscribe("MockLiveListener",
                       std::make_unique<MockLiveListenerInstantiator>(product));
 
@@ -132,8 +132,8 @@ public:
   void test_create_throws_when_unable_to_connect() {
     LiveListenerFactoryImpl &factory = LiveListenerFactory::Instance();
     // Subscribe the mock implementation created in ILiveListenerTest.h
-    boost::shared_ptr<ILiveListener> l;
-    auto product = boost::make_shared<MockLiveListener>();
+    std::shared_ptr<ILiveListener> l;
+    auto product = std::make_shared<MockLiveListener>();
     factory.subscribe("MockLiveListener",
                       std::make_unique<MockLiveListenerInstantiator>(product));
     EXPECT_CALL(*product, connect(testing::_))
@@ -154,8 +154,8 @@ public:
   void test_createUnwrapped_throws() {
     LiveListenerFactoryImpl &factory = LiveListenerFactory::Instance();
     // Subscribe the mock implementation created in ILiveListenerTest.h
-    boost::shared_ptr<ILiveListener> l;
-    auto product = boost::make_shared<MockLiveListener>();
+    std::shared_ptr<ILiveListener> l;
+    auto product = std::make_shared<MockLiveListener>();
     factory.subscribe("MockLiveListener",
                       std::make_unique<MockLiveListenerInstantiator>(product));
     // Make sure this method just throws.
@@ -169,5 +169,3 @@ public:
     factory.unsubscribe("MockLiveListener");
   }
 };
-
-#endif /* LIVELISTENERFACTORYTEST_H_ */

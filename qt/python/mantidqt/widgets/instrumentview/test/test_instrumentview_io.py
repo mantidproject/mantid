@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import unittest
 
 from mantidqt.project.encoderfactory import EncoderFactory
@@ -23,7 +21,8 @@ INSTRUMENT_VIEW_DICT = {u'workspaceName': u'ws',
                                 u'roiOn': False, u'groupingOn': False, u'maskingOn': True},
                             u'activeTools': {u'ellipseButton': False, u'moveButton': True,
                                              u'pointerButton': False, u'ringRectangleButton': False,
-                                             u'freeDrawButton': False, u'ringEllipseButton': False},
+                                             u'freeDrawButton': False, u'ringEllipseButton': False,
+                                             u'tubeButton': False, u'pixelButton': False},
                             u'maskWorkspaceSaved': False},
                             u'renderTab': {u'displayWireframe': False, u'displayLighting': False,
                                            u'labelPrecision': 1, u'useUCorrection': False, u'autoScaling': False,
@@ -38,7 +37,7 @@ INSTRUMENT_VIEW_DICT = {u'workspaceName': u'ws',
                                          u'ringRectangle': False, u'peak': False, u'ellipse': False,
                                          u'rectangle': False}}, u'surfaceType': 0,
                         u'actor': {u'binMasks': [], u'fileName': u'viridis'},
-                        u'energyTransfer': [0.0, 20000.0],
+                        u'energyTransfer': [0.0, 20000.0, True],
                         u'surface': {u'shapes': [],
                                      u'alignmentInfo': [],
                                      u'backgroundColor': {u'blue': 0,

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_REPOTREEVIEW_H_
-#define MANTID_API_REPOTREEVIEW_H_
+#pragma once
 
 #include "DllOption.h"
 #include <QTreeView>
@@ -13,11 +12,9 @@
 namespace MantidQt {
 namespace API {
 /** RepoTreeView : A specialization of QTreeView class that emits signal every
-  time
-    the selection change. It extends the currentChanged method in order to add
-  the
-    emition of the signal currentCell.
-*/
+ * time the selection change. It extends the currentChanged method in order to
+ * add the emition of the signal currentCell.
+ */
 class EXPORT_OPT_MANTIDQT_COMMON RepoTreeView : public QTreeView {
   Q_OBJECT
 
@@ -41,5 +38,3 @@ protected slots:
 
 } // namespace API
 } // namespace MantidQt
-
-#endif /* MANTID_API_REPOTREEVIEW_H_ */

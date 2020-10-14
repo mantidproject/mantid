@@ -1,16 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MUON_APPLYMUONDETECTORGROUPING_H_
-#define MANTID_MUON_APPLYMUONDETECTORGROUPING_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidKernel/System.h"
+#include "MantidMuon/DllConfig.h"
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
 namespace Mantid {
@@ -21,7 +20,7 @@ namespace Muon {
 @date 2018-05-04
 */
 
-class DLLExport ApplyMuonDetectorGrouping : public API::Algorithm {
+class MANTID_MUON_DLL ApplyMuonDetectorGrouping : public API::Algorithm {
 public:
   /// (Empty) Constructor
   ApplyMuonDetectorGrouping() : API::Algorithm() {}
@@ -60,9 +59,9 @@ private:
   void clipXRangeToWorkspace(const API::WorkspaceGroup &ws,
                              Muon::AnalysisOptions &options);
   /// Creates and analyses a workspace, if noRebin does not rebin.
-  API::Workspace_sptr createAnalysisWorkspace(API::Workspace_sptr inputWS,
-                                              bool noRebin,
-                                              Muon::AnalysisOptions options);
+  API::Workspace_sptr
+  createAnalysisWorkspace(const API::Workspace_sptr &inputWS, bool noRebin,
+                          Muon::AnalysisOptions options);
   /// Sets algorithm properties according to options.
   void setMuonProcessAlgorithmProperties(API::IAlgorithm &alg,
                                          const AnalysisOptions &options) const;
@@ -71,7 +70,7 @@ private:
   /// MuonProcess.
   void
   setMuonProcessPeriodProperties(API::IAlgorithm &alg,
-                                 API::Workspace_sptr inputWS,
+                                 const API::Workspace_sptr &inputWS,
                                  const Muon::AnalysisOptions &options) const;
 
   void setMuonProcessAlgorithmOutputTypeProperty(
@@ -94,5 +93,3 @@ private:
 
 } // namespace Muon
 } // namespace Mantid
-
-#endif /* MANTID_MUON_APPLYMUONDETECTORGROUPING_H_ */

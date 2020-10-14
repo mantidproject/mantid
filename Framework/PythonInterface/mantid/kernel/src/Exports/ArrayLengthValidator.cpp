@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ArrayLengthValidator.h"
 #include <boost/python/class.hpp>
@@ -54,7 +54,7 @@ namespace {
            arg("self"), "Set the accepted minimum length of an array")         \
       .def("clearLengthMax", &ArrayLengthValidator<type>::clearLengthMax,      \
            arg("self"), "Set the accepted maximum length of an array");
-}
+} // namespace
 
 void export_ArrayLengthValidator() {
   EXPORT_LENGTHVALIDATOR(double, Float);

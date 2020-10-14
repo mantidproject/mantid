@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/MuonGroupDetectors.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -72,7 +72,7 @@ void MuonGroupDetectors::exec() {
   // First pass to determine how many non-empty groups we have
   for (size_t row = 0; row < table->rowCount(); ++row) {
     if (!table->cell<std::vector<int>>(row, 0).empty())
-      nonEmptyRows.push_back(row);
+      nonEmptyRows.emplace_back(row);
   }
 
   if (nonEmptyRows.empty())

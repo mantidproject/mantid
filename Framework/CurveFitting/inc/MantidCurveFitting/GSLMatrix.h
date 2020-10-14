@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_GSLMATRIX_H_
-#define MANTID_CURVEFITTING_GSLMATRIX_H_
+#pragma once
 
 #include "MantidCurveFitting/DllConfig.h"
 #include "MantidCurveFitting/GSLVector.h"
@@ -162,7 +161,7 @@ public:
   /// Invert this matrix
   void invert();
   /// Calculate the determinant
-  double det();
+  double det() const;
   /// Calculate the eigensystem of a symmetric matrix
   void eigenSystem(GSLVector &eigenValues, GSLMatrix &eigenVectors);
   Tr<GSLMatrix> tr() { return Tr<GSLMatrix>(*this); }
@@ -178,6 +177,7 @@ private:
   std::vector<double> m_data;
   /// The pointer to the GSL vector
   gsl_matrix_view m_view;
+  GSLVector multiplyByVector(const GSLVector &v) const;
 };
 
 /// Overloaded operator for matrix multiplication
@@ -271,5 +271,3 @@ inline double &GSLMatrix::operator()(size_t i, size_t j) {
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_GSLMATRIX_H_*/

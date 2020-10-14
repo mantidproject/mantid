@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_BINMD_H_
-#define MANTID_MDALGORITHMS_BINMD_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CoordTransform.h"
@@ -64,10 +63,6 @@ private:
   /// Run the algorithm
   void exec() override;
 
-  //    /// Helper method
-  //    template<typename MDE, size_t nd>
-  //    void do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws);
-
   /// Helper method
   template <typename MDE, size_t nd>
   void binByIterating(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
@@ -82,10 +77,10 @@ private:
   /// Progress reporting
   std::unique_ptr<Mantid::API::Progress> prog = nullptr;
   /// ImplicitFunction used
-  Mantid::Geometry::MDImplicitFunction *implicitFunction;
+  std::unique_ptr<Mantid::Geometry::MDImplicitFunction> implicitFunction;
 
   /// Cached values for speed up
-  size_t *indexMultiplier;
+  std::vector<size_t> indexMultiplier;
   signal_t *signals;
   signal_t *errors;
   signal_t *numEvents;
@@ -94,5 +89,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_BINMD_H_ */

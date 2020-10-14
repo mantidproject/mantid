@@ -1,5 +1,4 @@
-#ifndef __CxxTestMain_h
-#define __CxxTestMain_h
+#pragma once
 
 #include <cxxtest/TestTracker.h>
 #include <cxxtest/Flags.h>
@@ -107,8 +106,6 @@ return tmp.run();
 }
 
 }
-#endif
-
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government
 // retains certain rights in this software.

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_USAGESERVICE_H_
-#define MANTID_KERNEL_USAGESERVICE_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/SingletonHolder.h"
@@ -22,6 +21,11 @@
 namespace Mantid {
 namespace Kernel {
 
+/** An enum specifying the 3 possible features types that can be logged in the
+    usage service
+*/
+enum class FeatureType { Algorithm, Interface, Feature };
+
 /** UsageReporter : The Usage reporter is responsible for collating, and sending
   all usage data.
   This  centralizes all the logic covering Usage Reporting including:
@@ -36,15 +40,19 @@ namespace Kernel {
 class FeatureUsage {
 public:
   /// Constructor
-  FeatureUsage(const std::string &type, const std::string &name,
-               const bool internal);
+  FeatureUsage(const FeatureType &type, std::string name, const bool internal,
+               std::string application);
   bool operator<(const FeatureUsage &r) const;
 
   ::Json::Value asJson() const;
 
-  std::string type;
+  FeatureType type;
   std::string name;
   bool internal;
+  std::string application;
+
+protected:
+  std::string featureTypeToString() const;
 };
 
 class MANTID_KERNEL_DLL UsageServiceImpl {
@@ -57,8 +65,22 @@ public:
   void setInterval(const uint32_t seconds = 60);
   /// Registers the Startup of Mantid
   void registerStartup();
-  /// Registers the use of a feature in mantid
-  void registerFeatureUsage(const std::string &type, const std::string &name,
+  /// registerFeatureUsage registers the use of a feature in mantid.
+  /// Provide three overloads:
+  /// Version that takes vector of strings if want to register
+  /// usage of a particular class/method combination
+  void registerFeatureUsage(const FeatureType &type,
+                            const std::vector<std::string> &name,
+                            const bool internal);
+  /// Version that takes a string if just registering usage of a class
+  void registerFeatureUsage(const FeatureType &type, const std::string &name,
+                            const bool internal);
+  /// Version that accepts an initializer list. This is required because
+  /// {"abc","def"} is both a valid constructor for std::string and an
+  /// initializer list so without this it's not clear which overload is being
+  /// called
+  void registerFeatureUsage(const FeatureType &type,
+                            std::initializer_list<std::string> name,
                             const bool internal);
 
   /// Returns true if usage reporting is enabled
@@ -138,5 +160,3 @@ using UsageService = Mantid::Kernel::SingletonHolder<UsageServiceImpl>;
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_USAGESERVICE_H_ */

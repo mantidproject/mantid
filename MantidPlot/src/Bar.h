@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef BARS_H
-#define BARS_H
+#pragma once
 
 #include <qwt3d_plot.h>
 
@@ -49,5 +48,3 @@ private:
   double radius_;
   double diag_;
 };
-
-#endif

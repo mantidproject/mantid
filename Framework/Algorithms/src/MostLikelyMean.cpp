@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MostLikelyMean.h"
 #include "MantidKernel/ArrayLengthValidator.h"
@@ -44,7 +44,7 @@ const std::string MostLikelyMean::summary() const {
 /** Initialize the algorithm's properties.
  */
 void MostLikelyMean::init() {
-  auto lengthValidator = boost::make_shared<ArrayLengthValidator<double>>();
+  auto lengthValidator = std::make_shared<ArrayLengthValidator<double>>();
   lengthValidator->setLengthMin(1);
   declareProperty(std::make_unique<ArrayProperty<double>>(
                       "InputArray", lengthValidator, Direction::Input),

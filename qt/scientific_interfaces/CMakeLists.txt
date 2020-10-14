@@ -9,12 +9,12 @@ endif(${Boost_VERSION} GREATER 104799 AND ${qt_version} VERSION_GREATER 4.7.3)
 
 # Now add the packages one-by-one, building up the dependencies as we go
 add_subdirectory(General)
+add_subdirectory(Direct)
 add_subdirectory(MultiDatasetFit)
 add_subdirectory(Muon)
 add_subdirectory(ISISSANS)
 add_subdirectory(ISISReflectometry)
 add_subdirectory(Indirect)
-add_subdirectory(EnggDiffraction)
 add_subdirectory(DynamicPDF)
 
 # Testing - These should be split out by library
@@ -25,21 +25,12 @@ set(TEST_FILES
     test/ALCLatestFileFinderTest.h
     test/ALCPeakFittingModelTest.h
     test/ALCPeakFittingPresenterTest.h
-    test/EnggDiffGSASFittingModelTest.h
-    test/EnggDiffGSASFittingPresenterTest.h
-    test/EnggDiffMultiRunFittingWidgetModelTest.h
-    test/EnggDiffMultiRunFittingWidgetPresenterTest.h
-    test/EnggDiffFittingModelTest.h
-    test/EnggDiffFittingPresenterTest.h
-    test/EnggDiffractionPresenterTest.h
-    test/EnggVanadiumCorrectionsModelTest.h
     test/IO_MuonGroupingTest.h
     test/MuonAnalysisDataLoaderTest.h
     test/MuonAnalysisFitDataPresenterTest.h
     test/MuonAnalysisFitFunctionPresenterTest.h
     test/MuonAnalysisHelperTest.h
     test/MuonAnalysisResultTableCreatorTest.h
-    test/RunMapTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerProcessingTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerProgressBarTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerWorkspacesTest.h
@@ -51,6 +42,7 @@ set(TEST_FILES
     test/ISISReflectometry/Reduction/ParseReflectometryStringsTest.h
     test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
     test/ISISReflectometry/Reduction/ValidatePerThetaDefaultsTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterDisplayTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterGroupDeletionTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterGroupInsertionTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterRowInsertionTest.h
@@ -64,14 +56,20 @@ set(TEST_FILES
     test/ISISReflectometry/Instrument/InstrumentPresenterTest.h
     test/ISISReflectometry/Instrument/InstrumentOptionDefaultsTest.h
     test/ISISReflectometry/Runs/CatalogRunNotifierTest.h
+    test/ISISReflectometry/Runs/QtCatalogSearcherTest.h
     test/ISISReflectometry/Runs/RunsPresenterTest.h
     test/ISISReflectometry/MainWindow/MainWindowPresenterTest.h
+    test/ISISReflectometry/Options/OptionsDialogPresenterTest.h
     test/ISISReflectometry/Runs/SearchResultTest.h
     test/ISISReflectometry/Save/SavePresenterTest.h
+    test/ISISReflectometry/Common/ClipboardTest.h
     test/ISISReflectometry/Common/PlotterTestQt4.h
     test/ISISReflectometry/Common/DecoderTest.h
     test/ISISReflectometry/Common/EncoderTest.h
 )
+
+set(CXXTEST_EXTRA_HEADER_INCLUDE
+    ${CMAKE_CURRENT_LIST_DIR}/test/ScientificInterfacesTestInitialization.h)
 
 mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                  QT_VERSION 4
@@ -80,6 +78,7 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ../../Framework/DataObjects/inc
                    ../../Framework/TestHelpers/inc
                    inc
+                   ${PYTHON_INCLUDE_PATH}
                  TEST_HELPER_SRCS
                    ../../Framework/TestHelpers/src/ComponentCreationHelper.cpp
                    ../../Framework/TestHelpers/src/DataProcessorTestHelper.cpp
@@ -89,37 +88,38 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ../../Framework/TestHelpers/src/ScopedFileHelper.cpp
                    ../../Framework/TestHelpers/src/TearDownWorld.cpp
                  LINK_LIBS
-                   ${TCMALLOC_LIBRARIES_LINKTIME}
                    ${CORE_MANTIDLIBS}
                    DataObjects
-                   ${GMOCK_LIBRARIES}
-                   ${GTEST_LIBRARIES}
+                   PythonInterfaceCore
+                   gmock
                    ${POCO_LIBRARIES}
-                   ${Boost_LIBRARIES}
                  QT4_LINK_LIBS
                    Qwt5
                  MTD_QT_LINK_LIBS
                    MantidScientificInterfacesGeneral
+                   MantidScientificInterfacesDirect
                    MantidScientificInterfacesMuon
                    MantidScientificInterfacesISISReflectometry
-                   MantidScientificInterfacesEnggDiffraction
                    MantidScientificInterfacesMultiDatasetFit
                    MantidQtWidgetsCommon
                  PARENT_DEPENDENCIES
                    GUITests)
 
-set(QT5_TEST_FILES     
+set(QT5_TEST_FILES
     test/ISISReflectometry/Batch/BatchJobRunnerProcessingTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerProgressBarTest.h
     test/ISISReflectometry/Batch/BatchJobRunnerWorkspacesTest.h
     test/ISISReflectometry/Batch/BatchPresenterTest.h
     test/ISISReflectometry/Batch/GroupProcessingAlgorithmTest.h
     test/ISISReflectometry/Batch/RowProcessingAlgorithmTest.h
+    test/ISISReflectometry/MainWindow/MainWindowPresenterTest.h
+    test/ISISReflectometry/Options/OptionsDialogPresenterTest.h
     test/ISISReflectometry/Reduction/GroupTest.h
     test/ISISReflectometry/Reduction/ValidateRowTest.h
     test/ISISReflectometry/Reduction/ParseReflectometryStringsTest.h
     test/ISISReflectometry/Reduction/ReductionJobsMergeTest.h
     test/ISISReflectometry/Reduction/ValidatePerThetaDefaultsTest.h
+    test/ISISReflectometry/RunsTable/RunsTablePresenterDisplayTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterGroupDeletionTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterGroupInsertionTest.h
     test/ISISReflectometry/RunsTable/RunsTablePresenterRowInsertionTest.h
@@ -135,8 +135,6 @@ set(QT5_TEST_FILES
     test/ISISReflectometry/Common/EncoderTest.h
 )
 
-find_package(BoostPython REQUIRED)
-
 mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                  QT_VERSION 5
                  SRC ${QT5_TEST_FILES}
@@ -151,12 +149,10 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ../../Framework/TestHelpers/src/ScopedFileHelper.cpp
                    ../../Framework/TestHelpers/src/TearDownWorld.cpp
                  LINK_LIBS
-                   ${TCMALLOC_LIBRARIES_LINKTIME}
                    ${CORE_MANTIDLIBS}
                    DataObjects
                    PythonInterfaceCore
-                   ${GMOCK_LIBRARIES}
-                   ${GTEST_LIBRARIES}
+                   gmock
                    ${POCO_LIBRARIES}
                    ${Boost_LIBRARIES}
                    ${PYTHON_LIBRARIES}

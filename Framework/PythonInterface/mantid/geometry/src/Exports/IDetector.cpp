@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/IDetector.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -16,8 +16,8 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(IDetector)
 
 void export_IDetector() {
-  register_ptr_to_python<boost::shared_ptr<IDetector>>();
-  register_ptr_to_python<boost::shared_ptr<const IDetector>>();
+  register_ptr_to_python<std::shared_ptr<IDetector>>();
+  register_ptr_to_python<std::shared_ptr<const IDetector>>();
 
   class_<IDetector, bases<IObjComponent>, boost::noncopyable>("IDetector",
                                                               no_init)

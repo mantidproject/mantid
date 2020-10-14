@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TESTSAMPLE_H_
-#define TESTSAMPLE_H_
+#pragma once
 
 #include "MantidAPI/Sample.h"
 #include "MantidGeometry/Crystal/CrystalStructure.h"
@@ -63,8 +62,8 @@ public:
     Sample sample;
     const std::string envName("TestKit");
     auto kit = std::make_unique<SampleEnvironment>(
-        envName, boost::make_shared<const Container>(""));
-    kit->add(boost::make_shared<const CSGObject>());
+        envName, std::make_shared<const Container>(""));
+    kit->add(std::make_shared<const CSGObject>());
 
     TS_ASSERT_THROWS_NOTHING(sample.setEnvironment(std::move(kit)));
 
@@ -76,26 +75,23 @@ public:
 
   void test_OrientedLattice() {
     Sample sample;
-    OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
-
-    TS_ASSERT_THROWS_NOTHING(sample.setOrientedLattice(latt));
+    auto lattice = std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90);
+    auto latticeAddress = lattice.get();
+    TS_ASSERT_THROWS_NOTHING(sample.setOrientedLattice(std::move(lattice)));
 
     const OrientedLattice &retLatt = sample.getOrientedLattice();
-    // Test that this references the correct object
-    // TS_ASSERT_EQUALS(&retLatt, latt);//This is no longer correct.
-    // setOrientedLattice makes a copy of the OrientedLattice object
-    TS_ASSERT_EQUALS(retLatt.a(), 1.0);
+    // Test that this takes ownership of the lattice
+    TS_ASSERT_EQUALS(&retLatt, latticeAddress);
     TS_ASSERT_EQUALS(retLatt.b(), 2.0);
     TS_ASSERT_EQUALS(retLatt.c(), 3.0);
-    delete latt;
   }
 
   void test_OrientedLattice_and_theCopyconstructor() {
     Sample sample;
-    // const std::string envName("TestKit");
-    OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
+    auto lattice = std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90);
+    auto latticeAddress = lattice.get();
 
-    TS_ASSERT_THROWS_NOTHING(sample.setOrientedLattice(latt));
+    TS_ASSERT_THROWS_NOTHING(sample.setOrientedLattice(std::move(lattice)));
 
     // Copy constructor
     Sample sample2(sample);
@@ -111,17 +107,16 @@ public:
 
     const OrientedLattice &retLatt = sample2.getOrientedLattice();
     // The copy does NOT refer to the same object
-    TS_ASSERT_DIFFERS(&retLatt, latt);
+    TS_ASSERT_DIFFERS(&retLatt, latticeAddress);
     TS_ASSERT_EQUALS(retLatt.a(), 1.0);
     TS_ASSERT_EQUALS(retLatt.b(), 2.0);
     TS_ASSERT_EQUALS(retLatt.c(), 3.0);
-    delete latt;
   }
 
   void test_clearOrientedLattice() {
     Sample sample;
-    OrientedLattice *latt = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
-    TS_ASSERT_THROWS_NOTHING(sample.setOrientedLattice(latt));
+    TS_ASSERT_THROWS_NOTHING(sample.setOrientedLattice(
+        std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90)));
 
     TS_ASSERT(sample.hasOrientedLattice())
     TS_ASSERT_THROWS_NOTHING(sample.getOrientedLattice())
@@ -131,14 +126,13 @@ public:
 
     TS_ASSERT(!sample.hasOrientedLattice())
     TS_ASSERT_THROWS(sample.getOrientedLattice(), std::runtime_error &)
-    delete latt;
   }
 
   void test_clearOrientedLattice_and_the_copy_constructor() {
     // Create a sample with an oriented lattice.
     Sample sampleA;
-    OrientedLattice *latticeA = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
-    TS_ASSERT_THROWS_NOTHING(sampleA.setOrientedLattice(latticeA));
+    TS_ASSERT_THROWS_NOTHING(sampleA.setOrientedLattice(
+        std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90)));
 
     // Copy the sample.
     Sample sampleB(sampleA);
@@ -154,7 +148,7 @@ public:
 
     // One should be cleared, the other should not.
     TS_ASSERT(!sampleA.hasOrientedLattice())
-    TS_ASSERT_THROWS(sampleA.getOrientedLattice(), std::runtime_error &)
+    TS_ASSERT_THROWS(sampleA.getOrientedLattice(), const std::runtime_error &)
     TS_ASSERT(sampleB.hasOrientedLattice())
     TS_ASSERT_THROWS_NOTHING(sampleB.getOrientedLattice())
 
@@ -165,17 +159,16 @@ public:
 
     // Both should be cleared.
     TS_ASSERT(!sampleA.hasOrientedLattice())
-    TS_ASSERT_THROWS(sampleA.getOrientedLattice(), std::runtime_error &)
+    TS_ASSERT_THROWS(sampleA.getOrientedLattice(), const std::runtime_error &)
     TS_ASSERT(!sampleB.hasOrientedLattice())
-    TS_ASSERT_THROWS(sampleB.getOrientedLattice(), std::runtime_error &)
-    delete latticeA;
+    TS_ASSERT_THROWS(sampleB.getOrientedLattice(), const std::runtime_error &)
   }
 
   void test_clearOrientedLattice_and_assignment() {
     // Create a sample with an oriented lattice.
     Sample sampleA;
-    OrientedLattice *latticeA = new OrientedLattice(1.0, 2.0, 3.0, 90, 90, 90);
-    TS_ASSERT_THROWS_NOTHING(sampleA.setOrientedLattice(latticeA));
+    TS_ASSERT_THROWS_NOTHING(sampleA.setOrientedLattice(
+        std::make_unique<OrientedLattice>(1.0, 2.0, 3.0, 90, 90, 90)));
 
     // Create and then assign to the sample.
     Sample sampleB;
@@ -192,7 +185,7 @@ public:
 
     // One should be cleared, the other should not.
     TS_ASSERT(!sampleA.hasOrientedLattice())
-    TS_ASSERT_THROWS(sampleA.getOrientedLattice(), std::runtime_error &)
+    TS_ASSERT_THROWS(sampleA.getOrientedLattice(), const std::runtime_error &)
     TS_ASSERT(sampleB.hasOrientedLattice())
     TS_ASSERT_THROWS_NOTHING(sampleB.getOrientedLattice())
 
@@ -203,10 +196,9 @@ public:
 
     // Both should be cleared.
     TS_ASSERT(!sampleA.hasOrientedLattice())
-    TS_ASSERT_THROWS(sampleA.getOrientedLattice(), std::runtime_error &)
+    TS_ASSERT_THROWS(sampleA.getOrientedLattice(), const std::runtime_error &)
     TS_ASSERT(!sampleB.hasOrientedLattice())
-    TS_ASSERT_THROWS(sampleB.getOrientedLattice(), std::runtime_error &)
-    delete latticeA;
+    TS_ASSERT_THROWS(sampleB.getOrientedLattice(), const std::runtime_error &)
   }
 
   void test_setCrystalStructure() {
@@ -295,7 +287,7 @@ public:
   void test_Multiple_Samples() {
     Sample sample;
     sample.setName("test name for test_Multiple_Sample");
-    auto sample2 = boost::make_shared<Sample>();
+    auto sample2 = std::make_shared<Sample>();
     sample2->setName("test name for test_Multiple_Sample - 2");
 
     TS_ASSERT_EQUALS(sample.size(), 1);
@@ -322,9 +314,9 @@ public:
     sample.setShape(shape_sptr);
     sample.setName("NameOfASample");
     sample.setWidth(1.234);
-    OrientedLattice latt(4, 5, 6, 90, 91, 92);
-    sample.setOrientedLattice(&latt);
-    auto sample2 = boost::make_shared<Sample>();
+    sample.setOrientedLattice(
+        std::make_unique<OrientedLattice>(4, 5, 6, 90, 91, 92));
+    auto sample2 = std::make_shared<Sample>();
     sample2->setName("test name for test_Multiple_Sample - 2");
     sample.addSample(sample2);
     TS_ASSERT(
@@ -367,6 +359,126 @@ public:
 
     TS_ASSERT(loaded.getName().empty());
   }
-};
 
-#endif /*TESTSAMPLE_H_*/
+  void test_equal_when_sample_identical() {
+    Sample a;
+    Sample b;
+    TS_ASSERT_EQUALS(a, b);
+  }
+
+  void test_not_equal_when_sample_differs_in_extents() {
+    Sample a;
+    auto b = a;
+    a.setHeight(10);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+    b = a;
+    a.setWidth(10);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+    b = a;
+    a.setThickness(10);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equal_when_sample_differs_in_geom_id() {
+    Sample a;
+    auto b = a;
+    TS_ASSERT_EQUALS(a, b);
+    a.setGeometryFlag(1);
+    b.setGeometryFlag(2);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+  void test_not_equal_when_sample_differs_in_name() {
+    Sample a;
+    auto b = a;
+    b.setName("something");
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+  }
+
+  void test_not_equal_when_sample_differs_in_environment() {
+    auto kit1 = std::make_unique<SampleEnvironment>(
+        "Env", std::make_shared<const Container>(""));
+
+    auto kit2 = std::make_unique<SampleEnvironment>(
+        "Env2", std::make_shared<const Container>(""));
+
+    // same as kit1
+    auto kit3 = std::make_unique<SampleEnvironment>(
+        kit1->name(), std::make_shared<const Container>(""));
+
+    Sample a;
+    auto b = a;
+    b.setEnvironment(std::move(kit1));
+    // A has no environment
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // A has valid but different same environment
+    a.setEnvironment(std::move(kit2));
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // A has valid but different same environment
+    a.setEnvironment(std::move(kit3));
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_not_equal_when_sample_differs_in_shape() {
+    IObject_sptr shape1 = ComponentCreationHelper::createCappedCylinder(
+        0.0127, 1.0, V3D(), V3D(0.0, 1.0, 0.0), "cyl");
+
+    IObject_sptr shape2 = ComponentCreationHelper::createCappedCylinder(
+        0.0137, 1.0, V3D(), V3D(0.0, 0.0, 0.0), "cyl");
+
+    Sample a;
+    auto b = a;
+    a.setShape(shape1);
+    // b has no shape
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // b has different shape
+    b.setShape(shape2);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // b has same shape
+    b.setShape(IObject_sptr(shape1->clone()));
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+
+  void test_not_equal_when_sample_differs_in_space_group() {
+    CrystalStructure structure1("3 4 5 90 90 90", "C m m m",
+                                "Fe 0.12 0.23 0.121");
+    // Same as above
+    CrystalStructure structure2("3 4 5 90 90 90", "C m m m",
+                                "Fe 0.12 0.23 0.121");
+    // Different
+    CrystalStructure structure3("5.431 5.431 5.431", "F d -3 m",
+                                "Si 0 0 0 1.0 0.02");
+
+    Sample a;
+    auto b = a;
+    // b has no structure
+    a.setCrystalStructure(structure1);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // b has different structure
+    b.setCrystalStructure(structure3);
+    TS_ASSERT_DIFFERS(a, b);
+    TS_ASSERT(!(a == b));
+
+    // b has same structure
+    b = Sample{};
+    b.setCrystalStructure(structure2);
+    TS_ASSERT_EQUALS(a, b);
+    TS_ASSERT(!(a != b));
+  }
+};

@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceProperty, Progress, MultipleFileProperty, FileAction, mtd
 from mantid.kernel import Direction, Property, IntArrayProperty, StringListValidator
 from mantid.simpleapi import LoadEventNexus, RemoveLogs, DeleteWorkspace, ConvertToMD, Rebin, CreateGroupingWorkspace, GroupDetectors, SetUB
@@ -43,7 +42,7 @@ class LoadWANDSCD(PythonAlgorithm):
         issues = dict()
 
         if not self.getProperty("Filename").value:
-            if (self.getProperty("IPTS").value == Property.EMPTY_INT) or len(self.getProperty("RunNumbers").value) is 0:
+            if (self.getProperty("IPTS").value == Property.EMPTY_INT) or len(self.getProperty("RunNumbers").value) == 0:
                 issues["Filename"] = 'Must specify either Filename or IPTS AND RunNumbers'
 
         return issues

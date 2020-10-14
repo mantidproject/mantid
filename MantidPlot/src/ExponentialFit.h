@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef EXPONENTIALFIT_H
-#define EXPONENTIALFIT_H
+#pragma once
 
 #include "Fit.h"
 
@@ -99,4 +98,3 @@ private:
   void customizeFitResults() override;
   void calculateFitCurveData(double *X, double *Y) override;
 };
-#endif

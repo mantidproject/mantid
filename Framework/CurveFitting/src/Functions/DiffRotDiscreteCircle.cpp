@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // Mantid Coding standards <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
@@ -62,11 +62,11 @@ void DiffRotDiscreteCircle::setAttribute(const std::string &name,
  * @brief Initialize elastic and inelastic parts, aliases, attributes, and ties
  */
 void DiffRotDiscreteCircle::init() {
-  m_elastic = boost::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(
+  m_elastic = std::dynamic_pointer_cast<ElasticDiffRotDiscreteCircle>(
       API::FunctionFactory::Instance().createFunction(
           "ElasticDiffRotDiscreteCircle"));
   this->addFunction(m_elastic);
-  m_inelastic = boost::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(
+  m_inelastic = std::dynamic_pointer_cast<InelasticDiffRotDiscreteCircle>(
       API::FunctionFactory::Instance().createFunction(
           "InelasticDiffRotDiscreteCircle"));
   this->addFunction(m_inelastic);

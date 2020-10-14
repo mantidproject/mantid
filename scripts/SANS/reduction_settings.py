@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 The aim of this file is to change the way in which we pass settings around
@@ -68,7 +68,6 @@ between reduction steps.  The benefits to this new method are as follows:
    passing settings to each other via PropertyManager objects.
 """
 
-from __future__ import (absolute_import, division, print_function)
 from mantid.simpleapi import *
 from mantid.api import *
 from mantid.kernel import *

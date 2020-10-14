@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_CONVFITDATAPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_CONVFITDATAPRESENTER_H_
+#pragma once
 
 #include "ConvFitModel.h"
 #include "IndirectFitDataPresenter.h"
@@ -22,6 +21,10 @@ class MANTIDQT_INDIRECT_DLL ConvFitDataPresenter
 public:
   ConvFitDataPresenter(ConvFitModel *model, IIndirectFitDataView *view);
 
+signals:
+  void modelResolutionAdded(std::string const &name,
+                            TableDatasetIndex const &index);
+
 private slots:
   void setModelResolution(const QString &name);
 
@@ -29,12 +32,13 @@ protected:
   void addModelData(const std::string &name) override;
 
 private:
-  void setModelResolution(std::string const &name, std::size_t const &index);
+  void setModelResolution(std::string const &name,
+                          TableDatasetIndex const &index);
   void addDataToModel(IAddWorkspaceDialog const *dialog) override;
   std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const override;
-  void addWorkspace(ConvFitAddWorkspaceDialog const *dialog,
-                    IndirectFittingModel *model);
+  void addWorkspace(ConvFitAddWorkspaceDialog const &dialog,
+                    IndirectFittingModel &model);
 
   void setMultiInputResolutionFBSuffixes(IAddWorkspaceDialog *dialog) override;
   void setMultiInputResolutionWSSuffixes(IAddWorkspaceDialog *dialog) override;
@@ -45,5 +49,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_CONVFITDATAPRESENTER_H_ */

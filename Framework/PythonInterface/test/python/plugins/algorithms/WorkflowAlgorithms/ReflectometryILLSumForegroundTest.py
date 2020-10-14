@@ -1,227 +1,80 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from __future__ import (absolute_import, division, print_function)
-
-from mantid.api import mtd
-from testhelpers import (assertRaisesNothing, create_algorithm, illhelpers)
+from mantid.api import MatrixWorkspace
+from mantid.simpleapi import ReflectometryILLPreprocess, ReflectometryILLSumForeground, mtd
 import unittest
 
 
 class ReflectometryILLSumForegroundTest(unittest.TestCase):
 
-    def tearDown(self):
+    @classmethod
+    def setUpClass(cls):
+        ReflectometryILLPreprocess(Run = 'ILL/D17/317369.nxs',
+                                   Measurement='DirectBeam',
+                                   ForegroundHalfWidth=5,
+                                   OutputWorkspace='db')
+        ReflectometryILLPreprocess(Run='ILL/D17/317370.nxs',
+                                   Measurement='ReflectedBeam',
+                                   ForegroundHalfWidth=5,
+                                   OutputWorkspace='rb')
+        ReflectometryILLPreprocess(Run='ILL/Figaro/000002.nxs',
+                                   Measurement='DirectBeam',
+                                   ForegroundHalfWidth=5,
+                                   OutputWorkspace='fig_db')
+
+    @classmethod
+    def tearDownClass(cls):
         mtd.clear()
 
-    def testDirectBeamSummationExecutes(self):
-        ws = illhelpers.create_poor_mans_d17_workspace()
-        illhelpers.refl_rotate_detector(ws, 1.2)
-        ws = illhelpers.refl_add_line_position(ws, 128.0)
-        ws = illhelpers.refl_add_two_theta(ws, 5.5)
-        ws = illhelpers.refl_preprocess('ws', ws)
-        args = {
-            'InputWorkspace': ws,
-            'OutputWorkspace': 'foreground',
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        assertRaisesNothing(self, alg.execute)
-        self.assertTrue(alg.isExecuted())
+    def testSumInLambdaD17(self):
+        # first the direct beam
+        ReflectometryILLSumForeground(InputWorkspace='db',
+                                      OutputWorkspace='db_frg')
 
-    def testReflectedBeamSumInLambdaExecutes(self):
-        dirWS = illhelpers.create_poor_mans_d17_workspace()
-        illhelpers.add_chopper_configuration_D17(dirWS)
-        illhelpers.add_slit_configuration_D17(dirWS, 0.03, 0.02)
-        dirWS = illhelpers.refl_add_line_position(dirWS, 128.0)
-        dirWS = illhelpers.refl_add_two_theta(dirWS, 6.7)
-        dirWS = illhelpers.refl_preprocess('dirWS', dirWS)
-        args = {
-            'InputWorkspace': dirWS,
-            'OutputWorkspace': 'dirForeground',
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        assertRaisesNothing(self, alg.execute)
-        self.assertTrue(alg.isExecuted())
-        dirForeground = alg.getProperty('OutputWorkspace').value
-        reflWS = illhelpers.create_poor_mans_d17_workspace()
-        illhelpers.refl_rotate_detector(reflWS, 1.2)
-        illhelpers.add_chopper_configuration_D17(reflWS)
-        illhelpers.add_slit_configuration_D17(reflWS, 0.03, 0.02)
-        reflWS = illhelpers.refl_add_line_position(reflWS, 128.0)
-        reflWS = illhelpers.refl_add_two_theta(reflWS, 6.7)
-        reflWS = illhelpers.refl_preprocess('refWS', reflWS)
-        args = {
-            'InputWorkspace': reflWS,
-            'OutputWorkspace': 'foreground',
-            'DirectForegroundWorkspace': dirForeground,
-            'SummationType': 'SumInLambda',
-            'DirectLineWorkspace': dirWS,
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        assertRaisesNothing(self, alg.execute)
-        self.assertTrue(alg.isExecuted())
+        # then the reflected beam
+        ReflectometryILLSumForeground(InputWorkspace='rb',
+                                      OutputWorkspace='rb_frg',
+                                      SummationType='SumInLambda',
+                                      DirectLineWorkspace='db',
+                                      DirectForegroundWorkspace='db_frg')
+        self.checkOutput(mtd['rb_frg'], 991)
 
-    def testReflectedBeamSumInQExecutes(self):
-        dirWS = illhelpers.create_poor_mans_d17_workspace()
-        illhelpers.add_chopper_configuration_D17(dirWS)
-        illhelpers.add_slit_configuration_D17(dirWS, 0.02, 0.03)
-        dirWS = illhelpers.refl_add_line_position(dirWS, 128.0)
-        dirWS = illhelpers.refl_add_two_theta(dirWS, 5.5)
-        dirWS = illhelpers.refl_preprocess('dirWS', dirWS)
-        args = {
-            'InputWorkspace': dirWS,
-            'OutputWorkspace': 'dirForeground',
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        assertRaisesNothing(self, alg.execute)
-        self.assertTrue(alg.isExecuted())
-        dirForeground = alg.getProperty('OutputWorkspace').value
-        reflWS = illhelpers.create_poor_mans_d17_workspace()
-        illhelpers.refl_rotate_detector(reflWS, 1.2)
-        illhelpers.add_chopper_configuration_D17(reflWS)
-        illhelpers.add_slit_configuration_D17(reflWS, 0.02, 0.03)
-        reflWS = illhelpers.refl_add_line_position(reflWS, 128.0)
-        reflWS = illhelpers.refl_add_two_theta(reflWS, 6.7)
-        reflWS = illhelpers.refl_preprocess('refWS', reflWS)
-        args = {
-            'InputWorkspace': reflWS,
-            'OutputWorkspace': 'foreground',
-            'DirectForegroundWorkspace': dirForeground,
-            'SummationType': 'SumInQ',
-            'DirectLineWorkspace': dirWS,
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        assertRaisesNothing(self, alg.execute)
-        self.assertTrue(alg.isExecuted())
 
-    def testFigaroSumInLambdaExecutes(self):
-        args = {
-            'Run': 'ILL/Figaro/000002.nxs',
-            'OutputWorkspace': 'direct',
-            'ForegroundHalfWidth': [6, 6],
-            'FlatBackground': 'Background OFF',
-        }
-        alg = create_algorithm('ReflectometryILLPreprocess', **args)
-        assertRaisesNothing(self, alg.execute)
-        self.assertTrue(alg.isExecuted())
-        args = {
-            'InputWorkspace': 'direct',
-            'OutputWorkspace': 'direct-fgd'
-        }
-        alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        assertRaisesNothing(self, alg.execute)
-        self.assertTrue(alg.isExecuted())
-        args = {
-            'Run': 'ILL/Figaro/000002.nxs',
-            'OutputWorkspace': 'reflected',
-            'ForegroundHalfWidth': [6, 6],
-            'FlatBackground': 'Background OFF',
-        }
-        alg = create_algorithm('ReflectometryILLPreprocess', **args)
-        assertRaisesNothing(self, alg.execute)
-        self.assertTrue(alg.isExecuted())
-        args = {
-            'InputWorkspace': 'reflected',
-            'OutputWorkspace': 'reflected-fgd',
-            'DirectForegroundWorkspace': 'direct-fgd',
-            'DirectLineWorkspace': 'direct'
-        }
-        alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        assertRaisesNothing(self, alg.execute)
-        self.assertTrue(alg.isExecuted())
+    def testSumInQD17(self):
+        # first the direct beam
+        ReflectometryILLSumForeground(InputWorkspace='db',
+                                      OutputWorkspace='db_frg')
 
-    def testWavelengthRange(self):
-        ws = illhelpers.create_poor_mans_d17_workspace()
-        illhelpers.refl_rotate_detector(ws, 1.2)
-        ws = illhelpers.refl_add_line_position(ws, 128.0)
-        ws = illhelpers.refl_add_two_theta(ws, 5.5)
-        ws = illhelpers.refl_preprocess('ws', ws)
-        xMin = 2.3
-        xMax = 4.2
-        args = {
-            'InputWorkspace': ws,
-            'OutputWorkspace': 'foreground',
-            'WavelengthRange': [xMin, xMax],
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        assertRaisesNothing(self, alg.execute)
-        out = alg.getProperty('OutputWorkspace').value
-        self.assertEqual(out.getNumberHistograms(), 1)
-        Xs = out.readX(0)
-        self.assertGreater(len(Xs), 1)
-        self.assertGreater(Xs[0], xMin)
-        self.assertLess(Xs[-1], xMax)
+        # then the reflected beam
+        ReflectometryILLSumForeground(InputWorkspace='rb',
+                                      OutputWorkspace='rb_inq_frg',
+                                      SummationType='SumInQ',
+                                      DirectLineWorkspace='db',
+                                      DirectForegroundWorkspace='db_frg')
 
-    def testWavelengthRangeDefault(self):
-        ws = illhelpers.create_poor_mans_d17_workspace()
-        illhelpers.refl_rotate_detector(ws, 1.2)
-        ws = illhelpers.refl_add_line_position(ws, 128.0)
-        ws = illhelpers.refl_add_two_theta(ws, 5.5)
-        ws = illhelpers.refl_preprocess('ws', ws)
-        args = {
-            'InputWorkspace': ws,
-            'OutputWorkspace': 'foreground',
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        assertRaisesNothing(self, alg.execute)
-        out = alg.getProperty('OutputWorkspace').value
-        self.assertEqual(out.getNumberHistograms(), 1)
-        Xs = out.readX(0)
-        self.assertGreater(len(Xs), 1)
-        self.assertGreater(Xs[0], 0.)
-        self.assertLess(Xs[-1], 30.)
+        self.checkOutput(mtd['rb_inq_frg'], 1045)
 
-    def testNoDirectForegroundAndSumInQRaises(self):
-        ws = illhelpers.create_poor_mans_d17_workspace()
-        illhelpers.refl_rotate_detector(ws, 1.2)
-        ws = illhelpers.refl_add_line_position(ws, 128.0)
-        ws = illhelpers.refl_add_two_theta(ws, 5.5)
-        ws = illhelpers.refl_preprocess('ws', ws)
-        args = {
-            'InputWorkspace': ws,
-            'OutputWorkspace': 'foreground',
-            'SummationType': 'SumInQ',
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        self.assertRaisesRegexp(RuntimeError, 'Some invalid Properties found', alg.execute)
-        self.assertTrue(alg.isExecuted)
+    def testDirectBeamFigaro(self):
+        # the direct beam
+        ReflectometryILLSumForeground(InputWorkspace='fig_db',
+                                      OutputWorkspace='fig_db_frg')
 
-    def testNotSummedDirectForegroundRaises(self):
-        ws = illhelpers.create_poor_mans_d17_workspace()
-        illhelpers.refl_rotate_detector(ws, 1.2)
-        ws = illhelpers.refl_add_line_position(ws, 128.0)
-        ws = illhelpers.refl_add_two_theta(ws, 5.5)
-        ws = illhelpers.refl_preprocess('ws', ws)
-        args = {
-            'InputWorkspace': ws,
-            'OutputWorkspace': 'foreground',
-            'DirectForegroundWorkspace': ws,
-            'rethrow': True,
-            'child': True
-        }
-        alg = create_algorithm('ReflectometryILLSumForeground', **args)
-        self.assertRaisesRegexp(RuntimeError, 'Some invalid Properties found', alg.execute)
-        self.assertTrue(alg.isExecuted)
+        self.checkOutput(mtd['fig_db_frg'], 971)
+
+
+    def checkOutput(self, ws, blocksize):
+        self.assertTrue(ws)
+        self.assertTrue(isinstance(ws, MatrixWorkspace))
+        self.assertTrue(ws.isHistogramData())
+        self.assertEquals(ws.blocksize(), blocksize)
+        self.assertEquals(ws.getNumberHistograms(), 1)
+        self.assertEquals(ws.getAxis(0).getUnit().unitID(), 'Wavelength')
+
 
 if __name__ == "__main__":
     unittest.main()

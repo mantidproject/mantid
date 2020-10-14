@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_SIMPLECHEBFUNTEST_H_
-#define MANTID_CURVEFITTING_SIMPLECHEBFUNTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -222,8 +221,8 @@ public:
 
 private:
   void do_test_values(const SimpleChebfun &cheb,
-                      std::function<double(double)> fun, double accur1 = 1e-14,
-                      double accur2 = 1e-14) {
+                      const std::function<double(double)> &fun,
+                      double accur1 = 1e-14, double accur2 = 1e-14) {
     TS_ASSERT(cheb.size() > 0);
     TS_ASSERT(cheb.width() > 0.0);
     if (cheb.isGood()) {
@@ -241,5 +240,3 @@ private:
     }
   }
 };
-
-#endif /* MANTID_CURVEFITTING_SIMPLECHEBFUNTEST_H_ */

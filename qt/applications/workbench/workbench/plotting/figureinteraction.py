@@ -1,44 +1,62 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 """
 Defines interaction behaviour for plotting.
 """
-from __future__ import (absolute_import, unicode_literals)
-
 # std imports
+import numpy as np
+from contextlib import contextmanager
 from collections import OrderedDict
 from copy import copy
 from functools import partial
+
+# third party imports
+from matplotlib.axes import Axes
+from matplotlib.container import ErrorbarContainer
+from matplotlib.contour import QuadContourSet
 from qtpy.QtCore import Qt
 from qtpy.QtGui import QCursor
 from qtpy.QtWidgets import QActionGroup, QMenu, QApplication
+from matplotlib.colors import LogNorm, Normalize
+from matplotlib.collections import Collection
+from mpl_toolkits.mplot3d.axes3d import Axes3D
 
-# third party imports
+# mantid imports
 from mantid.api import AnalysisDataService as ads
-from mantid.plots import MantidAxes
-from mantid.py3compat import iteritems
+from mantid.plots import datafunctions, MantidAxes, axesfunctions
+from mantid.plots.utility import zoom, MantidAxType
 from mantidqt.plotting.figuretype import FigureType, figure_type
 from mantidqt.plotting.markers import SingleMarker
+from mantidqt.widgets.plotconfigdialog.curvestabwidget import curve_has_errors, CurveProperties
 from workbench.plotting.figureerrorsmanager import FigureErrorsManager
-from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor, SingleMarkerEditor,
-                                                 GlobalMarkerEditor, ColorbarAxisEditor)
+from workbench.plotting.propertiesdialog import (LabelEditor, XAxisEditor, YAxisEditor,
+                                                 SingleMarkerEditor, GlobalMarkerEditor,
+                                                 ColorbarAxisEditor, ZAxisEditor, LegendEditor)
+from workbench.plotting.style import VALID_LINE_STYLE, VALID_COLORS
 from workbench.plotting.toolbar import ToolbarStateManager
 
 # Map canvas context-menu string labels to a pair of matplotlib scale-type strings
-AXES_SCALE_MENU_OPTS = OrderedDict([
-    ("Lin x/Lin y", ("linear", "linear")),
-    ("Log x/Log y", ("log", "log")),
-    ("Lin x/Log y", ("linear", "log")),
-    ("Log x/Lin y", ("log", "linear"))]
-)
-VALID_LINE_STYLE = [str(name) for name in ['solid', 'dashed', 'dotted', 'dashdot']]
-VALID_COLORS = {'blue': 'C0', 'orange': 'C1', 'green': 'C2', 'red': 'C3', 'purple': 'C4'}
+AXES_SCALE_MENU_OPTS = OrderedDict(
+    [("Lin x/Lin y", ("linear", "linear")), ("Log x/Log y", ("log", "log")),
+     ("Lin x/Log y", ("linear", "log")), ("Log x/Lin y", ("log", "linear"))])
+COLORBAR_SCALE_MENU_OPTS = OrderedDict(
+    [("Linear", Normalize), ("Log", LogNorm)])
+
+
+@contextmanager
+def errorbar_caps_removed(ax):
+    # Error bar caps are considered lines so they are removed before checking the number of lines on the axes so
+    # they aren't confused for "actual" lines.
+    error_bar_caps = datafunctions.remove_and_return_errorbar_cap_lines(ax)
+    yield
+    # Re-add error bar caps
+    ax.lines += error_bar_caps
 
 
 class FigureInteraction(object):
@@ -46,6 +64,10 @@ class FigureInteraction(object):
     Defines the behaviour of interaction events on a figure canvas. Note that
     this currently only works with Qt canvas types.
     """
+
+    ERROR_BARS_MENU_TEXT = "Error Bars"
+    SHOW_ERROR_BARS_BUTTON_TEXT = "Show all errors"
+    HIDE_ERROR_BARS_BUTTON_TEXT = "Hide all errors"
 
     def __init__(self, fig_manager):
         """
@@ -66,6 +88,7 @@ class FigureInteraction(object):
         self._cids.append(canvas.mpl_connect('resize_event', self.mpl_redraw_annotations))
         self._cids.append(canvas.mpl_connect('figure_leave_event', self.on_leave))
         self._cids.append(canvas.mpl_connect('axis_leave_event', self.on_leave))
+        self._cids.append(canvas.mpl_connect('scroll_event', self.on_scroll))
 
         self.canvas = canvas
         self.toolbar_manager = ToolbarStateManager(self.canvas.toolbar)
@@ -73,7 +96,6 @@ class FigureInteraction(object):
         self.fit_browser = fig_manager.fit_browser
         self.errors_manager = FigureErrorsManager(self.canvas)
         self.markers = []
-        self.vertical_markers = []
         self.valid_lines = VALID_LINE_STYLE
         self.valid_colors = VALID_COLORS
         self.default_marker_name = 'marker'
@@ -84,12 +106,25 @@ class FigureInteraction(object):
 
     def disconnect(self):
         """
-        Disconnects all registered event handers
+        Disconnects all registered event handlers
         """
-        for id in self._cids:
-            self.canvas.mpl_disconnect(id)
+        for cid in self._cids:
+            self.canvas.mpl_disconnect(cid)
 
     # ------------------------ Handlers --------------------
+    def on_scroll(self, event):
+        """Respond to scroll events: zoom in/out"""
+        self.canvas.toolbar.push_current()
+        if not getattr(event, 'inaxes', None) or isinstance(event.inaxes, Axes3D) or \
+                len(event.inaxes.images) == 0 and len(event.inaxes.lines) == 0:
+            return
+        zoom_factor = 1.05 + abs(event.step) / 6
+        if event.button == 'up':  # zoom in
+            zoom(event.inaxes, event.xdata, event.ydata, factor=zoom_factor)
+        elif event.button == 'down':  # zoom out
+            zoom(event.inaxes, event.xdata, event.ydata, factor=1 / zoom_factor)
+        event.canvas.draw()
+
     def on_mouse_button_press(self, event):
         """Respond to a MouseEvent where a button was pressed"""
         # local variables to avoid constant self lookup
@@ -112,8 +147,8 @@ class FigureInteraction(object):
                     marker.set_move_cursor(Qt.ClosedHandCursor, x_pos, y_pos)
                 marker.mouse_move_start(x_pos, y_pos)
 
-        if (event.button == canvas.buttond.get(Qt.RightButton) and
-                not self.toolbar_manager.is_tool_active()):
+        if (event.button == canvas.buttond.get(Qt.RightButton)
+                and not self.toolbar_manager.is_tool_active()):
             if not marker_selected:
                 self._show_context_menu(event)
             else:
@@ -123,9 +158,34 @@ class FigureInteraction(object):
                 self._show_axis_editor(event)
             elif len(marker_selected) == 1:
                 self._edit_marker(marker_selected[0])
+        elif event.button == canvas.buttond.get(Qt.MiddleButton):
+            if self.toolbar_manager.is_zoom_active():
+                self.toolbar_manager.emit_sig_home_clicked()
+            # Activate pan on middle button press
+            elif not self.toolbar_manager.is_tool_active():
+                if event.inaxes and event.inaxes.can_pan():
+                    event.button = 1
+                    try:
+                        self.canvas.toolbar.press_pan(event)
+                    finally:
+                        event.button = 3
+        elif isinstance(event.inaxes, Axes3D):
+            event.inaxes._button_press(event)
 
     def on_mouse_button_release(self, event):
         """ Stop moving the markers when the mouse button is released """
+        # Release pan on middle button release
+        if event.button == self.canvas.buttond.get(Qt.MiddleButton):
+            if not self.toolbar_manager.is_tool_active():
+                event.button = 1
+                try:
+                    self.canvas.toolbar.release_pan(event)
+                finally:
+                    event.button = 3
+        elif event.button == self.canvas.buttond.get(Qt.RightButton) and self.toolbar_manager.is_zoom_active():
+            # Reset the axes limits if you right click while using the zoom tool.
+            self.toolbar_manager.emit_sig_home_clicked()
+
         if self.toolbar_manager.is_tool_active():
             for marker in self.markers:
                 marker.add_all_annotations()
@@ -137,9 +197,17 @@ class FigureInteraction(object):
             self.stop_markers(x_pos, y_pos)
 
     def on_leave(self, event):
-        """When leaving the axis or canvas, restore cursor to default one and stop moving the markers"""
+        """
+        When leaving the axis or canvas, restore cursor to default one
+        and stop moving the markers
+        """
         QApplication.restoreOverrideCursor()
-        self.stop_markers(event.xdata, event.ydata)
+        if event:
+            self.stop_markers(event.xdata, event.ydata)
+
+    def set_all_markers_visible(self, visible):
+        for marker in self.markers:
+            marker.set_visible(visible)
 
     def stop_markers(self, x_pos, y_pos):
         """
@@ -172,15 +240,31 @@ class FigureInteraction(object):
                 move_and_show(LabelEditor(canvas, ax.xaxis.label))
             elif ax.yaxis.label.contains(event)[0]:
                 move_and_show(LabelEditor(canvas, ax.yaxis.label))
-            elif (ax.xaxis.contains(event)[0] or
-                  any(tick.contains(event)[0] for tick in ax.get_xticklabels())):
+            elif (ax.xaxis.contains(event)[0]
+                  or any(tick.contains(event)[0] for tick in ax.get_xticklabels())):
                 move_and_show(XAxisEditor(canvas, ax))
-            elif (ax.yaxis.contains(event)[0] or
-                  any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
-                if ax == axes[0]:
-                    move_and_show(YAxisEditor(canvas, ax))
+            elif (ax.yaxis.contains(event)[0]
+                  or any(tick.contains(event)[0] for tick in ax.get_yticklabels())):
+                if type(ax) == Axes:
+                    move_and_show(ColorbarAxisEditor(canvas, ax))
                 else:
-                    move_and_show(ColorbarAxisEditor(canvas,ax))
+                    move_and_show(YAxisEditor(canvas, ax))
+            elif hasattr(ax, 'zaxis'):
+                if ax.zaxis.label.contains(event)[0]:
+                    move_and_show(LabelEditor(canvas, ax.zaxis.label))
+                elif (ax.zaxis.contains(event)[0]
+                      or any(tick.contains(event)[0] for tick in ax.get_zticklabels())):
+                    move_and_show(ZAxisEditor(canvas, ax))
+            elif ax.get_legend() is not None and ax.get_legend().contains(event)[0]:
+                # We have to set the legend as non draggable else we hold onto the legend
+                # until the mouse button is clicked again
+                ax.get_legend().set_draggable(False)
+                legend_texts = ax.get_legend().get_texts()
+                active_lines = datafunctions.get_legend_handles(ax)
+                for legend_text, curve in zip(legend_texts, active_lines):
+                    if legend_text.contains(event)[0]:
+                        move_and_show(LegendEditor(canvas, legend_text, curve))
+                ax.get_legend().set_draggable(True)
 
     def _show_markers_menu(self, markers, event):
         """
@@ -231,21 +315,29 @@ class FigureInteraction(object):
             return
 
         fig_type = figure_type(self.canvas.figure)
-        if fig_type == FigureType.Empty or fig_type == FigureType.Image:
-            # Fitting or changing scale types does not make sense in
-            # these cases
+        if fig_type == FigureType.Empty:
+            # Fitting or changing scale types does not make sense in this case
             return
 
         menu = QMenu()
 
-        if self.fit_browser.tool is not None:
-            self.fit_browser.add_to_menu(menu)
-            menu.addSeparator()
-        self._add_axes_scale_menu(menu, event.inaxes)
-        if isinstance(event.inaxes, MantidAxes):
-            self._add_normalization_option_menu(menu, event.inaxes)
-        self.errors_manager.add_error_bars_menu(menu, event.inaxes)
-        self._add_marker_option_menu(menu, event)
+        if fig_type == FigureType.Image or fig_type == FigureType.Contour:
+            if isinstance(event.inaxes, MantidAxes):
+                self._add_axes_scale_menu(menu, event.inaxes)
+                self._add_normalization_option_menu(menu, event.inaxes)
+                self._add_colorbar_axes_scale_menu(menu, event.inaxes)
+        elif fig_type == FigureType.Surface:
+            self._add_colorbar_axes_scale_menu(menu, event.inaxes)
+        elif fig_type != FigureType.Wireframe:
+            if self.fit_browser.tool is not None:
+                self.fit_browser.add_to_menu(menu)
+                menu.addSeparator()
+            self._add_axes_scale_menu(menu, event.inaxes)
+            if isinstance(event.inaxes, MantidAxes):
+                self._add_normalization_option_menu(menu, event.inaxes)
+            self.add_error_bars_menu(menu, event.inaxes)
+            self._add_marker_option_menu(menu, event)
+            self._add_plot_type_option_menu(menu, event.inaxes)
 
         menu.exec_(QCursor.pos())
 
@@ -254,7 +346,7 @@ class FigureInteraction(object):
         axes_menu = QMenu("Axes", menu)
         axes_actions = QActionGroup(axes_menu)
         current_scale_types = (ax.get_xscale(), ax.get_yscale())
-        for label, scale_types in iteritems(AXES_SCALE_MENU_OPTS):
+        for label, scale_types in AXES_SCALE_MENU_OPTS.items():
             action = axes_menu.addAction(label, partial(self._quick_change_axes, scale_types, ax))
             if current_scale_types == scale_types:
                 action.setCheckable(True)
@@ -271,10 +363,9 @@ class FigureInteraction(object):
         # Create menu
         norm_menu = QMenu("Normalization", menu)
         norm_actions_group = QActionGroup(norm_menu)
-        none_action = norm_menu.addAction(
-            'None', lambda: self._set_normalization_none(ax))
-        norm_action = norm_menu.addAction(
-            'Bin Width', lambda: self._set_normalization_bin_width(ax))
+        none_action = norm_menu.addAction('None', lambda: self._set_normalization_none(ax))
+        norm_action = norm_menu.addAction('Bin Width',
+                                          lambda: self._set_normalization_bin_width(ax))
         for action in [none_action, norm_action]:
             norm_actions_group.addAction(action)
             action.setCheckable(True)
@@ -287,6 +378,76 @@ class FigureInteraction(object):
             none_action.setChecked(True)
 
         menu.addMenu(norm_menu)
+
+    def _add_colorbar_axes_scale_menu(self, menu, ax):
+        """Add the Axes scale options menu to the given menu"""
+        axes_menu = QMenu("Color bar", menu)
+        axes_actions = QActionGroup(axes_menu)
+        images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
+        for label, scale_type in COLORBAR_SCALE_MENU_OPTS.items():
+            action = axes_menu.addAction(label, partial(self._change_colorbar_axes, scale_type))
+            if type(images[0].norm) == scale_type:
+                action.setCheckable(True)
+                action.setChecked(True)
+            axes_actions.addAction(action)
+        menu.addMenu(axes_menu)
+
+    def add_error_bars_menu(self, menu, ax):
+        """
+        Add menu actions to toggle the errors for all lines in the plot.
+
+        Lines without errors are added in the context menu first,
+        then lines containing errors are appended afterwards.
+
+        This is done so that the context menu always has
+        the same order of curves as the legend is currently showing - and the
+        legend always appends curves with errors after the lines without errors.
+        Relevant source, as of 10 July 2019:
+        https://github.com/matplotlib/matplotlib/blob/154922992722db37a9d9c8680682ccc4acf37f8c/lib/matplotlib/legend.py#L1201
+
+        :param menu: The menu to which the actions will be added
+        :type menu: QMenu
+        :param ax: The Axes containing lines to toggle errors on
+        """
+        # if the ax is not a MantidAxes, and there are no errors plotted,
+        # then do not add any options for the menu
+        if not isinstance(ax, MantidAxes) and len(ax.containers) == 0:
+            return
+
+        error_bars_menu = QMenu(self.ERROR_BARS_MENU_TEXT, menu)
+        error_bars_menu.addAction(self.SHOW_ERROR_BARS_BUTTON_TEXT,
+                                  partial(self.errors_manager.update_plot_after,
+                                          self.errors_manager.toggle_all_errors, ax, make_visible=True))
+        error_bars_menu.addAction(self.HIDE_ERROR_BARS_BUTTON_TEXT,
+                                  partial(self.errors_manager.update_plot_after,
+                                          self.errors_manager.toggle_all_errors, ax, make_visible=False))
+        menu.addMenu(error_bars_menu)
+
+        self.errors_manager.active_lines = self.errors_manager.get_curves_from_ax(ax)
+
+        # if there's more than one line plotted, then
+        # add a sub menu, containing an action to hide the
+        # error bar for each line
+        error_bars_menu.addSeparator()
+        add_later = []
+        for index, line in enumerate(self.errors_manager.active_lines):
+            if curve_has_errors(line):
+                curve_props = CurveProperties.from_curve(line)
+                # Add lines without errors first, lines with errors are appended later. Read docstring for more info
+                if not isinstance(line, ErrorbarContainer):
+                    action = error_bars_menu.addAction(line.get_label(), partial(
+                        self.errors_manager.update_plot_after, self.errors_manager.toggle_error_bars_for, ax, line))
+                    action.setCheckable(True)
+                    action.setChecked(not curve_props.hide_errors)
+                else:
+                    add_later.append((line.get_label(), partial(
+                        self.errors_manager.update_plot_after, self.errors_manager.toggle_error_bars_for, ax, line),
+                                      not curve_props.hide_errors))
+
+        for label, function, visible in add_later:
+            action = error_bars_menu.addAction(label, function)
+            action.setCheckable(True)
+            action.setChecked(visible)
 
     def _add_marker_option_menu(self, menu, event):
         """
@@ -301,8 +462,10 @@ class FigureInteraction(object):
         marker_action_group = QActionGroup(marker_menu)
         x0, x1 = event.inaxes.get_xlim()
         y0, y1 = event.inaxes.get_ylim()
-        horizontal = marker_menu.addAction("Horizontal", lambda: self._add_horizontal_marker(event.ydata, y0, y1, event.inaxes))
-        vertical = marker_menu.addAction("Vertical", lambda: self._add_vertical_marker(event.xdata, x0, x1, event.inaxes))
+        horizontal = marker_menu.addAction(
+            "Horizontal", lambda: self._add_horizontal_marker(event.ydata, y0, y1, event.inaxes))
+        vertical = marker_menu.addAction(
+            "Vertical", lambda: self._add_vertical_marker(event.xdata, x0, x1, event.inaxes))
         edit = marker_menu.addAction("Edit", lambda: self._global_edit_markers())
 
         for action in [horizontal, vertical, edit]:
@@ -310,13 +473,46 @@ class FigureInteraction(object):
 
         menu.addMenu(marker_menu)
 
+    def _add_plot_type_option_menu(self, menu, ax):
+        with errorbar_caps_removed(ax):
+            # Able to change the plot type to waterfall if there is only one axes, it is a MantidAxes, and there is more
+            # than one line on the axes.
+            if len(ax.get_figure().get_axes()) > 1 or not isinstance(ax, MantidAxes) or len(ax.get_lines()) <= 1:
+                return
+
+        plot_type_menu = QMenu("Plot Type", menu)
+        plot_type_action_group = QActionGroup(plot_type_menu)
+        standard = plot_type_menu.addAction("1D", lambda: self._change_plot_type(
+            ax, plot_type_action_group.checkedAction()))
+        waterfall = plot_type_menu.addAction("Waterfall", lambda: self._change_plot_type(
+            ax, plot_type_action_group.checkedAction()))
+
+        for action in [waterfall, standard]:
+            plot_type_action_group.addAction(action)
+            action.setCheckable(True)
+
+        if ax.is_waterfall():
+            waterfall.setChecked(True)
+        else:
+            standard.setChecked(True)
+
+        menu.addMenu(plot_type_menu)
+
+    def _change_plot_type(self, ax, action):
+        if action.text() == "Waterfall":
+            ax.set_waterfall(True)
+        else:
+            ax.set_waterfall(False)
+
     def _global_edit_markers(self):
         """Open a window that allows editing of all currently plotted markers"""
+
         def move_and_show(editor):
             editor.move(QCursor.pos())
             editor.exec_()
 
-        move_and_show(GlobalMarkerEditor(self.canvas, self.markers, self.valid_lines, self.valid_colors))
+        move_and_show(
+            GlobalMarkerEditor(self.canvas, self.markers, self.valid_lines, self.valid_colors))
 
     def _get_free_marker_name(self):
         """
@@ -340,7 +536,14 @@ class FigureInteraction(object):
                 return "{} {}".format(self.default_marker_name, proposed_number)
             proposed_number += 1
 
-    def _add_horizontal_marker(self, y_pos, lower, upper, axis, name=None, line_style='dashed', color='C2'):
+    def _add_horizontal_marker(self,
+                               y_pos,
+                               lower,
+                               upper,
+                               axis,
+                               name=None,
+                               line_style='dashed',
+                               color=VALID_COLORS['green']):
         """
         Add a horizontal marker to the plot and append it to the list of open markers
         :param y_pos: position to plot the marker to
@@ -348,17 +551,32 @@ class FigureInteraction(object):
         :param upper: x value to stop the marker at
         :param name: label displayed beside the marker
         :param line_style: 'solid', 'dashed', etc.
-        :param color: 'C0', 'C1', 'r', etc.
+        :param color: 'r', 'g', 'b' etc. or some hex code
         """
         if name is None:
             name = self._get_free_marker_name()
-        marker = SingleMarker(self.canvas, color, y_pos, lower, upper, name=name,
-                              marker_type='YSingle', line_style=line_style, axis=axis)
+        marker = SingleMarker(
+            self.canvas,
+            color,
+            y_pos,
+            lower,
+            upper,
+            name=name,
+            marker_type='YSingle',
+            line_style=line_style,
+            axis=axis)
         marker.add_name()
         marker.redraw()
         self.markers.append(marker)
 
-    def _add_vertical_marker(self, x_pos, lower, upper, axis, name=None, line_style='dashed', color='C2'):
+    def _add_vertical_marker(self,
+                             x_pos,
+                             lower,
+                             upper,
+                             axis,
+                             name=None,
+                             line_style='dashed',
+                             color=VALID_COLORS['green']):
         """
         Add a vertical marker to the plot and append it to the list of open markers
         :param x_pos: position to plot the marker to
@@ -366,12 +584,20 @@ class FigureInteraction(object):
         :param upper: y value to stop the marker at
         :param name: label displayed beside the marker
         :param line_style: 'solid', 'dashed', etc.
-        :param color: 'C0', 'C1', 'r', etc.
+        :param color: 'r', 'g', 'b' etc. or some hex code
         """
         if name is None:
             name = self._get_free_marker_name()
-        marker = SingleMarker(self.canvas, color, x_pos, lower, upper, name=name,
-                              marker_type='XSingle', line_style=line_style, axis=axis)
+        marker = SingleMarker(
+            self.canvas,
+            color,
+            x_pos,
+            lower,
+            upper,
+            name=name,
+            marker_type='XSingle',
+            line_style=line_style,
+            axis=axis)
         marker.add_name()
         marker.redraw()
         self.markers.append(marker)
@@ -390,13 +616,16 @@ class FigureInteraction(object):
         """
         Open a dialog window to edit the marker properties (position, name, line style, colour)
         """
+
         def move_and_show(editor):
             editor.move(QCursor.pos())
             editor.exec_()
 
         used_names = [str(_marker.name) for _marker in self.markers]
         QApplication.restoreOverrideCursor()
-        move_and_show(SingleMarkerEditor(self.canvas, marker, self.valid_lines, self.valid_colors, used_names))
+        move_and_show(
+            SingleMarkerEditor(self.canvas, marker, self.valid_lines, self.valid_colors,
+                               used_names))
 
     def _set_hover_cursor(self, x_pos, y_pos):
         """
@@ -427,7 +656,8 @@ class FigureInteraction(object):
 
     def motion_event(self, event):
         """ Move the marker if the mouse is moving and in range """
-        if self.toolbar_manager.is_tool_active():
+        if self.toolbar_manager.is_tool_active() or self.toolbar_manager.is_fit_active() \
+                or event is None:
             return
 
         x = event.xdata
@@ -464,42 +694,127 @@ class FigureInteraction(object):
             return
         self._toggle_normalization(ax)
 
-    def _toggle_normalization(self, ax):
+    def _toggle_normalization(self, selected_ax):
+        if figure_type(self.canvas.figure) == FigureType.Image and len(self.canvas.figure.get_axes()) > 1:
+            axes = datafunctions.get_axes_from_figure(self.canvas.figure)
+        else:
+            axes = [selected_ax]
+
+        for ax in axes:
+            waterfall = isinstance(ax, MantidAxes) and ax.is_waterfall()
+            if waterfall:
+                x, y = ax.waterfall_x_offset, ax.waterfall_y_offset
+                has_fill = ax.waterfall_has_fill()
+
+                if has_fill:
+                    line_colour_fill = datafunctions.waterfall_fill_is_line_colour(ax)
+                    if line_colour_fill:
+                        fill_colour = None
+                    else:
+                        fill_colour = datafunctions.get_waterfall_fills(ax)[0].get_facecolor()
+
+                ax.update_waterfall(0, 0)
+
+            # The colorbar can get screwed up with ragged workspaces and log scales as they go
+            # through the normalisation toggle.
+            # Set it to Linear and change it back after if necessary, since there's no reason
+            # to duplicate the handling.
+            colorbar_log = False
+            if ax.images:
+                colorbar_log = isinstance(ax.images[-1].norm, LogNorm)
+                if colorbar_log:
+                    self._change_colorbar_axes(Normalize)
+
+            self._change_plot_normalization(ax)
+
+            if ax.lines:  # Relim causes issues with colour plots, which have no lines.
+                ax.relim()
+                ax.autoscale()
+
+            if ax.images:  # Colour bar limits are wrong if workspace is ragged. Set them manually.
+                colorbar_min = np.nanmin(ax.images[-1].get_array())
+                colorbar_max = np.nanmax(ax.images[-1].get_array())
+                for image in ax.images:
+                    image.set_clim(colorbar_min, colorbar_max)
+
+                    # Update the colorbar label
+                    cb = image.colorbar
+                    if cb:
+                        datafunctions.add_colorbar_label(cb, ax.get_figure().axes)
+                if colorbar_log:  # If it had a log scaled colorbar before, put it back.
+                    self._change_colorbar_axes(LogNorm)
+
+                axesfunctions.update_colorplot_datalimits(ax, ax.images)
+
+            datafunctions.set_initial_dimensions(ax)
+            if waterfall:
+                ax.update_waterfall(x, y)
+
+                if has_fill:
+                    ax.set_waterfall_fill(True, fill_colour)
+
+        self.canvas.draw()
+
+    def _change_plot_normalization(self, ax):
         is_normalized = self._is_normalized(ax)
         for arg_set in ax.creation_args:
+            if arg_set['function'] == 'contour':
+                continue
+
             if arg_set['workspaces'] in ax.tracked_workspaces:
                 workspace = ads.retrieve(arg_set['workspaces'])
                 arg_set['distribution'] = is_normalized
                 arg_set_copy = copy(arg_set)
-                [arg_set_copy.pop(key) for key in ['function', 'workspaces', 'autoscale_on_update']
-                 if key in arg_set_copy.keys()]
+                [
+                    arg_set_copy.pop(key)
+                    for key in ['function', 'workspaces', 'autoscale_on_update', 'norm']
+                    if key in arg_set_copy.keys()
+                ]
                 if 'specNum' not in arg_set:
                     if 'wkspIndex' in arg_set:
                         arg_set['specNum'] = workspace.getSpectrum(
                             arg_set.pop('wkspIndex')).getSpectrumNo()
                     else:
-                        raise RuntimeError(
-                            "No spectrum number associated with plot of "
-                            "workspace '{}'".format(workspace.name()))
+                        raise RuntimeError("No spectrum number associated with plot of "
+                                           "workspace '{}'".format(workspace.name()))
+                # 2D plots have no spec number so remove it
+                if figure_type(self.canvas.figure) in [FigureType.Image, FigureType.Contour]:
+                    arg_set_copy.pop('specNum')
                 for ws_artist in ax.tracked_workspaces[workspace.name()]:
-                    if ws_artist.spec_num == arg_set.get('specNum'):
+                    if ws_artist.spec_num == arg_set_copy.get('specNum'):
                         ws_artist.is_normalized = not is_normalized
-                        ws_artist.replace_data(workspace, arg_set_copy)
-        ax.relim()
-        ax.autoscale()
-        self.canvas.draw()
+
+                        # This check is to prevent the contour lines being re-plotted using the colorfill plot args.
+                        if isinstance(ws_artist._artists[0], QuadContourSet):
+                            contour_line_colour = ws_artist._artists[0].collections[0].get_color()
+
+                            ws_artist.replace_data(workspace, None)
+
+                            # Re-apply the contour line colour
+                            for col in ws_artist._artists[0].collections:
+                                col.set_color(contour_line_colour)
+                        else:
+                            ws_artist.replace_data(workspace, arg_set_copy)
 
     def _can_toggle_normalization(self, ax):
         """
-        Return True if no plotted workspaces are distributions and all curves
-        on the figure are either distributions or non-distributions. Return
+        Return True if no plotted workspaces are distributions, all curves
+        on the figure are either distributions or non-distributions,
+        and the data_replace_cb method was set when plotting . Return
         False otherwise.
         :param ax: A MantidAxes object
         :return: bool
         """
         plotted_normalized = []
+        if not ax.creation_args:
+            return False
+        axis = ax.creation_args[0].get('axis', None)
         for workspace_name, artists in ax.tracked_workspaces.items():
-            if not ads.retrieve(workspace_name).isDistribution():
+            if hasattr(ads.retrieve(workspace_name), "isDistribution"):
+                is_dist = ads.retrieve(workspace_name).isDistribution()
+            else:
+                is_dist = True
+            if axis != MantidAxType.BIN and not is_dist and ax.data_replaced:
                 plotted_normalized += [a.is_normalized for a in artists]
             else:
                 return False
@@ -517,8 +832,21 @@ class FigureInteraction(object):
         # not rescaled properly because the vertical marker artists were
         # included in the last computation of the data limits and
         # set_xscale/set_yscale only autoscale the view
-        ax.relim()
+        xlim = copy(ax.get_xlim())
+        ylim = copy(ax.get_ylim())
         ax.set_xscale(scale_types[0])
         ax.set_yscale(scale_types[1])
+        ax.set_xlim(xlim)
+        ax.set_ylim(ylim)
+
+        self.canvas.draw_idle()
+
+    def _change_colorbar_axes(self, scale_type):
+        for ax in self.canvas.figure.get_axes():
+            images = ax.get_images() + [col for col in ax.collections if isinstance(col, Collection)]
+            for image in images:
+                if image.norm.vmin is not None and image.norm.vmax is not None:
+                    datafunctions.update_colorbar_scale(self.canvas.figure, image, scale_type, image.norm.vmin,
+                                                        image.norm.vmax)
 
         self.canvas.draw_idle()

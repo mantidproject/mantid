@@ -1,14 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_COSTFUNCUNWEIGHTEDLEASTSQUARES_H_
-#define MANTID_CURVEFITTING_COSTFUNCUNWEIGHTEDLEASTSQUARES_H_
+#pragma once
 
 #include "MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -25,7 +23,8 @@ namespace CostFunctions {
     @author Michael Wedel, Paul Scherrer Institut - SINQ
     @date 03/03/2015
 */
-class DLLExport CostFuncUnweightedLeastSquares : public CostFuncLeastSquares {
+class MANTID_CURVEFITTING_DLL CostFuncUnweightedLeastSquares
+    : public CostFuncLeastSquares {
 public:
   CostFuncUnweightedLeastSquares();
 
@@ -43,5 +42,3 @@ protected:
 } // namespace CostFunctions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_COSTFUNCUNWEIGHTEDLEASTSQUARES_H_ */

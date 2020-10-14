@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef I_MD_DIMENSION_H
-#define I_MD_DIMENSION_H
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/MDFrame.h"
@@ -13,7 +12,7 @@
 #include "MantidKernel/MDUnit.h"
 #include "MantidKernel/V3D.h"
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 #include <stdexcept>
 #include <vector>
@@ -102,14 +101,13 @@ public:
 };
 
 /// Shared Pointer for IMDDimension. Frequently used type in framework.
-using IMDDimension_sptr = boost::shared_ptr<IMDDimension>;
+using IMDDimension_sptr = std::shared_ptr<IMDDimension>;
 /// Shared Pointer to const IMDDimension. Not strictly necessary since
 /// IMDDimension is pure abstract.
-using IMDDimension_const_sptr = boost::shared_ptr<const IMDDimension>;
+using IMDDimension_const_sptr = std::shared_ptr<const IMDDimension>;
 /// Vector of constant shared pointers to IMDDimensions.
 using VecIMDDimension_const_sptr = std::vector<IMDDimension_const_sptr>;
 /// Vector of shared pointers to IMDDimensions.
 using VecIMDDimension_sptr = std::vector<IMDDimension_sptr>;
 } // namespace Geometry
 } // namespace Mantid
-#endif

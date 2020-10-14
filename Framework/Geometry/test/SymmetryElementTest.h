@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SYMMETRYELEMENTTEST_H_
-#define MANTID_GEOMETRY_SYMMETRYELEMENTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -41,7 +40,7 @@ public:
 
     SymmetryElement_sptr cloned = identity.clone();
     SymmetryElementIdentity_sptr castedClone =
-        boost::dynamic_pointer_cast<SymmetryElementIdentity>(cloned);
+        std::dynamic_pointer_cast<SymmetryElementIdentity>(cloned);
 
     TS_ASSERT(castedClone);
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), "1");
@@ -55,7 +54,7 @@ public:
 
     SymmetryElement_sptr cloned = translation.clone();
     SymmetryElementTranslation_sptr castedClone =
-        boost::dynamic_pointer_cast<SymmetryElementTranslation>(cloned);
+        std::dynamic_pointer_cast<SymmetryElementTranslation>(cloned);
 
     TS_ASSERT(castedClone);
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), "t");
@@ -70,7 +69,7 @@ public:
 
     SymmetryElement_sptr cloned = inversion.clone();
     SymmetryElementInversion_sptr castedClone =
-        boost::dynamic_pointer_cast<SymmetryElementInversion>(cloned);
+        std::dynamic_pointer_cast<SymmetryElementInversion>(cloned);
 
     TS_ASSERT(castedClone);
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), "-1");
@@ -127,7 +126,7 @@ public:
 
     SymmetryElement_sptr cloned = rotationElement.clone();
     SymmetryElementRotation_sptr castedClone =
-        boost::dynamic_pointer_cast<SymmetryElementRotation>(cloned);
+        std::dynamic_pointer_cast<SymmetryElementRotation>(cloned);
     TS_ASSERT(castedClone);
 
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), symbolScrew);
@@ -154,7 +153,7 @@ public:
 
     SymmetryElement_sptr cloned = mirrorElement.clone();
     SymmetryElementMirror_sptr castedClone =
-        boost::dynamic_pointer_cast<SymmetryElementMirror>(cloned);
+        std::dynamic_pointer_cast<SymmetryElementMirror>(cloned);
     TS_ASSERT(castedClone);
 
     TS_ASSERT_EQUALS(castedClone->hmSymbol(), symbolGlide);
@@ -183,5 +182,3 @@ private:
   };
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
-
-#endif /* MANTID_GEOMETRY_SYMMETRYELEMENTTEST_H_ */

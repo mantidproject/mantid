@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FunctionProperty.h"
 #include "MantidPythonInterface/core/PropertyWithValueExporter.h"
@@ -16,9 +16,9 @@ using Mantid::PythonInterface::PropertyWithValueExporter;
 using namespace boost::python;
 
 void export_FunctionProperty() {
-  // FuncitonProperty has base PropertyWithValue<boost::shared_ptr<IFunction>>
+  // FuncitonProperty has base PropertyWithValue<std::shared_ptr<IFunction>>
   // which must be exported
-  using HeldType = boost::shared_ptr<IFunction>;
+  using HeldType = std::shared_ptr<IFunction>;
   PropertyWithValueExporter<HeldType>::define("FunctionPropertyWithValue");
 
   class_<FunctionProperty, bases<PropertyWithValue<HeldType>>,

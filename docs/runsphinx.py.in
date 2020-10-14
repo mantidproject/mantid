@@ -83,7 +83,6 @@ def main(sysarg):
                                 % opts.testinclude)
 
     # Run
-    import sphinx.cmdline
     # IPython monkey patches the RegexLexer.get_tokens_unprocessed method and
     # causes Sphinx to fall over. We need to put it back while processing
     # the documentation
@@ -95,7 +94,11 @@ def main(sysarg):
     except AttributeError:
         pass
     try:
+        import sphinx.cmdline
         return_value = sphinx.cmdline.main(argv)
+    except ModuleNotFoundError:
+        from sphinx.cmd import build
+        return_value = build.main(argv)
     finally:
         try:
             from qtconsole import pygments_highlighter

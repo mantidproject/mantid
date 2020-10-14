@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMDIALOGS_SLICINGALGORITHMDIALOG_H_
-#define MANTIDQTCUSTOMDIALOGS_SLICINGALGORITHMDIALOG_H_
+#pragma once
 
 //----------------------
 // Includes
@@ -45,10 +44,10 @@ public:
   ~SlicingAlgorithmDialog() override;
 
   // Customisation for the VSI
-  void customiseLayoutForVsi(std::string initialWorkspace);
+  void customiseLayoutForVsi(const std::string &initialWorkspace);
 
   /// Reset the aligned dim values for the VSI
-  void resestAlignedDimProperty(size_t index, QString propertyValue);
+  void resestAlignedDimProperty(size_t index, const QString &propertyValue);
 
 protected:
   /// view
@@ -97,7 +96,7 @@ private:
   /// Build dimension inputs.
   void makeDimensionInputs(
       const QString &propertyPrefix, QLayout *owningLayout,
-      QString (*format)(Mantid::Geometry::IMDDimension_const_sptr),
+      QString (*format)(const Mantid::Geometry::IMDDimension_const_sptr &),
       History history);
 
   /// Determine if history should be used.
@@ -153,5 +152,3 @@ public:
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif

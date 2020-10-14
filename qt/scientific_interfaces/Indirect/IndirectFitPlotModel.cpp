@@ -1,15 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectFitPlotModel.h"
 
+#include <utility>
+
+#include "ConvFitModel.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionDomain1D.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/Workspace_fwd.h"
@@ -25,9 +28,10 @@ IFunction_sptr firstFunctionWithParameter(IFunction_sptr function,
                                           const std::string &category,
                                           const std::string &parameterName);
 
-IFunction_sptr firstFunctionWithParameter(CompositeFunction_sptr composite,
-                                          const std::string &category,
-                                          const std::string &parameterName) {
+IFunction_sptr
+firstFunctionWithParameter(const CompositeFunction_sptr &composite,
+                           const std::string &category,
+                           const std::string &parameterName) {
   for (auto i = 0u; i < composite->nFunctions(); ++i) {
     const auto value = firstFunctionWithParameter(composite->getFunction(i),
                                                   category, parameterName);
@@ -43,14 +47,13 @@ IFunction_sptr firstFunctionWithParameter(IFunction_sptr function,
   if (function->category() == category && function->hasParameter(parameterName))
     return function;
 
-  const auto composite =
-      boost::dynamic_pointer_cast<CompositeFunction>(function);
+  const auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     return firstFunctionWithParameter(composite, category, parameterName);
   return nullptr;
 }
 
-boost::optional<double> firstParameterValue(IFunction_sptr function,
+boost::optional<double> firstParameterValue(const IFunction_sptr &function,
                                             const std::string &category,
                                             const std::string &parameterName) {
   if (!function)
@@ -63,22 +66,24 @@ boost::optional<double> firstParameterValue(IFunction_sptr function,
   return boost::none;
 }
 
-boost::optional<double> findFirstPeakCentre(IFunction_sptr function) {
-  return firstParameterValue(function, "Peak", "PeakCentre");
+boost::optional<double> findFirstPeakCentre(const IFunction_sptr &function) {
+  return firstParameterValue(std::move(function), "Peak", "PeakCentre");
 }
 
-boost::optional<double> findFirstFWHM(IFunction_sptr function) {
-  return firstParameterValue(function, "Peak", "FWHM");
+boost::optional<double> findFirstFWHM(const IFunction_sptr &function) {
+  return firstParameterValue(std::move(function), "Peak", "FWHM");
 }
 
-boost::optional<double> findFirstBackgroundLevel(IFunction_sptr function) {
-  return firstParameterValue(function, "Background", "A0");
+boost::optional<double>
+findFirstBackgroundLevel(const IFunction_sptr &function) {
+  return firstParameterValue(std::move(function), "Background", "A0");
 }
 
-void setFunctionParameters(IFunction_sptr function, const std::string &category,
+void setFunctionParameters(const IFunction_sptr &function,
+                           const std::string &category,
                            const std::string &parameterName, double value);
 
-void setFunctionParameters(CompositeFunction_sptr composite,
+void setFunctionParameters(const CompositeFunction_sptr &composite,
                            const std::string &category,
                            const std::string &parameterName, double value) {
   for (auto i = 0u; i < composite->nFunctions(); ++i)
@@ -86,25 +91,39 @@ void setFunctionParameters(CompositeFunction_sptr composite,
                           value);
 }
 
-void setFunctionParameters(IFunction_sptr function, const std::string &category,
+void setFunctionParameters(const IFunction_sptr &function,
+                           const std::string &category,
                            const std::string &parameterName, double value) {
   if (function->category() == category && function->hasParameter(parameterName))
     function->setParameter(parameterName, value);
 
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
+  auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
   if (composite)
     setFunctionParameters(composite, category, parameterName, value);
 }
 
+void setFunctionParameters(const MultiDomainFunction_sptr &function,
+                           const std::string &category,
+                           const std::string &parameterName, double value) {
+  for (size_t i = 0u; i < function->nFunctions(); ++i)
+    setFunctionParameters(function->getFunction(i), category, parameterName,
+                          value);
+}
+
 void setFirstBackground(IFunction_sptr function, double value) {
-  firstFunctionWithParameter(function, "Background", "A0")
+  firstFunctionWithParameter(std::move(function), "Background", "A0")
       ->setParameter("A0", value);
 }
 
-MatrixWorkspace_sptr castToMatrixWorkspace(Workspace_sptr workspace) {
-  return boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+MatrixWorkspace_sptr castToMatrixWorkspace(const Workspace_sptr &workspace) {
+  return std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
 }
-
+// Need to adjust the guess range so the first data point isn't thrown away
+constexpr double RANGEADJUSTMENT = 1e-5;
+inline void adjustRange(std::pair<double, double> &range) {
+  range.first = (1 - RANGEADJUSTMENT) * range.first;
+  range.second = (1 + RANGEADJUSTMENT) * range.second;
+}
 } // namespace
 
 namespace MantidQt {
@@ -114,28 +133,28 @@ namespace IDA {
 using namespace Mantid::API;
 
 IndirectFitPlotModel::IndirectFitPlotModel(IndirectFittingModel *fittingModel)
-    : m_fittingModel(fittingModel), m_activeIndex(0), m_activeSpectrum(0) {}
+    : m_fittingModel(fittingModel), m_activeIndex{0}, m_activeSpectrum{0} {}
 
 IndirectFitPlotModel::~IndirectFitPlotModel() {
   deleteExternalGuessWorkspace();
 }
 
-void IndirectFitPlotModel::setActiveIndex(std::size_t index) {
+void IndirectFitPlotModel::setActiveIndex(TableDatasetIndex index) {
   m_activeIndex = index;
 }
 
-void IndirectFitPlotModel::setActiveSpectrum(std::size_t spectrum) {
+void IndirectFitPlotModel::setActiveSpectrum(WorkspaceIndex spectrum) {
   m_activeSpectrum = spectrum;
 }
 
 void IndirectFitPlotModel::setStartX(double startX) {
   if (getRange().second > startX)
-    m_fittingModel->setStartX(startX, m_activeIndex, m_activeSpectrum);
+    m_fittingModel->setStartX(startX, m_activeIndex);
 }
 
 void IndirectFitPlotModel::setEndX(double endX) {
   if (getRange().first < endX)
-    m_fittingModel->setEndX(endX, m_activeIndex, m_activeSpectrum);
+    m_fittingModel->setEndX(endX, m_activeIndex);
 }
 
 void IndirectFitPlotModel::setFWHM(double fwhm) {
@@ -176,21 +195,41 @@ std::pair<double, double> IndirectFitPlotModel::getResultRange() const {
   return {xValues.front(), xValues.back()};
 }
 
-std::size_t IndirectFitPlotModel::getActiveDataIndex() const {
+TableDatasetIndex IndirectFitPlotModel::getActiveDataIndex() const {
   return m_activeIndex;
 }
 
-std::size_t IndirectFitPlotModel::getActiveSpectrum() const {
+WorkspaceIndex IndirectFitPlotModel::getActiveSpectrum() const {
   return m_activeSpectrum;
 }
 
-std::size_t IndirectFitPlotModel::numberOfWorkspaces() const {
+TableDatasetIndex IndirectFitPlotModel::numberOfWorkspaces() const {
   return m_fittingModel->numberOfWorkspaces();
 }
 
-std::string IndirectFitPlotModel::getFitDataName(std::size_t index) const {
+FitDomainIndex IndirectFitPlotModel::getActiveDomainIndex() const {
+  FitDomainIndex index{0};
+  for (TableDatasetIndex iws{0}; iws < numberOfWorkspaces(); ++iws) {
+    if (iws < m_activeIndex) {
+      index += FitDomainIndex{m_fittingModel->getNumberOfSpectra(iws)};
+    } else {
+      auto const spectra = m_fittingModel->getSpectra(iws);
+      try {
+        index += spectra.indexOf(m_activeSpectrum);
+      } catch (const std::runtime_error &) {
+        if (m_activeSpectrum.value != 0)
+          throw;
+      }
+      break;
+    }
+  }
+  return index;
+}
+
+std::string
+IndirectFitPlotModel::getFitDataName(TableDatasetIndex index) const {
   if (m_fittingModel->getWorkspace(index))
-    return m_fittingModel->createDisplayName("%1% (%2%)", "-", index);
+    return m_fittingModel->createDisplayName(index);
   return "";
 }
 
@@ -200,8 +239,8 @@ std::string IndirectFitPlotModel::getFitDataName() const {
 
 std::string IndirectFitPlotModel::getLastFitDataName() const {
   auto const workspaceCount = m_fittingModel->numberOfWorkspaces();
-  if (workspaceCount > 0)
-    return getFitDataName(workspaceCount - 1);
+  if (workspaceCount.value > 0)
+    return getFitDataName(workspaceCount - TableDatasetIndex{1});
   return "";
 }
 
@@ -217,7 +256,14 @@ boost::optional<double> IndirectFitPlotModel::getFirstPeakCentre() const {
 }
 
 boost::optional<double> IndirectFitPlotModel::getFirstBackgroundLevel() const {
-  return findFirstBackgroundLevel(m_fittingModel->getFittingFunction());
+  auto const spectra = m_fittingModel->getSpectra(m_activeIndex);
+  if (spectra.empty())
+    return boost::optional<double>();
+  auto index = spectra.indexOf(m_activeSpectrum);
+  IFunction_sptr fun = m_fittingModel->getFittingFunction();
+  if (!fun)
+    return boost::optional<double>();
+  return findFirstBackgroundLevel(fun->getFunction(index.value));
 }
 
 double IndirectFitPlotModel::calculateHWHMMaximum(double minimum) const {
@@ -235,10 +281,19 @@ bool IndirectFitPlotModel::canCalculateGuess() const {
   if (!function)
     return false;
 
-  const auto composite =
-      boost::dynamic_pointer_cast<CompositeFunction>(function);
+  const auto composite = std::dynamic_pointer_cast<CompositeFunction>(function);
+  const auto resolutionLoaded = isResolutionLoaded();
   const auto isEmptyModel = composite && composite->nFunctions() == 0;
-  return getWorkspace() && !isEmptyModel;
+  return getWorkspace() && !isEmptyModel && resolutionLoaded;
+}
+
+bool IndirectFitPlotModel::isResolutionLoaded() const {
+  const auto model = dynamic_cast<ConvFitModel *>(m_fittingModel);
+  if (model) {
+    return m_fittingModel->getResolutionsForFit().size() != 0;
+  }
+  // If its not a ConvFitModel it doesn't require a resolution, so return true
+  return true;
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::getResultWorkspace() const {
@@ -248,29 +303,40 @@ MatrixWorkspace_sptr IndirectFitPlotModel::getResultWorkspace() const {
   if (location) {
     const auto group = location->result.lock();
     if (group)
-      return castToMatrixWorkspace(group->getItem(location->index));
+      return castToMatrixWorkspace(group->getItem(location->index.value));
   }
   return nullptr;
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::getGuessWorkspace() const {
-  const auto range = getRange();
+  const auto range = getGuessRange();
   return createGuessWorkspace(
-      getWorkspace(), m_fittingModel->getFittingFunction(),
-      boost::numeric_cast<int>(m_activeSpectrum), range.first, range.second);
+      getWorkspace(),
+      m_fittingModel->getSingleFunction(m_activeIndex, m_activeSpectrum),
+      range.first, range.second);
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::appendGuessToInput(
-    MatrixWorkspace_sptr guessWorkspace) const {
-  const auto range = getRange();
-  return createInputAndGuessWorkspace(
-      getWorkspace(), guessWorkspace,
-      boost::numeric_cast<int>(m_activeSpectrum), range.first, range.second);
+    const MatrixWorkspace_sptr &guessWorkspace) const {
+  const auto range = getGuessRange();
+  return createInputAndGuessWorkspace(getWorkspace(), std::move(guessWorkspace),
+                                      static_cast<int>(m_activeSpectrum.value),
+                                      range.first, range.second);
+}
+
+std::pair<double, double> IndirectFitPlotModel::getGuessRange() const {
+  std::pair<double, double> range;
+  if (getResultWorkspace())
+    range = getResultRange();
+  range = getRange();
+  adjustRange(range);
+  return range;
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
-    MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr guessWorkspace,
-    int spectrum, double startX, double endX) const {
+    const MatrixWorkspace_sptr &inputWS,
+    const MatrixWorkspace_sptr &guessWorkspace, int spectrum, double startX,
+    double endX) const {
   guessWorkspace->setInstrument(inputWS->getInstrument());
   guessWorkspace->replaceAxis(
       0,
@@ -290,22 +356,27 @@ MatrixWorkspace_sptr IndirectFitPlotModel::createInputAndGuessWorkspace(
 }
 
 MatrixWorkspace_sptr IndirectFitPlotModel::createGuessWorkspace(
-    MatrixWorkspace_sptr inputWorkspace, IFunction_const_sptr func,
-    int workspaceIndex, double startX, double endX) const {
-  auto croppedWS = cropWorkspace(inputWorkspace, startX, endX, workspaceIndex,
-                                 workspaceIndex);
-  const auto dataY = computeOutput(func, croppedWS->points(0).rawData());
-
-  if (dataY.empty())
-    return WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-
-  auto createWs = createWorkspaceAlgorithm(1, croppedWS->dataX(0), dataY);
-  createWs->execute();
-  return createWs->getProperty("OutputWorkspace");
+    const MatrixWorkspace_sptr &inputWorkspace,
+    const IFunction_const_sptr &func, double startX, double endX) const {
+  IAlgorithm_sptr createWsAlg =
+      AlgorithmManager::Instance().create("EvaluateFunction");
+  createWsAlg->initialize();
+  createWsAlg->setChild(true);
+  createWsAlg->setLogging(false);
+  createWsAlg->setProperty("Function", func->asString());
+  createWsAlg->setProperty("InputWorkspace", inputWorkspace);
+  createWsAlg->setProperty("OutputWorkspace", "__QENSGuess");
+  createWsAlg->setProperty("StartX", startX);
+  createWsAlg->setProperty("EndX", endX);
+  createWsAlg->execute();
+  Workspace_sptr outputWorkspace = createWsAlg->getProperty("OutputWorkspace");
+  return extractSpectra(
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(outputWorkspace),
+      1, 1, startX, endX);
 }
 
 std::vector<double>
-IndirectFitPlotModel::computeOutput(IFunction_const_sptr func,
+IndirectFitPlotModel::computeOutput(const IFunction_const_sptr &func,
                                     const std::vector<double> &dataX) const {
   if (dataX.empty())
     return std::vector<double>();
@@ -336,7 +407,7 @@ IAlgorithm_sptr IndirectFitPlotModel::createWorkspaceAlgorithm(
 }
 
 MatrixWorkspace_sptr
-IndirectFitPlotModel::extractSpectra(MatrixWorkspace_sptr inputWS,
+IndirectFitPlotModel::extractSpectra(const MatrixWorkspace_sptr &inputWS,
                                      int startIndex, int endIndex,
                                      double startX, double endX) const {
   auto extractSpectraAlg =
@@ -354,9 +425,9 @@ IndirectFitPlotModel::extractSpectra(MatrixWorkspace_sptr inputWS,
   return extractSpectraAlg->getProperty("OutputWorkspace");
 }
 
-MatrixWorkspace_sptr
-IndirectFitPlotModel::appendSpectra(MatrixWorkspace_sptr inputWS,
-                                    MatrixWorkspace_sptr spectraWS) const {
+MatrixWorkspace_sptr IndirectFitPlotModel::appendSpectra(
+    const MatrixWorkspace_sptr &inputWS,
+    const MatrixWorkspace_sptr &spectraWS) const {
   auto appendSpectraAlg = AlgorithmManager::Instance().create("AppendSpectra");
   appendSpectraAlg->initialize();
   appendSpectraAlg->setChild(true);
@@ -369,8 +440,8 @@ IndirectFitPlotModel::appendSpectra(MatrixWorkspace_sptr inputWS,
 }
 
 MatrixWorkspace_sptr
-IndirectFitPlotModel::cropWorkspace(MatrixWorkspace_sptr inputWS, double startX,
-                                    double endX, int startIndex,
+IndirectFitPlotModel::cropWorkspace(const MatrixWorkspace_sptr &inputWS,
+                                    double startX, double endX, int startIndex,
                                     int endIndex) const {
   const auto cropAlg = AlgorithmManager::Instance().create("CropWorkspace");
   cropAlg->initialize();

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
-#define MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_
+#pragma once
 
 #include "IndirectDataAnalysis.h"
 #include "IndirectPlotOptionsPresenter.h"
@@ -16,7 +15,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/WorkspaceGroup_fwd.h"
 
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 class QwtPlotCurve;
 class QwtPlot;
@@ -53,12 +52,13 @@ class RangeSelector;
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport IndirectDataAnalysisTab : public IndirectTab {
+class MANTIDQT_INDIRECT_DLL IndirectDataAnalysisTab : public IndirectTab {
   Q_OBJECT
 
 public:
   /// Constructor
   IndirectDataAnalysisTab(QWidget *parent = nullptr);
+  virtual ~IndirectDataAnalysisTab() override = default;
 
   /// Set the presenter for the output plotting options
   void setOutputPlotOptionsPresenter(
@@ -75,9 +75,6 @@ public:
   /// Prevent loading of data with incorrect naming
   void filterInputData(bool filter);
 
-  /// Sets the active workspace in the selected tab
-  void setActiveWorkspace();
-
 protected:
   /// Function to run a string as python code
   void runPythonScript(const QString &pyInput);
@@ -93,7 +90,7 @@ protected:
 
   /// Set preview plot workspace
   void setPreviewPlotWorkspace(
-      Mantid::API::MatrixWorkspace_sptr previewPlotWorkspace);
+      const Mantid::API::MatrixWorkspace_sptr &previewPlotWorkspace);
 
   /// Retrieve the selected spectrum
   int selectedSpectrum() const;
@@ -113,11 +110,12 @@ protected:
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlot(Mantid::API::WorkspaceGroup_sptr workspaceGroup, size_t index,
+  void updatePlot(const Mantid::API::WorkspaceGroup_sptr &workspaceGroup,
+                  size_t index,
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlot(Mantid::API::WorkspaceGroup_sptr outputWS,
+  void updatePlot(const Mantid::API::WorkspaceGroup_sptr &outputWS,
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
@@ -125,7 +123,7 @@ protected:
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlot(Mantid::API::MatrixWorkspace_sptr outputWS,
+  void updatePlot(const Mantid::API::MatrixWorkspace_sptr &outputWS,
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
@@ -165,12 +163,12 @@ private:
   /// Overidden by child class.
   virtual void loadSettings(const QSettings &settings) = 0;
   virtual void setFileExtensionsByName(bool filter) = 0;
-  virtual void setBrowserWorkspace() = 0;
+  virtual void setBrowserWorkspace(){};
 
   /// A pointer to the parent (friend) IndirectDataAnalysis object.
   IndirectDataAnalysis *m_parent;
   Mantid::API::MatrixWorkspace_sptr m_inputWorkspace;
-  boost::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
+  std::weak_ptr<Mantid::API::MatrixWorkspace> m_previewPlotWorkspace;
   int m_selectedSpectrum;
   int m_minSpectrum;
   int m_maxSpectrum;
@@ -180,5 +178,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACESIDA_IDATAB_H_ */

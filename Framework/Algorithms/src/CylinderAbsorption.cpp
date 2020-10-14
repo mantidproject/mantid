@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CylinderAbsorption.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -38,7 +38,7 @@ std::map<std::string, std::string> CylinderAbsorption::validateInputs() {
 }
 
 void CylinderAbsorption::defineProperties() {
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("CylinderSampleHeight", EMPTY_DBL(), mustBePositive,
                   "The height of the cylindrical sample in centimetres");
@@ -48,7 +48,7 @@ void CylinderAbsorption::defineProperties() {
       std::make_unique<ArrayProperty<double>>("CylinderAxis", "0.0, 1.0, 0.0"),
       "A 3D vector specifying the cylindrical sample's orientation");
 
-  auto positiveInt = boost::make_shared<BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(1);
   declareProperty(
       "NumberOfSlices", 1, positiveInt,

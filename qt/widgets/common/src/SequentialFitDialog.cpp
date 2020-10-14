@@ -1,19 +1,22 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/SequentialFitDialog.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidQtWidgets/Common/FitPropertyBrowser.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include "MantidQtWidgets/Common/PropertyHandler.h"
 #include "MantidQtWidgets/Common/SelectWorkspacesDialog.h"
 
 #include <Poco/ActiveResult.h>
@@ -37,7 +40,7 @@ namespace MantidWidgets {
 /// @param mantidui Its purpose is to provide the slot showSequentialPlot
 SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser,
                                          QObject *mantidui)
-    : QDialog(fitBrowser), m_fitBrowser(fitBrowser) {
+    : MantidDialog(fitBrowser), m_fitBrowser(fitBrowser) {
   ui.setupUi(this);
 
   connect(ui.btnAddFile, SIGNAL(clicked()), this, SLOT(addFile()));
@@ -63,28 +66,19 @@ SequentialFitDialog::SequentialFitDialog(FitPropertyBrowser *fitBrowser,
   connect(fitBrowser, SIGNAL(functionChanged()), this, SLOT(functionChanged()));
 
   // When a fit is completed finishHandle is called which emits needShowPlot
-  bool connected = connect(
+  connect(
       this,
       SIGNAL(needShowPlot(Ui::SequentialFitDialog *,
                           MantidQt::MantidWidgets::FitPropertyBrowser *)),
       mantidui,
       SLOT(showSequentialPlot(Ui::SequentialFitDialog *,
                               MantidQt::MantidWidgets::FitPropertyBrowser *)));
-
-  // This has been added to warn users of a known bug #26333
-  // It should be removed once the bug has been fixed
-  if (!connected) {
-    g_log.warning("Unable to update plot and parameters in the fit function "
-                  "browser but the sequential fit has completed and is in the "
-                  "Workspace Toolbox. This will be fixed in r4.2");
-  }
   connect(ui.tWorkspaces, SIGNAL(cellChanged(int, int)), this,
           SLOT(spectraChanged(int, int)));
   connect(ui.tWorkspaces, SIGNAL(itemSelectionChanged()), this,
           SLOT(selectionChanged()));
-
   selectionChanged();
-}
+} // namespace MantidWidgets
 
 void SequentialFitDialog::addWorkspace() {
   SelectWorkspacesDialog *dlg =
@@ -94,7 +88,7 @@ void SequentialFitDialog::addWorkspace() {
   }
 }
 
-bool SequentialFitDialog::addWorkspaces(const QStringList wsNames) {
+bool SequentialFitDialog::addWorkspaces(const QStringList &wsNames) {
   if (wsNames.isEmpty())
     return false;
   int row = ui.tWorkspaces->rowCount();
@@ -119,7 +113,7 @@ bool SequentialFitDialog::addWorkspaces(const QStringList wsNames) {
     if (ui.ckbLogPlot->isChecked()) {
       // set spectrum number corresponding to the workspace index
       Mantid::API::MatrixWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
               Mantid::API::AnalysisDataService::Instance().retrieve(
                   name.toStdString()));
       int spec = -1;
@@ -197,9 +191,9 @@ void SequentialFitDialog::removeItem() {
   }
 }
 
-bool SequentialFitDialog::validateLogs(const QString wsName) {
+bool SequentialFitDialog::validateLogs(const QString &wsName) {
   Mantid::API::MatrixWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(
               wsName.toStdString()));
   if (ws) {
@@ -278,7 +272,7 @@ QString SequentialFitDialog::getIndex(int row) const {
     }
   } else {
     Mantid::API::MatrixWorkspace_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 name(row).toStdString()));
     Mantid::API::Axis *y = ws->getAxis(1);
@@ -320,6 +314,11 @@ void SequentialFitDialog::accept() {
     funStr = (m_fitBrowser->m_compositeFunction->getFunction(0))->asString();
   }
 
+  m_outputName = m_fitBrowser->outputName();
+  if (m_fitBrowser->workspaceName() == m_outputName) {
+    m_outputName += "_res";
+  }
+
   Mantid::API::IAlgorithm_sptr alg =
       Mantid::API::AlgorithmManager::Instance().create("PlotPeakByLogValue");
   alg->initialize();
@@ -327,7 +326,7 @@ void SequentialFitDialog::accept() {
   alg->setProperty("WorkspaceIndex", m_fitBrowser->workspaceIndex());
   alg->setProperty("StartX", m_fitBrowser->startX());
   alg->setProperty("EndX", m_fitBrowser->endX());
-  alg->setPropertyValue("OutputWorkspace", m_fitBrowser->outputName());
+  alg->setPropertyValue("OutputWorkspace", m_outputName);
   alg->setPropertyValue("Function", funStr);
   alg->setProperty("CreateOutput", ui.ckCreateOutput->isChecked());
   alg->setProperty("OutputCompositeMembers",
@@ -373,7 +372,65 @@ void SequentialFitDialog::functionChanged() { populateParameters(); }
 
 void SequentialFitDialog::finishHandle(
     const Mantid::API::IAlgorithm * /*alg*/) {
+  getFitResults();
   emit needShowPlot(&ui, m_fitBrowser);
+  m_fitBrowser->sequentialFitFinished();
+}
+
+/// Set the parameters to the fit outcome.
+/// if more than one entry in the gui the parameters used are first entry with
+/// same name as fit property browser if one entry will try and use row that
+/// corresponds to ws index in fit browser, if not found defaults to first row.
+void SequentialFitDialog::getFitResults() {
+  auto wsName = m_outputName;
+  if (!Mantid::API::AnalysisDataService::Instance().doesExist(wsName)) {
+    return;
+  }
+  Mantid::API::ITableWorkspace_sptr ws =
+      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+          Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
+  if (!ws) {
+    return;
+  }
+  auto columnNames = ws->getColumnNames();
+
+  size_t rowNo = 0;
+  if (rowCount() > 1) {
+    // first column contains ws names
+    auto firstColumn = ws->getColumn(0);
+    for (size_t i = 0; i < ws->rowCount(); ++i) {
+      if (firstColumn->cell<std::string>(i) == m_fitBrowser->workspaceName()) {
+        rowNo = i;
+        break;
+      }
+    }
+  } else {
+    // first column contains log names or axis-1
+    size_t index = m_fitBrowser->workspaceIndex();
+    if (index < ws->rowCount()) {
+      rowNo = index;
+    }
+  }
+
+  Mantid::API::TableRow row = ws->getRow(rowNo);
+  // results parameter table contains parameter value followed by its error so
+  // increment by 2 for each value. Ignore first and last column in row as they
+  // contain name and chi-squared
+  for (size_t col = 1; col < columnNames.size() - 1; col += 2) {
+    auto value = row.Double(col);
+    auto error = row.Double(col + 1);
+    auto name = columnNames[col];
+    // In case of a single function Fit doesn't create a CompositeFunction
+    if (m_fitBrowser->count() == 1) {
+      name.insert(0, "f0.");
+    }
+    size_t paramIndex = m_fitBrowser->compositeFunction()->parameterIndex(name);
+
+    m_fitBrowser->compositeFunction()->setParameter(paramIndex, value);
+    m_fitBrowser->compositeFunction()->setError(paramIndex, error);
+  }
+  m_fitBrowser->updateParameters();
+  m_fitBrowser->getHandler()->updateErrors();
 }
 
 void SequentialFitDialog::helpClicked() {
@@ -401,7 +458,7 @@ void SequentialFitDialog::spectraChanged(int row, int col) {
                        .toString();
     Mantid::API::MatrixWorkspace_sptr ws;
     try {
-      ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+      ws = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(
               name.toStdString()));
     } catch (...) { //
@@ -507,7 +564,7 @@ void SequentialFitDialog::plotAgainstLog(bool yes) {
   //    ui.tWorkspaces->hideColumn(3);
   //    ui.tWorkspaces->horizontalHeaderItem(2)->setData(Qt::DisplayRole,"Range");
   //    Mantid::API::MatrixWorkspace_sptr ws =
-  //    boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+  //    std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
   //      Mantid::API::AnalysisDataService::Instance().retrieve(name(0).toStdString())
   //      );
   //    Mantid::API::Axis* y = ws->getAxis(1);

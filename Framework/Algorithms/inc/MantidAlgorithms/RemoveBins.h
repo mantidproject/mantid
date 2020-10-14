@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_REMOVEBINS_H_
-#define MANTID_ALGORITHMS_REMOVEBINS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/Unit.h"
 
 namespace Mantid {
@@ -43,7 +43,7 @@ namespace Algorithms {
     @author Matt Clarke
     @date 08/12/2008
  */
-class DLLExport RemoveBins : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RemoveBins : public API::Algorithm {
 public:
   /// Default constructor
   RemoveBins();
@@ -92,5 +92,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_REMOVEBINS_H_*/

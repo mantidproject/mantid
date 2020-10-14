@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/FilteredTimeSeriesProperty.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -36,7 +36,7 @@ namespace {
       .def("unfiltered", &FilteredTimeSeriesProperty<TYPE>::unfiltered,        \
            (arg("self")), return_value_policy<RemoveConst>(),                  \
            "Returns a time series containing the unfiltered data");
-}
+} // namespace
 
 void export_FilteredTimeSeriesProperty() {
   EXPORT_FILTEREDTIMESERIES_PROP(double, Float);

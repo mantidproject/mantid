@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/EQSANSMonitorTOF.h"
 #include "MantidAPI/Run.h"
@@ -28,7 +28,7 @@ using namespace Geometry;
 void EQSANSMonitorTOF::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<WorkspaceUnitValidator>("TOF")),
+                      std::make_shared<WorkspaceUnitValidator>("TOF")),
                   "Workspace to apply the TOF correction to");
 
   // Output parameters
@@ -190,7 +190,7 @@ void EQSANSMonitorTOF::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-double EQSANSMonitorTOF::getTofOffset(MatrixWorkspace_const_sptr inputWS,
+double EQSANSMonitorTOF::getTofOffset(const MatrixWorkspace_const_sptr &inputWS,
                                       bool frame_skipping,
                                       double source_to_monitor) {
   //# Storage for chopper information read from the logs

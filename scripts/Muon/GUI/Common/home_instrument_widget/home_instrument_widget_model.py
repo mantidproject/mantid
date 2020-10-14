@@ -1,13 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from decimal import Decimal, InvalidOperation
-
 from mantid import api
 from mantid.api import ITableWorkspace
 
@@ -26,6 +23,8 @@ class InstrumentWidgetModel(object):
         self._data = context.data_context
         self._context = context
         self._context.gui_context['RebinType'] = 'None'
+        self._context.gui_context['DoublePulseTime'] = 0.33
+        self._context.gui_context['DoublePulseEnabled'] = False
 
     def clear_data(self):
         """When e.g. instrument changed"""
@@ -80,8 +79,15 @@ class InstrumentWidgetModel(object):
     def set_user_last_good_data(self, last_good_data):
         self._context.gui_context.update_and_send_signal(LastGoodData=last_good_data)
 
+    def set_double_pulse_time(self, double_pulse_time):
+        self._context.gui_context.update_and_send_non_calculation_signal(DoublePulseTime=double_pulse_time)
+
+    def set_double_pulse_enabled(self, enabled):
+        self._context.gui_context.update_and_send_non_calculation_signal(DoublePulseEnabled=enabled)
+
     def get_dead_time_table_from_data(self):
-        return self._data.current_data["DataDeadTimeTable"]
+        dead_time_name = self._data.current_data["DataDeadTimeTable"]
+        return api.AnalysisDataService.retrieve(self._data.current_data["DataDeadTimeTable"]) if dead_time_name else None
 
     def get_dead_time_table(self):
         return self._data.dead_time_table
@@ -128,7 +134,11 @@ class InstrumentWidgetModel(object):
         self._context.gui_context.update_and_send_signal(DeadTimeSource='FromFile')
 
     def set_user_dead_time_from_ADS(self, name):
+        if name == 'None':
+            self._context.gui_context.update_and_send_signal(DeadTimeTable=None)
+            return
         dtc = api.AnalysisDataService.retrieve(str(name))
+        self._context.gui_context.update_and_send_non_calculation_signal(DeadTimeSource='FromADS')
         self._context.gui_context.update_and_send_signal(DeadTimeTable=dtc)
 
     def validate_variable_rebin_string(self, variable_rebin_string):

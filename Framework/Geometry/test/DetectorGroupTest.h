@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TESTDETECTORGROUP_H_
-#define TESTDETECTORGROUP_H_
+#pragma once
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using namespace Mantid;
@@ -61,14 +60,14 @@ public:
 
   void testIdentRectShape() {
     Kernel::V3D center;
-    boost::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup =
+    std::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup =
         ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
     TSM_ASSERT_EQUALS("should be rectangular shape", rect,
                       rectGroup->getTopology(center));
   }
   void testIdentRectShapeWithGaps() {
     Kernel::V3D center;
-    boost::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup =
+    std::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup =
         ComponentCreationHelper::
             createDetectorGroupWithNCylindricalDetectorsWithGaps(4, 0.0);
     TSM_ASSERT_EQUALS("should be rectangular shape", rect,
@@ -76,7 +75,7 @@ public:
   }
   void testIdentRingShape() {
     Kernel::V3D center;
-    boost::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup =
+    std::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup =
         ComponentCreationHelper::createRingOfCylindricalDetectors();
     TSM_ASSERT_EQUALS("should be ring shape", cyl,
                       rectGroup->getTopology(center));
@@ -90,9 +89,9 @@ public:
   void testBoundingBox() {}
 
   void testAddDetector() {
-    boost::shared_ptr<DetectorGroup> detg =
+    std::shared_ptr<DetectorGroup> detg =
         ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
-    auto d = boost::make_shared<Detector>("d", 6, nullptr);
+    auto d = std::make_shared<Detector>("d", 6, nullptr);
     d->setPos(6.0, 3.0, 2.0);
     detg->addDetector(d);
     TS_ASSERT_EQUALS(detg->getID(), 1);
@@ -135,8 +134,6 @@ public:
   }
 
 private:
-  boost::shared_ptr<DetectorGroup> m_detGroup;
+  std::shared_ptr<DetectorGroup> m_detGroup;
   Component m_origin;
 };
-
-#endif /*TESTDETECTORGROUP_H_*/

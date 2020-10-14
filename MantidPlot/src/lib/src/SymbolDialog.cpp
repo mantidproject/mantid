@@ -38,7 +38,8 @@
 #include <QSizePolicy>
 #include <QTextCodec>
 
-SymbolDialog::SymbolDialog(CharSet charSet, QWidget *parent, Qt::WFlags fl)
+SymbolDialog::SymbolDialog(CharSet charSet, QWidget *parent,
+                           const Qt::WFlags &fl)
     : QDialog(parent, fl) {
   setAttribute(Qt::WA_DeleteOnClose);
   setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);

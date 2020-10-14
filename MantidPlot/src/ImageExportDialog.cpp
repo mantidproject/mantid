@@ -42,7 +42,7 @@
 #include <QStackedWidget>
 
 ImageExportDialog::ImageExportDialog(QWidget *parent, bool vector_options,
-                                     bool extended, Qt::WFlags flags)
+                                     bool extended, const Qt::WFlags &flags)
     : ExtensibleFileDialog(parent, extended, flags) {
   setWindowTitle(tr("MantidPlot - Choose a filename to save under"));
   setAcceptMode(QFileDialog::AcceptSave);

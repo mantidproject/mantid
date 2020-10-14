@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegrateEllipsoids.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -101,7 +101,7 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
     double errorSq(1.); // ignorable garbage
     const std::vector<WeightedEventNoTime> &raw_events =
         events.getWeightedEventsNoTime();
-    std::vector<std::pair<double, V3D>> qList;
+    std::vector<std::pair<std::pair<double, double>, V3D>> qList;
     for (const auto &raw_event : raw_events) {
       double val = unitConverter.convertUnits(raw_event.tof());
       qConverter.calcMatrixCoord(val, locCoord, signal, errorSq);
@@ -111,7 +111,9 @@ void IntegrateEllipsoids::qListFromEventWS(Integrate3DEvents &integrator,
       V3D qVec(buffer[0], buffer[1], buffer[2]);
       if (hkl_integ)
         qVec = UBinv * qVec;
-      qList.emplace_back(raw_event.m_weight, qVec);
+      qList.emplace_back(std::pair<double, double>(raw_event.m_weight,
+                                                   raw_event.m_errorSquared),
+                         qVec);
     } // end of loop over events in list
     PARALLEL_CRITICAL(addEvents) { integrator.addEvents(qList, hkl_integ); }
 
@@ -155,6 +157,7 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
     // get tof and y values
     const auto &xVals = wksp->points(i);
     const auto &yVals = wksp->y(i);
+    const auto &eVals = wksp->e(i);
 
     // update which pixel is being converted
     std::vector<Mantid::coord_t> locCoord(DIMS, 0.);
@@ -165,10 +168,11 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
     double signal(1.);  // ignorable garbage
     double errorSq(1.); // ignorable garbage
 
-    std::vector<std::pair<double, V3D>> qList;
+    std::vector<std::pair<std::pair<double, double>, V3D>> qList;
 
     for (size_t j = 0; j < yVals.size(); ++j) {
       const double &yVal = yVals[j];
+      const double &esqVal = eVals[j] * eVals[j]; // error squared (variance)
       if (yVal > 0) // TODO, is this condition right?
       {
         double val = unitConverter.convertUnits(xVals[j]);
@@ -186,7 +190,7 @@ void IntegrateEllipsoids::qListFromHistoWS(Integrate3DEvents &integrator,
           continue;
         // Account for counts in histograms by increasing the qList with the
         // same q-point
-        qList.emplace_back(yVal, qVec);
+        qList.emplace_back(std::pair<double, double>(yVal, esqVal), qVec);
       }
     }
     PARALLEL_CRITICAL(addHisto) { integrator.addEvents(qList, hkl_integ); }
@@ -222,7 +226,7 @@ const std::string IntegrateEllipsoids::category() const {
 /** Initialize the algorithm's properties.
  */
 void IntegrateEllipsoids::init() {
-  auto ws_valid = boost::make_shared<CompositeValidator>();
+  auto ws_valid = std::make_shared<CompositeValidator>();
   ws_valid->add<WorkspaceUnitValidator>("TOF");
   ws_valid->add<InstrumentValidator>();
   // the validator which checks if the workspace has axis
@@ -237,7 +241,7 @@ void IntegrateEllipsoids::init() {
                   "Workspace with Peaks to be integrated. NOTE: The peaks MUST "
                   "be indexed with integer HKL values.");
 
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive(
+  std::shared_ptr<BoundedValidator<double>> mustBePositive(
       new BoundedValidator<double>());
   mustBePositive->setLower(0.0);
 
@@ -312,6 +316,9 @@ void IntegrateEllipsoids::init() {
   declareProperty("SatelliteBackgroundOuterSize", .09, mustBePositive,
                   "Half-length of major axis for outer ellipsoidal surface of "
                   "satellite background region");
+
+  declareProperty("GetUBFromPeaksWorkspace", false,
+                  "If true, UB is taken from peak workspace.");
 }
 
 //---------------------------------------------------------------------
@@ -321,9 +328,8 @@ void IntegrateEllipsoids::exec() {
   // get the input workspace
   MatrixWorkspace_sptr wksp = getProperty("InputWorkspace");
 
-  EventWorkspace_sptr eventWS =
-      boost::dynamic_pointer_cast<EventWorkspace>(wksp);
-  Workspace2D_sptr histoWS = boost::dynamic_pointer_cast<Workspace2D>(wksp);
+  EventWorkspace_sptr eventWS = std::dynamic_pointer_cast<EventWorkspace>(wksp);
+  Workspace2D_sptr histoWS = std::dynamic_pointer_cast<Workspace2D>(wksp);
   if (!eventWS && !histoWS) {
     throw std::runtime_error("IntegrateEllipsoids needs either a "
                              "EventWorkspace or Workspace2D as input.");
@@ -358,6 +364,14 @@ void IntegrateEllipsoids::exec() {
   double adaptiveQBackgroundMultiplier = 0.0;
   bool useOnePercentBackgroundCorrection =
       getProperty("UseOnePercentBackgroundCorrection");
+  bool getUB = getProperty("GetUBFromPeaksWorkspace");
+
+  // getUB only valid if peak workspace has a UB matrix
+  if (!(in_peak_ws->sample().hasOrientedLattice()) && getUB) {
+    throw std::runtime_error("Peaks workspace needs a oriented lattice for "
+                             "GetUBFromPeaksWorkspace is true");
+  }
+
   if (adaptiveQBackground)
     adaptiveQBackgroundMultiplier = adaptiveQMultiplier;
   if (!integrateEdge) {
@@ -384,7 +398,7 @@ void IntegrateEllipsoids::exec() {
   size_t n_peaks = peak_ws->getNumberPeaks();
   size_t indexed_count = 0;
   std::vector<V3D> peak_q_list;
-  std::vector<std::pair<double, V3D>> qList;
+  std::vector<std::pair<std::pair<double, double>, V3D>> qList;
   std::vector<V3D> hkl_vectors;
   std::vector<V3D> mnp_vectors;
   int ModDim = 0;
@@ -403,39 +417,51 @@ void IntegrateEllipsoids::exec() {
     // use tolerance == 1 to just check for (0,0,0,0,0,0)
     if (Geometry::IndexingUtils::ValidIndex(hkl, 1.0)) {
       peak_q_list.emplace_back(peaks[i].getQLabFrame());
-      qList.emplace_back(1., V3D(peaks[i].getQLabFrame()));
-      hkl_vectors.push_back(hkl);
-      mnp_vectors.push_back(mnp);
+      qList.emplace_back(std::pair<double, double>(1., 1.),
+                         V3D(peaks[i].getQLabFrame()));
+      hkl_vectors.emplace_back(hkl);
+      mnp_vectors.emplace_back(mnp);
       indexed_count++;
     }
   }
-
-  if (indexed_count < 3)
-    throw std::runtime_error(
-        "At least three linearly independent indexed peaks are needed.");
 
   // Get UB using indexed peaks and
   // lab-Q vectors
   Matrix<double> UB(3, 3, false);
   Matrix<double> modUB(3, 3, false);
   Matrix<double> modHKL(3, 3, false);
-  Geometry::IndexingUtils::Optimize_6dUB(UB, modUB, hkl_vectors, mnp_vectors,
-                                         ModDim, peak_q_list);
-
   int maxOrder = 0;
   bool CT = false;
-  if (peak_ws->sample().hasOrientedLattice()) {
+  if (getUB & peak_ws->sample().hasOrientedLattice()) {
+    if (indexed_count < 1)
+      throw std::runtime_error("At least one indexed peak required.");
     OrientedLattice lattice = peak_ws->mutableSample().getOrientedLattice();
-    lattice.setUB(UB);
-    lattice.setModUB(modUB);
+    auto goniometerMatrix = peak_ws->run().getGoniometerMatrix();
+    // get UB etc. and rotate by goniometer matrix
+    UB = goniometerMatrix * lattice.getUB();
+    modUB = goniometerMatrix * lattice.getModUB();
     modHKL = lattice.getModHKL();
     maxOrder = lattice.getMaxOrder();
     CT = lattice.getCrossTerm();
+  } else {
+    if (indexed_count < 3)
+      throw std::runtime_error(
+          "At least three linearly independent indexed peaks are needed.");
+    Geometry::IndexingUtils::Optimize_6dUB(UB, modUB, hkl_vectors, mnp_vectors,
+                                           ModDim, peak_q_list);
+    if (peak_ws->sample().hasOrientedLattice()) {
+      OrientedLattice lattice = peak_ws->mutableSample().getOrientedLattice();
+      lattice.setUB(UB);
+      lattice.setModUB(modUB);
+      modHKL = lattice.getModHKL();
+      maxOrder = lattice.getMaxOrder();
+      CT = lattice.getCrossTerm();
+    }
   }
 
   Matrix<double> UBinv(UB);
   UBinv.Invert();
-  UBinv *= (1.0 / (2.0 * M_PI));
+  UBinv *= (1.0 / (2.0 * M_PI)); // if loaded is it already in these units?
 
   std::vector<double> PeakRadiusVector(n_peaks, peak_radius);
   std::vector<double> BackgroundInnerRadiusVector(n_peaks, back_inner_radius);
@@ -535,13 +561,13 @@ void IntegrateEllipsoids::exec() {
       if (axes_radii.size() == 3) {
         if (inti / sigi > cutoffIsigI || cutoffIsigI == EMPTY_DBL()) {
           if (mnp == V3D(0, 0, 0)) {
-            principalaxis1.push_back(axes_radii[0]);
-            principalaxis2.push_back(axes_radii[1]);
-            principalaxis3.push_back(axes_radii[2]);
+            principalaxis1.emplace_back(axes_radii[0]);
+            principalaxis2.emplace_back(axes_radii[1]);
+            principalaxis3.emplace_back(axes_radii[2]);
           } else {
-            sateprincipalaxis1.push_back(axes_radii[0]);
-            sateprincipalaxis2.push_back(axes_radii[1]);
-            sateprincipalaxis3.push_back(axes_radii[2]);
+            sateprincipalaxis1.emplace_back(axes_radii[0]);
+            sateprincipalaxis2.emplace_back(axes_radii[1]);
+            sateprincipalaxis3.emplace_back(axes_radii[2]);
           }
         }
       }
@@ -596,7 +622,7 @@ void IntegrateEllipsoids::exec() {
         "Workspace2D", histogramNumber, principalaxis1.size(),
         principalaxis1.size());
     Workspace2D_sptr wsProfile2D =
-        boost::dynamic_pointer_cast<Workspace2D>(wsProfile);
+        std::dynamic_pointer_cast<Workspace2D>(wsProfile);
     AnalysisDataService::Instance().addOrReplace("EllipsoidAxes", wsProfile2D);
 
     // set output workspace
@@ -635,13 +661,13 @@ void IntegrateEllipsoids::exec() {
           peaks[i].setSigmaIntensity(sigi);
           if (axes_radii.size() == 3) {
             if (mnp == V3D(0, 0, 0)) {
-              principalaxis1.push_back(axes_radii[0]);
-              principalaxis2.push_back(axes_radii[1]);
-              principalaxis3.push_back(axes_radii[2]);
+              principalaxis1.emplace_back(axes_radii[0]);
+              principalaxis2.emplace_back(axes_radii[1]);
+              principalaxis3.emplace_back(axes_radii[2]);
             } else {
-              sateprincipalaxis1.push_back(axes_radii[0]);
-              sateprincipalaxis2.push_back(axes_radii[1]);
-              sateprincipalaxis3.push_back(axes_radii[2]);
+              sateprincipalaxis1.emplace_back(axes_radii[0]);
+              sateprincipalaxis2.emplace_back(axes_radii[1]);
+              sateprincipalaxis3.emplace_back(axes_radii[2]);
             }
           }
         } else {
@@ -654,7 +680,7 @@ void IntegrateEllipsoids::exec() {
             "Workspace2D", histogramNumber, principalaxis1.size(),
             principalaxis1.size());
         Workspace2D_sptr wsProfile2D2 =
-            boost::dynamic_pointer_cast<Workspace2D>(wsProfile2);
+            std::dynamic_pointer_cast<Workspace2D>(wsProfile2);
         AnalysisDataService::Instance().addOrReplace("EllipsoidAxes_2ndPass",
                                                      wsProfile2D2);
 
@@ -736,13 +762,13 @@ void IntegrateEllipsoids::calculateE1(
     V3D E1 = V3D(-std::sin(tt1) * std::cos(ph1), -std::sin(tt1) * std::sin(ph1),
                  1. - std::cos(tt1)); // end of trajectory
     E1 = E1 * (1. / E1.norm());       // normalize
-    E1Vec.push_back(E1);
+    E1Vec.emplace_back(E1);
   }
 }
 
 void IntegrateEllipsoids::runMaskDetectors(
-    Mantid::DataObjects::PeaksWorkspace_sptr peakWS, std::string property,
-    std::string values) {
+    const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+    const std::string &property, const std::string &values) {
   IAlgorithm_sptr alg = createChildAlgorithm("MaskBTP");
   alg->setProperty<Workspace_sptr>("Workspace", peakWS);
   alg->setProperty(property, values);

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SUMOVERLAPPINGTUBESTEST_H_
-#define MANTID_ALGORITHMS_SUMOVERLAPPINGTUBESTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -14,6 +13,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadILLTOF2.h"
 #include "MantidDataObjects/ScanningWorkspaceBuilder.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -34,8 +34,8 @@ using namespace Mantid::Types::Core;
 
 namespace {
 MatrixWorkspace_sptr createTestScanningWS(size_t nTubes, size_t nPixelsPerTube,
-                                          std::vector<double> rotations,
-                                          std::string name = "testWS") {
+                                          const std::vector<double> &rotations,
+                                          const std::string &name = "testWS") {
   const auto instrument = ComponentCreationHelper::createInstrumentWithPSDTubes(
       nTubes, nPixelsPerTube, true);
   size_t nTimeIndexes = rotations.size();
@@ -43,7 +43,7 @@ MatrixWorkspace_sptr createTestScanningWS(size_t nTubes, size_t nPixelsPerTube,
 
   std::vector<std::pair<DateAndTime, DateAndTime>> timeRanges;
   for (size_t i = 0; i < nTimeIndexes; ++i)
-    timeRanges.push_back(std::make_pair(DateAndTime(i), DateAndTime(i + 1)));
+    timeRanges.emplace_back(std::make_pair(DateAndTime(i), DateAndTime(i + 1)));
 
   ScanningWorkspaceBuilder builder(instrument, nTimeIndexes, nBins);
   builder.setTimeRanges(timeRanges);
@@ -107,7 +107,7 @@ public:
   void verifySuccessCase(double expectedCounts = 2.0,
                          double expectedErrors = sqrt(2.0)) {
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES);
@@ -131,7 +131,7 @@ public:
       TS_ASSERT_DELTA(yAxis->getValue(i), 0.003 * double(i), 1e-6)
   }
 
-  void verifySpectraHaveSameCounts(MatrixWorkspace_sptr outWS,
+  void verifySpectraHaveSameCounts(const MatrixWorkspace_sptr &outWS,
                                    double expectedCounts = 2.0,
                                    double expectedErrors = sqrt(2.0),
                                    bool checkErrors = true) {
@@ -143,7 +143,7 @@ public:
       }
   }
 
-  void verifySpectraCountsForScan(MatrixWorkspace_sptr outWS) {
+  void verifySpectraCountsForScan(const MatrixWorkspace_sptr &outWS) {
     size_t bin = 0;
     for (size_t j = 0; j < N_PIXELS_PER_TUBE; ++j) {
       TS_ASSERT_DELTA(outWS->getSpectrum(j).y()[bin], 2.0, 1e-6)
@@ -206,7 +206,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
     const auto &xAxis = outWS->getAxis(0);
     TS_ASSERT_EQUALS(xAxis->length(), 6)
@@ -343,7 +343,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
@@ -370,7 +370,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     const auto &xAxis = outWS->getAxis(0);
@@ -418,7 +418,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
@@ -465,7 +465,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
@@ -490,7 +490,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
@@ -516,7 +516,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("outWS"));
 
     verifyScatteringAngleAxis(outWS, N_TUBES + 2);
@@ -574,7 +574,7 @@ public:
     alg.setProperty("MirrorScatteringAngles", false);
     TS_ASSERT_THROWS_NOTHING(alg.execute());
 
-    auto outWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+    auto outWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("outWS"));
 
     const auto &xAxis = outWS->getAxis(0);
@@ -673,6 +673,80 @@ public:
     AnalysisDataService::Instance().remove("testWS");
     AnalysisDataService::Instance().remove("outWS");
   }
+
+  void test_PANTHER_2d() {
+    Mantid::DataHandling::LoadILLTOF2 loader;
+    loader.setRethrows(true);
+    loader.initialize();
+    loader.setPropertyValue("Filename", "ILL/PANTHER/001036.nxs");
+
+    std::string inputSpace = "inWS";
+    loader.setPropertyValue("OutputWorkspace", inputSpace);
+    loader.execute();
+
+    SumOverlappingTubes alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", inputSpace);
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("ScatteringAngleBinning", "0.5180645");
+    alg.setProperty("Normalise", true);
+    alg.setProperty("OutputType", "2D");
+    alg.setProperty("MirrorScatteringAngles", false);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    auto outWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("outWS"));
+
+    auto yAxis = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->length(), 296)
+    TS_ASSERT_EQUALS(yAxis->length(), 256)
+
+    for (size_t i = 0; i < 256; i++) {
+      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 2.2 * double(i) / 255, 1e-6)
+    }
+
+    TS_ASSERT_EQUALS(outWS->getSpectrum(14).y()[0], 27)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(13).y()[293], 22)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(239).y()[278], 88.5)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(236).y()[93], 296)
+  }
+
+  void test_PANTHER_2dTubes() {
+    Mantid::DataHandling::LoadILLTOF2 loader;
+    loader.setRethrows(true);
+    loader.initialize();
+    loader.setPropertyValue("Filename", "ILL/PANTHER/001036.nxs");
+
+    std::string inputSpace = "inWS";
+    loader.setPropertyValue("OutputWorkspace", inputSpace);
+    loader.execute();
+
+    SumOverlappingTubes alg;
+    alg.initialize();
+    alg.setProperty("InputWorkspaces", inputSpace);
+    alg.setProperty("OutputWorkspace", "outWS");
+    alg.setProperty("ScatteringAngleBinning", "0.5180645");
+    alg.setProperty("Normalise", true);
+    alg.setProperty("OutputType", "2DTubes");
+    alg.setProperty("MirrorScatteringAngles", false);
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+
+    auto outWS = std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("outWS"));
+
+    auto yAxis = outWS->getAxis(1);
+    TS_ASSERT_EQUALS(outWS->getAxis(0)->length(), 296)
+    TS_ASSERT_EQUALS(yAxis->length(), 256)
+
+    for (size_t i = 0; i < 256; i++) {
+      TS_ASSERT_DELTA(yAxis->getValue(i), -0.5925 + 2.2 * double(i) / 255, 1e-6)
+    }
+
+    TS_ASSERT_EQUALS(outWS->getSpectrum(14).y()[0], 40)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(13).y()[293], 27)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(239).y()[278], 95)
+    TS_ASSERT_EQUALS(outWS->getSpectrum(236).y()[93], 401)
+  }
 };
 
 class SumOverlappingTubesTestPerformance : public CxxTest::TestSuite {
@@ -688,12 +762,12 @@ public:
 
   void setUp() override {
 
-    WorkspaceGroup_sptr group = boost::make_shared<WorkspaceGroup>();
+    WorkspaceGroup_sptr group = std::make_shared<WorkspaceGroup>();
 
     for (size_t i = 0; i < m_numberOfWorkspaces; ++i) {
       std::vector<double> rotations;
       for (size_t j = 0; j < 25; ++j)
-        rotations.push_back(double(j * m_numberOfWorkspaces + i) * 0.1);
+        rotations.emplace_back(double(j * m_numberOfWorkspaces + i) * 0.1);
 
       auto testWS =
           createTestScanningWS(100, 128, rotations, "a" + std::to_string(i));
@@ -724,5 +798,3 @@ private:
   SumOverlappingTubes m_alg;
   size_t m_numberOfWorkspaces = 20;
 };
-
-#endif /* MANTID_ALGORITHMS_SUMOVERLAPPINGTUBESTEST_H_ */

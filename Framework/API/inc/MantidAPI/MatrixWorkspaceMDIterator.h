@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_MATRIXWORKSPACEMDITERATOR_H_
-#define MANTID_API_MATRIXWORKSPACEMDITERATOR_H_
+#pragma once
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -22,7 +21,7 @@ namespace API {
 
   @date 2012-02-08
 */
-class DLLExport MatrixWorkspaceMDIterator : public IMDIterator {
+class MANTID_API_DLL MatrixWorkspaceMDIterator : public IMDIterator {
 public:
   MatrixWorkspaceMDIterator(const MatrixWorkspace *workspace,
                             Mantid::Geometry::MDImplicitFunction *function,
@@ -133,5 +132,3 @@ private:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_MATRIXWORKSPACEMDITERATOR_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------------------------
 // Includes
@@ -73,8 +73,6 @@ struct InY {
 ///@endcond
 } // namespace
 
-/**
- */
 GramCharlierComptonProfile::GramCharlierComptonProfile()
     : ComptonProfile(), m_hermite(), m_yfine(), m_qfine(), m_voigt(),
       m_voigtProfile(), m_userFixedFSE(false) {}
@@ -86,8 +84,6 @@ std::string GramCharlierComptonProfile::name() const {
   return "GramCharlierComptonProfile";
 }
 
-/**
- */
 void GramCharlierComptonProfile::declareParameters() {
   // Base class ones
   ComptonProfile::declareParameters();
@@ -96,8 +92,6 @@ void GramCharlierComptonProfile::declareParameters() {
   // Other parameters depend on the Hermite attribute...
 }
 
-/**
- */
 void GramCharlierComptonProfile::declareAttributes() {
   // Base class ones
   ComptonProfile::declareAttributes();
@@ -140,7 +134,7 @@ void GramCharlierComptonProfile::setHermiteCoefficients(
           "NCSCountRate - Error reading int from hermite coefficient string: " +
           coeffs);
     }
-    m_hermite.push_back(value);
+    m_hermite.emplace_back(value);
   }
   declareGramCharlierParameters();
 }
@@ -164,8 +158,6 @@ void GramCharlierComptonProfile::declareGramCharlierParameters() {
   }
 }
 
-/*
- */
 std::vector<size_t>
 GramCharlierComptonProfile::intensityParameterIndices() const {
   assert(!m_hermite.empty());
@@ -177,13 +169,13 @@ GramCharlierComptonProfile::intensityParameterIndices() const {
       std::ostringstream os;
       os << HERMITE_PREFIX
          << 2 * i; // refactor to have method that produces the name
-      indices.push_back(this->parameterIndex(os.str()));
+      indices.emplace_back(this->parameterIndex(os.str()));
     }
   }
   // Include Kfse if it is not fixed
   const size_t kIndex = this->parameterIndex(KFSE_NAME);
   if (isActive(kIndex)) {
-    indices.push_back(kIndex);
+    indices.emplace_back(kIndex);
   }
 
   return indices;
@@ -322,6 +314,10 @@ void GramCharlierComptonProfile::addFSETerm(std::vector<double> &lhs) const {
   if (m_userFixedFSE)
     kfse *= getParameter("C_0");
 
+  if (m_yfine.empty() || m_qfine.empty()) {
+    throw std::runtime_error("The Y values or Q values have not been set");
+  }
+
   for (int j = 0; j < NFINE_Y; ++j) {
     const double y = m_yfine[j] / M_SQRT2 / wg;
     const double he3 = boost::math::hermite(3, y);
@@ -362,7 +358,7 @@ void GramCharlierComptonProfile::convoluteVoigt(
  * @param endX Ending x-vaue (unused).
  */
 void GramCharlierComptonProfile::setMatrixWorkspace(
-    boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
+    std::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi,
     double startX, double endX) {
   ComptonProfile::setMatrixWorkspace(workspace, wi, startX,
                                      endX); // Do base-class calculation first

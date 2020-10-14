@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTOR_H_
-#define MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTOR_H_
+#pragma once
 
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/Validation.h"
@@ -31,14 +30,13 @@ namespace detail {
 */
 template <class T> class FixedLengthVector {
 public:
+  // Ctors
   FixedLengthVector() = default;
   FixedLengthVector(size_t count, const double &value) : m_data(count, value) {}
   explicit FixedLengthVector(size_t count) : m_data(count) {}
   FixedLengthVector(std::initializer_list<double> init) : m_data(init) {
     Validator<T>::checkValidity(m_data);
   }
-  FixedLengthVector(const FixedLengthVector &) = default;
-  FixedLengthVector(FixedLengthVector &&) = default;
   FixedLengthVector(const std::vector<double> &other) : m_data(other) {}
   FixedLengthVector(std::vector<double> &&other) : m_data(std::move(other)) {}
   template <class InputIt>
@@ -50,35 +48,26 @@ public:
     std::generate(m_data.begin(), m_data.end(), g);
   }
 
-  template <class InputIt> void assign(InputIt first, InputIt last) & {
-    checkAssignmentSize(static_cast<size_t>(std::distance(first, last)));
-    m_data.assign(first, last);
-  }
-  void assign(size_t count, const double &value) & {
-    checkAssignmentSize(count);
-    m_data.assign(count, value);
+  FixedLengthVector(const FixedLengthVector &) = default;
+
+  FixedLengthVector &operator=(FixedLengthVector rhs) {
+    checkAssignmentSize(rhs);
+
+    swap(*this, rhs);
+    return *this;
   }
 
-  FixedLengthVector &operator=(const FixedLengthVector &rhs) {
-    checkAssignmentSize(rhs);
-    m_data = rhs.m_data;
-    return *this;
+  friend void swap(FixedLengthVector &lhs, FixedLengthVector &rhs) {
+    using std::swap;
+    swap(lhs.m_data, rhs.m_data);
   }
-  FixedLengthVector &operator=(FixedLengthVector &&rhs) {
-    checkAssignmentSize(rhs);
-    m_data = std::move(rhs.m_data);
-    return *this;
-  }
+
   FixedLengthVector &operator=(const std::vector<double> &rhs) {
     checkAssignmentSize(rhs);
     m_data = rhs;
     return *this;
   }
-  FixedLengthVector &operator=(std::vector<double> &&rhs) {
-    checkAssignmentSize(rhs);
-    m_data = std::move(rhs);
-    return *this;
-  }
+
   FixedLengthVector &operator=(std::initializer_list<double> ilist) {
     checkAssignmentSize(ilist);
     Validator<T>::checkValidity(ilist);
@@ -88,6 +77,15 @@ public:
   FixedLengthVector &operator=(const double value) {
     m_data.assign(m_data.size(), value);
     return *this;
+  }
+
+  template <class InputIt> void assign(InputIt first, InputIt last) & {
+    checkAssignmentSize(static_cast<size_t>(std::distance(first, last)));
+    m_data.assign(first, last);
+  }
+  void assign(size_t count, const double &value) & {
+    checkAssignmentSize(count);
+    m_data.assign(count, value);
   }
 
   bool operator==(const FixedLengthVector<T> &rhs) const {
@@ -121,10 +119,6 @@ protected:
    * Note that this is not available in the public interface, since that would
    * allow for length modifications, which we need to prevent. */
   std::vector<double> &mutableRawData() { return m_data; }
-
-  // This is used as base class only, cannot delete polymorphically, so
-  // destructor is protected.
-  ~FixedLengthVector() = default;
 
 private:
   template <class Other> void checkAssignmentSize(const Other &other) const {
@@ -167,5 +161,3 @@ public:
 } // namespace detail
 } // namespace HistogramData
 } // namespace Mantid
-
-#endif /* MANTID_HISTOGRAMDATA_FIXEDLENGTHVECTOR_H_ */

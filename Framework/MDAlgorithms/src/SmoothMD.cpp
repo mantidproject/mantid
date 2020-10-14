@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SmoothMD.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -17,12 +17,10 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/PropertyWithValue.h"
-#include <boost/bind.hpp>
-#include <boost/function.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <limits>
 #include <map>
+#include <memory>
 #include <numeric>
 #include <sstream>
 #include <stack>
@@ -45,7 +43,7 @@ using OptionalIMDHistoWorkspace_const_sptr =
     boost::optional<IMDHistoWorkspace_const_sptr>;
 
 // Typedef for a smoothing function
-using SmoothFunction = boost::function<IMDHistoWorkspace_sptr(
+using SmoothFunction = std::function<IMDHistoWorkspace_sptr(
     IMDHistoWorkspace_const_sptr, const WidthVector &,
     OptionalIMDHistoWorkspace_const_sptr)>;
 
@@ -59,11 +57,12 @@ namespace {
  * @return function map
  */
 SmoothFunctionMap makeFunctionMap(Mantid::MDAlgorithms::SmoothMD *instance) {
+  using namespace std::placeholders;
   return {
-      {"Hat", boost::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance,
-                          _1, _2, _3)},
-      {"Gaussian", boost::bind(&Mantid::MDAlgorithms::SmoothMD::gaussianSmooth,
-                               instance, _1, _2, _3)}};
+      {"Hat", std::bind(&Mantid::MDAlgorithms::SmoothMD::hatSmooth, instance,
+                        _1, _2, _3)},
+      {"Gaussian", std::bind(&Mantid::MDAlgorithms::SmoothMD::gaussianSmooth,
+                             instance, _1, _2, _3)}};
 }
 } // namespace
 
@@ -93,7 +92,7 @@ KernelVector gaussianKernel(const double fwhm) {
   double pixel_value = std::erf(0.5 * sigma_factor) * sigma;
   int pixel_count = 0;
   while (pixel_value > 0.02) {
-    kernel_one_side.push_back(pixel_value);
+    kernel_one_side.emplace_back(pixel_value);
     pixel_count++;
     pixel_value = (std::erf((pixel_count + 0.5) * sigma_factor) -
                    std::erf((pixel_count - 0.5) * sigma_factor)) *
@@ -176,7 +175,7 @@ const std::string SmoothMD::summary() const {
  * @return Smoothed MDHistoWorkspace
  */
 IMDHistoWorkspace_sptr
-SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
+SmoothMD::hatSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
                     const WidthVector &widthVector,
                     OptionalIMDHistoWorkspace_const_sptr weightingWS) {
 
@@ -227,9 +226,10 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
       // We've already checked in the validator that the doubles we have are odd
       // integer values and well below max int
       std::vector<int> widthVectorInt;
-      widthVectorInt.reserve(widthVector.size());
-      std::copy(widthVector.cbegin(), widthVector.cend(),
-                std::back_inserter(widthVectorInt));
+      widthVectorInt.resize(widthVector.size());
+      std::transform(widthVector.cbegin(), widthVector.cend(),
+                     widthVectorInt.begin(),
+                     [](double w) -> int { return static_cast<int>(w); });
 
       std::vector<size_t> neighbourIndexes =
           iterator->findNeighbourIndexesByWidth(widthVectorInt);
@@ -278,7 +278,7 @@ SmoothMD::hatSmooth(IMDHistoWorkspace_const_sptr toSmooth,
  * @return Smoothed MDHistoWorkspace
  */
 IMDHistoWorkspace_sptr
-SmoothMD::gaussianSmooth(IMDHistoWorkspace_const_sptr toSmooth,
+SmoothMD::gaussianSmooth(const IMDHistoWorkspace_const_sptr &toSmooth,
                          const WidthVector &widthVector,
                          OptionalIMDHistoWorkspace_const_sptr weightingWS) {
 
@@ -392,12 +392,12 @@ void SmoothMD::init() {
                       "InputWorkspace", "", Direction::Input),
                   "An input MDHistoWorkspace to smooth.");
 
-  auto widthVectorValidator = boost::make_shared<CompositeValidator>();
+  auto widthVectorValidator = std::make_shared<CompositeValidator>();
   auto boundedValidator =
-      boost::make_shared<ArrayBoundedValidator<double>>(1, 1000);
+      std::make_shared<ArrayBoundedValidator<double>>(1, 1000);
   widthVectorValidator->add(boundedValidator);
   widthVectorValidator->add(
-      boost::make_shared<MandatoryValidator<WidthVector>>());
+      std::make_shared<MandatoryValidator<WidthVector>>());
 
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
@@ -414,7 +414,7 @@ void SmoothMD::init() {
   declareProperty(
       std::make_unique<PropertyWithValue<std::string>>(
           "Function", first,
-          boost::make_shared<ListValidator<std::string>>(allFunctionTypes),
+          std::make_shared<ListValidator<std::string>>(allFunctionTypes),
           Direction::Input),
       docBuffer.str());
 
@@ -426,12 +426,11 @@ void SmoothMD::init() {
   for (auto const &unitOption : unitOptions) {
     docUnits << unitOption << ", ";
   }
-  declareProperty(
-      std::make_unique<PropertyWithValue<std::string>>(
-          "Units", "pixels",
-          boost::make_shared<ListValidator<std::string>>(unitOptions),
-          Direction::Input),
-      docUnits.str());
+  declareProperty(std::make_unique<PropertyWithValue<std::string>>(
+                      "Units", "pixels",
+                      std::make_shared<ListValidator<std::string>>(unitOptions),
+                      Direction::Input),
+                  docUnits.str());
 
   declareProperty(std::make_unique<WorkspaceProperty<API::IMDHistoWorkspace>>(
                       "InputNormalizationWorkspace", "", Direction::Input,

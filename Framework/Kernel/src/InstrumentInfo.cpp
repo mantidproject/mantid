@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -296,6 +296,19 @@ void InstrumentInfo::fillLiveData(const Poco::XML::Element *elem) {
     } catch (...) {
       g_log.error() << "Exception occurred while loading livedata for "
                     << m_name << " instrument. Skipping faulty connection.\n";
+    }
+  }
+
+  // Get kafka topics under <livedata>
+  Poco::AutoPtr<Poco::XML::NodeList> topics =
+      elem->getElementsByTagName("topic");
+  for (unsigned long i = 0; i < topics->length(); ++i) {
+    auto *topic = dynamic_cast<Poco::XML::Element *>(topics->item(i));
+    try {
+      m_kafkaTopics.emplace_back(this, topic);
+    } catch (...) {
+      g_log.error() << "Exception occured while loading livedata for " << m_name
+                    << " instrument. Skipping kafka topic.\n";
     }
   }
 }

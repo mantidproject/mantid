@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AddSampleLog.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -45,26 +45,26 @@ void AddSampleLog::init() {
                       "Workspace", "", Direction::InOut),
                   "Workspace to add the log entry to");
   declareProperty("LogName", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The name that will identify the log entry");
 
   declareProperty("LogText", "", "The content of the log");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back(stringLogOption);
-  propOptions.push_back(numberLogOption);
-  propOptions.push_back(numberSeriesLogOption);
+  propOptions.emplace_back(stringLogOption);
+  propOptions.emplace_back(numberLogOption);
+  propOptions.emplace_back(numberSeriesLogOption);
   declareProperty("LogType", stringLogOption,
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The type that the log data will be.");
   declareProperty("LogUnit", "", "The units of the log");
 
   std::vector<std::string> typeOptions;
-  typeOptions.push_back(intTypeOption);
-  typeOptions.push_back(doubleTypeOption);
-  typeOptions.push_back(autoTypeOption);
+  typeOptions.emplace_back(intTypeOption);
+  typeOptions.emplace_back(doubleTypeOption);
+  typeOptions.emplace_back(autoTypeOption);
   declareProperty("NumberType", autoTypeOption,
-                  boost::make_shared<StringListValidator>(typeOptions),
+                  std::make_shared<StringListValidator>(typeOptions),
                   "Force LogText to be interpreted as a number of type 'int' "
                   "or 'double'.");
 
@@ -83,7 +83,7 @@ void AddSampleLog::init() {
 
   std::vector<std::string> time_units{"Second", "Nanosecond"};
   declareProperty("TimeUnit", "Second",
-                  boost::make_shared<Kernel::StringListValidator>(time_units),
+                  std::make_shared<Kernel::StringListValidator>(time_units),
                   "The unit of the time of the input workspace");
   declareProperty("RelativeTime", true,
                   "If specified as True, then then the "
@@ -97,12 +97,11 @@ void AddSampleLog::init() {
 void AddSampleLog::exec() {
   // A pointer to the workspace to add a log to
   Workspace_sptr target_workspace = getProperty("Workspace");
-  auto expinfo_ws =
-      boost::dynamic_pointer_cast<ExperimentInfo>(target_workspace);
+  auto expinfo_ws = std::dynamic_pointer_cast<ExperimentInfo>(target_workspace);
   if (!expinfo_ws) {
     // We're dealing with an MD workspace which has multiple experiment infos
     auto infos =
-        boost::dynamic_pointer_cast<MultipleExperimentInfos>(target_workspace);
+        std::dynamic_pointer_cast<MultipleExperimentInfos>(target_workspace);
     if (!infos) {
       throw std::invalid_argument(
           "Input workspace does not support sample logs");
@@ -285,7 +284,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
 
   // initialze the TimeSeriesProperty and add unit
   if (is_int_series) {
-    auto tsp = new TimeSeriesProperty<int>(prop_name);
+    auto tsp = std::make_unique<TimeSeriesProperty<int>>(prop_name);
     if (use_single_value) {
       int intVal;
       if (Strings::convert(prop_value, intVal)) {
@@ -295,9 +294,9 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
             "Input value cannot be converted to an integer value.");
       }
     }
-    run_obj.addLogData(tsp);
+    run_obj.addLogData(std::move(tsp));
   } else {
-    auto tsp = new TimeSeriesProperty<double>(prop_name);
+    auto tsp = std::make_unique<TimeSeriesProperty<double>>(prop_name);
     if (use_single_value) {
       double dblVal;
       if (Strings::convert(prop_value, dblVal)) {
@@ -307,7 +306,7 @@ void AddSampleLog::addTimeSeriesProperty(Run &run_obj,
             "Input value cannot be converted to a double number.");
       }
     }
-    run_obj.addLogData(tsp);
+    run_obj.addLogData(std::move(tsp));
   }
   // add unit
   run_obj.getProperty(prop_name)->setUnits(prop_unit);
@@ -369,7 +368,7 @@ void AddSampleLog::setTimeSeriesData(Run &run_obj,
  * @return
  */
 std::vector<Types::Core::DateAndTime>
-AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
+AddSampleLog::getTimes(const API::MatrixWorkspace_const_sptr &dataws,
                        int workspace_index, bool is_epoch, bool is_second,
                        API::Run &run_obj) {
   // get run start time
@@ -389,7 +388,7 @@ AddSampleLog::getTimes(API::MatrixWorkspace_const_sptr dataws,
       timedbl *= 1.E9;
     auto entry_i64 = static_cast<int64_t>(timedbl);
     Types::Core::DateAndTime entry(timeshift + entry_i64);
-    timevec.push_back(entry);
+    timevec.emplace_back(entry);
   }
 
   return timevec;
@@ -421,12 +420,12 @@ Types::Core::DateAndTime AddSampleLog::getRunStart(API::Run &run_obj) {
  * @return
  */
 std::vector<double>
-AddSampleLog::getDblValues(API::MatrixWorkspace_const_sptr dataws,
+AddSampleLog::getDblValues(const API::MatrixWorkspace_const_sptr &dataws,
                            int workspace_index) {
   std::vector<double> valuevec;
   size_t vecsize = dataws->readY(workspace_index).size();
   for (size_t i = 0; i < vecsize; ++i)
-    valuevec.push_back(dataws->readY(workspace_index)[i]);
+    valuevec.emplace_back(dataws->readY(workspace_index)[i]);
 
   return valuevec;
 }
@@ -439,12 +438,12 @@ AddSampleLog::getDblValues(API::MatrixWorkspace_const_sptr dataws,
  * @return
  */
 std::vector<int>
-AddSampleLog::getIntValues(API::MatrixWorkspace_const_sptr dataws,
+AddSampleLog::getIntValues(const API::MatrixWorkspace_const_sptr &dataws,
                            int workspace_index) {
   std::vector<int> valuevec;
   size_t vecsize = dataws->readY(workspace_index).size();
   for (size_t i = 0; i < vecsize; ++i)
-    valuevec.push_back(static_cast<int>(dataws->readY(workspace_index)[i]));
+    valuevec.emplace_back(static_cast<int>(dataws->readY(workspace_index)[i]));
 
   return valuevec;
 }
@@ -455,7 +454,7 @@ AddSampleLog::getIntValues(API::MatrixWorkspace_const_sptr dataws,
  * @param epochtime
  * @param timeunit
  */
-void AddSampleLog::getMetaData(API::MatrixWorkspace_const_sptr dataws,
+void AddSampleLog::getMetaData(const API::MatrixWorkspace_const_sptr &dataws,
                                bool &epochtime, std::string &timeunit) {
   bool auto_meta = getProperty("AutoMetaData");
   if (auto_meta) {

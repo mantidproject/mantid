@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadTOFRawNexus.h"
 #include "MantidAPI/Axis.h"
@@ -20,6 +20,7 @@
 
 #include <boost/algorithm/string/detail/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <utility>
 
 namespace Mantid {
 namespace DataHandling {
@@ -30,8 +31,8 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using HistogramData::BinEdges;
-using HistogramData::CountStandardDeviations;
 using HistogramData::Counts;
+using HistogramData::CountStandardDeviations;
 
 LoadTOFRawNexus::LoadTOFRawNexus()
     : m_numPixels(0), m_signalNo(0), pulseTimes(0), m_numBins(0), m_spec_min(0),
@@ -52,7 +53,7 @@ void LoadTOFRawNexus::init() {
                   "Some NXS files have multiple data fields giving binning in "
                   "other units (e.g. d-spacing or momentum).\n"
                   "Enter the right signal number for your desired field.");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty(
       std::make_unique<PropertyWithValue<specnum_t>>("SpectrumMin", 1,
@@ -202,7 +203,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
         const auto bankEntries = file.getEntries();
 
         if (bankEntries.find("pixel_id") != bankEntries.end()) {
-          bankNames.push_back(name);
+          bankNames.emplace_back(name);
 
           // Count how many pixels in the bank
           file.openData("pixel_id");
@@ -216,7 +217,7 @@ void LoadTOFRawNexus::countPixels(const std::string &nexusfilename,
             m_numPixels += newPixels;
           }
         } else {
-          bankNames.push_back(name);
+          bankNames.emplace_back(name);
 
           // Get the number of pixels from the offsets arrays
           file.openData("x_pixel_offset");
@@ -267,7 +268,7 @@ namespace {
 // Check the numbers supplied are not in the range and erase the ones that are
 struct range_check {
   range_check(specnum_t min, specnum_t max, detid2index_map id_to_wi)
-      : m_min(min), m_max(max), m_id_to_wi(id_to_wi) {}
+      : m_min(min), m_max(max), m_id_to_wi(std::move(id_to_wi)) {}
 
   bool operator()(specnum_t x) {
     auto wi = static_cast<specnum_t>((m_id_to_wi)[x]);
@@ -292,7 +293,7 @@ private:
 void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
                                const std::string &entry_name,
                                const std::string &bankName,
-                               API::MatrixWorkspace_sptr WS,
+                               const API::MatrixWorkspace_sptr &WS,
                                const detid2index_map &id_to_wi) {
   g_log.debug() << "Loading bank " << bankName << '\n';
   // To avoid segfaults on RHEL5/6 and Fedora
@@ -351,7 +352,7 @@ void LoadTOFRawNexus::loadBank(const std::string &nexusfilename,
 
     for (size_t i = 0; i < numX; i++) {
       for (size_t j = 0; j < numY; j++) {
-        pixel_id.push_back(
+        pixel_id.emplace_back(
             static_cast<uint32_t>(j + numY * (i + numX * bankNum)));
       }
     }
@@ -518,8 +519,10 @@ void LoadTOFRawNexus::exec() {
   // Load the meta data, but don't stop on errors
   prog->report("Loading metadata");
   g_log.debug() << "Loading metadata\n";
+  Kernel::NexusHDF5Descriptor descriptor(filename);
+
   try {
-    LoadEventNexus::loadEntryMetadata(filename, WS, entry_name);
+    LoadEventNexus::loadEntryMetadata(filename, WS, entry_name, descriptor);
   } catch (std::exception &e) {
     g_log.warning() << "Error while loading meta data: " << e.what() << '\n';
   }

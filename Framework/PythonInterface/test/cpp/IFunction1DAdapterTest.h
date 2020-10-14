@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTERTEST_H
-#define MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTERTEST_H
+#pragma once
 
 #include "FunctionAdapterTestCommon.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
@@ -78,8 +77,8 @@ public:
 
   void testfunction_Uses_Numerical_Deriv_When_Deriv_NotSupplied() {
     using Mantid::API::IFunction1D_sptr;
-    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     using Mantid::PythonInterface::createTestFunction;
+    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     IFunction1D_sptr noDerivFunc1D;
     TS_ASSERT_THROWS_NOTHING(
         noDerivFunc1D = createTestFunction<IFunction1D_sptr::element_type>(
@@ -97,8 +96,8 @@ public:
 
   void testfunction_Uses_Supplied_Deriv() {
     using Mantid::API::IFunction1D_sptr;
-    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     using Mantid::PythonInterface::createTestFunction;
+    using Mantid::PythonInterface::FunctionAdapterTestJacobian;
     IFunction1D_sptr func1DWithDeriv;
     TS_ASSERT_THROWS_NOTHING(
         func1DWithDeriv = createTestFunction<IFunction1D_sptr::element_type>(
@@ -150,5 +149,3 @@ private:
   TestDataType m_xdata;
   TestDataType m_result;
 };
-
-#endif // MANTID_PYTHONINTERFACE_IFUNCTION1DADAPTERTEST_H

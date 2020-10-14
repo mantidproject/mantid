@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_ISISLIVEEVENTDATALISTENER_H_
-#define MANTID_LIVEDATA_ISISLIVEEVENTDATALISTENER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -101,7 +100,7 @@ public:
    *    will call extractData() again a short while later. Any other exception
    *    will stop the calling algorithm.
    */
-  boost::shared_ptr<API::Workspace> extractData() override;
+  std::shared_ptr<API::Workspace> extractData() override;
 
   //----------------------------------------------------------------------
   // State flags
@@ -184,7 +183,7 @@ protected:
   /// Holds on to any exceptions that were thrown in the background thread so
   /// that we
   /// can re-throw them in the forground thread
-  boost::shared_ptr<std::runtime_error> m_backgroundException;
+  std::shared_ptr<std::runtime_error> m_backgroundException;
 
   /// Used to buffer events between calls to extractData()
   std::vector<DataObjects::EventWorkspace_sptr> m_eventBuffer;
@@ -218,5 +217,3 @@ protected:
 
 } // namespace LiveData
 } // namespace Mantid
-
-#endif /*MANTID_LIVEDATA_ISISLIVEEVENTDATALISTENER_H_*/

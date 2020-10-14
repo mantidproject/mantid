@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import mantid.simpleapi as mantid
 
 from isis_powder.hrpd_routines import hrpd_advanced_config
@@ -61,9 +59,19 @@ def calculate_slab_absorb_corrections(ws_to_correct, sample_details_obj):
     if previous_units != ws_units.wavelength:
         ws_to_correct = mantid.ConvertUnits(InputWorkspace=ws_to_correct, OutputWorkspace=ws_to_correct,
                                             Target=ws_units.wavelength)
-
+    # set element size based on thickness
+    sample_thickness = sample_details_obj.thickness()
+    # half and convert cm to mm 5=(0.5*10)
+    element_size = 5.*sample_thickness
+    # limit number of wavelength points as for small samples the number of elements can be required to be quite large
+    if sample_thickness < 0.1:  # 1mm
+        nlambda = 100
+    else:
+        nlambda = None  # use all points
     absorb_factors = mantid.HRPDSlabCanAbsorption(InputWorkspace=ws_to_correct,
-                                                  Thickness=str(sample_details_obj.thickness()))
+                                                  Thickness=sample_thickness,
+                                                  ElementSize=element_size,
+                                                  NumberOfWavelengthPoints=nlambda)
     ws_to_correct = mantid.Divide(LHSWorkspace=ws_to_correct, RHSWorkspace=absorb_factors,
                                   OutputWorkspace=ws_to_correct)
     mantid.DeleteWorkspace(Workspace=absorb_factors)

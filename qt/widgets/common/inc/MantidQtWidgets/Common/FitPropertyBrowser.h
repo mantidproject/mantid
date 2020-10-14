@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FITPROPERTYBROWSER_H_
-#define FITPROPERTYBROWSER_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/AlgorithmObserver.h"
@@ -22,6 +21,7 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IWorkspaceFitControl.h"
+#include "MantidQtWidgets/Common/SelectFunctionDialog.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
 /* Forward declarations */
@@ -38,19 +38,23 @@ class ParameterPropertyManager;
 class QtProperty;
 class QtBrowserItem;
 
-class QPushButton;
+class QAction;
+class QComboBox;
 class QLabel;
 class QLineEdit;
-class QComboBox;
-class QSignalMapper;
+class QListWidget;
+class QListWidgetItem;
 class QMenu;
-class QAction;
+class QPushButton;
+class QSignalMapper;
 class QTreeWidget;
+class QVBoxLayout;
 
 namespace MantidQt {
 namespace MantidWidgets {
 
 class PropertyHandler;
+class SelectFunctionDialog;
 /**
  * Class FitPropertyBrowser implements QtPropertyBrowser to display
  * and control fitting function parameters and settings.
@@ -95,7 +99,7 @@ public:
   /// Set new current function
   void setCurrentFunction(PropertyHandler *h) const;
   /// Get the current function
-  boost::shared_ptr<const Mantid::API::IFunction> theFunction() const;
+  std::shared_ptr<const Mantid::API::IFunction> theFunction() const;
   /// Update the function parameters
   void updateParameters();
   /// Update the function attributes
@@ -104,6 +108,8 @@ public:
   QList<double> getParameterValues() const;
   /// Get function parameter names
   QStringList getParameterNames() const;
+  // Get parameters used to run the Fit algorithm
+  std::string getFitAlgorithmParameters() const;
 
   /// Load function
   void loadFunction(const QString &funcString);
@@ -114,7 +120,7 @@ public:
   virtual void removeFunction(PropertyHandler *handler);
 
   /// Get Composite Function
-  boost::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() const {
+  std::shared_ptr<Mantid::API::CompositeFunction> compositeFunction() const {
     return m_compositeFunction;
   }
 
@@ -138,7 +144,7 @@ public:
   void setDefaultBackgroundType(const std::string &fnType);
 
   /// Get the workspace
-  boost::shared_ptr<Mantid::API::Workspace> getWorkspace() const;
+  std::shared_ptr<Mantid::API::Workspace> getWorkspace() const;
   /// Get the input workspace name
   std::string workspaceName() const;
   /// Set the input workspace name
@@ -169,6 +175,10 @@ public:
   int maxIterations() const;
   /// Get the peak radius for peak functions
   int getPeakRadius() const;
+  /// Get the excluded range for the fit
+  std::string getExcludeRange() const;
+  /// Get the X limits of the workspace
+  QVector<double> getXRange();
 
   /// Get the start X
   double startX() const;
@@ -180,6 +190,12 @@ public:
   void setEndX(double end) override;
   /// Set both start and end X
   void setXRange(double start, double end);
+  /// Get the name of the X column
+  QString getXColumnName() const;
+  /// Get the name of the Y column
+  QString getYColumnName() const;
+  /// Get the name of the Error column
+  QString getErrColumnName() const;
   /// Set LogValue for PlotPeakByLogValue
   void setLogValue(const QString &lv = "");
   /// Get LogValue
@@ -212,7 +228,7 @@ public:
   void setTip(const QString &txt);
 
   /// alter text of Plot Guess
-  void setTextPlotGuess(const QString text);
+  void setTextPlotGuess(const QString &text);
 
   /// Creates the "Ties" property value for the Fit algorithm
   QString getTieString() const;
@@ -254,8 +270,14 @@ public:
   void setADSObserveEnabled(bool enabled);
 
   void postDeleteHandle(const std::string &wsName) override;
+  void renameHandle(const std::string &oldName,
+                    const std::string &newName) override;
   void addHandle(const std::string &wsName,
-                 const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+                 const std::shared_ptr<Mantid::API::Workspace> &ws) override;
+
+  // Remove Workspace
+  void removeWorkspace(const std::string &wsName);
+  void removeWorkspaceAndSpectra(const std::string &wsName);
 
   /// Called when the Fit is finished
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;
@@ -263,8 +285,6 @@ public:
   /// Returns the list of workspaces that are currently been worked on by the
   /// fit property browser.
   QStringList getWorkspaceNames();
-  /// Create a MatrixWorkspace from a TableWorkspace
-  Mantid::API::Workspace_sptr createMatrixFromTableWorkspace() const;
 
   /// Allow or disallow sequential fits (depending on whether other conditions
   /// are met)
@@ -274,6 +294,13 @@ public:
   /// menu.
   QMenu *getFitMenu() const { return m_fitMenu; }
 
+  /// Return the Fit menu. This gives Python access to events emitted by this
+  /// menu.
+  QListWidget *getWorkspaceList() const { return m_wsListWidget; }
+
+  /// Adds the fit result workspaces to the QListWidget in the browser
+  void addFitResultWorkspacesToTableWidget();
+
   // Methods intended for testing only
 
   int sizeOfFunctionsGroup() const;
@@ -281,6 +308,7 @@ public:
   // Methods intended for interfacing with the workbench fitting tools
 
   void addAllowedSpectra(const QString &wsName, const QList<int> &wsIndices);
+  void addAllowedTableWorkspace(const QString &wsName);
   QString addFunction(const QString &fnName);
   PropertyHandler *getPeakHandler(const QString &prefix);
   void setPeakCentreOf(const QString &prefix, double value);
@@ -291,8 +319,16 @@ public:
   double getPeakFwhmOf(const QString &prefix);
   QStringList getPeakPrefixes() const;
 
+  // Emits a signal for when the sequential fit has finished
+
+  void sequentialFitFinished() { emit sequentialFitDone(); }
+
 public slots:
   virtual void fit();
+  virtual void toggleSettingsBrowserVisible();
+  virtual void
+  removePropertiesFromSettingsBrowser(const QStringList &propsToRemove);
+  virtual void toggleWsListVisible();
   virtual void sequentialFit();
   void undoFit();
   virtual void clear();
@@ -303,6 +339,7 @@ public slots:
   void executeDisplayMenu(const QString & /*item*/);
   void executeSetupMenu(const QString & /*item*/);
   void executeSetupManageMenu(const QString & /*item*/);
+  void workspaceDoubleClicked(QListWidgetItem *item);
 
 signals:
   void currentChanged() const;
@@ -311,6 +348,7 @@ signals:
   void workspaceIndexChanged(int index);
   void updatePlotSpectrum(int index);
   void workspaceNameChanged(const QString & /*_t1*/);
+  void sequentialFitDone() const;
 
   void wsChangePPAssign(const QString & /*_t1*/);
   void functionChanged();
@@ -341,6 +379,8 @@ signals:
   void fitUndone();
   void functionLoaded(const QString & /*_t1*/);
   void fitResultsChanged(const QString &status);
+  void workspaceClicked(const QString &wsName);
+  void itemDoubleClicked(QListWidgetItem *item);
 
 protected slots:
   /// Get the registered function names
@@ -436,7 +476,7 @@ protected:
   ///
   void updateDecimals();
   /// Sets the workspace to a function
-  void setWorkspace(boost::shared_ptr<Mantid::API::IFunction> f) const;
+  void setWorkspace(const Mantid::API::IFunction_sptr &function) const;
   /// Display properties relevant to the selected workspace
   void setWorkspaceProperties();
   /// Adds the workspace index property to the browser.
@@ -456,7 +496,7 @@ protected:
   /// Catches unexpected not found exceptions
   Mantid::API::IFunction_sptr tryCreateFitFunction(const QString &str);
   /// Create CompositeFunction from pointer
-  void createCompositeFunction(const Mantid::API::IFunction_sptr func);
+  void createCompositeFunction(const Mantid::API::IFunction_sptr &func);
 
   /// Property managers:
   QtGroupPropertyManager *m_groupManager;
@@ -485,6 +525,7 @@ protected:
   QtProperty *m_peakRadius;
   QtProperty *m_logValue;
   QtProperty *m_plotDiff;
+  QtProperty *m_excludeRange;
   QtProperty *m_plotCompositeMembers;
   QtProperty *m_convolveMembers;
   QtProperty *m_rawData;
@@ -496,7 +537,7 @@ protected:
   QList<QtProperty *> m_minimizerProperties;
 
   /// A copy of the edited function
-  boost::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
+  std::shared_ptr<Mantid::API::CompositeFunction> m_compositeFunction;
 
   QtTreePropertyBrowser *m_browser;
 
@@ -562,7 +603,7 @@ private:
   /// Return the nearest allowed workspace index.
   int getAllowedIndex(int currentIndex) const;
 
-  void setCurrentFunction(Mantid::API::IFunction_const_sptr f) const;
+  void setCurrentFunction(const Mantid::API::IFunction_const_sptr &f) const;
 
   /// Sets the new workspace to the current one
   virtual void workspaceChange(const QString &wsName);
@@ -602,9 +643,13 @@ private:
   QLabel *m_status;
 
   // The widget for choosing the fit function.
-  QDialog *m_fitSelector;
+  SelectFunctionDialog *m_fitSelector;
   // The tree widget containing the fit functions.
   QTreeWidget *m_fitTree;
+
+  //
+  QListWidget *m_wsListWidget;
+  QLabel *m_workspaceLabel;
 
   /// String property managers for special case attributes such as Filename or
   /// Formula
@@ -625,6 +670,9 @@ private:
 
   /// Shows if the PeakPickerTool is on
   bool m_peakToolOn;
+
+  /// bool to display ws list or not
+  bool m_hideWsListWidget;
 
   /// If true background function will be included automatically
   bool m_auto_back;
@@ -653,11 +701,16 @@ private:
   /// Should the data be normalised before fitting?
   bool m_shouldBeNormalised;
 
+  // Keep a history of the parameters used to run the Fit algorithm
+  std::string m_fitAlgParameters;
+
   /// If non-empty it contains references to the spectra
   /// allowed to be fitted in this browser:
   ///   keys are workspace names,
   ///   values are lists of workspace indices
   QMap<QString, QList<int>> m_allowedSpectra;
+  /// If set it contains the table workspace name to be fitted in this browser:
+  QString m_allowedTableWorkspace;
   /// Store workspace index to revert to in case validation fails
   int m_oldWorkspaceIndex;
 
@@ -670,5 +723,3 @@ private:
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*FITPROPERTYBROWSER_H_*/

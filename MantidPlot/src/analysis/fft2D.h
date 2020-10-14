@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : fft2D.h
@@ -16,11 +16,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef FOURIER_H
-#define FOURIER_H
+#pragma once
 
 void fft2d(double **xtre, double **xtim, int width, int height);
 void fft2d_inv(double **xtre, double **xtim, double **xrec_re, double **xrec_im,
                int width, int height);
-
-#endif

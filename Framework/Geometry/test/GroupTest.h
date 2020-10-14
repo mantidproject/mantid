@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_GROUPTEST_H_
-#define MANTID_GEOMETRY_GROUPTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -14,7 +13,7 @@
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/V3D.h"
 #include "MantidKernel/WarningSuppressions.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
@@ -40,8 +39,9 @@ public:
 
   void testConstructor() {
     std::vector<SymmetryOperation> symOps;
-    symOps.push_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    symOps.push_back(
+    symOps.emplace_back(
+        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     TS_ASSERT_THROWS_NOTHING(Group group(symOps));
@@ -57,8 +57,9 @@ public:
 
   void testCopyConstructor() {
     std::vector<SymmetryOperation> symOps;
-    symOps.push_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    symOps.push_back(
+    symOps.emplace_back(
+        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     Group group(symOps);
@@ -71,8 +72,9 @@ public:
 
   void testAssignmentOperator() {
     std::vector<SymmetryOperation> symOps;
-    symOps.push_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    symOps.push_back(
+    symOps.emplace_back(
+        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     Group otherGroup(symOps);
@@ -94,21 +96,22 @@ public:
 
     // Making a group of two operations gives order 2
     std::vector<SymmetryOperation> symOps;
-    symOps.push_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    symOps.push_back(
+    symOps.emplace_back(
+        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     Group biggerGroup(symOps);
     TS_ASSERT_EQUALS(biggerGroup.order(), 2);
 
     // Adding another one results in 3
-    symOps.push_back(
+    symOps.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,y,z"));
     Group evenBiggerGroup(symOps);
     TS_ASSERT_EQUALS(evenBiggerGroup.order(), 3);
 
     // Multiple occurences of the same operation do not count
-    symOps.push_back(
+    symOps.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
     Group sameAsBefore(symOps);
     TS_ASSERT_EQUALS(sameAsBefore.order(), 3);
@@ -116,8 +119,9 @@ public:
 
   void testComparison() {
     std::vector<SymmetryOperation> symOps;
-    symOps.push_back(SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    symOps.push_back(
+    symOps.emplace_back(
+        SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
+    symOps.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     Group groupOne(symOps);
@@ -136,16 +140,16 @@ public:
   void testMultiplicationOperator() {
     // We take pointgroup -1
     std::vector<SymmetryOperation> inversion;
-    inversion.push_back(
+    inversion.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    inversion.push_back(
+    inversion.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     // And 2 (b-axis unique)
     std::vector<SymmetryOperation> twoFoldY;
-    twoFoldY.push_back(
+    twoFoldY.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    twoFoldY.push_back(
+    twoFoldY.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,y,-z"));
 
     Group one(inversion);
@@ -171,9 +175,9 @@ public:
 
   void testAxisSystemOrthogonal() {
     std::vector<SymmetryOperation> orthogonal;
-    orthogonal.push_back(
+    orthogonal.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    orthogonal.push_back(
+    orthogonal.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,y,-z"));
 
     Group two(orthogonal);
@@ -183,9 +187,9 @@ public:
 
   void testAxisSystemHexagonal() {
     std::vector<SymmetryOperation> hexagonal;
-    hexagonal.push_back(
+    hexagonal.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-y,x-y,z"));
-    hexagonal.push_back(
+    hexagonal.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("y,x,-z+1/2"));
 
     Group two(hexagonal);
@@ -343,20 +347,20 @@ public:
   void testSmartPointerOperators() {
     // We take pointgroup -1
     std::vector<SymmetryOperation> inversion;
-    inversion.push_back(
+    inversion.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    inversion.push_back(
+    inversion.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,-y,-z"));
 
     // And 2 (b-axis unique)
     std::vector<SymmetryOperation> twoFoldY;
-    twoFoldY.push_back(
+    twoFoldY.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("x,y,z"));
-    twoFoldY.push_back(
+    twoFoldY.emplace_back(
         SymmetryOperationFactory::Instance().createSymOp("-x,y,-z"));
 
-    Group_const_sptr one = boost::make_shared<const Group>(inversion);
-    Group_const_sptr two = boost::make_shared<const Group>(twoFoldY);
+    Group_const_sptr one = std::make_shared<const Group>(inversion);
+    Group_const_sptr two = std::make_shared<const Group>(twoFoldY);
 
     Group_const_sptr three = one * two;
     TS_ASSERT_EQUALS(three->order(), 4);
@@ -386,5 +390,3 @@ public:
     TS_ASSERT_THROWS(null * coords, const std::invalid_argument &);
   }
 };
-
-#endif /* MANTID_GEOMETRY_GROUPTEST_H_ */

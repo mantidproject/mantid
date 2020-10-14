@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_INTEGRATEPEAKSCWSD_H_
-#define MANTID_MDALGORITHMS_INTEGRATEPEAKSCWSD_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -71,7 +70,7 @@ private:
   std::map<int, double> getMeasureTime();
 
   std::vector<detid_t>
-  processMaskWorkspace(DataObjects::MaskWorkspace_const_sptr maskws);
+  processMaskWorkspace(const DataObjects::MaskWorkspace_const_sptr &maskws);
 
   void getPeakInformation();
 
@@ -83,7 +82,8 @@ private:
   void normalizePeaksIntensities();
 
   DataObjects::PeaksWorkspace_sptr
-  createPeakworkspace(Kernel::V3D peakCenter, API::IMDEventWorkspace_sptr mdws);
+  createPeakworkspace(Kernel::V3D peakCenter,
+                      const API::IMDEventWorkspace_sptr &mdws);
 
   /// Input MDEventWorkspace
   Mantid::API::IMDEventWorkspace_sptr m_inputWS;
@@ -119,5 +119,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_INTEGRATEPEAKSCWSD_H_ */

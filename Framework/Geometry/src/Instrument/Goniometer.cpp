@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/ConfigService.h"
@@ -14,6 +14,8 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <utility>
+
 #include <vector>
 
 using namespace Mantid::Kernel;
@@ -64,7 +66,7 @@ Goniometer::Goniometer() : R(3, 3, true), initFromR(false) {}
 /// Constructor from a rotation matrix
 /// @param rot :: DblMatrix matrix that is going to be the internal rotation
 /// matrix of the goniometer. Cannot push additional axes
-Goniometer::Goniometer(DblMatrix rot) {
+Goniometer::Goniometer(const DblMatrix &rot) {
   DblMatrix ide(3, 3), rtr(3, 3);
   rtr = rot.Tprime() * rot;
   ide.identityMatrix();
@@ -83,12 +85,20 @@ const Kernel::DblMatrix &Goniometer::getR() const { return R; }
 /// @param rot :: DblMatrix matrix that is going to be the internal rotation
 /// matrix of the goniometer.
 void Goniometer::setR(Kernel::DblMatrix rot) {
-  R = rot;
+  R = std::move(rot);
   initFromR = true;
 }
 
 /// Function reports if the goniometer is defined
 bool Goniometer::isDefined() const { return initFromR || (!motors.empty()); }
+
+bool Goniometer::operator==(const Goniometer &other) const {
+  return this->R == other.R;
+}
+
+bool Goniometer::operator!=(const Goniometer &other) const {
+  return this->R != other.R;
+}
 
 /// Return information about axes.
 /// @return str :: string that contains on each line one motor information (axis
@@ -129,7 +139,7 @@ std::string Goniometer::axesInfo() {
   @param sense :: rotation sense (CW or CCW), CCW by default
   @param angUnit :: units for angle of type#AngleUnit, angDegrees by default
 */
-void Goniometer::pushAxis(std::string name, double axisx, double axisy,
+void Goniometer::pushAxis(const std::string &name, double axisx, double axisy,
                           double axisz, double angle, int sense, int angUnit) {
   if (initFromR) {
     throw std::runtime_error(
@@ -151,7 +161,7 @@ void Goniometer::pushAxis(std::string name, double axisx, double axisy,
         throw std::invalid_argument("Motor name already defined");
     }
     GoniometerAxis a(name, V3D(axisx, axisy, axisz), angle, sense, angUnit);
-    motors.push_back(a);
+    motors.emplace_back(a);
   }
   recalculateR();
 }
@@ -160,7 +170,7 @@ void Goniometer::pushAxis(std::string name, double axisx, double axisy,
   @param name :: GoniometerAxis name
   @param value :: value in the units that the axis is set
 */
-void Goniometer::setRotationAngle(std::string name, double value) {
+void Goniometer::setRotationAngle(const std::string &name, double value) {
   bool changed = false;
   std::vector<GoniometerAxis>::iterator it;
   for (it = motors.begin(); it < motors.end(); ++it) {
@@ -192,19 +202,38 @@ void Goniometer::setRotationAngle(size_t axisnumber, double value) {
  * Q Sample
  * @param position :: Q Sample position in reciprocal space
  * @param wavelength :: wavelength
+ * @param flip_x :: option if the q_lab x value should be negative, hence the
+ * detector of the other side of the beam
+ * @param inner :: whether the goniometer is the most inner (phi) or most outer
+ * (omega)
  */
 void Goniometer::calcFromQSampleAndWavelength(
-    const Mantid::Kernel::V3D &position, double wavelength) {
+    const Mantid::Kernel::V3D &position, double wavelength, bool flip_x,
+    bool inner) {
   V3D Q(position);
   if (Kernel::ConfigService::Instance().getString("Q.convention") ==
       "Crystallography")
     Q *= -1;
+
+  Matrix<double> starting_goniometer = getR();
+
+  if (!inner)
+    Q = starting_goniometer * Q;
+
   double wv = 2.0 * M_PI / wavelength;
   double norm_q2 = Q.norm2();
   double theta = acos(1 - norm_q2 / (2 * wv * wv)); // [0, pi]
-  double phi = asin(-Q[1] / wv * sin(theta));       // [-pi/2, pi/2]
+  double phi = asin(-Q[1] / (wv * sin(theta)));     // [-pi/2, pi/2]
   V3D Q_lab(-wv * sin(theta) * cos(phi), -wv * sin(theta) * sin(phi),
             wv * (1 - cos(theta)));
+
+  if (flip_x)
+    Q_lab[0] *= -1;
+
+  if (inner) {
+    starting_goniometer.Invert();
+    Q_lab = starting_goniometer * Q_lab;
+  }
 
   // Solve to find rotation matrix, assuming only rotation around y-axis
   // A * X = B
@@ -219,7 +248,12 @@ void Goniometer::calcFromQSampleAndWavelength(
   goniometer[0][2] = sin(rot);
   goniometer[2][0] = -sin(rot);
   goniometer[2][2] = cos(rot);
-  setR(goniometer);
+  if (inner) {
+    starting_goniometer.Invert();
+    setR(starting_goniometer * goniometer);
+  } else {
+    setR(goniometer * starting_goniometer);
+  }
 }
 
 /// Get GoniometerAxis obfject using motor number
@@ -231,7 +265,7 @@ const GoniometerAxis &Goniometer::getAxis(size_t axisnumber) const {
 
 /// Get GoniometerAxis object using motor name
 /// @param axisname :: axis name
-const GoniometerAxis &Goniometer::getAxis(std::string axisname) const {
+const GoniometerAxis &Goniometer::getAxis(const std::string &axisname) const {
   for (auto it = motors.begin(); it < motors.end(); ++it) {
     if (axisname == it->name) {
       return (*it);
@@ -264,7 +298,7 @@ void Goniometer::makeUniversalGoniometer() {
  * @param convention :: the convention used to calculate Euler Angles. The
  * UniversalGoniometer is YZY, a triple axis goniometer at HFIR is YZX
  */
-std::vector<double> Goniometer::getEulerAngles(std::string convention) {
+std::vector<double> Goniometer::getEulerAngles(const std::string &convention) {
   return Quat(getR()).getEulerAngles(convention);
 }
 
@@ -320,7 +354,7 @@ void Goniometer::loadNexus(::NeXus::File *file, const std::string &group) {
   for (int i = 0; i < num_axes; i++) {
     GoniometerAxis newAxis;
     newAxis.loadNexus(file, "axis" + Strings::toString(i));
-    motors.push_back(newAxis);
+    motors.emplace_back(newAxis);
   }
   file->closeGroup();
   // Refresh cached values

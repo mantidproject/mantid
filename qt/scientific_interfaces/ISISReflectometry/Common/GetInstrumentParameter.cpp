@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "GetInstrumentParameter.h"
 namespace MantidQt {
@@ -10,7 +10,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 
 std::vector<std::string> InstrumentParameter<std::string>::get(
-    Mantid::Geometry::Instrument_const_sptr instrument,
+    const Mantid::Geometry::Instrument_const_sptr &instrument,
     std::string const &parameterName) {
   try {
     return instrument->getStringParameter(parameterName);
@@ -20,7 +20,7 @@ std::vector<std::string> InstrumentParameter<std::string>::get(
 }
 
 std::vector<int> InstrumentParameter<int>::get(
-    Mantid::Geometry::Instrument_const_sptr instrument,
+    const Mantid::Geometry::Instrument_const_sptr &instrument,
     std::string const &parameterName) {
   try {
     return instrument->getIntParameter(parameterName);
@@ -30,7 +30,7 @@ std::vector<int> InstrumentParameter<int>::get(
 }
 
 std::vector<bool> InstrumentParameter<bool>::get(
-    Mantid::Geometry::Instrument_const_sptr instrument,
+    const Mantid::Geometry::Instrument_const_sptr &instrument,
     std::string const &parameterName) {
   try {
     return instrument->getBoolParameter(parameterName);
@@ -40,7 +40,7 @@ std::vector<bool> InstrumentParameter<bool>::get(
 }
 
 std::vector<double> InstrumentParameter<double>::get(
-    Mantid::Geometry::Instrument_const_sptr instrument,
+    const Mantid::Geometry::Instrument_const_sptr &instrument,
     std::string const &parameterName) {
   try {
     return instrument->getNumberParameter(parameterName);

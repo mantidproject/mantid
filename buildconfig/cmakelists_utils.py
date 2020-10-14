@@ -1,11 +1,11 @@
-from __future__ import (absolute_import, division, print_function, unicode_literals)
-
 import datetime
 import os
 import re
 import sys
 
 #======================================================================================
+
+
 def find_basedir(project, subproject):
     """ Returns the base directory. If the subproject is known to be in MantidQt or Vates, it uses that.
     The default is current dir + Framework
@@ -122,6 +122,8 @@ def fix_cmake_format(subproject):
     f.close()
 
 #======================================================================
+
+
 def fix_all_cmakes():
     """ Fix all cmake files """
     projects = ["Algorithms", "DataObjects", "MDAlgorithms", "API",

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_SYMMETRYELEMENTFACTORYTEST_H_
-#define MANTID_GEOMETRY_SYMMETRYELEMENTFACTORYTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -42,7 +41,7 @@ public:
     TS_ASSERT_EQUALS(identityElement->hmSymbol(), "1");
 
     SymmetryElementIdentity_sptr castedElement =
-        boost::dynamic_pointer_cast<SymmetryElementIdentity>(identityElement);
+        std::dynamic_pointer_cast<SymmetryElementIdentity>(identityElement);
     TS_ASSERT(castedElement);
 
     // But not other operations.
@@ -69,7 +68,7 @@ public:
     TS_ASSERT_EQUALS(translationElement->hmSymbol(), "t");
 
     SymmetryElementTranslation_sptr castedElement =
-        boost::dynamic_pointer_cast<SymmetryElementTranslation>(
+        std::dynamic_pointer_cast<SymmetryElementTranslation>(
             translationElement);
     TS_ASSERT(castedElement);
     TS_ASSERT_EQUALS(castedElement->getTranslation(), V3R(1, 1, 1) / 2);
@@ -109,7 +108,7 @@ public:
         inversionGenerator.generateElement(shiftedInversion);
 
     SymmetryElementInversion_sptr castedElement =
-        boost::dynamic_pointer_cast<SymmetryElementInversion>(shiftedElement);
+        std::dynamic_pointer_cast<SymmetryElementInversion>(shiftedElement);
 
     TS_ASSERT(castedElement);
     TS_ASSERT_EQUALS(castedElement->getInversionPoint(), V3R(1, 1, 1) / 8);
@@ -283,7 +282,7 @@ public:
     TS_ASSERT_EQUALS(rotationElement->hmSymbol(), "43");
 
     SymmetryElementRotation_sptr castedElement =
-        boost::dynamic_pointer_cast<SymmetryElementRotation>(rotationElement);
+        std::dynamic_pointer_cast<SymmetryElementRotation>(rotationElement);
 
     TS_ASSERT(castedElement);
     TS_ASSERT_EQUALS(castedElement->getRotationSense(),
@@ -327,7 +326,7 @@ public:
     TS_ASSERT_EQUALS(mirrorElement->hmSymbol(), "d");
 
     SymmetryElementMirror_sptr castedElement =
-        boost::dynamic_pointer_cast<SymmetryElementMirror>(mirrorElement);
+        std::dynamic_pointer_cast<SymmetryElementMirror>(mirrorElement);
 
     TS_ASSERT(castedElement);
     TS_ASSERT_EQUALS(castedElement->getAxis(), V3R(0, 0, 1));
@@ -378,8 +377,8 @@ public:
     TS_ASSERT(generator);
 
     // It's really the correct one.
-    boost::shared_ptr<SymmetryElementMirrorGenerator> castedGenerator =
-        boost::dynamic_pointer_cast<SymmetryElementMirrorGenerator>(generator);
+    std::shared_ptr<SymmetryElementMirrorGenerator> castedGenerator =
+        std::dynamic_pointer_cast<SymmetryElementMirrorGenerator>(generator);
     TS_ASSERT(castedGenerator);
 
     // Now we can create the corresponding element
@@ -424,5 +423,3 @@ private:
     friend class SymmetryElementFactoryTest;
   };
 };
-
-#endif /* MANTID_GEOMETRY_SYMMETRYELEMENTFACTORYTEST_H_ */

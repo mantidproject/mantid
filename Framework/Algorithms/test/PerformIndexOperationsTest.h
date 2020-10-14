@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_PERFORMINDEXOPERATIONSTEST_H_
-#define MANTID_ALGORITHMS_PERFORMINDEXOPERATIONSTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -17,7 +16,7 @@ using Mantid::Algorithms::PerformIndexOperations;
 using namespace Mantid::API;
 
 MatrixWorkspace_const_sptr
-doExecute(MatrixWorkspace_sptr inWS,
+doExecute(const MatrixWorkspace_sptr &inWS,
           const std::string &processingInstructions) {
   // Name of the output workspace.
   std::string outWSName("PerformIndexOperationsTest_OutputWS");
@@ -151,5 +150,3 @@ public:
     TS_ASSERT_EQUALS(1.2 + 1.3, outWS->readY(2)[0])
   }
 };
-
-#endif /* MANTID_ALGORITHMS_PERFORMINDEXOPERATIONSTEST_H_ */

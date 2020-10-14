@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_FITPEAKTEST_H_
-#define MANTID_ALGORITHMS_FITPEAKTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -26,8 +25,8 @@ using namespace Mantid::DataObjects;
 
 using namespace std;
 
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Points;
 
 class FitPeakTest : public CxxTest::TestSuite {
@@ -170,13 +169,13 @@ public:
     parvalues.clear();
 
     parnames.emplace_back("Height");
-    parvalues.push_back(1.0);
+    parvalues.emplace_back(1.0);
 
     parnames.emplace_back("PeakCentre");
-    parvalues.push_back(0.5936);
+    parvalues.emplace_back(0.5936);
 
     parnames.emplace_back("Sigma");
-    parvalues.push_back(0.01);
+    parvalues.emplace_back(0.01);
 
     return;
   }
@@ -189,13 +188,13 @@ public:
     parvalues.clear();
 
     parnames.emplace_back("A0");
-    parvalues.push_back(1000.);
+    parvalues.emplace_back(1000.);
 
     parnames.emplace_back("A1");
-    parvalues.push_back(-10.);
+    parvalues.emplace_back(-10.);
 
     parnames.emplace_back("A2");
-    parvalues.push_back(0.01);
+    parvalues.emplace_back(0.01);
 
     return;
   }
@@ -209,7 +208,7 @@ public:
 
     const size_t NVectors = 1;
 
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", NVectors, size,
                                             size));
 
@@ -359,11 +358,9 @@ public:
   /** Generate a workspace contains PG3_4866 5-th peak
    */
   MatrixWorkspace_sptr gen_PG3DiamondData() {
-    vector<double> vecx, vecy, vece;
-
     size_t NVectors = 1;
     size_t size = 53;
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", NVectors, size,
                                             size));
 
@@ -404,13 +401,11 @@ public:
     parvalues.clear();
 
     parnames.emplace_back("A0");
-    parvalues.push_back(48000.);
+    parvalues.emplace_back(48000.);
 
     parnames.emplace_back("A1");
-    parvalues.push_back(-60010.);
+    parvalues.emplace_back(-60010.);
 
     return;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_FITPEAKTEST_H_ */

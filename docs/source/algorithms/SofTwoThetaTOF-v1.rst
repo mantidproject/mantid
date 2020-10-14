@@ -44,10 +44,7 @@ Usage
    axes.set_xlim(0.)
    # Uncomment the line below to show the plot.
    #fig.show()
-   mtd.clear()
-
 
 .. categories::
 
 .. sourcelink::
-

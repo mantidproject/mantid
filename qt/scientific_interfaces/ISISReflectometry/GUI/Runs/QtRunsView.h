@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_QTRUNSVIEW_H_
-#define MANTID_ISISREFLECTOMETRY_QTRUNSVIEW_H_
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "GUI/RunsTable/QtRunsTableView.h"
@@ -19,17 +18,12 @@
 
 namespace MantidQt {
 
-namespace MantidWidgets {
-class SlitCalculator;
-} // namespace MantidWidgets
 namespace API {
 class AlgorithmRunner;
 }
 
 namespace CustomInterfaces {
 namespace ISISReflectometry {
-
-using MantidWidgets::SlitCalculator;
 
 /** QtRunsView : Provides an interface for the "Runs" tab in the
 ISIS Reflectometry interface.
@@ -39,7 +33,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtRunsView
       public IRunsView {
   Q_OBJECT
 public:
-  QtRunsView(QWidget *parent, RunsTableViewFactory makeView);
+  QtRunsView(QWidget *parent, const RunsTableViewFactory &makeView);
 
   void subscribe(RunsViewSubscriber *notifyee) override;
   void subscribeTimer(RunsViewTimerSubscriber *notifyee) override;
@@ -56,8 +50,7 @@ public:
   ISearchModel &mutableSearchResults() override;
 
   // Setter methods
-  void setInstrumentList(const std::vector<std::string> &instruments,
-                         int defaultInstrumentIndex) override;
+  void setInstrumentList(const std::vector<std::string> &instruments) override;
   void updateMenuEnabledState(bool isProcessing) override;
   void setAutoreduceButtonEnabled(bool enabled) override;
   void setAutoreducePauseButtonEnabled(bool enabled) override;
@@ -67,6 +60,7 @@ public:
   void setSearchButtonEnabled(bool enabled) override;
   void setStartMonitorButtonEnabled(bool enabled) override;
   void setStopMonitorButtonEnabled(bool enabled) override;
+  void setUpdateIntervalSpinBoxEnabled(bool enabled) override;
 
   // Set the status of the progress bar
   void setProgressRange(int min, int max) override;
@@ -79,10 +73,12 @@ public:
   std::string getSearchInstrument() const override;
   void setSearchInstrument(std::string const &instrumentName) override;
   std::string getSearchString() const override;
+  std::string getSearchCycle() const override;
+  int getLiveDataUpdateInterval() const override;
 
-  boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  std::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const override;
-  boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  std::shared_ptr<MantidQt::API::AlgorithmRunner>
   getMonitorAlgorithmRunner() const override;
 
   // Live data monitor
@@ -95,8 +91,8 @@ private:
   /// Implement our own timer event to trigger autoreduction
   void timerEvent(QTimerEvent *event) override;
 
-  boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
-  boost::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
+  std::shared_ptr<MantidQt::API::AlgorithmRunner> m_algoRunner;
+  std::shared_ptr<MantidQt::API::AlgorithmRunner> m_monitorAlgoRunner;
 
   void setSelected(QComboBox &box, std::string const &str);
 
@@ -108,8 +104,6 @@ private:
 
   // the interface
   Ui::RunsWidget m_ui;
-  // the slit calculator
-  SlitCalculator *m_calculator;
 
   QtRunsTableView *m_tableView;
 
@@ -130,12 +124,9 @@ private slots:
   void onStartMonitorComplete();
   void onSearchComplete();
   void onInstrumentChanged(int index);
-  void onShowSlitCalculatorRequested();
   void onShowSearchContextMenuRequested(const QPoint &pos);
 };
 
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_ISISREFLECTOMETRY_QTRUNSVIEW_H_ */

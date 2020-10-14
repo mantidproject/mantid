@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SANSBEAMFLUXCORRECTION_H_
-#define MANTID_ALGORITHMS_SANSBEAMFLUXCORRECTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -46,11 +45,9 @@ private:
   void exec() override;
   void execEvent();
   API::MatrixWorkspace_sptr loadReference();
-  boost::shared_ptr<Kernel::PropertyManager> m_reductionManager;
+  std::shared_ptr<Kernel::PropertyManager> m_reductionManager;
   std::string m_output_message;
 };
 
 } // namespace WorkflowAlgorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_SANSBEAMFLUXCORRECTION_H_*/

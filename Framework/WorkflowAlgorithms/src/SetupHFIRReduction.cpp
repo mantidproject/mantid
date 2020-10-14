@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -53,7 +53,7 @@ void SetupHFIRReduction::init() {
   // Optionally, we can specify the wavelength and wavelength spread and
   // overwrite
   // the value in the data file (used when the data file is not populated)
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(
       "Wavelength", EMPTY_DBL(), mustBePositive,
@@ -76,7 +76,7 @@ void SetupHFIRReduction::init() {
                                          "Scattering"};
 
   declareProperty("BeamCenterMethod", "None",
-                  boost::make_shared<StringListValidator>(centerOptions),
+                  std::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the data beam center");
 
   //    Option 1: Set beam center by hand
@@ -102,7 +102,7 @@ void SetupHFIRReduction::init() {
 
   // declareProperty("Tolerance", EMPTY_DBL(), "Tolerance on the center of mass
   // position between each iteration [m]. Default: 0.00125");
-  auto positiveDouble = boost::make_shared<BoundedValidator<double>>();
+  auto positiveDouble = std::make_shared<BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty(
       "BeamRadius", EMPTY_DBL(),
@@ -126,7 +126,7 @@ void SetupHFIRReduction::init() {
   incidentBeamNormOptions.emplace_back("Timer");
   this->declareProperty(
       "Normalisation", "Monitor",
-      boost::make_shared<StringListValidator>(incidentBeamNormOptions),
+      std::make_shared<StringListValidator>(incidentBeamNormOptions),
       "Options for data normalisation");
 
   // Dark current
@@ -161,7 +161,7 @@ void SetupHFIRReduction::init() {
 
   // - sensitivity beam center
   declareProperty("SensitivityBeamCenterMethod", "None",
-                  boost::make_shared<StringListValidator>(centerOptions),
+                  std::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the sensitivity data beam center");
 
   //    Option 1: Set beam center by hand
@@ -215,7 +215,7 @@ void SetupHFIRReduction::init() {
   std::string trans_grp = "Transmission";
   std::vector<std::string> transOptions{"Value", "DirectBeam", "BeamSpreader"};
   declareProperty("TransmissionMethod", "Value",
-                  boost::make_shared<StringListValidator>(transOptions),
+                  std::make_shared<StringListValidator>(transOptions),
                   "Transmission determination method");
 
   // - Transmission value entered by hand
@@ -254,7 +254,7 @@ void SetupHFIRReduction::init() {
 
   // - transmission beam center
   declareProperty("TransmissionBeamCenterMethod", "None",
-                  boost::make_shared<StringListValidator>(centerOptions),
+                  std::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the transmission data beam center");
   setPropertySettings("TransmissionBeamCenterMethod",
                       std::make_unique<VisibleWhenProperty>(
@@ -363,7 +363,7 @@ void SetupHFIRReduction::init() {
   std::string bck_grp = "Background";
   declareProperty("BackgroundFiles", "", "Background data files");
   declareProperty("BckTransmissionMethod", "Value",
-                  boost::make_shared<StringListValidator>(transOptions),
+                  std::make_shared<StringListValidator>(transOptions),
                   "Transmission determination method");
 
   // - Transmission value entered by hand
@@ -403,7 +403,7 @@ void SetupHFIRReduction::init() {
 
   // - transmission beam center
   declareProperty("BckTransmissionBeamCenterMethod", "None",
-                  boost::make_shared<StringListValidator>(centerOptions),
+                  std::make_shared<StringListValidator>(centerOptions),
                   "Method for determining the transmission data beam center");
   setPropertySettings("BckTransmissionBeamCenterMethod",
                       std::make_unique<VisibleWhenProperty>(
@@ -522,7 +522,7 @@ void SetupHFIRReduction::init() {
   maskOptions.emplace_back("Front");
   maskOptions.emplace_back("Back");
   declareProperty("MaskedSide", "None",
-                  boost::make_shared<StringListValidator>(maskOptions),
+                  std::make_shared<StringListValidator>(maskOptions),
                   "Mask one side of the detector");
   declareProperty(
       "MaskedFullComponent", "",
@@ -541,7 +541,7 @@ void SetupHFIRReduction::init() {
   scaleOptions.emplace_back("Value");
   scaleOptions.emplace_back("ReferenceData");
   declareProperty("AbsoluteScaleMethod", "None",
-                  boost::make_shared<StringListValidator>(scaleOptions),
+                  std::make_shared<StringListValidator>(scaleOptions),
                   "Absolute scale correction method");
   declareProperty("AbsoluteScalingFactor", 1.0, "Absolute scaling factor");
   setPropertySettings("AbsoluteScalingFactor",
@@ -585,9 +585,9 @@ void SetupHFIRReduction::init() {
   std::string iq1d_grp = "I(q) Calculation";
   declareProperty("DoAzimuthalAverage", true);
   declareProperty(std::make_unique<ArrayProperty<double>>(
-      "IQBinning", boost::make_shared<RebinParamsValidator>(true)));
+      "IQBinning", std::make_shared<RebinParamsValidator>(true)));
 
-  auto positiveInt = boost::make_shared<BoundedValidator<int>>();
+  auto positiveInt = std::make_shared<BoundedValidator<int>>();
   positiveInt->setLower(0);
   declareProperty("IQNumberOfBins", 100, positiveInt,
                   "Number of I(q) bins when binning is not specified.");
@@ -643,8 +643,8 @@ void SetupHFIRReduction::exec() {
     g_log.error() << "ERROR: Reduction Property Manager name is empty\n";
     return;
   }
-  boost::shared_ptr<PropertyManager> reductionManager =
-      boost::make_shared<PropertyManager>();
+  std::shared_ptr<PropertyManager> reductionManager =
+      std::make_shared<PropertyManager>();
   PropertyManagerDataService::Instance().addOrReplace(reductionManagerName,
                                                       reductionManager);
 
@@ -904,7 +904,7 @@ void SetupHFIRReduction::exec() {
 }
 
 void SetupHFIRReduction::setupSensitivity(
-    boost::shared_ptr<PropertyManager> reductionManager) {
+    const std::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
 
   const std::string sensitivityFile = getPropertyValue("SensitivityFile");
@@ -994,7 +994,7 @@ void SetupHFIRReduction::setupSensitivity(
 }
 
 void SetupHFIRReduction::setupBackground(
-    boost::shared_ptr<PropertyManager> reductionManager) {
+    const std::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Background
   const std::string backgroundFile = getPropertyValue("BackgroundFiles");
@@ -1112,7 +1112,7 @@ void SetupHFIRReduction::setupBackground(
 }
 
 void SetupHFIRReduction::setupTransmission(
-    boost::shared_ptr<PropertyManager> reductionManager) {
+    const std::shared_ptr<PropertyManager> &reductionManager) {
   const std::string reductionManagerName = getProperty("ReductionProperties");
   // Transmission options
   const bool thetaDependentTrans = getProperty("ThetaDependentTransmission");

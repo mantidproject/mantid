@@ -1,20 +1,20 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REMOVELOWRESTOF_H_
-#define REMOVELOWRESTOF_H_
+#pragma once
 
 #include "MantidAPI/DistributedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 
 namespace Mantid {
 
 namespace Algorithms {
-class DLLExport RemoveLowResTOF : public API::DistributedAlgorithm {
+class MANTID_ALGORITHMS_DLL RemoveLowResTOF : public API::DistributedAlgorithm {
 public:
   RemoveLowResTOF();
   const std::string name() const override;
@@ -54,5 +54,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* REMOVELOWRESTOF_H_ */

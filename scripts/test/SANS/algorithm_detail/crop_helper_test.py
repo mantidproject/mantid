@@ -1,17 +1,16 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
-from sans.algorithm_detail.crop_helper import get_component_name
-from sans.common.enums import DetectorType
-from sans.common.constants import EMPTY_NAME
-from sans.common.general_functions import create_unmanaged_algorithm
+
 from mantid.api import FileFinder
+from sans.algorithm_detail.crop_helper import get_component_name
+from sans.common.constants import EMPTY_NAME
+from sans.common.enums import DetectorType
+from sans.common.general_functions import create_unmanaged_algorithm
 
 
 class CropHelperTest(unittest.TestCase):
@@ -26,21 +25,22 @@ class CropHelperTest(unittest.TestCase):
 
     def test_that_can_get_component_name_for_sans2d(self):
         workspace = self._get_workspace("SANS2D00022024")
-        self.assertEqual("front-detector",  get_component_name(workspace, DetectorType.HAB))
-        self.assertEqual("rear-detector",  get_component_name(workspace, DetectorType.LAB))
+        self.assertEqual("front-detector", get_component_name(workspace, DetectorType.HAB))
+        self.assertEqual("rear-detector", get_component_name(workspace, DetectorType.LAB))
 
     def test_that_can_get_component_name_for_loq(self):
         workspace = self._get_workspace("LOQ48127")
-        self.assertEqual("HAB",  get_component_name(workspace, DetectorType.HAB))
-        self.assertEqual("main-detector-bank",  get_component_name(workspace, DetectorType.LAB))
+        self.assertEqual("HAB", get_component_name(workspace, DetectorType.HAB))
+        self.assertEqual("main-detector-bank", get_component_name(workspace, DetectorType.LAB))
 
     def test_that_can_get_component_name_for_larmor(self):
         workspace = self._get_workspace("LARMOR00002260")
-        self.assertEqual("DetectorBench",  get_component_name(workspace, DetectorType.HAB))
+        self.assertEqual("DetectorBench", get_component_name(workspace, DetectorType.HAB))
 
     def test_that_can_get_component_name_for_zoom(self):
         # TODO when test data is available
         pass
+
 
 if __name__ == '__main__':
     unittest.main()

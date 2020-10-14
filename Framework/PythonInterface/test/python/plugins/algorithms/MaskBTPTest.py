@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
@@ -197,13 +195,13 @@ class MaskBTPTest(unittest.TestCase):
         ws_name = 'biosans_wing'
         LoadEmptyInstrument(InstrumentName='BIOSANS', OutputWorkspace=ws_name)
 
-        masked = MaskBTP(Workspace=ws_name, Bank=2, Tube='1:300:2')
+        masked = MaskBTP(Workspace=ws_name, Bank='49-88', Tube='1,3')
         wksp = mtd[ws_name]
         self.assertEqual(int(160 * 256 / 2), len(masked))
         self.checkConsistentMask(wksp, masked)
 
     def test_biosans_wing_ends(self):
-        masked = MaskBTP(Instrument='BIOSANS', Bank=2, Pixel='1-20,245-256')
+        masked = MaskBTP(Instrument='BIOSANS', Bank='49-88', Pixel='1-20,245-256')
         wksp = mtd['BIOSANSMaskBTP']
         self.assertEqual(int(32 * 160), len(masked))
         self.checkConsistentMask(wksp, masked)

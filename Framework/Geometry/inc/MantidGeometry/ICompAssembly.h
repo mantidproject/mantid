@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_ICOMPASSEMBLY_
-#define MANTID_GEOMETRY_ICOMPASSEMBLY_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IComponent.h"
@@ -47,17 +46,17 @@ public:
   virtual int addCopy(IComponent *, const std::string &) = 0;
   /// Get a pointer to the ith component within the assembly. Easier to use than
   /// [] when you have a pointer
-  virtual boost::shared_ptr<IComponent> getChild(const int i) const = 0;
+  virtual std::shared_ptr<IComponent> getChild(const int i) const = 0;
   /// Returns a pointer to the first component of assembly encountered with the
   /// given name
-  virtual boost::shared_ptr<const IComponent>
+  virtual std::shared_ptr<const IComponent>
   getComponentByName(const std::string &cname, int nlevels = 0) const = 0;
   /// Get all children
   virtual void getChildren(std::vector<IComponent_const_sptr> &outVector,
                            bool recursive) const = 0;
   /// Overloaded index operator. Get a pointer to the ith component in the
   /// assembly
-  virtual boost::shared_ptr<IComponent> operator[](int i) const = 0;
+  virtual std::shared_ptr<IComponent> operator[](int i) const = 0;
   /// Print information about all children
   virtual void printChildren(std::ostream &) const = 0;
   /** Print information about all the elements in the tree to a stream
@@ -80,11 +79,9 @@ private:
 };
 
 /// Shared pointer to a ICompAssembly
-using ICompAssembly_sptr = boost::shared_ptr<ICompAssembly>;
+using ICompAssembly_sptr = std::shared_ptr<ICompAssembly>;
 /// Shared pointer to a const ICompAssembly
-using ICompAssembly_const_sptr = boost::shared_ptr<const ICompAssembly>;
+using ICompAssembly_const_sptr = std::shared_ptr<const ICompAssembly>;
 
 } // Namespace Geometry
 } // Namespace Mantid
-
-#endif

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <stdexcept>
 
@@ -59,7 +59,7 @@ void SofQW::init() {
   const char *methodOptions[] = {"Centre", "Polygon", "NormalisedPolygon"};
   this->declareProperty(
       "Method", "Centre",
-      boost::make_shared<StringListValidator>(
+      std::make_shared<StringListValidator>(
           std::vector<std::string>(methodOptions, methodOptions + 3)),
       "Defines the method used to compute the output.");
 }
@@ -69,7 +69,7 @@ void SofQW::init() {
  * @param alg An algorithm object
  */
 void SofQW::createCommonInputProperties(API::Algorithm &alg) {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("DeltaE");
   wsValidator->add<SpectraAxisValidator>();
   wsValidator->add<CommonBinsValidator>();
@@ -85,15 +85,15 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
                       "The name to use for the q-omega workspace.");
   alg.declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "QAxisBinning", boost::make_shared<RebinParamsValidator>()),
+          "QAxisBinning", std::make_shared<RebinParamsValidator>()),
       "The bin parameters to use for the q axis (in the format used by the "
       ":ref:`algm-Rebin` algorithm).");
 
   const std::vector<std::string> propOptions{"Direct", "Indirect"};
   alg.declareProperty("EMode", "",
-                      boost::make_shared<StringListValidator>(propOptions),
+                      std::make_shared<StringListValidator>(propOptions),
                       "The energy transfer analysis mode (Direct/Indirect)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   alg.declareProperty("EFixed", 0.0, mustBePositive,
                       "The value of fixed energy: :math:`E_i` (EMode=Direct) "
@@ -105,7 +105,7 @@ void SofQW::createCommonInputProperties(API::Algorithm &alg) {
                       Direction::Input);
   alg.declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "EAxisBinning", boost::make_shared<RebinParamsValidator>(true)),
+          "EAxisBinning", std::make_shared<RebinParamsValidator>(true)),
       "The bin parameters to use for the E axis (optional, in the format "
       "used by the :ref:`algm-Rebin` algorithm).");
   alg.declareProperty(
@@ -123,7 +123,7 @@ void SofQW::exec() {
   std::string child = "SofQW" + method;
 
   // Setup and run
-  Algorithm_sptr childAlg = boost::dynamic_pointer_cast<Algorithm>(
+  Algorithm_sptr childAlg = std::dynamic_pointer_cast<Algorithm>(
       createChildAlgorithm(child, 0.0, 1.0));
   // This will add the Method property to the child algorithm but it will be
   // ignored anyway...

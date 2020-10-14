@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_MDTYPES_H_
-#define MANTID_GEOMETRY_MDTYPES_H_
+#pragma once
 
 /**
     This file contains typedefs for entities relating to multi-dimensional
@@ -62,5 +61,3 @@ using signal_t = double;
 #define UNDEF_COORDT std::numeric_limits<coord_t>::quiet_NaN()
 #define UNDEF_UINT64 std::numeric_limits<uint64_t>::max()
 } // namespace Mantid
-
-#endif // MANTID_GEOMETRY_MDTYPES_H_

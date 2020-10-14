@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from mantid.kernel import *
 from mantid.api import *
 
@@ -235,7 +234,7 @@ class EnggFocus(PythonAlgorithm):
         """
         alg = self.createChildAlgorithm('ApplyCalibration')
         alg.setProperty('Workspace', wks)
-        alg.setProperty('PositionTable', detector_positions)
+        alg.setProperty('CalibrationTable', detector_positions)
         alg.execute()
 
     def _convert_to_distribution(self, wks):

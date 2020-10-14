@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_REPOMODEL_H_
-#define MANTID_API_REPOMODEL_H_
+#pragma once
 #include "MantidAPI/ScriptRepository.h"
+#include "MantidQtWidgets/Common/DllOption.h"
 #include <QAbstractItemModel>
 #include <QDialog>
 #include <QFutureWatcher>
@@ -16,7 +16,6 @@
 #include <QStringList>
 #include <QVariant>
 #include <QWidget>
-#include <QtConcurrentRun>
 
 class QLineEdit;
 class QCheckBox;
@@ -73,7 +72,7 @@ const QString DELETABLEENTRY = "deletable";
   and the assignment
    will be make private to ensure this.
 */
-class RepoModel : public QAbstractItemModel {
+class EXPORT_OPT_MANTIDQT_COMMON RepoModel : public QAbstractItemModel {
   Q_OBJECT
 
   /** A nested class to help RepoModel to implement the QAbstractItemModel.
@@ -181,7 +180,7 @@ public:
   QModelIndex parent(const QModelIndex &index) const override;
   //// provide the number of the rows
   int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-  /// provide the nubmer of the coluns
+  /// provide the number of the columns
   int columnCount(const QModelIndex &parent = QModelIndex()) const override;
   /// change data
   bool setData(const QModelIndex &index, const QVariant &value,
@@ -253,5 +252,3 @@ private slots:
 
 } // namespace API
 } // namespace MantidQt
-
-#endif /* MANTID_API_SCRIPTREPOSITORYVIEW_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/vtkDataSetToNonOrthogonalDataSet.h"
 #include "MantidAPI/CoordTransform.h"
@@ -148,7 +148,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   // Have to cast since inherited class doesn't provide access to all info
   if (boost::algorithm::find_first(wsType, "MDHistoWorkspace")) {
     API::IMDHistoWorkspace_const_sptr infoWs =
-        boost::dynamic_pointer_cast<const API::IMDHistoWorkspace>(ws);
+        std::dynamic_pointer_cast<const API::IMDHistoWorkspace>(ws);
 
     m_boundingBox[0] = infoWs->getXDimension()->getMinimum();
     m_boundingBox[1] = infoWs->getXDimension()->getMaximum();
@@ -187,7 +187,7 @@ void vtkDataSetToNonOrthogonalDataSet::execute(ProgressAction *progress) {
   // This is only here to make the unit test run.
   if (boost::algorithm::find_first(wsType, "MDEventWorkspace")) {
     API::IMDEventWorkspace_const_sptr infoWs =
-        boost::dynamic_pointer_cast<const API::IMDEventWorkspace>(ws);
+        std::dynamic_pointer_cast<const API::IMDEventWorkspace>(ws);
 
     m_boundingBox[0] = infoWs->getXDimension()->getMinimum();
     m_boundingBox[1] = infoWs->getXDimension()->getMaximum();

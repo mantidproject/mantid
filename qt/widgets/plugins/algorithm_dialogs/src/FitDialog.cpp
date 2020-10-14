@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------
 // Includes
@@ -455,7 +455,7 @@ void FitDialog::createInputWorkspaceWidgets() {
   if (!fun)
     return;
   auto multid =
-      boost::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>(fun);
+      std::dynamic_pointer_cast<Mantid::API::MultiDomainFunction>(fun);
   if (multid) {
     // number of domains that the function expects
     size_t nd = multid->getMaxIndex();
@@ -514,11 +514,11 @@ namespace {
  * Helper function to check if a function is an MD one.
  * @param fun :: Function to check
  */
-bool isFunctionMD(Mantid::API::IFunction_sptr fun) {
-  auto cf = boost::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
+bool isFunctionMD(const Mantid::API::IFunction_sptr &fun) {
+  auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
   if (!cf)
     return static_cast<bool>(
-        boost::dynamic_pointer_cast<Mantid::API::IFunctionMD>(fun));
+        std::dynamic_pointer_cast<Mantid::API::IFunctionMD>(fun));
   for (size_t i = 0; i < cf->nFunctions(); ++i) {
     bool yes = isFunctionMD(cf->getFunction(i));
     if (yes)

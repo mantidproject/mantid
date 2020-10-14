@@ -22,8 +22,7 @@
 //		Initial release
 //----------------------------------------------------------------------
 
-#ifndef ANN_kd_util_H
-#define ANN_kd_util_H
+#pragma once
 
 #include "kd_tree.h" // kd-tree declarations
 
@@ -120,5 +119,3 @@ void annBnds2Box(               // convert bounds to inner box
     int n_bnds,                 // number of bounds
     ANNorthHSArray bnds,        // bounds array
     ANNorthRect &inner_box);    // inner box (returned)
-
-#endif

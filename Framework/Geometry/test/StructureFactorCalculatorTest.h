@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_STRUCTUREFACTORCALCULATORTEST_H_
-#define MANTID_GEOMETRY_STRUCTUREFACTORCALCULATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -17,9 +16,9 @@
 
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
+using ::testing::_;
 using ::testing::Mock;
 using ::testing::Return;
-using ::testing::_;
 
 class StructureFactorCalculatorTest : public CxxTest::TestSuite {
 public:
@@ -112,5 +111,3 @@ private:
     GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 };
-
-#endif /* MANTID_GEOMETRY_STRUCTUREFACTORCALCULATORTEST_H_ */

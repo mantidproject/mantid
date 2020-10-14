@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef BINARYFILETEST_H_
-#define BINARYFILETEST_H_
+#pragma once
 
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/ConfigService.h"
@@ -34,7 +33,7 @@ struct DasEvent {
 };
 
 /** Creates a dummy file with so many bytes */
-static void MakeDummyFile(std::string filename, size_t num_bytes) {
+static void MakeDummyFile(const std::string &filename, size_t num_bytes) {
   std::vector<char> buffer(num_bytes);
   for (size_t i = 0; i < num_bytes; i++) {
     // Put 1,2,3 in 32-bit ints
@@ -191,5 +190,3 @@ public:
     TS_ASSERT_THROWS(file2.loadBlock(buffer, 10), const std::runtime_error &);
   }
 };
-
-#endif /*BINARYFILETEST_H_*/

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/Cluster.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
@@ -52,7 +52,7 @@ size_t Cluster::size() const { return m_indexes.size(); }
  * Add the index to the cluster
  * @param index : index to add
  */
-void Cluster::addIndex(const size_t &index) { m_indexes.push_back(index); }
+void Cluster::addIndex(const size_t &index) { m_indexes.emplace_back(index); }
 
 /**
  * Apply the cluster to the image

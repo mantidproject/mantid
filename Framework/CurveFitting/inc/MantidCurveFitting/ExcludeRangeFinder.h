@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_EXCLUDERANGEFINDER_H_
-#define MANTID_CURVEFITTING_EXCLUDERANGEFINDER_H_
+#pragma once
 
 #include "MantidCurveFitting/DllConfig.h"
 
@@ -20,7 +19,7 @@ checked value. A relevant region is the one which either includes the value or
 the nearest one with the left boundary greater than the value. The class also
 keeps the index of the region (its left boundary) for efficient search.
 */
-class DLLExport ExcludeRangeFinder {
+class MANTID_CURVEFITTING_DLL ExcludeRangeFinder {
 public:
   /// Constructor
   ExcludeRangeFinder(const std::vector<double> &exclude, double startX,
@@ -46,5 +45,3 @@ private:
 
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_EXCLUDERANGEFINDER_H_ */

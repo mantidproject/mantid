@@ -1,12 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/Kafka/KafkaEventListener.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include "MantidLiveData/Kafka/KafkaBroker.h"
 #include "MantidLiveData/Kafka/KafkaEventStreamDecoder.h"
 #include "MantidLiveData/Kafka/KafkaTopicSubscriber.h"
@@ -45,21 +47,51 @@ bool KafkaEventListener::connect(const Poco::Net::SocketAddress &address) {
         "KafkaEventListener::connect requires a non-empty instrument name");
   }
 
+  auto instrumentInfo =
+      Kernel::ConfigService::Instance().getInstrument(m_instrumentName);
+
+  // Get topics from Facilites.xml if available otherwise use defaults.
+  auto topics = instrumentInfo.topicInfoList();
+
+  std::string eventTopic(m_instrumentName +
+                         KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX),
+      runInfoTopic(m_instrumentName + KafkaTopicSubscriber::RUN_TOPIC_SUFFIX),
+      sampleEnvTopic(m_instrumentName +
+                     KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX),
+      chopperTopic(m_instrumentName +
+                   KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX),
+      monitorTopic(m_instrumentName +
+                   KafkaTopicSubscriber::MONITOR_TOPIC_SUFFIX);
+
+  for (const auto &topic : topics) {
+    switch (topic.type()) {
+    case Kernel::TopicType::Event:
+      eventTopic = topic.name();
+      break;
+    case Kernel::TopicType::Chopper:
+      chopperTopic = topic.name();
+      break;
+    case Kernel::TopicType::Sample:
+      sampleEnvTopic = topic.name();
+      break;
+    case Kernel::TopicType::Run:
+      runInfoTopic = topic.name();
+      break;
+    case Kernel::TopicType::Monitor:
+      monitorTopic = topic.name();
+      break;
+    }
+  }
+
   const std::size_t bufferThreshold = getProperty("BufferThreshold");
   auto broker = std::make_shared<KafkaBroker>(address.toString());
   try {
-    const std::string eventTopic(m_instrumentName +
-                                 KafkaTopicSubscriber::EVENT_TOPIC_SUFFIX),
-        runInfoTopic(m_instrumentName + KafkaTopicSubscriber::RUN_TOPIC_SUFFIX),
-        spDetInfoTopic(m_instrumentName +
-                       KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX),
-        sampleEnvTopic(m_instrumentName +
-                       KafkaTopicSubscriber::SAMPLE_ENV_TOPIC_SUFFIX),
-        chopperTopic(m_instrumentName +
-                     KafkaTopicSubscriber::CHOPPER_TOPIC_SUFFIX);
+    const std::string spDetInfoTopic(
+        m_instrumentName + KafkaTopicSubscriber::DET_SPEC_TOPIC_SUFFIX);
+
     m_decoder = std::make_unique<KafkaEventStreamDecoder>(
         broker, eventTopic, runInfoTopic, spDetInfoTopic, sampleEnvTopic,
-        chopperTopic, bufferThreshold);
+        chopperTopic, monitorTopic, bufferThreshold);
   } catch (std::exception &exc) {
     g_log.error() << "KafkaEventListener::connect - Connection Error: "
                   << exc.what() << "\n";
@@ -86,7 +118,7 @@ void KafkaEventListener::start(Types::Core::DateAndTime startTime) {
 }
 
 /// @copydoc ILiveListener::extractData
-boost::shared_ptr<API::Workspace> KafkaEventListener::extractData() {
+std::shared_ptr<API::Workspace> KafkaEventListener::extractData() {
   assert(m_decoder);
   // The first call to extract is very early in the start live data process
   // and we may not be completely ready yet, wait upto a maximum of 5 seconds

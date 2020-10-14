@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -11,6 +11,8 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidKernel/V3D.h"
+#include "MantidKernel/WarningSuppressions.h"
+#include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/Converters/CloneToNDArray.h"
 #include "MantidPythonInterface/core/Converters/NDArrayToVector.h"
 #include "MantidPythonInterface/core/Converters/PySequenceToVector.h"
@@ -18,7 +20,6 @@
 #include "MantidPythonInterface/core/NDArray.h"
 #include "MantidPythonInterface/core/Policies/VectorToNumpy.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
-#include "MantidPythonInterface/kernel/Registry/RegisterWorkspacePtrToPython.h"
 
 #include <boost/preprocessor/list/for_each.hpp>
 #include <boost/preprocessor/tuple/to_list.hpp>
@@ -27,6 +28,7 @@
 #include <boost/python/dict.hpp>
 #include <boost/python/list.hpp>
 #include <boost/python/make_constructor.hpp>
+#include <boost/python/overloads.hpp>
 
 #include <cstring>
 #include <vector>
@@ -80,7 +82,7 @@ namespace {
  * @param typeID The python identifier of the column type.
  * @param row The row to get the value from.
  */
-PyObject *getValue(Mantid::API::Column_const_sptr column,
+PyObject *getValue(const Mantid::API::Column_const_sptr &column,
                    const std::type_info &typeID, const int row) {
   if (typeID.hash_code() == typeid(Mantid::API::Boolean).hash_code()) {
     bool res = column->cell<Mantid::API::Boolean>(row);
@@ -127,7 +129,7 @@ PyObject *getValue(Mantid::API::Column_const_sptr column,
  * @param row :: The index of the row
  * @param value :: The value to set
  */
-void setValue(const Column_sptr column, const int row, const object &value) {
+void setValue(const Column_sptr &column, const int row, const object &value) {
   const auto &typeID = column->get_type_info();
 
   // Special case: Treat Mantid Boolean as normal bool
@@ -229,8 +231,11 @@ int getPlotType(ITableWorkspace &self, const object &column) {
  * @param self Reference to TableWorkspace this is called on
  * @param column Name or index of column
  * @param ptype PlotType: 0=None, 1=X, 2=Y, 3=Z, 4=xErr, 5=yErr, 6=Label
+ * @param linkedCol Index of the column that the column parameter is linked to
+ * (typically used for an error column)
  */
-void setPlotType(ITableWorkspace &self, const object &column, int ptype) {
+void setPlotType(ITableWorkspace &self, const object &column, int ptype,
+                 int linkedCol = -1) {
   // Find the column
   Mantid::API::Column_sptr colptr;
   if (STR_CHECK(column.ptr())) {
@@ -239,7 +244,55 @@ void setPlotType(ITableWorkspace &self, const object &column, int ptype) {
     colptr = self.getColumn(extract<int>(column)());
   }
   colptr->setPlotType(ptype);
+  if (linkedCol >= 0) {
+    colptr->setLinkedYCol(linkedCol);
+  }
   self.modified();
+}
+
+GNU_DIAG_OFF("unused-local-typedef")
+// Ignore -Wconversion warnings coming from boost::python
+// Seen with GCC 7.1.1 and Boost 1.63.0
+GNU_DIAG_OFF("conversion")
+BOOST_PYTHON_FUNCTION_OVERLOADS(setPlotType_overloads, setPlotType, 3, 4)
+GNU_DIAG_ON("conversion")
+GNU_DIAG_ON("unused-local-typedef")
+
+/**
+ * Get the data column associated with a Y error column
+ * @param self Reference to TableWorkspace this is called on
+ * @param column Name or index of column
+ * @return index of the associated Y column
+ */
+int getLinkedYCol(ITableWorkspace &self, const object &column) {
+  // Find the column
+  Mantid::API::Column_const_sptr colptr;
+  if (STR_CHECK(column.ptr())) {
+    colptr = self.getColumn(extract<std::string>(column)());
+  } else {
+    colptr = self.getColumn(extract<int>(column)());
+  }
+
+  return colptr->getLinkedYCol();
+}
+
+/**
+ * Link a data column associated with a Y error column
+ * @param self Reference to TableWorkspace this is called on
+ * @param column Name or index of error column
+ * @return index of the associated Y column
+ */
+void setLinkedYCol(ITableWorkspace &self, const object &errColumn,
+                   const int dataColomn) {
+  // Find the column
+  Mantid::API::Column_sptr colptr;
+  if (STR_CHECK(errColumn.ptr())) {
+    colptr = self.getColumn(extract<std::string>(errColumn)());
+  } else {
+    colptr = self.getColumn(extract<int>(errColumn)());
+  }
+
+  colptr->setLinkedYCol(dataColomn);
 }
 
 /**
@@ -362,10 +415,7 @@ void addRowFromDict(ITableWorkspace &self, const dict &rowItems) {
     // Wrong type of data for one of the columns
     if (PyErr_ExceptionMatches(PyExc_TypeError)) {
       std::ostringstream msg;
-      msg << "Wrong datatype <";
-      msg << std::string(
-          extract<std::string>(value.attr("__class__").attr("__name__")));
-      msg << "> for column <" << col->name() << "> ";
+      msg << "Wrong datatype for column <" << col->name() << "> ";
       msg << "(expected <" << col->type() << ">)";
       PyErr_SetString(PyExc_TypeError, msg.str().c_str());
     }
@@ -410,10 +460,7 @@ void addRowFromSequence(ITableWorkspace &self, const object &rowItems) {
       // Wrong type of data for one of the columns
       if (PyErr_ExceptionMatches(PyExc_TypeError)) {
         std::ostringstream msg;
-        msg << "Wrong datatype <";
-        msg << std::string(
-            extract<std::string>(value.attr("__class__").attr("__name__")));
-        msg << "> for column <" << col->name() << "> ";
+        msg << "Wrong datatype for column <" << col->name() << "> ";
         msg << "(expected <" << col->type() << ">)";
         PyErr_SetString(PyExc_TypeError, msg.str().c_str());
       }
@@ -514,7 +561,7 @@ public:
     return data;
   }
 
-  static void setstate(ITableWorkspace &ws, dict state) {
+  static void setstate(ITableWorkspace &ws, const dict &state) {
     readMetaData(ws, state);
     readData(ws, state);
   }
@@ -619,11 +666,21 @@ void export_ITableWorkspace() {
            "Accepts column name or index. \nPossible return values: "
            "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
 
-      .def("setPlotType", &setPlotType,
-           (arg("self"), arg("column"), arg("ptype")),
-           "Set the plot type of given column. "
-           "Accepts column name or index. \nPossible type values: "
-           "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = Label).")
+      .def(
+          "setPlotType", setPlotType,
+          setPlotType_overloads(
+              (arg("self"), arg("column"), arg("ptype"), arg("linkedCol") = -1),
+              "Set the plot type of given column. "
+              "Accepts column name or index. \nPossible type values: "
+              "(0 = None, 1 = X, 2 = Y, 3 = Z, 4 = xErr, 5 = yErr, 6 = "
+              "Label)."))
+
+      .def("getLinkedYCol", &getLinkedYCol, (arg("self"), arg("column")),
+           "Get the data column associated with a given error column. ")
+
+      .def("setLinkedYCol", &setLinkedYCol,
+           (arg("self"), arg("errColumn"), arg("dataColumn")),
+           "Set the data column associated with a given error column. ")
 
       .def("removeColumn", &ITableWorkspace::removeColumn,
            (arg("self"), arg("name")), "Remove the named column.")

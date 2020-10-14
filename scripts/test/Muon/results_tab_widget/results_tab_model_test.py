@@ -1,26 +1,24 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import (absolute_import, print_function, unicode_literals)
-
-from collections import OrderedDict
-from copy import deepcopy
 import datetime
 import unittest
+from collections import OrderedDict
+from copy import deepcopy
+from unittest import mock
 
-from mantid.api import AnalysisDataService, ITableWorkspace, WorkspaceFactory, WorkspaceGroup
-from mantid.kernel import FloatTimeSeriesProperty, StringPropertyWithValue
-from mantid.py3compat import iteritems, mock, string_types
-from mantid.simpleapi import Load
-from mantidqt.utils.qt.testing import start_qapplication
-
+from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformation
 from Muon.GUI.Common.results_tab_widget.results_tab_model import (
     DEFAULT_TABLE_NAME, ResultsTabModel, TableColumnType)
-from Muon.GUI.Common.contexts.fitting_context import FittingContext, FitInformation
+from mantidqt.utils.qt.testing import start_qapplication
+
+from mantid.api import AnalysisDataService, ITableWorkspace
+from mantid.kernel import FloatTimeSeriesProperty
+from mantid.simpleapi import Load
 
 
 def create_test_workspace(ws_name=None):
@@ -51,7 +49,7 @@ def create_test_fits(input_workspaces,
         'Name': name,
         'Value': value,
         'Error': error
-    } for name, (value, error) in iteritems(parameters)]
+    } for name, (value, error) in parameters.items()]
 
     fits = []
     for name in input_workspaces:
@@ -166,7 +164,7 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertEqual(model.selected_fit_function(), new_selection)
 
     def test_model_returns_fit_functions_from_context(self):
-        _, model = create_test_model(('ws1', ), 'func1', self.parameters, [],
+        _, model = create_test_model(('ws1',), 'func1', self.parameters, [],
                                      self.logs)
 
         self.assertEqual(['func1'], model.fit_functions())
@@ -202,7 +200,7 @@ class ResultsTabModelTest(unittest.TestCase):
         self.assertEqual(0, len(model.log_selection({})))
 
     def test_model_combines_existing_log_selection(self):
-        _, model = create_test_model(('ws1', ), 'func1', self.parameters)
+        _, model = create_test_model(('ws1',), 'func1', self.parameters)
         model._fit_context.log_names = mock.MagicMock()
         model._fit_context.log_names.return_value = [
             'run_number', 'run_start', 'magnetic_field'
@@ -223,7 +221,7 @@ class ResultsTabModelTest(unittest.TestCase):
                              model.log_selection(existing_selection))
 
     def test_create_results_table_with_no_logs_or_global_parameters(self):
-        _, model = create_test_model(('ws1', ), 'func1', self.parameters, [])
+        _, model = create_test_model(('ws1',), 'func1', self.parameters, [])
         logs = []
         selected_results = [('ws1', 0)]
         table = model.create_results_table(logs, selected_results)
@@ -253,7 +251,7 @@ class ResultsTabModelTest(unittest.TestCase):
                                             model.results_table_name())
 
     def test_create_results_table_with_logs_selected(self):
-        _, model = create_test_model(('ws1', ), 'func1', self.parameters, ('ws1', ),
+        _, model = create_test_model(('ws1',), 'func1', self.parameters, ('ws1',),
                                      self.logs)
         selected_results = [('ws1', 0)]
         table = model.create_results_table(self.log_names, selected_results)
@@ -288,7 +286,7 @@ class ResultsTabModelTest(unittest.TestCase):
     def test_create_results_table_with_fit_with_global_parameters(self):
         logs = []
         global_parameters = ['Height']
-        _, model = create_test_model(('simul-1', ), 'func1', self.parameters,
+        _, model = create_test_model(('simul-1',), 'func1', self.parameters,
                                      [], logs, global_parameters)
         selected_results = [('simul-1', 0)]
         table = model.create_results_table(logs, selected_results)
@@ -320,11 +318,11 @@ class ResultsTabModelTest(unittest.TestCase):
             self):
         parameters = OrderedDict([('Height', (100, 0.1)),
                                   ('Cost function value', (1.5, 0))])
-        fits_func1 = create_test_fits(('ws1', ), 'func1', parameters, [])
+        fits_func1 = create_test_fits(('ws1',), 'func1', parameters, [])
 
         parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)),
                                   ('Cost function value', (1.5, 0))])
-        fits_func2 = create_test_fits(('ws2', ), 'func2', parameters, [])
+        fits_func2 = create_test_fits(('ws2',), 'func2', parameters, [])
         model = ResultsTabModel(FittingContext(fits_func1 + fits_func2))
 
         selected_results = [('ws1', 0), ('ws2', 1)]
@@ -336,8 +334,8 @@ class ResultsTabModelTest(unittest.TestCase):
         parameters = OrderedDict([('f0.Height', (100, 0.1)),
                                   ('f1.Height', (90, 0.001)),
                                   ('Cost function value', (1.5, 0))])
-        fits_func1 = create_test_fits(('ws1', ), 'func1', parameters, [])
-        fits_globals = create_test_fits(('ws2', ),
+        fits_func1 = create_test_fits(('ws1',), 'func1', parameters, [])
+        fits_globals = create_test_fits(('ws2',),
                                         'func1',
                                         parameters, [],
                                         global_parameters=['Height'])
@@ -352,10 +350,10 @@ class ResultsTabModelTest(unittest.TestCase):
         parameters = OrderedDict([('f0.Height', (100, 0.1))])
         logs = [('log1', (1., 2.)), ('log2', (3., 4.)), ('log3', (4., 5.)),
                 ('log4', (5., 6.))]
-        fits_logs1 = create_test_fits(('ws1', ), 'func1', parameters, output_workspace_names=('ws1', ))
+        fits_logs1 = create_test_fits(('ws1',), 'func1', parameters, output_workspace_names=('ws1',))
         add_logs(fits_logs1[0].input_workspaces[0], logs[:2])
 
-        fits_logs2 = create_test_fits(('ws2', ), 'func1', parameters, output_workspace_names=('ws2', ))
+        fits_logs2 = create_test_fits(('ws2',), 'func1', parameters, output_workspace_names=('ws2',))
         add_logs(fits_logs2[0].input_workspaces[0], logs[2:])
         model = ResultsTabModel(FittingContext(fits_logs1 + fits_logs2))
 
@@ -363,6 +361,20 @@ class ResultsTabModelTest(unittest.TestCase):
         selected_logs = ['log1', 'log3']
         self.assertRaises(RuntimeError, model.create_results_table,
                           selected_logs, selected_results)
+
+    def test_that_when_new_fit_is_performed_function_name_is_set_to_lastest_fit_name(self):
+        parameters = OrderedDict([('Height', (100, 0.1)),
+                                  ('Cost function value', (1.5, 0))])
+        fits_func1 = create_test_fits(('ws1',), 'func1', parameters, [])
+
+        parameters = OrderedDict([('Height', (100, 0.1)), ('A0', (1, 0.001)),
+                                  ('Cost function value', (1.5, 0))])
+        fits_func2 = create_test_fits(('ws2',), 'func2', parameters, [])
+        model = ResultsTabModel(FittingContext(fits_func1 + fits_func2))
+
+        model.on_new_fit_performed()
+
+        self.assertEqual(model.selected_fit_function(), 'func2')
 
     # ---------------------- Private helper functions -------------------------
 
@@ -382,7 +394,7 @@ class ResultsTabModelTest(unittest.TestCase):
             self.assertEqual(len(expected_row), len(actual_row))
             for col_index, expected in enumerate(expected_row):
                 actual = table.cell(row_index, col_index)
-                if isinstance(expected, string_types):
+                if isinstance(expected, str):
                     self.assertEqual(expected, actual)
                 else:
                     # Fit pushes things back/forth through strings so exact match is not possible

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h"
 
@@ -44,7 +44,7 @@ RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
       MatrixWorkspace_sptr matrixws =
           AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(input);
       if (matrixws)
-        outputs.push_back(matrixws->getName());
+        outputs.emplace_back(matrixws->getName());
       else
         throw(std::runtime_error(
             "The input " + input +
@@ -59,7 +59,8 @@ RunCombinationHelper::unWrapGroups(const std::vector<std::string> &inputs) {
  * to later check the compatibility of the others with the reference
  * @param ref : the reference workspace
  */
-void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
+void RunCombinationHelper::setReferenceProperties(
+    const MatrixWorkspace_sptr &ref) {
   m_numberSpectra = ref->getNumberHistograms();
   m_numberDetectors = ref->detectorInfo().size();
   m_xUnit = ref->getAxis(0)->unit()->unitID();
@@ -71,7 +72,7 @@ void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
   if (m_numberSpectra) {
     m_hasDx.reserve(m_numberSpectra);
     for (unsigned int i = 0; i < m_numberSpectra; ++i)
-      m_hasDx.push_back(ref->hasDx(i));
+      m_hasDx.emplace_back(ref->hasDx(i));
   }
 }
 
@@ -82,7 +83,7 @@ void RunCombinationHelper::setReferenceProperties(MatrixWorkspace_sptr ref) {
  * @return : empty if compatible, error message otherwises
  */
 std::string
-RunCombinationHelper::checkCompatibility(MatrixWorkspace_sptr ws,
+RunCombinationHelper::checkCompatibility(const MatrixWorkspace_sptr &ws,
                                          bool checkNumberHistograms) {
   std::string errors;
   if (ws->getNumberHistograms() != m_numberSpectra && checkNumberHistograms)

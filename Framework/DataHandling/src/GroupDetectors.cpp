@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -26,7 +26,7 @@ void GroupDetectors::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "Workspace", "", Direction::InOut,
-          boost::make_shared<CommonBinsValidator>()),
+          std::make_shared<CommonBinsValidator>()),
       "The name of the workspace2D on which to perform the algorithm");
 
   declareProperty(

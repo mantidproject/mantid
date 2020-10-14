@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_PRODUCTGROUPTEST_H_
-#define MANTID_GEOMETRY_PRODUCTGROUPTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -34,13 +33,13 @@ public:
 
   void testVectorConstructor() {
     std::vector<Group_const_sptr> groups;
-    groups.push_back(GroupFactory::create<CyclicGroup>("-x,-y,-z"));
-    groups.push_back(GroupFactory::create<CyclicGroup>("x,-y,z"));
+    groups.emplace_back(GroupFactory::create<CyclicGroup>("-x,-y,-z"));
+    groups.emplace_back(GroupFactory::create<CyclicGroup>("x,-y,z"));
 
     TS_ASSERT_THROWS_NOTHING(ProductOfCyclicGroups group(groups));
 
     Group_const_sptr null;
-    groups.push_back(null);
+    groups.emplace_back(null);
 
     TS_ASSERT_THROWS_ANYTHING(ProductOfCyclicGroups group(groups));
   }
@@ -71,8 +70,8 @@ public:
     TestableProductOfCyclicGroups group;
 
     std::vector<Group_const_sptr> groups;
-    groups.push_back(GroupFactory::create<CyclicGroup>("-x,-y,-z"));
-    groups.push_back(GroupFactory::create<CyclicGroup>("x,-y,z"));
+    groups.emplace_back(GroupFactory::create<CyclicGroup>("-x,-y,-z"));
+    groups.emplace_back(GroupFactory::create<CyclicGroup>("x,-y,z"));
 
     Group_const_sptr productGroup = group.getProductOfCyclicGroups(groups);
 
@@ -88,5 +87,3 @@ private:
     ~TestableProductOfCyclicGroups() override {}
   };
 };
-
-#endif /* MANTID_GEOMETRY_PRODUCTGROUPTEST_H_ */

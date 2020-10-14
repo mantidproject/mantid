@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_PROPERTYWIDGET_H_
-#define MANTID_API_PROPERTYWIDGET_H_
+#pragma once
 
 #include "MantidKernel/Property.h"
 #include "MantidKernel/System.h"
@@ -54,6 +53,11 @@ class EXPORT_OPT_MANTIDQT_COMMON PropertyWidget : public QWidget {
   Q_OBJECT
 
 public:
+  /// Set the placeholder text of the given field based on the default value of
+  /// the given property.
+  static void setFieldPlaceholderText(Mantid::Kernel::Property *prop,
+                                      QLineEdit *field);
+
   enum Info { INVALID, REPLACE, RESTORE };
 
   PropertyWidget(Mantid::Kernel::Property *prop, QWidget *parent = nullptr,
@@ -123,11 +127,6 @@ protected:
   /// the given property.
   static void setLabelFont(Mantid::Kernel::Property *prop, QWidget *label);
 
-  /// Set the placeholder text of the given field based on the default value of
-  /// the given property.
-  static void setFieldPlaceholderText(Mantid::Kernel::Property *prop,
-                                      QLineEdit *field);
-
   /// Property being looked at. This is NOT owned by the widget
   Mantid::Kernel::Property *m_prop;
 
@@ -171,5 +170,3 @@ protected:
 
 } // namespace API
 } // namespace MantidQt
-
-#endif /* MANTID_API_PROPERTYWIDGET_H_ */

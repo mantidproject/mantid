@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_MATERIALBUILDERTEST_H_
-#define MANTID_KERNEL_MATERIALBUILDERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -99,7 +98,7 @@ public:
     TS_ASSERT_EQUALS(mat.totalScatterXSection(), 2.3)
     TS_ASSERT_EQUALS(mat.cohScatterXSection(), 0.5)
     TS_ASSERT_EQUALS(mat.incohScatterXSection(), 5.0)
-    TS_ASSERT_EQUALS(mat.absorbXSection(), 0.23)
+    TS_ASSERT_DELTA(mat.absorbXSection(), 0.23, 1e-8)
   }
 
   void test_Number_Density_Set_By_Formula_ZParameter_And_Cell_Volume() {
@@ -250,5 +249,3 @@ public:
     TS_ASSERT_THROWS(builder.build(), const std::runtime_error &)
   }
 };
-
-#endif /* MANTID_KERNEL_MATERIALBUILDERTEST_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MDFPlotController.h"
 
@@ -17,7 +17,7 @@
 #include "MantidQtWidgets/Common/PythonRunner.h"
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include <QMessageBox>
 
@@ -119,8 +119,8 @@ void PlotController::nextPlot() {
 
 /// Get a pointer to a dataset data.
 /// @param index :: Index of a dataset.
-boost::shared_ptr<DatasetPlotData> PlotController::getData(int index) {
-  auto data = boost::shared_ptr<DatasetPlotData>();
+std::shared_ptr<DatasetPlotData> PlotController::getData(int index) {
+  auto data = std::shared_ptr<DatasetPlotData>();
   if (index < 0)
     return data;
   if (!m_plotData.contains(index)) {
@@ -128,8 +128,8 @@ boost::shared_ptr<DatasetPlotData> PlotController::getData(int index) {
     int wsIndex = owner()->getWorkspaceIndex(index);
     QString outputWorkspaceName = owner()->getOutputWorkspaceName(index);
     try {
-      data = boost::make_shared<DatasetPlotData>(wsName, wsIndex,
-                                                 outputWorkspaceName);
+      data = std::make_shared<DatasetPlotData>(wsName, wsIndex,
+                                               outputWorkspaceName);
       m_plotData.insert(index, data);
     } catch (std::exception &e) {
       QMessageBox::critical(owner(), "Mantid - Error", e.what());

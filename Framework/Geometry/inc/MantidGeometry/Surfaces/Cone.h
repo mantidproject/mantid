@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef Cone_h
-#define Cone_h
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
@@ -87,9 +86,9 @@ public:
                       double &ymin, double &zmin) override;
 
   /// The number of slices to approximate a cone
-  constexpr static int g_nslices = 10;
+  constexpr static int g_NSLICES = 10;
   /// The number of stacks to approximate a cone
-  constexpr static int g_nstacks = 1;
+  constexpr static int g_NSTACKS = 1;
 #ifdef ENABLE_OPENCASCADE
   TopoDS_Shape createShape() override;
 #endif
@@ -98,5 +97,3 @@ public:
 } // namespace Geometry
 
 } // NAMESPACE Mantid
-
-#endif

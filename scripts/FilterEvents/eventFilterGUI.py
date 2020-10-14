@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, too-many-lines, too-many-instance-attributes
-from __future__ import (absolute_import, division, print_function)
 import numpy
 
 from qtpy.QtWidgets import (QFileDialog, QMainWindow, QMessageBox, QSlider, QVBoxLayout, QWidget)  # noqa
@@ -198,7 +197,7 @@ class MainWindow(QMainWindow):
         self._defaultdir = os.getcwd()
 
         # register startup
-        mantid.UsageService.registerFeatureUsage("Interface", "EventFilter", False)
+        mantid.UsageService.registerFeatureUsage(mantid.kernel.FeatureType.Interface, "EventFilter", False)
 
     def on_mouseDownEvent(self, event):
         """ Respond to pick up a value with mouse down event
@@ -963,17 +962,15 @@ class MainWindow(QMainWindow):
         fastLog = self.ui.checkBox_fastLog.isChecked()
 
         title = str(self.ui.lineEdit_title.text())
-
-        splitws, infows = api.GenerateEventsFilter(InputWorkspace=self._dataWS,
-                                                   UnitOfTime="Seconds",
-                                                   TitleOfSplitters=title,
-                                                   OutputWorkspace=splitwsname,
-                                                   LogName=samplelog,
-                                                   FastLog=fastLog,
-                                                   InformationWorkspace=splitinfowsname,
-                                                   **kwargs)
-
         try:
+            splitws, infows = api.GenerateEventsFilter(InputWorkspace=self._dataWS,
+                                                       UnitOfTime="Seconds",
+                                                       TitleOfSplitters=title,
+                                                       OutputWorkspace=splitwsname,
+                                                       LogName=samplelog,
+                                                       FastLog=fastLog,
+                                                       InformationWorkspace=splitinfowsname,
+                                                       **kwargs)
             self.splitWksp(splitws, infows)
         except RuntimeError as e:
             self._setErrorMsg("Splitting Failed!\n %s" % (str(e)))

@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_FINDCLUSTERFACES_H_
-#define MANTID_CRYSTAL_FINDCLUSTERFACES_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -16,7 +15,7 @@ namespace Crystal {
 /** FindClusterFaces : Algorithm to find faces of clusters in an
   MDHistoWorkspace (image)
 */
-class DLLExport FindClusterFaces : public API::Algorithm {
+class MANTID_CRYSTAL_DLL FindClusterFaces : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -37,5 +36,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_FINDCLUSTERFACES_H_ */

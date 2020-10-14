@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CONJOINWORKSPACES_H_
-#define MANTID_ALGORITHMS_CONJOINWORKSPACES_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -43,7 +42,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella
     @date 25/08/2008
 */
-class DLLExport ConjoinWorkspaces : public WorkspaceJoiners {
+class MANTID_ALGORITHMS_DLL ConjoinWorkspaces : public WorkspaceJoiners {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "ConjoinWorkspaces"; }
@@ -78,5 +77,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CONJOINWORKSPACES_H_ */

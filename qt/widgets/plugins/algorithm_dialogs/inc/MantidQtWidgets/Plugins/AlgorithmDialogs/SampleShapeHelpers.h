@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMDIALOGS_SAMPLESHAPEHELPERS_H_
-#define MANTIDQT_CUSTOMDIALOGS_SAMPLESHAPEHELPERS_H_
+#pragma once
 
 //--------------------------------------
 // Includes
@@ -75,7 +74,7 @@ struct Operation {
   Operation(int op = 0) : binaryop(op) {}
 
   /// Return the string that represnts the result of this operation
-  QString toString(QString left, QString right) const;
+  QString toString(const QString &left, const QString &right) const;
 
   /// The stored operation
   int binaryop;
@@ -436,5 +435,3 @@ private:
 // };
 } // namespace CustomDialogs
 } // namespace MantidQt
-
-#endif // MANTIDQT_CUSTOMDIALOGS_SAMPLESHAPEHELPERS_H_

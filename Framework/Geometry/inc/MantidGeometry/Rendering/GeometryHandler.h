@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef GEOMETRYHANDLER_H
-#define GEOMETRYHANDLER_H
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Rendering/RenderingMesh.h"
@@ -13,7 +12,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/V3D.h"
 
-#include <boost/shared_ptr.hpp>
 #include <memory>
 #include <vector>
 
@@ -77,13 +75,13 @@ protected:
       nullptr; ///< ObjComponent that uses this geometry handler
   CSGObject *m_csgObj = nullptr; ///< Object that uses this geometry handler
 public:
-  GeometryHandler(IObjComponent *comp);              ///< Constructor
-  GeometryHandler(boost::shared_ptr<CSGObject> obj); ///< Constructor
-  GeometryHandler(CSGObject *obj);                   ///< Constructor
+  GeometryHandler(IObjComponent *comp);                   ///< Constructor
+  GeometryHandler(const std::shared_ptr<CSGObject> &obj); ///< Constructor
+  GeometryHandler(CSGObject *obj);                        ///< Constructor
   GeometryHandler(const MeshObject &obj);
   GeometryHandler(const MeshObject2D &obj);
   GeometryHandler(const GeometryHandler &handler);
-  boost::shared_ptr<GeometryHandler> clone() const;
+  std::shared_ptr<GeometryHandler> clone() const;
   ~GeometryHandler();
   void render() const; ///< Render Object or ObjComponent
   void
@@ -113,5 +111,3 @@ public:
 
 } // NAMESPACE Geometry
 } // NAMESPACE Mantid
-
-#endif

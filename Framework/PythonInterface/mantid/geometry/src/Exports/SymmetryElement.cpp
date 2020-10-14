@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/SymmetryElement.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -38,7 +38,7 @@ SymmetryElementRotation::RotationSense getRotationSense(SymmetryElement &self) {
 } // namespace
 
 void export_SymmetryElement() {
-  register_ptr_to_python<boost::shared_ptr<SymmetryElement>>();
+  register_ptr_to_python<std::shared_ptr<SymmetryElement>>();
 
   scope symmetryElementScope =
       class_<SymmetryElement, boost::noncopyable>("SymmetryElement", no_init);

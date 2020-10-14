@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/LinePlotOptions.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -64,7 +64,8 @@ void LinePlotOptions::addPlotRadioButton(const std::string &text,
 
 //------------------------------------------------------------------------------
 /** Set the original workspace, to show the axes plot choice */
-void LinePlotOptions::setOriginalWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
+void LinePlotOptions::setOriginalWorkspace(
+    const Mantid::API::IMDWorkspace_sptr &ws) {
   if (!ws)
     return;
 

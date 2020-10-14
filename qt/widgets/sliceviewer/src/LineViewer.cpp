@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/LineViewer.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -75,8 +75,8 @@ Mantid::Kernel::Logger g_log("LineViewer");
  * @param width : Default thickness (for non integrated dimensions)
  * @param thicknesses : Thickness vector to write to
  */
-void setThicknessUsingDimensionInfo(IMDWorkspace_sptr ws, size_t dimIndex,
-                                    double width,
+void setThicknessUsingDimensionInfo(const IMDWorkspace_sptr &ws,
+                                    size_t dimIndex, double width,
                                     Mantid::Kernel::VMD &thicknesses) {
   auto currentDim = ws->getDimension(dimIndex);
   if (currentDim->getIsIntegrated()) {
@@ -151,7 +151,7 @@ LineViewer::LineViewer(QWidget *parent)
                    SLOT(onToggleLogYAxis()));
 
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
-      "Feature", "SliceViewer->LineViewer", false);
+      FeatureType::Feature, {"SliceViewer", "LineViewer"}, false);
 }
 
 LineViewer::~LineViewer() {}
@@ -160,7 +160,7 @@ LineViewer::~LineViewer() {}
 /** With the workspace set, create the dimension text boxes */
 void LineViewer::createDimensionWidgets() {
   // Create all necessary widgets
-  if (m_startText.size() < int(m_ws->getNumDims())) {
+  if (m_startText.size() < m_ws->getNumDims()) {
     for (size_t d = m_startText.size(); d < m_ws->getNumDims(); d++) {
       QLabel *dimLabel = new QLabel(this);
       dimLabel->setAlignment(Qt::AlignHCenter);
@@ -246,10 +246,14 @@ void LineViewer::updateFreeDimensions() {
 //-----------------------------------------------------------------------------------------------
 /** Show the start/end/width points in the GUI */
 void LineViewer::updateStartEnd() {
-  for (int d = 0; d < int(m_ws->getNumDims()); d++) {
-    m_startText[d]->setText(QString::number(m_start[d]));
-    m_endText[d]->setText(QString::number(m_end[d]));
-    m_thicknessText[d]->setText(QString::number(m_thickness[d]));
+  const size_t ndims{m_ws->getNumDims()};
+  for (size_t d = 0; d < ndims; d++) {
+    if (d < m_start.getNumDims())
+      m_startText[d]->setText(QString::number(m_start[d]));
+    if (d < m_end.getNumDims())
+      m_endText[d]->setText(QString::number(m_end[d]));
+    if (d < m_thickness.getNumDims())
+      m_thicknessText[d]->setText(QString::number(m_thickness[d]));
   }
   ui.textPlaneWidth->setText(QString::number(m_planeWidth * 2.));
 
@@ -324,7 +328,7 @@ void LineViewer::readTextboxes() {
  * @param ws :: MatrixWorkspace to integrate
  */
 IAlgorithm_sptr
-LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
+LineViewer::applyMatrixWorkspace(const Mantid::API::MatrixWorkspace_sptr &ws) {
   // (half-width in the plane)
   const double planeWidth = getPlanarWidth();
 
@@ -405,7 +409,7 @@ LineViewer::applyMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
  * @return the algorithm to run
  */
 IAlgorithm_sptr
-LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
+LineViewer::applyMDWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   bool adaptive = ui.chkAdaptiveBins->isChecked();
 
   // (half-width in the plane)
@@ -420,7 +424,7 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
   // Check if this is a axis-aligned cut of a histogram workspace with at most
   // 5 dimensions. If so, we'll use IntegrateMDHistoWorkspace.
-  auto histWS = boost::dynamic_pointer_cast<IMDHistoWorkspace>(ws);
+  auto histWS = std::dynamic_pointer_cast<IMDHistoWorkspace>(ws);
   if (histWS && histWS->getNumDims() <= 5 && (dx == 0 || dy == 0)) {
     const int axis = dx != 0 ? m_freeDimX : m_freeDimY;
     const int paxis = dx != 0 ? m_freeDimY : m_freeDimX;
@@ -495,15 +499,15 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
   // The X basis vector
   alg->setPropertyValue("BasisVector0", "X,units," + basisX.toString(","));
-  OutputExtents.push_back(0);
-  OutputExtents.push_back(length);
-  OutputBins.push_back(int(numBins));
+  OutputExtents.emplace_back(0);
+  OutputExtents.emplace_back(length);
+  OutputBins.emplace_back(int(numBins));
 
   // The Y basis vector, with one bin
   alg->setPropertyValue("BasisVector1", "Y,units," + basisY.toString(","));
-  OutputExtents.push_back(-planeWidth);
-  OutputExtents.push_back(+planeWidth);
-  OutputBins.push_back(1);
+  OutputExtents.emplace_back(-planeWidth);
+  OutputExtents.emplace_back(+planeWidth);
+  OutputBins.emplace_back(1);
 
   // Now each remaining dimension
   std::string dimChars = "012345"; // SlicingAlgorithm::getDimensionChars();
@@ -519,9 +523,9 @@ LineViewer::applyMDWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
       // Set the basis vector with the width *2 and 1 bin
       alg->setPropertyValue("BasisVector" + dim,
                             dim + ",units," + basis.toString(","));
-      OutputExtents.push_back(-0.5 * m_thickness[d]);
-      OutputExtents.push_back(+0.5 * m_thickness[d]);
-      OutputBins.push_back(1);
+      OutputExtents.emplace_back(-0.5 * m_thickness[d]);
+      OutputExtents.emplace_back(+0.5 * m_thickness[d]);
+      OutputBins.emplace_back(1);
 
       propNum++;
       if (propNum > dimChars.size())
@@ -560,7 +564,7 @@ void LineViewer::apply() {
 
   // Different call for
   MatrixWorkspace_sptr matrixWs =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(m_ws);
+      std::dynamic_pointer_cast<MatrixWorkspace>(m_ws);
 
   IAlgorithm_sptr alg;
   if (matrixWs)
@@ -702,7 +706,7 @@ bool LineViewer::getFixedBinWidthMode() const { return m_fixedBinWidthMode; }
 /** Set the workspace being sliced
  *
  * @param ws :: IMDWorkspace */
-void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
+void LineViewer::setWorkspace(const Mantid::API::IMDWorkspace_sptr &ws) {
   if (!ws)
     throw std::runtime_error("LineViewer::setWorkspace(): Invalid workspace.");
   m_initFreeDimX = -1;
@@ -716,7 +720,7 @@ void LineViewer::setWorkspace(Mantid::API::IMDWorkspace_sptr ws) {
 
 /** Set the start point of the line to integrate
  * @param start :: vector for the start point */
-void LineViewer::setStart(Mantid::Kernel::VMD start) {
+void LineViewer::setStart(const Mantid::Kernel::VMD &start) {
   if (m_ws && start.getNumDims() != m_ws->getNumDims())
     throw std::runtime_error("LineViewer::setStart(): Invalid number of "
                              "dimensions in the start vector.");
@@ -726,7 +730,7 @@ void LineViewer::setStart(Mantid::Kernel::VMD start) {
 
 /** Set the end point of the line to integrate
  * @param end :: vector for the end point */
-void LineViewer::setEnd(Mantid::Kernel::VMD end) {
+void LineViewer::setEnd(const Mantid::Kernel::VMD &end) {
   if (m_ws && end.getNumDims() != m_ws->getNumDims())
     throw std::runtime_error("LineViewer::setEnd(): Invalid number of "
                              "dimensions in the end vector.");
@@ -737,7 +741,7 @@ void LineViewer::setEnd(Mantid::Kernel::VMD end) {
 /** Set the width of the line in each dimensions
  * @param width :: vector for the width in each dimension. X dimension stands in
  * for the XY plane width */
-void LineViewer::setThickness(Mantid::Kernel::VMD width) {
+void LineViewer::setThickness(const Mantid::Kernel::VMD &width) {
   if (m_ws && width.getNumDims() != m_ws->getNumDims())
     throw std::runtime_error("LineViewer::setThickness(): Invalid number of "
                              "dimensions in the width vector.");
@@ -1200,7 +1204,7 @@ void LineViewer::showFull() {
   if (!m_sliceWS)
     return;
   MatrixWorkspace_sptr sliceMatrix =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(m_sliceWS);
+      std::dynamic_pointer_cast<MatrixWorkspace>(m_sliceWS);
   if (sliceMatrix) {
     const bool distribution(false);
     QwtWorkspaceSpectrumData curveData(*sliceMatrix, 0, isLogScaledY(),

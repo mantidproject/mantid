@@ -43,8 +43,6 @@
 
 {%- block body -%}
     <h1> Category: {{ title }} </h1>
-    {% set header_file = text_page %}
-    {% include header_file ignore missing %}
     {% if subcategories %}
     <br>
     <h2> Subcategories </h2>
@@ -64,7 +62,7 @@
         {{ list_to_single_column(pages) }}
       {% endif %}
     {% endif %}
-    
+
     {% if parentcategory %}
     <p> {{ parentcategory }} </p>
     {% endif %}

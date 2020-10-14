@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGON_H_
-#define MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGON_H_
+#pragma once
 
 #include "MantidAlgorithms/Rebin2D.h"
 #include "MantidAlgorithms/SofQCommon.h"
@@ -38,7 +37,7 @@ common bins. </LI>
 
 @date 2012/05/04
  */
-class DLLExport SofQWNormalisedPolygon : public Rebin2D {
+class MANTID_ALGORITHMS_DLL SofQWNormalisedPolygon : public Rebin2D {
 public:
   /// Default constructor
   SofQWNormalisedPolygon() = default;
@@ -50,7 +49,8 @@ public:
     return "Calculate the intensity as a function of momentum transfer and "
            "energy.";
   }
-
+  /// validate the inputs
+  std::map<std::string, std::string> validateInputs() override;
   /// Algorithm's version for identification
   int version() const override;
   const std::vector<std::string> seeAlso() const override {
@@ -64,7 +64,6 @@ private:
   void init() override;
   /// Run the algorithm
   void exec() override;
-
   /// Init the theta index
   void initAngularCachesNonPSD(const API::MatrixWorkspace &workspace);
   /// Get angles and calculate angular widths.
@@ -85,5 +84,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_SOFQWNORMALISEDPOLYGON_H_ */

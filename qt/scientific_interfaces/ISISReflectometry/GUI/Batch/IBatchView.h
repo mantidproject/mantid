@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_IBATCHVIEW_H
-#define MANTID_ISISREFLECTOMETRY_IBATCHVIEW_H
+#pragma once
 
 #include "GUI/Event/IEventView.h"
 #include "GUI/Experiment/IExperimentView.h"
@@ -19,7 +18,7 @@ namespace MantidQt {
 namespace API {
 class BatchAlgorithmRunner;
 class IConfiguredAlgorithm;
-using IConfiguredAlgorithm_sptr = boost::shared_ptr<IConfiguredAlgorithm>;
+using IConfiguredAlgorithm_sptr = std::shared_ptr<IConfiguredAlgorithm>;
 } // namespace API
 
 namespace CustomInterfaces {
@@ -61,4 +60,3 @@ public:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_IBATCHVIEW_H */

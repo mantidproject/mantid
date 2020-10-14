@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -22,8 +22,8 @@ using namespace boost::python;
 
 /// This is the base TypedValidator for most of the WorkspaceValidators
 void export_MatrixWorkspaceValidator() {
-  using Mantid::API::MatrixWorkspaceValidator;
   using Mantid::API::MatrixWorkspace_sptr;
+  using Mantid::API::MatrixWorkspaceValidator;
   TypedValidatorExporter<MatrixWorkspace_sptr>::define(
       "MatrixWorkspaceValidator");
   TypedValidatorExporter<IMDWorkspace_sptr>::define("IMDWorkspaceValidator");

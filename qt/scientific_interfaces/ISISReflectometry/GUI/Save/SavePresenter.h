@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H
-#define MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "IAsciiSaver.h"
@@ -35,17 +34,17 @@ public:
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
   void saveWorkspaces(std::vector<std::string> const &workspaceNames) override;
   bool shouldAutosave() const override;
-  void reductionPaused() override;
-  void reductionResumed() override;
-  void autoreductionPaused() override;
-  void autoreductionResumed() override;
+  void notifyReductionPaused() override;
+  void notifyReductionResumed() override;
+  void notifyAutoreductionPaused() override;
+  void notifyAutoreductionResumed() override;
 
   // SaveViewSubscriber overrides
+  void notifySettingsChanged() override;
   void notifyPopulateWorkspaceList() override;
   void notifyFilterWorkspaceList() override;
   void notifyPopulateParametersList() override;
   void notifySaveSelectedWorkspaces() override;
-  void notifySuggestSaveDir() override;
   void notifyAutosaveDisabled() override;
   void notifyAutosaveEnabled() override;
   void notifySavePathChanged() override;
@@ -78,6 +77,7 @@ private:
   void enableAutosave();
   void disableAutosave();
   void updateWidgetEnabledState() const;
+  void updateWidgetStateBasedOnFileFormat() const;
   bool isProcessing() const;
   bool isAutoreducing() const;
 
@@ -89,4 +89,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_CUSTOMINTERFACES_SAVEPRESENTER_H */

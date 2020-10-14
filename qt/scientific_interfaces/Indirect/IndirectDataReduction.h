@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTDATAREDUCTION_H_
-#define MANTIDQTCUSTOMINTERFACES_INDIRECTDATAREDUCTION_H_
+#pragma once
 #include "ui_IndirectDataReduction.h"
 
 #include "IndirectDataReductionTab.h"
@@ -70,7 +69,7 @@ signals:
 
 private slots:
   /// Shows/hides tabs based on facility
-  void filterUiForFacility(QString facility);
+  void filterUiForFacility(const QString &facility);
 
   /// Exports the current tab algorithms as a Python script
   void exportTabPython();
@@ -90,9 +89,9 @@ private:
 
   void loadInstrumentDetails();
 
-  QString
-  getInstrumentParameterFrom(Mantid::Geometry::IComponent_const_sptr comp,
-                             std::string param);
+  QString getInstrumentParameterFrom(
+      const Mantid::Geometry::IComponent_const_sptr &comp,
+      const std::string &param);
 
   void readSettings();
   void saveSettings();
@@ -167,5 +166,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_INDIRECTDATAREDUCTION_H_

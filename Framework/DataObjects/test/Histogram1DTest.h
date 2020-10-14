@@ -1,20 +1,20 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TESTHISTOGRAM1D_
-#define TESTHISTOGRAM1D_
+#pragma once
 
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 #include <vector>
 
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidHistogramData/LinearGenerator.h"
+#include "MantidKernel/WarningSuppressions.h"
 
 using namespace Mantid;
 using namespace API;
@@ -28,8 +28,8 @@ private:
   Histogram1D h{Histogram::XMode::Points, Histogram::YMode::Counts};
   Histogram1D h2{Histogram::XMode::Points, Histogram::YMode::Counts};
   MantidVec x1, y1, e1; // vectors
-  boost::shared_ptr<HistogramY> pa;
-  boost::shared_ptr<HistogramE> pb;
+  std::shared_ptr<HistogramY> pa;
+  std::shared_ptr<HistogramE> pb;
 
 public:
   void setUp() override {
@@ -39,9 +39,9 @@ public:
     y1.resize(nel);
     std::fill(y1.begin(), y1.end(), rand());
     e1.resize(nel);
-    pa = boost::make_shared<HistogramY>(nel);
+    pa = std::make_shared<HistogramY>(nel);
     std::fill(pa->begin(), pa->end(), rand());
-    pb = boost::make_shared<HistogramE>(nel);
+    pb = std::make_shared<HistogramE>(nel);
     std::fill(pb->begin(), pb->end(), rand());
     h.setHistogram(Histogram(Points(100, LinearGenerator(0.0, 1.0)),
                              Counts(100, 0.0), CountVariances(100, 0.0)));
@@ -141,7 +141,7 @@ public:
     TS_ASSERT_EQUALS(h.dataE()[12], 0.0);
   }
   void testsetgetXPointer() {
-    auto px = boost::make_shared<HistogramX>(0);
+    auto px = std::make_shared<HistogramX>(0);
     h.setX(px);
     TS_ASSERT_EQUALS(&(*h.ptrX()), &(*px));
   }
@@ -170,16 +170,28 @@ public:
   }
   void testrangeexceptionX() {
     h.setPoints(x1);
+    // vector.at() is marked nodiscard in MSVC but we just want to test it
+    // throws so suppress the warning
+    MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataX().at(nel), const std::out_of_range &);
+    MSVC_DIAG_ON(4834)
   }
   void testrangeexceptionY() {
     h.setCounts(y1);
+    // vector.at() is marked nodiscard in MSVC but we just want to test it
+    // throws so suppress the warning
+    MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataY().at(nel), const std::out_of_range &);
+    MSVC_DIAG_ON(4834)
   }
   void testrangeexceptionE() {
     h.setCounts(y1);
     h.setCountStandardDeviations(e1);
+    // vector.at() is marked nodiscard in MSVC but we just want to test it
+    // throws so suppress the warning
+    MSVC_DIAG_OFF(4834)
     TS_ASSERT_THROWS(h.dataE().at(nel), const std::out_of_range &);
+    MSVC_DIAG_ON(4834)
   }
 
   void test_copy_constructor() {
@@ -265,4 +277,3 @@ public:
     TS_ASSERT_EQUALS(clone.readE()[0], 0.3);
   }
 };
-#endif /*TESTHISTOGRAM1D_*/

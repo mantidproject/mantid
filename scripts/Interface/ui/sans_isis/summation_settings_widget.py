@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets
 from qtpy.QtCore import Signal
 
@@ -53,11 +51,11 @@ class SummationSettingsWidget(QtWidgets.QWidget, Ui_SummationSettingsWidget):
 
     @staticmethod
     def _binning_type_to_index(bin_type):
-        if bin_type == BinningType.Custom:
+        if bin_type == BinningType.CUSTOM:
             return 0
-        elif bin_type == BinningType.FromMonitors:
+        elif bin_type == BinningType.FROM_MONITORS:
             return 1
-        elif bin_type == BinningType.SaveAsEventData:
+        elif bin_type == BinningType.SAVE_AS_EVENT_DATA:
             return 2
 
     def _handle_binning_type_changed(self, index):

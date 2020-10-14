@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DIFFSPHERE_H_
-#define MANTID_DIFFSPHERE_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -25,7 +24,8 @@ namespace Functions {
 @date 11/14/2011
 */
 
-class DLLExport DiffSphere : public API::ImmutableCompositeFunction {
+class MANTID_CURVEFITTING_DLL DiffSphere
+    : public API::ImmutableCompositeFunction {
 
 public:
   /// overwrite IFunction base class methods
@@ -52,14 +52,12 @@ public:
   void init() override;
 
 private:
-  boost::shared_ptr<Mantid::CurveFitting::Functions::ElasticDiffSphere>
+  std::shared_ptr<Mantid::CurveFitting::Functions::ElasticDiffSphere>
       m_elastic; // elastic intensity of the DiffSphere structure factor
-  boost::shared_ptr<Mantid::CurveFitting::Functions::InelasticDiffSphere>
+  std::shared_ptr<Mantid::CurveFitting::Functions::InelasticDiffSphere>
       m_inelastic; // inelastic intensity of the DiffSphere structure factor
 };
 
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_DIFFSPHERE_H_*/

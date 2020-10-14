@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_DECODER_H
-#define MANTID_ISISREFLECTOMETRY_DECODER_H
+#pragma once
 
 #include "../../Common/DllConfig.h"
 #include "../../Reduction/ReductionOptionsMap.h"
-#include "../MainWindow/QtMainWindowView.h"
+#include "IDecoder.h"
 #include "MantidQtWidgets/Common/BaseDecoder.h"
 
 #include <QMap>
@@ -17,6 +16,7 @@
 #include <QTableWidget>
 #include <QVariant>
 #include <boost/optional.hpp>
+#include <string>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -27,6 +27,7 @@ class ReductionJobs;
 class ReductionWorkspaces;
 class Row;
 class BatchPresenter;
+class IMainWindowView;
 class QtBatchView;
 class QtExperimentView;
 class QtInstrumentView;
@@ -42,20 +43,18 @@ class RangeInQ;
 class TransmissionRunPair;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Decoder
-    : public MantidQt::API::BaseDecoder {
+    : public MantidQt::API::BaseDecoder,
+      public IDecoder {
 public:
   QWidget *decode(const QMap<QString, QVariant> &map,
                   const std::string &directory) override;
   QList<QString> tags() override;
-  void decodeBatch(const QtBatchView *gui, const QtMainWindowView *mwv,
-                   const QMap<QString, QVariant> &map,
-                   const BatchPresenter *presenter = nullptr);
-  void decodeBatch(const IBatchPresenter *presenter, const IMainWindowView *mwv,
-                   const QMap<QString, QVariant> &map);
+  void decodeBatch(const IMainWindowView *mwv, int batchIndex,
+                   const QMap<QString, QVariant> &map) override;
 
 private:
   BatchPresenter *findBatchPresenter(const QtBatchView *gui,
-                                     const QtMainWindowView *mww);
+                                     const IMainWindowView *mww);
   void decodeExperiment(const QtExperimentView *gui,
                         const QMap<QString, QVariant> &map);
   void decodePerAngleDefaults(QTableWidget *tab,
@@ -68,10 +67,12 @@ private:
                         const QMap<QString, QVariant> &map);
   void decodeRuns(QtRunsView *gui, ReductionJobs *redJobs,
                   RunsTablePresenter *presenter,
-                  const QMap<QString, QVariant> &map);
+                  const QMap<QString, QVariant> &map,
+                  boost::optional<int> precision);
   void decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
                        RunsTablePresenter *presenter,
-                       const QMap<QString, QVariant> &map);
+                       const QMap<QString, QVariant> &map,
+                       boost::optional<int> precision);
   void decodeRunsTableModel(ReductionJobs *jobs, const QList<QVariant> &list);
   MantidQt::CustomInterfaces::ISISReflectometry::Group
   decodeGroup(const QMap<QString, QVariant> &map);
@@ -88,7 +89,8 @@ private:
   void decodeSave(const QtSaveView *gui, const QMap<QString, QVariant> &map);
   void decodeEvent(const QtEventView *gui, const QMap<QString, QVariant> &map);
   void updateRunsTableViewFromModel(QtRunsTableView *view,
-                                    const ReductionJobs *model);
+                                    const ReductionJobs *model,
+                                    boost::optional<int> precision);
   bool m_projectSave = false;
   friend class CoderCommonTester;
 };
@@ -96,5 +98,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_ISISREFLECTOMETRY_DECODER_H */

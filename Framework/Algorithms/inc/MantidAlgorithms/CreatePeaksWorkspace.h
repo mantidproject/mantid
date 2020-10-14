@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CREATEPEAKSWORKSPACE_H_
-#define MANTID_ALGORITHMS_CREATEPEAKSWORKSPACE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -18,7 +17,7 @@ namespace Algorithms {
  * @author Janik Zikovsky
  * @date 2011-04-26 08:49:10.540441
  */
-class DLLExport CreatePeaksWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreatePeaksWorkspace : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "CreatePeaksWorkspace"; };
@@ -46,5 +45,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CREATEPEAKSWORKSPACE_H_ */

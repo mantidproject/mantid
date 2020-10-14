@@ -36,9 +36,6 @@ General properties
 | ``algorithms.categories.hidden`` | A comma separated list of any categories of      | ``Muons,Testing``      |
 |                                  | algorithms that should be hidden in Mantid.      |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
-| ``algorithms.retained``          | The Number of algorithms properties to retain in | ``50``                 |
-|                                  | memory for reference in scripts.                 |                        |
-+----------------------------------+--------------------------------------------------+------------------------+
 | ``curvefitting.guiExclude``      | A semicolon separated list of function names     | ``ExpDecay;Gaussian;`` |
 |                                  | that should be hidden in Mantid.                 |                        |
 +----------------------------------+--------------------------------------------------+------------------------+
@@ -115,7 +112,11 @@ Directory Properties
 |                                      | that Mantid requires to function correctly.       |                                     |
 |                                      | **WARNING:** Do not alter the default value.      |                                     |
 +--------------------------------------+---------------------------------------------------+-------------------------------------+
-
+| ``python.plugins.manifest``          | A path to the location of the manifest file       | N/A                                 |
+|                                      | containing paths to each of the python algorithm  |                                     |
+|                                      | files.                                            |                                     |
+|                                      | **WARNING:** Do not alter the default value.      |                                     |
++--------------------------------------+---------------------------------------------------+-------------------------------------+
 
 
 Logging Properties
@@ -149,12 +150,15 @@ The logging priority levels for the file logging and console logging can also be
 
 
 
-MantidPlot Properties
-*********************
+Mantid Graphical User Interface Properties
+******************************************
 
 +--------------------------------------------+---------------------------------------------------+-----------------+
 |Property                                    |Description                                        |Example value    |
 +============================================+===================================================+=================+
+| ``Notifications.Enabled``                  |Should Mantid use System Notifications for         | ``On``, ``Off`` |
+|                                            |important messages?                                |                 |
++--------------------------------------------+---------------------------------------------------+-----------------+
 | ``cluster.submission``                     |Enable cluster submission elements in GUIs         | ``On``, ``Off`` |
 +--------------------------------------------+---------------------------------------------------+-----------------+
 | ``MantidOptions.InstrumentView.UseOpenGL`` |Controls the use of OpenGL in rendering the        | ``On``, ``Off`` |
@@ -246,6 +250,51 @@ Project Saving
 | ``projectSaving.warningSize``   |Size in bytes of a project before the user is warned when saving  |  ``10737418240`` |
 +---------------------------------+------------------------------------------------------------------+------------------+
 
+Plotting Settings
+*****************
+
++---------------------------------+------------------------------------------------------------------+---------------------+
+|Property                         |Description                                                       |Example value        |
++=================================+==================================================================+=====================+
+|``plots.ShowTitle``              |Whether to show titles on plots                                   | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ShowMinorTicks``         |Whether to show minor ticks on plots                              | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ShowMinorGridlines``     |Whether to show minor gridlines on plots                          | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.font``                   |The default font for labels and titles on plots.                  |``Helvetica``        |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.xAxesScale``             |The default x scale on 1d plots                                   |``Linear``, ``Log``  |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.yAxesScale``             |The default y scale on 1d plots                                   |``Linear``, ``Log``  |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.line.Style``             |Default Line style on 1d plots                                    |``solid``, ``dashed``|
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.line.DrawStyle``         |Default Draw style on 1d plots                                    |``default``,``steps``|
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.line.Width``             |Default Line width on 1d plots                                    |``1.5``              |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.marker.Style``           |Default marker style on 1d plots                                  |``point``            |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.marker.Size``            |Default maker size on 1d plots                                    |``6``                |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.errorbar.Capsize``       |Default cap size on error bars in 1d plots                        |``1.0``              |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.errorbar.CapThickness``  |Default cap thickness on error bars in 1d plots                   |``1.0``              |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.errorbar.errorEvery``    |Default number of error bars for every data point                 |``1``                |
+|                                 |in 1d plots. Must be an integer                                   |                     |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.errorbar.Width``         |Default width of error bars in 1d plots                           |``1.0``              |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.legend.FontSize``        |Default legend font size                                          |``8.0``              |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.legend.Location``        |Default legend location                                           |``best``             |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.images.Colormap``        |Default colormap for image plots                                  |``viridis``          |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.images.ColorBarScale``   |Default colorbar scale for image plots                            |``Linear``           |
++---------------------------------+------------------------------------------------------------------+---------------------+
 
 Getting access to Mantid properties
 ***********************************

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/AddPeakHKL.h"
 
@@ -46,7 +46,7 @@ void AddPeakHKL::init() {
           "Workspace", "", Direction::InOut),
       "An input workspace.");
   // clang-format off
-    declareProperty(std::make_unique<ArrayProperty<double>>("HKL", boost::make_shared<ArrayLengthValidator<double> > (3)), "HKL point to add");
+    declareProperty(std::make_unique<ArrayProperty<double>>("HKL", std::make_shared<ArrayLengthValidator<double> > (3)), "HKL point to add");
   // clang-format on
 }
 

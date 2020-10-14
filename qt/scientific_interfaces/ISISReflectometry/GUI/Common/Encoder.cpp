@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "Encoder.h"
 #include "../../Reduction/Group.h"
 #include "../../Reduction/ReductionJobs.h"
@@ -24,8 +23,10 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
+
 BatchPresenter *Encoder::findBatchPresenter(const QtBatchView *gui,
-                                            const QtMainWindowView *mwv) {
+                                            const IMainWindowView *view) {
+  auto mwv = dynamic_cast<const QtMainWindowView *>(view);
   for (auto &ipresenter : mwv->m_presenter->m_batchPresenters) {
     auto presenter = dynamic_cast<BatchPresenter *>(ipresenter.get());
     if (presenter->m_view == gui) {
@@ -42,9 +43,10 @@ QMap<QString, QVariant> Encoder::encode(const QWidget *gui,
   QMap<QString, QVariant> map;
   map.insert(QString("tag"), QVariant(QString("ISIS Reflectometry")));
   QList<QVariant> batches;
-  for (const auto &batchView : mwv->m_batchViews) {
-    batches.append(QVariant(
-        encodeBatch(dynamic_cast<const QtBatchView *>(batchView), mwv, true)));
+  for (size_t batchIndex = 0; batchIndex < mwv->batches().size();
+       ++batchIndex) {
+    batches.append(
+        QVariant(encodeBatch(mwv, static_cast<int>(batchIndex), true)));
   }
   map.insert(QString("batches"), QVariant(batches));
   return map;
@@ -54,14 +56,10 @@ QList<QString> Encoder::tags() {
   return QList<QString>({QString("ISIS Reflectometry")});
 }
 
-QMap<QString, QVariant> Encoder::encodeBatch(const QtBatchView *gui,
-                                             const QtMainWindowView *mwv,
-                                             bool projectSave,
-                                             const BatchPresenter *presenter) {
-  auto batchPresenter = presenter;
-  if (!batchPresenter) {
-    batchPresenter = findBatchPresenter(gui, mwv);
-  }
+QMap<QString, QVariant> Encoder::encodeBatch(const IMainWindowView *mwv,
+                                             int batchIndex, bool projectSave) {
+  auto gui = dynamic_cast<const QtBatchView *>(mwv->batches()[batchIndex]);
+  auto batchPresenter = findBatchPresenter(gui, mwv);
   if (!batchPresenter) {
     throw std::runtime_error(
         "BatchPresenter could not be found during encode.");
@@ -86,15 +84,6 @@ QMap<QString, QVariant> Encoder::encodeBatch(const QtBatchView *gui,
   return map;
 }
 
-QMap<QString, QVariant> Encoder::encodeBatch(const IBatchPresenter *presenter,
-                                             const IMainWindowView *mwv,
-                                             bool projectSave) {
-  auto batchPresenter = dynamic_cast<const BatchPresenter *>(presenter);
-  return encodeBatch(dynamic_cast<QtBatchView *>(batchPresenter->m_view),
-                     dynamic_cast<const QtMainWindowView *>(mwv), projectSave,
-                     batchPresenter);
-}
-
 QMap<QString, QVariant> Encoder::encodeRuns(const QtRunsView *gui,
                                             bool projectSave,
                                             const ReductionJobs *redJobs) {
@@ -104,6 +93,7 @@ QMap<QString, QVariant> Encoder::encodeRuns(const QtRunsView *gui,
   map.insert(QString("comboSearchInstrument"),
              QVariant(gui->m_ui.comboSearchInstrument->currentIndex()));
   map.insert(QString("textSearch"), QVariant(gui->m_ui.textSearch->text()));
+  map.insert(QString("textCycle"), QVariant(gui->m_ui.textCycle->text()));
   return map;
 }
 
@@ -318,6 +308,14 @@ QMap<QString, QVariant> Encoder::encodeExperiment(const QtExperimentView *gui) {
              QVariant(gui->m_ui.transStitchParamsEdit->text()));
   map.insert(QString("transScaleRHSCheckBox"),
              QVariant(gui->m_ui.transScaleRHSCheckBox->isChecked()));
+  map.insert(QString("subtractBackgroundCheckBox"),
+             QVariant(gui->m_ui.subtractBackgroundCheckBox->isChecked()));
+  map.insert(QString("backgroundMethodComboBox"),
+             QVariant(gui->m_ui.backgroundMethodComboBox->currentIndex()));
+  map.insert(QString("polynomialDegreeSpinBox"),
+             QVariant(gui->m_ui.polynomialDegreeSpinBox->value()));
+  map.insert(QString("costFunctionComboBox"),
+             QVariant(gui->m_ui.costFunctionComboBox->currentIndex()));
   map.insert(QString("polCorrCheckBox"),
              QVariant(gui->m_ui.polCorrCheckBox->isChecked()));
   map.insert(QString("floodCorComboBox"),
@@ -365,8 +363,8 @@ QMap<QString, QVariant> Encoder::encodeSave(const QtSaveView *gui) {
   QMap<QString, QVariant> map;
   map.insert(QString("savePathEdit"), QVariant(gui->m_ui.savePathEdit->text()));
   map.insert(QString("prefixEdit"), QVariant(gui->m_ui.prefixEdit->text()));
-  map.insert(QString("titleCheckBox"),
-             QVariant(gui->m_ui.titleCheckBox->isChecked()));
+  map.insert(QString("headerCheckBox"),
+             QVariant(gui->m_ui.headerCheckBox->isChecked()));
   map.insert(QString("qResolutionCheckBox"),
              QVariant(gui->m_ui.qResolutionCheckBox->isChecked()));
   map.insert(QString("commaRadioButton"),

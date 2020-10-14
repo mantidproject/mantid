@@ -64,8 +64,9 @@ can be specified manually by setting the :literal:`CorrectionAlgorithm` to eithe
 Note that when using a correction algorithm, monitors will not be integrated, even if
 :literal:`NormalizeByIntegratedMonitors` was set to true.
 
-:literal:`OutputWorkspace` is cropped to `MomentumTransferMin` and/or
-:literal:`MomentumTransferMax`, if they are given.
+:literal:`OutputWorkspace` is scaled to :literal:`ScaleFactor` and cropped to
+:literal:`MomentumTransferMin` and/or :literal:`MomentumTransferMax`, if they
+are given.
 
 :literal:`OutputWorkspaceBinned` is rebinned to the resolution specified by
 :literal:`MomentumTransferStep`, if it is given; otherwise the algorithm
@@ -75,9 +76,6 @@ with a `vertical gap` must be defined in the instrument definition file - if it
 cannot be found, rebinning will not be done and a warning will be
 logged). `MomentumTransferMin` and `MomentumTransferMax` are used for the rebin
 if provided; otherwise the original min/max in Q is retained.
-
-Finally, `ScaleFactor` is used to scale the rebinned workspace
-:literal:`OutputWorkspaceBinned`.
 
 See :ref:`algm-ReflectometryReductionOne` for more information
 on how the input properties are used by the wrapped algorithm.
@@ -159,7 +157,7 @@ Output:
 
     run = Load(Filename='INTER00013460.nxs')
     trans = Load(Filename='INTER00013463.nxs')
-    IvsQ, IvsQ_unbinned = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)
+    IvsQ, IvsQ_unbinned, IvsLam, TRANS = ReflectometryReductionOneAuto(InputWorkspace=run, FirstTransmissionRun=trans, ThetaIn=0.7)
 
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[96]))
     print("{:.5f}".format(IvsQ_unbinned.readY(0)[97]))

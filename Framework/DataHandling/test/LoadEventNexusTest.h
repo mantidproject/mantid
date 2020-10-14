@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADEVENTNEXUSTEST_H_
-#define LOADEVENTNEXUSTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -91,7 +90,7 @@ void run_multiprocess_load(const std::string &file, bool precount) {
 }
 
 namespace {
-boost::shared_ptr<const EventWorkspace>
+std::shared_ptr<const EventWorkspace>
 load_reference_workspace(const std::string &filename) {
   // Construct default communicator *without* threading backend. In non-MPI run
   // (such as when running unit tests) this will thus just be a communicator
@@ -104,13 +103,13 @@ load_reference_workspace(const std::string &filename) {
   TS_ASSERT_THROWS_NOTHING(alg->execute());
   TS_ASSERT(alg->isExecuted());
   Workspace_const_sptr out = alg->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<const EventWorkspace>(out);
+  return std::dynamic_pointer_cast<const EventWorkspace>(out);
 }
 void run_MPI_load(const Parallel::Communicator &comm,
-                  boost::shared_ptr<std::mutex> mutex,
+                  const std::shared_ptr<std::mutex> &mutex,
                   const std::string &filename) {
-  boost::shared_ptr<const EventWorkspace> reference;
-  boost::shared_ptr<const EventWorkspace> eventWS;
+  std::shared_ptr<const EventWorkspace> reference;
+  std::shared_ptr<const EventWorkspace> eventWS;
   {
     std::lock_guard<std::mutex> lock(*mutex);
     reference = load_reference_workspace(filename);
@@ -123,7 +122,7 @@ void run_MPI_load(const Parallel::Communicator &comm,
     if (comm.size() != 1) {
       TS_ASSERT_EQUALS(out->storageMode(), Parallel::StorageMode::Distributed);
     }
-    eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(out);
+    eventWS = std::dynamic_pointer_cast<const EventWorkspace>(out);
   }
   const size_t localSize = eventWS->getNumberHistograms();
   auto localEventCount = eventWS->getNumberEvents();
@@ -211,7 +210,7 @@ public:
     alg.setProperty("OutputWorkspace", "dummy_for_child");
     alg.execute();
     Workspace_sptr ws = alg.getProperty("OutputWorkspace");
-    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
     TS_ASSERT(eventWS);
 
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 1439);
@@ -231,7 +230,7 @@ public:
       alg.setProperty("OutputWorkspace", "dummy_for_child");
       alg.execute();
       Workspace_sptr ws = alg.getProperty("OutputWorkspace");
-      auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+      auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
       TS_ASSERT(eventWS);
 
       TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 43277);
@@ -242,6 +241,24 @@ public:
     }
   }
 
+  void test_NumberOfBins() {
+    const std::string file = "SANS2D00022048.nxs";
+    int nBins = 273;
+    LoadEventNexus alg;
+    alg.setChild(true);
+    alg.setRethrows(true);
+    alg.initialize();
+    alg.setProperty("Filename", file);
+    alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.setProperty("NumberOfBins", nBins);
+    alg.execute();
+    Workspace_sptr ws = alg.getProperty("OutputWorkspace");
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
+    TS_ASSERT(eventWS);
+
+    TS_ASSERT_EQUALS(eventWS->blocksize(), nBins);
+  }
+
   void test_load_event_nexus_sans2d_ess() {
     const std::string file = "SANS2D_ESS_example.nxs";
     LoadEventNexus alg;
@@ -250,9 +267,10 @@ public:
     alg.initialize();
     alg.setProperty("Filename", file);
     alg.setProperty("OutputWorkspace", "dummy_for_child");
+    alg.setProperty("NumberOfBins", 1);
     alg.execute();
     Workspace_sptr ws = alg.getProperty("OutputWorkspace");
-    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
     TS_ASSERT(eventWS);
 
     TS_ASSERT_EQUALS(eventWS->getNumberEvents(), 14258850);
@@ -302,7 +320,7 @@ public:
     alg.setProperty("OutputWorkspace", "dummy_for_child");
     alg.execute();
     Workspace_sptr ws = alg.getProperty("OutputWorkspace");
-    auto eventWS = boost::dynamic_pointer_cast<EventWorkspace>(ws);
+    auto eventWS = std::dynamic_pointer_cast<EventWorkspace>(ws);
     TS_ASSERT(eventWS);
     const double duration =
         eventWS->mutableRun().getPropertyValueAsType<double>("duration");
@@ -318,6 +336,7 @@ public:
     ld.setPropertyValue("Filename", "CNCS_7860_event.nxs");
     ld.setPropertyValue("OutputWorkspace", outws_name);
     ld.setPropertyValue("Precount", "0");
+    ld.setProperty("NumberOfBins", 1);
     ld.setProperty<bool>("LoadLogs", false); // Time-saver
     ld.execute();
     TS_ASSERT(ld.isExecuted());
@@ -360,6 +379,7 @@ public:
     ld2.setPropertyValue("OutputWorkspace", outws_name2);
     ld2.setPropertyValue("Precount", "1");
     ld2.setProperty<bool>("LoadLogs", false); // Time-saver
+    ld2.setProperty("NumberOfBins", 1);
     ld2.execute();
     TS_ASSERT(ld2.isExecuted());
 
@@ -474,10 +494,10 @@ public:
   void test_partial_spectra_loading() {
     std::string wsName = "test_partial_spectra_loading_SpectrumList";
     std::vector<int32_t> specList;
-    specList.push_back(13);
-    specList.push_back(16);
-    specList.push_back(21);
-    specList.push_back(28);
+    specList.emplace_back(13);
+    specList.emplace_back(16);
+    specList.emplace_back(21);
+    specList.emplace_back(28);
 
     // A) test SpectrumList
     LoadEventNexus ld;
@@ -535,7 +555,7 @@ public:
     const size_t sMin = 20;
     const size_t sMax = 22;
     specList.clear();
-    specList.push_back(17);
+    specList.emplace_back(17);
 
     LoadEventNexus ldLMM;
     ldLMM.initialize();
@@ -576,7 +596,7 @@ public:
     std::string wsName2 = "test_partial_spectra_loading_SpectrumListISIS2";
     std::string filename = "OFFSPEC00036416.nxs";
     std::vector<int32_t> specList;
-    specList.push_back(45);
+    specList.emplace_back(45);
 
     LoadEventNexus ld;
     ld.initialize();
@@ -716,7 +736,7 @@ public:
   }
 
   void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount,
-                        std::string BankName = "bank36",
+                        const std::string &BankName = "bank36",
                         bool willFail = false) {
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
@@ -933,11 +953,11 @@ public:
     loader.execute();
     Workspace_sptr outWS = loader.getProperty("OutputWorkspace");
     WorkspaceGroup_sptr outGroup =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(outWS);
+        std::dynamic_pointer_cast<WorkspaceGroup>(outWS);
     TSM_ASSERT("Invalid Output Workspace Type", outGroup);
 
     IEventWorkspace_sptr firstWS =
-        boost::dynamic_pointer_cast<IEventWorkspace>(outGroup->getItem(0));
+        std::dynamic_pointer_cast<IEventWorkspace>(outGroup->getItem(0));
     auto run = firstWS->run();
     const int nPeriods = run.getPropertyValueAsType<int>("nperiods");
     TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
@@ -946,7 +966,7 @@ public:
 
     for (size_t i = 0; i < outGroup->size(); ++i) {
       EventWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
+          std::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
       TS_ASSERT(ws);
       TSM_ASSERT("Non-zero events in each period", ws->getNumberEvents() > 0);
 
@@ -969,13 +989,13 @@ public:
 
     for (size_t i = 0; i < outGroup->size(); ++i) {
       EventWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
+          std::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
       if (isFirstChildWorkspace) {
         specids.reserve(ws->getNumberHistograms());
       }
       for (size_t index = 0; index < ws->getNumberHistograms(); ++index) {
         if (isFirstChildWorkspace) {
-          specids.push_back(ws->getSpectrum(index).getSpectrumNo());
+          specids.emplace_back(ws->getSpectrum(index).getSpectrumNo());
         } else {
           TSM_ASSERT_EQUALS(
               "The spectrNo should be the same for all child workspaces.",
@@ -999,7 +1019,7 @@ public:
     ParallelTestHelpers::ParallelRunner runner(threads);
     // Test reads from multiple threads, which is not supported by our HDF5
     // libraries, so we need a mutex.
-    auto hdf5Mutex = boost::make_shared<std::mutex>();
+    auto hdf5Mutex = std::make_shared<std::mutex>();
     runner.run(run_MPI_load, hdf5Mutex, "CNCS_7860_event.nxs");
   }
 
@@ -1008,7 +1028,7 @@ public:
     ParallelTestHelpers::ParallelRunner runner(threads);
     // Test reads from multiple threads, which is not supported by our HDF5
     // libraries, so we need a mutex.
-    auto hdf5Mutex = boost::make_shared<std::mutex>();
+    auto hdf5Mutex = std::make_shared<std::mutex>();
     runner.run(run_MPI_load, hdf5Mutex, "SANS2D00022048.nxs");
   }
 
@@ -1095,5 +1115,3 @@ public:
     TS_ASSERT(loader.execute());
   }
 };
-
-#endif /*LOADEVENTNEXUSTEST_H_*/

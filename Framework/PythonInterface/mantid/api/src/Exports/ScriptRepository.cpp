@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ScriptRepository.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -85,7 +85,7 @@ PyObject *getDescription(ScriptRepository &self, const std::string &path) {
 
 void export_ScriptRepository() {
 
-  register_ptr_to_python<boost::shared_ptr<ScriptRepository>>();
+  register_ptr_to_python<std::shared_ptr<ScriptRepository>>();
 
   // reset the option to
   docstring_options local_docstring_options(true, true, false);

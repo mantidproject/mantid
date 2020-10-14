@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "PeakPickerTool.h"
 #include "../FunctionCurve.h"
@@ -60,6 +60,12 @@ PeakPickerTool::PeakPickerTool(
   } else {
     return;
   }
+
+  // Show the fitPropertyBrowser if it isn't already. This sets the
+  // WorkspaceIndex to 0
+  if (showFitPropertyBrowser)
+    m_fitPropertyBrowser->show();
+
   m_fitPropertyBrowser->normaliseData(m_shouldBeNormalised);
   m_fitPropertyBrowser->getHandler()->removeAllPlots();
   m_fitPropertyBrowser->setWorkspaceName(m_wsName);
@@ -100,9 +106,6 @@ PeakPickerTool::PeakPickerTool(
   connect(m_fitPropertyBrowser, SIGNAL(destroyed()), graph,
           SLOT(disableTools()));
 
-  // Show the fitPropertyBrowser if it isn't already.
-  if (showFitPropertyBrowser)
-    m_fitPropertyBrowser->show();
   connect(this, SIGNAL(isOn(bool)), m_fitPropertyBrowser,
           SLOT(setPeakToolOn(bool)));
   emit isOn(true);
@@ -147,15 +150,6 @@ PeakPickerTool::PeakPickerTool(
 
   connect(d_graph, SIGNAL(curveRemoved()), this, SLOT(curveRemoved()));
   connect(d_graph, SIGNAL(modifiedGraph()), this, SLOT(modifiedGraph()));
-
-  try { // if it's a MatrixWorkspace in the ADS
-    m_ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        Mantid::API::AnalysisDataService::Instance().retrieve(
-            m_wsName.toStdString()));
-  } catch (...) { // or it can be a TableWorkspace
-    m_ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
-        m_fitPropertyBrowser->createMatrixFromTableWorkspace());
-  }
 }
 
 PeakPickerTool::~PeakPickerTool() {
@@ -322,8 +316,8 @@ bool PeakPickerTool::eventFilter(QObject *obj, QEvent *event) {
   return QwtPlotPicker::eventFilter(obj, event);
 }
 
-void PeakPickerTool::windowStateChanged(Qt::WindowStates,
-                                        Qt::WindowStates newState) {
+void PeakPickerTool::windowStateChanged(const Qt::WindowStates &,
+                                        const Qt::WindowStates &newState) {
   (void)newState;
 }
 
@@ -658,7 +652,7 @@ void PeakPickerTool::replot(MantidQt::MantidWidgets::PropertyHandler *h) const {
       formulas[1] = QString::fromStdString(h->ifun()->asString());
       fc->setFormulas(formulas);
       // fc->loadData();
-      auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+      auto ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
           m_fitPropertyBrowser->getWorkspace());
       fc->loadMantidData(ws, m_fitPropertyBrowser->workspaceIndex(),
                          m_fitPropertyBrowser->getPeakRadius());
@@ -772,9 +766,6 @@ void PeakPickerTool::addPeak() {
   }
 }
 
-/**
- *
- */
 void PeakPickerTool::addPeakAt(int x, int y) {
   // x - axis is #2, y - is #0
   double c = d_graph->plotWidget()->invTransform(2, x);
@@ -899,7 +890,7 @@ void PeakPickerTool::plotFitFunction(
           m_fitPropertyBrowser->workspaceIndex(), h->functionName());
       fc->setRange(m_fitPropertyBrowser->startX(),
                    m_fitPropertyBrowser->endX());
-      auto ws = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+      auto ws = std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
           m_fitPropertyBrowser->getWorkspace());
       fc->loadMantidData(ws, m_fitPropertyBrowser->workspaceIndex(),
                          m_fitPropertyBrowser->getPeakRadius());

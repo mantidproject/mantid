@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataProcessorUI/PostprocessingStep.h"
 #include "MantidQtWidgets/Common/DataProcessorUI/WorkspaceNameUtils.h"
@@ -10,10 +10,10 @@
 namespace MantidQt {
 namespace MantidWidgets {
 namespace DataProcessor {
-PostprocessingStep::PostprocessingStep(QString options)
+PostprocessingStep::PostprocessingStep(const QString &options)
     : m_options(std::move(options)) {}
-PostprocessingStep::PostprocessingStep(QString options,
-                                       PostprocessingAlgorithm algorithm,
+PostprocessingStep::PostprocessingStep(const QString &options,
+                                       const PostprocessingAlgorithm &algorithm,
                                        std::map<QString, QString> map)
     : m_options(std::move(options)), m_algorithm(std::move(algorithm)),
       m_map(std::move(map)) {}

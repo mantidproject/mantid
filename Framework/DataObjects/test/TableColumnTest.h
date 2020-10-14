@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_TABLECOLUMNTEST_H_
-#define MANTID_DATAOBJECTS_TABLECOLUMNTEST_H_
+#pragma once
 
 #include "MantidDataObjects/TableColumn.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -13,7 +12,7 @@
 
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::DataObjects;
 
@@ -208,8 +207,10 @@ public:
     TableWorkspace ws(n);
     ws.addColumn("int", "col1");
     ws.addColumn("str", "col2");
-    auto clonedColInt = ws.getColumn("col1")->clone();
-    auto clonedColStr = ws.getColumn("col2")->clone();
+    auto clonedColInt =
+        std::unique_ptr<Mantid::API::Column>(ws.getColumn("col1")->clone());
+    auto clonedColStr =
+        std::unique_ptr<Mantid::API::Column>(ws.getColumn("col2")->clone());
     TS_ASSERT_EQUALS(clonedColInt->type(), "int");
     TS_ASSERT_EQUALS(clonedColStr->type(), "str");
   }
@@ -520,5 +521,3 @@ private:
     return vec;
   }
 };
-
-#endif /* MANTID_DATAOBJECTS_TABLECOLUMNTEST_H_ */

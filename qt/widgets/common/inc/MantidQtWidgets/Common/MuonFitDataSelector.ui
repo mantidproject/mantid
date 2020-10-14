@@ -120,7 +120,7 @@
                </widget>
               </item>
               <item>
-               <widget class="MantidQt::API::MWRunFiles" name="runs" native="true">
+               <widget class="MantidQt::API::FileFinderWidget" name="runs" native="true">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                   <horstretch>0</horstretch>
@@ -216,9 +216,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::API::MWRunFiles</class>
+   <class>MantidQt::API::FileFinderWidget</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
+   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

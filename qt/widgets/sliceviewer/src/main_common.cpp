@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -97,7 +97,7 @@ IMDWorkspace_sptr makeDemoData(bool binned = false) {
   addPeak(5000, 2, 0, 0, 0.3);
   addPeak(5000, 2, 1, 0, 0.3);
   //  addPeak(12000,0,0,0, 0.03);
-  IMDEventWorkspace_sptr mdew = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+  IMDEventWorkspace_sptr mdew = std::dynamic_pointer_cast<IMDEventWorkspace>(
       AnalysisDataService::Instance().retrieve("mdew"));
   mdew->splitAllIfNeeded(NULL);
   if (binned) {
@@ -131,8 +131,8 @@ IMDWorkspace_sptr makeDemoData(bool binned = false) {
         "Rebin", 8, "Params", "40e3, 1e3, 70e3", "PreserveEvents", "1",
         "InputWorkspace", "workspace_2d", "OutputWorkspace", "workspace_2d");
 
-    return boost::dynamic_pointer_cast<IMDWorkspace>(
+    return std::dynamic_pointer_cast<IMDWorkspace>(
         AnalysisDataService::Instance().retrieve("binned"));
   } else
-    return boost::dynamic_pointer_cast<IMDWorkspace>(mdew);
+    return std::dynamic_pointer_cast<IMDWorkspace>(mdew);
 }

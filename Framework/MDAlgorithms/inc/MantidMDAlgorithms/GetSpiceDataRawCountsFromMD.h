@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_GETSPICEDATARAWCOUNTSFROMMD_H_
-#define MANTID_MDALGORITHMS_GETSPICEDATARAWCOUNTSFROMMD_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
@@ -48,34 +47,35 @@ private:
   void exec() override;
 
   /// Export all detectors' counts for a run
-  void exportDetCountsOfRun(API::IMDEventWorkspace_const_sptr datamdws,
-                            API::IMDEventWorkspace_const_sptr monitormdws,
-                            const int runnumber, std::vector<double> &vecX,
-                            std::vector<double> &vecY, std::string &xlabel,
-                            std::string &ylabel, bool donormalize);
+  void
+  exportDetCountsOfRun(const API::IMDEventWorkspace_const_sptr &datamdws,
+                       const API::IMDEventWorkspace_const_sptr &monitormdws,
+                       const int runnumber, std::vector<double> &vecX,
+                       std::vector<double> &vecY, std::string &xlabel,
+                       std::string &ylabel, bool donormalize);
 
   /// Export a detector's counts accross all runs
-  void exportIndividualDetCounts(API::IMDEventWorkspace_const_sptr datamdws,
-                                 API::IMDEventWorkspace_const_sptr monitormdws,
-                                 const int detid, std::vector<double> &vecX,
-                                 std::vector<double> &vecY, std::string &xlabel,
-                                 std::string &ylabel, const bool &donormalize);
+  void exportIndividualDetCounts(
+      const API::IMDEventWorkspace_const_sptr &datamdws,
+      const API::IMDEventWorkspace_const_sptr &monitormdws, const int detid,
+      std::vector<double> &vecX, std::vector<double> &vecY, std::string &xlabel,
+      std::string &ylabel, const bool &donormalize);
 
   /// Export sample log values accross all runs
-  void exportSampleLogValue(API::IMDEventWorkspace_const_sptr datamdws,
+  void exportSampleLogValue(const API::IMDEventWorkspace_const_sptr &datamdws,
                             const std::string &samplelogname,
                             std::vector<double> &vecX,
                             std::vector<double> &vecY, std::string &xlabel,
                             std::string &ylabel);
 
   /// Get detectors' counts
-  void getDetCounts(API::IMDEventWorkspace_const_sptr mdws,
+  void getDetCounts(const API::IMDEventWorkspace_const_sptr &mdws,
                     const int &runnumber, const int &detid,
                     std::vector<double> &vecX, std::vector<double> &vecY,
                     bool formX);
 
   /// Get sample log values
-  void getSampleLogValues(API::IMDEventWorkspace_const_sptr mdws,
+  void getSampleLogValues(const API::IMDEventWorkspace_const_sptr &mdws,
                           const std::string &samplelogname, const int runnumber,
                           std::vector<double> &vecSampleLog);
 
@@ -88,5 +88,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_GETSPICEDATARAWCOUNTSFROMMD_H_ */

@@ -50,7 +50,7 @@
 #endif
 
 SetColValuesDialog::SetColValuesDialog(ScriptingEnv *env, Table *t,
-                                       Qt::WFlags fl)
+                                       const Qt::WFlags &fl)
     : QDialog(t, fl), Scripted(env) {
   setObjectName("SetColValuesDialog");
   setWindowTitle(tr("MantidPlot - Set column values"));

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_FUNCTIONPROPERTY_H_
-#define MANTID_API_FUNCTIONPROPERTY_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -27,7 +26,7 @@ is the creation string accepted by the FunctionFactory.
 @date 08/02/2012
 */
 class MANTID_API_DLL FunctionProperty
-    : public Kernel::PropertyWithValue<boost::shared_ptr<IFunction>> {
+    : public Kernel::PropertyWithValue<std::shared_ptr<IFunction>> {
 public:
   /// Constructor.
   FunctionProperty(const std::string &name,
@@ -42,8 +41,7 @@ public:
 
   /// Bring in the PropertyWithValue assignment operator explicitly (avoids
   /// VSC++ warning)
-  FunctionProperty &
-  operator=(const boost::shared_ptr<IFunction> &value) override;
+  FunctionProperty &operator=(const std::shared_ptr<IFunction> &value) override;
 
   /// Add the value of another property
   FunctionProperty &operator+=(Kernel::Property const *) override;
@@ -84,5 +82,3 @@ private:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_FUNCTIONPROPERTY_H_*/

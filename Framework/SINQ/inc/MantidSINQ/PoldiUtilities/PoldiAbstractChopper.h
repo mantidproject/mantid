@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef POLDIABSTRACTCHOPPER_H
-#define POLDIABSTRACTCHOPPER_H
+#pragma once
 
 #include "MantidSINQ/DllConfig.h"
 
@@ -46,8 +45,6 @@ protected:
   PoldiAbstractChopper() = default;
 };
 
-using PoldiAbstractChopper_sptr = boost::shared_ptr<PoldiAbstractChopper>;
+using PoldiAbstractChopper_sptr = std::shared_ptr<PoldiAbstractChopper>;
 } // namespace Poldi
 } // namespace Mantid
-
-#endif // POLDIABSTRACTCHOPPER_H

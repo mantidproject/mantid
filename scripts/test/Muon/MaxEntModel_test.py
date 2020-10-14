@@ -1,12 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.py3compat import mock
+from unittest import mock
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_model
 
 
@@ -30,9 +30,9 @@ class MaxEntModelTest(unittest.TestCase):
         inputs["maxent"] = empty
         self.wrapper.loadData(inputs)
         self.wrapper.execute()
-        assert(self.model.setRun.call_count == 1)
-        assert(self.model.MaxEntAlg.call_count == 1)
-        assert(self.model.makePhaseTable.call_count == 0)
+        assert (self.model.setRun.call_count == 1)
+        assert (self.model.MaxEntAlg.call_count == 1)
+        assert (self.model.makePhaseTable.call_count == 0)
 
     def testAll_execute(self):
         empty = {}
@@ -42,9 +42,10 @@ class MaxEntModelTest(unittest.TestCase):
         inputs["phaseTable"] = empty
         self.wrapper.loadData(inputs)
         self.wrapper.execute()
-        assert(self.model.setRun.call_count == 1)
-        assert(self.model.MaxEntAlg.call_count == 1)
-        assert(self.model.makePhaseTable.call_count == 1)
+        assert (self.model.setRun.call_count == 1)
+        assert (self.model.MaxEntAlg.call_count == 1)
+        assert (self.model.makePhaseTable.call_count == 1)
+
 
 if __name__ == '__main__':
     unittest.main()

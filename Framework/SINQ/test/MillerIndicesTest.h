@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SINQ_MILLERINDICESTEST_H
-#define MANTID_SINQ_MILLERINDICESTEST_H
+#pragma once
 
 #include "MantidKernel/V3D.h"
 #include "MantidSINQ/PoldiUtilities/MillerIndices.h"
@@ -32,16 +31,16 @@ public:
 
   void testvectorConstructor() {
     std::vector<int> hkl;
-    hkl.push_back(2);
-    hkl.push_back(5);
-    hkl.push_back(4);
+    hkl.emplace_back(2);
+    hkl.emplace_back(5);
+    hkl.emplace_back(4);
 
     MillerIndices hklMI(hkl);
     TS_ASSERT_EQUALS(hklMI.h(), 2);
     TS_ASSERT_EQUALS(hklMI.k(), 5);
     TS_ASSERT_EQUALS(hklMI.l(), 4);
 
-    hkl.push_back(3);
+    hkl.emplace_back(3);
 
     TS_ASSERT_THROWS(MillerIndices fails(hkl), const std::runtime_error &);
   }
@@ -120,5 +119,3 @@ public:
     TS_ASSERT_DIFFERS(hklOne, hklThree);
   }
 };
-
-#endif // MANTID_SINQ_MILLERINDICESTEST_H

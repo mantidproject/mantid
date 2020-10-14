@@ -1,0 +1,346 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>597</width>
+    <height>427</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QGroupBox" name="range_binning_box">
+     <property name="title">
+      <string>Input Wavelength Range (Å)</string>
+     </property>
+     <layout class="QGridLayout" name="loRangeBinning_2">
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <item row="0" column="1">
+       <widget class="QComboBox" name="binning_type_combo_box">
+        <item>
+         <property name="text">
+          <string>Single</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Multiple</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QStackedWidget" name="binning_types_stack">
+        <property name="baseSize">
+         <size>
+          <width>0</width>
+          <height>0</height>
+         </size>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <widget class="QWidget" name="single_type_widget">
+         <layout class="QHBoxLayout" name="horizontalLayout_5">
+          <item>
+           <widget class="QLabel" name="single_low_label">
+            <property name="text">
+             <string>Low:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="single_low_spin_box">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="single_width_label">
+            <property name="text">
+             <string>Width:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="single_width_spin_box">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="single_high_label">
+            <property name="text">
+             <string>High:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="single_high_spin_box">
+            <property name="decimals">
+             <number>3</number>
+            </property>
+            <property name="minimum">
+             <double>0.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>1000.000000000000000</double>
+            </property>
+            <property name="singleStep">
+             <double>0.100000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+        <widget class="QWidget" name="multiple_type_widget">
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QLineEdit" name="multiple_line_edit"/>
+          </item>
+         </layout>
+        </widget>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="binning_type_label">
+        <property name="text">
+         <string>Type:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QLabel" name="histogram_err">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="sample_details_box">
+     <property name="title">
+      <string>Sample Details</string>
+     </property>
+     <layout class="QGridLayout" name="loSampleDetails_2">
+      <item row="2" column="2">
+       <widget class="QLabel" name="thickness_err">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="thickness_label">
+        <property name="text">
+         <string>Thickness</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="density_spin_box">
+        <property name="suffix">
+         <string notr="true"/>
+        </property>
+        <property name="decimals">
+         <number>5</number>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.100000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="2">
+       <widget class="QLabel" name="density_err">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="thickness_spin_box">
+        <property name="suffix">
+         <string> cm</string>
+        </property>
+        <property name="decimals">
+         <number>5</number>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.100000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QLabel" name="chemical_formula_err">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="chemical_formula_label">
+        <property name="text">
+         <string>Chemical Formula</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QComboBox" name="density_combo_box">
+        <item>
+         <property name="text">
+          <string>Mass Density</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Number Density</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="chemical_formula_line_edit"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QGroupBox" name="output_box">
+     <property name="title">
+      <string>Output</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0">
+      <item>
+       <layout class="QHBoxLayout" name="output_layout" stretch="1,1">
+        <item>
+         <widget class="QWidget" name="placeholder_widget" native="true"/>
+        </item>
+        <item>
+         <widget class="QTreeWidget" name="results_tree">
+          <column>
+           <property name="text">
+            <string>Property</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Value</string>
+           </property>
+          </column>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="3" column="0">
+    <layout class="QHBoxLayout" name="action_buttons_box" stretch="0,1,0">
+     <item>
+      <widget class="QPushButton" name="help_button">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>25</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>25</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Opens the help page for the interface.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>?</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="validation_label">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="calculate_button">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Runs the sample transmission calculation.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>Calculate</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>binning_type_combo_box</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>binning_types_stack</receiver>
+   <slot>setCurrentIndex(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>95</x>
+     <y>45</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>358</x>
+     <y>45</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

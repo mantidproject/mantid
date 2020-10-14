@@ -25,8 +25,7 @@
 */
 
 
-#ifndef tree_hh_
-#define tree_hh_
+#pragma once
 
 #include <cassert>
 #include <memory>
@@ -2778,8 +2777,6 @@ typename tree<T, tree_node_allocator>::leaf_iterator& tree<T, tree_node_allocato
       }
    return (*this);
    }
-
-#endif
 
 // Local variables:
 // default-tab-width: 3

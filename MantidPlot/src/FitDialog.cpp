@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2004 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : FitDialog.cpp
@@ -56,7 +56,7 @@
 
 using namespace MantidQt::API;
 
-FitDialog::FitDialog(Graph *g, QWidget *parent, Qt::WFlags fl)
+FitDialog::FitDialog(Graph *g, QWidget *parent, const Qt::WFlags &fl)
     : QDialog(parent, fl) {
   setObjectName("FitDialog");
   setWindowTitle(tr("MantidPlot - Fit Wizard"));
@@ -1215,7 +1215,7 @@ void FitDialog::changeDataRange() {
   boxTo->setValue(qMax(start, end));
 }
 
-void FitDialog::setSrcTables(QList<MdiSubWindow *> tables) {
+void FitDialog::setSrcTables(const QList<MdiSubWindow *> &tables) {
   if (tables.isEmpty()) {
     tableNamesBox->addItem(tr("No data tables"));
     colNamesBox->addItem(tr("No data tables"));

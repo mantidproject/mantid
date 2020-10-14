@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IFunction1D.h"
 #include "MantidPythonInterface/api/FitFunctions/IFunction1DAdapter.h"
@@ -15,10 +15,10 @@ using namespace boost::python;
 
 void export_IFunction1D() {
   /**
-   * The Python held type, boost::shared_ptr<IFunction1DAdapter>, allows
+   * The Python held type, std::shared_ptr<IFunction1DAdapter>, allows
    * the class' virtual functions to be overridden in Python
    */
-  class_<IFunction1D, bases<IFunction>, boost::shared_ptr<IFunction1DAdapter>,
+  class_<IFunction1D, bases<IFunction>, std::shared_ptr<IFunction1DAdapter>,
          boost::noncopyable>("IFunction1D", "Base class for 1D Fit functions")
       .def("function1D",
            (object(IFunction1DAdapter::*)(const object &) const) &

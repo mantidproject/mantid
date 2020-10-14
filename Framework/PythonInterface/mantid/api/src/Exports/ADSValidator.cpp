@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ADSValidator.h"
 #include "MantidKernel/TypedValidator.h"
@@ -16,10 +16,11 @@ using namespace boost::python;
 
 /// This is the base TypedValidator for most of the WorkspaceValidators
 void export_ADSValidator() {
-  TypedValidatorExporter<std::string>::define("StringTypedValidator");
+  TypedValidatorExporter<std::vector<std::string>>::define(
+      "StringTypedValidator");
 
-  class_<ADSValidator, bases<TypedValidator<std::string>>, boost::noncopyable>(
-      "ADSValidator", init<>("Default constructor"))
+  class_<ADSValidator, bases<TypedValidator<std::vector<std::string>>>,
+         boost::noncopyable>("ADSValidator", init<>("Default constructor"))
       .def(init<const bool, const bool>(
           "Constructor setting allowMultiple and isOptional.",
           args("allowMultipleSelection", "isOptional")))

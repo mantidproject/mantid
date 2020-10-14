@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_ARRAYLENGTHVALIDATORTEST_H_
-#define MANTID_KERNEL_ARRAYLENGTHVALIDATORTEST_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
@@ -46,7 +45,7 @@ public:
 
   /// test the clone function
   void testClone() {
-    boost::shared_ptr<ArrayLengthValidator<int>> vi(
+    std::shared_ptr<ArrayLengthValidator<int>> vi(
         new ArrayLengthValidator<int>);
     IValidator_sptr vvi = vi->clone();
     TS_ASSERT_DIFFERS(vi, vvi);
@@ -88,25 +87,23 @@ public:
   void testValidator() {
     ArrayLengthValidator<int> vi(3);
     std::vector<int> a;
-    a.push_back(3);
+    a.emplace_back(3);
     TS_ASSERT_DIFFERS(vi.isValid(a).length(), 0);
-    a.push_back(-1);
-    a.push_back(11);
+    a.emplace_back(-1);
+    a.emplace_back(11);
     TS_ASSERT_EQUALS(vi.isValid(a).length(), 0);
   }
 
   void testValidatorRange() {
     ArrayLengthValidator<int> vi(2, 3);
     std::vector<int> a;
-    a.push_back(3);
+    a.emplace_back(3);
     TS_ASSERT_DIFFERS(vi.isValid(a).length(), 0);
-    a.push_back(11);
+    a.emplace_back(11);
     TS_ASSERT_EQUALS(vi.isValid(a).length(), 0);
-    a.push_back(12);
+    a.emplace_back(12);
     TS_ASSERT_EQUALS(vi.isValid(a).length(), 0);
-    a.push_back(21);
+    a.emplace_back(21);
     TS_ASSERT_DIFFERS(vi.isValid(a).length(), 0);
   }
 };
-
-#endif /* MANTID_KERNEL_ARRAYLENGTHVALIDATORTEST_H_ */

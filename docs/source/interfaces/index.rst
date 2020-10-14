@@ -12,10 +12,8 @@ Interfaces
 ===========
 
 .. toctree::
-   :hidden:
    :glob:
    :maxdepth: 1
 
+   ./isis_sans/ISIS SANS.rst
    *
-   MuonAnalysis_test_guides/index
-

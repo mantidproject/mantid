@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmHasProperty.h"
 #include "MantidAPI/IAlgorithm.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -26,7 +26,7 @@ std::string AlgorithmHasProperty::getType() const {
 
 /// Make a copy of the present type of validator
 Kernel::IValidator_sptr AlgorithmHasProperty::clone() const {
-  return boost::make_shared<AlgorithmHasProperty>(*this);
+  return std::make_shared<AlgorithmHasProperty>(*this);
 }
 
 /**
@@ -36,7 +36,7 @@ Kernel::IValidator_sptr AlgorithmHasProperty::clone() const {
  * error
  */
 std::string AlgorithmHasProperty::checkValidity(
-    const boost::shared_ptr<IAlgorithm> &value) const {
+    const std::shared_ptr<IAlgorithm> &value) const {
   std::string message;
   if (value->existsProperty(m_propName)) {
     Kernel::Property *p = value->getProperty(m_propName);

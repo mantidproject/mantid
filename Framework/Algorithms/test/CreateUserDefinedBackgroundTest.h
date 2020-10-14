@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CREATEUSERDEFINEDBACKGROUNDTEST_H_
-#define MANTID_ALGORITHMS_CREATEUSERDEFINEDBACKGROUNDTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -19,9 +18,9 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cmath>
 
+using Mantid::Algorithms::CreateUserDefinedBackground;
 using Mantid::API::ITableWorkspace_sptr;
 using Mantid::API::MatrixWorkspace_sptr;
-using Mantid::Algorithms::CreateUserDefinedBackground;
 
 namespace {
 // Gaussian
@@ -283,7 +282,7 @@ private:
 
   /// Create table containing user-selected background points
   ITableWorkspace_sptr createTable(bool isDistribution = false) {
-    auto table = boost::make_shared<Mantid::DataObjects::TableWorkspace>();
+    auto table = std::make_shared<Mantid::DataObjects::TableWorkspace>();
     table->addColumn("double", "X");
     table->addColumn("double", "Y");
     double width = 0.1;
@@ -302,19 +301,19 @@ private:
     constexpr double binWidth = 0.1;
     for (size_t i = 0; i < 100; ++i) {
       const double x = binWidth * static_cast<double>(i);
-      xData.push_back(x);
+      xData.emplace_back(x);
       const double y = background(x);
-      yData.push_back(isHisto && plotsNormalised ? y * binWidth : y);
-      eData.push_back(0.0);
+      yData.emplace_back(isHisto && plotsNormalised ? y * binWidth : y);
+      eData.emplace_back(0.0);
     }
     if (isHisto) {
       // add last bin edge
-      xData.push_back(10.0);
+      xData.emplace_back(10.0);
     } else {
       // add extra point
-      xData.push_back(10.0);
-      yData.push_back(background(10.0));
-      eData.push_back(0.0);
+      xData.emplace_back(10.0);
+      yData.emplace_back(background(10.0));
+      eData.emplace_back(0.0);
     }
     auto alg =
         Mantid::API::AlgorithmFactory::Instance().create("CreateWorkspace", 1);
@@ -331,8 +330,8 @@ private:
   }
 
   /// Compare workspaces
-  bool workspacesEqual(const MatrixWorkspace_sptr lhs,
-                       const MatrixWorkspace_sptr rhs, double tolerance,
+  bool workspacesEqual(const MatrixWorkspace_sptr &lhs,
+                       const MatrixWorkspace_sptr &rhs, double tolerance,
                        bool relativeError = false) {
     auto alg = Mantid::API::AlgorithmFactory::Instance().create(
         "CompareWorkspaces", 1);
@@ -379,5 +378,3 @@ private:
   /// Key for option
   const std::string m_key;
 };
-
-#endif /* MANTID_ALGORITHMS_CREATEUSERDEFINEDBACKGROUNDTEST_H_ */

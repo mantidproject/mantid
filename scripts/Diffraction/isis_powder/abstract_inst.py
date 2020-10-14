@@ -1,16 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import os
 from isis_powder.routines import calibrate, focus, common, common_enums, common_output
 from mantid.kernel import config, logger
-from six import iteritems
-
 # This class provides common hooks for instruments to override
 # if they want to define the behaviour of the hook. Otherwise it
 # returns the object passed in without manipulating it as a default
@@ -322,7 +318,7 @@ class AbstractInst(object):
             "tof_xye_filename": dat_files_directory,
             "dspacing_xye_filename": dat_files_directory
         }
-        for key, output_dir in iteritems(output_formats):
+        for key, output_dir in output_formats.items():
             filepath = os.path.join(output_dir,
                                     getattr(self._inst_settings, key).format(**format_options))
             out_file_names[key] = filepath

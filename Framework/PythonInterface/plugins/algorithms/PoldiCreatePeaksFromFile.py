@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 # pylint: disable=no-init,invalid-name,too-few-public-methods,unused-import
 from mantid.kernel import *
 from mantid.simpleapi import *
@@ -87,26 +85,20 @@ class PoldiCrystalFileParser(object):
             lambda o, s, loc, token: raiseParseErrorException("Element symbol must be one or two characters."))
         self.integerNumber = Word(nums)
         self.decimalSeparator = Word('./', max=1)
-        self.floatNumber = Combine(
-            self.integerNumber +
-            Optional(self.decimalSeparator + Optional(self.integerNumber))
-        )
+        self.floatNumber = Combine(self.integerNumber + Optional(self.decimalSeparator + Optional(self.integerNumber)))
 
         self.whiteSpace = Suppress(White())
 
-        self.atomLine = Combine(
-            self.elementSymbol + self.whiteSpace +
-            delimitedList(self.floatNumber, delim=White()),
-            joinString=' '
-        )
+        self.atomLine = Combine(self.elementSymbol + self.whiteSpace + delimitedList(self.floatNumber, delim=White()),
+                                joinString=' ')
 
         self.keyValueSeparator = Suppress(Literal(":"))
 
         self.groupOpener = Suppress(Literal('{'))
         self.groupCloser = Suppress(Literal('}'))
 
-        self.atomsGroup = Group(CaselessLiteral("atoms") + self.keyValueSeparator +
-                                self.groupOpener + delimitedList(self.atomLine, delim=lineEnd) + self.groupCloser)
+        self.atomsGroup = Group(CaselessLiteral("atoms") + self.keyValueSeparator
+                                + self.groupOpener + delimitedList(self.atomLine, delim=lineEnd) + self.groupCloser)
 
         self.unitCell = Group(CaselessLiteral("lattice") + self.keyValueSeparator + delimitedList(
             self.floatNumber, delim=White()))
@@ -120,8 +112,8 @@ class PoldiCrystalFileParser(object):
 
         self.compoundName = Word(alphanums + '_')
 
-        self.compound = Group(self.compoundName + Optional(self.whiteSpace) +
-                              self.groupOpener + self.compoundContent + self.groupCloser)
+        self.compound = Group(self.compoundName + Optional(self.whiteSpace)
+                              + self.groupOpener + self.compoundContent + self.groupCloser)
 
         self.comment = Suppress(Literal('#') + restOfLine)
 
@@ -198,8 +190,8 @@ class PoldiCreatePeaksFromFile(PythonAlgorithm):
             # If two compounds have the same name, a warning is written to the log.
             for compound in compounds:
                 if compound.getName() in workspaces:
-                    self.log().warning("A compound with the name '" + compound.getName() +
-                                       "' has already been created. Please check the file '" + crystalFileName + "'")
+                    self.log().warning("A compound with the name '" + compound.getName()
+                                       + "' has already been created. Please check the file '" + crystalFileName + "'")
                 else:
                     workspaces.append(self._createPeaksFromCell(compound, dMin, dMax))
 

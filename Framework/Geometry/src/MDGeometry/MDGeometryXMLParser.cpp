@@ -1,10 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include <algorithm>
+#include <functional>
+#include <utility>
 
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLDefinitions.h"
@@ -19,24 +21,20 @@
 namespace Mantid {
 namespace Geometry {
 /// Helper unary comparison type for finding IMDDimensions by a specified id.
-struct findID
-    : public std::unary_function<Mantid::Geometry::IMDDimension_sptr, bool> {
+struct findID {
   const std::string m_id;
   explicit findID(const std::string &id) : m_id(id) {}
 
-  bool operator()(const Mantid::Geometry::IMDDimension_sptr obj) const {
+  bool operator()(const Mantid::Geometry::IMDDimension_sptr &obj) const {
     return m_id == obj->getDimensionId();
   }
-  findID &operator=(const findID &);
 };
 
 /// Helper unary comparison type for finding non-integrated dimensions.
-struct findIntegrated
-    : public std::unary_function<Mantid::Geometry::IMDDimension_sptr, bool> {
-  bool operator()(const Mantid::Geometry::IMDDimension_sptr obj) const {
+struct findIntegrated {
+  bool operator()(const Mantid::Geometry::IMDDimension_sptr &obj) const {
     return obj->getIsIntegrated();
   }
-  findIntegrated &operator=(const findIntegrated &);
 };
 
 /**
@@ -254,7 +252,7 @@ MDGeometryXMLParser::getIntegratedDimensions() const {
   validate();
   Mantid::Geometry::VecIMDDimension_sptr temp = m_vecAllDims;
   temp.erase(
-      std::remove_if(temp.begin(), temp.end(), std::not1(findIntegrated())),
+      std::remove_if(temp.begin(), temp.end(), std::not_fn(findIntegrated())),
       temp.end());
   return temp;
 }
@@ -311,7 +309,7 @@ Setter for the root element.
 "Dimensions" unless xml snippet passed in directly, in which case do not set.
 */
 void MDGeometryXMLParser::SetRootNodeCheck(std::string elementName) {
-  m_rootNodeName = elementName;
+  m_rootNodeName = std::move(elementName);
 }
 
 /**
@@ -350,7 +348,7 @@ Determines whether query dimension is the x dimension.
 @return true if matches.
 */
 bool MDGeometryXMLParser::isXDimension(
-    Mantid::Geometry::IMDDimension_sptr candidate) const {
+    const Mantid::Geometry::IMDDimension_sptr &candidate) const {
   validate();
   bool bResult = false;
   if (hasXDimension()) {
@@ -367,7 +365,7 @@ Determines whether query dimension is the y dimension.
 @return true if matches.
 */
 bool MDGeometryXMLParser::isYDimension(
-    Mantid::Geometry::IMDDimension_sptr candidate) const {
+    const Mantid::Geometry::IMDDimension_sptr &candidate) const {
   validate();
   bool bResult = false;
   if (hasYDimension()) {
@@ -384,7 +382,7 @@ Determines whether query dimension is the z dimension.
 @return true if matches.
 */
 bool MDGeometryXMLParser::isZDimension(
-    Mantid::Geometry::IMDDimension_sptr candidate) const {
+    const Mantid::Geometry::IMDDimension_sptr &candidate) const {
   validate();
   bool bResult = false;
   if (hasZDimension()) {
@@ -401,7 +399,7 @@ Determines whether query dimension is the t dimension.
 @return true if matches.
 */
 bool MDGeometryXMLParser::isTDimension(
-    Mantid::Geometry::IMDDimension_sptr candidate) const {
+    const Mantid::Geometry::IMDDimension_sptr &candidate) const {
   validate();
   bool bResult = false;
   if (hasTDimension()) {

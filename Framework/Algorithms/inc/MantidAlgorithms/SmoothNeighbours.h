@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SmoothNeighbours_H_
-#define MANTID_ALGORITHMS_SmoothNeighbours_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/WeightingStrategy.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -23,7 +23,7 @@ using SpectraDistanceMap = std::map<specnum_t, Mantid::Kernel::V3D>;
 /*
 Filters spectra detector list by radius.
 */
-class DLLExport RadiusFilter {
+class MANTID_ALGORITHMS_DLL RadiusFilter {
 public:
   /**
   Constructor
@@ -63,7 +63,7 @@ private:
   @authors Janik Zikovsky, Vickie Lynch, SNS
   @date Oct 2010
 */
-class DLLExport SmoothNeighbours : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL SmoothNeighbours : public API::Algorithm {
 public:
   /// Default constructor
   SmoothNeighbours();
@@ -105,7 +105,7 @@ private:
   void setupNewInstrument(API::MatrixWorkspace &outws) const;
 
   /// Build the instrument/detector setup in workspace
-  void spreadPixels(API::MatrixWorkspace_sptr outws);
+  void spreadPixels(const API::MatrixWorkspace_sptr &outws);
 
   /// Non rectangular detector group name
   static const std::string NON_UNIFORM_GROUP;
@@ -147,5 +147,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_SmoothNeighbours_H_*/

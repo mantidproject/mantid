@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_WORKSPACESINGLEVALUE_H_
-#define MANTID_DATAOBJECTS_WORKSPACESINGLEVALUE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -86,11 +85,9 @@ private:
 };
 
 /// shared pointer to the WorkspaceSingleValue class
-using WorkspaceSingleValue_sptr = boost::shared_ptr<WorkspaceSingleValue>;
+using WorkspaceSingleValue_sptr = std::shared_ptr<WorkspaceSingleValue>;
 using WorkspaceSingleValue_const_sptr =
-    boost::shared_ptr<const WorkspaceSingleValue>;
+    std::shared_ptr<const WorkspaceSingleValue>;
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /*MANTID_DATAOBJECTS_WORKSPACESINGLEVALUE_H_*/

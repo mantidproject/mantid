@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/MDFrame.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -18,9 +18,10 @@ void export_MDFrame() {
 
   using namespace Mantid::Geometry;
 
-  register_ptr_to_python<boost::shared_ptr<MDFrame>>();
+  register_ptr_to_python<std::shared_ptr<MDFrame>>();
 
   class_<MDFrame, boost::noncopyable>("MDFrame", no_init)
       .def("getUnitLabel", &MDFrame::getUnitLabel, arg("self"))
-      .def("name", &MDFrame::name, arg("self"));
+      .def("name", &MDFrame::name, arg("self"))
+      .def("isQ", &MDFrame::isQ, arg("self"));
 }

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/UnwrappedDetector.h"
 #include "MantidGeometry/IDetector.h"
@@ -18,7 +18,7 @@ UnwrappedDetector::UnwrappedDetector()
   color = GLColor(0, 0, 0);
 }
 
-UnwrappedDetector::UnwrappedDetector(GLColor color, size_t detIndex)
+UnwrappedDetector::UnwrappedDetector(const GLColor &color, size_t detIndex)
     : u(0), v(0), width(0), height(0), uscale(0), vscale(0),
       detIndex(detIndex) {
   this->color = color;

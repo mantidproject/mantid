@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_FINDSUBTREEROOTS_H
-#define MANTID_MANTIDWIDGETS_FINDSUBTREEROOTS_H
+#pragma once
 
 #include "MantidQtWidgets/Common/Batch/FindSubtreeRoots.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
@@ -242,5 +241,3 @@ public:
     TS_ASSERT(!roots.is_initialized())
   }
 };
-
-#endif // MANTID_MANTIDWIDGETS_FINDSUBTREEROOTS_H

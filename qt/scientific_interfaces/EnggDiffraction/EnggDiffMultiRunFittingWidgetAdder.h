@@ -4,12 +4,11 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETADDER_H_
-#define MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETADDER_H_
+#pragma once
 
 #include "IEnggDiffMultiRunFittingWidgetAdder.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -33,5 +32,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETADDER_H_

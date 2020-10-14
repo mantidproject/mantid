@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SaveHKL.h"
 #include "MantidAPI/FileProperty.h"
@@ -44,7 +44,7 @@ void SaveHKL::init() {
                       "InputWorkspace", "", Direction::Input),
                   "An input PeaksWorkspace.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("ScalePeaks", 1.0, mustBePositive,
                   "Multiply FSQ and sig(FSQ) by scaleFactor");
@@ -78,7 +78,7 @@ void SaveHKL::init() {
 
   std::vector<std::string> histoTypes{"Bank", "RunNumber", ""};
   declareProperty("SortBy", histoTypes[2],
-                  boost::make_shared<StringListValidator>(histoTypes),
+                  std::make_shared<StringListValidator>(histoTypes),
                   "Sort the histograms by bank, run number or both (default).");
   declareProperty("MinIsigI", EMPTY_DBL(), mustBePositive,
                   "The minimum I/sig(I) ratio");
@@ -219,9 +219,9 @@ void SaveHKL::exec() {
 
     // Save in the map
     if (type.compare(0, 2, "Ru") == 0)
-      runMap[run][bank].push_back(i);
+      runMap[run][bank].emplace_back(i);
     else
-      runMap[bank][run].push_back(i);
+      runMap[bank][run].emplace_back(i);
     // Track unique bank numbers
     uniqueBanks.insert(bank);
     uniqueRuns.insert(run);
@@ -303,8 +303,8 @@ void SaveHKL::exec() {
         if (STRING.find("Bank") == std::string::npos) {
           double time0, spectra0;
           ss >> time0 >> spectra0;
-          time[a].push_back(time0);
-          spectra[a].push_back(spectra0);
+          time[a].emplace_back(time0);
+          spectra[a].emplace_back(spectra0);
 
         } else {
           std::string temp;
@@ -366,9 +366,9 @@ void SaveHKL::exec() {
           continue;
         }
         // Take out the "bank" part of the bank name and convert to an int
-        bankName.erase(remove_if(bankName.begin(), bankName.end(),
-                                 not1(std::ptr_fun(::isdigit))),
-                       bankName.end());
+        bankName.erase(
+            remove_if(bankName.begin(), bankName.end(), std::not_fn(::isdigit)),
+            bankName.end());
         Strings::convert(bankName, bank);
 
         // Two-theta = polar angle = scattering angle = between +Z vector and
@@ -436,14 +436,14 @@ void SaveHKL::exec() {
               1.0 - std::exp(-mu * depth); // efficiency at center of detector
 
           // Distance to center of detector
-          boost::shared_ptr<const IComponent> det0 =
+          std::shared_ptr<const IComponent> det0 =
               inst->getComponentByName(p.getBankName());
           if (inst->getName() ==
               "CORELLI") // for Corelli with sixteenpack under bank
           {
             std::vector<Geometry::IComponent_const_sptr> children;
-            boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-                boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(
+            std::shared_ptr<const Geometry::ICompAssembly> asmb =
+                std::dynamic_pointer_cast<const Geometry::ICompAssembly>(
                     inst->getComponentByName(p.getBankName()));
             asmb->getChildren(children, false);
             det0 = children[0];
@@ -629,7 +629,7 @@ void SaveHKL::exec() {
   // delete banned peaks
   std::vector<int> badPeaks;
   for (auto it = banned.crbegin(); it != banned.crend(); ++it) {
-    badPeaks.push_back(static_cast<int>(*it));
+    badPeaks.emplace_back(static_cast<int>(*it));
   }
   peaksW->removePeaks(std::move(badPeaks));
   setProperty("OutputWorkspace", peaksW);
@@ -747,16 +747,16 @@ double SaveHKL::spectrumCalc(double TOF, int iSpec,
 
   return spect;
 }
-void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
+void SaveHKL::sizeBanks(const std::string &bankName, int &nCols, int &nRows) {
   if (bankName == "None")
     return;
-  boost::shared_ptr<const IComponent> parent =
+  std::shared_ptr<const IComponent> parent =
       m_ws->getInstrument()->getComponentByName(bankName);
   if (!parent)
     return;
   if (parent->type() == "RectangularDetector") {
-    boost::shared_ptr<const RectangularDetector> RDet =
-        boost::dynamic_pointer_cast<const RectangularDetector>(parent);
+    std::shared_ptr<const RectangularDetector> RDet =
+        std::dynamic_pointer_cast<const RectangularDetector>(parent);
 
     nCols = RDet->xpixels();
     nRows = RDet->ypixels();
@@ -765,17 +765,17 @@ void SaveHKL::sizeBanks(std::string bankName, int &nCols, int &nRows) {
         "CORELLI") // for Corelli with sixteenpack under bank
     {
       std::vector<Geometry::IComponent_const_sptr> children;
-      boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-          boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+      std::shared_ptr<const Geometry::ICompAssembly> asmb =
+          std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
       asmb->getChildren(children, false);
       parent = children[0];
     }
     std::vector<Geometry::IComponent_const_sptr> children;
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(parent);
     asmb->getChildren(children, false);
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb2 =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb2 =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(children[0]);
     std::vector<Geometry::IComponent_const_sptr> grandchildren;
     asmb2->getChildren(grandchildren, false);
     nRows = static_cast<int>(grandchildren.size());

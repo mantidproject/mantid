@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MESSAGE_H_
-#define MESSAGE_H_
+#pragma once
 
 //----------------------------------
 // Includes
@@ -36,30 +35,38 @@ public:
   /// Default constuctor required by Qt meta-type system
   Message();
   /// Construct a message from a QString with a given priority (default=notice)
-  Message(const QString &text, Priority priority = Priority::PRIO_NOTICE);
+  Message(const QString &text, Priority priority = Priority::PRIO_NOTICE,
+          const QString &scriptPath = "");
   /// Construct a message from a std::string with a given priority
   /// (default=notice)
-  Message(const std::string &text, Priority priority = Priority::PRIO_NOTICE);
+  Message(const std::string &text, Priority priority = Priority::PRIO_NOTICE,
+          const QString &scriptPath = "");
   /// Construct a message from a c-style string and a given priority
   /// (default=notice)
-  Message(const char *text, Priority priority = Priority::PRIO_NOTICE);
+  Message(const char *text, Priority priority = Priority::PRIO_NOTICE,
+          const QString &scriptPath = "");
   /// Copy constructor
   Message(const Message &msg);
+  /// Copy assignment
+  Message &operator=(const Message &msg);
 
 public:
   /// @returns The message text
   inline QString text() const { return m_text; }
   /// @returns The message priority
   inline Priority priority() const { return m_priority; }
+  /// @returns The name of the script the message came from
+  inline QString scriptPath() const { return m_scriptPath; }
+  /// Set the script name. This is useful if a script is renamed
+  void setScriptPath(const QString &scriptPath) { m_scriptPath = scriptPath; }
 
 private:
   QString m_text;
   Priority m_priority;
+  QString m_scriptPath;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt
 
 /// Required to operate in signals/slots
 Q_DECLARE_METATYPE(MantidQt::MantidWidgets::Message)
-
-#endif // MESSAGE_H_

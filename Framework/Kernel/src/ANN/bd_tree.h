@@ -24,8 +24,7 @@
 //		Changed IN, OUT to ANN_IN, ANN_OUT
 //----------------------------------------------------------------------
 
-#ifndef ANN_bd_tree_H
-#define ANN_bd_tree_H
+#pragma once
 
 #include "MantidKernel/ANN/ANNx.h" // all ANN includes
 #include "kd_tree.h"               // kd-tree includes
@@ -96,5 +95,3 @@ public:
   void ann_pri_search(ANNdist) override; // priority search
   void ann_FR_search(ANNdist) override;  // fixed-radius search
 };
-
-#endif

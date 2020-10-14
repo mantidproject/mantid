@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SampleCorrections/RectangularBeamProfile.h"
 #include "MantidAPI/Sample.h"
@@ -80,17 +80,11 @@ IBeamProfile::Ray RectangularBeamProfile::generatePoint(
 
 /**
  * Compute a region that defines how the beam illuminates the given sample/can
- * @param sample A reference to a sample object holding its shape
+ * @param sampleBox A reference to the bounding box of the sample
  * @return A BoundingBox defining the active region
  */
-Geometry::BoundingBox
-RectangularBeamProfile::defineActiveRegion(const API::Sample &sample) const {
-  auto sampleBox = sample.getShape().getBoundingBox();
-  try {
-    const auto &envBox = sample.getEnvironment().boundingBox();
-    sampleBox.grow(envBox);
-  } catch (std::runtime_error &) {
-  }
+Geometry::BoundingBox RectangularBeamProfile::defineActiveRegion(
+    const Geometry::BoundingBox &sampleBox) const {
   // In the beam direction use the maximum sample extent other wise restrict
   // the active region to the width/height of beam
   const auto &sampleMin(sampleBox.minPoint());

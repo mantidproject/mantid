@@ -1,6 +1,11 @@
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
 
-#ifndef LOADEMUAUTEST_H_
-#define LOADEMUAUTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -77,7 +82,7 @@ public:
         run.getProperty("end_time")->value().find("2018-07-26T10:17:12.6") == 0)
 
     // test some data properties
-    auto logpm = [&run](std::string tag) {
+    auto logpm = [&run](const std::string &tag) {
       return dynamic_cast<TimeSeriesProperty<double> *>(run.getProperty(tag))
           ->firstValue();
     };
@@ -86,12 +91,10 @@ public:
 
     // test some instrument parameters
     auto instr = output->getInstrument();
-    auto iparam = [&instr](std::string tag) {
+    auto iparam = [&instr](const std::string &tag) {
       return instr->getNumberParameter(tag)[0];
     };
     TS_ASSERT_DELTA(iparam("AnalysedV2"), 630.866, 1.0e-3);
     TS_ASSERT_DELTA(iparam("SampleAnalyser"), 1.8, 1.0e-3);
   }
 };
-
-#endif /*LOADEMUAUTEST_H_*/

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTER_H
+#pragma once
 
 #include "../../Reduction/Instrument.h"
 #include "Common/DllConfig.h"
@@ -36,11 +35,11 @@ public:
 
   // IInstrumentPresenver overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
-  void reductionPaused() override;
-  void reductionResumed() override;
-  void autoreductionPaused() override;
-  void autoreductionResumed() override;
-  void instrumentChanged(std::string const &instrumentName) override;
+  void notifyReductionPaused() override;
+  void notifyReductionResumed() override;
+  void notifyAutoreductionPaused() override;
+  void notifyAutoreductionResumed() override;
+  void notifyInstrumentChanged(std::string const &instrumentName) override;
   void restoreDefaults() override;
 
   // InstrumentViewSubscriber overrides
@@ -71,4 +70,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_ISISREFLECTOMETRY_INSTRUMENTPRESENTER_H

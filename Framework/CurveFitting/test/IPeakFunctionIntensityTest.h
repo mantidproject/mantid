@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IPEAKFUNCTIONINTENSITYTEST_H
-#define IPEAKFUNCTIONINTENSITYTEST_H
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -103,11 +102,11 @@ private:
     for (auto &registeredFunction : registeredFunctions) {
       if (blackList.count(registeredFunction) == 0) {
         IPeakFunction_sptr peakFunction =
-            boost::dynamic_pointer_cast<IPeakFunction>(
+            std::dynamic_pointer_cast<IPeakFunction>(
                 FunctionFactory::Instance().createFunction(registeredFunction));
 
         if (peakFunction) {
-          peakFunctions.push_back(peakFunction);
+          peakFunctions.emplace_back(peakFunction);
         }
       }
     }
@@ -139,10 +138,10 @@ private:
 
   std::vector<ParameterSet> getParameterSets() const {
     std::vector<ParameterSet> parameterSets;
-    parameterSets.push_back(ParameterSet(0.0, 4.34, 0.25));
-    parameterSets.push_back(ParameterSet(0.0, 5.34, 0.25));
-    parameterSets.push_back(ParameterSet(0.0, 6.34, 0.25));
-    parameterSets.push_back(ParameterSet(0.0, 7.34, 0.25));
+    parameterSets.emplace_back(ParameterSet(0.0, 4.34, 0.25));
+    parameterSets.emplace_back(ParameterSet(0.0, 5.34, 0.25));
+    parameterSets.emplace_back(ParameterSet(0.0, 6.34, 0.25));
+    parameterSets.emplace_back(ParameterSet(0.0, 7.34, 0.25));
 
     return parameterSets;
   }
@@ -152,7 +151,7 @@ private:
     std::vector<double> intensities;
 
     for (const auto &peak : peaks) {
-      intensities.push_back(peak->intensity());
+      intensities.emplace_back(peak->intensity());
     }
 
     return intensities;
@@ -162,5 +161,3 @@ private:
   std::vector<ParameterSet> m_parameterSets;
   std::unordered_set<std::string> m_blackList;
 };
-
-#endif // IPEAKFUNCTIONINTENSITYTEST_H

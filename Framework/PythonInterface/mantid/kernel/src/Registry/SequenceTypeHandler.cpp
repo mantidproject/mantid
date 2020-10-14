@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
@@ -89,9 +89,9 @@ std::unique_ptr<Kernel::Property> SequenceTypeHandler<ContainerType>::create(
     const boost::python::object &validator,
     const unsigned int direction) const {
   using DestElementType = typename ContainerType::value_type;
+  using boost::python::extract;
   using Kernel::IValidator;
   using Kernel::PropertyWithValue;
-  using boost::python::extract;
 
   ContainerType valueInC;
   // Current workaround for things that still pass back wrapped vectors...

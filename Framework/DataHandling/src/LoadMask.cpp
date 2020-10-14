@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadMask.h"
 #include "MantidAPI/FileFinder.h"
@@ -75,7 +75,7 @@ void convertToVector(const std::vector<T> &singles,
   // expand pairs
   for (size_t i = 0; i < ranges.size(); i += 2) {
     for (T obj_id = ranges[i]; obj_id < ranges[i + 1] + 1; ++obj_id) {
-      tot_singles.push_back(obj_id);
+      tot_singles.emplace_back(obj_id);
     }
   }
 }
@@ -122,12 +122,12 @@ void parseRangeText(const std::string &inputstr, std::vector<T> &singles,
             "Range string " + rawstring + " has wrong order of detectors ID!";
         throw std::invalid_argument(error);
       }
-      pairs.push_back(intstart);
-      pairs.push_back(intend);
+      pairs.emplace_back(intstart);
+      pairs.emplace_back(intend);
 
     } else { // 3. Treat singles
       auto itemp = boost::lexical_cast<T>(rawstring);
-      singles.push_back(itemp);
+      singles.emplace_back(itemp);
     }
   } // ENDFOR i
 }
@@ -189,18 +189,18 @@ void parseISISStringToVector(const std::string &ins,
   index = 0;
   while (tocontinue) {
     // i)   push to the starting vector
-    ranges.push_back(
+    ranges.emplace_back(
         boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));
 
     // ii)  push the ending vector
     if (index == splitstrings.size() - 1 || splitstrings[index + 1] != "-") {
       // the next one is not '-'
-      ranges.push_back(
+      ranges.emplace_back(
           boost::lexical_cast<Mantid::specnum_t>(splitstrings[index]));
       index++;
     } else {
       // the next one is '-', thus read '-', next
-      ranges.push_back(
+      ranges.emplace_back(
           boost::lexical_cast<Mantid::specnum_t>(splitstrings[index + 2]));
       index += 3;
     }
@@ -259,9 +259,9 @@ void parseComponent(const std::string &valuetext, bool tomask,
 
   // 1. Parse bank out
   if (tomask) {
-    toMask.push_back(valuetext);
+    toMask.emplace_back(valuetext);
   } else {
-    toUnmask.push_back(valuetext);
+    toUnmask.emplace_back(valuetext);
   }
 }
 } // namespace
@@ -276,7 +276,7 @@ void LoadMask::init() {
 
   // 1. Declare property
   declareProperty("Instrument", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the instrument to apply the mask.");
 
   const std::vector<std::string> maskExts{".xml", ".msk"};
@@ -433,8 +433,8 @@ void LoadMask::componentToDetectors(
     }
 
     // b) component -> component assembly --> children (more than detectors)
-    boost::shared_ptr<const Geometry::ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
+    std::shared_ptr<const Geometry::ICompAssembly> asmb =
+        std::dynamic_pointer_cast<const Geometry::ICompAssembly>(component);
     std::vector<Geometry::IComponent_const_sptr> children;
     asmb->getChildren(children, true);
 
@@ -447,11 +447,11 @@ void LoadMask::componentToDetectors(
     for (const auto &child : children) {
       // c) convert component to detector
       Geometry::IDetector_const_sptr det =
-          boost::dynamic_pointer_cast<const Geometry::IDetector>(child);
+          std::dynamic_pointer_cast<const Geometry::IDetector>(child);
 
       if (det) {
         detid_t detid = det->getID();
-        detectors.push_back(detid);
+        detectors.emplace_back(detid);
         numdets++;
         if (detid < id_min)
           id_min = detid;
@@ -498,7 +498,7 @@ void LoadMask::bankToDetectors(const std::vector<std::string> &singlebanks,
 
     for (const auto &det : idetectors) {
       detid_t detid = det->getID();
-      detectors.push_back(detid);
+      detectors.emplace_back(detid);
     }
     g_log.debug() << "Number of Detectors in Bank  " << singlebank
                   << "  is: " << numdets << "\nRange From: " << detid_first
@@ -731,7 +731,7 @@ void LoadMask::convertSpMasksToDetIDs(const API::MatrixWorkspace &sourceWS,
     }
     // add detectors to the masked det-id list
     for (auto it = source_range.first; it != source_range.second; ++it) {
-      singleDetIds.push_back(it->second);
+      singleDetIds.emplace_back(it->second);
     }
   }
 }

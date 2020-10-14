@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef EXTRACTSINGLESPECTRUMTEST_H_
-#define EXTRACTSINGLESPECTRUMTEST_H_
+#pragma once
 
 #include "CropWorkspaceTest.h" // Use the test label functionality as it should do the same thing
 #include "MantidAlgorithms/ExtractSingleSpectrum.h"
@@ -17,20 +16,16 @@ using Mantid::detid_t;
 class ExtractSingleSpectrumTest : public CxxTest::TestSuite {
 public:
   void testName() {
-    IAlgorithm *nameTester = createExtractSingleSpectrum();
-    TS_ASSERT_EQUALS(nameTester->name(), "ExtractSingleSpectrum");
+    TS_ASSERT_EQUALS(ExtractSingleSpectrum().name(), "ExtractSingleSpectrum");
   }
 
-  void testVersion() {
-    IAlgorithm *versionTester = createExtractSingleSpectrum();
-    TS_ASSERT_EQUALS(versionTester->version(), 1);
-  }
+  void testVersion() { TS_ASSERT_EQUALS(ExtractSingleSpectrum().version(), 1); }
 
   void testInit() {
-    IAlgorithm *initTester = createExtractSingleSpectrum();
-    TS_ASSERT_THROWS_NOTHING(initTester->initialize());
-    TS_ASSERT(initTester->isInitialized());
-    TS_ASSERT_EQUALS(initTester->getProperties().size(), 3);
+    ExtractSingleSpectrum initTester;
+    TS_ASSERT_THROWS_NOTHING(initTester.initialize());
+    TS_ASSERT(initTester.isInitialized());
+    TS_ASSERT_EQUALS(initTester.getProperties().size(), 3);
   }
 
   void testExec() {
@@ -82,7 +77,7 @@ public:
     MatrixWorkspace_sptr output = runAlgorithm(eventWS, wsIndex);
 
     EventWorkspace_sptr outputWS =
-        boost::dynamic_pointer_cast<EventWorkspace>(output);
+        std::dynamic_pointer_cast<EventWorkspace>(output);
     TSM_ASSERT("Output should be an event workspace", outputWS);
     const size_t numEvents = outputWS->getNumberEvents();
     TS_ASSERT_EQUALS(numEvents, eventsPerPixel);
@@ -93,30 +88,26 @@ public:
   }
 
 private:
-  ExtractSingleSpectrum *createExtractSingleSpectrum() {
-    return new ExtractSingleSpectrum();
-  }
-
-  MatrixWorkspace_sptr runAlgorithm(MatrixWorkspace_sptr inputWS,
+  MatrixWorkspace_sptr runAlgorithm(const MatrixWorkspace_sptr &inputWS,
                                     const int index) {
-    Algorithm *extractor = createExtractSingleSpectrum();
-    extractor->initialize();
-    extractor->setChild(true); // Don't add the output to the ADS, then we don't
-                               // have to clear it
-    TS_ASSERT_THROWS_NOTHING(extractor->setProperty("InputWorkspace", inputWS));
+    ExtractSingleSpectrum extractor;
+    extractor.initialize();
+    extractor.setChild(true); // Don't add the output to the ADS, then we don't
+                              // have to clear it
+    TS_ASSERT_THROWS_NOTHING(extractor.setProperty("InputWorkspace", inputWS));
     TS_ASSERT_THROWS_NOTHING(
-        extractor->setPropertyValue("OutputWorkspace", "child_algorithm"));
-    TS_ASSERT_THROWS_NOTHING(extractor->setProperty("WorkspaceIndex", index));
-    TS_ASSERT_THROWS_NOTHING(extractor->execute());
-    TS_ASSERT(extractor->isExecuted());
-    if (!extractor->isExecuted()) {
+        extractor.setPropertyValue("OutputWorkspace", "child_algorithm"));
+    TS_ASSERT_THROWS_NOTHING(extractor.setProperty("WorkspaceIndex", index));
+    TS_ASSERT_THROWS_NOTHING(extractor.execute());
+    TS_ASSERT(extractor.isExecuted());
+    if (!extractor.isExecuted()) {
       TS_FAIL("Error running algorithm");
     }
-    return extractor->getProperty("OutputWorkspace");
+    return extractor.getProperty("OutputWorkspace");
   }
 
-  void do_Spectrum_Tests(MatrixWorkspace_sptr outputWS, const specnum_t specID,
-                         const detid_t detID) {
+  void do_Spectrum_Tests(const MatrixWorkspace_sptr &outputWS,
+                         const specnum_t specID, const detid_t detID) {
     TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
     TS_ASSERT_THROWS_NOTHING(outputWS->getSpectrum(0));
     const auto &spectrum = outputWS->getSpectrum(0);
@@ -127,5 +118,3 @@ private:
     TS_ASSERT_EQUALS(id, detID);
   }
 };
-
-#endif /*EXTRACTSINGLESPECTRUMTEST_H_*/

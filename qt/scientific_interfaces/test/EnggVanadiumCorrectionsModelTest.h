@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ENGGVANADIUMCORRECTIONSMODELTEST_H_
-#define MANTIDQT_CUSTOMINTERFACES_ENGGVANADIUMCORRECTIONSMODELTEST_H_
+#pragma once
 
 #include "../EnggDiffraction/EnggVanadiumCorrectionsModel.h"
 
@@ -179,7 +178,7 @@ private:
   Poco::File m_inputDir;
 
   void saveNexus(const std::string &filename,
-                 const Mantid::API::Workspace_sptr workspace) const {
+                 const Mantid::API::Workspace_sptr &workspace) const {
     auto save = Mantid::API::AlgorithmManager::Instance().create("SaveNexus");
     save->initialize();
     save->setProperty("InputWorkspace", workspace);
@@ -188,8 +187,8 @@ private:
   }
 
   void writeOutSampleCorrectionWorkspaces(
-      Mantid::API::ITableWorkspace_sptr integratedWS,
-      Mantid::API::MatrixWorkspace_sptr curvesWS) {
+      const Mantid::API::ITableWorkspace_sptr &integratedWS,
+      const Mantid::API::MatrixWorkspace_sptr &curvesWS) {
     Poco::Path curvesWSPath(m_inputDir.path());
     curvesWSPath.append("123_precalculated_vanadium_run_bank_curves.nxs");
     saveNexus(curvesWSPath.toString(), curvesWS);
@@ -205,5 +204,3 @@ const std::string EnggVanadiumCorrectionsModelTest::CURRENT_INSTRUMENT =
 
 const std::string EnggVanadiumCorrectionsModelTest::INPUT_DIR_NAME(
     "EnggVanadiumCorrectionsModelTestData");
-
-#endif // MANTIDQT_CUSTOMINTERFACES_ENGGVANADIUMCORRECTIONSMODELTEST_H_

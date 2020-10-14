@@ -25,7 +25,7 @@ set(
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/InterfaceManager.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/MantidDesktopServices.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/MessageDisplay.h
-  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/MWRunFiles.h
+  ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/FileFinderWidget.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/WidgetScrollbarDecorator.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/FitPropertyBrowser.h
   ${WIDGETS_COMMON_INC}/MantidQtWidgets/Common/SlitCalculator.h
@@ -88,12 +88,9 @@ mtd_add_sip_module(MODULE_NAME mantidqtpython
                    INCLUDE_DIRS
                      ${CMAKE_CURRENT_LIST_DIR}
                      ${COMMON_SIP_DIR}
-                     ${PYTHON_INCLUDE_PATH}
-                     ${SIP_INCLUDE_DIR}
                      ../../../Framework/PythonInterface/core/inc
                    PYQT_VERSION 4
                    LINK_LIBS
-                     ${TCMALLOC_LIBRARIES_LINKTIME}
                      MantidQtWidgetsCommonQt4
                      MantidQtWidgetsPlottingQt4
                      MantidQtWidgetsSliceViewerQt4
@@ -107,11 +104,13 @@ mtd_add_sip_module(MODULE_NAME mantidqtpython
                      Qt4::QtCore
                      Qt4::QtGui
                      Qt4::QtOpenGL
+		     Qt4::Qscintilla
                      Qwt5
-                     ${PYTHON_LIBRARIES}
+                     Python::Python
                    FOLDER Qt4
                    OSX_INSTALL_RPATH
                      @loader_path/../Contents/MacOS
+                     @loader_path/../Contents/Frameworks
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../${LIB_DIR}")
 
@@ -121,9 +120,9 @@ if(MSVC)
   # the special PyQt4 debug build to the bin directory
   add_custom_command(
     TARGET mantidqtpython
-	POST_BUILD
+    POST_BUILD
     COMMAND if 1==$<CONFIG:Debug> ${CMAKE_COMMAND} -E copy_directory
-            ${PYTHON_DIR}/msvc-site-packages/debug/PyQt4
+            ${MSVC_PYTHON_EXECUTABLE_DIR}/msvc-site-packages/debug/PyQt4
             ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/PyQt4
     COMMENT "Copying debug PyQt4 to bin")
 endif()

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_CENTERINGGROUP_H_
-#define MANTID_GEOMETRY_CENTERINGGROUP_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/Group.h"
 #include "MantidGeometry/DllConfig.h"
@@ -51,8 +50,8 @@ protected:
   std::string m_symbol;
 };
 
-using CenteringGroup_sptr = boost::shared_ptr<CenteringGroup>;
-using CenteringGroup_const_sptr = boost::shared_ptr<const CenteringGroup>;
+using CenteringGroup_sptr = std::shared_ptr<CenteringGroup>;
+using CenteringGroup_const_sptr = std::shared_ptr<const CenteringGroup>;
 
 /// Helper class to keep this out of the interface of CenteringGroup.
 class MANTID_GEOMETRY_DLL CenteringGroupCreatorImpl {
@@ -92,5 +91,3 @@ EXTERN_MANTID_GEOMETRY template class MANTID_GEOMETRY_DLL Mantid::Kernel::
     SingletonHolder<Mantid::Geometry::CenteringGroupCreatorImpl>;
 }
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_CENTERINGGROUP_H_ */

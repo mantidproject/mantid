@@ -1,28 +1,54 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.kernel import UnitConversion, DeltaEModeType
-from mantid.simpleapi import CreateWorkspace, Multiply
+from mantid.simpleapi import CreateWorkspace, DeleteWorkspace, Multiply, mtd
 import scipy.constants as constants
+import h5py
+import numpy
+
+
+def sample_angle(run):
+    """Return the sample theta angle in degrees."""
+    if isinstance(run, list):
+        run = run[0]
+    with h5py.File(run, "r") as nexus:
+        if nexus.get('entry0/instrument/SAN') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/SAN/value'), dtype='float'))
+        elif nexus.get('entry0/instrument/san') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/san/value'), dtype='float'))
+        else:
+            raise RuntimeError('Cannot retrieve sample angle from Nexus file {}.'.format(run))
+
+
+def detector_angle(run):
+    """Return the detector angle in degrees."""
+    if isinstance(run, list):
+        run = run[0]
+    with h5py.File(run, "r") as nexus:
+        if nexus.get('entry0/instrument/DAN') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/DAN/value'), dtype='float'))
+        elif nexus.get('entry0/instrument/dan') is not None:
+            return float(numpy.array(nexus.get('entry0/instrument/dan/value'), dtype='float'))
+        else:
+            raise RuntimeError('Cannot retrieve detector angle from Nexus file {}.'.format(run))
 
 
 def chopperOpeningAngle(sampleLogs, instrumentName):
     """Return the chopper opening angle in degrees."""
     if instrumentName == 'D17':
         chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper1_phase_average').value
+        chopperWindow = sampleLogs.getProperty('ChopperWindow').value
         if chopper1Phase > 360.:
             # Workaround for broken old D17 NeXus files.
             chopper1Phase = sampleLogs.getProperty('VirtualChopper.chopper2_speed_average').value
         chopper2Phase = sampleLogs.getProperty('VirtualChopper.chopper2_phase_average').value
         openoffset = sampleLogs.getProperty('VirtualChopper.open_offset').value
-        return 45. - (chopper2Phase - chopper1Phase) - openoffset
+        return chopperWindow - (chopper2Phase - chopper1Phase) - openoffset
     else:
         firstChopper = int(sampleLogs.getProperty('ChopperSetting.firstChopper').value)
         secondChopper = int(sampleLogs.getProperty('ChopperSetting.secondChopper').value)
@@ -43,7 +69,7 @@ def chopperOpeningAngle(sampleLogs, instrumentName):
 def chopperPairDistance(sampleLogs, instrumentName):
     """Return the gap between the two choppers."""
     if instrumentName == 'D17':
-        return sampleLogs.getProperty('Distance.ChopperGap').value * 1e-2
+        return sampleLogs.getProperty('Distance.ChopperGap').value # in [m]
     else:
         return sampleLogs.getProperty('ChopperSetting.distSeparationChopperPair').value * 1e-3
 
@@ -130,10 +156,98 @@ def instrumentName(ws):
     return name
 
 
+def slitSizes(ws):
+    run = ws.run()
+    instrName = instrumentName(ws)
+    slit2width = run.get(slitSizeLogEntry(instrName, 1))
+    slit3width = run.get(slitSizeLogEntry(instrName, 2))
+    if slit2width is None or slit3width is None:
+        run.addProperty(SampleLogs.SLIT2WIDTH, str('-'), '', True)
+        run.addProperty(SampleLogs.SLIT3WIDTH, str('-'), '', True)
+    else:
+        slit2widthUnit = slit2width.units
+        slit3widthUnit = slit3width.units
+        slit3w = slit3width.value
+        if instrumentName(ws) != 'D17':
+            bgs3 = float(run.getProperty('BGS3.value').value)
+            if bgs3 >= 150.:
+                slit3w += 0.08
+            elif 150. > bgs3 >= 50.:
+                slit3w += 0.06
+            elif -50. > bgs3 >= -150.:
+                slit3w -= 0.12
+            elif bgs3 < -150.:
+                slit3w -= 0.24
+        slit2w = slit2width.value
+        run.addProperty(SampleLogs.SLIT2WIDTH, float(slit2w), slit2widthUnit, True)
+        run.addProperty(SampleLogs.SLIT3WIDTH, float(slit3w), slit3widthUnit, True)
+
+
 class SampleLogs:
     FOREGROUND_CENTRE = 'reduction.foreground.centre_workspace_index'
     FOREGROUND_END = 'reduction.foreground.last_workspace_index'
     FOREGROUND_START = 'reduction.foreground.first_workspace_index'
     LINE_POSITION = 'reduction.line_position'
+    SLIT2WIDTH = 'reduction.slit2width'
+    SLIT3WIDTH = 'reduction.slit3width'
     SUM_TYPE = 'reduction.foreground.summation_type'
-    TWO_THETA = 'loader.two_theta'
+
+
+class WSCleanup:
+    """A class to manage intermediate workspace cleanup."""
+
+    OFF = 'Cleanup OFF'
+    ON = 'Cleanup ON'
+
+    def __init__(self, cleanupMode, deleteAlgorithmLogging):
+        """Initialize an instance of the class."""
+        self._deleteAlgorithmLogging = deleteAlgorithmLogging
+        self._doDelete = cleanupMode == self.ON
+        self._protected = set()
+        self._toBeDeleted = set()
+
+    def cleanup(self, *args):
+        """Delete the workspaces listed in *args."""
+        for ws in args:
+            self._delete(ws)
+
+    def cleanupLater(self, *args):
+        """Mark the workspaces listed in *args to be cleaned up later."""
+        for arg in args:
+            self._toBeDeleted.add(str(arg))
+
+    def finalCleanup(self):
+        """Delete all workspaces marked to be cleaned up later."""
+        for ws in self._toBeDeleted:
+            self._delete(ws)
+
+    def protect(self, *args):
+        """Mark the workspaces listed in *args to be never deleted."""
+        for arg in args:
+            self._protected.add(str(arg))
+
+    def _delete(self, ws):
+        """Delete the given workspace in ws if it is not protected, and
+        deletion is actually turned on.
+        """
+        if not self._doDelete:
+            return
+        try:
+            ws = str(ws)
+        except RuntimeError:
+            return
+        if ws not in self._protected and mtd.doesExist(ws):
+            DeleteWorkspace(Workspace=ws, EnableLogging=self._deleteAlgorithmLogging)
+
+
+class WSNameSource:
+    """A class to provide names for intermediate workspaces."""
+
+    def __init__(self, prefix, cleanupMode):
+        """Initialize an instance of the class."""
+        self._names = set()
+        self._prefix = '__' + prefix if cleanupMode == WSCleanup.ON else prefix
+
+    def withSuffix(self, suffix):
+        """Returns a workspace name with given suffix applied."""
+        return self._prefix + '_' + suffix + '_'

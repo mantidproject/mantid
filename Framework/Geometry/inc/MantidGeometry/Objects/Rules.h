@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef Rules_h
-#define Rules_h
+#pragma once
 
-#include <boost/shared_ptr.hpp>
 #include <map>
+#include <memory>
 
 class TopoDS_Shape;
 
@@ -93,7 +92,7 @@ public:
 
   int Eliminate(); ///< elimination not written
   int substituteSurf(const int SurfN, const int newSurfN,
-                     const boost::shared_ptr<Surface> &SPtr);
+                     const std::shared_ptr<Surface> &SPtr);
 
   /// Abstract Display
   virtual std::string display() const = 0;
@@ -234,7 +233,7 @@ be calculated
 
 class MANTID_GEOMETRY_DLL SurfPoint : public Rule {
 private:
-  boost::shared_ptr<Surface> m_key; ///< Actual Surface Base Object
+  std::shared_ptr<Surface> m_key; ///< Actual Surface Base Object
   SurfPoint *doClone() const override;
   int keyN; ///< Key Number (identifer)
   int sign; ///< +/- in Object unit
@@ -254,7 +253,7 @@ public:
   int type() const override { return 0; } ///< Effective name
 
   void setKeyN(const int Ky); ///< set keyNumber
-  void setKey(const boost::shared_ptr<Surface> &Spoint);
+  void setKey(const std::shared_ptr<Surface> &Spoint);
   bool isValid(const Kernel::V3D &) const override;
   bool isValid(const std::map<int, int> &) const override;
   int getSign() const { return sign; } ///< Get Sign
@@ -440,5 +439,3 @@ public:
 } // NAMESPACE  Geometry
 
 } // NAMESPACE  Mantid
-
-#endif

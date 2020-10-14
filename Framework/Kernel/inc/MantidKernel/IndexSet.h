@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_INDEXSET_H_
-#define MANTID_KERNEL_INDEXSET_H_
+#pragma once
 
 #include <vector>
 
@@ -28,7 +27,7 @@ class MANTID_KERNEL_DLL IndexSet {
 public:
   IndexSet(size_t fullRange);
   IndexSet(int64_t min, int64_t max, size_t fullRange);
-  IndexSet(const std::vector<size_t> indices, size_t fullRange);
+  IndexSet(const std::vector<size_t> &indices, size_t fullRange);
 
   /// Returns the size of the set.
   size_t size() const { return m_size; }
@@ -51,5 +50,3 @@ private:
 
 } // Namespace Kernel
 } // Namespace Mantid
-
-#endif /* MANTID_KERNEL_INDEXSET_H_ */

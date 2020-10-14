@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidRemoteAlgorithms/QueryRemoteJob2.h"
 #include "MantidAPI/RemoteJobManagerFactory.h"
@@ -26,15 +26,15 @@ using namespace Mantid::API;
 void QueryRemoteJob2::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
-  auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
-  auto nullValidator = boost::make_shared<NullValidator>();
+  auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
+  auto nullValidator = std::make_shared<NullValidator>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
                                           .getFacility()
                                           .computeResources();
   declareProperty(
-      "ComputeResource", "", boost::make_shared<StringListValidator>(computes),
+      "ComputeResource", "", std::make_shared<StringListValidator>(computes),
       "The name of the remote compute resource to query", Direction::Input);
 
   // The ID of the job we want to query

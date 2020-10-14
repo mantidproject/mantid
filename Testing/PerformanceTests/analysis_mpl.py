@@ -1,21 +1,17 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ Module containing functions for test
 performance analysis, plotting, and saving
 to other formats (CSV, PDF) """
-from __future__ import (absolute_import, division, print_function)
-
 import datetime
 import os
 
 import numpy as np
 from pylab import close, figure, gcf, plot, xticks, ylabel, xlabel, title, savefig
-from six.moves import range
-
 import sqlresults
 from sqlresults import get_results
 

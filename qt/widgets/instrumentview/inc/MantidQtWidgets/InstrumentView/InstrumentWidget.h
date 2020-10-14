@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef INSTRUMENTWIDGET_H_
-#define INSTRUMENTWIDGET_H_
+#pragma once
 
 #include "DllOption.h"
 #include "InstrumentWidgetTypes.h"
@@ -21,7 +20,7 @@
 #include "MantidQtWidgets/Common/GraphOptions.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -106,7 +105,9 @@ public:
   SurfaceType getSurfaceType() const { return m_surfaceType; }
   Mantid::Kernel::V3D getSurfaceAxis(const int surfaceType) const;
   /// Get pointer to the projection surface
-  boost::shared_ptr<ProjectionSurface> getSurface() const;
+  std::shared_ptr<ProjectionSurface> getSurface() const;
+  /// True if the workspace is being replaced
+  bool isWsBeingReplaced() const;
   /// True if the GL instrument display is currently on
   bool isGLEnabled() const;
   /// Toggle between the GL and simple instrument display widgets
@@ -116,7 +117,7 @@ public:
   /// Recalculate the detector data and redraw the instrument view
   void updateInstrumentDetectors();
   /// Delete the peaks workspace.
-  void deletePeaksWorkspace(Mantid::API::IPeaksWorkspace_sptr pws);
+  void deletePeaksWorkspace(const Mantid::API::IPeaksWorkspace_sptr &pws);
 
   /// Alter data from a script. These just foward calls to the 3D widget
   void setColorMapMinValue(double minValue);
@@ -147,7 +148,7 @@ public:
   bool hasWorkspace(const std::string &wsName) const;
   void handleWorkspaceReplacement(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace);
+      const std::shared_ptr<Mantid::API::Workspace> &workspace);
 
   /// Get the currently selected tab index
   int getCurrentTab() const;
@@ -155,6 +156,11 @@ public:
   void loadFromProject(const std::string &lines);
   /// Save the widget to a Mantid projecy file.
   std::string saveToProject() const;
+  void removeTab(const std::string &tabName);
+  void addTab(const std::string &tabName);
+  void hideHelp();
+  InstrumentWidgetPickTab *getPickTab() { return m_pickTab; };
+  bool isIntegrable() const { return m_isIntegrable; }
 
 signals:
   void enableLighting(bool /*_t1*/);
@@ -188,7 +194,7 @@ public slots:
   void tabChanged(int /*unused*/);
   void componentSelected(size_t componentIndex);
   void executeAlgorithm(const QString & /*unused*/, const QString & /*unused*/);
-  void executeAlgorithm(Mantid::API::IAlgorithm_sptr /*alg*/);
+  void executeAlgorithm(const Mantid::API::IAlgorithm_sptr & /*alg*/);
 
   void setupColorMap();
 
@@ -223,7 +229,7 @@ public slots:
   /// Enable OpenGL. Slot called from render tab only - doesn't update the
   /// checkbox.
   void enableGL(bool on);
-  void updateInfoText();
+  void updateInfoText(const QString &text = QString());
 
 private slots:
   void helpClicked();
@@ -244,17 +250,16 @@ protected:
   void setBackgroundColor(const QColor &color);
   /// Get the surface info string
   QString getSurfaceInfoText() const;
-  /// Return the width of the instrunemt display
-  int getInstrumentDisplayWidth() const;
-  /// Return the height of the instrunemt display
-  int getInstrumentDisplayHeight() const;
+  /// Return the size of the OpenGL display widget in device pixels
+  QSize glWidgetDimensions();
   /// Select the OpenGL or simple widget for instrument display
   void selectOpenGLDisplay(bool yes);
   /// Set the surface type.
   void setSurfaceType(const QString &typeStr);
   /// Return a filename to save a grouping to
   QString getSaveGroupingFilename();
-
+  /// add the selected tabs
+  void addSelectedTabs();
   // GUI elements
   QLabel *mInteractionInfo;
   QTabWidget *mControlsTab;
@@ -304,35 +309,41 @@ protected:
   bool m_blocked;
   QList<int> m_selectedDetectors;
   bool m_instrumentDisplayContextMenuOn;
+  /// dict of selected tabs
+  std::vector<std::pair<std::string, bool>> m_stateOfTabs;
+
+  /// Is the workspace monochromatic ?
+  bool m_isIntegrable;
 
 private:
   /// ADS notification handlers
   void preDeleteHandle(
       const std::string &ws_name,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr) override;
+      const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
   void afterReplaceHandle(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> workspace_ptr) override;
+      const std::shared_ptr<Mantid::API::Workspace> &workspace_ptr) override;
   void renameHandle(const std::string &oldName,
                     const std::string &newName) override;
   void clearADSHandle() override;
   /// overlay a peaks workspace on the projection surface
-  void overlayPeaksWorkspace(Mantid::API::IPeaksWorkspace_sptr ws);
+  void overlayPeaksWorkspace(const Mantid::API::IPeaksWorkspace_sptr &ws);
   /// overlay a masked workspace on the projection surface
-  void overlayMaskedWorkspace(Mantid::API::IMaskWorkspace_sptr ws);
+  void overlayMaskedWorkspace(const Mantid::API::IMaskWorkspace_sptr &ws);
   /// overlay a table workspace with shape parameters on the projection surface
-  void overlayShapesWorkspace(Mantid::API::ITableWorkspace_sptr /*ws*/);
+  void overlayShapesWorkspace(const Mantid::API::ITableWorkspace_sptr & /*ws*/);
   /// get a workspace from the ADS
   Mantid::API::Workspace_sptr getWorkspaceFromADS(const std::string &name);
   /// get a handle to the unwrapped surface
-  boost::shared_ptr<UnwrappedSurface> getUnwrappedSurface();
+  std::shared_ptr<UnwrappedSurface> getUnwrappedSurface();
   /// Load tabs on the widget form a project file
   void loadTabs(const std::string &lines) const;
   /// Save tabs on the widget to a string
   std::string saveTabs() const;
+
+  bool m_wsReplace;
+  QPushButton *m_help;
 };
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*INSTRUMENTWIDGET_H_*/

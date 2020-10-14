@@ -1,14 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/PredictPeaks.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidCrystal/PeakAlgorithmHelpers.h"
 #include "MantidGeometry/Crystal/BasicHKLFilters.h"
 #include "MantidGeometry/Crystal/EdgePixel.h"
 #include "MantidGeometry/Crystal/HKLFilterWavelength.h"
@@ -38,24 +39,11 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 
-namespace {
-/// Small helper function that return -1 if convention
-/// is "Crystallography" and 1 otherwise.
-double get_factor_for_q_convention(const std::string &convention) {
-  if (convention == "Crystallography") {
-    return -1.0;
-  }
-
-  return 1.0;
-}
-} // namespace
-
 /** Constructor
  */
 PredictPeaks::PredictPeaks()
     : m_runNumber(-1), m_inst(), m_pw(), m_sfCalculator(),
-      m_qConventionFactor(get_factor_for_q_convention(
-          ConfigService::Instance().getString("Q.convention"))) {
+      m_qConventionFactor(qConventionFactor()) {
   m_refConds = getAllReflectionConditions();
 }
 
@@ -92,7 +80,7 @@ void PredictPeaks::init() {
                   "This will calculate the goniometer rotation (around y-axis "
                   "only) for a constant wavelength.");
 
-  auto nonNegativeDbl = boost::make_shared<BoundedValidator<double>>();
+  auto nonNegativeDbl = std::make_shared<BoundedValidator<double>>();
   nonNegativeDbl->setLower(0);
   declareProperty("Wavelength", DBL_MAX, nonNegativeDbl,
                   "Wavelength to use when calculating goniometer angle");
@@ -121,7 +109,7 @@ void PredictPeaks::init() {
                  std::back_inserter(propOptions),
                  [](const auto &condition) { return condition->getName(); });
   declareProperty("ReflectionCondition", "Primitive",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Which reflection condition applies to this crystal, "
                   "reducing the number of expected HKL peaks?");
 
@@ -168,7 +156,7 @@ void PredictPeaks::init() {
                   " instrument) to predict peaks which do not fall onto any"
                   "detector. This may produce a very high number of results.");
 
-  auto nonNegativeInt = boost::make_shared<BoundedValidator<int>>();
+  auto nonNegativeInt = std::make_shared<BoundedValidator<int>>();
   nonNegativeInt->setLower(0);
   declareProperty("EdgePixels", 0, nonNegativeInt,
                   "Remove peaks that are at pixels this close to edge. ");
@@ -182,21 +170,21 @@ void PredictPeaks::exec() {
   m_edge = this->getProperty("EdgePixels");
 
   ExperimentInfo_sptr inputExperimentInfo =
-      boost::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);
+      std::dynamic_pointer_cast<ExperimentInfo>(rawInputWorkspace);
 
   MatrixWorkspace_sptr matrixWS =
-      boost::dynamic_pointer_cast<MatrixWorkspace>(rawInputWorkspace);
+      std::dynamic_pointer_cast<MatrixWorkspace>(rawInputWorkspace);
   PeaksWorkspace_sptr peaksWS =
-      boost::dynamic_pointer_cast<PeaksWorkspace>(rawInputWorkspace);
+      std::dynamic_pointer_cast<PeaksWorkspace>(rawInputWorkspace);
   MultipleExperimentInfos_sptr mdWS =
-      boost::dynamic_pointer_cast<MultipleExperimentInfos>(rawInputWorkspace);
+      std::dynamic_pointer_cast<MultipleExperimentInfos>(rawInputWorkspace);
 
   std::vector<DblMatrix> gonioVec;
   if (matrixWS) {
     // Retrieve the goniometer rotation matrix
     try {
       DblMatrix goniometerMatrix = matrixWS->run().getGoniometerMatrix();
-      gonioVec.push_back(goniometerMatrix);
+      gonioVec.emplace_back(goniometerMatrix);
     } catch (std::runtime_error &e) {
       // If there is no goniometer matrix, use identity matrix instead.
       g_log.error() << "Error getting the goniometer rotation matrix from the "
@@ -208,7 +196,7 @@ void PredictPeaks::exec() {
     // Sort peaks by run number so that peaks with equal goniometer matrices are
     // adjacent
     std::vector<std::pair<std::string, bool>> criteria;
-    criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
+    criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
 
     peaksWS->sort(criteria);
 
@@ -218,7 +206,7 @@ void PredictPeaks::exec() {
       IPeak &p = peaksWS->getPeak(i);
       DblMatrix currentGoniometerMatrix = p.getGoniometerMatrix();
       if (!(currentGoniometerMatrix == lastGoniometerMatrix)) {
-        gonioVec.push_back(currentGoniometerMatrix);
+        gonioVec.emplace_back(currentGoniometerMatrix);
         lastGoniometerMatrix = currentGoniometerMatrix;
       }
     }
@@ -237,10 +225,10 @@ void PredictPeaks::exec() {
       try {
         DblMatrix goniometerMatrix =
             mdWS->getExperimentInfo(i)->mutableRun().getGoniometerMatrix();
-        gonioVec.push_back(goniometerMatrix);
+        gonioVec.emplace_back(goniometerMatrix);
       } catch (std::runtime_error &e) {
         // If there is no goniometer matrix, use identity matrix instead.
-        gonioVec.push_back(DblMatrix(3, 3, true));
+        gonioVec.emplace_back(DblMatrix(3, 3, true));
 
         g_log.error()
             << "Error getting the goniometer rotation matrix from the "
@@ -255,7 +243,7 @@ void PredictPeaks::exec() {
   // If there's no goniometer matrix at this point, push back an identity
   // matrix.
   if (gonioVec.empty()) {
-    gonioVec.push_back(DblMatrix(3, 3, true));
+    gonioVec.emplace_back(DblMatrix(3, 3, true));
   }
 
   setInstrumentFromInputWorkspace(inputExperimentInfo);
@@ -264,7 +252,7 @@ void PredictPeaks::exec() {
   checkBeamDirection();
 
   // Create the output
-  m_pw = boost::make_shared<PeaksWorkspace>();
+  m_pw = std::make_shared<PeaksWorkspace>();
 
   // Copy instrument, sample, etc.
   m_pw->copyExperimentInfoFrom(inputExperimentInfo.get());
@@ -372,8 +360,8 @@ void PredictPeaks::exec() {
   // Sort peaks by run number so that peaks with equal goniometer matrices are
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
-  criteria.push_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.push_back(std::pair<std::string, bool>("BankName", true));
+  criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
+  criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
   m_pw->sort(criteria);
 
   auto &peaks = m_pw->getPeaks();
@@ -461,7 +449,7 @@ void PredictPeaks::fillPossibleHKLsUsingGenerator(
   // --- Reflection condition ----
   // Use the primitive by default
   ReflectionCondition_sptr refCond =
-      boost::make_shared<ReflectionConditionPrimitive>();
+      std::make_shared<ReflectionConditionPrimitive>();
   // Get it from the property
   const std::string refCondName = getPropertyValue("ReflectionCondition");
   const auto found = std::find_if(m_refConds.crbegin(), m_refConds.crend(),
@@ -473,9 +461,8 @@ void PredictPeaks::fillPossibleHKLsUsingGenerator(
   }
 
   HKLGenerator gen(orientedLattice, dMin);
-  auto filter =
-      boost::make_shared<HKLFilterCentering>(refCond) &
-      boost::make_shared<HKLFilterDRange>(orientedLattice, dMin, dMax);
+  auto filter = std::make_shared<HKLFilterCentering>(refCond) &
+                std::make_shared<HKLFilterDRange>(orientedLattice, dMin, dMax);
 
   V3D hklMin = *(gen.begin());
 
@@ -510,7 +497,7 @@ void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(
    * for the convention stored in the workspace.
    */
   double peaks_q_convention_factor =
-      get_factor_for_q_convention(peaksWorkspace->getConvention());
+      qConventionFactor(peaksWorkspace->getConvention());
 
   for (int i = 0; i < static_cast<int>(peaksWorkspace->getNumberPeaks()); ++i) {
     IPeak &p = peaksWorkspace->getPeak(i);
@@ -520,7 +507,7 @@ void PredictPeaks::fillPossibleHKLsUsingPeaksWorkspace(
     if (roundHKL)
       hkl.round();
 
-    possibleHKLs.push_back(hkl);
+    possibleHKLs.emplace_back(hkl);
   } // for each hkl in the workspace
 }
 
@@ -600,7 +587,7 @@ void PredictPeaks::calculateQAndAddToOutput(const V3D &hkl,
         m_inst->getComponentByName("extended-detector-space");
     // Check that the component is valid
     const auto component =
-        boost::dynamic_pointer_cast<const ObjComponent>(returnedComponent);
+        std::dynamic_pointer_cast<const ObjComponent>(returnedComponent);
     if (!component)
       throw std::runtime_error("PredictPeaks: user requested use of a extended "
                                "detector space to predict peaks but there is no"

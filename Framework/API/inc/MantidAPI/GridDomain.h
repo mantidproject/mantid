@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_GRIDDOMAIN_H_
-#define MANTID_API_GRIDDOMAIN_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -32,20 +31,18 @@ public:
   /// number of dimensions in the grid
   size_t nDimensions();
   /// get the grid at specified index
-  boost::shared_ptr<GridDomain> getGrid(size_t index);
+  std::shared_ptr<GridDomain> getGrid(size_t index);
   /// re-scale all grids
   void reScale(const std::string &scaling);
 
 private:
   /// composition of grids
-  std::vector<boost::shared_ptr<GridDomain>> m_grids;
+  std::vector<std::shared_ptr<GridDomain>> m_grids;
 
 }; // class IGridDomain
 
 /// typedef for a shared pointer
-using GridDomain_sptr = boost::shared_ptr<GridDomain>;
+using GridDomain_sptr = std::shared_ptr<GridDomain>;
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_GRIDDOMAIN_H_*/

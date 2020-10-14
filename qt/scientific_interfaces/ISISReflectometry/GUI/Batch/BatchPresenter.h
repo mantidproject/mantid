@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_BATCHPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_BATCHPRESENTER_H
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "GUI/Event/IEventPresenter.h"
@@ -16,7 +15,6 @@
 #include "IBatchJobRunner.h"
 #include "IBatchPresenter.h"
 #include "IBatchView.h"
-#include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/WorkspaceObserver.h"
 #include <memory>
 
@@ -43,6 +41,10 @@ public:
                  std::unique_ptr<IExperimentPresenter> experimentPresenter,
                  std::unique_ptr<IInstrumentPresenter> instrumentPresenter,
                  std::unique_ptr<ISavePresenter> savePresenter);
+  BatchPresenter(BatchPresenter const &rhs) = delete;
+  BatchPresenter(BatchPresenter &&rhs) = delete;
+  BatchPresenter const &operator=(BatchPresenter const &rhs) = delete;
+  BatchPresenter &operator=(BatchPresenter &&rhs) = delete;
 
   // BatchViewSubscriber overrides
   void notifyBatchComplete(bool error) override;
@@ -56,21 +58,32 @@ public:
 
   // IBatchPresenter overrides
   void acceptMainPresenter(IMainWindowPresenter *mainPresenter) override;
-  void notifyReductionPaused() override;
-  void notifyReductionResumed() override;
-  void notifyAutoreductionResumed() override;
-  void notifyAutoreductionPaused() override;
+  void initInstrumentList() override;
+  void notifyPauseReductionRequested() override;
+  void notifyResumeReductionRequested() override;
+  void notifyResumeAutoreductionRequested() override;
+  void notifyPauseAutoreductionRequested() override;
   void notifyAutoreductionCompleted() override;
-  void notifyInstrumentChanged(const std::string &instName) override;
-  void notifyRestoreDefaultsRequested() override;
+  void
+  notifyChangeInstrumentRequested(const std::string &instrumentName) override;
+  void notifyInstrumentChanged(const std::string &instrumentName) override;
+  void notifyUpdateInstrumentRequested() override;
   void notifySettingsChanged() override;
-  void anyBatchAutoreductionResumed() override;
-  void anyBatchAutoreductionPaused() override;
-  void reductionPaused() override;
+  void notifySetRoundPrecision(int &precision) override;
+  void notifyResetRoundPrecision() override;
+  void notifyAnyBatchReductionResumed() override;
+  void notifyAnyBatchReductionPaused() override;
+  void notifyAnyBatchAutoreductionResumed() override;
+  void notifyAnyBatchAutoreductionPaused() override;
+  void notifyReductionPaused() override;
   bool requestClose() const override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
+  bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
+  bool isWarnDiscardChangesChecked() const override;
+  bool isBatchUnsaved() const override;
+  void setBatchUnsaved(bool isUnsaved = true) override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   std::string instrumentName() const override;
   int percentComplete() const override;
@@ -86,15 +99,13 @@ private:
   bool
   startBatch(std::deque<MantidQt::API::IConfiguredAlgorithm_sptr> algorithms);
   void resumeReduction();
-  void reductionResumed();
+  void notifyReductionResumed();
   void pauseReduction();
   void resumeAutoreduction();
-  void autoreductionResumed();
+  void notifyAutoreductionResumed();
   void pauseAutoreduction();
-  void autoreductionPaused();
+  void notifyAutoreductionPaused();
   void autoreductionCompleted();
-  void instrumentChanged(const std::string &instName);
-  void updateInstrument(const std::string &instName);
   void settingsChanged();
 
   IBatchView *m_view;
@@ -104,7 +115,7 @@ private:
   std::unique_ptr<IExperimentPresenter> m_experimentPresenter;
   std::unique_ptr<IInstrumentPresenter> m_instrumentPresenter;
   std::unique_ptr<ISavePresenter> m_savePresenter;
-  Mantid::Geometry::Instrument_const_sptr m_instrument;
+  bool m_unsavedBatchFlag;
 
   friend class Encoder;
   friend class Decoder;
@@ -116,4 +127,3 @@ protected:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_BATCHPRESENTER_H */

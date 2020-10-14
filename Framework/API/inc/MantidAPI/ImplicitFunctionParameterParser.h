@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PARAMETER_PARSER_H_
-#define PARAMETER_PARSER_H_
+#pragma once
 
 /* Used to register classes into the factory. creates a global object in an
  * anonymous namespace. The object itself does nothing, but the comma operator
@@ -24,11 +23,12 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include <memory>
 #include <vector>
 
 #ifndef Q_MOC_RUN
 #include <boost/interprocess/smart_ptr/unique_ptr.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 #include "ImplicitFunctionParameter.h"
@@ -81,5 +81,3 @@ protected:
 };
 } // namespace API
 } // namespace Mantid
-
-#endif

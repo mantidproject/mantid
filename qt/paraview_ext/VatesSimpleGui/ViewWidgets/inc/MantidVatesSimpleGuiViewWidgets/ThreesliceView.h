@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef THREESLICEVIEW_H_
-#define THREESLICEVIEW_H_
+#pragma once
 
 #include "MantidVatesSimpleGuiViewWidgets/ViewBase.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
@@ -87,5 +86,3 @@ private:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-
-#endif // THREESLICEVIEW_H_

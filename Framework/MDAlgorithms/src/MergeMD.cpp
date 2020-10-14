@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/MergeMD.h"
 #include "MantidAPI/WorkspaceGroup.h"
@@ -41,7 +41,7 @@ void MergeMD::init() {
   declareProperty(
       std::make_unique<ArrayProperty<std::string>>(
           "InputWorkspaces",
-          boost::make_shared<MandatoryValidator<std::vector<std::string>>>()),
+          std::make_shared<MandatoryValidator<std::vector<std::string>>>()),
       "The names of the input MDWorkspaces as a comma-separated list");
 
   declareProperty(std::make_unique<WorkspaceProperty<IMDEventWorkspace>>(
@@ -59,14 +59,14 @@ void MergeMD::init() {
 void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
   auto it = inputs.begin();
   for (; it != inputs.end(); it++) {
-    IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+    IMDEventWorkspace_sptr ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve(*it));
     if (!ws)
       throw std::invalid_argument(
           "Workspace " + *it +
           " is not a MDEventWorkspace. Cannot merge this workspace.");
     else
-      m_workspaces.push_back(ws);
+      m_workspaces.emplace_back(ws);
   }
   if (m_workspaces.empty())
     throw std::invalid_argument("No valid m_workspaces specified.");
@@ -151,7 +151,7 @@ void MergeMD::createOutputWorkspace(std::vector<std::string> &inputs) {
 
   for (uint16_t i = 0; i < nExperiments; i++) {
     uint16_t nWSexperiments = m_workspaces[i]->getNumExperimentInfo();
-    experimentInfoNo.push_back(nWSexperiments);
+    experimentInfoNo.emplace_back(nWSexperiments);
     for (uint16_t j = 0; j < nWSexperiments; j++) {
       API::ExperimentInfo_sptr ei = API::ExperimentInfo_sptr(
           m_workspaces[i]->getExperimentInfo(j)->cloneExperimentInfo());
@@ -209,7 +209,7 @@ template <typename MDE, size_t nd>
 void MergeMD::doPlus(typename MDEventWorkspace<MDE, nd>::sptr ws2) {
   // CPUTimer tim;
   typename MDEventWorkspace<MDE, nd>::sptr ws1 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(out);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDE, nd>>(out);
   if (!ws1 || !ws2)
     throw std::runtime_error("Incompatible workspace types passed to MergeMD.");
 
@@ -295,7 +295,7 @@ void MergeMD::exec() {
       inputs.insert(inputs.end(), group.begin(), group.end());
     } else {
       // Single workspace
-      inputs.push_back(input);
+      inputs.emplace_back(input);
     }
   }
 

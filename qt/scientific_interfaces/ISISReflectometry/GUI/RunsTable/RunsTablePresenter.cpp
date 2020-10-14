@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsTablePresenter.h"
 #include "Common/Map.h"
@@ -61,6 +61,11 @@ void applyWarningStateStyling(MantidWidgets::Batch::Cell &cell,
   cell.setToolTip(errorMessage);
 }
 
+/** Check if a group name exists in the given model.
+ * @param groupName : the name to check
+ * @param jobs : the model to compare against
+ * @rootsToIgnore : rows to ignore in the check
+ */
 bool groupNameExists(
     std::string const &groupName, ReductionJobs const &jobs,
     std::vector<MantidWidgets::Batch::RowLocation> const &rootsToIgnore) {
@@ -80,6 +85,22 @@ bool groupNameExists(
   return true;
 }
 
+/** Check if a group name exists in the clipboard.
+ * @param groupName : the name to check
+ * @param clipboard : the clipboard to compare against
+ * @indexToIgnore : the index of the original item which should be ignored
+ */
+bool groupNameExists(std::string const &groupName, Clipboard const &clipboard,
+                     int indexToIgnore) {
+  for (auto compareIndex = 0; compareIndex < clipboard.numberOfRoots();
+       ++compareIndex) {
+    if (compareIndex != indexToIgnore &&
+        groupName == clipboard.groupName(compareIndex))
+      return true;
+  }
+  return false;
+}
+
 void makePastedGroupNamesUnique(
     Clipboard &clipboard, int rootIndex,
     std::vector<MantidWidgets::Batch::RowLocation> const &replacementRoots,
@@ -88,9 +109,13 @@ void makePastedGroupNamesUnique(
   if (!clipboard.isGroupLocation(rootIndex))
     return;
 
-  // Recursively replace the group name until it is unique
   auto groupName = clipboard.groupName(rootIndex);
-  while (groupNameExists(groupName, jobs, replacementRoots))
+  if (groupName.empty())
+    return;
+
+  // Replace the group name until it is unique in the model and clipboard
+  while (groupNameExists(groupName, jobs, replacementRoots) ||
+         groupNameExists(groupName, clipboard, rootIndex))
     groupName.append(" (copy)");
 
   // Set the new name
@@ -164,6 +189,7 @@ void RunsTablePresenter::notifyDeleteRowRequested() {
       removeRowsAndGroupsFromView(selected);
       removeRowsFromModel(selected);
       ensureAtLeastOneGroupExists();
+      notifyTableChanged();
       notifyRowStateChanged();
       notifySelectionChanged();
     } else {
@@ -184,6 +210,7 @@ void RunsTablePresenter::notifyDeleteGroupRequested() {
     removeGroupsFromModel(groupIndicesOrderedLowToHigh);
     removeGroupsFromView(groupIndicesOrderedLowToHigh);
     ensureAtLeastOneGroupExists();
+    notifyTableChanged();
     notifyRowStateChanged();
     notifySelectionChanged();
   } else {
@@ -205,12 +232,12 @@ void RunsTablePresenter::removeGroupsFromModel(
     removeGroup(m_model.mutableReductionJobs(), *it);
 }
 
-void RunsTablePresenter::notifyReductionResumed() {
-  m_mainPresenter->notifyReductionResumed();
+void RunsTablePresenter::notifyResumeReductionRequested() {
+  m_mainPresenter->notifyResumeReductionRequested();
 }
 
-void RunsTablePresenter::notifyReductionPaused() {
-  m_mainPresenter->notifyReductionPaused();
+void RunsTablePresenter::notifyPauseReductionRequested() {
+  m_mainPresenter->notifyPauseReductionRequested();
 }
 
 void RunsTablePresenter::notifyInsertRowRequested() {
@@ -225,6 +252,7 @@ void RunsTablePresenter::notifyInsertRowRequested() {
   } else {
     m_view->mustSelectGroupOrRow();
   }
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -237,10 +265,9 @@ void RunsTablePresenter::notifyFilterChanged(std::string const &filterString) {
   }
 }
 
-void RunsTablePresenter::notifyInstrumentChanged() {
+void RunsTablePresenter::notifyChangeInstrumentRequested() {
   auto const instrumentName = m_view->getInstrumentName();
-  if (m_mainPresenter)
-    m_mainPresenter->notifyInstrumentChanged(instrumentName);
+  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
 void RunsTablePresenter::notifyFilterReset() { m_view->resetFilterBox(); }
@@ -250,7 +277,8 @@ void RunsTablePresenter::updateWidgetEnabledState() {
   auto const autoreducing = isAutoreducing();
 
   m_view->setJobsTableEnabled(!processing && !autoreducing);
-  m_view->setInstrumentSelectorEnabled(!processing && !autoreducing);
+  m_view->setInstrumentSelectorEnabled(!isAnyBatchProcessing() &&
+                                       !isAnyBatchAutoreducing());
   m_view->setProcessButtonEnabled(!processing && !autoreducing);
   m_view->setActionEnabled(IRunsTableView::Action::Process,
                            !processing && !autoreducing);
@@ -272,20 +300,52 @@ void RunsTablePresenter::updateWidgetEnabledState() {
                            !processing && !autoreducing);
 }
 
-void RunsTablePresenter::reductionResumed() { updateWidgetEnabledState(); }
+void RunsTablePresenter::notifyReductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void RunsTablePresenter::reductionPaused() { updateWidgetEnabledState(); }
+void RunsTablePresenter::notifyReductionPaused() { updateWidgetEnabledState(); }
 
-void RunsTablePresenter::autoreductionResumed() { reductionResumed(); }
+void RunsTablePresenter::notifyAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
 
-void RunsTablePresenter::autoreductionPaused() { reductionPaused(); }
+void RunsTablePresenter::notifyAutoreductionPaused() {
+  updateWidgetEnabledState();
+}
 
-void RunsTablePresenter::instrumentChanged(std::string const &instrumentName) {
+void RunsTablePresenter::notifyAnyBatchReductionResumed() {
+  updateWidgetEnabledState();
+}
+
+void RunsTablePresenter::notifyAnyBatchReductionPaused() {
+  updateWidgetEnabledState();
+}
+
+void RunsTablePresenter::notifyAnyBatchAutoreductionResumed() {
+  updateWidgetEnabledState();
+}
+
+void RunsTablePresenter::notifyAnyBatchAutoreductionPaused() {
+  updateWidgetEnabledState();
+}
+
+void RunsTablePresenter::notifyInstrumentChanged(
+    std::string const &instrumentName) {
   m_view->setInstrumentName(instrumentName);
+}
+
+void RunsTablePresenter::setTablePrecision(int &precision) {
+  m_jobViewUpdater.setPrecision(precision);
+}
+
+void RunsTablePresenter::resetTablePrecision() {
+  m_jobViewUpdater.resetPrecision();
 }
 
 void RunsTablePresenter::settingsChanged() {
   m_model.resetState();
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -316,6 +376,7 @@ void RunsTablePresenter::notifyInsertGroupRequested() {
     appendEmptyGroupInView();
     appendEmptyGroupInModel();
   }
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -511,6 +572,7 @@ void RunsTablePresenter::notifyCellTextChanged(
     updateGroupName(itemIndex, column, oldValue, newValue);
   else
     updateRowField(itemIndex, column, oldValue, newValue);
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -538,6 +600,7 @@ void RunsTablePresenter::notifyRowInserted(
   } else if (isRowLocation(newRowLocation)) {
     insertEmptyRowInModel(groupOf(newRowLocation), rowOf(newRowLocation));
   }
+  notifyTableChanged();
   notifyRowStateChanged();
 }
 
@@ -657,6 +720,7 @@ void RunsTablePresenter::notifyPasteRowsRequested() {
       pasteRowsOntoGroup(replacementRoots);
     else
       pasteRowsOntoRows(replacementRoots);
+    notifyTableChanged();
     notifyRowStateChanged();
     notifySelectionChanged();
   }
@@ -778,6 +842,10 @@ void RunsTablePresenter::updateProgressBar() {
   m_view->setProgress(m_mainPresenter->percentComplete());
 }
 
+void RunsTablePresenter::notifyTableChanged() {
+  m_mainPresenter->notifyTableChanged();
+}
+
 void RunsTablePresenter::notifyRowStateChanged() {
   updateProgressBar();
 
@@ -844,6 +912,14 @@ bool RunsTablePresenter::isProcessing() const {
 
 bool RunsTablePresenter::isAutoreducing() const {
   return m_mainPresenter->isAutoreducing();
+}
+
+bool RunsTablePresenter::isAnyBatchProcessing() const {
+  return m_mainPresenter->isAnyBatchProcessing();
+}
+
+bool RunsTablePresenter::isAnyBatchAutoreducing() const {
+  return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
 void RunsTablePresenter::notifyPlotSelectedPressed() {

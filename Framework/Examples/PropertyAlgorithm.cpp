@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "PropertyAlgorithm.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -33,7 +33,7 @@ void PropertyAlgorithm::init() {
   // declareProperty("IntValue",1);
 
   // A validator puts restrictions on property's possible values
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("PositiveIntValue", 0, mustBePositive);
   declareProperty("PositiveIntValue1", 0, mustBePositive);

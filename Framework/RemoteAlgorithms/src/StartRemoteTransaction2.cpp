@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidRemoteAlgorithms/StartRemoteTransaction2.h"
 #include "MantidAPI/RemoteJobManagerFactory.h"
@@ -26,7 +26,7 @@ void StartRemoteTransaction2::init() {
                                           .getFacility()
                                           .computeResources();
   declareProperty("ComputeResource", "",
-                  boost::make_shared<StringListValidator>(computes),
+                  std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer where the new transaction "
                   "will be created",
                   Direction::Input);

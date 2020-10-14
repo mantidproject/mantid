@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/ChebfunBase.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -22,6 +22,7 @@
 #include <limits>
 #include <numeric>
 #include <sstream>
+#include <utility>
 
 namespace Mantid {
 namespace CurveFitting {
@@ -455,7 +456,7 @@ ChebfunBase::bestFitTempl(double start, double end, FunctionType f,
   }
   p.clear();
   a.clear();
-  a.push_back(maxA);
+  a.emplace_back(maxA);
   return ChebfunBase_sptr();
 }
 
@@ -465,7 +466,7 @@ ChebfunBase_sptr ChebfunBase::bestFit(double start, double end,
                                       std::vector<double> &p,
                                       std::vector<double> &a, double maxA,
                                       double tolerance, size_t maxSize) {
-  return bestFitTempl(start, end, f, p, a, maxA, tolerance, maxSize);
+  return bestFitTempl(start, end, std::move(f), p, a, maxA, tolerance, maxSize);
 }
 
 /// Template specialization for IFunction
@@ -603,7 +604,7 @@ std::vector<double> ChebfunBase::calcP(const std::vector<double> &a) const {
  */
 std::vector<double> ChebfunBase::fit(ChebfunFunctionType f) const {
   std::vector<double> res(size());
-  std::transform(m_x.begin(), m_x.end(), res.begin(), f);
+  std::transform(m_x.begin(), m_x.end(), res.begin(), std::move(f));
   return res;
 }
 
@@ -626,7 +627,7 @@ std::vector<double> ChebfunBase::fit(const API::IFunction &f) const {
  * @param f :: Function to calculate.
  * @param p :: Values of function f at the even-valued indices of m_x.
  */
-std::vector<double> ChebfunBase::fitOdd(ChebfunFunctionType f,
+std::vector<double> ChebfunBase::fitOdd(const ChebfunFunctionType &f,
                                         std::vector<double> &p) const {
   assert(size() == p.size() * 2 - 1);
   assert(size() % 2 == 1);
@@ -660,7 +661,7 @@ std::vector<double> ChebfunBase::fitOdd(const API::IFunction &f,
   xOdd.reserve(pOdd.size());
   // m_x is odd-sized so the loop is ok
   for (auto x = m_x.begin() + 1; x != m_x.end(); x += 2) {
-    xOdd.push_back(*x);
+    xOdd.emplace_back(*x);
   }
 
   API::FunctionDomain1DView x(xOdd.data(), xOdd.size());
@@ -737,7 +738,7 @@ std::vector<double> ChebfunBase::roots(const std::vector<double> &a) const {
     } else {
       if (im + firstIm < 1e-10) {
         double x = startX() + (re + 1.0) / 2.0 * Dx;
-        r.push_back(x);
+        r.emplace_back(x);
       }
       isFirst = true;
     }

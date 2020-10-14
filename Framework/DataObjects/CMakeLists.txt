@@ -125,8 +125,10 @@ set(INC_FILES
     inc/MantidDataObjects/SplittersWorkspace.h
     inc/MantidDataObjects/TableColumn.h
     inc/MantidDataObjects/TableWorkspace.h
+    inc/MantidDataObjects/TableWorkspace_fwd.h
     inc/MantidDataObjects/VectorColumn.h
     inc/MantidDataObjects/Workspace2D.h
+    inc/MantidDataObjects/Workspace2D_fwd.h
     inc/MantidDataObjects/WorkspaceCreation.h
     inc/MantidDataObjects/WorkspaceSingleValue.h)
 
@@ -219,9 +221,9 @@ set_target_properties(DataObjects PROPERTIES
                       INTERFACE_INCLUDE_DIRECTORIES
                         ${CMAKE_CURRENT_LIST_DIR}/inc)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(DataObjects
-                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS")
+                        PROPERTIES INSTALL_RPATH "@loader_path/../MacOS;@loader_path/../Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(DataObjects
                         PROPERTIES INSTALL_RPATH "\$ORIGIN/../${LIB_DIR}")
@@ -238,7 +240,6 @@ set_property(TARGET DataObjects PROPERTY FOLDER "MantidFramework")
 
 target_link_libraries(DataObjects
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${JSONCPP_LIBRARIES}
                       ${NEXUS_LIBRARIES})

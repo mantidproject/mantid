@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -111,8 +111,8 @@ void ThreadPool::start(double waitSec) {
     auto runnable = std::make_unique<ThreadPoolRunnable>(i, m_scheduler.get(),
                                                          m_prog.get(), waitSec);
     thread->start(*runnable);
-    m_threads.push_back(std::move(thread));
-    m_runnables.push_back(std::move(runnable));
+    m_threads.emplace_back(std::move(thread));
+    m_runnables.emplace_back(std::move(runnable));
   }
   // Yep, all the threads are running.
   m_started = true;
@@ -125,7 +125,7 @@ void ThreadPool::start(double waitSec) {
  * @param task :: pointer to a Task object to run.
  * @param start :: start the thread at the same time; default false
  */
-void ThreadPool::schedule(std::shared_ptr<Task> task, bool start) {
+void ThreadPool::schedule(const std::shared_ptr<Task> &task, bool start) {
   if (task) {
     m_scheduler->push(task);
     // Start all the threads if they were not already.

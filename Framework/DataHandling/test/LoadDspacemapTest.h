@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADDSPACEMAPTEST_H_
-#define MANTID_DATAHANDLING_LOADDSPACEMAPTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidDataHandling/LoadDspacemap.h"
@@ -49,7 +48,7 @@ public:
 
     // Get the offsets out
     OffsetsWorkspace_sptr offsetsWS =
-        boost::dynamic_pointer_cast<OffsetsWorkspace>(
+        std::dynamic_pointer_cast<OffsetsWorkspace>(
             AnalysisDataService::Instance().retrieve("ines_offsets"));
     TS_ASSERT(offsetsWS);
     if (!offsetsWS)
@@ -59,9 +58,8 @@ public:
     TS_ASSERT_DELTA(offsetsWS->dataY(0)[0], -0.6162, 0.0001);
   }
 
-  void doTestVulcan(std::string dspaceFile, std::string fileType) {
-    std::string outputFile = "./VULCAN_dspacemaptocal_test.cal";
-
+  void doTestVulcan(const std::string &dspaceFile,
+                    const std::string &fileType) {
     LoadDspacemap testerDSP;
     TS_ASSERT_THROWS_NOTHING(testerDSP.initialize());
     TS_ASSERT_THROWS_NOTHING(testerDSP.isInitialized());
@@ -77,7 +75,7 @@ public:
 
     // Get the offsets out
     OffsetsWorkspace_sptr offsetsWS =
-        boost::dynamic_pointer_cast<OffsetsWorkspace>(
+        std::dynamic_pointer_cast<OffsetsWorkspace>(
             AnalysisDataService::Instance().retrieve("test_vulcan_offset"));
     TS_ASSERT(offsetsWS);
     if (!offsetsWS)
@@ -95,5 +93,3 @@ public:
     doTestVulcan("pid_offset_vulcan_new.dat.bin", "VULCAN-Binary");
   }
 };
-
-#endif /* MANTID_DATAHANDLING_LOADDSPACEMAPTEST_H_ */

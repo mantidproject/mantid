@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IAsciiSaver.h"
 namespace MantidQt {
@@ -23,12 +23,12 @@ std::string const &InvalidWorkspaceName::name() const { return m_name; }
 
 FileFormatOptions::FileFormatOptions(NamedFormat format,
                                      std::string const &prefix,
-                                     bool includeTitle,
+                                     bool includeHeader,
                                      std::string const &separator,
                                      bool includeQResolution)
-    : m_format(format), m_prefix(prefix), m_includeTitle(includeTitle),
+    : m_format(format), m_prefix(prefix), m_includeHeader(includeHeader),
       m_separator(separator), m_includeQResolution(includeQResolution) {}
-bool FileFormatOptions::shouldIncludeTitle() const { return m_includeTitle; }
+bool FileFormatOptions::shouldIncludeHeader() const { return m_includeHeader; }
 bool FileFormatOptions::shouldIncludeQResolution() const {
   return m_includeQResolution;
 }

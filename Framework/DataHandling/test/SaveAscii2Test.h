@@ -1,17 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVEASCIITEST_H_
-#define SAVEASCIITEST_H_
+#pragma once
 
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/TableRow.h"
 #include "MantidAPI/TextAxis.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataHandling/SaveAscii2.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
@@ -75,7 +76,7 @@ public:
 
     boost::split(binstr, binlines, boost::is_any_of(","));
     for (const auto &i : binstr) {
-      bins.push_back(boost::lexical_cast<double>(i));
+      bins.emplace_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 0);
     TS_ASSERT_EQUALS(bins[1], 2);
@@ -85,7 +86,7 @@ public:
     bins.clear();
     boost::split(binstr, binlines, boost::is_any_of(","));
     for (const auto &i : binstr) {
-      bins.push_back(boost::lexical_cast<double>(i));
+      bins.emplace_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 1.66667);
     TS_ASSERT_EQUALS(bins[1], 8.66667);
@@ -99,7 +100,7 @@ public:
 
   void testExec_DXNoData() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       std::vector<double> &X = wsToSave->dataX(i);
@@ -113,7 +114,7 @@ public:
     }
     AnalysisDataService::Instance().add(m_name, wsToSave);
     SaveAscii2 save;
-    std::string filename = initSaveAscii2(save);
+    initSaveAscii2(save);
     TS_ASSERT_THROWS_NOTHING(save.setPropertyValue("WriteXError", "1"));
     TS_ASSERT_THROWS_ANYTHING(save.execute());
     AnalysisDataService::Instance().remove(m_name);
@@ -121,7 +122,7 @@ public:
 
   void testExec_DX() {
     Mantid::DataObjects::Workspace2D_sptr wsToSave =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       auto &X = wsToSave->mutableX(i);
@@ -172,7 +173,7 @@ public:
 
     boost::split(binstr, binlines, boost::is_any_of(","));
     for (const auto &i : binstr) {
-      bins.push_back(boost::lexical_cast<double>(i));
+      bins.emplace_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 0);
     TS_ASSERT_EQUALS(bins[1], 2);
@@ -182,7 +183,7 @@ public:
     bins.clear();
     boost::split(binstr, binlines, boost::is_any_of(","));
     for (const auto &i : binstr) {
-      bins.push_back(boost::lexical_cast<double>(i));
+      bins.emplace_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 1.66667);
     TS_ASSERT_EQUALS(bins[1], 8.66667);
@@ -228,6 +229,41 @@ public:
     TS_ASSERT_EQUALS(qVal, 2.2092230401788049);
     TS_ASSERT_EQUALS(angle, 57.295779513082316);
 
+    in.close();
+
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  void test_spectrum_axis_values() {
+    MatrixWorkspace_sptr wsToSave;
+    writeInelasticWS(wsToSave);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.setProperty("WriteSpectrumAxisValue", true));
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    double axisVal;
+    std::string header1, header2, header3, separator, comment;
+
+    // Test that the first few column headers, separator and first two bins are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+        axisVal;
+
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "X");
+    TS_ASSERT_EQUALS(header2, "Y");
+    TS_ASSERT_EQUALS(header3, "E");
+    TS_ASSERT_EQUALS(axisVal, 1.);
     in.close();
 
     Poco::File(filename).remove();
@@ -494,7 +530,7 @@ public:
     writeSampleWS(wsToSave, false);
 
     SaveAscii2 save;
-    std::string filename = initSaveAscii2(save);
+    initSaveAscii2(save);
 
     TS_ASSERT_THROWS_NOTHING(
         save.setProperty("SpectrumMetaData", "SpectrumNumber"));
@@ -596,7 +632,7 @@ public:
 
     boost::split(binstr, binlines, boost::is_any_of(","));
     for (const auto &i : binstr) {
-      bins.push_back(boost::lexical_cast<double>(i));
+      bins.emplace_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 0);
     TS_ASSERT_EQUALS(bins[1], 4);
@@ -606,7 +642,7 @@ public:
     bins.clear();
     boost::split(binstr, binlines, boost::is_any_of(","));
     for (const auto &i : binstr) {
-      bins.push_back(boost::lexical_cast<double>(i));
+      bins.emplace_back(boost::lexical_cast<double>(i));
     }
     TS_ASSERT_EQUALS(bins[0], 1.66667);
     TS_ASSERT_EQUALS(bins[1], 17.3333);
@@ -800,7 +836,7 @@ public:
     writeSampleWS(wsToSave);
 
     SaveAscii2 save;
-    std::string filename = initSaveAscii2(save);
+    initSaveAscii2(save);
 
     TS_ASSERT_THROWS_NOTHING(
         save.setPropertyValue("SpectrumMetaData", "NotAValidChoice"));
@@ -828,10 +864,85 @@ public:
     AnalysisDataService::Instance().remove(m_name);
   }
 
+  void test_TableWorkspace() {
+    Workspace_sptr wsToSave = writeTableWS(m_name);
+
+    SaveAscii2 save;
+    std::string filename = initSaveAscii2(save);
+
+    TS_ASSERT_THROWS_NOTHING(save.execute());
+
+    // has the algorithm written a file to disk?
+    TS_ASSERT(Poco::File(filename).exists());
+
+    // Now make some checks on the content of the file
+    std::ifstream in(filename.c_str());
+    std::string header1, header2, header3, header4, header5, header6, header7,
+        header8, header9, separator, comment, type1, type2;
+
+    // Test that the first few column headers, separator and first two types are
+    // as expected
+    in >> comment >> header1 >> separator >> header2 >> separator >> header3 >>
+        separator >> header4 >> separator >> header5 >> separator >> header6 >>
+        separator >> header7 >> separator >> header8 >> separator >> header9 >>
+        separator >> type1 >> separator >> type2;
+
+    TS_ASSERT_EQUALS(comment, "#");
+    TS_ASSERT_EQUALS(separator, ",");
+    TS_ASSERT_EQUALS(header1, "int");
+    TS_ASSERT_EQUALS(header2, "uint");
+    TS_ASSERT_EQUALS(header3, "int64");
+    TS_ASSERT_EQUALS(header4, "size_t");
+    TS_ASSERT_EQUALS(header5, "float");
+    TS_ASSERT_EQUALS(header6, "double");
+    TS_ASSERT_EQUALS(header7, "bool");
+    TS_ASSERT_EQUALS(header8, "string");
+    TS_ASSERT_EQUALS(header9, "V3D");
+    TS_ASSERT_EQUALS(type1, "int");
+    TS_ASSERT_EQUALS(type2, "uint");
+
+    in.close();
+
+    Poco::File(filename).remove();
+    AnalysisDataService::Instance().remove(m_name);
+  }
+
+  // public as it is used in LoadAsciiTest as well.
+  static ITableWorkspace_sptr writeTableWS(const std::string &name) {
+    auto table = WorkspaceFactory::Instance().createTable();
+    // One column of each type
+    table->addColumn("int", "int");
+    table->addColumn("uint", "uint");
+    table->addColumn("long64", "int64");
+    table->addColumn("size_t", "size_t");
+    table->addColumn("float", "float");
+    table->addColumn("double", "double");
+    table->addColumn("bool", "bool");
+    table->addColumn("str", "string");
+    table->addColumn("V3D", "V3D");
+
+    // A few rows
+    TableRow row1 = table->appendRow();
+    row1 << -1 << static_cast<uint32_t>(0) << static_cast<int64_t>(1)
+         << static_cast<size_t>(10) << 5.5f << -9.9 << true << "Hello"
+         << Mantid::Kernel::V3D();
+    TableRow row2 = table->appendRow();
+    row2 << 1 << static_cast<uint32_t>(2) << static_cast<int64_t>(-2)
+         << static_cast<size_t>(100) << 0.0f << 101.0 << false << "World"
+         << Mantid::Kernel::V3D(-1, 3, 4);
+    TableRow row3 = table->appendRow();
+    row3 << 6 << static_cast<uint32_t>(3) << static_cast<int64_t>(0)
+         << static_cast<size_t>(0) << -99.0f << 0.0 << false << "!"
+         << Mantid::Kernel::V3D(1, 6, 10);
+
+    AnalysisDataService::Instance().add(name, table);
+    return table;
+  }
+
 private:
   void writeSampleWS(Mantid::DataObjects::Workspace2D_sptr &wsToSave,
                      const bool &isSpectra = true) {
-    wsToSave = boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+    wsToSave = std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, 3, 3));
     for (int i = 0; i < 2; i++) {
       auto &X = wsToSave->mutableX(i);
@@ -936,4 +1047,3 @@ private:
     AnalysisDataService::Instance().add(m_name, wsToSave);
   }
 };
-#endif /*SAVEASCIITEST_H_*/

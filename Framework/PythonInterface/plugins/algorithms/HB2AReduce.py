@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceProperty, FileProperty,
                         FileAction, MultipleFileProperty)
 from mantid.kernel import (Direction, IntArrayProperty, FloatTimeSeriesProperty, FloatBoundedValidator,
@@ -78,7 +77,7 @@ class HB2AReduce(PythonAlgorithm):
         if not self.getProperty("Filename").value:
             ipts = self.getProperty("IPTS").value
 
-            if ((ipts == Property.EMPTY_INT) or len(self.getProperty("ScanNumbers").value) is 0):
+            if ((ipts == Property.EMPTY_INT) or len(self.getProperty("ScanNumbers").value) == 0):
                 issues["Filename"] = 'Must specify either Filename or IPTS AND ScanNumbers'
 
             if self.getProperty("Exp").value == Property.EMPTY_INT:

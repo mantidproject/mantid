@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_INTEGRATEMDHISTOWORKSPACETEST_H_
-#define MANTID_MDALGORITHMS_INTEGRATEMDHISTOWORKSPACETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -19,7 +18,7 @@ namespace {
 
 // This helper sets the signal values to the linear index to have some
 // variety
-void resetSignalsToLinearIndexValue(IMDHistoWorkspace_sptr ws) {
+void resetSignalsToLinearIndexValue(const IMDHistoWorkspace_sptr &ws) {
   auto numberOfIndices = static_cast<size_t>(ws->getNPoints());
   for (size_t i = 0; i < numberOfIndices; ++i) {
     auto &signal = ws->signalAt(i);
@@ -825,5 +824,3 @@ public:
     TS_ASSERT(outWS);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_INTEGRATEMDHISTOWORKSPACETEST_H_ */

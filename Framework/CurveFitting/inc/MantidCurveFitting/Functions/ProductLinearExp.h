@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_PRODUCTLINEAREXP_H_
-#define MANTID_CURVEFITTING_PRODUCTLINEAREXP_H_
+#pragma once
 
 #include "MantidAPI/IFunction1D.h"
 #include "MantidAPI/ParamFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid {
@@ -18,8 +18,8 @@ namespace Functions {
 /** ProductLinearExp : Function that evauates the product of an exponential and
   linear function.
 */
-class DLLExport ProductLinearExp : public API::ParamFunction,
-                                   public API::IFunction1D {
+class MANTID_CURVEFITTING_DLL ProductLinearExp : public API::ParamFunction,
+                                                 public API::IFunction1D {
 public:
   ProductLinearExp();
 
@@ -37,5 +37,3 @@ protected:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_PRODUCTLINEAREXP_H_ */

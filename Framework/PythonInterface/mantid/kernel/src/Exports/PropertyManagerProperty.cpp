@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/PropertyManagerProperty.h"
 #include "MantidKernel/PropertyManager.h"
@@ -19,8 +19,8 @@
 #include <boost/python/make_constructor.hpp>
 
 using Mantid::Kernel::Direction;
-using Mantid::Kernel::PropertyManagerProperty;
 using Mantid::Kernel::PropertyManager_sptr;
+using Mantid::Kernel::PropertyManagerProperty;
 using Mantid::PythonInterface::PropertyWithValueExporter;
 namespace Registry = Mantid::PythonInterface::Registry;
 using namespace boost::python;

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * PeakHKLErrorsTest.h
@@ -11,8 +11,7 @@
  *      Author: ruth
  */
 
-#ifndef PANELHKLERRORSTEST_H_
-#define PANELHKLERRORSTEST_H_
+#pragma once
 
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/Jacobian.h"
@@ -57,7 +56,7 @@ public:
     alg.setProperty("OutputWorkspace", "abcd");
     API::Workspace_sptr ows = alg.getProperty("OutputWorkspace");
     DataObjects::PeaksWorkspace_sptr peaks =
-        boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
+        std::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(ows);
     // std::cout<<"Peaks number="<<peaks->getNumberPeaks()<<'\n';
 
     LoadIsawUB loadUB;
@@ -110,7 +109,7 @@ public:
     TS_ASSERT_DELTA(-0.0060874, out[12], .01);
     TS_ASSERT_DELTA(-0.0103673, out[16], .01);
 
-    boost::shared_ptr<Jacob> Jac(
+    std::shared_ptr<Jacob> Jac(
         new Jacob((int)peakErrs.nParams(), (int)(3 * NPeaks)));
     peakErrs.functionDeriv1D(Jac.get(), xValues.data(), (size_t)(3 * NPeaks));
 
@@ -127,5 +126,3 @@ public:
     TS_ASSERT_DELTA(Jac->get(80, 4), -.0943, .1);
   }
 };
-
-#endif /* PANELHKLERRORSTEST_H_ */

@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_WIENERSMOOTH_H_
-#define MANTID_ALGORITHMS_WIENERSMOOTH_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidHistogramData/HistogramX.h"
 #include "MantidKernel/cow_ptr.h"
 
@@ -18,7 +18,7 @@ namespace Algorithms {
   workspace
   using the Wiener filter smoothing.
 */
-class DLLExport WienerSmooth : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL WienerSmooth : public API::Algorithm {
 public:
   const std::string name() const override { return "WienerSmooth"; }
   int version() const override;
@@ -35,7 +35,7 @@ private:
   std::pair<double, double>
   getStartEnd(const Mantid::HistogramData::HistogramX &X,
               bool isHistogram) const;
-  API::MatrixWorkspace_sptr copyInput(API::MatrixWorkspace_sptr inputWS,
+  API::MatrixWorkspace_sptr copyInput(const API::MatrixWorkspace_sptr &inputWS,
                                       size_t wsIndex);
   API::MatrixWorkspace_sptr
   smoothSingleSpectrum(API::MatrixWorkspace_sptr inputWS, size_t wsIndex);
@@ -43,5 +43,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_WIENERSMOOTH_H_ */

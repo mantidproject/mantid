@@ -1541,7 +1541,7 @@ void ConfigDialog::correctTreePatrialTicks(QTreeWidgetItem &topLevelCat) {
 }
 
 QTreeWidgetItem *
-ConfigDialog::createCheckedTreeItem(QString name,
+ConfigDialog::createCheckedTreeItem(const QString &name,
                                     Qt::CheckState checkBoxState) {
   QTreeWidgetItem *item = new QTreeWidgetItem(QStringList(name));
   item->setFlags(item->flags() | Qt::ItemIsUserCheckable);

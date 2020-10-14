@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_DIFFRACTIONFOCUSSING_H_
-#define MANTID_ALGORITHM_DIFFRACTIONFOCUSSING_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include <Poco/NObserver.h>
 
 namespace Mantid {
@@ -47,8 +47,9 @@ The structure of the grouping file is as follows:
 @author Nick Draper, Tessella
 @date 11/07/2008
 */
-class DLLExport DiffractionFocussing : public API::Algorithm,
-                                       public API::DeprecatedAlgorithm {
+class MANTID_ALGORITHMS_DLL DiffractionFocussing
+    : public API::Algorithm,
+      public API::DeprecatedAlgorithm {
 public:
   /// Constructor
   DiffractionFocussing();
@@ -77,10 +78,8 @@ private:
   void calculateRebinParams(const API::MatrixWorkspace_const_sptr &workspace,
                             double &min, double &max, double &step);
   std::multimap<int64_t, int64_t>
-  readGroupingFile(std::string groupingFileName);
+  readGroupingFile(const std::string &groupingFileName);
 };
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_DIFFRACTIONFOCUSSING_H_*/

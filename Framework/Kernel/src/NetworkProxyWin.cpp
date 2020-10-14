@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // Only compile on windows.
 #if defined(_WIN32) || defined(_WIN64)
 
 #include "MantidKernel/NetworkProxy.h"
+#include "MantidKernel/WarningSuppressions.h"
 // std
 #include <sstream>
 // windows
@@ -117,7 +118,9 @@ bool get_proxy_configuration_win(const std::string &target_url,
   if (fail) {
     err_msg = info.str();
   }
+  MSVC_DIAG_OFF(4244)
   proxy_str = std::string(proxy.begin(), proxy.end());
+  MSVC_DIAG_ON(4244)
   return !fail;
 }
 

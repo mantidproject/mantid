@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_CONVERTERS_CONTAINERDTYPE_H_
-#define MANTID_PYTHONINTERFACE_CONVERTERS_CONTAINERDTYPE_H_
+#pragma once
 
 #include <string>
 #include <type_traits>
@@ -41,5 +40,3 @@ std::string dtype(const Container<HeldType> &) {
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /*MANTID_PYTHONINTERFACE_CONVERTERS_CONTAINERDTYPE_H_*/

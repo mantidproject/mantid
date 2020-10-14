@@ -1,123 +1,24 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ConvFitModel.h"
 
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidGeometry/Instrument.h"
 
 #include <boost/algorithm/string/join.hpp>
 
 #include <stdexcept>
+#include <utility>
 
 using namespace Mantid::API;
 
 namespace {
-
-MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-      workspaceName);
-}
-
-bool doesExistInADS(std::string const &workspaceName) {
-  return AnalysisDataService::Instance().doesExist(workspaceName);
-}
-
-boost::optional<std::size_t>
-getFirstInCategory(CompositeFunction_const_sptr composite,
-                   const std::string &category) {
-  if (!composite)
-    return boost::none;
-
-  for (auto i = 0u; i < composite->nFunctions(); ++i) {
-    if (composite->getFunction(i)->category() == category)
-      return i;
-  }
-  return boost::none;
-}
-
-IFunction_sptr removeFunction(CompositeFunction_sptr composite,
-                              std::size_t index) {
-  auto function = composite->getFunction(index);
-  composite->removeFunction(index);
-  return function;
-}
-
-CompositeFunction_sptr shallowCopy(CompositeFunction_sptr composite) {
-  CompositeFunction_sptr copy(new CompositeFunction);
-  for (auto i = 0u; i < composite->nFunctions(); ++i)
-    copy->addFunction(composite->getFunction(i));
-  copy->addTies(composite->writeTies());
-  return copy;
-}
-
-IFunction_sptr shallowCopy(IFunction_sptr function) {
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
-  if (composite)
-    return shallowCopy(composite);
-  return function;
-}
-
-IFunction_sptr createResolutionFunction(const std::string &resolutionName) {
-  auto func = FunctionFactory::Instance().createFunction("Resolution");
-  // add resolution file
-  IFunction::Attribute attr(resolutionName);
-  func->setAttribute("Workspace", attr);
-  return func;
-}
-
-CompositeFunction_sptr applyTemperatureCorrection(IFunction_sptr function,
-                                                  IFunction_sptr correction,
-                                                  double value) {
-  auto product = boost::dynamic_pointer_cast<CompositeFunction>(
-      FunctionFactory::Instance().createFunction("ProductFunction"));
-  product->addFunction(correction);
-  product->addFunction(function);
-  product->tie("f0.Temp", std::to_string(value));
-  product->applyTies();
-  return product;
-}
-
-IFunction_sptr createTemperatureCorrection(double correction) {
-  // create temperature correction function to multiply with the lorentzians
-  IFunction_sptr tempFunc;
-
-  // create user function for the exponential correction
-  // (x*temp) / 1-exp(-(x*temp))
-  tempFunc = FunctionFactory::Instance().createFunction("UserFunction");
-  // 11.606 is the conversion factor from meV to K
-  std::string formula = "((x*11.606)/Temp) / (1 - exp(-((x*11.606)/Temp)))";
-  IFunction::Attribute att(formula);
-  tempFunc->setAttribute("Formula", att);
-  tempFunc->setParameter("Temp", correction);
-  return tempFunc;
-}
-
-CompositeFunction_sptr addTemperatureCorrection(CompositeFunction_sptr model,
-                                                double value) {
-  auto correction = createTemperatureCorrection(value);
-
-  for (auto i = 0u; i < model->nFunctions(); ++i) {
-    auto function = model->getFunction(i);
-
-    if (function->name() != "DeltaFunction") {
-      auto corrected = applyTemperatureCorrection(function, correction, value);
-      model->replaceFunction(i, corrected);
-    }
-  }
-  return model;
-}
-
-CompositeFunction_sptr addTemperatureCorrection(IFunction_sptr model,
-                                                double value) {
-  auto correction = createTemperatureCorrection(value);
-  return applyTemperatureCorrection(model, correction, value);
-}
 
 IAlgorithm_sptr loadParameterFileAlgorithm(std::string const &workspaceName,
                                            std::string const &filename) {
@@ -129,7 +30,7 @@ IAlgorithm_sptr loadParameterFileAlgorithm(std::string const &workspaceName,
 }
 
 void readAnalyserFromFile(const std::string &analyser,
-                          MatrixWorkspace_sptr workspace) {
+                          const MatrixWorkspace_sptr &workspace) {
   auto const instrument = workspace->getInstrument();
   auto const idfDirectory = Mantid::Kernel::ConfigService::Instance().getString(
       "instrumentDefinition.directory");
@@ -148,7 +49,7 @@ void readAnalyserFromFile(const std::string &analyser,
 }
 
 Mantid::Geometry::IComponent_const_sptr
-getAnalyser(MatrixWorkspace_sptr workspace) {
+getAnalyser(const MatrixWorkspace_sptr &workspace) {
   auto const instrument = workspace->getInstrument();
   auto const analysers = instrument->getStringParameter("analyser");
 
@@ -170,7 +71,8 @@ getAnalyser(MatrixWorkspace_sptr workspace) {
   return instrument->getComponentByName(analysers[0]);
 }
 
-boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
+boost::optional<double>
+instrumentResolution(const MatrixWorkspace_sptr &workspace) {
   try {
     auto const analyser = getAnalyser(workspace);
     if (analyser && analyser->hasParameter("resolution"))
@@ -190,68 +92,6 @@ boost::optional<double> instrumentResolution(MatrixWorkspace_sptr workspace) {
   } catch (std::exception const &) {
     return boost::none;
   }
-}
-
-MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr inputWS,
-                                    std::string const &outputName) {
-  auto cloneAlg = AlgorithmManager::Instance().create("CloneWorkspace");
-  cloneAlg->setLogging(false);
-  cloneAlg->initialize();
-  cloneAlg->setProperty("InputWorkspace", inputWS);
-  cloneAlg->setProperty("OutputWorkspace", outputName);
-  cloneAlg->execute();
-  return getADSMatrixWorkspace(outputName);
-}
-
-MatrixWorkspace_sptr appendWorkspace(MatrixWorkspace_sptr leftWS,
-                                     MatrixWorkspace_sptr rightWS,
-                                     int numHistograms,
-                                     std::string const &outputName) {
-  auto appendAlg = AlgorithmManager::Instance().create("AppendSpectra");
-  appendAlg->setLogging(false);
-  appendAlg->initialize();
-  appendAlg->setProperty("InputWorkspace1", leftWS);
-  appendAlg->setProperty("InputWorkspace2", rightWS);
-  appendAlg->setProperty("Number", numHistograms);
-  appendAlg->setProperty("OutputWorkspace", outputName);
-  appendAlg->execute();
-  return getADSMatrixWorkspace(outputName);
-}
-
-void renameWorkspace(std::string const &name, std::string const &newName) {
-  auto renamer = AlgorithmManager::Instance().create("RenameWorkspace");
-  renamer->setLogging(false);
-  renamer->setProperty("InputWorkspace", name);
-  renamer->setProperty("OutputWorkspace", newName);
-  renamer->execute();
-}
-
-void deleteWorkspace(std::string const &workspaceName) {
-  auto deleter = AlgorithmManager::Instance().create("DeleteWorkspace");
-  deleter->setLogging(false);
-  deleter->setProperty("Workspace", workspaceName);
-  deleter->execute();
-}
-
-void extendResolutionWorkspace(MatrixWorkspace_sptr resolution,
-                               std::size_t numberOfHistograms,
-                               std::string const &outputName) {
-  const auto resolutionNumHist = resolution->getNumberHistograms();
-  if (resolutionNumHist != 1 && resolutionNumHist != numberOfHistograms) {
-    std::string msg(
-        "Resolution must have either one or as many spectra as the sample");
-    throw std::runtime_error(msg);
-  }
-
-  auto resolutionWS = cloneWorkspace(resolution, "__cloned");
-
-  // Append to cloned workspace if necessary
-  if (resolutionNumHist == 1 && numberOfHistograms > 1) {
-    appendWorkspace(resolutionWS, resolution,
-                    static_cast<int>(numberOfHistograms - 1), outputName);
-    deleteWorkspace("__cloned");
-  } else
-    renameWorkspace("__cloned", outputName);
 }
 
 void getParameterNameChanges(
@@ -346,7 +186,7 @@ constructParameterNameChanges(const IFunction &model,
   }
 }
 
-IAlgorithm_sptr addSampleLogAlgorithm(Workspace_sptr workspace,
+IAlgorithm_sptr addSampleLogAlgorithm(const Workspace_sptr &workspace,
                                       const std::string &name,
                                       const std::string &text,
                                       const std::string &type) {
@@ -362,7 +202,8 @@ IAlgorithm_sptr addSampleLogAlgorithm(Workspace_sptr workspace,
 struct AddSampleLogRunner {
   AddSampleLogRunner(Workspace_sptr resultWorkspace,
                      WorkspaceGroup_sptr resultGroup)
-      : m_resultWorkspace(resultWorkspace), m_resultGroup(resultGroup) {}
+      : m_resultWorkspace(std::move(resultWorkspace)),
+        m_resultGroup(std::move(resultGroup)) {}
 
   void operator()(const std::string &name, const std::string &text,
                   const std::string &type) {
@@ -376,72 +217,24 @@ private:
 };
 
 std::vector<std::string>
-getNames(const std::vector<boost::weak_ptr<Mantid::API::MatrixWorkspace>>
+getNames(const MantidQt::CustomInterfaces::IDA::ResolutionCollectionType
              &workspaces) {
   std::vector<std::string> names;
-  names.reserve(workspaces.size());
-  std::transform(workspaces.begin(), workspaces.end(),
-                 std::back_inserter(names),
-                 [](boost::weak_ptr<Mantid::API::MatrixWorkspace> workspace) {
-                   return workspace.lock()->getName();
-                 });
+  names.reserve(workspaces.size().value);
+  std::transform(
+      workspaces.begin(), workspaces.end(), std::back_inserter(names),
+      [](const std::weak_ptr<Mantid::API::MatrixWorkspace> &workspace) {
+        return workspace.lock()->getName();
+      });
   return names;
 }
 
-std::string backgroundString(IFunction_sptr function) {
-  const auto functionName = function->name();
-
-  if (functionName == "FlatBackground") {
-    if (function->isFixed(0))
-      return "FixF";
-    return "FitF";
-  } else if (functionName == "LinearBackground")
-    return "FitL";
-  return "";
-}
-
-IFunction_sptr createConvolutionFitModel(IFunction_sptr model,
-                                         IFunction_sptr background,
-                                         boost::optional<double> temperature) {
-  CompositeFunction_sptr comp(new CompositeFunction);
-
-  if (!(model &&
-        AnalysisDataService::Instance().doesExist("__ConvFitResolution0")))
-    return model ? model : comp;
-
-  if (auto compModel = boost::dynamic_pointer_cast<CompositeFunction>(model)) {
-    if (compModel->nFunctions() == 1) {
-      model = compModel->getFunction(0);
-    }
-  }
-
-  auto conv = boost::dynamic_pointer_cast<CompositeFunction>(
-      FunctionFactory::Instance().createFunction("Convolution"));
-  conv->addFunction(createResolutionFunction("__ConvFitResolution0"));
-
-  if (temperature) {
-    auto compositeModel = boost::dynamic_pointer_cast<CompositeFunction>(model);
-    if (compositeModel)
-      model = addTemperatureCorrection(compositeModel, *temperature);
-    else
-      model = addTemperatureCorrection(model, *temperature);
-  }
-  conv->addFunction(model);
-
-  if (background) {
-    comp->addFunction(background);
-    comp->addFunction(conv);
-  } else
-    comp = conv;
-  return comp;
-}
-
-void setResolutionAttribute(CompositeFunction_sptr convolutionModel,
+void setResolutionAttribute(const CompositeFunction_sptr &convolutionModel,
                             const IFunction::Attribute &attr) {
   if (convolutionModel->name() == "Convolution")
     convolutionModel->getFunction(0)->setAttribute("Workspace", attr);
   else {
-    auto convolution = boost::dynamic_pointer_cast<CompositeFunction>(
+    auto convolution = std::dynamic_pointer_cast<CompositeFunction>(
         convolutionModel->getFunction(1));
     convolution->getFunction(0)->setAttribute("Workspace", attr);
   }
@@ -452,7 +245,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-ConvFitModel::ConvFitModel() {}
+ConvFitModel::ConvFitModel() { m_fitType = CONVFIT_STRING; }
 
 ConvFitModel::~ConvFitModel() {
   for (const auto &resolution : m_extendedResolution)
@@ -467,52 +260,22 @@ IAlgorithm_sptr ConvFitModel::simultaneousFitAlgorithm() const {
   return AlgorithmManager::Instance().create("ConvolutionFitSimultaneous");
 }
 
-std::string ConvFitModel::sequentialFitOutputName() const {
-  if (isMultiFit())
-    return "MultiConvFit_" + m_fitType + m_backgroundString + "_Results";
-  return createOutputName(
-      "%1%_conv_" + m_fitType + m_backgroundString + "_s%2%", "_to_", 0);
-}
-
-std::string ConvFitModel::simultaneousFitOutputName() const {
-  return sequentialFitOutputName();
-}
-
-std::string ConvFitModel::singleFitOutputName(std::size_t index,
-                                              std::size_t spectrum) const {
-  return createSingleFitOutputName("%1%_conv_" + m_fitType +
-                                       m_backgroundString + "_s%2%_Results",
-                                   index, spectrum);
-}
-
-Mantid::API::IFunction_sptr ConvFitModel::getFittingFunction() const {
-  auto function = shallowCopy(IndirectFittingModel::getFittingFunction());
-  auto composite = boost::dynamic_pointer_cast<CompositeFunction>(function);
-
-  IFunction_sptr background(nullptr);
-  if (composite && m_backgroundIndex)
-    background = removeFunction(composite, *m_backgroundIndex);
-  return createConvolutionFitModel(function, background, m_temperature);
+Mantid::API::MultiDomainFunction_sptr ConvFitModel::getFittingFunction() const {
+  return IndirectFittingModel::getFittingFunction();
 }
 
 boost::optional<double>
-ConvFitModel::getInstrumentResolution(std::size_t dataIndex) const {
+ConvFitModel::getInstrumentResolution(TableDatasetIndex dataIndex) const {
   if (dataIndex < numberOfWorkspaces())
     return instrumentResolution(getWorkspace(dataIndex));
   return boost::none;
 }
 
-std::size_t ConvFitModel::getNumberHistograms(std::size_t index) const {
+std::size_t ConvFitModel::getNumberHistograms(TableDatasetIndex index) const {
   return getWorkspace(index)->getNumberHistograms();
 }
 
-MatrixWorkspace_sptr ConvFitModel::getResolution(std::size_t index) const {
-  if (index < m_resolution.size())
-    return m_resolution[index].lock();
-  return nullptr;
-}
-
-CompositeFunction_sptr ConvFitModel::getMultiDomainFunction() const {
+MultiDomainFunction_sptr ConvFitModel::getMultiDomainFunction() const {
   auto function = IndirectFittingModel::getMultiDomainFunction();
   const std::string base = "__ConvFitResolution";
 
@@ -522,23 +285,7 @@ CompositeFunction_sptr ConvFitModel::getMultiDomainFunction() const {
   return function;
 }
 
-std::vector<std::string> ConvFitModel::getSpectrumDependentAttributes() const {
-  /// Q value also depends on spectrum but is automatically updated when
-  /// the WorkspaceIndex is changed
-  return {"WorkspaceIndex"};
-}
-
-void ConvFitModel::setFitFunction(IFunction_sptr function) {
-  auto const composite =
-      boost::dynamic_pointer_cast<CompositeFunction>(function);
-  m_backgroundIndex = getFirstInCategory(composite, "Background");
-  setParameterNameChanges(*function, m_backgroundIndex);
-
-  IFunction_sptr background(nullptr);
-  if (composite && m_backgroundIndex)
-    background = composite->getFunction(*m_backgroundIndex);
-  m_backgroundString = background ? backgroundString(background) : "";
-
+void ConvFitModel::setFitFunction(MultiDomainFunction_sptr function) {
   IndirectFittingModel::setFitFunction(function);
 }
 
@@ -546,71 +293,26 @@ void ConvFitModel::setTemperature(const boost::optional<double> &temperature) {
   m_temperature = temperature;
 }
 
-void ConvFitModel::addWorkspace(MatrixWorkspace_sptr workspace,
-                                const Spectra &spectra) {
-  IndirectFittingModel::addWorkspace(workspace, spectra);
-
-  const auto dataSize = numberOfWorkspaces();
-  if (m_resolution.size() < dataSize)
-    m_resolution.emplace_back(MatrixWorkspace_sptr());
-  else if (m_resolution.size() == dataSize &&
-           m_resolution[dataSize - 1].lock() &&
-           m_extendedResolution.size() < dataSize)
-    addExtendedResolution(dataSize - 1);
-}
-
-void ConvFitModel::removeWorkspace(std::size_t index) {
+void ConvFitModel::removeWorkspace(TableDatasetIndex index) {
   IndirectFittingModel::removeWorkspace(index);
 
   const auto newSize = numberOfWorkspaces();
   while (m_resolution.size() > newSize)
-    m_resolution.erase(m_resolution.begin() + index);
+    m_resolution.remove(index);
 
   while (m_extendedResolution.size() > newSize) {
     AnalysisDataService::Instance().remove(m_extendedResolution[index]);
-    m_extendedResolution.erase(m_extendedResolution.begin() + index);
+    m_extendedResolution.remove(index);
   }
 }
 
-void ConvFitModel::setResolution(const std::string &name, std::size_t index) {
-  if (!name.empty() && doesExistInADS(name))
-    setResolution(getADSMatrixWorkspace(name), index);
-  else
-    throw std::runtime_error("A valid resolution file needs to be selected.");
-}
-
-void ConvFitModel::setResolution(MatrixWorkspace_sptr resolution,
-                                 std::size_t index) {
-  if (m_resolution.size() > index)
-    m_resolution[index] = resolution;
-  else if (m_resolution.size() == index)
-    m_resolution.emplace_back(resolution);
-  else
-    throw std::out_of_range("Provided resolution index '" +
-                            std::to_string(index) + "' was out of range.");
-
-  if (numberOfWorkspaces() > index)
-    addExtendedResolution(index);
-}
-
-void ConvFitModel::addExtendedResolution(std::size_t index) {
-  const std::string name = "__ConvFitResolution" + std::to_string(index);
-
-  extendResolutionWorkspace(m_resolution[index].lock(),
-                            getNumberHistograms(index), name);
-
-  if (m_extendedResolution.size() > index)
-    m_extendedResolution[index] = name;
-  else
-    m_extendedResolution.emplace_back(name);
-}
-
-void ConvFitModel::setFitTypeString(const std::string &fitType) {
-  m_fitType = fitType;
+void ConvFitModel::setResolution(const std::string &name,
+                                 TableDatasetIndex index) {
+  m_fitDataModel->setResolution(name, index);
 }
 
 std::unordered_map<std::string, ParameterValue>
-ConvFitModel::createDefaultParameters(std::size_t index) const {
+ConvFitModel::createDefaultParameters(TableDatasetIndex index) const {
   std::unordered_map<std::string, ParameterValue> defaultValues;
   defaultValues["PeakCentre"] = ParameterValue(0.0);
   defaultValues["Centre"] = ParameterValue(0.0);
@@ -656,60 +358,20 @@ void ConvFitModel::addSampleLogs() {
   }
 }
 
-IndirectFitOutput ConvFitModel::createFitOutput(
-    WorkspaceGroup_sptr resultGroup, ITableWorkspace_sptr parameterTable,
-    WorkspaceGroup_sptr resultWorkspace, const FitDataIterator &fitDataBegin,
-    const FitDataIterator &fitDataEnd) const {
-  auto output = IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
-                                  fitDataBegin, fitDataEnd);
-  output.mapParameterNames(m_parameterNameChanges, fitDataBegin, fitDataEnd);
-  return output;
-}
-
-IndirectFitOutput
-ConvFitModel::createFitOutput(Mantid::API::WorkspaceGroup_sptr resultGroup,
-                              Mantid::API::ITableWorkspace_sptr parameterTable,
-                              Mantid::API::WorkspaceGroup_sptr resultWorkspace,
-                              IndirectFitData *fitData,
-                              std::size_t spectrum) const {
-  auto output = IndirectFitOutput(resultGroup, parameterTable, resultWorkspace,
-                                  fitData, spectrum);
-  output.mapParameterNames(m_parameterNameChanges, fitData, spectrum);
-  return output;
-}
-
 void ConvFitModel::addOutput(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   IndirectFittingModel::addOutput(fitAlgorithm);
   addSampleLogs();
 }
 
-void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
-                             WorkspaceGroup_sptr resultGroup,
-                             ITableWorkspace_sptr parameterTable,
-                             WorkspaceGroup_sptr resultWorkspace,
-                             const FitDataIterator &fitDataBegin,
-                             const FitDataIterator &fitDataEnd) const {
-  fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace,
-                       fitDataBegin, fitDataEnd);
-  fitOutput->mapParameterNames(m_parameterNameChanges, fitDataBegin,
-                               fitDataEnd);
-}
-
-void ConvFitModel::addOutput(IndirectFitOutput *fitOutput,
-                             WorkspaceGroup_sptr resultGroup,
-                             ITableWorkspace_sptr parameterTable,
-                             WorkspaceGroup_sptr resultWorkspace,
-                             IndirectFitData *fitData,
-                             std::size_t spectrum) const {
-  fitOutput->addOutput(resultGroup, parameterTable, resultWorkspace, fitData,
-                       spectrum);
-  fitOutput->mapParameterNames(m_parameterNameChanges, fitData, spectrum);
-}
-
 void ConvFitModel::setParameterNameChanges(
     const IFunction &model, boost::optional<std::size_t> backgroundIndex) {
   m_parameterNameChanges = constructParameterNameChanges(
-      model, backgroundIndex, m_temperature.is_initialized());
+      model, std::move(backgroundIndex), m_temperature.is_initialized());
+}
+
+std::vector<std::pair<std::string, size_t>>
+ConvFitModel::getResolutionsForFit() const {
+  return m_fitDataModel->getResolutionsForFit();
 }
 
 } // namespace IDA

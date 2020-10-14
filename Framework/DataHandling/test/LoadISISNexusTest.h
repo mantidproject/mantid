@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LOADISISNEXUSTEST_H_
-#define LOADISISNEXUSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -28,7 +27,7 @@ using namespace Mantid::DataHandling;
 class LoadISISNexusTest : public CxxTest::TestSuite {
 private:
   // Helper method to fetch the log property entry corresponding to period.
-  Property *fetchPeriodLog(MatrixWorkspace_sptr workspace,
+  Property *fetchPeriodLog(const MatrixWorkspace_sptr &workspace,
                            int expectedPeriodNumber) {
     std::stringstream period_number_stream;
     period_number_stream << expectedPeriodNumber;
@@ -39,14 +38,14 @@ private:
 
   // Helper method to fetch the log property entry corresponding to the current
   // period.
-  Property *fetchCurrentPeriodLog(MatrixWorkspace_sptr workspace) {
+  Property *fetchCurrentPeriodLog(const MatrixWorkspace_sptr &workspace) {
     Property *p = workspace->run().getLogData("current_period");
     return p;
   }
 
   // Helper method to check that the log data contains a specific period number
   // entry.
-  void checkPeriodLogData(MatrixWorkspace_sptr workspace,
+  void checkPeriodLogData(const MatrixWorkspace_sptr &workspace,
                           int expectedPeriodNumber) {
     Property *p = nullptr;
     TS_ASSERT_THROWS_NOTHING(
@@ -122,14 +121,7 @@ public:
     TS_ASSERT_EQUALS(mon_ws->y(0)[3], 0.);
 
     const std::vector<Property *> &logs = mon_ws->run().getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 62);
-
-    std::string header =
-        mon_ws->run().getPropertyValueAsType<std::string>("run_header");
-    TS_ASSERT_EQUALS(86, header.size());
-    TS_ASSERT_EQUALS("LOQ 49886 Team LOQ             Quiet Count, ISIS Off, N "
-                     "28-APR-2009  09:20:29     0.00",
-                     header);
+    TS_ASSERT_EQUALS(logs.size(), 50);
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(
@@ -207,14 +199,7 @@ public:
     TS_ASSERT(ws->getSpectrum(1234).hasDetectorID(1235));
 
     const std::vector<Property *> &logs = ws->run().getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 62);
-
-    std::string header =
-        ws->run().getPropertyValueAsType<std::string>("run_header");
-    TS_ASSERT_EQUALS(86, header.size());
-    TS_ASSERT_EQUALS("LOQ 49886 Team LOQ             Quiet Count, ISIS Off, N "
-                     "28-APR-2009  09:20:29     0.00",
-                     header);
+    TS_ASSERT_EQUALS(logs.size(), 50);
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(
@@ -486,9 +471,9 @@ public:
 
     // Check the individual workspace group members.
     MatrixWorkspace_sptr ws1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(0));
     MatrixWorkspace_sptr ws2 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(1));
+        std::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(1));
     TS_ASSERT(ws1 != nullptr);
     TS_ASSERT(ws2 != nullptr);
     // Check that workspace 1 has the correct period data, and no other period
@@ -531,7 +516,7 @@ public:
     WorkspaceGroup_sptr grpWs;
     TS_ASSERT_THROWS_NOTHING(grpWs = ADS.retrieveWS<WorkspaceGroup>(wsName));
     MatrixWorkspace_sptr ws1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(grpWs->getItem(0));
 
     auto inst = ws1->getInstrument();
     TS_ASSERT(!inst->getFilename().empty()); // This is how we know we didn't
@@ -611,14 +596,7 @@ public:
     TS_ASSERT(ws->getSpectrum(1234 - 2).hasDetectorID(1235));
 
     const std::vector<Property *> &logs = ws->run().getLogData();
-    TS_ASSERT_EQUALS(logs.size(), 62);
-
-    std::string header =
-        ws->run().getPropertyValueAsType<std::string>("run_header");
-    TS_ASSERT_EQUALS(86, header.size());
-    TS_ASSERT_EQUALS("LOQ 49886 Team LOQ             Quiet Count, ISIS Off, N "
-                     "28-APR-2009  09:20:29     0.00",
-                     header);
+    TS_ASSERT_EQUALS(logs.size(), 50);
 
     TimeSeriesProperty<std::string> *slog =
         dynamic_cast<TimeSeriesProperty<std::string> *>(
@@ -678,10 +656,10 @@ public:
     TS_ASSERT(ld.isExecuted());
 
     Workspace_sptr detWS = ld.getProperty("OutputWorkspace");
-    auto detGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(detWS);
+    auto detGroup = std::dynamic_pointer_cast<WorkspaceGroup>(detWS);
     TS_ASSERT(detGroup);
     Workspace_sptr monWS = ld.getProperty("MonitorWorkspace");
-    auto monGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(monWS);
+    auto monGroup = std::dynamic_pointer_cast<WorkspaceGroup>(monWS);
     TS_ASSERT(monGroup);
 
     if (!(detGroup && monGroup))
@@ -691,7 +669,7 @@ public:
     TS_ASSERT_EQUALS(2, monGroup->size());
 
     auto detWS0 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(detGroup->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(detGroup->getItem(0));
     TS_ASSERT_EQUALS(1000, detWS0->blocksize());
     TS_ASSERT_EQUALS(243, detWS0->getNumberHistograms());
     TS_ASSERT_DELTA(105, detWS0->x(1)[1], 1e-08);
@@ -700,7 +678,7 @@ public:
     TS_ASSERT_EQUALS(detWS0->getSpectrum(0).getSpectrumNo(), 4);
 
     auto monWS0 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(monGroup->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(monGroup->getItem(0));
     TS_ASSERT_EQUALS(1000, monWS0->blocksize());
     TS_ASSERT_EQUALS(3, monWS0->getNumberHistograms());
     TS_ASSERT_DELTA(105, monWS0->x(1)[1], 1e-08);
@@ -710,7 +688,7 @@ public:
     TS_ASSERT_EQUALS(monWS0->getSpectrum(2).getSpectrumNo(), 3);
 
     auto monWS1 =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(monGroup->getItem(1));
+        std::dynamic_pointer_cast<MatrixWorkspace>(monGroup->getItem(1));
     TS_ASSERT_EQUALS(1000, monWS1->blocksize());
     TS_ASSERT_EQUALS(3, monWS1->getNumberHistograms());
     TS_ASSERT_DELTA(105, monWS1->x(1)[1], 1e-08);
@@ -747,11 +725,11 @@ public:
 
     Workspace_sptr detWS = ld.getProperty("OutputWorkspace");
 
-    auto groupWS = boost::dynamic_pointer_cast<WorkspaceGroup>(detWS);
+    auto groupWS = std::dynamic_pointer_cast<WorkspaceGroup>(detWS);
     TSM_ASSERT("Should have got back a workspace group", groupWS);
 
     auto firstMatrixWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(0));
+        std::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(0));
 
     TS_ASSERT_EQUALS("34", extractStringLog(*firstMatrixWS, "measurement_id"));
     TS_ASSERT_EQUALS("0",
@@ -761,7 +739,7 @@ public:
                      extractStringLog(*firstMatrixWS, "measurement_type"));
 
     auto secondMatrixWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(1));
+        std::dynamic_pointer_cast<MatrixWorkspace>(groupWS->getItem(1));
 
     TS_ASSERT_EQUALS("34", extractStringLog(*secondMatrixWS, "measurement_id"));
     TS_ASSERT_EQUALS("0",
@@ -1665,5 +1643,3 @@ public:
     TS_ASSERT(loader.execute());
   }
 };
-
-#endif /*LOADISISNEXUSTEST_H_*/

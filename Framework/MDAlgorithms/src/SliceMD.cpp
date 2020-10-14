@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/SliceMD.h"
 #include "MantidAPI/FileProperty.h"
@@ -12,7 +12,6 @@
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EnabledWhenProperty.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 
@@ -57,7 +56,7 @@ void SliceMD::init() {
   declareProperty("TakeMaxRecursionDepthFromInput", true,
                   "Copy the maximum recursion depth from the input workspace.");
 
-  auto mustBePositiveInteger = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositiveInteger = std::make_shared<BoundedValidator<int>>();
   mustBePositiveInteger->setLower(0);
 
   declareProperty("MaxRecursionDepth", 1000, mustBePositiveInteger,
@@ -179,12 +178,11 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
 
   // Function defining which events (in the input dimensions) to place in the
   // output
-  MDImplicitFunction *function =
-      this->getImplicitFunctionForChunk(nullptr, nullptr);
+  auto function = this->getImplicitFunctionForChunk(nullptr, nullptr);
 
   std::vector<API::IMDNode *> boxes;
   // Leaf-only; no depth limit; with the implicit function passed to it.
-  ws->getBox()->getBoxes(boxes, 1000, true, function);
+  ws->getBox()->getBoxes(boxes, 1000, true, function.get());
   // Sort boxes by file position IF file backed. This reduces seeking time,
   // hopefully.
   bool fileBackedWS = bc->isFileBacked();
@@ -286,7 +284,7 @@ void SliceMD::slice(typename MDEventWorkspace<MDE, nd>::sptr ws) {
   // Pass on the display normalization from the input event workspace to the
   // output event workspace
   IMDEventWorkspace_sptr outEvent =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
   outEvent->setDisplayNormalization(ws->displayNormalization());
   outEvent->setDisplayNormalizationHisto(ws->displayNormalizationHisto());
   // return the size of the input workspace write buffer to its initial value

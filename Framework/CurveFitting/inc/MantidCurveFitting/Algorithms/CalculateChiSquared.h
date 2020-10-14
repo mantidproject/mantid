@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_CALCULATECHISQUARED_H_
-#define MANTID_CURVEFITTING_CALCULATECHISQUARED_H_
+#pragma once
 
 #include "MantidCurveFitting/IFittingAlgorithm.h"
 #include "MantidKernel/System.h"
@@ -20,7 +19,7 @@ namespace Algorithms {
   Optionally outputs slices of the chi^2 along the parameter axes
   and estimates the standard deviations.
 */
-class DLLExport CalculateChiSquared : public IFittingAlgorithm {
+class MANTID_CURVEFITTING_DLL CalculateChiSquared : public IFittingAlgorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -43,5 +42,3 @@ private:
 } // namespace Algorithms
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_CALCULATECHISQUARED_H_ */

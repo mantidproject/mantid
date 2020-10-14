@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CAMERAMANAGER_H_
-#define CAMERAMANAGER_H_
+#pragma once
 
 #include "MantidVatesAPI/ViewFrustum.h"
 #include "MantidVatesSimpleGuiViewWidgets/WidgetDllOption.h"
@@ -34,5 +33,3 @@ public:
 } // namespace SimpleGui
 } // namespace Vates
 } // namespace Mantid
-
-#endif

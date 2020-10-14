@@ -10,8 +10,7 @@
 /// \brief Test ranges to if they are equal
 /// \author Marshall Clow
 
-#ifndef BOOST_ALGORITHM_EQUAL_HPP
-#define BOOST_ALGORITHM_EQUAL_HPP
+#pragma once
 
 #include <algorithm>    // for std::equal
 #include <iterator>
@@ -94,6 +93,4 @@ bool equal ( InputIterator1 first1, InputIterator1 last1,
 //  There are already range-based versions of these.
 
 }} // namespace boost and algorithm
-
-#endif // BOOST_ALGORITHM_EQUAL_HPP
 // clang-format on

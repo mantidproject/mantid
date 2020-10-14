@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
-from __future__ import absolute_import, unicode_literals
-
 import unittest
 
 from qtpy.QtWidgets import QApplication
@@ -28,7 +26,7 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
 
         p.close(ws.name())
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         self.assertEqual(None, p.ads_observer)
         self.assert_widget_not_present("instr")
         self.assert_no_toplevel_widgets()
@@ -42,7 +40,7 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
 
         p.force_close()
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
         self.assertEqual(None, p.ads_observer)
         self.assert_widget_not_present("instr")
         self.assert_no_toplevel_widgets()

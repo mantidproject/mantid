@@ -1,9 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#include <utility>
+
 #include "MantidAPI/NotebookWriter.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
@@ -34,7 +36,7 @@ void NotebookWriter::codeCell(Json::Value array_code) {
 
   cell_data["cell_type"] = "code";
   cell_data["collapsed"] = false;
-  cell_data["input"] = array_code;
+  cell_data["input"] = std::move(array_code);
   cell_data["language"] = "python";
   cell_data["metadata"] = empty;
   cell_data["outputs"] = Json::Value(Json::arrayValue);
@@ -47,7 +49,7 @@ void NotebookWriter::codeCell(Json::Value array_code) {
  *
  * @param string_code :: string containing the python for the code cell
  */
-std::string NotebookWriter::codeCell(std::string string_code) {
+std::string NotebookWriter::codeCell(const std::string &string_code) {
 
   Json::Value cell_data;
   const Json::Value empty = Json::Value(Json::ValueType::objectValue);
@@ -77,7 +79,7 @@ void NotebookWriter::markdownCell(Json::Value string_array) {
 
   cell_data["cell_type"] = "markdown";
   cell_data["metadata"] = empty;
-  cell_data["source"] = string_array;
+  cell_data["source"] = std::move(string_array);
 
   m_cell_buffer.append(cell_data);
 }
@@ -87,7 +89,7 @@ void NotebookWriter::markdownCell(Json::Value string_array) {
  *
  * @param string_text :: string containing the python code for the code cell
  */
-std::string NotebookWriter::markdownCell(std::string string_text) {
+std::string NotebookWriter::markdownCell(const std::string &string_text) {
 
   Json::Value cell_data;
   const Json::Value empty = Json::Value(Json::ValueType::objectValue);

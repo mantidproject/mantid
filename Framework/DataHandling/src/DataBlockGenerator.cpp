@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/DataBlockGenerator.h"
 #include "MantidDataHandling/DataBlock.h"
@@ -14,11 +14,10 @@ namespace DataHandling {
 // DataBlock Generator
 // -------------------------------------------------------------
 DataBlockGenerator::DataBlockGenerator(
-    const std::vector<std::pair<int64_t, int64_t>> &intervals)
+    const std::vector<SpectrumPair> &intervals)
     : m_intervals(intervals) {
   // We need to sort the data items.
-  auto comparison = [](const std::pair<int64_t, int64_t> &el1,
-                       const std::pair<int64_t, int64_t> &el2) {
+  auto comparison = [](const SpectrumPair &el1, const SpectrumPair &el2) {
     return el1.first < el2.first;
   };
   std::sort(m_intervals.begin(), m_intervals.end(), comparison);
@@ -82,6 +81,6 @@ void DataBlockGenerator::next() { ++(*this); }
 
 bool DataBlockGenerator::isDone() { return !m_currentIntervalIndex; }
 
-int64_t DataBlockGenerator::getValue() { return m_currentSpectrum; }
+specnum_t DataBlockGenerator::getValue() { return m_currentSpectrum; }
 } // namespace DataHandling
 } // namespace Mantid

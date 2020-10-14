@@ -52,7 +52,7 @@ using std::string;
 using namespace Mantid;
 
 MdiSubWindow::MdiSubWindow(QWidget *parent, const QString &label,
-                           const QString &name, Qt::WFlags f)
+                           const QString &name, const Qt::WFlags &f)
     : MdiSubWindowParent_t(parent, f),
       d_app(static_cast<ApplicationWindow *>(parent)),
       d_folder(d_app->currentFolder()), d_label(label), d_status(Normal),
@@ -70,7 +70,7 @@ MdiSubWindow::MdiSubWindow()
       d_min_restore_size(QSize()) {}
 
 void MdiSubWindow::init(QWidget *parent, const QString &label,
-                        const QString &name, Qt::WFlags flags) {
+                        const QString &name, const Qt::WFlags &flags) {
   setParent(parent);
   setObjectName(name);
   setName(name);

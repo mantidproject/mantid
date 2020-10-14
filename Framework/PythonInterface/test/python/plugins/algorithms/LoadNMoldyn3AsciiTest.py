@@ -1,15 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=too-many-public-methods
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.simpleapi import *
 from mantid.api import *
+
 
 class LoadNMoldyn3AsciiTest(unittest.TestCase):
 
@@ -21,6 +20,7 @@ class LoadNMoldyn3AsciiTest(unittest.TestCase):
         """
         Load an F(Q, t) function from an nMOLDYN 3 .cdl file
         """
+
         moldyn_group = LoadNMoldyn3Ascii(Filename=self._cdl_filename,
                                          Functions=['Fqt-total'],
                                          OutputWorkspace='__LoadNMoldyn3Ascii_test')
@@ -81,6 +81,12 @@ class LoadNMoldyn3AsciiTest(unittest.TestCase):
 
         self.assertTrue(isinstance(moldyn_ws, MatrixWorkspace))
         self.assertTrue(moldyn_ws.getNumberHistograms(), 12)
+
+        workdir = config['defaultsave.directory']
+        filename = 'MolDyn_angles.txt'
+        path = os.path.join(workdir, filename)
+        if os.path.exists(path):
+            os.remove(path)
 
 
     def test_function_validation_cdl(self):

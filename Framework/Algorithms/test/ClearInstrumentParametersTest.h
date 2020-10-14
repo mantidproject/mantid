@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef CLEARINSTRUMENTPARAMETERSTEST_H
-#define CLEARINSTRUMENTPARAMETERSTEST_H
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -48,24 +47,26 @@ public:
     TS_ASSERT_EQUALS(oldPos, m_ws->detectorInfo().position(0));
   }
 
-  void setParam(std::string cName, std::string pName, std::string value) {
+  void setParam(const std::string &cName, const std::string &pName,
+                const std::string &value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     paramMap.addString(comp->getComponentID(), pName, value);
   }
 
-  void setParam(std::string cName, std::string pName, double value) {
+  void setParam(const std::string &cName, const std::string &pName,
+                double value) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     paramMap.addDouble(comp->getComponentID(), pName, value);
   }
 
-  void checkEmpty(std::string cName, std::string pName) {
+  void checkEmpty(const std::string &cName, const std::string &pName) {
     Instrument_const_sptr inst = m_ws->getInstrument();
     ParameterMap &paramMap = m_ws->instrumentParameters();
-    boost::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
+    std::shared_ptr<const IComponent> comp = inst->getComponentByName(cName);
     bool exists = paramMap.contains(comp.get(), pName);
     TS_ASSERT_EQUALS(exists, false);
   }
@@ -86,7 +87,7 @@ public:
     std::string wsName = "SaveParameterFileTestIDF2";
     Workspace_sptr ws =
         WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
-    Workspace2D_sptr ws2D = boost::dynamic_pointer_cast<Workspace2D>(ws);
+    Workspace2D_sptr ws2D = std::dynamic_pointer_cast<Workspace2D>(ws);
 
     TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
 
@@ -98,11 +99,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(loaderIDF2.execute());
     TS_ASSERT(loaderIDF2.isExecuted());
 
-    m_ws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws2D);
+    m_ws = std::dynamic_pointer_cast<MatrixWorkspace>(ws2D);
   }
 
 private:
   MatrixWorkspace_sptr m_ws;
 };
-
-#endif /* CLEARINSTRUMENTPARAMETERSTEST_H */

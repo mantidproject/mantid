@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import mtd
 from mantid.kernel import DeltaEModeType, UnitConversion
 import numpy
@@ -207,32 +205,6 @@ def default_test_detectors(ws):
 def refl_add_line_position(ws, linePosition):
     ws.run().addProperty(common.SampleLogs.LINE_POSITION, float(linePosition), True)
     return ws
-
-
-def refl_add_two_theta(ws, twoTheta):
-    ws.run().addProperty(common.SampleLogs.TWO_THETA, float(twoTheta), 'degree', True)
-    return ws
-
-
-def refl_preprocess(outputWSName, ws):
-    args = {
-        'InputWorkspace': ws,
-        'OutputWorkspace': outputWSName,
-    }
-    alg = create_algorithm('ReflectometryILLPreprocess', **args)
-    alg.execute()
-    return mtd[outputWSName]
-
-
-def refl_preprocess_with_calibration(outputWSName, ws, directLineWS):
-    args = {
-        'InputWorkspace': ws,
-        'DirectLineWorkspace': directLineWS,
-        'OutputWorkspace': outputWSName,
-    }
-    alg = create_algorithm('ReflectometryILLPreprocess', **args)
-    alg.execute()
-    return mtd[outputWSName]
 
 
 def refl_rotate_detector(ws, angle):

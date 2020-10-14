@@ -8,8 +8,7 @@ This program is released under the GPL with the additional exemption that
 compiling, linking, and/or using OpenSSL is allowed.
 */
 
-#ifndef ICat4ICATPortBindingProxy_H
-#define ICat4ICATPortBindingProxy_H
+#pragma once
 #include "ICat4H.h"
 
 namespace ICat4 {
@@ -318,5 +317,3 @@ public:
 };
 
 } // namespace ICat4
-
-#endif

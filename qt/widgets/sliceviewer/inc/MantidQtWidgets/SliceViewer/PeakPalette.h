@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAKPALETTE_H
-#define MANTID_SLICEVIEWER_PEAKPALETTE_H
+#pragma once
 
 #include "MantidKernel/System.h"
 #include "MantidQtWidgets/SliceViewer/PeakViewColor.h"
@@ -37,7 +36,7 @@ private:
   ColourMapType m_foregroundMap;
   typename ColourMapType::iterator safeFetchPair(ColourMapType &map,
                                                  const int index) {
-    typename ColourMapType::iterator it = map.find(index);
+    auto it = map.find(index);
     if (it == map.end()) {
       std::stringstream stream;
       stream << "Index " << index << " is out of range";
@@ -141,4 +140,3 @@ template <> DLLExport PeakPalette<PeakViewColor>::PeakPalette();
 
 } // namespace SliceViewer
 } // namespace MantidQt
-#endif // MANTID_SLICEVIEWER_PEAKSPALETTE_H

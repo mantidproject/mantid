@@ -1,5 +1,3 @@
-from __future__ import print_function, absolute_import
-
 __all__ = ['main']
 
 import sys
@@ -26,6 +24,7 @@ wrotePreamble = 0
 wroteWorld = 0
 lastIncluded = ''
 
+
 def main(args=None):
     '''The main program'''
     #
@@ -46,6 +45,7 @@ def main(args=None):
     else:
         [options,suites] = cxxtest_parser.scanInputFiles( files, options )
     writeOutput()
+
 
 def parseCommandline(args):
     '''Analyze command line arguments'''
@@ -162,10 +162,12 @@ def printVersion():
     sys.stdout.write( "This is CxxTest version INSERT_VERSION_HERE.\n" )
     sys.exit(0)
 
+
 def setFiles(patterns ):
     '''Set input files specified on command line'''
     files = expandWildcards( patterns )
     return files
+
 
 def expandWildcards( patterns ):
     '''Expand all wildcards in an array (glob)'''
@@ -175,6 +177,7 @@ def expandWildcards( patterns ):
         for fileName in patternFiles:
             fileNames.append( fixBackslashes( fileName ) )
     return fileNames
+
 
 def fixBackslashes( fileName ):
     '''Convert backslashes to slashes in file name'''
@@ -187,6 +190,7 @@ def writeOutput():
         writeTemplateOutput()
     else:
         writeSimpleOutput()
+
 
 def writeSimpleOutput():
     '''Create output not based on template'''
@@ -204,6 +208,8 @@ def writeSimpleOutput():
 include_re = re.compile( r"\s*\#\s*include\s+<cxxtest/" )
 preamble_re = re.compile( r"^\s*<CxxTest\s+preamble>\s*$" )
 world_re = re.compile( r"^\s*<CxxTest\s+world>\s*$" )
+
+
 def writeTemplateOutput():
     '''Create output based on template file'''
     template = open(options.templateFileName)
@@ -224,6 +230,7 @@ def writeTemplateOutput():
     template.close()
     output.close()
 
+
 def startOutputFile():
     '''Create output file and write header'''
     if options.outputFileName is not None:
@@ -232,6 +239,7 @@ def startOutputFile():
         output = sys.stdout
     output.write( "/* Generated file, do not edit */\n\n" )
     return output
+
 
 def writePreamble( output ):
     '''Write the CxxTest header (#includes and #defines)'''
@@ -266,6 +274,7 @@ def writePreamble( output ):
         output.write( "#include <cxxtest/%s.h>\n" % options.gui )
     output.write( "\n" )
     wrotePreamble = 1
+
 
 def writeMain( output ):
     '''Write the main() function for the test runner'''
@@ -313,6 +322,7 @@ def writeWorld( output ):
         writeInitialize( output )
     wroteWorld = 1
 
+
 def writeSuites(output):
     '''Write all TestDescriptions and SuiteDescriptions'''
     for suite in suites:
@@ -327,13 +337,16 @@ def writeSuites(output):
         writeSuiteDescription( output, suite )
         writeTestDescriptions( output, suite )
 
+
 def isGenerated(suite):
     '''Checks whether a suite class should be created'''
     return suite['generated']
 
+
 def isDynamic(suite):
     '''Checks whether a suite is dynamic'''
     return 'create' in suite
+
 
 def writeInclude(output, file):
     '''Add #include "file" statement'''
@@ -341,6 +354,7 @@ def writeInclude(output, file):
     if file == lastIncluded: return
     output.writelines( [ '#include "', file, '"\n\n' ] )
     lastIncluded = file
+
 
 def generateSuite( output, suite ):
     '''Write a suite declared with CXXTEST_SUITE()'''
@@ -350,6 +364,7 @@ def generateSuite( output, suite ):
         output.write(line)
     output.write( '};\n\n' )
 
+
 def writeSuitePointer( output, suite ):
     '''Create static suite pointer object for dynamic suites'''
     if options.noStaticInit:
@@ -357,9 +372,11 @@ def writeSuitePointer( output, suite ):
     else:
         output.write( 'static %s *%s = nullptr;\n\n' % (suite['name'], suite['object']) )
 
+
 def writeSuiteObject( output, suite ):
     '''Create static suite object for non-dynamic suites'''
     output.writelines( [ "static ", suite['name'], " ", suite['object'], ";\n\n" ] )
+
 
 def writeTestList( output, suite ):
     '''Write the head of the test linked list for a suite'''
@@ -368,6 +385,7 @@ def writeTestList( output, suite ):
     else:
         output.write( 'static CxxTest::List %s = { nullptr, nullptr };\n' % suite['tlist'] )
 
+
 def writeWorldDescr( output ):
     '''Write the static name of the world name'''
     if options.noStaticInit:
@@ -375,10 +393,12 @@ def writeWorldDescr( output ):
     else:
         output.write( 'const char* CxxTest::RealWorldDescription::_worldName = "cxxtest";\n' )
 
+
 def writeTestDescriptions( output, suite ):
     '''Write all test descriptions for a suite'''
     for test in suite['tests']:
         writeTestDescription( output, suite, test )
+
 
 def writeTestDescription( output, suite, test ):
     '''Write test description object'''
@@ -390,18 +410,22 @@ def writeTestDescription( output, suite, test ):
     output.write( ' void runTest() override final { %s } // NOLINT\n' % runBody( suite, test ) )
     output.write( '} %s;\n\n' % test['object'] )
 
+
 def runBody( suite, test ):
     '''Body of TestDescription::run()'''
     if isDynamic(suite): return dynamicRun( suite, test )
     else: return staticRun( suite, test )
 
+
 def dynamicRun( suite, test ):
     '''Body of TestDescription::run() for test in a dynamic suite'''
     return 'if ( ' + suite['object'] + ' ) ' + suite['object'] + '->' + test['name'] + '();'
 
+
 def staticRun( suite, test ):
     '''Body of TestDescription::run() for test in a non-dynamic suite'''
     return suite['object'] + '.' + test['name'] + '();'
+
 
 def writeSuiteDescription( output, suite ):
     '''Write SuiteDescription object'''
@@ -409,6 +433,7 @@ def writeSuiteDescription( output, suite ):
         writeDynamicDescription( output, suite )
     else:
         writeStaticDescription( output, suite )
+
 
 def writeDynamicDescription( output, suite ):
     '''Write SuiteDescription for a dynamic suite'''
@@ -419,6 +444,7 @@ def writeDynamicDescription( output, suite ):
                        suite['object'], suite['create'], suite['destroy']) )
     output.write( ';\n\n' )
 
+
 def writeStaticDescription( output, suite ):
     '''Write SuiteDescription for a static suite'''
     output.write( 'CxxTest::StaticSuiteDescription %s' % suite['dobject'] )
@@ -427,9 +453,11 @@ def writeStaticDescription( output, suite ):
                       (suite['cfile'], suite['line'], suite['name'], suite['object'], suite['tlist']) )
     output.write( ';\n\n' )
 
+
 def writeRoot(output):
     '''Write static members of CxxTest classes'''
     output.write( '#include <cxxtest/Root.cpp>\n' )
+
 
 def writeInitialize(output):
     '''Write CxxTest::initialize(), which replaces static initialization'''

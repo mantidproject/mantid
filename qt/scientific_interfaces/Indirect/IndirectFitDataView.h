@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTFITDATAVIEW_H_
-#define MANTIDQTCUSTOMINTERFACES_INDIRECTFITDATAVIEW_H_
+#pragma once
 
 #include "ui_IndirectFitDataView.h"
 
@@ -51,11 +50,19 @@ public:
   void readSettings(const QSettings &settings) override;
   UserInputValidator &validate(UserInputValidator &validator) override;
 
+  void setXRange(std::pair<double, double> const &range) override;
+  QComboBox *cbParameterType;
+  QComboBox *cbParameter;
+  QLabel *lbParameter;
+  QLabel *lbParameterType;
+
 public slots:
   void displayWarning(const std::string &warning) override;
 
 protected slots:
   void emitViewSelected(int index);
+  void setStartX(double) override;
+  void setEndX(double) override;
 
 private:
   UserInputValidator &validateMultipleData(UserInputValidator &validator);
@@ -69,5 +76,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACES_INDIRECTFITDATAVIEW_H_ */

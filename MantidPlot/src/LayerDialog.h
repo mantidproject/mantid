@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2004 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : LayerDialog.h
@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef LAYERDIALOG_H
-#define LAYERDIALOG_H
+#pragma once
 
 #include "MultiLayer.h"
 
@@ -31,7 +30,7 @@ class LayerDialog : public QDialog {
   Q_OBJECT
 
 public:
-  LayerDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  LayerDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
   void setMultiLayer(MultiLayer *g);
 
 protected slots:
@@ -55,5 +54,3 @@ private:
   QCheckBox *fitBox;
   QComboBox *alignHorBox, *alignVertBox;
 };
-
-#endif

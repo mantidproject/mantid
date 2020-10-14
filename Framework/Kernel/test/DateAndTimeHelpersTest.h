@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_DATEANDTIMEHELPERSTEST_H_
-#define MANTID_KERNEL_DATEANDTIMEHELPERSTEST_H_
+#pragma once
 
 #include "MantidKernel/DateAndTimeHelpers.h"
 #include "MantidTypes/Core/DateAndTime.h"
@@ -45,17 +44,15 @@ public:
     std::vector<DateAndTime> times;
     TS_ASSERT_THROWS(averageSorted(times), const std::invalid_argument &);
 
-    times.push_back(
+    times.emplace_back(
         createFromSanitizedISO8601("1977-05-25T00:00Z")); // Star Wars IV
-    times.push_back(
+    times.emplace_back(
         createFromSanitizedISO8601("1977-09-11T00:00Z")); // ATARI 2600
-    times.push_back(
+    times.emplace_back(
         createFromSanitizedISO8601("1980-05-17T00:00Z")); // Star Wars V
-    times.push_back(
+    times.emplace_back(
         createFromSanitizedISO8601("1983-05-25T00:00Z")); // Star Wars VI
     TS_ASSERT_EQUALS(averageSorted(times),
                      createFromSanitizedISO8601("1979-09-19T00:00Z"));
   }
 };
-
-#endif /* MANTID_KERNEL_DATEANDTIMEHELPERSTEST_H_ */

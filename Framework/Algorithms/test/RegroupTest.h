@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REGROUPTEST_H_
-#define REGROUPTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -21,8 +20,8 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::LinearGenerator;
 
 class RegroupTest : public CxxTest::TestSuite {
@@ -84,4 +83,3 @@ private:
     return retVal;
   }
 };
-#endif /* REGROUPTEST */

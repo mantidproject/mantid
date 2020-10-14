@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtWidgets, PYQT4
 from Muon.GUI.Common.message_box import warning, question
 from Muon.GUI.Common.utilities.muon_file_utils import show_file_browser_and_return_selection
@@ -26,8 +24,13 @@ class GroupingTabView(QtWidgets.QWidget):
         self.vertical_layout = None
         self.horizontal_layout_base = None
         self.horizontal_layout_description = None
+        self.horizontal_layout_1 = None
         self.description_label = None
         self.description_edit = None
+        self.summed_period_edit = None
+        self.period_label = None
+        self.subtracted_period_edit = None
+        self.minus_label = None
 
         self._grouping_table = grouping_table
         self._pairing_table = pairing_table
@@ -137,7 +140,7 @@ class GroupingTabView(QtWidgets.QWidget):
                     '',
                     'XML files (*.xml)'))
         else:
-            chosen_file, _filter =\
+            chosen_file, _filter = \
                 QtWidgets.QFileDialog.getSaveFileName(
                     self,
                     "Select file",
@@ -162,6 +165,7 @@ class GroupingTabView(QtWidgets.QWidget):
 
     def display_warning_box(self, message):
         warning(message, self)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Signal / slot connections
     # ------------------------------------------------------------------------------------------------------------------

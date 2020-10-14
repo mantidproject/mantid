@@ -27,8 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef TEXTDLG_H
-#define TEXTDLG_H
+#pragma once
 
 #include <QDialog>
 class QGroupBox;
@@ -63,7 +62,8 @@ public:
    * @param parent :: parent widget
    * @param fl :: window flags
    */
-  TextDialog(TextType type, QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  TextDialog(TextType type, QWidget *parent = nullptr,
+             const Qt::WFlags &fl = nullptr);
 
   //! Return axis label alignment
   /**
@@ -119,5 +119,3 @@ protected:
   Graph *d_graph;
   QwtScaleWidget *d_scale;
 };
-
-#endif // TEXTDLG_H

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MDGEOMETRY_XML_PARSER_H
-#define MDGEOMETRY_XML_PARSER_H
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -79,13 +78,13 @@ public:
 
   bool hasTDimension() const;
 
-  bool isXDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isXDimension(const Mantid::Geometry::IMDDimension_sptr &) const;
 
-  bool isYDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isYDimension(const Mantid::Geometry::IMDDimension_sptr &) const;
 
-  bool isZDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isZDimension(const Mantid::Geometry::IMDDimension_sptr &) const;
 
-  bool isTDimension(Mantid::Geometry::IMDDimension_sptr) const;
+  bool isTDimension(const Mantid::Geometry::IMDDimension_sptr &) const;
 
   void SetRootNodeCheck(std::string elementName);
 
@@ -95,5 +94,3 @@ public:
 };
 } // namespace Geometry
 } // namespace Mantid
-
-#endif

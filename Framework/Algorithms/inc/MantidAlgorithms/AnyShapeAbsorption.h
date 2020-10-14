@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_ANYSHAPEABSORPTION_H_
-#define MANTID_ALGORITHMS_ANYSHAPEABSORPTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -67,7 +66,7 @@ namespace Algorithms {
     @author Russell Taylor, Tessella plc
     @date 11/03/2010
 */
-class DLLExport AnyShapeAbsorption : public AbsorptionCorrection {
+class MANTID_ALGORITHMS_DLL AnyShapeAbsorption : public AbsorptionCorrection {
 public:
   /// (Empty) Constructor
   AnyShapeAbsorption();
@@ -100,12 +99,10 @@ private:
   std::string sampleXML() override;
   void initialiseCachedDistances() override;
   /// Create the gague volume for the correction
-  boost::shared_ptr<const Geometry::IObject> constructGaugeVolume();
+  std::shared_ptr<const Geometry::IObject> constructGaugeVolume();
 
   double m_cubeSide; ///< The length of the side of an element cube in m
 };
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_ANYSHAPEABSORPTION_H_*/

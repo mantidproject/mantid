@@ -150,8 +150,7 @@ Usage
             # This will cancel both algorithms
             # you can do the same in the GUI
             # by clicking on the details button on the bottom right
-            AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
-            AlgorithmManager.newestInstanceOf("FakeISISEventDAE").cancel()
+            AlgorithmManager.cancelAll()
             time.sleep(1)
     #--------------------------------------------------------------------------------------------------
 
@@ -216,8 +215,7 @@ Output:
             # This will cancel both algorithms
             # you can do the same in the GUI
             # by clicking on the details button on the bottom right
-            AlgorithmManager.newestInstanceOf("MonitorLiveData").cancel()
-            AlgorithmManager.newestInstanceOf("FakeISISHistoDAE").cancel()
+            AlgorithmManager.cancelAll()
             time.sleep(1)
     #--------------------------------------------------------------------------------------------------
 

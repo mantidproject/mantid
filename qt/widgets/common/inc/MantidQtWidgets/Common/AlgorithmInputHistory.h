@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_ALGORITHMINPUTHISTORY_H_
-#define MANTIDQT_API_ALGORITHMINPUTHISTORY_H_
+#pragma once
 
 //----------------------------------
 // Includes
@@ -61,7 +60,7 @@ public:
 
 protected:
   /// Constructor
-  AbstractAlgorithmInputHistory(QString settingsGroup);
+  AbstractAlgorithmInputHistory(const QString &settingsGroup);
 
 private:
   /// Load any values that are available from persistent storage
@@ -103,5 +102,3 @@ EXTERN_MANTIDQT_COMMON template class EXPORT_OPT_MANTIDQT_COMMON
     Mantid::Kernel::SingletonHolder<MantidQt::API::AlgorithmInputHistoryImpl>;
 }
 } // namespace Mantid
-
-#endif // ALGORITHMINPUTHISTORY_H_

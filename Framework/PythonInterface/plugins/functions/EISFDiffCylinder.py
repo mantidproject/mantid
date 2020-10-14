@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 """
 @author Jose Borreguero, ORNL
 @date December 07, 2017
 """
-from __future__ import (absolute_import, division, print_function)
-
 import numpy as np
 from mantid.api import IFunction1D, FunctionFactory
 
@@ -65,6 +63,7 @@ class EISFDiffCylinder(IFunction1D):
         # integrate in theta
         eisf = self.d_theta * np.sum(self.sin_theta * a * b, axis=1)
         return self.getParameterValue('A') * eisf
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(EISFDiffCylinder)

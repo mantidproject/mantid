@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_XMLINSTRUMENTPARAMETER_H_
-#define MANTID_GEOMETRY_XMLINSTRUMENTPARAMETER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -43,7 +42,7 @@ public:
   /// Default constructor
   XMLInstrumentParameter(
       const std::string &logfileID, const std::string &value,
-      const boost::shared_ptr<Kernel::Interpolation> &interpolation,
+      const std::shared_ptr<Kernel::Interpolation> &interpolation,
       const std::string &formula, const std::string &formulaUnit,
       const std::string &resultUnit, const std::string &paramName,
       const std::string &type, const std::string &tie,
@@ -72,7 +71,7 @@ public:
       m_formulaUnit; ///< unit for formula (i.e. for Centre in formula)
   const std::string m_resultUnit; ///< expected result (output) unit from
   /// evaluating the formula
-  boost::shared_ptr<Kernel::Interpolation>
+  std::shared_ptr<Kernel::Interpolation>
       m_interpolation;                      ///< specific to fitting parameter
   const std::string m_extractSingleValueAs; ///< describes the way to extract a
   /// single value from the log file(
@@ -97,5 +96,3 @@ public:
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /*MANTID_GEOMETRY_XMLINSTRUMENTPARAMETER_H_*/

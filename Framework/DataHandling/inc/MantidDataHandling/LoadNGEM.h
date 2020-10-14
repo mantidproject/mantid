@@ -1,20 +1,20 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef MANTID_DATAHANDLING_LOADNGEM_H_
-#define MANTID_DATAHANDLING_LOADNGEM_H_
+#pragma once
 
 #include "MantidAPI/IFileLoader.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/FileDescriptor.h"
 
 namespace Mantid {
 namespace DataHandling {
 
 static constexpr uint64_t CONTIN_ID_VALUE = 0x4F;
+static constexpr uint64_t EVENT_ID_MASK = 0x40;
 
 /// Generic event to separate bits.
 struct GenericEvent {
@@ -22,7 +22,11 @@ struct GenericEvent {
   uint64_t reserved2 : 32; // Reserved for non-generics
   uint64_t contin : 8;     // 0x4F Continuation Code
   uint64_t reserved1 : 56; // Reserved for non-generics
-  uint64_t id : 8;         // 0x4E Event ID
+  uint64_t id : 8;         // Event ID
+  bool check() const {
+    // as id is 8 bit, we can do a simple AND to check
+    return (id & EVENT_ID_MASK) != 0 && contin == CONTIN_ID_VALUE;
+  }
 };
 
 /// Indicate time 0, the start of a new frame.
@@ -108,18 +112,12 @@ private:
   void exec() override;
   /// Load a file into the event lists.
   void loadSingleFile(const std::vector<std::string> &filePath,
-                      int &eventCountInFrame, int &maxToF, int &minToF,
+                      int &eventCountInFrame, double &maxToF, double &minToF,
                       int &rawFrames, int &goodFrames, const int &minEventsReq,
                       const int &maxEventsReq, MantidVec &frameEventCounts,
                       std::vector<DataObjects::EventList> &events,
                       std::vector<DataObjects::EventList> &eventsInFrame,
                       const size_t &totalFilePaths, int &fileCount);
-  /// Add some text information to the sample logs.
-  void addToSampleLog(const std::string &logName, const std::string &logText,
-                      DataObjects::EventWorkspace_sptr &ws);
-  /// Add some number information to the sample logs.
-  void addToSampleLog(const std::string &logName, const int &logNumber,
-                      DataObjects::EventWorkspace_sptr &ws);
   /// Check that a file to be loaded is in 128 bit words.
   size_t verifyFileSize(std::ifstream &file);
   /// Reports progress and checks cancel flag.
@@ -138,5 +136,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif // MANTID_DATAHANDLING_LOADNGEM_H_

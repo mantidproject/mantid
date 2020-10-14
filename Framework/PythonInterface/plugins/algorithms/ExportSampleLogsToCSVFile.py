@@ -1,17 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name,too-many-instance-attributes
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import *
 from mantid.kernel import *
 from distutils.version import LooseVersion
 import numpy as np
 import os
-from six.moves import range # pylint: disable=redefined-builtin
 
 
 class ExportSampleLogsToCSVFile(PythonAlgorithm):
@@ -96,8 +94,8 @@ class ExportSampleLogsToCSVFile(PythonAlgorithm):
 
         # Log time tolerance
         self.declareProperty("TimeTolerance", 0.01,
-                             "If any 2 log entries with log times within the time tolerance, " +
-                             "they will be recorded in one line. Unit is second. ")
+                             "If any 2 log entries with log times within the time tolerance, "
+                             + "they will be recorded in one line. Unit is second. ")
 
         return
 

@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_INDEX_SX_PEAKS_H_
-#define MANTID_CRYSTAL_INDEX_SX_PEAKS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidKernel/V3D.h"
 #include <boost/tuple/tuple.hpp>
@@ -26,7 +26,7 @@ namespace Crystal {
     @date 11/08/2009
  */
 
-struct DLLExport index {
+struct MANTID_CRYSTAL_DLL index {
   index(int h, int k, int l) : _h(h), _k(k), _l(l) {}
   friend bool operator<(const index &i1, const index &i2) {
     if (i1._h < i2._h)
@@ -59,7 +59,7 @@ struct DLLExport index {
   int _h, _k, _l;
 };
 
-class DLLExport PeakCandidate {
+class MANTID_CRYSTAL_DLL PeakCandidate {
 public:
   PeakCandidate(double qx, double qy, double qz) : _Q(qx, qy, qz) {}
   double getdSpacing() const { return 1 / _Q.norm(); }
@@ -99,10 +99,10 @@ public:
     std::set<index> s1;
     std::set<index> s2;
     for (it1 = _hkls.begin(); it1 != _hkls.end();
-         it1++) // All possible vectors for hkl on current instance
+         ++it1) // All possible vectors for hkl on current instance
     {
       for (it2 = rhs._hkls.begin(); it2 != rhs._hkls.end();
-           it2++) // All possible vectors for hkl on other
+           ++it2) // All possible vectors for hkl on other
       {
         const index &index1 = *it1;
         const index &index2 = *it2;
@@ -136,7 +136,7 @@ private:
   std::set<index> _hkls;
 };
 
-class DLLExport IndexSXPeaks : public API::Algorithm {
+class MANTID_CRYSTAL_DLL IndexSXPeaks : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "IndexSXPeaks"; }
@@ -170,5 +170,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_IndexSXPeaks_H_*/

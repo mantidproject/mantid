@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -16,7 +16,7 @@
 #include "MantidKernel/Strings.h"
 
 #include <boost/algorithm/string.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 #include "MantidKernel/StringTokenizer.h"
 #include <Poco/DOM/Element.h>
@@ -114,7 +114,7 @@ void FacilityInfo::fillExtensions(const Poco::XML::Element *elem) {
 void FacilityInfo::addExtension(const std::string &ext) {
   auto it = std::find(m_extensions.begin(), m_extensions.end(), ext);
   if (it == m_extensions.end())
-    m_extensions.push_back(ext);
+    m_extensions.emplace_back(ext);
 }
 
 /// Called from constructor to fill archive interface names
@@ -131,7 +131,7 @@ void FacilityInfo::fillArchiveNames(const Poco::XML::Element *elem) {
       auto *elem = dynamic_cast<Poco::XML::Element *>(pNL_interfaces->item(i));
       std::string plugin = elem->getAttribute("plugin");
       if (!plugin.empty()) {
-        m_archiveSearch.push_back(plugin);
+        m_archiveSearch.emplace_back(plugin);
       }
     }
   }
@@ -167,7 +167,7 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element *elem) {
     if (elem) {
       try {
         InstrumentInfo instr(this, elem);
-        m_instruments.push_back(instr);
+        m_instruments.emplace_back(instr);
       } catch (...) { /*skip this instrument*/
       }
     }
@@ -190,7 +190,7 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
     if (elem) {
       try {
         ComputeResourceInfo cr(this, elem);
-        m_computeResInfos.push_back(cr);
+        m_computeResInfos.emplace_back(cr);
 
         g_log.debug() << "Compute resource found: " << cr << '\n';
       } catch (...) { // next resource...
@@ -201,7 +201,7 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
       // RemoteJobManager goes away from here (then this would be
       // removed), see header for details.
       m_computeResources.emplace(name,
-                                 boost::make_shared<RemoteJobManager>(elem));
+                                 std::make_shared<RemoteJobManager>(elem));
     }
   }
 }
@@ -264,7 +264,7 @@ FacilityInfo::instruments(const std::string &tech) const {
   auto it = m_instruments.begin();
   for (; it != m_instruments.end(); ++it) {
     if (it->techniques().count(tech)) {
-      out.push_back(*it);
+      out.emplace_back(*it);
     }
   }
   return out;
@@ -278,7 +278,7 @@ std::vector<std::string> FacilityInfo::computeResources() const {
   std::vector<std::string> names;
   auto it = m_computeResources.begin();
   while (it != m_computeResources.end()) {
-    names.push_back((*it).first);
+    names.emplace_back((*it).first);
     ++it;
   }
 
@@ -327,12 +327,12 @@ FacilityInfo::computeResource(const std::string &name) const {
  * @return a shared pointer to the RemoteJobManager instance (or
  * Null if the name wasn't recognized)
  */
-boost::shared_ptr<RemoteJobManager>
+std::shared_ptr<RemoteJobManager>
 FacilityInfo::getRemoteJobManager(const std::string &name) const {
   auto it = m_computeResources.find(name);
   if (it == m_computeResources.end()) {
-    return boost::shared_ptr<RemoteJobManager>(); // TODO: should we throw an
-                                                  // exception instead??
+    return std::shared_ptr<RemoteJobManager>(); // TODO: should we throw an
+                                                // exception instead??
   }
   return (*it).second;
 }

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_Vector3DParameter_H_
-#define MANTID_MDALGORITHMS_Vector3DParameter_H_
+#pragma once
 
 #include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MantidKernel/System.h"
@@ -148,5 +147,3 @@ ElemType &Vector3DParameter<Derived, ElemType>::operator[](int index) {
   };
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif

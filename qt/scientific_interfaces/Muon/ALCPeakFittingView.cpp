@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCPeakFittingView.h"
 
@@ -102,7 +102,7 @@ void ALCPeakFittingView::setFunction(const IFunction_const_sptr &newFunction) {
       double error = newFunction->getError(i);
 
       m_ui.peaks->setParameter(name, value);
-      m_ui.peaks->setParamError(name, error);
+      m_ui.peaks->setParameterError(name, error);
     }
   } else {
     m_ui.peaks->clear();

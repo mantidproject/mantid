@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ABRAGAMTEST_H_
-#define ABRAGAMTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -21,7 +20,7 @@ public:
 
     // check its categories
     TS_ASSERT(ab.categories().size() == 1);
-    TS_ASSERT(ab.category() == "Muon");
+    TS_ASSERT(ab.category() == "Muon\\MuonSpecific");
   }
 
   void test_values() {
@@ -51,5 +50,3 @@ public:
     TS_ASSERT_DELTA(y[9], 0.0360, 1e-4);
   }
 };
-
-#endif /*ABRAGAMTEST_H_*/

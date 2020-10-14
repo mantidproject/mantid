@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTMANTIDWIDGETS_DATAPROCESSORONELEVELTREEMANAGER_H
-#define MANTIDQTMANTIDWIDGETS_DATAPROCESSORONELEVELTREEMANAGER_H
+#pragma once
 
 #include "MantidQtWidgets/Common/DataProcessorUI/TreeManager.h"
 #include "MantidQtWidgets/Common/DllOption.h"
@@ -28,7 +27,7 @@ class EXPORT_OPT_MANTIDQT_COMMON OneLevelTreeManager : public TreeManager {
 public:
   /// Constructor
   OneLevelTreeManager(DataProcessorPresenter *presenter,
-                      Mantid::API::ITableWorkspace_sptr table,
+                      const Mantid::API::ITableWorkspace_sptr &table,
                       const WhiteList &whitelist);
   /// Constructor (no table ws given)
   OneLevelTreeManager(DataProcessorPresenter *presenter,
@@ -101,7 +100,7 @@ public:
                     size_t whitelistColumns) const override;
 
   /// Return the model
-  boost::shared_ptr<AbstractTreeModel> getModel() override;
+  std::shared_ptr<AbstractTreeModel> getModel() override;
   /// Return the table workspace
   Mantid::API::ITableWorkspace_sptr getTableWorkspace() override;
 
@@ -116,7 +115,7 @@ private:
   /// The DataProcessor presenter
   DataProcessorPresenter *m_presenter;
   /// The model
-  boost::shared_ptr<QOneLevelTreeModel> m_model;
+  std::shared_ptr<QOneLevelTreeModel> m_model;
 
   /// Insert an empty row in the model
   void insertRow(int rowIndex);
@@ -124,11 +123,10 @@ private:
   Mantid::API::ITableWorkspace_sptr
   createDefaultWorkspace(const WhiteList &whitelist);
   /// Validate a table workspace
-  void validateModel(Mantid::API::ITableWorkspace_sptr ws,
+  void validateModel(const Mantid::API::ITableWorkspace_sptr &ws,
                      size_t whitelistColumns) const;
-  TreeData constructTreeData(std::set<int> rows);
+  TreeData constructTreeData(const std::set<int> &rows);
 };
 } // namespace DataProcessor
 } // namespace MantidWidgets
 } // namespace MantidQt
-#endif /*MANTIDQTMANTIDWIDGETS_DATAPROCESSORONELEVELTREEMANAGER_H*/

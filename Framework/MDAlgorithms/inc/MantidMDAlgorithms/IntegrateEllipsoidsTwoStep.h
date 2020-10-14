@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_TWO_STEP_H_
-#define MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_TWO_STEP_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -55,8 +54,8 @@ private:
                         const Kernel::DblMatrix &UBinv, bool hkl_integ);
   /// Calculate if this Q is on a detector
   void calculateE1(const Geometry::DetectorInfo &detectorInfo);
-  void runMaskDetectors(Mantid::DataObjects::PeaksWorkspace_sptr peakWS,
-                        std::string property, std::string values);
+  void runMaskDetectors(const Mantid::DataObjects::PeaksWorkspace_sptr &peakWS,
+                        const std::string &property, const std::string &values);
 
   /// integrate a collection of strong peaks
   DataObjects::PeaksWorkspace_sptr
@@ -68,5 +67,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_INTEGRATE_ELLIPSOIDS_TWO_STEP_H_ */

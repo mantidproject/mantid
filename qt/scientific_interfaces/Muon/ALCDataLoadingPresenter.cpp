@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ALCDataLoadingPresenter.h"
 
@@ -15,9 +15,9 @@
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
 #include "MuonAnalysisHelper.h"
 
+#include "Poco/File.h"
 #include <Poco/ActiveResult.h>
 #include <Poco/Path.h>
-
 #include <QApplication>
 #include <QDir>
 #include <QFileInfo>
@@ -31,17 +31,15 @@ using namespace MantidQt::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view), m_directoryChanged(false), m_timerID(), m_numDetectors(0) {}
+    : m_view(view), m_numDetectors(0), m_loadingData(false), m_oldInput("") {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
 
   connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
-  connect(m_view, SIGNAL(firstRunSelected()), SLOT(updateAvailableInfo()));
-  connect(&m_watcher, SIGNAL(directoryChanged(const QString &)),
-          SLOT(updateDirectoryChangedFlag(const QString &)));
-  connect(m_view, SIGNAL(lastRunAutoCheckedChanged(int)),
-          SLOT(changeWatchState(int)));
+  connect(m_view, SIGNAL(runsSelected()), SLOT(updateAvailableInfo()));
+  connect(m_view, SIGNAL(runAutoChecked()), SLOT(updateAutoRun()));
+  connect(m_view, SIGNAL(runAutoUnchecked()), SLOT(resetAutoRun()));
 }
 
 /**
@@ -50,92 +48,184 @@ void ALCDataLoadingPresenter::initialize() {
  * If it was "auto", sets up a watcher to automatically reload on new files.
  */
 void ALCDataLoadingPresenter::handleLoadRequested() {
-  std::string lastFile(m_view->lastRun());
-  // remove any directories the watcher is currently watching
-  changeWatchState(false);
-  // Check if input was "Auto"
-  if (0 == lastFile.compare(m_view->autoString())) {
-    // Add path to watcher
-    changeWatchState(true);
-    // and get the most recent file in the directory to be lastFile
-    ALCLatestFileFinder finder(m_view->firstRun());
-    lastFile = finder.getMostRecentFile();
-    m_view->setCurrentAutoFile(lastFile);
+  std::vector<std::string> files(m_view->getRuns());
+
+  // Check not empty
+  if (files.empty()) {
+    m_view->displayError(
+        "Error message:\n" + m_view->getRunsErrorMessage() +
+        "\n\nCan specify a list of runs by a dash \ne.g. 1-10\nCan specify "
+        "specific runs with a comma separated list \ne.g. 1-10, 15, 20-30\n "
+        "Range must go in increasing order, \ne.g. 1-10, 15, 20-30");
+    return;
   }
+
   // Now perform the load
-  load(lastFile);
+  load(files);
 }
 
 /**
- * The watched directory has been changed - update flag.
- * @param path :: [input] Path to directory modified (not used)
+ * Remove the run number from a full file path
+ * @param file :: [input] full path which contains a run number
+ * @return An integer representation of the run number
  */
-void ALCDataLoadingPresenter::updateDirectoryChangedFlag(const QString &path) {
-  Q_UNUSED(path); // just set the flag, don't need the path
-  m_directoryChanged = true;
+int ALCDataLoadingPresenter::extractRunNumber(const std::string &file) {
+  if (file.empty())
+    return -1;
+
+  auto returnVal = file;
+  // Strip beginning of path to just the run (e.g. MUSR00015189.nxs)
+  std::size_t found = returnVal.find_last_of("/\\");
+  returnVal = returnVal.substr(found + 1);
+
+  // Remove all non-digits
+  returnVal.erase(std::remove_if(returnVal.begin(), returnVal.end(),
+                                 [](auto c) { return !std::isdigit(c); }),
+                  returnVal.end());
+
+  // Return run number as int (removes leading 0's)
+  return std::stoi(returnVal);
 }
 
 /**
- * This timer runs every second when we are watching a directory.
- * If any changes have occurred in the meantime, reload.
- * @param timeup :: [input] Qt timer event (not used)
+ * Changes which files are loaded based on autoRun. Will only make changes if
+ * the current last run number is less than autoRun Removes any files which
+ * don't exist between the first run and autoRun
+ * @param autoRun :: [input] The latest run number found in the same directory
+ * as the first run supplied
  */
-void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
-  Q_UNUSED(timeup); // We only have one timer, so not necessary to use this
+void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
 
-  // Check flag for changes
-  if (m_directoryChanged.load()) {
-    // Most recent file in directory
-    ALCLatestFileFinder finder(m_view->firstRun());
-    std::string lastFile = finder.getMostRecentFile();
-    // Load file and update view
-    load(lastFile);
-    m_view->setCurrentAutoFile(lastFile);
-    // Reset flag
-    m_directoryChanged = false;
+  const int currentLastRun = extractRunNumber(m_view->lastRun());
+  auto currentInput = m_view->getCurrentRunsText();
+
+  // Save old input
+  m_oldInput = currentInput;
+
+  // Only make changes if found run > user last run
+  if (autoRun <= currentLastRun)
+    return;
+
+  // Check if range at end
+  std::size_t findRange = currentInput.find_last_of("-");
+  std::size_t findComma = currentInput.find_last_of(",");
+  QString newInput;
+
+  // Remove ending range if at end of input
+  if (findRange != std::string::npos &&
+      (findComma == std::string::npos || findRange > findComma)) {
+    currentInput.erase(findRange, currentInput.length() - 1);
   }
-}
 
-/**
- * Start/stop watching directory for changes
- * @param watching :: [input] True to start watching, false to stop
- */
-void ALCDataLoadingPresenter::changeWatchState(bool watching) {
-  m_directoryChanged = false;
-  if (watching) {
-    Poco::Path path(m_view->firstRun());
-    m_watcher.addPath(QString(path.parent().toString().c_str()));
-    m_timerID = startTimer(1000); // 1-second timer
-  } else {
-    if (!m_watcher.directories().empty()) {
-      m_watcher.removePaths(m_watcher.directories());
+  // Initialise new input
+  newInput = QString::fromStdString(currentInput);
+
+  // Will hold the base path for all runs, used to check which run numbers
+  // exist
+  auto basePath = m_view->firstRun();
+  if (basePath.empty()) {
+    m_view->displayError("First run invalid");
+    return;
+  }
+
+  // Strip the extension
+  size_t findExt = basePath.find_last_of(".");
+  const auto ext = basePath.substr(findExt);
+  basePath.erase(findExt);
+
+  // Remove the run number part so we are left with just the base path
+  const std::string numPart = std::to_string(currentLastRun);
+  basePath.erase(basePath.length() - numPart.length());
+
+  bool fnf = false; // file not found
+
+  // Check all files valid between current last and auto, remove bad ones
+  for (int i = currentLastRun + 1; i < autoRun; ++i) {
+
+    // Try creating a file from base, i and extension
+    Poco::File testFile(basePath + std::to_string(i) + ext);
+
+    // If doesn't exist add range to previous run
+    if (testFile.exists()) {
+
+      if (fnf) { // Means next file found since a file not found
+        // Add comma
+        newInput.append(",");
+        newInput.append(QString::number(i));
+        fnf = false;
+      }
+    } else {
+      // Edge case do not add range
+      if (i - 1 == currentLastRun && i + 1 == autoRun) {
+        fnf = true;
+      } else {
+        newInput.append("-");
+        newInput.append(QString::number(i - 1));
+        fnf = true;
+      }
     }
-    killTimer(m_timerID);
   }
+
+  // If true then need a comma instead as file before last is missing
+  if (fnf)
+    newInput.append(",");
+  else
+    newInput.append("-");
+  newInput.append(QString::number(autoRun));
+
+  // Update it
+  // m_ui.runs->setFileTextWithSearch(newInput);
+  m_view->setRunsTextWithSearch(newInput);
 }
 
 /**
- * Start/stop watching directory for changes
- * (called when Auto checkbox checked/unchecked)
- * @param state :: [input] Member of Qt::CheckState enum
+ * Called when the auto checkbox is checked
+ * Tries to find the most recent file in the same directory as first
+ * and save the run number
  */
-void ALCDataLoadingPresenter::changeWatchState(int state) {
-  if (state == Qt::Checked) {
-    changeWatchState(true);
-  } else {
-    changeWatchState(false);
+void ALCDataLoadingPresenter::updateAutoRun() {
+
+  // Set read only
+  m_view->setRunsReadOnly(true);
+
+  // Find most recent file from first
+  ALCLatestFileFinder finder(m_view->firstRun());
+  const auto last = finder.getMostRecentFile();
+
+  // If empty auto cannot be used
+  if (last.empty()) {
+    m_view->displayError("Could not determine a valid last file.");
+    m_view->setCurrentAutoRun(-1);
+    return;
   }
+
+  // Update the auto run in the view
+  const int lastRun = extractRunNumber(last);
+  m_view->setCurrentAutoRun(lastRun);
+
+  // Update text
+  updateRunsTextFromAuto(lastRun);
+}
+
+/**
+ * Called when Auto checkbox is unchecked
+ * Sets runs file finder to input as it was before auto was checked
+ */
+void ALCDataLoadingPresenter::resetAutoRun() {
+  // Remove read only
+  m_view->setRunsReadOnly(false);
+
+  m_view->setRunsTextWithSearch(QString::fromStdString(m_oldInput));
 }
 
 /**
  * Load new data and update the view accordingly
- * @param lastFile :: [input] Last file in range (user-specified or auto)
+ * @param files :: [input] range of files (user-specified or auto generated)
  */
-void ALCDataLoadingPresenter::load(const std::string &lastFile) {
+void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
+
+  m_loadingData = true;
   m_view->disableAll();
-  // Use Path.toString() to ensure both are in same (native) format
-  Poco::Path firstRunPath(m_view->firstRun());
-  Poco::Path lastRunPath(lastFile);
 
   // Before loading, check custom grouping (if used) is sensible
   const bool groupingOK = checkCustomGrouping();
@@ -146,12 +236,21 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
     return;
   }
 
+  if (files.empty()) {
+    m_view->displayError("The list of files to load is empty. ");
+    m_view->enableAll();
+    m_loadingData = false;
+    return;
+  }
+
   try {
+
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
     alg->setChild(true); // Don't want workspaces in the ADS
-    alg->setProperty("FirstRun", firstRunPath.toString());
-    alg->setProperty("LastRun", lastRunPath.toString());
+
+    // Change first last run to WorkspaceNames
+    alg->setProperty("WorkspaceNames", files);
     alg->setProperty("LogValue", m_view->log());
     alg->setProperty("Function", m_view->function());
     alg->setProperty("Type", m_view->calculationType());
@@ -187,6 +286,8 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
 
     alg->setPropertyValue("OutputWorkspace", "__NotUsed");
 
+    // Set loading alg equal to alg
+    this->m_LoadingAlg = alg;
     // Execute async so we can show progress bar
     Poco::ActiveResult<bool> result(alg->executeAsync());
     while (!result.available()) {
@@ -197,14 +298,13 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
     }
 
     MatrixWorkspace_sptr tmp = alg->getProperty("OutputWorkspace");
-
     IAlgorithm_sptr sortAlg = AlgorithmManager::Instance().create("SortXAxis");
     sortAlg->setChild(true); // Don't want workspaces in the ADS
     sortAlg->setProperty("InputWorkspace", tmp);
     sortAlg->setProperty("Ordering", "Ascending");
     sortAlg->setProperty("OutputWorkspace", "__NotUsed__");
-
     sortAlg->execute();
+
     m_loadedData = sortAlg->getProperty("OutputWorkspace");
 
     // If errors are properly caught, shouldn't happen
@@ -223,11 +323,13 @@ void ALCDataLoadingPresenter::load(const std::string &lastFile) {
 
     emit dataChanged();
 
+  } catch (const std::invalid_argument &e) {
+    m_view->displayError(e.what());
   } catch (std::exception &e) {
     m_view->displayError(e.what());
   }
-
   m_view->enableAll();
+  m_loadingData = false;
 }
 
 void ALCDataLoadingPresenter::updateAvailableInfo() {
@@ -265,7 +367,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 
   const auto &properties = ws->run().getProperties();
   for (auto property : properties) {
-    logs.push_back(property->name());
+    logs.emplace_back(property->name());
   }
   m_view->setAvailableLogs(logs);
 
@@ -275,7 +377,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   for (size_t i = 0; i < numPeriods; i++) {
     std::stringstream buffer;
     buffer << i + 1;
-    periods.push_back(buffer.str());
+    periods.emplace_back(buffer.str());
   }
   m_view->setAvailablePeriods(periods);
 
@@ -293,11 +395,11 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 
 MatrixWorkspace_sptr ALCDataLoadingPresenter::exportWorkspace() {
   if (m_loadedData)
-    return boost::const_pointer_cast<MatrixWorkspace>(m_loadedData);
+    return std::const_pointer_cast<MatrixWorkspace>(m_loadedData);
   return MatrixWorkspace_sptr();
 }
 
-void ALCDataLoadingPresenter::setData(MatrixWorkspace_sptr data) {
+void ALCDataLoadingPresenter::setData(const MatrixWorkspace_sptr &data) {
 
   if (data) {
     // Set the data
@@ -351,6 +453,15 @@ ALCDataLoadingPresenter::isCustomGroupingValid(const std::string &group,
   }
   return group;
 }
+/**
+ * If currently loading data
+ * @returns :: True if currently in load() method
+ */
+bool ALCDataLoadingPresenter::isLoading() const { return m_loadingData; }
+/**
+ * Cancels current loading algorithm
+ */
+void ALCDataLoadingPresenter::cancelLoading() const { m_LoadingAlg->cancel(); }
 
 } // namespace CustomInterfaces
 } // namespace MantidQt

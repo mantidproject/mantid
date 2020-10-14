@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_SYSTEM_H_
-#define MANTID_KERNEL_SYSTEM_H_
+#pragma once
 
 /*******************************************************************************
  *                      READ THIS!! (AND THEN READ IT AGAIN)
@@ -61,7 +60,9 @@
  * but are required for documentation purposes.
  * This is a macro to silence compiler warnings about the subject
  */
+#ifndef UNUSED_ARG
 #define UNUSED_ARG(x) (void)x;
+#endif
 
 /**
  * A Macro to mark a function as deprecated.
@@ -80,5 +81,3 @@
  */
 #include <cstddef>
 #include <cstdint>
-
-#endif /*MANTID_KERNEL_SYSTEM_H_*/

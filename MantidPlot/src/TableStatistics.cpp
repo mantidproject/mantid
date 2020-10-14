@@ -47,7 +47,7 @@ DECLARE_WINDOW(TableStatistics)
 using namespace Mantid;
 
 TableStatistics::TableStatistics(ScriptingEnv *env, QWidget *parent,
-                                 Table *base, Type t, QList<int> targets)
+                                 Table *base, Type t, const QList<int> &targets)
     : Table(env, 1, 1, "", parent, ""), d_base(base), d_type(t),
       d_targets(targets) {
 

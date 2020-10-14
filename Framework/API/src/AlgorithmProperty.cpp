@@ -1,16 +1,20 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
 //-----------------------------------------------------------------------------
 #include "MantidAPI/AlgorithmProperty.h"
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/PropertyWithValue.h"
 
 #include <json/value.h>
+
+#include <memory>
+#include <utility>
 
 namespace Mantid {
 namespace API {
@@ -29,8 +33,8 @@ namespace API {
 AlgorithmProperty::AlgorithmProperty(const std::string &propName,
                                      Kernel::IValidator_sptr validator,
                                      unsigned int direction)
-    : Kernel::PropertyWithValue<HeldType>(propName, HeldType(), validator,
-                                          direction),
+    : Kernel::PropertyWithValue<HeldType>(propName, HeldType(),
+                                          std::move(validator), direction),
       m_algmStr() {}
 
 /**

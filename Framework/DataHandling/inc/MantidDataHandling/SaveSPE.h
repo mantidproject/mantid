@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVESPE_H_
-#define MANTID_DATAHANDLING_SAVESPE_H_
+#pragma once
 
 //---------------------------------------------------
 // Includes
@@ -83,9 +82,9 @@ private:
 
   void writeSPEFile(FILE *outSPEFile,
                     const API::MatrixWorkspace_const_sptr &inputWS);
-  void writeHists(const API::MatrixWorkspace_const_sptr WS,
+  void writeHists(const API::MatrixWorkspace_const_sptr &WS,
                   FILE *const outFile);
-  void writeHist(const API::MatrixWorkspace_const_sptr WS, FILE *const outFile,
+  void writeHist(const API::MatrixWorkspace_const_sptr &WS, FILE *const outFile,
                  const int wsIn) const;
   void writeMaskFlags(FILE *const outFile) const;
   void writeBins(const std::vector<double> &Vs, FILE *const outFile) const;
@@ -121,5 +120,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif // MANTID_DATAHANDLING_SAVESPE_H_

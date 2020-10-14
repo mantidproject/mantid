@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_API_NONORTHOGONALTEST_H_
-#define MANTIDQT_API_NONORTHOGONALTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -225,13 +224,13 @@ private:
       alg->setProperty("beta", 90.0);
       alg->setProperty("gamma", 120.0);
       std::vector<double> uVec;
-      uVec.push_back(1 * scale);
-      uVec.push_back(1);
-      uVec.push_back(0);
+      uVec.emplace_back(1 * scale);
+      uVec.emplace_back(1);
+      uVec.emplace_back(0);
       std::vector<double> vVec;
-      vVec.push_back(0);
-      vVec.push_back(0);
-      vVec.push_back(1);
+      vVec.emplace_back(0);
+      vVec.emplace_back(0);
+      vVec.emplace_back(1);
       alg->setProperty("u", uVec);
       alg->setProperty("v", vVec);
       alg->execute();
@@ -292,5 +291,3 @@ private:
 
   enum DimensionIndex { DimX = 0, DimY = 1, SliceDim = 2 };
 };
-
-#endif /* MANTIDQT_API_NONORTHOGONALTEST_H_ */

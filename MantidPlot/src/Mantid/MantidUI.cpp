@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidUI.h"
 #include "AlgorithmDockWidget.h"
@@ -57,6 +57,7 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspaceTreeWidget.h"
 
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace.h"
@@ -181,7 +182,7 @@ bool workspaceIsFitResult(const QString &wsName) {
       const auto specAxis = ws->getAxis(1); // y
       for (size_t iSpec = 0; iSpec < FIT_RESULTS_SPECTRA_NAMES.size();
            ++iSpec) {
-        spectraNames.push_back(specAxis->label(iSpec));
+        spectraNames.emplace_back(specAxis->label(iSpec));
       }
       isFit = spectraNames == FIT_RESULTS_SPECTRA_NAMES;
     }
@@ -206,10 +207,10 @@ getWorkspacesFromAds(const QList<QString> &workspaceNames) {
   std::vector<Mantid::API::MatrixWorkspace_const_sptr> workspaces;
   for (auto &workspaceName : workspaceNames) {
     Mantid::API::MatrixWorkspace_const_sptr workspace =
-        boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 workspaceName.toStdString()));
-    workspaces.push_back(workspace);
+    workspaces.emplace_back(workspace);
   }
   return workspaces;
 }
@@ -325,6 +326,8 @@ MantidUI::MantidUI(ApplicationWindow *aw)
   connect(m_appWindow, SIGNAL(configModified(void)), this,
           SLOT(configModified(void)));
   init();
+  g_log.warning("Please upgrade to Workbench which is replacing MantidPlot.\n"
+                "Future releases beyond v5.1 will not include MantidPlot.\n");
 }
 
 // Should it be moved to the constructor?
@@ -508,7 +511,7 @@ void MantidUI::deleteWorkspaces(const QStringList &wsNames) {
       std::vector<std::string> vecWsNames;
       vecWsNames.reserve(wsNames.size());
       foreach (auto wsName, wsNames) {
-        vecWsNames.push_back(wsName.toStdString());
+        vecWsNames.emplace_back(wsName.toStdString());
       }
       alg->setProperty("WorkspaceList", vecWsNames);
       executeAlgorithmAsync(alg);
@@ -696,7 +699,7 @@ void MantidUI::importBoxDataTable() {
   QString wsName = getSelectedWorkspaceName();
   try {
     // Get the MD event table
-    IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+    IMDEventWorkspace_sptr ws = std::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     if (!ws)
       return;
@@ -816,15 +819,14 @@ void MantidUI::showListData() {
 void MantidUI::showVatesSimpleInterface() {
   QString wsName = getSelectedWorkspaceName();
   try {
-    IMDEventWorkspace_sptr mdews =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(
-            AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+    IMDEventWorkspace_sptr mdews = std::dynamic_pointer_cast<IMDEventWorkspace>(
+        AnalysisDataService::Instance().retrieve(wsName.toStdString()));
 
-    IPeaksWorkspace_sptr pws = boost::dynamic_pointer_cast<IPeaksWorkspace>(
+    IPeaksWorkspace_sptr pws = std::dynamic_pointer_cast<IPeaksWorkspace>(
         AnalysisDataService::Instance().retrieve(wsName.toStdString()));
 
     IMDHistoWorkspace_sptr mdhist =
-        boost::dynamic_pointer_cast<IMDHistoWorkspace>(
+        std::dynamic_pointer_cast<IMDHistoWorkspace>(
             AnalysisDataService::Instance().retrieve(wsName.toStdString()));
 
     if (!mdews && !pws && !mdhist) {
@@ -925,7 +927,7 @@ void MantidUI::showVatesSimpleInterface() {
 void MantidUI::showSpectrumViewer() {
   QString wsName = getSelectedWorkspaceName();
   try {
-    MatrixWorkspace_sptr wksp = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr wksp = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(wsName.toStdString()));
     if (wksp) {
       MantidQt::SpectrumView::SpectrumView *viewer;
@@ -978,9 +980,9 @@ void MantidUI::showSpectrumViewer() {
 void MantidUI::showSliceViewer() {
   // Retrieve the MDWorkspace
   QString wsName = getSelectedWorkspaceName();
-  IMDWorkspace_sptr mdws = boost::dynamic_pointer_cast<IMDWorkspace>(
+  IMDWorkspace_sptr mdws = std::dynamic_pointer_cast<IMDWorkspace>(
       AnalysisDataService::Instance().retrieve(wsName.toStdString()));
-  MatrixWorkspace_sptr mw = boost::dynamic_pointer_cast<MatrixWorkspace>(mdws);
+  MatrixWorkspace_sptr mw = std::dynamic_pointer_cast<MatrixWorkspace>(mdws);
   if (mdws) {
     // Create the slice viewer window
     SliceViewerWindow *w;
@@ -1252,11 +1254,11 @@ Table *MantidUI::createDetectorTable(const QString &wsName,
   if (AnalysisDataService::Instance().doesExist(wsName.toStdString())) {
     auto ws = AnalysisDataService::Instance().retrieve(wsName.toStdString());
     // Standard MatrixWorkspace
-    auto matrix = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    auto matrix = std::dynamic_pointer_cast<MatrixWorkspace>(ws);
     if (matrix) {
       return createDetectorTable(wsName, matrix, indices, include_data);
     }
-    auto peaks = boost::dynamic_pointer_cast<IPeaksWorkspace>(ws);
+    auto peaks = std::dynamic_pointer_cast<IPeaksWorkspace>(ws);
     if (peaks) {
       return createDetectorTable(wsName, peaks);
     }
@@ -1291,8 +1293,8 @@ Table *MantidUI::createDetectorTable(
   const auto &spectrumInfo = ws->spectrumInfo();
   if (spectrumInfo.hasDetectors(0)) {
     try {
-      boost::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0),
-                                                  Mantid::NoDeleting());
+      std::shared_ptr<const IDetector> detector(&spectrumInfo.detector(0),
+                                                Mantid::NoDeleting());
       ws->getEFixed(detector);
     } catch (std::runtime_error &) {
       calcQ = false;
@@ -1674,10 +1676,17 @@ void MantidUI::showAlgorithmDialog(const QString &algName,
   if (!alg)
     return;
 
-  for (QHash<QString, QString>::Iterator it = paramList.begin();
-       it != paramList.end(); ++it) {
-    alg->setPropertyValue(it.key().toStdString(), it.value().toStdString());
+  try {
+    for (QHash<QString, QString>::Iterator it = paramList.begin();
+         it != paramList.end(); ++it) {
+      alg->setPropertyValue(it.key().toStdString(), it.value().toStdString());
+    }
+  } catch (std::exception &ex) {
+    g_log.error() << "Error setting the properties for algotithm "
+                  << algName.toStdString() << ": " << ex.what() << '\n';
+    return;
   }
+
   MantidQt::API::AlgorithmDialog *dlg = createAlgorithmDialog(alg);
 
   if (algName == "Load") {
@@ -1709,7 +1718,7 @@ void MantidUI::executeAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
  * This creates an algorithm dialog (the default property entry thingie).
  */
 MantidQt::API::AlgorithmDialog *
-MantidUI::createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg) {
+MantidUI::createAlgorithmDialog(const Mantid::API::IAlgorithm_sptr &alg) {
   QHash<QString, QString> presets;
   QStringList enabled;
 
@@ -1752,7 +1761,7 @@ MantidUI::createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg) {
  * @param algorithm :: A pointer to the algorithm instance
  */
 QString MantidUI::findInputWorkspaceProperty(
-    Mantid::API::IAlgorithm_sptr algorithm) const {
+    const Mantid::API::IAlgorithm_sptr &algorithm) const {
   // Iterate through the properties and find the first input one
   std::vector<Mantid::Kernel::Property *> props = algorithm->getProperties();
   std::vector<Mantid::Kernel::Property *>::const_iterator pend = props.end();
@@ -1780,7 +1789,7 @@ void MantidUI::copyWorkspacestoVector(
   QList<QTreeWidgetItem *>::const_iterator itr;
   for (itr = selectedItems.begin(); itr != selectedItems.end(); ++itr) {
     std::string inputWSName = (*itr)->text(0).toStdString();
-    inputWSVec.push_back(inputWSName);
+    inputWSVec.emplace_back(inputWSName);
   } // end of for loop for input workspaces
 }
 
@@ -2110,7 +2119,7 @@ InstrumentWindow *MantidUI::getInstrumentView(const QString &wsName, int tab) {
           wsName.toStdString()))
     return nullptr;
   MatrixWorkspace_const_sptr ws =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
+      std::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
   if (!ws)
     return nullptr;
   ScopedOverrideCursor waitCursor;
@@ -2356,13 +2365,11 @@ MantidMatrix *MantidUI::getMantidMatrix(const QString &wsName) {
   return m;
 }
 
-bool MantidUI::createScriptInputDialog(const QString &alg_name,
+bool MantidUI::createScriptInputDialog(const IAlgorithm_sptr &alg,
                                        const QString &preset_values,
                                        const QString &optional_msg,
                                        const QStringList &enabled,
                                        const QStringList &disabled) {
-  IAlgorithm_sptr alg =
-      AlgorithmManager::Instance().newestInstanceOf(alg_name.toStdString());
   if (!alg) {
     return false;
   }
@@ -2527,7 +2534,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logName,
 
   // Make sure the workspace exists and contains the log
   MatrixWorkspace_const_sptr ws =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
+      std::dynamic_pointer_cast<const MatrixWorkspace>(getWorkspace(wsName));
   if (!ws)
     return;
 
@@ -2837,7 +2844,7 @@ Table *MantidUI::createTableFromSpectraList(const QString &tableName,
                                             QList<int> indexList, bool errs,
                                             bool binCentres) {
   MatrixWorkspace_const_sptr workspace =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(
+      std::dynamic_pointer_cast<const MatrixWorkspace>(
           getWorkspace(workspaceName));
   if (!workspace) {
     throw std::invalid_argument(workspaceName.toStdString() +
@@ -2969,7 +2976,7 @@ MultiLayer *MantidUI::createGraphFromTable(Table *t, int type) {
 */
 void MantidUI::setUpBinGraph(
     MultiLayer *ml, const QString &Name,
-    Mantid::API::MatrixWorkspace_const_sptr workspace) {
+    const Mantid::API::MatrixWorkspace_const_sptr &workspace) {
   Graph *g = ml->activeGraph();
   g->setTitle(tr("Workspace ") + Name);
   QString xtitle;
@@ -3250,7 +3257,7 @@ void MantidUI::putLogsIntoCurveSpecs(std::vector<CurveSpec> &curveSpecList,
       }
       curveSpec.wsName = it.key();
       curveSpec.index = it.value();
-      curveSpecList.push_back(curveSpec);
+      curveSpecList.emplace_back(curveSpec);
 
     } catch (Mantid::Kernel::Exception::NotFoundError &) {
       g_log.warning() << "Workspace " << it.key().toStdString()
@@ -3279,7 +3286,7 @@ void MantidUI::showSequentialPlot(
     MantidQt::MantidWidgets::FitPropertyBrowser *fitbrowser) {
   std::string wsName = fitbrowser->outputName();
   Mantid::API::ITableWorkspace_sptr ws =
-      boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+      std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
           Mantid::API::AnalysisDataService::Instance().retrieve(wsName));
   if (ws) {
     if ((ws->columnCount() - 1) / 2 !=
@@ -3389,7 +3396,7 @@ MultiLayer *MantidUI::drawSingleColorFillPlot(const QString &wsName,
                                               GraphOptions::CurveType curveType,
                                               MultiLayer *window, bool hidden) {
   auto workspace =
-      boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
+      std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(
           getWorkspace(wsName));
   if (!workspace)
     return nullptr;
@@ -3737,7 +3744,8 @@ MultiLayer *MantidUI::plotSubplots(const QStringList &wsNames,
 }
 
 Table *MantidUI::createTableFromBins(
-    const QString &wsName, Mantid::API::MatrixWorkspace_const_sptr workspace,
+    const QString &wsName,
+    const Mantid::API::MatrixWorkspace_const_sptr &workspace,
     const QList<int> &bins, bool errs, int fromRow, int toRow) {
   if (bins.empty())
     return nullptr;
@@ -3807,8 +3815,8 @@ void MantidUI::savedatainNexusFormat(const std::string &fileName,
   QString algorithm = "SaveNexusProcessed";
 
   //...but if it's an MD workspace, we use SaveMD instead
-  if (boost::dynamic_pointer_cast<const IMDEventWorkspace>(inputWorkspace) ||
-      boost::dynamic_pointer_cast<const IMDHistoWorkspace>(inputWorkspace))
+  if (std::dynamic_pointer_cast<const IMDEventWorkspace>(inputWorkspace) ||
+      std::dynamic_pointer_cast<const IMDHistoWorkspace>(inputWorkspace))
     algorithm = "SaveMD";
 
   try {
@@ -3857,7 +3865,7 @@ QString MantidUI::getSelectedGroupName() const {
   if (!sel.isEmpty() &&
       AnalysisDataService::Instance().doesExist(sel.toStdString())) {
     try {
-      gWs = boost::dynamic_pointer_cast<const WorkspaceGroup>(
+      gWs = std::dynamic_pointer_cast<const WorkspaceGroup>(
           Mantid::API::AnalysisDataService::Instance().retrieve(
               sel.toStdString()));
     } catch (std::exception &) {
@@ -3952,7 +3960,7 @@ void countVirtual(vector<mem_block> &mem, int &total) {
     size += info.RegionSize;
 
     mem_block b = {info.RegionSize, state};
-    mem.push_back(b);
+    mem.emplace_back(b);
 
     /*cerr<<"BaseAddress = "<< info.BaseAddress<<'\n';
     cerr<<"AllocationBase = "<< info.AllocationBase<<'\n';
@@ -4038,9 +4046,9 @@ void MantidUI::memoryImage2() {
 }
 
 #endif
-  //=======================================================================
-  // End of Windows specific stuff
-  //=======================================================================
+//=======================================================================
+// End of Windows specific stuff
+//=======================================================================
 
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
@@ -4049,18 +4057,15 @@ void MantidUI::test() {
   std::cerr << "\nTest\n\n";
 
   MatrixWorkspace_const_sptr ws =
-      boost::dynamic_pointer_cast<const MatrixWorkspace>(
-          getSelectedWorkspace());
+      std::dynamic_pointer_cast<const MatrixWorkspace>(getSelectedWorkspace());
   if (ws) {
-    boost::shared_ptr<const Mantid::Geometry::Instrument> instr =
+    std::shared_ptr<const Mantid::Geometry::Instrument> instr =
         ws->getInstrument()->baseInstrument();
-    boost::shared_ptr<Mantid::Geometry::CompAssembly> both =
-        boost::dynamic_pointer_cast<Mantid::Geometry::CompAssembly>(
-            (*instr)[3]);
+    std::shared_ptr<Mantid::Geometry::CompAssembly> both =
+        std::dynamic_pointer_cast<Mantid::Geometry::CompAssembly>((*instr)[3]);
     if (both) {
-      boost::shared_ptr<Mantid::Geometry::CompAssembly> first =
-          boost::dynamic_pointer_cast<Mantid::Geometry::CompAssembly>(
-              (*both)[0]);
+      std::shared_ptr<Mantid::Geometry::CompAssembly> first =
+          std::dynamic_pointer_cast<Mantid::Geometry::CompAssembly>((*both)[0]);
       if (first) {
         static int i = 0;
         Mantid::Kernel::V3D u =

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_PEAKTEST_H_
-#define MANTID_DATAOBJECTS_PEAKTEST_H_
+#pragma once
 
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -234,6 +233,13 @@ public:
     TS_ASSERT_EQUALS(p.getK(), 2.0);
     TS_ASSERT_EQUALS(p.getL(), 3.0);
     TS_ASSERT_EQUALS(p.getHKL(), V3D(1.0, 2.0, 3.0));
+  }
+
+  void test_isIndexed() {
+    Peak p(inst, 10000, 2.0);
+    TS_ASSERT_EQUALS(false, p.isIndexed());
+    p.setHKL(1, 2, 3);
+    TS_ASSERT_EQUALS(true, p.isIndexed());
   }
 
   void test_samplePos() {
@@ -622,5 +628,3 @@ private:
     }
   }
 };
-
-#endif /* MANTID_DATAOBJECTS_PEAKTEST_H_ */

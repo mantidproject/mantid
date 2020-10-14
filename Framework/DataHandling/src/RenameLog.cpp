@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/RenameLog.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -25,10 +25,10 @@ void RenameLog::init() {
           "Workspace", "Anonymous", Direction::InOut),
       "Workspace to have logs merged");
   declareProperty("OriginalLogName", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "Log's original name.");
   declareProperty("NewLogName", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "Log's new name.");
 }
 

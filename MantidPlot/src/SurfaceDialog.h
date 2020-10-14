@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2006 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /***************************************************************************
     File                 : SurfaceDialog.h
@@ -15,8 +15,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef SURFACEDIALOG_H
-#define SURFACEDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -33,7 +32,7 @@ class SurfaceDialog : public QDialog {
   Q_OBJECT
 
 public:
-  SurfaceDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  SurfaceDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
 public slots:
   void accept() override;
@@ -78,5 +77,3 @@ private:
   QCheckBox *boxUPeriodic, *boxVPeriodic;
   QSpinBox *boxColumns, *boxRows, *boxFuncColumns, *boxFuncRows;
 };
-
-#endif

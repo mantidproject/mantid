@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef PLOT_TOOL_INTERFACE_H
-#define PLOT_TOOL_INTERFACE_H
+#pragma once
 
 class Graph;
 
@@ -93,5 +92,3 @@ public:
 protected:
   Graph *d_graph;
 };
-
-#endif // ifndef PLOT_TOOL_INTERFACE_H

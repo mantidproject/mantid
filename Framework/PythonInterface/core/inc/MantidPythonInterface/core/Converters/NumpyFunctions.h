@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef NUMPY_FUNCTIONS_H
-#define NUMPY_FUNCTIONS_H
+#pragma once
 
 #ifdef __GNUC__
 #pragma GCC system_header
@@ -48,4 +47,3 @@ func_PyArray_Descr(const char *datadescr);
 } // namespace Converters
 } // namespace PythonInterface
 } // namespace Mantid
-#endif // NUMPY_FUNCTIONS_H

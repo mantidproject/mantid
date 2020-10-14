@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -46,7 +46,7 @@ void LoadSpec::init() {
   std::vector<std::string> units = UnitFactory::Instance().getKeys();
   units.insert(units.begin(), "MomemtumTransfer");
   declareProperty("Unit", "Energy",
-                  boost::make_shared<Kernel::StringListValidator>(units),
+                  std::make_shared<Kernel::StringListValidator>(units),
                   "The unit to assign to the X axis (anything known to the "
                   "[[Unit Factory]] or \"Dimensionless\")");
 }
@@ -66,7 +66,7 @@ void LoadSpec::exec() {
   std::vector<double> input;
 
   const size_t nSpectra = readNumberOfSpectra(file);
-  auto localWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  auto localWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 2, 1));
 
   localWorkspace->getAxis(0)->unit() =
@@ -168,11 +168,11 @@ void LoadSpec::readHistogram(const std::vector<double> &input,
   e.reserve(nElements);
 
   for (size_t index = 0; index < nElements; index++) {
-    x.push_back(input[index]);
+    x.emplace_back(input[index]);
     index++;
-    y.push_back(input[index]);
+    y.emplace_back(input[index]);
     index++;
-    e.push_back(input[index]);
+    e.emplace_back(input[index]);
   }
 
   histogram.resize(y.size());
@@ -180,7 +180,7 @@ void LoadSpec::readHistogram(const std::vector<double> &input,
   if (isHist) {
     // we're loading binned data
     // last value is final x bin
-    x.push_back(input.back());
+    x.emplace_back(input.back());
     histogram.setBinEdges(x);
   } else {
     histogram.setPoints(x);

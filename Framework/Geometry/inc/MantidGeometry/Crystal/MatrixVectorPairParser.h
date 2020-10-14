@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_MATRIXVECTORPAIRPARSER_H_
-#define MANTID_GEOMETRY_MATRIXVECTORPAIRPARSER_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/MatrixVectorPair.h"
 #include "MantidGeometry/Crystal/V3R.h"
@@ -43,9 +42,9 @@ public:
 
     std::vector<T> typedMatrixElements;
     for (const auto &rb : m_matrixRows) {
-      typedMatrixElements.push_back(boost::rational_cast<T>((rb).x()));
-      typedMatrixElements.push_back(boost::rational_cast<T>((rb).y()));
-      typedMatrixElements.push_back(boost::rational_cast<T>((rb).z()));
+      typedMatrixElements.emplace_back(boost::rational_cast<T>((rb).x()));
+      typedMatrixElements.emplace_back(boost::rational_cast<T>((rb).y()));
+      typedMatrixElements.emplace_back(boost::rational_cast<T>((rb).z()));
     }
     Kernel::Matrix<T> mat(typedMatrixElements);
 
@@ -291,5 +290,3 @@ parseMatrixVectorPair(const std::string &matrixVectorString) {
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_MATRIXVECTORPAIRPARSER_H_ */

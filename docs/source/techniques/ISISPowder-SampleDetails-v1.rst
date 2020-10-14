@@ -12,7 +12,8 @@ Introduction
 ------------
 The sample details object holds the user defined properties of
 the current sample if absorption corrections are required whilst
-focusing. Only specific instruments support sample absorption
+focusing or a total scattering pdf calculation is being performed.
+Only specific instruments support sample absorption
 corrections. This can be determined from visiting the
 instrument reference:
 :ref:`instrument_doc_links_isis-powder-diffraction-ref`.
@@ -187,6 +188,7 @@ The following properties are required to set the sample material:
 
 - :ref:`chemical_formula_sampleDetails_isis-powder-diffraction-ref`
 - :ref:`number_density_sampleDetails_isis-powder-diffraction-ref`
+- :ref:`crystal_density_sampleDetails_isis-powder-diffraction-ref`
   (Optional if *chemical_formula* is an element, otherwise mandatory).
 
 Example
@@ -233,6 +235,20 @@ Example Input:
 ..  code-block:: python
 
     sample_obj.set_material(number_density=0.123, ...)
+
+.. _crystal_density_sampleDetails_isis-powder-diffraction-ref:
+
+crystal_density
+^^^^^^^^^^^^^^^
+This parameter defines the full or crystallographic number density of the material.
+If this is not set it will use the `number_density` in its place. This value
+is used to convert between different PDF types in `Polaris.create_total_scattering_pdf`.
+
+Example Input:
+
+..  code-block:: python
+
+    sample_obj.set_material(crystal_density=0.231, ...)
 
 .. _set_material_properties_sampleDetails_isis-powder-diffraction-ref:
 

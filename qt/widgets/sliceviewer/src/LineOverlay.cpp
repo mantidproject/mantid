@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/SliceViewer/LineOverlay.h"
 #include "MantidKernel/Utils.h"
@@ -240,7 +240,8 @@ QPointF LineOverlay::snap(QPointF original) const {
 
 //----------------------------------------------------------------------------------------------
 /** Draw a handle (for dragging) at the given plot coordinates */
-QRect LineOverlay::drawHandle(QPainter &painter, QPointF coords, QColor brush) {
+QRect LineOverlay::drawHandle(QPainter &painter, QPointF coords,
+                              const QColor &brush) {
   int size = 8;
   QPoint center = transform(coords);
   QRect marker(center.x() - size / 2, center.y() - size / 2, size, size);

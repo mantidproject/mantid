@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_INDIRECTTRANSMISSION_H_
-#define MANTID_CUSTOMINTERFACES_INDIRECTTRANSMISSION_H_
+#pragma once
 
 #include "IndirectDataReductionTab.h"
 #include "MantidKernel/System.h"
@@ -45,8 +44,8 @@ private slots:
   void setSaveEnabled(bool enabled);
   void updateRunButton(bool enabled = true,
                        std::string const &enableOutputButtons = "unchanged",
-                       QString const message = "Run",
-                       QString const tooltip = "");
+                       QString const &message = "Run",
+                       QString const &tooltip = "");
 
 private:
   void setInstrument(QString const &instrumentName);
@@ -56,5 +55,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_CUSTOMINTERFACES_INDIRECTTRANSMISSION_H_ */

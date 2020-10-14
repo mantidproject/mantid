@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_BACKGROUNDFUNCTION_H_
-#define MANTID_CURVEFITTING_BACKGROUNDFUNCTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IBackgroundFunction.h"
-#include <boost/shared_array.hpp>
+#include "MantidCurveFitting/DllConfig.h"
+#include <memory>
 
 namespace mu {
 class Parser;
@@ -27,7 +27,8 @@ should inherit from this class to enable certain features. E.g. querying
 @author Roman Tolchenov, Tessella plc
 @date 26/04/2010
 */
-class DLLExport BackgroundFunction : public API::IBackgroundFunction {
+class MANTID_CURVEFITTING_DLL BackgroundFunction
+    : public API::IBackgroundFunction {
 public:
   /// Returns the centre of the function, which may be something as simple as
   /// the centre of
@@ -58,10 +59,8 @@ public:
   const std::string category() const override { return "Background"; }
 };
 
-using BackgroundFunction_sptr = boost::shared_ptr<BackgroundFunction>;
+using BackgroundFunction_sptr = std::shared_ptr<BackgroundFunction>;
 
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_BACKGROUNDFUNCTION_H_*/

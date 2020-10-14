@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -16,7 +16,7 @@ using namespace boost::python;
 GET_POINTER_SPECIALIZATION(ICompAssembly)
 
 void export_ICompAssembly() {
-  register_ptr_to_python<boost::shared_ptr<ICompAssembly>>();
+  register_ptr_to_python<std::shared_ptr<ICompAssembly>>();
 
   class_<ICompAssembly, boost::python::bases<IComponent>, boost::noncopyable>(
       "ICompAssembly", no_init)

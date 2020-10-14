@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IMDHISTOWORKSPACE_H_
-#define MANTID_API_IMDHISTOWORKSPACE_H_
+#pragma once
 
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -20,8 +19,8 @@ namespace API {
 
   @date 2011-11-09
 */
-class DLLExport IMDHistoWorkspace : public IMDWorkspace,
-                                    public MultipleExperimentInfos {
+class MANTID_API_DLL IMDHistoWorkspace : public IMDWorkspace,
+                                         public MultipleExperimentInfos {
 public:
   IMDHistoWorkspace() = default;
   IMDHistoWorkspace &operator=(const IMDHistoWorkspace &) = delete;
@@ -35,9 +34,14 @@ public:
   }
   /// See the MDHistoWorkspace definition for descriptions of these
   virtual coord_t getInverseVolume() const = 0;
-  virtual signal_t *getSignalArray() const = 0;
-  virtual signal_t *getErrorSquaredArray() const = 0;
-  virtual signal_t *getNumEventsArray() const = 0;
+  virtual const signal_t *getSignalArray() const = 0;
+  virtual const signal_t *getErrorSquaredArray() const = 0;
+  virtual const signal_t *getNumEventsArray() const = 0;
+
+  virtual signal_t *mutableSignalArray() = 0;
+  virtual signal_t *mutableErrorSquaredArray() = 0;
+  virtual signal_t *mutableNumEventsArray() = 0;
+
   virtual void setTo(signal_t signal, signal_t errorSquared,
                      signal_t numEvents) = 0;
   virtual Mantid::Kernel::VMD getCenter(size_t linearIndex) const = 0;
@@ -108,5 +112,3 @@ private:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_IMDHISTOWORKSPACE_H_ */

@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, too-many-branches, too-few-public-methods, too-many-arguments, too-many-locals
 ''' SVN Info:      The variables below will only get subsituted at svn checkout if
@@ -15,7 +15,6 @@
 '''
 # these need to be moved into one NR folder or so
 # from ReflectometerCors import *
-from __future__ import (absolute_import, division, print_function)
 from isis_reflectometry.l2q import *
 from isis_reflectometry.combineMulti import *
 from mantid.simpleapi import *  # New API
@@ -26,7 +25,6 @@ from isis_reflectometry.convert_to_wavelength import ConvertToWavelength
 import math
 import re
 import abc
-from six import with_metaclass
 
 
 def enum(**enums):
@@ -36,7 +34,7 @@ def enum(**enums):
 PolarisationCorrection = enum(PNR=1, PA=2, NONE=3)
 
 
-class CorrectionStrategy(with_metaclass(abc.ABCMeta, object)):
+class CorrectionStrategy(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def apply(self, to_correct):
         pass

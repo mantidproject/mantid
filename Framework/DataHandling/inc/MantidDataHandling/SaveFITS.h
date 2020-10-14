@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVEFITS_H_
-#define MANTID_DATAHANDLING_SAVEFITS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -37,20 +36,20 @@ private:
 
   std::map<std::string, std::string> validateInputs() override;
 
-  void saveFITSImage(const API::MatrixWorkspace_sptr img,
+  void saveFITSImage(const API::MatrixWorkspace_sptr &img,
                      const std::string &filename);
 
-  void writeFITSHeaderBlock(const API::MatrixWorkspace_sptr img,
+  void writeFITSHeaderBlock(const API::MatrixWorkspace_sptr &img,
                             std::ofstream &file);
 
-  void writeFITSImageMatrix(const API::MatrixWorkspace_sptr img,
+  void writeFITSImageMatrix(const API::MatrixWorkspace_sptr &img,
                             std::ofstream &file);
 
   void writeFITSHeaderEntry(const std::string &hdr, std::ofstream &file);
 
   std::string makeBitDepthHeader(size_t depth) const;
 
-  void writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr img,
+  void writeFITSHeaderAxesSizes(const API::MatrixWorkspace_sptr &img,
                                 std::ofstream &file);
 
   void writePaddingFITSHeaders(size_t count, std::ofstream &file);
@@ -73,5 +72,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_SAVEFITS_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAPI/Axis.h"
@@ -43,7 +43,7 @@ DECLARE_ALGORITHM(DiffractionFocussing2)
  */
 void DiffractionFocussing2::init() {
 
-  auto wsValidator = boost::make_shared<API::RawCountValidator>();
+  auto wsValidator = std::make_shared<API::RawCountValidator>();
   declareProperty(std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "A 2D workspace with X values of d-spacing/Q-spacing");
@@ -121,7 +121,7 @@ void DiffractionFocussing2::exec() {
     IAlgorithm_sptr childAlg = createChildAlgorithm("CreateGroupingWorkspace");
     childAlg->setProperty(
         "InputWorkspace",
-        boost::const_pointer_cast<MatrixWorkspace>(m_matrixInputW));
+        std::const_pointer_cast<MatrixWorkspace>(m_matrixInputW));
     childAlg->setProperty("OldCalFilename", groupingFileName);
     childAlg->executeAsChildAlg();
     groupWS = childAlg->getProperty("OutputWorkspace");
@@ -146,7 +146,7 @@ void DiffractionFocussing2::exec() {
   double eventXMin = 0.;
   double eventXMax = 0.;
 
-  m_eventW = boost::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
+  m_eventW = std::dynamic_pointer_cast<const EventWorkspace>(m_matrixInputW);
   if (m_eventW != nullptr) {
     if (getProperty("PreserveEvents")) {
       // Input workspace is an event workspace. Use the other exec method
@@ -236,7 +236,7 @@ void DiffractionFocussing2::exec() {
       // Check for masked bins in this spectrum
       if (m_matrixInputW->hasMaskedBins(i)) {
         MantidVec weight_bins, weights;
-        weight_bins.push_back(Xin.front());
+        weight_bins.emplace_back(Xin.front());
         // If there are masked bins, get a reference to the list of them
         const API::MatrixWorkspace::MaskList &mask =
             m_matrixInputW->maskedBins(i);
@@ -247,19 +247,19 @@ void DiffractionFocussing2::exec() {
           // Add an intermediate bin with full weight if masked bins aren't
           // consecutive
           if (weight_bins.back() != currentX) {
-            weights.push_back(1.0);
-            weight_bins.push_back(currentX);
+            weights.emplace_back(1.0);
+            weight_bins.emplace_back(currentX);
           }
           // The weight for this masked bin is 1 - the degree to which this bin
           // is masked
-          weights.push_back(1.0 - bin.second);
-          weight_bins.push_back(Xin[bin.first + 1]);
+          weights.emplace_back(1.0 - bin.second);
+          weight_bins.emplace_back(Xin[bin.first + 1]);
         }
         // Add on a final bin with full weight if masking doesn't go up to the
         // end
         if (weight_bins.back() != Xin.back()) {
-          weights.push_back(1.0);
-          weight_bins.push_back(Xin.back());
+          weights.emplace_back(1.0);
+          weight_bins.emplace_back(Xin.back());
         }
 
         // Create a zero vector for the errors because we don't care about them
@@ -441,7 +441,7 @@ void DiffractionFocussing2::execEvent() {
         // When focussing in place, you can clear out old memory from the input
         // one!
         if (inPlace) {
-          boost::const_pointer_cast<EventWorkspace>(m_eventW)
+          std::const_pointer_cast<EventWorkspace>(m_eventW)
               ->getSpectrum(wi)
               .clear();
         }
@@ -590,11 +590,10 @@ void DiffractionFocussing2::determineRebinParameters() {
 
   nGroups = group2minmax.size(); // Number of unique groups
 
-  double Xmin, Xmax, step;
   const int64_t xPoints = nPoints + 1;
-
   // Iterator over all groups to create the new X vectors
-  for (gpit = group2minmax.begin(); gpit != group2minmax.end(); gpit++) {
+  for (gpit = group2minmax.begin(); gpit != group2minmax.end(); ++gpit) {
+    double Xmin, Xmax, step;
     Xmin = (gpit->second).first;
     Xmax = (gpit->second).second;
 
@@ -653,19 +652,19 @@ size_t DiffractionFocussing2::setupGroupToWSIndices() {
     }
 
     // Also record a list of workspace indices
-    wsIndices[group].push_back(wi);
+    wsIndices[group].emplace_back(wi);
   }
 
   // initialize a vector of the valid group numbers
   size_t totalHistProcess = 0;
   for (const auto &item : group2xvector) {
     const auto group = item.first;
-    m_validGroups.push_back(group);
+    m_validGroups.emplace_back(group);
     totalHistProcess += wsIndices[group].size();
   }
 
   for (const auto &group : m_validGroups)
-    m_wsIndices.push_back(std::move(wsIndices[static_cast<int>(group)]));
+    m_wsIndices.emplace_back(std::move(wsIndices[static_cast<int>(group)]));
 
   return totalHistProcess;
 }

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADNEXUSMONITORS2_H_
-#define MANTID_DATAHANDLING_LOADNEXUSMONITORS2_H_
+#pragma once
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/ParallelAlgorithm.h"
@@ -83,8 +82,8 @@ private:
   void fixUDets(::NeXus::File &file);
 
   /// Load the logs
-  void runLoadLogs(const std::string filename,
-                   API::MatrixWorkspace_sptr localWorkspace);
+  void runLoadLogs(const std::string &filename,
+                   const API::MatrixWorkspace_sptr &localWorkspace);
 
   /// is it possible to open the file?
   bool canOpenAsNeXus(const std::string &fname);
@@ -113,5 +112,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif // MANTID_DATAHANDLING_LOADNEXUSMONITORS2_H_

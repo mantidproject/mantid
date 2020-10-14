@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADGEOMETRY_H_
-#define MANTID_DATAHANDLING_LOADGEOMETRY_H_
+#pragma once
 
+#include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -24,6 +25,10 @@ namespace LoadGeometry {
 bool isIDF(const std::string &filename);
 /// Determine if the Geometry file type is Nexus
 bool isNexus(const std::string &filename);
+/// Determine if the Geometry file type is Nexus
+/// version that reuses the metadata container
+bool isNexus(const std::string &filename,
+             const std::map<std::string, std::set<std::string>> &allEntries);
 /// List allowed file extensions for geometry
 const std::vector<std::string> validExtensions();
 
@@ -31,5 +36,3 @@ const std::vector<std::string> validExtensions();
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /*MANTID_DATAHANDLING_LOADGEOMETRY_H_*/

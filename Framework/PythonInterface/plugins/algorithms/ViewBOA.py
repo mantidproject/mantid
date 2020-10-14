@@ -1,12 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init,invalid-name
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import AlgorithmFactory
 from mantid.api import PythonAlgorithm
 from mantid.kernel import Direction
@@ -25,12 +23,12 @@ class ViewBOA(PythonAlgorithm):
         now = datetime.datetime.now()
         self.declareProperty("Year",now.year,"Choose year",direction=Direction.Input)
         self.declareProperty('Numor',0,'Choose file number',direction=Direction.Input)
-        self.declareProperty('CD-Distance',6.000,'Chopper Detector distance in metres',direction=Direction.Input)
+        self.declareProperty('CDDistance',6.000,'Chopper Detector distance in metres',direction=Direction.Input)
 
     def PyExec(self):
         year=self.getProperty('Year').value
         num=self.getProperty('Numor').value
-        CD = self.getProperty('CD-Distance').value
+        CD = self.getProperty('CDDistance').value
         self.log().error('Running LoadBOA for file number ' + str(num))
         rawfile = 'tmp' + str(num)
         LoadSINQ('BOA',year,num, OutputWorkspace=rawfile)

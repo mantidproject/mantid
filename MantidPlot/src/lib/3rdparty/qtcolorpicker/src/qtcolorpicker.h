@@ -44,8 +44,7 @@
 **
 ****************************************************************************/
 
-#ifndef QTCOLORPICKER_H
-#define QTCOLORPICKER_H
+#pragma once
 #include <QtCore/QString>
 #include <QtGui/QColor>
 #include <QtGui/QPushButton>
@@ -119,5 +118,3 @@ private:
   bool dirty;
   bool firstInserted;
 };
-
-#endif

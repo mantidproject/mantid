@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_MATRIXWORKSPACEVALIDATOR_H_
-#define MANTID_API_MATRIXWORKSPACEVALIDATOR_H_
+#pragma once
 
 #include "MantidAPI/DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -22,5 +21,3 @@ class MANTID_API_DLL MatrixWorkspaceValidator
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_MATRIXWORKSPACEVALIDATOR_H_ */

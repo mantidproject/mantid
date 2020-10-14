@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext, default_dict
 import unittest
@@ -36,13 +36,13 @@ class PhaseTableContextTest(unittest.TestCase):
     def test_add_phase_quad_adds_phase_quad_name_to_list(self):
         name = create_workspace_wrapper_stub_object('MUSR22222_phase_quad')
 
-        self.context.add_phase_quad(name)
+        self.context.add_phase_quad(name, '22222')
 
-        self.assertEqual(self.context.phase_quad, [name])
+        self.assertEqual(self.context.phase_quad, {'22222': name})
 
     def test_get_phase_quad_returns_phase_quad_name_if_run_and_instrument_match(self):
         name = create_workspace_wrapper_stub_object('MUSR22222_phase_quad')
-        self.context.add_phase_quad(name)
+        self.context.add_phase_quad(name, '22222')
 
         self.assertEqual(self.context.get_phase_quad('MUSR', '22222'), ['MUSR22222_phase_quad'])
 

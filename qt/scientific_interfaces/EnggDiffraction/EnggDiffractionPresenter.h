@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "IEnggDiffractionCalibration.h"
@@ -215,10 +214,12 @@ private:
   //@}
 
   // plots workspace according to the user selection
-  void plotFocusedWorkspace(std::string outWSName);
+  void plotFocusedWorkspace(const std::string &outWSName);
 
-  void plotCalibWorkspace(std::vector<double> difc, std::vector<double> tzero,
-                          std::string specNos);
+  void plotCalibWorkspace(const std::vector<double> &difa,
+                          const std::vector<double> &difc,
+                          const std::vector<double> &tzero,
+                          const std::string &specNos);
 
   // algorithms to save the generated workspace
   void saveGSS(const RunLabel &runLabel, const std::string &inputWorkspace);
@@ -259,14 +260,15 @@ private:
   // generates the pycode string which can be passed to view
   std::string vanadiumCurvesPlotFactory();
 
-  std::string DifcZeroWorkspaceFactory(
-      const std::vector<double> &difc, const std::vector<double> &tzero,
-      const std::string &specNo, const std::string &customisedBankName) const;
+  std::string TOFFitWorkspaceFactory(
+      const std::vector<double> &difa, const std::vector<double> &difc,
+      const std::vector<double> &tzero, const std::string &specNo,
+      const std::string &customisedBankName) const;
 
-  std::string
-  plotDifcZeroWorkspace(const std::string &customisedBankName) const;
+  std::string plotTOFWorkspace(const std::string &customisedBankName) const;
 
   void writeOutCalibFile(const std::string &outFilename,
+                         const std::vector<double> &difa,
                          const std::vector<double> &difc,
                          const std::vector<double> &tzero,
                          const std::vector<std::string> &bankNames,
@@ -345,9 +347,8 @@ private:
 
   /// Model for calculating the vanadium corrections workspaces for focus and
   /// calib
-  boost::shared_ptr<IEnggVanadiumCorrectionsModel> m_vanadiumCorrectionsModel;
+  std::shared_ptr<IEnggVanadiumCorrectionsModel> m_vanadiumCorrectionsModel;
 };
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFRACTIONPRESENTER_H_

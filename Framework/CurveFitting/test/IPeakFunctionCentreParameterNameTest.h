@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef IPEAKFUNCTIONCENTREPARAMETERNAMETEST_H
-#define IPEAKFUNCTIONCENTREPARAMETERNAMETEST_H
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -43,7 +42,7 @@ public:
       const std::string &peakFunctionName = expectedResult.first;
       const std::string &centreParameterName = expectedResult.second;
 
-      IPeakFunction_sptr fn = boost::dynamic_pointer_cast<IPeakFunction>(
+      IPeakFunction_sptr fn = std::dynamic_pointer_cast<IPeakFunction>(
           FunctionFactory::Instance().createFunction(peakFunctionName));
 
       TS_ASSERT(fn);
@@ -61,5 +60,3 @@ public:
 private:
   std::map<std::string, std::string> m_expectedResults;
 };
-
-#endif // IPEAKFUNCTIONCENTREPARAMETERNAMETEST_H

@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name, anomalous-backslash-in-string, attribute-defined-outside-init
 
@@ -13,7 +13,6 @@
 This module provides functionality common to classes StretchedExpFT and PrimStretchedExpFT
 """
 
-from __future__ import (absolute_import, division, print_function)
 import copy
 from scipy.fftpack import fft, fftfreq
 from scipy.special import gamma
@@ -104,7 +103,7 @@ def validateParams(function):
 surrogates = {'fillJacobian': fillJacobian,
               'functionDeriv1D': functionDeriv1D,
               'init': init,
-              'validateParams': validateParams,}
+              'validateParams': validateParams, }
 
 
 def surrogate(method):
@@ -154,8 +153,10 @@ def function1Dcommon(function, xvals, refine_factor=16, **optparms):
     # Normalize the integral in energies to unity
     fourier *= 2*p['Tau']*gamma(1./p['Beta']) / (p['Beta']*planck_constant)
     # symmetrize to negative energies
-    fourier = np.concatenate([fourier[nt:], fourier[:nt]])  # increasing ordering
+    fourier = np.concatenate(
+        [fourier[nt:], fourier[:nt]])  # increasing ordering
     # Find energy values corresponding to the fourier values
     energies = planck_constant * fftfreq(2 * nt, d=dt)  # standard ordering
-    energies = np.concatenate([energies[nt:], energies[:nt]])  # increasing ordering
+    energies = np.concatenate(
+        [energies[nt:], energies[:nt]])  # increasing ordering
     return p, de, energies, fourier

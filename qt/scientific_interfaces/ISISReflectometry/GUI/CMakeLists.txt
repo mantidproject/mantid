@@ -3,6 +3,7 @@ add_subdirectory(Event)
 add_subdirectory(Experiment)
 add_subdirectory(Instrument)
 add_subdirectory(MainWindow)
+add_subdirectory(Options)
 add_subdirectory(Runs)
 add_subdirectory(RunsTable)
 add_subdirectory(Save)
@@ -14,6 +15,7 @@ set(GUI_SRC_FILES
     ${EXPERIMENT_SRC_FILES}
     ${INSTRUMENT_SRC_FILES}
     ${MAINWINDOW_SRC_FILES}
+    ${OPTIONS_SRC_FILES}
     ${RUNS_SRC_FILES}
     ${RUNS_TABLE_SRC_FILES}
     ${SAVE_SRC_FILES}
@@ -27,6 +29,7 @@ set(GUI_INC_FILES
     ${EXPERIMENT_INC_FILES}
     ${INSTRUMENT_INC_FILES}
     ${MAINWINDOW_INC_FILES}
+    ${OPTIONS_INC_FILES}
     ${RUNS_INC_FILES}
     ${RUNS_TABLE_INC_FILES}
     ${SAVE_INC_FILES}
@@ -40,6 +43,7 @@ set(GUI_MOC_FILES
     ${EXPERIMENT_MOC_FILES}
     ${INSTRUMENT_MOC_FILES}
     ${MAINWINDOW_MOC_FILES}
+    ${OPTIONS_MOC_FILES}
     ${RUNS_MOC_FILES}
     ${RUNS_TABLE_MOC_FILES}
     ${SAVE_MOC_FILES}
@@ -51,6 +55,7 @@ set(GUI_UI_FILES
     ${EXPERIMENT_UI_FILES}
     ${INSTRUMENT_UI_FILES}
     ${MAINWINDOW_UI_FILES}
+    ${OPTIONS_UI_FILES}
     ${RUNS_UI_FILES}
     ${RUNS_TABLE_UI_FILES}
     ${SAVE_UI_FILES}

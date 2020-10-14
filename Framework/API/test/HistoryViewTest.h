@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef HISTORYVIEWTEST_H_
-#define HISTORYVIEWTEST_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/HistoryView.h"
@@ -57,7 +56,7 @@ private:
     alg.execute();
 
     AlgorithmHistory history(&alg, execTime, 14.0, m_execCount++);
-    return boost::make_shared<AlgorithmHistory>(history);
+    return std::make_shared<AlgorithmHistory>(history);
   }
 
 public:
@@ -356,5 +355,3 @@ public:
   WorkspaceHistory m_wsHist;
   size_t m_execCount;
 };
-
-#endif

@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, unicode_literals)
 
 
 class DetectorsPresenter(object):
@@ -16,6 +15,12 @@ class DetectorsPresenter(object):
 
     def setStateQuietly(self, name, state):
         self.view.setStateQuietly(name, state)
+
+    def enableDetector(self, name):
+        self.view.enableDetector(name)
+
+    def disableDetector(self, name):
+        self.view.disableDetector(name)
 
     def getNames(self):
         return self.view.widgets.keys()

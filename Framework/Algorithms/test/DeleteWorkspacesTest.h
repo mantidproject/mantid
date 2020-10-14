@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------
 // Includes
@@ -42,9 +42,8 @@ public:
 
     TS_ASSERT_EQUALS(dataStore.size(), storeSizeAtStart + 1);
     // Check that what is left is correct
-    MatrixWorkspace_sptr wsRemain =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
-            dataStore.retrieve(testName3));
+    MatrixWorkspace_sptr wsRemain = std::dynamic_pointer_cast<MatrixWorkspace>(
+        dataStore.retrieve(testName3));
     TS_ASSERT(wsRemain);
     if (!wsRemain)
       TS_FAIL("Unable to retrieve remaining workspace.");
@@ -118,7 +117,7 @@ public:
     TS_ASSERT_EQUALS(dataStore.size(), storeSizeAtStart);
   }
 
-  void createAndStoreWorkspace(std::string name, int ylength = 10) {
+  void createAndStoreWorkspace(const std::string &name, int ylength = 10) {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 

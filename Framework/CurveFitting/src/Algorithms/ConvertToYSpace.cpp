@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Algorithms/ConvertToYSpace.h"
 
@@ -162,7 +162,7 @@ void ConvertToYSpace::calculateY(double &yspace, double &qspace, double &ei,
 /** Initialize the algorithm's properties.
  */
 void ConvertToYSpace::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<HistogramValidator>(false); // point data
   wsValidator->add<InstrumentValidator>();
   wsValidator->add<WorkspaceUnitValidator>("TOF");
@@ -170,7 +170,7 @@ void ConvertToYSpace::init() {
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The input workspace in Time of Flight");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   mustBePositive->setLowerExclusive(true); // strictly greater than 0.0
   declareProperty("Mass", -1.0, mustBePositive,
@@ -196,7 +196,7 @@ void ConvertToYSpace::exec() {
 
   const auto nhist = static_cast<int64_t>(m_inputWS->getNumberHistograms());
   const int64_t nreports = nhist;
-  auto progress = boost::make_shared<Progress>(this, 0.0, 1.0, nreports);
+  auto progress = std::make_shared<Progress>(this, 0.0, 1.0, nreports);
 
   auto &spectrumInfo = m_outputWS->mutableSpectrumInfo();
   SpectrumInfo *qSpectrumInfo{nullptr};
@@ -289,7 +289,7 @@ void ConvertToYSpace::createOutputWorkspace() {
   // y-Space output workspace
   m_outputWS = WorkspaceFactory::Instance().create(m_inputWS);
 
-  auto xLabel = boost::make_shared<Units::Label>("Momentum", "A^-1");
+  auto xLabel = std::make_shared<Units::Label>("Momentum", "A^-1");
   m_outputWS->getAxis(0)->unit() = xLabel;
   m_outputWS->setYUnit("");
   m_outputWS->setYUnitLabel("");
@@ -304,8 +304,6 @@ void ConvertToYSpace::createOutputWorkspace() {
   }
 }
 
-/**
- */
 void ConvertToYSpace::cacheInstrumentGeometry() {
   auto inst = m_inputWS->getInstrument();
   auto source = inst->getSource();

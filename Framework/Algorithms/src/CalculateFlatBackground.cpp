@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/CalculateFlatBackground.h"
 #include "MantidAPI/FunctionFactory.h"
@@ -66,7 +66,7 @@ void CalculateFlatBackground::init() {
       "default: modify all spectra");
   std::vector<std::string> modeOptions{"Linear Fit", "Mean", "Moving Average"};
   declareProperty("Mode", "Linear Fit",
-                  boost::make_shared<StringListValidator>(modeOptions),
+                  std::make_shared<StringListValidator>(modeOptions),
                   "The background count rate is estimated either by taking a "
                   "mean, doing a linear fit, or taking the\n"
                   "minimum of a moving average (default: Linear Fit)");
@@ -75,7 +75,7 @@ void CalculateFlatBackground::init() {
   std::vector<std::string> outputOptions{"Subtract Background",
                                          "Return Background"};
   declareProperty("OutputMode", "Subtract Background",
-                  boost::make_shared<StringListValidator>(outputOptions),
+                  std::make_shared<StringListValidator>(outputOptions),
                   "Once the background has been determined it can either be "
                   "subtracted from \n"
                   "the InputWorkspace and returned or just returned (default: "

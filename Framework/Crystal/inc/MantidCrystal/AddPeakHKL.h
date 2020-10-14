@@ -1,21 +1,20 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_ADDPEAKHKL_H_
-#define MANTID_CRYSTAL_ADDPEAKHKL_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
 
 /** AddPeakHKL : Algorithm to add a peaks to a PeaksWorkspace in the HKL frame
  */
-class DLLExport AddPeakHKL : public API::Algorithm {
+class MANTID_CRYSTAL_DLL AddPeakHKL : public API::Algorithm {
 public:
   const std::string name() const override;
   int version() const override;
@@ -32,5 +31,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_ADDPEAKHKL_H_ */

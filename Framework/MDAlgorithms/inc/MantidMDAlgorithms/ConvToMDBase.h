@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_CONVERTMD_BASE_H
-#define MANTID_MDALGORITHMS_CONVERTMD_BASE_H
+#pragma once
 
 #include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
@@ -39,7 +38,7 @@ public:
 
   /// method which initiates all main class variables
   virtual size_t initialize(const MDWSDescription &WSD,
-                            boost::shared_ptr<MDEventWSWrapper> inWSWrapper,
+                            std::shared_ptr<MDEventWSWrapper> inWSWrapper,
                             bool ignoreZeros);
   /// method which starts the conversion procedure
   virtual void runConversion(API::Progress *) = 0;
@@ -60,7 +59,7 @@ protected:
   API::MatrixWorkspace_const_sptr m_InWS2D;
   // pointer to the class, which keeps target workspace and provides functions
   // adding additional MD events to it.
-  boost::shared_ptr<MDEventWSWrapper> m_OutWSWrapper;
+  std::shared_ptr<MDEventWSWrapper> m_OutWSWrapper;
   // shared pointer to the converter, which converts WS coordinates to MD
   // coordinates
   MDTransf_sptr m_QConverter;
@@ -106,4 +105,3 @@ private:
 
 } // end namespace MDAlgorithms
 } // end namespace Mantid
-#endif

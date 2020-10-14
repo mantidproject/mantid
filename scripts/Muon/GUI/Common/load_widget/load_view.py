@@ -1,14 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import absolute_import
-
 from qtpy import QtWidgets, QtCore
 
-from mantidqt.widgets.manageuserdirectories import ManageUserDirectories
+from mantidqt.widgets import manageuserdirectories
+from Muon.GUI.Common import message_box
 
 
 class LoadView(QtWidgets.QWidget):
@@ -36,7 +35,7 @@ class LoadView(QtWidgets.QWidget):
         self.setLayout(self.grid)
 
     def show_directory_manager(self):
-        ManageUserDirectories.openUserDirsDialog(self)
+        manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
 
     def disable_buttons(self):
         self.spinbox.setEnabled(False)
@@ -84,3 +83,6 @@ class LoadView(QtWidgets.QWidget):
             self.sig_loading_finished.disconnect(slot)
         except TypeError:
             return
+
+    def warning(self,msg):
+        message_box.warning(msg)

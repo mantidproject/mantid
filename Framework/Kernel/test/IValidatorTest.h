@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_IVALIDATORTEST_H_
-#define MANTID_KERNEL_IVALIDATORTEST_H_
+#pragma once
 
 #include "MantidKernel/IValidator.h"
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 namespace {
 /**
@@ -23,7 +22,7 @@ public:
   DataNotCopiedValidator() : Mantid::Kernel::IValidator(), m_head(nullptr) {}
 
   Mantid::Kernel::IValidator_sptr clone() const override {
-    return boost::make_shared<DataNotCopiedValidator>();
+    return std::make_shared<DataNotCopiedValidator>();
   }
 
   /// Return the stored head pointer
@@ -54,5 +53,3 @@ public:
     TS_ASSERT_EQUALS(noCopy.head(), testData.data());
   }
 };
-
-#endif /* MANTID_KERNEL_IVALIDATORTEST_H_ */

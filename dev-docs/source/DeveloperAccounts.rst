@@ -16,7 +16,6 @@ Account Creation
 ----------------
 
 - Create a **Mantid Wiki** account; follow `this link <https://www.mantidproject.org/Special:RequestAccount>`__.
-- Sign up to the **Mantid Developers** email list; follow `this link <http://lists.mantidproject.org/mailman/listinfo/mantid-developers>`__.
 - Sign up for the **Mantid Slack** channel; follow `this link <https://mantid.slack.com/>`__.
 - If you don't already have one, sign up for a **Github** account; follow `this link <https://github.com/>`__.
 	+ Remember that your username should be easily identifiable.

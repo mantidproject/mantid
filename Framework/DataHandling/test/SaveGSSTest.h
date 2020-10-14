@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SAVEGSSTEST_H_
-#define SAVEGSSTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -68,7 +67,7 @@ API::MatrixWorkspace_sptr generateTestMatrixWorkspace(const std::string &wsName,
                                                       int numHistograms,
                                                       int numBins) {
   // Create workspace
-  MatrixWorkspace_sptr dataws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+  MatrixWorkspace_sptr dataws = std::dynamic_pointer_cast<MatrixWorkspace>(
       WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
           numHistograms, numBins, false, false, true, "TestFake"));
   populateWorkspaceWithLogData(dataws.get());
@@ -137,14 +136,14 @@ public:
 
     // define user specified arbitrary header
     std::vector<std::string> user_header;
-    user_header.push_back("user line 1");
-    user_header.push_back("user line 2");
-    user_header.push_back("user line 3");
+    user_header.emplace_back("user line 1");
+    user_header.emplace_back("user line 2");
+    user_header.emplace_back("user line 3");
 
     // define user specified arbitrary bank header
     std::vector<std::string> user_bank_headers;
-    user_bank_headers.push_back("Bank 1 some information");
-    user_bank_headers.push_back("Bank 2 some information different");
+    user_bank_headers.emplace_back("Bank 1 some information");
+    user_bank_headers.emplace_back("Bank 2 some information different");
 
     // SLOG XYE precision
     std::vector<int> slog_xye_precision(3, 1);
@@ -285,6 +284,9 @@ public:
     const std::string fileOnePath = outFilePath + "-0.gsas";
     const std::string fileTwoPath = outFilePath + "-1.gsas";
 
+    Poco::TemporaryFile::registerForDeletion(fileOnePath);
+    Poco::TemporaryFile::registerForDeletion(fileTwoPath);
+
     TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
         "SaveGSS-SplitRef-0.gsas", fileOnePath));
     TS_ASSERT(FileComparisonHelper::isEqualToReferenceFile(
@@ -364,5 +366,3 @@ private:
 
   SaveGSS *m_alg = nullptr;
 };
-
-#endif // SAVEGSSTEST_H_

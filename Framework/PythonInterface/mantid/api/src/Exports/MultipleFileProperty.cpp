@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/FileProperty.h"
@@ -17,8 +17,8 @@
 using Mantid::API::FileProperty;
 using Mantid::API::MultipleFileProperty;
 using Mantid::Kernel::PropertyWithValue;
-using Mantid::PythonInterface::Converters::PySequenceToVector;
 using Mantid::PythonInterface::PropertyWithValueExporter;
+using Mantid::PythonInterface::Converters::PySequenceToVector;
 using namespace boost::python;
 
 namespace {

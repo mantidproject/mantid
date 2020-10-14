@@ -1,23 +1,23 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/StartLiveData.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmProperty.h"
-#include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/ArrayBoundedValidator.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/System.h"
 #include "MantidLiveData/LoadLiveData.h"
 #include "MantidLiveData/MonitorLiveData.h"
 #include "MantidTypes/Core/DateAndTime.h"
 
 #include <Poco/ActiveResult.h>
+
+#include <memory>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -63,9 +63,9 @@ void StartLiveData::init() {
       "You must specify the StartTime property if this is checked.");
 
   declareProperty(
-      std::make_unique<PropertyWithValue<double>>("UpdateEvery", 60.0,
+      std::make_unique<PropertyWithValue<double>>("UpdateEvery", 30.0,
                                                   Direction::Input),
-      "Frequency of updates, in seconds. Default 60.\n"
+      "Frequency of updates, in seconds. Default 30.\n"
       "If you specify 0, MonitorLiveData will not launch and you will get only "
       "one chunk.");
 
@@ -73,7 +73,7 @@ void StartLiveData::init() {
   initProps();
 
   declareProperty(std::make_unique<AlgorithmProperty>(
-                      "MonitorLiveData", boost::make_shared<NullValidator>(),
+                      "MonitorLiveData", std::make_shared<NullValidator>(),
                       Direction::Output),
                   "A handle to the MonitorLiveData algorithm instance that "
                   "continues to read live data after this algorithm "
@@ -108,7 +108,7 @@ void StartLiveData::afterPropertySet(const std::string &propName) {
  * @param listener ILiveListener from which to copy properties
  */
 void StartLiveData::copyListenerProperties(
-    const boost::shared_ptr<ILiveListener> &listener) {
+    const std::shared_ptr<ILiveListener> &listener) {
   // Add clones of listener's properties to this algorithm
   for (auto listenerProp : listener->getProperties()) {
     auto prop = std::unique_ptr<Property>(listenerProp->clone());
@@ -126,7 +126,7 @@ void StartLiveData::removeListenerProperties() {
   // Find properties tagged with the listener property group
   for (const auto &prop : getProperties()) {
     if (prop->getGroup() == listenerPropertyGroup) {
-      propertiesToRemove.push_back(prop->name());
+      propertiesToRemove.emplace_back(prop->name());
     }
   }
 
@@ -198,7 +198,7 @@ void StartLiveData::exec() {
                 "The effective start time is therefore 'now'.");
   }
 
-  auto loadAlg = boost::dynamic_pointer_cast<LoadLiveData>(
+  auto loadAlg = std::dynamic_pointer_cast<LoadLiveData>(
       createChildAlgorithm("LoadLiveData"));
   if (!loadAlg)
     throw std::logic_error(
@@ -222,9 +222,9 @@ void StartLiveData::exec() {
 
   double UpdateEvery = this->getProperty("UpdateEvery");
   if (UpdateEvery > 0) {
-    // Create the MonitorLiveData but DO NOT make a AlgorithmProxy to it
+    // Create the MonitorLiveData
     IAlgorithm_sptr algBase =
-        AlgorithmManager::Instance().create("MonitorLiveData", -1, false);
+        AlgorithmManager::Instance().create("MonitorLiveData", -1);
     auto *monitorAlg = dynamic_cast<MonitorLiveData *>(algBase.get());
 
     if (!monitorAlg)

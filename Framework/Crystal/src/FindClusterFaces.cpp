@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/FindClusterFaces.h"
 
@@ -43,7 +43,7 @@ using OptionalLabelPeakIndexMap = boost::optional<LabelMap>;
  */
 OptionalLabelPeakIndexMap
 createOptionalLabelFilter(size_t dimensionality, int emptyLabelId,
-                          IPeaksWorkspace_sptr filterWorkspace,
+                          const IPeaksWorkspace_sptr &filterWorkspace,
                           IMDHistoWorkspace_sptr &clusterImage) {
   OptionalLabelPeakIndexMap optionalAllowedLabels;
 
@@ -148,7 +148,7 @@ void findFacesAtIndex(const size_t linearIndex, IMDIterator *mdIterator,
           face.maxEdge = maxEdge;
           face.radius = radius;
 
-          localClusterFaces.push_back(face);
+          localClusterFaces.emplace_back(face);
         }
       }
     }
@@ -286,7 +286,7 @@ void FindClusterFaces::init() {
 
   declareProperty(std::make_unique<PropertyWithValue<int>>(
                       "MaximumRows", 100000,
-                      boost::make_shared<BoundedValidator<int>>(),
+                      std::make_shared<BoundedValidator<int>>(),
                       Direction::Input),
                   "The number of neighbours to utilise. Defaults to 100000.");
   setPropertySettings("MaximumRows", std::make_unique<EnabledWhenProperty>(
@@ -312,7 +312,7 @@ void FindClusterFaces::exec() {
   std::vector<size_t> imageShape;
   const size_t dimensionality = clusterImage->getNumDims();
   for (size_t i = 0; i < dimensionality; ++i) {
-    imageShape.push_back(clusterImage->getDimension(i)->getNBins());
+    imageShape.emplace_back(clusterImage->getDimension(i)->getNBins());
   }
 
   // Get the peaks workspace

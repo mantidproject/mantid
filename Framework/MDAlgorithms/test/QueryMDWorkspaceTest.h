@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_QUERYMDWORKSPACETEST_H_
-#define MANTID_MDEVENTS_QUERYMDWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -31,7 +30,7 @@ public:
 
   QueryMDWorkspaceTest() { FrameworkManager::Instance(); }
 
-  void checkInputs(std::string strNormalisation) {
+  void checkInputs(const std::string &strNormalisation) {
     MDEventWorkspace3Lean::sptr in_ws =
         MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
     QueryMDWorkspace query;
@@ -85,7 +84,7 @@ public:
   void testDifferentNormalisation() {
     MDEventWorkspace3Lean::sptr in_ws =
         MDEventsTestHelper::makeMDEW<3>(10, -10.0, 20.0, 3);
-    boost::shared_ptr<IMDIterator> it(in_ws->createIterator());
+    std::shared_ptr<IMDIterator> it(in_ws->createIterator());
 
     QueryMDWorkspace A;
     A.initialize();
@@ -105,9 +104,9 @@ public:
     AnalysisDataServiceImpl &ADS = AnalysisDataService::Instance();
 
     TableWorkspace_sptr queryA =
-        boost::dynamic_pointer_cast<TableWorkspace>(ADS.retrieve("QueryWS_A"));
+        std::dynamic_pointer_cast<TableWorkspace>(ADS.retrieve("QueryWS_A"));
     TableWorkspace_sptr queryB =
-        boost::dynamic_pointer_cast<TableWorkspace>(ADS.retrieve("QueryWS_B"));
+        std::dynamic_pointer_cast<TableWorkspace>(ADS.retrieve("QueryWS_B"));
 
     TS_ASSERT_EQUALS(queryA->rowCount(), queryB->rowCount());
 
@@ -242,7 +241,7 @@ public:
     binMDAlg->setPropertyValue("OutputWorkspace", "temp");
     binMDAlg->execute();
     Workspace_sptr temp = binMDAlg->getProperty("OutputWorkspace");
-    auto slice = boost::dynamic_pointer_cast<IMDWorkspace>(temp);
+    auto slice = std::dynamic_pointer_cast<IMDWorkspace>(temp);
     return slice;
   }
 
@@ -349,7 +348,7 @@ public:
     binMDAlg->execute();
     Workspace_sptr binned_temp = binMDAlg->getProperty("OutputWorkspace");
     IMDWorkspace_sptr binned_md_temp =
-        boost::dynamic_pointer_cast<IMDWorkspace>(binned_temp);
+        std::dynamic_pointer_cast<IMDWorkspace>(binned_temp);
 
     IAlgorithm_sptr maskMDAlg = AlgorithmManager::Instance().create("MaskMD");
     maskMDAlg->initialize();
@@ -370,5 +369,3 @@ public:
     TSM_ASSERT_THROWS_NOTHING("Should execute successfully", query.execute());
   }
 };
-
-#endif /* MANTID_MDEVENTS_QUERYMDWORKSPACETEST_H_ */

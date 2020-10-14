@@ -16,6 +16,7 @@ set(SRC_FILES
     src/MuonGroupingCounts.cpp
     src/MuonGroupingAsymmetry.cpp
     src/MuonPreProcess.cpp
+    src/PSIBackgroundSubtraction.cpp
     src/MuonPairingAsymmetry.cpp
     src/PhaseQuadMuon.cpp
     src/PlotAsymmetryByLogValue.cpp
@@ -41,6 +42,7 @@ set(INC_FILES
     inc/MantidMuon/MuonPairingAsymmetry.h
     inc/MantidMuon/MuonGroupingAsymmetry.h
     inc/MantidMuon/MuonPreProcess.h
+    inc/MantidMuon/PSIBackgroundSubtraction.h
     inc/MantidMuon/PhaseQuadMuon.h
     inc/MantidMuon/PlotAsymmetryByLogValue.h
     inc/MantidMuon/RemoveExpDecay.h
@@ -64,6 +66,7 @@ set(TEST_FILES
     MuonGroupingCountsTest.h
     MuonGroupingAsymmetryTest.h
     MuonPreProcessTest.h
+    PSIBackgroundSubtractionTest.h
     PhaseQuadMuonTest.h
     PlotAsymmetryByLogValueTest.h
     RemoveExpDecayTest.h
@@ -88,7 +91,7 @@ set_target_properties(Muon
                                  COMPILE_DEFINITIONS
                                  "IN_MANTID_MUON")
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(Muon
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")
@@ -103,15 +106,17 @@ include_directories(inc)
 
 target_link_libraries(Muon
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${GSL_LIBRARIES})
 
 # Add the unit tests directory
 add_subdirectory(test)
 
-# Installation settings
+# Auto-generate exports header
+target_include_directories(Muon PUBLIC ${CMAKE_BINARY_DIR}/Framework/Muon)
+generate_mantid_export_header(Muon FALSE)
 
+# Installation settings
 mtd_install_targets(TARGETS
                     Muon
                     INSTALL_DIRS

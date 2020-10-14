@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_SETUB_H_
-#define MANTID_CRYSTAL_SETUB_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidCrystal/DllConfig.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -21,7 +20,7 @@ namespace Crystal {
   @author Andrei Savici
   @date 2011-11-07
 */
-class DLLExport SetUB : public API::Algorithm {
+class MANTID_CRYSTAL_DLL SetUB : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -44,5 +43,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_SETUB_H_ */

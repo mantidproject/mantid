@@ -5,6 +5,7 @@ set(SRC_FILES
     src/Algorithms/ConvolutionFit.cpp
     src/Algorithms/ConvolveWorkspaces.cpp
     src/Algorithms/CrystalFieldEnergies.cpp
+    src/Algorithms/DoublePulseFit.cpp
     src/Algorithms/EstimateFitParameters.cpp
     src/Algorithms/EstimatePeakErrors.cpp
     src/Algorithms/EvaluateFunction.cpp
@@ -17,8 +18,10 @@ set(SRC_FILES
     src/Algorithms/NormaliseByPeakArea.cpp
     src/Algorithms/PawleyFit.cpp
     src/Algorithms/PlotPeakByLogValue.cpp
+    src/Algorithms/PlotPeakByLogValueHelper.cpp
     src/Algorithms/QENSFitSequential.cpp
     src/Algorithms/QENSFitSimultaneous.cpp
+    src/Algorithms/QENSFitUtilities.cpp
     src/Algorithms/RefinePowderInstrumentParameters.cpp
     src/Algorithms/RefinePowderInstrumentParameters3.cpp
     src/Algorithms/SplineBackground.cpp
@@ -34,6 +37,7 @@ set(SRC_FILES
     src/CostFunctions/CostFuncLeastSquares.cpp
     src/CostFunctions/CostFuncRwp.cpp
     src/CostFunctions/CostFuncUnweightedLeastSquares.cpp
+    src/CostFunctions/CostFuncPoisson.cpp
     src/ExcludeRangeFinder.cpp
     src/FitMW.cpp
     src/FuncMinimizers/BFGS_Minimizer.cpp
@@ -139,6 +143,7 @@ set(SRC_FILES
     src/Functions/UserFunction1D.cpp
     src/Functions/VesuvioResolution.cpp
     src/Functions/Voigt.cpp
+    src/Functions/ConvTempCorrection.cpp
     src/GSLFunctions.cpp
     src/GSLMatrix.cpp
     src/GSLVector.cpp
@@ -168,6 +173,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Algorithms/ConvolutionFit.h
     inc/MantidCurveFitting/Algorithms/ConvolveWorkspaces.h
     inc/MantidCurveFitting/Algorithms/CrystalFieldEnergies.h
+    inc/MantidCurveFitting/Algorithms/DoublePulseFit.h
     inc/MantidCurveFitting/Algorithms/EstimateFitParameters.h
     inc/MantidCurveFitting/Algorithms/EstimatePeakErrors.h
     inc/MantidCurveFitting/Algorithms/EvaluateFunction.h
@@ -180,8 +186,10 @@ set(INC_FILES
     inc/MantidCurveFitting/Algorithms/NormaliseByPeakArea.h
     inc/MantidCurveFitting/Algorithms/PawleyFit.h
     inc/MantidCurveFitting/Algorithms/PlotPeakByLogValue.h
+    inc/MantidCurveFitting/Algorithms/PlotPeakByLogValueHelper.h
     inc/MantidCurveFitting/Algorithms/QENSFitSequential.h
     inc/MantidCurveFitting/Algorithms/QENSFitSimultaneous.h
+    inc/MantidCurveFitting/Algorithms/QENSFitUtilities.h
     inc/MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters.h
     inc/MantidCurveFitting/Algorithms/RefinePowderInstrumentParameters3.h
     inc/MantidCurveFitting/Algorithms/SplineBackground.h
@@ -197,7 +205,7 @@ set(INC_FILES
     inc/MantidCurveFitting/CostFunctions/CostFuncLeastSquares.h
     inc/MantidCurveFitting/CostFunctions/CostFuncRwp.h
     inc/MantidCurveFitting/CostFunctions/CostFuncUnweightedLeastSquares.h
-    inc/MantidCurveFitting/DllConfig.h
+    inc/MantidCurveFitting/CostFunctions/CostFuncPoisson.h
     inc/MantidCurveFitting/ExcludeRangeFinder.h
     inc/MantidCurveFitting/FitMW.h
     inc/MantidCurveFitting/FortranDefs.h
@@ -301,6 +309,7 @@ set(INC_FILES
     inc/MantidCurveFitting/Functions/UserFunction1D.h
     inc/MantidCurveFitting/Functions/VesuvioResolution.h
     inc/MantidCurveFitting/Functions/Voigt.h
+    inc/MantidCurveFitting/Functions/ConvTempCorrection.h
     inc/MantidCurveFitting/GSLFunctions.h
     inc/MantidCurveFitting/GSLJacobian.h
     inc/MantidCurveFitting/GSLMatrix.h
@@ -330,6 +339,7 @@ set(TEST_FILES
     Algorithms/ConvertToYSpaceTest.h
     Algorithms/ConvolutionFitSequentialTest.h
     Algorithms/ConvolveWorkspacesTest.h
+    Algorithms/DoublePulseFitTest.h
     Algorithms/EstimateFitParametersTest.h
     Algorithms/EstimatePeakErrorsTest.h
     Algorithms/EvaluateFunctionTest.h
@@ -340,6 +350,7 @@ set(TEST_FILES
     Algorithms/NormaliseByPeakAreaTest.h
     Algorithms/PawleyFitTest.h
     Algorithms/PlotPeakByLogValueTest.h
+    Algorithms/PlotPeakByLogValueHelperTest.h
     Algorithms/QENSFitSequentialTest.h
     Algorithms/QENSFitSimultaneousTest.h
     Algorithms/RefinePowderInstrumentParameters3Test.h
@@ -358,6 +369,7 @@ set(TEST_FILES
     CostFunctions/CostFuncFittingTest.h
     CostFunctions/CostFuncUnweightedLeastSquaresTest.h
     CostFunctions/LeastSquaresTest.h
+    CostFuncPoissonTest.h
     FitMWTest.h
     FortranMatrixTest.h
     FortranVectorTest.h
@@ -453,6 +465,7 @@ set(TEST_FILES
     Functions/UserFunctionTest.h
     Functions/VesuvioResolutionTest.h
     Functions/VoigtTest.h
+    Functions/ConvTempCorrectionTest.h
     GSLMatrixTest.h
     GSLVectorTest.h
     GeneralDomainCreatorTest.h
@@ -493,7 +506,7 @@ set_target_properties(CurveFitting
                                  COMPILE_DEFINITIONS
                                  IN_MANTID_CURVEFITTING)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(CurveFitting
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")
@@ -509,12 +522,15 @@ include_directories(inc)
 target_include_directories(CurveFitting SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(CurveFitting
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${GSL_LIBRARIES})
 
 # Add the unit tests directory
 add_subdirectory(test)
+
+# Auto-generate exports header
+target_include_directories(CurveFitting PUBLIC ${CMAKE_BINARY_DIR}/Framework/CurveFitting)
+generate_mantid_export_header(CurveFitting FALSE)
 
 # Installation settings
 

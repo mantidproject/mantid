@@ -567,6 +567,11 @@
     </livedata>
   </instrument>
 
+  <instrument name="NOW4" shortname="NOW4" beamline="14Q">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+  </instrument>
+
   <instrument name="VISION" shortname="VIS" beamline="16B">
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Indirect Geometry Spectroscopy</technique>
@@ -679,6 +684,10 @@
     <technique>SANS</technique>
   </instrument>
 
+  <instrument name="D16">
+    <technique>SANS</technique>
+  </instrument>
+
   <instrument name="D22">
     <technique>SANS</technique>
   </instrument>
@@ -717,6 +726,13 @@
     <technique>Disk chopper time-of-flight spectrometer PANTHER</technique>
   </instrument>
 
+  <instrument name="D7">
+    <technique>Polarized diffraction</technique>
+    <technique>Polarized spectroscopy</technique>
+    <technique>Diffuse Scattering</technique>    
+  </instrument>
+
+  
 </facility>
 
 <facility name="SINQ" FileExtensions=".hdf">
@@ -903,6 +919,19 @@
 <facility name="HZB" FileExtensions=".nxs">
    <timezone>Europe/Berlin</timezone>
 
+   <instrument name="TEST" shortname="TEST">
+	<zeropadding size="8" />
+    <technique>ESS Test Beamline</technique>
+	<livedata default="event">
+		<connection name="event" address="192.168.1.80:9092" listener="KafkaEventListener" />
+	</livedata>
+   </instrument>
+
+  <instrument name="NEAT">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>TOF Direct Geometry Spectroscopy</technique>
+  </instrument>
+
   <instrument name="EXED">
     <technique>TOF Direct Geometry Spectroscopy</technique>
     <technique>Single Crystal Diffraction</technique>
@@ -916,11 +945,16 @@
   <instrument name="V20_IMAGING">
     <technique>Neutron Imaging</technique>
   </instrument>
-   <instrument name="V20_DENEX" shortname="V20_DENEX" >
+   <instrument name="V20" shortname="V20" >
     <zeropadding size="8" />
     <technique>ESS Test Beamline</technique>
     <livedata default="event">
       <connection name="event" address="192.168.1.80:9092" listener="KafkaEventListener" />
+	  <topic name="V20_choppers" type="chopper" />
+	  <topic name="V20_motion" type="sample" />
+	  <topic name="V20_runInfo" type="run" />
+	  <topic name="denex_detector" type="event" />
+	  <topic name="monitor" type="monitor" />
     </livedata>
   </instrument>
 </facility>
@@ -928,6 +962,13 @@
 <!--  Test Facility to allow example usage of Live listeners against "Fake" instrument sources -->
 <facility name="TEST_LIVE" FileExtensions=".nxs,.raw">
   <timezone>UTC</timezone>
+
+  <instrument name="LOKI">
+    <technique>SANS Test</technique>
+    <livedata>
+      <connection name="event" address="hinata:9092" listener="KafkaEventListener" />
+    </livedata>
+  </instrument>
 
   <instrument name="ISIS_Histogram">
     <technique>Test Listener</technique>

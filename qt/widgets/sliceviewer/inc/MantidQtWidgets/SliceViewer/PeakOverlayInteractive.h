@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_SLICEVIEWER_PEAKOVERLAYINTERACTIVE_H_
-#define MANTID_SLICEVIEWER_PEAKOVERLAYINTERACTIVE_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidQtWidgets/SliceViewer/PeakOverlayView.h"
@@ -91,5 +90,3 @@ private slots:
 };
 } // namespace SliceViewer
 } // namespace MantidQt
-
-#endif // MANTID_SLICEVIEWER_PEAKOVERLAYINTERACTIVE_H_

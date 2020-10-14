@@ -1,22 +1,23 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/OptionsPropertyWidget.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/System.h"
 #include <QComboBox>
+#include <QCompleter>
 #include <QLabel>
+#include <QLineEdit>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 namespace MantidQt {
 namespace API {
-
 //----------------------------------------------------------------------------------------------
 /** Destructor
  */
@@ -40,6 +41,13 @@ OptionsPropertyWidget::OptionsPropertyWidget(Mantid::Kernel::Property *prop,
   // output box and used the saved combo box
   m_combo = new QComboBox(this);
   m_combo->setToolTip(m_doc);
+  if (std::string(prop->type()).find("Workspace") != std::string::npos) {
+    m_combo->setEditable(true);
+    m_combo->setInsertPolicy(QComboBox::NoInsert);
+    m_combo->completer()->setCompletionMode(QCompleter::PopupCompletion);
+    connect(m_combo->lineEdit(), SIGNAL(editingFinished()),
+            SLOT(editingFinished()));
+  }
   m_widgets.push_back(m_combo);
 
   std::vector<std::string> items = prop->allowedValues();
@@ -75,5 +83,20 @@ void OptionsPropertyWidget::setValueImpl(const QString &value) {
   if (index >= 0)
     m_combo->setCurrentIndex(index);
 }
+
+//----------------------------------------------------------------------------------------------
+/** Performs validation of the inputs when editing is finished */
+void OptionsPropertyWidget::editingFinished() {
+  auto value = m_combo->currentText();
+  const QString temp =
+      value.isEmpty() ? QString::fromStdString(m_prop->getDefault()) : value;
+  int index = m_combo->findText(temp);
+  if (index >= 0)
+    m_combo->setCurrentIndex(index);
+  else {
+    updateIconVisibility();
+  }
+}
+
 } // namespace API
 } // namespace MantidQt

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "RunsTable.h"
 #include "RowLocation.h"
@@ -34,6 +34,10 @@ std::vector<RowLocation> const &RunsTable::selectedRowLocations() const {
 
 void RunsTable::setSelectedRowLocations(std::vector<RowLocation> selected) {
   m_selectedRowLocations = std::move(selected);
+}
+
+void RunsTable::appendSelectedRowLocations(RowLocation selectedRowLocation) {
+  m_selectedRowLocations.emplace_back(std::move(selectedRowLocation));
 }
 
 void RunsTable::resetState() { m_reductionJobs.resetState(); }

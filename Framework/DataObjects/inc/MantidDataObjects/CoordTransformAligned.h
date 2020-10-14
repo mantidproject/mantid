@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_COORDTRANSFORMALIGNED_H_
-#define MANTID_DATAOBJECTS_COORDTRANSFORMALIGNED_H_
+#pragma once
 
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/VectorParameter.h"
@@ -42,11 +41,10 @@ public:
                         const size_t *dimensionToBinFrom, const coord_t *origin,
                         const coord_t *scaling);
   CoordTransformAligned(const size_t inD, const size_t outD,
-                        const std::vector<size_t> dimensionToBinFrom,
-                        const std::vector<coord_t> origin,
-                        const std::vector<coord_t> scaling);
+                        std::vector<size_t> dimensionToBinFrom,
+                        std::vector<coord_t> origin,
+                        std::vector<coord_t> scaling);
   CoordTransform *clone() const override;
-  ~CoordTransformAligned() override;
 
   std::string toXMLString() const override;
   std::string id() const override;
@@ -56,14 +54,12 @@ public:
 protected:
   /// For each dimension in the output, index in the input workspace of which
   /// dimension it is
-  size_t *m_dimensionToBinFrom;
+  std::vector<size_t> m_dimensionToBinFrom;
   /// Offset (minimum) position in each of the output dimensions, sized [outD]
-  coord_t *m_origin;
+  std::vector<coord_t> m_origin;
   /// Scaling from the input to the output dimension, sized [outD]
-  coord_t *m_scaling;
+  std::vector<coord_t> m_scaling;
 };
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_COORDTRANSFORMALIGNED_H_ */

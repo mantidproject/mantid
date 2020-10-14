@@ -5,7 +5,7 @@ Phase Table Tab
 
 .. image::  ../images/muon_interface_tab_phase_table.png
    :align: right
-   :height: 500px
+   :height: 400px
 
 Phase Table Calculator
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -38,5 +38,5 @@ into a quadrature phase signal.
 Used By
 ^^^^^^^
 
-:ref:`Muon Analysis 2 <MuonAnalysis_2-ref>`,
+:ref:`Muon Analysis <MuonAnalysis_2-ref>`,
 :ref:`Frequency Domain Analysis <Frequency_Domain_Analysis_2-ref>`

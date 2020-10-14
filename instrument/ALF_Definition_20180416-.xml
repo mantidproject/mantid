@@ -40,7 +40,7 @@
 
 <!-- source and sample-position components -->
    <component type="undulator">
-     <location z="-14.9165"> <facing val="none"/> </location>
+     <location z="-14.8625"> <facing val="none"/> </location>
    </component>
 
    <component type="nickel-holder">

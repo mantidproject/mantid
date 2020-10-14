@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidPythonInterface/core/Converters/MatrixToNDArray.h"
@@ -16,10 +16,10 @@
 #include <boost/python/scope.hpp>
 #include <boost/python/self.hpp>
 
-using Mantid::Geometry::AngleUnits;
-using Mantid::Geometry::UnitCell;
 using Mantid::Geometry::angDegrees;
+using Mantid::Geometry::AngleUnits;
 using Mantid::Geometry::angRadians;
+using Mantid::Geometry::UnitCell;
 using Mantid::Kernel::DblMatrix;
 using Mantid::Kernel::V3D;
 using namespace boost::python;
@@ -30,7 +30,7 @@ namespace //<unnamed>
 using namespace Mantid::PythonInterface;
 
 /// Pass-through function to set the unit cell from a 2D numpy array
-void recalculateFromGstar(UnitCell &self, object values) {
+void recalculateFromGstar(UnitCell &self, const object &values) {
   // Create a double matrix and put this in to the unit cell
   self.recalculateFromGstar(Converters::PyObjectToMatrix(values)());
 }
@@ -325,6 +325,20 @@ void export_UnitCell() {
            "Set the error in the :math:`\\gamma` angle of the unit cell using "
            "the "
            "``Unit`` parameter.")
+      .def("setModVec1",
+           (void (UnitCell::*)(const V3D &)) & UnitCell::setModVec1,
+           (arg("self"), arg("vec")),
+           "Set the first modulated structure vector")
+      .def("setModVec2",
+           (void (UnitCell::*)(const V3D &)) & UnitCell::setModVec2,
+           (arg("self"), arg("vec")),
+           "Set the second modulated structure vector")
+      .def("setModVec3",
+           (void (UnitCell::*)(const V3D &)) & UnitCell::setModVec3,
+           (arg("self"), arg("vec")),
+           "Set the third modulated structure vector")
+      .def("setMaxOrder", &UnitCell::setMaxOrder,
+           "Set the maximum order of modulated vectors searched")
       .def("volume", (double (UnitCell::*)() const) & UnitCell::volume,
            arg("self"),
            "Return the volume of the unit cell (in :math:`\\rm{\\AA}{^3}`)")
@@ -354,6 +368,8 @@ void export_UnitCell() {
       .def("getMaxOrder", &UnitCell::getMaxOrder, arg("self"),
            "Returns the number of modulation vectors. This will return an "
            "int.")
+      .def("getModVec", &UnitCell::getModVec, (arg("self"), arg("i")),
+           "Returns the ith modulation vector")
       .def("recalculateFromGstar", &recalculateFromGstar,
            (arg("self"), arg("NewGstar")),
            "Recalculate the unit cell parameters from a metric tensor. This "

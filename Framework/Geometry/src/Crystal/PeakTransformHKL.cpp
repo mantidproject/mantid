@@ -1,11 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/PeakTransformHKL.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using boost::regex;
 
@@ -27,7 +27,7 @@ PeakTransformHKL::PeakTransformHKL(const std::string &xPlotLabel,
 Clone the PeakTransformHKL.
 */
 PeakTransform_sptr PeakTransformHKL::clone() const {
-  return boost::make_shared<PeakTransformHKL>(*this);
+  return std::make_shared<PeakTransformHKL>(*this);
 }
 
 /** Transform peak.

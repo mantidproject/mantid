@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-arguments,invalid-name,too-many-locals,too-many-branches
 """
 Defines functions and classes to start the processing of Vesuvio data.
 The main entry point that most users should care about is fit_tof().
 """
-from __future__ import (absolute_import, division, print_function)
-
 import re
 import numpy as np
 from functools import reduce
@@ -198,10 +196,8 @@ class VesuvioTOFFitRoutineIteration(object):
             # Calculate corrections
             corrections_result = self._corrections(vesuvio_input.sample_data, vesuvio_input.container_data, index,
                                                    all_mass_values, all_profiles, prefit_result[1], verbose_output)
-
             # Calculate final fit
             fit_result = self._final_fit(corrections_result[-1], fit_mass_values, fit_profiles)
-
             # Update output with results from fit
             _update_output(vesuvio_output, prefit_result, corrections_result, fit_result)
 
@@ -210,7 +206,6 @@ class VesuvioTOFFitRoutineIteration(object):
                 UnGroupWorkspace(corrections_result[0])
                 UnGroupWorkspace(corrections_result[1])
             mtd.remove(prefit_result[1].name())
-            mtd.remove(corrections_result[-1].name())
             mtd.remove(fit_result[1].name())
 
         return vesuvio_output
@@ -1009,9 +1004,8 @@ def _parse_hydrogen_constraint(constraint):
     symbol = constraint.pop("symbol", None)
 
     if symbol is None:
-        raise RuntimeError("Invalid hydrogen constraint: " +
-                           str(constraint) +
-                           " - No symbol provided")
+        raise RuntimeError("Invalid hydrogen constraint: "
+                           + str(constraint) + " - No symbol provided")
     return {symbol: constraint}
 
 

@@ -1,15 +1,18 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_LAZYASYNCRUNNER_H_
-#define MANTIDQTCUSTOMINTERFACES_LAZYASYNCRUNNER_H_
+#pragma once
 
 #include "DllConfig.h"
 
 #include <QtCore>
+
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include <QtConcurrent>
+#endif
 
 #include <boost/optional.hpp>
 
@@ -78,5 +81,3 @@ private:
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQTCUSTOMINTERFACES_INDIRECTFITDATAPRESENTER_H_ */

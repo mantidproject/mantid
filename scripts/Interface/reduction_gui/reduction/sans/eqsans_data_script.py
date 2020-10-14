@@ -1,13 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
     Data set options for EQSANS reduction
 """
-from __future__ import (absolute_import, division, print_function)
 from reduction_gui.reduction.sans.eqsans_sample_script import SampleData as BaseSampleData
 from reduction_gui.reduction.sans.eqsans_background_script import Background
 

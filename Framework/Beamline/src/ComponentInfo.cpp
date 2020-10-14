@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidBeamline/ComponentInfo.h"
 #include "MantidBeamline/DetectorInfo.h"
 #include "MantidKernel/make_cow.h"
 #include <algorithm>
-#include <boost/make_shared.hpp>
 #include <iterator>
+#include <memory>
 #include <numeric>
 #include <sstream>
 #include <utility>
@@ -32,27 +32,26 @@ void checkScanInterval(const std::pair<int64_t, int64_t> &interval) {
 } // namespace
 
 ComponentInfo::ComponentInfo()
-    : m_assemblySortedDetectorIndices(
-          boost::make_shared<std::vector<size_t>>(0)),
+    : m_assemblySortedDetectorIndices(std::make_shared<std::vector<size_t>>(0)),
       m_size(0), m_detectorInfo(nullptr) {}
 
 ComponentInfo::ComponentInfo(
-    boost::shared_ptr<const std::vector<size_t>> assemblySortedDetectorIndices,
-    boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+    std::shared_ptr<const std::vector<size_t>> assemblySortedDetectorIndices,
+    std::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
         detectorRanges,
-    boost::shared_ptr<const std::vector<size_t>> assemblySortedComponentIndices,
-    boost::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
+    std::shared_ptr<const std::vector<size_t>> assemblySortedComponentIndices,
+    std::shared_ptr<const std::vector<std::pair<size_t, size_t>>>
         componentRanges,
-    boost::shared_ptr<const std::vector<size_t>> parentIndices,
-    boost::shared_ptr<std::vector<std::vector<size_t>>> children,
-    boost::shared_ptr<std::vector<Eigen::Vector3d>> positions,
-    boost::shared_ptr<std::vector<Eigen::Quaterniond,
-                                  Eigen::aligned_allocator<Eigen::Quaterniond>>>
+    std::shared_ptr<const std::vector<size_t>> parentIndices,
+    std::shared_ptr<std::vector<std::vector<size_t>>> children,
+    std::shared_ptr<std::vector<Eigen::Vector3d>> positions,
+    std::shared_ptr<std::vector<Eigen::Quaterniond,
+                                Eigen::aligned_allocator<Eigen::Quaterniond>>>
         rotations,
-    boost::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
-    boost::shared_ptr<std::vector<ComponentType>> componentType,
-    boost::shared_ptr<const std::vector<std::string>> names,
-    int64_t sourceIndex, int64_t sampleIndex)
+    std::shared_ptr<std::vector<Eigen::Vector3d>> scaleFactors,
+    std::shared_ptr<std::vector<ComponentType>> componentType,
+    std::shared_ptr<const std::vector<std::string>> names, int64_t sourceIndex,
+    int64_t sampleIndex)
     : m_assemblySortedDetectorIndices(std::move(assemblySortedDetectorIndices)),
       m_assemblySortedComponentIndices(
           std::move(assemblySortedComponentIndices)),
@@ -179,7 +178,8 @@ ComponentInfo::numberOfDetectorsInSubtree(const size_t componentIndex) const {
   return std::distance(range.begin(), range.end());
 }
 
-Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
+const Eigen::Vector3d &
+ComponentInfo::position(const size_t componentIndex) const {
   checkNoTimeDependence();
   if (isDetector(componentIndex)) {
     return m_detectorInfo->position(componentIndex);
@@ -188,7 +188,7 @@ Eigen::Vector3d ComponentInfo::position(const size_t componentIndex) const {
   return (*m_positions)[rangesIndex];
 }
 
-Eigen::Vector3d
+const Eigen::Vector3d &
 ComponentInfo::position(const std::pair<size_t, size_t> &index) const {
 
   const auto componentIndex = index.first;
@@ -481,7 +481,7 @@ bool ComponentInfo::hasSource() const { return m_sourceIndex >= 0; }
 
 bool ComponentInfo::hasSample() const { return m_sampleIndex >= 0; }
 
-Eigen::Vector3d ComponentInfo::sourcePosition() const {
+const Eigen::Vector3d &ComponentInfo::sourcePosition() const {
   if (!hasSource()) {
     throw std::runtime_error("Source component has not been specified");
   }
@@ -490,7 +490,7 @@ Eigen::Vector3d ComponentInfo::sourcePosition() const {
   return position({static_cast<size_t>(m_sourceIndex), 0});
 }
 
-Eigen::Vector3d ComponentInfo::samplePosition() const {
+const Eigen::Vector3d &ComponentInfo::samplePosition() const {
   if (!hasSample()) {
     throw std::runtime_error("Sample component has not been specified");
   }
@@ -644,7 +644,7 @@ void ComponentInfo::merge(const ComponentInfo &other) {
       continue;
     auto &positions = m_positions.access();
     auto &rotations = m_rotations.access();
-    m_scanIntervals.push_back(other.m_scanIntervals[timeIndex]);
+    m_scanIntervals.emplace_back(other.m_scanIntervals[timeIndex]);
     const size_t indexStart = other.linearIndex({0, timeIndex});
     size_t indexEnd = indexStart + nonDetectorSize();
     positions.insert(positions.end(), other.m_positions->begin() + indexStart,

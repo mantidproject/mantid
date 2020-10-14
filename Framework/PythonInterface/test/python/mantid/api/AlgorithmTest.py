@@ -1,16 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-import six
 
 import unittest
 import json
 from mantid.api import AlgorithmID, AlgorithmManager, FrameworkManagerImpl
 from testhelpers import run_algorithm
+
 
 class AlgorithmTest(unittest.TestCase):
 
@@ -67,12 +66,7 @@ class AlgorithmTest(unittest.TestCase):
         data = [1.5,2.5,3.5]
         kwargs = {'child':True}
         unitx = 'Wavelength'
-        if six.PY2:
-            # force a property value to be unicode to assert conversion happens correctly
-            # this is only an issue in python2
-            kwargs[unicode('UnitX')] = unicode(unitx)
-        else:
-            kwargs['UnitX'] = unitx
+        kwargs['UnitX'] = unitx
 
 
         alg = run_algorithm('CreateWorkspace',DataX=data,DataY=data,NSpec=1,**kwargs)

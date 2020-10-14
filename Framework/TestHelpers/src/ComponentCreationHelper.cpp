@@ -511,7 +511,6 @@ createCylInstrumentWithVerticalOffsetsSpecified(
       cylRadius, cylHeight, V3D(0.0, 0.0, 0.0), V3D(0., 1.0, 0.),
       "pixel-shape");
   auto instrument = std::make_shared<Instrument>("instrument_with_tubes");
-
   CompAssembly *bank = new CompAssembly("sixteenpack");
 
   if (inhomogeneous) {
@@ -864,6 +863,7 @@ createMinimalInstrument(const Mantid::Kernel::V3D &sourcePos,
   Component *sample = new Component("some-surface-holder");
   sample->setPos(samplePos);
   sample->setName("some-surface-holder");
+
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
@@ -909,6 +909,7 @@ createMinimalInstrumentWithMonitor(const Mantid::Kernel::V3D &monitorPos,
   auto *sample = new Component("some-surface-holder");
   sample->setPos(V3D(0, 0, 0));
   sample->setName("some-surface-holder");
+
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 
@@ -1024,6 +1025,7 @@ Instrument_sptr createInstrumentWithOptionalComponents(bool haveSource,
   if (haveSample) {
     Component *sample = new Component("some-sample");
     sample->setName("some-sample");
+
     instrument->add(sample);
     instrument->markAsSamplePos(sample);
   }
@@ -1078,7 +1080,9 @@ Instrument_sptr createSimpleInstrumentWithRotation(
   // A sample
   Component *sample = new Component("some-surface-holder");
   sample->setPos(samplePos);
+
   sample->setName("some-surface-holder");
+
   instrument->add(sample);
   instrument->markAsSamplePos(sample);
 

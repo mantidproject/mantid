@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCE_H_
-#define MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCE_H_
+#pragma once
 
 #include "MantidAPI/CoordTransform.h"
 #include "MantidAPI/VectorParameter.h"
@@ -39,31 +38,36 @@ DECLARE_VECTOR_PARAMETER(DimensionsUsedVectorParam, bool)
  */
 class DLLExport CoordTransformDistance : public Mantid::API::CoordTransform {
 public:
-  CoordTransformDistance(const size_t inD, const coord_t *center,
-                         const bool *dimensionsUsed, const size_t outD = 1);
+  CoordTransformDistance(
+      const size_t inD, const coord_t *center, const bool *dimensionsUsed,
+      const size_t outD = 1,
+      const std::vector<Kernel::V3D> &eigenvects = std::vector<Kernel::V3D>(0),
+      const std::vector<double> &eigenvals = std::vector<double>(0, 0.0));
+
   CoordTransform *clone() const override;
-  ~CoordTransformDistance() override;
   std::string toXMLString() const override;
   std::string id() const override;
 
   void apply(const coord_t *inputVector, coord_t *outVector) const override;
 
   /// Return the center coordinate array
-  const coord_t *getCenter() { return m_center; }
+  const std::vector<coord_t> &getCenter() { return m_center; }
 
   /// Return the dimensions used bool array
-  const bool *getDimensionsUsed() { return m_dimensionsUsed; }
+  const std::vector<bool> &getDimensionsUsed() { return m_dimensionsUsed; }
 
 protected:
   /// Coordinates at the center
-  coord_t *m_center;
+  std::vector<coord_t> m_center;
 
   /// Parmeter where True is set for those dimensions that are considered when
   /// calculating distance
-  bool *m_dimensionsUsed;
-};
+  std::vector<bool> m_dimensionsUsed;
 
+  // Eigenvectors and radii for nd ellipsoid
+  std::vector<Kernel::V3D> m_eigenvects;
+  std::vector<double> m_eigenvals;
+  double m_maxEigenval;
+};
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_COORDTRANSFORMDISTANCE_H_ */

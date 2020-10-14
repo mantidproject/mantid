@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/IndexTypeProperty.h"
 
@@ -12,9 +12,9 @@ IndexTypeProperty::IndexTypeProperty(const std::string &name,
                                      const int indexType)
     : PropertyWithValue<std::string>(name, "", Kernel::Direction::Input) {
   if (indexType & IndexType::WorkspaceIndex)
-    m_allowedValues.push_back("WorkspaceIndex");
+    m_allowedValues.emplace_back("WorkspaceIndex");
   if (indexType & IndexType::SpectrumNum)
-    m_allowedValues.push_back("SpectrumNumber");
+    m_allowedValues.emplace_back("SpectrumNumber");
 
   if (m_allowedValues.empty())
     throw std::invalid_argument("Argument indexType incorrectly specified");

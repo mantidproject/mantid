@@ -1,13 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SCALETEST_H_
-#define SCALETEST_H_
+#pragma once
 
-#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAlgorithms/Scale.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -45,10 +44,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("tomultiply")));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("multiplied")));
 
     testScaleFactorApplied(in, result, 2.5, true); // multiply=true
@@ -78,10 +77,10 @@ public:
 
     MatrixWorkspace_const_sptr in, result;
     TS_ASSERT_THROWS_NOTHING(
-        in = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        in = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("toadd")));
     TS_ASSERT_THROWS_NOTHING(
-        result = boost::dynamic_pointer_cast<MatrixWorkspace>(
+        result = std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("added")));
 
     testScaleFactorApplied(in, result, -100, false); // multiply=false
@@ -128,7 +127,7 @@ private:
     }
   }
 
-  void doTestScaleWithDx(std::string type, bool outIsIn = false) {
+  void doTestScaleWithDx(const std::string &type, bool outIsIn = false) {
     // Arrange
     const double xValue = 1.222;
     const double value = 5;
@@ -149,8 +148,7 @@ private:
     }
 
     // Act
-    auto algScale =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("Scale");
+    auto algScale = Mantid::API::AlgorithmManager::Instance().create("Scale");
     algScale->initialize();
     algScale->setRethrows(true);
     algScale->setPropertyValue("InputWorkspace", wsName);
@@ -183,5 +181,3 @@ private:
   }
   Mantid::Algorithms::Scale scale;
 };
-
-#endif /*SCALETEST_H_*/

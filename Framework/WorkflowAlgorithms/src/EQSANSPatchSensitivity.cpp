@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/EQSANSPatchSensitivity.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -79,7 +79,7 @@ void EQSANSPatchSensitivity::exec() {
 
       // If this detector is masked, skip to the next one
       if (spectrumInfo.isMasked(iDet))
-        patched_ids.push_back(iDet);
+        patched_ids.emplace_back(iDet);
       else {
         if (!inSpectrumInfo.isMasked(iDet)) {
           double yPosition = spectrumInfo.position(iDet).Y();

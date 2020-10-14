@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_SOFQCOMMONTEST_H
-#define MANTID_ALGORITHMS_SOFQCOMMONTEST_H
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -236,9 +235,9 @@ public:
 private:
   static double k(const double E) {
     using namespace Mantid;
-    using PhysicalConstants::NeutronMass;
     using PhysicalConstants::h_bar;
     using PhysicalConstants::meV;
+    using PhysicalConstants::NeutronMass;
     return std::sqrt(2 * NeutronMass * E * meV) / h_bar * 1e-10;
   }
 
@@ -258,7 +257,7 @@ private:
     return std::sqrt(ki * ki + kf * kf - 2. * ki * kf * std::cos(twoTheta));
   }
 
-  static void setEFixed(Mantid::API::MatrixWorkspace_sptr ws,
+  static void setEFixed(const Mantid::API::MatrixWorkspace_sptr &ws,
                         const std::string &component, const double eFixed) {
     using namespace Mantid;
     auto alg = API::AlgorithmManager::Instance().createUnmanaged(
@@ -273,5 +272,3 @@ private:
     alg->execute();
   }
 };
-
-#endif /* MANTID_ALGORITHMS_SOFQCOMMONTEST_H */

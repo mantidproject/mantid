@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plotting/Mpl/SingleSelector.h"
 #include "MantidQtWidgets/Plotting/Mpl/PreviewPlot.h"
@@ -70,6 +70,7 @@ QString SingleSelector::selectTypeAsQString(const SelectType &type) const {
 void SingleSelector::resetBounds() {
   auto const axisRange = getAxisRange(m_type);
   m_singleMarker->setBounds(std::get<0>(axisRange), std::get<1>(axisRange));
+  emit resetScientificBounds();
 }
 
 void SingleSelector::setBounds(const std::pair<double, double> &bounds) {

@@ -1,22 +1,20 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
-import mantid
 
-from isis_reducer import ReductionStateTransferer
 import ISISCommandInterface as ici
+from isis_reducer import ReductionStateTransferer
 
 
 class TestReductionStateTransferer(unittest.TestCase):
     def test_that_state_is_transfered(self):
         """
         This test shows that some state can be transferred between the logic instances
-        of the ReducerSingelton. 
+        of the ReducerSingelton.
         """
         # 1. Create a ReudcerSingleton and apply the user file settings
         ici.SANS2D()

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_CALCULATECOVERAGEDGSTEST_H_
-#define MANTID_MDALGORITHMS_CALCULATECOVERAGEDGSTEST_H_
+#pragma once
 
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/MDHistoWorkspace.h"
@@ -56,8 +55,8 @@ public:
     V3D sampPos(0., 0., 0.), sourcePos(0, 0, -1.);
     WorkspaceCreationHelper::createInstrumentForWorkspaceWithDistances(
         inputWorkspace, sampPos, sourcePos, detectorPositions);
-    OrientedLattice ol(2, 2, 2, 90, 90, 90);
-    inputWorkspace->mutableSample().setOrientedLattice(&ol);
+    inputWorkspace->mutableSample().setOrientedLattice(
+        std::make_unique<OrientedLattice>(2, 2, 2, 90, 90, 90));
     Goniometer gon(DblMatrix(3, 3, true));
     inputWorkspace->mutableRun().setGoniometer(gon, true);
     inputWorkspace->mutableRun().addLogData(
@@ -93,8 +92,7 @@ public:
     if (!ws)
       return;
 
-    MDHistoWorkspace_sptr out =
-        boost::dynamic_pointer_cast<MDHistoWorkspace>(ws);
+    MDHistoWorkspace_sptr out = std::dynamic_pointer_cast<MDHistoWorkspace>(ws);
     TS_ASSERT(out);
     TS_ASSERT_EQUALS(out->getNumDims(), 4);
     TS_ASSERT_EQUALS(out->getDimension(0)->getNBins(), 40);
@@ -133,5 +131,3 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_CALCULATECOVERAGEDGSTEST_H_ */

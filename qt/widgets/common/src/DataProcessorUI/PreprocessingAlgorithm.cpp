@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataProcessorUI/PreprocessingAlgorithm.h"
 
@@ -18,9 +18,9 @@ namespace DataProcessor {
  * @param blacklist : The list of properties we don't want to show
  * algorithm in the processed workspace's name
  */
-PreprocessingAlgorithm::PreprocessingAlgorithm(QString name, QString prefix,
-                                               QString separator,
-                                               std::set<QString> blacklist)
+PreprocessingAlgorithm::PreprocessingAlgorithm(
+    const QString &name, const QString &prefix, const QString &separator,
+    const std::set<QString> &blacklist)
     : ProcessingAlgorithmBase(std::move(name), std::move(blacklist)),
       m_prefix(std::move(prefix)), m_separator(std::move(separator)) {
 
@@ -53,8 +53,9 @@ PreprocessingAlgorithm::PreprocessingAlgorithm(QString name, QString prefix,
  * @param blacklist : The list of properties we don't want to show, as a string
  * algorithm in the processed workspace's name
  */
-PreprocessingAlgorithm::PreprocessingAlgorithm(QString name, QString prefix,
-                                               QString separator,
+PreprocessingAlgorithm::PreprocessingAlgorithm(const QString &name,
+                                               const QString &prefix,
+                                               const QString &separator,
                                                const QString &blacklist)
     : PreprocessingAlgorithm(std::move(name), std::move(prefix),
                              std::move(separator),

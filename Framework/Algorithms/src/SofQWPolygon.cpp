@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SofQWPolygon.h"
 #include "MantidAPI/SpectraAxis.h"
@@ -146,7 +146,8 @@ void SofQWPolygon::exec() {
  * Init variables caches
  * @param workspace :: Workspace pointer
  */
-void SofQWPolygon::initCachedValues(API::MatrixWorkspace_const_sptr workspace) {
+void SofQWPolygon::initCachedValues(
+    const API::MatrixWorkspace_const_sptr &workspace) {
   m_EmodeProperties.initCachedValues(*workspace, this);
   // Index theta cache
   initThetaCache(*workspace);

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SendToProgramDialog_H
-#define SendToProgramDialog_H
+#pragma once
 
 #include "ui_SendToProgramDialog.h"
 #include <QDialog>
@@ -27,10 +26,10 @@ class SendToProgramDialog : public QDialog {
   Q_OBJECT
 
 public:
-  SendToProgramDialog(QWidget *parent, Qt::WFlags fl = nullptr);
-  SendToProgramDialog(QWidget *parent, QString programName,
+  SendToProgramDialog(QWidget *parent, const Qt::WFlags &fl = nullptr);
+  SendToProgramDialog(QWidget *parent, const QString &programName,
                       std::map<std::string, std::string> programKeysAndDetails,
-                      Qt::WFlags fl = nullptr);
+                      const Qt::WFlags &fl = nullptr);
   std::pair<std::string, std::map<std::string, std::string>>
   getSettings() const;
 
@@ -58,5 +57,3 @@ private:
   Ui::SendToProgramDialog m_uiform;
   std::pair<std::string, std::map<std::string, std::string>> m_settings;
 };
-
-#endif // SendToProgram_H

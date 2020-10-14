@@ -1,11 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidDataHandling/LoadEventNexusIndexSetup.h"
+#include <utility>
+
 #include "MantidAPI/SpectrumDetectorMapping.h"
+#include "MantidDataHandling/LoadEventNexusIndexSetup.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -32,7 +34,7 @@ void setupConsistentSpectrumNumbers(IndexInfo &filtered,
   // included in DetectorInfo).
   for (int32_t i = 0; i < static_cast<int32_t>(detIDs.size()); ++i) {
     if (filtered.spectrumNumber(spectrumNumbers.size()) == detIDs[i])
-      spectrumNumbers.push_back(i + 1);
+      spectrumNumbers.emplace_back(i + 1);
     if (filtered.size() == spectrumNumbers.size())
       break;
   }
@@ -42,10 +44,10 @@ void setupConsistentSpectrumNumbers(IndexInfo &filtered,
 
 LoadEventNexusIndexSetup::LoadEventNexusIndexSetup(
     MatrixWorkspace_const_sptr instrumentWorkspace, const int32_t min,
-    const int32_t max, const std::vector<int32_t> range,
+    const int32_t max, const std::vector<int32_t> &range,
     const Parallel::Communicator &communicator)
-    : m_instrumentWorkspace(instrumentWorkspace), m_min(min), m_max(max),
-      m_range(range), m_communicator(communicator) {}
+    : m_instrumentWorkspace(std::move(instrumentWorkspace)), m_min(min),
+      m_max(max), m_range(range), m_communicator(communicator) {}
 
 std::pair<int32_t, int32_t> LoadEventNexusIndexSetup::eventIDLimits() const {
   return {m_min, m_max};
@@ -186,7 +188,8 @@ LoadEventNexusIndexSetup::filterIndexInfo(const IndexInfo &indexInfo) {
     const auto indices = indexInfo.makeIndexSet(
         static_cast<SpectrumNumber>(m_min), static_cast<SpectrumNumber>(m_max));
     for (const auto index : indices)
-      m_range.push_back(static_cast<int32_t>(indexInfo.spectrumNumber(index)));
+      m_range.emplace_back(
+          static_cast<int32_t>(indexInfo.spectrumNumber(index)));
   }
   // Check if SpectrumList was supplied (or filled via min/max above)
   if (!m_range.empty()) {

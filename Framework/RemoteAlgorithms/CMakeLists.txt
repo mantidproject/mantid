@@ -90,7 +90,7 @@ add_library(RemoteAlgorithms ${SRC_FILES} ${INC_FILES})
 set_target_properties(RemoteAlgorithms
                       PROPERTIES OUTPUT_NAME MantidRemoteAlgorithms)
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(RemoteAlgorithms
                         PROPERTIES INSTALL_RPATH
                                    "@loader_path/../Contents/MacOS")
@@ -106,7 +106,6 @@ include_directories(inc)
 
 target_link_libraries(RemoteAlgorithms
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${GSL_LIBRARIES})
 

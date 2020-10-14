@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_BASICHKLFILTERS_H_
-#define MANTID_GEOMETRY_BASICHKLFILTERS_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/HKLFilter.h"
 #include "MantidGeometry/Crystal/ReflectionCondition.h"
@@ -30,8 +29,8 @@ namespace Geometry {
   range of d-values and the reflection conditions of a space group:
 
     HKLFilter_const_sptr filter =
-        boost::make_shared<HKLFilterDRange>(unitCell, 0.5)
-      & boost::make_shared<HKLFilterSpaceGroup>(spaceGroup);
+        std::make_shared<HKLFilterDRange>(unitCell, 0.5)
+      & std::make_shared<HKLFilterSpaceGroup>(spaceGroup);
 
     HKLGenerator gen(unitCell, 0.5);
     std::vector<V3D> hkls;
@@ -43,7 +42,7 @@ namespace Geometry {
   reflection conditions of a space group:
 
     HKLFilter_const_sptr sgFilter =
-        boost::make_shared<HKLFilterSpaceGroup>(spaceGroup);
+        std::make_shared<HKLFilterSpaceGroup>(spaceGroup);
 
     auto matchingHKLCount = std::count_if(hkls.begin(), hkls.end(),
                                           sgFilter->fn());
@@ -54,10 +53,23 @@ namespace Geometry {
   Combining HKLGenerator and different HKLFilters provides a very flexible
   system for creating and processing specific sets of Miller indices that
   is easy to expand by adding other HKLFilters.
-
-      @author Michael Wedel, ESS
-      @date 23/09/2015
 */
+
+/**
+ * A class to do no filtering of HKL values.
+ *
+ * It implements the NULL-object pattern to avoid having generic code
+ * check if a filter is available. Instead use this if no filter is required.\
+ */
+class MANTID_GEOMETRY_DLL HKLFilterNone final : public HKLFilter {
+public:
+  inline std::string getDescription() const noexcept override {
+    return "Accepts all HKL values.";
+  }
+  inline bool isAllowed(const Kernel::V3D & /*hkl*/) const noexcept override {
+    return true;
+  }
+};
 
 /**
  * A class to filter HKLs by their d-values
@@ -70,13 +82,13 @@ namespace Geometry {
  * be the lattice parameter with the largest value. There can not be
  * a greater interplanar spacing than that value.
  */
-class MANTID_GEOMETRY_DLL HKLFilterDRange : public HKLFilter {
+class MANTID_GEOMETRY_DLL HKLFilterDRange final : public HKLFilter {
 public:
   HKLFilterDRange(const UnitCell &cell, double dMin);
   HKLFilterDRange(const UnitCell &cell, double dMin, double dMax);
 
-  std::string getDescription() const override;
-  bool isAllowed(const Kernel::V3D &hkl) const override;
+  std::string getDescription() const noexcept override;
+  bool isAllowed(const Kernel::V3D &hkl) const noexcept override;
 
 private:
   void checkProperDRangeValues();
@@ -92,12 +104,12 @@ private:
  * reflections as allowed that are allowed according to the
  * reflection conditions of the space group.
  */
-class MANTID_GEOMETRY_DLL HKLFilterSpaceGroup : public HKLFilter {
+class MANTID_GEOMETRY_DLL HKLFilterSpaceGroup final : public HKLFilter {
 public:
   HKLFilterSpaceGroup(const SpaceGroup_const_sptr &spaceGroup);
 
-  std::string getDescription() const override;
-  bool isAllowed(const Kernel::V3D &hkl) const override;
+  std::string getDescription() const noexcept override;
+  bool isAllowed(const Kernel::V3D &hkl) const noexcept override;
 
 protected:
   SpaceGroup_const_sptr m_spaceGroup;
@@ -111,13 +123,13 @@ protected:
  * minimum, the reflection is considered allowed. The default minimum
  * is 1e-6.
  */
-class MANTID_GEOMETRY_DLL HKLFilterStructureFactor : public HKLFilter {
+class MANTID_GEOMETRY_DLL HKLFilterStructureFactor final : public HKLFilter {
 public:
   HKLFilterStructureFactor(const StructureFactorCalculator_sptr &calculator,
                            double fSquaredMin = 1.0e-6);
 
-  std::string getDescription() const override;
-  bool isAllowed(const Kernel::V3D &hkl) const override;
+  std::string getDescription() const noexcept override;
+  bool isAllowed(const Kernel::V3D &hkl) const noexcept override;
 
 protected:
   StructureFactorCalculator_sptr m_calculator;
@@ -130,12 +142,12 @@ protected:
  * HKLFilterCentering is a filter that stores a ReflectionCondition object
  * internally and filters the HKLs according to that.
  */
-class MANTID_GEOMETRY_DLL HKLFilterCentering : public HKLFilter {
+class MANTID_GEOMETRY_DLL HKLFilterCentering final : public HKLFilter {
 public:
   HKLFilterCentering(const ReflectionCondition_sptr &centering);
 
-  std::string getDescription() const override;
-  bool isAllowed(const Kernel::V3D &hkl) const override;
+  std::string getDescription() const noexcept override;
+  bool isAllowed(const Kernel::V3D &hkl) const noexcept override;
 
 protected:
   ReflectionCondition_sptr m_centering;
@@ -143,5 +155,3 @@ protected:
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_BASICHKLFILTERS_H_ */

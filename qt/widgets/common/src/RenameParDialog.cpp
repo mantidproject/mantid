@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/RenameParDialog.h"
 
@@ -42,7 +42,7 @@ RenameParDialog::RenameParDialog(const std::vector<std::string> &old_params,
  * m_old_names and in column #1 of the table widget
  */
 bool RenameParDialog::isUnique(const QString &name) const {
-  std::vector<std::string>::const_iterator it =
+  auto it =
       std::find(m_old_params.begin(), m_old_params.end(), name.toStdString());
   if (it != m_old_params.end())
     return false;
@@ -97,7 +97,8 @@ std::vector<std::string> RenameParDialog::setOutput() const {
   std::vector<std::string> out;
   QAbstractItemModel *model = m_uiForm.tableWidget->model();
   for (int row = 0; row < m_uiForm.tableWidget->rowCount(); ++row) {
-    out.push_back(model->data(model->index(row, 1)).toString().toStdString());
+    out.emplace_back(
+        model->data(model->index(row, 1)).toString().toStdString());
   }
   return out;
 }

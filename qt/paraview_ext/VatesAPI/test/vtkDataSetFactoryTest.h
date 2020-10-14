@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef VTKDATASETFACTORYTEST_H_
-#define VTKDATASETFACTORYTEST_H_
+#pragma once
 
 #include "MantidAPI/IMDHistoWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -37,7 +35,7 @@ private:
     MOCK_CONST_METHOD1(
         create, vtkSmartPointer<vtkDataSet>(Mantid::VATES::ProgressAction &));
     MOCK_METHOD1(initialize,
-                 void(const boost::shared_ptr<Mantid::API::Workspace> &));
+                 void(const std::shared_ptr<Mantid::API::Workspace> &));
     MOCK_CONST_METHOD0(validate, void());
     MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
     GNU_DIAG_ON_SUGGEST_OVERRIDE
@@ -132,5 +130,3 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&factory));
   }
 };
-
-#endif

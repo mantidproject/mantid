@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/GoniometerAnglesFromPhiRotation.h"
 #include "MantidAPI/Algorithm.h"
@@ -190,10 +190,10 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   //----------------------------------------------
 
-  Geometry::OrientedLattice lat2 = PeaksRun1->sample().getOrientedLattice();
-
-  lat2.setUB(UB1);
-  PeaksRun2->mutableSample().setOrientedLattice(&lat2);
+  auto lat2 = std::make_unique<OrientedLattice>(
+      PeaksRun1->sample().getOrientedLattice());
+  lat2->setUB(UB1);
+  PeaksRun2->mutableSample().setOrientedLattice(std::move(lat2));
 
   if (!Run1HasOrientedLattice)
     PeaksRun1->mutableSample().setOrientedLattice(nullptr);
@@ -250,9 +250,9 @@ void GoniometerAnglesFromPhiRotation::exec() {
   MantidVec Xvals;
 
   for (int i = 0; i < Npeaks; ++i) {
-    Xvals.push_back(i);
-    Xvals.push_back(i);
-    Xvals.push_back(i);
+    Xvals.emplace_back(i);
+    Xvals.emplace_back(i);
+    Xvals.emplace_back(i);
   }
 
   ws->setPoints(0, Xvals);
@@ -290,7 +290,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
   std::string Ties = "SampleXOffset=0.0,SampleYOffset=0.0,SampleZOffset=0.0,"
                      "GonRotx=0.0,GonRoty=0.0,GonRotz=0.0";
 
-  boost::shared_ptr<Algorithm> Fit = createChildAlgorithm("Fit");
+  std::shared_ptr<Algorithm> Fit = createChildAlgorithm("Fit");
 
   Fit->initialize();
   Fit->setProperty("Function", FunctionArgs);
@@ -305,7 +305,7 @@ void GoniometerAnglesFromPhiRotation::exec() {
 
   Fit->executeAsChildAlg();
 
-  boost::shared_ptr<API::ITableWorkspace> results =
+  std::shared_ptr<API::ITableWorkspace> results =
       Fit->getProperty("OutputParameters");
   double chisq = Fit->getProperty("OutputChi2overDoF");
 
@@ -366,13 +366,13 @@ void GoniometerAnglesFromPhiRotation::exec() {
     PeaksRun2->getPeak(i).setGoniometerMatrix(Gon2a);
   }
 
-  OrientedLattice latt2(PeaksRun2->mutableSample().getOrientedLattice());
-  // Kernel::Matrix<double> UB = latt2.getUB();
+  auto latt2 = std::make_unique<OrientedLattice>(
+      PeaksRun2->mutableSample().getOrientedLattice());
   Rot.Invert();
   Gon2a.Invert();
-  latt2.setUB(Gon2a * Mk * UB1);
+  latt2->setUB(Gon2a * Mk * UB1);
 
-  PeaksRun2->mutableSample().setOrientedLattice(&latt2);
+  PeaksRun2->mutableSample().setOrientedLattice(std::move(latt2));
 }
 
 /**

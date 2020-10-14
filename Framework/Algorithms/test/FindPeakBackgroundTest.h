@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_FindPeakBackground_H_
-#define MANTID_ALGORITHMS_FindPeakBackgroundTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -57,7 +56,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     Mantid::API::ITableWorkspace_sptr peaklist =
-        boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
+        std::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve("Signal"));
 
     TS_ASSERT(peaklist);
@@ -80,7 +79,7 @@ public:
 
     const size_t size = 20;
 
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 1, size, size));
 
     MantidVec xdata(size);
@@ -115,7 +114,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Check result
-    ITableWorkspace_sptr outws = boost::dynamic_pointer_cast<ITableWorkspace>(
+    ITableWorkspace_sptr outws = std::dynamic_pointer_cast<ITableWorkspace>(
         AnalysisDataService::Instance().retrieve("Signal3"));
     TS_ASSERT(outws);
     if (!outws)
@@ -159,7 +158,7 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     // Check result
-    ITableWorkspace_sptr outws = boost::dynamic_pointer_cast<ITableWorkspace>(
+    ITableWorkspace_sptr outws = std::dynamic_pointer_cast<ITableWorkspace>(
         AnalysisDataService::Instance().retrieve("Signal2"));
     TS_ASSERT(outws);
     if (!outws)
@@ -190,7 +189,7 @@ public:
 
     const size_t size = 20;
 
-    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr ws = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceFactory::Instance().create("Workspace2D", 2, size, size));
 
     // Workspace index = 0
@@ -207,5 +206,3 @@ public:
     return ws;
   }
 };
-
-#endif /* MANTID_ALGORITHMS_FindPeakBackgroundTEST_H_ */

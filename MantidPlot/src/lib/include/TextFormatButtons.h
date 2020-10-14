@@ -29,8 +29,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef TEXTFORMATBUTTONS_H
-#define TEXTFORMATBUTTONS_H
+#pragma once
 
 #include <QWidget>
 class QTextEdit;
@@ -91,5 +90,3 @@ private slots:
   //! Insert 'letter' into the text
   void addSymbol(const QString &letter);
 };
-
-#endif // TEXTFORMATBUTTONS_H

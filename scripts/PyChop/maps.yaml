@@ -3,7 +3,7 @@ name: MAPS
 
 chopper_system:
   name: MAPS chopper system
-  chop_sam: 1.9                 # Distance (x1) from final chopper to sample (m)
+  chop_sam: 1.899               # Distance (x1) from final chopper to sample (m)
   sam_det: 6.0                  # Distance (x2) from sample to detector (m)
   aperture_width: 0.094         # Width of aperture at moderator face (m)
   aperture_height: 0.094        # Height of aperture at moderator face (m)
@@ -26,7 +26,7 @@ chopper_system:
       phaseName: 'Multirep mode number'
     -
       name: MAPS Fermi
-      distance: 10.1            # Distance from moderator to this chopper in metres
+      distance: 10.143          # Distance from moderator to this chopper in metres
       aperture_distance: 8.27   # Distance from aperture (moderator face) to this chopper (only for Fermi)
       packages:                 # A hash of chopper packages
         A:

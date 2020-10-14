@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_ROTATESOURCETEST_H_
-#define MANTID_DATAHANDLING_ROTATESOURCETEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -38,9 +37,8 @@ public:
   void testRotateClockwise() {
 
     // The instrument
-    Instrument_sptr instr = boost::make_shared<Instrument>();
-    instr->setReferenceFrame(
-        boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
+    Instrument_sptr instr = std::make_shared<Instrument>();
+    instr->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // The source
     ObjComponent *source = new ObjComponent("source");
@@ -49,7 +47,7 @@ public:
     instr->markAsSource(source);
 
     // The sample
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     sample->setPos(V3D(0, 0, 0));
     instr->add(sample);
     instr->markAsSamplePos(sample);
@@ -77,9 +75,8 @@ public:
   void testRotateCounterClockwise() {
 
     // The instrument
-    Instrument_sptr instr = boost::make_shared<Instrument>();
-    instr->setReferenceFrame(
-        boost::make_shared<ReferenceFrame>(Y, Z, Left, ""));
+    Instrument_sptr instr = std::make_shared<Instrument>();
+    instr->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Left, ""));
 
     // The source
     ObjComponent *source = new ObjComponent("source");
@@ -88,7 +85,7 @@ public:
     instr->markAsSource(source);
 
     // The sample
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     sample->setPos(V3D(0, 0, 0));
     instr->add(sample);
     instr->markAsSamplePos(sample);
@@ -116,9 +113,8 @@ public:
   void testRotateClockwiseSampleAt001() {
 
     // The instrument
-    Instrument_sptr instr = boost::make_shared<Instrument>();
-    instr->setReferenceFrame(
-        boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
+    Instrument_sptr instr = std::make_shared<Instrument>();
+    instr->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Right, ""));
 
     // The source
     ObjComponent *source = new ObjComponent("source");
@@ -127,7 +123,7 @@ public:
     instr->markAsSource(source);
 
     // The sample
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     sample->setPos(V3D(0, 0, 1));
     instr->add(sample);
     instr->markAsSamplePos(sample);
@@ -155,9 +151,8 @@ public:
   void testRotateClockwiseSampleAt111() {
 
     // The instrument
-    Instrument_sptr instr = boost::make_shared<Instrument>();
-    instr->setReferenceFrame(
-        boost::make_shared<ReferenceFrame>(Y, Z, Right, ""));
+    Instrument_sptr instr = std::make_shared<Instrument>();
+    instr->setReferenceFrame(std::make_shared<ReferenceFrame>(Y, Z, Right, ""));
 
     // The source
     ObjComponent *source = new ObjComponent("source");
@@ -166,7 +161,7 @@ public:
     instr->markAsSource(source);
 
     // The sample
-    ObjComponent *sample = new ObjComponent("sample");
+    Component *sample = new Component("sample");
     sample->setPos(V3D(1, 1, 1));
     instr->add(sample);
     instr->markAsSamplePos(sample);
@@ -191,5 +186,3 @@ public:
     TS_ASSERT_DELTA(newPos.Z(), 1.0, 1E-5);
   }
 };
-
-#endif /* MANTID_DATAHANDLING_ROTATESOURCETEST_H_ */

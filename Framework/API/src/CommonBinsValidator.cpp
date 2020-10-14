@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/CommonBinsValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -12,7 +12,7 @@ namespace API {
 
 /// Clone the current state
 Kernel::IValidator_sptr CommonBinsValidator::clone() const {
-  return boost::make_shared<CommonBinsValidator>(*this);
+  return std::make_shared<CommonBinsValidator>(*this);
 }
 
 /** Checks that the bin boundaries of each histogram in the workspace are the

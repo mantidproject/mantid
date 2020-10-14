@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------
 // Includes
@@ -18,8 +18,10 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
 
+#include <QCompleter>
 #include <QDebug>
 #include <QDropEvent>
+#include <QLineEdit>
 #include <QMimeData>
 #include <QUrl>
 using namespace MantidQt::MantidWidgets;
@@ -40,7 +42,7 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
       m_init(init), m_workspaceTypes(), m_showHidden(false), m_showGroups(true),
       m_optional(false), m_binLimits(std::make_pair(0, -1)), m_suffix(),
       m_algName(), m_algPropName(), m_algorithm() {
-  setEditable(false);
+  setEditable(true);
   if (init) {
     Mantid::API::AnalysisDataServiceImpl &ads =
         Mantid::API::AnalysisDataService::Instance();
@@ -53,6 +55,8 @@ WorkspaceSelector::WorkspaceSelector(QWidget *parent, bool init)
     refresh();
   }
   this->setAcceptDrops(true);
+  this->completer()->setCompletionMode(QCompleter::PopupCompletion);
+  this->setInsertPolicy(QComboBox::NoInsert);
 }
 
 /**
@@ -246,7 +250,7 @@ void WorkspaceSelector::handleReplaceEvent(
 }
 
 bool WorkspaceSelector::checkEligibility(
-    const QString &name, Mantid::API::Workspace_sptr object) const {
+    const QString &name, const Mantid::API::Workspace_sptr &object) const {
   if (m_algorithm && !m_algPropName.isEmpty()) {
     try {
       m_algorithm->setPropertyValue(m_algPropName.toStdString(),
@@ -263,8 +267,7 @@ bool WorkspaceSelector::checkEligibility(
   } else if (!hasValidNumberOfBins(object)) {
     return false;
   } else if (!m_showGroups) {
-    auto group =
-        boost::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(object);
+    auto group = std::dynamic_pointer_cast<Mantid::API::WorkspaceGroup>(object);
     if (group != nullptr)
       return false;
   }
@@ -287,10 +290,10 @@ bool WorkspaceSelector::hasValidSuffix(const QString &name) const {
 }
 
 bool WorkspaceSelector::hasValidNumberOfBins(
-    Mantid::API::Workspace_sptr object) const {
+    const Mantid::API::Workspace_sptr &object) const {
   if (m_binLimits.first != 0 || m_binLimits.second != -1) {
     if (auto const workspace =
-            boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object)) {
+            std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(object)) {
       auto const numberOfBins = static_cast<int>(workspace->y(0).size());
       if (m_binLimits.second != -1)
         return numberOfBins >= m_binLimits.first &&

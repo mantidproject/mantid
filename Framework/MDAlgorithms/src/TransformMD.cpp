@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/TransformMD.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -117,7 +117,7 @@ void TransformMD::exec() {
   outWS = getProperty("OutputWorkspace");
   std::string outName = getPropertyValue("OutputWorkspace");
 
-  if (boost::dynamic_pointer_cast<MatrixWorkspace>(inWS))
+  if (std::dynamic_pointer_cast<MatrixWorkspace>(inWS))
     throw std::runtime_error("TransformMD can only transform a "
                              "MDHistoWorkspace or a MDEventWorkspace.");
 
@@ -155,9 +155,9 @@ void TransformMD::exec() {
   outWS->transformDimensions(m_scaling, m_offset);
 
   MDHistoWorkspace_sptr histo =
-      boost::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
+      std::dynamic_pointer_cast<MDHistoWorkspace>(outWS);
   IMDEventWorkspace_sptr event =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(outWS);
 
   if (histo) {
     // Recalculate all the values since the dimensions changed.
@@ -171,9 +171,9 @@ void TransformMD::exec() {
         axes[i] = 0;
         if (i > 0)
           histo = transposeMD(histo, axes);
-        signal_t *signals = histo->getSignalArray();
-        signal_t *errorsSq = histo->getErrorSquaredArray();
-        signal_t *numEvents = histo->getNumEventsArray();
+        signal_t *signals = histo->mutableSignalArray();
+        signal_t *errorsSq = histo->mutableErrorSquaredArray();
+        signal_t *numEvents = histo->mutableNumEventsArray();
 
         // Find the extents
         size_t nPoints =
@@ -208,7 +208,7 @@ void TransformMD::exec() {
     event->refreshCache();
     // Set the special coordinate system.
     IMDEventWorkspace_sptr inEvent =
-        boost::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
+        std::dynamic_pointer_cast<IMDEventWorkspace>(inWS);
     event->setCoordinateSystem(inEvent->getSpecialCoordinateSystem());
 
     if (m_scaling[0] < 0) {
@@ -218,10 +218,10 @@ void TransformMD::exec() {
       for (size_t d = 0; d < nd; d++) {
         Geometry::IMDDimension_const_sptr dim = event->getDimension(d);
         // Find the extents
-        extents.push_back(dim->getMinimum());
-        extents.push_back(dim->getMaximum());
-        names.push_back(std::string(dim->getName()));
-        units.push_back(dim->getUnits());
+        extents.emplace_back(dim->getMinimum());
+        extents.emplace_back(dim->getMaximum());
+        names.emplace_back(std::string(dim->getName()));
+        units.emplace_back(dim->getUnits());
       }
       Algorithm_sptr create_alg = createChildAlgorithm("CreateMDWorkspace");
       create_alg->setProperty("Dimensions", static_cast<int>(nd));
@@ -238,7 +238,7 @@ void TransformMD::exec() {
       Mantid::API::BoxController_sptr boxController = event->getBoxController();
       std::vector<int> splits;
       for (size_t d = 0; d < nd; d++) {
-        splits.push_back(static_cast<int>(boxController->getSplitInto(d)));
+        splits.emplace_back(static_cast<int>(boxController->getSplitInto(d)));
       }
       Algorithm_sptr merge_alg = createChildAlgorithm("MergeMD");
       merge_alg->setPropertyValue("InputWorkspaces", outName + ",__none");
@@ -269,7 +269,7 @@ TransformMD::transposeMD(MDHistoWorkspace_sptr &toTranspose,
   transposeMD->setProperty("Axes", axes);
   transposeMD->execute();
   IMDHistoWorkspace_sptr outputWS = transposeMD->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+  return std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
 
 } // namespace MDAlgorithms

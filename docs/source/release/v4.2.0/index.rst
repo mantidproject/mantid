@@ -4,21 +4,27 @@
 Mantid 4.2.0 Release Notes
 ===========================
 
-.. figure:: ../../images/ImageNotFound.png
+.. figure:: ../../images/fish.jpeg
    :class: screenshot
-   :width: 385px
+   :width: 500px
    :align: right
 
 .. contents:: Table of Contents
    :local:
 
-.. warning:: This release is still under construction. The changes can be found in the nightly builds on the `download page`_.
-
 We are proud to announce version 4.2.0 of Mantid.
 
-**TODO: Add paragraph summarizing big changes**
+**THIS IS THE LAST RELEASE THAT WILL SUPPORT Python 2**
 
-This is just one of many improvements in this release, so please take a
+| From v4.3 onwards Mantid will no longer support Python 2 and scripts run in Mantid will have to change to reflect this. `Time is Ticking <https://pythonclock.org/>`_! 
+| NB. Mantid v4.3 will be released near the End of February 2020.
+
+| *Interfaces, interfaces, interfaces*! Hard to say but Easy to use!
+| One of the major changes for this release is the new Direct :ref:`ALF View <ALF_View-ref>` GUI for aligning samples on the ALF Instrument. There have also been serious developments in the :doc:`Indirect <indirect_geometry>` Interfaces: 
+| The Analysis and Bayes Interfaces have been introduced to Mantid Workbench and all interfaces will accept lists to plot multiple spectra. 
+| Generally usuability has been improved, such as the cleaner :doc:`ISIS SANS <sans>` Interface and the multiple improvements in Workbench. The Script Repository has even been added into :doc:`Workbench <mantidworkbench>`!
+
+These are just a few of the many improvements in this release, so please take a
 look at the release notes, which are filled with details of the
 important changes and improvements in many areas. The development team
 has put a great effort into making all of these improvements within
@@ -57,7 +63,7 @@ Changes
    *
 
 - :doc:`Framework <framework>`
-- :doc:`General UI & Usability <ui>`
+- User Interfaces
 
   - :doc:`MantidPlot <mantidplot>`
 

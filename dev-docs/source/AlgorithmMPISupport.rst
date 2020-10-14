@@ -429,7 +429,7 @@ A typical example could look as follows:
     // to avoid clashes, since the threading backend in ParallelRunner shares the
     // ADS for all 'ranks'.
     auto alg = ParallelTestHelpers::create<Mantid::Algorithms::MyAlg>(comm);
-    alg->setProperty("InputWorkspace", boost::make_shared<WorkspaceTester>());
+    alg->setProperty("InputWorkspace", std::make_shared<WorkspaceTester>());
     alg->execute();
     Workspace_const_sptr ws = alg->getProperty("OutputWorkspace");
     TS_ASSERT_EQUALS(ws->storageMode(), Parallel::StorageMode::Distributed);
@@ -602,22 +602,12 @@ RemovePromptPulse                      all
 RenameWorkspace                        all
 ReplaceSpecialValues                   all                     see ``UnaryOperation``
 RotateInstrumentComponent              all
-SANSCalculateTransmission              MasterOnly, Identical
-SANSConvertToQ                         all
-SANSConvertToWavelength                all
 SANSConvertToWavelengthAndRebin        all
-SANSCreateAdjustmentWorkspaces         all
 SANSCreateWavelengthAndPixelAdjustment MasterOnly, Identical
-SANSCrop                               all
 SANSFitShiftScale                      MasterOnly, Identical
 SANSLoad                               MasterOnly, Identical   child algorithms may actually be run with ``ExecutionMode::Distributed`` if that is their default
-SANSMaskWorkspace                      all
-SANSMove                               all
-SANSNormalizeToMonitor                 MasterOnly, Identical
 SANSReductionCore                      all
-SANSScale                              all
 SANSSingleReduction                    all
-SANSSliceEvent                         all
 SANSStitch                             MasterOnly, Identical
 SaveFocusedXYE                         MasterOnly
 SaveGSS                                MasterOnly

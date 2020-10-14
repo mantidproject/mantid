@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INELASTICDIFFSPHERE_H_
-#define MANTID_INELASTICDIFFSPHERE_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Mantid Headers from the same project
@@ -42,7 +41,7 @@ struct linearJ {
  * @brief Inelastic part of the DiffSphere function. Contains the 98
  * Lorentzians.
  */
-class DLLExport InelasticDiffSphere : public FunctionQDepends {
+class MANTID_CURVEFITTING_DLL InelasticDiffSphere : public FunctionQDepends {
 public:
   InelasticDiffSphere();
 
@@ -74,7 +73,7 @@ private:
   void initLinJlist();
 
   /// Cache Q values from the workspace
-  void setWorkspace(boost::shared_ptr<const API::Workspace> ws) override;
+  void setWorkspace(std::shared_ptr<const API::Workspace> ws) override;
 
   /// xnl coefficients
   std::vector<xnlc> m_xnl;
@@ -102,5 +101,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif // MANTID_INELASTICDIFFSPHERE_H_

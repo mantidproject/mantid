@@ -1,10 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IqtFit.h"
+#include "IndirectFitPlotView.h"
+#include "IndirectFunctionBrowser/IqtTemplateBrowser.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
@@ -18,16 +20,18 @@
 
 #include <QMenu>
 
-#include <qwt_plot.h>
-#include <qwt_plot_curve.h>
-
 #include <boost/algorithm/string/predicate.hpp>
 
+using namespace Mantid;
 using namespace Mantid::API;
 
 namespace {
 Mantid::Kernel::Logger g_log("IqtFit");
-}
+std::vector<std::string> IQTFIT_HIDDEN_PROPS = std::vector<std::string>(
+    {"CreateOutput", "LogValue", "PassWSIndexToFunction", "ConvolveMembers",
+     "OutputCompositeMembers", "OutputWorkspace", "IgnoreInvalidData", "Output",
+     "PeakRadius", "PlotParameter"});
+} // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -35,16 +39,20 @@ namespace IDA {
 
 IqtFit::IqtFit(QWidget *parent)
     : IndirectFitAnalysisTab(new IqtFitModel, parent),
-      m_uiForm(new Ui::IqtFit) {
+      m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
   m_iqtFittingModel = dynamic_cast<IqtFitModel *>(fittingModel());
-
   setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(
-      m_iqtFittingModel, m_uiForm->fitDataView));
-  setPlotView(m_uiForm->pvFitPlotView);
+      m_iqtFittingModel, m_uiForm->dockArea->m_fitDataView));
+  setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
-  setFitPropertyBrowser(m_uiForm->fitPropertyBrowser);
+  auto templateBrowser = new IqtTemplateBrowser;
+  m_uiForm->dockArea->m_fitPropertyBrowser->setFunctionTemplateBrowser(
+      templateBrowser);
+  setFitPropertyBrowser(m_uiForm->dockArea->m_fitPropertyBrowser);
+  m_uiForm->dockArea->m_fitPropertyBrowser->setHiddenProperties(
+      IQTFIT_HIDDEN_PROPS);
 
   setEditResultVisible(true);
 }
@@ -55,71 +63,41 @@ void IqtFit::setupFitTab() {
   const auto exponential = functionFactory.createFunction("ExpDecay");
   const auto stretchedExponential =
       functionFactory.createFunction("StretchExp");
-  addSpinnerFunctionGroup("Exponential", {exponential}, 0, 2);
-  addCheckBoxFunctionGroup("Stretched Exponential", {stretchedExponential});
-
-  // Add custom settings
-  addBoolCustomSetting("ConstrainIntensities", "Constrain Intensities");
-  addBoolCustomSetting("ConstrainBeta", "Make Beta Global");
-  addBoolCustomSetting("ExtractMembers", "Extract Members");
-  setCustomSettingEnabled("ConstrainBeta", false);
-  setCustomSettingEnabled("ConstrainIntensities", false);
-
-  // Set available background options
-  setBackgroundOptions({"None", "FlatBackground"});
 
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
-
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
-  connect(this, SIGNAL(customBoolChanged(const QString &, bool)), this,
-          SLOT(customBoolUpdated(const QString &, bool)));
+}
+
+EstimationDataSelector IqtFit::getEstimationDataSelector() const {
+  return
+      [](const MantidVec &x, const MantidVec &y,
+         const std::pair<double, double> range) -> DataForParameterEstimation {
+        (void)range;
+        size_t const n = 4;
+        if (y.size() < n + 1)
+          return DataForParameterEstimation{{}, {}};
+        return DataForParameterEstimation{{x[0], x[n]}, {y[0], y[n]}};
+      };
 }
 
 void IqtFit::fitFunctionChanged() {
-  if (numberOfCustomFunctions("StretchExp") > 0) {
-    setCustomSettingEnabled("ConstrainBeta", true);
-  } else {
-    setCustomBoolSetting("ConstrainBeta", false);
-    setCustomSettingEnabled("ConstrainBeta", false);
-  }
-  setConstrainIntensitiesEnabled(m_iqtFittingModel->canConstrainIntensities());
   m_iqtFittingModel->setFitTypeString(fitTypeString());
-}
-
-void IqtFit::setConstrainIntensitiesEnabled(bool enabled) {
-  setCustomSettingEnabled("ConstrainIntensities", enabled);
-  if (!enabled)
-    setCustomBoolSetting("ConstrainIntensities", false);
-  else if (boolSettingValue("ConstrainIntensities")) {
-    if (m_iqtFittingModel->setConstrainIntensities(true))
-      updateTies();
-  }
-}
-
-void IqtFit::customBoolUpdated(const QString &key, bool value) {
-  if (key == "Constrain Intensities") {
-    if (m_iqtFittingModel->setConstrainIntensities(value))
-      updateTies();
-  } else if (key == "Make Beta Global")
-    m_iqtFittingModel->setBetaIsGlobal(value);
 }
 
 std::string IqtFit::fitTypeString() const {
   const auto numberOfExponential = numberOfCustomFunctions("ExpDecay");
   const auto numberOfStretched = numberOfCustomFunctions("StretchExp");
-
+  std::string functionType{""};
   if (numberOfExponential > 0)
-    return std::to_string(numberOfExponential) + "E";
+    functionType += std::to_string(numberOfExponential) + "E";
 
   if (numberOfStretched > 0)
-    return std::to_string(numberOfStretched) + "S";
+    functionType += std::to_string(numberOfStretched) + "S";
 
-  return "";
+  return functionType;
 }
 
 void IqtFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
-  fitAlgorithm->setProperty("ExtractMembers",
-                            boolSettingValue("ExtractMembers"));
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }
 

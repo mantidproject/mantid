@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/IWorkspaceProperty.h"
@@ -15,6 +15,7 @@
 #include "MantidQtWidgets/Common/FilePropertyWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
+#include "MantidQtWidgets/Common/PropertyWidget.h"
 
 #include <QCheckBox>
 #include <QCloseEvent>
@@ -179,7 +180,7 @@ void AlgorithmDialog::saveInput() {
  * Set the algorithm pointer
  * @param alg :: A pointer to the algorithm
  */
-void AlgorithmDialog::setAlgorithm(Mantid::API::IAlgorithm_sptr alg) {
+void AlgorithmDialog::setAlgorithm(const Mantid::API::IAlgorithm_sptr &alg) {
   m_algorithm = alg;
   m_algName = QString::fromStdString(alg->name());
   m_algProperties.clear();
@@ -329,7 +330,7 @@ void AlgorithmDialog::showValidators() {
  * end.
  * @return true if the property is valid.
  */
-bool AlgorithmDialog::setPropertyValue(const QString pName,
+bool AlgorithmDialog::setPropertyValue(const QString &pName,
                                        bool validateOthers) {
   // Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
   QString value = getInputValue(pName);
@@ -433,7 +434,7 @@ void AlgorithmDialog::addOptionalMessage(QVBoxLayout *mainLay) {
   inputMessage->setAlignment(Qt::AlignJustify);
   inputMessage->setMargin(3);
   inputMessage->setText(getOptionalMessage());
-  QHBoxLayout *msgArea = new QHBoxLayout;
+  auto *msgArea = new QHBoxLayout;
   msgArea->addWidget(inputMessage);
   mainLay->addLayout(msgArea, 0);
 }
@@ -566,6 +567,15 @@ QWidget *AlgorithmDialog::tie(QWidget *widget, const QString &property,
     setPreviousValue(widget, property);
   }
 
+  // If the widget is a line edit and has no value then set the placeholder text
+  // to the default value.
+  QLineEdit *textfield = qobject_cast<QLineEdit *>(widget);
+  if ((textfield)) {
+    if (prop) {
+      PropertyWidget::setFieldPlaceholderText(prop, textfield);
+    }
+  }
+
   return validlbl;
 }
 
@@ -657,7 +667,7 @@ QLayout *AlgorithmDialog::createDefaultButtonLayout(
   m_exitButton = new QPushButton(cancelText);
   connect(m_exitButton, SIGNAL(clicked()), this, SLOT(reject()));
 
-  QHBoxLayout *buttonRowLayout = new QHBoxLayout;
+  auto *buttonRowLayout = new QHBoxLayout;
   buttonRowLayout->addWidget(createHelpButton(helpText));
   buttonRowLayout->addStretch();
 
@@ -683,7 +693,7 @@ QLayout *AlgorithmDialog::createDefaultButtonLayout(
  * for that algorithm
  */
 QPushButton *AlgorithmDialog::createHelpButton(const QString &helpText) const {
-  QPushButton *help = new QPushButton(helpText);
+  auto *help = new QPushButton(helpText);
   help->setMaximumWidth(25);
   connect(help, SIGNAL(clicked()), this, SLOT(helpClicked()));
   return help;
@@ -798,15 +808,12 @@ void AlgorithmDialog::executeAlgorithmAsync() {
 }
 
 //-------------------------------------------------------------------------------------------------
-/*
- */
+
 void AlgorithmDialog::removeAlgorithmFromManager() {
   using namespace Mantid::API;
   AlgorithmManager::Instance().removeById(m_algorithm->getAlgorithmID());
 }
 
-/**
- */
 void AlgorithmDialog::enableExitButton() { m_exitButton->setEnabled(true); }
 
 //------------------------------------------------------
@@ -922,7 +929,7 @@ void AlgorithmDialog::setOptionalMessage(const QString &message) {
  *
  * The function needs to know about the types of widgets
  * that are being used. Currently it knows about QComboBox, QLineEdit, QCheckBox
- * and MWRunFiles
+ * and FileFinderWidget
  * @param widget :: A pointer to the widget
  */
 QString AlgorithmDialog::getValue(QWidget *widget) {
@@ -1064,7 +1071,7 @@ void AlgorithmDialog::setPreviousValue(QWidget *widget,
  */
 void AlgorithmDialog::addAlgorithmObserver(
     Mantid::API::AlgorithmObserver *observer) {
-  m_observers.push_back(observer);
+  m_observers.emplace_back(observer);
   // turn off the keep open option - it would only confuse things if someone is
   // watching
   setShowKeepOpen(false);

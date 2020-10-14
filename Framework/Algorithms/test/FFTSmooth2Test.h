@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FFTSMOOTH2TEST_H_
-#define FFTSMOOTH2TEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -170,8 +169,9 @@ public:
   }
 
   //-------------------------------------------------------------------------------------------------
-  void performTest(bool event, std::string filter, std::string params,
-                   bool AllSpectra, int WorkspaceIndex, bool inPlace = false) {
+  void performTest(bool event, const std::string &filter,
+                   const std::string &params, bool AllSpectra,
+                   int WorkspaceIndex, bool inPlace = false) {
     MatrixWorkspace_sptr ws1, out;
     int numPixels = 10;
     int numBins = 20;
@@ -277,9 +277,11 @@ public:
             }
 
             if (!AllSpectra) {
+              bool allSpectraGtZero = false;
+
               for (int WorkspaceIndex = 0; WorkspaceIndex < 10;
                    WorkspaceIndex++) {
-                performTest((event > 0), filter, params, (AllSpectra > 0),
+                performTest((event > 0), filter, params, allSpectraGtZero,
                             WorkspaceIndex, (inPlace > 0));
               }
             } else {
@@ -292,5 +294,3 @@ public:
 private:
   Mantid::Algorithms::FFTSmooth2 fftsmooth2;
 };
-
-#endif /*FFTSMOOTH2TEST_H_*/

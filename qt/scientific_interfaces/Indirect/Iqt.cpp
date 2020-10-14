@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "Iqt.h"
 
@@ -13,8 +13,6 @@
 #include "MantidQtWidgets/Plotting/RangeSelector.h"
 
 #include "MantidQtWidgets/Common/UserInputValidator.h"
-
-#include <qwt_plot.h>
 
 #include <tuple>
 
@@ -30,10 +28,10 @@ MatrixWorkspace_sptr getADSMatrixWorkspace(std::string const &workspaceName) {
       workspaceName);
 }
 
-std::string
-checkInstrumentParametersMatch(Instrument_const_sptr sampleInstrument,
-                               Instrument_const_sptr resolutionInstrument,
-                               std::string const &parameter) {
+std::string checkInstrumentParametersMatch(
+    const Instrument_const_sptr &sampleInstrument,
+    const Instrument_const_sptr &resolutionInstrument,
+    std::string const &parameter) {
   if (!sampleInstrument->hasParameter(parameter))
     return "Could not find the " + parameter + " for the sample workspace.";
   if (!resolutionInstrument->hasParameter(parameter))
@@ -45,9 +43,10 @@ checkInstrumentParametersMatch(Instrument_const_sptr sampleInstrument,
   return "";
 }
 
-std::string checkParametersMatch(MatrixWorkspace_const_sptr sampleWorkspace,
-                                 MatrixWorkspace_const_sptr resolutionWorkspace,
-                                 std::string const &parameter) {
+std::string
+checkParametersMatch(const MatrixWorkspace_const_sptr &sampleWorkspace,
+                     const MatrixWorkspace_const_sptr &resolutionWorkspace,
+                     std::string const &parameter) {
   auto const sampleInstrument = sampleWorkspace->getInstrument();
   auto const resolutionInstrument = resolutionWorkspace->getInstrument();
   return checkInstrumentParametersMatch(sampleInstrument, resolutionInstrument,
@@ -63,8 +62,8 @@ std::string checkParametersMatch(std::string const &sampleName,
 }
 
 std::string
-checkInstrumentsMatch(MatrixWorkspace_const_sptr sampleWorkspace,
-                      MatrixWorkspace_const_sptr resolutionWorkspace) {
+checkInstrumentsMatch(const MatrixWorkspace_const_sptr &sampleWorkspace,
+                      const MatrixWorkspace_const_sptr &resolutionWorkspace) {
   auto const sampleInstrument = sampleWorkspace->getInstrument();
   auto const resolutionInstrument = resolutionWorkspace->getInstrument();
   if (sampleInstrument->getName() != resolutionInstrument->getName())
@@ -72,9 +71,9 @@ checkInstrumentsMatch(MatrixWorkspace_const_sptr sampleWorkspace,
   return "";
 }
 
-std::string
-validateNumberOfHistograms(MatrixWorkspace_const_sptr sampleWorkspace,
-                           MatrixWorkspace_const_sptr resolutionWorkspace) {
+std::string validateNumberOfHistograms(
+    const MatrixWorkspace_const_sptr &sampleWorkspace,
+    const MatrixWorkspace_const_sptr &resolutionWorkspace) {
   auto const sampleSize = sampleWorkspace->getNumberHistograms();
   auto const resolutionSize = resolutionWorkspace->getNumberHistograms();
   if (resolutionSize > 1 && sampleSize != resolutionSize)
@@ -87,8 +86,8 @@ void addErrorMessage(UserInputValidator &uiv, std::string const &message) {
     uiv.addErrorMessage(QString::fromStdString(message) + "\n");
 }
 
-bool isTechniqueDirect(MatrixWorkspace_const_sptr sampleWorkspace,
-                       MatrixWorkspace_const_sptr resWorkspace) {
+bool isTechniqueDirect(const MatrixWorkspace_const_sptr &sampleWorkspace,
+                       const MatrixWorkspace_const_sptr &resWorkspace) {
   try {
     auto const logValue1 = sampleWorkspace->getLog("deltaE-mode")->value();
     auto const logValue2 = resWorkspace->getLog("deltaE-mode")->value();
@@ -204,12 +203,10 @@ void Iqt::setup() {
   auto xRangeSelector = m_uiForm.ppPlot->addRangeSelector("IqtRange");
 
   // signals / slots & validators
-  connect(xRangeSelector, SIGNAL(selectionChangedLazy(double, double)), this,
-          SLOT(rsRangeChangedLazy(double, double)));
+  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
+          SLOT(rangeChanged(double, double)));
   connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updateRS(QtProperty *, double)));
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updatePropertyValues(QtProperty *, double)));
+          SLOT(updateRangeSelector(QtProperty *, double)));
   connect(m_uiForm.dsInput, SIGNAL(dataReady(const QString &)), this,
           SLOT(plotInput(const QString &)));
   connect(m_uiForm.dsResolution, SIGNAL(dataReady(const QString &)), this,
@@ -236,6 +233,7 @@ void Iqt::setup() {
 }
 
 void Iqt::run() {
+  m_uiForm.ppPlot->watchADS(false);
   setRunIsRunning(true);
 
   updateDisplayedBinParameters();
@@ -279,6 +277,7 @@ void Iqt::run() {
  * @param error If the algorithm failed
  */
 void Iqt::algorithmComplete(bool error) {
+  m_uiForm.ppPlot->watchADS(true);
   setRunIsRunning(false);
   if (error)
     setSaveResultEnabled(false);
@@ -352,40 +351,6 @@ bool Iqt::validate() {
 }
 
 /**
- * Ensures that the min energy is below zero and the max energy is above zero
- *
- * @param prop Qt property that was changed
- * @param val New value of that property
- */
-void Iqt::updatePropertyValues(QtProperty *prop, double val) {
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updatePropertyValues(QtProperty *, double)));
-
-  if (prop == m_properties["EHigh"]) {
-    if (val < 0) {
-      val = -val;
-      m_dblManager->setValue(m_properties["EHigh"], val);
-    }
-
-    if (m_uiForm.ckSymmetricEnergy->isChecked())
-      m_dblManager->setValue(m_properties["ELow"], -val);
-  } else if (prop == m_properties["ELow"]) {
-    if (val > 0) {
-      val = -val;
-      m_dblManager->setValue(m_properties["ELow"], val);
-    }
-
-    if (m_uiForm.ckSymmetricEnergy->isChecked())
-      m_dblManager->setValue(m_properties["EHigh"], -val);
-  }
-
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updatePropertyValues(QtProperty *, double)));
-
-  updateDisplayedBinParameters();
-}
-
-/**
  * Calculates binning parameters.
  */
 void Iqt::updateDisplayedBinParameters() {
@@ -418,13 +383,15 @@ void Iqt::updateDisplayedBinParameters() {
                              numBins);
   if (success) {
     disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-               SLOT(updatePropertyValues(QtProperty *, double)));
+               SLOT(updateRangeSelector(QtProperty *, double)));
+
     // Update data in property editor
     m_dblManager->setValue(m_properties["EWidth"], energyWidth);
     m_dblManager->setValue(m_properties["ResolutionBins"], resolutionBins);
     m_dblManager->setValue(m_properties["SampleBins"], sampleBins);
+
     connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-            SLOT(updatePropertyValues(QtProperty *, double)));
+            SLOT(updateRangeSelector(QtProperty *, double)));
 
     // Warn for low number of resolution bins
     if (resolutionBins < 5)
@@ -454,9 +421,6 @@ void Iqt::setFileExtensionsByName(bool filter) {
 }
 
 void Iqt::plotInput(const QString &wsname) {
-  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-             SLOT(updatePropertyValues(QtProperty *, double)));
-
   MatrixWorkspace_sptr workspace;
   try {
     workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -475,7 +439,7 @@ void Iqt::plotInput(const QString &wsname) {
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   try {
-    QPair<double, double> range = m_uiForm.ppPlot->getCurveRange("Sample");
+    auto const range = getXRangeFromWorkspace(workspace);
     double rounded_min(range.first);
     double rounded_max(range.second);
     const std::string instrName(workspace->getInstrument()->getName());
@@ -515,9 +479,6 @@ void Iqt::plotInput(const QString &wsname) {
     showMessageBox(exc.what());
   }
 
-  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
-          SLOT(updatePropertyValues(QtProperty *, double)));
-
   updateDisplayedBinParameters();
 }
 
@@ -531,24 +492,81 @@ void Iqt::setPreviewSpectrumMaximum(int value) {
  * @param min Range selector min value
  * @param max Range selector max value
  */
-void Iqt::rsRangeChangedLazy(double min, double max) {
+void Iqt::rangeChanged(double min, double max) {
   double oldMin = m_dblManager->value(m_properties["ELow"]);
   double oldMax = m_dblManager->value(m_properties["EHigh"]);
 
-  if (fabs(oldMin - min) > 0.0000001)
-    m_dblManager->setValue(m_properties["ELow"], min);
-
-  if (fabs(oldMax - max) > 0.0000001)
-    m_dblManager->setValue(m_properties["EHigh"], max);
-}
-
-void Iqt::updateRS(QtProperty *prop, double val) {
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
-  if (prop == m_properties["ELow"])
-    xRangeSelector->setMinimum(val);
-  else if (prop == m_properties["EHigh"])
-    xRangeSelector->setMaximum(val);
+  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
+             SLOT(rangeChanged(double, double)));
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateRangeSelector(QtProperty *, double)));
+
+  if (fabs(oldMin - min) > 0.0000001) {
+    m_dblManager->setValue(m_properties["ELow"], min);
+    xRangeSelector->setMinimum(min);
+    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
+      m_dblManager->setValue(m_properties["EHigh"], -min);
+      xRangeSelector->setMaximum(-min);
+    }
+  }
+
+  if (fabs(oldMax - max) > 0.0000001) {
+    m_dblManager->setValue(m_properties["EHigh"], max);
+    xRangeSelector->setMaximum(max);
+    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
+      m_dblManager->setValue(m_properties["ELow"], -max);
+      xRangeSelector->setMinimum(-max);
+    }
+  }
+
+  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
+          SLOT(rangeChanged(double, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateRangeSelector(QtProperty *, double)));
+}
+
+/**
+ * Updates the range selectors when the ELow or EHigh property is changed in the
+ * table.
+ *
+ * @param prop The property which has been changed
+ * @param val The new position for the range selector
+ */
+void Iqt::updateRangeSelector(QtProperty *prop, double val) {
+  auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
+
+  disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
+             SLOT(rangeChanged(double, double)));
+  disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+             SLOT(updateRangeSelector(QtProperty *, double)));
+
+  if (prop == m_properties["ELow"]) {
+    setRangeSelectorMin(m_properties["ELow"], m_properties["EHigh"],
+                        xRangeSelector, val);
+    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
+      m_dblManager->setValue(m_properties["EHigh"], -val);
+      setRangeSelectorMax(m_properties["ELow"], m_properties["EHigh"],
+                          xRangeSelector, -val);
+    }
+
+  } else if (prop == m_properties["EHigh"]) {
+    setRangeSelectorMax(m_properties["ELow"], m_properties["EHigh"],
+                        xRangeSelector, val);
+    if (m_uiForm.ckSymmetricEnergy->isChecked()) {
+      m_dblManager->setValue(m_properties["ELow"], -val);
+      setRangeSelectorMin(m_properties["ELow"], m_properties["EHigh"],
+                          xRangeSelector, -val);
+    }
+  }
+
+  connect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
+          SLOT(rangeChanged(double, double)));
+  connect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
+          SLOT(updateRangeSelector(QtProperty *, double)));
+
+  updateDisplayedBinParameters();
 }
 
 void Iqt::updateEnergyRange(int state) {

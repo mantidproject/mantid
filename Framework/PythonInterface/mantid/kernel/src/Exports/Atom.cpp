@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/NeutronAtom.h"
@@ -48,27 +48,27 @@ dict neutron(Atom &self) {
  * @param z_number :: Atomic number of element (number of protons)
  * @return a dict of the neutron cross-sections
  */
-static boost::shared_ptr<Atom> setAtom(const std::string &symbol,
-                                       const uint16_t a_number = 0,
-                                       const uint16_t z_number = 0) {
+static std::shared_ptr<Atom> setAtom(const std::string &symbol,
+                                     const uint16_t a_number = 0,
+                                     const uint16_t z_number = 0) {
   if (z_number > 0) {
     Atom atom = getAtom(z_number, a_number);
-    return boost::shared_ptr<Atom>(new Atom(atom));
+    return std::shared_ptr<Atom>(new Atom(atom));
   }
   // Returns Hydrogen by default
   else if (symbol.empty()) {
     Atom atom = getAtom(1, 0);
-    return boost::shared_ptr<Atom>(new Atom(atom));
+    return std::shared_ptr<Atom>(new Atom(atom));
   } else {
     Atom atom = getAtom(symbol, a_number);
-    return boost::shared_ptr<Atom>(new Atom(atom));
+    return std::shared_ptr<Atom>(new Atom(atom));
   }
 }
 } // namespace
 
 void export_Atom() {
   register_ptr_to_python<Atom *>();
-  register_ptr_to_python<boost::shared_ptr<Atom>>();
+  register_ptr_to_python<std::shared_ptr<Atom>>();
 
   class_<Atom, boost::noncopyable>("Atom", no_init) // No default constructor
       .def("__init__",

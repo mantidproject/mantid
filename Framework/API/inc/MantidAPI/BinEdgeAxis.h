@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_BINEDGEAXIS_H_
-#define MANTID_API_BINEDGEAXIS_H_
+#pragma once
 
 #include "MantidAPI/NumericAxis.h"
 
@@ -30,13 +29,7 @@ public:
   std::vector<double> createBinBoundaries() const override;
   void setValue(const std::size_t &index, const double &value) override;
   size_t indexOfValue(const double value) const override;
-
-private:
-  /// Private, undefined copy assignment operator
-  const BinEdgeAxis &operator=(const BinEdgeAxis &);
 };
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_BINEDGEAXIS_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*
  * SCDCalibratePanelsTest.h
@@ -11,11 +11,11 @@
  *      Author: ruth
  */
 
-#ifndef SCDCALIBRATEPANELSTEST_H_
-#define SCDCALIBRATEPANELSTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidCrystal/SCDCalibratePanels.h"
+#include <boost/filesystem.hpp>
 #include <cxxtest/TestSuite.h>
 
 using namespace Mantid::API;
@@ -30,7 +30,7 @@ class SCDCalibratePanelsTest : public CxxTest::TestSuite {
 public:
   void test_TOPAZ_5637() {
     // load a peaks file
-    boost::shared_ptr<Algorithm> alg =
+    std::shared_ptr<Algorithm> alg =
         AlgorithmFactory::Instance().create("LoadIsawPeaks", 1);
     alg->initialize();
     alg->setPropertyValue("Filename", "Peaks5637.integrate");
@@ -43,7 +43,7 @@ public:
     std::vector<int> notBank47;
     for (int i = 0; i < int(numberPeaks); i++)
       if (pws->getPeak(i).getBankName() != "bank47")
-        notBank47.push_back(i);
+        notBank47.emplace_back(i);
     pws->removePeaks(std::move(notBank47));
 
     // run the calibration
@@ -57,7 +57,9 @@ public:
     alg->setProperty("alpha", 90.0);
     alg->setProperty("beta", 90.0);
     alg->setProperty("gamma", 120.0);
-    alg->setPropertyValue("DetCalFilename", "/tmp/topaz.detcal"); // deleteme
+    auto detCalTempPath = boost::filesystem::temp_directory_path();
+    detCalTempPath /= "topaz.detcal";
+    alg->setPropertyValue("DetCalFilename", detCalTempPath.string());
     TS_ASSERT(alg->execute());
 
     // verify the results
@@ -82,7 +84,7 @@ public:
         AnalysisDataService::Instance().retrieveWS<ITableWorkspace>(
             "params_L1");
     TS_ASSERT_DELTA(0.00529, resultsL1->cell<double>(2, 1), .01);
+
+    remove(detCalTempPath.string().c_str());
   }
 };
-
-#endif /* SCDCALIBRATEPANELSTEST_H_ */

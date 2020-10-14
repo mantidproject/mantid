@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_DETECTORGRIDDEFINITION_H_
-#define MANTID_ALGORITHMS_DETECTORGRIDDEFINITION_H_
+#pragma once
 
 #include "MantidAlgorithms/DllConfig.h"
 
 #include <array>
+#include <cstddef>
 
 namespace Mantid {
 namespace Algorithms {
@@ -27,8 +27,11 @@ public:
   double longitudeAt(const size_t column) const;
   std::array<size_t, 4> nearestNeighbourIndices(const double latitude,
                                                 const double longitude) const;
+  std::pair<size_t, size_t> getNearestVertex(const double latitude,
+                                             const double longitude) const;
   size_t numberColumns() const;
   size_t numberRows() const;
+  size_t getDetectorIndex(size_t row, size_t col);
 
 private:
   double m_minLatitude;
@@ -43,5 +46,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_DETECTORGRIDDEFINITION_H_ */

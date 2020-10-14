@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/LiveListenerFactory.h"
 #include "MantidKernel/ConfigService.h"
@@ -10,7 +10,7 @@
 #include "MantidKernel/Logger.h"
 #include <Poco/Net/SocketAddress.h>
 
-using boost::shared_ptr;
+using std::shared_ptr;
 
 namespace Mantid {
 namespace API {
@@ -35,7 +35,7 @@ Kernel::Logger g_log("LiveListenerFactory");
  * @throws std::runtime_error If unable to connect to the listener at the
  *                            configured address.
  */
-boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
+std::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
     const std::string &instrumentName, bool connect,
     const API::IAlgorithm *callingAlgorithm,
     const std::string &listenerConnectionName) const {
@@ -69,7 +69,7 @@ boost::shared_ptr<ILiveListener> LiveListenerFactoryImpl::create(
  *                   if it has any.
  * @return A shared pointer to the created ILiveListener implementation
  */
-boost::shared_ptr<ILiveListener>
+std::shared_ptr<ILiveListener>
 LiveListenerFactoryImpl::create(const Kernel::LiveListenerInfo &info,
                                 bool connect,
                                 const API::IAlgorithm *callingAlgorithm) const {

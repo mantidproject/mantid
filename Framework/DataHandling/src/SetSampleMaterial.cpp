@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SetSampleMaterial.h"
 #include "MantidAPI/ExperimentInfo.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidGeometry/Crystal/OrientedLattice.h"
@@ -49,7 +50,7 @@ void SetSampleMaterial::init() {
   declareProperty("AtomicNumber", 0, "The atomic number");
   declareProperty("MassNumber", 0,
                   "Mass number if ion (use 0 for default mass number)");
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty(
       "SampleNumberDensity", EMPTY_DBL(), mustBePositive,
@@ -74,6 +75,11 @@ void SetSampleMaterial::init() {
                   "Optional:  This total scattering cross-section (coherent + "
                   "incoherent) for the sample material in barns will be used "
                   "instead of tabulated");
+  const std::vector<std::string> extensions{".DAT"};
+  declareProperty(
+      std::make_unique<FileProperty>("AttenuationProfile", "",
+                                     FileProperty::OptionalLoad, extensions),
+      "The path name of the file containing the attenuation profile");
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
                   "to be used to calculate the number density.");
@@ -87,7 +93,7 @@ void SetSampleMaterial::init() {
       "to calculate the number density.");
   const std::vector<std::string> units({"Atoms", "Formula Units"});
   declareProperty("NumberDensityUnit", units.front(),
-                  boost::make_shared<StringListValidator>(units),
+                  std::make_shared<StringListValidator>(units),
                   "Choose which units SampleNumberDensity referes to.");
 
   // Perform Group Associations.
@@ -110,6 +116,7 @@ void SetSampleMaterial::init() {
   setPropertyGroup("IncoherentXSection", specificValuesGrp);
   setPropertyGroup("AttenuationXSection", specificValuesGrp);
   setPropertyGroup("ScatteringXSection", specificValuesGrp);
+  setPropertyGroup("AttenuationProfile", specificValuesGrp);
 
   // Extra property settings
   setPropertySettings("ChemicalFormula",
@@ -130,16 +137,17 @@ std::map<std::string, std::string> SetSampleMaterial::validateInputs() {
   params.chemicalSymbol = getPropertyValue("ChemicalFormula");
   params.atomicNumber = getProperty("AtomicNumber");
   params.massNumber = getProperty("MassNumber");
-  params.sampleNumberDensity = getProperty("SampleNumberDensity");
+  params.numberDensity = getProperty("SampleNumberDensity");
   params.zParameter = getProperty("ZParameter");
   params.unitCellVolume = getProperty("UnitCellVolume");
-  params.sampleMassDensity = getProperty("SampleMassDensity");
-  params.sampleMass = getProperty("SampleMass");
-  params.sampleVolume = getProperty("SampleVolume");
+  params.massDensity = getProperty("SampleMassDensity");
+  params.mass = getProperty("SampleMass");
+  params.volume = getProperty("SampleVolume");
   params.coherentXSection = getProperty("CoherentXSection");
   params.incoherentXSection = getProperty("IncoherentXSection");
   params.attenuationXSection = getProperty("AttenuationXSection");
   params.scatteringXSection = getProperty("ScatteringXSection");
+  params.attenuationProfileFileName = getPropertyValue("AttenuationProfile");
   const std::string numberDensityUnit = getProperty("NumberDensityUnit");
   if (numberDensityUnit == "Atoms") {
     params.numberDensityUnit = MaterialBuilder::NumberDensityUnit::Atoms;
@@ -182,7 +190,7 @@ void SetSampleMaterial::exec() {
   Workspace_sptr workspace = getProperty("InputWorkspace");
   // an ExperimentInfo object has a sample
   ExperimentInfo_sptr expInfo =
-      boost::dynamic_pointer_cast<ExperimentInfo>(workspace);
+      std::dynamic_pointer_cast<ExperimentInfo>(workspace);
   if (!expInfo) {
     throw std::runtime_error("InputWorkspace does not have a sample object");
   }
@@ -202,7 +210,7 @@ void SetSampleMaterial::exec() {
     normalizedLaue = 0.;
 
   // set the material but leave the geometry unchanged
-  auto shapeObject = boost::shared_ptr<Geometry::IObject>(
+  auto shapeObject = std::shared_ptr<Geometry::IObject>(
       expInfo->sample().getShape().cloneWithMaterial(*material));
   expInfo->mutableSample().setShape(shapeObject);
   g_log.information() << "Sample number density ";

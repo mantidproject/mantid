@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PROJECTIONSURFACE_H
-#define PROJECTIONSURFACE_H
+#pragma once
 
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/Quat.h"
@@ -23,7 +22,7 @@
 #include <QMap>
 #include <QStack>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -148,6 +147,8 @@ public:
   /// Save settings for the projection surface to a project file
   virtual std::string saveToProject() const;
 
+  void setCurrentTab(QString currentTab) { m_currentTab = currentTab; }
+
   //-----------------------------------
   //    Mask methods
   //-----------------------------------
@@ -236,16 +237,18 @@ public:
   /// Save masks to a table workspace
   void saveShapesToTableWorkspace();
   /// Load masks from a table workspace
-  void loadShapesFromTableWorkspace(Mantid::API::ITableWorkspace_const_sptr ws);
+  void loadShapesFromTableWorkspace(
+      const Mantid::API::ITableWorkspace_const_sptr &ws);
 
   //-----------------------------------
   //    Peaks overlay methods
   //-----------------------------------
 
   QList<PeakMarker2D *> getMarkersWithID(int detID) const;
-  boost::shared_ptr<Mantid::API::IPeaksWorkspace> getEditPeaksWorkspace() const;
+  std::shared_ptr<Mantid::API::IPeaksWorkspace> getEditPeaksWorkspace() const;
   QStringList getPeaksWorkspaceNames() const;
-  void deletePeaksWorkspace(boost::shared_ptr<Mantid::API::IPeaksWorkspace> ws);
+  void
+  deletePeaksWorkspace(const std::shared_ptr<Mantid::API::IPeaksWorkspace> &ws);
   void clearPeakOverlays();
   void clearAlignmentPlane();
   void clearComparisonPeaks();
@@ -266,6 +269,7 @@ signals:
   // detector selection
   void singleComponentTouched(size_t /*_t1*/);
   void singleComponentPicked(size_t /*_t1*/);
+  void singleComponentPickedForMasking(size_t /*_t1*/);
 
   // shape manipulation
   void signalToStartCreatingShape2D(const QString &type,
@@ -386,14 +390,13 @@ private:
   /// Set when the picking image must be redrawn regardless of the interaction
   /// mode
   mutable bool m_redrawPicking;
+  QString m_currentTab;
 
   friend class InstrumentWidgetEncoder;
   friend class InstrumentWidgetDecoder;
 };
 
-using ProjectionSurface_sptr = boost::shared_ptr<ProjectionSurface>;
+using ProjectionSurface_sptr = std::shared_ptr<ProjectionSurface>;
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif // PROJECTIONSURFACE_H

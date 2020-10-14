@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from Muon.GUI.FrequencyDomainAnalysis.Transform.transform_view import TransformView
 
 from Muon.GUI.FrequencyDomainAnalysis.TransformSelection.transform_selection_widget import TransformSelectionWidget
-from Muon.GUI.Common.observer_pattern import Observer, GenericObserver
+from mantidqt.utils.observer_pattern import Observer, GenericObserver
 
 from qtpy import QtWidgets
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/UnwrapMonitorsInTOF.h"
 #include "MantidAPI/ISpectrum.h"
@@ -244,7 +244,7 @@ getWorkspaceIndicesForMonitors(Mantid::API::MatrixWorkspace *workspace) {
       auto spectrumNumber = spectrum.getSpectrumNo();
       auto workspaceIndex =
           workspace->getIndexFromSpectrumNumber(spectrumNumber);
-      workspaceIndices.push_back(workspaceIndex);
+      workspaceIndices.emplace_back(workspaceIndex);
     }
   } else {
     auto numberOfHistograms = workspace->getNumberHistograms();
@@ -252,7 +252,7 @@ getWorkspaceIndicesForMonitors(Mantid::API::MatrixWorkspace *workspace) {
     for (size_t workspaceIndex = 0; workspaceIndex < numberOfHistograms;
          ++workspaceIndex) {
       if (spectrumInfo.isMonitor(workspaceIndex)) {
-        workspaceIndices.push_back(workspaceIndex);
+        workspaceIndices.emplace_back(workspaceIndex);
       }
     }
   }

@@ -17,6 +17,9 @@ Fixes #xxxx. <!-- and fix #xxxx or close #xxxx xor resolves #xxxx -->
 *This does not require release notes* because **fill in an explanation of why**
 -->
 
+<!-- Ensure the base of this PR is correct (e.g. release-next or master)
+Finally, don't forget to add the appropriate labels, milestones, etc.!  -->
+
 ---
 
 #### Reviewer ####
@@ -28,6 +31,7 @@ Please comment on the following ([full description](http://developer.mantidproje
 - Is the code of an acceptable quality?
 - Does the code conform to the [coding standards](http://developer.mantidproject.org/Standards/)?
 - Are the unit tests small and test the class in isolation?
+- If there is GUI work does it follow the [GUI standards](http://developer.mantidproject.org/Standards/GUIStandards.html)?
 - If there are changes in the release notes then do they describe the changes appropriately?
 
 ##### Functional Tests #####

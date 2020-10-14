@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_PERFORMINDEXOPERATIONS_H_
-#define MANTID_ALGORITHMS_PERFORMINDEXOPERATIONS_H_
+#pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -16,7 +15,8 @@ namespace Algorithms {
 /** PerformIndexOperations : Crop and sum a workspace according to the parsed
   workspace index operations provided.
 */
-class DLLExport PerformIndexOperations : public API::DataProcessorAlgorithm {
+class MANTID_ALGORITHMS_DLL PerformIndexOperations
+    : public API::DataProcessorAlgorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -37,5 +37,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_PERFORMINDEXOPERATIONS_H_ */

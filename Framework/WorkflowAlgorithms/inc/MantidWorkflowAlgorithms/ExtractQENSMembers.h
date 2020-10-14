@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_EXRACTMEMBERS_H_
-#define MANTID_ALGORITHMS_EXRACTMEMBERS_H_
+#pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -34,7 +33,7 @@ private:
   getQValues(const std::vector<Mantid::API::MatrixWorkspace_sptr> &workspaces);
 
   std::vector<std::string>
-  getAxisLabels(Mantid::API::MatrixWorkspace_sptr workspace,
+  getAxisLabels(const Mantid::API::MatrixWorkspace_sptr &workspace,
                 size_t axisIndex) const;
 
   std::vector<std::string>
@@ -42,20 +41,21 @@ private:
                          const std::vector<std::string> &newNames) const;
 
   Mantid::API::MatrixWorkspace_sptr
-  extractSpectrum(Mantid::API::MatrixWorkspace_sptr inputWS, size_t spectrum);
+  extractSpectrum(const Mantid::API::MatrixWorkspace_sptr &inputWS,
+                  size_t spectrum);
 
   Mantid::API::MatrixWorkspace_sptr
-  appendSpectra(Mantid::API::MatrixWorkspace_sptr inputWS,
-                Mantid::API::MatrixWorkspace_sptr spectraWorkspace);
+  appendSpectra(const Mantid::API::MatrixWorkspace_sptr &inputWS,
+                const Mantid::API::MatrixWorkspace_sptr &spectraWorkspace);
 
   Mantid::API::WorkspaceGroup_sptr
   groupWorkspaces(const std::vector<std::string> &workspaceNames);
 
   std::vector<Mantid::API::MatrixWorkspace_sptr>
-  createMembersWorkspaces(Mantid::API::MatrixWorkspace_sptr initialWS,
+  createMembersWorkspaces(const Mantid::API::MatrixWorkspace_sptr &initialWS,
                           const std::vector<std::string> &members);
 
-  void appendToMembers(Mantid::API::MatrixWorkspace_sptr resultWS,
+  void appendToMembers(const Mantid::API::MatrixWorkspace_sptr &resultWS,
                        std::vector<Mantid::API::MatrixWorkspace_sptr> &members);
 
   void setNumericAxis(
@@ -70,5 +70,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_EXRACTMEMBERS_H_ */

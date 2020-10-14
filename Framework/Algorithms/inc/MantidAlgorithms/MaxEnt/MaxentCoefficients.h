@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MAXENTCOEFFICIENTS_H_
-#define MANTID_ALGORITHMS_MAXENTCOEFFICIENTS_H_
+#pragma once
 
 #include "MantidKernel/Matrix.h"
 
@@ -19,5 +18,3 @@ struct QuadraticCoefficients {
   Mantid::Kernel::DblMatrix s2; // Quadratic coefficient g_mu_nu
   Mantid::Kernel::DblMatrix c2; // Quadratic coefficient M_mu_nu
 };
-
-#endif /* MANTID_ALGORITHMS_MAXENTCOEFFICIENTS_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDEVENTS_CREATEMDHISTOWORKSPACETEST_H_
-#define MANTID_MDEVENTS_CREATEMDHISTOWORKSPACETEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidGeometry/MDGeometry/GeneralFrame.h"
@@ -28,7 +27,7 @@ private:
   be overriden in individual tests.
   */
   IAlgorithm_sptr make_standard_algorithm(const std::string &outWSName) {
-    IAlgorithm_sptr alg = boost::make_shared<CreateMDHistoWorkspace>();
+    IAlgorithm_sptr alg = std::make_shared<CreateMDHistoWorkspace>();
     alg->initialize();
     alg->setRethrows(true);
     alg->setPropertyValue("SignalInput", "1,2,3");
@@ -137,10 +136,10 @@ public:
     TS_ASSERT_EQUALS(5, dim1->getNBins());
 
     // Check the data
-    double *signals = outWs->getSignalArray();
+    const auto signals = outWs->getSignalArray();
     TS_ASSERT_DELTA(1, signals[0], 0.0001); // Check the first signal value
     TS_ASSERT_DELTA(2, signals[1], 0.0001); // Check the second signal value
-    double *errorsSQ = outWs->getErrorSquaredArray();
+    const auto errorsSQ = outWs->getErrorSquaredArray();
     TS_ASSERT_DELTA(0, errorsSQ[0], 0.0001); // Check the first error sq value
     TS_ASSERT_DELTA(0.01, errorsSQ[1],
                     0.0001); // Check the second error sq value
@@ -196,10 +195,10 @@ public:
                       dim2->getMDFrame().name());
 
     // Check the data
-    double *signals = outWs->getSignalArray();
+    const auto signals = outWs->getSignalArray();
     TS_ASSERT_DELTA(1, signals[0], 0.0001); // Check the first signal value
     TS_ASSERT_DELTA(2, signals[1], 0.0001); // Check the second signal value
-    double *errorsSQ = outWs->getErrorSquaredArray();
+    const auto errorsSQ = outWs->getErrorSquaredArray();
     TS_ASSERT_DELTA(0, errorsSQ[0], 0.0001); // Check the first error sq value
     TS_ASSERT_DELTA(0.01, errorsSQ[1],
                     0.0001); // Check the second error sq value
@@ -208,5 +207,3 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 };
-
-#endif /* MANTID_MDEVENTS_CREATEMDHISTOWORKSPACETEST_H_ */

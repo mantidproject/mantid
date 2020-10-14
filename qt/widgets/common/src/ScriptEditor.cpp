@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //---------------------------------------------
 // Includes
@@ -29,6 +29,7 @@
 #include <QSettings>
 #include <QShortcut>
 #include <QTextStream>
+#include <QThread>
 
 // Qscintilla
 #include <Qsci/qsciapis.h>
@@ -100,6 +101,10 @@ ScriptEditor::ScriptEditor(QWidget *parent, QsciLexer *codelexer,
 #else
   setEolMode(EolUnix);
 #endif
+
+  // Remove the shortcut for zooming in because this is dealt with in
+  // keyPressEvent
+  clearKeyBinding("Ctrl++");
 
   // Syntax highlighting and code completion
   setLexer(codelexer);
@@ -284,8 +289,25 @@ void ScriptEditor::setText(int lineno, const QString &txt, int index) {
  * @param event A pointer to the QKeyPressEvent object
  */
 void ScriptEditor::keyPressEvent(QKeyEvent *event) {
-  // Avoids a bug in QScintilla
-  forwardKeyPressToBase(event);
+  // The built-in shortcut Ctrl++ from QScintilla doesn't work for some reason
+  // Creating a new QShortcut makes Ctrl++ to zoom in on the IPython console
+  // stop working
+  // So here is where Ctrl++ is detected to zoom in
+  if (QApplication::keyboardModifiers() & Qt::ControlModifier &&
+      (event->key() == Qt::Key_Plus || event->key() == Qt::Key_Equal)) {
+    zoomIn();
+    emit textZoomedIn();
+  } else {
+    // Avoids a bug in QScintilla
+    forwardKeyPressToBase(event);
+  }
+
+  // There is a built in Ctrl+- shortcut for zooming out, but a signal is
+  // emitted here to tell the other editor tabs to also zoom out
+  if (QApplication::keyboardModifiers() & Qt::ControlModifier &&
+      (event->key() == Qt::Key_Minus)) {
+    emit textZoomedOut();
+  }
 }
 
 /*
@@ -359,12 +381,30 @@ void ScriptEditor::setMarkerState(bool enabled) {
 
 /**
  * Update the arrow marker to point to the correct line and colour it
+ * depending on the error state. If the call is from a thread other than the
+ * application thread then the call is reperformed on that thread
+ * @param lineno :: The line to place the marker at. A negative number will
+ * clear all markers
+ * @param error :: If true, the marker will turn red
+ */
+void ScriptEditor::updateProgressMarkerFromThread(int lineno, bool error) {
+  if (QThread::currentThread() != QApplication::instance()->thread()) {
+    QMetaObject::invokeMethod(this, "updateProgressMarker", Qt::AutoConnection,
+                              Q_ARG(int, lineno), Q_ARG(bool, error));
+  } else {
+    updateProgressMarker(lineno, error);
+  }
+}
+
+/**
+ * Update the arrow marker to point to the correct line and colour it
  * depending on the error state
  * @param lineno :: The line to place the marker at. A negative number will
  * clear all markers
  * @param error :: If true, the marker will turn red
  */
 void ScriptEditor::updateProgressMarker(int lineno, bool error) {
+
   m_currentExecLine = lineno;
   if (error) {
     setMarkerBackgroundColor(g_error_colour, m_progressArrowKey);
@@ -378,6 +418,7 @@ void ScriptEditor::updateProgressMarker(int lineno, bool error) {
 
   ensureLineVisible(lineno);
   markerAdd(m_currentExecLine - 1, m_progressArrowKey);
+  progressMade(lineno);
 }
 
 /// Mark the progress arrow as an error
@@ -473,7 +514,7 @@ void ScriptEditor::dropEvent(QDropEvent *de) {
  */
 void ScriptEditor::print() {
   QPrinter printer(QPrinter::HighResolution);
-  QPrintDialog *print_dlg = new QPrintDialog(&printer, this);
+  auto *print_dlg = new QPrintDialog(&printer, this);
   print_dlg->setWindowTitle(tr("Print Script"));
   if (print_dlg->exec() != QDialog::Accepted) {
     return;
@@ -524,9 +565,9 @@ void ScriptEditor::forwardKeyPressToBase(QKeyEvent *event) {
   // not appear, you have to delete the ( and type it again
   // This does that for you!
   if (event->text() == "(") {
-    QKeyEvent *backspEvent =
+    auto *backspEvent =
         new QKeyEvent(QEvent::KeyPress, Qt::Key_Backspace, Qt::NoModifier);
-    QKeyEvent *bracketEvent = new QKeyEvent(*event);
+    auto *bracketEvent = new QKeyEvent(*event);
     QsciScintilla::keyPressEvent(bracketEvent);
     QsciScintilla::keyPressEvent(backspEvent);
 
@@ -574,7 +615,7 @@ void ScriptEditor::replaceAll(const QString &searchString,
                                wrap, forward, 0, 0);
   // If find first fails then there is nothing to replace
   if (!found) {
-    QMessageBox::information(this, "MantidPlot - Find and Replace",
+    QMessageBox::information(this, "Mantid - Find and Replace",
                              "No matches found in current document.");
   }
 
@@ -591,4 +632,8 @@ void ScriptEditor::replaceAll(const QString &searchString,
     }
   }
   this->endUndoAction();
+}
+
+int ScriptEditor::getZoom() const {
+  return static_cast<int>(SendScintilla(SCI_GETZOOM));
 }

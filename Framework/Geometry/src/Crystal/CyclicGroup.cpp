@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/CyclicGroup.h"
 #include "MantidGeometry/Crystal/SymmetryOperationFactory.h"
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -29,7 +29,7 @@ CyclicGroup::generateAllOperations(const SymmetryOperation &operation) const {
   std::vector<SymmetryOperation> symOps(1, operation);
   symOps.reserve(operation.order());
   for (size_t i = 1; i < operation.order(); ++i) {
-    symOps.push_back(operation * symOps.back());
+    symOps.emplace_back(operation * symOps.back());
   }
 
   return symOps;

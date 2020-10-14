@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -263,7 +263,7 @@ void Fit1D::init() {
                       "InputWorkspace", "", Direction::Input),
                   "Name of the input Workspace");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("WorkspaceIndex", 0, mustBePositive,
                   "The Workspace to fit, uses the workspace numbering of the "
@@ -286,7 +286,7 @@ void Fit1D::init() {
   // load the name of these specific parameter into a vector for later use
   const std::vector<Property *> props = getProperties();
   for (size_t i = i0; i < props.size(); i++) {
-    m_parameterNames.push_back(props[i]->name());
+    m_parameterNames.emplace_back(props[i]->name());
   }
 
   declareProperty("Fix", "",
@@ -457,7 +457,7 @@ void Fit1D::exec() {
 
   m_fittedParameter.clear();
   for (size_t i = 0; i < nParams(); i++) {
-    m_fittedParameter.push_back(getProperty(m_parameterNames[i]));
+    m_fittedParameter.emplace_back(getProperty(m_parameterNames[i]));
   }
   modifyInitialFittedParameters(
       m_fittedParameter); // does nothing except if overwritten by derived class
@@ -609,7 +609,7 @@ void Fit1D::exec() {
 
       int iPNotFixed = 0;
       for (size_t i = 0; i < nParams(); i++) {
-        sdExtended.push_back(1.0);
+        sdExtended.emplace_back(1.0);
         if (l_data.active[i]) {
           sdExtended[i] = sqrt(gsl_matrix_get(covar, iPNotFixed, iPNotFixed));
           iPNotFixed++;
@@ -618,7 +618,7 @@ void Fit1D::exec() {
       modifyFinalFittedParameters(sdExtended);
       for (size_t i = 0; i < nParams(); i++)
         if (l_data.active[i])
-          standardDeviations.push_back(sdExtended[i]);
+          standardDeviations.emplace_back(sdExtended[i]);
 
       declareProperty(
           std::make_unique<WorkspaceProperty<API::ITableWorkspace>>(
@@ -637,7 +637,7 @@ void Fit1D::exec() {
       for (size_t i = 0; i < nParams(); i++) {
         if (l_data.active[i]) {
           m_covariance->addColumn("double", m_parameterNames[i]);
-          paramThatAreFitted.push_back(m_parameterNames[i]);
+          paramThatAreFitted.emplace_back(m_parameterNames[i]);
         }
       }
 
@@ -699,7 +699,7 @@ void Fit1D::exec() {
 
     int histN = isHistogram ? 1 : 0;
     Mantid::DataObjects::Workspace2D_sptr ws =
-        boost::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
+        std::dynamic_pointer_cast<Mantid::DataObjects::Workspace2D>(
             Mantid::API::WorkspaceFactory::Instance().create(
                 "Workspace2D", 3, l_data.n + histN, l_data.n));
     ws->setTitle("");
@@ -733,7 +733,7 @@ void Fit1D::exec() {
     delete[] lOut;
 
     setProperty("OutputWorkspace",
-                boost::dynamic_pointer_cast<MatrixWorkspace>(ws));
+                std::dynamic_pointer_cast<MatrixWorkspace>(ws));
 
     if (isDerivDefined)
       gsl_matrix_free(covar);

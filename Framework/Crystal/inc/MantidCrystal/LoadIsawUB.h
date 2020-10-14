@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_LOADISAWUB_H_
-#define MANTID_CRYSTAL_LOADISAWUB_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
 
 namespace Mantid {
 namespace Crystal {
@@ -21,7 +20,7 @@ namespace Crystal {
  * @author Janik Zikovsky
  * @date 2011-05-25
  */
-class DLLExport LoadIsawUB : public API::Algorithm {
+class MANTID_CRYSTAL_DLL LoadIsawUB : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override { return "LoadIsawUB"; };
@@ -52,5 +51,3 @@ private:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_LOADISAWUB_H_ */

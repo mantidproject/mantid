@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_HISTOGRAMDATA_HISTOGRAME_H_
-#define MANTID_HISTOGRAMDATA_HISTOGRAME_H_
+#pragma once
 
 #include "MantidHistogramData/Addable.h"
 #include "MantidHistogramData/DllConfig.h"
 #include "MantidHistogramData/FixedLengthVector.h"
+#include "MantidHistogramData/Multipliable.h"
 #include "MantidHistogramData/Scalable.h"
 
 namespace Mantid {
@@ -39,6 +39,7 @@ template <class FrequencyVariances, class HistogramE> class VectorOf;
 class MANTID_HISTOGRAMDATA_DLL HistogramE
     : public detail::FixedLengthVector<HistogramE>,
       public detail::Addable<HistogramE>,
+      public detail::Multipliable<HistogramE>,
       public detail::Scalable<HistogramE> {
 public:
   using detail::FixedLengthVector<HistogramE>::FixedLengthVector;
@@ -51,6 +52,11 @@ public:
   HistogramE(HistogramE &&) = default;
   HistogramE &operator=(const HistogramE &) & = default;
   HistogramE &operator=(HistogramE &&) & = default;
+  // Multiple inheritance causes ambiguous overload, bring operators into scope.
+  using detail::Multipliable<HistogramE>::operator*=;
+  using detail::Multipliable<HistogramE>::operator/=;
+  using detail::Scalable<HistogramE>::operator*=;
+  using detail::Scalable<HistogramE>::operator/=;
   // These classes are friends, such that they can modify the length.
   friend class Histogram;
   friend class detail::VectorOf<CountStandardDeviations, HistogramE>;
@@ -61,5 +67,3 @@ public:
 
 } // namespace HistogramData
 } // namespace Mantid
-
-#endif /* MANTID_HISTOGRAMDATA_HISTOGRAME_H_ */

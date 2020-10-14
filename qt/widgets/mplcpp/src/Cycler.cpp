@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Cycler.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
@@ -40,7 +40,7 @@ Python::Object cycleIterator(const Python::Object &rawCycler) {
  * that produces an iterable
  * @param obj An existing instance of a Cycler object
  */
-Cycler::Cycler(Python::Object obj)
+Cycler::Cycler(const Python::Object &obj)
     : Python::InstanceHolder(cycleIterator(std::move(obj))) {}
 
 /**

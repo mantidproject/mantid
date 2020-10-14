@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/CatalogPublishDialog.h"
 
@@ -77,7 +77,7 @@ void CatalogPublishDialog::populateUserInvestigations() {
       // Cast a catalog to a catalogInfoService to access downloading
       // functionality.
       auto catalogInfoService =
-          boost::dynamic_pointer_cast<Mantid::API::ICatalogInfoService>(
+          std::dynamic_pointer_cast<Mantid::API::ICatalogInfoService>(
               Mantid::API::CatalogManager::Instance().getCatalog(
                   session.front()->getSessionId()));
       // Check if the catalog created supports publishing functionality.

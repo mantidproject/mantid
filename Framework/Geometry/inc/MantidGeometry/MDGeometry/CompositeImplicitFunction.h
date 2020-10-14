@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
-#define MANTID_ALGORITHMS_COMPOSITEIMPLICITFUNCTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -14,7 +13,7 @@
 #include "MantidKernel/System.h"
 #include <vector>
 #ifndef Q_MOC_RUN
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #endif
 
 namespace Mantid {
@@ -39,8 +38,8 @@ public:
   using MDImplicitFunction::isPointContained;
   //-----------------------------------------------------------------
 
-  bool
-  addFunction(Mantid::Geometry::MDImplicitFunction_sptr constituentFunction);
+  bool addFunction(
+      const Mantid::Geometry::MDImplicitFunction_sptr &constituentFunction);
   std::string getName() const override;
   std::string toXMLString() const override;
   int getNFunctions() const;
@@ -53,5 +52,3 @@ protected:
 };
 } // namespace Geometry
 } // namespace Mantid
-
-#endif

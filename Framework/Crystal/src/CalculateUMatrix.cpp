@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/CalculateUMatrix.h"
 #include "MantidAPI/Sample.h"
@@ -27,11 +27,11 @@ void CalculateUMatrix::init() {
   this->declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
                             "PeaksWorkspace", "", Direction::InOut),
                         "An input workspace.");
-  boost::shared_ptr<BoundedValidator<double>> mustBePositive =
-      boost::make_shared<BoundedValidator<double>>();
+  std::shared_ptr<BoundedValidator<double>> mustBePositive =
+      std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
-  boost::shared_ptr<BoundedValidator<double>> reasonable_angle =
-      boost::make_shared<BoundedValidator<double>>();
+  std::shared_ptr<BoundedValidator<double>> reasonable_angle =
+      std::make_shared<BoundedValidator<double>>();
   reasonable_angle->setLower(5.0);
   reasonable_angle->setUpper(175.0);
   // put in negative values, so user is forced to input all parameters. no
@@ -56,8 +56,8 @@ void CalculateUMatrix::exec() {
   double alpha = this->getProperty("alpha");
   double beta = this->getProperty("beta");
   double gamma = this->getProperty("gamma");
-  OrientedLattice o(a, b, c, alpha, beta, gamma);
-  Matrix<double> B = o.getB();
+  auto lattice = std::make_unique<OrientedLattice>(a, b, c, alpha, beta, gamma);
+  Matrix<double> B = lattice->getB();
 
   PeaksWorkspace_sptr ws = this->getProperty("PeaksWorkspace");
   if (!ws)
@@ -135,9 +135,9 @@ void CalculateUMatrix::exec() {
       Eval[0][0], Eval[1][0], Eval[2][0],
       Eval[3][0]); // the first column corresponds to the highest eigenvalue
   DblMatrix U(qR.getRotation());
-  o.setU(U);
+  lattice->setU(U);
 
-  ws->mutableSample().setOrientedLattice(&o);
+  ws->mutableSample().setOrientedLattice(std::move(lattice));
 }
 
 } // namespace Crystal

@@ -1,46 +1,30 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from sans.common.enums import (SANSInstrument, FindDirectionEnum, DetectorType)
-from mantid.kernel import (Logger)
-from sans.common.file_information import get_instrument_paths_for_sans_file
-from sans.common.xml_parsing import get_named_elements_from_ipf_file
+from mantid.kernel import Logger
+from sans.common.enums import (FindDirectionEnum, DetectorType, SANSInstrument)
+from sans.state.AllStates import AllStates
+from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter)
 
 
 class BeamCentreModel(object):
+    logger = Logger("CentreFinder")
+
     def __init__(self, SANSCentreFinder):
         super(BeamCentreModel, self).__init__()
-        self.reset_to_defaults_for_instrument()
-        self.SANSCentreFinder = SANSCentreFinder
-
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-
-    def reset_to_defaults_for_instrument(self, file_information = None):
-        r_range = {}
-        instrument = None
-
-        if file_information:
-            instrument_file_path = get_instrument_paths_for_sans_file(file_information=file_information)
-            r_range = get_named_elements_from_ipf_file(instrument_file_path[1],
-                                                       ["beam_centre_radius_min", "beam_centre_radius_max"], float)
-            instrument = file_information.get_instrument()
-
         self._max_iterations = 10
-        self._r_min = r_range["beam_centre_radius_min"] if "beam_centre_radius_min" in r_range else 60
-        self._r_max = r_range["beam_centre_radius_max"] if "beam_centre_radius_max" in r_range else 280
+        self._r_min = 0
+        self._r_max = 0
         self._left_right = True
         self._up_down = True
-        self._tolerance = 0.0001251
+        self._tolerance = 1.251E-07 # metres
         self._lab_pos_1 = ''
         self._lab_pos_2 = ''
         self._hab_pos_2 = ''
         self._hab_pos_1 = ''
-        self.scale_1 = 1000
-        self.scale_2 = 1000
         self.COM = False
         self.verbose = False
         self.q_min = 0.01
@@ -49,16 +33,25 @@ class BeamCentreModel(object):
         self.update_lab = True
         self.update_hab = True
 
-        if instrument == SANSInstrument.LARMOR:
-            self.scale_1 = 1.0
+        self.reset_inst_defaults(instrument=SANSInstrument.NO_INSTRUMENT)
 
-    def set_scaling(self, instrument):
-        self.scale_1 = 1000
-        self.scale_2 = 1000
-        if instrument == SANSInstrument.LARMOR:
-            self.scale_1 = 1.0
+        self.SANSCentreFinder = SANSCentreFinder
 
-    def find_beam_centre(self, state):
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
+    def reset_inst_defaults(self, instrument):
+        if instrument is SANSInstrument.LOQ:
+            self._r_min = 0.096 # metres
+            self._r_max = 0.216 # metres
+
+            # TODO HAB on LOQ prefers 96-750
+        else:
+            # All other instruments hard-code this as follows
+            self._r_min = 0.06 # metres
+            self._r_max = 0.280 # metres
+
+    def find_beam_centre(self, state: AllStates):
         """
         This is called from the GUI and runs the find beam centre algorithm given a state model and a beam_centre_model object.
 
@@ -67,22 +60,18 @@ class BeamCentreModel(object):
         :returns: The centre position found.
         """
         centre_finder = self.SANSCentreFinder()
-        find_direction = None
-        if self.up_down and self.left_right:
-            find_direction = FindDirectionEnum.All
-        elif self.up_down:
-            find_direction = FindDirectionEnum.Up_Down
-        elif self.left_right:
-            find_direction = FindDirectionEnum.Left_Right
-        else:
-            logger = Logger("CentreFinder")
-            logger.notice("Have chosen no find direction exiting early")
-            return {"pos1": self.lab_pos_1, "pos2": self.lab_pos_2}
+        find_direction = self.get_finder_direction()
+        if not find_direction:
+            self.logger.error("Have chosen no find direction exiting early")
+            return
+
+        pos_1 = self._lab_pos_1 if self.component is DetectorType.LAB else self._hab_pos_1
+        pos_2 = self._lab_pos_2 if self.component is DetectorType.LAB else self._hab_pos_2
 
         if self.COM:
             centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
                                    max_iter=self.max_iterations,
-                                   x_start=self.lab_pos_1, y_start=self.lab_pos_2,
+                                   x_start=pos_1, y_start=pos_2,
                                    tolerance=self.tolerance,
                                    find_direction=find_direction, reduction_method=False, component=self.component)
 
@@ -94,11 +83,33 @@ class BeamCentreModel(object):
                                    verbose=self.verbose, component=self.component)
         else:
             centre = centre_finder(state, r_min=self.r_min, r_max=self.r_max,
-                                   max_iter=self.max_iterations, x_start=self.lab_pos_1,
-                                   y_start=self.lab_pos_2, tolerance=self.tolerance,
+                                   max_iter=self.max_iterations, x_start=pos_1,
+                                   y_start=pos_2, tolerance=self.tolerance,
                                    find_direction=find_direction, reduction_method=True,
                                    verbose=self.verbose, component=self.component)
-        return centre
+
+        self._update_centre_positions(results=centre)
+
+    def _update_centre_positions(self, results):
+        if self.component is DetectorType.LAB:
+            self._lab_pos_1 = results["pos1"]
+            self._lab_pos_2 = results["pos2"]
+        elif self.component is DetectorType.HAB:
+            self._hab_pos_1 = results['pos1']
+            self._hab_pos_2 = results['pos2']
+        else:
+            raise RuntimeError("Unexpected detector type, got %r" % results)
+
+    def get_finder_direction(self):
+        find_direction = None
+        if self.up_down and self.left_right:
+            find_direction = FindDirectionEnum.ALL
+        elif self.up_down:
+            find_direction = FindDirectionEnum.UP_DOWN
+        elif self.left_right:
+            find_direction = FindDirectionEnum.LEFT_RIGHT
+
+        return find_direction
 
     @property
     def max_iterations(self):
@@ -110,19 +121,19 @@ class BeamCentreModel(object):
 
     @property
     def r_min(self):
-        return self._r_min
+        return meter_2_millimeter(self._r_min)
 
     @r_min.setter
     def r_min(self, value):
-        self._r_min = value
+        self._r_min = millimeter_2_meter(value)
 
     @property
     def r_max(self):
-        return self._r_max
+        return meter_2_millimeter(self._r_max)
 
     @r_max.setter
     def r_max(self, value):
-        self._r_max = value
+        self._r_max = millimeter_2_meter(value)
 
     @property
     def q_min(self):
@@ -174,43 +185,43 @@ class BeamCentreModel(object):
 
     @property
     def tolerance(self):
-        return self._tolerance
+        return meter_2_millimeter(self._tolerance)
 
     @tolerance.setter
     def tolerance(self, value):
-        self._tolerance = value
+        self._tolerance = millimeter_2_meter(value)
 
     @property
     def lab_pos_1(self):
-        return self._lab_pos_1
+        return meter_2_millimeter(self._lab_pos_1) if self._lab_pos_1 else ''
 
     @lab_pos_1.setter
     def lab_pos_1(self, value):
-        self._lab_pos_1 = value
+        self._lab_pos_1 = millimeter_2_meter(value)
 
     @property
     def lab_pos_2(self):
-        return self._lab_pos_2
+        return meter_2_millimeter(self._lab_pos_2) if self._lab_pos_2 else ''
 
     @lab_pos_2.setter
     def lab_pos_2(self, value):
-        self._lab_pos_2 = value
+        self._lab_pos_2 = millimeter_2_meter(value)
 
     @property
     def hab_pos_1(self):
-        return self._hab_pos_1
+        return meter_2_millimeter(self._hab_pos_1) if self._hab_pos_1 else ''
 
     @hab_pos_1.setter
     def hab_pos_1(self, value):
-        self._hab_pos_1 = value
+        self._hab_pos_1 = millimeter_2_meter(value)
 
     @property
     def hab_pos_2(self):
-        return self._hab_pos_2
+        return meter_2_millimeter(self._hab_pos_2) if self._hab_pos_2 else ''
 
     @hab_pos_2.setter
     def hab_pos_2(self, value):
-        self._hab_pos_2 = value
+        self._hab_pos_2 = millimeter_2_meter(value)
 
     @property
     def component(self):

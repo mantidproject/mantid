@@ -1,8 +1,7 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR})
+)
 
   include_directories(../../DataHandling/inc ../../TestHelpers/inc)
   # This variable is used within the cxxtest_add_test macro to build these
@@ -19,13 +18,12 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(CurveFittingTest ${TEST_FILES})
   target_link_libraries(CurveFittingTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         CurveFitting
                         DataHandling
                         ${GSL_LIBRARIES}
-                        ${GMOCK_LIBRARIES}
-                        ${GTEST_LIBRARIES})
+                        gmock
+)
   add_dependencies(CurveFittingTest Algorithms)
   add_dependencies(FrameworkTests CurveFittingTest)
   # Test data

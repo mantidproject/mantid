@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Plugins/AlgorithmDialogs/PeriodicTableWidget.h"
 #include <QVector>
@@ -131,7 +131,7 @@ void PeriodicTableWidget::ColourUnknownProperties(
   }
 }
 
-void PeriodicTableWidget::enableButtonByName(QString elementStr) {
+void PeriodicTableWidget::enableButtonByName(const QString &elementStr) {
   for (auto &AllElementButton : AllElementButtons) {
     for (auto btn_i = AllElementButton.begin(); btn_i != AllElementButton.end();
          btn_i++) {
@@ -142,8 +142,8 @@ void PeriodicTableWidget::enableButtonByName(QString elementStr) {
   }
 }
 
-bool PeriodicTableWidget::compareButtonNameToStr(QPushButton *buttonToCompare,
-                                                 QString stringToCompare) {
+bool PeriodicTableWidget::compareButtonNameToStr(
+    QPushButton *buttonToCompare, const QString &stringToCompare) {
   return (strcmp(buttonToCompare->text().toStdString().c_str(),
                  stringToCompare.toStdString().c_str()) == 0);
 }
@@ -162,15 +162,15 @@ void PeriodicTableWidget::disableAllElementButtons() {
   disableButtons(UnknownProperties);
 }
 void PeriodicTableWidget::ColourButton(QPushButton *element,
-                                       QString colourStr) {
+                                       const QString &colourStr) {
   element->setStyleSheet(
       "QPushButton{border:1px solid rgb(0, 0, 0); " + colourStr + ";}" +
       "QPushButton:checked{ background-color:rgb(175,255,255)}" +
       "QPushButton:!enabled{background-color: rgb(204,204,204);" + "}");
 }
 
-QString
-PeriodicTableWidget::elementsSelectedToString(QVector<QPushButton *> elements) {
+QString PeriodicTableWidget::elementsSelectedToString(
+    const QVector<QPushButton *> &elements) {
   QString selectedElements = "";
   /* Loop through QPushButtons and if they are checked
    * then retrieve the text on the button i.e the

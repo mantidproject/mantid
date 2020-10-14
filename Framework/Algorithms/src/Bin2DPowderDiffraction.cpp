@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/Bin2DPowderDiffraction.h"
 #include "MantidAPI/BinEdgeAxis.h"
@@ -61,7 +61,7 @@ const std::string Bin2DPowderDiffraction::summary() const {
 /** Initialize the algorithm's properties.
  */
 void Bin2DPowderDiffraction::init() {
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<SpectraAxisValidator>();
   wsValidator->add<InstrumentValidator>();
@@ -83,7 +83,7 @@ void Bin2DPowderDiffraction::init() {
       "this can be followed by a comma and more widths and last boundary "
       "pairs. "
       "Negative width values indicate logarithmic binning.";
-  auto rebinValidator = boost::make_shared<RebinParamsValidator>(true);
+  auto rebinValidator = std::make_shared<RebinParamsValidator>(true);
   declareProperty(
       std::make_unique<ArrayProperty<double>>("dSpaceBinning", rebinValidator),
       docString);
@@ -316,27 +316,27 @@ void Bin2DPowderDiffraction::ReadBinsFromFile(
     n = line.find("dp =");
     if (n != std::string::npos) {
       if (!tmp.empty()) {
-        Xbins.push_back(tmp);
+        Xbins.emplace_back(tmp);
         tmp.clear();
       }
       double dp1 = std::stod(line.substr(4), &sz); // 4 is needed to crop 'dp='
       double dp2 = std::stod(line.substr(sz + 4));
       if (dpno < 1) {
-        Ybins.push_back(dp1);
-        Ybins.push_back(dp2);
+        Ybins.emplace_back(dp1);
+        Ybins.emplace_back(dp2);
       } else {
-        Ybins.push_back(dp2);
+        Ybins.emplace_back(dp2);
       }
       dpno++;
     } else if (line.find("#") == std::string::npos) {
       std::stringstream ss(line);
       double d;
       while (ss >> d) {
-        tmp.push_back(d);
+        tmp.emplace_back(d);
       }
     }
   }
-  Xbins.push_back(tmp);
+  Xbins.emplace_back(tmp);
   g_log.information() << "Number of Ybins: " << Ybins.size() << std::endl;
   g_log.information() << "Number of Xbins sets: " << Xbins.size() << std::endl;
 }
@@ -365,7 +365,8 @@ size_t Bin2DPowderDiffraction::UnifyXBins(
   return max_size;
 }
 
-void Bin2DPowderDiffraction::normalizeToBinArea(MatrixWorkspace_sptr outWS) {
+void Bin2DPowderDiffraction::normalizeToBinArea(
+    const MatrixWorkspace_sptr &outWS) {
   NumericAxis *verticalAxis = dynamic_cast<NumericAxis *>(outWS->getAxis(1));
   const std::vector<double> &yValues = verticalAxis->getValues();
   auto nhist = outWS->getNumberHistograms();

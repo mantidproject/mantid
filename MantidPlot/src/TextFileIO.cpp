@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "TextFileIO.h"
 #include "MantidQtWidgets/Common/FileDialogHandler.h"
@@ -16,7 +16,8 @@
 /**
  * Construct an object with a list of file filters
  */
-TextFileIO::TextFileIO(QStringList fileFilters) : m_filters(fileFilters) {}
+TextFileIO::TextFileIO(const QStringList &fileFilters)
+    : m_filters(fileFilters) {}
 
 /**
  * Save to a file

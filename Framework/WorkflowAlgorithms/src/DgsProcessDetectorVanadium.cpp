@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidWorkflowAlgorithms/DgsProcessDetectorVanadium.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -44,7 +44,7 @@ const std::string DgsProcessDetectorVanadium::category() const {
 /** Initialize the algorithm's properties.
  */
 void DgsProcessDetectorVanadium::init() {
-  // auto wsValidator = boost::make_shared<CompositeValidator>();
+  // auto wsValidator = std::make_shared<CompositeValidator>();
   // wsValidator->add<WorkspaceUnitValidator>("TOF");
   this->declareProperty(
       std::make_unique<WorkspaceProperty<>>("InputWorkspace", "",
@@ -74,7 +74,7 @@ void DgsProcessDetectorVanadium::exec() {
   // Get the reduction property manager
   const std::string reductionManagerName =
       this->getProperty("ReductionProperties");
-  boost::shared_ptr<PropertyManager> reductionManager;
+  std::shared_ptr<PropertyManager> reductionManager;
   if (PropertyManagerDataService::Instance().doesExist(reductionManagerName)) {
     reductionManager =
         PropertyManagerDataService::Instance().retrieve(reductionManagerName);

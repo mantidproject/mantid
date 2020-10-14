@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MUON_MUONPREPROCESS_H_
-#define MANTID_MUON_MUONPREPROCESS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/TableWorkspace.h"
+#include "MantidMuon/DllConfig.h"
 
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -17,7 +17,7 @@ using namespace Mantid::DataObjects;
 namespace Mantid {
 namespace Muon {
 
-class DLLExport MuonPreProcess : public API::Algorithm {
+class MANTID_MUON_DLL MuonPreProcess : public API::Algorithm {
 public:
   MuonPreProcess() : API::Algorithm() {}
   ~MuonPreProcess() {}
@@ -45,11 +45,11 @@ private:
   void exec() override;
 
   /// Apply a series of corrections ; DTC, offset, rebin, crop
-  WorkspaceGroup_sptr correctWorkspaces(WorkspaceGroup_sptr wsGroup);
+  WorkspaceGroup_sptr correctWorkspaces(const WorkspaceGroup_sptr &wsGroup);
   MatrixWorkspace_sptr correctWorkspace(MatrixWorkspace_sptr ws);
 
   MatrixWorkspace_sptr applyDTC(MatrixWorkspace_sptr ws,
-                                TableWorkspace_sptr dt);
+                                const TableWorkspace_sptr &dt);
 
   MatrixWorkspace_sptr applyTimeOffset(MatrixWorkspace_sptr ws,
                                        const double &offset);
@@ -60,10 +60,10 @@ private:
   MatrixWorkspace_sptr applyRebinning(MatrixWorkspace_sptr ws,
                                       const std::vector<double> &rebinArgs);
 
-  MatrixWorkspace_sptr cloneWorkspace(MatrixWorkspace_sptr ws);
+  MatrixWorkspace_sptr cloneWorkspace(const MatrixWorkspace_sptr &ws);
 
   /// Add the correction inputs into the logs
-  void addPreProcessSampleLogs(WorkspaceGroup_sptr group);
+  void addPreProcessSampleLogs(const WorkspaceGroup_sptr &group);
 
   /// Perform validation of inputs to the algorithm
   std::map<std::string, std::string> validateInputs() override;
@@ -74,5 +74,3 @@ private:
 
 } // namespace Muon
 } // namespace Mantid
-
-#endif /* MANTID_MUON_MUONPREPROCESS_H_ */

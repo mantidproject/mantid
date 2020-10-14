@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
 
 ABSOLUTE_UNITS_OFF = 'Absolute Units OFF'
 ABSOLUTE_UNITS_ON = 'Absolute Units ON'
@@ -91,6 +88,7 @@ PROP_MON_INDEX = 'Monitor'
 PROP_MON_PEAK_SIGMA_MULTIPLIER = 'MonitorPeakWidthInSigmas'
 PROP_NORMALISATION = 'Normalisation'
 PROP_NUMBER_OF_SIMULATION_WAVELENGTHS = 'NumberOfSimulatedWavelengths'
+PROP_EVENTS_PER_WAVELENGTH = 'EventsPerPoint'
 PROP_OUTPUT_DET_EPP_WS = 'OutputEPPWorkspace'
 PROP_OUTPUT_DIAGNOSTICS_REPORT = 'OutputReport'
 PROP_OUTPUT_DIAGNOSTICS_REPORT_WS = 'OutputReportWorkspace'
@@ -122,6 +120,8 @@ PROPGROUP_OPTIONAL_OUTPUT = 'Optional Output'
 
 SIMULATION_INSTRUMENT_FULL = 'Full Instrument'
 SIMULATION_INSTRUMEN_SPARSE = 'Sparse Instrument'
+
+SIMULATION_SEED = 123456789
 
 SUBALG_LOGGING_OFF = 'Logging OFF'
 SUBALG_LOGGING_ON = 'Logging ON'

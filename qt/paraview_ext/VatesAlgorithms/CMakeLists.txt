@@ -34,7 +34,6 @@ set_target_properties(VatesAlgorithms
 
 target_link_libraries(VatesAlgorithms
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTID_SUBPROJECT_LIBS}
                       VatesAPI
                       vtkCommonCore
@@ -47,11 +46,11 @@ target_link_libraries(VatesAlgorithms
                       vtkRenderingOpenGL2
                       ${POCO_LIBRARIES})
 
-if(OSX_VERSION VERSION_GREATER 10.8)
+if(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
   set_target_properties(
     VatesAlgorithms
     PROPERTIES INSTALL_RPATH
-               "@loader_path/../Contents/MacOS;@loader_path/../Contents/Libraries")
+               "@loader_path/../Contents/MacOS;@loader_path/../Contents/Frameworks")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   set_target_properties(
     VatesAlgorithms
@@ -64,8 +63,7 @@ endif()
 # Create test file projects
 include_directories(SYSTEM
                     ${CXXTEST_INCLUDE_DIR}
-                    ${GMOCK_INCLUDE_DIR}
-                    ${GTEST_INCLUDE_DIR})
+)
 
 include_directories(inc
                     ../../../Framework/TestHelpers/inc
@@ -81,14 +79,13 @@ set(TESTHELPER_SRCS
 cxxtest_add_test(VatesAlgorithmsTest ${TEST_FILES})
 target_link_libraries(VatesAlgorithmsTest
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTID_SUBPROJECT_LIBS}
                       Indexing
                       VatesAPI
                       VatesAlgorithms
                       ${POCO_LIBRARIES}
-                      ${GMOCK_LIBRARIES}
-                      ${GTEST_LIBRARIES})
+                      gmock
+)
 add_dependencies(AllTests VatesAlgorithmsTest)
 # Add to the 'UnitTests' group in VS
 set_property(TARGET VatesAlgorithmsTest PROPERTY FOLDER "UnitTests")

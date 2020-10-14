@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_MATERIALBUILDER_H_
-#define MANTID_KERNEL_MATERIALBUILDER_H_
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #include "MantidKernel/Material.h"
@@ -43,6 +42,9 @@ public:
   MaterialBuilder &setCoherentXSection(double xsec);
   MaterialBuilder &setIncoherentXSection(double xsec);
   MaterialBuilder &setAbsorptionXSection(double xsec);
+  MaterialBuilder &setAttenuationProfileFilename(std::string filename);
+
+  void setAttenuationSearchPath(std::string path);
 
   Material build() const;
 
@@ -65,9 +67,9 @@ private:
   boost::optional<double> m_totalXSection, m_cohXSection, m_incXSection,
       m_absSection;
   NumberDensityUnit m_numberDensityUnit;
+  boost::optional<std::string> m_attenuationProfileFileName;
+  std::string m_attenuationFileSearchPath;
 };
 
 } // namespace Kernel
 } // namespace Mantid
-
-#endif /* MANTID_KERNEL_MATERIALBUILDER_H_ */

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSESANS.h"
 
@@ -275,7 +275,7 @@ ColumnMap LoadSESANS::consumeData(std::ifstream &infile, std::string &line,
       boost::split(tokens, line, isspace, boost::token_compress_on);
 
       for (size_t i = 0; i < tokens.size(); i++)
-        columns[columnHeaders[i]].push_back(std::stod(tokens[i]));
+        columns[columnHeaders[i]].emplace_back(std::stod(tokens[i]));
     } else {
       g_log.warning("Line " + std::to_string(lineNum) +
                     " discarded, as it was badly formed. Expected " +

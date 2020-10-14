@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_EXTRACTPOLARIZATIONEFFICIENCIESTEST_H_
-#define MANTID_DATAHANDLING_EXTRACTPOLARIZATIONEFFICIENCIESTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -518,7 +517,7 @@ private:
     double const dX = (endX - startX) / double(size - 1);
     Points xVals(size, LinearGenerator(startX, dX));
     Counts yVals(size, 1.0);
-    auto retVal = boost::make_shared<Workspace2D>();
+    auto retVal = std::make_shared<Workspace2D>();
     retVal->initialize(1, Histogram(xVals, yVals));
     return retVal;
   }
@@ -528,8 +527,8 @@ private:
                        std::string const &lambda = "1 2 3 4",
                        bool skipP1 = false, bool loadErrors = false) {
     auto workspace = createPointWS(1, 0, 10);
-    auto pmap = boost::make_shared<ParameterMap>();
-    auto instrument = boost::make_shared<Instrument>();
+    auto pmap = std::make_shared<ParameterMap>();
+    auto instrument = std::make_shared<Instrument>();
 
     pmap->addString(instrument.get(), "polarization_correction_method", method);
     if (!lambda.empty()) {
@@ -560,11 +559,9 @@ private:
       }
     }
 
-    instrument = boost::make_shared<Instrument>(instrument, pmap);
+    instrument = std::make_shared<Instrument>(instrument, pmap);
     workspace->setInstrument(instrument);
 
     return workspace;
   }
 };
-
-#endif /* MANTID_DATAHANDLING_EXTRACTPOLARIZATIONEFFICIENCIESTEST_H_ */

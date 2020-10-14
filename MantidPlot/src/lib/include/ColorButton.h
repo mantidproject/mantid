@@ -27,8 +27,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef COLORBUTTON_H
-#define COLORBUTTON_H
+#pragma once
 
 #include <qtcolorpicker.h>
 
@@ -53,5 +52,3 @@ public:
 signals:
   void colorChanged();
 };
-
-#endif

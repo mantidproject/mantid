@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_FINDSXPEAKSHELPERTEST_H_
-#define MANTID_CRYSTAL_FINDSXPEAKSHELPERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -179,8 +178,7 @@ public:
     // WHEN + THEN
     TSM_ASSERT_THROWS("Should throw a invalid argument error when background "
                       "strategy is not AbsoluteBackgroundStrategy",
-                      std::make_unique<AllPeaksStrategy>(
-                          backgroundStrategy.get(), spectrumInfo);
+                      AllPeaksStrategy(backgroundStrategy.get(), spectrumInfo);
                       , const std::invalid_argument &);
   }
 
@@ -436,5 +434,3 @@ private:
     }
   }
 };
-
-#endif /* MANTID_CRYSTAL_FINDSXPEAKSHELPERTEST_H_ */

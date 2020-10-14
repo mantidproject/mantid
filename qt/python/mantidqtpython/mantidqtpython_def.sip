@@ -150,7 +150,6 @@ class ManageUserDirectories : QDialog
 %End
 public:
     ManageUserDirectories();
-    static void openUserDirsDialog(QWidget *parent);
 };
 
 class InterfaceManager
@@ -193,10 +192,10 @@ public:
 namespace API
 {
 
-class MWRunFiles : QWidget
+class FileFinderWidget : QWidget
 {
 %TypeHeaderCode
-#include "MantidQtWidgets/Common/MWRunFiles.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 %End
 public:
 void setLabelMinWidth(const int);

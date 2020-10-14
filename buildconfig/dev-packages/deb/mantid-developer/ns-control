@@ -3,17 +3,20 @@ Priority: optional
 Standards-Version: 3.9.2
 
 Package: mantid-developer
-Version: 1.4.1
+Version: 2.2
 Maintainer: Mantid Project <mantid-tech@mantidproject.org>
 Priority: optional
 Architecture: all
 Depends: git,
   g++,
-  clang-format-5.0,
-  cmake-qt-gui(>=3.5),
-  ninja-build,
+  clang-format-6.0,
+  cmake-qt-gui(>=3.13),
+  dvipng,
+  doxygen,
+  graphviz,
   libtbb-dev,
   libgoogle-perftools-dev,
+  libjemalloc-dev,
   libboost-all-dev,
   libpoco-dev(>=1.4.6),
   libnexus0-dev,
@@ -38,52 +41,35 @@ Depends: git,
   libqt5x11extras5-dev,
   libqt5opengl5-dev,
   libqt5scintilla2-dev,
-  libpython-dev,
-  python-setuptools,
-  python-numpy,
-  python-scipy,
-  python-skimage,
-  python-qt4-dev,
-  python-qt4-dbg,
-  pyqt5-dev,
-  pyqt5-dev-tools,
-  python-qtpy,
-  python-sphinx,
-  python-dateutil,
-  python-sphinx-bootstrap-theme,
-  python-matplotlib,
-  python-h5py,
-  python-yaml,
-  python-mock,
-  python-psutil,
-  python-requests,
-  ipython-qtconsole (>=1.2.0),
-  texlive,
-  texlive-latex-extra,
-  dvipng,
-  graphviz,
-  doxygen,
+  libpython3-dev,
+  ninja-build,
   python3-setuptools,
   python3-sip-dev,
   python3-pyqt4,
+  python-qt4-dev,
   python3-pyqt5,
+  pyqt5-dev,
+  pyqt5-dev-tools,
   python3-qtpy,
   python3-numpy,
   python3-scipy,
-  python3-skimage,
   python3-sphinx,
   python3-sphinx-bootstrap-theme,
   python3-dateutil,
   python3-matplotlib,
   ipython3-qtconsole,
   python3-h5py,
-  python3-yaml,
   python3-mock,
   python3-psutil,
-  python3-requests
+  python3-requests,
+  python3-toml,
+  python3-pycifrw(>=4.2.1),
+  python3-yaml,
+  texlive,
+  texlive-latex-extra
 Description: Installs all packages required for a Mantid developer
  A metapackage which requires all the dependencies and tools that are
- required for Mantid development. It works for Ubuntu 16.04.
+ required for Mantid development. It works for Ubuntu 18.04.
  Some packages must be newer than those in the Ubuntu repository. Please
  follow instructions at http://www.mantidproject.org/Mantid_Prerequisites#Repositories
 Installed-Size: 0

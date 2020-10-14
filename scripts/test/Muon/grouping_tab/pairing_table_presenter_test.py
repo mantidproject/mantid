@@ -1,13 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.py3compat import mock
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
-import six
 from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
@@ -23,6 +22,7 @@ def pair_name():
     for i in range(21):
         name.append("pair_" + str(i+1))
     return name
+
 
 @start_qapplication
 class PairingTablePresenterTest(unittest.TestCase):
@@ -72,7 +72,7 @@ class PairingTablePresenterTest(unittest.TestCase):
 
     def test_that_table_has_five_columns_when_initialized(self):
         # these are : pair name, group 1, group 2, alpha, guess alpha
-        self.assertEqual(self.view.num_cols(), 5)
+        self.assertEqual(self.view.num_cols(), 6)
 
     def test_that_model_is_initialized_as_empty(self):
         self.assert_model_empty()
@@ -97,7 +97,7 @@ class PairingTablePresenterTest(unittest.TestCase):
     def test_that_add_pair_button_adds_pair_to_end_of_table(self):
         self.add_two_pairs_to_table()
 
-        self.presenter.add_pair(MuonPair(pair_name="new"))
+        self.presenter.add_pair(MuonPair(pair_name="new", forward_group_name='my_group_0', backward_group_name='my_group_1'))
 
         self.assertEqual(self.view.get_table_item_text(self.view.num_rows() - 1, 0), "new")
 
@@ -256,7 +256,7 @@ class PairingTablePresenterTest(unittest.TestCase):
         self.assertEqual(str(self.view.get_table_item_text(0, 0)), "pair_1")
         self.assertEqual(str(self.view.get_table_item_text(1, 0)), "pair_2")
         self.assertEqual(str(self.view.get_table_item_text(2, 0)), "pair_3")
-        six.assertCountEqual(self, self.model.pair_names, ["pair_1", "pair_2", "pair_3"])
+        self.assertCountEqual(self.model.pair_names, ["pair_1", "pair_2", "pair_3"])
 
 
 if __name__ == '__main__':

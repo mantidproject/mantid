@@ -1,15 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import mantid.simpleapi as mantid  # Have to import Mantid to setup paths
 import unittest
-
-from six import assertRaisesRegex
 
 from isis_powder.routines import common, common_enums, SampleDetails
 
@@ -23,12 +19,12 @@ class ISISPowderCommonTest(unittest.TestCase):
         dict_with_key = {correct_key_name: expected_val}
 
         # Check it correctly raises
-        with assertRaisesRegex(self, KeyError, "The field '" + missing_key_name + "' is required"):
+        with self.assertRaisesRegex(KeyError, "The field '" + missing_key_name + "' is required"):
             common.cal_map_dictionary_key_helper(dictionary=dict_with_key, key=missing_key_name)
 
         # Check it correctly appends the passed error message when raising
         appended_e_msg = "test append message"
-        with assertRaisesRegex(self, KeyError, appended_e_msg):
+        with self.assertRaisesRegex(KeyError, appended_e_msg):
             common.cal_map_dictionary_key_helper(dictionary=dict_with_key, key=missing_key_name,
                                                  append_to_error_message=appended_e_msg)
 
@@ -60,15 +56,15 @@ class ISISPowderCommonTest(unittest.TestCase):
             bank_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, XMin=0, XMax=1100, BinWidth=1))
 
         # Check a list of WS and single cropping value is detected
-        with assertRaisesRegex(self, ValueError, "The cropping values were not in a list type"):
-            common.crop_banks_using_crop_list(bank_list=bank_list, crop_values_list=cropping_value)
+        with self.assertRaisesRegex(ValueError, "The cropping values were not in a list or tuple type"):
+            common.crop_banks_using_crop_list(bank_list=bank_list, crop_values_list=1000)
 
         # Check a list of cropping values and a single workspace is detected
-        with assertRaisesRegex(self, RuntimeError, "Attempting to use list based cropping"):
+        with self.assertRaisesRegex(RuntimeError, "Attempting to use list based cropping"):
             common.crop_banks_using_crop_list(bank_list=bank_list[0], crop_values_list=cropping_value_list)
 
         # What about a mismatch between the number of cropping values and workspaces
-        with assertRaisesRegex(self, RuntimeError, "The number of TOF cropping values does not match"):
+        with self.assertRaisesRegex(RuntimeError, "The number of TOF cropping values does not match"):
             common.crop_banks_using_crop_list(bank_list=bank_list[1:], crop_values_list=cropping_value_list)
 
         # Check we can crop a single workspace from the list
@@ -80,6 +76,39 @@ class ISISPowderCommonTest(unittest.TestCase):
         # Check we can crop a whole list
         cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:],
                                                             crop_values_list=cropping_value_list[1:])
+        for ws in cropped_ws_list[1:]:
+            self.assertEqual(ws.blocksize(), expected_number_of_bins)
+            mantid.DeleteWorkspace(Workspace=ws)
+
+    def test_crop_banks_using_a_single_fractional_cropping_value(self):
+        bank_list = []
+        cropping_value = (0.05, 0.95)  # Crop to 0-1000 microseconds for unit tests
+        x_min = 500
+        x_max = 1000
+
+        expected_number_of_bins = x_max * cropping_value[-1] - x_min * (1+cropping_value[0])
+
+        for i in range(0, 3):
+            out_name = "crop_banks_in_tof-" + str(i)
+            bank_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, XMin=x_min, XMax=x_max, BinWidth=1))
+
+        # Check a list of WS and non list or tuple
+        with self.assertRaisesRegex(ValueError, "The cropping values were not in a list or tuple type"):
+            common.crop_banks_using_crop_list(bank_list=bank_list, crop_values_list=1000)
+
+        # Check a cropping value and a single workspace is detected
+        with self.assertRaisesRegex(RuntimeError, "Attempting to use list based cropping"):
+            common.crop_banks_using_crop_list(bank_list=bank_list[0], crop_values_list=cropping_value)
+
+        # Check we can crop a single workspace from the list
+        cropped_single_ws_list = common.crop_banks_using_crop_list(bank_list=[bank_list[0]],
+                                                                   crop_values_list=cropping_value)
+        self.assertEqual(cropped_single_ws_list[0].blocksize(), expected_number_of_bins)
+        mantid.DeleteWorkspace(Workspace=cropped_single_ws_list[0])
+
+        # Check we can crop a whole list
+        cropped_ws_list = common.crop_banks_using_crop_list(bank_list=bank_list[1:],
+                                                            crop_values_list=cropping_value)
         for ws in cropped_ws_list[1:]:
             self.assertEqual(ws.blocksize(), expected_number_of_bins)
             mantid.DeleteWorkspace(Workspace=ws)
@@ -104,6 +133,42 @@ class ISISPowderCommonTest(unittest.TestCase):
         for ws in cropped_ws_list:
             self.assertEqual(ws.blocksize(), expected_number_of_bins)
             mantid.DeleteWorkspace(ws)
+
+    def test_crop_in_tof_by_fraction(self):
+        ws_list = []
+        x_min = 0.2
+        x_max = 0.8  # Crop 20% from the front and back.
+        expected_number_of_bins = 600 * x_max - 100 * (1 + x_min)
+
+        for i in range(0, 3):
+            out_name = "crop_banks_in_tof-" + str(i)
+            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, XMin=100, XMax=600, BinWidth=1))
+
+        # Crop a single workspace in TOF
+        tof_single_ws = common.crop_in_tof(ws_to_crop=ws_list[0], x_min=x_min, x_max=x_max)
+        self.assertEqual(tof_single_ws.blocksize(), expected_number_of_bins)
+        mantid.DeleteWorkspace(tof_single_ws)
+
+        # Crop a list of workspaces in TOF
+        cropped_ws_list = common.crop_in_tof(ws_to_crop=ws_list[1:], x_min=x_min, x_max=x_max)
+        for ws in cropped_ws_list:
+            self.assertEqual(ws.blocksize(), expected_number_of_bins)
+            mantid.DeleteWorkspace(ws)
+
+    def test_crop_in_tof_by_fraction_fails_when_max_less_than_min(self):
+        ws_list = []
+        x_min = 0.8
+        x_max = 0.799999  # Crop 20% from the front and back.
+
+        for i in range(0, 3):
+            out_name = "crop_banks_in_tof-" + str(i)
+            ws_list.append(mantid.CreateSampleWorkspace(OutputWorkspace=out_name, XMin=100, XMax=600, BinWidth=1))
+
+        # Crop a single workspace in TOF
+        self.assertRaises(ValueError, common.crop_in_tof, ws_to_crop=ws_list[0], x_min=x_min, x_max=x_max)
+
+        # Crop a list of workspaces in TOF
+        self.assertRaises(ValueError, common.crop_in_tof, ws_to_crop=ws_list[1:], x_min=x_min, x_max=x_max)
 
     def test_crop_in_tof_coverts_units(self):
         # Checks that crop_in_tof converts to TOF before cropping
@@ -139,7 +204,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         with self.assertRaises(KeyError):
             common.dictionary_key_helper(dictionary=test_dictionary, key=bad_key_name)
 
-        with assertRaisesRegex(self, KeyError, e_msg):
+        with self.assertRaisesRegex(KeyError, e_msg):
             common.dictionary_key_helper(dictionary=test_dictionary, key=bad_key_name, exception_msg=e_msg)
 
         self.assertEqual(common.dictionary_key_helper(dictionary=test_dictionary, key=good_key_name), 123)
@@ -243,11 +308,11 @@ class ISISPowderCommonTest(unittest.TestCase):
     def test_generate_run_numbers_fails(self):
         run_input_sting = "text-string"
 
-        with assertRaisesRegex(self, ValueError, "Could not generate run numbers from this input"):
+        with self.assertRaisesRegex(ValueError, "Could not generate run numbers from this input"):
             common.generate_run_numbers(run_number_string=run_input_sting)
 
         # Check it says what the actual string was
-        with assertRaisesRegex(self, ValueError, run_input_sting):
+        with self.assertRaisesRegex(ValueError, run_input_sting):
             common.generate_run_numbers(run_number_string=run_input_sting)
 
     def test_load_current_normalised_workspace(self):
@@ -377,14 +442,14 @@ class ISISPowderCommonTest(unittest.TestCase):
                                                         NumBanks=1, BankPixelWidth=1, XMax=10, BinWidth=1))
         # What if the item passed in is not a list
         err_msg_not_list = "was not a list"
-        with assertRaisesRegex(self, RuntimeError, err_msg_not_list):
+        with self.assertRaisesRegex(RuntimeError, err_msg_not_list):
             common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=None)
 
-        with assertRaisesRegex(self, RuntimeError, err_msg_not_list):
+        with self.assertRaisesRegex(RuntimeError, err_msg_not_list):
             common.rebin_workspace_list(workspace_list=None, bin_width_list=[])
 
         # What about if the lists aren't the same length
-        with assertRaisesRegex(self, ValueError, "does not match the number of banks"):
+        with self.assertRaisesRegex(ValueError, "does not match the number of banks"):
             incorrect_number_bin_widths = [1] * (number_of_ws - 1)
             common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=incorrect_number_bin_widths)
 
@@ -413,10 +478,10 @@ class ISISPowderCommonTest(unittest.TestCase):
 
         # Are the lengths checked
         incorrect_length = [1] * (number_of_ws - 1)
-        with assertRaisesRegex(self, ValueError, "The number of starting bin values"):
+        with self.assertRaisesRegex(ValueError, "The number of starting bin values"):
             common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths,
                                         start_x_list=incorrect_length, end_x_list=end_x_list)
-        with assertRaisesRegex(self, ValueError, "The number of ending bin values"):
+        with self.assertRaisesRegex(ValueError, "The number of ending bin values"):
             common.rebin_workspace_list(workspace_list=ws_list, bin_width_list=ws_bin_widths,
                                         start_x_list=start_x_list, end_x_list=incorrect_length)
 
@@ -521,7 +586,7 @@ class ISISPowderCommonTest(unittest.TestCase):
         ws_file_name = "100"  # Load POL100
 
         # This should throw as the TOF ranges do not match
-        with assertRaisesRegex(self, ValueError, "specified for this file do not have matching binning. Do the "):
+        with self.assertRaisesRegex(ValueError, "specified for this file do not have matching binning. Do the "):
             common.subtract_summed_runs(ws_to_correct=sample_ws, instrument=ISISPowderMockInst(),
                                         empty_sample_ws_string=ws_file_name)
 
@@ -586,6 +651,7 @@ class ISISPowderMockInst(object):
 class ISISPowderMockRunDetails(object):
     def __init__(self, file_ext):
         self.file_extension = file_ext
+
 
 if __name__ == "__main__":
     unittest.main()

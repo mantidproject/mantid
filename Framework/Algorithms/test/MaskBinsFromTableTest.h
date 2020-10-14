@@ -1,13 +1,11 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MASKDETECTORBINSTEST_H_
-#define MANTID_ALGORITHMS_MASKDETECTORBINSTEST_H_
+#pragma once
 
-#include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include <cxxtest/TestSuite.h>
 
@@ -47,7 +45,7 @@ public:
 
     // 2. Generate a TableWorskpace
     DataObjects::TableWorkspace_sptr tablews =
-        boost::shared_ptr<DataObjects::TableWorkspace>(
+        std::shared_ptr<DataObjects::TableWorkspace>(
             new DataObjects::TableWorkspace());
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
@@ -66,7 +64,7 @@ public:
     TS_ASSERT(maskalg.isExecuted());
 
     // 4. Check
-    WS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+    WS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(WS);
     for (int wi = 1; wi <= 3; wi++) {
@@ -95,7 +93,7 @@ public:
 
     // 2. Generate a TableWorskpace
     DataObjects::TableWorkspace_sptr tablews =
-        boost::shared_ptr<DataObjects::TableWorkspace>(
+        std::shared_ptr<DataObjects::TableWorkspace>(
             new DataObjects::TableWorkspace());
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
@@ -115,7 +113,7 @@ public:
 
     // 4. Check
     MatrixWorkspace_sptr outWS =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(opWSName));
     TS_ASSERT(outWS);
     for (int wi = 1; wi <= 3; wi++) {
@@ -145,7 +143,7 @@ public:
 
     // 2. Generate a TableWorskpace
     DataObjects::TableWorkspace_sptr tablews =
-        boost::shared_ptr<DataObjects::TableWorkspace>(
+        std::shared_ptr<DataObjects::TableWorkspace>(
             new DataObjects::TableWorkspace());
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
@@ -168,7 +166,7 @@ public:
     TS_ASSERT(maskalg.isExecuted());
 
     // 4. Check
-    WS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+    WS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(WS);
 
@@ -185,10 +183,10 @@ public:
 
     // b) Table Line 1
     std::vector<int> speclist;
-    speclist.push_back(5);
-    speclist.push_back(6);
-    speclist.push_back(7);
-    speclist.push_back(8);
+    speclist.emplace_back(5);
+    speclist.emplace_back(6);
+    speclist.emplace_back(7);
+    speclist.emplace_back(8);
     for (int spectrum : speclist) {
       auto &yvec = WS->y(spectrum);
       for (size_t bin = 0; bin < yvec.size(); ++bin) {
@@ -232,7 +230,7 @@ public:
 
     // 2. Generate a TableWorskpace
     DataObjects::TableWorkspace_sptr tablews =
-        boost::shared_ptr<DataObjects::TableWorkspace>(
+        std::shared_ptr<DataObjects::TableWorkspace>(
             new DataObjects::TableWorkspace());
     tablews->addColumn("str", "SpectraList");
     tablews->addColumn("double", "XMin");
@@ -251,7 +249,7 @@ public:
     TS_ASSERT(maskalg.isExecuted());
 
     // 4. Check
-    WS = boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+    WS = std::dynamic_pointer_cast<API::MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(WS);
     for (int wi = 1; wi <= 3; wi++) {
@@ -282,7 +280,7 @@ public:
       dataws->getSpectrum(i).setDetectorID(i + 1);
 
     // Generate a TableWorksapce
-    auto tablews = boost::make_shared<TableWorkspace>();
+    auto tablews = std::make_shared<TableWorkspace>();
     tablews->addColumn("str", "DetectorIDsList");
     tablews->addColumn("double", "XMin");
     tablews->addColumn("double", "XMax");
@@ -302,7 +300,7 @@ public:
 
     // Check
     MatrixWorkspace_sptr outws =
-        boost::dynamic_pointer_cast<API::MatrixWorkspace>(
+        std::dynamic_pointer_cast<API::MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve(workspaceName));
     TS_ASSERT(outws);
     for (int wi = 1; wi <= 3; wi++) {
@@ -316,5 +314,3 @@ public:
     AnalysisDataService::Instance().remove("MaskInfoTable");
   }
 };
-
-#endif /* MANTID_ALGORITHMS_MASKDETECTORBINSTEST_H_ */

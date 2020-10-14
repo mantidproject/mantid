@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadCanSAS1D.h"
 #include "MantidAPI/Axis.h"
@@ -23,8 +23,8 @@
 #include <Poco/DOM/NodeList.h>
 #include <Poco/SAX/InputSource.h>
 
-using Poco::XML::DOMParser;
 using Poco::XML::Document;
+using Poco::XML::DOMParser;
 using Poco::XML::Element;
 using Poco::XML::Node;
 using Poco::XML::NodeList;
@@ -46,6 +46,29 @@ int getGeometryID(const std::string &selection) {
     geometryID = 0;
   }
   return geometryID;
+}
+
+/** Set a log value on the given run from the given element value, if the
+ * element has the given name
+ *
+ * @param searchName : the element name to check against
+ * @param elem : the element
+ * @param run : the run to update the logs for
+ * @param logName : the name of the log to update
+ */
+bool setLogFromElementIfNameIs(std::string const &searchName, Element *elem,
+                               Run &run, std::string const &logName) {
+  if (!elem)
+    return false;
+
+  const std::string termName = elem->getAttribute("name");
+  if (termName == searchName) {
+    std::string file = elem->innerText();
+    run.addLogData(new PropertyWithValue<std::string>(logName, file));
+    return true;
+  }
+
+  return false;
 }
 } // namespace
 
@@ -142,7 +165,7 @@ void LoadCanSAS1D::exec() {
     outputWork = WS;
     break;
   default:
-    auto group = boost::make_shared<WorkspaceGroup>();
+    auto group = std::make_shared<WorkspaceGroup>();
     for (unsigned int i = 0; i < numEntries; ++i) {
       std::string run;
       MatrixWorkspace_sptr newWork = loadEntry(entryList->item(i), run);
@@ -297,9 +320,9 @@ void LoadCanSAS1D::check(const Poco::XML::Element *const toCheck,
  * @param[out] container the data will be added to this group
  * @throw ExistsError if a workspace with this name had already been added
  */
-void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork,
-                                      const std::string &newWorkName,
-                                      API::WorkspaceGroup_sptr container) {
+void LoadCanSAS1D::appendDataToOutput(
+    const API::MatrixWorkspace_sptr &newWork, const std::string &newWorkName,
+    const API::WorkspaceGroup_sptr &container) {
   // the name of the property, like the workspace name must be different for
   // each workspace. Add "_run" at the end to stop problems with names like
   // "outputworkspace"
@@ -317,8 +340,9 @@ void LoadCanSAS1D::appendDataToOutput(API::MatrixWorkspace_sptr newWork,
  * @param inst_name :: The name written in the Nexus file
  * @param localWorkspace :: The workspace to insert the instrument into
  */
-void LoadCanSAS1D::runLoadInstrument(const std::string &inst_name,
-                                     API::MatrixWorkspace_sptr localWorkspace) {
+void LoadCanSAS1D::runLoadInstrument(
+    const std::string &inst_name,
+    const API::MatrixWorkspace_sptr &localWorkspace) {
 
   API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 
@@ -337,12 +361,13 @@ void LoadCanSAS1D::runLoadInstrument(const std::string &inst_name,
         "Unable to successfully run LoadInstrument Child Algorithm");
   }
 }
+
 /** Loads data into the run log
  *  @param[in] sasEntry the entry corresponding to the passed workspace
  *  @param[in] wSpace the log will be created in this workspace
  */
 void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
-                              API::MatrixWorkspace_sptr wSpace) const {
+                              const API::MatrixWorkspace_sptr &wSpace) const {
   API::Run &run = wSpace->mutableRun();
   Element *runText = sasEntry->getChildElement("Run");
   check(runText, "Run");
@@ -352,24 +377,25 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
   Element *process = sasEntry->getChildElement("SASprocess");
   if (process) {
     Poco::AutoPtr<NodeList> terms = process->getElementsByTagName("term");
-    for (unsigned int i = 0; i < terms->length(); ++i) {
+    auto setUserFile = false;
+    auto setBatchFile = false;
+    for (unsigned int i = 0;
+         i < terms->length() && (!setUserFile || !setBatchFile); ++i) {
       Node *term = terms->item(i);
       auto *elem = dynamic_cast<Element *>(term);
-      if (elem) {
-        const std::string termName = elem->getAttribute("name");
-        if (termName == "user_file") {
-          std::string file = elem->innerText();
-          run.addLogData(new PropertyWithValue<std::string>("UserFile", file));
-          break;
-        }
-      }
+      if (!setUserFile &&
+          setLogFromElementIfNameIs("user_file", elem, run, "UserFile"))
+        setUserFile = true;
+      else if (!setBatchFile &&
+               setLogFromElementIfNameIs("batch_file", elem, run, "BatchFile"))
+        setBatchFile = true;
     }
   }
 }
 
 void LoadCanSAS1D::createSampleInformation(
     const Poco::XML::Element *const sasEntry,
-    Mantid::API::MatrixWorkspace_sptr wSpace) const {
+    const Mantid::API::MatrixWorkspace_sptr &wSpace) const {
   auto &sample = wSpace->mutableSample();
 
   // Get the thickness information

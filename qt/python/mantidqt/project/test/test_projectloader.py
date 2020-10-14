@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
@@ -20,7 +20,7 @@ import tempfile  # noqa
 
 from mantid.api import AnalysisDataService as ADS  # noqa
 from mantid.simpleapi import CreateSampleWorkspace  # noqa
-from mantid.py3compat import mock  # noqa
+from unittest import mock  # noqa
 from mantidqt.project import projectloader, projectsaver  # noqa
 from mantidqt.utils.qt.testing import start_qapplication  # noqa
 
@@ -86,6 +86,22 @@ class ProjectReaderTest(unittest.TestCase):
         project_reader = projectloader.ProjectReader(project_file_ext)
         project_reader.read_project(working_project_file)
         self.assertEqual(["ws1"], project_reader.workspace_names)
+
+    def test_mantidplot_project_reading(self):
+        mantidplot_project_partial = "MantidPlot 0.9.5 project file\n" + \
+                                     "<scripting-lang>	Python\n" + \
+                                     "<windows>	3\n" + \
+                                     "<mantidworkspaces>\n" + \
+                                     "WorkspaceNames\tws1\tws2\n" + \
+                                     "</mantidworkspaces>\n" + \
+                                     "<scriptwindow>\n"
+
+        mplot_project_file = join(working_directory, "mplot_temp.mantid")
+        with open(mplot_project_file, "w") as f:
+            f.write(mantidplot_project_partial)
+        project_reader = projectloader.ProjectReader(project_file_ext)
+        project_reader.read_project(mplot_project_file)
+        self.assertEqual(["ws1","ws2"], project_reader.workspace_names)
 
 
 if __name__ == "__main__":

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/api/Algorithms/AlgorithmObserverAdapter.h"
 #include "MantidPythonInterface/core/CallMethod.h"
@@ -14,11 +14,13 @@ AlgorithmObserverAdapter::AlgorithmObserverAdapter(PyObject *self)
     : API::AlgorithmObserver(), m_self(self) {}
 
 void AlgorithmObserverAdapter::progressHandle(const API::IAlgorithm *alg,
-                                              double p,
-                                              const std::string &msg) {
+                                              double p, const std::string &msg,
+                                              const double estimatedTime,
+                                              const int progressPrecision) {
   UNUSED_ARG(alg)
   try {
-    return callMethod<void>(getSelf(), "progressHandle", p, msg);
+    return callMethod<void>(getSelf(), "progressHandle", p, msg, estimatedTime,
+                            progressPrecision);
   } catch (UndefinedAttributeError &) {
     return;
   }

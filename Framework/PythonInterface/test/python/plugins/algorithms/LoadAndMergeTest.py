@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import LoadAndMerge, config, mtd
@@ -13,11 +11,14 @@ from mantid.simpleapi import LoadAndMerge, config, mtd
 
 class LoadAndMergeTest(unittest.TestCase):
 
+    @classmethod
+    def setUpClass(cls):
+        config.appendDataSearchSubDir('ILL/IN16B/')
+        config.appendDataSearchSubDir('ILL/D20/')
+
     def setUp(self):
         config['default.facility'] = 'ILL'
         config['default.instrument'] = 'IN16B'
-        config.appendDataSearchSubDir('ILL/IN16B/')
-        config.appendDataSearchSubDir('ILL/D20/')
 
     def test_single_run_load(self):
         out1 = LoadAndMerge(Filename='170257')

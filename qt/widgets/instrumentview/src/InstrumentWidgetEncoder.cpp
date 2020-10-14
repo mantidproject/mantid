@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetEncoder.h"
 #include "MantidQtWidgets/InstrumentView/ColorBar.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentActor.h"
@@ -37,26 +36,35 @@ InstrumentWidgetEncoder::encode(const InstrumentWidget &obj,
                                 const QString &projectPath,
                                 const bool saveMask) {
   QMap<QString, QVariant> map;
-  m_projectPath = projectPath.toStdString();
-  m_saveMask = saveMask;
+  // there is no reference to the workspace if it is being replaced, so return
+  // the empty map
+  if (!obj.isWsBeingReplaced()) {
+    m_projectPath = projectPath.toStdString();
+    m_saveMask = saveMask;
 
-  map.insert(QString("workspaceName"), QVariant(obj.getWorkspaceName()));
+    map.insert(QString("workspaceName"), QVariant(obj.getWorkspaceName()));
 
-  map.insert(QString("surfaceType"), QVariant(obj.getSurfaceType()));
+    map.insert(QString("surfaceType"), QVariant(obj.getSurfaceType()));
 
-  map.insert(QString("currentTab"), QVariant(obj.getCurrentTab()));
+    map.insert(QString("currentTab"), QVariant(obj.getCurrentTab()));
 
-  QList<QVariant> energyTransferList;
-  energyTransferList.append(QVariant(obj.m_xIntegration->getMinimum()));
-  energyTransferList.append(QVariant(obj.m_xIntegration->getMaximum()));
-  map.insert(QString("energyTransfer"), QVariant(energyTransferList));
+    QList<QVariant> energyTransferList;
+    if (obj.isIntegrable()) {
+      energyTransferList.append(QVariant(obj.m_xIntegration->getMinimum()));
+      energyTransferList.append(QVariant(obj.m_xIntegration->getMaximum()));
+    } else {
+      energyTransferList.append(QVariant(0));
+      energyTransferList.append(QVariant(1));
+    }
+    energyTransferList.append(QVariant(obj.isIntegrable()));
+    map.insert(QString("energyTransfer"), QVariant(energyTransferList));
 
-  map.insert(QString("surface"),
-             QVariant(this->encodeSurface(obj.getSurface())));
-  map.insert(QString("actor"),
-             QVariant(this->encodeActor(obj.m_instrumentActor)));
-  map.insert(QString("tabs"), QVariant(this->encodeTabs(obj)));
-
+    map.insert(QString("surface"),
+               QVariant(this->encodeSurface(obj.getSurface())));
+    map.insert(QString("actor"),
+               QVariant(this->encodeActor(obj.m_instrumentActor)));
+    map.insert(QString("tabs"), QVariant(this->encodeTabs(obj)));
+  }
   return map;
 }
 
@@ -156,6 +164,9 @@ InstrumentWidgetEncoder::encodeMaskTab(const InstrumentWidgetMaskTab *tab) {
                      QVariant(tab->m_ring_rectangle->isChecked()));
   activeTools.insert(QString("freeDrawButton"),
                      QVariant(tab->m_free_draw->isChecked()));
+  activeTools.insert(QString("pixelButton"),
+                     QVariant(tab->m_pixel->isChecked()));
+  activeTools.insert(QString("tubeButton"), QVariant(tab->m_tube->isChecked()));
   map.insert(QString("activeTools"), QVariant(activeTools));
 
   activeType.insert(QString("maskingOn"),
@@ -248,7 +259,7 @@ QMap<QString, QVariant>
 InstrumentWidgetEncoder::encodeSurface(const ProjectionSurface_sptr &obj) {
   QMap<QString, QVariant> map;
 
-  auto projection3D = boost::dynamic_pointer_cast<Projection3D>(obj);
+  auto projection3D = std::dynamic_pointer_cast<Projection3D>(obj);
   if (projection3D) {
     map.insert(QString("projection3DSuccess"), QVariant(true));
     map.insert(QString("projection3D"),
@@ -338,6 +349,9 @@ InstrumentWidgetEncoder::encodeShape(const Shape2D *obj) {
   } else if (obj->type() == "ring") {
     subShapeMap = this->encodeRing(static_cast<const Shape2DRing *>(obj));
     map.insert(QString("type"), QVariant(QString("ring")));
+  } else if (obj->type() == "sector") {
+    subShapeMap = this->encodeSector(static_cast<const Shape2DSector *>(obj));
+    map.insert(QString("type"), QVariant(QString("sector")));
   } else if (obj->type() == "free") {
     subShapeMap = this->encodeFree(static_cast<const Shape2DFree *>(obj));
     map.insert(QString("type"), QVariant(QString("free")));
@@ -393,6 +407,26 @@ InstrumentWidgetEncoder::encodeRing(const Shape2DRing *obj) {
   map.insert(QString("xWidth"), QVariant(xWidth));
   map.insert(QString("yWidth"), QVariant(yWidth));
   map.insert(QString("shape"), QVariant(this->encodeShape(baseShape)));
+
+  return map;
+}
+
+QMap<QString, QVariant>
+InstrumentWidgetEncoder::encodeSector(const Shape2DSector *obj) {
+  const auto outerRadius = obj->getDouble("outerRadius");
+  const auto innerRadius = obj->getDouble("innerRadius");
+  const auto startAngle = obj->getDouble("startAngle") * M_PI / 180;
+  const auto endAngle = obj->getDouble("endAngle") * M_PI / 180;
+  const auto centerX = obj->getPoint("center").x();
+  const auto centerY = obj->getPoint("center").y();
+
+  QMap<QString, QVariant> map;
+  map.insert(QString("outerRadius"), QVariant(outerRadius));
+  map.insert(QString("innerRadius"), QVariant(innerRadius));
+  map.insert(QString("startAngle"), QVariant(startAngle));
+  map.insert(QString("endAngle"), QVariant(endAngle));
+  map.insert(QString("centerX"), QVariant(centerX));
+  map.insert(QString("centerY"), QVariant(centerY));
 
   return map;
 }

@@ -1,30 +1,32 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from __future__ import (absolute_import, unicode_literals)
-
-from matplotlib.axes import ErrorbarContainer
 from matplotlib.lines import Line2D
 
-from mantid.plots import MantidAxes
-from mantid.plots.helperfunctions import get_data_from_errorbar_container
+from mantid.plots.legend import LegendProperties
+from mantid.plots import datafunctions, MantidAxes
 from mantidqt.utils.qt import block_signals
 from mantidqt.widgets.plotconfigdialog import get_axes_names_dict, curve_in_ax
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import (
-    CurveProperties, set_errorbars_hidden, curve_has_errors,
-    remove_curve_from_ax)
+    CurveProperties, curve_has_errors, remove_curve_from_ax)
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.view import CurvesTabWidgetView
+from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 
 
 class CurvesTabWidgetPresenter:
 
-    def __init__(self, fig, view=None, parent=None):
+    def __init__(self, fig, view=None, parent=None, legend_tab=None):
         self.fig = fig
+
+        # The legend tab is passed in so that it can be removed if all curves are removed.
+        self.legend_tab = legend_tab
+        self.legend_props = None
+
         if not view:
             self.view = CurvesTabWidgetView(parent)
         else:
@@ -38,6 +40,8 @@ class CurvesTabWidgetPresenter:
         self.curve_names_dict = {}
         self.populate_curve_combo_box_and_update_view()
 
+        self.set_apply_to_all_buttons_enabled()
+
         # Signals
         self.view.select_axes_combo_box.currentIndexChanged.connect(
             self.populate_curve_combo_box_and_update_view)
@@ -45,33 +49,34 @@ class CurvesTabWidgetPresenter:
             self.update_view)
         self.view.remove_curve_button.clicked.connect(
             self.remove_selected_curve)
+        self.view.line.apply_to_all_button.clicked.connect(
+            self.line_apply_to_all)
+        self.view.marker.apply_to_all_button.clicked.connect(
+            self.marker_apply_to_all)
+        self.view.marker.marker_style_combo_box.currentTextChanged.connect(
+            self.view.marker.set_colour_fields_enabled)
+        self.view.errorbars.apply_to_all_button.clicked.connect(
+            self.errorbars_apply_to_all)
 
     def apply_properties(self):
         """Take properties from views and set them on the selected curve"""
+        ax = self.get_selected_ax()
+        if ax.legend_:
+            self.legend_props = LegendProperties.from_legend(ax.legend_)
+
         view_props = self.get_view_properties()
         if view_props == self.current_view_properties:
             return
+        plot_kwargs = view_props.get_plot_kwargs()
         # Re-plot curve
-        self._replot_selected_curve(view_props.get_plot_kwargs())
+        self._replot_selected_curve(plot_kwargs)
         curve = self.get_selected_curve()
         # Set the curve's new name in the names dict and combo box
         self.set_new_curve_name_in_dict_and_combo_box(curve, view_props.label)
-        self.toggle_errors(curve, view_props)
+        FigureErrorsManager.toggle_errors(curve, view_props)
         self.current_view_properties = view_props
 
-        self.update_limits_and_legend(self.get_selected_ax())
-
-    @staticmethod
-    def update_limits_and_legend(ax):
-        ax.relim()
-        ax.autoscale()
-        if ax.legend_:
-            ax.legend().draggable()
-
-    @staticmethod
-    def toggle_errors(curve, view_props):
-        setattr(curve, 'hide_errors', view_props.hide_errors)
-        set_errorbars_hidden(curve, view_props.hide_errors)
+        FigureErrorsManager.update_limits_and_legend(ax, self.legend_props)
 
     def close_tab(self):
         """Close the tab and set the view to None"""
@@ -100,49 +105,67 @@ class CurvesTabWidgetPresenter:
         """Get top level properties from view"""
         return self.view.get_properties()
 
-    @staticmethod
-    def _replot_mpl_curve(ax, curve, plot_kwargs):
-        """
-        Replot the given matplotlib curve with new kwargs
-        :param ax: The axis that the curve will be plotted on
-        :param curve: The curve that will be replotted
-        :param plot_kwargs: Kwargs for the plot that will be passed onto matplotlib
-        """
-        remove_curve_from_ax(curve)
-        if isinstance(curve, Line2D):
-            [plot_kwargs.pop(arg, None) for arg in
-             ['capsize', 'capthick', 'ecolor', 'elinewidth', 'errorevery']]
-            new_curve = ax.plot(curve.get_xdata(), curve.get_ydata(),
-                                **plot_kwargs)[0]
-        elif isinstance(curve, ErrorbarContainer):
-            # Because of "error every" option, we need to store the original
-            # error bar data on the curve or we will lose data on re-plotting
-            x, y, xerr, yerr = getattr(curve, 'errorbar_data',
-                                       get_data_from_errorbar_container(curve))
-            new_curve = ax.errorbar(x, y, xerr=xerr, yerr=yerr, **plot_kwargs)
-            setattr(new_curve, 'errorbar_data', [x, y, xerr, yerr])
-        else:
-            raise ValueError("Curve must have type 'Line2D' or 'ErrorbarContainer'. Found '{}'".format(type(curve)))
-        return new_curve
-
     def _replot_selected_curve(self, plot_kwargs):
         """Replot the selected curve with the given plot kwargs"""
         ax = self.get_selected_ax()
         curve = self.get_selected_curve()
-        new_curve = self.replot_curve(ax, curve, plot_kwargs)
+
+        waterfall = False
+        if isinstance(ax, MantidAxes):
+            waterfall = ax.is_waterfall()
+        check_line_colour = False
+        # If the plot is a waterfall plot and the user has set it so the area under each line is filled, and the fill
+        # colour for each line is set as the line colour, after the curve is updated we need to check if its colour has
+        # changed so the fill can be updated accordingly.
+        if waterfall and ax.waterfall_has_fill() and datafunctions.waterfall_fill_is_line_colour(ax):
+            check_line_colour = True
+
+        if isinstance(curve, Line2D):
+            curve_index = ax.get_lines().index(curve)
+            errorbar = False
+        else:
+            curve_index = ax.get_lines().index(curve[0])
+            errorbar = True
+
+        # When you remove the curve on a waterfall plot, the remaining curves are repositioned so that they are
+        # equally spaced apart. However since the curve is being replotted we don't want that to happen, so here
+        # the waterfall offsets are set to 0 so the plot appears to be non-waterfall. The offsets are then re-set
+        # after the curve is replotted.
+        if waterfall:
+            x_offset, y_offset = ax.waterfall_x_offset, ax.waterfall_y_offset
+            ax.waterfall_x_offset = ax.waterfall_y_offset = 0
+
+        new_curve = FigureErrorsManager.replot_curve(ax, curve, plot_kwargs)
         self.curve_names_dict[self.view.get_selected_curve_name()] = new_curve
 
-    @classmethod
-    def replot_curve(cls, ax, curve, plot_kwargs):
         if isinstance(ax, MantidAxes):
-            try:
-                new_curve = ax.replot_artist(curve, errorbars=True, **plot_kwargs)
-            except ValueError:  # ValueError raised if Artist not tracked by Axes
-                new_curve = cls._replot_mpl_curve(ax, curve, plot_kwargs)
+            errorbar_cap_lines = datafunctions.remove_and_return_errorbar_cap_lines(ax)
         else:
-            new_curve = cls._replot_mpl_curve(ax, curve, plot_kwargs)
-        setattr(new_curve, 'errorevery', plot_kwargs.get('errorevery', 1))
-        return new_curve
+            errorbar_cap_lines = []
+
+        # When a curve is redrawn it is moved to the back of the list of curves so here it is moved back to its previous
+        # position. This is so that the correct offset is applied to the curve if the plot is a waterfall plot, but it
+        # also just makes sense for the curve order to remain unchanged.
+        ax.lines.insert(curve_index, ax.lines.pop())
+
+        if waterfall:
+            # Set the waterfall offsets to what they were previously.
+            ax.waterfall_x_offset, ax.waterfall_y_offset = x_offset, y_offset
+            if check_line_colour:
+                # curve can be either a Line2D or an ErrorContainer and the colour is accessed differently for each.
+                if not errorbar:
+                    # if the line colour hasn't changed then the fill colour doesn't need to be updated.
+                    update_fill = curve.get_color() != new_curve[0].get_color()
+                else:
+                    update_fill = curve[0].get_color() != new_curve[0].get_color()
+                datafunctions.convert_single_line_to_waterfall(ax, curve_index, need_to_update_fill=update_fill)
+            else:
+                # the curve has been reset to its original position so for a waterfall plot it needs to be re-offset.
+                datafunctions.convert_single_line_to_waterfall(ax, curve_index)
+
+            datafunctions.set_waterfall_fill_visible(ax, curve_index)
+
+        ax.lines += errorbar_cap_lines
 
     def populate_curve_combo_box_and_update_view(self):
         """
@@ -171,13 +194,18 @@ class CurvesTabWidgetPresenter:
         Remove selected curve from figure and combobox. If there are no
         curves left on the axes remove that axes from the axes combo box
         """
+        ax = self.get_selected_ax()
+        if ax.legend_:
+            self.legend_props = LegendProperties.from_legend(ax.legend_)
+
         # Remove curve from ax and remove from curve names dictionary
         remove_curve_from_ax(self.get_selected_curve())
         self.curve_names_dict.pop(self.view.get_selected_curve_name())
+        self.set_apply_to_all_buttons_enabled()
 
         ax = self.get_selected_ax()
         # Update the legend and redraw
-        self.update_limits_and_legend(ax)
+        FigureErrorsManager.update_limits_and_legend(ax, self.legend_props)
         ax.figure.canvas.draw()
 
         # Remove the curve from the curve selection combo box
@@ -197,6 +225,8 @@ class CurvesTabWidgetPresenter:
                 self.view.remove_select_axes_combo_box_selected_item()
                 if self.view.select_axes_combo_box.count() == 0:
                     self.close_tab()
+                    if self.legend_tab:
+                        self.legend_tab.close_tab()
                     return True
 
     def set_new_curve_name_in_dict_and_combo_box(self, curve, new_label):
@@ -240,11 +270,7 @@ class CurvesTabWidgetPresenter:
     def _get_selected_ax_errorbars(self):
         """Get all errorbar containers in selected axes"""
         ax = self.get_selected_ax()
-        return self.get_errorbars_from_ax(ax)
-
-    @staticmethod
-    def get_errorbars_from_ax(ax):
-        return [cont for cont in ax.containers if isinstance(cont, ErrorbarContainer)]
+        return FigureErrorsManager.get_errorbars_from_ax(ax)
 
     def _populate_select_curve_combo_box(self):
         """
@@ -259,20 +285,95 @@ class CurvesTabWidgetPresenter:
             self.view.close()
             return False
 
-        active_lines = self.get_curves_from_ax(selected_ax)
+        # Get the lines in the order that they are listed on the legend.
+        active_lines = datafunctions.get_legend_handles(selected_ax)
         for line in active_lines:
             self._update_selected_curve_name(line)
-
-        self.view.populate_select_curve_combo_box(
-            sorted(self.curve_names_dict.keys(), key=lambda s: s.lower()))
+        self.view.populate_select_curve_combo_box(list(self.curve_names_dict))
         return True
-
-    @staticmethod
-    def get_curves_from_ax(ax):
-        return ax.get_lines() + CurvesTabWidgetPresenter.get_errorbars_from_ax(ax)
 
     def _update_selected_curve_name(self, curve):
         """Update the selected curve's name in the curve_names_dict"""
         name = self._generate_curve_name(curve, curve.get_label())
         if name:
             self.curve_names_dict[name] = curve
+
+    def set_apply_to_all_buttons_enabled(self):
+        """
+        Enables the Apply to All buttons in the line, marker, and errorbar tabs
+        if there is more than one curve.
+        """
+        if len(self.curve_names_dict) > 1:
+            self.view.line.set_apply_to_all_enabled(True)
+            self.view.marker.set_apply_to_all_enabled(True)
+            self.view.errorbars.set_apply_to_all_enabled(True)
+        else:
+            self.view.line.set_apply_to_all_enabled(False)
+            self.view.marker.set_apply_to_all_enabled(False)
+            self.view.errorbars.set_apply_to_all_enabled(False)
+
+    def line_apply_to_all(self):
+        """
+        Applies the settings in the line tab for the current curve to all other curves.
+        """
+        current_curve_index = self.view.select_curve_combo_box.currentIndex()
+
+        line_style = self.view.line.get_style()
+        draw_style = self.view.line.get_draw_style()
+        width = self.view.line.get_width()
+
+        for i in range(len(self.curve_names_dict)):
+            self.view.select_curve_combo_box.setCurrentIndex(i)
+
+            self.view.line.set_style(line_style)
+            self.view.line.set_draw_style(draw_style)
+            self.view.line.set_width(width)
+
+            self.apply_properties()
+
+        self.fig.canvas.draw()
+        self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)
+
+    def marker_apply_to_all(self):
+        current_curve_index = self.view.select_curve_combo_box.currentIndex()
+
+        marker_style = self.view.marker.get_style()
+        marker_size = self.view.marker.get_size()
+
+        for i in range(len(self.curve_names_dict)):
+            self.view.select_curve_combo_box.setCurrentIndex(i)
+
+            self.view.marker.set_style(marker_style)
+            self.view.marker.set_size(marker_size)
+
+            self.apply_properties()
+
+        self.fig.canvas.draw()
+        self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)
+
+    def errorbars_apply_to_all(self):
+        current_curve_index = self.view.select_curve_combo_box.currentIndex()
+
+        checked = self.view.errorbars.get_hide()
+
+        if not checked:
+            width = self.view.errorbars.get_width()
+            capsize = self.view.errorbars.get_capsize()
+            cap_thickness = self.view.errorbars.get_cap_thickness()
+            error_every = self.view.errorbars.get_error_every()
+
+        for i in range(len(self.curve_names_dict)):
+            self.view.select_curve_combo_box.setCurrentIndex(i)
+
+            self.view.errorbars.set_hide(checked)
+
+            if not checked:
+                self.view.errorbars.set_width(width)
+                self.view.errorbars.set_capsize(capsize)
+                self.view.errorbars.set_cap_thickness(cap_thickness)
+                self.view.errorbars.set_error_every(error_every)
+
+            self.apply_properties()
+
+        self.fig.canvas.draw()
+        self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)

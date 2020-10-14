@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_PREDICTPEAKSTEST_H_
-#define MANTID_CRYSTAL_PREDICTPEAKSTEST_H_
+#pragma once
 
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/PredictPeaks.h"
@@ -20,6 +19,8 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
+
+#include <utility>
 
 using namespace Mantid;
 using namespace Mantid::Crystal;
@@ -38,8 +39,8 @@ public:
   }
 
   /** Make a HKL peaks workspace */
-  PeaksWorkspace_sptr getHKLpw(Instrument_sptr inst, std::vector<V3D> hkls,
-                               detid_t detid) {
+  PeaksWorkspace_sptr getHKLpw(const Instrument_sptr &inst,
+                               const std::vector<V3D> &hkls, detid_t detid) {
     PeaksWorkspace_sptr hklPW;
     if (hkls.size() > 0) {
       hklPW = PeaksWorkspace_sptr(new PeaksWorkspace());
@@ -52,9 +53,9 @@ public:
     return hklPW;
   }
 
-  void do_test_exec(std::string reflectionCondition, size_t expectedNumber,
-                    std::vector<V3D> hkls, int convention = 1,
-                    bool useExtendedDetectorSpace = false,
+  void do_test_exec(const std::string &reflectionCondition,
+                    size_t expectedNumber, const std::vector<V3D> &hkls,
+                    int convention = 1, bool useExtendedDetectorSpace = false,
                     bool addExtendedDetectorDefinition = false, int edge = 0) {
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
@@ -79,13 +80,13 @@ public:
     WorkspaceCreationHelper::setOrientedLattice(inWS, 12.0, 12.0, 12.0);
     WorkspaceCreationHelper::setGoniometer(inWS, 0., 0., 0.);
 
-    PeaksWorkspace_sptr hklPW = getHKLpw(inst, hkls, 10000);
+    PeaksWorkspace_sptr hklPW = getHKLpw(inst, std::move(hkls), 10000);
 
     PredictPeaks alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS)));
+        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMin", "0.1"));
@@ -151,7 +152,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS)));
+        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("WavelengthMin", "0.1"));
@@ -213,7 +214,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS)));
+        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("HKLPeaksWorkspace", hklPW));
@@ -244,15 +245,21 @@ public:
   void test_manual_U_and_gonio() { do_test_manual(22.5, 22.5); }
 
   void test_crystallography() {
-    Kernel::ConfigService::Instance().setString("Q.convention",
-                                                "Crystallography");
+    using Kernel::ConfigService;
+    auto origQConv = ConfigService::Instance().getString("Q.convention");
+    ConfigService::Instance().setString("Q.convention", "Crystallography");
     do_test_exec("Primitive", 10, std::vector<V3D>(), -1);
+    ConfigService::Instance().setString("Q.convention", origQConv);
   }
   void test_edge() {
     do_test_exec("Primitive", 5, std::vector<V3D>(), 1, false, false, 10);
   }
 
   void test_exec_with_CalculateGoniometerForCW() {
+    using Kernel::ConfigService;
+    auto origQConv = ConfigService::Instance().getString("Q.convention");
+    ConfigService::Instance().setString("Q.convention", "Crystallography");
+
     // Name of the output workspace.
     std::string outWSName("PredictPeaksTest_OutputWS");
 
@@ -271,13 +278,13 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
     TS_ASSERT_THROWS_NOTHING(alg.setProperty(
-        "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inWS)));
+        "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inWS)));
     TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("OutputWorkspace", outWSName));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("CalculateGoniometerForCW", true));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Wavelength", "1.5"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MinAngle", "0"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaxAngle", "10.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("MaxAngle", "5.0"));
     TS_ASSERT_THROWS_NOTHING(alg.execute(););
     TS_ASSERT(alg.isExecuted());
 
@@ -296,6 +303,8 @@ public:
 
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);
+
+    ConfigService::Instance().setString("Q.convention", origQConv);
   }
 };
 
@@ -315,7 +324,7 @@ public:
     PredictPeaks alg;
     alg.initialize();
     alg.setProperty("InputWorkspace",
-                    boost::dynamic_pointer_cast<Workspace>(inWS));
+                    std::dynamic_pointer_cast<Workspace>(inWS));
     alg.setPropertyValue("OutputWorkspace", "predict_peaks_performance");
     alg.setPropertyValue("WavelengthMin", ".5");
     alg.setPropertyValue("WavelengthMax", "15.0");
@@ -339,7 +348,7 @@ public:
     PredictPeaks alg;
     alg.initialize();
     alg.setProperty("InputWorkspace",
-                    boost::dynamic_pointer_cast<Workspace>(inWS));
+                    std::dynamic_pointer_cast<Workspace>(inWS));
     alg.setPropertyValue("OutputWorkspace", "predict_peaks_performance");
     alg.setPropertyValue("WavelengthMin", ".5");
     alg.setPropertyValue("WavelengthMax", "15.0");
@@ -348,5 +357,3 @@ public:
     alg.execute();
   }
 };
-
-#endif /* MANTID_CRYSTAL_PREDICTPEAKSTEST_H_ */

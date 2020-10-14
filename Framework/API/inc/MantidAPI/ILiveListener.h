@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ILIVELISTENER_H_
-#define MANTID_API_ILIVELISTENER_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -84,7 +83,7 @@ public:
    *    will call extractData() again a short while later. Any other exception
    *    will stop the calling algorithm.
    */
-  virtual boost::shared_ptr<Workspace> extractData() = 0;
+  virtual std::shared_ptr<Workspace> extractData() = 0;
 
   //----------------------------------------------------------------------
   // State information
@@ -134,9 +133,7 @@ public:
 };
 
 /// Shared pointer to an ILiveListener
-using ILiveListener_sptr = boost::shared_ptr<ILiveListener>;
+using ILiveListener_sptr = std::shared_ptr<ILiveListener>;
 
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_ILIVELISTENER_H_*/

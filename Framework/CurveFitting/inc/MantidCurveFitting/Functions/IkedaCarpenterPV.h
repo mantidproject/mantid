@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_IKEDACARPENTERPV_H_
-#define MANTID_CURVEFITTING_IKEDACARPENTERPV_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IFunctionMW.h"
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidCurveFitting/DllConfig.h"
 
 namespace Mantid {
 namespace CurveFitting {
@@ -24,8 +24,9 @@ page www.mantidproject.org/IkedaCarpenterPV for documentation for this function.
 @author Anders Markvardsen, ISIS, RAL
 @date 3/11/2009
 */
-class DLLExport IkedaCarpenterPV : virtual public API::IPeakFunction,
-                                   virtual public API::IFunctionMW {
+class MANTID_CURVEFITTING_DLL IkedaCarpenterPV
+    : virtual public API::IPeakFunction,
+      virtual public API::IFunctionMW {
 public:
   /// overwrite IPeakFunction base class methods
   double centre() const override;
@@ -41,6 +42,9 @@ public:
 
   /// Returns the integral intensity of the peak
   double intensity() const override;
+
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace> workspace,
+                          size_t wi, double startX, double endX) override;
 
 protected:
   void functionLocal(double *out, const double *xValues,
@@ -71,11 +75,9 @@ private:
                             double &eta) const;
 
   /// constrain all parameters to be non-negative
-  void lowerConstraint0(std::string paramName);
+  void lowerConstraint0(const std::string &paramName);
 };
 
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_IKEDACARPENTERPV_H_*/

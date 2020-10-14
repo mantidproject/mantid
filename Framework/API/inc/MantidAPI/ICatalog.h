@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_ICATLOG_H_
-#define MANTID_API_ICATLOG_H_
+#pragma once
 
 #include "MantidAPI/CatalogSession.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
@@ -26,7 +25,7 @@ namespace API {
  @author Sofia Antony, ISIS Rutherford Appleton Laboratory
  @date 23/09/2010
 */
-class DLLExport ICatalog {
+class MANTID_API_DLL ICatalog {
 public:
   /// Virtual destructor
   virtual ~ICatalog() = default;
@@ -56,9 +55,7 @@ public:
   virtual void keepAlive() = 0;
 };
 
-using ICatalog_sptr = boost::shared_ptr<ICatalog>;
-using ICatalog_const_sptr = boost::shared_ptr<const ICatalog>;
+using ICatalog_sptr = std::shared_ptr<ICatalog>;
+using ICatalog_const_sptr = std::shared_ptr<const ICatalog>;
 } // namespace API
 } // namespace Mantid
-
-#endif /*MANTID_API_ICATLOG_H_*/

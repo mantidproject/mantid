@@ -35,7 +35,6 @@ mtd_add_qt_library(
   INCLUDE_DIRS
     inc
   LINK_LIBS
-    ${TCMALLOC_LIBRARIES_LINKTIME}
     ${POCO_LIBRARIES}
     ${MANTID_SUBPROJECT_LIBS}
   QT4_LINK_LIBS
@@ -45,7 +44,7 @@ mtd_add_qt_library(
   INSTALL_DIR_BASE
     ${PLUGINS_DIR}
   OSX_INSTALL_RPATH
-    @loader_path/../../Contents/Libraries
+    @loader_path/../../Contents/Frameworks
     @loader_path/../../Contents/MacOS
   LINUX_INSTALL_RPATH
     "\$ORIGIN/../../${LIB_DIR};\$ORIGIN/../../${LIB_DIR}/paraview-${ParaView_VERSION_MAJOR}.${ParaView_VERSION_MINOR}"

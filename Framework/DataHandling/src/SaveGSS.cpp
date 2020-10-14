@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveGSS.h"
 
@@ -119,12 +119,13 @@ void writeBankHeader(std::stringstream &out, const std::string &bintype,
 //----------------------------------------------------------------------------------------------
 // Initialise the algorithm
 void SaveGSS::init() {
-  declareProperty(std::make_unique<API::WorkspaceProperty<>>(
+  const std::vector<std::string> exts{".gsa", ".gss", ".gda", ".txt"};
+  declareProperty(std::make_unique<API::WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Kernel::Direction::Input),
                   "The input workspace");
 
-  declareProperty(std::make_unique<API::FileProperty>("Filename", "",
-                                                      API::FileProperty::Save),
+  declareProperty(std::make_unique<API::FileProperty>(
+                      "Filename", "", API::FileProperty::Save, exts),
                   "The filename to use for the saved data");
 
   declareProperty(
@@ -144,13 +145,13 @@ void SaveGSS::init() {
 
   const std::vector<std::string> formats{RALF, SLOG};
   declareProperty("Format", RALF,
-                  boost::make_shared<Kernel::StringListValidator>(formats),
+                  std::make_shared<Kernel::StringListValidator>(formats),
                   "GSAS format to save as");
 
   const std::vector<std::string> ralfDataFormats{FXYE, ALT};
   declareProperty(
       "DataFormat", FXYE,
-      boost::make_shared<Kernel::StringListValidator>(ralfDataFormats),
+      std::make_shared<Kernel::StringListValidator>(ralfDataFormats),
       "Saves RALF data as either FXYE or alternative format");
   setPropertySettings(
       "DataFormat",
@@ -187,11 +188,11 @@ void SaveGSS::init() {
       "Number of strings in the give array must be same as number of banks."
       "And the order is preserved.");
 
-  auto must_be_3 = boost::make_shared<Kernel::ArrayLengthValidator<int>>(3);
+  auto must_be_3 = std::make_shared<Kernel::ArrayLengthValidator<int>>(3);
   auto precision_range =
-      boost::make_shared<Kernel::ArrayBoundedValidator<int>>(0, 10);
+      std::make_shared<Kernel::ArrayBoundedValidator<int>>(0, 10);
 
-  auto precision_validator = boost::make_shared<Kernel::CompositeValidator>();
+  auto precision_validator = std::make_shared<Kernel::CompositeValidator>();
   precision_validator->add(must_be_3);
   precision_validator->add(precision_range);
 
@@ -542,7 +543,7 @@ void SaveGSS::generateOutFileNames(size_t numberOfOutFiles) {
   if (numberOfOutFiles == 1) {
     // Only add one name and don't generate split filenames
     // when we are not in split mode
-    m_outFileNames.push_back(outputFileName);
+    m_outFileNames.emplace_back(outputFileName);
     return;
   }
 
@@ -715,7 +716,11 @@ std::map<std::string, std::string> SaveGSS::validateInputs() {
   std::map<std::string, std::string> result;
 
   API::MatrixWorkspace_const_sptr input_ws = getProperty("InputWorkspace");
-
+  if (!input_ws) {
+    result["InputWorkspace"] =
+        "The input workspace cannot be a GroupWorkspace.";
+    return result;
+  }
   // Check the number of histogram/spectra < 99
   const auto nHist = static_cast<int>(input_ws->getNumberHistograms());
   const bool split = getProperty("SplitFiles");

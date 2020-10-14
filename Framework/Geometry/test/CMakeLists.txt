@@ -1,8 +1,7 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR})
+)
 
   # This is required to pick up ComponentCreationHelper, which is the only
   # TestHelpers class that may be used by Geometry tests (as it does not depend
@@ -18,9 +17,9 @@ if(CXXTEST_FOUND)
       ../../TestHelpers/src/LoggingCleaner.cpp)
 
   cxxtest_add_test(GeometryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
+  target_compile_definitions(GeometryTest PRIVATE -D_SILENCE_FPOS_SEEKPOS_DEPRECATION_WARNING)
   target_link_libraries(GeometryTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         Geometry
                         Beamline
                         Types
@@ -29,8 +28,8 @@ if(CXXTEST_FOUND)
                         ${GSL_LIBRARIES}
                         ${Boost_LIBRARIES}
                         ${POCO_LIBRARIES}
-                        ${GMOCK_LIBRARIES}
-                        ${GTEST_LIBRARIES})
+                        gmock
+)
 
   add_dependencies(FrameworkTests GeometryTest)
   # Add to the 'FrameworkTests' group in VS

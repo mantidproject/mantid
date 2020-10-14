@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SIGNALBLOCKERTEST_H_
-#define MANTID_API_SIGNALBLOCKERTEST_H_
+#pragma once
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 #include <QObject>
@@ -21,7 +20,7 @@ public:
   static void destroySuite(SignalBlockerTest *suite) { delete suite; }
 
   void test_obtain_and_release_behaviour() {
-    QObject *toBlock = new QObject;
+    auto *toBlock = new QObject;
     {
       SignalBlocker scopedObj(toBlock);
       TSM_ASSERT("Should now block", toBlock->signalsBlocked());
@@ -30,5 +29,3 @@ public:
     delete toBlock;
   }
 };
-
-#endif /* MANTID_API_SIGNALBLOCKERTEST_H_ */

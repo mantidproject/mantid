@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Unit.h"
 #include "MantidPythonInterface/core/GetPointer.h"
@@ -55,7 +55,7 @@ tuple quickConversionWrapper(Unit &self, const T &destUnitName) {
 
 void export_Unit() {
 
-  register_ptr_to_python<boost::shared_ptr<Unit>>();
+  register_ptr_to_python<std::shared_ptr<Unit>>();
 
   class_<Unit, boost::noncopyable>("Unit", no_init)
       .def("name", &deprecatedName, arg("self"),

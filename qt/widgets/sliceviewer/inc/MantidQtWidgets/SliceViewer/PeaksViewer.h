@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PEAKSVIEWER_H
-#define PEAKSVIEWER_H
+#pragma once
 
 #include "DllOption.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
 #include "MantidQtWidgets/SliceViewer/PeaksPresenter.h"
 #include "MantidQtWidgets/SliceViewer/UpdateableOnDemand.h"
 #include <QWidget>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace API {
@@ -26,23 +25,20 @@ namespace SliceViewer {
 class ProxyCompositePeaksPresenter;
 class PeaksWorkspaceWidget;
 
-/**
-
-*/
 class EXPORT_OPT_MANTIDQT_SLICEVIEWER PeaksViewer : public QWidget,
                                                     public UpdateableOnDemand {
   Q_OBJECT
 public:
   PeaksViewer(QWidget *parent = nullptr);
   void setPeaksWorkspaces(const SetPeaksWorkspaces &workspaces);
-  void setPresenter(boost::shared_ptr<ProxyCompositePeaksPresenter> presenter);
-  void performUpdate() override;
   void
-  updatePeaksWorkspace(const std::string &toName,
-                       boost::shared_ptr<const Mantid::API::IPeaksWorkspace>
-                           toWorkspace) override;
+  setPresenter(const std::shared_ptr<ProxyCompositePeaksPresenter> &presenter);
+  void performUpdate() override;
+  void updatePeaksWorkspace(
+      const std::string &toName,
+      std::shared_ptr<const Mantid::API::IPeaksWorkspace> toWorkspace) override;
   bool removePeaksWorkspace(
-      boost::shared_ptr<const Mantid::API::IPeaksWorkspace> toRemove);
+      const std::shared_ptr<const Mantid::API::IPeaksWorkspace> &toRemove);
   bool removePeaksWorkspace(const std::string &toRemove);
   void hide();
   ~PeaksViewer() override;
@@ -65,7 +61,8 @@ public slots:
   void
   onBackgroundRadiusShown(Mantid::API::IPeaksWorkspace_const_sptr /*peaksWS*/,
                           bool /*show*/);
-  void onRemoveWorkspace(Mantid::API::IPeaksWorkspace_const_sptr /*peaksWS*/);
+  void onRemoveWorkspace(
+      const Mantid::API::IPeaksWorkspace_const_sptr & /*peaksWS*/);
   void onHideInPlot(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
                     bool /*hide*/);
   void onZoomToPeak(Mantid::API::IPeaksWorkspace_const_sptr peaksWS,
@@ -86,12 +83,11 @@ private:
   /// Load a presented peaks workspace and settings from a project file
   void loadPresentedWorkspace(const std::string &section);
   /// Save a presented peaks workspace and settings to a project file
-  std::string
-  savePresentedWorkspace(Mantid::API::IPeaksWorkspace_const_sptr ws) const;
+  std::string savePresentedWorkspace(
+      const Mantid::API::IPeaksWorkspace_const_sptr &ws) const;
 
-  boost::shared_ptr<ProxyCompositePeaksPresenter> m_presenter;
+  std::shared_ptr<ProxyCompositePeaksPresenter> m_presenter;
 };
 
 } // namespace SliceViewer
 } // namespace MantidQt
-#endif // PEAKSVIEWER_H

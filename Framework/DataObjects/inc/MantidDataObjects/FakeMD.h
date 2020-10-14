@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAOBJECTS_FAKEMD_H_
-#define MANTID_DATAOBJECTS_FAKEMD_H_
+#pragma once
 
 #include <vector>
 
@@ -23,16 +22,19 @@ namespace DataObjects {
 class MANTID_DATAOBJECTS_DLL FakeMD {
 public:
   FakeMD(const std::vector<double> &uniformParams,
-         const std::vector<double> &peakParams, const int randomSeed,
+         const std::vector<double> &peakParams,
+         const std::vector<double> &ellipsoidParams, const int randomSeed,
          const bool randomizeSignal);
 
-  void fill(API::IMDEventWorkspace_sptr workspace);
+  void fill(const API::IMDEventWorkspace_sptr &workspace);
 
 private:
   void setupDetectorCache(const API::IMDEventWorkspace &workspace);
 
   template <typename MDE, size_t nd>
   void addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws);
+  template <typename MDE, size_t nd>
+  void addFakeEllipsoid(typename MDEventWorkspace<MDE, nd>::sptr ws);
   template <typename MDE, size_t nd>
   void addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
@@ -48,6 +50,7 @@ private:
   //------------------ Member variables ------------------------------------
   std::vector<double> m_uniformParams;
   std::vector<double> m_peakParams;
+  std::vector<double> m_ellipsoidParams;
   const int m_randomSeed;
   const bool m_randomizeSignal;
   mutable std::vector<detid_t> m_detIDs;
@@ -57,5 +60,3 @@ private:
 
 } // namespace DataObjects
 } // namespace Mantid
-
-#endif /* MANTID_DATAOBJECTS_FAKEMD_H_ */

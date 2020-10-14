@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetDecoder.h"
 
 #include "MantidQtWidgets/InstrumentView/ColorBar.h"
@@ -54,7 +53,14 @@ void InstrumentWidgetDecoder::decode(const QMap<QString, QVariant> &map,
   const auto energyTransferList = map[QString("energyTransfer")].toList();
   const auto min = energyTransferList[0].toDouble();
   const auto max = energyTransferList[1].toDouble();
-  obj.setBinRange(min, max);
+  if (energyTransferList.size() == 3) {
+    const bool isIntegrable = energyTransferList[2].toBool();
+    if (isIntegrable) {
+      obj.setBinRange(min, max);
+    }
+  } else {
+    obj.setBinRange(min, max);
+  }
 
   this->decodeSurface(map[QString("surface")].toMap(), obj.getSurface());
   this->decodeActor(map[QString("actor")].toMap(), obj.m_instrumentActor);
@@ -82,6 +88,8 @@ void InstrumentWidgetDecoder::decodeMaskTab(const QMap<QString, QVariant> &map,
   obj->m_ring_rectangle->setChecked(
       activeTools["ringRectangleButton"].toBool());
   obj->m_free_draw->setChecked(activeTools["freeFrawButton"].toBool());
+  obj->m_pixel->setChecked(activeTools["pixelButton"].toBool());
+  obj->m_tube->setChecked(activeTools["tubeButton"].toBool());
 
   // Decode the active type
   obj->m_masking_on->setChecked(activeType["maskingOn"].toBool());
@@ -195,9 +203,9 @@ void InstrumentWidgetDecoder::decodeBinMasks(const QList<QVariant> &list,
 
 void InstrumentWidgetDecoder::decodeSurface(
     const QMap<QString, QVariant> &map,
-    boost::shared_ptr<ProjectionSurface> obj) {
+    std::shared_ptr<ProjectionSurface> obj) {
 
-  auto projection3D = boost::dynamic_pointer_cast<Projection3D>(obj);
+  auto projection3D = std::dynamic_pointer_cast<Projection3D>(obj);
   // Decide Projection3D stuff
   if (map[QString("projection3DSuccess")].toBool() && projection3D) {
     this->decodeProjection3D(map[QString("projection3D")].toMap(),
@@ -260,6 +268,8 @@ InstrumentWidgetDecoder::decodeShape(const QMap<QString, QVariant> &map) {
       return this->decodeRectangle(map[QString("subShapeMap")].toMap());
     } else if (type == "ring") {
       return this->decodeRing(map[QString("subShapeMap")].toMap());
+    } else if (type == "sector") {
+      return this->decodeSector(map[QString("subShapeMap")].toMap());
     } else if (type == "free") {
       return this->decodeFree(map[QString("subShapeMap")].toMap());
     } else {
@@ -320,6 +330,18 @@ InstrumentWidgetDecoder::decodeRing(const QMap<QString, QVariant> &map) {
   const auto baseShape = this->decodeShape(map[QString("shape")].toMap());
   return new Shape2DRing(baseShape, xWidth, yWidth);
 }
+Shape2D *
+InstrumentWidgetDecoder::decodeSector(const QMap<QString, QVariant> &map) {
+  const double outerRadius = map[QString("outerRadius")].toDouble();
+  const double innerRadius = map[QString("innerRadius")].toDouble();
+  const double startAngle = map[QString("startAngle")].toDouble();
+  const double endAngle = map[QString("endAngle")].toDouble();
+  const double centerX = map[QString("centerX")].toDouble();
+  const double centerY = map[QString("centerY")].toDouble();
+
+  return new Shape2DSector(innerRadius, outerRadius, startAngle, endAngle,
+                           QPointF(centerX, centerY));
+}
 
 Shape2D *
 InstrumentWidgetDecoder::decodeFree(const QMap<QString, QVariant> &map) {
@@ -338,7 +360,7 @@ InstrumentWidgetDecoder::decodeFree(const QMap<QString, QVariant> &map) {
 }
 
 void InstrumentWidgetDecoder::decodeAlignmentInfo(
-    const QList<QVariant> &list, boost::shared_ptr<ProjectionSurface> &obj) {
+    const QList<QVariant> &list, std::shared_ptr<ProjectionSurface> &obj) {
 
   std::vector<std::pair<Mantid::Kernel::V3D, QPointF>> alignmentPlane;
   for (const auto &item : list) {
@@ -349,7 +371,7 @@ void InstrumentWidgetDecoder::decodeAlignmentInfo(
                                qLabMap[QString("y")].toDouble(),
                                qLabMap[QString("z")].toDouble());
 
-    alignmentPlane.push_back(std::make_pair(qValue, marker));
+    alignmentPlane.emplace_back(std::make_pair(qValue, marker));
   }
   obj->m_selectedAlignmentPlane = alignmentPlane;
 }

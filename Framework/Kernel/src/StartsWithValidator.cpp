@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/StartsWithValidator.h"
 #ifndef Q_MOC_RUN
-#include <boost/make_shared.hpp>
+#include <memory>
 #endif
 
 namespace Mantid {
@@ -26,7 +26,7 @@ StartsWithValidator::StartsWithValidator(const std::set<std::string> &values)
 
 /// Clone the validator
 IValidator_sptr StartsWithValidator::clone() const {
-  return boost::make_shared<StartsWithValidator>(*this);
+  return std::make_shared<StartsWithValidator>(*this);
 }
 
 /** Checks if the string passed starts with one from the list

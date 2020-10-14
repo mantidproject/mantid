@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CREATEGROUPINGWORKSPACE_H_
-#define MANTID_ALGORITHMS_CREATEGROUPINGWORKSPACE_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -20,7 +19,7 @@ namespace Algorithms {
  *
  *  Optionally uses bank names to create the groups.
  */
-class DLLExport CreateGroupingWorkspace : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CreateGroupingWorkspace : public API::Algorithm {
 public:
   /// Algorithm's name for identification
   const std::string name() const override;
@@ -50,5 +49,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_CREATEGROUPINGWORKSPACE_H_ */

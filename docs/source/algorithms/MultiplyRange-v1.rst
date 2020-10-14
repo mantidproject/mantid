@@ -18,7 +18,7 @@ Usage
 
   # Create a workspace with 100 bins
   ws = CreateSampleWorkspace()
-  # Multuply the values in bins 25 to 75 by 2
+  # Multiply the values in bins 25 to 75 by 3
   res = MultiplyRange(ws,StartBin=25,EndBin=75,Factor=3.0)
 
   # Check the result

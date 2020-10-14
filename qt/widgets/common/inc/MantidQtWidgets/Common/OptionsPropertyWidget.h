@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_OPTIONSPROPERTYWIDGET_H_
-#define MANTID_API_OPTIONSPROPERTYWIDGET_H_
+#pragma once
 
 #include "MantidKernel/Property.h"
 #include "MantidKernel/System.h"
@@ -21,6 +20,7 @@ namespace API {
 
   @date 2012-02-17
 */
+
 class DLLExport OptionsPropertyWidget : public PropertyWidget {
   Q_OBJECT
 
@@ -41,9 +41,10 @@ protected:
 
   /// Combo box with the allowed options
   QComboBox *m_combo;
+
+public slots:
+  void editingFinished();
 };
 
 } // namespace API
 } // namespace MantidQt
-
-#endif /* MANTID_API_OPTIONSPROPERTYWIDGET_H_ */

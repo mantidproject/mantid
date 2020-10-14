@@ -14,9 +14,9 @@ GSASIIRefineFitPeaksParameters::GSASIIRefineFitPeaksParameters(
     const RunLabel &_runLabel, const GSASRefinementMethod &_refinementMethod,
     const std::string &_instParamsFile,
     const std::vector<std::string> &_phaseFiles, const std::string &_gsasHome,
-    const std::string &_gsasProjectFile, const boost::optional<double> _dMin,
-    const boost::optional<double> _negativeWeight,
-    const boost::optional<double> _xMin, const boost::optional<double> _xMax,
+    const std::string &_gsasProjectFile, const boost::optional<double> &_dMin,
+    const boost::optional<double> &_negativeWeight,
+    const boost::optional<double> &_xMin, const boost::optional<double> &_xMax,
     const bool _refineSigma, const bool _refineGamma)
     : inputWorkspace(_inputWorkspace), runLabel(_runLabel),
       refinementMethod(_refinementMethod), instParamsFile(_instParamsFile),

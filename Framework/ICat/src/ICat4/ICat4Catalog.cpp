@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidICat/ICat4/ICat4Catalog.h"
 #include "MantidAPI/CatalogFactory.h"
@@ -44,7 +44,7 @@ API::CatalogSession_sptr ICat4Catalog::login(const std::string &username,
   // Created the session object here in order to set the endpoint, which is used
   // in setICATProxySettings.
   // We can then manually set the sessionID later if it exists.
-  m_session = boost::make_shared<API::CatalogSession>("", facility, endpoint);
+  m_session = std::make_shared<API::CatalogSession>("", facility, endpoint);
 
   // Securely set, including soap-endpoint.
   ICATPortBindingProxy icat;
@@ -82,11 +82,11 @@ API::CatalogSession_sptr ICat4Catalog::login(const std::string &username,
   // Setting the username and pass credentials to the login class.
   entry.key = &usernameKey;
   entry.value = &userName;
-  entries.push_back(entry);
+  entries.emplace_back(entry);
 
   entry.key = &passwordKey;
   entry.value = &passWord;
-  entries.push_back(entry);
+  entries.emplace_back(entry);
 
   int result = icat.login(&login, &loginResponse);
 
@@ -557,7 +557,7 @@ void ICat4Catalog::listInstruments(std::vector<std::string> &instruments) {
   for (auto &searchResult : searchResults) {
     auto instrument = dynamic_cast<xsd__string *>(searchResult);
     if (instrument)
-      instruments.push_back(instrument->__item);
+      instruments.emplace_back(instrument->__item);
   }
 }
 
@@ -576,7 +576,7 @@ void ICat4Catalog::listInvestigationTypes(
   for (auto &searchResult : searchResults) {
     auto investigationType = dynamic_cast<xsd__string *>(searchResult);
     if (investigationType)
-      invstTypes.push_back(investigationType->__item);
+      invstTypes.emplace_back(investigationType->__item);
   }
 }
 

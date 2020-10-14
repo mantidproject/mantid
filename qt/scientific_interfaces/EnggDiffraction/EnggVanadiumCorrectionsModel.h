@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ENGGVANADIUMCORRECTIONSMODEL_H_
-#define MANTIDQT_CUSTOMINTERFACES_ENGGVANADIUMCORRECTIONSMODEL_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "IEnggVanadiumCorrectionsModel.h"
@@ -69,11 +68,11 @@ private:
 
   void saveCorrectionsToCache(
       const std::string &runNumber,
-      const Mantid::API::MatrixWorkspace_sptr curvesWorkspace,
-      const Mantid::API::ITableWorkspace_sptr integratedWorkspace) const;
+      const Mantid::API::MatrixWorkspace_sptr &curvesWorkspace,
+      const Mantid::API::ITableWorkspace_sptr &integratedWorkspace) const;
 
   void saveNexus(const std::string &filename,
-                 const Mantid::API::Workspace_sptr workspace) const;
+                 const Mantid::API::Workspace_sptr &workspace) const;
 
   EnggDiffCalibSettings m_calibSettings;
 
@@ -82,5 +81,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQT_CUSTOMINTERFACES_ENGGVANADIUMCORRECTIONSMODEL_H_

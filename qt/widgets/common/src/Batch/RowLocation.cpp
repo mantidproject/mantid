@@ -1,12 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/AssertOrThrow.h"
 #include <boost/algorithm/string/predicate.hpp>
+#include <utility>
 
 #include "MantidQtWidgets/Common/Batch/equal.hpp"
 // equivalent to
@@ -18,7 +19,7 @@ namespace MantidQt {
 namespace MantidWidgets {
 namespace Batch {
 
-RowLocation::RowLocation(RowPath path) : m_path(path) {}
+RowLocation::RowLocation(RowPath path) : m_path(std::move(path)) {}
 RowPath const &RowLocation::path() const { return m_path; }
 int RowLocation::rowRelativeToParent() const { return m_path.back(); }
 bool RowLocation::isRoot() const { return m_path.empty(); }

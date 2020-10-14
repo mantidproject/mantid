@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef FUNCTIONDIALOG_H
-#define FUNCTIONDIALOG_H
+#pragma once
 
 #include "Graph.h"
 
@@ -48,7 +47,7 @@ class FunctionDialog : public QDialog {
 
 public:
   FunctionDialog(ApplicationWindow *app, Graph *g = nullptr,
-                 Qt::WFlags fl = nullptr);
+                 const Qt::WFlags &fl = nullptr);
 
 protected:
   QComboBox *boxXFunction;
@@ -100,5 +99,3 @@ private:
   Graph *graph;
   int curveID;
 };
-
-#endif // FUNCTIONDIALOG_H

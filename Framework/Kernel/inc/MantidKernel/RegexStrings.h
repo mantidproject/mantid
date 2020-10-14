@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef REGEXSUPPORT_H
-#define REGEXSUPPORT_H
+#pragma once
 
 #include "MantidKernel/DllConfig.h"
 #ifndef Q_MOC_RUN
@@ -65,4 +64,3 @@ MANTID_KERNEL_DLL int findPattern(std::istream &, const boost::regex &,
 } // NAMESPACE Kernel
 
 } // NAMESPACE Mantid
-#endif

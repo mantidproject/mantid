@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_
-#define MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_
+#pragma once
 #include "../../../ISISReflectometry/GUI/Batch/RowProcessingAlgorithm.h"
 #include "../../../ISISReflectometry/Reduction/Batch.h"
 #include "../../../ISISReflectometry/TestHelpers/ModelCreationHelper.h"
@@ -40,6 +39,10 @@ public:
     TS_ASSERT_EQUALS(result["SummationType"], "SumInQ");
     TS_ASSERT_EQUALS(result["IncludePartialBins"], "1");
     TS_ASSERT_EQUALS(result["Debug"], "1");
+    TS_ASSERT_EQUALS(result["SubtractBackground"], "1");
+    TS_ASSERT_EQUALS(result["BackgroundCalculationMethod"], "Polynomial");
+    TS_ASSERT_EQUALS(result["DegreeOfPolynomial"], "3");
+    TS_ASSERT_EQUALS(result["CostFunction"], "Unweighted least squares");
     TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "1");
     TS_ASSERT_EQUALS(result["FloodCorrection"], "Workspace");
     TS_ASSERT_EQUALS(result["FloodWorkspace"], "test_workspace");
@@ -58,6 +61,10 @@ public:
     TS_ASSERT_EQUALS(result["SummationType"], "SumInQ");
     TS_ASSERT_EQUALS(result["IncludePartialBins"], "1");
     TS_ASSERT_EQUALS(result["Debug"], "1");
+    TS_ASSERT_EQUALS(result["SubtractBackground"], "1");
+    TS_ASSERT_EQUALS(result["BackgroundCalculationMethod"], "Polynomial");
+    TS_ASSERT_EQUALS(result["DegreeOfPolynomial"], "3");
+    TS_ASSERT_EQUALS(result["CostFunction"], "Unweighted least squares");
     TS_ASSERT_EQUALS(result["PolarizationAnalysis"], "1");
     TS_ASSERT_EQUALS(result["FloodCorrection"], "Workspace");
     TS_ASSERT_EQUALS(result["FloodWorkspace"], "test_workspace");
@@ -78,6 +85,7 @@ public:
     TS_ASSERT_EQUALS(result["MomentumTransferMax"], "1.300000");
     TS_ASSERT_EQUALS(result["ScaleFactor"], "0.900000");
     TS_ASSERT_EQUALS(result["ProcessingInstructions"], "4-6");
+    TS_ASSERT_EQUALS(result["BackgroundProcessingInstructions"], "2-3,7-8");
   }
 
   void testPerThetaDefaultsWithWildcardLookup() {
@@ -93,6 +101,7 @@ public:
     TS_ASSERT_EQUALS(result["MomentumTransferMax"], "1.100000");
     TS_ASSERT_EQUALS(result["ScaleFactor"], "0.700000");
     TS_ASSERT_EQUALS(result["ProcessingInstructions"], "1");
+    TS_ASSERT_EQUALS(result["BackgroundProcessingInstructions"], "3,7");
   }
 
   void testInstrumentSettings() {
@@ -217,6 +226,25 @@ public:
     TS_ASSERT_EQUALS(result["WavelengthMin"], "3.3");
   }
 
+  void testOptionsCellOverridesSubtractBackgroundAndStillPicksUpSettings() {
+    auto experiment = Experiment(
+        AnalysisMode::MultiDetector, ReductionType::NonFlatSample,
+        SummationType::SumInQ, true, true,
+        BackgroundSubtraction(false, BackgroundSubtractionType::AveragePixelFit,
+                              3, CostFunctionType::UnweightedLeastSquares),
+        makePolarizationCorrections(), makeFloodCorrections(),
+        makeTransmissionStitchOptions(), makeStitchOptions(),
+        makePerThetaDefaultsWithTwoAnglesAndWildcard());
+    auto model = Batch(experiment, m_instrument, m_runsTable, m_slicing);
+    auto row = makeRowWithOptionsCellFilled(
+        2.3, ReductionOptionsMap{{"SubtractBackground", "1"}});
+    auto result = createAlgorithmRuntimeProps(model, row);
+    TS_ASSERT_EQUALS(result["SubtractBackground"], "1");
+    TS_ASSERT_EQUALS(result["BackgroundCalculationMethod"], "AveragePixelFit");
+    TS_ASSERT_EQUALS(result["DegreeOfPolynomial"], "3");
+    TS_ASSERT_EQUALS(result["CostFunction"], "Unweighted least squares");
+  }
+
 private:
   std::vector<std::string> m_instruments;
   double m_thetaTolerance;
@@ -225,4 +253,3 @@ private:
   RunsTable m_runsTable;
   Slicing m_slicing;
 };
-#endif // MANTID_CUSTOMINTERFACES_ROWPROCESSINGALGORITHMTEST_H_

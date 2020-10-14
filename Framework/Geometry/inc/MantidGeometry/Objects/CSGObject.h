@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_CSGOBJECT_H_
-#define MANTID_GEOMETRY_CSGOBJECT_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -76,30 +75,31 @@ public:
   }
 
   /// Return the top rule
-  const Rule *topRule() const { return TopRule.get(); }
-  void setID(const std::string &id) { m_id = id; }
+  const Rule *topRule() const { return m_topRule.get(); }
+  void setID(const std::string &id) override { m_id = id; }
   const std::string &id() const override { return m_id; }
 
-  void setName(const int nx) { ObjNum = nx; }     ///< Set Name
-  int getName() const override { return ObjNum; } ///< Get Name
+  void setName(const int objNum) { m_objNum = objNum; } ///< Set Name
+  int getName() const override { return m_objNum; }     ///< Get Name
 
-  void setMaterial(const Kernel::Material &material);
+  void setMaterial(const Kernel::Material &material) override;
   const Kernel::Material &material() const override;
 
   /// Return whether this object has a valid shape
   bool hasValidShape() const override;
-  int setObject(const int ON, const std::string &Ln);
-  int procString(const std::string &Line);
-  int complementaryObject(const int Cnum,
-                          std::string &Ln); ///< Process a complementary object
+  int setObject(const int objName, const std::string &lineStr);
+  int procString(const std::string &lineStr);
+  int complementaryObject(
+      const int cellNum,
+      std::string &lineStr); ///< Process a complementary object
   int hasComplement() const;
 
-  int populate(const std::map<int, boost::shared_ptr<Surface>> &);
+  int populate(const std::map<int, std::shared_ptr<Surface>> &);
   int createSurfaceList(const int outFlag = 0); ///< create Surface list
   int addSurfString(const std::string &);       ///< Not implemented
-  int removeSurface(const int SurfN);
-  int substituteSurf(const int SurfN, const int NsurfN,
-                     const boost::shared_ptr<Surface> &SPtr);
+  int removeSurface(const int surfNum);
+  int substituteSurf(const int surfNum, const int newSurfNum,
+                     const std::shared_ptr<Surface> &surfPtr);
   void makeComplement();
   void convertComplement(const std::map<int, CSGObject> &);
 
@@ -117,10 +117,10 @@ public:
   std::vector<int> getSurfaceIndex() const;
   /// Get the list of surfaces (const version)
   const std::vector<const Surface *> &getSurfacePtr() const {
-    return m_SurList;
+    return m_surList;
   }
   /// Get the list of surfaces
-  std::vector<const Surface *> &getSurfacePtr() { return m_SurList; }
+  std::vector<const Surface *> &getSurfacePtr() { return m_surList; }
 
   std::string cellCompStr() const;
   std::string cellStr(const std::map<int, CSGObject> &) const;
@@ -129,7 +129,8 @@ public:
   void write(std::ostream &) const; ///< MCNPX output
 
   // INTERSECTION
-  int interceptSurface(Geometry::Track &) const override;
+  int interceptSurface(Geometry::Track &track) const override;
+  double distance(const Track &track) const override;
 
   // Solid angle - uses triangleSolidAngle unless many (>30000) triangles
   double solidAngle(const Kernel::V3D &observer) const override;
@@ -164,25 +165,27 @@ public:
   int getPointInObject(Kernel::V3D &point) const override;
 
   /// Select a random point within the object
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const size_t) const override;
-  Kernel::V3D generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
-                                    const BoundingBox &activeRegion,
-                                    const size_t) const override;
+  boost::optional<Kernel::V3D>
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const size_t) const override;
+  boost::optional<Kernel::V3D>
+  generatePointInObject(Kernel::PseudoRandomNumberGenerator &rng,
+                        const BoundingBox &activeRegion,
+                        const size_t) const override;
 
   // Rendering member functions
   void draw() const override;
   // Initialize Drawing
   void initDraw() const override;
   // Get Geometry Handler
-  boost::shared_ptr<GeometryHandler> getGeometryHandler() const override;
+  std::shared_ptr<GeometryHandler> getGeometryHandler() const override;
   /// Set Geometry Handler
-  void setGeometryHandler(boost::shared_ptr<GeometryHandler> h);
+  void setGeometryHandler(const std::shared_ptr<GeometryHandler> &h);
 
   /// set vtkGeometryCache writer
-  void setVtkGeometryCacheWriter(boost::shared_ptr<vtkGeometryCacheWriter>);
+  void setVtkGeometryCacheWriter(std::shared_ptr<vtkGeometryCacheWriter>);
   /// set vtkGeometryCache reader
-  void setVtkGeometryCacheReader(boost::shared_ptr<vtkGeometryCacheReader>);
+  void setVtkGeometryCacheReader(std::shared_ptr<vtkGeometryCacheReader>);
   detail::ShapeInfo::GeometryShape shape() const override;
   const detail::ShapeInfo &shapeInfo() const override;
   void GetObjectGeom(detail::ShapeInfo::GeometryShape &type,
@@ -192,7 +195,8 @@ public:
   std::string getShapeXML() const;
 
 private:
-  int procPair(std::string &Ln, std::map<int, std::unique_ptr<Rule>> &Rlist,
+  int procPair(std::string &lineStr,
+               std::map<int, std::unique_ptr<Rule>> &ruleMap,
                int &compUnit) const;
   std::unique_ptr<CompGrp> procComp(std::unique_ptr<Rule>) const;
   int checkSurfaceValid(const Kernel::V3D &, const Kernel::V3D &) const;
@@ -214,7 +218,7 @@ private:
   double singleShotMonteCarloVolume(const int shotSize,
                                     const size_t seed) const;
   /// Top rule [ Geometric scope of object]
-  std::unique_ptr<Rule> TopRule;
+  std::unique_ptr<Rule> m_topRule;
   /// Object's bounding box
   BoundingBox m_boundingBox;
   // -- DEPRECATED --
@@ -227,17 +231,17 @@ private:
   mutable bool boolBounded; ///< flag true if a bounding box exists, either by
 
   /// Creation number
-  int ObjNum;
+  int m_objNum;
   /// Geometry Handle for rendering
-  boost::shared_ptr<GeometryHandler> m_handler;
+  std::shared_ptr<GeometryHandler> m_handler;
   friend class GeometryHandler;
   friend class GeometryRenderer;
   /// Is geometry caching enabled?
   bool bGeometryCaching;
   /// a pointer to a class for reading from the geometry cache
-  boost::shared_ptr<vtkGeometryCacheReader> vtkCacheReader;
+  std::shared_ptr<vtkGeometryCacheReader> vtkCacheReader;
   /// a pointer to a class for writing to the geometry cache
-  boost::shared_ptr<vtkGeometryCacheWriter> vtkCacheWriter;
+  std::shared_ptr<vtkGeometryCacheWriter> vtkCacheWriter;
   void updateGeometryHandler();
   size_t numberOfTriangles() const;
   size_t numberOfVertices() const;
@@ -254,11 +258,9 @@ private:
   bool m_isFiniteGeometry = true;
 
 protected:
-  std::vector<const Surface *> m_SurList; ///< Full surfaces (make a map
+  std::vector<const Surface *> m_surList; ///< Full surfaces (make a map
   /// including complementary object ?)
 };
 
 } // NAMESPACE Geometry
 } // NAMESPACE Mantid
-
-#endif /*MANTID_GEOMETRY_CSGOBJECT_H_*/

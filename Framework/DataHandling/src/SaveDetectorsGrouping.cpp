@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveDetectorsGrouping.h"
 
@@ -125,16 +125,16 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
         ed = detid;
       } else {
         // broken:  (1) store (2) start new
-        detranges.push_back(st);
-        detranges.push_back(ed);
+        detranges.emplace_back(st);
+        detranges.emplace_back(ed);
 
         st = detid;
         ed = detid;
       }
     } // ENDFOR detectors
     // Complete the uncompleted
-    detranges.push_back(st);
-    detranges.push_back(ed);
+    detranges.emplace_back(st);
+    detranges.emplace_back(ed);
 
     // c) Save entry in output
     groupdetidrangemap[groupid] = detranges;
@@ -143,8 +143,8 @@ void SaveDetectorsGrouping::convertToDetectorsRanges(
 }
 
 void SaveDetectorsGrouping::printToXML(
-    std::map<int, std::vector<detid_t>> groupdetidrangemap,
-    std::string xmlfilename) {
+    const std::map<int, std::vector<detid_t>> &groupdetidrangemap,
+    const std::string &xmlfilename) {
 
   // 1. Get Instrument information
   const auto &instrument = mGroupWS->getInstrument();

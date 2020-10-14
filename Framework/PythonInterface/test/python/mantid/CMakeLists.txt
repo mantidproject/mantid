@@ -14,7 +14,9 @@ set(TEST_PY_FILES
     SimpleAPIRenameWorkspaceTest.py
     FitFunctionsTest.py)
 
-if(MAKE_VATES)
+# ParaView is unused and will be removed in the future. Effort to fix Python tests
+# is not worth it
+if(MAKE_VATES AND NOT MSVC)
   list(APPEND TEST_PY_FILES PVPythonTest.py)
 endif()
 

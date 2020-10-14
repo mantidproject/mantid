@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2009 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
 This class holds the widgets that hold the details for each axis so the contents
@@ -13,8 +13,7 @@ from the University of Derby
 @date 15/09/2013
 */
 
-#ifndef SCALEDETAILS_H_
-#define SCALEDETAILS_H_
+#pragma once
 
 #include <QList>
 #include <QWidget>
@@ -80,5 +79,3 @@ private:
   void checkstep();
   bool validate();
 };
-
-#endif /* ScaleDetails_H_ */

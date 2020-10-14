@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidQtWidgets/Common/QtJSONUtils.h"
 
 #include <QFile>
@@ -17,9 +16,10 @@
 #include <QJsonObject>
 #include <QTextStream>
 #endif
+#include <stdexcept>
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 namespace {
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
 // Code in anonymous namespace taken from stack overflow
 // https://stackoverflow.com/questions/4169988/easiest-way-to-parse-json-in-qt-4-7
 // from user2243820 on 1st August 2019
@@ -59,7 +59,7 @@ public:
     return toString.call(obj).toString();
   }
 
-  QMap<QString, QVariant> decodeInner(QScriptValue object) {
+  QMap<QString, QVariant> decodeInner(const QScriptValue &object) {
     QMap<QString, QVariant> map;
     QScriptValueIterator it(object);
     while (it.hasNext()) {
@@ -80,7 +80,7 @@ public:
     return map;
   }
 
-  QList<QVariant> decodeInnerToList(QScriptValue arrayValue) {
+  QList<QVariant> decodeInnerToList(const QScriptValue &arrayValue) {
     QList<QVariant> list;
     QScriptValueIterator it(arrayValue);
     while (it.hasNext()) {
@@ -111,31 +111,51 @@ public:
     return decodeInner(object);
   }
 };
-} // namespace
 #endif
+
+void writeData(const QString &filename, const QByteArray &data) {
+  QFile jsonFile(filename);
+
+  if (!jsonFile.open(QFile::WriteOnly)) {
+    throw std::invalid_argument("Could not open file at " +
+                                filename.toStdString());
+  }
+
+  if (jsonFile.write(data) == -1) {
+    throw std::runtime_error("Failed to write data to " +
+                             filename.toStdString());
+  }
+}
+
+} // namespace
 namespace MantidQt {
 namespace API {
-void saveJSONToFile(const QString &filename,
-                    const QMap<QString, QVariant> &map) {
+void saveJSONToFile(QString &filename, const QMap<QString, QVariant> &map) {
+  auto filenameString = filename.toStdString();
+  if (filenameString.find_last_of(".") == std::string::npos ||
+      filenameString.substr(filenameString.find_last_of(".") + 1) !=
+          std::string("json")) {
+    filename += ".json";
+  }
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   JSON JSON;
   auto jsonString = JSON.encode(map);
-  QFile jsonFile(filename);
-  jsonFile.open(QFile::WriteOnly);
+
   QByteArray jsonByteArray;
-  jsonFile.write(jsonByteArray.append(jsonString));
+  writeData(filename, jsonByteArray.append(jsonString));
 #else
   QJsonDocument jsonDocument(QJsonObject::fromVariantMap(map));
-  QFile jsonFile(filename);
-  jsonFile.open(QFile::WriteOnly);
-  jsonFile.write(jsonDocument.toJson());
+  writeData(filename, jsonDocument.toJson());
 #endif
 }
 
 QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   QFile jsonFile(filename);
-  jsonFile.open(QFile::ReadOnly);
+  if (!jsonFile.open(QFile::ReadOnly)) {
+    throw std::invalid_argument("Cannot open file at: " +
+                                filename.toStdString());
+  }
   QString jsonString(jsonFile.readAll());
   return loadJSONFromString(jsonString);
 #else
@@ -144,8 +164,9 @@ QMap<QString, QVariant> loadJSONFromFile(const QString &filename) {
    * implementation of this function, from user alanwsx and edited by BSMP.
    */
   QFile file(filename);
-  if (!file.open(QIODevice::ReadOnly)) {
-    throw std::runtime_error("Failed to open " + filename.toStdString());
+  if (!file.open(QFile::ReadOnly)) {
+    throw std::invalid_argument("Cannot open file at: " +
+                                filename.toStdString());
   }
 
   // step 2

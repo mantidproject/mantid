@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MASKBINSFROMWORKSPACETEST_H_
-#define MASKBINSFROMWORKSPACETEST_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -58,7 +57,7 @@ public:
     TS_ASSERT(masker.isExecuted());
 
     MatrixWorkspace_const_sptr outputWS =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             ads.retrieve(resultWorkspaceName));
 
     for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i) {
@@ -124,5 +123,3 @@ public:
 private:
   Mantid::Algorithms::MaskBinsFromWorkspace masker;
 };
-
-#endif /*MASKBINSFROMWORKSPACETEST_H_*/

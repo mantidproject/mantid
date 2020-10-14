@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/MDGeometry/IMDDimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDFrameFactory.h"
@@ -15,7 +15,7 @@
 #include <Poco/DOM/NamedNodeMap.h>
 #include <Poco/NumberParser.h>
 #include <Poco/XML/XMLException.h>
-#include <boost/make_shared.hpp>
+#include <memory>
 
 namespace Mantid {
 namespace Geometry {
@@ -130,7 +130,7 @@ IMDDimension_sptr createDimension(const Poco::XML::Element &dimensionXML) {
   MDFrame_const_uptr mdframe =
       makeMDFrameFactoryChain()->create(MDFrameArgument(frame, units));
 
-  return boost::make_shared<MDHistoDimension>(
+  return std::make_shared<MDHistoDimension>(
       name, id, *mdframe, static_cast<coord_t>(lowerBounds),
       static_cast<coord_t>(upperBounds), nBins);
 }

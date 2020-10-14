@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/CommonBinsValidator.h"
@@ -93,7 +93,7 @@ void validateWorkspaceName(std::map<std::string, std::string> &validationOutput,
     return;
   size_t index = 0;
   for (const auto &item : *wsGroup) {
-    auto matrixWs = boost::dynamic_pointer_cast<MatrixWorkspace>(item);
+    auto matrixWs = std::dynamic_pointer_cast<MatrixWorkspace>(item);
     if (!matrixWs) {
       validationOutput["InputWorkspace"] =
           "Input group contains an invalid workspace type at item " +
@@ -115,7 +115,7 @@ void validateWorkspaceName(std::map<std::string, std::string> &validationOutput,
 void SumSpectra::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<CommonBinsValidator>()),
+                      std::make_shared<CommonBinsValidator>()),
                   "The workspace containing the spectra to be summed.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
@@ -124,7 +124,7 @@ void SumSpectra::init() {
       " A workspace of this name will be created and stored in the Analysis "
       "Data Service.");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("StartWorkspaceIndex", 0, mustBePositive,
                   "The first Workspace index to be included in the summing");
@@ -165,6 +165,10 @@ void SumSpectra::init() {
   setPropertySettings(
       "MultiplyBySpectra",
       std::make_unique<EnabledWhenProperty>("WeightedSum", IS_EQUAL_TO, "1"));
+
+  declareProperty("UseFractionalArea", true,
+                  "Normalize the output workspace to the fractional area for "
+                  "RebinnedOutput workspaces.");
 }
 
 /*
@@ -233,7 +237,7 @@ void SumSpectra::exec() {
 
   Progress progress(this, 0.0, 1.0, m_indices.size());
   EventWorkspace_const_sptr eventW =
-      boost::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
+      std::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
   if (eventW) {
     if (m_calculateWeightedSum) {
       g_log.warning("Ignoring request for WeightedSum");
@@ -320,7 +324,7 @@ void SumSpectra::determineIndices(const size_t numberOfSpectra) {
  * @return The minimum spectrum No for all the spectra being summed.
  */
 specnum_t
-SumSpectra::getOutputSpecNo(MatrixWorkspace_const_sptr localworkspace) {
+SumSpectra::getOutputSpecNo(const MatrixWorkspace_const_sptr &localworkspace) {
   // initial value - any included spectrum will do
   specnum_t specId =
       localworkspace->getSpectrum(*(m_indices.begin())).getSpectrumNo();
@@ -431,7 +435,7 @@ bool useSpectrum(const SpectrumInfo &spectrumInfo, const size_t wsIndex,
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
-void SumSpectra::doSimpleSum(MatrixWorkspace_sptr outputWorkspace,
+void SumSpectra::doSimpleSum(const MatrixWorkspace_sptr &outputWorkspace,
                              Progress &progress, size_t &numSpectra,
                              size_t &numMasked, size_t &numZeros) {
   // Clean workspace of any NANs or Inf values
@@ -506,7 +510,7 @@ void SumSpectra::doSimpleSum(MatrixWorkspace_sptr outputWorkspace,
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
-void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
+void SumSpectra::doFractionalSum(const MatrixWorkspace_sptr &outputWorkspace,
                                  Progress &progress, size_t &numSpectra,
                                  size_t &numMasked, size_t &numZeros) {
   // First, we need to clean the input workspace for nan's and inf's in order
@@ -516,9 +520,13 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
 
   // Transform to real workspace types
   RebinnedOutput_sptr inWS =
-      boost::dynamic_pointer_cast<RebinnedOutput>(localworkspace);
+      std::dynamic_pointer_cast<RebinnedOutput>(localworkspace);
   RebinnedOutput_sptr outWS =
-      boost::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
+      std::dynamic_pointer_cast<RebinnedOutput>(outputWorkspace);
+
+  // Check finalize state prior to the sum process, at the completion
+  // the output is unfinalized
+  auto isFinalized = inWS->isFinalized();
 
   // Get references to the output workspaces's data vectors
   auto &outSpec = outputWorkspace->getSpectrum(0);
@@ -548,21 +556,22 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
     if (m_calculateWeightedSum) {
       for (size_t yIndex = 0; yIndex < m_yLength; ++yIndex) {
         const double yErrorsVal = YErrors[yIndex];
+        const double fracVal = (isFinalized ? FracArea[yIndex] : 1.0);
         if (std::isnormal(yErrorsVal)) { // is non-zero, nan, or infinity
-          const double errsq =
-              yErrorsVal * yErrorsVal * FracArea[yIndex] * FracArea[yIndex];
+          const double errsq = yErrorsVal * yErrorsVal * fracVal * fracVal;
           YErrorSum[yIndex] += errsq;
           Weight[yIndex] += 1. / errsq;
-          YSum[yIndex] += YValues[yIndex] * FracArea[yIndex] / errsq;
+          YSum[yIndex] += YValues[yIndex] * fracVal / errsq;
         } else {
           nZeros[yIndex]++;
         }
       }
     } else {
       for (size_t yIndex = 0; yIndex < m_yLength; ++yIndex) {
-        YSum[yIndex] += YValues[yIndex] * FracArea[yIndex];
-        YErrorSum[yIndex] += YErrors[yIndex] * YErrors[yIndex] *
-                             FracArea[yIndex] * FracArea[yIndex];
+        const double fracVal = (isFinalized ? FracArea[yIndex] : 1.0);
+        YSum[yIndex] += YValues[yIndex] * fracVal;
+        YErrorSum[yIndex] +=
+            YErrors[yIndex] * YErrors[yIndex] * fracVal * fracVal;
       }
     }
     // accumulation of fractional weight is the same
@@ -583,8 +592,11 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
     numZeros = 0;
   }
 
-  // Create the correct representation
-  outWS->finalize();
+  // Create the correct representation if using fractional area
+  auto useFractionalArea = getProperty("UseFractionalArea");
+  if (useFractionalArea) {
+    outWS->finalize();
+  }
 }
 
 /** Executes the algorithm
@@ -596,16 +608,16 @@ void SumSpectra::doFractionalSum(MatrixWorkspace_sptr outputWorkspace,
  * @param numZeros The number of zero bins in histogram workspace or empty
  * spectra for event workspace.
  */
-void SumSpectra::execEvent(MatrixWorkspace_sptr outputWorkspace,
+void SumSpectra::execEvent(const MatrixWorkspace_sptr &outputWorkspace,
                            Progress &progress, size_t &numSpectra,
                            size_t &numMasked, size_t &numZeros) {
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
   EventWorkspace_const_sptr inputWorkspace =
-      boost::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
+      std::dynamic_pointer_cast<const EventWorkspace>(localworkspace);
 
   // Get the pointer to the output event list
   EventWorkspace_sptr outputEventWorkspace =
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
+      std::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
   EventList &outputEL = outputEventWorkspace->getSpectrum(0);
   outputEL.setSpectrumNo(m_outSpecNum);
   outputEL.clearDetectorIDs();

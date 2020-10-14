@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FunctionParameterDecorator.h"
 #include "MantidAPI/CompositeFunction.h"
@@ -30,7 +30,7 @@ IFunction_sptr FunctionParameterDecorator::getDecoratedFunction() const {
 
 IFunction_sptr FunctionParameterDecorator::clone() const {
   FunctionParameterDecorator_sptr cloned =
-      boost::dynamic_pointer_cast<FunctionParameterDecorator>(
+      std::dynamic_pointer_cast<FunctionParameterDecorator>(
           FunctionFactory::Instance().createFunction(name()));
 
   if (!cloned) {
@@ -48,15 +48,15 @@ IFunction_sptr FunctionParameterDecorator::clone() const {
 }
 
 void FunctionParameterDecorator::setWorkspace(
-    boost::shared_ptr<const Workspace> ws) {
+    std::shared_ptr<const Workspace> ws) {
   throwIfNoFunctionSet();
 
   m_wrappedFunction->setWorkspace(ws);
 }
 
 void FunctionParameterDecorator::setMatrixWorkspace(
-    boost::shared_ptr<const MatrixWorkspace> workspace, size_t wi,
-    double startX, double endX) {
+    std::shared_ptr<const MatrixWorkspace> workspace, size_t wi, double startX,
+    double endX) {
   throwIfNoFunctionSet();
 
   m_wrappedFunction->setMatrixWorkspace(workspace, wi, startX, endX);
@@ -169,7 +169,7 @@ size_t FunctionParameterDecorator::getParameterIndex(
     const ParameterReference &ref) const {
   throwIfNoFunctionSet();
 
-  if (boost::dynamic_pointer_cast<CompositeFunction>(m_wrappedFunction)) {
+  if (std::dynamic_pointer_cast<CompositeFunction>(m_wrappedFunction)) {
     return m_wrappedFunction->getParameterIndex(ref);
   }
 

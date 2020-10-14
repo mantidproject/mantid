@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/DataProcessorUI/WhiteList.h"
 #include <QString>
@@ -25,13 +25,13 @@ void WhiteList::addElement(const QString &colName, const QString &algProperty,
                            const QString &prefix, bool isKey) {
   m_names.emplace_back(colName);
   m_algorithmProperties.emplace_back(algProperty);
-  m_isShown.push_back(isShown);
+  m_isShown.emplace_back(isShown);
   /* std::vector<bool> does not have emplace_back until c++14 (currently not
    * fully supported on RHEL7).
    * See: http://en.cppreference.com/w/cpp/container/vector/emplace_back */
   m_prefixes.emplace_back(prefix);
   m_descriptions.emplace_back(description);
-  m_isKey.push_back(isKey);
+  m_isKey.emplace_back(isKey);
 }
 
 /** Returns the column index for a column specified via its name

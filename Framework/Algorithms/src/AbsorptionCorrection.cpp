@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/AbsorptionCorrection.h"
 #include "MantidAPI/HistoWorkspace.h"
@@ -71,7 +71,7 @@ AbsorptionCorrection::AbsorptionCorrection()
 void AbsorptionCorrection::init() {
 
   // The input workspace must have an instrument and units of wavelength
-  auto wsValidator = boost::make_shared<CompositeValidator>();
+  auto wsValidator = std::make_shared<CompositeValidator>();
   wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
@@ -88,10 +88,10 @@ void AbsorptionCorrection::init() {
                                            CALC_ENVIRONMENT};
   declareProperty(
       "ScatterFrom", CALC_SAMPLE,
-      boost::make_shared<StringListValidator>(std::move(scatter_options)),
+      std::make_shared<StringListValidator>(std::move(scatter_options)),
       "The component to calculate the absorption for (default: Sample)");
 
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("AttenuationXSection", EMPTY_DBL(), mustBePositive,
                   "The ABSORPTION cross-section, at 1.8 Angstroms, for the "
@@ -105,7 +105,7 @@ void AbsorptionCorrection::init() {
                   "The number density of the sample in number of atoms per "
                   "cubic angstrom if not set with SetSampleMaterial");
 
-  auto positiveInt = boost::make_shared<BoundedValidator<int64_t>>();
+  auto positiveInt = std::make_shared<BoundedValidator<int64_t>>();
   positiveInt->setLower(1);
   declareProperty(
       "NumberOfWavelengthPoints", static_cast<int64_t>(EMPTY_INT()),
@@ -115,14 +115,13 @@ void AbsorptionCorrection::init() {
 
   std::vector<std::string> exp_options{"Normal", "FastApprox"};
   declareProperty(
-      "ExpMethod", "Normal",
-      boost::make_shared<StringListValidator>(exp_options),
+      "ExpMethod", "Normal", std::make_shared<StringListValidator>(exp_options),
       "Select the method to use to calculate exponentials, normal or a\n"
       "fast approximation (default: Normal)");
 
   std::vector<std::string> propOptions{"Elastic", "Direct", "Indirect"};
   declareProperty("EMode", "Elastic",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "The energy mode (default: elastic)");
   declareProperty(
       "EFixed", 0.0, mustBePositive,
@@ -333,7 +332,7 @@ void AbsorptionCorrection::retrieveBaseProperties() {
     NeutronAtom neutron(0, 0, 0.0, 0.0, sigma_s, 0.0, sigma_s, sigma_atten);
 
     // Save input in Sample with wrong atomic number and name
-    auto shape = boost::shared_ptr<IObject>(
+    auto shape = std::shared_ptr<IObject>(
         m_inputWS->sample().getShape().cloneWithMaterial(
             Material("SetInAbsorptionCorrection", neutron, rho)));
     m_inputWS->mutableSample().setShape(shape);
@@ -407,7 +406,7 @@ void AbsorptionCorrection::constructSample(API::Sample &sample) {
     msg << "Cannot use geometry xml for ScatterFrom=" << scatterFrom;
     throw std::runtime_error(msg.str());
   } else { // create a geometry from the sample object
-    boost::shared_ptr<IObject> shape = ShapeFactory().createShape(xmlstring);
+    std::shared_ptr<IObject> shape = ShapeFactory().createShape(xmlstring);
     sample.setShape(shape);
     m_sampleObject = &sample.getShape();
 
@@ -436,39 +435,8 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
     // detector
     const V3D direction = normalize(detectorPos - m_elementPositions[i]);
     Track outgoing(m_elementPositions[i], direction);
-    int temp = m_sampleObject->interceptSurface(outgoing);
-
-    /* Most of the time, the number of hits is 1. Sometime, we have more than
-     * one intersection due to
-     * arithmetic imprecision. If it is the case, then selecting the first
-     * intersection is valid.
-     * In principle, one could check the consistency of all distances if hits is
-     * larger than one by doing:
-     * Mantid::Geometry::Track::LType::const_iterator it=outgoing.begin();
-     * and looping until outgoing.end() checking the distances with it->Dist
-     */
-    // Not hitting the cylinder from inside, usually means detector is badly
-    // defined,
-    // i.e, position is (0,0,0).
-    if (temp < 1) {
-      // FOR NOW AT LEAST, JUST IGNORE THIS ERROR AND USE A ZERO PATH LENGTH,
-      // WHICH I RECKON WILL MAKE A
-      // NEGLIGIBLE DIFFERENCE ANYWAY (ALWAYS SEEMS TO HAPPEN WITH ELEMENT RIGHT
-      // AT EDGE OF SAMPLE)
-      L2s[i] = 0.0;
-
-      // std::ostringstream message;
-      // message << "Problem with detector at " << detectorPos << " ID:" <<
-      // detector->getID() << '\n';
-      // message << "This usually means that this detector is defined inside the
-      // sample cylinder";
-      // g_log.error(message.str());
-      // throw std::runtime_error("Problem in
-      // AbsorptionCorrection::calculateDistances");
-    } else // The normal situation
-    {
-      L2s[i] = outgoing.cbegin()->distFromStart;
-    }
+    m_sampleObject->interceptSurface(outgoing);
+    L2s[i] = outgoing.totalDistInsideObject();
   }
 }
 

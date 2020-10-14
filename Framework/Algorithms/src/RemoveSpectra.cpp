@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidAlgorithms/RemoveSpectra.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -50,9 +49,8 @@ std::map<std::string, std::string> RemoveSpectra::validateInputs() {
   std::map<std::string, std::string> errors;
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   const auto workspace2D =
-      boost::dynamic_pointer_cast<const Workspace2D>(inputWS);
-  const auto eventWS =
-      boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      std::dynamic_pointer_cast<const Workspace2D>(inputWS);
+  const auto eventWS = std::dynamic_pointer_cast<const EventWorkspace>(inputWS);
   if (!workspace2D && !eventWS) {
     errors.insert(std::make_pair(
         "InputWorkspace",

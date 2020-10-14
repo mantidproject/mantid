@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_LOADDNSSCD_H_
-#define MANTID_MDALGORITHMS_LOADDNSSCD_H_
+#pragma once
 
 #include "MantidAPI/DataProcessorAlgorithm.h"
 #include "MantidAPI/IFileLoader.h"
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventWorkspace.h"
+#include "MantidKernel/FileDescriptor.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
@@ -89,13 +89,13 @@ private:
   Mantid::API::IMDEventWorkspace_sptr m_OutWS;
 
   int splitIntoColumns(std::list<std::string> &columns, std::string &str);
-  void read_data(const std::string fname,
+  void read_data(const std::string &fname,
                  std::map<std::string, std::string> &str_metadata,
                  std::map<std::string, double> &num_metadata);
   void fillOutputWorkspace(double wavelength);
   void fillOutputWorkspaceRaw(double wavelength);
   API::ITableWorkspace_sptr saveHuber();
-  void loadHuber(API::ITableWorkspace_sptr tws);
+  void loadHuber(const API::ITableWorkspace_sptr &tws);
   template <class T>
   void updateProperties(API::Run &run, std::map<std::string, T> &metadata,
                         std::string time);
@@ -103,5 +103,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_LOADDNSSCD_H_ */

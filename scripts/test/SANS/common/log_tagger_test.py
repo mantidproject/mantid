@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import unittest
 
 from mantid.api import AlgorithmManager, FrameworkManager
@@ -52,6 +51,7 @@ class SANSLogTaggerTest(unittest.TestCase):
         set_hash(tag1, hashed_value_1, ws1)
         self.assertTrue(has_hash(tag1, hashed_value_1, ws1))
         self.assertFalse(has_hash(tag1, hashed_value_2, ws1))
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "isisraw.h"
 #include "MantidKernel/Logger.h"
@@ -123,7 +123,6 @@ ISISRAW::ISISRAW() : m_crpt(nullptr), dat1(nullptr) {
   logsect.nlines = 1;
   logsect.lines = new LOG_LINE[logsect.nlines];
   for (i = 0; i < logsect.nlines; i++) {
-    // logsect.lines[i].data = "test log line"; //Deprecated
     logsect.lines[i].data = reinterpret_cast<char *>(malloc(16));
     strcpy(logsect.lines[i].data, "test log line");
     logsect.lines[i].len = static_cast<int>(strlen(logsect.lines[i].data));
@@ -716,10 +715,10 @@ int ISISRAW::ioRAW(FILE *file, LOG_STRUCT *s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, LOG_LINE *s, int len, bool from_file) {
   char padding[5];
   memset(padding, ' ', sizeof(padding));
-  int i, nbytes_rounded;
+  int i;
   for (i = 0; i < len; i++) {
     ioRAW(file, &(s[i].len), 1, from_file);
-    nbytes_rounded = 4 * (1 + (s[i].len - 1) / 4);
+    int nbytes_rounded = 4 * (1 + (s[i].len - 1) / 4);
     ioRAW(file, &(s[i].data), s[i].len, from_file);
     ioRAW(file, padding, nbytes_rounded - s[i].len, from_file);
   }
@@ -732,12 +731,11 @@ int ISISRAW::ioRAW(FILE *file, char *s, int len, bool from_file) {
     return 0;
   }
 
-  size_t n;
   if (from_file) {
-    n = fread(s, sizeof(char), len, file);
+    size_t n = fread(s, sizeof(char), len, file);
     return static_cast<int>(n - len);
   } else {
-    n = fwrite(s, sizeof(char), len, file);
+    fwrite(s, sizeof(char), len, file);
   }
 
   return 0;
@@ -749,12 +747,11 @@ int ISISRAW::ioRAW(FILE *file, int *s, int len, bool from_file) {
     return 0;
   }
 
-  size_t n;
   if (from_file) {
-    n = fread(s, sizeof(int), len, file);
+    size_t n = fread(s, sizeof(int), len, file);
     return static_cast<int>(n - len);
   } else {
-    n = fwrite(s, sizeof(int), len, file);
+    fwrite(s, sizeof(int), len, file);
   }
 
   return 0;
@@ -766,12 +763,11 @@ int ISISRAW::ioRAW(FILE *file, uint32_t *s, int len, bool from_file) {
     return 0;
   }
 
-  size_t n;
   if (from_file) {
-    n = fread(s, sizeof(uint32_t), len, file);
+    size_t n = fread(s, sizeof(uint32_t), len, file);
     return static_cast<int>(n - len);
   } else {
-    n = fwrite(s, sizeof(uint32_t), len, file);
+    fwrite(s, sizeof(uint32_t), len, file);
   }
   return 0;
 }
@@ -783,14 +779,13 @@ int ISISRAW::ioRAW(FILE *file, float *s, int len, bool from_file) {
     return 0;
   }
 
-  size_t n;
   if (from_file) {
-    n = fread(s, sizeof(float), len, file);
+    size_t n = fread(s, sizeof(float), len, file);
     vaxf_to_local(s, &len, &errcode);
     return static_cast<int>(n - len);
   } else {
     local_to_vaxf(s, &len, &errcode);
-    n = fwrite(s, sizeof(float), len, file);
+    fwrite(s, sizeof(float), len, file);
     vaxf_to_local(s, &len, &errcode);
   }
   return 0;
@@ -800,6 +795,7 @@ int ISISRAW::ioRAW(FILE *file, float *s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, char **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new char[len];
       ioRAW(file, *s, len, from_file);
     } else {
@@ -817,6 +813,7 @@ int ISISRAW::ioRAW(FILE *file, char **s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, int **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new int[len];
       ioRAW(file, *s, len, from_file);
     } else {
@@ -834,6 +831,7 @@ int ISISRAW::ioRAW(FILE *file, int **s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, uint32_t **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new uint32_t[len];
       ioRAW(file, *s, len, from_file);
     } else {
@@ -851,6 +849,7 @@ int ISISRAW::ioRAW(FILE *file, uint32_t **s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, float **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new float[len];
       ioRAW(file, *s, len, from_file);
     } else {
@@ -868,6 +867,7 @@ int ISISRAW::ioRAW(FILE *file, float **s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, SE_STRUCT **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new SE_STRUCT[len];
       ioRAW(file, *s, len, from_file);
     } else {
@@ -885,6 +885,7 @@ int ISISRAW::ioRAW(FILE *file, SE_STRUCT **s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, DDES_STRUCT **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new DDES_STRUCT[len];
       ioRAW(file, *s, len, from_file);
     } else {
@@ -902,6 +903,7 @@ int ISISRAW::ioRAW(FILE *file, DDES_STRUCT **s, int len, bool from_file) {
 int ISISRAW::ioRAW(FILE *file, LOG_LINE **s, int len, bool from_file) {
   if (from_file) {
     if (len > 0) {
+      delete[] * s;
       *s = new LOG_LINE[len];
       ioRAW(file, *s, len, from_file);
     } else {
@@ -936,6 +938,7 @@ int ISISRAW::vmstime(char *timbuf, int len, time_t time_value) {
    * get time in VMS format 01-JAN-1970 00:00:00
    */
   size_t i, n;
+  // cppcheck-suppress redundantAssignment
   struct tm *tmstruct = nullptr;
 #ifdef MS_VISUAL_STUDIO
   errno_t err = localtime_s(tmstruct, &time_value);

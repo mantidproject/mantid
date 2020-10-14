@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGTEST_H_
-#define MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -97,7 +96,7 @@ class ALCPeakFittingPresenterTest : public CxxTest::TestSuite {
   ALCPeakFittingPresenter *m_presenter;
 
   IPeakFunction_sptr createGaussian(double centre, double fwhm, double height) {
-    auto peak = boost::dynamic_pointer_cast<IPeakFunction>(
+    auto peak = std::dynamic_pointer_cast<IPeakFunction>(
         API::FunctionFactory::Instance().createFunction("Gaussian"));
     peak->setCentre(centre);
     peak->setFwhm(fwhm);
@@ -170,7 +169,7 @@ public:
   }
 
   void test_onDataChanged() {
-    auto dataWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto dataWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceCreationHelper::create2DWorkspace123(1, 3));
 
     ON_CALL(*m_model, data()).WillByDefault(Return(dataWorkspace));
@@ -181,7 +180,7 @@ public:
 
   void test_onFittedPeaksChanged() {
     IFunction_const_sptr fitFunction = createGaussian(1, 2, 3);
-    auto dataWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto dataWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceCreationHelper::create2DWorkspace123(1, 3));
 
     ON_CALL(*m_model, fittedPeaks()).WillByDefault(Return(fitFunction));
@@ -338,9 +337,9 @@ public:
    * Test that "Plot guess" with a function set plots a function
    */
   void test_plotGuess() {
-    auto dataWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto dataWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceCreationHelper::create2DWorkspace123(1, 3));
-    auto guessWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    auto guessWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
         WorkspaceCreationHelper::create2DWorkspace123(1, 4));
     IFunction_const_sptr peaks = createGaussian(1, 2, 3);
     const auto xValues = dataWorkspace->x(0).rawData();
@@ -373,4 +372,3 @@ public:
   }
 };
 GNU_DIAG_ON_SUGGEST_OVERRIDE
-#endif /* MANTIDQT_CUSTOMINTERFACES_ALCPEAKFITTINGTEST_H_ */

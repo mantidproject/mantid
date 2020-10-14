@@ -44,7 +44,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_2">
         <item>
-         <widget class="MantidQt::API::MWRunFiles" name="rfInput" native="true">
+         <widget class="MantidQt::API::FileFinderWidget" name="rfInput" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -386,7 +386,7 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
-           <widget class="MantidQt::API::MWRunFiles" name="rfMapFile" native="true">
+           <widget class="MantidQt::API::FileFinderWidget" name="rfMapFile" native="true">
             <property name="geometry">
              <rect>
               <x>0</x>
@@ -446,7 +446,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_7">
         <item>
-         <widget class="MantidQt::API::MWRunFiles" name="rfBackgroundRun" native="true">
+         <widget class="MantidQt::API::FileFinderWidget" name="rfBackgroundRun" native="true">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
             <horstretch>0</horstretch>
@@ -558,7 +558,7 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_6">
         <item>
-         <widget class="MantidQt::API::MWRunFiles" name="rfCalibrationRun" native="true">
+         <widget class="MantidQt::API::FileFinderWidget" name="rfCalibrationRun" native="true">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -655,7 +655,7 @@
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout_10">
            <item>
-            <widget class="MantidQt::API::MWRunFiles" name="rfBackCalibrationRun" native="true">
+            <widget class="MantidQt::API::FileFinderWidget" name="rfBackCalibrationRun" native="true">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                <horstretch>0</horstretch>
@@ -807,7 +807,7 @@
          </widget>
         </item>
         <item>
-         <widget class="MantidQt::API::MWRunFiles" name="rfAlignmentRun" native="true">
+         <widget class="MantidQt::API::FileFinderWidget" name="rfAlignmentRun" native="true">
           <property name="enabled">
            <bool>true</bool>
           </property>
@@ -1053,9 +1053,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>MantidQt::API::MWRunFiles</class>
+   <class>MantidQt::API::FileFinderWidget</class>
    <extends>QWidget</extends>
-   <header>MantidQtWidgets/Common/MWRunFiles.h</header>
+   <header>MantidQtWidgets/Common/FileFinderWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

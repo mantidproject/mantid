@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_SAVENEXUSGEOMETRYTEST_H_
-#define MANTID_DATAHANDLING_SAVENEXUSGEOMETRYTEST_H_
+#pragma once
 
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -56,7 +55,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", "testWS"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName", destinationFile));
     TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("H5Path", "algorithm_test_data"));
+        alg.setPropertyValue("EntryName", "algorithm_test_data"));
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(alg.isExecuted());
 
@@ -215,5 +214,3 @@ public:
     TS_ASSERT(!saver.isExecuted());
   }
 };
-
-#endif /* MANTID_DATAHANDLING_SAVENEXUSGEOMETRYTEST_H_ */

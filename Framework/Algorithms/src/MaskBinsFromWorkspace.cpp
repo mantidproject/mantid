@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MaskBinsFromWorkspace.h"
 #include "MantidAPI/Algorithm.tcc"
@@ -21,12 +21,12 @@ void MaskBinsFromWorkspace::init() {
   declareWorkspaceInputProperties<MatrixWorkspace>(
       "InputWorkspace",
       "The name of the input workspace. Must contain histogram data.",
-      boost::make_shared<HistogramValidator>());
+      std::make_shared<HistogramValidator>());
   declareWorkspaceInputProperties<MatrixWorkspace>(
       "MaskedWorkspace",
       "The name of the workspaces containing masked bins to copy over. Must "
       "contain histogram data.",
-      boost::make_shared<HistogramValidator>());
+      std::make_shared<HistogramValidator>());
 
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),

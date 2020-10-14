@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //------------------------------------------------------------------------------------------------
 // Includes
@@ -24,8 +24,6 @@ const char *AMP_PARAM = "Intensity";
 
 const double STDDEV_TO_HWHM = std::sqrt(std::log(4.0));
 
-/**
- */
 GaussianComptonProfile::GaussianComptonProfile() : ComptonProfile() {}
 
 /**
@@ -35,16 +33,12 @@ std::string GaussianComptonProfile::name() const {
   return "GaussianComptonProfile";
 }
 
-/**
- */
 void GaussianComptonProfile::declareParameters() {
   ComptonProfile::declareParameters();
   declareParameter(WIDTH_PARAM, 1.0, "Gaussian width parameter");
   declareParameter(AMP_PARAM, 1.0, "Gaussian intensity parameter");
 }
 
-/*
- */
 std::vector<size_t> GaussianComptonProfile::intensityParameterIndices() const {
   return std::vector<size_t>(1, this->parameterIndex(AMP_PARAM));
 }
@@ -109,6 +103,9 @@ void GaussianComptonProfile::massProfile(double *result, const size_t nData,
 
   const auto &modq = modQ();
   const auto &ei = e0();
+  if (modq.empty() || ei.empty()) {
+    throw std::runtime_error("The Q values or e0 values have not been set");
+  }
   // Include e_i^0.1*mass/q pre-factor
   for (size_t j = 0; j < nData; ++j) {
     const double q = modq[j];

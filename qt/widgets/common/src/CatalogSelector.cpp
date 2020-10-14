@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/CatalogSelector.h"
 #include "MantidAPI/CatalogManager.h"
@@ -28,10 +28,10 @@ std::vector<std::string> CatalogSelector::getSelectedCatalogSessions() {
   std::vector<std::string> selectedSessions;
   for (int row = 0; row < m_uiForm.selectedCatalogs->count(); ++row) {
     if (m_uiForm.selectedCatalogs->item(row)->isSelected()) {
-      selectedSessions.push_back(m_uiForm.selectedCatalogs->item(row)
-                                     ->data(Qt::UserRole)
-                                     .toString()
-                                     .toStdString());
+      selectedSessions.emplace_back(m_uiForm.selectedCatalogs->item(row)
+                                        ->data(Qt::UserRole)
+                                        .toString()
+                                        .toStdString());
     }
   }
   return selectedSessions;

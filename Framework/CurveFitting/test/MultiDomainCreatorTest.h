@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MULTIDOMAINCREATORTEST_H_
-#define MULTIDOMAINCREATORTEST_H_
+#pragma once
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionDomain1D.h"
@@ -24,8 +23,8 @@
 #include "MantidTestHelpers/FakeObjects.h"
 
 #include <algorithm>
-#include <boost/make_shared.hpp>
 #include <cxxtest/TestSuite.h>
+#include <memory>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -36,15 +35,15 @@ using namespace Mantid::CurveFitting::Functions;
 class MultiDomainCreatorTest_Fun : public IFunction1D, public ParamFunction {
 public:
   size_t m_wsIndex;
-  boost::shared_ptr<const MatrixWorkspace> m_workspace;
+  std::shared_ptr<const MatrixWorkspace> m_workspace;
   std::string name() const override { return "MultiDomainCreatorTest_Fun"; }
   void function1D(double *, const double *, const size_t) const override {}
-  void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace>,
+  void setMatrixWorkspace(std::shared_ptr<const API::MatrixWorkspace>,
                           size_t wi, double, double) override {
     m_wsIndex = wi;
   }
-  void setWorkspace(boost::shared_ptr<const Workspace> ws) override {
-    m_workspace = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
+  void setWorkspace(std::shared_ptr<const Workspace> ws) override {
+    m_workspace = std::dynamic_pointer_cast<const MatrixWorkspace>(ws);
   }
 };
 
@@ -146,7 +145,7 @@ public:
     TS_ASSERT(domain);
     TS_ASSERT(values);
 
-    auto jointDomain = boost::dynamic_pointer_cast<JointDomain>(domain);
+    auto jointDomain = std::dynamic_pointer_cast<JointDomain>(domain);
     TS_ASSERT(jointDomain);
     TS_ASSERT_EQUALS(jointDomain->getNParts(), 3);
 
@@ -201,19 +200,19 @@ public:
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
 
-    auto mdfun = boost::make_shared<MultiDomainFunction>();
+    auto mdfun = std::make_shared<MultiDomainFunction>();
 
-    auto f1 = boost::make_shared<UserFunction>();
+    auto f1 = std::make_shared<UserFunction>();
     f1->setAttributeValue("Formula", "1.1 + 0*x");
     mdfun->addFunction(f1);
     mdfun->setDomainIndex(0, 0);
 
-    auto f2 = boost::make_shared<UserFunction>();
+    auto f2 = std::make_shared<UserFunction>();
     f2->setAttributeValue("Formula", "2.1 + 0*x");
     mdfun->addFunction(f2);
     mdfun->setDomainIndex(1, 1);
 
-    auto f3 = boost::make_shared<UserFunction>();
+    auto f3 = std::make_shared<UserFunction>();
     f3->setAttributeValue("Formula", "3.1 + 0*x");
     mdfun->addFunction(f3);
     mdfun->setDomainIndex(2, 2);
@@ -222,16 +221,16 @@ public:
                                           FunctionValues_sptr(), "OUT_WS");
     TS_ASSERT(ws);
 
-    auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+    auto group = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
     TS_ASSERT(group);
 
     TS_ASSERT_EQUALS(group->size(), 3);
 
-    auto ows1 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+    auto ows1 = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
     doTestOutputSpectrum(ows1, 0);
-    auto ows2 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
+    auto ows2 = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(1));
     doTestOutputSpectrum(ows2, 1);
-    auto ows3 = boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(2));
+    auto ows3 = std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(2));
     doTestOutputSpectrum(ows3, 2);
 
     WorkspaceGroup_sptr outWS = manager.getProperty("OUT_WS");
@@ -278,17 +277,17 @@ public:
     FunctionDomain_sptr domain;
     FunctionValues_sptr values;
 
-    auto mdfun = boost::make_shared<MultiDomainFunction>();
+    auto mdfun = std::make_shared<MultiDomainFunction>();
 
-    auto f1 = boost::make_shared<MultiDomainCreatorTest_Fun>();
+    auto f1 = std::make_shared<MultiDomainCreatorTest_Fun>();
     mdfun->addFunction(f1);
     mdfun->setDomainIndex(0, 0);
 
-    auto f2 = boost::make_shared<MultiDomainCreatorTest_Fun>();
+    auto f2 = std::make_shared<MultiDomainCreatorTest_Fun>();
     mdfun->addFunction(f2);
     mdfun->setDomainIndex(1, 1);
 
-    auto f3 = boost::make_shared<MultiDomainCreatorTest_Fun>();
+    auto f3 = std::make_shared<MultiDomainCreatorTest_Fun>();
     mdfun->addFunction(f3);
     mdfun->setDomainIndex(2, 2);
 
@@ -303,7 +302,7 @@ public:
   }
 
 private:
-  void doTestOutputSpectrum(MatrixWorkspace_sptr ws, size_t index) {
+  void doTestOutputSpectrum(const MatrixWorkspace_sptr &ws, size_t index) {
     TS_ASSERT(ws);
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 3);
     auto &data = ws->readY(0);
@@ -319,5 +318,3 @@ private:
 
   MatrixWorkspace_sptr ws1, ws2, ws3;
 };
-
-#endif /*MULTIDOMAINCREATORTEST_H_*/

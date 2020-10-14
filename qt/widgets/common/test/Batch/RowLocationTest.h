@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MANTIDWIDGETS_ROWLOCATIONTEST_H
-#define MANTID_MANTIDWIDGETS_ROWLOCATIONTEST_H
+#pragma once
 
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include <algorithm>
@@ -156,5 +155,3 @@ public:
         !pathsSameUntilDepth(1, RowLocation({1, 1}), RowLocation({2, 2})));
   }
 };
-
-#endif // MANTID_MANTIDWIDGETS_ROWLOCATIONTEST_H

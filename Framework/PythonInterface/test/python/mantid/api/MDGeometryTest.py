@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import mantid
 from mantid.kernel import VMD
 from mantid.geometry import IMDDimension
@@ -14,6 +12,7 @@ import numpy
 import unittest
 
 from testhelpers import WorkspaceCreationHelper
+
 
 class MDGeometryTest(unittest.TestCase):
 
@@ -28,6 +27,9 @@ class MDGeometryTest(unittest.TestCase):
 #====================== Success cases ==================================================
     def test_numDims_returns_expected_number(self):
         self.assertEqual(self._test_ndims, self._test_mdws.getNumDims())
+
+    def test_numNonIntegratedDims_returns_expected_number(self):
+        self.assertEqual(self._test_ndims, self._test_mdws.getNumNonIntegratedDims())
 
     def test_getDimension_by_index_returns_IMDDimension_object_for_valid_index(self):
         dimension =  self._test_mdws.getDimension(0) # positional

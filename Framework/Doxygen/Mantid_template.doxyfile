@@ -121,7 +121,6 @@ INPUT = @CMAKE_CURRENT_SOURCE_DIR@/../Algorithms/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/plugins/designer/inc \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/widgets/plugins/designer/src \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/DynamicPDF \
-        @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/EnggDiffraction \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/General \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/ISISReflectometry \
         @CMAKE_CURRENT_SOURCE_DIR@/../../qt/scientific_interfaces/ISISSANS \

@@ -42,7 +42,6 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesGeneral
                    SYSTEM_INCLUDE_DIRS
                      ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
-                     ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      ${POCO_LIBRARIES}
                      ${Boost_LIBRARIES}
@@ -56,5 +55,6 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesGeneral
                      ${PLUGINS_DIR}
                    OSX_INSTALL_RPATH
                      @loader_path/../../Contents/MacOS
+                     @loader_path/../../Contents/Frameworks
                    LINUX_INSTALL_RPATH
                      "\$ORIGIN/../../${LIB_DIR}")

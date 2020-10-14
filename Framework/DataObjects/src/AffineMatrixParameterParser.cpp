@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/AffineMatrixParameterParser.h"
 #include <boost/algorithm/string.hpp>
@@ -48,7 +48,7 @@ AffineMatrixParameter *AffineMatrixParameterParser::createParameter(
       col_it = vecStrCols.begin();
       while (col_it != vecStrCols.end()) {
         coord_t val = static_cast<coord_t>(std::stof(col_it->c_str()));
-        elements.push_back(val);
+        elements.emplace_back(val);
         ++col_it;
       }
       ++row_it;

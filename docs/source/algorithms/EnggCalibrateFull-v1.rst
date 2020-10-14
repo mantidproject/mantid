@@ -85,14 +85,14 @@ Usage
    ws_name = 'ws_focussed'
    Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)
 
-   # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
+   # Using precalculated Vanadium corrections. To calculate from scratch see EnggVanadiumCorrections
    van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
    van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
 
    pos_table, peaks_info = EnggCalibrateFull(Workspace=ws_name,
                                              VanIntegrationWorkspace=van_integ_ws,
                                              VanCurvesWorkspace=van_curves_ws,
-                                             ExpectedPeaks=[1.097, 2.1], Bank='1')
+                                             ExpectedPeaks=[1.097, 1.28, 2.1], Bank='1')
 
    det_id = pos_table.column(0)[0]
    cal_pos =  pos_table.column(2)[0]
@@ -111,9 +111,10 @@ Usage
 Output:
 
 .. testoutput:: ExCalFull
+   :options: +ELLIPSIS
 
    Det ID: 100001
-   Calibrated position: (1.506,0.000,0.002)
+   Calibrated position: ...
    Is the detector position calibrated now in the original workspace instrument? True
 
 **Example - Calculate corrected positions for EngingX, saving in a file:**
@@ -128,14 +129,14 @@ Output:
    # this test to run fast. Please user your (proper) run file.
    Load('ENGINX00213855focussed.nxs', OutputWorkspace=ws_name)
 
-   # Using precalculated Vanadium corrections. To calculate from scrach see EnggVanadiumCorrections
+   # Using precalculated Vanadium corrections. To calculate from scratch see EnggVanadiumCorrections
    van_integ_ws = Load('ENGINX_precalculated_vanadium_run000236516_integration.nxs')
    van_curves_ws = Load('ENGINX_precalculated_vanadium_run000236516_bank_curves.nxs')
 
    pos_table, peaks_info = EnggCalibrateFull(Workspace=ws_name,
                                              VanIntegrationWorkspace=van_integ_ws,
                                              VanCurvesWorkspace=van_curves_ws,
-                                             ExpectedPeaks=[1.097, 2.1], Bank='1',
+                                             ExpectedPeaks=[1.097, 1.28, 2.1], Bank='1',
                                              OutDetPosFilename=pos_filename)
 
    det_id = pos_table.column(0)[0]
@@ -145,14 +146,16 @@ Output:
    print("Got details on the peaks fitted for {0:d} detector(s)".format(peaks_info.rowCount()))
    print("Was the file created? {}".format(os.path.exists(pos_filename)))
    with open(pos_filename) as csvf:
-      reader = csv.reader(csvf, dialect='excel')
+      reader = csv.reader(csvf, dialect='excel', delimiter="\t")
+      next(reader)  # Skip the two metadata lines
       next(reader)
       calibOK = True
       for i,row in enumerate(reader):
          cal_pos = pos_table.column(2)[i]
-         calibOK = calibOK and (abs(float(row[4]) - cal_pos.getX()) < 1e-6) and\
-                   (abs(float(row[5]) - cal_pos.getY()) < 1e-6) and\
-                   (abs(float(row[6]) - cal_pos.getZ()) < 1e-6)
+         detector_pos_list = row[2].strip("[]").split(',')
+         calibOK = calibOK and (float(detector_pos_list[0]) - cal_pos.getX()) < 1e-5 and\
+                               (float(detector_pos_list[1]) - cal_pos.getY()) < 1e-5 and\
+                               (float(detector_pos_list[2]) - cal_pos.getZ()) < 1e-5
          if not calibOK: break
    print("Does the calibration file have the expected values? {}".format(calibOK))
 
@@ -167,9 +170,10 @@ Output:
 Output:
 
 .. testoutput:: ExCalFullWithOutputFile
+   :options: +ELLIPSIS
 
    Det ID: 100001
-   Calibrated position: (1.506,0.000,0.002)
+   Calibrated position: ...
    Got details on the peaks fitted for 1 detector(s)
    Was the file created? True
    Does the calibration file have the expected values? True

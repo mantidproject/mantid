@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_IRUNSVIEW_H
-#define MANTID_ISISREFLECTOMETRY_IRUNSVIEW_H
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "GUI/RunsTable/IRunsTableView.h"
 #include "ISearchModel.h"
 #include "MantidQtWidgets/Common/ProgressableView.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -33,10 +32,10 @@ subclass.
 class MANTIDQT_ISISREFLECTOMETRY_DLL RunsViewSubscriber {
 public:
   virtual void notifySearch() = 0;
-  virtual void notifyAutoreductionResumed() = 0;
-  virtual void notifyAutoreductionPaused() = 0;
+  virtual void notifyResumeAutoreductionRequested() = 0;
+  virtual void notifyPauseAutoreductionRequested() = 0;
   virtual void notifyTransfer() = 0;
-  virtual void notifyInstrumentChanged() = 0;
+  virtual void notifyChangeInstrumentRequested() = 0;
   virtual void notifyStartMonitor() = 0;
   virtual void notifyStopMonitor() = 0;
   virtual void notifyStartMonitorComplete() = 0;
@@ -80,8 +79,8 @@ public:
   virtual ISearchModel &mutableSearchResults() = 0;
 
   // Setter methods
-  virtual void setInstrumentList(const std::vector<std::string> &instruments,
-                                 int defaultInstrumentIndex) = 0;
+  virtual void
+  setInstrumentList(const std::vector<std::string> &instruments) = 0;
   virtual void updateMenuEnabledState(bool isProcessing) = 0;
   virtual void setAutoreduceButtonEnabled(bool enabled) = 0;
   virtual void setAutoreducePauseButtonEnabled(bool enabled) = 0;
@@ -89,19 +88,22 @@ public:
   virtual void setInstrumentComboEnabled(bool enabled) = 0;
   virtual void setSearchTextEntryEnabled(bool enabled) = 0;
   virtual void setSearchButtonEnabled(bool enabled) = 0;
+  virtual void setSearchInstrument(std::string const &instrumentName) = 0;
   virtual void setStartMonitorButtonEnabled(bool enabled) = 0;
   virtual void setStopMonitorButtonEnabled(bool enabled) = 0;
+  virtual void setUpdateIntervalSpinBoxEnabled(bool enabled) = 0;
 
   // Accessor methods
   virtual std::set<int> getSelectedSearchRows() const = 0;
   virtual std::set<int> getAllSearchRows() const = 0;
   virtual std::string getSearchInstrument() const = 0;
-  virtual void setSearchInstrument(std::string const &instrumentName) = 0;
   virtual std::string getSearchString() const = 0;
+  virtual std::string getSearchCycle() const = 0;
+  virtual int getLiveDataUpdateInterval() const = 0;
 
-  virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner>
   getAlgorithmRunner() const = 0;
-  virtual boost::shared_ptr<MantidQt::API::AlgorithmRunner>
+  virtual std::shared_ptr<MantidQt::API::AlgorithmRunner>
   getMonitorAlgorithmRunner() const = 0;
 
   // Start live data monitoring
@@ -111,4 +113,3 @@ public:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_IRUNSVIEW_H */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MPLCPP_COLORS_H
-#define MPLCPP_COLORS_H
+#pragma once
 
 #include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
@@ -28,7 +27,7 @@ namespace MplCpp {
 class MANTID_MPLCPP_DLL NormalizeBase : public Common::Python::InstanceHolder {
 public:
   /// Autoscale the limits to vmin, vmax, clamping any invalid values
-  std::tuple<double, double> autoscale(std::tuple<double, double> clim);
+  virtual std::tuple<double, double> autoscale(std::tuple<double, double> clim);
 
   /// Return an appropriate object to determine the tick locations
   /// The default returns None indicating that matplotlib should autoselect it
@@ -90,9 +89,10 @@ class MANTID_MPLCPP_DLL PowerNorm : public NormalizeBase {
 public:
   PowerNorm(double gamma);
   PowerNorm(double gamma, double vmin, double vmax);
+  virtual std::tuple<double, double>
+  autoscale(std::tuple<double, double> clim) override;
 };
 
 } // namespace MplCpp
 } // namespace Widgets
 } // namespace MantidQt
-#endif // MPLCPP_COLORS_H

@@ -1,12 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
-
 import math
 from Muon.GUI.Common import thread_model
 import mantid.simpleapi as mantid
@@ -54,7 +51,7 @@ class MaxEntPresenter(object):
         else:
             self.view.setRun("")
 
-        if run is not "None":
+        if run != "None":
             final_options.append(run)
         self.view.addItems(final_options)
         start = int(

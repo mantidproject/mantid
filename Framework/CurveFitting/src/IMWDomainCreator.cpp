@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 // Includes
 //----------------------------------------------------------------------
@@ -69,7 +69,7 @@ void IMWDomainCreator::setParameters() const {
 
     // get the workspace
     API::Workspace_sptr ws = m_manager->getProperty(m_workspacePropertyName);
-    m_matrixWorkspace = boost::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
+    m_matrixWorkspace = std::dynamic_pointer_cast<API::MatrixWorkspace>(ws);
     if (!m_matrixWorkspace) {
       throw std::invalid_argument("InputWorkspace must be a MatrixWorkspace.");
     }
@@ -94,7 +94,7 @@ void IMWDomainCreator::declareDatasetProperties(const std::string &suffix,
   m_endXPropertyName = "EndX" + suffix;
 
   if (addProp && !m_manager->existsProperty(m_workspaceIndexPropertyName)) {
-    auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+    auto mustBePositive = std::make_shared<BoundedValidator<int>>();
     mustBePositive->setLower(0);
     declareProperty(new PropertyWithValue<int>(m_workspaceIndexPropertyName, 0,
                                                mustBePositive),
@@ -256,10 +256,10 @@ void IMWDomainCreator::setInitialValues(API::IFunction &function) {
  * @param values :: A API::FunctionValues instance containing the fitting data
  * @param outputWorkspacePropertyName :: The property name
  */
-boost::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
+std::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
     const std::string &baseName, API::IFunction_sptr function,
-    boost::shared_ptr<API::FunctionDomain> domain,
-    boost::shared_ptr<API::FunctionValues> values,
+    std::shared_ptr<API::FunctionDomain> domain,
+    std::shared_ptr<API::FunctionValues> values,
     const std::string &outputWorkspacePropertyName) {
   if (!values) {
     throw std::logic_error("FunctionValues expected");
@@ -318,7 +318,7 @@ boost::shared_ptr<API::Workspace> IMWDomainCreator::createOutputWorkspace(
 
   // If the input is a not an EventWorkspace and is a distrubution, then convert
   // the output also to a distribution
-  if (!boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(
+  if (!std::dynamic_pointer_cast<Mantid::API::IEventWorkspace>(
           m_matrixWorkspace)) {
     if (m_matrixWorkspace->isDistribution()) {
       ws->setDistribution(true);
@@ -338,11 +338,11 @@ void IMWDomainCreator::appendCompositeFunctionMembers(
   // if function is a Convolution then output of convolved model's mebers may be
   // required
   if (m_convolutionCompositeMembers &&
-      boost::dynamic_pointer_cast<Functions::Convolution>(function)) {
+      std::dynamic_pointer_cast<Functions::Convolution>(function)) {
     appendConvolvedCompositeFunctionMembers(functionList, function);
   } else {
     const auto compositeFn =
-        boost::dynamic_pointer_cast<API::CompositeFunction>(function);
+        std::dynamic_pointer_cast<API::CompositeFunction>(function);
     if (!compositeFn)
       return;
 
@@ -350,7 +350,7 @@ void IMWDomainCreator::appendCompositeFunctionMembers(
     for (size_t i = 0; i < nlocals; ++i) {
       auto localFunction = compositeFn->getFunction(i);
       auto localComposite =
-          boost::dynamic_pointer_cast<API::CompositeFunction>(localFunction);
+          std::dynamic_pointer_cast<API::CompositeFunction>(localFunction);
       if (localComposite)
         appendCompositeFunctionMembers(functionList, localComposite);
       else
@@ -375,10 +375,10 @@ void IMWDomainCreator::appendCompositeFunctionMembers(
 void IMWDomainCreator::appendConvolvedCompositeFunctionMembers(
     std::list<API::IFunction_sptr> &functionList,
     const API::IFunction_sptr &function) const {
-  boost::shared_ptr<Functions::Convolution> convolution =
-      boost::dynamic_pointer_cast<Functions::Convolution>(function);
+  std::shared_ptr<Functions::Convolution> convolution =
+      std::dynamic_pointer_cast<Functions::Convolution>(function);
 
-  const auto compositeFn = boost::dynamic_pointer_cast<API::CompositeFunction>(
+  const auto compositeFn = std::dynamic_pointer_cast<API::CompositeFunction>(
       convolution->getFunction(1));
   if (!compositeFn) {
     functionList.insert(functionList.end(), convolution);
@@ -387,8 +387,8 @@ void IMWDomainCreator::appendConvolvedCompositeFunctionMembers(
     const size_t nlocals = compositeFn->nFunctions();
     for (size_t i = 0; i < nlocals; ++i) {
       auto localFunction = compositeFn->getFunction(i);
-      boost::shared_ptr<Functions::Convolution> localConvolution =
-          boost::make_shared<Functions::Convolution>();
+      std::shared_ptr<Functions::Convolution> localConvolution =
+          std::make_shared<Functions::Convolution>();
       localConvolution->addFunction(resolution);
       localConvolution->addFunction(localFunction);
       functionList.insert(functionList.end(), localConvolution);
@@ -407,9 +407,9 @@ void IMWDomainCreator::appendConvolvedCompositeFunctionMembers(
  */
 void IMWDomainCreator::addFunctionValuesToWS(
     const API::IFunction_sptr &function,
-    boost::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
-    const boost::shared_ptr<API::FunctionDomain> &domain,
-    boost::shared_ptr<API::FunctionValues> resultValues) const {
+    std::shared_ptr<API::MatrixWorkspace> &ws, const size_t wsIndex,
+    const std::shared_ptr<API::FunctionDomain> &domain,
+    const std::shared_ptr<API::FunctionValues> &resultValues) const {
   const size_t nData = resultValues->size();
   resultValues->zeroCalculated();
 

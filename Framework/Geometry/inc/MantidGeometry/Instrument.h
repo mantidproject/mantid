@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_INSTRUMENT_H_
-#define MANTID_GEOMETRY_INSTRUMENT_H_
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/IDetector.h"
@@ -34,7 +33,7 @@ class ReferenceFrame;
 /// Convenience typedef
 using InstrumentParameterCache =
     std::map<std::pair<std::string, const IComponent *>,
-             boost::shared_ptr<XMLInstrumentParameter>>;
+             std::shared_ptr<XMLInstrumentParameter>>;
 
 /**
 Base Instrument Class.
@@ -49,8 +48,8 @@ public:
   /// String description of the type of component
   std::string type() const override { return "Instrument"; }
 
-  Instrument(const boost::shared_ptr<const Instrument> instr,
-             boost::shared_ptr<ParameterMap> map);
+  Instrument(const std::shared_ptr<const Instrument> &instr,
+             const std::shared_ptr<ParameterMap> &map);
   Instrument();
   Instrument(const std::string &name);
   Instrument(const Instrument &);
@@ -126,15 +125,15 @@ public:
   void getBoundingBox(BoundingBox &assemblyBox) const override;
 
   /// Get pointers to plottable components
-  boost::shared_ptr<const std::vector<IObjComponent_const_sptr>>
+  std::shared_ptr<const std::vector<IObjComponent_const_sptr>>
   getPlottable() const;
 
   /// Returns a shared pointer to a component
-  boost::shared_ptr<const IComponent>
+  std::shared_ptr<const IComponent>
   getComponentByID(const IComponent *id) const;
 
   /// Returns pointers to all components encountered with the given name
-  std::vector<boost::shared_ptr<const IComponent>>
+  std::vector<std::shared_ptr<const IComponent>>
   getAllComponentsWithName(const std::string &cname) const;
 
   /// Get information about the parameters described in the instrument
@@ -166,11 +165,11 @@ public:
   using CompAssembly::getChild;
 
   /// Pointer to the 'real' instrument, for parametrized instruments
-  boost::shared_ptr<const Instrument> baseInstrument() const;
+  std::shared_ptr<const Instrument> baseInstrument() const;
 
   /// Pointer to the NOT const ParameterMap holding the parameters of the
   /// modified instrument components.
-  boost::shared_ptr<ParameterMap> getParameterMap() const;
+  std::shared_ptr<ParameterMap> getParameterMap() const;
 
   /// @return the date from which the instrument definition begins to be valid.
   Types::Core::DateAndTime getValidFromDate() const { return m_ValidFrom; }
@@ -188,7 +187,7 @@ public:
 
   // Methods for use with indirect geometry instruments,
   // where the physical instrument differs from the 'neutronic' one
-  boost::shared_ptr<const Instrument> getPhysicalInstrument() const;
+  std::shared_ptr<const Instrument> getPhysicalInstrument() const;
   void setPhysicalInstrument(std::unique_ptr<Instrument>);
 
   void getInstrumentParameters(double &l1, Kernel::V3D &beamline,
@@ -204,9 +203,9 @@ public:
   const std::string &getXmlText() const;
 
   /// Set reference Frame
-  void setReferenceFrame(boost::shared_ptr<ReferenceFrame> frame);
+  void setReferenceFrame(std::shared_ptr<ReferenceFrame> frame);
   /// Get refernce Frame
-  boost::shared_ptr<const ReferenceFrame> getReferenceFrame() const;
+  std::shared_ptr<const ReferenceFrame> getReferenceFrame() const;
 
   /// To determine whether the instrument contains elements of some type
   enum ContainsState { Full, Partial, None };
@@ -217,7 +216,7 @@ public:
 
   bool isMonitorViaIndex(const size_t index) const;
   size_t detectorIndex(const detid_t detID) const;
-  boost::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
+  std::shared_ptr<ParameterMap> makeLegacyParameterMap() const;
 
   bool isEmptyInstrument() const;
 
@@ -280,10 +279,10 @@ private:
   std::string m_defaultViewAxis;
 
   /// Pointer to the "real" instrument, for parametrized Instrument
-  boost::shared_ptr<const Instrument> m_instr;
+  std::shared_ptr<const Instrument> m_instr;
 
   /// Non-const pointer to the parameter map
-  boost::shared_ptr<ParameterMap> m_map_nonconst;
+  std::shared_ptr<ParameterMap> m_map_nonconst;
 
   /// the date from which the instrument definition begins to be valid.
   Types::Core::DateAndTime m_ValidFrom;
@@ -298,16 +297,16 @@ private:
 
   /// Pointer to the physical instrument, where this differs from the
   /// 'neutronic' one (indirect geometry)
-  boost::shared_ptr<const Instrument> m_physicalInstrument;
+  std::shared_ptr<const Instrument> m_physicalInstrument;
 
   /// Pointer to the reference frame object.
-  boost::shared_ptr<ReferenceFrame> m_referenceFrame;
+  std::shared_ptr<ReferenceFrame> m_referenceFrame;
 
   /// Pointer to the DetectorInfo object. May be NULL.
-  boost::shared_ptr<const DetectorInfo> m_detectorInfo{nullptr};
+  std::shared_ptr<const DetectorInfo> m_detectorInfo{nullptr};
 
   /// Pointer to the ComponentInfo object. May be NULL.
-  boost::shared_ptr<const ComponentInfo> m_componentInfo{nullptr};
+  std::shared_ptr<const ComponentInfo> m_componentInfo{nullptr};
 
   /// Flag - is this the physical rather than neutronic instrument
   bool m_isPhysicalInstrument{false};
@@ -326,4 +325,3 @@ tofToDSpacingFactor(const double l1, const double l2, const double twoTheta,
 
 } // namespace Geometry
 } // Namespace Mantid
-#endif /*MANTID_GEOMETRY_INSTRUMENT_H_*/

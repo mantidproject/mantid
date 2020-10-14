@@ -1,10 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from contextlib import contextmanager
 import numpy
 import os
@@ -97,13 +96,13 @@ class GSASIIRefineFitPeaks(PythonAlgorithm):
                              doc="Path to the directory containing GSASII executable on the user's machine")
 
         self.declareProperty(name=self.PROP_XMIN, defaultValue=0.0, direction=Direction.Input,
-                             doc="Minimum x value to use for refinement, in the same units as the input workspace. " +
-                                 "Leave blank to refine from the start of the data to {0}. Note, if {1} corresponds to "
-                                 "a greater TOF value than this, then {1} is used".format(self.PROP_XMAX,
-                                                                                          self.PROP_PAWLEY_DMIN))
+                             doc="Minimum x value to use for refinement, in the same units as the input workspace. "
+                                 + "Leave blank to refine from the start of the data to {0}. Note, if {1} corresponds"
+                                 "  to a greater TOF value than this, then {1} is used".format(self.PROP_XMAX,
+                                                                                               self.PROP_PAWLEY_DMIN))
         self.declareProperty(name=self.PROP_XMAX, defaultValue=0.0, direction=Direction.Input,
-                             doc="Maximum x value to use for refinement, in the same units as the input workspace. " +
-                                 "Leave blank to refine in the range {} to the end of the data".format(self.PROP_XMIN))
+                             doc="Maximum x value to use for refinement, in the same units as the input workspace. "
+                                 + "Leave blank to refine in the range {} to the end of the data".format(self.PROP_XMIN))
         self.declareProperty(name=self.PROP_REFINE_SIGMA, defaultValue=False, direction=Direction.Input,
                              doc="Whether to refine the sigma-1 profile coefficient")
         self.declareProperty(name=self.PROP_REFINE_GAMMA, defaultValue=False, direction=Direction.Input,

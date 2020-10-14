@@ -1,10 +1,9 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
 #include "MantidAPI/MultipleFileProperty.h"
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
@@ -77,8 +76,8 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
                                            bool allowEmptyTokens)
     : PropertyWithValue<std::vector<std::vector<std::string>>>(
           name, std::vector<std::vector<std::string>>(),
-          boost::make_shared<MultiFileValidator>(
-              exts, (action == FileProperty::Load)),
+          std::make_shared<MultiFileValidator>(exts,
+                                               (action == FileProperty::Load)),
           Direction::Input),
       m_allowEmptyTokens(allowEmptyTokens) {
   if (action != FileProperty::Load && action != FileProperty::OptionalLoad) {
@@ -95,7 +94,7 @@ MultipleFileProperty::MultipleFileProperty(const std::string &name,
 
   for (const auto &ext : exts)
     if (doesNotContainWildCard(ext))
-      m_exts.push_back(ext);
+      m_exts.emplace_back(ext);
 }
 
 /**
@@ -289,7 +288,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
     // so we can see how many we have.
     std::vector<std::string> plusTokenStrings;
     for (; plusToken != end; ++plusToken)
-      plusTokenStrings.push_back(plusToken->str());
+      plusTokenStrings.emplace_back(plusToken->str());
 
     for (auto &plusTokenString : plusTokenStrings) {
       try {
@@ -310,7 +309,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       // existing) file within a token, but which has unexpected zero padding,
       // or some other anomaly.
       if (VectorHelper::flattenVector(f).empty())
-        f.push_back(std::vector<std::string>(1, plusTokenString));
+        f.emplace_back(std::vector<std::string>(1, plusTokenString));
 
       if (plusTokenStrings.size() > 1) {
         // See [3] in header documentation.  Basically, for reasons of
@@ -322,10 +321,10 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
                  "supported.";
 
         if (temp.empty())
-          temp.push_back(f[0]);
+          temp.emplace_back(f[0]);
         else {
           for (auto &parsedFile : f[0])
-            temp[0].push_back(parsedFile);
+            temp[0].emplace_back(parsedFile);
         }
       } else {
         temp.insert(temp.end(), f.begin(), f.end());
@@ -424,7 +423,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
             throw std::runtime_error(
                 "Unable to find file matching the string \"" +
                 unresolvedFileName +
-                "\", even after appending suggested file extensions.");
+                "\", please check the data search directories.");
           } else {
             // if the fullyResolvedFile is empty, it means it failed to find the
             // file so keep the unresolvedFileName as a hint to be displayed
@@ -435,9 +434,9 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       }
 
       // Append the file name to result.
-      fullFileNames.push_back(std::move(fullyResolvedFile));
+      fullFileNames.emplace_back(std::move(fullyResolvedFile));
     }
-    allFullFileNames.push_back(std::move(fullFileNames));
+    allFullFileNames.emplace_back(std::move(fullFileNames));
   }
 
   // Now re-set the value using the full paths found.

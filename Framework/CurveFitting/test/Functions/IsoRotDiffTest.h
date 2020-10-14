@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ISOROTDIFFTEST_H_
-#define ISOROTDIFFTEST_H_
+#pragma once
 
 // Mantid Coding standars <http://www.mantidproject.org/Coding_Standards>
 // Main Module Header
@@ -19,7 +18,7 @@
 #include "MantidAPI/IFunction.h"
 #include <cxxtest/TestSuite.h>
 // third party library headers
-#include <boost/make_shared.hpp>
+#include <memory>
 // standard library headers (n/a)
 #include <limits>
 
@@ -60,8 +59,8 @@ private:
     }
   };
 
-  boost::shared_ptr<TestableIsoRotDiff> createTestIsoRotDiff() {
-    auto func = boost::make_shared<TestableIsoRotDiff>();
+  std::shared_ptr<TestableIsoRotDiff> createTestIsoRotDiff() {
+    auto func = std::make_shared<TestableIsoRotDiff>();
     func->initialize();
     func->setParameter("Height", 0.88);
     func->setParameter("Radius", 1.06); // Angstrom
@@ -70,4 +69,3 @@ private:
     return func;
   }
 };
-#endif /*ISOROTDIFFTEST_H_*/

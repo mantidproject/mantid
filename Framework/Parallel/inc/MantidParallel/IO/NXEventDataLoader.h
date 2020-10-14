@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_IO_NXEVENTDATALOADER_H_
-#define MANTID_PARALLEL_IO_NXEVENTDATALOADER_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 #include <H5Cpp.h>
@@ -213,5 +212,3 @@ std::string NXEventDataLoader<TimeOffsetType>::readEventTimeOffsetUnit() const {
 } // namespace IO
 } // namespace Parallel
 } // namespace Mantid
-
-#endif /* MANTID_PARALLEL_IO_NXEVENTDATALOADER_H_ */

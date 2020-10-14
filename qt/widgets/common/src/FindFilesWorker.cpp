@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FindFilesWorker.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -44,7 +44,7 @@ FindFilesWorker::FindFilesWorker(const FindFilesSearchParameters &parameters)
  * 1. Files are found directly by the FileFinder.  This is the default case.
  * 2. Files are found using the specified algorithm property.  In this case, a
  *    class user must have specified the algorithm and property via
- *    MWRunFiles::setAlgorithmProperty().
+ *    FileFinderWidget::setAlgorithmProperty().
  */
 void FindFilesWorker::run() {
   // Reset result member vars.
@@ -100,7 +100,7 @@ void FindFilesWorker::run() {
         std::string result = fileSearcher.getFullPath(*it);
         Poco::File test(result);
         if ((!result.empty()) && test.exists()) {
-          filenames.push_back(*it);
+          filenames.emplace_back(*it);
           valueForProperty += QString::fromStdString(*it) + ",";
         } else {
           throw std::invalid_argument("File \"" + (*it) + "\" not found");
@@ -146,12 +146,11 @@ FindFilesWorker::getFilesFromAlgorithm() {
   Property *prop = algorithm->getProperty(propName);
   std::string valueForProperty = prop->value();
 
-  FileProperty *fileProp = dynamic_cast<FileProperty *>(prop);
-  MultipleFileProperty *multiFileProp =
-      dynamic_cast<MultipleFileProperty *>(prop);
+  auto *fileProp = dynamic_cast<FileProperty *>(prop);
+  auto *multiFileProp = dynamic_cast<MultipleFileProperty *>(prop);
 
   if (fileProp) {
-    filenames.push_back(fileProp->value());
+    filenames.emplace_back(fileProp->value());
   } else if (multiFileProp) {
     // This flattens any summed files to a set of single files so that you lose
     // the information about

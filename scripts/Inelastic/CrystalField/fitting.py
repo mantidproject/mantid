@@ -1,16 +1,12 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import re
 import warnings
-from six import string_types, iteritems
-
-
 # RegEx pattern matching a composite function parameter name, eg f2.Sigma.
 FN_PATTERN = re.compile('f(\\d+)\\.(.+)')
 
@@ -41,7 +37,7 @@ def ionname2Nre(ionname):
     if ionname not in ion_nre_map.keys():
         msg = 'Value %s is not allowed for attribute Ion.\nList of allowed values: %s' % \
               (ionname, ', '.join(list(ion_nre_map.keys())))
-        arbitraryJ = re.match('[SJsj]([0-9\.]+)', ionname)
+        arbitraryJ = re.match(r'[SJsj]([0-9\.]+)', ionname)
         if arbitraryJ and (float(arbitraryJ.group(1)) % 0.5) == 0:
             nre = int(-float(arbitraryJ.group(1)) * 2.)
             if nre < -99:
@@ -59,10 +55,10 @@ def cfpstrmaker(x, pref='B'):
 
 def getSymmAllowedParam(sym_str):
     if 'T' in sym_str or 'O' in sym_str:
-        return ['B40', 'B44', 'B60', 'B64']
+        return ['B40', 'B60']
     if any([sym_str == val for val in ['C1', 'Ci']]):
-        return sum([cfpstrmaker(i) for i in range(7)] +
-                   [cfpstrmaker(i, 'IB') for i in range(1, 7)],[])
+        return sum([cfpstrmaker(i) for i in range(7)]
+                   + [cfpstrmaker(i, 'IB') for i in range(1, 7)],[])
     retval = cfpstrmaker(0)
     if '6' in sym_str or '3' in sym_str:
         retval += cfpstrmaker(6)
@@ -214,10 +210,15 @@ class CrystalField(object):
             elif key not in free_parameters:
                 raise RuntimeError('Unknown attribute/parameters %s' % key)
 
+        # Cubic is a special case where B44=5*B40, B64=-21*B60
+        is_cubic = self.Symmetry.startswith('T') or self.Symmetry.startswith('O')
+        symm_allowed_par = getSymmAllowedParam(self.Symmetry)
+
         for param in CrystalField.field_parameter_names:
             if param in free_parameters:
                 self.function.setParameter(param, free_parameters[param])
-            symm_allowed_par = getSymmAllowedParam(self.Symmetry)
+            if is_cubic and (param == 'B44' or param == 'B64'):
+                continue
             if param not in symm_allowed_par:
                 self.function.fixParameter(param)
             else:
@@ -898,7 +899,7 @@ class CrystalField(object):
             ws_index = args.pop(0)
 
         pptype = 'M(T)' if (typeid == 4) else 'M(H)'
-        self._typeid = self._str2id(typeid) if isinstance(typeid, string_types) else int(typeid)
+        self._typeid = self._str2id(typeid) if isinstance(typeid, str) else int(typeid)
 
         return self._getPhysProp(PhysicalProperties(pptype, *args, **kwargs), workspace, ws_index)
 
@@ -999,7 +1000,7 @@ class CrystalField(object):
                 params['ion1.' + bparam] = other[bparam]
             ties = {}
             fixes = []
-            for prefix, obj in iteritems({'ion0.':self, 'ion1.':other}):
+            for prefix, obj in {'ion0.':self, 'ion1.':other}.items():
                 tiestr = obj.function.getTies()
                 if tiestr:
                     for tiepair in [tie.split('=') for tie in tiestr.split(',')]:
@@ -1086,11 +1087,11 @@ class CrystalField(object):
         return params
 
     def _getFieldTies(self):
-        ties = re.search(',ties=\((.*?)\)', str(self.crystalFieldFunction))
-        return ties.group(1) if ties else ''
+        ties = re.search(r',ties=\((.*?)\)', str(self.crystalFieldFunction))
+        return re.sub(FN_PATTERN, '', ties.group(1)).rstrip(',') if ties else ''
 
     def _getFieldConstraints(self):
-        constraints = re.search('constraints=\((.*?)\)', str(self.crystalFieldFunction))
+        constraints = re.search(r'constraints=\((.*?)\)', str(self.crystalFieldFunction))
         return constraints.group(1) if constraints else ''
 
     def _getPhysProp(self, ppobj, workspace, ws_index):
@@ -1154,7 +1155,7 @@ class CrystalField(object):
         alg = AlgorithmManager.createUnmanaged('EvaluateFunction')
         alg.initialize()
         alg.setChild(True)
-        alg.setProperty('Function', i if isinstance(i, string_types) else self.makeSpectrumFunction(i))
+        alg.setProperty('Function', i if isinstance(i, str) else self.makeSpectrumFunction(i))
         alg.setProperty("InputWorkspace", workspace)
         alg.setProperty('WorkspaceIndex', ws_index)
         alg.setProperty('OutputWorkspace', 'dummy')

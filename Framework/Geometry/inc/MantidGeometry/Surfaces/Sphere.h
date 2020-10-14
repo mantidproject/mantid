@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef SPHERE_H
-#define SPHERE_H
+#pragma once
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
@@ -77,9 +76,9 @@ public:
                       double &ymin, double &zmin) override;
 
   /// The number of slices to approximate a sphere
-  static int g_nslices;
+  constexpr static int g_NSLICES = 5;
   /// The number of stacks to approximate a sphere
-  static int g_nstacks;
+  constexpr static int g_NSTACKS = 5;
 #ifdef ENABLE_OPENCASCADE
   TopoDS_Shape createShape() override;
 #endif
@@ -88,5 +87,3 @@ public:
 } // NAMESPACE Geometry
 
 } // NAMESPACE Mantid
-
-#endif

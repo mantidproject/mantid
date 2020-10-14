@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FilterByTime2.h"
 #include "MantidAPI/WorkspaceProperty.h"
@@ -32,7 +32,7 @@ void FilterByTime2::init() {
           "OutputWorkspace", "", Direction::Output),
       "The name to use for the output workspace");
 
-  auto min = boost::make_shared<BoundedValidator<double>>();
+  auto min = std::make_shared<BoundedValidator<double>>();
   min->setLower(0.0);
   declareProperty("StartTime", 0.0, min,
                   "The start time, in seconds, since the start of the run. "

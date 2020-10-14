@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_DIFFPEAKSWORKSPACESTEST_H_
-#define MANTID_CRYSTAL_DIFFPEAKSWORKSPACESTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -44,7 +43,7 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 
-    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr inWS = WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     // Name of the output workspace.
     std::string outWSName("CombinePeaksWorkspacesTest_OutputWS");
@@ -76,7 +75,8 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 
-    PeaksWorkspace_sptr lhsWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr lhsWS =
+        WorkspaceCreationHelper::createPeaksWorkspace(2);
     PeaksWorkspace_sptr rhsWS =
         WorkspaceCreationHelper::createPeaksWorkspace(6);
 
@@ -109,8 +109,10 @@ public:
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
 
-    PeaksWorkspace_sptr lhsWS = WorkspaceCreationHelper::createPeaksWorkspace();
-    PeaksWorkspace_sptr rhsWS = WorkspaceCreationHelper::createPeaksWorkspace();
+    PeaksWorkspace_sptr lhsWS =
+        WorkspaceCreationHelper::createPeaksWorkspace(2);
+    PeaksWorkspace_sptr rhsWS =
+        WorkspaceCreationHelper::createPeaksWorkspace(2);
 
     // Shift the rhs peaks in Q
     auto &rhsPeaks = rhsWS->getPeaks();
@@ -216,5 +218,3 @@ public:
     AnalysisDataService::Instance().remove(outWSName);
   }
 };
-
-#endif /* MANTID_CRYSTAL_DIFFPEAKSWORKSPACESTEST_H_ */

@@ -1,15 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "SANSBackgroundCorrectionSettings.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 SANSBackgroundCorrectionSettings::SANSBackgroundCorrectionSettings(
-    QString runNumber, bool useMean, bool useMon, QString monNumber)
+    const QString &runNumber, bool useMean, bool useMon,
+    const QString &monNumber)
     : m_runNumber(runNumber), m_useMean(useMean), m_useMon(useMon),
       m_monNumber(monNumber) {
   hasValidSettings();

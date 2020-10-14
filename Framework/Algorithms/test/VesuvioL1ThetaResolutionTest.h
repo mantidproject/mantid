@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_VESUVIOL1THETARESOLUTIONTEST_H_
-#define MANTID_ALGORITHMS_VESUVIOL1THETARESOLUTIONTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -160,7 +159,7 @@ public:
   }
 
 private:
-  void validateFullResolutionWorkspace(MatrixWorkspace_sptr ws) {
+  void validateFullResolutionWorkspace(const MatrixWorkspace_sptr &ws) {
     NumericAxis *xAxis = dynamic_cast<NumericAxis *>(ws->getAxis(0));
     TS_ASSERT(xAxis);
     if (xAxis) {
@@ -178,7 +177,7 @@ private:
     }
   }
 
-  void validateFullDistributionWorkspace(MatrixWorkspace_sptr ws,
+  void validateFullDistributionWorkspace(const MatrixWorkspace_sptr &ws,
                                          const std::string &label) {
     NumericAxis *xAxis = dynamic_cast<NumericAxis *>(ws->getAxis(0));
     TS_ASSERT(xAxis);
@@ -205,5 +204,3 @@ private:
     TS_ASSERT_DIFFERS(lastSpecDetIDs.find(3232), lastSpecDetIDs.end());
   }
 };
-
-#endif /* MANTID_ALGORITHMS_VESUVIOL1THETARESOLUTIONTEST_H_ */

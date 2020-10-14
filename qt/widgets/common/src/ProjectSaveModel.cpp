@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/ProjectSaveModel.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -24,7 +24,7 @@ using namespace MantidQt::MantidWidgets;
  * @param activePythonInterfaces The list of active Python interfaces
  */
 ProjectSaveModel::ProjectSaveModel(
-    std::vector<IProjectSerialisable *> windows,
+    const std::vector<IProjectSerialisable *> &windows,
     std::vector<std::string> activePythonInterfaces)
     : m_activePythonInterfaces(std::move(activePythonInterfaces)) {
   auto workspaces = getWorkspaces();
@@ -40,14 +40,14 @@ ProjectSaveModel::ProjectSaveModel(
     // then track it so we can always add it to the included
     // window list
     if (wsNames.size() == 0) {
-      m_unattachedWindows.push_back(window);
+      m_unattachedWindows.emplace_back(window);
       continue;
     }
 
     // otherwise add a reference mapping the window to the
     // it's various connected workspaces
     for (auto &name : wsNames) {
-      m_workspaceWindows[name].push_back(window);
+      m_workspaceWindows[name].emplace_back(window);
     }
   }
 }
@@ -146,13 +146,13 @@ ProjectSaveModel::getWindowInformation(const std::vector<std::string> &wsNames,
 
   for (auto window : getUniqueWindows(wsNames)) {
     auto info = makeWindowInfoObject(window);
-    winInfo.push_back(info);
+    winInfo.emplace_back(info);
   }
 
   if (includeUnattached) {
     for (const auto window : m_unattachedWindows) {
       auto info = makeWindowInfoObject(window);
-      winInfo.push_back(info);
+      winInfo.emplace_back(info);
     }
   }
 
@@ -182,14 +182,14 @@ std::vector<WorkspaceInfo> ProjectSaveModel::getWorkspaceInformation() const {
     auto info = makeWorkspaceInfoObject(ws);
 
     if (ws->id() == "WorkspaceGroup") {
-      auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws);
+      auto group = std::dynamic_pointer_cast<WorkspaceGroup>(ws);
       for (int i = 0; i < group->getNumberOfEntries(); ++i) {
         auto subInfo = makeWorkspaceInfoObject(group->getItem(i));
-        info.subWorkspaces.push_back(subInfo);
+        info.subWorkspaces.emplace_back(subInfo);
       }
     }
 
-    wsInfo.push_back(info);
+    wsInfo.emplace_back(info);
   }
 
   return wsInfo;
@@ -204,8 +204,8 @@ std::vector<Workspace_sptr> ProjectSaveModel::getWorkspaces() const {
   return ads.getObjects();
 }
 
-WorkspaceInfo
-ProjectSaveModel::makeWorkspaceInfoObject(Workspace_const_sptr ws) const {
+WorkspaceInfo ProjectSaveModel::makeWorkspaceInfoObject(
+    const Workspace_const_sptr &ws) const {
   WorkspaceIcons icons;
   WorkspaceInfo info;
   info.name = ws->getName();

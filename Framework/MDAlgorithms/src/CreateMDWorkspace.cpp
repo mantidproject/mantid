@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/CreateMDWorkspace.h"
 #include "MantidAPI/FileProperty.h"
@@ -71,7 +71,7 @@ void CreateMDWorkspace::init() {
 
   std::vector<std::string> propOptions{"MDEvent", "MDLeanEvent"};
   declareProperty("EventType", "MDLeanEvent",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Which underlying data type will event take.");
 
   declareProperty(std::make_unique<ArrayProperty<double>>("Extents"),
@@ -224,7 +224,7 @@ void CreateMDWorkspace::exec() {
     IAlgorithm_sptr alg = createChildAlgorithm("SaveMD");
     alg->setPropertyValue("Filename", filename);
     alg->setProperty("InputWorkspace",
-                     boost::dynamic_pointer_cast<IMDWorkspace>(out));
+                     std::dynamic_pointer_cast<IMDWorkspace>(out));
     alg->executeAsChildAlg();
     // And now re-load it with this file as the backing.
     g_log.notice() << "Running LoadMD\n";
@@ -236,15 +236,15 @@ void CreateMDWorkspace::exec() {
     // Replace the workspace with the loaded, file-backed one
     IMDWorkspace_sptr temp;
     temp = alg->getProperty("OutputWorkspace");
-    out = boost::dynamic_pointer_cast<IMDEventWorkspace>(temp);
+    out = std::dynamic_pointer_cast<IMDEventWorkspace>(temp);
   }
 
   // Save it on the output.
-  setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(out));
+  setProperty("OutputWorkspace", std::dynamic_pointer_cast<Workspace>(out));
 }
 
-MDFrame_uptr CreateMDWorkspace::createMDFrame(std::string frame,
-                                              std::string unit) {
+MDFrame_uptr CreateMDWorkspace::createMDFrame(const std::string &frame,
+                                              const std::string &unit) {
   auto frameFactory = makeMDFrameFactoryChain();
   MDFrameArgument frameArg(frame, unit);
   return frameFactory->create(frameArg);

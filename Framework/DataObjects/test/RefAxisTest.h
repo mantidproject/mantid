@@ -1,15 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //-------------------------------------------------------------------------------------------------
 // This set of tests has been placed in DataObjects because it really needs to
 // use a real workspace
 //-------------------------------------------------------------------------------------------------
-#ifndef REFAXISTEST_H_
-#define REFAXISTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -111,5 +110,3 @@ private:
   std::unique_ptr<MatrixWorkspace> m_space, m_space2;
   std::unique_ptr<RefAxis> m_refAxis;
 };
-
-#endif /*REFAXISTEST_H_*/

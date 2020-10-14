@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/ImportMDHistoWorkspace.h"
 #include "MantidAPI/FileProperty.h"
@@ -93,8 +93,8 @@ void ImportMDHistoWorkspace::exec() {
   }
 
   // Fetch out raw pointers to workspace arrays.
-  double *signals = ws->getSignalArray();
-  double *errors = ws->getErrorSquaredArray();
+  auto signals = ws->mutableSignalArray();
+  double *errors = ws->mutableErrorSquaredArray();
 
   // Write to the signal and error array from the deque.
   size_t currentBox = 0;

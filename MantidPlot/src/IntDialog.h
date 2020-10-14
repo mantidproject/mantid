@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef INTDIALOG_H
-#define INTDIALOG_H
+#pragma once
 
 #include <QDialog>
 
@@ -45,7 +44,7 @@ class IntDialog : public QDialog {
 
 public:
   IntDialog(QWidget *parent = nullptr, Graph *g = nullptr,
-            Qt::WFlags fl = nullptr);
+            const Qt::WFlags &fl = nullptr);
 
 public slots:
   void accept() override;
@@ -64,5 +63,3 @@ private:
   DoubleSpinBox *boxEnd;
   DoubleSpinBox *boxTol;
 };
-
-#endif

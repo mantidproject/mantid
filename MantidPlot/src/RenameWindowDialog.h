@@ -27,8 +27,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef RENAMEDIALOG_H
-#define RENAMEDIALOG_H
+#pragma once
 
 #include <qdialog.h>
 #include <qvariant.h>
@@ -48,7 +47,7 @@ class RenameWindowDialog : public QDialog {
   Q_OBJECT
 
 public:
-  RenameWindowDialog(QWidget *parent = nullptr, Qt::WFlags fl = nullptr);
+  RenameWindowDialog(QWidget *parent = nullptr, const Qt::WFlags &fl = nullptr);
 
 private:
   QPushButton *buttonOk;
@@ -71,5 +70,3 @@ signals:
 private:
   MdiSubWindow *window;
 };
-
-#endif // EXPORTDIALOG_H

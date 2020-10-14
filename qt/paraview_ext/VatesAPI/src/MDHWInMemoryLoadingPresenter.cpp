@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidVatesAPI/MDHWInMemoryLoadingPresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -57,7 +57,7 @@ bool MDHWInMemoryLoadingPresenter::canReadFile() const {
   if (!m_repository->canProvideWorkspace(m_wsName)) {
     // The workspace does not exist.
     bCanReadIt = false;
-  } else if (boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
+  } else if (std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(
                  m_repository->fetchWorkspace(m_wsName))) {
     // The workspace can be found, but is not an IMDHistoWorkspace.
     bCanReadIt = true;
@@ -84,7 +84,7 @@ MDHWInMemoryLoadingPresenter::execute(vtkDataSetFactory *factory,
 
   Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
   IMDHistoWorkspace_sptr histoWs =
-      boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
+      std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
 
   MDHWLoadingPresenter::transposeWs(histoWs, m_cachedVisualHistoWs);
 
@@ -119,7 +119,7 @@ void MDHWInMemoryLoadingPresenter::executeLoadMetadata() {
 
   Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
   IMDHistoWorkspace_sptr histoWs =
-      boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
+      std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
   m_wsTypeName = histoWs->id();
   m_specialCoords = histoWs->getSpecialCoordinateSystem();
 
@@ -159,7 +159,7 @@ std::vector<int> MDHWInMemoryLoadingPresenter::getExtents() {
   using namespace Mantid::API;
   Workspace_sptr ws = m_repository->fetchWorkspace(m_wsName);
   IMDHistoWorkspace_sptr histoWs =
-      boost::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
+      std::dynamic_pointer_cast<Mantid::API::IMDHistoWorkspace>(ws);
   MDHWLoadingPresenter::transposeWs(histoWs, m_cachedVisualHistoWs);
   std::vector<int> extents(6, 0);
   extents[1] =

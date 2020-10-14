@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=no-init,invalid-name
 '''
 @author Spencer Howells, ISIS
 @date December 05, 2013
 '''
-from __future__ import (absolute_import, division, print_function)
-
 import math
 import numpy as np
 
@@ -29,7 +27,7 @@ class HallRoss(IFunction1D):
     def init(self):
         # Active fitting parameters
         self.declareParameter("Tau", 1.0, 'Residence time')
-        self.declareParameter("L", 0.2, 'Jump length')
+        self.declareParameter("L", 0.2, 'Standard deviation of jump lengths')
 
     def function1D(self, xvals):
         tau = self.getParameterValue("Tau")
@@ -38,7 +36,7 @@ class HallRoss(IFunction1D):
         xvals = np.array(xvals)
 
         with np.errstate(divide='ignore'):
-            hwhm = self.hbar*(1.0 - np.exp( -l * np.square(xvals))) / tau
+            hwhm = self.hbar*(1.0 - np.exp(-l * np.square(xvals))) / tau
         return hwhm
 
     def functionDeriv1D(self, xvals, jacobian):
@@ -49,8 +47,8 @@ class HallRoss(IFunction1D):
         for i, x in enumerate(xvals, start=0):
             ex = math.exp(-l*x*x)
             hwhm = self.hbar*(1.0-ex)/tau
-            jacobian.set(i,0,-hwhm/tau)
-            jacobian.set(i,1,x*x*ex/tau)
+            jacobian.set(i, 0, -hwhm/tau)
+            jacobian.set(i, 1, x*x*ex/tau)
 
 
 # Required to have Mantid recognise the new function

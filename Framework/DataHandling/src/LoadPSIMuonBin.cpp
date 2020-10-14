@@ -1,8 +1,9 @@
 
+// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//     NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadPSIMuonBin.h"
 #include "MantidAPI/Algorithm.h"
@@ -10,33 +11,38 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/RegisterFileLoader.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidHistogramData/Histogram.h"
+#include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/BinaryStreamReader.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/UnitLabelTypes.h"
 
-#include <Poco/Path.h>
-#include <Poco/RecursiveDirectoryIterator.h>
 #include <boost/algorithm/string.hpp>
-#include <boost/shared_ptr.hpp>
+#include <boost/filesystem.hpp>
 #include <fstream>
 #include <map>
+#include <memory>
 
 namespace Mantid {
 namespace DataHandling {
 
 namespace {
-const std::map<std::string, std::string> months{
+const std::map<std::string, std::string> MONTHS{
     {"JAN", "01"}, {"FEB", "02"}, {"MAR", "03"}, {"APR", "04"},
     {"MAY", "05"}, {"JUN", "06"}, {"JUL", "07"}, {"AUG", "08"},
     {"SEP", "09"}, {"OCT", "10"}, {"NOV", "11"}, {"DEC", "12"}};
-const std::vector<std::string> psiMonths{"JAN", "FEB", "MAR", "APR",
-                                         "MAY", "JUN", "JUL", "AUG",
-                                         "SEP", "OCT", "NOV", "DEC"};
+const std::vector<std::string> PSI_MONTHS{"JAN", "FEB", "MAR", "APR",
+                                          "MAY", "JUN", "JUL", "AUG",
+                                          "SEP", "OCT", "NOV", "DEC"};
+constexpr int TEMPERATURE_FILE_MAX_SEARCH_DEPTH = 3;
+constexpr auto TEMPERATURE_FILE_EXT = ".mon";
 } // namespace
 
 DECLARE_FILELOADER_ALGORITHM(LoadPSIMuonBin)
@@ -106,14 +112,24 @@ void LoadPSIMuonBin::init() {
   declareProperty("TimeZero", 0.0, "The TimeZero of the OutputWorkspace",
                   Kernel::Direction::Output);
 
-  declareProperty("DataDeadTimeTable", 0,
-                  "This property should not be set and is present to work with "
-                  "the Muon GUI preprocessor.",
-                  Kernel::Direction::Output);
+  declareProperty(
+      std::make_unique<Mantid::API::WorkspaceProperty<Mantid::API::Workspace>>(
+          "DeadTimeTable", "", Mantid::Kernel::Direction::Output,
+          Mantid::API::PropertyMode::Optional),
+      "This property should only be set in the GUI and is present to work with "
+      "the Muon GUI preprocessor.");
 
   declareProperty("MainFieldDirection", 0,
                   "The field direction of the magnetic field on the instrument",
                   Kernel::Direction::Output);
+
+  declareProperty(std::make_unique<Kernel::ArrayProperty<double>>(
+                      "TimeZeroList", Kernel::Direction::Output),
+                  "A vector of time zero values");
+  declareProperty(
+      "CorrectTime", true,
+      "Boolean flag controlling whether time should be corrected by timezero.",
+      Kernel::Direction::Input);
 }
 
 void LoadPSIMuonBin::exec() {
@@ -165,12 +181,11 @@ void LoadPSIMuonBin::exec() {
   // Set up for the Muon PreProcessor
   setProperty("OutputWorkspace", outputWorkspace);
 
+  // create empty dead time table
+  makeDeadTimeTable(m_histograms.size());
+
   auto largestBinValue =
       outputWorkspace->x(0)[outputWorkspace->x(0).size() - 1];
-
-  auto firstGoodDataSpecIndex = static_cast<int>(
-      *std::max_element(m_header.firstGood, m_header.firstGood + 16));
-  setProperty("FirstGoodData", outputWorkspace->x(0)[firstGoodDataSpecIndex]);
 
   // Since the arrray is all 0s before adding them this can't get min
   // element so just get first element
@@ -178,33 +193,84 @@ void LoadPSIMuonBin::exec() {
   setProperty("LastGoodData", outputWorkspace->x(0)[lastGoodDataSpecIndex]);
 
   double timeZero = 0.0;
+  std::vector<double> timeZeroList;
   if (m_header.realT0[0] != 0) {
     timeZero = *std::max_element(std::begin(m_header.realT0),
                                  std::end(m_header.realT0));
+    timeZeroList =
+        std::vector<double>(std::begin(m_header.realT0),
+                            std::begin(m_header.realT0) + m_histograms.size());
   } else {
     timeZero = static_cast<double>(*std::max_element(
         std::begin(m_header.integerT0), std::end(m_header.integerT0)));
+    timeZeroList = std::vector<double>(std::begin(m_header.integerT0),
+                                       std::begin(m_header.integerT0) +
+                                           m_histograms.size());
   }
 
   // If timeZero is bigger than the largest bin assume it refers to a bin's
   // value
+  double absTimeZero = timeZero;
+  std::vector<double> correctedTimeZeroList;
   if (timeZero > largestBinValue) {
-    setProperty("TimeZero",
-                outputWorkspace->x(0)[static_cast<int>(std::floor(timeZero))]);
+    absTimeZero = outputWorkspace->x(0)[static_cast<int>(std::floor(timeZero))];
+    for (auto timeZeroValue : timeZeroList) {
+      correctedTimeZeroList.emplace_back(
+          outputWorkspace->x(0)[static_cast<int>(std::floor(timeZeroValue))]);
+    }
   } else {
-    setProperty("TimeZero", timeZero);
+    correctedTimeZeroList = timeZeroList;
+  }
+
+  setProperty("TimeZero", absTimeZero);
+  setProperty("TimeZeroList", correctedTimeZeroList);
+
+  auto firstGoodDataSpecIndex = static_cast<int>(
+      *std::max_element(m_header.firstGood, m_header.firstGood + 16));
+
+  setProperty("FirstGoodData", outputWorkspace->x(0)[firstGoodDataSpecIndex]);
+
+  // Time zero is when the pulse starts.
+  // The pulse should be at t=0 to be like ISIS data
+  // manually offset the data
+  auto correctTime = getProperty("CorrectTime");
+  if (correctTime) {
+    for (auto specNum = 0u; specNum < m_histograms.size(); ++specNum) {
+      auto &xData = outputWorkspace->mutableX(specNum);
+      for (auto &xValue : xData) {
+        xValue -= absTimeZero;
+      }
+    }
   }
 }
 
-std::string LoadPSIMuonBin::getFormattedDateTime(std::string date,
-                                                 std::string time) {
+void LoadPSIMuonBin::makeDeadTimeTable(const size_t &numSpec) {
+  if (getPropertyValue("DeadTimeTable").empty())
+    return;
+  Mantid::DataObjects::TableWorkspace_sptr deadTimeTable =
+      std::dynamic_pointer_cast<Mantid::DataObjects::TableWorkspace>(
+          Mantid::API::WorkspaceFactory::Instance().createTable(
+              "TableWorkspace"));
+  assert(deadTimeTable);
+  deadTimeTable->addColumn("int", "spectrum");
+  deadTimeTable->addColumn("double", "dead-time");
+
+  for (size_t i = 0; i < numSpec; i++) {
+    Mantid::API::TableRow row = deadTimeTable->appendRow();
+    row << static_cast<int>(i) + 1 << 0.0;
+  }
+  setProperty("DeadTimeTable", deadTimeTable);
+}
+
+std::string LoadPSIMuonBin::getFormattedDateTime(const std::string &date,
+                                                 const std::string &time) {
   std::string year;
   if (date.size() == 11) {
     year = date.substr(7, 4);
   } else {
     year = "20" + date.substr(7, 2);
   }
-  return year + "-" + months.find(date.substr(3, 3))->second + "-" +
+  return year + "-" + MONTHS.find(date.substr(3, 3))->second + "-" +
          date.substr(0, 2) + "T" + time;
 }
 
@@ -393,16 +459,17 @@ void LoadPSIMuonBin::generateUnknownAxis() {
   // Create a x axis, assumption that m_histograms will all be the same size,
   // and that x will be 1 more in size than y
   for (auto xIndex = 0u; xIndex <= m_histograms[0].size(); ++xIndex) {
-    m_xAxis.push_back(static_cast<double>(xIndex) * m_header.histogramBinWidth);
+    m_xAxis.emplace_back(static_cast<double>(xIndex) *
+                         m_header.histogramBinWidth);
   }
 
   // Create Errors
   for (const auto &histogram : m_histograms) {
     std::vector<double> newEAxis;
     for (auto eIndex = 0u; eIndex < m_histograms[0].size(); ++eIndex) {
-      newEAxis.push_back(sqrt(histogram[eIndex]));
+      newEAxis.emplace_back(sqrt(histogram[eIndex]));
     }
-    m_eAxis.push_back(newEAxis);
+    m_eAxis.emplace_back(newEAxis);
   }
 }
 
@@ -459,8 +526,8 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
 
   // Set axis variables
   outputWorkspace->setYUnit("Counts");
-  boost::shared_ptr<Kernel::Units::Label> lblUnit =
-      boost::dynamic_pointer_cast<Kernel::Units::Label>(
+  std::shared_ptr<Kernel::Units::Label> lblUnit =
+      std::dynamic_pointer_cast<Kernel::Units::Label>(
           Kernel::UnitFactory::Instance().create("Label"));
   lblUnit->setLabel("Time", Kernel::Units::Symbol::Microsecond);
   outputWorkspace->getAxis(0)->unit() = lblUnit;
@@ -479,8 +546,8 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
     g_log.warning("The date in the .bin file was invalid");
   }
 
-  addToSampleLog("run_end", startDate, outputWorkspace);
-  addToSampleLog("run_start", endDate, outputWorkspace);
+  addToSampleLog("run_end", endDate, outputWorkspace);
+  addToSampleLog("run_start", startDate, outputWorkspace);
 
   // Assume unit is at the end of the temperature
   boost::trim_right(m_header.temp);
@@ -550,8 +617,16 @@ void LoadPSIMuonBin::assignOutputWorkspaceParticulars(
   for (auto i = 0u; i < sizeOfLabels; ++i) {
     if (m_header.labelsOfHistograms[i] == "")
       break;
-    addToSampleLog("Label Spectra " + std::to_string(i),
-                   m_header.labelsOfHistograms[i], outputWorkspace);
+    std::string name = m_header.labelsOfHistograms[i];
+    // if empty name is present (i.e. just empty space)
+    // replace with default name:
+    // group_specNum
+    const bool isSpace = name.find_first_not_of(" ") == std::string::npos;
+    std::string label = isSpace ? "group_" + std::to_string(i + 1)
+                                : m_header.labelsOfHistograms[i];
+
+    addToSampleLog("Label Spectra " + std::to_string(i), std::move(label),
+                   outputWorkspace);
   }
 
   addToSampleLog("Orientation", m_header.orientation, outputWorkspace);
@@ -671,8 +746,8 @@ void LoadPSIMuonBin::processHeaderLine(const std::string &line) {
   if (line.find("Title") != std::string::npos) {
     // Find sample log titles from the header
     processTitleHeaderLine(line);
-  } else if (std::find(std::begin(psiMonths), std::end(psiMonths),
-                       line.substr(5, 3)) != std::end(psiMonths)) {
+  } else if (std::find(std::begin(PSI_MONTHS), std::end(PSI_MONTHS),
+                       line.substr(5, 3)) != std::end(PSI_MONTHS)) {
     // If the line contains a Month in the PSI format then assume it conains a
     // date on the line. 5 is the index of the line that is where the month is
     // found and 3 is the length of the month.
@@ -750,24 +825,39 @@ void LoadPSIMuonBin::processLine(const std::string &line,
 }
 
 std::string LoadPSIMuonBin::detectTempFile() {
-  const std::string binFileName = getPropertyValue("Filename");
-  const Poco::Path fileDir(Poco::Path(binFileName).parent());
+  // Perform a breadth-first search starting from
+  // directory containing the main file. The search has
+  // a fixed limited depth to ensure we don't accidentally
+  // crawl the while filesystem.
+  namespace fs = boost::filesystem;
+  const fs::path searchDir{
+      fs::path{getPropertyValue("Filename")}.parent_path()};
 
-  Poco::SiblingsFirstRecursiveDirectoryIterator end;
-  // 3 represents the maximum recursion depth for this search
-  const uint16_t maxRecursionDepth = 3;
-  for (Poco::SiblingsFirstRecursiveDirectoryIterator it(fileDir,
-                                                        maxRecursionDepth);
-       it != end; ++it) {
-    // If it is not a directory, exists, has the extension '.mon', and it
-    // contains the current run number.
-    const Poco::Path path = it->path();
-    if (!it->isDirectory() && it->exists() && path.getExtension() == "mon" &&
-        path.getFileName().find(std::to_string(m_header.numberOfRuns)) !=
-            std::string::npos) {
-      return path.toString();
+  std::deque<fs::path> queue;
+  queue.push_back(fs::path{searchDir});
+  while (!queue.empty()) {
+    const auto entry = queue.front();
+    queue.pop_front();
+    for (fs::directory_iterator dirIter{entry};
+         dirIter != fs::directory_iterator(); ++dirIter) {
+      const auto &entry{dirIter->path()};
+
+      if (fs::is_directory(entry)) {
+        const auto relPath{entry.lexically_relative(searchDir)};
+        if (std::distance(relPath.begin(), relPath.end()) <
+            TEMPERATURE_FILE_MAX_SEARCH_DEPTH) {
+          // save the directory for searching when we have exhausted
+          // the file entries at this level
+          queue.push_back(entry);
+        }
+      } else if (entry.extension() == TEMPERATURE_FILE_EXT &&
+                 entry.filename().string().find(std::to_string(
+                     m_header.numberOfRuns)) != std::string::npos) {
+        return entry.string();
+      }
     }
   }
+
   return "";
 }
 

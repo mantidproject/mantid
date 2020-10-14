@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODELTEST_H
-#define MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODELTEST_H
+#pragma once
 
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -18,6 +17,8 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
+#include <utility>
+
 using namespace MantidQt::API;
 using namespace MantidQt::MantidWidgets;
 using namespace testing;
@@ -29,17 +30,18 @@ GNU_DIAG_OFF_SUGGEST_OVERRIDE
 class MockProjectSaveModel : public ProjectSaveModel {
 public:
   MockProjectSaveModel(
-      std::vector<MantidQt::API::IProjectSerialisable *> windows,
+      const std::vector<MantidQt::API::IProjectSerialisable *> &windows,
       std::vector<std::string> activePythonInterfaces =
           std::vector<std::string>())
-      : ProjectSaveModel(windows, activePythonInterfaces) {}
+      : ProjectSaveModel(std::move(windows),
+                         std::move(activePythonInterfaces)) {}
   MOCK_METHOD1(getProjectSize, size_t(const std::vector<std::string> &wsNames));
 };
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 namespace {
-size_t calculateSize(std::vector<Workspace_sptr> workspaces) {
+size_t calculateSize(const std::vector<Workspace_sptr> &workspaces) {
   size_t result = 0;
   for (const auto &ws : workspaces) {
     result += ws->getMemorySize();
@@ -90,7 +92,7 @@ public:
   void testGetWindowsForWorkspaceOneWindow() {
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
     WindowStub win1("window1", {"ws1"});
-    windows.push_back(&win1);
+    windows.emplace_back(&win1);
 
     ProjectSaveModel model(windows);
     TS_ASSERT(model.hasWindows("ws1"));
@@ -101,8 +103,8 @@ public:
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
     WindowStub win1("window1", {"ws1"});
     WindowStub win2("window2", {"ws1"});
-    windows.push_back(&win1);
-    windows.push_back(&win2);
+    windows.emplace_back(&win1);
+    windows.emplace_back(&win2);
 
     ProjectSaveModel model(windows);
     TS_ASSERT(model.hasWindows("ws1"));
@@ -113,8 +115,8 @@ public:
     std::vector<MantidQt::API::IProjectSerialisable *> windows;
     WindowStub win1("window1", {"ws1"});
     WindowStub win2("window2", {"ws2"});
-    windows.push_back(&win1);
-    windows.push_back(&win2);
+    windows.emplace_back(&win1);
+    windows.emplace_back(&win2);
 
     ProjectSaveModel model(windows);
     TS_ASSERT(model.hasWindows("ws1"));
@@ -155,10 +157,10 @@ public:
     WindowStub win2("window2", {"ws2"});
     WindowStub win3("window3", {"ws1", "ws2"});
     WindowStub win4("window4", {});
-    windows.push_back(&win1);
-    windows.push_back(&win2);
-    windows.push_back(&win3);
-    windows.push_back(&win4);
+    windows.emplace_back(&win1);
+    windows.emplace_back(&win2);
+    windows.emplace_back(&win3);
+    windows.emplace_back(&win4);
 
     ProjectSaveModel model(windows);
     auto names = model.getWindowNames({"ws1", "ws2"});
@@ -185,10 +187,10 @@ public:
     WindowStub win2("window2", {"ws2"});
     WindowStub win3("window3", {"ws1", "ws2"});
     WindowStub win4("window4", {});
-    windows.push_back(&win1);
-    windows.push_back(&win2);
-    windows.push_back(&win3);
-    windows.push_back(&win4);
+    windows.emplace_back(&win1);
+    windows.emplace_back(&win2);
+    windows.emplace_back(&win3);
+    windows.emplace_back(&win4);
 
     ProjectSaveModel model(windows);
     auto windowsSubset = model.getUniqueWindows({"ws1", "ws2"});
@@ -277,10 +279,10 @@ public:
     WindowStub win2("window2", {"ws2"});
     WindowStub win3("window3", {"ws1", "ws2"});
     WindowStub win4("window4", {});
-    windows.push_back(&win1);
-    windows.push_back(&win2);
-    windows.push_back(&win3);
-    windows.push_back(&win4);
+    windows.emplace_back(&win1);
+    windows.emplace_back(&win2);
+    windows.emplace_back(&win3);
+    windows.emplace_back(&win4);
 
     ProjectSaveModel model(windows);
 
@@ -322,5 +324,3 @@ public:
     TS_ASSERT_EQUALS(model.getProjectSize(workspaceNames), assumedSize);
   }
 };
-
-#endif // MANTIDQT_MANTIDWIDGETS_PROJECTSAVEMODELTEST_H

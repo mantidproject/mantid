@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -38,7 +38,7 @@ void SumRowColumn::init() {
   // Need to select whether to sum rows or columns
   std::vector<std::string> orientation{"D_H", "D_V"};
   declareProperty("Orientation", "",
-                  boost::make_shared<StringListValidator>(orientation),
+                  std::make_shared<StringListValidator>(orientation),
                   "Whether to sum rows (D_H) or columns (D_V).");
 
   // This is the range to select - the whole lot by default
@@ -50,7 +50,7 @@ void SumRowColumn::init() {
       "The ending X value for each spectrum to include in the summation.");
 
   // For selecting a column range - the whole lot by default
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(0);
   declareProperty("HOverVMin", EMPTY_INT(), mustBePositive,
                   "The first row to include in the summation when summing by "

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_APPENDGEOMETRYTOSNSNEXUS_H_
-#define MANTID_DATAHANDLING_APPENDGEOMETRYTOSNSNEXUS_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/System.h"
@@ -50,12 +49,12 @@ private:
 
   /// Run LoadInstrument as a Child Algorithm
   bool runLoadInstrument(const std::string &idf_filename,
-                         API::MatrixWorkspace_sptr localWorkspace,
+                         const API::MatrixWorkspace_sptr &localWorkspace,
                          Algorithm *alg);
 
   /// Load logs from the NeXus file
   static bool runLoadNexusLogs(const std::string &nexusFileName,
-                               API::MatrixWorkspace_sptr localWorkspace,
+                               const API::MatrixWorkspace_sptr &localWorkspace,
                                Algorithm *alg);
 
   /// Are we going to make a copy of the NeXus file to operate on ?
@@ -73,5 +72,3 @@ private:
 
 } // namespace DataHandling
 } // namespace Mantid
-
-#endif /* MANTID_DATAHANDLING_APPENDGEOMETRYTOSNSNEXUS_H_ */

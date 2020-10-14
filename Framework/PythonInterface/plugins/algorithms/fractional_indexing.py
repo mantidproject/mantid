@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import itertools
 import numpy as np
@@ -209,7 +209,7 @@ def get_hkls(peaks_workspace):
     :param peaks_workspace: the peaks workspace to extract HKL values from
     :return: 2D numpy array of HKL values.
     """
-    return np.array([np.array([peak['h'], peak['k'], peak['l']])
+    return np.array([np.array([peak.getH(), peak.getK(), peak.getL()])
                      for peak in peaks_workspace])
 
 

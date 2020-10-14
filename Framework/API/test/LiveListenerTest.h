@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LIVELISTENER_TEST_H_
-#define LIVELISTENER_TEST_H_
+#pragma once
 
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/LiveListener.h"
@@ -26,7 +25,7 @@ public:
   MOCK_CONST_METHOD0(buffersEvents, bool());
   MOCK_METHOD1(connect, bool(const Poco::Net::SocketAddress &));
   MOCK_METHOD1(start, void(Mantid::Types::Core::DateAndTime));
-  MOCK_METHOD0(extractData, boost::shared_ptr<Mantid::API::Workspace>());
+  MOCK_METHOD0(extractData, std::shared_ptr<Mantid::API::Workspace>());
   MOCK_METHOD0(isConnected, bool());
   MOCK_METHOD0(runStatus, RunStatus());
   MOCK_CONST_METHOD0(runNumber, int());
@@ -47,5 +46,3 @@ public:
     delete l;
   }
 };
-
-#endif

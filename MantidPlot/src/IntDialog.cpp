@@ -41,7 +41,7 @@
 #include <QSpinBox>
 #include <QTextEdit>
 
-IntDialog::IntDialog(QWidget *parent, Graph *g, Qt::WFlags fl)
+IntDialog::IntDialog(QWidget *parent, Graph *g, const Qt::WFlags &fl)
     : QDialog(parent, fl), d_graph(g) {
   setObjectName("IntegrationDialog");
   setAttribute(Qt::WA_DeleteOnClose);

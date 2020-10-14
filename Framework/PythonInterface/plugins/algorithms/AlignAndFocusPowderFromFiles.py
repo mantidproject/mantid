@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import mtd, AlgorithmFactory, DistributedDataProcessorAlgorithm, ITableWorkspaceProperty, \
     MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode
 from mantid.kernel import Direction, PropertyManagerDataService
@@ -28,7 +26,7 @@ PROPS_FOR_ALIGN = [CAL_FILE, GROUP_FILE,
                    "Params", "ResampleX", "Dspacing",
                    "PreserveEvents",
                    "RemovePromptPulseWidth", "CompressTolerance", "CompressWallClockTolerance",
-                   "CompressStartTime", "UnwrapRef", "LowResRef",
+                   "CompressStartTime", "LorentzCorrection", "UnwrapRef", "LowResRef",
                    "LowResSpectrumOffset", "ReductionProperties"]
 PROPS_FOR_ALIGN.extend(PROPS_IN_PD_CHARACTER)
 PROPS_FOR_ALIGN.extend(PROPS_FOR_INSTR)
@@ -310,7 +308,7 @@ class AlignAndFocusPowderFromFiles(DistributedDataProcessorAlgorithm):
         newprop = 'files_to_sum={}'.format(filenames_str)
         return self.__getCacheName('summed_'+wsname, additional_props=[newprop])
 
-    def __processFile(self, filename, file_prog_start, determineCharacterizations, createUnfocused):  # noqa: C902
+    def __processFile(self, filename, file_prog_start, determineCharacterizations, createUnfocused):  # noqa: C902,C901
         # create a unique name for the workspace
         wkspname = '__' + self.__wkspNameFromFile(filename)
         wkspname += '_f%d' % self._filenames.index(filename)  # add file number to be unique

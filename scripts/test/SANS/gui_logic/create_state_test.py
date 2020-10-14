@@ -1,89 +1,59 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 
-from mantid.py3compat import mock
-from sans.gui_logic.models.create_state import (create_states, create_gui_state_from_userfile)
-from sans.common.enums import (SANSInstrument, ISISReductionMode, SANSFacility, SaveType)
+from unittest import mock
+from sans.common.enums import SANSFacility
+from sans.gui_logic.models.RowEntries import RowEntries
+from sans.gui_logic.models.create_state import create_states
 from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.gui_logic.models.table_model import TableModel, TableIndexModel
-from sans.state.state import State
-from qtpy.QtCore import QCoreApplication
+from sans.state.AllStates import AllStates
 
 
 class GuiCommonTest(unittest.TestCase):
     def setUp(self):
-        self.qApp = QCoreApplication(['test_app'])
-        self.table_model = TableModel()
-        self.state_gui_model = StateGuiModel({})
-        table_index_model_0 = TableIndexModel('LOQ74044', '', '', '', '', '', '', '', '', '', '', '')
-        table_index_model_1 = TableIndexModel('LOQ74044', '', '', '', '', '', '', '', '', '', '', '')
-        self.table_model.add_table_entry(0, table_index_model_0)
-        self.table_model.add_table_entry(1, table_index_model_1)
-        self.table_model.wait_for_file_finding_done()
-        self.qApp.processEvents()
+        self.state_gui_model = StateGuiModel(AllStates())
+        self._good_row_one = RowEntries(sample_scatter='LOQ74044')
+        self._good_row_two = RowEntries(sample_scatter='LOQ74044')
 
-        self.fake_state = mock.MagicMock(spec=State)
         self.gui_state_director_instance = mock.MagicMock()
-        self.gui_state_director_instance.create_state.return_value = self.fake_state
+        self.gui_state_director_instance.create_state.return_value = self.state_gui_model
         self.patcher = mock.patch('sans.gui_logic.models.create_state.GuiStateDirector')
         self.addCleanup(self.patcher.stop)
         self.gui_state_director = self.patcher.start()
         self.gui_state_director.return_value = self.gui_state_director_instance
 
     def test_create_states_returns_correct_number_of_states(self):
-        states, errors = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
-                               row_index=[0,1])
+        rows = [self._good_row_one, self._good_row_two]
+        states, errors = create_states(self.state_gui_model, SANSFacility.ISIS, row_entries=rows)
 
         self.assertEqual(len(states), 2)
-
-    def test_create_states_returns_correct_number_of_states_for_specified_row_index(self):
-
-        states, errors = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
-                               row_index=[1])
-
-        self.assertEqual(len(states), 1)
 
     def test_skips_empty_rows(self):
-        table_index_model = TableIndexModel('', '', '', '', '', '', '', '', '', '', '', '')
-        self.table_model.add_table_entry(1, table_index_model)
-        self.table_model.wait_for_file_finding_done()
-        self.qApp.processEvents()
+        rows = [self._good_row_one, RowEntries(), self._good_row_two]
+        states, errors = create_states(self.state_gui_model, SANSFacility.ISIS, row_entries=rows)
+        self.assertEqual(2, len(states))
 
-        states, errors = create_states(self.state_gui_model, self.table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
-                               row_index=[0,1, 2])
+    @mock.patch('sans.gui_logic.models.create_state._get_thickness_for_row')
+    def test_create_state_from_user_file_if_specified(self, thickness_mock):
+        expected_user_file = 'MaskLOQData.txt'
 
-        self.assertEqual(len(states), 2)
+        # Mock out row entry so it does not lookup file information
+        mock_row_entry = mock.Mock(spec=RowEntries)
+        mock_row_entry.is_empty.return_value = False
+        mock_row_entry.user_file = expected_user_file
+        rows = [mock_row_entry, RowEntries(), RowEntries()]
 
-    @mock.patch('sans.gui_logic.models.create_state.create_gui_state_from_userfile')
-    def test_create_state_from_user_file_if_specified(self, create_gui_state_mock):
-        create_gui_state_mock.returns = StateGuiModel({})
-        table_index_model = TableIndexModel('LOQ74044', '', '', '', '', '', '', '', '', '', '', '',
-                                            user_file='MaskLOQData.txt')
-        table_model = TableModel()
-        table_model.add_table_entry(0, table_index_model)
-        table_model.wait_for_file_finding_done()
-        self.qApp.processEvents()
-
-        states, errors = create_states(self.state_gui_model, table_model, SANSInstrument.LOQ, SANSFacility.ISIS,
-                               row_index=[0,1, 2])
+        states, errors = create_states(self.state_gui_model, row_entries=rows, facility=SANSFacility.ISIS)
 
         self.assertEqual(len(states), 1)
-        create_gui_state_mock.assert_called_once_with('MaskLOQData.txt', self.state_gui_model)
-
-    def test_create_gui_state_from_userfile_adds_save_format_from_gui(self):
-        gui_state = StateGuiModel({})
-        gui_state.save_types = [SaveType.NXcanSAS]
-
-        row_state = create_gui_state_from_userfile('MaskLOQData.txt', gui_state)
-
-        self.assertEqual(gui_state.save_types, row_state.save_types)
+        self.gui_state_director_instance.create_state.assert_called_once_with(
+            mock_row_entry, file_lookup=mock.ANY, row_user_file=expected_user_file)
+        thickness_mock.assert_called()
 
 
 if __name__ == '__main__':

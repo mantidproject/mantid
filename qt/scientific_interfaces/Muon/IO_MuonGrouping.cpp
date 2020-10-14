@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -20,9 +20,8 @@
 #include <Poco/DOM/Text.h>
 #include <Poco/XML/XMLWriter.h>
 
-#include <boost/bind.hpp>
-#include <boost/shared_ptr.hpp>
 #include <fstream>
+#include <memory>
 
 //-----------------------------------------------------------------------------
 using namespace Mantid;
@@ -254,7 +253,7 @@ std::vector<int> MuonGroupingHelper::whichGroupToWhichRow() const {
       continue;
     }
 
-    groupToRow.push_back(i);
+    groupToRow.emplace_back(i);
   }
   return groupToRow;
 }
@@ -284,16 +283,14 @@ std::vector<int> MuonGroupingHelper::whichPairToWhichRow() const {
       continue;
 
     // test if content in combo boxes
-    QComboBox *qwF =
-        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 1));
-    QComboBox *qwB =
-        static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 2));
+    auto *qwF = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 1));
+    auto *qwB = static_cast<QComboBox *>(m_uiForm.pairTable->cellWidget(i, 2));
     if (!qwF || !qwB)
       continue;
     if (qwF->count() < 2 || qwB->count() < 2)
       continue;
 
-    pairToRow.push_back(i);
+    pairToRow.emplace_back(i);
   }
   return pairToRow;
 }

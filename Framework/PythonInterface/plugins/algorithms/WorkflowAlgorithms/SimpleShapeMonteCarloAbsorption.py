@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from mantid.api import (DataProcessorAlgorithm, AlgorithmFactory, MatrixWorkspaceProperty, Progress)
 from mantid.kernel import (VisibleWhenProperty, EnabledWhenProperty, Property, PropertyCriterion,
                            StringListValidator, IntBoundedValidator, FloatBoundedValidator, Direction)
@@ -190,6 +188,10 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
                              doc='The output corrected workspace.')
 
     def PyExec(self):
+
+        self.log().warning(
+            'SimpleShapeMonteCarloAbsorption is deprecated, please use PaalmanPingsMonteCarloAbsorption instead.')
+
         # setup progress reporting
         prog = Progress(self, 0.0, 1.0, 3)
 
@@ -254,10 +256,7 @@ class SimpleShapeMonteCarloAbsorption(DataProcessorAlgorithm):
 
             set_sample_alg.setProperty("Material", sample_material)
 
-            try:
-                set_sample_alg.execute()
-            except RuntimeError as exc:
-                raise RuntimeError("Supplied chemical formula was invalid: \n" + str(exc))
+            set_sample_alg.execute()
 
         prog.report('Calculating sample corrections')
 

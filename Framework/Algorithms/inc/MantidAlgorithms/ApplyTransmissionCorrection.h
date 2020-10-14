@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_APPLYTRANSMISSIONCORRECTION_H_
-#define MANTID_ALGORITHMS_APPLYTRANSMISSIONCORRECTION_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -48,7 +48,8 @@ namespace Algorithms {
     File change history is stored at: <https://github.com/mantidproject/mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ApplyTransmissionCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL ApplyTransmissionCorrection
+    : public API::Algorithm {
 public:
   /// Algorithm's name
   const std::string name() const override {
@@ -72,11 +73,11 @@ public:
 private:
   /// Initialisation code
   void init() override;
+  /// Cross check inputs
+  std::map<std::string, std::string> validateInputs() override;
   /// Execution code
   void exec() override;
 };
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_APPLYTRANSMISSIONCORRECTION_H_*/

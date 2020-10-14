@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import os
 import math
 import numpy as np
@@ -51,6 +49,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _reduction_type = None
     _mirror_sense = None
     _doppler_energy = None
+    _doppler_speed = None
     _velocity_profile = None
     _instrument_name = None
     _instrument = None
@@ -69,7 +68,6 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
     _fit_option = None
     _group_by = None
     _pulse_chopper = None
-    _group_detectors = None
 
     def category(self):
         return "Workflow\\MIDAS;Workflow\\Inelastic;Inelastic\\Indirect;Inelastic\\Reduction;ILL\\Indirect"
@@ -171,6 +169,9 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                                  'in order to get absorption corrections right, \n'
                                  'however the default value is True for backwards compatibility.')
 
+        self.declareProperty(name='DiscardSingleDetectors', defaultValue=False,
+                             doc='Whether to discard the spectra of single detectors.')
+
     def validateInputs(self):
 
         issues = dict()
@@ -235,11 +236,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         if self._use_map_file:
             if self._map_file == '':
                 # path name for default map file
-                if self._instrument.hasParameter('Workflow.GroupingFile'):
-                    grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
-                    self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
+                if self.getProperty('DiscardSingleDetectors').value:
+                    grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile.PSDOnly')[0]
                 else:
-                    raise RuntimeError("Failed to find default detector grouping file. Please specify manually.")
+                    grouping_filename = self._instrument.getStringParameter('Workflow.GroupingFile')[0]
+                self._map_file = os.path.join(config['groupingFiles.directory'], grouping_filename)
 
             self.log().information('Set detector map file : {0}'.format(self._map_file))
 
@@ -262,30 +263,33 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
     def _convert_to_energy(self, ws):
         """
-        Converts the x-axis from raw channel number to energy transfer
+        Converts the x-axis from raw channel number to energy transfer for Doppler mode
         @param ws :: input workspace name
         """
+        from scipy.constants import physical_constants
+        c = physical_constants['speed of light in vacuum'][0]
+        nm = physical_constants['neutron mass energy equivalent in MeV'][0]
 
-        x = mtd[ws].readX(0)
-        size = mtd[ws].blocksize()
-        mid = (x[-1] + x[0])/ 2.
-        scale = 0.001  # from micro ev to mili ev
-
-        factor = size / (size - 1)
-
-        # minus sign is needed
+        bsize = mtd[ws].blocksize()
         if self._doppler_energy != 0:
-            formula = '-(x/{0} - 1)*{1}'.format(mid, self._doppler_energy * scale * factor)
+            # the doppler channels are linear in velocity (not time, neither deltaE)
+            # so we perform 2-step conversion, first linear to v, then quadratic to deltaE
+            efixed = mtd[ws].getInstrument().getNumberParameter('Efixed')[0]
+            vfixed = math.sqrt(2 * efixed * c**2 / (nm * 1E+9))
+            vformula = '-2/({0}-1)*{1}*(x-{0}/2)+{2}'.format(bsize, self._doppler_speed, vfixed)
+            ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=vformula)
+            nmass = nm * 1E+9 / c**2 # mev / (m/s)**2
+            eformula = '{0}*x*x/2 - {1}'.format(nmass, efixed)
+            ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=eformula, AxisUnits='DeltaE')
         else:
             # Center the data for elastic fixed window scan, for integration over the elastic peak
-            formula = '-(x-{0})*{1}'.format(mid-0.5, 1. / scale)
-            self.log().notice('The only energy value is 0 meV. Ignore the x-axis.')
+            # Here all that matters is that the center is at 0 deltaE, but there is no real meaning of the axis extent
+            formula = '-(x-{0})*{1}'.format(bsize / 2 - 0.5, 1E+3)
+            self.log().debug('The only energy value is 0 meV. Ignore the x-axis.')
+            ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=formula, AxisUnits='DeltaE')
 
-        self.log().information('Energy conversion formula is: {0}'.format(formula))
-
-        ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=formula, AxisUnits = 'DeltaE')
-
-    def _monitor_max_range(self, ws):
+    @staticmethod
+    def _monitor_max_range(ws):
         """
         Gives the bin indices of the first and last peaks in the monitor
         @param ws :: input workspace name
@@ -299,7 +303,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         imax = np.nanargmax(y[mid:size]) + mid
         return imin, imax
 
-    def _monitor_zero_range(self, ws):
+    @staticmethod
+    def _monitor_zero_range(ws):
         """
         Gives the bin indices of the first and last non-zero bins in monitor
         @param ws :: input workspace name
@@ -331,6 +336,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             self._doppler_energy = run.getLogData('Doppler.maximum_delta_energy').value
         else:
             raise RuntimeError('Maximum delta energy '+ message)
+
+        if run.hasProperty('Doppler.doppler_speed'):
+            self._doppler_speed = run.getLogData('Doppler.doppler_speed').value
+        else:
+            raise RuntimeError('Doppler speed '+ message)
 
         if run.hasProperty('Doppler.velocity_profile'):
             self._velocity_profile = run.getLogData('Doppler.velocity_profile').value
@@ -396,6 +406,11 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
                 self._reduce_one_wing_doppler(self._ws)
                 GroupWorkspaces(InputWorkspaces=[self._ws],OutputWorkspace=self._red_ws)
 
+        if self._normalise_to == 'Monitor':
+            for ws in mtd[self._red_ws]:
+                AddSampleLog(Workspace=ws, LogName="NormalisedTo", LogType="String",
+                             LogText="Monitor", EnableLogging=False)
+
         self.setProperty('OutputWorkspace',self._red_ws)
 
     def _create_elastic_channel_ws(self, epp_ws, run, epp_equator_ws=None):
@@ -427,7 +442,8 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             epp_ws.setCell('ChopperPhase', row, phase)
             epp_ws.setCell('PSD_TOF_Delay', row, delay)
 
-    def _t0_offset(self, center_chopper_speed, center_chopper_phase, shifted_chopper_phase, center_psd_delay, shifted_psd_delay):
+    @staticmethod
+    def _t0_offset(center_chopper_speed, center_chopper_phase, shifted_chopper_phase, center_psd_delay, shifted_psd_delay):
         """
         Calculates the t0 offset between measurements with and without inelastic offset.
         """
@@ -603,12 +619,16 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
         RebinToWorkspace(WorkspaceToRebin=ws, WorkspaceToMatch=rebin_ws, OutputWorkspace=ws)
         if self._group_detectors:
             self._do_group_detectors(ws)
+        if self._normalise_to == 'Monitor':
+            mtd[ws].setDistribution(True)
         GroupWorkspaces(InputWorkspaces=[ws],OutputWorkspace=self._red_ws)
         DeleteWorkspaces([rebin_ws])
 
-    def _group_pixels(self, by=4):
+    @staticmethod
+    def _group_pixels(by=4):
         """
         Groups pixels in the tubes by the factor, which should be a power of 2.
+        @param by : the group pixels by
         """
         pattern = ''
         for i in range(N_TUBES):
@@ -720,7 +740,7 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
 
             # remember the integral of the monitor
             AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number",
-                         LogText=str(mtd[int_ws].readY(0)[0]), EnableLogging = False)
+                         LogText=str(mtd[int_ws].readY(0)[0]), EnableLogging=False)
 
             DeleteWorkspace(int_ws)
 
@@ -742,11 +762,14 @@ class IndirectILLEnergyTransfer(PythonAlgorithm):
             Plus(LHSWorkspace=i1,RHSWorkspace=i2,OutputWorkspace=int_ws)
 
             if mtd[int_ws].readY(0)[0] != 0: # this needs to be checked
-                Scale(InputWorkspace = ws, OutputWorkspace = ws, Factor = 1./mtd[int_ws].readY(0)[0])
+                Scale(InputWorkspace=ws, OutputWorkspace=ws, Factor=1./mtd[int_ws].readY(0)[0])
 
             # remember the integral of the monitor
             AddSampleLog(Workspace=ws, LogName="MonitorIntegral", LogType="Number",
-                         LogText=str(mtd[int_ws].readY(0)[0]), EnableLogging = False)
+                         LogText=str(mtd[int_ws].readY(0)[0]), EnableLogging=False)
+
+            # store the x_start and x_end derived from monitor, needed later for integration
+            AddSampleLogMultiple(Workspace=ws,LogNames=['MonitorLeftPeak', 'MonitorRightPeak'],LogValues=[x_start, x_end])
 
             DeleteWorkspace(i1)
             DeleteWorkspace(i2)

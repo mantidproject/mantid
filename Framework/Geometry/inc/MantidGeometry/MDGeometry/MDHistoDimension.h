@@ -1,11 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_MDHISTODIMENSION_H_
-#define MANTID_GEOMETRY_MDHISTODIMENSION_H_
+#pragma once
+
+#include <utility>
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
@@ -39,8 +40,8 @@ public:
    */
   MDHistoDimension(std::string name, std::string ID, const MDFrame &frame,
                    coord_t min, coord_t max, size_t numBins)
-      : m_name(name), m_dimensionId(ID), m_frame(frame.clone()), m_min(min),
-        m_max(max), m_numBins(numBins),
+      : m_name(std::move(name)), m_dimensionId(std::move(ID)),
+        m_frame(frame.clone()), m_min(min), m_max(max), m_numBins(numBins),
         m_binWidth((max - min) / static_cast<coord_t>(numBins)) {
     if (max < min) {
       throw std::invalid_argument("Error making MDHistoDimension. Cannot have "
@@ -153,12 +154,10 @@ private:
 };
 
 /// Shared pointer to a MDHistoDimension
-using MDHistoDimension_sptr = boost::shared_ptr<MDHistoDimension>;
+using MDHistoDimension_sptr = std::shared_ptr<MDHistoDimension>;
 
 /// Shared pointer to a const MDHistoDimension
-using MDHistoDimension_const_sptr = boost::shared_ptr<const MDHistoDimension>;
+using MDHistoDimension_const_sptr = std::shared_ptr<const MDHistoDimension>;
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_MDHISTODIMENSION_H_ */

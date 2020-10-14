@@ -12,7 +12,11 @@ Description
 Loads an ILL TOF NeXus file into a :ref:`Workspace2D <Workspace2D>` with
 the given name.
 
-To date this algorithm only supports: IN4, IN5 and IN6.
+To date this algorithm only supports: IN4, IN5, IN6 and PANTHER.
+
+By default, this algorithm loads the data indexed by channels. To convert to time-of-flight, use the ConvertToTOF option.
+
+This algorithm also supports diffraction mode. In this case, the unit of the output workspace will be wavelength instead of time-of-flight or channel.
 
 .. note::
     The initial time-of-flight axis is set up using the 'time_of_flight' field in the NeXus file. Therefore the conversion from 'TOF' to 'DeltaE' may not give the correct zero-energy transfer.

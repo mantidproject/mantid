@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_WORKFLOWALGORITHMS_SOFTWOTHETATOFTEST_H_
-#define MANTID_WORKFLOWALGORITHMS_SOFTWOTHETATOFTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -98,12 +97,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("AngleStep", angleStep))
     auto tempXml = boost::filesystem::temp_directory_path();
     tempXml /= boost::filesystem::unique_path("SofTwoThetaTest-%%%%%%%%.xml");
-#if _WIN32
-    auto const wfilename = tempXml.native();
-    std::string const filename{wfilename.cbegin(), wfilename.cend()};
-#else
-    std::string const filename{tempXml.native()};
-#endif
+    std::string const filename{tempXml.string()};
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("GroupingFilename", filename))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())
@@ -166,5 +160,3 @@ public:
     }
   }
 };
-
-#endif /* MANTID_WORKFLOWALGORITHMS_SOFTWOTHETATOFTEST_H_ */

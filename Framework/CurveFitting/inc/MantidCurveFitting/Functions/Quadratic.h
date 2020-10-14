@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_QUADRATIC_H_
-#define MANTID_CURVEFITTING_QUADRATIC_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -29,7 +28,7 @@ Quadratic parameters:
 @author Anders Markvardsen, ISIS, RAL
 @date 20/10/2009
 */
-class DLLExport Quadratic : public BackgroundFunction {
+class MANTID_CURVEFITTING_DLL Quadratic : public BackgroundFunction {
 public:
   /// overwrite IFunction base class methods
   std::string name() const override { return "Quadratic"; }
@@ -46,5 +45,3 @@ protected:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /*MANTID_CURVEFITTING_QUADRATIC_H_*/

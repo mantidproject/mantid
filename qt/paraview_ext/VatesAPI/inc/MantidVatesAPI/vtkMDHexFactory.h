@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_VATES_VTK_MD_HEX_FACTORY_H_
-#define MANTID_VATES_VTK_MD_HEX_FACTORY_H_
+#pragma once
 
 #include "MantidAPI/IMDEventWorkspace_fwd.h"
 #include "MantidDataObjects/MDEventFactory.h"
@@ -14,7 +13,7 @@
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <vector>
 #include <vtkNew.h>
 
@@ -94,7 +93,7 @@ private:
   mutable std::unique_ptr<bool[]> sliceMask;
 
   /// Implicit function to define which boxes to render.
-  mutable boost::shared_ptr<Mantid::Geometry::MDImplicitFunction>
+  mutable std::shared_ptr<Mantid::Geometry::MDImplicitFunction>
       sliceImplicitFunction;
 
   /// Time value.
@@ -102,5 +101,3 @@ private:
 };
 } // namespace VATES
 } // namespace Mantid
-
-#endif

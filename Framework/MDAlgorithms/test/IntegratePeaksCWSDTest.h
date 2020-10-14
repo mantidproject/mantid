@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDAGORITHMS_INTEGRATEPEAKSCWSDTEST_H_
-#define MANTID_MDAGORITHMS_INTEGRATEPEAKSCWSDTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/IMDEventWorkspace.h"
@@ -89,7 +88,7 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
 
   // Creates a new instance of the MDEventInserter to output workspace
   MDEventWorkspace<MDEvent<3>, 3>::sptr mdws_mdevt_3 =
-      boost::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
+      std::dynamic_pointer_cast<MDEventWorkspace<MDEvent<3>, 3>>(mdws);
   MDEventInserter<MDEventWorkspace<MDEvent<3>, 3>::sptr> inserter(mdws_mdevt_3);
 
   // Go though each spectrum to conver to MDEvent
@@ -112,7 +111,7 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
   }
 
   // Set up run information
-  ExperimentInfo_sptr exp_info = boost::make_shared<ExperimentInfo>();
+  ExperimentInfo_sptr exp_info = std::make_shared<ExperimentInfo>();
   exp_info->mutableRun().addProperty("run_number", 121);
   exp_info->mutableRun().addProperty("monitor", 3021);
 
@@ -123,7 +122,7 @@ createMDWorkspace(const std::vector<Mantid::Kernel::V3D> &vec_event_qsample,
   exp_info->setInstrument(inst1);
   mdws->addExperimentInfo(exp_info);
 
-  ExperimentInfo_sptr exp_info2 = boost::make_shared<ExperimentInfo>();
+  ExperimentInfo_sptr exp_info2 = std::make_shared<ExperimentInfo>();
   exp_info2->mutableRun().addProperty("run_number", 144);
   exp_info2->mutableRun().addProperty("monitor", 1022);
   // add instrument
@@ -199,10 +198,10 @@ void createMDEvents1Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
         Mantid::Kernel::V3D qsample(q_x, q_y, q_z);
         double signal = qsample.distance(origin) * 1000;
 
-        vec_qsample.push_back(qsample);
-        vec_signal.push_back(signal);
-        vec_detid.push_back(detid);
-        vec_runnumber.push_back(121);
+        vec_qsample.emplace_back(qsample);
+        vec_signal.emplace_back(signal);
+        vec_detid.emplace_back(detid);
+        vec_runnumber.emplace_back(121);
 
         ++detid;
       }
@@ -240,10 +239,10 @@ void createMDEvents2Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
         Mantid::Kernel::V3D qsample(q_x, q_y, q_z);
         double signal = qsample.distance(origin) * 1000;
 
-        vec_qsample.push_back(qsample);
-        vec_signal.push_back(signal);
-        vec_detid.push_back(detid);
-        vec_runnumber.push_back(121);
+        vec_qsample.emplace_back(qsample);
+        vec_signal.emplace_back(signal);
+        vec_detid.emplace_back(detid);
+        vec_runnumber.emplace_back(121);
 
         ++detid;
       }
@@ -266,10 +265,10 @@ void createMDEvents2Run(std::vector<Mantid::Kernel::V3D> &vec_qsample,
         Mantid::Kernel::V3D qsample(q_x, q_y, q_z);
         double signal = qsample.distance(origin) * 100;
 
-        vec_qsample.push_back(qsample);
-        vec_signal.push_back(signal);
-        vec_detid.push_back(detid);
-        vec_runnumber.push_back(144);
+        vec_qsample.emplace_back(qsample);
+        vec_signal.emplace_back(signal);
+        vec_detid.emplace_back(detid);
+        vec_runnumber.emplace_back(144);
 
         ++detid;
       }
@@ -318,10 +317,10 @@ public:
     AnalysisDataService::Instance().addOrReplace("TestMDWS", inputws);
 
     std::vector<int> runnumberlist;
-    runnumberlist.push_back(vec_runnumbers[0]);
+    runnumberlist.emplace_back(vec_runnumbers[0]);
     Mantid::Kernel::V3D peakcenter(1.4, 2.4, 3.4);
     std::vector<Mantid::Kernel::V3D> peakcenterlist;
-    peakcenterlist.push_back(peakcenter);
+    peakcenterlist.emplace_back(peakcenter);
     PeaksWorkspace_sptr peakws =
         buildPeakWorkspace(runnumberlist, peakcenterlist);
     AnalysisDataService::Instance().addOrReplace("TestPeaksWS", peakws);
@@ -337,7 +336,7 @@ public:
     alg.execute();
     TS_ASSERT(alg.isExecuted())
     // check result
-    PeaksWorkspace_sptr outws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    PeaksWorkspace_sptr outws = std::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
     TS_ASSERT(outws)
     TS_ASSERT_EQUALS(outws->getNumberPeaks(), 1)
@@ -369,12 +368,12 @@ public:
     TS_ASSERT(AnalysisDataService::Instance().doesExist("TestMDWS2"));
 
     std::vector<int> runnumberlist;
-    runnumberlist.push_back(vec_runnumbers.front());
-    runnumberlist.push_back(vec_runnumbers.back());
+    runnumberlist.emplace_back(vec_runnumbers.front());
+    runnumberlist.emplace_back(vec_runnumbers.back());
     Mantid::Kernel::V3D peakcenter(3, 3, 3);
     std::vector<Mantid::Kernel::V3D> peakcenterlist;
-    peakcenterlist.push_back(peakcenter);
-    peakcenterlist.push_back(peakcenter);
+    peakcenterlist.emplace_back(peakcenter);
+    peakcenterlist.emplace_back(peakcenter);
     PeaksWorkspace_sptr peakws =
         buildPeakWorkspace(runnumberlist, peakcenterlist);
     AnalysisDataService::Instance().addOrReplace("TestPeaksWS", peakws);
@@ -396,7 +395,7 @@ public:
     TS_ASSERT(alg.isExecuted())
 
     // check
-    PeaksWorkspace_sptr outws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    PeaksWorkspace_sptr outws = std::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
     TS_ASSERT(outws)
     TS_ASSERT_EQUALS(outws->getNumberPeaks(), 2)
@@ -445,7 +444,7 @@ public:
     bool doesexit =
         AnalysisDataService::Instance().doesExist("IntegratedPeakWS");
     TS_ASSERT(doesexit);
-    PeaksWorkspace_sptr outws = boost::dynamic_pointer_cast<PeaksWorkspace>(
+    PeaksWorkspace_sptr outws = std::dynamic_pointer_cast<PeaksWorkspace>(
         AnalysisDataService::Instance().retrieve("IntegratedPeakWS"));
     TS_ASSERT(outws);
 
@@ -473,12 +472,12 @@ public:
         createMDWorkspace(vec_qsample, vec_signal, vec_detid, vec_runnumbers);
     AnalysisDataService::Instance().addOrReplace("TestMDWS2", inputws);
 
-    runnumberlist.push_back(vec_runnumbers.front());
-    runnumberlist.push_back(vec_runnumbers.back());
+    runnumberlist.emplace_back(vec_runnumbers.front());
+    runnumberlist.emplace_back(vec_runnumbers.back());
     Mantid::Kernel::V3D peakcenter(3, 3, 3);
     std::vector<Mantid::Kernel::V3D> peakcenterlist;
-    peakcenterlist.push_back(peakcenter);
-    peakcenterlist.push_back(peakcenter);
+    peakcenterlist.emplace_back(peakcenter);
+    peakcenterlist.emplace_back(peakcenter);
     peakws = buildPeakWorkspace(runnumberlist, peakcenterlist);
     AnalysisDataService::Instance().addOrReplace("TestPeaksWS", peakws);
 
@@ -519,5 +518,3 @@ private:
   std::vector<int> vec_runnumbers;
   std::vector<int> runnumberlist;
 };
-
-#endif /* MANTID_MDEVENTS_INTEGRATEPEAKSCWSDTEST_H_ */

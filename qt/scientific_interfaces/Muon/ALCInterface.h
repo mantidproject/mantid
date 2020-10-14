@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ALCINTERFACE_H_
-#define MANTIDQT_CUSTOMINTERFACES_ALCINTERFACE_H_
+#pragma once
 
 #include "MantidKernel/System.h"
 
@@ -36,6 +35,7 @@ class MANTIDQT_MUONINTERFACE_DLL ALCInterface : public API::UserSubWindow {
 public:
   ALCInterface(QWidget *parent = nullptr);
 
+  void closeEvent(QCloseEvent *event) override;
   static std::string name() { return "ALC"; }
   static QString categoryInfo() { return "Muon"; }
 
@@ -80,5 +80,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTIDQT_CUSTOMINTERFACES_ALCINTERFACE_H_ */

@@ -1,11 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=invalid-name
-from __future__ import (absolute_import, division, print_function)
 from xml.dom.minidom import getDOMImplementation
 from datetime import datetime
 import re
@@ -105,12 +104,12 @@ class MantidGeom(object):
         if location is None:
             self._append_child("location", sample, x="0.0", y="0.0", z="0.0")
         else:
-            if coord_type is "cartesian":
+            if coord_type == "cartesian":
                 self._append_child("location", sample,
                                    x=location[0],
                                    y=location[1],
                                    z=location[2])
-            if coord_type is "spherical":
+            if coord_type == "spherical":
                 self._append_child("location", sample,
                                    r=location[0],
                                    t=location[1],

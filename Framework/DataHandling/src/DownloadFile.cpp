@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/DownloadFile.h"
 #include "MantidAPI/FileProperty.h"
@@ -60,7 +60,7 @@ const std::string DownloadFile::summary() const {
  */
 void DownloadFile::init() {
   declareProperty(
-      "Address", "", boost::make_shared<MandatoryValidator<std::string>>(),
+      "Address", "", std::make_shared<MandatoryValidator<std::string>>(),
       "The address of the network resource to download.", Direction::InOut);
   declareProperty(
       std::make_unique<FileProperty>("Filename", "", FileProperty::Save),

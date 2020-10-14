@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_NOTEBOOKWRITER_H
-#define MANTID_NOTEBOOKWRITER_H
+#pragma once
 
 /** @class NotebookWriter
 
@@ -25,8 +24,8 @@ class MANTID_API_DLL NotebookWriter {
 public:
   NotebookWriter();
   virtual ~NotebookWriter() = default;
-  std::string markdownCell(std::string string_text);
-  std::string codeCell(std::string string_code);
+  std::string markdownCell(const std::string &string_text);
+  std::string codeCell(const std::string &string_code);
   std::string writeNotebook();
 
 private:
@@ -42,5 +41,3 @@ private:
 };
 } // namespace API
 } // namespace Mantid
-
-#endif // MANTID_NOTEBOOKWRITER_H

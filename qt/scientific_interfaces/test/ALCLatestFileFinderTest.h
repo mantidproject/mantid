@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_ALCLATESTFILEFINDERTEST_H_
-#define MANTID_CUSTOMINTERFACES_ALCLATESTFILEFINDERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -143,6 +142,36 @@ public:
   }
 
   /**
+   * Test that getMostRecentFile reader can read
+   * filenames where the name of the detector
+   * is not given in the same case as the other files
+   */
+  void test_getMostRecentFileInsensativeToCaps() {
+    const ScopedDirectory tmpDir("test_getMostRecentFile");
+    auto files = generateTestFiles(tmpDir.getDirectoryName());
+    ALCLatestFileFinder finder(files[0].getFileName());
+    TS_ASSERT_EQUALS(finder.getMostRecentFile(), files[2].getFileName());
+    auto newFile = TestFile("2116-03-15T15:00:00", tmpDir.getDirectoryName(),
+                            "MuSr", "90003");
+    TS_ASSERT_EQUALS(finder.getMostRecentFile(), newFile.getFileName());
+  }
+
+  /**
+   * Test that getMostRecentFile reader can handle
+   * an empty run directory
+   * Previously this test would fail due to a segmentation fault
+   */
+  void test_getMostRecentFileHandlesEmptyDirectory() {
+    const ScopedDirectory tmpDir("test_getMostRecentFile");
+    auto files = generateTestFiles(tmpDir.getDirectoryName());
+    ALCLatestFileFinder finder(files[0].getFileName());
+    // Delete files
+    files.clear();
+    std::string foundFile;
+    TS_ASSERT_THROWS_NOTHING(foundFile = finder.getMostRecentFile());
+  }
+
+  /**
    * Test that the finder ignores non-NeXus files
    */
   void test_ignoreNonNeXus() {
@@ -240,5 +269,3 @@ private:
   std::vector<TestFile> m_files;
   std::string m_mostRecent;
 };
-
-#endif /* MANTID_CUSTOMINTERFACES_ALCLATESTFILEFINDERTEST_H_ */

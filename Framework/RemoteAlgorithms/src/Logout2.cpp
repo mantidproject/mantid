@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidRemoteAlgorithms/Logout2.h"
 #include "MantidAPI/RemoteJobManagerFactory.h"
@@ -24,14 +24,14 @@ using namespace Mantid::Kernel;
 void Logout2::init() {
   // Unlike most algorithms, this wone doesn't deal with workspaces....
 
-  auto requireValue = boost::make_shared<MandatoryValidator<std::string>>();
+  auto requireValue = std::make_shared<MandatoryValidator<std::string>>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
                                           .getFacility()
                                           .computeResources();
   declareProperty("ComputeResource", "",
-                  boost::make_shared<StringListValidator>(computes),
+                  std::make_shared<StringListValidator>(computes),
                   "The remote computer to log out from", Direction::Input);
 
   declareProperty("UserName", "", requireValue,

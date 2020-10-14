@@ -1,23 +1,25 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/Integrate3DEvents.h"
 #include "MantidDataObjects/NoShape.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
 #include "MantidGeometry/Crystal/IndexingUtils.h"
 
-#include <boost/make_shared.hpp>
 #include <boost/math/special_functions/round.hpp>
 #include <cmath>
 #include <fstream>
+#include <memory>
 #include <numeric>
 #include <tuple>
 
 extern "C" {
 #include <cstdio>
+#include <utility>
+
 #include <gsl/gsl_eigen.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
@@ -45,7 +47,8 @@ using Mantid::Kernel::V3D;
  *                       correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
-    const std::vector<std::pair<double, Mantid::Kernel::V3D>> &peak_q_list,
+    const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>
+        &peak_q_list,
     Kernel::DblMatrix const &UBinv, double radius,
     const bool useOnePercentBackgroundCorrection)
     : m_UBinv(UBinv), m_radius(radius), maxOrder(0), crossterm(0),
@@ -80,9 +83,9 @@ Integrate3DEvents::Integrate3DEvents(
  *                       correction should be used.
  */
 Integrate3DEvents::Integrate3DEvents(
-    const std::vector<std::pair<double, Mantid::Kernel::V3D>> &peak_q_list,
-    std::vector<Mantid::Kernel::V3D> const &hkl_list,
-    std::vector<Mantid::Kernel::V3D> const &mnp_list,
+    const std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>>
+        &peak_q_list,
+    std::vector<V3D> const &hkl_list, std::vector<V3D> const &mnp_list,
     Kernel::DblMatrix const &UBinv, Kernel::DblMatrix const &ModHKL,
     double radius_m, double radius_s, int MaxO, const bool CrossT,
     const bool useOnePercentBackgroundCorrection)
@@ -120,7 +123,8 @@ Integrate3DEvents::Integrate3DEvents(
  * @param hkl_integ
  */
 void Integrate3DEvents::addEvents(
-    std::vector<std::pair<double, V3D>> const &event_qs, bool hkl_integ) {
+    std::vector<std::pair<std::pair<double, double>, V3D>> const &event_qs,
+    bool hkl_integ) {
   if (!maxOrder)
     for (const auto &event_q : event_qs)
       addEvent(event_q, hkl_integ);
@@ -129,7 +133,7 @@ void Integrate3DEvents::addEvents(
       addModEvent(event_q, hkl_integ);
 }
 
-std::pair<boost::shared_ptr<const Geometry::PeakShape>,
+std::pair<std::shared_ptr<const Geometry::PeakShape>,
           std::tuple<double, double, double>>
 Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
                                        const V3D &peak_q, double &inti,
@@ -139,23 +143,22 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
   sigi = 0.0; // is wrong with the peak.
   auto result = getEvents(peak_q);
   if (!result)
-    return std::make_pair(boost::make_shared<NoShape>(),
-                          make_tuple(0., 0., 0.));
+    return std::make_pair(std::make_shared<NoShape>(), make_tuple(0., 0., 0.));
 
   const auto &events = *result;
   if (events.empty())
-    return std::make_pair(boost::make_shared<NoShape>(),
-                          make_tuple(0., 0., 0.));
+    return std::make_pair(std::make_shared<NoShape>(), make_tuple(0., 0., 0.));
 
   DblMatrix cov_matrix(3, 3);
   makeCovarianceMatrix(events, cov_matrix, params.regionRadius);
 
   std::vector<V3D> eigen_vectors;
-  getEigenVectors(cov_matrix, eigen_vectors);
+  std::vector<double> eigen_values;
+  getEigenVectors(cov_matrix, eigen_vectors, eigen_values);
 
   std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
-    sigmas[i] = stdDev(events, eigen_vectors[i], params.regionRadius);
+    sigmas[i] = sqrt(eigen_values[i]);
   }
 
   bool invalid_peak =
@@ -164,13 +167,11 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
       });
 
   if (invalid_peak)
-    return std::make_pair(boost::make_shared<NoShape>(),
-                          make_tuple(0., 0., 0.));
+    return std::make_pair(std::make_shared<NoShape>(), make_tuple(0., 0., 0.));
 
   const auto max_sigma = *std::max_element(sigmas.begin(), sigmas.end());
   if (max_sigma == 0)
-    return std::make_pair(boost::make_shared<NoShape>(),
-                          make_tuple(0., 0., 0.));
+    return std::make_pair(std::make_shared<NoShape>(), make_tuple(0., 0., 0.));
 
   auto rValues = calculateRadiusFactors(params, max_sigma);
   auto &r1 = std::get<0>(rValues), r2 = std::get<1>(rValues),
@@ -179,9 +180,9 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
   std::vector<double> abcBackgroundOuterRadii, abcBackgroundInnerRadii;
   std::vector<double> peakRadii;
   for (int i = 0; i < 3; i++) {
-    abcBackgroundOuterRadii.push_back(r3 * sigmas[i]);
-    abcBackgroundInnerRadii.push_back(r2 * sigmas[i]);
-    peakRadii.push_back(r1 * sigmas[i]);
+    abcBackgroundOuterRadii.emplace_back(r3 * sigmas[i]);
+    abcBackgroundInnerRadii.emplace_back(r2 * sigmas[i]);
+    peakRadii.emplace_back(r1 * sigmas[i]);
   }
 
   const auto isPeakOnDetector =
@@ -189,7 +190,7 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
                               abcBackgroundInnerRadii, abcBackgroundOuterRadii);
 
   if (!isPeakOnDetector)
-    return std::make_pair(boost::make_shared<NoShape>(),
+    return std::make_pair(std::make_shared<NoShape>(),
                           make_tuple(0.0, 0.0, 0.));
 
   const auto backgrd = numInEllipsoidBkg(
@@ -199,20 +200,20 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
   const auto peak = numInEllipsoid(events, eigen_vectors, peakRadii);
   const auto ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
 
-  inti = peak - ratio * backgrd;
-  sigi = sqrt(peak + ratio * ratio * backgrd);
+  inti = peak.first - ratio * backgrd.first;
+  sigi = sqrt(peak.second + ratio * ratio * backgrd.second);
 
   // compute the fraction of peak within the standard core
-  const auto total = (core + peak) - ratio * backgrd;
+  const auto total = (core.first + peak.first) - ratio * backgrd.first;
   const auto frac = std::min(1.0, std::abs(inti / total));
   // compute the uncertainty in the fraction
-  const auto df_ds_core = (1 - frac) / peak;
-  const auto df_ds_peak = frac / peak;
+  const auto df_ds_core = (1 - frac) / peak.first;
+  const auto df_ds_peak = frac / peak.first;
   const auto fracError =
-      sqrt(peak * pow(df_ds_core, 2) + core * pow(df_ds_peak, 2));
+      sqrt(peak.first * pow(df_ds_core, 2) + core.first * pow(df_ds_peak, 2));
 
   // create the peaks shape for the strong peak
-  const auto shape = boost::make_shared<const PeakShapeEllipsoid>(
+  const auto shape = std::make_shared<const PeakShapeEllipsoid>(
       eigen_vectors, peakRadii, abcBackgroundInnerRadii,
       abcBackgroundOuterRadii, Mantid::Kernel::QLab,
       "IntegrateEllipsoidsTwoStep");
@@ -220,8 +221,7 @@ Integrate3DEvents::integrateStrongPeak(const IntegrationParameters &params,
   return std::make_pair(shape, std::make_tuple(frac, fracError, max_sigma));
 }
 
-boost::shared_ptr<const Geometry::PeakShape>
-Integrate3DEvents::integrateWeakPeak(
+std::shared_ptr<const Geometry::PeakShape> Integrate3DEvents::integrateWeakPeak(
     const IntegrationParameters &params, PeakShapeEllipsoid_const_sptr shape,
     const std::tuple<double, double, double> &libPeak, const V3D &center,
     double &inti, double &sigi) {
@@ -231,7 +231,7 @@ Integrate3DEvents::integrateWeakPeak(
 
   auto result = getEvents(center);
   if (!result)
-    return boost::make_shared<NoShape>();
+    return std::make_shared<NoShape>();
 
   const auto &events = *result;
 
@@ -254,16 +254,17 @@ Integrate3DEvents::integrateWeakPeak(
                r3 = std::get<2>(rValues);
 
   // integrate
-  double backgrd = numInEllipsoidBkg(
+  std::pair<double, double> backgrd = numInEllipsoidBkg(
       events, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii,
       m_useOnePercentBackgroundCorrection);
-  double peak_w_back = numInEllipsoid(events, directions, abcRadii);
+  std::pair<double, double> peak_w_back =
+      numInEllipsoid(events, directions, abcRadii);
   double ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
 
   const auto frac = std::get<0>(libPeak);
   const auto fracError = std::get<1>(libPeak);
 
-  inti = peak_w_back - ratio * backgrd;
+  inti = peak_w_back.first - ratio * backgrd.first;
 
   // correct for fractional intensity
   sigi = sigi / pow(inti, 2);
@@ -279,14 +280,15 @@ Integrate3DEvents::integrateWeakPeak(
     abcBackgroundOuterRadii[i] *= frac;
   }
 
-  return boost::make_shared<const PeakShapeEllipsoid>(
+  return std::make_shared<const PeakShapeEllipsoid>(
       shape->directions(), abcRadii, abcBackgroundInnerRadii,
       abcBackgroundOuterRadii, Mantid::Kernel::QLab,
       "IntegrateEllipsoidsTwoStep");
 }
 
 double Integrate3DEvents::estimateSignalToNoiseRatio(
-    const IntegrationParameters &params, const V3D &center) {
+    const IntegrationParameters &params, const V3D &center, bool forceSpherical,
+    double sphericityTol) {
 
   auto result = getEvents(center);
   if (!result)
@@ -300,44 +302,57 @@ double Integrate3DEvents::estimateSignalToNoiseRatio(
   makeCovarianceMatrix(events, cov_matrix, params.regionRadius);
 
   std::vector<V3D> eigen_vectors;
-  getEigenVectors(cov_matrix, eigen_vectors);
+  std::vector<double> eigen_values;
+  getEigenVectors(cov_matrix, eigen_vectors, eigen_values);
 
   std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
-    sigmas[i] = stdDev(events, eigen_vectors[i], params.regionRadius);
+    sigmas[i] = sqrt(eigen_values[i]);
   }
 
   const auto max_sigma = *std::max_element(sigmas.begin(), sigmas.end());
+  const auto min_sigma = *std::min_element(sigmas.begin(), sigmas.end());
   if (max_sigma == 0)
     return .0;
 
   auto rValues = calculateRadiusFactors(params, max_sigma);
   auto &r1 = std::get<0>(rValues), r2 = std::get<1>(rValues),
        r3 = std::get<2>(rValues);
-
   std::vector<double> abcBackgroundOuterRadii, abcBackgroundInnerRadii;
   std::vector<double> peakRadii;
-  for (int i = 0; i < 3; i++) {
-    abcBackgroundOuterRadii.push_back(r3 * sigmas[i]);
-    abcBackgroundInnerRadii.push_back(r2 * sigmas[i]);
-    peakRadii.push_back(r1 * sigmas[i]);
+  if (forceSpherical) {
+    // test for spherically symmeteric peak (within tolerance)
+    if ((max_sigma - min_sigma) / max_sigma > sphericityTol)
+      return .0;
+    for (int i = 0; i < 3; i++) {
+      abcBackgroundOuterRadii.emplace_back(r3 * max_sigma);
+      abcBackgroundInnerRadii.emplace_back(r2 * max_sigma);
+      peakRadii.emplace_back(r1 * max_sigma);
+    }
+  } else {
+    for (int i = 0; i < 3; i++) {
+      abcBackgroundOuterRadii.emplace_back(r3 * sigmas[i]);
+      abcBackgroundInnerRadii.emplace_back(r2 * sigmas[i]);
+      peakRadii.emplace_back(r1 * sigmas[i]);
+    }
   }
 
   // Background / Peak / Background
-  double backgrd = numInEllipsoidBkg(
+  std::pair<double, double> backgrd = numInEllipsoidBkg(
       events, eigen_vectors, abcBackgroundOuterRadii, abcBackgroundInnerRadii,
       m_useOnePercentBackgroundCorrection);
 
-  double peak_w_back = numInEllipsoid(events, eigen_vectors, peakRadii);
+  std::pair<double, double> peak_w_back =
+      numInEllipsoid(events, eigen_vectors, peakRadii);
 
   double ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
-  auto inti = peak_w_back - ratio * backgrd;
-  auto sigi = sqrt(peak_w_back + ratio * ratio * backgrd);
+  auto inti = peak_w_back.first - ratio * backgrd.first;
+  auto sigi = sqrt(peak_w_back.second + ratio * ratio * backgrd.second);
 
   return inti / sigi;
 }
 
-const std::vector<std::pair<double, V3D>> *
+const std::vector<std::pair<std::pair<double, double>, V3D>> *
 Integrate3DEvents::getEvents(const V3D &peak_q) {
   auto hkl_key = getHklKey(peak_q);
   if (maxOrder)
@@ -429,7 +444,7 @@ bool Integrate3DEvents::correctForDetectorEdges(
  */
 Mantid::Geometry::PeakShape_const_sptr
 Integrate3DEvents::ellipseIntegrateEvents(
-    std::vector<Kernel::V3D> E1Vec, V3D const &peak_q, bool specify_size,
+    const std::vector<V3D> &E1Vec, V3D const &peak_q, bool specify_size,
     double peak_radius, double back_inner_radius, double back_outer_radius,
     std::vector<double> &axes_radii, double &inti, double &sigi) {
   inti = 0.0; // default values, in case something
@@ -438,30 +453,32 @@ Integrate3DEvents::ellipseIntegrateEvents(
   int64_t hkl_key = getHklKey(peak_q);
 
   if (hkl_key == 0) {
-    return boost::make_shared<NoShape>();
+    return std::make_shared<NoShape>();
   }
 
   auto pos = m_event_lists.find(hkl_key);
   if (m_event_lists.end() == pos)
-    return boost::make_shared<NoShape>();
+    return std::make_shared<NoShape>();
   ;
 
-  std::vector<std::pair<double, V3D>> &some_events = pos->second;
+  std::vector<std::pair<std::pair<double, double>, V3D>> &some_events =
+      pos->second;
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return
-    return boost::make_shared<NoShape>();
+    return std::make_shared<NoShape>();
   }
 
   DblMatrix cov_matrix(3, 3);
   makeCovarianceMatrix(some_events, cov_matrix, m_radius);
 
   std::vector<V3D> eigen_vectors;
-  getEigenVectors(cov_matrix, eigen_vectors);
+  std::vector<double> eigen_values;
+  getEigenVectors(cov_matrix, eigen_vectors, eigen_values);
 
   std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++) {
-    sigmas[i] = stdDev(some_events, eigen_vectors[i], m_radius);
+    sigmas[i] = sqrt(eigen_values[i]);
   }
 
   bool invalid_peak =
@@ -469,20 +486,20 @@ Integrate3DEvents::ellipseIntegrateEvents(
         return std::isnan(sigma) || sigma <= 0;
       });
 
-  if (invalid_peak)                       // if data collapses to a line or
-  {                                       // to a plane, the volume of the
-    return boost::make_shared<NoShape>(); // ellipsoids will be zero.
+  if (invalid_peak)                     // if data collapses to a line or
+  {                                     // to a plane, the volume of the
+    return std::make_shared<NoShape>(); // ellipsoids will be zero.
   }
 
-  return ellipseIntegrateEvents(E1Vec, peak_q, some_events, eigen_vectors,
-                                sigmas, specify_size, peak_radius,
-                                back_inner_radius, back_outer_radius,
-                                axes_radii, inti, sigi);
+  return ellipseIntegrateEvents(std::move(E1Vec), peak_q, some_events,
+                                eigen_vectors, sigmas, specify_size,
+                                peak_radius, back_inner_radius,
+                                back_outer_radius, axes_radii, inti, sigi);
 }
 
 Mantid::Geometry::PeakShape_const_sptr
 Integrate3DEvents::ellipseIntegrateModEvents(
-    std::vector<Kernel::V3D> E1Vec, V3D const &peak_q, V3D const &hkl,
+    const std::vector<V3D> &E1Vec, V3D const &peak_q, V3D const &hkl,
     V3D const &mnp, bool specify_size, double peak_radius,
     double back_inner_radius, double back_outer_radius,
     std::vector<double> &axes_radii, double &inti, double &sigi) {
@@ -495,19 +512,20 @@ Integrate3DEvents::ellipseIntegrateModEvents(
       boost::math::iround<double>(mnp[1]), boost::math::iround<double>(mnp[2]));
 
   if (hkl_key == 0) {
-    return boost::make_shared<NoShape>();
+    return std::make_shared<NoShape>();
   }
 
   auto pos = m_event_lists.find(hkl_key);
   if (m_event_lists.end() == pos)
-    return boost::make_shared<NoShape>();
+    return std::make_shared<NoShape>();
   ;
 
-  std::vector<std::pair<double, V3D>> &some_events = pos->second;
+  std::vector<std::pair<std::pair<double, double>, V3D>> &some_events =
+      pos->second;
 
   if (some_events.size() < 3) // if there are not enough events to
   {                           // find covariance matrix, return
-    return boost::make_shared<NoShape>();
+    return std::make_shared<NoShape>();
   }
 
   DblMatrix cov_matrix(3, 3);
@@ -517,26 +535,27 @@ Integrate3DEvents::ellipseIntegrateModEvents(
     makeCovarianceMatrix(some_events, cov_matrix, s_radius);
 
   std::vector<V3D> eigen_vectors;
-  getEigenVectors(cov_matrix, eigen_vectors);
+  std::vector<double> eigen_values;
+  getEigenVectors(cov_matrix, eigen_vectors, eigen_values);
 
   std::vector<double> sigmas(3);
   for (int i = 0; i < 3; i++)
-    sigmas[i] = stdDev(some_events, eigen_vectors[i], m_radius);
+    sigmas[i] = sqrt(eigen_values[i]);
 
   bool invalid_peak =
       std::any_of(sigmas.cbegin(), sigmas.cend(), [](const double sigma) {
         return std::isnan(sigma) || sigma <= 0;
       });
 
-  if (invalid_peak)                       // if data collapses to a line or
-  {                                       // to a plane, the volume of the
-    return boost::make_shared<NoShape>(); // ellipsoids will be zero.
+  if (invalid_peak)                     // if data collapses to a line or
+  {                                     // to a plane, the volume of the
+    return std::make_shared<NoShape>(); // ellipsoids will be zero.
   }
 
-  return ellipseIntegrateEvents(E1Vec, peak_q, some_events, eigen_vectors,
-                                sigmas, specify_size, peak_radius,
-                                back_inner_radius, back_outer_radius,
-                                axes_radii, inti, sigi);
+  return ellipseIntegrateEvents(std::move(E1Vec), peak_q, some_events,
+                                eigen_vectors, sigmas, specify_size,
+                                peak_radius, back_inner_radius,
+                                back_outer_radius, axes_radii, inti, sigi);
 }
 /**
  * Calculate the number of events in an ellipsoid centered at 0,0,0 with
@@ -551,18 +570,21 @@ Integrate3DEvents::ellipseIntegrateModEvents(
  *                     of the three axes of the ellisoid.
  * @return Then number of events that are in or on the specified ellipsoid.
  */
-double Integrate3DEvents::numInEllipsoid(
-    std::vector<std::pair<double, V3D>> const &events,
+std::pair<double, double> Integrate3DEvents::numInEllipsoid(
+    std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
     std::vector<V3D> const &directions, std::vector<double> const &sizes) {
-  double count = 0;
+
+  std::pair<double, double> count(0, 0);
   for (const auto &event : events) {
     double sum = 0;
     for (size_t k = 0; k < 3; k++) {
       double comp = event.second.scalar_prod(directions[k]) / sizes[k];
       sum += comp * comp;
     }
-    if (sum <= 1)
-      count += event.first;
+    if (sum <= 1) {
+      count.first += event.first.first;   // count
+      count.second += event.first.second; // error squared (add in quadrature)
+    }
   }
 
   return count;
@@ -584,13 +606,13 @@ double Integrate3DEvents::numInEllipsoid(
  correction should be used.
  * @return Then number of events that are in or on the specified ellipsoid.
  */
-double Integrate3DEvents::numInEllipsoidBkg(
-    std::vector<std::pair<double, V3D>> const &events,
+std::pair<double, double> Integrate3DEvents::numInEllipsoidBkg(
+    std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
     std::vector<V3D> const &directions, std::vector<double> const &sizes,
     std::vector<double> const &sizesIn,
     const bool useOnePercentBackgroundCorrection) {
-  double count = 0;
-  std::vector<double> eventVec;
+  std::pair<double, double> count(0, 0);
+  std::vector<std::pair<double, double>> eventVec;
   for (const auto &event : events) {
     double sum = 0;
     double sumIn = 0;
@@ -601,18 +623,22 @@ double Integrate3DEvents::numInEllipsoidBkg(
       sumIn += comp * comp;
     }
     if (sum <= 1 && sumIn >= 1)
-      eventVec.push_back(event.first);
+      eventVec.emplace_back(event.first);
   }
 
   auto endIndex = eventVec.size();
   if (useOnePercentBackgroundCorrection) {
     // Remove top 1% of background
-    std::sort(eventVec.begin(), eventVec.end());
+    std::sort(
+        eventVec.begin(), eventVec.end(),
+        [](const std::pair<double, double> &a,
+           const std::pair<double, double> &b) { return a.first < b.first; });
     endIndex = static_cast<size_t>(0.99 * static_cast<double>(endIndex));
   }
 
   for (size_t k = 0; k < endIndex; ++k) {
-    count += eventVec[k];
+    count.first += eventVec[k].first;
+    count.second += eventVec[k].second;
   }
 
   return count;
@@ -646,19 +672,21 @@ double Integrate3DEvents::numInEllipsoidBkg(
  */
 
 void Integrate3DEvents::makeCovarianceMatrix(
-    std::vector<std::pair<double, V3D>> const &events, DblMatrix &matrix,
-    double radius) {
+    std::vector<std::pair<std::pair<double, double>, V3D>> const &events,
+    DblMatrix &matrix, double radius) {
+  double totalCounts;
   for (int row = 0; row < 3; row++) {
     for (int col = 0; col < 3; col++) {
+      totalCounts = 0;
       double sum = 0;
-      for (const auto &value : events) {
-        const auto &event = value.second;
-        if (event.norm() <= radius) {
-          sum += event[row] * event[col];
+      for (const auto &event : events) {
+        if (event.second.norm() <= radius) {
+          totalCounts += event.first.first;
+          sum += event.first.first * event.second[row] * event.second[col];
         }
       }
-      if (events.size() > 1)
-        matrix[row][col] = sum / static_cast<double>(events.size() - 1);
+      if (totalCounts > 1)
+        matrix[row][col] = sum / (totalCounts - 1);
       else
         matrix[row][col] = sum;
     }
@@ -671,9 +699,11 @@ void Integrate3DEvents::makeCovarianceMatrix(
  *  @param cov_matrix     3x3 real symmetric matrix.
  *  @param eigen_vectors  The eigen vectors for the matrix are returned
  *                        in this list.
+ *  @param eigen_values   3 eigenvalues of matrix
  */
 void Integrate3DEvents::getEigenVectors(DblMatrix const &cov_matrix,
-                                        std::vector<V3D> &eigen_vectors) {
+                                        std::vector<V3D> &eigen_vectors,
+                                        std::vector<double> &eigen_values) {
   unsigned int size = 3;
 
   gsl_matrix *matrix = gsl_matrix_alloc(size, size);
@@ -694,50 +724,13 @@ void Integrate3DEvents::getEigenVectors(DblMatrix const &cov_matrix,
     eigen_vectors.emplace_back(gsl_matrix_get(eigen_vec, 0, col),
                                gsl_matrix_get(eigen_vec, 1, col),
                                gsl_matrix_get(eigen_vec, 2, col));
+    eigen_values.emplace_back(gsl_vector_get(eigen_val, col));
   }
 
   gsl_matrix_free(matrix);
   gsl_vector_free(eigen_val);
   gsl_matrix_free(eigen_vec);
   gsl_eigen_symmv_free(wkspace);
-}
-
-/**
- *  Calculate the standard deviation of the given list of 3D events in
- *  the direction of the specified vector.  Only events that are within
- *  the specified radius of 0,0,0 will be considered.
- *
- *  @param  events      List of 3D events centered at 0,0,0
- *  @param  direction   Unit vector giving the direction vector on which
- *                      the 3D events will be projected.
- *  @param  radius      Maximun size of event vectors that will be used
- *                      in calculating the standard deviation.
- */
-double
-Integrate3DEvents::stdDev(std::vector<std::pair<double, V3D>> const &events,
-                          V3D const &direction, double radius) {
-  double sum = 0;
-  double sum_sq = 0;
-  double stdev = 0;
-  int count = 0;
-
-  for (const auto &value : events) {
-    const auto &event = value.second;
-    if (event.norm() <= radius) {
-      double dot_prod = event.scalar_prod(direction);
-      sum += dot_prod;
-      sum_sq += dot_prod * dot_prod;
-      count++;
-    }
-  }
-
-  if (count > 1) {
-    double ave = sum / count;
-    stdev = sqrt((sum_sq / count - ave * ave) * static_cast<double>(count) /
-                 (count - 1.0));
-  }
-
-  return stdev;
 }
 
 /**
@@ -1004,8 +997,8 @@ int64_t Integrate3DEvents::getHklMnpKey(V3D const &q_vector) {
  *                     event_lists map, if it is close enough to some peak
  * @param hkl_integ
  */
-void Integrate3DEvents::addEvent(std::pair<double, V3D> event_Q,
-                                 bool hkl_integ) {
+void Integrate3DEvents::addEvent(
+    std::pair<std::pair<double, double>, V3D> event_Q, bool hkl_integ) {
   int64_t hkl_key;
   if (hkl_integ)
     hkl_key = getHklKey2(event_Q.second);
@@ -1023,7 +1016,7 @@ void Integrate3DEvents::addEvent(std::pair<double, V3D> event_Q,
       else
         event_Q.second = event_Q.second - peak_it->second;
       if (event_Q.second.norm() < m_radius) {
-        m_event_lists[hkl_key].push_back(event_Q);
+        m_event_lists[hkl_key].emplace_back(event_Q);
       }
     }
   }
@@ -1043,8 +1036,8 @@ void Integrate3DEvents::addEvent(std::pair<double, V3D> event_Q,
  *                     event_lists map, if it is close enough to some peak
  * @param hkl_integ
  */
-void Integrate3DEvents::addModEvent(std::pair<double, V3D> event_Q,
-                                    bool hkl_integ) {
+void Integrate3DEvents::addModEvent(
+    std::pair<std::pair<double, double>, V3D> event_Q, bool hkl_integ) {
   int64_t hklmnp_key;
 
   if (hkl_integ)
@@ -1065,9 +1058,9 @@ void Integrate3DEvents::addModEvent(std::pair<double, V3D> event_Q,
 
       if (hklmnp_key % 10000 == 0) {
         if (event_Q.second.norm() < m_radius)
-          m_event_lists[hklmnp_key].push_back(event_Q);
+          m_event_lists[hklmnp_key].emplace_back(event_Q);
       } else if (event_Q.second.norm() < s_radius) {
-        m_event_lists[hklmnp_key].push_back(event_Q);
+        m_event_lists[hklmnp_key].emplace_back(event_Q);
       }
     }
   }
@@ -1111,12 +1104,13 @@ void Integrate3DEvents::addModEvent(std::pair<double, V3D> event_Q,
  *
  */
 PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
-    std::vector<Kernel::V3D> E1Vec, V3D const &peak_q,
-    std::vector<std::pair<double, Mantid::Kernel::V3D>> const &ev_list,
-    std::vector<Mantid::Kernel::V3D> const &directions,
-    std::vector<double> const &sigmas, bool specify_size, double peak_radius,
-    double back_inner_radius, double back_outer_radius,
-    std::vector<double> &axes_radii, double &inti, double &sigi) {
+    const std::vector<V3D> &E1Vec, V3D const &peak_q,
+    std::vector<std::pair<std::pair<double, double>, Mantid::Kernel::V3D>> const
+        &ev_list,
+    std::vector<V3D> const &directions, std::vector<double> const &sigmas,
+    bool specify_size, double peak_radius, double back_inner_radius,
+    double back_outer_radius, std::vector<double> &axes_radii, double &inti,
+    double &sigi) {
   // r1, r2 and r3 will give the sizes of the major axis of
   // the peak ellipsoid, and of the inner and outer surface
   // of the background ellipsoidal shell, respectively.
@@ -1158,10 +1152,10 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
   std::vector<double> abcBackgroundInnerRadii;
   std::vector<double> abcRadii;
   for (int i = 0; i < 3; i++) {
-    abcBackgroundOuterRadii.push_back(r3 * sigmas[i]);
-    abcBackgroundInnerRadii.push_back(r2 * sigmas[i]);
-    abcRadii.push_back(r1 * sigmas[i]);
-    axes_radii.push_back(r1 * sigmas[i]);
+    abcBackgroundOuterRadii.emplace_back(r3 * sigmas[i]);
+    abcBackgroundInnerRadii.emplace_back(r2 * sigmas[i]);
+    abcRadii.emplace_back(r1 * sigmas[i]);
+    axes_radii.emplace_back(r1 * sigmas[i]);
   }
 
   if (!E1Vec.empty()) {
@@ -1173,7 +1167,7 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     double h1 = 1.0 - detectorQ(E1Vec, peak_q, axes_radii);
     // Do not use peak if edge of detector is inside integration radius
     if (h1 > 0.0)
-      return boost::make_shared<const PeakShapeEllipsoid>(
+      return std::make_shared<const PeakShapeEllipsoid>(
           directions, abcRadii, abcBackgroundInnerRadii,
           abcBackgroundOuterRadii, Mantid::Kernel::QLab, "IntegrateEllipsoids");
     r3 *= m3;
@@ -1187,19 +1181,20 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
     }
   }
 
-  double backgrd = numInEllipsoidBkg(
+  std::pair<double, double> backgrd = numInEllipsoidBkg(
       ev_list, directions, abcBackgroundOuterRadii, abcBackgroundInnerRadii,
       m_useOnePercentBackgroundCorrection);
 
-  double peak_w_back = numInEllipsoid(ev_list, directions, axes_radii);
+  std::pair<double, double> peak_w_back =
+      numInEllipsoid(ev_list, directions, axes_radii);
 
   double ratio = pow(r1, 3) / (pow(r3, 3) - pow(r2, 3));
 
-  inti = peak_w_back - ratio * backgrd;
-  sigi = sqrt(peak_w_back + ratio * ratio * backgrd);
+  inti = peak_w_back.first - ratio * backgrd.first;
+  sigi = sqrt(peak_w_back.second + ratio * ratio * backgrd.second);
 
   // Make the shape and return it.
-  return boost::make_shared<const PeakShapeEllipsoid>(
+  return std::make_shared<const PeakShapeEllipsoid>(
       directions, abcRadii, abcBackgroundInnerRadii, abcBackgroundOuterRadii,
       Mantid::Kernel::QLab, "IntegrateEllipsoids");
 }
@@ -1214,8 +1209,8 @@ PeakShapeEllipsoid_const_sptr Integrate3DEvents::ellipseIntegrateEvents(
  * @param QLabFrame: The Peak center.
  * @param r: Peak radius.
  */
-double Integrate3DEvents::detectorQ(std::vector<Kernel::V3D> E1Vec,
-                                    const Mantid::Kernel::V3D QLabFrame,
+double Integrate3DEvents::detectorQ(const std::vector<V3D> &E1Vec,
+                                    const V3D QLabFrame,
                                     const std::vector<double> &r) {
   double quot = 1.0;
   for (auto &E1 : E1Vec) {

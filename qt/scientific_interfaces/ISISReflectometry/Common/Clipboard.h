@@ -1,13 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
 
-#ifndef MANTID_CUSTOMINTERFACES_CLIPBOARD_H_
-#define MANTID_CUSTOMINTERFACES_CLIPBOARD_H_
-
+#include "DllConfig.h"
 #include "MantidQtWidgets/Common/Batch/RowLocation.h"
 #include "MantidQtWidgets/Common/Batch/Subtree.h"
 #include "Reduction/Group.h"
@@ -16,7 +15,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace ISISReflectometry {
 
-class Clipboard {
+class MANTIDQT_ISISREFLECTOMETRY_DLL Clipboard {
 public:
   struct Item {
     Item(MantidQt::MantidWidgets::Batch::RowLocation location,
@@ -67,8 +66,7 @@ private:
       MantidQt::MantidWidgets::Batch::Subtree const &subtree) const;
 };
 
-bool containsGroups(Clipboard const &clipboard);
+bool MANTIDQT_ISISREFLECTOMETRY_DLL containsGroups(Clipboard const &clipboard);
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTID_CUSTOMINTERFACES_CLIPBOARD_H_

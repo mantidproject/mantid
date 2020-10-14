@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_INDEXING_CONVERSION_H_
-#define MANTID_INDEXING_CONVERSION_H_
+#pragma once
 
 #include "MantidIndexing/DllConfig.h"
 #include "MantidIndexing/GlobalSpectrumIndex.h"
@@ -35,7 +34,7 @@ std::vector<Out> castVector(const std::vector<In> &indices) {
   std::vector<Out> converted;
   converted.reserve(indices.size());
   for (const auto index : indices)
-    converted.push_back(static_cast<typename Out::underlying_type>(index));
+    converted.emplace_back(static_cast<typename Out::underlying_type>(index));
   return converted;
 }
 
@@ -53,12 +52,10 @@ std::vector<Out> castVector(const std::vector<In> &indices) {
   std::vector<Out> converted;
   converted.reserve(indices.size());
   for (const auto index : indices)
-    converted.push_back(
+    converted.emplace_back(
         static_cast<Out>(static_cast<typename In::underlying_type>(index)));
   return converted;
 }
 
 } // namespace Indexing
 } // namespace Mantid
-
-#endif /* MANTID_INDEXING_CONVERSION_H_ */

@@ -22,7 +22,7 @@ if (NOT EXISTS ${_find_sphinx_py})
 endif()
 
 # import sphinx-build to attempt to get the version
-execute_process (COMMAND ${PYTHON_EXECUTABLE} ${_find_sphinx_py} OUTPUT_VARIABLE sphinx_output
+execute_process (COMMAND ${Python_EXECUTABLE} ${_find_sphinx_py} OUTPUT_VARIABLE sphinx_output
                                                                  RESULT_VARIABLE sphinx_result)
 string (STRIP "${sphinx_output}" sphinx_output)
 

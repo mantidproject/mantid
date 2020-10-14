@@ -1,11 +1,9 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
 ###############################################################################
 # This has to be tested through a workspace as it cannot be created in
@@ -15,6 +13,7 @@ from testhelpers import run_algorithm, WorkspaceCreationHelper
 from mantid.geometry import Instrument
 from mantid.api import Sample, Run
 from math import pi
+
 
 class ExperimentInfoTest(unittest.TestCase):
 
@@ -49,10 +48,25 @@ class ExperimentInfoTest(unittest.TestCase):
         # No instrument in test workspace, so size is 0.
         self.assertEqual(detInfo.size(), 0)
 
-#    def test_set_and_get_efixed(self):
-#      ws = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(1, 5, False, False)
-#        ws.setEFixed(1, pi)
-#      self.assertEqual(ws.getEFixed(1), pi)
+    def test_setSample(self):
+        sample = Sample()
+        sample.setThickness(12.5)
+
+        self._expt_ws.setSample(sample)
+        held_sample = self._expt_ws.sample()
+
+        self.assertNotEqual(id(held_sample), id(sample))
+        self.assertEqual(held_sample.getThickness(), sample.getThickness())
+
+    def test_setRun(self):
+        run = Run()
+        run.addProperty("run_property", 1, True)
+
+        self._expt_ws.setRun(run)
+        held_run = self._expt_ws.run()
+
+        self.assertNotEqual(id(held_run), id(run))
+        self.assertTrue(held_run.hasProperty('run_property'))
 
 if __name__ == '__main__':
     unittest.main()

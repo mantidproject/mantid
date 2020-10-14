@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef ATOMTEST_H_
-#define ATOMTEST_H_
+#pragma once
 
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/NeutronAtom.h"
@@ -67,10 +66,10 @@ public:
     boost::random::mt19937 gen;
     boost::random::uniform_int_distribution<uint16_t> dist(1, 96);
     for (size_t i = 0; i < test_size; ++i) {
-      z_input.push_back(dist(gen));
+      z_input.emplace_back(dist(gen));
     }
     for (auto z : z_input) {
-      symbol_input.push_back(getAtom(z).symbol);
+      symbol_input.emplace_back(getAtom(z).symbol);
     }
   }
 
@@ -106,5 +105,3 @@ private:
   std::vector<uint16_t> z_input;
   std::vector<std::string> symbol_input;
 };
-
-#endif // ATOMTEST_H_

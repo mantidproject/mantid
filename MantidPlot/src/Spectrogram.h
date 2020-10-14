@@ -26,8 +26,7 @@
  *                                                                         *
  ***************************************************************************/
 
-#ifndef SPECTROGRAM_H
-#define SPECTROGRAM_H
+#pragma once
 
 #include "Matrix.h"
 #include "PlotCurve.h"
@@ -45,9 +44,9 @@
 #include "MantidQtWidgets/Plotting/Qwt/MantidColorMap.h"
 
 #include <QPainter>
-#include <boost/shared_ptr.hpp>
 #include <float.h>
 #include <fstream>
+#include <memory>
 #include <qobject.h>
 
 class MatrixData;
@@ -83,7 +82,7 @@ public:
   /// Handles afterReplace notification
   void afterReplaceHandle(
       const std::string &wsName,
-      const boost::shared_ptr<Mantid::API::Workspace> ws) override;
+      const std::shared_ptr<Mantid::API::Workspace> &ws) override;
   /// Handle an ADS clear notification
   void clearADSHandle() override;
 
@@ -363,5 +362,3 @@ private:
   //! Min and max values in the source data matrix
   double min_z, max_z;
 };
-
-#endif

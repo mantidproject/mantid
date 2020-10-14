@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidPythonInterface/api/PythonAlgorithm/DataProcessorAdapter.h"
@@ -25,7 +25,7 @@ template <class Base> void do_export(const std::string &name) {
   using Adapter = DataProcessorAdapter<Base>;
 
   class_<GenericDataProcessorAlgorithm<Base>, bases<Base>,
-         boost::shared_ptr<Adapter>, boost::noncopyable>(
+         std::shared_ptr<Adapter>, boost::noncopyable>(
       name.c_str(), "Base class workflow-type algorithms")
 
       .def("setLoadAlg", &Adapter::setLoadAlgProxy, (arg("self"), arg("alg")),

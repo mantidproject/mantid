@@ -14,7 +14,7 @@ Interface Overview
 ------------------
 
 This interface is used to analyse the time domain data collected on Muon instruments. The interface can be
-accessed from the main menu of MantidPlot, in *Interfaces → Muon → Muon Analysis 2*. For sample
+accessed from the main menu of MantidPlot, in *Interfaces → Muon → Muon Analysis*. For sample
 datasets, please visit `Muon - Downloads <http://www.isis.stfc.ac.uk/groups/muons/downloads/downloads4612.html>`_.
 
 Loading
@@ -40,10 +40,12 @@ Tabs
 
 All these tabs can be dragged away from the interface into their own window.
 
+* :ref:`Plotting Window <muon_plotting_window-ref>`
 * :ref:`Home Tab <muon_home_tab-ref>`
 * :ref:`Grouping Tab <muon_grouping_tab-ref>`
 * :ref:`Phase Table Tab <muon_phase_table_tab-ref>`
 * :ref:`Fitting Tab <muon_fitting_tab-ref>`
+* :ref:`Sequential Fitting Tab <muon_sequential_fitting_tab-ref>`
 * :ref:`Results Table Tab <muon_results_tab-ref>`
 
 Feedback & Comments

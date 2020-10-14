@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_CRYSTALFIELDPEAKS_H_
-#define MANTID_CURVEFITTING_CRYSTALFIELDPEAKS_H_
+#pragma once
 
 #include "MantidAPI/IFunctionGeneral.h"
 #include "MantidCurveFitting/Functions/CrystalFieldPeaksBase.h"
@@ -38,5 +37,3 @@ private:
 } // namespace Functions
 } // namespace CurveFitting
 } // namespace Mantid
-
-#endif /* MANTID_CURVEFITTING_CRYSTALFIELDPEAKS_H_ */

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PARALLEL_IO_EVENT_PARSER_H
-#define MANTID_PARALLEL_IO_EVENT_PARSER_H
+#pragma once
 
 #include "MantidParallel/Collectives.h"
 #include "MantidParallel/Communicator.h"
@@ -219,7 +218,7 @@ void EventParser<TimeOffsetType>::startAsync(
   // Wrapped in lambda because std::thread is unable to specialize doParsing on
   // its own
   m_thread =
-      std::thread([this, event_id_start, event_time_offset_start, &range] {
+      std::thread([this, event_id_start, event_time_offset_start, range] {
         doParsing(event_id_start, event_time_offset_start, range);
       });
 }
@@ -247,4 +246,3 @@ template <class TimeOffsetType> void EventParser<TimeOffsetType>::wait() {
 } // namespace IO
 } // namespace Parallel
 } // namespace Mantid
-#endif // MANTID_PARALLEL_IO_EVENT_PARSER_H

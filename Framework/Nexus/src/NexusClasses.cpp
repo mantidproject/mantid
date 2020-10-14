@@ -1,13 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidNexus/NexusClasses.h"
+#include <memory>
 
 namespace Mantid {
 namespace NeXus {
@@ -93,17 +94,13 @@ void NXObject::getAttributes() {
   int rank;
   int dims[4];
 #endif
-  int nbuff = 127;
-  boost::shared_array<char> buff(new char[nbuff + 1]);
+  std::vector<char> buff(128);
 
 #ifdef NEXUS43
   while (NXgetnextattr(m_fileID, pName, &iLength, &iType) != NX_EOD) {
 #else
   while (NXgetnextattra(m_fileID, pName, &rank, dims, &iType) != NX_EOD) {
 #endif
-// std::cerr<<"--------------------------\n";
-// std::cerr<<"name="<<path()<<'\n';
-// std::cerr<<pName<<' ' <<iLength<<' '<<iType<<'\n';
 #ifndef NEXUS43
     if (rank > 1) { // mantid only supports single value attributes
       throw std::runtime_error(
@@ -117,35 +114,33 @@ void NXObject::getAttributes() {
 
     switch (iType) {
     case NX_CHAR: {
-      if (iLength > nbuff + 1) {
-        nbuff = iLength;
-        buff.reset(new char[nbuff + 1]);
+      if (iLength >= 0 && (unsigned)iLength > buff.size()) {
+        buff.resize(iLength);
       }
       int nz = iLength + 1;
-      NXgetattr(m_fileID, pName, buff.get(), &nz, &iType);
-      attributes.set(pName, buff.get());
-      // std::cerr<<"value="<<buff.get()<<'\n';
+      NXgetattr(m_fileID, pName, buff.data(), &nz, &iType);
+      attributes.set(pName, buff.data());
       break;
     }
     case NX_INT16: {
       short int value;
       NXgetattr(m_fileID, pName, &value, &iLength, &iType);
-      sprintf(buff.get(), "%i", value);
-      attributes.set(pName, buff.get());
+      sprintf(buff.data(), "%i", value);
+      attributes.set(pName, buff.data());
       break;
     }
     case NX_INT32: {
       int value;
       NXgetattr(m_fileID, pName, &value, &iLength, &iType);
-      sprintf(buff.get(), "%i", value);
-      attributes.set(pName, buff.get());
+      sprintf(buff.data(), "%i", value);
+      attributes.set(pName, buff.data());
       break;
     }
     case NX_UINT16: {
       short unsigned int value;
       NXgetattr(m_fileID, pName, &value, &iLength, &iType);
-      sprintf(buff.get(), "%u", value);
-      attributes.set(pName, buff.get());
+      sprintf(buff.data(), "%u", value);
+      attributes.set(pName, buff.data());
       break;
     }
     }
@@ -183,12 +178,11 @@ void NXClass::readAllInfo() {
           NXgetinfo(m_fileID, &data_info.rank, data_info.dims, &data_info.type);
       NXclosedata(m_fileID);
       data_info.nxname = info.nxname;
-      m_datasets->push_back(data_info);
+      m_datasets->emplace_back(data_info);
     } else if (info.nxclass.substr(0, 2) == "NX" ||
                info.nxclass.substr(0, 2) == "IX") {
-      m_groups->push_back(info);
+      m_groups->emplace_back(info);
     }
-    // std::cerr<<'!'<<info.nxname<<'\n';
   }
   reset();
 }
@@ -202,8 +196,6 @@ bool NXClass::isValid(const std::string &path) const {
 }
 
 void NXClass::open() {
-  // if (NX_ERROR == NXopengroup(m_fileID,name().c_str(),NX_class().c_str()))
-  //{
   if (NX_ERROR == NXopengrouppath(m_fileID, m_path.c_str())) {
 
     throw std::runtime_error("Cannot open group " + name() + " of class " +
@@ -358,7 +350,7 @@ std::vector<std::string> &NXNote::data() {
 
     std::string line;
     while (getline(istr, line)) {
-      m_data.push_back(line);
+      m_data.emplace_back(line);
     }
 
     m_data_ok = true;

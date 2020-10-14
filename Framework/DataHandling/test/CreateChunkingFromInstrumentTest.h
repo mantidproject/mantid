@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_CREATECHUNKINGFROMINSTRUMENTTEST_H_
-#define MANTID_DATAHANDLING_CREATECHUNKINGFROMINSTRUMENTTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -58,7 +57,7 @@ public:
       return;
 
     // Check the results
-    ITableWorkspace_sptr tws = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
+    ITableWorkspace_sptr tws = std::dynamic_pointer_cast<ITableWorkspace>(ws);
     TS_ASSERT_EQUALS(tws->columnCount(), 1);
     TS_ASSERT_EQUALS(tws->getColumnNames()[0], "BankName");
     TS_ASSERT_EQUALS(tws->rowCount(), 4);
@@ -92,7 +91,7 @@ public:
       return;
 
     // Check the results
-    ITableWorkspace_sptr tws = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
+    ITableWorkspace_sptr tws = std::dynamic_pointer_cast<ITableWorkspace>(ws);
     TS_ASSERT_EQUALS(tws->columnCount(), 1);
     TS_ASSERT_EQUALS(tws->getColumnNames()[0], "BankName");
     TS_ASSERT_EQUALS(tws->rowCount(), 0);
@@ -119,5 +118,3 @@ public:
     TS_ASSERT(!alg.isExecuted());
   }
 };
-
-#endif /* MANTID_DATAHANDLING_CREATECHUNKINGFROMINSTRUMENTTEST_H_ */

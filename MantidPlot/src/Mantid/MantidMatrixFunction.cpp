@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMatrixFunction.h"
 
@@ -286,10 +286,10 @@ MantidMatrixFunctionWorkspaceObserver::MantidMatrixFunctionWorkspaceObserver(
 
 void MantidMatrixFunctionWorkspaceObserver::afterReplaceHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace> ws) {
+    const std::shared_ptr<Mantid::API::Workspace> &ws) {
   if (m_function->m_workspace && wsName == m_function->m_workspace->getName()) {
     auto mws =
-        boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws);
+        std::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws);
     if (mws) {
       m_function->reset(mws);
       emit requestRedraw();
@@ -301,7 +301,7 @@ void MantidMatrixFunctionWorkspaceObserver::afterReplaceHandle(
 
 void MantidMatrixFunctionWorkspaceObserver::preDeleteHandle(
     const std::string &wsName,
-    const boost::shared_ptr<Mantid::API::Workspace>) {
+    const std::shared_ptr<Mantid::API::Workspace> &) {
   if (m_function->m_workspace && wsName == m_function->m_workspace->getName()) {
     emit requestClose();
   }

@@ -1,17 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_CROSSCORRELATE_H_
-#define MANTID_ALGORITHMS_CROSSCORRELATE_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -41,7 +41,7 @@ namespace Algorithms {
     @author Laurent C Chapon, ISIS Facility Rutherford Appleton Laboratory
     @date 15/12/2008
 */
-class DLLExport CrossCorrelate : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CrossCorrelate : public API::Algorithm {
 public:
   /// (Empty) Constructor
   CrossCorrelate() : API::Algorithm() {}
@@ -81,5 +81,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHMS_CROSSCORRELATE_H_*/

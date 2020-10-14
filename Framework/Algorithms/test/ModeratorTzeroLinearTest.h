@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_
-#define MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_
+#pragma once
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
@@ -27,7 +26,7 @@ using Mantid::HistogramData::LinearGenerator;
 using Mantid::Types::Event::TofEvent;
 
 namespace {
-void addToInstrument(MatrixWorkspace_sptr testWS,
+void addToInstrument(const MatrixWorkspace_sptr &testWS,
                      const bool &add_deltaE_mode = false,
                      const bool &add_t0_formula = false) {
   const double evalue(2.082); // energy corresponding to the first order Bragg
@@ -288,5 +287,3 @@ private:
   MatrixWorkspace_sptr input;
   EventWorkspace_sptr inputEvent;
 };
-
-#endif /* MANTID_ALGORITHMS_MODERATORTZEROLINEARTEST_H_ */

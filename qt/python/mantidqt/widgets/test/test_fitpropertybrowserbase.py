@@ -1,4 +1,9 @@
-from __future__ import (absolute_import, division, print_function)
+# Mantid Repository : https://github.com/mantidproject/mantid
+#
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+# SPDX - License - Identifier: GPL - 3.0 +
 import platform
 import sys
 import unittest
@@ -13,8 +18,8 @@ from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowserBase
 
 
 def on_ubuntu_or_darwin():
-    return ('Ubuntu' in platform.platform() and sys.version[0] == '2' or
-            sys.platform == 'darwin' and PYQT_VERSION[0] == '4')
+    return ('Ubuntu' in platform.platform() and sys.version[0] == '2'
+            or sys.platform == 'darwin' and PYQT_VERSION[0] == '4')
 
 
 @unittest.skipIf(on_ubuntu_or_darwin(), "Popups don't show on ubuntu with python 2. Unskip when switched to xvfb."

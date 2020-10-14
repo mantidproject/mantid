@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidLiveData/FileEventDataListener.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -126,7 +126,7 @@ void FileEventDataListener::start(
   loadChunk();
 }
 
-boost::shared_ptr<Workspace> FileEventDataListener::extractData() {
+std::shared_ptr<Workspace> FileEventDataListener::extractData() {
   // Once the end of the file is reached, this method throws to stop the calling
   // algorithm.
   // This is equivalent to the end of the run - which we still need to figure

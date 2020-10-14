@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_GETSPICEDATARAWCOUNTSFROMMDTEST_H_
-#define MANTID_MDALGORITHMS_GETSPICEDATARAWCOUNTSFROMMDTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -64,7 +63,7 @@ public:
     testalg.execute();
     TS_ASSERT(testalg.isExecuted());
 
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
@@ -102,7 +101,7 @@ public:
     testalg.execute();
     TS_ASSERT(testalg.isExecuted());
 
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
@@ -141,7 +140,7 @@ public:
     testalg.execute();
     TS_ASSERT(testalg.isExecuted());
 
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
@@ -180,7 +179,7 @@ public:
     testalg.execute();
     TS_ASSERT(testalg.isExecuted());
 
-    MatrixWorkspace_sptr outws = boost::dynamic_pointer_cast<MatrixWorkspace>(
+    MatrixWorkspace_sptr outws = std::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve("Run1CountsMatrixWS"));
     TS_ASSERT(outws);
 
@@ -234,12 +233,12 @@ private:
 
     // Retrieve the workspaces as the inputs of ConvertSpiceDataToRealSpace
     ITableWorkspace_sptr datatablews =
-        boost::dynamic_pointer_cast<ITableWorkspace>(
+        std::dynamic_pointer_cast<ITableWorkspace>(
             AnalysisDataService::Instance().retrieve("DataTable"));
     TS_ASSERT(datatablews);
 
     MatrixWorkspace_sptr parentlogws =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(
+        std::dynamic_pointer_cast<MatrixWorkspace>(
             AnalysisDataService::Instance().retrieve("LogParentWS"));
     TS_ASSERT(parentlogws);
 
@@ -257,9 +256,9 @@ private:
     TS_ASSERT(loader.isExecuted());
 
     // Get on hold of MDWorkspaces for test
-    m_dataMD = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+    m_dataMD = std::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve("HB2A_MD"));
-    m_monitorMD = boost::dynamic_pointer_cast<IMDEventWorkspace>(
+    m_monitorMD = std::dynamic_pointer_cast<IMDEventWorkspace>(
         AnalysisDataService::Instance().retrieve("MonitorMDW"));
     TS_ASSERT(m_dataMD);
     TS_ASSERT(m_monitorMD);
@@ -271,5 +270,3 @@ private:
     return;
   }
 };
-
-#endif /* MANTID_MDALGORITHMS_GETSPICEDATARAWCOUNTSFROMMDTEST_H_ */

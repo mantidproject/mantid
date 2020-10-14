@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadPreNexus.h"
 #include "MantidAPI/FileProperty.h"
@@ -62,7 +62,9 @@ const std::string LoadPreNexus::category() const {
  */
 int LoadPreNexus::confidence(Kernel::FileDescriptor &descriptor) const {
   const std::string &filename = descriptor.filename();
-  if (filename.compare(filename.size() - 12, 12, "_runinfo.xml") == 0)
+  if (filename.size() > 12
+          ? (filename.compare(filename.size() - 12, 12, "_runinfo.xml") == 0)
+          : false)
     return 80;
   else
     return 0;
@@ -84,7 +86,7 @@ void LoadPreNexus::init() {
       "File containing the pixel mapping (DAS pixels to pixel IDs) file "
       "(typically INSTRUMENT_TS_YYYY_MM_DD.dat). The filename will be found "
       "automatically if not specified.");
-  auto mustBePositive = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<int>>();
   mustBePositive->setLower(1);
   declareProperty("ChunkNumber", EMPTY_INT(), mustBePositive,
                   "If loading the file by sections ('chunks'), this is the "
@@ -99,7 +101,7 @@ void LoadPreNexus::init() {
                                          "ChunkNumber", IS_NOT_DEFAULT));
   std::vector<std::string> propOptions{"Auto", "Serial", "Parallel"};
   declareProperty("UseParallelProcessing", "Auto",
-                  boost::make_shared<StringListValidator>(propOptions),
+                  std::make_shared<StringListValidator>(propOptions),
                   "Use multiple cores for loading the data?\n"
                   "  Auto: Use serial loading for small data sets, parallel "
                   "for large data sets.\n"
@@ -235,7 +237,7 @@ void LoadPreNexus::parseRuninfo(const string &runinfo, string &dataDir,
               while (pNode) {
                 if (pNode->nodeName() == "scattering") {
                   auto *element = static_cast<Poco::XML::Element *>(pNode);
-                  eventFilenames.push_back(element->getAttribute("name"));
+                  eventFilenames.emplace_back(element->getAttribute("name"));
                 }
                 pNode = pNode->nextSibling();
               }
@@ -280,14 +282,14 @@ void LoadPreNexus::runLoadNexusLogs(const string &runinfo,
 
   // put together a list of possible locations
   vector<string> possibilities;
-  possibilities.push_back(dataDir + shortName +
-                          "_event.nxs"); // next to runinfo
-  possibilities.push_back(dataDir + shortName + "_histo.nxs");
-  possibilities.push_back(dataDir + shortName + ".nxs");
-  possibilities.push_back(dataDir + "../NeXus/" + shortName +
-                          "_event.nxs"); // in NeXus directory
-  possibilities.push_back(dataDir + "../NeXus/" + shortName + "_histo.nxs");
-  possibilities.push_back(dataDir + "../NeXus/" + shortName + ".nxs");
+  possibilities.emplace_back(dataDir + shortName +
+                             "_event.nxs"); // next to runinfo
+  possibilities.emplace_back(dataDir + shortName + "_histo.nxs");
+  possibilities.emplace_back(dataDir + shortName + ".nxs");
+  possibilities.emplace_back(dataDir + "../NeXus/" + shortName +
+                             "_event.nxs"); // in NeXus directory
+  possibilities.emplace_back(dataDir + "../NeXus/" + shortName + "_histo.nxs");
+  possibilities.emplace_back(dataDir + "../NeXus/" + shortName + ".nxs");
 
   // run the algorithm
   bool loadedLogs = false;

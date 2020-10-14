@@ -1,14 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_RADIUSSUM_H_
-#define MANTID_ALGORITHMS_RADIUSSUM_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidKernel/System.h"
+#include "MantidAlgorithms/DllConfig.h"
 #include "MantidKernel/V3D.h"
 
 namespace Mantid {
@@ -21,7 +20,7 @@ namespace Algorithms {
 
   @author Gesner Passos, ISIS
 */
-class DLLExport RadiusSum : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL RadiusSum : public API::Algorithm {
 public:
   const std::string name() const override;
   /// Summary of algorithms purpose
@@ -36,13 +35,14 @@ public:
   }
   const std::string category() const override;
 
-  static bool inputWorkspaceHasInstrumentAssociated(API::MatrixWorkspace_sptr);
+  static bool
+  inputWorkspaceHasInstrumentAssociated(const API::MatrixWorkspace_sptr &);
 
   static std::vector<double>
-      getBoundariesOfNumericImage(API::MatrixWorkspace_sptr);
+  getBoundariesOfNumericImage(const API::MatrixWorkspace_sptr &);
 
   static std::vector<double>
-      getBoundariesOfInstrument(API::MatrixWorkspace_sptr);
+  getBoundariesOfInstrument(const API::MatrixWorkspace_sptr &);
 
   static void centerIsInsideLimits(const std::vector<double> &centre,
                                    const std::vector<double> &boundaries);
@@ -72,8 +72,8 @@ private:
   API::MatrixWorkspace_sptr inputWS;
   double min_radius = 0.0, max_radius = 0.0;
 
-  double getMinBinSizeForInstrument(API::MatrixWorkspace_sptr);
-  double getMinBinSizeForNumericImage(API::MatrixWorkspace_sptr);
+  double getMinBinSizeForInstrument(const API::MatrixWorkspace_sptr &);
+  double getMinBinSizeForNumericImage(const API::MatrixWorkspace_sptr &);
 
   /** Return the bin position for a given distance
    *  From the input, it is defined the limits of distances as:
@@ -108,5 +108,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_RADIUSSUM_H_ */

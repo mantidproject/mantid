@@ -1,27 +1,17 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from __future__ import (absolute_import, unicode_literals)
-
-from matplotlib import colors, rcParams
+from mantid.plots.legend import convert_color_to_hex
+from matplotlib import rcParams
 from qtpy.QtCore import QRegExp
-from qtpy.QtGui import QColor, QPalette, QRegExpValidator
+from qtpy.QtGui import QColor, QRegExpValidator
 from qtpy.QtWidgets import (QWidget, QLineEdit, QPushButton, QHBoxLayout,
                             QColorDialog)
-
-
-def convert_color_to_hex(color):
-    """Convert a matplotlib color to its hex form"""
-    try:
-        return colors.cnames[color]
-    except (KeyError, TypeError):
-        rgb = colors.colorConverter.to_rgb(color)
-        return colors.rgb2hex(rgb)
 
 
 MPL_DEFAULT = convert_color_to_hex(rcParams['lines.color'])
@@ -84,10 +74,9 @@ class ColorSelector(QWidget):
         self.line_edit.setText(color_hex)
 
     def update_color_button(self):
-        palette = QPalette(self.button.palette())
-        qcolor = QColor(self.get_color())
-        palette.setColor(QPalette.Button, qcolor)
-        self.button.setPalette(palette)
+        color = self.get_color()
+        self.button.setStyleSheet("border:1px solid #000000;"
+                                  f"background-color: {color}")
         self.button.update()
 
     def convert_three_digit_hex_to_six(self):

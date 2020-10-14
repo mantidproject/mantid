@@ -1,22 +1,20 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-lines, invalid-name, redefined-builtin, protected-access, too-many-arguments
 """
     Enables the SANS commands (listed at http://www.mantidproject.org/SANS) to
     be run
 """
-from __future__ import (absolute_import, division, print_function)
 import isis_instrument
 from reducer_singleton import ReductionSingleton
 from mantid.kernel import Logger
 import isis_reduction_steps
 import isis_reducer
 from centre_finder import *
-# import SANSReduction
 from mantid.simpleapi import *
 from mantid.api import WorkspaceGroup, ExperimentInfo
 import copy
@@ -24,6 +22,15 @@ from SANSadd2 import *
 import SANSUtility as su
 from SANSUtility import deprecated
 import SANSUserFileParser as UserFileParser
+
+import warnings
+warnings.simplefilter("default", category=DeprecationWarning)
+warnings.warn("This ISIS Command Interface is deprecated.\n"
+              "Please change 'import ISISCommandInterface' or 'from ISISCommandInterface'"
+              "to use 'sans.command_interface.ISISCommandInterface' instead.", DeprecationWarning,
+              stacklevel=2)
+warnings.simplefilter("ignore", category=DeprecationWarning)
+
 sanslog = Logger("SANS")
 
 # disable plotting if running outside Mantidplot
@@ -233,6 +240,22 @@ def SetMergeQRange(q_min=None, q_max=None):
     ReductionSingleton().instrument.getDetector('FRONT').mergeRange = ReductionSingleton().instrument. \
         getDetector('FRONT')._MergeRange(q_min, q_max)
     _printMessage('#Set merge range values')
+
+
+def SetDetectorMaskFiles(filenames):
+    assert isinstance(filenames, str),\
+        "Expected a command seperated list of filenames, got %r instead" % filenames
+    ReductionSingleton().settings["MaskFiles"] = filenames
+    _printMessage('#Set masking file names to {0}'.format(filenames))
+
+
+def SetMonDirect(correction_file):
+    if not ReductionSingleton().instrument:
+        raise RuntimeError("You must create an instrument object first")
+
+    ReductionSingleton().instrument.cur_detector().correction_file = correction_file
+    ReductionSingleton().instrument.other_detector().correction_file = correction_file
+    _printMessage('#Set MonDirect to {0}'.format(correction_file))
 
 
 def TransFit(mode, lambdamin=None, lambdamax=None, selector='BOTH'):
@@ -1185,9 +1208,9 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
     # If we have 0 iterations then we should return here. At this point the
     # Left/Right/Up/Down workspaces have been already created by the SeekCentre function.
     if MaxIter <= 0:
-        zero_iterations_msg = ("You have selected 0 iterations. The beam centre " +
-                               "will be positioned at (" + str(xstart*coord1_scale_factor) +
-                               ", " + str(ystart*coord2_scale_factor) + ")")
+        zero_iterations_msg = ("You have selected 0 iterations. The beam centre "
+                               + "will be positioned at (" + str(xstart*coord1_scale_factor)
+                               + ", " + str(ystart*coord2_scale_factor) + ")")
         beam_center_logger.report(zero_iterations_msg)
         return xstart, ystart
 
@@ -1225,8 +1248,8 @@ def FindBeamCentre(rlow, rupp, MaxIter=10, xstart=None, ystart=None, tolerance=1
             centre_positioner.set_new_increment_coord1()
         if resCoord2 > resCoord2_old:
             centre_positioner.set_new_increment_coord2()
-        if (centre_positioner.is_increment_coord1_smaller_than_tolerance() and
-                centre_positioner.is_increment_coord2_smaller_than_tolerance()):
+        if (centre_positioner.is_increment_coord1_smaller_than_tolerance()
+                and centre_positioner.is_increment_coord2_smaller_than_tolerance()):
             # this is the success criteria, we've close enough to the center
             beam_center_logger.report("Converged - check if stuck in local minimum!")
             break
@@ -1321,15 +1344,15 @@ def check_time_shifts_for_added_event_files(number_of_files, time_shifts=''):
         try:
             float(time_shift_element)
         except ValueError:
-            message = ('Error: Elements of the time shift list cannot be ' +
-                       'converted to a numeric value, e.g ' + time_shift_element)
+            message = ('Error: Elements of the time shift list cannot be '
+                       + 'converted to a numeric value, e.g ' + time_shift_element)
             print(message)
             return message
 
     if number_of_files - 1 != len(time_shift_container):
-        message = ('Error: Expected N-1 time shifts for N files, but read ' +
-                   str(len(time_shift_container)) + ' time shifts for ' +
-                   str(number_of_files) + ' files.')
+        message = ('Error: Expected N-1 time shifts for N files, but read '
+                   + str(len(time_shift_container)) + ' time shifts for '
+                   + str(number_of_files) + ' files.')
         print(message)
         return message
 
@@ -1839,8 +1862,8 @@ def MatchIDFInReducerAndWorkspace(file_name):
     # Get the idf from the reducer
     idf_path_reducer = get_current_idf_path_in_reducer()
 
-    is_matched = ((idf_path_reducer == idf_path_workspace) and
-                  su.are_two_files_identical(idf_path_reducer, idf_path_reducer))
+    is_matched = ((idf_path_reducer == idf_path_workspace)
+                  and su.are_two_files_identical(idf_path_reducer, idf_path_reducer))
 
     return is_matched
 

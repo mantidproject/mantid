@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_KERNEL_DISKBUFFER_ISAVEABLE_TEST_H_
-#define MANTID_KERNEL_DISKBUFFER_ISAVEABLE_TEST_H_
+#pragma once
 
 #include "MantidKernel/CPUTimer.h"
 #include "MantidKernel/DiskBuffer.h"
@@ -87,12 +86,12 @@ public:
     num = 10;
     data.clear();
     for (size_t i = 0; i < num; i++)
-      data.push_back(std::make_unique<ISaveableTester>(i));
+      data.emplace_back(std::make_unique<ISaveableTester>(i));
     BIG_NUM = 1000;
     bigData.clear();
     bigData.reserve(BIG_NUM);
     for (long i = 0; i < BIG_NUM; i++)
-      bigData.push_back(std::make_unique<ISaveableTester>(i));
+      bigData.emplace_back(std::make_unique<ISaveableTester>(i));
   }
 
   void tearDown() override {
@@ -428,7 +427,7 @@ public:
     num = 100000;
     data.clear();
     for (size_t i = 0; i < num; i++) {
-      data.push_back(new ISaveableTester(i));
+      data.emplace_back(new ISaveableTester(i));
       data[i]->setBusy(true); // Items won't do any real saving
     }
   }
@@ -480,5 +479,3 @@ public:
               << " into MRU (no write buffer).\n";
   }
 };
-
-#endif /* MANTID_KERNEL_DISKBUFFERTEST_H_ */

@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDWIDGETS_EDITLOCALPARAMETERDIALOG_H_
-#define MANTIDWIDGETS_EDITLOCALPARAMETERDIALOG_H_
+#pragma once
 
 #include "DllOption.h"
 #include "MantidQtWidgets/Common/LogValueFinder.h"
+#include "MantidQtWidgets/Common/MantidDialog.h"
 #include "ui_EditLocalParameterDialog.h"
 #include <QDialog>
 #include <memory>
@@ -23,20 +23,25 @@ class FunctionMultiDomainPresenter;
  * Parameters can be set individually or all to the same value.
  * They also can be fixed and unfixed.
  */
-class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog
+    : public MantidQt::API::MantidDialog {
   Q_OBJECT
 public:
-  EditLocalParameterDialog(QWidget *parent,
-                           FunctionMultiDomainPresenter *funcBrowser,
-                           const QString &parName, const QStringList &wsNames);
+  EditLocalParameterDialog(QWidget *parent, const QString &parName,
+                           const QStringList &wsNames,
+                           const QList<double> &values,
+                           const QList<bool> &fixes, const QStringList &ties,
+                           const QStringList &constraints);
   void doSetup(const QString &parName, const QStringList &wsNames);
   QString getParameterName() const { return m_parName; }
   QList<double> getValues() const;
   QList<bool> getFixes() const;
   QStringList getTies() const;
+  QStringList getConstraints() const;
   double getValue(int i) const { return m_values[i]; }
   bool isFixed(int i) const { return m_fixes[i]; }
   QString getTie(int i) const { return m_ties[i]; }
+  QString getConstraint(int i) const { return m_constraints[i]; }
   bool areOthersFixed(int i) const;
   bool areAllOthersFixed(int i) const;
   bool areOthersTied(int i) const;
@@ -51,7 +56,9 @@ private slots:
   void fixParameter(int /*index*/, bool /*fix*/);
   void setAllFixed(bool /*fix*/);
   void setTie(int /*index*/, QString /*tie*/);
-  void setTieAll(QString /*tie*/);
+  void setTieAll(const QString & /*tie*/);
+  void setConstraint(int /*index*/, QString /*tie*/);
+  void setConstraintAll(const QString & /*tie*/);
   void copy();
   void paste();
   void setValueToLog(int /*i*/);
@@ -72,11 +79,11 @@ private:
   QList<bool> m_fixes;
   /// Cache for the ties
   QStringList m_ties;
+  /// Cache for the constraints
+  QStringList m_constraints;
   /// Log value finder
   std::unique_ptr<LogValueFinder> m_logFinder;
 };
 
 } // namespace MantidWidgets
 } // namespace MantidQt
-
-#endif /*MANTIDWIDGETS_EDITLOCALPARAMETERDIALOG_H_*/

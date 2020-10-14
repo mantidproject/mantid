@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 """
 @author Jose Borreguero, ORNL
 @date December 06, 2017
 """
-from __future__ import (absolute_import, division, print_function)
-
 import numpy as np
 try:
     from scipy.special import spherical_jn
@@ -42,8 +40,10 @@ class EISFDiffSphereAlkyl(IFunction1D):
     def init(self):
         # Active fitting parameters
         self.declareParameter('A', 1.0, 'Amplitude')
-        self.declareParameter('Rmin', 1.0, 'Minimum radius, inverse units of Q.')
-        self.declareParameter('Rmax', 2.0, 'Maximum radius, inverse units of Q.')
+        self.declareParameter(
+            'Rmin', 1.0, 'Minimum radius, inverse units of Q.')
+        self.declareParameter(
+            'Rmax', 2.0, 'Maximum radius, inverse units of Q.')
         self.declareAttribute('M', 2)
         # Vectorize the calculation of the bessel functions
 
@@ -85,6 +85,7 @@ class EISFDiffSphereAlkyl(IFunction1D):
         zs = np.outer(np.linspace(r, R, self._M), np.asarray(xvals))
         eisf = np.mean(np.square(3 * self.vecbessel(zs)), axis=0)
         return self.getParameterValue('A') * eisf
+
 
 # Required to have Mantid recognise the new function
 FunctionFactory.subscribe(EISFDiffSphereAlkyl)

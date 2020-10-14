@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETPRESENTERTEST_H_
-#define MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETPRESENTERTEST_H_
+#pragma once
 
 #include "../EnggDiffraction/EnggDiffMultiRunFittingWidgetPresenter.h"
 #include "EnggDiffMultiRunFittingWidgetModelMock.h"
@@ -27,7 +26,7 @@ API::MatrixWorkspace_sptr createSampleWorkspace() {
   return API::WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
 }
 
-void addBankID(API::MatrixWorkspace_sptr ws, const size_t bankID) {
+void addBankID(const API::MatrixWorkspace_sptr &ws, const size_t bankID) {
   auto addLogAlg =
       API::FrameworkManager::Instance().createAlgorithm("AddSampleLog");
   addLogAlg->initialize();
@@ -392,5 +391,3 @@ private:
     }
   }
 };
-
-#endif // MANTIDQT_CUSTOMINTERFACES_ENGGDIFFMULTIRUNFITTINGWIDGETPRESENTERTEST_H_

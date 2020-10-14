@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGMODEL_H_
-#define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGMODEL_H_
+#pragma once
 
 #include "GSASIIRefineFitPeaksParameters.h"
 #include "IEnggDiffGSASFittingObserver.h"
@@ -16,7 +15,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
@@ -91,10 +90,8 @@ public:
 
   /// set the observer for refinement
   virtual void
-  setObserver(boost::shared_ptr<IEnggDiffGSASFittingObserver> observer) = 0;
+  setObserver(std::shared_ptr<IEnggDiffGSASFittingObserver> observer) = 0;
 };
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_IENGGDIFFGSASFITTINGMODEL_H_

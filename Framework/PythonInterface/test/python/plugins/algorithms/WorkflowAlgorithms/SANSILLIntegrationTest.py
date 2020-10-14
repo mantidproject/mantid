@@ -1,12 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 import unittest
+
 from mantid.api import MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import SANSILLIntegration, SANSILLReduction, config, mtd
 
@@ -17,23 +16,25 @@ class SANSILLIntegrationTest(unittest.TestCase):
 
     def setUp(self):
         self._facility = config['default.facility']
+        self._data_search_dirs = config.getDataSearchDirs()
         config.appendDataSearchSubDir('ILL/D11/')
         config.appendDataSearchSubDir('ILL/D33/')
-        config['default.facility'] = 'ILL'
+        config.setFacility("ILL")
         SANSILLReduction(Run='010569', ProcessAs='Sample', OutputWorkspace='sample')
 
     def tearDown(self):
-        config['default.facility'] = self._facility
+        config.setFacility(self._facility)
+        config.setDataSearchDirs(self._data_search_dirs)
         mtd.clear()
 
     def test_monochromatic(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq')
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 88)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_monochromatic_with_wedges(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', NumberOfWedges=2, WedgeWorkspace='wedges')
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', NumberOfWedges=2, WedgeWorkspace='wedges', CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 88)
         self.assertTrue(mtd['iq'].hasDx(0))
@@ -46,13 +47,13 @@ class SANSILLIntegrationTest(unittest.TestCase):
             self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_monochromatic_cake(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputType='I(Phi,Q)', NumberOfWedges=36)
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputType='I(Phi,Q)', NumberOfWedges=36, CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'], 36)
         self.assertEqual(mtd['iq'].blocksize(), 88)
         azimuth_axis = mtd['iq'].getAxis(1)
         self.assertTrue(azimuth_axis.isNumeric())
         self.assertEqual(len(azimuth_axis),36)
-        self.assertEqual(azimuth_axis.getUnit().unitID(), "Degrees")
+        self.assertEqual(azimuth_axis.getUnit().unitID(), "Phi")
         for phi in range(36):
             self.assertTrue(mtd['iq'].hasDx(phi))
 
@@ -66,31 +67,31 @@ class SANSILLIntegrationTest(unittest.TestCase):
         self.assertEqual(qy_axis.getUnit().unitID(), "MomentumTransfer")
 
     def test_with_bin_width(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=-0.1)
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=-0.1, CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 51)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_with_bin_range(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=[0.001,0.03])
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=[0.001,0.03], CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 73)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_with_bin_width_and_range(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=[0.001,-0.1,0.03])
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=[0.001,-0.1,0.03], CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_custom_binning(self):
         binning = [0.001,0.005,0.006,0.01,0.016]
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=binning)
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', OutputBinning=binning, CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 2)
         self.assertTrue(mtd['iq'].hasDx(0))
 
     def test_resolution_binning(self):
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', DefaultQBinning='ResolutionBased')
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', DefaultQBinning='ResolutionBased', CalculateResolution='MildnerCarpenter')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 37)
         self.assertTrue(mtd['iq'].hasDx(0))
@@ -99,7 +100,7 @@ class SANSILLIntegrationTest(unittest.TestCase):
         # D33 VTOF
         SANSILLReduction(Run='093410', ProcessAs='Sample', OutputWorkspace='sample')
         # TOF resolution is not yet implemented
-        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq', CalculateResolution='None')
+        SANSILLIntegration(InputWorkspace='sample', OutputWorkspace='iq')
         self._check_output(mtd['iq'])
         self.assertEqual(mtd['iq'].blocksize(), 217)
 

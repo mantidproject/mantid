@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //----------------------------------------------------------------------
 // Includes
@@ -52,7 +52,7 @@ using namespace Kernel;
  */
 XMLInstrumentParameter::XMLInstrumentParameter(
     const std::string &logfileID, const std::string &value,
-    const boost::shared_ptr<Kernel::Interpolation> &interpolation,
+    const std::shared_ptr<Kernel::Interpolation> &interpolation,
     const std::string &formula, const std::string &formulaUnit,
     const std::string &resultUnit, const std::string &paramName,
     const std::string &type, const std::string &tie,

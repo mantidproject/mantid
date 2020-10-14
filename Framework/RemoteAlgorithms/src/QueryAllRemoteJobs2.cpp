@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidRemoteAlgorithms/QueryAllRemoteJobs2.h"
 #include "MantidAPI/RemoteJobManagerFactory.h"
@@ -25,14 +25,14 @@ using namespace Mantid::Kernel;
 void QueryAllRemoteJobs2::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
-  auto nullValidator = boost::make_shared<NullValidator>();
+  auto nullValidator = std::make_shared<NullValidator>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
                                           .getFacility()
                                           .computeResources();
   declareProperty("ComputeResource", "",
-                  boost::make_shared<StringListValidator>(computes),
+                  std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer to query", Direction::Input);
 
   // Mantid can't store arbitrary structs in its properties, so we're going to
@@ -92,15 +92,15 @@ void QueryAllRemoteJobs2::exec() {
   std::vector<std::string> completionDates;
   std::vector<std::string> cmdLine;
   for (auto &info : infos) {
-    jobIds.push_back(info.id);
-    jobNames.push_back(info.name);
-    jobStatusStrs.push_back(info.status);
-    transIds.push_back(info.transactionID);
-    runNames.push_back(info.runnableName);
-    submitDates.push_back(info.submitDate.toISO8601String());
-    startDates.push_back(info.startDate.toISO8601String());
-    completionDates.push_back(info.completionTime.toISO8601String());
-    cmdLine.push_back(info.cmdLine);
+    jobIds.emplace_back(info.id);
+    jobNames.emplace_back(info.name);
+    jobStatusStrs.emplace_back(info.status);
+    transIds.emplace_back(info.transactionID);
+    runNames.emplace_back(info.runnableName);
+    submitDates.emplace_back(info.submitDate.toISO8601String());
+    startDates.emplace_back(info.startDate.toISO8601String());
+    completionDates.emplace_back(info.completionTime.toISO8601String());
+    cmdLine.emplace_back(info.cmdLine);
   }
   setProperty("JobID", jobIds);
   setProperty("JobStatusString", jobStatusStrs);

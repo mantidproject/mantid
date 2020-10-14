@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /**
  * This Algorithms inverts the dimensions of a MD data set. The
@@ -13,8 +13,7 @@
  *
  *
  */
-#ifndef INVERTMDDIM_H_
-#define INVERTMDDIM_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/IMDHistoWorkspace_fwd.h"
@@ -45,15 +44,14 @@ private:
   /// Execution code
   void exec() override;
 
-  void copyMetaData(Mantid::API::IMDHistoWorkspace_sptr inws,
-                    Mantid::API::IMDHistoWorkspace_sptr outws);
-  void recurseDim(Mantid::API::IMDHistoWorkspace_sptr inWS,
-                  Mantid::API::IMDHistoWorkspace_sptr outWS, int currentDim,
-                  int *idx, int rank);
+  void copyMetaData(const Mantid::API::IMDHistoWorkspace_sptr &inws,
+                    const Mantid::API::IMDHistoWorkspace_sptr &outws);
+  void recurseDim(const Mantid::API::IMDHistoWorkspace_sptr &inWS,
+                  const Mantid::API::IMDHistoWorkspace_sptr &outWS,
+                  int currentDim, int *idx, int rank);
 
-  unsigned int calcIndex(Mantid::API::IMDHistoWorkspace_sptr ws, int *dim);
-  unsigned int calcInvertedIndex(Mantid::API::IMDHistoWorkspace_sptr ws,
+  unsigned int calcIndex(const Mantid::API::IMDHistoWorkspace_sptr &ws,
+                         int *dim);
+  unsigned int calcInvertedIndex(const Mantid::API::IMDHistoWorkspace_sptr &ws,
                                  int *dim);
 };
-
-#endif /*INVERTMDDIM_H_*/

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidRemoteAlgorithms/QueryAllRemoteJobs.h"
 #include "MantidKernel/ArrayProperty.h"
@@ -30,14 +30,14 @@ using namespace Mantid::API;
 void QueryAllRemoteJobs::init() {
   // Unlike most algorithms, this one doesn't deal with workspaces....
 
-  auto nullValidator = boost::make_shared<NullValidator>();
+  auto nullValidator = std::make_shared<NullValidator>();
 
   // Compute Resources
   std::vector<std::string> computes = Mantid::Kernel::ConfigService::Instance()
                                           .getFacility()
                                           .computeResources();
   declareProperty("ComputeResource", "",
-                  boost::make_shared<StringListValidator>(computes),
+                  std::make_shared<StringListValidator>(computes),
                   "The name of the remote computer to query", Direction::Input);
 
   // Mantid can't store arbitrary structs in its properties, so we're going to
@@ -76,12 +76,12 @@ void QueryAllRemoteJobs::init() {
 }
 
 void QueryAllRemoteJobs::exec() {
-  boost::shared_ptr<RemoteJobManager> jobManager =
+  std::shared_ptr<RemoteJobManager> jobManager =
       Mantid::Kernel::ConfigService::Instance()
           .getFacility()
           .getRemoteJobManager(getPropertyValue("ComputeResource"));
 
-  // jobManager is a boost::shared_ptr...
+  // jobManager is a std::shared_ptr...
   if (!jobManager) {
     // Requested compute resource doesn't exist
     // TODO: should we create our own exception class for this??
@@ -114,22 +114,22 @@ void QueryAllRemoteJobs::exec() {
 
     JSONObject::const_iterator it = resp.begin();
     while (it != resp.end()) {
-      jobIds.push_back((*it).first);
+      jobIds.emplace_back((*it).first);
       JSONObject jobData;
       (*it).second.getValue(jobData);
 
       std::string value;
       jobData["JobStatus"].getValue(value);
-      jobStatusStrs.push_back(value);
+      jobStatusStrs.emplace_back(value);
 
       jobData["JobName"].getValue(value);
-      jobNames.push_back(value);
+      jobNames.emplace_back(value);
 
       jobData["ScriptName"].getValue(value);
-      scriptNames.push_back(value);
+      scriptNames.emplace_back(value);
 
       jobData["TransID"].getValue(value);
-      transIds.push_back(value);
+      transIds.emplace_back(value);
 
       // The time stuff is actually an optional extension.  We could check the
       // info
@@ -138,13 +138,13 @@ void QueryAllRemoteJobs::exec() {
       // the output and see if the values are there...
       if (jobData.find("SubmitDate") != jobData.end()) {
         jobData["SubmitDate"].getValue(value);
-        submitDates.push_back(value);
+        submitDates.emplace_back(value);
 
         jobData["StartDate"].getValue(value);
-        startDates.push_back(value);
+        startDates.emplace_back(value);
 
         jobData["CompletionDate"].getValue(value);
-        completionDates.push_back(value);
+        completionDates.emplace_back(value);
       } else {
         // push back empty strings just so all the array properties have the
         // same

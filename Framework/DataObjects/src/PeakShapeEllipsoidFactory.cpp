@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataObjects/PeakShapeEllipsoidFactory.h"
 #include "MantidDataObjects/PeakShapeEllipsoid.h"
@@ -36,20 +36,20 @@ PeakShapeEllipsoidFactory::create(const std::string &source) const {
           static_cast<SpecialCoordinateSystem>(root["frame"].asInt()));
       std::vector<double> abcRadii, abcRadiiBackgroundInner,
           abcRadiiBackgroundOuter;
-      abcRadii.push_back(root["radius0"].asDouble());
-      abcRadii.push_back(root["radius1"].asDouble());
-      abcRadii.push_back(root["radius2"].asDouble());
-      abcRadiiBackgroundInner.push_back(
+      abcRadii.emplace_back(root["radius0"].asDouble());
+      abcRadii.emplace_back(root["radius1"].asDouble());
+      abcRadii.emplace_back(root["radius2"].asDouble());
+      abcRadiiBackgroundInner.emplace_back(
           root["background_inner_radius0"].asDouble());
-      abcRadiiBackgroundInner.push_back(
+      abcRadiiBackgroundInner.emplace_back(
           root["background_inner_radius1"].asDouble());
-      abcRadiiBackgroundInner.push_back(
+      abcRadiiBackgroundInner.emplace_back(
           root["background_inner_radius2"].asDouble());
-      abcRadiiBackgroundOuter.push_back(
+      abcRadiiBackgroundOuter.emplace_back(
           root["background_outer_radius0"].asDouble());
-      abcRadiiBackgroundOuter.push_back(
+      abcRadiiBackgroundOuter.emplace_back(
           root["background_outer_radius1"].asDouble());
-      abcRadiiBackgroundOuter.push_back(
+      abcRadiiBackgroundOuter.emplace_back(
           root["background_outer_radius2"].asDouble());
 
       std::vector<V3D> directions(3);
@@ -85,7 +85,7 @@ PeakShapeEllipsoidFactory::create(const std::string &source) const {
  * @param successorFactory : successor
  */
 void PeakShapeEllipsoidFactory::setSuccessor(
-    boost::shared_ptr<const PeakShapeFactory> successorFactory) {
+    std::shared_ptr<const PeakShapeFactory> successorFactory) {
   this->m_successor = successorFactory;
 }
 

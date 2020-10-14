@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Instrument.h"
 #include "MantidBeamline/ComponentInfo.h"
@@ -21,9 +21,10 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <nexus/NeXusFile.hpp>
 #include <queue>
+#include <utility>
 
 using namespace Mantid::Kernel;
 using Mantid::Kernel::Exception::InstrumentDefinitionError;
@@ -59,8 +60,8 @@ Instrument::Instrument(const std::string &name)
  *  @param instr :: instrument for parameter inclusion
  *  @param map :: parameter map to include
  */
-Instrument::Instrument(const boost::shared_ptr<const Instrument> instr,
-                       boost::shared_ptr<ParameterMap> map)
+Instrument::Instrument(const std::shared_ptr<const Instrument> &instr,
+                       const std::shared_ptr<ParameterMap> &map)
     : CompAssembly(instr.get(), map.get()), m_sourceCache(instr->m_sourceCache),
       m_sampleCache(instr->m_sampleCache), m_defaultView(instr->m_defaultView),
       m_defaultViewAxis(instr->m_defaultViewAxis), m_instr(instr),
@@ -107,7 +108,7 @@ Instrument::Instrument(const Instrument &instr)
     // Now check whether the current component is the source or sample.
     // As the majority of components will be detectors, we will rarely get to
     // here
-    if (const auto *obj = dynamic_cast<const ObjComponent *>(it->get())) {
+    if (const auto *obj = dynamic_cast<const Component *>(it->get())) {
       const std::string objName = obj->getName();
       // This relies on the source and sample having a unique name.
       // I think the way our instrument definition files work ensures this is
@@ -163,8 +164,8 @@ Instrument_const_sptr Instrument::getPhysicalInstrument() const {
       // owning instrument in the ParameterMap. We need to undo this immediately
       // since the ParameterMap must always be owned by the neutronic
       // instrument.
-      return boost::make_shared<Instrument>(m_instr->getPhysicalInstrument(),
-                                            m_map_nonconst);
+      return std::make_shared<Instrument>(m_instr->getPhysicalInstrument(),
+                                          m_map_nonconst);
     } else {
       return Instrument_const_sptr();
     }
@@ -216,12 +217,12 @@ std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const {
     const auto &in_dets = m_instr->m_detectorCache;
     for (const auto &in_det : in_dets)
       if (!skipMonitors || !std::get<2>(in_det))
-        out.push_back(std::get<0>(in_det));
+        out.emplace_back(std::get<0>(in_det));
   } else {
     const auto &in_dets = m_detectorCache;
     for (const auto &in_det : in_dets)
       if (!skipMonitors || !std::get<2>(in_det))
-        out.push_back(std::get<0>(in_det));
+        out.emplace_back(std::get<0>(in_det));
   }
   return out;
 }
@@ -286,14 +287,14 @@ void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
   const auto bank = dynamic_cast<const ICompAssembly *>(&comp);
   if (bank) {
     // Get a vector of children (recursively)
-    std::vector<boost::shared_ptr<const IComponent>> children;
+    std::vector<std::shared_ptr<const IComponent>> children;
     bank->getChildren(children, true);
-    std::vector<boost::shared_ptr<const IComponent>>::iterator it;
+    std::vector<std::shared_ptr<const IComponent>>::iterator it;
     for (it = children.begin(); it != children.end(); ++it) {
       IDetector_const_sptr det =
-          boost::dynamic_pointer_cast<const IDetector>(*it);
+          std::dynamic_pointer_cast<const IDetector>(*it);
       if (det) {
-        dets.push_back(det);
+        dets.emplace_back(det);
       }
     }
   }
@@ -311,7 +312,7 @@ void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
  */
 void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
                                     const std::string &bankName) const {
-  boost::shared_ptr<const IComponent> comp = this->getComponentByName(bankName);
+  std::shared_ptr<const IComponent> comp = this->getComponentByName(bankName);
   if (!comp) {
     throw Kernel::Exception::NotFoundError("Could not find component",
                                            bankName);
@@ -385,14 +386,14 @@ Kernel::V3D Instrument::getBeamDirection() const {
  *   @param id :: ID
  *   @return A pointer to the component.
  */
-boost::shared_ptr<const IComponent>
+std::shared_ptr<const IComponent>
 Instrument::getComponentByID(const IComponent *id) const {
   const auto *base = static_cast<const IComponent *>(id);
   if (m_map)
     return ParComponentFactory::create(
-        boost::shared_ptr<const IComponent>(base, NoDeleting()), m_map);
+        std::shared_ptr<const IComponent>(base, NoDeleting()), m_map);
   else
-    return boost::shared_ptr<const IComponent>(base, NoDeleting());
+    return std::shared_ptr<const IComponent>(base, NoDeleting());
 }
 
 /** Find all components in an Instrument Definition File (IDF) with a given
@@ -404,34 +405,34 @@ Instrument::getComponentByID(const IComponent *id) const {
  * the first one found is returned.
  *  @returns Pointers to components
  */
-std::vector<boost::shared_ptr<const IComponent>>
+std::vector<std::shared_ptr<const IComponent>>
 Instrument::getAllComponentsWithName(const std::string &cname) const {
-  boost::shared_ptr<const IComponent> node =
-      boost::shared_ptr<const IComponent>(this, NoDeleting());
-  std::vector<boost::shared_ptr<const IComponent>> retVec;
+  std::shared_ptr<const IComponent> node =
+      std::shared_ptr<const IComponent>(this, NoDeleting());
+  std::vector<std::shared_ptr<const IComponent>> retVec;
   // Check the instrument name first
   if (this->getName() == cname) {
-    retVec.push_back(node);
+    retVec.emplace_back(node);
   }
   // Same algorithm as used in getComponentByName() but searching the full tree
-  std::deque<boost::shared_ptr<const IComponent>> nodeQueue;
+  std::deque<std::shared_ptr<const IComponent>> nodeQueue;
   // Need to be able to enter the while loop
-  nodeQueue.push_back(node);
+  nodeQueue.emplace_back(node);
   while (!nodeQueue.empty()) {
     node = nodeQueue.front();
     nodeQueue.pop_front();
     int nchildren(0);
-    boost::shared_ptr<const ICompAssembly> asmb =
-        boost::dynamic_pointer_cast<const ICompAssembly>(node);
+    std::shared_ptr<const ICompAssembly> asmb =
+        std::dynamic_pointer_cast<const ICompAssembly>(node);
     if (asmb) {
       nchildren = asmb->nelements();
     }
     for (int i = 0; i < nchildren; ++i) {
-      boost::shared_ptr<const IComponent> comp = (*asmb)[i];
+      std::shared_ptr<const IComponent> comp = (*asmb)[i];
       if (comp->getName() == cname) {
-        retVec.push_back(comp);
+        retVec.emplace_back(comp);
       } else {
-        nodeQueue.push_back(comp);
+        nodeQueue.emplace_back(comp);
       }
     }
   } // while-end
@@ -534,8 +535,8 @@ Instrument::getDetectorG(const std::set<detid_t> &det_ids) const {
   if (ndets == 1) {
     return this->getDetector(*det_ids.begin());
   } else {
-    boost::shared_ptr<DetectorGroup> det_group =
-        boost::make_shared<DetectorGroup>();
+    std::shared_ptr<DetectorGroup> det_group =
+        std::make_shared<DetectorGroup>();
     for (const auto detID : det_ids) {
       det_group->addDetector(this->getDetector(detID));
     }
@@ -553,7 +554,7 @@ Instrument::getDetectors(const std::vector<detid_t> &det_ids) const {
   dets_ptr.reserve(det_ids.size());
   std::vector<detid_t>::const_iterator it;
   for (it = det_ids.begin(); it != det_ids.end(); ++it) {
-    dets_ptr.push_back(this->getDetector(*it));
+    dets_ptr.emplace_back(this->getDetector(*it));
   }
   return dets_ptr;
 }
@@ -568,7 +569,7 @@ Instrument::getDetectors(const std::set<detid_t> &det_ids) const {
   dets_ptr.reserve(det_ids.size());
   std::set<detid_t>::const_iterator it;
   for (it = det_ids.begin(); it != det_ids.end(); ++it) {
-    dets_ptr.push_back(this->getDetector(*it));
+    dets_ptr.emplace_back(this->getDetector(*it));
   }
   return dets_ptr;
 }
@@ -587,6 +588,15 @@ void Instrument::markAsSamplePos(const IComponent *comp) {
   if (m_map)
     throw std::runtime_error("Instrument::markAsSamplePos() called on a "
                              "parametrized Instrument object.");
+
+  auto objComp = dynamic_cast<const IObjComponent *>(comp);
+  if (objComp) {
+    throw std::runtime_error(
+        "Instrument::markAsSamplePos() called on an IObjComponent "
+        "object that supports shape definition. Sample is prevented from "
+        "being this type because the shape must only be stored in "
+        "ExperimentInfo::m_sample.");
+  }
 
   if (!m_sampleCache) {
     if (comp->getName().empty()) {
@@ -742,7 +752,7 @@ std::vector<detid_t> Instrument::getMonitors() const {
   std::vector<detid_t> mons;
   for (const auto &item : m_detectorCache)
     if (std::get<2>(item))
-      mons.push_back(std::get<0>(item));
+      mons.emplace_back(std::get<0>(item));
   return mons;
 }
 
@@ -791,11 +801,11 @@ void Instrument::getBoundingBox(BoundingBox &assemblyBox) const {
   }
 }
 
-boost::shared_ptr<const std::vector<IObjComponent_const_sptr>>
+std::shared_ptr<const std::vector<IObjComponent_const_sptr>>
 Instrument::getPlottable() const {
   if (m_map) {
     // Get the 'base' plottable components
-    boost::shared_ptr<const std::vector<IObjComponent_const_sptr>> objs =
+    std::shared_ptr<const std::vector<IObjComponent_const_sptr>> objs =
         m_instr->getPlottable();
 
     // Get a reference to the underlying vector, casting away the constness so
@@ -805,14 +815,14 @@ Instrument::getPlottable() const {
     const std::vector<IObjComponent_const_sptr>::size_type total = res.size();
     for (std::vector<IObjComponent_const_sptr>::size_type i = 0; i < total;
          ++i) {
-      res[i] = boost::dynamic_pointer_cast<const Detector>(
+      res[i] = std::dynamic_pointer_cast<const Detector>(
           ParComponentFactory::create(objs->at(i), m_map));
     }
     return objs;
 
   } else {
     // Base instrument
-    auto res = boost::make_shared<std::vector<IObjComponent_const_sptr>>();
+    auto res = std::make_shared<std::vector<IObjComponent_const_sptr>>();
     res->reserve(m_detectorCache.size() + 10);
     appendPlottable(*this, *res);
     return res;
@@ -830,9 +840,9 @@ void Instrument::appendPlottable(
       auto *d = dynamic_cast<Detector *>(c);
       auto *o = dynamic_cast<ObjComponent *>(c);
       if (d)
-        lst.push_back(IObjComponent_const_sptr(d, NoDeleting()));
+        lst.emplace_back(IObjComponent_const_sptr(d, NoDeleting()));
       else if (o)
-        lst.push_back(IObjComponent_const_sptr(o, NoDeleting()));
+        lst.emplace_back(IObjComponent_const_sptr(o, NoDeleting()));
       else
         g_log.error() << "Unknown comp type\n";
     }
@@ -960,7 +970,7 @@ void Instrument::saveNexus(::NeXus::File *file,
     std::vector<detid_t> monitorIDs;
     for (size_t i = 0; i < detmonIDs.size(); i++) {
       if (isMonitorViaIndex(i))
-        monitorIDs.push_back(detmonIDs[i]);
+        monitorIDs.emplace_back(detmonIDs[i]);
     }
 
     // Add Monitors group
@@ -1036,15 +1046,15 @@ void Instrument::loadNexus(::NeXus::File *file, const std::string &group) {
 Setter for the reference frame.
 @param frame : reference frame object to use.
 */
-void Instrument::setReferenceFrame(boost::shared_ptr<ReferenceFrame> frame) {
-  m_referenceFrame = frame;
+void Instrument::setReferenceFrame(std::shared_ptr<ReferenceFrame> frame) {
+  m_referenceFrame = std::move(frame);
 }
 
 /**
 Getter for the reference frame.
 @return : reference frame.
 */
-boost::shared_ptr<const ReferenceFrame> Instrument::getReferenceFrame() const {
+std::shared_ptr<const ReferenceFrame> Instrument::getReferenceFrame() const {
   if (m_map) {
     return m_instr->getReferenceFrame();
   } else {
@@ -1120,7 +1130,7 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
 
     // Skip monitors
     IDetector_const_sptr detector =
-        boost::dynamic_pointer_cast<const IDetector>(comp);
+        std::dynamic_pointer_cast<const IDetector>(comp);
     if (detector && isMonitor(detector->getID()))
       continue;
 
@@ -1134,7 +1144,7 @@ Instrument::ContainsState Instrument::containsRectDetectors() const {
         foundRect = true;
     } else {
       ICompAssembly_const_sptr assembly =
-          boost::dynamic_pointer_cast<const ICompAssembly>(comp);
+          std::dynamic_pointer_cast<const ICompAssembly>(comp);
 
       if (assembly) {
         for (int i = 0; i < assembly->nelements(); i++)
@@ -1184,8 +1194,8 @@ size_t Instrument::detectorIndex(const detid_t detID) const {
 
 /// Returns a legacy ParameterMap, containing information that is now stored in
 /// DetectorInfo (masking, positions, rotations, scale factors).
-boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
-  auto pmap = boost::make_shared<ParameterMap>(*getParameterMap());
+std::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
+  auto pmap = std::make_shared<ParameterMap>(*getParameterMap());
   // Instrument is only needed for DetectorInfo access so it is not needed. This
   // also clears DetectorInfo and ComponentInfo (information will be stored
   // directly in pmap so we do not need them).
@@ -1226,7 +1236,7 @@ boost::shared_ptr<ParameterMap> Instrument::makeLegacyParameterMap() const {
 
     if (componentInfo.isDetector(i)) {
 
-      const boost::shared_ptr<const IDetector> &baseDet =
+      const std::shared_ptr<const IDetector> &baseDet =
           std::get<1>(baseInstr.m_detectorCache[i]);
 
       isDetFixedInBank =
@@ -1328,8 +1338,8 @@ Instrument::makeWrappers(ParameterMap &pmap, const ComponentInfo &componentInfo,
   auto detInfo = std::make_unique<DetectorInfo>(detectorInfo);
   compInfo->m_componentInfo->setDetectorInfo(detInfo->m_detectorInfo.get());
   const auto parInstrument = ParComponentFactory::createInstrument(
-      boost::shared_ptr<const Instrument>(this, NoDeleting()),
-      boost::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
+      std::shared_ptr<const Instrument>(this, NoDeleting()),
+      std::shared_ptr<ParameterMap>(&pmap, NoDeleting()));
   detInfo->m_instrument = parInstrument;
   return {std::move(compInfo), std::move(detInfo)};
 }

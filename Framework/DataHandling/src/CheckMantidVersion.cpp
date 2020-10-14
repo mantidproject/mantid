@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/CheckMantidVersion.h"
 #include "MantidKernel/ConfigService.h"
@@ -175,11 +175,11 @@ CheckMantidVersion::splitVersionString(const std::string &versionString) const {
   for (; h != tokenizer.end(); ++h) {
     try {
       auto part = boost::lexical_cast<int>(*h);
-      retVal.push_back(part);
+      retVal.emplace_back(part);
     } catch (const boost::bad_lexical_cast &) {
       g_log.error("Failed to convert the following string to an integer '" +
                   *h + "' as part of CheckMantidVersion::splitVersionString");
-      retVal.push_back(0);
+      retVal.emplace_back(0);
     }
   }
   return retVal;

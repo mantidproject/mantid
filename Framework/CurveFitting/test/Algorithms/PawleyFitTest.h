@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_PAWLEYFITTEST_H_
-#define MANTID_CURVEFITTING_PAWLEYFITTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -232,7 +231,7 @@ private:
          << ",Sigma=" << fwhmAbs / (2.0 * sqrt(2.0 * M_LN2))
          << ",Height=" << row.String(3);
 
-      functionStrings.push_back(fn.str());
+      functionStrings.emplace_back(fn.str());
     }
 
     return boost::join(functionStrings, ";");
@@ -262,5 +261,3 @@ private:
     return ws;
   }
 };
-
-#endif /* MANTID_CURVEFITTING_PAWLEYFITTEST_H_ */

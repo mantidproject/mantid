@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/DefaultEventLoader.h"
 #include "MantidAPI/Progress.h"
@@ -32,7 +32,7 @@ void DefaultEventLoader::load(LoadEventNexus *alg, EventWorkspaceCollection &ws,
   // Make the thread pool
   auto scheduler = new ThreadSchedulerMutexes;
   ThreadPool pool(scheduler);
-  auto diskIOMutex = boost::make_shared<std::mutex>();
+  auto diskIOMutex = std::make_shared<std::mutex>();
 
   // set up progress bar for the rest of the (multi-threaded) process
   size_t numProg = bankNames.size() * (1 + 3); // 1 = disktask, 3 = proc task

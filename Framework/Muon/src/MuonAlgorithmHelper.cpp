@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/MuonAlgorithmHelper.h"
 
@@ -15,6 +15,8 @@
 
 #include <fstream>
 #include <string>
+#include <utility>
+
 #include <vector>
 
 namespace Mantid {
@@ -28,12 +30,12 @@ using namespace Mantid::API;
  * workspace has one period only - it is returned.
  * @param ws :: Run workspace
  */
-MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws) {
+MatrixWorkspace_sptr firstPeriod(const Workspace_sptr &ws) {
 
-  if (auto group = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
+  if (auto group = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+    return std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(0));
   } else {
-    return boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+    return std::dynamic_pointer_cast<MatrixWorkspace>(ws);
   }
 }
 
@@ -43,7 +45,7 @@ MatrixWorkspace_sptr firstPeriod(Workspace_sptr ws) {
  * @return :: run label
  */
 std::string getRunLabel(Mantid::API::Workspace_sptr ws) {
-  const std::vector<Mantid::API::Workspace_sptr> wsList{ws};
+  const std::vector<Mantid::API::Workspace_sptr> wsList{std::move(ws)};
   return getRunLabel(wsList);
 }
 
@@ -68,7 +70,7 @@ std::string getRunLabel(const std::vector<Workspace_sptr> &wsList) {
   runNumbers.reserve(wsList.size());
   for (auto &&workspace : wsList) {
     int runNumber = firstPeriod(workspace)->getRunNumber();
-    runNumbers.push_back(runNumber);
+    runNumbers.emplace_back(runNumber);
   }
 
   return getRunLabel(instrument, runNumbers);
@@ -282,12 +284,12 @@ std::string generateWorkspaceName(const Muon::DatasetParams &params) {
  * group) and return as an ordered set.
  */
 std::set<Mantid::detid_t>
-getAllDetectorIDsFromWorkspace(Mantid::API::Workspace_sptr ws) {
+getAllDetectorIDsFromWorkspace(const Mantid::API::Workspace_sptr &ws) {
 
   std::set<Mantid::detid_t> detectorIDs;
-  if (auto workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
+  if (auto workspace = std::dynamic_pointer_cast<MatrixWorkspace>(ws)) {
     detectorIDs = getAllDetectorIDsFromMatrixWorkspace(workspace);
-  } else if (auto workspace = boost::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
+  } else if (auto workspace = std::dynamic_pointer_cast<WorkspaceGroup>(ws)) {
     detectorIDs = getAllDetectorIDsFromGroupWorkspace(workspace);
   }
   return detectorIDs;
@@ -296,8 +298,8 @@ getAllDetectorIDsFromWorkspace(Mantid::API::Workspace_sptr ws) {
 /**
  * Find all the detector IDs contained inside a matrix workspace
  */
-std::set<Mantid::detid_t>
-getAllDetectorIDsFromMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
+std::set<Mantid::detid_t> getAllDetectorIDsFromMatrixWorkspace(
+    const Mantid::API::MatrixWorkspace_sptr &ws) {
 
   std::set<Mantid::detid_t> detectorIDs;
   std::set<Mantid::detid_t> spectrumIDs;
@@ -312,8 +314,8 @@ getAllDetectorIDsFromMatrixWorkspace(Mantid::API::MatrixWorkspace_sptr ws) {
 /**
  * Find all the detector IDs contained inside a group workspace
  */
-std::set<Mantid::detid_t>
-getAllDetectorIDsFromGroupWorkspace(Mantid::API::WorkspaceGroup_sptr ws) {
+std::set<Mantid::detid_t> getAllDetectorIDsFromGroupWorkspace(
+    const Mantid::API::WorkspaceGroup_sptr &ws) {
 
   std::set<Mantid::detid_t> detectorIDs;
   std::set<Mantid::detid_t> detectorIDsSingleWorkspace;
@@ -322,7 +324,7 @@ getAllDetectorIDsFromGroupWorkspace(Mantid::API::WorkspaceGroup_sptr ws) {
 
   std::vector<Workspace_sptr> workspaces = ws->getAllItems();
   for (const auto &workspace : workspaces) {
-    matrixWS = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace);
+    matrixWS = std::dynamic_pointer_cast<MatrixWorkspace>(workspace);
     detectorIDsSingleWorkspace = getAllDetectorIDsFromMatrixWorkspace(matrixWS);
     detectorIDs.insert(detectorIDsSingleWorkspace.begin(),
                        detectorIDsSingleWorkspace.end());
@@ -348,8 +350,8 @@ std::vector<int> getAllDetectorIDsFromGroup(const Grouping &grouping) {
 // Checks if all the detectors in the groups in a Grouping are in the workspace.
 // Workspace can be matrix or group type.
 bool checkGroupDetectorsInWorkspace(const Grouping &grouping,
-                                    Workspace_sptr ws) {
-  std::set<int> detectorIDs = getAllDetectorIDsFromWorkspace(ws);
+                                    const Workspace_sptr &ws) {
+  std::set<int> detectorIDs = getAllDetectorIDsFromWorkspace(std::move(ws));
   std::vector<int> groupDetectorIDs = getAllDetectorIDsFromGroup(grouping);
   return checkItemsInSet(groupDetectorIDs, detectorIDs);
 }
@@ -451,11 +453,11 @@ void parseRunLabel(const std::string &label, std::string &instrument,
           const auto start = boost::lexical_cast<int>(pairTokenizer[0]);
           const auto end = boost::lexical_cast<int>(endRun);
           for (int run = start; run < end + 1; run++) {
-            runNumbers.push_back(run);
+            runNumbers.emplace_back(run);
           }
         } else if (pairTokenizer.count() == 1) {
           // Single run
-          runNumbers.push_back(boost::lexical_cast<int>(pairTokenizer[0]));
+          runNumbers.emplace_back(boost::lexical_cast<int>(pairTokenizer[0]));
         } else {
           throw std::invalid_argument("Failed to parse run label: " + label +
                                       " too many tokens ");
@@ -537,7 +539,7 @@ MatrixWorkspace_sptr sumPeriods(const WorkspaceGroup_sptr &inputWS,
   MatrixWorkspace_sptr outWS;
   if (!periodsToSum.empty()) {
     auto LHSWorkspace = inputWS->getItem(periodsToSum[0] - 1);
-    outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
+    outWS = std::dynamic_pointer_cast<MatrixWorkspace>(LHSWorkspace);
     if (outWS != nullptr && periodsToSum.size() > 1) {
       auto numPeriods = static_cast<int>(periodsToSum.size());
       for (int i = 1; i < numPeriods; i++) {
@@ -605,8 +607,8 @@ MatrixWorkspace_sptr extractSpectrum(const Workspace_sptr &inputWS,
   return outWS;
 }
 
-void addSampleLog(MatrixWorkspace_sptr workspace, const std::string &logName,
-                  const std::string &logValue) {
+void addSampleLog(const MatrixWorkspace_sptr &workspace,
+                  const std::string &logName, const std::string &logValue) {
   IAlgorithm_sptr alg =
       AlgorithmManager::Instance().createUnmanaged("AddSampleLog");
   alg->initialize();

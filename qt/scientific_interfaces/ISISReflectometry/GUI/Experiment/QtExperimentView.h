@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_QTEXPERIMENTVIEW_H_
-#define MANTID_CUSTOMINTERFACES_QTEXPERIMENTVIEW_H_
+#pragma once
 
 #include "Common/DllConfig.h"
 #include "IExperimentView.h"
@@ -26,7 +25,7 @@ class MANTIDQT_ISISREFLECTOMETRY_DLL QtExperimentView : public QWidget,
                                                         public IExperimentView {
   Q_OBJECT
 public:
-  QtExperimentView(Mantid::API::IAlgorithm_sptr algorithmForTooltips,
+  QtExperimentView(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips,
                    QWidget *parent = nullptr);
   void subscribe(ExperimentViewSubscriber *notifyee) override;
   void connectExperimentSettingsWidgets() override;
@@ -97,8 +96,27 @@ public:
   void disableAll() override;
   void enableAll() override;
 
+  bool getSubtractBackground() const override;
+  void setSubtractBackground(bool enable) override;
+
+  std::string getBackgroundSubtractionMethod() const override;
+  void setBackgroundSubtractionMethod(std::string const &method) override;
+  void enableBackgroundSubtractionMethod() override;
+  void disableBackgroundSubtractionMethod() override;
+
+  int getPolynomialDegree() const override;
+  void setPolynomialDegree(int polynomialDegree) override;
+  void enablePolynomialDegree() override;
+  void disablePolynomialDegree() override;
+
+  std::string getCostFunction() const override;
+  void setCostFunction(std::string const &costFunction) override;
+  void enableCostFunction() override;
+  void disableCostFunction() override;
+
   void enablePolarizationCorrections() override;
   void disablePolarizationCorrections() override;
+
   void enableFloodCorrectionInputs() override;
   void disableFloodCorrectionInputs() override;
 
@@ -115,6 +133,9 @@ public slots:
   void onPerAngleDefaultsChanged(int row, int column);
 
 private:
+  void initializeTableColumns(
+      QTableWidget &table,
+      const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initializeTableItems(QTableWidget &table);
   void initializeTableRow(QTableWidget &table, int row);
   void initializeTableRow(QTableWidget &table, int row,
@@ -124,28 +145,35 @@ private:
   QString messageFor(const InstrumentParameterTypeMissmatch &typeError) const;
 
   /// Initialise the interface
-  void initLayout();
-  void initOptionsTable();
+  void initLayout(Mantid::API::IAlgorithm_sptr algorithmForTooltips);
+  void
+  initOptionsTable(const Mantid::API::IAlgorithm_sptr &algorithmForTooltips);
   void initFloodControls();
-  void registerSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
-  void registerExperimentSettingsWidgets(Mantid::API::IAlgorithm_sptr alg);
-  void setToolTipAsPropertyDocumentation(QWidget &widget,
-                                         std::string const &propertyName,
-                                         Mantid::API::IAlgorithm_sptr alg);
+  void registerSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
+  void
+  registerExperimentSettingsWidgets(const Mantid::API::IAlgorithm_sptr &alg);
+  void
+  setToolTipAsPropertyDocumentation(QWidget &widget,
+                                    std::string const &propertyName,
+                                    const Mantid::API::IAlgorithm_sptr &alg);
 
   template <typename Widget>
   void registerSettingWidget(Widget &widget, std::string const &propertyName,
-                             Mantid::API::IAlgorithm_sptr alg);
+                             const Mantid::API::IAlgorithm_sptr &alg);
+  template <typename Widget>
+  void registerSettingWidget(Widget &widget, std::string const &tooltip);
   void connectSettingsChange(QLineEdit &edit);
   void connectSettingsChange(QComboBox &edit);
   void connectSettingsChange(QCheckBox &edit);
   void connectSettingsChange(QTableWidget &edit);
   void connectSettingsChange(QDoubleSpinBox &edit);
+  void connectSettingsChange(QSpinBox &edit);
   void disconnectSettingsChange(QLineEdit &edit);
   void disconnectSettingsChange(QComboBox &edit);
   void disconnectSettingsChange(QCheckBox &edit);
   void disconnectSettingsChange(QTableWidget &edit);
   void disconnectSettingsChange(QDoubleSpinBox &edit);
+  void disconnectSettingsChange(QSpinBox &edit);
   QLineEdit &stitchOptionsLineEdit() const;
   void setSelected(QComboBox &box, std::string const &str);
   void setText(QLineEdit &lineEdit, int value);
@@ -175,6 +203,8 @@ private:
   std::unique_ptr<QShortcut> m_deleteShortcut;
   Ui::ExperimentWidget m_ui;
   ExperimentViewSubscriber *m_notifyee;
+  std::array<QString, PerThetaDefaults::OPTIONS_TABLE_COLUMN_COUNT>
+      m_columnToolTips;
 
   friend class Encoder;
   friend class Decoder;
@@ -184,5 +214,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif /* MANTID_CUSTOMINTERFACES_QTEXPERIMENTVIEW_H_ */

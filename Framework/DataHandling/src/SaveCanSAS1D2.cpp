@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveCanSAS1D2.h"
 #include "MantidAPI/Axis.h"
@@ -63,7 +63,7 @@ void SaveCanSAS1D2::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<>>(
           "Transmission", "", Kernel::Direction::Input, PropertyMode::Optional,
-          boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
+          std::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
       "The transmission workspace. Optional. If given, will be saved at "
       "TransmissionSpectrum");
 
@@ -71,7 +71,7 @@ void SaveCanSAS1D2::init() {
       std::make_unique<API::WorkspaceProperty<>>(
           "TransmissionCan", "", Kernel::Direction::Input,
           PropertyMode::Optional,
-          boost::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
+          std::make_shared<API::WorkspaceUnitValidator>("Wavelength")),
       "The transmission workspace of the Can. Optional. If given, will be "
       "saved at TransmissionSpectrum");
 
@@ -214,6 +214,8 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
   std::string user_file;
   if (run.hasProperty("UserFile")) {
     user_file = run.getLogData("UserFile")->value();
+  } else {
+    g_log.warning("No user file was found in the input workspace.");
   }
 
   std::string sasProcuserfile = "\n\t\t\t<term name=\"user_file\">";
@@ -221,6 +223,15 @@ void SaveCanSAS1D2::createSASProcessElement(std::string &sasProcess) {
   sasProcuserfile += "</term>";
   // outFile<<sasProcuserfile;
   sasProcess += sasProcuserfile;
+
+  std::string batch_file;
+  if (run.hasProperty("BatchFile")) {
+    batch_file = run.getLogData("BatchFile")->value();
+  }
+  std::string sasProcbatchfile = "\n\t\t\t<term name=\"batch_file\">";
+  sasProcbatchfile += batch_file;
+  sasProcbatchfile += "</term>";
+  sasProcess += sasProcbatchfile;
 
   if (m_trans_ws) {
     // Add other run numbers

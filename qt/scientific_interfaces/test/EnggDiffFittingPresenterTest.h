@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
-#define MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H
+#pragma once
 
 #include "../EnggDiffraction/EnggDiffFittingPresenter.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -16,6 +15,8 @@
 #include "EnggDiffFittingViewMock.h"
 #include "EnggDiffractionParamMock.h"
 #include <cxxtest/TestSuite.h>
+#include <utility>
+
 #include <vector>
 
 using namespace MantidQt::CustomInterfaces;
@@ -41,8 +42,9 @@ public:
 
   EnggDiffFittingPresenterNoThread(
       IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
-      boost::shared_ptr<IEnggDiffractionParam> mainParam)
-      : EnggDiffFittingPresenter(view, std::move(model), nullptr, mainParam) {}
+      std::shared_ptr<IEnggDiffractionParam> mainParam)
+      : EnggDiffFittingPresenter(view, std::move(model), nullptr,
+                                 std::move(mainParam)) {}
 
 private:
   // not async at all
@@ -82,13 +84,13 @@ public:
         m_view.get(), std::move(mockModel), nullptr, nullptr));
 
     // default banks
-    m_ex_enginx_banks.push_back(true);
-    m_ex_enginx_banks.push_back(false);
+    m_ex_enginx_banks.emplace_back(true);
+    m_ex_enginx_banks.emplace_back(false);
 
     // default run number
     m_ex_empty_run_num.emplace_back("");
     m_invalid_run_number.emplace_back("");
-    m_ex_run_number.push_back(g_validRunNo);
+    m_ex_run_number.emplace_back(g_validRunNo);
     g_vanNo.emplace_back("8899999988");
     g_ceriaNo.emplace_back("9999999999");
 
@@ -310,7 +312,7 @@ public:
   void test_browse_peaks_list() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     const auto paramMock =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
         std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
@@ -339,7 +341,7 @@ public:
   void test_browse_peaks_list_with_warning() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     const auto paramMock =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
         std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
@@ -374,7 +376,7 @@ public:
   void test_save_peaks_list() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     const auto paramMock =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
         std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
@@ -401,7 +403,7 @@ public:
   void test_save_peaks_list_with_warning() {
     testing::NiceMock<MockEnggDiffFittingView> mockView;
     const auto paramMock =
-        boost::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
+        std::make_shared<testing::NiceMock<MockEnggDiffractionParam>>();
     EnggDiffFittingPresenterNoThread pres(
         &mockView,
         std::make_unique<testing::NiceMock<MockEnggDiffFittingModel>>(),
@@ -760,5 +762,3 @@ const std::string EnggDiffFittingPresenterTest::g_focusedFittingRunNo =
     "241391-241394";
 
 const std::string EnggDiffFittingPresenterTest::EMPTY = "";
-
-#endif // MANTID_CUSTOMINTERFACES_ENGGDIFFFITTINGPRESENTERTEST_H

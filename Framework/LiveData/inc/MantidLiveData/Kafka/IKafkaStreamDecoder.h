@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_LIVEDATA_IKAFKASTREAMDECODER_H_
-#define MANTID_LIVEDATA_IKAFKASTREAMDECODER_H_
+#pragma once
 
 #include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -36,8 +35,17 @@ public:
   public:
     using FnType = std::function<void()>;
 
-    Callback(Callback::FnType callback) : m_mutex(), m_callback() {
-      setFunction(std::move(callback));
+    explicit Callback(const Callback::FnType &callback)
+        : m_mutex(), m_callback() {
+      setFunction(callback);
+    }
+
+    Callback(Callback &&other) noexcept {
+      {
+        // We must lock the other obj - not ourself
+        std::lock_guard lck(other.m_mutex);
+        m_callback = std::move(other.m_callback);
+      }
     }
 
     inline void operator()() {
@@ -60,10 +68,13 @@ public:
                       const std::string &runInfoTopic,
                       const std::string &spDetTopic,
                       const std::string &sampleEnvTopic,
-                      const std::string &chopperTopic);
+                      const std::string &chopperTopic,
+                      const std::string &monitorTopic);
   virtual ~IKafkaStreamDecoder();
   IKafkaStreamDecoder(const IKafkaStreamDecoder &) = delete;
   IKafkaStreamDecoder &operator=(const IKafkaStreamDecoder &) = delete;
+
+  IKafkaStreamDecoder(IKafkaStreamDecoder &&) noexcept;
 
 public:
   ///@name Start/stop
@@ -105,6 +116,12 @@ protected:
     size_t nPeriods;
     std::string nexusStructure;
     int64_t runStartMsgOffset;
+
+    // Detector-Spectrum mapping information
+    bool detSpecMapSpecified = false;
+    size_t numberOfSpectra = 0;
+    std::vector<int32_t> spectrumNumbers;
+    std::vector<int32_t> detectorIDs;
   };
 
   /// Main loop of listening for data messages and populating the cache
@@ -113,8 +130,7 @@ protected:
   virtual void captureImplExcept() = 0;
 
   /// Create the cache workspaces, LoadLiveData extracts data from these
-  virtual void initLocalCaches(const std::string &rawMsgBuffer,
-                               const RunStartStruct &runStartData) = 0;
+  virtual void initLocalCaches(const RunStartStruct &runStartData) = 0;
 
   /// Get an expected message from the run information topic
   int64_t getRunInfoMessage(std::string &rawMsgBuffer);
@@ -139,6 +155,7 @@ protected:
   const std::string m_spDetTopic;
   const std::string m_sampleEnvTopic;
   const std::string m_chopperTopic;
+  const std::string m_monitorTopic;
   /// Flag indicating if user interruption has been requested
   std::atomic<bool> m_interrupt;
   /// Subscriber for the data stream
@@ -150,8 +167,6 @@ protected:
   Types::Core::DateAndTime m_runStart;
   /// Subscriber for the run info stream
   std::unique_ptr<IKafkaStreamSubscriber> m_runStream;
-  /// Subscriber for the run info stream
-  std::unique_ptr<IKafkaStreamSubscriber> m_spDetStream;
   /// Subscriber for the chopper timestamp stream
   std::unique_ptr<IKafkaStreamSubscriber> m_chopperStream;
   /// Run number
@@ -168,7 +183,7 @@ protected:
   /// Flag indicating that the decoder is capturing
   std::atomic<bool> m_capturing;
   /// Exception object indicating there was an error
-  boost::shared_ptr<std::runtime_error> m_exception;
+  std::shared_ptr<std::runtime_error> m_exception;
 
   /// For notifying other threads of changes to conditions (the following bools)
   std::condition_variable m_cv;
@@ -188,22 +203,22 @@ protected:
   void waitForDataExtraction();
   void waitForRunEndObservation();
 
-  std::map<int32_t, std::set<int32_t>>
+  static std::map<int32_t, std::set<int32_t>>
   buildSpectrumToDetectorMap(const int32_t *spec, const int32_t *udet,
                              uint32_t length);
 
   template <typename T>
-  boost::shared_ptr<T>
+  std::shared_ptr<T>
   createBufferWorkspace(const std::string &workspaceClassName, size_t nspectra,
                         const int32_t *spec, const int32_t *udet,
                         uint32_t length);
   template <typename T>
-  boost::shared_ptr<T>
+  std::shared_ptr<T>
   createBufferWorkspace(const std::string &workspaceClassName,
-                        const boost::shared_ptr<T> &parent);
+                        const std::shared_ptr<T> &parent);
 
   template <typename T>
-  void loadInstrument(const std::string &name, boost::shared_ptr<T> workspace,
+  bool loadInstrument(const std::string &name, std::shared_ptr<T> workspace,
                       const std::string &jsonGeometry = "");
 
   void checkRunMessage(
@@ -212,8 +227,8 @@ protected:
       std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
 
   void checkRunEnd(
-      const std::string &topicName, bool &checkOffsets, const int64_t offset,
-      const int32_t partition,
+      const std::string &topicName, bool &checkOffsets, int64_t offset,
+      int32_t partition,
       std::unordered_map<std::string, std::vector<int64_t>> &stopOffsets,
       std::unordered_map<std::string, std::vector<bool>> &reachedEnd);
 
@@ -235,10 +250,11 @@ protected:
   /// Subscribe to data stream at the time specified in a run start message
   void joinStreamAtTime(const RunStartStruct &runStartData);
   /// Convert a duration in nanoseconds to milliseconds
-  int64_t nanosecondsToMilliseconds(uint64_t timeNanoseconds) const;
-  /// Get a det-spec map message using the time specified in a run start message
-  std::string getDetSpecMapForRun(const RunStartStruct &runStartStruct);
+  static int64_t nanosecondsToMilliseconds(uint64_t timeNanoseconds);
+
+  static RunStartStruct
+  extractRunStartDataFromMessage(const std::string &messageBuffer,
+                                 int64_t offset);
 };
 } // namespace LiveData
 } // namespace Mantid
-#endif // MANTID_LIVEDATA_IKAFKASTREAMDECODER_H_

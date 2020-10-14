@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_DATAHANDLING_LOADFITSTEST_H_
-#define MANTID_DATAHANDLING_LOADFITSTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -57,8 +56,8 @@ public:
 
   void test_castAlgorithm() {
     // can create
-    boost::shared_ptr<LoadFITS> a;
-    TS_ASSERT(a = boost::make_shared<LoadFITS>());
+    std::shared_ptr<LoadFITS> a;
+    TS_ASSERT(a = std::make_shared<LoadFITS>());
     // can cast to inherited interfaces and base classes
 
     TS_ASSERT(dynamic_cast<Mantid::DataHandling::LoadFITS *>(a.get()));
@@ -151,10 +150,10 @@ public:
                      2); // Number of time bins should equal number of files
     MatrixWorkspace_sptr ws1;
     TS_ASSERT_THROWS_NOTHING(
-        ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0)));
+        ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0)));
     MatrixWorkspace_sptr ws2;
     TS_ASSERT_THROWS_NOTHING(
-        ws2 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1)));
+        ws2 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1)));
 
     // basic FITS headers
     const auto run = ws1->run();
@@ -211,7 +210,7 @@ public:
     for (int i = 0; i < out->getNumberOfEntries(); ++i) {
       MatrixWorkspace_sptr ws;
       TS_ASSERT_THROWS_NOTHING(
-          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
+          ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
       TS_ASSERT_EQUALS(ws->getNumberHistograms(), g_SPECTRA_COUNT);
 
@@ -267,7 +266,7 @@ public:
     for (int i = 0; i < out->getNumberOfEntries(); ++i) {
       MatrixWorkspace_sptr ws;
       TS_ASSERT_THROWS_NOTHING(
-          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
+          ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
       TS_ASSERT_EQUALS(ws->getNumberHistograms(),
                        g_SPECTRA_COUNT_ASRECT / binSize);
@@ -299,7 +298,7 @@ public:
     for (int i = 0; i < out->getNumberOfEntries(); ++i) {
       MatrixWorkspace_sptr ws;
       TS_ASSERT_THROWS_NOTHING(
-          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
+          ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
       TS_ASSERT_EQUALS(ws->getNumberHistograms(),
                        g_SPECTRA_COUNT_ASRECT / binSize);
@@ -332,7 +331,7 @@ public:
     for (int i = 0; i < out->getNumberOfEntries(); ++i) {
       MatrixWorkspace_sptr ws;
       TS_ASSERT_THROWS_NOTHING(
-          ws = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
+          ws = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(i)));
 
       TSM_ASSERT_EQUALS("The number of histograms should be the expected, "
                         "dimension of the image",
@@ -345,7 +344,7 @@ public:
     // and finally a basic check of values in the image, to be safe
     MatrixWorkspace_sptr ws0;
     TS_ASSERT_THROWS_NOTHING(
-        ws0 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0)));
+        ws0 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(0)));
 
     TSM_ASSERT_EQUALS("The title of the first output workspace is not the name "
                       "of the first file",
@@ -366,7 +365,7 @@ public:
 
     MatrixWorkspace_sptr ws1;
     TS_ASSERT_THROWS_NOTHING(
-        ws1 = boost::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1)));
+        ws1 = std::dynamic_pointer_cast<MatrixWorkspace>(out->getItem(1)));
 
     TSM_ASSERT_EQUALS("The title of the second output workspace is not the "
                       "name of the second file",
@@ -458,5 +457,3 @@ public:
     TS_ASSERT(lf.execute());
   }
 };
-
-#endif // MANTID_DATAHANDLING_LOADFITSTEST_H_

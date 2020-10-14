@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_PEAKINTENSITYVSRADIUSTEST_H_
-#define MANTID_CRYSTAL_PEAKINTENSITYVSRADIUSTEST_H_
+#pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -211,12 +210,12 @@ public:
     assertFlatAfter1(ws);
   }
 
-  void assertFlatAfter1(MatrixWorkspace_sptr ws) {
+  void assertFlatAfter1(const MatrixWorkspace_sptr &ws) {
     TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[12], 1000, 1e-6);
     TSM_ASSERT_DELTA("After 1.0, the signal is flat", ws->y(0)[15], 1000, 1e-6)
   }
 
-  void assertFirstFourYValuesCloseToZero(MatrixWorkspace_sptr ws) {
+  void assertFirstFourYValuesCloseToZero(const MatrixWorkspace_sptr &ws) {
     TS_ASSERT_DELTA(ws->y(0)[0], 0, 10);
     TS_ASSERT_DELTA(ws->y(0)[1], 0, 10);
     TS_ASSERT_DELTA(ws->y(0)[2], 0, 10);
@@ -235,5 +234,3 @@ public:
     assertFlatAfter1(ws);
   }
 };
-
-#endif /* MANTID_CRYSTAL_PEAKINTENSITYVSRADIUSTEST_H_ */

@@ -4,8 +4,7 @@
 //     NScD Oak Ridge National Laboratory, European Spallation Source
 //     & Institut Laue - Langevin
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESENTER_H_
-#define MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESENTER_H_
+#pragma once
 
 #include "DllConfig.h"
 #include "IEnggDiffFittingModel.h"
@@ -40,8 +39,8 @@ class MANTIDQT_ENGGDIFFRACTION_DLL EnggDiffFittingPresenter
 public:
   EnggDiffFittingPresenter(
       IEnggDiffFittingView *view, std::unique_ptr<IEnggDiffFittingModel> model,
-      boost::shared_ptr<IEnggDiffractionCalibration> mainCalib,
-      boost::shared_ptr<IEnggDiffractionParam> mainParam);
+      std::shared_ptr<IEnggDiffractionCalibration> mainCalib,
+      std::shared_ptr<IEnggDiffractionParam> mainParam);
   ~EnggDiffFittingPresenter() override;
 
   void notify(IEnggDiffFittingPresenter::Notification notif) override;
@@ -65,7 +64,7 @@ public:
                  const std::string &expectedPeaks);
 
   void plotFocusedFile(bool plotSinglePeaks,
-                       Mantid::API::MatrixWorkspace_sptr focusedPeaksWS);
+                       const Mantid::API::MatrixWorkspace_sptr &focusedPeaksWS);
 
   void plotAlignedWorkspace(const bool plotFittedPeaks);
 
@@ -108,7 +107,7 @@ private:
 
   void savePeakList();
 
-  std::string readPeaksFile(std::string fileDir);
+  std::string readPeaksFile(const std::string &fileDir);
 
   void fittingWriteFile(const std::string &fileDir);
 
@@ -121,10 +120,10 @@ private:
   QThread *m_workerThread;
 
   /// interface for the 'current' calibration
-  boost::shared_ptr<IEnggDiffractionCalibration> m_mainCalib;
+  std::shared_ptr<IEnggDiffractionCalibration> m_mainCalib;
 
   /// interface for the 'current' calibration
-  boost::shared_ptr<IEnggDiffractionParam> m_mainParam;
+  std::shared_ptr<IEnggDiffractionParam> m_mainParam;
 
   /// Associated view for this presenter (MVP pattern)
   IEnggDiffFittingView *const m_view;
@@ -141,4 +140,3 @@ private:
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif // MANTIDQTCUSTOMINTERFACES_ENGGDIFFRACTION_ENGGDIFFFITTINGPRESENTER_H_

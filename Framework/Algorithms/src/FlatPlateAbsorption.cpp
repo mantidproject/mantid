@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/FlatPlateAbsorption.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -27,7 +27,7 @@ FlatPlateAbsorption::FlatPlateAbsorption()
       m_XSliceThickness(0), m_YSliceThickness(0), m_ZSliceThickness(0) {}
 
 void FlatPlateAbsorption::defineProperties() {
-  auto mustBePositive = boost::make_shared<BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("SampleHeight", -1.0, mustBePositive,
                   "The height of the plate in cm");
@@ -36,7 +36,7 @@ void FlatPlateAbsorption::defineProperties() {
   declareProperty("SampleThickness", -1.0, mustBePositive,
                   "The thickness of the plate in cm");
 
-  auto moreThanZero = boost::make_shared<BoundedValidator<double>>();
+  auto moreThanZero = std::make_shared<BoundedValidator<double>>();
   moreThanZero->setLower(0.001);
   declareProperty("ElementSize", 1.0, moreThanZero,
                   "The size of one side of an integration element cube in mm");

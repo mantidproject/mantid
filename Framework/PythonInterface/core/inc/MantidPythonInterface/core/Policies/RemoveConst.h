@@ -1,18 +1,17 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PYTHONINTERFACE_REMOVECONST_H_
-#define MANTID_PYTHONINTERFACE_REMOVECONST_H_
+#pragma once
 
 #include <boost/python/detail/prefix.hpp>
 #include <boost/python/to_python_value.hpp>
 
 #include <boost/mpl/and.hpp>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <type_traits>
 
@@ -28,7 +27,7 @@
  * Two policies are defined:
  *  - RemoveConst: Bare pointers, return type must be "const T*"
  *  - RemoveConstSharedPtr: SharedPtr to const object, return type must be
- *boost::shared_ptr<const T>
+ *std::shared_ptr<const T>
  */
 
 namespace Mantid {
@@ -39,14 +38,14 @@ namespace {
 //-----------------------------------------------------------------------
 // MPL helper structs
 //-----------------------------------------------------------------------
-/// MPL struct to figure out if a type is a boost::shared_ptr<const T>
+/// MPL struct to figure out if a type is a std::shared_ptr<const T>
 /// The general one inherits from std::false_type
 template <typename T> struct IsConstSharedPtr : std::false_type {};
 
-/// Specialization for boost::shared_ptr<const T> types to inherit from
+/// Specialization for std::shared_ptr<const T> types to inherit from
 /// std::true_type
 template <typename T>
-struct IsConstSharedPtr<boost::shared_ptr<const T>> : std::true_type {};
+struct IsConstSharedPtr<std::shared_ptr<const T>> : std::true_type {};
 
 //-----------------------------------------------------------------------
 // Polciy implementations
@@ -87,12 +86,12 @@ template <typename ConstSharedPtr> struct RemoveConstSharedPtrImpl {
   using ConstElementType = typename ConstSharedPtr::element_type;
   using NonConstElementType =
       typename std::remove_const<ConstElementType>::type;
-  using NonConstSharedPtr = typename boost::shared_ptr<NonConstElementType>;
+  using NonConstSharedPtr = typename std::shared_ptr<NonConstElementType>;
 
   inline PyObject *operator()(const ConstSharedPtr &p) const {
     using namespace boost::python;
     return to_python_value<NonConstSharedPtr>()(
-        boost::const_pointer_cast<NonConstElementType>(p));
+        std::const_pointer_cast<NonConstElementType>(p));
   }
 
   inline PyTypeObject const *get_pytype() const {
@@ -127,7 +126,7 @@ struct RemoveConst {
 struct RemoveConstSharedPtr {
   template <class T> struct apply {
     // Deduce if type is correct for policy, needs to be a
-    // "boost::shared_ptr<T>"
+    // "std::shared_ptr<T>"
     using type = typename boost::mpl::if_c<
         IsConstSharedPtr<T>::value, RemoveConstSharedPtrImpl<T>,
         RemoveConstSharedPtr_Requires_SharedPtr_Const_T_Pointer_Return_Value<
@@ -138,5 +137,3 @@ struct RemoveConstSharedPtr {
 } // namespace Policies
 } // namespace PythonInterface
 } // namespace Mantid
-
-#endif /* MANTID_PYTHONINTERFACE_REMOVECONST_H_REMOVECONST_H_ */

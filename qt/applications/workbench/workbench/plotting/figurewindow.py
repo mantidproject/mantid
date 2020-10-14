@@ -1,15 +1,13 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 #
 #
 """Provides the QMainWindow subclass for a plotting window"""
-from __future__ import absolute_import
-
 # std imports
 import weakref
 
@@ -25,14 +23,18 @@ from mantidqt.widgets.observers.observing_view import ObservingView
 
 class FigureWindow(QMainWindow, ObservingView):
     """A MainWindow that will hold plots"""
+    # signals
     activated = Signal()
     closing = Signal()
     visibility_changed = Signal()
     show_context_menu = Signal()
     close_signal = Signal()
 
-    def __init__(self, canvas, parent=None):
-        QMainWindow.__init__(self, parent=parent)
+    def __init__(self, canvas, parent=None, window_flags=None):
+        if window_flags is not None:
+            QMainWindow.__init__(self, parent, window_flags)
+        else:
+            QMainWindow.__init__(self, parent)
         # attributes
         self._canvas = weakref.proxy(canvas)
         self.setAttribute(Qt.WA_DeleteOnClose, True)
@@ -86,8 +88,18 @@ class FigureWindow(QMainWindow, ObservingView):
         from matplotlib.backend_bases import LocationEvent
         workspace_names = event.mimeData().text().split('\n')
 
-        # This creates a matplotlib LocationEvent so that the axis in which the drop event occurred can be calculated
-        x, y = self._canvas.mouseEventCoords(event.pos())
+        # This creates a matplotlib LocationEvent so that the axis in which the
+        # drop event occurred can be calculated
+        try:
+            x, y = self._canvas.mouseEventCoords(event.pos())
+        except AttributeError:  # matplotlib v1.5 does not have mouseEventCoords
+            try:
+                dpi_ratio = self._canvas.devicePixelRatio() or 1
+            except AttributeError:
+                dpi_ratio = 1
+            x = dpi_ratio * event.pos().x()
+            y = dpi_ratio * self._canvas.figure.bbox.height / dpi_ratio - event.pos().y()
+
         location_event = LocationEvent('AxesGetterEvent', self._canvas, x, y)
         ax = location_event.inaxes if location_event.inaxes else self._canvas.figure.axes[0]
 
@@ -109,12 +121,18 @@ class FigureWindow(QMainWindow, ObservingView):
         if len(names) == 0:
             return
         # local import to avoid circular import with FigureManager
-        from mantidqt.plotting.functions import pcolormesh_from_names, plot_from_names
+        from mantidqt.plotting.functions import pcolormesh, plot_from_names, plot_surface, plot_wireframe, plot_contour
 
         fig = self._canvas.figure
         fig_type = figure_type(fig, ax)
         if fig_type == FigureType.Image:
-            pcolormesh_from_names(names, fig=fig, ax=ax)
+            pcolormesh(names, fig=fig)
+        elif fig_type == FigureType.Surface:
+            plot_surface(names, fig=fig)
+        elif fig_type == FigureType.Wireframe:
+            plot_wireframe(names, fig=fig)
+        elif fig_type == FigureType.Contour:
+            plot_contour(names, fig=fig)
         else:
             plot_from_names(names, errors=(fig_type == FigureType.Errorbar),
                             overplot=ax, fig=fig)

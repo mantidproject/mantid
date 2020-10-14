@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_GEOMETRY_HKLGENERATOR_H_
-#define MANTID_GEOMETRY_HKLGENERATOR_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidGeometry/DllConfig.h"
@@ -41,7 +40,7 @@ namespace Geometry {
     ...
         hkl = V3D(h, k, l)
         if(isOk(hkl)) {
-            hkls.push_back(hkl);
+            hkls.emplace_back(hkl);
         }
     ...
 
@@ -51,7 +50,7 @@ namespace Geometry {
 
     HKLGenerator generator(V3D(hmin, kmin, lmin), V3D(hmax, kmax, lmax));
     for(auto hkl = generator.begin(); hkl != generator.end(); ++hkl) {
-        hkls.push_back(*hkl);
+        hkls.emplace_back(*hkl);
     }
 
   Or even shorter, using std::copy:
@@ -167,5 +166,3 @@ private:
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_HKLGENERATOR_H_ */

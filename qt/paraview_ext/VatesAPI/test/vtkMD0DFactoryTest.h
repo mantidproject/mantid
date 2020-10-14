@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef VTK_MD_0D_FACTORY_TEST
-#define VTK_MD_0D_FACTORY_TEST
+#pragma once
 #include <cxxtest/TestSuite.h>
 
 #include "MantidVatesAPI/vtkMD0DFactory.h"
@@ -32,5 +31,3 @@ public:
                dataSet->GetNumberOfCells() == 1);
   }
 };
-
-#endif

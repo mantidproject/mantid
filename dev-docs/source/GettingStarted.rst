@@ -25,6 +25,7 @@ Install the following:
 
     * ``Windows Universal CRT SDK``
     * The latest Windows 10 SDK
+  * If your machine has less than 32GB of memory Mantid may not build. If you have problems change the maximum number of parallel project builds to 1 in Visual Studio in Tools -> Options -> Projects and Solutions -> Build And Run.
 
 
 * `Git <https://git-scm.com/>`_.
@@ -71,21 +72,88 @@ Red Hat/Cent OS/Fedora
   # Install dependencies
   yum install mantid-developer
 
-Ubuntu
-~~~~~~
-Follow the `Ubuntu instructions <http://download.mantidproject.org/ubuntu.html>`_ to add the
-stable release repository and mantid ppa. Download the latest
-`mantid-developer <https://sourceforge.net/projects/mantid/files/developer>`_
-package and install it:
+Ubuntu 18.04
+~~~~~~~~~~~~
+- Setup the Kitware APT repository to get a recent version of CMake by
+  following `these instructions <https://apt.kitware.com/>`_
+- Follow the `Ubuntu instructions <http://download.mantidproject.org/ubuntu.html>`_
+  to add the stable release repository and mantid ppa and
+- Download the latest
+  `mantid-developer <https://sourceforge.net/projects/mantid/files/developer>`_
+  package and install it:
 
 .. code-block:: sh
 
    apt install gdebi-core
-   apt install ~/Downloads/mantid-developer.X.Y.Z.deb
+   gdebi ~/Downloads/mantid-developer.X.Y.Z.deb
 
 where ``X.Y.Z`` should be replaced with the version that was downloaded.
 
 if you wish to setup eclipse for use developing mantid, then instructions can be found :ref:`here <Eclipse>`.
+
+Ubuntu 20.04
+~~~~~~~~~~~~
+- Mantid uses `qtpy` to talk to Python bindings of Qt.  It is recommended to have the _
+  environment var `QT_API=pyqt5` exported to the shell before building with CMake.
+- The header and lib shipped with Anaconda (if installed) could interfere with Mantid building _
+  process. It is highly recommended to remove Anaconda Python from your env prior to building _
+  using `conda deactivate`.
+- Mantid is not yet officially supported on Ubuntu 20.04 as Qt4 has been removed but Workbench can be built by installing:
+
+.. code-block:: sh
+
+   apt-get install -y \
+     git \
+     g++ \
+     clang-format-6.0 \
+     cmake \
+     dvipng \
+     doxygen \
+     libtbb-dev \
+     libgoogle-perftools-dev \
+     libboost-all-dev \
+     libpoco-dev \
+     libnexus-dev \
+     libhdf5-dev \
+     libhdf4-dev \
+     libjemalloc-dev \
+     libgsl-dev \
+     liboce-visualization-dev \
+     libmuparser-dev \
+     libssl-dev \
+     libjsoncpp-dev \
+     librdkafka-dev \
+     qtbase5-dev \
+     qttools5-dev \
+     qttools5-dev-tools \
+     libqt5webkit5-dev \
+     libqt5x11extras5-dev \
+     libqt5opengl5-dev \
+     libqscintilla2-qt5-dev \
+     libpython3-dev \
+     ninja-build \
+     python3-setuptools \
+     python3-sip-dev \
+     python3-pyqt5 \
+     pyqt5-dev \
+     pyqt5-dev-tools \
+     python3-qtpy \
+     python3-numpy \
+     python3-scipy \
+     python3-sphinx \
+     python3-sphinx-bootstrap-theme \
+     python3-pycifrw \
+     python3-dateutil \
+     python3-matplotlib \
+     python3-qtconsole \
+     python3-h5py \
+     python3-mock \
+     python3-psutil \
+     python3-requests \
+     python3-toml \
+     python3-yaml
+
+and passing the `-DENABLE_MANTIDPLOT=OFF` option to the cmake command line or selecting this in the cmake GUI.
 
 OSX
 ---
@@ -95,7 +163,7 @@ Docker
 ------
 
 On Docker supported systems you may use the `mantid-development
-<https://github.com/mantidproject/dockerfiles/tree/master/mantid-development>`_
+<https://github.com/mantidproject/dockerfiles/tree/master/development>`_
 images to develop Mantid without having to configure your system as a suitable
 build environment. This will give you an out of the box working build
 environment, including ParaView/VATES, Python 3 (where available) and ccache.
@@ -117,7 +185,7 @@ There are a number of URLs via which the code can be checked out using various p
 
 Setting up GitHub
 #################
-Please install the ZenHub Browser extension from this `page <https://www.zenhub.com/extension>`_. 
+Please install the ZenHub Browser extension from this `page <https://www.zenhub.com/extension>`_.
 
 Building Mantid
 ###############
@@ -131,8 +199,8 @@ Archive access
 ##############
 
 It is very convenient to be able to access the data archive directly.
-At ISIS, this is automatically done on the Windows machines, however OSX
-requires some extra setup.
+At ISIS, this is automatically done on the Windows machines, however OSX and Linux
+require some extra setup.
 
 OSX
 ---
@@ -144,3 +212,47 @@ OSX
 * It can be found at `/Volumes/inst$`
 
 **NB** the address in step 2 sometimes changes - if it does not work, replace `80` with `55` or `3`.
+
+Linux
+------
+1. Install packages:
+
+``sudo apt-get install -y autofs cifs-utils keyutils``
+
+2. Create an ``/archive.creds`` file in the root directory containing this, filling in the relevant details:
+
+This should only be done if full disk encryption is enabled or if the ``archive.creds`` file is stored in a secure (encrypted) location; to ensure passwords are kept safe.
+
+.. code-block:: text
+
+   username=FEDERAL_ID_HERE
+   password=FED_PASSWD_HERE
+   domain=CLRC
+
+3. Edit ``/etc/auto.master`` and add the line:
+
+.. code-block:: text
+
+   /archive      /etc/auto.archive
+
+4. Create ``/etc/auto.archive`` and add the single line:
+
+.. code-block:: text
+
+   *     -fstype=cifs,ro,credentials=/archive.creds,file_mode=0444,dir_mode=0555,vers=3.0,noserverino,nounix    ://isis.cclrc.ac.uk/inst\$/&
+
+5. Enter the following commands:
+
+.. code-block:: bash
+
+   sudo chmod 400 /archive.creds
+   sudo mkdir /archive
+   service autofs restart
+
+Done. You can now access directories in the archive. Test it by doing:
+
+.. code-block:: bash
+
+   ls /archive/ndxalf
+
+If it's working the command should return ``ls: cannot access '/archive/ndxalf/DfsrPrivate': Permission denied``

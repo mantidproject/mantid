@@ -1,13 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
-
-from __future__ import (absolute_import, unicode_literals)
 
 from qtpy.QtCore import Signal, Slot, Qt
 from qtpy.QtWidgets import QDialog, QHeaderView, QTableWidgetItem
@@ -33,6 +31,9 @@ class ProjectRecoveryWidgetView(QDialog):
         self.ui.progressBar.setMinimum(0)
         self._add_data_to_table()
 
+        # keep copy of reference to the code editor
+        self.editor = None
+
     def reject(self):
         self.presenter.start_mantid_normally()
 
@@ -40,8 +41,8 @@ class ProjectRecoveryWidgetView(QDialog):
         self.ui.progressBar.setMaximum(new_value)
 
     def connect_progress_bar(self):
-        self.presenter.project_recovery.loader.multi_file_interpreter.current_editor().sig_progress.connect(
-            self.update_progress_bar)
+        self.editor = self.presenter.project_recovery.loader.multi_file_interpreter.current_editor()
+        self.editor.connect_to_progress_reports(self.update_progress_bar)
 
     def emit_abort_script(self):
         self.abort_project_recovery_script.connect(
@@ -56,6 +57,10 @@ class ProjectRecoveryWidgetView(QDialog):
         row = self.presenter.get_row(0)
         self.ui.tableWidget.setItem(0, 0, QTableWidgetItem(row[0]))
         self.ui.tableWidget.setItem(0, 1, QTableWidgetItem(row[1]))
+
+    def closeEvent(self, _):
+        if self.editor is not None:
+            self.editor.disconnect_from_progress_reports()
 
     ######################################################
     #  Slots

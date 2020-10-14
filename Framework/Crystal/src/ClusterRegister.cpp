@@ -1,15 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/ClusterRegister.h"
 #include "MantidCrystal/Cluster.h"
 #include "MantidCrystal/CompositeCluster.h"
 #include <boost/functional/hash.hpp>
-#include <boost/make_shared.hpp>
 #include <list>
+#include <memory>
 #include <unordered_set>
 
 namespace {
@@ -63,13 +63,13 @@ public:
     // ------------- Find equivalent sets
     for (auto &cluster : m_groups) {
       if (cluster.find(aLabel) != cluster.end()) {
-        containingAny.push_back(cluster);
+        containingAny.emplace_back(cluster);
       } else if (cluster.find(bLabel) != cluster.end()) {
-        containingAny.push_back(cluster);
+        containingAny.emplace_back(cluster);
       } else {
-        containingNone.push_back(cluster); // Current iterated set contains
-                                           // NEITHER of these labels. It can
-                                           // therfore be ignored.
+        containingNone.emplace_back(cluster); // Current iterated set contains
+                                              // NEITHER of these labels. It can
+                                              // therfore be ignored.
       }
     }
     // ------------ Process equivalent sets
@@ -78,7 +78,7 @@ public:
       GroupType::value_type newSet;
       newSet.insert(aLabel);
       newSet.insert(bLabel);
-      m_groups.push_back(newSet);
+      m_groups.emplace_back(newSet);
     } else {
       // At least one set already contains at least one label. We merge all such
       // sets into a master set.
@@ -92,7 +92,7 @@ public:
         masterSet.insert(childSet.begin(),
                          childSet.end()); // Build the master set.
       }
-      temp.push_back(masterSet);
+      temp.emplace_back(masterSet);
       m_groups = temp; // Swap.
       newItem = false;
     }
@@ -103,15 +103,15 @@ public:
    * Make composite clusters from the merged groups.
    * @return Merged composite clusters.
    */
-  std::list<boost::shared_ptr<CompositeCluster>> makeCompositeClusters() {
-    std::list<boost::shared_ptr<CompositeCluster>> composites;
+  std::list<std::shared_ptr<CompositeCluster>> makeCompositeClusters() {
+    std::list<std::shared_ptr<CompositeCluster>> composites;
     for (auto &labelSet : m_groups) {
-      auto composite = boost::make_shared<CompositeCluster>();
+      auto composite = std::make_shared<CompositeCluster>();
       for (auto j : labelSet) {
-        boost::shared_ptr<ICluster> &cluster = m_register[j];
+        std::shared_ptr<ICluster> &cluster = m_register[j];
         composite->add(cluster);
       }
-      composites.push_back(composite);
+      composites.emplace_back(composite);
     }
     return composites;
   }
@@ -132,7 +132,7 @@ ClusterRegister::~ClusterRegister() = default;
  * @param cluster : Cluster with label
  */
 void ClusterRegister::add(const size_t &label,
-                          const boost::shared_ptr<ICluster> &cluster) {
+                          const std::shared_ptr<ICluster> &cluster) {
   m_Impl->m_register.emplace(label, cluster);
   m_Impl->m_unique.emplace(label, cluster);
 }

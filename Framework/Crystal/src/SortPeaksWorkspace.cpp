@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCrystal/SortPeaksWorkspace.h"
 #include "MantidKernel/MandatoryValidator.h"
@@ -44,7 +44,7 @@ void SortPeaksWorkspace::init() {
                       "OutputWorkspace", "", Direction::Output),
                   "An output workspace.");
 
-  auto mustHave = boost::make_shared<MandatoryValidator<std::string>>();
+  auto mustHave = std::make_shared<MandatoryValidator<std::string>>();
   declareProperty("ColumnNameToSortBy", "", mustHave, "Column to sort by");
 
   declareProperty(
@@ -61,24 +61,18 @@ void SortPeaksWorkspace::exec() {
   PeaksWorkspace_sptr inputWS = getProperty("InputWorkspace");
   PeaksWorkspace_sptr outputWS = getProperty("OutputWorkspace");
 
-  try {
-    // Try to get the column. This will throw if the column does not exist.
-    inputWS->getColumn(columnToSortBy);
+  // Try to get the column. This will throw if the column does not exist.
+  inputWS->getColumn(columnToSortBy);
 
-    if (inputWS != outputWS) {
-      outputWS = inputWS->clone();
-    }
-
-    // Perform the sorting.
-    std::vector<std::pair<std::string, bool>> sortCriteria;
-    sortCriteria.push_back(
-        std::pair<std::string, bool>(columnToSortBy, sortAscending));
-    outputWS->sort(sortCriteria);
-    setProperty("OutputWorkspace", outputWS);
-  } catch (std::invalid_argument &) {
-    this->g_log.error("Specified ColumnToSortBy does not exist");
-    throw;
+  if (inputWS != outputWS) {
+    outputWS = inputWS->clone();
   }
+
+  // Perform the sorting.
+  std::vector<PeaksWorkspace::ColumnAndDirection> sortCriteria;
+  sortCriteria.emplace_back(std::make_pair(columnToSortBy, sortAscending));
+  outputWS->sort(sortCriteria);
+  setProperty("OutputWorkspace", outputWS);
 }
 
 } // namespace Crystal

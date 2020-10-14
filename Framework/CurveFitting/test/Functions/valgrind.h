@@ -69,8 +69,7 @@
    problem, you can compile with the NVALGRIND symbol defined (gcc
    -DNVALGRIND) so that client requests are not even compiled in.  */
 
-#ifndef __VALGRIND_H
-#define __VALGRIND_H
+#pragma once
 
 /* ------------------------------------------------------------------ */
 /* VERSION NUMBER OF VALGRIND                                         */
@@ -340,7 +339,7 @@ valgrind_do_client_request_expr(uintptr_t _zzq_default, uintptr_t _zzq_request,
 
 #endif /* PLAT_x86_win32 */
 
-  /* ------------------------ amd64-{linux,darwin} --------------- */
+/* ------------------------ amd64-{linux,darwin} --------------- */
 
 #if defined(PLAT_amd64_linux) || defined(PLAT_amd64_darwin)
 
@@ -4431,5 +4430,3 @@ static int
 #undef PLAT_arm_linux
 #undef PLAT_s390x_linux
 #undef PLAT_mips32_linux
-
-#endif /* __VALGRIND_H */

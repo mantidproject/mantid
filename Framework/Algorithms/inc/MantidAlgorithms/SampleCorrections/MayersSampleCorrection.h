@@ -1,13 +1,13 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2015 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_MAYERSSAMPLECORRECTION_H_
-#define MANTID_ALGORITHMS_MAYERSSAMPLECORRECTION_H_
-#include "MantidAPI/Algorithm.h"
+#pragma once
 
+#include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 namespace Mantid {
 namespace Algorithms {
 
@@ -16,7 +16,7 @@ namespace Algorithms {
   algorithm of Jerry Mayers.
   See https://inis.iaea.org/search/search.aspx?orig_q=RN:20000574
 */
-class DLLExport MayersSampleCorrection : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL MayersSampleCorrection : public API::Algorithm {
 public:
   MayersSampleCorrection();
 
@@ -37,5 +37,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_MAYERSSAMPLECORRECTION_H_ */

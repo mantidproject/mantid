@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef IMPORTOPJ_H
-#define IMPORTOPJ_H
+#pragma once
 
 #include "ApplicationWindow.h"
 #include "origin/OPJFile.h"
@@ -57,5 +56,3 @@ private:
   int xoffset;
   ApplicationWindow *mw;
 };
-
-#endif // IMPORTOPJ_H

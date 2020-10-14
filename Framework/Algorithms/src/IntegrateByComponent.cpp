@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/IntegrateByComponent.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -46,12 +46,12 @@ const std::string IntegrateByComponent::category() const {
 void IntegrateByComponent::init() {
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input,
-                      boost::make_shared<HistogramValidator>()),
+                      std::make_shared<HistogramValidator>()),
                   "The input workspace.");
   declareProperty(std::make_unique<WorkspaceProperty<>>("OutputWorkspace", "",
                                                         Direction::Output),
                   "The output workspace.");
-  auto mustBePosInt = boost::make_shared<BoundedValidator<int>>();
+  auto mustBePosInt = std::make_shared<BoundedValidator<int>>();
   mustBePosInt->setLower(0);
   declareProperty(
       "LevelsUp", 0, mustBePosInt,
@@ -103,8 +103,8 @@ void IntegrateByComponent::exec() {
 
         // Now we have a good value
         PARALLEL_CRITICAL(IntegrateByComponent_good) {
-          averageYInput.push_back(yValue);
-          averageEInput.push_back(eValue * eValue);
+          averageYInput.emplace_back(yValue);
+          averageEInput.emplace_back(eValue * eValue);
         }
 
         PARALLEL_END_INTERUPT_REGION
@@ -158,15 +158,15 @@ void IntegrateByComponent::exec() {
  * @return  vector of vectors, containing each spectrum that belongs to each
  * group
  */
-std::vector<std::vector<size_t>>
-IntegrateByComponent::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
+std::vector<std::vector<size_t>> IntegrateByComponent::makeInstrumentMap(
+    const API::MatrixWorkspace_sptr &countsWS) {
   std::vector<std::vector<size_t>> mymap;
   std::vector<size_t> single;
 
   for (size_t i = 0; i < countsWS->getNumberHistograms(); i++) {
-    single.push_back(i);
+    single.emplace_back(i);
   }
-  mymap.push_back(single);
+  mymap.emplace_back(single);
   return mymap;
 }
 
@@ -178,7 +178,8 @@ IntegrateByComponent::makeInstrumentMap(API::MatrixWorkspace_sptr countsWS) {
  * group
  */
 std::vector<std::vector<size_t>>
-IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
+IntegrateByComponent::makeMap(const API::MatrixWorkspace_sptr &countsWS,
+                              int parents) {
   std::unordered_multimap<Mantid::Geometry::ComponentID, size_t> mymap;
 
   if (parents == 0) // this should not happen in this file, but if one reuses
@@ -197,7 +198,7 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
     }
 
     const auto detIdx = spectrumInfo.spectrumDefinition(i)[0].first;
-    std::vector<boost::shared_ptr<const Mantid::Geometry::IComponent>> anc =
+    std::vector<std::shared_ptr<const Mantid::Geometry::IComponent>> anc =
         detectorInfo.detector(detIdx).getAncestors();
 
     if (anc.size() < static_cast<size_t>(parents)) {
@@ -219,9 +220,9 @@ IntegrateByComponent::makeMap(API::MatrixWorkspace_sptr countsWS, int parents) {
     // Iterate over all map elements with key == theKey
     speclistsingle.clear();
     for (s_it = keyRange.first; s_it != keyRange.second; ++s_it) {
-      speclistsingle.push_back((*s_it).second);
+      speclistsingle.emplace_back((*s_it).second);
     }
-    speclist.push_back(speclistsingle);
+    speclist.emplace_back(speclistsingle);
   }
 
   return speclist;

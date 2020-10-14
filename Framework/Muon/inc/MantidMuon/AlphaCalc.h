@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_MUONALPHACALC_H_
-#define MANTID_ALGORITHM_MUONALPHACALC_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidMuon/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -31,7 +31,7 @@ Required Properties:
 @author Anders Markvardsen, ISIS, RAL
 @date 21/09/2010
 */
-class DLLExport AlphaCalc : public API::Algorithm {
+class MANTID_MUON_DLL AlphaCalc : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "AlphaCalc"; }
@@ -58,5 +58,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_MUONALPHACALC_H_*/

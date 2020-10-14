@@ -1,14 +1,14 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2013 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_SCOPEDWORKSPACE_H_
-#define MANTID_API_SCOPEDWORKSPACE_H_
+#pragma once
 
 #include <string>
 
+#include "MantidAPI/DllConfig.h"
 #include "MantidAPI/Workspace_fwd.h"
 #include "MantidKernel/System.h"
 
@@ -31,13 +31,13 @@ namespace API {
   but it can be
   useful in other places, e.g. tests.
 */
-class DLLExport ScopedWorkspace {
+class MANTID_API_DLL ScopedWorkspace {
 public:
   /// Empty constructor
   ScopedWorkspace();
 
   /// Workspace constructor
-  ScopedWorkspace(Workspace_sptr ws);
+  ScopedWorkspace(const Workspace_sptr &ws);
 
   /// Destructor
   virtual ~ScopedWorkspace();
@@ -61,7 +61,7 @@ public:
   operator bool() const;
 
   /// Make ADS entry to point to the given workspace
-  void set(Workspace_sptr newWS);
+  void set(const Workspace_sptr &newWS);
 
 private:
   /// ADS name of the workspace
@@ -79,5 +79,3 @@ private:
 
 } // namespace API
 } // namespace Mantid
-
-#endif /* MANTID_API_SCOPEDWORKSPACE_H_ */

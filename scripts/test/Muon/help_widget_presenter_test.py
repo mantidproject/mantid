@@ -1,17 +1,15 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-
-from mantid.py3compat import mock
-from mantidqt.utils.qt.testing import start_qapplication
+from unittest import mock
 
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidgetPresenter
 from Muon.GUI.Common.help_widget.help_widget_view import HelpWidgetView
-
+from mantidqt.utils.qt.testing import start_qapplication
 
 
 @start_qapplication
@@ -25,11 +23,10 @@ class HelpWidgetPresenterTest(unittest.TestCase):
     def tearDown(self):
         self.view = None
 
-    @mock.patch('Muon.GUI.Common.help_widget.help_widget_view.ManageUserDirectories')
-    def test_that_manage_directories_button_clicked_opens_directory_manager(self, ManageUserDirectories_mock):
+    @mock.patch('Muon.GUI.Common.help_widget.help_widget_view.manageuserdirectories.ManageUserDirectories')
+    def test_that_manage_directories_button_clicked_opens_directory_manager(self, mud_mock):
         self.view.manage_user_dir_button.clicked.emit(True)
-
-        ManageUserDirectories_mock.openUserDirsDialog.assert_called_once_with(self.view)
+        self.assertEqual(1, mud_mock.openManageUserDirectories.call_count)
 
 
 if __name__ == '__main__':

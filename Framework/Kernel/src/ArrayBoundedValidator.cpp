@@ -1,12 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/ArrayBoundedValidator.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <sstream>
 
 namespace Mantid {
@@ -55,7 +55,7 @@ ArrayBoundedValidator<TYPE>::ArrayBoundedValidator(
  */
 template <typename TYPE>
 IValidator_sptr ArrayBoundedValidator<TYPE>::clone() const {
-  return boost::make_shared<ArrayBoundedValidator<TYPE>>(*this);
+  return std::make_shared<ArrayBoundedValidator<TYPE>>(*this);
 }
 
 /**

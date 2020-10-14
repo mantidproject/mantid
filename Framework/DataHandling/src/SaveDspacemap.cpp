@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/SaveDspacemap.h"
 #include "MantidAPI/FileProperty.h"
@@ -56,8 +56,8 @@ void SaveDspacemap::exec() {
  * @param offsetsWS :: OffsetsWorkspace with instrument and offsets
  */
 void SaveDspacemap::CalculateDspaceFromCal(
-    Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS,
-    std::string DFileName) {
+    const Mantid::DataObjects::OffsetsWorkspace_sptr &offsetsWS,
+    const std::string &DFileName) {
   const char *filename = DFileName.c_str();
   // Get a pointer to the instrument contained in the workspace
   Instrument_const_sptr instrument = offsetsWS->getInstrument();
@@ -87,7 +87,7 @@ void SaveDspacemap::CalculateDspaceFromCal(
   std::ofstream fout(filename, std::ios_base::out | std::ios_base::binary);
   Progress prog(this, 0.0, 1.0, maxdetID);
 
-  for (detid_t i = 0; i != maxdetID; i++) {
+  for (detid_t i = 0; i != maxdetID; ++i) {
     // Compute the factor
     double factor;
     Geometry::IDetector_const_sptr det;

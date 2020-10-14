@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_PHYSICALCONSTANTS_H_
-#define MANTID_PHYSICALCONSTANTS_H_
+#pragma once
 
 #include <cmath>
 
@@ -90,5 +89,3 @@ static constexpr double MuonGyromagneticRatio = 0.01355342;
 
 } // namespace PhysicalConstants
 } // namespace Mantid
-
-#endif /*MANTID_PHYSICALCONSTANTS_H_*/

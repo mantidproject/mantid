@@ -1,8 +1,8 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (DataProcessorAlgorithm, mtd, AlgorithmFactory,
                         WorkspaceProperty,
@@ -301,16 +301,16 @@ class LinkedUBs(DataProcessorAlgorithm):
             num_peaks_var = self._num_peaks + self._peak_increment * m
 
             # add q_lab and dpsacing values of found peaks to a list
-            qlabs_observed = np.array(self._observed_peaks.column(15))
-            dspacings_observed = np.array(self._observed_peaks.column(8))
+            qlabs_observed = np.array(self._observed_peaks.column("QLab"))
+            dspacings_observed = np.array(self._observed_peaks.column("DSpacing"))
 
             # sort the predicted peaks from largest to smallest dspacing
-            qlabs_predicted = np.array(predictor.column(15))
-            dspacings_predicted = np.array(predictor.column(8))
+            qlabs_predicted = np.array(predictor.column("QLab"))
+            dspacings_predicted = np.array(predictor.column("DSpacing"))
 
             # get the indexing list that sorts dspacing from largest to
             # smallest
-            hkls = np.array([[p['h'], p['k'], p['l']] for p in predictor])
+            hkls = np.array([[p.getH(), p.getK(), p.getL()] for p in predictor])
             idx = dspacings_predicted.argsort()[::-1]
             HKL_predicted = hkls[idx, :]
 
@@ -336,11 +336,10 @@ class LinkedUBs(DataProcessorAlgorithm):
                     qx_pred, qy_pred, qz_pred = q_ordered[j]
                     d_pred = d_ordered[j]
 
-                    if (qx_pred - qtol_var <= qx_obs <= qx_pred +
-                        qtol_var and qy_pred - qtol_var <= qy_obs <= qy_pred +
-                        qtol_var and qz_pred - qtol_var <= qz_obs <= qz_pred +
-                        qtol_var and d_pred - self._dtol <= d_obs <= d_pred +
-                            self._dtol):
+                    if (qx_pred - qtol_var <= qx_obs <= qx_pred
+                            + qtol_var and qy_pred - qtol_var <= qy_obs <= qy_pred
+                            + qtol_var and qz_pred - qtol_var <= qz_obs <= qz_pred
+                            + qtol_var and d_pred - self._dtol <= d_obs <= d_pred + self._dtol):
                         h, k, l = HKL_ordered[j]
                         p_obs.setHKL(h, k, l)
                         linked_peaks.addPeak(p_obs)

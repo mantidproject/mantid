@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/IntegratePeaksMDHKL.h"
 #include "MantidAPI/CommonBinsValidator.h"
@@ -49,7 +49,7 @@ void IntegratePeaksMDHKL::init() {
                   "Number of points in 5^3 surrounding "
                   "points above intensity threshold for "
                   "point to be part of peak.");
-  auto fluxValidator = boost::make_shared<CompositeValidator>();
+  auto fluxValidator = std::make_shared<CompositeValidator>();
   fluxValidator->add<WorkspaceUnitValidator>("Momentum");
   fluxValidator->add<InstrumentValidator>();
   fluxValidator->add<CommonBinsValidator>();
@@ -122,9 +122,9 @@ void IntegratePeaksMDHKL::exec() {
   MatrixWorkspace_sptr sa = getProperty("SolidAngleWorkspace");
 
   IMDEventWorkspace_sptr m_eventWS =
-      boost::dynamic_pointer_cast<IMDEventWorkspace>(m_inputWS);
+      std::dynamic_pointer_cast<IMDEventWorkspace>(m_inputWS);
   IMDHistoWorkspace_sptr m_histoWS =
-      boost::dynamic_pointer_cast<IMDHistoWorkspace>(m_inputWS);
+      std::dynamic_pointer_cast<IMDHistoWorkspace>(m_inputWS);
   int npeaks = peakWS->getNumberPeaks();
 
   auto prog = std::make_unique<Progress>(this, 0.3, 1.0, npeaks);
@@ -191,11 +191,11 @@ IntegratePeaksMDHKL::normalize(int h, int k, int l, double box, int gridPts,
   alg->setPropertyValue("OutputWorkspace", "out");
   alg->execute();
   IMDWorkspace_sptr out = alg->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MDHistoWorkspace>(out);
+  return std::dynamic_pointer_cast<MDHistoWorkspace>(out);
 }
 
 void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
-                                        MDHistoWorkspace_sptr out,
+                                        const MDHistoWorkspace_sptr &out,
                                         double &intensity,
                                         double &errorSquared) {
   std::vector<int> gridPts;
@@ -209,10 +209,10 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
     BackgroundInnerRadius2 = pow(BackgroundInnerRadius2, 2.0);
   const size_t dimensionality = out->getNumDims();
   for (size_t i = 0; i < dimensionality; ++i) {
-    gridPts.push_back(static_cast<int>(out->getDimension(i)->getNBins()));
+    gridPts.emplace_back(static_cast<int>(out->getDimension(i)->getNBins()));
   }
 
-  double *F = out->getSignalArray();
+  const auto F = out->getSignalArray();
   double Fmax = 0.;
   double Fmin = std::numeric_limits<double>::max();
   for (int i = 0; i < gridPts[0] * gridPts[1] * gridPts[2]; i++) {
@@ -221,7 +221,7 @@ void IntegratePeaksMDHKL::integratePeak(const int neighborPts,
       Fmax = std::max(Fmax, F[i]);
     }
   }
-  double *SqError = out->getErrorSquaredArray();
+  const auto SqError = out->getErrorSquaredArray();
 
   double minIntensity = Fmin + 0.01 * (Fmax - Fmin);
   int measuredPoints = 0;
@@ -334,7 +334,7 @@ IntegratePeaksMDHKL::binEvent(int h, int k, int l, double box, int gridPts,
   binMD->setPropertyValue("OutputWorkspace", "out");
   binMD->executeAsChildAlg();
   Workspace_sptr outputWS = binMD->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+  return std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
 
 /**
@@ -362,7 +362,7 @@ IntegratePeaksMDHKL::cropHisto(int h, int k, int l, double box,
   cropMD->setPropertyValue("OutputWorkspace", "out");
   cropMD->executeAsChildAlg();
   IMDHistoWorkspace_sptr outputWS = cropMD->getProperty("OutputWorkspace");
-  return boost::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
+  return std::dynamic_pointer_cast<MDHistoWorkspace>(outputWS);
 }
 
 } // namespace MDAlgorithms

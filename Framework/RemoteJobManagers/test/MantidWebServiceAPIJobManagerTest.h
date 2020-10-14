@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGERTEST_H_
-#define MANTID_REMOTEJOBMANAGERS_MANTIDWEBSERVICEAPIJOBMANAGERTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -15,7 +14,7 @@
 #include "MantidKernel/SimpleJSON.h"
 #include "MantidRemoteJobManagers/MantidWebServiceAPIJobManager.h"
 
-#include <boost/make_shared.hpp>
+#include <memory>
 
 using namespace Mantid::API;
 using namespace Mantid::RemoteJobManagers;
@@ -135,8 +134,8 @@ public:
 
   void test_constructCasts() {
     // can create
-    boost::shared_ptr<MockMantidAPIStatusOK> djm;
-    TS_ASSERT(djm = boost::make_shared<MockMantidAPIStatusOK>());
+    std::shared_ptr<MockMantidAPIStatusOK> djm;
+    TS_ASSERT(djm = std::make_shared<MockMantidAPIStatusOK>());
     // can cast to inherited interfaces and base classes
 
     MockMantidAPIStatusOK wsapi;
@@ -488,5 +487,3 @@ private:
 const std::string MantidWebServiceAPIJobManagerTest::SNSFac = "SNS";
 const std::string MantidWebServiceAPIJobManagerTest::ISISFac = "ISIS";
 const std::string MantidWebServiceAPIJobManagerTest::FermiName = "Fermi";
-
-#endif // MANTID_REMOTEJOGMANAGERS_MANTIDWEBSERVICEJOBMANAGERTEST_H_

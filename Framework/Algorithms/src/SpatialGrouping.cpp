@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SpatialGrouping.h"
 
@@ -131,15 +131,15 @@ void SpatialGrouping::exec() {
     std::vector<int> group;
     m_included.insert(specNo);
     // Add the central spectrum
-    group.push_back(specNo);
+    group.emplace_back(specNo);
 
     // Add all the nearest neighbors
     std::map<specnum_t, Mantid::Kernel::V3D>::iterator nrsIt;
     for (nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt) {
       m_included.insert(nrsIt->first);
-      group.push_back(nrsIt->first);
+      group.emplace_back(nrsIt->first);
     }
-    m_groups.push_back(group);
+    m_groups.emplace_back(group);
   }
 
   if (m_groups.empty()) {
@@ -313,8 +313,8 @@ void SpatialGrouping::createBox(const Geometry::IDetector &det,
 
   // We may have DetectorGroups here
   // Unfortunately, IDetector doesn't contain the
-  // boost::shared_ptr<Mantid::Geometry::Detector> detector =
-  // boost::dynamic_pointer_cast<Mantid::Geometry::Detector>(det);
+  // std::shared_ptr<Mantid::Geometry::Detector> detector =
+  // std::dynamic_pointer_cast<Mantid::Geometry::Detector>(det);
 
   Mantid::Geometry::BoundingBox bbox;
   det.getBoundingBox(bbox);

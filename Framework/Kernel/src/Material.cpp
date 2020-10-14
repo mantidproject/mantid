@@ -1,15 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidKernel/Material.h"
 #include "MantidKernel/Atom.h"
+#include "MantidKernel/AttenuationProfile.h"
 #include "MantidKernel/StringTokenizer.h"
 #include <NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
+#include <memory>
 #include <numeric>
 
 namespace Mantid {
@@ -19,8 +20,8 @@ using tokenizer = Mantid::Kernel::StringTokenizer;
 using str_pair = std::pair<std::string, std::string>;
 
 using PhysicalConstants::Atom;
-using PhysicalConstants::NeutronAtom;
 using PhysicalConstants::getAtom;
+using PhysicalConstants::NeutronAtom;
 
 namespace {
 constexpr double INV_FOUR_PI = 1. / (4. * M_PI);
@@ -54,13 +55,13 @@ inline double scatteringXS(const double realLength, const double imagLength) {
 } // namespace
 
 Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
-    const boost::shared_ptr<PhysicalConstants::Atom> &atom,
+    const std::shared_ptr<PhysicalConstants::Atom> &atom,
     const double multiplicity)
     : atom(atom), multiplicity(multiplicity) {}
 
 Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
     const PhysicalConstants::Atom &atom, const double multiplicity)
-    : atom(boost::make_shared<PhysicalConstants::Atom>(atom)),
+    : atom(std::make_shared<PhysicalConstants::Atom>(atom)),
       multiplicity(multiplicity) {}
 
 /**
@@ -68,7 +69,8 @@ Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
  */
 Material::Material()
     : m_name(), m_chemicalFormula(), m_atomTotal(0.0), m_numberDensity(0.0),
-      m_temperature(0.0), m_pressure(0.0) {}
+      m_temperature(0.0), m_pressure(0.0), m_linearAbsorpXSectionByWL(0.0),
+      m_totalScatterXSection(0.0) {}
 
 /**
  * Construct a material object
@@ -85,6 +87,8 @@ Material::Material(const std::string &name, const ChemicalFormula &formula,
       m_temperature(temperature), m_pressure(pressure) {
   m_chemicalFormula.assign(formula.begin(), formula.end());
   this->countAtoms();
+  this->calculateLinearAbsorpXSectionByWL();
+  this->calculateTotalScatterXSection();
 }
 
 /**
@@ -109,6 +113,8 @@ Material::Material(const std::string &name,
   } else { // isotopic average
     m_chemicalFormula.emplace_back(atom, 1.);
   }
+  this->calculateLinearAbsorpXSectionByWL();
+  this->calculateTotalScatterXSection();
 }
 
 // update the total atom count
@@ -118,6 +124,66 @@ void Material::countAtoms() {
                                 [](double subtotal, const FormulaUnit &right) {
                                   return subtotal + right.multiplicity;
                                 });
+}
+
+/**
+ * Calculate the absorption cross section for a given wavelength
+ * according to Sears eqn 14. Store result as a cross section per wavelength
+ * to enable the result to be reused to calculate the cross section for
+ * specific wavelengths (assuming linear dependence on the wavelength)
+ * with the reference wavelength = NeutronAtom::ReferenceLambda angstroms.
+ */
+
+void Material::calculateLinearAbsorpXSectionByWL() {
+  double weightedTotal;
+
+  if (m_chemicalFormula.size() == 1) {
+    weightedTotal = m_chemicalFormula.front().atom->neutron.abs_scatt_xs;
+  } else {
+    weightedTotal =
+        std::accumulate(std::begin(m_chemicalFormula),
+                        std::end(m_chemicalFormula), 0.,
+                        [](double subtotal, const FormulaUnit &right) {
+                          return subtotal + right.atom->neutron.abs_scatt_xs *
+                                                right.multiplicity;
+                        }) /
+        m_atomTotal;
+  }
+
+  if (!std::isnormal(weightedTotal)) {
+    weightedTotal = 0.;
+  }
+
+  m_linearAbsorpXSectionByWL =
+      weightedTotal / PhysicalConstants::NeutronAtom::ReferenceLambda;
+}
+
+// calculate the total scattering x section (by wavelength) following Sears
+// eqn 13.
+void Material::calculateTotalScatterXSection() {
+  double weightedTotal;
+  if (m_chemicalFormula.size() == 1)
+    weightedTotal = m_chemicalFormula.front().atom->neutron.tot_scatt_xs;
+  else {
+    weightedTotal =
+        std::accumulate(std::begin(m_chemicalFormula),
+                        std::end(m_chemicalFormula), 0.,
+                        [](double subtotal, const FormulaUnit &right) {
+                          return subtotal + right.atom->neutron.tot_scatt_xs *
+                                                right.multiplicity;
+                        }) /
+        m_atomTotal;
+  }
+
+  if (!std::isnormal(weightedTotal)) {
+    m_totalScatterXSection = 0.;
+  } else {
+    m_totalScatterXSection = weightedTotal;
+  }
+}
+
+void Material::setAttenuationProfile(AttenuationProfile attenuationOverride) {
+  m_attenuationOverride = std::move(attenuationOverride);
 }
 
 /**
@@ -173,61 +239,33 @@ double Material::incohScatterXSection() const {
 }
 
 /**
- * Get the total scattering cross section following Sears eqn 13.
+ * Get the total scattering cross section
  *
  * @returns The value of the total scattering cross section.
  */
-double Material::totalScatterXSection() const {
-  if (m_chemicalFormula.size() == 1)
-    return m_chemicalFormula.front().atom->neutron.tot_scatt_xs;
-
-  const double weightedTotal =
-      std::accumulate(std::begin(m_chemicalFormula),
-                      std::end(m_chemicalFormula), 0.,
-                      [](double subtotal, const FormulaUnit &right) {
-                        return subtotal + right.atom->neutron.tot_scatt_xs *
-                                              right.multiplicity;
-                      }) /
-      m_atomTotal;
-
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal;
-  }
-}
+double Material::totalScatterXSection() const { return m_totalScatterXSection; }
 
 /**
  * Get the absorption cross section for a given wavelength
- * according to Sears eqn 14
- *
- * CURRENTLY This assumes a linear dependence on the wavelength with the
- * reference wavelength = NeutronAtom::ReferenceLambda angstroms.
- *
  * @param lambda :: The wavelength to evaluate the cross section
  * @returns The value of the absoprtion cross section at
  * the given wavelength
  */
 double Material::absorbXSection(const double lambda) const {
-  double weightedTotal;
+  return m_linearAbsorpXSectionByWL * lambda;
+}
 
-  if (m_chemicalFormula.size() == 1) {
-    weightedTotal = m_chemicalFormula.front().atom->neutron.abs_scatt_xs;
+/**
+ * @param lambda Wavelength (Angstroms) to compute the attenuation (default =
+ * reference lambda)
+ * @return The attenuation coefficient in m-1
+ */
+double Material::attenuationCoefficient(const double lambda) const {
+  if (!m_attenuationOverride) {
+    return 100 * numberDensity() *
+           (totalScatterXSection() + absorbXSection(lambda));
   } else {
-    weightedTotal =
-        std::accumulate(std::begin(m_chemicalFormula),
-                        std::end(m_chemicalFormula), 0.,
-                        [](double subtotal, const FormulaUnit &right) {
-                          return subtotal + right.atom->neutron.abs_scatt_xs *
-                                                right.multiplicity;
-                        }) /
-        m_atomTotal;
-  }
-
-  if (!std::isnormal(weightedTotal)) {
-    return 0.;
-  } else {
-    return weightedTotal * (lambda / NeutronAtom::ReferenceLambda);
+    return m_attenuationOverride->getAttenuationCoefficient(lambda);
   }
 }
 
@@ -235,11 +273,10 @@ double Material::absorbXSection(const double lambda) const {
  * @param distance Distance (m) travelled
  * @param lambda Wavelength (Angstroms) to compute the attenuation (default =
  * reference lambda)
- * @return The dimensionless attenuation coefficient
+ * @return The dimensionless attenuation factor
  */
 double Material::attenuation(const double distance, const double lambda) const {
-  return exp(-100 * numberDensity() *
-             (totalScatterXSection() + absorbXSection(lambda)) * distance);
+  return exp(-attenuationCoefficient(lambda) * distance);
 }
 
 // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
@@ -252,6 +289,7 @@ double Material::linearAbsorpCoef(const double lambda) const {
 std::vector<double> Material::linearAbsorpCoef(
     std::vector<double>::const_iterator lambdaBegin,
     std::vector<double>::const_iterator lambdaEnd) const {
+
   const double linearCoefByWL =
       absorbXSection(PhysicalConstants::NeutronAtom::ReferenceLambda) * 100. *
       numberDensity() / PhysicalConstants::NeutronAtom::ReferenceLambda;
@@ -545,7 +583,7 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
       file->readData("coh_scatt_length", neutron.coh_scatt_length);
       file->readData("inc_scatt_length", neutron.inc_scatt_length);
 
-      m_chemicalFormula.emplace_back(boost::make_shared<Atom>(neutron), 1);
+      m_chemicalFormula.emplace_back(std::make_shared<Atom>(neutron), 1);
     }
     // the other option is empty which does not need to be addressed
   } else {
@@ -553,6 +591,8 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
         "Only know how to read version 1 or 2 for Material");
   }
   this->countAtoms();
+  this->calculateLinearAbsorpXSectionByWL();
+  this->calculateTotalScatterXSection();
 
   file->readData("number_density", m_numberDensity);
   file->readData("temperature", m_temperature);
@@ -579,7 +619,7 @@ getAtomName(const std::string &text) // TODO change to get number after letters
 } // namespace
 
 Material::ChemicalFormula
-Material::parseChemicalFormula(const std::string chemicalSymbol) {
+Material::parseChemicalFormula(const std::string &chemicalSymbol) {
   Material::ChemicalFormula CF;
 
   tokenizer tokens(chemicalSymbol, " -",

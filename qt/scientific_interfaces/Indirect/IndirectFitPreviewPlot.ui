@@ -6,14 +6,29 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>595</width>
+    <width>445</width>
     <height>663</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0">
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <property name="topMargin">
     <number>0</number>
    </property>
@@ -21,93 +36,7 @@
     <widget class="QComboBox" name="cbDataSelection"/>
    </item>
    <item>
-    <widget class="QDockWidget" name="dwMiniPlots">
-     <property name="features">
-      <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
-     </property>
-     <property name="allowedAreas">
-      <set>Qt::NoDockWidgetArea</set>
-     </property>
-     <property name="windowTitle">
-      <string>Mini-plots</string>
-     </property>
-     <widget class="QWidget" name="dockWidgetContents_2">
-      <layout class="QGridLayout" name="gridLayout">
-       <property name="leftMargin">
-        <number>0</number>
-       </property>
-       <property name="topMargin">
-        <number>0</number>
-       </property>
-       <property name="rightMargin">
-        <number>0</number>
-       </property>
-       <property name="bottomMargin">
-        <number>0</number>
-       </property>
-       <item row="0" column="0">
-        <widget class="QSplitter" name="splitter">
-         <property name="styleSheet">
-          <string notr="true">QSplitter::handle {
-background: transparent;
-}</string>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotTop" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>10</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>125</height>
-           </size>
-          </property>
-          <property name="showLegend" stdset="0">
-           <bool>true</bool>
-          </property>
-          <property name="canvasColour" stdset="0">
-           <color>
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
-           </color>
-          </property>
-         </widget>
-         <widget class="MantidQt::MantidWidgets::PreviewPlot" name="ppPlotBottom" native="true">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>6</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>0</width>
-            <height>75</height>
-           </size>
-          </property>
-          <property name="showLegend" stdset="0">
-           <bool>true</bool>
-          </property>
-          <property name="canvasColour" stdset="0">
-           <color>
-            <red>255</red>
-            <green>255</green>
-            <blue>255</blue>
-           </color>
-          </property>
-         </widget>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </widget>
+    <layout class="QGridLayout" name="gridLayout"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="loPlotOptions">
@@ -120,6 +49,9 @@ background: transparent;
      </item>
      <item>
       <widget class="QStackedWidget" name="swPlotSpectrum">
+       <property name="currentIndex">
+        <number>0</number>
+       </property>
        <widget class="QWidget" name="pgPlotSpinBox">
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
@@ -209,14 +141,6 @@ background: transparent;
    </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MantidQt::MantidWidgets::PreviewPlot</class>
-   <extends>QWidget</extends>
-   <header>MantidQtWidgets/Plotting/PreviewPlot.h</header>
-   <container>1</container>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

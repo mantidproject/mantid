@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/InelasticDiffSphere.h"
 
@@ -96,7 +96,7 @@ void InelasticDiffSphere::initXnlCoeff() {
     coeff.x = xvalues[i];
     coeff.l = lvalues[i];
     coeff.n = nvalues[i];
-    m_xnl.push_back(coeff);
+    m_xnl.emplace_back(coeff);
   }
 }
 
@@ -109,7 +109,7 @@ void InelasticDiffSphere::initAlphaCoeff() {
        ++it) {
     double x = it->x; // eigenvalue for a (n, l) pair
     auto l = static_cast<double>(it->l);
-    m_alpha.push_back((2.0 * l + 1) * 6.0 * x * x / (x * x - l * (l + 1)));
+    m_alpha.emplace_back((2.0 * l + 1) * 6.0 * x * x / (x * x - l * (l + 1)));
   }
 }
 
@@ -136,7 +136,7 @@ void InelasticDiffSphere::initLinJlist() {
     abJ.intercept =
         J0 -
         abJ.slope * (x - m_divZone); // intercept of the linear interpolation
-    m_linearJlist.push_back(
+    m_linearJlist.emplace_back(
         abJ); // store the parameters of the linear interpolation for this it->x
   }
 }
@@ -232,7 +232,7 @@ void InelasticDiffSphere::function1D(double *out, const double *xValues,
   size_t ncoeff = m_xnl.size();
   for (size_t n = 0; n < ncoeff; n++) {
     auto x = m_xnl[n].x; // eigenvalue
-    HWHM.push_back(m_hbar * x * x * D / (R * R));
+    HWHM.emplace_back(m_hbar * x * x * D / (R * R));
   }
 
   std::vector<double> YJ;
@@ -257,10 +257,10 @@ void InelasticDiffSphere::function1D(double *out, const double *xValues,
  * @param ws Pointer to workspace
  */
 void InelasticDiffSphere::setWorkspace(
-    boost::shared_ptr<const API::Workspace> ws) {
+    std::shared_ptr<const API::Workspace> ws) {
   m_qValueCache.clear();
 
-  auto workspace = boost::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
+  auto workspace = std::dynamic_pointer_cast<const API::MatrixWorkspace>(ws);
   if (!workspace)
     return;
 
@@ -283,7 +283,7 @@ void InelasticDiffSphere::setWorkspace(
       double q =
           Mantid::Kernel::UnitConversion::convertToElasticQ(usingTheta, efixed);
 
-      m_qValueCache.push_back(q);
+      m_qValueCache.emplace_back(q);
     } catch (std::runtime_error &) {
       m_qValueCache.clear();
       g_log.information("Cannot populate Q values from workspace - could not "

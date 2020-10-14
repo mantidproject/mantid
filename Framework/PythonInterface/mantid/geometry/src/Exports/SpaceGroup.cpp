@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Crystal/SpaceGroup.h"
 #include "MantidGeometry/Crystal/Group.h"
@@ -51,7 +51,7 @@ Mantid::Geometry::Group_sptr getSiteSymmetryGroup(SpaceGroup &self,
   const Mantid::Kernel::V3D &posV3d = Converters::PyObjectToV3D(position)();
 
   Mantid::Geometry::Group_sptr group =
-      boost::const_pointer_cast<Group>(self.getSiteSymmetryGroup(posV3d));
+      std::const_pointer_cast<Group>(self.getSiteSymmetryGroup(posV3d));
 
   return group;
 }
@@ -66,7 +66,7 @@ std::string __repr__implementation(const SpaceGroup &self) {
 } // namespace
 
 void export_SpaceGroup() {
-  register_ptr_to_python<boost::shared_ptr<SpaceGroup>>();
+  register_ptr_to_python<std::shared_ptr<SpaceGroup>>();
 
   class_<SpaceGroup, boost::noncopyable, bases<Group>>("SpaceGroup", no_init)
       .def("getNumber", &SpaceGroup::number, arg("self"))

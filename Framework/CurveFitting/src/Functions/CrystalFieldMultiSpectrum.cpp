@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/CrystalFieldMultiSpectrum.h"
 #include "MantidCurveFitting/Functions/CrystalElectricField.h"
@@ -77,7 +77,8 @@ public:
                          "Intensity scaling factor for spectrum " + si);
       } catch (std::invalid_argument &) {
       }
-      m_IntensityScalingIdx.push_back(parameterIndex("IntensityScaling" + si));
+      m_IntensityScalingIdx.emplace_back(
+          parameterIndex("IntensityScaling" + si));
     }
   }
   /// Declare the Lambda parameter for susceptibility
@@ -124,10 +125,12 @@ CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
 size_t CrystalFieldMultiSpectrum::getNumberDomains() const {
   if (!m_target) {
     buildTargetFunction();
+
+    if (!m_target) {
+      throw std::runtime_error("Failed to build target function.");
+    }
   }
-  if (!m_target) {
-    throw std::runtime_error("Failed to build target function.");
-  }
+
   return m_target->getNumberDomains();
 }
 
@@ -137,7 +140,7 @@ CrystalFieldMultiSpectrum::createEquivalentFunctions() const {
   std::vector<IFunction_sptr> funs;
   auto &composite = dynamic_cast<CompositeFunction &>(*m_target);
   for (size_t i = 0; i < composite.nFunctions(); ++i) {
-    funs.push_back(composite.getFunction(i));
+    funs.emplace_back(composite.getFunction(i));
   }
   return funs;
 }
@@ -163,7 +166,9 @@ void CrystalFieldMultiSpectrum::setAttribute(const std::string &name,
         }
       }
     }
-    FunctionGenerator::setAttribute("FWHMs", Attribute(new_fwhm));
+    Attribute newVal = attr;
+    newVal.setVector(new_fwhm);
+    FunctionGenerator::setAttribute("FWHMs", newVal);
     for (size_t iSpec = 0; iSpec < nSpec; ++iSpec) {
       const auto suffix = std::to_string(iSpec);
       declareAttribute("FWHMX" + suffix, Attribute(m_fwhmX[iSpec]));
@@ -269,7 +274,7 @@ void CrystalFieldMultiSpectrum::buildTargetFunction() const {
   } else {
     m_physprops.clear();
     for (auto elem : physprops) {
-      m_physprops.push_back(static_cast<int>(elem));
+      m_physprops.emplace_back(static_cast<int>(elem));
     }
   }
   // Create the single-spectrum functions.
@@ -389,7 +394,7 @@ API::IFunction_sptr CrystalFieldMultiSpectrum::buildPhysprop(
     IFunction_sptr retval = IFunction_sptr(new CrystalFieldMagnetisation);
     auto &spectrum = dynamic_cast<CrystalFieldMagnetisation &>(*retval);
     spectrum.setHamiltonian(ham, nre);
-    spectrum.setAttribute("Temperature", Attribute(temperature));
+    spectrum.setAttributeValue("Temperature", temperature);
     const auto suffix = std::to_string(iSpec);
     spectrum.setAttribute("Unit", getAttribute("Unit" + suffix));
     spectrum.setAttribute("Hdir", getAttribute("Hdir" + suffix));

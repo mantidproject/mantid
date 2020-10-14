@@ -1,16 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2007 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHM_FINDDEADDETECTORS_H_
-#define MANTID_ALGORITHM_FINDDEADDETECTORS_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
 namespace Algorithms {
@@ -49,7 +49,7 @@ detector UDETs </LI>
 @author Nick Draper, Tessella Support Services plc
 @date 02/10/2008
 */
-class DLLExport FindDeadDetectors : public API::Algorithm {
+class MANTID_ALGORITHMS_DLL FindDeadDetectors : public API::Algorithm {
 public:
   /// Algorithm's name for identification overriding a virtual method
   const std::string name() const override { return "FindDeadDetectors"; }
@@ -76,5 +76,3 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /*MANTID_ALGORITHM_FINDDEADDETECTORS_H_*/

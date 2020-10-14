@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMuon/ApplyDeadTimeCorr.h"
 #include "MantidAPI/EqualBinSizesValidator.h"
@@ -35,7 +35,7 @@ void ApplyDeadTimeCorr::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
           "InputWorkspace", "", Direction::Input,
-          boost::make_shared<EqualBinSizesValidator>(0.5)),
+          std::make_shared<EqualBinSizesValidator>(0.5)),
       "The name of the input workspace containing measured counts");
 
   declareProperty(
@@ -75,10 +75,10 @@ void ApplyDeadTimeCorr::exec() {
       IAlgorithm_sptr duplicate = createChildAlgorithm("CloneWorkspace");
       duplicate->initialize();
       duplicate->setProperty<Workspace_sptr>(
-          "InputWorkspace", boost::dynamic_pointer_cast<Workspace>(inputWs));
+          "InputWorkspace", std::dynamic_pointer_cast<Workspace>(inputWs));
       duplicate->execute();
       MatrixWorkspace_sptr outputWs =
-          boost::dynamic_pointer_cast<MatrixWorkspace>(
+          std::dynamic_pointer_cast<MatrixWorkspace>(
               static_cast<Workspace_sptr>(
                   duplicate->getProperty("OutputWorkspace")));
 

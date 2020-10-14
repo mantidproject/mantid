@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_SLICINGALGORITHM_H_
-#define MANTID_MDALGORITHMS_SLICINGALGORITHM_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/CoordTransform.h"
@@ -18,7 +17,6 @@
 #include "MantidDataObjects/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidGeometry/MDGeometry/MDImplicitFunction.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/VMD.h"
 
 namespace Mantid {
@@ -52,10 +50,10 @@ protected:
   void makeAlignedDimensionFromString(const std::string &str);
   void makeBasisVectorFromString(const std::string &str);
 
-  Mantid::Geometry::MDImplicitFunction *
+  std::unique_ptr<Mantid::Geometry::MDImplicitFunction>
   getImplicitFunctionForChunk(const size_t *const chunkMin,
                               const size_t *const chunkMax);
-  Mantid::Geometry::MDImplicitFunction *
+  std::unique_ptr<Mantid::Geometry::MDImplicitFunction>
   getGeneralImplicitFunction(const size_t *const chunkMin,
                              const size_t *const chunkMax);
 
@@ -77,23 +75,24 @@ protected:
   /// Coordinate transformation to apply. This transformation
   /// contains the scaling that makes the output coordinate = bin indexes in the
   /// output MDHistoWorkspace.
-  Mantid::API::CoordTransform *m_transform;
+  std::unique_ptr<API::CoordTransform> m_transform;
 
   /// Coordinate transformation to save in the output workspace
   /// (original->binned)
-  Mantid::API::CoordTransform *m_transformFromOriginal;
+  std::unique_ptr<API::CoordTransform> m_transformFromOriginal;
   /// Coordinate transformation to save in the output workspace
   /// (binned->original)
-  Mantid::API::CoordTransform *m_transformToOriginal;
+  std::unique_ptr<API::CoordTransform> m_transformToOriginal;
 
   /// Intermediate original workspace. Output -> intermediate (MDHisto) ->
   /// original (MDEvent)
   Mantid::API::IMDWorkspace_sptr m_intermediateWS;
   /// Coordinate transformation to save in the output WS, from the intermediate
   /// WS
-  Mantid::DataObjects::CoordTransformAffine *m_transformFromIntermediate;
+  std::unique_ptr<DataObjects::CoordTransformAffine>
+      m_transformFromIntermediate;
   /// Coordinate transformation to save in the intermediate WS
-  Mantid::DataObjects::CoordTransformAffine *m_transformToIntermediate;
+  std::unique_ptr<DataObjects::CoordTransformAffine> m_transformToIntermediate;
 
   /// Set to true if the cut is aligned with the axes
   bool m_axisAligned;
@@ -137,8 +136,8 @@ protected:
 
 private:
   Mantid::Geometry::MDFrame_uptr
-  createMDFrameForNonAxisAligned(std::string units,
-                                 Mantid::Kernel::VMD basisVector) const;
+  createMDFrameForNonAxisAligned(const std::string &units,
+                                 const Mantid::Kernel::VMD &basisVector) const;
   std::vector<Mantid::Kernel::VMD> getOldBasis(size_t dimension) const;
   bool isProjectingOnFrame(const Mantid::Kernel::VMD &oldVector,
                            const Mantid::Kernel::VMD &basisVector) const;
@@ -147,12 +146,10 @@ private:
       const std::vector<Mantid::Kernel::VMD> &oldBasis) const;
   Mantid::Geometry::MDFrame_uptr
   extractMDFrameForNonAxisAligned(std::vector<size_t> indicesWithProjection,
-                                  std::string units) const;
+                                  const std::string &units) const;
   void setTargetUnits(Mantid::Geometry::MDFrame_uptr &frame,
                       const std::string &units) const;
 };
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_SLICINGALGORITHM_H_ */

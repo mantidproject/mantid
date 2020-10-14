@@ -1,10 +1,10 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-#pylint: disable=no-init,invalid-name
+# pylint: disable=no-init,invalid-name
 """
 This example implements a simple Linear function that could be used as a background.
 
@@ -15,7 +15,6 @@ to have meaningful concepts such as this then see ExamplePeakFunction.
 1D functions do not have to have a derivative defined, if they do not then they will use a numerical
 derivative
 """
-from __future__ import (absolute_import, division, print_function)
 from mantid.api import IFunction1D, FunctionFactory
 
 
@@ -46,7 +45,7 @@ class Example1DFunction(IFunction1D):
         Computes the function on the set of values given and returns
         the answer as a numpy array of floats
         """
-        return self.getParameterValue("A0") +  self.getParameterValue("A1")*xvals
+        return self.getParameterValue("A0") + self.getParameterValue("A1")*xvals
 
     def functionDeriv1D(self, xvals, jacobian):
         """
@@ -59,8 +58,8 @@ class Example1DFunction(IFunction1D):
         """
         i = 0
         for x in xvals:
-            jacobian.set(i,0,1)
-            jacobian.set(i,1,x)
+            jacobian.set(i, 0, 1)
+            jacobian.set(i, 1, x)
             i += 1
 
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -79,7 +79,7 @@ void ITableWorkspace::modified() {
   Workspace_sptr ws = AnalysisDataService::Instance().retrieve(this->getName());
   if (!ws)
     return;
-  ITableWorkspace_sptr tws = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
+  ITableWorkspace_sptr tws = std::dynamic_pointer_cast<ITableWorkspace>(ws);
   if (!tws)
     return;
   AnalysisDataService::Instance().notificationCenter.postNotification(

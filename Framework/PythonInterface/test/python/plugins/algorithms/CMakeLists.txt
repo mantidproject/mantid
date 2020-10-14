@@ -34,7 +34,7 @@ set(TEST_PY_FILES
     DSFinterpTest.py
     EnggCalibrateFullTest.py
     EnggCalibrateTest.py
-    EnggFitDIFCFromPeaksTest.py
+    EnggFitTOFFromPeaksTest.py
     EnggFitPeaksTest.py
     EnggFocusTest.py
     EnggSaveGSASIIFitResultsToHDF5Test.py
@@ -48,6 +48,7 @@ set(TEST_PY_FILES
     FractionalIndexingTest.py
     GetEiT0atSNSTest.py
     HB2AReduceTest.py
+    HFIRSANS2WavelengthTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
     LoadAndMergeTest.py
@@ -63,6 +64,7 @@ set(TEST_PY_FILES
     LoadNMoldyn4Ascii1DTest.py
     LoadNMoldyn4AsciiTest.py
     LoadWANDSCDTest.py
+    LRDirectBeamSortTest.py
     LRPeakSelectionTest.py
     MatchSpectraTest.py
     MaskAngleTest.py
@@ -85,6 +87,7 @@ set(TEST_PY_FILES
     SANSWideAngleCorrectionTest.py
     SaveGEMMAUDParamFileTest.py
     SaveNexusPDTest.py
+    SaveGSSCWTest.py
     SavePlot1DAsJsonTest.py
     SaveReflectionsTest.py
     ExtractMonitorsTest.py
@@ -106,6 +109,7 @@ set(TEST_PY_FILES
     VelocityCrossCorrelationsTest.py
     VelocityAutoCorrelationsTest.py
     SelectNexusFilesByMetadataTest.py
+    VesuvioAnalysisTest.py
     VesuvioPeakPredictionTest.py
     VesuvioPreFitTest.py
     VesuvioResolutionTest.py
@@ -113,7 +117,8 @@ set(TEST_PY_FILES
     VesuvioTOFFitTest.py
     PoldiCreatePeaksFromFileTest.py
     LoadCIFTest.py
-    SaveYDATest.py)
+    SaveYDATest.py
+    SaveP2DTest.py)
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})
 

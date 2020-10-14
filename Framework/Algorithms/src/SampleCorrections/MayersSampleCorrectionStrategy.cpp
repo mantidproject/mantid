@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //-----------------------------------------------------------------------------
 // Includes
@@ -17,9 +17,9 @@
 
 using Mantid::Kernel::ChebyshevPolyFit;
 using Mantid::Kernel::ChebyshevSeries;
+using Mantid::Kernel::getStatistics;
 using Mantid::Kernel::MersenneTwister;
 using Mantid::Kernel::StatOptions;
-using Mantid::Kernel::getStatistics;
 using std::pow;
 
 namespace {

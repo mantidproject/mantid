@@ -1,19 +1,19 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CURVEFITTING_COSTFUNCFITTINGTEST_H_
-#define MANTID_CURVEFITTING_COSTFUNCFITTINGTEST_H_
+#pragma once
 
 #include "MantidAPI/FunctionDomain1D.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionValues.h"
-#include <cxxtest/TestSuite.h>
 
 #include "MantidCurveFitting/CostFunctions/CostFuncFitting.h"
-#include <boost/make_shared.hpp>
+
+#include <cxxtest/TestSuite.h>
+#include <memory>
 
 using Mantid::CurveFitting::CostFunctions::CostFuncFitting;
 using namespace Mantid::API;
@@ -23,6 +23,20 @@ namespace {
 class CostFuncMock : public CostFuncFitting {
 public:
   std::string name() const override { return "CostFuncMock"; }
+  void addVal(FunctionDomain_sptr domain,
+              FunctionValues_sptr values) const override {
+    UNUSED_ARG(domain)
+    UNUSED_ARG(values)
+  }
+  void addValDerivHessian(IFunction_sptr function, FunctionDomain_sptr domain,
+                          FunctionValues_sptr values, bool evalDeriv = true,
+                          bool evalHessian = true) const override {
+    UNUSED_ARG(domain)
+    UNUSED_ARG(values)
+    UNUSED_ARG(evalDeriv)
+    UNUSED_ARG(evalHessian)
+    UNUSED_ARG(function)
+  }
   double val() const override { return 0.0; }
   void deriv(std::vector<double> &) const override {}
   double valAndDeriv(std::vector<double> &) const override { return 0.0; }
@@ -42,8 +56,8 @@ public:
     CostFuncMock costFun;
     auto fun = FunctionFactory::Instance().createInitialized(
         "name=LinearBackground;name=ExpDecay");
-    auto domain = boost::make_shared<FunctionDomain1DVector>(0);
-    auto values = boost::make_shared<FunctionValues>(*domain);
+    auto domain = std::make_shared<FunctionDomain1DVector>(0);
+    auto values = std::make_shared<FunctionValues>(*domain);
     costFun.setFittingFunction(fun, domain, values);
     TS_ASSERT_EQUALS(costFun.nParams(), 4);
     TS_ASSERT_EQUALS(costFun.parameterName(0), "f0.A0");
@@ -57,5 +71,3 @@ public:
     TS_ASSERT_EQUALS(costFun.parameterName(2), "f1.Lifetime");
   }
 };
-
-#endif /* MANTID_CURVEFITTING_COSTFUNCFITTINGTEST_H_ */

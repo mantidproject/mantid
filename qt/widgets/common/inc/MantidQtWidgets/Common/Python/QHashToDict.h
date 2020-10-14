@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTWIDGETS_QHASHTODICT_H
-#define MANTIDQTWIDGETS_QHASHTODICT_H
+#pragma once
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
 
@@ -25,5 +24,3 @@ EXPORT_OPT_MANTIDQT_COMMON Python::Dict qHashToDict(const KwArgs &hash);
 } // namespace Common
 } // namespace Widgets
 } // namespace MantidQt
-
-#endif /* MANTIDQTWIDGETS_QHASHTODICT_H */

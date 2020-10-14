@@ -55,7 +55,6 @@ function(coveralls_setup _COVERAGE_SRCS _COVERALLS_UPLOAD)
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
 
-        INCLUDE(FindPythonInterp)
 	add_custom_target(coveralls_generate
 
 		# Zero the coverage counters.
@@ -68,7 +67,7 @@ function(coveralls_setup _COVERAGE_SRCS _COVERALLS_UPLOAD)
 		# Generate Gcov and translate it into coveralls JSON.
 		# We do this by executing an external CMake script.
 		# (We don't want this to run at CMake generation time, but after compilation and everything has run).
-		COMMAND ${PYTHON_EXECUTABLE} 
+		COMMAND ${Python_EXECUTABLE}
                                 ${_CMAKE_SCRIPT_PATH}/CoverallsGenerateGcov.py
 				--COVERAGE_SRCS_FILE="${COVERAGE_SRCS}"
 				--COVERALLS_OUTPUT_FILE="${COVERALLS_FILE}"

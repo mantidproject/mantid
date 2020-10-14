@@ -1,16 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
-
 from qtpy import QtGui, QtWidgets
 from qtpy.QtCore import Signal, QSettings, QFileInfo
 
-from mantidqt.widgets import manageuserdirectories
 from mantidqt.utils.qt import load_ui
+from mantidqt.widgets import manageuserdirectories
 
 Ui_RunSelectorWidget, _ = load_ui(__file__, "run_selector_widget.ui")
 
@@ -58,7 +56,7 @@ class RunSelectorWidget(QtWidgets.QWidget, Ui_RunSelectorWidget):
         return "Files ( *" + " *".join(extensions) + ")"
 
     def show_directories_manager(self):
-        manageuserdirectories.ManageUserDirectories(self).exec_()
+        manageuserdirectories.ManageUserDirectories.openManageUserDirectories()
 
     def run_not_found(self):
         QtWidgets.QMessageBox.warning(self, "Run Not Found!",

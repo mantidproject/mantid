@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2016 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ALGORITHMS_IBEAMPROFILE_H_
-#define MANTID_ALGORITHMS_IBEAMPROFILE_H_
+#pragma once
 
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
@@ -36,10 +35,8 @@ public:
   virtual Ray generatePoint(Kernel::PseudoRandomNumberGenerator &rng,
                             const Geometry::BoundingBox &) const = 0;
   virtual Geometry::BoundingBox
-  defineActiveRegion(const API::Sample &) const = 0;
+  defineActiveRegion(const Geometry::BoundingBox &) const = 0;
 };
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#endif /* MANTID_ALGORITHMS_IBEAMPROFILE_H_ */

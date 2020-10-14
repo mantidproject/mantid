@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_API_IPEAK_H_
-#define MANTID_API_IPEAK_H_
+#pragma once
 
 #include "MantidGeometry/Crystal/PeakShape.h"
 #include "MantidGeometry/DllConfig.h"
@@ -45,13 +44,14 @@ public:
   virtual double getK() const = 0;
   virtual double getL() const = 0;
   virtual Mantid::Kernel::V3D getHKL() const = 0;
+  virtual bool isIndexed() const = 0;
   virtual Mantid::Kernel::V3D getIntHKL() const = 0;
   virtual void setH(double m_H) = 0;
   virtual void setK(double m_K) = 0;
   virtual void setL(double m_L) = 0;
   virtual void setHKL(double H, double K, double L) = 0;
   virtual void setHKL(const Mantid::Kernel::V3D &HKL) = 0;
-  virtual void setIntHKL(const Mantid::Kernel::V3D HKL) = 0;
+  virtual void setIntHKL(const Mantid::Kernel::V3D &HKL) = 0;
   virtual void setSamplePos(double samX, double samY, double samZ) = 0;
   virtual void setSamplePos(const Mantid::Kernel::V3D &XYZ) = 0;
   virtual Mantid::Kernel::V3D getSamplePos() const = 0;
@@ -94,7 +94,7 @@ public:
   virtual void setPeakNumber(int m_PeakNumber) = 0;
 
   virtual Mantid::Kernel::V3D getIntMNP() const = 0;
-  virtual void setIntMNP(const Mantid::Kernel::V3D MNP) = 0;
+  virtual void setIntMNP(const Mantid::Kernel::V3D &MNP) = 0;
 
   virtual Mantid::Kernel::Matrix<double> getGoniometerMatrix() const = 0;
   virtual void setGoniometerMatrix(
@@ -109,9 +109,10 @@ public:
   virtual double getL2() const = 0;
 
   virtual const Mantid::Geometry::PeakShape &getPeakShape() const = 0;
+
+  virtual void setAbsorptionWeightedPathLength(double pathLength) = 0;
+  virtual double getAbsorptionWeightedPathLength() const = 0;
 };
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_API_IPEAK_H_ */

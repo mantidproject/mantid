@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectMolDyn.h"
 
@@ -50,7 +50,7 @@ void IndirectMolDyn::setup() {}
 bool IndirectMolDyn::validate() {
   UserInputValidator uiv;
 
-  if (uiv.checkMWRunFilesIsValid("Data", m_uiForm.mwRun)) {
+  if (uiv.checkFileFinderWidgetIsValid("Data", m_uiForm.mwRun)) {
     QString filename = m_uiForm.mwRun->getFirstFilename();
     QString version = m_uiForm.cbVersion->currentText();
     QFileInfo finfo(filename);

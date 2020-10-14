@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/ScalarMappable.h"
 #include "MantidQtWidgets/MplCpp/Colormap.h"
@@ -12,11 +12,11 @@
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/NDArray.h"
 
-using Mantid::PythonInterface::Converters::VectorToNDArray;
-using Mantid::PythonInterface::Converters::WrapReadOnly;
+using Mantid::PythonInterface::callMethodNoCheck;
 using Mantid::PythonInterface::GlobalInterpreterLock;
 using Mantid::PythonInterface::NDArray;
-using Mantid::PythonInterface::callMethodNoCheck;
+using Mantid::PythonInterface::Converters::VectorToNDArray;
+using Mantid::PythonInterface::Converters::WrapReadOnly;
 using namespace MantidQt::Widgets::Common;
 
 namespace MantidQt {

@@ -1,12 +1,11 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from __future__ import (absolute_import, division, print_function)
 from re import findall
-from six import iteritems
+from mantid import AnalysisDataService
 
 
 class MaxEnt(object):
@@ -41,20 +40,20 @@ class FrequencyContext(object):
     """
     A simple class for identifing the current run
     and it can return the name, run and instrument.
-    The current run is the same as the one in MonAnalysis
+    The current run is the same as the one in MuonAnalysis
     """
 
     def __init__(self):
         self._maxEnt_freq = {}
         self._FFT_freq = {}
-        self.plot_type = "None"
+        self.plot_type = "All"
 
     @property
     def window_title(self):
         return "Frequency Domain Analysis"
 
     def add_maxEnt(self, run, ws_freq):
-        self._maxEnt_freq[ws_freq.name()] = MaxEnt(run, ws_freq)
+        self._maxEnt_freq[ws_freq] = MaxEnt(run, AnalysisDataService.retrieve(ws_freq))
 
     @property
     def maxEnt_freq(self):
@@ -73,13 +72,13 @@ class FrequencyContext(object):
     def get_frequency_workspace_names(self, run_list, group, pair, phasequad, frequency_type):
         # do MaxEnt first as it only has run number
         names = []
-        for name, maxEnt in iteritems(self._maxEnt_freq):
+        for name, maxEnt in self._maxEnt_freq.items():
             for runs in run_list:
                 for run in runs:
                     if int(run) == int(maxEnt.run):
                         names.append(name)
         # do FFT
-        for name, fft in iteritems(self._FFT_freq):
+        for name, fft in self._FFT_freq.items():
             for runs in run_list:
                 for run in runs:
                     # check Re part

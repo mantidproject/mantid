@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
-#define MANTIDQTCUSTOMINTERFACES_INDIRECTBAYES_H_
+#pragma once
 #include "ui_IndirectBayes.h"
 
 #include "IndirectBayesTab.h"
@@ -24,7 +23,7 @@ window.
 @author Samuel Jackson, STFC
 */
 
-class DLLExport IndirectBayes : public IndirectInterface {
+class MANTIDQT_INDIRECT_DLL IndirectBayes : public IndirectInterface {
   Q_OBJECT
 
 public: // public constants and enums
@@ -65,5 +64,3 @@ private:
 };
 } // namespace CustomInterfaces
 } // namespace MantidQt
-
-#endif

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef LoadRawBin0Test123_H_
-#define LoadRawBin0Test123_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -62,8 +61,7 @@ public:
     Workspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(
         output = AnalysisDataService::Instance().retrieve(outputSpace));
-    Workspace2D_sptr output2D =
-        boost::dynamic_pointer_cast<Workspace2D>(output);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(output);
     // Should be 2584 for file LOQ48127.RAW
     TS_ASSERT_EQUALS(output2D->getNumberHistograms(), 8);
     // Check two X vectors are the same
@@ -104,12 +102,12 @@ public:
     Workspace_sptr wsSptr =
         AnalysisDataService::Instance().retrieve("multiperiod");
     WorkspaceGroup_sptr sptrWSGrp =
-        boost::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
+        std::dynamic_pointer_cast<WorkspaceGroup>(wsSptr);
     std::vector<std::string> wsNamevec;
     wsNamevec = sptrWSGrp->getNames();
     int period = 1;
     std::vector<std::string>::const_iterator it = wsNamevec.begin();
-    for (; it != wsNamevec.end(); it++) {
+    for (; it != wsNamevec.end(); ++it) {
       std::stringstream count;
       count << period;
       std::string wsName = "multiperiod_" + count.str();
@@ -119,7 +117,7 @@ public:
     std::vector<std::string>::const_iterator itr1 = wsNamevec.begin();
     int periodNumber = 0;
     const int nHistograms = 4;
-    for (; itr1 != wsNamevec.end(); itr1++) {
+    for (; itr1 != wsNamevec.end(); ++itr1) {
       MatrixWorkspace_sptr outsptr;
       TS_ASSERT_THROWS_NOTHING(
           outsptr = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -150,7 +148,7 @@ public:
 private:
   /// Helper method to run common set of tests on a workspace in a multi-period
   /// group.
-  void doTestMultiPeriodWorkspace(MatrixWorkspace_sptr workspace,
+  void doTestMultiPeriodWorkspace(const MatrixWorkspace_sptr &workspace,
                                   const size_t &nHistograms,
                                   int expected_period) {
     // Check the number of histograms.
@@ -175,5 +173,3 @@ private:
   std::string inputFile;
   std::string outputSpace;
 };
-
-#endif /*LoadRawBin0Test_H_*/

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadQKK.h"
 
@@ -111,8 +111,8 @@ void LoadQKK::exec() {
   // Add dummy source and samplepos to instrument
 
   // Create an instrument component wich will represent the sample position.
-  Geometry::ObjComponent *samplepos =
-      new Geometry::ObjComponent("Sample", instrument.get());
+  Geometry::Component *samplepos =
+      new Geometry::Component("Sample", instrument.get());
   instrument->add(samplepos);
   instrument->markAsSamplePos(samplepos);
   // Put the sample in the centre of the coordinate system

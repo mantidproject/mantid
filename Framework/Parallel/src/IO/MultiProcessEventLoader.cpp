@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidParallel/IO/MultiProcessEventLoader.h"
 //#include <boost/process/child.hpp>
@@ -136,21 +136,23 @@ void MultiProcessEventLoader::load(
           i < m_numProcesses - 1 ? evPerPr * (i + 1) : numEvents;
       std::vector<std::string> processArgs;
 
-      processArgs.push_back(m_segmentNames[i]);           // segment name
-      processArgs.push_back(m_storageName);               // storage name
-      processArgs.push_back(std::to_string(i));           // proc id
-      processArgs.push_back(std::to_string(evPerPr * i)); // first event to load
-      processArgs.push_back(std::to_string(upperBound));  // upper bound to load
-      processArgs.push_back(std::to_string(m_numPixels)); // pixel count
-      processArgs.push_back(std::to_string(storageSize)); // memory size
-      processArgs.push_back(filename);                    // nexus file name
-      processArgs.push_back(groupname); // instrument group name
-      processArgs.push_back(
+      processArgs.emplace_back(m_segmentNames[i]); // segment name
+      processArgs.emplace_back(m_storageName);     // storage name
+      processArgs.emplace_back(std::to_string(i)); // proc id
+      processArgs.emplace_back(
+          std::to_string(evPerPr * i)); // first event to load
+      processArgs.emplace_back(
+          std::to_string(upperBound)); // upper bound to load
+      processArgs.emplace_back(std::to_string(m_numPixels)); // pixel count
+      processArgs.emplace_back(std::to_string(storageSize)); // memory size
+      processArgs.emplace_back(filename);                    // nexus file name
+      processArgs.emplace_back(groupname); // instrument group name
+      processArgs.emplace_back(
           m_precalculateEvents ? "1 "
                                : "0 "); // variant of algorithm used for loading
       for (unsigned j = 0; j < bankNames.size(); ++j) {
-        processArgs.push_back(bankNames[j]);                   // bank name
-        processArgs.push_back(std::to_string(bankOffsets[j])); // bank size
+        processArgs.emplace_back(bankNames[j]);                   // bank name
+        processArgs.emplace_back(std::to_string(bankOffsets[j])); // bank size
       }
 
       try {

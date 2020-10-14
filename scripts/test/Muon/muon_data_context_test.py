@@ -1,30 +1,27 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import copy
 import unittest
 from mantidqt.utils.qt.testing import start_qapplication
 
 from mantid.api import AnalysisDataService, FileFinder
-from mantid.py3compat import mock
+from unittest import mock
 
 from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 
 @start_qapplication
 class MuonDataContextTest(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super(MuonDataContextTest, cls).setUpClass()
-        cls.filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
-        cls.load_result, cls.run_number, cls.filename, _ = load_workspace_from_filename(cls.filepath)
-
     def setUp(self):
+        self.filepath = FileFinder.findRuns('EMU00019489.nxs')[0]
+        self.load_result, self.run_number, self.filename, _ = load_workspace_from_filename(self.filepath)
         self.loaded_data = MuonLoadData()
         self.context = MuonDataContext(load_data=self.loaded_data)
         self.context.instrument = 'EMU'
@@ -91,6 +88,21 @@ class MuonDataContextTest(unittest.TestCase):
 
     def test_return_sample_log_returns_correctly(self):
         self.assertEqual(self.context.get_sample_log('goodfrm').value, 31369.0)
+
+    def test_that_is_multi_period_returns_false_for_single_period_data(self):
+        is_multi_period = self.context.is_multi_period()
+
+        self.assertTrue(not is_multi_period)
+
+    def test_that_any_multi_period_data_will_mark_everything_as_multiperiod(self):
+        multi_period_worspace_list = [MuonWorkspaceWrapper(f'raw_data_{period_index + 1}') for period_index in range(4)]
+        load_result = {'OutputWorkspace': multi_period_worspace_list}
+        self.loaded_data.add_data(workspace=load_result, run=[84447], filename='workspace_filename', instrument='EMU')
+        self.context._current_runs = [[84447],[19489]]
+
+        is_multi_period = self.context.is_multi_period()
+
+        self.assertTrue(is_multi_period)
 
 
 if __name__ == '__main__':

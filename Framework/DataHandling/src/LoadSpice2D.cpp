@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadSpice2D.h"
 #include "MantidAPI/AlgorithmFactory.h"
@@ -22,10 +22,8 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <boost/lexical_cast.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/regex.hpp>
-#include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "MantidKernel/StringTokenizer.h"
 #include <Poco/DOM/DOMParser.h>
@@ -38,13 +36,14 @@
 #include <Poco/SAX/InputSource.h>
 
 #include <algorithm>
+#include <memory>
 #include <sstream>
 #include <string>
 #include <utility>
 #include <vector>
 
-using Poco::XML::DOMParser;
 using Poco::XML::Document;
+using Poco::XML::DOMParser;
 using Poco::XML::Element;
 
 namespace Mantid {
@@ -80,8 +79,9 @@ bool from_string(T &t, const std::string &s,
  * @param wavelength: wavelength value [Angstrom]
  * @param dwavelength: error on the wavelength [Angstrom]
  */
-void store_value(DataObjects::Workspace2D_sptr ws, int specID, double value,
-                 double error, double wavelength, double dwavelength) {
+void store_value(const DataObjects::Workspace2D_sptr &ws, int specID,
+                 double value, double error, double wavelength,
+                 double dwavelength) {
   auto &X = ws->mutableX(specID);
   auto &Y = ws->mutableY(specID);
   auto &E = ws->mutableE(specID);
@@ -146,7 +146,7 @@ void LoadSpice2D::init() {
   // Optionally, we can specify the wavelength and wavelength spread and
   // overwrite
   // the value in the data file (used when the data file is not populated)
-  auto mustBePositive = boost::make_shared<Kernel::BoundedValidator<double>>();
+  auto mustBePositive = std::make_shared<Kernel::BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("Wavelength", EMPTY_DBL(), mustBePositive,
                   "Optional wavelength value to use when loading the data file "
@@ -341,7 +341,7 @@ std::vector<int> LoadSpice2D::getData(const std::string &dataXpath = "//Data") {
     std::stringstream iss(data_str);
     double number;
     while (iss >> number) {
-      data.push_back(static_cast<int>(number));
+      data.emplace_back(static_cast<int>(number));
     }
     g_log.debug() << "Detector XPath: " << detectorXpath
                   << " parsed. Total size of data processed up to now = "
@@ -369,7 +369,7 @@ void LoadSpice2D::createWorkspace(const std::vector<int> &data,
   int nBins = 1;
   int numSpectra = static_cast<int>(data.size()) + LoadSpice2D::nMonitors;
 
-  m_workspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
+  m_workspace = std::dynamic_pointer_cast<DataObjects::Workspace2D>(
       API::WorkspaceFactory::Instance().create("Workspace2D", numSpectra,
                                                nBins + 1, nBins));
   m_workspace->setTitle(title);
@@ -441,13 +441,13 @@ void LoadSpice2D::setBeamTrapRunProperty(
   double trapDiameterInUse = trapDiameters[1];
 
   std::vector<double> trapMotorPositions;
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_25mm"]));
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_50mm"]));
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_76mm"]));
-  trapMotorPositions.push_back(
+  trapMotorPositions.emplace_back(
       boost::lexical_cast<double>(metadata["Motor_Positions/trap_y_101mm"]));
 
   // Check how many traps are in use (store indexes):
@@ -455,7 +455,7 @@ void LoadSpice2D::setBeamTrapRunProperty(
   for (size_t i = 0; i < trapMotorPositions.size(); i++) {
     if (trapMotorPositions[i] > 26.0) {
       // Resting positions are below 25. Make sure we have one trap in use!
-      trapIndexInUse.push_back(i);
+      trapIndexInUse.emplace_back(i);
     }
   }
 
@@ -659,7 +659,7 @@ void LoadSpice2D::detectorTranslation(
  */
 void LoadSpice2D::runLoadInstrument(
     const std::string &inst_name,
-    DataObjects::Workspace2D_sptr localWorkspace) {
+    const DataObjects::Workspace2D_sptr &localWorkspace) {
 
   API::IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
 

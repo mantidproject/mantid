@@ -73,18 +73,18 @@ Usage
     epptable = FindEPP(wsVana)
     # calculate correction coefficients
     wsCoefs = ComputeCalibrationCoefVan(wsVana, epptable)
-    print('Spectrum 4 of the output workspace is filled with:  {}'.format(round(wsCoefs.readY(999)[0])))
+    print(f'Spectrum 4 of the output workspace is filled with:  {wsCoefs.readY(999)[0]:.1f}')
 
     # wsCoefs can be used as rhs with Divide algorithm to apply correction to the data
     wsCorr = wsVana/wsCoefs
-    print('Spectrum 4 of the input workspace is filled with:  {}'.format(round(wsVana.readY(999)[0], 1)))
-    print('Spectrum 4 of the corrected workspace is filled with:  {}'.format(round(wsCorr.readY(999)[0], 5)))
+    print(f'Spectrum 4 of the input workspace is filled with:  {wsVana.readY(999)[0]:.1f}')
+    print(f'Spectrum 4 of the corrected workspace is filled with:  {wsCorr.readY(999)[0]:.5f}')
 
 Output:
 
 .. testoutput:: ExComputeCalibrationCoefVan
 
-    Spectrum 4 of the output workspace is filled with:  6895.0
+    Spectrum 4 of the output workspace is filled with:  6894.8
     Spectrum 4 of the input workspace is filled with:  1.0
     Spectrum 4 of the corrected workspace is filled with:  0.00015
 

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H
-#define MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H
+#pragma once
 
 #include "CatalogRunNotifier.h"
 #include "Common/DllConfig.h"
@@ -17,7 +16,7 @@
 #include "MantidAPI/AlgorithmObserver.h"
 #include "MantidAPI/IAlgorithm.h"
 #include "SearchResult.h"
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 class ProgressPresenter;
 
@@ -59,7 +58,7 @@ public:
                 const RunsTablePresenterFactory &makeRunsTablePresenter,
                 double thetaTolerance,
                 std::vector<std::string> const &instruments,
-                int defaultInstrumentIndex, IMessageHandler *messageHandler);
+                IMessageHandler *messageHandler);
   RunsPresenter(RunsPresenter const &) = delete;
   ~RunsPresenter() override;
   RunsPresenter const &operator=(RunsPresenter const &) = delete;
@@ -69,36 +68,48 @@ public:
 
   // IRunsPresenter overrides
   void acceptMainPresenter(IBatchPresenter *mainPresenter) override;
+  void initInstrumentList() override;
   RunsTable const &runsTable() const override;
   RunsTable &mutableRunsTable() override;
   bool isProcessing() const override;
   bool isAutoreducing() const override;
   int percentComplete() const override;
-  void notifyInstrumentChanged(std::string const &instrumentName) override;
-  void notifyReductionResumed() override;
-  void notifyReductionPaused() override;
+  void setRoundPrecision(int &precision) override;
+  void resetRoundPrecision() override;
+  void
+  notifyChangeInstrumentRequested(std::string const &instrumentName) override;
+  void notifyResumeReductionRequested() override;
+  void notifyPauseReductionRequested() override;
   void notifyRowStateChanged() override;
   void notifyRowStateChanged(boost::optional<Item const &> item) override;
   void notifyRowOutputsChanged() override;
   void notifyRowOutputsChanged(boost::optional<Item const &> item) override;
 
-  void reductionPaused() override;
-  void reductionResumed() override;
+  void notifyReductionPaused() override;
+  void notifyReductionResumed() override;
   bool resumeAutoreduction() override;
-  void autoreductionResumed() override;
-  void autoreductionPaused() override;
+  void notifyAutoreductionResumed() override;
+  void notifyAutoreductionPaused() override;
   void autoreductionCompleted() override;
-  void anyBatchAutoreductionResumed() override;
-  void anyBatchAutoreductionPaused() override;
-  void instrumentChanged(std::string const &instrumentName) override;
+  void notifyAnyBatchReductionResumed() override;
+  void notifyAnyBatchReductionPaused() override;
+  void notifyAnyBatchAutoreductionResumed() override;
+  void notifyAnyBatchAutoreductionPaused() override;
+  void notifyInstrumentChanged(std::string const &instrumentName) override;
+  void notifyTableChanged() override;
   void settingsChanged() override;
+
+  bool isAnyBatchProcessing() const override;
+  bool isAnyBatchAutoreducing() const override;
+  bool isOverwritingTablePrevented() const override;
+  bool isOverwriteBatchPrevented() const override;
 
   // RunsViewSubscriber overrides
   void notifySearch() override;
-  void notifyAutoreductionResumed() override;
-  void notifyAutoreductionPaused() override;
+  void notifyResumeAutoreductionRequested() override;
+  void notifyPauseAutoreductionRequested() override;
   void notifyTransfer() override;
-  void notifyInstrumentChanged() override;
+  void notifyChangeInstrumentRequested() override;
   void notifyStartMonitor() override;
   void notifyStopMonitor() override;
   void notifyStartMonitorComplete() override;
@@ -134,16 +145,11 @@ private:
   IMessageHandler *m_messageHandler;
   /// The list of instruments
   std::vector<std::string> m_instruments;
-  /// The default index in the instrument list
-  int m_defaultInstrumentIndex;
   /// The tolerance used when looking up settings by theta
   double m_thetaTolerance;
 
-  bool isAnyBatchAutoreducing() const;
-
   /// searching
   bool search(ISearcher::SearchType searchType);
-  void populateSearchResults(Mantid::API::ITableWorkspace_sptr results);
   bool searchInProgress() const;
   /// autoreduction
   bool requireNewAutoreduction() const;
@@ -188,4 +194,3 @@ private:
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt
-#endif /* MANTID_ISISREFLECTOMETRY_RUNSPRESENTER_H */

@@ -1,13 +1,12 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /* File: Indexing_Utils.h */
 
-#ifndef MANTID_GEOMETRY_INDEXING_UTILS_H_
-#define MANTID_GEOMETRY_INDEXING_UTILS_H_
+#pragma once
 
 //----------------------------------------------------------------------
 // Includes
@@ -88,7 +87,7 @@ public:
   /// Scan rotations to find UB that indexes peaks given lattice parameters
   static double ScanFor_UB(Kernel::DblMatrix &UB,
                            const std::vector<Kernel::V3D> &q_vectors,
-                           const UnitCell &lattice, double degrees_per_step,
+                           const UnitCell &cell, double degrees_per_step,
                            double required_tolerance);
 
   /// Get list of possible directions and lengths for real space unit cell
@@ -147,6 +146,9 @@ public:
                                 double required_tolerance, double len_tol,
                                 double ang_tol);
 
+  /// Round all the components of a HKL objects to the nearest integer
+  static void RoundHKL(Kernel::V3D &hkl);
+
   /// Round all the components of a list of V3D objects, to the nearest integer
   static void RoundHKLs(std::vector<Kernel::V3D> &hkl_list);
 
@@ -184,12 +186,22 @@ public:
                               const std::vector<Kernel::V3D> &q_vectors,
                               double tolerance);
 
-  /// Given a UB, get list of Miller indices for specifed Qs
+  /// Given a UB, get list of Miller indices for specifed Qs and tolerance
   static int CalculateMillerIndices(const Kernel::DblMatrix &UB,
                                     const std::vector<Kernel::V3D> &q_vectors,
                                     double tolerance,
                                     std::vector<Kernel::V3D> &miller_indices,
                                     double &ave_error);
+
+  /// Given a UB, calculate the miller indices for given q vector
+  static bool CalculateMillerIndices(const Kernel::DblMatrix &inverseUB,
+                                     const Kernel::V3D &q_vector,
+                                     double tolerance,
+                                     Kernel::V3D &miller_indices);
+
+  /// Given a UB, calculate the miller indices for given q vector
+  static Kernel::V3D CalculateMillerIndices(const Kernel::DblMatrix &inverseUB,
+                                            const Kernel::V3D &q_vector);
 
   /// Get lists of indices and Qs for peaks indexed in the specified direction
   static int GetIndexedPeaks_1D(const Kernel::V3D &direction,
@@ -226,8 +238,8 @@ public:
   /// Choose the direction in a list of directions, that is most nearly
   /// perpendicular to planes with the specified spacing in reciprocal space.
   static int SelectDirection(Kernel::V3D &best_direction,
-                             const std::vector<Kernel::V3D> q_vectors,
-                             const std::vector<Kernel::V3D> direction_list,
+                             const std::vector<Kernel::V3D> &q_vectors,
+                             const std::vector<Kernel::V3D> &direction_list,
                              double plane_spacing, double required_tolerance);
 
   /// Get the lattice parameters for the specified orientation matrix
@@ -253,5 +265,3 @@ private:
 
 } // namespace Geometry
 } // namespace Mantid
-
-#endif /* MANTID_GEOMETRY_INDEXING_UTILS_H_ */

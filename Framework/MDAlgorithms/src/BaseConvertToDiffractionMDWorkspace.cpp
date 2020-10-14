@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidMDAlgorithms/BaseConvertToDiffractionMDWorkspace.h"
 
@@ -81,7 +81,7 @@ void BaseConvertToDiffractionMDWorkspace::init() {
   frameOptions.emplace_back("HKL");
   declareProperty(
       "OutputDimensions", "Q (lab frame)",
-      boost::make_shared<StringListValidator>(frameOptions),
+      std::make_shared<StringListValidator>(frameOptions),
       "What will be the dimensions of the output workspace?\n"
       "  Q (lab frame): Wave-vector change of the lattice in the lab frame.\n"
       "  Q (sample frame): Wave-vector change of the lattice in the frame of "

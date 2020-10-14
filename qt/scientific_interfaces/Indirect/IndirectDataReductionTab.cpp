@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataReductionTab.h"
 
@@ -51,7 +51,9 @@ void IndirectDataReductionTab::runTab() {
     emit updateRunButton(false, "disable", "Running...",
                          "Running data reduction...");
     try {
-      m_plotOptionsPresenter->clearWorkspaces();
+      if (m_plotOptionsPresenter) {
+        m_plotOptionsPresenter->clearWorkspaces();
+      }
       run();
     } catch (std::exception const &ex) {
       m_tabRunning = false;
@@ -189,16 +191,16 @@ std::map<std::string, double> IndirectDataReductionTab::getRangesFromInstrument(
   double resolution = resParams[0];
 
   std::vector<double> x;
-  x.push_back(-6 * resolution);
-  x.push_back(-5 * resolution);
-  x.push_back(-2 * resolution);
-  x.push_back(0);
-  x.push_back(2 * resolution);
+  x.emplace_back(-6 * resolution);
+  x.emplace_back(-5 * resolution);
+  x.emplace_back(-2 * resolution);
+  x.emplace_back(0);
+  x.emplace_back(2 * resolution);
   std::vector<double> y;
-  y.push_back(1);
-  y.push_back(2);
-  y.push_back(3);
-  y.push_back(4);
+  y.emplace_back(1);
+  y.emplace_back(2);
+  y.emplace_back(3);
+  y.emplace_back(4);
   std::vector<double> e(4, 0);
 
   IAlgorithm_sptr createWsAlg =

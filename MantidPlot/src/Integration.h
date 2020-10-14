@@ -26,8 +26,7 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
-#ifndef INTEGRATION_H
-#define INTEGRATION_H
+#pragma once
 
 #include "Filter.h"
 
@@ -76,5 +75,3 @@ private:
   //! Variable name for the function to be integrated
   QString d_variable;
 };
-
-#endif

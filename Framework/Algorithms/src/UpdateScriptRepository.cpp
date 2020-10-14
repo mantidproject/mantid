@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/UpdateScriptRepository.h"
 #include "MantidAPI/ScriptRepository.h"
@@ -41,8 +41,8 @@ void UpdateScriptRepository::init() {}
 void UpdateScriptRepository::exec() {
   // TODO Auto-generated execute stub
   using Mantid::API::ScriptRepository;
-  using Mantid::API::ScriptRepositoryFactory;
   using Mantid::API::ScriptRepository_sptr;
+  using Mantid::API::ScriptRepositoryFactory;
   auto repo_ptr =
       ScriptRepositoryFactory::Instance().create("ScriptRepositoryImpl");
 

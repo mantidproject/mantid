@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/HistogramValidator.h"
@@ -92,17 +92,17 @@ void MonIDPropChanger::applyChanges(const IPropertyManager *algo,
       spectra_max = static_cast<int>(inputWS->getNumberHistograms()) + 1;
     }
     piProp->replaceValidator(
-        boost::make_shared<Kernel::BoundedValidator<int>>(-1, spectra_max));
+        std::make_shared<Kernel::BoundedValidator<int>>(-1, spectra_max));
   } else {
     piProp->replaceValidator(
-        boost::make_shared<Kernel::ListValidator<int>>(iExistingAllowedValues));
+        std::make_shared<Kernel::ListValidator<int>>(iExistingAllowedValues));
   }
 }
 
 // read the monitors list from the workspace and try to do it once for any
 // particular ws;
 bool MonIDPropChanger::monitorIdReader(
-    MatrixWorkspace_const_sptr inputWS) const {
+    const MatrixWorkspace_const_sptr &inputWS) const {
   // no workspace
   if (!inputWS)
     return false;
@@ -174,10 +174,10 @@ void NormaliseToMonitor::init() {
   // Must be histograms OR one count per bin
   // Must be raw counts
   auto validatorHistSingle =
-      boost::make_shared<CompositeValidator>(CompositeRelation::OR);
+      std::make_shared<CompositeValidator>(CompositeRelation::OR);
   validatorHistSingle->add<HistogramValidator>();
   validatorHistSingle->add<SingleCountValidator>();
-  auto validator = boost::make_shared<CompositeValidator>();
+  auto validator = std::make_shared<CompositeValidator>();
   validator->add(validatorHistSingle);
   validator->add<RawCountValidator>();
 
@@ -589,7 +589,7 @@ void NormaliseToMonitor::normaliseByIntegratedCount(
   }
 
   EventWorkspace_sptr inputEvent =
-      boost::dynamic_pointer_cast<EventWorkspace>(inputWorkspace);
+      std::dynamic_pointer_cast<EventWorkspace>(inputWorkspace);
 
   if (inputEvent) {
     // Run the divide algorithm explicitly to enable progress reporting
@@ -678,7 +678,7 @@ void NormaliseToMonitor::normaliseBinByBin(
     const MatrixWorkspace_sptr &inputWorkspace,
     MatrixWorkspace_sptr &outputWorkspace) {
   EventWorkspace_sptr inputEvent =
-      boost::dynamic_pointer_cast<EventWorkspace>(inputWorkspace);
+      std::dynamic_pointer_cast<EventWorkspace>(inputWorkspace);
 
   // Only create output workspace if different to input one
   if (outputWorkspace != inputWorkspace) {
@@ -687,8 +687,7 @@ void NormaliseToMonitor::normaliseBinByBin(
     } else
       outputWorkspace = create<MatrixWorkspace>(*inputWorkspace);
   }
-  auto outputEvent =
-      boost::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
+  auto outputEvent = std::dynamic_pointer_cast<EventWorkspace>(outputWorkspace);
 
   const auto &inputSpecInfo = inputWorkspace->spectrumInfo();
   const auto &monitorSpecInfo = m_monitor->spectrumInfo();

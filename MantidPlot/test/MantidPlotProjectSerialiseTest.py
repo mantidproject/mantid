@@ -1,12 +1,14 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 Test of basic project saving and loading
 """
+import io
+
 import mantidplottests
 from mantidplottests import *
 import shutil
@@ -388,7 +390,7 @@ def get_project_file_contents(folder_name):
     project_name = os.path.basename(folder_name) + '.mantid'
     project_file = os.path.join(folder_name, project_name)
 
-    with open(project_file, 'r') as file_handle:
+    with io.open(project_file, 'r', encoding='utf-8') as file_handle:
         contents = file_handle.read()
 
     return contents

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
@@ -16,9 +16,9 @@
 #include "MantidQtWidgets/InstrumentView/ProjectionSurface.h"
 #include "MantidQtWidgets/InstrumentView/UnwrappedSurface.h"
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IPeaksWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
@@ -51,6 +51,8 @@
 
 #include <boost/math/constants/constants.hpp>
 
+using Mantid::API::AlgorithmManager;
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -77,7 +79,10 @@ double getPhiOffset(const Mantid::Kernel::V3D &pos, const double offset) {
  */
 InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
     : InstrumentWidgetTab(instrWidget), m_freezePlot(false),
-      m_tubeXUnitsCache(0), m_plotTypeCache(0) {
+      m_tubeXUnitsCache(0), m_plotTypeCache(0),
+      m_addedActions(
+          std::vector<std::pair<
+              QAction *, std::function<bool(std::map<std::string, bool>)>>>{}) {
 
   // connect to InstrumentWindow signals
   connect(m_instrWidget, SIGNAL(integrationRangeChanged(double, double)), this,
@@ -159,6 +164,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   CollapsibleStack *panelStack = new CollapsibleStack(this);
   m_infoPanel = panelStack->addPanel("Selection", m_selectionInfoDisplay);
   m_plotPanel = panelStack->addPanel("Name", m_plot);
+  collapsePlotPanel();
 
   m_selectionType = Single;
 
@@ -211,6 +217,12 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_ring_rectangle->setIcon(QIcon(":/PickTools/selection-box-ring.png"));
   m_ring_rectangle->setToolTip("Draw a rectangular ring");
 
+  m_sector = new QPushButton();
+  m_sector->setCheckable(true);
+  m_sector->setAutoExclusive(true);
+  m_sector->setIcon(QIcon(":/PickTools/selection-sector.png"));
+  m_sector->setToolTip("Draw a circular sector");
+
   m_free_draw = new QPushButton();
   m_free_draw->setCheckable(true);
   m_free_draw->setAutoExclusive(true);
@@ -247,21 +259,22 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   m_peakAlign->setIcon(QIcon(":/PickTools/selection-peak-plane.png"));
   m_peakAlign->setToolTip("Crystal peak alignment tool");
 
-  QGridLayout *toolBox = new QGridLayout();
+  auto *toolBox = new QGridLayout();
   toolBox->addWidget(m_zoom, 0, 0);
   toolBox->addWidget(m_edit, 0, 1);
   toolBox->addWidget(m_ellipse, 0, 2);
   toolBox->addWidget(m_rectangle, 0, 3);
   toolBox->addWidget(m_ring_ellipse, 0, 4);
   toolBox->addWidget(m_ring_rectangle, 0, 5);
-  toolBox->addWidget(m_free_draw, 0, 6);
+  toolBox->addWidget(m_sector, 0, 6);
+  toolBox->addWidget(m_free_draw, 0, 7);
   toolBox->addWidget(m_one, 1, 0);
   toolBox->addWidget(m_tube, 1, 1);
   toolBox->addWidget(m_peak, 1, 2);
   toolBox->addWidget(m_peakSelect, 1, 3);
   toolBox->addWidget(m_peakCompare, 1, 4);
   toolBox->addWidget(m_peakAlign, 1, 5);
-  toolBox->setColumnStretch(6, 1);
+  toolBox->setColumnStretch(8, 1);
   toolBox->setSpacing(2);
   connect(m_zoom, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_one, SIGNAL(clicked()), this, SLOT(setSelectionType()));
@@ -274,6 +287,7 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   connect(m_ellipse, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_ring_ellipse, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_ring_rectangle, SIGNAL(clicked()), this, SLOT(setSelectionType()));
+  connect(m_sector, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_free_draw, SIGNAL(clicked()), this, SLOT(setSelectionType()));
   connect(m_edit, SIGNAL(clicked()), this, SLOT(setSelectionType()));
 
@@ -281,6 +295,16 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
   layout->addWidget(m_activeTool);
   layout->addLayout(toolBox);
   layout->addWidget(panelStack);
+}
+
+/**
+ * If the workspace is monochromatic, the plot panel is useless and should be
+ * collapsed
+ */
+void InstrumentWidgetPickTab::collapsePlotPanel() {
+  if (!m_instrWidget->isIntegrable()) {
+    m_plotPanel->collapseCaption();
+  }
 }
 
 /**
@@ -463,6 +487,13 @@ void InstrumentWidgetPickTab::setSelectionType() {
     plotType = DetectorPlotController::Single;
     m_instrWidget->getSurface()->startCreatingShape2D(
         "ring rectangle", Qt::green, QColor(255, 255, 255, 80));
+  } else if (m_sector->isChecked()) {
+    m_selectionType = Draw;
+    m_activeTool->setText("Tool: Circular sector");
+    surfaceMode = ProjectionSurface::DrawRegularMode;
+    plotType = DetectorPlotController::Single;
+    m_instrWidget->getSurface()->startCreatingShape2D(
+        "sector", Qt::green, QColor(255, 255, 255, 80));
   } else if (m_free_draw->isChecked()) {
     m_selectionType = Draw;
     m_activeTool->setText("Tool: Arbitrary shape");
@@ -586,7 +617,7 @@ void InstrumentWidgetPickTab::initSurface() {
           SLOT(updatePlotMultipleDetectors()));
   connect(surface, SIGNAL(shapesRemoved()), this,
           SLOT(updatePlotMultipleDetectors()));
-  Projection3D *p3d = dynamic_cast<Projection3D *>(surface);
+  auto *p3d = dynamic_cast<Projection3D *>(surface);
   if (p3d) {
     connect(p3d, SIGNAL(finishedMove()), this,
             SLOT(updatePlotMultipleDetectors()));
@@ -608,8 +639,7 @@ void InstrumentWidgetPickTab::initSurface() {
 /**
  * Return current ProjectionSurface.
  */
-boost::shared_ptr<ProjectionSurface>
-InstrumentWidgetPickTab::getSurface() const {
+std::shared_ptr<ProjectionSurface> InstrumentWidgetPickTab::getSurface() const {
   return m_instrWidget->getSurface();
 }
 
@@ -636,7 +666,12 @@ void InstrumentWidgetPickTab::loadSettings(const QSettings &settings) {
   m_plotTypeCache =
       settings.value("PlotType", DetectorPlotController::Single).toInt();
 }
-
+void InstrumentWidgetPickTab::addToContextMenu(
+    QAction *action,
+    std::function<bool(std::map<std::string, bool>)> &actionCondition) {
+  auto pair = std::make_pair(action, actionCondition);
+  m_addedActions.emplace_back(pair);
+}
 /**
  * Fill in the context menu.
  * @param context :: A menu to fill.
@@ -651,6 +686,15 @@ bool InstrumentWidgetPickTab::addToDisplayContextMenu(QMenu &context) const {
   if (m_plot->hasStored() || m_plot->hasCurve()) {
     context.addAction(m_savePlotToWorkspace);
     res = true;
+  }
+  std::map<std::string, bool> tabBools = {};
+  tabBools.insert(std::make_pair("plotStored", m_plot->hasStored()));
+  tabBools.insert(std::make_pair("hasCurve", m_plot->hasCurve()));
+  tabBools.insert(std::make_pair("isTube", m_tube->isChecked()));
+  for (auto actionPair : m_addedActions) {
+    if (actionPair.second && actionPair.second(tabBools)) {
+      context.addAction(actionPair.first);
+    }
   }
   return res;
 }
@@ -915,8 +959,9 @@ QString ComponentInfoController::displayDetectorInfo(size_t index) {
             QString::fromStdString(componentInfo.name(index)) + '\n';
 
     const double integrated = actor.getIntegratedCounts(index);
-    const QString counts =
-        integrated == -1.0 ? "N/A" : QString::number(integrated);
+    const QString counts = integrated == InstrumentActor::INVALID_VALUE
+                               ? "N/A"
+                               : QString::number(integrated);
     text += "Counts: " + counts + '\n';
     // display info about peak overlays
     text += actor.getParameterInfo(index);
@@ -1594,7 +1639,7 @@ void DetectorPlotController::savePlotToWorkspace() {
       prepareDataForSinglePlot(actor.getDetectorByDetID(detid), x, y, &e);
       unitX = parentWorkspace->getAxis(0)->unit()->unitID();
       // save det ids for the output workspace
-      detids.push_back(static_cast<Mantid::detid_t>(detid));
+      detids.emplace_back(static_cast<Mantid::detid_t>(detid));
     } else {
       continue;
     }
@@ -1631,7 +1676,7 @@ void DetectorPlotController::savePlotToWorkspace() {
     if (!detids.empty()) {
       // set up spectra - detector mapping
       Mantid::API::MatrixWorkspace_sptr ws =
-          boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          std::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
               Mantid::API::AnalysisDataService::Instance().retrieve("Curves"));
       if (!ws) {
         throw std::runtime_error("Failed to create Curves workspace");
@@ -1774,7 +1819,7 @@ void DetectorPlotController::addPeak(double x, double y) {
         Mantid::API::AnalysisDataService::Instance().add(peakTableName, tw);
         newPeaksWorkspace = true;
       } else {
-        tw = boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(
+        tw = std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(
             Mantid::API::AnalysisDataService::Instance().retrieve(
                 peakTableName));
         if (!tw) {
@@ -1788,13 +1833,12 @@ void DetectorPlotController::addPeak(double x, double y) {
       auto unwrappedSurface = dynamic_cast<UnwrappedSurface *>(surface.get());
       if (unwrappedSurface) {
         unwrappedSurface->setPeaksWorkspace(
-            boost::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
+            std::dynamic_pointer_cast<Mantid::API::IPeaksWorkspace>(tw));
       }
     }
 
     // Run the AddPeak algorithm
-    auto alg =
-        Mantid::API::FrameworkManager::Instance().createAlgorithm("AddPeak");
+    auto alg = AlgorithmManager::Instance().create("AddPeak");
     const auto &detIDs =
         m_instrWidget->getInstrumentActor().detectorInfo().detectorIDs();
     alg->setPropertyValue("RunWorkspace", ws->getName());
@@ -1808,15 +1852,14 @@ void DetectorPlotController::addPeak(double x, double y) {
     // if data WS has UB copy it to the new peaks workspace
     if (newPeaksWorkspace && ws->sample().hasOrientedLattice()) {
       auto UB = ws->sample().getOrientedLattice().getUB();
-      auto lattice = new Mantid::Geometry::OrientedLattice;
+      auto lattice = std::make_unique<Mantid::Geometry::OrientedLattice>();
       lattice->setUB(UB);
-      tw->mutableSample().setOrientedLattice(lattice);
+      tw->mutableSample().setOrientedLattice(std::move(lattice));
     }
 
     // if there is a UB available calculate HKL for the new peak
     if (tw->sample().hasOrientedLattice()) {
-      alg = Mantid::API::FrameworkManager::Instance().createAlgorithm(
-          "CalculatePeaksHKL");
+      alg = AlgorithmManager::Instance().create("CalculatePeaksHKL");
       alg->setPropertyValue("PeaksWorkspace", peakTableName);
       alg->execute();
     }

@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef FILEVALIDATORTEST_H_
-#define FILEVALIDATORTEST_H_
+#pragma once
 
 #include <cxxtest/TestSuite.h>
 
@@ -104,21 +103,4 @@ public:
     FileValidator file_val;
     TS_ASSERT_EQUALS(file_val.isValid(""), "File \"\" not found");
   }
-
-  void testCanWrite() {
-    std::string filename("myJunkFile_hgfvj.cpp");
-
-    // file existance is optional
-    FileValidator v1(std::vector<std::string>(), false, true);
-    TS_ASSERT_EQUALS(v1.isValid(""), "Cannot write to empty filename");
-    TS_ASSERT_EQUALS(v1.isValid(filename), "");
-
-    // file existance is required
-    FileValidator v2(std::vector<std::string>(), true, true);
-    TS_ASSERT_EQUALS(v2.isValid(""), "File \"\" not found");
-    TS_ASSERT_EQUALS(v2.isValid(filename),
-                     "File \"" + filename + "\" not found");
-  }
 };
-
-#endif /*FILEVALIDATORTEST_H_*/

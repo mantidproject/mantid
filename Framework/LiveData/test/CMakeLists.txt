@@ -1,8 +1,7 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR})
+)
 
   include_directories(../../TestHelpers/inc)
   # This variable is used within the cxxtest_add_test macro to build this helper
@@ -10,6 +9,7 @@ if(CXXTEST_FOUND)
   # file so doesn't need un-setting
   set(TESTHELPER_SRCS
       KafkaTesting.h
+      KafkaTestThreadHelper.h
       TestDataListener.cpp
       TestGroupDataListener.cpp
       ../../TestHelpers/src/TearDownWorld.cpp
@@ -21,10 +21,9 @@ if(CXXTEST_FOUND)
   cxxtest_add_test(LiveDataTest ${TEST_FILES})
   target_link_libraries(LiveDataTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         LiveData
-                        ${GMOCK_LIBRARIES})
+                        gmock)
   target_include_directories(LiveDataTest PRIVATE ../src/)
   add_dependencies(LiveDataTest DataHandling Algorithms MDAlgorithms)
   add_dependencies(FrameworkTests LiveDataTest)

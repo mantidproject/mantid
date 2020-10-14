@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "CorrectionsTab.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -74,7 +74,8 @@ void CorrectionsTab::inputChanged() { validate(); }
  * @throws std::runtime_error if one of the workspaces is an invalid pointer
  */
 bool CorrectionsTab::checkWorkspaceBinningMatches(
-    MatrixWorkspace_const_sptr left, MatrixWorkspace_const_sptr right) {
+    const MatrixWorkspace_const_sptr &left,
+    const MatrixWorkspace_const_sptr &right) {
   if (left && right) // check the workspaces actually point to something first
   {
     const auto &leftX = left->x(0);
@@ -100,7 +101,7 @@ bool CorrectionsTab::checkWorkspaceBinningMatches(
  * @return Name of output workspace
  */
 boost::optional<std::string> CorrectionsTab::addConvertUnitsStep(
-    MatrixWorkspace_sptr ws, std::string const &unitID,
+    const MatrixWorkspace_sptr &ws, std::string const &unitID,
     std::string const &suffix, std::string eMode, double eFixed) {
   std::string outputName = ws->getName();
 

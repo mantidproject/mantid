@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_MDALGORITHMS_FINDPEAKSMD_H_
-#define MANTID_MDALGORITHMS_FINDPEAKSMD_H_
+#pragma once
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/ExperimentInfo.h"
@@ -67,7 +66,7 @@ private:
                const Geometry::InstrumentRayTracer &tracer);
 
   /// Adds a peak based on Q, bin count
-  boost::shared_ptr<DataObjects::Peak>
+  std::shared_ptr<DataObjects::Peak>
   createPeak(const Mantid::Kernel::V3D &Q, const double binCount,
              const Geometry::InstrumentRayTracer &tracer);
 
@@ -75,7 +74,7 @@ private:
   template <typename MDE, size_t nd>
   void findPeaks(typename DataObjects::MDEventWorkspace<MDE, nd>::sptr ws);
   /// Run find peaks on a histo workspace
-  void findPeaksHisto(Mantid::DataObjects::MDHistoWorkspace_sptr ws);
+  void findPeaksHisto(const Mantid::DataObjects::MDHistoWorkspace_sptr &ws);
 
   /// Output PeaksWorkspace
   Mantid::DataObjects::PeaksWorkspace_sptr peakWS;
@@ -126,5 +125,3 @@ private:
 
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif /* MANTID_MDALGORITHMS_FINDPEAKSMD_H_ */

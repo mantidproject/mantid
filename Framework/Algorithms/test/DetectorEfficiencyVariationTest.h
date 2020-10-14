@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef DETECTOREFFICIENCYVARIATION_H_
-#define DETECTOREFFICIENCYVARIATION_H_
+#pragma once
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
@@ -20,10 +19,10 @@
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/UnitFactory.h"
 #include <Poco/Path.h>
-#include <boost/shared_ptr.hpp>
 #include <cmath>
 #include <fstream>
 #include <ios>
+#include <memory>
 #include <sstream>
 #include <string>
 
@@ -33,8 +32,8 @@ using namespace Mantid::API;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
 using Mantid::HistogramData::BinEdges;
-using Mantid::HistogramData::CountStandardDeviations;
 using Mantid::HistogramData::Counts;
+using Mantid::HistogramData::CountStandardDeviations;
 
 class DetectorEfficiencyVariationTest : public CxxTest::TestSuite {
 public:
@@ -81,7 +80,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(
                                  "DetEfficVariTestWSO"));
     MatrixWorkspace_sptr outputMat =
-        boost::dynamic_pointer_cast<MatrixWorkspace>(output);
+        std::dynamic_pointer_cast<MatrixWorkspace>(output);
     TS_ASSERT(outputMat);
     TS_ASSERT_EQUALS(outputMat->YUnit(), "");
 
@@ -113,18 +112,17 @@ public:
         WorkspaceFactory::Instance().create("Workspace2D", Nhist, NXs, NXs - 1);
     Workspace_sptr spaceB =
         WorkspaceFactory::Instance().create("Workspace2D", Nhist, NXs, NXs - 1);
-    Workspace2D_sptr inputA = boost::dynamic_pointer_cast<Workspace2D>(spaceA);
-    Workspace2D_sptr inputB = boost::dynamic_pointer_cast<Workspace2D>(spaceB);
+    Workspace2D_sptr inputA = std::dynamic_pointer_cast<Workspace2D>(spaceA);
+    Workspace2D_sptr inputB = std::dynamic_pointer_cast<Workspace2D>(spaceB);
     BinEdges x(NXs, HistogramData::LinearGenerator(0.0, 1000.0));
     // random numbers that will be copied into the workspace spectra
     const short ySize = NXs - 1;
-    double yArray[ySize] = {0.2, 4,        50,    14,    0.001, 0,   0,
-                            0,   1,        0,     1e-3,  15,    4,   0,
-                            9,   0.001,    2e-10, 1,     0,     8,   0,
-                            7,   1e-4,     1,     7,     11,    101, 6,
-                            53,  0.345324, 3444,  13958, 0.8}; // NXs = 34 so
-                                                               // we need that
-                                                               // many numbers
+    double yArray[ySize] = {
+        0.2, 4,  50,  14,    0.001, 0,        0,    0,     1,  0, 1e-3, 15,
+        4,   0,  9,   0.001, 2e-10, 1,        0,    8,     0,  7, 1e-4, 1,
+        7,   11, 101, 6,     53,    0.345324, 3444, 13958, 0.8}; // NXs = 34 so
+                                                                 // we need that
+                                                                 // many numbers
 
     // the error values aren't used and aren't tested so we'll use some basic
     // data
@@ -137,11 +135,11 @@ public:
       std::vector<double> forInputA, forInputB;
       // the spectravalues will be multiples of the random numbers above
       for (double y : yArray) {
-        forInputA.push_back(y);
+        forInputA.emplace_back(y);
         // there is going to be a small difference between the workspaces that
         // will vary with histogram number
-        forInputB.push_back(forInputA.back() *
-                            (1 + m_ramp * (j - (Nhist / 2))));
+        forInputB.emplace_back(forInputA.back() *
+                               (1 + m_ramp * (j - (Nhist / 2))));
       }
       // insert a particularly large value to pick up later
       m_LargeValue = 3.1;
@@ -188,5 +186,3 @@ private:
     GoodVal = 0
   };
 };
-
-#endif /*DETECTOREFFICIENCYVARIATION_H_*/

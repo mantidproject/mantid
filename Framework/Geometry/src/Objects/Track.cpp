@@ -1,14 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/Track.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidKernel/Matrix.h"
 #include "MantidKernel/Tolerance.h"
 #include "MantidKernel/V3D.h"
+#include <boost/iterator/distance.hpp>
 
 #include <algorithm>
 #include <cmath>
@@ -77,7 +78,7 @@ int Track::nonComplete() const {
 
   while (bc != m_links.end()) {
     if ((ac->exitPoint).distance(bc->entryPoint) > Tolerance) {
-      return (static_cast<int>(distance(m_links.begin(), bc)) + 1);
+      return (static_cast<int>(boost::distance(m_links.begin(), bc)) + 1);
     }
     ++ac;
     ++bc;
@@ -128,9 +129,19 @@ void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
                      const IObject &obj, const ComponentID compID) {
   IntersectionPoint newPoint(
       direction, endPoint, endPoint.distance(m_line.getOrigin()), obj, compID);
-  auto lowestPtr =
-      std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
-  m_surfPoints.insert(lowestPtr, newPoint);
+  if (m_surfPoints.empty()) {
+    m_surfPoints.push_back(newPoint);
+  } else {
+    auto lowestPtr =
+        std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
+
+    // Make sure same point isn't added twice
+    if (newPoint == *lowestPtr) {
+      return;
+    }
+
+    m_surfPoints.insert(lowestPtr, newPoint);
+  }
 }
 
 /**
@@ -150,9 +161,19 @@ int Track::addLink(const V3D &firstPoint, const V3D &secondPoint,
   Link newLink(firstPoint, secondPoint, distanceAlongTrack, obj, compID);
   int index(0);
   if (m_links.empty()) {
-    m_links.push_back(newLink);
+    m_links.emplace_back(newLink);
     index = 0;
   } else {
+    // Check if the same Link has already been added before adding newLink
+    // This might not be the most efficient method of testing this, but
+    //  the similar/identical link is not necessarily the one at the end of
+    //  the m_links array.. so we have to loop over and check each
+    for (auto it = m_links.begin(); it != m_links.end(); ++it) {
+      if (newLink == *it) {
+        return static_cast<int>(std::distance(m_links.begin(), m_links.end()));
+      }
+    }
+
     auto linkPtr = std::lower_bound(m_links.begin(), m_links.end(), newLink);
     // must extract the distance before you insert otherwise the iterators are
     // incompatible
@@ -232,6 +253,19 @@ void Track::buildLink() {
   }
 
   m_surfPoints.clear();
+}
+
+/**
+ * Sums each link's distance inside an object to get a total
+ * interior distance for the track. This is needed when there
+ * are multiple intersection points through an object.
+ * @returns Sum of all links distInsideObject
+ */
+double Track::totalDistInsideObject() const {
+  return std::accumulate(m_links.begin(), m_links.end(), 0.,
+                         [](double total, const auto &link) {
+                           return total + link.distInsideObject;
+                         });
 }
 
 std::ostream &operator<<(std::ostream &os, TrackDirection direction) {

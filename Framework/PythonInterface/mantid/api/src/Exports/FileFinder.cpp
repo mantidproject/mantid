@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/FileFinder.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -39,12 +39,13 @@ GNU_DIAG_ON("unused-local-typedef")
  * combination of exts_list and facility_exts.
  */
 std::vector<std::string> runFinderProxy(FileFinderImpl &self,
-                                        std::string hintstr, list exts_list,
+                                        const std::string &hintstr,
+                                        list exts_list,
                                         const bool useExtsOnly) {
   // Convert python list to c++ vector
   std::vector<std::string> exts;
   for (int i = 0; i < len(exts_list); ++i)
-    exts.push_back(extract<std::string>(exts_list[i]));
+    exts.emplace_back(extract<std::string>(exts_list[i]));
 
   //   Before calling the function we need to release the GIL,
   //   drop the Python threadstate and reset anything installed

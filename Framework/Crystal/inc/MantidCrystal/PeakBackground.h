@@ -1,17 +1,16 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2014 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_CRYSTAL_PEAKBACKGROUND_H_
-#define MANTID_CRYSTAL_PEAKBACKGROUND_H_
+#pragma once
 
 #include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IPeaksWorkspace_fwd.h"
+#include "MantidCrystal/DllConfig.h"
 #include "MantidCrystal/HardThresholdBackground.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/V3D.h"
 #include <boost/function.hpp>
 
@@ -27,7 +26,7 @@ the peaks radius limits (no mater what their theshold is). For pixels inside the
 radius, they must also be above the threshold value.
 */
 
-class DLLExport PeakBackground : public HardThresholdBackground {
+class MANTID_CRYSTAL_DLL PeakBackground : public HardThresholdBackground {
 private:
   /// Peak workspace containing peaks of interest
   Mantid::API::IPeaksWorkspace_const_sptr m_peaksWS;
@@ -59,5 +58,3 @@ public:
 
 } // namespace Crystal
 } // namespace Mantid
-
-#endif /* MANTID_CRYSTAL_PEAKBACKGROUND_H_ */

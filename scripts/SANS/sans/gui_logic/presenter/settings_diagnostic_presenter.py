@@ -1,19 +1,19 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 """ The settings diagnostic tab which visualizes the SANS state object. """
-from __future__ import (absolute_import, division, print_function)
-
-
-import os
 import json
+import os
+
+from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 
 from mantid.kernel import Logger
-from ui.sans_isis.settings_diagnostic_tab import SettingsDiagnosticTab
 from sans.gui_logic.gui_common import JSON_SUFFIX
+from sans.state.AllStates import AllStates
+from sans.state.Serializer import Serializer
 
 
 class SettingsDiagnosticPresenter(object):
@@ -96,14 +96,18 @@ class SettingsDiagnosticPresenter(object):
         self._view.update_rows([])
         self.display_state_diagnostic_tree(state=None)
 
-    def get_state(self, index):
+    def get_state(self, index) -> AllStates:
         return self._parent_presenter.get_state_for_row(index)
 
     def display_state_diagnostic_tree(self, state):
         # Convert to dict before passing the state to the view
-        if state is not None:
-            state = state.property_manager
-        self._view.set_tree(state)
+        dict_vals = None
+
+        if state:
+            state = Serializer.to_json(state)
+            dict_vals = json.loads(state)  # We intentionally do not use serializer to get a dict type back
+
+        self._view.set_tree(dict_vals)
 
     def on_save_state(self):
         # Get the save location
@@ -120,9 +124,7 @@ class SettingsDiagnosticPresenter(object):
 
         row_index = self._view.get_current_row()
         state = self.get_state(row_index)
-        serialized_state = state.property_manager
-        with open(full_file_path, 'w') as f:
-            json.dump(serialized_state, f, sort_keys=True, indent=4)
+        Serializer.save_file(state, full_file_path)
         self.gui_logger.information("The state for row {} has been saved to: {} ".format(row_index, full_file_path))
 
         # Update the file name in the UI

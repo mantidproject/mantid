@@ -1,12 +1,9 @@
-# -*- coding: utf-8 -*-
-# Mantid Repository : https://github.com/mantidproject/mantid
+# -*- coding: utf-8 -*-# Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-#     NScD Oak Ridge National Laboratory, European Spallation Source
-#     & Institut Laue - Langevin
+#   NScD Oak Ridge National Laboratory, European Spallation Source,
+#   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
-from __future__ import (absolute_import, division, print_function)
 
 import DirectILL_common as common
 import ILL_utilities as utils
@@ -71,11 +68,12 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
         progress.report('Loading inputs')
         mainWS = self._inputWS()
 
-        progress.report('Applying self shielding corrections')
-        mainWS, applied = self._applyCorrections(mainWS)
-
+        # First subtract the background, then apply the absorption correction to sample
         progress.report('Subtracting EC')
         mainWS, subtracted = self._subtractEC(mainWS)
+
+        progress.report('Applying self shielding corrections')
+        mainWS, applied = self._applyCorrections(mainWS)
 
         if not applied and not subtracted:
             mainWS = self._cloneOnly(mainWS)
@@ -114,8 +112,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
                                  common.SUBALG_LOGGING_OFF,
                                  common.SUBALG_LOGGING_ON]),
                              direction=Direction.Input,
-                             doc='Enable or disable subalgorithms to ' +
-                                 'print in the logs.')
+                             doc='Enable or disable subalgorithms to print in the logs.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_EC_WS,
             defaultValue='',
@@ -127,8 +124,7 @@ class DirectILLApplySelfShielding(DataProcessorAlgorithm):
                              defaultValue=1.0,
                              validator=mustBePositive,
                              direction=Direction.Input,
-                             doc='A multiplier (transmission, if no self ' +
-                                 'shielding is applied) for the empty container.')
+                             doc='A multiplier (transmission, if no self shielding is applied) for the empty container.')
         self.declareProperty(MatrixWorkspaceProperty(
             name=common.PROP_SELF_SHIELDING_CORRECTION_WS,
             defaultValue='',

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -40,13 +40,27 @@ namespace {
 Mantid::Kernel::Logger window_log("AlgorithmHistoryWindow");
 /// static tree widget logger
 Mantid::Kernel::Logger widget_log("AlgHistoryTreeWidget");
+
+int getNumberOfItemsInTree(QTreeWidgetItem *item) {
+  // item is the root of the tree
+  int count{1};
+  for (int i = 0; i < item->childCount(); i++) {
+    if (item->child(i)->checkState(1) == Qt::Checked) {
+      // recurse into unrolled algorithms
+      count += getNumberOfItemsInTree(item->child(i));
+    } else {
+      count++;
+    }
+  }
+  return count;
+}
 } // namespace
 
 AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QWidget *w)
     : QGroupBox(w), m_execDurationlabel(nullptr), m_execDurationEdit(nullptr),
       m_Datelabel(nullptr), m_execDateTimeEdit(nullptr), m_algexecDuration() {}
 
-AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title, QWidget *w)
+AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(const QString &title, QWidget *w)
     : QGroupBox(title, w), m_execDurationlabel(nullptr),
       m_execDurationEdit(nullptr), m_Datelabel(nullptr),
       m_execDateTimeEdit(nullptr), m_algexecDuration() {
@@ -66,7 +80,7 @@ AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title, QWidget *w)
   if (m_Datelabel)
     m_Datelabel->setBuddy(m_execDateTimeEdit);
 
-  QFormLayout *formLayout = new QFormLayout;
+  auto *formLayout = new QFormLayout;
   if (formLayout) {
     formLayout->addRow(m_execDurationlabel, m_execDurationEdit);
     formLayout->addRow(m_Datelabel, m_execDateTimeEdit);
@@ -121,7 +135,7 @@ AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QWidget *w)
       m_osVersionLabel(nullptr), m_osVersionEdit(nullptr),
       m_frmworkVersionLabel(nullptr), m_frmwkVersnEdit(nullptr) {}
 
-AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title, QWidget *w)
+AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(const QString &title, QWidget *w)
     : QGroupBox(title, w), m_osNameLabel(nullptr), m_osNameEdit(nullptr),
       m_osVersionLabel(nullptr), m_osVersionEdit(nullptr),
       m_frmworkVersionLabel(nullptr), m_frmwkVersnEdit(nullptr) {
@@ -151,7 +165,7 @@ AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title, QWidget *w)
   if (m_frmworkVersionLabel)
     m_frmworkVersionLabel->setBuddy(m_frmwkVersnEdit);
 
-  QFormLayout *formLayout = new QFormLayout();
+  auto *formLayout = new QFormLayout();
   if (formLayout) {
     formLayout->addRow(m_osNameLabel, m_osNameEdit);
     formLayout->addRow(m_osVersionLabel, m_osVersionEdit);
@@ -188,7 +202,7 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox() {
 }
 
 AlgorithmHistoryWindow::AlgorithmHistoryWindow(
-    QWidget *parent, const boost::shared_ptr<const Workspace> wsptr)
+    QWidget *parent, const std::shared_ptr<const Workspace> &wsptr)
     : QDialog(parent), m_algHist(wsptr->getHistory()),
       m_histPropWindow(nullptr), m_execSumGrpBox(nullptr),
       m_envHistGrpBox(nullptr), m_wsName(wsptr->getName().c_str()),
@@ -248,7 +262,7 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
           SLOT(doRoll(int)));
 
   // The tree and the history details layout
-  QHBoxLayout *treeLayout = new QHBoxLayout;
+  auto *treeLayout = new QHBoxLayout;
   treeLayout->addWidget(m_Historytree, 3); // History stretches 1
   treeLayout->addWidget(m_histPropWindow->m_histpropTree,
                         5); // Properties gets more space
@@ -261,7 +275,7 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
     m_envHistGrpBox =
         createEnvHistGrpBox(wsptr->getHistory().getEnvironmentHistory());
 
-  QHBoxLayout *environmentLayout = new QHBoxLayout;
+  auto *environmentLayout = new QHBoxLayout;
   environmentLayout->addWidget(m_execSumGrpBox, 1);
   environmentLayout->addWidget(m_envHistGrpBox, 2);
 
@@ -283,16 +297,22 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(
   connect(m_scriptButtonClipboard, SIGNAL(clicked()), this,
           SLOT(copytoClipboard()));
 
-  QHBoxLayout *buttonLayout = new QHBoxLayout;
+  auto *buttonLayout = new QHBoxLayout;
   buttonLayout->addStretch(1); // Align the button to the right
   buttonLayout->addWidget(m_scriptVersionLabel);
   buttonLayout->addWidget(m_scriptComboMode);
   buttonLayout->addWidget(m_scriptButtonFile);
   buttonLayout->addWidget(m_scriptButtonClipboard);
 
+  // Unroll all checkbox below tree layout
+  m_unrollAllHistoryCheckbox = new QCheckBox("Unroll All Algorithms", this);
+  connect(m_unrollAllHistoryCheckbox, SIGNAL(stateChanged(int)), this,
+          SLOT(unrollAll(int)));
+
   // Main layout
   QVBoxLayout *mainLayout = new QVBoxLayout(this);
   mainLayout->addLayout(treeLayout);
+  mainLayout->addWidget(m_unrollAllHistoryCheckbox);
   mainLayout->addLayout(environmentLayout);
   mainLayout->addLayout(buttonLayout);
 }
@@ -450,13 +470,13 @@ void AlgEnvHistoryGrpBox::fillEnvHistoryGroupBox(
 }
 
 void AlgorithmHistoryWindow::updateAll(
-    Mantid::API::AlgorithmHistory_const_sptr algHistory) {
+    const Mantid::API::AlgorithmHistory_const_sptr &algHistory) {
   updateAlgHistoryProperties(algHistory);
   updateExecSummaryGrpBox(algHistory);
 }
 
 void AlgorithmHistoryWindow::updateAlgHistoryProperties(
-    AlgorithmHistory_const_sptr algHistory) {
+    const AlgorithmHistory_const_sptr &algHistory) {
   PropertyHistories histProp = algHistory->getProperties();
   if (m_histPropWindow) {
     m_histPropWindow->setAlgProperties(histProp);
@@ -466,7 +486,7 @@ void AlgorithmHistoryWindow::updateAlgHistoryProperties(
 }
 
 void AlgorithmHistoryWindow::updateExecSummaryGrpBox(
-    AlgorithmHistory_const_sptr algHistory) {
+    const AlgorithmHistory_const_sptr &algHistory) {
   // getting the selected algorithm at pos from History vector
   double duration = algHistory->executionDuration();
   Mantid::Types::Core::DateAndTime date = algHistory->executionDate();
@@ -494,6 +514,20 @@ void AlgorithmHistoryWindow::doUnroll(const std::vector<int> &unrollIndicies) {
 }
 
 void AlgorithmHistoryWindow::doRoll(int index) { m_view->roll(index); }
+
+void AlgorithmHistoryWindow::unrollAll(int state) {
+  // Iterate all items in tree which have child algorithms to be unrolled
+  QTreeWidgetItemIterator it(m_Historytree,
+                             QTreeWidgetItemIterator::HasChildren);
+  while (*it) {
+    // set state of unroll based on checkbox sate
+    if (state == Qt::Checked)
+      (*it)->setCheckState(1, Qt::Checked);
+    else
+      (*it)->setCheckState(1, Qt::Unchecked);
+    ++it;
+  }
+}
 
 //--------------------------------------------------------------------------------------------------
 // AlgHistoryProperties Definitions
@@ -638,49 +672,69 @@ void AlgHistoryTreeWidget::onItemChanged(QTreeWidgetItem *item, int index) {
   this->blockSignals(false);
 }
 
-void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
-  std::vector<int> indicies;
+void AlgHistoryTreeWidget::getItemIndex(QTreeWidgetItem *item, int &index) {
+  // Counts all of the algorithms which precede the given one, including child
+  // algorithms if an algorithm is unrolled.
   QModelIndex modelIndex;
+  if (item->parent()) {
+    index++;
+  }
+  modelIndex = indexFromItem(item, 1);
+  for (auto i = 0; i < modelIndex.row(); i++) {
+    // If an algorithm is unrolled, add all of its children to the index,
+    // otherwise just add one.
+    if (item->parent() &&
+        item->parent()->child(i)->checkState(1) == Qt::Checked) {
+      index += getNumberOfItemsInTree(item->parent()->child(i));
+    } else if (item->parent() == nullptr &&
+               topLevelItem(i)->checkState(1) == Qt::Checked) {
+      index += getNumberOfItemsInTree(topLevelItem(i));
+    } else {
+      index += 1;
+    }
+  }
+}
 
-  do {
-    modelIndex = indexFromItem(item, index);
-    indicies.push_back(modelIndex.row() + 1);
+void AlgHistoryTreeWidget::itemChecked(QTreeWidgetItem *item, int index) {
+  std::vector<QTreeWidgetItem *> checkedItems;
+  std::vector<int> unrollIndices;
+  int unrollIndex{0};
 
-    if (item->flags().testFlag(Qt::ItemIsUserCheckable)) {
-      item->setCheckState(index, Qt::Checked);
+  for (auto currentItem = item; currentItem;
+       currentItem = currentItem->parent()) {
+    // Check the item if it isn't already checked.
+    if (currentItem->checkState(index) != Qt::Checked) {
+      currentItem->setCheckState(index, Qt::Checked);
     }
 
-    item = item->parent();
-  } while (item);
+    checkedItems.emplace_back(currentItem);
+  }
 
-  indicies[indicies.size() - 1] -= 1;
+  for (auto it = checkedItems.rbegin(); it != checkedItems.rend(); ++it) {
+    auto currentItem = *it;
 
-  // sum the indices to obtain the positions we must unroll
-  std::vector<int> unrollIndicies;
-  unrollIndicies.reserve(indicies.size());
-  std::partial_sum(indicies.rbegin(), indicies.rend(),
-                   std::back_inserter(unrollIndicies));
+    // Find where we are in the tree.
+    getItemIndex(currentItem, unrollIndex);
 
+    unrollIndices.emplace_back(unrollIndex);
+  }
   this->blockSignals(false);
-  emit unrollAlgorithmHistory(unrollIndicies);
+  emit unrollAlgorithmHistory(unrollIndices);
   this->blockSignals(true);
 }
 
 void AlgHistoryTreeWidget::itemUnchecked(QTreeWidgetItem *item, int index) {
-  int rollIndex = 0;
-  QModelIndex modelIndex;
+  int rollIndex{0};
 
   // disable any children
   uncheckAllChildren(item, index);
 
   // find where we are in the tree
-  do {
-    modelIndex = indexFromItem(item, index);
-    rollIndex += modelIndex.row() + 1;
-    item = item->parent();
-  } while (item);
+  for (auto currentItem = item; currentItem;
+       currentItem = currentItem->parent()) {
+    getItemIndex(currentItem, rollIndex);
+  }
 
-  --rollIndex;
   this->blockSignals(false);
   emit rollAlgorithmHistory(rollIndex);
   this->blockSignals(true);
@@ -732,7 +786,8 @@ void AlgHistoryTreeWidget::populateAlgHistoryTreeWidget(
 }
 
 void AlgHistoryTreeWidget::populateNestedHistory(
-    AlgHistoryItem *parentWidget, Mantid::API::AlgorithmHistory_sptr history) {
+    AlgHistoryItem *parentWidget,
+    const Mantid::API::AlgorithmHistory_sptr &history) {
   const Mantid::API::AlgorithmHistories &entries = history->getChildHistories();
   if (history->childHistorySize() > 0) {
     parentWidget->setFlags(Qt::ItemIsUserCheckable | Qt::ItemIsSelectable |

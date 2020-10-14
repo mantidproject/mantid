@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/SumEventsByLogValue.h"
 
@@ -47,12 +47,12 @@ void SumEventsByLogValue::init() {
                   "otherwise.");
 
   declareProperty("LogName", "",
-                  boost::make_shared<MandatoryValidator<std::string>>(),
+                  std::make_shared<MandatoryValidator<std::string>>(),
                   "The name of the number series log against which the data "
                   "should be summed");
   declareProperty(
       std::make_unique<ArrayProperty<double>>(
-          "OutputBinning", "", boost::make_shared<RebinParamsValidator>(true)),
+          "OutputBinning", "", std::make_shared<RebinParamsValidator>(true)),
       "Binning parameters for the output workspace (see [[Rebin]] for syntax) "
       "(Optional for logs holding integer values, mandatory otherwise)");
 }
@@ -302,9 +302,9 @@ void SumEventsByLogValue::filterEventList(
  *  @param minVal          The minimum value of the log
  *  @param maxVal          The maximum value of the log
  */
-void SumEventsByLogValue::addMonitorCounts(ITableWorkspace_sptr outputWorkspace,
-                                           const TimeSeriesProperty<int> *log,
-                                           const int minVal, const int maxVal) {
+void SumEventsByLogValue::addMonitorCounts(
+    const ITableWorkspace_sptr &outputWorkspace,
+    const TimeSeriesProperty<int> *log, const int minVal, const int maxVal) {
   DataObjects::EventWorkspace_const_sptr monitorWorkspace =
       getProperty("MonitorWorkspace");
   // If no monitor workspace was given, there's nothing to do
@@ -385,11 +385,11 @@ double SumEventsByLogValue::sumProtonCharge(
     const Kernel::TimeSeriesProperty<double> *protonChargeLog,
     const Kernel::TimeSplitterType &filter) {
   // Clone the proton charge log and filter the clone on this log value
-  auto protonChargeLogClone(protonChargeLog->clone());
+  std::unique_ptr<Kernel::TimeSeriesProperty<double>> protonChargeLogClone(
+      protonChargeLog->clone());
   protonChargeLogClone->filterByTimes(filter);
   // Seems like the only way to sum this is to yank out the values
   const std::vector<double> pcValues = protonChargeLogClone->valuesAsVector();
-
   return std::accumulate(pcValues.begin(), pcValues.end(), 0.0);
 }
 
@@ -403,7 +403,7 @@ void SumEventsByLogValue::createBinnedOutput(
   // If only the number of bins was given, add the min & max values of the log
   if (m_binningParams.size() == 1) {
     m_binningParams.insert(m_binningParams.begin(), log->minValue());
-    m_binningParams.push_back(
+    m_binningParams.emplace_back(
         log->maxValue() *
         1.000001); // Make it a tiny bit larger to cover full range
   }
