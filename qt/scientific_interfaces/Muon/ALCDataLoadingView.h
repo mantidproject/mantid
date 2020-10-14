@@ -37,6 +37,9 @@ public:
 
   void initialize() override;
 
+  void initInstruments() override;
+  std::string getInstrument() const override;
+  std::string getPath() const override;
   std::string firstRun() const override;
   std::string lastRun() const override;
   std::vector<std::string> getRuns() const override;
@@ -69,6 +72,8 @@ public:
   void setRunsTextWithSearch(const QString &text) override;
   void setCurrentAutoRun(const int run) override { m_currentAutoRun = run; }
   void setRunsReadOnly(bool readOnly) override;
+  void instrumentChanged(QString instrument) override;
+  void pathChanged(QString path) override;
 
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------

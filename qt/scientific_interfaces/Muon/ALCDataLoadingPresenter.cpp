@@ -40,6 +40,8 @@ void ALCDataLoadingPresenter::initialize() {
   connect(m_view, SIGNAL(runsSelected()), SLOT(updateAvailableInfo()));
   connect(m_view, SIGNAL(runAutoChecked()), SLOT(updateAutoRun()));
   connect(m_view, SIGNAL(runAutoUnchecked()), SLOT(resetAutoRun()));
+  connect(m_view, SIGNAL(instrumentChangedSignal(std::string)), SLOT());
+  connect(m_view, SIGNAL(pathChangedSignal(std::string)), SLOT());
 }
 
 /**

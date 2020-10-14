@@ -38,6 +38,9 @@ class MockALCDataLoadingView : public IALCDataLoadingView {
   using PAIR_OF_DOUBLES = std::pair<double, double>;
 
 public:
+  MOCK_METHOD0(initInstruments, void());
+  MOCK_CONST_METHOD0(getInstrument, std::string());
+  MOCK_CONST_METHOD0(getPath, std::string());
   MOCK_CONST_METHOD0(firstRun, std::string());
   MOCK_CONST_METHOD0(lastRun, std::string());
   MOCK_CONST_METHOD0(getRuns, std::vector<std::string>());
@@ -74,6 +77,8 @@ public:
   MOCK_METHOD1(setCurrentAutoFile, void(const std::string &));
   MOCK_METHOD0(handleFirstFileChanged, void());
   MOCK_METHOD1(setRunsReadOnly, void(bool));
+  MOCK_METHOD1(instrumentChanged, void(QString));
+  MOCK_METHOD1(pathChanged, void(QString));
 
   void requestLoading() { emit loadRequested(); }
   void selectRuns() { emit runsSelected(); }
@@ -365,4 +370,5 @@ public:
     EXPECT_CALL(*m_view, help()).Times(1);
     m_view->help();
   }
+
 };

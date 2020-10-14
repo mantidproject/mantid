@@ -23,6 +23,15 @@ class MANTIDQT_MUONINTERFACE_DLL IALCDataLoadingView : public QObject {
   Q_OBJECT
 
 public:
+  /// Init instrument combo box
+  virtual void initInstruments() = 0;
+
+  /// @return std::string of instrument name
+  virtual std::string getInstrument() const = 0;
+
+  /// @return std::string of path
+  virtual std::string getPath() const = 0; 
+
   /// @return Full path to first run data file, or empty string if invalid/not
   /// selected
   virtual std::string firstRun() const = 0;
@@ -133,6 +142,12 @@ public slots:
   /// Toggles "auto" mode for last file
   virtual void checkBoxAutoChanged(int state) = 0;
 
+  /// Instrument Changed
+  virtual void instrumentChanged(QString instrument) = 0;
+
+  /// Path Changed
+  virtual void pathChanged(QString path) = 0;
+
 signals:
   /// Request to load data
   void loadRequested();
@@ -148,6 +163,12 @@ signals:
 
   /// "Auto" box has been unchecked
   void runAutoUnchecked();
+
+  /// Instrument has been changed
+  void instrumentChangedSignal(std::string);
+
+  /// Path has been changed
+  void pathChangedSignal(std::string);
 };
 
 } // namespace CustomInterfaces

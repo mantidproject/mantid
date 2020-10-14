@@ -11,9 +11,15 @@
 #include "MantidQtWidgets/Common/LogValueSelector.h"
 #include <Poco/File.h>
 
+#include "MantidKernel/ConfigService.h"
+
+
 #include <QMessageBox>
 
 using namespace Mantid::API;
+
+const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU",
+                                           "HIFI",  "MUSR",    "PSI"};
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -24,6 +30,7 @@ ALCDataLoadingView::~ALCDataLoadingView() {}
 
 void ALCDataLoadingView::initialize() {
   m_ui.setupUi(m_widget);
+  initInstruments();
   m_ui.logValueSelector->setCheckboxShown(false);
   m_ui.logValueSelector->setVisible(true);
   m_ui.logValueSelector->setEnabled(true);
@@ -32,6 +39,9 @@ void ALCDataLoadingView::initialize() {
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_ui.runAuto, SIGNAL(stateChanged(int)), this,
           SLOT(checkBoxAutoChanged(int)));
+  connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this,
+          SLOT(instrumentChanged(QString)));
+  connect(m_ui.path, SIGNAL(textChanged(QString)), this, SLOT(pathChanged(QString)));
 
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 
@@ -50,6 +60,36 @@ void ALCDataLoadingView::initialize() {
   m_ui.detectorGroupingGroup->setPalette(palette);
   m_ui.periodsGroup->setPalette(palette);
   m_ui.calculationGroup->setPalette(palette);
+}
+
+void ALCDataLoadingView::initInstruments() {
+  for (const auto &instrument : INSTRUMENTS) {
+    m_ui.instrument->addItem(QString::fromStdString(instrument));
+  }
+  // Get default instrument otherwise set to MUSR
+  const auto userInstrument =
+      Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
+
+  const auto index =
+      m_ui.instrument->findText(QString::fromStdString(userInstrument));
+  if (index != -1)
+    m_ui.instrument->setCurrentIndex(index);
+  else
+    m_ui.instrument->setCurrentIndex(4);
+}
+
+/**
+ * Returns string of selected instrument
+ */
+std::string ALCDataLoadingView::getInstrument() const {
+  return m_ui.instrument->currentText().toStdString();
+}
+
+/**
+ * Returns string of path
+ */
+std::string ALCDataLoadingView::getPath() const {
+  return m_ui.path->text().toStdString();
 }
 
 std::string ALCDataLoadingView::firstRun() const {
@@ -317,6 +357,15 @@ std::string ALCDataLoadingView::getCurrentRunsText() const {
 
 void ALCDataLoadingView::setRunsTextWithSearch(const QString &text) {
   m_ui.runs->setFileTextWithSearch(text);
+}
+
+void ALCDataLoadingView::instrumentChanged(QString instrument) {
+  std::cout << "Instrument Changed" << std::endl;
+  emit instrumentChangedSignal(instrument.toStdString());
+}
+void ALCDataLoadingView::pathChanged(QString path) {
+  std::cout << "Path Changed" << std::endl;
+  emit pathChangedSignal(path.toStdString());
 }
 
 } // namespace CustomInterfaces
