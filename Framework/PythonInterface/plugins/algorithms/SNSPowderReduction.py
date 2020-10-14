@@ -1302,7 +1302,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         AnalysisDataService.addOrReplace(absName, absorptionWS)
 
         # Make sure one is set before calling SetSample
-        if material != None or geometry != None or environment != None:
+        if material or geometry or environment is not None:
             self._setup_sample(absName, material, geometry, environment)
 
         return absName
