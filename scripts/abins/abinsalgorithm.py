@@ -9,7 +9,7 @@
 # another part of AbinsModules.
 import os
 import re
-from typing import Optional, Tuple
+from typing import Dict, Optional, Tuple
 
 import numpy as np
 from mantid.api import mtd, FileAction, FileProperty, WorkspaceGroup, WorkspaceProperty
@@ -125,7 +125,7 @@ class AbinsAlgorithm:
                              validator=StringListValidator(valid_choices),
                              doc="Setting choice for this instrument (e.g. monochromator)")
 
-    def validate_common_inputs(self, issues: dict = None) -> dict:
+    def validate_common_inputs(self, issues: dict = None) -> Dict[str, str]:
         """Validate inputs common to Abins 1D and 2D versions
 
         Args:
@@ -172,7 +172,42 @@ class AbinsAlgorithm:
         if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
             issues["BinWidthInWavenumber"] = "Invalid bin width. Valid range is [1.0, 10.0] cm^-1"
 
+        issues.update(self._validate_instrument_settings())
+
         return issues
+
+    def _validate_instrument_settings(self) -> Dict[str, str]:
+        """Check that Setting is compatible with selected Instrument"""
+        instrument_name = self.getProperty("Instrument").value
+        setting = self.getProperty("Setting").value
+
+        if instrument_name not in abins.parameters.instruments:
+            # If an instrument lacks an entry in abins.parameters, we cannot
+            # reason about how appropriate the setting is; assume good.
+            return {}
+
+        parameters = abins.parameters.instruments.get(instrument_name)
+
+        if 'settings' not in parameters:
+            return {}
+
+        if setting == '':
+            if 'default_setting' in parameters:
+                return {}
+            else:
+                return {"Setting":
+                        f'Instrument "{instrument_name}" does not have a default '
+                        + 'setting, and no setting was specified. Accepted settings: '
+                        + ', '.join(parameters['settings'].keys())}
+
+        downcased_settings = {s.lower(): s for s in parameters['settings']}
+        if setting.lower() in downcased_settings:
+            return {}
+
+        return {"Setting":
+                f'Setting "{setting}" is unknown for instrument '
+                + f'{instrument_name}. Supported settings: '
+                + ', '.join(sorted(parameters['settings'].keys()))}
 
     @staticmethod
     def get_atom_selection(*, atoms_data: abins.AtomsData, selection: list) -> Tuple[list, list]:
