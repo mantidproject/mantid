@@ -9,7 +9,7 @@ from os import path
 from mantidqt.utils.observer_pattern import Observable
 
 SETTINGS_DICT = {"save_location": str, "full_calibration": str, "recalc_vanadium": bool, "logs": str,
-                 "primary_log": str}
+                 "primary_log": str, "sort_ascending": bool}
 
 DEFAULT_SETTINGS = {
     "full_calibration": "",
@@ -17,7 +17,8 @@ DEFAULT_SETTINGS = {
     "recalc_vanadium": False,
     "logs": ','.join(
         ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
-    "primary_log": 'strain'
+    "primary_log": 'strain',
+    "sort_ascending": True
 }
 
 ALL_LOGS = ','.join(
@@ -32,10 +33,6 @@ ALL_LOGS = ','.join(
      'strain_sp_rbv', 'strain_step_time', 'stress', 'stress_sp_rbv', 'stress_step_time', 'stressrig_go',
      'wave_running', 'wave_start', 'wave_type'])
 
-import pydevd_pycharm
-
-pydevd_pycharm.settrace('debug_host', port=44444, stdoutToServer=True, stderrToServer=True, suspend=False)
-
 
 class SettingsPresenter(object):
     def __init__(self, model, view):
@@ -46,21 +43,18 @@ class SettingsPresenter(object):
 
         # add logs to list in view
         self.view.add_log_checkboxs(ALL_LOGS)
-        # self.view.set_primary_log(self.settings['primary_log'])
 
         # Connect view signals
         self.view.set_on_apply_clicked(self.save_new_settings)
         self.view.set_on_ok_clicked(self.save_and_close_dialog)
         self.view.set_on_cancel_clicked(self.close_dialog)
         self.view.set_on_log_changed(self.update_logs)
-        self.view.set_on_primary_log_changed(self.update_primary_log)
+        self.view.set_on_check_ascending_changed(self.ascending_changed)
+        self.view.set_on_check_descending_changed(self.descending_changed)
 
     def show(self):
-        self.view.show()
-
-    def load_existing_settings(self):
-        self.load_settings_from_file_or_default()
         self._show_settings_in_view()
+        self.view.show()
 
     def close_dialog(self):
         self.view.close()
@@ -71,10 +65,12 @@ class SettingsPresenter(object):
 
     def update_logs(self):
         self.view.set_primary_log_combobox(self.settings["primary_log"])
-        self.save_new_settings()
 
-    def update_primary_log(self):
-        self.save_new_settings()
+    def ascending_changed(self, state):
+        self.view.set_descending_checked(not bool(state))
+
+    def descending_changed(self, state):
+        self.view.set_ascending_checked(not bool(state))
 
     def save_new_settings(self):
         self._collect_new_settings_from_view()
@@ -86,6 +82,7 @@ class SettingsPresenter(object):
         self.settings["recalc_vanadium"] = self.view.get_van_recalc()
         self.settings["logs"] = self.view.get_checked_logs()
         self.settings["primary_log"] = self.view.get_primary_log()
+        self.settings["sort_ascending"] = self.view.get_ascending_checked()
 
     def _show_settings_in_view(self):
         if self._validate_settings(self.settings):
@@ -94,6 +91,7 @@ class SettingsPresenter(object):
             self.view.set_van_recalc(self.settings["recalc_vanadium"])
             self.view.set_checked_logs(self.settings["logs"])
             self.view.set_primary_log_combobox(self.settings["primary_log"])
+            self.view.set_ascending_checked(self.settings["sort_ascending"])
         self._find_files()
 
     def _find_files(self):
@@ -115,11 +113,11 @@ class SettingsPresenter(object):
     def _validate_settings(settings):
         try:
             all_keys = settings.keys() == SETTINGS_DICT.keys()
+            not_none = all([val is not None for val in settings.values()])
             save_location = str(settings["save_location"])
-            save_valid = save_location != "" and save_location is not None
-            recalc_valid = settings["recalc_vanadium"] is not None
+            save_valid = save_location != ""
             log_valid = settings["logs"] != ""
-            return all_keys and save_valid and recalc_valid and log_valid
+            return all_keys and not_none and save_valid and log_valid
         except KeyError:  # Settings contained invalid key.
             return False
 

@@ -151,12 +151,16 @@ class FittingDataModel(object):
         ws_list = list(self._loaded_workspaces.keys())
         primary_log = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
                                   "primary_log")
+        sort_ascending = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+                                     "sort_ascending")
         if primary_log:
             log_table = ADS.retrieve(primary_log)
             isort = argsort(array(log_table.column('avg')))
-            return [ws_list[iws] for iws in isort]
-        else:
-            return ws_list
+            ws_list = [ws_list[iws] for iws in isort]
+        if not sort_ascending == 'true':
+            # settings can only be saved as text
+            ws_list = ws_list[::-1]
+        return ws_list
 
     def update_fit(self, fitprops):
         for fitprop in fitprops:
