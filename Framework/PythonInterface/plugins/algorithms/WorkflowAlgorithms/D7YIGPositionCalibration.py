@@ -178,7 +178,6 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         else:
             self._created_ws_names.append(detector_parameters.name())
         if self.getProperty('ClearCache').value:
-            print(self._created_ws_names)
             DeleteWorkspaces(WorkspaceList=self._created_ws_names)
 
     def _get_scan_data(self, ws_name, progress):
