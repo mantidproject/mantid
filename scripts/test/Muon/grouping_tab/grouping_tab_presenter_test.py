@@ -238,7 +238,7 @@ class GroupingTabPresenterTest(unittest.TestCase):
             mock_load.return_value = (groups, pairs, 'description', default)
             self.presenter.handle_load_grouping_from_file()
 
-    def test_default_clickd(self):
+    def test_default_clicked(self):
         self.presenter._model.reset_groups_and_pairs_to_default = mock.MagicMock(return_value="success")
         self.presenter.handle_default_grouping_button_clicked()
         self.assertEqual(self.view.display_warning_box.call_count, 0)
