@@ -32,6 +32,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
     _beamMask2 = None
     _minDistance = None
     _scanStepSize = None
+    _created_ws_names = []
 
     def category(self):
         return 'ILL\\Diffraction'
@@ -152,7 +153,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         yig_peaks_positions = self._get_yig_peaks_positions(conjoined_scan, yig_d)
         # fits gaussian to peaks for each pixel, returns peaks as a function of their expected position
         progress.report('Fitting YIG peaks')
-        fitted_peaks_positions, single_peaks_fits  = self._fit_bragg_peaks(conjoined_scan, yig_peaks_positions)
+        fitted_peaks_positions, single_peaks_fits = self._fit_bragg_peaks(conjoined_scan, yig_peaks_positions)
+        self._created_ws_names.append(fitted_peaks_positions)
+        self._created_ws_names.append(single_peaks_fits)
         ReplaceSpecialValues(InputWorkspace=fitted_peaks_positions, OutputWorkspace=fitted_peaks_positions,
                              NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, checkErrorAxis=True)
         # fits the wavelength, bank gradients and individual
@@ -168,18 +171,18 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         if not self.getProperty('FitOutputWorkspace').isDefault:
             self.setProperty('FitOutputWorkspace', detector_parameters)
         else:
-            DeleteWorkspace(Workspace=detector_parameters)
+            self._created_ws_names.append(detector_parameters.name())
         if self.getProperty('ClearCache').value:
-            created_ws_names = [conjoined_scan, fitted_peaks_positions, single_peaks_fits]
-            DeleteWorkspaces(WorkspaceList=created_ws_names)
+            print(self._created_ws_names)
+            DeleteWorkspaces(WorkspaceList=self._created_ws_names)
 
     def _get_scan_data(self, ws_name, progress):
         """ Loads YIG scan data, removes monitors, and prepares
         a workspace for Bragg peak fitting"""
-
         # workspace indices for monitors
         monitor_indices = "{0}, {1}".format(self._D7NumberPixels, self._D7NumberPixels+1)
         scan_data_name = "scan_data_{}".format(ws_name)
+        self._created_ws_names.append(scan_data_name)
         progress.report(0, 'Loading YIG scan data')
         LoadAndMerge(Filename=self.getPropertyValue("Filenames"), OutputWorkspace=scan_data_name, LoaderName='LoadILLPolarizedDiffraction',
                      startProgress=0.0, endProgress=0.6)
@@ -190,6 +193,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         x_axis = NumericAxis.create(nfiles)
         # Fill the intensity and position tables with all the data from scans
         conjoined_scan_name = "conjoined_input_{}".format(ws_name)
+        self._created_ws_names.append(conjoined_scan_name)
         name_list = []
         for entry_no, entry in enumerate(mtd[scan_data_name]):
             # normalize to monitor1 as monitor2 is sometimes empty:
@@ -457,9 +461,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                "\nConsider changing initial parameters.".format(e))
         param_table = fit_output.OutputParameters
 
-        #clean up
-        DeleteWorkspace('det_fit_out_{}_NormalisedCovarianceMatrix'.format(fit_output_name))
-
+        self._created_ws_names.append('det_fit_out_{}_Workspaces'.format(fit_output_name))
+        self._created_ws_names.append('det_fit_out_{}_NormalisedCovarianceMatrix'.format(fit_output_name))
         return param_table
 
     def _calculate_pixel_positions(self, parameter_table):
