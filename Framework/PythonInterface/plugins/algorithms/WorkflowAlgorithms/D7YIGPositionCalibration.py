@@ -13,7 +13,6 @@ from datetime import date
 import math
 import numpy as np
 import os
-import tempfile
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 
