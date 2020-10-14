@@ -122,6 +122,8 @@ class DrillView(QMainWindow):
         self.errorRows = set()
         self.rundexFile = None
 
+        self.groups = dict()
+
         self._presenter = DrillPresenter(self)
 
     def show(self):
@@ -416,6 +418,41 @@ class DrillView(QMainWindow):
             self.rowDeleted.emit(row)
             self.setWindowModified(True)
 
+    def groupSelectedRows(self):
+        """
+        Add the selected row(s) to a new group. This method changes the row
+        label.
+        """
+        rows = self.table.getSelectedRows()
+        if not rows:
+            return
+
+        groupLabel = 'A'
+        while ((groupLabel in self.groups)
+                and (self.groups[groupLabel])):
+            groupLabel = chr(ord(groupLabel) + 1)
+
+        self.groups[groupLabel] = rows
+
+        rowLabel = 1
+        for row in self.groups[groupLabel]:
+            self.table.setRowLabel(row, groupLabel + str(rowLabel))
+            rowLabel += 1
+
+    def ungroupSelectedRows(self):
+        """
+        Remove the selected row(s) to all their potential groups. This method
+        reset the row label.
+        """
+        rows = self.table.getSelectedRows()
+        if not rows:
+            return
+
+        for row in rows:
+            for group in self.groups:
+                self.groups[group] = [r for r in self.groups[group] if r != row]
+            self.table.delRowLabel(row)
+
     def process_selected_rows(self):
         """
         Ask for the processing of the selected rows. If the selected rows
@@ -578,6 +615,13 @@ class DrillView(QMainWindow):
             self.pasteCells()
         elif (event.key() == Qt.Key_Delete):
             self.eraseSelectedCells()
+        elif (event.key() == Qt.Key_G
+                and event.modifiers() == Qt.ControlModifier):
+            self.ungroupSelectedRows()
+            self.groupSelectedRows()
+        elif (event.key() == Qt.Key_G
+                and event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier):
+            self.ungroupSelectedRows()
 
     def show_directory_manager(self):
         """

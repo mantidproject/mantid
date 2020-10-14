@@ -244,6 +244,36 @@ class DrillViewTest(unittest.TestCase):
         calls = [mock.call(2), mock.call(1), mock.call(0)]
         self.view.table.deleteRow.assert_has_calls(calls)
 
+    def test_groupSelectedRows(self):
+        self.view.table.getSelectedRows.return_value = []
+        self.view.groupSelectedRows()
+        self.assertEqual(self.view.groups, {})
+        self.view.table.getSelectedRows.return_value = [1, 2, 3]
+        self.view.groupSelectedRows()
+        self.assertDictEqual(self.view.groups, {"A": [1, 2, 3]})
+        self.view.table.getSelectedRows.return_value = [4, 5, 6]
+        self.view.groupSelectedRows()
+        self.assertDictEqual(self.view.groups, {"A": [1, 2, 3],
+                                                "B": [4, 5, 6]})
+        self.view.groups = {"A": [],
+                            "B": [4, 5, 6]}
+        self.view.table.getSelectedRows.return_value = [1, 2, 3]
+        self.view.groupSelectedRows()
+        self.assertDictEqual(self.view.groups, {"A": [1, 2, 3],
+                                                "B": [4, 5, 6]})
+
+    def test_ungroupSelectedRows(self):
+        self.view.groups = {"A": [1, 2, 3],
+                            "B": [4, 5, 6]}
+        self.view.table.getSelectedRows.return_value = [1, 2, 3]
+        self.view.ungroupSelectedRows()
+        self.assertDictEqual(self.view.groups, {"A": [],
+                                                "B": [4, 5, 6]})
+        self.view.table.getSelectedRows.return_value = [5, 6]
+        self.view.ungroupSelectedRows()
+        self.assertDictEqual(self.view.groups, {"A": [],
+                                                "B": [4]})
+
     def test_processSelectedRows(self):
         self.view.process = mock.Mock()
         # no selection
@@ -326,6 +356,8 @@ class DrillViewTest(unittest.TestCase):
         self.view.cutSelectedCells = mock.Mock()
         self.view.pasteCells = mock.Mock()
         self.view.eraseSelectedCells = mock.Mock()
+        self.view.ungroupSelectedRows = mock.Mock()
+        self.view.groupSelectedRows = mock.Mock()
 
         QTest.keyClick(self.view, Qt.Key_C, Qt.ControlModifier)
         self.view.copySelectedCells.assert_called_once()
@@ -335,6 +367,13 @@ class DrillViewTest(unittest.TestCase):
         self.view.pasteCells.assert_called_once()
         QTest.keyClick(self.view, Qt.Key_Delete, Qt.NoModifier)
         self.view.eraseSelectedCells.assert_called_once()
+        QTest.keyClick(self.view, Qt.Key_G, Qt.ControlModifier)
+        self.view.ungroupSelectedRows.assert_called_once()
+        self.view.groupSelectedRows.assert_called_once()
+        self.view.ungroupSelectedRows.reset_mock()
+        QTest.keyClick(self.view, Qt.Key_G,
+                       Qt.ControlModifier | Qt.ShiftModifier)
+        self.view.ungroupSelectedRows.assert_called_once()
 
     def test_showDirectoryManager(self):
         self.view.show_directory_manager()
