@@ -469,9 +469,15 @@
      </widget>
      <addaction name="menuAddRemoveColumn"/>
     </widget>
+    <widget class="QMenu" name="menuCell_s">
+     <property name="title">
+      <string>Cell(s)</string>
+     </property>
+     <addaction name="actionErase"/>
+    </widget>
     <addaction name="menuColumns_s"/>
     <addaction name="menuRow_s"/>
-    <addaction name="actionErase"/>
+    <addaction name="menuCell_s"/>
    </widget>
    <widget class="QMenu" name="menuProcess_2">
     <property name="title">
