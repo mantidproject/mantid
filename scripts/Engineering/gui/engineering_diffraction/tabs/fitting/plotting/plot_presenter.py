@@ -7,6 +7,7 @@
 from mantidqt.utils.observer_pattern import GenericObserverWithArgPassing, GenericObserver, GenericObservable
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_model import FittingPlotModel
 from Engineering.gui.engineering_diffraction.tabs.fitting.plotting.plot_view import FittingPlotView
+from mantid.simpleapi import Fit
 
 PLOT_KWARGS = {"linestyle": "", "marker": "x", "markersize": "3"}
 
@@ -49,5 +50,14 @@ class FittingPlotPresenter(object):
     def apply_fit(self, ws_list):
         fitprop_list = []
         for ws in ws_list:
-            fitprop_list += [self.view.fit_ws(ws)]
+            fitprop = self.view.read_fitprop_from_browser()
+            # update I/O workspace name
+            fitprop['properties']['InputWorkspace'] = ws
+            fitprop['properties']['Output'] = ws
+            # do fit
+            fit_output = Fit(**fitprop['properties'])
+            fitprop['properties']['Function'] = str(fit_output.Function.fun)
+            # save setup in fitprop browser
+            self.view.update_browser_setup(fitprop['properties']['Function'], ws)
+            fitprop_list += [fitprop]
         self.seq_fit_done_notifier.notify_subscribers(fitprop_list)

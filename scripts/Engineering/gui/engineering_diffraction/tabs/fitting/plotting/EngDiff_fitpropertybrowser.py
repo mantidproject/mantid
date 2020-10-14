@@ -36,13 +36,34 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         return None
 
     def get_fitprop(self):
-        # evalaute string to make a dict (replace case of bool values)
+        """
+        Get the algorithm parameters updated post-fit
+        :return: dictionary of parameters
+        """
         dict_str = self.getFitAlgorithmParameters()
         if dict_str:
+            # evalaute string to make a dict (replace case of bool values)
             return eval(dict_str.replace('true', 'True').replace('false', 'False'))
         else:
+            # if no fit has been performed
             return None
 
+    def read_current_fitprop(self):
+        """
+        Get algorithm parameters currently displayed in the UI browser (incl. defaults that user cannot change)
+        :return: dict in style of self.getFitAlgorithmParameters()
+        """
+        fitprop = {'properties': {'InputWorkspace': self.workspaceName(),
+                                  'Output': self.outputName(),
+                                  'StartX': self.startX(),
+                                  'EndX': self.endX(),
+                                  'Function': self.getFunctionString(),
+                                  'ConvolveMembers': True,
+                                  'OutputCompositeMembers': True}}
+        exclude = self.getExcludeRange()
+        if exclude:
+            fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
+        return fitprop
 
     def save_current_setup(self, name):
         self.executeCustomSetupRemove(name)
