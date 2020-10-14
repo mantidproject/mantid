@@ -93,7 +93,7 @@ template <typename ExpectedT> void validateStorageType(const DataSet &data) {
     }
   }
 }
-  
+
 template <typename ValueType>
 std::vector<ValueType> extractVector(const DataSet &data) {
 

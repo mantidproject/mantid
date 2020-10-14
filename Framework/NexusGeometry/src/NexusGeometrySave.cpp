@@ -1996,7 +1996,7 @@ void saveInstrument(const Geometry::ComponentInfo &compInfo,
       if (isDesiredNXDetector(index, saved_indices, compInfo)) {
         if (reporter != nullptr)
           reporter->report();
-        writer.detector(instrument, compInfo, detIds, index);
+        writer.detector(instrument, compInfo, index);
         saved_indices.emplace_back(
             index); // Now record the fact that children of
       }
@@ -2103,7 +2103,7 @@ void saveInstrument(const Mantid::API::MatrixWorkspace &ws,
 
         if (reporter != nullptr)
           reporter->report();
-        writer.detector(instrument, compInfo, detIds, index, mappings);
+        writer.detector(instrument, compInfo, index, mappings);
         saved_indices.emplace_back(
             index); // Now record the fact that children of
                     // this are not needed as NXdetectors

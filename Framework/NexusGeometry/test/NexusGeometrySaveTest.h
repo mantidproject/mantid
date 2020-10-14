@@ -1181,7 +1181,6 @@ Instrument cache.
                      H5::GroupIException &);
   }
 
-
   /*
 ====================================================================
 
@@ -1365,5 +1364,4 @@ MeshObjects.
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
   }
-
 };

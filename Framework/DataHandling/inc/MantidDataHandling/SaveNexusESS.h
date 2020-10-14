@@ -37,7 +37,6 @@ private:
                          const std::string &filename);
   virtual bool saveLegacyInstrument() override;
   void init() override;
-
 };
 
 } // namespace DataHandling

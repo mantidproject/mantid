@@ -47,7 +47,6 @@ tests.
 
 //----------------------------------------------------------------------------------------------
 
-
 std::shared_ptr<Mantid::Geometry::MeshObject>
 createSimpleMeshObject(const std::vector<uint32_t> &faces,
                        const std::vector<Mantid::Kernel::V3D> &vertices,

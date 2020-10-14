@@ -47,10 +47,9 @@ bool SaveNexusESS::processGroups() {
 void SaveNexusESS::saveNexusGeometry(const Mantid::API::MatrixWorkspace &ws,
                                      const std::string &filename) {
 
-    NexusGeometry::LogAdapter<Kernel::Logger> adapter(&g_log);
-    NexusGeometry::NexusGeometrySave::saveInstrument(
-        ws, filename, "mantid_workspace_1", adapter, true);
-
+  NexusGeometry::LogAdapter<Kernel::Logger> adapter(&g_log);
+  NexusGeometry::NexusGeometrySave::saveInstrument(
+      ws, filename, "mantid_workspace_1", adapter, true);
 }
 
 bool SaveNexusESS::saveLegacyInstrument() {
