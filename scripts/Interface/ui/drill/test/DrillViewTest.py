@@ -265,14 +265,29 @@ class DrillViewTest(unittest.TestCase):
     def test_ungroupSelectedRows(self):
         self.view.groups = {"A": [1, 2, 3],
                             "B": [4, 5, 6]}
+        self.view.masterRows = {"A": 1, "B": 4}
         self.view.table.getSelectedRows.return_value = [1, 2, 3]
         self.view.ungroupSelectedRows()
         self.assertDictEqual(self.view.groups, {"A": [],
                                                 "B": [4, 5, 6]})
+        self.assertDictEqual(self.view.masterRows, {"B": 4})
         self.view.table.getSelectedRows.return_value = [5, 6]
         self.view.ungroupSelectedRows()
         self.assertDictEqual(self.view.groups, {"A": [],
                                                 "B": [4]})
+        self.assertDictEqual(self.view.masterRows, {"B": 4})
+
+    def test_setSelectedRowAsMasterRow(self):
+        self.view.table.getSelectedRows.return_value = [1, 2, 3]
+        self.view.setSelectedRowAsMasterRow()
+        self.assertEqual(self.view.masterRows, {})
+        self.view.table.getSelectedRows.return_value = [1]
+        self.view.setSelectedRowAsMasterRow()
+        self.assertEqual(self.view.masterRows, {})
+        self.view.groups = {"A": [1, 2, 3]}
+        self.view.table.getSelectedRows.return_value = [1]
+        self.view.setSelectedRowAsMasterRow()
+        self.assertDictEqual(self.view.masterRows, {"A": 1})
 
     def test_processSelectedRows(self):
         self.view.process = mock.Mock()
@@ -358,6 +373,7 @@ class DrillViewTest(unittest.TestCase):
         self.view.eraseSelectedCells = mock.Mock()
         self.view.ungroupSelectedRows = mock.Mock()
         self.view.groupSelectedRows = mock.Mock()
+        self.view.setSelectedRowAsMasterRow = mock.Mock()
 
         QTest.keyClick(self.view, Qt.Key_C, Qt.ControlModifier)
         self.view.copySelectedCells.assert_called_once()
@@ -374,6 +390,8 @@ class DrillViewTest(unittest.TestCase):
         QTest.keyClick(self.view, Qt.Key_G,
                        Qt.ControlModifier | Qt.ShiftModifier)
         self.view.ungroupSelectedRows.assert_called_once()
+        QTest.keyClick(self.view, Qt.Key_M, Qt.ControlModifier)
+        self.view.setSelectedRowAsMasterRow.assert_called_once()
 
     def test_showDirectoryManager(self):
         self.view.show_directory_manager()

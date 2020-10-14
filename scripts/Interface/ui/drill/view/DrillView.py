@@ -123,6 +123,7 @@ class DrillView(QMainWindow):
         self.rundexFile = None
 
         self.groups = dict()
+        self.masterRows = dict()
 
         self._presenter = DrillPresenter(self)
 
@@ -451,7 +452,36 @@ class DrillView(QMainWindow):
         for row in rows:
             for group in self.groups:
                 self.groups[group] = [r for r in self.groups[group] if r != row]
+                if ((group in self.masterRows)
+                        and (self.masterRows[group] == row)):
+                    del self.masterRows[group]
             self.table.delRowLabel(row)
+
+    def setSelectedRowAsMasterRow(self):
+        """
+        This method sets the selected row as the master row for the group it
+        belongs to.
+        """
+        rows = self.table.getSelectedRows()
+        if not rows or len(rows) > 1:
+            return
+
+        row = rows[0]
+        group = None
+        for g in self.groups:
+            if row in self.groups[g]:
+                group = g
+                break
+
+        if not group:
+            return
+
+        if group in self.masterRows:
+            label = self.table.getRowLabel(self.masterRows[group])
+            self.table.setRowLabel(self.masterRows[group], label, False)
+        self.masterRows[group] = row
+        label = self.table.getRowLabel(row)
+        self.table.setRowLabel(row, label, True)
 
     def process_selected_rows(self):
         """
@@ -622,6 +652,9 @@ class DrillView(QMainWindow):
         elif (event.key() == Qt.Key_G
                 and event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier):
             self.ungroupSelectedRows()
+        elif (event.key() == Qt.Key_M
+                and event.modifiers() == Qt.ControlModifier):
+            self.setSelectedRowAsMasterRow()
 
     def show_directory_manager(self):
         """

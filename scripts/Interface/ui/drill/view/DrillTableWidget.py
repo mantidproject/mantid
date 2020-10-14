@@ -24,7 +24,6 @@ class DrillTableWidget(QTableWidget):
         self._disabled = False
         header = DrillHeaderView(self)
         header.setSectionsClickable(True)
-        header.setHighlightSections(True)
         header.setSectionResizeMode(QHeaderView.Interactive)
         self.setHorizontalHeader(header)
 
@@ -36,6 +35,9 @@ class DrillTableWidget(QTableWidget):
                                           None, self)
         minSize = self.fontMetrics().height() + 2 * margin
         self.verticalHeader().setDefaultSectionSize(minSize)
+
+        self.horizontalHeader().setHighlightSections(False)
+        self.verticalHeader().setHighlightSections(False)
 
     def addRow(self, position):
         """
@@ -338,7 +340,7 @@ class DrillTableWidget(QTableWidget):
             if item and c < len(tooltips):
                 item.setToolTip(tooltips[c])
 
-    def setRowLabel(self, row, label):
+    def setRowLabel(self, row, label, bold=False):
         """
         Set the label of a specific row.
 
@@ -351,6 +353,10 @@ class DrillTableWidget(QTableWidget):
             item.setText(label)
         else:
             self.setVerticalHeaderItem(row, QTableWidgetItem(label))
+
+        font = self.verticalHeaderItem(row).font()
+        font.setBold(bold)
+        self.verticalHeaderItem(row).setFont(font)
 
     def getRowLabel(self, row):
         """
