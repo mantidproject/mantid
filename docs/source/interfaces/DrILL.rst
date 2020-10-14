@@ -38,6 +38,8 @@ spreadsheet like table (1)
     measured at one or more distances (SANS) or angles (Reflectometry). There is no limit
     on the number of the different configurations.
     It is used to provide filenames and options to the reduction algorithm.
+    The state of the table is reset when the instrument and/or the acquisition
+    mode is changed.
 
 tool buttons (2)
     In two different places. At the top of the table, these buttons facilitate
@@ -149,7 +151,9 @@ the interface in JSON format. By using the appropriate tool button or the menu
 bar (*File* -> *Save...* or *Load...*) one can export or import a Rundex file.
 
 When saving, the global settings, all the samples and some of the visual setup
-are exported in the rundex file. Symmetrically, the load action imports all
-these data in the current DrILL session.
+are exported in the rundex file (i.e. the collapsed columns, the hidden
+columns...). Symmetrically, the load action imports all these data in the
+current DrILL session and one will recover the interface in the same state as
+it was previously saved.
 
 .. categories:: Interfaces
