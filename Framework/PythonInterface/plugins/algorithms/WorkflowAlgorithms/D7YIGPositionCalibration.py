@@ -108,6 +108,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                           defaultValue=''),
                              doc="The output YIG calibration Instrument Parameter File.")
 
+        self.declareProperty(name="ClearCache", defaultValue=True, direction=Direction.Input,
+                             doc="Whether to clear the intermediate fitting results.")
+
         self.declareProperty(ITableWorkspaceProperty(name='FitOutputWorkspace',
                                                      defaultValue='fit_output',
                                                      direction=Direction.Output,
@@ -161,11 +164,13 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         progress.report('Printing out calibration')
         self._print_parameter_file(wavelength, pixel_offsets, bank_offsets, bank_slopes)
 
-        if self.getProperty('FitOutputWorkspace').isDefault:
-            created_ws_names = [conjoined_scan, fitted_peaks_positions, single_peaks_fits, detector_parameters]
-            DeleteWorkspaces(created_ws_names)
-        else:
+        if not self.getProperty('FitOutputWorkspace').isDefault:
             self.setProperty('FitOutputWorkspace', detector_parameters)
+        else:
+            DeleteWorkspace(Workspace=detector_parameters)
+        if self.getProperty('ClearCache').value:
+            created_ws_names = [conjoined_scan, fitted_peaks_positions, single_peaks_fits]
+            DeleteWorkspaces(WorkspaceList=created_ws_names)
 
     def _get_scan_data(self, ws_name, progress):
         """ Loads YIG scan data, removes monitors, and prepares
