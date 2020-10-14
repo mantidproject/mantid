@@ -96,14 +96,12 @@ template <typename ExpectedT> void validateStorageType(const DataSet &data) {
 
 template <typename ValueType>
 std::vector<ValueType> extractVector(const DataSet &data) {
-
-  // validateStorageType<ValueType>(data); HERE
+  validateStorageType<ValueType>(data);
   DataSpace dataSpace = data.getSpace();
   std::vector<ValueType> values;
   values.resize(dataSpace.getSelectNpoints());
   // Read data into vector
   data.read(values.data(), data.getDataType(), dataSpace);
-
   return values;
 }
 
@@ -114,22 +112,6 @@ class Parser {
 private:
   // Logger object
   std::unique_ptr<AbstractLogger> m_logger;
-
-  template <typename T>
-  std::vector<double> toNexusFloat(const T &host, const std::string &dSetName) {
-
-    DataSet data = openDataSet(host, dSetName);
-    std::vector<double> nexusData;
-    auto storageType = data.getDataType().getSize();
-    if (storageType == sizeof(float)) {
-      auto values = extractVector<float>(data);
-      nexusData = convertVector<float, double>(values);
-    } else if (storageType == sizeof(double)) {
-      auto values = extractVector<double>(data);
-      nexusData = values;
-    }
-    return nexusData;
-  }
 
   /**
    * The function allows us to determine where problems are and logs key
@@ -596,7 +578,6 @@ private:
   // Parse OFF (mesh) nexus geometry
   std::shared_ptr<const Geometry::IObject>
   parseNexusMesh(const Group &shapeGroup) {
-
     const auto faceIndices = readNXUInts32(shapeGroup, "faces");
     const auto windingOrder = readNXUInts32(shapeGroup, "winding_order");
     const auto vertices = readNXFloats(shapeGroup, "vertices");
@@ -694,7 +675,6 @@ private:
       throw std::runtime_error("Expect to have as many detector_face entries "
                                "as detector_number entries");
     if (detFaces.size() % 2 != 0)
-
       throw std::runtime_error("Unequal pairs of face indices to detector "
                                "indices in detector_faces");
     if (detFaces.size() / 2 > faceIndices.size())

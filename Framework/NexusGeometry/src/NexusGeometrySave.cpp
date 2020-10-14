@@ -1500,11 +1500,10 @@ public:
     // return true if all shape types, heights and radii are equal to the
     // first shape in children detectors.
 
-    const Geometry::MeshObject *mesh;
-    const Geometry::MeshObject2D *mesh2D;
-
     std::for_each(pixels.begin(), pixels.end(), [&](const size_t &idx) {
       if (compInfo.hasValidShape(idx)) {
+        const Geometry::MeshObject *mesh;
+        const Geometry::MeshObject2D *mesh2D;
         auto &shapeObj = compInfo.shape(idx);
         if (mesh = dynamic_cast<const Geometry::MeshObject *>(&shapeObj))
           meshes.push_back(idx);
