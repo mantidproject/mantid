@@ -70,26 +70,26 @@ template <typename ExpectedT> void validateStorageType(const DataSet &data) {
     if (H5T_FLOAT != typeClass) {
       throw std::runtime_error("Storage type mismatch. Expecting to extract a "
                                "floating point number from " +
-                               data.getObjName());
+                               H5_OBJ_NAME(data));
     }
     if (sizeOfType != sizeof(ExpectedT)) {
       throw std::runtime_error(
           "Storage type mismatch for floats. This operation "
           "is dangerous. Nexus stored has byte size:" +
-          std::to_string(sizeOfType) + " in " + data.getObjName());
+          std::to_string(sizeOfType) + " in " + H5_OBJ_NAME(data));
     }
   } else if (std::is_integral<ExpectedT>::value) {
     if (H5T_INTEGER != typeClass) {
       throw std::runtime_error(
           "Storage type mismatch. Expecting to extract a integer from " +
-          data.getObjName());
+          H5_OBJ_NAME(data));
     }
     if (sizeOfType > sizeof(ExpectedT)) {
       // endianness not checked
       throw std::runtime_error(
           "Storage type mismatch for integer. Result "
           "would result in truncation. Nexus stored has byte size:" +
-          std::to_string(sizeOfType) + " in " + data.getObjName());
+          std::to_string(sizeOfType) + " in " + H5_OBJ_NAME(data));
     }
   }
 }
