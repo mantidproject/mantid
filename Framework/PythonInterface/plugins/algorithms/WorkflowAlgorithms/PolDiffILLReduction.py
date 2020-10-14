@@ -70,18 +70,18 @@ class PolDiffILLReduction(PythonAlgorithm):
 
             sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentPropertiesDictionary').value
             geometry_type = self.getPropertyValue('SampleGeometry')
-            required_keys = ['mass', 'density', 'number_density', 'beam_height', 'beam_width', 'formula_units', 'container_density',
-                             'chemical_formula']
+            required_keys = ['Mass', 'Density', 'NumberDensity', 'BeamHeight', 'BeamWidth', 'FormulaUnits', 'ContainerDensity',
+                             'ChemicalFormula']
 
             if geometry_type == 'FlatPlate':
-                required_keys += ['height', 'width', 'thickness', 'container_front_thickness', 'container_back_thickness']
+                required_keys += ['Height', 'Width', 'Thickness', 'ContainerFrontThickness', 'ContainerBackThickness']
             if geometry_type == 'Cylinder':
-                required_keys += ['height', 'radius', 'container_radius']
+                required_keys += ['Height', 'Radius', 'ContainerRadius']
             if geometry_type == 'Annulus':
-                required_keys += ['height', 'inner_radius', 'outer_radius', 'container_inner_radius', 'container_outer_radius']
+                required_keys += ['Height', 'InnerRadius', 'OuterRadius', 'ContainerInnerRadius', 'ContainerOuterRadius']
 
             if self.getPropertyValue('DetectorEfficiencyCalibration') == 'Incoherent':
-                required_keys.append('sample_spin')
+                required_keys.append('SampleSpin')
 
             for key in required_keys:
                 if key not in sampleAndEnvironmentProperties:
@@ -454,7 +454,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         for entry in mtd[ws]:
             SetInstrumentParameter(entry, ParameterName="formula_eff", Value=correction_formula)
             DetectorEfficiencyCorUser(InputWorkspace=entry, OutputWorkspace=entry,
-                                      IncidentEnergy=self._sampleAndEnvironmentProperties['initial_energy'].value)
+                                      IncidentEnergy=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
         return ws
 
     def _frame_overlap_correction(self, ws):
@@ -509,15 +509,15 @@ class PolDiffILLReduction(PythonAlgorithm):
          such as the beam size and calculates derived parameters."""
         self._sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentPropertiesDictionary').value
         if 'n_atoms' not in self._sampleAndEnvironmentProperties:
-            self._sampleAndEnvironmentProperties['n_atoms'] = float(self._sampleAndEnvironmentProperties['number_density'].value) \
-                * float(self._sampleAndEnvironmentProperties['mass'].value) \
-                / float(self._sampleAndEnvironmentProperties['density'].value)
+            self._sampleAndEnvironmentProperties['NAtoms'] = float(self._sampleAndEnvironmentProperties['NumberDensity'].value) \
+                * float(self._sampleAndEnvironmentProperties['Mass'].value) \
+                / float(self._sampleAndEnvironmentProperties['Density'].value)
         if 'initial_energy' not in self._sampleAndEnvironmentProperties:
             h = physical_constants['Planck constant'][0]  # in m^2 kg^2 / s^2
             neutron_mass = physical_constants['neutron mass'][0]  # in kg
             wavelength = mtd[ws].getItem(0).getRun().getLogData('monochromator.wavelength').value * 1e-10  # in m
             joules_to_mev = 1e3 / physical_constants['electron volt'][0]
-            self._sampleAndEnvironmentProperties['initial_energy'] = joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
+            self._sampleAndEnvironmentProperties['InitialEnergy'] = joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
 
     def _enforce_uniform_units(self, origin_ws, target_ws):
         for entry_tuple in zip(mtd[origin_ws], mtd[target_ws]):
@@ -531,30 +531,30 @@ class PolDiffILLReduction(PythonAlgorithm):
         geometry_type = self.getPropertyValue('SampleGeometry')
 
         kwargs = {}
-        kwargs['BeamHeight'] = self._sampleAndEnvironmentProperties['beam_height'].value
-        kwargs['BeamWidth'] = self._sampleAndEnvironmentProperties['beam_width'].value
-        kwargs['SampleDensity'] = self._sampleAndEnvironmentProperties['density'].value
-        kwargs['Height'] = self._sampleAndEnvironmentProperties['height'].value
-        kwargs['SampleChemicalFormula'] = self._sampleAndEnvironmentProperties['chemical_formula'].value
+        kwargs['BeamHeight'] = self._sampleAndEnvironmentProperties['BeamHeight'].value
+        kwargs['BeamWidth'] = self._sampleAndEnvironmentProperties['BeamWidth'].value
+        kwargs['SampleDensity'] = self._sampleAndEnvironmentProperties['Density'].value
+        kwargs['Height'] = self._sampleAndEnvironmentProperties['Height'].value
+        kwargs['SampleChemicalFormula'] = self._sampleAndEnvironmentProperties['ChemicalFormula'].value
         if 'container_formula' in self._sampleAndEnvironmentProperties:
-            kwargs['ContainerChemicalFormula'] = self._sampleAndEnvironmentProperties['container_formula'].value
-            kwargs['ContainerDensity'] = self._sampleAndEnvironmentProperties['container_density'].value
+            kwargs['ContainerChemicalFormula'] = self._sampleAndEnvironmentProperties['ContainerFormula'].value
+            kwargs['ContainerDensity'] = self._sampleAndEnvironmentProperties['ContainerDensity'].value
         if geometry_type == 'FlatPlate':
-            kwargs['SampleWidth'] = self._sampleAndEnvironmentProperties['width'].value
-            kwargs['SampleThickness'] = self._sampleAndEnvironmentProperties['thickness'].value
+            kwargs['SampleWidth'] = self._sampleAndEnvironmentProperties['Width'].value
+            kwargs['SampleThickness'] = self._sampleAndEnvironmentProperties['Thickness'].value
             if 'container_formula' in self._sampleAndEnvironmentProperties:
-                kwargs['ContainerFrontThickness'] = self._sampleAndEnvironmentProperties['container_front_thickness'].value
-                kwargs['ContainerBackThickness'] = self._sampleAndEnvironmentProperties['container_back_thickness'].value
+                kwargs['ContainerFrontThickness'] = self._sampleAndEnvironmentProperties['ContainerFrontThickness'].value
+                kwargs['ContainerBackThickness'] = self._sampleAndEnvironmentProperties['ContainerBackThickness'].value
         elif geometry_type == 'Cylinder':
-            kwargs['SampleRadius'] = self._sampleAndEnvironmentProperties['radius'].value
+            kwargs['SampleRadius'] = self._sampleAndEnvironmentProperties['Radius'].value
             if 'container_formula' in self._sampleAndEnvironmentProperties:
-                kwargs['ContainerRadius'] = self._sampleAndEnvironmentProperties['container_radius'].value
+                kwargs['ContainerRadius'] = self._sampleAndEnvironmentProperties['ContainerRadius'].value
         elif geometry_type == 'Annulus':
-            kwargs['SampleInnerRadius'] = self._sampleAndEnvironmentProperties['inner_radius'].value
-            kwargs['SampleOuterRadius']  = self._sampleAndEnvironmentProperties['outer_radius'].value
+            kwargs['SampleInnerRadius'] = self._sampleAndEnvironmentProperties['InnerRadius'].value
+            kwargs['SampleOuterRadius']  = self._sampleAndEnvironmentProperties['OuterRadius'].value
             if 'container_formula' in self._sampleAndEnvironmentProperties:
-                kwargs['ContainerInnerRadius'] = self._sampleAndEnvironmentProperties['container_inner_radius'].value
-                kwargs['ContainerOuterRadius'] = self._sampleAndEnvironmentProperties['container_outer_radius'].value
+                kwargs['ContainerInnerRadius'] = self._sampleAndEnvironmentProperties['ContainerInnerRadius'].value
+                kwargs['ContainerOuterRadius'] = self._sampleAndEnvironmentProperties['ContainerOuterRadius'].value
 
         self._enforce_uniform_units(sample_ws, container_ws)
         if geometry_type == 'Custom':
@@ -633,7 +633,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                         sigma_xpy_nsf = mtd[ws][entry_no+9].readY(spectrum)
                         # Magnetic component
                         try:
-                            theta_0 = self._sampleAndEnvironmentProperties['theta_offset'].value
+                            theta_0 = self._sampleAndEnvironmentProperties['ThetaOffset'].value
                         except KeyError:
                             raise RuntimeError("The value for theta_0 needs to be defined for the component separation in 10p method.")
                         theta = mtd[ws][entry_no].detectorInfo().twoTheta(spectrum)
@@ -706,7 +706,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         if calibrationType == 'Vanadium':
             vanadium_ws = self.getPropertyValue('VanadiumInputWorkspace')
             if normaliseToAbsoluteUnits:
-                normFactor = self._sampleAndEnvironmentProperties['formula_units'].value
+                normFactor = self._sampleAndEnvironmentProperties['FormulaUnits'].value
                 CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace='normalisation_ws')
             else:
                 normalisationFactors = self._max_values_per_detector(vanadium_ws)
@@ -729,7 +729,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     const = (2.0/3.0) * math.pow(physical_constants['neutron gyromag. ratio']
                                                  * physical_constants['classical electron radius'], 2)
                     paramagneticComponent = mtd[conjoined_components].getItem(2)
-                    spin = self._sampleAndEnvironmentProperties['sample_spin'].value
+                    spin = self._sampleAndEnvironmentProperties['SampleSpin'].value
                     Divide(LHSWorkspace=const * spin * (spin+1),
                            RHSWorkspace=paramagneticComponent,
                            OutputWorkspace=ws_name)
@@ -784,7 +784,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Performs normalisation of the vanadium data to the expected cross-section."""
         if self._mode == 'TOF':
             ws = self._sum_TOF_data(ws)
-        CreateSingleValuedWorkspace(DataValue=0.404 * self._sampleAndEnvironmentProperties['n_atoms'].value,
+        CreateSingleValuedWorkspace(DataValue=0.404 * self._sampleAndEnvironmentProperties['NAtoms'].value,
                                     OutputWorkspace='norm')
         Divide(LHSWorkspace='norm', RHSWorkspace=ws, OutputWorkspace=ws)
         DeleteWorkspace(Workspace='norm')
@@ -802,7 +802,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
         elif output_unit == 'Q':
             ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ',
-                                EFixed=self._sampleAndEnvironmentProperties['initial_energy'].value)
+                                EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
         for entry in mtd[ws]:
             unit = ''
             if output_unit == 'TwoTheta':
