@@ -14,6 +14,10 @@ class MaterialBuilderTest(unittest.TestCase):
         builder = MaterialBuilder()
         material = builder.setName('Bizarre oxide').setFormula('Al2 O3').setNumberDensity(0.23).build()
         self.assertEqual(material.name(), 'Bizarre oxide')
+        self.assertEqual(material.numberDensity, 0.23)
+        self.assertEqual(material.numberDensityEffective, 0.23)
+        self.assertEqual(material.packingFraction, 1.)
+
         formula = material.chemicalFormula()
         self.assertEqual(len(formula), 2)
         atoms = formula[0]
@@ -32,7 +36,8 @@ class MaterialBuilderTest(unittest.TestCase):
         builder.setNumberDensityUnit(NumberDensityUnit.FormulaUnits)
         material = builder.build()
         self.assertEqual(material.numberDensity, 0.23 * (2. + 3.))
-
+        self.assertEqual(material.numberDensityEffective, 0.23 * (2. + 3.))
+        self.assertEqual(material.packingFraction, 1.)
 
 if __name__ == '__main__':
     unittest.main()
