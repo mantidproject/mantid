@@ -120,7 +120,12 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                              doc="The table workspace name that will be used to store all of the calibration parameters.")
 
     def PyExec(self):
-        progress = Progress(self, start=0.0, end=1.0, nreports=10)
+        nfiles = self.getPropertyValue("Filenames").count(',')
+        if nfiles > 0:
+            nreports = 10
+        else:
+            nreports = 6
+        progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
 
         self._scanStepSize = self.getProperty("ScanStepSize").value
         self._peakWidth = self.getProperty("BraggPeakWidth").value
@@ -137,7 +142,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         else:
             input_name = self.getPropertyValue('InputWorkspace')
             RenameWorkspace(InputWorkspace=input_name, OutputWorkspace=conjoined_scan)
-            progress.report(3, 'Loading YIG scan data')
+            progress.report(2, 'Loading YIG scan data')
         if not self.getProperty("BankOffsets").isDefault:
             offsets = self.getProperty("BankOffsets").value
             for bank_no in range(int(self._D7NumberPixels / self._D7NumberPixelsBank)):
@@ -149,7 +154,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         # loads the YIG peaks from an IPF
         yig_d = self._load_yig_peaks(conjoined_scan)
         # checks how many and which peaks can be fitted in each row
-        progress.report(0, 'Getting YIG peaks positions')
+        progress.report('Getting YIG peaks positions')
         yig_peaks_positions = self._get_yig_peaks_positions(conjoined_scan, yig_d)
         # fits gaussian to peaks for each pixel, returns peaks as a function of their expected position
         progress.report('Fitting YIG peaks')
@@ -224,8 +229,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             ConvertToPointData(InputWorkspace=entry, OutputWorkspace=entry)
             name_list.append(entry.name())
 
-        ConjoinXRuns(InputWorkspaces=name_list, OutputWorkspace=conjoined_scan_name,
-                     startProgress=0.6, endProgress=0.65)
+        ConjoinXRuns(InputWorkspaces=name_list, OutputWorkspace=conjoined_scan_name)
         #replace axis and corrects labels
         x_axis.setUnit("Label").setLabel('TwoTheta', 'degrees')
         mtd[conjoined_scan_name].replaceAxis(0, x_axis)
