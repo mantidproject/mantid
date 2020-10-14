@@ -23,7 +23,7 @@ class ToscaInstrument(IndirectInstrument):
         super().__init__(name='TOSCA', setting=setting)
 
         if self._setting != '':
-            raise ValueError('TOSCA Instrument does not use multiple settings')
+            print('WIP: TOSCA Instrument settings not yet implemented')
 
     @classmethod
     def calculate_q_powder(cls, input_data=None):

@@ -33,6 +33,7 @@ instruments = {
         #    TOSCA parameters for calculating Q^2
         'final_neutron_energy': 32.0,  # Final energy on the crystal analyser in cm-1
         'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians
+        'settings': {'forward': None, 'backward': None},
         # TOSCA parameters for resolution function
         # sigma = tosca_a * omega * omega + tosca_b * omega + tosca_c
         # where sigma is width of Gaussian function
