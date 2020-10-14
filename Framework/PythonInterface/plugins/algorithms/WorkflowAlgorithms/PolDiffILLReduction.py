@@ -577,7 +577,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         return sample_ws
 
-    def _data_structure_helper(self):
+    def _user_method_data_structure(self):
         nMeasurements = 0
         nComponents = 0
         if self._user_method == '10p':
@@ -595,7 +595,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
         current sample. The method used is based on either the user's choice or the provided data structure."""
 
-        nMeasurements, nComponents = self._data_structure_helper()
+        nMeasurements, nComponents = self._user_method_data_structure()
         componentNames = ['Coherent', 'Incoherent', 'Magnetic']
         number_histograms = mtd[ws][0].getNumberHistograms()
         block_size = mtd[ws][0].blocksize()
@@ -695,7 +695,7 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _detector_efficiency_correction(self, ws, component_ws):
         """Corrects detector efficiency and normalises data to either vanadium, incoherent scattering, or paramagnetic scattering."""
 
-        nMeasurements, _ = self._data_structure_helper()
+        nMeasurements, _ = self._user_method_data_structure()
 
         if component_ws:
             conjoined_components = self._conjoin_components(component_ws)
