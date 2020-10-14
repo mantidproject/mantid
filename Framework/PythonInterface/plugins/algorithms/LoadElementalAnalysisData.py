@@ -9,9 +9,9 @@ import glob
 import os
 import numpy as np
 from mantid import config
-from mantid.api import PythonAlgorithm, AlgorithmFactory, AlgorithmManager, WorkspaceGroupProperty, WorkspaceGroup
-from mantid.kernel import IntBoundedValidator, Direction
-from mantid.simpleapi import DeleteWorkspace, LoadAscii, CreateSampleWorkspace, GroupWorkspaces, mtd, ConvertToHistogram, ConvertToPointData, WorkspaceFactory
+from mantid.api import AlgorithmFactory, AnalysisDataService, PythonAlgorithm, TextAxis, WorkspaceGroup, WorkspaceGroupProperty
+from mantid.kernel import Direction, IntBoundedValidator
+from mantid.simpleapi import ConvertToHistogram, ConvertToPointData, CreateSampleWorkspace, DeleteWorkspace, GroupWorkspaces, LoadAscii, WorkspaceFactory
 
 type_keys = {"10": "Prompt", "20": "Delayed", "99": "Total"}
 spectrum_index = {"Delayed": 1, "Prompt": 2, "Total": 3}
@@ -32,11 +32,17 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='Output group workspace for run')
 
+    def validateInputs(self):
+        issues = dict()
+        checkRun = self.search_user_dirs()
+        if not checkRun:
+            issues['Run'] = "Cannot find files for run " + self.getPropertyValue("Run")
+        return issues
+
     def PyExec(self):
         run = self.getPropertyValue("Run")
         to_load = self.search_user_dirs()
-        import pydevd_pycharm
-        pydevd_pycharm.settrace('localhost', port=12345, stdoutToServer=True, stderrToServer=True)
+
         workspaces = {
             filename: self.get_filename(filename, run)
             for filename in to_load if self.get_filename(filename, run) is not None
@@ -49,6 +55,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
 
         self.format_workspace(workspaces)
         self.merge_workspaces(run, workspaces.values())
+
 
     def pad_run(self):
         """ Pads run number: i.e. 123 -> 00123; 2695 -> 02695 """
@@ -83,13 +90,12 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         """ where workspaces is a tuple of form:
                 (filepath, ws name)
         """
-        d_string = "{}; Detector {}"
         # detectors is a dictionary of {detector_name : [names_of_workspaces]}
-        detectors = {d_string.format(run, x): [] for x in range(1, 5)}
+        detectors = {f"{run}; Detector {x}": [] for x in range(1, 5)}
         # fill dictionary
         for workspace in workspaces:
-            detector_number = self.get_detector_num_from_ws(workspace)
-            detectors[d_string.format(run, detector_number)].append(workspace)
+            detector_number = workspace[0]
+            detectors[f"{run}; Detector {detector_number}"].append(workspace)
         # initialise a group workspace
         overall_ws = WorkspaceGroup()
         # merge each workspace list in detectors into a single workspace
@@ -104,11 +110,10 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                 workspace_list = sorted_workspace_list
                 # create merged workspace
                 merged_ws = self.create_merged_workspace(workspace_list)
-                merged_ws = ConvertToHistogram(InputWorkspace=merged_ws)
-                overall_ws.addWorkspace(merged_ws)
-                DeleteWorkspace(merged_ws)
+                ConvertToHistogram(InputWorkspace=merged_ws, OutputWorkspace=detector)
+                overall_ws.addWorkspace(AnalysisDataService.retrieve(detector))
         self.setProperty("GroupWorkspace", overall_ws)
-        DeleteWorkspace(overall_ws)
+
 
     def create_merged_workspace(self, workspace_list):
         if workspace_list:
@@ -116,19 +121,19 @@ class LoadElementalAnalysisData(PythonAlgorithm):
             max_num_bins = 0
             for ws_name in workspace_list:
                 if ws_name:
-                    ws = mtd[ws_name]
+                    ws = AnalysisDataService.retrieve(ws_name)
                     max_num_bins = max(ws.blocksize(), max_num_bins)
 
             # create single ws for the merged data, use original ws as a template
             template_ws = next(ws for ws in workspace_list if ws is not None)
-            merged_ws = WorkspaceFactory.create(mtd[template_ws], NVectors=num_files_per_detector,
+            merged_ws = WorkspaceFactory.create(AnalysisDataService.retrieve(template_ws), NVectors=num_files_per_detector,
                                                        XLength=max_num_bins, YLength=max_num_bins)
 
             # create a merged workspace based on every entry from workspace list
             for i in range(0, num_files_per_detector):
                 # load in ws - first check workspace exists
                 if workspace_list[i]:
-                    ws = mtd[workspace_list[i]]
+                    ws = AnalysisDataService.retrieve(workspace_list[i])
                     # check if histogram data, and convert if necessary
                     if ws.isHistogramData():
                         ws = ConvertToPointData(InputWorkspace=ws.name(), OutputWorkspace=ws.name())
@@ -150,29 +155,23 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                     merged_ws.setY(i, Y_padded)
                     merged_ws.setE(i, E_padded)
 
+                    #set y axis labels
+                    self.set_y_axis_labels(merged_ws, spectrum_index)
+
                     # remove workspace from ADS
                     DeleteWorkspace(ws)
 
             return merged_ws
 
-    def create_groupworkspace(self, groupworkspace, tmp_workspace):
-        alg = AlgorithmManager.create("GroupWorkspaces")
-        alg.initialize()
-        alg.setAlwaysStoreInADS(False)
-        alg.setRethrows(True)
-        alg.setProperty("InputWorkspaces", [tmp_workspace])
-        alg.setProperty("OutputWorkspace", groupworkspace)
-        alg.execute()
+    def set_y_axis_labels(self, workspace, labels):
+        """ adds the spectrum_index to the plot labels """
 
-        return alg.getProperty("OutputWorkspace")
+        axis = TextAxis.create(len(labels))
 
-    def get_detector_num_from_ws(self,name):
-        """
-        Gets the detector number from the workspace name:
-            i.e the first character
-        """
-        return name[0]
+        for index, label in enumerate(labels):
+            axis.setLabel(index, label)
 
+        workspace.replaceAxis(1, axis)
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(LoadElementalAnalysisData)
