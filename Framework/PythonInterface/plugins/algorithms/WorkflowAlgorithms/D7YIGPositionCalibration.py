@@ -195,12 +195,13 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             # normalize to monitor1 as monitor2 is sometimes empty:
             monitor1_counts = entry.readY(self._D7NumberPixels-2)[0]
             if monitor1_counts != 0:
+                monitor_name = '__monitor_' + entry.name()
                 CreateSingleValuedWorkspace(DataValue=monitor1_counts, ErrorValue=np.sqrt(monitor1_counts),
-                                            OutputWorkspace='_monitor')
+                                            OutputWorkspace=monitor_name)
                 Divide(LHSWorkspace=entry,
-                       RHSWorkspace='_monitor',
+                       RHSWorkspace=monitor_name,
                        OutputWorkspace=entry)
-                DeleteWorkspace(Workspace='_monitor')
+                DeleteWorkspace(Workspace=monitor_name)
             # remove Monitors:
             RemoveSpectra(InputWorkspace=entry, WorkspaceIndices=monitor_indices, OutputWorkspace=entry)
             # prepare proper label for the axes
