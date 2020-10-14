@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidTestHelpers/JSONGeometryParserTestHelper.h"
 #include "json/json.h"
@@ -205,6 +205,10 @@ void addNXInstrumentName(Json::Value &instrument, const std::string &name) {
   auto instrumentName = createEmptyDataset("name", "string");
   instrumentName["values"] = name;
   appendToChildren(instrument, instrumentName);
+}
+
+Json::Value &addNXSource(Json::Value &instrument, const std::string &name) {
+  return addNX(instrument, name, "NXsource");
 }
 
 Json::Value &addNXMonitor(Json::Value &entry, const std::string &name) {
@@ -743,6 +747,51 @@ std::string getFullJSONInstrumentSimpleOFF() {
       JSONTestInstrumentBuilder::addNXInstrument(entry, "instrument");
   JSONTestInstrumentBuilder::addNXInstrumentName(instrument,
                                                  "SimpleInstrument");
+  auto &detectorBank =
+      JSONTestInstrumentBuilder::addNXDetector(instrument, "detector_1");
+
+  JSONTestInstrumentBuilder::addDetectorNumbers(
+      detectorBank, {2, 2}, std::vector<int32_t>{1, 2, 3, 4});
+  JSONTestInstrumentBuilder::addXPixelOffset(detectorBank, {2, 2},
+                                             {-0.299, -0.297, -0.299, -0.297});
+  JSONTestInstrumentBuilder::addYPixelOffset(detectorBank, {2, 2},
+                                             {-0.299, -0.299, -0.297, -0.297});
+  auto &pixelShape = JSONTestInstrumentBuilder::addOffShape(detectorBank);
+  JSONTestInstrumentBuilder::addOffShapeFaces(pixelShape);
+  JSONTestInstrumentBuilder::addOffShapeVertices(pixelShape);
+  JSONTestInstrumentBuilder::addOffShapeWindingOrder(pixelShape);
+
+  // Add dependency but no transformations
+  JSONTestInstrumentBuilder::addNXTransformationDependency(
+      detectorBank, "/entry/instrument/detector_1/transformations/location");
+
+  auto &transformation = JSONTestInstrumentBuilder::addNXTransformation(
+      detectorBank, "transformations");
+  JSONTestInstrumentBuilder::addNXTransformationLocation(transformation);
+  JSONTestInstrumentBuilder::addNXTransformationBeamDirectionOffset(
+      transformation);
+  JSONTestInstrumentBuilder::addNXTransformationOrientation(transformation);
+  return JSONTestInstrumentBuilder::convertToString(root);
+}
+
+std::string getFullJSONInstrumentSimpleWithSource() {
+  Json::Value root;
+  JSONTestInstrumentBuilder::initialiseRoot(root, "nexus_structure");
+  auto &entry = JSONTestInstrumentBuilder::addNXEntry(root, "entry");
+  JSONTestInstrumentBuilder::addNXSample(entry, "sample");
+  auto &instrument =
+      JSONTestInstrumentBuilder::addNXInstrument(entry, "instrument");
+  JSONTestInstrumentBuilder::addNXInstrumentName(instrument,
+                                                 "SimpleInstrument");
+
+  // add source to NXInstrument
+  auto &source =
+      JSONTestInstrumentBuilder::addNXSource(instrument, "moderator");
+  auto &sourceTransformation =
+      JSONTestInstrumentBuilder::addNXTransformation(source, "transformations");
+  JSONTestInstrumentBuilder::addNXTransformationLocation(
+      sourceTransformation, {1}, {28.900002}, {0.0, 0.0, -1.0});
+
   auto &detectorBank =
       JSONTestInstrumentBuilder::addNXDetector(instrument, "detector_1");
 

@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Objects/MeshObject.h"
@@ -64,7 +64,7 @@ private:
 
   template <typename T>
   void appendTo(std::vector<T> &destination, unsigned int value) {
-    destination.push_back(static_cast<T>(value));
+    destination.emplace_back(static_cast<T>(value));
   }
 
 public:

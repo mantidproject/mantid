@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
@@ -14,8 +14,7 @@
  *  than API (e.g. any algorithm or concrete workspace), even if via the
  *factory.
  *********************************************************************************/
-#ifndef FAKEOBJECTS_H_
-#define FAKEOBJECTS_H_
+#pragma once
 
 /*
  * FakeObjects.h: Fake Tester objects for APITest
@@ -43,12 +42,12 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
-using Mantid::Kernel::SpecialCoordinateSystem;
-using Mantid::MantidVec;
 using Mantid::coord_t;
 using Mantid::detid_t;
+using Mantid::MantidVec;
 using Mantid::signal_t;
 using Mantid::specnum_t;
+using Mantid::Kernel::SpecialCoordinateSystem;
 
 //===================================================================================================================
 /** Helper class that implements ISpectrum */
@@ -484,15 +483,27 @@ public:
     throw std::runtime_error("Not Implemented");
   }
 
-  signal_t *getSignalArray() const override {
+  const signal_t *getSignalArray() const override {
     throw std::runtime_error("Not Implemented");
   }
 
-  signal_t *getErrorSquaredArray() const override {
+  const signal_t *getErrorSquaredArray() const override {
     throw std::runtime_error("Not Implemented");
   }
 
-  signal_t *getNumEventsArray() const override {
+  const signal_t *getNumEventsArray() const override {
+    throw std::runtime_error("Not Implemented");
+  }
+
+  signal_t *mutableSignalArray() override {
+    throw std::runtime_error("Not Implemented");
+  }
+
+  signal_t *mutableErrorSquaredArray() override {
+    throw std::runtime_error("Not Implemented");
+  }
+
+  signal_t *mutableNumEventsArray() override {
     throw std::runtime_error("Not Implemented");
   }
 
@@ -717,8 +728,9 @@ public:
 
     throw std::runtime_error("Not Implemented");
   }
-  MDHistoWorkspaceTester(MDHistoDimension_sptr dimX, MDHistoDimension_sptr dimY,
-                         MDHistoDimension_sptr dimZ) {
+  MDHistoWorkspaceTester(const MDHistoDimension_sptr &dimX,
+                         const MDHistoDimension_sptr &dimY,
+                         const MDHistoDimension_sptr &dimZ) {
     std::vector<IMDDimension_sptr> dimensions{dimX, dimY, dimZ};
     initGeometry(dimensions);
   }
@@ -743,4 +755,3 @@ class VariableBinThrowingTester : public AxeslessWorkspaceTester {
     return 0;
   }
 };
-#endif /* FAKEOBJECTS_H_ */

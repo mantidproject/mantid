@@ -1,8 +1,6 @@
 if(CXXTEST_FOUND)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
-                      ${GMOCK_INCLUDE_DIR}
-                      ${GTEST_INCLUDE_DIR}
                       ${Boost_INCLUDE_DIRS}
                       ../../TestHelpers/inc)
 
@@ -17,7 +15,6 @@ if(CXXTEST_FOUND)
                              PRIVATE ${HDF5_INCLUDE_DIRS})
   target_link_libraries(NexusGeometryTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         NexusGeometry
                         Geometry
@@ -28,7 +25,7 @@ if(CXXTEST_FOUND)
                         ${NEXUS_LIBRARIES}
                         ${HDF5_LIBRARIES}
                         ${HDF5_HL_LIBRARIES}
-                        ${GMOCK_LIBRARIES})
+                        gmock)
   add_dependencies(NexusGeometryTest Geometry)
   add_dependencies(FrameworkTests NexusGeometryTest)
   add_dependencies(NexusGeometryTest StandardTestData)

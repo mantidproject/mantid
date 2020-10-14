@@ -1,12 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-
-#ifndef MANTID_NEXUSGEOMETRY_NEXUSFILEREADER_H_
-#define MANTID_NEXUSGEOMETRY_NEXUSFILEREADER_H_
+#pragma once
 
 #include "MantidNexusGeometry/H5ForwardCompatibility.h"
 #include "MantidNexusGeometry/NexusGeometryDefinitions.h"
@@ -115,7 +113,7 @@ public:
   // read a multidimensional dataset and returns vector containing the data
   template <typename T>
   std::vector<T> readDataSetMultidimensional(FullNXPath &pathToGroup,
-                                             std::string dataSetName) {
+                                             const std::string &dataSetName) {
 
     std::vector<T> dataInFile;
 
@@ -275,7 +273,6 @@ public:
 
   bool groupHasDataset(const FullNXPath &pathToGroup,
                        const std::string &dsetName) {
-
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
     auto numOfChildren = parentGroup.getNumObjs();
@@ -321,6 +318,61 @@ public:
     }
   }
 
+  // check if dataset or group has name-specific attribute
+  bool hasAttributeInGroup(const std::string &attrName,
+                           const std::string &attrVal,
+                           const FullNXPath &pathToGroup) {
+
+    H5::Group parentGroup = openfullH5Path(pathToGroup);
+
+    H5::Attribute attribute = parentGroup.openAttribute(attrName);
+    std::string attributeValue;
+    auto type = attribute.getDataType();
+    attribute.read(type, attributeValue);
+    attributeValue.resize(type.getSize());
+    return attributeValue == attrVal;
+  }
+
+  bool hasNXAttributeInGroup(const std::string &attrVal,
+                             const FullNXPath &pathToGroup) {
+
+    H5::Group parentGroup = openfullH5Path(pathToGroup);
+
+    H5::Attribute attribute = parentGroup.openAttribute(NX_CLASS);
+    std::string attributeValue;
+    attribute.read(attribute.getDataType(), attributeValue);
+
+    return attributeValue == attrVal;
+  }
+
+  bool hasAttributeInDataSet(
+      const std::string &dataSetName, const std::string &attrName,
+      const std::string &attrVal,
+      const FullNXPath &pathToGroup /*where the dataset lives*/) {
+
+    H5::Attribute attribute;
+    H5::Group parentGroup = openfullH5Path(pathToGroup);
+    H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
+    attribute = dataSet.openAttribute(attrName);
+    std::string attributeValue;
+    attribute.read(attribute.getDataType(), attributeValue);
+
+    return attributeValue == attrVal;
+  }
+
+  bool hasNXAttributeInDataSet(const std::string &dataSetName,
+                               const std::string &attrVal,
+                               const FullNXPath &pathToGroup) {
+    H5::Attribute attribute;
+    H5::Group parentGroup = openfullH5Path(pathToGroup);
+    H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
+    attribute = dataSet.openAttribute(NX_CLASS);
+    std::string attributeValue;
+    attribute.read(attribute.getDataType(), attributeValue);
+
+    return attributeValue == attrVal;
+  }
+
   void close() {
     if (m_open) {
       m_file.close();
@@ -336,4 +388,3 @@ private:
 }; // NexusFileReader
 } // namespace NexusGeometry
 } // namespace Mantid
-#endif

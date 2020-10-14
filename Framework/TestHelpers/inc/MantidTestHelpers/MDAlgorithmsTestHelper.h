@@ -1,16 +1,15 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /*********************************************************************************
  *  PLEASE READ THIS!!!!!!!
  *
  *  This header MAY ONLY be included in the MDalgorithms package
  *********************************************************************************/
-#ifndef MDALGORITHMSTESTHELPER_H
-#define MDALGORITHMSTESTHELPER_H
+#pragma once
 
 #include "MantidDataObjects/MDEventFactory.h"
 
@@ -32,5 +31,3 @@ DataObjects::MDEventWorkspace3Lean::sptr makeFileBackedMDEWwithMDFrame(
 } // namespace MDAlgorithmsTestHelper
 } // namespace MDAlgorithms
 } // namespace Mantid
-
-#endif

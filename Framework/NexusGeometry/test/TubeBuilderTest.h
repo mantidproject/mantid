@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef TUBE_TEST_H_
-#define TUBE_TEST_H_
+#pragma once
 
 #include "MantidGeometry/Objects/IObject.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
@@ -68,5 +67,3 @@ public:
     TS_ASSERT_EQUALS(tube.size(), 1);
   }
 };
-
-#endif // TUBE_TEST_H_

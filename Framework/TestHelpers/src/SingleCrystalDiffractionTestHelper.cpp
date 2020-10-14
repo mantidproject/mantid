@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 /* Test functions for algorithms for single crystal diffraction
  */
@@ -102,13 +102,13 @@ void WorkspaceBuilder::createInstrument() {
  */
 void WorkspaceBuilder::createPeaksWorkspace() {
   // Create a peaks workspace
-  m_peaksWorkspace = boost::make_shared<PeaksWorkspace>();
+  m_peaksWorkspace = std::make_shared<PeaksWorkspace>();
   // Set the instrument to be the fake rectangular bank above.
   m_peaksWorkspace->setInstrument(m_instrument);
   // Set the oriented lattice for a cubic crystal
-  OrientedLattice ol(6, 6, 6, 90, 90, 90);
-  ol.setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
-  m_peaksWorkspace->mutableSample().setOrientedLattice(&ol);
+  auto lattice = std::make_unique<OrientedLattice>(6, 6, 6, 90, 90, 90);
+  lattice->setUFromVectors(V3D(6, 0, 0), V3D(0, 6, 0));
+  m_peaksWorkspace->mutableSample().setOrientedLattice(std::move(lattice));
 }
 
 /** Create an empty event workspace
@@ -117,7 +117,7 @@ void WorkspaceBuilder::createPeaksWorkspace() {
  */
 void WorkspaceBuilder::createEventWorkspace() {
   // Make an event workspace and add fake peak data
-  m_eventWorkspace = boost::make_shared<EventWorkspace>();
+  m_eventWorkspace = std::make_shared<EventWorkspace>();
   m_eventWorkspace->setInstrument(m_instrument);
   m_eventWorkspace->initialize(m_totalNPixels /*n spectra*/, 3 /* x-size */,
                                3 /* y-size */);
@@ -162,7 +162,7 @@ void WorkspaceBuilder::createPeak(const HKLPeakDescriptor &descriptor) {
   const auto sigmas = std::get<2>(descriptor);
 
   // Create the peak and add it to the peaks ws
-  const auto peak = std::unique_ptr<Peak>(m_peaksWorkspace->createPeakHKL(hkl));
+  const auto peak = m_peaksWorkspace->createPeakHKL(hkl);
   m_peaksWorkspace->addPeak(*peak);
 
   // Get detector ID and TOF position of peak

@@ -1,5 +1,10 @@
-#ifndef NEXUSGEOMETRY_MOCKOBJECTS_H
-#define NEXUSGEOMETRY_MOCKOBJECTS_H
+// Mantid Repository : https://github.com/mantidproject/mantid
+//
+// Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
+// SPDX - License - Identifier: GPL - 3.0 +
+#pragma once
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidNexusGeometry/AbstractLogger.h"
@@ -19,5 +24,3 @@ public:
   MOCK_METHOD1(error, void(const std::string &));
   GNU_DIAG_ON_SUGGEST_OVERRIDE
 };
-
-#endif // NEXUSGEOMETRY_MOCKOBJECTS_H

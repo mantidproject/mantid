@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
-#define MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_
+#pragma once
 
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/ComponentInfoBankHelpers.h"
@@ -123,7 +122,7 @@ used.
     TS_ASSERT_THROWS(NexusGeometrySave::saveInstrument(
                          instr, destinationFile, DEFAULT_ROOT_ENTRY_NAME,
                          logger, false /*append*/),
-                     std::invalid_argument);
+                     const std::invalid_argument &);
     TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&logger));
   }
 
@@ -1366,5 +1365,3 @@ MeshObjects.
                                       DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
   }
 };
-
-#endif /* MANTID_NEXUSGEOMETRY_NEXUSGEOMETRYSAVETEST_H_ */

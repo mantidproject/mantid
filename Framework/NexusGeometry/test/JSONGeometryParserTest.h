@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2019 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef MANTID_NEXUSGEOMETRY_JSONGEOMETRYPARSERTEST_H_
-#define MANTID_NEXUSGEOMETRY_JSONGEOMETRYPARSERTEST_H_
+#pragma once
 
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
@@ -18,8 +17,8 @@
 #include <string>
 
 using namespace Mantid::Kernel;
-using Mantid::NexusGeometry::JSONGeometryParser;
 using Mantid::detid_t;
+using Mantid::NexusGeometry::JSONGeometryParser;
 
 class JSONGeometryParserTest : public CxxTest::TestSuite {
 public:
@@ -30,85 +29,85 @@ public:
   }
   static void destroySuite(JSONGeometryParserTest *suite) { delete suite; }
 
-  void test_parse_fail_with_empty_json_string() {
+  void test_parse_fail_with_empty_JSON_string() {
     std::string json;
-    attemptParseInvalidArgument(json, "Empty geometry json string provided.");
+    attemptParseInvalidArgument(json, "Empty geometry JSON string provided.");
   }
 
-  void test_parse_fail_with_no_nexus_structure_in_json() {
+  void test_parse_fail_with_no_nexus_structure_in_JSON() {
     std::string json = "{}";
     attemptParseInvalidArgument(
-        json, "Json geometry does not contain nexus_structure.");
+        json, "JSON geometry does not contain nexus_structure.");
   }
 
-  void test_parse_fail_with_no_child_entry_in_json() {
+  void test_parse_fail_with_no_child_entry_in_JSON() {
     std::string json = "{\"nexus_structure\": { \"children\":[]}}";
     attemptParseInvalidArgument(
-        json, "No nexus \"entry\" child found in nexus_structure json.");
+        json, "No nexus \"entry\" child found in nexus_structure JSON.");
   }
 
-  void test_parse_fail_with_no_sample_in_json() {
+  void test_parse_fail_with_no_sample_in_JSON() {
     std::string json = Mantid::TestHelpers::getJSONGeometryNoSample();
-    attemptParseInvalidArgument(json, "No sample found in json.");
+    attemptParseInvalidArgument(json, "No sample found in JSON.");
   }
 
-  void test_parse_fail_with_no_instrument_in_json() {
+  void test_parse_fail_with_no_instrument_in_JSON() {
     std::string json = Mantid::TestHelpers::getJSONGeometryNoInstrument();
-    attemptParseInvalidArgument(json, "No instrument found in json.");
+    attemptParseInvalidArgument(json, "No instrument found in JSON.");
   }
 
-  void test_parse_fail_with_no_detectors_in_json() {
+  void test_parse_fail_with_no_detectors_in_JSON() {
     std::string json = Mantid::TestHelpers::getJSONGeometryNoDetectors();
-    attemptParseInvalidArgument(json, "No detectors found in json.");
+    attemptParseInvalidArgument(json, "No detectors found in JSON.");
   }
 
-  void test_parse_fail_if_no_detector_ids_in_json() {
+  void test_parse_fail_if_no_detector_ids_in_JSON() {
     std::string json = Mantid::TestHelpers::getJSONGeometryNoDetectorIDs();
     attemptParseInvalidArgument(json, "No detector ids found in detector_1.");
   }
 
-  void test_parse_fail_if_no_x_pixel_offset_in_json() {
+  void test_parse_fail_if_no_x_pixel_offset_in_JSON() {
     std::string json = Mantid::TestHelpers::getJSONGeometryNoXPixelOffset();
     attemptParseInvalidArgument(json,
                                 "No x_pixel_offsets found in detector_1.");
   }
 
-  void test_parse_fail_if_no_y_pixel_offset_in_json() {
+  void test_parse_fail_if_no_y_pixel_offset_in_JSON() {
     std::string json = Mantid::TestHelpers::getJSONGeometryNoYPixelOffset();
     attemptParseInvalidArgument(json,
                                 "No y_pixel_offsets found in detector_1.");
   }
 
-  void test_parse_fail_if_no_pixel_shape_in_json() {
+  void test_parse_fail_if_no_pixel_shape_in_JSON() {
     std::string json = Mantid::TestHelpers::getJSONGeometryNoPixelShape();
     attemptParseInvalidArgument(
         json, "Insufficient pixel shape information found in detector_1.");
   }
 
-  void test_parse_fail_for_empty_off_geometry_in_json() {
+  void test_parse_fail_for_empty_off_geometry_in_JSON() {
     std::string json = Mantid::TestHelpers::getJSONGeometryEmptyOffGeometry();
     attemptParseInvalidArgument(
         json, "Insufficient pixel shape information found in detector_1.");
   }
 
-  void test_parse_fail_for_invalid_off_geometry_in_json() {
+  void test_parse_fail_for_invalid_off_geometry_in_JSON() {
     std::string json = Mantid::TestHelpers::getJSONGeometryInvalidOffGeometry();
     attemptParseInvalidArgument(
-        json, "Invalid off geometry provided in json pixel_shape.");
+        json, "Invalid off geometry provided in JSON pixel_shape.");
   }
 
-  void test_parse_fail_for_empty_cylindrical_geometry_in_json() {
+  void test_parse_fail_for_empty_cylindrical_geometry_in_JSON() {
     std::string json =
         Mantid::TestHelpers::getJSONGeometryEmptyCylindricalGeometry();
     attemptParseInvalidArgument(
         json, "Insufficient pixel shape information found in detector_1.");
   }
 
-  void test_parse_fail_for_invalid_cylindrical_geometry_in_json() {
+  void test_parse_fail_for_invalid_cylindrical_geometry_in_JSON() {
     std::string json =
         Mantid::TestHelpers::getJSONGeometryInvalidCylindricalGeometry();
     attemptParseInvalidArgument(
-        json, "Invalid cylindrical geometry provided in json pixel_shape.");
+        json, "Invalid cylindrical geometry provided in JSON pixel_shape.");
   }
 
   void test_parse_fail_for_missing_transformation_dependency() {
@@ -116,7 +115,7 @@ public:
         Mantid::TestHelpers::getJSONGeometryMissingTransformations();
     attemptParseInvalidArgument(json, "Could not find dependency "
                                       "/entry/instrument/detector_1/"
-                                      "transformations/location in json "
+                                      "transformations/location in JSON "
                                       "provided.");
   }
 
@@ -126,14 +125,14 @@ public:
     attemptParseInvalidArgument(json, "Could not find dependency "
                                       "/entry/instrument/detector_1/"
                                       "transformations/beam_direction_offset "
-                                      "in json provided.");
+                                      "in JSON provided.");
   }
 
   void test_parse_fail_for_missing_transformation_orientation() {
     std::string json = Mantid::TestHelpers::getJSONGeometryMissingOrientation();
     attemptParseInvalidArgument(json, "Could not find dependency "
                                       "/entry/instrument/detector_1/"
-                                      "transformations/orientation in json "
+                                      "transformations/orientation in JSON "
                                       "provided.");
   }
 
@@ -141,7 +140,7 @@ public:
     std::string json =
         Mantid::TestHelpers::getJSONGeometryMissingChopperInformation();
     attemptParseInvalidArgument(
-        json, "Full chopper definition missing in json provided.");
+        json, "Full chopper definition missing in JSON provided.");
   }
 
   void test_parse_fail_for_empty_monitor() {
@@ -149,7 +148,7 @@ public:
         Mantid::TestHelpers::getJSONGeometryMissingMonitorInformation();
     attemptParseInvalidArgument(
         json,
-        "Full monitor definition for monitor_1 missing in json provided.");
+        "Full monitor definition for monitor_1 missing in JSON provided.");
   }
 
   void test_load_full_instrument_simple_off_pixel_shape() {
@@ -162,6 +161,47 @@ public:
     TS_ASSERT_EQUALS(angleAxis.angle(), 0);
     TS_ASSERT_EQUALS(angleAxis.axis(), Eigen::Vector3d(1, 0, 0));
     TS_ASSERT_EQUALS(parser.sourceName(), "Unspecified");
+    TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
+    TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
+    const auto &detIDs = parser.detectorIDs(0);
+    TS_ASSERT_EQUALS(detIDs.size(), 4);
+    TS_ASSERT((detIDs == std::vector<detid_t>{1, 2, 3, 4}));
+    const auto &x = parser.xPixelOffsets(0);
+    TS_ASSERT((x == std::vector<double>{-0.299, -0.297, -0.299, -0.297}));
+    const auto &y = parser.yPixelOffsets(0);
+    TS_ASSERT((y == std::vector<double>{-0.299, -0.299, -0.297, -0.297}));
+    const auto &translation = parser.translation(0);
+    TS_ASSERT_EQUALS(translation, Eigen::Vector3d(0.971, 0, -0.049));
+    angleAxis = Eigen::AngleAxisd(parser.orientation(0));
+    TS_ASSERT_DELTA(angleAxis.angle(), parser.degreesToRadians(90), TOLERANCE);
+    TS_ASSERT_EQUALS(angleAxis.axis(), Eigen::Vector3d(0, 1, 0));
+    TS_ASSERT(parser.isOffGeometry(0));
+    std::vector<Eigen::Vector3d> testVerticesVec{{-0.001, -0.001, 0},
+                                                 {0.001, -0.001, 0},
+                                                 {0.001, 0.001, 0},
+                                                 {-0.001, 0.001, 0}};
+    assertVectors(parser.vertices(0), testVerticesVec);
+    std::vector<uint32_t> testFacesVec{0};
+    TS_ASSERT_EQUALS(testFacesVec, parser.faces(0));
+    std::vector<uint32_t> testWindingOrderVec{0, 1, 2, 3};
+    TS_ASSERT_EQUALS(testWindingOrderVec, parser.windingOrder(0));
+    const auto &cylinders = parser.cylinders(0);
+    TS_ASSERT(cylinders.empty());
+  }
+
+  void test_load_full_instrument_simple_with_source() {
+    std::string json =
+        Mantid::TestHelpers::getFullJSONInstrumentSimpleWithSource();
+    JSONGeometryParser parser(json);
+    TS_ASSERT_EQUALS(parser.name(), "SimpleInstrument");
+    TS_ASSERT_EQUALS(parser.sampleName(), "sample");
+    TS_ASSERT_EQUALS(parser.samplePosition(), Eigen::Vector3d(0, 0, 0));
+    auto angleAxis = Eigen::AngleAxisd(parser.sampleOrientation());
+    TS_ASSERT_EQUALS(angleAxis.angle(), 0);
+    TS_ASSERT_EQUALS(angleAxis.axis(), Eigen::Vector3d(1, 0, 0));
+    TS_ASSERT_EQUALS(parser.sourceName(), "moderator");
+    TS_ASSERT_EQUALS(parser.sourcePosition(),
+                     Eigen::Vector3d(0, 0, -28.900002));
     TS_ASSERT_EQUALS(parser.numberOfBanks(), 1);
     TS_ASSERT_EQUALS(parser.detectorName(0), "detector_1");
     const auto &detIDs = parser.detectorIDs(0);
@@ -436,5 +476,3 @@ public:
 private:
   std::string instrument;
 };
-
-#endif /* MANTID_GEOMETRY_JSONGEOMETRYPARSERTEST_H_ */

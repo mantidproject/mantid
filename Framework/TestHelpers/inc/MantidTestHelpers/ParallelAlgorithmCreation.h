@@ -1,11 +1,10 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#ifndef PARALLELALGORITHMCREATION_H_
-#define PARALLELALGORITHMCREATION_H_
+#pragma once
 
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/Property.h"
@@ -47,5 +46,3 @@ std::unique_ptr<T> create(const Mantid::Parallel::Communicator &comm) {
 }
 
 } // namespace ParallelTestHelpers
-
-#endif /*PARALLELALGORITHMCREATION_H_*/

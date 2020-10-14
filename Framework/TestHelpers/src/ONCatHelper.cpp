@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2012 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidTestHelpers/ONCatHelper.h"
 
@@ -72,10 +72,12 @@ int MockONCatAPI::sendHTTPSRequest(const std::string &url,
   return statusCode;
 }
 
+/// @cond DOXYGEN_BUG
 std::shared_ptr<MockONCatAPI>
 make_mock_oncat_api(const MockResponseMap &responseMap) {
   return std::make_shared<MockONCatAPI>(responseMap);
 }
+/// @endcond DOXYGEN_BUG
 
 std::unique_ptr<ONCat>
 make_oncat_with_mock_api(const std::shared_ptr<MockONCatAPI> &mockAPI) {
@@ -102,7 +104,7 @@ IOAuthTokenStore_uptr make_mock_token_store_already_logged_in() {
       "Bearer", 3600, "2KSL5aEnLvIudMHIjc7LcBWBCfxOHZ",
       "api:read data:read settings:read",
       boost::make_optional<std::string>("eZEiz7LbgFrkL5ZHv7R4ck9gOzXexb")));
-  return std::move(tokenStore);
+  return tokenStore;
 }
 
 } // namespace TestHelpers

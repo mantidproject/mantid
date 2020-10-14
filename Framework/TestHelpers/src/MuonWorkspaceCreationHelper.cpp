@@ -1,8 +1,8 @@
 // Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
-//     NScD Oak Ridge National Laboratory, European Spallation Source
-//     & Institut Laue - Langevin
+//   NScD Oak Ridge National Laboratory, European Spallation Source,
+//   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidTestHelpers/MuonWorkspaceCreationHelper.h"
 
@@ -93,8 +93,8 @@ MatrixWorkspace_sptr createCountsWorkspace(size_t nspec, size_t maxt,
   // Add number of good frames (required for Asymmetry calculation)
   ws->mutableRun().addProperty("goodfrm", 10);
   // Add instrument and run number
-  boost::shared_ptr<Geometry::Instrument> inst1 =
-      boost::make_shared<Geometry::Instrument>();
+  std::shared_ptr<Geometry::Instrument> inst1 =
+      std::make_shared<Geometry::Instrument>();
   inst1->setName("EMU");
   ws->setInstrument(inst1);
   ws->mutableRun().addProperty("run_number", 12345);
@@ -124,14 +124,14 @@ WorkspaceGroup_sptr
 createMultiPeriodWorkspaceGroup(const int &nPeriods, size_t nspec, size_t maxt,
                                 const std::string &wsGroupName) {
 
-  WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
+  WorkspaceGroup_sptr wsGroup = std::make_shared<WorkspaceGroup>();
   AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
 
   std::string wsNameStem = "MuonDataPeriod_";
   std::string wsName;
 
-  boost::shared_ptr<Geometry::Instrument> inst1 =
-      boost::make_shared<Geometry::Instrument>();
+  std::shared_ptr<Geometry::Instrument> inst1 =
+      std::make_shared<Geometry::Instrument>();
   inst1->setName("EMU");
 
   for (int period = 1; period < nPeriods + 1; period++) {
@@ -151,15 +151,15 @@ Mantid::API::WorkspaceGroup_sptr
 createMultiPeriodAsymmetryData(const int &nPeriods, size_t nspec, size_t maxt,
                                const std::string &wsGroupName) {
   Mantid::API::WorkspaceGroup_sptr wsGroup =
-      boost::make_shared<Mantid::API::WorkspaceGroup>();
+      std::make_shared<Mantid::API::WorkspaceGroup>();
   Mantid::API::AnalysisDataService::Instance().addOrReplace(wsGroupName,
                                                             wsGroup);
 
   std::string wsNameStem = "MuonDataPeriod_";
   std::string wsName;
 
-  boost::shared_ptr<Mantid::Geometry::Instrument> inst1 =
-      boost::make_shared<Mantid::Geometry::Instrument>();
+  std::shared_ptr<Mantid::Geometry::Instrument> inst1 =
+      std::make_shared<Mantid::Geometry::Instrument>();
   inst1->setName("EMU");
 
   for (int period = 1; period < nPeriods + 1; period++) {
@@ -184,7 +184,7 @@ createMultiPeriodAsymmetryData(const int &nPeriods, size_t nspec, size_t maxt,
 ITableWorkspace_sptr createDeadTimeTable(const size_t &nspec,
                                          std::vector<double> &deadTimes) {
 
-  auto deadTimeTable = boost::dynamic_pointer_cast<ITableWorkspace>(
+  auto deadTimeTable = std::dynamic_pointer_cast<ITableWorkspace>(
       WorkspaceFactory::Instance().createTable("TableWorkspace"));
 
   deadTimeTable->addColumn("int", "Spectrum Number");
@@ -215,7 +215,7 @@ createWorkspaceWithInstrumentandRun(const std::string &instrName, int runNumber,
                                     size_t nSpectra) {
 
   Geometry::Instrument_const_sptr instr =
-      boost::make_shared<Geometry::Instrument>(instrName);
+      std::make_shared<Geometry::Instrument>(instrName);
   MatrixWorkspace_sptr ws =
       WorkspaceFactory::Instance().create("Workspace2D", nSpectra, 1, 1);
   ws->setInstrument(instr);
@@ -237,7 +237,7 @@ createWorkspaceGroupConsecutiveDetectorIDs(const int &nWorkspaces, size_t nspec,
                                            size_t maxt,
                                            const std::string &wsGroupName) {
 
-  WorkspaceGroup_sptr wsGroup = boost::make_shared<WorkspaceGroup>();
+  WorkspaceGroup_sptr wsGroup = std::make_shared<WorkspaceGroup>();
   AnalysisDataService::Instance().addOrReplace(wsGroupName, wsGroup);
 
   std::string wsNameStem = "MuonDataPeriod_";
