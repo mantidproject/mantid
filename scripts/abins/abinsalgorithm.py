@@ -112,9 +112,17 @@ class AbinsAlgorithm:
                              validator=StringListValidator(choices),
                              doc="Name of an instrument for which analysis should be performed.")
 
+        # Populate list of possible instrument settings
+        valid_choices = ['']
+        for instrument in choices:
+            if ((instrument in abins.parameters.instruments)
+                and ('settings' in abins.parameters.instruments[instrument])):
+                valid_choices += sorted(list(abins.parameters.instruments[instrument]['settings']))
+
         self.declareProperty(name="Setting",
                              direction=Direction.Input,
                              defaultValue="",
+                             validator=StringListValidator(valid_choices),
                              doc="Setting choice for this instrument (e.g. monochromator)")
 
     def validate_common_inputs(self, issues: dict = None) -> dict:
