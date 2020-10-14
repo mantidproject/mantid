@@ -557,7 +557,7 @@
   </action>
   <action name="actionErase">
    <property name="text">
-    <string>Erase seleced cell(s)</string>
+    <string>Erase selected cell(s)</string>
    </property>
   </action>
   <action name="actionAddRow">
