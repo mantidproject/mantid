@@ -9,7 +9,7 @@ from mantid.simpleapi import config, mtd, D7YIGPositionCalibration, Load, LoadIL
 from mantid.api import ITableWorkspace
 import os.path
 from os import path
-
+import tempfile
 
 class D7YIGPositionCalibrationTest(unittest.TestCase):
 
@@ -22,8 +22,9 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
 
     def tearDown(self):
         mtd.clear()
-        if path.exists('test_shortWavelength.xml'):
-            os.remove('test_shortWavelength.xml')
+        output_path = os.path.join(tempfile.gettempdir(), 'test_shortWavelength.xml')
+        if path.exists(output_path):
+            os.remove(output_path)
 
     def test_algorithm_with_no_input_workspace_raises_exception(self):
         with self.assertRaises(RuntimeError):

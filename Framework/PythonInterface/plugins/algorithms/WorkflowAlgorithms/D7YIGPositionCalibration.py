@@ -13,6 +13,7 @@ from datetime import date
 import math
 import numpy as np
 import os
+import tempfile
 from xml.dom import minidom
 import xml.etree.ElementTree as ET
 
@@ -540,7 +541,10 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                 value.set('val', str(pixel_offsets[bank_no*self._D7NumberPixelsBank + pixel_no]))
 
         filename = self.getPropertyValue('CalibrationOutputFile')
-        outfile = open(os.path.join(ConfigService.Instance().getString('defaultsave.directory'), filename), "w")
+        output_path = filename
+        if not os.path.isabs(filename):
+            output_path = os.path.join(tempfile.gettempdir(), filename)
+        outfile = open(output_path, "w")
         outfile.write(self._prettify(param_file))
 
 
