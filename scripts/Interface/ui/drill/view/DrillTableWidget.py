@@ -338,6 +338,46 @@ class DrillTableWidget(QTableWidget):
             if item and c < len(tooltips):
                 item.setToolTip(tooltips[c])
 
+    def setRowLabel(self, row, label):
+        """
+        Set the label of a specific row.
+
+        Args:
+            row (int): row index
+            label (str): row label
+        """
+        item = self.verticalHeaderItem(row)
+        if item:
+            item.setText(label)
+        else:
+            self.setVerticalHeaderItem(row, QTableWidgetItem(label))
+
+    def getRowLabel(self, row):
+        """
+        Get the label of a specific row.
+
+        Args:
+            row (int): row index
+
+        Returns:
+            str: row label
+        """
+        item = self.verticalHeaderItem(row)
+        if item:
+            return item.text()
+        else:
+            return str(row + 1)
+
+    def delRowLabel(self, row):
+        """
+        Delete the row label. Actually, this method puts back the default label:
+        the row index (starting at 1).
+
+        Args:
+            ros (int): row index
+        """
+        self.setVerticalHeaderItem(row, QTableWidgetItem(str(row + 1)))
+
     def setHeaderFoldingState(self, columns):
         """
         Give a folding state for each column.

@@ -249,6 +249,21 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.assertEqual(self.table.horizontalHeaderItem(0).toolTip(),
                          "tooltip")
 
+    def test_setRowLabel(self):
+        self.table.setRowLabel(0, "test")
+        self.assertEqual(self.table.verticalHeaderItem(0).text(), "test")
+
+    def test_getRowLabel(self):
+        self.assertEqual(self.table.getRowLabel(0), "1")
+        self.table.setRowLabel(0, "test")
+        self.assertEqual(self.table.getRowLabel(0), "test")
+
+    def test_delRowLabel(self):
+        self.table.setRowLabel(0, "test")
+        self.assertEqual(self.table.getRowLabel(0), "test")
+        self.table.delRowLabel(0)
+        self.assertEqual(self.table.getRowLabel(0), "1")
+
 
 if __name__ == "__main__":
     unittest.main()
