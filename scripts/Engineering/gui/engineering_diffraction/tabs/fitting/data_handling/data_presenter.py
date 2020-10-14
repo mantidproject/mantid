@@ -27,7 +27,7 @@ class FittingDataPresenter(object):
         self.view.set_on_remove_selected_clicked(self._remove_selected_tracked_workspaces)
         self.view.set_on_remove_all_clicked(self._remove_all_tracked_workspaces)
         self.view.set_on_plotBG_clicked(self._plotBG)
-        self.view.set_on_apply_fit_clicked(self._start_seq_fit)
+        self.view.set_on_seq_fit_clicked(self._start_seq_fit)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
         self.view.set_on_xunit_changed(self._log_xunit_change)
         self.view.set_table_selection_changed(self._handle_selection_changed)
@@ -36,14 +36,14 @@ class FittingDataPresenter(object):
         self.plot_added_notifier = GenericObservable()
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
-        self.apply_fit_notifier = GenericObservable()
+        self.seq_fit_notifier = GenericObservable()
         # Obeservers
         self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
         self.func_changed_observer = GenericObserverWithArgPassing(self.func_changed)
         self.seq_fit_observer = GenericObserverWithArgPassing(self.fit_completed)
 
     def func_changed(self, fit_enabled):
-        self.view.set_apply_fit_button_enabled(fit_enabled)
+        self.view.set_seq_fit_button_enabled(fit_enabled)
 
     def fit_completed(self, fitprops):
         self.model.update_fit(fitprops)
@@ -51,7 +51,7 @@ class FittingDataPresenter(object):
     def _start_seq_fit(self):
         ws_list = self.model.get_ws_sorted_by_primary_log()
         # set off sequential fit
-        self.apply_fit_notifier.notify_subscribers(ws_list)
+        self.seq_fit_notifier.notify_subscribers(ws_list)
 
     def _log_xunit_change(self, xunit):
         logger.notice("Subsequent files will be loaded with the x-axis unit:\t{}".format(xunit))

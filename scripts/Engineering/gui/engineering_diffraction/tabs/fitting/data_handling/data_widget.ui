@@ -223,12 +223,12 @@ QGroupBox:title {
          </widget>
         </item>
 		<item row="0" column="3">
-         <widget class="QPushButton" name="button_ApplyFit">
+         <widget class="QPushButton" name="button_SeqFit">
           <property name="enabled">
            <bool>false</bool>
           </property>
           <property name="text">
-           <string>Apply Fit To All</string>
+		   <string>Sequential Fit</string>
           </property>
          </widget>
         </item>

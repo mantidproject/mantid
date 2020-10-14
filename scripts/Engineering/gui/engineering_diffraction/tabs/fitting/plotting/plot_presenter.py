@@ -26,7 +26,7 @@ class FittingPlotPresenter(object):
         self.workspace_added_observer = GenericObserverWithArgPassing(self.add_workspace_to_plot)
         self.workspace_removed_observer = GenericObserverWithArgPassing(self.remove_workspace_from_plot)
         self.all_workspaces_removed_observer = GenericObserver(self.clear_plot)
-        self.apply_fit_observer = GenericObserverWithArgPassing(self.apply_fit)
+        self.seq_fit_observer = GenericObserverWithArgPassing(self.do_sequential_fit)
         self.seq_fit_done_notifier = GenericObservable()
 
     def add_workspace_to_plot(self, ws):
@@ -47,7 +47,7 @@ class FittingPlotPresenter(object):
         self.view.clear_figure()
         self.view.update_fitbrowser()
 
-    def apply_fit(self, ws_list):
+    def do_sequential_fit(self, ws_list):
         fitprop_list = []
         for ws in ws_list:
             fitprop = self.view.read_fitprop_from_browser()

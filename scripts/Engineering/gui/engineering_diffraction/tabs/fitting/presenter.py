@@ -21,7 +21,7 @@ class FittingPresenter(object):
             self.plot_widget.workspace_added_observer)
         self.data_widget.presenter.all_plots_removed_notifier.add_subscriber(
             self.plot_widget.all_workspaces_removed_observer)
-        self.data_widget.presenter.apply_fit_notifier.add_subscriber(self.plot_widget.apply_fit_observer)
+        self.data_widget.presenter.seq_fit_notifier.add_subscriber(self.plot_widget.seq_fit_observer)
         self.plot_widget.view.fit_browser.fit_notifier.add_subscriber(self.data_widget.presenter.fit_observer)
         self.plot_widget.view.fit_browser.func_changed_notifier.add_subscriber(
             self.data_widget.presenter.func_changed_observer)
