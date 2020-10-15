@@ -322,35 +322,8 @@ class Background(object):
         if index < len(self.functions):
             self.functions[index].update(func)
         else:
-            raise ValueError(f"Invalid index ({index}) provided: Background is made of {len(self.functions)} Function(s).")
-
-    def index_of(self, func):
-        """
-        Returns the index of the Function object provided.
-
-        @param func: The Function object to search for.
-        @returns The index of the Function object provided.
-        """
-        if not isinstance(func, Function):
-            raise TypeError(f"Expected a Function object but found {type(function)} object.")
-
-        for index, function in enumerate(self.functions):
-            if func == function:
-                return index
-
-        raise RuntimeError(f"{str(func.toString())} was not found in the Background object.")
-
-    def function(self, index):
-        """
-        Returns the Function object at the given index in the Background object.
-
-        @param index: The index of the Function object to be returned.
-        @returns The Function object at the given index in the Background object.
-        """
-        if index < len(self.functions):
-            return self.functions[index]
-
-        raise ValueError(f"Invalid index ({index}) provided: Background is made of {len(self.functions)} Function(s).")
+            raise ValueError(f"Invalid index ({index}) provided: Background is made of {len(self.functions)} "
+                             f"Function(s).")
 
 
 class ResolutionModel:
