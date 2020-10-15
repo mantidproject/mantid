@@ -41,36 +41,39 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
 
     def d7_short_wavelength_test(self):
         approximate_wavelength = '3.14' # Angstrom
-        D7YIGPositionCalibration(InputWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
-                                 MinimalDistanceBetweenPeaks=1.75, BankOffsets=[-3, -3, 1],
-                                 FitOutputWorkspace='test_shortWavelength')
+        fit_output_workspace = 'test_shortWavelength'
         calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
-                                               'test_shortWavelength.xml')
+                                               '{}.xml'.format(fit_output_workspace))
+        D7YIGPositionCalibration(InputWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
+                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
+                                 MinimalDistanceBetweenPeaks=1.75, BankOffsets=[-3, -3, 1], ClearCache=True,
+                                 FitOutputWorkspace='test_shortWavelength')
         self.assertTrue(calibration_output_path)
         self._check_fit_output('test_shortWavelength')
         self._check_load_data_with_calibration(calibration_output_path)
 
     def d7_intermediate_wavelength_test(self):
         approximate_wavelength = '4.8' # Angstrom
-        D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_intermediateWavelength.xml',
-                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-3, -3, 1],
-                                 FitOutputWorkspace='test_intermediateWavelength')
+        fit_output_workspace = 'test_intermediateWavelength'
         calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
-                                               'test_intermediateWavelength.xml')
+                                               '{}.xml'.format(fit_output_workspace))
+        D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
+                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
+                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-3, -3, 1], ClearCache=True,
+                                 FitOutputWorkspace='test_intermediateWavelength')
         self.assertTrue(path.exists(calibration_output_path))
         self._check_fit_output('test_intermediateWavelength')
         self._check_load_data_with_calibration(calibration_output_path)
 
     def d7_long_wavelength_test(self):
         approximate_wavelength = '5.7' # Angstrom
-        D7YIGPositionCalibration(InputWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_longWavelength.xml',
-                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-3, -3, 1],
-                                 FitOutputWorkspace='test_longWavelength')
+        fit_output_workspace = 'test_longWavelength'
         calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
-                                               'test_longWavelength.xml')
+                                               '{}.xml'.format(fit_output_workspace))
+        D7YIGPositionCalibration(InputWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
+                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
+                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-3, -3, 1], ClearCache=True,
+                                 FitOutputWorkspace=fit_output_workspace)
         self.assertTrue(path.exists(calibration_output_path))
         self._check_fit_output('test_longWavelength')
         self._check_load_data_with_calibration(calibration_output_path)

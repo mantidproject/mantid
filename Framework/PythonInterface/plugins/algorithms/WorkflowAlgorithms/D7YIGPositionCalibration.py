@@ -178,6 +178,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             self._created_ws_names.append(detector_parameters.name())
         if self.getProperty('ClearCache').value:
             DeleteWorkspaces(WorkspaceList=self._created_ws_names)
+        self._created_ws_names.clear() #cleanup
 
     def _get_scan_data(self, ws_name, progress):
         """ Loads YIG scan data, removes monitors, and prepares
@@ -393,7 +394,6 @@ class D7YIGPositionCalibration(PythonAlgorithm):
 
         fit_output_name = self.getPropertyValue('FitOutputWorkspace')
         # need to set up a function for each pixel with proper ties
-        function_list = []
         ties_lambda_list = []
         ties_gradient_list = []
         ties_bank_off_list = []
@@ -462,7 +462,6 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             raise RuntimeError("Fitting detector positions and wavelength failed due to {}."
                                "\nConsider changing initial parameters.".format(e))
         param_table = fit_output.OutputParameters
-
         self._created_ws_names.append('det_fit_out_{}_Workspaces'.format(fit_output_name))
         self._created_ws_names.append('det_fit_out_{}_NormalisedCovarianceMatrix'.format(fit_output_name))
         return param_table
