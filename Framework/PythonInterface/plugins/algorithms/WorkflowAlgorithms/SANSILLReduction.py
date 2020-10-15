@@ -132,7 +132,10 @@ class SANSILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('BeamFinderMethod', beam)
 
-        self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.), doc='Sample thickness [cm]')
+        self.declareProperty('SampleThickness', 0.1,
+                             validator=FloatBoundedValidator(lower=-1),
+                             doc='Sample thickness [cm] (if -1, the value is '
+                             'taken from the nexus file).')
 
         self.setPropertySettings('SampleThickness', sample)
 
@@ -545,6 +548,50 @@ class SANSILLReduction(PythonAlgorithm):
         if mask_ws:
             self._mask(ws, mask_ws)
 
+    def _apply_thickness(self, ws):
+        """
+            Perform the normalization by sample thickness. In case the provided
+            thickness is -1, this method will try to get it from the sample
+            logs.
+            @param ws : input workspace on wich the normalization is applied.
+        """
+        thickness = self.getProperty('SampleThickness').value
+        if thickness == -1:
+            try:
+                run = mtd[ws].getRun()
+                thickness = run.getLogData('sample.thickness').value
+                self.log().information("Sample thickness read from the sample "
+                                       "logs: {0} cm.".format(thickness))
+            except:
+                thickness = self.getProperty("SampleThickness").getDefault
+                thickness = float(thickness)
+                self.log().warning("Sample thickness not found in the sample "
+                                   "logs. Using the default value: {:.2f}"
+                                   .format(thickness))
+            finally:
+                self.setProperty('SampleThickness', thickness)
+        NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws,
+                             SampleThickness=thickness)
+
+    def _set_sample_title(self, ws):
+        """
+            Set the workspace title using Nexus file fields.
+            @param ws : input workspace
+        """
+        run = mtd[ws].getRun()
+        title = ''
+        if run.hasProperty('sample_description'):
+            title = run.getLogData('sample_description').value
+            if title:
+                mtd[ws].setTitle(title)
+                return
+
+        if run.hasProperty('sample.sampleId'):
+            title = run.getLogData('sample.sampleId').value
+            if title:
+                title = "Sample ID = " + title
+                mtd[ws].setTitle(title)
+
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Sample']
@@ -612,8 +659,7 @@ class SANSILLReduction(PythonAlgorithm):
                         if container_ws:
                             self._apply_container(ws, container_ws)
                         self._apply_masks(ws)
-                        thickness = self.getProperty('SampleThickness').value
-                        NormaliseByThickness(InputWorkspace=ws, OutputWorkspace=ws, SampleThickness=thickness)
+                        self._apply_thickness(ws)
                         # parallax (gondola) effect
                         if self._instrument in ['D22', 'D22lr', 'D33']:
                             self._apply_parallax(ws)
@@ -622,6 +668,7 @@ class SANSILLReduction(PythonAlgorithm):
                         if sensitivity_out:
                             self._process_sensitivity(ws, sensitivity_out)
                         self._process_sample(ws)
+                        self._set_sample_title(ws)
                         progress.report()
         self._finalize(ws, process)
 
