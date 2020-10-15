@@ -465,12 +465,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         singleCorrectionPerPOL = False
         if mtd[ws].getNumberOfEntries() != 2*mtd[pol_eff_ws].getNumberOfEntries():
             singleCorrectionPerPOL = True
-            if self._method_data_structure == 'Uniaxial':
-                nPolarisations = 2
-            elif self._method_data_structure == 'XYZ':
-                nPolarisations = 3
-            elif self._method_data_structure == '10p':
-                nPolarisations = 5
+            nMeasurements, _ = self._data_structure_helper()
+            nPolarisations = math.floor(nMeasurements / 2.0)
             if mtd[pol_eff_ws].getNumberOfEntries() != nPolarisations:
                 raise RuntimeError("Incompatible number of polarisations between quartz input and sample.")
 
@@ -575,25 +571,34 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         return sample_ws
 
-    def _user_method_data_structure(self):
+    def _data_structure_helper(self):
         nMeasurements = 0
         nComponents = 0
-        if self._user_method == '10p':
-            nMeasurements = 10
-            nComponents = 3
-        elif self._user_method == 'XYZ':
-            nMeasurements = 6
-            nComponents = 3
-        elif self._user_method == 'Uniaxial':
-            nMeasurements = 2
-            nComponents = 2
+        if self._user_method == 'None':
+            if self._method_data_structure == '10p':
+                nMeasurements = 10
+            elif self._method_data_structure == 'XYZ':
+                nMeasurements = 6
+            elif self._method_data_structure == 'Uniaxial':
+                nMeasurements = 2
+        else:
+            if self._user_method == '10p':
+                nMeasurements = 10
+                nComponents = 3
+            elif self._user_method == 'XYZ':
+                nMeasurements = 6
+                nComponents = 3
+            elif self._user_method == 'Uniaxial':
+                nMeasurements = 2
+                nComponents = 2
+
         return nMeasurements, nComponents
 
     def _component_separation(self, ws):
         """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
         current sample. The method used is based on either the user's choice or the provided data structure."""
 
-        nMeasurements, nComponents = self._user_method_data_structure()
+        nMeasurements, nComponents = self._data_structure_helper()
         componentNames = ['Coherent', 'Incoherent', 'Magnetic']
         number_histograms = mtd[ws][0].getNumberHistograms()
         block_size = mtd[ws][0].blocksize()
@@ -693,12 +698,11 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _detector_efficiency_correction(self, ws, component_ws):
         """Corrects detector efficiency and normalises data to either vanadium, incoherent scattering, or paramagnetic scattering."""
 
-        nMeasurements, _ = self._user_method_data_structure()
-
+        nMeasurements, _ = self._data_structure_helper()
         if component_ws:
             conjoined_components = self._conjoin_components(component_ws)
         calibrationType = self.getPropertyValue('DetectorEfficiencyCalibration')
-        normaliseToAbsoluteUnits = self.getProperty('AbsoluteUnitsNormalisation')
+        normaliseToAbsoluteUnits = self.getProperty('AbsoluteUnitsNormalisation').value
         tmp_name = 'det_eff'
         tmp_names = []
         if calibrationType == 'Vanadium':
