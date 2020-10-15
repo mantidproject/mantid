@@ -225,10 +225,14 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                              StringListValidator(["None", "SampleOnly", "SampleAndContainer", "FullPaalmanPings"]),
                              doc="Specifies the Absorption Correction terms to calculate, if any.")
         self.declareProperty("SampleFormula", "", doc="Chemical formula of the sample")
-        self.declareProperty("MeasuredMassDensity", defaultValue=0.0,
-                             validator=FloatBoundedValidator(lower=0., exclusive=False))  # in g/cc, way to validate?
-        self.declareProperty("ContainerShape", defaultValue="PAC06", doc="Defined standard container geometries")
-        self.declareProperty("VRodType", defaultValue="VAN06", doc="Vanadium rod geometry")
+        self.declareProperty("MeasuredMassDensity", defaultValue=0.1,
+                             validator=FloatBoundedValidator(lower=0., exclusive=True))  # in g/cc, way to validate?
+        container_validator = StringListValidator(["QuartzTube03", "PAC03", "PAC06", "PAC08", "PAC10"])
+        self.declareProperty("ContainerShape", defaultValue="PAC06", doc="Defined standard container geometries",
+                             validator=container_validator)
+        vanadium_validator = StringListValidator(["VAN06"])
+        self.declareProperty("VRodType", defaultValue="VAN06", doc="Vanadium rod geometry",
+                             validator=vanadium_validator)
 
         workspace_prop = WorkspaceProperty('SplittersWorkspace', '', Direction.Input, PropertyMode.Optional)
         self.declareProperty(workspace_prop, "Splitters workspace for split event workspace.")
@@ -253,6 +257,11 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
     def validateInputs(self):
         issues = dict()
+
+        # If doing absorption correction, make sure the sample formula is correct
+        if self.getProperty("TypeOfCorrection").value != "None":
+            if self.getProperty("SampleFormula").value == '':
+                issues['SampleFormula'] = "A sample formula must be provided."
 
         return issues
 

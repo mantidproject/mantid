@@ -121,7 +121,7 @@
       </container>
 
 	 <!-- PG3 Vanadium rod -->
-	 <container id="PG3Van" material="vanadium">
+	 <container id="VAN06" material="vanadium">
 	<geometry>
 	  <cylinder id="cyla">
 	    <centre-of-bottom-base x="0.0" y="0.0" z="0.0"/>
