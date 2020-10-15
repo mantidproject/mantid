@@ -90,6 +90,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       mantidqt/widgets/test/test_messagedisplay.py
       mantidqt/widgets/test/test_fitpropertybrowser.py
       mantidqt/widgets/test/test_fitpropertybrowserbase.py
+      mantidqt/widgets/test/test_fitpropertybrowserplotinteraction.py
       mantidqt/widgets/test/test_functionbrowser.py
       mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
       mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py

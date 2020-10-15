@@ -11,10 +11,20 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
+New features
+############
+- New algorithm to clip peaks, providing a background estimation :ref:`ClipPeaks <algm-ClipPeaks>`.
+- Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
+- New algorithm :ref:`AbsorptionCorrectionPaalmanPings <algm-AbsorptionCorrectionPaalmanPings>` uses a numerical integration method to calculate attenuation factors for all Paalmin Pings terms
+
+Improvements
+############
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
 
 New features
 ############
 
+- Modify filenames of xye outputs from running a focus in the Pearl power diffraction scripts
 - Remove _noatten workspace that was produced by the Pearl powder diffraction scripts when run with perform_attenuation=True
 
 Bugfixes

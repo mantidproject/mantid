@@ -66,9 +66,11 @@ It can can be generated in one of three ways:
    ``InputWorkspace``).
 3. Specifying the mass density. In this case the number density is calculated as
 
-.. math:: \rho_n = \frac{N_{atoms} \rho_m N_A}{M_r}
+.. math:: \rho_{n,eff} = f \rho_n = \frac{N_{atoms} \rho_m N_A}{\sum_{i}n_{i}M_i}
 
-where :math:`\rho_m` is the mass density, :math:`N_A` is the Avogadro constant, and :math:`M_r` the relative molecular mass.
+where :math:`f` is the packing fraction, :math:`\rho_m` is the mass density, :math:`N_A` is the Avogadro constant, and :math:`M_i` is the relative molecular mass of the ith atom.
+The effective number density, :math:`\rho_{n,eff}`, should be used for :ref:`absorption calculations<Sample Corrections>`.
+However, the number density, :math:`\rho_n` should be used for refinements and converting between real space representations.
 
 Attenuation Coefficients
 ##############################
