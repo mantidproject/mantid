@@ -302,21 +302,6 @@ class Background(object):
             self.functions.append(self.background)
         self.functions.extend(functions)
 
-    def clone(self):
-        """Make a copy of self."""
-        n = 0
-        peak_copy, background_copy = None, None
-        if self.peak is not None:
-            peak_copy = self.peak.clone()
-            n += 1
-        if self.background is not None:
-            background_copy = self.background.clone()
-            n += 1
-
-        functions_copy = [function.clone() for function in self.functions[n:]]
-
-        return Background(peak=peak_copy, background=background_copy, functions=functions_copy)
-
     def functions(self):
         """Return the list of functions which make up the Background object."""
         return self.functions
