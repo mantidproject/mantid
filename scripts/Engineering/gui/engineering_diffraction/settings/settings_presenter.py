@@ -18,7 +18,7 @@ DEFAULT_SETTINGS = {
     "logs": ','.join(
         ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
     "primary_log": 'strain',
-    "sort_ascending": True
+    "sort_ascending": "true"
 }
 
 ALL_LOGS = ','.join(
@@ -108,6 +108,7 @@ class SettingsPresenter(object):
         if not self._validate_settings(self.settings):
             self.settings = DEFAULT_SETTINGS.copy()
             self._save_settings_to_file()
+        self._find_files()
 
     @staticmethod
     def _validate_settings(settings):
