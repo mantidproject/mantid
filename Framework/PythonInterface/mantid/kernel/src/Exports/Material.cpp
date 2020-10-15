@@ -76,9 +76,11 @@ void export_Material() {
            return_value_policy<copy_const_reference>(), "Name of the material")
       .add_property("numberDensity", make_function(&Material::numberDensity),
                     "Number density in atoms per A^-3")
-      .add_property("numberDensityEffective", make_function(&Material::numberDensityEffective),
+      .add_property("numberDensityEffective",
+                    make_function(&Material::numberDensityEffective),
                     "Effective number density in atoms per A^-3")
-      .add_property("packingFraction", make_function(&Material::packingFraction),
+      .add_property("packingFraction",
+                    make_function(&Material::packingFraction),
                     "Packing fraction as a number, ideally, 0 to 1")
       .add_property("temperature", make_function(&Material::temperature),
                     "Temperature")
