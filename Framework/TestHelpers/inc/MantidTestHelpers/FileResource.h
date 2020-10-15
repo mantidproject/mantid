@@ -4,8 +4,9 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-/** RAII: Gives a clean file destination and removes the file when
- * handle is out of scope. Must be stack allocated.
+//
+/** RAII File handle which gives a clean file destination and removes the file
+ * when handle is out of scope. Must be stack allocated.
  *
  * @author Takudzwa Makoni, RAL (UKRI), ISIS
  * @date 06/08/2019
@@ -28,7 +29,7 @@ public:
 private:
   bool m_debugMode;
   boost::filesystem::path m_full_path; // full path to file
-  // prevent heap allocation for ScopedFileHandle
+  // prevent heap allocation for FileResource
 protected:
   static void *operator new(std::size_t); // prevent heap allocation of scalar.
   static void *operator new[](std::size_t); // prevent heap allocation of array.

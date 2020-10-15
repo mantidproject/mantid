@@ -291,7 +291,7 @@ used.
     const auto &compInfo = *instr.first;
 
     // full H5 path to the NXinstrument group
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, compInfo.name(compInfo.root())};
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME, compInfo.name(compInfo.root())};
 
     // assert no exception thrown on open of instrument group in file with
     // manually set name.
@@ -390,7 +390,7 @@ used.
     NexusGeometrySave::saveInstrument(instr, destinationFile,
                                       DEFAULT_ROOT_ENTRY_NAME, m_mockLogger);
     NexusFileReader tester(destinationFile);
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME,
                        "basic_rect" /*instrument name*/};
 
     int numOfNXDetectors = tester.countNXgroup(path, NX_DETECTOR);
@@ -451,7 +451,7 @@ Instrument cache.
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {
+    FullH5Path path = {
         DEFAULT_ROOT_ENTRY_NAME,
         "test-instrument-with-detector-rotations" /*instrument name*/,
         "detector-stage" /*bank name*/, TRANSFORMATIONS};
@@ -512,7 +512,7 @@ Instrument cache.
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument-with-monitor",
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument-with-monitor",
                        "test-monitor", TRANSFORMATIONS};
 
     // get angle magnitude in dataset
@@ -569,7 +569,7 @@ Instrument cache.
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME,
                        "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
@@ -626,7 +626,7 @@ Instrument cache.
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME,
                        "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
@@ -685,7 +685,7 @@ Instrument cache.
     NexusFileReader tester(destinationFile);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME,
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME,
                        "test-instrument" /*instrument name*/,
                        "source" /*source name*/, TRANSFORMATIONS};
 
@@ -722,7 +722,7 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to access NXtransformations group with test utility
-    FullNXPath path = {
+    FullH5Path path = {
         DEFAULT_ROOT_ENTRY_NAME,
         "test-instrument-with-detector-rotations" /*instrument name*/,
         "detector-stage" /*bank name*/, TRANSFORMATIONS};
@@ -762,7 +762,7 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument-with-monitor",
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument-with-monitor",
                        "test-monitor", TRANSFORMATIONS};
 
     // call saveInstrument passing test instrument as parameter
@@ -804,7 +804,7 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // full path to group to be opened in test utility
-    FullNXPath path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument", "source",
+    FullH5Path path = {DEFAULT_ROOT_ENTRY_NAME, "test-instrument", "source",
                        TRANSFORMATIONS};
 
     // call saveinstrument passing test instrument as parameter
@@ -858,7 +858,7 @@ Instrument cache.
 
     // instance of test utility to check saved file
     NexusFileReader tester(destinationFile);
-    FullNXPath path = {
+    FullH5Path path = {
         DEFAULT_ROOT_ENTRY_NAME,
         "test-instrument-with-detector-rotations" /*instrument name*/,
         "detector-stage" /*bank name*/};
@@ -931,11 +931,11 @@ Instrument cache.
             detectorLocation, sourceRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    FullNXPath transformationsPath = {
+    FullH5Path transformationsPath = {
         DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
-    FullNXPath sourcePath = transformationsPath;
+    FullH5Path sourcePath = transformationsPath;
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument with test instrument as parameter
@@ -956,7 +956,7 @@ Instrument cache.
     // assert that the NXsource depends on dataset 'orientation' in the
     // transformationsPath, since the dataset exists.
     bool sourceDependencyIsOrientation = tester.dataSetHasStrValue(
-        DEPENDS_ON, toNXPathString(transformationsPath) + "/" + ORIENTATION,
+        DEPENDS_ON, toH5PathString(transformationsPath) + "/" + ORIENTATION,
         sourcePath);
     TS_ASSERT(sourceDependencyIsOrientation);
 
@@ -997,11 +997,11 @@ Instrument cache.
             detectorLocation, sourceRotation);
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
-    FullNXPath transformationsPath = {
+    FullH5Path transformationsPath = {
         DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
-    FullNXPath sourcePath = transformationsPath;
+    FullH5Path sourcePath = transformationsPath;
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument with test instrument as parameter
@@ -1023,7 +1023,7 @@ Instrument cache.
     // transformationsPath, since the dataset exists.
     bool sourceDependencyIsLocation = tester.dataSetHasStrValue(
         DEPENDS_ON /*dataset name*/,
-        toNXPathString(transformationsPath) + "/" + LOCATION /*dataset value*/,
+        toH5PathString(transformationsPath) + "/" + LOCATION /*dataset value*/,
         sourcePath /*where the dataset lives*/);
     TS_ASSERT(sourceDependencyIsLocation);
 
@@ -1066,12 +1066,12 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // path to NXtransformations subgoup in NXsource
-    FullNXPath transformationsPath = {
+    FullH5Path transformationsPath = {
         DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     // path to NXsource group
-    FullNXPath sourcePath = transformationsPath;
+    FullH5Path sourcePath = transformationsPath;
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument passing test instrument as parameter
@@ -1089,15 +1089,15 @@ Instrument cache.
 
     bool sourceDependencyIsOrientation =
         tester.dataSetHasStrValue(DEPENDS_ON /*dataset name*/,
-                                  toNXPathString(transformationsPath) + "/" +
+                                  toH5PathString(transformationsPath) + "/" +
                                       ORIENTATION /*value in dataset*/,
                                   sourcePath /*where the dataset lives*/);
     TS_ASSERT(sourceDependencyIsOrientation);
-    auto x = toNXPathString(transformationsPath) + "/" +
+    auto x = toH5PathString(transformationsPath) + "/" +
              LOCATION /*dAttribute value*/;
     bool orientationDependencyIsLocation = tester.hasAttributeInDataSet(
         ORIENTATION /*dataset name*/, DEPENDS_ON /*dAttribute name*/,
-        toNXPathString(transformationsPath) + "/" +
+        toH5PathString(transformationsPath) + "/" +
             LOCATION /*dAttribute value*/,
         transformationsPath
         /*where the dataset lives*/);
@@ -1137,12 +1137,12 @@ Instrument cache.
     auto instr = Mantid::Geometry::InstrumentVisitor::makeWrappers(*instrument);
 
     // path to NXtransformations subgoup in NXsource
-    FullNXPath transformationsPath = {
+    FullH5Path transformationsPath = {
         DEFAULT_ROOT_ENTRY_NAME, "test-instrument" /*instrument name*/,
         "source" /*source name*/, TRANSFORMATIONS};
 
     // path to NXsource group
-    FullNXPath sourcePath = transformationsPath;
+    FullH5Path sourcePath = transformationsPath;
     sourcePath.pop_back(); // source path is one level abve transformationsPath
 
     // call saveInstrument passing test instrument as parameter

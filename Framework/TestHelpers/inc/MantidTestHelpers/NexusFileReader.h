@@ -25,9 +25,9 @@
 
 namespace Mantid {
 namespace NexusGeometry {
-using FullNXPath = std::vector<std::string>;
+using FullH5Path = std::vector<std::string>;
 // get Nexus file path as string. Used in Nexus Geometry unit tests.
-std::string toNXPathString(FullNXPath &path) {
+std::string toH5PathString(FullH5Path &path) {
   std::string pathString = "";
   for (const std::string &grp : path) {
     pathString += "/" + grp;
@@ -87,7 +87,7 @@ public:
     }
   }
 
-  int countNXgroup(const FullNXPath &pathToGroup, const std::string &nxClass) {
+  int countNXgroup(const FullH5Path &pathToGroup, const std::string &nxClass) {
     int counter = 0;
     H5::Group parentGroup = openfullH5Path(pathToGroup);
     for (hsize_t i = 0; i < parentGroup.getNumObjs(); ++i) {
@@ -120,7 +120,7 @@ public:
 
   // read a multidimensional dataset and returns vector containing the data
   template <typename T>
-  std::vector<T> readDataSetMultidimensional(FullNXPath &pathToGroup,
+  std::vector<T> readDataSetMultidimensional(FullH5Path &pathToGroup,
                                              const std::string &dataSetName) {
 
     std::vector<T> dataInFile;
@@ -139,7 +139,7 @@ public:
 
   /* safely open a HDF5 group path with additional helpful
    debug information to output where open fails) */
-  H5::Group openfullH5Path(const FullNXPath &pathList) const {
+  H5::Group openfullH5Path(const FullH5Path &pathList) const {
 
     H5::Group child;
     H5::Group parent = m_file.openGroup(pathList[0]);
@@ -216,7 +216,7 @@ public:
   } // namespace
 
   double readDoubleFromDataset(const std::string &datasetName,
-                               const FullNXPath &pathToGroup) {
+                               const FullH5Path &pathToGroup) {
     double value;
     int rank = 1;
     hsize_t dims[static_cast<hsize_t>(1)];
@@ -235,7 +235,7 @@ public:
   std::vector<double>
   readDoubleVectorFrom_d_Attribute(const std::string &attrName,
                                    const std::string &datasetName,
-                                   const FullNXPath &pathToGroup) {
+                                   const FullH5Path &pathToGroup) {
 
     // open dataset and read.
     H5::Group parentGroup = openfullH5Path(pathToGroup);
@@ -299,7 +299,7 @@ public:
     return false;
   }
 
-  bool hasDataset(const std::string &dsetName, const FullNXPath &pathToGroup) {
+  bool hasDataset(const std::string &dsetName, const FullH5Path &pathToGroup) {
 
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
@@ -329,7 +329,7 @@ public:
 
   bool dataSetHasStrValue(
       const std::string &dataSetName, const std::string &dataSetValue,
-      const FullNXPath &pathToGroup /*where the dataset lives*/) const {
+      const FullH5Path &pathToGroup /*where the dataset lives*/) const {
 
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
@@ -348,7 +348,7 @@ public:
   // check if dataset or group has name-specific attribute
   bool hasAttributeInGroup(const std::string &attrName,
                            const std::string &attrVal,
-                           const FullNXPath &pathToGroup) {
+                           const FullH5Path &pathToGroup) {
 
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
@@ -361,7 +361,7 @@ public:
   }
 
   bool hasNXAttributeInGroup(const std::string &attrVal,
-                             const FullNXPath &pathToGroup) {
+                             const FullH5Path &pathToGroup) {
 
     H5::Group parentGroup = openfullH5Path(pathToGroup);
 
@@ -375,7 +375,7 @@ public:
   bool hasAttributeInDataSet(
       const std::string &dataSetName, const std::string &attrName,
       const std::string &attrVal,
-      const FullNXPath &pathToGroup /*where the dataset lives*/) {
+      const FullH5Path &pathToGroup /*where the dataset lives*/) {
 
     H5::Attribute attribute;
     H5::Group parentGroup = openfullH5Path(pathToGroup);
@@ -389,7 +389,7 @@ public:
 
   bool hasNXAttributeInDataSet(const std::string &dataSetName,
                                const std::string &attrVal,
-                               const FullNXPath &pathToGroup) {
+                               const FullH5Path &pathToGroup) {
     H5::Attribute attribute;
     H5::Group parentGroup = openfullH5Path(pathToGroup);
     H5::DataSet dataSet = parentGroup.openDataSet(dataSetName);
