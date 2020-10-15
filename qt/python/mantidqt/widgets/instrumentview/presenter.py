@@ -35,9 +35,8 @@ class InstrumentViewPresenter(ObservingPresenter):
         return self.ws_name == name
 
     def replace_workspace(self, workspace_name, workspace):
+        self.container.widget.replaceWs(workspace_name, workspace)
         # replace is handled by the InstrumentWidget inside C++
-        # this method is also unused, but is added to conform to the interface
-        pass
 
     def rename_workspace(self, old_name, new_name):
         # rename is handled by the InstrumentWidget inside C++
