@@ -297,6 +297,9 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._outDir = self.getProperty("OutputDirectory").value
         self._outPrefix = self.getProperty("OutputFilePrefix").value.strip()
         self._outTypes = self.getProperty("SaveAs").value.lower()
+        self._absMethod = self.getProperty("TypeOfCorrection").value
+        self._sampleFormula = self.getProperty("SampleFormula").value
+        self._massDensity = self.getProperty("MeasuredMassDensity").value
 
         samRuns = self._getLinearizedFilenames("Filename")
         self._determineInstrument(samRuns[0])
@@ -360,13 +363,16 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                     focuspos['Azimuthal'] = phis
         # ENDIF
 
+        # calculate absorption from first sample run
+        a_sample, a_container = self._calculate_absorption_correction(samRuns[0])
+
         if self.getProperty("Sum").value and len(samRuns) > 1:
             self.log().information('Ignoring value of "Sum" property')
             # Sum input sample runs and then do reduction
             if self._splittersWS is not None:
                 raise NotImplementedError("Summing spectra and filtering events are not supported simultaneously.")
 
-            sam_ws_name = self._focusAndSum(samRuns, preserveEvents=preserveEvents)
+            sam_ws_name = self._focusAndSum(samRuns, preserveEvents=preserveEvents, absorptionWksp=a_sample)
             assert isinstance(sam_ws_name, str), 'Returned from _focusAndSum() must be a string but not' \
                                                  '%s. ' % str(type(sam_ws_name))
 
@@ -380,7 +386,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 self._info = None
                 if sample_time_filter_wall[0] == 0. and sample_time_filter_wall[-1] == 0. \
                         and self._splittersWS is None:
-                    returned = self._focusAndSum([sam_run_number], preserveEvents=preserveEvents)
+                    returned = self._focusAndSum([sam_run_number], preserveEvents=preserveEvents, absorptionWksp=a_sample)
                 else:
                     returned = self._focusChunks(sam_run_number, sample_time_filter_wall,
                                                  splitwksp=self._splittersWS,
@@ -417,7 +423,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             # process the container
             can_run_numbers = self._info["container"].value
             can_run_numbers = ['%s_%d' % (self._instrument, value) for value in can_run_numbers]
-            can_run_ws_name = self._process_container_runs(can_run_numbers, samRunIndex, preserveEvents)
+            can_run_ws_name = self._process_container_runs(can_run_numbers, samRunIndex, preserveEvents, absorptionWksp=a_sample)
             if can_run_ws_name is not None:
                 workspacelist.append(can_run_ws_name)
 
@@ -1200,7 +1206,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         return do_split_raw_wksp, num_out_wksp
 
-    def _process_container_runs(self, can_run_numbers, samRunIndex, preserveEvents):
+    def _process_container_runs(self, can_run_numbers, samRunIndex, preserveEvents, absorptionWksp=None):
         """ Process container runs
         :param can_run_numbers:
         :return:
@@ -1232,7 +1238,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 fileArg = [can_run_number]
                 if self.getProperty("Sum").value:
                     fileArg = can_run_numbers
-                self._focusAndSum(fileArg, preserveEvents, final_name=can_run_ws_name)
+                self._focusAndSum(fileArg, preserveEvents, final_name=can_run_ws_name, absorptionWksp=absorptionWksp)
 
                 # smooth background
                 smoothParams = self.getProperty("BackgroundSmoothParams").value
@@ -1248,6 +1254,65 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         # END-IF (can run)
 
         return can_run_ws_name
+
+    def _calculate_absorption_correction(self, filename):
+        """The absorption correction is applied by (I_s - I_c*k*A_csc/A_cc)/A_ssc for pull Paalman-Ping
+
+        If no cross-term then I_s/A_ss - I_c/A_cc
+
+        Therefore this will return 2 workspace, one for correcting the
+        sample (A_s) and one for the container (A_c) depending on the
+        absorption method, that will be passed to _focusAndSum and
+        therefore AlignAndFocusPowderFromFiles.
+
+        If SampleOnly then
+
+        A_s = A_ss
+        A_c = None
+
+        If SampleAndContainer then
+
+        A_s = A_ss
+        A_c = A_cc
+
+        If FullPaalmanPings then
+        A_s = A_ssc
+        A_c = A_cc*A_ssc/A_csc
+
+        This will then return (A_s, A_c)
+        """
+        if self._absMethod == "None":
+            return None, None
+
+        material = {"ChemicalFormula": self._sampleFormula,
+                    "SampleMassDensity": self._massDensity}
+        donorWS = self._create_absorption_input(filename, num_wl_bins=1000, material=material, environment=self._containerShape)
+
+        absName = '__{}_abs_correction'.format(getBasename(filename))
+
+        if self._absMethod == "SampleOnly":
+            api.AbsorptionCorrection(donorWS,
+                                     OutputWorkspace=absName+'_ass',
+                                     ScatterFrom='Sample')
+            return absName+'_ass', None
+        elif self._absMethod == "SampleAndContainer":
+            api.AbsorptionCorrection(donorWS,
+                                     OutputWorkspace=absName+'_ass',
+                                     ScatterFrom='Sample')
+            api.AbsorptionCorrection(donorWS,
+                                     OutputWorkspace=absName+'_acc',
+                                     ScatterFrom='Container')
+            return absName+'_ass', absName+'_acc'
+        else:
+            api.AbsorptionCorrectionPaalmanPings(donorWS,
+                                                 OutputWorkspace=absName)
+            api.Multiply(LHSWorkspace=absName+'_acc',
+                         RHSWorkspace=absName+'_assc',
+                         OutputWorkspace=absName+'_ac')
+            api.Divide(LHSWorkspace=absName+'_ac',
+                       RHSWorkspace=absName+'_acsc',
+                       OutputWorkspace=absName+'_ac')
+            return absName+'_assc', absName+'_ac'
 
     def _create_absorption_input(self, filename, num_wl_bins, material=None, geometry=None, environment=None):
         '''
