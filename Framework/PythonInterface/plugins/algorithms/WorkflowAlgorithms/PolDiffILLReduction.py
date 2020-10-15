@@ -347,8 +347,8 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _normalise(self, ws):
         """Normalises the provided WorkspaceGroup to the monitor 1."""
         monID = 100000 # monitor 1
-        monitor_indices = "{},{}".format(mtd[ws].getItem(0).getNumberHistograms()-2,
-                                         mtd[ws].getItem(0).getNumberHistograms()-1)
+        monitor_indices = "{},{}".format(mtd[ws][0].getNumberHistograms()-2,
+                                         mtd[ws][0].getNumberHistograms()-1)
         for entry_no, entry in enumerate(mtd[ws]):
             mon = ws + '_mon'
             ExtractSpectra(InputWorkspace=entry, DetectorList=monID, OutputWorkspace=mon)
@@ -365,7 +365,7 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _calculate_transmission(self, ws, beam_ws):
         """Calculates transmission based on the measurement of the current sample, empty beam, and absorber."""
         # extract Monitor2 values
-        if 0 in mtd[ws].getItem(0).readY(0):
+        if 0 in mtd[ws][0].readY(0):
             raise RuntimeError('Cannot calculate transmission; monitor has 0 counts.')
         if 0 in mtd[beam_ws].readY(0):
             raise RuntimeError('Cannot calculate transmission; beam monitor has 0 counts.')
@@ -383,11 +383,11 @@ class PolDiffILLReduction(PythonAlgorithm):
         background_ws = 'background_ws'
         tmp_names = [unit_ws, background_ws]
         for entry_no, entry in enumerate(mtd[ws]):
-            container_entry = mtd[container_ws].getItem(entry_no).name()
+            container_entry = mtd[container_ws][entry_no].name()
             mtd[container_entry].setYUnit('Counts/Counts')
             mtd[transmission_ws].setYUnit('Counts/Counts')
             if self._mode != 'TOF':
-                absorber_entry = mtd[absorber_ws].getItem(entry_no).name()
+                absorber_entry = mtd[absorber_ws][entry_no].name()
                 mtd[absorber_entry].setYUnit('Counts/Counts')
                 container_corr = container_entry + '_corr'
                 tmp_names.append(container_corr)
@@ -513,7 +513,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         if 'initial_energy' not in self._sampleAndEnvironmentProperties:
             h = physical_constants['Planck constant'][0]  # in m^2 kg^2 / s^2
             neutron_mass = physical_constants['neutron mass'][0]  # in kg
-            wavelength = mtd[ws].getItem(0).getRun().getLogData('monochromator.wavelength').value * 1e-10  # in m
+            wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value * 1e-10  # in m
             joules_to_mev = 1e3 / physical_constants['electron volt'][0]
             self._sampleAndEnvironmentProperties['InitialEnergy'] = joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
 
@@ -566,11 +566,11 @@ class PolDiffILLReduction(PythonAlgorithm):
                     PaalmanPingsMonteCarloAbsorption(SampleWorkspace=entry,
                                                      Shape=geometry_type,
                                                      CorrectionsWorkspace=correction_ws,
-                                                     ContainerWorkspace=mtd[container_ws].getItem(entry_no),
+                                                     ContainerWorkspace=mtd[container_ws][entry_no],
                                                      **kwargs)
                 ApplyPaalmanPingsCorrection(SampleWorkspace=entry,
                                             CorrectionsWorkspace=correction_ws,
-                                            CanWorkspace=mtd[container_ws].getItem(entry_no),
+                                            CanWorkspace=mtd[container_ws][entry_no],
                                             OutputWorkspace=entry)
 
         return sample_ws
@@ -656,7 +656,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 tmp_name = str(mtd[ws][entry_no].name())[:-1] + componentNames[component]
                 tmp_names.append(tmp_name)
                 CreateWorkspace(DataX=dataX, DataY=dataY[component], dataE=dataE,
-                                Nspec=mtd[ws].getItem(entry_no).getNumberHistograms(),
+                                Nspec=mtd[ws][entry_no].getNumberHistograms(),
                                 OutputWorkspace=tmp_name)
         output_name = self.getPropertyValue('ProcessAs') + '_component_separation'
         GroupWorkspaces(tmp_names, OutputWorkspace=output_name)
@@ -707,11 +707,11 @@ class PolDiffILLReduction(PythonAlgorithm):
                 normFactor = self._sampleAndEnvironmentProperties['FormulaUnits'].value
                 CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace='normalisation_ws')
             else:
-                normalisationFactors = self._max_values_per_detector(vanadium_ws)
+                normalisationFactors = self._max_value_per_detector(vanadium_ws)
                 dataE = np.sqrt(normalisationFactors)
-                entry0 = mtd[vanadium_ws].getItem(0)
+                entry0 = mtd[vanadium_ws][0]
                 CreateWorkspace(dataX=entry0.readX(0), dataY=normalisationFactors, dataE=dataE,
-                                NSpec=entry0.getNumberOfHistograms(), OutputWorkspace='normalisation_ws')
+                                NSpec=entry0.getNumberHistograms(), OutputWorkspace='normalisation_ws')
             Divide(LHSWorkspace=vanadium_ws,
                    RHSWorkspace='normalisation_ws',
                    OutputWorkspace='det_efficiency')
@@ -726,7 +726,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     tmp_names.append(ws_name)
                     const = (2.0/3.0) * math.pow(physical_constants['neutron gyromag. ratio']
                                                  * physical_constants['classical electron radius'], 2)
-                    paramagneticComponent = mtd[conjoined_components].getItem(2)
+                    paramagneticComponent = mtd[conjoined_components][2]
                     spin = self._sampleAndEnvironmentProperties['SampleSpin'].value
                     Divide(LHSWorkspace=const * spin * (spin+1),
                            RHSWorkspace=paramagneticComponent,
@@ -734,16 +734,16 @@ class PolDiffILLReduction(PythonAlgorithm):
             else: # Incoherent
                 if self._mode == 'TOF':
                     raise RuntimeError('Incoherent calibration is not valid in the TOF mode.')
-                for spectrum_no in range(mtd[conjoined_components].getItem(1).getNumberOfHistograms()):
+                for spectrum_no in range(mtd[conjoined_components][1].getNumberHistograms()):
                     if normaliseToAbsoluteUnits:
                         normFactor = float(self.getPropertyValue('IncoherentCrossSection'))
                         CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace='normalisation_ws')
                     else:
-                        normalisationFactors = self._max_values_per_detector(mtd[conjoined_components].getItem(1).name())
+                        normalisationFactors = self._max_value_per_detector(mtd[conjoined_components][1].name())
                         dataE = np.sqrt(normalisationFactors)
-                        CreateWorkspace(dataX=mtd[conjoined_components].getItem(1).readX(0), dataY=normalisationFactors,
+                        CreateWorkspace(dataX=mtd[conjoined_components][1].readX(0), dataY=normalisationFactors,
                                         dataE=dataE,
-                                        NSpec=mtd[conjoined_components].getItem(1).getNumberOfHistograms(),
+                                        NSpec=mtd[conjoined_components][1].getNumberHistograms(),
                                         OutputWorkspace='normalisation_ws')
                     ws_name = '{0}_{1}'.format(tmp_name, entry_no)
                     tmp_names.append(ws_name)
@@ -762,7 +762,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             if single_efficiency_per_POL:
                 det_eff_entry_no = det_eff_entry_no % nMeasurements
             Multiply(LHSWorkspace=entry,
-                     RHSWorkspace=mtd['det_efficiency'].getItem(det_eff_entry_no),
+                     RHSWorkspace=mtd['det_efficiency'][det_eff_entry_no],
                      OutputWorkspace=entry)
         return ws
 
@@ -770,7 +770,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Integrates intensities over all time channels or time-of-flight bins."""
         tofUnits = self.getPropertyValue('TOFUnits')
         if tofUnits == 'UncalibratedTime':
-            timeBinWidth = mtd[ws].getItem(0).getRun().getLogData('Detector.time_of_flight_0')
+            timeBinWidth = mtd[ws][0].getRun().getLogData('Detector.time_of_flight_0')
             Multiply(LHSWorkspace=ws, RHSWorkspace=timeBinWidth, OutputWorkspace=ws)
         if tofUnits == 'Energy':
             energyBinWidth = 0 # placeholder
@@ -831,9 +831,9 @@ class PolDiffILLReduction(PythonAlgorithm):
              PositionCalibration=calibration_setting, YIGFileName=self.getPropertyValue('InstrumentCalibration'),
              TOFUnits=self.getPropertyValue('TOFUnits'), OutputWorkspace=ws)
 
-        self._instrument = mtd[ws].getItem(0).getInstrument().getName()
+        self._instrument = mtd[ws][0].getInstrument().getName()
         self._mode = self.getPropertyValue('MeasurementTechnique')
-        run = mtd[ws].getItem(0).getRun()
+        run = mtd[ws][0].getRun()
         if run['acquisition_mode'].value == 1 and self._mode != 'TOF':
             raise RuntimeError("Monochromatic measurement method chosen but data contains TOF results.")
         elif self._mode == 'TOF' and run['acquisition_mode'].value == 0:
