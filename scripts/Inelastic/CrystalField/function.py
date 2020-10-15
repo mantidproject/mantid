@@ -285,23 +285,41 @@ class Background(object):
     background.
     """
 
-    def __init__(self, functions=[]):
+    def __init__(self, peak=None, background=None, functions=[]):
         """
         Initialise new instance.
+        @param peak: An instance of Function class meaning to be the elastic peak (remains for backward-compatibility).
+        @param background: An instance of Function class serving as the background (remains for backward-compatibility).
         @param functions: A list of Function class instances which make up the background.
         """
-        self._functions = functions
+        self.peak = peak
+        self.background = background
+
+        self.functions = []
+        if self.peak is not None:
+            self.functions.append(self.peak)
+        if self.background is not None:
+            self.functions.append(self.background)
+        self.functions.extend(functions)
 
     def clone(self):
         """Make a copy of self."""
-        aCopy = Background()
-        for function in self._functions:
-            aCopy.add_function(function.clone())
-        return aCopy
+        n = 0
+        peak_copy, background_copy = None, None
+        if self.peak is not None:
+            peak_copy = self.peak.clone()
+            n += 1
+        if self.background is not None:
+            background_copy = self.background.clone()
+            n += 1
+
+        functions_copy = [function.clone() for function in self.functions[n:]]
+
+        return Background(peak=peak_copy, background=background_copy, functions=functions_copy)
 
     def functions(self):
         """Return the list of functions which make up the Background object."""
-        return self._functions
+        return self.functions
 
     def add_function(self, function):
         """
@@ -309,22 +327,18 @@ class Background(object):
         @param function: The Function class instance to add to the Background object.
         """
         if isinstance(function, Function):
-            self._functions.append(function)
+            self.functions.append(function)
         else:
             raise TypeError("Expected to add a Function object to the Background object.")
 
     def toString(self):
         """Return the Background object in string format."""
-        if len(self._functions) == 0:
+        if len(self.functions) == 0:
             return ''
-        elif len(self._functions) == 1:
-            return self._functions[0].toString()
+        elif len(self.functions) == 1:
+            return self.functions[0].toString()
         else:
-            function_string = '(' + self._functions[0].toString()
-            for function in self._functions[1:]:
-                function_string += ';'
-                function_string += function.toString()
-            return function_string + ')'
+            return '(' + ';'.join([function.toString() for function in self.functions]) + ')'
 
     def update(self, func, index=0):
         """
@@ -334,7 +348,7 @@ class Background(object):
         @param func: The IFunction object containing new parameter values.
         @param index: The index of the function to update in the Background object.
         """
-        if index < len(self._functions):
+        if index < len(updatable_functions):
             self._functions[index].update(func)
         else:
             raise ValueError(f"Invalid index ({index}) provided: Background object is made up of only "

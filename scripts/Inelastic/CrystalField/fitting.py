@@ -619,15 +619,16 @@ class CrystalField(object):
 
     def _makeBackgroundObject(self, value, prefix=''):
         from .function import Background, Function
-        background_object = Background()
-
-        if len(value.functions()) == 1:
-            background_object.add_function(Function(self.function, prefix=prefix + 'f0.'))
-            return background_object
-        else:
-            for i in range(len(value.functions())):
-                background_object.add_function(Function(self.function, prefix=prefix + 'f0.f' + str(i) + '.'))
-            return background_object
+        if value.peak is not None and value.background is not None:
+            peak = Function(self.function, prefix=prefix + 'f0.f0.')
+            background = Function(self.function, prefix=prefix + 'f0.f1.')
+        elif value.peak is not None:
+            peak = Function(self.function, prefix=prefix + 'f0.')
+            background = None
+        elif value.background is not None:
+            peak = None
+            background = Function(self.function, prefix=prefix + 'f0.')
+        return Background(peak=peak, background=background)
 
     @property
     def PhysicalProperty(self):
@@ -970,9 +971,9 @@ class CrystalField(object):
         if self._background is not None:
             if isinstance(self._background, list):
                 for background in self._background:
-                    background.update(func, index)
+                    background.update(func)
             else:
-                self._background.update(func, index)
+                self._background.update(func)
         self._setPeaks()
 
     def calc_xmin_xmax(self, i):
