@@ -30,4 +30,4 @@ class LoadElementalAnalysisTest(systemtesting.MantidSystemTest):
     def validate(self):
         self.tolerance = 0.0001
 
-        #return ['9999', 'ILL_D20_calib_def.nxs']
+        return ['9999', 'ElementalAnalysisLoad.nxs']
