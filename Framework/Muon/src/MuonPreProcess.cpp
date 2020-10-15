@@ -256,14 +256,64 @@ MatrixWorkspace_sptr MuonPreProcess::applyCropping(MatrixWorkspace_sptr ws,
                                                    const double &xMin,
                                                    const double &xMax) {
   if (xMin != EMPTY_DBL() || xMax != EMPTY_DBL()) {
-    IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
-    crop->setProperty("InputWorkspace", ws);
-    if (xMin != EMPTY_DBL())
-      crop->setProperty("Xmin", xMin);
-    if (xMax != EMPTY_DBL())
-      crop->setProperty("Xmax", xMax);
-    crop->execute();
-    return crop->getProperty("OutputWorkspace");
+    if (!getPropertyValue("TimeZeroTable").empty()) {
+      /* IAlgorithm_sptr cropRagged =
+       createChildAlgorithm("CropWorkspaceRagged");
+       cropRagged->setProperty("InputWorkspace", ws);
+       if (xMin != EMPTY_DBL()) {
+         std::vector<double> xMinVec(ws->getNumberHistograms(), xMin);
+         cropRagged->setProperty("XMin", xMinVec);
+       }
+       if (xMax != EMPTY_DBL()) {
+         std::vector<double> xMaxVec(ws->getNumberHistograms(), xMax);
+         cropRagged->setProperty("XMax", xMaxVec);
+       }
+       cropRagged->execute();
+       Workspace_sptr returnWs =
+           cropRagged->getProperty("OutputWorkspace");
+       return std::dynamic_pointer_cast<MatrixWorkspace>(returnWs);*/
+      auto clone = cloneWorkspace(ws);
+      for (int i = 0; i < ws->getNumberHistograms(); ++i) {
+        std::vector<double> X;
+        std::vector<double> Y;
+        auto dataY = ws->mutableY(i);
+        int k = 0;
+        for (auto &x : ws->readX(i)) {
+          if (x >= xMin && x <= xMax) {
+            X.emplace_back(x);
+            Y.emplace_back(dataY[k]);
+          }
+          ++k;
+        }
+        IAlgorithm_sptr create = createChildAlgorithm("CreateWorkspace");
+        create->setProperty("DataX", X);
+        create->setProperty("DataY", Y);
+        std::cout << X.size() << std::endl;
+        std::cout << Y.size() << std::endl;
+        // create->setProperty("NSpec",
+        // static_cast<int>(ws->getNumberHistograms()));
+        create->execute();
+        MatrixWorkspace_sptr temp = create->getProperty("OutputWorkspace");
+        IAlgorithm_sptr conjoin = createChildAlgorithm("ConjoinWorkspaces");
+        conjoin->setProperty("InputWorkspace1", ws);
+        conjoin->setProperty("InputWorkspace2", temp);
+        conjoin->setProperty("CheckOverlapping", false);
+        conjoin->execute();
+        clone = conjoin->getProperty("InputWorkspace1");
+      }
+
+      return clone;
+
+    } else {
+      IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
+      crop->setProperty("InputWorkspace", ws);
+      if (xMin != EMPTY_DBL())
+        crop->setProperty("Xmin", xMin);
+      if (xMax != EMPTY_DBL())
+        crop->setProperty("Xmax", xMax);
+      crop->execute();
+      return crop->getProperty("OutputWorkspace");
+    }
   } else {
     return ws;
   }
