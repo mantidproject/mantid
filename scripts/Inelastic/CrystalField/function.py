@@ -333,11 +333,11 @@ class Background(object):
         @param func: The IFunction object containing new parameter values.
         @param index: The index of the function to update in the Background object.
         """
-        if index < len(updatable_functions):
-            self._functions[index].update(func)
+        if index < len(self.functions):
+            self.functions[index].update(func)
         else:
             raise ValueError(f"Invalid index ({index}) provided: Background object is made up of only "
-                             f"{len(self._functions)} functions.")
+                             f"{len(self.functions)} functions.")
 
 
 class ResolutionModel:
