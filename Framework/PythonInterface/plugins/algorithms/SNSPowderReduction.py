@@ -1366,7 +1366,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             absWksp = self._create_absorption_input(van_run_number, num_wl_bins=1000,
                                                     material={'ChemicalFormula': 'V', 'SampleNumberDensity': 0.0721},
                                                     geometry={'Radius': self._vanRadius},
-                                                    environment={'Name': 'InAir', 'Container': 'PG3Van'})
+                                                    environment={'Name': 'InAir', 'Container': 'VAN06'})
 
             # calculate the correction which is 1/normal carpenter correction - it doesn't look at sample shape
             api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr',
