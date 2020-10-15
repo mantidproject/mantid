@@ -223,18 +223,13 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         # absorption correction
         self.declareProperty("TypeOfCorrection", "None",
-                             StringListValidator(["None", "SampleOnly", "SampleAndContainer", "FullPaalmanPings"]))
-        self.declareProperty("SampleFormula", "")
-        self.declareProperty("MassFraction", defaultValue=0.0,
-                             validator=FloatBoundedValidator(lower=0., exclusive=False))
-        self.declareProperty("SampleShape", "Cylinder", StringListValidator(["Cylinder", "Sphere"]))
-        # This should be swapped with using environment definitions instead?
-        self.declareProperty("Radius", defaultValue=0.0, validator=FloatBoundedValidator(lower=0., exclusive=False),
-                             doc="Radius of sample in cm for absorption correction.")
-        fraction_validator = FloatBoundedValidator(lower=0., upper=2.)
-        fraction_validator.setLowerExclusive(True)
-        fraction_validator.setUpperExclusive(False)
-        self.declareProperty("PackingFraction", defaultValue=0.1, validator=fraction_validator)
+                             StringListValidator(["None", "SampleOnly", "SampleAndContainer", "FullPaalmanPings"]),
+                             doc="Specifies the Absorption Correction terms to calculate, if any.")
+        self.declareProperty("SampleFormula", "", doc="Chemical formula of the sample")
+        self.declareProperty("MeasuredMassDensity", defaultValue=0.0,
+                             validator=FloatBoundedValidator(lower=0., exclusive=False))  # in g/cc, way to validate?
+        self.declareProperty("ContainerShape", defaultValue="PAC06", doc="Defined standard container geometries")
+        self.declareProperty("VRodType", defaultValue="VAN06", doc="Vanadium rod geometry")
 
         workspace_prop = WorkspaceProperty('SplittersWorkspace', '', Direction.Input, PropertyMode.Optional)
         self.declareProperty(workspace_prop, "Splitters workspace for split event workspace.")
@@ -256,6 +251,11 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.copyProperties('AlignAndFocusPowderFromFiles', ['FrequencyLogNames', 'WaveLengthLogNames'])
 
         return
+
+    def validateInputs(self):
+        issues = dict()
+
+        return issues
 
     #pylint: disable=too-many-locals,too-many-branches,too-many-statements
     def PyExec(self):  # noqa
