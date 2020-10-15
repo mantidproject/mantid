@@ -615,7 +615,7 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
   file->readData("number_density", m_numberDensity);
   try {
     file->readData("packing_fraction", m_packingFraction);
-  } catch (NeXus::Exception &) {
+  } catch (::NeXus::Exception &) {
     m_packingFraction = 1.;
   }
   file->readData("temperature", m_temperature);
