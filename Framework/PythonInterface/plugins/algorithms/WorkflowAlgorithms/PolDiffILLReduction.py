@@ -363,7 +363,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _calculate_transmission(self, ws, beam_ws):
-        """Calculates transmission based on the measurement of the current sample, empty beam, and absorber."""
+        """Calculates transmission based on the measurement of the current sample and empty beam."""
         # extract Monitor2 values
         if 0 in mtd[ws][0].readY(0):
             raise RuntimeError('Cannot calculate transmission; monitor has 0 counts.')
