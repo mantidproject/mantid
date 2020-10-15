@@ -226,10 +226,9 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                              doc="Specifies the Absorption Correction terms to calculate, if any.")
         self.declareProperty("SampleFormula", "", doc="Chemical formula of the sample")
         self.declareProperty("MeasuredMassDensity", defaultValue=0.1,
-                             validator=FloatBoundedValidator(lower=0., exclusive=True))  # in g/cc, way to validate?
-        container_validator = StringListValidator(["QuartzTube03", "PAC03", "PAC06", "PAC08", "PAC10"])
-        self.declareProperty("ContainerShape", defaultValue="PAC06", doc="Defined standard container geometries",
-                             validator=container_validator)
+                             validator=FloatBoundedValidator(lower=0., exclusive=True),
+                             doc="Measured mass density of sample in g/cc")  # in g/cc, way to validate?
+        self.declareProperty("ContainerShape", defaultValue="PAC06", doc="Defines the container geometry")
         vanadium_validator = StringListValidator(["VAN06"])
         self.declareProperty("VRodType", defaultValue="VAN06", doc="Vanadium rod geometry",
                              validator=vanadium_validator)
