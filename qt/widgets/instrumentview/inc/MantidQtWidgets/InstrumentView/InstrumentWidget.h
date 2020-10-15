@@ -149,6 +149,8 @@ public:
   void handleWorkspaceReplacement(
       const std::string &wsName,
       const std::shared_ptr<Mantid::API::Workspace> &workspace);
+  void replaceWs(const std::string &newWs,
+                 const std::shared_ptr<Mantid::API::Workspace> &workspace);
 
   /// Get the currently selected tab index
   int getCurrentTab() const;
