@@ -606,7 +606,10 @@ class CrystalField(object):
         if not hasattr(value, 'toString'):
             raise TypeError('Expected a Background object, found %s' % str(value))
         if not self._isMultiSpectrum:
+            print("HERREE")
             fun_str = value.toString() + ';' + str(self.function)
+            print(fun_str)
+            print("HERREE")
             self.function = FunctionFactory.createInitialized(fun_str)
             self._background = self._makeBackgroundObject(value)
             self._setPeaks()
@@ -619,16 +622,24 @@ class CrystalField(object):
 
     def _makeBackgroundObject(self, value, prefix=''):
         from .function import Background, Function
-        if value.peak is not None and value.background is not None:
-            peak = Function(self.function, prefix=prefix + 'f0.f0.')
-            background = Function(self.function, prefix=prefix + 'f0.f1.')
-        elif value.peak is not None:
-            peak = Function(self.function, prefix=prefix + 'f0.')
-            background = None
-        elif value.background is not None:
-            peak = None
-            background = Function(self.function, prefix=prefix + 'f0.')
-        return Background(peak=peak, background=background)
+
+        if len(value.functions) > 1:
+            prefix += 'f0.'
+
+        n_functions = 0
+        peak, background = None, None
+        if value.peak is not None:
+            peak = Function(self.function, prefix=prefix + f'f{n_functions}.')
+            n_functions += 1
+        if value.background is not None:
+            background = Function(self.function, prefix=prefix + f'f{n_functions}.')
+            n_functions += 1
+
+        other_functions = []
+        for function_index in range(n_functions, len(value.functions)):
+            other_functions.append(Function(self.function, prefix=prefix + f'f{function_index}.'))
+
+        return Background(peak=peak, background=background, functions=other_functions)
 
     @property
     def PhysicalProperty(self):
