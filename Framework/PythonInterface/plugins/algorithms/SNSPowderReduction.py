@@ -139,9 +139,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
     _absMethod = None
     _sampleFormula = None
     _massDensity = None
-    _sampleShape = None
-    _sampleRadius = None
-    _packingFrac = None
+    _containerShape = None
+    _vanadiumShape = None
 
     def category(self):
         return "Diffraction\\Reduction"
