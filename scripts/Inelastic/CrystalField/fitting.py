@@ -606,10 +606,7 @@ class CrystalField(object):
         if not hasattr(value, 'toString'):
             raise TypeError('Expected a Background object, found %s' % str(value))
         if not self._isMultiSpectrum:
-            print("HERREE")
             fun_str = value.toString() + ';' + str(self.function)
-            print(fun_str)
-            print("HERREE")
             self.function = FunctionFactory.createInitialized(fun_str)
             self._background = self._makeBackgroundObject(value)
             self._setPeaks()
@@ -982,9 +979,9 @@ class CrystalField(object):
         if self._background is not None:
             if isinstance(self._background, list):
                 for background in self._background:
-                    background.update(func)
+                    background.update(func, index)
             else:
-                self._background.update(func)
+                self._background.update(func, index)
         self._setPeaks()
 
     def calc_xmin_xmax(self, i):

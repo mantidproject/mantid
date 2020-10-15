@@ -302,22 +302,8 @@ class Background(object):
             self.functions.append(self.background)
         self.functions.extend(functions)
 
-    def functions(self):
-        """Return the list of functions which make up the Background object."""
-        return self.functions
-
-    def add_function(self, function):
-        """
-        Add a function to the background object.
-        @param function: The Function class instance to add to the Background object.
-        """
-        if isinstance(function, Function):
-            self.functions.append(function)
-        else:
-            raise TypeError("Expected to add a Function object to the Background object.")
-
     def toString(self):
-        """Return the Background object in string format."""
+        """Returns the Background object in string format."""
         if len(self.functions) == 0:
             return ''
         elif len(self.functions) == 1:
