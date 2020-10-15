@@ -13,6 +13,7 @@ from mantid.api import AlgorithmFactory, AnalysisDataService, PythonAlgorithm, T
 from mantid.kernel import Direction, IntBoundedValidator
 from mantid.simpleapi import ConvertToHistogram, ConvertToPointData, CreateSampleWorkspace, DeleteWorkspace, GroupWorkspaces, LoadAscii, WorkspaceFactory
 
+
 type_keys = {"10": "Prompt", "20": "Delayed", "99": "Total"}
 spectrum_index = {"Delayed": 1, "Prompt": 2, "Total": 3}
 num_files_per_detector = 3
@@ -39,10 +40,10 @@ class LoadElementalAnalysisData(PythonAlgorithm):
             issues['Run'] = "Cannot find files for run " + self.getPropertyValue("Run")
         return issues
 
+
     def PyExec(self):
         run = self.getPropertyValue("Run")
         to_load = self.search_user_dirs()
-
         workspaces = {
             filename: self.get_filename(filename, run)
             for filename in to_load if self.get_filename(filename, run) is not None
@@ -55,7 +56,6 @@ class LoadElementalAnalysisData(PythonAlgorithm):
 
         self.format_workspace(workspaces)
         self.merge_workspaces(run, workspaces.values())
-
 
     def pad_run(self):
         """ Pads run number: i.e. 123 -> 00123; 2695 -> 02695 """
@@ -114,7 +114,6 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                 overall_ws.addWorkspace(AnalysisDataService.retrieve(detector))
         self.setProperty("GroupWorkspace", overall_ws)
 
-
     def create_merged_workspace(self, workspace_list):
         if workspace_list:
             # get max number of bins and max X range
@@ -162,6 +161,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                     DeleteWorkspace(ws)
 
             return merged_ws
+
 
     def set_y_axis_labels(self, workspace, labels):
         """ adds the spectrum_index to the plot labels """
