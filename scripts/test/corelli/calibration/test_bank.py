@@ -60,7 +60,7 @@ class TestBank(unittest.TestCase):
         cls.assert_missing_tube = assert_missing_tube
 
     @classmethod
-    def tearDown(cls) -> None:
+    def tearDownClass(cls) -> None:
         r"""Delete the workspaces associated to the test cases"""
         DeleteWorkspaces(list(cls.cases.values()))
 
@@ -71,11 +71,6 @@ class TestBank(unittest.TestCase):
     def test_fit_bank(self):
         control = self.cases['123455_bank20']  # a bank with a reasonable wire scan
 
-        # assert the parameters table group is created
-        fit_bank(control, 'bank20', parameters_table_group='parameters_table')
-        assert AnalysisDataService.doesExist('parameters_table')
-        for tube_number in range(1, 1 + TUBES_IN_BANK):
-            assert AnalysisDataService.doesExist(f'parameters_table_{tube_number}')
         with self.assertRaises(AssertionError) as exception_info:
             fit_bank('I_am_not_here', 'bank42')
         assert 'Input workspace I_am_not_here does not exists' in str(exception_info.exception)
@@ -92,18 +87,21 @@ class TestBank(unittest.TestCase):
             fit_bank(self.cases['123555_bank20'], 'bank20')
         assert 'Insufficient counts per pixel in workspace CORELLI_123555_bank20' in str(exception_info.exception)
 
-        fit_bank(control, 'bank20')
+        fit_bank(control, 'bank20', parameters_table_group='parameters_table')
         # Expect default name for calibration table
         assert AnalysisDataService.doesExist('CalibTable')
         # Expect default name for peak pixel position table
         assert AnalysisDataService.doesExist('PeakTable')
-        DeleteWorkspaces(['CalibTable', 'PeakTable'])
+        # assert the parameters tables are created
+        assert AnalysisDataService.doesExist('parameters_table')
+        for tube_number in range(TUBES_IN_BANK):
+            assert AnalysisDataService.doesExist(f'parameters_table_{tube_number}')
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'parameters_table'])
 
         fit_bank(control, 'bank20', calibration_table='table_20', peak_pixel_positions_table='pixel_20')
         assert AnalysisDataService.doesExist('table_20')
         assert AnalysisDataService.doesExist('pixel_20')
-
-        DeleteWorkspaces(['CalibTable', 'PeakTable'])  # a bit of clean-up
+        DeleteWorkspaces(['table_20', 'pixel_20'])  # a bit of clean-up
 
     def test_criterium_peak_pixel_position(self):
         # control bank, it has no problems
@@ -210,7 +208,7 @@ class TestBank(unittest.TestCase):
         # control bank, it has no problems. Thus, no mask to be created
         calibration, mask = calibrate_bank(self.cases['123455_bank20'], 'bank20', 'calibration_table')
         assert calibration.rowCount() == 256 * 16
-        assert calibration.columnCount() == 3
+        assert calibration.columnCount() == 2
         assert AnalysisDataService.doesExist('calibration_table')
         assert mask is None
         assert AnalysisDataService.doesExist('MaskTable') is False
