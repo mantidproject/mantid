@@ -9,6 +9,11 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+New features
+------------
+
+- New algorithm :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` to perform wavelength and detector position calibration for the ILL D7 instrument.
+    
 Powder Diffraction
 ------------------
 New features
@@ -31,6 +36,7 @@ Bugfixes
 ########
 
 - Dummy detectors in polaris workspaces no longer prevent unit conversion.
+
 
 Engineering Diffraction
 -----------------------
