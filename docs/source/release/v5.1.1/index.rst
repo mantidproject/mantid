@@ -16,9 +16,11 @@ The main changes are:
 
 - a bug in the Muon interface that lead to error bars being lost on fitted data has been fixed
 
-- fixed a bug where `import CaChannel` would cause a hard crash within MantidWorkbench on Linux.
+- fixed a bug where `import CaChannel` would cause a hard crash within MantidWorkbench on Linux
 
 - updated the ISIS Reflectometry live data monitor to work with new instrument PV names
+
+- corrected the table value for a partially invalid, filtered log, with only one remaining entry
 
 Citation
 --------
