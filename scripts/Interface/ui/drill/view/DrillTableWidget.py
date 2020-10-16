@@ -499,8 +499,4 @@ class DrillTableWidget(QTableWidget):
 
         selectedItem = rightClickMenu.exec(position)
         if selectedItem:
-            li = self.columns.index(selectedItem.text())
-            if header.isSectionHidden(li):
-                header.setSectionHidden(li, False)
-            else:
-                header.setSectionHidden(li, True)
+            self.toggleColumnVisibility(selectedItem.text())
