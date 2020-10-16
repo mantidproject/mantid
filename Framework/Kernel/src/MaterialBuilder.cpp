@@ -319,9 +319,8 @@ MaterialBuilder::density_packing MaterialBuilder::getOrCalculateRhoAndPacking(
 
   // calculate the number density by one of many ways
   if (m_numberDensity) {
-    if (m_numberDensityUnit == NumberDensityUnit::Atoms) {
-      result.number_density = m_numberDensity.get();
-    } else if (m_numberDensityUnit == NumberDensityUnit::FormulaUnits) {
+    result.number_density = m_numberDensity.get();
+    if (m_numberDensityUnit == NumberDensityUnit::FormulaUnits && totalNumAtoms > 0.)  {
       result.number_density = m_numberDensity.get() * totalNumAtoms;
     }
   } else if (m_zParam && m_cellVol) {
