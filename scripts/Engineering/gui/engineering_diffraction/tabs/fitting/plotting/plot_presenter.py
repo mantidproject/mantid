@@ -57,7 +57,7 @@ class FittingPlotPresenter(object):
             # do fit
             fit_output = Fit(**fitprop['properties'])
             fitprop['properties']['Function'] = str(fit_output.Function.fun)
-            # save setup in fitprop browser
+            # save setup in fitprop browser (updates browser for next iteration of loop)
             self.view.update_browser_setup(fitprop['properties']['Function'], ws)
-            fitprop_list += [fitprop]
+            fitprop_list.append(fitprop)
         self.seq_fit_done_notifier.notify_subscribers(fitprop_list)

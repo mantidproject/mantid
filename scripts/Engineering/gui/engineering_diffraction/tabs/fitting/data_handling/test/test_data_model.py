@@ -330,12 +330,12 @@ class TestFittingDataModel(unittest.TestCase):
             'Error': [1.0, 10.0, 2.0, 1.0, 10.0, 2.0, 0.0]}
         mock_ads.retrieve.return_value = mock_table
         func_str = 'name=Gaussian,Height=11,PeakCentre=38837,Sigma=54;name=Gaussian,Height=10,PeakCentre=33638,Sigma=51'
-        results_dict = {'name': 'Fit', 'properties': {'ConvolveMembers': True, 'EndX': 52000,
-                                                      'Function': func_str,
-                                                      'InputWorkspace': "name1", 'Output': "name1",
-                                                      'OutputCompositeMembers': True, 'StartX': 50000}, 'version': 1}
+        fitprop = {'name': 'Fit', 'properties': {'ConvolveMembers': True, 'EndX': 52000,
+                                                 'Function': func_str,
+                                                 'InputWorkspace': "name1", 'Output': "name1",
+                                                 'OutputCompositeMembers': True, 'StartX': 50000}, 'version': 1}
 
-        self.model.update_fit(results_dict)
+        self.model.update_fit([fitprop])
 
         self.assertEqual(self.model._fit_results['name1']['model'], func_str)
         self.assertEqual(self.model._fit_results['name1']['results'], {'Gaussian_Height': [[11.0, 1.0], [10.0, 1.0]],
@@ -432,6 +432,43 @@ class TestFittingDataModel(unittest.TestCase):
             self.model._fit_results['name2']['results'].keys())))
         # test only table for unique parameter
         self.assertEqual(sorted(ws_names), sorted(param_names))
+
+    @patch(file_path + '.get_setting')
+    @patch(file_path + '.ADS')
+    def test_get_ws_sorted_by_primary_log_ascending(self, mock_ads, mock_getsetting):
+        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws, "name3": self.mock_ws}
+        mock_getsetting.side_effect = ['log', 'true']  # primary log, sort_ascending
+        mock_log_table = mock.MagicMock()
+        mock_log_table.column.return_value = [2, 0, 1]  # fake log values
+        mock_ads.retrieve.return_value = mock_log_table
+
+        ws_list = self.model.get_ws_sorted_by_primary_log()
+
+        self.assertEqual(ws_list, ["name2", "name3", "name1"])
+
+    @patch(file_path + '.get_setting')
+    @patch(file_path + '.ADS')
+    def test_get_ws_sorted_by_primary_log_descending(self, mock_ads, mock_getsetting):
+        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws, "name3": self.mock_ws}
+        mock_getsetting.side_effect = ['log', 'false']  # primary log, sort_ascending
+        mock_log_table = mock.MagicMock()
+        mock_log_table.column.return_value = [2, 0, 1]  # fake log values
+        mock_ads.retrieve.return_value = mock_log_table
+
+        ws_list = self.model.get_ws_sorted_by_primary_log()
+
+        self.assertEqual(ws_list, ["name1", "name3", "name2"])
+
+    @patch(file_path + '.get_setting')
+    @patch(file_path + '.ADS')
+    def test_get_ws_sorted_by_primary_log_not_specified(self, mock_ads, mock_getsetting):
+        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws, "name3": self.mock_ws}
+        mock_getsetting.side_effect = ['', 'false']  # primary log, sort_ascending
+
+        ws_list = self.model.get_ws_sorted_by_primary_log()
+
+        self.assertEqual(ws_list, list(self.model._loaded_workspaces.keys())[::-1])
+        mock_ads.retrieve.assert_not_called()
 
 
 if __name__ == '__main__':
