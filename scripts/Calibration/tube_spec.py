@@ -12,6 +12,8 @@
 
 # Author: Karl Palmen ISIS
 
+from mantid.api import mtd
+
 
 class TubeSpec:
     """
@@ -43,9 +45,10 @@ class TubeSpec:
     def __init__(self, ws):
         """
         The constructor creates empty tube specification for specified instrument.
-        :param ws: workspace containing the specified instrument with oneN pixel detector per spectrum.
+        :param ws: name or handle to the workspace containing the specified instrument
+            with one pixel detector per spectrum.
         """
-        self.ws = ws
+        self.ws = mtd[str(ws)]
         self.inst = ws.getInstrument()
         self.numTubes = 0
         self.componentNameArray = []
