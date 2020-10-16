@@ -38,6 +38,21 @@ Usage
 -----
 .. include:: ../usagedata-note.txt
 
+**Example - D7YIGPositionCalibration - calibration at the shortest wavelength**
+
+.. code-block:: python
+
+   approximate_wavelength = '3.1' # Angstrom
+   D7YIGPositionCalibration(Filenames='402652:403041', ApproximateWavelength=approximate_wavelength,
+                               YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
+                               MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1", ClearCache=True,
+                               FitOutputWorkspace='shortWavelength')
+		       
+   print('The calibrated wavelength is: {0:.2f}'.format(float(approximate_wavelength)*mtd['shortWavelength'].column(1)[1]))
+   print('The bank2 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[0]))
+   print('The bank3 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[176]))
+   print('The bank4 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[352]))
+
 **Example - D7YIGPositionCalibration - calibration at the intermediate wavelength**
 
 .. testcode:: D7YIGCalibrationIntermediateExample
