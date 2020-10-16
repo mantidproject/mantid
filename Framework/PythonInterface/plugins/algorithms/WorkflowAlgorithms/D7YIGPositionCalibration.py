@@ -113,7 +113,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                              doc="Whether to clear the intermediate fitting results.")
 
         self.declareProperty(ITableWorkspaceProperty(name='FitOutputWorkspace',
-                                                     defaultValue='fit_output',
+                                                     defaultValue='',
                                                      direction=Direction.Output,
                                                      optional=PropertyMode.Optional),
                              doc="The table workspace name that will be used to store all of the calibration parameters.")
