@@ -194,12 +194,12 @@ class Pearl(AbstractInst):
             for atten_file in self._inst_settings.attenuation_files:
                 if any (required_key not in atten_file for required_key in [name_key,path_key]):
                     logger.warning("A dictionary in attenuation_files has been ignored because "
-                                   "it doesn't contain both {} and {} entries".format(name_key,path_key))
+                                   f"it doesn't contain both {name_key} and {path_key} entries")
                 elif atten_file[name_key] == self._inst_settings.attenuation_file:
                     attenuation_path = atten_file[path_key]
             if attenuation_path is None:
                 raise RuntimeError(
-                    "Unknown attenuation_file {} specified for attenuation".format(self._inst_settings.attenuation_file))
+                    f"Unknown attenuation_file {self._inst_settings.attenuation_file} specified for attenuation")
 
         output_spectra = \
             pearl_output.generate_and_save_focus_output(self, processed_spectra=processed_spectra,
