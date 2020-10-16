@@ -171,7 +171,7 @@ class FittingDataModel(object):
             # get num params for each function (first elem empty as str begins with 'name=')
             # need to remove ties and constrtaints which are enclosed in ()
             nparams = [s.count('=') for s in
-                       sub('=\([^)]*\)', '', fitprop['properties']['Function']).split('name=')[1:]]
+                       sub(r'=\([^)]*\)', '', fitprop['properties']['Function']).split('name=')[1:]]
             params_dict = ADS.retrieve(fitprop['properties']['Output'] + '_Parameters').toDict()
             # loop over rows in output workspace to get value and error for each parameter
             istart = 0
