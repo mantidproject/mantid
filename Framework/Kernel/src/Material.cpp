@@ -8,7 +8,6 @@
 #include "MantidKernel/Atom.h"
 #include "MantidKernel/AttenuationProfile.h"
 #include "MantidKernel/StringTokenizer.h"
-#include <NeXusException.hpp>
 #include <NeXusFile.hpp>
 #include <boost/lexical_cast.hpp>
 #include <memory>
@@ -615,7 +614,7 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
   file->readData("number_density", m_numberDensity);
   try {
     file->readData("packing_fraction", m_packingFraction);
-  } catch (::NeXus::Exception &) {
+  } catch (std::runtime_error &) {
     m_packingFraction = 1.;
   }
   file->readData("temperature", m_temperature);
