@@ -406,6 +406,8 @@ class DrillTableWidget(QTableWidget):
         if header.isSectionHidden(i):
             header.showSection(i)
         else:
+            for j in range(self.rowCount()):
+                self.setCellContents(j, i, "")
             header.hideSection(i)
 
     def getHiddenColumns(self):
