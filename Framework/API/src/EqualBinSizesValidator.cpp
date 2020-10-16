@@ -38,7 +38,7 @@ EqualBinSizesValidator::checkValidity(const MatrixWorkspace_sptr &value) const {
 
   Kernel::EqualBinsChecker checker(value->readX(0), m_errorLevel,
                                    m_warningLevel);
-  return checker.validate();
+  return checker.validate(false);
 }
 
 } // namespace API
