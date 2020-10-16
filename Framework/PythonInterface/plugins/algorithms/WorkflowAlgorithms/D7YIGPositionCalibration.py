@@ -174,8 +174,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
 
         if not self.getProperty('FitOutputWorkspace').isDefault:
             self.setProperty('FitOutputWorkspace', detector_parameters)
-        else:
-            self._created_ws_names.append(detector_parameters.name())
+        self._created_ws_names.append(detector_parameters.name())
         if self.getProperty('ClearCache').value:
             DeleteWorkspaces(WorkspaceList=self._created_ws_names)
         self._created_ws_names.clear() #cleanup
