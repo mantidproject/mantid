@@ -9,7 +9,7 @@ from copy import deepcopy
 import numpy as np
 import re
 from typing import Any, Callable, Dict, Optional, Tuple
-from corelli.calibration.utils import InputTable, WorkspaceTypes  # custom type aliases
+from corelli.calibration.utils import InputTable, WorkspaceGroupTypes, WorkspaceTypes  # custom type aliases
 # imports from Mantid
 from mantid import AnalysisDataService, mtd
 from mantid.api import TextAxis, WorkspaceGroup
@@ -42,7 +42,9 @@ def sufficient_intensity(input_workspace: WorkspaceTypes, bank_name: str, minimu
 
 def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1000, shadow_width: float = 4,
              fit_domain: float = 7, minimum_intensity: float = 1000,
-             calibration_table: str = 'CalibTable', peak_pixel_positions_table: str = 'PeakTable') -> None:
+             calibration_table: str = 'CalibTable',
+             peak_pixel_positions_table: str = 'PeakTable',
+             parameters_table_group: Optional[str] = None) -> None:
     r"""
     Find the position of the wire shadow on each tube in the bank, in units of pixel positions
 
@@ -57,6 +59,12 @@ def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1
     for its calibrated XYZ coordinates, in meters
     :param peak_pixel_positions_table: output table containing the positions of the wire shadows for each tube, in
     units of pixel coordinates
+    :param parameters_table_group: name of the WorkspaceGroup containing individual TableWorkspace tables. Each
+        table holds values and errors for the optimized coefficients of the polynomial that fits the peak positions (in
+        pixel coordinates) to the known slit positions (along the Y-coordinate). The last entry in the table
+        holds the goodness-of-fit, chi-square value. The name of each individual TableWorkspace is the string
+        `parameters_table_group` plus the suffix `_I`, where `I` is the tube index in the bank, startin at zero.
+        If set to `None`, no group workspace is generated.
 
     :raises AssertionError: the input workspace is of incorrect type or cannot be found
     :raises AssertionError: the input `shadow_height` is a non-positive value
@@ -85,15 +93,88 @@ def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1
     fit_par.setAutomatic(True)
 
     tube.calibrate(workspace_name, bank_name, wire_positions(units='meters')[1: -1],
-                   peaks_form, fitPar=fit_par, outputPeak=True)
+                   peaks_form, fitPar=fit_par, outputPeak=True, parameters_table_group=parameters_table_group)
     if calibration_table != 'CalibTable':
         RenameWorkspace(InputWorkspace='CalibTable', OutputWorkspace=calibration_table)
     if peak_pixel_positions_table != 'PeakTable':
         RenameWorkspace(InputWorkspace='PeakTable', OutputWorkspace=peak_pixel_positions_table)
 
 
-def criterium_peak_pixel_position(peak_table: InputTable, summary: Optional[str] = None,
-                                  zscore_threshold: float = 2.5, deviation_threshold: float = 3.0) -> np.ndarray:
+def collect_bank_fit_results(output_workspace: str,
+                             acceptance_summary: Optional[WorkspaceTypes] = None,
+                             parameters_table_group: Optional[WorkspaceGroupTypes] = None) -> Optional[Workspace2D]:
+    r"""
+    Combine different results from the fitting process for one bank into one single workspace
+
+    The output workspace has one spectrum for each fitting result. The spectra run over the tubes in the bank
+        fit-result   tube1,  tube2,...,tube16
+        success        0       1         1  # was the tube successfully fitted?
+        deviation    0.0005 0.0001 ... 0.0003  # see the acceptance criterium function for explanation of 'deviation'
+        Z-score      # Z-score associated to 'deviation`
+        A0-value     # y(n) = A0 + A1 * n + A2 * n^2  fits the peak positions in pixel coordinates to th
+        A0-error     #                                known positions of the slits, in meters
+        A1-value
+        A1-error
+        A2-value
+        A2-error
+
+    :param output_workspace: name of the workspace containing the fitting results
+    :param acceptance_summary: name or reference to the Workspace2D containing deviations and
+        Z-score for each tube.
+    :param parameters_table_group:  name or reference to the WorkspaceGroup containing individual
+        TableWorkspace tables. Each table holds values and errors for the optimized coefficients of
+        the polynomial that fits the peak positions (in pixel coordinates) to the known slit positions
+        (along the Y-coordinate). The last entry in the table holds the goodness-of-fit, chi-square value.
+        The name of each individual TableWorkspace is the string `parameters_table_group` plus the
+        suffix `_I`, where `I` is the tube index in the bank, startin at zero. If set to `None`, no
+        group workspace is generated.
+
+    :return: reference to the fit results workspace. Return `None` if no fit results are provided
+    """
+    if acceptance_summary is None and parameters_table_group is None:
+        raise IOError(f'At least one of the input fit results should be different than None')
+
+    # fit_results is a dictionary with entries like this:
+    # 'A0-value': [-0.521, -0.517,..., -0.524]  # one value for each tube in the bank
+    # 'A0-error': [...]  # and so on with A1 and A2 coefficients
+    fit_results = {}
+    fit_result_names = []  # ['success', 'Z-score', ...]
+
+    if acceptance_summary is not None:
+        workspace = mtd[str(acceptance_summary)]
+        axis = workspace.getAxis(1)
+        for spectrum_index in workspace.getNumberHistograms():
+            fit_result_name = axis.label(spectrum_index)
+            fit_result_names.append(fit_result_name)
+            fit_results[fit_result_name] = workspace.readY(spectrum_index)
+
+    if parameters_table_group is not None:
+        workspace = mtd[str(parameters_table_group)]
+        # collect the values of the fit results
+        for parameters_table in workspace:
+            for table_row in parameters_table:
+                # table_row is a dictionary, e.g. {'Name': 'A0', 'Value':-0.521, 'Error':0.003}
+                name = table_row['Name']  # polynomial fit coefficient
+                if name == 'Cost function value':
+                    continue
+                for quantity in ('Value', 'Error'):
+                    fit_result_name = f'{name}-{quantity.lower()}'
+                    if fit_result_name not in fit_result_names:
+                        fit_result_names.append(fit_result_name)
+                    fit_result = fit_results.get(fit_result_name, [])  # e.g. key 'A0-value'
+                    fit_result.append(table_row[quantity])
+
+    # Create a workspace with the fit_results, where each (key, value) pair becomes one spectrum
+    x_values = list(range(1, 1 + TUBES_IN_BANK))
+    y_values = [y for fit_result in fit_results.values() for y in fit_result]
+    return CreateWorkspace(x_values, y_values, NSpec=len(fit_result_names), OutputWorkspace=output_workspace,
+                           WorkspaceTitle='Fitting Results', EnableLogging=False)
+
+
+def criterium_peak_pixel_position(peak_table: InputTable,
+                                  summary: Optional[str] = None,
+                                  zscore_threshold: float = 2.5,
+                                  deviation_threshold: float = 3.0) -> np.ndarray:
     r"""
     Flag tubes whose peak pixel positions deviate considerably from the peak pixel positions when
     averaged for all tubes in the bank.
@@ -235,10 +316,13 @@ def mask_bank(bank_name: str, tubes_fit_success: np.ndarray, output_table: str) 
 
 
 def calibrate_bank(workspace: WorkspaceTypes, bank_name: str,
-                   calibration_table: str, mask_table: str = 'MaskTable',
+                   calibration_table: str,
+                   mask_table: str = 'MaskTable',
                    acceptance_criterium: Callable[[Any], np.ndarray] = criterium_peak_pixel_position,
                    criterium_kwargs: Dict[str, Any] = {},
-                   shadow_height: float = 1000, shadow_width: float = 4, fit_domain: float = 7,
+                   shadow_height: float = 1000,
+                   shadow_width: float = 4,
+                   fit_domain: float = 7,
                    minimum_intensity: float = 1000) -> Tuple[TableWorkspace, Optional[TableWorkspace]]:
     r"""
     Calibrate the tubes in a bank and assess their goodness-of-fit with an acceptance function. Creates a
@@ -251,7 +335,7 @@ def calibrate_bank(workspace: WorkspaceTypes, bank_name: str,
     :param fit_domain: number of pixels over which a calibrating wire may have any significant influence
     :param minimum_intensity: mininum number of neutron counts per pixel to warrant a significant fit
     session. This number is compared against the neutron counts per pixel, averaged over all pixels in the bank
-    :param acceptance_criterium: a function the determines wether each pixel in the tube was calibrated correctly
+    :param acceptance_criterium: a function the determines whether each pixel in the tube was calibrated correctly
     :param criterium_kwargs: optional arguments to the `acceptance_criterium` function.
     :param calibration_table: output TableWorkspace containing one column for detector ID and one column
     for its calibrated XYZ coordinates, in meters
@@ -275,7 +359,8 @@ def calibrate_bank(workspace: WorkspaceTypes, bank_name: str,
 
 
 def calibrate_banks(workspace: WorkspaceTypes, bank_selection: str,
-                    calibration_group: str = 'calibrations', mask_group: str = 'masks',
+                    calibration_group: str = 'calibrations',
+                    mask_group: str = 'masks',
                     acceptance_group: str = 'acceptances') -> Tuple[WorkspaceGroup, Optional[WorkspaceGroup]]:
     r"""
     Calibrate the tubes in a selection of banks, and assess their goodness-of-fit with an acceptance function.

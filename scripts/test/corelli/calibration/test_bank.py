@@ -11,10 +11,13 @@ from os import path
 import unittest
 
 # Mantid imports
-from corelli.calibration.bank import (calibrate_bank, calibrate_banks, criterium_peak_pixel_position, fit_bank,
-                                      mask_bank, purge_table, sufficient_intensity)
 from mantid import AnalysisDataService, config, mtd
 from mantid.simpleapi import DeleteWorkspaces, LoadNexusProcessed
+
+from corelli.calibration.bank import (calibrate_bank, calibrate_banks, criterium_peak_pixel_position, fit_bank,
+                                      mask_bank, purge_table, sufficient_intensity)
+from corelli.calibration.utils import TUBES_IN_BANK
+
 
 
 class TestBank(unittest.TestCase):
@@ -67,6 +70,12 @@ class TestBank(unittest.TestCase):
         assert sufficient_intensity(self.cases['123455_bank20'], 'bank20')
 
     def test_fit_bank(self):
+        # assert the parameters table group is created
+        fit_bank(control, 'bank20', parameters_table_group='parameters_table')
+        assert AnalysisDataService.doesExist('parameters_table')
+        for tube_number in range(1, 1 + TUBES_IN_BANK):
+
+            assert AnalysisDataService.doesExist(f'parameters_table_{tube_number}')
         with self.assertRaises(AssertionError) as exception_info:
             fit_bank('I_am_not_here', 'bank42')
         assert 'Input workspace I_am_not_here does not exists' in str(exception_info.exception)
