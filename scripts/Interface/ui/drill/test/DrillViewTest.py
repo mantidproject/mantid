@@ -366,7 +366,7 @@ class DrillViewTest(unittest.TestCase):
 
     def test_setTable(self):
         self.view.set_table(["test", "test"])
-        self.view.table.setColumnCount.assert_called_once_with(2)
+        self.view.table.setColumnCount.assert_called_with(2)
 
     def test_fillTable(self):
         # empty contents
