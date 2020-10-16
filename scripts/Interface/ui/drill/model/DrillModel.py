@@ -137,6 +137,7 @@ class DrillModel(QObject):
         self.rundexFile = None
         self.samples = list()
         self.settings = dict()
+        self.visualSettings = None
 
         if (instrument in RundexSettings.ACQUISITION_MODES):
             config['default.instrument'] = instrument
@@ -191,6 +192,7 @@ class DrillModel(QObject):
             return
         self.rundexFile = None
         self.samples = list()
+        self.visualSettings = None
         self.acquisitionMode = mode
         self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
         self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
