@@ -17,7 +17,7 @@ from mantid.api import AnalysisDataService, mtd
 from mantid.simpleapi import DeleteWorkspaces, LoadNexusProcessed
 
 # Calibration
-from Calibration.tube_calib import correct_tube_to_ideal_tube, getCalibratedPixelPositions, getCalibration
+from Calibration.tube_calib import correct_tube_to_ideal_tube, getCalibratedPixelPositions
 from Calibration.tube_spec import TubeSpec
 
 

@@ -436,7 +436,7 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     override_peaks = param_helper.get_parameter(OVERRIDEPEAKS, kwargs, tube_set=tubeSet, ideal_tube=ideal_tube)
     polin_fit = param_helper.get_parameter(FITPOLIN, kwargs)  # order of the fiting polynomial. Default is 2
     output_peak, delete_peak_table_after = param_helper.get_parameter(OUTPUTPEAK, kwargs, ideal_tube=ideal_tube)
-    parameters_table_group = kwargs.get(parameters_table_group, None)
+    parameters_table_group = kwargs.get('parameters_table_group', None)
 
     getCalibration(ws, tubeSet, calib_table, fit_par, ideal_tube, output_peak,
                    override_peaks, exclude_short_tubes, plot_tube, range_list, polin_fit,

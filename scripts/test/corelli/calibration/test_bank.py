@@ -19,7 +19,6 @@ from corelli.calibration.bank import (calibrate_bank, calibrate_banks, criterium
 from corelli.calibration.utils import TUBES_IN_BANK
 
 
-
 class TestBank(unittest.TestCase):
 
     @classmethod
@@ -70,17 +69,17 @@ class TestBank(unittest.TestCase):
         assert sufficient_intensity(self.cases['123455_bank20'], 'bank20')
 
     def test_fit_bank(self):
+        control = self.cases['123455_bank20']  # a bank with a reasonable wire scan
+
         # assert the parameters table group is created
         fit_bank(control, 'bank20', parameters_table_group='parameters_table')
         assert AnalysisDataService.doesExist('parameters_table')
         for tube_number in range(1, 1 + TUBES_IN_BANK):
-
             assert AnalysisDataService.doesExist(f'parameters_table_{tube_number}')
         with self.assertRaises(AssertionError) as exception_info:
             fit_bank('I_am_not_here', 'bank42')
         assert 'Input workspace I_am_not_here does not exists' in str(exception_info.exception)
 
-        control = self.cases['123455_bank20']  # a bank with a reasonable wire scan
         with self.assertRaises(AssertionError) as exception_info:
             fit_bank(control, 'bank20', shadow_height=-1000)
         assert 'shadow height must be positive' in str(exception_info.exception)

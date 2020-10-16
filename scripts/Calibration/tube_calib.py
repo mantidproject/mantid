@@ -22,18 +22,21 @@ import numpy
 import os
 import re
 from typing import Any, Dict, List, Optional, Tuple, Union
-ArrayInt = Union[List[int], numpy.ndarray]
+
 # Mantid
 from mantid.api import AnalysisDataService as ADS
 from mantid.dataobjects import EventWorkspace, TableWorkspace, Workspace2D
 from mantid.simpleapi import *
 from mantid.kernel import *
-WorkspaceInput = Union[str, EventWorkspace, Workspace2D]
 
 # Calibration
 from ideal_tube import IdealTube
 from tube_calib_fit_params import TubeCalibFitParams
 from tube_spec import TubeSpec
+
+# Type aliases
+ArrayInt = Union[List[int], numpy.ndarray]
+WorkspaceInput = Union[str, EventWorkspace, Workspace2D]
 
 
 def create_tube_calibration_ws_by_ws_index_list(integrated_workspace, output_workspace, workspace_index_list):
