@@ -77,6 +77,7 @@ Material::Material()
  * @param name :: The name of the material
  * @param formula :: The chemical formula
  * @param numberDensity :: Density in atoms / Angstrom^3
+ * @param packingFraction :: Packing fraction of material
  * @param temperature :: The temperature in Kelvin (Default = 300K)
  * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
  */
@@ -97,6 +98,7 @@ Material::Material(const std::string &name, const ChemicalFormula &formula,
  * @param name :: The name of the material
  * @param atom :: The neutron atom to take scattering infrmation from
  * @param numberDensity :: Density in atoms / Angstrom^3
+ * @param packingFraction :: Packing fraction of material
  * @param temperature :: The temperature in Kelvin (Default = 300K)
  * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
  */
