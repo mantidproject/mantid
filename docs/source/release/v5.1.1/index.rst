@@ -41,20 +41,23 @@ Changes in this version
 - `29672 <https://github.com/mantidproject/mantid/pull/29672>`_ Fixed muon fitting bugs
 - `29695 <https://github.com/mantidproject/mantid/pull/29695>`_ Workaround crash with importing CaChannel on Linux
 - `29706 <https://github.com/mantidproject/mantid/pull/29706>`_ Update hard-coded PV names in RROLD
+- `29754 <https://github.com/mantidproject/mantid/pull/29754>`_ Filtered Value is displayed in Sample logs table
 
 Summary of impact
 -----------------
 
-+-------+----------------------------------------------+----------+--------------+
-| Issue | Impact                                       | Solution | Side Effect  |
-|       |                                              |          | Probability  |
-+=======+==============================================+==========+==============+
-| 29695 | Fixes cachannel import on Linux in workbench |          | **medium**   |
-+-------+----------------------------------------------+----------+--------------+
-| 29672 | Fixed muon fitting bugs                      |          | **low**      |
-+-------+----------------------------------------------+----------+--------------+
-| 29706 | Update hard-coded PV names in RROLD          |          | **low**      |
-+-------+----------------------------------------------+----------+--------------+
++-------+--------------------------------------------------+----------+--------------+
+| Issue | Impact                                           | Solution | Side Effect  |
+|       |                                                  |          | Probability  |
++=======+==================================================+==========+==============+
+| 29695 | Fixes cachannel import on Linux in workbench     |          | **medium**   |
++-------+--------------------------------------------------+----------+--------------+
+| 29672 | Fixed muon fitting bugs                          |          | **low**      |
++-------+--------------------------------------------------+----------+--------------+
+| 29706 | Update hard-coded PV names in RROLD              |          | **low**      |
++-------+--------------------------------------------------+----------+--------------+
+| 29754 | Filtered Value is displayed in Sample logs table |          | **low**      |
++-------+--------------------------------------------------+----------+--------------+
 
 .. _download page: http://download.mantidproject.org
 
