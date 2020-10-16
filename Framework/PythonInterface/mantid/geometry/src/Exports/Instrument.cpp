@@ -24,12 +24,18 @@ void export_Instrument() {
 
   class_<Instrument, bases<CompAssembly>, boost::noncopyable>("Instrument",
                                                               no_init)
-      .def("getSample", &Instrument::getSample, arg("self"),
+      .def("getSample",
+           (std::shared_ptr<const IComponent>(Instrument::*)(bool) const) &
+               Instrument::getSample,
+           (arg("self"), arg("writeToLog") = true),
            return_value_policy<RemoveConstSharedPtr>(),
            "Return the :class:`~mantid.geometry.Component` object that "
            "represents the sample")
 
-      .def("getSource", &Instrument::getSource, arg("self"),
+      .def("getSource",
+           (std::shared_ptr<const IComponent>(Instrument::*)(bool) const) &
+               Instrument::getSource,
+           (arg("self"), arg("writeToLog") = true),
            return_value_policy<RemoveConstSharedPtr>(),
            "Return the :class:`~mantid.geometry.Component` object that "
            "represents the source")
