@@ -14,8 +14,6 @@ from tempfile import NamedTemporaryFile
 
 
 TEST_MESSAGE = "Hello Mantid!"
-TEST_FILE = NamedTemporaryFile(suffix=".txt", delete=False).name.replace('\\', '/')
-TEST_SCRIPT = NamedTemporaryFile(suffix=".py", delete=False).name.replace('\\', '/')
 
 EXECUTABLE_SWITCHER = {"linux": ["launch_mantidworkbench.sh", "mantidworkbench"],
                        "darwin": ["MantidWorkbench"],
@@ -38,9 +36,9 @@ def get_mantid_executable_path(platform):
     raise RuntimeError(f"Could not find path to {workbench_exe}.")
 
 
-def write_test_script():
-    with open(TEST_SCRIPT, "w") as file:
-        file.write(f"\nwith open('{TEST_FILE}', 'w') as file:")
+def write_test_script(test_script, test_file):
+    with open(test_script, "w") as file:
+        file.write(f"\nwith open('{test_file}', 'w') as file:")
         file.write(f"\n    file.write('{TEST_MESSAGE}')")
 
 
@@ -59,21 +57,23 @@ class WorkbenchStartupTest(systemtesting.MantidSystemTest):
     def __init__(self):
         super(WorkbenchStartupTest, self).__init__()
 
-        write_test_script()
+        self._test_file = NamedTemporaryFile(suffix=".txt", delete=False).name.replace('\\', '/')
+        self._test_script = NamedTemporaryFile(suffix=".py", delete=False).name.replace('\\', '/')
+
+        write_test_script(self._test_script, self._test_file)
 
         self._executable = get_mantid_executable_path(sys.platform)
 
     def runTest(self):
-        process = subprocess.Popen([self._executable, "--execute", TEST_SCRIPT, "--quit"],
+        process = subprocess.Popen([self._executable, "--execute", self._test_script, "--quit"],
                                    stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         # Wait for the process to finish execution, and assert it was successfully
         self.assertTrue(process.wait() == 0)
         # Assert that the test script runs successfully by writing to a .txt file
-        with open(TEST_FILE, "r") as file:
+        with open(self._test_file, "r") as file:
             self.assertTrue(file.readline() == TEST_MESSAGE)
 
-    @staticmethod
-    def cleanup():
-        remove_file(TEST_SCRIPT)
-        remove_file(TEST_FILE)
+    def cleanup(self):
+        remove_file(self._test_script)
+        remove_file(self._test_file)
