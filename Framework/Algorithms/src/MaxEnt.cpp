@@ -263,10 +263,10 @@ void MaxEnt::init() {
 //----------------------------------------------------------------------------------------------
 /** Revisit bin edge validation to write errors/warnings to the log
  */
-void MaxEnt::validateBinEdges(std::string wsName,
+void MaxEnt::validateBinEdges(const std::string &wsName,
                               std::map<std::string, std::string> &messages) {
   const double warningLevel = 0.01;
-  MatrixWorkspace_sptr ws = getProperty(wsName);
+  MatrixWorkspace_const_sptr ws = getProperty(wsName);
   if (ws) {
 
     Kernel::EqualBinsChecker binChecker(ws->readX(0), BIN_WIDTH_ERROR_LEVEL,
