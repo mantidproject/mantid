@@ -8,7 +8,7 @@ Direct Geometry Changes
 Improvements
 ------------
 
-- The instrument geometry of PANTHER has been corrected according to the findins during the hot commissioning.
+- The instrument geometry of PANTHER has been corrected according to the findings during the hot commissioning.
 
 
 DGSPlanner
