@@ -503,8 +503,8 @@ class PolDiffILLReduction(PythonAlgorithm):
          such as the beam size and calculates derived parameters."""
         self._sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentPropertiesDictionary').value
         if 'n_atoms' not in self._sampleAndEnvironmentProperties:
-            self._sampleAndEnvironmentProperties['NAtoms'] = float(self._sampleAndEnvironmentProperties['NumberDensity'].value) \
-                * float(self._sampleAndEnvironmentProperties['Mass'].value) \
+            self._sampleAndEnvironmentProperties['NAtoms'] = self._sampleAndEnvironmentProperties['NumberDensity'].value \
+                * self._sampleAndEnvironmentProperties['Mass'].value \
                 / float(self._sampleAndEnvironmentProperties['Density'].value)
         if 'initial_energy' not in self._sampleAndEnvironmentProperties:
             h = physical_constants['Planck constant'][0]  # in m^2 kg^2 / s^2
