@@ -645,6 +645,8 @@ class DrillView(QMainWindow):
         self.invalidCells = set()
         self.coloredRows = set()
         self.table.setRowCount(0)
+        self.table.setColumnCount(0)
+        self.table.horizontalHeader().reset()
         self.table.setColumnCount(len(columns))
         self.table.setHorizontalHeaderLabels(columns)
         if tooltips:
