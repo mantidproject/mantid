@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, \
-                           QStyle, QAbstractItemView, QMenu
+                           QStyle, QAbstractItemView, QMenu, QMessageBox
 from qtpy.QtGui import QBrush, QColor
 from qtpy.QtCore import *
 
@@ -394,7 +394,9 @@ class DrillTableWidget(QTableWidget):
 
     def toggleColumnVisibility(self, column):
         """
-        Change the visibility state of a column by giving its name.
+        Change the visibility state of a column by giving its name. If the
+        column is not empty it is emptied before being hidden. In that case, the
+        user is asked for confirmation.
 
         Args:
             column (str): column name
@@ -406,9 +408,20 @@ class DrillTableWidget(QTableWidget):
         if header.isSectionHidden(i):
             header.showSection(i)
         else:
+            empty = True
             for j in range(self.rowCount()):
-                self.setCellContents(j, i, "")
-            header.hideSection(i)
+                if self.getCellContents(j, i):
+                    empty = False
+            if not empty:
+                q = QMessageBox.question(self, "Column is not empty", "Hiding "
+                                         "the column will erase its content. "
+                                         "Do you want to continue?")
+                if q == QMessageBox.Yes:
+                    for j in range(self.rowCount()):
+                        self.setCellContents(j, i, "")
+                    header.hideSection(i)
+            else:
+                header.hideSection(i)
 
     def getHiddenColumns(self):
         """
