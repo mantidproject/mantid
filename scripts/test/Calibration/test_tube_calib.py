@@ -11,20 +11,19 @@ from numpy.testing import assert_allclose
 from os import path
 import unittest
 
-# Mantid
+# Mantid import
 from mantid import config
 from mantid.api import AnalysisDataService, mtd
 from mantid.simpleapi import DeleteWorkspaces, LoadNexusProcessed
 
-# Calibration
+# Calibration imports
 from Calibration.tube_calib import correct_tube_to_ideal_tube, getCalibratedPixelPositions
-from Calibration.tube_spec import TubeSpec
 
 
 class TestTubeCalib(unittest.TestCase):
 
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls):  # called only before running all tests in the test case
         cls.workspaces_temporary = list()  # workspaces to be deleted at tear-down
 
         # Single tube data. Tube dimensions appropriate for a CORELLI tube
@@ -64,18 +63,17 @@ class TestTubeCalib(unittest.TestCase):
                 break
         workspace = 'CORELLI_123455_bank20'
         LoadNexusProcessed(Filename=path.join(data_dir, workspace + '.nxs'), OutputWorkspace=workspace)
+        assert AnalysisDataService.doesExist(workspace)
         cls.workspaces_temporary.append(workspace)  # delete workspace at tear-down
         cls.corelli = {'tube_length': 0.900466,  # in meters
                        'pixels_per_tube': 256,
-                       'workspace': workspace,
-                       'tube_set': TubeSpec(workspace).setTubeSpecByString('bank20'),
-                       'calib_table': None,
-                       }
+                       'workspace': workspace}
 
     @classmethod
-    def tearDown(cls) -> None:
+    def tearDownClass(cls) -> None:  # called only after all tests in the test case have run
         r"""Delete the workspaces associated to the test cases"""
-        DeleteWorkspaces(cls.workspaces_temporary)
+        if len(cls.workspaces_temporary) > 0:
+            DeleteWorkspaces(cls.workspaces_temporary)
 
     def test_correct_tube_to_ideal_tube(self):
         # Verify the quadratic fit works
@@ -129,9 +127,6 @@ class TestTubeCalib(unittest.TestCase):
         # a bit of clean-up
         DeleteWorkspaces(['parameters', 'PolyFittingWorkspace', 'QF_NormalisedCovarianceMatrix',
                           'QF_Parameters', 'QF_Workspace'])
-
-    def test_getCalibration(self):
-        pass
 
 
 if __name__ == '__main__':
