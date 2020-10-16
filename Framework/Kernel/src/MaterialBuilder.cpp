@@ -318,17 +318,16 @@ MaterialBuilder::density_packing MaterialBuilder::getOrCalculateRhoAndPacking(
                       });
 
   // calculate the number density by one of many ways
-  if (m_numberDensity && m_numberDensityUnit == NumberDensityUnit::Atoms) {
-    result.number_density = m_numberDensity.get();
-  } else {
-    if (m_numberDensity &&
-        m_numberDensityUnit == NumberDensityUnit::FormulaUnits) {
+  if (m_numberDensity) {
+    if (m_numberDensityUnit == NumberDensityUnit::Atoms) {
+      result.number_density = m_numberDensity.get();
+    } else if (m_numberDensityUnit == NumberDensityUnit::FormulaUnits) {
       result.number_density = m_numberDensity.get() * totalNumAtoms;
-    } else if (m_zParam && m_cellVol) {
-      result.number_density = totalNumAtoms * m_zParam.get() / m_cellVol.get();
-    } else if (!m_formula.empty() && m_formula.size() == 1) {
-      result.number_density = m_formula.front().atom->number_density;
     }
+  } else if (m_zParam && m_cellVol) {
+      result.number_density = totalNumAtoms * m_zParam.get() / m_cellVol.get();
+  } else if (!m_formula.empty() && m_formula.size() == 1) {
+    result.number_density = m_formula.front().atom->number_density;
   }
 
   // calculate the effective number density
