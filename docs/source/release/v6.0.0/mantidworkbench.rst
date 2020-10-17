@@ -22,6 +22,7 @@ Improvements
 - Add the possibility to copy and paste shapes in the instrument viewer using Ctrl + C and Ctrl + V.
 - Improved spectra selection within the sliceviewer, which should ensure that high counting spectra are shown immediately when the sliceviewer is opened.
 - Powder diffraction support (instruments D2B and D20) has been added to DrILL interface. See
+- Dynamic binning has been enabled for MDHistoWorkspaces with an attached original in the SliceViewer. Manual rebinning options are now also shown.
 
 Bugfixes
 ########
