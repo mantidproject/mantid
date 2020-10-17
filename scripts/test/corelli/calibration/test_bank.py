@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import numpy as np
-from numpy.testing import assert_equal
+from numpy.testing import assert_equal, assert_allclose
 from os import path
 import unittest
 
@@ -14,8 +14,9 @@ import unittest
 from mantid import AnalysisDataService, config, mtd
 from mantid.simpleapi import DeleteWorkspaces, LoadNexusProcessed
 
-from corelli.calibration.bank import (calibrate_bank, calibrate_banks, criterium_peak_pixel_position, fit_bank,
-                                      mask_bank, purge_table, sufficient_intensity)
+from corelli.calibration.bank import (calibrate_bank, calibrate_banks, collect_bank_fit_results,
+                                      criterium_peak_pixel_position, fit_bank, mask_bank, purge_table,
+                                      sufficient_intensity)
 from corelli.calibration.utils import TUBES_IN_BANK
 
 
@@ -73,8 +74,6 @@ class TestBank(unittest.TestCase):
 
         with self.assertRaises(AssertionError) as exception_info:
             fit_bank('I_am_not_here', 'bank42')
-        assert 'Input workspace I_am_not_here does not exists' in str(exception_info.exception)
-
         with self.assertRaises(AssertionError) as exception_info:
             fit_bank(control, 'bank20', shadow_height=-1000)
         assert 'shadow height must be positive' in str(exception_info.exception)
@@ -202,6 +201,52 @@ class TestBank(unittest.TestCase):
         assert detector_ids[0], detector_ids[-1] == [182784, 182784 + 3 * 256]
 
         DeleteWorkspaces(['CalibTable', 'PeakTable', 'masked_tubes'])  # a bit of clean-up
+
+    def test_collect_bank_fit_results(self):
+
+        def spectra_labels(workspace_name):
+            workspace = mtd[str(workspace_name)]
+            axis = workspace.getAxis(1)
+            return [axis.label(spectrum_index) for spectrum_index in range(workspace.getNumberHistograms())]
+
+        fit_bank(self.cases['123455_bank20'], 'bank20', parameters_table_group='parameters_tables')
+        criterium_peak_pixel_position('PeakTable', summary='summary', zscore_threshold=2.5, deviation_threshold=3)
+
+        with self.assertRaises(AssertionError) as exception_info:
+            collect_bank_fit_results('fit_results', acceptance_summary=None, parameters_table_group=None)
+        assert 'fit results should be different than None' in str(exception_info.exception)
+
+        # collect only the acceptance criteria results
+        collect_bank_fit_results('fit_results', acceptance_summary='summary', parameters_table_group=None)
+        assert spectra_labels('fit_results') == ['success', 'deviation', 'Z-score']
+        assert_allclose(mtd['fit_results'].readY(0), mtd['summary'].readY(0))
+        DeleteWorkspaces(['fit_results'])
+
+        # collect only the polynomial coefficients
+        collect_bank_fit_results('fit_results', acceptance_summary=None, parameters_table_group='parameters_tables')
+        assert spectra_labels('fit_results') == ['A0', 'A1', 'A2']
+        for coefficient_idx in range(3):  # we have three polynomial coefficients
+            for tube_idx in range(TUBES_IN_BANK):
+                self.assertAlmostEqual(mtd['fit_results'].readY(coefficient_idx)[tube_idx],
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Value'], delta=1e-6)
+                self.assertAlmostEqual(mtd['fit_results'].readE(coefficient_idx)[tube_idx],
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Error'], delta=1e-6)
+        DeleteWorkspaces(['fit_results'])
+
+        # collect both acceptance criteria and polynomial coefficients
+        collect_bank_fit_results('fit_results', acceptance_summary='summary',
+                                 parameters_table_group='parameters_tables')
+        assert spectra_labels('fit_results') == ['success', 'deviation', 'Z-score', 'A0', 'A1', 'A2']
+        for spectrum_idx in [0, 1, 2]:
+            assert_allclose(mtd['fit_results'].readY(spectrum_idx), mtd['summary'].readY(spectrum_idx))
+            assert_allclose(mtd['fit_results'].readE(spectrum_idx), mtd['summary'].readE(spectrum_idx))
+        for coefficient_idx, spectrum_idx in [(0, 3), (1, 4), (2, 5)]:  # we have three polynomial coefficients
+            for tube_idx in range(TUBES_IN_BANK):
+                self.assertAlmostEqual(mtd['fit_results'].readY(spectrum_idx)[tube_idx],
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Value'], delta=1e-6)
+                self.assertAlmostEqual(mtd['fit_results'].readE(spectrum_idx)[tube_idx],
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Error'], delta=1e-6)
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'summary', 'parameters_tables', 'fit_results'])  # clean-up
 
     def test_calibrate_bank(self):
 

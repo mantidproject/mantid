@@ -131,44 +131,53 @@ def collect_bank_fit_results(output_workspace: str,
 
     :return: reference to the fit results workspace. Return `None` if no fit results are provided
     """
-    if acceptance_summary is None and parameters_table_group is None:
-        raise IOError(f'At least one of the input fit results should be different than None')
+    error_message = 'At least one of the input fit results should be different than None'
+    assert acceptance_summary is not None or parameters_table_group is not None,  error_message
 
-    # fit_results is a dictionary with entries like this:
-    # 'A0-value': [-0.521, -0.517,..., -0.524]  # one value for each tube in the bank
-    # 'A0-error': [...]  # and so on with A1 and A2 coefficients
-    fit_results = {}
+    # fit_results_values is a dictionary with entries like this:
+    # 'A0': [-0.521, -0.517,..., -0.524]  # one value for each tube in the bank, and so on with A1 and A2 coefficients
+    fit_results_values = {}
+    fit_results_errors = {}  # errors in the optimized values of the polynomial coefficients
     fit_result_names = []  # ['success', 'Z-score', ...]
 
     if acceptance_summary is not None:
         workspace = mtd[str(acceptance_summary)]
         axis = workspace.getAxis(1)
-        for spectrum_index in workspace.getNumberHistograms():
+        for spectrum_index in range(workspace.getNumberHistograms()):
             fit_result_name = axis.label(spectrum_index)
             fit_result_names.append(fit_result_name)
-            fit_results[fit_result_name] = workspace.readY(spectrum_index)
+            fit_results_values[fit_result_name] = workspace.readY(spectrum_index)
+            fit_results_errors[fit_result_name] = workspace.readE(spectrum_index)
 
     if parameters_table_group is not None:
         workspace = mtd[str(parameters_table_group)]
-        # collect the values of the fit results
-        for parameters_table in workspace:
+        # collect the names of the polynomial coefficients using the first table
+        first_table = mtd[workspace.getNames()[0]]  # handle to the first table in the list
+        for coefficient_name in first_table.column(0)[:-1]:  # exclude the last item, which is the chi-square value
+            fit_result_names.append(coefficient_name)
+            fit_results_values[coefficient_name], fit_results_errors[coefficient_name] = [], []
+        # collect values and errors of the fit results
+        for parameters_table in workspace:  # iterate over the parameter tables, one table for each tube
             for table_row in parameters_table:
                 # table_row is a dictionary, e.g. {'Name': 'A0', 'Value':-0.521, 'Error':0.003}
-                name = table_row['Name']  # polynomial fit coefficient
-                if name == 'Cost function value':
+                coefficient_name = table_row['Name']  # polynomial fit coefficient
+                if coefficient_name == 'Cost function value':  # don't store the Chi-square value
                     continue
-                for quantity in ('Value', 'Error'):
-                    fit_result_name = f'{name}-{quantity.lower()}'
-                    if fit_result_name not in fit_result_names:
-                        fit_result_names.append(fit_result_name)
-                    fit_result = fit_results.get(fit_result_name, [])  # e.g. key 'A0-value'
-                    fit_result.append(table_row[quantity])
+                fit_results_values[coefficient_name].append(table_row['Value'])
+                fit_results_errors[coefficient_name].append(table_row['Error'])
 
-    # Create a workspace with the fit_results, where each (key, value) pair becomes one spectrum
+    # Create a workspace with the fit results, where each (key, values, errors) pair becomes one spectrum
     x_values = list(range(1, 1 + TUBES_IN_BANK))
-    y_values = [y for fit_result in fit_results.values() for y in fit_result]
-    return CreateWorkspace(x_values, y_values, NSpec=len(fit_result_names), OutputWorkspace=output_workspace,
-                           WorkspaceTitle='Fitting Results', EnableLogging=False)
+    y_values = [y for fit_result_values in fit_results_values.values() for y in fit_result_values]
+    e_values = [e for fit_result_errors in fit_results_errors.values() for e in fit_result_errors]
+    CreateWorkspace(DataX=x_values, DataY=y_values, DataE=e_values, NSpec=len(fit_result_names),
+                    OutputWorkspace=output_workspace, WorkspaceTitle='Fitting Results', EnableLogging=False)
+    # label each spectrum of the workspace
+    axis = TextAxis.create(len(fit_result_names))
+    [axis.setLabel(index, fit_result_name) for index, fit_result_name in enumerate(fit_result_names)]
+    workspace = mtd[output_workspace]
+    workspace.replaceAxis(1, axis)
+    return workspace
 
 
 def criterium_peak_pixel_position(peak_table: InputTable,
