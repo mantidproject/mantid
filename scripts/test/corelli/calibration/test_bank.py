@@ -257,6 +257,7 @@ class TestBank(unittest.TestCase):
         assert AnalysisDataService.doesExist('calibration_table')
         assert mask is None
         assert AnalysisDataService.doesExist('MaskTable') is False
+        DeleteWorkspaces(['calibration_table'])  # clean-up
 
         # tubes 3, 8, and 13 have very faint wire shadows. Thus, mask these tubes
         calibration, mask = calibrate_bank(self.cases['124023_bank14'], 'bank14',
@@ -267,18 +268,20 @@ class TestBank(unittest.TestCase):
         assert mask.rowCount() == 256 * 3
         assert mask.columnCount() == 1
         assert AnalysisDataService.doesExist('MaskTable')
+        DeleteWorkspaces(['calibration_table', 'MaskTable'])  # clean-up
 
-        # check for the summary workspace
-        calibrate_bank(self.cases['123455_bank20'], 'bank20', 'calibration_table',
-                       criterium_kwargs=dict(summary='summary'))
-        assert AnalysisDataService.doesExist('summary')
-        workspace = mtd['summary']
+        # check for the fits workspace
+        calibrate_bank(self.cases['123455_bank20'], 'bank20', 'calibration_table', fit_results='fits')
+        assert AnalysisDataService.doesExist('fits')
+        workspace = mtd['fits']
         axis = workspace.getAxis(1)
-        assert [axis.label(workspace_index) for workspace_index in (0, 1, 2)] == ['success', 'deviation', 'Z-score']
-        self.assertEqual(min(workspace.readY(0)), 1.0)
-        self.assertAlmostEqual(max(workspace.readY(2)), 1.728, delta=0.001)
-
-        DeleteWorkspaces(['calibration_table', 'MaskTable', 'summary'])  # a bit of clean-up
+        labels = [axis.label(i) for i in range(workspace.getNumberHistograms())]
+        assert labels == ['success', 'deviation', 'Z-score', 'A0', 'A1', 'A2']
+        assert_allclose(workspace.readY(0), [1.0] * TUBES_IN_BANK)  # success status for first tube
+        self.assertAlmostEqual(max(workspace.readY(2)), 1.728, delta=0.001)  # maximum Z-score
+        self.assertAlmostEqual(max(workspace.readY(3)), -0.445, delta=0.001)  # maximum A0 value
+        self.assertAlmostEqual(max(workspace.readE(3)), 1.251, delta=0.001)  # maximum A0 error
+        DeleteWorkspaces(['calibration_table', 'fits'])  # a bit of clean-up
 
     def test_calibrate_banks(self):
         calibrations, masks = calibrate_banks(self.cases['124023_banks_14_15'], '14-15')
@@ -287,10 +290,16 @@ class TestBank(unittest.TestCase):
         assert mtd['calib14'].rowCount() == 256 * (16 - 3)
         assert mtd['mask14'].rowCount() == 256 * 3
         assert mtd['calib15'].rowCount() == 256 * 16
-        self.assertEqual(mtd['acceptance14'].readY(0).tolist(), [1, 1, 0., 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1])
-        self.assertEqual(mtd['acceptance15'].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-
-        DeleteWorkspaces(['calibrations', 'masks', 'acceptances'])
+        # Check for success status
+        self.assertEqual(mtd['fit14'].readY(0).tolist(), [1, 1, 0., 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1])
+        self.assertEqual(mtd['fit15'].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        # Check for A1 coefficient values
+        self.assertAlmostEqual(max(mtd['fit14'].readY(4)), 0.0044, delta=0.0001)
+        self.assertAlmostEqual(max(mtd['fit15'].readY(4)), 0.0037, delta=0.0001)
+        # Check for A2 coefficient errors
+        self.assertAlmostEqual(max(mtd['fit14'].readE(4)), 0.0224, delta=0.0001)
+        self.assertAlmostEqual(max(mtd['fit15'].readE(4)), 0.0221, delta=0.0001)
+        DeleteWorkspaces(['calibrations', 'masks', 'fits'])
 
 
 if __name__ == "__main__":
