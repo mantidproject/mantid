@@ -424,7 +424,7 @@ class DrillView(QMainWindow):
         Add the selected row(s) to a new group. This method changes the row
         label.
         """
-        rows = self.table.getSelectedRows()
+        rows = self.table.getRowsFromSelectedCells()
         if not rows:
             return
 
@@ -445,7 +445,7 @@ class DrillView(QMainWindow):
         Remove the selected row(s) to all their potential groups. This method
         reset the row label.
         """
-        rows = self.table.getSelectedRows()
+        rows = self.table.getRowsFromSelectedCells()
         if not rows:
             return
 
@@ -462,7 +462,7 @@ class DrillView(QMainWindow):
         This method sets the selected row as the master row for the group it
         belongs to.
         """
-        rows = self.table.getSelectedRows()
+        rows = self.table.getRowsFromSelectedCells()
         if not rows or len(rows) > 1:
             return
 

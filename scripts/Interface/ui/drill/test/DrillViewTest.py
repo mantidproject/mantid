@@ -245,19 +245,19 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.deleteRow.assert_has_calls(calls)
 
     def test_groupSelectedRows(self):
-        self.view.table.getSelectedRows.return_value = []
+        self.view.table.getRowsFromSelectedCells.return_value = []
         self.view.groupSelectedRows()
         self.assertEqual(self.view.groups, {})
-        self.view.table.getSelectedRows.return_value = [1, 2, 3]
+        self.view.table.getRowsFromSelectedCells.return_value = [1, 2, 3]
         self.view.groupSelectedRows()
         self.assertDictEqual(self.view.groups, {"A": [1, 2, 3]})
-        self.view.table.getSelectedRows.return_value = [4, 5, 6]
+        self.view.table.getRowsFromSelectedCells.return_value = [4, 5, 6]
         self.view.groupSelectedRows()
         self.assertDictEqual(self.view.groups, {"A": [1, 2, 3],
                                                 "B": [4, 5, 6]})
         self.view.groups = {"A": [],
                             "B": [4, 5, 6]}
-        self.view.table.getSelectedRows.return_value = [1, 2, 3]
+        self.view.table.getRowsFromSelectedCells.return_value = [1, 2, 3]
         self.view.groupSelectedRows()
         self.assertDictEqual(self.view.groups, {"A": [1, 2, 3],
                                                 "B": [4, 5, 6]})
@@ -266,26 +266,26 @@ class DrillViewTest(unittest.TestCase):
         self.view.groups = {"A": [1, 2, 3],
                             "B": [4, 5, 6]}
         self.view.masterRows = {"A": 1, "B": 4}
-        self.view.table.getSelectedRows.return_value = [1, 2, 3]
+        self.view.table.getRowsFromSelectedCells.return_value = [1, 2, 3]
         self.view.ungroupSelectedRows()
         self.assertDictEqual(self.view.groups, {"A": [],
                                                 "B": [4, 5, 6]})
         self.assertDictEqual(self.view.masterRows, {"B": 4})
-        self.view.table.getSelectedRows.return_value = [5, 6]
+        self.view.table.getRowsFromSelectedCells.return_value = [5, 6]
         self.view.ungroupSelectedRows()
         self.assertDictEqual(self.view.groups, {"A": [],
                                                 "B": [4]})
         self.assertDictEqual(self.view.masterRows, {"B": 4})
 
     def test_setSelectedRowAsMasterRow(self):
-        self.view.table.getSelectedRows.return_value = [1, 2, 3]
+        self.view.table.getRowsFromSelectedCells.return_value = [1, 2, 3]
         self.view.setSelectedRowAsMasterRow()
         self.assertEqual(self.view.masterRows, {})
-        self.view.table.getSelectedRows.return_value = [1]
+        self.view.table.getRowsFromSelectedCells.return_value = [1]
         self.view.setSelectedRowAsMasterRow()
         self.assertEqual(self.view.masterRows, {})
         self.view.groups = {"A": [1, 2, 3]}
-        self.view.table.getSelectedRows.return_value = [1]
+        self.view.table.getRowsFromSelectedCells.return_value = [1]
         self.view.setSelectedRowAsMasterRow()
         self.assertDictEqual(self.view.masterRows, {"A": 1})
 
