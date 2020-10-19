@@ -22,6 +22,8 @@ The main changes are:
 
 - corrected the table value for a partially invalid, filtered log, with only one remaining entry
 
+- fixed a bug where Muon Analysis would crash when using default grouping with no runs
+
 Citation
 --------
 
@@ -42,22 +44,26 @@ Changes in this version
 - `29695 <https://github.com/mantidproject/mantid/pull/29695>`_ Workaround crash with importing CaChannel on Linux
 - `29706 <https://github.com/mantidproject/mantid/pull/29706>`_ Update hard-coded PV names in RROLD
 - `29754 <https://github.com/mantidproject/mantid/pull/29754>`_ Filtered Value is displayed in Sample logs table
+- `29708 <https://github.com/mantidproject/mantid/pull/29708>`_ Muon analysis crash when using default grouping with no runs
 
 Summary of impact
 -----------------
 
-+-------+--------------------------------------------------+----------+--------------+
-| Issue | Impact                                           | Solution | Side Effect  |
-|       |                                                  |          | Probability  |
-+=======+==================================================+==========+==============+
-| 29695 | Fixes cachannel import on Linux in workbench     |          | **medium**   |
-+-------+--------------------------------------------------+----------+--------------+
-| 29672 | Fixed muon fitting bugs                          |          | **low**      |
-+-------+--------------------------------------------------+----------+--------------+
-| 29706 | Update hard-coded PV names in RROLD              |          | **low**      |
-+-------+--------------------------------------------------+----------+--------------+
-| 29754 | Filtered Value is displayed in Sample logs table |          | **low**      |
-+-------+--------------------------------------------------+----------+--------------+
++-------+---------------------------------------------------------------+--------------+
+| Issue | Impact                                                        | Side Effect  |
+|       |                                                               | Probability  |
++=======+===============================================================+==============+
+| 29695 | Fixes cachannel import on Linux in workbench                  | **medium**   |
++-------+---------------------------------------------------------------+--------------+
+| 29672 | Fixed muon fitting bugs                                       | **low**      |
++-------+---------------------------------------------------------------+--------------+
+| 29706 | Update hard-coded PV names in RROLD                           | **low**      |
++-------+---------------------------------------------------------------+--------------+
+| 29754 | Fixes filtered value is displayed in Sample logs table        | **low**      |
++-------+---------------------------------------------------------------+--------------+
+| 29708 | Fixes Muon analysis crash using default grouping with no runs | **low**      |
++-------+---------------------------------------------------------------+--------------+
+
 
 .. _download page: http://download.mantidproject.org
 
