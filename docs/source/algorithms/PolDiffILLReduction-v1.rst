@@ -151,11 +151,12 @@ This example below performs a complete reduction for D7 data.
     )
     # Beam measurement for transmisison
     PolDiffILLReduction(
-        Run='396983,396984',
+        Run='396983',
         OutputWorkspace='beam_ws',
         AbsorberTransmissionInputWorkspace='cadmium_ws_1',
         ProcessAs='Beam'
     )
+    print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium'].readY(0)[0] / mtd['beam_ws'].readY(0)[0]))
 
     # Quartz transmission
     PolDiffILLReduction(
@@ -165,6 +166,7 @@ This example below performs a complete reduction for D7 data.
         BeamInputWorkspace='beam_ws_1',
        ProcessAs='Transmission'
     )
+    print('Quartz transmission is {0:.3f}'.format(mtd['quartz_transmission'].readY(0)[0]))
 
     # Empty container
     PolDiffILLReduction(
@@ -179,6 +181,7 @@ This example below performs a complete reduction for D7 data.
         OutputWorkspace='absorber_ws',
         ProcessAs='Absorber'
     )
+    
     # Polarisation correction
     PolDiffILLReduction(
         Run='396939',
@@ -198,7 +201,8 @@ This example below performs a complete reduction for D7 data.
         BeamInputWorkspace='beam_ws_1',
         ProcessAs='Transmission'
     )
-
+    print('Vanadium transmission is {0:.3f}'.format(mtd['vanadium_transmission'].readY(0)[0]))
+    
     # Vanadium reduction
     PolDiffILLReduction(
         Run='396993',
@@ -222,6 +226,7 @@ This example below performs a complete reduction for D7 data.
        BeamInputWorkspace='beam_ws_1',
        ProcessAs='Transmission'
     )
+    print('Sample transmission is {0:.3f}'.format(mtd['sample_transmission'].readY(0)[0]))
 
     # Sample reduction
     PolDiffILLReduction(
@@ -245,11 +250,10 @@ Output:
 
 .. testoutput:: ExPolDiffILLReduction
 
-    Absorber transmission is 
-    Container transmission is 
-    Quartz transmission is 
-    Vanadium transmission is 
-    Sample transmission is 
+    Cadmium absorber transmission is 0.010
+    Quartz transmission is 0.688
+    Vanadium transmission is 0.872
+    Sample transmission is 0.947
 
 .. testcleanup:: ExPolDiffILLReduction
 
