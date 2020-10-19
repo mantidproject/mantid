@@ -10,17 +10,19 @@
 import pathlib
 from datetime import datetime
 import re
+from typing import Optional
 
 from mantid.dataobjects import TableWorkspace
 from mantid.api import WorkspaceGroup, Workspace
 from mantid.simpleapi import CreateEmptyTableWorkspace, SaveNexusProcessed, LoadNexusProcessed
 
 
-def init_corelli_table()->TableWorkspace :
+def init_corelli_table( name:Optional[str] = None )->TableWorkspace :
     """
     Function that initializes a Corelli calibration TableWorkspace columns
     """
-    table:TableWorkspace = CreateEmptyTableWorkspace()
+    table:TableWorkspace = CreateEmptyTableWorkspace(OutputWorkspace=name) if name else CreateEmptyTableWorkspace()
+
     table.addColumn(type="int", name="Detector ID")
     table.addColumn(type="vector_double", name="Detector Position")
     return table
@@ -47,14 +49,14 @@ def filename_bank_table( bankID:int, database_path:str, date:str, table_type:str
            Example: database/corelli/ for
                     database/corelli/bank001/
                     database/corelli/bank002/
-    :param type 'calibration', 'mask' or 'acceptance'
+    :param type 'calibration', 'mask' or 'fit'
     """
 
     verify_date_YYYYMMDD('filename_bank_table', date)
     subdirectory:str = database_path + '/' + 'bank' + str(bankID).zfill(3)
     pathlib.Path(subdirectory).mkdir(parents=True, exist_ok=True)
-    message = f'{"Cannot process Corelli filename_bank_table, table_type must be calibration, mask or acceptance"}'
-    assert table_type == 'calibration' or table_type == 'mask' or table_type == 'acceptance', message
+    message = f'{"Cannot process Corelli filename_bank_table, table_type must be calibration, mask or fit"}'
+    assert table_type == 'calibration' or table_type == 'mask' or table_type == 'fit', message
 
     filename = subdirectory + '/' + table_type + '_corelli_bank' + str(bankID).zfill(3) + '_' + date + '.nxs.h5'
     # make it portable
@@ -62,7 +64,7 @@ def filename_bank_table( bankID:int, database_path:str, date:str, table_type:str
     return filename
 
 
-def save_manifest_file( bankIDs:list, database_path:str, date:str, iso_timestamps:list)->None:
+def save_manifest_file( bankIDs:list, database_path:str, date:str)->None:
     """
     Function that saves or updates an existing manifest_corelli_date.csv file.
     There is one file stored for each calibration day. If file exist it will append two columns:
@@ -72,18 +74,9 @@ def save_manifest_file( bankIDs:list, database_path:str, date:str, iso_timestamp
            Example: database/corelli/ for manifest file:
                     database/corelli/manifest_corelli_YYYYMMDD.csv
     :param date format YYYYMMDD
-    :param iso_timestamps list of timestamps for each calibrated bank in iso format YYYY-MM-DDTHH:MM:SS
-                          from datetime.datetime.now().replace(microsecond=0).isoformat()
     """
-    # verify banks and timestamps are the same length
-    if len(bankIDs) != len(iso_timestamps):
-        raise ValueError('bankIDs and iso_timestamps list inputs must have the same lengths')
-
     # verify timestamps are correct
-    for iso_timestamp in iso_timestamps:
-        if not re.match('[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}', iso_timestamp):
-            raise ValueError('iso_timestamp entry: ' + str(iso_timestamp) + ' is not valid iso format YYYY-MM-DDTHH:MM:SS')
-
+    verify_date_YYYYMMDD('save_manifest_file', date)
     filename = database_path + '/manifest_corelli_' + date + '.csv'
 
     if pathlib.Path(filename).is_file():
@@ -94,14 +87,14 @@ def save_manifest_file( bankIDs:list, database_path:str, date:str, iso_timestamp
 
     lines:str = ''
     for t, bankID in enumerate(bankIDs):
-        lines += str(bankID) + ', ' + str(iso_timestamps[t]) + '\n'
+        lines += str(bankID) + ', ' + str(date) + '\n'
 
     file.write(lines)
     file.close()
 
 
 def save_bank_table( data:Workspace, bankID:int, database_path:str, date:str,
-                     table_type:str = 'calibration' ) -> None:
+                     table_type:str = 'calibration') -> None:
     """
     Function that saves a bank calibrated TableWorkspace into a single HDF5 file
     using corelli format and using current date:
@@ -112,14 +105,15 @@ def save_bank_table( data:Workspace, bankID:int, database_path:str, date:str,
            Example: database/corelli/ for
                     database/corelli/bank001/
                     database/corelli/bank002/
-    :param table_type 'calibration', 'mask' or 'acceptance'
+    :param table_type 'calibration', 'mask' or 'fit'
     """
     verify_date_YYYYMMDD('save_bank_table', date)
     filename:str = filename_bank_table(bankID, database_path, date, table_type)
     SaveNexusProcessed(data,filename)
 
 
-def load_bank_table( bankID:int, database_path:str, date:str, table_type:str = 'calibration' ) -> TableWorkspace:
+def load_bank_table( bankID:int, database_path:str, date:str, table_type:str = 'calibration'
+                     ) -> TableWorkspace:
     """
     Function that loads the latest bank calibrated TableWorkspace from a single HDF5 file
     using corelli format:
@@ -130,7 +124,7 @@ def load_bank_table( bankID:int, database_path:str, date:str, table_type:str = '
                     database/corelli/bank001/
                     database/corelli/bank002/
     :param date current day in YYYYMMDD format
-    :param table_type 'calibration', 'mask' or 'acceptance'
+    :param table_type 'calibration', 'mask' or 'fit'
     :return TableWorkspace with corresponding data
     """
     verify_date_YYYYMMDD('load_bank_table', date)
@@ -159,7 +153,7 @@ def combine_temporal_banks( database_path:str, date:str, table_type:str = 'calib
                     database/corelli/bank001/
                     database/corelli/bank002/
     :param date pivot date in YYYYMMDD
-    :param table_type 'calibration', 'mask' or 'acceptance'
+    :param table_type 'calibration', 'mask' or 'fit'
     :return WorkspaceGroup, each component is a calibrated TableWorkspace bank
     """
 
@@ -196,7 +190,7 @@ def combine_temporal_banks( database_path:str, date:str, table_type:str = 'calib
     return tables
 
 
-def combine_spatial_banks(tables:WorkspaceGroup)->TableWorkspace:
+def combine_spatial_banks(tables:WorkspaceGroup, name: Optional[str] = None)->TableWorkspace:
     """
     Function that inputs a GroupWorkspace of TableWorkspace .
     :param tables: input GroupWorkspace with independent bank TableWorkspace for Corelli
@@ -205,7 +199,7 @@ def combine_spatial_banks(tables:WorkspaceGroup)->TableWorkspace:
     message = f'{"Cannot process Corelli combine_spatial_banks, input is not of type WorkspaceGroup"}'
     assert isinstance(tables, WorkspaceGroup), message
 
-    combined_table:TableWorkspace = init_corelli_table()
+    combined_table:TableWorkspace = init_corelli_table(name) if name else init_corelli_table()
 
     for i in range(tables.getNumberOfEntries()):
         table = tables.getItem(i)

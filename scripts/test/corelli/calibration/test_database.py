@@ -59,7 +59,7 @@ class TestCorelliDatabase(unittest.TestCase):
         calibratedWS.addRow( [28707,[2.291367950578997, -1.2992001571797284, -0.7778867990739283]])
         save_bank_table( calibratedWS, 40, self.database_path, '20200601') # use different date
 
-        calibratedWS = init_corelli_table()
+        calibratedWS = init_corelli_table('calibration_' + str(40))
         calibratedWS.addRow( [28704,[2.291367950578997, -1.1711478720770645, -0.7778867990739283]])
         calibratedWS.addRow( [28705,[2.291367950578997, -1.1876249296284657, -0.7778867990739283]])
         calibratedWS.addRow( [28706,[2.291367950578997, -1.2927213977528369, -0.7778867990739283]])
@@ -103,19 +103,24 @@ class TestCorelliDatabase(unittest.TestCase):
         filename = filename_bank_table(1, self.database_path, date, 'mask')
         self.assertEqual(filename, expected_filename)
 
-        # acceptance
-        expected_filename = str(pathlib.Path(abs_subdir + '/acceptance_corelli_bank001_' + date + '.nxs.h5').resolve())
-        filename = filename_bank_table(1, self.database_path, date, 'acceptance')
+        # fit
+        expected_filename = str(pathlib.Path(abs_subdir + '/fit_corelli_bank001_' + date + '.nxs.h5').resolve())
+        filename = filename_bank_table(1, self.database_path, date, 'fit')
         self.assertEqual(filename, expected_filename)
 
         # verify assertion is raised for invalid name
         with self.assertRaises( AssertionError ) as ar:
             filename_bank_table(1, self.database_path, date, 'wrong')
 
-        self.assertEqual( 'table_type must be calibration, mask or acceptance' in str(ar.exception), True)
+        self.assertEqual( 'table_type must be calibration, mask or fit' in str(ar.exception), True)
 
     def test_combine_spatial_banks(self):
 
+        # test with name
+        combined_table = combine_spatial_banks(self.ws_group, 'calibrated_banks')
+        self.assertTrue(combined_table.getName() == 'calibrated_banks')
+
+        # test without name
         combined_table = combine_spatial_banks(self.ws_group)
         combined_dict = combined_table.toDict()
 
@@ -148,38 +153,23 @@ class TestCorelliDatabase(unittest.TestCase):
     def test_save_manifest_file(self):
 
         date:str = datetime.now().strftime('%Y%m%d') # format YYYYMMDD
-        ts:str = datetime.now().replace(microsecond=0).isoformat()
-
         filename = self.database_path + '/manifest_corelli_' + date + '.csv'
 
         # writing
-        save_manifest_file( [10,11], self.database_path, date, [ts,ts] )
+        save_manifest_file( [10,11], self.database_path, date)
         self.assertTrue(pathlib.Path(filename).is_file())
 
         file_contents = pathlib.Path(filename).read_text() # safe one liner
-        expected_manifest = f'bankID, timestamp\n10, {ts}\n11, {ts}\n'
+        expected_manifest = f'bankID, timestamp\n10, {date}\n11, {date}\n'
         self.assertEqual(file_contents, expected_manifest)
 
         # appending
-        ts = datetime.now().replace(microsecond=0).isoformat()
-        save_manifest_file( [12], self.database_path, date, [ts] )
+        save_manifest_file( [12], self.database_path, date )
         self.assertTrue(pathlib.Path(filename).is_file())
 
         file_contents = pathlib.Path(filename).read_text() # safe one liner
-        expected_manifest = f'bankID, timestamp\n10, {ts}\n11, {ts}\n12, {ts}\n'
+        expected_manifest = f'bankID, timestamp\n10, {date}\n11, {date}\n12, {date}\n'
         self.assertEqual(file_contents, expected_manifest)
-
-        # verify exceptions
-        with self.assertRaises( ValueError ) as ar:
-            save_manifest_file( [12], self.database_path, date, [ts,ts] )
-
-        self.assertEqual( 'bankIDs and iso_timestamps list inputs must have the same lengths' in str(ar.exception), True)
-
-        # verify exceptions
-        with self.assertRaises( ValueError ) as ar:
-            save_manifest_file( [12], self.database_path, date, ['hello'] )
-
-        self.assertEqual( 'is not valid iso format YYYY-MM-DDTHH:MM:SS' in str(ar.exception), True)
 
         remove(filename)
 
