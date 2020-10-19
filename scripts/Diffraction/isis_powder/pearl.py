@@ -191,12 +191,17 @@ class Pearl(AbstractInst):
             path_key='path'
             if isinstance(self._inst_settings.attenuation_files, str):
                 self._inst_settings.attenuation_files = eval(self._inst_settings.attenuation_files)
+            atten_file_found = False
             for atten_file in self._inst_settings.attenuation_files:
                 if any (required_key not in atten_file for required_key in [name_key,path_key]):
                     logger.warning("A dictionary in attenuation_files has been ignored because "
                                    f"it doesn't contain both {name_key} and {path_key} entries")
                 elif atten_file[name_key] == self._inst_settings.attenuation_file:
+                    if atten_file_found:
+                        raise RuntimeError(
+                            f"Duplicate name {self._inst_settings.attenuation_file} found in attenuation_files")
                     attenuation_path = atten_file[path_key]
+                    atten_file_found = True
             if attenuation_path is None:
                 raise RuntimeError(
                     f"Unknown attenuation_file {self._inst_settings.attenuation_file} specified for attenuation")
