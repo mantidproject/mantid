@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument="D7" valid-from="1900-01-01T00:00:00">
+
+  <component-link name="D7">
+    <!-- formula for Detector efficiency calculation. Algorithm: DetectorEfficiencyCorUser
+	 See http://muparser.sourceforge.net/mup_features.html#idDef2 for available
+	 operators -->
+    <parameter name="formula_eff" type="string">
+      <value val="1.0 - exp(-13.153/sqrt(e))" />
+    </parameter>
+  </component-link>
+
+</parameter-file>
+

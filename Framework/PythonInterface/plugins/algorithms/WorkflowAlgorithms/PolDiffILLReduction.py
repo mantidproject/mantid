@@ -451,9 +451,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _detector_analyser_energy_efficiency(self, ws):
         """Corrects for the detector and analyser energy efficiency."""
-        correction_formula = "1.0 - exp(-13.153/sqrt(e))"
         for entry in mtd[ws]:
-            SetInstrumentParameter(entry, ParameterName="formula_eff", Value=correction_formula)
             DetectorEfficiencyCorUser(InputWorkspace=entry, OutputWorkspace=entry,
                                       IncidentEnergy=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
         return ws
