@@ -273,10 +273,6 @@ void writeStrDataset(H5::Group &grp, const std::string &dSetName,
   }
 }
 
-/*
-TODO: TESTS to check empty datasets and attributes are not written.
-*/
-
 /** Function: writeStrAttribute
  * writes a StrType HDF attribute and attribute value to a HDF group.
  *
@@ -356,7 +352,7 @@ void writeXYZPixeloffset(H5::Group &grp,
   bool yIsZero = isApproxZero(posy, PRECISION);
   bool zIsZero = isApproxZero(posz, PRECISION);
 
-  auto bankName = compInfo.name(idx);
+  auto const &bankName = compInfo.name(idx);
   const auto nDetectorsInBank = static_cast<hsize_t>(posx.size());
 
   int rank = 1;
@@ -779,7 +775,7 @@ public:
   NexusGeometrySaveImpl(const NexusGeometrySaveImpl &) =
       delete; // No intention to suport copies
 
-  /*
+  /**
    * Function: NXInstrument
    * for NXentry parent (root group). Produces an NXinstrument group in the
    * parent group, and writes Nexus compliant datasets and metadata stored in
@@ -801,9 +797,6 @@ public:
     writeStrDataset(childGroup, NAME, instrName);
     writeStrAttribute(childGroup, NX_CLASS, NX_INSTRUMENT);
 
-    std::string defaultShortName = instrName.substr(0, 3);
-    H5::DataSet name = childGroup.openDataSet(NAME);
-    writeStrAttribute(name, SHORT_NAME, defaultShortName);
     return childGroup;
   }
 
@@ -896,7 +889,7 @@ public:
   /*
    * Function: monitor
    * For NXinstrument parent (component info root). Produces an NXmonitor
-   * groups from Component info, and saves it in the parent
+   * group from Component info, and saves it in the parent
    * group, along with the Nexus compliant datasets, and metadata stored in
    * attributes to the new group.
    *
@@ -972,7 +965,7 @@ public:
   }
 
   /* For NXinstrument parent (component info root). Produces an NXmonitor
-   * groups from Component info, and saves it in the parent
+   * group from Component info, and saves it in the parent
    * group, along with the Nexus compliant datasets, and metadata stored in
    * attributes to the new group.
    *
@@ -1001,7 +994,7 @@ public:
   }
 
   /*
-   * Function: detectors
+   * Function: detector
    * For NXinstrument parent (component info root). Save method which produces
    * a set of NXdetctor groups from Component info detector banks, and saves
    * it in the parent group, along with the Nexus compliant datasets, and
@@ -1078,8 +1071,8 @@ public:
     return childGroup;
   }
 
-  /*
-   * Function: detectors
+  /**
+   * Function: detector
    * For NXinstrument parent (component info root). Save method which produces
    * a set of NXdetctor groups from Component info detector banks, and saves
    * it in the parent group, along with the Nexus compliant datasets, and
@@ -1109,9 +1102,40 @@ public:
     writeSpectra(childGroup, mappings);
   }
 
-  /*
-    TODO:
-    */
+  // sets chunks for multi - dimensional dataset array and the compression level
+  H5::DSetCreatPropList
+  setStorageLayout2D(hsize_t const dim1Size, hsize_t const dim2Size,
+                     int const comp_level = COMPRESSION_LEVEL) {
+    hsize_t chunks[2] = {dim1Size, dim2Size};
+    H5::DSetCreatPropList plist;
+    plist.setChunk(2, chunks);
+    plist.setDeflate(comp_level);
+    return plist;
+  }
+
+  // sets chunks for one - dimensional dataset array and the compression level
+  H5::DSetCreatPropList
+  setStorageLayout1D(hsize_t const dim1Size,
+                     int const comp_level = COMPRESSION_LEVEL) {
+    hsize_t chunks[1] = {dim1Size};
+    H5::DSetCreatPropList plist;
+    plist.setChunk(1, chunks);
+    plist.setDeflate(comp_level);
+    return plist;
+  }
+
+  /**
+   * Function: writeMesh
+   * write mesh shape data from instrument cache to a group in NeXus format
+   *
+   * @param grp : H5 group to write into
+   * @param vertices : vertices of each triangle
+   * @param windingOrder : winding order for each triangle
+   * @param nFaces : number of faces in mesh object
+   * @param nVertices : number of vertices
+   * @param detFaces : which of the enumerated faces are detectors
+   */
+
   void writeMesh(H5::Group &grp, const std::vector<double> &vertices,
                  const std::vector<uint32_t> &windingOrder, const size_t nFaces,
                  const size_t nVertices, std::vector<size_t> detFaces = {}) {
@@ -1125,15 +1149,12 @@ public:
     vdims[0] = static_cast<hsize_t>(nVertices);
     vdims[1] = static_cast<hsize_t>(3);
     H5::DataSpace vspace = H5Screate_simple(vrank, vdims, nullptr);
-
-    // Modify dataset creation property to enable chunking
-    hsize_t vchunks[2] = {static_cast<hsize_t>(nVertices), 3};
-    H5::DSetCreatPropList vplist;
-    vplist.setChunk(2, vchunks);
-    vplist.setDeflate(6);
+    H5::DSetCreatPropList vplist =
+        setStorageLayout2D(static_cast<hsize_t>(nVertices), 3);
 
     dVertices =
         grp.createDataSet(VERTICES, H5::PredType::NATIVE_FLOAT, vspace, vplist);
+
     writeToDataset(dVertices, vertices, H5::PredType::NATIVE_FLOAT, vspace);
     writeStrAttribute(dVertices, UNITS, METRES);
 
@@ -1146,10 +1167,7 @@ public:
     H5::DataSpace wspace = H5Screate_simple(wrank, wdims, nullptr);
 
     // Modify dataset creation property to enable chunking
-    hsize_t wchunks[1] = {wsize};
-    H5::DSetCreatPropList wplist;
-    wplist.setChunk(1, wchunks);
-    wplist.setDeflate(6);
+    H5::DSetCreatPropList wplist = setStorageLayout1D(wsize);
 
     dWindingOrder = grp.createDataSet(WINDING_ORDER, H5::PredType::NATIVE_INT,
                                       wspace, wplist);
@@ -1159,22 +1177,19 @@ public:
     // faces
 
     // fixed to 3 for triangles.
-    int jumps = 3;
+    int increments = 3;
 
     std::vector<int> facesData;
     for (int i = 0; static_cast<hsize_t>(i) <= nFaces; ++i)
-      facesData.push_back(i * jumps);
+      facesData.push_back(i * increments);
 
     int frank = 1;
-    hsize_t fdims[static_cast<hsize_t>(1)];
+    hsize_t fdims[1];
     fdims[0] = static_cast<hsize_t>(nFaces);
     H5::DataSpace fspace = H5Screate_simple(frank, fdims, nullptr);
 
     // Modify dataset creation property to enable chunking
-    hsize_t fchunks[1] = {static_cast<hsize_t>(nFaces)};
-    H5::DSetCreatPropList fplist;
-    fplist.setChunk(1, fchunks);
-    fplist.setDeflate(6);
+    H5::DSetCreatPropList fplist = setStorageLayout1D(fdims[0]);
 
     dFaces = grp.createDataSet(FACES, H5::PredType::NATIVE_INT, fspace, fplist);
     writeToDataset(dFaces, facesData, H5::PredType::NATIVE_INT, fspace);
@@ -1197,9 +1212,15 @@ public:
     }
   }
 
-  /*
-  TODO:
-  */
+  /**
+   * Function: writeCylinder
+   * method for writing Nexus format cylinder vertices and count datasets
+   *
+   * @param grp : H5 group to write into
+   * @param nCylinders : number of cylinders.
+   * @param vertexCoordinates : std::vector containing vertex coordinates for
+   * cylinders in NeXus format.
+   */
   void writeCylinder(H5::Group &grp, size_t nCylinders,
                      const std::vector<double> &vertexCoordinates) {
 
@@ -1221,11 +1242,7 @@ public:
     // Modify dataset creation property to enable chunking
     if (nCylinders > 1) {
       // cylinder dataset can be chunked if describing more than cylinder only
-      hsize_t cchunks[2] = {nCylinders, 3};
-      H5::DSetCreatPropList cplist;
-      cplist.setChunk(2, cchunks);
-      cplist.setDeflate(COMPRESSION_LEVEL);
-
+      H5::DSetCreatPropList cplist = setStorageLayout2D(cdims[0], cdims[1]);
       cylinders = grp.createDataSet(CYLINDERS, H5::PredType::NATIVE_INT, cspace,
                                     cplist);
     } else {
@@ -1242,10 +1259,7 @@ public:
     H5::DataSpace vspace = H5Screate_simple(vrank, vdims, nullptr);
 
     // Modify dataset creation property to enable chunking
-    hsize_t vchunks[2] = {static_cast<hsize_t>(3 * nCylinders), 3};
-    H5::DSetCreatPropList vplist;
-    vplist.setChunk(2, vchunks);
-    vplist.setDeflate(COMPRESSION_LEVEL);
+    H5::DSetCreatPropList vplist = setStorageLayout2D(vdims[0], vdims[1]);
 
     vertices = grp.createDataSet(VERTICES, H5::PredType::NATIVE_DOUBLE, vspace,
                                  vplist);
@@ -1268,7 +1282,6 @@ public:
     // prevents undefined behaviour when passing empty container into
     // std::all_of. If empty, there is no data to write. No associated group
     // will be created in file.
-
     // check if cylinders are homogeneous
     bool meshesAreHomogeneous =
         std::all_of(meshes.begin(), meshes.end(), [&](const size_t &idx) {
@@ -1334,28 +1347,34 @@ public:
     }
   }
 
-  /*
-  TODO: DOC
-  */
+  /**
+   * Function: writeCylinderShapeToPixels
+   * write cylinder shape data from instrument cache to a group in NeXus format
+   * with cylinders and vertices datasets.
+   *
+   * @param compInfo : componentInfo object.
+   * @param grp : H5 group to write into
+   * @param cylinders : current component index
+   */
   void writeCylinderShapeToPixels(const Geometry::ComponentInfo &compInfo,
                                   H5::Group &grp,
                                   std::vector<size_t> &cylinders) {
 
     // shape type of the first detector in children detectors
-    auto &firstShape = compInfo.shape(cylinders.front());
-    auto firstShapeInfo = firstShape.shapeInfo();
-    auto fType = firstShapeInfo.shape();
-    auto fHeight = firstShapeInfo.height();
-    auto fRadius = firstShapeInfo.radius();
+    auto const &firstShape = compInfo.shape(cylinders.front());
+    auto const firstShapeInfo = firstShape.shapeInfo();
+    auto const fType = firstShapeInfo.shape();
+    auto const fHeight = firstShapeInfo.height();
+    auto const fRadius = firstShapeInfo.radius();
 
     // check if cylinders are homogeneous
-    bool cylindersAreHomogeneous =
+    bool const &cylindersAreHomogeneous =
         std::all_of(cylinders.begin(), cylinders.end(), [&](const size_t &idx) {
-          auto &shapeObj = compInfo.shape(idx);
-          auto shapeInfo = shapeObj.shapeInfo();
-          auto type = shapeInfo.shape();
-          auto height = shapeInfo.height();
-          auto radius = shapeInfo.radius();
+          auto const &shapeObj = compInfo.shape(idx);
+          auto const shapeInfo = shapeObj.shapeInfo();
+          auto const type = shapeInfo.shape();
+          auto const height = shapeInfo.height();
+          auto const radius = shapeInfo.radius();
           return (type == fType && height == fHeight && fRadius == radius);
         });
     if (cylindersAreHomogeneous) {
@@ -1364,12 +1383,12 @@ public:
       H5::Group pixelShapeGroup =
           simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
       // write cylinder only once, using the first index
-      auto geometry = firstShapeInfo.cylinderGeometry();
+      auto &geometry = firstShapeInfo.cylinderGeometry();
       const Eigen::Vector3d &base =
           Kernel::toVector3d(geometry.centreOfBottomBase);
       const Eigen::Vector3d &axis = Kernel::toVector3d(geometry.axis);
-      double &height = geometry.height;
-      double &radius = geometry.radius;
+      double height = geometry.height;
+      double radius = geometry.radius;
 
       double a, b, c;
       a = axis[0];
@@ -1392,10 +1411,9 @@ public:
       H5::Group pixelShapeGroup =
           simpleNXSubGroup(grp, DETECTOR_SHAPE, NX_CYLINDER);
       std::vector<double> vertices;
-      for (std::vector<size_t>::iterator it = cylinders.begin();
-           it != cylinders.end(); ++it) {
+      for (size_t const cylinder : cylinders) {
 
-        auto shapeInfo = compInfo.shape(*it).shapeInfo();
+        auto const &shapeInfo = compInfo.shape(cylinder).shapeInfo();
         auto geometry = shapeInfo.cylinderGeometry();
         const Eigen::Vector3d &base =
             Kernel::toVector3d(geometry.centreOfBottomBase);
@@ -1420,9 +1438,14 @@ public:
     }
   }
 
-  /*
-  optimisation for
-  */
+  /**
+   * Function: writeMonitorShape
+   * write monitor shape data from instrument cache to a group in NeXus format.
+   *
+   * @param compInfo : componentInfo object.
+   * @param grp : H5 group to write into
+   * @param idx : current component index
+   */
   void writeMonitorShape(const Geometry::ComponentInfo &compInfo,
                          H5::Group &grp, size_t idx) {
 
@@ -1448,7 +1471,7 @@ public:
 
       } else {
 
-        auto shapeInfo = shapeObj.shapeInfo();
+        auto const &shapeInfo = shapeObj.shapeInfo();
         auto type = shapeObj.shapeInfo().shape();
         // this makes the assumption that if either dynamic casts above fail
         // then the shape must be of type CSGObject, and has implementation
@@ -1457,7 +1480,7 @@ public:
 
           H5::Group shapeGroup = simpleNXSubGroup(grp, SHAPE, NX_CYLINDER);
 
-          auto geometry = shapeInfo.cylinderGeometry();
+          auto &geometry = shapeInfo.cylinderGeometry();
           const Eigen::Vector3d &base =
               Kernel::toVector3d(geometry.centreOfBottomBase);
           const Eigen::Vector3d &axis = Kernel::toVector3d(geometry.axis);
@@ -1615,11 +1638,10 @@ private:
     bool yIsZero{true}; // becomes false when atleast 1 non-zero y found
     bool zIsZero{true}; // becomes false when atleast 1 non-zero z found
     // get pixel offset data
-    for (std::vector<size_t>::iterator it = pixels.begin(); it != pixels.end();
-         ++it) {
+    for (size_t const pixel : pixels) {
       Eigen::Vector3d offset =
           Geometry::ComponentInfoBankHelpers::offsetFromAncestor(compInfo, idx,
-                                                                 *it);
+                                                                 pixel);
       if (!isApproxZero(offset[0], PRECISION))
         xIsZero = false;
       if (!isApproxZero(offset[1], PRECISION))
@@ -1639,12 +1661,7 @@ private:
     hsize_t dims[static_cast<hsize_t>(1)];
     dims[0] = nDetectorsInBank;
     H5::DataSpace space = H5Screate_simple(rank, dims, nullptr);
-
-    // Modify dataset creation property to enable chunking
-    hsize_t chunks[1] = {nDetectorsInBank};
-    H5::DSetCreatPropList plist;
-    plist.setChunk(1, chunks);
-    plist.setDeflate(COMPRESSION_LEVEL);
+    H5::DSetCreatPropList plist = setStorageLayout1D(nDetectorsInBank);
 
     if (!xIsZero) {
       xPixelOffset = grp.createDataSet(
@@ -1855,7 +1872,7 @@ private:
   void write1DIntDataset(H5::Group &grp, const H5std_string &name,
                          const std::vector<T> &container) {
 
-    auto csize = static_cast<hsize_t>(container.size());
+    hsize_t csize = static_cast<hsize_t>(container.size());
     H5::DataSet dataset;
     const int rank = 1;
     hsize_t dims[1] = {csize};
@@ -1864,11 +1881,7 @@ private:
 
     // dataset can be chunked if datasize is > 1. else is contiguous.
     if (csize > 1) {
-      hsize_t chunks[1] = {csize};
-      H5::DSetCreatPropList plist;
-      plist.setChunk(1, chunks);
-      plist.setDeflate(COMPRESSION_LEVEL);
-
+      H5::DSetCreatPropList plist = setStorageLayout1D(csize);
       dataset = grp.createDataSet(name, H5::PredType::NATIVE_INT, space, plist);
     } else {
       dataset = grp.createDataSet(name, H5::PredType::NATIVE_INT, space);

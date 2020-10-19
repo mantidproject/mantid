@@ -216,7 +216,7 @@ used.
     // this test checks that the root group of the output file in saveInstrument
     // has NXclass attribute of NXentry. as required by the Nexus file format.
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource("check_nxentry_group_test_file.nxs");
     std::string destinationFile = fileResource.fullPath();
 
@@ -240,7 +240,7 @@ used.
     // this test checks that inside of the NXentry root group, the instrument
     // data is saved to a group of NXclass NXinstrument
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource("check_nxinstrument_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -267,7 +267,7 @@ used.
     // NXInstrument group name is always written as "instrument" for legacy
     // compatibility reasons
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource("check_instrument_name_test_file.nxs");
     auto destinationFile = fileResource.fullPath();
 
@@ -315,7 +315,7 @@ used.
     // same name, HDF5 will throw a group exception. In this test, we expect no
     // such exception to throw.
 
-    // RAII file resource for test file destination.
+    //  file resource for test file destination.
     FileResource fileResource("default_group_names_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -332,7 +332,7 @@ used.
     // this test checks that inside of the NXinstrument group, the the source
     // data is saved to a group of NXclass NXsource
 
-    // RAII file resource for test file destination.
+    //  file resource for test file destination.
     FileResource fileResource("check_nxsource_group_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -427,7 +427,7 @@ Instrument cache.
    indicating that saveinstrument has correctly written the orientation data.
    */
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource(
         "check_rotation_written_to_nxdetector_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -489,7 +489,7 @@ Instrument cache.
     data.
     */
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource(
         "check_rotation_written_to_nx_monitor_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -546,7 +546,7 @@ Instrument cache.
     saveinstrument has correctly written the location data.
     */
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource(
         "check_location_written_to_nxsource_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -603,7 +603,7 @@ Instrument cache.
     indicating that saveinstrument has correctly written the orientation data.
     */
 
-    // RAII file resource for test file destination
+    //  file resource for test file destination
     FileResource fileResource(
         "check_rotation_written_to_nxsource_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
@@ -661,7 +661,7 @@ Instrument cache.
     transformation to file
     */
 
-    // RAII file resource for test file destination
+    // file resource for test file destination
     FileResource fileResource("origin_nx_source_location_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -710,7 +710,7 @@ Instrument cache.
     const Quat someRotation(30, V3D(1, 0, 0)); // arbitrary
     const Quat bankRotation(0, V3D(0, 0, 1));  // set (angle) to zero
 
-    // RAII file resource for test file destination
+    // file resource for test file destination
     FileResource fileResource("zero_nx_detector_rotation_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -749,7 +749,7 @@ Instrument cache.
     file
     */
 
-    // RAII file resource for test file destination
+    // file resource for test file destination
     FileResource fileResource("zero_nx_monitor_rotation_file_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -792,7 +792,7 @@ Instrument cache.
     const V3D sourceLocation(-10, 0, 0);
     const Quat sourceRotation(0, V3D(0, 0, 1)); // set (angle) to zero
 
-    // RAII file resource for test file destination
+    // file resource for test file destination
     FileResource inFileResource("zero_nx_source_rotation_file_test.hdf5");
     std::string destinationFile = inFileResource.fullPath();
 
@@ -831,7 +831,7 @@ Instrument cache.
     manually set offset.
     */
 
-    // create RAII file resource for testing
+    // create file resource for testing
     FileResource fileResource("check_pixel_offset_format_test_file.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -919,7 +919,7 @@ Instrument cache.
     const Quat sourceRotation(90, V3D(0, 1, 0)); // arbitrary
     const V3D sourceLocation(0, 0, 0);           // set to zero
 
-    // create RAII file resource for testing
+    // create  file resource for testing
     FileResource fileResource("no_location_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -985,7 +985,7 @@ Instrument cache.
     const V3D sourceLocation(0.0, 0.0, -10.0);          // arbitrary
     const Quat sourceRotation(0.0, V3D(0.0, 1.0, 0.0)); // set to zero
 
-    // create RAII file resource for testing
+    // create  file resource for testing
     FileResource fileResource("no_orientation_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -1054,7 +1054,7 @@ Instrument cache.
     const V3D sourceLocation(0, 0, -10);         // arbitrary non-origin
     const Quat sourceRotation(45, V3D(0, 1, 0)); // arbitrary non-zero
 
-    // create RAII file resource for testing
+    // create  file resource for testing
     FileResource fileResource("both_transformations_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
@@ -1125,7 +1125,7 @@ Instrument cache.
     const V3D sourceLocation(0, 0, 0);          // set to zero
     const Quat sourceRotation(0, V3D(0, 1, 0)); // set to zero
 
-    // create RAII file resource for testing
+    // create file resource for testing
     FileResource fileResource("neither_transformations_dependency_test.hdf5");
     std::string destinationFile = fileResource.fullPath();
 
