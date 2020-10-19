@@ -386,11 +386,11 @@ class PolDiffILLReduction(PythonAlgorithm):
         tmp_names = [unit_ws, background_ws]
         for entry_no, entry in enumerate(mtd[ws]):
             container_entry = mtd[container_ws][entry_no].name()
-            mtd[container_entry].setYUnit('Counts/Counts')
-            mtd[transmission_ws].setYUnit('Counts/Counts')
+            mtd[container_entry].setYUnit('Counts')
+            mtd[transmission_ws].setYUnit('Counts')
             if self._mode != 'TOF':
                 absorber_entry = mtd[absorber_ws][entry_no].name()
-                mtd[absorber_entry].setYUnit('Counts/Counts')
+                mtd[absorber_entry].setYUnit('Counts')
                 container_corr = container_entry + '_corr'
                 tmp_names.append(container_corr)
                 Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=container_entry, OutputWorkspace=container_corr)
@@ -812,7 +812,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 unit = 'S (TwoTheta)'
             elif output_unit == 'Q':
                 unit = 'S (Q)'
-            entry.setYUnit(unit)
+            entry.setYUnit("")
+            entry.setYUnitLabel(unit)
         return ws
 
     def _finalize(self, ws, process):
