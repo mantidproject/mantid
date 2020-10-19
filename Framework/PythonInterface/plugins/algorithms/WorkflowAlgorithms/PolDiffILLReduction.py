@@ -783,7 +783,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         Integration(InputWorkspace=ws, OutputWorkspace=ws)
         return ws
 
-    def _output_vanadium(self, ws):
+    def _normalise_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
         if self._mode == 'TOF':
             ws = self._sum_TOF_data(ws)
@@ -897,7 +897,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     component_ws = ''
                 progress.report()
                 if process == 'Vanadium':
-                    self._output_vanadium(ws)
+                    self._normalise_vanadium(ws)
                 else:
                     self._detector_efficiency_correction(ws, component_ws)
                     progress.report()
