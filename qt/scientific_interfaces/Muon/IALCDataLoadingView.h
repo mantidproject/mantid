@@ -32,21 +32,6 @@ public:
   /// @return std::string of path
   virtual std::string getPath() const = 0; 
 
-  /// @return Full path to first run data file, or empty string if invalid/not
-  /// selected
-  virtual std::string firstRun() const = 0;
-
-  /// @return Full path to last run data file, or empty string if invalid/not
-  /// selected
-  virtual std::string lastRun() const = 0;
-
-  /// @return Vector of file names
-  virtual std::vector<std::string> getRuns() const = 0;
-
-  /// @return String containing error message from runs widget, empty on no
-  /// errors
-  virtual std::string getRunsErrorMessage() const = 0;
-
   /// Returns the name of the log to use
   /// @return Log name
   virtual std::string log() const = 0;
@@ -85,18 +70,6 @@ public:
   /// @return Selected integration time range, or nothing if limiting is
   /// disabled
   virtual boost::optional<std::pair<double, double>> timeRange() const = 0;
-
-  /// Sets the run number found from auto
-  virtual void setCurrentAutoRun(const int run) = 0;
-
-  /// @return text from ALC interface runs filefinder widget
-  virtual std::string getCurrentRunsText() const = 0;
-
-  /// Sets text of runs with a search for files
-  virtual void setRunsTextWithSearch(const QString &text) = 0;
-
-  /// Sets readonly for runs filefinder widget
-  virtual void setRunsReadOnly(bool readOnly) = 0;
 
 public slots:
   /// Performs any necessary initialization
@@ -139,30 +112,27 @@ public slots:
   /// Enables all the widgets
   virtual void enableAll() = 0;
 
-  /// Toggles "auto" mode for last file
-  virtual void checkBoxAutoChanged(int state) = 0;
-
   /// Instrument Changed
   virtual void instrumentChanged(QString instrument) = 0;
 
   /// Path Changed
   virtual void pathChanged(QString path) = 0;
 
+  /// Runs has been changed
+  virtual void handleRunsEditingFinsihed() = 0;
+
+  /// Enables/Disables the load button when ready
+  virtual void enableLoad(bool enable) = 0;
+
 signals:
   /// Request to load data
   void loadRequested();
 
   /// User has changed runs
-  void runsSelected();
+  void runsChanged(std::string);
 
   /// New data have been loaded
   void dataChanged();
-
-  /// "Auto" box has been checked
-  void runAutoChecked();
-
-  /// "Auto" box has been unchecked
-  void runAutoUnchecked();
 
   /// Instrument has been changed
   void instrumentChangedSignal(std::string);

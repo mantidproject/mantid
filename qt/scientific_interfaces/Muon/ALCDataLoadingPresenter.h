@@ -43,6 +43,12 @@ public:
   // Cancels current loading algorithm
   void cancelLoading() const;
 
+  // Validates expression given
+  static std::vector<int> validateAndGetRunsFromExpression(std::string runs);
+
+  // Removes range ('-') between two ints and returns vector of all ints between
+  static std::vector<int> unwrapRange(std::string range);
+
 private slots:
   /// Check file range and call method to load new data
   void handleLoadRequested();
@@ -50,10 +56,8 @@ private slots:
   /// Updates the list of logs and number of periods
   void updateAvailableInfo();
 
-  /// Updates the run number found from auto in the view
-  void updateAutoRun();
-
-  void resetAutoRun();
+  /// Handle for when runs line edit changed
+  void handleRunsChanged(std::string runs);
 
 signals:
   /// Signal emitted when data get changed
@@ -63,12 +67,10 @@ private:
   /// Load new data and update the view accordingly
   void load(const std::vector<std::string> &files);
 
-  void updateRunsTextFromAuto(const int autoRun);
-
   /// Check custom grouping is sensible
   bool checkCustomGrouping();
 
-  /// Extract run number as in from file name string
+  /// Extract run number as int from file name string
   int extractRunNumber(const std::string &file);
 
   /// Check the group is valid
@@ -88,9 +90,6 @@ private:
 
   // Loading algorithm
   Mantid::API::IAlgorithm_sptr m_LoadingAlg;
-
-  /// Input entered before auto checked
-  std::string m_oldInput;
 };
 
 } // namespace CustomInterfaces

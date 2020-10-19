@@ -13,7 +13,6 @@
 
 #include "MantidKernel/ConfigService.h"
 
-
 #include <QMessageBox>
 
 using namespace Mantid::API;
@@ -34,15 +33,15 @@ void ALCDataLoadingView::initialize() {
   m_ui.logValueSelector->setCheckboxShown(false);
   m_ui.logValueSelector->setVisible(true);
   m_ui.logValueSelector->setEnabled(true);
+  enableLoad(false);
   connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
-  connect(m_ui.runs, SIGNAL(fileFindingFinished()), SIGNAL(runsSelected()));
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_ui.runAuto, SIGNAL(stateChanged(int)), this,
-          SLOT(checkBoxAutoChanged(int)));
   connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this,
           SLOT(instrumentChanged(QString)));
-  connect(m_ui.path, SIGNAL(textChanged(QString)), this, SLOT(pathChanged(QString)));
-
+  connect(m_ui.path, SIGNAL(textChanged(QString)), this,
+          SLOT(pathChanged(QString)));
+  connect(m_ui.runs, SIGNAL(returnPressed()), this, SLOT(handleRunsEditingFinsihed()));
+  
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 
   // Error bars on the plot
@@ -60,22 +59,29 @@ void ALCDataLoadingView::initialize() {
   m_ui.detectorGroupingGroup->setPalette(palette);
   m_ui.periodsGroup->setPalette(palette);
   m_ui.calculationGroup->setPalette(palette);
+
+  // Regex for runs
+  QRegExp re("[0-9]+(\,[0-9]+)*(\-[0-9]+(($)|(\,[0-9]+))+)*");
+  QValidator *validator = new QRegExpValidator(re,this);
+  m_ui.runs->setValidator(validator);
 }
 
+/**
+ * Initialised instrument combo box with Muon instruments and sets index to user
+ * defualt instrument if available otherwise set as HIFI
+ */
 void ALCDataLoadingView::initInstruments() {
   for (const auto &instrument : INSTRUMENTS) {
     m_ui.instrument->addItem(QString::fromStdString(instrument));
   }
-  // Get default instrument otherwise set to MUSR
   const auto userInstrument =
       Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
-
   const auto index =
       m_ui.instrument->findText(QString::fromStdString(userInstrument));
   if (index != -1)
     m_ui.instrument->setCurrentIndex(index);
   else
-    m_ui.instrument->setCurrentIndex(4);
+    m_ui.instrument->setCurrentIndex(3);
 }
 
 /**
@@ -90,47 +96,6 @@ std::string ALCDataLoadingView::getInstrument() const {
  */
 std::string ALCDataLoadingView::getPath() const {
   return m_ui.path->text().toStdString();
-}
-
-std::string ALCDataLoadingView::firstRun() const {
-  if (m_ui.runs->isValid()) {
-    return m_ui.runs->getFirstFilename().toStdString();
-  } else {
-    return "";
-  }
-}
-
-/**
- * If the last run is valid, return the filename.
- * Otherwise, return an empty string.
- */
-std::string ALCDataLoadingView::lastRun() const {
-  if (m_ui.runs->isValid()) {
-    const auto files = m_ui.runs->getFilenames();
-    if (!files.empty())
-      return files.back().toStdString();
-  }
-  return "";
-}
-
-/**
- * If runs expression is valid, returns vector of file names
- */
-std::vector<std::string> ALCDataLoadingView::getRuns() const {
-  std::vector<std::string> returnFiles;
-  if (m_ui.runs->isValid()) {
-    const auto fileNames = m_ui.runs->getFilenames();
-    for (const auto &file : fileNames)
-      returnFiles.emplace_back(file.toStdString());
-  }
-  return returnFiles;
-}
-
-/**
- * Returns an error message from file finder, empty string if no error
- */
-std::string ALCDataLoadingView::getRunsErrorMessage() const {
-  return m_ui.runs->getFileProblem().toStdString();
 }
 
 std::string ALCDataLoadingView::log() const {
@@ -327,38 +292,6 @@ void ALCDataLoadingView::enableAll() {
   m_ui.load->setEnabled(true);
 }
 
-/**
- * Called when the check state of the "Auto" checkbox changes.
- * Set text before setting read-only to validate the right text.
- * @param state :: [input] Check state - member of Qt::CheckState enum
- */
-void ALCDataLoadingView::checkBoxAutoChanged(int state) {
-
-  // Try to auto fill in rest of runs
-  if (state == Qt::Checked) {
-
-    // Update auto run
-    emit runAutoChecked();
-
-  } else {
-
-    // Reset text as before auto checked
-    emit runAutoUnchecked();
-  }
-}
-
-void ALCDataLoadingView::setRunsReadOnly(bool readOnly) {
-  m_ui.runs->setReadOnly(readOnly);
-}
-
-std::string ALCDataLoadingView::getCurrentRunsText() const {
-  return m_ui.runs->getText().toStdString();
-}
-
-void ALCDataLoadingView::setRunsTextWithSearch(const QString &text) {
-  m_ui.runs->setFileTextWithSearch(text);
-}
-
 void ALCDataLoadingView::instrumentChanged(QString instrument) {
   std::cout << "Instrument Changed" << std::endl;
   emit instrumentChangedSignal(instrument.toStdString());
@@ -366,6 +299,15 @@ void ALCDataLoadingView::instrumentChanged(QString instrument) {
 void ALCDataLoadingView::pathChanged(QString path) {
   std::cout << "Path Changed" << std::endl;
   emit pathChangedSignal(path.toStdString());
+}
+
+void ALCDataLoadingView::handleRunsEditingFinsihed() {
+  // emit signal with path
+  emit runsChanged(m_ui.runs->text().toStdString());
+}
+
+void ALCDataLoadingView::enableLoad(bool enable) {
+  m_ui.load->setEnabled(enable);
 }
 
 } // namespace CustomInterfaces

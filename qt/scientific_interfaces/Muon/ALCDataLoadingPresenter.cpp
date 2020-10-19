@@ -31,17 +31,97 @@ using namespace MantidQt::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view), m_numDetectors(0), m_loadingData(false), m_oldInput("") {}
+    : m_view(view), m_numDetectors(0), m_loadingData(false) {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
 
   connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
   connect(m_view, SIGNAL(runsSelected()), SLOT(updateAvailableInfo()));
-  connect(m_view, SIGNAL(runAutoChecked()), SLOT(updateAutoRun()));
-  connect(m_view, SIGNAL(runAutoUnchecked()), SLOT(resetAutoRun()));
   connect(m_view, SIGNAL(instrumentChangedSignal(std::string)), SLOT());
   connect(m_view, SIGNAL(pathChangedSignal(std::string)), SLOT());
+  connect(m_view, SIGNAL(runsChanged(std::string)),
+          SLOT(handleRunsChanged(std::string)));
+}
+
+/**
+ * Converts a range of ints as string into a vector of integers
+ * @param range :: String in the form "<n>-<m>"
+ * @return Vector of all ints between the range
+ * @throws std::runtime_error if m > n
+ */
+std::vector<int> ALCDataLoadingPresenter::unwrapRange(std::string range) {
+  std::vector<int> runs;
+
+  auto beginningString = range.substr(0, range.find('-'));
+  auto endString = range.substr(range.find('-') + 1);
+  auto beginning = std::stoi(beginningString);
+  auto end = std::stoi(endString);
+
+  // If beginning longer then and, assume end is short hand e.g. 100-3 -> 100-103
+  if (beginningString.length() > endString.length()) {
+    for (int i = beginning; i <= beginning+end; ++i)
+      runs.emplace_back(i);
+  } else {
+    // Assumed not using short hand so end must be > beginning
+    if (end < beginning)
+      throw std::runtime_error(
+          "Decreasing range is not allowed, try " + std::to_string(beginning) +
+          "-" + std::to_string(end) + " instead."); // Needs error message
+    for (int i = beginning; i <= end; ++i)
+      runs.emplace_back(i);
+  }
+  return runs;
+}
+
+/**
+ * Validates the given expression and returns vector of run numbers
+ * Can be a comma separated list e.g. 1,2,3
+ * Can be a range e.g. 100-103 which is equally 100-3
+ * Can be a mixture e.g. 1,2-5,9,10-12
+ * @param runs :: expression to be validated
+ * @return Vector of run numbers
+ */
+std::vector<int>
+ALCDataLoadingPresenter::validateAndGetRunsFromExpression(std::string runs) {
+  std::vector<int> runNumbers;
+  std::stringstream ss(runs);
+  std::string token;
+
+  while (std::getline(ss, token, ',')) {
+    // Try find -
+    auto index = token.find('-');
+    if (index == std::string::npos) {
+      // Convert staright to in and add to list
+      const int number = std::stoi(token);
+      runNumbers.emplace_back(number);
+    } else {
+      // Unwrap range and add each separately
+      auto numbers = unwrapRange(token); // Throws if not successful
+      for (const auto &number : numbers)
+        runNumbers.emplace_back(number);
+    }
+  }
+  return runNumbers;
+}
+
+void ALCDataLoadingPresenter::handleRunsChanged(std::string runs) {
+  // Validate runs and get as run numbers
+  // if valid attempt to load first run
+  // if loaded set path
+  // if path update available info
+  // if fails need error message
+  // if success activate load button
+  try {
+    auto runNumbers = validateAndGetRunsFromExpression(runs);
+    m_view->enableLoad(true);
+  } catch (std::runtime_error e) {
+    m_view->displayError(
+        std::string(e.what()) +
+        "\n\nCan specify a list of runs by a dash \ne.g. 1-10\nCan specify "
+        "specific runs with a comma separated list \ne.g. 1-10, 15, 20-30\n "
+        "Range must go in increasing order, \ne.g. 1-10, 15, 20-30");
+  }
 }
 
 /**
@@ -50,8 +130,8 @@ void ALCDataLoadingPresenter::initialize() {
  * If it was "auto", sets up a watcher to automatically reload on new files.
  */
 void ALCDataLoadingPresenter::handleLoadRequested() {
-  std::vector<std::string> files(m_view->getRuns());
-
+  // Get runs
+  /*
   // Check not empty
   if (files.empty()) {
     m_view->displayError(
@@ -64,6 +144,7 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
 
   // Now perform the load
   load(files);
+  */
 }
 
 /**
@@ -87,137 +168,6 @@ int ALCDataLoadingPresenter::extractRunNumber(const std::string &file) {
 
   // Return run number as int (removes leading 0's)
   return std::stoi(returnVal);
-}
-
-/**
- * Changes which files are loaded based on autoRun. Will only make changes if
- * the current last run number is less than autoRun Removes any files which
- * don't exist between the first run and autoRun
- * @param autoRun :: [input] The latest run number found in the same directory
- * as the first run supplied
- */
-void ALCDataLoadingPresenter::updateRunsTextFromAuto(const int autoRun) {
-
-  const int currentLastRun = extractRunNumber(m_view->lastRun());
-  auto currentInput = m_view->getCurrentRunsText();
-
-  // Save old input
-  m_oldInput = currentInput;
-
-  // Only make changes if found run > user last run
-  if (autoRun <= currentLastRun)
-    return;
-
-  // Check if range at end
-  std::size_t findRange = currentInput.find_last_of("-");
-  std::size_t findComma = currentInput.find_last_of(",");
-  QString newInput;
-
-  // Remove ending range if at end of input
-  if (findRange != std::string::npos &&
-      (findComma == std::string::npos || findRange > findComma)) {
-    currentInput.erase(findRange, currentInput.length() - 1);
-  }
-
-  // Initialise new input
-  newInput = QString::fromStdString(currentInput);
-
-  // Will hold the base path for all runs, used to check which run numbers
-  // exist
-  auto basePath = m_view->firstRun();
-  if (basePath.empty()) {
-    m_view->displayError("First run invalid");
-    return;
-  }
-
-  // Strip the extension
-  size_t findExt = basePath.find_last_of(".");
-  const auto ext = basePath.substr(findExt);
-  basePath.erase(findExt);
-
-  // Remove the run number part so we are left with just the base path
-  const std::string numPart = std::to_string(currentLastRun);
-  basePath.erase(basePath.length() - numPart.length());
-
-  bool fnf = false; // file not found
-
-  // Check all files valid between current last and auto, remove bad ones
-  for (int i = currentLastRun + 1; i < autoRun; ++i) {
-
-    // Try creating a file from base, i and extension
-    Poco::File testFile(basePath + std::to_string(i) + ext);
-
-    // If doesn't exist add range to previous run
-    if (testFile.exists()) {
-
-      if (fnf) { // Means next file found since a file not found
-        // Add comma
-        newInput.append(",");
-        newInput.append(QString::number(i));
-        fnf = false;
-      }
-    } else {
-      // Edge case do not add range
-      if (i - 1 == currentLastRun && i + 1 == autoRun) {
-        fnf = true;
-      } else {
-        newInput.append("-");
-        newInput.append(QString::number(i - 1));
-        fnf = true;
-      }
-    }
-  }
-
-  // If true then need a comma instead as file before last is missing
-  if (fnf)
-    newInput.append(",");
-  else
-    newInput.append("-");
-  newInput.append(QString::number(autoRun));
-
-  // Update it
-  // m_ui.runs->setFileTextWithSearch(newInput);
-  m_view->setRunsTextWithSearch(newInput);
-}
-
-/**
- * Called when the auto checkbox is checked
- * Tries to find the most recent file in the same directory as first
- * and save the run number
- */
-void ALCDataLoadingPresenter::updateAutoRun() {
-
-  // Set read only
-  m_view->setRunsReadOnly(true);
-
-  // Find most recent file from first
-  ALCLatestFileFinder finder(m_view->firstRun());
-  const auto last = finder.getMostRecentFile();
-
-  // If empty auto cannot be used
-  if (last.empty()) {
-    m_view->displayError("Could not determine a valid last file.");
-    m_view->setCurrentAutoRun(-1);
-    return;
-  }
-
-  // Update the auto run in the view
-  const int lastRun = extractRunNumber(last);
-  m_view->setCurrentAutoRun(lastRun);
-
-  // Update text
-  updateRunsTextFromAuto(lastRun);
-}
-
-/**
- * Called when Auto checkbox is unchecked
- * Sets runs file finder to input as it was before auto was checked
- */
-void ALCDataLoadingPresenter::resetAutoRun() {
-  // Remove read only
-  m_view->setRunsReadOnly(false);
-
-  m_view->setRunsTextWithSearch(QString::fromStdString(m_oldInput));
 }
 
 /**
@@ -343,7 +293,10 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     IAlgorithm_sptr loadAlg =
         AlgorithmManager::Instance().create("LoadMuonNexus");
     loadAlg->setChild(true); // Don't want workspaces in the ADS
-    loadAlg->setProperty("Filename", m_view->firstRun());
+
+    //// Need first run here to update available info
+    // loadAlg->setProperty("Filename", m_view->firstRun());
+
     // We need logs only but we have to use LoadMuonNexus
     // (can't use LoadMuonLogs as not all the logs would be
     // loaded), so we load the minimum amount of data, i.e., one spectrum

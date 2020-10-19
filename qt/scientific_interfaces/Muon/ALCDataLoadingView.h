@@ -40,10 +40,6 @@ public:
   void initInstruments() override;
   std::string getInstrument() const override;
   std::string getPath() const override;
-  std::string firstRun() const override;
-  std::string lastRun() const override;
-  std::vector<std::string> getRuns() const override;
-  std::string getRunsErrorMessage() const override;
   std::string log() const override;
   std::string function() const override;
   std::string deadTimeType() const override;
@@ -67,13 +63,10 @@ public:
   void help() override;
   void disableAll() override;
   void enableAll() override;
-  void checkBoxAutoChanged(int state) override;
-  std::string getCurrentRunsText() const override;
-  void setRunsTextWithSearch(const QString &text) override;
-  void setCurrentAutoRun(const int run) override { m_currentAutoRun = run; }
-  void setRunsReadOnly(bool readOnly) override;
   void instrumentChanged(QString instrument) override;
   void pathChanged(QString path) override;
+  void handleRunsEditingFinsihed() override;
+  void enableLoad(bool enable) override;
 
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
@@ -88,9 +81,6 @@ private:
 
   /// The widget used
   QWidget *const m_widget;
-
-  /// The currently found last run when auto checked, -1 if not found
-  int m_currentAutoRun;
 };
 
 } // namespace CustomInterfaces
