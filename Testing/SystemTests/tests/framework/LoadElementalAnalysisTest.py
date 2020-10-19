@@ -8,6 +8,7 @@
 import systemtesting
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import LoadElementalAnalysisData, GroupWorkspaces
+import numpy as np
 
 class LoadElementalAnalysisTest(systemtesting.MantidSystemTest):
 
@@ -25,9 +26,70 @@ class LoadElementalAnalysisTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         LoadElementalAnalysisData(Run='9999',
-                            OutputWorkspace='9999')
+                            GroupWorkspace='9999')
+
+        #Check the Groupworkspace contains 4 Workspaces
+        self.assertEqual(AnalysisDataService.retrieve('9999').size(), 4)
+        #Check the first workspace contains 3 spectra
+        detector1_ws = AnalysisDataService.retrieve('9999; Detector 1')
+        detectorSpectrumAxis = detector1_ws.getAxis(1)
+        self.assertEqual(detectorSpectrumAxis.length(), 3)
+        #Check that Bin 3318 of the Prompt spectra of the workspace of Detector 1 is 0.206791
+        self.assertEqual(detector1_ws.extractY()[1, 3318], 0.206791)
+        # Check that Bin 230 of the Total spectra of the workspace of Detector 2 is 243.729
+        detector2_ws = AnalysisDataService.retrieve('9999; Detector 2')
+        self.assertEqual(detector2_ws.extractY()[2, 230], 243.729)
+        #Check that Bin 6029 of the Delayed spectra of the workspace of Detector 3 is 62.0691
+        detector3_ws = AnalysisDataService.retrieve('9999; Detector 3')
+        self.assertEqual(detector3_ws.extractY()[0, 6029], 62.0691)
+        #Check that the Bin 4083 of the Total spectra of the workspace of Detecror 4 is 120.457
+        detector4_ws = AnalysisDataService.retrieve('9999; Detector 4')
+        self.assertEqual(detector4_ws.extractY()[2, 4083], 120.457)
+
 
     def validate(self):
         self.tolerance = 0.0001
 
         return ['9999', 'ElementalAnalysisLoad.nxs']
+
+
+class LoadPartialElementalAnalysisTest(systemtesting.MantidSystemTest):
+    def __init__(self):
+        super(LoadPartialElementalAnalysisTest, self).__init__()
+
+    def requiredFiles(self):
+        return ['ral02683.rooth2099.dat', 'ral02683.rooth4099.dat']
+
+    def cleanup(self):
+        AnalysisDataService.clear()
+
+    def runTest(self):
+        LoadElementalAnalysisData(Run='2683',
+                            GroupWorkspace='2683')
+
+        #Check the Groupworkspace contains 2 Workspaces
+        self.assertEqual(AnalysisDataService.retrieve('2683').size(), 2)
+        #Check the first workspace contains 3 spectra as it populates missing spectra with
+        # value 0.0 in each bin
+        detector1_ws = AnalysisDataService.retrieve('2683; Detector 1')
+        detectorSpectrumAxis = detector1_ws.getAxis(1)
+        self.assertEqual(detectorSpectrumAxis.length(), 3)
+        #Check that the Prompt and Delay Spectra in Dectector 1 workspace do not contain any values
+        # and therefore max and min should be 0
+        detector1_prompt = detector1_ws.extractY()[0, :]
+        detector1_delay = detector1_ws.extractY()[1, :]
+        self.assertEqual(np.amax(detector1_prompt), 0.0)
+        self.assertEqual(np.amax(detector1_delay), 0.0)
+        self.assertEqual(np.amin(detector1_prompt), 0.0)
+        self.assertEqual(np.amin(detector1_delay), 0.0)
+        #Check that Bin 5237 of the Total spectra of the workspace of Detector 1 is 4.0
+        self.assertEqual(detector1_ws.extractY()[2, 5237], 4.0)
+        #Check that Bin 4697 of the Total spectra of the workspace of Detector 3 is 10.0
+        detector3_ws = AnalysisDataService.retrieve('2683; Detector 3')
+        self.assertEqual(detector3_ws.extractY()[2, 4697], 10.0)
+
+
+    def validate(self):
+        self.tolerance = 0.0001
+
+        return ['2683', 'PartialElementalAnalysisLoad.nxs']
