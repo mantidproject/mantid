@@ -419,14 +419,15 @@ class DrillView(QMainWindow):
             self.rowDeleted.emit(row)
             self.setWindowModified(True)
 
-    def groupSelectedRows(self):
+    def groupRows(self, rows):
         """
-        Add the selected row(s) to a new group. This method changes the row
-        label.
-        """
-        self.ungroupSelectedRows()
+        Add a list of row(s) to a new group. This method changes the row labels.
 
-        rows = self.table.getRowsFromSelectedCells()
+        Args:
+            rows (list(int)): row indexes
+        """
+        self.ungroupRows(rows)
+
         if not rows:
             return
 
@@ -442,12 +443,14 @@ class DrillView(QMainWindow):
             self.table.setRowLabel(row, groupLabel + str(rowLabel))
             rowLabel += 1
 
-    def ungroupSelectedRows(self):
+    def ungroupRows(self, rows):
         """
-        Remove the selected row(s) to all their potential groups. This method
-        reset the row label.
+        Remove a list of row(s) to all their potential groups. This method
+        reset the row labels.
+
+        Args:
+            rows (list(int)): row indexes
         """
-        rows = self.table.getRowsFromSelectedCells()
         if not rows:
             return
 
@@ -459,16 +462,13 @@ class DrillView(QMainWindow):
                     del self.masterRows[group]
             self.table.delRowLabel(row)
 
-    def setSelectedRowAsMasterRow(self):
+    def setMasterRow(self, row):
         """
-        This method sets the selected row as the master row for the group it
-        belongs to.
-        """
-        rows = self.table.getRowsFromSelectedCells()
-        if not rows or len(rows) > 1:
-            return
+        This method sets a row as the master row for the group it belongs to.
 
-        row = rows[0]
+        Args:
+            row (int): row index
+        """
         group = None
         for g in self.groups:
             if row in self.groups[g]:
@@ -649,13 +649,17 @@ class DrillView(QMainWindow):
             self.eraseSelectedCells()
         elif (event.key() == Qt.Key_G
                 and event.modifiers() == Qt.ControlModifier):
-            self.groupSelectedRows()
+            rows = self.table.getRowsFromSelectedCells()
+            self.groupRows(rows)
         elif (event.key() == Qt.Key_G
                 and event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier):
-            self.ungroupSelectedRows()
+            rows = self.table.getRowsFromSelectedCells()
+            self.ungroupRows(rows)
         elif (event.key() == Qt.Key_M
                 and event.modifiers() == Qt.ControlModifier):
-            self.setSelectedRowAsMasterRow()
+            rows = self.table.getRowsFromSelectedCells()
+            if len(rows) == 1:
+                self.setMasterRow(rows[0])
 
     def show_directory_manager(self):
         """
