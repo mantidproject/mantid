@@ -56,8 +56,11 @@ public:
 
   Instrument *clone() const override;
 
-  IComponent_const_sptr getSource(bool writeToLog = true) const;
-  IComponent_const_sptr getSample(bool writeToLog = true) const;
+  bool hasSource() const;
+  bool hasSample() const;
+
+  IComponent_const_sptr getSource() const;
+  IComponent_const_sptr getSample() const;
   Kernel::V3D getBeamDirection() const;
 
   IDetector_const_sptr getDetector(const detid_t &detector_id) const;

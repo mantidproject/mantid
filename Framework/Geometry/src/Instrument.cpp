@@ -320,14 +320,22 @@ void Instrument::getDetectorsInBank(std::vector<IDetector_const_sptr> &dets,
   getDetectorsInBank(dets, *comp);
 }
 
-//------------------------------------------------------------------------------------------
+/** Checks to see if the Instrument has a source.
+ *   @returns True if the instrument has a source cache.
+ */
+bool Instrument::hasSource() const { return m_sourceCache; }
+
+/** Checks to see if the Instrument has a sample.
+ *   @returns True if the instrument has a sample cache.
+ */
+bool Instrument::hasSample() const { return m_sampleCache; }
+
 /** Gets a pointer to the source
  *   @returns a pointer to the source
  */
-IComponent_const_sptr Instrument::getSource(bool writeToLog) const {
+IComponent_const_sptr Instrument::getSource() const {
   if (!m_sourceCache) {
-    if (writeToLog)
-      g_log.warning("In Instrument::getSource(). No source has been set.");
+    g_log.warning("In Instrument::getSource(). No source has been set.");
     return IComponent_const_sptr(m_sourceCache, NoDeleting());
   } else if (m_map) {
     auto sourceCache = static_cast<const Instrument *>(m_base)->m_sourceCache;
@@ -338,11 +346,9 @@ IComponent_const_sptr Instrument::getSource(bool writeToLog) const {
     else if (dynamic_cast<const Component *>(sourceCache))
       return IComponent_const_sptr(new Component(sourceCache, m_map));
     else {
-      if (writeToLog) {
-        g_log.error("In Instrument::getSource(). Source is not a recognised "
-                    "component type.");
-        g_log.error("Try to assume it is a Component.");
-      }
+      g_log.error("In Instrument::getSource(). Source is not a recognised "
+                  "component type.");
+      g_log.error("Try to assume it is a Component.");
       return IComponent_const_sptr(new ObjComponent(sourceCache, m_map));
     }
   } else {
@@ -353,11 +359,9 @@ IComponent_const_sptr Instrument::getSource(bool writeToLog) const {
 /** Gets a pointer to the Sample Position
  *  @returns a pointer to the Sample Position
  */
-IComponent_const_sptr Instrument::getSample(bool writeToLog) const {
+IComponent_const_sptr Instrument::getSample() const {
   if (!m_sampleCache) {
-    if (writeToLog)
-      g_log.warning(
-          "In Instrument::getSamplePos(). No SamplePos has been set.");
+    g_log.warning("In Instrument::getSamplePos(). No SamplePos has been set.");
     return IComponent_const_sptr(m_sampleCache, NoDeleting());
   } else if (m_map) {
     auto sampleCache = static_cast<const Instrument *>(m_base)->m_sampleCache;
@@ -368,11 +372,9 @@ IComponent_const_sptr Instrument::getSample(bool writeToLog) const {
     else if (dynamic_cast<const Component *>(sampleCache))
       return IComponent_const_sptr(new Component(sampleCache, m_map));
     else {
-      if (writeToLog) {
-        g_log.error("In Instrument::getSamplePos(). SamplePos is not a "
-                    "recognised component type.");
-        g_log.error("Try to assume it is a Component.");
-      }
+      g_log.error("In Instrument::getSamplePos(). SamplePos is not a "
+                  "recognised component type.");
+      g_log.error("Try to assume it is a Component.");
       return IComponent_const_sptr(new ObjComponent(sampleCache, m_map));
     }
   } else {
