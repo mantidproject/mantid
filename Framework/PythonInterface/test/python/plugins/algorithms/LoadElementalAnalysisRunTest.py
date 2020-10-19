@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
+from mantid.api import AnalysisDataService
 from mantid.simpleapi import AlgorithmManager, LoadElementalAnalysisData
 
 class LoadElementalAnalysisRunTest(unittest.TestCase):
@@ -19,6 +20,7 @@ class LoadElementalAnalysisRunTest(unittest.TestCase):
         errors = alg.validateInputs()
         self.assertTrue("Run" in errors)
         self.assertEquals(len(errors), 1)
+        self.assertFalse(AnalysisDataService.doesExist("1"))
 
 if __name__ == '__main__':
     unittest.main()

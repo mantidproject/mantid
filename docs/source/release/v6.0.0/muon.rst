@@ -11,3 +11,11 @@ MuSR Changes
 
 
 :ref:`Release 6.0.0 <v6.0.0>`
+
+Algorithms
+----------
+
+New Algorithms
+##############
+
+- :ref:`algm-LoadElementalAnalysisData` algorithm was introduced for loading runs into Elemental Analysis GUI, enabling it to be registered by WorkspaceHistory.
