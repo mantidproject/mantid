@@ -424,6 +424,8 @@ class DrillView(QMainWindow):
         Add the selected row(s) to a new group. This method changes the row
         label.
         """
+        self.ungroupSelectedRows()
+
         rows = self.table.getRowsFromSelectedCells()
         if not rows:
             return
@@ -647,7 +649,6 @@ class DrillView(QMainWindow):
             self.eraseSelectedCells()
         elif (event.key() == Qt.Key_G
                 and event.modifiers() == Qt.ControlModifier):
-            self.ungroupSelectedRows()
             self.groupSelectedRows()
         elif (event.key() == Qt.Key_G
                 and event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier):

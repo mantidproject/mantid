@@ -384,9 +384,7 @@ class DrillViewTest(unittest.TestCase):
         QTest.keyClick(self.view, Qt.Key_Delete, Qt.NoModifier)
         self.view.eraseSelectedCells.assert_called_once()
         QTest.keyClick(self.view, Qt.Key_G, Qt.ControlModifier)
-        self.view.ungroupSelectedRows.assert_called_once()
         self.view.groupSelectedRows.assert_called_once()
-        self.view.ungroupSelectedRows.reset_mock()
         QTest.keyClick(self.view, Qt.Key_G,
                        Qt.ControlModifier | Qt.ShiftModifier)
         self.view.ungroupSelectedRows.assert_called_once()
