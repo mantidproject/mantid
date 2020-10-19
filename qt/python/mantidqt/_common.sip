@@ -169,6 +169,7 @@ signals:
   void modificationChanged(bool m);
   void textZoomedIn();
   void textZoomedOut();
+  void progressMade(const int);
 
 private:
   ScriptEditor(const ScriptEditor&);
@@ -384,6 +385,10 @@ signals:
   void sliceViewerClicked(const QStringList &workspaceNames);
   void showInstrumentClicked(const QStringList &workspaceNames);
   void showAlgorithmHistoryClicked(const QStringList &workspaceNames);
+  void plotMDHistoClicked(const QStringList &workspaceNames);
+  void overplotMDHistoClicked(const QStringList &workspaceNames);
+  void plotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
+  void overplotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
 };
 
 class AlgorithmHistoryWindow : public QDialog {
@@ -417,6 +422,54 @@ class ScriptRepositoryView : QDialog {
 %End
 public:
     ScriptRepositoryView(QWidget *parent = nullptr);
+};
+
+// ---------------------------------
+// Instrument Selector
+// ---------------------------------
+
+class InstrumentSelector : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/InstrumentSelector.h"
+%End
+public:
+  InstrumentSelector(QWidget *parent /TransferThis/ = nullptr);
+  void setTechniques(const QStringList &techniques);
+  void setCurrentIndex(int);
+  QString currentText();
+  int count();
+};
+
+// ---------------------------------
+// Property Handler
+// ---------------------------------
+class PropertyHandler
+    : public QObject {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/PropertyHandler.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
+#include <boost/python/extract.hpp>
+#include <boost/python/to_python_value.hpp>
+%End
+public:
+    PropertyHandler(SIP_PYOBJECT, SIP_PYOBJECT, FitPropertyBrowser *)[(const Mantid::API::IFunction_sptr &,
+ Mantid::API::CompositeFunction_sptr,  FitPropertyBrowser *)];
+    %MethodCode
+    auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
+    auto compositeFunction = boost::python::extract<Mantid::API::CompositeFunction_sptr>(a1)();
+    sipCpp = new sipPropertyHandler(function, compositeFunction,  a2);
+    %End
+    SIP_PYOBJECT ifun();
+    %MethodCode
+    sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->ifun());
+    %End
+    void setHasPlot(bool);
+    QString functionPrefix() const;
+    PropertyHandler * findHandler(SIP_PYOBJECT);
+    %MethodCode
+    auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
+    sipRes = sipCpp->findHandler(function);
+    %End
 };
 
 // ---------------------------------
@@ -464,7 +517,9 @@ public:
     void addFitResultWorkspacesToTableWidget();
     void setWorkspaceName(const QString &wsName);
     void postDeleteHandle(const std::string &wsName);
+    void removeWorkspaceAndSpectra(const std::string &wsName);
     std::string getFitAlgorithmParameters() const;
+    PropertyHandler * currentHandler() const;
 
     SIP_PYOBJECT defaultPeakType();
 %MethodCode
@@ -516,14 +571,20 @@ SIP_PYOBJECT defaultBackgroundType();
 
 signals:
     void functionChanged();
+    void functionRemoved();
     void startXChanged(double);
     void endXChanged(double);
     void changedParameterOf(const QString &prefix);
     void algorithmFinished(const QString &);
     void removeFitCurves();
+    void removeGuess();
+    void removeCurrentGuess();
     void plotGuess();
+    void plotCurrentGuess();
     void sequentialFitDone() const;
     void workspaceClicked(const QString &);
+    void removePlotSignal(PropertyHandler *);
+
 };
 
 // ---------------------------------
@@ -913,9 +974,11 @@ public:
     void setLabelMinWidth(const int);
     void setText(const QString&);
     void setUserInput(const QVariant &);
+    QVariant getUserInput() const;
     void setReadOnly(bool readOnly);
     void setFileExtensions(const QStringList &extensions);
     void findFiles(bool isModified);
+    void isOptional(bool);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);
@@ -992,4 +1055,5 @@ class WorkspaceSelector : QComboBox
 %End
 public:
     WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
+    void setOptional(bool optional);
 };

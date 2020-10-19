@@ -161,7 +161,7 @@ void CalculateIqt::exec() {
       monteCarloErrorCalculation(sampleWorkspace, resolution, rebinParams, seed,
                                  calculateErrors, nIterations);
 
-  outputWorkspace = removeInvalidData(outputWorkspace);
+  outputWorkspace = replaceSpecialValues(outputWorkspace);
   setProperty("OutputWorkspace", outputWorkspace);
 }
 
@@ -293,14 +293,6 @@ CalculateIqt::replaceSpecialValues(const MatrixWorkspace_sptr &workspace) {
   specialValuesAlgorithm->setProperty("NaNValue", 0.0);
   specialValuesAlgorithm->execute();
   return specialValuesAlgorithm->getProperty("OutputWorkspace");
-}
-
-MatrixWorkspace_sptr
-CalculateIqt::removeInvalidData(MatrixWorkspace_sptr workspace) {
-  auto binning = (workspace->blocksize() + 1) / 2;
-  auto binV = workspace->x(0)[binning];
-  workspace = cropWorkspace(workspace, binV);
-  return replaceSpecialValues(workspace);
 }
 
 MatrixWorkspace_sptr

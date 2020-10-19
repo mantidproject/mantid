@@ -30,6 +30,7 @@ public:
 
   void set(Value kind);
   void set(const std::string &kind);
+  void setIndependentErrors(const bool independent);
 
   std::unique_ptr<Kernel::Property> property() const;
   std::string propertyDoc() const;
@@ -41,6 +42,7 @@ public:
 
 private:
   Value m_value = Value::Linear;
+  bool m_independentErrors;
 };
 
 } // namespace Algorithms

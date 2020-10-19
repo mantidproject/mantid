@@ -299,6 +299,22 @@ std::string getDate() {
   return sasDate;
 }
 
+/** Write a property value to the H5 file if the property exists in the run
+ *
+ * @param run : the run to look for the property in
+ * @param propertyName : the name of the property to find
+ * @param sasGroup : the group to add the term into in the output file
+ * @param sasTerm : the name of the term to add
+ */
+void addPropertyFromRunIfExists(Run const &run, std::string const &propertyName,
+                                H5::Group &sasGroup,
+                                std::string const &sasTerm) {
+  if (run.hasProperty(propertyName)) {
+    auto property = run.getProperty(propertyName);
+    Mantid::DataHandling::H5Util::write(sasGroup, sasTerm, property->value());
+  }
+}
+
 /**
  * Add the process information to the NXcanSAS file. This information
  * about the run number, the Mantid version and the user file (if available)
@@ -324,13 +340,12 @@ void addProcess(H5::Group &group,
   const auto version = std::string(MantidVersion::version());
   Mantid::DataHandling::H5Util::write(process, sasProcessTermSvn, version);
 
+  // Add log values
   const auto run = workspace->run();
-  if (run.hasProperty(sasProcessUserFileInLogs)) {
-    auto userFileProperty = run.getProperty(sasProcessUserFileInLogs);
-    auto userFileString = userFileProperty->value();
-    Mantid::DataHandling::H5Util::write(process, sasProcessTermUserFile,
-                                        userFileString);
-  }
+  addPropertyFromRunIfExists(run, sasProcessUserFileInLogs, process,
+                             sasProcessTermUserFile);
+  addPropertyFromRunIfExists(run, sasProcessBatchFileInLogs, process,
+                             sasProcessTermBatchFile);
 }
 
 /**
@@ -360,12 +375,10 @@ void addProcess(H5::Group &group,
   Mantid::DataHandling::H5Util::write(process, sasProcessTermSvn, version);
 
   const auto run = workspace->run();
-  if (run.hasProperty(sasProcessUserFileInLogs)) {
-    auto userFileProperty = run.getProperty(sasProcessUserFileInLogs);
-    auto userFileString = userFileProperty->value();
-    Mantid::DataHandling::H5Util::write(process, sasProcessTermUserFile,
-                                        userFileString);
-  }
+  addPropertyFromRunIfExists(run, sasProcessUserFileInLogs, process,
+                             sasProcessTermUserFile);
+  addPropertyFromRunIfExists(run, sasProcessBatchFileInLogs, process,
+                             sasProcessTermBatchFile);
 
   // Add can run number
   const auto canRun = canWorkspace->getRunNumber();

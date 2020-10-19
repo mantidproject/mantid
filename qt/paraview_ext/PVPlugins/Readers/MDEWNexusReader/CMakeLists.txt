@@ -12,7 +12,6 @@ include_directories(SYSTEM ${QWT5_INCLUDE_DIR})
 
 target_link_libraries(MantidParaViewMDEWNexusReaderSMPlugin
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${vtkjsoncpp_LIBRARIES}
                       ${CORE_MANTIDLIBS}
                       DataObjects

@@ -673,7 +673,6 @@ target_include_directories(DataHandling SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS} ${Bo
 
 target_link_libraries(DataHandling
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       Nexus
                       HistogramData

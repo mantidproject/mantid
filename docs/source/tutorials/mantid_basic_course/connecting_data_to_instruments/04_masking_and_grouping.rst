@@ -32,6 +32,10 @@ The shapes ready for grouping have blue border
 
 |GroupBlueRing.png|
 
+*Note* : The pixel and tube selections work differently than the shapes: once the tool is selected, the masking or grouping
+is immediately applied on click on the instrument, while for the grouping, the selected option (Sum to workspace or Extract to workspace)
+is applied to the last selected pixel / tube *only*.
+
 Grouping
 ========
 
@@ -84,6 +88,12 @@ it **cannot be undone**!
 .. figure:: /images/Fullmaskview.png
    :align: center
    :alt: Fullmaskview.png
+
+
+Note that the first button in the View section above is called "Apply bin mask to View", because it only covers bins within the time 
+range selected on the bottom bar (between -0.55 to 28.47 microseconds). This range bar selects the interval over which instrument 
+view sums/integrates and correspnds to the x-axis of the underlying workspace. This button is called "Apply detector mask to View" 
+when the entire x-axis range is selected as in this way you mask an entire spectrum (and its related detector).
 
 Be aware that any data analysis on spectra from a region of interest (ROI) should not be performed on data in the Pick > mini-plot. You would need to run the :ref:`algm-DiffractionFocussing` algorithm.
 

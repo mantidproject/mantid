@@ -28,7 +28,7 @@ from qtpy import QT_VERSION
 
 from mantid.api import AnalysisDataService, AnalysisDataServiceObserver, ITableWorkspace, MatrixWorkspace
 from mantid.kernel import logger
-from mantid.plots import datafunctions, MantidAxes
+from mantid.plots import datafunctions, MantidAxes, axesfunctions
 from mantidqt.io import open_a_file_dialog
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall, force_method_calls_to_qapp_thread
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
@@ -238,7 +238,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # 0 argument is arbitrary and has no effect on fit widget size
         # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
         if QT_VERSION >= LooseVersion("5.6"):
-            self.window.resizeDocks([self.fit_browser], [0], Qt.Horizontal)
+            self.window.resizeDocks([self.fit_browser], [1], Qt.Horizontal)
         self.fit_browser.hide()
 
         if matplotlib.is_interactive():
@@ -432,6 +432,9 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
                             ax.collections[0]._vec = copy.deepcopy(ax.original_data)
                         else:
                             ax.view_init()
+                    elif ax.images:
+                        axesfunctions.update_colorplot_datalimits(ax, ax.images)
+                        continue
 
                     ax.autoscale()
 

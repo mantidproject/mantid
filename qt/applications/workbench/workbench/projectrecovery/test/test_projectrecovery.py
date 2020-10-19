@@ -15,6 +15,7 @@ import tempfile
 import time
 import unittest
 import datetime
+import psutil
 
 from mantid.api import AnalysisDataService as ADS
 from mantid.kernel import ConfigService
@@ -143,6 +144,13 @@ class ProjectRecoveryTest(unittest.TestCase):
 
         result = self.pr.get_pid_folder_to_load_a_checkpoint_from()
         self.assertEqual(one, result)
+
+    def test_get_pid_folder_returns_pid_if_access_denied(self):
+        pid = os.path.join(self.pr.recovery_directory_hostname, "10000000")
+        os.makedirs(pid)
+        with mock.patch('psutil.Process.cmdline', side_effect=psutil.AccessDenied()):
+            result = self.pr.get_pid_folder_to_load_a_checkpoint_from()
+        self.assertEqual(pid, result)
 
     def test_list_dir_full_path(self):
         one = os.path.join(self.working_directory, "10000000")

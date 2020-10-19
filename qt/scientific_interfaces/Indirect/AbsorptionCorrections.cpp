@@ -502,15 +502,21 @@ void AbsorptionCorrections::convertSpectrumAxes(
 
 /**
  * Handle completion of the absorption correction algorithm.
- *
  * @param error True if algorithm has failed.
  */
 void AbsorptionCorrections::algorithmComplete(bool error) {
   setRunIsRunning(false);
-  if (!error) {
+  // The m_saveAlgRunning flag is queried here so the
+  // processWavelengthWorkspace isn't executed at the end of the
+  // saveAlg completing, as this will throw an exception.
+  if (!error && !m_saveAlgRunning) {
     processWavelengthWorkspace();
     setOutputPlotOptionsWorkspaces({m_pythonExportWsName});
+  } else if (!error && m_saveAlgRunning) {
+    setButtonsEnabled(true);
+    m_saveAlgRunning = false;
   } else {
+    m_saveAlgRunning = false;
     setSaveResultEnabled(false);
     emit showMessageBox(
         "Could not run absorption corrections.\nSee Results Log for details.");
@@ -596,6 +602,7 @@ void AbsorptionCorrections::addSaveWorkspace(std::string const &workspaceName) {
 }
 
 void AbsorptionCorrections::saveClicked() {
+  m_saveAlgRunning = true;
   auto const factorsWs = m_absCorAlgo->getPropertyValue("CorrectionsWorkspace");
   addSaveWorkspace(m_pythonExportWsName);
   addSaveWorkspace(factorsWs);

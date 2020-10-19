@@ -244,30 +244,26 @@ add_subdirectory(scripts)
 # Docs requirements
 option(ENABLE_DOCS "Enable Building user and developer documentation" ON)
 if (ENABLE_DOCS)
-  find_package(Sphinx 1.2)
-  if(SPHINX_FOUND)
-    # run python to see if the theme is installed
-    execute_process(COMMAND ${Python_EXECUTABLE} -c
-                            "import sphinx_bootstrap_theme"
-                    OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
-                    ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
-                    OUTPUT_STRIP_TRAILING_WHITESPACE
-                    ERROR_STRIP_TRAILING_WHITESPACE)
-    if(SPHINX_BOOTSTRAP_THEME_ERR)
-      message(ERROR " Did not find sphinx_bootstrap_theme")
-      message(STATUS "${Python_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
-      message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
-      message(
-        FATAL_ERROR
-          " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/"
-        )
-    endif()
-
-    add_subdirectory(dev-docs)
-    if(ENABLE_MANTIDPLOT)
-      add_subdirectory(docs)
-    endif()
+  find_package(Sphinx REQUIRED)
+  # run python to see if the theme is installed
+  execute_process(COMMAND ${Python_EXECUTABLE} -c
+                          "import sphinx_bootstrap_theme"
+                  OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
+                  ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
+                  OUTPUT_STRIP_TRAILING_WHITESPACE
+                  ERROR_STRIP_TRAILING_WHITESPACE)
+  if(SPHINX_BOOTSTRAP_THEME_ERR)
+    message(ERROR " Did not find sphinx_bootstrap_theme")
+    message(STATUS "${Python_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
+    message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
+    message(
+      FATAL_ERROR
+        " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/"
+      )
   endif()
+
+  add_subdirectory(dev-docs)
+  add_subdirectory(docs)
 endif()
 
 # System test data target
@@ -291,8 +287,10 @@ endif()
 
 # Installation settings
 
-# N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
-install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
+if(ENABLE_MANTIDPLOT)
+  # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
+  install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
+endif()
 
 # Install the files (.desktop and icon) to create a menu items
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -513,13 +511,13 @@ if(ENABLE_CPACK)
                    ${CPACK_DEBIAN_PACKAGE_DEPENDS})
   endif()
 
-  # soft requirement of tcmalloc if selected
-  if(USE_TCMALLOC)
-    message(STATUS "Adding gperftools to the package requirements")
+  # soft requirement of jemalloc if selected
+  if(USE_JEMALLOC)
+    message(STATUS "Adding jemalloc to the package requirements")
     set(CPACK_RPM_PACKAGE_REQUIRES
-        "${CPACK_RPM_PACKAGE_REQUIRES},gperftools-libs >= 2.0")
+        "${CPACK_RPM_PACKAGE_REQUIRES}, jemalloc >= 3.0")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS
-        "${CPACK_DEBIAN_PACKAGE_DEPENDS},libgoogle-perftools4 (>= 1.7)")
+        "${CPACK_DEBIAN_PACKAGE_DEPENDS}, libjemalloc1 (>= 3.0)")
   endif()
 
   # run cpack configuration

@@ -23,7 +23,6 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsPluginsDesigner
                      ../../common
                      ../../plotting
                    LINK_LIBS
-                     ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      ${POCO_LIBRARIES}
                      ${Boost_LIBRARIES}

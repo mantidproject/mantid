@@ -167,7 +167,6 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                    SYSTEM_INCLUDE_DIRS
                      ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
-                     ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      ${POCO_LIBRARIES}
                      ${Boost_LIBRARIES}
@@ -208,7 +207,6 @@ mtd_add_qt_library(TARGET_NAME MantidQtWidgetsInstrumentView
                    INCLUDE_DIRS
                      inc
                    LINK_LIBS
-                     ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      PythonInterfaceCore
                      ${POCO_LIBRARIES}

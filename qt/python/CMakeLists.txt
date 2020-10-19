@@ -11,9 +11,15 @@ endif()
 # mantidqt
 if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   if(APPLE)
-    set(_install_lib_dirs "${SITE_PACKAGES};${WORKBENCH_SITE_PACKAGES}")
+    set(_install_lib_dirs)
+    if(ENABLE_WORKBENCH)
+      list(APPEND _install_lib_dirs ${WORKBENCH_SITE_PACKAGES})
+    endif()
+    if(ENABLE_MANTIDPLOT)
+      list(APPEND _install_lib_dirs ${SITE_PACKAGES})
+    endif()
   else()
-    set(_install_lib_dirs "${WORKBENCH_SITE_PACKAGES}")
+    set(_install_lib_dirs "${SITE_PACKAGES}")
   endif()
   add_python_package(mantidqt INSTALL_LIB_DIRS ${_install_lib_dirs})
 
@@ -84,6 +90,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
       mantidqt/widgets/test/test_messagedisplay.py
       mantidqt/widgets/test/test_fitpropertybrowser.py
       mantidqt/widgets/test/test_fitpropertybrowserbase.py
+      mantidqt/widgets/test/test_fitpropertybrowserplotinteraction.py
       mantidqt/widgets/test/test_functionbrowser.py
       mantidqt/widgets/samplelogs/test/test_samplelogs_model.py
       mantidqt/widgets/samplelogs/test/test_samplelogs_presenter.py
@@ -110,6 +117,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_presenter.py
         mantidqt/widgets/codeeditor/tab_widget/test/test_codeeditor_tab_view.py
         mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogpresenter.py
+        mantidqt/widgets/fitpropertybrowser/addfunctiondialog/test/test_addfunctiondialogview.py
         mantidqt/widgets/instrumentview/test/test_instrumentview_io.py
         mantidqt/widgets/instrumentview/test/test_instrumentview_view.py
         mantidqt/widgets/plotconfigdialog/axestabwidget/test/test_axestabwidgetpresenter.py
@@ -120,7 +128,9 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/plotconfigdialog/imagestabwidget/test/test_imagestabwidgetpresenter.py
         mantidqt/widgets/plotconfigdialog/test/test_plotconfigdialogpresenter.py
         mantidqt/widgets/samplelogs/test/test_samplelogs_view.py
+        mantidqt/widgets/sliceviewer/test/test_sliceviewer_cursortracker.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_model.py
+        mantidqt/widgets/sliceviewer/test/test_sliceviewer_movemousecursor.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_presenter.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_sliceinfo.py
         mantidqt/widgets/sliceviewer/test/test_sliceviewer_transform.py
@@ -147,7 +157,7 @@ if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
         mantidqt/widgets/workspacedisplay/matrix/test/test_matrixworkspacedisplay_io.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_error_column.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_marked_columns.py
-        mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_workbench_table_widget_item.py
+        mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_tableworkspace_item.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_model.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_presenter.py
         mantidqt/widgets/workspacedisplay/table/test/test_tableworkspacedisplay_view.py

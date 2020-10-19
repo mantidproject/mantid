@@ -12,6 +12,7 @@ from unittest import TestCase, main
 
 # third party imports
 import matplotlib
+from matplotlib import cm
 
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
@@ -21,14 +22,22 @@ import numpy as np
 # register mantid projection
 import mantid.plots  # noqa
 from mantid.api import AnalysisDataService, WorkspaceFactory
-from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace
+from mantid.simpleapi import CreateWorkspace, CreateSampleWorkspace, CreateMDHistoWorkspace
 from mantid.kernel import config
 from mantid.plots import MantidAxes
 from unittest import mock
 from mantidqt.dialogs.spectraselectordialog import SpectraSelection
 from mantidqt.plotting.functions import (can_overplot, current_figure_or_none, figure_title,
-                                         manage_workspace_names, plot, plot_from_names,
+                                         manage_workspace_names, plot, plot_from_names, plot_md_ws_from_names,
                                          pcolormesh_from_names, plot_surface)
+
+IMAGE_PLOT_OPTIONS = {"plots.images.Colormap": "spring", "plots.images.ColorBarScale": "Log",
+                      "plots.ShowMinorTicks": "off", "plots.ShowMinorGridlines": "off"}
+
+
+class MockConfigService(object):
+    def __init__(self):
+        self.getString = mock.Mock(side_effect=IMAGE_PLOT_OPTIONS.get)
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
@@ -46,13 +55,23 @@ def workspace_names_dummy_func(workspaces):
 
 
 class FunctionsTest(TestCase):
-
     _test_ws = None
+    _test_md_ws = None
 
     def setUp(self):
         if self._test_ws is None:
             self.__class__._test_ws = WorkspaceFactory.Instance().create(
                 "Workspace2D", NVectors=2, YLength=5, XLength=5)
+
+        if self._test_md_ws is None:
+            self._test_md_ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,2,1',
+                                                      ErrorInput='1,1,1,1,1,1',
+                                                      Dimensionality=3,
+                                                      Extents='-1,1,-1,1,0.5,6.5',
+                                                      NumberOfBins='1,1,6',
+                                                      Names='x,y,|Q|',
+                                                      Units='mm,km,AA^-1',
+                                                      OutputWorkspace='test_plot_md_from_names_ws')
 
     def tearDown(self):
         AnalysisDataService.Instance().clear()
@@ -143,6 +162,14 @@ class FunctionsTest(TestCase):
                                       wksp_indices=[1], errors=False, overplot=True,
                                       target_fig=fig)
 
+    def test_plot_md_ws_from_names(self):
+        """Test 1 workspace
+
+        :return:
+        """
+        self._do_plot_md_from_names_test(expected_labels=['test_plot_md_from_names_ws'],
+                                         errors=False, overplot=False, target_fig=None)
+
     @mock.patch('mantidqt.plotting.functions.pcolormesh')
     def test_pcolormesh_from_names_calls_pcolormesh(self, pcolormesh_mock):
         ws_name = 'test_pcolormesh_from_names_calls_pcolormesh-1'
@@ -168,6 +195,25 @@ class FunctionsTest(TestCase):
         fig = pcolormesh_from_names([ws_name], fig=target_fig)
         self.assertEqual(fig, target_fig)
         self.assertEqual(1, len(fig.gca().images))
+
+    @mock.patch('mantidqt.plotting.functions.ConfigService', new_callable=MockConfigService)
+    def test_pcolor_mesh_from_names_gets_colorbar_scale_from_ConfigService(self, mock_ConfigService):
+        ws = CreateSampleWorkspace()
+
+        fig = pcolormesh_from_names([ws])
+
+        mock_ConfigService.getString.assert_any_call('plots.images.ColorBarScale')
+        self.assertTrue(isinstance(fig.gca().images[0].colorbar.norm, matplotlib.colors.LogNorm))
+
+    @mock.patch('mantidqt.plotting.functions.ConfigService', new_callable=MockConfigService)
+    def test_pcolor_mesh_from_names_gets_colormap_from_ConfigService(self, mock_ConfigService):
+        ws = CreateSampleWorkspace()
+        spring_colormap = cm.get_cmap('spring')
+
+        fig = pcolormesh_from_names([ws])
+
+        mock_ConfigService.getString.assert_any_call('plots.images.Colormap')
+        self.assertEqual(fig.gca().images[0].colorbar.get_cmap(), spring_colormap)
 
     def test_workspace_can_be_plotted_on_top_of_scripted_plots(self):
         fig = plt.figure()
@@ -231,7 +277,7 @@ class FunctionsTest(TestCase):
     def test_setting_waterfall_to_true_makes_waterfall_plot(self):
         fig = plt.figure()
         ws = self._test_ws
-        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+        plot([ws], wksp_indices=[0, 1], fig=fig, waterfall=True)
         ax = plt.gca()
 
         self.assertTrue(ax.is_waterfall())
@@ -247,7 +293,7 @@ class FunctionsTest(TestCase):
     def test_overplotting_onto_waterfall_plot_maintains_waterfall(self):
         fig = plt.figure()
         ws = self._test_ws
-        plot([ws], wksp_indices=[0,1], fig=fig, waterfall=True)
+        plot([ws], wksp_indices=[0, 1], fig=fig, waterfall=True)
         # Overplot one of the same lines.
         plot([ws], wksp_indices=[0], fig=fig, overplot=True)
         ax = plt.gca()
@@ -310,6 +356,36 @@ class FunctionsTest(TestCase):
                 self.assertTrue(label_part in line.get_label(),
                                 msg="Label fragment '{}' not found in line label".format(label_part))
         return fig
+
+    def _do_plot_md_from_names_test(self, expected_labels, errors, overplot, target_fig):
+        """
+        Do plot_md_ws_from_names test (in general)
+
+        :param expected_labels: list of strings as expected labels of a plot (i.e., workspace name)
+        :param errors:
+        :param overplot:
+        :param target_fig:
+        :return:
+        """
+        ws_name = 'test_plot_md_from_names_ws'
+        AnalysisDataService.Instance().addOrReplace(ws_name, self._test_md_ws)
+
+        # call method to test
+        test_fig = plot_md_ws_from_names([ws_name], errors, overplot, target_fig)
+
+        # Verification: with target figure, new plot will be plotted on the same one
+        if target_fig is not None:
+            self.assertEqual(target_fig, test_fig)
+
+        # Check lines plotted
+        plotted_lines = test_fig.gca().get_legend().get_lines()
+
+        # number of plotted lines must be equal to expected values
+        self.assertEqual(len(expected_labels), len(plotted_lines))
+        # check legend labels
+        for label_part, line in zip(expected_labels, plotted_lines):
+            if label_part is not None:
+                self.assertTrue(label_part in line.get_label())
 
     def _compare_errorbar_labels_and_title(self):
         ws = self._test_ws

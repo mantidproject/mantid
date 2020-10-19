@@ -28,7 +28,6 @@ if(CXXTEST_FOUND)
   target_include_directories(${_pythoninterface_test_target_name} PUBLIC ${CMAKE_BINARY_DIR}/Framework/Types)
   target_link_libraries(${_pythoninterface_test_target_name}
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         API
                         Geometry
                         Kernel

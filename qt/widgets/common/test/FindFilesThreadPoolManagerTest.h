@@ -57,7 +57,7 @@ public:
     poolManager.createWorker(widget, parameters);
     // Block and wait for all the threads to process
     poolManager.waitForDone();
-    QCoreApplication::processEvents();
+    QCoreApplication::sendPostedEvents();
 
     // Assert
     const auto results = widget->getResults();
@@ -115,7 +115,7 @@ public:
 
     // Block and wait for all the threads to process
     poolManager.waitForDone();
-    QCoreApplication::processEvents();
+    QCoreApplication::sendPostedEvents();
 
     // Assert
     const auto results = widget.getResults();

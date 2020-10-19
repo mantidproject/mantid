@@ -20,7 +20,6 @@ if(CXXTEST_FOUND)
   target_compile_definitions(GeometryTest PRIVATE -D_SILENCE_FPOS_SEEKPOS_DEPRECATION_WARNING)
   target_link_libraries(GeometryTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         Geometry
                         Beamline
                         Types

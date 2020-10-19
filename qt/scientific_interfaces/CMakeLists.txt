@@ -88,7 +88,6 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ../../Framework/TestHelpers/src/ScopedFileHelper.cpp
                    ../../Framework/TestHelpers/src/TearDownWorld.cpp
                  LINK_LIBS
-                   ${TCMALLOC_LIBRARIES_LINKTIME}
                    ${CORE_MANTIDLIBS}
                    DataObjects
                    PythonInterfaceCore
@@ -150,7 +149,6 @@ mtd_add_qt_tests(TARGET_NAME MantidQtScientificInterfacesTest
                    ../../Framework/TestHelpers/src/ScopedFileHelper.cpp
                    ../../Framework/TestHelpers/src/TearDownWorld.cpp
                  LINK_LIBS
-                   ${TCMALLOC_LIBRARIES_LINKTIME}
                    ${CORE_MANTIDLIBS}
                    DataObjects
                    PythonInterfaceCore

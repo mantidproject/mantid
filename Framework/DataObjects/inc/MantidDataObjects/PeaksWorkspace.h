@@ -6,24 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "MantidAPI/Column.h"
-#include "MantidAPI/ExperimentInfo.h"
 #include "MantidAPI/IPeaksWorkspace.h"
-#include "MantidAPI/TableRow.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidDataObjects/DllConfig.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeakColumn.h"
-#include "MantidDataObjects/TableWorkspace.h"
-#include "MantidGeometry/Instrument.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/Exception.h"
-#include "MantidKernel/Logger.h"
-#include "MantidKernel/Matrix.h"
-#include "MantidKernel/System.h"
+#include "MantidGeometry/Crystal/IPeak.h"
+#include "MantidKernel/SpecialCoordinateSystem.h"
 #include "MantidKernel/V3D.h"
-#include <boost/optional.hpp>
-#include <string>
-#include <utility>
-#include <vector>
 
 // IsamplePosition should be IsampleOrientation
 namespace Mantid {
@@ -43,12 +33,17 @@ namespace DataObjects {
     @author Ruth Mikkelson, SNS ORNL
     @date 3/10/2010
  */
-class DLLExport PeaksWorkspace : public Mantid::API::IPeaksWorkspace {
+class MANTID_DATAOBJECTS_DLL PeaksWorkspace
+    : public Mantid::API::IPeaksWorkspace {
+public:
+  using ColumnAndDirection = std::pair<std::string, bool>;
+
 public:
   const std::string id() const override { return "PeaksWorkspace"; }
 
   PeaksWorkspace();
   PeaksWorkspace &operator=(const PeaksWorkspace &other) = delete;
+
   /** Get access to shared pointer containing workspace porperties. This
    function is there to provide common interface of iTableWorkspace
     * Despite it is non-constant method, one should be very carefull using it to

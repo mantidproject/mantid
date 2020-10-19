@@ -12,7 +12,7 @@ set(PYQT4_SIP_VERSION_STR "4.19.7" CACHE STRING "sip version string" FORCE)
 ExternalProject_Add(extern-pyqt4-sip
   PREFIX ${_SIP_PYQT_DIR}/sip
   INSTALL_DIR ${_SIP_PYQT_INSTALL_DIR}
-  URL https://www.riverbankcomputing.com/static/Downloads/sip/4.19.7/sip-4.19.7.tar.gz
+  URL https://sourceforge.net/projects/pyqt/files/sip/sip-4.19.7/sip-4.19.7.tar.gz/download
   URL_HASH MD5=ae4f2db79713046d61b2a44e5ee1e3ab
   CONFIGURE_COMMAND "${Python_EXECUTABLE}" "<SOURCE_DIR>/configure.py"
     --sip-module=PyQt4.sip

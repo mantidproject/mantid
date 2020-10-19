@@ -50,7 +50,6 @@ target_include_directories(RemoteJobManagers PRIVATE ${OPENSSL_INCLUDE_DIR})
 
 target_link_libraries(RemoteJobManagers
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${GSL_LIBRARIES})
 

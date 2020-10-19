@@ -54,11 +54,12 @@ class MuonGroup(object):
     - The workspace associated to the group can be set, but must be of type MuonWorkspaceWrapper.
     """
 
-    def __init__(self, group_name, detector_ids=[]):
+    def __init__(self, group_name, detector_ids=(1,), periods=(1,)):
 
         self._group_name = group_name
         self._detector_ids = None
-        self.detectors = detector_ids
+        self._periods = list(periods)
+        self.detectors = list(detector_ids)
         self._counts_workspace = {}
         self._asymmetry_estimate = {}
         self._counts_workspace_rebin = {}
@@ -77,6 +78,16 @@ class MuonGroup(object):
         else:
             raise AttributeError("Attempting to set workspace to type " + str(
                 type(new_workspace)) + " but should be MuonWorkspaceWrapper")
+
+    """
+    Returns the name of the counts workspace for a given run
+    if the workspace does not exist will raise a KeyError
+    """
+    def get_counts_workspace_for_run(self, run, rebin):
+        if rebin:
+            return self._counts_workspace_rebin[MuonRun(run)].workspace_name
+        else:
+            return self._counts_workspace[MuonRun(run)].workspace_name
 
     @property
     def name(self):
@@ -107,6 +118,14 @@ class MuonGroup(object):
                 raise AttributeError("MuonGroup : detectors must be a list of ints.")
         else:
             raise ValueError("detectors must be a list of ints.")
+
+    @property
+    def periods(self):
+        return self._periods
+
+    @periods.setter
+    def periods(self, value):
+        self._periods = value
 
     def show_raw(self, run: List[int], name: str, asym_name: str, asym_name_unnorm: str):
         run_object = MuonRun(run)

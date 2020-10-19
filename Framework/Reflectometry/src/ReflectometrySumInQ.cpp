@@ -8,6 +8,7 @@
 
 #include "MantidAPI/Algorithm.tcc"
 #include "MantidAPI/InstrumentValidator.h"
+#include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -509,13 +510,14 @@ ReflectometrySumInQ::referenceAngles(const API::SpectrumInfo &spectrumInfo) {
   Angles a;
   const double beamCentre = getProperty(Prop::BEAM_CENTRE);
   const bool isFlat = getProperty(Prop::IS_FLAT_SAMPLE);
+  const double twoTheta = centreTwoTheta(beamCentre, spectrumInfo);
+  a.referenceWSIndex = static_cast<size_t>(beamCentre);
+  a.twoTheta = twoTheta;
   if (isFlat) {
-    a.horizon = centreTwoTheta(beamCentre, spectrumInfo) / 2.;
+    a.horizon = twoTheta / 2.;
   } else {
     a.horizon = 0.;
   }
-  a.referenceWSIndex = static_cast<size_t>(beamCentre);
-  a.twoTheta = spectrumInfo.twoTheta(a.referenceWSIndex);
   a.delta = a.twoTheta - a.horizon;
   return a;
 }

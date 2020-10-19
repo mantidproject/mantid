@@ -1013,6 +1013,176 @@ public:
          {"DegreeOfPolynomial", "2"}});
   }
 
+  void test_history_for_sum_in_lambda() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "3+4");
+    alg.setChild(false); // required to get history
+    alg.execute();
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS, {"GroupDetectors", "ConvertUnits",
+                                     "CropWorkspace", "ConvertUnits"});
+  }
+
+  void test_history_for_sum_in_lambda_with_angle_correction() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "3+4");
+    alg.setProperty("ThetaIn", 22.0);
+    alg.setChild(false); // required to get history
+    alg.execute();
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("IvsQ"));
+    // Uses RefRoi instead of ConvertUnits
+    checkWorkspaceHistory(outputWS, {"GroupDetectors", "ConvertUnits",
+                                     "CropWorkspace", "RefRoi"});
+  }
+
+  void test_history_for_sum_in_lambda_with_monitor_normalisation() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmMonitorCorrection(alg, 1.5, 15.0, "3+4", m_multiDetectorWS,
+                                    false);
+    alg.setChild(false); // required to get history
+    alg.execute();
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS,
+                          {"GroupDetectors", "ConvertUnits", "CropWorkspace",
+                           "ConvertUnits", "CalculateFlatBackground",
+                           "RebinToWorkspace", "Divide", "CropWorkspace",
+                           "ConvertUnits"});
+  }
+
+  void test_history_for_sum_in_lambda_with_transmission_normalisation() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3+4",
+                                         m_multiDetectorWS, false);
+    alg.setChild(false); // required to get history
+    alg.execute();
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS,
+                          {"GroupDetectors", "ConvertUnits", "CropWorkspace",
+                           "CreateTransmissionWorkspace", "RebinToWorkspace",
+                           "Divide", "ConvertUnits"});
+  }
+
+  void test_history_for_sum_in_q() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "3+4");
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 22.0);
+    alg.setChild(false); // required to get history
+    alg.execute();
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS,
+                          {"ConvertUnits", "CropWorkspace", "ConvertUnits"});
+  }
+
+  void test_history_for_sum_in_q_with_monitor_normalisation() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmMonitorCorrection(alg, 1.5, 15.0, "3+4", m_multiDetectorWS,
+                                    false);
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 22.0);
+    alg.setChild(false); // required to get history
+    alg.execute();
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS,
+                          {"ConvertUnits", "CropWorkspace", "ConvertUnits",
+                           "CalculateFlatBackground", "RebinToWorkspace",
+                           "Divide", "CropWorkspace", "ConvertUnits"});
+  }
+
+  void test_history_for_sum_in_q_with_transmission_normalisation() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3+4",
+                                         m_multiDetectorWS, false);
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.setProperty("ThetaIn", 22.0);
+    alg.setChild(false); // required to get history
+    alg.execute();
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS,
+                          {"ConvertUnits", "CreateTransmissionWorkspace",
+                           "RebinToWorkspace", "Divide", "CropWorkspace",
+                           "ConvertUnits"});
+  }
+
+  void test_IvsQ_is_not_distribution_data() {
+    // This may not be correct but this behaviour is historic - the output is
+    // not distribution data if the input is not distribution
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "3+4");
+    alg.execute();
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outQ->isDistribution(), false);
+  }
+
+  void test_IvsQ_is_not_distribution_data_when_angle_correction_is_done() {
+    // This may not be correct but this behaviour is historic - the output is
+    // not distribution data if the input is not distribution. Similar to above
+    // but also check the special case where angle correction is done with
+    // RefRoi
+    ReflectometryReductionOne2 alg;
+    setupAlgorithm(alg, 1.5, 15.0, "3+4");
+    alg.setProperty("ThetaIn", 22.0);
+    alg.execute();
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outQ->isDistribution(), false);
+  }
+
+  void test_IvsQ_is_distribution_data_if_input_is_distribution() {
+    ReflectometryReductionOne2 alg;
+    auto inputWS = MatrixWorkspace_sptr(m_multiDetectorWS->clone());
+    inputWS->setDistribution(true);
+    setupAlgorithm(alg, 1.5, 15.0, "3+4");
+    alg.setProperty("InputWorkspace", inputWS);
+    alg.execute();
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outQ->isDistribution(), true);
+  }
+
+  void test_IvsQ_is_distribution_data_if_normalised_by_monitor() {
+    // Monitor correction causes the divided workspace to become
+    // distribution data therefore the output is also distribution
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmMonitorCorrection(alg, 1.5, 15.0, "3+4", m_multiDetectorWS,
+                                    false);
+    alg.execute();
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outQ->isDistribution(), true);
+  }
+
+  void test_IvsQ_is_distribution_data_if_normalised_by_transmission() {
+    // Transmission correction causes the divided workspace to become
+    // distribution data therefore the output is also distribution
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmTransmissionCorrection(alg, 1.5, 15.0, "3+4",
+                                         m_multiDetectorWS, false);
+    alg.execute();
+    MatrixWorkspace_sptr outQ = alg.getProperty("OutputWorkspace");
+    TS_ASSERT_EQUALS(outQ->isDistribution(), true);
+  }
+
+  void test_subtract_background_sum_in_q() {
+    ReflectometryReductionOne2 alg;
+    setupAlgorithmForBackgroundSubtraction(alg, m_multiDetectorWS);
+    alg.setProperty("SummationType", "SumInQ");
+    alg.setProperty("ReductionType", "DivergentBeam");
+    alg.execute();
+    auto outputWS = std::dynamic_pointer_cast<MatrixWorkspace>(
+        AnalysisDataService::Instance().retrieve("IvsQ"));
+    checkWorkspaceHistory(outputWS,
+                          {"ReflectometryBackgroundSubtraction", "ConvertUnits",
+                           "CropWorkspace", "ConvertUnits"});
+  }
+
 private:
   // Do standard algorithm setup
   void setupAlgorithm(ReflectometryReductionOne2 &alg,

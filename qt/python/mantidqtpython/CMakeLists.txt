@@ -91,7 +91,6 @@ mtd_add_sip_module(MODULE_NAME mantidqtpython
                      ../../../Framework/PythonInterface/core/inc
                    PYQT_VERSION 4
                    LINK_LIBS
-                     ${TCMALLOC_LIBRARIES_LINKTIME}
                      MantidQtWidgetsCommonQt4
                      MantidQtWidgetsPlottingQt4
                      MantidQtWidgetsSliceViewerQt4

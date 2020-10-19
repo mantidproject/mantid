@@ -70,7 +70,7 @@ target_include_directories(PythonGeometryModule PUBLIC inc)
 # Add the required dependencies
 target_link_libraries(
   PythonGeometryModule
-  PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  PRIVATE
           PythonInterfaceCore
           PythonKernelModule
           Geometry

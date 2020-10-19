@@ -116,6 +116,9 @@ public:
   /// Get a list of global parameters
   QStringList getGlobalParameters() const;
 
+  IFunction_sptr getSelectedFunction() override;
+  void showFunctionHelp(const QString &functionName) const override;
+
   /// Return the function
   Mantid::API::IFunction_sptr getFunction(QtProperty *prop = nullptr,
                                           bool attributesOnly = false);
@@ -253,9 +256,7 @@ protected slots:
   void removeConstraint();
   /// Update index of currently selected function
   void updateCurrentFunctionIndex();
-
   //   Property change slots
-
   /// Called when a function attribute property is changed
   void attributeChanged(QtProperty *);
   /// Called when a member of a vector attribute is changed
@@ -343,6 +344,8 @@ protected:
   QAction *m_actionRemoveConstraints;
   /// Remove one constraints from current parameter
   QAction *m_actionRemoveConstraint;
+  /// Show function help menu
+  QAction *m_actionFunctionHelp;
   /// Index of currently selected function. Gets updated in
   /// updateCurrentFunctionIndex()
   boost::optional<QString> m_currentFunctionIndex;

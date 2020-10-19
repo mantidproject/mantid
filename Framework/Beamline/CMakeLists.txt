@@ -52,7 +52,6 @@ target_link_libraries(Beamline
                       LINK_PUBLIC
                       Eigen3::Eigen
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${GSL_LIBRARIES}
                       Kernel
                       ${MANTIDLIBS})

@@ -12,7 +12,7 @@ from qtpy.QtWidgets import QApplication, QMessageBox, QVBoxLayout
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.kernel import logger
 from mantidqt.plotting import functions
-from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names
+from mantidqt.plotting.functions import can_overplot, pcolormesh, plot, plot_from_names, plot_md_ws_from_names
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import CreateDetectorTable
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback
@@ -23,6 +23,7 @@ from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDi
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacewidget.algorithmhistorywindow import AlgorithmHistoryWindow
 from mantidqt.widgets.workspacewidget.workspacetreewidget import WorkspaceTreeWidget
+from workbench.config import CONF
 from workbench.plugins.base import PluginWidget
 
 
@@ -42,6 +43,16 @@ class WorkspaceWidget(PluginWidget):
         # behaviour
         self.workspacewidget.plotSpectrumClicked.connect(
             partial(self._do_plot_spectrum, errors=False, overplot=False))
+
+        self.workspacewidget.plotMDHistoClicked.connect(
+            partial(self._do_plot_1d_md, errors=False, overplot=False))
+        self.workspacewidget.overplotMDHistoClicked.connect(
+            partial(self._do_plot_1d_md, errors=False, overplot=True))
+        self.workspacewidget.plotMDHistoWithErrorsClicked.connect(
+            partial(self._do_plot_1d_md, errors=True, overplot=False))
+        self.workspacewidget.overplotMDHistoWithErrorsClicked.connect(
+            partial(self._do_plot_1d_md, errors=True, overplot=True))
+
         self.workspacewidget.plotBinClicked.connect(
             partial(self._do_plot_bin, errors=False, overplot=False))
         self.workspacewidget.overplotSpectrumClicked.connect(
@@ -102,6 +113,26 @@ class WorkspaceWidget(PluginWidget):
                 return
         try:
             plot_from_names(names, errors, overplot, advanced=advanced)
+        except RuntimeError as re:
+            logger.error(str(re))
+
+    def _do_plot_1d_md(self, names, errors, overplot):
+        """
+        Plot 1D IMDHistoWorlspaces
+
+        :param names: list of workspace names
+        :param errors: boolean.  if true, the error bar will be plotted
+        :param overplot: boolean.  If true, then add these plots to the current figure if one exists
+                                   and it is a compatible figure
+        :return:
+        """
+        if overplot:
+            compatible, error_msg = can_overplot()
+            if not compatible:
+                QMessageBox.warning(self, "", error_msg)
+                return
+        try:
+            plot_md_ws_from_names(names, errors, overplot)
         except RuntimeError as re:
             logger.error(str(re))
 
@@ -178,7 +209,7 @@ class WorkspaceWidget(PluginWidget):
         """
         for ws in self._ads.retrieveWorkspaces(names, unrollGroups=True):
             try:
-                presenter = SliceViewer(ws=ws, parent=self)
+                presenter = SliceViewer(ws=ws, parent=self, conf=CONF)
                 presenter.view.show()
             except Exception as exception:
                 logger.warning("Could not open slice viewer for workspace '{}'."

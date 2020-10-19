@@ -150,17 +150,15 @@ class TableWorkspaceDisplayModel:
         from mantid.simpleapi import SortPeaksWorkspace, SortTableWorkspace
         column_name = self.ws.getColumnNames()[column_index]
         if self.is_peaks_workspace():
-            SortPeaksWorkspace(
-                InputWorkspace=self.ws,
-                OutputWorkspace=self.ws,
-                ColumnNameToSortBy=column_name,
-                SortAscending=sort_ascending)
+            SortPeaksWorkspace(InputWorkspace=self.ws,
+                               OutputWorkspace=self.ws,
+                               ColumnNameToSortBy=column_name,
+                               SortAscending=sort_ascending)
         else:
-            SortTableWorkspace(
-                InputWorkspace=self.ws,
-                OutputWorkspace=self.ws,
-                Columns=column_name,
-                Ascending=sort_ascending)
+            SortTableWorkspace(InputWorkspace=self.ws,
+                               OutputWorkspace=self.ws,
+                               Columns=column_name,
+                               Ascending=sort_ascending)
 
     def set_column_type(self, col, type, linked_col_index=-1):
         self.ws.setPlotType(col, type, linked_col_index)

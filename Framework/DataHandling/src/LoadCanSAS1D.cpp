@@ -47,6 +47,29 @@ int getGeometryID(const std::string &selection) {
   }
   return geometryID;
 }
+
+/** Set a log value on the given run from the given element value, if the
+ * element has the given name
+ *
+ * @param searchName : the element name to check against
+ * @param elem : the element
+ * @param run : the run to update the logs for
+ * @param logName : the name of the log to update
+ */
+bool setLogFromElementIfNameIs(std::string const &searchName, Element *elem,
+                               Run &run, std::string const &logName) {
+  if (!elem)
+    return false;
+
+  const std::string termName = elem->getAttribute("name");
+  if (termName == searchName) {
+    std::string file = elem->innerText();
+    run.addLogData(new PropertyWithValue<std::string>(logName, file));
+    return true;
+  }
+
+  return false;
+}
 } // namespace
 
 namespace Mantid {
@@ -338,6 +361,7 @@ void LoadCanSAS1D::runLoadInstrument(
         "Unable to successfully run LoadInstrument Child Algorithm");
   }
 }
+
 /** Loads data into the run log
  *  @param[in] sasEntry the entry corresponding to the passed workspace
  *  @param[in] wSpace the log will be created in this workspace
@@ -353,17 +377,18 @@ void LoadCanSAS1D::createLogs(const Poco::XML::Element *const sasEntry,
   Element *process = sasEntry->getChildElement("SASprocess");
   if (process) {
     Poco::AutoPtr<NodeList> terms = process->getElementsByTagName("term");
-    for (unsigned int i = 0; i < terms->length(); ++i) {
+    auto setUserFile = false;
+    auto setBatchFile = false;
+    for (unsigned int i = 0;
+         i < terms->length() && (!setUserFile || !setBatchFile); ++i) {
       Node *term = terms->item(i);
       auto *elem = dynamic_cast<Element *>(term);
-      if (elem) {
-        const std::string termName = elem->getAttribute("name");
-        if (termName == "user_file") {
-          std::string file = elem->innerText();
-          run.addLogData(new PropertyWithValue<std::string>("UserFile", file));
-          break;
-        }
-      }
+      if (!setUserFile &&
+          setLogFromElementIfNameIs("user_file", elem, run, "UserFile"))
+        setUserFile = true;
+      else if (!setBatchFile &&
+               setLogFromElementIfNameIs("batch_file", elem, run, "BatchFile"))
+        setBatchFile = true;
     }
   }
 }

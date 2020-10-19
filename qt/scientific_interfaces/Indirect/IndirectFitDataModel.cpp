@@ -205,11 +205,15 @@ void IndirectFitDataModel::addWorkspace(const std::string &workspaceName,
 
 void IndirectFitDataModel::addWorkspace(
     Mantid::API::MatrixWorkspace_sptr workspace, const Spectra &spectra) {
-  if (!m_fittingData->empty() &&
-      equivalentWorkspaces(workspace, m_fittingData->back().workspace()))
-    m_fittingData->back().combine(IndirectFitData(workspace, spectra));
-  else
-    addNewWorkspace(workspace, spectra);
+  if (!m_fittingData->empty()) {
+    for (auto i : *m_fittingData) {
+      if (equivalentWorkspaces(workspace, i.workspace())) {
+        i.combine(IndirectFitData(workspace, spectra));
+        return;
+      }
+    }
+  }
+  addNewWorkspace(workspace, spectra);
 }
 
 FitDomainIndex
@@ -306,9 +310,13 @@ void IndirectFitDataModel::removeWorkspace(TableDatasetIndex index) {
 
 void IndirectFitDataModel::removeDataByIndex(FitDomainIndex fitDomainIndex) {
   auto subIndices = getSubIndices(fitDomainIndex);
-  m_fittingData->at(subIndices.first.value)
-      .getMutableSpectra()
-      .erase(subIndices.second);
+  auto &spectra = m_fittingData->at(subIndices.first.value).getMutableSpectra();
+  spectra.erase(subIndices.second);
+  // If the spectra list corresponding to a workspace is empty, remove workspace
+  // at this index, else we'll have a workspace persist with no spectra loaded.
+  if (spectra.empty()) {
+    removeWorkspace(subIndices.first.value);
+  }
 }
 
 void IndirectFitDataModel::switchToSingleInputMode() {

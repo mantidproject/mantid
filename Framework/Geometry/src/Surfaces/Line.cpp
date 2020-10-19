@@ -25,14 +25,14 @@ using Kernel::Tolerance;
 using Kernel::V3D;
 
 Line::Line()
-    : Origin(), Direct()
+    : m_origin(), m_direction()
 /**
 Constructor
 */
 {}
 
 Line::Line(const Kernel::V3D &O, const Kernel::V3D &D)
-    : Origin(O), Direct(normalize(D))
+    : m_origin(O), m_direction(normalize(D))
 /**
 Constructor
 */
@@ -54,7 +54,7 @@ Return the point on the line given lambda*direction
 @return \f$ \vec{O}+ \lambda \vec{D} \f$
 */
 {
-  return Origin + Direct * lambda;
+  return m_origin + m_direction * lambda;
 }
 
 double Line::distance(const Kernel::V3D &A) const
@@ -64,7 +64,7 @@ Distance of a point from the line
 @return absolute distance (not signed)
 */
 {
-  const double lambda = Direct.scalar_prod(A - Origin);
+  const double lambda = m_direction.scalar_prod(A - m_origin);
   Kernel::V3D L = getPoint(lambda);
   L -= A;
   return L.norm();
@@ -89,9 +89,9 @@ object.
 @param MA :: Rotation Matrix
 */
 {
-  Origin.rotate(MA);
-  Direct.rotate(MA);
-  Direct.normalize();
+  m_origin.rotate(MA);
+  m_direction.rotate(MA);
+  m_direction.normalize();
 }
 
 void Line::displace(const Kernel::V3D &Pt)
@@ -100,7 +100,7 @@ Apply a displacement Pt
 @param Pt :: Point value of the displacement
 */
 {
-  Origin += Pt;
+  m_origin += Pt;
 }
 
 int Line::lambdaPair(
@@ -165,8 +165,8 @@ added. It does not check the points for validity.
 */
 {
   const std::vector<double> &BN = Sur.copyBaseEqn();
-  const double a(Origin[0]), b(Origin[1]), c(Origin[2]);
-  const double d(Direct[0]), e(Direct[1]), f(Direct[2]);
+  const double a(m_origin[0]), b(m_origin[1]), c(m_origin[2]);
+  const double d(m_direction[0]), e(m_direction[1]), f(m_direction[2]);
   double Coef[3];
   Coef[0] = BN[0] * d * d + BN[1] * e * e + BN[2] * f * f + BN[3] * d * e +
             BN[4] * d * f + BN[5] * e * f;
@@ -194,8 +194,8 @@ added. It does not check the points for validity.
 */
 {
 
-  const double OdotN = Origin.scalar_prod(Pln.getNormal());
-  const double DdotN = Direct.scalar_prod(Pln.getNormal());
+  const double OdotN = m_origin.scalar_prod(Pln.getNormal());
+  const double DdotN = m_direction.scalar_prod(Pln.getNormal());
   if (fabs(DdotN) < Tolerance) // Plane and line parallel
     return 0;
   const double u = (Pln.getDistance() - OdotN) / DdotN;
@@ -217,15 +217,15 @@ added. It does not check the points for validity.
 */
 {
   const Kernel::V3D Cent = Cyl.getCentre();
-  const Kernel::V3D Ax = Origin - Cent;
+  const Kernel::V3D Ax = m_origin - Cent;
   const Kernel::V3D N = Cyl.getNormal();
   const double R = Cyl.getRadius();
-  const double vDn = N.scalar_prod(Direct);
+  const double vDn = N.scalar_prod(m_direction);
   const double vDA = N.scalar_prod(Ax);
   // First solve the equation of intersection
   double C[3];
   C[0] = 1.0 - (vDn * vDn);
-  C[1] = 2.0 * (Ax.scalar_prod(Direct) - vDA * vDn);
+  C[1] = 2.0 * (Ax.scalar_prod(m_direction) - vDA * vDn);
   C[2] = Ax.scalar_prod(Ax) - (R * R + vDA * vDA);
   std::pair<std::complex<double>, std::complex<double>> SQ;
   const int ix = solveQuadratic(C, SQ);
@@ -245,12 +245,12 @@ added. It does not check the points for validity.
 */
 {
   // Nasty stripping of useful stuff from sphere
-  const Kernel::V3D Ax = Origin - Sph.getCentre();
+  const Kernel::V3D Ax = m_origin - Sph.getCentre();
   const double R = Sph.getRadius();
   // First solve the equation of intersection
   double C[3];
   C[0] = 1;
-  C[1] = 2.0 * Ax.scalar_prod(Direct);
+  C[1] = 2.0 * Ax.scalar_prod(m_direction);
   C[2] = Ax.scalar_prod(Ax) - R * R;
   std::pair<std::complex<double>, std::complex<double>> SQ;
   const int ix = solveQuadratic(C, SQ);
@@ -270,8 +270,8 @@ sets the line given the Origne and direction
 {
   if (D.nullVector())
     return 0;
-  Origin = O;
-  Direct = normalize(D);
+  m_origin = O;
+  m_direction = normalize(D);
   return 1;
 }
 
@@ -280,7 +280,7 @@ void Line::print() const
 Print statement for debugging
 */
 {
-  logger.debug() << "Line == " << Origin << " :: " << Direct << '\n';
+  logger.debug() << "Line == " << m_origin << " :: " << m_direction << '\n';
 }
 
 } // namespace Geometry

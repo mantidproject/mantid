@@ -6,7 +6,6 @@ if(CXXTEST_FOUND)
   target_include_directories(NexusTest SYSTEM PRIVATE ${HDF5_INCLUDE_DIRS})
   target_link_libraries(NexusTest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         Nexus
                         ${NEXUS_LIBRARIES}

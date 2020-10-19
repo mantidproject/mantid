@@ -24,6 +24,7 @@ public:
     LoadLiveDataWorkspace,
     RenameWorkspace,
     DeleteWorkspaces,
+    ClearWorkspaces,
     GroupWorkspaces,
     UngroupWorkspaces,
     SortWorkspaces,

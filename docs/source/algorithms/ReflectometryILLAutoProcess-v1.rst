@@ -5,7 +5,7 @@
 Description
 -----------
 
-This algorithm executes the full data reduction for ILL reflectometers D17 and FIGARO in TOF mode (specular reflection).
+This algorithm executes the full data reduction for ILL reflectometers D17 and FIGARO in TOF mode (specular reflection) following [#Gutfreund]_.
 
 Input
 -----
@@ -111,13 +111,12 @@ Usage
 .. testoutput:: MultipleAngles
 
     The R(Q) workspace at first angle has 186 points
-    The R(Q) workspace at second angle has 98 points
-    The R(Q) workspace at second angle has 284 points
+    The R(Q) workspace at second angle has 94 points
+    The R(Q) workspace at second angle has 280 points
 
-**Example - Round Robin with 3 angle configurations and multiple numors summed**
+**Example - Full treatment with 3 angles and multiple numors summed**
 
-.. plot::
-   :include-source:
+.. code-block:: python
 
    from mantid.simpleapi import *
    config['default.facility'] = 'ILL'
@@ -169,7 +168,14 @@ Usage
    ax.set_xlabel('Q [$\AA^{-1}$]')
    ax.set_ylabel('R')
    ax.legend()
-   #fig.show()
+   fig.show()
+
+References
+----------
+
+.. [#Gutfreund] P. Gutfreund, T. Saerbeck, M. A. Gonzalez, E. Pellegrini, M. Laver, C. Dewhurst, R. Cubitt,
+            `Towards generalized data reduction on a chopper-based time-of-flight neutron reflectometer.`
+            `J. Appl. Cryst. (2018). 51, 606-615, <https://doi.org/10.1107/S160057671800448X>`_
 
 .. relatedalgorithms::
 

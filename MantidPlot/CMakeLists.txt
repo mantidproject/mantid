@@ -835,7 +835,6 @@ target_compile_options(
 target_link_libraries(
   MantidPlot
   LINK_PRIVATE
-  ${TCMALLOC_LIBRARIES_LINKTIME}
   ${CORE_MANTIDLIBS}
   PythonInterfaceCore
   MantidQtWidgetsCommonQt4

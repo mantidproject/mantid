@@ -52,5 +52,6 @@ class SANSLogTaggerTest(unittest.TestCase):
         self.assertTrue(has_hash(tag1, hashed_value_1, ws1))
         self.assertFalse(has_hash(tag1, hashed_value_2, ws1))
 
+
 if __name__ == '__main__':
     unittest.main()

@@ -16,10 +16,10 @@ set(
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/Row.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/RowLocation.h
   ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/JobTreeView.h
-  ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h)
+  ${COMMON_INC_DIR}/MantidQtWidgets/Common/Batch/JobTreeViewSignalAdapter.h
+  ${COMMON_INC_DIR}/MantidQtWidgets/Common/InstrumentSelector.h)
 
 list(APPEND common_link_libs
-            ${TCMALLOC_LIBRARIES_LINKTIME}
             ${CORE_MANTIDLIBS}
             ${POCO_LIBRARIES}
             PythonInterfaceCore)

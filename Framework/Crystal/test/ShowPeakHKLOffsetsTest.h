@@ -23,7 +23,6 @@ using Mantid::DataHandling::LoadNexusProcessed;
 using namespace Mantid::DataObjects;
 using Mantid::Crystal::LoadIsawUB;
 using Mantid::Crystal::ShowPeakHKLOffsets;
-using Mantid::DataObjects::TableWorkspace;
 
 class ShowPeakHKLOffsetsTest : public CxxTest::TestSuite {
 public:

@@ -29,7 +29,7 @@ class LoadRunWidgetPresenterLoadFailTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            QApplication.instance().processEvents()
+            QApplication.sendPostedEvents()
 
     def create_fake_workspace(self, name):
         workspace_mock = CreateSampleWorkspace(StoreInADS=False)

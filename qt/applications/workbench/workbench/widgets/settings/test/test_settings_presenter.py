@@ -103,3 +103,19 @@ class SettingsPresenterTest(TestCase):
         presenter.categories_settings.update_properties.assert_called_once_with()
         presenter.plot_settings.update_properties.assert_called_once_with()
         presenter.fitting_settings.update_properties.assert_called_once_with()
+
+    def test_register_change_needs_restart(self):
+        mock_view = MagicMock()
+        mock_model = MagicMock()
+        mock_parent = MagicMock()
+        presenter = SettingsPresenter(mock_parent, view=mock_view, model = mock_model,
+                                      general_settings=mock_view.general_settings,
+                                      categories_settings=mock_view.categories_settings,
+                                      plot_settings=mock_view.plot_settings,
+                                      fitting_settings=mock_view.fitting_settings)
+
+        settings_needing_restart = ["Setting one","Setting two"]
+        for setting in settings_needing_restart:
+            presenter.register_change_needs_restart(setting)
+        presenter.view_closing()
+        presenter.view.notify_changes_need_restart.assert_called_once_with(settings_needing_restart)

@@ -29,8 +29,6 @@ class BeamCentreModelTest(unittest.TestCase):
         self.assertEqual(self.beam_centre_model.lab_pos_2, '')
         self.assertEqual(self.beam_centre_model.hab_pos_2, '')
         self.assertEqual(self.beam_centre_model.hab_pos_1, '')
-        self.assertEqual(self.beam_centre_model.scale_1, 1000)
-        self.assertEqual(self.beam_centre_model.scale_2, 1000)
         self.assertEqual(self.beam_centre_model.COM, False)
         self.assertEqual(self.beam_centre_model.verbose, False)
         self.assertEqual(self.beam_centre_model.q_min, 0.01)
@@ -44,7 +42,6 @@ class BeamCentreModelTest(unittest.TestCase):
             self.beam_centre_model.reset_inst_defaults(instrument=inst)
             self.assertEqual(60, self.beam_centre_model.r_min)
             self.assertEqual(280, self.beam_centre_model.r_max)
-            self.assertEqual(1000, self.beam_centre_model.scale_1)
 
     def test_loq_values_updated(self):
         self.beam_centre_model.reset_inst_defaults(SANSInstrument.LOQ)
@@ -52,14 +49,8 @@ class BeamCentreModelTest(unittest.TestCase):
         self.assertEqual(216, self.beam_centre_model.r_max)
 
     def test_that_can_update_model_values(self):
-        self.beam_centre_model.scale_2 = 1.0
-
-        self.assertEqual(self.beam_centre_model.scale_2, 1.0)
-
-    def test_that_correct_values_are_set_for_LARMOR(self):
-        self.beam_centre_model.reset_inst_defaults(instrument=SANSInstrument.LARMOR)
-
-        self.assertEqual(self.beam_centre_model.scale_1, 1.0)
+        self.beam_centre_model.r_max = 1.0
+        self.assertEqual(self.beam_centre_model.r_max, 1.0)
 
     def test_that_find_beam_centre_calls_centre_finder_once_when_COM_is_False(self):
         state = mock.MagicMock()

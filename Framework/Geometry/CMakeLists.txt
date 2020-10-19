@@ -490,7 +490,6 @@ set_property(TARGET Geometry PROPERTY FOLDER "MantidFramework")
 
 target_link_libraries(Geometry
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${OPENGL_gl_LIBRARY}
                       ${OPENGL_glu_LIBRARY}

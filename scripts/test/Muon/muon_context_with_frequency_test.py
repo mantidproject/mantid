@@ -42,7 +42,7 @@ class MuonContextWithFrequencyTest(unittest.TestCase):
         self.data_context.current_runs = [[self.run_number]]
         self.data_context.update_current_data()
         self.group_pair_context.reset_group_and_pairs_to_default(self.load_result['OutputWorkspace'][0].workspace,
-                                                                 'EMU', '')
+                                                                 'EMU', '', 1)
 
     def tearDown(self):
         ConfigService['MantidOptions.InvisibleWorkspaces'] = 'False'

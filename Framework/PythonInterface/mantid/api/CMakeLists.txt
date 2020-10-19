@@ -82,6 +82,8 @@ set(EXPORT_FILES
     src/Exports/SpectrumInfoPythonIterator.cpp
     src/Exports/AnalysisDataServiceObserver.cpp
     src/Exports/Citation.cpp
+    src/Exports/IPreview.cpp
+    src/Exports/PreviewManager.cpp
 )
 
 set(MODULE_DEFINITION ${CMAKE_CURRENT_BINARY_DIR}/api.cpp)
@@ -131,7 +133,7 @@ target_include_directories(PythonAPIModule PUBLIC inc)
 # Add the required dependencies
 target_link_libraries(
   PythonAPIModule
-  PRIVATE ${TCMALLOC_LIBRARIES_LINKTIME}
+  PRIVATE
           PythonInterfaceCore
           PythonGeometryModule
           PythonKernelModule

@@ -34,8 +34,8 @@ the origin
 */
 class MANTID_GEOMETRY_DLL Plane : public Quadratic {
 private:
-  Kernel::V3D NormV; ///< Normal vector
-  double Dist;       ///< Distance
+  Kernel::V3D m_normVec; ///< Normal vector
+  double m_distance;     ///< Distance from origin
 
   std::size_t planeType() const; ///< are we alined on an axis
   Plane *doClone() const override;
@@ -63,9 +63,9 @@ public:
   double
   distance(const Kernel::V3D &) const override; ///< distance from a point
 
-  double getDistance() const { return Dist; } ///< Distance from origin
+  double getDistance() const { return m_distance; } ///< Distance from origin
   const Kernel::V3D &getNormal() const {
-    return NormV;
+    return m_normVec;
   } ///< Normal to plane (+ve surface)
 
   void rotate(const Kernel::Matrix<double> &) override;

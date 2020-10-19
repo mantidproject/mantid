@@ -38,6 +38,11 @@ class BatchCsvParserTest(unittest.TestCase):
             parser.parse_batch_file(batch_file_path)
         BatchCsvParserTest._remove_csv(batch_file_path)
 
+    def test_handles_unknown_data(self):
+        parser = BatchCsvParser()
+        with self.assertRaises(SyntaxError):
+            parser.parse_batch_file('LOQ74044.nxs')
+
     def test_raises_if_the_batch_file_uses_key_as_val(self):
         content = "# MANTID_BATCH_FILE add more text here\n" \
                    "sample_sans,sample_trans,74024,sample_direct_beam,74014,can_sans,74019,can_trans,74020," \

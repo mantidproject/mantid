@@ -16,7 +16,6 @@ matplotlib.use('Agg')  # noqa: E402
 # Mock out simpleapi to import expensive import of something we don't use anyway
 sys.modules['mantid.simpleapi'] = mock.MagicMock()  # noqa: E402
 
-import mantid.api
 from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE
 from mantidqt.widgets.sliceviewer.presenter import (PeaksViewerCollectionPresenter, SliceViewer)
 from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform
@@ -154,7 +153,7 @@ class SliceViewerTest(unittest.TestCase):
         presenter = SliceViewer(None, model=self.model, view=self.view)
         presenter.normalization_changed("By bin width")
         self.view.data_view.plot_matrix.assert_called_with(
-            self.model.get_ws(), normalize=mantid.api.MDNormalization.VolumeNormalization)
+            self.model.get_ws(), distribution=False)
 
     def peaks_button_disabled_if_model_cannot_support_it(self):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MATRIX)

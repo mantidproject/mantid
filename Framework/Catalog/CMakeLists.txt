@@ -55,7 +55,6 @@ target_include_directories(Catalog PUBLIC inc/)
 
 target_link_libraries(Catalog
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${OPENSSL_LIBRARIES}
                       ${JSONCPP_LIBRARIES})

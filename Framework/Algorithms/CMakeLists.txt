@@ -1,5 +1,6 @@
 set(SRC_FILES
     src/AbsorptionCorrection.cpp
+    src/AbsorptionCorrectionPaalmanPings.cpp
     src/AddAbsorptionWeightedPathLengths.cpp
     src/AddLogDerivative.cpp
     src/AddNote.cpp
@@ -263,6 +264,7 @@ set(SRC_FILES
     src/RunCombinationHelpers/RunCombinationHelper.cpp
     src/RunCombinationHelpers/SampleLogsBehaviour.cpp
     src/SANSCollimationLengthEstimator.cpp
+    src/SampleCorrections/CircularBeamProfile.cpp
     src/SampleCorrections/DetectorGridDefinition.cpp
     src/SampleCorrections/MCAbsorptionStrategy.cpp
     src/SampleCorrections/MCInteractionStatistics.cpp
@@ -326,6 +328,7 @@ set(SRC_FILES
 
 set(INC_FILES
     inc/MantidAlgorithms/AbsorptionCorrection.h
+    inc/MantidAlgorithms/AbsorptionCorrectionPaalmanPings.h
     inc/MantidAlgorithms/AddAbsorptionWeightedPathLengths.h
     inc/MantidAlgorithms/AddLogDerivative.h
     inc/MantidAlgorithms/AddNote.h
@@ -593,6 +596,7 @@ set(INC_FILES
     inc/MantidAlgorithms/RunCombinationHelpers/RunCombinationHelper.h
     inc/MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h
     inc/MantidAlgorithms/SANSCollimationLengthEstimator.h
+    inc/MantidAlgorithms/SampleCorrections/CircularBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/DetectorGridDefinition.h
     inc/MantidAlgorithms/SampleCorrections/IBeamProfile.h
     inc/MantidAlgorithms/SampleCorrections/IMCAbsorptionStrategy.h
@@ -671,6 +675,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 set(TEST_FILES
+    AbsorptionCorrectionPaalmanPingsTest.h
     AddAbsorptionWeightedPathLengthsTest.h
     AddLogDerivativeTest.h
     AddNoteTest.h
@@ -693,8 +698,8 @@ set(TEST_FILES
     CalculateCountRateTest.h
     CalculateDIFCTest.h
     CalculateDynamicRangeTest.h
-    CalculateEfficiencyTest.h
     CalculateEfficiency2Test.h
+    CalculateEfficiencyTest.h
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
     CalculatePlaczekSelfScatteringTest.h
@@ -711,6 +716,7 @@ set(TEST_FILES
     ChangeTimeZeroTest.h
     CheckWorkspacesMatchTest.h
     ChopDataTest.h
+    CircularBeamProfileTest.h
     ClearCacheTest.h
     ClearInstrumentParametersTest.h
     ClearMaskFlagTest.h
@@ -881,8 +887,8 @@ set(TEST_FILES
     OneMinusExponentialCorTest.h
     PDCalibrationTest.h
     PDDetermineCharacterizationsTest.h
-    PDFFourierTransformTest.h
     PDFFourierTransform2Test.h
+    PDFFourierTransformTest.h
     PaddingAndApodizationTest.h
     ParallaxCorrectionTest.h
     PauseTest.h
@@ -926,8 +932,8 @@ set(TEST_FILES
     ResizeRectangularDetectorTest.h
     RingProfileTest.h
     RunCombinationHelperTest.h
-    SampleLogsBehaviourTest.h
     SANSCollimationLengthEstimatorTest.h
+    SampleLogsBehaviourTest.h
     SassenaFFTTest.h
     ScaleTest.h
     ScaleXTest.h
@@ -1020,7 +1026,6 @@ include_directories(inc)
 target_include_directories(Algorithms SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(Algorithms
                       LINK_PRIVATE
-                      ${TCMALLOC_LIBRARIES_LINKTIME}
                       ${MANTIDLIBS}
                       ${GSL_LIBRARIES})
 

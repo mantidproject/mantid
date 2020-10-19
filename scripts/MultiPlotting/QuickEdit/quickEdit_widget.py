@@ -10,13 +10,32 @@ from MultiPlotting.QuickEdit.quickEdit_presenter import QuickEditPresenter
 
 class QuickEditWidget(object):
 
-    def __init__(self, parent=None):
-        view = QuickEditView(None, parent)
+    def __init__(self, parent=None, auto_btn = False):
+        view = QuickEditView(None, parent, auto_btn)
         self._presenter = QuickEditPresenter(view)
 
     @property
     def widget(self):
         return self._presenter.widget
+
+    @property
+    def autoscale(self):
+        return self._presenter.autoscale
+
+    def disable_yaxis_changer(self):
+        self._presenter.disable_yaxis_changer()
+
+    def enable_yaxis_changer(self):
+        self._presenter.enable_yaxis_changer()
+
+    def disable_autoscale(self):
+        self._presenter.disable_autoscale()
+
+    def enable_autoscale(self):
+        self._presenter.enable_autoscale()
+
+    def uncheck_autoscale(self):
+        self._presenter.uncheck_autoscale()
 
     """ connect statements"""
 

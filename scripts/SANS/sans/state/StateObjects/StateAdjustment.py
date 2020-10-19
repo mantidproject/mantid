@@ -13,6 +13,9 @@ import json
 
 from sans.common.enums import SANSFacility
 from sans.state.JsonSerializable import JsonSerializable
+from sans.state.StateObjects.StateCalculateTransmission import StateCalculateTransmission
+from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
+from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
 from sans.state.automatic_setters import automatic_setters
 
 
@@ -20,10 +23,12 @@ class StateAdjustment(metaclass=JsonSerializable):
 
     def __init__(self):
         super(StateAdjustment, self).__init__()
-        self.calculate_transmission = None  # : StateCalculateTransmission
-        self.normalize_to_monitor = None  # : StateNormalizeToMonitor
-        self.wavelength_and_pixel_adjustment = None  # : StateWavelengthAndPixelAdjustment
-        self.wide_angle_correction = False  # : Bool
+        self.calculate_transmission: StateCalculateTransmission = StateCalculateTransmission()
+        self.normalize_to_monitor: StateNormalizeToMonitor = StateNormalizeToMonitor()
+        self.wavelength_and_pixel_adjustment: StateWavelengthAndPixelAdjustment = StateWavelengthAndPixelAdjustment()
+        self.wide_angle_correction: bool = False
+
+        self.calibration = None  # : Str()
 
     def validate(self):
         is_invalid = {}

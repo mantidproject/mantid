@@ -141,12 +141,12 @@ std::string InstrumentFileFinder::getParameterPath(const std::string &instName,
     // find the first beat file
     const std::string result = lookupIPF(dirName, filename);
     if (!result.empty()) {
-      std::cout << "Found: " << result << '\n';
+      g_log.debug() << "Found: " << result << '\n';
       return result;
     }
   }
 
-  std::cout << "Found Nothing \n";
+  g_log.debug() << "Found Nothing \n";
   return "";
 }
 

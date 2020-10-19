@@ -10,9 +10,19 @@ import json
 
 from sans.common.enums import SANSFacility
 from sans.state.JsonSerializable import JsonSerializable
-from sans.state.StateObjects.StateCompatibility import get_compatibility_builder
+from sans.state.StateObjects.StateAdjustment import StateAdjustment
+from sans.state.StateObjects.StateCompatibility import get_compatibility_builder, StateCompatibility
 # Note that the compatibility state is not part of the new reduction chain, but allows us to accurately compare
 # results obtained via the old and new reduction chain
+from sans.state.StateObjects.StateConvertToQ import StateConvertToQ
+from sans.state.StateObjects.StateData import StateData
+from sans.state.StateObjects.StateMaskDetectors import StateMask
+from sans.state.StateObjects.StateMoveDetectors import StateMove
+from sans.state.StateObjects.StateReductionMode import StateReductionMode
+from sans.state.StateObjects.StateSave import StateSave
+from sans.state.StateObjects.StateScale import StateScale
+from sans.state.StateObjects.StateSliceEvent import StateSliceEvent
+from sans.state.StateObjects.StateWavelength import StateWavelength
 from sans.state.automatic_setters import automatic_setters
 
 
@@ -25,17 +35,17 @@ class AllStates(metaclass=JsonSerializable):
     def __init__(self):
 
         super(AllStates, self).__init__()
-        self.data = None  # : StateData
-        self.move = None  # : StateMove
-        self.reduction = None  # : StateReductionMode
-        self.slice = None  # : StateSliceEvent
-        self.mask = None  # : StateMask
-        self.wavelength = None  # : StateWavelength
-        self.save = None  # : StateSave
-        self.scale = None  # : StateScale
-        self.adjustment = None  # : StateAdjustment
-        self.convert_to_q = None  # : StateConvertToQ
-        self.compatibility = None  # : StateCompatibility
+        self.data : StateData = StateData()
+        self.move: StateMove = StateMove()
+        self.reduction: StateReductionMode = StateReductionMode()
+        self.slice: StateSliceEvent = StateSliceEvent()
+        self.mask: StateMask = StateMask()
+        self.wavelength: StateWavelength = StateWavelength()
+        self.save: StateSave = StateSave()
+        self.scale: StateScale = StateScale()
+        self.adjustment: StateAdjustment = StateAdjustment()
+        self.convert_to_q: StateConvertToQ = StateConvertToQ()
+        self.compatibility: StateCompatibility = StateCompatibility()
 
     def validate(self):
         is_invalid = dict()

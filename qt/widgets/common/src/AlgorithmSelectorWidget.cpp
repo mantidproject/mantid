@@ -276,7 +276,8 @@ void AlgorithmTreeWidget::update() {
   this->clear();
 
   using AlgNamesType = std::vector<AlgorithmDescriptor>;
-  AlgNamesType names = AlgorithmFactory::Instance().getDescriptors();
+  AlgNamesType names =
+      AlgorithmFactory::Instance().getDescriptors(false, false);
 
   // sort by category/name/version to fill QTreeWidget
   sort(names.begin(), names.end(), AlgorithmDescriptorLess);
@@ -349,7 +350,7 @@ void FindAlgComboBox::keyPressEvent(QKeyEvent *e) {
 /** Update the list of algos in the combo box */
 void FindAlgComboBox::update() {
   // include hidden categories in the combo list box
-  AlgNamesType names = AlgorithmFactory::Instance().getDescriptors(true);
+  AlgNamesType names = AlgorithmFactory::Instance().getDescriptors(true, false);
   addAliases(names);
 
   // sort by algorithm names only to fill this combobox

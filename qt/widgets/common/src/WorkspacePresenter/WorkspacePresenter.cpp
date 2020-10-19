@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/WorkspacePresenter/WorkspacePresenter.h"
 
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h"
 #include "MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h"
 
@@ -79,6 +80,9 @@ void WorkspacePresenter::notifyFromView(ViewNotifiable::Flag flag) {
     break;
   case ViewNotifiable::Flag::DeleteWorkspaces:
     deleteWorkspaces();
+    break;
+  case ViewNotifiable::Flag::ClearWorkspaces:
+    clearWorkspaces();
     break;
   case ViewNotifiable::Flag::SaveSingleWorkspace:
     saveSingleWorkspace();
@@ -261,6 +265,13 @@ void WorkspacePresenter::deleteWorkspaces() {
 
   if (deleteWs)
     m_view->deleteWorkspaces(selected);
+}
+
+void WorkspacePresenter::clearWorkspaces() {
+  if (m_view->clearWorkspacesConfirmation()) {
+    Mantid::API::AnalysisDataService::Instance().clear();
+    m_view->enableClearButton(false);
+  }
 }
 
 void WorkspacePresenter::saveSingleWorkspace() {

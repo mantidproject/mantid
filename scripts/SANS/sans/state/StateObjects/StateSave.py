@@ -19,12 +19,16 @@ class StateSave(metaclass=JsonSerializable):
     def __init__(self):
         super(StateSave, self).__init__()
         self.zero_free_correction = True  # : Bool
-        self.file_format = SaveType.NO_TYPE
+        self.file_format : SaveType = None
 
         # Settings for the output name
         self.user_specified_output_name = None  # : Str
         self.user_specified_output_name_suffix = None  # : Str()
         self.use_reduction_mode_as_suffix = None  # : Bool
+
+        # Settings for the main user file and batch file
+        self.user_file = None # : Str
+        self.batch_file = None # : Str
 
     def validate(self):
         pass

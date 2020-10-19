@@ -109,6 +109,12 @@ Group makeGroupWithTwoRows() {
           makeRowWithOutputNames({"IvsLam_2", "IvsQ_2", "IvsQ_binned_2"})});
 }
 
+Group makeGroupWithTwoRowsWithDifferentAngles() {
+  return Group("multi_angle_group",
+               std::vector<boost::optional<Row>>{makeRow("12345", 0.2),
+                                                 makeRow("12346", 0.9)});
+}
+
 Group makeGroupWithTwoRowsWithNonstandardNames() {
   return Group(
       "multi_row_group",

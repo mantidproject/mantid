@@ -90,6 +90,7 @@ private slots:
   void viewChangedGlobals(const QStringList &globalParameters);
   void editLocalParameter(const QString &parName);
   void editLocalParameterFinish(int result);
+  void viewRequestedFunctionHelp();
 
 private:
   void updateViewFromModel();

@@ -111,6 +111,10 @@ void export_Axis() {
            Axis_getValue((arg("self"), arg("index"), arg("vertical_index")),
                          "Returns the value at the given point on the Axis. "
                          "The vertical axis index [default=0]"))
+      .def("indexOfValue", &Axis::indexOfValue,
+           ((arg("self"), arg("value")),
+            return_value_policy<copy_const_reference>(),
+            "Returns the index of the given value on the Axis. "))
       .def("extractValues", &extractAxisValues, arg("self"),
            "Return a numpy array of the axis values")
       .def("indexOfValue", &Axis::indexOfValue, (arg("value")),

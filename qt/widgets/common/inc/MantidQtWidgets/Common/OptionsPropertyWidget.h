@@ -20,6 +20,7 @@ namespace API {
 
   @date 2012-02-17
 */
+
 class DLLExport OptionsPropertyWidget : public PropertyWidget {
   Q_OBJECT
 
@@ -40,6 +41,9 @@ protected:
 
   /// Combo box with the allowed options
   QComboBox *m_combo;
+
+public slots:
+  void editingFinished();
 };
 
 } // namespace API

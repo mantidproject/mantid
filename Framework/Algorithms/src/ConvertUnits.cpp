@@ -60,8 +60,8 @@ void ConvertUnits::init() {
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("EFixed", EMPTY_DBL(), mustBePositive,
-                  "Value of fixed energy in meV : EI (EMode=Direct) or EF "
-                  "(EMode=Indirect) . Must be\n"
+                  "Value of fixed energy in meV : EI (EMode='Direct') or EF "
+                  "(EMode='Indirect') . Must be\n"
                   "set if the target unit requires it (e.g. DeltaE)");
 
   declareProperty("AlignBins", false,
@@ -412,10 +412,15 @@ bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
 
   if (!spectrumInfo.isMonitor(wsIndex)) {
     // The scattering angle for this detector (in radians).
-    if (signedTheta)
-      twoTheta = spectrumInfo.signedTwoTheta(wsIndex);
-    else
-      twoTheta = spectrumInfo.twoTheta(wsIndex);
+    try {
+      if (signedTheta)
+        twoTheta = spectrumInfo.signedTwoTheta(wsIndex);
+      else
+        twoTheta = spectrumInfo.twoTheta(wsIndex);
+    } catch (const std::runtime_error &e) {
+      g_log.warning(e.what());
+      twoTheta = std::numeric_limits<double>::quiet_NaN();
+    }
     // If an indirect instrument, try getting Efixed from the geometry
     if (emode == 2 && efixed == EMPTY_DBL()) // indirect
     {

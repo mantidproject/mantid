@@ -9,7 +9,7 @@ import unittest
 from mantid.api import FunctionFactory, MultiDomainFunction
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
-from qtpy import QtWidgets
+from qtpy.QtWidgets import QApplication
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
@@ -38,7 +38,7 @@ def retrieve_combobox_info(combo_box):
 def wait_for_thread(thread_model):
     if thread_model:
         thread_model._thread.wait()
-        QtWidgets.QApplication.instance().processEvents()
+        QApplication.sendPostedEvents()
 
 
 def create_multi_domain_function(function_list):
@@ -512,7 +512,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         result = self.presenter.get_parameters_for_tf_function_calculation(fit_function)
 
         self.assertEqual(result, {'InputFunction': fit_function, 'WorkspaceList': [new_workspace_list[0]],
-                                  'Mode': 'Construct'})
+                                  'Mode': 'Construct', 'CopyTies': False})
 
     def test_get_parameters_for_tf_function_calculation_for_turning_mode_off(self):
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
@@ -523,7 +523,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         result = self.presenter.get_parameters_for_tf_function_calculation(fit_function)
 
         self.assertEqual(result, {'InputFunction': fit_function, 'WorkspaceList': [new_workspace_list[0]],
-                                  'Mode': 'Extract'})
+                                  'Mode': 'Extract', 'CopyTies': False})
 
     def test_handle_asymmetry_mode_changed_reverts_changed_and_shows_error_if_non_group_selected(self):
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',

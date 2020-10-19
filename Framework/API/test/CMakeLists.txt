@@ -22,7 +22,6 @@ if(CXXTEST_FOUND)
   endif()
   target_link_libraries(APITest
                         LINK_PRIVATE
-                        ${TCMALLOC_LIBRARIES_LINKTIME}
                         ${MANTIDLIBS}
                         ${BCRYPT}
                         Types

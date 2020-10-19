@@ -43,6 +43,7 @@ class ModestImage(mi.AxesImage):
 
     def __init__(self, *args, **kwargs):
         self._full_res = None
+        self.transpose = kwargs.pop('transpose', False)
         self._full_extent = kwargs.get('extent', None)
         super(ModestImage, self).__init__(*args, **kwargs)
         self.invalidate_cache()
@@ -97,15 +98,11 @@ class ModestImage(mi.AxesImage):
             extent = self._full_extent
 
             if extent is None:
-
                 self._pixel2world_cache = IDENTITY_TRANSFORM
 
             else:
-
                 self._pixel2world_cache = Affine2D()
-
                 self._pixel2world.translate(+0.5, +0.5)
-
                 self._pixel2world.scale((extent[1] - extent[0]) / self._full_res.shape[1],
                                         (extent[3] - extent[2]) / self._full_res.shape[0])
 
@@ -210,7 +207,7 @@ def main():
 def imshow(axes, X, cmap=None, norm=None, aspect=None,
            interpolation=None, alpha=None, vmin=None, vmax=None,
            origin=None, extent=None, shape=None, filternorm=1,
-           filterrad=4.0, imlim=None, resample=None, url=None, **kwargs):
+           filterrad=4.0, imlim=None, resample=None, url=None, transpose=None, **kwargs):
     """Similar to matplotlib's imshow command, but produces a ModestImage
 
     Unlike matplotlib version, must explicitly specify axes
@@ -222,7 +219,7 @@ def imshow(axes, X, cmap=None, norm=None, aspect=None,
     axes.set_aspect(aspect)
     im = ModestImage(axes, cmap=cmap, norm=norm, interpolation=interpolation,
                      origin=origin, extent=extent, filternorm=filternorm,
-                     filterrad=filterrad, resample=resample, **kwargs)
+                     filterrad=filterrad, resample=resample, transpose=transpose, **kwargs)
 
     im.set_data(X)
     im.set_alpha(alpha)
@@ -235,6 +232,11 @@ def imshow(axes, X, cmap=None, norm=None, aspect=None,
     # if norm is None and shape is None:
     #    im.set_clim(vmin, vmax)
     if vmin is not None or vmax is not None:
+        if norm is not None and isinstance(norm, mcolors.LogNorm):
+            if vmin <= 0:
+                vmin = 0.0001
+            if vmax <= 0:
+                vmax = 1
         im.set_clim(vmin, vmax)
     elif norm is None:
         im.autoscale_None()

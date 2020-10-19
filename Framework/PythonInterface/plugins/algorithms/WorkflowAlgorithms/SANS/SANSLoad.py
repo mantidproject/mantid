@@ -124,7 +124,8 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
         publish_to_ads = self.getProperty("PublishToCache").value
 
         data = state.data
-        progress = self._get_progress_for_file_loading(data)
+        state_adjustment = state.adjustment
+        progress = self._get_progress_for_file_loading(data, state_adjustment)
 
         # Get the correct SANSLoader from the SANSLoaderFactory
         load_factory = SANSLoadDataFactory()
@@ -132,7 +133,7 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
 
         workspaces, workspace_monitors = loader.execute(data_info=data, use_cached=use_cached,
                                                         publish_to_ads=publish_to_ads, progress=progress,
-                                                        parent_alg=self)
+                                                        parent_alg=self, adjustment_info=state.adjustment)
         progress.report("Loaded the data.")
 
         progress_move = Progress(self, start=0.8, end=1.0, nreports=2)
@@ -336,12 +337,12 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                                beam_coordinates=beam_coordinates, move_type=MoveTypes.INITIAL_MOVE,
                                workspace=workspace, is_transmission_workspace=is_trans)
 
-    def _get_progress_for_file_loading(self, data):
+    def _get_progress_for_file_loading(self, data, state_adjustment):
         # Get the number of workspaces which are to be loaded
         number_of_files_to_load = sum(x is not None for x in [data.sample_scatter, data.sample_transmission,
                                                               data.sample_direct, data.can_transmission,
                                                               data.can_transmission, data.can_direct,
-                                                              data.calibration])
+                                                              state_adjustment.calibration])
         progress_steps = number_of_files_to_load + 1
         # Check if there is a move operation to be performed
 

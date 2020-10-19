@@ -32,7 +32,6 @@ set_python_properties(PythonCurveFittingModule _curvefitting)
 target_link_libraries(
   PythonCurveFittingModule
   LINK_PRIVATE
-  ${TCMALLOC_LIBRARIES_LINKTIME}
   PythonInterfaceCore
   PythonAPIModule
   PythonGeometryModule

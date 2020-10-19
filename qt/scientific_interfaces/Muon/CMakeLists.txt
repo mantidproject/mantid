@@ -98,7 +98,6 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesMuon
                    DEFS IN_MANTIDQT_MUONINTERFACE
                    PRECOMPILED PrecompiledHeader.h
                    LINK_LIBS
-                     ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      ${POCO_LIBRARIES}
                      ${Boost_LIBRARIES}
@@ -186,7 +185,6 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesMuon
                    DEFS IN_MANTIDQT_MUONINTERFACE
                    PRECOMPILED PrecompiledHeader.h
                    LINK_LIBS
-                     ${TCMALLOC_LIBRARIES_LINKTIME}
                      ${CORE_MANTIDLIBS}
                      ${POCO_LIBRARIES}
                      ${Boost_LIBRARIES}

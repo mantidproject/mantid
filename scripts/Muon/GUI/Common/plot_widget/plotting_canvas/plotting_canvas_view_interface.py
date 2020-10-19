@@ -115,3 +115,15 @@ class PlottingCanvasViewInterface(metaclass=PlottingViewMeta):
     def get_axis_limits(self, axis_number):
         """Get the x and y limits if the specified axis"""
         pass
+
+    @abc.abstractmethod
+    def add_uncheck_autoscale_subscriber(self, observer):
+        pass
+
+    @abc.abstractmethod
+    def add_enable_autoscale_subscriber(self,observer):
+        pass
+
+    @abc.abstractmethod
+    def add_disable_autoscale_subscriber(self,observer):
+        pass

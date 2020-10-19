@@ -48,6 +48,8 @@ public:
   virtual bool isPromptDelete() const = 0;
   virtual bool deleteConfirmation() const = 0;
   virtual void deleteWorkspaces(const StringList &wsNames) = 0;
+  virtual bool clearWorkspacesConfirmation() const = 0;
+  virtual void enableClearButton(bool enable) = 0;
   virtual void clearView() = 0;
   virtual SortDirection getSortDirection() const = 0;
   virtual SortCriteria getSortCriteria() const = 0;

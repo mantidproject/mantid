@@ -14,6 +14,7 @@ input workspaces must be in Muon Nexus files, the names of which follow the
 rule: the filename must begin with at least 1 letter and followed by a
 number. The input property FirstRun must be set to the file name with
 the smallest number and the LastRun to the one with the highest number.
+Alternatively the input property WorkspaceNames can be set as a list of runs.
 
 The output workspace contains asymmetry as the Y values, and the selected
 log values for X. The log values can be chosen as the mean, minimum, maximum,
@@ -45,7 +46,7 @@ Usage
 
 .. include:: ../usagedata-note.txt
 
-**Example - Calculating asymmetry for a series of MUSR runs:**
+**Example - Calculating asymmetry for a series of MUSR runs using First and Last:**
 
 .. testcode:: ExSimple
 
@@ -64,6 +65,30 @@ Output:
 
    Y values (asymmetry): [ 0.14500665  0.136374    0.11987909]
    X values (sample magn. field): [ 1350.  1360.  1370.]
+   
+**Example - Calculating asymmetry for a series of MUSR runs using a range:**
+
+.. testcode:: ExSimpleRange
+
+   ws_list = ['MUSR00015195','MUSR00015189','MUSR00015192']
+
+   ws = PlotAsymmetryByLogValue(WorkspaceNames = ws_list,
+                                LogValue = 'sample_magn_field',
+                                TimeMin = 0.55,
+                                TimeMax = 12.0);
+
+   print("Y values (asymmetry): [ {:.7f}  {:.7f}  {:.7f} ]".format(
+       ws.readY(0)[0],ws.readY(0)[1],ws.readY(0)[2]))
+   print("X values (sample magn. field): [ {:.1f}  {:.1f}  {:.1f} ]".format(
+       ws.readX(0)[0],ws.readX(0)[1],ws.readX(0)[2]))
+	
+Output:
+
+.. testoutput:: ExSimpleRange
+  :options: +NORMALIZE_WHITESPACE
+  
+   Y values (asymmetry): [ 0.1450066  0.0929052  0.0652143 ]
+   X values (sample magn. field): [ 1350.0  1380.0  1410.0 ]
 
 **Example - Using both Red and Green periods:**
 
