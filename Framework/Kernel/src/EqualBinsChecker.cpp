@@ -8,6 +8,7 @@
 #include "MantidKernel/Logger.h"
 #include <cmath>
 #include <ostream>
+#include <sstream>
 #include <stdexcept>
 #include <vector>
 
@@ -76,10 +77,11 @@ std::string EqualBinsChecker::validate() const {
   for (size_t bin = 0; bin < xSize - 2; bin++) {
     const double diff = getDifference(bin, dx);
     if (diff > m_errorLevel) {
-      // return an actual error
-      g_log.error() << "dx=" << xData[bin + 1] - xData[bin] << ' ' << dx << ' '
-                    << bin << std::endl;
-      return "X axis must be linear (all bins must have the same width)";
+      std::stringstream errorStr;
+      errorStr << "X axis must be linear (all bins must have the same width) ";
+      errorStr << "dx=" << xData[bin + 1] - xData[bin] << " reference dx=" << dx
+               << " bin number=" << bin;
+      return errorStr.str();
     } else if (m_warn && diff > m_warningLevel) {
       // just warn the user
       printWarning = true;

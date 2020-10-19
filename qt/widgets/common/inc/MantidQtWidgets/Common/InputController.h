@@ -168,6 +168,10 @@ signals:
   void setSelection(const QRect & /*_t1*/);
   /// Rubber band selection is done
   void finishSelection(const QRect & /*_t1*/);
+  /// Copy the selected shapes.
+  void copySelectedShapes();
+  /// Paste previously copied shapes.
+  void pasteCopiedShapes();
 
 public slots:
   void startCreatingShape2D(const QString &type, const QColor &borderColor,

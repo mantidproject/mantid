@@ -60,8 +60,8 @@ void ConvertUnits::init() {
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0.0);
   declareProperty("EFixed", EMPTY_DBL(), mustBePositive,
-                  "Value of fixed energy in meV : EI (EMode=Direct) or EF "
-                  "(EMode=Indirect) . Must be\n"
+                  "Value of fixed energy in meV : EI (EMode='Direct') or EF "
+                  "(EMode='Indirect') . Must be\n"
                   "set if the target unit requires it (e.g. DeltaE)");
 
   declareProperty("AlignBins", false,

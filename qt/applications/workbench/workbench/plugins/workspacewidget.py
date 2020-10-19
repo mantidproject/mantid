@@ -46,6 +46,12 @@ class WorkspaceWidget(PluginWidget):
 
         self.workspacewidget.plotMDHistoClicked.connect(
             partial(self._do_plot_1d_md, errors=False, overplot=False))
+        self.workspacewidget.overplotMDHistoClicked.connect(
+            partial(self._do_plot_1d_md, errors=False, overplot=True))
+        self.workspacewidget.plotMDHistoWithErrorsClicked.connect(
+            partial(self._do_plot_1d_md, errors=True, overplot=False))
+        self.workspacewidget.overplotMDHistoWithErrorsClicked.connect(
+            partial(self._do_plot_1d_md, errors=True, overplot=True))
 
         self.workspacewidget.plotBinClicked.connect(
             partial(self._do_plot_bin, errors=False, overplot=False))
