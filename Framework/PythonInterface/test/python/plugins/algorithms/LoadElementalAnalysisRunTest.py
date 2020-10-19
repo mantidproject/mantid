@@ -6,20 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import unittest
-from mantid.simpleapi import LoadElementalAnalysisData, GroupWorkspaces
+from mantid.simpleapi import AlgorithmManager, LoadElementalAnalysisData
 
 class LoadElementalAnalysisRunTest(unittest.TestCase):
 
-    def set_up_alg(self):
-        run = 1
-        alg= LoadElementalAnalysisData(Run=run,
-                                  GroupWorkspace=run)
-        alg.initialize()
-
     def test_incorrect_run_number(self):
-        alg = self.set_up_alg()
+        alg = AlgorithmManager.create('LoadElementalAnalysisData')
+        alg.setChild(True)
+        alg.initialize()
+        alg.setProperty('Run', 1)
+        alg.setProperty('GroupWorkspace', '1')
         errors = alg.validateInputs()
-        self.assertTrue("Cannot find files for run" in errors)
+        self.assertTrue("Run" in errors)
         self.assertEquals(len(errors), 1)
 
 if __name__ == '__main__':
