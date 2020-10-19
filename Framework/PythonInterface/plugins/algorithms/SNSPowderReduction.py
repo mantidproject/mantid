@@ -424,7 +424,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             # process the container
             can_run_numbers = self._info["container"].value
             can_run_numbers = ['%s_%d' % (self._instrument, value) for value in can_run_numbers]
-            can_run_ws_name = self._process_container_runs(can_run_numbers, samRunIndex, preserveEvents, absorptionWksp=a_sample)
+            can_run_ws_name = self._process_container_runs(can_run_numbers, samRunIndex, preserveEvents, absorptionWksp=a_container)
             if can_run_ws_name is not None:
                 workspacelist.append(can_run_ws_name)
 
