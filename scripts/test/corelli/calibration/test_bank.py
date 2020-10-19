@@ -6,15 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import numpy as np
-from numpy.testing import assert_equal
+from numpy.testing import assert_equal, assert_allclose
 from os import path
 import unittest
 
 # Mantid imports
-from corelli.calibration.bank import (calibrate_bank, calibrate_banks, criterium_peak_pixel_position, fit_bank,
-                                      mask_bank, purge_table, sufficient_intensity)
 from mantid import AnalysisDataService, config, mtd
 from mantid.simpleapi import DeleteWorkspaces, LoadNexusProcessed
+
+from corelli.calibration.bank import (calibrate_bank, calibrate_banks, collect_bank_fit_results,
+                                      criterium_peak_pixel_position, fit_bank, mask_bank, purge_table,
+                                      sufficient_intensity)
+from corelli.calibration.utils import TUBES_IN_BANK
 
 
 class TestBank(unittest.TestCase):
@@ -58,7 +61,7 @@ class TestBank(unittest.TestCase):
         cls.assert_missing_tube = assert_missing_tube
 
     @classmethod
-    def tearDown(cls) -> None:
+    def tearDownClass(cls) -> None:
         r"""Delete the workspaces associated to the test cases"""
         DeleteWorkspaces(list(cls.cases.values()))
 
@@ -67,11 +70,10 @@ class TestBank(unittest.TestCase):
         assert sufficient_intensity(self.cases['123455_bank20'], 'bank20')
 
     def test_fit_bank(self):
+        control = self.cases['123455_bank20']  # a bank with a reasonable wire scan
+
         with self.assertRaises(AssertionError) as exception_info:
             fit_bank('I_am_not_here', 'bank42')
-        assert 'Input workspace I_am_not_here does not exists' in str(exception_info.exception)
-
-        control = self.cases['123455_bank20']  # a bank with a reasonable wire scan
         with self.assertRaises(AssertionError) as exception_info:
             fit_bank(control, 'bank20', shadow_height=-1000)
         assert 'shadow height must be positive' in str(exception_info.exception)
@@ -84,18 +86,21 @@ class TestBank(unittest.TestCase):
             fit_bank(self.cases['123555_bank20'], 'bank20')
         assert 'Insufficient counts per pixel in workspace CORELLI_123555_bank20' in str(exception_info.exception)
 
-        fit_bank(control, 'bank20')
+        fit_bank(control, 'bank20', parameters_table_group='parameters_table')
         # Expect default name for calibration table
         assert AnalysisDataService.doesExist('CalibTable')
         # Expect default name for peak pixel position table
         assert AnalysisDataService.doesExist('PeakTable')
-        DeleteWorkspaces(['CalibTable', 'PeakTable'])
+        # assert the parameters tables are created
+        assert AnalysisDataService.doesExist('parameters_table')
+        for tube_number in range(TUBES_IN_BANK):
+            assert AnalysisDataService.doesExist(f'parameters_table_{tube_number}')
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'parameters_table'])
 
         fit_bank(control, 'bank20', calibration_table='table_20', peak_pixel_positions_table='pixel_20')
         assert AnalysisDataService.doesExist('table_20')
         assert AnalysisDataService.doesExist('pixel_20')
-
-        DeleteWorkspaces(['CalibTable', 'PeakTable'])  # a bit of clean-up
+        DeleteWorkspaces(['table_20', 'pixel_20'])  # a bit of clean-up
 
     def test_criterium_peak_pixel_position(self):
         # control bank, it has no problems
@@ -197,15 +202,62 @@ class TestBank(unittest.TestCase):
 
         DeleteWorkspaces(['CalibTable', 'PeakTable', 'masked_tubes'])  # a bit of clean-up
 
+    def test_collect_bank_fit_results(self):
+
+        def spectra_labels(workspace_name):
+            workspace = mtd[str(workspace_name)]
+            axis = workspace.getAxis(1)
+            return [axis.label(spectrum_index) for spectrum_index in range(workspace.getNumberHistograms())]
+
+        fit_bank(self.cases['123455_bank20'], 'bank20', parameters_table_group='parameters_tables')
+        criterium_peak_pixel_position('PeakTable', summary='summary', zscore_threshold=2.5, deviation_threshold=3)
+
+        with self.assertRaises(AssertionError) as exception_info:
+            collect_bank_fit_results('fit_results', acceptance_summary=None, parameters_table_group=None)
+        assert 'fit results should be different than None' in str(exception_info.exception)
+
+        # collect only the acceptance criteria results
+        collect_bank_fit_results('fit_results', acceptance_summary='summary', parameters_table_group=None)
+        assert spectra_labels('fit_results') == ['success', 'deviation', 'Z-score']
+        assert_allclose(mtd['fit_results'].readY(0), mtd['summary'].readY(0))
+        DeleteWorkspaces(['fit_results'])
+
+        # collect only the polynomial coefficients
+        collect_bank_fit_results('fit_results', acceptance_summary=None, parameters_table_group='parameters_tables')
+        assert spectra_labels('fit_results') == ['A0', 'A1', 'A2']
+        for coefficient_idx in range(3):  # we have three polynomial coefficients
+            for tube_idx in range(TUBES_IN_BANK):
+                self.assertAlmostEqual(mtd['fit_results'].readY(coefficient_idx)[tube_idx],
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Value'], delta=1e-6)
+                self.assertAlmostEqual(mtd['fit_results'].readE(coefficient_idx)[tube_idx],
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Error'], delta=1e-6)
+        DeleteWorkspaces(['fit_results'])
+
+        # collect both acceptance criteria and polynomial coefficients
+        collect_bank_fit_results('fit_results', acceptance_summary='summary',
+                                 parameters_table_group='parameters_tables')
+        assert spectra_labels('fit_results') == ['success', 'deviation', 'Z-score', 'A0', 'A1', 'A2']
+        for spectrum_idx in [0, 1, 2]:
+            assert_allclose(mtd['fit_results'].readY(spectrum_idx), mtd['summary'].readY(spectrum_idx))
+            assert_allclose(mtd['fit_results'].readE(spectrum_idx), mtd['summary'].readE(spectrum_idx))
+        for coefficient_idx, spectrum_idx in [(0, 3), (1, 4), (2, 5)]:  # we have three polynomial coefficients
+            for tube_idx in range(TUBES_IN_BANK):
+                self.assertAlmostEqual(mtd['fit_results'].readY(spectrum_idx)[tube_idx],
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Value'], delta=1e-6)
+                self.assertAlmostEqual(mtd['fit_results'].readE(spectrum_idx)[tube_idx],
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Error'], delta=1e-6)
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'summary', 'parameters_tables', 'fit_results'])  # clean-up
+
     def test_calibrate_bank(self):
 
         # control bank, it has no problems. Thus, no mask to be created
         calibration, mask = calibrate_bank(self.cases['123455_bank20'], 'bank20', 'calibration_table')
         assert calibration.rowCount() == 256 * 16
-        assert calibration.columnCount() == 3
+        assert calibration.columnCount() == 2
         assert AnalysisDataService.doesExist('calibration_table')
         assert mask is None
         assert AnalysisDataService.doesExist('MaskTable') is False
+        DeleteWorkspaces(['calibration_table'])  # clean-up
 
         # tubes 3, 8, and 13 have very faint wire shadows. Thus, mask these tubes
         calibration, mask = calibrate_bank(self.cases['124023_bank14'], 'bank14',
@@ -216,18 +268,20 @@ class TestBank(unittest.TestCase):
         assert mask.rowCount() == 256 * 3
         assert mask.columnCount() == 1
         assert AnalysisDataService.doesExist('MaskTable')
+        DeleteWorkspaces(['calibration_table', 'MaskTable'])  # clean-up
 
-        # check for the summary workspace
-        calibrate_bank(self.cases['123455_bank20'], 'bank20', 'calibration_table',
-                       criterium_kwargs=dict(summary='summary'))
-        assert AnalysisDataService.doesExist('summary')
-        workspace = mtd['summary']
+        # check for the fits workspace
+        calibrate_bank(self.cases['123455_bank20'], 'bank20', 'calibration_table', fit_results='fits')
+        assert AnalysisDataService.doesExist('fits')
+        workspace = mtd['fits']
         axis = workspace.getAxis(1)
-        assert [axis.label(workspace_index) for workspace_index in (0, 1, 2)] == ['success', 'deviation', 'Z-score']
-        self.assertEqual(min(workspace.readY(0)), 1.0)
-        self.assertAlmostEqual(max(workspace.readY(2)), 1.728, delta=0.001)
-
-        DeleteWorkspaces(['calibration_table', 'MaskTable', 'summary'])  # a bit of clean-up
+        labels = [axis.label(i) for i in range(workspace.getNumberHistograms())]
+        assert labels == ['success', 'deviation', 'Z-score', 'A0', 'A1', 'A2']
+        assert_allclose(workspace.readY(0), [1.0] * TUBES_IN_BANK)  # success status for first tube
+        self.assertAlmostEqual(max(workspace.readY(2)), 1.728, delta=0.001)  # maximum Z-score
+        self.assertAlmostEqual(max(workspace.readY(3)), -0.445, delta=0.001)  # maximum A0 value
+        self.assertAlmostEqual(max(workspace.readE(3)), 1.251, delta=0.001)  # maximum A0 error
+        DeleteWorkspaces(['calibration_table', 'fits'])  # a bit of clean-up
 
     def test_calibrate_banks(self):
         calibrations, masks = calibrate_banks(self.cases['124023_banks_14_15'], '14-15')
@@ -236,10 +290,16 @@ class TestBank(unittest.TestCase):
         assert mtd['calib14'].rowCount() == 256 * (16 - 3)
         assert mtd['mask14'].rowCount() == 256 * 3
         assert mtd['calib15'].rowCount() == 256 * 16
-        self.assertEqual(mtd['acceptance14'].readY(0).tolist(), [1, 1, 0., 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1])
-        self.assertEqual(mtd['acceptance15'].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-
-        DeleteWorkspaces(['calibrations', 'masks', 'acceptances'])
+        # Check for success status
+        self.assertEqual(mtd['fit14'].readY(0).tolist(), [1, 1, 0., 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1])
+        self.assertEqual(mtd['fit15'].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        # Check for A1 coefficient values
+        self.assertAlmostEqual(max(mtd['fit14'].readY(4)), 0.0044, delta=0.0001)
+        self.assertAlmostEqual(max(mtd['fit15'].readY(4)), 0.0037, delta=0.0001)
+        # Check for A2 coefficient errors
+        self.assertAlmostEqual(max(mtd['fit14'].readE(4)), 0.0224, delta=0.0001)
+        self.assertAlmostEqual(max(mtd['fit15'].readE(4)), 0.0221, delta=0.0001)
+        DeleteWorkspaces(['calibrations', 'masks', 'fits'])
 
 
 if __name__ == "__main__":
