@@ -126,12 +126,12 @@ This example below performs a complete reduction for D7 data.
 
 **Example - full treatment of a sample**
 
-.. testsetup:: ExSANSILLReduction
+.. testsetup:: ExPolDiffILLReduction
 
     config['default.facility'] = 'ILL'
     config.appendDataSearchSubDir('ILL/D7/')
 
-.. testcode:: ExSANSILLReduction
+.. testcode:: ExPolDiffILLReduction
 
     vanadium_dictionary = {'Mass':8.54,'Density':6.0,'FormulaUnits':50,'ChemicalFormula':'V',
         'Thickness':2,'Height':2,'Width':2,'BeamWidth':2.5,'BeamHeight':2.5,'NumberDensity':1.18,
