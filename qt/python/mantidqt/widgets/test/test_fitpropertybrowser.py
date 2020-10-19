@@ -53,24 +53,6 @@ class FitPropertyBrowserTest(unittest.TestCase):
             property_browser.getFitMenu().aboutToShow.emit()
         property_browser.normaliseData.assert_called_once_with(False)
 
-    def test_plot_guess_plots_for_table_workspaces(self):
-        table = WorkspaceFactory.createTable()
-        table.addColumn('double', 'X', 1)
-        table.addColumn('double', 'Y', 2)
-        for i in range(1, 10):
-            table.addRow([0.1 * i, 5])
-        name = "table_name"
-        AnalysisDataService.Instance().addOrReplace(name, table)
-        property_browser = self._create_widget()
-        property_browser.getFittingFunction = Mock(return_value='name=FlatBackground')
-        property_browser.workspaceName = Mock(return_value=name)
-        property_browser.startX = Mock(return_value=0.15)
-        property_browser.endX = Mock(return_value=0.95)
-        property_browser.get_axes().get_legend = Mock(return_value=None)
-        property_browser.plot_guess()
-
-        self.assertEqual(1, property_browser.get_axes().plot.call_count)
-
     def test_fit_curves_removed_when_workspaces_deleted(self):
         fig, canvas = self._create_and_plot_matrix_workspace(name="ws")
         property_browser = self._create_widget(canvas=canvas)
@@ -202,13 +184,6 @@ class FitPropertyBrowserTest(unittest.TestCase):
         fit_ws_name = "fit_ws"
         CreateSampleWorkspace(OutputWorkspace=fit_ws_name)
         widget.fitting_done_slot(fit_ws_name)
-        self.assertEqual(ax_limits, fig.get_axes()[0].axis())
-
-    def test_plot_limits_are_not_changed_when_plotting_guess(self):
-        fig, canvas = self._create_and_plot_matrix_workspace()
-        ax_limits = fig.get_axes()[0].axis()
-        widget = self._create_widget(canvas=canvas)
-        widget.plot_guess()
         self.assertEqual(ax_limits, fig.get_axes()[0].axis())
 
     @patch('matplotlib.pyplot.get_figlabels')

@@ -155,8 +155,9 @@ class DrillModel(QObject):
                 RundexSettings.ACQUISITION_MODES[instrument][0]
             self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
             self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
-            self.settings.update(
+            self.settings = dict.fromkeys(
                     RundexSettings.SETTINGS[self.acquisitionMode])
+            self._setDefaultSettings()
             self._initController()
         else:
             if log:
@@ -200,8 +201,9 @@ class DrillModel(QObject):
         else:
             nThreads = QThread.idealThreadCount()
         self.tasksPool.setMaxThreadCount(nThreads)
-        self.settings = dict()
-        self.settings.update(RundexSettings.SETTINGS[self.acquisitionMode])
+        self.settings = dict.fromkeys(
+                RundexSettings.SETTINGS[self.acquisitionMode])
+        self._setDefaultSettings()
         self._initController()
 
     def getAcquisitionMode(self):
@@ -339,21 +341,19 @@ class DrillModel(QObject):
         types = dict()
         values = dict()
         docs = dict()
-
         if not self.algorithm:
             return types, values, docs
 
         alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
         alg.initialize()
-
         for s in self.settings:
             p = alg.getProperty(s)
             if (isinstance(p, FileProperty)):
                 t = "file"
             elif (isinstance(p, MultipleFileProperty)):
                 t = "files"
-            elif ((isinstance(p, WorkspaceGroupProperty))
-                  or (isinstance(p, MatrixWorkspaceProperty))):
+            elif (isinstance(p, (WorkspaceGroupProperty,
+                                 MatrixWorkspaceProperty))):
                 t = "workspace"
             elif (isinstance(p, StringPropertyWithValue)):
                 if (p.allowedValues):
@@ -362,6 +362,8 @@ class DrillModel(QObject):
                     t = "string"
             elif (isinstance(p, BoolPropertyWithValue)):
                 t = "bool"
+            elif (isinstance(p, (FloatArrayProperty, IntArrayProperty))):
+                t = "array"
             else:
                 t = "string"
 
@@ -370,6 +372,20 @@ class DrillModel(QObject):
             docs[s] = p.documentation
 
         return (types, values, docs)
+
+    def _setDefaultSettings(self):
+        """
+        Set the settings to their defautl values. This method takes the default
+        values directly from the algorithm.
+        """
+        if not self.algorithm:
+            return
+        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
+        alg.initialize()
+
+        for s in self.settings:
+            p = alg.getProperty(s)
+            self.settings[s] = p.value
 
     def checkParameter(self, param, value, sample=-1):
         """

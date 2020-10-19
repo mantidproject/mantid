@@ -9,29 +9,34 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+New features
+------------
+
+- New algorithm :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` to perform wavelength and detector position calibration for the ILL D7 instrument.
+    
 Powder Diffraction
 ------------------
 New features
 ############
+
+- Add ability to store multiple alternative attenuation file paths in the Pearl yaml configuration file
+- Modify filenames of xye outputs from running a focus in the Pearl power diffraction scripts
+- Remove _noatten workspace that was produced by the Pearl powder diffraction scripts when run with perform_attenuation=True
+- Speed up focus action in ISIS powder diffraction scripts by saving pre-summed empty instrument workspace during calibration step
+- Add sample_empty and sample_empty_scale into Pearl configuration for ISIS powder diffraction scripts
 - New algorithm to clip peaks, providing a background estimation :ref:`ClipPeaks <algm-ClipPeaks>`.
 - Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
+- New algorithm :ref:`AbsorptionCorrectionPaalmanPings <algm-AbsorptionCorrectionPaalmanPings>` uses a numerical integration method to calculate attenuation factors for all Paalmin Pings terms
 
 Improvements
 ############
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
 
-New features
-############
-
-- Modify filenames of xye outputs from running a focus in the Pearl power diffraction scripts
-- Remove _noatten workspace that was produced by the Pearl powder diffraction scripts when run with perform_attenuation=True
-- Speed up focus action in ISIS powder diffraction scripts by saving pre-summed empty instrument workspace during calibration step
-- Add sample_empty and sample_empty_scale into Pearl configuration for ISIS powder diffraction scripts
-
 Bugfixes
 ########
 
 - Dummy detectors in polaris workspaces no longer prevent unit conversion.
+
 
 Engineering Diffraction
 -----------------------
