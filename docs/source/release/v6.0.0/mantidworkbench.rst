@@ -17,6 +17,7 @@ Improvements
 - Enabled the plotting of individual functions in the Workbench fit browser. This replicates a feature that was in MantidPlot.
   Plotting of each function can be performed by right clicking on the function within the browser and selecting plot.
 - Add the possibility to copy and paste shapes in the instrument viewer using Ctrl + C and Ctrl + V.
+- Improved spectra selection within the sliceviewer, which should ensure that high counting spectra are shown immediately when the sliceviewer is opened.
 
 Bugfixes
 ########
