@@ -91,8 +91,8 @@ def load_banks(filename: str, bank_selection: str, output_workspace: str) -> Wor
     return mtd[output_workspace]
 
 
-def calculate_tube_calibration(workspace: WorkspaceTypes, tube_name: str, shadow_height: float = 1000,
-                               shadow_width: float = 4, fit_domain: float = 7) -> TableWorkspace:
+def calibrate_tube(workspace: WorkspaceTypes, tube_name: str, shadow_height: float = 1000,
+                   shadow_width: float = 4, fit_domain: float = 7) -> TableWorkspace:
     r"""
     Calibration table for one tube of CORELLI
 

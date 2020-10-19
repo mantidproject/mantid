@@ -10,7 +10,7 @@ from numpy.testing import assert_allclose
 from os import path
 import unittest
 
-from corelli.calibration.utils import (apply_calibration, bank_numbers, calculate_tube_calibration, load_banks,
+from corelli.calibration.utils import (apply_calibration, bank_numbers, calibrate_tube, load_banks,
                                        wire_positions)
 from mantid import AnalysisDataService, config
 from mantid.simpleapi import DeleteWorkspaces, LoadEmptyInstrument
@@ -107,21 +107,21 @@ class TestUtils(unittest.TestCase):
     def test_calculate_tube_calibration(self) -> None:
         # Check the validators are doing what they're supposed to do
         with self.assertRaises(AssertionError) as exception_info:
-            calculate_tube_calibration(None, 'bank42/sixteenpack/tube8')
+            calibrate_tube(None, 'bank42/sixteenpack/tube8')
         assert 'Cannot process workspace' in str(exception_info.exception)
         with self.assertRaises(AssertionError) as exception_info:
-            calculate_tube_calibration(self.workspace, 'tube42')
+            calibrate_tube(self.workspace, 'tube42')
         assert 'tube42 does not uniquely specify one tube' in str(exception_info.exception)
         with self.assertRaises(AssertionError) as exception_info:
-            calculate_tube_calibration(self.workspace, 'bank42/sixteenpack/tube8', fit_domain=20)
+            calibrate_tube(self.workspace, 'bank42/sixteenpack/tube8', fit_domain=20)
         assert 'The fit domain cannot be larger than the distance between consecutive' in str(exception_info.exception)
 
-        table = calculate_tube_calibration(self.workspace, 'bank42/sixteenpack/tube8')
+        table = calibrate_tube(self.workspace, 'bank42/sixteenpack/tube8')
         calibrated_y = np.array([v.Y() for v in table.column(1)])
         assert_allclose(calibrated_y, self.calibrated_y, atol=1e-3)
 
     def test_apply_instrument(self) -> None:
-        table = calculate_tube_calibration(self.workspace, 'bank42/sixteenpack/tube8')
+        table = calibrate_tube(self.workspace, 'bank42/sixteenpack/tube8')
         apply_calibration(self.workspace, table)
         assert AnalysisDataService.doesExist('uncalibrated_calibrated')
         DeleteWorkspaces(['uncalibrated_calibrated', str(table)])
