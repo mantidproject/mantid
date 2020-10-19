@@ -129,8 +129,8 @@ public:
 private:
   std::string runConvolutionFit(const MatrixWorkspace_sptr &inputWorkspace,
                                 const MatrixWorkspace_sptr &resolution,
-                                const std::vector<double> startX,
-                                const std::vector<double> endX) {
+                                const std::vector<double> &startX,
+                                const std::vector<double> &endX) {
     QENSFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
 

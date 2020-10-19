@@ -125,8 +125,8 @@ const std::vector<std::string> IqtFit<Base>::seeAlso() const {
 template <>
 std::map<std::string, std::string> IqtFit<QENSFitSequential>::validateInputs() {
   auto errors = QENSFitSequential::validateInputs();
-  std::vector<double> startX = QENSFitSequential::getProperty("StartX");
-  for (double start : startX) {
+  const std::vector<double> startX = QENSFitSequential::getProperty("StartX");
+  for (const double &start : startX) {
     if (start < 0) {
       errors["StartX"] = "StartX must be greater than or equal to 0.";
     }

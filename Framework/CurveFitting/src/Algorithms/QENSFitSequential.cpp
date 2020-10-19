@@ -604,8 +604,8 @@ void QENSFitSequential::exec() {
     std::string resultWsName = results->getName();
     auto endLoc = resultWsName.find("__Result");
     std::string baseName = resultWsName.erase(endLoc);
-    for (auto workspace : groupWs->getAllItems()) {
-      std::string wsName = workspace->getName();
+    for (auto &workspace : groupWs->getAllItems()) {
+      const std::string wsName = workspace->getName();
       if (wsName.find(baseName) != wsName.npos) {
         copyLogs(std::dynamic_pointer_cast<MatrixWorkspace>(results), groupWs);
         addFitRangeLogs(workspace, itter);
