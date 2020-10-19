@@ -156,7 +156,7 @@ This example below performs a complete reduction for D7 data.
         AbsorberTransmissionInputWorkspace='cadmium_ws_1',
         ProcessAs='Beam'
     )
-    print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium'].readY(0)[0] / mtd['beam_ws'].readY(0)[0]))
+    print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium_ws_1'].readY(0)[0] / mtd['beam_ws_1'].readY(0)[0]))
 
     # Quartz transmission
     PolDiffILLReduction(
