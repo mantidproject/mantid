@@ -1,59 +1,58 @@
-digraph Reference {
+digraph Vanadium {
   $global_style
 
   subgraph decisions {
     $decision_style
-    NormaliseBy
+    ConvertUnits
+    SumCountsOrAverage
   }
 
   subgraph params {
     $param_style
     Run
+    D7YIGPositionCalibration
     AbsorberInputWorkspace
     ContainerInputWorkspace
-    MaskedInputWorkspace
-    BeamInputWorkspace
+    QuartzInputWorkspace
     TransmissionInputWorkspace
-    SampleThickness
+    PaalmanPingsMonteCarloAbsorption
+    SampleAndEnvironmentProperties
   }
 
   subgraph values {
     $value_style
     OutputWorkspace
-    SensitivityOutputWorkspace
   }
 
   subgraph algorithms {
     $algorithm_style
-    LoadAndMerge
+    Load
     Divide
+    Multiply
     Minus
-    MoveInstrumentComponent
-    ApplyTransmissionCorrection
-    SolidAngle
-    Minus2 [label="Minus"]
-    CalculateEfficiency
-    MaskDetectors
-    NormaliseByThickness
+    Plus
+    Divide2 [label="Divide"]
+    SumOverlappingTubes
+    SeparateComponents
   }
 
-  Run -> LoadAndMerge
-  LoadAndMerge -> NormaliseBy
-  NormaliseBy -> Divide
+  Run -> Load
+  D7YIGPositionCalibration -> Load
+  Load -> Divide
   Divide -> Minus
   AbsorberInputWorkspace -> Minus
-  Minus -> MoveInstrumentComponent
-  BeamInputWorkspace -> MoveInstrumentComponent
-  MoveInstrumentComponent -> SolidAngle [label="Divide"]
-  SolidAngle -> ApplyTransmissionCorrection
-  TransmissionInputWorkspace -> ApplyTransmissionCorrection
-  ApplyTransmissionCorrection -> Minus2
-  ContainerInputWorkspace -> Minus2
-  Minus2 -> MaskDetectors
-  MaskedInputWorkspace -> MaskDetectors
-  MaskDetectors -> NormaliseByThickness
-  SampleThickness -> NormaliseByThickness
-  NormaliseByThickness -> CalculateEfficiency
-  CalculateEfficiency -> SensitivityOutputWorkspace
-  NormaliseByThickness -> OutputWorkspace
+  ContainerInputWorkspace -> Minus
+  TransmissionInputWorkspace -> Minus
+  Minus -> Multiply
+  QuartzInputWorkspace -> Multiply
+  Multiply -> PaalmanPingsMonteCarloAbsorption
+  SampleAndEnvironmentProperties -> PaalmanPingsMonteCarloAbsorption
+  PaalmanPingsMonteCarloAbsorption -> ConvertUnits
+  ConvertUnits -> SumCountsOrAverage
+  SumCountsOrAverage -> SumOverlappingTubes
+  SumCountsOrAverage -> Plus
+  Plus -> SeparateComponents
+  SeparateComponents -> Divide2
+  SumOverlappingTubes -> Divide2
+  Divide2 -> OutputWorkspace
 }

@@ -3,21 +3,22 @@ digraph Sample {
 
   subgraph decisions {
     $decision_style
-    NormaliseBy
+    ConvertUnits
+    SumCountsOrAverage
     AbsoluteScaleBy
   }
 
   subgraph params {
     $param_style
     Run
-    BeamInputWorkspace
-    TransmissionInputWorkspace
+    D7YIGPositionCalibration
     AbsorberInputWorkspace
     ContainerInputWorkspace
-    SensitivityInputWorkspace
-    ReferenceInputWorkspace
-    MaskedInputWorkspace
-    SampleThickness
+    QuartzInputWorkspace
+    TransmissionInputWorkspace
+    VanadiumInputWorkspace
+    PaalmanPingsMonteCarloAbsorption
+    SampleAndEnvironmentProperties
   }
 
   subgraph values {
@@ -27,18 +28,15 @@ digraph Sample {
 
   subgraph algorithms {
     $algorithm_style
-    LoadAndMerge
+    Load
     Divide
+    Multiply
+    DetectorEfficiencyCorUser
     Minus
-    MoveInstrumentComponent
-    ApplyTransmissionCorrection
-    SolidAngle
-    Minus2 [label="Minus"]
-    MaskDetectors
-    NormaliseByThickness
+    Plus
     Divide2 [label="Divide"]
-    Divide3 [label="Divide"]
-    Divide4 [label="Divide"]
+    SumOverlappingTubes
+    SeparateComponents
   }
 
   subgraph process {
@@ -46,30 +44,29 @@ digraph Sample {
     ScaleByFluxFactor
   }
 
-  Run -> LoadAndMerge
-  LoadAndMerge -> NormaliseBy
-  NormaliseBy -> Divide
+  Run -> Load
+  D7YIGPositionCalibration -> Load
+  Load -> Divide
   Divide -> Minus
   AbsorberInputWorkspace -> Minus
-  Minus -> MoveInstrumentComponent
-  BeamInputWorkspace -> MoveInstrumentComponent
-  MoveInstrumentComponent -> SolidAngle [label="Divide"]
-  SolidAngle -> ApplyTransmissionCorrection
-  TransmissionInputWorkspace -> ApplyTransmissionCorrection
-  ApplyTransmissionCorrection -> Minus2
-  ContainerInputWorkspace -> Minus2
-  Minus2 -> MaskDetectors
-  MaskedInputWorkspace -> MaskDetectors
-  MaskDetectors -> NormaliseByThickness
-  SampleThickness -> NormaliseByThickness
-  NormaliseByThickness -> AbsoluteScaleBy
-  AbsoluteScaleBy -> Divide2 [label="Beam Flux"]
-  BeamInputWorkspace -> Divide2
-  Divide2 -> Divide3
-  SensitivityInputWorkspace -> Divide3
-  Divide3 -> ScaleByFluxFactor
-  AbsoluteScaleBy -> Divide4 [label="Standard Sample"]
-  ReferenceInputWorkspace -> Divide4
-  Divide4 -> ScaleByFluxFactor
-  ScaleByFluxFactor -> OutputWorkspace
+  ContainerInputWorkspace -> Minus
+  TransmissionInputWorkspace -> Minus
+  Minus -> Multiply
+  QuartzInputWorkspace -> Multiply
+  Multiply -> DetectorEfficiencyCorUser
+  DetectorEfficiencyCorUser -> PaalmanPingsMonteCarloAbsorption
+  SampleAndEnvironmentProperties -> PaalmanPingsMonteCarloAbsorption
+  PaalmanPingsMonteCarloAbsorption -> ConvertUnits
+  ConvertUnits -> SumCountsOrAverage
+  SumCountsOrAverage -> SumOverlappingTubes
+  SumCountsOrAverage -> Plus
+  Plus -> SeparateComponents
+  SumOverlappingTubes -> SeparateComponents
+  SeparateComponents -> AbsoluteScaleBy
+  VanadiumInputWorkspace -> AbsoluteScaleBy
+  AbsoluteScaleBy -> Divide2
+  Divide2 -> OutputWorkspace
 }
+
+
+

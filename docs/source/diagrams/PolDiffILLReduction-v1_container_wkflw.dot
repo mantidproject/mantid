@@ -1,17 +1,9 @@
 digraph Container {
   $global_style
 
-  subgraph decisions {
-    $decision_style
-    NormaliseBy
-  }
-
   subgraph params {
     $param_style
     Run
-    TransmissionInputWorkspace
-    BeamInputWorkspace
-    AbsorberInputWorkspace
   }
 
   subgraph values {
@@ -21,23 +13,11 @@ digraph Container {
 
   subgraph algorithms {
     $algorithm_style
-    LoadAndMerge
+    Load
     Divide
-    Minus
-    MoveInstrumentComponent
-    ApplyTransmissionCorrection
-    SolidAngle
   }
 
-  Run -> LoadAndMerge
-  LoadAndMerge -> NormaliseBy
-  NormaliseBy -> Divide
-  Divide -> Minus
-  AbsorberInputWorkspace -> Minus
-  Minus -> MoveInstrumentComponent
-  BeamInputWorkspace -> MoveInstrumentComponent
-  MoveInstrumentComponent -> SolidAngle [label="Divide"]
-  SolidAngle -> ApplyTransmissionCorrection
-  TransmissionInputWorkspace -> ApplyTransmissionCorrection
-  ApplyTransmissionCorrection -> OutputWorkspace
+  Run -> Load
+  Load -> Divide
+  Divide -> OutputWorkspace
 }

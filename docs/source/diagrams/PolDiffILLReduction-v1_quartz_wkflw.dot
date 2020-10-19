@@ -1,59 +1,35 @@
-digraph Reference {
+digraph Quartz {
   $global_style
-
-  subgraph decisions {
-    $decision_style
-    NormaliseBy
-  }
 
   subgraph params {
     $param_style
     Run
+    D7YIGPositionCalibration
     AbsorberInputWorkspace
     ContainerInputWorkspace
-    MaskedInputWorkspace
-    BeamInputWorkspace
     TransmissionInputWorkspace
-    SampleThickness
   }
 
   subgraph values {
     $value_style
     OutputWorkspace
-    SensitivityOutputWorkspace
   }
 
   subgraph algorithms {
     $algorithm_style
-    LoadAndMerge
+    Load
     Divide
     Minus
-    MoveInstrumentComponent
-    ApplyTransmissionCorrection
-    SolidAngle
-    Minus2 [label="Minus"]
-    CalculateEfficiency
-    MaskDetectors
-    NormaliseByThickness
+    Divide2 [label="Divide"]
   }
 
-  Run -> LoadAndMerge
-  LoadAndMerge -> NormaliseBy
-  NormaliseBy -> Divide
+  Run -> Load
+  D7YIGPositionCalibration -> Load
+  Load -> Divide
   Divide -> Minus
   AbsorberInputWorkspace -> Minus
-  Minus -> MoveInstrumentComponent
-  BeamInputWorkspace -> MoveInstrumentComponent
-  MoveInstrumentComponent -> SolidAngle [label="Divide"]
-  SolidAngle -> ApplyTransmissionCorrection
-  TransmissionInputWorkspace -> ApplyTransmissionCorrection
-  ApplyTransmissionCorrection -> Minus2
-  ContainerInputWorkspace -> Minus2
-  Minus2 -> MaskDetectors
-  MaskedInputWorkspace -> MaskDetectors
-  MaskDetectors -> NormaliseByThickness
-  SampleThickness -> NormaliseByThickness
-  NormaliseByThickness -> CalculateEfficiency
-  CalculateEfficiency -> SensitivityOutputWorkspace
-  NormaliseByThickness -> OutputWorkspace
+  ContainerInputWorkspace -> Minus
+  TransmissionInputWorkspace -> Minus
+  Minus -> Divide2
+  Divide2 -> OutputWorkspace
 }
