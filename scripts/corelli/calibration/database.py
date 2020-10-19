@@ -162,6 +162,7 @@ def combine_temporal_banks( database_path:str, date:str, table_type:str = 'calib
     bank_dirs = list(pathlib.Path(database_path).glob('bank'+ ('[0-9]' * 3) ))
     # filter directories
     bank_dirs = [dir for dir in bank_dirs if dir.is_dir()]
+    bank_dirs.sort()
 
     for bank_dir in bank_dirs:
 
@@ -178,7 +179,7 @@ def combine_temporal_banks( database_path:str, date:str, table_type:str = 'calib
 
         available_dates.sort(reverse=True)
 
-        # check available dates choose the latest in the past if not found
+        # check available dates choose the latest in the past if not found for current date
         for available_date in available_dates:
 
             if available_date <= int(date):
@@ -194,6 +195,7 @@ def combine_spatial_banks(tables:WorkspaceGroup, name: Optional[str] = None)->Ta
     """
     Function that inputs a GroupWorkspace of TableWorkspace .
     :param tables: input GroupWorkspace with independent bank TableWorkspace for Corelli
+    :param name: input name for the TableWorkSpace output
     :return unified TableWorkspace for all banks
     """
     message = f'{"Cannot process Corelli combine_spatial_banks, input is not of type WorkspaceGroup"}'
