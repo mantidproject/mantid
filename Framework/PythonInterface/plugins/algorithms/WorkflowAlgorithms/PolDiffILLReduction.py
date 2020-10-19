@@ -351,14 +351,16 @@ class PolDiffILLReduction(PythonAlgorithm):
                                          mtd[ws][0].getNumberHistograms()-1)
         for entry_no, entry in enumerate(mtd[ws]):
             mon = ws + '_mon'
-            ExtractSpectra(InputWorkspace=entry, DetectorList=monID, OutputWorkspace=mon)
+            ExtractMonitors(InputWorkspace=entry, DetectorWorkspace=entry,
+                            MonitorWorkspace=mon)
             if 0 in mtd[mon].readY(0):
                 raise RuntimeError('Cannot normalise to monitor; monitor has 0 counts.')
             else:
                 if self._mode == 'TOF':
                     Integration(InputWorkspace=mon, OutputWorkspace=mon)
+                CreateSingleValuedWorkspace(DataValue=mtd[mon].readY(0)[0], ErrorValue=mtd[mon].readE(0)[0],
+                                            OutputWorkspace=mon)
                 Divide(LHSWorkspace=entry, RHSWorkspace=mon, OutputWorkspace=entry)
-                RemoveSpectra(entry, WorkspaceIndices=monitor_indices, OutputWorkspace=entry)
                 DeleteWorkspace(Workspace=mon)
         return ws
 
