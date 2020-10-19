@@ -244,6 +244,15 @@ class DrillViewTest(unittest.TestCase):
         calls = [mock.call(2), mock.call(1), mock.call(0)]
         self.view.table.deleteRow.assert_has_calls(calls)
 
+    def test_labelRowsInGroup(self):
+        self.view.groups = {"A": [1, 2, 3],
+                            "B": [4, 5, 6]}
+        self.view._labelRowsInGroup("C")
+        self.view.table.setRowLabel.assert_not_called()
+        self.view._labelRowsInGroup("A")
+        calls = [mock.call(1, "A1"), mock.call(2, "A2"), mock.call(3, "A3")]
+        self.view.table.setRowLabel.assert_has_calls(calls)
+
     def test_groupRows(self):
         self.view.groupRows([])
         self.assertEqual(self.view.groups, {})

@@ -419,6 +419,21 @@ class DrillView(QMainWindow):
             self.rowDeleted.emit(row)
             self.setWindowModified(True)
 
+    def _labelRowsInGroup(self, groupName):
+        """
+        Loop through all the rows of a group and set their labels to "group
+        name" + number (i.e. A1, A2, ...)
+
+        Args:
+            groupName (str): name of the group
+        """
+        if groupName not in self.groups:
+            return
+        rowName = 1
+        for row in self.groups[groupName]:
+            self.table.setRowLabel(row, groupName + str(rowName))
+            rowName += 1
+
     def groupRows(self, rows):
         """
         Add a list of row(s) to a new group. This method changes the row labels.
@@ -437,11 +452,7 @@ class DrillView(QMainWindow):
             groupLabel = chr(ord(groupLabel) + 1)
 
         self.groups[groupLabel] = rows
-
-        rowLabel = 1
-        for row in self.groups[groupLabel]:
-            self.table.setRowLabel(row, groupLabel + str(rowLabel))
-            rowLabel += 1
+        self._labelRowsInGroup(groupLabel)
 
     def ungroupRows(self, rows):
         """
@@ -455,12 +466,15 @@ class DrillView(QMainWindow):
             return
 
         for row in rows:
-            for group in self.groups:
-                self.groups[group] = [r for r in self.groups[group] if r != row]
-                if ((group in self.masterRows)
-                        and (self.masterRows[group] == row)):
-                    del self.masterRows[group]
-            self.table.delRowLabel(row)
+            for groupName in self.groups:
+                if row in self.groups[groupName]:
+                    self.groups[groupName].remove(row)
+                    self.table.delRowLabel(row)
+                    if ((groupName in self.masterRows)
+                            and (self.masterRows[groupName] == row)):
+                        del self.masterRows[groupName]
+                    self._labelRowsInGroup(groupName)
+                    break
 
     def setMasterRow(self, row):
         """
