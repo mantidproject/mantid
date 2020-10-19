@@ -122,14 +122,15 @@ def _batched_run_focusing(instrument, perform_vanadium_norm, run_number_string, 
                                                 OutputWorkspace=van)
         else:
             vanadium_splines = mantid.mtd[van]
-
     output = None
     for ws in read_ws_list:
         output = _focus_one_ws(input_workspace=ws, run_number=run_number_string, instrument=instrument,
                                perform_vanadium_norm=perform_vanadium_norm, absorb=absorb,
                                sample_details=sample_details, vanadium_path=vanadium_splines)
     if instrument.get_instrument_prefix() == "PEARL" and vanadium_splines is not None :
-        mantid.DeleteWorkspace(vanadium_splines.OutputWorkspace)
+        if hasattr(vanadium_splines, "OutputWorkspace"):
+            vanadium_splines = vanadium_splines.OutputWorkspace
+        mantid.DeleteWorkspace(vanadium_splines)
     return output
 
 
