@@ -204,11 +204,15 @@ class PolDiffILLReduction(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="Which measurement technique was used to measure the sample.")
 
+        self.setPropertySettings('MeasurementTechnique', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
+
         self.declareProperty(name="ComponentSeparationMethod",
                              defaultValue="None",
                              validator=StringListValidator(["None", "Uniaxial", "XYZ", "10p"]),
                              direction=Direction.Input,
                              doc="Whether to perform component separation and what type of method to use.")
+
+        self.setPropertySettings('ComponentSeparationMethod', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
         self.declareProperty(name="SampleGeometry",
                              defaultValue="None",
@@ -223,6 +227,9 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('SampleAndEnvironmentPropertiesDictionary',
                                  EnabledWhenProperty('SampleGeometry', PropertyCriterion.IsNotEqualTo, 'Custom'))
+
+        self.setPropertySettings('SampleAndEnvironmentPropertiesDictionary',
+                                 EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
         self.declareProperty(FileProperty(name="SampleGeometryFile",
                              defaultValue="",
