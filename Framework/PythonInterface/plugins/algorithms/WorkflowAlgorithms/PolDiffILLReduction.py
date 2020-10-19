@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, \
-    NumericAxis, PropertyMode, Progress, PythonAlgorithm, WorkspaceGroup, WorkspaceGroupProperty, \
+    NumericAxis, PropertyMode, Progress, PythonAlgorithm, WorkspaceGroupProperty, \
     FileAction, AlgorithmFactory
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, IntBoundedValidator, \
     LogicOperator, PropertyCriterion, PropertyManagerProperty, StringListValidator
@@ -346,9 +346,6 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _normalise(self, ws):
         """Normalises the provided WorkspaceGroup to the monitor 1."""
-        monID = 100000 # monitor 1
-        monitor_indices = "{},{}".format(mtd[ws][0].getNumberHistograms()-2,
-                                         mtd[ws][0].getNumberHistograms()-1)
         for entry_no, entry in enumerate(mtd[ws]):
             mon = ws + '_mon'
             ExtractMonitors(InputWorkspace=entry, DetectorWorkspace=entry,
@@ -796,9 +793,8 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _set_units(self, ws):
         output_unit = self.getPropertyValue('OutputUnits')
         if output_unit == 'TwoTheta':
-            if (self.getProperty('OutputTreatment').value == 'SumScans'
-                    and isinstance(mtd[ws], WorkspaceGroup)
-                    and mtd[ws].getNumberOfEntries() > 1):
+            if (len(self.getPropertyValue('Run').split(',')) > 1
+                    and self.getProperty('OutputTreatment').value == 'SumScans'):
                 self._merge_polarisations(ws)
             else:
                 ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta')
