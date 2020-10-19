@@ -10,7 +10,8 @@ from isis_powder.pearl_routines.pearl_enums import PEARL_FOCUS_MODES, PEARL_TT_M
 
 #                 Maps friendly user name (ext_name) -> script name (int_name)
 attr_mapping = [
-    ParamMapEntry(ext_name="attenuation_file_path", int_name="attenuation_file_path"),
+    ParamMapEntry(ext_name="attenuation_files", int_name="attenuation_files"),
+    ParamMapEntry(ext_name="attenuation_file", int_name="attenuation_file"),
     ParamMapEntry(ext_name="config_file", int_name="config_file_name"),
     ParamMapEntry(ext_name="calibration_mapping_file", int_name="cal_mapping_path"),
     ParamMapEntry(ext_name="calibration_directory", int_name="calibration_dir"),
