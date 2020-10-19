@@ -68,7 +68,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
             sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentPropertiesDictionary').value
             geometry_type = self.getPropertyValue('SampleGeometry')
-            required_keys = ['Mass', 'FormulaUnits', 'ChemicalFormula']
+            required_keys = ['Mass', 'FormulaUnits', 'ChemicalFormula', 'NumberDensity']
             if geometry_type != 'None':
                 required_keys += ['BeamHeight', 'BeamWidth', 'ContainerDensity',]
             if geometry_type == 'FlatPlate':
@@ -84,9 +84,6 @@ class PolDiffILLReduction(PythonAlgorithm):
             for key in required_keys:
                 if key not in sampleAndEnvironmentProperties:
                     issues['SampleAndEnvironmentPropertiesDictionary'] = '{} needs to be defined.'.format(key)
-
-            if 'Density' not in sampleAndEnvironmentProperties and 'NumberDensity' not in sampleAndEnvironmentProperties:
-                issues['SampleAndEnvironmentPropertiesDictionary'] = 'Either Density of NumberDensity needs to be defined.'
 
         if process == 'Sample':
             if self.getProperty('TransmissionInputWorkspace').isDefault :
@@ -528,7 +525,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         kwargs = {}
         kwargs['BeamHeight'] = self._sampleAndEnvironmentProperties['BeamHeight'].value
         kwargs['BeamWidth'] = self._sampleAndEnvironmentProperties['BeamWidth'].value
-        kwargs['SampleDensity'] = self._sampleAndEnvironmentProperties['Density'].value
+        kwargs['SampleDensityType'] = 'Number Density'
+        kwargs['SampleDensity'] = self._sampleAndEnvironmentProperties['NumberDensity'].value
         kwargs['Height'] = self._sampleAndEnvironmentProperties['Height'].value
         kwargs['SampleChemicalFormula'] = self._sampleAndEnvironmentProperties['ChemicalFormula'].value
         if 'container_formula' in self._sampleAndEnvironmentProperties:
