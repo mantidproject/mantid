@@ -300,6 +300,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._absMethod = self.getProperty("TypeOfCorrection").value
         self._sampleFormula = self.getProperty("SampleFormula").value
         self._massDensity = self.getProperty("MeasuredMassDensity").value
+        self._containerShape = self.getProperty("ContainerShape").value
 
         samRuns = self._getLinearizedFilenames("Filename")
         self._determineInstrument(samRuns[0])
@@ -1286,7 +1287,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         material = {"ChemicalFormula": self._sampleFormula,
                     "SampleMassDensity": self._massDensity}
-        donorWS = self._create_absorption_input(filename, num_wl_bins=1000, material=material, environment=self._containerShape)
+        environment = {'Name': 'InAir', 'Container': self._containerShape}
+        donorWS = self._create_absorption_input(filename, num_wl_bins=1000, material=material, environment=environment)
 
         absName = '__{}_abs_correction'.format(getBasename(filename))
 
@@ -1320,6 +1322,11 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         '''
         absName = '__{}_abs'.format(getBasename(filename))
 
+        api.LoadEventNexus(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True)
+
+        if self._info is None:
+            self._info= self._getinfo(absName)
+
         # first attempt to get the wavelength range from the properties file
         wl_min, wl_max = self._info['wavelength_min'].value, self._info['wavelength_max'].value
         # override that with what was given as parameters to the algorithm
@@ -1327,8 +1334,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             wl_min = self._wavelengthMin
         if self._wavelengthMax != Property.EMPTY_DBL:
             wl_max = self._wavelengthMax
-
-        api.LoadEventNexus(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True)
 
         # if it isn't found by this point, guess it from the time-of-flight range
         if (wl_min == wl_max == 0.):
