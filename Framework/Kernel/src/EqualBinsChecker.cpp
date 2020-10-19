@@ -61,7 +61,7 @@ void EqualBinsChecker::setErrorType(const ErrorType &errorType) {
  * Perform validation of the given X array
  * @returns :: Error string (empty if no error)
  */
-std::string EqualBinsChecker::validate(bool writeToLog) const {
+std::string EqualBinsChecker::validate() const {
   const auto &xData = m_xData;
   const auto xSize = xData.size();
   // First check for empty input
@@ -82,7 +82,7 @@ std::string EqualBinsChecker::validate(bool writeToLog) const {
       errorStr << "dx=" << xData[bin + 1] - xData[bin] << " reference dx=" << dx
                << " bin number=" << bin;
       return errorStr.str();
-    } else if (m_warn && diff > m_warningLevel && writeToLog) {
+    } else if (m_warn && diff > m_warningLevel) {
       // just warn the user
       printWarning = true;
     }
