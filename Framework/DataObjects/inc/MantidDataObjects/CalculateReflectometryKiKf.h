@@ -30,14 +30,19 @@ public:
    pre-calculates and caches to cos theta for speed.
    @param thetaIncident: incident theta value in degrees
    */
-  void setThetaIncident(double thetaIncident) override { m_sin_theta_i = sin(to_radians_factor * thetaIncident); }
+  void updateThetaIncident(double thetaIncident) override {
+    m_sin_theta_i = sin(to_radians_factor * thetaIncident);
+  }
 
   /**
-    Setter for the final theta value require for the calculation. Internally
-    pre-calculates and caches to cos theta for speed.
-    @param thetaFinal: final theta value in degrees
+    Set the final theta value from the detector twoTheta angle. Internally
+    pre-calculates and caches to cos theta_f for speed.
+    @param twoTheta: detector twoTheta value in degrees
     */
-  void setThetaFinal(double thetaFinal) override { m_sin_theta_f = sin(to_radians_factor * thetaFinal); }
+  void setTwoTheta(double twoTheta) override {
+    const double thetaFinal = twoTheta - m_theta_i;
+    m_sin_theta_f = sin(to_radians_factor * thetaFinal);
+  }
 
   /**
    Executes the calculation to determine Ki
@@ -58,14 +63,16 @@ public:
   }
   Mantid::Geometry::Quadrilateral createQuad(double lamUpper, double lamLower, double thetaUpper,
                                              double thetaLower) override {
-    setThetaFinal(thetaLower);
+    setTwoTheta(thetaLower);
     const Mantid::Kernel::V2D firstVertex(calculateDim0(lamLower), // highest qx
                                           calculateDim1(lamLower));
-    const Mantid::Kernel::V2D secondVertex(calculateDim0(lamUpper),
-                                           calculateDim1(lamUpper)); // lowest qz
-    setThetaFinal(thetaUpper);
-    const Mantid::Kernel::V2D thirdVertex(calculateDim0(lamLower),
-                                          calculateDim1(lamLower)); // highest qz
+    const Mantid::Kernel::V2D secondVertex(
+        calculateDim0(lamUpper),
+        calculateDim1(lamUpper)); // lowest qz
+    setTwoTheta(thetaUpper);
+    const Mantid::Kernel::V2D thirdVertex(
+        calculateDim0(lamLower),
+        calculateDim1(lamLower)); // highest qz
     const Mantid::Kernel::V2D fourthVertex(calculateDim0(lamUpper), // lowest qx
                                            calculateDim1(lamUpper));
 

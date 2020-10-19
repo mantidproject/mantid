@@ -283,8 +283,8 @@ ReflectometryTransform::executeMD(const Mantid::API::MatrixWorkspace_const_sptr 
     auto wavelengths = inputWs->readX(index);
     auto errors = inputWs->readE(index);
     const size_t nInputBins = wavelengths.size() - 1;
-    const double theta_final = spectraAxis->getValue(index);
-    m_calculator->setThetaFinal(theta_final);
+    const double twoTheta = spectraAxis->getValue(index);
+    m_calculator->setTwoTheta(twoTheta);
     // Loop over all bins in spectra
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
       const double &wavelength = 0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
@@ -334,8 +334,8 @@ ReflectometryTransform::execute(const Mantid::API::MatrixWorkspace_const_sptr &i
     auto wavelengths = inputWs->readX(index);
     auto errors = inputWs->readE(index);
     const size_t nInputBins = wavelengths.size() - 1;
-    const double theta_final = spectraAxis->getValue(index);
-    m_calculator->setThetaFinal(theta_final);
+    const double twoTheta = spectraAxis->getValue(index);
+    m_calculator->setTwoTheta(twoTheta);
     // Loop over all bins in spectra
     for (size_t binIndex = 0; binIndex < nInputBins; ++binIndex) {
       const double wavelength = 0.5 * (wavelengths[binIndex] + wavelengths[binIndex + 1]);
