@@ -251,10 +251,10 @@ Output:
 
 .. testoutput:: ExPolDiffILLReduction
 
-    Cadmium absorber transmission is 0.010
-    Quartz transmission is 0.688
-    Vanadium transmission is 0.872
-    Sample transmission is 0.947
+    Cadmium absorber transmission is 0.011
+    Quartz transmission is 0.700
+    Vanadium transmission is 0.886
+    Sample transmission is 0.962
 
 .. testcleanup:: ExPolDiffILLReduction
 
