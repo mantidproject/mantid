@@ -10,7 +10,6 @@ from mantid.api import FileProperty, MatrixWorkspaceProperty, MultipleFileProper
     FileAction, AlgorithmFactory
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, IntBoundedValidator, \
     LogicOperator, PropertyCriterion, PropertyManagerProperty, StringListValidator
-
 from mantid.simpleapi import *
 
 from scipy.constants import physical_constants
@@ -599,79 +598,6 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         return nMeasurements, nComponents
 
-    def _component_separation(self, ws):
-        """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
-        current sample. The method used is based on either the user's choice or the provided data structure."""
-
-        nMeasurements, nComponents = self._data_structure_helper()
-        componentNames = ['Coherent', 'Incoherent', 'Magnetic']
-        number_histograms = mtd[ws][0].getNumberHistograms()
-        block_size = mtd[ws][0].blocksize()
-        tmp_names = []
-
-        for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
-            dataY_nuclear = np.zeros(shape=(number_histograms, block_size))
-            dataY_incoherent = np.zeros(shape=(number_histograms, block_size))
-            dataY_magnetic = np.zeros(shape=(number_histograms, block_size))
-            for spectrum in range(number_histograms):
-                sigma_z_sf = mtd[ws][entry_no].readY(spectrum)
-                sigma_z_nsf = mtd[ws][entry_no+1].readY(spectrum)
-                if nMeasurements == 2:
-                    dataY_nuclear[spectrum] = 2.0 * sigma_z_nsf - sigma_z_sf  # Nuclear coherent
-                    dataY_incoherent[spectrum] = 2.0 * sigma_z_sf - sigma_z_nsf # Incoherent
-                    dataY_magnetic[spectrum] = 0 # Magnetic
-                elif nMeasurements == 6 or nMeasurements == 10:
-                    sigma_y_sf = mtd[ws][entry_no+2].readY(spectrum)
-                    sigma_y_nsf = mtd[ws][entry_no+3].readY(spectrum)
-                    sigma_x_sf = mtd[ws][entry_no+4].readY(spectrum)
-                    sigma_x_nsf = mtd[ws][entry_no+5].readY(spectrum)
-                    if nMeasurements == 6:
-                        # Magnetic component
-                        magnetic_component = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf )
-                        dataY_magnetic[spectrum] = magnetic_component
-                        # Nuclear coherent component
-                        dataY_nuclear[spectrum] = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
-                                                   - (sigma_x_sf + sigma_y_sf + sigma_z_sf)) / 6.0
-                        # Incoherent component
-                        dataY_incoherent[spectrum] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - magnetic_component
-                    else:
-                        sigma_xmy_sf = mtd[ws][entry_no+6].readY(spectrum)
-                        sigma_xmy_nsf = mtd[ws][entry_no+7].readY(spectrum)
-                        sigma_xpy_sf = mtd[ws][entry_no+8].readY(spectrum)
-                        sigma_xpy_nsf = mtd[ws][entry_no+9].readY(spectrum)
-                        # Magnetic component
-                        try:
-                            theta_0 = self._sampleAndEnvironmentProperties['ThetaOffset'].value
-                        except KeyError:
-                            raise RuntimeError("The value for theta_0 needs to be defined for the component separation in 10p method.")
-                        theta = mtd[ws][entry_no].detectorInfo().twoTheta(spectrum)
-                        alpha = theta - 0.5*np.pi - theta_0
-                        c0 = math.pow(math.cos(alpha), 2)
-                        c4 = math.pow(math.cos(alpha - np.pi/4.0), 2)
-                        magnetic_cos2alpha = (2*c0-4)*sigma_x_nsf + (2*c0+2)*sigma_y_nsf + (2-4*c0)*sigma_z_nsf
-                        magnetic_sin2alpha = (2*c4-4)*sigma_xpy_nsf + (2*c4+2)*sigma_xmy_nsf + (2-4*c4)*sigma_z_nsf
-                        magnetic_component = magnetic_cos2alpha * math.cos(2*alpha) + magnetic_sin2alpha * math.sin(2*alpha)
-                        dataY_magnetic[spectrum] = magnetic_component
-                        # Nuclear coherent component
-                        dataY_nuclear[spectrum] = (2.0 * (sigma_x_nsf + sigma_y_nsf + 2*sigma_z_nsf + sigma_xpy_nsf + sigma_xmy_nfs)
-                                                   - (sigma_x_sf + sigma_y_sf + 2*sigma_z_sf + sigma_xpy_sf + sigma_xmy_sf)) / 12.0
-                        # Incoherent component
-                        dataY_incoherent[spectrum] = 0.25 * (sigma_x_sf + sigma_y_sf + 2*sigma_z_sf + sigma_xpy_sf + sigma_xmy_sf) \
-                            - magnetic_component
-
-            dataY = [dataY_nuclear, dataY_incoherent, dataY_magnetic]
-            for component in range(nComponents):
-                dataX = mtd[ws][entry_no].readX(0)
-                dataE = np.sqrt(abs(dataY[component]))
-                tmp_name = str(mtd[ws][entry_no].name())[:-1] + componentNames[component]
-                tmp_names.append(tmp_name)
-                CreateWorkspace(DataX=dataX, DataY=dataY[component], dataE=dataE,
-                                Nspec=mtd[ws][entry_no].getNumberHistograms(),
-                                OutputWorkspace=tmp_name)
-        output_name = self.getPropertyValue('ProcessAs') + '_component_separation'
-        GroupWorkspaces(tmp_names, OutputWorkspace=output_name)
-        return output_name
-
     def _conjoin_components(self, ws):
         """Conjoins the component workspaces coming from a theta scan."""
         components = [[], []]
@@ -901,7 +827,13 @@ class PolDiffILLReduction(PythonAlgorithm):
                     self._merge_polarisations(ws, average_detectors=True)
                 if self._user_method != 'None':
                     progress.report('Separating components')
-                    component_ws = self._component_separation(ws)
+                    theta_0 = 0
+                    if self._user_method == '10p':
+                        try:
+                            theta_0 = self._sampleAndEnvironmentProperties['ThetaOffset'].value
+                        except KeyError:
+                            raise RuntimeError("The value for theta_0 needs to be defined for the component separation in 10p method.")
+                    component_ws = ILLComponentSeparation(ws, self._user_method, theta_0)
                 else:
                     component_ws = ''
                 if process == 'Vanadium':
