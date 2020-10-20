@@ -46,7 +46,7 @@ endif()
 #   builder - Name of the sphinx builder: html, qthelp etc
 #   target_name - Optional target name. Default=docs-${builder}
 function (add_sphinx_build_target builder)
-  set(runner ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidpython)
+  set(runner ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidpython$<$<BOOL:${WIN32}>:.bat>)
   set(runner_args "--classic")
   if(ARGC GREATER 1)
     set(target_name ${ARGV1})
