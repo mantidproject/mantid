@@ -10,7 +10,7 @@ from numpy.testing import assert_allclose
 from os import path
 import unittest
 
-from corelli.calibration.utils import (apply_calibration, bank_numbers, calibrate_tube, load_banks, peak_y_table,
+from corelli.calibration.utils import (apply_calibration, bank_numbers, calibrate_tube, load_banks, calculate_peak_y_table,
                                        wire_positions)
 from mantid import AnalysisDataService, config
 from mantid.simpleapi import (CreateEmptyTableWorkspace, DeleteWorkspaces, GroupWorkspaces, LoadEmptyInstrument,
@@ -166,11 +166,11 @@ class TestUtils(unittest.TestCase):
 
         # Check we raise an assertion error since the number of tubes is different than number of tables
         with self.assertRaises(AssertionError) as exception_info:
-            peak_y_table(peak_table, parameters_table, output_workspace='PeakYTable')
+            calculate_peak_y_table(peak_table, parameters_table, output_workspace='PeakYTable')
         assert 'number of rows in peak_table different than' in str(exception_info.exception)
         # Add another parameter table to ParametersTableGroup, the create peak_vertical_table
         peak_table.addRow(['tube2', 0, 1, 2])
-        table = peak_y_table(peak_table, parameters_table, output_workspace='PeakYTable')
+        table = calculate_peak_y_table(peak_table, parameters_table, output_workspace='PeakYTable')
         assert AnalysisDataService.doesExist('PeakYTable')
         assert_allclose(list(table.row(0).values())[1:], [0, 1, 4])
         assert_allclose(list(table.row(1).values())[1:], [1, 3, 7])

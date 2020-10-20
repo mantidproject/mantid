@@ -19,7 +19,7 @@ from mantid.simpleapi import (CloneWorkspace, CreateEmptyTableWorkspace, CreateW
 from Calibration import tube
 from Calibration.tube_spec import TubeSpec
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
-from corelli.calibration.utils import bank_numbers, PIXELS_PER_TUBE, peak_y_table, TUBES_IN_BANK, wire_positions
+from corelli.calibration.utils import bank_numbers, PIXELS_PER_TUBE, calculate_peak_y_table, TUBES_IN_BANK, wire_positions
 
 
 def sufficient_intensity(input_workspace: WorkspaceTypes, bank_name: str, minimum_intensity:float = 10000) -> bool:
@@ -103,7 +103,7 @@ def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1
         RenameWorkspace(InputWorkspace='CalibTable', OutputWorkspace=calibration_table)
     if peak_pixel_positions_table != 'PeakTable':
         RenameWorkspace(InputWorkspace='PeakTable', OutputWorkspace=peak_pixel_positions_table)
-    peak_y_table(peak_pixel_positions_table, parameters_table_group, output_workspace=peak_vertical_positions_table)
+    calculate_peak_y_table(peak_pixel_positions_table, parameters_table_group, output_workspace=peak_vertical_positions_table)
 
 
 def collect_bank_fit_results(output_workspace: str,
@@ -186,7 +186,7 @@ def collect_bank_fit_results(output_workspace: str,
     return workspace
 
 
-def criterion_peak_vertical_position(peak_y_table: InputTable,
+def criterion_peak_vertical_position(peak_table: InputTable,
                                      summary: Optional[str] = None,
                                      zscore_threshold: float = 2.5,
                                      deviation_threshold: float = 0.0035) -> np.ndarray:
@@ -200,13 +200,13 @@ def criterion_peak_vertical_position(peak_y_table: InputTable,
       \delta_j^2 = \frac{1}{n_w} \Sum (p_{ij} - <p_i>)^2
       assert d_j < threshold
 
-    :param peak_y_table: vertical positions of the wire shadows for each tube, in meters
+    :param peak_table: vertical positions of the wire shadows for each tube, in meters
     :param summary: name of output Workspace2D containing deviations and Z-score for each tube.
     :param zscore_threshold: maximum Z-score for the vertical positions of a tube.
     :param deviation_threshold: maximum deviation (in meters) for the vertical positions of the wire shadows.
     :return: array of booleans, one per tube. `True` is the tube passes the acceptance criterion, `False` otherwise.
     """
-    table = mtd[str(peak_y_table)]  # handle to the peak table
+    table = mtd[str(peak_table)]  # handle to the peak table
     peak_count = table.columnCount() - 1  # the first column contains the names of the tubes
     # `positions_average` stores the vertical position for each wire shadow, averaged for all tubes
     positions_average = [np.mean(table.column(column_number)) for column_number in range(1, 1 + peak_count)]
@@ -407,6 +407,7 @@ def calibrate_bank(workspace: WorkspaceTypes,
                    calibration_table: str,
                    mask_table: str = 'MaskTable',
                    peak_table: str = None,
+                   peak_y_table: str = None,
                    fit_results: Optional[str] = None,
                    shadow_height: float = 1000,
                    shadow_width: float = 4,
@@ -417,8 +418,8 @@ def calibrate_bank(workspace: WorkspaceTypes,
     table of calibrated detector IDs and a table of non-calibrated detector IDs
 
     This function produces the following temporary workspaces: 'PeakTable' (TableWorkspace),
-    'parameters_table' (WorkspaceGroup), and 'acceptance' (Workspace2D). Thus, any extant workspace having
-    any of these names will be overwritten
+    'PeakTable' (TableWorkspace), 'ParametersTable' (WorkspaceGroup), and 'acceptance' (Workspace2D).
+    Thus, any extant workspace having any of these names will be overwritten
 
     :param workspace: input Workspace2D containing total neutron counts per pixel
     :param bank_name: a string of the form 'bankI' where 'I' is a bank number
@@ -428,6 +429,9 @@ def calibrate_bank(workspace: WorkspaceTypes,
         unsuccessfully fitted tubes
     :param peak_table: output table with pixel positions for each shadow, for each tube. If `None`, then no
         table is output
+    :param peak_y_table: output table containing the positions of the wire shadows for each tube
+        along the vertical (Y) axis. This positions are the result if evaluating the peak pixel positions with
+        the quadratic function that translates pixel positions to vertical positions
     :param fit_results: name of output Workspace2D containing acceptance criterion results and coefficients of the
         quadratic function fitting shadow locations in the tube to wire positions.
     :param shadow_height: initial guess for the decrease in neutron counts caused by the calibrating wire
@@ -441,11 +445,12 @@ def calibrate_bank(workspace: WorkspaceTypes,
     # Validate inputs are taken care in function fit_bank
     # Fit the tubes in the bank
     peak_table_temp = 'PeakTable' if peak_table is None else peak_table
+    peak_y_table_temp = 'PeakYTable' if peak_y_table is None else peak_y_table
     fit_bank(workspace, bank_name, shadow_height, shadow_width, fit_domain, minimum_intensity,
              calibration_table=calibration_table, peak_pixel_positions_table=peak_table_temp,
-             parameters_table_group='parameters_table')
+             peak_vertical_positions_table=peak_y_table_temp, parameters_table_group='parameters_table')
     # Run the acceptance criterion to determine the failing tubes
-    tubes_fit_success = criterion_peak_pixel_position(peak_table_temp, summary='acceptance')
+    tubes_fit_success = criterion_peak_vertical_position(peak_y_table_temp, summary='acceptance')
     # collect acceptances and polynomial coefficients
     if isinstance(fit_results, str) and len(fit_results) > 0:
         collect_bank_fit_results(fit_results, acceptance_summary='acceptance',
@@ -457,6 +462,8 @@ def calibrate_bank(workspace: WorkspaceTypes,
     DeleteWorkspaces(['parameters_table', 'acceptance'])
     if peak_table is None:
         DeleteWorkspaces([peak_table_temp])
+    if peak_y_table is None:
+        DeleteWorkspaces([peak_y_table_temp])
     return mtd[calibration_table], mask_table_workspace
 
 

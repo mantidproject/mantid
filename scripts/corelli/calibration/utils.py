@@ -93,9 +93,9 @@ def load_banks(filename: str, bank_selection: str, output_workspace: str) -> Wor
     return mtd[output_workspace]
 
 
-def peak_y_table(peak_table: InputTable,
-                 parameters_table_group: WorkspaceGroupTypes,
-                 output_workspace: str = 'PeakYTable') -> TableWorkspace:
+def calculate_peak_y_table(peak_table: InputTable,
+                           parameters_table_group: WorkspaceGroupTypes,
+                           output_workspace: str = 'PeakYTable') -> TableWorkspace:
     r"""
     Evaluate the Y-coordinate of each wire shadow given the estimated pixel positions of the
     shadows and the polynomial function translating pixel positions to y-coordinate
@@ -183,7 +183,7 @@ def calibrate_tube(workspace: WorkspaceTypes,
     if output_peak_table != 'PeakTable':  # 'PeakTable' is output by tube.calibrate
         RenameWorkspace(InputWorkspace='PeakTable', OutputWorkspace=output_peak_table)
     # Table with shadow positions along the vertical axis
-    peak_y_table(output_peak_table, 'ParametersTableGroup', output_workspace=output_peak_y_table)
+    calculate_peak_y_table(output_peak_table, 'ParametersTableGroup', output_workspace=output_peak_y_table)
     # Table with optimized parameters for the polynomial coefficients A0, A1, A2, and chi-square
     RenameWorkspace(InputWorkspace=mtd['ParametersTableGroup'].getItem(0), OutputWorkspace=output_parameters_table)
     UnGroupWorkspace(InputWorkspace='ParametersTableGroup')

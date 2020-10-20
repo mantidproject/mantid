@@ -331,8 +331,7 @@ class TestBank(unittest.TestCase):
         DeleteWorkspaces(['calibration_table'])  # clean-up
 
         # tubes 3, 8, and 13 have very faint wire shadows. Thus, mask these tubes
-        calibration, mask = calibrate_bank(self.cases['124023_bank14'], 'bank14',
-                                           calibration_table='calibration_table')
+        calibration, mask = calibrate_bank(self.cases['124023_bank14'], 'bank14', 'calibration_table')
         assert calibration.rowCount() == 256 * (16 - 3)
         assert calibration.columnCount() == 2  # Detector ID, Position
         assert AnalysisDataService.doesExist('calibration_table')
@@ -349,7 +348,7 @@ class TestBank(unittest.TestCase):
         labels = [axis.label(i) for i in range(workspace.getNumberHistograms())]
         assert labels == ['success', 'deviation', 'Z-score', 'A0', 'A1', 'A2']
         assert_allclose(workspace.readY(0), [1.0] * TUBES_IN_BANK)  # success status for first tube
-        self.assertAlmostEqual(max(workspace.readY(2)), 1.728, delta=0.001)  # maximum Z-score
+        self.assertAlmostEqual(max(workspace.readY(2)), 2.73, delta=0.01)  # maximum Z-score
         self.assertAlmostEqual(max(workspace.readY(3)), -0.445, delta=0.001)  # maximum A0 value
         self.assertAlmostEqual(max(workspace.readE(3)), 1.251, delta=0.001)  # maximum A0 error
         DeleteWorkspaces(['calibration_table', 'fits'])  # a bit of clean-up
@@ -357,13 +356,14 @@ class TestBank(unittest.TestCase):
     def test_calibrate_banks(self):
         calibrations, masks = calibrate_banks(self.cases['124023_banks_14_15'], '14-15')
         assert list(calibrations.getNames()) == ['calib14', 'calib15']
-        assert list(masks.getNames()) == ['mask14']
-        assert mtd['calib14'].rowCount() == 256 * (16 - 3)
+        assert list(masks.getNames()) == ['mask14', 'mask15']
+        assert mtd['calib14'].rowCount() == 256 * (16 - 3)  # three uncalibrated tubes
         assert mtd['mask14'].rowCount() == 256 * 3
-        assert mtd['calib15'].rowCount() == 256 * 16
+        assert mtd['calib15'].rowCount() == 256 * (16 - 1)  # one uncalibrated tubes
+        assert mtd['mask15'].rowCount() == 256
         # Check for success status
         self.assertEqual(mtd['fit14'].readY(0).tolist(), [1, 1, 0., 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1])
-        self.assertEqual(mtd['fit15'].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
+        self.assertEqual(mtd['fit15'].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1])
         # Check for A1 coefficient values
         self.assertAlmostEqual(max(mtd['fit14'].readY(4)), 0.0044, delta=0.0001)
         self.assertAlmostEqual(max(mtd['fit15'].readY(4)), 0.0037, delta=0.0001)
