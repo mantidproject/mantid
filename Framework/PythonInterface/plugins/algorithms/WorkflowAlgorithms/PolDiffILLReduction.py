@@ -841,7 +841,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     self._merge_polarisations(ws, average_detectors=True)
                 if self._user_method != 'None':
                     progress.report('Separating components')
-                    component_ws = self._separate_components(ws)
+                    component_ws = self._separate_components(ws, process)
                 else:
                     component_ws = ''
                 if process == 'Vanadium':
