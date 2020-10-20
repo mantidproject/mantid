@@ -53,10 +53,6 @@ private:
   void setButtonsEnabled(const bool &enabled);
   void setRunEnabled(const bool &enabled);
   void setSaveResultEnabled(const bool &enabled);
-  void updatePlotRange(const QString &rangeName,
-                       MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-                       const QString &startRangePropName = "",
-                       const QString &endRangePropName = "");
 
   Ui::Elwin m_uiForm;
   QtTreePropertyBrowser *m_elwTree;

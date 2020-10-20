@@ -505,8 +505,6 @@ void Elwin::newPreviewFileSelected(int index) {
  */
 void Elwin::plotInput() {
   IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
-  Elwin::updatePlotRange("ElwinIntegrationRange", m_uiForm.ppPlot,
-                         "IntegrationStart", "IntegrationEnd");
   setDefaultSampleLog(inputWorkspace());
 }
 
@@ -658,33 +656,6 @@ void Elwin::setRunEnabled(const bool &enabled) {
 
 void Elwin::setSaveResultEnabled(const bool &enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
-}
-
-/*
- * Updates the plot range with the specified name, to match the range of
- * the sample curve.
- *
- * @param rangeName           The name of the range to update.
- * @param previewPlot         The preview plot widget, in which the range
- *                            is specified.
- * @param startRangePropName  The name of the property specifying the start
- *                            value for the range.
- * @param endRangePropName    The name of the property specifying the end
- *                            value for the range.
- */
-void Elwin::updatePlotRange(const QString &rangeName,
-                            MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-                            const QString &startRangePropName,
-                            const QString &endRangePropName) {
-
-  if (auto const workspace = inputWorkspace()) {
-    try {
-      auto const xRange = getXRangeFromWorkspace(workspace);
-      auto rangeSelector = previewPlot->getRangeSelector(rangeName);
-    } catch (std::exception &exc) {
-      showMessageBox(exc.what());
-    }
-  }
 }
 
 } // namespace IDA
