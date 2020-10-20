@@ -128,6 +128,9 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         view = view if view else TableWorkspaceDisplayView(self, parent)
         TableWorkspaceDataPresenter.__init__(self, model, view)
 
+        from mantid.api import IPeaksWorkspace
+        self.is_peaks_worksapce = isinstance(ws, IPeaksWorkspace)
+
         self.name = name if name else self.model.get_name()
         self.container = container if container else StatusBarView(parent,
                                                                    self.view,
