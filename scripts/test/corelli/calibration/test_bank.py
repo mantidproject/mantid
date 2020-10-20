@@ -209,6 +209,7 @@ class TestBank(unittest.TestCase):
         DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable', 'summary'])  # a bit of clean-up
 
     def test_purge_table(self):
+        r"""We use either of two criterion functions"""
         with self.assertRaises(AssertionError) as exception_info:
             purge_table('I am not here', 'table', [True, False])
         assert 'Input workspace I am not here does not exists' in str(exception_info.exception)
@@ -227,7 +228,8 @@ class TestBank(unittest.TestCase):
 
         # tube11 is not working at all. Thus, purge only one tube
         fit_bank(self.cases['124018_bank45'], 'bank45')
-        tube_fit_success = criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        tube_fit_success = criterion_peak_vertical_position('PeakYTable', zscore_threshold=2.5,
+                                                            deviation_threshold=0.0035)
         unpurged_row_count = mtd['CalibTable'].rowCount()
         purge_table(self.cases['124018_bank45'], 'CalibTable', tube_fit_success)
         assert mtd['CalibTable'].rowCount() == unpurged_row_count - 256
@@ -236,7 +238,8 @@ class TestBank(unittest.TestCase):
 
         # tubes 3, 8, and 13 have very faint wire shadows. Thus, purge three tubes
         fit_bank(self.cases['124023_bank14'], 'bank14')
-        tube_fit_success = criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        tube_fit_success = criterion_peak_vertical_position('PeakYTable', zscore_threshold=2.5,
+                                                            deviation_threshold=0.0035)
         unpurged_row_count = mtd['CalibTable'].rowCount()
         purge_table(self.cases['124023_bank14'], 'CalibTable', tube_fit_success)
         assert mtd['CalibTable'].rowCount() == unpurged_row_count - 256 * 3
@@ -253,7 +256,8 @@ class TestBank(unittest.TestCase):
 
         # tube11 is not working at all. Thus, mask this tube
         fit_bank(self.cases['124018_bank45'], 'bank45')
-        tube_fit_success = criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        tube_fit_success = criterion_peak_vertical_position('PeakTable', zscore_threshold=2.5,
+                                                            deviation_threshold=0.0035)
         mask_bank('bank45', tube_fit_success, 'masked_tubes')
         detector_ids = mtd['masked_tubes'].column(0)
         assert detector_ids[0], detector_ids[-1] == [182784, 182784 + 256]
@@ -261,7 +265,8 @@ class TestBank(unittest.TestCase):
 
         # tubes 3, 8, and 13 have very faint wire shadows. Thus, mask these tubes
         fit_bank(self.cases['124023_bank14'], 'bank14')
-        tube_fit_success = criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        tube_fit_success = criterion_peak_vertical_position('PeakTable', zscore_threshold=2.5,
+                                                            deviation_threshold=0.0035)
         mask_bank('bank14', tube_fit_success, 'masked_tubes')
         detector_ids = mtd['masked_tubes'].column(0)
         assert detector_ids[0], detector_ids[-1] == [182784, 182784 + 3 * 256]
