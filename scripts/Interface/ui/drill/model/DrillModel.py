@@ -109,6 +109,8 @@ class DrillModel(QObject):
         self.experimentId = None
         self.algorithm = None
         self.samples = list()
+        self.groups = dict()
+        self.masterSample = dict()
         self.settings = dict()
         self.controller = None
         self.rundexFile = None
@@ -454,6 +456,46 @@ class DrillModel(QObject):
         else:
             self.samples[row][self.columns[column]] = contents
             self.checkParameter(self.columns[column], contents, row)
+
+    def setSamplesGroup(self, samples, groupName):
+        """
+        Set the group of several samples.
+
+        Args:
+            samples (list(int)): sample indexes
+            groupName (str): name of the group
+        """
+        self.groups[groupName] = samples
+
+    def getSamplesGroup(self):
+        """
+        Get the samples groups.
+
+        Returns:
+            dict(str, list(int)): groups of samples
+        """
+        groups = dict()
+        groups.update(self.groups)
+        return groups
+
+    def setGroupMaster(self, groupName, sample):
+        """
+        Set the master sample of group.
+
+        Args:
+            groupName (str): name of the group
+            sample (int): sample index
+        """
+        self.masterSample[groupName] = sample
+
+    def getGroupMaster(self):
+        """
+        Get the master samples of each groups.
+
+        Returns:
+            dict(str, int): master samples for each group.
+        """
+        return self.masterSample
 
     def getProcessingParameters(self, sample):
         """

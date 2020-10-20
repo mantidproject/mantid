@@ -31,6 +31,7 @@ class DrillPresenter:
         self.view.rowAdded.connect(self.model.addSample)
         self.view.rowDeleted.connect(self.model.deleteSample)
         self.view.dataChanged.connect(self.model.changeParameter)
+        self.view.groupChanged.connect(self.onGroupChanged)
         self.view.process.connect(self.process)
         self.view.processStopped.connect(self.stopProcessing)
         self.view.rundexLoaded.connect(self.rundexLoaded)
@@ -49,6 +50,20 @@ class DrillPresenter:
         self.model.paramError.connect(self.view.set_cell_error)
 
         self.updateViewFromModel()
+
+    def onGroupChanged(self, groupName):
+        """
+        Triggered when the view notifies a change in a specific group of rows.
+        This method is getting the content of that group and the associated
+        master row and set them in the model.
+
+        Args:
+            groupName (str): name of the modified group
+        """
+        samples = self.view.getRowsInGroup(groupName)
+        masterSample = self.view.getMasterRow(groupName)
+        self.model.setSamplesGroup(samples, groupName)
+        self.model.setGroupMaster(groupName, masterSample)
 
     def process(self, rows):
         """
