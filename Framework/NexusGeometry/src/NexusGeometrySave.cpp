@@ -352,7 +352,6 @@ void writeXYZPixeloffset(H5::Group &grp,
   bool yIsZero = isApproxZero(posy, PRECISION);
   bool zIsZero = isApproxZero(posz, PRECISION);
 
-  auto const &bankName = compInfo.name(idx);
   const auto nDetectorsInBank = static_cast<hsize_t>(posx.size());
 
   int rank = 1;
