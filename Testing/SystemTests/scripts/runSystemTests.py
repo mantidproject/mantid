@@ -11,7 +11,7 @@ import sys
 import time
 from multiprocessing import Process, Array, Manager, Value, Lock
 
-# Prevents erros in systemtests that use matplotlib directly
+# Prevents errors in systemtests that use matplotlib directly
 os.environ['MPLBACKEND'] = 'Agg'
 
 #########################################################################
@@ -20,6 +20,7 @@ os.environ['MPLBACKEND'] = 'Agg'
 
 start_time = time.time()
 
+DEFAULT_QT_API = "pyqt5"
 THIS_MODULE_DIR = os.path.dirname(os.path.realpath(__file__))
 DEFAULT_FRAMEWORK_LOC = os.path.realpath(os.path.join(THIS_MODULE_DIR, "..", "lib", "systemtests"))
 DATA_DIRS_LIST_PATH = os.path.join(THIS_MODULE_DIR, "datasearch-directories.txt")
@@ -58,6 +59,8 @@ def main():
     parser.add_argument("--frameworkLoc",
                         help="location of the system test framework (default=%s)" %
                         DEFAULT_FRAMEWORK_LOC)
+    parser.add_argument("--qt_api",
+                        help="The qt version to use for the system test (default={0}).".format(DEFAULT_QT_API))
     parser.add_argument("--disablepropmake",
                         action="store_false",
                         dest="makeprop",
@@ -133,6 +136,7 @@ def main():
                         action="store_true",
                         help="Skip tests that do not import correctly rather raising an error.")
     parser.set_defaults(frameworkLoc=DEFAULT_FRAMEWORK_LOC,
+                        qt_api=DEFAULT_QT_API,
                         executable=sys.executable,
                         makeprop=True,
                         loglevel="information",
@@ -141,6 +145,9 @@ def main():
                         output_on_failure=False,
                         clean=False)
     options = parser.parse_args()
+
+    # Set the Qt version to use during the system tests
+    os.environ['QT_API'] = options.qt_api
 
     # import the system testing framework
     sys.path.append(options.frameworkLoc)

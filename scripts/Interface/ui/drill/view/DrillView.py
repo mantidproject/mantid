@@ -465,7 +465,8 @@ class DrillView(QMainWindow):
         Ask for the saving of the table in a rundex file.
         """
         filename = QFileDialog.getSaveFileName(
-                self, 'Save rundex', '.', "Rundex (*.mrd)"
+                self, 'Save rundex', './*.mrd',
+                "Rundex (*.mrd);;All files (*.*)"
                 )
         if not filename[0]:
             return

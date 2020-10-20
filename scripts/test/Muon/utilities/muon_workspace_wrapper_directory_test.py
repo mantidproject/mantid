@@ -68,7 +68,7 @@ class MuonWorkspaceAddDirectoryTest(unittest.TestCase):
     # ----------------------------------------------------------------------------------------------
 
     def test_that_if_workspace_exists_with_same_name_as_group_then_it_is_replaced(self):
-        group = simpleapi.CreateWorkspace([1, 2, 3, 4], [10, 10, 10, 10])
+        simpleapi.CreateWorkspace([1, 2, 3, 4], [10, 10, 10, 10], OutputWorkspace="group")
 
         workspace_handle = MuonWorkspaceWrapper('group')
         workspace_handle.show("group/ws1")

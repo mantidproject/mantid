@@ -24,6 +24,6 @@ class SampleLogsViewTest(unittest.TestCase, QtWidgetFinder):
         self.assert_widget_created()
         pres.view.close()
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
 
         self.assert_no_toplevel_widgets()

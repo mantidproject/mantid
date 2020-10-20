@@ -746,11 +746,11 @@ PropertyHandler *FitPropertyBrowser::addFunction(const std::string &fnName) {
 
 void FitPropertyBrowser::removeFunction(PropertyHandler *handler) {
   if (handler) {
+    emit functionRemoved();
+    emit functionChanged();
     emit removePlotSignal(getHandler());
     handler->removeFunction();
     compositeFunction()->checkFunction();
-    emit functionRemoved();
-    emit functionChanged();
   }
 }
 

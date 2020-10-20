@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 
-from mantid.simpleapi import logger
-import abins.test_helpers
 import abins.input
+import abins.test_helpers
+
 
 class AbinsLoadGAUSSIANTest(unittest.TestCase, abins.input.Tester):
 
@@ -16,6 +16,7 @@ class AbinsLoadGAUSSIANTest(unittest.TestCase, abins.input.Tester):
         abins.test_helpers.remove_output_files(list_of_names=["LoadGAUSSIAN"])
 
         #  *************************** USE CASES ********************************************
+
     # ===================================================================================
     # | Use cases: molecular calculation for GAUSSIAN03 Hartree Fock, Unix              |
     # ===================================================================================
