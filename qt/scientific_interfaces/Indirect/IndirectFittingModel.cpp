@@ -166,7 +166,7 @@ shortToLongParameterNames(const IFunction_sptr &function) {
 template <typename Map, typename KeyMap>
 Map mapKeys(const Map &map, const KeyMap &mapping) {
   Map mapped;
-  for (const auto value : map) {
+  for (const auto& value : map) {
     auto it = mapping.find(value.first);
     if (it != mapping.end())
       mapped[it->second] = value.second;

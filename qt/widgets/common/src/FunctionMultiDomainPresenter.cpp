@@ -400,7 +400,7 @@ void FunctionMultiDomainPresenter::editLocalParameterFinish(int result) {
 
 void FunctionMultiDomainPresenter::updateViewFromModel() {
   const auto index = m_model->currentDomainIndex();
-  for (auto const name : m_model->getParameterNames()) {
+  for (auto const& name : m_model->getParameterNames()) {
     auto const value = m_model->getParameter(name);
     m_view->setParameter(name, value);
     m_view->setParameterError(name, m_model->getParameterError(name));

@@ -137,7 +137,7 @@ template <typename ValueType> Json::Value encodeAsJson(const ValueType &value) {
 template <typename ValueType>
 Json::Value encodeAsJson(const std::vector<ValueType> &vectorValue) {
   Json::Value jsonArray(Json::arrayValue);
-  for (const auto &element : vectorValue) {
+  for (const auto& element : vectorValue) {
     jsonArray.append(encodeAsJson(element));
   }
   return jsonArray;

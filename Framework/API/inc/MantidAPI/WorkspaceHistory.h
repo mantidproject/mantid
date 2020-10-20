@@ -41,7 +41,7 @@ public:
   /// Copy constructor
   WorkspaceHistory(const WorkspaceHistory &) = default;
   /// Deleted copy assignment operator
-  WorkspaceHistory &operator=(const WorkspaceHistory &) = default;
+  WorkspaceHistory &operator=(const WorkspaceHistory &) = delete;
   /// Retrieve the algorithm history list
   const AlgorithmHistories &getAlgorithmHistories() const;
   /// Retrieve the environment history

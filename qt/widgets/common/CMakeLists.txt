@@ -192,7 +192,6 @@ set(
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
-  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RenameParDialog.h
   inc/MantidQtWidgets/Common/RepoModel.h
@@ -520,7 +519,6 @@ set(
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
-  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RepoTreeView.h
   inc/MantidQtWidgets/Common/RepoModel.h
