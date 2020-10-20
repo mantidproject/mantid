@@ -34,6 +34,7 @@ Bugfixes
 ########
 
 - Dummy detectors in polaris workspaces no longer prevent unit conversion.
+- Focus in PEARL powder diffraction scripts no longer fails if previous run has left Van splines workspace group in ADS
 
 
 Engineering Diffraction
