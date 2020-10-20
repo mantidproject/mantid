@@ -3,28 +3,30 @@ digraph FullTreatment {
 
   subgraph params {
     $param_style
-    A
+    AT
     B
     T
     C
-    R
+    A
+    Q
+    V
     S
   }
 
-  A -> B
-  A -> T
-  A -> C
-  A -> R
-  A -> S
+  AT -> B
+  AT -> T
   B -> T
-  B -> C
-  B -> R
-  B -> S
-  T -> C
-  T -> R
+  A -> Q
+  C -> Q
+  T -> Q
+  Q -> V
+  T -> V
+  C -> V
+  A -> V
+  V -> S
+  Q -> S
   T -> S
-  C -> R
+  A -> S
   C -> S
-  R -> S
 
 }

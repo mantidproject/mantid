@@ -39,11 +39,6 @@ digraph Sample {
     SeparateComponents
   }
 
-  subgraph process {
-    $process_style
-    ScaleByFluxFactor
-  }
-
   Run -> Load
   D7YIGPositionCalibration -> Load
   Load -> Divide
@@ -56,8 +51,7 @@ digraph Sample {
   Multiply -> DetectorEfficiencyCorUser
   DetectorEfficiencyCorUser -> PaalmanPingsMonteCarloAbsorption
   SampleAndEnvironmentProperties -> PaalmanPingsMonteCarloAbsorption
-  PaalmanPingsMonteCarloAbsorption -> ConvertUnits
-  ConvertUnits -> SumCountsOrAverage
+  PaalmanPingsMonteCarloAbsorption -> SumCountsOrAverage
   SumCountsOrAverage -> SumOverlappingTubes
   SumCountsOrAverage -> Plus
   Plus -> SeparateComponents
@@ -65,7 +59,10 @@ digraph Sample {
   SeparateComponents -> AbsoluteScaleBy
   VanadiumInputWorkspace -> AbsoluteScaleBy
   AbsoluteScaleBy -> Divide2
-  Divide2 -> OutputWorkspace
+  Divide2 -> ConvertUnits
+  ConvertUnits -> ConvertSpectrumAxis
+  ConvertUnits -> OutputWorkspace
+  ConvertSpectrumAxis -> OutputWorkspace
 }
 
 

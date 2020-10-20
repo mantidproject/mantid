@@ -47,12 +47,14 @@ digraph Vanadium {
   QuartzInputWorkspace -> Multiply
   Multiply -> PaalmanPingsMonteCarloAbsorption
   SampleAndEnvironmentProperties -> PaalmanPingsMonteCarloAbsorption
-  PaalmanPingsMonteCarloAbsorption -> ConvertUnits
-  ConvertUnits -> SumCountsOrAverage
+  PaalmanPingsMonteCarloAbsorption -> SumCountsOrAverage
   SumCountsOrAverage -> SumOverlappingTubes
   SumCountsOrAverage -> Plus
+  SumOverlappingTubes -> SeparateComponents
   Plus -> SeparateComponents
-  SeparateComponents -> Divide2
-  SumOverlappingTubes -> Divide2
+  SeparateComponents -> ConvertUnits
+  ConvertUnits -> ConvertSpectrumAxis
+  ConvertSpectrumAxis -> Divide2
+  ConvertUnits -> Divide2
   Divide2 -> OutputWorkspace
 }

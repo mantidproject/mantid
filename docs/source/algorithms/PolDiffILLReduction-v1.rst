@@ -64,8 +64,8 @@ where input from transmission is indispensable.
 
 In the flowcharts below the yellow ovals represent the inputs, the grey parallelograms are the outputs for each process type.
 
-Absorber
-########
+Absorber transmission
+#####################
 
 .. diagram:: PolDiffILLReduction-v1_absorber_wkflw.dot
 
@@ -79,8 +79,8 @@ Transmission
 
 .. diagram:: PolDiffILLReduction-v1_transmission_wkflw.dot
 
-Container
-#########
+Container/Absorber
+##################
 
 .. diagram:: PolDiffILLReduction-v1_container_wkflw.dot
 
@@ -104,14 +104,15 @@ Full Treatment
 ##############
 
 Full treatment is built by stacking up unary reductions with corresponding **ProcessAs**. The diagram below illustrates the flow of processing.
-Letters denote absorber (A), beam (B), transmission (T), container (C), reference (R), sample (S).
-A is processed first, and passed to all the other processes.
-B takes only A as input, and the output of B is needed by the rest.
-T takes A and B as inputs, and the calculated transmission is used by C, R and S respectively.
-C takes A, B and the container T as input, and the output is supplied to R and S respectively.
-R takes A, B, its T, and C, and the output is seeded to S.
-S takes A, B, its T and C, as well as R as inputs.
-The output of S is passed to final step integration.
+Letters denote absorber transmission (AT), beam (B), transmission (T), absorber (A), container (C), quartz (Q), vanadium (V), sample (S).
+AT is processed first, and passed to all the other processes.
+B takes only AT as input, and the output of B is needed by the rest.
+T takes AT and B as inputs, and the calculated transmission is used by Q, V, and S respectively.
+C and A are supplied to Q, V, and S respectively.
+Q takes A, C, its T, and the output is provided to V and S.
+V takes A, C, its T, and Q as inputs and the output is used by S
+S takes A, C, its T, as well as Q and V as inputs.
+The output of S is reduced sample in desired units.
 
 .. diagram:: PolDiffILLReduction-v1_all_wkflw.dot
 
