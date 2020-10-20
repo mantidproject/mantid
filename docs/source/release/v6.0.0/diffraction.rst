@@ -9,10 +9,19 @@ Diffraction Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+New features
+------------
+
+- New algorithm :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` to perform wavelength and detector position calibration for the ILL D7 instrument.
+    
 Powder Diffraction
 ------------------
 New features
 ############
+
+- Add ability to store multiple alternative attenuation file paths in the Pearl yaml configuration file
+- Modify filenames of xye outputs from running a focus in the Pearl power diffraction scripts
+- Remove _noatten workspace that was produced by the Pearl powder diffraction scripts when run with perform_attenuation=True
 - New algorithm to clip peaks, providing a background estimation :ref:`ClipPeaks <algm-ClipPeaks>`.
 - Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
 - New algorithm :ref:`AbsorptionCorrectionPaalmanPings <algm-AbsorptionCorrectionPaalmanPings>` uses a numerical integration method to calculate attenuation factors for all Paalmin Pings terms
@@ -21,16 +30,12 @@ Improvements
 ############
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
 
-New features
-############
-
-- Modify filenames of xye outputs from running a focus in the Pearl power diffraction scripts
-- Remove _noatten workspace that was produced by the Pearl powder diffraction scripts when run with perform_attenuation=True
-
 Bugfixes
 ########
 
 - Dummy detectors in polaris workspaces no longer prevent unit conversion.
+- Focus in PEARL powder diffraction scripts no longer fails if previous run has left Van splines workspace group in ADS
+
 
 Engineering Diffraction
 -----------------------

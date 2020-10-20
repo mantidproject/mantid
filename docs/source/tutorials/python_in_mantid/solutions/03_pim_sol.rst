@@ -56,7 +56,7 @@ B - plotSpectrum with ISIS Data
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
     import numpy as np
-    from mantid.plots._compatability import plotSpectrum
+    from mantid.plots._compatability import plotSpectrum #import needed outside Workbench
 
     '''Processing'''
 

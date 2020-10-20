@@ -77,8 +77,6 @@ public:
   /// Set a value to attribute attName
   void setAttribute(const std::string &attName,
                     const IFunction::Attribute &value) override;
-  /// Check if attribute attName exists
-  bool hasAttribute(const std::string &attName) const override;
 
 private:
   /// Call the appropriate load function

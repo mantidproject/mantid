@@ -21,6 +21,7 @@
 #include "MantidAPI/ParameterTie.h"
 
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include <boost/regex.hpp>
 
 namespace Mantid {
@@ -34,6 +35,8 @@ using namespace API;
 DECLARE_FUNCTION(CrystalFieldMultiSpectrum)
 
 namespace {
+
+Kernel::Logger g_log("CrystalFieldMultiSpectrum");
 
 // Regex for the FWHMX# type strings (single-site mode)
 const boost::regex FWHMX_ATTR_REGEX("FWHMX([0-9]+)");
@@ -120,6 +123,14 @@ CrystalFieldMultiSpectrum::CrystalFieldMultiSpectrum()
   declareAttribute("FixAllPeaks", Attribute(false));
   declareAttribute("PhysicalProperties",
                    Attribute(std::vector<double>(1, 0.0)));
+}
+
+void CrystalFieldMultiSpectrum::init() {
+  try {
+    buildTargetFunction();
+  } catch (std::runtime_error const &ex) {
+    g_log.error(ex.what());
+  }
 }
 
 size_t CrystalFieldMultiSpectrum::getNumberDomains() const {

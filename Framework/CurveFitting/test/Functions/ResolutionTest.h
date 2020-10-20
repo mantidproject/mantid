@@ -154,6 +154,27 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
+  void testAttributesSetUpCorrectly() {
+    Resolution res;
+    auto names = res.getAttributeNames();
+    TS_ASSERT_EQUALS(names.size(), 5);
+    TS_ASSERT_EQUALS(names[0], "FileName");
+    TS_ASSERT_EQUALS(names[1], "Workspace");
+    TS_ASSERT_EQUALS(names[2], "WorkspaceIndex");
+    TS_ASSERT_EQUALS(names[3], "X");
+    TS_ASSERT_EQUALS(names[4], "Y");
+    TS_ASSERT(res.hasAttribute("FileName"));
+    TS_ASSERT(res.hasAttribute("Workspace"));
+    TS_ASSERT(res.hasAttribute("WorkspaceIndex"));
+    TS_ASSERT(res.hasAttribute("X"));
+    TS_ASSERT(res.hasAttribute("Y"));
+    TS_ASSERT_EQUALS(res.attributeName(0), "FileName");
+    TS_ASSERT_EQUALS(res.attributeName(1), "Workspace");
+    TS_ASSERT_EQUALS(res.attributeName(2), "WorkspaceIndex");
+    TS_ASSERT_EQUALS(res.attributeName(3), "X");
+    TS_ASSERT_EQUALS(res.attributeName(4), "Y");
+  }
+
 private:
   const double resH, resS;
   const int N;
