@@ -514,6 +514,15 @@ class DrillModel(QObject):
         if self.acquisitionMode in RundexSettings.FLAGS:
             params.update(RundexSettings.FLAGS[self.acquisitionMode])
         params.update(self.settings)
+
+        # search for master sample
+        master = None
+        for group in self.groups:
+            if sample in self.groups[group]:
+                master = self.masterSample[group]
+                if master is not None:
+                    params.update(self.samples[master])
+
         params.update(self.samples[sample])
         # override global params with custom ones
         if "CustomOptions" in params:
