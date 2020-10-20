@@ -13,10 +13,29 @@ import unittest
 from corelli.calibration.utils import (apply_calibration, bank_numbers, calibrate_tube, load_banks,
                                        wire_positions)
 from mantid import AnalysisDataService, config
-from mantid.simpleapi import DeleteWorkspaces, LoadEmptyInstrument
+from mantid.simpleapi import DeleteWorkspaces, LoadEmptyInstrument, LoadNexusProcessed
 
 
 class TestUtils(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        r"""
+        Load the tests cases for calibrate_bank, consisting of data for only one bank
+        CORELLI_124023_bank10, tube 13 has shadows at pixel numbers quite different from the rest
+        """
+        config.appendDataSearchSubDir('CORELLI/calibration')
+        for directory in config.getDataSearchDirs():
+            if 'UnitTest' in directory:
+                data_dir = path.join(directory, 'CORELLI', 'calibration')
+                break
+        cls.workspaces_temporary = list()
+        cls.cases = dict()
+        for bank_case in ('124023_bank10',):
+            workspace = 'CORELLI_' + bank_case
+            LoadNexusProcessed(Filename=path.join(data_dir, workspace + '.nxs'), OutputWorkspace=workspace)
+            cls.cases[bank_case] = workspace
+            cls.workspaces_temporary.append(workspace)
 
     def setUp(self) -> None:
         # Neutron counts along a tube
@@ -69,6 +88,12 @@ class TestUtils(unittest.TestCase):
         self.table = 'calibTable'
         self.calibrated_y = y
 
+    @classmethod
+    def tearDownClass(cls) -> None:
+        r"""Delete temporary workspaces"""
+        if len(cls.workspaces_temporary) > 0:
+            DeleteWorkspaces(cls.workspaces_temporary)
+
     def test_wire_positions(self):
         with self.assertRaises(AssertionError) as exception_info:
             wire_positions(units='mm')
@@ -104,7 +129,10 @@ class TestUtils(unittest.TestCase):
         self.assertAlmostEqual(workspace.readY(42)[0], 13297.0)
         DeleteWorkspaces(['jambalaya'])
 
-    def test_calculate_tube_calibration(self) -> None:
+    def test_calibrate_tube(self) -> None:
+        table = calibrate_tube(self.cases['124023_bank10'], 'bank10/sixteenpack/tube13')
+        DeleteWorkspaces(['CalibTable', 'ParametersTable', 'ParametersTable_0', 'PeakTable'])
+
         # Check the validators are doing what they're supposed to do
         with self.assertRaises(AssertionError) as exception_info:
             calibrate_tube(None, 'bank42/sixteenpack/tube8')

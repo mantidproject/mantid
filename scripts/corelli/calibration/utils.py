@@ -91,10 +91,17 @@ def load_banks(filename: str, bank_selection: str, output_workspace: str) -> Wor
     return mtd[output_workspace]
 
 
-def calibrate_tube(workspace: WorkspaceTypes, tube_name: str, shadow_height: float = 1000,
-                   shadow_width: float = 4, fit_domain: float = 7) -> TableWorkspace:
+def calibrate_tube(workspace: WorkspaceTypes,
+                   tube_name: str,
+                   shadow_height: float = 1000,
+                   shadow_width: float = 4,
+                   fit_domain: float = 7) -> TableWorkspace:
     r"""
     Calibration table for one tube of CORELLI
+
+    This function creates TableWorkspace 'CalibTable', TableWorkspace 'PeakTable',
+    and WorkspaceGroup 'ParametersTable' containing TableWorkspace 'ParametersTableI'
+    where 'I' is the tube number.
 
     :param workspace: string or handle to ~mantid.dataobjects.Workspace2D
     :param tube_name: string uniquely representing one tube e.g. 'bank88/sixteenpack/tube3'
@@ -109,25 +116,18 @@ def calibrate_tube(workspace: WorkspaceTypes, tube_name: str, shadow_height: flo
     for marker in ('bank', 'sixteenpack', 'tube'):
         assert marker in tube_name, f'{tube_name} does not uniquely specify one tube'
     peak_height, peak_width = -shadow_height, shadow_width
-    # the center of the 16 wires is aligned with the center of the tube, set to Y == 0
-    bottom_wire_position, topmost_wire_position = -7.5 * WIRE_GAP, 8.5 * WIRE_GAP
-    wire_positions = np.arange(bottom_wire_position, topmost_wire_position, WIRE_GAP)
-    # Fit only the inner 14 dips because the extrema wires are too close to the tube tips.
-    # The dead zone in the tube tips interferes with the shadow cast by the extrema  wires
-    # preventing a good fitting
-    wire_positions = wire_positions[1: -1]  # drop the extrema wires
-    wire_count = len(wire_positions)
-    peaks_form = [1] * wire_count  # signals we'll be fitting dips (peaks with negative heights)
     # Initial guess for the peak positions, assuming:
     # - the center of the the wire mesh coincides with the center ot the tube_calib_fit_params
     # - wires cast a shadow on a perfectly calibrated tube
     fit_extent = (fit_domain / PIXELS_PER_TUBE) * TUBE_LENGTH  # fit domain in meters
     assert fit_extent < WIRE_GAP, 'The fit domain cannot be larger than the distance between consecutive wires'
-    wire_pixel_positions = (PIXELS_PER_TUBE / TUBE_LENGTH) * wire_positions + PIXELS_PER_TUBE / 2
+    wire_pixel_positions = wire_positions(units='pixels')[1: -1]
     fit_par = TubeCalibFitParams(wire_pixel_positions, height=peak_height, width=peak_width, margin=fit_domain)
     fit_par.setAutomatic(True)
-    calibration_table, _ = tube.calibrate(workspace, tube_name, wire_positions, peaks_form, fitPar=fit_par,
-                                          outputPeak=True)
+    # Generate the calibration table, the peak table, and the parameters table
+    peaks_form = [1] * len(wire_pixel_positions)  # signals we'll be fitting dips (peaks with negative heights)
+    calibration_table, _ = tube.calibrate(workspace, tube_name, wire_positions(units='meters')[1: -1], peaks_form,
+                                          fitPar=fit_par, outputPeak=True, parameters_table_group='ParametersTable')
     return calibration_table
 
 
@@ -139,7 +139,8 @@ def apply_calibration(workspace: WorkspaceTypes, calibration_table: InputTable,
     :param workspace: input Workspace2D containing total neutron counts per pixel
     :param calibration_table: a TableWorskpace containing one column for detector ID and one column
     for its calibrated XYZ coordinates, in meters
-    :param output_workspace: name of the output workspace containing calibrated detectors
+    :param output_workspace: name of the output workspace containing calibrated detectors. If `None`, then
+        the output workspace name will be the input workspace plus the suffix `_calibrated`
     :param show_instrument: open the instrument view for `output_workspace`
 
     :raises AssertionError: either `workspace` or `calibration_table` are not found
