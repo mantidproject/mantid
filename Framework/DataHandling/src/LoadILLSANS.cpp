@@ -751,9 +751,8 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
   // Get the starting date of the measure, as it is needed by the instrument and
   // parameter loaders later
   std::string startDate = entry.getString("start_time");
-  LoadHelper loadHelper = LoadHelper();
   runDetails.addProperty<std::string>(
-      "run_start", loadHelper.dateTimeInIsoFormat(startDate));
+      "run_start", m_loadHelper.dateTimeInIsoFormat(startDate));
 }
 
 /**

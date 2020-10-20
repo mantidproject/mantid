@@ -2181,7 +2181,8 @@ void InstrumentDefinitionParser::setFacing(Geometry::IComponent *comp,
  *  @param comp :: Some component
  *  @param pElem ::  Poco::XML element that may hold \<parameter\> elements
  *  @param logfileCache :: Cache to add information about parameter to
- *
+ *  @param requestedDate :: Reference date to check the validity of the
+ * parameter against
  *  @throw InstrumentDefinitionError Thrown if issues with the content of XML
  *instrument file
  */
@@ -2527,6 +2528,8 @@ void InstrumentDefinitionParser::setLogfile(
  *\<component-link\> elements
  *  @param progress :: Optional progress object for reporting progress to an
  *algorithm
+ * @param requestedDate :: Date against which to check the validity of an IPF
+ *parameter
  */
 void InstrumentDefinitionParser::setComponentLinks(
     std::shared_ptr<Geometry::Instrument> &instrument,

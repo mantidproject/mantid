@@ -62,7 +62,7 @@ class SampleLogsModelTest(unittest.TestCase):
         model = SampleLogsModel(ws)
 
         log_names = model.get_log_names()
-        self.assertEqual(len(log_names), 293)
+        self.assertEqual(len(log_names), 294)
         self.assertIn("Beam.sample_pressure", log_names)
 
         values = model.get_log_display_values("Beam.sample_pressure")

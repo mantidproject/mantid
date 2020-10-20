@@ -90,7 +90,8 @@ private:
   std::string m_resMode; ///< Resolution mode for D11 and D22
   bool m_isTOF;          ///< TOF or monochromatic flag
   double m_sourcePos;    ///< Source Z (for D33 TOF)
-  bool m_isD16Omega;
+  bool m_isD16Omega;     ///< Data come from a D16 omega scan flag
+  LoadHelper m_loadHelper;
 
   void setFinalProperties(const std::string &filename);
   void setPixelSize();
