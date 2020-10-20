@@ -768,7 +768,8 @@ class PolDiffILLReduction(PythonAlgorithm):
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample']
-        progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
+        nReports = [3, 2, 3, 3, 3, 10, 10]
+        progress = Progress(self, start=0.0, end=1.0, nreports=nReports[processes.index(process)])
         ws = '__' + self.getPropertyValue('OutputWorkspace')
 
         calibration_setting = 'YIGFile'
