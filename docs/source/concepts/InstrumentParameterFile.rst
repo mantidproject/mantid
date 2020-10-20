@@ -22,7 +22,8 @@ To create a parameters file it is advisable to consult the parameter file schema
 General Structure
 ~~~~~~~~~~~~~~~~~
 
-The Instrument parameter files, like the :ref:`IDFs<InstrumentDefinitionFile>`, are written in XML. They must contain a root element <parameter-file> with an attribute 'name' equal to the name of the instrument. Within the <parameter-file> element, goes all the rest of the information. To specify a parameter for a component defined the :ref:`IDF<InstrumentDefinitionFile>`, use a <component-link> element with attribute 'name' equal to the name of the component. Within the <component-link> element, the various parameters can be defined in exactly the same way as described in the parameters section of the IDF Page. 
+The Instrument parameter files, like the :ref:`IDFs<InstrumentDefinitionFile>`, are written in XML. They must contain a root element <parameter-file> with an attribute 'name' equal to the name of the instrument. Within the <parameter-file> element, goes all the rest of the information. To specify a parameter for a component defined the :ref:`IDF<InstrumentDefinitionFile>`, use a <component-link> element with attribute 'name' equal to the name of the component. Within the <component-link> element, the various parameters can be defined mostly in the same way as described in the parameters section of the IDF Page.
+The only difference is that it is possible to set multiple values for a parameter, each one with a defined time range, using the format "<value val="" valid-from="YYYY-MM-DDTHH:mm:SS" valid-to="YYYY-MM-DDTHH:mm:SS"\>".
 The below example shows some of the elements featured in IN10_silicon_111_Parameters.xml. It defines a parameter 'analysis-type' for the component IN10 i.e. the whole instrument. The component link is closed and then a new one is opened to define parameters for the component 'silicon'.
 
 
