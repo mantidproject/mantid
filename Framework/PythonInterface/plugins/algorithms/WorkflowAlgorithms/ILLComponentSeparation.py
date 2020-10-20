@@ -16,8 +16,6 @@ import math
 
 class ILLComponentSeparation(PythonAlgorithm):
 
-    _DEG_2_RAD =  np.pi / 180.0
-
     def category(self):
         return 'ILL\\Diffraction'
 
@@ -80,7 +78,7 @@ class ILLComponentSeparation(PythonAlgorithm):
                 raise RunTimeError(error_msg.format(user_method))
         elif nMeasurements == 2:
             nComponents = 2
-            if method == '10p':
+            if user_method == '10p':
                 raise RunTimeError(error_msg.format(user_method))
             if user_method == 'XYZ':
                 raise RunTimeError(error_msg.format(user_method))
@@ -92,7 +90,7 @@ class ILLComponentSeparation(PythonAlgorithm):
     def _component_separation(self, ws):
         """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
         current sample. The method used is based on either the user's choice or the provided data structure."""
-
+        DEG_2_RAD =  np.pi / 180.0
         nMeasurements, nComponents = self._data_structure_helper(ws)
         componentNames = ['Coherent', 'Incoherent', 'Magnetic']
         number_histograms = mtd[ws][0].getNumberHistograms()
@@ -130,7 +128,7 @@ class ILLComponentSeparation(PythonAlgorithm):
                         sigma_xpy_sf = mtd[ws][entry_no+8].readY(spectrum)
                         sigma_xpy_nsf = mtd[ws][entry_no+9].readY(spectrum)
                         # Magnetic component
-                        theta_0 = _DEG_2_RAD * self.getProperty('ThetaOffset').value
+                        theta_0 = DEG_2_RAD * self.getProperty('ThetaOffset').value
                         theta = mtd[ws][entry_no].detectorInfo().twoTheta(spectrum)
                         alpha = theta - 0.5*np.pi - theta_0
                         c0 = math.pow(math.cos(alpha), 2)
@@ -140,7 +138,7 @@ class ILLComponentSeparation(PythonAlgorithm):
                         magnetic_component = magnetic_cos2alpha * math.cos(2*alpha) + magnetic_sin2alpha * math.sin(2*alpha)
                         dataY_magnetic[spectrum] = magnetic_component
                         # Nuclear coherent component
-                        dataY_nuclear[spectrum] = (2.0 * (sigma_x_nsf + sigma_y_nsf + 2*sigma_z_nsf + sigma_xpy_nsf + sigma_xmy_nfs)
+                        dataY_nuclear[spectrum] = (2.0 * (sigma_x_nsf + sigma_y_nsf + 2*sigma_z_nsf + sigma_xpy_nsf + sigma_xmy_nsf)
                                                    - (sigma_x_sf + sigma_y_sf + 2*sigma_z_sf + sigma_xpy_sf + sigma_xmy_sf)) / 12.0
                         # Incoherent component
                         dataY_incoherent[spectrum] = 0.25 * (sigma_x_sf + sigma_y_sf + 2*sigma_z_sf + sigma_xpy_sf + sigma_xmy_sf) \
