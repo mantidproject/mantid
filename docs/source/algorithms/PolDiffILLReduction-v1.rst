@@ -166,7 +166,7 @@ This example below performs a complete reduction for D7 data.
         BeamInputWorkspace='beam_ws_1',
        ProcessAs='Transmission'
     )
-    print('Quartz transmission is {0:.3f}'.format(mtd['quartz_transmission'].readY(0)[0]))
+    print('Quartz transmission is {0:.3f}'.format(mtd['quartz_transmission_1'].readY(0)[0]))
 
     # Empty container
     PolDiffILLReduction(
@@ -201,7 +201,7 @@ This example below performs a complete reduction for D7 data.
         BeamInputWorkspace='beam_ws_1',
         ProcessAs='Transmission'
     )
-    print('Vanadium transmission is {0:.3f}'.format(mtd['vanadium_transmission'].readY(0)[0]))
+    print('Vanadium transmission is {0:.3f}'.format(mtd['vanadium_transmission_1'].readY(0)[0]))
     
     # Vanadium reduction
     PolDiffILLReduction(
@@ -226,7 +226,7 @@ This example below performs a complete reduction for D7 data.
        BeamInputWorkspace='beam_ws_1',
        ProcessAs='Transmission'
     )
-    print('Sample transmission is {0:.3f}'.format(mtd['sample_transmission'].readY(0)[0]))
+    print('Sample transmission is {0:.3f}'.format(mtd['sample_transmission_1'].readY(0)[0]))
 
     # Sample reduction
     PolDiffILLReduction(
