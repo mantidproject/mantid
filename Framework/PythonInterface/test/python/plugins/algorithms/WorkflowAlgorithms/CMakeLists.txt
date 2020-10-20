@@ -18,6 +18,7 @@ set(TEST_PY_FILES
     FitGaussianPeaksTest.py
     FindPeakAutomaticTest.py
     FlatPlatePaalmanPingsCorrectionTest.py
+    ILLComponentSeparationTest.py
     IndirectAnnulusAbsorptionTest.py
     IndirectAnnulusAbsorption2Test.py
     IndirectCalibrationTest.py
