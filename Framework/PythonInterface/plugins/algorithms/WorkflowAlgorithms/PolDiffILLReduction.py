@@ -768,8 +768,7 @@ class PolDiffILLReduction(PythonAlgorithm):
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
         processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample']
-        nReports = [3, 2, 3, 3, 3, 10, 10]
-        progress = Progress(self, start=0.0, end=1.0, nreports=nReports[processes.index(process)])
+        progress = Progress(self, start=0.0, end=1.0, nreports=processes.index(process) + 1)
         ws = '__' + self.getPropertyValue('OutputWorkspace')
 
         calibration_setting = 'YIGFile'
@@ -796,7 +795,6 @@ class PolDiffILLReduction(PythonAlgorithm):
             absorber_transmission_ws = self.getPropertyValue('AbsorberTransmissionInputWorkspace')
             if absorber_transmission_ws:
                 Minus(LHSWorkspace=ws, RHSWorkspace=absorber_transmission_ws, OutputWorkspace=ws)
-            progress.report('Extracting monitor2 values')
             monID = 100001 # monitor 2
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=ws)
             if process in ['Transmission']:
