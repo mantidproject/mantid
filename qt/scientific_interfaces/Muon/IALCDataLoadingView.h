@@ -32,6 +32,9 @@ public:
   /// @return std::string of path
   virtual std::string getPath() const = 0; 
 
+  /// @return std::string of expression in runs box
+  virtual std::string getRunsExpression() const = 0;
+
   /// Returns the name of the log to use
   /// @return Log name
   virtual std::string log() const = 0;
@@ -129,7 +132,7 @@ signals:
   void loadRequested();
 
   /// User has changed runs
-  void runsChanged(std::string);
+  void runsChangedSignal();
 
   /// New data have been loaded
   void dataChanged();

@@ -40,7 +40,7 @@ void ALCDataLoadingView::initialize() {
           SLOT(instrumentChanged(QString)));
   connect(m_ui.path, SIGNAL(textChanged(QString)), this,
           SLOT(pathChanged(QString)));
-  connect(m_ui.runs, SIGNAL(returnPressed()), this, SLOT(handleRunsEditingFinsihed()));
+  connect(m_ui.runs, SIGNAL(returnPressed()), this, SIGNAL(runsChangedSignal()));
   
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 
@@ -96,6 +96,10 @@ std::string ALCDataLoadingView::getInstrument() const {
  */
 std::string ALCDataLoadingView::getPath() const {
   return m_ui.path->text().toStdString();
+}
+
+std::string ALCDataLoadingView::getRunsExpression() const {
+  return m_ui.runs->text().toStdString();
 }
 
 std::string ALCDataLoadingView::log() const {
@@ -293,17 +297,14 @@ void ALCDataLoadingView::enableAll() {
 }
 
 void ALCDataLoadingView::instrumentChanged(QString instrument) {
-  std::cout << "Instrument Changed" << std::endl;
   emit instrumentChangedSignal(instrument.toStdString());
 }
 void ALCDataLoadingView::pathChanged(QString path) {
-  std::cout << "Path Changed" << std::endl;
   emit pathChangedSignal(path.toStdString());
 }
 
 void ALCDataLoadingView::handleRunsEditingFinsihed() {
-  // emit signal with path
-  emit runsChanged(m_ui.runs->text().toStdString());
+  //emit runsChangedSignal(m_ui.runs->text().toStdString());
 }
 
 void ALCDataLoadingView::enableLoad(bool enable) {

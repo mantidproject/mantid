@@ -40,6 +40,7 @@ public:
   void initInstruments() override;
   std::string getInstrument() const override;
   std::string getPath() const override;
+  std::string getRunsExpression() const override;
   std::string log() const override;
   std::string function() const override;
   std::string deadTimeType() const override;

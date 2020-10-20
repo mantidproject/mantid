@@ -57,7 +57,7 @@ private slots:
   void updateAvailableInfo();
 
   /// Handle for when runs line edit changed
-  void handleRunsChanged(std::string runs);
+  void handleRunsChanged();
 
 signals:
   /// Signal emitted when data get changed

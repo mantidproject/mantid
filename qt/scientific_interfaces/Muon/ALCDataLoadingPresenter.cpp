@@ -40,8 +40,8 @@ void ALCDataLoadingPresenter::initialize() {
   connect(m_view, SIGNAL(runsSelected()), SLOT(updateAvailableInfo()));
   connect(m_view, SIGNAL(instrumentChangedSignal(std::string)), SLOT());
   connect(m_view, SIGNAL(pathChangedSignal(std::string)), SLOT());
-  connect(m_view, SIGNAL(runsChanged(std::string)),
-          SLOT(handleRunsChanged(std::string)));
+  connect(m_view, SIGNAL(runsChangedSignal()),
+          SLOT(handleRunsChanged()));
 }
 
 /**
@@ -66,8 +66,8 @@ std::vector<int> ALCDataLoadingPresenter::unwrapRange(std::string range) {
     // Assumed not using short hand so end must be > beginning
     if (end < beginning)
       throw std::runtime_error(
-          "Decreasing range is not allowed, try " + std::to_string(beginning) +
-          "-" + std::to_string(end) + " instead."); // Needs error message
+          "Decreasing range is not allowed, try " + std::to_string(end) +
+          "-" + std::to_string(beginning) + " instead."); // Needs error message
     for (int i = beginning; i <= end; ++i)
       runs.emplace_back(i);
   }
@@ -105,15 +105,17 @@ ALCDataLoadingPresenter::validateAndGetRunsFromExpression(std::string runs) {
   return runNumbers;
 }
 
-void ALCDataLoadingPresenter::handleRunsChanged(std::string runs) {
+void ALCDataLoadingPresenter::handleRunsChanged() {
+  // get runs
   // Validate runs and get as run numbers
   // if valid attempt to load first run
   // if loaded set path
   // if path update available info
   // if fails need error message
-  // if success activate load button
+  // if success activate load buttons
   try {
-    auto runNumbers = validateAndGetRunsFromExpression(runs);
+    auto runsExpression = m_view->getRunsExpression();
+    auto runNumbers = validateAndGetRunsFromExpression(runsExpression);
     m_view->enableLoad(true);
   } catch (std::runtime_error e) {
     m_view->displayError(
@@ -121,6 +123,7 @@ void ALCDataLoadingPresenter::handleRunsChanged(std::string runs) {
         "\n\nCan specify a list of runs by a dash \ne.g. 1-10\nCan specify "
         "specific runs with a comma separated list \ne.g. 1-10, 15, 20-30\n "
         "Range must go in increasing order, \ne.g. 1-10, 15, 20-30");
+    m_view->enableLoad(false);
   }
 }
 
