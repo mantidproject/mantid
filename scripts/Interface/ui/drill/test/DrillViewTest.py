@@ -431,6 +431,20 @@ class DrillViewTest(unittest.TestCase):
         self.view.set_table(["test", "test"])
         self.view.table.setColumnCount.assert_called_once_with(2)
 
+    def test_getRowsInGroup(self):
+        self.view.groups = {"A": [1, 2, 3]}
+        rows = self.view.getRowsInGroup("B")
+        self.assertEqual(rows, [])
+        rows = self.view.getRowsInGroup("A")
+        self.assertEqual(rows, [1, 2, 3])
+
+    def test_getMasterRow(self):
+        self.view.masterRows = {"A": 0}
+        master = self.view.getMasterRow("B")
+        self.assertIsNone(master)
+        master = self.view.getMasterRow("A")
+        self.assertEqual(master, 0)
+
     def test_fillTable(self):
         # empty contents
         self.view.fill_table([])

@@ -771,6 +771,36 @@ class DrillView(QMainWindow):
         self.table.resizeColumnsToContents()
         self.setWindowModified(False)
 
+    def getRowsInGroup(self, groupName):
+        """
+        Get the rows in a specific group.
+
+        Args:
+            groupName (str): name of the group
+
+        Returns:
+            list(int): row indexes
+        """
+        if groupName in self.groups:
+            return [row for row in self.groups[groupName]]
+        else:
+            return []
+
+    def getMasterRow(self, groupName):
+        """
+        Get the master row of a specific group.
+
+        Args:
+            groupName (str): name of the group
+
+        Returns:
+            int: row index, None if no master row
+        """
+        if groupName in self.masterRows:
+            return self.masterRows[groupName]
+        else:
+            return None
+
     def fill_table(self, rows_contents):
         """
         Fill the table.
