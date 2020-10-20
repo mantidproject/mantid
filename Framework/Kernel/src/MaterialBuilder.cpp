@@ -344,7 +344,7 @@ MaterialBuilder::density_packing MaterialBuilder::getOrCalculateRhoAndPacking(
   }
 
   // count the number of values that were set and generate errors
-  uint count = 0;
+  int count = 0;
   if (result.packing_fraction > 0.)
     count++;
   if (result.effective_number_density > 0.)
