@@ -5,11 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import PropertyMode, Progress, PythonAlgorithm, WorkspaceGroupProperty, \
-    AlgorithmFactory
+from mantid.api import PythonAlgorithm, WorkspaceGroupProperty, AlgorithmFactory
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator,\
-    StringListValidator, LogicOperator, PropertyCriterion
-
+    StringListValidator, PropertyCriterion
 from mantid.simpleapi import *
 
 import numpy as np
@@ -35,7 +33,7 @@ class ILLComponentSeparation(PythonAlgorithm):
         if separationMethod == '10p' and self.getProperty('ThetaOffset').isDefault:
             issues['ThetaOffset'] = "The value for theta_0 needs to be defined for the component separation in 10p method."
         return issues
- 
+
     def PyInit(self):
 
         self.declareProperty(WorkspaceGroupProperty('InputWorkspace', '',
@@ -160,5 +158,6 @@ class ILLComponentSeparation(PythonAlgorithm):
         output_name = self.getPropertyValue('OutputWorkspace')
         GroupWorkspaces(tmp_names, OutputWorkspace=output_name)
         return output_name
+
 
 AlgorithmFactory.subscribe(ILLComponentSeparation)

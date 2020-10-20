@@ -713,7 +713,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         Integration(InputWorkspace=ws, OutputWorkspace=ws)
         return ws
 
-    def _separate_components(self, ws):
+    def _separate_components(self, ws, process):
         theta_0 = 0
         if self._user_method == '10p':
             try:
