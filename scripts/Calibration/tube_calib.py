@@ -305,8 +305,8 @@ def correct_tube(AP, BP, CP, nDets):
 def correct_tube_to_ideal_tube(tube_points: List,
                                ideal_tube_points: List,
                                n_detectors: int,
-                               test_mode:bool = False,
-                               polin_fit:int = 2,
+                               test_mode: bool = False,
+                               polin_fit: int = 2,
                                parameters_table: Optional[str] = None) -> numpy.ndarray:
     r"""
     Corrects position errors in a tube given an array of points and their ideal positions.

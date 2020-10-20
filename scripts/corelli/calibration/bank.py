@@ -328,6 +328,7 @@ def calibrate_bank(workspace: WorkspaceTypes,
                    bank_name: str,
                    calibration_table: str,
                    mask_table: str = 'MaskTable',
+                   peak_table: str = None,
                    fit_results: Optional[str] = None,
                    shadow_height: float = 1000,
                    shadow_width: float = 4,
@@ -347,6 +348,8 @@ def calibrate_bank(workspace: WorkspaceTypes,
     for its calibrated XYZ coordinates, in meters
     :param mask_table: output TableWorkspace containing containing the detector ID's of the
         unsuccessfully fitted tubes
+    :param peak_table: output table with pixel positions for each shadow, for each tube. If `None`, then no
+        table is output
     :param fit_results: name of output Workspace2D containing acceptance criterium results and coefficients of the
         quadratic function fitting shadow locations in the tube to wire positions.
     :param shadow_height: initial guess for the decrease in neutron counts caused by the calibrating wire
@@ -359,11 +362,12 @@ def calibrate_bank(workspace: WorkspaceTypes,
     """
     # Validate inputs are taken care in function fit_bank
     # Fit the tubes in the bank
+    peak_table_temp = 'PeakTable' if peak_table is None else peak_table
     fit_bank(workspace, bank_name, shadow_height, shadow_width, fit_domain, minimum_intensity,
-             calibration_table=calibration_table, peak_pixel_positions_table='PeakTable',
+             calibration_table=calibration_table, peak_pixel_positions_table=peak_table_temp,
              parameters_table_group='parameters_table')
     # Run the acceptance criterium to determine the failing tubes
-    tubes_fit_success = criterium_peak_pixel_position('PeakTable', summary='acceptance')
+    tubes_fit_success = criterium_peak_pixel_position(peak_table_temp, summary='acceptance')
     # collect acceptances and polynomial coefficients
     if isinstance(fit_results, str) and len(fit_results) > 0:
         collect_bank_fit_results(fit_results, acceptance_summary='acceptance',
@@ -372,7 +376,9 @@ def calibrate_bank(workspace: WorkspaceTypes,
     purge_table(workspace, calibration_table, tubes_fit_success)
     # Create table of masked detector ID's, or None if all tubes were successfully fitted
     mask_table_workspace = mask_bank(bank_name, tubes_fit_success, mask_table)
-    DeleteWorkspaces(['PeakTable', 'parameters_table', 'acceptance'])
+    DeleteWorkspaces(['parameters_table', 'acceptance'])
+    if peak_table is None:
+        DeleteWorkspaces([peak_table_temp])
     return mtd[calibration_table], mask_table_workspace
 
 
