@@ -195,7 +195,7 @@ class TestUtils(unittest.TestCase):
         calibrate_tube(self.cases['124023_bank10'], 'bank10/sixteenpack/tube13')
         DeleteWorkspaces(['CalibTable', 'PeakTable', 'ParametersTable', 'PeakYTable'])
 
-    def test_apply_instrument(self) -> None:
+    def test_apply_calibration(self) -> None:
         table = calibrate_tube(self.workspace, 'bank42/sixteenpack/tube8')
         apply_calibration(self.workspace, table)
         assert AnalysisDataService.doesExist('uncalibrated_calibrated')
