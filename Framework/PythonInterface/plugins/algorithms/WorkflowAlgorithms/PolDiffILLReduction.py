@@ -835,7 +835,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         calibration_setting = 'YIGFile'
         if self.getProperty('InstrumentCalibration').isDefault:
             calibration_setting = 'None'
-
+        progress.report('Loading data')
         Load(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLPolarizedDiffraction',
              PositionCalibration=calibration_setting, YIGFileName=self.getPropertyValue('InstrumentCalibration'),
              TOFUnits=self.getPropertyValue('TOFUnits'), OutputWorkspace=ws)
@@ -849,7 +849,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             raise RuntimeError("TOF measurement method chosen but data contains monochromatic results.")
         self._user_method = self.getPropertyValue('ComponentSeparationMethod')
         self._figure_out_measurement_method(ws)
-        progress.report()
+
         if process in ['Beam', 'Transmission']:
             if mtd[ws].getNumberOfEntries() > 1:
                 self._merge_polarisations(ws, average_detectors=True)
@@ -860,51 +860,56 @@ class PolDiffILLReduction(PythonAlgorithm):
             ExtractSpectra(InputWorkspace=ws, DetectorList=monID, OutputWorkspace=ws)
             if process in ['Transmission']:
                 beam_ws = self.getPropertyValue('BeamInputWorkspace')
+                progress.report('Calculating transmission')
                 self._calculate_transmission(ws, beam_ws)
-            progress.report()
         else:
+            progress.report('Normalising to monitor')
             self._normalise(ws)
-            progress.report()
 
         if process in ['Quartz', 'Vanadium', 'Sample']:
             if not self.getProperty('ContainerInputWorkspace').isDefault and not self.getProperty('TransmissionInputWorkspace').isDefault:
                 # Subtracts background if the workspaces for container and transmission are provided
                 container_ws = self.getPropertyValue('ContainerInputWorkspace')
                 transmission_ws = self.getPropertyValue('TransmissionInputWorkspace')
+                progress.report('Subtracting backgrounds')
                 self._subtract_background(ws, container_ws, transmission_ws)
-                progress.report()
 
             if process == 'Quartz':
+                progress.report('Calculating polarising efficiencies')
                 self._calculate_polarising_efficiencies(ws)
-                progress.report()
 
             if process in ['Vanadium', 'Sample']:
                 if self._mode == 'TOF' and process == 'Sample':
+                    progress.report('Correcting for frame overlap')
                     self._frame_overlap_correction(ws)
-                    progress.report()
                 pol_eff_ws = self.getPropertyValue('QuartzInputWorkspace')
                 if pol_eff_ws:
+                    progress.report('Applying polarisation corrections')
                     self._apply_polarisation_corrections(ws, pol_eff_ws)
-                    progress.report()
                 if self._mode == 'TOF':
+                    if process == 'Vanadium':
+                        progress.report('Calibrating the energy')
+                        self._elastic_energy_calibration(ws)
+                    progress.report('Correcting detector-analyser efficiency')
                     self._detector_analyser_energy_efficiency(ws)
-                    progress.report()
                 self._read_experiment_properties(ws)
                 if self.getPropertyValue('SampleGeometry') != 'None' and self._mode != 'TOF':
+                    progress.report('Applying self-attenuation correction')
                     self._apply_self_attenuation_correction(ws, container_ws)
-                progress.report()
                 if self.getProperty('OutputTreatment').value == 'AverageScans':
+                    progress.report('Merging polarisations')
                     self._merge_polarisations(ws, average_detectors=True)
                 if self._user_method != 'None':
+                    progress.report('Separating components')
                     component_ws = self._component_separation(ws)
                 else:
                     component_ws = ''
-                progress.report()
                 if process == 'Vanadium':
+                    progress.report('Normalising vanadium output')
                     self._normalise_vanadium(ws)
                 else:
+                    progress.report('Correcting for detector efficiency')
                     self._detector_efficiency_correction(ws, component_ws)
-                    progress.report()
                 self._set_units(ws)
 
         self._finalize(ws, process)
