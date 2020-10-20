@@ -7,8 +7,9 @@
 
 import systemtesting
 from mantid.api import AnalysisDataService
-from mantid.simpleapi import LoadElementalAnalysisData, GroupWorkspaces
+from mantid.simpleapi import LoadElementalAnalysisData
 import numpy as np
+
 
 class LoadElementalAnalysisTest(systemtesting.MantidSystemTest):
 
@@ -26,7 +27,7 @@ class LoadElementalAnalysisTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         LoadElementalAnalysisData(Run='9999',
-                            GroupWorkspace='9999')
+                                  GroupWorkspace='9999')
 
         #Check the Groupworkspace contains 4 Workspaces
         self.assertEqual(AnalysisDataService.retrieve('9999').size(), 4)
@@ -46,7 +47,6 @@ class LoadElementalAnalysisTest(systemtesting.MantidSystemTest):
         detector4_ws = AnalysisDataService.retrieve('9999; Detector 4')
         self.assertEqual(detector4_ws.extractY()[2, 4083], 120.457)
 
-
     def validate(self):
         self.tolerance = 0.0001
 
@@ -65,7 +65,7 @@ class LoadPartialElementalAnalysisTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         LoadElementalAnalysisData(Run='2683',
-                            GroupWorkspace='2683')
+                                  GroupWorkspace='2683')
 
         #Check the Groupworkspace contains 2 Workspaces
         self.assertEqual(AnalysisDataService.retrieve('2683').size(), 2)
@@ -87,7 +87,6 @@ class LoadPartialElementalAnalysisTest(systemtesting.MantidSystemTest):
         #Check that Bin 4697 of the Total spectra of the workspace of Detector 3 is 10.0
         detector3_ws = AnalysisDataService.retrieve('2683; Detector 3')
         self.assertEqual(detector3_ws.extractY()[2, 4697], 10.0)
-
 
     def validate(self):
         self.tolerance = 0.0001

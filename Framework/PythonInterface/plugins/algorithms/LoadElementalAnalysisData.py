@@ -11,12 +11,13 @@ import numpy as np
 from mantid import config
 from mantid.api import AlgorithmFactory, AnalysisDataService, PythonAlgorithm, TextAxis, WorkspaceGroup, WorkspaceGroupProperty
 from mantid.kernel import Direction, IntBoundedValidator
-from mantid.simpleapi import ConvertToHistogram, ConvertToPointData, CreateSampleWorkspace, DeleteWorkspace, GroupWorkspaces, LoadAscii, WorkspaceFactory
+from mantid.simpleapi import ConvertToHistogram, ConvertToPointData, DeleteWorkspace, LoadAscii, WorkspaceFactory
 
 
 type_keys = {"10": "Prompt", "20": "Delayed", "99": "Total"}
 spectrum_index = {"Delayed": 1, "Prompt": 2, "Total": 3}
 num_files_per_detector = 3
+
 
 class LoadElementalAnalysisData(PythonAlgorithm):
     def category(self):
@@ -39,7 +40,6 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         if not checkRun:
             issues['Run'] = "Cannot find files for run " + self.getPropertyValue("Run")
         return issues
-
 
     def PyExec(self):
         run = self.getPropertyValue("Run")
@@ -126,7 +126,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
             # create single ws for the merged data, use original ws as a template
             template_ws = next(ws for ws in workspace_list if ws is not None)
             merged_ws = WorkspaceFactory.create(AnalysisDataService.retrieve(template_ws), NVectors=num_files_per_detector,
-                                                       XLength=max_num_bins, YLength=max_num_bins)
+                                                XLength=max_num_bins, YLength=max_num_bins)
 
             # create a merged workspace based on every entry from workspace list
             for i in range(0, num_files_per_detector):
@@ -162,7 +162,6 @@ class LoadElementalAnalysisData(PythonAlgorithm):
 
             return merged_ws
 
-
     def set_y_axis_labels(self, workspace, labels):
         """ adds the spectrum_index to the plot labels """
 
@@ -172,6 +171,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
             axis.setLabel(index, label)
 
         workspace.replaceAxis(1, axis)
+
 
 # Register algorithm with Mantid
 AlgorithmFactory.subscribe(LoadElementalAnalysisData)
