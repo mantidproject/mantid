@@ -280,3 +280,6 @@ plots.legend.FontSize = 8
 
 # Default colormap for image plots
 plots.images.Colormap = viridis
+
+# Default colorbar scale for image plots
+plots.images.ColorBarScale = Linear

@@ -44,7 +44,7 @@ Categories
 - Choose which Interface categories to show in the Interfaces menu.
 
 
-.. image:: ../images/SettingsPlots.png
+.. image:: ../images/PlotSettings.png
    :scale: 60%
    :align: right
    :alt: SettingsPlots

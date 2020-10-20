@@ -79,12 +79,21 @@ class DrillSetting(QObject):
             self._setter = self._widget.setChecked
             self._getter = self._widget.isChecked
 
+        elif (settingType == "array"):
+            self._widget = QLineEdit()
+            self._widget.editingFinished.connect(
+                    lambda : self.valueChanged.emit(name)
+                    )
+            self._setter = lambda v : self._widget.setText(','.join(str(e)
+                                                           for e in v))
+            self._getter = self._widget.text
+
         elif (settingType == "string"):
             self._widget = QLineEdit()
             self._widget.editingFinished.connect(
                     lambda : self.valueChanged.emit(name)
                     )
-            self._setter = lambda v : self._widget.setText(str(v) if v else "")
+            self._setter = lambda v : self._widget.setText(str(v))
             self._getter = self._widget.text
 
     @property
@@ -202,7 +211,7 @@ class DrillSettingsDialog(QDialog):
         Get all the settings as a dictionnary.
 
         Returns:
-            dict(str: any): setting name and value. Value can be str or bool
+            dict(str: any): setting name and value.
         """
         settings = dict()
         for (k, v) in self.settings.items():

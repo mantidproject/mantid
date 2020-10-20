@@ -115,7 +115,9 @@ You may find the following aliases helpful. You can also add your own.
            detail = "%C(yellow)commit %h%Creset%C(auto)%d%Creset%n%C(yellow)Parents: %p%Creset%n%C(cyan)Author: %an <%ae>%Creset%n%C(cyan)        %ai (%ar)%Creset%n%C(green)Commit: %cn <%ce>%Creset%n%C(green)        %ci (%cr)%Creset%n%n%w(79)%s%n%n%b"
 
    [alias]
-           # Check out a pull request for testing
+           # Check out a pull request for testing. The first argument is the name of the remote and the
+           # second is the the pull request number,
+           # e.g. git test-pr origin 12345
            test-pr = "!f() { git fetch $1 pull/$2/merge:pr/$2-merged && git checkout pr/$2-merged; }; f"
            # Remove all branches starting pr/
            test-pr-remove-all = "!f() { git branch | grep pr/ | xargs git branch -D; }; f"
