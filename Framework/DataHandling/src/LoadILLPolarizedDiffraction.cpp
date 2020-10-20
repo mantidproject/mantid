@@ -323,6 +323,7 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
 /**
  * Runs LoadInstrument as child to link the instrument to workspace
  * @param workspace : workspace with data from the first entry
+ * @param startTime :: the date the run started, in ISO compliant format
  */
 void LoadILLPolarizedDiffraction::loadInstrument(
     API::MatrixWorkspace_sptr workspace, std::string startTime) {

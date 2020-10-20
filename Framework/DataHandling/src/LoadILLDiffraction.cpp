@@ -267,6 +267,8 @@ void LoadILLDiffraction::loadMetaData() {
 /**
  * Initializes the output workspace based on the resolved instrument, scan
  * points, and scan type
+ *
+ * @param start_time :: the date the run started, in ISO compliant format
  */
 void LoadILLDiffraction::initStaticWorkspace(const std::string &start_time) {
   size_t nSpectra = m_numberDetectorsActual + NUMBER_MONITORS;
