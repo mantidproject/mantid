@@ -280,7 +280,8 @@ class TestBank(unittest.TestCase):
             return [axis.label(spectrum_index) for spectrum_index in range(workspace.getNumberHistograms())]
 
         fit_bank(self.cases['123455_bank20'], 'bank20', parameters_table_group='parameters_tables')
-        criterion_peak_pixel_position('PeakTable', summary='summary', zscore_threshold=2.5, deviation_threshold=3)
+        criterion_peak_vertical_position('PeakTable', summary='summary',
+                                         zscore_threshold=2.5, deviation_threshold=0.0035)
 
         with self.assertRaises(AssertionError) as exception_info:
             collect_bank_fit_results('fit_results', acceptance_summary=None, parameters_table_group=None)
