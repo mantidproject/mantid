@@ -70,6 +70,13 @@ class DrillView(QMainWindow):
     dataChanged = Signal(int, int, str)
 
     """
+    Sent when a row group changed.
+    Args:
+        str: name of the group
+    """
+    groupChanged = Signal(str)
+
+    """
     Sent when the user asks for a row processing.
     Args:
         int: row index
@@ -453,6 +460,7 @@ class DrillView(QMainWindow):
 
         self.groups[groupLabel] = rows
         self._labelRowsInGroup(groupLabel)
+        self.groupChanged.emit(groupLabel)
 
     def ungroupRows(self, rows):
         """
@@ -480,6 +488,7 @@ class DrillView(QMainWindow):
         if group in self.groups:
             self.groups[group] += rows
             self._labelRowsInGroup(group)
+            self.groupChanged.emit(group)
 
     def delRowFromGroup(self, row):
         """
@@ -497,6 +506,7 @@ class DrillView(QMainWindow):
                         and (self.masterRows[groupName] == row)):
                     del self.masterRows[groupName]
                 self._labelRowsInGroup(groupName)
+                self.groupChanged.emit(groupName)
                 break
 
     def setMasterRow(self, row):
@@ -521,6 +531,7 @@ class DrillView(QMainWindow):
         self.masterRows[group] = row
         label = self.table.getRowLabel(row)
         self.table.setRowLabel(row, label, True)
+        self.groupChanged.emit(group)
 
     def process_selected_rows(self):
         """
