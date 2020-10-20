@@ -466,15 +466,38 @@ class DrillView(QMainWindow):
             return
 
         for row in rows:
-            for groupName in self.groups:
-                if row in self.groups[groupName]:
-                    self.groups[groupName].remove(row)
-                    self.table.delRowLabel(row)
-                    if ((groupName in self.masterRows)
-                            and (self.masterRows[groupName] == row)):
-                        del self.masterRows[groupName]
-                    self._labelRowsInGroup(groupName)
-                    break
+            self.delRowFromGroup(row)
+
+    def addRowsToGroup(self, rows, group):
+        """
+        Add row(s) to an existing group. This will reset all the label in the
+        group.
+
+        Args:
+            rows (list(int)): row indexes
+            group (str): group name
+        """
+        if group in self.groups:
+            self.groups[group] += rows
+            self._labelRowsInGroup(group)
+
+    def delRowFromGroup(self, row):
+        """
+        Remove a row from its group. This will reset all the labels in the
+        group.
+
+        Args:
+            row (int): row index
+        """
+        for groupName in self.groups:
+            if row in self.groups[groupName]:
+                self.groups[groupName].remove(row)
+                self.table.delRowLabel(row)
+                if ((groupName in self.masterRows)
+                        and (self.masterRows[groupName] == row)):
+                    del self.masterRows[groupName]
+                self._labelRowsInGroup(groupName)
+                break
 
     def setMasterRow(self, row):
         """

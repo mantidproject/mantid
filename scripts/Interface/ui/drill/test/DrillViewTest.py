@@ -280,6 +280,20 @@ class DrillViewTest(unittest.TestCase):
                                                 "B": [4]})
         self.assertDictEqual(self.view.masterRows, {"B": 4})
 
+    def test_addRowsToGroup(self):
+        self.view.groups = {"A": [1, 2, 3]}
+        self.view.addRowsToGroup([4], "B")
+        self.assertDictEqual(self.view.groups, {"A": [1, 2, 3]})
+        self.view.addRowsToGroup([4], "A")
+        self.assertDictEqual(self.view.groups, {"A": [1, 2, 3, 4]})
+
+    def test_delRowFromGroup(self):
+        self.view.groups = {"A": [1, 2, 3]}
+        self.view.delRowFromGroup(4)
+        self.assertDictEqual(self.view.groups, {"A": [1, 2, 3]})
+        self.view.delRowFromGroup(3)
+        self.assertDictEqual(self.view.groups, {"A": [1, 2]})
+
     def test_setMasterRow(self):
         self.view.table.getRowsFromSelectedCells.return_value = [1]
         self.view.setMasterRow(1)
