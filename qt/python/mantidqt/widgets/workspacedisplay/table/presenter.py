@@ -180,8 +180,11 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         :type item: A reference to the item that has been edited
         """
         try:
-            self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole),
-                                     item.is_v3d)
+            if self.is_peaks_worksapce:
+                self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole), False)
+            else:
+                self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole),
+                                        item.is_v3d)
         except ValueError:
             item.reset()
             self.view.show_warning(self.ITEM_CHANGED_INVALID_DATA_MESSAGE)
@@ -189,7 +192,8 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
             item.reset()
             self.view.show_warning(self.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(x))
         else:
-            item.sync()
+            if not self.is_peaks_worksapce:
+                item.sync()
 
     def action_copy_cells(self):
         self.copy_cells(self.view)
