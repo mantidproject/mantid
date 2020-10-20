@@ -36,7 +36,7 @@ digraph Sample {
     Plus
     Divide2 [label="Divide"]
     SumOverlappingTubes
-    SeparateComponents
+    ILLComponentSeparation
   }
 
   Run -> Load
@@ -54,9 +54,9 @@ digraph Sample {
   PaalmanPingsMonteCarloAbsorption -> SumCountsOrAverage
   SumCountsOrAverage -> SumOverlappingTubes
   SumCountsOrAverage -> Plus
-  Plus -> SeparateComponents
-  SumOverlappingTubes -> SeparateComponents
-  SeparateComponents -> AbsoluteScaleBy
+  Plus -> ILLComponentSeparation
+  SumOverlappingTubes -> ILLComponentSeparation
+  ILLComponentSeparation -> AbsoluteScaleBy
   VanadiumInputWorkspace -> AbsoluteScaleBy
   AbsoluteScaleBy -> Divide2
   Divide2 -> ConvertUnits

@@ -9,6 +9,7 @@ from mantid.api import PropertyMode, Progress, PythonAlgorithm, WorkspaceGroupPr
     AlgorithmFactory
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator,\
     StringListValidator, LogicOperator, PropertyCriterion
+
 from mantid.simpleapi import *
 
 import numpy as np
@@ -28,39 +29,13 @@ class ILLComponentSeparation(PythonAlgorithm):
     def name(self):
         return 'ILLComponentSeparation'
 
-    def _input_data_structure_helper(self):
-        nMeasurements = 0
-        nComponents = 0
-        user_method = self.getProperty('ComponentSeparationMethod')
-        entries_per_numor = mtd[ws].getNumberOfEntries() / len(self.getPropertyValue('Run').split(','))
-        error_msg = "The provided data cannot support {} measurement component separation."
-        if entries_per_numor == 10:
-            nMeasurements = 10
-            nComponents = 3
-        elif entries_per_numor == 6:
-            nMeasurements = 6
-            nComponents = 3
-            if user_method == '10p':
-                raise RunTimeError(error_msg.format(user_method))
-        elif entries_per_numor == 2:
-            data_structure = 'Uniaxial'
-            nMeasurements = 2
-            nComponents = 2
-            if method == '10p':
-                raise RunTimeError(error_msg.format(user_method))
-            if user_method == 'XYZ':
-                raise RunTimeError(error_msg.format(user_method))
-        else:
-            raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
-                               + "The provided input does not fit in any of these measurement types.")
-        return nMeasurements, nComponents
-
     def validateInputs(self):
         issues = dict()
         separationMethod = self.getPropertyValue('ComponentSeparationMethod')
         if separationMethod == '10p' and self.getProperty('ThetaOffset').isDefault:
             issues['ThetaOffset'] = "The value for theta_0 needs to be defined for the component separation in 10p method."
-
+        return issues
+ 
     def PyInit(self):
 
         self.declareProperty(WorkspaceGroupProperty('InputWorkspace', '',
@@ -90,11 +65,37 @@ class ILLComponentSeparation(PythonAlgorithm):
         output_name = self._component_separation(input_ws)
         self.setProperty('OutputWorkspace', mtd[output_name])
 
+    def _data_structure_helper(self, ws):
+        nComponents = 0
+        user_method = self.getProperty('ComponentSeparationMethod')
+        measurements = set()
+        for name in mtd[ws].getNames():
+            last_underscore = name.rfind("_")
+            measurements.add(name[last_underscore:])
+        nMeasurements = len(measurements)
+        error_msg = "The provided data cannot support {} measurement component separation."
+        if nMeasurements == 10:
+            nComponents = 3
+        elif nMeasurements == 6:
+            nComponents = 3
+            if user_method == '10p':
+                raise RunTimeError(error_msg.format(user_method))
+        elif nMeasurements == 2:
+            nComponents = 2
+            if method == '10p':
+                raise RunTimeError(error_msg.format(user_method))
+            if user_method == 'XYZ':
+                raise RunTimeError(error_msg.format(user_method))
+        else:
+            raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
+                               + "The provided input does not fit in any of these measurement types.")
+        return nMeasurements, nComponents
+
     def _component_separation(self, ws):
         """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
         current sample. The method used is based on either the user's choice or the provided data structure."""
 
-        nMeasurements, nComponents = self._input_data_structure_helper()
+        nMeasurements, nComponents = self._data_structure_helper(ws)
         componentNames = ['Coherent', 'Incoherent', 'Magnetic']
         number_histograms = mtd[ws][0].getNumberHistograms()
         block_size = mtd[ws][0].blocksize()

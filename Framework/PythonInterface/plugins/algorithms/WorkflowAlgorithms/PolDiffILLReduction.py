@@ -713,6 +713,19 @@ class PolDiffILLReduction(PythonAlgorithm):
         Integration(InputWorkspace=ws, OutputWorkspace=ws)
         return ws
 
+    def _separate_components(self, ws):
+        theta_0 = 0
+        if self._user_method == '10p':
+            try:
+                theta_0 = self._sampleAndEnvironmentProperties['ThetaOffset'].value
+            except KeyError:
+                raise RuntimeError("The value for theta_0 needs to be defined for the component separation in 10p method.")
+        component_ws = '{}_separated_components'.format(process)
+        ILLComponentSeparation(InputWorkspace=ws, OutputWorkspace=component_ws,
+                               ComponentSeparationMethod=self._user_method,
+                               ThetaOffset=theta_0)
+        return component_Ws
+
     def _normalise_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
         if self._mode == 'TOF':
@@ -827,13 +840,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     self._merge_polarisations(ws, average_detectors=True)
                 if self._user_method != 'None':
                     progress.report('Separating components')
-                    theta_0 = 0
-                    if self._user_method == '10p':
-                        try:
-                            theta_0 = self._sampleAndEnvironmentProperties['ThetaOffset'].value
-                        except KeyError:
-                            raise RuntimeError("The value for theta_0 needs to be defined for the component separation in 10p method.")
-                    component_ws = ILLComponentSeparation(ws, self._user_method, theta_0)
+                    component_ws = self._separate_components(ws)
                 else:
                     component_ws = ''
                 if process == 'Vanadium':

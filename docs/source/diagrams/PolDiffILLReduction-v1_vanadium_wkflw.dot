@@ -33,7 +33,7 @@ digraph Vanadium {
     Plus
     Divide2 [label="Divide"]
     SumOverlappingTubes
-    SeparateComponents
+    ILLComponentSeparation
   }
 
   Run -> Load
@@ -50,9 +50,9 @@ digraph Vanadium {
   PaalmanPingsMonteCarloAbsorption -> SumCountsOrAverage
   SumCountsOrAverage -> SumOverlappingTubes
   SumCountsOrAverage -> Plus
-  SumOverlappingTubes -> SeparateComponents
-  Plus -> SeparateComponents
-  SeparateComponents -> ConvertUnits
+  SumOverlappingTubes -> ILLComponentSeparation
+  Plus -> ILLComponentSeparation
+  ILLComponentSeparation -> ConvertUnits
   ConvertUnits -> ConvertSpectrumAxis
   ConvertSpectrumAxis -> Divide2
   ConvertUnits -> Divide2
