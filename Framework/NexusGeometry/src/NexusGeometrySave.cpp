@@ -1654,9 +1654,7 @@ private:
       posz.push_back(offset[2]); // z pixel offset
     }
 
-    auto bankName = compInfo.name(idx);
     const auto nDetectorsInBank = static_cast<hsize_t>(posx.size());
-
     int rank = 1;
     hsize_t dims[static_cast<hsize_t>(1)];
     dims[0] = nDetectorsInBank;
