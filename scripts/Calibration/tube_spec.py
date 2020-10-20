@@ -12,6 +12,11 @@
 
 # Author: Karl Palmen ISIS
 
+from typing import Union
+
+# Mantid imports
+from mantid.api import mtd, Workspace
+
 
 class TubeSpec:
     """
@@ -40,11 +45,13 @@ class TubeSpec:
         This may differ from the order they appear in the workspace indices.
     """
 
-    def __init__(self, ws):
+    def __init__(self, input_workspace: Union[str, Workspace]) -> None:
         """
         The constructor creates empty tube specification for specified instrument.
-        :param ws: workspace containing the specified instrument with oneN pixel detector per spectrum.
+        :param input_workspace: name or handle to the workspace containing the specified instrument
+            with one pixel detector per spectrum.
         """
+        ws = mtd[str(input_workspace)]
         self.ws = ws
         self.inst = ws.getInstrument()
         self.numTubes = 0
