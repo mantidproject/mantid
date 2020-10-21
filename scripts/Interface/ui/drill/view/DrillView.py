@@ -438,7 +438,9 @@ class DrillView(QMainWindow):
             return
         rowName = 1
         for row in self.groups[groupName]:
-            self.table.setRowLabel(row, groupName + str(rowName))
+            bold = ((groupName in self.masterRows)
+                   and (self.masterRows[groupName] == row))
+            self.table.setRowLabel(row, groupName + str(rowName), bold)
             rowName += 1
 
     def groupRows(self, rows):
@@ -525,12 +527,8 @@ class DrillView(QMainWindow):
         if not group:
             return
 
-        if group in self.masterRows:
-            label = self.table.getRowLabel(self.masterRows[group])
-            self.table.setRowLabel(self.masterRows[group], label, False)
         self.masterRows[group] = row
-        label = self.table.getRowLabel(row)
-        self.table.setRowLabel(row, label, True)
+        self._labelRowsInGroup(group)
         self.groupChanged.emit(group)
 
     def process_selected_rows(self):
