@@ -88,6 +88,66 @@ class PG3Analysis(systemtesting.MantidSystemTest):
         self.tolerance = 1.0e-2
         return ('PG3_4844','PG3_4844_golden')
 
+class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
+    cal_file  = "PG3_PAC_HR_d46168_2020_05_06.h5"
+    char_files = ["PG3_char_2020_01_04_PAC_limit_1.4MW.txt","PG3_char_2020_05_06-HighRes-PAC_1.4 MW.txt"]
+
+    def skipTests(self):
+        return _skip_test()
+
+    def cleanup(self):
+        return do_cleanup()
+
+    def requiredFiles(self):
+        files = [self.cal_file]
+        files.append(self.char_files)
+        files.append("PG3_46577.nxs.h5") # /SNS/PG3/IPTS-2767/nexus/
+        #files.append("PG3_4866_event.nxs") # /SNS/PG3/IPTS-2767/0/
+        #files.append("PG3_5226_event.nxs") # /SNS/PG3/IPTS-2767/0/
+        return files
+
+    def runTest(self):
+        savedir = getSaveDir()
+
+        # Silicon Full Paalman-Pings test
+        SNSPowderReduction("PG3_46577.nxs.h5",
+                   CalibrationFile=self.cal_file,
+                   CharacterizationRunsFile=self.char_files,
+                   Binning=-0.001,
+                   SaveAs="nexus",
+                   TypeOfCorrection="FullPaalmanPings",
+                   SampleFormula="Si",
+                   MeasuredMassDensity=1.165,  # Need to verify 'packing density' = 'measured mass density'?
+                   ContainerShape="PAC06",
+                   OutputFilePrefix='PP_absorption_',
+                   OutputDirectory=self.savedir)
+
+        LoadNexus(Filename="PP_absorption_PG3_46577.nxs", OutputWorkspace="PP_46577")
+
+    def validate(self):
+        self.tolerance = 0.5
+        Power(InputWorkspace="PG3_46577",
+              OutputWorkspace="bottom",
+              Exponent=2)
+        Integration(InputWorkspace="bottom",
+                    OutputWorkspace="bottom")
+
+        Subtract(InputWorkspace="PG3_46577",
+                 OutputWorkspace="top")
+        Power(InputWorkspace="top",
+              OutputWorkspace="top",
+              Exponent=2)
+        Integration(InputWorkspace="top",
+                    OutputWorkspace="top")
+
+        Divide(LHSWorkspace="top",
+               RHSWorkspace="bottom",
+               OutputWorkspace="Rval")
+        Rval = Rval.dataY(0)
+
+        self.assertTrue(Rval < self.tolerance)
+
+        return ('PG3_46577')
 
 class PG3StripPeaks(systemtesting.MantidSystemTest):
     ref_file = 'PG3_4866_reference.gsa'
