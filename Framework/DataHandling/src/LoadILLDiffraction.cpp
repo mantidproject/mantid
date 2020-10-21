@@ -64,7 +64,9 @@ DECLARE_NEXUS_FILELOADER_ALGORITHM(LoadILLDiffraction)
 int LoadILLDiffraction::confidence(NexusDescriptor &descriptor) const {
 
   // fields existent only at the ILL Diffraction
-  if (descriptor.pathExists("/entry0/instrument/2theta")) {
+  // the second one is to recognize D1B
+  if (descriptor.pathExists("/entry0/instrument/2theta") ||
+      descriptor.pathExists("/entry0/instrument/Canne")) {
     return 80;
   } else {
     return 0;
@@ -93,7 +95,7 @@ const std::string LoadILLDiffraction::summary() const {
  * Constructor
  */
 LoadILLDiffraction::LoadILLDiffraction()
-    : IFileLoader<NexusDescriptor>(), m_instNames({"D20", "D2B"}) {}
+    : IFileLoader<NexusDescriptor>(), m_instNames({"D20", "D2B", "D1B"}) {}
 
 /**
  * Initialize the algorithm's properties.
@@ -201,7 +203,14 @@ void LoadILLDiffraction::loadDataScan() {
   axis.load();
 
   // read the starting two theta
-  NXFloat twoTheta0 = firstEntry.openNXFloat("instrument/2theta/value");
+  std::string twoThetaPath;
+  if (m_instName != "D1B") {
+    twoThetaPath = "instrument/2theta/value";
+  } else {
+    twoThetaPath = "instrument/Omega/value";
+  }
+  NXFloat twoTheta0 = firstEntry.openNXFloat(twoThetaPath);
+  ;
   twoTheta0.load();
 
   // figure out the dimensions
