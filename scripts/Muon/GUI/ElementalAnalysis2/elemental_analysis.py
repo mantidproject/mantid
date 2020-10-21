@@ -4,15 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets, QtCore, QT_VERSION
-from distutils.version import LooseVersion
-
-from mantid.kernel import ConfigServiceImpl
+from qtpy import QtWidgets, QtCore
 
 import Muon.GUI.Common.message_box as message_box
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
-from mantidqt.utils.observer_pattern import GenericObserver,GenericObservable
 from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
 
 
@@ -68,5 +64,3 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def closeEvent(self, event):
         self.tabs.closeEvent(event)
         super(ElementalAnalysisGui, self).closeEvent(event)
-
-

@@ -8,11 +8,9 @@ import unittest
 from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
 
 
-
 class ElementalAnalysisContextTest(unittest.TestCase):
     def setUp(self):
         self.context = ElementalAnalysisContext()
-
 
     def test_name(self):
         self.assertEqual(self.context.name, "Elemental Analysis 2")

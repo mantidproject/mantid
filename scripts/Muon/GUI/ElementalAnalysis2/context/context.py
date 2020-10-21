@@ -9,10 +9,8 @@
 class ElementalAnalysisContext(object):
 
     def __init__(self):
-      self._window_title = "Elemental Analysis 2"
+        self._window_title = "Elemental Analysis 2"
 
     @property
     def name(self):
         return self._window_title
-
-
