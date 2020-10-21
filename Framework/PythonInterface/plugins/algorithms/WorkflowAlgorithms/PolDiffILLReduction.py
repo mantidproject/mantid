@@ -365,10 +365,11 @@ class PolDiffILLReduction(PythonAlgorithm):
         tmp_names = [unit_ws, background_ws]
         for entry_no, entry in enumerate(mtd[ws]):
             container_entry = mtd[container_ws][entry_no].name()
-            mtd[container_entry].setYUnit('Counts')
-            mtd[transmission_ws].setYUnit('Counts')
+            mtd[container_entry].setYUnit('')
+            mtd[transmission_ws].setYUnit('')
             absorber_entry = mtd[absorber_ws][entry_no].name()
-            mtd[absorber_entry].setYUnit('Counts')
+            mtd[absorber_entry].setYUnit('')
+            entry.setYUnit('')
             container_corr = container_entry + '_corr'
             tmp_names.append(container_corr)
             Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=container_entry, OutputWorkspace=container_corr)
