@@ -12,5 +12,9 @@
 			<value val="False" />
 	  </parameter>
 
+		<parameter name="sample_logs_sum" type="string">
+      <value val="ScanSteps" />
+    </parameter>
+
 	</component-link>
 </parameter-file>
