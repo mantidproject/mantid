@@ -668,6 +668,13 @@ class DrillModel(QObject):
             logger.warning("No sample found when importing {0}."
                            .format(filename))
 
+        # groups
+        self.groups = dict()
+        if "Groups" in json_data and json_data["Groups"]:
+            self.groups = json_data["Groups"]
+        if "GroupsMaster" in json_data and json_data["GroupsMaster"]:
+            self.masterSample = json_data["GroupsMaster"]
+
         self.rundexFile = filename
 
     def exportRundexData(self, filename, visualSettings=None):
@@ -699,6 +706,10 @@ class DrillModel(QObject):
         json_data[RundexSettings.SAMPLES_JSON_KEY] = list()
         for sample in self.samples:
             json_data[RundexSettings.SAMPLES_JSON_KEY].append(sample)
+
+        # groups
+        json_data["Groups"] = self.groups
+        json_data["GroupsMaster"] = self.masterSample
 
         with open(filename, 'w') as json_file:
             json.dump(json_data, json_file, indent=4)

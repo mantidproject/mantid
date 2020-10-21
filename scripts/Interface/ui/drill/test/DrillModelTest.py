@@ -514,7 +514,9 @@ class DrillModelTest(unittest.TestCase):
             "Instrument": "i1",
             "AcquisitionMode": "a1",
             "GlobalSettings": dict.fromkeys(self.SETTINGS["a1"], "test"),
-            "Samples": []
+            "Samples": [],
+            "Groups": {},
+            "GroupsMaster": {}
             })
 
     def test_getRundexFile(self):

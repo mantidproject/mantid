@@ -289,7 +289,9 @@ class DrillTest(unittest.TestCase):
                     'FoldedColumns': {}
                     },
                 'GlobalSettings': self.model.settings,
-                'Samples': []
+                'Samples': [],
+                'Groups': {},
+                'GroupsMaster': {}
                 }
         self.assertDictEqual(json, mJson.dump.call_args[0][0])
 
