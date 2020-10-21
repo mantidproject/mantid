@@ -1032,13 +1032,27 @@ class RunDescriptor(PropDescriptor):
 #--------------------------------------------------------------------------------------------------------------------
 
     def find_file(self,propman,inst_name=None,run_num=None,filePath=None,fileExt=None,**kwargs):
-        """Use Mantid to search for the given run. """
+        """Use Mantid to search for the given run using additional information provided as input
+           
+           If no file guess information provided, form default file name, used as the guess for search.
+
+           Optional arguments:
+           be_quet = True -- do not reports if search have failed or file with non-default
+                             extension present.
+           force_extension = ['raw,nxs,nXXX, rXXX] find files with specified extension only
+                             Ignore other similar data files, which different extensions,
+                             Mantid may found for you.
+        """
 
         if not inst_name:
             inst_name = propman.short_inst_name
 
         if not run_num:
             run_num = self.run_number()
+        if 'force_extension' in kwargs:
+            fileExt = kwargs['force_extension']
+            self.set_file_ext(fileExt)
+
 
         fac             = propman.facility
         zero_padding    = fac.instrument(inst_name).zeroPadding(run_num)
@@ -1049,30 +1063,40 @@ class RunDescriptor(PropDescriptor):
         def _check_ext(file_name):
             fname,fex = os.path.splitext(file_name)
             if old_ext != fex:
-                message = '*** Cannot find run-file with extension {0}.\n'\
-                          '    Found file {1} instead'.format(old_ext,file_name)
-                RunDescriptor._logger(message,'notice')
-            self._run_file_path = os.path.dirname(fname)
-            self._fext = fex
+                if 'force_extension' in kwargs:
+                    if 'be_quet' not in kwargs:
+                        message= '*** Cannot find file matching hint {0} with the requested extension {1} on Mantid search paths '.\
+                        format(file_hint,old_ext)
+                        RunDescriptor._logger(message,'warning')
+                    raise RuntimeError(message)
+                else:
+                    message = '*** Cannot find run-file with extension {0}.\n'\
+                              '    Found file {1} instead'.format(old_ext,file_name)
+                    RunDescriptor._logger(message,'notice')
+                self._run_file_path = os.path.dirname(fname)
+                self._fext = fex
 
         #------------------------------------------------
         try:
             file_name = FileFinder.findRuns(file_hint)[0]
             _check_ext(file_name)
             return (True,file_name)
-        except RuntimeError:
-            try:
+        except RuntimeError as Err:
+            if 'force_extension' in kwargs:
+                return(False,str(Err))
+            else:
+                try: # find file with other exception
 #pylint: disable=unused-variable
-                file_hint,oext = os.path.splitext(file_hint)
-                file_name = FileFinder.findRuns(file_hint)[0]
-                _check_ext(file_name)
-                return (True,file_name)
-            except RuntimeError:
-                message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
-                        format(file_hint)
-                if 'be_quet' not in kwargs:
-                    RunDescriptor._logger(message,'warning')
-                return (False,message)
+                    file_hint,oext = os.path.splitext(file_hint)
+                    file_name = FileFinder.findRuns(file_hint)[0]
+                    _check_ext(file_name)
+                    return (True,file_name)
+                except RuntimeError:
+                    message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
+                            format(file_hint)
+                    if 'be_quet' not in kwargs:
+                        RunDescriptor._logger(message,'warning')
+                    return (False,message)
 #--------------------------------------------------------------------------------------------------------------------
 #pylint: disable=too-many-arguments
 

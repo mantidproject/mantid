@@ -501,8 +501,10 @@ class ReductionWrapper(object):
 
         timeToWait = self._wait_for_file
         wait_counter = 0
+        _, fext_requested = PropertyManager.sample_run.file_hint()
         if timeToWait > 0:
-            Found, input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man, be_quet=True)
+            Found, input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,\
+               be_quet=True,force_extension=fext_requested)
             while not Found:
                 file_hint, fext = PropertyManager.sample_run.file_hint()
                 self.reducer.prop_man.log("*** Waiting {0} sec for file {1} to appear on the data search path"
@@ -510,24 +512,7 @@ class ReductionWrapper(object):
 
                 self._run_pause(timeToWait)
                 Found, input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man, file_hint=file_hint,
-                                                                         be_quet=True)
-                if Found:
-                    _, found_ext = os.path.splitext(input_file)
-                    if found_ext != fext:
-                        wait_counter += 1
-                        if wait_counter < 2:
-                            timeToWait = 60
-                            self.reducer.prop_man.log(
-                                "*** Requested file with extension {0} but found one with extension {1}\n"
-                                "    The target may not have been delivered from the DAE machine\n".format(fext,
-                                                                                                           found_ext))
-                            Found = False
-                        else:
-                            wait_counter = 0
-                    else:
-                        pass
-                else:
-                    pass  # not found, wait more
+                                                                         be_quet=True,force_extension=fext_requested)
             # endWhile
             # found but let's give it some time to finish possible IO operations
             self._check_access_granted(input_file)

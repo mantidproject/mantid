@@ -122,6 +122,31 @@ class RunDescriptorTest(unittest.TestCase):
         os.remove(testFile1)
         os.remove(testFile2)
 
+    def test_alsk_one_find_another_ext_file(self):
+        propman = self.prop_man
+        propman.sample_run = 11001
+        PropertyManager.sample_run.set_file_ext('nxs')
+
+        ok, file = PropertyManager.sample_run.find_file(propman)
+        self.assertTrue(ok)
+        self.assertGreater(len(file), 12)
+
+        ext = PropertyManager.sample_run.get_fext()
+        self.assertEqual(ext.casefold(), '.raw'.casefold())
+
+    def test_alsk_one_find_another_ext_blocked(self):
+        propman = self.prop_man
+        propman.sample_run = 11001
+        PropertyManager.sample_run.set_file_ext('raw')
+
+        ok, file = PropertyManager.sample_run.find_file(propman,force_extension='.nxs')
+        self.assertFalse(ok)
+        self.assertEqual(file.strip(),\
+           '*** Cannot find file matching hint MAR11001.nxs with the requested extension .nxs on Mantid search paths')
+
+
+
+
     def test_load_workspace(self):
         propman = self.prop_man
 
@@ -599,6 +624,6 @@ class RunDescriptorTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    # tester=RunDescriptorTest('test_monitors_renamed')
-    # tester.test_monitors_renamed()
+    #tester=RunDescriptorTest('test_alsk_one_find_another_ext_blocked')
+    #tester.test_alsk_one_find_another_ext_blocked()
     unittest.main()
