@@ -5,9 +5,12 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, QStyle, QAbstractItemView
+from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, \
+                           QStyle, QAbstractItemView, QMenu, QMessageBox
 from qtpy.QtGui import QBrush, QColor
 from qtpy.QtCore import *
+
+from mantidqt import icons
 
 from .DrillHeaderView import DrillHeaderView
 from .DrillItemDelegate import DrillItemDelegate
@@ -36,6 +39,17 @@ class DrillTableWidget(QTableWidget):
                                           None, self)
         minSize = self.fontMetrics().height() + 2 * margin
         self.verticalHeader().setDefaultSectionSize(minSize)
+
+    def setHorizontalHeaderLabels(self, labels):
+        """
+        Overrides QTableWidget::setHorizontalHeaderLabels. This methods calls
+        the base class method and keeps a list of columns label for later use.
+
+        Args:
+            labels (list(str)): columns labels
+        """
+        super(DrillTableWidget, self).setHorizontalHeaderLabels(labels)
+        self.columns = labels
 
     def addRow(self, position):
         """
@@ -338,31 +352,120 @@ class DrillTableWidget(QTableWidget):
             if item and c < len(tooltips):
                 item.setToolTip(tooltips[c])
 
-    def setHeaderFoldingState(self, columns):
+    def setFoldedColumns(self, columns):
         """
-        Give a folding state for each column.
+        Fold specific columns.
 
         Args:
-            columns(list(bool)): column indexes
-        """
-        if (len(columns) != self.columnCount()):
-            return
-        for i in range(len(columns)):
-            if columns[i]:
-                self.horizontalHeader().foldSection(i)
-
-    def getHeaderFoldingState(self):
-        """
-        Get the folding state of each column.
-
-        Returns:
-            list(bool): True if the column is folded
+            columns (list(str)): list of column labels
         """
         header = self.horizontalHeader()
-        fold = list()
-        for i in range(self.columnCount()):
-            fold.append(header.isSectionFolded(i))
-        return fold
+        for i in range(len(self.columns)):
+            name = self.columns[i]
+            if name in columns:
+                header.foldSection(i)
+
+    def getFoldedColumns(self):
+        """
+        Get the list of folded columns.
+
+        Returns:
+            list(str): list of columns labels
+        """
+        header = self.horizontalHeader()
+        folded = list()
+        for i in range(len(self.columns)):
+            if header.isSectionFolded(i):
+                folded.append(self.columns[i])
+        return folded
+
+    def setHiddenColumns(self, columns):
+        """
+        Hide specific columns.
+
+        Args:
+            columns(list(str)): list of column labels
+        """
+        header = self.horizontalHeader()
+        for i in range(len(self.columns)):
+            name = self.columns[i]
+            if name in columns:
+                header.hideSection(i)
+
+    def toggleColumnVisibility(self, column):
+        """
+        Change the visibility state of a column by giving its name. If the
+        column is not empty it is emptied before being hidden. In that case, the
+        user is asked for confirmation.
+
+        Args:
+            column (str): column name
+        """
+        if column not in self.columns:
+            return
+        header = self.horizontalHeader()
+        i = self.columns.index(column)
+        if header.isSectionHidden(i):
+            header.showSection(i)
+        else:
+            empty = True
+            for j in range(self.rowCount()):
+                if self.getCellContents(j, i):
+                    empty = False
+            if not empty:
+                q = QMessageBox.question(self, "Column is not empty", "Hiding "
+                                         "the column will erase its content. "
+                                         "Do you want to continue?")
+                if q == QMessageBox.Yes:
+                    for j in range(self.rowCount()):
+                        self.setCellContents(j, i, "")
+                    header.hideSection(i)
+            else:
+                header.hideSection(i)
+
+    def getHiddenColumns(self):
+        """
+        Get the list of hidden columns.
+
+        Returns:
+            list(str): list of column labels
+        """
+        header = self.horizontalHeader()
+        hidden = list()
+        for i in range(len(self.columns)):
+            if header.isSectionHidden(i):
+                hidden.append(self.columns[i])
+        return hidden
+
+    def setColumnsOrder(self, columns):
+        """
+        Set the columns order by giving a list of labels.
+
+        Args:
+            columns (list(str)): list of labels whose table should follow the
+                                 order
+        """
+        header = self.horizontalHeader()
+        for c in columns:
+            if c not in self.columns:
+                continue
+            indexFrom = header.visualIndex(self.columns.index(c))
+            indexTo = columns.index(c)
+            header.moveSection(indexFrom, indexTo)
+
+    def getColumnsOrder(self):
+        """
+        Get the columns order as a list of labels.
+
+        Returns:
+            list(str): list of columns labels
+        """
+        columns = [""] * len(self.columns)
+        header = self.horizontalHeader()
+        for i in range(len(self.columns)):
+            index = header.visualIndex(i)
+            columns[index] = self.columns[i]
+        return columns
 
     def setDisabled(self, state):
         """
@@ -389,3 +492,26 @@ class DrillTableWidget(QTableWidget):
                     else:
                         item.setFlags(item.flags() | flags)
         self.blockSignals(False)
+
+    def contextMenuEvent(self, event):
+        """
+        Context menu. It contains:
+        * add/delete menu with a list of visible and hidden columns
+
+        Args:
+            event (QContextMenuEvent): event that triggered the function
+        """
+        position = event.globalPos()
+        header = self.horizontalHeader()
+        rightClickMenu = QMenu(self)
+
+        colMenu = rightClickMenu.addMenu("Add/Delete column")
+        for li in range(len(self.columns)):
+            if header.isSectionHidden(li):
+                colMenu.addAction(icons.get_icon("mdi.close"), self.columns[li])
+            else:
+                colMenu.addAction(icons.get_icon("mdi.check"), self.columns[li])
+
+        selectedItem = rightClickMenu.exec(position)
+        if selectedItem:
+            self.toggleColumnVisibility(selectedItem.text())

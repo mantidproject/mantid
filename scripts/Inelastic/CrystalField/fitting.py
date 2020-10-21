@@ -226,6 +226,9 @@ class CrystalField(object):
 
         self._setPeaks()
 
+        # Required to build the target function for the first time (which includes applying all ties)
+        self.crystalFieldFunction.initialize()
+
         # Eigensystem
         self._dirty_eigensystem = True
         self._eigenvalues = None
@@ -390,6 +393,8 @@ class CrystalField(object):
         self.crystalFieldFunction.setAttributeValue('Symmetry', value)
         self._dirty_eigensystem = True
         self._dirty_peaks = True
+
+        self.crystalFieldFunction.initialize()
 
     @property
     def ToleranceEnergy(self):

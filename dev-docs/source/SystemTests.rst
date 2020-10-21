@@ -254,7 +254,7 @@ would run the tests on 8 cores.
 Some tests write or delete in the same directories, using the same file
 names, which causes issues when running in parallel. To resolve this,
 a global list of test modules (= different Python files in the
-``Testing/SystemTests/tests/analysis`` directory) is first created.
+``Testing/SystemTests/tests/framework`` directory) is first created.
 Now we scan each test module line by line and list all the data files
 that are used by that module. The possible ways files are being
 specified are:

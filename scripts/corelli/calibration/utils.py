@@ -10,7 +10,7 @@ import numpy as np
 from typing import List, Optional, Union
 
 # imports from Mantid
-from mantid.api import AnalysisDataService, mtd
+from mantid.api import AnalysisDataService, mtd, WorkspaceGroup
 from mantid.dataobjects import TableWorkspace, Workspace2D
 from mantid.simpleapi import ApplyCalibration, CloneWorkspace, Integration, LoadEventNexus, LoadNexusProcessed
 try:
@@ -24,10 +24,11 @@ from Calibration.tube_calib_fit_params import TubeCalibFitParams
 # Type aliases
 InputTable = Union[str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
 WorkspaceTypes = Union[str, Workspace2D]  # allowed types for the input workspace to calibrate_bank
+WorkspaceGroupTypes = Union[str, WorkspaceGroup]
 
 PIXELS_PER_TUBE = 256
 TUBES_IN_BANK = 16
-TUBE_LENGTH = 0.9001  # in meters
+TUBE_LENGTH = 0.900466  # in meters
 WIRE_GAP = 52.8 / 1000  # in meters, distance between consecutive wires
 
 
