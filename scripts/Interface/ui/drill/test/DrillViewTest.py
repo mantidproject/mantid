@@ -447,12 +447,12 @@ class DrillViewTest(unittest.TestCase):
 
     def test_fillTable(self):
         # empty contents
-        self.view.fill_table([])
+        self.view.fill_table([], {}, {})
         self.view.table.addRow.assert_called_once()
         # contents
         self.view.table.reset_mock()
         self.view.fill_table([["test", "test"],
-                              ["test", "test"]])
+                              ["test", "test"]], {}, {})
         self.view.table.addRow.assert_not_called()
         self.view.table.setRowCount.assert_called_once()
         calls = [mock.call(0, ["test", "test"]),

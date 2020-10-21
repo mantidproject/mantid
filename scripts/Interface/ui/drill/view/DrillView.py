@@ -812,7 +812,7 @@ class DrillView(QMainWindow):
         else:
             return None
 
-    def fill_table(self, rows_contents):
+    def fill_table(self, rows_contents, rowsGroup, groupsMaster):
         """
         Fill the table.
 
@@ -822,10 +822,15 @@ class DrillView(QMainWindow):
         if (not self.table.columnCount()):
             return
         if rows_contents:
+            self.groups = dict()
             self.blockSignals(True)
             self.table.setRowCount(len(rows_contents))
             for row in range(len(rows_contents)):
                 self.table.setRowContents(row, rows_contents[row])
+            self.groups = rowsGroup
+            self.masterRows = groupsMaster
+            for group in self.groups:
+                self._labelRowsInGroup(group)
             self.blockSignals(False)
         else:
             self.table.addRow(0)
