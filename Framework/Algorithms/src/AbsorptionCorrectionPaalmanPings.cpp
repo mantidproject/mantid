@@ -380,9 +380,9 @@ void AbsorptionCorrectionPaalmanPings::retrieveBaseProperties() {
   // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
   // will cancel for mu to give units: cm^-1
   m_ampleLinearCoefTotScatt =
-      -m_material.totalScatterXSection() * m_material.numberDensity() * 100;
+      -m_material.totalScatterXSection() * m_material.numberDensityEffective() * 100;
   m_containerLinearCoefTotScatt = -m_containerMaterial.totalScatterXSection() *
-                                  m_containerMaterial.numberDensity() * 100;
+                                  m_containerMaterial.numberDensityEffective() * 100;
 
   m_num_lambda = getProperty("NumberOfWavelengthPoints");
 

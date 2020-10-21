@@ -322,7 +322,7 @@ void AbsorptionCorrection::retrieveBaseProperties() {
   if (createMaterial) {
     // get values from the existing material
     if (isEmpty(rho))
-      rho = m_material.numberDensity();
+      rho = m_material.numberDensityEffective();
     if (isEmpty(sigma_s))
       sigma_s = m_material.totalScatterXSection();
     if (isEmpty(sigma_atten))
@@ -344,7 +344,7 @@ void AbsorptionCorrection::retrieveBaseProperties() {
   // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
   // will cancel for mu to give units: cm^-1
   m_linearCoefTotScatt =
-      -m_material.totalScatterXSection() * m_material.numberDensity() * 100;
+      -m_material.totalScatterXSection() * m_material.numberDensityEffective() * 100;
 
   m_num_lambda = getProperty("NumberOfWavelengthPoints");
 
