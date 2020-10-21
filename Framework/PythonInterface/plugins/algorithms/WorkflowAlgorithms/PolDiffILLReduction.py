@@ -197,14 +197,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.declareProperty('ClearCache', True,
                              doc='Whether or not to clear the cache of intermediate workspaces.')
 
-        self.declareProperty(name="MeasurementTechnique",
-                             defaultValue="Powder",
-                             validator=StringListValidator(["Powder", "SingleCrystal", "TOF"]),
-                             direction=Direction.Input,
-                             doc="Which measurement technique was used to measure the sample.")
-
-        self.setPropertySettings('MeasurementTechnique', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
-
         self.declareProperty(name="ComponentSeparationMethod",
                              defaultValue="None",
                              validator=StringListValidator(["None", "Uniaxial", "XYZ", "10p"]),
@@ -259,26 +251,13 @@ class PolDiffILLReduction(PythonAlgorithm):
                                                                                LogicOperator.And))
 
         self.declareProperty(name="OutputUnits",
-                             defaultValue="Wavelength/TOF",
-                             validator=StringListValidator(["Wavelength/TOF", "TwoTheta", "Q"]),
+                             defaultValue="Wavelength",
+                             validator=StringListValidator(["Wavelength", "TwoTheta", "Q"]),
                              direction=Direction.Input,
                              doc="The choice to display the reduced data either as a function of the raw data units, the detector twoTheta,"
                                  +" or the momentum exchange.")
 
         self.setPropertySettings('OutputUnits', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
-
-        self.declareProperty(name="TOFUnits",
-                             defaultValue="TimeChannels",
-                             validator=StringListValidator(["TimeChannels", "UncalibratedTime", "Energy"]),
-                             direction=Direction.Input,
-                             doc="The choice to display the TOF data either as a function of the time channel or the uncalibrated time.\
-                             It has no effect if the measurement mode is monochromatic.")
-
-        tofMeasurement = EnabledWhenProperty('MeasurementTechnique', PropertyCriterion.IsEqualTo, 'TOF')
-
-        self.setPropertySettings('TOFUnits', EnabledWhenProperty(tofMeasurement,
-                                                                 EnabledWhenProperty(vanadium, sample, LogicOperator.Or),
-                                                                 LogicOperator.And))
 
         self.declareProperty(name="ScatteringAngleBinSize",
                              defaultValue=0.5,
@@ -359,8 +338,6 @@ class PolDiffILLReduction(PythonAlgorithm):
             if 0 in mtd[mon].readY(0):
                 raise RuntimeError('Cannot normalise to monitor; monitor has 0 counts.')
             else:
-                if self._mode == 'TOF':
-                    Integration(InputWorkspace=mon, OutputWorkspace=mon)
                 CreateSingleValuedWorkspace(DataValue=mtd[mon].readY(0)[0], ErrorValue=mtd[mon].readE(0)[0],
                                             OutputWorkspace=mon)
                 Divide(LHSWorkspace=entry, RHSWorkspace=mon, OutputWorkspace=entry)
@@ -379,10 +356,9 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _subtract_background(self, ws, container_ws, transmission_ws):
         """Subtracts empty container and absorber scaled by transmission."""
-        if self._mode != 'TOF':
-            absorber_ws = self.getPropertyValue('AbsorberInputWorkspace')
-            if absorber_ws == "":
-                raise RuntimeError("Absorber input workspace needs to be provided for non-TOF background subtraction.")
+        absorber_ws = self.getPropertyValue('AbsorberInputWorkspace')
+        if absorber_ws == "":
+            raise RuntimeError("Absorber input workspace needs to be provided for monochromatic background subtraction.")
         unit_ws = 'unit_ws'
         CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace=unit_ws)
         background_ws = 'background_ws'
@@ -391,24 +367,21 @@ class PolDiffILLReduction(PythonAlgorithm):
             container_entry = mtd[container_ws][entry_no].name()
             mtd[container_entry].setYUnit('Counts')
             mtd[transmission_ws].setYUnit('Counts')
-            if self._mode != 'TOF':
-                absorber_entry = mtd[absorber_ws][entry_no].name()
-                mtd[absorber_entry].setYUnit('Counts')
-                container_corr = container_entry + '_corr'
-                tmp_names.append(container_corr)
-                Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=container_entry, OutputWorkspace=container_corr)
-                transmission_corr = transmission_ws + '_corr'
-                tmp_names.append(transmission_corr)
-                Minus(LHSWorkspace=unit_ws, RHSWorkspace=transmission_ws, OutputWorkspace=transmission_corr)
-                absorber_corr = absorber_entry + '_corr'
-                tmp_names.append(absorber_corr)
-                Multiply(LHSWorkspace=transmission_corr, RHSWorkspace=absorber_entry, OutputWorkspace=absorber_corr)
-                Plus(LHSWorkspace=container_corr, RHSWorkspace=absorber_corr, OutputWorkspace=background_ws)
-                Minus(LHSWorkspace=entry,
-                      RHSWorkspace=background_ws,
-                      OutputWorkspace=entry)
-            else:
-                raise RuntimeError("TOF requires elastic channel definition")
+            absorber_entry = mtd[absorber_ws][entry_no].name()
+            mtd[absorber_entry].setYUnit('Counts')
+            container_corr = container_entry + '_corr'
+            tmp_names.append(container_corr)
+            Multiply(LHSWorkspace=transmission_ws, RHSWorkspace=container_entry, OutputWorkspace=container_corr)
+            transmission_corr = transmission_ws + '_corr'
+            tmp_names.append(transmission_corr)
+            Minus(LHSWorkspace=unit_ws, RHSWorkspace=transmission_ws, OutputWorkspace=transmission_corr)
+            absorber_corr = absorber_entry + '_corr'
+            tmp_names.append(absorber_corr)
+            Multiply(LHSWorkspace=transmission_corr, RHSWorkspace=absorber_entry, OutputWorkspace=absorber_corr)
+            Plus(LHSWorkspace=container_corr, RHSWorkspace=absorber_corr, OutputWorkspace=background_ws)
+            Minus(LHSWorkspace=entry,
+                  RHSWorkspace=background_ws,
+                  OutputWorkspace=entry)
         DeleteWorkspaces(WorkspaceList=tmp_names)
         return ws
 
@@ -457,9 +430,6 @@ class PolDiffILLReduction(PythonAlgorithm):
             DetectorEfficiencyCorUser(InputWorkspace=entry, OutputWorkspace=entry,
                                       IncidentEnergy=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
         return ws
-
-    def _frame_overlap_correction(self, ws):
-        pass
 
     def _apply_polarisation_corrections(self, ws, pol_eff_ws):
         """Applies the polarisation correction based on the output from quartz reduction."""
@@ -652,8 +622,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                    OutputWorkspace='det_efficiency')
         elif calibrationType in  ['Paramagnetic', 'Incoherent']:
             if calibrationType == 'Paramagnetic':
-                if self._mode == 'TOF':
-                    raise RuntimeError('Paramagnetic calibration is not valid in the TOF mode.')
                 if self._user_method == 'Uniaxial':
                     raise RuntimeError('Paramagnetic calibration is not valid in the Uniaxial measurement mode.')
                 for entry_no, entry in enumerate(mtd[ws]):
@@ -667,8 +635,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                            RHSWorkspace=paramagneticComponent,
                            OutputWorkspace=ws_name)
             else: # Incoherent
-                if self._mode == 'TOF':
-                    raise RuntimeError('Incoherent calibration is not valid in the TOF mode.')
                 for spectrum_no in range(mtd[conjoined_components][1].getNumberHistograms()):
                     if normaliseToAbsoluteUnits:
                         normFactor = float(self.getPropertyValue('IncoherentCrossSection'))
@@ -701,18 +667,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                      OutputWorkspace=entry)
         return ws
 
-    def _sum_TOF_data(self, ws):
-        """Integrates intensities over all time channels or time-of-flight bins."""
-        tofUnits = self.getPropertyValue('TOFUnits')
-        if tofUnits == 'UncalibratedTime':
-            timeBinWidth = mtd[ws][0].getRun().getLogData('Detector.time_of_flight_0')
-            Multiply(LHSWorkspace=ws, RHSWorkspace=timeBinWidth, OutputWorkspace=ws)
-        if tofUnits == 'Energy':
-            energyBinWidth = 0 # placeholder
-            Multiply(LHSWorkspace=ws, RHSWorkspace=energyBinWidth, OutputWorkspace=ws)
-        Integration(InputWorkspace=ws, OutputWorkspace=ws)
-        return ws
-
     def _separate_components(self, ws, process):
         theta_0 = 0
         if self._user_method == '10p':
@@ -721,15 +675,13 @@ class PolDiffILLReduction(PythonAlgorithm):
             except KeyError:
                 raise RuntimeError("The value for theta_0 needs to be defined for the component separation in 10p method.")
         component_ws = '{}_separated_components'.format(process)
-        ILLComponentSeparation(InputWorkspace=ws, OutputWorkspace=component_ws,
-                               ComponentSeparationMethod=self._user_method,
+        CrossSectionSeparation(InputWorkspace=ws, OutputWorkspace=component_ws,
+                               CrossSectionSeparationMethod=self._user_method,
                                ThetaOffset=theta_0)
-        return component_Ws
+        return component_ws
 
     def _normalise_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
-        if self._mode == 'TOF':
-            ws = self._sum_TOF_data(ws)
         CreateSingleValuedWorkspace(DataValue=0.404 * self._sampleAndEnvironmentProperties['NAtoms'].value,
                                     OutputWorkspace='norm')
         Divide(LHSWorkspace='norm', RHSWorkspace=ws, OutputWorkspace=ws)
@@ -778,15 +730,12 @@ class PolDiffILLReduction(PythonAlgorithm):
         progress.report('Loading data')
         Load(Filename=self.getPropertyValue('Run'), LoaderName='LoadILLPolarizedDiffraction',
              PositionCalibration=calibration_setting, YIGFileName=self.getPropertyValue('InstrumentCalibration'),
-             TOFUnits=self.getPropertyValue('TOFUnits'), OutputWorkspace=ws)
+             OutputWorkspace=ws)
 
         self._instrument = mtd[ws][0].getInstrument().getName()
-        self._mode = self.getPropertyValue('MeasurementTechnique')
         run = mtd[ws][0].getRun()
-        if run['acquisition_mode'].value == 1 and self._mode != 'TOF':
-            raise RuntimeError("Monochromatic measurement method chosen but data contains TOF results.")
-        elif self._mode == 'TOF' and run['acquisition_mode'].value == 0:
-            raise RuntimeError("TOF measurement method chosen but data contains monochromatic results.")
+        if run['acquisition_mode'].value == 1:
+            raise RuntimeError("TOF data reduction is not supported at the moment.")
         self._user_method = self.getPropertyValue('ComponentSeparationMethod')
         self._figure_out_measurement_method(ws)
 
@@ -819,21 +768,12 @@ class PolDiffILLReduction(PythonAlgorithm):
                 self._calculate_polarising_efficiencies(ws)
 
             if process in ['Vanadium', 'Sample']:
-                if self._mode == 'TOF' and process == 'Sample':
-                    progress.report('Correcting for frame overlap')
-                    self._frame_overlap_correction(ws)
                 pol_eff_ws = self.getPropertyValue('QuartzInputWorkspace')
                 if pol_eff_ws:
                     progress.report('Applying polarisation corrections')
                     self._apply_polarisation_corrections(ws, pol_eff_ws)
-                if self._mode == 'TOF':
-                    if process == 'Vanadium':
-                        progress.report('Calibrating the energy')
-                        self._elastic_energy_calibration(ws)
-                    progress.report('Correcting detector-analyser efficiency')
-                    self._detector_analyser_energy_efficiency(ws)
                 self._read_experiment_properties(ws)
-                if self.getPropertyValue('SampleGeometry') != 'None' and self._mode != 'TOF':
+                if self.getPropertyValue('SampleGeometry') != 'None':
                     progress.report('Applying self-attenuation correction')
                     self._apply_self_attenuation_correction(ws, container_ws)
                 if self.getProperty('OutputTreatment').value == 'AverageScans':
