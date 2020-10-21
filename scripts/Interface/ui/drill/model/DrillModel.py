@@ -457,15 +457,48 @@ class DrillModel(QObject):
             self.samples[row][self.columns[column]] = contents
             self.checkParameter(self.columns[column], contents, row)
 
-    def setSamplesGroup(self, samples, groupName):
+    def groupSamples(self, samples):
         """
-        Set the group of several samples.
+        Group samples.
 
         Args:
-            samples (list(int)): sample indexes
-            groupName (str): name of the group
+            samples (set(int)): sample indexes
+
+        Returns:
+            str: name of the created group
         """
+        for sample in samples:
+            for group in self.groups:
+                if sample in self.groups[group]:
+                    self.groups[group].remove(sample)
+                if ((group in self.masterSample)
+                        and (self.masterSample[group] == sample)):
+                    del self.masterSample[group]
+
+        self.groups = {k:v for k,v in self.groups.items() if v}
+
+        groupName = 'A'
+        while groupName in self.groups:
+            groupName = chr(ord(groupName) + 1)
         self.groups[groupName] = samples
+
+        return groupName
+
+    def ungroupSamples(self, samples):
+        """
+        Ungroup samples.
+
+        Args:
+            samples (set(int)): sample indexes
+        """
+        for sample in samples:
+            for group in self.groups:
+                self.groups[group].discard(sample)
+                if ((group in self.masterSample)
+                        and (self.masterSample[group] == sample)):
+                    del self.masterSample[group]
+
+        self.groups = {k:v for k,v in self.groups.items() if v}
 
     def getSamplesGroup(self):
         """
@@ -478,24 +511,32 @@ class DrillModel(QObject):
         groups.update(self.groups)
         return groups
 
-    def setGroupMaster(self, groupName, sample):
+    def setGroupMaster(self, sample):
         """
-        Set the master sample of group.
+        Set the sample as master for its group.
 
         Args:
-            groupName (str): name of the group
             sample (int): sample index
-        """
-        self.masterSample[groupName] = sample
 
-    def getGroupMaster(self):
+        Returns:
+            str: name of the group, None if the row is not in a group
+        """
+        for group in self.groups:
+            if sample in self.groups[group]:
+                self.masterSample[group] = sample
+                return group
+        return None
+
+    def getGroupMasters(self):
         """
         Get the master samples of each groups.
 
         Returns:
             dict(str, int): master samples for each group.
         """
-        return self.masterSample
+        master = dict()
+        master.update(self.masterSample)
+        return master
 
     def getProcessingParameters(self, sample):
         """
@@ -671,7 +712,8 @@ class DrillModel(QObject):
         # groups
         self.groups = dict()
         if "Groups" in json_data and json_data["Groups"]:
-            self.groups = json_data["Groups"]
+            for k,v in json_data["Groups"]:
+                self.groups[k] = set(v)
         if "GroupsMaster" in json_data and json_data["GroupsMaster"]:
             self.masterSample = json_data["GroupsMaster"]
 
@@ -708,7 +750,9 @@ class DrillModel(QObject):
             json_data[RundexSettings.SAMPLES_JSON_KEY].append(sample)
 
         # groups
-        json_data["Groups"] = self.groups
+        json_data["Groups"] = dict()
+        for k,v in self.groups.items():
+            json_data["Groups"][k] = list(v)
         json_data["GroupsMaster"] = self.masterSample
 
         with open(filename, 'w') as json_file:

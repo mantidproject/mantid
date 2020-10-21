@@ -70,11 +70,33 @@ class DrillView(QMainWindow):
     dataChanged = Signal(int, int, str)
 
     """
-    Sent when a row group changed.
+    Sent when a new group is requested.
     Args:
+        set(int): row indexes
+    """
+    groupRequested = Signal(set)
+
+    """
+    Sent when the removing of row(s) from their group is requested.
+    Args:
+        set(int): row indexes
+    """
+    ungroupRequested = Signal(set)
+
+    """
+    Sent when the addition of row(s) to an existing group is requested.
+    Args:
+        set(int): row indexes
         str: name of the group
     """
-    groupChanged = Signal(str)
+    addToGroup = Signal(set, str)
+
+    """
+    Sent when a row is set as master row.
+    Args:
+        int: row index
+    """
+    setMaster = Signal(int)
 
     """
     Sent when the user asks for a row processing.
@@ -128,9 +150,6 @@ class DrillView(QMainWindow):
         self.coloredRows = set()
         self.errorRows = set()
         self.rundexFile = None
-
-        self.groups = dict()
-        self.masterRows = dict()
 
         self._presenter = DrillPresenter(self)
 
@@ -426,21 +445,21 @@ class DrillView(QMainWindow):
             self.rowDeleted.emit(row)
             self.setWindowModified(True)
 
-    def _labelRowsInGroup(self, groupName):
+    def labelRowsInGroup(self, groupName, rows, masterRow):
         """
-        Loop through all the rows of a group and set their labels to "group
-        name" + number (i.e. A1, A2, ...)
+        Change the row label to contain the name of the group and a number.
 
         Args:
             groupName (str): name of the group
+            rows (set(int)): row indexes
         """
-        if groupName not in self.groups:
-            return
         rowName = 1
-        for row in self.groups[groupName]:
-            bold = ((groupName in self.masterRows)
-                   and (self.masterRows[groupName] == row))
-            self.table.setRowLabel(row, groupName + str(rowName), bold)
+        for row in rows:
+            bold = (row == masterRow)
+            if groupName:
+                self.table.setRowLabel(row, groupName + str(rowName), bold)
+            else:
+                self.table.delRowLabel(row)
             rowName += 1
 
     def groupRows(self, rows):
@@ -450,33 +469,20 @@ class DrillView(QMainWindow):
         Args:
             rows (list(int)): row indexes
         """
-        self.ungroupRows(rows)
-
         if not rows:
             return
-
-        groupLabel = 'A'
-        while ((groupLabel in self.groups)
-                and (self.groups[groupLabel])):
-            groupLabel = chr(ord(groupLabel) + 1)
-
-        self.groups[groupLabel] = rows
-        self._labelRowsInGroup(groupLabel)
-        self.groupChanged.emit(groupLabel)
+        self.groupRequested.emit(set(rows))
 
     def ungroupRows(self, rows):
         """
-        Remove a list of row(s) to all their potential groups. This method
-        reset the row labels.
+        Remove a list of row(s) to all their potential groups.
 
         Args:
             rows (list(int)): row indexes
         """
         if not rows:
             return
-
-        for row in rows:
-            self.delRowFromGroup(row)
+        self.ungroupRequested.emit(set(rows))
 
     def addRowsToGroup(self, rows, group):
         """
@@ -487,29 +493,7 @@ class DrillView(QMainWindow):
             rows (list(int)): row indexes
             group (str): group name
         """
-        if group in self.groups:
-            self.groups[group] += rows
-            self._labelRowsInGroup(group)
-            self.groupChanged.emit(group)
-
-    def delRowFromGroup(self, row):
-        """
-        Remove a row from its group. This will reset all the labels in the
-        group.
-
-        Args:
-            row (int): row index
-        """
-        for groupName in self.groups:
-            if row in self.groups[groupName]:
-                self.groups[groupName].remove(row)
-                self.table.delRowLabel(row)
-                if ((groupName in self.masterRows)
-                        and (self.masterRows[groupName] == row)):
-                    del self.masterRows[groupName]
-                self._labelRowsInGroup(groupName)
-                self.groupChanged.emit(groupName)
-                break
+        self.addToGroup.emit(set(rows), group)
 
     def setMasterRow(self, row):
         """
@@ -518,18 +502,7 @@ class DrillView(QMainWindow):
         Args:
             row (int): row index
         """
-        group = None
-        for g in self.groups:
-            if row in self.groups[g]:
-                group = g
-                break
-
-        if not group:
-            return
-
-        self.masterRows[group] = row
-        self._labelRowsInGroup(group)
-        self.groupChanged.emit(group)
+        self.setMaster.emit(row)
 
     def process_selected_rows(self):
         """
@@ -780,37 +753,7 @@ class DrillView(QMainWindow):
         self.table.resizeColumnsToContents()
         self.setWindowModified(False)
 
-    def getRowsInGroup(self, groupName):
-        """
-        Get the rows in a specific group.
-
-        Args:
-            groupName (str): name of the group
-
-        Returns:
-            list(int): row indexes
-        """
-        if groupName in self.groups:
-            return [row for row in self.groups[groupName]]
-        else:
-            return []
-
-    def getMasterRow(self, groupName):
-        """
-        Get the master row of a specific group.
-
-        Args:
-            groupName (str): name of the group
-
-        Returns:
-            int: row index, None if no master row
-        """
-        if groupName in self.masterRows:
-            return self.masterRows[groupName]
-        else:
-            return None
-
-    def fill_table(self, rows_contents, rowsGroup, groupsMaster):
+    def fill_table(self, rows_contents):
         """
         Fill the table.
 
@@ -820,15 +763,10 @@ class DrillView(QMainWindow):
         if (not self.table.columnCount()):
             return
         if rows_contents:
-            self.groups = dict()
             self.blockSignals(True)
             self.table.setRowCount(len(rows_contents))
             for row in range(len(rows_contents)):
                 self.table.setRowContents(row, rows_contents[row])
-            self.groups = rowsGroup
-            self.masterRows = groupsMaster
-            for group in self.groups:
-                self._labelRowsInGroup(group)
             self.blockSignals(False)
         else:
             self.table.addRow(0)

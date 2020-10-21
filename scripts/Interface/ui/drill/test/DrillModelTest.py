@@ -430,6 +430,57 @@ class DrillModelTest(unittest.TestCase):
         self.assertEqual(self.model.samples, samples)
         self.mController.return_value.addParameter.assert_called()
 
+    def test_groupSamples(self):
+        name = self.model.groupSamples({1, 2, 3})
+        self.assertEqual(name, 'A')
+        self.assertDictEqual(self.model.groups, {'A': {1, 2, 3}})
+        self.model.masterSample['A'] = 3
+        name = self.model.groupSamples({2, 3, 4})
+        self.assertEqual(name, 'B')
+        self.assertDictEqual(self.model.groups, {'A': {1},
+                                                 'B': {2, 3, 4}})
+        self.assertDictEqual(self.model.masterSample, {})
+        name = self.model.groupSamples({1, 5})
+        self.assertEqual(name, 'A')
+        self.assertDictEqual(self.model.groups, {'A': {1, 5},
+                                                 'B': {2, 3, 4}})
+
+    def test_ungroupSamples(self):
+        self.model.groups = {'A': {1, 5}, 'B': {2, 3, 4}}
+        self.model.ungroupSamples({1})
+        self.assertDictEqual(self.model.groups, {'A': {5},
+                                                 'B': {2, 3, 4}})
+        self.model.masterSample['A'] = 5
+        self.model.masterSample['B'] = 2
+        self.model.ungroupSamples({5})
+        self.assertDictEqual(self.model.groups, {'B': {2, 3, 4}})
+        self.assertDictEqual(self.model.masterSample, {'B': 2})
+
+    def test_getSamplesGroup(self):
+        self.model.groups = {'A': {1, 5}, 'B': {2, 3, 4}}
+        groups = self.model.getSamplesGroup()
+        self.assertDictEqual(groups, {'A': {1, 5}, 'B': {2, 3, 4}})
+        del groups['A']
+        self.assertDictEqual(self.model.groups, {'A': {1, 5}, 'B': {2, 3, 4}})
+
+    def test_setGroupMaster(self):
+        name = self.model.setGroupMaster(1)
+        self.assertIsNone(name)
+        self.assertEqual(self.model.groups, {})
+        self.assertEqual(self.model.masterSample, {})
+        self.model.groups = {'A': {1, 5}, 'B': {2, 3, 4}}
+        self.model.masterSample['A'] = 5
+        name = self.model.setGroupMaster(1)
+        self.assertEqual(name, 'A')
+        self.assertDictEqual(self.model.masterSample, {'A': 1})
+
+    def test_getGroupMasters(self):
+        self.model.masterSample = {'A': 1, 'B': 5}
+        master = self.model.getGroupMasters()
+        self.assertDictEqual(master, {'A': 1, 'B': 5})
+        master['A'] = 8
+        self.assertDictEqual(self.model.masterSample, {'A': 1, 'B': 5})
+
     def test_getProcessingParameters(self):
         params = dict.fromkeys(self.SETTINGS["a1"], "test")
         params["OutputWorkspace"] = "sample_1"

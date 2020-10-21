@@ -245,64 +245,35 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.deleteRow.assert_has_calls(calls)
 
     def test_labelRowsInGroup(self):
-        self.view.groups = {"A": [1, 2, 3],
-                            "B": [4, 5, 6]}
-        self.view._labelRowsInGroup("C")
-        self.view.table.setRowLabel.assert_not_called()
-        self.view._labelRowsInGroup("A")
+        self.view.labelRowsInGroup("A", {1, 2, 3}, None)
         calls = [mock.call(1, "A1", False),
                  mock.call(2, "A2", False),
                  mock.call(3, "A3", False)]
         self.view.table.setRowLabel.assert_has_calls(calls)
 
     def test_groupRows(self):
+        self.view.groupRequested = mock.Mock()
         self.view.groupRows([])
-        self.assertEqual(self.view.groups, {})
+        self.view.groupRequested.emit.assert_not_called()
         self.view.groupRows([1, 2, 3])
-        self.assertDictEqual(self.view.groups, {"A": [1, 2, 3]})
-        self.view.groupRows([4, 5, 6])
-        self.assertDictEqual(self.view.groups, {"A": [1, 2, 3],
-                                                "B": [4, 5, 6]})
-        self.view.groups = {"A": [],
-                            "B": [4, 5, 6]}
-        self.view.groupRows([1, 2, 3])
-        self.assertDictEqual(self.view.groups, {"A": [1, 2, 3],
-                                                "B": [4, 5, 6]})
+        self.view.groupRequested.emit.assert_called_once_with({1, 2, 3})
 
     def test_ungroupRows(self):
-        self.view.groups = {"A": [1, 2, 3],
-                            "B": [4, 5, 6]}
-        self.view.masterRows = {"A": 1, "B": 4}
+        self.view.ungroupRequested = mock.Mock()
+        self.view.ungroupRows([])
+        self.view.ungroupRequested.emit.assert_not_called()
         self.view.ungroupRows([1, 2, 3])
-        self.assertDictEqual(self.view.groups, {"A": [],
-                                                "B": [4, 5, 6]})
-        self.assertDictEqual(self.view.masterRows, {"B": 4})
-        self.view.ungroupRows([5, 6])
-        self.assertDictEqual(self.view.groups, {"A": [],
-                                                "B": [4]})
-        self.assertDictEqual(self.view.masterRows, {"B": 4})
+        self.view.ungroupRequested.emit.assert_called_once_with({1, 2, 3})
 
     def test_addRowsToGroup(self):
-        self.view.groups = {"A": [1, 2, 3]}
+        self.view.addToGroup = mock.Mock()
         self.view.addRowsToGroup([4], "B")
-        self.assertDictEqual(self.view.groups, {"A": [1, 2, 3]})
-        self.view.addRowsToGroup([4], "A")
-        self.assertDictEqual(self.view.groups, {"A": [1, 2, 3, 4]})
-
-    def test_delRowFromGroup(self):
-        self.view.groups = {"A": [1, 2, 3]}
-        self.view.delRowFromGroup(4)
-        self.assertDictEqual(self.view.groups, {"A": [1, 2, 3]})
-        self.view.delRowFromGroup(3)
-        self.assertDictEqual(self.view.groups, {"A": [1, 2]})
+        self.view.addToGroup.emit.assert_called_once_with({4}, "B")
 
     def test_setMasterRow(self):
-        self.view.table.getRowsFromSelectedCells.return_value = [1]
+        self.view.setMaster = mock.Mock()
         self.view.setMasterRow(1)
-        self.assertEqual(self.view.masterRows, {})
-        self.view.groups = {"A": [1, 2, 3]}
-        self.view.setMasterRow(1)
-        self.assertDictEqual(self.view.masterRows, {"A": 1})
+        self.view.setMaster.emit.assert_called_once_with(1)
 
     def test_processSelectedRows(self):
         self.view.process = mock.Mock()
@@ -433,28 +404,14 @@ class DrillViewTest(unittest.TestCase):
         self.view.set_table(["test", "test"])
         self.view.table.setColumnCount.assert_called_once_with(2)
 
-    def test_getRowsInGroup(self):
-        self.view.groups = {"A": [1, 2, 3]}
-        rows = self.view.getRowsInGroup("B")
-        self.assertEqual(rows, [])
-        rows = self.view.getRowsInGroup("A")
-        self.assertEqual(rows, [1, 2, 3])
-
-    def test_getMasterRow(self):
-        self.view.masterRows = {"A": 0}
-        master = self.view.getMasterRow("B")
-        self.assertIsNone(master)
-        master = self.view.getMasterRow("A")
-        self.assertEqual(master, 0)
-
     def test_fillTable(self):
         # empty contents
-        self.view.fill_table([], {}, {})
+        self.view.fill_table([])
         self.view.table.addRow.assert_called_once()
         # contents
         self.view.table.reset_mock()
         self.view.fill_table([["test", "test"],
-                              ["test", "test"]], {}, {})
+                              ["test", "test"]])
         self.view.table.addRow.assert_not_called()
         self.view.table.setRowCount.assert_called_once()
         calls = [mock.call(0, ["test", "test"]),

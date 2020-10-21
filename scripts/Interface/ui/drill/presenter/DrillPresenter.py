@@ -31,7 +31,9 @@ class DrillPresenter:
         self.view.rowAdded.connect(self.model.addSample)
         self.view.rowDeleted.connect(self.model.deleteSample)
         self.view.dataChanged.connect(self.model.changeParameter)
-        self.view.groupChanged.connect(self.onGroupChanged)
+        self.view.groupRequested.connect(self.onGroupRequested)
+        self.view.ungroupRequested.connect(self.onUngroupRequested)
+        self.view.setMaster.connect(self.onMasterRowRequested)
         self.view.process.connect(self.process)
         self.view.processStopped.connect(self.stopProcessing)
         self.view.rundexLoaded.connect(self.rundexLoaded)
@@ -51,19 +53,31 @@ class DrillPresenter:
 
         self.updateViewFromModel()
 
-    def onGroupChanged(self, groupName):
+    def onGroupRequested(self, rows):
         """
-        Triggered when the view notifies a change in a specific group of rows.
-        This method is getting the content of that group and the associated
-        master row and set them in the model.
+        Triggered when the view request the creation of a group.
 
         Args:
-            groupName (str): name of the modified group
+            rows (set(int)): row indexes
         """
-        samples = self.view.getRowsInGroup(groupName)
-        masterSample = self.view.getMasterRow(groupName)
-        self.model.setSamplesGroup(samples, groupName)
-        self.model.setGroupMaster(groupName, masterSample)
+        group = self.model.groupSamples(set(rows))
+        self.view.labelRowsInGroup(group, rows, None)
+
+    def onUngroupRequested(self, rows):
+        """
+        Triggered when the view request the removing of row from their group(s).
+
+        Args:
+            rows (set(int)): row indexes
+        """
+        self.model.ungroupSamples(set(rows))
+        self.view.labelRowsInGroup(None, rows, None)
+
+    def onMasterRowRequested(self, row):
+        group = self.model.setGroupMaster(row)
+        if group:
+            rows = self.model.getSamplesGroup()[group]
+            self.view.labelRowsInGroup(group, rows, row)
 
     def process(self, rows):
         """
@@ -181,9 +195,11 @@ class DrillPresenter:
         columns, tooltips = self.model.getColumnHeaderData()
         self.view.set_table(columns, tooltips)
         contents = self.model.getRowsContents()
+        self.view.fill_table(contents)
         groups = self.model.getSamplesGroup()
-        masters = self.model.getGroupMaster()
-        self.view.fill_table(contents, groups, masters)
+        masters = self.model.getGroupMasters()
+        for group in groups:
+            self.view.labelRowsInGroup(group, groups[group], masters[group])
         # set the visual settings if they exist
         vs = self.model.getVisualSettings()
         if vs:
