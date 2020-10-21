@@ -114,7 +114,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 
     @with_mock_presenter
     def test_handleItemChanged(self, ws, view, twd):
-        items = [Mock(spec=RevertibleItem) ,Mock(spec=QStandardItem)]
+        items = [Mock(spec=RevertibleItem), Mock(spec=QStandardItem)]
         for item in items:
             item.row.return_value = 5
             item.column.return_value = 5
@@ -130,7 +130,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 
     @with_mock_presenter
     def test_handleItemChanged_raises_ValueError(self, ws, view, twd):
-        items = [Mock(spec=RevertibleItem) ,Mock(spec=QStandardItem)]
+        items = [Mock(spec=RevertibleItem), Mock(spec=QStandardItem)]
         for item in items:
             item.row.return_value = 5
             item.column.return_value = 5
@@ -151,7 +151,7 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 
     @with_mock_presenter
     def test_handleItemChanged_raises_Exception(self, ws, view, twd):
-        items = [Mock(spec=RevertibleItem) ,Mock(spec=QStandardItem)]
+        items = [Mock(spec=RevertibleItem), Mock(spec=QStandardItem)]
         for item in items:
             item.row.return_value = ws.ROWS
             item.column.return_value = ws.COLS
