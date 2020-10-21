@@ -280,7 +280,7 @@ double Material::absorbXSection(const double lambda) const {
  */
 double Material::attenuationCoefficient(const double lambda) const {
   if (!m_attenuationOverride) {
-    return 100 * numberDensity() *
+    return 100 * numberDensityEffective() *
            (totalScatterXSection() + absorbXSection(lambda));
   } else {
     return m_attenuationOverride->getAttenuationCoefficient(lambda);
