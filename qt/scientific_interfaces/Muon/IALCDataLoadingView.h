@@ -88,6 +88,11 @@ public slots:
   /// @param error :: Error message to display
   virtual void displayError(const std::string &error) = 0;
 
+  /// Displays a warning to the user
+  /// @param warning :: Warning message to display
+  /// @return Users response
+  virtual bool displayWarning(const std::string &warning) = 0;
+
   /// Update the list of logs user can select
   /// @param logs :: New list of log names
   virtual void setAvailableLogs(const std::vector<std::string> &logs) = 0;

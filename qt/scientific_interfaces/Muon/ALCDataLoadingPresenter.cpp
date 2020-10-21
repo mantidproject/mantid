@@ -37,11 +37,10 @@ void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
 
   connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
-  connect(m_view, SIGNAL(runsSelected()), SLOT(updateAvailableInfo()));
-  connect(m_view, SIGNAL(instrumentChangedSignal(std::string)), SLOT());
-  connect(m_view, SIGNAL(pathChangedSignal(std::string)), SLOT());
-  connect(m_view, SIGNAL(runsChangedSignal()),
-          SLOT(handleRunsChanged()));
+  //connect(m_view, SIGNAL(runsSelected()), SLOT(updateAvailableInfo()));
+  //connect(m_view, SIGNAL(instrumentChangedSignal(std::string)), SLOT());
+  //connect(m_view, SIGNAL(pathChangedSignal(std::string)), SLOT());
+  connect(m_view, SIGNAL(runsChangedSignal()), SLOT(handleRunsChanged()));
 }
 
 /**
@@ -58,16 +57,17 @@ std::vector<int> ALCDataLoadingPresenter::unwrapRange(std::string range) {
   auto beginning = std::stoi(beginningString);
   auto end = std::stoi(endString);
 
-  // If beginning longer then and, assume end is short hand e.g. 100-3 -> 100-103
+  // If beginning longer then and, assume end is short hand e.g. 100-3 ->
+  // 100-103
   if (beginningString.length() > endString.length()) {
-    for (int i = beginning; i <= beginning+end; ++i)
+    for (int i = beginning; i <= beginning + end; ++i)
       runs.emplace_back(i);
   } else {
     // Assumed not using short hand so end must be > beginning
     if (end < beginning)
       throw std::runtime_error(
-          "Decreasing range is not allowed, try " + std::to_string(end) +
-          "-" + std::to_string(beginning) + " instead."); // Needs error message
+          "Decreasing range is not allowed, try " + std::to_string(end) + "-" +
+          std::to_string(beginning) + " instead."); // Needs error message
     for (int i = beginning; i <= end; ++i)
       runs.emplace_back(i);
   }
@@ -116,6 +116,17 @@ void ALCDataLoadingPresenter::handleRunsChanged() {
   try {
     auto runsExpression = m_view->getRunsExpression();
     auto runNumbers = validateAndGetRunsFromExpression(runsExpression);
+
+    if (runNumbers.size() > 200) {
+      auto continueLoad = m_view->displayWarning("You are attempting to load " +
+                             std::to_string(runNumbers.size()) +
+                             " runs, are you sure you want to do this?");
+      if (!continueLoad) {
+        m_view->enableLoad(false);
+        return;
+      }
+    }
+
     m_view->enableLoad(true);
   } catch (std::runtime_error e) {
     m_view->displayError(

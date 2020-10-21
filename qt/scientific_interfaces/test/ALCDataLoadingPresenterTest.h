@@ -67,6 +67,7 @@ public:
   MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace,
                                   const std::size_t &workspaceIndex));
   MOCK_METHOD1(displayError, void(const std::string &));
+  MOCK_METHOD1(displayWarning, bool(const std::string &));
   MOCK_METHOD1(setAvailableLogs, void(const std::vector<std::string> &));
   MOCK_METHOD1(setAvailablePeriods, void(const std::vector<std::string> &));
   MOCK_METHOD2(setTimeLimits, void(double, double));
@@ -399,6 +400,36 @@ public:
 
     EXPECT_CALL(*m_view, getRunsExpression()).Times(1);
     EXPECT_CALL(*m_view, displayError(errorMsg)).Times(1);
+    EXPECT_CALL(*m_view, enableLoad(false)).Times(1);
+
+    TS_ASSERT_THROWS_NOTHING(m_view->changeRuns());
+  }
+
+  void test_reply_yes_when_loading_excess_amount_of_runs() {
+    // Max of 200 runs without warning
+    const auto warningMessage = "You are attempting to load 301 runs, are you "
+                                "sure you want to do this?";
+    ON_CALL(*m_view, getRunsExpression()).WillByDefault(Return("0-300"));
+    ON_CALL(*m_view, displayWarning(warningMessage))
+        .WillByDefault(Return(true));
+
+    EXPECT_CALL(*m_view, getRunsExpression()).Times(1);
+    EXPECT_CALL(*m_view, displayWarning(warningMessage)).Times(1);
+    EXPECT_CALL(*m_view, enableLoad(true)).Times(1);
+
+    TS_ASSERT_THROWS_NOTHING(m_view->changeRuns());
+  }
+
+  void test_reply_no_when_loading_excess_amount_of_runs() {
+    // Max of 200 runs without warning
+    const auto warningMessage = "You are attempting to load 301 runs, are you "
+                                "sure you want to do this?";
+    ON_CALL(*m_view, getRunsExpression()).WillByDefault(Return("0-300"));
+    ON_CALL(*m_view, displayWarning(warningMessage))
+        .WillByDefault(Return(false));
+
+    EXPECT_CALL(*m_view, getRunsExpression()).Times(1);
+    EXPECT_CALL(*m_view, displayWarning(warningMessage)).Times(1);
     EXPECT_CALL(*m_view, enableLoad(false)).Times(1);
 
     TS_ASSERT_THROWS_NOTHING(m_view->changeRuns());

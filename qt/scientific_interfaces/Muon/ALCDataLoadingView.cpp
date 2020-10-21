@@ -40,8 +40,9 @@ void ALCDataLoadingView::initialize() {
           SLOT(instrumentChanged(QString)));
   connect(m_ui.path, SIGNAL(textChanged(QString)), this,
           SLOT(pathChanged(QString)));
-  connect(m_ui.runs, SIGNAL(returnPressed()), this, SIGNAL(runsChangedSignal()));
-  
+  connect(m_ui.runs, SIGNAL(returnPressed()), this,
+          SIGNAL(runsChangedSignal()));
+
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 
   // Error bars on the plot
@@ -62,7 +63,7 @@ void ALCDataLoadingView::initialize() {
 
   // Regex for runs
   QRegExp re("[0-9]+(\,[0-9]+)*(\-[0-9]+(($)|(\,[0-9]+))+)*");
-  QValidator *validator = new QRegExpValidator(re,this);
+  QValidator *validator = new QRegExpValidator(re, this);
   m_ui.runs->setValidator(validator);
 }
 
@@ -199,6 +200,16 @@ void ALCDataLoadingView::displayError(const std::string &error) {
                         QString::fromStdString(error));
 }
 
+bool ALCDataLoadingView::displayWarning(const std::string &warning) {
+  auto reply = QMessageBox::warning(
+      m_widget, "Warning", QString::fromStdString(warning),
+      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+  if (reply == QMessageBox::Yes)
+    return true;
+  else
+    return false;
+}
+
 /**
  * Set list of available log values
  * @param logs :: [input] List of log values
@@ -304,7 +315,7 @@ void ALCDataLoadingView::pathChanged(QString path) {
 }
 
 void ALCDataLoadingView::handleRunsEditingFinsihed() {
-  //emit runsChangedSignal(m_ui.runs->text().toStdString());
+  // emit runsChangedSignal(m_ui.runs->text().toStdString());
 }
 
 void ALCDataLoadingView::enableLoad(bool enable) {

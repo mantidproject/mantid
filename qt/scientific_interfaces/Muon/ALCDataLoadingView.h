@@ -57,6 +57,7 @@ public:
   void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
                     std::size_t const &workspaceIndex = 0) override;
   void displayError(const std::string &error) override;
+  bool displayWarning(const std::string &warning) override;
   void setAvailableLogs(const std::vector<std::string> &logs) override;
   void setAvailablePeriods(const std::vector<std::string> &periods) override;
   void setTimeLimits(double tMin, double tMax) override;
