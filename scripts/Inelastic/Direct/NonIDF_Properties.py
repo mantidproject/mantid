@@ -9,6 +9,7 @@ from Direct.PropertiesDescriptors import *
 from Direct.RunDescriptor import RunDescriptor,RunDescriptorDependent
 from mantid.simpleapi import *
 from mantid import geometry
+from sys import platform
 
 
 class NonIDF_Properties(object):
@@ -30,6 +31,17 @@ class NonIDF_Properties(object):
           "information" : (4,lambda msg:   logger.information(msg)),
           "debug" :       (5,lambda msg:   logger.debug(msg))}
 
+    # The default location of the 
+    __arhive_upload_log_template
+    if platform == "linux" or platform == "linux2":
+        # linux default log file location 
+        __arhive_upload_log_template = '/archive/NDX{0}/Instrument/logs/lastrun.txt'
+    elif platform == "darwin":
+        __arhive_upload_log_template ='' # no default location for log file
+    elif platform == "win32":
+        # windows default log file location
+        __arhive_upload_log_template = r'\\isis\inst$\NDX{0}\Instrument\logs\lastrun.txt'
+
     def __init__(self,Instrument,run_workspace=None):
         """ initialize main properties, defined by the class
             @parameter Instrument  -- name or pointer to the instrument,
@@ -44,6 +56,7 @@ class NonIDF_Properties(object):
         object.__setattr__(self,'_log_to_mantid',False)
 
         object.__setattr__(self,'_current_log_level',3)
+        object.__setattr__(self,'_archive_upload_log_file',None)
 
         self._set_instrument_and_facility(Instrument,run_workspace)
 
@@ -177,6 +190,31 @@ class NonIDF_Properties(object):
     @mapmask_ref_ws.setter
     def mapmask_ref_ws(self,val):
         object.__setattr__(self,'_mapmask_ref_ws',val)
+
+    # -----------------------------------------------------------------------------
+    @property
+    def arhive_upload_log_file(self):
+        """ The full path to the file, containing log describing the last run number,
+            uploaded to archive on ISIS. Only after a file has been added to the archive,
+            the data are available for reduction. The information is used by reduction
+            script, which runs during experiment and waits for data files to reduce
+        """
+        if self._archive_upload_log_file is None:
+            if len(NonIDF_Properties.__arhive_upload_log_template)>0:
+                trial_file = NonIDF_Properties.__arhive_upload_log_template.format(self.instr_name)
+                self.arhive_upload_log_file = trial_file
+        else:
+            return self._archive_upload_log_file
+
+    @arhive_upload_log_file.setter
+    def arhive_upload_log_file(self,filename):
+        if os.path.isfile(filename):
+            object.__setattr__(self,'_arhive_upload_log_file',filename)
+        else:
+            object.__setattr__(self,'_arhive_upload_log_file','')
+            self.log("archive upload file log {0} does not exist. Ignoring it.".format(filename), 'warning')
+
+
 
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)

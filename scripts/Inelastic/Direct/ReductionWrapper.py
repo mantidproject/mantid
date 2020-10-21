@@ -443,6 +443,15 @@ class ReductionWrapper(object):
             Pause(timeToWait)
 
     #
+    def _check_progress_log_stater_run_written(self):
+       """ Method to verify experiment progress log file and check if the file to reduce
+           has been written.
+
+           If progress log is nod defined or not available, the method returns success
+           so further checks are necessary to verify if actual file is indeed available
+       """
+       propman = self.reducer.propman
+       if 
 
     def _check_access_granted(self, input_file):
         """ Check if the access to the found nxs file is granted

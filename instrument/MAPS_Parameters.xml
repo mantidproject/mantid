@@ -451,14 +451,6 @@
   "/>
 </parameter>
 
-<parameter name="arhive_upload_log"  type="string">
-  <value val="/archive/NDXMAPS/Instrument/logs/lastrun.txt"/>
-  <description is="The full path to the file, containing log describing the last run number, uploaded to archive on ISIS. Only after a file has been added to the archive, the data are available for reduction. The information is used by reduction script, which runs during experiment and waits for data files to reduce.
-  Default is ISIS Unix path as normal reduction runs on linux. Under windows, the log is available at
-  \\isis\inst$\NDX[Instrument Name]\Instrument\logs\
-  "/>
-</parameter>
-
 <!-- List of the words which can be used as a command line arguments to define reducer keywords
      the form is reducer_keword1=synonim1=synonim2=synonim3;reducer_keword1=synonim1a, so, 
      the reducer keywords are the leftmost values of the keyword assignments below
