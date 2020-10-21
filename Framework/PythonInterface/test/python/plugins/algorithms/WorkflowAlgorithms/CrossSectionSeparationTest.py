@@ -38,17 +38,20 @@ class CrossSectionSeparationTest(unittest.TestCase):
         mtd.clear()
 
     def test_uniaxial_separation(self):
-        CrossSectionSeparation(InputWorkspace='vanadium_uniaxial', OutputWorkspace='uniaxial')
+        CrossSectionSeparation(InputWorkspace='vanadium_uniaxial', OutputWorkspace='uniaxial',
+                               CrossSectionSeparationMethod='Uniaxial')
         self.assertTrue(mtd['uniaxial'].getNumberOfEntries() == 2)
         self._check_output('uniaxial', 1, 132)
 
     def test_xyz_separation(self):
-        CrossSectionSeparation(InputWorkspace='vanadium_xyz', OutputWorkspace='xyz')
+        CrossSectionSeparation(InputWorkspace='vanadium_xyz', OutputWorkspace='xyz',
+                               CrossSectionSeparationMethod='XYZ')
         self.assertTrue(mtd['xyz'].getNumberOfEntries() == 3)
         self._check_output('xyz', 1, 132)
 
     def test_10p_separation(self):
-        CrossSectionSeparation(InputWorkspace='vanadium_10p', OutputWorkspace='10p')
+        CrossSectionSeparation(InputWorkspace='vanadium_10p', OutputWorkspace='10p',
+                               CrossSectionSeparationMethod='10p', ThetaOffset=1.0)
         self.assertTrue(mtd['10p'].getNumberOfEntries() == 3)
         self._check_output('10p', 1, 132)
 
