@@ -2298,7 +2298,7 @@ void InstrumentDefinitionParser::setLogfile(
     if (numberValueEle >= 1) {
       bool hasValue = false;
 
-      for (size_t i = 0; i < numberValueEle; i++) {
+      for (unsigned long i = 0; i < numberValueEle; i++) {
         pValueElem = static_cast<Element *>(pNLvalue->item(i));
 
         if (!pValueElem->hasAttribute(("val")))
