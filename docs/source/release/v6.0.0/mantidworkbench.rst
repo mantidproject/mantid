@@ -27,5 +27,6 @@ Bugfixes
 ########
 
 - Only display slice viewer widget for MDEventWorkspaces with 2 or more dimensions.
+- Fix Workbench crashes upon deleting rows or columns in a TableWorkspace.
 
 :ref:`Release 6.0.0 <v6.0.0>`
