@@ -65,18 +65,18 @@ Usage
                                FitOutputWorkspace='intermediateWavelength')
 		       
    print('The calibrated wavelength is: {0:.2f}'.format(float(approximate_wavelength)*mtd['intermediateWavelength'].column(1)[1]))
-   print('The bank2 gradient is: {0:.3f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[0]))
-   print('The bank3 gradient is: {0:.3f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[176]))
-   print('The bank4 gradient is: {0:.3f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[352]))
+   print('The bank2 gradient is: {0:.2f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[0]))
+   print('The bank3 gradient is: {0:.2f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[176]))
+   print('The bank4 gradient is: {0:.2f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[352]))
 
 Output:
 
 .. testoutput:: D7YIGCalibrationIntermediateExample
 
    The calibrated wavelength is: 4.86
-   The bank2 gradient is: 0.992
-   The bank3 gradient is: 1.004
-   The bank4 gradient is: 0.997
+   The bank2 gradient is: 0.99
+   The bank3 gradient is: 1.00
+   The bank4 gradient is: 1.00
 
 #. T. Fennell, L. Mangin-Thro, H.Mutka, G.J. Nilsen, A.R. Wildes.
    *Wavevector and energy resolution of the polarized diffuse scattering spectrometer D7*,
