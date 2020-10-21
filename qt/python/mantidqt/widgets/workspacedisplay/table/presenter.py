@@ -196,7 +196,7 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
             return
         try:
             self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole),
-                                         item.is_v3d)
+                                     item.is_v3d)
         except ValueError:
             item.reset()
             self.view.show_warning(self.ITEM_CHANGED_INVALID_DATA_MESSAGE)
