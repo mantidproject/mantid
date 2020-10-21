@@ -69,6 +69,8 @@ public:
   void pathChanged(QString path) override;
   void handleRunsEditingFinsihed() override;
   void enableLoad(bool enable) override;
+  void setPath(std::string &path) override;
+
 
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------

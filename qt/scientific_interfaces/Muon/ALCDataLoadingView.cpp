@@ -17,8 +17,8 @@
 
 using namespace Mantid::API;
 
-const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU",
-                                           "HIFI",  "MUSR",    "PSI"};
+const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI",
+                                           "MUSR"};
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -60,6 +60,7 @@ void ALCDataLoadingView::initialize() {
   m_ui.detectorGroupingGroup->setPalette(palette);
   m_ui.periodsGroup->setPalette(palette);
   m_ui.calculationGroup->setPalette(palette);
+  m_ui.subtractCheckbox->setEnabled(false);
 
   // Regex for runs
   QRegExp re("[0-9]+(\,[0-9]+)*(\-[0-9]+(($)|(\,[0-9]+))+)*");
@@ -320,6 +321,10 @@ void ALCDataLoadingView::handleRunsEditingFinsihed() {
 
 void ALCDataLoadingView::enableLoad(bool enable) {
   m_ui.load->setEnabled(enable);
+}
+
+void ALCDataLoadingView::setPath(std::string &path) {
+  m_ui.path->setText(QString::fromStdString(path));
 }
 
 } // namespace CustomInterfaces

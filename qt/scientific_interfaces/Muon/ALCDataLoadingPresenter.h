@@ -44,10 +44,10 @@ public:
   void cancelLoading() const;
 
   // Validates expression given
-  static std::vector<int> validateAndGetRunsFromExpression(std::string runs);
+  std::vector<std::string> validateAndGetRunsFromExpression(std::string runs);
 
   // Removes range ('-') between two ints and returns vector of all ints between
-  static std::vector<int> unwrapRange(std::string range);
+  std::vector<std::string> unwrapRange(std::string range);
 
 private slots:
   /// Check file range and call method to load new data
@@ -58,6 +58,9 @@ private slots:
 
   /// Handle for when runs line edit changed
   void handleRunsChanged();
+
+  /// Handle for when instrument changed
+  void handleInstrumentChanged(std::string instrument);
 
 signals:
   /// Signal emitted when data get changed
@@ -90,6 +93,12 @@ private:
 
   // Loading algorithm
   Mantid::API::IAlgorithm_sptr m_LoadingAlg;
+
+  /// Runs to be loaded
+  std::vector<std::string> m_runs;
+
+  /// File extension of runs loaded
+  std::string m_extension;
 };
 
 } // namespace CustomInterfaces

@@ -73,7 +73,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QGridLayout" name="pathLayout" columnstretch="1,4,2">
+           <layout class="QGridLayout" name="pathLayout" columnstretch="1,6">
             <property name="leftMargin">
              <number>9</number>
             </property>
@@ -86,6 +86,13 @@
             <property name="bottomMargin">
              <number>0</number>
             </property>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="path">
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="0">
              <widget class="QLabel" name="pathLabel">
               <property name="text">
@@ -93,26 +100,10 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QLineEdit" name="path"/>
-            </item>
-            <item row="0" column="2">
-             <spacer name="pathSpacer">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
            </layout>
           </item>
           <item>
-           <layout class="QGridLayout" name="runLayout" columnstretch="1,4,2">
+           <layout class="QGridLayout" name="runLayout" columnstretch="1,5,1">
             <property name="leftMargin">
              <number>9</number>
             </property>

@@ -132,6 +132,9 @@ public slots:
   /// Enables/Disables the load button when ready
   virtual void enableLoad(bool enable) = 0;
 
+  /// Sets path from where data loaded from
+  virtual void setPath(std::string &path) = 0;
+
 signals:
   /// Request to load data
   void loadRequested();
