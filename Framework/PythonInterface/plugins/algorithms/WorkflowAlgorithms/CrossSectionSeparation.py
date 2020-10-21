@@ -8,22 +8,23 @@
 from mantid.api import PythonAlgorithm, WorkspaceGroupProperty, AlgorithmFactory
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator,\
     StringListValidator, PropertyCriterion
+
 from mantid.simpleapi import *
 
 import numpy as np
 import math
 
 
-class ILLComponentSeparation(PythonAlgorithm):
+class CrossSectionSeparation(PythonAlgorithm):
 
     def category(self):
         return 'ILL\\Diffraction'
 
     def summary(self):
-        return 'Separates magnetic, nuclear coherent, and incoherent components for diffraction and spectroscopy data at the ILL.'
+        return 'Separates magnetic, nuclear coherent, and incoherent components for diffraction and spectroscopy data.'
 
     def name(self):
-        return 'ILLComponentSeparation'
+        return 'CrossSectionSeparation'
 
     def validateInputs(self):
         issues = dict()
@@ -158,4 +159,4 @@ class ILLComponentSeparation(PythonAlgorithm):
         return output_name
 
 
-AlgorithmFactory.subscribe(ILLComponentSeparation)
+AlgorithmFactory.subscribe(CrossSectionSeparation)

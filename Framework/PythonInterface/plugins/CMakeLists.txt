@@ -97,7 +97,6 @@ set(PYTHON_PLUGINS
   algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
   algorithms/WorkflowAlgorithms/IndirectReplaceFitResult.py
   algorithms/WorkflowAlgorithms/ILL_utilities.py
-  algorithms/WorkflowAlgorithms/ILLComponentSeparation.py
   algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
   algorithms/WorkflowAlgorithms/PowderILLParameterScan.py
   algorithms/WorkflowAlgorithms/ReactorSANSResolution.py
@@ -126,6 +125,7 @@ set(PYTHON_PLUGINS
   algorithms/WorkflowAlgorithms/ApplyPaalmanPingsCorrection.py
   algorithms/WorkflowAlgorithms/SANSILLParameterScan.py
   algorithms/WorkflowAlgorithms/PolDiffILLReduction.py
+  algorithms/WorkflowAlgorithms/CrossSectionSeparation.py
   algorithms/ViewBOA.py
   algorithms/ReflectometrySliceEventWorkspace.py
   algorithms/SNAPReduce.py

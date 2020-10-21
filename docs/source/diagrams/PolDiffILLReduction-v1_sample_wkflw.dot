@@ -36,7 +36,7 @@ digraph Sample {
     Plus
     Divide2 [label="Divide"]
     SumOverlappingTubes
-    ILLComponentSeparation
+    CrossSectionSeparation [label="Component separation"]
   }
 
   Run -> Load
@@ -55,8 +55,8 @@ digraph Sample {
   SumCountsOrAverage -> SumOverlappingTubes
   SumCountsOrAverage -> Plus
   Plus -> ILLComponentSeparation
-  SumOverlappingTubes -> ILLComponentSeparation
-  ILLComponentSeparation -> AbsoluteScaleBy
+  SumOverlappingTubes -> CrossSectionSeparation
+  CrossSectionSeparation -> AbsoluteScaleBy
   VanadiumInputWorkspace -> AbsoluteScaleBy
   AbsoluteScaleBy -> Divide2
   Divide2 -> ConvertUnits

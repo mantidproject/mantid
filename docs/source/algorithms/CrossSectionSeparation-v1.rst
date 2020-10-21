@@ -31,7 +31,13 @@ Usage
 -----
 .. include:: ../usagedata-note.txt
 
-**Example - ILLComponentSeparation - XYZ component separation of vanadium data**
+**Example - CrossSectionSeparation - XYZ component separation of vanadium data**
+
+
+#. Stewart, J. R. and Deen, P. P. and Andersen, K. H. and Schober, H. and Barthelemy, J.-F. and Hillier, J. M. and Murani, A. P. and Hayes, T. and Lindenau, B.
+   *Disordered materials studied using neutron polarization analysis on the multi-detector spectrometer, D7*
+   Journal of Applied Crystallography **42** (2009) 69-84
+   `doi: 10.1107/S0021889808039162 <https://doi.org/10.1107/S0021889808039162>`_
 
 
 .. categories::
