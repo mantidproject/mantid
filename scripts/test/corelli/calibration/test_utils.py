@@ -10,13 +10,33 @@ from numpy.testing import assert_allclose
 from os import path
 import unittest
 
-from corelli.calibration.utils import (apply_calibration, bank_numbers, calculate_tube_calibration, load_banks,
+from corelli.calibration.utils import (apply_calibration, bank_numbers, calibrate_tube, load_banks, calculate_peak_y_table,
                                        wire_positions)
 from mantid import AnalysisDataService, config
-from mantid.simpleapi import DeleteWorkspaces, LoadEmptyInstrument
+from mantid.simpleapi import (CreateEmptyTableWorkspace, DeleteWorkspaces, GroupWorkspaces, LoadEmptyInstrument,
+                              LoadNexusProcessed)
 
 
 class TestUtils(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        r"""
+        Load the tests cases for calibrate_bank, consisting of data for only one bank
+        CORELLI_124023_bank10, tube 13 has shadows at pixel numbers quite different from the rest
+        """
+        config.appendDataSearchSubDir('CORELLI/calibration')
+        for directory in config.getDataSearchDirs():
+            if 'UnitTest' in directory:
+                data_dir = path.join(directory, 'CORELLI', 'calibration')
+                break
+        cls.workspaces_temporary = list()
+        cls.cases = dict()
+        for bank_case in ('124023_bank10',):
+            workspace = 'CORELLI_' + bank_case
+            LoadNexusProcessed(Filename=path.join(data_dir, workspace + '.nxs'), OutputWorkspace=workspace)
+            cls.cases[bank_case] = workspace
+            cls.workspaces_temporary.append(workspace)
 
     def setUp(self) -> None:
         # Neutron counts along a tube
@@ -69,6 +89,12 @@ class TestUtils(unittest.TestCase):
         self.table = 'calibTable'
         self.calibrated_y = y
 
+    @classmethod
+    def tearDownClass(cls) -> None:
+        r"""Delete temporary workspaces"""
+        if len(cls.workspaces_temporary) > 0:
+            DeleteWorkspaces(cls.workspaces_temporary)
+
     def test_wire_positions(self):
         with self.assertRaises(AssertionError) as exception_info:
             wire_positions(units='mm')
@@ -104,24 +130,73 @@ class TestUtils(unittest.TestCase):
         self.assertAlmostEqual(workspace.readY(42)[0], 13297.0)
         DeleteWorkspaces(['jambalaya'])
 
-    def test_calculate_tube_calibration(self) -> None:
+    def test_peak_y_table(self) -> None:
+        # Mock PeakTable with two tubes and three peaks. Simple, integer values
+        def peak_pixels_table(table_name, peak_count, tube_names=None, pixel_positions=None):
+            table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
+            table.addColumn(type='str', name='TubeId')
+            for i in range(peak_count):
+                table.addColumn(type='float', name='Peak%d' % (i + 1))
+            if tube_names is not None and pixel_positions is not None:
+                assert len(tube_names) == len(pixel_positions), 'tube_names and pixel_positions have different length'
+                for tube_index in range(len(tube_names)):
+                    # tube_names is a list of str values; pixel_positions is a list of lists of float values
+                    table.addRow([tube_names[tube_index]] + pixel_positions[tube_index])
+            return table
+
+        # Create a peak table with only one tube
+        peak_table = peak_pixels_table('PeakTable', 3, ['tube1'], [[0, 1, 2]])
+
+        # Mock ParametersTableGroup with one parameter table. Simple parabola
+        def parameters_optimized_table(table_name, values=None, errors=None):
+            table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
+            for column_type, column_name in [('str', 'Name'), ('float', 'Value'), ('float', 'Error')]:
+                table.addColumn(type=column_type, name=column_name)
+            if values is not None and errors is not None:
+                assert len(values) == 4 and len(errors) == 4  # A0, A1, A2, 'Cost function value'
+                for index, row_name in enumerate(['A0', 'A1', 'A2', 'Cost function value']):
+                    table.addRow([row_name, values[index], errors[index]])
+            return table
+
+        # Create two tables with optimized polynomial coefficients, then group them
+        parameters_optimized_table('parameters_table_0', [0, 0, 1, 1.3], [0, 0, 0, 0])  # first tube
+        parameters_optimized_table('parameters_table_1', [1, 1, 1, 2.3], [0, 0, 0, 0])  # second tube
+        parameters_table = GroupWorkspaces(InputWorkspaces=['parameters_table_0', 'parameters_table_1'],
+                                           OutputWorkspace='parameters_table')
+
+        # Check we raise an assertion error since the number of tubes is different than number of tables
+        with self.assertRaises(AssertionError) as exception_info:
+            calculate_peak_y_table(peak_table, parameters_table, output_workspace='PeakYTable')
+        assert 'number of rows in peak_table different than' in str(exception_info.exception)
+        # Add another parameter table to ParametersTableGroup, the create peak_vertical_table
+        peak_table.addRow(['tube2', 0, 1, 2])
+        table = calculate_peak_y_table(peak_table, parameters_table, output_workspace='PeakYTable')
+        assert AnalysisDataService.doesExist('PeakYTable')
+        assert_allclose(list(table.row(0).values())[1:], [0, 1, 4])
+        assert_allclose(list(table.row(1).values())[1:], [1, 3, 7])
+
+    def test_calibrate_tube(self) -> None:
         # Check the validators are doing what they're supposed to do
         with self.assertRaises(AssertionError) as exception_info:
-            calculate_tube_calibration(None, 'bank42/sixteenpack/tube8')
+            calibrate_tube(None, 'bank42/sixteenpack/tube8')
         assert 'Cannot process workspace' in str(exception_info.exception)
         with self.assertRaises(AssertionError) as exception_info:
-            calculate_tube_calibration(self.workspace, 'tube42')
+            calibrate_tube(self.workspace, 'tube42')
         assert 'tube42 does not uniquely specify one tube' in str(exception_info.exception)
         with self.assertRaises(AssertionError) as exception_info:
-            calculate_tube_calibration(self.workspace, 'bank42/sixteenpack/tube8', fit_domain=20)
+            calibrate_tube(self.workspace, 'bank42/sixteenpack/tube8', fit_domain=20)
         assert 'The fit domain cannot be larger than the distance between consecutive' in str(exception_info.exception)
 
-        table = calculate_tube_calibration(self.workspace, 'bank42/sixteenpack/tube8')
+        table = calibrate_tube(self.workspace, 'bank42/sixteenpack/tube8')
         calibrated_y = np.array([v.Y() for v in table.column(1)])
         assert_allclose(calibrated_y, self.calibrated_y, atol=1e-3)
 
-    def test_apply_instrument(self) -> None:
-        table = calculate_tube_calibration(self.workspace, 'bank42/sixteenpack/tube8')
+        # Check for existence of all table workspaces
+        calibrate_tube(self.cases['124023_bank10'], 'bank10/sixteenpack/tube13')
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'ParametersTable', 'PeakYTable'])
+
+    def test_apply_calibration(self) -> None:
+        table = calibrate_tube(self.workspace, 'bank42/sixteenpack/tube8')
         apply_calibration(self.workspace, table)
         assert AnalysisDataService.doesExist('uncalibrated_calibrated')
         DeleteWorkspaces(['uncalibrated_calibrated', str(table)])
