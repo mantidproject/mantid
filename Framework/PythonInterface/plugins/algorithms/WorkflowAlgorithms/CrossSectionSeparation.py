@@ -18,7 +18,7 @@ import math
 class CrossSectionSeparation(PythonAlgorithm):
 
     def category(self):
-        return 'ILL\\Diffraction'
+        return 'Diffraction'
 
     def summary(self):
         return 'Separates magnetic, nuclear coherent, and incoherent components for diffraction and spectroscopy data.'
@@ -28,7 +28,7 @@ class CrossSectionSeparation(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        separationMethod = self.getPropertyValue('ComponentSeparationMethod')
+        separationMethod = self.getPropertyValue('CrossSectionSeparationMethod')
         if separationMethod == '10p' and self.getProperty('ThetaOffset').isDefault:
             issues['ThetaOffset'] = "The value for theta_0 needs to be defined for the component separation in 10p method."
         return issues
@@ -43,18 +43,18 @@ class CrossSectionSeparation(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='The output workspace.')
 
-        self.declareProperty(name="ComponentSeparationMethod",
+        self.declareProperty(name="CrossSectionSeparationMethod",
                              defaultValue="Uniaxial",
                              validator=StringListValidator(["Uniaxial", "XYZ", "10p"]),
                              direction=Direction.Input,
-                             doc="What type of component separation to perform.")
+                             doc="What type of cross-section separation to perform.")
 
         self.declareProperty(name="ThetaOffset",
                              defaultValue=0.0,
                              validator=FloatBoundedValidator(lower=-180, upper=180),
                              direction=Direction.Input,
                              doc="Theta_0 offset used in 10p method.")
-        self.setPropertySettings('ThetaOffset', EnabledWhenProperty("ComponentSeparationMethod",
+        self.setPropertySettings('ThetaOffset', EnabledWhenProperty("CrossSectionSeparationMethod",
                                                                     PropertyCriterion.IsEqualTo, '10p'))
 
     def PyExec(self):
@@ -64,7 +64,7 @@ class CrossSectionSeparation(PythonAlgorithm):
 
     def _data_structure_helper(self, ws):
         nComponents = 0
-        user_method = self.getProperty('ComponentSeparationMethod')
+        user_method = self.getProperty('CrossSectionSeparationMethod')
         measurements = set()
         for name in mtd[ws].getNames():
             last_underscore = name.rfind("_")
