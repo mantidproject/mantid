@@ -6,6 +6,7 @@ set(TEST_PY_FILES
     BayesQuasiTest.py
     BayesStretchTest.py
     CalculateMonteCarloAbsorptionTest.py
+    CrossSectionSeparationTest.py
     DetectorFloodWeightingTest.py
     DirectILLApplySelfShieldingTest.py
     DirectILLCollectDataTest.py
@@ -18,7 +19,6 @@ set(TEST_PY_FILES
     FitGaussianPeaksTest.py
     FindPeakAutomaticTest.py
     FlatPlatePaalmanPingsCorrectionTest.py
-    ILLComponentSeparationTest.py
     IndirectAnnulusAbsorptionTest.py
     IndirectAnnulusAbsorption2Test.py
     IndirectCalibrationTest.py
