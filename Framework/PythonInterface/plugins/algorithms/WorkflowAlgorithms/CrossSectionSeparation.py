@@ -64,7 +64,7 @@ class CrossSectionSeparation(PythonAlgorithm):
 
     def _data_structure_helper(self, ws):
         nComponents = 0
-        user_method = self.getProperty('CrossSectionSeparationMethod')
+        user_method = self.getPropertyValue('CrossSectionSeparationMethod')
         measurements = set()
         for name in mtd[ws].getNames():
             last_underscore = name.rfind("_")
