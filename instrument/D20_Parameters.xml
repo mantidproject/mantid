@@ -16,5 +16,9 @@
       <value val="ScanSteps" />
     </parameter>
 
+		<parameter name="sample_logs_time_series" type="string">
+		    <value val="2theta.Position" />
+		</parameter>
+
 	</component-link>
 </parameter-file>

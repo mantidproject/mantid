@@ -366,8 +366,9 @@ class PowderILLEfficiency(PythonAlgorithm):
         self._bin_offset = int(math.ceil(scan_step_in_pixel_numbers))
         self.log().information('Bin offset is: ' + str(self._bin_offset))
         if (abs(self._bin_offset - scan_step_in_pixel_numbers) > 0.1 and not self._interpolate):
-            self.log().warning('Scan step is not an integer multiple of the pixel size. '
-                               'Consider checking the option InterpolateOverlappingAngles.')
+            self.log().warning('Scan step is not an integer multiple of the pixel size: {0:.3f}. '
+                               'Consider checking the option InterpolateOverlappingAngles.'
+                               .format(scan_step_in_pixel_numbers))
         if self._pixel_range[1] > self._n_det:
             self.log().warning('Last pixel number provided is larger than total number of pixels. '
                                'Taking the last existing pixel.')

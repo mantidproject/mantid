@@ -179,7 +179,7 @@ void CubicSpline::calculateSpline(double *out, const double *xValues,
     }
   }
 
-  // warn user than some values wern't calculated
+  // warn user that some values wern't calculated
   if (outOfRange) {
     g_log.information()
         << "Some x values where out of range and will not be calculated.\n";
