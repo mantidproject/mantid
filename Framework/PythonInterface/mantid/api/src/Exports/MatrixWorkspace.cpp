@@ -133,7 +133,7 @@ list getSpectrumNumbers(const MatrixWorkspace &self) {
   const auto &spectrumNums = self.indexInfo().spectrumNumbers();
   list spectra;
 
-  for (const auto& index : spectrumNums) {
+  for (const auto &index : spectrumNums) {
     spectra.append(static_cast<int32_t>(index));
   }
 
