@@ -22,6 +22,7 @@ from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayVi
 from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import (
     QStandardItem,
     create_table_item,
+    RevertibleItem,
 )
 
 
@@ -136,9 +137,9 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         view = view if view else TableWorkspaceDisplayView(self, parent)
         TableWorkspaceDataPresenter.__init__(self, model, view)
 
-        from mantid.api import IPeaksWorkspace
+        # from mantid.api import IPeaksWorkspace
 
-        self.is_peaks_worksapce = isinstance(ws, IPeaksWorkspace)
+        # self.is_peaks_worksapce = isinstance(ws, IPeaksWorkspace)
 
         self.name = name if name else self.model.get_name()
         self.container = (container if container else StatusBarView(
@@ -190,12 +191,11 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         """
         :type item: A reference to the item that has been edited
         """
+        if not isinstance(item, RevertibleItem):
+            # Do not perform any additional task for standard QStandardItem
+            return
         try:
-            if self.is_peaks_worksapce:
-                self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole),
-                                         False)
-            else:
-                self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole),
+            self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole),
                                          item.is_v3d)
         except ValueError:
             item.reset()
@@ -204,8 +204,7 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
             item.reset()
             self.view.show_warning(self.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(x))
         else:
-            if not self.is_peaks_worksapce:
-                item.sync()
+            item.sync()
 
     def action_copy_cells(self):
         self.copy_cells(self.view)
