@@ -6,11 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from qtpy.QtWidgets import QTableWidget, QTableWidgetItem, QHeaderView, \
-                           QStyle, QAbstractItemView, QMenu, QMessageBox
+                           QStyle, QAbstractItemView, QMessageBox
 from qtpy.QtGui import QBrush, QColor
 from qtpy.QtCore import *
-
-from mantidqt import icons
 
 from .DrillHeaderView import DrillHeaderView
 from .DrillItemDelegate import DrillItemDelegate
@@ -538,26 +536,3 @@ class DrillTableWidget(QTableWidget):
                     else:
                         item.setFlags(item.flags() | flags)
         self.blockSignals(False)
-
-    def contextMenuEvent(self, event):
-        """
-        Context menu. It contains:
-        * add/delete menu with a list of visible and hidden columns
-
-        Args:
-            event (QContextMenuEvent): event that triggered the function
-        """
-        position = event.globalPos()
-        header = self.horizontalHeader()
-        rightClickMenu = QMenu(self)
-
-        colMenu = rightClickMenu.addMenu("Add/Delete column")
-        for li in range(len(self.columns)):
-            if header.isSectionHidden(li):
-                colMenu.addAction(icons.get_icon("mdi.close"), self.columns[li])
-            else:
-                colMenu.addAction(icons.get_icon("mdi.check"), self.columns[li])
-
-        selectedItem = rightClickMenu.exec(position)
-        if selectedItem:
-            self.toggleColumnVisibility(selectedItem.text())

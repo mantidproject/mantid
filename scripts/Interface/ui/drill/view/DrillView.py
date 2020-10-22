@@ -18,6 +18,7 @@ from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 
 from ..presenter.DrillPresenter import DrillPresenter
+from .DrillTableWidget import DrillTableWidget
 
 
 class DrillView(QMainWindow):
@@ -245,6 +246,8 @@ class DrillView(QMainWindow):
         Setup the main table widget.
         """
         self.table.cellChanged.connect(self.on_cell_changed)
+        self.table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.table.customContextMenuRequested.connect(self.showContextMenu)
 
     def closeEvent(self, event):
         """
@@ -695,6 +698,37 @@ class DrillView(QMainWindow):
         self.dataChanged.emit(row, column,
                               self.table.getCellContents(row, column))
         self.setWindowModified(True)
+
+    def showContextMenu(self, pos):
+        """
+        Context menu. It contains:
+        * add/delete menu with a list of visible and hidden columns
+
+        Args:
+            pos (QPoint): mouse position in the widget frame
+        """
+        # get position in global frame
+        mousePos = None
+        if isinstance(self.sender(), DrillTableWidget):
+            mousePos = self.table.viewport().mapToGlobal(pos)
+        if not mousePos:
+            return
+
+        rightClickMenu = QMenu(self)
+
+        # add/delete column submenu
+        colMenu = rightClickMenu.addMenu("Add/Delete column")
+        allColumns = self.table.getColumnsOrder()
+        hiddenColumns = self.table.getHiddenColumns()
+        for column in allColumns:
+            if column in hiddenColumns:
+                action = colMenu.addAction(icons.get_icon("mdi.close"), column)
+            else:
+                action = colMenu.addAction(icons.get_icon("mdi.check"), column)
+            action.triggered.connect(lambda checked, c=column:
+                                     self.table.toggleColumnVisibility(c))
+
+        rightClickMenu.exec(mousePos)
 
     ###########################################################################
     # for model calls                                                         #
