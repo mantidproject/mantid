@@ -227,7 +227,15 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.declareProperty("MeasuredMassDensity", defaultValue=0.1,
                              validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Measured mass density of sample in g/cc")  # in g/cc, way to validate?
+        self.declareProperty("SampleNumberDensity", defaultValue=Property.EMPTY_DBL,
+                             doc="Number density of the sample in number of atoms per cubic Angstrom will be used instead of calculated")
         self.declareProperty("ContainerShape", defaultValue="PAC06", doc="Defines the container geometry")
+        self.declareProperty("ContainerScaleFactor", defaultValue=1.0,
+                             validator=FloatBoundedValidator(lower=0),
+                             doc="Factor to scale the container data")
+        self.copyProperties("AbsorptionCorrection", "ElementSize")
+        self.declareProperty("NumWavelengthBins", defaultValue=1000,
+                             doc="Number of wavelength bin to calculate the for absorption correction")
 
         workspace_prop = WorkspaceProperty('SplittersWorkspace', '', Direction.Input, PropertyMode.Optional)
         self.declareProperty(workspace_prop, "Splitters workspace for split event workspace.")
@@ -296,7 +304,11 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self._absMethod = self.getProperty("TypeOfCorrection").value
         self._sampleFormula = self.getProperty("SampleFormula").value
         self._massDensity = self.getProperty("MeasuredMassDensity").value
+        self._numberDensity = self.getProperty("SampleNumberDensity").value
         self._containerShape = self.getProperty("ContainerShape").value
+        self._containerScaleFactor = self.getProperty("ContainerScaleFactor").value
+        self._elementSize = self.getProperty("ElementSize").value
+        self._num_wl_bins = self.getProperty("NumWavelengthBins").value
 
         samRuns = self._getLinearizedFilenames("Filename")
         self._determineInstrument(samRuns[0])
@@ -445,7 +457,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             #   return
 
             # the final bit of math to remove container run and vanadium run
-            if can_run_ws_name is not None:
+            if can_run_ws_name is not None and self._containerScaleFactor != 0:
                 # must convert the sample to a matrix workspace if the can run isn't one
                 if not allEventWorkspaces(can_run_ws_name, sam_ws_name):
                     api.ConvertToMatrixWorkspace(InputWorkspace=sam_ws_name,
@@ -455,6 +467,9 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                 api.RebinToWorkspace(WorkspaceToRebin=can_run_ws_name,
                                      WorkspaceToMatch=sam_ws_name,
                                      OutputWorkspace=can_run_ws_name)
+                api.Scale(InputWorkspace=can_run_ws_name,
+                          OutputWorkspace=can_run_ws_name,
+                          Factor=self._containerScaleFactor)
                 api.Minus(LHSWorkspace=sam_ws_name,
                           RHSWorkspace=can_run_ws_name,
                           OutputWorkspace=sam_ws_name)
@@ -1283,27 +1298,35 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
 
         material = {"ChemicalFormula": self._sampleFormula,
                     "SampleMassDensity": self._massDensity}
+
+        if self._numberDensity != Property.EMPTY_DBL:
+            material["SampleNumberDensity"] = self._numberDensity
+
         environment = {'Name': 'InAir', 'Container': self._containerShape}
-        donorWS = self._create_absorption_input(filename, num_wl_bins=1000, material=material, environment=environment)
+        donorWS = self._create_absorption_input(filename, material=material, environment=environment)
 
         absName = '__{}_abs_correction'.format(getBasename(filename))
 
         if self._absMethod == "SampleOnly":
             api.AbsorptionCorrection(donorWS,
                                      OutputWorkspace=absName+'_ass',
-                                     ScatterFrom='Sample')
+                                     ScatterFrom='Sample',
+                                     ElementSize=self._elementSize)
             return absName+'_ass', None
         elif self._absMethod == "SampleAndContainer":
             api.AbsorptionCorrection(donorWS,
                                      OutputWorkspace=absName+'_ass',
-                                     ScatterFrom='Sample')
+                                     ScatterFrom='Sample',
+                                     ElementSize=self._elementSize)
             api.AbsorptionCorrection(donorWS,
                                      OutputWorkspace=absName+'_acc',
-                                     ScatterFrom='Container')
+                                     ScatterFrom='Container',
+                                     ElementSize=self._elementSize)
             return absName+'_ass', absName+'_acc'
         else:
             api.AbsorptionCorrectionPaalmanPings(donorWS,
-                                                 OutputWorkspace=absName)
+                                                 OutputWorkspace=absName,
+                                                 ElementSize=self._elementSize)
             api.Multiply(LHSWorkspace=absName+'_acc',
                          RHSWorkspace=absName+'_assc',
                          OutputWorkspace=absName+'_ac')
@@ -1312,7 +1335,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                        OutputWorkspace=absName+'_ac')
             return absName+'_assc', absName+'_ac'
 
-    def _create_absorption_input(self, filename, num_wl_bins, material=None, geometry=None, environment=None):
+    def _create_absorption_input(self, filename, material=None, geometry=None, environment=None):
         '''
         Create an input workspace for carpenter or other absorption corrections
         '''
@@ -1364,8 +1387,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         self.log().information('Using wavelength range min={}A max={}A'.format(wl_min, wl_max))
 
         absorptionWS = WorkspaceFactory.create(mtd[absName], NVectors=mtd[absName].getNumberHistograms(),
-                                               XLength=num_wl_bins + 1, YLength=num_wl_bins)
-        xaxis = np.arange(0., float(num_wl_bins + 1)) * (wl_max - wl_min) / (num_wl_bins) + wl_min
+                                               XLength=self._num_wl_bins + 1, YLength=self._num_wl_bins)
+        xaxis = np.arange(0., float(self._num_wl_bins + 1)) * (wl_max - wl_min) / (self._num_wl_bins) + wl_min
         for i in range(absorptionWS.getNumberHistograms()):
             absorptionWS.setX(i, xaxis)
         absorptionWS.getAxis(0).setUnit('Wavelength')
@@ -1426,8 +1449,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             self.log().notice('Processing vanadium {}'.format(van_run_ws_name))
 
             # create the donor workspace for calculating the sample correction
-            # TODO should num_wl_bins be hard coded?
-            absWksp = self._create_absorption_input(van_run_number, num_wl_bins=1000,
+            absWksp = self._create_absorption_input(van_run_number,
                                                     material={'ChemicalFormula': 'V', 'SampleNumberDensity': 0.0721},
                                                     geometry={'Shape': 'Cylinder',
                                                               'Height': 7.,
