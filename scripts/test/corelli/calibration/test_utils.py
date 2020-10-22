@@ -13,7 +13,7 @@ import unittest
 from corelli.calibration.utils import (apply_calibration, bank_numbers, calibrate_tube, load_banks, calculate_peak_y_table,
                                        wire_positions)
 from mantid import AnalysisDataService, config
-from mantid import TableWorkspace
+from mantid.dataobjects import TableWorkspace
 from mantid.simpleapi import (CreateEmptyTableWorkspace, DeleteWorkspaces, GroupWorkspaces, LoadEmptyInstrument,
                               LoadNexusProcessed)
 
