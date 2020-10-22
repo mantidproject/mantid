@@ -32,6 +32,16 @@ New
     # Ties can then be applied by indexing to the relevant function
     cf.background.functions[1].ties(Height=1465, Sigma=0.1111/2, PeakCentre=0.09147)
 
+- Implemented a method for fixing function parameters in the ``Background`` to their current values. An example using
+  the same background as above is:
+
+.. code-block:: python
+
+    # Fixes the PeakCentre and Height of the first Gaussian to their current values.
+    cf.background.functions[0].fix('PeakCentre', 'Height')
+
+    # Fixes all the parameters of the LinearBackground to their current values.
+    cf.background.functions[2].fix('all')
 
 BugFixes
 ########
