@@ -149,8 +149,10 @@ public:
   void handleWorkspaceReplacement(
       const std::string &wsName,
       const std::shared_ptr<Mantid::API::Workspace> &workspace);
-  void replaceWs(const std::string &newWs,
-                 const std::shared_ptr<Mantid::API::Workspace> &workspace);
+  void
+  replaceWorkspace(const std::string &newWs,
+                   const std::shared_ptr<Mantid::API::Workspace> &workspace,
+                   const std::string &newInstrumentWindowName);
 
   /// Get the currently selected tab index
   int getCurrentTab() const;
@@ -161,7 +163,7 @@ public:
   void removeTab(const std::string &tabName);
   void addTab(const std::string &tabName);
   void hideHelp();
-  InstrumentWidgetPickTab *getPickTab() { return m_pickTab; };
+  InstrumentWidgetPickTab *getPickTab() { return m_pickTab; }
   bool isIntegrable() const { return m_isIntegrable; }
 
 signals:

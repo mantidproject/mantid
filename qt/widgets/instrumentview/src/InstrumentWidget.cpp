@@ -576,20 +576,28 @@ void InstrumentWidget::setSurfaceType(const QString &typeStr) {
 }
 
 /**
- * @brief InstrumentWidget::replaceWs
+ * @brief InstrumentWidget::replaceWorkspace
  * Replace the workspace currently linked to the instrument viewer by a new one.
  * @param newWs the name of the new workspace
  * @param workspace the new workspace to show
+ * @param newInstrumentWindowName the new title of the window
  */
-void InstrumentWidget::replaceWs(const std::string &newWs,
-                                 const std::shared_ptr<Workspace> &workspace) {
+void InstrumentWidget::replaceWorkspace(
+    const std::string &newWs, const std::shared_ptr<Workspace> &workspace,
+    const std::string &newInstrumentWindowName) {
+  // change inside objects
   handleWorkspaceReplacement(m_workspaceName.toStdString(), workspace);
   renameWorkspace(newWs);
   m_instrumentActor.reset(new InstrumentActor(QString::fromStdString(newWs)));
+
+  // change the view and colormap
   auto surface = getSurface();
   surface->resetInstrumentActor(m_instrumentActor.get());
-
   setupColorMap();
+
+  // change the title of the instrument window
+  nativeParentWidget()->setWindowTitle(
+      QString().fromStdString(newInstrumentWindowName));
 }
 
 /**
