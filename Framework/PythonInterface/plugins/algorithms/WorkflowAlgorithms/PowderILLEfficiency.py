@@ -461,7 +461,7 @@ class PowderILLEfficiency(PythonAlgorithm):
         x_2d = mtd[ws_2d].extractX()
         x[0:self._scan_points] = x_2d[0,...]
         index = self._scan_points
-        for pixel in range(0,self._n_det):
+        for pixel in range(0,self._n_det-1):
             x[index:(index+self._bin_offset)] = x_2d[pixel,-self._bin_offset:]
             index += self._bin_offset
         CreateWorkspace(DataX=x, DataY=y, DataE=e, NSpec=1, UnitX='Degrees', OutputWorkspace=response_ws)
