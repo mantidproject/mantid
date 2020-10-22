@@ -13,7 +13,6 @@ from mantiddoc import get_logger
 
 ALG_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)-v([0-9][0-9]*)$')
 FIT_DOCNAME_RE = re.compile(r'^([A-Z][a-zA-Z0-9]+)$')
-INITIALIZED_ALGS = {}
 
 
 # ----------------------------------------------------------------------------------------
@@ -227,17 +226,10 @@ class AlgorithmBaseDirective(BaseDirective):
         Returns:
           algorithm: An instance of a Mantid algorithm.
         """
-        global INITIALIZED_ALGS
         if version == -1:
             version = AlgorithmFactory.Instance().highestVersion(algorithm_name)
-        alg_key = (algorithm_name, version)
-        try:
-            alg = INITIALIZED_ALGS[alg_key]
-        except KeyError:
-            alg = AlgorithmManager.Instance().createUnmanaged(algorithm_name, version)
-            alg.initialize()
-            INITIALIZED_ALGS[alg_key] = alg
-
+        alg = AlgorithmManager.Instance().createUnmanaged(algorithm_name, version)
+        alg.initialize()
         return alg
 
     def create_mantid_ifunction(self, function_name):

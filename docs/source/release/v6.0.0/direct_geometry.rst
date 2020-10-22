@@ -9,11 +9,17 @@ Direct Geometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Improvements
+------------
+
+- The instrument geometry of PANTHER has been corrected according to the findings during the hot commissioning.
+
 DGSPlanner
 ----------
 
 Improvements
 ############
+
 - Widgets were rearranged into groups of items based on their logical function
 
 

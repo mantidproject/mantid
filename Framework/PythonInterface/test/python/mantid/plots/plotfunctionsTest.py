@@ -11,6 +11,8 @@
 import unittest
 
 # third party imports
+from unittest import mock
+
 import matplotlib
 
 matplotlib.use('AGG')  # noqa
@@ -24,6 +26,18 @@ from mantid.kernel import config
 from mantid.plots import MantidAxes
 from mantid.plots.plotfunctions import (figure_title, manage_workspace_names,
                                         plot, plot_md_histo_ws)
+
+
+PLOT_OPTIONS = {"plots.ShowMinorTicks": "off", "plots.ShowMinorGridlines": "off",
+                "plots.ShowLegend": "off", "plots.line.Width": 5,
+                "plots.marker.Style": "None",
+                "plots.marker.Size": 5,
+                "plots.ShowTitle": "off"}
+
+
+class MockConfigService(object):
+    def __init__(self):
+        self.getString = mock.Mock(side_effect=PLOT_OPTIONS.get)
 
 
 # Avoid importing the whole of mantid for a single mock of the workspace class
@@ -80,6 +94,17 @@ class FunctionsTest(unittest.TestCase):
     def test_figure_title_with_empty_list_raises_assertion(self):
         with self.assertRaises(AssertionError):
             figure_title([], 5)
+
+    @mock.patch('mantid.plots.plotfunctions.ConfigService', new_callable=MockConfigService)
+    def test_plot_gets_legend_visibility_from_ConfigService(self, mock_ConfigService):
+        fig = plt.figure()
+        plt.plot([0, 1], [0, 1])
+        ws = self._test_ws
+        plot([ws], wksp_indices=[1], fig=fig, overplot=True)
+        ax = plt.gca()
+
+        mock_ConfigService.getString.assert_any_call('plots.ShowLegend')
+        self.assertEqual(ax.get_legend().get_visible(), False)
 
     def test_that_plot_can_accept_workspace_names(self):
         ws_name1 = "some_workspace"
