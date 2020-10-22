@@ -21,8 +21,8 @@
 #include <QApplication>
 #include <QCursor>
 #include <QMessageBox>
-#include <QtDebug>
 #include <QPainterPath>
+#include <QtDebug>
 
 using namespace Mantid::Geometry;
 using Mantid::Beamline::ComponentType;
@@ -641,7 +641,8 @@ PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &detPos,
 }
 
 void PanelsSurface::addDetector(size_t detIndex,
-                                const Mantid::Kernel::V3D &refPos, int bankIndex,
+                                const Mantid::Kernel::V3D &refPos,
+                                int bankIndex,
                                 const Mantid::Kernel::Quat &rotation) {
   const auto &detectorInfo = m_instrActor->detectorInfo();
 
