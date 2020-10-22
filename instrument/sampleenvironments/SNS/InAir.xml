@@ -120,26 +120,6 @@
 	</samplegeometry>
       </container>
 
-	 <!-- PG3 Vanadium rod -->
-	 <container id="VAN06" material="vanadium">
-	<geometry>
-	  <cylinder id="cyla">
-	    <centre-of-bottom-base x="0.0" y="0.0" z="0.0"/>
-	    <axis x="0.0" y="1" z="0" />
-	    <radius val="0.003175" />
-	    <height val="0.07" />
-	  </cylinder>
-	</geometry>
-	<samplegeometry>
-	  <cylinder id="cyla">
-	    <centre-of-bottom-base x="0.0" y="0.0" z="0.0"/>
-	    <axis x="0.0" y="1" z="0" />
-	    <radius val="0.003175" />
-	    <height val="0.07" />
-	  </cylinder>
-	</samplegeometry>
-      </container>
-
     </containers>
   </components>
 </environmentspec>

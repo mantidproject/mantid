@@ -140,7 +140,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
     _sampleFormula = None
     _massDensity = None
     _containerShape = None
-    _vanadiumShape = None
 
     def category(self):
         return "Diffraction\\Reduction"
@@ -229,9 +228,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                              validator=FloatBoundedValidator(lower=0., exclusive=True),
                              doc="Measured mass density of sample in g/cc")  # in g/cc, way to validate?
         self.declareProperty("ContainerShape", defaultValue="PAC06", doc="Defines the container geometry")
-        vanadium_validator = StringListValidator(["VAN06"])
-        self.declareProperty("VRodType", defaultValue="VAN06", doc="Vanadium rod geometry",
-                             validator=vanadium_validator)
 
         workspace_prop = WorkspaceProperty('SplittersWorkspace', '', Direction.Input, PropertyMode.Optional)
         self.declareProperty(workspace_prop, "Splitters workspace for split event workspace.")
@@ -1434,8 +1430,10 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             # TODO should num_wl_bins be hard coded?
             absWksp = self._create_absorption_input(van_run_number, num_wl_bins=1000,
                                                     material={'ChemicalFormula': 'V', 'SampleNumberDensity': 0.0721},
-                                                    geometry={'Radius': self._vanRadius},
-                                                    environment={'Name': 'InAir', 'Container': 'VAN06'})
+                                                    geometry={'Shape': 'Cylinder',
+                                                              'Height': 7.,
+                                                              'Radius': self._vanRadius,
+                                                              'Center': [0., 0., 0.]})
 
             # calculate the correction which is 1/normal carpenter correction - it doesn't look at sample shape
             api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr',
