@@ -95,8 +95,9 @@ Usage
 Output:
 
 .. testoutput:: ExCrossSectionSeparationXYZ
-	Number of separated cross-sections: 3
-        Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 11.8
+
+   Number of separated cross-sections: 3
+   Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 11.8
 
 .. testcleanup:: ExCrossSectionSeparationXYZ
 
