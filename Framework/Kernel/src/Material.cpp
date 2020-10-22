@@ -69,22 +69,24 @@ Mantid::Kernel::Material::FormulaUnit::FormulaUnit(
  */
 Material::Material()
     : m_name(), m_chemicalFormula(), m_atomTotal(0.0), m_numberDensity(0.0),
-      m_temperature(0.0), m_pressure(0.0), m_linearAbsorpXSectionByWL(0.0),
-      m_totalScatterXSection(0.0) {}
+      m_packingFraction(1.0), m_temperature(0.0), m_pressure(0.0),
+      m_linearAbsorpXSectionByWL(0.0), m_totalScatterXSection(0.0) {}
 
 /**
  * Construct a material object
  * @param name :: The name of the material
  * @param formula :: The chemical formula
  * @param numberDensity :: Density in atoms / Angstrom^3
+ * @param packingFraction :: Packing fraction of material
  * @param temperature :: The temperature in Kelvin (Default = 300K)
  * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
  */
 Material::Material(const std::string &name, const ChemicalFormula &formula,
-                   const double numberDensity, const double temperature,
-                   const double pressure)
+                   const double numberDensity, const double packingFraction,
+                   const double temperature, const double pressure)
     : m_name(name), m_atomTotal(0.0), m_numberDensity(numberDensity),
-      m_temperature(temperature), m_pressure(pressure) {
+      m_packingFraction(packingFraction), m_temperature(temperature),
+      m_pressure(pressure) {
   m_chemicalFormula.assign(formula.begin(), formula.end());
   this->countAtoms();
   this->calculateLinearAbsorpXSectionByWL();
@@ -96,16 +98,17 @@ Material::Material(const std::string &name, const ChemicalFormula &formula,
  * @param name :: The name of the material
  * @param atom :: The neutron atom to take scattering infrmation from
  * @param numberDensity :: Density in atoms / Angstrom^3
+ * @param packingFraction :: Packing fraction of material
  * @param temperature :: The temperature in Kelvin (Default = 300K)
  * @param pressure :: Pressure in kPa (Default: 101.325 kPa)
  */
 Material::Material(const std::string &name,
                    const PhysicalConstants::NeutronAtom &atom,
-                   const double numberDensity, const double temperature,
-                   const double pressure)
+                   const double numberDensity, const double packingFraction,
+                   const double temperature, const double pressure)
     : m_name(name), m_chemicalFormula(), m_atomTotal(1.0),
-      m_numberDensity(numberDensity), m_temperature(temperature),
-      m_pressure(pressure) {
+      m_numberDensity(numberDensity), m_packingFraction(packingFraction),
+      m_temperature(temperature), m_pressure(pressure) {
   if (atom.z_number == 0) { // user specified atom
     m_chemicalFormula.emplace_back(atom, 1.);
   } else if (atom.a_number > 0) { // single isotope
@@ -203,6 +206,21 @@ const Material::ChemicalFormula &Material::chemicalFormula() const {
 double Material::numberDensity() const { return m_numberDensity; }
 
 /**
+ * Get the effective number density
+ * @returns The number density of the material in atoms / Angstrom^3
+ */
+double Material::numberDensityEffective() const {
+  return m_numberDensity * m_packingFraction;
+}
+
+/**
+ * Get the packing fraction. This should be a number 0<f<=1. However,
+ * this is sometimes used as a fudge factor and is allowed to vary 0<f<2.
+ * @returns The packing fraction
+ */
+double Material::packingFraction() const { return m_packingFraction; }
+
+/**
  * Get the temperature
  * @returns The temperature of the material in Kelvin
  */
@@ -262,7 +280,7 @@ double Material::absorbXSection(const double lambda) const {
  */
 double Material::attenuationCoefficient(const double lambda) const {
   if (!m_attenuationOverride) {
-    return 100 * numberDensity() *
+    return 100 * numberDensityEffective() *
            (totalScatterXSection() + absorbXSection(lambda));
   } else {
     return m_attenuationOverride->getAttenuationCoefficient(lambda);
@@ -282,7 +300,7 @@ double Material::attenuation(const double distance, const double lambda) const {
 // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
 // will cancel for mu to give units: cm^-1
 double Material::linearAbsorpCoef(const double lambda) const {
-  return absorbXSection(lambda) * 100. * numberDensity();
+  return absorbXSection(lambda) * 100. * numberDensityEffective();
 }
 
 // This must match the values that come from the scalar version
@@ -290,15 +308,13 @@ std::vector<double> Material::linearAbsorpCoef(
     std::vector<double>::const_iterator lambdaBegin,
     std::vector<double>::const_iterator lambdaEnd) const {
 
-  const double linearCoefByWL =
-      absorbXSection(PhysicalConstants::NeutronAtom::ReferenceLambda) * 100. *
-      numberDensity() / PhysicalConstants::NeutronAtom::ReferenceLambda;
+  const double densityTerm = 100. * numberDensityEffective();
 
   std::vector<double> linearCoef(std::distance(lambdaBegin, lambdaEnd));
 
   std::transform(lambdaBegin, lambdaEnd, linearCoef.begin(),
-                 [linearCoefByWL](const double lambda) {
-                   return linearCoefByWL * lambda;
+                 [densityTerm, this](const double lambda) {
+                   return densityTerm * this->absorbXSection(lambda);
                  });
 
   return linearCoef;
@@ -530,6 +546,7 @@ void Material::saveNexus(::NeXus::File *file, const std::string &group) const {
   }
 
   file->writeData("number_density", m_numberDensity);
+  file->writeData("packing_fraction", m_packingFraction);
   file->writeData("temperature", m_temperature);
   file->writeData("pressure", m_pressure);
   file->closeGroup();
@@ -595,6 +612,11 @@ void Material::loadNexus(::NeXus::File *file, const std::string &group) {
   this->calculateTotalScatterXSection();
 
   file->readData("number_density", m_numberDensity);
+  try {
+    file->readData("packing_fraction", m_packingFraction);
+  } catch (std::runtime_error &) {
+    m_packingFraction = 1.;
+  }
   file->readData("temperature", m_temperature);
   file->readData("pressure", m_pressure);
   file->closeGroup();
