@@ -81,7 +81,7 @@ Usage
 
 .. testcode:: ExCrossSectionSeparationXYZ
 
-      Load('vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz')
+      Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz')
       CrossSectionSeparation(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
 	      OutputWorkspace='xyz')
       print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
