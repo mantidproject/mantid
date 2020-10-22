@@ -12,6 +12,8 @@ Framework Changes
 Concepts
 --------
 
+- Added packing fraction to :ref:`Material <Materials>` to separate number density and effective number density.
+
 Algorithms
 ----------
 
@@ -48,5 +50,6 @@ Improvements
 
 Bugfixes
 ########
+
 
 :ref:`Release 6.0.0 <v6.0.0>`
