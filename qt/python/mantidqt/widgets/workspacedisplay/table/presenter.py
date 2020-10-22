@@ -19,7 +19,11 @@ from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
 from mantidqt.widgets.workspacedisplay.table.plot_type import PlotType
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
-from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import QStandardItem, create_table_item
+from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import (
+    QStandardItem,
+    create_table_item,
+    RevertibleItem,
+)
 
 
 class TableWorkspaceDataPresenter(object):
@@ -176,6 +180,9 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         """
         :type item: A reference to the item that has been edited
         """
+        if not isinstance(item, RevertibleItem):
+            # Do not perform any additional task for standard QStandardItem
+            return
         try:
             self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole),
                                      item.is_v3d)
