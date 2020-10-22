@@ -259,11 +259,20 @@ public:
     const auto &paramMap = output->constInstrumentParameters();
     const auto &detectorInfo = output->detectorInfo();
     const auto &det = detectorInfo.detector(detectorInfo.indexOf(1008));
-    Parameter_sptr param = paramMap.get(&det, "date-most-recent");
+    Parameter_sptr param;
+    param = paramMap.get(&det, "date-most-recent");
     TS_ASSERT_EQUALS(param->value<double>(), 1);
     param = paramMap.get(&det, "date-within-bound");
     TS_ASSERT_EQUALS(param->value<double>(), 1);
-    param = paramMap.get(&det, "date-no-bounds");
+    param = paramMap.get(&det, "date-no-bounds-vs-end");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-same-start-no-end");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-no-bounds-vs-start");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-same-start");
+    TS_ASSERT_EQUALS(param->value<double>(), 1);
+    param = paramMap.get(&det, "date-no-bounds-vs-invalid");
     TS_ASSERT_EQUALS(param->value<double>(), 1);
   }
 
