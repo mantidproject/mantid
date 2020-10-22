@@ -154,9 +154,12 @@ def calibrate_tube(workspace: WorkspaceTypes,
     :param output_peak_table:
     :param output_parameters_table:
     :param output_peak_y_table:
-    :param shadow_height: estimated dip in the background intensity.
-    :param shadow_width: estimated width of the shadow cast by the wire, in pixel units
-    :param fit_domain: estimated range, in pixel units, over which to carry out the fit.
+    :param shadow_height: estimated dip in the background intensity. Dips typical of Cd-wire runs are around 1000
+        neutron counts.
+    :param shadow_width: estimated width of the shadow cast by the wire, in pixel units. The Cd-wire typically
+        cast a shadow over four pixels.
+    :param fit_domain: estimated range, in pixel units, over which to carry out the fit. An appropriate value
+        is about twice the shadow width
     :return: table containing detector ID and position vector
     """
     message = f'Cannot process workspace {workspace}. Pass the name of an existing workspace or a workspace handle'

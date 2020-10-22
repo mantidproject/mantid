@@ -13,6 +13,7 @@ import unittest
 from corelli.calibration.utils import (apply_calibration, bank_numbers, calibrate_tube, load_banks, calculate_peak_y_table,
                                        wire_positions)
 from mantid import AnalysisDataService, config
+from mantid import TableWorkspace
 from mantid.simpleapi import (CreateEmptyTableWorkspace, DeleteWorkspaces, GroupWorkspaces, LoadEmptyInstrument,
                               LoadNexusProcessed)
 
@@ -132,7 +133,7 @@ class TestUtils(unittest.TestCase):
 
     def test_peak_y_table(self) -> None:
         # Mock PeakTable with two tubes and three peaks. Simple, integer values
-        def peak_pixels_table(table_name, peak_count, tube_names=None, pixel_positions=None):
+        def peak_pixels_table(table_name, peak_count, tube_names=None, pixel_positions=None) -> TableWorkspace:
             table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
             table.addColumn(type='str', name='TubeId')
             for i in range(peak_count):
@@ -148,7 +149,7 @@ class TestUtils(unittest.TestCase):
         peak_table = peak_pixels_table('PeakTable', 3, ['tube1'], [[0, 1, 2]])
 
         # Mock ParametersTableGroup with one parameter table. Simple parabola
-        def parameters_optimized_table(table_name, values=None, errors=None):
+        def parameters_optimized_table(table_name, values=None, errors=None) -> TableWorkspace:
             table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
             for column_type, column_name in [('str', 'Name'), ('float', 'Value'), ('float', 'Error')]:
                 table.addColumn(type=column_type, name=column_name)
