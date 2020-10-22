@@ -332,11 +332,12 @@ class ReductionWrapperTest(unittest.TestCase):
 
         with open(test_log,'w') as fh:
             fh.write('MAR 1001 0 \n')
-        # next attept is successfull
+        # next attempt is successfull
         ok,run_num,info = th._check_progress_log_run_completed(1001)
-        self.assertTrue(ok)
-        self.assertEqual(run_num,1001)
         self.assertEqual(info,'')
+        self.assertEqual(run_num,1001)
+        self.assertTrue(ok)
+
 
         os.remove(test_log)
 
