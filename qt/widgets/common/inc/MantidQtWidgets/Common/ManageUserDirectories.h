@@ -22,7 +22,6 @@ public:
   ManageUserDirectories(QWidget *parent = nullptr);
   ~ManageUserDirectories() override;
   static void openManageUserDirectories();
-  void closeEvent(QCloseEvent *event) override;
 
 private:
   virtual void initLayout();

@@ -9,13 +9,14 @@
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include <QDir>
 #include <QFileDialog>
+#include <QPointer>
 #include <QSettings>
 #include <QUrl>
 
 using namespace MantidQt::API;
 
 namespace {
-std::unique_ptr<ManageUserDirectories> CURRENTLY_OPEN_MUD;
+QPointer<ManageUserDirectories> CURRENTLY_OPEN_MUD;
 } // namespace
 
 namespace ButtonPrefix {
@@ -317,15 +318,11 @@ void ManageUserDirectories::selectSaveDir() {
 }
 
 void ManageUserDirectories::openManageUserDirectories() {
-  if (CURRENTLY_OPEN_MUD) {
-    CURRENTLY_OPEN_MUD->raise();
-  } else {
-    CURRENTLY_OPEN_MUD = std::make_unique<ManageUserDirectories>();
+  if (CURRENTLY_OPEN_MUD.isNull()) {
+    CURRENTLY_OPEN_MUD =
+        QPointer<ManageUserDirectories>(new ManageUserDirectories);
     CURRENTLY_OPEN_MUD->show();
+  } else {
+    CURRENTLY_OPEN_MUD->raise();
   }
-}
-
-void ManageUserDirectories::closeEvent(QCloseEvent *event) {
-  CURRENTLY_OPEN_MUD.reset();
-  QWidget::closeEvent(event);
 }
