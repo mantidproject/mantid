@@ -26,6 +26,8 @@ The main changes are:
 
 - fixed an unhandled exception when marking columns in a table workspace for plotting or deleting rows
   from a PeaksWorkspace
+  
+- updated ALC documentation to clarify instrument used for data loading
 
 Citation
 --------
@@ -49,6 +51,7 @@ Changes in this version
 - `29754 <https://github.com/mantidproject/mantid/pull/29754>`_ Filtered Value is displayed in Sample logs table
 - `29708 <https://github.com/mantidproject/mantid/pull/29708>`_ Muon analysis crash when using default grouping with no runs
 - `29792 <https://github.com/mantidproject/mantid/pull/29792>`_ Fixes exceptions on altering table/peaks workspace data
+- `29796 <https://github.com/mantidproject/mantid/pull/29796>`_ Updated ALC documentation to clarify instrument used for data loading
 
 Summary of impact
 -----------------
@@ -68,6 +71,8 @@ Summary of impact
 | 29708 | Fixes Muon analysis crash using default grouping with no runs | **low**      |
 +-------+---------------------------------------------------------------+--------------+
 | 29792 | Fixes exceptions on altering table/peaks workspace data       | **low**      |
++-------+---------------------------------------------------------------+--------------+
+| 29796 | Updated ALC documentation on instrument used for data loading | **low**      |
 +-------+---------------------------------------------------------------+--------------+
 
 
