@@ -17,6 +17,7 @@ from mantid.simpleapi import ConvertToHistogram, ConvertToPointData, DeleteWorks
 type_keys = {"10": "Prompt", "20": "Delayed", "99": "Total"}
 spectrum_index = {"Delayed": 1, "Prompt": 2, "Total": 3}
 num_files_per_detector = 3
+run_number_length = 5
 
 
 class LoadElementalAnalysisData(PythonAlgorithm):
@@ -45,8 +46,8 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         run = self.getPropertyValue("Run")
         to_load = self.search_user_dirs()
         workspaces = {
-            filename: self.get_filename(filename, run)
-            for filename in to_load if self.get_filename(filename, run) is not None
+            path: self.get_filename(path, run)
+            for path in to_load if self.get_filename(path, run) is not None
         }
         unique_workspaces = {}
         for path, workspace in workspaces.items():
@@ -55,11 +56,11 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         workspaces = unique_workspaces
 
         self.format_workspace(workspaces)
-        self.merge_workspaces(run, workspaces.values())
+        self.merge_workspaces(workspaces.values())
 
     def pad_run(self):
         """ Pads run number: i.e. 123 -> 00123; 2695 -> 02695 """
-        return str(self.getProperty("Run").value).zfill(5)
+        return str(self.getProperty("Run").value).zfill(run_number_length)
 
     def search_user_dirs(self):
         """ Finds all files for the run number provided """
@@ -86,16 +87,17 @@ class LoadElementalAnalysisData(PythonAlgorithm):
             workspace = LoadAscii(path, OutputWorkspace=output)
             workspace.getAxis(0).setUnit("Label").setLabel("Energy", "keV")
 
-    def merge_workspaces(self, run, workspaces):
+    def merge_workspaces(self, workspaces):
         """ where workspaces is a tuple of form:
                 (filepath, ws name)
         """
+        workspace_name = self.getPropertyValue('GroupWorkspace')
         # detectors is a dictionary of {detector_name : [names_of_workspaces]}
-        detectors = {f"{run}; Detector {x}": [] for x in range(1, 5)}
+        detectors = {f"{workspace_name}; Detector {x}": [] for x in range(1, 5)}
         # fill dictionary
         for workspace in workspaces:
             detector_number = workspace[0]
-            detectors[f"{run}; Detector {detector_number}"].append(workspace)
+            detectors[f"{workspace_name}; Detector {detector_number}"].append(workspace)
         # initialise a group workspace
         overall_ws = WorkspaceGroup()
         # merge each workspace list in detectors into a single workspace

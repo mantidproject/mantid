@@ -18,4 +18,4 @@ Algorithms
 New Algorithms
 ##############
 
-- :ref:`algm-LoadElementalAnalysisData` algorithm was introduced for loading runs into Elemental Analysis GUI, enabling it to be registered by WorkspaceHistory.
+- :ref:`algm-LoadElementalAnalysisData` algorithm was introduced for loading runs for the new Elemental Analysis GUI, enabling it to be registered by WorkspaceHistory.
