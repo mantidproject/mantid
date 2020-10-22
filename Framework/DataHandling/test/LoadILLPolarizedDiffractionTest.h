@@ -22,6 +22,8 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
+
 #include <tuple>
 
 using namespace Mantid::API;
@@ -129,6 +131,7 @@ public:
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 2042)
     TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 45.18, 0.01)
+    checkTimeFormat(workspaceEntry1);
   }
 
   void test_D7_timeOfFlight() {
@@ -214,6 +217,7 @@ public:
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[512], 3579.68, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[511], 0)
     TS_ASSERT_DELTA(workspaceEntry1->e(133)[511], 0.00, 0.01)
+    checkTimeFormat(workspaceEntry1);
   }
 
   void test_D7_multifile_sum() {
@@ -272,6 +276,7 @@ public:
     TS_ASSERT_DELTA(workspaceEntry1->x(133)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry1->y(133)[0], 4109)
     TS_ASSERT_DELTA(workspaceEntry1->e(133)[0], 64.10, 0.01)
+    checkTimeFormat(workspaceEntry1);
   }
 
   void test_D7_multifile_list() {
@@ -361,6 +366,7 @@ public:
     TS_ASSERT_DELTA(workspaceEntry12->x(133)[1], 3.19, 0.01)
     TS_ASSERT_EQUALS(workspaceEntry12->y(133)[0], 108504)
     TS_ASSERT_DELTA(workspaceEntry12->e(133)[0], 329.39, 0.01)
+    checkTimeFormat(workspaceEntry1);
   }
 
   void test_D7_default_alignment() {
@@ -497,6 +503,7 @@ public:
     double wavelength =
         stod(ws->mutableRun().getLogData("monochromator.wavelength")->value());
     TS_ASSERT_DELTA(wavelength, 3.09, 0.01)
+    checkTimeFormat(ws);
   }
 
   void test_D7_transpose() {
@@ -628,6 +635,7 @@ public:
       TS_ASSERT(workspaceEntry->isHistogramData())
       TS_ASSERT(!workspaceEntry->isDistribution())
       TS_ASSERT_EQUALS(workspaceEntry->YUnitLabel(), "Counts")
+      checkTimeFormat(workspaceEntry);
       if (measurementMode == "monochromatic") {
         TS_ASSERT_EQUALS(workspaceEntry->blocksize(), 1)
         TS_ASSERT_EQUALS(workspaceEntry->getAxis(0)->unit()->caption(),
@@ -640,6 +648,12 @@ public:
         }
       }
     }
+  }
+
+  void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
+    TS_ASSERT(outputWS->run().hasProperty("run_start"));
+    TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
+        outputWS->run().getProperty("run_start")->value()));
   }
 
 private:

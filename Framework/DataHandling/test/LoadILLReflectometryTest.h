@@ -19,6 +19,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLReflectometry;
@@ -55,6 +56,10 @@ private:
                      std::set<Mantid::detid_t>{0})
     // sample log entry must exist
     TS_ASSERT(output->run().hasProperty("reduction.line_position"))
+
+    TS_ASSERT(output->run().hasProperty("run_start"));
+    TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
+        output->run().getProperty("run_start")->value()));
   }
 
   static double detCounts(const MatrixWorkspace_sptr &output) {
