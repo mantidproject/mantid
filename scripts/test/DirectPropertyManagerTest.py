@@ -1279,7 +1279,7 @@ class DirectPropertyManagerTest(unittest.TestCase):
         propman = self.prop_man
 
         if os.path.isdir(log_dir):
-            # in case test server or test machine is connected to archive
+            # in case test server or test machine is connected to the archive
             self.assertEqual(propman.arhive_upload_log_file,\
                 os.path.normpath(log_dir+'lastrun.txt'))
         else:

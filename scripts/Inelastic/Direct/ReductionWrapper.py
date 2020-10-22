@@ -95,6 +95,10 @@ class ReductionWrapper(object):
         web_vars = self._wvs.get_all_vars()
         if web_vars:
             self.reducer.prop_man.set_input_parameters(**web_vars)
+        # if run on ISIS, information about the log files, responsible for
+        # storing data in archive
+        self._lat_commit_log_modification_time = None
+        self._last_runnum_added_to_archive = 0
 
     @property
     def wait_for_file(self):
@@ -443,15 +447,41 @@ class ReductionWrapper(object):
             Pause(timeToWait)
 
     #
-    def _check_progress_log_stater_run_written(self):
+    def _check_progress_log_run_completed(self,run_number_requested):
        """ Method to verify experiment progress log file and check if the file to reduce
            has been written.
+           Input: 
+            run_number_requested -- the number expected to be in logged in the log file
 
-           If progress log is nod defined or not available, the method returns success
+           Output:
+             returns: (True,run_number_written,'') if the run_number stored in the log is
+                      higher then the run number requested
+                      (False,run_number_written,'') if the stored number is lower then the requested
+
+           If progress log is nod defined or not available, the method returns True, last known run number
+           and additional text information indicating the reason for failure
            so further checks are necessary to verify if actual file is indeed available
        """
-       propman = self.reducer.propman
-       if 
+       propman = self.reducer.prop_man
+       if len(propman.arhive_upload_log_file)==0 :
+           return (True,0,'log test disabled as no log file available')
+
+       mod_time = os.path.getmtime(propman.arhive_upload_log_file)
+       if self._lat_commit_log_modification_time == mod_time: # Still old data in archive
+           run_num = self._last_runnum_added_to_archive
+           return (run_num >= run_number_requested,run_num,'no new data has been added to archive')
+       self._lat_commit_log_modification_time = mod_time
+       try:
+        with open(propman.arhive_upload_log_file) as fh:
+            contents = fh.read();
+       except:
+           return(False,self._last_runnum_added_to_archive,'Error accessing log file {0}'.format(propman.arhive_upload_log_file))
+       #
+       contents = contents.split()
+       run_written = int(contents[1])
+       self._last_runnum_added_to_archive = run_written
+       return(run_written >= run_number_requested,run_written,'')
+
 
     def _check_access_granted(self, input_file):
         """ Check if the access to the found nxs file is granted
@@ -512,16 +542,25 @@ class ReductionWrapper(object):
         wait_counter = 0
         _, fext_requested = PropertyManager.sample_run.file_hint()
         if timeToWait > 0:
-            Found, input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,\
-               be_quet=True,force_extension=fext_requested)
+            run_number_requsted = PropertyManager.sample_run.run_number
+            available,_,_ = self._check_progress_log_run_completed(run_number_requsted)
+            if available:
+                Found, input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,\
+                    be_quet=True,force_extension=fext_requested)
+            else:
+                Found = False
             while not Found:
                 file_hint, fext = PropertyManager.sample_run.file_hint()
                 self.reducer.prop_man.log("*** Waiting {0} sec for file {1} to appear on the data search path"
                                           .format(timeToWait, file_hint), 'notice')
 
                 self._run_pause(timeToWait)
-                Found, input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man, file_hint=file_hint,
+                available,_,_ = self._check_progress_log_run_completed(run_number_requsted)
+                if available:
+                    Found, input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man, file_hint=file_hint,
                                                                          be_quet=True,force_extension=fext_requested)
+                else:
+                    Found = False
             # endWhile
             # found but let's give it some time to finish possible IO operations
             self._check_access_granted(input_file)
@@ -584,7 +623,12 @@ class ReductionWrapper(object):
                     # here we have run numbers. Let's get real file names
                     prop_man = self.reducer.prop_man
                     instr_name = prop_man.short_instr_name
-                    is_found, fname = PropertyManager.sample_run.find_file(prop_man, instr_name, run)
+                    run_number_requsted = PropertyManager.sample_run.run_number
+                    available,_,_ = self._check_progress_log_run_completed(run_number_requsted)
+                    if available:
+                        is_found, fname = PropertyManager.sample_run.find_file(prop_man, instr_name, run)
+                    else:
+                        is_found = False
                     if not is_found:
                         raise RuntimeError("File has been found earlier but can not been retrieved now. Logical bug")
                     else:
