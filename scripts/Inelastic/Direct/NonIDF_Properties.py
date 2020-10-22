@@ -32,13 +32,15 @@ class NonIDF_Properties(object):
           "debug" :       (5,lambda msg:   logger.debug(msg))}
 
     # The default location of the archive load log file
-    arhive_upload_log_template = ''
     if platform == "linux" or platform == "linux2":
         # linux default log file location
         arhive_upload_log_template = '/archive/NDX{0}/Instrument/logs/lastrun.txt'
     elif platform == "win32":
         # windows default log file location
         arhive_upload_log_template = r'\\isis\inst$\NDX{0}\Instrument\logs\lastrun.txt'
+    else:
+        arhive_upload_log_template = ''
+
 
     def __init__(self,Instrument,run_workspace=None):
         """ initialize main properties, defined by the class
@@ -201,6 +203,9 @@ class NonIDF_Properties(object):
             if len(NonIDF_Properties.arhive_upload_log_template)>0:
                 trial_file = NonIDF_Properties.arhive_upload_log_template.format(self.instr_name)
                 self._set_arcive_update_log(trial_file,False)
+            else:
+                object.__setattr__(self,'_archive_upload_log_file','')
+
         return self._archive_upload_log_file
 
     @arhive_upload_log_file.setter
