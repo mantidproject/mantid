@@ -450,7 +450,7 @@ class ReductionWrapper(object):
     def _check_progress_log_run_completed(self,run_number_requested):
         """ Method to verify experiment progress log file and check if the file to reduce
             has been written.
-            Input: 
+            Input:
              run_number_requested -- the number expected to be in logged in the log file
 
             Output:
@@ -473,16 +473,17 @@ class ReductionWrapper(object):
         self._lat_commit_log_modification_time = mod_time
         try:
             with open(propman.arhive_upload_log_file) as fh:
-                contents = fh.read();
+                contents = fh.read()
         except:
-            return(False,self._last_runnum_added_to_archive,'Error accessing log file {0}'.format(propman.arhive_upload_log_file))
+            return(False,self._last_runnum_added_to_archive,
+                   'Error accessing log file {0}'.format(propman.arhive_upload_log_file))
         #
         contents = contents.split()
         run_written = int(contents[1])
         self._last_runnum_added_to_archive = run_written
         return(run_written >= run_number_requested,run_written,'')
 
-
+    #
     def _check_access_granted(self, input_file):
         """ Check if the access to the found nxs file is granted
 
@@ -539,14 +540,14 @@ class ReductionWrapper(object):
             config['defaultsave.directory'] = str(output_directory)
 
         timeToWait = self._wait_for_file
-        wait_counter = 0
         _, fext_requested = PropertyManager.sample_run.file_hint()
         if timeToWait > 0:
             run_number_requsted = PropertyManager.sample_run.run_number
             available,_,_ = self._check_progress_log_run_completed(run_number_requsted)
             if available:
-                Found, input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,
-                                    be_quet=True,force_extension=fext_requested)
+                Found, input_file = PropertyManager.sample_run.find_file(
+                                    self.reducer.prop_man,be_quet=True,
+                                    force_extension=fext_requested)
             else:
                 Found = False
             while not Found:
@@ -849,7 +850,6 @@ def custom_operation(custom_fun):
         return ws
 
     return custom_fun_wrapper
-
 
 if __name__ == "__main__":
     pass

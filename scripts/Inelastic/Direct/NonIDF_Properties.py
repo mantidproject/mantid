@@ -215,11 +215,10 @@ class NonIDF_Properties(object):
             if report_failure:
                 self.log("archive upload file log {0} does not exist. Ignoring it.".format(filename), 'warning')
 
-
-
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
-    #
+    # -----------------------------------------------------------------------------
+
     def _set_instrument_and_facility(self,Instrument,run_workspace = None):
         """Obtain default instrument and facility and store it in properties"""
 

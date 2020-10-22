@@ -300,7 +300,7 @@ class ReductionWrapperTest(unittest.TestCase):
         if os.path.isfile(test_log):
             os.remove(test_log)
         propman.arhive_upload_log_file = test_log
-        
+
         # no log file at all
         ok,run_num,info = th._check_progress_log_run_completed(10);
         self.assertTrue(ok)
@@ -314,34 +314,31 @@ class ReductionWrapperTest(unittest.TestCase):
         propman.arhive_upload_log_file = test_log
 
         # log file states data available
-        ok,run_num,info = th._check_progress_log_run_completed(10);
+        ok,run_num,info = th._check_progress_log_run_completed(10)
         self.assertTrue(ok)
         self.assertEqual(run_num,1000)
         self.assertEqual(len(info),0)
 
         # no changes for the second attempt to look at file
-        ok,run_num,info = th._check_progress_log_run_completed(1000);
+        ok,run_num,info = th._check_progress_log_run_completed(1000)
         self.assertTrue(ok)
         self.assertEqual(run_num,1000)
         self.assertEqual(info,'no new data has been added to archive')
 
-        ok,run_num,info = th._check_progress_log_run_completed(1001);
+        ok,run_num,info = th._check_progress_log_run_completed(1001)
         self.assertFalse(ok)
         self.assertEqual(run_num,1000)
         self.assertEqual(info,'no new data has been added to archive')
 
-
         with open(test_log,'w') as fh:
             fh.write('MAR 1001 0 \n')
         # next attept is successfull
-        ok,run_num,info = th._check_progress_log_run_completed(1001);
+        ok,run_num,info = th._check_progress_log_run_completed(1001)
         self.assertTrue(ok)
         self.assertEqual(run_num,1001)
         self.assertEqual(info,'')
 
         os.remove(test_log)
-
-
 
 if __name__ == "__main__":
     #tester=ReductionWrapperTest('test_check_archive_logs')
