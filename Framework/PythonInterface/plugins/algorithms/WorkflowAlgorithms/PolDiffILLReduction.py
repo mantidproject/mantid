@@ -199,7 +199,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.declareProperty(name="ComponentSeparationMethod",
                              defaultValue="None",
-                             validator=StringListValidator(["None", "Uniaxial", "XYZ", "10p"]),
+                             validator=StringListValidator(["None", "Uniaxial", "XYZ", "10p", "10p_2XYZ"]),
                              direction=Direction.Input,
                              doc="Whether to perform component separation and what type of method to use.")
 

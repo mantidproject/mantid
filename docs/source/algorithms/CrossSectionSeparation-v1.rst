@@ -84,19 +84,19 @@ Usage
       Load('vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz')
       CrossSectionSeparation(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
 	      OutputWorkspace='xyz')
-      print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries())
-      SumSpectra(InputWorkspace=mtd['xyz'][0], EndWorkspaceIndex=mtd['xyz'][1].getNumberHistograms()-1,
+      print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
+      SumSpectra(InputWorkspace=mtd['xyz'][1], EndWorkspaceIndex=mtd['xyz'][1].getNumberHistograms()-1,
 	         OutputWorkspace='sum_incoherent')
       SumSpectra(InputWorkspace=mtd['xyz'][0], EndWorkspaceIndex=mtd['xyz'][0].getNumberHistograms()-1,
 	         OutputWorkspace='sum_coherent')
       Divide(LHSWorkspace='sum_incoherent', RHSWorkspace='sum_coherent', OutputWorkspace='ratio')
-      print("Ratio of nuclear coherent to spin-incoherent cross-sections measured for vanadium is equal to:{0:.1f}".format(mtd['ratio'].readY(0)[0])
+      print("Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: {0:.1f}".format(mtd['ratio'].readY(0)[0]))
 
 Output:
 
 .. testoutput:: ExCrossSectionSeparationXYZ
 	Number of separated cross-sections: 3
-        Ratio of nuclear coherent to spin-incoherent cross-sections measured for vanadium is equal to: 11.8
+        Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 11.8
 
 .. testcleanup:: ExCrossSectionSeparationXYZ
 
