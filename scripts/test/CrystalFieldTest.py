@@ -396,6 +396,34 @@ class CrystalFieldTests(unittest.TestCase):
                                                 "ties=(Height=1.8,PeakCentre=9);"
                                                 "name=LinearBackground,A0=34,A1=0.01)")
 
+    def test_that_the_Background_composite_returns_the_expected_function_string_with_fixes(self):
+        from CrystalField import Background, Function
+
+        background = Background(functions=[Function('PseudoVoigt', Intensity=101, FWHM=0.8, Mixing=0.84),
+                                           Function('Gaussian', Height=1.8, Sigma=0.27, PeakCentre=9.0),
+                                           Function('LinearBackground', A0=34, A1=0.01)])
+        background.functions[0].fix('All')
+        background.functions[1].fix('PeakCentre', 'Height')
+
+        self.assertEqual(background.toString(), "(name=PseudoVoigt,Mixing=0.84,Intensity=101,PeakCentre=0,FWHM=0.8,"
+                                                "ties=(Mixing=0.84,Intensity=101,PeakCentre=0,FWHM=0.8);"
+                                                "name=Gaussian,Height=1.8,PeakCentre=9,Sigma=0.27,"
+                                                "ties=(Height=1.8,PeakCentre=9);"
+                                                "name=LinearBackground,A0=34,A1=0.01)")
+
+    def test_that_the_Background_will_fail_silently_when_attempting_to_fix_a_parameter_which_does_not_exist(self):
+        from CrystalField import Background, Function
+
+        background = Background(functions=[Function('PseudoVoigt', Intensity=101, FWHM=0.8, Mixing=0.84),
+                                           Function('Gaussian', Height=1.8, Sigma=0.27, PeakCentre=9.0),
+                                           Function('LinearBackground', A0=34, A1=0.01)])
+
+        background.functions[0].fix('BadParameter')
+
+        self.assertEqual(background.toString(), "(name=PseudoVoigt,Mixing=0.84,Intensity=101,PeakCentre=0,FWHM=0.8;"
+                                                "name=Gaussian,Height=1.8,PeakCentre=9,Sigma=0.27;"
+                                                "name=LinearBackground,A0=34,A1=0.01)")
+
     def test_api_CrystalField_spectrum_background_no_peak(self):
         from CrystalField import CrystalField, Background, Function
         cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
