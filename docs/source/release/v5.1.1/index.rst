@@ -24,6 +24,9 @@ The main changes are:
 
 - fixed a bug where Muon Analysis would crash when using default grouping with no runs
 
+- fixed an unhandled exception when marking columns in a table workspace for plotting or deleting rows
+  from a PeaksWorkspace
+
 Citation
 --------
 
@@ -45,6 +48,7 @@ Changes in this version
 - `29706 <https://github.com/mantidproject/mantid/pull/29706>`_ Update hard-coded PV names in RROLD
 - `29754 <https://github.com/mantidproject/mantid/pull/29754>`_ Filtered Value is displayed in Sample logs table
 - `29708 <https://github.com/mantidproject/mantid/pull/29708>`_ Muon analysis crash when using default grouping with no runs
+- `29792 <https://github.com/mantidproject/mantid/pull/29792>`_ Fixes exceptions on altering table/peaks workspace data
 
 Summary of impact
 -----------------
@@ -62,6 +66,8 @@ Summary of impact
 | 29754 | Fixes filtered value is displayed in Sample logs table        | **low**      |
 +-------+---------------------------------------------------------------+--------------+
 | 29708 | Fixes Muon analysis crash using default grouping with no runs | **low**      |
++-------+---------------------------------------------------------------+--------------+
+| 29792 | Fixes exceptions on altering table/peaks workspace data       | **low**      |
 +-------+---------------------------------------------------------------+--------------+
 
 
