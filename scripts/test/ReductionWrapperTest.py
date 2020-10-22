@@ -338,7 +338,6 @@ class ReductionWrapperTest(unittest.TestCase):
         self.assertEqual(run_num,1001)
         self.assertTrue(ok)
 
-
         os.remove(test_log)
 
 

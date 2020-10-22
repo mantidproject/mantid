@@ -40,8 +40,9 @@ class NonIDF_Properties(object):
         arhive_upload_log_template = r'\\isis\inst$\NDX{0}\Instrument\logs\lastrun.txt'
     else:
         arhive_upload_log_template = ''
+    #----------------------------------------------------------------------------------
 
-
+    #
     def __init__(self,Instrument,run_workspace=None):
         """ initialize main properties, defined by the class
             @parameter Instrument  -- name or pointer to the instrument,
