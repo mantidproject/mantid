@@ -173,7 +173,7 @@ public:
   }
 
   void test_time_series_from_scalars() {
-    // Tests when no time series logs are merge into a time series log
+    // Tests when no time series logs are merged into a time series log
     Logger log("testLog");
     auto ws = createWorkspace(2.65, 1.56, 8.55, "2018-11-30T16:17:01");
     auto base = createWorkspace(4.5, 3.2, 7.9, "2018-11-30T16:17:03");
