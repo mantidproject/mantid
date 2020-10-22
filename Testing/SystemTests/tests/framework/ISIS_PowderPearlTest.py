@@ -136,8 +136,8 @@ class FocusTest(systemtesting.MantidSystemTest):
         user_output = os.path.join(output_dir, cycle, user_name)
         assert_output_file_exists(user_output, 'PRL98507_tt70.nxs')
         assert_output_file_exists(user_output, 'PRL98507_tt70.gsas')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_tof_xye-0.dat')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_d_xye-0.dat')
+        assert_output_file_exists(user_output, 'PRL98507_tt70_tof-0.xye')
+        assert_output_file_exists(user_output, 'PRL98507_tt70_d-0.xye')
 
         self.tolerance = 1e-8  # Required for difference in spline data between operating systems
         return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
@@ -186,10 +186,10 @@ class FocusLongThenShortTest(systemtesting.MantidSystemTest):
         assert_output_file_exists(user_output, 'PRL98507_tt70_long.nxs')
         assert_output_file_exists(user_output, 'PRL98507_tt70.gsas')
         assert_output_file_exists(user_output, 'PRL98507_tt70_long.gsas')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_tof_xye-0.dat')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_d_xye-0.dat')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_long_tof_xye-0.dat')
-        assert_output_file_exists(user_output, 'PRL98507_tt70_long_d_xye-0.dat')
+        assert_output_file_exists(user_output, 'PRL98507_tt70_tof-0.xye')
+        assert_output_file_exists(user_output, 'PRL98507_tt70_d-0.xye')
+        assert_output_file_exists(user_output, 'PRL98507_tt70_long_tof-0.xye')
+        assert_output_file_exists(user_output, 'PRL98507_tt70_long_d-0.xye')
 
         self.tolerance = 1e-8  # Required for difference in spline data between operating systems
         return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70Atten.nxs"
@@ -291,7 +291,8 @@ def run_focus(inst_object, tt_mode):
     shutil.copy(original_splined_path, spline_path)
 
     return inst_object.focus(run_number=run_number, vanadium_normalisation=True, do_absorb_corrections=False,
-                             perform_attenuation=True, attenuation_file_path=attenuation_path, tt_mode=tt_mode)
+                             perform_attenuation=True, attenuation_file='ZTA',
+                             attenuation_files=[{"name": "ZTA", "path": attenuation_path}], tt_mode=tt_mode)
 
 
 def run_focus_with_absorb_corrections():

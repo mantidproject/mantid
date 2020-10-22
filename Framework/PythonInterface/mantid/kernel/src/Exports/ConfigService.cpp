@@ -82,6 +82,9 @@ void export_ConfigService() {
            arg("self"), "Returns the path to the system wide properties file.")
       .def("getUserFilename", &ConfigServiceImpl::getUserFilename, arg("self"),
            "Returns the path to the user properties file")
+      .def("getPropertiesDir", &ConfigServiceImpl::getPropertiesDir,
+           arg("self"),
+           "Returns the directory containing the Mantid.properties file.")
       .def("getUserPropertiesDir", &ConfigServiceImpl::getUserPropertiesDir,
            arg("self"),
            "Returns the directory to use to write out Mantid information")

@@ -16,6 +16,8 @@ currently supported instruments:
     * D22: SANS
     * D33: SANS
     * FIGARO: Reflectometry
+    * D2B: Powder diffraction
+    * D20: Powder diffraction
 
 The interface is accessible through the Workbench menu bar: *Interfaces* ->
 *ILL* -> *DrILL*.
@@ -38,6 +40,8 @@ spreadsheet like table (1)
     measured at one or more distances (SANS) or angles (Reflectometry). There is no limit
     on the number of the different configurations.
     It is used to provide filenames and options to the reduction algorithm.
+    The state of the table is reset when the instrument and/or the acquisition
+    mode is changed.
 
 tool buttons (2)
     In two different places. At the top of the table, these buttons facilitate
@@ -65,6 +69,8 @@ To get further information on the currently supported algorithms:
 
     * SANS: :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`
     * Reflectometry: :ref:`ReflectometryILLAutoProcess <algm-ReflectometryILLAutoProcess>`
+    * Powder diffraction: :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` and
+      :ref:`PowderILLParameterScan <algm-PowderILLParameterScan>`
 
 
 Global settings
@@ -92,7 +98,9 @@ Table filling
 
 When selecting the instrument and the acquisition mode, the table is updated
 with the needed column headers. To obtain information about a column, a tooltip
-is displayed when moving the mouse over the corresponding header.
+is displayed when moving the mouse over the corresponding header. To facilitate
+filling, columns can be collapsed (button in the header), hidden (right click or
+menu bar) and their order can be changed by drag-and-drop.
 
 Each cell can be edited manually or filled programmatically by using some of the
 tool buttons.
@@ -147,7 +155,9 @@ the interface in JSON format. By using the appropriate tool button or the menu
 bar (*File* -> *Save...* or *Load...*) one can export or import a Rundex file.
 
 When saving, the global settings, all the samples and some of the visual setup
-are exported in the rundex file. Symmetrically, the load action imports all
-these data in the current DrILL session.
+are exported in the rundex file (i.e. the collapsed columns, the hidden
+columns...). Symmetrically, the load action imports all these data in the
+current DrILL session and one will recover the interface in the same state as
+it was previously saved.
 
 .. categories:: Interfaces
