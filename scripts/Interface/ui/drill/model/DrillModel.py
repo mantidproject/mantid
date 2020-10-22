@@ -137,6 +137,7 @@ class DrillModel(QObject):
         self.rundexFile = None
         self.samples = list()
         self.settings = dict()
+        self.visualSettings = None
 
         # When the user changes the facility after DrILL has been started
         if config['default.facility'] != 'ILL':
@@ -193,6 +194,7 @@ class DrillModel(QObject):
             return
         self.rundexFile = None
         self.samples = list()
+        self.visualSettings = None
         self.acquisitionMode = mode
         self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
         self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]

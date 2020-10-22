@@ -67,11 +67,10 @@ private:
   void setWorkspaceIndexAttribute(const API::IFunction_sptr &fun,
                                   int wsIndex) const;
 
-  std::shared_ptr<Algorithm> runSingleFit(bool createFitOutput,
-                                          bool outputCompositeMembers,
-                                          bool outputConvolvedMembers,
-                                          const API::IFunction_sptr &ifun,
-                                          const InputSpectraToFit &data);
+  std::shared_ptr<Algorithm>
+  runSingleFit(bool createFitOutput, bool outputCompositeMembers,
+               bool outputConvolvedMembers, const API::IFunction_sptr &ifun,
+               const InputSpectraToFit &data, double startX, double endX);
 
   double calculateLogValue(const std::string &logName,
                            const InputSpectraToFit &data);
