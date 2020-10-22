@@ -34,7 +34,7 @@ class NonIDF_Properties(object):
     # The default location of the archive load log file
     arhive_upload_log_template = ''
     if platform == "linux" or platform == "linux2":
-        # linux default log file location 
+        # linux default log file location
         arhive_upload_log_template = '/archive/NDX{0}/Instrument/logs/lastrun.txt'
     elif platform == "win32":
         # windows default log file location
@@ -217,11 +217,10 @@ class NonIDF_Properties(object):
 
 
 
-
     # -----------------------------------------------------------------------------
     # Service properties (used by class itself)
     #
-    def _set_instrument_and_facility(self,Instrument,run_workspace=None):
+    def _set_instrument_and_facility(self,Instrument,run_workspace = None):
         """Obtain default instrument and facility and store it in properties"""
 
         if run_workspace:

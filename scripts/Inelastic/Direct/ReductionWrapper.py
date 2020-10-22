@@ -448,39 +448,39 @@ class ReductionWrapper(object):
 
     #
     def _check_progress_log_run_completed(self,run_number_requested):
-       """ Method to verify experiment progress log file and check if the file to reduce
-           has been written.
-           Input: 
-            run_number_requested -- the number expected to be in logged in the log file
+        """ Method to verify experiment progress log file and check if the file to reduce
+            has been written.
+            Input: 
+             run_number_requested -- the number expected to be in logged in the log file
 
-           Output:
-             returns: (True,run_number_written,'') if the run_number stored in the log is
+            Output:
+              returns: (True,run_number_written,'') if the run_number stored in the log is
                       higher then the run number requested
                       (False,run_number_written,'') if the stored number is lower then the requested
 
-           If progress log is nod defined or not available, the method returns True, last known run number
-           and additional text information indicating the reason for failure
-           so further checks are necessary to verify if actual file is indeed available
-       """
-       propman = self.reducer.prop_man
-       if len(propman.arhive_upload_log_file)==0 :
-           return (True,0,'log test disabled as no log file available')
+            If progress log is nod defined or not available, the method returns True, last known run number
+            and additional text information indicating the reason for failure
+            so further checks are necessary to verify if actual file is indeed available
+        """
+        propman = self.reducer.prop_man
+        if len(propman.arhive_upload_log_file)==0 :
+            return (True,0,'log test disabled as no log file available')
 
-       mod_time = os.path.getmtime(propman.arhive_upload_log_file)
-       if self._lat_commit_log_modification_time == mod_time: # Still old data in archive
-           run_num = self._last_runnum_added_to_archive
-           return (run_num >= run_number_requested,run_num,'no new data has been added to archive')
-       self._lat_commit_log_modification_time = mod_time
-       try:
-        with open(propman.arhive_upload_log_file) as fh:
-            contents = fh.read();
-       except:
-           return(False,self._last_runnum_added_to_archive,'Error accessing log file {0}'.format(propman.arhive_upload_log_file))
-       #
-       contents = contents.split()
-       run_written = int(contents[1])
-       self._last_runnum_added_to_archive = run_written
-       return(run_written >= run_number_requested,run_written,'')
+        mod_time = os.path.getmtime(propman.arhive_upload_log_file)
+        if self._lat_commit_log_modification_time == mod_time: # Still old data in archive
+            run_num = self._last_runnum_added_to_archive
+            return (run_num >= run_number_requested,run_num,'no new data has been added to archive')
+        self._lat_commit_log_modification_time = mod_time
+        try:
+            with open(propman.arhive_upload_log_file) as fh:
+                contents = fh.read();
+        except:
+            return(False,self._last_runnum_added_to_archive,'Error accessing log file {0}'.format(propman.arhive_upload_log_file))
+        #
+        contents = contents.split()
+        run_written = int(contents[1])
+        self._last_runnum_added_to_archive = run_written
+        return(run_written >= run_number_requested,run_written,'')
 
 
     def _check_access_granted(self, input_file):
@@ -545,8 +545,8 @@ class ReductionWrapper(object):
             run_number_requsted = PropertyManager.sample_run.run_number
             available,_,_ = self._check_progress_log_run_completed(run_number_requsted)
             if available:
-                Found, input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,\
-                    be_quet=True,force_extension=fext_requested)
+                Found, input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man,
+                                    be_quet=True,force_extension=fext_requested)
             else:
                 Found = False
             while not Found:
@@ -557,8 +557,9 @@ class ReductionWrapper(object):
                 self._run_pause(timeToWait)
                 available,_,_ = self._check_progress_log_run_completed(run_number_requsted)
                 if available:
-                    Found, input_file = PropertyManager.sample_run.find_file(self.reducer.prop_man, file_hint=file_hint,
-                                                                         be_quet=True,force_extension=fext_requested)
+                    Found, input_file = PropertyManager.sample_run.find_file(
+                                        self.reducer.prop_man, file_hint=file_hint,
+                                        be_quet=True,force_extension=fext_requested)
                 else:
                     Found = False
             # endWhile

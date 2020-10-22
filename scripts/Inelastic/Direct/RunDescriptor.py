@@ -1033,7 +1033,7 @@ class RunDescriptor(PropDescriptor):
 
     def find_file(self,propman,inst_name=None,run_num=None,filePath=None,fileExt=None,**kwargs):
         """Use Mantid to search for the given run using additional information provided as input
-           
+
            If no file guess information provided, form default file name, used as the guess for search.
 
            Optional arguments:
@@ -1053,9 +1053,8 @@ class RunDescriptor(PropDescriptor):
             fileExt = kwargs['force_extension']
             self.set_file_ext(fileExt)
 
-
-        fac             = propman.facility
-        zero_padding    = fac.instrument(inst_name).zeroPadding(run_num)
+        fac = propman.facility
+        zero_padding = fac.instrument(inst_name).zeroPadding(run_num)
         run_num_str = str(run_num).zfill(zero_padding)
         #
         file_hint,old_ext = self.file_hint(run_num_str,filePath,fileExt,**kwargs)
@@ -1066,7 +1065,7 @@ class RunDescriptor(PropDescriptor):
                 if 'force_extension' in kwargs:
                     if 'be_quet' not in kwargs:
                         message= '*** Cannot find file matching hint {0} with the requested extension {1} on Mantid search paths '.\
-                        format(file_hint,old_ext)
+                                format(file_hint,old_ext)
                         RunDescriptor._logger(message,'warning')
                     raise RuntimeError(message)
                 else:
