@@ -142,7 +142,7 @@ class RunDescriptorTest(unittest.TestCase):
         ok, file = PropertyManager.sample_run.find_file(propman,force_extension='.nxs')
         self.assertFalse(ok)
         self.assertEqual(file.strip(),
-           '*** Cannot find file matching hint MAR11001.nxs with the requested extension .nxs on Mantid search paths')
+                        '*** Cannot find file matching hint MAR11001.nxs with the requested extension .nxs on Mantid search paths')
 
     #
     def test_load_workspace(self):

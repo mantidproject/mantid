@@ -302,7 +302,7 @@ class ReductionWrapperTest(unittest.TestCase):
         propman.arhive_upload_log_file = test_log
 
         # no log file at all
-        ok,run_num,info = th._check_progress_log_run_completed(10);
+        ok,run_num,info = th._check_progress_log_run_completed(10)
         self.assertTrue(ok)
         self.assertEqual(run_num,0)
         self.assertEqual(info,'log test disabled as no log file available')
@@ -339,6 +339,7 @@ class ReductionWrapperTest(unittest.TestCase):
         self.assertEqual(info,'')
 
         os.remove(test_log)
+
 
 if __name__ == "__main__":
     #tester=ReductionWrapperTest('test_check_archive_logs')
