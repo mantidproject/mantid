@@ -37,6 +37,10 @@ public:
     int massNumber = 0;
     /// The sample number density to set, defaults to EMPTY_DBL()
     double numberDensity = EMPTY_DBL();
+    /// The sample effective number density
+    double numberDensityEffective = EMPTY_DBL();
+    /// The sample packing fraction
+    double packingFraction = EMPTY_DBL();
     /// The zParameter to set, defaults to EMPTY_DBL()
     double zParameter = EMPTY_DBL();
     /// The unit cell volume to set, defaults to EMPTY_DBL()
