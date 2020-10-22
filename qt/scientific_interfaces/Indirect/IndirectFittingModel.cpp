@@ -663,10 +663,15 @@ IndirectFittingModel::createSequentialFit(const IFunction_sptr &function,
   fitAlgorithm->setProperty("Input", input);
   fitAlgorithm->setProperty("OutputWorkspace", sequentialFitOutputName());
   fitAlgorithm->setProperty("LogName", getResultLogName());
-
-  const auto range = m_fitDataModel->getFittingRange(FitDomainIndex{0});
-  fitAlgorithm->setProperty("StartX", range.first);
-  fitAlgorithm->setProperty("EndX", range.second);
+  std::stringstream startX;
+  std::stringstream endX;
+  for (size_t i = 0; i < m_fitDataModel->getNumberOfDomains(); i++) {
+    const auto range = m_fitDataModel->getFittingRange(FitDomainIndex(i));
+    startX << range.first << ",";
+    endX << range.second << ",";
+  }
+  fitAlgorithm->setProperty("StartX", startX.str());
+  fitAlgorithm->setProperty("EndX", endX.str());
 
   auto excludeRegion =
       m_fitDataModel->getExcludeRegionVector(FitDomainIndex{0});
