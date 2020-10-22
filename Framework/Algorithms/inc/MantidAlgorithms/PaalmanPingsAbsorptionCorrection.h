@@ -24,20 +24,20 @@ class IObject;
 } // namespace Geometry
 
 namespace Algorithms {
-/** AbsorptionCorrectionPaalmanPings : calculate paalman-pings absorption terms
+/** PaalmanPingsAbsorptionCorrection : calculate paalman-pings absorption terms
  */
 /** Expansion of the AbsorptionCorrection algorithm to calculate full
    paalman-pings absorption terms
 
 */
-class MANTID_ALGORITHMS_DLL AbsorptionCorrectionPaalmanPings
+class MANTID_ALGORITHMS_DLL PaalmanPingsAbsorptionCorrection
     : public API::Algorithm {
 public:
   /// (Empty) Constructor
-  AbsorptionCorrectionPaalmanPings();
+  PaalmanPingsAbsorptionCorrection();
   /// Algorithm's name
   const std::string name() const override {
-    return "AbsorptionCorrectionPaalmanPings";
+    return "PaalmanPingsAbsorptionCorrection";
   }
   /// Algorithm's category for identification
   const std::string category() const override {
