@@ -37,7 +37,11 @@ def do_cleanup():
              'PG3_4844.getn',
              'PG3_4844.gsa',
              'PG3_4844.py',
-             'PG3_4866.gsa']
+             'PG3_4866.gsa',
+             'PG3_46577.nxs',
+             'PG3_46577.py',
+             'PP_absorption_PG3_46577.nxs',
+             'PP_absorption_PG3_46577.py']
     for filename in Files:
         absfile = FileFinder.getFullPath(filename)
         if os.path.exists(absfile):
@@ -100,31 +104,43 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
 
     def requiredFiles(self):
         files = [self.cal_file]
-        files.append(self.char_files)
+        files.append(self.char_files[0])
+        files.append(self.char_files[1])
         files.append("PG3_46577.nxs.h5") # /SNS/PG3/IPTS-2767/nexus/
-        #files.append("PG3_4866_event.nxs") # /SNS/PG3/IPTS-2767/0/
-        #files.append("PG3_5226_event.nxs") # /SNS/PG3/IPTS-2767/0/
+        files.append("PG3_46190.nxs.h5")
+        files.append("PG3_46199.nxs.h5")
+        files.append("PG3_46202.nxs.h5")
         return files
 
     def runTest(self):
         savedir = getSaveDir()
 
+        charfile = ','.join(self.char_files)
+
+        # Get the result without any absorption correction first
+        SNSPowderReduction("PG3_46577.nxs.h5",
+                   CalibrationFile=self.cal_file,
+                   CharacterizationRunsFile=charfile,
+                   Binning=-0.001,
+                   SaveAs="nexus",
+                   OutputDirectory=savedir)
+
         # Silicon Full Paalman-Pings test
         SNSPowderReduction("PG3_46577.nxs.h5",
                    CalibrationFile=self.cal_file,
-                   CharacterizationRunsFile=self.char_files,
+                   CharacterizationRunsFile=charfile,
                    Binning=-0.001,
                    SaveAs="nexus",
                    TypeOfCorrection="FullPaalmanPings",
                    SampleFormula="Si",
-                   MeasuredMassDensity=1.165,  # Need to verify 'packing density' = 'measured mass density'?
+                   MeasuredMassDensity=1.165,
                    ContainerShape="PAC06",
                    OutputFilePrefix='PP_absorption_',
-                   OutputDirectory=self.savedir)
+                   OutputDirectory=savedir)
 
+        LoadNexus(Filename="PG3_46577.nxs", OutputWorkspace="PG3_46577")
         LoadNexus(Filename="PP_absorption_PG3_46577.nxs", OutputWorkspace="PP_46577")
 
-    def validate(self):
         self.tolerance = 0.5
         Power(InputWorkspace="PG3_46577",
               OutputWorkspace="bottom",
@@ -132,9 +148,10 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
         Integration(InputWorkspace="bottom",
                     OutputWorkspace="bottom")
 
-        Subtract(InputWorkspace="PG3_46577",
-                 OutputWorkspace="top")
-        Power(InputWorkspace="top",
+        Subtract(LHSWorkspace="PG3_46577",
+                 RHSWorkspace="PP_46577",
+                 OutputWorkspace="diff")
+        Power(InputWorkspace="diff",
               OutputWorkspace="top",
               Exponent=2)
         Integration(InputWorkspace="top",
@@ -143,11 +160,9 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
         Divide(LHSWorkspace="top",
                RHSWorkspace="bottom",
                OutputWorkspace="Rval")
-        Rval = Rval.dataY(0)
+        Rval = mtd['Rval'].dataY(0)
 
-        self.assertTrue(Rval < self.tolerance)
-
-        return ('PG3_46577')
+        self.assertLessThan(Rval, self.tolerance)
 
 class PG3StripPeaks(systemtesting.MantidSystemTest):
     ref_file = 'PG3_4866_reference.gsa'
