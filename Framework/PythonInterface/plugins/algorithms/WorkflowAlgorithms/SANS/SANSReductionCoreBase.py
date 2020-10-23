@@ -124,10 +124,10 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
     def _move(self, state, workspace, component, is_transmission=False):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
         # Second we use the initial move to bring the workspace into the correct position
-        move_component(component_name="", move_info=state.move, move_type=MoveTypes.RESET_POSITION,
+        move_component(component_name="", state=state, move_type=MoveTypes.RESET_POSITION,
                        workspace=workspace)
 
-        move_component(component_name=component, move_info=state.move, move_type=MoveTypes.INITIAL_MOVE,
+        move_component(component_name=component, state=state, move_type=MoveTypes.INITIAL_MOVE,
                        workspace=workspace, is_transmission_workspace=is_transmission)
 
         return workspace
