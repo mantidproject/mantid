@@ -6,8 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import sys
-import time
-import datetime
 from tempfile import TemporaryDirectory
 
 from mantid.simpleapi import *
