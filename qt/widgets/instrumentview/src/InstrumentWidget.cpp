@@ -126,7 +126,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
       m_stateOfTabs(std::vector<std::pair<std::string, bool>>{}),
       m_wsReplace(false), m_help(nullptr) {
   setFocusPolicy(Qt::StrongFocus);
-  QVBoxLayout *mainLayout = new QVBoxLayout(this);
+  m_mainLayout = new QVBoxLayout(this);
   auto *controlPanelLayout = new QSplitter(Qt::Horizontal);
 
   // Add Tab control panel
@@ -152,27 +152,15 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
 
   controlPanelLayout->addWidget(aWidget);
 
-  mainLayout->addWidget(controlPanelLayout);
+  m_mainLayout->addWidget(controlPanelLayout);
 
   m_instrumentActor.reset(
       new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
 
-  try {
-    size_t blockSize = m_instrumentActor->getWorkspace()->blocksize();
-
-    m_isIntegrable =
-        (blockSize > 1 ||
-         m_instrumentActor->getWorkspace()->id() == "EventWorkspace");
-  } catch (...) {
-    m_isIntegrable = true;
-  }
-
-  if (m_isIntegrable) {
-    m_xIntegration = new XIntegrationControl(this);
-    mainLayout->addWidget(m_xIntegration);
-    connect(m_xIntegration, SIGNAL(changed(double, double)), this,
-            SLOT(setIntegrationRange(double, double)));
-  }
+  m_xIntegration = new XIntegrationControl(this);
+  m_mainLayout->addWidget(m_xIntegration);
+  connect(m_xIntegration, SIGNAL(changed(double, double)), this,
+          SLOT(setIntegrationRange(double, double)));
 
   // Set the mouse/keyboard operation info and help button
   auto *infoLayout = new QHBoxLayout();
@@ -184,7 +172,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   infoLayout->addWidget(m_help);
   infoLayout->setStretchFactor(mInteractionInfo, 1);
   infoLayout->setStretchFactor(m_help, 0);
-  mainLayout->addLayout(infoLayout);
+  m_mainLayout->addLayout(infoLayout);
   QSettings settings;
   settings.beginGroup(InstrumentWidgetSettingsGroup);
 
@@ -307,12 +295,8 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
         new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   }
 
-  if (m_isIntegrable) {
-    m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),
-                                  m_instrumentActor->maxBinValue());
-    m_xIntegration->setUnits(QString::fromStdString(
-        m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
-  }
+  updateIntegrationWidget();
+
   auto surface = getSurface();
   if (resetGeometry || !surface) {
     if (setDefaultView) {
@@ -418,6 +402,21 @@ QString InstrumentWidget::getSaveFileName(const QString &title,
     m_savedialog_dir = finfo.dir().path();
   }
   return filename;
+}
+
+/**
+ * @brief InstrumentWidget::isIntegrable
+ * Returns whether or not the workspace requires an integration bar.
+ */
+bool InstrumentWidget::isIntegrable() {
+  try {
+    size_t blockSize = m_instrumentActor->getWorkspace()->blocksize();
+
+    return (blockSize > 1 ||
+            m_instrumentActor->getWorkspace()->id() == "EventWorkspace");
+  } catch (...) {
+    return true;
+  }
 }
 
 /**
@@ -595,9 +594,29 @@ void InstrumentWidget::replaceWorkspace(
   surface->resetInstrumentActor(m_instrumentActor.get());
   setupColorMap();
 
+  updateIntegrationWidget();
+
   // change the title of the instrument window
   nativeParentWidget()->setWindowTitle(
       QString().fromStdString(newInstrumentWindowName));
+}
+
+/**
+ * Update the range of the integration widget, and show or hide it is needed
+ */
+void InstrumentWidget::updateIntegrationWidget() {
+  m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),
+                                m_instrumentActor->maxBinValue());
+  m_xIntegration->setUnits(QString::fromStdString(
+      m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
+
+  bool integrable = isIntegrable();
+
+  if (integrable) {
+    m_xIntegration->show();
+  } else {
+    m_xIntegration->hide();
+  }
 }
 
 /**
@@ -926,9 +945,7 @@ void InstrumentWidget::setIntegrationRange(double xmin, double xmax) {
  * python.
  */
 void InstrumentWidget::setBinRange(double xmin, double xmax) {
-  if (m_isIntegrable) {
-    m_xIntegration->setRange(xmin, xmax);
-  }
+  m_xIntegration->setRange(xmin, xmax);
 }
 
 /**
@@ -1298,10 +1315,9 @@ void InstrumentWidget::createTabs(QSettings &settings) {
           this, SLOT(executeAlgorithm(const QString &, const QString &)));
   m_maskTab->loadSettings(settings);
 
-  if (m_isIntegrable) {
-    connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
-            SLOT(changedIntegrationRange(double, double)));
-  }
+  connect(m_xIntegration, SIGNAL(changed(double, double)), m_maskTab,
+          SLOT(changedIntegrationRange(double, double)));
+
   // Instrument tree controls
   m_treeTab = new InstrumentWidgetTreeTab(this);
   m_treeTab->loadSettings(settings);
@@ -1544,12 +1560,8 @@ std::string InstrumentWidget::saveToProject() const {
   tsv.writeLine("SurfaceType") << getSurfaceType();
   tsv.writeSection("surface", getSurface()->saveToProject());
   tsv.writeLine("CurrentTab") << getCurrentTab();
-  if (this->isIntegrable()) {
-    tsv.writeLine("EnergyTransfer")
-        << m_xIntegration->getMinimum() << m_xIntegration->getMaximum() << true;
-  } else {
-    tsv.writeLine("EnergyTransfer") << -1 << -1 << false;
-  }
+  tsv.writeLine("EnergyTransfer")
+      << m_xIntegration->getMinimum() << m_xIntegration->getMaximum();
 
   // serialise widget subsections
   tsv.writeSection("actor", m_instrumentActor->saveToProject());
@@ -1613,7 +1625,7 @@ void InstrumentWidget::loadFromProject(const std::string &lines) {
 
   if (tsv.selectLine("EnergyTransfer")) {
     double min, max;
-    bool isIntegrable;
+    bool isIntegrable = true;
     tsv >> min >> max >> isIntegrable;
     if (isIntegrable) {
       setBinRange(min, max);

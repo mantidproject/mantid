@@ -43,6 +43,8 @@ class QDragEnterEvent;
 class QDropEvent;
 class QStackedLayout;
 class QSettings;
+class QVBoxLayout;
+class QHBoxLayout;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -164,7 +166,8 @@ public:
   void addTab(const std::string &tabName);
   void hideHelp();
   InstrumentWidgetPickTab *getPickTab() { return m_pickTab; }
-  bool isIntegrable() const { return m_isIntegrable; }
+  /// Determine if the workspace requires an integration bar
+  bool isIntegrable();
 
 signals:
   void enableLighting(bool /*_t1*/);
@@ -264,6 +267,9 @@ protected:
   QString getSaveGroupingFilename();
   /// add the selected tabs
   void addSelectedTabs();
+  /// update integration widget visibility and range
+  void updateIntegrationWidget();
+
   // GUI elements
   QLabel *mInteractionInfo;
   QTabWidget *mControlsTab;
@@ -316,9 +322,6 @@ protected:
   /// dict of selected tabs
   std::vector<std::pair<std::string, bool>> m_stateOfTabs;
 
-  /// Is the workspace monochromatic ?
-  bool m_isIntegrable;
-
 private:
   /// ADS notification handlers
   void preDeleteHandle(
@@ -347,6 +350,7 @@ private:
 
   bool m_wsReplace;
   QPushButton *m_help;
+  QVBoxLayout *m_mainLayout;
 };
 
 } // namespace MantidWidgets
