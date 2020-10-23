@@ -116,12 +116,12 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         else:
             self.fit_status_success_failure.setText('Failure: {}'.format(output_status))
             self.fit_status_success_failure.setStyleSheet('color: red')
-
+        self.function_browser.setErrorsEnabled(True)
         self.fit_status_chi_squared.setText('Chi squared: {:.4g}'.format(output_chi_squared))
 
-    def update_global_fit_state(self, output_list):
+    def update_global_fit_state(self, output_list, index):
         if self.fit_type == self.simultaneous_fit:
-            indexed_fit = output_list[self.get_index_for_start_end_times()]
+            indexed_fit = output_list[index]
             boolean_list = [indexed_fit == 'success'] if indexed_fit else []
         else:
             boolean_list = [output == 'success' for output in output_list if output]
