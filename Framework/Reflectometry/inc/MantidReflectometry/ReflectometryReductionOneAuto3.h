@@ -109,23 +109,22 @@ private:
   void applyFloodCorrections();
   double getPropertyOrDefault(const std::string &propertyName,
                               const double defaultValue, bool &isDefault);
-  void setOutputWorkspaces(const WorkspaceNames &outputGroupNames,
-                           std::vector<std::string> &IvsLamGroup,
-                           std::vector<std::string> &IvsQBinnedGroup,
-                           std::vector<std::string> &IvsQGroup);
   void setTransmissionProperties(Algorithm_sptr alg,
                                  std::string const &propertyName);
-  WorkspaceNames getOutputNamesForGroups(const std::string &inputName,
-                                         const std::string &runNumber,
-                                         const size_t wsGroupNumber);
+  WorkspaceNames getOutputNamesForGroupMember(const std::string &inputName,
+                                              const std::string &runNumber,
+                                              const size_t wsGroupNumber);
   void getTransmissionRun(std::map<std::string, std::string> &results,
                           WorkspaceGroup_sptr &workspaceGroup,
                           const std::string &transmissionRun);
-  Algorithm_sptr createAlgorithmForWorkspaceInGroup();
-  void groupOutputWorkspaces(std::vector<std::string> IvsQGroup,
-                             std::vector<std::string> IvsQBinnedGroup,
-                             std::vector<std::string> IvsLamGroup,
-                             WorkspaceNames const &outputNames);
+  Algorithm_sptr
+  createAlgorithmForWorkspaceInGroup(std::string const &inputName,
+                                     WorkspaceNames const &outputNames,
+                                     bool skipCorrections = false);
+  void setOutputWorkspaces(std::vector<std::string> IvsQGroup,
+                           std::vector<std::string> IvsQBinnedGroup,
+                           std::vector<std::string> IvsLamGroup,
+                           WorkspaceNames const &outputNames);
   void setOutputProperties(OutputProperties const &outputProperties);
 };
 } // namespace Reflectometry
