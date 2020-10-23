@@ -45,13 +45,62 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
                                      "no ChemicalFormula or AtomicNumber is "
                                      "given.";
     }
-    if (isEmpty(params.numberDensity)) {
+    if (isEmpty(params.numberDensity) &&
+        isEmpty(params.numberDensityEffective) &&
+        isEmpty(params.packingFraction)) {
       result["NumberDensity"] =
-          "The number density must be specified with a use-defined material.";
+          "The number density or effective number density must "
+          " be specified with a user-defined material";
     }
+
   } else if (chemicalSymbol && atomicNumber) {
     result["AtomicNumber"] =
         "Cannot specify both ChemicalFormula and AtomicNumber";
+  }
+
+  if (!isEmpty(params.numberDensity) &&
+      !isEmpty(params.numberDensityEffective) &&
+      !isEmpty(params.packingFraction)) {
+    result["NumberDensity"] = "Number Density cannot be determined when "
+                              "both the effective number density and "
+                              "packing fraction are set. Only two can "
+                              "be specified at most.";
+  }
+
+  if (isEmpty(params.massDensity) && isEmpty(params.zParameter) &&
+      isEmpty(params.unitCellVolume)) {
+    // Checks if only the packing fraction has been specified with no other
+    // way of computing the number density or eff. number density
+    if (isEmpty(params.numberDensity) &&
+        isEmpty(params.numberDensityEffective) &&
+        !isEmpty(params.packingFraction)) {
+      result["PackingFraction"] =
+          "Cannot determine number density from only "
+          " the packing fraction. The number density "
+          " or effective number density is also needed.";
+    }
+  }
+
+  // If these are all set, then number density and eff. number density can be
+  // calculated. In this case, make sure the packing frac isn't set
+  if (!isEmpty(params.massDensity) && !isEmpty(params.zParameter) &&
+      !isEmpty(params.unitCellVolume)) {
+    if (!isEmpty(params.packingFraction)) {
+      result["PackingFraction"] =
+          "Cannot set packing fraction when both the number density "
+          "and effective number density are determined from "
+          "the mass density and cell volume + zParameter.";
+    }
+  }
+
+  // Bounds check the packing fraction number [0, 2)
+  if (!isEmpty(params.packingFraction)) {
+    if (params.packingFraction >= 2.0) {
+      result["PackingFraction"] =
+          "Cannot have a packing fraction larger than 2";
+    } else if (params.packingFraction < 0.0) {
+      result["PackingFraction"] = "Cannot have a packing fraction less than 0";
+    }
   }
 
   if (params.massNumber > 0 && params.atomicNumber <= 0)
