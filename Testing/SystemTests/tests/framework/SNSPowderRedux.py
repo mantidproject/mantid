@@ -92,9 +92,10 @@ class PG3Analysis(systemtesting.MantidSystemTest):
         self.tolerance = 1.0e-2
         return ('PG3_4844','PG3_4844_golden')
 
+
 class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
-    cal_file  = "PG3_PAC_HR_d46168_2020_05_06.h5"
-    char_files = ["PG3_char_2020_01_04_PAC_limit_1.4MW.txt","PG3_char_2020_05_06-HighRes-PAC_1.4 MW.txt"]
+    cal_file = "PG3_PAC_HR_d46168_2020_05_06.h5"
+    char_files = ["PG3_char_2020_01_04_PAC_limit_1.4MW.txt", "PG3_char_2020_05_06-HighRes-PAC_1.4_MW.txt"]
 
     def skipTests(self):
         return _skip_test()
@@ -106,7 +107,7 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
         files = [self.cal_file]
         files.append(self.char_files[0])
         files.append(self.char_files[1])
-        files.append("PG3_46577.nxs.h5") # /SNS/PG3/IPTS-2767/nexus/
+        files.append("PG3_46577.nxs.h5")  # /SNS/PG3/IPTS-2767/nexus/
         files.append("PG3_46190.nxs.h5")
         files.append("PG3_46199.nxs.h5")
         files.append("PG3_46202.nxs.h5")
@@ -119,24 +120,24 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
 
         # Get the result without any absorption correction first
         SNSPowderReduction("PG3_46577.nxs.h5",
-                   CalibrationFile=self.cal_file,
-                   CharacterizationRunsFile=charfile,
-                   Binning=-0.001,
-                   SaveAs="nexus",
-                   OutputDirectory=savedir)
+                           CalibrationFile=self.cal_file,
+                           CharacterizationRunsFile=charfile,
+                           Binning=-0.001,
+                           SaveAs="nexus",
+                           OutputDirectory=savedir)
 
         # Silicon Full Paalman-Pings test
         SNSPowderReduction("PG3_46577.nxs.h5",
-                   CalibrationFile=self.cal_file,
-                   CharacterizationRunsFile=charfile,
-                   Binning=-0.001,
-                   SaveAs="nexus",
-                   TypeOfCorrection="FullPaalmanPings",
-                   SampleFormula="Si",
-                   MeasuredMassDensity=1.165,
-                   ContainerShape="PAC06",
-                   OutputFilePrefix='PP_absorption_',
-                   OutputDirectory=savedir)
+                           CalibrationFile=self.cal_file,
+                           CharacterizationRunsFile=charfile,
+                           Binning=-0.001,
+                           SaveAs="nexus",
+                           TypeOfCorrection="FullPaalmanPings",
+                           SampleFormula="Si",
+                           MeasuredMassDensity=1.165,
+                           ContainerShape="PAC06",
+                           OutputFilePrefix='PP_absorption_',
+                           OutputDirectory=savedir)
 
         LoadNexus(Filename="PG3_46577.nxs", OutputWorkspace="PG3_46577")
         LoadNexus(Filename="PP_absorption_PG3_46577.nxs", OutputWorkspace="PP_46577")
@@ -163,6 +164,7 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
         Rval = mtd['Rval'].dataY(0)
 
         self.assertLessThan(Rval, self.tolerance)
+
 
 class PG3StripPeaks(systemtesting.MantidSystemTest):
     ref_file = 'PG3_4866_reference.gsa'
