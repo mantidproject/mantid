@@ -56,8 +56,6 @@ In this case, the magnetic cross-section cannot be separated from data.
 
 where :math:`\alpha` is the Sharpf angle, which for elastic scattering is equal to half of the (signed) in-plane scattering angle and :math:`\theta_{0}` is an experimentally fixed offset (see more in Ref. [3]).
 
-
-
 .. math:: M_{1} = (2 c_{0} - 4) \cdot \left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{nsf}} + (2c_{0} + 2) \cdot \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2-4c_{0}) \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}}
 
 .. math:: M_{2} = (2 c_{4} - 4) \cdot \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2c_{4} + 2) \cdot \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{nsf}} + (2-4c_{4}) \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}}
@@ -81,16 +79,16 @@ Usage
 
 .. testcode:: ExCrossSectionSeparationXYZ
 
-      Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz')
-      CrossSectionSeparation(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
-	      OutputWorkspace='xyz')
-      print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
-      SumSpectra(InputWorkspace=mtd['xyz'][1], EndWorkspaceIndex=mtd['xyz'][1].getNumberHistograms()-1,
-	         OutputWorkspace='sum_incoherent')
-      SumSpectra(InputWorkspace=mtd['xyz'][0], EndWorkspaceIndex=mtd['xyz'][0].getNumberHistograms()-1,
-	         OutputWorkspace='sum_coherent')
-      Divide(LHSWorkspace='sum_incoherent', RHSWorkspace='sum_coherent', OutputWorkspace='ratio')
-      print("Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: {0:.1f}".format(mtd['ratio'].readY(0)[0]))
+   Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz')
+   CrossSectionSeparation(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
+                          OutputWorkspace='xyz')
+   print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
+   SumSpectra(InputWorkspace=mtd['xyz'][1], EndWorkspaceIndex=mtd['xyz'][1].getNumberHistograms()-1,
+              OutputWorkspace='sum_incoherent')
+   SumSpectra(InputWorkspace=mtd['xyz'][0], EndWorkspaceIndex=mtd['xyz'][0].getNumberHistograms()-1,
+              OutputWorkspace='sum_coherent')
+   Divide(LHSWorkspace='sum_incoherent', RHSWorkspace='sum_coherent', OutputWorkspace='ratio')
+   print("Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: {0:.1f}".format(mtd['ratio'].readY(0)[0]))
 
 Output:
 
@@ -101,7 +99,7 @@ Output:
 
 .. testcleanup:: ExCrossSectionSeparationXYZ
 
-    mtd.clear()
+   mtd.clear()
 
 	
 References
