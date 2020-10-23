@@ -225,20 +225,6 @@ def _generate_vanadium_name(vanadium_string, is_spline, *args):
     return out_name
 
 
-def _generate_summed_empty_name(empty_run_string):
-    """
-        :param empty_run_string: The number of the run(s) being processed
-        :param args: Any other strings to append to the filename
-        :return: A filename for the summed empty run workspace
-        """
-    out_name = 'summed_empty'
-
-    out_name += '_' + str(empty_run_string)
-
-    out_name += ".nxs"
-    return out_name
-
-
 def generate_splined_name(vanadium_string, *args):
     """
     Generates a unique splined vanadium name which encapsulates
@@ -274,7 +260,12 @@ def generate_summed_empty_name(empty_runs_string):
     :param empty_runs_string: The empty runs that are summed in this file
     :return: The generated file name
     """
-    return _generate_summed_empty_name(empty_runs_string)
+    out_name = 'summed_empty'
+
+    out_name += '_' + str(empty_runs_string)
+
+    out_name += ".nxs"
+    return out_name
 
 
 def get_first_run_number(run_number_string):
