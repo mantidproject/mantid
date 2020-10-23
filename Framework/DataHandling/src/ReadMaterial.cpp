@@ -111,21 +111,6 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
       result["UnitCellVolume"] =
           "UnitCellVolume must be provided with ZParameter";
     }
-    if (!isEmpty(params.numberDensity)) {
-      result["ZParameter"] = "Cannot give ZParameter with NumberDensity set";
-    }
-    if (!isEmpty(params.massDensity)) {
-      result["MassDensity"] = "Cannot give MassDensity with ZParameter set";
-    }
-  } else if (!isEmpty(params.numberDensity)) {
-    if (!isEmpty(params.massDensity)) {
-      result["MassDensity"] = "Cannot give MassDensity with NumberDensity set";
-    }
-    bool canCalculateMassDensity =
-        ((!isEmpty(params.mass)) && (!isEmpty(params.volume)));
-    if (canCalculateMassDensity) {
-      result["MassDensity"] = "Cannot give MassDensity with NumberDensity set";
-    }
   }
   return result;
 }

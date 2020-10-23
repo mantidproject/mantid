@@ -211,7 +211,7 @@ public:
     TS_ASSERT(result.empty());
   }
 
-  void testFailureValidateInputsNumberAndZParam() {
+  void testSuccessfulValidateInputsNumberAndZParam() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
@@ -225,8 +225,7 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["ZParameter"],
-                     "Cannot give ZParameter with NumberDensity set")
+    TS_ASSERT(result.empty());
   }
 
   void testFailureValidateInputsNumbersAndPacking() {
@@ -340,7 +339,7 @@ public:
     TS_ASSERT(result.empty());
   }
 
-  void testFailureValidateInputsZParamWithMass() {
+  void testSuccessfulValidateInputsZParamWithMass() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
@@ -354,8 +353,7 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["MassDensity"],
-                     "Cannot give MassDensity with ZParameter set")
+    TS_ASSERT(result.empty());
   }
 
   void testFailureValidateInputsZParamWithoutUnitCell() {
@@ -374,7 +372,7 @@ public:
                      "UnitCellVolume must be provided with ZParameter")
   }
 
-  void testFailureValidateInputsNumWithMass() {
+  void testSuccessfulValidateInputsNumWithMass() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
@@ -387,8 +385,7 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["MassDensity"],
-                     "Cannot give MassDensity with NumberDensity set")
+    TS_ASSERT(result.empty());
   }
 
   void testMaterialIsCorrect() {
