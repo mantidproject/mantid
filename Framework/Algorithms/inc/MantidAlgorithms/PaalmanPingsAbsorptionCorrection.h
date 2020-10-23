@@ -52,7 +52,7 @@ public:
 
   const std::vector<std::string> seeAlso() const override {
     return {"SetSampleMaterial", "AbsorptionCorrection",
-            "ApplyPaalmanPingsCorrection"};
+            "ApplyPaalmanPingsCorrection", "PaalmanPingsMonteCarloAbsorption"};
   }
 
   /// Algorithm's version
