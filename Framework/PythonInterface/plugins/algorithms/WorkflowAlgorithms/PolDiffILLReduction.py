@@ -220,14 +220,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             self._method_data_structure = '10p'
         elif entries_per_numor == 6:
             self._method_data_structure = 'XYZ'
-            if self._user_method == '10p':
-                raise RunTimeError("The provided data cannot support 10-point measurement component separation.")
         elif entries_per_numor == 2:
             self._method_data_structure = 'Uniaxial'
-            if self._user_method == '10p':
-                raise RunTimeError("The provided data cannot support 10-point measurement component separation.")
-            if self._user_method == 'XYZ':
-                raise RunTimeError("The provided data cannot support XYZ measurement component separation.")
         else:
             if self.getPropertyValue("ProcessAs") not in ['Beam', 'Transmission']:
                 raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
