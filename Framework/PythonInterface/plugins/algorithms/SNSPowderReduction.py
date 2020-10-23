@@ -1318,7 +1318,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         '''
         absName = '__{}_abs'.format(getBasename(filename))
 
-        api.LoadEventNexus(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True)
+        api.Load(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True)
 
         if self._info is None:
             self._info= self._getinfo(absName)
@@ -1363,7 +1363,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             raise RuntimeError('Invalid wavelength range min={}A max={}A'.format(wl_min, wl_max))
         self.log().information('Using wavelength range min={}A max={}A'.format(wl_min, wl_max))
 
-        api.LoadEventNexus(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True)
         absorptionWS = WorkspaceFactory.create(mtd[absName], NVectors=mtd[absName].getNumberHistograms(),
                                                XLength=num_wl_bins + 1, YLength=num_wl_bins)
         xaxis = np.arange(0., float(num_wl_bins + 1)) * (wl_max - wl_min) / (num_wl_bins) + wl_min
