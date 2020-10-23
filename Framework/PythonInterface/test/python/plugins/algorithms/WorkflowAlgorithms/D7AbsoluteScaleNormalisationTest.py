@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.api import WorkspaceGroup, MatrixWorkspace
-from mantid.simpleapi import Load, config, mtd, CrossSectionSeparation
+from mantid.simpleapi import Load, config, mtd, D7AbsoluteScaleNormalisation
 
-class CrossSectionSeparationTest(unittest.TestCase):
+class D7AbsoluteScaleNormalisationTest(unittest.TestCase):
 
     _facility = None
     _instrument = None
@@ -38,33 +38,35 @@ class CrossSectionSeparationTest(unittest.TestCase):
         mtd.clear()
 
     def test_uniaxial_separation(self):
-        CrossSectionSeparation(InputWorkspace='vanadium_uniaxial', OutputWorkspace='uniaxial',
-                               CrossSectionSeparationMethod='Uniaxial')
+        D7AbsoluteScaleNormalisation(InputWorkspace='vanadium_uniaxial', OutputWorkspace='uniaxial',
+                                         CrossSectionSeparationMethod='Uniaxial')
         self.assertTrue(mtd['uniaxial'].getNumberOfEntries() == 2)
-        self._check_output('uniaxial', 1, 132)
+        self._check_output('uniaxial', 1, 132, onlySeparation=True)
 
     def test_xyz_separation(self):
-        CrossSectionSeparation(InputWorkspace='vanadium_xyz', OutputWorkspace='xyz',
-                               CrossSectionSeparationMethod='XYZ')
+        D7AbsoluteScaleNormalisation(InputWorkspace='vanadium_xyz', OutputWorkspace='xyz',
+                                         CrossSectionSeparationMethod='XYZ', NormalisationMethod='None')
         self.assertTrue(mtd['xyz'].getNumberOfEntries() == 3)
-        self._check_output('xyz', 1, 132)
+        self._check_output('xyz', 1, 132, onlySeparation=True)
 
     def test_10p_separation(self):
-        CrossSectionSeparation(InputWorkspace='vanadium_10p', OutputWorkspace='10p',
-                               CrossSectionSeparationMethod='10p', ThetaOffset=1.0)
+        D7AbsoluteScaleNormalisation(InputWorkspace='vanadium_10p', OutputWorkspace='10p',
+                                         CrossSectionSeparationMethod='10p', ThetaOffset=1.0,
+                                         NormalisationMethod='None')
         self.assertTrue(mtd['10p'].getNumberOfEntries() == 3)
-        self._check_output('10p', 1, 132)
+        self._check_output('10p', 1, 132, onlySeparation=True)
 
-    def _check_output(self, ws, blocksize, spectra):
+    def _check_output(self, ws, blocksize, spectra, onlySeparation):
         self.assertTrue(mtd[ws])
         self.assertTrue(isinstance(mtd[ws], WorkspaceGroup))
         for entry in mtd[ws]:
             self.assertTrue(isinstance(entry, MatrixWorkspace))
             self.assertTrue(entry.isHistogramData())
             self.assertTrue(not entry.isDistribution())
-            name = entry.name()
-            name = name[name.rfind("_")+1:]
-            self.assertTrue(name in ['Coherent', 'Incoherent', 'Magnetic'])
+            if onlySeparation:
+                name = entry.name()
+                name = name[name.rfind("_")+1:]
+                self.assertTrue(name in ['Coherent', 'Incoherent', 'Magnetic'])
             self.assertEqual(entry.blocksize(), blocksize)
             self.assertEqual(entry.getNumberHistograms(), spectra)
             self.assertTrue(entry.getHistory())

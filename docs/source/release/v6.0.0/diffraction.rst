@@ -13,7 +13,7 @@ New features
 ------------
 
 - New algorithm :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` to perform polarised diffraction data reduction for the ILL D7 instrument.
-- New algorithm :ref:`CrossSectionSeparation <algm-CrossSectionSeparation>` to separate magnetic, nuclear coherent, and incoherent components using spin-flip and non-spin-flip cross-sections.
+- New algorithm :ref:`D7AbsoluteScaleNormalisation <algm-D7AbsoluteScaleNormalisation>` to separate magnetic, nuclear coherent, and incoherent cross-sections using spin-flip and non-spin-flip cross-sections, and to normalise D7 data to a given standard.
 - New algorithm :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` to perform wavelength and detector position calibration for the ILL D7 instrument.
     
 Powder Diffraction

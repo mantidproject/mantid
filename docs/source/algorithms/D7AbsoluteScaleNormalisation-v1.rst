@@ -11,12 +11,19 @@
 Description
 -----------
 
-This is the algorithm that performs magnetic, nuclear coherent, and spin-incoherent cross-section separation for polarised diffraction and spectroscopy data. 
-Three types of analysis are supported: `uniaxial`, `XYZ`, and `10p`, for which 2, 6, and 10 distributions with spin-flip and non-spin-flip cross-sections
-are required. The expected input is a workspace group containing spin-flip and non-spin-flip cross-sections, with the following order of axis directions:
-Z, Y, X, X-Y, X+Y.
+This is the algorithm that performs magnetic, nuclear coherent, and spin-incoherent cross-section separation and allows for sample data normalisation to
+absolute scale using either the output from cross-section separation or a vanadium reference sample for polarised diffraction and spectroscopy data measured
+by D7 instrument at the ILL. 
 
-To achieve the best results, the input data should be fully corrected for detector effects and efficiencies.
+Three types of cross-section separation are supported: `Uniaxial`, `XYZ`, and `10p`, for which 2, 6, and 10 distributions with spin-flip and non-spin-flip cross-sections
+are required. The expected input is a workspace group containing spin-flip and non-spin-flip cross-sections, with the following order of axis directions:
+Z, Y, X, X-Y, X+Y. This step can be skipped by setting `CrossSectionSeparationMethod` parameter to `'None'`.
+
+Three ways of sample data normalisation are supported: `Vanadium`, `Paramagnetic`, and `Incoherent`, for which either the output from vanadium data reduction,
+or from the cross-section separation (magnetic and spin-incoherent respectively) is used. This step can also be skipped by setting `NormalisationMethod` parameter
+to `'None'`.
+
+This algorithm is indended to be invoked on sample data that is fully corrected and needs to be normalised to the absolute scale..
 
 Cross-section separation method
 ###############################
@@ -71,16 +78,29 @@ where :math:`c_{0} = \text{cos}^{2} \alpha` and :math:`c_{4} = \text{cos}^{2} (\
 .. math:: I = \frac{1}{4} \cdot \left(\left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}d\Omega}\right)_{\text{sf}} + 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x+y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{x-y}}{\text{d}\Omega}\right)_{\text{sf}} - M \right)
 
 
+Sample data normalisation
+#########################
+
+1. Vanadium
+
+
+2. Paramagnetic
+
+
+3. Spin-incoherent
+
+
+
 Usage
 -----
 .. include:: ../usagedata-note.txt
 
-**Example - CrossSectionSeparation - XYZ component separation of vanadium data**
+**Example - AbsoluteScaleNormalisation - XYZ cross-section separation of vanadium data**
 
-.. testcode:: ExCrossSectionSeparationXYZ
+.. testcode:: ExAbsoluteScaleNormalisation_XYZ_separation
 
    Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz')
-   CrossSectionSeparation(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
+   AbsoluteScaleNormalisation(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
                           OutputWorkspace='xyz')
    print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
    SumSpectra(InputWorkspace=mtd['xyz'][1], EndWorkspaceIndex=mtd['xyz'][1].getNumberHistograms()-1,
@@ -92,12 +112,12 @@ Usage
 
 Output:
 
-.. testoutput:: ExCrossSectionSeparationXYZ
+.. testoutput:: ExAbsoluteScaleNormalisation_XYZ_separation
 
    Number of separated cross-sections: 3
    Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 11.8
 
-.. testcleanup:: ExCrossSectionSeparationXYZ
+.. testcleanup:: ExAbsoluteScaleNormalisation_XYZ_separation
 
    mtd.clear()
 
