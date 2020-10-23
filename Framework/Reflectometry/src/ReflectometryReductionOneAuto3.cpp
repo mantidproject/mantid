@@ -75,6 +75,12 @@ void removeWorkspacesFromADS(const std::vector<std::string> &workspaceNames) {
   for (auto workspaceName : workspaceNames)
     AnalysisDataService::Instance().remove(workspaceName);
 }
+
+bool anyWorkspaceInListExists(std::vector<std::string> &names) {
+  return std::any_of(names.cbegin(), names.cend(), [](std::string const &name) {
+    return AnalysisDataService::Instance().doesExist(name);
+  });
+}
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -781,32 +787,6 @@ bool ReflectometryReductionOneAuto3::checkGroups() {
           AnalysisDataService::Instance().retrieveWS<WorkspaceGroup>(wsName));
 } // namespace Algorithms
 
-void ReflectometryReductionOneAuto3::setOutputWorkspaces(
-    const WorkspaceNames &outputGroupNames,
-    std::vector<std::string> &IvsLamGroup,
-    std::vector<std::string> &IvsQBinnedGroup,
-    std::vector<std::string> &IvsQGroup) {
-  // Group the IvsQ and IvsLam workspaces
-  Algorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
-  groupAlg->setChild(false);
-  groupAlg->setRethrows(true);
-  if (!IvsLamGroup.empty()) {
-    groupAlg->setProperty("InputWorkspaces", IvsLamGroup);
-    groupAlg->setProperty("OutputWorkspace", outputGroupNames.iVsLam);
-    groupAlg->execute();
-  }
-  groupAlg->setProperty("InputWorkspaces", IvsQBinnedGroup);
-  groupAlg->setProperty("OutputWorkspace", outputGroupNames.iVsQBinned);
-  groupAlg->execute();
-  groupAlg->setProperty("InputWorkspaces", IvsQGroup);
-  groupAlg->setProperty("OutputWorkspace", outputGroupNames.iVsQ);
-  groupAlg->execute();
-
-  setPropertyValue("OutputWorkspace", outputGroupNames.iVsQ);
-  setPropertyValue("OutputWorkspaceBinned", outputGroupNames.iVsQBinned);
-  setPropertyValue("OutputWorkspaceWavelength", outputGroupNames.iVsLam);
-}
-
 /** Set up the transmission properties on the child algorithm when processing
  * workspace groups.
  *
@@ -844,10 +824,19 @@ void ReflectometryReductionOneAuto3::setTransmissionProperties(
   alg->setProperty(propertyName, transWS);
 }
 
-/** Used by processGroups to set up the algorithm to run on each group member
+/** Used by processGroups to set up the algorithm to run on each group member.
+ *
+ * @param inputName : the input workspace name
+ * @param outputNames : a struct holding the names to be set for the output
+ * workspaces
+ * @param skipCorrections : if true, corrections will be ignored; this is used
+ * when re-running the algorithm on an input that has already had corrections
+ * applied
  */
 Algorithm_sptr
-ReflectometryReductionOneAuto3::createAlgorithmForWorkspaceInGroup() {
+ReflectometryReductionOneAuto3::createAlgorithmForWorkspaceInGroup(
+    std::string const &inputName, WorkspaceNames const &outputNames,
+    bool skipCorrections) {
   // Create a copy of ourselves
   Algorithm_sptr alg =
       createChildAlgorithm(name(), -1, -1, isLogging(), version());
@@ -864,35 +853,58 @@ ReflectometryReductionOneAuto3::createAlgorithmForWorkspaceInGroup() {
     }
   }
 
-  // Set the transmission workspaces on the child algorithm
-  setTransmissionProperties(alg, "FirstTransmissionRun");
-  setTransmissionProperties(alg, "SecondTransmissionRun");
+  alg->setProperty("InputWorkspace", inputName);
+  alg->setProperty("Debug", true);
+  alg->setProperty("OutputWorkspace", outputNames.iVsQ);
+  alg->setProperty("OutputWorkspaceBinned", outputNames.iVsQBinned);
+  alg->setProperty("OutputWorkspaceWavelength", outputNames.iVsLam);
+
+  if (!skipCorrections) {
+    setTransmissionProperties(alg, "FirstTransmissionRun");
+    setTransmissionProperties(alg, "SecondTransmissionRun");
+
+    if (!isDefault("FloodWorkspace")) {
+      MatrixWorkspace_sptr flood = getProperty("FloodWorkspace");
+      alg->setProperty("FloodWorkspace", flood);
+    }
+  } else {
+    // A correction algorithm may be applied by default so if we don't want to
+    // apply corrections explicitly set it to None
+    alg->setProperty("CorrectionAlgorithm", "None");
+  }
 
   return alg;
 }
 
-void ReflectometryReductionOneAuto3::groupOutputWorkspaces(
+/** Set the output workspaces for the main algorithm based on the grouped
+ * outputs of the child algorihms from processGroups
+ */
+void ReflectometryReductionOneAuto3::setOutputWorkspaces(
     std::vector<std::string> IvsQGroup,
     std::vector<std::string> IvsQBinnedGroup,
     std::vector<std::string> IvsLamGroup, WorkspaceNames const &outputNames) {
   Algorithm_sptr groupAlg = createChildAlgorithm("GroupWorkspaces");
   groupAlg->setChild(false);
   groupAlg->setRethrows(true);
-  if (!IvsQGroup.empty()) {
+  if (anyWorkspaceInListExists(IvsQGroup)) {
     groupAlg->setProperty("InputWorkspaces", IvsQGroup);
     groupAlg->setProperty("OutputWorkspace", outputNames.iVsQ);
     groupAlg->execute();
   }
-  if (!IvsQBinnedGroup.empty()) {
+  if (anyWorkspaceInListExists(IvsQBinnedGroup)) {
     groupAlg->setProperty("InputWorkspaces", IvsQBinnedGroup);
     groupAlg->setProperty("OutputWorkspace", outputNames.iVsQBinned);
     groupAlg->execute();
   }
-  if (!IvsLamGroup.empty()) {
+  if (anyWorkspaceInListExists(IvsLamGroup)) {
     groupAlg->setProperty("InputWorkspaces", IvsLamGroup);
     groupAlg->setProperty("OutputWorkspace", outputNames.iVsLam);
     groupAlg->execute();
   }
+
+  setPropertyValue("OutputWorkspace", outputNames.iVsQ);
+  setPropertyValue("OutputWorkspaceBinned", outputNames.iVsQBinned);
+  setPropertyValue("OutputWorkspaceWavelength", outputNames.iVsLam);
 }
 
 void ReflectometryReductionOneAuto3::setOutputProperties(
@@ -922,31 +934,16 @@ bool ReflectometryReductionOneAuto3::processGroups() {
   std::vector<std::string> IvsQBinnedGroup, IvsQGroup, IvsLamGroup;
   OutputProperties outputProperties;
   for (size_t i = 0; i < group->size(); ++i) {
-    auto alg = createAlgorithmForWorkspaceInGroup();
-
     auto inputName = group->getItem(i)->getName();
-    auto outputNames = getOutputNamesForGroups(inputName, runNumber, i);
-
-    const std::string IvsQName = outputNames.iVsQ;
-    const std::string IvsQBinnedName = outputNames.iVsQBinned;
-    const std::string IvsLamName = outputNames.iVsLam;
-
-    alg->setProperty("InputWorkspace", inputName);
-    alg->setProperty("Debug", true);
-    alg->setProperty("OutputWorkspace", IvsQName);
-    alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
-    alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
-    if (!isDefault("FloodWorkspace")) {
-      MatrixWorkspace_sptr flood = getProperty("FloodWorkspace");
-      alg->setProperty("FloodWorkspace", flood);
-    }
+    auto outputNames = getOutputNamesForGroupMember(inputName, runNumber, i);
+    auto alg = createAlgorithmForWorkspaceInGroup(inputName, outputNames);
     alg->execute();
+
     // Cache the output names
-    IvsQGroup.emplace_back(IvsQName);
-    IvsQBinnedGroup.emplace_back(IvsQBinnedName);
-    if (AnalysisDataService::Instance().doesExist(IvsLamName)) {
-      IvsLamGroup.emplace_back(IvsLamName);
-    }
+    IvsQGroup.emplace_back(outputNames.iVsQ);
+    IvsQBinnedGroup.emplace_back(outputNames.iVsQBinned);
+    IvsLamGroup.emplace_back(outputNames.iVsLam);
+
     // Cache the other output properties so that we can set them as our outputs
     // (required by the GUI). We can only display one set on the GUI so just
     // return the last set processed
@@ -959,10 +956,10 @@ bool ReflectometryReductionOneAuto3::processGroups() {
 
   // Set the main algorithm output properties (workspaces and other calculated
   // values)
-  const auto outputNames = getOutputWorkspaceNames();
-  groupOutputWorkspaces(IvsQGroup, IvsQBinnedGroup, IvsLamGroup, outputNames);
+  const auto outputGroupNames = getOutputWorkspaceNames();
   setOutputProperties(outputProperties);
-  setOutputWorkspaces(outputNames, IvsLamGroup, IvsQBinnedGroup, IvsQGroup);
+  setOutputWorkspaces(IvsQGroup, IvsQBinnedGroup, IvsLamGroup,
+                      outputGroupNames);
 
   const bool polarizationAnalysisOn = getProperty("PolarizationAnalysis");
   if (!polarizationAnalysisOn) {
@@ -970,7 +967,7 @@ bool ReflectometryReductionOneAuto3::processGroups() {
     return true;
   }
 
-  applyPolarizationCorrection(outputNames.iVsLam);
+  applyPolarizationCorrection(outputGroupNames.iVsLam);
 
   // Polarization correction may have changed the number of workspaces in the
   // groups
@@ -978,40 +975,41 @@ bool ReflectometryReductionOneAuto3::processGroups() {
   IvsQBinnedGroup.clear();
   IvsQGroup.clear();
 
-  // Now we've overwritten the IvsLam workspaces, we'll need to recalculate
-  // the IvsQ ones
-  auto outputIvsLamNames = workspaceNamesInGroup(outputNames.iVsLam);
-  for (size_t i = 0; i < outputIvsLamNames.size(); ++i) {
-    auto alg = createAlgorithmForWorkspaceInGroup();
-    alg->setProperty("FirstTransmissionRun", "");
-    alg->setProperty("SecondTransmissionRun", "");
-    alg->setProperty("CorrectionAlgorithm", "None");
+  // Now we've overwritten the IvsLam workspaces, we'll need to recalculate the
+  // IvsQ ones
+  auto correctedIvsLamWorkspaces =
+      workspaceNamesInGroup(outputGroupNames.iVsLam);
+  for (size_t i = 0; i < correctedIvsLamWorkspaces.size(); ++i) {
+    // Pass the corrected IvsLam workspace as the input (note that because this
+    // is already summed and converted to wavelength, those parts of the
+    // reduction will be skipped)
+    auto inputName = correctedIvsLamWorkspaces[i];
+    auto outputNames = getOutputNamesForGroupMember(
+        group->getItem(i)->getName(), runNumber, i);
+    // IvsLam output will be the same as the input, so ensure the name stays the
+    // same
+    outputNames.iVsLam = inputName;
+    auto const skipCorrections = true;
 
-    auto inputName = group->getItem(i)->getName();
-    auto outputNames = getOutputNamesForGroups(inputName, runNumber, i);
+    auto alg = createAlgorithmForWorkspaceInGroup(inputName, outputNames,
+                                                  skipCorrections);
 
-    const std::string IvsQName = outputNames.iVsQ;
-    const std::string IvsQBinnedName = outputNames.iVsQBinned;
-    const std::string IvsLamName = outputIvsLamNames[i];
-
-    // Find the spectrum processing instructions for ws index 0
+    // Set the processing instructions. IvsLam only has a single spectrum so
+    // find the spectrum number for it, i.e. workspace index 0
     auto currentWorkspace = std::dynamic_pointer_cast<MatrixWorkspace>(
-        AnalysisDataService::Instance().retrieve(outputIvsLamNames[i]));
+        AnalysisDataService::Instance().retrieve(outputNames.iVsLam));
     auto newProcInst = convertToSpectrumNumber("0", currentWorkspace);
     alg->setProperty("ProcessingInstructions", newProcInst);
-    alg->setProperty("InputWorkspace", IvsLamName);
-    alg->setProperty("OutputWorkspace", IvsQName);
-    alg->setProperty("OutputWorkspaceBinned", IvsQBinnedName);
-    alg->setProperty("OutputWorkspaceWavelength", IvsLamName);
+
     alg->execute();
-    IvsQBinnedGroup.emplace_back(IvsQBinnedName);
-    IvsQGroup.emplace_back(IvsQName);
-    if (AnalysisDataService::Instance().doesExist(IvsLamName)) {
-      IvsLamGroup.emplace_back(IvsLamName);
-    }
+
+    IvsQGroup.emplace_back(outputNames.iVsQ);
+    IvsQBinnedGroup.emplace_back(outputNames.iVsQBinned);
+    IvsLamGroup.emplace_back(outputNames.iVsLam);
   }
 
-  setOutputWorkspaces(outputNames, IvsLamGroup, IvsQBinnedGroup, IvsQGroup);
+  setOutputWorkspaces(IvsQGroup, IvsQBinnedGroup, IvsLamGroup,
+                      outputGroupNames);
 
   return true;
 }
@@ -1021,7 +1019,7 @@ bool ReflectometryReductionOneAuto3::processGroups() {
  * TOF_<runNumber>_<otherInfo> then the output workspaces will be of the same
  * format otherwise they are numbered according to the wsGroupNumber
  */
-auto ReflectometryReductionOneAuto3::getOutputNamesForGroups(
+auto ReflectometryReductionOneAuto3::getOutputNamesForGroupMember(
     const std::string &inputName, const std::string &runNumber,
     const size_t wsGroupNumber) -> WorkspaceNames {
   const auto output = getOutputWorkspaceNames();
