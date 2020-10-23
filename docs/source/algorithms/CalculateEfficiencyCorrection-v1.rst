@@ -26,19 +26,19 @@ and output correction is given as:
 
 where
 
-- :math:`\rho` is the number density in atoms/:math:`\AA^3`
+- :math:`\rho` is the number density in atoms/:math:`Å^3`
 - :math:`T` is a sample thickness given in cm
-- :math:`\lambda_{ref}` = 1.7982 :math:`\AA`,
+- :math:`\lambda_{ref}` = 1.7982 Å,
 - :math:`\sigma (\lambda)` is the wavelength-dependent cross-section which is either:
 
-    - :math:`\sigma (\lambda) = \sigma_a (\lambda_{ref}) \left( \frac{\lambda}{\lambda_{ref}} \right)` for ``XSectionType`` == ``AttenuationXSection`` where :math:`\sigma_a` is the absorption cross-section in units of barns 
+    - :math:`\sigma (\lambda) = \sigma_a (\lambda_{ref}) \left( \frac{\lambda}{\lambda_{ref}} \right)` for ``XSectionType`` == ``AttenuationXSection`` where :math:`\sigma_a` is the absorption cross-section in units of barns
     - or :math:`\sigma (\lambda) = \sigma_s + \sigma_a (\lambda_{ref}) \left( \frac{\lambda}{\lambda_{ref}} \right)` for ``XSectionType`` == ``TotalXSection`` where :math:`\sigma_s` is the total scattering cross-section in units of barns
 
-- :math:`\rho_{A}` is the area density (:math:`\rho_{A}=\rho * T`) in units of atoms*cm/:math:`\AA^3`,
-- :math:`\alpha = \rho_{A} * \frac{\sigma (\lambda_{ref})}{\lambda_{ref}} = \rho * T * \frac{\sigma (\lambda_{ref})}{\lambda_{ref}}` in units of 1/:math:`\AA`.
-- :math:`\lambda` is in units of :math:`\AA`. 
+- :math:`\rho_{A}` is the area density (:math:`\rho_{A}=\rho * T`) in units of atoms*cm/:math:`Å^3`,
+- :math:`\alpha = \rho_{A} * \frac{\sigma (\lambda_{ref})}{\lambda_{ref}} = \rho * T * \frac{\sigma (\lambda_{ref})}{\lambda_{ref}}` in units of 1/Å.
+- :math:`\lambda` is in units of Å.
 
-NOTE: :math:`1 \AA^2 = 10^{8}` barns and :math:`1 \AA = 10^{-8}` cm.
+NOTE: :math:`1 Å^2 = 10^{8}` barns and :math:`1 Å = 10^{-8}` cm.
 
 The optional inputs into the algorithm are to input either:
   1. The ``Alpha`` parameter
@@ -216,22 +216,22 @@ The transmission of a sample can be measured as :math:`e^{-\rho T \sigma_t (\lam
 
 .. testcode:: ExTransmissionCalcualteEfficiencyCorrection
 
-    ws = CalculateSampleTransmission(WavelengthRange='2.0, 0.1, 10.0',  
-                                     ChemicalFormula='H2-O')  
-    print('Transmission: {} ...'.format(ws.readY(0)[:3]))  
-     
-    corr_wksp = CalculateEfficiencyCorrection(WavelengthRange="2.0, 0.1, 10.0", 
-                                              Density=0.1, 
-                                              Thickness=0.1, 
-                                              ChemicalFormula="H2-O", 
-                                              XSectionType="TotalXSection") 
-    dataX = corr_wksp.readX(0) 
-    dataY = np.ones(len(corr_wksp.readX(0))) 
-    ones = CreateWorkspace(dataX, dataY, UnitX="Wavelength") 
+    ws = CalculateSampleTransmission(WavelengthRange='2.0, 0.1, 10.0',
+                                     ChemicalFormula='H2-O')
+    print('Transmission: {} ...'.format(ws.readY(0)[:3]))
+
+    corr_wksp = CalculateEfficiencyCorrection(WavelengthRange="2.0, 0.1, 10.0",
+                                              Density=0.1,
+                                              Thickness=0.1,
+                                              ChemicalFormula="H2-O",
+                                              XSectionType="TotalXSection")
+    dataX = corr_wksp.readX(0)
+    dataY = np.ones(len(corr_wksp.readX(0)))
+    ones = CreateWorkspace(dataX, dataY, UnitX="Wavelength")
     efficiency = Divide(LHSWorkspace=ones, RHSWorkspace=corr_wksp) # 1 + -1 * transmission
     negative_trans = Minus(LHSWorkspace=efficiency, RHSWorkspace=ones) # -1 * transmission
-    transmission = Multiply(LHSWOrkspace=negative_trans, RHSWorkspace=-1.*ones) 
-    print('Transmission using efficiency correction: {} ...'.format(transmission.readY(0)[:3]))        
+    transmission = Multiply(LHSWOrkspace=negative_trans, RHSWorkspace=-1.*ones)
+    print('Transmission using efficiency correction: {} ...'.format(transmission.readY(0)[:3]))
 
 Output:
 
@@ -240,7 +240,7 @@ Output:
     Transmission: [ 0.94506317  0.94505148  0.94503979] ...
     Transmission using efficiency correction: [ 0.9450632   0.94505151  0.94503982] ...
 
-The discrepancies are due to the differenc in :math:`\lambda_{ref}` = 1.7982 :math:`\AA` in ``CalculateEfficiencyCorrection``, consistent with `ReferenceLambda <https://github.com/mantidproject/mantid/blob/32ed0b2cbbe4fbfb230570d5a53032f6101743de/Framework/Kernel/src/NeutronAtom.cpp#L23>`_ where :ref:`algm-CalculateSampleTransmission-v1`  uses :math:`\lambda_{ref}` = 1.798 :math:`\AA`.
+The discrepancies are due to the differenc in :math:`\lambda_{ref}` = 1.7982 Å in ``CalculateEfficiencyCorrection``, consistent with `ReferenceLambda <https://github.com/mantidproject/mantid/blob/32ed0b2cbbe4fbfb230570d5a53032f6101743de/Framework/Kernel/src/NeutronAtom.cpp#L23>`_ where :ref:`algm-CalculateSampleTransmission-v1`  uses :math:`\lambda_{ref}` = 1.798 Å.
 
 **Example - Running CalculateEfficiencyCorrection for incident spectrum.**
 
@@ -269,7 +269,7 @@ From Eq. :eq:`incident_spectrum`, the parameters vary based on the moderator mat
 +--------------------+-------------+-----------------------------+
 | :math:`\lambda_2`  | ``lambda2`` | 0.06075                     |
 +--------------------+-------------+-----------------------------+
-| :math:`\lambda_T`  | ``lambdaT`` | 1.58 :math:`\AA`            |
+| :math:`\lambda_T`  | ``lambdaT`` | 1.58 Å                      |
 +--------------------+-------------+-----------------------------+
 
 To first back out the measured spectrum of Milder et al. [1]_, the incident spectrum for polyethylene at 300K using Eq. :eq:`incident_spectrum` is obtained, then the efficiency correction is calculated, and then the incident spectrum is divided by this correction to back out what was originally measured. Then, the correction is applied by multiplying it by the measured spectrum to get back to the corrected incident spectrum to demonstrate how this is regularly apply this to a measured spectrum:

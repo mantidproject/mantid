@@ -37,14 +37,14 @@ reasonable approximation independent of :math:`\lambda`. However, exceptions inc
 
 Absorption cross section (:math:`\sigma_a`)
 ###########################################
-For the absorption cross section, again typically the cross section is used from the same tabulated single atom values [1]_ but is only valid for the reference wavelength, 1.7982 :math:`\AA`,
-at which it was measured at. Thus, we can look up the value of :math:`\sigma_a (1.7982 \AA)`. Yet, the absorption cross section is a linear function of wavelength (away from nuclear resonances).
+For the absorption cross section, again typically the cross section is used from the same tabulated single atom values [1]_ but is only valid for the reference wavelength, 1.7982 Å,
+at which it was measured at. Thus, we can look up the value of :math:`\sigma_a (1.7982 Å)`. Yet, the absorption cross section is a linear function of wavelength (away from nuclear resonances).
 Thus, we can calculate the absorption cross section at other wavelengths from:
 
 .. math::
    :label: abs_xs
 
-    \sigma_a (\lambda) = \sigma_a (1.7982 \AA) \left( \frac{\lambda}{1.7982} \right)
+   \sigma_a (\lambda) = \sigma_a (1.7982 Å) \left( \frac{\lambda}{1.7982} \right)
 
 **NOTE:** In Mantid, the reference wavelength is defined as a variable :code:`ReferenceLambda` in :code:`NeutronAtom.cpp` [3]_. This variable should be used for consistency in all sample correction algorithms that
 calculate :math:`\sigma_a (\lambda)` from this reference wavelength.
@@ -482,7 +482,8 @@ To address (2) above, we can assume elastic scattering and then Eq. :eq:`Im` bec
 .. math::
    :label: Im_elastic
 
-    I_{m,elastic} &= \sum_{i=2}^{n} J_0 \rho^i \prod_{j=1}^{i} \frac{d\sigma}{d\Omega} \left( \theta_j \right) \int_V ... \int_V \frac{exp \left[ -\mu (\lambda) \left( l_1 + \sum_{j=1}^{i-1} l_{j,j+1} + l_i \right) \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
+   I_{m,elastic} = \sum_{i=2}^{n}J_0 \rho^i \prod_{j=1}^{i} \frac{d\sigma}{d\Omega} \left( \theta_j \right) \int_V ... \int_V \frac{exp \left[ -\mu (\lambda) \left( l_1 + \sum_{j=1}^{i-1} l_{j,j+1} + l_i \right) \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
+
 
 Isotropic Scattering
 ^^^^^^^^^^^^^^^^^^^^^
@@ -491,7 +492,7 @@ To address (3) above, we can assume isotropic scattering and then Eq. :eq:`Im` b
 .. math::
    :label: Im_isotropic
 
-    I_{m,isotropic} &= \sum_{i=2}^{n} J_0 \rho^i \left( \frac{\sigma}{4\pi} \right)^i \int_V ... \int_V \frac{exp \left[ -\mu (\lambda_1) l_1 + - \sum_{j=1}^{i-1} \mu (\lambda_{j,j+1}) l_{j,j+1} + - \mu (\lambda_i) l_i \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
+   I_{m,isotropic} = \sum_{i=2}^{n} J_0 \rho^i \left( \frac{\sigma}{4\pi} \right)^i \int_V ... \int_V \frac{exp \left[ -\mu (\lambda_1) l_1 + - \sum_{j=1}^{i-1} \mu (\lambda_{j,j+1}) l_{j,j+1} + - \mu (\lambda_i) l_i \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
 
 Elastic + Isotropic Scattering
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -500,7 +501,7 @@ Combining both the elastic and isotropic assumptions, we have:
 .. math::
    :label: Im_elastic_isotropic
 
-    I_{m,elastic+isotropic} &= \sum_{i=2}^{n} J_0 \rho^i \left( \frac{\sigma}{4\pi} \right)^i \int_V ... \int_V \frac{exp \left[ -\mu (\lambda) \left( l_1 + \sum_{j=1}^{i-1} l_{j,j+1} + l_i \right) \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
+   I_{m,elastic+isotropic} = \sum_{i=2}^{n} J_0 \rho^i \left( \frac{\sigma}{4\pi} \right)^i \int_V ... \int_V \frac{exp \left[ -\mu (\lambda) \left( l_1 + \sum_{j=1}^{i-1} l_{j,j+1} + l_i \right) \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
 
 Constant Ratio for  :math:`\frac{I_n}{I_{n-1}} = \Delta`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
