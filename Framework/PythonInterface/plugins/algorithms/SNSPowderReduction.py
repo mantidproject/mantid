@@ -1324,7 +1324,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                      ElementSize=self._elementSize)
             return absName+'_ass', absName+'_acc'
         else:
-            api.AbsorptionCorrectionPaalmanPings(donorWS,
+            api.PaalmanPingsAbsorptionCorrection(donorWS,
                                                  OutputWorkspace=absName,
                                                  ElementSize=self._elementSize)
             api.Multiply(LHSWorkspace=absName+'_acc',
