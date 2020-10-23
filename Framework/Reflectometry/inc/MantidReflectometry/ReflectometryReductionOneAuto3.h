@@ -44,6 +44,16 @@ private:
     std::string iVsLam;
   };
 
+  // Utility struct to collate output properties of child algorithm when
+  // processing groups
+  struct OutputProperties {
+    double thetaIn;
+    double qMin;
+    double qMax;
+    double qStep;
+    double scale;
+  };
+
   struct RebinParams {
     double qMin;
     bool qMinIsDefault;
@@ -111,7 +121,12 @@ private:
   void getTransmissionRun(std::map<std::string, std::string> &results,
                           WorkspaceGroup_sptr &workspaceGroup,
                           const std::string &transmissionRun);
+  Algorithm_sptr createAlgorithmForWorkspaceInGroup();
+  void groupOutputWorkspaces(std::vector<std::string> IvsQGroup,
+                             std::vector<std::string> IvsQBinnedGroup,
+                             std::vector<std::string> IvsLamGroup,
+                             WorkspaceNames const &outputNames);
+  void setOutputProperties(OutputProperties const &outputProperties);
 };
-
 } // namespace Reflectometry
 } // namespace Mantid
