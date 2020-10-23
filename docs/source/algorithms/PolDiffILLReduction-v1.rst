@@ -46,15 +46,17 @@ Different input properties can be specified depending on the value of **ProcessA
 |              | * **TransmissionInputWorkspace**     |                                            |
 +--------------+--------------------------------------+--------------------------------------------+
 | Vanadium     | * AbsorberInputWorkspace             | * SampleGeometry                           |
-|              | * ContainerInputWorkspace            | * ComponentSeparationMethod                |
-|              | * TransmissionInputWorkspace         | * SampleAndEnvironmentPropertiesDictionary |
-|              | * QuartzInputWorkspace               | * OutputTreatment                          |
+|              | * ContainerInputWorkspace            | * SampleAndEnvironmentPropertiesDictionary |
+|              | * TransmissionInputWorkspace         | * OutputTreatment                          |
+|              | * QuartzInputWorkspace               | * OutputUnits                              |
+|              |                                      | * ScatteringAngleBinSize                   |
 +--------------+--------------------------------------+--------------------------------------------+
 | Sample       | * AbsorberInputWorkspace             | * SampleGeometry                           |
 |              | * ContainerInputWorkspace            | * ComponentSeparationMethod                |
 |              | * TransmissionInputWorkspace         | * SampleAndEnvironmentPropertiesDictionary |
-|              | * QuartzInputWorkspace               | * DetectorEfficiencyCalibration            |
-|              | * VanadiumInputWorkspace             | * OutputTreatment                          |
+|              | * QuartzInputWorkspace               | * OutputTreatment                          |
+|              |                                      | * OutputUnits                              |
+|              |                                      | * ScatteringAngleBinSize                   |
 +--------------+--------------------------------------+--------------------------------------------+
 
 All the input workspace properties above are optional, unless bolded.
@@ -110,8 +112,8 @@ B takes only AT as input, and the output of B is needed by the rest.
 T takes AT and B as inputs, and the calculated transmission is used by Q, V, and S respectively.
 C and A are supplied to Q, V, and S respectively.
 Q takes A, C, its T, and the output is provided to V and S.
-V takes A, C, its T, and Q as inputs and the output is used by S
-S takes A, C, its T, as well as Q and V as inputs.
+V takes A, C, its T, and Q as inputs and the output can used to normalise S
+S takes A, C, its T, as well as Q as inputs.
 The output of S is reduced sample in desired units.
 
 .. diagram:: PolDiffILLReduction-v1_all_wkflw.dot
@@ -214,7 +216,6 @@ This example below performs a complete reduction for D7 data.
         QuartzInputWorkspace='pol_corrections',
         OutputTreatment='SumScans',
         SampleGeometry='None',
-        ComponentSeparationMethod='None',
         SampleAndEnvironmentPropertiesDictionary=vanadium_dictionary,
         ProcessAs='Vanadium'
     )
@@ -237,14 +238,10 @@ This example below performs a complete reduction for D7 data.
         ContainerInputWorkspace='container_ws',
         TransmissionInputWorkspace='sample_transmission_1',
         QuartzInputWorkspace='pol_corrections',
-        VanadiumInputWorkspace='vanadium_ws',
         OutputTreatment='AverageScans',
         SampleGeometry='None',
-        ComponentSeparationMethod='None',
         SampleAndEnvironmentPropertiesDictionary=sample_dictionary,
-        DetectorEfficiencyCalibration='Vanadium',
-        AbsoluteUnitsNormalisation=False,
-        ProcessAs='Sample'
+	ProcessAs='Sample'
     )
 
 Output:

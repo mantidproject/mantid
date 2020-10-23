@@ -16,7 +16,6 @@ digraph Sample {
     ContainerInputWorkspace
     QuartzInputWorkspace
     TransmissionInputWorkspace
-    VanadiumInputWorkspace
     PaalmanPingsMonteCarloAbsorption
     SampleAndEnvironmentProperties
   }
@@ -36,7 +35,6 @@ digraph Sample {
     Plus
     Divide2 [label="Divide"]
     SumOverlappingTubes
-    CrossSectionSeparation [label="Component separation"]
   }
 
   Run -> Load
@@ -54,12 +52,9 @@ digraph Sample {
   PaalmanPingsMonteCarloAbsorption -> SumCountsOrAverage
   SumCountsOrAverage -> SumOverlappingTubes
   SumCountsOrAverage -> Plus
-  Plus -> ILLComponentSeparation
-  SumOverlappingTubes -> CrossSectionSeparation
-  CrossSectionSeparation -> AbsoluteScaleBy
-  VanadiumInputWorkspace -> AbsoluteScaleBy
-  AbsoluteScaleBy -> Divide2
-  Divide2 -> ConvertUnits
+  Plus -> ConvertUnits
+  SumCountsOrAverage -> ConvertUnits
+  SumOverlappingTubes -> ConvertUnits
   ConvertUnits -> ConvertSpectrumAxis
   ConvertUnits -> OutputWorkspace
   ConvertSpectrumAxis -> OutputWorkspace

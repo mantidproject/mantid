@@ -23,7 +23,6 @@ digraph FullTreatment {
   T -> V
   C -> V
   A -> V
-  V -> S
   Q -> S
   T -> S
   A -> S

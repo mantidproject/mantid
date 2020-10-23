@@ -21,7 +21,6 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     _mode = 'Monochromatic'
     _method_data_structure = None # measurement method determined from the data
-    _user_method = None
     _instrument = None
     _sampleAndEnvironmentProperties = None
 
@@ -77,27 +76,9 @@ class PolDiffILLReduction(PythonAlgorithm):
             if geometry_type == 'Annulus':
                 required_keys += ['Height', 'InnerRadius', 'OuterRadius', 'ContainerInnerRadius', 'ContainerOuterRadius']
 
-            if self.getPropertyValue('DetectorEfficiencyCalibration') == 'Incoherent':
-                required_keys.append('SampleSpin')
-
             for key in required_keys:
                 if key not in sampleAndEnvironmentProperties:
                     issues['SampleAndEnvironmentPropertiesDictionary'] = '{} needs to be defined.'.format(key)
-
-        if process == 'Sample':
-            if self.getProperty('TransmissionInputWorkspace').isDefault :
-                issues['TransmissionInputWorkspace'] = 'Sample transmission is mandatory for sample data reduction.'
-
-            if (self.getProperty('DetectorEfficiencyCalibration') == 'Vanadium'
-                    and self.getProperty('VanadiumInputWorkspace').isDefault):
-                issues['VanadiumInputWorkspace'] = 'Vanadium input workspace is mandatory for sample data reduction when \
-                    detector efficiency calibration is based "Vanadium".'
-
-            if ( (self.getProperty('DetectorEfficiencyCalibration') == 'Incoherent'
-                  or self.getProperty('DetectorEfficiencyCalibration') == 'Paramagnetic')
-                 and self.getProperty('ComponentSeparationMethod').isDefault):
-                issues['DetectorEfficiencyCalibration'] = 'Chosen sample normalisation requires input from the component separation.'
-                issues['ComponentSeparationMethod'] = 'Chosen sample normalisation requires input from the component separation.'
 
         return issues
 
@@ -173,14 +154,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.setPropertySettings('QuartzInputWorkspace',
                                  EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
-        self.declareProperty(WorkspaceGroupProperty('VanadiumInputWorkspace', '',
-                                                    direction=Direction.Input,
-                                                    optional=PropertyMode.Optional),
-                             doc='The name of the vanadium workspace.')
-
-        self.setPropertySettings('VanadiumInputWorkspace', EnabledWhenProperty('DetectorEfficiencyCalibration',
-                                                                               PropertyCriterion.IsEqualTo, 'Vanadium'))
-
         self.declareProperty(name="OutputTreatment",
                              defaultValue="OutputIndividualScans",
                              validator=StringListValidator(["OutputIndividualScans", "AverageScans", "SumScans"]),
@@ -189,21 +162,8 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('OutputTreatment', scan)
 
-        self.declareProperty('AbsoluteUnitsNormalisation', True,
-                             doc='Whether or not express the output in absolute units.')
-
-        self.setPropertySettings('AbsoluteUnitsNormalisation', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
-
         self.declareProperty('ClearCache', True,
                              doc='Whether or not to clear the cache of intermediate workspaces.')
-
-        self.declareProperty(name="ComponentSeparationMethod",
-                             defaultValue="None",
-                             validator=StringListValidator(["None", "Uniaxial", "XYZ", "10p", "10p_2XYZ"]),
-                             direction=Direction.Input,
-                             doc="Whether to perform component separation and what type of method to use.")
-
-        self.setPropertySettings('ComponentSeparationMethod', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
         self.declareProperty(name="SampleGeometry",
                              defaultValue="None",
@@ -228,27 +188,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                              doc="The path to the custom geometry for self-attenuation correction to be applied.")
 
         self.setPropertySettings('SampleGeometryFile', EnabledWhenProperty('SampleGeometry', PropertyCriterion.IsEqualTo, 'Custom'))
-
-        self.declareProperty(name="DetectorEfficiencyCalibration",
-                             defaultValue="None",
-                             validator=StringListValidator(["None", "Vanadium", "Incoherent",  "Paramagnetic"]),
-                             direction=Direction.Input,
-                             doc="Detector efficiency calibration type.")
-
-        self.setPropertySettings('DetectorEfficiencyCalibration', sample)
-
-        self.declareProperty(name="IncoherentCrossSection",
-                             defaultValue=0,
-                             validator=IntBoundedValidator(lower=0),
-                             direction=Direction.Input,
-                             doc="Cross-section for incoherent scattering, necessary for setting the output on the absolute scale.")
-
-        incoherent = EnabledWhenProperty('DetectorEfficiencyCalibration', PropertyCriterion.IsEqualTo, 'Incoherent')
-
-        absoluteNormalisation = EnabledWhenProperty('AbsoluteUnitsNormalisation', PropertyCriterion.IsDefault)
-
-        self.setPropertySettings('IncoherentCrossSection', EnabledWhenProperty(incoherent, absoluteNormalisation,
-                                                                               LogicOperator.And))
 
         self.declareProperty(name="OutputUnits",
                              defaultValue="Wavelength",
@@ -439,7 +378,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         singleCorrectionPerPOL = False
         if mtd[ws].getNumberOfEntries() != 2*mtd[pol_eff_ws].getNumberOfEntries():
             singleCorrectionPerPOL = True
-            nMeasurements, _ = self._data_structure_helper()
+            nMeasurements = self._data_structure_helper()
             nPolarisations = math.floor(nMeasurements / 2.0)
             if mtd[pol_eff_ws].getNumberOfEntries() != nPolarisations:
                 raise RuntimeError("Incompatible number of polarisations between quartz input and sample.")
@@ -548,138 +487,14 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _data_structure_helper(self):
         nMeasurements = 0
-        nComponents = 0
-        if self._user_method == 'None':
-            if self._method_data_structure == '10p':
-                nMeasurements = 10
-            elif self._method_data_structure == 'XYZ':
-                nMeasurements = 6
-            elif self._method_data_structure == 'Uniaxial':
-                nMeasurements = 2
-        else:
-            if self._user_method == '10p':
-                nMeasurements = 10
-                nComponents = 3
-            elif self._user_method == 'XYZ':
-                nMeasurements = 6
-                nComponents = 3
-            elif self._user_method == 'Uniaxial':
-                nMeasurements = 2
-                nComponents = 2
+        if self._method_data_structure == '10p':
+            nMeasurements = 10
+        elif self._method_data_structure == 'XYZ':
+            nMeasurements = 6
+        elif self._method_data_structure == 'Uniaxial':
+            nMeasurements = 2
 
-        return nMeasurements, nComponents
-
-    def _conjoin_components(self, ws):
-        """Conjoins the component workspaces coming from a theta scan."""
-        components = [[], []]
-        componentNames = ['Incoherent', 'Coherent', 'Magnetic']
-        if self._user_method in ['10p', 'XYZ']:
-            components.append([])
-        for entry in mtd[ws]:
-            entryName = entry.name()
-            ConvertToPointData(InputWorkspace=entry, OutputWorkspace=entry)
-            for component_no, componentName in enumerate(componentNames):
-                if componentName in entryName:
-                    components[component_no].append(entryName)
-
-        x_axis = NumericAxis.create(len(components[0]))
-        for index in range(len(components[0])):
-            x_axis.setValue(index, index)
-        x_axis.setUnit("Label").setLabel('Scan step', '')
-
-        ws_names = []
-        for component_no, compList in enumerate(components):
-            ws_name = '{}_component'.format(componentNames[component_no])
-            ws_names.append(ws_name)
-            ConjoinXRuns(InputWorkspaces=compList, OutputWorkspace=ws_name)
-            mtd[ws_name].replaceAxis(0, x_axis)
-        output_name = '{}_conjoined_components'.format(self.getPropertyValue('ProcessAs'))
-        GroupWorkspaces(ws_names, OutputWorkspace=output_name)
-        return output_name
-
-    def _detector_efficiency_correction(self, ws, component_ws):
-        """Corrects detector efficiency and normalises data to either vanadium, incoherent scattering, or paramagnetic scattering."""
-
-        nMeasurements, _ = self._data_structure_helper()
-        if component_ws:
-            conjoined_components = self._conjoin_components(component_ws)
-        calibrationType = self.getPropertyValue('DetectorEfficiencyCalibration')
-        normaliseToAbsoluteUnits = self.getProperty('AbsoluteUnitsNormalisation').value
-        tmp_name = 'det_eff'
-        tmp_names = []
-        if calibrationType == 'Vanadium':
-            vanadium_ws = self.getPropertyValue('VanadiumInputWorkspace')
-            if normaliseToAbsoluteUnits:
-                normFactor = self._sampleAndEnvironmentProperties['FormulaUnits'].value
-                CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace='normalisation_ws')
-            else:
-                normalisationFactors = self._max_value_per_detector(vanadium_ws)
-                dataE = np.sqrt(normalisationFactors)
-                entry0 = mtd[vanadium_ws][0]
-                CreateWorkspace(dataX=entry0.readX(0), dataY=normalisationFactors, dataE=dataE,
-                                NSpec=entry0.getNumberHistograms(), OutputWorkspace='normalisation_ws')
-            Divide(LHSWorkspace=vanadium_ws,
-                   RHSWorkspace='normalisation_ws',
-                   OutputWorkspace='det_efficiency')
-        elif calibrationType in  ['Paramagnetic', 'Incoherent']:
-            if calibrationType == 'Paramagnetic':
-                if self._user_method == 'Uniaxial':
-                    raise RuntimeError('Paramagnetic calibration is not valid in the Uniaxial measurement mode.')
-                for entry_no, entry in enumerate(mtd[ws]):
-                    ws_name = '{0}_{1}'.format(tmp_name, entry_no)
-                    tmp_names.append(ws_name)
-                    const = (2.0/3.0) * math.pow(physical_constants['neutron gyromag. ratio']
-                                                 * physical_constants['classical electron radius'], 2)
-                    paramagneticComponent = mtd[conjoined_components][2]
-                    spin = self._sampleAndEnvironmentProperties['SampleSpin'].value
-                    Divide(LHSWorkspace=const * spin * (spin+1),
-                           RHSWorkspace=paramagneticComponent,
-                           OutputWorkspace=ws_name)
-            else: # Incoherent
-                for spectrum_no in range(mtd[conjoined_components][1].getNumberHistograms()):
-                    if normaliseToAbsoluteUnits:
-                        normFactor = float(self.getPropertyValue('IncoherentCrossSection'))
-                        CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace='normalisation_ws')
-                    else:
-                        normalisationFactors = self._max_value_per_detector(mtd[conjoined_components][1].name())
-                        dataE = np.sqrt(normalisationFactors)
-                        CreateWorkspace(dataX=mtd[conjoined_components][1].readX(0), dataY=normalisationFactors,
-                                        dataE=dataE,
-                                        NSpec=mtd[conjoined_components][1].getNumberHistograms(),
-                                        OutputWorkspace='normalisation_ws')
-                    ws_name = '{0}_{1}'.format(tmp_name, entry_no)
-                    tmp_names.append(ws_name)
-
-                Divide(LHSWorkspace='normalisation_ws',
-                       RHSWorkspace=component_ws,
-                       OutputWorkspace=ws_name)
-
-            GroupWorkspaces(tmp_names, OutputWorkspace='det_efficiency')
-
-        single_efficiency_per_POL = False
-        if mtd[ws].getNumberOfEntries() != mtd['det_efficiency'].getNumberOfEntries():
-            single_efficiency_per_POL = True
-        for entry_no, entry in enumerate(mtd[ws]):
-            det_eff_entry_no = entry_no
-            if single_efficiency_per_POL:
-                det_eff_entry_no = det_eff_entry_no % nMeasurements
-            Multiply(LHSWorkspace=entry,
-                     RHSWorkspace=mtd['det_efficiency'][det_eff_entry_no],
-                     OutputWorkspace=entry)
-        return ws
-
-    def _separate_components(self, ws, process):
-        theta_0 = 0
-        if self._user_method == '10p':
-            try:
-                theta_0 = self._sampleAndEnvironmentProperties['ThetaOffset'].value
-            except KeyError:
-                raise RuntimeError("The value for theta_0 needs to be defined for the component separation in 10p method.")
-        component_ws = '{}_separated_components'.format(process)
-        CrossSectionSeparation(InputWorkspace=ws, OutputWorkspace=component_ws,
-                               CrossSectionSeparationMethod=self._user_method,
-                               ThetaOffset=theta_0)
-        return component_ws
+        return nMeasurements
 
     def _normalise_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
@@ -737,7 +552,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         run = mtd[ws][0].getRun()
         if run['acquisition_mode'].value == 1:
             raise RuntimeError("TOF data reduction is not supported at the moment.")
-        self._user_method = self.getPropertyValue('ComponentSeparationMethod')
         self._figure_out_measurement_method(ws)
 
         if process in ['Beam', 'Transmission']:
@@ -780,17 +594,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                 if self.getProperty('OutputTreatment').value == 'AverageScans':
                     progress.report('Merging polarisations')
                     self._merge_polarisations(ws, average_detectors=True)
-                if self._user_method != 'None':
-                    progress.report('Separating components')
-                    component_ws = self._separate_components(ws, process)
-                else:
-                    component_ws = ''
                 if process == 'Vanadium':
                     progress.report('Normalising vanadium output')
                     self._normalise_vanadium(ws)
-                else:
-                    progress.report('Correcting for detector efficiency')
-                    self._detector_efficiency_correction(ws, component_ws)
                 self._set_units(ws)
 
         self._finalize(ws, process)

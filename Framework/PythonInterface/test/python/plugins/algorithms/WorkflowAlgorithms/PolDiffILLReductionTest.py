@@ -107,14 +107,6 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396983', ProcessAs='Beam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
                             BeamInputWorkspace='beam_ws_1')
-        vanadiumPropertiesDictionary = {'Mass': 8.54, 'Density': 6.0, 'FormulaUnits': 50, 'ChemicalFormula': 'V',
-                                      'Thickness': 2, 'Height': 2, 'Width': 2, 'BeamWidth': 2.5, 'BeamHeight': 2.5,
-                                      'NumberDensity': 1.18, 'ContainerFormula': 'Al', 'ContainerDensity': 2.7,
-                                      'ContainerFrontThickness': 0.02, 'ContainerBackThickness': 0.02}
-        PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
-                            TransmissionInputWorkspace='vanadium_transmission',
-                            SampleAndEnvironmentPropertiesDictionary=vanadiumPropertiesDictionary,
-                            OutputTreatment='AverageScans')
 
         samplePropertiesDictionary = {'Mass': 2.932, 'Density': 2.0, 'FormulaUnits': 182.54,
                                       'ChemicalFormula': 'Mn0.5-Fe0.5-P-S3', 'Thickness': 2, 'Height': 2, 'Width': 2,
@@ -124,11 +116,8 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396986', ProcessAs='Transmission', OutputWorkspace='sample_transmission',
                             BeamInputWorkspace='beam_ws_1')
         PolDiffILLReduction(Run='397004', ProcessAs='Sample', OutputWorkspace='sample',
-                            ComponentSeparationMethod='None',
                             TransmissionInputWorkspace='sample_transmission_1',
-                            VanadiumInputWorkspace='vanadium_1',
                             SampleAndEnvironmentPropertiesDictionary=samplePropertiesDictionary,
-                            DetectorEfficiencyCalibration='Vanadium',
                             OutputTreatment='OutputIndividualScans')
         self._check_output(mtd['sample'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['sample'], 'Sample')
