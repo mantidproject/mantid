@@ -727,7 +727,7 @@ bool PanelsSurface::isOverlapped(QPolygonF &polygon, int iexclude) const {
     if (i == iexclude)
       continue;
     const auto &testPoly = m_flatBanks[i]->polygon;
-#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
+#if (QT_VERSION <= QT_VERSION_CHECK(5, 10, 0))
     QPainterPath subject;
     subject.addPolygon(testPoly);
     QPainterPath clip;
