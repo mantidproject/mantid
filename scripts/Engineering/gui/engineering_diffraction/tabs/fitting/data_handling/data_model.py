@@ -16,6 +16,7 @@ from matplotlib.pyplot import subplots
 from numpy import full, nan, max, array, vstack
 from itertools import chain
 from re import findall
+from collections import defaultdict
 
 
 class FittingDataModel(object):
@@ -149,7 +150,7 @@ class FittingDataModel(object):
     def update_fit(self, results_dict):
         wsname = results_dict['properties']['InputWorkspace']
         self._fit_results[wsname] = {'model': results_dict['properties']['Function']}
-        self._fit_results[wsname]['results'] = dict()  # {function_param: [[Y1, E1], [Y2,E2],...] }
+        self._fit_results[wsname]['results'] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
         fnames = [x.split('=')[-1] for x in findall('name=[^,]*', results_dict['properties']['Function'])]
         # get num params for each function (first elem empty as str begins with 'name='
         nparams = [s.count('=') for s in results_dict['properties']['Function'].split('name=')[1:]]
@@ -160,8 +161,6 @@ class FittingDataModel(object):
             for iparam in range(0, nparams[ifunc]):
                 irow = istart + iparam
                 key = '_'.join([fname, params_dict['Name'][irow].split('.')[-1]])  # funcname_param
-                if key not in self._fit_results[wsname]['results']:
-                    self._fit_results[wsname]['results'][key] = []
                 self._fit_results[wsname]['results'][key].append([
                     params_dict['Value'][irow], params_dict['Error'][irow]])
             istart += nparams[ifunc]
@@ -182,13 +181,10 @@ class FittingDataModel(object):
             # axis for labels in workspace
             axis = TextAxis.create(nruns)
             for iws, wsname in enumerate(self._loaded_workspaces.keys()):
-                if wsname in self._fit_results:
-                    if param in self._fit_results[wsname]['results']:
-                        fitvals = array(self._fit_results[wsname]['results'][param])
-                        # pad to max length (with nans)
-                        data = vstack((fitvals, full((nfuncs - fitvals.shape[0], 2), nan)))
-                    else:
-                        data = full((nfuncs, 2), nan)
+                if wsname in self._fit_results and param in self._fit_results[wsname]['results']:
+                    fitvals = array(self._fit_results[wsname]['results'][param])
+                    # pad to max length (with nans)
+                    data = vstack((fitvals, full((nfuncs - fitvals.shape[0], 2), nan)))
                 else:
                     data = full((nfuncs, 2), nan)
                 w.setY(iws, data[:, 0])
