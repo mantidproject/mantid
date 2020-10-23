@@ -346,6 +346,6 @@ class ReductionWrapperTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    tester=ReductionWrapperTest('test_check_archive_logs')
-    tester.run()
-    #unittest.main()
+    #tester=ReductionWrapperTest('test_check_archive_logs')
+    #tester.run()
+    unittest.main()
