@@ -62,6 +62,9 @@ private slots:
   /// Handle for when instrument changed
   void handleInstrumentChanged(std::string instrument);
 
+  /// Handle for when manage user directories clicked
+  void handleManageDirectories();
+
 signals:
   /// Signal emitted when data get changed
   void dataChanged();

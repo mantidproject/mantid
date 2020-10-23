@@ -135,6 +135,21 @@ public slots:
   /// Sets path from where data loaded from
   virtual void setPath(std::string &path) = 0;
 
+  /// Sets the instrument in runs box if user changes it from combobox
+  virtual void setInstrument(std::string &instrument) = 0;
+
+  /// Enables/Disables auto add 
+  virtual void enableRunsAutoAdd(bool enable) = 0;
+
+  /// Get runs errors
+  virtual std::string getRunsError() = 0;
+
+  // Get files for loading
+  virtual std::vector<std::string> getFiles() = 0;
+
+  // Get first file only for loading
+  virtual std::string getFirstFile() = 0;
+
 signals:
   /// Request to load data
   void loadRequested();
@@ -150,6 +165,9 @@ signals:
 
   /// Path has been changed
   void pathChangedSignal(std::string);
+
+  // Manage user directories has been clicked
+  void manageDirectoriesClicked();
 };
 
 } // namespace CustomInterfaces

@@ -14,6 +14,7 @@
 
 #include "ALCLatestFileFinder.h"
 #include "MantidQtWidgets/Common/AlgorithmInputHistory.h"
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include "MuonAnalysisHelper.h"
 
 #include "Poco/File.h"
@@ -43,6 +44,8 @@ void ALCDataLoadingPresenter::initialize() {
           SLOT(handleInstrumentChanged(std::string)));
   // connect(m_view, SIGNAL(pathChangedSignal(std::string)), SLOT());
   connect(m_view, SIGNAL(runsChangedSignal()), SLOT(handleRunsChanged()));
+  connect(m_view, SIGNAL(manageDirectoriesClicked()),
+          SLOT(handleManageDirectories()));
 }
 
 /**
@@ -107,6 +110,7 @@ ALCDataLoadingPresenter::validateAndGetRunsFromExpression(std::string runs) {
 }
 
 void ALCDataLoadingPresenter::handleRunsChanged() {
+  /*
   try {
     // Reset path as we don't know if new runs will be successful
     m_view->setPath(std::string{});
@@ -142,6 +146,39 @@ void ALCDataLoadingPresenter::handleRunsChanged() {
         "specific runs with a comma separated list \ne.g. 1-10, 15, 20-30\n "
         "Range must go in increasing order, \ne.g. 1-10, 15, 20-30");
     m_view->enableLoad(false);
+  } */
+
+  // Reset path
+  // Check valid
+  // Update available info
+  // Enable/disable load
+  std::cout << "runs changed" << std::endl;
+
+  // On a new load so need to reset path and auto add
+  m_view->setPath(std::string{});
+  m_view->enableRunsAutoAdd(false);
+
+  // Check runs are valid
+  const auto error = m_view->getRunsError();
+  if (!error.empty()) {
+    m_view->displayError(
+        error +
+        "\n\nYou can specify a range of runs by a dash: \ne.g. 1-1\nYou can "
+        "specify "
+        "specific runs with a comma separated list which includes ranges: "
+        "\ne.g. 1-10, 15, 20-30\n "
+        "The range must go in increasing order: \ne.g. 1-10, 15, 20-30");
+    return;
+  }
+
+  // Now try update available info
+  try {
+    updateAvailableInfo();
+    m_view->enableLoad(true);
+  } catch (const std::runtime_error &e) {
+    // Display error and ensure load disabled
+    m_view->displayError(e.what());
+    m_view->enableLoad(false);
   }
 }
 
@@ -151,6 +188,7 @@ void ALCDataLoadingPresenter::handleRunsChanged() {
  * If it was "auto", sets up a watcher to automatically reload on new files.
  */
 void ALCDataLoadingPresenter::handleLoadRequested() {
+  /*
   std::vector<std::string> files;
   const auto instrument = m_view->getInstrument();
   const auto path = m_view->getPath();
@@ -166,6 +204,9 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
     files.emplace_back(ss.str());
   }
   load(files);
+  m_view->enableRunsAutoAdd(true); */
+  load(m_view->getFiles());
+  m_view->enableRunsAutoAdd(true);
 }
 
 /**
@@ -314,7 +355,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     IAlgorithm_sptr loadAlg =
         AlgorithmManager::Instance().create("LoadMuonNexus");
     loadAlg->setChild(true); // Don't want workspaces in the ADS
-
+    /*
     // Need first run here to update available info
     const auto instrument = m_view->getInstrument();
     std::stringstream file;
@@ -325,11 +366,12 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     for (int i = m_runs[0].size(); i < paddingSize; ++i)
       file << "0";
     file << m_runs[0];
-    loadAlg->setProperty("Filename", file.str());
+    loadAlg->setProperty("Filename", file.str()); */
 
     // We need logs only but we have to use LoadMuonNexus
     // (can't use LoadMuonLogs as not all the logs would be
     // loaded), so we load the minimum amount of data, i.e., one spectrum
+    loadAlg->setProperty("Filename", m_view->getFirstFile());
     loadAlg->setPropertyValue("SpectrumMin", "1");
     loadAlg->setPropertyValue("SpectrumMax", "1");
     loadAlg->setPropertyValue("OutputWorkspace", "__NotUsed");
@@ -461,6 +503,13 @@ void ALCDataLoadingPresenter::handleInstrumentChanged(std::string instrument) {
 
   // User cannot load yet as path not set
   m_view->enableLoad(false);
+
+  // If there are runs entered, try loading again
+  
+}
+
+void ALCDataLoadingPresenter::handleManageDirectories() {
+  MantidQt::API::ManageUserDirectories::openManageUserDirectories();
 }
 
 } // namespace CustomInterfaces

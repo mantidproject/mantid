@@ -7,8 +7,10 @@
 #include "ALCDataLoadingView.h"
 
 #include "ALCLatestFileFinder.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/LogValueSelector.h"
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include <Poco/File.h>
 
 #include "MantidKernel/ConfigService.h"
@@ -34,14 +36,17 @@ void ALCDataLoadingView::initialize() {
   m_ui.logValueSelector->setVisible(true);
   m_ui.logValueSelector->setEnabled(true);
   enableLoad(false);
+  enableRunsAutoAdd(false);
   connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this,
           SLOT(instrumentChanged(QString)));
   connect(m_ui.path, SIGNAL(textChanged(QString)), this,
           SLOT(pathChanged(QString)));
-  connect(m_ui.runs, SIGNAL(returnPressed()), this,
+  connect(m_ui.runs, SIGNAL(filesFound()),
           SIGNAL(runsChangedSignal()));
+  connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()),
+          SIGNAL(manageDirectoriesClicked()));
 
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 
@@ -65,7 +70,9 @@ void ALCDataLoadingView::initialize() {
   // Regex for runs
   QRegExp re("[0-9]+(\,[0-9]+)*(\-[0-9]+(($)|(\,[0-9]+))+)*");
   QValidator *validator = new QRegExpValidator(re, this);
-  m_ui.runs->setValidator(validator);
+  m_ui.runs->setTextValidator(validator);
+
+  m_ui.runs->doButtonOpt(MantidQt::API::FileFinderWidget::ButtonOpts::None);
 }
 
 /**
@@ -73,6 +80,8 @@ void ALCDataLoadingView::initialize() {
  * defualt instrument if available otherwise set as HIFI
  */
 void ALCDataLoadingView::initInstruments() {
+  // Initialising so do not want to send signals here
+  m_ui.instrument->blockSignals(true);
   for (const auto &instrument : INSTRUMENTS) {
     m_ui.instrument->addItem(QString::fromStdString(instrument));
   }
@@ -82,8 +91,10 @@ void ALCDataLoadingView::initInstruments() {
       m_ui.instrument->findText(QString::fromStdString(userInstrument));
   if (index != -1)
     m_ui.instrument->setCurrentIndex(index);
-  else
+  else 
     m_ui.instrument->setCurrentIndex(3);
+  m_ui.instrument->blockSignals(false);
+  setInstrument(m_ui.instrument->currentText().toStdString());
 }
 
 /**
@@ -101,7 +112,8 @@ std::string ALCDataLoadingView::getPath() const {
 }
 
 std::string ALCDataLoadingView::getRunsExpression() const {
-  return m_ui.runs->text().toStdString();
+  // return m_ui.runs->text().toStdString();
+  return "";
 }
 
 std::string ALCDataLoadingView::log() const {
@@ -310,7 +322,9 @@ void ALCDataLoadingView::enableAll() {
 
 void ALCDataLoadingView::instrumentChanged(QString instrument) {
   emit instrumentChangedSignal(instrument.toStdString());
+  //m_ui.runs->findFiles();
 }
+
 void ALCDataLoadingView::pathChanged(QString path) {
   emit pathChangedSignal(path.toStdString());
 }
@@ -325,6 +339,30 @@ void ALCDataLoadingView::enableLoad(bool enable) {
 
 void ALCDataLoadingView::setPath(std::string &path) {
   m_ui.path->setText(QString::fromStdString(path));
+}
+
+void ALCDataLoadingView::enableRunsAutoAdd(bool enable) {
+  m_ui.runsAutoAdd->setEnabled(enable);
+}
+
+void ALCDataLoadingView::setInstrument(std::string &instrument) {
+  m_ui.runs->setInstrumentOverride(QString::fromStdString(instrument));
+}
+
+std::string ALCDataLoadingView::getRunsError() {
+  return m_ui.runs->getFileProblem().toStdString();
+}
+
+std::vector<std::string> ALCDataLoadingView::getFiles() {
+  const auto QFiles = m_ui.runs->getFilenames();
+  std::vector<std::string> files;
+  for (const auto &file : QFiles)
+    files.emplace_back(file.toStdString());
+  return files;
+}
+
+std::string ALCDataLoadingView::getFirstFile() {
+  return m_ui.runs->getFirstFilename().toStdString();
 }
 
 } // namespace CustomInterfaces

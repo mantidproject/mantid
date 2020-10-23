@@ -152,6 +152,7 @@ public:
   QString getLastDirectory() { return m_lastDir; }
   /// Set the last directory
   void setLastDirectory(const QString &lastDir) { m_lastDir = lastDir; }
+  void setTextValidator(const QValidator *validator);
 
 signals:
   /// Emitted when the file text changes

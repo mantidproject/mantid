@@ -70,6 +70,11 @@ public:
   void handleRunsEditingFinsihed() override;
   void enableLoad(bool enable) override;
   void setPath(std::string &path) override;
+  void enableRunsAutoAdd(bool enable) override;
+  void setInstrument(std::string &instrument) override;
+  std::string getRunsError() override;
+  std::vector<std::string> getFiles() override;
+  std::string getFirstFile() override;
 
 
   // -- End of IALCDataLoadingView interface
