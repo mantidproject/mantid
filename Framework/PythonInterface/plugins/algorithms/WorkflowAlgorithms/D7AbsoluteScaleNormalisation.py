@@ -63,6 +63,12 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
                                                     direction=Direction.Input),
                              doc='The input workspace with spin-flip and non-spin-flip data.')
 
+        self.declareProperty(WorkspaceGroupProperty('RotatedXYZWorkspace', '',
+                                                    direction=Direction.Input,
+                                                    optional=PropertyMode.Optional),
+                             doc='The workspace used in 10p method when data is taken as two XYZ'
+                                 +' measurements rotated by 45 degress.')
+
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
                                                     direction=Direction.Output),
                              doc='The output workspace.')
