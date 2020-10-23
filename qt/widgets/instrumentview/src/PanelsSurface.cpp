@@ -726,15 +726,18 @@ bool PanelsSurface::isOverlapped(QPolygonF &polygon, int iexclude) const {
   for (int i = 0; i < m_flatBanks.size(); ++i) {
     if (i == iexclude)
       continue;
-    /* Once Qt4 support is dropped we should replace with
-     * QPolygonF::instersects()*/
     const auto &testPoly = m_flatBanks[i]->polygon;
+#if (QT_VERSION < QT_VERSION_CHECK(5, 0, 0))
     QPainterPath subject;
     subject.addPolygon(testPoly);
     QPainterPath clip;
     clip.addPolygon(polygon);
     if (subject.intersects(clip))
       return true;
+#else
+    if (testPoly.intersects(polygon))
+      return true;
+#endif
   }
   return false;
 }
