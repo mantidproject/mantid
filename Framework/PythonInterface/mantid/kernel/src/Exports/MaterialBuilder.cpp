@@ -45,6 +45,10 @@ void export_MaterialBuilder() {
            return_self<>(), (arg("self"), arg("rho")),
            "Set the number density of the material in atoms (default) or "
            "formula units per Angstrom^3")
+      .def("setPackingFraction", &MaterialBuilder::setPackingFraction,
+           return_self<>(), (arg("self"), arg("fraction")),
+           "Set the packing fraction of the material (default is 1). This is "
+           "used to infer the effective number density.")
       .def("setNumberDensityUnit", &MaterialBuilder::setNumberDensityUnit,
            return_self<>(), (arg("self"), arg("unit")),
            "Change the number density units from atoms per Angstrom^3 to the "
