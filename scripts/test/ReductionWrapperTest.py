@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import os
 import sys
+import time
+import datetime
 from tempfile import TemporaryDirectory
 
 from mantid.simpleapi import *
@@ -323,15 +325,19 @@ class ReductionWrapperTest(unittest.TestCase):
         ok,run_num,info = th._check_progress_log_run_completed(1000)
         self.assertTrue(ok)
         self.assertEqual(run_num,1000)
-        self.assertEqual(info,'no new data has been added to archive')
+        self.assertEqual(info,'no new data have been added to archive')
 
         ok,run_num,info = th._check_progress_log_run_completed(1001)
         self.assertFalse(ok)
         self.assertEqual(run_num,1000)
-        self.assertEqual(info,'no new data has been added to archive')
+        self.assertEqual(info,'no new data have been added to archive')
 
         with open(test_log,'w') as fh:
             fh.write('MAR 1001 0 \n')
+        m_time = os.path.getmtime(test_log)
+        # Update modification time manually as some OS and some tests do not update it properly
+        m_time  = m_time +1
+        os.utime(test_log,(m_time,m_time))
         # next attempt is successfull
         ok,run_num,info = th._check_progress_log_run_completed(1001)
         self.assertEqual(info,'')
@@ -342,6 +348,6 @@ class ReductionWrapperTest(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    #tester=ReductionWrapperTest('test_check_archive_logs')
-    #tester.run()
-    unittest.main()
+    tester=ReductionWrapperTest('test_check_archive_logs')
+    tester.run()
+    #unittest.main()

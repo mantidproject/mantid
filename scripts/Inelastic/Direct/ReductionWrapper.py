@@ -469,7 +469,7 @@ class ReductionWrapper(object):
         mod_time = os.path.getmtime(propman.arhive_upload_log_file)
         if self._lat_commit_log_modification_time == mod_time: # Still old data in archive
             run_num = self._last_runnum_added_to_archive
-            return (run_num >= run_number_requested,run_num,'no new data has been added to archive')
+            return (run_num >= run_number_requested,run_num,'no new data have been added to archive')
         self._lat_commit_log_modification_time = mod_time
         try:
             with open(propman.arhive_upload_log_file) as fh:
@@ -540,10 +540,13 @@ class ReductionWrapper(object):
             config['defaultsave.directory'] = str(output_directory)
 
         timeToWait = self._wait_for_file
-        _, fext_requested = PropertyManager.sample_run.file_hint()
         if timeToWait > 0:
+            _, fext_requested = PropertyManager.sample_run.file_hint()
             run_number_requsted = PropertyManager.sample_run.run_number
-            available,_,_ = self._check_progress_log_run_completed(run_number_requsted)
+            available,_,info = self._check_progress_log_run_completed(run_number_requsted)
+            if len(info) > 0: # report if archive upload log is not available
+                self.reducer.prop_man.log("*** "+info, 'warning')
+
             if available:
                 Found, input_file = PropertyManager.sample_run.find_file(
                                     self.reducer.prop_man,be_quet=True,
