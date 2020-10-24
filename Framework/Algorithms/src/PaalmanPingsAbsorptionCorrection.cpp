@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidAlgorithms/AbsorptionCorrectionPaalmanPings.h"
+#include "MantidAlgorithms/PaalmanPingsAbsorptionCorrection.h"
 #include "MantidAPI/HistoWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
@@ -29,7 +29,7 @@ namespace Mantid {
 namespace Algorithms {
 
 // Register the algorithm into the AlgorithmFactory
-DECLARE_ALGORITHM(AbsorptionCorrectionPaalmanPings)
+DECLARE_ALGORITHM(PaalmanPingsAbsorptionCorrection)
 
 using namespace API;
 using namespace Geometry;
@@ -49,7 +49,7 @@ inline size_t findMiddle(const size_t start, const size_t stop) {
 
 } // namespace
 
-AbsorptionCorrectionPaalmanPings::AbsorptionCorrectionPaalmanPings()
+PaalmanPingsAbsorptionCorrection::PaalmanPingsAbsorptionCorrection()
     : API::Algorithm(), m_inputWS(), m_sampleObject(nullptr),
       m_containerObject(nullptr), m_sampleL1s(), m_sample_containerL1s(),
       m_sampleElementVolumes(), m_sampleElementPositions(),
@@ -60,7 +60,7 @@ AbsorptionCorrectionPaalmanPings::AbsorptionCorrectionPaalmanPings()
       m_containerLinearCoefTotScatt(0), m_num_lambda(0), m_xStep(0),
       m_cubeSide(0.0) {}
 
-void AbsorptionCorrectionPaalmanPings::init() {
+void PaalmanPingsAbsorptionCorrection::init() {
 
   // The input workspace must have an instrument and units of wavelength
   auto wsValidator = std::make_shared<CompositeValidator>();
@@ -90,7 +90,7 @@ void AbsorptionCorrectionPaalmanPings::init() {
 }
 
 std::map<std::string, std::string>
-AbsorptionCorrectionPaalmanPings::validateInputs() {
+PaalmanPingsAbsorptionCorrection::validateInputs() {
   std::map<std::string, std::string> result;
 
   // verify that the container information is there if requested
@@ -108,7 +108,7 @@ AbsorptionCorrectionPaalmanPings::validateInputs() {
   return result;
 }
 
-void AbsorptionCorrectionPaalmanPings::exec() {
+void PaalmanPingsAbsorptionCorrection::exec() {
   // Retrieve the input workspace
   m_inputWS = getProperty("InputWorkspace");
   // Cache the beam direction
@@ -300,7 +300,7 @@ void AbsorptionCorrectionPaalmanPings::exec() {
 /// Calculate the distances for L1 (for both self-absorption and
 /// absorption by other object) and element size for each element in
 /// the sample and container
-void AbsorptionCorrectionPaalmanPings::initialiseCachedDistances() {
+void PaalmanPingsAbsorptionCorrection::initialiseCachedDistances() {
   // First, check if a 'gauge volume' has been defined. If not, it's the same as
   // the sample.
   auto integrationVolume =
@@ -358,7 +358,7 @@ void AbsorptionCorrectionPaalmanPings::initialiseCachedDistances() {
 }
 
 std::shared_ptr<const Geometry::IObject>
-AbsorptionCorrectionPaalmanPings::constructGaugeVolume() {
+PaalmanPingsAbsorptionCorrection::constructGaugeVolume() {
   g_log.information("Calculating scattering within the gauge volume defined on "
                     "the input workspace");
 
@@ -370,7 +370,7 @@ AbsorptionCorrectionPaalmanPings::constructGaugeVolume() {
 }
 
 /// Fetch the properties and set the appropriate member variables
-void AbsorptionCorrectionPaalmanPings::retrieveBaseProperties() {
+void PaalmanPingsAbsorptionCorrection::retrieveBaseProperties() {
 
   // get the material from the correct component
   const auto &sampleObj = m_inputWS->sample();
@@ -393,7 +393,7 @@ void AbsorptionCorrectionPaalmanPings::retrieveBaseProperties() {
 }
 
 /// Create the sample object using the Geometry classes, or use the existing one
-void AbsorptionCorrectionPaalmanPings::constructSample(API::Sample &sample) {
+void PaalmanPingsAbsorptionCorrection::constructSample(API::Sample &sample) {
   m_sampleObject = &sample.getShape();
   m_containerObject = &(sample.getEnvironment().getContainer());
 
@@ -414,7 +414,7 @@ void AbsorptionCorrectionPaalmanPings::constructSample(API::Sample &sample) {
 }
 
 /// Calculate the distances traversed by the neutrons within the sample
-void AbsorptionCorrectionPaalmanPings::calculateDistances(
+void PaalmanPingsAbsorptionCorrection::calculateDistances(
     const IDetector &detector, std::vector<double> &sample_L2s,
     std::vector<double> &sample_container_L2s,
     std::vector<double> &container_L2s,
@@ -471,7 +471,7 @@ void AbsorptionCorrectionPaalmanPings::calculateDistances(
 /// Carries out the numerical integration over the sample for elastic
 /// instruments
 
-void AbsorptionCorrectionPaalmanPings::doIntegration(
+void PaalmanPingsAbsorptionCorrection::doIntegration(
     double &integral, double &crossIntegral, const double linearCoefAbs,
     const double linearCoefTotScatt, const std::vector<double> &elementVolumes,
     const std::vector<double> &L1s, const std::vector<double> &L2s,
