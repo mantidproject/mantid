@@ -19,7 +19,7 @@ import math
 class D7AbsoluteScaleNormalisation(PythonAlgorithm):
 
     def category(self):
-        return 'ILL/Diffraction'
+        return 'ILL\\Diffraction'
 
     def summary(self):
         return 'Separates magnetic, nuclear coherent, and incoherent components for diffraction and spectroscopy data,' \
