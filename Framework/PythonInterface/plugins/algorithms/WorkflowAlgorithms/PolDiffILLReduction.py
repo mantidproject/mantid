@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.api import FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, \
-    NumericAxis, PropertyMode, Progress, PythonAlgorithm, WorkspaceGroupProperty, \
-    FileAction, AlgorithmFactory
-from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, IntBoundedValidator, \
+    PropertyMode, Progress, PythonAlgorithm, WorkspaceGroupProperty, FileAction, \
+    AlgorithmFactory
+from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, \
     LogicOperator, PropertyCriterion, PropertyManagerProperty, StringListValidator
 from mantid.simpleapi import *
 
