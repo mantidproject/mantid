@@ -95,12 +95,12 @@ Usage
 -----
 .. include:: ../usagedata-note.txt
 
-**Example - AbsoluteScaleNormalisation - XYZ cross-section separation of vanadium data**
+**Example - D7AbsoluteScaleNormalisation - XYZ cross-section separation of vanadium data**
 
-.. testcode:: ExAbsoluteScaleNormalisation_XYZ_separation
+.. testcode:: ExD7AbsoluteScaleNormalisation_XYZ_separation
 
    Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz')
-   AbsoluteScaleNormalisation(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
+   D7AbsoluteScaleNormalisation(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
                           OutputWorkspace='xyz')
    print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
    SumSpectra(InputWorkspace=mtd['xyz'][1], EndWorkspaceIndex=mtd['xyz'][1].getNumberHistograms()-1,
@@ -112,12 +112,12 @@ Usage
 
 Output:
 
-.. testoutput:: ExAbsoluteScaleNormalisation_XYZ_separation
+.. testoutput:: ExD7AbsoluteScaleNormalisation_XYZ_separation
 
    Number of separated cross-sections: 3
    Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: 11.8
 
-.. testcleanup:: ExAbsoluteScaleNormalisation_XYZ_separation
+.. testcleanup:: ExD7AbsoluteScaleNormalisation_XYZ_separation
 
    mtd.clear()
 
