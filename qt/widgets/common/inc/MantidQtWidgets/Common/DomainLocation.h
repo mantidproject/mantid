@@ -10,23 +10,21 @@
 
 #include <cstring>
 
-#include <QList>
 #include <QString>
-#include <QStringList>
 
 namespace MantidQt {
 namespace MantidWidgets {
 
-struct Dataset {
-  Dataset();
-  Dataset(QString const &workspaceName, QList<std::size_t> const &spectraList);
+struct DomainLocation {
+  DomainLocation();
+  DomainLocation(QString const &workspaceName,
+                 std::size_t const &spectrumNumber, bool isOnlySpectrum = true);
 
-  std::size_t numberOfDomains() const;
-
-  QStringList getDatasetDomainNames() const;
+  QString domainName() const;
 
   QString m_workspaceName;
-  QList<std::size_t> m_spectraList;
+  std::size_t m_spectrumNumber;
+  bool m_isOnlySpectrum;
 };
 
 } // namespace MantidWidgets

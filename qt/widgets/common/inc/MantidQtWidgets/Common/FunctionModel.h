@@ -8,14 +8,15 @@
 
 #include "DllOption.h"
 
-#include "Dataset.h"
+#include "DomainLocation.h"
 #include "IFunctionModel.h"
 #include "MantidAPI/IFunction.h"
+
+#include <vector>
 
 #include <QList>
 #include <QString>
 #include <QStringList>
-#include <QVector>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -46,7 +47,7 @@ public:
   IFunction_sptr getCurrentFunction() const override;
   void setNumberDomains(int) override;
   void setDatasets(const QStringList &datasetNames) override;
-  QStringList getDatasetNames() const override;
+  std::vector<DomainLocation> getDatasetDomains() const override;
   int getNumberDomains() const override;
   int currentDomainIndex() const override;
   void setCurrentDomainIndex(int) override;
@@ -83,11 +84,10 @@ protected:
   MultiDomainFunction_sptr m_function;
 
 private:
-  void checkDatasetDomainNames(QStringList &datasetDomainNames) const;
   void checkIndex(int) const;
   void updateGlobals();
   size_t m_currentDomainIndex = 0;
-  mutable QVector<Dataset> m_datasets;
+  mutable std::vector<DomainLocation> m_domains;
   mutable QStringList m_globalParameterNames;
 };
 
