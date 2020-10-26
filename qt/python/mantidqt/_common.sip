@@ -37,6 +37,7 @@ public:
 class GUIRegistryImpl {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/GUIRegistry.h"
+#include "MantidPythonInterface/core/PythonObjectInstantiator.h"
 #include <boost/python/extract.hpp>
 %End
 public:
@@ -48,8 +49,9 @@ static SIP_PYOBJECT Instance() const;
 %End
 void subscribe(SIP_PYOBJECT);
 %MethodCode
+auto sptr = boost::python::extract<MantidQt::API::IGUILauncher_sptr>(a0);
 try {
-    sipCpp->subscribe(boost::python::extract<MantidQt::API::IGUILauncher_sptr>(a0));
+    sipCpp->subscribe(sptr);
 } catch (std::runtime_error &sipExceptionRef)
 {
    const char *detail = sipExceptionRef.what();
@@ -64,6 +66,11 @@ catch (...)
    return NULL;
 }
 %End
+private:
+  // lifetime management is with C++ so don't generate any of that in Python
+  GUIRegistryImpl();
+  ~GUIRegistryImpl();
+  GUIRegistryImpl(const GUIRegistryImpl &);
 };
 
 class Configurable {

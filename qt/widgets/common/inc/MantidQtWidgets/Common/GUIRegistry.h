@@ -85,7 +85,9 @@ private:
       return false;
     }
   }
-  LauncherRegistry m_registry;
+  LauncherRegistry
+      m_registry; // holds the GUI launchers with unique names under given
+                  // category and unique category names
 };
 
 using GUIRegistry = Mantid::Kernel::SingletonHolder<GUIRegistryImpl>;
