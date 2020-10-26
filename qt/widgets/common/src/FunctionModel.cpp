@@ -287,6 +287,29 @@ void FunctionModel::setDatasets(const QStringList &datasetNames) {
   m_domains = domains;
 }
 
+void FunctionModel::setDatasets(
+    const QMap<QString, QList<std::size_t>> &datasets) {
+
+  int totalNumberOfDomains{0};
+  for (const auto &item : datasets.values())
+    totalNumberOfDomains += item.size();
+
+  if (totalNumberOfDomains != m_numberDomains) {
+    throw std::runtime_error(
+        "Number of dataset domains doesn't match the number of domains.");
+  }
+
+  std::vector<DatasetDomain> domains;
+  domains.reserve(static_cast<std::size_t>(totalNumberOfDomains));
+  for (const auto &workspaceName : datasets.keys()) {
+    const auto spectra = datasets.value(workspaceName);
+    for (const auto &specNum : spectra)
+      domains.emplace_back(DatasetDomain(workspaceName, specNum));
+  }
+
+  m_domains = domains;
+}
+
 void FunctionModel::addDatasets(const QStringList &datasetNames) {
   for (const auto &datasetName : datasetNames)
     m_domains.emplace_back(DatasetDomain(datasetName, 0));
