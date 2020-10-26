@@ -159,10 +159,9 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
-    TS_ASSERT_EQUALS(
-        result["NumberDensity"],
-        "The number density or effective number density must "
-        " be specified with a user-defined material")
+    TS_ASSERT_EQUALS(result["NumberDensity"],
+                     "The number density or effective number density must "
+                     " be specified with a user-defined material")
   }
 
   void testSuccessfullValidateInputsSampleNumber() {
@@ -528,7 +527,8 @@ private:
         material.chemicalFormula();
 
     TS_ASSERT_EQUALS(material.numberDensity(), check.numberDensity());
-    TS_ASSERT_EQUALS(material.numberDensityEffective(), check.numberDensityEffective())
+    TS_ASSERT_EQUALS(material.numberDensityEffective(),
+                     check.numberDensityEffective())
     TS_ASSERT_EQUALS(material.packingFraction(), check.packingFraction())
     TS_ASSERT_DELTA(material.cohScatterXSection(), check.cohScatterXSection(),
                     PRECISION);

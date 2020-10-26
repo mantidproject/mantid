@@ -131,7 +131,7 @@ void ReadMaterial::setMaterialParameters(const MaterialParameters &params) {
       massDensity = params.mass / params.volume;
   }
 
-  setNumberDensity(massDensity, params.numberDensity, params.numberDensityUnit,
+  setNumberDensity(massDensity, params.numberDensity, params.packingFraction, params.numberDensityUnit,
                    params.zParameter, params.unitCellVolume);
   setScatteringInfo(params.coherentXSection, params.incoherentXSection,
                     params.attenuationXSection, params.scatteringXSection,
@@ -158,19 +158,23 @@ void ReadMaterial::setMaterial(const std::string &chemicalSymbol,
 }
 
 void ReadMaterial::setNumberDensity(
-    const double rho_m, const double rho,
+    const double rho_m, const double rho, const double pFrac,
     Kernel::MaterialBuilder::NumberDensityUnit rhoUnit, const double zParameter,
     const double unitCellVolume) {
   if (!isEmpty(rho_m))
     builder.setMassDensity(rho_m);
-  if (isEmpty(rho)) {
-    if (!isEmpty(zParameter)) {
-      builder.setZParameter(zParameter);
-      builder.setUnitCellVolume(unitCellVolume);
-    }
-  } else {
+
+  // These can be specified even if mass density set
+  if (!isEmpty(zParameter)) {
+    builder.setZParameter(zParameter);
+    builder.setUnitCellVolume(unitCellVolume);
+  }
+  if(!isEmpty(rho)) {
     builder.setNumberDensity(rho);
     builder.setNumberDensityUnit(rhoUnit);
+  }
+  if(!isEmpty(pFrac)) {
+    builder.setPackingFraction(pFrac);
   }
 }
 

@@ -98,7 +98,7 @@ private:
                    const int massNumber);
 
   void
-  setNumberDensity(const double rho_m, const double rho,
+  setNumberDensity(const double rho_m, const double rho, const double pFrac,
                    const Kernel::MaterialBuilder::NumberDensityUnit rhoUnit,
                    const double zParameter, const double unitCellVolume);
   void setScatteringInfo(double coherentXSection, double incoherentXSection,
