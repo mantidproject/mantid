@@ -5,13 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import PythonAlgorithm, WorkspaceGroupProperty, AlgorithmFactory, \
-    PropertyMode
+from mantid.api import AlgorithmFactory, NumericAxis, PropertyMode, \
+    PythonAlgorithm, WorkspaceGroupProperty, WorkspaceGroup
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, \
     LogicOperator, PropertyCriterion, StringListValidator
 
 from mantid.simpleapi import *
 
+from scipy.constants import physical_constants
 import numpy as np
 import math
 
