@@ -91,6 +91,14 @@ class AdvancedSetupWidget(BaseWidget):
         dv7.setBottom(0.0)
         self._content.scaledata_edit.setValidator(dv7)
 
+        dv8 = QDoubleValidator(self._content.numberdensity_edit)
+        dv8.setBottom(0.0)
+        self._content.numberdensity_edit.setValidator(dv8)
+
+        dv9 = QDoubleValidator(self._content.massdensity_edit)
+        dv9.setBottom(0.0)
+        self._content.massdensity_edit.setValidator(dv9)
+
         # Default states
         self._content.stripvanpeaks_chkbox.setChecked(True)
         self._syncStripVanPeakWidgets(True)
@@ -133,6 +141,12 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.vanpeaktol_edit.setText(str(state.vanadiumpeaktol))
         self._content.vansmoothpar_edit.setText(str(state.vanadiumsmoothparams))
 
+        self._content.sampleformula_edit.setText(str(state.sampleformula))
+        self._content.numberdensity_edit.setText(str(state.samplenumberdensity))
+        self._content.massdensity_edit.setText(str(state.measuredmassdensity))
+        self._content.containertype_combo.setCurrentIndex(self._content.containertype_combo.findText(state.containershape))
+        self._content.correctiontype_combo.setCurrentIndex(self._content.correctiontype_combo.findText(state.typeofcorrection))
+
         self._content.preserveevents_checkbox.setChecked(state.preserveevents)
         self._content.outputfileprefix_edit.setText(state.outputfileprefix)
 
@@ -163,6 +177,12 @@ class AdvancedSetupWidget(BaseWidget):
         s.vanadiumfwhm = self._content.vanpeakfwhm_edit.text()
         s.vanadiumpeaktol = self._content.vanpeaktol_edit.text()
         s.vanadiumsmoothparams = self._content.vansmoothpar_edit.text()
+
+        s.sampleformula = self._content.sampleformula_edit.text()
+        s.samplenumberdensity = self._content.numberdensity_edit.text()
+        s.measuredmassdensity = self._content.massdensity_edit.text()
+        s.containershape = self._content.containertype_combo.currentText()
+        s.typeofcorrection = self._content.correctiontype_combo.currentText()
 
         s.preserveevents = self._content.preserveevents_checkbox.isChecked()
 
