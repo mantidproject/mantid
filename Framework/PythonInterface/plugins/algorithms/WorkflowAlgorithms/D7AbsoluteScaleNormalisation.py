@@ -122,10 +122,13 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
         self.setPropertySettings('FormulaUnits', EnabledWhenProperty('NormalisationMethod',
                                                                      PropertyCriterion.IsEqualTo, 'Vanadium'))
 
-        incoherent = EnabledWhenProperty('NormalisationMethod', PropertyCriterion.IsEqualTo, 'Incoherent')
+        self.declareProperty(name="SampleSpin",
+                             defaultValue=0.0,
+                             direction=Direction.Input,
+                             doc="Spin of the sample.")
 
-        self.declareProperty('AbsoluteUnitsNormalisation', True,
-                             doc='Whether or not express the output in absolute units.')
+        self.setPropertySettings('SampleSpin', EnabledWhenProperty('NormalisationMethod',
+                                                                   PropertyCriterion.IsEqualTo, 'Incoherent'))
 
         self.declareProperty(name="IncoherentCrossSection",
                              defaultValue=0.0,
@@ -136,6 +139,9 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
         incoherent = EnabledWhenProperty('NormalisationMethod', PropertyCriterion.IsEqualTo, 'Incoherent')
 
         absoluteNormalisation = EnabledWhenProperty('AbsoluteUnitsNormalisation', PropertyCriterion.IsDefault)
+
+        self.declareProperty('AbsoluteUnitsNormalisation', True,
+                             doc='Whether or not express the output in absolute units.')
 
         self.setPropertySettings('IncoherentCrossSection', EnabledWhenProperty(incoherent, absoluteNormalisation,
                                                                                LogicOperator.And))
@@ -261,7 +267,7 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
             ws_names.append(ws_name)
             ConjoinXRuns(InputWorkspaces=compList, OutputWorkspace=ws_name)
             mtd[ws_name].replaceAxis(0, x_axis)
-        output_name = '{}_conjoined_components'.format(self.getPropertyValue('ProcessAs'))
+        output_name = '{}_conjoined_cross_sections'.format(ws)
         GroupWorkspaces(ws_names, OutputWorkspace=output_name)
         return output_name
 
