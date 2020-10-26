@@ -12,7 +12,9 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "ParameterEstimation.h"
 
+#include <QList>
 #include <QMap>
+#include <QString>
 #include <QWidget>
 
 class QtBoolPropertyManager;
@@ -49,6 +51,8 @@ public:
   virtual void setNumberOfDatasets(int) = 0;
   virtual int getNumberOfDatasets() const = 0;
   virtual void setDatasets(const QStringList &datasetNames) = 0;
+  virtual void
+  setDatasets(const QMap<QString, QList<std::size_t>> &datasets) = 0;
   virtual QStringList getGlobalParameters() const = 0;
   virtual QStringList getLocalParameters() const = 0;
   virtual void setGlobalParameters(const QStringList &globals) = 0;

@@ -304,7 +304,7 @@ void FunctionModel::setDatasets(
   for (const auto &workspaceName : datasets.keys()) {
     const auto spectra = datasets.value(workspaceName);
     for (const auto &specNum : spectra)
-      domains.emplace_back(DatasetDomain(workspaceName, specNum));
+      domains.emplace_back(DatasetDomain(workspaceName, specNum, false));
   }
 
   m_domains = domains;

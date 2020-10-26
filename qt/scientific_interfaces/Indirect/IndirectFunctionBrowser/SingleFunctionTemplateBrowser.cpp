@@ -121,6 +121,11 @@ void SingleFunctionTemplateBrowser::setDatasets(
   m_presenter.setDatasets(datasetNames);
 }
 
+void SingleFunctionTemplateBrowser::setDatasets(
+    const QMap<QString, QList<std::size_t>> &datasets) {
+  m_presenter.setDatasets(datasets);
+}
+
 QStringList SingleFunctionTemplateBrowser::getGlobalParameters() const {
   return m_presenter.getGlobalParameters();
 }

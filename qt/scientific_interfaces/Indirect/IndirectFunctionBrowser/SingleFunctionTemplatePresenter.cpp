@@ -133,6 +133,11 @@ void SingleFunctionTemplatePresenter::setDatasets(
   m_model.setDatasets(datasetNames);
 }
 
+void SingleFunctionTemplatePresenter::setDatasets(
+    const QMap<QString, QList<std::size_t>> &datasets) {
+  m_model.setDatasets(datasets);
+}
+
 void SingleFunctionTemplatePresenter::setErrorsEnabled(bool enabled) {
   m_view->setErrorsEnabled(enabled);
 }

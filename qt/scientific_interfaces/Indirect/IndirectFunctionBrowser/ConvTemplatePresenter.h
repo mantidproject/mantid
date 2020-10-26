@@ -50,6 +50,7 @@ public:
   void updateParameters(const IFunction &fun);
   void setCurrentDataset(int i);
   void setDatasets(const QStringList &datasetNames);
+  void setDatasets(const QMap<QString, QList<std::size_t>> &datasets);
   void setErrorsEnabled(bool enabled);
   void setResolution(std::string const &name, TableDatasetIndex const &index);
   void setResolution(

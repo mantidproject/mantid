@@ -53,6 +53,7 @@ public:
   void setCurrentDataset(int i);
   int getCurrentDataset();
   void setDatasets(const QStringList &datasetNames);
+  void setDatasets(const QMap<QString, QList<std::size_t>> &datasets);
   void setViewParameterDescriptions();
   void setErrorsEnabled(bool enabled);
   void tieIntensities(bool on);

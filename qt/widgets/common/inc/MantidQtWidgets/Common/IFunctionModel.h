@@ -13,6 +13,8 @@
 
 #include <vector>
 
+#include <QList>
+#include <QMap>
 #include <QString>
 #include <QStringList>
 
@@ -44,6 +46,8 @@ public:
   virtual IFunction_sptr getCurrentFunction() const = 0;
   virtual void setNumberDomains(int) = 0;
   virtual void setDatasets(const QStringList &datasetNames) = 0;
+  virtual void
+  setDatasets(const QMap<QString, QList<std::size_t>> &datasets) = 0;
   virtual std::vector<DatasetDomain> getDatasetDomains() const = 0;
   virtual int getNumberDomains() const = 0;
   virtual int currentDomainIndex() const = 0;

@@ -143,6 +143,11 @@ void FunctionMultiDomainPresenter::setDatasets(
   m_model->setDatasets(datasetNames);
 }
 
+void FunctionMultiDomainPresenter::setDatasets(
+    const QMap<QString, QList<std::size_t>> &datasets) {
+  m_model->setDatasets(datasets);
+};
+
 void FunctionMultiDomainPresenter::addDatasets(
     const QStringList &datasetNames) {
   m_model->addDatasets(datasetNames);

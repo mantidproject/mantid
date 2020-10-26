@@ -102,6 +102,11 @@ void ConvTemplateBrowser::setDatasets(const QStringList &datasetNames) {
   m_presenter.setDatasets(datasetNames);
 }
 
+void ConvTemplateBrowser::setDatasets(
+    const QMap<QString, QList<std::size_t>> &datasets) {
+  m_presenter.setDatasets(datasets);
+}
+
 QStringList ConvTemplateBrowser::getGlobalParameters() const {
   return m_presenter.getGlobalParameters();
 }

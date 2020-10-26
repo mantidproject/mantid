@@ -408,6 +408,11 @@ void IqtFunctionModel::setDatasets(const QStringList &datasetNames) {
   m_model.setDatasets(datasetNames);
 }
 
+void IqtFunctionModel::setDatasets(
+    const QMap<QString, QList<std::size_t>> &datasets) {
+  m_model.setDatasets(datasets);
+}
+
 std::vector<DatasetDomain> IqtFunctionModel::getDatasetDomains() const {
   return m_model.getDatasetDomains();
 }

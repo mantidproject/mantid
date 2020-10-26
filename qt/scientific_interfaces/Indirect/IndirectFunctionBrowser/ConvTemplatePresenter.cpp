@@ -194,6 +194,11 @@ void ConvTemplatePresenter::setDatasets(const QStringList &datasetNames) {
   m_model.setDatasets(datasetNames);
 }
 
+void ConvTemplatePresenter::setDatasets(
+    const QMap<QString, QList<std::size_t>> &datasets) {
+  m_model.setDatasets(datasets);
+}
+
 void ConvTemplatePresenter::setBackgroundA0(double value) {
   m_model.setBackgroundA0(value);
   updateViewParameters();

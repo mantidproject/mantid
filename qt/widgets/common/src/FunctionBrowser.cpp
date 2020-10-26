@@ -165,6 +165,11 @@ void FunctionBrowser::setDatasets(const QStringList &datasetNames) {
   m_presenter->setDatasets(datasetNames);
 }
 
+void FunctionBrowser::setDatasets(
+    const QMap<QString, QList<std::size_t>> &datasets) {
+  m_presenter->setDatasets(datasets);
+}
+
 /**
  * Get value of a local parameter
  * @param parName :: Name of a parameter.

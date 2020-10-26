@@ -489,6 +489,11 @@ void ConvFunctionModel::setDatasets(const QStringList &datasetNames) {
   m_model.setDatasets(datasetNames);
 }
 
+void ConvFunctionModel::setDatasets(
+    const QMap<QString, QList<std::size_t>> &datasets) {
+  m_model.setDatasets(datasets);
+}
+
 std::vector<DatasetDomain> ConvFunctionModel::getDatasetDomains() const {
   return m_model.getDatasetDomains();
 }
