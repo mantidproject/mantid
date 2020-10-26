@@ -183,15 +183,11 @@ public:
 
   void test_Setting_ZParameter_UnitCell_And_MassDensity_Throws_Error() {
     MaterialBuilder builder;
-    TS_ASSERT_THROWS(builder.setMassDensity(4).setZParameter(6),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(builder.setMassDensity(4).setUnitCellVolume(250.),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS_NOTHING(builder.setMassDensity(4).setZParameter(6));
+    TS_ASSERT_THROWS_NOTHING(builder.setMassDensity(4).setUnitCellVolume(250.));
 
-    TS_ASSERT_THROWS(builder.setZParameter(6).setMassDensity(4),
-                     const std::runtime_error &);
-    TS_ASSERT_THROWS(builder.setUnitCellVolume(6).setMassDensity(4),
-                     const std::runtime_error &);
+    TS_ASSERT_THROWS_NOTHING(builder.setZParameter(6).setMassDensity(4));
+    TS_ASSERT_THROWS_NOTHING(builder.setUnitCellVolume(6).setMassDensity(4));
   }
 
   void test_MultiAtom_with_no_number_density_throws() {
