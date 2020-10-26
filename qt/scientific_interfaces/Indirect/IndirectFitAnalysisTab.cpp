@@ -733,24 +733,25 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
           SLOT(fitAlgorithmComplete(bool)));
 }
 
-QStringList IndirectFitAnalysisTab::getDatasetNames() const {
-  QStringList datasetNames;
-  auto const numberWorkspaces = m_fittingModel->numberOfWorkspaces();
-  for (size_t i{0}; i < numberWorkspaces.value; ++i) {
+QMap<QString, QList<std::size_t>> IndirectFitAnalysisTab::getDatasets() const {
+  QMap<QString, QList<std::size_t>> datasets;
+
+  for (size_t i{0}; i < m_fittingModel->numberOfWorkspaces().value; ++i) {
     TableDatasetIndex index{i};
-    auto const name =
-        QString::fromStdString(m_fittingModel->getWorkspace(index)->getName());
-    auto const spectra = m_fittingModel->getSpectra(index);
-    for (auto spectrum : spectra) {
-      datasetNames << name + " (" + QString::number(spectrum.value) + ")";
-    }
+
+    QList<std::size_t> spectraList;
+    for (auto const &spectrum : m_fittingModel->getSpectra(index))
+      spectraList << spectrum.value;
+
+    auto const name = m_fittingModel->getWorkspace(index)->getName();
+    datasets[QString::fromStdString(name)] = spectraList;
   }
-  return datasetNames;
+  return datasets;
 }
 
 void IndirectFitAnalysisTab::updateDataReferences() {
   m_fitPropertyBrowser->updateFunctionBrowserData(
-      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasetNames(),
+      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasets(),
       m_fittingModel->getQValuesForData(),
       m_fittingModel->getResolutionsForFit());
   m_fittingModel->setFitFunction(m_fitPropertyBrowser->getFittingFunction());
@@ -776,7 +777,7 @@ void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(
   m_plotPresenter->updateAvailableSpectra();
   m_dataPresenter->updateSpectraInTable(i);
   m_fitPropertyBrowser->updateFunctionBrowserData(
-      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasetNames(),
+      static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasets(),
       m_fittingModel->getQValuesForData(),
       m_fittingModel->getResolutionsForFit());
   setModelFitFunction();
