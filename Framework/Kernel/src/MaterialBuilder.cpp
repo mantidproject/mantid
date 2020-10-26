@@ -107,7 +107,8 @@ MaterialBuilder &MaterialBuilder::setMassNumber(int massNumber) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setNumberDensity(double rho) {
-  m_numberDensity = rho;
+  if (rho != Mantid::EMPTY_DBL())
+    m_numberDensity = rho;
   return *this;
 }
 
@@ -129,7 +130,8 @@ MaterialBuilder &MaterialBuilder::setNumberDensityUnit(NumberDensityUnit unit) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setEffectiveNumberDensity(double rho_eff) {
-  m_numberDensityEff = rho_eff;
+  if (rho_eff != Mantid::EMPTY_DBL())
+    m_numberDensityEff = rho_eff;
   return *this;
 }
 
@@ -138,7 +140,8 @@ MaterialBuilder &MaterialBuilder::setEffectiveNumberDensity(double rho_eff) {
  * infer the effective number density
  */
 MaterialBuilder &MaterialBuilder::setPackingFraction(double fraction) {
-  m_packingFraction = fraction;
+  if (fraction != Mantid::EMPTY_DBL())
+    m_packingFraction = fraction;
   return *this;
 }
 
@@ -321,6 +324,10 @@ MaterialBuilder::density_packing MaterialBuilder::getOrCalculateRhoAndPacking(
   // get the packing fraction
   if (m_packingFraction)
     result.packing_fraction = m_packingFraction.get();
+
+  // if effective density has been specified
+  if (m_numberDensityEff)
+    result.effective_number_density = m_numberDensityEff.get();
 
   // total number of atoms is used in both density calculations
   const double totalNumAtoms =
