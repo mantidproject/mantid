@@ -54,9 +54,7 @@ extensions = [
 # Deal with math extension. Can be overridden with MATH_EXT environment variable
 # If set to imgmath we deal with the fact that < 1.8 is was called pngmath
 mathext = os.environ.get('MATH_EXT', 'sphinx.ext.imgmath')
-if LooseVersion(sphinx_version) >= LooseVersion("1.1"):  # use mathjax by default
-    extensions.append('sphinx.ext.mathjax')
-elif mathext.endswith('imgmath') and LooseVersion(sphinx_version) <= LooseVersion("1.8"):
+if mathext.endswith('imgmath') and LooseVersion(sphinx_version) <= LooseVersion("1.8"):
     extensions.append('sphinx.ext.pngmath')
 else:
     extensions.append(mathext)
