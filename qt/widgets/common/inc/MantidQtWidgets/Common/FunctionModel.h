@@ -8,11 +8,14 @@
 
 #include "DllOption.h"
 
+#include "Dataset.h"
 #include "IFunctionModel.h"
 #include "MantidAPI/IFunction.h"
 
+#include <QList>
 #include <QString>
 #include <QStringList>
+#include <QVector>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -80,10 +83,11 @@ protected:
   MultiDomainFunction_sptr m_function;
 
 private:
+  void checkDatasetDomainNames(QStringList &datasetDomainNames) const;
   void checkIndex(int) const;
   void updateGlobals();
   size_t m_currentDomainIndex = 0;
-  mutable QStringList m_datasetNames;
+  mutable QVector<Dataset> m_datasets;
   mutable QStringList m_globalParameterNames;
 };
 

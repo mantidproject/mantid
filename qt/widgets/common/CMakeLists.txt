@@ -11,6 +11,7 @@ set(
   src/BatchAlgorithmRunner.cpp
   src/BoolPropertyWidget.cpp
   src/DataSelector.cpp
+  src/Dataset.cpp
   src/DropEventHelper.cpp
   src/EditLocalParameterDialog.cpp
   src/FileDialogHandler.cpp
@@ -246,6 +247,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
     inc/MantidQtWidgets/Common/AlternateCSPythonLexer.h
     inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
+    inc/MantidQtWidgets/Common/Dataset.h
     inc/MantidQtWidgets/Common/DropEventHelper.h
     inc/MantidQtWidgets/Common/FileDialogHandler.h
     inc/MantidQtWidgets/Common/FlowLayout.h
@@ -327,6 +329,7 @@ set(
   src/AlternateCSPythonLexer.cpp
   src/BatchAlgorithmRunner.cpp
   src/BoolPropertyWidget.cpp
+  src/Dataset.cpp
   src/DropEventHelper.cpp
   src/EditLocalParameterDialog.cpp
   src/FileDialogHandler.cpp
@@ -623,6 +626,7 @@ set(
   inc/MantidQtWidgets/Common/AlgorithmDialogFactory.h
   inc/MantidQtWidgets/Common/BatchAlgorithmRunner.h
   inc/MantidQtWidgets/Common/Configurable.h
+  inc/MantidQtWidgets/Common/Dataset.h
   inc/MantidQtWidgets/Common/DllOption.h
   inc/MantidQtWidgets/Common/DropEventHelper.h
   inc/MantidQtWidgets/Common/FileDialogHandler.h

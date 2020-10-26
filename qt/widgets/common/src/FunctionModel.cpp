@@ -276,17 +276,22 @@ void FunctionModel::setDatasets(const QStringList &datasetNames) {
     throw std::runtime_error(
         "Number of dataset names doesn't match the number of domains.");
   }
-  m_datasetNames = datasetNames;
+
+  QVector<Dataset> datasets;
+  for (const auto &datasetName : datasetNames)
+    datasets << Dataset(datasetName, QList<std::size_t>({0u}));
+
+  m_datasets = datasets;
 }
 
 QStringList FunctionModel::getDatasetNames() const {
-  if (static_cast<size_t>(m_datasetNames.size()) != m_numberDomains) {
-    m_datasetNames.clear();
-    for (size_t i = 0; i < m_numberDomains; ++i) {
-      m_datasetNames << QString::number(i);
-    }
-  }
-  return m_datasetNames;
+  QStringList datasetDomainNames;
+  for (const auto &dataset : m_datasets)
+    datasetDomainNames << dataset.getDatasetDomainNames();
+
+  checkDatasetDomainNames(datasetDomainNames);
+
+  return datasetDomainNames;
 }
 
 int FunctionModel::getNumberDomains() const {
@@ -444,6 +449,16 @@ void FunctionModel::checkIndex(int index) const {
     throw std::runtime_error(
         "Domain index is out of range: " + std::to_string(index) + " out of " +
         std::to_string(getNumberDomains()));
+  }
+}
+
+/// Check the number of domain names is equal to the number of domains
+void FunctionModel::checkDatasetDomainNames(
+    QStringList &datasetDomainNames) const {
+  if (static_cast<std::size_t>(datasetDomainNames.size()) != m_numberDomains) {
+    datasetDomainNames.clear();
+    for (auto i = 0u; i < m_numberDomains; ++i)
+      datasetDomainNames << QString::number(i);
   }
 }
 
