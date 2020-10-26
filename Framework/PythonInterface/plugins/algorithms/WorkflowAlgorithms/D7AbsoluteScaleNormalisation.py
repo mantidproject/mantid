@@ -350,16 +350,21 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
         single_efficiency_per_POL = False
         if mtd[ws].getNumberOfEntries() != mtd[det_efficiency_ws].getNumberOfEntries():
             single_efficiency_per_POL = True
+        tmp_names = []
         for entry_no, entry in enumerate(mtd[ws]):
             det_eff_entry_no = int(entry_no / 2)
             if single_efficiency_per_POL:
                 det_eff_entry_no = int(entry_no / 2)
                 if entry_no % 2 != 0:
                     det_eff_entry_no -= 1
+            ws_name = entry.name() + '_normalised'
+            tmp_names.append(ws_name)
             Multiply(LHSWorkspace=entry,
                      RHSWorkspace=mtd[det_efficiency_ws][det_eff_entry_no],
-                     OutputWorkspace=entry)
-        return ws
+                     OutputWorkspace=ws_name)
+        output_name = self.getPropertyValue('OutputWorkspace')
+        GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_name)
+        return output_name
 
     def PyExec(self):
         input_ws = self.getPropertyValue('InputWorkspace')
