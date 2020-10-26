@@ -131,8 +131,9 @@ void ReadMaterial::setMaterialParameters(const MaterialParameters &params) {
       massDensity = params.mass / params.volume;
   }
 
-  setNumberDensity(massDensity, params.numberDensity, params.packingFraction, params.numberDensityUnit,
-                   params.zParameter, params.unitCellVolume);
+  setNumberDensity(massDensity, params.numberDensity, params.packingFraction,
+                   params.numberDensityUnit, params.zParameter,
+                   params.unitCellVolume);
   setScatteringInfo(params.coherentXSection, params.incoherentXSection,
                     params.attenuationXSection, params.scatteringXSection,
                     params.attenuationProfileFileName);
@@ -169,11 +170,11 @@ void ReadMaterial::setNumberDensity(
     builder.setZParameter(zParameter);
     builder.setUnitCellVolume(unitCellVolume);
   }
-  if(!isEmpty(rho)) {
+  if (!isEmpty(rho)) {
     builder.setNumberDensity(rho);
     builder.setNumberDensityUnit(rhoUnit);
   }
-  if(!isEmpty(pFrac)) {
+  if (!isEmpty(pFrac)) {
     builder.setPackingFraction(pFrac);
   }
 }

@@ -57,7 +57,8 @@ void SetSampleMaterial::init() {
       "This number density of the sample in number of "
       "atoms or formula units per cubic Angstrom will be used instead of "
       "calculated");
-  declareProperty("SampleEffectiveNumberDensity", EMPTY_DBL(), mustBePositive,
+  declareProperty(
+      "SampleEffectiveNumberDensity", EMPTY_DBL(), mustBePositive,
       "Defines the effective number density of the sample, which is "
       "related to the number density and packing fraction.");
   auto packingValidator = std::make_shared<BoundedValidator<double>>();
@@ -65,7 +66,8 @@ void SetSampleMaterial::init() {
   packingValidator->setLower(0.0);
   packingValidator->setUpper(2.0);
   packingValidator->setUpperExclusive(false);
-  declareProperty("SamplePackingFraction", 1.0, packingValidator,
+  declareProperty(
+      "SamplePackingFraction", 1.0, packingValidator,
       "Defines the packing fraction of the sample which can be used "
       "to calculate the number density and the effective number density");
   declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,

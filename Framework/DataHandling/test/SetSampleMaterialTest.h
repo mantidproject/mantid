@@ -70,7 +70,8 @@ public:
     // can get away with holding pointer as it is an inout ws property
     const auto sampleMaterial = testWS->sample().getMaterial();
     TS_ASSERT_DELTA(sampleMaterial.numberDensity(), 0.1183245, 0.0001);
-    TS_ASSERT_EQUALS(sampleMaterial.numberDensityEffective(), sampleMaterial.numberDensity())
+    TS_ASSERT_EQUALS(sampleMaterial.numberDensityEffective(),
+                     sampleMaterial.numberDensity())
     TS_ASSERT_EQUALS(sampleMaterial.packingFraction(), 1.0)
     TS_ASSERT_DELTA(sampleMaterial.totalScatterXSection(), 3.1404, 0.0001);
     TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
@@ -117,7 +118,8 @@ public:
     // can get away with holding pointer as it is an inout ws property
     const auto sampleMaterial = testWS->sample().getMaterial();
     TS_ASSERT_DELTA(sampleMaterial.numberDensity(), 0.1183245, 0.0001);
-    TS_ASSERT_EQUALS(sampleMaterial.numberDensityEffective(), sampleMaterial.numberDensity())
+    TS_ASSERT_EQUALS(sampleMaterial.numberDensityEffective(),
+                     sampleMaterial.numberDensity())
     TS_ASSERT_EQUALS(sampleMaterial.packingFraction(), 1.0)
     TS_ASSERT_DELTA(sampleMaterial.totalScatterXSection(), 3.1404, 0.0001);
     TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
@@ -156,7 +158,8 @@ public:
     // can get away with holding pointer as it is an inout ws property
     const auto sampleMaterial = testWS->sample().getMaterial();
     TS_ASSERT_DELTA(sampleMaterial.numberDensity(), 0.1183245, 0.0001);
-    TS_ASSERT_EQUALS(sampleMaterial.numberDensityEffective(), sampleMaterial.numberDensity())
+    TS_ASSERT_EQUALS(sampleMaterial.numberDensityEffective(),
+                     sampleMaterial.numberDensity())
     TS_ASSERT_EQUALS(sampleMaterial.packingFraction(), 1.0)
     TS_ASSERT_DELTA(sampleMaterial.totalScatterXSection(), 4.0852, 0.0001);
     TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
@@ -200,7 +203,8 @@ public:
 
     const auto sampleMaterial = testWS->sample().getMaterial();
     TS_ASSERT_DELTA(sampleMaterial.numberDensity(), 0.1183245, 0.0001);
-    TS_ASSERT_EQUALS(sampleMaterial.numberDensityEffective(), sampleMaterial.numberDensity())
+    TS_ASSERT_EQUALS(sampleMaterial.numberDensityEffective(),
+                     sampleMaterial.numberDensity())
     TS_ASSERT_EQUALS(sampleMaterial.packingFraction(), 1.0)
     TS_ASSERT_DELTA(sampleMaterial.totalScatterXSection(), 3.1404, 0.0001);
     TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
@@ -240,7 +244,8 @@ public:
 
     const auto sampleMaterial = testWS->sample().getMaterial();
     TS_ASSERT_DELTA(sampleMaterial.numberDensity(), 0.0913375, 0.0001);
-    TS_ASSERT_EQUALS(sampleMaterial.numberDensityEffective(), sampleMaterial.numberDensity())
+    TS_ASSERT_EQUALS(sampleMaterial.numberDensityEffective(),
+                     sampleMaterial.numberDensity())
     TS_ASSERT_EQUALS(sampleMaterial.packingFraction(), 1.0)
     TS_ASSERT_DELTA(sampleMaterial.totalScatterXSection(), 18.5, 0.0001);
     TS_ASSERT_DELTA(sampleMaterial.absorbXSection(NeutronAtom::ReferenceLambda),
