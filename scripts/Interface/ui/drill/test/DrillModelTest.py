@@ -347,10 +347,10 @@ class DrillModelTest(unittest.TestCase):
         prop.documentation = "test doc"
         alg.getProperty.return_value = prop
         types, values, docs = self.model.getSettingsTypes()
-        self.assertDictEqual(types, {"str": "array",
-                                     "int": "array",
-                                     "float": "array",
-                                     "bool": "array"})
+        self.assertDictEqual(types, {"str": "floatArray",
+                                     "int": "floatArray",
+                                     "float": "floatArray",
+                                     "bool": "floatArray"})
         self.assertDictEqual(values, {"str": ["test", "test"],
                                       "int": ["test", "test"],
                                       "float": ["test", "test"],
