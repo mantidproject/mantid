@@ -714,7 +714,7 @@ class DrillModel(QObject):
         # groups
         self.groups = dict()
         if "Groups" in json_data and json_data["Groups"]:
-            for k,v in json_data["Groups"]:
+            for k,v in json_data["Groups"].items():
                 self.groups[k] = set(v)
         if "GroupsMaster" in json_data and json_data["GroupsMaster"]:
             self.masterSample = json_data["GroupsMaster"]
