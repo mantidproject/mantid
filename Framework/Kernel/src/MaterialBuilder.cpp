@@ -122,6 +122,18 @@ MaterialBuilder &MaterialBuilder::setNumberDensityUnit(NumberDensityUnit unit) {
 }
 
 /**
+ * Set the effective number density of the sample in atoms or formula units /
+ * Angstrom^3
+ * @param rho_eff effective density of the sample in atoms or formula units /
+ * Angstrom^3
+ * @return A reference to the this object to allow chaining
+ */
+MaterialBuilder &MaterialBuilder::setEffectiveNumberDensity(double rho_eff) {
+  m_numberDensityEff = rho_eff;
+  return *this;
+}
+
+/**
  * Set the packing fraction of the material (default is 1). This is used to
  * infer the effective number density
  */

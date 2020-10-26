@@ -95,7 +95,7 @@ void SetSampleMaterial::init() {
       "The path name of the file containing the attenuation profile");
   declareProperty("SampleMassDensity", EMPTY_DBL(), mustBePositive,
                   "Measured mass density in g/cubic cm of the sample "
-                  "to be used to calculate the number density.");
+                  "to be used to calculate the effective number density.");
   declareProperty(
       "SampleMass", EMPTY_DBL(), mustBePositive,
       "Measured mass in g of the sample. This is used with the SampleVolume "

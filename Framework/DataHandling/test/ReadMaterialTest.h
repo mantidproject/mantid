@@ -247,6 +247,25 @@ public:
                      "be specified at most.")
   }
 
+  void testFailureValidateInputsEffectiveWithMass() {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.atomicNumber = 1;
+      setMaterial.massDensity = 1;
+      setMaterial.numberDensityEffective = 1;
+      return setMaterial;
+    }
+    ();
+
+    auto result = ReadMaterial::validateInputs(params);
+
+    TS_ASSERT_EQUALS(
+        result["EffectiveNumberDensity"],
+        "Cannot set effective number density when the mass density "
+        "is specified. The value specified will be overwritten "
+        "because it will be computed from the mass density.");
+  }
+
   void testFailureValidateInputsLargePackingFrac() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;

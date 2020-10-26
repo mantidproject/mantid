@@ -93,6 +93,17 @@ ReadMaterial::validateInputs(const MaterialParameters &params) {
     }
   }
 
+  // Effective num density will be overwritten in MaterialBuilder if mass
+  // density is set
+  if (!isEmpty(params.massDensity)) {
+    if (!isEmpty(params.numberDensityEffective)) {
+      result["EffectiveNumberDensity"] =
+          "Cannot set effective number density when the mass density "
+          "is specified. The value specified will be overwritten "
+          "because it will be computed from the mass density.";
+    }
+  }
+
   // Bounds check the packing fraction number [0, 2)
   if (!isEmpty(params.packingFraction)) {
     if (params.packingFraction >= 2.0) {
@@ -131,7 +142,8 @@ void ReadMaterial::setMaterialParameters(const MaterialParameters &params) {
       massDensity = params.mass / params.volume;
   }
 
-  setNumberDensity(massDensity, params.numberDensity, params.packingFraction,
+  setNumberDensity(massDensity, params.numberDensity,
+                   params.numberDensityEffective, params.packingFraction,
                    params.numberDensityUnit, params.zParameter,
                    params.unitCellVolume);
   setScatteringInfo(params.coherentXSection, params.incoherentXSection,
@@ -159,9 +171,9 @@ void ReadMaterial::setMaterial(const std::string &chemicalSymbol,
 }
 
 void ReadMaterial::setNumberDensity(
-    const double rho_m, const double rho, const double pFrac,
-    Kernel::MaterialBuilder::NumberDensityUnit rhoUnit, const double zParameter,
-    const double unitCellVolume) {
+    const double rho_m, const double rho, const double rho_eff,
+    const double pFrac, Kernel::MaterialBuilder::NumberDensityUnit rhoUnit,
+    const double zParameter, const double unitCellVolume) {
   if (!isEmpty(rho_m))
     builder.setMassDensity(rho_m);
 
@@ -173,6 +185,9 @@ void ReadMaterial::setNumberDensity(
   if (!isEmpty(rho)) {
     builder.setNumberDensity(rho);
     builder.setNumberDensityUnit(rhoUnit);
+  }
+  if (!isEmpty(rho_eff)) {
+    builder.setEffectiveNumberDensity(rho_eff);
   }
   if (!isEmpty(pFrac)) {
     builder.setPackingFraction(pFrac);
