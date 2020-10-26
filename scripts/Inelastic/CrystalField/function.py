@@ -285,50 +285,45 @@ class Background(object):
     background.
     """
 
-    def __init__(self, peak=None, background=None):
+    def __init__(self, peak=None, background=None, functions=[]):
         """
         Initialise new instance.
-        @param peak: An instance of Function class meaning to be the elastic peak.
-        @param background: An instance of Function class serving as the background.
+        @param peak: An instance of Function class meaning to be the elastic peak (remains for backward-compatibility).
+        @param background: An instance of Function class serving as the background (remains for backward-compatibility).
+        @param functions: A list of Function class instances which make up the background.
         """
         self.peak = peak
         self.background = background
 
-    def clone(self):
-        """Make a copy of self."""
-        aCopy = Background()
+        self.functions = []
         if self.peak is not None:
-            aCopy.peak = self.peak.clone()
+            self.functions.append(self.peak)
         if self.background is not None:
-            aCopy.background = self.background.clone()
-        return aCopy
+            self.functions.append(self.background)
+        self.functions.extend(functions)
 
     def toString(self):
-        if self.peak is None and self.background is None:
+        """Returns the Background object in string format."""
+        if len(self.functions) == 0:
             return ''
-        if self.peak is None:
-            return self.background.toString()
-        if self.background is None:
-            return self.peak.toString()
-        return '(%s;%s)' % (self.peak.toString(), self.background.toString())
+        elif len(self.functions) == 1:
+            return self.functions[0].toString()
+        else:
+            return '(' + ';'.join([function.toString() for function in self.functions]) + ')'
 
-    def update(self, func1, func2=None):
+    def update(self, func, index=0):
         """
         Update values of the fitting parameters. If both arguments are given
             the first one updates the peak and the other updates the background.
 
-        @param func1: First IFunction object containing new parameter values.
-        @param func2: Second IFunction object containing new parameter values.
+        @param func: The IFunction object containing new parameter values.
+        @param index: The index of the function to update in the Background object.
         """
-        if func2 is not None:
-            if self.peak is None or self.background is None:
-                raise RuntimeError('Background has peak or background undefined.')
-            self.peak.update(func1)
-            self.background.update(func2)
-        elif self.peak is None:
-            self.background.update(func1)
+        if index < len(self.functions):
+            self.functions[index].update(func)
         else:
-            self.peak.update(func1)
+            raise ValueError(f"Invalid index ({index}) provided: Background is made of {len(self.functions)} "
+                             f"Function(s).")
 
 
 class ResolutionModel:
