@@ -34,6 +34,8 @@ cross-sections from the provided input :ref:`WorkspaceGroup <WorkspaceGroup>`.
 
 1. Uniaxial
 
+At least two separate measurements along the same axis with opposite spin orientations are needed for this method to work. Usually, the measured axis is the 'Z' axis that is colinear with the beam axis, thus the spin-flip and non-spin-flip cross-sections are measured along the longitudinal axis. This method does not allow for separation of magnetic cross-section.
+
 .. math::
 
       N = 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}} - \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}}
@@ -44,6 +46,8 @@ cross-sections from the provided input :ref:`WorkspaceGroup <WorkspaceGroup>`.
 In this case, the magnetic cross-section cannot be separated from data.
 
 2. XYZ
+
+This method is an expansion of the Uniaxial method, that requires measurements of spin-flip and non-spin-flip cross-sections along three orthogonal axes. This method allows for separation of magnetic cross-section from nuclear coherent and spin-incoherent.
 
 .. math::
 
@@ -56,6 +60,8 @@ In this case, the magnetic cross-section cannot be separated from data.
       I = \frac{1}{2} \cdot \left(\left(\frac{\text{d}\sigma_{x}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{y}}{\text{d}\Omega}\right)_{\text{sf}} + \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} - M \right)
 
 3. 10-point
+
+The 10-point method is an expansion of the XYZ method, that requires measurements of spin-flip and non-spin-flip cross-sections along three orthogonal axes as in the XYZ and two additional axes that are rotated by 45 degrees around the Z axis, labelled `'x-y'` and `'x+y'`. Similarly to the XYZ method, it is possible to separate magnetic cross-section from nuclear coherent and spin-incoherent ones, and additionally the method offers a possibility to separate the magnetic cross-section and the term dependent on azimuthal angle.
 
 .. math::
 
