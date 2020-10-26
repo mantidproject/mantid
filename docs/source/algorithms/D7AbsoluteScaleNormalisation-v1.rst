@@ -23,14 +23,14 @@ Three ways of sample data normalisation are supported: `Vanadium`, `Paramagnetic
 or from the cross-section separation (magnetic and spin-incoherent respectively) is used. This step can also be skipped by setting `NormalisationMethod` parameter
 to `'None'`.
 
-This algorithm is indended to be invoked on sample data that is fully corrected and needs to be normalised to the absolute scale..
+This algorithm is indended to be invoked on sample data that is fully corrected and needs to be normalised to the absolute scale.
 
 Cross-section separation method
 ###############################
 
 Below are presented formulae used to separate magnetic (M), nuclear coherent (N), and spin-incoherent (I) cross-sections using
 spin-flip :math:`\left(\frac{d\sigma}{d\Omega}\right)_{\text{sf}}` and non-spin-flip :math:`\left(\frac{d\sigma}{d\Omega}\right)_{\text{nsf}}`
-cross-sections from the provided input :ref:`WorkspaceGroup <WorkspaceGroup>`. 
+cross-sections from the provided input :ref:`WorkspaceGroup <WorkspaceGroup>`.
 
 1. Uniaxial
 
@@ -42,7 +42,7 @@ At least two separate measurements along the same axis with opposite spin orient
 
       I = 2 \cdot \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{sf}} - \left(\frac{\text{d}\sigma_{z}}{\text{d}\Omega}\right)_{\text{nsf}}
 
-      
+
 In this case, the magnetic cross-section cannot be separated from data.
 
 2. XYZ
@@ -136,7 +136,7 @@ Usage
 
    Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz')
    D7AbsoluteScaleNormalisation(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
-                          OutputWorkspace='xyz')
+                                OutputWorkspace='xyz')
    print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
    SumSpectra(InputWorkspace=mtd['xyz'][1], EndWorkspaceIndex=mtd['xyz'][1].getNumberHistograms()-1,
               OutputWorkspace='sum_incoherent')
@@ -156,7 +156,51 @@ Output:
 
    mtd.clear()
 
-	
+
+**Example - D7AbsoluteScaleNormalisation - Sample normalisation to vanadium data**
+
+.. testcode:: ExD7AbsoluteScaleNormalisation_vanadium_normalisation
+
+   Load('396993_reduced.nxs', OutputWorkspace='vanadium_data')
+   Load('397004_reduced.nxs', OutputWorkspace='sample_data')
+   D7AbsoluteScaleNormalisation(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_vanadium',
+                                CrossSectionSeparationMethod='XYZ', NormalisationMethod='Vanadium',
+                                VanadiumInputWorkspace='vanadium_data', AbsoluteUnitsNormalisation=False)
+   print("The number of entries in the normalised data is: {}".format(mtd['normalised_sample_vanadium'].getNumberOfEntries()))
+
+
+Output:
+
+.. testoutput:: ExD7AbsoluteScaleNormalisation_vanadium_normalisation
+
+   The number of entries in the normalised data is: 6
+
+.. testcleanup:: ExD7AbsoluteScaleNormalisation_vanadium_normalisation
+
+   mtd.clear()
+
+
+**Example - D7AbsoluteScaleNormalisation - Sample normalisation to paramagnetic cross-section**
+
+.. testcode:: ExD7AbsoluteScaleNormalisation_paramagnetic_normalisation
+
+   Load('397004_reduced.nxs', OutputWorkspace='sample_data')
+   D7AbsoluteScaleNormalisation(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_magnetic',
+                                CrossSectionSeparationMethod='XYZ', NormalisationMethod='Paramagnetic',
+                                SampleSpin = 0.5, AbsoluteUnitsNormalisation=False)
+   print("The number of entries in the normalised data is: {}".format(mtd['normalised_sample_magnetic'].getNumberOfEntries()))
+		
+Output:
+
+.. testoutput:: ExD7AbsoluteScaleNormalisation_paramagnetic_normalisation
+
+   The number of entries in the normalised data is: 6
+
+.. testcleanup:: ExD7AbsoluteScaleNormalisation_paramagnetic_normalisation
+
+   mtd.clear()
+
+
 References
 ----------
 
