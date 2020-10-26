@@ -151,10 +151,6 @@ MaterialBuilder &MaterialBuilder::setPackingFraction(double fraction) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setZParameter(double zparam) {
-  if (m_massDensity) {
-    throw std::runtime_error("MaterialBuilder::setZParameter() - Mass density "
-                             "already set, cannot use Z parameter as well.");
-  }
   m_zParam = zparam;
   return *this;
 }
@@ -165,11 +161,6 @@ MaterialBuilder &MaterialBuilder::setZParameter(double zparam) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setUnitCellVolume(double cellVolume) {
-  if (m_massDensity) {
-    throw std::runtime_error(
-        "MaterialBuilder::setUnitCellVolume() - Mass density "
-        "already set, cannot use unit cell volume as well.");
-  }
   m_cellVol = cellVolume;
   return *this;
 }
@@ -180,15 +171,6 @@ MaterialBuilder &MaterialBuilder::setUnitCellVolume(double cellVolume) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setMassDensity(double massDensity) {
-  if (m_zParam) {
-    throw std::runtime_error("MaterialBuilder::setMassDensity() - Z parameter "
-                             "already set, cannot use mass density as well.");
-  }
-  if (m_cellVol) {
-    throw std::runtime_error(
-        "MaterialBuilder::setMassDensity() - Unit cell "
-        "volume already set, cannot use mass density as well.");
-  }
   m_massDensity = massDensity;
   return *this;
 }
