@@ -37,7 +37,6 @@ public:
 class GUIRegistryImpl {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/GUIRegistry.h"
-#include "MantidPythonInterface/core/PythonObjectInstantiator.h"
 #include <boost/python/extract.hpp>
 %End
 public:
