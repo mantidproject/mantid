@@ -207,7 +207,10 @@ class GroupingTabPresenter(object):
         self.calculation_finished_notifier.notify_subscribers()
 
     def handle_default_grouping_button_clicked(self):
-        self._model.reset_groups_and_pairs_to_default()
+        status = self._model.reset_groups_and_pairs_to_default()
+        if status == "failed":
+            self._view.display_warning_box("The default may depend on the instrument. Please load a run.")
+            return
         self._model.reset_selected_groups_and_pairs()
         self.grouping_table_widget.update_view_from_model()
         self.pairing_table_widget.update_view_from_model()
