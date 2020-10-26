@@ -19,6 +19,17 @@ import math
 
 class D7AbsoluteScaleNormalisation(PythonAlgorithm):
 
+    @staticmethod
+    def _max_value_per_detector(ws):
+        if isinstance(mtd[ws], WorkspaceGroup):
+            max_values = np.zeros(shape=(mtd[ws][0].getNumberHistograms(),
+                                         mtd[ws].getNumberOfEntries()))
+            for entry_no, entry in enumerate(mtd[ws]):
+                max_values[:, entry_no] = entry.extractY().T
+        else:
+            max_values = mtd[ws].extractY().T
+        return np.amax(max_values, axis=1)
+
     def category(self):
         return 'ILL\\Diffraction'
 

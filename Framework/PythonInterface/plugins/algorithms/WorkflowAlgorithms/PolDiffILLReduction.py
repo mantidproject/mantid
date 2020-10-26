@@ -26,14 +26,6 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     _DEG_2_RAD =  np.pi / 180.0
 
-    @staticmethod
-    def _max_value_per_detector(ws):
-        max_values = np.zeros(shape=(mtd[ws][0].getNumberHistograms(),
-                                     mtd[ws].getNumberOfEntries()))
-        for entry_no, entry in enumerate(mtd[ws]):
-            max_values[:, entry_no] = entry.extractY().T
-        return np.amax(max_values, axis=1)
-
     def category(self):
         return 'ILL\\Diffraction'
 
