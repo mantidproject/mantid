@@ -152,7 +152,7 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
         measurements = set()
         for name in mtd[ws].getNames():
             last_underscore = name.rfind("_")
-            measurements.add(name[last_underscore:])
+            measurements.add(name[last_underscore+1:])
         nMeasurements = len(measurements)
         error_msg = "The provided data cannot support {} measurement component separation."
         if nMeasurements == 10:
@@ -239,15 +239,19 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
                                 Nspec=mtd[ws][entry_no].getNumberHistograms(),
                                 OutputWorkspace=tmp_name)
         output_name = ws + '_separated_cs'
-        # output_name = self.getPropertyValue('OutputWorkspace')
         GroupWorkspaces(tmp_names, OutputWorkspace=output_name)
         return output_name
 
-    def _conjoin_components(self, ws):
+    def _conjoin_cross_sections(self, ws):
         """Conjoins the component workspaces coming from a theta scan."""
         components = [[], []]
         componentNames = ['Incoherent', 'Coherent', 'Magnetic']
-        if self._user_method in ['10p', 'XYZ']:
+        user_method = self.getPropertyValue('CrossSectionSeparationMethod')
+        if (mtd[ws].getNumberOfEntries() == 2 and user_method == 'Uniaxial'
+            or mtd[ws].getNumberOfEntries() == 3 and user_method != 'Uniaxial'):
+            return ws
+
+        if user_method in ['10p', 'XYZ']:
             components.append([])
         for entry in mtd[ws]:
             entryName = entry.name()
@@ -357,7 +361,7 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
                 output_ws = input_ws
         else:
             if normalisation_method != 'Vanadium':
-                det_efficiency_input = self._conjoin_components(component_ws)
+                det_efficiency_input = self._conjoin_cross_sections(component_ws)
             else:
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
             det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
