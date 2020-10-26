@@ -489,8 +489,8 @@ void ConvFunctionModel::setDatasets(const QStringList &datasetNames) {
   m_model.setDatasets(datasetNames);
 }
 
-QStringList ConvFunctionModel::getDatasetNames() const {
-  return m_model.getDatasetNames();
+std::vector<DatasetDomain> ConvFunctionModel::getDatasetDomains() const {
+  return m_model.getDatasetDomains();
 }
 
 double ConvFunctionModel::getLocalParameterValue(const QString &parName,

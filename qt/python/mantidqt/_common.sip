@@ -873,7 +873,6 @@ public:
     void setDatasets(const QStringList &datasetNames);
     void addDatasets(const QStringList &names);
     void removeDatasets(QList<int> indices);
-    QStringList getDatasetNames() const;
     void setErrorsEnabled(bool enabled);
     void hideGlobalCheckbox();
     void showGlobalCheckbox();

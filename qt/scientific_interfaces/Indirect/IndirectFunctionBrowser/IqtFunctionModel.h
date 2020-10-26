@@ -12,6 +12,8 @@
 #include "MantidQtWidgets/Common/FunctionModel.h"
 #include "ParameterEstimation.h"
 
+#include <vector>
+
 #include <QMap>
 #include <boost/optional.hpp>
 
@@ -40,7 +42,7 @@ public:
   IFunction_sptr getCurrentFunction() const override;
   void setNumberDomains(int) override;
   void setDatasets(const QStringList &datasetNames) override;
-  QStringList getDatasetNames() const override;
+  std::vector<DatasetDomain> getDatasetDomains() const override;
   int getNumberDomains() const override;
   void setCurrentDomainIndex(int i) override;
   int currentDomainIndex() const override;

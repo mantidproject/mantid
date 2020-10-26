@@ -72,7 +72,7 @@ private slots:
   void viewChangedParameterValue(const QString &parName, double value);
 
 private:
-  QStringList getDatasetNames() const;
+  std::vector<MantidWidgets::DatasetDomain> getDatasetDomains() const;
   double getLocalParameterValue(const QString &parName, int i) const;
   bool isLocalParameterFixed(const QString &parName, int i) const;
   QString getLocalParameterTie(const QString &parName, int i) const;

@@ -15,7 +15,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-struct DatasetDomain {
+struct EXPORT_OPT_MANTIDQT_COMMON DatasetDomain {
   DatasetDomain();
   DatasetDomain(QString const &workspaceName, std::size_t const &spectrumNumber,
                 bool isOnlySpectrum = true);

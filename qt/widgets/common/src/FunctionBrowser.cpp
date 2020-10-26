@@ -148,8 +148,8 @@ int FunctionBrowser::getNumberOfDatasets() const {
 }
 
 /// Get the names of datasets
-QStringList FunctionBrowser::getDatasetNames() const {
-  return m_presenter->getDatasetNames();
+std::vector<DatasetDomain> FunctionBrowser::getDatasetDomains() const {
+  return m_presenter->getDatasetDomains();
 }
 
 /// Set new number of the datasets
@@ -205,12 +205,9 @@ void FunctionBrowser::removeDatasets(const QList<int> &indices) {
 }
 
 /// Add some datasets to those already set.
-/// @param names :: A list of names fr the new datasets.
+/// @param names :: A list of names for the new datasets.
 void FunctionBrowser::addDatasets(const QStringList &names) {
-  auto allNames = m_presenter->getDatasetNames();
-  allNames.append(names);
-  m_presenter->setNumberOfDatasets(allNames.size());
-  m_presenter->setDatasets(allNames);
+  m_presenter->addDatasets(names);
 }
 
 /// Return the multidomain function for multi-dataset fitting

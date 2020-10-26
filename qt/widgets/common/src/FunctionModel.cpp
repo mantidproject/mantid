@@ -12,6 +12,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 
+#include <utility>
+
 namespace {
 Mantid::Kernel::Logger g_log("FitFunction");
 }
@@ -272,7 +274,7 @@ void FunctionModel::setNumberDomains(int nDomains) {
 }
 
 void FunctionModel::setDatasets(const QStringList &datasetNames) {
-  if (static_cast<size_t>(datasetNames.size()) != m_numberDomains) {
+  if (static_cast<std::size_t>(datasetNames.size()) != m_numberDomains) {
     throw std::runtime_error(
         "Number of dataset names doesn't match the number of domains.");
   }
@@ -283,6 +285,29 @@ void FunctionModel::setDatasets(const QStringList &datasetNames) {
     domains.emplace_back(DatasetDomain(datasetName, 0));
 
   m_domains = domains;
+}
+
+void FunctionModel::addDatasets(const QStringList &datasetNames) {
+  for (const auto &datasetName : datasetNames)
+    m_domains.emplace_back(DatasetDomain(datasetName, 0));
+
+  setNumberDomains(static_cast<int>(m_domains.size()));
+}
+
+void FunctionModel::removeDatasets(QList<int> &indices) {
+  // Sort in reverse order
+  qSort(indices.begin(), indices.end(), [](int a, int b) { return a > b; });
+  for (auto i = indices.constBegin(); i != indices.constEnd(); ++i)
+    m_domains.erase(m_domains.begin() + *i);
+
+  const auto numberOfDomains = static_cast<int>(m_domains.size());
+  setNumberDomains(numberOfDomains);
+
+  auto currentIndex = currentDomainIndex();
+  if (currentIndex >= numberOfDomains) {
+    currentIndex = m_domains.empty() ? 0 : numberOfDomains - 1;
+  }
+  setCurrentDomainIndex(currentIndex);
 }
 
 std::vector<DatasetDomain> FunctionModel::getDatasetDomains() const {

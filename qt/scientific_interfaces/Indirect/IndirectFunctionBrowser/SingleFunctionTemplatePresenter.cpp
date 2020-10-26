@@ -147,8 +147,9 @@ void SingleFunctionTemplatePresenter::estimateFunctionParameters() {
   updateView();
 }
 
-QStringList SingleFunctionTemplatePresenter::getDatasetNames() const {
-  return m_model.getDatasetNames();
+std::vector<DatasetDomain>
+SingleFunctionTemplatePresenter::getDatasetDomains() const {
+  return m_model.getDatasetDomains();
 }
 
 double
@@ -200,12 +201,12 @@ void SingleFunctionTemplatePresenter::setLocalParameterFixed(
 
 void SingleFunctionTemplatePresenter::editLocalParameter(
     const QString &parName) {
-  auto const wsNames = getDatasetNames();
+  auto const datasetDomains = getDatasetDomains();
   QList<double> values;
   QList<bool> fixes;
   QStringList ties;
   QStringList constraints;
-  const int n = wsNames.size();
+  const int n = static_cast<int>(datasetDomains.size());
   for (auto i = 0; i < n; ++i) {
     const double value = getLocalParameterValue(parName, i);
     values.push_back(value);
@@ -218,7 +219,7 @@ void SingleFunctionTemplatePresenter::editLocalParameter(
   }
 
   m_editLocalParameterDialog = new EditLocalParameterDialog(
-      m_view, parName, wsNames, values, fixes, ties, constraints);
+      m_view, parName, datasetDomains, values, fixes, ties, constraints);
   connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this,
           SLOT(editLocalParameterFinish(int)));
   m_editLocalParameterDialog->open();

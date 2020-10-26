@@ -50,7 +50,8 @@ public:
   boost::optional<QString> currentFunctionIndex() const;
   void setNumberOfDatasets(int);
   void setDatasets(const QStringList &datasetNames);
-  QStringList getDatasetNames() const;
+  void addDatasets(const QStringList &datasetNames);
+  std::vector<DatasetDomain> getDatasetDomains() const;
   int getNumberOfDatasets() const;
   int getCurrentDataset() const;
   void setCurrentDataset(int);

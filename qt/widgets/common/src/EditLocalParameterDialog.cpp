@@ -12,6 +12,7 @@
 #include <QClipboard>
 #include <QMenu>
 #include <QMessageBox>
+#include <algorithm>
 #include <limits>
 #include <utility>
 
@@ -28,25 +29,26 @@ namespace MantidWidgets {
  * Constructor used inside and outside of MultiDatasetFit interface
  * @param parent :: [input] Parent widget of this dialog
  * @param parName :: [input] Name of parameter to edit in this dialog
- * @param wsNames :: [input] Names of workspaces being fitted
+ * @param datasetDomains :: [input] The domains being fitted across workspaces.
  * @param values :: [input] Parameter values.
  * @param fixes :: [input] Flags indicating if a parameter is fixed.
  * @param ties :: [input] Parameter ties.
  * @param constraints :: [input] Parameter constraints.
  */
 EditLocalParameterDialog::EditLocalParameterDialog(
-    QWidget *parent, const QString &parName, const QStringList &wsNames,
+    QWidget *parent, const QString &parName,
+    const std::vector<DatasetDomain> &datasetDomains,
     const QList<double> &values, const QList<bool> &fixes,
     const QStringList &ties, const QStringList &constraints)
     : MantidDialog(parent), m_parName(parName), m_values(values),
       m_fixes(fixes), m_ties(ties), m_constraints(constraints) {
-  assert(values.size() == wsNames.size());
-  assert(fixes.size() == wsNames.size());
-  assert(ties.size() == wsNames.size());
-  assert(constraints.size() == wsNames.size());
+  assert(values.size() == datasetDomains.size());
+  assert(fixes.size() == datasetDomains.size());
+  assert(ties.size() == datasetDomains.size());
+  assert(constraints.size() == datasetDomains.size());
   m_uiForm.setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
-  doSetup(parName, wsNames);
+  doSetup(parName, datasetDomains);
 }
 
 /**
@@ -54,11 +56,26 @@ EditLocalParameterDialog::EditLocalParameterDialog(
  * Prerequisite: one of the constructors must have filled m_values, m_fixes,
  * m_ties and set up the UI first
  * @param parName :: [input] Name of parameter to edit in this dialog
- * @param wsNames :: [input] Names of workspaces being fitted
+ * @param datasetDomains :: [input] The domains being fitted across workspaces.
  */
-void EditLocalParameterDialog::doSetup(const QString &parName,
-                                       const QStringList &wsNames) {
-  m_logFinder = std::make_unique<LogValueFinder>(wsNames);
+void EditLocalParameterDialog::doSetup(
+    const QString &parName, const std::vector<DatasetDomain> &datasetDomains) {
+
+  QStringList workspaceNames;
+  std::transform(datasetDomains.begin(), datasetDomains.end(),
+                 std::back_inserter(workspaceNames),
+                 [](const DatasetDomain &datasetDomain) {
+                   return datasetDomain.m_workspaceName;
+                 });
+
+  QStringList domainNames;
+  std::transform(datasetDomains.begin(), datasetDomains.end(),
+                 std::back_inserter(domainNames),
+                 [](const DatasetDomain &datasetDomain) {
+                   return datasetDomain.domainName();
+                 });
+
+  m_logFinder = std::make_unique<LogValueFinder>(workspaceNames);
   // Populate list of logs
   auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
   for (const auto &logName : m_logFinder->getLogNames()) {
@@ -78,11 +95,11 @@ void EditLocalParameterDialog::doSetup(const QString &parName,
           SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + parName);
 
-  for (int i = 0; i < wsNames.size(); i++) {
+  for (int i = 0; i < domainNames.size(); i++) {
     m_uiForm.tableWidget->insertRow(i);
     auto cell = new QTableWidgetItem(makeNumber(m_values[i]));
     m_uiForm.tableWidget->setItem(i, valueColumn, cell);
-    auto headerItem = new QTableWidgetItem(wsNames[i]);
+    auto headerItem = new QTableWidgetItem(domainNames[i]);
     m_uiForm.tableWidget->setVerticalHeaderItem(i, headerItem);
     cell = new QTableWidgetItem("");
     auto flags = cell->flags();
