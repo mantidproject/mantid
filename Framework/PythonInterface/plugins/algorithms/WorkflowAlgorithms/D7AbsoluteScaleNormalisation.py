@@ -351,9 +351,11 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
         if mtd[ws].getNumberOfEntries() != mtd[det_efficiency_ws].getNumberOfEntries():
             single_efficiency_per_POL = True
         for entry_no, entry in enumerate(mtd[ws]):
-            det_eff_entry_no = entry_no
+            det_eff_entry_no = int(entry_no / 2)
             if single_efficiency_per_POL:
-                det_eff_entry_no = det_eff_entry_no % nMeasurements
+                det_eff_entry_no = int(entry_no / 2)
+                if entry_no % 2 != 0:
+                    det_eff_entry_no -= 1
             Multiply(LHSWorkspace=entry,
                      RHSWorkspace=mtd[det_efficiency_ws][det_eff_entry_no],
                      OutputWorkspace=entry)
