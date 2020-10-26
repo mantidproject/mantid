@@ -13,7 +13,7 @@ Improvements
 ------------
 
 - The instrument geometry of PANTHER has been corrected according to the findings during the hot commissioning.
-
+- New IDF has been added for the SHARP time-of-flight spectrometer at the ILL.
 
 CrystalField
 ------------
