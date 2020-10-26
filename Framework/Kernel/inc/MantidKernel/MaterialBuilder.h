@@ -34,6 +34,7 @@ public:
 
   MaterialBuilder &setNumberDensity(double rho);
   MaterialBuilder &setNumberDensityUnit(NumberDensityUnit unit);
+  MaterialBuilder &setEffectiveNumberDensity(double rho_eff);
   MaterialBuilder &setPackingFraction(double fraction);
   MaterialBuilder &setZParameter(double zparam);
   MaterialBuilder &setUnitCellVolume(double cellVolume);
@@ -72,6 +73,7 @@ private:
   boost::optional<int> m_atomicNo;
   int m_massNo;
   boost::optional<double> m_numberDensity, m_packingFraction;
+  boost::optional<double> m_numberDensityEff;
   boost::optional<double> m_zParam, m_cellVol, m_massDensity;
   boost::optional<double> m_totalXSection, m_cohXSection, m_incXSection,
       m_absSection;
