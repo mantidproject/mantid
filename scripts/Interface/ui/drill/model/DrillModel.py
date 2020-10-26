@@ -117,9 +117,9 @@ class DrillModel(QObject):
         self.visualSettings = None
 
         # set the instrument and default acquisition mode
+        self.tasksPool = DrillAlgorithmPool()
         self.setInstrument(config['default.instrument'], log=False)
 
-        self.tasksPool = DrillAlgorithmPool()
         # setup the thread pool
         self.tasksPool.signals.taskStarted.connect(self._onTaskStarted)
         self.tasksPool.signals.taskSuccess.connect(self._onTaskSuccess)
@@ -139,38 +139,25 @@ class DrillModel(QObject):
         self.rundexFile = None
         self.samples = list()
         self.settings = dict()
+        self.columns = list()
         self.visualSettings = None
+        self.instrument = None
+        self.acquisitionMode = None
+        self.algorithm = None
 
         # When the user changes the facility after DrILL has been started
         if config['default.facility'] != 'ILL':
             logger.error('Drill is enabled only if the facility is set to ILL.')
-            self.instrument = None
-            self.acquisitionMode = None
-            self.columns = list()
-            self.algorithm = None
-            self.settings = dict()
             return
 
         if (instrument in RundexSettings.ACQUISITION_MODES):
             config['default.instrument'] = instrument
             self.instrument = instrument
-            self.acquisitionMode = \
-                RundexSettings.ACQUISITION_MODES[instrument][0]
-            self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
-            self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
-            self.settings = dict.fromkeys(
-                    RundexSettings.SETTINGS[self.acquisitionMode])
-            self._setDefaultSettings()
-            self._initController()
+            self.setAcquisitionMode(RundexSettings.ACQUISITION_MODES[instrument][0])
         else:
             if log:
                 logger.error('Instrument {0} is not supported yet.'
                              .format(instrument))
-            self.instrument = None
-            self.acquisitionMode = None
-            self.columns = list()
-            self.algorithm = None
-            self.settings = dict()
 
     def getInstrument(self):
         """
