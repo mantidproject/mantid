@@ -61,13 +61,8 @@ void SetSampleMaterial::init() {
       "SampleEffectiveNumberDensity", EMPTY_DBL(), mustBePositive,
       "Defines the effective number density of the sample, which is "
       "related to the number density and packing fraction.");
-  auto packingValidator = std::make_shared<BoundedValidator<double>>();
-  // Make sure packing fraction is within [0, 2)
-  packingValidator->setLower(0.0);
-  packingValidator->setUpper(2.0);
-  packingValidator->setUpperExclusive(false);
   declareProperty(
-      "SamplePackingFraction", 1.0, packingValidator,
+      "SamplePackingFraction", EMPTY_DBL(), mustBePositive,
       "Defines the packing fraction of the sample which can be used "
       "to calculate the number density and the effective number density");
   declareProperty("ZParameter", EMPTY_DBL(), mustBePositive,
