@@ -296,7 +296,7 @@ class PEARLTransfit(PythonAlgorithm):
             LoadRaw(Filename=fileName, OutputWorkspace=fileName_Raw)
             CropWorkspace(InputWorkspace=fileName_Raw, OutputWorkspace=fileName_Raw, XMin=100, XMax=19990)
             NormaliseByCurrent(InputWorkspace=fileName_Raw, OutputWorkspace=fileName_Raw)
-            ExtractSingleSpectrum(InputWorkspace=fileName_Raw, OutputWorkspace=fileName_3, WorkspaceIndex=2)
+            ExtractSingleSpectrum(InputWorkspace=fileName_Raw, OutputWorkspace=fileName_3, WorkspaceIndex=3)
             DeleteWorkspace(fileName_Raw)
             ConvertUnits(InputWorkspace=fileName_3, Target='Energy', OutputWorkspace=fileName_3)
             self.TransfitRebin(fileName_3, fileName_3, foilType, divE)
