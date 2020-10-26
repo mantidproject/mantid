@@ -11,6 +11,7 @@ Diffraction Changes
 
 Powder Diffraction
 ------------------
+- Added a new Transfit Algorithm for PEARL that uses a TransVoigt function to determine the temperature of a given sample
 
 Engineering Diffraction
 -----------------------
