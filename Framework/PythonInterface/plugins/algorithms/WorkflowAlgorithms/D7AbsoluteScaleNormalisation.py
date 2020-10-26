@@ -275,60 +275,66 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
         GroupWorkspaces(ws_names, OutputWorkspace=output_name)
         return output_name
 
-    def _detector_efficiency_correction(self, ws):
+    def _detector_efficiency_correction(self, cross_section_ws):
         """Calculates detector efficiency using either vanadium, incoherent scattering,
         or paramagnetic scattering."""
 
-        nMeasurements, _ = self._data_structure_helper(ws)
         calibrationType = self.getPropertyValue('NormalisationMethod')
         normaliseToAbsoluteUnits = self.getProperty('AbsoluteUnitsNormalisation').value
-        det_efficiency_ws = ws + '_det_efficiency'
+        det_efficiency_ws = cross_section_ws + '_det_efficiency'
         tmp_name = 'det_eff'
         tmp_names = []
         if calibrationType == 'Vanadium':
-            vanadium_ws = ws
             if normaliseToAbsoluteUnits:
                 normFactor = self.getProperty('FormulaUnits').value
                 CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace='normalisation_ws')
             else:
-                normalisationFactors = self._max_value_per_detector(vanadium_ws)
+                normalisationFactors = self._max_value_per_detector(cross_section_ws)
                 dataE = np.sqrt(normalisationFactors)
-                entry0 = mtd[vanadium_ws][0]
+                entry0 = mtd[cross_section_ws][0]
                 CreateWorkspace(dataX=entry0.readX(0), dataY=normalisationFactors, dataE=dataE,
                                 NSpec=entry0.getNumberHistograms(), OutputWorkspace='normalisation_ws')
-            Divide(LHSWorkspace=vanadium_ws,
+            Divide(LHSWorkspace=cross_section_ws,
                    RHSWorkspace='normalisation_ws',
                    OutputWorkspace=det_efficiency_ws)
         elif calibrationType in  ['Paramagnetic', 'Incoherent']:
             if calibrationType == 'Paramagnetic':
                 spin = self.getProperty('SampleSpin').value
-                for entry_no, entry in enumerate(mtd[ws]):
+                for entry_no, entry in enumerate(mtd[cross_section_ws]):
                     ws_name = '{0}_{1}'.format(tmp_name, entry_no)
                     tmp_names.append(ws_name)
-                    const = (2.0/3.0) * math.pow(physical_constants['neutron gyromag. ratio']
-                                                 * physical_constants['classical electron radius'], 2)
-                    paramagneticComponent = mtd[conjoined_components][2]
-                    Divide(LHSWorkspace=const * spin * (spin+1),
+                    const = (2.0/3.0) * math.pow(physical_constants['neutron gyromag. ratio'][0]
+                                                 * physical_constants['classical electron radius'][0], 2)
+                    paramagneticComponent = mtd[cross_section_ws][2]
+                    normalisation_name = 'normalisation_{}'.format(ws_name)
+                    to_clean.append(normalisation_name)
+                    CreateSingleValuedWorkspace(DataValue=const * spin * (spin+1), OutputWorkspace=normalisation_name)
+                    Divide(LHSWorkspace=normalisation_name,
                            RHSWorkspace=paramagneticComponent,
                            OutputWorkspace=ws_name)
             else: # Incoherent
-                for spectrum_no in range(mtd[conjoined_components][1].getNumberHistograms()):
+                for spectrum_no in range(mtd[cross_section_ws][1].getNumberHistograms()):
                     if normaliseToAbsoluteUnits:
                         normFactor = float(self.getPropertyValue('IncoherentCrossSection'))
                         CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace='normalisation_ws')
                     else:
-                        normalisationFactors = self._max_value_per_detector(mtd[conjoined_components][1].name())
+                        normalisationFactors = self._max_value_per_detector(mtd[cross_section_ws][1].name())
                         dataE = np.sqrt(normalisationFactors)
-                        CreateWorkspace(dataX=mtd[conjoined_components][1].readX(0), dataY=normalisationFactors,
-                                        dataE=dataE,
-                                        NSpec=mtd[conjoined_components][1].getNumberHistograms(),
-                                        OutputWorkspace='normalisation_ws')
-                    ws_name = '{0}_{1}'.format(tmp_name, entry_no)
+                        if len(normalisationFactors) == 1:
+                            CreateSingleValuedWorkspace(DataValue=normalisationFactors[0],
+                                                        ErrorValue=dataE[0],
+                                                        OutputWorkspace='normalisation_ws')
+                        else:
+                            CreateWorkspace(dataX=mtd[cross_section_ws][1].readX(0), dataY=normalisationFactors,
+                                            dataE=dataE,
+                                            NSpec=mtd[cross_section_ws][1].getNumberHistograms(),
+                                            OutputWorkspace='normalisation_ws')
+                    ws_name = '{0}_{1}'.format(tmp_name, spectrum_no)
                     tmp_names.append(ws_name)
 
-                Divide(LHSWorkspace='normalisation_ws',
-                       RHSWorkspace=component_ws,
-                       OutputWorkspace=ws_name)
+                    Divide(LHSWorkspace='normalisation_ws',
+                           RHSWorkspace=cross_section_ws,
+                           OutputWorkspace=ws_name)
 
             GroupWorkspaces(tmp_names, OutputWorkspace=det_efficiency_ws)
 
@@ -336,7 +342,7 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
 
     def _normalise_sample_data(self, ws, det_efficiency_ws):
         """Normalises the sample data using the detector efficiency calibration workspace"""
-
+        nMeasurements, _ = self._data_structure_helper(ws)
         single_efficiency_per_POL = False
         if mtd[ws].getNumberOfEntries() != mtd[det_efficiency_ws].getNumberOfEntries():
             single_efficiency_per_POL = True
