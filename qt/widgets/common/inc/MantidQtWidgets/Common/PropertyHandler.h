@@ -90,10 +90,9 @@ public:
   std::shared_ptr<const Mantid::API::IFunction>
   findFunction(QtBrowserItem *item) const;
 
-  PropertyHandler *findHandler(QtProperty *prop);
-
-  PropertyHandler *findHandler(const Mantid::API::IFunction_const_sptr &fun);
   PropertyHandler *findHandler(const Mantid::API::IFunction *fun);
+  PropertyHandler *findHandler(const Mantid::API::IFunction_const_sptr &fun);
+  PropertyHandler *findHandler(QtProperty *prop);
 
   /**
    * Set function parameter value read from a QtProperty
@@ -196,10 +195,8 @@ public:
   QList<PropertyHandler *> getPeakList();
 
   // Plot the function on a graph
-  // void plot(Graph* g)const;
   bool &hasPlot() { return m_hasPlot; }
-  // void replot()const;
-  // void removePlot();
+  void setHasPlot(bool &state) { m_hasPlot = state; };
   void removeAllPlots();
 
   void fit();

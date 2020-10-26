@@ -125,7 +125,7 @@ class IndirectTransmission(PythonAlgorithm):
         wave = 1.8 * math.sqrt(25.2429 / efixed)
 
         material = mtd[str(workspace)].sample().getMaterial()
-        number_density = material.numberDensity
+        number_density = material.numberDensityEffective
         absorption_x_section = material.absorbXSection(wave)
         coherent_x_section = material.cohScatterXSection()
         incoherent_x_section = material.incohScatterXSection()

@@ -39,7 +39,6 @@ set(SRC_FILES
     src/Expression.cpp
     src/FileBackedExperimentInfo.cpp
     src/FileFinder.cpp
-    src/InstrumentFileFinder.cpp
     src/FileLoaderRegistry.cpp
     src/FileProperty.cpp
     src/FrameworkManager.cpp
@@ -89,6 +88,7 @@ set(SRC_FILES
     src/IndexProperty.cpp
     src/IndexTypeProperty.cpp
     src/InstrumentDataService.cpp
+    src/InstrumentFileFinder.cpp
     src/InstrumentValidator.cpp
     src/JointDomain.cpp
     src/LatticeDomain.cpp
@@ -120,6 +120,7 @@ set(SRC_FILES
     src/ParameterReference.cpp
     src/ParameterTie.cpp
     src/PeakFunctionIntegrator.cpp
+    src/PreviewManager.cpp
     src/Progress.cpp
     src/Projection.cpp
     src/PropertyWithValue.cpp
@@ -153,8 +154,7 @@ set(SRC_FILES
     src/WorkspaceNearestNeighbours.cpp
     src/WorkspaceOpOverloads.cpp
     src/WorkspaceProperty.cpp
-    src/WorkspaceUnitValidator.cpp
-)
+    src/WorkspaceUnitValidator.cpp)
 
 set(SRC_UNITY_IGNORE_FILES
     src/CompositeFunction.cpp
@@ -211,7 +211,6 @@ set(INC_FILES
     inc/MantidAPI/Expression.h
     inc/MantidAPI/FileBackedExperimentInfo.h
     inc/MantidAPI/FileFinder.h
-    inc/MantidAPI/InstrumentFileFinder.h
     inc/MantidAPI/FileLoaderRegistry.h
     inc/MantidAPI/FileProperty.h
     inc/MantidAPI/FrameworkManager.h
@@ -248,13 +247,13 @@ set(INC_FILES
     inc/MantidAPI/IFileLoader.h
     inc/MantidAPI/IFuncMinimizer.h
     inc/MantidAPI/IFunction.h
-    inc/MantidAPI/IFunction_fwd.h
     inc/MantidAPI/IFunction1D.h
     inc/MantidAPI/IFunction1DSpectrum.h
     inc/MantidAPI/IFunctionGeneral.h
     inc/MantidAPI/IFunctionMD.h
     inc/MantidAPI/IFunctionMW.h
     inc/MantidAPI/IFunctionWithLocation.h
+    inc/MantidAPI/IFunction_fwd.h
     inc/MantidAPI/ILatticeFunction.h
     inc/MantidAPI/ILiveListener.h
     inc/MantidAPI/IMDEventWorkspace.h
@@ -270,6 +269,7 @@ set(INC_FILES
     inc/MantidAPI/IPeaksWorkspace.h
     inc/MantidAPI/IPeaksWorkspace_fwd.h
     inc/MantidAPI/IPowderDiffPeakFunction.h
+    inc/MantidAPI/IPreview.h
     inc/MantidAPI/IRemoteJobManager.h
     inc/MantidAPI/ISpectrum.h
     inc/MantidAPI/ISplittersWorkspace.h
@@ -289,6 +289,7 @@ set(INC_FILES
     inc/MantidAPI/IndexProperty.h
     inc/MantidAPI/IndexTypeProperty.h
     inc/MantidAPI/InstrumentDataService.h
+    inc/MantidAPI/InstrumentFileFinder.h
     inc/MantidAPI/InstrumentValidator.h
     inc/MantidAPI/Jacobian.h
     inc/MantidAPI/JointDomain.h
@@ -323,6 +324,7 @@ set(INC_FILES
     inc/MantidAPI/ParameterReference.h
     inc/MantidAPI/ParameterTie.h
     inc/MantidAPI/PeakFunctionIntegrator.h
+    inc/MantidAPI/PreviewManager.h
     inc/MantidAPI/Progress.h
     inc/MantidAPI/Projection.h
     inc/MantidAPI/RawCountValidator.h
@@ -364,8 +366,7 @@ set(INC_FILES
     inc/MantidAPI/WorkspaceProperty.h
     inc/MantidAPI/WorkspaceProperty.tcc
     inc/MantidAPI/WorkspaceUnitValidator.h
-    inc/MantidAPI/Workspace_fwd.h
-)
+    inc/MantidAPI/Workspace_fwd.h)
 
 option(PROFILE_ALGORITHM_LINUX "Profile algorithm execution on Linux" OFF)
 if(PROFILE_ALGORITHM_LINUX)
@@ -379,20 +380,20 @@ endif()
 
 set(TEST_FILES
     ADSValidatorTest.h
-    AlgorithmFactoryTest.h
     AlgorithmFactoryObserverTest.h
+    AlgorithmFactoryTest.h
     AlgorithmHasPropertyTest.h
     AlgorithmHistoryTest.h
     AlgorithmMPITest.h
     AlgorithmManagerTest.h
     AlgorithmPropertyTest.h
     AlgorithmTest.h
-    AnalysisDataServiceTest.h
     AnalysisDataServiceObserverTest.h
+    AnalysisDataServiceTest.h
     AsynchronousTest.h
     BinEdgeAxisTest.h
-    BoxControllerTest.h
     BoxControllerSettingsAlgorithmTest.h
+    BoxControllerTest.h
     CitationTest.h
     CommonBinsValidatorTest.h
     CompositeFunctionTest.h
@@ -407,7 +408,6 @@ set(TEST_FILES
     ExpressionTest.h
     FileBackedExperimentInfoTest.h
     FileFinderTest.h
-    InstrumentFileFinderTest.h
     FilePropertyTest.h
     FrameworkManagerTest.h
     FuncMinimizerFactoryTest.h
@@ -430,6 +430,7 @@ set(TEST_FILES
     IFunctionTest.h
     ILatticeFunctionTest.h
     IMDWorkspaceTest.h
+    IPreviewTest.h
     ISpectrumTest.h
     ImmutableCompositeFunctionTest.h
     ImplicitFunctionParserFactoryTest.h
@@ -437,6 +438,7 @@ set(TEST_FILES
     IndexPropertyTest.h
     IndexTypePropertyTest.h
     InstrumentDataServiceTest.h
+    InstrumentFileFinderTest.h
     InstrumentValidatorTest.h
     LatticeDomainTest.h
     LiveListenerFactoryTest.h
@@ -461,6 +463,7 @@ set(TEST_FILES
     ParameterReferenceTest.h
     ParameterTieTest.h
     PeakFunctionIntegratorTest.h
+    PreviewManagerTest.h
     ProgressTest.h
     ProjectionTest.h
     RawCountValidatorTest.h
@@ -489,8 +492,7 @@ set(TEST_FILES
     WorkspaceNearestNeighboursTest.h
     WorkspaceOpOverloadsTest.h
     WorkspacePropertyTest.h
-    WorkspaceUnitValidatorTest.h
-)
+    WorkspaceUnitValidatorTest.h)
 
 set(GMOCK_TEST_FILES
     ImplicitFunctionFactoryTest.h ImplicitFunctionParameterParserFactoryTest.h

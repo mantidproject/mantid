@@ -14,18 +14,18 @@ class AbinsPowderDataTest(unittest.TestCase):
         # hypothetical data for two atoms
         self.good_items = {
             "a_tensors": {0: np.asarray([[[0.01, 0.02, 0.03],
-                                            [0.01, 0.02, 0.03],
-                                            [0.01, 0.02, 0.03]],
-                                           [[0.01, 0.02, 0.03],
-                                            [0.01, 0.02, 0.03],
-                                            [0.01, 0.02, 0.03]]])},
+                                          [0.01, 0.02, 0.03],
+                                          [0.01, 0.02, 0.03]],
+                                         [[0.01, 0.02, 0.03],
+                                          [0.01, 0.02, 0.03],
+                                          [0.01, 0.02, 0.03]]])},
 
             "b_tensors": {0: np.asarray([[[0.01, 0.02, 0.03],
-                                            [0.01, 0.02, 0.03],
-                                            [0.01, 0.02, 0.03]],
-                                           [[0.01, 0.02, 0.03],
-                                            [0.01, 0.02, 0.03],
-                                            [0.01, 0.02, 0.03]]])},
+                                          [0.01, 0.02, 0.03],
+                                          [0.01, 0.02, 0.03]],
+                                         [[0.01, 0.02, 0.03],
+                                          [0.01, 0.02, 0.03],
+                                          [0.01, 0.02, 0.03]]])},
             "frequencies": {0: np.asarray([2.34, 5.67, 8.90])}}
 
     def test_bad_num_atoms(self):
@@ -83,6 +83,7 @@ class AbinsPowderDataTest(unittest.TestCase):
                                         good_powderdata.get_b_tensors()[k_point]))
             self.assertTrue(np.allclose(self.good_items["frequencies"][k_point],
                                         good_powderdata.get_frequencies()[k_point]))
+
 
 if __name__ == '__main__':
     unittest.main()

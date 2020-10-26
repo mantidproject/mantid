@@ -116,60 +116,78 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         return 'SANSILLAutoProcess'
 
     def validateInputs(self):
+        self.setUp()
+
         result = dict()
-        message = 'Wrong number of {0} runs: {1}. Provide one or as many as sample runs: {2}.'
+        message = 'Wrong number of {0} runs: {1}. Provide one or as many as '\
+                  'sample runs: {2}.'
         message_value = 'Wrong number of {0} values: {1}. Provide one or as ' \
                         'many as sample runs: {2}.'
-        tr_message = 'Wrong number of {0} runs: {1}. Provide one or multiple runs summed with +.'
-        sample_dim = self.getPropertyValue('SampleRuns').count(',')
-        abs_dim = self.getPropertyValue('AbsorberRuns').count(',')
-        beam_dim = self.getPropertyValue('BeamRuns').count(',')
-        flux_dim = self.getPropertyValue('FluxRuns').count(',')
-        can_dim = self.getPropertyValue('ContainerRuns').count(',')
-        str_dim = self.getPropertyValue('SampleTransmissionRuns').count(',')
-        ctr_dim = self.getPropertyValue('ContainerTransmissionRuns').count(',')
-        btr_dim = self.getPropertyValue('TransmissionBeamRuns').count(',')
-        atr_dim = self.getPropertyValue('TransmissionAbsorberRuns').count(',')
-        mask_dim = self.getPropertyValue('MaskFiles').count(',')
-        sens_dim = self.getPropertyValue('SensitivityMaps').count(',')
-        ref_dim = self.getPropertyValue('ReferenceFiles').count(',')
-        maxqxy_dim = self.getPropertyValue('MaxQxy').count(',')
-        deltaq_dim = self.getPropertyValue('DeltaQ').count(',')
-        output_type = self.getPropertyValue('OutputType')
-        n_wedges = self.getProperty('NumberOfWedges').value
+        tr_message = 'Wrong number of {0} runs: {1}. Provide one or multiple ' \
+                     'runs summed with +.'
+
+        # array parameters checks
+        sample_dim = len(self.sample)
+        abs_dim = len(self.absorber)
+        beam_dim = len(self.beam)
+        flux_dim = len(self.flux)
+        can_dim = len(self.container)
+        mask_dim = len(self.mask)
+        sens_dim = len(self.sensitivity)
+        ref_dim = len(self.reference)
+        maxqxy_dim = len(self.maxqxy)
+        deltaq_dim = len(self.deltaq)
+        radius_dim = len(self.radius)
         if self.getPropertyValue('SampleRuns') == '':
             result['SampleRuns'] = 'Please provide at least one sample run.'
-        if abs_dim != sample_dim and abs_dim != 0:
-            result['AbsorberRuns'] = message.format('Absorber', abs_dim, sample_dim)
-        if beam_dim != sample_dim and beam_dim != 0:
+        if abs_dim != sample_dim and abs_dim > 1:
+            result['AbsorberRuns'] = \
+                message.format('Absorber', abs_dim, sample_dim)
+        if beam_dim != sample_dim and beam_dim > 1:
             result['BeamRuns'] = message.format('Beam', beam_dim, sample_dim)
-        if can_dim != sample_dim and can_dim != 0:
-            result['ContainerRuns'] = message.format('Container', can_dim, sample_dim)
-        if str_dim != 0:
-            result['SampleTransmissionRuns'] = tr_message.format('SampleTransmission', str_dim)
-        if ctr_dim != 0:
-            result['ContainerTransmissionRuns'] = tr_message.format('ContainerTransmission', ctr_dim)
-        if btr_dim != 0:
-            result['TransmissionBeamRuns'] = tr_message.format('TransmissionBeam', btr_dim)
-        if atr_dim != 0:
-            result['TransmissionAbsorberRuns'] = tr_message.format('TransmissionAbsorber', atr_dim)
-        if mask_dim != sample_dim and mask_dim != 0:
+        if can_dim != sample_dim and can_dim > 1:
+            result['ContainerRuns'] = \
+                message.format('Container', can_dim, sample_dim)
+        if mask_dim != sample_dim and mask_dim > 1:
             result['MaskFiles'] = message.format('Mask', mask_dim, sample_dim)
-        if ref_dim != sample_dim and ref_dim != 0:
-            result['ReferenceFiles'] = message.format('Reference', ref_dim, sample_dim)
-        if sens_dim != sample_dim and sens_dim != 0:
-            result['SensitivityMaps'] = message.format('Sensitivity', sens_dim, sample_dim)
-        if flux_dim != flux_dim and flux_dim != 0:
+        if ref_dim != sample_dim and ref_dim > 1:
+            result['ReferenceFiles'] = \
+                    message.format('Reference', ref_dim, sample_dim)
+        if sens_dim != sample_dim and sens_dim > 1:
+            result['SensitivityMaps'] = \
+                    message.format('Sensitivity', sens_dim, sample_dim)
+        if flux_dim != sample_dim and flux_dim > 1:
             result['FluxRuns'] = message.format('Flux')
-        if maxqxy_dim != sample_dim and maxqxy_dim != 0:
-            result['MaxQxy'] = message_value.format('MaxQxy',
-                                                    maxqxy_dim,
-                                                    sample_dim)
-        if deltaq_dim != sample_dim and deltaq_dim != 0:
-            result['DeltaQ'] = message_value.format('DeltaQ',
-                                                    deltaq_dim,
-                                                    sample_dim)
-        if output_type == 'I(Phi,Q)' and n_wedges == 0:
+        if maxqxy_dim != sample_dim and maxqxy_dim > 1:
+            result['MaxQxy'] = \
+                message_value.format('MaxQxy', maxqxy_dim, sample_dim)
+        if deltaq_dim != sample_dim and deltaq_dim > 1:
+            result['DeltaQ'] = \
+                message_value.format('DeltaQ', deltaq_dim, sample_dim)
+        if radius_dim != sample_dim and radius_dim > 1:
+            result['BeamRadius'] = \
+                    message_value.format('BeamRadius', radius_dim, sample_dim)
+
+        # transmission runs checks
+        str_dim = len(self.stransmission.split(','))
+        ctr_dim = len(self.ctransmission.split(','))
+        btr_dim = len(self.btransmission.split(','))
+        atr_dim = len(self.atransmission.split(','))
+        if str_dim > 1:
+            result['SampleTransmissionRuns'] = \
+                tr_message.format('SampleTransmission', str_dim)
+        if ctr_dim > 1:
+            result['ContainerTransmissionRuns'] = \
+                tr_message.format('ContainerTransmission', ctr_dim)
+        if btr_dim > 1:
+            result['TransmissionBeamRuns'] = \
+                tr_message.format('TransmissionBeam', btr_dim)
+        if atr_dim > 1:
+            result['TransmissionAbsorberRuns'] = \
+                tr_message.format('TransmissionAbsorber', atr_dim)
+
+        # other checks
+        if self.output_type == 'I(Phi,Q)' and self.n_wedges == 0:
             result['NumberOfWedges'] = "For I(Phi,Q) processing, the number " \
                                        "of wedges must be different from 0."
 
@@ -197,7 +215,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
         self.normalise = self.getPropertyValue('NormaliseBy')
         self.theta_dependent = self.getProperty('ThetaDependent').value
-        self.radius = self.getProperty('BeamRadius').value
+        self.tr_radius = self.getProperty('TransmissionBeamRadius').value
+        self.radius = self.getPropertyValue('BeamRadius').split(',')
         self.dimensionality = len(self.sample)
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10 * self.dimensionality)
         self.cleanup = self.getProperty('ClearCorrected2DWorkspace').value
@@ -293,11 +312,18 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.copyProperties('SANSILLReduction', ['NormaliseBy'])
 
-        self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.),
+        self.declareProperty('SampleThickness', 0.1,
+                             validator=FloatBoundedValidator(lower=-1),
                              doc='Sample thickness [cm]')
 
-        self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.),
-                             doc='Beam radius [m]; used for beam center finding, transmission and flux calculations.')
+        self.declareProperty('TransmissionBeamRadius', 0.1,
+                             validator=FloatBoundedValidator(lower=0.),
+                             doc='Beam radius [m]; used for transmission '
+                             'calculations.')
+
+        self.declareProperty(FloatArrayProperty('BeamRadius', values=[0.1]),
+                             doc='Beam radius [m]; used for beam center '
+                             'finding and flux calculations.')
 
         self.declareProperty('WaterCrossSection', 1., doc='Provide water cross-section; '
                                                           'used only if the absolute scale is done by dividing to water.')
@@ -310,6 +336,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('NormaliseBy', 'Options')
         self.setPropertyGroup('SampleThickness', 'Options')
         self.setPropertyGroup('BeamRadius', 'Options')
+        self.setPropertyGroup('TransmissionBeamRadius', 'Options')
         self.setPropertyGroup('WaterCrossSection', 'Options')
 
         self.declareProperty(FloatArrayProperty('MaxQxy', values=[-1]),
@@ -440,7 +467,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              ProcessAs='Beam',
                              NormaliseBy=self.normalise,
                              OutputWorkspace=transmission_beam_name,
-                             BeamRadius=self.radius,
+                             BeamRadius=self.tr_radius,
                              FluxOutputWorkspace=flux_name,
                              AbsorberInputWorkspace=
                              transmission_absorber_name)
@@ -456,7 +483,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              transmission_absorber_name,
                              BeamInputWorkspace=transmission_beam_name,
                              NormaliseBy=self.normalise,
-                             BeamRadius=self.radius)
+                             BeamRadius=self.tr_radius)
 
         [process_sample_transmission, sample_transmission_name] = \
             needs_processing(self.stransmission, 'Transmission')
@@ -469,7 +496,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              transmission_absorber_name,
                              BeamInputWorkspace=transmission_beam_name,
                              NormaliseBy=self.normalise,
-                             BeamRadius=self.radius)
+                             BeamRadius=self.tr_radius)
         return container_transmission_name, sample_transmission_name
 
     def processAbsorber(self, i):
@@ -490,6 +517,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         beam = (self.beam[i]
                 if len(self.beam) == self.dimensionality
                 else self.beam[0])
+        radius = (self.radius[i]
+                  if len(self.radius) == self.dimensionality
+                  else self.radius[0])
         [process_beam, beam_name] = needs_processing(beam, 'Beam')
         flux_name = beam_name + '_Flux' if not self.flux[0] else ''
         self.progress.report('Processing beam')
@@ -498,7 +528,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              ProcessAs='Beam',
                              OutputWorkspace=beam_name,
                              NormaliseBy=self.normalise,
-                             BeamRadius=self.radius,
+                             BeamRadius=radius,
                              AbsorberInputWorkspace=absorber_name,
                              FluxOutputWorkspace=flux_name)
         return beam_name, flux_name
@@ -508,6 +538,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             flux = (self.flux[i]
                     if len(self.flux) == self.dimensionality
                     else self.flux[0])
+            radius = (self.radius[i]
+                      if len(self.radius) == self.dimensionality
+                      else self.radius[0])
             [process_flux, flux_name] = needs_processing(flux, 'Flux')
             self.progress.report('Processing flux')
             if process_flux:
@@ -516,7 +549,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  OutputWorkspace=flux_name.replace('Flux',
                                                                    'Beam'),
                                  NormaliseBy=self.normalise,
-                                 BeamRadius=self.radius,
+                                 BeamRadius=radius,
                                  AbsorberInputWorkspace=absorber_name,
                                  FluxOutputWorkspace=flux_name)
             return flux_name

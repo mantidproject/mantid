@@ -61,6 +61,27 @@ struct MANTID_GEOMETRY_DLL Link {
     return distFromStart < other;
   }
 
+  inline bool operator==(const Link &other) const {
+    if (componentID != other.componentID) {
+      return false;
+    }
+
+    if (object != other.object) {
+      return false;
+    }
+
+    // Need a bit wider tolerance than Kernel::Tolerance for comparing exitPoint
+    //  Although this is due to very slight numerical changes for some reason.
+    // The entryPoint seems to be identical among duplicated Links, so the
+    //  built-in V3D == operator is used in for that case.
+    const double tolerance = 1.0e-5;
+    bool isExitSame =
+        !(std::abs(exitPoint[0] - other.exitPoint[0]) > tolerance ||
+          std::abs(exitPoint[1] - other.exitPoint[1]) > tolerance ||
+          std::abs(exitPoint[2] - other.exitPoint[2]) > tolerance);
+    return isExitSame && (entryPoint == other.entryPoint);
+  }
+
   /** @name Attributes. */
   //@{
   Kernel::V3D entryPoint;  ///< Entry point
@@ -124,6 +145,19 @@ struct IntersectionPoint {
     const double diff = fabs(distFromStart - other.distFromStart);
     return (diff > Kernel::Tolerance) ? distFromStart < other.distFromStart
                                       : direction < other.direction;
+  }
+
+  inline bool operator==(const IntersectionPoint &other) const {
+    if (direction != other.direction) {
+      return false;
+    }
+
+    const double diff = fabs(distFromStart - other.distFromStart);
+    if (diff > Kernel::Tolerance) {
+      return false;
+    }
+
+    return endPoint == other.endPoint;
   }
 
   /** @name Attributes. */
@@ -197,6 +231,8 @@ public:
   LType::const_reference back() const { return m_links.back(); }
   /// Returns the number of links
   int count() const { return static_cast<int>(m_links.size()); }
+  /// Returns the number of intersection points
+  int surfPointsCount() const { return static_cast<int>(m_surfPoints.size()); }
   /// Is the link complete?
   int nonComplete() const;
 

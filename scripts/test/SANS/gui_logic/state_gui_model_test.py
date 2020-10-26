@@ -7,12 +7,10 @@
 import unittest
 
 from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SampleShape, SaveType,
-                               SANSInstrument, FitModeForMerge, CanonicalCoordinates, DetectorType)
+                               SANSInstrument, FitModeForMerge, DetectorType)
 from sans.gui_logic.models.state_gui_model import StateGuiModel
-from sans.state.StateObjects.StateMoveDetectors import StateMoveDetectors
 from sans.state.AllStates import AllStates
-from sans.user_file.settings_tags import (OtherId, event_binning_string_values, DetectorId)
-from sans.user_file.settings_tags import (det_fit_range)
+from sans.state.StateObjects.StateMoveDetectors import StateMoveDetectors
 
 
 class StateGuiModelTest(unittest.TestCase):
@@ -116,6 +114,7 @@ class StateGuiModelTest(unittest.TestCase):
         def red_dim_wrapper():
             state_gui_model = StateGuiModel(AllStates())
             state_gui_model.reduction_dimensionality = "string"
+
         self.assertRaises(ValueError, red_dim_wrapper)
 
     def test_that_can_update_reduction_dimensionality(self):
@@ -155,6 +154,7 @@ class StateGuiModelTest(unittest.TestCase):
         def red_mode_wrapper():
             state_gui_model = StateGuiModel(AllStates())
             state_gui_model.reduction_mode = "string"
+
         self.assertRaises(ValueError, red_mode_wrapper)
 
     def test_that_can_update_reduction_mode(self):
@@ -219,7 +219,7 @@ class StateGuiModelTest(unittest.TestCase):
         state.reduction.merge_fit_mode = FitModeForMerge.SHIFT_ONLY
         state.reduction.merge_range_min = 1.
         state.reduction.merge_range_max = 7.
-        
+
         state_gui_model = StateGuiModel(state)
         self.assertEqual(state_gui_model.merge_scale, 12.)
         self.assertEqual(state_gui_model.merge_shift, 234.)
@@ -481,24 +481,24 @@ class StateGuiModelTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
     def test_that_user_file_items_interpreted_correctly(self):
         state = AllStates()
-        state.move.sample_offset = 1.78/1000.
+        state.move.sample_offset = 1.78 / 1000.
         state.scale.width = 1.2
         state.scale.height = 1.6
         state.scale.thickness = 1.8
         state.scale.shape = SampleShape.FLAT_PLATE
-        state.convert_to_q.radius_cutoff = 45./1000.
-        state.convert_to_q.q_resolution_a1 = 1.5/1000.
-        state.convert_to_q.q_resolution_a2 = 2.5/1000.
-        state.convert_to_q.q_resolution_h1 = 1.5/1000.
-        state.convert_to_q.q_resolution_h2 = 2.5/1000.
-        state.convert_to_q.q_resolution_delta_r = 0.1/1000.
-        state.mask.radius_min = 12./1000.
-        state.mask.radius_max = 13./1000.
+        state.convert_to_q.radius_cutoff = 45. / 1000.
+        state.convert_to_q.q_resolution_a1 = 1.5 / 1000.
+        state.convert_to_q.q_resolution_a2 = 2.5 / 1000.
+        state.convert_to_q.q_resolution_h1 = 1.5 / 1000.
+        state.convert_to_q.q_resolution_h2 = 2.5 / 1000.
+        state.convert_to_q.q_resolution_delta_r = 0.1 / 1000.
+        state.mask.radius_min = 12. / 1000.
+        state.mask.radius_max = 13. / 1000.
         state.move.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
                                 DetectorType.HAB.value: StateMoveDetectors()}
-        state.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = 21.5/1000.
+        state.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = 21.5 / 1000.
         state.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = 17.8 / 1000.
-        state.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = 25.1/1000.
+        state.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = 25.1 / 1000.
         state.move.detectors[DetectorType.HAB.value].sample_centre_pos2 = 16.9 / 1000.
         state_gui_model = StateGuiModel(state)
         self.assertEqual(state_gui_model.sample_width, 1.2)

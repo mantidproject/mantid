@@ -1,5 +1,6 @@
 set(SRC_FILES
     src/AbsorptionCorrection.cpp
+    src/PaalmanPingsAbsorptionCorrection.cpp
     src/AddAbsorptionWeightedPathLengths.cpp
     src/AddLogDerivative.cpp
     src/AddNote.cpp
@@ -327,6 +328,7 @@ set(SRC_FILES
 
 set(INC_FILES
     inc/MantidAlgorithms/AbsorptionCorrection.h
+    inc/MantidAlgorithms/PaalmanPingsAbsorptionCorrection.h
     inc/MantidAlgorithms/AddAbsorptionWeightedPathLengths.h
     inc/MantidAlgorithms/AddLogDerivative.h
     inc/MantidAlgorithms/AddNote.h
@@ -673,6 +675,7 @@ if(UNITY_BUILD)
 endif(UNITY_BUILD)
 
 set(TEST_FILES
+    PaalmanPingsAbsorptionCorrectionTest.h
     AddAbsorptionWeightedPathLengthsTest.h
     AddLogDerivativeTest.h
     AddNoteTest.h
@@ -695,8 +698,8 @@ set(TEST_FILES
     CalculateCountRateTest.h
     CalculateDIFCTest.h
     CalculateDynamicRangeTest.h
-    CalculateEfficiencyTest.h
     CalculateEfficiency2Test.h
+    CalculateEfficiencyTest.h
     CalculateFlatBackgroundTest.h
     CalculateIqtTest.h
     CalculatePlaczekSelfScatteringTest.h
@@ -884,8 +887,8 @@ set(TEST_FILES
     OneMinusExponentialCorTest.h
     PDCalibrationTest.h
     PDDetermineCharacterizationsTest.h
-    PDFFourierTransformTest.h
     PDFFourierTransform2Test.h
+    PDFFourierTransformTest.h
     PaddingAndApodizationTest.h
     ParallaxCorrectionTest.h
     PauseTest.h
@@ -929,8 +932,8 @@ set(TEST_FILES
     ResizeRectangularDetectorTest.h
     RingProfileTest.h
     RunCombinationHelperTest.h
-    SampleLogsBehaviourTest.h
     SANSCollimationLengthEstimatorTest.h
+    SampleLogsBehaviourTest.h
     SassenaFFTTest.h
     ScaleTest.h
     ScaleXTest.h

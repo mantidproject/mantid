@@ -4,11 +4,11 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantiddoc.directives.base import BaseDirective #pylint: disable=unused-import
+from mantiddoc.directives.base import BaseDirective  #pylint: disable=unused-import
 import os
 
-class InterfaceDirective(BaseDirective):
 
+class InterfaceDirective(BaseDirective):
     """
     Adds a screenshot of the custom interface
 
@@ -18,7 +18,7 @@ class InterfaceDirective(BaseDirective):
     """
 
     required_arguments, optional_arguments = 1, 0
-    option_spec = {"widget":str, "align":str, "width":int}
+    option_spec = {"widget": str, "align": str, "width": int}
 
     def run(self):
         """
@@ -36,15 +36,19 @@ class InterfaceDirective(BaseDirective):
         """
         Called by Sphinx when the ..interface:: directive is encountered
         """
-        picture = self._create_screenshot(widget_name=self.options.get("widget", None))
-        self._insert_screenshot_link(picture, align=self.options.get("align", None),
+        try:
+            picture = self._create_screenshot(widget_name=self.options.get("widget", None))
+        except RuntimeError:
+            picture = None
+        self._insert_screenshot_link(picture,
+                                     align=self.options.get("align", None),
                                      width=self.options.get("width", None))
         return []
 
     def interface_name(self):
         return self.arguments[0]
 
-    def _create_screenshot(self, widget_name = None):
+    def _create_screenshot(self, widget_name=None):
         """
         Creates a screenshot for the named interface in the "images/screenshots"
         subdirectory.
@@ -54,21 +58,15 @@ class InterfaceDirective(BaseDirective):
         Returns:
           screenshot: A mantiddoc.tools.Screenshot object
         """
-        try:
-            screenshots_dir = self._screenshot_directory()
-        except RuntimeError:
+        screenshots_dir = self.screenshots_dir
+        if screenshots_dir is None:
             return None
 
         # Generate image
         from mantiddoc.tools.screenshot import custominterface_screenshot
-        if not os.path.exists(screenshots_dir):
-            os.makedirs(screenshots_dir)
-
-        try:
-            return custominterface_screenshot(self.interface_name(), screenshots_dir, widget_name = widget_name)
-        except RuntimeError:
-            # Assume GUI is not available
-            return None
+        return custominterface_screenshot(self.interface_name(),
+                                          screenshots_dir,
+                                          widget_name=widget_name)
 
     def _insert_screenshot_link(self, picture, align=None, width=None):
         """
@@ -83,14 +81,6 @@ class InterfaceDirective(BaseDirective):
           width: The width to use (in pixels, defaults to width of screenshot)
         """
         env = self.state.document.settings.env
-        format_str = ".. figure:: %s\n"\
-                     "   :class: screenshot\n"\
-                     "   :width: %dpx"
-
-        if align != None:
-            format_str += "\n   :align: " + align
-
-        format_str += "\n\n"
 
         # Sphinx assumes that an absolute path is actually relative to the directory containing the
         # conf.py file and a relative path is relative to the directory where the current rst file
@@ -105,35 +95,31 @@ class InterfaceDirective(BaseDirective):
             # relative path to image
             rel_path = os.path.relpath(screenshots_dir, env.srcdir)
             # This is a href link so is expected to be in unix style
-            rel_path = rel_path.replace("\\","/")
+            rel_path = rel_path.replace("\\", "/")
             # stick a "/" as the first character so Sphinx computes relative location from source directory
             path = "/" + rel_path + "/" + filename
+            caption = ""
         else:
             # use stock not found image
             path = "/images/ImageNotFound.png"
             width = 200
+            caption = "Enable screenshots using DOCS_SCREENSHOTS in CMake"
 
-        self.add_rst(format_str % (path, width))
+        if align is not None:
+            self.add_rst(f".. figure:: {path}\n"
+                         f"   :class: screenshot\n"
+                         f"   :width: {width}px\n"
+                         f"   :align: {align}\n\n"
+                         f"   {caption}\n\n")
+        else:
+            self.add_rst(f".. figure:: {path}\n"
+                         f"   :class: screenshot\n"
+                         f"   :width: {width}px\n\n"
+                         f"   {caption}\n\n")
 
-    def _screenshot_directory(self):
-        """
-        Returns a full path where the screenshots should be generated. They are
-        put in a screenshots subdirectory of the main images directory in the source
-        tree. Sphinx then handles copying them to the final location
-
-        Arguments:
-          env (BuildEnvironment): Allows access to find the source directory
-
-        Returns:
-          str: A string containing a path to where the screenshots should be created. This will
-          be a filesystem path
-        """
-        try:
-            return os.environ["SCREENSHOTS_DIR"]
-        except:
-            raise RuntimeError("The '.. interface::' directive requires a SCREENSHOTS_DIR environment variable to be set.")
 
 #------------------------------------------------------------------------------------------------------------
+
 
 def setup(app):
     """

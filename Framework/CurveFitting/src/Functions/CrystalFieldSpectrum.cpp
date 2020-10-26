@@ -14,9 +14,14 @@
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/ParameterTie.h"
 #include "MantidCurveFitting/Constraints/BoundaryConstraint.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 
 #include <algorithm>
+
+namespace {
+Mantid::Kernel::Logger g_log("CrystalFieldSpectrum");
+}
 
 namespace Mantid {
 namespace CurveFitting {
@@ -41,6 +46,14 @@ CrystalFieldSpectrum::CrystalFieldSpectrum()
   declareAttribute("FixAllPeaks", Attribute(false));
 }
 
+void CrystalFieldSpectrum::init() {
+  try {
+    buildTargetFunction();
+  } catch (std::runtime_error const &ex) {
+    g_log.error(ex.what());
+  }
+}
+
 /// Uses m_crystalField to calculate peak centres and intensities
 /// then populates m_spectrum with peaks of type given in PeakShape attribute.
 void CrystalFieldSpectrum::buildTargetFunction() const {
@@ -52,6 +65,7 @@ void CrystalFieldSpectrum::buildTargetFunction() const {
   FunctionDomainGeneral domain;
   FunctionValues values;
   m_source->function(domain, values);
+  m_source->applyTies();
 
   if (values.size() == 0) {
     return;
