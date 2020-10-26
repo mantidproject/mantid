@@ -247,8 +247,8 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
         components = [[], []]
         componentNames = ['Incoherent', 'Coherent', 'Magnetic']
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
-        if (mtd[ws].getNumberOfEntries() == 2 and user_method == 'Uniaxial'
-            or mtd[ws].getNumberOfEntries() == 3 and user_method != 'Uniaxial'):
+        if ( mtd[ws].getNumberOfEntries() == 2 and user_method == 'Uniaxial'
+             or mtd[ws].getNumberOfEntries() == 3 and user_method != 'Uniaxial'):
             return ws
 
         if user_method in ['10p', 'XYZ']:
