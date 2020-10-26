@@ -138,6 +138,8 @@ class DrillModel(QObject):
         """
         self.rundexFile = None
         self.samples = list()
+        self.groups = dict()
+        self.masterSample = dict()
         self.settings = dict()
         self.columns = list()
         self.visualSettings = None
@@ -183,6 +185,8 @@ class DrillModel(QObject):
             return
         self.rundexFile = None
         self.samples = list()
+        self.groups = dict()
+        self.masterSample = dict()
         self.visualSettings = None
         self.acquisitionMode = mode
         self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
