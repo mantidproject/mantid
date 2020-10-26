@@ -171,6 +171,9 @@ calculates the partial absorption factors in flat plate geometry using numerical
 :ref:`CylinderPaalmanPingsCorrection <algm-CylinderPaalmanPingsCorrection>`
 calculates the partial absorption factors in cylindrical geometry using numerical integration.
 
+:ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>`
+calculates the partial absorption factors for generic shapes using numerical integration.
+
 References
 ----------
 

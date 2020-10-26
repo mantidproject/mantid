@@ -66,7 +66,7 @@ def uniqueDescription(name, wksp):
         sample = mtd[wksp].sample()
         materialname = sample.getMaterial().name()
         shapeXML = sample.getShape().getShapeXML()
-        density = str(sample.getMaterial().numberDensity)
+        density = str(sample.getMaterial().numberDensityEffective)
         wavelength = mtd[wksp].readX(0)
         wavelength = '{} to {} with {} bins'.format(wavelength[0], wavelength[-1], mtd[wksp].readY(0).size)
         value = ';'.join((materialname, density, shapeXML, wavelength))

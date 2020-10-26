@@ -20,12 +20,13 @@ Improvements
 - Enabled the plotting of individual functions in the Workbench fit browser. This replicates a feature that was in MantidPlot.
   Plotting of each function can be performed by right clicking on the function within the browser and selecting plot.
 - Add the possibility to copy and paste shapes in the instrument viewer using Ctrl + C and Ctrl + V.
+- Improved spectra selection within the sliceviewer, which should ensure that high counting spectra are shown immediately when the sliceviewer is opened.
 - Powder diffraction support (instruments D2B and D20) has been added to DrILL interface. See
-  :ref:`DrILL documentation <DrILL-ref>` for more information.
 
 Bugfixes
 ########
 
 - Only display slice viewer widget for MDEventWorkspaces with 2 or more dimensions.
+- Fix Workbench crashes upon deleting rows or columns in a TableWorkspace.
 
 :ref:`Release 6.0.0 <v6.0.0>`

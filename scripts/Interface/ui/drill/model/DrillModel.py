@@ -8,6 +8,7 @@
 import json
 import os
 import sys
+import numpy
 
 from qtpy.QtCore import QObject, Signal, QThread
 
@@ -357,8 +358,10 @@ class DrillModel(QObject):
                     t = "string"
             elif (isinstance(p, BoolPropertyWithValue)):
                 t = "bool"
-            elif (isinstance(p, (FloatArrayProperty, IntArrayProperty))):
-                t = "array"
+            elif (isinstance(p, FloatArrayProperty)):
+                t = "floatArray"
+            elif (isinstance(p, IntArrayProperty)):
+                t = "intArray"
             else:
                 t = "string"
 
@@ -380,7 +383,11 @@ class DrillModel(QObject):
 
         for s in self.settings:
             p = alg.getProperty(s)
-            self.settings[s] = p.value
+            v = p.value
+            if (isinstance(v, numpy.ndarray)):
+                self.settings[s] = v.tolist()
+            else:
+                self.settings[s] = v
 
     def checkParameter(self, param, value, sample=-1):
         """

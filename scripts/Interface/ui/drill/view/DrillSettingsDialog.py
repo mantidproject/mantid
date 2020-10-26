@@ -79,14 +79,24 @@ class DrillSetting(QObject):
             self._setter = self._widget.setChecked
             self._getter = self._widget.isChecked
 
-        elif (settingType == "array"):
+        elif (settingType == "floatArray") or (settingType == "intArray"):
             self._widget = QLineEdit()
             self._widget.editingFinished.connect(
                     lambda : self.valueChanged.emit(name)
                     )
             self._setter = lambda v : self._widget.setText(','.join(str(e)
                                                            for e in v))
-            self._getter = self._widget.text
+
+            if (settingType == "floatArray"):
+                self._getter = (
+                        lambda : [float(v)
+                                  for v in self._widget.text().split(',')
+                                  if v])
+            else:
+                self._getter = (
+                        lambda : [int(v)
+                                  for v in self._widget.text().split(',')
+                                  if v])
 
         elif (settingType == "string"):
             self._widget = QLineEdit()

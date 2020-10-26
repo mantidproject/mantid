@@ -231,6 +231,8 @@ public:
   LType::const_reference back() const { return m_links.back(); }
   /// Returns the number of links
   int count() const { return static_cast<int>(m_links.size()); }
+  /// Returns the number of intersection points
+  int surfPointsCount() const { return static_cast<int>(m_surfPoints.size()); }
   /// Is the link complete?
   int nonComplete() const;
 
