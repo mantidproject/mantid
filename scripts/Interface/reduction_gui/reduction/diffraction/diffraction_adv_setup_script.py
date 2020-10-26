@@ -65,6 +65,11 @@ class AdvancedSetupScript(BaseScriptElement):
     extension = "_event.nxs"
     outputfileprefix = ""
     scaledata = ""
+    sampleformula = ""
+    samplenumberdensity = ""
+    measuredmassdensity = ""
+    containershape = ""
+    typeofcorrection = ""
 
     parnamelist = None
 
@@ -99,8 +104,11 @@ class AdvancedSetupScript(BaseScriptElement):
         self.parnamelist.append("PreserveEvents")
         self.parnamelist.append("OutputFilePrefix")
         self.parnamelist.append("ScaleData")
-
-        return
+        self.parnamelist.append("TypeOfCorrection")
+        self.parnamelist.append("SampleFormula")
+        self.parnamelist.append("MeasuredMassDensity")
+        self.parnamelist.append("SampleNumberDensity")
+        self.parnamelist.append("ContainerShape")
 
     def set_default_pars(self, inst_name):
         """ Set default values
@@ -147,6 +155,11 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["PreserveEvents"] = str(int(self.preserveevents))
         pardict["OutputFilePrefix"] = self.outputfileprefix
         pardict["ScaleData"] = self.scaledata
+        pardict["TypeOfCorrection"] = self.typeofcorrection
+        pardict["SampleFormula"] = self.sampleformula
+        pardict["MeasuredMassDensity"] = self.measuredmassdensity
+        pardict["SampleNumberDensity"] = self.samplenumberdensity
+        pardict["ContainerShape"] = self.containershape
 
         return pardict
 
@@ -234,7 +247,20 @@ class AdvancedSetupScript(BaseScriptElement):
             self.scaledata = getFloatElement(instrument_dom, "scaledata",
                                              AdvancedSetupScript.scaledata)
 
-            return
+            self.sampleformula = BaseScriptElement.getStringElement(instrument_dom, "sampleformula",
+                                                                    default=AdvancedSetupScript.sampleformula)
+
+            self.samplenumberdensity = getFloatElement(instrument_dom, "samplenumberdensity",
+                                                       AdvancedSetupScript.samplenumberdensity)
+
+            self.measuredmassdensity = getFloatElement(instrument_dom, "measuredmassdensity",
+                                                       AdvancedSetupScript.measuredmassdensity)
+
+            self.containershape = BaseScriptElement.getStringElement(instrument_dom, "containershape",
+                                                                     default=AdvancedSetupScript.containershape)
+
+            self.typeofcorrection = BaseScriptElement.getStringElement(instrument_dom, "typeofcorrection",
+                                                                       default=AdvancedSetupScript.typeofcorrection)
 
     def reset(self):
         """ 'Public' method to reset state
