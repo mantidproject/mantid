@@ -33,19 +33,23 @@ using namespace MantidQt::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view), m_numDetectors(0), m_loadingData(false), m_runs() {}
+    : m_view(view), m_numDetectors(0), m_loadingData(false), m_directoryChanged(false), m_timerID()  {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
 
   connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
-  // connect(m_view, SIGNAL(runsSelected()), SLOT(updateAvailableInfo()));
   connect(m_view, SIGNAL(instrumentChangedSignal(std::string)),
           SLOT(handleInstrumentChanged(std::string)));
   // connect(m_view, SIGNAL(pathChangedSignal(std::string)), SLOT());
   connect(m_view, SIGNAL(runsChangedSignal()), SLOT(handleRunsChanged()));
   connect(m_view, SIGNAL(manageDirectoriesClicked()),
           SLOT(handleManageDirectories()));
+  connect(m_view, SIGNAL(runsFoundSignal()), SLOT(handleRunsFound()));
+  connect(m_view, SIGNAL(autoAddToggledSignal(bool)),
+          SLOT(startWatching(bool)));
+  connect(&m_watcher, SIGNAL(directoryChanged(const QString &)),
+         SLOT(updateDirectoryChangedFlag(const QString &)));
 }
 
 /**
@@ -110,75 +114,42 @@ ALCDataLoadingPresenter::validateAndGetRunsFromExpression(std::string runs) {
 }
 
 void ALCDataLoadingPresenter::handleRunsChanged() {
-  /*
-  try {
-    // Reset path as we don't know if new runs will be successful
-    m_view->setPath(std::string{});
-
-    auto runsExpression = m_view->getRunsExpression();
-    auto runNumbers =
-        validateAndGetRunsFromExpression(runsExpression); // Throws here
-
-    if (runNumbers.size() > 200) {
-      auto continueLoad = m_view->displayWarning(
-          "You are attempting to load " + std::to_string(runNumbers.size()) +
-          " runs, are you sure you want to do this?");
-      if (!continueLoad) {
-        m_view->enableLoad(false);
-        return;
-      }
-    }
-
-    m_runs = runNumbers;
-
-    // Set intial values (if successful path is set in GUI)
-    updateAvailableInfo();
-
-    if (m_view->getPath().empty()) {
-      throw std::runtime_error("Could not find the first run.");
-      m_view->enableLoad(false);
-    } else
-      m_view->enableLoad(true); // ready to load
-  } catch (std::runtime_error e) {
-    m_view->displayError(
-        std::string(e.what()) +
-        "\n\nCan specify a list of runs by a dash \ne.g. 1-10\nCan specify "
-        "specific runs with a comma separated list \ne.g. 1-10, 15, 20-30\n "
-        "Range must go in increasing order, \ne.g. 1-10, 15, 20-30");
-    m_view->enableLoad(false);
-  } */
-
   // Reset path
   // Check valid
   // Update available info
   // Enable/disable load
   std::cout << "runs changed" << std::endl;
 
-  // On a new load so need to reset path and auto add
+  // If runs empty, make sure everything is reset but no error
+  m_view->enableLoad(false);
   m_view->setPath(std::string{});
   m_view->enableRunsAutoAdd(false);
+  m_view->setAvailableInfoToEmtpy();
+  m_view->setLoadStatus("Attempting to find files");
+}
 
-  // Check runs are valid
-  const auto error = m_view->getRunsError();
-  if (!error.empty()) {
-    m_view->displayError(
-        error +
-        "\n\nYou can specify a range of runs by a dash: \ne.g. 1-1\nYou can "
-        "specify "
-        "specific runs with a comma separated list which includes ranges: "
-        "\ne.g. 1-10, 15, 20-30\n "
-        "The range must go in increasing order: \ne.g. 1-10, 15, 20-30");
+void ALCDataLoadingPresenter::handleRunsFound() {
+  std::cout << "handle runs found" << std::endl;
+  // Do a quick check for an empty input, do nothing in this case
+  if (m_view->getRunsText().empty()) {
+    m_view->setLoadStatus("");
     return;
   }
 
-  // Now try update available info
+  // Check for errors as files might not have been found
+  if (!m_view->getRunsError().empty()) {
+    m_view->displayError(m_view->getRunsError());
+    return;
+  }
+
+  // Try update info and enable load
   try {
     updateAvailableInfo();
     m_view->enableLoad(true);
+    m_view->setLoadStatus("Found files");
   } catch (const std::runtime_error &e) {
-    // Display error and ensure load disabled
     m_view->displayError(e.what());
-    m_view->enableLoad(false);
+    m_view->setLoadStatus("");
   }
 }
 
@@ -188,24 +159,20 @@ void ALCDataLoadingPresenter::handleRunsChanged() {
  * If it was "auto", sets up a watcher to automatically reload on new files.
  */
 void ALCDataLoadingPresenter::handleLoadRequested() {
-  /*
-  std::vector<std::string> files;
-  const auto instrument = m_view->getInstrument();
-  const auto path = m_view->getPath();
-  for (const auto &run : m_runs) {
-    auto paddingSize = Mantid::Kernel::ConfigService::Instance()
-                           .getInstrument(instrument)
-                           .zeroPadding(std::stoi(run));
-    std::stringstream ss;
-    ss << path << instrument;
-    for (int i = run.size(); i < paddingSize; ++i)
-      ss << "0";
-    ss << run << m_extension;
-    files.emplace_back(ss.str());
+  auto files = m_view->getFiles();
+
+  // Warning message if trying to load excessive number of files
+  if (files.size() > 200) {
+    auto continueLoad = m_view->displayWarning(
+        "You are attempting to load " + std::to_string(files.size()) +
+        " runs, are you sure you want to do this?");
+    if (!continueLoad)
+      return;
   }
+
+  m_view->setLoadStatus("Loading files");
   load(files);
-  m_view->enableRunsAutoAdd(true); */
-  load(m_view->getFiles());
+  m_view->setLoadStatus("Loaded files");
   m_view->enableRunsAutoAdd(true);
 }
 
@@ -355,18 +322,6 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     IAlgorithm_sptr loadAlg =
         AlgorithmManager::Instance().create("LoadMuonNexus");
     loadAlg->setChild(true); // Don't want workspaces in the ADS
-    /*
-    // Need first run here to update available info
-    const auto instrument = m_view->getInstrument();
-    std::stringstream file;
-    auto paddingSize = Mantid::Kernel::ConfigService::Instance()
-                           .getInstrument(instrument)
-                           .zeroPadding(std::stoi(m_runs[0]));
-    file << instrument;
-    for (int i = m_runs[0].size(); i < paddingSize; ++i)
-      file << "0";
-    file << m_runs[0];
-    loadAlg->setProperty("Filename", file.str()); */
 
     // We need logs only but we have to use LoadMuonNexus
     // (can't use LoadMuonLogs as not all the logs would be
@@ -383,15 +338,12 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 
     // Get actual file path and set on view
     auto path = loadAlg->getPropertyValue("Filename");
-    m_extension = path.substr(path.find_last_of("."));
     path = path.substr(0, path.find_last_of("/\\") + 1);
     m_view->setPath(path);
-
   } catch (...) {
-    m_view->setAvailableLogs(std::vector<std::string>()); // Empty logs list
-    m_view->setAvailablePeriods(
-        std::vector<std::string>()); // Empty period list
-    m_view->setTimeLimits(0, 0);     // "Empty" time limits
+    m_view->setAvailableInfoToEmtpy();
+    throw std::runtime_error(
+        "Error updating user interface. The runs numbers may be wrong.");
     return;
   }
 
@@ -505,11 +457,27 @@ void ALCDataLoadingPresenter::handleInstrumentChanged(std::string instrument) {
   m_view->enableLoad(false);
 
   // If there are runs entered, try loading again
-  
 }
 
 void ALCDataLoadingPresenter::handleManageDirectories() {
   MantidQt::API::ManageUserDirectories::openManageUserDirectories();
+}
+
+/**
+ * The watched directory has been changed - update flag.
+ * @param path :: [input] Path to directory modified (not used)
+ */
+void ALCDataLoadingPresenter::updateDirectoryChangedFlag(const QString &path) {
+  Q_UNUSED(path); // just set the flag, don't need the path
+  m_directoryChanged = true;
+}
+
+void ALCDataLoadingPresenter::startWatching(bool watch) { 
+  if (watch) {
+    std::cout << "watch" << std::endl;
+  } else {
+    std::cout << "don't watch" << std::endl;
+  }
 }
 
 } // namespace CustomInterfaces

@@ -65,6 +65,15 @@ private slots:
   /// Handle for when manage user directories clicked
   void handleManageDirectories();
 
+  /// Handle for when runs have been searched for
+  void handleRunsFound();
+
+  /// When directory contents change, set flag
+  void updateDirectoryChangedFlag(const QString &path);
+
+  /// Begin/Stop watching path
+  void startWatching(bool watch);
+
 signals:
   /// Signal emitted when data get changed
   void dataChanged();
@@ -97,11 +106,14 @@ private:
   // Loading algorithm
   Mantid::API::IAlgorithm_sptr m_LoadingAlg;
 
-  /// Runs to be loaded
-  std::vector<std::string> m_runs;
+  /// Watches the path for changes
+  QFileSystemWatcher m_watcher;
 
-  /// File extension of runs loaded
-  std::string m_extension;
+  /// Flag for changes in watched directory
+  std::atomic_bool m_directoryChanged;
+
+  /// Timer ID of running timer
+  int m_timerID;
 };
 
 } // namespace CustomInterfaces

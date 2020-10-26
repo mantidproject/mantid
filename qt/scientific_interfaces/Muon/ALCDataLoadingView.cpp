@@ -43,10 +43,12 @@ void ALCDataLoadingView::initialize() {
           SLOT(instrumentChanged(QString)));
   connect(m_ui.path, SIGNAL(textChanged(QString)), this,
           SLOT(pathChanged(QString)));
-  connect(m_ui.runs, SIGNAL(filesFound()),
-          SIGNAL(runsChangedSignal()));
+  connect(m_ui.runs, SIGNAL(findingFiles()), SIGNAL(runsChangedSignal()));
+  connect(m_ui.runs, SIGNAL(fileFindingFinished()), SIGNAL(runsFoundSignal()));
   connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()),
           SIGNAL(manageDirectoriesClicked()));
+  connect(m_ui.runsAutoAdd, SIGNAL(toggled(bool)), this,
+          SLOT(runsAutoAddToggled(bool)));
 
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 
@@ -91,7 +93,7 @@ void ALCDataLoadingView::initInstruments() {
       m_ui.instrument->findText(QString::fromStdString(userInstrument));
   if (index != -1)
     m_ui.instrument->setCurrentIndex(index);
-  else 
+  else
     m_ui.instrument->setCurrentIndex(3);
   m_ui.instrument->blockSignals(false);
   setInstrument(m_ui.instrument->currentText().toStdString());
@@ -321,8 +323,14 @@ void ALCDataLoadingView::enableAll() {
 }
 
 void ALCDataLoadingView::instrumentChanged(QString instrument) {
+  m_ui.runs->setInstrumentOverride(instrument);
   emit instrumentChangedSignal(instrument.toStdString());
-  //m_ui.runs->findFiles();
+  if (!m_ui.runs->getText().isEmpty()) {
+    m_ui.runs->findFiles(); // Re-search for files with new instrument
+    // emit runsFoundSignal();
+    // m_ui.runs->setFileTextWithSearch(m_ui.runs->getText());
+    std::cout << "finding files" << std::endl;
+  }
 }
 
 void ALCDataLoadingView::pathChanged(QString path) {
@@ -363,6 +371,32 @@ std::vector<std::string> ALCDataLoadingView::getFiles() {
 
 std::string ALCDataLoadingView::getFirstFile() {
   return m_ui.runs->getFirstFilename().toStdString();
+}
+
+void ALCDataLoadingView::setAvailableInfoToEmtpy() {
+  setAvailableLogs(std::vector<std::string>());    // Empty logs list
+  setAvailablePeriods(std::vector<std::string>()); // Empty period list
+  setTimeLimits(0, 0);                             // "Empty" time limits
+}
+
+std::string ALCDataLoadingView::getRunsText() const {
+  return m_ui.runs->getText().toStdString();
+}
+
+void ALCDataLoadingView::setLoadStatus(const std::string &status) {
+  m_ui.loadStatusLabel->setText(QString::fromStdString(status));
+}
+
+void ALCDataLoadingView::runsAutoAddToggled(bool on) {
+  if (on) {
+    m_ui.runs->setReadOnly(true);
+    std::cout << "emit true" << std::endl;
+    emit autoAddToggledSignal(true);
+  } else {
+    m_ui.runs->setReadOnly(false);
+    std::cout << "emit false" << std::endl;
+    emit autoAddToggledSignal(false);
+  }
 }
 
 } // namespace CustomInterfaces

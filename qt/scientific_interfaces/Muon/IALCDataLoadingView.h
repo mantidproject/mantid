@@ -30,7 +30,7 @@ public:
   virtual std::string getInstrument() const = 0;
 
   /// @return std::string of path
-  virtual std::string getPath() const = 0; 
+  virtual std::string getPath() const = 0;
 
   /// @return std::string of expression in runs box
   virtual std::string getRunsExpression() const = 0;
@@ -73,6 +73,12 @@ public:
   /// @return Selected integration time range, or nothing if limiting is
   /// disabled
   virtual boost::optional<std::pair<double, double>> timeRange() const = 0;
+
+  /// Sets all available info to empty
+  virtual void setAvailableInfoToEmtpy() = 0;
+
+  /// Get text input for runs
+  virtual std::string getRunsText() const = 0;
 
 public slots:
   /// Performs any necessary initialization
@@ -138,7 +144,7 @@ public slots:
   /// Sets the instrument in runs box if user changes it from combobox
   virtual void setInstrument(std::string &instrument) = 0;
 
-  /// Enables/Disables auto add 
+  /// Enables/Disables auto add
   virtual void enableRunsAutoAdd(bool enable) = 0;
 
   /// Get runs errors
@@ -149,6 +155,12 @@ public slots:
 
   // Get first file only for loading
   virtual std::string getFirstFile() = 0;
+
+  /// Set status label for loading
+  virtual void setLoadStatus(const std::string &status) = 0;
+
+  /// Handle check/uncheck of runs auto add
+  virtual void runsAutoAddToggled(bool on) = 0;
 
 signals:
   /// Request to load data
@@ -168,6 +180,12 @@ signals:
 
   // Manage user directories has been clicked
   void manageDirectoriesClicked();
+
+  /// Searching finished
+  void runsFoundSignal();
+
+  /// Runs Auto Add state changed
+  void autoAddToggledSignal(bool);
 };
 
 } // namespace CustomInterfaces

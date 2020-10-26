@@ -538,6 +538,13 @@
           </widget>
          </item>
          <item>
+          <widget class="QLabel" name="loadStatusLabel">
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+         <item>
           <spacer name="horizontalSpacer">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -572,7 +579,7 @@
       <zorder>periodsGroup</zorder>
       <zorder>calculationGroup</zorder>
       <zorder>dataGroup</zorder>
-      <zorder></zorder>
+      <zorder>verticalSpacer</zorder>
      </widget>
      <widget class="QGroupBox" name="groupBox">
       <property name="styleSheet">
@@ -725,8 +732,8 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="deadTimeCorrType"/>
   <buttongroup name="detectorGroupingType"/>
+  <buttongroup name="deadTimeCorrType"/>
   <buttongroup name="calculationType"/>
  </buttongroups>
 </ui>
