@@ -8,7 +8,7 @@
 
 #include "DllOption.h"
 
-#include "DomainLocation.h"
+#include "DatasetDomain.h"
 #include "IFunctionModel.h"
 #include "MantidAPI/IFunction.h"
 
@@ -47,7 +47,7 @@ public:
   IFunction_sptr getCurrentFunction() const override;
   void setNumberDomains(int) override;
   void setDatasets(const QStringList &datasetNames) override;
-  std::vector<DomainLocation> getDatasetDomains() const override;
+  std::vector<DatasetDomain> getDatasetDomains() const override;
   int getNumberDomains() const override;
   int currentDomainIndex() const override;
   void setCurrentDomainIndex(int) override;
@@ -87,7 +87,7 @@ private:
   void checkIndex(int) const;
   void updateGlobals();
   size_t m_currentDomainIndex = 0;
-  mutable std::vector<DomainLocation> m_domains;
+  mutable std::vector<DatasetDomain> m_domains;
   mutable QStringList m_globalParameterNames;
 };
 

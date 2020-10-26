@@ -15,10 +15,10 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-struct DomainLocation {
-  DomainLocation();
-  DomainLocation(QString const &workspaceName,
-                 std::size_t const &spectrumNumber, bool isOnlySpectrum = true);
+struct DatasetDomain {
+  DatasetDomain();
+  DatasetDomain(QString const &workspaceName, std::size_t const &spectrumNumber,
+                bool isOnlySpectrum = true);
 
   QString domainName() const;
 

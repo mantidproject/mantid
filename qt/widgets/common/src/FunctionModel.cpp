@@ -277,19 +277,19 @@ void FunctionModel::setDatasets(const QStringList &datasetNames) {
         "Number of dataset names doesn't match the number of domains.");
   }
 
-  std::vector<DomainLocation> domains;
+  std::vector<DatasetDomain> domains;
   domains.reserve(datasetNames.size());
   for (const auto &datasetName : datasetNames)
-    domains.emplace_back(DomainLocation(datasetName, 0));
+    domains.emplace_back(DatasetDomain(datasetName, 0));
 
   m_domains = domains;
 }
 
-std::vector<DomainLocation> FunctionModel::getDatasetDomains() const {
+std::vector<DatasetDomain> FunctionModel::getDatasetDomains() const {
   if (static_cast<std::size_t>(m_domains.size()) != m_numberDomains) {
     m_domains.clear();
     for (auto i = 0u; i < m_numberDomains; ++i)
-      m_domains.emplace_back(DomainLocation("", i, false));
+      m_domains.emplace_back(DatasetDomain("", i, false));
     return m_domains;
   }
   return m_domains;
