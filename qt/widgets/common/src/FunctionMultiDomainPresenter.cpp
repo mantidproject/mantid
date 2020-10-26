@@ -138,8 +138,9 @@ void FunctionMultiDomainPresenter::setNumberOfDatasets(int n) {
   m_model->setNumberDomains(n);
 }
 
-void FunctionMultiDomainPresenter::setDatasetNames(const QStringList &names) {
-  m_model->setDatasetNames(names);
+void FunctionMultiDomainPresenter::setDatasets(
+    const QStringList &datasetNames) {
+  m_model->setDatasets(datasetNames);
 }
 
 QStringList FunctionMultiDomainPresenter::getDatasetNames() const {
@@ -169,7 +170,7 @@ void FunctionMultiDomainPresenter::removeDatasets(QList<int> indices) {
     datasetNames.removeAt(*i);
   }
   m_model->setNumberDomains(datasetNames.size());
-  m_model->setDatasetNames(datasetNames);
+  m_model->setDatasets(datasetNames);
   auto currentIndex = m_model->currentDomainIndex();
   if (currentIndex >= datasetNames.size()) {
     currentIndex = datasetNames.isEmpty() ? 0 : datasetNames.size() - 1;

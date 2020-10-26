@@ -28,7 +28,7 @@ public:
   virtual void clearErrors() = 0;
   virtual void setFunction(const QString &funStr) = 0;
   virtual void setNumberOfDatasets(int n) = 0;
-  virtual void setDatasetNames(const QStringList &) = 0;
+  virtual void setDatasets(const QStringList &datasetNames) = 0;
   virtual Mantid::API::IFunction_sptr getGlobalFunction() = 0;
   virtual void
   updateMultiDatasetParameters(const Mantid::API::IFunction &fun) = 0;

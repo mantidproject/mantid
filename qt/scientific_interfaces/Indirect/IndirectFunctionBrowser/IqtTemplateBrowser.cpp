@@ -221,8 +221,8 @@ int IqtTemplateBrowser::getNumberOfDatasets() const {
   return m_presenter.getNumberOfDatasets();
 }
 
-void IqtTemplateBrowser::setDatasetNames(const QStringList &names) {
-  m_presenter.setDatasetNames(names);
+void IqtTemplateBrowser::setDatasets(const QStringList &datasetNames) {
+  m_presenter.setDatasets(datasetNames);
 }
 
 QStringList IqtTemplateBrowser::getGlobalParameters() const {

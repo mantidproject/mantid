@@ -271,12 +271,12 @@ void FunctionModel::setNumberDomains(int nDomains) {
   }
 }
 
-void FunctionModel::setDatasetNames(const QStringList &names) {
-  if (static_cast<size_t>(names.size()) != m_numberDomains) {
+void FunctionModel::setDatasets(const QStringList &datasetNames) {
+  if (static_cast<size_t>(datasetNames.size()) != m_numberDomains) {
     throw std::runtime_error(
         "Number of dataset names doesn't match the number of domains.");
   }
-  m_datasetNames = names;
+  m_datasetNames = datasetNames;
 }
 
 QStringList FunctionModel::getDatasetNames() const {

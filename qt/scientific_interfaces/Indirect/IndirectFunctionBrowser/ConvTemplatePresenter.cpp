@@ -190,8 +190,8 @@ void ConvTemplatePresenter::setCurrentDataset(int i) {
   updateViewParameters();
 }
 
-void ConvTemplatePresenter::setDatasetNames(const QStringList &names) {
-  m_model.setDatasetNames(names);
+void ConvTemplatePresenter::setDatasets(const QStringList &datasetNames) {
+  m_model.setDatasets(datasetNames);
 }
 
 void ConvTemplatePresenter::setBackgroundA0(double value) {

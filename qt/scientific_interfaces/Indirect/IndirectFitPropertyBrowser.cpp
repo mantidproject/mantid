@@ -398,9 +398,9 @@ void IndirectFitPropertyBrowser::updateFunctionBrowserData(
     const std::vector<double> &qValues,
     const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   m_functionBrowser->setNumberOfDatasets(nData);
-  m_functionBrowser->setDatasetNames(datasetNames);
+  m_functionBrowser->setDatasets(datasetNames);
   m_templateBrowser->setNumberOfDatasets(nData);
-  m_templateBrowser->setDatasetNames(datasetNames);
+  m_templateBrowser->setDatasets(datasetNames);
   m_templateBrowser->setQValues(qValues);
   m_templateBrowser->setResolution(fitResolutions);
 }

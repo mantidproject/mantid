@@ -49,7 +49,7 @@ public:
   void clearErrors();
   boost::optional<QString> currentFunctionIndex() const;
   void setNumberOfDatasets(int);
-  void setDatasetNames(const QStringList &names);
+  void setDatasets(const QStringList &datasetNames);
   QStringList getDatasetNames() const;
   int getNumberOfDatasets() const;
   int getCurrentDataset() const;

@@ -116,8 +116,9 @@ int SingleFunctionTemplateBrowser::getNumberOfDatasets() const {
   return m_presenter.getNumberOfDatasets();
 }
 
-void SingleFunctionTemplateBrowser::setDatasetNames(const QStringList &names) {
-  m_presenter.setDatasetNames(names);
+void SingleFunctionTemplateBrowser::setDatasets(
+    const QStringList &datasetNames) {
+  m_presenter.setDatasets(datasetNames);
 }
 
 QStringList SingleFunctionTemplateBrowser::getGlobalParameters() const {

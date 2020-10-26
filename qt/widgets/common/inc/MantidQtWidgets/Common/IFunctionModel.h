@@ -40,7 +40,7 @@ public:
   virtual IFunction_sptr getSingleFunction(int index) const = 0;
   virtual IFunction_sptr getCurrentFunction() const = 0;
   virtual void setNumberDomains(int) = 0;
-  virtual void setDatasetNames(const QStringList &names) = 0;
+  virtual void setDatasets(const QStringList &datasetNames) = 0;
   virtual QStringList getDatasetNames() const = 0;
   virtual int getNumberDomains() const = 0;
   virtual int currentDomainIndex() const = 0;

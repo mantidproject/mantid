@@ -50,7 +50,7 @@ public:
   void updateParameters(const IFunction &fun);
   void setCurrentDataset(int i);
   int getCurrentDataset();
-  void setDatasetNames(const QStringList &names);
+  void setDatasets(const QStringList &datasetNames);
   void setViewParameterDescriptions();
   void setErrorsEnabled(bool enabled);
   void tieIntensities(bool on);

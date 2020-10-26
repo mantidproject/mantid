@@ -128,9 +128,9 @@ void SingleFunctionTemplatePresenter::setCurrentDataset(int i) {
   updateView();
 }
 
-void SingleFunctionTemplatePresenter::setDatasetNames(
-    const QStringList &names) {
-  m_model.setDatasetNames(names);
+void SingleFunctionTemplatePresenter::setDatasets(
+    const QStringList &datasetNames) {
+  m_model.setDatasets(datasetNames);
 }
 
 void SingleFunctionTemplatePresenter::setErrorsEnabled(bool enabled) {

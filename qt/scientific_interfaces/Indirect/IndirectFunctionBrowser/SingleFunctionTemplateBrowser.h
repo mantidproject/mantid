@@ -44,7 +44,7 @@ public:
   IFunction_sptr getFunction() const override;
   void setNumberOfDatasets(int) override;
   int getNumberOfDatasets() const override;
-  void setDatasetNames(const QStringList &names) override;
+  void setDatasets(const QStringList &datasetNames) override;
   QStringList getGlobalParameters() const override;
   QStringList getLocalParameters() const override;
   void setGlobalParameters(const QStringList &globals) override;

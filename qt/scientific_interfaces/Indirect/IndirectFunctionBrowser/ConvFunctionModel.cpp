@@ -485,8 +485,8 @@ void ConvFunctionModel::removeConstraint(const QString &paramName) {
   m_model.removeConstraint(paramName);
 }
 
-void ConvFunctionModel::setDatasetNames(const QStringList &names) {
-  m_model.setDatasetNames(names);
+void ConvFunctionModel::setDatasets(const QStringList &datasetNames) {
+  m_model.setDatasets(datasetNames);
 }
 
 QStringList ConvFunctionModel::getDatasetNames() const {

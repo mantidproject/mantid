@@ -181,8 +181,8 @@ int IqtTemplatePresenter::getCurrentDataset() {
   return m_model.currentDomainIndex();
 }
 
-void IqtTemplatePresenter::setDatasetNames(const QStringList &names) {
-  m_model.setDatasetNames(names);
+void IqtTemplatePresenter::setDatasets(const QStringList &datasetNames) {
+  m_model.setDatasets(datasetNames);
 }
 
 void IqtTemplatePresenter::setViewParameterDescriptions() {

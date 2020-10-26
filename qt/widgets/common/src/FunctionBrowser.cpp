@@ -161,8 +161,8 @@ void FunctionBrowser::setNumberOfDatasets(int n) {
 /// Set the names of the datasets. They will be displayed by the
 /// local parameter editing dialog.
 /// @param names :: Names of the datasets
-void FunctionBrowser::setDatasetNames(const QStringList &names) {
-  m_presenter->setDatasetNames(names);
+void FunctionBrowser::setDatasets(const QStringList &datasetNames) {
+  m_presenter->setDatasets(datasetNames);
 }
 
 /**
@@ -210,7 +210,7 @@ void FunctionBrowser::addDatasets(const QStringList &names) {
   auto allNames = m_presenter->getDatasetNames();
   allNames.append(names);
   m_presenter->setNumberOfDatasets(allNames.size());
-  m_presenter->setDatasetNames(allNames);
+  m_presenter->setDatasets(allNames);
 }
 
 /// Return the multidomain function for multi-dataset fitting
