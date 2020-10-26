@@ -284,6 +284,7 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
         det_efficiency_ws = cross_section_ws + '_det_efficiency'
         tmp_name = 'det_eff'
         tmp_names = []
+        to_clean = []
         if calibrationType == 'Vanadium':
             if normaliseToAbsoluteUnits:
                 normFactor = self.getProperty('FormulaUnits').value
@@ -338,6 +339,9 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
 
             GroupWorkspaces(tmp_names, OutputWorkspace=det_efficiency_ws)
 
+        if len(to_clean) != 0:
+            DeleteWorkspaces(to_clean)
+
         return det_efficiency_ws
 
     def _normalise_sample_data(self, ws, det_efficiency_ws):
@@ -372,7 +376,7 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
             det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
             output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
-
+            DeleteWorkspaces([det_efficiency_ws, det_efficiency_input]) # cleanup
         self.setProperty('OutputWorkspace', mtd[output_ws])
 
 
