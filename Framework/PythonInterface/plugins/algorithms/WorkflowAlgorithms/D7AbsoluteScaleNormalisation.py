@@ -159,7 +159,7 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
             nComponents = 3
         elif nMeasurements == 6:
             nComponents = 3
-            if user_method == '10p':
+            if user_method == '10p' and self.getProperty('RotatedXYZWorkspace').isDefault:
                 raise RunTimeError(error_msg.format(user_method))
         elif nMeasurements == 2:
             nComponents = 2
@@ -177,9 +177,14 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
         current sample. The method used is based on either the user's choice or the provided data structure."""
         DEG_2_RAD =  np.pi / 180.0
         nMeasurements, nComponents = self._data_structure_helper(ws)
+        user_method = self.getPropertyValue('CrossSectionSeparationMethod')
         componentNames = ['Coherent', 'Incoherent', 'Magnetic']
         number_histograms = mtd[ws][0].getNumberHistograms()
         block_size = mtd[ws][0].blocksize()
+        double_xyz_method = False
+        if not self.getProperty('RotatedXYZWorkspace').isDefault:
+            double_xyz_method = True
+            second_xyz_ws = self.getPropertyValue('RotatedXYZWorkspace')
         tmp_names = []
 
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
@@ -198,7 +203,7 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
                     sigma_y_nsf = mtd[ws][entry_no+3].readY(spectrum)
                     sigma_x_sf = mtd[ws][entry_no+4].readY(spectrum)
                     sigma_x_nsf = mtd[ws][entry_no+5].readY(spectrum)
-                    if nMeasurements == 6:
+                    if nMeasurements == 6 and user_method == 'XYZ':
                         # Magnetic component
                         magnetic_component = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf )
                         dataY_magnetic[spectrum] = magnetic_component
@@ -208,10 +213,19 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
                         # Incoherent component
                         dataY_incoherent[spectrum] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - magnetic_component
                     else:
-                        sigma_xmy_sf = mtd[ws][entry_no+6].readY(spectrum)
-                        sigma_xmy_nsf = mtd[ws][entry_no+7].readY(spectrum)
-                        sigma_xpy_sf = mtd[ws][entry_no+8].readY(spectrum)
-                        sigma_xpy_nsf = mtd[ws][entry_no+9].readY(spectrum)
+                        if not double_xyz_method:
+                            sigma_xmy_sf = mtd[ws][entry_no+6].readY(spectrum)
+                            sigma_xmy_nsf = mtd[ws][entry_no+7].readY(spectrum)
+                            sigma_xpy_sf = mtd[ws][entry_no+8].readY(spectrum)
+                            sigma_xpy_nsf = mtd[ws][entry_no+9].readY(spectrum)
+                        else:
+                            # assumed is averaging of twice measured Z-axis:
+                            sigma_z_sf = 0.5 * (sigma_z_sf + mtd[second_xyz_ws][entry_no].readY(spectrum))
+                            sigma_z_nsf = 0.5 * (sigma_z_nsf + mtd[second_xyz_ws][entry_no+1].readY(spectrum))
+                            sigma_xmy_sf = mtd[second_xyz_ws][entry_no+2].readY(spectrum)
+                            sigma_xmy_nsf = mtd[second_xyz_ws][entry_no+3].readY(spectrum)
+                            sigma_xpy_sf = mtd[second_xyz_ws][entry_no+4].readY(spectrum)
+                            sigma_xpy_nsf = mtd[second_xyz_ws][entry_no+5].readY(spectrum)
                         # Magnetic component
                         theta_0 = DEG_2_RAD * self.getProperty('ThetaOffset').value
                         theta = mtd[ws][entry_no].detectorInfo().twoTheta(spectrum)

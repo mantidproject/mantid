@@ -58,6 +58,14 @@ class D7AbsoluteScaleNormalisationTest(unittest.TestCase):
         self.assertTrue(mtd['10p'].getNumberOfEntries() == 3)
         self._check_output('10p', 1, 132, onlySeparation=True)
 
+    def test_10p_separation_double_xyz(self):
+        D7AbsoluteScaleNormalisation(InputWorkspace='vanadium_xyz', RotatedXYZWorkspace='vanadium_xyz',
+                                     OutputWorkspace='10p_double_xyz',
+                                     CrossSectionSeparationMethod='10p', ThetaOffset=1.0,
+                                     NormalisationMethod='None')
+        self.assertTrue(mtd['10p_double_xyz'].getNumberOfEntries() == 3)
+        self._check_output('10p_double_xyz', 1, 132, onlySeparation=True)
+
     def test_vanadium_normalisation(self):
         D7AbsoluteScaleNormalisation(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_vanadium',
                                      CrossSectionSeparationMethod='XYZ', NormalisationMethod='Vanadium',
