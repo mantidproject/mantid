@@ -51,10 +51,10 @@ public:
     for (const auto &guis : m_registry) {
       QMenu *subMenu = new QMenu();
       subMenu->setTitle(QString::fromStdString(guis.first));
-      menu.addMenu(subMenu);
       for (const auto &gui : guis.second) {
         subMenu->addMenu(QString::fromStdString(gui.first));
       }
+      menu.addMenu(subMenu);
     }
   }
 
@@ -70,7 +70,7 @@ public:
       throw std::runtime_error("GUI is already registered: " + category +
                                " > " + name);
     }
-    m_registry[category][name] = gui;
+    m_registry[category][name] = std::move(gui);
   }
 
   /**
