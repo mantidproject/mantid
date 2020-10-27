@@ -8,7 +8,7 @@ import unittest
 from mantid.simpleapi import mtd, PEARLTransfit
 
 
-class MyTestCase(unittest.TestCase):
+class PEARLTransfitTest(unittest.TestCase):
 
     def tearDown(self):
         mtd.clear()
