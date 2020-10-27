@@ -273,6 +273,9 @@ void FunctionModel::setNumberDomains(int nDomains) {
   }
 }
 
+/// Sets the datasets based on their workspace names. This assumes there is only
+/// a single spectrum in the workspaces being fitted.
+/// @param datasetNames :: Names of the workspaces to be fitted.
 void FunctionModel::setDatasets(const QStringList &datasetNames) {
   QMap<QString, QList<std::size_t>> datasets;
   for (const auto &datasetName : datasetNames)
@@ -281,12 +284,18 @@ void FunctionModel::setDatasets(const QStringList &datasetNames) {
   setDatasets(datasets);
 }
 
+/// Sets the datasets using a map of <workspace name, spectra list>. This
+/// should be used when the workspaces being fitted have multiple spectra.
+/// @param datasets :: Names of workspaces to be fitted maped to a spectra list.
 void FunctionModel::setDatasets(
     const QMap<QString, QList<std::size_t>> &datasets) {
   checkNumberOfDomains(datasets);
   m_datasets = datasets;
 }
 
+/// Adds datasets based on their workspace names. This assumes there is only
+/// a single spectrum in the added workspaces.
+/// @param datasetNames :: Names of the workspaces to be added.
 void FunctionModel::addDatasets(const QStringList &datasetNames) {
   for (const auto &datasetName : datasetNames)
     m_datasets[datasetName] = QList<std::size_t>({0u});
@@ -294,6 +303,8 @@ void FunctionModel::addDatasets(const QStringList &datasetNames) {
   setNumberDomains(numberOfDomains(m_datasets));
 }
 
+/// Removes datasets (i.e. workspaces) from the Function model based on the
+/// index of the dataset in the QMap.
 void FunctionModel::removeDatasets(QList<int> &indices) {
   // Sort in reverse order
   qSort(indices.begin(), indices.end(), [](int a, int b) { return a > b; });
@@ -310,6 +321,9 @@ void FunctionModel::removeDatasets(QList<int> &indices) {
   setCurrentDomainIndex(currentIndex);
 }
 
+/// Returns the workspace names of the datasets. If a dataset has N spectra,
+/// then the workspace name is multiplied by N. This is required for
+/// EditLocalParameterDialog.
 QStringList FunctionModel::getDatasetNames() const {
   QStringList datasetNames;
   for (const auto &datasetName : m_datasets.keys())
@@ -319,6 +333,9 @@ QStringList FunctionModel::getDatasetNames() const {
   return datasetNames;
 }
 
+/// Returns names for the domains of each dataset. If a dataset has multiple
+/// spectra, then a domain name will include the spectrum number of a domain in
+/// a workspace. This is required for EditLocalParameterDialog.
 QStringList FunctionModel::getDatasetDomainNames() const {
   QStringList domainNames;
   for (const auto &datasetName : m_datasets.keys()) {
