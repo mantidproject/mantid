@@ -166,7 +166,7 @@ class FittingDataModel(object):
         for fitprop in fitprops:
             wsname = fitprop['properties']['InputWorkspace']
             self._fit_results[wsname] = {'model': fitprop['properties']['Function']}
-            self._fit_results[wsname]['results'] = dict()  # {function_param: [[Y1, E1], [Y2,E2],...] }
+            self._fit_results[wsname]['results'] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
             fnames = [x.split('=')[-1] for x in findall('name=[^,]*', fitprop['properties']['Function'])]
             # get num params for each function (first elem empty as str begins with 'name=')
             # need to remove ties and constrtaints which are enclosed in ()
@@ -179,8 +179,6 @@ class FittingDataModel(object):
                 for iparam in range(0, nparams[ifunc]):
                     irow = istart + iparam
                     key = '_'.join([fname, params_dict['Name'][irow].split('.')[-1]])  # funcname_param
-                    if key not in self._fit_results[wsname]['results']:
-                        self._fit_results[wsname]['results'][key] = []
                     self._fit_results[wsname]['results'][key].append([
                         params_dict['Value'][irow], params_dict['Error'][irow]])
                 istart += nparams[ifunc]
