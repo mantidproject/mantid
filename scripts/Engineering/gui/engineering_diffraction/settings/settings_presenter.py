@@ -18,7 +18,7 @@ DEFAULT_SETTINGS = {
     "logs": ','.join(
         ['Temp_1', 'W_position', 'X_position', 'Y_position', 'Z_position', 'stress', 'strain', 'stressrig_go']),
     "primary_log": 'strain',
-    "sort_ascending": "true"
+    "sort_ascending": True
 }
 
 ALL_LOGS = ','.join(
@@ -118,7 +118,8 @@ class SettingsPresenter(object):
             save_location = str(settings["save_location"])
             save_valid = save_location != ""
             log_valid = settings["logs"] != ""
-            return all_keys and not_none and save_valid and log_valid
+            ascending_valid = settings["sort_ascending"] != ""
+            return all_keys and not_none and save_valid and log_valid and ascending_valid
         except KeyError:  # Settings contained invalid key.
             return False
 
