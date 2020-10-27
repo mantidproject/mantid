@@ -450,14 +450,10 @@ void FunctionModel::checkIndex(int index) const {
 void FunctionModel::updateMultiDatasetParameters(const IFunction &fun) {
   if (!hasFunction())
     return;
-  if (m_function->nParams() != fun.nParams())
-    return;
-  for (size_t i = 0; i < fun.nParams(); ++i) {
-    m_function->setParameter(i, fun.getParameter(i));
-    m_function->setError(i, fun.getError(i));
-  }
+  copyParametersAndErrors(fun, *m_function);
   updateMultiDatasetAttributes(fun);
 }
+
 void FunctionModel::updateMultiDatasetAttributes(const IFunction &fun) {
   if (!hasFunction())
     return;

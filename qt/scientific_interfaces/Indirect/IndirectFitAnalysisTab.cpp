@@ -415,10 +415,11 @@ void IndirectFitAnalysisTab::updateParameterValues() {
  * @param parameters  The parameter values to update the browser with.
  */
 void IndirectFitAnalysisTab::updateParameterValues(
-    const std::unordered_map<std::string, ParameterValue> &) {
+    const std::unordered_map<std::string, ParameterValue>
+        params) {
   try {
-    updateFitBrowserParameterValues();
-  } catch (const std::out_of_range &) {
+    updateFitBrowserParameterValues(params);
+  } catch (const std::out_of_range &error) {
     g_log.warning(
         "Warning issue updating parameter values in fit property browser");
   } catch (const std::invalid_argument &) {
@@ -427,9 +428,13 @@ void IndirectFitAnalysisTab::updateParameterValues(
   }
 }
 
-void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
+void IndirectFitAnalysisTab::updateFitBrowserParameterValues(
+    std::unordered_map<std::string, ParameterValue> params) {
   IFunction_sptr fun = m_fittingModel->getFittingFunction();
   if (fun) {
+    for (auto pair : params) {
+      fun->setParameter(pair.first, pair.second.value);
+    }
     if (fun->getNumberDomains() > 1) {
       m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
     } else {

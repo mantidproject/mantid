@@ -423,6 +423,16 @@ double CompositeFunction::getError(size_t i) const {
 }
 
 /**
+ * Get the fitting error for a parameter by name.
+ * @param name :: The name of the parameter.
+ * @return value of the requested named parameter
+ */
+double CompositeFunction::getError(const std::string &name) const {
+  const auto [parameterName, index] = parseName(name);
+  return getFunction(index)->getError(parameterName);
+}
+
+/**
  * Set the fitting error for a parameter
  * @param i :: The index of a parameter
  * @param err :: The error value to set
@@ -430,6 +440,16 @@ double CompositeFunction::getError(size_t i) const {
 void CompositeFunction::setError(size_t i, double err) {
   size_t iFun = functionIndex(i);
   m_functions[iFun]->setError(i - m_paramOffsets[iFun], err);
+}
+
+/**
+ * Sets the fitting error to a parameter by name.
+ * @param name :: The name of the parameter.
+ * @param err :: The error value to set
+ */
+void CompositeFunction::setError(const std::string &name, double err) {
+  auto [parameterName, index] = parseName(name);
+  getFunction(index)->setError(parameterName, err);
 }
 
 /// Value of i-th active parameter. Override this method to make fitted

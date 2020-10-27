@@ -32,6 +32,8 @@ protected slots:
   void setModelResolution(const std::string &resolutionName);
   void setModelResolution(const std::string &resolutionName,
                           TableDatasetIndex index);
+  void setDefaultResolution(const Mantid::API::MatrixWorkspace_const_sptr &ws,
+                            const QPair<double, double> &range);
   void runClicked();
   void fitFunctionChanged();
 
