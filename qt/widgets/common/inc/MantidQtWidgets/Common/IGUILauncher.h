@@ -13,16 +13,14 @@ namespace MantidQt {
 namespace API {
 
 /** IGUILauncher : This is the interface for custom GUI launcher.
-*/
+ */
 class EXPORT_OPT_MANTIDQT_COMMON IGUILauncher {
 public:
-    virtual ~IGUILauncher() = default;
-    virtual QString name() const = 0;
-    virtual QString category() const = 0;
-    virtual void show() const = 0;
+  virtual ~IGUILauncher() = default;
+  virtual QString name() const = 0;
+  virtual QString category() const = 0;
+  virtual void show() const = 0;
 };
-
-using IGUILauncher_sptr = std::shared_ptr<IGUILauncher>;
 
 } // namespace API
 } // namespace MantidQt

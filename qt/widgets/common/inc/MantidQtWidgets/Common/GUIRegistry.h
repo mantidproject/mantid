@@ -13,9 +13,7 @@
 
 #include <map>
 #include <string>
-#include <QString>
-#include <QVector>
-#include <QMap>
+#include <vector>
 #include <QMenu>
 
 namespace MantidQt {
@@ -24,7 +22,7 @@ namespace API {
 using namespace Mantid::Kernel;
 
 using LauncherRegistry =
-    std::map<std::string, std::map<std::string, IGUILauncher_sptr>>;
+    std::map<std::string, std::map<std::string, IGUILauncher *>>;
 
 /** GUIRegistry : Manages the list of subscribed plugin GUIs.
  */
@@ -39,31 +37,46 @@ public:
     }
     return interfaces;
   }
-  QMenu* getMenu() const {
-      QMenu* menu = new QMenu();
-      return menu;
-  }
   const IGUILauncher &getGUI(const std::string &category,
                              const std::string &name) const {
     if (checkExists(category, name)) {
       return *m_registry.at(category).at(name);
     } else {
-      throw std::runtime_error(
-          "GUI with the given name does not exist under the given category");
+      throw std::runtime_error("GUI is not registered: " + category + " > " +
+                               name);
     }
   }
 
-  void subscribe(const IGUILauncher_sptr &gui) {
+  void populateMenu(QMenu &menu) const {
+    for (const auto &guis : m_registry) {
+      QMenu *subMenu = new QMenu();
+      subMenu->setTitle(QString::fromStdString(guis.first));
+      for (const auto &gui : guis.second) {
+        subMenu->addMenu(QString::fromStdString(gui.first));
+      }
+      menu.addMenu(subMenu);
+    }
+  }
+
+  /**
+   * @brief subscribes through a raw pointer
+   * This is public and exposed to python
+   * @param gui
+   */
+  void subscribe(IGUILauncher *gui) {
     const auto category = gui->category().toStdString();
     const auto name = gui->name().toStdString();
     if (checkExists(category, name)) {
-      throw std::runtime_error(
-          "GUI with the same name is already registered under the same "
-          "category.");
+      throw std::runtime_error("GUI is already registered: " + category +
+                               " > " + name);
     }
-    m_registry[category][name] = gui;
+    m_registry[category][name] = std::move(gui);
   }
 
+  /**
+   * @brief subsribes through a class type
+   * This is how the C++ launchers are registered with a macro
+   */
   template <class C> void subscribe() {
     std::unique_ptr<AbstractInstantiator<IGUILauncher>> instantiator =
         std::make_unique<Instantiator<C, IGUILauncher>>();
@@ -74,8 +87,7 @@ private:
   template <class T>
   void subscribe(std::unique_ptr<AbstractInstantiator<T>> instantiator) {
     static_assert(std::is_base_of<IGUILauncher, T>::value);
-    IGUILauncher_sptr gui = instantiator->createInstance();
-    subscribe(gui);
+    subscribe(instantiator->createUnwrappedInstance());
   }
 
   bool checkExists(const std::string &category, const std::string &name) const {
@@ -87,7 +99,7 @@ private:
   }
   LauncherRegistry
       m_registry; // holds the GUI launchers with unique names under given
-                  // category and unique category names
+                  // category and with unique category names
 };
 
 using GUIRegistry = Mantid::Kernel::SingletonHolder<GUIRegistryImpl>;
