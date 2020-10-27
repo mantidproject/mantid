@@ -27,6 +27,7 @@ qRegisterMetaType<Message>("Message");
 class IGUILauncher {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/IGUILauncher.h"
+#include <QString>
 %End
 public:
   virtual QString name() const = 0;
@@ -37,10 +38,12 @@ public:
 class GUIRegistryImpl {
 %TypeHeaderCode
 #include "MantidQtWidgets/Common/GUIRegistry.h"
-#include <boost/python/extract.hpp>
+#include "MantidQtWidgets/Common/Python/Sip.h"
+#include <QMenu>
+using MantidQt::Widgets::Common::Python::extract;
 %End
 public:
-QMenu *getMenu() const;
+void populateMenu(QMenu&) const;
 static SIP_PYOBJECT Instance() const;
 %MethodCode
   auto &cppInstance = MantidQt::API::GUIRegistry::Instance();
@@ -48,9 +51,9 @@ static SIP_PYOBJECT Instance() const;
 %End
 void subscribe(SIP_PYOBJECT);
 %MethodCode
-auto sptr = boost::python::extract<MantidQt::API::IGUILauncher_sptr>(a0);
 try {
-    sipCpp->subscribe(sptr);
+   auto cppGuiLauncher = extract<MantidQt::API::IGUILauncher>(a0);
+   sipCpp->subscribe(cppGuiLauncher);
 } catch (std::runtime_error &sipExceptionRef)
 {
    const char *detail = sipExceptionRef.what();
