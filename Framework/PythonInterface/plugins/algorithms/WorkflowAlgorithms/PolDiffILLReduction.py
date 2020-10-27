@@ -147,8 +147,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                                  EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
         self.declareProperty(name="OutputTreatment",
-                             defaultValue="OutputIndividualScans",
-                             validator=StringListValidator(["OutputIndividualScans", "AverageScans", "SumScans"]),
+                             defaultValue="Individual",
+                             validator=StringListValidator(["Individual", "Average", "Sum"]),
                              direction=Direction.Input,
                              doc="Which treatment of the provided scan should be used to create output.")
 
@@ -196,7 +196,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.")
 
-        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment', PropertyCriterion.IsEqualTo, 'SumScans'))
+        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment', PropertyCriterion.IsEqualTo, 'Sum'))
 
         self.declareProperty(FileProperty('InstrumentCalibration', '',
                                           action=FileAction.OptionalLoad,
@@ -321,7 +321,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         names_to_delete = [flipper_corr_ws]
         index = 0
 
-        if self.getProperty('OutputTreatment').value == 'AverageScans':
+        if self.getProperty('OutputTreatment').value == 'Average':
             ws = self._merge_polarisations(ws, average_detectors=True)
         for entry_no in range(1, mtd[ws].getNumberOfEntries()+1, nMeasurementsPerPOL):
             # two polarizer-analyzer states, fixed flipper_eff
@@ -494,7 +494,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         output_unit = self.getPropertyValue('OutputUnits')
         if output_unit == 'TwoTheta':
             if (len(self.getPropertyValue('Run').split(',')) > 1
-                    and self.getProperty('OutputTreatment').value == 'SumScans'):
+                    and self.getProperty('OutputTreatment').value == 'Sum'):
                 self._merge_polarisations(ws)
             else:
                 ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta')
@@ -577,7 +577,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                 if self.getPropertyValue('SampleGeometry') != 'None':
                     progress.report('Applying self-attenuation correction')
                     self._apply_self_attenuation_correction(ws, container_ws)
-                if self.getProperty('OutputTreatment').value == 'AverageScans':
+                if self.getProperty('OutputTreatment').value == 'Average':
                     progress.report('Merging polarisations')
                     self._merge_polarisations(ws, average_detectors=True)
                 if process == 'Vanadium':

@@ -69,7 +69,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
                             AbsorberTransmissionInputWorkspace='cadmium_ws_1', BeamInputWorkspace='beam_ws_1',)
         PolDiffILLReduction(Run='396939', ProcessAs='Quartz', TransmissionInputWorkspace='quartz_transmission_1',
-                            OutputTreatment='AverageScans', OutputWorkspace='quartz')
+                            OutputTreatment='Average', OutputWorkspace='quartz')
         self._check_output(mtd['quartz'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['quartz'], 'Quartz')
     
@@ -84,7 +84,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
                             TransmissionInputWorkspace='vanadium_transmission',
                             SampleAndEnvironmentPropertiesDictionary=samplePropertiesDictionary,
-                            OutputTreatment='OutputIndividualScans')
+                            OutputTreatment='Individual')
         self._check_output(mtd['vanadium_1'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_1'], 'Vanadium')
 
@@ -99,7 +99,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
                             TransmissionInputWorkspace='vanadium_transmission',
                             SampleAndEnvironmentPropertiesDictionary=samplePropertiesDictionary,
-                            OutputTreatment='SumScans', OutputUnits='TwoTheta')
+                            OutputTreatment='Sum', OutputUnits='TwoTheta')
         self._check_output(mtd['vanadium_1'], 1, 132, 'Wavelength', 'Wavelength', 'Scattering angle', 'Degrees')
         self._check_process_flag(mtd['vanadium_1'], 'Vanadium')
 
@@ -118,7 +118,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='397004', ProcessAs='Sample', OutputWorkspace='sample',
                             TransmissionInputWorkspace='sample_transmission_1',
                             SampleAndEnvironmentPropertiesDictionary=samplePropertiesDictionary,
-                            OutputTreatment='OutputIndividualScans')
+                            OutputTreatment='Individual')
         self._check_output(mtd['sample'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['sample'], 'Sample')
     
