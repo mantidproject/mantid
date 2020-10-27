@@ -12,6 +12,7 @@ from qtpy.QtWidgets import (QDialog, QFrame)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.diffraction.diffraction_adv_setup_script import AdvancedSetupScript
+from mantid.kernel import MaterialBuilder
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
@@ -94,10 +95,15 @@ class AdvancedSetupWidget(BaseWidget):
         dv8 = QDoubleValidator(self._content.numberdensity_edit)
         dv8.setBottom(0.0)
         self._content.numberdensity_edit.setValidator(dv8)
+        self._content.numberdensity_edit.editingFinished.connect(self._calculate_packing_fraction)
 
         dv9 = QDoubleValidator(self._content.massdensity_edit)
         dv9.setBottom(0.0)
         self._content.massdensity_edit.setValidator(dv9)
+        self._content.massdensity_edit.editingFinished.connect(self._calculate_packing_fraction)
+
+        self._content.sampleformula_edit.textEdited.connect(self._validate_formula)
+        self._content.sampleformula_edit.editingFinished.connect(self._calculate_packing_fraction)
 
         # Default states
         self._content.stripvanpeaks_chkbox.setChecked(True)
@@ -222,6 +228,23 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.vansmoothpar_edit.setEnabled(stripvanpeak)
         self._content.vanpeaktol_edit.setEnabled(stripvanpeak)
 
-        return
+    def _validate_formula(self):
+        try:
+            MaterialBuilder().setFormula(self._content.sampleformula_edit.text())
+            self._content.sampleformula_edit.setToolTip("")
+            self._content.sampleformula_edit.setStyleSheet("QLineEdit{}")
+        except ValueError as e:
+            self._content.sampleformula_edit.setToolTip(str(e).replace("MaterialBuilder::setFormula() - ",""))
+            self._content.sampleformula_edit.setStyleSheet("QLineEdit{background:salmon;}")
+
+    def _calculate_packing_fraction(self):
+        try:
+            self._content.packingfraction_edit.setText('{:.5f}'.format(MaterialBuilder()
+                                                                       .setFormula(self._content.sampleformula_edit.text())
+                                                                       .setNumberDensity(float(self._content.numberdensity_edit.text()))
+                                                                       .setMassDensity(float(self._content.massdensity_edit.text()))
+                                                                       .build().packingFraction))
+        except ValueError:  # boost.python.ArgumentError are not catchable
+            self._content.packingfraction_edit.setText(str(1))
 
 #ENDCLASSDEF
