@@ -43,7 +43,8 @@ public:
   MOCK_METHOD1(setFunction, void(const QString &));
   MOCK_METHOD1(setNumberOfDatasets, void(int));
   MOCK_METHOD1(setDatasets, void(const QStringList &));
-  MOCK_METHOD1(setDatasets, void(const QList<QPair<QString, QList<std::size_t>>> &));
+  MOCK_METHOD1(setDatasets,
+               void(const QList<QPair<QString, QList<std::size_t>>> &));
   MOCK_METHOD1(updateMultiDatasetParameters,
                void(const Mantid::API::IFunction &));
   MOCK_METHOD1(updateMultiDatasetParameters,

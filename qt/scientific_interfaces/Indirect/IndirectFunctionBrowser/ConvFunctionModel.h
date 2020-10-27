@@ -45,7 +45,8 @@ public:
   IFunction_sptr getSingleFunction(int index) const override;
   IFunction_sptr getCurrentFunction() const override;
   void setNumberDomains(int) override;
-  void setDatasets(const QList<QPair<QString, QList<std::size_t>>> &datasets) override;
+  void setDatasets(
+      const QList<QPair<QString, QList<std::size_t>>> &datasets) override;
   QStringList getDatasetNames() const override;
   QStringList getDatasetDomainNames() const override;
   int getNumberDomains() const override;
