@@ -306,6 +306,8 @@ void FunctionModel::addDatasets(const QStringList &datasetNames) {
 /// Removes datasets (i.e. workspaces) from the Function model based on the
 /// index of the dataset in the QMap.
 void FunctionModel::removeDatasets(QList<int> &indices) {
+  checkDatasets();
+
   // Sort in reverse order
   qSort(indices.begin(), indices.end(), [](int a, int b) { return a > b; });
   for (auto i = indices.constBegin(); i != indices.constEnd(); ++i)
@@ -494,6 +496,15 @@ QStringList FunctionModel::getLocalParameters() const {
       locals << name;
   }
   return locals;
+}
+
+/// Check that the number of domains is correct for m_datasets
+void FunctionModel::checkDatasets() {
+  if (numberOfDomains(m_datasets) != m_numberDomains) {
+    m_datasets.clear();
+    for (auto i = 0u; i < m_numberDomains; ++i)
+      m_datasets[QString::number(i)] = QList<std::size_t>({0u});
+  }
 }
 
 /// Check that the datasets supplied have the expected total number of domains.

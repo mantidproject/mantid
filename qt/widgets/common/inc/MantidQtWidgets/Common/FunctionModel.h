@@ -86,6 +86,7 @@ protected:
   MultiDomainFunction_sptr m_function;
 
 private:
+  void checkDatasets();
   void
   checkNumberOfDomains(const QMap<QString, QList<std::size_t>> &datasets) const;
   int numberOfDomains(const QMap<QString, QList<std::size_t>> &datasets) const;
