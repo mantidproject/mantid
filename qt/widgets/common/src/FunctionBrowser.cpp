@@ -148,8 +148,8 @@ int FunctionBrowser::getNumberOfDatasets() const {
 }
 
 /// Get the names of datasets
-std::vector<DatasetDomain> FunctionBrowser::getDatasetDomains() const {
-  return m_presenter->getDatasetDomains();
+QStringList FunctionBrowser::getDatasetNames() const {
+  return m_presenter->getDatasetNames();
 }
 
 /// Set new number of the datasets

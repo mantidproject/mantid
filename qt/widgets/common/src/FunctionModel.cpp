@@ -310,14 +310,13 @@ void FunctionModel::removeDatasets(QList<int> &indices) {
   setCurrentDomainIndex(currentIndex);
 }
 
-std::vector<DatasetDomain> FunctionModel::getDatasetDomains() const {
-  if (static_cast<std::size_t>(m_domains.size()) != m_numberDomains) {
-    m_domains.clear();
-    for (auto i = 0u; i < m_numberDomains; ++i)
-      m_domains.emplace_back(DatasetDomain("", i, false));
-    return m_domains;
-  }
-  return m_domains;
+QStringList FunctionModel::getDatasetNames() const {
+  QStringList datasetNames;
+  for (const auto &datasetName : m_datasets.keys())
+    for (const auto &specNum : m_datasets[datasetName])
+      datasetNames << datasetName;
+
+  return datasetNames;
 }
 
 int FunctionModel::getNumberDomains() const {

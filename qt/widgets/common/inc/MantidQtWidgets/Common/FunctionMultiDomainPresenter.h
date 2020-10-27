@@ -52,7 +52,7 @@ public:
   void setDatasets(const QStringList &datasetNames);
   void setDatasets(const QMap<QString, QList<std::size_t>> &datasets);
   void addDatasets(const QStringList &datasetNames);
-  std::vector<DatasetDomain> getDatasetDomains() const;
+  QStringList getDatasetNames() const;
   int getNumberOfDatasets() const;
   int getCurrentDataset() const;
   void setCurrentDataset(int);

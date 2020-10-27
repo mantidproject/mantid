@@ -48,7 +48,7 @@ public:
   virtual void setDatasets(const QStringList &datasetNames) = 0;
   virtual void
   setDatasets(const QMap<QString, QList<std::size_t>> &datasets) = 0;
-  virtual std::vector<DatasetDomain> getDatasetDomains() const = 0;
+  virtual QStringList getDatasetNames() const = 0;
   virtual int getNumberDomains() const = 0;
   virtual int currentDomainIndex() const = 0;
   virtual void setCurrentDomainIndex(int) = 0;

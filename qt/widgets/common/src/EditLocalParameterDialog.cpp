@@ -29,26 +29,25 @@ namespace MantidWidgets {
  * Constructor used inside and outside of MultiDatasetFit interface
  * @param parent :: [input] Parent widget of this dialog
  * @param parName :: [input] Name of parameter to edit in this dialog
- * @param datasetDomains :: [input] The domains being fitted across workspaces.
+ * @param datasetNames :: [input] The domains being fitted across workspaces.
  * @param values :: [input] Parameter values.
  * @param fixes :: [input] Flags indicating if a parameter is fixed.
  * @param ties :: [input] Parameter ties.
  * @param constraints :: [input] Parameter constraints.
  */
 EditLocalParameterDialog::EditLocalParameterDialog(
-    QWidget *parent, const QString &parName,
-    const std::vector<DatasetDomain> &datasetDomains,
+    QWidget *parent, const QString &parName, const QStringList &datasetNames,
     const QList<double> &values, const QList<bool> &fixes,
     const QStringList &ties, const QStringList &constraints)
     : MantidDialog(parent), m_parName(parName), m_values(values),
       m_fixes(fixes), m_ties(ties), m_constraints(constraints) {
-  assert(values.size() == datasetDomains.size());
-  assert(fixes.size() == datasetDomains.size());
-  assert(ties.size() == datasetDomains.size());
-  assert(constraints.size() == datasetDomains.size());
+  assert(values.size() == datasetNames.size());
+  assert(fixes.size() == datasetNames.size());
+  assert(ties.size() == datasetNames.size());
+  assert(constraints.size() == datasetNames.size());
   m_uiForm.setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
-  doSetup(parName, datasetDomains);
+  doSetup(parName, datasetNames);
 }
 
 /**
@@ -56,26 +55,26 @@ EditLocalParameterDialog::EditLocalParameterDialog(
  * Prerequisite: one of the constructors must have filled m_values, m_fixes,
  * m_ties and set up the UI first
  * @param parName :: [input] Name of parameter to edit in this dialog
- * @param datasetDomains :: [input] The domains being fitted across workspaces.
+ * @param datasetNames :: [input] The domains being fitted across workspaces.
  */
-void EditLocalParameterDialog::doSetup(
-    const QString &parName, const std::vector<DatasetDomain> &datasetDomains) {
+void EditLocalParameterDialog::doSetup(const QString &parName,
+                                       const QStringList &datasetNames) {
 
-  QStringList workspaceNames;
-  std::transform(datasetDomains.begin(), datasetDomains.end(),
-                 std::back_inserter(workspaceNames),
-                 [](const DatasetDomain &datasetDomain) {
-                   return datasetDomain.m_workspaceName;
-                 });
+  //QStringList workspaceNames;
+  //std::transform(datasetNames.begin(), datasetNames.end(),
+  //               std::back_inserter(workspaceNames),
+  //               [](const DatasetDomain &datasetDomain) {
+  //                 return datasetDomain.m_workspaceName;
+  //               });
 
-  QStringList domainNames;
-  std::transform(datasetDomains.begin(), datasetDomains.end(),
-                 std::back_inserter(domainNames),
-                 [](const DatasetDomain &datasetDomain) {
-                   return datasetDomain.domainName();
-                 });
+  //QStringList domainNames;
+  //std::transform(datasetNames.begin(), datasetNames.end(),
+  //               std::back_inserter(domainNames),
+  //               [](const DatasetDomain &datasetDomain) {
+  //                 return datasetDomain.domainName();
+  //               });
 
-  m_logFinder = std::make_unique<LogValueFinder>(workspaceNames);
+  m_logFinder = std::make_unique<LogValueFinder>(datasetNames);
   // Populate list of logs
   auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
   for (const auto &logName : m_logFinder->getLogNames()) {
@@ -95,11 +94,11 @@ void EditLocalParameterDialog::doSetup(
           SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + parName);
 
-  for (int i = 0; i < domainNames.size(); i++) {
+  for (int i = 0; i < datasetNames.size(); i++) {
     m_uiForm.tableWidget->insertRow(i);
     auto cell = new QTableWidgetItem(makeNumber(m_values[i]));
     m_uiForm.tableWidget->setItem(i, valueColumn, cell);
-    auto headerItem = new QTableWidgetItem(domainNames[i]);
+    auto headerItem = new QTableWidgetItem(datasetNames[i]);
     m_uiForm.tableWidget->setVerticalHeaderItem(i, headerItem);
     cell = new QTableWidgetItem("");
     auto flags = cell->flags();

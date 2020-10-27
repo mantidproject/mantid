@@ -153,9 +153,8 @@ void FunctionMultiDomainPresenter::addDatasets(
   m_model->addDatasets(datasetNames);
 }
 
-std::vector<DatasetDomain>
-FunctionMultiDomainPresenter::getDatasetDomains() const {
-  return m_model->getDatasetDomains();
+QStringList FunctionMultiDomainPresenter::getDatasetNames() const {
+  return m_model->getDatasetNames();
 }
 
 int FunctionMultiDomainPresenter::getNumberOfDatasets() const {
@@ -366,12 +365,12 @@ void FunctionMultiDomainPresenter::viewChangedAttribute(
  * @param parName :: Name of parameter that button was clicked for.
  */
 void FunctionMultiDomainPresenter::editLocalParameter(const QString &parName) {
-  auto const datasetDomains = m_model->getDatasetDomains();
+  auto const datasetNames = m_model->getDatasetNames();
   QList<double> values;
   QList<bool> fixes;
   QStringList ties;
   QStringList constraints;
-  const int n = static_cast<int>(datasetDomains.size());
+  const int n = static_cast<int>(datasetNames.size());
   for (int i = 0; i < n; ++i) {
     const double value = getLocalParameterValue(parName, i);
     values.push_back(value);
@@ -384,7 +383,7 @@ void FunctionMultiDomainPresenter::editLocalParameter(const QString &parName) {
   }
 
   m_editLocalParameterDialog = new EditLocalParameterDialog(
-      m_view, parName, datasetDomains, values, fixes, ties, constraints);
+      m_view, parName, datasetNames, values, fixes, ties, constraints);
   connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this,
           SLOT(editLocalParameterFinish(int)));
   m_editLocalParameterDialog->open();

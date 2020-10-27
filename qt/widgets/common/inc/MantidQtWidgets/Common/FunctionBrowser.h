@@ -81,7 +81,7 @@ public:
   /// Get the number of datasets
   int getNumberOfDatasets() const override;
   /// Get the names of datasets
-  std::vector<DatasetDomain> getDatasetDomains() const override;
+  QStringList getDatasetNames() const override;
   /// Get value of a local parameter
   double getLocalParameterValue(const QString &parName, int i) const override;
   /// Set value of a local parameter

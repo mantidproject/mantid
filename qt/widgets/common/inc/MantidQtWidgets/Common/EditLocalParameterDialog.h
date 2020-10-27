@@ -32,7 +32,7 @@ class EXPORT_OPT_MANTIDQT_COMMON EditLocalParameterDialog
   Q_OBJECT
 public:
   EditLocalParameterDialog(QWidget *parent, const QString &parName,
-                           const std::vector<DatasetDomain> &datasetDomains,
+                           const QStringList &datasetNames,
                            const QList<double> &values,
                            const QList<bool> &fixes, const QStringList &ties,
                            const QStringList &constraints);
@@ -69,8 +69,7 @@ private slots:
   void setAllValuesToLog();
 
 private:
-  void doSetup(const QString &parName,
-               const std::vector<DatasetDomain> &datasetDomains);
+  void doSetup(const QString &parName, const QStringList &datasetDomains);
   bool eventFilter(QObject *obj, QEvent *ev) override;
   void showContextMenu();
   void redrawCells();

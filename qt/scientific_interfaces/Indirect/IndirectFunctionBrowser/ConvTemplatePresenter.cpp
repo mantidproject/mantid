@@ -230,8 +230,8 @@ void ConvTemplatePresenter::updateViewParameters() {
   }
 }
 
-std::vector<DatasetDomain> ConvTemplatePresenter::getDatasetDomains() const {
-  return m_model.getDatasetDomains();
+QStringList ConvTemplatePresenter::getDatasetNames() const {
+  return m_model.getDatasetNames();
 }
 
 double ConvTemplatePresenter::getLocalParameterValue(const QString &parName,
@@ -275,12 +275,12 @@ void ConvTemplatePresenter::setLocalParameterFixed(const QString &parName,
 }
 
 void ConvTemplatePresenter::editLocalParameter(const QString &parName) {
-  auto const datasetDomains = getDatasetDomains();
+  auto const datasetNames = getDatasetNames();
   QList<double> values;
   QList<bool> fixes;
   QStringList ties;
   QStringList constraints;
-  const int n = static_cast<int>(datasetDomains.size());
+  const int n = static_cast<int>(datasetNames.size());
   for (int i = 0; i < n; ++i) {
     const double value = getLocalParameterValue(parName, i);
     values.push_back(value);
@@ -293,7 +293,7 @@ void ConvTemplatePresenter::editLocalParameter(const QString &parName) {
   }
 
   m_editLocalParameterDialog = new EditLocalParameterDialog(
-      m_view, parName, datasetDomains, values, fixes, ties, constraints);
+      m_view, parName, datasetNames, values, fixes, ties, constraints);
   connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this,
           SLOT(editLocalParameterFinish(int)));
   m_editLocalParameterDialog->open();

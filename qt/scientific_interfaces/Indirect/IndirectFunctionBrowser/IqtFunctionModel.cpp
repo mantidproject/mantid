@@ -413,8 +413,8 @@ void IqtFunctionModel::setDatasets(
   m_model.setDatasets(datasets);
 }
 
-std::vector<DatasetDomain> IqtFunctionModel::getDatasetDomains() const {
-  return m_model.getDatasetDomains();
+QStringList IqtFunctionModel::getDatasetNames() const {
+  return m_model.getDatasetNames();
 }
 
 double IqtFunctionModel::getLocalParameterValue(const QString &parName,

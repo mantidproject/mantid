@@ -50,7 +50,7 @@ public:
   void setDatasets(const QMap<QString, QList<std::size_t>> &datasets) override;
   void addDatasets(const QStringList &datasetNames);
   void removeDatasets(QList<int> &indices);
-  std::vector<DatasetDomain> getDatasetDomains() const override;
+  QStringList getDatasetNames() const override;
   int getNumberDomains() const override;
   int currentDomainIndex() const override;
   void setCurrentDomainIndex(int) override;
