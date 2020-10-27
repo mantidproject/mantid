@@ -70,7 +70,7 @@ public:
       throw std::runtime_error("GUI is already registered: " + category +
                                " > " + name);
     }
-    m_registry[category][name] = std::move(gui);
+    m_registry[category][name] = gui;
   }
 
   /**
