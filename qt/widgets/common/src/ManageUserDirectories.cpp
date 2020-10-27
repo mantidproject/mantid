@@ -39,14 +39,16 @@ const auto LastDirectory{"ManageUserSettings/last_directory"};
 
 // ID for help page in docs
 const QString HELP_ID{"ManageUserDirectories"};
+
 // Current instance opened with openManageUserDirectories
 QPointer<ManageUserDirectories> CURRENTLY_OPEN_MUD;
 } // namespace
 
 /**
- * Show the dialog or raise the existing one if it exists
+ * Show the default dialog or raise the existing one if it exists. It wraps
+ * the Mantid::Kernel::ConfigService by default.
  */
-void ManageUserDirectories::openManageUserDirectories() {
+ManageUserDirectories *ManageUserDirectories::openManageUserDirectories() {
   if (CURRENTLY_OPEN_MUD.isNull()) {
     CURRENTLY_OPEN_MUD =
         QPointer<ManageUserDirectories>(new ManageUserDirectories);
@@ -54,6 +56,7 @@ void ManageUserDirectories::openManageUserDirectories() {
   } else {
     CURRENTLY_OPEN_MUD->raise();
   }
+  return CURRENTLY_OPEN_MUD;
 }
 
 /**
@@ -61,10 +64,20 @@ void ManageUserDirectories::openManageUserDirectories() {
  * @param parent A parent QWidget for the dialog
  */
 ManageUserDirectories::ManageUserDirectories(QWidget *parent)
-    : BaseClass(parent) {
+    : BaseClass(parent), m_saveToFile(true) {
   setAttribute(Qt::WA_DeleteOnClose);
   m_uiForm.setupUi(this);
   initLayout();
+}
+
+/**
+ * Control if the config service changes are persisted to the user file.
+ * @param enabled If true the config is persisted to the user file
+ * after updating the service otherwise only the in-memory store is
+ * affected.
+ */
+void ManageUserDirectories::enableSaveToFile(bool enabled) {
+  m_saveToFile = enabled;
 }
 
 /**
@@ -207,7 +220,9 @@ void ManageUserDirectories::saveProperties() {
                    toConfigString(m_uiForm.lwScriptSearchDirs));
   config.setString(ConfigKeys::USERPYTHONPLUGINS_DIRS,
                    toConfigString(m_uiForm.lwExtSearchDirs));
-  config.saveConfig(config.getUserFilename());
+
+  if (m_saveToFile)
+    config.saveConfig(config.getUserFilename());
 }
 
 /**

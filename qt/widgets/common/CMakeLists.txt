@@ -1026,6 +1026,7 @@ set(
   test/ImageInfoModelMDTest.h
   test/ImageInfoPresenterTest.h
   test/InterfaceManagerTest.h
+  test/ManageUserDirectoriesTest.h
   test/QtJSONUtilsTest.h
   test/RepoModelTest.h
   test/Batch/BuildSubtreeItemsTest.h
@@ -1067,6 +1068,7 @@ mtd_add_qt_tests(
     PythonInterfaceCore
     DataObjects
     gmock
+    Qt5::Test
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )

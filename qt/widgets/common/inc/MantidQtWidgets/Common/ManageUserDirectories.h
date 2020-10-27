@@ -35,10 +35,16 @@ class EXPORT_OPT_MANTIDQT_COMMON ManageUserDirectories
   Q_OBJECT
 
 public:
-  static void openManageUserDirectories();
+  static ManageUserDirectories *openManageUserDirectories();
 
 public:
   ManageUserDirectories(QWidget *parent = nullptr);
+
+  void enableSaveToFile(bool enabled);
+
+public:
+  /// Testing accessors
+  QPushButton *cancelButton() const { return m_uiForm.pbCancel; }
 
 private:
   virtual void initLayout();
@@ -59,6 +65,7 @@ private slots:
 
 private:
   Ui::ManageUserDirectories m_uiForm;
+  bool m_saveToFile;
 };
 
 } // namespace API
