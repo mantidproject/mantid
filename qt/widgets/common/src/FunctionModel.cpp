@@ -305,7 +305,7 @@ void FunctionModel::addDatasets(const QStringList &datasetNames) {
 }
 
 /// Removes datasets (i.e. workspaces) from the Function model based on the
-/// index of the dataset in the QMap.
+/// index of the dataset in the QList.
 void FunctionModel::removeDatasets(QList<int> &indices) {
   checkDatasets();
 

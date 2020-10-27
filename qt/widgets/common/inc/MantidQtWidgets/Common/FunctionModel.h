@@ -95,7 +95,7 @@ private:
   void checkIndex(int) const;
   void updateGlobals();
   size_t m_currentDomainIndex = 0;
-  // The datasets being fitted. A list of workspace names paired to a list of
+  // The datasets being fitted. A list of workspace names paired to lists of
   // spectra.
   mutable QList<QPair<QString, QList<std::size_t>>> m_datasets;
   mutable QStringList m_globalParameterNames;
