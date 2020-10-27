@@ -19,7 +19,7 @@ from mantid.simpleapi import (CloneWorkspace, CreateEmptyTableWorkspace, CreateW
 from Calibration import tube
 from Calibration.tube_spec import TubeSpec
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
-from corelli.calibration.utils import bank_numbers, PIXELS_PER_TUBE, TUBES_IN_BANK, wire_positions
+from corelli.calibration.utils import bank_numbers, PIXELS_PER_TUBE, calculate_peak_y_table, TUBES_IN_BANK, wire_positions
 
 
 def sufficient_intensity(input_workspace: WorkspaceTypes, bank_name: str, minimum_intensity:float = 10000) -> bool:
@@ -44,7 +44,8 @@ def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1
              fit_domain: float = 7, minimum_intensity: float = 1000,
              calibration_table: str = 'CalibTable',
              peak_pixel_positions_table: str = 'PeakTable',
-             parameters_table_group: Optional[str] = None) -> None:
+             peak_vertical_positions_table: str = 'PeakYTable',
+             parameters_table_group: str = 'ParametersTable') -> None:
     r"""
     Find the position of the wire shadow on each tube in the bank, in units of pixel positions
 
@@ -59,9 +60,13 @@ def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1
     for its calibrated XYZ coordinates, in meters
     :param peak_pixel_positions_table: output table containing the positions of the wire shadows for each tube, in
     units of pixel coordinates
+    :param peak_vertical_positions_table: output table containing the positions of the wire shadows for each tube
+        along the vertical (Y) axis. This positions are the result if evaluating the peak pixel positions with
+        the quadratic function that translates pixel positions to vertical positions (see
+        parameters_table_group)
     :param parameters_table_group: name of the WorkspaceGroup containing individual TableWorkspace tables. Each
         table holds values and errors for the optimized coefficients of the polynomial that fits the peak positions (in
-        pixel coordinates) to the known slit positions (along the Y-coordinate). The last entry in the table
+        pixel coordinates) to the known wire positions (along the Y-coordinate). The last entry in the table
         holds the goodness-of-fit, chi-square value. The name of each individual TableWorkspace is the string
         `parameters_table_group` plus the suffix `_I`, where `I` is the tube index in the bank, startin at zero.
         If set to `None`, no group workspace is generated.
@@ -98,6 +103,7 @@ def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1
         RenameWorkspace(InputWorkspace='CalibTable', OutputWorkspace=calibration_table)
     if peak_pixel_positions_table != 'PeakTable':
         RenameWorkspace(InputWorkspace='PeakTable', OutputWorkspace=peak_pixel_positions_table)
+    calculate_peak_y_table(peak_pixel_positions_table, parameters_table_group, output_workspace=peak_vertical_positions_table)
 
 
 def collect_bank_fit_results(output_workspace: str,
@@ -109,7 +115,7 @@ def collect_bank_fit_results(output_workspace: str,
     The output workspace has one spectrum for each fitting result. The spectra run over the tubes in the bank
         fit-result   tube1,  tube2,...,tube16
         success        0       1         1  # was the tube successfully fitted?
-        deviation    0.0005 0.0001 ... 0.0003  # see the acceptance criterium function for explanation of 'deviation'
+        deviation    0.0005 0.0001 ... 0.0003  # see the acceptance criterion function for explanation of 'deviation'
         Z-score      # Z-score associated to 'deviation`
         A0-value     # y(n) = A0 + A1 * n + A2 * n^2  fits the peak positions in pixel coordinates to th
         A0-error     #                                known positions of the slits, in meters
@@ -180,10 +186,83 @@ def collect_bank_fit_results(output_workspace: str,
     return workspace
 
 
-def criterium_peak_pixel_position(peak_table: InputTable,
+def criterion_peak_vertical_position(peak_table: InputTable,
+                                     summary: Optional[str] = None,
+                                     zscore_threshold: float = 2.5,
+                                     deviation_threshold: float = 0.0035) -> np.ndarray:
+    r"""
+    Flag tubes whose wire shadows vertical positions deviate considerably from the vertical positions when
+    averaged for all tubes in the bank.
+
+    .. math::
+
+      <p_i> = \frac{1}{n_t} \Sum_{j=1}^{n_t} p_{ij}
+      \delta_j^2 = \frac{1}{n_w} \Sum (p_{ij} - <p_i>)^2
+      assert d_j < threshold
+
+    :param peak_table: vertical positions of the wire shadows for each tube, in meters
+    :param summary: name of output Workspace2D containing deviations and Z-score for each tube.
+    :param zscore_threshold: maximum Z-score for the vertical positions of a tube.
+    :param deviation_threshold: maximum deviation (in meters) for the vertical positions of the wire shadows.
+    :return: array of booleans, one per tube. `True` is the tube passes the acceptance criterion, `False` otherwise.
+    """
+    table = mtd[str(peak_table)]  # handle to the peak table
+    peak_count = table.columnCount() - 1  # the first column contains the names of the tubes
+    # `positions_average` stores the vertical position for each wire shadow, averaged for all tubes
+    positions_average = [np.mean(table.column(column_number)) for column_number in range(1, 1 + peak_count)]
+
+    deviations = list()  # a measure of how much the vertical positions deviate from the mean positions
+    tube_count = table.rowCount()  # number of tubes in the bank
+    for tube_index in range(tube_count):
+        positions = np.array(list(table.row(tube_index).values())[1:])  # peak positions for the current tube
+        deviations.append(np.sqrt(np.mean(np.square(positions - positions_average))))
+
+    # find tubes with a large Z-score
+    outlier_values = list()
+    values = deepcopy(deviations)
+    z_score = 1000
+    outlier_value = 1000
+    while z_score > zscore_threshold and outlier_value > deviation_threshold and len(values) > 0:
+        # find the tube with the highest Z-score, possibly signaling a large deviation from the mean
+        mean, std = np.mean(values), np.std(values)
+        outlier_index = np.argmax(np.abs((values - mean) / std))
+        outlier_value = values[outlier_index]
+        # recalculate the Z-score of the tube, but removing it from the pool of values. This removes
+        # any skewing effects from including the aberrant tube in the calculation of its Z-score
+        del values[outlier_index]
+        mean, std = np.mean(values), np.std(values)
+        z_score = np.abs((outlier_value - mean) / std)
+        if z_score > zscore_threshold and outlier_value > deviation_threshold:
+            outlier_values.append(outlier_value)
+
+    # flag the outlier tubes as failing the criterion
+    criterion_pass = np.tile(True, tube_count)  # initialize as all tubes passing the criterion
+    if len(outlier_values) > 0:
+        failure_indexes = [deviations.index(value) for value in outlier_values]
+        criterion_pass[failure_indexes] = False
+
+    # create an analysis summary if so requested
+    if isinstance(summary, str) and len(summary) > 0:
+        success = [1 if criterion else 0 for criterion in criterion_pass]
+        x_values = list(range(1, 1 + TUBES_IN_BANK))
+        mean, std = np.mean(deviations), np.std(deviations)
+        z_scores = np.abs((deviations - mean) / std)
+        y_values = np.array([success, deviations, z_scores]).flatten()
+        workspace = CreateWorkspace(x_values, y_values, NSpec=3, OutputWorkspace=summary,
+                                    WorkspaceTitle='Tube deviations from averages taken over the bank',
+                                    YUnitLabel='Pixel Units', EnableLogging=False)
+        labels = ('success', 'deviation', 'Z-score')
+        axis = TextAxis.create(len(labels))
+        [axis.setLabel(index, label) for index, label in enumerate(labels)]
+        workspace.replaceAxis(1, axis)
+
+    return criterion_pass
+
+
+def criterion_peak_pixel_position(peak_table: InputTable,
                                   summary: Optional[str] = None,
                                   zscore_threshold: float = 2.5,
-                                  deviation_threshold: float = 3.0) -> np.ndarray:
+                                  deviation_threshold: float = 0.0035) -> np.ndarray:
     r"""
     Flag tubes whose peak pixel positions deviate considerably from the peak pixel positions when
     averaged for all tubes in the bank.
@@ -198,7 +277,7 @@ def criterium_peak_pixel_position(peak_table: InputTable,
     :param summary: name of output Workspace2D containing deviations and Z-score for each tube.
     :param zscore_threshold: maximum Z-score for the pixels positions of a tube.
     :param deviation_threshold: maximum deviation (in pixels) for the pixels positions of a tube.
-    :return: array of booleans, one per tube. `True` is the tube passes the acceptance criterium, `False` otherwise.
+    :return: array of booleans, one per tube. `True` is the tube passes the acceptance criterion, `False` otherwise.
     """
     table = mtd[str(peak_table)]  # handle to the peak table
     peak_count = table.columnCount() - 1  # the first column contains the names of the tubes
@@ -216,7 +295,6 @@ def criterium_peak_pixel_position(peak_table: InputTable,
     values = deepcopy(deviations)
     z_score = 1000
     outlier_value = 1000
-    deviation_threshold = 3.0  # three pixels
     while z_score > zscore_threshold and outlier_value > deviation_threshold and len(values) > 0:
         # find the tube with the highest Z-score, possibly signaling a large deviation from the mean
         mean, std = np.mean(values), np.std(values)
@@ -230,15 +308,15 @@ def criterium_peak_pixel_position(peak_table: InputTable,
         if z_score > zscore_threshold and outlier_value > deviation_threshold:
             outlier_values.append(outlier_value)
 
-    # flag the outlier tubes as failing the criterium
-    criterium_pass = np.tile(True, tube_count)  # initialize as all tubes passing the criterium
+    # flag the outlier tubes as failing the criterion
+    criterion_pass = np.tile(True, tube_count)  # initialize as all tubes passing the criterion
     if len(outlier_values) > 0:
         failure_indexes = [deviations.index(value) for value in outlier_values]
-        criterium_pass[failure_indexes] = False
+        criterion_pass[failure_indexes] = False
 
     # create an analysis summary if so requested
     if isinstance(summary, str) and len(summary) > 0:
-        success = [1 if criterium else 0 for criterium in criterium_pass]
+        success = [1 if criterion else 0 for criterion in criterion_pass]
         x_values = list(range(1, 1 + TUBES_IN_BANK))
         mean, std = np.mean(deviations), np.std(deviations)
         z_scores = np.abs((deviations - mean) / std)
@@ -251,7 +329,7 @@ def criterium_peak_pixel_position(peak_table: InputTable,
         [axis.setLabel(index, label) for index, label in enumerate(labels)]
         workspace.replaceAxis(1, axis)
 
-    return criterium_pass
+    return criterion_pass
 
 
 def purge_table(workspace: WorkspaceTypes, calibration_table: TableWorkspace,
@@ -317,7 +395,7 @@ def mask_bank(bank_name: str, tubes_fit_success: np.ndarray, output_table: str) 
     tube_numbers = ','.join([str(n) for n in tube_numbers])  # failing tubes as a string
     detector_ids = MaskBTP(Instrument='CORELLI', Bank=bank_number, Tube=tube_numbers)
     table = CreateEmptyTableWorkspace(OutputWorkspace=output_table)
-    table.addColumn('long64', 'DETECTOR ID')
+    table.addColumn('long64', 'Detector ID')
     [table.addRow([detector_id]) for detector_id in detector_ids.tolist()]
     if AnalysisDataService.doesExist('CORELLIMaskBTP'):
         DeleteWorkspaces(['CORELLIMaskBTP'])
@@ -328,6 +406,8 @@ def calibrate_bank(workspace: WorkspaceTypes,
                    bank_name: str,
                    calibration_table: str,
                    mask_table: str = 'MaskTable',
+                   peak_table: str = None,
+                   peak_y_table: str = None,
                    fit_results: Optional[str] = None,
                    shadow_height: float = 1000,
                    shadow_width: float = 4,
@@ -338,8 +418,8 @@ def calibrate_bank(workspace: WorkspaceTypes,
     table of calibrated detector IDs and a table of non-calibrated detector IDs
 
     This function produces the following temporary workspaces: 'PeakTable' (TableWorkspace),
-    'parameters_table' (WorkspaceGroup), and 'acceptance' (Workspace2D). Thus, any extant workspace having
-    any of these names will be overwritten
+    'PeakTable' (TableWorkspace), 'ParametersTable' (WorkspaceGroup), and 'acceptance' (Workspace2D).
+    Thus, any extant workspace having any of these names will be overwritten
 
     :param workspace: input Workspace2D containing total neutron counts per pixel
     :param bank_name: a string of the form 'bankI' where 'I' is a bank number
@@ -347,7 +427,12 @@ def calibrate_bank(workspace: WorkspaceTypes,
     for its calibrated XYZ coordinates, in meters
     :param mask_table: output TableWorkspace containing containing the detector ID's of the
         unsuccessfully fitted tubes
-    :param fit_results: name of output Workspace2D containing acceptance criterium results and coefficients of the
+    :param peak_table: output table with pixel positions for each shadow, for each tube. If `None`, then no
+        table is output
+    :param peak_y_table: output table containing the positions of the wire shadows for each tube
+        along the vertical (Y) axis. This positions are the result if evaluating the peak pixel positions with
+        the quadratic function that translates pixel positions to vertical positions
+    :param fit_results: name of output Workspace2D containing acceptance criterion results and coefficients of the
         quadratic function fitting shadow locations in the tube to wire positions.
     :param shadow_height: initial guess for the decrease in neutron counts caused by the calibrating wire
     :param shadow_width: initial guess for the number of pixels shadowed by the calibrating wire
@@ -359,11 +444,13 @@ def calibrate_bank(workspace: WorkspaceTypes,
     """
     # Validate inputs are taken care in function fit_bank
     # Fit the tubes in the bank
+    peak_table_temp = 'PeakTable' if peak_table is None else peak_table
+    peak_y_table_temp = 'PeakYTable' if peak_y_table is None else peak_y_table
     fit_bank(workspace, bank_name, shadow_height, shadow_width, fit_domain, minimum_intensity,
-             calibration_table=calibration_table, peak_pixel_positions_table='PeakTable',
-             parameters_table_group='parameters_table')
-    # Run the acceptance criterium to determine the failing tubes
-    tubes_fit_success = criterium_peak_pixel_position('PeakTable', summary='acceptance')
+             calibration_table=calibration_table, peak_pixel_positions_table=peak_table_temp,
+             peak_vertical_positions_table=peak_y_table_temp, parameters_table_group='parameters_table')
+    # Run the acceptance criterion to determine the failing tubes
+    tubes_fit_success = criterion_peak_vertical_position(peak_y_table_temp, summary='acceptance')
     # collect acceptances and polynomial coefficients
     if isinstance(fit_results, str) and len(fit_results) > 0:
         collect_bank_fit_results(fit_results, acceptance_summary='acceptance',
@@ -372,7 +459,11 @@ def calibrate_bank(workspace: WorkspaceTypes,
     purge_table(workspace, calibration_table, tubes_fit_success)
     # Create table of masked detector ID's, or None if all tubes were successfully fitted
     mask_table_workspace = mask_bank(bank_name, tubes_fit_success, mask_table)
-    DeleteWorkspaces(['PeakTable', 'parameters_table', 'acceptance'])
+    DeleteWorkspaces(['parameters_table', 'acceptance'])
+    if peak_table is None:
+        DeleteWorkspaces([peak_table_temp])
+    if peak_y_table is None:
+        DeleteWorkspaces([peak_y_table_temp])
     return mtd[calibration_table], mask_table_workspace
 
 
@@ -399,7 +490,7 @@ def calibrate_banks(workspace: WorkspaceTypes, bank_selection: str,
     :param calibration_group: name of the output WorkspaceGroup containing the calibration tables for each bank
     :param mask_group: name of the output WorkspaceGroup containing the mask tables for each bank
     :param fit_group: name of the output WorkspaceGroup gathering the Workspace2D objects that hold the tube
-        success criterium results, as well as the optimized polynomial coefficients of the quadratic function
+        success criterion results, as well as the optimized polynomial coefficients of the quadratic function
         fitting the shadow locations in the tube to the known Y-coordinate for the wires.
 
     :return: handles to the calibrations and masks WorkspaceGroup objects
