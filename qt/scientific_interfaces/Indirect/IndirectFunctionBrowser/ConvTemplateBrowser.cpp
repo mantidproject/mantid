@@ -99,7 +99,7 @@ int ConvTemplateBrowser::getNumberOfDatasets() const {
 }
 
 void ConvTemplateBrowser::setDatasets(
-    const QMap<QString, QList<std::size_t>> &datasets) {
+    const QList<QPair<QString, QList<std::size_t>>> &datasets) {
   m_presenter.setDatasets(datasets);
 }
 

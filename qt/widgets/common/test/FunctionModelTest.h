@@ -17,12 +17,12 @@
 
 namespace {
 
-QMap<QString, QList<std::size_t>>
+QList<QPair<QString, QList<std::size_t>>>
 createDatasetMap(QStringList const &datasetNames,
                  QList<std::size_t> const &spectraList) {
-  QMap<QString, QList<std::size_t>> datasets;
+  QList<QPair<QString, QList<std::size_t>>> datasets;
   for (const auto &datasetName : datasetNames)
-    datasets[datasetName] = spectraList;
+    datasets.append(QPair(datasetName, spectraList));
   return datasets;
 }
 

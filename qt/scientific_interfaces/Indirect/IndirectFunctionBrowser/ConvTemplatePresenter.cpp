@@ -191,7 +191,7 @@ void ConvTemplatePresenter::setCurrentDataset(int i) {
 }
 
 void ConvTemplatePresenter::setDatasets(
-    const QMap<QString, QList<std::size_t>> &datasets) {
+    const QList<QPair<QString, QList<std::size_t>>> &datasets) {
   m_model.setDatasets(datasets);
 }
 

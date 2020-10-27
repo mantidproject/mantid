@@ -12,7 +12,7 @@
 #include "MantidAPI/IFunction.h"
 
 #include <QList>
-#include <QMap>
+#include <QPair>
 #include <QString>
 #include <QStringList>
 
@@ -45,7 +45,8 @@ public:
   IFunction_sptr getCurrentFunction() const override;
   void setNumberDomains(int) override;
   void setDatasets(const QStringList &datasetNames);
-  void setDatasets(const QMap<QString, QList<std::size_t>> &datasets) override;
+  void setDatasets(
+      const QList<QPair<QString, QList<std::size_t>>> &datasets) override;
   void addDatasets(const QStringList &datasetNames);
   void removeDatasets(QList<int> &indices);
   QStringList getDatasetNames() const override;
@@ -87,15 +88,16 @@ protected:
 
 private:
   void checkDatasets();
-  void
-  checkNumberOfDomains(const QMap<QString, QList<std::size_t>> &datasets) const;
-  int numberOfDomains(const QMap<QString, QList<std::size_t>> &datasets) const;
+  void checkNumberOfDomains(
+      const QList<QPair<QString, QList<std::size_t>>> &datasets) const;
+  int numberOfDomains(
+      const QList<QPair<QString, QList<std::size_t>>> &datasets) const;
   void checkIndex(int) const;
   void updateGlobals();
   size_t m_currentDomainIndex = 0;
-  // The datasets being fitted. The key is a workspace name, and the value is
-  // a list of spectra numbers in the specified workspace.
-  mutable QMap<QString, QList<std::size_t>> m_datasets;
+  // The datasets being fitted. A list of workspace names paired to a list of
+  // spectra.
+  mutable QList<QPair<QString, QList<std::size_t>>> m_datasets;
   mutable QStringList m_globalParameterNames;
 };
 

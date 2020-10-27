@@ -11,7 +11,7 @@
 #include "MantidAPI/IFunction_fwd.h"
 
 #include <QList>
-#include <QMap>
+#include <QPair>
 #include <QString>
 #include <QStringList>
 
@@ -43,7 +43,7 @@ public:
   virtual IFunction_sptr getCurrentFunction() const = 0;
   virtual void setNumberDomains(int) = 0;
   virtual void
-  setDatasets(const QMap<QString, QList<std::size_t>> &datasets) = 0;
+  setDatasets(const QList<QPair<QString, QList<std::size_t>>> &datasets) = 0;
   virtual QStringList getDatasetNames() const = 0;
   virtual QStringList getDatasetDomainNames() const = 0;
   virtual int getNumberDomains() const = 0;

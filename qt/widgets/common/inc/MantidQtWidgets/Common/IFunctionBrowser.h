@@ -12,7 +12,7 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
 #include <QList>
-#include <QMap>
+#include <QPair>
 #include <QString>
 #include <QStringList>
 
@@ -35,7 +35,7 @@ public:
   virtual void setNumberOfDatasets(int n) = 0;
   virtual void setDatasets(const QStringList &datasetNames) = 0;
   virtual void
-  setDatasets(const QMap<QString, QList<std::size_t>> &datasets) = 0;
+  setDatasets(const QList<QPair<QString, QList<std::size_t>>> &datasets) = 0;
   virtual Mantid::API::IFunction_sptr getGlobalFunction() = 0;
   virtual void
   updateMultiDatasetParameters(const Mantid::API::IFunction &fun) = 0;

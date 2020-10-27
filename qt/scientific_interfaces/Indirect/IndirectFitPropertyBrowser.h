@@ -15,7 +15,7 @@
 
 #include <QDockWidget>
 #include <QList>
-#include <QMap>
+#include <QPair>
 #include <QString>
 
 #include <boost/optional.hpp>
@@ -73,7 +73,7 @@ public:
   void setCurrentDataset(FitDomainIndex i);
   FitDomainIndex currentDataset() const;
   void updateFunctionBrowserData(
-      int nData, const QMap<QString, QList<std::size_t>> &datasets,
+      int nData, const QList<QPair<QString, QList<std::size_t>>> &datasets,
       const std::vector<double> &qValues,
       const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void updatePlotGuess(const MatrixWorkspace_const_sptr &sampleWorkspace);

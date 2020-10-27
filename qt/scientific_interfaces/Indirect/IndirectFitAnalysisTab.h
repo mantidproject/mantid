@@ -25,7 +25,7 @@
 #include <type_traits>
 
 #include <QList>
-#include <QMap>
+#include <QPair>
 #include <QString>
 
 namespace MantidQt {
@@ -157,7 +157,7 @@ private:
   std::string getOutputBasename() const;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   std::vector<std::string> getFitParameterNames() const;
-  QMap<QString, QList<std::size_t>> getDatasets() const;
+  QList<QPair<QString, QList<std::size_t>>> getDatasets() const;
   void enableFitButtons(bool enable);
   void enableOutputOptions(bool enable);
   void setPDFWorkspace(std::string const &workspaceName);

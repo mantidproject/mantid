@@ -277,18 +277,19 @@ void FunctionModel::setNumberDomains(int nDomains) {
 /// a single spectrum in the workspaces being fitted.
 /// @param datasetNames :: Names of the workspaces to be fitted.
 void FunctionModel::setDatasets(const QStringList &datasetNames) {
-  QMap<QString, QList<std::size_t>> datasets;
+  QList<QPair<QString, QList<std::size_t>>> datasets;
   for (const auto &datasetName : datasetNames)
-    datasets[datasetName] = QList<std::size_t>({0u});
+    datasets.append(QPair(datasetName, QList<std::size_t>({0u})));
 
   setDatasets(datasets);
 }
 
 /// Sets the datasets using a map of <workspace name, spectra list>. This
 /// should be used when the workspaces being fitted have multiple spectra.
-/// @param datasets :: Names of workspaces to be fitted maped to a spectra list.
+/// @param datasets :: Names of workspaces to be fitted paired to a spectra
+/// list.
 void FunctionModel::setDatasets(
-    const QMap<QString, QList<std::size_t>> &datasets) {
+    const QList<QPair<QString, QList<std::size_t>>> &datasets) {
   checkNumberOfDomains(datasets);
   m_datasets = datasets;
 }
@@ -298,7 +299,7 @@ void FunctionModel::setDatasets(
 /// @param datasetNames :: Names of the workspaces to be added.
 void FunctionModel::addDatasets(const QStringList &datasetNames) {
   for (const auto &datasetName : datasetNames)
-    m_datasets[datasetName] = QList<std::size_t>({0u});
+    m_datasets.append(QPair(datasetName, QList<std::size_t>({0u})));
 
   setNumberDomains(numberOfDomains(m_datasets));
 }
@@ -328,9 +329,9 @@ void FunctionModel::removeDatasets(QList<int> &indices) {
 /// EditLocalParameterDialog.
 QStringList FunctionModel::getDatasetNames() const {
   QStringList datasetNames;
-  for (const auto &datasetName : m_datasets.keys())
-    for (const auto &specNum : m_datasets[datasetName])
-      datasetNames << datasetName;
+  for (const auto &dataset : m_datasets)
+    for (const auto &specNum : dataset.second)
+      datasetNames << dataset.first;
 
   return datasetNames;
 }
@@ -340,12 +341,12 @@ QStringList FunctionModel::getDatasetNames() const {
 /// a workspace. This is required for EditLocalParameterDialog.
 QStringList FunctionModel::getDatasetDomainNames() const {
   QStringList domainNames;
-  for (const auto &datasetName : m_datasets.keys()) {
-    if (m_datasets[datasetName].size() == 1)
-      domainNames << datasetName;
+  for (const auto &dataset : m_datasets) {
+    if (dataset.second.size() == 1)
+      domainNames << dataset.first;
     else {
-      for (const auto &specNum : m_datasets[datasetName])
-        domainNames << datasetName + " (" + QString::number(specNum) + ")";
+      for (const auto &specNum : dataset.second)
+        domainNames << dataset.first + " (" + QString::number(specNum) + ")";
     }
   }
   return domainNames;
@@ -503,13 +504,13 @@ void FunctionModel::checkDatasets() {
   if (numberOfDomains(m_datasets) != m_numberDomains) {
     m_datasets.clear();
     for (auto i = 0u; i < m_numberDomains; ++i)
-      m_datasets[QString::number(i)] = QList<std::size_t>({0u});
+      m_datasets.append(QPair(QString::number(i), QList<std::size_t>({0u})));
   }
 }
 
 /// Check that the datasets supplied have the expected total number of domains.
 void FunctionModel::checkNumberOfDomains(
-    const QMap<QString, QList<std::size_t>> &datasets) const {
+    const QList<QPair<QString, QList<std::size_t>>> &datasets) const {
   if (numberOfDomains(datasets) != static_cast<int>(m_numberDomains)) {
     throw std::runtime_error(
         "Number of dataset domains doesn't match the number of domains.");
@@ -517,10 +518,10 @@ void FunctionModel::checkNumberOfDomains(
 }
 
 int FunctionModel::numberOfDomains(
-    const QMap<QString, QList<std::size_t>> &datasets) const {
+    const QList<QPair<QString, QList<std::size_t>>> &datasets) const {
   int totalNumberOfDomains{0};
-  for (const auto &spectraList : datasets.values())
-    totalNumberOfDomains += spectraList.size();
+  for (const auto &dataset : datasets)
+    totalNumberOfDomains += dataset.second.size();
 
   return totalNumberOfDomains;
 }

@@ -12,7 +12,6 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
 
-#include <QMap>
 #include <QWidget>
 
 #include <boost/optional.hpp>
@@ -142,7 +141,8 @@ public slots:
   // Handling of multiple datasets
   void setNumberOfDatasets(int n) override;
   void setDatasets(const QStringList &datasetNames) override;
-  void setDatasets(const QMap<QString, QList<std::size_t>> &datasets) override;
+  void setDatasets(
+      const QList<QPair<QString, QList<std::size_t>>> &datasets) override;
   void resetLocalParameters();
   void setCurrentDataset(int i) override;
   void removeDatasets(const QList<int> &indices);
