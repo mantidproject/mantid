@@ -8,7 +8,6 @@
 
 #include "MantidQtWidgets/Common/DllOption.h"
 #include "MantidQtWidgets/Common/Python/Object.h"
-#include "MantidPythonInterface/core/PythonObjectInstantiator.h"
 #include <sip.h>
 #include <stdexcept>
 
@@ -64,6 +63,7 @@ template <typename T> T *extract(PyObject* obj) {
   return static_cast<T *>(wrapper->u.cppPtr);
 #endif
 }
+
 } // namespace Python
 } // namespace Common
 } // namespace Widgets
