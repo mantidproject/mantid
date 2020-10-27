@@ -146,7 +146,11 @@ pngmath_latex_preamble = r'\usepackage[active]{preview}'
 pngmath_use_preview = True
 
 # -- Fix up angstrom symbol for mathjax which shouldn't have an effect on pngmath
-rst_prolog = r""":math:`\renewcommand\AA{\unicode{x212B}}`"""
+rst_prolog = r"""
+
+:math:`\renewcommand\AA{\unicode{x212B}}`
+
+"""
 
 # -- HTML output ----------------------------------------------------
 
