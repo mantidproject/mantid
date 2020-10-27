@@ -13,7 +13,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
 from mantid.simpleapi import GroupWorkspaces, Load
-from mantid.kernel import StringListValidator, Direction
+from mantid.kernel import Direction
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
 

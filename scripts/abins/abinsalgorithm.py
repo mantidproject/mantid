@@ -116,8 +116,9 @@ class AbinsAlgorithm:
         valid_choices = ['']
         for instrument in choices:
             if ((instrument in abins.parameters.instruments)
-                and ('settings' in abins.parameters.instruments[instrument])):
+                    and ('settings' in abins.parameters.instruments[instrument])):
                 valid_choices += sorted(list(abins.parameters.instruments[instrument]['settings']))
+        valid_choices = sorted(list(set(valid_choices)))
 
         self.declareProperty(name="Setting",
                              direction=Direction.Input,

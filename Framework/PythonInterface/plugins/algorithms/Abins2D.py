@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+import numbers
 import numpy as np
 from typing import Dict
 
@@ -13,7 +14,7 @@ from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
 from mantid.simpleapi import GroupWorkspaces
-from mantid.kernel import StringListValidator, Direction
+from mantid.kernel import Direction
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
 
@@ -50,16 +51,6 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         self.declare_instrument_properties(default="TwoDMap", choices=TWO_DIMENSIONAL_INSTRUMENTS)
 
         # Declare special properties for 2D instrument
-        self.declareProperty(name="Resolution",
-                             direction=Direction.Input,
-                             defaultValue=abins.parameters.instruments['TwoDMap']['resolution'],
-                             doc="Width of broadening function")
-
-        self.declareProperty(name="Angles",
-                             direction=Direction.Input,
-                             defaultValue="3.0, 140.0, 50",
-                             doc='Angles sampled in spectrum, expressed as "START, END, NSAMPLES"')
-
         self.declareProperty(name="IncidentEnergy",
                              direction=Direction.Input,
                              defaultValue=4100)
@@ -73,19 +64,8 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
 
         self._check_advanced_parameter()
 
-        import numbers
-        if not isinstance(self.getProperty("Resolution").value, numbers.Real):
-            issues["Resolution"] = "Resolution must a real number"
-
         if not isinstance(self.getProperty("IncidentEnergy").value, numbers.Real):
             issues["IncidentEnergy"] = "Incident energy must a real number"
-
-        try:
-            self._angle_string_to_list(self.getProperty("Angles").value)
-
-        except ValueError:
-            issues["Angles"] = ("Could not parse Angle input. Format should be "
-                                "\"min, max, steps\" or \"angle1, angle2, angle3, ...\"")
 
         return issues
 
@@ -243,20 +223,6 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
                                ".instruments['TwoDMap']['resolution']"
                                + message_end)
 
-    @staticmethod
-    def _angle_string_to_list(angle_string):
-        angle_string = angle_string.strip()
-        if angle_string[0] == '[' and angle_string[-1] == ']':
-            angles = list(map(float, angle_string[1:-1].split(',')))
-        else:
-            linspace_spec = list(map(float, angle_string.split(',')))
-            if len(linspace_spec) != 3:
-                raise ValueError()
-
-            angles = np.linspace(*linspace_spec).tolist()
-
-        return angles
-
     def _get_properties(self):
         """
         Loads all properties to object's attributes.
@@ -273,9 +239,6 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=abins.constants.FLOAT_TYPE)
 
         instrument_params = abins.parameters.instruments[self._instrument.get_name()]
-
-        instrument_params['resolution'] = self.getProperty("Resolution").value
-        instrument_params['angles'] = self._angle_string_to_list(self.getProperty("Angles").value)
         instrument_params['e_init'] = [float(self.getProperty("IncidentEnergy").value)]
 
 
