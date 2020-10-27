@@ -221,10 +221,6 @@ int IqtTemplateBrowser::getNumberOfDatasets() const {
   return m_presenter.getNumberOfDatasets();
 }
 
-void IqtTemplateBrowser::setDatasets(const QStringList &datasetNames) {
-  m_presenter.setDatasets(datasetNames);
-}
-
 void IqtTemplateBrowser::setDatasets(
     const QMap<QString, QList<std::size_t>> &datasets) {
   m_presenter.setDatasets(datasets);

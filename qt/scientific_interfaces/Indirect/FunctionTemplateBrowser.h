@@ -50,7 +50,6 @@ public:
   virtual IFunction_sptr getFunction() const = 0;
   virtual void setNumberOfDatasets(int) = 0;
   virtual int getNumberOfDatasets() const = 0;
-  virtual void setDatasets(const QStringList &datasetNames) = 0;
   virtual void
   setDatasets(const QMap<QString, QList<std::size_t>> &datasets) = 0;
   virtual QStringList getGlobalParameters() const = 0;

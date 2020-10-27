@@ -129,11 +129,6 @@ void SingleFunctionTemplatePresenter::setCurrentDataset(int i) {
 }
 
 void SingleFunctionTemplatePresenter::setDatasets(
-    const QStringList &datasetNames) {
-  m_model.setDatasets(datasetNames);
-}
-
-void SingleFunctionTemplatePresenter::setDatasets(
     const QMap<QString, QList<std::size_t>> &datasets) {
   m_model.setDatasets(datasets);
 }
