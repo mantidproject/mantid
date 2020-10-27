@@ -10,8 +10,6 @@
 #include "IqtFunctionModel.h"
 #include "ParameterEstimation.h"
 
-#include <vector>
-
 #include <QMap>
 #include <QWidget>
 

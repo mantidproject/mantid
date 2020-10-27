@@ -17,7 +17,6 @@
 
 #include <boost/optional.hpp>
 #include <memory>
-#include <vector>
 
 namespace Mantid {
 namespace API {

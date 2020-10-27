@@ -12,7 +12,6 @@
 #include "ui_EditLocalParameterDialog.h"
 
 #include <memory>
-#include <vector>
 
 #include <QDialog>
 

@@ -10,8 +10,6 @@
 
 #include "MantidAPI/IFunction_fwd.h"
 
-#include <vector>
-
 #include <QList>
 #include <QMap>
 #include <QString>

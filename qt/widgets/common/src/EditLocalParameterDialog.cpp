@@ -12,7 +12,6 @@
 #include <QClipboard>
 #include <QMenu>
 #include <QMessageBox>
-#include <algorithm>
 #include <limits>
 #include <utility>
 
@@ -29,7 +28,8 @@ namespace MantidWidgets {
  * Constructor used inside and outside of MultiDatasetFit interface
  * @param parent :: [input] Parent widget of this dialog
  * @param parName :: [input] Name of parameter to edit in this dialog
- * @param datasetNames :: [input] The domains being fitted across workspaces.
+ * @param datasetNames :: [input] Names of workspaces being fitted.
+ * @param datasetDomainNames :: [input] Names given to the domains being fitted.
  * @param values :: [input] Parameter values.
  * @param fixes :: [input] Flags indicating if a parameter is fixed.
  * @param ties :: [input] Parameter ties.
@@ -56,7 +56,8 @@ EditLocalParameterDialog::EditLocalParameterDialog(
  * Prerequisite: one of the constructors must have filled m_values, m_fixes,
  * m_ties and set up the UI first
  * @param parName :: [input] Name of parameter to edit in this dialog
- * @param datasetNames :: [input] The domains being fitted across workspaces.
+ * @param datasetNames :: [input] Names of workspaces being fitted.
+ * @param datasetDomainNames :: [input] Names given to the domains being fitted.
  */
 void EditLocalParameterDialog::doSetup(const QString &parName,
                                        const QStringList &datasetNames,

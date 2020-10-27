@@ -11,8 +11,6 @@
 #include "IFunctionModel.h"
 #include "MantidAPI/IFunction.h"
 
-#include <vector>
-
 #include <QList>
 #include <QMap>
 #include <QString>
@@ -94,8 +92,8 @@ private:
   void checkIndex(int) const;
   void updateGlobals();
   size_t m_currentDomainIndex = 0;
-  // The datasets being fitted. The key is the workspace name, and the value is
-  // a list of spectra numbers from that workspace.
+  // The datasets being fitted. The key is a workspace name, and the value is
+  // a list of spectra numbers in the specified workspace.
   mutable QMap<QString, QList<std::size_t>> m_datasets;
   mutable QStringList m_globalParameterNames;
 };
