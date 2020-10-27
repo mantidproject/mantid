@@ -17,6 +17,9 @@ add_subdirectory(ISISReflectometry)
 add_subdirectory(Indirect)
 add_subdirectory(DynamicPDF)
 
+# python interfaces
+add_subdirectory(python)
+
 # Testing - These should be split out by library
 set(TEST_FILES
     test/ALCBaselineModellingModelTest.h
