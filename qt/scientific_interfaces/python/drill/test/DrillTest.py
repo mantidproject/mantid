@@ -15,8 +15,8 @@ from qtpy.QtCore import Qt, QPoint
 
 from mantid.kernel import config
 
-from Interface.ui.drill.view.DrillView import DrillView
-from Interface.ui.drill.model.configurations import RundexSettings
+from drill.view.DrillView import DrillView
+from drill.model.configurations import RundexSettings
 
 app = QApplication(sys.argv)
 
@@ -140,17 +140,15 @@ class DrillTest(unittest.TestCase):
         config['default.facility'] = "ILL"
         config['default.instrument'] = "D11"
         # avoid popup messages
-        patch = mock.patch('Interface.ui.drill.view.DrillView.QMessageBox')
+        patch = mock.patch('drill.view.DrillView.QMessageBox')
         self.mMessageBox = patch.start()
         self.addCleanup(patch.stop)
         # mock the controller
-        patch = mock.patch(
-                'Interface.ui.drill.model.DrillModel.DrillParameterController')
+        patch = mock.patch('drill.model.DrillModel.DrillParameterController')
         self.mController = patch.start()
         self.addCleanup(patch.stop)
         # mock logger
-        patch = mock.patch(
-                'Interface.ui.drill.model.DrillModel.logger')
+        patch = mock.patch('drill.model.DrillModel.logger')
         self.mLogger = patch.start()
         self.addCleanup(patch.stop)
 
@@ -239,7 +237,7 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(self.model.cycleNumber, "test2")
         self.assertEqual(self.model.experimentId, "test1")
 
-    @mock.patch('Interface.ui.drill.view.DrillView.manageuserdirectories')
+    @mock.patch('drill.view.DrillView.manageuserdirectories')
     def test_userDirectories(self, mDirectoriesManager):
         QTest.mouseClick(self.view.datadirs, Qt.LeftButton)
         mDirectoriesManager.ManageUserDirectories.assert_called_once()
@@ -247,7 +245,7 @@ class DrillTest(unittest.TestCase):
         self.view.actionManageDirectories.trigger()
         mDirectoriesManager.ManageUserDirectories.assert_called_once()
 
-    @mock.patch('Interface.ui.drill.presenter.DrillPresenter.DrillSettingsDialog')
+    @mock.patch('drill.presenter.DrillPresenter.DrillSettingsDialog')
     def test_settingsWindow(self, mSettings):
         QTest.mouseClick(self.view.settings, Qt.LeftButton)
         mSettings.assert_called_once()
@@ -255,9 +253,9 @@ class DrillTest(unittest.TestCase):
         self.view.actionSettings.trigger()
         mSettings.assert_called_once()
 
-    @mock.patch('Interface.ui.drill.view.DrillView.QFileDialog')
-    @mock.patch('Interface.ui.drill.model.DrillModel.json')
-    @mock.patch('Interface.ui.drill.model.DrillModel.open')
+    @mock.patch('drill.view.DrillView.QFileDialog')
+    @mock.patch('drill.model.DrillModel.json')
+    @mock.patch('drill.model.DrillModel.open')
     def test_loadRundex(self, mOpen, mJson, mFileDialog):
         mFileDialog.getOpenFileName.return_value = ["test", "test"]
         mJson.load.return_value = {
@@ -278,9 +276,9 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(self.model.samples, [{}])
         self.assertEqual(self.view.table.columnCount(), len(self.model.columns))
 
-    @mock.patch('Interface.ui.drill.view.DrillView.QFileDialog')
-    @mock.patch('Interface.ui.drill.model.DrillModel.json')
-    @mock.patch('Interface.ui.drill.model.DrillModel.open')
+    @mock.patch('drill.view.DrillView.QFileDialog')
+    @mock.patch('drill.model.DrillModel.json')
+    @mock.patch('drill.model.DrillModel.open')
     def test_saveRundex(self, mOpen, mJson, mFileDialog):
         self.model.setInstrument("D11")
         mFileDialog.getSaveFileName.return_value = ["test", "test"]

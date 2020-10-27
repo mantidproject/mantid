@@ -8,19 +8,17 @@
 import unittest
 from unittest import mock
 
-from Interface.ui.drill.presenter.DrillPresenter import DrillPresenter
+from drill.presenter.DrillPresenter import DrillPresenter
 
 
 class DrillPresenterTest(unittest.TestCase):
 
     def setUp(self):
-        patch = mock.patch('Interface.ui.drill.presenter.DrillPresenter'
-                           '.DrillSettingsDialog')
+        patch = mock.patch('drill.presenter.DrillPresenter.DrillSettingsDialog')
         self.mSettings = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch(
-                'Interface.ui.drill.presenter.DrillPresenter.DrillModel')
+        patch = mock.patch('drill.presenter.DrillPresenter.DrillModel')
         self.mModel = patch.start()
         self.mModel.return_value.getColumnHeaderData.return_value = [], []
         self.mModel.return_value.getCycleAndExperiment.return_value = "", ""

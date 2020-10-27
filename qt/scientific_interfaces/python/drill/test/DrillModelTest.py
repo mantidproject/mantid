@@ -11,7 +11,7 @@ from unittest import mock
 from mantid.kernel import *
 from mantid.api import *
 
-from Interface.ui.drill.model.DrillModel import DrillModel
+from drill.model.DrillModel import DrillModel
 
 
 class DrillModelTest(unittest.TestCase):
@@ -48,7 +48,7 @@ class DrillModelTest(unittest.TestCase):
 
     def setUp(self):
         # mock sapi
-        patch = mock.patch('Interface.ui.drill.model.DrillModel.sapi')
+        patch = mock.patch('drill.model.DrillModel.sapi')
         self.mSapi = patch.start()
         self.addCleanup(patch.stop)
 
@@ -57,78 +57,76 @@ class DrillModelTest(unittest.TestCase):
             .return_value.value = "test"
 
         # mock open
-        patch = mock.patch('Interface.ui.drill.model.DrillModel.open')
+        patch = mock.patch('drill.model.DrillModel.open')
         self.mOpen = patch.start()
         self.addCleanup(patch.stop)
 
         # mock json
-        patch = mock.patch('Interface.ui.drill.model.DrillModel.json')
+        patch = mock.patch('drill.model.DrillModel.json')
         self.mJson = patch.start()
         self.addCleanup(patch.stop)
 
         # mock parameter controller
-        patch = mock.patch(
-                'Interface.ui.drill.model.DrillModel.DrillParameterController'
-                )
+        patch = mock.patch('drill.model.DrillModel.DrillParameterController')
         self.mController = patch.start()
         self.addCleanup(patch.stop)
 
         # mock config
         d = {'default.instrument': 'i1', 'default.facility': 'ILL'}
-        patch = mock.patch('Interface.ui.drill.model.DrillModel.config')
+        patch = mock.patch('drill.model.DrillModel.config')
         self.mConfig = patch.start()
         self.mConfig.__getitem__.side_effect = d.__getitem__
         self.addCleanup(patch.stop)
 
         # mock logger
-        patch = mock.patch('Interface.ui.drill.model.DrillModel.logger')
+        patch = mock.patch('drill.model.DrillModel.logger')
         self.mLogger = patch.start()
         self.addCleanup(patch.stop)
 
         # mock specifications
         patch = mock.patch.dict(
-                'Interface.ui.drill.model.DrillModel.RundexSettings.TECHNIQUE',
+                'drill.model.DrillModel.RundexSettings.TECHNIQUE',
                 self.TECHNIQUE, clear=True
                 )
         self.mTechniques = patch.start()
         self.addCleanup(patch.stop)
 
         patch = mock.patch.dict(
-                'Interface.ui.drill.model.DrillModel.RundexSettings.ACQUISITION_MODES',
+                'drill.model.DrillModel.RundexSettings.ACQUISITION_MODES',
                 self.ACQUISITION_MODES, clear=True
                 )
         self.mAcq = patch.start()
         self.addCleanup(patch.stop)
 
         patch = mock.patch.dict(
-                'Interface.ui.drill.model.DrillModel.RundexSettings.COLUMNS',
+                'drill.model.DrillModel.RundexSettings.COLUMNS',
                 self.COLUMNS, clear=True
                 )
         self.mColumns = patch.start()
         self.addCleanup(patch.stop)
 
         patch = mock.patch.dict(
-                'Interface.ui.drill.model.DrillModel.RundexSettings.ALGORITHM',
+                'drill.model.DrillModel.RundexSettings.ALGORITHM',
                 self.ALGORITHM, clear=True
                 )
         self.mAlgo = patch.start()
         self.addCleanup(patch.stop)
 
         patch = mock.patch.dict(
-                'Interface.ui.drill.model.DrillModel.RundexSettings.SETTINGS',
+                'drill.model.DrillModel.RundexSettings.SETTINGS',
                 self.SETTINGS, clear=True
                 )
         self.mSettings = patch.start()
         self.addCleanup(patch.stop)
 
         # mock drill task
-        patch = mock.patch('Interface.ui.drill.model.DrillModel.DrillTask')
+        patch = mock.patch('drill.model.DrillModel.DrillTask')
         self.mDrillTask = patch.start()
         self.addCleanup(patch.stop)
 
         # mock drill tasks pool
         patch = mock.patch(
-                'Interface.ui.drill.model.DrillModel.DrillAlgorithmPool'
+                'drill.model.DrillModel.DrillAlgorithmPool'
                 )
         self.mTasksPool = patch.start()
         self.addCleanup(patch.stop)

@@ -14,7 +14,7 @@ from qtpy.QtGui import QCloseEvent
 from qtpy.QtCore import *
 from qtpy.QtTest import *
 
-from Interface.ui.drill.view.DrillView import DrillView
+from drill.view.DrillView import DrillView
 
 
 app = QApplication(sys.argv)
@@ -23,21 +23,19 @@ app = QApplication(sys.argv)
 class DrillViewTest(unittest.TestCase):
 
     def setUp(self):
-        patch = mock.patch('Interface.ui.drill.view.DrillView.QFileDialog')
+        patch = mock.patch('drill.view.DrillView.QFileDialog')
         self.mFileDialog = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch('Interface.ui.drill.view.DrillView.QMessageBox')
+        patch = mock.patch('drill.view.DrillView.QMessageBox')
         self.mMsgBox = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch(
-                'Interface.ui.drill.view.DrillView.manageuserdirectories')
+        patch = mock.patch('drill.view.DrillView.manageuserdirectories')
         self.mUserDir = patch.start()
         self.addCleanup(patch.stop)
 
-        patch = mock.patch(
-                'Interface.ui.drill.view.DrillView.DrillPresenter')
+        patch = mock.patch('drill.view.DrillView.DrillPresenter')
         self.mPresenter = patch.start()
         self.addCleanup(patch.stop)
 

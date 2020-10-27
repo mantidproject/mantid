@@ -8,8 +8,9 @@
 import unittest
 from unittest import mock
 
-from Interface.ui.drill.model.DrillParameterController \
-        import DrillParameterController, DrillControllerSignals, DrillParameter
+from drill.model.DrillParameterController import DrillParameterController, \
+                                                 DrillControllerSignals, \
+                                                 DrillParameter
 
 
 class DrillParameterControllerTest(unittest.TestCase):
@@ -17,7 +18,7 @@ class DrillParameterControllerTest(unittest.TestCase):
     def setUp(self):
         # mock sapi
         patch = mock.patch(
-                'Interface.ui.drill.model.DrillParameterController.sapi')
+                'drill.model.DrillParameterController.sapi')
         self.mSapi = patch.start()
         self.addCleanup(patch.stop)
 
