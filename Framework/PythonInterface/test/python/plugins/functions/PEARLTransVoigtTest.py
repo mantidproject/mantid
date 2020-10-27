@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+import numpy as np
 
 from MsdTestHelper import is_registered, do_a_fit, check_output
 
