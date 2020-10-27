@@ -37,7 +37,8 @@ public:
   void setNumberOfDatasets(int) override;
   int getCurrentDataset() override;
   int getNumberOfDatasets() const override;
-  void setDatasets(const QList<QPair<QString, QList<std::size_t>>> &datasets);
+  void setDatasets(
+      const QList<QPair<QString, QList<std::size_t>>> &datasets) override;
   QStringList getGlobalParameters() const override;
   QStringList getLocalParameters() const override;
   void setGlobalParameters(const QStringList &globals) override;

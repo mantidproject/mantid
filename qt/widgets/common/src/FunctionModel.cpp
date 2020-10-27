@@ -330,9 +330,10 @@ void FunctionModel::removeDatasets(QList<int> &indices) {
 QStringList FunctionModel::getDatasetNames() const {
   QStringList datasetNames;
   for (const auto &dataset : m_datasets)
-    for (const auto &specNum : dataset.second)
+    for (const auto &specNum : dataset.second) {
+      UNUSED_ARG(specNum);
       datasetNames << dataset.first;
-
+    }
   return datasetNames;
 }
 
@@ -501,7 +502,7 @@ QStringList FunctionModel::getLocalParameters() const {
 
 /// Check that the number of domains is correct for m_datasets
 void FunctionModel::checkDatasets() {
-  if (numberOfDomains(m_datasets) != m_numberDomains) {
+  if (numberOfDomains(m_datasets) != static_cast<int>(m_numberDomains)) {
     m_datasets.clear();
     for (auto i = 0u; i < m_numberDomains; ++i)
       m_datasets.append(QPair(QString::number(i), QList<std::size_t>({0u})));
