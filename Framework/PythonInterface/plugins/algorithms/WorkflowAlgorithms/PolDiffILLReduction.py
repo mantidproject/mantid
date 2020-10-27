@@ -484,7 +484,9 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _normalise_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
-        CreateSingleValuedWorkspace(DataValue=0.404 * self._sampleAndEnvironmentProperties['NAtoms'].value,
+        vanadium_expected_cross_section = 0.404 # barns
+        CreateSingleValuedWorkspace(DataValue=vanadium_expected_cross_section
+                                              * self._sampleAndEnvironmentProperties['NAtoms'].value,
                                     OutputWorkspace='norm')
         Divide(LHSWorkspace='norm', RHSWorkspace=ws, OutputWorkspace=ws)
         DeleteWorkspace(Workspace='norm')
