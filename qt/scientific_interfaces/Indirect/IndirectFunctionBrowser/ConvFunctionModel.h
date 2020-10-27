@@ -14,8 +14,6 @@
 #include "MantidQtWidgets/Common/ConvolutionFunctionModel.h"
 #include "ParameterEstimation.h"
 
-#include <vector>
-
 #include <QMap>
 #include <boost/optional.hpp>
 

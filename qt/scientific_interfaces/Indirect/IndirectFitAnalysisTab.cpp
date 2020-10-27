@@ -736,7 +736,7 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
 QMap<QString, QList<std::size_t>> IndirectFitAnalysisTab::getDatasets() const {
   QMap<QString, QList<std::size_t>> datasets;
 
-  for (size_t i{0}; i < m_fittingModel->numberOfWorkspaces().value; ++i) {
+  for (auto i = 0u; i < m_fittingModel->numberOfWorkspaces().value; ++i) {
     TableDatasetIndex index{i};
 
     QList<std::size_t> spectraList;

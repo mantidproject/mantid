@@ -12,10 +12,7 @@
 #include "MantidQtWidgets/Common/FunctionModel.h"
 #include "ParameterEstimation.h"
 
-#include <vector>
-
 #include <QMap>
-#include <QStringList>
 #include <boost/optional.hpp>
 
 namespace MantidQt {

@@ -62,7 +62,6 @@ EditLocalParameterDialog::EditLocalParameterDialog(
 void EditLocalParameterDialog::doSetup(const QString &parName,
                                        const QStringList &datasetNames,
                                        const QStringList &datasetDomainNames) {
-
   m_logFinder = std::make_unique<LogValueFinder>(datasetNames);
   // Populate list of logs
   auto *logCombo = m_uiForm.logValueSelector->getLogComboBox();
