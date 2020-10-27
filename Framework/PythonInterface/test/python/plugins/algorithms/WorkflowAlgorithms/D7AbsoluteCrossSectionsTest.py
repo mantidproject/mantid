@@ -15,19 +15,18 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls._facility = config['default.facility']
+        cls._instrument = config['default.instrument']
+
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D7'
+
         config.appendDataSearchSubDir('ILL/D7/')
         Load('vanadium_uniaxial.nxs', OutputWorkspace='vanadium_uniaxial')
         Load('vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz')
         Load('vanadium_10p.nxs', OutputWorkspace='vanadium_10p')
         Load('396993_reduced.nxs', OutputWorkspace='vanadium_data')
         Load('397004_reduced.nxs', OutputWorkspace='sample_data')
-
-    def setUp(self):
-        self._facility = config['default.facility']
-        self._instrument = config['default.instrument']
-
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D7'
 
     def tearDown(self):
         if self._facility:
