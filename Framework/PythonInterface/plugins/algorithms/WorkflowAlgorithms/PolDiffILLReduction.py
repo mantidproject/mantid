@@ -53,10 +53,10 @@ class PolDiffILLReduction(PythonAlgorithm):
             issues['TransmissionInputWorkspace'] = 'Vanadium transmission is mandatory for vanadium data reduction.'
 
         if process == 'Sample' or process == 'Vanadium':
-            if len(self.getProperty('SampleAndEnvironmentPropertiesDictionary').value) == 0:
-                issues['SampleAndEnvironmentPropertiesDictionary'] = 'Sample parameters need to be defined.'
+            if len(self.getProperty('SampleAndEnvironmentProperties').value) == 0:
+                issues['SampleAndEnvironmentProperties'] = 'Sample parameters need to be defined.'
 
-            sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentPropertiesDictionary').value
+            sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
             geometry_type = self.getPropertyValue('SampleGeometry')
             required_keys = ['Mass', 'FormulaUnits', 'ChemicalFormula', 'NumberDensity']
             if geometry_type != 'None':
@@ -70,7 +70,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
             for key in required_keys:
                 if key not in sampleAndEnvironmentProperties:
-                    issues['SampleAndEnvironmentPropertiesDictionary'] = '{} needs to be defined.'.format(key)
+                    issues['SampleAndEnvironmentProperties'] = '{} needs to be defined.'.format(key)
 
         return issues
 
@@ -165,13 +165,13 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('SampleGeometry', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
-        self.declareProperty(PropertyManagerProperty('SampleAndEnvironmentPropertiesDictionary', dict()),
+        self.declareProperty(PropertyManagerProperty('SampleAndEnvironmentProperties', dict()),
                              doc="Dictionary for the geometry used for self-attenuation correction.")
 
-        self.setPropertySettings('SampleAndEnvironmentPropertiesDictionary',
+        self.setPropertySettings('SampleAndEnvironmentProperties',
                                  EnabledWhenProperty('SampleGeometry', PropertyCriterion.IsNotEqualTo, 'Custom'))
 
-        self.setPropertySettings('SampleAndEnvironmentPropertiesDictionary',
+        self.setPropertySettings('SampleAndEnvironmentProperties',
                                  EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
         self.declareProperty(FileProperty(name="SampleGeometryFile",
@@ -400,7 +400,7 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _read_experiment_properties(self, ws):
         """Reads the user-provided dictionary that contains sample geometry (type, dimensions) and experimental conditions,
          such as the beam size and calculates derived parameters."""
-        self._sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentPropertiesDictionary').value
+        self._sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
         if 'n_atoms' not in self._sampleAndEnvironmentProperties:
             self._sampleAndEnvironmentProperties['NAtoms'] = self._sampleAndEnvironmentProperties['NumberDensity'].value \
                 * self._sampleAndEnvironmentProperties['Mass'].value \
