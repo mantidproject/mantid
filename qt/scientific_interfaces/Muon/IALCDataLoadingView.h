@@ -129,12 +129,6 @@ public slots:
   /// Instrument Changed
   virtual void instrumentChanged(QString instrument) = 0;
 
-  /// Path Changed
-  virtual void pathChanged(QString path) = 0;
-
-  /// Runs has been changed
-  virtual void handleRunsEditingFinsihed() = 0;
-
   /// Enables/Disables the load button when ready
   virtual void enableLoad(bool enable) = 0;
 
@@ -162,6 +156,9 @@ public slots:
   /// Handle check/uncheck of runs auto add
   virtual void runsAutoAddToggled(bool on) = 0;
 
+  /// Sets text and makes file finder search for runs
+  virtual void setRunsTextWithSearch(const std::string &text) = 0;
+
 signals:
   /// Request to load data
   void loadRequested();
@@ -174,9 +171,6 @@ signals:
 
   /// Instrument has been changed
   void instrumentChangedSignal(std::string);
-
-  /// Path has been changed
-  void pathChangedSignal(std::string);
 
   // Manage user directories has been clicked
   void manageDirectoriesClicked();

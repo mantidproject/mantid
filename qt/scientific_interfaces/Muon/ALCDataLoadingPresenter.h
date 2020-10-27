@@ -43,12 +43,6 @@ public:
   // Cancels current loading algorithm
   void cancelLoading() const;
 
-  // Validates expression given
-  std::vector<std::string> validateAndGetRunsFromExpression(std::string runs);
-
-  // Removes range ('-') between two ints and returns vector of all ints between
-  std::vector<std::string> unwrapRange(std::string range);
-
 private slots:
   /// Check file range and call method to load new data
   void handleLoadRequested();
@@ -77,6 +71,10 @@ private slots:
 signals:
   /// Signal emitted when data get changed
   void dataChanged();
+
+protected:
+  /// Signal emitted when timer event occurs
+  void timerEvent(QTimerEvent *timeup) override;
 
 private:
   /// Load new data and update the view accordingly
@@ -114,6 +112,15 @@ private:
 
   /// Timer ID of running timer
   int m_timerID;
+
+  /// Last run loaded by auto
+  int m_lastRunLoadedAuto;
+
+  /// Files that are loaded
+  std::vector<std::string> m_filesLoaded;
+
+  /// Last run added by auto was addes as range
+  std::atomic_bool m_wasLastAutoRange;
 };
 
 } // namespace CustomInterfaces

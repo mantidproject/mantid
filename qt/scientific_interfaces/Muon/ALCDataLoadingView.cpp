@@ -327,18 +327,7 @@ void ALCDataLoadingView::instrumentChanged(QString instrument) {
   emit instrumentChangedSignal(instrument.toStdString());
   if (!m_ui.runs->getText().isEmpty()) {
     m_ui.runs->findFiles(); // Re-search for files with new instrument
-    // emit runsFoundSignal();
-    // m_ui.runs->setFileTextWithSearch(m_ui.runs->getText());
-    std::cout << "finding files" << std::endl;
   }
-}
-
-void ALCDataLoadingView::pathChanged(QString path) {
-  emit pathChangedSignal(path.toStdString());
-}
-
-void ALCDataLoadingView::handleRunsEditingFinsihed() {
-  // emit runsChangedSignal(m_ui.runs->text().toStdString());
 }
 
 void ALCDataLoadingView::enableLoad(bool enable) {
@@ -390,13 +379,17 @@ void ALCDataLoadingView::setLoadStatus(const std::string &status) {
 void ALCDataLoadingView::runsAutoAddToggled(bool on) {
   if (on) {
     m_ui.runs->setReadOnly(true);
-    std::cout << "emit true" << std::endl;
+    m_ui.load->setEnabled(false);
     emit autoAddToggledSignal(true);
   } else {
     m_ui.runs->setReadOnly(false);
-    std::cout << "emit false" << std::endl;
+    m_ui.load->setEnabled(true);
     emit autoAddToggledSignal(false);
   }
+}
+
+void ALCDataLoadingView::setRunsTextWithSearch(const std::string &text) {
+  m_ui.runs->setFileTextWithoutSearch(QString::fromStdString(text));
 }
 
 } // namespace CustomInterfaces

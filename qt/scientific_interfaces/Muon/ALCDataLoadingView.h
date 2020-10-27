@@ -68,8 +68,6 @@ public:
   void disableAll() override;
   void enableAll() override;
   void instrumentChanged(QString instrument) override;
-  void pathChanged(QString path) override;
-  void handleRunsEditingFinsihed() override;
   void enableLoad(bool enable) override;
   void setPath(std::string &path) override;
   void enableRunsAutoAdd(bool enable) override;
@@ -79,6 +77,7 @@ public:
   std::string getFirstFile() override;
   void setLoadStatus(const std::string &status) override;
   void runsAutoAddToggled(bool on) override;
+  void setRunsTextWithSearch(const std::string &text) override;
 
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------

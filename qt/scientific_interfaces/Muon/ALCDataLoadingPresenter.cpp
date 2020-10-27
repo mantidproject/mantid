@@ -33,7 +33,9 @@ using namespace MantidQt::API;
 namespace MantidQt {
 namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
-    : m_view(view), m_numDetectors(0), m_loadingData(false), m_directoryChanged(false), m_timerID()  {}
+    : m_view(view), m_numDetectors(0), m_loadingData(false),
+      m_directoryChanged(false), m_timerID(), m_filesLoaded(),
+      m_lastRunLoadedAuto(-2), m_wasLastAutoRange(false) {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
@@ -41,7 +43,6 @@ void ALCDataLoadingPresenter::initialize() {
   connect(m_view, SIGNAL(loadRequested()), SLOT(handleLoadRequested()));
   connect(m_view, SIGNAL(instrumentChangedSignal(std::string)),
           SLOT(handleInstrumentChanged(std::string)));
-  // connect(m_view, SIGNAL(pathChangedSignal(std::string)), SLOT());
   connect(m_view, SIGNAL(runsChangedSignal()), SLOT(handleRunsChanged()));
   connect(m_view, SIGNAL(manageDirectoriesClicked()),
           SLOT(handleManageDirectories()));
@@ -49,77 +50,10 @@ void ALCDataLoadingPresenter::initialize() {
   connect(m_view, SIGNAL(autoAddToggledSignal(bool)),
           SLOT(startWatching(bool)));
   connect(&m_watcher, SIGNAL(directoryChanged(const QString &)),
-         SLOT(updateDirectoryChangedFlag(const QString &)));
-}
-
-/**
- * Converts a range of ints as string into a vector of integers
- * @param range :: String in the form "<n>-<m>"
- * @return Vector of all ints between the range as strings
- * @throws std::runtime_error if m > n
- */
-std::vector<std::string>
-ALCDataLoadingPresenter::unwrapRange(std::string range) {
-  std::vector<std::string> runsVec;
-
-  auto beginningString = range.substr(0, range.find('-'));
-  auto endString = range.substr(range.find('-') + 1);
-  auto beginning = std::stoi(beginningString);
-  auto end = std::stoi(endString);
-
-  // If beginning longer then and, assume end is short hand e.g. 100-3 ->
-  // 100-103
-  if (beginningString.length() > endString.length()) {
-    for (int i = beginning; i <= beginning + end; ++i)
-      runsVec.emplace_back(std::to_string(i));
-  } else {
-    // Assumed not using short hand so end must be > beginning
-    if (end < beginning)
-      throw std::runtime_error(
-          "Decreasing range is not allowed, try " + std::to_string(end) + "-" +
-          std::to_string(beginning) + " instead."); // Needs error message
-    for (int i = beginning; i <= end; ++i)
-      runsVec.emplace_back(std::to_string(i));
-  }
-  return runsVec;
-}
-
-/**
- * Validates the given expression and returns vector of run numbers
- * Can be a comma separated list e.g. 1,2,3
- * Can be a range e.g. 100-103 which is equally 100-3
- * Can be a mixture e.g. 1,2-5,9,10-12
- * @param runs :: expression to be validated
- * @return Vector of run numbers as strings
- */
-std::vector<std::string>
-ALCDataLoadingPresenter::validateAndGetRunsFromExpression(std::string runs) {
-  std::vector<std::string> runNumbers;
-  std::stringstream ss(runs);
-  std::string token;
-
-  while (std::getline(ss, token, ',')) {
-    // Try find -
-    auto index = token.find('-');
-    if (index == std::string::npos) {
-      runNumbers.emplace_back(token);
-    } else {
-      // Unwrap range and add each separately
-      auto numbers = unwrapRange(token); // Throws if not successful
-      for (const auto &number : numbers)
-        runNumbers.emplace_back(number);
-    }
-  }
-  return runNumbers;
+          SLOT(updateDirectoryChangedFlag(const QString &)));
 }
 
 void ALCDataLoadingPresenter::handleRunsChanged() {
-  // Reset path
-  // Check valid
-  // Update available info
-  // Enable/disable load
-  std::cout << "runs changed" << std::endl;
-
   // If runs empty, make sure everything is reset but no error
   m_view->enableLoad(false);
   m_view->setPath(std::string{});
@@ -129,7 +63,6 @@ void ALCDataLoadingPresenter::handleRunsChanged() {
 }
 
 void ALCDataLoadingPresenter::handleRunsFound() {
-  std::cout << "handle runs found" << std::endl;
   // Do a quick check for an empty input, do nothing in this case
   if (m_view->getRunsText().empty()) {
     m_view->setLoadStatus("");
@@ -172,6 +105,7 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
 
   m_view->setLoadStatus("Loading files");
   load(files);
+  m_filesLoaded = files;
   m_view->setLoadStatus("Loaded files");
   m_view->enableRunsAutoAdd(true);
 }
@@ -338,7 +272,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
 
     // Get actual file path and set on view
     auto path = loadAlg->getPropertyValue("Filename");
-    path = path.substr(0, path.find_last_of("/\\") + 1);
+    path = path.substr(0, path.find_last_of("/\\"));
     m_view->setPath(path);
   } catch (...) {
     m_view->setAvailableInfoToEmtpy();
@@ -455,8 +389,6 @@ void ALCDataLoadingPresenter::handleInstrumentChanged(std::string instrument) {
 
   // User cannot load yet as path not set
   m_view->enableLoad(false);
-
-  // If there are runs entered, try loading again
 }
 
 void ALCDataLoadingPresenter::handleManageDirectories() {
@@ -472,11 +404,88 @@ void ALCDataLoadingPresenter::updateDirectoryChangedFlag(const QString &path) {
   m_directoryChanged = true;
 }
 
-void ALCDataLoadingPresenter::startWatching(bool watch) { 
+void ALCDataLoadingPresenter::startWatching(bool watch) {
   if (watch) {
-    std::cout << "watch" << std::endl;
+    // Get path to watch and add to watcher
+    const auto path = m_view->getPath();
+    m_watcher.addPath(QString::fromStdString(path));
+
+    // start a timer that executes every second
+    m_timerID = startTimer(1000);
   } else {
-    std::cout << "don't watch" << std::endl;
+    // Check if watcher has a directory, then remove all
+    if (!m_watcher.directories().empty()) {
+      m_watcher.removePaths(m_watcher.directories());
+    }
+
+    // Stop timer
+    killTimer(m_timerID);
+
+    // Reset latest auto run number and was range
+    m_lastRunLoadedAuto = -2;
+    m_wasLastAutoRange = false;
+  }
+}
+
+/**
+ * This timer runs every second when we are watching a directory.
+ * If any changes have occurred in the meantime, reload.
+ * @param timeup :: [input] Qt timer event (not used)
+ */
+void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
+  Q_UNUSED(timeup); // Only have one timer so do not need this
+
+  // Check if there are changes to watched directory
+  if (m_directoryChanged.load()) {
+    // Need to add most recent file to add to list
+    ALCLatestFileFinder finder(m_view->getFirstFile());
+    const auto latestFile = finder.getMostRecentFile();
+
+    // Check if file found
+    if (latestFile.empty()) {
+      // Error message?
+      return;
+    }
+    // If not currently loading load new files
+    if (!isLoading()) {
+      // add to list set text with search
+      const auto oldRuns = m_view->getFiles();
+      if (std::find(oldRuns.begin(), oldRuns.end(), latestFile) ==
+          oldRuns.end()) {
+        // Get old text
+        auto newText = m_view->getRunsText();
+
+        // Extract run number from latest file
+        auto runNumber = extractRunNumber(latestFile);
+
+        // If new run number is less then error
+        if (runNumber <= m_lastRunLoadedAuto) {
+          // error
+          std::cout << "error " << std::endl;
+          return;
+        } else if (m_lastRunLoadedAuto + 1 == runNumber) {
+          // Add as range
+          // Check if last added was a range
+          if (m_wasLastAutoRange.load()) {
+            // Remove last run number from text
+            newText = newText.substr(0, newText.find_last_of('-'));
+          }
+          newText += "-" + std::to_string(runNumber);
+          m_wasLastAutoRange = true;
+        } else {
+          // Add as comma
+          newText += "," + std::to_string(runNumber);
+          m_wasLastAutoRange = false;
+        }
+        m_filesLoaded.push_back(latestFile);
+        m_lastRunLoadedAuto = runNumber;
+        // Set text without search, call manual load
+        m_view->setRunsTextWithSearch(newText);
+        load(m_filesLoaded);
+      }
+
+      m_directoryChanged = false;
+    }
   }
 }
 
