@@ -22,7 +22,6 @@ Improvements
 - Add the possibility to copy and paste shapes in the instrument viewer using Ctrl + C and Ctrl + V.
 - Powder diffraction support (instruments D2B and D20) has been added to DrILL interface. See
   :ref:`DrILL documentation <DrILL-ref>` for more information.
-- Allow to set multiple values for a parameter in an instrument parameter file, and to define a time validity range for each one.
 
 
 Bugfixes

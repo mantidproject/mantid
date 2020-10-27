@@ -326,7 +326,7 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
  * @param startTime :: the date the run started, in ISO compliant format
  */
 void LoadILLPolarizedDiffraction::loadInstrument(
-    API::MatrixWorkspace_sptr workspace, std::string startTime) {
+    API::MatrixWorkspace_sptr workspace, const std::string &startTime) {
 
   // the start time is needed in the workspace when loading the parameter file
   workspace->mutableRun().addProperty("start_time", startTime);

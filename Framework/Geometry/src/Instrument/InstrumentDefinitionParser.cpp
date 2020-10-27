@@ -2298,7 +2298,7 @@ void InstrumentDefinitionParser::setLogfile(
     if (numberValueEle >= 1) {
       bool hasValue = false;
 
-      for (unsigned long i = 0; i < numberValueEle; i++) {
+      for (unsigned long i = 0; i < numberValueEle; ++i) {
         pValueElem = static_cast<Element *>(pNLvalue->item(i));
 
         if (!pValueElem->hasAttribute(("val")))
@@ -2528,8 +2528,8 @@ void InstrumentDefinitionParser::setLogfile(
  *\<component-link\> elements
  *  @param progress :: Optional progress object for reporting progress to an
  *algorithm
- * @param requestedDate :: Date against which to check the validity of an IPF
- *parameter
+ * @param requestedDate :: Optional Date against which to check the validity of
+ *an IPF parameter
  */
 void InstrumentDefinitionParser::setComponentLinks(
     std::shared_ptr<Geometry::Instrument> &instrument,

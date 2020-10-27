@@ -12,6 +12,11 @@ Framework Changes
 Concepts
 --------
 
+Improvements
+############
+
+- Added a feature allowing time-dependent values for individual instrument parameters.
+
 Algorithms
 ----------
 
