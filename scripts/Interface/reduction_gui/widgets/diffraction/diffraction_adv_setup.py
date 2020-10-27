@@ -13,6 +13,8 @@ from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.diffraction.diffraction_adv_setup_script import AdvancedSetupScript
 from mantid.kernel import MaterialBuilder
+from mantidqt.interfacemanager import InterfaceManager
+import functools
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
@@ -123,6 +125,9 @@ class AdvancedSetupWidget(BaseWidget):
         # Handler for events
         # TODO - Need to add an event handler for the change of instrument and facility
 
+        self._content.material_help_button.clicked.connect(functools.partial(self._show_concept_help, "Materials"))
+        self._content.absorption_help_button.clicked.connect(functools.partial(self._show_concept_help, "AbsorptionAndMultipleScattering"))
+
         # Validated widgets
 
         return
@@ -219,7 +224,9 @@ class AdvancedSetupWidget(BaseWidget):
         dialog = HelpDialog(self)
         dialog.exec_()
 
-        return
+    def _show_concept_help(self, concept):
+        InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/'
+                                        f'concepts/{concept}.html')
 
     def _syncStripVanPeakWidgets(self, stripvanpeak):
         """ Synchronize the other widgets with vanadium peak
