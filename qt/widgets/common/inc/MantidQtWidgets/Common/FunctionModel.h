@@ -87,10 +87,15 @@ protected:
   MultiDomainFunction_sptr m_function;
 
 private:
+  void
+  checkNumberOfDomains(const QMap<QString, QList<std::size_t>> &datasets) const;
+  int numberOfDomains(const QMap<QString, QList<std::size_t>> &datasets) const;
   void checkIndex(int) const;
   void updateGlobals();
   size_t m_currentDomainIndex = 0;
-  mutable std::vector<DatasetDomain> m_domains;
+  // The datasets being fitted. The key is the workspace name, and the value is
+  // a list of spectra numbers from that workspace.
+  mutable QMap<QString, QList<std::size_t>> m_datasets;
   mutable QStringList m_globalParameterNames;
 };
 

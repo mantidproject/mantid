@@ -274,62 +274,39 @@ void FunctionModel::setNumberDomains(int nDomains) {
 }
 
 void FunctionModel::setDatasets(const QStringList &datasetNames) {
-  if (static_cast<std::size_t>(datasetNames.size()) != m_numberDomains) {
-    throw std::runtime_error(
-        "Number of dataset names doesn't match the number of domains.");
-  }
-
-  std::vector<DatasetDomain> domains;
-  domains.reserve(datasetNames.size());
+  QMap<QString, QList<std::size_t>> datasets;
   for (const auto &datasetName : datasetNames)
-    domains.emplace_back(DatasetDomain(datasetName, 0));
+    datasets[datasetName] = QList<std::size_t>({0u});
 
-  m_domains = domains;
+  setDatasets(datasets);
 }
 
 void FunctionModel::setDatasets(
     const QMap<QString, QList<std::size_t>> &datasets) {
-
-  int totalNumberOfDomains{0};
-  for (const auto &item : datasets.values())
-    totalNumberOfDomains += item.size();
-
-  if (totalNumberOfDomains != m_numberDomains) {
-    throw std::runtime_error(
-        "Number of dataset domains doesn't match the number of domains.");
-  }
-
-  std::vector<DatasetDomain> domains;
-  domains.reserve(static_cast<std::size_t>(totalNumberOfDomains));
-  for (const auto &workspaceName : datasets.keys()) {
-    const auto spectra = datasets.value(workspaceName);
-    for (const auto &specNum : spectra)
-      domains.emplace_back(DatasetDomain(workspaceName, specNum, false));
-  }
-
-  m_domains = domains;
+  checkNumberOfDomains(datasets);
+  m_datasets = datasets;
 }
 
 void FunctionModel::addDatasets(const QStringList &datasetNames) {
   for (const auto &datasetName : datasetNames)
-    m_domains.emplace_back(DatasetDomain(datasetName, 0));
+    m_datasets[datasetName] = QList<std::size_t>({0u});
 
-  setNumberDomains(static_cast<int>(m_domains.size()));
+  setNumberDomains(numberOfDomains(m_datasets));
 }
 
 void FunctionModel::removeDatasets(QList<int> &indices) {
   // Sort in reverse order
   qSort(indices.begin(), indices.end(), [](int a, int b) { return a > b; });
   for (auto i = indices.constBegin(); i != indices.constEnd(); ++i)
-    m_domains.erase(m_domains.begin() + *i);
+    m_datasets.erase(m_datasets.begin() + *i);
 
-  const auto numberOfDomains = static_cast<int>(m_domains.size());
-  setNumberDomains(numberOfDomains);
+  const auto nDomains = numberOfDomains(m_datasets);
+  setNumberDomains(nDomains);
 
   auto currentIndex = currentDomainIndex();
-  if (currentIndex >= numberOfDomains) {
-    currentIndex = m_domains.empty() ? 0 : numberOfDomains - 1;
-  }
+  if (currentIndex >= nDomains)
+    currentIndex = m_datasets.isEmpty() ? 0 : nDomains - 1;
+
   setCurrentDomainIndex(currentIndex);
 }
 
@@ -488,6 +465,24 @@ QStringList FunctionModel::getLocalParameters() const {
       locals << name;
   }
   return locals;
+}
+
+/// Check that the datasets supplied have the expected total number of domains.
+void FunctionModel::checkNumberOfDomains(
+    const QMap<QString, QList<std::size_t>> &datasets) const {
+  if (numberOfDomains(datasets) != static_cast<int>(m_numberDomains)) {
+    throw std::runtime_error(
+        "Number of dataset domains doesn't match the number of domains.");
+  }
+}
+
+int FunctionModel::numberOfDomains(
+    const QMap<QString, QList<std::size_t>> &datasets) const {
+  int totalNumberOfDomains{0};
+  for (const auto &spectraList : datasets.values())
+    totalNumberOfDomains += spectraList.size();
+
+  return totalNumberOfDomains;
 }
 
 /// Check a domain/function index to be in range.
