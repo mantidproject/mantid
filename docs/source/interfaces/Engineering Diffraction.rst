@@ -35,7 +35,8 @@ Settings
     Provides a range of options that apply across the entire interface, currently
     providing the option to change the default output directory and force the
     recalculation of the vanadium correction files. The user can also select the
-    log values from a list which are loaded with data in the fitting tab.
+    log values from a list which are loaded with data in the fitting tab and select 
+	a log by which to sort the runs in a sequential fit.
 
 Close
     Close the interface.
@@ -177,7 +178,9 @@ This allows for the user to select peaks of any supported type (e.g. :ref:`Pseud
 After a successful fit the best-fit model is stored as a setup in the fit browser (Setup > Custom Setup) with the name of the workspace fitted. 
 Selecting this loads the function and the parameters and the curve can be inspected by doing Display > Plot Guess.
 
-The output from the fit is stored in a group of workspaces that contains a matrix workspace of the fit value and error for each parameter in the model. If there is more than one of the same function, the parameters are stored in the same workspace with different x-values. For example, if there were two Gaussian peaks then there would be a workspace for each parameter of the Gaussian (i.e. Height, PeakCentre, Sigma) each of which will have two columns corresponding to each peak. Each workspace has a spectra per run loaded (each row in the table of the UI fitting tab). In general different models/functions could be fitted to each run, so when there is a parameter that does not exist for a run (or that run has not yet been fitted), the Y and E fields in the relevant row are filled with NaNs. The group of fit workspaces also contains a table workspace that stores the model string that can be copied into the fitpropertybrowser (Setup > Manage Setup > Load From String).
+The output from the fit is stored in a group of workspaces that contains a matrix workspace of the fit value and error for each parameter in the model. If there is more than one of the same function, the parameters are stored in the same workspace with different x-values. For example, if there were two Gaussian peaks then there would be a workspace for each parameter of the Gaussian (i.e. Height, PeakCentre, Sigma) each of which will have two columns corresponding to each peak. Each workspace has a spectra per run loaded (each row in the table of the UI fitting tab). In general different models/functions could be fitted to each run, so when there is a parameter that does not exist for a run (or that run has not yet been fitted), the Y and E fields in the relevant row are filled with NaNs. The group of fit workspaces also contains a table workspace that stores the model string that can be copied into the fit browser (Setup > Manage Setup > Load From String).
+
+The workspaces can be fit sequentially (sorted by the average of a chosen log in the settings). If a valid model is present in the fit browser then the Sequential Fit button will be enabled - it is not necessary to run an initial fit. The user may want to fix or constrain certain model parameters, which can be done in the usual way in the fit browser. The sequential fit will popoulate the fit tables as above and store the model in the Custom Setups.
 
 Parameters
 ^^^^^^^^^^
