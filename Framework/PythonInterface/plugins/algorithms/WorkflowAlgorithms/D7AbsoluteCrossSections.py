@@ -17,7 +17,7 @@ import numpy as np
 import math
 
 
-class D7AbsoluteScaleNormalisation(PythonAlgorithm):
+class D7AbsoluteCrossSections(PythonAlgorithm):
 
     @staticmethod
     def _max_value_per_detector(ws):
@@ -38,7 +38,7 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
                'and corrects the sample data for detector efficiency and normalises it to the chosen standard.'
 
     def name(self):
-        return 'D7AbsoluteScaleNormalisation'
+        return 'D7AbsoluteCrossSections'
 
     def validateInputs(self):
         issues = dict()
@@ -401,4 +401,4 @@ class D7AbsoluteScaleNormalisation(PythonAlgorithm):
         self.setProperty('OutputWorkspace', mtd[output_ws])
 
 
-AlgorithmFactory.subscribe(D7AbsoluteScaleNormalisation)
+AlgorithmFactory.subscribe(D7AbsoluteCrossSections)

@@ -6,9 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.api import WorkspaceGroup, MatrixWorkspace
-from mantid.simpleapi import Load, config, mtd, D7AbsoluteScaleNormalisation
+from mantid.simpleapi import Load, config, mtd, D7AbsoluteCrossSections
 
-class D7AbsoluteScaleNormalisationTest(unittest.TestCase):
+class D7AbsoluteCrossSectionsTest(unittest.TestCase):
 
     _facility = None
     _instrument = None
@@ -40,26 +40,26 @@ class D7AbsoluteScaleNormalisationTest(unittest.TestCase):
         mtd.clear()
 
     def test_uniaxial_separation(self):
-        D7AbsoluteScaleNormalisation(InputWorkspace='vanadium_uniaxial', OutputWorkspace='uniaxial',
+        D7AbsoluteCrossSections(InputWorkspace='vanadium_uniaxial', OutputWorkspace='uniaxial',
                                      CrossSectionSeparationMethod='Uniaxial')
         self.assertTrue(mtd['uniaxial'].getNumberOfEntries() == 2)
         self._check_output('uniaxial', 1, 132, onlySeparation=True)
 
     def test_xyz_separation(self):
-        D7AbsoluteScaleNormalisation(InputWorkspace='vanadium_xyz', OutputWorkspace='xyz',
+        D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', OutputWorkspace='xyz',
                                      CrossSectionSeparationMethod='XYZ', NormalisationMethod='None')
         self.assertTrue(mtd['xyz'].getNumberOfEntries() == 3)
         self._check_output('xyz', 1, 132, onlySeparation=True)
 
     def test_10p_separation(self):
-        D7AbsoluteScaleNormalisation(InputWorkspace='vanadium_10p', OutputWorkspace='10p',
+        D7AbsoluteCrossSections(InputWorkspace='vanadium_10p', OutputWorkspace='10p',
                                      CrossSectionSeparationMethod='10p', ThetaOffset=1.0,
                                      NormalisationMethod='None')
         self.assertTrue(mtd['10p'].getNumberOfEntries() == 3)
         self._check_output('10p', 1, 132, onlySeparation=True)
 
     def test_10p_separation_double_xyz(self):
-        D7AbsoluteScaleNormalisation(InputWorkspace='vanadium_xyz', RotatedXYZWorkspace='vanadium_xyz',
+        D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', RotatedXYZWorkspace='vanadium_xyz',
                                      OutputWorkspace='10p_double_xyz',
                                      CrossSectionSeparationMethod='10p', ThetaOffset=1.0,
                                      NormalisationMethod='None')
@@ -67,21 +67,21 @@ class D7AbsoluteScaleNormalisationTest(unittest.TestCase):
         self._check_output('10p_double_xyz', 1, 132, onlySeparation=True)
 
     def test_vanadium_normalisation(self):
-        D7AbsoluteScaleNormalisation(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_vanadium',
+        D7AbsoluteCrossSections(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_vanadium',
                                      CrossSectionSeparationMethod='XYZ', NormalisationMethod='Vanadium',
                                      VanadiumInputWorkspace='vanadium_data', AbsoluteUnitsNormalisation=False)
         self.assertTrue(mtd['normalised_sample_vanadium'].getNumberOfEntries() == 6)
         self._check_output('normalised_sample_vanadium', 1, 132, onlySeparation=False)
 
     def test_paramagnetic_normalisation(self):
-        D7AbsoluteScaleNormalisation(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_magnetic',
+        D7AbsoluteCrossSections(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_magnetic',
                                      CrossSectionSeparationMethod='XYZ', NormalisationMethod='Paramagnetic',
                                      SampleSpin = 0.5, AbsoluteUnitsNormalisation=False)
         self.assertTrue(mtd['normalised_sample_magnetic'].getNumberOfEntries() == 6)
         self._check_output('normalised_sample_magnetic', 1, 132, onlySeparation=False)
 
     def test_incoherent_normalisation(self):
-        D7AbsoluteScaleNormalisation(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_incoherent',
+        D7AbsoluteCrossSections(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_incoherent',
                                      CrossSectionSeparationMethod='XYZ', NormalisationMethod='Incoherent',
                                      AbsoluteUnitsNormalisation=False)
         self.assertTrue(mtd['normalised_sample_incoherent'].getNumberOfEntries() == 6)

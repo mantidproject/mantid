@@ -98,7 +98,7 @@ set(PYTHON_PLUGINS
   algorithms/WorkflowAlgorithms/IndirectReplaceFitResult.py
   algorithms/WorkflowAlgorithms/ILL_utilities.py
   algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
-  algorithms/WorkflowAlgorithms/D7AbsoluteScaleNormalisation.py
+  algorithms/WorkflowAlgorithms/D7AbsoluteCrossSections.py
   algorithms/WorkflowAlgorithms/PowderILLParameterScan.py
   algorithms/WorkflowAlgorithms/ReactorSANSResolution.py
   algorithms/WorkflowAlgorithms/ReflectometryILLSumForeground.py

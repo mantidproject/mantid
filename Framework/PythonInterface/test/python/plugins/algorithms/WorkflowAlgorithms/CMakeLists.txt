@@ -40,7 +40,7 @@ set(TEST_PY_FILES
     ISISIndirectEnergyTransferTest.py
     ISISIndirectEnergyTransferWrapperTest.py
     D7YIGPositionCalibrationTest.py
-    D7AbsoluteScaleNormalisationTest.py
+    D7AbsoluteCrossSectionsTest.py
     LoadWANDTest.py
     MDNormSCDPreprocessIncoherentTest.py
     MolDynTest.py
