@@ -46,14 +46,14 @@ Different input properties can be specified depending on the value of **ProcessA
 |              | * **TransmissionInputWorkspace**     |                                            |
 +--------------+--------------------------------------+--------------------------------------------+
 | Vanadium     | * AbsorberInputWorkspace             | * SampleGeometry                           |
-|              | * ContainerInputWorkspace            | * SampleAndEnvironmentPropertiesDictionary |
+|              | * ContainerInputWorkspace            | * SampleAndEnvironmentProperties           |
 |              | * TransmissionInputWorkspace         | * OutputTreatment                          |
 |              | * QuartzInputWorkspace               | * OutputUnits                              |
 |              |                                      | * ScatteringAngleBinSize                   |
 +--------------+--------------------------------------+--------------------------------------------+
 | Sample       | * AbsorberInputWorkspace             | * SampleGeometry                           |
 |              | * ContainerInputWorkspace            | * ComponentSeparationMethod                |
-|              | * TransmissionInputWorkspace         | * SampleAndEnvironmentPropertiesDictionary |
+|              | * TransmissionInputWorkspace         | * SampleAndEnvironmentProperties           |
 |              | * QuartzInputWorkspace               | * OutputTreatment                          |
 |              |                                      | * OutputUnits                              |
 |              |                                      | * ScatteringAngleBinSize                   |
@@ -192,7 +192,7 @@ This example below performs a complete reduction for D7 data.
         AbsorberInputWorkspace='absorber_ws',
         ContainerInputWorkspace='container_ws',
         TransmissionInputWorkspace='quartz_transmission_1',
-        OutputTreatment='AverageScans',
+        OutputTreatment='Average',
         ProcessAs='Quartz'
     )
 
@@ -214,9 +214,9 @@ This example below performs a complete reduction for D7 data.
         ContainerInputWorkspace='container_ws',
         TransmissionInputWorkspace='vanadium_transmission_1',
         QuartzInputWorkspace='pol_corrections',
-        OutputTreatment='SumScans',
+        OutputTreatment='Sum',
         SampleGeometry='None',
-        SampleAndEnvironmentPropertiesDictionary=vanadium_dictionary,
+        SampleAndEnvironmentProperties=vanadium_dictionary,
         ProcessAs='Vanadium'
     )
 
@@ -238,9 +238,9 @@ This example below performs a complete reduction for D7 data.
         ContainerInputWorkspace='container_ws',
         TransmissionInputWorkspace='sample_transmission_1',
         QuartzInputWorkspace='pol_corrections',
-        OutputTreatment='AverageScans',
+        OutputTreatment='Average',
         SampleGeometry='None',
-        SampleAndEnvironmentPropertiesDictionary=sample_dictionary,
+        SampleAndEnvironmentProperties=sample_dictionary,
 	ProcessAs='Sample'
     )
 
