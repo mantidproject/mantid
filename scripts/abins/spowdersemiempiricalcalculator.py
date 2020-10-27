@@ -403,9 +403,7 @@ class SPowderSemiEmpiricalCalculator:
 
             elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
 
-                instrument_params = abins.parameters.instruments[self._instrument.get_name()]
-
-                first_angle = instrument_params['angles'][0]
+                first_angle = self._instrument.get_angles()[0]
                 self._instrument.set_detector_angle(angle=first_angle)
                 indent = ANGLE_MESSAGE_INDENTATION
 
@@ -415,7 +413,7 @@ class SPowderSemiEmpiricalCalculator:
                 opt_local_freq, opt_local_coeff, rebinned_broad_spectrum = self._helper_atom_angle(
                     atom=atom, local_freq=local_freq, local_coeff=local_coeff, order=order, q2=q2)
 
-                for angle in instrument_params['angles'][1:]:
+                for angle in self._instrument.get_angles()[1:]:
                     self._report_progress(msg=indent + "Calculation for the detector at angle %s (atom=%s)" %
                                                        (angle, atom))
                     self._instrument.set_detector_angle(angle=angle)

@@ -11,6 +11,7 @@ import abins
 from abins.constants import MILLI_EV_TO_WAVENUMBER, WAVENUMBER_TO_INVERSE_A
 from .indirectinstrument import IndirectInstrument
 
+
 class LagrangeInstrument(IndirectInstrument):
     """Instrument class for IN1-LAGRANGE instrument at ILL
 

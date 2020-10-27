@@ -29,11 +29,35 @@ instruments = {
         'e_init': [4100.0],  # Incident energies in cm-1
         'angles': np.arange(3.0, 140.0, 1).tolist(), # All measurement angles for direct sweeps
         },
+    'MAPS': {
+        'resolution': 'pychop',
+        'q_size': 100,
+        'e_init': [400],
+        'angles_per_detector': 20,
+        'default_setting': 'A-400',
+        'settings': {'A-300': {'chopper': 'A', 'frequency': 300},
+                     'A-400': {'chopper': 'A', 'frequency': 400},
+                     'S-300': {'chopper': 'S', 'frequency': 300},
+                     'S-400': {'chopper': 'S', 'frequency': 400},}
+        },
+    'MARI': {
+        'resolution': 'pychop',
+        'q_size': 100,
+        'e_init': [400],
+        'angles_per_detector': 10,
+        'default_setting': 'A-400',
+        'settings': {'A-300': {'chopper': 'A', 'frequency': 300},
+                     'A-400': {'chopper': 'A', 'frequency': 400},
+                     'S-300': {'chopper': 'S', 'frequency': 300},
+                     'S-400': {'chopper': 'S', 'frequency': 400},}
+        },
     'TOSCA': {
         #    TOSCA parameters for calculating Q^2
         'final_neutron_energy': 32.0,  # Final energy on the crystal analyser in cm-1
+        'angles': [135],
         'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians
         'settings': {'forward': None, 'backward': None},
+        'default_setting': 'forward',
         # TOSCA parameters for resolution function
         # sigma = tosca_a * omega * omega + tosca_b * omega + tosca_c
         # where sigma is width of Gaussian function
@@ -44,6 +68,7 @@ instruments = {
         # Lagrange parameters for calculating Q^2
         # (NOT FOR PRODUCTION, CURRENTLY USING TOSCA VALUE FOR SCATTERING ANGLE)
         'final_neutron_energy': 4.5 * MILLI_EV_TO_WAVENUMBER,  # Final energy on the crystal analyser in cm-1 (converted from eV)
+        'angles': [135],
         'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians
         'scattering_angle_range': (math.pi * (10 / 180), math.pi / 2),
         # 'n_sampling_angles': 10,  # Could need something like this for sampling?

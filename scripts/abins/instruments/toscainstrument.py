@@ -4,13 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import numpy as np
-
 import abins
 import abins.parameters
 from abins.constants import WAVENUMBER_TO_INVERSE_A
 from .indirectinstrument import IndirectInstrument
-from .broadening import broaden_spectrum, prebin_required_schemes
 
 
 class ToscaInstrument(IndirectInstrument):

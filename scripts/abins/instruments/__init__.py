@@ -9,11 +9,14 @@ from abins.constants import ALL_INSTRUMENTS
 from .lagrangeinstrument import LagrangeInstrument
 from .toscainstrument import ToscaInstrument
 from .twodmap import TwoDMap
+from .pychop import PyChopInstrument
 from .instrument import Instrument
 
 instruments = {"lagrange": LagrangeInstrument,
                "tosca": ToscaInstrument,
-               "twodmap": TwoDMap}
+               "twodmap": TwoDMap,
+               "maps": (PyChopInstrument, {'name': 'MAPS'}),
+               "mari": (PyChopInstrument, {'name': 'MARI'})}
 
 def get_instrument(name: str, setting: str = '') -> Instrument:
     """Instantiate a named Instrument
@@ -31,7 +34,13 @@ def get_instrument(name: str, setting: str = '') -> Instrument:
 
     """
     if name.lower() in instruments:
-        return instruments.get(name.lower())(setting=setting)
+        instrument_factory = instruments.get(name.lower())
+        if isinstance(instrument_factory, tuple):
+            return instrument_factory[0](setting=setting,
+                                         **instrument_factory[1])
+        else:
+            return instrument_factory(setting=setting)
+
     elif name not in ALL_INSTRUMENTS:
         raise ValueError(f'Unknown instrument: "{name}". Known instruments: '
                          + ', '.join(ALL_INSTRUMENTS))
