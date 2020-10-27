@@ -53,6 +53,7 @@ public:
   void setDatasets(const QMap<QString, QList<std::size_t>> &datasets);
   void addDatasets(const QStringList &datasetNames);
   QStringList getDatasetNames() const;
+  QStringList getDatasetDomainNames() const;
   int getNumberOfDatasets() const;
   int getCurrentDataset() const;
   void setCurrentDataset(int);

@@ -6,7 +6,6 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "DatasetDomain.h"
 #include "DllOption.h"
 
 #include "MantidAPI/IFunction_fwd.h"
@@ -49,6 +48,7 @@ public:
   virtual void
   setDatasets(const QMap<QString, QList<std::size_t>> &datasets) = 0;
   virtual QStringList getDatasetNames() const = 0;
+  virtual QStringList getDatasetDomainNames() const = 0;
   virtual int getNumberDomains() const = 0;
   virtual int currentDomainIndex() const = 0;
   virtual void setCurrentDomainIndex(int) = 0;

@@ -51,6 +51,7 @@ public:
   void addDatasets(const QStringList &datasetNames);
   void removeDatasets(QList<int> &indices);
   QStringList getDatasetNames() const override;
+  QStringList getDatasetDomainNames() const override;
   int getNumberDomains() const override;
   int currentDomainIndex() const override;
   void setCurrentDomainIndex(int) override;

@@ -319,6 +319,19 @@ QStringList FunctionModel::getDatasetNames() const {
   return datasetNames;
 }
 
+QStringList FunctionModel::getDatasetDomainNames() const {
+  QStringList domainNames;
+  for (const auto &datasetName : m_datasets.keys()) {
+    if (m_datasets[datasetName].size() == 1)
+      domainNames << datasetName;
+    else {
+      for (const auto &specNum : m_datasets[datasetName])
+        domainNames << datasetName + " (" + QString::number(specNum) + ")";
+    }
+  }
+  return domainNames;
+}
+
 int FunctionModel::getNumberDomains() const {
   return static_cast<int>(m_numberDomains);
 }

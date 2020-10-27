@@ -417,6 +417,10 @@ QStringList IqtFunctionModel::getDatasetNames() const {
   return m_model.getDatasetNames();
 }
 
+QStringList IqtFunctionModel::getDatasetDomainNames() const {
+  return m_model.getDatasetDomainNames();
+}
+
 double IqtFunctionModel::getLocalParameterValue(const QString &parName,
                                                 int i) const {
   return m_model.getLocalParameterValue(parName, i);

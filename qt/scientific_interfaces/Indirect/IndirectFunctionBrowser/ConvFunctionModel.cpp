@@ -498,6 +498,10 @@ QStringList ConvFunctionModel::getDatasetNames() const {
   return m_model.getDatasetNames();
 }
 
+QStringList ConvFunctionModel::getDatasetDomainNames() const {
+  return m_model.getDatasetDomainNames();
+}
+
 double ConvFunctionModel::getLocalParameterValue(const QString &parName,
                                                  int i) const {
   return m_model.getLocalParameterValue(parName, i);

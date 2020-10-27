@@ -74,6 +74,7 @@ private slots:
 
 private:
   QStringList getDatasetNames() const;
+  QStringList getDatasetDomainNames() const;
   double getLocalParameterValue(const QString &parName, int i) const;
   bool isLocalParameterFixed(const QString &parName, int i) const;
   QString getLocalParameterTie(const QString &parName, int i) const;

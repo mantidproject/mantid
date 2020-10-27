@@ -37,17 +37,18 @@ namespace MantidWidgets {
  */
 EditLocalParameterDialog::EditLocalParameterDialog(
     QWidget *parent, const QString &parName, const QStringList &datasetNames,
-    const QList<double> &values, const QList<bool> &fixes,
-    const QStringList &ties, const QStringList &constraints)
+    const QStringList &datasetDomainNames, const QList<double> &values,
+    const QList<bool> &fixes, const QStringList &ties,
+    const QStringList &constraints)
     : MantidDialog(parent), m_parName(parName), m_values(values),
       m_fixes(fixes), m_ties(ties), m_constraints(constraints) {
-  assert(values.size() == datasetNames.size());
-  assert(fixes.size() == datasetNames.size());
-  assert(ties.size() == datasetNames.size());
-  assert(constraints.size() == datasetNames.size());
+  assert(values.size() == datasetDomainNames.size());
+  assert(fixes.size() == datasetDomainNames.size());
+  assert(ties.size() == datasetDomainNames.size());
+  assert(constraints.size() == datasetDomainNames.size());
   m_uiForm.setupUi(this);
   setAttribute(Qt::WA_DeleteOnClose);
-  doSetup(parName, datasetNames);
+  doSetup(parName, datasetNames, datasetDomainNames);
 }
 
 /**
@@ -58,21 +59,8 @@ EditLocalParameterDialog::EditLocalParameterDialog(
  * @param datasetNames :: [input] The domains being fitted across workspaces.
  */
 void EditLocalParameterDialog::doSetup(const QString &parName,
-                                       const QStringList &datasetNames) {
-
-  //QStringList workspaceNames;
-  //std::transform(datasetNames.begin(), datasetNames.end(),
-  //               std::back_inserter(workspaceNames),
-  //               [](const DatasetDomain &datasetDomain) {
-  //                 return datasetDomain.m_workspaceName;
-  //               });
-
-  //QStringList domainNames;
-  //std::transform(datasetNames.begin(), datasetNames.end(),
-  //               std::back_inserter(domainNames),
-  //               [](const DatasetDomain &datasetDomain) {
-  //                 return datasetDomain.domainName();
-  //               });
+                                       const QStringList &datasetNames,
+                                       const QStringList &datasetDomainNames) {
 
   m_logFinder = std::make_unique<LogValueFinder>(datasetNames);
   // Populate list of logs
@@ -94,11 +82,11 @@ void EditLocalParameterDialog::doSetup(const QString &parName,
           SLOT(valueChanged(int, int)));
   m_uiForm.lblParameterName->setText("Parameter: " + parName);
 
-  for (int i = 0; i < datasetNames.size(); i++) {
+  for (int i = 0; i < datasetDomainNames.size(); i++) {
     m_uiForm.tableWidget->insertRow(i);
     auto cell = new QTableWidgetItem(makeNumber(m_values[i]));
     m_uiForm.tableWidget->setItem(i, valueColumn, cell);
-    auto headerItem = new QTableWidgetItem(datasetNames[i]);
+    auto headerItem = new QTableWidgetItem(datasetDomainNames[i]);
     m_uiForm.tableWidget->setVerticalHeaderItem(i, headerItem);
     cell = new QTableWidgetItem("");
     auto flags = cell->flags();

@@ -152,6 +152,11 @@ QStringList FunctionBrowser::getDatasetNames() const {
   return m_presenter->getDatasetNames();
 }
 
+/// Get the names of the dataset domains
+QStringList FunctionBrowser::getDatasetDomainNames() const {
+  return m_presenter->getDatasetDomainNames();
+}
+
 /// Set new number of the datasets
 /// @param n :: New value for the number of datasets.
 void FunctionBrowser::setNumberOfDatasets(int n) {
