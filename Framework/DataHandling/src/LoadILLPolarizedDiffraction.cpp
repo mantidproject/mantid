@@ -328,9 +328,8 @@ LoadILLPolarizedDiffraction::initStaticWorkspace(const NXEntry &entry) {
 void LoadILLPolarizedDiffraction::loadInstrument(
     API::MatrixWorkspace_sptr workspace, std::string startTime) {
 
-  // the instrument and parameter loaders need to know the time the data was
-  // measured to choose the correct version
-  workspace->mutableRun().addProperty("run_start", startTime);
+  // the start time is needed in the workspace when loading the parameter file
+  workspace->mutableRun().addProperty("start_time", startTime);
 
   IAlgorithm_sptr loadInst = createChildAlgorithm("LoadInstrument");
   loadInst->setPropertyValue("Filename", m_instName + "_Definition.xml");

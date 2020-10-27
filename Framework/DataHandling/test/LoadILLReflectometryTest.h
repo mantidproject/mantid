@@ -57,9 +57,9 @@ private:
     // sample log entry must exist
     TS_ASSERT(output->run().hasProperty("reduction.line_position"))
 
-    TS_ASSERT(output->run().hasProperty("run_start"));
+    TS_ASSERT(output->run().hasProperty("start_time"));
     TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
-        output->run().getProperty("run_start")->value()));
+        output->run().getProperty("start_time")->value()));
   }
 
   static double detCounts(const MatrixWorkspace_sptr &output) {

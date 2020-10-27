@@ -283,7 +283,8 @@ void LoadILLDiffraction::initStaticWorkspace(const std::string &start_time) {
   m_outWorkspace = WorkspaceFactory::Instance().create("Workspace2D", nSpectra,
                                                        nBins, nBins);
 
-  m_outWorkspace->mutableRun().addProperty("run_start", start_time);
+  // the start time is needed in the workspace when loading the parameter file
+  m_outWorkspace->mutableRun().addProperty("start_time", start_time);
 }
 
 /**
@@ -808,7 +809,10 @@ LoadILLDiffraction::loadEmptyInstrument(const std::string &start_time) {
   loadInst->setPropertyValue("InstrumentName", m_instName);
   auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   auto &run = ws->mutableRun();
-  run.addProperty("run_start", start_time);
+
+  // the start time is needed in the workspace when loading the parameter file
+  run.addProperty("start_time", start_time);
+
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   loadInst->execute();

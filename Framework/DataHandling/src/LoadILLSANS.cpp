@@ -748,11 +748,10 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
   const double duration = entry.getFloat("duration");
   runDetails.addProperty<double>("timer", duration);
 
-  // Get the starting date of the measure, as it is needed by the instrument and
-  // parameter loaders later
+  // the start time is needed in the workspace when loading the parameter file
   std::string startDate = entry.getString("start_time");
   runDetails.addProperty<std::string>(
-      "run_start", m_loadHelper.dateTimeInIsoFormat(startDate));
+      "start_time", m_loadHelper.dateTimeInIsoFormat(startDate));
 }
 
 /**

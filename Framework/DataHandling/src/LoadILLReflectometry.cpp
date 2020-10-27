@@ -386,7 +386,7 @@ void LoadILLReflectometry::initWorkspace(
 
   // the start time is needed in the workspace when loading the parameter file
   m_localWorkspace->mutableRun().addProperty<std::string>(
-      "run_start", m_startTime.toISO8601String());
+      "start_time", m_startTime.toISO8601String());
 }
 
 /**

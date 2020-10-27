@@ -268,9 +268,9 @@ public:
   }
 
   void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
-    TS_ASSERT(outputWS->run().hasProperty("run_start"));
+    TS_ASSERT(outputWS->run().hasProperty("start_time"));
     TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
-        outputWS->run().getProperty("run_start")->value()));
+        outputWS->run().getProperty("start_time")->value()));
   }
 };
 
