@@ -161,8 +161,8 @@ Output:
 
 .. testcode:: ExD7AbsoluteScaleNormalisation_vanadium_normalisation
 
-   Load('396993_reduced.nxs', OutputWorkspace='vanadium_data')
-   Load('397004_reduced.nxs', OutputWorkspace='sample_data')
+   Load('ILL/D7/396993_reduced.nxs', OutputWorkspace='vanadium_data')
+   Load('ILL/D7/397004_reduced.nxs', OutputWorkspace='sample_data')
    D7AbsoluteScaleNormalisation(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_vanadium',
                                 CrossSectionSeparationMethod='XYZ', NormalisationMethod='Vanadium',
                                 VanadiumInputWorkspace='vanadium_data', AbsoluteUnitsNormalisation=False)
@@ -184,7 +184,7 @@ Output:
 
 .. testcode:: ExD7AbsoluteScaleNormalisation_paramagnetic_normalisation
 
-   Load('397004_reduced.nxs', OutputWorkspace='sample_data')
+   Load('ILL/D7/397004_reduced.nxs', OutputWorkspace='sample_data')
    D7AbsoluteScaleNormalisation(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_magnetic',
                                 CrossSectionSeparationMethod='XYZ', NormalisationMethod='Paramagnetic',
                                 SampleSpin = 0.5, AbsoluteUnitsNormalisation=False)
