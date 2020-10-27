@@ -283,7 +283,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Subtracts empty container and absorber scaled by transmission."""
         absorber_ws = self.getPropertyValue('AbsorberInputWorkspace')
         if absorber_ws == "":
-            raise RuntimeError("Absorber input workspace needs to be provided for monochromatic background subtraction.")
+            return ws
         unit_ws = 'unit_ws'
         CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace=unit_ws)
         background_ws = 'background_ws'
