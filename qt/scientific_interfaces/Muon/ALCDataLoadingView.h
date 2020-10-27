@@ -40,7 +40,6 @@ public:
   void initInstruments() override;
   std::string getInstrument() const override;
   std::string getPath() const override;
-  std::string getRunsExpression() const override;
   std::string log() const override;
   std::string function() const override;
   std::string deadTimeType() const override;
@@ -53,7 +52,6 @@ public:
   bool subtractIsChecked() const override;
   std::string calculationType() const override;
   boost::optional<std::pair<double, double>> timeRange() const override;
-  void setAvailableInfoToEmtpy() override;
   std::string getRunsText() const override;
 
   void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
@@ -67,17 +65,18 @@ public:
   void help() override;
   void disableAll() override;
   void enableAll() override;
+  void setAvailableInfoToEmtpy() override;
   void instrumentChanged(QString instrument) override;
   void enableLoad(bool enable) override;
-  void setPath(std::string &path) override;
+  void setPath(const std::string &path) override;
   void enableRunsAutoAdd(bool enable) override;
-  void setInstrument(std::string &instrument) override;
+  void setInstrument(const std::string &instrument) override;
   std::string getRunsError() override;
   std::vector<std::string> getFiles() override;
   std::string getFirstFile() override;
   void setLoadStatus(const std::string &status) override;
   void runsAutoAddToggled(bool on) override;
-  void setRunsTextWithSearch(const std::string &text) override;
+  void setRunsTextWithoutSearch(const std::string &text) override;
 
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------

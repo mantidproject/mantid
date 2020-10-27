@@ -113,11 +113,6 @@ std::string ALCDataLoadingView::getPath() const {
   return m_ui.path->text().toStdString();
 }
 
-std::string ALCDataLoadingView::getRunsExpression() const {
-  // return m_ui.runs->text().toStdString();
-  return "";
-}
-
 std::string ALCDataLoadingView::log() const {
   return m_ui.logValueSelector->getLog().toStdString();
 }
@@ -334,7 +329,7 @@ void ALCDataLoadingView::enableLoad(bool enable) {
   m_ui.load->setEnabled(enable);
 }
 
-void ALCDataLoadingView::setPath(std::string &path) {
+void ALCDataLoadingView::setPath(const std::string &path) {
   m_ui.path->setText(QString::fromStdString(path));
 }
 
@@ -342,7 +337,7 @@ void ALCDataLoadingView::enableRunsAutoAdd(bool enable) {
   m_ui.runsAutoAdd->setEnabled(enable);
 }
 
-void ALCDataLoadingView::setInstrument(std::string &instrument) {
+void ALCDataLoadingView::setInstrument(const std::string &instrument) {
   m_ui.runs->setInstrumentOverride(QString::fromStdString(instrument));
 }
 
@@ -388,7 +383,7 @@ void ALCDataLoadingView::runsAutoAddToggled(bool on) {
   }
 }
 
-void ALCDataLoadingView::setRunsTextWithSearch(const std::string &text) {
+void ALCDataLoadingView::setRunsTextWithoutSearch(const std::string &text) {
   m_ui.runs->setFileTextWithoutSearch(QString::fromStdString(text));
 }
 

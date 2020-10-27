@@ -88,8 +88,8 @@ void ALCDataLoadingPresenter::handleRunsFound() {
 
 /**
  * Called when the Load button is clicked.
- * Gets last run, passes it to load method if not "auto".
- * If it was "auto", sets up a watcher to automatically reload on new files.
+ * Displays a warning if trying to load over 200 files
+ * Passes files to load
  */
 void ALCDataLoadingPresenter::handleLoadRequested() {
   auto files = m_view->getFiles();
@@ -152,7 +152,7 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
   }
 
   if (files.empty()) {
-    m_view->displayError("The list of files to load is empty. ");
+    m_view->displayError("The list of files to load is empty.");
     m_view->enableAll();
     m_loadingData = false;
     return;
@@ -480,7 +480,7 @@ void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
         m_filesLoaded.push_back(latestFile);
         m_lastRunLoadedAuto = runNumber;
         // Set text without search, call manual load
-        m_view->setRunsTextWithSearch(newText);
+        m_view->setRunsTextWithoutSearch(newText);
         load(m_filesLoaded);
       }
 

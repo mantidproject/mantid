@@ -32,9 +32,6 @@ public:
   /// @return std::string of path
   virtual std::string getPath() const = 0;
 
-  /// @return std::string of expression in runs box
-  virtual std::string getRunsExpression() const = 0;
-
   /// Returns the name of the log to use
   /// @return Log name
   virtual std::string log() const = 0;
@@ -133,10 +130,10 @@ public slots:
   virtual void enableLoad(bool enable) = 0;
 
   /// Sets path from where data loaded from
-  virtual void setPath(std::string &path) = 0;
+  virtual void setPath(const std::string &path) = 0;
 
   /// Sets the instrument in runs box if user changes it from combobox
-  virtual void setInstrument(std::string &instrument) = 0;
+  virtual void setInstrument(const std::string &instrument) = 0;
 
   /// Enables/Disables auto add
   virtual void enableRunsAutoAdd(bool enable) = 0;
@@ -156,8 +153,8 @@ public slots:
   /// Handle check/uncheck of runs auto add
   virtual void runsAutoAddToggled(bool on) = 0;
 
-  /// Sets text and makes file finder search for runs
-  virtual void setRunsTextWithSearch(const std::string &text) = 0;
+  /// Sets text and ensure runs are not searched for
+  virtual void setRunsTextWithoutSearch(const std::string &text) = 0;
 
 signals:
   /// Request to load data
