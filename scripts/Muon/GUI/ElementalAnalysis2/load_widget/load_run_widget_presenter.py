@@ -128,54 +128,57 @@ class LoadRunWidgetPresenterEA(object):
 
     def handle_load_current_run(self):
         return
-    #     try:
-    #         current_run_file = file_utils.get_current_run_filename(self.get_current_instrument())
-    #     except ValueError as error:
-    #         self._view.warning_popup(error.args[0])
-    #         return
-    #
-    #     if current_run_file == "":
-    #         self._view.warning_popup("Cannot find directory for current instrument : " + self._instrument)
-    #         return
-    #
-    #     self.run_list = ['Current']
-    #     self.load_runs([current_run_file])
+        # try:
+        #     current_run_file = file_utils.get_current_run_filename(self.get_current_instrument())
+        # except ValueError as error:
+        #     self._view.warning_popup(error.args[0])
+        #     return
+        #
+        # if current_run_file == "":
+        #     self._view.warning_popup("Cannot find directory for current instrument : " + self._instrument)
+        #     return
+        #
+        # self.run_list = ['Current']
+        # self.load_runs([current_run_file])
 
     # ------------------------------------------------------------------------------------------------------------------
     # Loading from increment/decrement run buttons
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_increment_run(self):
-        return
-    #     incremented_run_list = self.get_incremented_run_list()
-    #     self.run_list = [max(incremented_run_list)] if incremented_run_list else []
-    #     if not self.run_list:
-    #         return
-    #     new_run = max(self.run_list)
-    #
-    #     try:
+        incremented_run_list = self.get_incremented_run_list()
+        print("created incremented_run_list")
+        self.run_list = [max(incremented_run_list)] if incremented_run_list else []
+        if not self.run_list:
+            return
+        new_run = max(self.run_list)
+        print("Have found new_run")
+
+        try:
     #         file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
-    #         self.load_runs([file_name])
-    #     except Exception:
-    #         # nothing is actually being caught here as it gets handled by thread_model.run
-    #         return
+            self.load_runs([new_run])
+            print("tried to load runs for new run")
+        except Exception:
+            # nothing is actually being caught here as it gets handled by thread_model.run
+            print("failed to load runs for new run")
+            return
 
     def handle_decrement_run(self):
-        return
-    #     decremented_run_list = self.get_decremented_run_list()
-    #     self.run_list = [min(decremented_run_list)] if decremented_run_list else []
-    #     if not self.run_list:
-    #         return
-    #     new_run = min(self.run_list)
-    #
-    #     file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
-    #     self.load_runs([file_name])
+        decremented_run_list = self.get_decremented_run_list()
+        self.run_list = [min(decremented_run_list)] if decremented_run_list else []
+        if not self.run_list:
+            return
+        new_run = min(self.run_list)
+
+        #file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
+        self.load_runs([new_run])
 
     def get_incremented_run_list(self):
         """
         Updates list of runs by adding a run equal to 1 after to the highest run.
         """
         run_list = load_utils.flatten_run_list(copy.copy(self._model.current_runs))
+        print("Have acquired the run_list for get_incremented_run_list")
         if run_list is None or len(run_list) == 0:
             return []
         if len(run_list) == 1:
@@ -246,7 +249,8 @@ class LoadRunWidgetPresenterEA(object):
 
     def on_loading_finished(self):
         try:
-            if self.run_list and self.run_list[0] == 'Current':
+            #if self.run_list and self.run_list[0] == 'Current':
+            if self.run_list:
                 latest_loaded_run = self._model.get_latest_loaded_run()
                 if isinstance(latest_loaded_run, list):
                     self.run_list = latest_loaded_run
@@ -254,6 +258,7 @@ class LoadRunWidgetPresenterEA(object):
                     self.run_list[0] = latest_loaded_run
                 self._model.current_run = self.run_list
             run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
+
             self._model.current_runs = run_list
 
             if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":

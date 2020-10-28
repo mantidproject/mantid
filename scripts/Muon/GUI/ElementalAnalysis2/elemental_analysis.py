@@ -7,6 +7,7 @@
 from qtpy import QtWidgets, QtCore
 
 import Muon.GUI.Common.message_box as message_box
+from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
@@ -29,6 +30,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setObjectName("ElementalAnalysis2")
         self.loaded_data = MuonLoadData()
+        self.data_context = MuonDataContext('Muon Data', self.loaded_data)
         self.context = ElementalAnalysisContext()
         self.current_tab = ''
 

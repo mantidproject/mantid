@@ -17,7 +17,8 @@ from Muon.GUI.ElementalAnalysis2.load_widget.load_widget_presenter import LoadWi
 
 
 class LoadWidgetModel(object):
-    def __init__(self, context=None):
+    def __init__(self, loaded_data_store=MuonLoadData(), context=None):
+        self._loaded_data_store = loaded_data_store
         self._data_context = context.data_context
         self._context = context
         return
@@ -39,10 +40,27 @@ class LoadWidgetModel(object):
         return
         # return self._data_context.current_filenames
 
+    def clear_data(self):
+        self._loaded_data_store.clear()
+        self._data_context.current_runs = []
+
 
 class BrowseFileWidgetModel(object):
-    def __init__(self):
-        return
+    def __init__(self, loaded_data_store=MuonLoadData(), context=None):
+        self._loaded_data_store = loaded_data_store
+        self._data_context = context.data_context
+
+    @property
+    def loaded_runs(self):
+        return self._loaded_data_store.get_parameter("run")
+
+    @property
+    def current_runs(self):
+        return self._data_context.current_runs
+
+    @current_runs.setter
+    def current_runs(self, value):
+        self._data_context.current_runs = value
 
 
 class LoadRunWidgetModel(object):
@@ -65,9 +83,8 @@ class LoadRunWidgetModel(object):
             except ValueError as error:
                 failed_files += [(run, error)]
                 continue
-                # self._loaded_data_store.remove_data(run=[run])
-                # self._loaded_data_store.add_data(run=[run], workspace=ws, filename=filename,
-                #                                  instrument=self._data_context.instrument)
+                #self._loaded_data_store.remove_data(run=[run])
+            self._loaded_data_store.add_data(run=[run])
         if failed_files:
             message = "The requested run could not be found. This could be due to: \n - The run does not yet exist." \
                       "\n - The file was not found locally (please check the user directories)."
@@ -95,8 +112,13 @@ class LoadRunWidgetModel(object):
 
     @property
     def loaded_runs(self):
-        return
-        #return self._loaded_data_store.get_parameter("run")
+        return self._loaded_data_store.get_parameter("run")
+
+    def get_latest_loaded_run(self):
+        return self._loaded_data_store.get_latest_data()['run']
+
+    def get_data(self, run):
+        return self._loaded_data_store.get_data(run=run, instrument=self._data_context.instrument)
 
 
 class LoadWidget(object):
@@ -109,9 +131,9 @@ class LoadWidget(object):
                                                load_file_view=self.load_file_view,
                                                load_run_view=self.load_run_view)
         self.load_widget = LoadWidgetPresenterEA(self.load_widget_view,
-                                               LoadWidgetModel(context))
+                                                 LoadWidgetModel(loaded_data, context))
 
-        self.file_widget = BrowseFileWidgetPresenter(self.load_file_view, BrowseFileWidgetModel())
+        self.file_widget = BrowseFileWidgetPresenter(self.load_file_view, BrowseFileWidgetModel(loaded_data, context))
         self.run_widget = LoadRunWidgetPresenterEA(self.load_run_view, LoadRunWidgetModel(loaded_data, context))
 
         self.load_widget.set_load_file_widget(self.file_widget)
