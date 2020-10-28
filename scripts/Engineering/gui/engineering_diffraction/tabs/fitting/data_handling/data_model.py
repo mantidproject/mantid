@@ -182,6 +182,9 @@ class FittingDataModel(object):
                     self._fit_results[wsname]['results'][key].append([
                         params_dict['Value'][irow], params_dict['Error'][irow]])
                 istart += nparams[ifunc]
+            # append the cost function value (in this case always chisq/DOF) as don't let user change cost func
+            # always last row in parameters table
+            self._fit_results[wsname]['costFunction'] = params_dict['Value'][-1]
         self.create_fit_tables()
 
     def create_fit_tables(self):
@@ -214,13 +217,14 @@ class FittingDataModel(object):
         # table for model summary/info
         model = CreateEmptyTableWorkspace(OutputWorkspace='model')
         model.addColumn(type="str", name="Workspace")
+        model.addColumn(type="float", name="chisq/DOF")  # always is for LM minimiser (users can't change)
         model.addColumn(type="str", name="Model")
         for iws, wsname in enumerate(self._loaded_workspaces.keys()):
             if wsname in self._fit_results:
-                row = [wsname, self._fit_results[wsname]['model']]
+                row = [wsname, self._fit_results[wsname]['costFunction'], self._fit_results[wsname]['model']]
                 self.write_table_row(model, row, iws)
             else:
-                self.write_table_row(model, ['', ''], iws)
+                self.write_table_row(model, ['', nan, ''], iws)
         wslist += [model]
         group_name = self._log_workspaces.name().split('_log')[0] + '_fits'
         self._fit_workspaces = GroupWorkspaces(wslist, OutputWorkspace=group_name)
