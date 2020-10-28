@@ -61,6 +61,7 @@ class AdvancedSetupScript(BaseScriptElement):
     vanadiumfwhm = ""
     vanadiumpeaktol = ""
     vanadiumsmoothparams = ""
+    vanadiumradius = 0.3175
     preserveevents = True
     extension = "_event.nxs"
     outputfileprefix = ""
@@ -98,6 +99,7 @@ class AdvancedSetupScript(BaseScriptElement):
         self.parnamelist.append("VanadiumFWHM")
         self.parnamelist.append("VanadiumPeakTol")
         self.parnamelist.append("VanadiumSmoothParams")
+        self.parnamelist.append("VanadiumRadius")
         self.parnamelist.append("FilterBadPulses")
         self.parnamelist.append("BackgroundSmoothParams")
         self.parnamelist.append("PushDataPositive")
@@ -152,6 +154,7 @@ class AdvancedSetupScript(BaseScriptElement):
         pardict["VanadiumFWHM"] = self.vanadiumfwhm
         pardict["VanadiumPeakTol"] = self.vanadiumpeaktol
         pardict["VanadiumSmoothParams"] = self.vanadiumsmoothparams
+        pardict["VanadiumRadius"] = self.vanadiumradius
         pardict["PreserveEvents"] = str(int(self.preserveevents))
         pardict["OutputFilePrefix"] = self.outputfileprefix
         pardict["ScaleData"] = self.scaledata
@@ -234,6 +237,9 @@ class AdvancedSetupScript(BaseScriptElement):
             self.vanadiumsmoothparams = BaseScriptElement.getStringElement(instrument_dom,
                                                                            "vanadiumsmoothparams",
                                                                            default=AdvancedSetupScript.vanadiumsmoothparams)
+
+            self.vanadiumradius = getFloatElement(instrument_dom, "vanadiumradius",
+                                                  AdvancedSetupScript.vanadiumradius)
 
             self.extension = BaseScriptElement.getStringElement(instrument_dom,
                                                                 "extension", default=AdvancedSetupScript.extension)

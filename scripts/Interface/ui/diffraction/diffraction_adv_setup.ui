@@ -79,7 +79,7 @@
         <x>0</x>
         <y>0</y>
         <width>1050</width>
-        <height>659</height>
+        <height>672</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
@@ -247,6 +247,20 @@
                </size>
               </property>
              </spacer>
+            </item>
+            <item row="4" column="5">
+             <widget class="QLabel" name="label_17">
+              <property name="text">
+               <string>Vanadium Rod Radius</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="6">
+             <widget class="QLineEdit" name="vanadiumradius_edit">
+              <property name="toolTip">
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Radius for CarpenterSampleCorrection&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>

@@ -107,6 +107,10 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.sampleformula_edit.textEdited.connect(self._validate_formula)
         self._content.sampleformula_edit.editingFinished.connect(self._calculate_packing_fraction)
 
+        dv10 = QDoubleValidator(self._content.vanadiumradius_edit)
+        dv10.setBottom(0.0)
+        self._content.vanadiumradius_edit.setValidator(dv10)
+
         # Default states
         self._content.stripvanpeaks_chkbox.setChecked(True)
         self._syncStripVanPeakWidgets(True)
@@ -151,6 +155,7 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.vanpeakfwhm_edit.setText(str(state.vanadiumfwhm))
         self._content.vanpeaktol_edit.setText(str(state.vanadiumpeaktol))
         self._content.vansmoothpar_edit.setText(str(state.vanadiumsmoothparams))
+        self._content.vanadiumradius_edit.setText(str(state.vanadiumradius))
 
         self._content.sampleformula_edit.setText(str(state.sampleformula))
         self._content.numberdensity_edit.setText(str(state.samplenumberdensity))
@@ -188,6 +193,7 @@ class AdvancedSetupWidget(BaseWidget):
         s.vanadiumfwhm = self._content.vanpeakfwhm_edit.text()
         s.vanadiumpeaktol = self._content.vanpeaktol_edit.text()
         s.vanadiumsmoothparams = self._content.vansmoothpar_edit.text()
+        s.vanadiumradius = self._content.vanadiumradius_edit.text()
 
         s.sampleformula = self._content.sampleformula_edit.text()
         s.samplenumberdensity = self._content.numberdensity_edit.text()
