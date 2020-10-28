@@ -36,11 +36,11 @@ class FittingDataPresenter(object):
         self.plot_added_notifier = GenericObservable()
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
-        self.seq_fit_notifier = GenericObservable()
+        self.seq_fit_started_notifier = GenericObservable()
         # Obeservers
         self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
         self.fit_enabled_observer = GenericObserverWithArgPassing(self.set_fit_enabled)
-        self.seq_fit_observer = GenericObserverWithArgPassing(self.fit_completed)
+        self.seq_fit_done_observer = GenericObserverWithArgPassing(self.fit_completed)
 
     def set_fit_enabled(self, fit_enabled):
         self.view.set_seq_fit_button_enabled(fit_enabled)
@@ -51,7 +51,7 @@ class FittingDataPresenter(object):
     def _start_seq_fit(self):
         ws_list = self.model.get_ws_sorted_by_primary_log()
         # set off sequential fit
-        self.seq_fit_notifier.notify_subscribers(ws_list)
+        self.seq_fit_started_notifier.notify_subscribers(ws_list)
 
     def _log_xunit_change(self, xunit):
         logger.notice("Subsequent files will be loaded with the x-axis unit:\t{}".format(xunit))
