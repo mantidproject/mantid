@@ -318,7 +318,6 @@ void ALCDataLoadingView::enableAll() {
 }
 
 void ALCDataLoadingView::instrumentChanged(QString instrument) {
-  m_ui.runs->setInstrumentOverride(instrument);
   emit instrumentChangedSignal(instrument.toStdString());
   if (!m_ui.runs->getText().isEmpty()) {
     m_ui.runs->findFiles(); // Re-search for files with new instrument
@@ -357,7 +356,7 @@ std::string ALCDataLoadingView::getFirstFile() {
   return m_ui.runs->getFirstFilename().toStdString();
 }
 
-void ALCDataLoadingView::setAvailableInfoToEmtpy() {
+void ALCDataLoadingView::setAvailableInfoToEmpty() {
   setAvailableLogs(std::vector<std::string>());    // Empty logs list
   setAvailablePeriods(std::vector<std::string>()); // Empty period list
   setTimeLimits(0, 0);                             // "Empty" time limits
@@ -385,6 +384,10 @@ void ALCDataLoadingView::runsAutoAddToggled(bool on) {
 
 void ALCDataLoadingView::setRunsTextWithoutSearch(const std::string &text) {
   m_ui.runs->setFileTextWithoutSearch(QString::fromStdString(text));
+}
+
+void ALCDataLoadingView::toggleRunsAutoAdd(const bool on) {
+  m_ui.runsAutoAdd->setChecked(on);
 }
 
 } // namespace CustomInterfaces

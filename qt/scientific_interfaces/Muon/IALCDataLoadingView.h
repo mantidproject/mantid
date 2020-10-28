@@ -72,10 +72,13 @@ public:
   virtual boost::optional<std::pair<double, double>> timeRange() const = 0;
 
   /// Sets all available info to empty
-  virtual void setAvailableInfoToEmtpy() = 0;
+  virtual void setAvailableInfoToEmpty() = 0;
 
   /// Get text input for runs
   virtual std::string getRunsText() const = 0;
+
+  /// Manual override of Auto add runs
+  virtual void toggleRunsAutoAdd(const bool on) = 0;
 
 public slots:
   /// Performs any necessary initialization

@@ -54,11 +54,11 @@ void ALCDataLoadingPresenter::initialize() {
 }
 
 void ALCDataLoadingPresenter::handleRunsChanged() {
-  // If runs empty, make sure everything is reset but no error
+  // Make sure everything is reset
   m_view->enableLoad(false);
   m_view->setPath(std::string{});
   m_view->enableRunsAutoAdd(false);
-  m_view->setAvailableInfoToEmtpy();
+  m_view->setAvailableInfoToEmpty();
   m_view->setLoadStatus("Attempting to find files");
 }
 
@@ -72,6 +72,7 @@ void ALCDataLoadingPresenter::handleRunsFound() {
   // Check for errors as files might not have been found
   if (!m_view->getRunsError().empty()) {
     m_view->displayError(m_view->getRunsError());
+    m_view->setLoadStatus("");
     return;
   }
 
@@ -94,6 +95,12 @@ void ALCDataLoadingPresenter::handleRunsFound() {
 void ALCDataLoadingPresenter::handleLoadRequested() {
   auto files = m_view->getFiles();
 
+  // Check there are files
+  if (files.empty()) {
+    m_view->displayError("The list of files to load is empty");
+    return;
+  }
+
   // Warning message if trying to load excessive number of files
   if (files.size() > 200) {
     auto continueLoad = m_view->displayWarning(
@@ -104,10 +111,18 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
   }
 
   m_view->setLoadStatus("Loading files");
-  load(files);
-  m_filesLoaded = files;
-  m_view->setLoadStatus("Loaded files");
-  m_view->enableRunsAutoAdd(true);
+  try {
+    load(files);
+    m_filesLoaded = files;
+    m_view->setLoadStatus("Loaded files");
+    m_view->enableRunsAutoAdd(true);
+  } catch (const std::runtime_error &e) {
+    m_view->displayError(e.what());
+    m_view->setLoadStatus("");
+    m_view->enableRunsAutoAdd(false);
+    m_view->enableAll();
+    m_loadingData = false;
+  }
 }
 
 /**
@@ -138,28 +153,17 @@ int ALCDataLoadingPresenter::extractRunNumber(const std::string &file) {
  * @param files :: [input] range of files (user-specified or auto generated)
  */
 void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
-
   m_loadingData = true;
   m_view->disableAll();
 
   // Before loading, check custom grouping (if used) is sensible
   const bool groupingOK = checkCustomGrouping();
   if (!groupingOK) {
-    m_view->displayError(
+    throw std::runtime_error(
         "Custom grouping not valid (bad format or detector numbers)");
-    m_view->enableAll();
-    return;
-  }
-
-  if (files.empty()) {
-    m_view->displayError("The list of files to load is empty.");
-    m_view->enableAll();
-    m_loadingData = false;
-    return;
   }
 
   try {
-
     IAlgorithm_sptr alg =
         AlgorithmManager::Instance().create("PlotAsymmetryByLogValue");
     alg->setChild(true); // Don't want workspaces in the ADS
@@ -239,9 +243,9 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
     emit dataChanged();
 
   } catch (const std::invalid_argument &e) {
-    m_view->displayError(e.what());
+    throw std::runtime_error(e.what());
   } catch (std::exception &e) {
-    m_view->displayError(e.what());
+    throw std::runtime_error(e.what());
   }
   m_view->enableAll();
   m_loadingData = false;
@@ -274,10 +278,9 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     auto path = loadAlg->getPropertyValue("Filename");
     path = path.substr(0, path.find_last_of("/\\"));
     m_view->setPath(path);
-  } catch (...) {
-    m_view->setAvailableInfoToEmtpy();
-    throw std::runtime_error(
-        "Error updating user interface. The runs numbers may be wrong.");
+  } catch (const std::exception &e) {
+    m_view->setAvailableInfoToEmpty();
+    throw std::runtime_error(e.what());
     return;
   }
 
@@ -387,8 +390,15 @@ void ALCDataLoadingPresenter::handleInstrumentChanged(std::string instrument) {
   // Clear path as instrument has changed
   m_view->setPath(std::string{});
 
+  // Update instrument
+  m_view->setInstrument(instrument);
+
   // User cannot load yet as path not set
   m_view->enableLoad(false);
+
+  // Turn off auto add
+  m_view->enableRunsAutoAdd(false);
+  m_view->toggleRunsAutoAdd(false);
 }
 
 void ALCDataLoadingPresenter::handleManageDirectories() {

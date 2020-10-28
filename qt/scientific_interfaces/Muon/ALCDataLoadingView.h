@@ -65,7 +65,7 @@ public:
   void help() override;
   void disableAll() override;
   void enableAll() override;
-  void setAvailableInfoToEmtpy() override;
+  void setAvailableInfoToEmpty() override;
   void instrumentChanged(QString instrument) override;
   void enableLoad(bool enable) override;
   void setPath(const std::string &path) override;
@@ -77,6 +77,7 @@ public:
   void setLoadStatus(const std::string &status) override;
   void runsAutoAddToggled(bool on) override;
   void setRunsTextWithoutSearch(const std::string &text) override;
+  void toggleRunsAutoAdd(const bool on) override;
 
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------
