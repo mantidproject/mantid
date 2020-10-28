@@ -35,11 +35,6 @@ class LoadWidgetModel(object):
     def current_runs(self, value):
         self._data_context.current_runs = value
 
-    @property
-    def filenames(self):
-        return
-        # return self._data_context.current_filenames
-
     def clear_data(self):
         self._loaded_data_store.clear()
         self._data_context.current_runs = []
@@ -83,15 +78,13 @@ class LoadRunWidgetModel(object):
             except ValueError as error:
                 failed_files += [(run, error)]
                 continue
-                #self._loaded_data_store.remove_data(run=[run])
             self._loaded_data_store.add_data(run=[run])
         if failed_files:
             message = "The requested run could not be found. This could be due to: \n - The run does not yet exist." \
                       "\n - The file was not found locally (please check the user directories)."
             raise ValueError(message)
 
-        # This is needed to work with thread model
-
+    # This is needed to work with thread model
     def output(self):
         pass
 

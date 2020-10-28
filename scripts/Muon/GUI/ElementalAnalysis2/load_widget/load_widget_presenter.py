@@ -78,14 +78,10 @@ class LoadWidgetPresenterEA(object):
 
     def handle_file_widget_data_changed(self):
         self.load_run_widget.update_view_from_model(self._model.runs)
-        #self.load_file_widget.update_view_from_model(self._model.filenames)
-        #self._model.update_current_data()
         self.loadNotifier.notify_subscribers()
 
     def handle_run_widget_data_changed(self):
         self.load_run_widget.update_view_from_model(self._model.runs)
-        #self.load_file_widget.update_view_from_model(self._model.filenames)
-        #self._model.update_current_data()
         self.loadNotifier.notify_subscribers()
 
     def disable_loading(self):
@@ -114,7 +110,6 @@ class LoadWidgetPresenterEA(object):
 
     def update_view_from_model(self):
         self.load_run_widget.update_view_from_model(self._model.runs)
-        #self.load_file_widget.update_view_from_model(self._model.filenames)
 
     @property
     def view(self):

@@ -6,10 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import copy
-from mantid.simpleapi import LoadElementalAnalysisData
 from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.run_string_utils as run_utils
-import Muon.GUI.Common.utilities.muon_file_utils as file_utils
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.utilities.run_string_utils import flatten_run_list
 from mantidqt.utils.observer_pattern import Observable
@@ -53,9 +51,6 @@ class LoadRunWidgetPresenterEA(object):
         if self._load_thread is not None:
             self._load_thread.cancel()
 
-    # def get_current_instrument(self):
-    #     return str(self._instrument)
-    #
     def set_current_instrument(self, instrument):
         self._instrument = instrument
         self._view.set_current_instrument(instrument)
@@ -65,7 +60,6 @@ class LoadRunWidgetPresenterEA(object):
         self.thread_success = True
 
     def enable_loading(self):
-        #if not self._instrument == "PSI":
         self._view.enable_load_buttons()
 
     def clear_loaded_data(self):
@@ -75,10 +69,6 @@ class LoadRunWidgetPresenterEA(object):
     @property
     def workspaces(self):
         return self._model.loaded_workspaces
-
-    @property
-    def filenames(self):
-        return self._model.loaded_filenames
 
     @property
     def runs(self):
@@ -116,8 +106,7 @@ class LoadRunWidgetPresenterEA(object):
         except IndexError as err:
             self._view.warning_popup(err.args[0])
             return
-        # file_names = [file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
-        #               for new_run in self.run_list if not self._model.get_data(run=[new_run])]
+
         if run_string:
             self.load_runs(self.run_list)
         else:
@@ -147,20 +136,15 @@ class LoadRunWidgetPresenterEA(object):
 
     def handle_increment_run(self):
         incremented_run_list = self.get_incremented_run_list()
-        print("created incremented_run_list")
         self.run_list = [max(incremented_run_list)] if incremented_run_list else []
         if not self.run_list:
             return
         new_run = max(self.run_list)
-        print("Have found new_run")
 
         try:
-    #         file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
             self.load_runs([new_run])
-            print("tried to load runs for new run")
         except Exception:
             # nothing is actually being caught here as it gets handled by thread_model.run
-            print("failed to load runs for new run")
             return
 
     def handle_decrement_run(self):
@@ -170,7 +154,6 @@ class LoadRunWidgetPresenterEA(object):
             return
         new_run = min(self.run_list)
 
-        #file_name = file_utils.file_path_for_instrument_and_run(self.get_current_instrument(), new_run)
         self.load_runs([new_run])
 
     def get_incremented_run_list(self):
@@ -210,9 +193,9 @@ class LoadRunWidgetPresenterEA(object):
         else:
             self.handle_load_no_threading(runs, self.on_loading_finished)
 
-    def handle_load_no_threading(self, filenames, finished_callback):
+    def handle_load_no_threading(self, runs, finished_callback):
         self.on_loading_start()
-        self._model.loadData(filenames)
+        self._model.loadData(runs)
         try:
             self._model.execute()
         except ValueError as error:
