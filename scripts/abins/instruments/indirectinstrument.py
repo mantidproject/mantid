@@ -7,6 +7,7 @@
 import numpy as np
 
 import abins
+from abins.constants import WAVENUMBER_TO_INVERSE_A
 from .instrument import Instrument
 from .broadening import broaden_spectrum, prebin_required_schemes
 
@@ -23,18 +24,33 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
         parameters = abins.parameters.instruments[self._name]
         return parameters['angles']
 
-    @classmethod
-    def calculate_q_powder(cls, input_data=None):
-        """Calculate squared Q vectors corresponding to frequencies
+    def calculate_q_powder(self, input_data=None):
+        """Calculates squared Q vectors.
+
+        By the cosine law Q^2 = k_f^2 + k_i^2 - 2 k_f k_i cos(theta)
+
+        where k are determined from
+        abins.parameters.instruments['TOSCA']['final_neutron_energy']
+        and the input series of vibrational frequencies and cos(theta) is
+        precomputed as abins.parameters.instruments['TOSCA']['cos_scattering_angle']
 
         :param input_data:
             frequencies (in cm-1) which should be used to construct Q2
 
         :returns:
             Q^2 array (in cm-1) corresponding to input frequencies,
-            constrained by conservation of mass/momentum and geometry
+            constrained by conservation of mass/momentum and TOSCA geometry
         """
-        raise NotImplementedError()
+        parameters = abins.parameters.instruments[self._name]
+        if self._angle is None:
+            self._angle = parameters['angles'][0]
+
+        cos_scattering_angle = np.cos(self._angle * np.pi / 180)
+
+        k2_i = (input_data + parameters['final_neutron_energy']) * WAVENUMBER_TO_INVERSE_A
+        k2_f = parameters['final_neutron_energy'] * WAVENUMBER_TO_INVERSE_A
+        result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * cos_scattering_angle
+        return result
 
     @classmethod
     def get_sigma(cls, frequencies):

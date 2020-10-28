@@ -19,6 +19,7 @@ class Instrument:
     def __init__(self, setting: str = ''):
         setting = self._check_setting(setting)
         self._setting = setting
+        self._angle = None
 
     def get_angles(self):
         """Get a list of detector angles to sample"""
@@ -50,6 +51,17 @@ class Instrument:
         :type scheme: str
         """
         raise NotImplementedError()
+
+    def set_detector_angle(self, angle=None):
+        """
+        Setter for detector angle.
+        :param angle: new angle of detector
+        """
+        if isinstance(angle, float):
+            self._angle = angle
+        else:
+            raise ValueError("Invalid value of a detector angle (%s, type(%s) = %s; should be float)."
+                             % (angle, angle, type(angle)))
 
     def __str__(self):
         return self._name

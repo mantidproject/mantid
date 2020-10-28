@@ -395,36 +395,28 @@ class SPowderSemiEmpiricalCalculator:
 
         if local_freq.any():  # check if local_freq has non-zero values
 
-            if self._instrument.get_name() in ONE_DIMENSIONAL_INSTRUMENTS:
+            first_angle = self._instrument.get_angles()[0]
+            self._instrument.set_detector_angle(angle=first_angle)
+            indent = ANGLE_MESSAGE_INDENTATION
 
-                q2 = self._instrument.calculate_q_powder(input_data=local_freq)
-                local_freq, local_coeff, rebinned_broad_spectrum = self._helper_atom_angle(
-                    atom=atom, local_freq=local_freq, local_coeff=local_coeff, order=order, q2=q2)
+            q2 = self._instrument.calculate_q_powder(input_data=local_freq)
+            self._report_progress(msg=indent + "Calculation for the detector at angle %s (atom=%s)" %
+                                               (first_angle, atom))
+            opt_local_freq, opt_local_coeff, rebinned_broad_spectrum = self._helper_atom_angle(
+                atom=atom, local_freq=local_freq, local_coeff=local_coeff, order=order, q2=q2)
 
-            elif self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
-
-                first_angle = self._instrument.get_angles()[0]
-                self._instrument.set_detector_angle(angle=first_angle)
-                indent = ANGLE_MESSAGE_INDENTATION
-
-                q2 = self._instrument.calculate_q_powder(input_data=local_freq)
+            for angle in self._instrument.get_angles()[1:]:
                 self._report_progress(msg=indent + "Calculation for the detector at angle %s (atom=%s)" %
-                                                   (first_angle, atom))
-                opt_local_freq, opt_local_coeff, rebinned_broad_spectrum = self._helper_atom_angle(
-                    atom=atom, local_freq=local_freq, local_coeff=local_coeff, order=order, q2=q2)
+                                                   (angle, atom))
+                self._instrument.set_detector_angle(angle=angle)
+                q2 = self._instrument.calculate_q_powder(input_data=local_freq)
+                temp = self._helper_atom_angle(atom=atom, local_freq=local_freq, local_coeff=local_coeff,
+                                               order=order, return_freq=False, q2=q2)
 
-                for angle in self._instrument.get_angles()[1:]:
-                    self._report_progress(msg=indent + "Calculation for the detector at angle %s (atom=%s)" %
-                                                       (angle, atom))
-                    self._instrument.set_detector_angle(angle=angle)
-                    q2 = self._instrument.calculate_q_powder(input_data=local_freq)
-                    temp = self._helper_atom_angle(atom=atom, local_freq=local_freq, local_coeff=local_coeff,
-                                                   order=order, return_freq=False, q2=q2)
+                rebinned_broad_spectrum += temp
 
-                    rebinned_broad_spectrum += temp
-
-                local_coeff = opt_local_coeff
-                local_freq = opt_local_freq
+            local_coeff = opt_local_coeff
+            local_freq = opt_local_freq
 
         else:
             rebinned_broad_spectrum = np.zeros_like(self._frequencies)

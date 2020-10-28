@@ -8,7 +8,7 @@
 import numpy as np
 
 import abins
-from abins.constants import MILLI_EV_TO_WAVENUMBER, WAVENUMBER_TO_INVERSE_A
+from abins.constants import MILLI_EV_TO_WAVENUMBER
 from .indirectinstrument import IndirectInstrument
 
 
@@ -63,7 +63,5 @@ class LagrangeInstrument(IndirectInstrument):
         if not self._q_model_warning_given:
             print("WARNING: WORK IN PROGRESS. THIS Q POWDER MODEL IS FOR TOSCA NOT LAGRANGE")
             self._q_model_warning_given = True
-        k2_i = (input_data + self.parameters['final_neutron_energy']) * WAVENUMBER_TO_INVERSE_A
-        k2_f = self.parameters['final_neutron_energy'] * WAVENUMBER_TO_INVERSE_A
-        result = k2_i + k2_f - 2 * (k2_i * k2_f) ** 0.5 * self.parameters['cos_scattering_angle']
-        return result
+
+        return super().calculate_q_powder(input_data=input_data)

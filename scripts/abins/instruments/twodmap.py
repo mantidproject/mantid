@@ -87,17 +87,6 @@ class TwoDMap(Instrument):
             raise ValueError("Invalid value of incident energy (%s, type(%s) = %s; should be float)."
                              % (e_init, e_init, type(e_init)))
 
-    def set_detector_angle(self, angle=None):
-        """
-        Setter for detector angle.
-        :param angle: new angle of detector
-        """
-        if isinstance(angle, float):
-            self._angle = angle
-        else:
-            raise ValueError("Invalid value of a detector angle (%s, type(%s) = %s; should be float)."
-                             % (angle, angle, type(angle)))
-
     def _calculate_sigma(self):
         """
         Calculates width of Gaussian resolution function.
