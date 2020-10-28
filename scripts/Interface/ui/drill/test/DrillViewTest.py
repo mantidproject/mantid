@@ -23,10 +23,6 @@ app = QApplication(sys.argv)
 class DrillViewTest(unittest.TestCase):
 
     def setUp(self):
-        patch = mock.patch('Interface.ui.drill.view.DrillView.QFileDialog')
-        self.mFileDialog = patch.start()
-        self.addCleanup(patch.stop)
-
         patch = mock.patch('Interface.ui.drill.view.DrillView.QMessageBox')
         self.mMsgBox = patch.start()
         self.addCleanup(patch.stop)
@@ -256,19 +252,19 @@ class DrillViewTest(unittest.TestCase):
         self.view.groupRows([])
         self.view.groupRequested.emit.assert_not_called()
         self.view.groupRows([1, 2, 3])
-        self.view.groupRequested.emit.assert_called_once_with({1, 2, 3})
+        self.view.groupRequested.emit.assert_called_once_with([1, 2, 3])
 
     def test_ungroupRows(self):
         self.view.ungroupRequested = mock.Mock()
         self.view.ungroupRows([])
         self.view.ungroupRequested.emit.assert_not_called()
         self.view.ungroupRows([1, 2, 3])
-        self.view.ungroupRequested.emit.assert_called_once_with({1, 2, 3})
+        self.view.ungroupRequested.emit.assert_called_once_with([1, 2, 3])
 
     def test_addRowsToGroup(self):
         self.view.addToGroup = mock.Mock()
         self.view.addRowsToGroup([4], "B")
-        self.view.addToGroup.emit.assert_called_once_with({4}, "B")
+        self.view.addToGroup.emit.assert_called_once_with([4], "B")
 
     def test_setMasterRow(self):
         self.view.setMaster = mock.Mock()
@@ -306,25 +302,6 @@ class DrillViewTest(unittest.TestCase):
         self.view.process_all_rows()
         calls = [mock.call([0, 1, 2])]
         self.view.process.emit.assert_has_calls(calls)
-
-    def test_loadRundex(self):
-        self.view.rundexLoaded = mock.Mock()
-        self.mFileDialog.getOpenFileName.return_value = ("test", "test")
-        self.view.load_rundex()
-        self.view.rundexLoaded.emit.assert_called_once_with("test")
-
-    def test_saveRundexAs(self):
-        self.view.rundexSaved = mock.Mock()
-        self.mFileDialog.getSaveFileName.return_value = ("test", "test")
-        self.view.saveRundexAs()
-        self.view.rundexSaved.emit.assert_called_once_with("test")
-
-    def test_saveRundex(self):
-        self.view.rundexSaved = mock.Mock()
-        self.view.rundexFile = "test"
-        self.view.saveRundex()
-        self.view.rundexSaved.emit.assert_called_once_with("test")
-        self.mFileDialog.getSaveFileName.assert_not_called()
 
     def test_automaticFilling(self):
         self.view.increment = mock.Mock()

@@ -56,16 +56,6 @@ class DrillModelTest(unittest.TestCase):
         self.mSapi.AlgorithmManager.createUnmanaged.return_value.getProperty \
             .return_value.value = "test"
 
-        # mock open
-        patch = mock.patch('Interface.ui.drill.model.DrillModel.open')
-        self.mOpen = patch.start()
-        self.addCleanup(patch.stop)
-
-        # mock json
-        patch = mock.patch('Interface.ui.drill.model.DrillModel.json')
-        self.mJson = patch.start()
-        self.addCleanup(patch.stop)
-
         # mock parameter controller
         patch = mock.patch(
                 'Interface.ui.drill.model.DrillModel.DrillParameterController'
@@ -540,43 +530,24 @@ class DrillModelTest(unittest.TestCase):
         self.model.stopProcess()
         self.model.tasksPool.abortProcessing.assert_called_once()
 
-    def test_importRundexData(self):
-        self.mJson.load.return_value = {
-                "Instrument": "i1",
-                "AcquisitionMode": "a1",
-                "GlobalSettings": {},
-                "Samples": []
-                }
-        self.model.importRundexData("test")
-        self.mOpen.assert_called_once_with("test")
-        self.mJson.load.assert_called_once()
-        self.assertDictEqual(self.model.settings,
-                             dict.fromkeys(self.SETTINGS["a1"], "test"))
-        self.assertEqual(self.model.samples, list())
-        self.assertEqual(self.model.instrument, "i1")
-        self.assertEqual(self.model.acquisitionMode, "a1")
+    @mock.patch("Interface.ui.drill.model.DrillModel.DrillIOModel")
+    def test_setIOFile(self, mIOModel):
+        self.model.setIOFile("test")
+        mIOModel.assert_called_once_with("test", self.model)
 
-    def test_exportRundexData(self):
-        self.model.exportRundexData("test")
-        self.mOpen.assert_called_once_with("test", 'w')
-        self.mJson.dump.assert_called_once()
-        written = self.mJson.dump.call_args[0][0]
-        self.assertEquals(written, {
-            "Instrument": "i1",
-            "AcquisitionMode": "a1",
-            "GlobalSettings": dict.fromkeys(self.SETTINGS["a1"], "test"),
-            "Samples": [],
-            "SamplesGroups": {},
-            "MasterSamples": {}
-            })
+    def test_resetIOFile(self):
+        self.model.ioModel = "test"
+        self.model.resetIOFile()
+        self.assertIsNone(self.model.ioModel)
 
-    def test_getRundexFile(self):
-        self.model.rundexFile = "test"
-        self.assertEqual(self.model.getRundexFile(), "test")
+    def test_getIOFile(self):
+        self.model.ioModel = mock.Mock()
+        self.model.ioModel.getFilename.return_value = "test"
+        self.assertEqual(self.model.getIOFile(), "test")
 
     def test_getVisualSettings(self):
-        self.model.visualSettings = "test"
-        self.assertEqual(self.model.getVisualSettings(), "test")
+        self.model.visualSettings = {"test": "test"}
+        self.assertEqual(self.model.getVisualSettings(), {"test": "test"})
 
     def test_getColumnHeaderData(self):
         mAlg = mock.Mock()

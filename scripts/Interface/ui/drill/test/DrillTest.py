@@ -255,9 +255,9 @@ class DrillTest(unittest.TestCase):
         self.view.actionSettings.trigger()
         mSettings.assert_called_once()
 
-    @mock.patch('Interface.ui.drill.view.DrillView.QFileDialog')
-    @mock.patch('Interface.ui.drill.model.DrillModel.json')
-    @mock.patch('Interface.ui.drill.model.DrillModel.open')
+    @mock.patch('Interface.ui.drill.presenter.DrillPresenter.QFileDialog')
+    @mock.patch('Interface.ui.drill.model.DrillIOModel.json')
+    @mock.patch('Interface.ui.drill.model.DrillIOModel.open')
     def test_loadRundex(self, mOpen, mJson, mFileDialog):
         mFileDialog.getOpenFileName.return_value = ["test", "test"]
         mJson.load.return_value = {
@@ -278,9 +278,9 @@ class DrillTest(unittest.TestCase):
         self.assertEqual(self.model.samples, [{}])
         self.assertEqual(self.view.table.columnCount(), len(self.model.columns))
 
-    @mock.patch('Interface.ui.drill.view.DrillView.QFileDialog')
-    @mock.patch('Interface.ui.drill.model.DrillModel.json')
-    @mock.patch('Interface.ui.drill.model.DrillModel.open')
+    @mock.patch('Interface.ui.drill.presenter.DrillPresenter.QFileDialog')
+    @mock.patch('Interface.ui.drill.model.DrillIOModel.json')
+    @mock.patch('Interface.ui.drill.model.DrillIOModel.open')
     def test_saveRundex(self, mOpen, mJson, mFileDialog):
         self.model.setInstrument("D11")
         mFileDialog.getSaveFileName.return_value = ["test", "test"]
@@ -294,9 +294,6 @@ class DrillTest(unittest.TestCase):
                     'ColumnsOrder': RundexSettings.COLUMNS['SANS']
                     },
                 'GlobalSettings': self.model.settings,
-                'Samples': [],
-                'SamplesGroups': {},
-                'MasterSamples': {}
                 }
         self.assertDictEqual(json, mJson.dump.call_args[0][0])
 

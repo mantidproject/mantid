@@ -55,9 +55,31 @@ class DrillPresenterTest(unittest.TestCase):
         self.presenter.acquisitionModeChanged("test")
         self.model.setAcquisitionMode.assert_called_once_with("test")
 
-    def test_rundexLoaded(self):
-        self.presenter.rundexLoaded("test")
-        self.model.importRundexData.assert_called_once_with("test")
+    @mock.patch("Interface.ui.drill.presenter.DrillPresenter.QFileDialog")
+    def test_onLoad(self, mDialog):
+        mDialog.getOpenFileName.return_value = ("test", "test")
+        self.presenter.onLoad()
+        self.model.setIOFile.assert_called_once_with("test")
+        self.view.setWindowModified.assert_called_once_with(False)
+
+    def test_onSave(self):
+        self.presenter.onSaveAs = mock.Mock()
+        self.model.getIOFile.return_value = 1
+        self.presenter.onSave()
+        self.model.exportRundexData.assert_called_once()
+        self.view.setWindowModified.assert_called_once_with(False)
+        self.presenter.onSaveAs.assert_not_called()
+        self.model.getIOFile.return_value = None
+        self.presenter.onSave()
+        self.presenter.onSaveAs.assert_called_once()
+
+    @mock.patch("Interface.ui.drill.presenter.DrillPresenter.QFileDialog")
+    def test_onSaveAs(self, mDialog):
+        mDialog.getSaveFileName.return_value = ("test", "test")
+        self.presenter.onSaveAs()
+        self.model.setIOFile.assert_called_once_with("test")
+        self.model.exportRundexData.assert_called_once()
+        self.view.setWindowModified.assert_called_once_with(False)
 
     def test_settingsWindow(self):
         self.model.getSettingsTypes.return_value = ({}, {}, {})

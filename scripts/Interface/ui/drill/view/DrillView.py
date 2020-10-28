@@ -7,8 +7,7 @@
 
 import os
 
-from qtpy.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, \
-                           QMenu, QAction
+from qtpy.QtWidgets import QMainWindow, QMessageBox, QDialog, QMenu, QAction
 from qtpy.QtCore import *
 from qtpy import uic
 
@@ -74,24 +73,24 @@ class DrillView(QMainWindow):
     """
     Sent when a new group is requested.
     Args:
-        set(int): row indexes
+        list(int): row indexes
     """
-    groupRequested = Signal(set)
+    groupRequested = Signal(list)
 
     """
     Sent when the removing of row(s) from their group is requested.
     Args:
-        set(int): row indexes
+        list(int): row indexes
     """
-    ungroupRequested = Signal(set)
+    ungroupRequested = Signal(list)
 
     """
     Sent when the addition of row(s) to an existing group is requested.
     Args:
-        set(int): row indexes
+        list(int): row indexes
         str: name of the group
     """
-    addToGroup = Signal(set, str)
+    addToGroup = Signal(list, str)
 
     """
     Sent when a row is set as master row.
@@ -114,17 +113,18 @@ class DrillView(QMainWindow):
 
     """
     Sent when the user asks for data loading from file.
-    Args:
-        str: rundex file name
     """
-    rundexLoaded = Signal(str)
+    loadRundex = Signal()
 
     """
     Sent when the user aks for data saving.
-    Args:
-        str: file name
     """
-    rundexSaved = Signal(str)
+    saveRundex = Signal()
+
+    """
+    Sent when the user aks for data saving in a new file.
+    """
+    saveRundexAs = Signal()
 
     """
     Sent when the user asks for the settings window.
@@ -151,7 +151,6 @@ class DrillView(QMainWindow):
         self.invalidCells = set()
         self.coloredRows = set()
         self.errorRows = set()
-        self.rundexFile = None
 
         self._presenter = DrillPresenter(self)
 
@@ -167,9 +166,9 @@ class DrillView(QMainWindow):
         """
         Setup the window header. Set the buttons icons and connect the signals.
         """
-        self.actionLoadRundex.triggered.connect(self.load_rundex)
-        self.actionSaveAs.triggered.connect(self.saveRundexAs)
-        self.actionSave.triggered.connect(self.saveRundex)
+        self.actionLoadRundex.triggered.connect(self.loadRundex.emit)
+        self.actionSaveAs.triggered.connect(self.saveRundexAs.emit)
+        self.actionSave.triggered.connect(self.saveRundex.emit)
         self.actionManageDirectories.triggered.connect(self.show_directory_manager)
         self.actionSettings.triggered.connect(self.showSettings.emit)
         self.actionClose.triggered.connect(self.close)
@@ -200,7 +199,7 @@ class DrillView(QMainWindow):
         self.datadirs.clicked.connect(self.show_directory_manager)
 
         self.load.setIcon(icons.get_icon("mdi.file-import"))
-        self.load.clicked.connect(self.load_rundex)
+        self.load.clicked.connect(self.loadRundex.emit)
 
         self.settings.setIcon(icons.get_icon("mdi.settings"))
         self.settings.clicked.connect(self.showSettings.emit)
@@ -224,7 +223,7 @@ class DrillView(QMainWindow):
         self.addrow.clicked.connect(self.add_row_after)
 
         self.save.setIcon(icons.get_icon("mdi.file-export"))
-        self.save.clicked.connect(self.saveRundexAs)
+        self.save.clicked.connect(self.saveRundex.emit)
 
         self.help.setIcon(icons.get_icon("mdi.help"))
         self.help.clicked.connect(self.helpWindow)
@@ -455,7 +454,7 @@ class DrillView(QMainWindow):
 
         Args:
             groupName (str): name of the group
-            rows (set(int)): row indexes
+            rows (list(int)): row indexes
         """
         rowName = 1
         for row in rows:
@@ -475,7 +474,7 @@ class DrillView(QMainWindow):
         """
         if not rows:
             return
-        self.groupRequested.emit(set(rows))
+        self.groupRequested.emit(rows)
 
     def ungroupRows(self, rows):
         """
@@ -486,7 +485,7 @@ class DrillView(QMainWindow):
         """
         if not rows:
             return
-        self.ungroupRequested.emit(set(rows))
+        self.ungroupRequested.emit(rows)
 
     def addRowsToGroup(self, rows, group):
         """
@@ -497,7 +496,7 @@ class DrillView(QMainWindow):
             rows (list(int)): row indexes
             group (str): group name
         """
-        self.addToGroup.emit(set(rows), group)
+        self.addToGroup.emit(rows, group)
 
     def setMasterRow(self, row):
         """
@@ -539,43 +538,6 @@ class DrillView(QMainWindow):
                     return
             self.errorRows = set()
             self.process.emit(rows)
-
-    def load_rundex(self):
-        """
-        Ask for the loading of a rundex file.
-        """
-        filename = QFileDialog.getOpenFileName(
-                self, 'Load rundex', '.', "Rundex (*.mrd);;All files (*.*)"
-                )
-        if not filename[0]:
-            return
-        self.rundexLoaded.emit(filename[0])
-        self.setWindowModified(False)
-
-    def saveRundexAs(self):
-        """
-        Ask for the saving of the table in a rundex file.
-        """
-        filename = QFileDialog.getSaveFileName(
-                self, 'Save rundex', './*.mrd',
-                "Rundex (*.mrd);;All files (*.*)"
-                )
-        if not filename[0]:
-            return
-        self.rundexSaved.emit(filename[0])
-        self.setWindowModified(False)
-        self.rundexFile = filename[0]
-
-    def saveRundex(self):
-        """
-        Save in the current rundex file. The current file is the one which has
-        been used to import or export the current data.
-        """
-        if self.rundexFile:
-            self.rundexSaved.emit(self.rundexFile)
-            self.setWindowModified(False)
-        else:
-            self.saveRundexAs()
 
     def helpWindow(self):
         """
@@ -847,15 +809,6 @@ class DrillView(QMainWindow):
         else:
             self.table.addRow(0)
             self.rowAdded.emit(0)
-
-    def setRundexFile(self, filename):
-        """
-        Set the current rundex filename.
-
-        Args:
-            filename: rundex file name.
-        """
-        self.rundexFile = filename
 
     def set_progress(self, n, nmax):
         """

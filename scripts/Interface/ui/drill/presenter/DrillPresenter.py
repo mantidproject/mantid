@@ -5,6 +5,8 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
+from qtpy.QtWidgets import QFileDialog
+
 from ..view.DrillSettingsDialog import DrillSettingsDialog
 from ..model.DrillModel import DrillModel
 
@@ -36,8 +38,9 @@ class DrillPresenter:
         self.view.setMaster.connect(self.onMasterRowRequested)
         self.view.process.connect(self.process)
         self.view.processStopped.connect(self.stopProcessing)
-        self.view.rundexLoaded.connect(self.rundexLoaded)
-        self.view.rundexSaved.connect(self.rundexSaved)
+        self.view.loadRundex.connect(self.onLoad)
+        self.view.saveRundex.connect(self.onSave)
+        self.view.saveRundexAs.connect(self.onSaveAs)
         self.view.showSettings.connect(self.settingsWindow)
 
         # model signals connection
@@ -58,9 +61,9 @@ class DrillPresenter:
         Triggered when the view request the creation of a group.
 
         Args:
-            rows (set(int)): row indexes
+            rows (list(int)): row indexes
         """
-        group = self.model.groupSamples(set(rows))
+        group = self.model.groupSamples(rows)
         self.view.labelRowsInGroup(group, rows, None)
 
     def onUngroupRequested(self, rows):
@@ -68,9 +71,9 @@ class DrillPresenter:
         Triggered when the view request the removing of row from their group(s).
 
         Args:
-            rows (set(int)): row indexes
+            rows (list(int)): row indexes
         """
-        self.model.ungroupSamples(set(rows))
+        self.model.ungroupSamples(rows)
         self.view.labelRowsInGroup(None, rows, None)
 
     def onMasterRowRequested(self, row):
@@ -115,6 +118,7 @@ class DrillPresenter:
             instrument (str): instrument name
         """
         self.model.setInstrument(instrument)
+        self.model.resetIOFile()
         self.updateViewFromModel()
 
     def acquisitionModeChanged(self, mode):
@@ -125,35 +129,49 @@ class DrillPresenter:
             mode (str): acquisition mode name
         """
         self.model.setAcquisitionMode(mode)
+        self.model.resetIOFile()
         self.updateViewFromModel()
 
-    def rundexLoaded(self, filename):
+    def onLoad(self):
         """
-        Forward the rundex file loading to the model and update the view.
+        Triggered when the user want to load a file. This methods start a
+        QDialog to get the file path from the user.
+        """
+        filename = QFileDialog.getOpenFileName(self.view, 'Load rundex', '.',
+                                               "Rundex (*.mrd);;All (*.*)")
+        if not filename[0]:
+            return
+        self.model.setIOFile(filename[0])
+        self.model.importRundexData()
+        self.view.setWindowModified(False)
+        self.updateViewFromModel()
 
-        Args:
-            filename (str): rundex file path
+    def onSave(self):
         """
-        try:
-            self.model.importRundexData(filename)
-            self.updateViewFromModel()
-        except Exception as ex:
-            self.view.errorPopup("Import error",
-                                 "Unable to load file {0}, please select a "
-                                 "rundex file (.mrd) saved from this interface."
-                                 .format(filename),
-                                 str(ex))
+        Triggered when the user wants to save its data. This method starts a
+        QDialog only if no file was previously used to load or save.
+        """
+        if self.model.getIOFile():
+            self.model.exportRundexData()
+            self.view.setWindowModified(False)
+        else:
+            self.onSaveAs()
 
-    def rundexSaved(self, filename):
+    def onSaveAs(self):
         """
-        Forward the rundex file saving to the model. This method transmit also
-        some potential visual settings that the view wants to save.
-
-        Args:
-            filename (str): rundex file path
+        Triggered when the user selects the "save as" function. This methods
+        will open a dialog to select the file even if one has previously been
+        used.
         """
-        vs = self.view.getVisualSettings()
-        self.model.exportRundexData(filename, vs)
+        filename = QFileDialog.getSaveFileName(self.view, 'Save rundex',
+                                               './*.mrd',
+                                               "Rundex (*.mrd);;All (*.*)")
+        if not filename[0]:
+            return
+        self.model.setIOFile(filename[0])
+        self.model.setVisualSettings(self.view.getVisualSettings())
+        self.model.exportRundexData()
+        self.view.setWindowModified(False)
 
     def settingsWindow(self):
         """
@@ -184,7 +202,6 @@ class DrillPresenter:
         """
         Update the view (header and table) from the model.
         """
-        self.view.setRundexFile(self.model.rundexFile)
         # update the header
         self.view.set_available_modes(
                 self.model.getAvailableAcquisitionModes())
@@ -199,7 +216,11 @@ class DrillPresenter:
         groups = self.model.getSamplesGroups()
         masters = self.model.getMasterSamples()
         for group in groups:
-            self.view.labelRowsInGroup(group, groups[group], masters[group])
+            if group in masters:
+                master = masters[group]
+            else:
+                master = None
+            self.view.labelRowsInGroup(group, groups[group], master)
         # set the visual settings if they exist
         vs = self.model.getVisualSettings()
         if vs:

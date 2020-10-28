@@ -5,7 +5,6 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-import json
 import os
 import sys
 import numpy
@@ -20,6 +19,7 @@ from .configurations import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
 from .DrillParameterController import DrillParameter, DrillParameterController
+from .DrillIOModel import DrillIOModel
 
 
 class DrillModel(QObject):
@@ -114,8 +114,8 @@ class DrillModel(QObject):
         self.masterSamples = dict()
         self.settings = dict()
         self.controller = None
-        self.rundexFile = None
-        self.visualSettings = None
+        self.visualSettings = dict()
+        self.ioModel = None
 
         # set the instrument and default acquisition mode
         self.tasksPool = DrillAlgorithmPool()
@@ -137,13 +137,12 @@ class DrillModel(QObject):
         Args:
             instrument (str): instrument name
         """
-        self.rundexFile = None
         self.samples = list()
         self.groups = dict()
         self.masterSamples = dict()
         self.settings = dict()
         self.columns = list()
-        self.visualSettings = None
+        self.visualSettings = dict()
         self.instrument = None
         self.acquisitionMode = None
         self.algorithm = None
@@ -184,11 +183,10 @@ class DrillModel(QObject):
                 or (mode not in RundexSettings.ACQUISITION_MODES[
                     self.instrument])):
             return
-        self.rundexFile = None
         self.samples = list()
         self.groups = dict()
         self.masterSamples = dict()
-        self.visualSettings = None
+        self.visualSettings = dict()
         self.acquisitionMode = mode
         self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
         self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
@@ -457,12 +455,12 @@ class DrillModel(QObject):
             self.samples[row][self.columns[column]] = contents
             self.checkParameter(self.columns[column], contents, row)
 
-    def groupSamples(self, samples):
+    def groupSamples(self, samples, groupName=None):
         """
         Group samples.
 
         Args:
-            samples (set(int)): sample indexes
+            samples (list(int)): sample indexes
 
         Returns:
             str: name of the created group
@@ -477,9 +475,10 @@ class DrillModel(QObject):
 
         self.groups = {k:v for k,v in self.groups.items() if v}
 
-        groupName = 'A'
-        while groupName in self.groups:
-            groupName = chr(ord(groupName) + 1)
+        if not groupName:
+            groupName = 'A'
+            while groupName in self.groups:
+                groupName = chr(ord(groupName) + 1)
         self.groups[groupName] = samples
 
         return groupName
@@ -489,7 +488,7 @@ class DrillModel(QObject):
         Ungroup samples.
 
         Args:
-            samples (set(int)): sample indexes
+            samples (list(int)): sample indexes
         """
         for sample in samples:
             for group in self.groups:
@@ -667,120 +666,54 @@ class DrillModel(QObject):
         """
         self.tasksPool.abortProcessing()
 
-    def importRundexData(self, filename):
+    def setIOFile(self, filename):
         """
-        Import data contained in a Json rundex file.
+        Setup the io service on a provided filename.
 
         Args:
-            filename(str): rundex file path
+            filename (str): the filename
         """
-        with open(filename) as json_file:
-            try:
-                json_data = json.load(json_file)
-            except Exception as ex:
-                logger.error("Wrong file format for: {0}".format(filename))
-                logger.error(str(ex))
-                raise ex
+        self.ioModel = DrillIOModel(filename, self)
 
-        if ((RundexSettings.MODE_JSON_KEY not in json_data)
-                or (RundexSettings.INSTRUMENT_JSON_KEY not in json_data)):
-            logger.error("Unable to load {0}".format(filename))
-            raise ValueError("Json mandatory fields '{0}' or '{1}' not found."
-                             .format(RundexSettings.CYCLE_JSON_KEY,
-                                     RundexSettings.INSTRUMENT_JSON_KEY))
-
-        self.setInstrument(json_data[RundexSettings.INSTRUMENT_JSON_KEY])
-        self.setAcquisitionMode(json_data[RundexSettings.MODE_JSON_KEY])
-
-        # cycle number and experiment id
-        if ((RundexSettings.CYCLE_JSON_KEY in json_data)
-                and (RundexSettings.EXPERIMENT_JSON_KEY in json_data)):
-            self.cycleNumber = json_data[RundexSettings.CYCLE_JSON_KEY]
-            self.experimentId = json_data[RundexSettings.EXPERIMENT_JSON_KEY]
-
-        # visual setings
-        if RundexSettings.VISUAL_SETTINGS_JSON_KEY in json_data:
-            self.visualSettings = json_data[
-                    RundexSettings.VISUAL_SETTINGS_JSON_KEY]
-        else:
-            self.visualSettings = None
-
-        # global settings
-        if (RundexSettings.SETTINGS_JSON_KEY in json_data):
-            self.settings.update(json_data[RundexSettings.SETTINGS_JSON_KEY])
-        else:
-            logger.warning("No global settings found when importing {0}. "
-                           "Default settings will be used."
-                           .format(filename))
-
-        # samples
-        self.samples = list()
-        if ((RundexSettings.SAMPLES_JSON_KEY in json_data)
-                and (json_data[RundexSettings.SAMPLES_JSON_KEY])):
-            for sample in json_data[RundexSettings.SAMPLES_JSON_KEY]:
-                self.samples.append(sample)
-        else:
-            logger.warning("No sample found when importing {0}."
-                           .format(filename))
-
-        # groups
-        self.groups = dict()
-        if "SamplesGroups" in json_data and json_data["Groups"]:
-            for k,v in json_data["SamplesGroups"].items():
-                self.groups[k] = set(v)
-        if "MasterSamples" in json_data and json_data["MasterSamples"]:
-            self.masterSamples = json_data["MasterSamples"]
-
-        self.rundexFile = filename
-
-    def exportRundexData(self, filename, visualSettings=None):
+    def resetIOFile(self):
         """
-        Export the data in a Json rundex file.
+        Reset the IO service.
+        """
+        self.ioModel = None
+
+    def getIOFile(self):
+        """
+        Get the filename used by the IO service.
+        """
+        if self.ioModel:
+            return self.ioModel.getFilename()
+        return None
+
+    def importRundexData(self):
+        """
+        Import data.
+        """
+        if self.ioModel:
+            self.ioModel.load()
+
+    def exportRundexData(self):
+        """
+        Export data.
+        """
+        if self.ioModel:
+            self.ioModel.save()
+
+    def setVisualSettings(self, vs):
+        """
+        Set the visual settings.
 
         Args:
-            filename (str): rundex file path
-            visualSettings (dict): settings that the view produced and can read
+            vs (dict(str:str)): visual settings
         """
-        json_data = dict()
-        json_data[RundexSettings.INSTRUMENT_JSON_KEY] = self.instrument
-        json_data[RundexSettings.MODE_JSON_KEY] = self.acquisitionMode
-
-        # experiment
-        if self.cycleNumber:
-            json_data[RundexSettings.CYCLE_JSON_KEY] = self.cycleNumber
-        if self.experimentId:
-            json_data[RundexSettings.EXPERIMENT_JSON_KEY] = self.experimentId
-
-        # visual setings
-        if visualSettings:
-            json_data[RundexSettings.VISUAL_SETTINGS_JSON_KEY] = visualSettings
-
-        # global settings
-        json_data[RundexSettings.SETTINGS_JSON_KEY] = self.settings
-
-        # samples
-        json_data[RundexSettings.SAMPLES_JSON_KEY] = list()
-        for sample in self.samples:
-            json_data[RundexSettings.SAMPLES_JSON_KEY].append(sample)
-
-        # groups
-        json_data["SamplesGroups"] = dict()
-        for k,v in self.groups.items():
-            json_data["SamplesGroups"][k] = list(v)
-        json_data["MasterSamples"] = self.masterSamples
-
-        with open(filename, 'w') as json_file:
-            json.dump(json_data, json_file, indent=4)
-        self.rundexFile = filename
-
-    def getRundexFile(self):
-        """
-        Get the current rundex file.
-
-        Returns:
-            str: rundex file
-        """
-        return self.rundexFile
+        if vs:
+            self.visualSettings = {k:v for k,v in vs.items()}
+        else:
+            self.visualSettings = dict()
 
     def getVisualSettings(self):
         """
@@ -789,7 +722,7 @@ class DrillModel(QObject):
         Returns:
             dict: visual settings that the view understands
         """
-        return self.visualSettings
+        return {k:v for k,v in self.visualSettings.items()}
 
     def getColumnHeaderData(self):
         """
@@ -815,12 +748,16 @@ class DrillModel(QObject):
 
         return self.columns, tooltips
 
+    def setSamples(self, samples):
+        self.samples = [s for s in samples]
+
     def addSample(self, ref):
         """
-        Add an empty sample. This method adds an empty space for a new sample.
+        Add a sample.
 
         Args:
-            ref (int): sample index
+            ref (int): sample index; if -1 the sample is added to the end
+            contents (dict(str:str)): sample parameters
         """
         self.samples.insert(ref, dict())
 
@@ -839,6 +776,15 @@ class DrillModel(QObject):
                 if ((group in self.masterSamples)
                         and (self.masterSamples[group] == ref)):
                     del self.masterSamples[group]
+
+    def getSamples(self):
+        """
+        Get the list of all the samples.
+
+        Return:
+            list(dict(str:str)): samples
+        """
+        return [s for s in self.samples]
 
     def getRowsContents(self):
         """
