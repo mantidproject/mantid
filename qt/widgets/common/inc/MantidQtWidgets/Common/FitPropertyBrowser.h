@@ -453,7 +453,6 @@ private slots:
   void processMultiBGResults();
 
   void executeCustomSetupLoad(const QString &name);
-  // void executeCustomSetupRemove(const QString &name);
 
   /// Update structure tooltips for all functions
   void updateStructureTooltips();

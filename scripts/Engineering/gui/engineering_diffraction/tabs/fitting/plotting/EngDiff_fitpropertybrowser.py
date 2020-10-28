@@ -26,7 +26,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
     def __init__(self, canvas, toolbar_manager, parent=None):
         super(EngDiffFitPropertyBrowser, self).__init__(canvas, toolbar_manager, parent)
         self.fit_notifier = GenericObservable()
-        self.func_changed_notifier = GenericObservable()
+        self.fit_enabled_notifier = GenericObservable()
 
     def set_output_window_names(self):
         """
@@ -69,6 +69,20 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         self.executeCustomSetupRemove(name)
         self.saveFunction(name)
 
+    def show(self):
+        """
+        Override the base class method. Hide the peak editing tool.
+        """
+        super(EngDiffFitPropertyBrowser, self).show()
+        self.fit_enabled_notifier.notify_subscribers(self.isFitEnabled() and self.isVisible())
+
+    def hide(self):
+        """
+        Override the base class method. Hide the peak editing tool.
+        """
+        super(EngDiffFitPropertyBrowser, self).hide()
+        self.fit_enabled_notifier.notify_subscribers(self.isFitEnabled() and self.isVisible())
+
     def _get_allowed_spectra(self):
         """
         Get the workspaces and spectra that can be fitted from the
@@ -106,4 +120,4 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         the browser: functions added and/or removed.
         """
         super(EngDiffFitPropertyBrowser, self).function_changed_slot()
-        self.func_changed_notifier.notify_subscribers(self.isFitEnabled())
+        self.fit_enabled_notifier.notify_subscribers(self.isFitEnabled() and self.isVisible())

@@ -39,10 +39,10 @@ class FittingDataPresenter(object):
         self.seq_fit_notifier = GenericObservable()
         # Obeservers
         self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
-        self.func_changed_observer = GenericObserverWithArgPassing(self.func_changed)
+        self.fit_enabled_observer = GenericObserverWithArgPassing(self.set_fit_enabled)
         self.seq_fit_observer = GenericObserverWithArgPassing(self.fit_completed)
 
-    def func_changed(self, fit_enabled):
+    def set_fit_enabled(self, fit_enabled):
         self.view.set_seq_fit_button_enabled(fit_enabled)
 
     def fit_completed(self, fitprops):

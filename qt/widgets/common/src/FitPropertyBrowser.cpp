@@ -1761,8 +1761,7 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
 
 std::string FitPropertyBrowser::getFunctionString() const {
   auto function = getFittingFunction();
-  std::string funStr = function->asString();
-  return funStr;
+  return function->asString();
 }
 
 /// Display the status string returned from Fit
