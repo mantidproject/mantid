@@ -916,7 +916,7 @@ Axis *MatrixWorkspace::getAxis(const std::size_t &axisIndex) const {
 
 /** Replaces one of the workspace's axes with the new one provided.
  *  @param axisIndex :: The index of the axis to replace
- *  @param newAxis :: A Unique_ptr to the new axis. The class will take
+ *  @param newAxis :: A shared_ptr to the new axis. The class will take shared
  * ownership.
  *  @throw IndexError If the axisIndex given is outside the range of axes held
  * by this workspace
@@ -924,7 +924,7 @@ Axis *MatrixWorkspace::getAxis(const std::size_t &axisIndex) const {
  * (within one of the old one)
  */
 void MatrixWorkspace::replaceAxis(const std::size_t &axisIndex,
-                                  std::unique_ptr<Axis> newAxis) {
+                                  std::shared_ptr<Axis> newAxis) {
   // First check that axisIndex is in range
   if (axisIndex >= m_axes.size()) {
     throw Kernel::Exception::IndexError(
