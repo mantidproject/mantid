@@ -80,6 +80,7 @@ signals:
   void parameterChanged(const QString &funcIndex, const QString &paramName);
 private slots:
   void viewChangedParameter(const QString &parName);
+  void viewChangedAttribute(const QString &attrName);
   void viewPastedFunction(const QString &funStr);
   void viewAddedFunction(const QString &funStr);
   void viewRemovedFunction(const QString &functionIndex);

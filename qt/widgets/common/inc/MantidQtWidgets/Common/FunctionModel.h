@@ -27,6 +27,7 @@ public:
   void addFunction(const QString &prefix, const QString &funStr) override;
   void removeFunction(const QString &functionIndex) override;
   void setParameter(const QString &paramName, double value) override;
+  void setAttribute(const QString &attrName, IFunction::Attribute &val);
   void setParameterError(const QString &paramName, double value) override;
   double getParameter(const QString &paramName) const override;
   double getParameterError(const QString &paramName) const override;

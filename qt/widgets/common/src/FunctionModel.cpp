@@ -145,6 +145,17 @@ void FunctionModel::setParameter(const QString &paramName, double value) {
   }
 }
 
+void FunctionModel::setAttribute(const QString &attrName,
+                                 IFunction::Attribute &value) {
+  auto fun = getCurrentFunction();
+  if (!fun) {
+    throw std::logic_error("Function is undefined.");
+  }
+  if (fun->hasAttribute(attrName.toStdString())) {
+    fun->setAttribute(attrName.toStdString(), value);
+  }
+}
+
 void FunctionModel::setParameterError(const QString &paramName, double value) {
   auto fun = getCurrentFunction();
   auto const index = fun->parameterIndex(paramName.toStdString());
@@ -210,7 +221,6 @@ QStringList FunctionModel::getAttributeNames() const {
   }
   return names;
 }
-
 
 IFunction_sptr FunctionModel::getSingleFunction(int index) const {
   checkIndex(index);
@@ -453,7 +463,7 @@ void FunctionModel::updateMultiDatasetAttributes(const IFunction &fun) {
     return;
   if (m_function->nAttributes() != fun.nAttributes())
     return;
-  for (const auto& name : fun.getAttributeNames()) {
+  for (const auto &name : fun.getAttributeNames()) {
     m_function->setAttribute(name, fun.getAttribute(name));
   }
 }

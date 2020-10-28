@@ -50,38 +50,9 @@ protected:
   void apply(std::vector<double> &v) const override {
     m_view->setAttributeValue(m_attrName, v);
   };
-private:
-  IFunctionView *m_view;
-  QString m_attrName;
-};
-
-/**
- * Attribute visitor to set an attribute in an IFunctionModel.
- */
-class SetAttributeInModel : public IFunction::AttributeVisitor<> {
-public:
-  SetAttributeInModel(IFunctionView *view, QString attrName)
-      : m_view(view), m_attrName(attrName){};
-protected:
-  void apply(double &d) const override {
-    m_view->setAttributeValue(m_attrName, d);
-  }
-  void apply(std::string &str) const override {
-    m_view->setAttributeValue(m_attrName, QString::fromStdString(str));
-  };
-  void apply(int &i) const override {
-    m_view->setAttributeValue(m_attrName, i);
-  }
-  void apply(bool &b) const override {
-    m_view->setAttributeValue(m_attrName, b);
-  };
-  void apply(std::vector<double> &v) const override {
-    m_view->setAttributeValue(m_attrName, v);
-  };
 
 private:
   IFunctionView *m_view;
-  IFunctionModel *m_model;
   QString m_attrName;
 };
 
@@ -111,6 +82,8 @@ FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
           SLOT(viewChangedGlobals(const QStringList &)));
   connect(m_view, SIGNAL(functionHelpRequest()), this,
           SLOT(viewRequestedFunctionHelp()));
+  connect(m_view, SIGNAL(attributePropertyChanged(const QString &)), this,
+          SLOT(viewChangedAttribute(const QString &)));
 }
 
 void FunctionMultiDomainPresenter::setFunction(IFunction_sptr fun) {
@@ -410,6 +383,12 @@ void FunctionMultiDomainPresenter::viewChangedParameter(
   m_model->setParameter(paramName, value);
   auto const parts = splitParameterName(paramName);
   emit parameterChanged(parts.first, parts.second);
+}
+
+void FunctionMultiDomainPresenter::viewChangedAttribute(
+    const QString &attrName) {
+  auto value = m_view->getAttribute(attrName);
+  m_model->setAttribute(attrName, value);
 }
 
 /**

@@ -8,7 +8,7 @@
 
 #include "DllOption.h"
 
-#include "MantidAPI/IFunction_fwd.h"
+#include "MantidAPI/IFunction.h"
 
 #include <QString>
 #include <QWidget>
@@ -35,6 +35,7 @@ public:
   virtual void setParameter(const QString &paramName, double value) = 0;
   virtual void setParameterError(const QString &paramName, double error) = 0;
   virtual double getParameter(const QString &paramName) const = 0;
+  virtual IFunction::Attribute getAttribute(const QString &attrName) const = 0;
   virtual void setErrorsEnabled(bool enabled) = 0;
   virtual void clearErrors() = 0;
   virtual boost::optional<QString> currentFunctionIndex() const = 0;
@@ -79,6 +80,8 @@ signals:
   void currentFunctionChanged();
   /// Function parameter gets changed
   void parameterChanged(const QString &paramName);
+  /// Function attribute gets changed
+  void attributePropertyChanged(const QString attrName);
   /// In multi-dataset context a button value editor was clicked
   void localParameterButtonClicked(const QString &parName);
   /// User sets a tie
