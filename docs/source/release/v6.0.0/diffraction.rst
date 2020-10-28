@@ -44,6 +44,10 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+New features
+############
+- When a fit is successful the model will be stored as a Custom Setup in the fit property browser under the name of the workspace fitted. 
+- The fitting tab now creates a group of workspaces that store the model string and  the fit value and error of parameters of the model for each loaded workspace.
 
 Single Crystal Diffraction
 --------------------------
