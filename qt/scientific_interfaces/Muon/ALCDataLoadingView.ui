@@ -579,7 +579,6 @@
       <zorder>periodsGroup</zorder>
       <zorder>calculationGroup</zorder>
       <zorder>dataGroup</zorder>
-      <zorder>verticalSpacer</zorder>
      </widget>
      <widget class="QGroupBox" name="groupBox">
       <property name="styleSheet">

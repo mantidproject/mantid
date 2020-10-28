@@ -69,8 +69,8 @@ void ALCDataLoadingView::initialize() {
   m_ui.calculationGroup->setPalette(palette);
   m_ui.subtractCheckbox->setEnabled(false);
 
-  // Regex for runs
-  QRegExp re("[0-9]+(\,[0-9]+)*(\-[0-9]+(($)|(\,[0-9]+))+)*");
+  // Regex validator for runs
+  QRegExp re("[0-9]+(,[0-9]+)*(-[0-9]+(($)|(,[0-9]+))+)*");
   QValidator *validator = new QRegExpValidator(re, this);
   m_ui.runs->setTextValidator(validator);
 

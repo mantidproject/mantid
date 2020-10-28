@@ -34,8 +34,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
     : m_view(view), m_numDetectors(0), m_loadingData(false),
-      m_directoryChanged(false), m_timerID(), m_filesLoaded(),
-      m_lastRunLoadedAuto(-2), m_wasLastAutoRange(false) {}
+      m_directoryChanged(false), m_timerID(), m_lastRunLoadedAuto(-2),
+      m_filesLoaded(), m_wasLastAutoRange(false) {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
@@ -281,7 +281,6 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   } catch (const std::exception &e) {
     m_view->setAvailableInfoToEmpty();
     throw std::runtime_error(e.what());
-    return;
   }
 
   // Set logs
