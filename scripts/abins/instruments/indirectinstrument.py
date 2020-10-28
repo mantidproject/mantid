@@ -24,7 +24,7 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
         parameters = abins.parameters.instruments[self._name]
         return parameters['angles']
 
-    def calculate_q_powder(self, input_data=None):
+    def calculate_q_powder(self, *, input_data=None, angle=None):
         """Calculates squared Q vectors.
 
         By the cosine law Q^2 = k_f^2 + k_i^2 - 2 k_f k_i cos(theta)
@@ -36,16 +36,16 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
 
         :param input_data:
             frequencies (in cm-1) which should be used to construct Q2
+        :param angle:
+            detector angle in degrees
 
         :returns:
             Q^2 array (in cm-1) corresponding to input frequencies,
             constrained by conservation of mass/momentum and TOSCA geometry
         """
         parameters = abins.parameters.instruments[self._name]
-        if self._angle is None:
-            self._angle = parameters['angles'][0]
 
-        cos_scattering_angle = np.cos(self._angle * np.pi / 180)
+        cos_scattering_angle = np.cos(angle * np.pi / 180)
 
         k2_i = (input_data + parameters['final_neutron_energy']) * WAVENUMBER_TO_INVERSE_A
         k2_f = parameters['final_neutron_energy'] * WAVENUMBER_TO_INVERSE_A

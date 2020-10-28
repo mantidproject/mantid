@@ -394,22 +394,21 @@ class SPowderSemiEmpiricalCalculator:
             quantum_order=order)
 
         if local_freq.any():  # check if local_freq has non-zero values
-
-            first_angle = self._instrument.get_angles()[0]
-            self._instrument.set_detector_angle(angle=first_angle)
             indent = ANGLE_MESSAGE_INDENTATION
 
-            q2 = self._instrument.calculate_q_powder(input_data=local_freq)
+            first_angle = self._instrument.get_angles()[0]
             self._report_progress(msg=indent + "Calculation for the detector at angle %s (atom=%s)" %
                                                (first_angle, atom))
+
+            q2 = self._instrument.calculate_q_powder(input_data=local_freq, angle=first_angle)
+
             opt_local_freq, opt_local_coeff, rebinned_broad_spectrum = self._helper_atom_angle(
                 atom=atom, local_freq=local_freq, local_coeff=local_coeff, order=order, q2=q2)
 
             for angle in self._instrument.get_angles()[1:]:
                 self._report_progress(msg=indent + "Calculation for the detector at angle %s (atom=%s)" %
                                                    (angle, atom))
-                self._instrument.set_detector_angle(angle=angle)
-                q2 = self._instrument.calculate_q_powder(input_data=local_freq)
+                q2 = self._instrument.calculate_q_powder(input_data=local_freq, angle=angle)
                 temp = self._helper_atom_angle(atom=atom, local_freq=local_freq, local_coeff=local_coeff,
                                                order=order, return_freq=False, q2=q2)
 
