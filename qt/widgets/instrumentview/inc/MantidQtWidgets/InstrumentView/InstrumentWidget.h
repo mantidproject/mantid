@@ -268,7 +268,7 @@ protected:
   /// add the selected tabs
   void addSelectedTabs();
   /// update integration widget visibility and range
-  void updateIntegrationWidget();
+  void updateIntegrationWidget(bool init = false);
 
   // GUI elements
   QLabel *mInteractionInfo;

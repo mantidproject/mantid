@@ -295,7 +295,7 @@ void InstrumentWidget::init(bool resetGeometry, bool autoscaling,
         new InstrumentActor(m_workspaceName, autoscaling, scaleMin, scaleMax));
   }
 
-  updateIntegrationWidget();
+  updateIntegrationWidget(true);
 
   auto surface = getSurface();
   if (resetGeometry || !surface) {
@@ -589,11 +589,15 @@ void InstrumentWidget::replaceWorkspace(
   renameWorkspace(newWs);
   m_instrumentActor.reset(new InstrumentActor(QString::fromStdString(newWs)));
 
-  // change the view and colormap
+  // update the view and colormap
   auto surface = getSurface();
   surface->resetInstrumentActor(m_instrumentActor.get());
   setupColorMap();
 
+  // reset the instrument position
+  m_renderTab->resetView();
+
+  // update the integration widget
   updateIntegrationWidget();
 
   // change the title of the instrument window
@@ -604,9 +608,15 @@ void InstrumentWidget::replaceWorkspace(
 /**
  * Update the range of the integration widget, and show or hide it is needed
  */
-void InstrumentWidget::updateIntegrationWidget() {
+void InstrumentWidget::updateIntegrationWidget(bool init) {
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),
                                 m_instrumentActor->maxBinValue());
+
+  if (!init) {
+    m_xIntegration->setRange(m_instrumentActor->minBinValue(),
+                             m_instrumentActor->maxBinValue());
+  }
+
   m_xIntegration->setUnits(QString::fromStdString(
       m_instrumentActor->getWorkspace()->getAxis(0)->unit()->caption()));
 
