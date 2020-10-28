@@ -54,8 +54,8 @@ instruments = {
     'TOSCA': {
         #    TOSCA parameters for calculating Q^2
         'final_neutron_energy': 32.0,  # Final energy on the crystal analyser in cm-1
-        'angles': [135],
-        'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians
+        'angles': [134.98885653282196],  # Forward detector angle; rather specific as test-data is based on truncated value in radians
+        'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians (NO LONGER USED)
         'settings': {'forward': None, 'backward': None},
         'default_setting': 'forward',
         # TOSCA parameters for resolution function
@@ -68,8 +68,7 @@ instruments = {
         # Lagrange parameters for calculating Q^2
         # (NOT FOR PRODUCTION, CURRENTLY USING TOSCA VALUE FOR SCATTERING ANGLE)
         'final_neutron_energy': 4.5 * MILLI_EV_TO_WAVENUMBER,  # Final energy on the crystal analyser in cm-1 (converted from eV)
-        'angles': [135],
-        'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians
+        #'angles': [135.],
         'scattering_angle_range': (math.pi * (10 / 180), math.pi / 2),
         # 'n_sampling_angles': 10,  # Could need something like this for sampling?
         'default_setting': 'Cu(220)',

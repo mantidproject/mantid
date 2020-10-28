@@ -36,6 +36,7 @@ class AbinsAdvancedParametersTest(unittest.TestCase):
             "TOSCA": {
                 "final_neutron_energy": 32.0,
                 "cos_scattering_angle": -0.7069,
+                "angles": [135.],
                 "a": 1e-7,
                 "b": 5e-3,
                 "c": 2.5}}
