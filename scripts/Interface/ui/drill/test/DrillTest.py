@@ -295,8 +295,8 @@ class DrillTest(unittest.TestCase):
                     },
                 'GlobalSettings': self.model.settings,
                 'Samples': [],
-                'Groups': {},
-                'GroupsMaster': {}
+                'SamplesGroups': {},
+                'MasterSamples': {}
                 }
         self.assertDictEqual(json, mJson.dump.call_args[0][0])
 

@@ -434,12 +434,12 @@ class DrillModelTest(unittest.TestCase):
         name = self.model.groupSamples({1, 2, 3})
         self.assertEqual(name, 'A')
         self.assertDictEqual(self.model.groups, {'A': {1, 2, 3}})
-        self.model.masterSample['A'] = 3
+        self.model.masterSamples['A'] = 3
         name = self.model.groupSamples({2, 3, 4})
         self.assertEqual(name, 'B')
         self.assertDictEqual(self.model.groups, {'A': {1},
                                                  'B': {2, 3, 4}})
-        self.assertDictEqual(self.model.masterSample, {})
+        self.assertDictEqual(self.model.masterSamples, {})
         name = self.model.groupSamples({1, 5})
         self.assertEqual(name, 'A')
         self.assertDictEqual(self.model.groups, {'A': {1, 5},
@@ -450,15 +450,15 @@ class DrillModelTest(unittest.TestCase):
         self.model.ungroupSamples({1})
         self.assertDictEqual(self.model.groups, {'A': {5},
                                                  'B': {2, 3, 4}})
-        self.model.masterSample['A'] = 5
-        self.model.masterSample['B'] = 2
+        self.model.masterSamples['A'] = 5
+        self.model.masterSamples['B'] = 2
         self.model.ungroupSamples({5})
         self.assertDictEqual(self.model.groups, {'B': {2, 3, 4}})
-        self.assertDictEqual(self.model.masterSample, {'B': 2})
+        self.assertDictEqual(self.model.masterSamples, {'B': 2})
 
-    def test_getSamplesGroup(self):
+    def test_getSamplesGroups(self):
         self.model.groups = {'A': {1, 5}, 'B': {2, 3, 4}}
-        groups = self.model.getSamplesGroup()
+        groups = self.model.getSamplesGroups()
         self.assertDictEqual(groups, {'A': {1, 5}, 'B': {2, 3, 4}})
         del groups['A']
         self.assertDictEqual(self.model.groups, {'A': {1, 5}, 'B': {2, 3, 4}})
@@ -467,19 +467,19 @@ class DrillModelTest(unittest.TestCase):
         name = self.model.setGroupMaster(1)
         self.assertIsNone(name)
         self.assertEqual(self.model.groups, {})
-        self.assertEqual(self.model.masterSample, {})
+        self.assertEqual(self.model.masterSamples, {})
         self.model.groups = {'A': {1, 5}, 'B': {2, 3, 4}}
-        self.model.masterSample['A'] = 5
+        self.model.masterSamples['A'] = 5
         name = self.model.setGroupMaster(1)
         self.assertEqual(name, 'A')
-        self.assertDictEqual(self.model.masterSample, {'A': 1})
+        self.assertDictEqual(self.model.masterSamples, {'A': 1})
 
-    def test_getGroupMasters(self):
-        self.model.masterSample = {'A': 1, 'B': 5}
-        master = self.model.getGroupMasters()
+    def test_geMasterSamples(self):
+        self.model.masterSamples = {'A': 1, 'B': 5}
+        master = self.model.getMasterSamples()
         self.assertDictEqual(master, {'A': 1, 'B': 5})
         master['A'] = 8
-        self.assertDictEqual(self.model.masterSample, {'A': 1, 'B': 5})
+        self.assertDictEqual(self.model.masterSamples, {'A': 1, 'B': 5})
 
     def test_getProcessingParameters(self):
         params = dict.fromkeys(self.SETTINGS["a1"], "test")
@@ -566,8 +566,8 @@ class DrillModelTest(unittest.TestCase):
             "AcquisitionMode": "a1",
             "GlobalSettings": dict.fromkeys(self.SETTINGS["a1"], "test"),
             "Samples": [],
-            "Groups": {},
-            "GroupsMaster": {}
+            "SamplesGroups": {},
+            "MasterSamples": {}
             })
 
     def test_getRundexFile(self):

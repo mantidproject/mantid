@@ -76,7 +76,7 @@ class DrillPresenter:
     def onMasterRowRequested(self, row):
         group = self.model.setGroupMaster(row)
         if group:
-            rows = self.model.getSamplesGroup()[group]
+            rows = self.model.getSamplesGroups()[group]
             self.view.labelRowsInGroup(group, rows, row)
 
     def process(self, rows):
@@ -196,8 +196,8 @@ class DrillPresenter:
         self.view.set_table(columns, tooltips)
         contents = self.model.getRowsContents()
         self.view.fill_table(contents)
-        groups = self.model.getSamplesGroup()
-        masters = self.model.getGroupMasters()
+        groups = self.model.getSamplesGroups()
+        masters = self.model.getMasterSamples()
         for group in groups:
             self.view.labelRowsInGroup(group, groups[group], masters[group])
         # set the visual settings if they exist

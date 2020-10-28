@@ -111,7 +111,7 @@ class DrillModel(QObject):
         self.algorithm = None
         self.samples = list()
         self.groups = dict()
-        self.masterSample = dict()
+        self.masterSamples = dict()
         self.settings = dict()
         self.controller = None
         self.rundexFile = None
@@ -140,7 +140,7 @@ class DrillModel(QObject):
         self.rundexFile = None
         self.samples = list()
         self.groups = dict()
-        self.masterSample = dict()
+        self.masterSamples = dict()
         self.settings = dict()
         self.columns = list()
         self.visualSettings = None
@@ -187,7 +187,7 @@ class DrillModel(QObject):
         self.rundexFile = None
         self.samples = list()
         self.groups = dict()
-        self.masterSample = dict()
+        self.masterSamples = dict()
         self.visualSettings = None
         self.acquisitionMode = mode
         self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
@@ -471,9 +471,9 @@ class DrillModel(QObject):
             for group in self.groups:
                 if sample in self.groups[group]:
                     self.groups[group].remove(sample)
-                if ((group in self.masterSample)
-                        and (self.masterSample[group] == sample)):
-                    del self.masterSample[group]
+                if ((group in self.masterSamples)
+                        and (self.masterSamples[group] == sample)):
+                    del self.masterSamples[group]
 
         self.groups = {k:v for k,v in self.groups.items() if v}
 
@@ -494,22 +494,47 @@ class DrillModel(QObject):
         for sample in samples:
             for group in self.groups:
                 self.groups[group].discard(sample)
-                if ((group in self.masterSample)
-                        and (self.masterSample[group] == sample)):
-                    del self.masterSample[group]
+                if ((group in self.masterSamples)
+                        and (self.masterSamples[group] == sample)):
+                    del self.masterSamples[group]
 
         self.groups = {k:v for k,v in self.groups.items() if v}
 
-    def getSamplesGroup(self):
+    def setSamplesGroups(self, groups):
+        """
+        Set the dictionnary of samples groups.
+
+        Args:
+            groups (dict(str:list(int))): samples groups
+        """
+        self.groups = {k:v for k,v in groups.items()}
+
+    def getSamplesGroups(self):
         """
         Get the samples groups.
 
         Returns:
             dict(str, list(int)): groups of samples
         """
-        groups = dict()
-        groups.update(self.groups)
-        return groups
+        return {k:v for k,v in self.groups.items()}
+
+    def setMasterSamples(self, masterSamples):
+        """
+        Set the dictionnary of master samples.
+
+        Args:
+            masterSamples (dict(str:int)): master samples
+        """
+        self.masterSamples = {k:v for k,v in masterSamples.items()}
+
+    def getMasterSamples(self):
+        """
+        Get the master samples of each groups.
+
+        Returns:
+            dict(str, int): master samples for each group.
+        """
+        return {k:v for k,v in self.masterSamples.items()}
 
     def setGroupMaster(self, sample):
         """
@@ -523,20 +548,9 @@ class DrillModel(QObject):
         """
         for group in self.groups:
             if sample in self.groups[group]:
-                self.masterSample[group] = sample
+                self.masterSamples[group] = sample
                 return group
         return None
-
-    def getGroupMasters(self):
-        """
-        Get the master samples of each groups.
-
-        Returns:
-            dict(str, int): master samples for each group.
-        """
-        master = dict()
-        master.update(self.masterSample)
-        return master
 
     def getProcessingParameters(self, sample):
         """
@@ -560,7 +574,7 @@ class DrillModel(QObject):
         master = None
         for group in self.groups:
             if sample in self.groups[group]:
-                master = self.masterSample[group]
+                master = self.masterSamples[group]
                 if master is not None:
                     params.update(self.samples[master])
 
@@ -711,11 +725,11 @@ class DrillModel(QObject):
 
         # groups
         self.groups = dict()
-        if "Groups" in json_data and json_data["Groups"]:
-            for k,v in json_data["Groups"].items():
+        if "SamplesGroups" in json_data and json_data["Groups"]:
+            for k,v in json_data["SamplesGroups"].items():
                 self.groups[k] = set(v)
-        if "GroupsMaster" in json_data and json_data["GroupsMaster"]:
-            self.masterSample = json_data["GroupsMaster"]
+        if "MasterSamples" in json_data and json_data["MasterSamples"]:
+            self.masterSamples = json_data["MasterSamples"]
 
         self.rundexFile = filename
 
@@ -750,10 +764,10 @@ class DrillModel(QObject):
             json_data[RundexSettings.SAMPLES_JSON_KEY].append(sample)
 
         # groups
-        json_data["Groups"] = dict()
+        json_data["SamplesGroups"] = dict()
         for k,v in self.groups.items():
-            json_data["Groups"][k] = list(v)
-        json_data["GroupsMaster"] = self.masterSample
+            json_data["SamplesGroups"][k] = list(v)
+        json_data["MasterSamples"] = self.masterSamples
 
         with open(filename, 'w') as json_file:
             json.dump(json_data, json_file, indent=4)
@@ -822,9 +836,9 @@ class DrillModel(QObject):
         for group in self.groups:
             if ref in self.groups[group]:
                 self.groups[group].remove(ref)
-                if ((group in self.masterSample)
-                        and (self.masterSample[group] == ref)):
-                    del self.masterSample[group]
+                if ((group in self.masterSamples)
+                        and (self.masterSamples[group] == ref)):
+                    del self.masterSamples[group]
 
     def getRowsContents(self):
         """
