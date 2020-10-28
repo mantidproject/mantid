@@ -5,11 +5,17 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
+class DataContext(object):
+    def __init__(self):
+        self.instrument = "rooth"
+        self.current_runs = []
+
 
 class ElementalAnalysisContext(object):
 
     def __init__(self):
         self._window_title = "Elemental Analysis 2"
+        self.data_context = DataContext()
 
     @property
     def name(self):
