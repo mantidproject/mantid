@@ -12,7 +12,6 @@ Framework Changes
 Concepts
 --------
 
-<<<<<<< HEAD
 Improvements
 ############
 
