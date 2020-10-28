@@ -261,7 +261,7 @@ class SliceViewer(object):
                                                    transpose=data_view.dimensions.transpose))
         except Exception as exc:
             self._logger.error(str(exc))
-            self._show_status_message(f"Error exporting ROI")
+            self._show_status_message("Error exporting ROI")
 
     def export_cut(self, limits, cut_type):
         """Notify that an roi has been selected for export to a workspace
@@ -281,7 +281,7 @@ class SliceViewer(object):
                     cut=cut_type))
         except Exception as exc:
             self._logger.error(str(exc))
-            self._show_status_message(f"Error exporting roi cut")
+            self._show_status_message("Error exporting roi cut")
 
     def export_pixel_cut(self, pos, axis):
         """Notify a single pixel line plot has been requested from the
@@ -301,7 +301,7 @@ class SliceViewer(object):
                     axis=axis))
         except Exception as exc:
             self._logger.error(str(exc))
-            self._show_status_message(f"Error exporting single-pixel cut")
+            self._show_status_message("Error exporting single-pixel cut")
 
     def nonorthogonal_axes(self, state: bool):
         """

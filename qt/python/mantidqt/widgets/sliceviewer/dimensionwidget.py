@@ -207,7 +207,7 @@ class Dimension(QWidget):
         self.layout.addWidget(self.spinbox)
         self.layout.addWidget(self.units)
 
-        self.set_value(self.spinbox.value())
+        self.set_value(self.spinbox.minimum())
         if self.nbins < 2:
             state = State.DISABLE
 
