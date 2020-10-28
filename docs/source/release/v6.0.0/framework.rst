@@ -12,15 +12,18 @@ Framework Changes
 Concepts
 --------
 
+<<<<<<< HEAD
 Improvements
 ############
 
+- Added packing fraction to :ref:`Material <Materials>` to separate number density and effective number density.
 - Added a feature allowing time-dependent values for individual instrument parameters.
 
 Algorithms
 ----------
 
 - The calculation of a distance has been updated in Track to correctly calculate the distance for objects that have multiple intercepting surfaces, e.g. hollow cylinder. This affect algorithms such as :ref:`AbsorptionCorrection <algm-AbsorptionCorrection>` where you may now get slightly different values.
+- Added the ability to specify the packing fraction and effective number density to :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>`.
 
 Data Objects
 ------------

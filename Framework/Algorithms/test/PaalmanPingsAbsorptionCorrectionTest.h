@@ -10,24 +10,24 @@
 
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/Axis.h"
-#include "MantidAlgorithms/AbsorptionCorrectionPaalmanPings.h"
+#include "MantidAlgorithms/PaalmanPingsAbsorptionCorrection.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::Algorithms::AbsorptionCorrectionPaalmanPings;
+using Mantid::Algorithms::PaalmanPingsAbsorptionCorrection;
 using Mantid::API::AlgorithmManager;
 using Mantid::API::AnalysisDataService;
 using Mantid::API::MatrixWorkspace_sptr;
 
-class AbsorptionCorrectionPaalmanPingsTest : public CxxTest::TestSuite {
+class PaalmanPingsAbsorptionCorrectionTest : public CxxTest::TestSuite {
 public:
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AbsorptionCorrectionPaalmanPingsTest *createSuite() {
-    return new AbsorptionCorrectionPaalmanPingsTest();
+  static PaalmanPingsAbsorptionCorrectionTest *createSuite() {
+    return new PaalmanPingsAbsorptionCorrectionTest();
   }
-  static void destroySuite(AbsorptionCorrectionPaalmanPingsTest *suite) {
+  static void destroySuite(PaalmanPingsAbsorptionCorrectionTest *suite) {
     delete suite;
   }
 
@@ -39,7 +39,7 @@ public:
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 
-    AbsorptionCorrectionPaalmanPings alg;
+    PaalmanPingsAbsorptionCorrection alg;
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS));
@@ -69,14 +69,14 @@ public:
     testWS->getAxis(0)->unit() =
         Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
     AnalysisDataService::Instance().addOrReplace(
-        "AbsorptionCorrectionPaalmanPingsTest", testWS);
+        "PaalmanPingsAbsorptionCorrectionTest", testWS);
 
     auto setSampleAlg =
         AlgorithmManager::Instance().createUnmanaged("SetSample");
     setSampleAlg->setRethrows(true);
     setSampleAlg->initialize();
     setSampleAlg->setPropertyValue("InputWorkspace",
-                                   "AbsorptionCorrectionPaalmanPingsTest");
+                                   "PaalmanPingsAbsorptionCorrectionTest");
     setSampleAlg->setPropertyValue(
         "Material",
         R"({"ChemicalFormula": "La-(B11)5.94-(B10)0.06", "SampleNumberDensity": 0.1})");
@@ -91,10 +91,10 @@ public:
         R"({"Shape": "HollowCylinder", "Height": 5.68, "InnerRadius": 0.295, "OuterRadius": 0.315, "Center": [0., 0., 0.]})");
     TS_ASSERT_THROWS_NOTHING(setSampleAlg->execute());
 
-    AbsorptionCorrectionPaalmanPings alg;
+    PaalmanPingsAbsorptionCorrection alg;
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "InputWorkspace", "AbsorptionCorrectionPaalmanPingsTest"));
+        "InputWorkspace", "PaalmanPingsAbsorptionCorrectionTest"));
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("ElementSize", 0.1));
     std::string outWSgroup("absorption");
     TS_ASSERT_THROWS_NOTHING(
@@ -149,7 +149,7 @@ public:
     absorptionCorrectionAlg->setRethrows(true);
     absorptionCorrectionAlg->initialize();
     absorptionCorrectionAlg->setPropertyValue(
-        "InputWorkspace", "AbsorptionCorrectionPaalmanPingsTest");
+        "InputWorkspace", "PaalmanPingsAbsorptionCorrectionTest");
     absorptionCorrectionAlg->setProperty("ElementSize", 0.1);
     absorptionCorrectionAlg->setPropertyValue("OutputWorkspace",
                                               "absorptionCorrection_ass");
