@@ -77,14 +77,10 @@ Usage
     # Print the results
     print("DIFA: %.1f" % difa)
     print("DIFC: %.0f" % round(difc,-1))
-    print("TZERO: %.0f" %round(tzero,-1))
+    print("TZERO: %.0f" % round(tzero,-1))
     tbl = mtd[out_tbl_name]
     print("The output table has %d row(s)" % tbl.rowCount())
     print("Number of peaks fitted: {0}".format(peaks_tbl.rowCount()))
-    print("First peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[0]))
-    print("First fitted peak center (ToF): {0:.1f}".format(peaks_tbl.column('X0')[0]))
-    print("Second peak expected (dSpacing): {0}".format(peaks_tbl.column('dSpacing')[1]))
-    print("Second fitted peak center (ToF): {0:.0f}".format(round(peaks_tbl.column('X0')[1],-1)))
 
 Output:
 
@@ -100,10 +96,6 @@ Output:
    TZERO: ...
    The output table has 1 row(s)
    Number of peaks fitted: 3
-   First peak expected (dSpacing): 0.8
-   First fitted peak center (ToF): 15006.0
-   Second peak expected (dSpacing): 1.5
-   Second fitted peak center (ToF): 27510
 
 .. categories::
 
