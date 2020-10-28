@@ -600,6 +600,9 @@ void InstrumentWidget::replaceWorkspace(
   // update the integration widget
   updateIntegrationWidget();
 
+  // reset the plot and the info widget in the pick tab
+  m_pickTab->clearWidgets();
+
   // change the title of the instrument window
   nativeParentWidget()->setWindowTitle(
       QString().fromStdString(newInstrumentWindowName));

@@ -571,7 +571,7 @@ QColor InstrumentWidgetPickTab::getShapeBorderColor() const {
 }
 
 /**
- * Do something when the time bin integraion range has changed.
+ * Do something when the time bin integration range has changed.
  */
 void InstrumentWidgetPickTab::changedIntegrationRange(double /*unused*/,
                                                       double /*unused*/) {
@@ -802,6 +802,16 @@ void InstrumentWidgetPickTab::updatePlotMultipleDetectors() {
     m_plotController->clear();
   }
   m_plot->replot();
+}
+
+/**
+ * Clear all the tab's widgets.
+ */
+void InstrumentWidgetPickTab::clearWidgets() {
+  m_plotController->clear();
+  m_infoController->clear();
+  selectTool(ToolType::PixelSelect);
+  collapsePlotPanel();
 }
 
 /**
