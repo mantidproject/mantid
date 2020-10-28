@@ -13,6 +13,7 @@
 #include <QString>
 #include <QWidget>
 #include <boost/optional.hpp>
+#include <type_traits>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -43,6 +44,29 @@ public:
                                       const QString &constraint) = 0;
   virtual void setGlobalParameters(const QStringList &) = 0;
   virtual void showFunctionHelp(const QString &) const = 0;
+  // Set the value of an attribute based on the template type
+  template <typename T>
+  void setAttributeValue(const QString &attributeName, T &value) {
+    if constexpr (std::is_same_v<T, double>) {
+      setDoubleAttribute(attributeName, value);
+    } else if constexpr (std::is_same_v<T, int>) {
+      setIntAttribute(attributeName, value);
+    } else if constexpr (std::is_same_v<T, QString>) {
+      setStringAttribute(attributeName, value);
+    } else if constexpr (std::is_same_v<T, bool>) {
+      setBooleanAttribute(attributeName, value);
+    } else if constexpr (std::is_same_v<T, std::vector<double>>) {
+      setVectorAttribute(attributeName, value);
+    }
+  }
+
+protected:
+  virtual void setDoubleAttribute(const QString &paramName, double value) = 0;
+  virtual void setIntAttribute(const QString &paramName, int value) = 0;
+  virtual void setStringAttribute(const QString &paramName, QString &value) = 0;
+  virtual void setBooleanAttribute(const QString &paramName, bool value) = 0;
+  virtual void setVectorAttribute(const QString &paramName,
+                                  std::vector<double> &val) = 0;
 
 signals:
   /// User replaces the whole function (eg, by pasting it from clipboard)

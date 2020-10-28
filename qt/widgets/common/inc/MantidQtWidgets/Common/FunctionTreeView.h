@@ -189,9 +189,10 @@ protected:
   /// Get function property for the index
   QtProperty *getFunctionProperty(const QString &index) const;
   ///// Get a property for a parameter
-  // QtProperty *getParameterProperty(const QString &paramName) const;
   /// Get a property for a parameter
   QtProperty *getParameterProperty(const QString &paramName) const;
+  /// Get a property for a parameter
+  QtProperty *getAttributeProperty(const QString &paramName) const;
   /// Get a property for a parameter which is a parent of a given
   /// property (tie or constraint).
   QtProperty *getParentParameterProperty(QtProperty *prop) const;
@@ -356,11 +357,19 @@ protected:
   SelectFunctionDialog *m_selectFunctionDialog;
   QtProperty *m_selectedFunctionProperty;
   bool m_emitParameterValueChange = true;
+  bool m_emitAttributeValueChange = true;
 
   friend class CreateAttributePropertyForFunctionTreeView;
   friend class SetAttributeFromProperty;
 
 private:
+  /// Update a double attribute 
+  void setDoubleAttribute(const QString &attrName, double value) override;
+  void setIntAttribute(const QString &attrName, int value) override;
+  void setStringAttribute(const QString &attrName, QString &value) override;
+  void setBooleanAttribute(const QString &attrName, bool value) override;
+  void setVectorAttribute(const QString &attrName, std::vector<double> &val) override;
+
   // Intended for testing only
   QTreeWidgetItem *getPropertyWidgetItem(QtProperty *prop) const;
   QRect visualItemRect(QtProperty *prop) const;

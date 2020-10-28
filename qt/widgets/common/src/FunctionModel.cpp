@@ -155,6 +155,11 @@ double FunctionModel::getParameter(const QString &paramName) const {
   return getCurrentFunction()->getParameter(paramName.toStdString());
 }
 
+IFunction::Attribute
+FunctionModel::getAttribute(const QString &attrName) const {
+  return getCurrentFunction()->getAttribute(attrName.toStdString());
+}
+
 double FunctionModel::getParameterError(const QString &paramName) const {
   auto fun = getCurrentFunction();
   auto const index = fun->parameterIndex(paramName.toStdString());
@@ -195,6 +200,17 @@ QStringList FunctionModel::getParameterNames() const {
   }
   return names;
 }
+QStringList FunctionModel::getAttributeNames() const {
+  QStringList names;
+  if (hasFunction()) {
+    const auto attributeNames = getCurrentFunction()->getAttributeNames();
+    for (auto const name : attributeNames) {
+      names << QString::fromStdString(name);
+    }
+  }
+  return names;
+}
+
 
 IFunction_sptr FunctionModel::getSingleFunction(int index) const {
   checkIndex(index);
@@ -429,6 +445,16 @@ void FunctionModel::updateMultiDatasetParameters(const IFunction &fun) {
   for (size_t i = 0; i < fun.nParams(); ++i) {
     m_function->setParameter(i, fun.getParameter(i));
     m_function->setError(i, fun.getError(i));
+  }
+  updateMultiDatasetAttributes(fun);
+}
+void FunctionModel::updateMultiDatasetAttributes(const IFunction &fun) {
+  if (!hasFunction())
+    return;
+  if (m_function->nAttributes() != fun.nAttributes())
+    return;
+  for (const auto& name : fun.getAttributeNames()) {
+    m_function->setAttribute(name, fun.getAttribute(name));
   }
 }
 

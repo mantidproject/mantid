@@ -25,6 +25,66 @@ namespace MantidWidgets {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
+/**
+ * Attribute visitor to set an attribute in an IFunctionView.
+ */
+class SetAttributeInView : public IFunction::AttributeVisitor<> {
+public:
+  SetAttributeInView(IFunctionView *view, QString attrName)
+      : m_view(view), m_attrName(attrName){};
+
+protected:
+  void apply(double &d) const override {
+    m_view->setAttributeValue(m_attrName, d);
+  }
+  void apply(std::string &str) const override {
+    auto attrVal = QString::fromStdString(str);
+    m_view->setAttributeValue(m_attrName, attrVal);
+  };
+  void apply(int &i) const override {
+    m_view->setAttributeValue(m_attrName, i);
+  }
+  void apply(bool &b) const override {
+    m_view->setAttributeValue(m_attrName, b);
+  };
+  void apply(std::vector<double> &v) const override {
+    m_view->setAttributeValue(m_attrName, v);
+  };
+private:
+  IFunctionView *m_view;
+  QString m_attrName;
+};
+
+/**
+ * Attribute visitor to set an attribute in an IFunctionModel.
+ */
+class SetAttributeInModel : public IFunction::AttributeVisitor<> {
+public:
+  SetAttributeInModel(IFunctionView *view, QString attrName)
+      : m_view(view), m_attrName(attrName){};
+protected:
+  void apply(double &d) const override {
+    m_view->setAttributeValue(m_attrName, d);
+  }
+  void apply(std::string &str) const override {
+    m_view->setAttributeValue(m_attrName, QString::fromStdString(str));
+  };
+  void apply(int &i) const override {
+    m_view->setAttributeValue(m_attrName, i);
+  }
+  void apply(bool &b) const override {
+    m_view->setAttributeValue(m_attrName, b);
+  };
+  void apply(std::vector<double> &v) const override {
+    m_view->setAttributeValue(m_attrName, v);
+  };
+
+private:
+  IFunctionView *m_view;
+  IFunctionModel *m_model;
+  QString m_attrName;
+};
+
 FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
     : m_view(view), m_model(std::make_unique<FunctionModel>()),
       m_editLocalParameterDialog(nullptr) {
@@ -116,6 +176,12 @@ void FunctionMultiDomainPresenter::updateParameters(const IFunction &fun) {
 void FunctionMultiDomainPresenter::updateMultiDatasetParameters(
     const IFunction &fun) {
   m_model->updateMultiDatasetParameters(fun);
+  updateViewFromModel();
+}
+
+void FunctionMultiDomainPresenter::updateMultiDatasetAttributes(
+    const IFunction &fun) {
+  m_model->updateMultiDatasetAttributes(fun);
   updateViewFromModel();
 }
 
@@ -411,6 +477,15 @@ void FunctionMultiDomainPresenter::updateViewFromModel() {
     }
     m_view->setParameterConstraint(
         name, m_model->getLocalParameterConstraint(name, index));
+  }
+  updateViewAttributesFromModel();
+}
+
+void FunctionMultiDomainPresenter::updateViewAttributesFromModel() {
+  for (const auto &name : m_model->getAttributeNames()) {
+    auto value = m_model->getAttribute(name);
+    SetAttributeInView tmp(m_view, name);
+    value.apply(tmp);
   }
 }
 
