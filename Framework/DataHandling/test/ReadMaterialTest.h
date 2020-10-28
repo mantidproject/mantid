@@ -144,7 +144,7 @@ public:
                      "no ChemicalFormula or AtomicNumber is "
                      "given.")
   }
-  void testFailureValidateInputsNoNumberDensity() {
+  void testFailureValidateInputsNoNumberDensityParams() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 0;
@@ -159,9 +159,9 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
     TS_ASSERT_EQUALS(result.size(), 1)
-    TS_ASSERT_EQUALS(
-        result["NumberDensity"],
-        "The number density must be specified with a use-defined material.")
+    TS_ASSERT_EQUALS(result["NumberDensity"],
+                     "The number density or effective number density must "
+                     " be specified with a user-defined material")
   }
 
   void testSuccessfullValidateInputsSampleNumber() {
@@ -210,7 +210,7 @@ public:
     TS_ASSERT(result.empty());
   }
 
-  void testFailureValidateInputsNumberAndZParam() {
+  void testSuccessfulValidateInputsNumberAndZParam() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
@@ -224,11 +224,140 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["ZParameter"],
-                     "Cannot give ZParameter with NumberDensity set")
+    TS_ASSERT(result.empty());
   }
 
-  void testFailureValidateInputsZParamWithMass() {
+  void testFailureValidateInputsNumbersAndPacking() {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.atomicNumber = 1;
+      setMaterial.numberDensity = 1;
+      setMaterial.numberDensityEffective = 1;
+      setMaterial.packingFraction = 1;
+      return setMaterial;
+    }
+    ();
+
+    auto result = ReadMaterial::validateInputs(params);
+
+    TS_ASSERT_EQUALS(result["NumberDensity"],
+                     "Number Density cannot be determined when "
+                     "both the effective number density and "
+                     "packing fraction are set. Only two can "
+                     "be specified at most.")
+  }
+
+  void testFailureValidateInputsEffectiveWithMass() {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.atomicNumber = 1;
+      setMaterial.massDensity = 1;
+      setMaterial.numberDensityEffective = 1;
+      return setMaterial;
+    }
+    ();
+
+    auto result = ReadMaterial::validateInputs(params);
+
+    TS_ASSERT_EQUALS(
+        result["EffectiveNumberDensity"],
+        "Cannot set effective number density when the mass density "
+        "is specified. The value specified will be overwritten "
+        "because it will be computed from the mass density.");
+  }
+
+  void testFailureValidateInputsLargePackingFrac() {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.atomicNumber = 1;
+      setMaterial.massNumber = 1;
+      setMaterial.packingFraction = 2.1;
+      setMaterial.zParameter = 1;
+      setMaterial.unitCellVolume = 1;
+      return setMaterial;
+    }
+    ();
+
+    auto result = ReadMaterial::validateInputs(params);
+
+    TS_ASSERT_EQUALS(result["PackingFraction"],
+                     "Cannot have a packing fraction larger than 2")
+  }
+
+  void testFailureValidateInputsNegativePackingFrac() {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.atomicNumber = 1;
+      setMaterial.massNumber = 1;
+      setMaterial.packingFraction = -1;
+      setMaterial.zParameter = 1;
+      setMaterial.unitCellVolume = 1;
+      return setMaterial;
+    }
+    ();
+
+    auto result = ReadMaterial::validateInputs(params);
+
+    TS_ASSERT_EQUALS(result["PackingFraction"],
+                     "Cannot have a packing fraction less than 0")
+  }
+
+  void testFailureValidateInputsPackingFracOnly() {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.atomicNumber = 1;
+      setMaterial.packingFraction = 1;
+      return setMaterial;
+    }
+    ();
+
+    auto result = ReadMaterial::validateInputs(params);
+
+    TS_ASSERT_EQUALS(result["PackingFraction"],
+                     "Cannot determine number density from only "
+                     " the packing fraction. The number density "
+                     " or effective number density is also needed.")
+  }
+
+  void testFailureValidateInputsPackingWithAll() {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.atomicNumber = 1;
+      setMaterial.zParameter = 1;
+      setMaterial.unitCellVolume = 1;
+      setMaterial.massDensity = 1;
+      setMaterial.packingFraction = 1;
+      return setMaterial;
+    }
+    ();
+
+    auto result = ReadMaterial::validateInputs(params);
+
+    TS_ASSERT_EQUALS(result["PackingFraction"],
+                     "Cannot set packing fraction when both the number density "
+                     "and effective number density are determined from "
+                     "the mass density and cell volume + zParameter.")
+  }
+
+  void testSuccessfulValidateInputsPackingFracOnly() {
+    const ReadMaterial::MaterialParameters params = []() -> auto {
+      ReadMaterial::MaterialParameters setMaterial;
+      setMaterial.atomicNumber = 1;
+      setMaterial.packingFraction = 1;
+      setMaterial.zParameter = 1;
+      setMaterial.unitCellVolume = 1;
+      return setMaterial;
+    }
+    ();
+
+    auto result = ReadMaterial::validateInputs(params);
+
+    // Should succeed because number density can be determined from
+    //  the zParameter and unitCellVolume
+    TS_ASSERT(result.empty());
+  }
+
+  void testSuccessfulValidateInputsZParamWithMass() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
@@ -242,8 +371,7 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["MassDensity"],
-                     "Cannot give MassDensity with ZParameter set")
+    TS_ASSERT(result.empty());
   }
 
   void testFailureValidateInputsZParamWithoutUnitCell() {
@@ -262,7 +390,7 @@ public:
                      "UnitCellVolume must be provided with ZParameter")
   }
 
-  void testFailureValidateInputsNumWithMass() {
+  void testSuccessfulValidateInputsNumWithMass() {
     const ReadMaterial::MaterialParameters params = []() -> auto {
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.atomicNumber = 1;
@@ -275,8 +403,7 @@ public:
 
     auto result = ReadMaterial::validateInputs(params);
 
-    TS_ASSERT_EQUALS(result["MassDensity"],
-                     "Cannot give MassDensity with NumberDensity set")
+    TS_ASSERT(result.empty());
   }
 
   void testMaterialIsCorrect() {
@@ -284,6 +411,7 @@ public:
       ReadMaterial::MaterialParameters setMaterial;
       setMaterial.chemicalSymbol = FORMULA;
       setMaterial.numberDensity = 1;
+      setMaterial.numberDensityEffective = 1;
       setMaterial.coherentXSection = 1;
       setMaterial.incoherentXSection = 2;
       setMaterial.attenuationXSection = 3;
@@ -418,6 +546,9 @@ private:
         material.chemicalFormula();
 
     TS_ASSERT_EQUALS(material.numberDensity(), check.numberDensity());
+    TS_ASSERT_EQUALS(material.numberDensityEffective(),
+                     check.numberDensityEffective())
+    TS_ASSERT_EQUALS(material.packingFraction(), check.packingFraction())
     TS_ASSERT_DELTA(material.cohScatterXSection(), check.cohScatterXSection(),
                     PRECISION);
     TS_ASSERT_DELTA(material.incohScatterXSection(),
