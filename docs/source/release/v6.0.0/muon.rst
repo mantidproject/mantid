@@ -5,6 +5,7 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
+=======
    
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
@@ -28,6 +29,7 @@ ALC
 
 New Features
 ############
+- The data loading section has been updated for this release. See :ref:`Muon ALC <MuonALC-ref>` for more.
 
 Improvements
 ############

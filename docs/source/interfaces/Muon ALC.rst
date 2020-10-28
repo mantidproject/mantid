@@ -159,6 +159,12 @@ asymmetry, displayed on the right panel.
 
 Options
 ^^^^^^^
+Instrument
+  The instrument
+  
+Path
+  The directory data has been loaded from
+
 Runs
   The range of nexus files in the series
 
@@ -191,6 +197,9 @@ Calculation
 
 ?
   Shows this help page.
+ 
+Manage User Directories
+  Opens a dialog where a user can specify which directories to load from
 
 Load
   Computes the asymmetry according to selected options and displays it against the 
@@ -280,7 +289,7 @@ Peak graph
 Run the ALC interface
 ---------------------
 
-The interface is available from the MantidPlot Interfaces menu: Interfaces -> Muon -> ALC.
+The interface is available from the Interfaces menu: Interfaces -> Muon -> ALC.
 
 Feedback & Comments
 -------------------
