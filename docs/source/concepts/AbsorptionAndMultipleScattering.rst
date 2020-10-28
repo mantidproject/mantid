@@ -482,7 +482,7 @@ To address (2) above, we can assume elastic scattering and then Eq. :eq:`Im` bec
 .. math::
    :label: Im_elastic
 
-    I_{m,elastic} &= \sum_{i=2}^{n} J_0 \rho^i \prod_{j=1}^{i} \frac{d\sigma}{d\Omega} \left( \theta_j \right) \int_V ... \int_V \frac{exp \left[ -\mu (\lambda) \left( l_1 + \sum_{j=1}^{i-1} l_{j,j+1} + l_i \right) \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
+    I_{m,elastic} = \sum_{i=2}^{n} J_0 \rho^i \prod_{j=1}^{i} \frac{d\sigma}{d\Omega} \left( \theta_j \right) \int_V ... \int_V \frac{exp \left[ -\mu (\lambda) \left( l_1 + \sum_{j=1}^{i-1} l_{j,j+1} + l_i \right) \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
 
 Isotropic Scattering
 ^^^^^^^^^^^^^^^^^^^^^
@@ -491,7 +491,7 @@ To address (3) above, we can assume isotropic scattering and then Eq. :eq:`Im` b
 .. math::
    :label: Im_isotropic
 
-    I_{m,isotropic} &= \sum_{i=2}^{n} J_0 \rho^i \left( \frac{\sigma}{4\pi} \right)^i \int_V ... \int_V \frac{exp \left[ -\mu (\lambda_1) l_1 + - \sum_{j=1}^{i-1} \mu (\lambda_{j,j+1}) l_{j,j+1} + - \mu (\lambda_i) l_i \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
+    I_{m,isotropic} = \sum_{i=2}^{n} J_0 \rho^i \left( \frac{\sigma}{4\pi} \right)^i \int_V ... \int_V \frac{exp \left[ -\mu (\lambda_1) l_1 + - \sum_{j=1}^{i-1} \mu (\lambda_{j,j+1}) l_{j,j+1} + - \mu (\lambda_i) l_i \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
 
 Elastic + Isotropic Scattering
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -500,7 +500,7 @@ Combining both the elastic and isotropic assumptions, we have:
 .. math::
    :label: Im_elastic_isotropic
 
-    I_{m,elastic+isotropic} &= \sum_{i=2}^{n} J_0 \rho^i \left( \frac{\sigma}{4\pi} \right)^i \int_V ... \int_V \frac{exp \left[ -\mu (\lambda) \left( l_1 + \sum_{j=1}^{i-1} l_{j,j+1} + l_i \right) \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
+    I_{m,elastic+isotropic} = \sum_{i=2}^{n} J_0 \rho^i \left( \frac{\sigma}{4\pi} \right)^i \int_V ... \int_V \frac{exp \left[ -\mu (\lambda) \left( l_1 + \sum_{j=1}^{i-1} l_{j,j+1} + l_i \right) \right]}{ \prod_{j=1}^{i-1} l_{j,j+1}^2} dV^{i}
 
 Constant Ratio for  :math:`\frac{I_n}{I_{n-1}} = \Delta`
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
