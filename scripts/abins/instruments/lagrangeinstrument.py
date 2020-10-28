@@ -42,7 +42,7 @@ class LagrangeInstrument(IndirectInstrument):
 
         return sigma
 
-    def calculate_q_powder(self, input_data=None):
+    def calculate_q_powder(self, *, input_data=None, angle=None):
         """Calculates squared Q vectors for Lagrange.
 
         By the cosine law Q^2 = k_f^2 + k_i^2 - 2 k_f k_i cos(theta)
@@ -54,6 +54,8 @@ class LagrangeInstrument(IndirectInstrument):
 
         :param input_data:
             frequencies (in cm-1) which should be used to construct Q2
+        :param angle:
+            detector angle in degrees
 
         :returns:
             Q^2 array (in cm-1) corresponding to input frequencies,
@@ -64,4 +66,4 @@ class LagrangeInstrument(IndirectInstrument):
             print("WARNING: WORK IN PROGRESS. THIS Q POWDER MODEL IS FOR TOSCA NOT LAGRANGE")
             self._q_model_warning_given = True
 
-        return super().calculate_q_powder(input_data=input_data)
+        return super().calculate_q_powder(input_data=input_data, angle=angle)

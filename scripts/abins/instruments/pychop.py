@@ -22,7 +22,6 @@ class PyChopInstrument(Instrument):
         super().__init__(setting=setting)
         self._name = name
         self._e_init = None
-        self._angle = None
         self._polyfits = {}
         self._tthlims = PyChop.Instruments.Instrument(self._name).detector.tthlims
 
@@ -35,7 +34,7 @@ class PyChopInstrument(Instrument):
                                  for (start, end) in angle_ranges])
         return angles
 
-    def calculate_q_powder(self, input_data=None):
+    def calculate_q_powder(self, *, input_data=None, angle=None):
         """
         Returns momentum transfer Q^2 corresponding to frequency series
 
@@ -44,9 +43,8 @@ class PyChopInstrument(Instrument):
 
         Calculation is restricted to the region E < E_i
 
-        Angle is determined from from the attribute self._angle
-
         :param input_data: list with frequencies for the given k-point.
+        :param angle: scattering angle in degrees
         :type array-like:
         """
 
@@ -63,7 +61,7 @@ class PyChopInstrument(Instrument):
         k2_f[conservation_indx] = (self._e_init - input_data[conservation_indx]) * WAVENUMBER_TO_INVERSE_A
         k2_i[conservation_indx] = self._e_init * WAVENUMBER_TO_INVERSE_A
 
-        cos_angle = math.cos(math.radians(self._angle))
+        cos_angle = math.cos(math.radians(angle))
         result = k2_i + k2_f - 2 * cos_angle * (k2_i * k2_f) ** 0.5
 
         return result

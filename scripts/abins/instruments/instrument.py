@@ -19,19 +19,21 @@ class Instrument:
     def __init__(self, setting: str = ''):
         setting = self._check_setting(setting)
         self._setting = setting
-        self._angle = None
 
     def get_angles(self):
         """Get a list of detector angles to sample"""
         raise NotImplementedError()
 
-    def calculate_q_powder(self, input_data=None):
+    def calculate_q_powder(self, *, input_data=None, angle=None):
         """
         Calculates Q2.
 
 
         :param  input_data: data from which Q2 should be calculated
+        :param angle: Detector angle in degrees
+
         :returns:  numpy array with Q2 data
+
         """
         raise NotImplementedError()
 
