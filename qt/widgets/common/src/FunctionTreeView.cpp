@@ -54,12 +54,17 @@
 namespace {
 const char *globalOptionName = "Global";
 Mantid::Kernel::Logger g_log("Function Browser");
-QString removePrefix(QString &param) { return param.split(QString("."))[1]; }
 QString addPrefix(QString &param) { return QString("f0.") + param; }
-
 const std::regex PREFIX_REGEX("(^[f][0-9](.*))");
 inline bool variableIsPrefixed(const std::string &name) {
   return std::regex_match(name, PREFIX_REGEX);
+}
+QString removePrefix(QString &param) {
+  if (variableIsPrefixed(param.toStdString()))
+    return param.split(QString("."))[1];
+  else {
+    return param;
+  }
 }
 // These attributes require the function to be fully reconstructed, as a
 // different number of properties will be required
@@ -1436,7 +1441,7 @@ void FunctionTreeView::setIntAttribute(const QString &attrName, int value) {
   auto prop = getAttributeProperty(attrName);
   ScopedFalse _false(m_emitAttributeValueChange);
   m_attributeIntManager->setValue(prop, value);
-};
+}
 /**
  * Updates the value of a string attribute
  * @param attrName :: Attribute name
@@ -1472,8 +1477,9 @@ void FunctionTreeView::setBooleanAttribute(const QString &attrName,
 /**
  * Updates the value of a vector attribute
  * NOTE: This is currently not implemented as there is no need for it
- * as the use of vector attributes is limited to tabulated functions (e.g resolution)
- * which create their attributes 'on-the-fly' when the fit is performed
+ * as the use of vector attributes is limited to tabulated functions (e.g
+ * resolution) which create their attributes 'on-the-fly' when the fit is
+ * performed
  * @param attrName :: Attribute name
  * @param value :: New value
  */
@@ -1877,7 +1883,8 @@ void FunctionTreeView::attributeChanged(QtProperty *prop) {
   // attributes emit an attributeValueChanged signal.
   if (std::find(REQUIRESRECONSTRUCTIONATTRIBUTES.begin(),
                 REQUIRESRECONSTRUCTIONATTRIBUTES.end(),
-                attributeName) != REQUIRESRECONSTRUCTIONATTRIBUTES.end()) {
+                removePrefix(attributeName)) !=
+      REQUIRESRECONSTRUCTIONATTRIBUTES.end()) {
     auto funProp = m_properties[prop].parent;
     if (!funProp)
       return;

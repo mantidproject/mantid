@@ -81,7 +81,7 @@ signals:
   /// Function parameter gets changed
   void parameterChanged(const QString &paramName);
   /// Function attribute gets changed
-  void attributePropertyChanged(const QString attrName);
+  void attributePropertyChanged(const QString &attrName);
   /// In multi-dataset context a button value editor was clicked
   void localParameterButtonClicked(const QString &parName);
   /// User sets a tie

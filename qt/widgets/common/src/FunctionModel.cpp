@@ -146,7 +146,7 @@ void FunctionModel::setParameter(const QString &paramName, double value) {
 }
 
 void FunctionModel::setAttribute(const QString &attrName,
-                                 IFunction::Attribute &value) {
+                                 const IFunction::Attribute &value) {
   auto fun = getCurrentFunction();
   if (!fun) {
     throw std::logic_error("Function is undefined.");

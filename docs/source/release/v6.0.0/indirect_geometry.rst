@@ -16,6 +16,7 @@ Improvements
 - :ref:`QENSFitSequential <algm-QENSFitSequential>` now accepts multiple inputs for `StartX` and `EndX` for each spectra.
 - Plotted fits in indirect data analysis are cleared when the fit parameters are changed.
 - The context menu for plots in the  indirect data analysis GUI is now enabled.
+- The function browser in the ConvFit tab should now correctly show Q values for Q dependent functions.
 
 Bug Fixes
 #########
