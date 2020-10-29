@@ -39,6 +39,19 @@ bool doesNotContainWildCard(const std::string &ext) {
   return std::string::npos == ext.find('*');
 }
 
+/**
+ * Returns the full absolute directory of a file.
+ * @param path : absolute path of a file
+ * @return absolute directory (i.e. without file name)
+ */
+Poco::Path absolutePath(const Poco::Path& path) {
+    Poco::Path absolutePath(true);
+    for (int i = 0; i < path.depth(); ++i) {
+        absolutePath.append(path.directory(i));
+    }
+    return absolutePath;
+}
+
 static const std::string SUCCESS("");
 
 // Regular expressions for any adjacent + or , operators
@@ -360,6 +373,10 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
 
   // Cycle through each vector of unresolvedFileNames in allUnresolvedFileNames.
   // Remember, each vector contains files that are to be added together.
+
+  // We assume that all the files must be in the same directory in order to skip searching
+  std::string directory;
+
   for (const auto &unresolvedFileNames : allUnresolvedFileNames) {
     // Check for the existance of wild cards. (Instead of iterating over all the
     // filenames just join them together and search for "*" in the result.)
@@ -369,9 +386,9 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
 
     std::vector<std::string> fullFileNames;
 
-    for (const auto &unresolvedFileName : unresolvedFileNames) {
+    for (const auto &unresolvedFile : unresolvedFileNames) {
       bool useDefaultExt;
-
+      std::string unresolvedFileName = unresolvedFile;
       try {
         // Check for an extension.
         Poco::Path path(unresolvedFileName);
@@ -384,6 +401,15 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       }
 
       std::string fullyResolvedFile;
+
+      if (!directory.empty()) {
+          Poco::Path file(unresolvedFileName);
+          if (!file.isAbsolute()) {
+            Poco::Path dir(directory);
+            dir.append(file);
+            unresolvedFileName = dir.toString();
+          }
+      }
 
       if (!useDefaultExt) {
         FileProperty slaveFileProp("Slave", "", FileProperty::Load, m_exts,
@@ -424,13 +450,21 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
                 "Unable to find file matching the string \"" +
                 unresolvedFileName +
                 "\", please check the data search directories.");
-          } else {
-            // if the fullyResolvedFile is empty, it means it failed to find the
-            // file so keep the unresolvedFileName as a hint to be displayed
-            // later on in the error message
-            fullyResolvedFile = unresolvedFileName;
           }
         }
+      }
+
+      if (fullyResolvedFile.empty()) {
+          // if the fullyResolvedFile is empty, it means it failed to find the
+          // file so keep the unresolvedFileName as a hint to be displayed
+          // later on in the error message
+          fullyResolvedFile = unresolvedFileName;
+      } else if (directory.empty()) {
+          // cache the directory
+          Poco::Path currentFile(fullyResolvedFile);
+          Poco::Path currentFileDirectory = absolutePath(currentFile);
+          directory = currentFileDirectory.toString();
+          g_log.debug("Cached first file directory " + directory);
       }
 
       // Append the file name to result.
