@@ -1471,8 +1471,9 @@ void FunctionTreeView::setBooleanAttribute(const QString &attrName,
 }
 /**
  * Updates the value of a vector attribute
- * NOTE: This is currently not implemented as vector attributes
- * such as (X,Y) for a resolution are not retrieved correctly from the function
+ * NOTE: This is currently not implemented as there is no need for it
+ * as the use of vector attributes is limited to tabulated functions (e.g resolution)
+ * which create their attributes 'on-the-fly' when the fit is performed
  * @param attrName :: Attribute name
  * @param value :: New value
  */
@@ -1491,7 +1492,7 @@ double FunctionTreeView::getParameter(const QString &paramName) const {
 }
 /**
  * Get a value of a attribute
- * @param paramName :: Attribute name
+ * @param attrName :: Attribute name
  */
 IFunction::Attribute
 FunctionTreeView::getAttribute(const QString &attrName) const {
@@ -1539,15 +1540,15 @@ FunctionTreeView::getAttributeProperty(const QString &attributeName) const {
   std::tie(index, name) = splitParameterName(attributeName);
   if (!variableIsPrefixed(attributeName.toStdString())) {
     // If variable is unprefixed then we are on the top level composite
-    // function so grab first property
+    // function so grab first property from the tree
     prop = m_browser->properties()[0];
+  } else {
+    prop = getFunctionProperty(index);
   }
-  if (prop = getFunctionProperty(index)) {
-    auto children = prop->subProperties();
-    foreach (QtProperty *child, children) {
-      if (isAttribute(child) && child->propertyName() == name) {
-        return child;
-      }
+  auto children = prop->subProperties();
+  foreach (QtProperty *child, children) {
+    if (isAttribute(child) && child->propertyName() == name) {
+      return child;
     }
   }
   std::string message =

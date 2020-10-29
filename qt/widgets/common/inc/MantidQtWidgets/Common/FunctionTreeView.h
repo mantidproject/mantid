@@ -101,7 +101,7 @@ public:
   /// Get a value of a parameter
   double getParameter(const QString &paramName) const override;
   /// Get a value of a attribute
-  IFunction::Attribute getAttribute(const QString &attrName) const;
+  IFunction::Attribute getAttribute(const QString &attrName) const override;
   /// Set error display on/off
   void setErrorsEnabled(bool enabled) override;
   /// Clear all errors
