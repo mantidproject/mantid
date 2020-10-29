@@ -39,19 +39,6 @@ bool doesNotContainWildCard(const std::string &ext) {
   return std::string::npos == ext.find('*');
 }
 
-/**
- * Returns the full absolute directory of a file.
- * @param path : absolute path of a file
- * @return absolute directory (i.e. without file name)
- */
-Poco::Path absolutePath(const Poco::Path &path) {
-  Poco::Path absolutePath(true);
-  for (int i = 0; i < path.depth(); ++i) {
-    absolutePath.append(path.directory(i));
-  }
-  return absolutePath;
-}
-
 static const std::string SUCCESS("");
 
 // Regular expressions for any adjacent + or , operators
@@ -376,7 +363,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
 
   // We assume that all the files must be in the same directory in order to skip
   // searching
-  std::string directory;
+  Poco::Path directory("");
 
   for (const auto &unresolvedFileNames : allUnresolvedFileNames) {
     // Check for the existance of wild cards. (Instead of iterating over all the
@@ -403,7 +390,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
 
       std::string fullyResolvedFile;
 
-      if (!directory.empty()) {
+      if (!directory.toString().empty()) {
         Poco::Path file(unresolvedFileName);
         if (!file.isAbsolute()) {
           bool emptyTokenFound = false;
@@ -415,8 +402,8 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
             }
           }
           if (!emptyTokenFound) {
-            Poco::Path dir(directory);
-            dir.append(file);
+            Poco::Path dir = directory;
+            dir.append(file.getFileName());
             unresolvedFileName = dir.toString();
           }
         }
@@ -470,12 +457,11 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
         // file so keep the unresolvedFileName as a hint to be displayed
         // later on in the error message
         fullyResolvedFile = unresolvedFileName;
-      } else if (directory.empty()) {
+      } else if (directory.toString().empty()) {
         // cache the directory
         Poco::Path currentFile(fullyResolvedFile);
-        Poco::Path currentFileDirectory = absolutePath(currentFile);
-        directory = currentFileDirectory.toString();
-        g_log.debug("Cached first file directory " + directory);
+        directory = currentFile.parent();
+        g_log.notice("Cached first file directory " + directory.toString() + " for file "+currentFile.getBaseName());
       }
 
       // Append the file name to result.
