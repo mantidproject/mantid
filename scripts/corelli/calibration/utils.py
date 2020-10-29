@@ -105,10 +105,12 @@ def load_banks(run: Union[int, str], bank_selection: str, output_workspace: str)
 
 def trim_calibration_table(input_workspace: InputTable, output_workspace: Optional[str] = None) -> TableWorkspace:
     r"""
+    Discard trim the X and Z pixel coordinates, since we are only interested in the calibrated Y-coordinate
 
     :param input_workspace:
     :param output_workspace:
-    :return:
+
+    :return: handle to the trimmed table workspace
     """
     if output_workspace is None:
         output_workspace = str(input_workspace)  # overwrite the input table
