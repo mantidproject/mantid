@@ -36,7 +36,7 @@ Settings
     providing the option to change the default output directory and force the
     recalculation of the vanadium correction files. The user can also select the
     log values from a list which are loaded with data in the fitting tab and select 
-	a log by which to sort the runs in a sequential fit.
+    a log by which to sort the runs in a sequential fit.
 
 Close
     Close the interface.
@@ -50,7 +50,7 @@ Red Stars
 
 Status Bar
     The status bar shows the calibration run numbers the GUI is currently using.
-	It also displays the save directory (which can be changed in the settings).
+    It also displays the save directory (which can be changed in the settings).
 
 Saved File Outputs
     The location of files saved by the GUI during processing will be shown in the mantid
