@@ -404,14 +404,14 @@ class SPowderSemiEmpiricalCalculator:
             q2 = self._instrument.calculate_q_powder(input_data=local_freq, angle=angles[0])
 
             opt_local_freq, opt_local_coeff, rebinned_broad_spectrum = self._helper_atom_angle(
-                atom=atom, local_freq=local_freq, local_coeff=local_coeff, order=order, q2=q2)
+                atom=atom, local_freq=local_freq, local_coeff=local_coeff, angle=angles[0], order=order, q2=q2)
 
             for angle in angles[1:]:
                 self._report_progress(msg=indent + "Calculation for the detector at angle %s (atom=%s)" %
                                                    (angle, atom))
                 q2 = self._instrument.calculate_q_powder(input_data=local_freq, angle=angle)
                 temp = self._helper_atom_angle(atom=atom, local_freq=local_freq, local_coeff=local_coeff,
-                                               order=order, return_freq=False, q2=q2)
+                                               angle=angle, order=order, return_freq=False, q2=q2)
 
                 rebinned_broad_spectrum += temp
 
@@ -429,14 +429,15 @@ class SPowderSemiEmpiricalCalculator:
 
         return local_freq, local_coeff, rebinned_broad_spectrum
 
-    def _helper_atom_angle(self, atom=None, local_freq=None, local_coeff=None, order=None, return_freq=True, q2=None):
+    def _helper_atom_angle(self, atom=None, local_freq=None, local_coeff=None, angle=None, order=None, return_freq=True, q2=None):
         """
         Helper function. It calculates S for one atom, q-index, order and angle (detector).
-        In case 2D instrument rebining over q is performed.
+        In case 2D instrument rebinning over q is performed.
         :param q2: squared momentum transfer
         :param atom: number of atom
         :param local_freq: frequency from the previous transition
         :param local_coeff: coefficients from the previous transition
+        :param angle: scattering angle
         :param order: order of quantum event
         :param return_freq: if true frequencies and corresponding coefficients are returned together with rebinned
                             spectrum; otherwise only rebinned spectrum is returned
@@ -469,7 +470,7 @@ class SPowderSemiEmpiricalCalculator:
             temp_full_s = np.zeros(shape=(q_size + 1, rebinned_broad_spectrum.size),
                                    dtype=FLOAT_TYPE)
 
-            all_q2 = self._instrument.calculate_q_powder(input_data=self._frequencies)
+            all_q2 = self._instrument.calculate_q_powder(input_data=self._frequencies, angle=angle)
             all_q = np.sqrt(all_q2)
 
             _q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=q_size)

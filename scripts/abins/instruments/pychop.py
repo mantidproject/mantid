@@ -19,11 +19,12 @@ class PyChopInstrument(Instrument):
     The "tthlims" data from PyChop is used to determine sampling angles.
     """
     def __init__(self, name='MAPS', setting=''):
-        super().__init__(setting=setting)
         self._name = name
         self._e_init = None
         self._polyfits = {}
         self._tthlims = PyChop.Instruments.Instrument(self._name).detector.tthlims
+
+        super().__init__(setting=setting)
 
     def get_angles(self):
         parameters = abins.parameters.instruments[self._name]
