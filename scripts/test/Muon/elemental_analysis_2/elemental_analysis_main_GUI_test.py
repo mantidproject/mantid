@@ -5,9 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from qtpy.QtCore import Qt
-from qtpy.QtTest import QTest
-
+from qtpy.QtGui import QCloseEvent as event
+from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.ElementalAnalysis2.elemental_analysis import ElementalAnalysisGui
 
@@ -18,7 +17,7 @@ class ElementalAnalysisGUITest(unittest.TestCase):
         GUI = ElementalAnalysisGui()
         self.assertTrue(GUI is not None)
         try:
-            GUI.closeEvent()
+            GUI.closeEvent(event())
         except:
             self.assertEquals("GUI did not close correctly", "")
 
