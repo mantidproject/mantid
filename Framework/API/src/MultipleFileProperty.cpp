@@ -405,9 +405,18 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       if (!directory.empty()) {
           Poco::Path file(unresolvedFileName);
           if (!file.isAbsolute()) {
-            Poco::Path dir(directory);
-            dir.append(file);
-            unresolvedFileName = dir.toString();
+            bool emptyTokenFound = false;
+            if (m_allowEmptyTokens) {
+                try {
+                  const int unresolvedInt = std::stoi(unresolvedFileName);
+                  emptyTokenFound = unresolvedInt == 0;
+                } catch (std::invalid_argument&) {}
+            }
+            if (!emptyTokenFound) {
+                Poco::Path dir(directory);
+                dir.append(file);
+                unresolvedFileName = dir.toString();
+            }
           }
       }
 
