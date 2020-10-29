@@ -12,6 +12,7 @@ from qtpy import QtGui
 from qtpy.QtCore import QVariant, Qt, QAbstractTableModel
 from enum import Enum
 
+from mantid import logger
 
 class MatrixWorkspaceTableViewModelType(Enum):
     x = 'x'
@@ -41,6 +42,8 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
     MONITOR_ROW_STRING = "This is a monitor spectrum. "
     MASKED_BIN_STRING = "This bin is masked. "
 
+    BLANK_CELL_STRING = "This cell is blank because the workspace is ragged."
+
     def __init__(self, ws, model_type):
         """
         :param ws:
@@ -55,7 +58,8 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         self.ws = ws
         self.ws_spectrum_info = self.ws.spectrumInfo()
         self.row_count = self.ws.getNumberHistograms()
-        self.column_count = self.ws.blocksize()
+        self.column_count = self._get_max_column_count()
+        logger.warning(str(self.column_count))
 
         self.masked_rows_cache = []
         self.monitor_rows_cache = []
@@ -64,7 +68,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
 
         self.masked_color = QtGui.QColor(240, 240, 240)
         self.monitor_color = QtGui.QColor(255, 253, 209)
-        self.blank_cell_color = QtGui.QColor(255, 102, 153)
+        self.blank_cell_color = QtGui.QColor(145, 139, 141)
 
         self.type = model_type
         if self.type == MatrixWorkspaceTableViewModelType.x:
@@ -81,6 +85,14 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             self.relevant_data = self.ws.readE
         else:
             raise ValueError("Unknown model type {0}".format(self.type))
+
+    def _get_max_column_count(self):
+        max_column_count = 0
+        for i in range(self.ws.getNumberHistograms()):
+            column_count = len(self.ws.readY(i))
+            if column_count > max_column_count:
+                max_column_count = column_count
+        return max_column_count
 
     def _makeVerticalHeader(self, section, role):
         def _numeric_axis_value_unit(axis):
@@ -168,9 +180,13 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
 
     def data(self, index, role=None):
         row = index.row()
+        column = index.column()
         if role == Qt.DisplayRole:
             # DisplayRole determines the text of each cell
-            return str(self.relevant_data(row)[index.column()])
+            if self.has_data(row, column):
+                return str(self.relevant_data(row)[column])
+            # The cell is blank
+            return ""
         elif role == Qt.BackgroundRole:
             # BackgroundRole determines the background of each cell
 
@@ -207,6 +223,8 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
                     tooltip += self.MASKED_BIN_STRING
             elif self.checkMaskedBinCache(row, index):
                 tooltip = self.MASKED_BIN_STRING
+            elif self.checkBlankCache(row, index.column()):
+                tooltip = self.BLANK_CELL_STRING
             return tooltip
         else:
             return QVariant()
@@ -240,10 +258,17 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
     def checkBlankCache(self, row, column):
         if row in self.blank_cell_cache and column in self.blank_cell_cache[row]:
             return True
-        elif str(self.relevant_data(row)[column]) == "":
+        elif not self.has_data(row, column):
             if row in self.blank_cell_cache:
                 self.blank_cell_cache[row].append(column)
             else:
                 self.blank_cell_cache[row] = [column]
             return True
         return False
+
+    def has_data(self, row, column):
+        try:
+            row_data = self.relevant_data(row)
+            return column < len(row_data)
+        except:
+            return False
