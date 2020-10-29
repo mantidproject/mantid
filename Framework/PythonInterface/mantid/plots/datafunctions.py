@@ -401,15 +401,17 @@ def get_bins(workspace, wkspIndex, withDy=False):
 
     """
     bins = get_bin_indices(workspace)
-    y_values = []
+    x_values, y_values = [], []
     dy = [] if withDy else None
     for bin_index in bins:
-        y_values.append(workspace.readY(int(bin_index))[wkspIndex])
-        if withDy:
-            dy.append(workspace.readE(int(bin_index))[wkspIndex])
-
+        y_data = workspace.readY(int(bin_index))
+        if wkspIndex < len(y_data):
+            x_values.append(bin_index)
+            y_values.append(y_data[wkspIndex])
+            if withDy:
+                dy.append(workspace.readE(int(bin_index))[wkspIndex])
     dx = None
-    return bins, y_values, dy, dx
+    return x_values, y_values, dy, dx
 
 
 def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=False):
