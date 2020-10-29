@@ -97,10 +97,10 @@ def save_manifest_file(database_path: str,
     consists of two columns: bank_id, timestamp (ISO format)
 
     :param database_path: location of the corelli database (absolute or relative)
-    :param bank_ids: input of bank numbers that have been calibrated
-    :param day_stamps: day stamp for each of the calibrated banks
-    :param manifest_day_stamp: day stamp, in YYYYMMDD format, to bear on the manifest file name. if `None`,
-        the last day stamp of list `day_stamps` is selected
+    :param bank_ids: input bank numbers that have been calibrated, as a list of `int` or `str`
+    :param day_stamps: day stamp for each of the calibrated banks in YYYMMDD format, either as a `int` or `str`
+    :param manifest_day_stamp: day stamp, in YYYYMMDD format, to bear on the manifest file name, either
+        as an `int` or `str`. if `None`,  the last day stamp of list `day_stamps` is selected
 
     :return absolute path of the manifest file
     """
@@ -150,15 +150,39 @@ def save_calibration_set(input_workspace: InputWorkspaceTypes,
                          masks: Optional[CalibrationInputSetTypes] = None,
                          fits: Optional[CalibrationInputSetTypes] = None) ->None:
     r"""
-    Save one or more calibration workspaces to the database
+    Save one or more calibration workspaces to the database.
 
-    The calibration date is picked up from the run start time stored in the metadata of the input workspace
+    The calibration date is picked up from the run start time stored in the metadata of the input workspace.
+    The input 'calibrations', 'masks' and 'fits' will typically results from invoking `bank.calibrate_banks`
+    on a wire-scan run.
 
-    :param input_workspace:
-    :param database_path:
-    :param calibrations:
-    :param masks:
-    :param fits:
+    Example:
+    Assume we have:
+    - workspace 'integrated_counts' containing metadata `run_start` with value 20201122
+    - directory '/tmp/temp_database'
+    - workspace group 'calibrations' with member tables 'bank10', 'bank11', and 'bank12'
+    - workspace group 'masks' with member tables 'mask10' and 'mask12'
+    - workspace group 'fits' with member workspaces 'fit10', 'fit11', and 'fit12'
+    Then save_calibration_set(integrated_counts, temp_database, calibrations, masks, fits) saves the following files:
+    - /tmp/temp_database/bank010/calibration_corelli_bank010_20201122.nxs.h5
+    - /tmp/temp_database/bank010/mask_corelli_bank010_20201122.nxs.h5
+    - /tmp/temp_database/bank010/fit_corelli_bank010_20201122.nxs.h5
+    - /tmp/temp_database/bank011/calibration_corelli_bank011_20201122.nxs.h5
+    - /tmp/temp_database/bank011/fit_corelli_bank011_20201122.nxs.h5
+    - /tmp/temp_database/bank012/calibration_corelli_bank012_20201122.nxs.h5
+    - /tmp/temp_database/bank012/mask_corelli_bank012_20201122.nxs.h5
+    - /tmp/temp_database/bank012/fit_corelli_bank012_20201122.nxs.h5
+
+    :param input_workspace: workspace from which the day-stamp will be retrieved.
+    :param database_path: absolute path where the calibration files will be saved
+    :param calibrations: one or more bank calibration tables. If more than one, a list or a `WorkspaceGroup` are
+        acceptable
+    :param masks: one or more bank calibration tables. If more than one, a list or a `WorkspaceGroup` are
+        acceptable
+    :param fits: one or more bank calibration tables. If more than one, a list or a `WorkspaceGroup` are
+        acceptable
+
+
     """
     date = str(day_stamp(input_workspace))
 
@@ -362,6 +386,34 @@ def new_corelli_calibration(database_path: str,
     to the given day stamp. The day stamp for the generated calibration will the most modern day stamp among
     the day stamps of all banks.
 
+    The files to be produced are:
+    - database_path/calibration_corelli_YYYYMMDD.nxs.h5
+    - database_path/mask_corelli_YYYYMMDD.nxs.h5
+    - database_path/manifest_corelli_YYYYMMDD.nxs.h5
+
+    Example: Assume today's date is 20201201 and we have a database with calibrations for two
+    different days. Furthermore our instrument has only one bank, for simplicity.
+    database_path/
+    |_bank001/
+      |_calibration_corelli_bank001_20200101.nxs.h5  (calibration in January)
+      |_calibration_corelli_bank001_20206101.nxs.h5  (calibration in June)
+      |_mask_corelli_bank0010_20200101.nxs.h5
+      |_mask_corelli_bank0010_20200601.nxs.h5
+    Invoking today new_corelli_calibration(database_path) will create the following files:
+    - database_path/calibration_corelli_20206101.nxs.h5
+    - database_path/mask_corelli_20206101.nxs.h5
+    - database_path/manifest_corelli_20206101.nxs.h5
+    Notice the date of the files (20206101) is not today's date (20201201) but the most "modern" day-stamp in
+    the database.
+    Invoking today new_corelli_calibration(database_path, date=20200301) will create the following files:
+    - database_path/calibration_corelli_20201101.nxs.h5
+    - database_path/mask_corelli_20201101.nxs.h5
+    - database_path/manifest_corelli_20201101.nxs.h5
+    The January files (20201101) are selected because we requested an instrument calibration
+    with a date (20200301) prior to the June files.
+
+
+
     :param database_path: absolute path to the database containing the bank calibrations
     :param date: day stamp in format YYYYMMDD
 
@@ -392,8 +444,8 @@ def new_corelli_calibration(database_path: str,
 
 def load_calibration_set(input_workspace: Union[str, Workspace],
                          database_path: str,
-                         output_calibration: str = 'calibration',
-                         output_mask: str = 'mask') -> Tuple[Optional[TableWorkspace], Optional[TableWorkspace]]:
+                         output_calibration_name: str = 'calibration',
+                         output_mask_name: str = 'mask') -> Tuple[Optional[TableWorkspace], Optional[TableWorkspace]]:
     r"""
     Retrieve an instrument calibration and instrument mask.
 
@@ -403,12 +455,12 @@ def load_calibration_set(input_workspace: Union[str, Workspace],
 
     :param input_workspace: Workspace containing the run-start in the metadata
     :param database_path: absolute path to the instrument calibration tables
-    :param output_calibration: name of the TableWorkspace containing the calibrated pixel positions
-    :param output_mask: name of the TableWorkspace containing the uncalibrated pixels to be masked
+    :param output_calibration_name: name of the TableWorkspace containing the calibrated pixel positions
+    :param output_mask_name: name of the TableWorkspace containing the uncalibrated pixels to be masked
     :return: calibration and mask tables. Returns `None` for each of these tables if a suitable
         calibration file is not found in the database.
     """
-    workspace_names = {'calibration': output_calibration, 'mask': output_mask}
+    workspace_names = {'calibration': output_calibration_name, 'mask': output_mask_name}
     run_start = day_stamp(input_workspace)  # day when the experiment associated to `input_workspace` was started
     instrument_tables = {'calibration': None, 'mask': None}  # store the calibration and mask instrument tables
 

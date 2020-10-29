@@ -194,8 +194,8 @@ def criterion_peak_vertical_position(peak_table: InputTable,
                                      zscore_threshold: float = 2.5,
                                      deviation_threshold: float = 0.0035) -> np.ndarray:
     r"""
-    Flag tubes whose wire shadows vertical positions deviate considerably from the vertical positions when
-    averaged for all tubes in the bank.
+    Flag tubes whose wire shadows vertical positions (Y-coordinate) deviate considerably from the
+    vertical positions when averaged for all tubes in the bank.
 
     .. math::
 
