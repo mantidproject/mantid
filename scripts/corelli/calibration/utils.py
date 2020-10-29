@@ -90,7 +90,7 @@ def load_banks(run: Union[int, str], bank_selection: str, output_workspace: str)
             file_descriptor = f'CORELLI_{str(int(run))}'
         except ValueError:  # run is path to a file
             filename = run
-            assert path.exists(filename), f'file {filename} does not exist'
+            assert path.exists(filename), f'File {filename} does not exist'
             file_descriptor = filename
 
     bank_names = ','.join(['bank' + b for b in bank_numbers(bank_selection)])
@@ -101,6 +101,33 @@ def load_banks(run: Union[int, str], bank_selection: str, output_workspace: str)
         LoadNexusProcessed(Filename=file_descriptor, OutputWorkspace=output_workspace)
     Integration(InputWorkspace=output_workspace, OutputWorkspace=output_workspace)
     return mtd[output_workspace]
+
+
+def trim_calibration_table(input_workspace: InputTable, output_workspace: Optional[str] = None) -> TableWorkspace:
+    r"""
+
+    :param input_workspace:
+    :param output_workspace:
+    :return:
+    """
+    if output_workspace is None:
+        output_workspace = str(input_workspace)  # overwrite the input table
+
+    # Extract detector ID's and Y-coordinates from the input table
+    table = mtd[str(input_workspace)]
+    detector_ids = table.column(0)
+    y_coordinates = [v.Y() for v in table.column(1)]
+
+    # create the (empty) trimmed table
+    table_trimmed = CreateEmptyTableWorkspace(OutputWorkspace=output_workspace)
+    table_trimmed.addColumn(type='int', name='Detector ID')
+    table_trimmed.addColumn(type='double', name='Detector Y Coordinate')
+
+    # fill the rows of the trimmed table
+    for detector_id, y_coordinate in zip(detector_ids, y_coordinates):
+        table_trimmed.addRow([detector_id, y_coordinate])
+
+    return table_trimmed
 
 
 def calculate_peak_y_table(peak_table: InputTable,
@@ -167,7 +194,7 @@ def calibrate_tube(workspace: WorkspaceTypes,
     :param shadow_height: estimated dip in the background intensity.
     :param shadow_width: estimated width of the shadow cast by the wire, in pixel units
     :param fit_domain: estimated range, in pixel units, over which to carry out the fit.
-    :return: table containing detector ID and position vector
+    :return: table containing detector ID and Y-coordinates
     """
     message = f'Cannot process workspace {workspace}. Pass the name of an existing workspace or a workspace handle'
     assert isinstance(workspace, (str, Workspace2D)), message
@@ -188,6 +215,7 @@ def calibrate_tube(workspace: WorkspaceTypes,
     calibration_table, _ = tube.calibrate(workspace, tube_name, wire_positions(units='meters')[1: -1], peaks_form,
                                           fitPar=fit_par, outputPeak=True,
                                           parameters_table_group='ParametersTableGroup')
+    calibration_table = trim_calibration_table(calibration_table)  # discard X and Z coordinates
     # Additional workspaces
     # Table with shadow positions along the tube, in pixel units
     if output_peak_table != 'PeakTable':  # 'PeakTable' is output by tube.calibrate

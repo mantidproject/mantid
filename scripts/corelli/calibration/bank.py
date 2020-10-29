@@ -19,7 +19,8 @@ from mantid.simpleapi import (CloneWorkspace, CreateEmptyTableWorkspace, CreateW
 from Calibration import tube
 from Calibration.tube_spec import TubeSpec
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
-from corelli.calibration.utils import bank_numbers, PIXELS_PER_TUBE, calculate_peak_y_table, TUBES_IN_BANK, wire_positions
+from corelli.calibration.utils import (bank_numbers, PIXELS_PER_TUBE, calculate_peak_y_table, trim_calibration_table,
+                                       TUBES_IN_BANK, wire_positions)
 
 
 def sufficient_intensity(input_workspace: WorkspaceTypes, bank_name: str, minimum_intensity:float = 10000) -> bool:
@@ -101,9 +102,11 @@ def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1
                    peaks_form, fitPar=fit_par, outputPeak=True, parameters_table_group=parameters_table_group)
     if calibration_table != 'CalibTable':
         RenameWorkspace(InputWorkspace='CalibTable', OutputWorkspace=calibration_table)
+    trim_calibration_table(calibration_table)  # discard X and Z coordinates
     if peak_pixel_positions_table != 'PeakTable':
         RenameWorkspace(InputWorkspace='PeakTable', OutputWorkspace=peak_pixel_positions_table)
-    calculate_peak_y_table(peak_pixel_positions_table, parameters_table_group, output_workspace=peak_vertical_positions_table)
+    calculate_peak_y_table(peak_pixel_positions_table, parameters_table_group,
+                           output_workspace=peak_vertical_positions_table)
 
 
 def collect_bank_fit_results(output_workspace: str,
@@ -343,7 +346,7 @@ def purge_table(workspace: WorkspaceTypes, calibration_table: TableWorkspace,
 
     :param workspace: input Workspace2D containing total neutron counts per pixel
     :param calibration_table: input TableWorkspace containing one column for detector ID and one column
-    for its calibrated XYZ coordinates, in meters
+    for its calibrated Y coordinates, in meters
     :param tubes_fit_success: array of booleans of length TUBES_IN_BANK. `False` if a tube was unsuccessfully fitted.
     :param output_table: name of the purged table. If `None`, the input `calibration_table` is purged.
     """
@@ -424,7 +427,7 @@ def calibrate_bank(workspace: WorkspaceTypes,
     :param workspace: input Workspace2D containing total neutron counts per pixel
     :param bank_name: a string of the form 'bankI' where 'I' is a bank number
     :param calibration_table: output TableWorkspace containing one column for detector ID and one column
-    for its calibrated XYZ coordinates, in meters
+    for its calibrated Y coordinates, in meters
     :param mask_table: output TableWorkspace containing containing the detector ID's of the
         unsuccessfully fitted tubes
     :param peak_table: output table with pixel positions for each shadow, for each tube. If `None`, then no

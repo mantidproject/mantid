@@ -8,7 +8,7 @@
 
 from os import path, remove
 import unittest
-import numpy as np
+from numpy.testing import assert_allclose
 import pathlib
 from datetime import datetime
 import tempfile
@@ -56,47 +56,47 @@ class TestCorelliDatabase(unittest.TestCase):
         date: str = datetime.now().strftime('%Y%m%d')  # format YYYYMMDD
 
         calibrated_ws = init_corelli_table()
-        calibrated_ws.addRow([28672, [2.291367950578997, -1.2497636826045173, -0.7778867990739283]])
-        calibrated_ws.addRow([28673, [2.291367950578997, -1.2462425728938251, -0.7778867990739283]])
-        calibrated_ws.addRow([28674, [2.291367950578997, -1.2427213977528369, -0.7778867990739283]])
-        calibrated_ws.addRow([28675, [2.291367950578997, -1.2392001571797284, -0.7778867990739283]])
+        calibrated_ws.addRow([28672, -1.2497636826045173])
+        calibrated_ws.addRow([28673, -1.2462425728938251])
+        calibrated_ws.addRow([28674, -1.2427213977528369])
+        calibrated_ws.addRow([28675, -1.2392001571797284])
         save_bank_table(calibrated_ws, 10, self.database_path, date)
 
         calibrated_ws = init_corelli_table()
-        calibrated_ws.addRow([28676, [2.291367950578997, -1.2597636826045173, -0.7778867990739283]])
-        calibrated_ws.addRow([28677, [2.291367950578997, -1.2562425728938251, -0.7778867990739283]])
-        calibrated_ws.addRow([28678, [2.291367950578997, -1.2527213977528369, -0.7778867990739283]])
-        calibrated_ws.addRow([28679, [2.291367950578997, -1.2492001571797284, -0.7778867990739283]])
+        calibrated_ws.addRow([28676, -1.2597636826045173])
+        calibrated_ws.addRow([28677, -1.2562425728938251])
+        calibrated_ws.addRow([28678, -1.2527213977528369])
+        calibrated_ws.addRow([28679, -1.2492001571797284])
         save_bank_table(calibrated_ws, 20, self.database_path, date)
 
         calibrated_ws = init_corelli_table()
-        calibrated_ws.addRow([28700, [2.291367950578997, -1.1511478720770645, -0.7778867990739283]])
-        calibrated_ws.addRow([28701, [2.291367950578997, -1.1476249296284657, -0.7778867990739283]])
-        calibrated_ws.addRow([28702, [2.291367950578997, -1.2427213977528369, -0.7778867990739283]])
-        calibrated_ws.addRow([28703, [2.291367950578997, -1.2392001571797284, -0.7778867990739283]])
+        calibrated_ws.addRow([28700, -1.1511478720770645])
+        calibrated_ws.addRow([28701, -1.1476249296284657])
+        calibrated_ws.addRow([28702, -1.2427213977528369])
+        calibrated_ws.addRow([28703, -1.2392001571797284])
         save_bank_table(calibrated_ws, 30, self.database_path, date)
 
         calibrated_ws = init_corelli_table()
-        calibrated_ws.addRow([28704, [2.291367950578997, -1.1611478720770645, -0.7778867990739283]])
-        calibrated_ws.addRow([28705, [2.291367950578997, -1.1776249296284657, -0.7778867990739283]])
-        calibrated_ws.addRow([28706, [2.291367950578997, -1.2827213977528369, -0.7778867990739283]])
-        calibrated_ws.addRow([28707, [2.291367950578997, -1.2992001571797284, -0.7778867990739283]])
+        calibrated_ws.addRow([28704, -1.1611478720770645])
+        calibrated_ws.addRow([28705, -1.1776249296284657])
+        calibrated_ws.addRow([28706, -1.2827213977528369])
+        calibrated_ws.addRow([28707, -1.2992001571797284])
         save_bank_table(calibrated_ws, 40, self.database_path, '20200601')  # use different date
 
         calibrated_ws = init_corelli_table('calibration_' + str(40))
-        calibrated_ws.addRow([28704, [2.291367950578997, -1.1711478720770645, -0.7778867990739283]])
-        calibrated_ws.addRow([28705, [2.291367950578997, -1.1876249296284657, -0.7778867990739283]])
-        calibrated_ws.addRow([28706, [2.291367950578997, -1.2927213977528369, -0.7778867990739283]])
-        calibrated_ws.addRow([28707, [2.291367950578997, -1.3092001571797284, -0.7778867990739283]])
+        calibrated_ws.addRow([28704, -1.1711478720770645])
+        calibrated_ws.addRow([28705, -1.1876249296284657])
+        calibrated_ws.addRow([28706, -1.2927213977528369])
+        calibrated_ws.addRow([28707, -1.3092001571797284])
         save_bank_table(calibrated_ws, 40, self.database_path, '20200101')  # use different date
 
         # placeholder to read from the database
         self.ws_group = WorkspaceGroup()
         date: str = datetime.now().strftime('%Y%m%d')  # format YYYYMMDD
-        self.ws_group.addWorkspace(load_bank_table( 10, self.database_path, date))
-        self.ws_group.addWorkspace(load_bank_table( 20, self.database_path, date))
-        self.ws_group.addWorkspace(load_bank_table( 30, self.database_path, date))
-        self.ws_group.addWorkspace(load_bank_table( 40, self.database_path, '20200601'))
+        self.ws_group.addWorkspace(load_bank_table(10, self.database_path, date))
+        self.ws_group.addWorkspace(load_bank_table(20, self.database_path, date))
+        self.ws_group.addWorkspace(load_bank_table(30, self.database_path, date))
+        self.ws_group.addWorkspace(load_bank_table(40, self.database_path, '20200601'))
 
     def test_init_corelli_table(self):
 
@@ -133,10 +133,10 @@ class TestCorelliDatabase(unittest.TestCase):
         self.assertEqual(filename, expected_filename)
 
         # verify assertion is raised for invalid name
-        with self.assertRaises(AssertionError ) as ar:
+        with self.assertRaises(AssertionError) as ar:
             filename_bank_table(1, self.database_path, date, 'wrong')
 
-        self.assertEqual('table_type must be calibration, mask or fit' in str(ar.exception), True)
+        self.assertEqual('wrong is not a valid table type' in str(ar.exception), True)
 
     def test_combine_spatial_banks(self):
 
@@ -150,29 +150,16 @@ class TestCorelliDatabase(unittest.TestCase):
 
         expected_dict = {'Detector ID': [28672, 28673, 28674, 28675, 28676, 28677, 28678, 28679,
                                          28700, 28701, 28702, 28703, 28704, 28705, 28706, 28707],
-                         'Detector Position': [np.array([2.29136795, -1.24976368, -0.7778868 ]),
-                                               np.array([2.29136795, -1.24624257, -0.7778868 ]),
-                                               np.array([2.29136795, -1.2427214 , -0.7778868 ]),
-                                               np.array([2.29136795, -1.23920016, -0.7778868 ]),
-                                               np.array([2.29136795, -1.25976368, -0.7778868 ]),
-                                               np.array([2.29136795, -1.25624257, -0.7778868 ]),
-                                               np.array([2.29136795, -1.2527214 , -0.7778868 ]),
-                                               np.array([2.29136795, -1.24920016, -0.7778868 ]),
-                                               np.array([2.29136795, -1.15114787, -0.7778868 ]),
-                                               np.array([2.29136795, -1.14762493, -0.7778868 ]),
-                                               np.array([2.29136795, -1.2427214 , -0.7778868 ]),
-                                               np.array([2.29136795, -1.23920016, -0.7778868 ]),
-                                               np.array([2.29136795, -1.16114787, -0.7778868 ]),
-                                               np.array([2.29136795, -1.17762493, -0.7778868 ]),
-                                               np.array([2.29136795, -1.2827214 , -0.7778868 ]),
-                                               np.array([2.29136795, -1.29920016, -0.7778868 ])
-                                               ]
+                         'Detector Y Coordinate': [-1.24976368, -1.24624257, -1.2427214, -1.23920016, -1.25976368,
+                                                   -1.25624257, -1.25272140, -1.24920016, -1.15114787, -1.14762493,
+                                                   -1.2427214, -1.23920016, -1.16114787, -1.17762493, -1.28272140,
+                                                   -1.29920016]
                          }
 
         self.assertEqual(expected_dict['Detector ID'], combined_dict['Detector ID'] )
 
-        for i, expected_array in enumerate(expected_dict['Detector Position']):
-            self.assertAlmostEqual(expected_array.all(), combined_dict['Detector Position'][i].all())
+        for i, expected_array in enumerate(expected_dict['Detector Y Coordinate']):
+            self.assertAlmostEqual(expected_array, combined_dict['Detector Y Coordinate'][i])
 
     def test_save_manifest_file(self):
 
@@ -185,14 +172,6 @@ class TestCorelliDatabase(unittest.TestCase):
 
         file_contents = pathlib.Path(filename).read_text()  # safe one liner
         expected_manifest = f'bankID, timestamp\n10, {date}\n11, {date}\n'
-        self.assertEqual(file_contents, expected_manifest)
-
-        # appending
-        save_manifest_file(self.database_path, [12], [date])
-        self.assertTrue(pathlib.Path(filename).is_file())
-
-        file_contents = pathlib.Path(filename).read_text()  # safe one liner
-        expected_manifest = f'bankID, timestamp\n10, {date}\n11, {date}\n12, {date}\n'
         self.assertEqual(file_contents, expected_manifest)
 
         remove(filename)
@@ -275,51 +254,29 @@ class TestCorelliDatabase(unittest.TestCase):
         date: str = datetime.now().strftime('%Y%m%d')  # format YYYYMMDD
         group_ws, bank_stamps = combine_temporal_banks(self.database_path, date)
         self.assertEqual([bs[0] for bs in bank_stamps], [10, 20, 30, 40])  # bank numbers
-        self.assertEqual([bs[1] for bs in bank_stamps], [20201026, 20201026, 20201026, 20200601])  # day-stamps
+        self.assertEqual([bs[1] for bs in bank_stamps], [int(date), int(date), int(date), 20200601])  # day-stamps
 
         # list of expected group_ws components as dictionaries
         expected = []
         expected.append({'Detector ID': [28672, 28673, 28674, 28675],
-                         'Detector Position':
-                         [np.array([2.29136795, -1.24976368, -0.7778868]),
-                          np.array([2.29136795, -1.24624257, -0.7778868]),
-                          np.array([2.29136795, -1.2427214, -0.7778868]),
-                          np.array([2.29136795, -1.23920016, -0.7778868])
-                          ]
-                         })
+                         'Detector Y Coordinate': [-1.24976368, -1.24624257, -1.24272140, -1.23920016]})
 
         expected.append({'Detector ID': [28676, 28677, 28678, 28679],
-                         'Detector Position': [
-                             np.array([2.29136795, -1.25976368, -0.7778868]),
-                             np.array([2.29136795, -1.25624257, -0.7778868]),
-                             np.array([2.29136795, -1.2527214 , -0.7778868]),
-                             np.array([2.29136795, -1.24920016, -0.7778868])]
-                         }
-                        )
+                         'Detector Y Coordinate': [-1.25976368, -1.25624257, -1.25272140, -1.24920016]})
 
         expected.append({'Detector ID': [28700, 28701, 28702, 28703],
-                         'Detector Position': [
-                             np.array([2.29136795, -1.15114787, -0.7778868]),
-                             np.array([2.29136795, -1.14762493, -0.7778868]),
-                             np.array([2.29136795, -1.2427214 , -0.7778868]),
-                             np.array([2.29136795, -1.23920016, -0.7778868])]
-                         }
-                        )
+                         'Detector Y Coordinate': [-1.15114787, -1.14762493, -1.24272140, -1.23920016]})
         # bank 40 from '20200601'
         expected.append({'Detector ID': [28704, 28705, 28706, 28707],
-                         'Detector Position': [
-                             np.array([2.29136795, -1.16114787, -0.7778868]),
-                             np.array([2.29136795, -1.17762493, -0.7778868]),
-                             np.array([2.29136795, -1.2827214 , -0.7778868]),
-                             np.array([2.29136795, -1.29920016, -0.7778868])]})
+                         'Detector Y Coordinate': [-1.16114787, -1.17762493, -1.28272140, -1.29920016]})
 
         for b, ws in enumerate(group_ws):
 
             table_dict = ws.toDict()
             self.assertEqual(expected[b]['Detector ID'], table_dict['Detector ID'] )
 
-            for i, expected_array in enumerate(expected[b]['Detector Position']):
-                self.assertAlmostEqual(expected_array.all(), table_dict['Detector Position'][i].all())
+            for i, expected_array in enumerate(expected[b]['Detector Y Coordinate']):
+                self.assertAlmostEqual(expected_array, table_dict['Detector Y Coordinate'][i])
 
     def test_new_corelli_calibration_and_load_calibration(self):
         r"""Creating a database is time consuming, thus we test both new_corelli_clibration and load_calibration"""
@@ -336,34 +293,31 @@ class TestCorelliDatabase(unittest.TestCase):
                 DeleteWorkspaces(['masks'])
 
         # invoque creation of  new corelli calibration without a date
-        calibration_newest, mask_newest = new_corelli_calibration(database.name)
-
-        # assert the following files have been created: calibration, mask, manifest
-        assert path.exists(path.join(database.name, 'calibration_corelli_20200109.nxs.h5'))
-        assert path.exists(path.join(database.name, 'mask_corelli_20200109.nxs.h5'))
-        path.exists(path.join(database.name, 'manifest_corelli_20200109.csv'))
-
-        # assert the day stamp in the manifest of the bank with more than one calibration is the latest
-
-        # invoque a new corelli calibration with a date falling in between the bank having two calibrations
-        calibration_oldest, mask_oldest = new_corelli_calibration(database.name, date='20200108')
-        assert path.exists(path.join(database.name, 'calibration_corelli_20200106.nxs.h5'))
-        assert path.exists(path.join(database.name, 'mask_corelli_20200106.nxs.h5'))
-        path.exists(path.join(database.name, 'manifest_corelli_20200106.csv'))
-
-        # assert the date of the new calibration in the day stamp of the files
-
-        # assert the day stamp in the manifest of the bank with more than one calibration is the first
+        calibration_file, mask_file, manifest_file = new_corelli_calibration(database.name)
+        for file_path in (calibration_file, mask_file, manifest_file):
+            assert path.exists(file_path)
+        assert open(manifest_file).read() == 'bankID, timestamp\n10, 20200109\n14, 20200109\n15, 20200109\n'
 
         # load latest calibration and mask (day-stamp of '124023_bank10' is 20200109)
         calibration, mask = load_calibration_set(self.cases['124023_bank10'], database.name)
-        assert calibration.to_dict() == calibration_newest.to_dict()
-        assert mask.to_dict() == mask_newest.to_dict()
+        calibration_expected = LoadNexusProcessed(Filename=calibration_file)
+        mask_expected = LoadNexusProcessed(Filename=mask_file)
+        assert_allclose(calibration.column(1), calibration_expected.column(1), atol=1e-4)
+        assert mask.column(0) == mask_expected.column(0)
+
+        # invoque a new corelli calibration with a date falling in between the bank (bank10) in
+        # in our small dataset having two calibrations
+        calibration_file, mask_file, manifest_file = new_corelli_calibration(database.name, date='20200108')
+        for file_path in (calibration_file, mask_file, manifest_file):
+            assert path.exists(file_path)
+        assert open(manifest_file).read() == 'bankID, timestamp\n10, 20200106\n'
 
         # load oldest calibration and mask(day-stamp of '124023_bank10' is 20200106)
         calibration, mask = load_calibration_set(self.cases['124016_bank10'], database.name)
-        assert calibration.to_dict() == calibration_newest.to_dict()
-        assert mask.to_dict() == mask_newest.to_dict()
+        calibration_expected = LoadNexusProcessed(Filename=calibration_file)
+        mask_expected = LoadNexusProcessed(Filename=mask_file)
+        assert_allclose(calibration.column(1), calibration_expected.column(1), atol=1e-4)
+        assert mask.column(0) == mask_expected.column(0)
 
         database.cleanup()
 

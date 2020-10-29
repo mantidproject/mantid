@@ -45,7 +45,7 @@ def init_corelli_table(name: Optional[str] = None, table_type='calibration') -> 
     table: TableWorkspace = CreateEmptyTableWorkspace(OutputWorkspace=name) if name else CreateEmptyTableWorkspace()
 
     # expected columns declarations (column_type, column_name) for each type of calibration table
-    column_declarations = {'calibration': [('int', 'Detector ID'), ('vector_double', 'Detector Position')],
+    column_declarations = {'calibration': [('int', 'Detector ID'), ('double', 'Detector Y Coordinate')],
                            'mask': [('int', 'Detector ID')]}
     for column_type, colum_name in column_declarations[table_type]:
         table.addColumn(type=column_type, name=colum_name)
@@ -56,7 +56,7 @@ def has_valid_columns(table: TableWorkspace, table_type='calibration') -> bool:
     """
     Check if table column names are valid Corelli calibration tables
     """
-    names_expected = {'calibration': ['Detector ID', 'Detector Position'], 'mask': ['Detector ID']}
+    names_expected = {'calibration': ['Detector ID', 'Detector Y Coordinate'], 'mask': ['Detector ID']}
     names = table.getColumnNames()
     if names != names_expected[table_type]:
         return False
@@ -80,8 +80,6 @@ def filename_bank_table(bank_id: int, database_path: str, date: str, table_type:
     verify_date_format('filename_bank_table', date)
     subdirectory: str = database_path + '/' + 'bank' + str(bank_id).zfill(3)
     pathlib.Path(subdirectory).mkdir(parents=True, exist_ok=True)
-    message = f'{"Cannot process Corelli filename_bank_table, table_type must be calibration, mask or fit"}'
-    assert table_type == 'calibration' or table_type == 'mask' or table_type == 'fit', message
 
     filename = subdirectory + '/' + table_type + '_corelli_bank' + str(bank_id).zfill(3) + '_' + date + '.nxs.h5'
     # make it portable
@@ -92,19 +90,19 @@ def filename_bank_table(bank_id: int, database_path: str, date: str, table_type:
 def save_manifest_file(database_path: str,
                        bank_ids: List[Union[int, str]],
                        day_stamps: List[Union[int, str]],
-                       manifest_day_stamp: Optional[Union[int, str]] = None) -> None:
+                       manifest_day_stamp: Optional[Union[int, str]] = None) -> str:
     """
-    Function that saves or updates an existing manifest_corelli_date.csv file.
-    There is one file stored for each calibration day. If file exist it will append two columns:
-    bank_id, timestamp (ISO format)
+    Function that saves a manifest_corelli_date.csv file.
+    There is one file stored for each time a new new correlli calibration is invoked. The file
+    consists of two columns: bank_id, timestamp (ISO format)
 
     :param database_path: location of the corelli database (absolute or relative)
-           Example: database/corelli/ for manifest file:
-                    database/corelli/manifest_corelli_YYYYMMDD.csv
     :param bank_ids: input of bank numbers that have been calibrated
     :param day_stamps: day stamp for each of the calibrated banks
     :param manifest_day_stamp: day stamp, in YYYYMMDD format, to bear on the manifest file name. if `None`,
         the last day stamp of list `day_stamps` is selected
+
+    :return absolute path of the manifest file
     """
     # verify day_stamps are correct
     [verify_date_format('save_manifest_file', date) for date in day_stamps]
@@ -114,11 +112,8 @@ def save_manifest_file(database_path: str,
 
     filename = database_path + '/manifest_corelli_' + str(manifest_day_stamp) + '.csv'
 
-    if pathlib.Path(filename).is_file():
-        file = open(filename, 'a+')
-    else:
-        file = open(filename, 'w')
-        file.write('bankID, timestamp\n')  # header
+    file = open(filename, 'w')
+    file.write('bankID, timestamp\n')  # header
 
     lines: str = ''
     for bank_id, date in zip(bank_ids, day_stamps):
@@ -126,6 +121,7 @@ def save_manifest_file(database_path: str,
 
     file.write(lines)
     file.close()
+    return filename
 
 
 def save_bank_table(data: Workspace, bank_id: int, database_path: str, date: str,
@@ -320,7 +316,7 @@ def combine_spatial_banks(tables: WorkspaceGroup,
         table_dict = table.toDict()
 
         # loop through rows
-        column_names = table.getColumnNames()  # 'Detector ID' and 'Detector Position' for 'calibration' table_type
+        column_names = table.getColumnNames()  # 'Detector ID' and 'Detector Y Coordinate' for 'calibration' table_type
         for r in range(0, table.rowCount()):
             combined_table.addRow([table_dict[name][r] for name in column_names])
 
@@ -358,7 +354,7 @@ def verify_date_format(function_name: str, date: Union[int, str]) -> None:
 
 
 def new_corelli_calibration(database_path: str,
-                            date: Optional[str] = None) -> Tuple[TableWorkspace, TableWorkspace, List[str]]:
+                            date: Optional[str] = None) -> Tuple[str, str, str]:
     r"""
     Generate a Corelli calibration set of files for a given day stamp, or for today if no day stamp is given.
 
@@ -369,32 +365,73 @@ def new_corelli_calibration(database_path: str,
     :param database_path: absolute path to the database containing the bank calibrations
     :param date: day stamp in format YYYYMMDD
 
-    :return: workspaces for the calibration and the mask, as well as a manifest list
+    :return: absolute path to files containing the calibrated pixels, the masked pixels,
+        and the manifest file, in this order.
     """
     if date is None:
         date = datetime.now().strftime('%Y%m%d')  # today's date in YYYYMMDD format
     verify_date_format('new_corelli_calibration', date)
 
-    instrument_table = dict()
+    file_paths = dict()
     for table_type in ('calibration', 'mask'):
         bank_tables, bank_stamps = combine_temporal_banks(database_path, date, table_type)
-        instrument_table[table_type] = combine_spatial_banks(bank_tables, table_type=table_type)
+        table = combine_spatial_banks(bank_tables, table_type=table_type)
 
         bank_numbers, day_stamps = zip(*bank_stamps)
         last_day_stamp = sorted(day_stamps)[-1]
         filename = str(pathlib.Path(database_path) / f'{table_type}_corelli_{last_day_stamp}.nxs.h5')
-        SaveNexusProcessed(InputWorkspace=instrument_table[table_type], Filename=filename)
+        SaveNexusProcessed(InputWorkspace=table, Filename=filename)
+        file_paths[table_type] = filename
 
         if table_type == 'calibration':
-            save_manifest_file(database_path, bank_numbers, day_stamps, manifest_day_stamp=last_day_stamp)
+            file_paths['manifest'] = save_manifest_file(database_path, bank_numbers, day_stamps,
+                                                        manifest_day_stamp=last_day_stamp)
 
-    return instrument_table.values()
+    return [file_paths[x] for x in ('calibration', 'mask', 'manifest')]
 
 
 def load_calibration_set(input_workspace: Union[str, Workspace],
                          database_path: str,
                          output_calibration: str = 'calibration',
-                         output_mask: str = 'mask') -> Tuple[TableWorkspace, TableWorkspace]:
-    calibration = None
-    mask = None
-    return calibration, mask
+                         output_mask: str = 'mask') -> Tuple[Optional[TableWorkspace], Optional[TableWorkspace]]:
+    r"""
+    Retrieve an instrument calibration and instrument mask.
+
+    The input workspaces has a day stamp corresponding to the day when the experiment was started
+    (the run-start day). This day is used to find in the database the calibration with the closest
+    and prior date to the run-start day.
+
+    :param input_workspace: Workspace containing the run-start in the metadata
+    :param database_path: absolute path to the instrument calibration tables
+    :param output_calibration: name of the TableWorkspace containing the calibrated pixel positions
+    :param output_mask: name of the TableWorkspace containing the uncalibrated pixels to be masked
+    :return: calibration and mask tables. Returns `None` for each of these tables if a suitable
+        calibration file is not found in the database.
+    """
+    workspace_names = {'calibration': output_calibration, 'mask': output_mask}
+    run_start = day_stamp(input_workspace)  # day when the experiment associated to `input_workspace` was started
+    instrument_tables = {'calibration': None, 'mask': None}  # store the calibration and mask instrument tables
+
+    for table_type in ('calibration', 'mask'):
+        filename = None  # store the path to the target instrument table
+        candidate_files = list(pathlib.Path(database_path).glob(table_type + '_corelli_*'))
+        # extract the YYYYMMDD date from each file name, convert to integers
+        available_dates = [int(re.search(r'corelli_(\d+)', str(f)).groups()[0]) for f in candidate_files]
+        date_to_file = {d: str(f) for d, f in zip(available_dates, candidate_files)}  # mapping
+        # numerical sort the available dates
+        available_dates.sort()
+        # Find the file with the daystamp closest to `run_start` and previous to `run_start`
+        for available_dates_index, available_date in enumerate(available_dates):
+            if available_date == run_start:
+                filename = date_to_file[available_date]
+                break
+            elif available_date > run_start:  # we overshot with the date
+                if available_dates_index == 0:  # database contains one file, but with a later daystamp than `run_start`
+                    break  # no calibration files is available with a prior date to `run_start`
+                # the correct calibration is the one with a date previous to `run_start`
+                filename = date_to_file[available_dates[available_dates_index - 1]]
+                break
+        if filename is not None:
+            instrument_tables[table_type] = LoadNexusProcessed(Filename=filename,
+                                                               OutputWorkspace=workspace_names[table_type])
+    return instrument_tables.values()

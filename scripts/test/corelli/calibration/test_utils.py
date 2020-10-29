@@ -10,11 +10,13 @@ from numpy.testing import assert_allclose
 from os import path
 import unittest
 
-from corelli.calibration.utils import (apply_calibration, bank_numbers, calibrate_tube, load_banks, calculate_peak_y_table,
-                                       wire_positions)
 from mantid import AnalysisDataService, config
+from mantid.kernel import V3D
 from mantid.simpleapi import (CreateEmptyTableWorkspace, DeleteWorkspaces, GroupWorkspaces, LoadEmptyInstrument,
                               LoadNexusProcessed)
+
+from corelli.calibration.utils import (apply_calibration, bank_numbers, calculate_peak_y_table, calibrate_tube,
+                                       load_banks, trim_calibration_table, wire_positions)
 
 
 class TestUtils(unittest.TestCase):
@@ -131,6 +133,23 @@ class TestUtils(unittest.TestCase):
         self.assertAlmostEqual(workspace.readY(42)[0], 13297.0)
         DeleteWorkspaces(['jambalaya'])
 
+    def test_trim_calibration_table(self):
+        # create a table with detector id and detector XYZ positions
+        table = CreateEmptyTableWorkspace(OutputWorkspace='CalibTable')
+        table.addColumn(type='int', name='Detector ID')
+        table.addColumn(type='V3D', name='Detector Position')
+        table.addRow([0, V3D(0, 1, 2)])  # add two detectors with ID's 0 and 1
+        table.addRow([1, V3D(3, 4, 5)])
+        y_values = [1, 4]
+        # call trim_calibration_table and save to new table
+        table_calibrated = trim_calibration_table(table, output_workspace='table_calibrated')
+        # assert the Y-coordinate hasn't changed
+        assert_allclose(table_calibrated.column(1), y_values, atol=0.0001)
+        # call trim_calibration_table and overwrite the table
+        table_calibrated = trim_calibration_table(table)
+        assert table_calibrated.name() == 'CalibTable'  # table workspace has been overwritten with the calibrated one
+        assert_allclose(table_calibrated.column(1), y_values, atol=0.0001)
+
     def test_peak_y_table(self) -> None:
         # Mock PeakTable with two tubes and three peaks. Simple, integer values
         def peak_pixels_table(table_name, peak_count, tube_names=None, pixel_positions=None):
@@ -189,7 +208,7 @@ class TestUtils(unittest.TestCase):
         assert 'The fit domain cannot be larger than the distance between consecutive' in str(exception_info.exception)
 
         table = calibrate_tube(self.workspace, 'bank42/sixteenpack/tube8')
-        calibrated_y = np.array([v.Y() for v in table.column(1)])
+        calibrated_y = table.column(1)
         assert_allclose(calibrated_y, self.calibrated_y, atol=1e-3)
 
         # Check for existence of all table workspaces
