@@ -475,7 +475,7 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
         Poco::Path currentFile(fullyResolvedFile);
         Poco::Path currentFileDirectory = absolutePath(currentFile);
         directory = currentFileDirectory.toString();
-        g_log.notice("Cached first file directory " + directory);
+        g_log.debug("Cached first file directory " + directory);
       }
 
       // Append the file name to result.
