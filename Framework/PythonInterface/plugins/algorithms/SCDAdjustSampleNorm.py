@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, PropertyMode, \
     MultipleFileProperty, WorkspaceProperty, mtd
-from mantid.kernel import Direction
-from mantid.simpleapi import GroupWorkspaces, Load, ConvertWANDSCDtoQ, MoveInstrumentComponent
+from mantid.kernel import Direction, FloatBoundedValidator, V3D
+from mantid.simpleapi import DeleteWorkspace, Load, ConvertWANDSCDtoQ, MoveInstrumentComponent
 import os
 
 
@@ -37,13 +37,15 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
             doc="File with Vanadium normalization scan data")
 
         self.declareProperty("DetectorHeightOffset", defaultValue=0.0, direction=Direction.Input,
+                             validator=FloatBoundedValidator(0.0),
                              doc="Optional distance to move detector height (relative to current position)")
         self.declareProperty("DetectorDistanceOffset", defaultValue=0.0, direction=Direction.Input,
+                             validator=FloatBoundedValidator(0.0),
                              doc="Optional distance to move detector distance (relative to current position)")
 
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
-            doc="Output MDWorkspace in Q-space. Name is prefix if multiple input files were provided.")
+            doc="Output MDWorkspace in Q-space, name is prefix if multiple input files were provided.")
 
     def validateInputs(self):
         issues = dict()
@@ -81,16 +83,24 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
 
             # Adjust detector height and distance with new offsets
             if height > 0.0:
-                instrument = scan.getInstrument()
-
                 # Move all the instrument banks
-                MoveInstrumentComponent(scan, ComponentName="bank1", Y=height, Z=distance)
-                MoveInstrumentComponent(scan, ComponentName="bank2", Y=height, Z=distance)
-                MoveInstrumentComponent(scan, ComponentName="bank3", Y=height, Z=distance)
+                component = scan.getExperimentInfo(0).componentInfo()
+                for bank in range(1, 4):
+                    index = component.indexOfAny("bank{}".format(bank))
+
+                    offset = V3D(0.0, height, distance)
+                    pos = component.position(index)
+
+                    offset += pos
+
+                    component.setPosition(index, offset)
 
             # Convert to Q space and normalize with from the vanadium
             ConvertWANDSCDtoQ(InputWorkspace=scan, NormalisationWorkspace=van_norm, Frame='Q_sample',
                               NormaliseBy='Monitor', OutputWorkspace=out_ws_name)
+
+        DeleteWorkspace("van_norm")
+        DeleteWorkspace("scan")
 
         self.setProperty("OutputWorkspace", out_ws_name)
 
