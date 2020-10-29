@@ -66,11 +66,10 @@ instruments = {
         'c': 2.5,},
     'Lagrange': {
         # Lagrange parameters for calculating Q^2
-        # (NOT FOR PRODUCTION, CURRENTLY USING TOSCA VALUE FOR SCATTERING ANGLE)
         'final_neutron_energy': 4.5 * MILLI_EV_TO_WAVENUMBER,  # Final energy on the crystal analyser in cm-1 (converted from eV)
-        #'angles': [135.],
-        'scattering_angle_range': (math.pi * (10 / 180), math.pi / 2),
-        # 'n_sampling_angles': 10,  # Could need something like this for sampling?
+        #'scattering_angle_range': (math.pi * (10 / 180), math.pi / 2),
+        'scattering_angle_range': (10, 90),
+        'angles_per_detector': 5,
         'default_setting': 'Cu(220)',
         'settings': {'Cu(220)': {'Ei_range_meV': (26, 500),
                                  'abs_resolution_meV': [7.6987e-5, 2.156e-2, -3.5961e-2],
