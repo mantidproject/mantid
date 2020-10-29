@@ -53,8 +53,6 @@ constexpr double D20_PIXEL_SIZE = 0.1;
 constexpr double RAD_TO_DEG = 180. / M_PI;
 // A factor to compute E from lambda: E (mev) = waveToE/lambda(A)
 constexpr double WAVE_TO_E = 81.8;
-// Number of pixels in the tubes for D2B
-constexpr size_t D2B_NUMBER_PIXELS_IN_TUBES = 128;
 } // namespace
 
 // Register the algorithm into the AlgorithmFactory
@@ -481,7 +479,10 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
 
   std::vector<double> axis = {0.};
   std::vector<double> monitor = getMonitor(scan);
-
+  auto d2bNumberPixelsInTubes = 0;
+  if (m_instName == "D2B") {
+      d2bNumberPixelsInTubes = m_outWorkspace->getInstrument()->getIntParameter("number_pixels_in_tubes")[0];
+  }
   // First load the monitors
   for (size_t i = 0; i < NUMBER_MONITORS; ++i) {
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
@@ -500,7 +501,7 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
       const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
       auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
       if (m_instName == "D2B" && !m_useCalibratedData && tubeNumber % 2 == 1) {
-        pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
+        pixelInTubeNumber = d2bNumberPixelsInTubes - 1 - pixelInTubeNumber;
       }
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
                             static_cast<int>(pixelInTubeNumber));
@@ -527,6 +528,13 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
   const std::vector<double> axis = getAxis(scan);
   const std::vector<double> monitor = getMonitor(scan);
 
+  // Link the instrument
+  loadStaticInstrument();
+  auto d2bNumberPixelsInTubes = 0;
+  if (m_instName == "D2B") {
+      d2bNumberPixelsInTubes = m_outWorkspace->getInstrument()->getIntParameter("number_pixels_in_tubes")[0];
+  }
+
   // Assign monitor counts
   m_outWorkspace->mutableX(0) = axis;
   m_outWorkspace->mutableY(0) = monitor;
@@ -543,7 +551,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
     const auto tubeNumber = (i - NUMBER_MONITORS) / m_sizeDim2;
     auto pixelInTubeNumber = (i - NUMBER_MONITORS) % m_sizeDim2;
     if (m_instName == "D2B" && !m_useCalibratedData && tubeNumber % 2 == 1) {
-      pixelInTubeNumber = D2B_NUMBER_PIXELS_IN_TUBES - 1 - pixelInTubeNumber;
+      pixelInTubeNumber = d2bNumberPixelsInTubes - 1 - pixelInTubeNumber;
     }
     for (size_t j = 0; j < m_numberScanPoints; ++j) {
       unsigned int y = data(static_cast<int>(j), static_cast<int>(tubeNumber),
@@ -553,9 +561,6 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
     }
     m_outWorkspace->mutableX(i) = axis;
   }
-
-  // Link the instrument
-  loadStaticInstrument();
 
   // Move to the starting 2theta
   moveTwoThetaZero(double(twoTheta0[0]));
