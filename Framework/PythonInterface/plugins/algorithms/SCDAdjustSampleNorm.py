@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, PropertyMode, MultipleFileProperty, \
-    WorkspaceProperty, mtd
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, PropertyMode, \
+    MultipleFileProperty, WorkspaceProperty, mtd
 from mantid.kernel import Direction
 from mantid.simpleapi import GroupWorkspaces, Load, ConvertWANDSCDtoQ, MoveInstrumentComponent
 import os
@@ -23,23 +23,23 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
         return "SCDAdjustSampleNorm"
 
     def summary(self):
-        return 'Takes detector scan data files, reprocesses them with an adjusted sample height if the detector \
-               options are given. Normalizes with detector efficiency from input vanadium file, and converts to \
-               Q-space.'
+        return 'Takes detector scan data files, adjusts the detector position based on detector height and distance ' \
+               'if the options are given. Normalizes with detector efficiency from input vanadium file, ' \
+               'and converts to Q-space. '
 
     def PyInit(self):
         self.declareProperty(MultipleFileProperty(name="Filename",
                                                   extensions=["_event.nxs", ".nxs.h5", ".nxs"]),
-                             "Input autoreduced detector scan data files to reprocess and convert.")
+                             "Input autoreduced detector scan data files to convert to Q-space.")
         self.declareProperty(
             FileProperty(name="VanadiumFile", defaultValue="", extensions=[".nxs"], direction=Direction.Input,
                          action=FileAction.Load),
             doc="File with Vanadium normalization scan data")
 
-        self.declareProperty("SampleHeight", defaultValue=0.0, direction=Direction.Input,
-                             doc="Optional new sample height (detector height)")
-        self.declareProperty("SampleDistance", defaultValue=0.0, direction=Direction.Input,
-                             doc="Optional new sample distance (detector distance)")
+        self.declareProperty("DetectorHeightOffset", defaultValue=0.0, direction=Direction.Input,
+                             doc="Optional distance to move detector height (relative to current position)")
+        self.declareProperty("DetectorDistanceOffset", defaultValue=0.0, direction=Direction.Input,
+                             doc="Optional distance to move detector distance (relative to current position)")
 
         self.declareProperty(
             WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
@@ -49,20 +49,20 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
         issues = dict()
 
         # Are height and distance supposed to be set together?
-        height = self.getProperty("SampleHeight").isDefault
-        distance = self.getProperty("SampleDistance").isDefault
+        height = self.getProperty("DetectorHeightOffset").isDefault
+        distance = self.getProperty("DetectorDistanceOffset").isDefault
         if not height and distance:
-            issues['SampleHeight'] = "Must set the sample height with the sample distance"
+            issues['DetectorHeightOffset'] = "Must set the detector height offset with the detector distance offset."
         if height and not distance:
-            issues['SampleDistance'] = "Must set the sample distance with the sample height"
+            issues['DetectorDistanceOffset'] = "Must set the detector distance with the detector height offset."
 
         return issues
 
     def PyExec(self):
         datafiles = self.getProperty("Filename").value
         vanadiumfile = self.getProperty("VanadiumFile").value
-        height = self.getProperty("SampleHeight").value
-        distance = self.getProperty("SampleDistance").value
+        height = self.getProperty("DetectorHeightOffset").value
+        distance = self.getProperty("DetectorDistanceOffset").value
         out_ws = self.getPropertyValue("OutputWorkspace")
         out_ws_name = out_ws
 
@@ -79,13 +79,14 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
             if has_multiple:
                 out_ws_name = out_ws + "_" + os.path.basename(file)
 
-            # Adjust sample height and reprocess data with new position
+            # Adjust detector height and distance with new offsets
             if height > 0.0:
-                exp_info = scan.getExperimentInfo(0)
-                detector = exp_info.detectorInfo()
-                component = exp_info.componentInfo()
+                instrument = scan.getInstrument()
 
-                MoveInstrumentComponent(scan, ComponentName="sample-position", Y=height, Z=distance)
+                # Move all the instrument banks
+                MoveInstrumentComponent(scan, ComponentName="bank1", Y=height, Z=distance)
+                MoveInstrumentComponent(scan, ComponentName="bank2", Y=height, Z=distance)
+                MoveInstrumentComponent(scan, ComponentName="bank3", Y=height, Z=distance)
 
             # Convert to Q space and normalize with from the vanadium
             ConvertWANDSCDtoQ(InputWorkspace=scan, NormalisationWorkspace=van_norm, Frame='Q_sample',
