@@ -9,11 +9,11 @@
 #include "DllOption.h"
 #include "IGUILauncher.h"
 #include "MantidKernel/Instantiator.h"
+#include "MantidKernel/RegistrationHelper.h"
 #include "MantidKernel/SingletonHolder.h"
 
 #include <map>
 #include <string>
-#include <type_traits>
 #include <vector>
 #include <QMenu>
 
@@ -75,6 +75,12 @@ public:
       throw std::runtime_error("GUI is already registered: " + category +
                                " > " + name);
     }
+    if (name.empty()) {
+        throw std::runtime_error("Unable to register a GUI with no name");
+    }
+    if (category.empty()) {
+        throw std::runtime_error("Unable to register a GUI with no category");
+    }
     // transfer the ownership to the registry
     m_registry[category][name] = std::unique_ptr<IGUILauncher>(gui);
   }
@@ -108,13 +114,13 @@ private:
                   // category and with unique category names
 };
 
-using GUIRegistry = Mantid::Kernel::SingletonHolder<GUIRegistryImpl>;
-
-#define DECLARE_GUI(classname)                                                 \
-  namespace {                                                                  \
-  RegistrationHelper register_gui_##classname(                                 \
-      ((Mantid::QtAPI::GUIRegistry::Instance().subscribe<classname>()), 0));   \
-  }
+using GUIRegistry = SingletonHolder<GUIRegistryImpl>;
 
 } // namespace API
 } // namespace MantidQt
+
+#define DECLARE_GUI(classname)                                                 \
+  namespace {                                                                  \
+  Mantid::Kernel::RegistrationHelper register_gui_##classname(                 \
+      ((MantidQt::API::GUIRegistry::Instance().subscribe<classname>()), 0));   \
+  }
