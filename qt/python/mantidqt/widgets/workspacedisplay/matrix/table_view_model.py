@@ -12,7 +12,6 @@ from qtpy import QtGui
 from qtpy.QtCore import QVariant, Qt, QAbstractTableModel
 from enum import Enum
 
-from mantid import logger
 
 class MatrixWorkspaceTableViewModelType(Enum):
     x = 'x'
@@ -36,13 +35,15 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
     HORIZONTAL_BINS_VARY_DISPLAY_STRING = "{0}\nbins vary"
     HORIZONTAL_BINS_VARY_TOOLTIP_STRING = "index {0}\nbin centre value varies\nRebin to set common bins"
 
-    MASKED_MONITOR_ROW_STRING = "This is a masked monitor spectrum. "
-    MASKED_ROW_STRING = "This is a masked spectrum. "
+    BLANK_CELL_STRING = ""
 
-    MONITOR_ROW_STRING = "This is a monitor spectrum. "
-    MASKED_BIN_STRING = "This bin is masked. "
+    MASKED_MONITOR_ROW_TOOLTIP = "This is a masked monitor spectrum. "
+    MASKED_ROW_TOOLTIP = "This is a masked spectrum. "
 
-    BLANK_CELL_STRING = "This cell is blank because the workspace is ragged."
+    MONITOR_ROW_TOOLTIP = "This is a monitor spectrum. "
+    MASKED_BIN_TOOLTIP = "This bin is masked. "
+
+    BLANK_CELL_TOOLTIP = "This cell is blank because the workspace is ragged."
 
     def __init__(self, ws, model_type):
         """
@@ -59,7 +60,6 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         self.ws_spectrum_info = self.ws.spectrumInfo()
         self.row_count = self.ws.getNumberHistograms()
         self.column_count = self._get_max_column_count()
-        logger.warning(str(self.column_count))
 
         self.masked_rows_cache = []
         self.monitor_rows_cache = []
@@ -183,10 +183,10 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         column = index.column()
         if role == Qt.DisplayRole:
             # DisplayRole determines the text of each cell
-            if self.has_data(row, column):
+            if self.has_data_at(row, column):
                 return str(self.relevant_data(row)[column])
             # The cell is blank
-            return ""
+            return self.BLANK_CELL_STRING
         elif role == Qt.BackgroundRole:
             # BackgroundRole determines the background of each cell
 
@@ -203,28 +203,28 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
                 return self.monitor_color
 
             # Checks if the BIN is MASKED, if so makes it the specified color for masked
-            elif self.checkMaskedBinCache(row, index):
+            elif self.checkMaskedBinCache(row, column):
                 return self.masked_color
 
             # Checks if the cell is BLANK, if so it returns the specified color for blank cells
-            elif self.checkBlankCache(row, index.column()):
+            elif self.checkBlankCache(row, column):
                 return self.blank_cell_color
 
         elif role == Qt.ToolTipRole:
             tooltip = QVariant()
             if self.checkMaskedCache(row):
                 if self.checkMonitorCache(row):
-                    tooltip = self.MASKED_MONITOR_ROW_STRING
+                    tooltip = self.MASKED_MONITOR_ROW_TOOLTIP
                 else:
-                    tooltip = self.MASKED_ROW_STRING
+                    tooltip = self.MASKED_ROW_TOOLTIP
             elif self.checkMonitorCache(row):
-                tooltip = self.MONITOR_ROW_STRING
-                if self.checkMaskedBinCache(row, index):
-                    tooltip += self.MASKED_BIN_STRING
-            elif self.checkMaskedBinCache(row, index):
-                tooltip = self.MASKED_BIN_STRING
-            elif self.checkBlankCache(row, index.column()):
-                tooltip = self.BLANK_CELL_STRING
+                tooltip = self.MONITOR_ROW_TOOLTIP
+                if self.checkMaskedBinCache(row, column):
+                    tooltip += self.MASKED_BIN_TOOLTIP
+            elif self.checkMaskedBinCache(row, column):
+                tooltip = self.MASKED_BIN_TOOLTIP
+            elif self.checkBlankCache(row, column):
+                tooltip = self.BLANK_CELL_TOOLTIP
             return tooltip
         else:
             return QVariant()
@@ -243,22 +243,22 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             self.monitor_rows_cache.append(row)
             return True
 
-    def checkMaskedBinCache(self, row, index):
+    def checkMaskedBinCache(self, row, column):
         if row in self.masked_bins_cache:
             # retrieve the masked bins IDs from the cache
-            if index.column() in self.masked_bins_cache[row]:
+            if column in self.masked_bins_cache[row]:
                 return True
 
         elif self.ws.hasMaskedBins(row):
             masked_bins = self.ws.maskedBinsIndices(row)
-            if index.column() in masked_bins:
+            if column in masked_bins:
                 self.masked_bins_cache[row] = masked_bins
                 return True
 
     def checkBlankCache(self, row, column):
         if row in self.blank_cell_cache and column in self.blank_cell_cache[row]:
             return True
-        elif not self.has_data(row, column):
+        elif not self.has_data_at(row, column):
             if row in self.blank_cell_cache:
                 self.blank_cell_cache[row].append(column)
             else:
@@ -266,7 +266,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             return True
         return False
 
-    def has_data(self, row, column):
+    def has_data_at(self, row, column):
         try:
             row_data = self.relevant_data(row)
             return column < len(row_data)
