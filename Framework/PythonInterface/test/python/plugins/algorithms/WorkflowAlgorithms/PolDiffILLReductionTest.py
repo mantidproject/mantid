@@ -77,13 +77,13 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396983', ProcessAs='Beam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
                             BeamInputWorkspace='beam_ws_1')
-        samplePropertiesDictionary = {'Mass': 8.54, 'Density': 6.0, 'FormulaUnits': 50, 'ChemicalFormula': 'V',
-                                      'Thickness': 2, 'Height': 2, 'Width': 2, 'BeamWidth': 2.5, 'BeamHeight': 2.5,
-                                      'NumberDensity': 1.18, 'ContainerFormula': 'Al', 'ContainerDensity': 2.7,
-                                      'ContainerFrontThickness': 0.02, 'ContainerBackThickness': 0.02}
+        sampleProperties = {'SampleMass': 8.54, 'SampleDensity': 6.0, 'FormulaUnits': 50, 'SampleChemicalFormula': 'V',
+                            'SampleThickness': 2, 'SampleHeight': 2, 'SampleWidth': 2, 'BeamWidth': 2.5, 'BeamHeight': 2.5,
+                            'SampleDensity': 1.18, 'ContainerFormula': 'Al', 'ContainerDensity': 2.7,
+                            'ContainerFrontThickness': 0.02, 'ContainerBackThickness': 0.02}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
                             TransmissionInputWorkspace='vanadium_transmission',
-                            SampleAndEnvironmentProperties=samplePropertiesDictionary,
+                            SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')
         self._check_output(mtd['vanadium_1'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_1'], 'Vanadium')
@@ -92,13 +92,13 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396983', ProcessAs='Beam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
                             BeamInputWorkspace='beam_ws_1')
-        samplePropertiesDictionary = {'Mass': 8.54, 'Density': 6.0, 'FormulaUnits': 50, 'ChemicalFormula': 'V',
-                                      'Thickness': 2, 'Height': 2, 'Width': 2, 'BeamWidth': 2.5, 'BeamHeight': 2.5,
-                                      'NumberDensity': 1.18, 'ContainerFormula': 'Al', 'ContainerDensity': 2.7,
-                                      'ContainerFrontThickness': 0.02, 'ContainerBackThickness': 0.02}
+        sampleProperties = {'SampleMass': 8.54, 'SampleDensity': 6.0, 'FormulaUnits': 50, 'SampleChemicalFormula': 'V',
+                            'SampleThickness': 2, 'SampleHeight': 2, 'SampleWidth': 2, 'BeamWidth': 2.5, 'BeamHeight': 2.5,
+                            'SampleDensity': 1.18, 'ContainerFormula': 'Al', 'ContainerDensity': 2.7,
+                            'ContainerFrontThickness': 0.02, 'ContainerBackThickness': 0.02}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
                             TransmissionInputWorkspace='vanadium_transmission',
-                            SampleAndEnvironmentProperties=samplePropertiesDictionary,
+                            SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Sum', OutputUnits='TwoTheta')
         self._check_output(mtd['vanadium_1'], 1, 132, 'Wavelength', 'Wavelength', 'Scattering angle', 'Degrees')
         self._check_process_flag(mtd['vanadium_1'], 'Vanadium')
@@ -108,16 +108,17 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
                             BeamInputWorkspace='beam_ws_1')
 
-        samplePropertiesDictionary = {'Mass': 2.932, 'Density': 2.0, 'FormulaUnits': 182.54,
-                                      'ChemicalFormula': 'Mn0.5-Fe0.5-P-S3', 'Thickness': 2, 'Height': 2, 'Width': 2,
-                                      'BeamWidth': 2.5, 'BeamHeight': 2.5, 'NumberDensity': 1.18,
-                                      'ContainerFormula': 'Al', 'ContainerDensity': 2.7,
-                                      'ContainerFrontThickness': 0.02, 'ContainerBackThickness': 0.02}
+        sampleProperties = {'SampleMass': 2.932, 'SampleDensity': 2.0, 'FormulaUnits': 182.54,
+                            'SampleChemicalFormula': 'Mn0.5-Fe0.5-P-S3', 'SampleThickness': 2,
+                            'SampleHeight': 2, 'SampleWidth': 2,
+                            'BeamWidth': 2.5, 'BeamHeight': 2.5, 'SampleDensity': 1.18,
+                            'ContainerFormula': 'Al', 'ContainerDensity': 2.7,
+                            'ContainerFrontThickness': 0.02, 'ContainerBackThickness': 0.02}
         PolDiffILLReduction(Run='396986', ProcessAs='Transmission', OutputWorkspace='sample_transmission',
                             BeamInputWorkspace='beam_ws_1')
         PolDiffILLReduction(Run='397004', ProcessAs='Sample', OutputWorkspace='sample',
                             TransmissionInputWorkspace='sample_transmission_1',
-                            SampleAndEnvironmentProperties=samplePropertiesDictionary,
+                            SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')
         self._check_output(mtd['sample'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['sample'], 'Sample')

@@ -58,15 +58,15 @@ class PolDiffILLReduction(PythonAlgorithm):
 
             sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
             geometry_type = self.getPropertyValue('SampleGeometry')
-            required_keys = ['Mass', 'FormulaUnits', 'ChemicalFormula', 'NumberDensity']
+            required_keys = ['SampleMass', 'FormulaUnits', 'SampleChemicalFormula', 'SampleDensity']
             if geometry_type != 'None':
                 required_keys += ['BeamHeight', 'BeamWidth', 'ContainerDensity',]
             if geometry_type == 'FlatPlate':
                 required_keys += ['Height', 'Width', 'Thickness', 'ContainerFrontThickness', 'ContainerBackThickness']
             if geometry_type == 'Cylinder':
-                required_keys += ['Height', 'Radius', 'ContainerRadius']
+                required_keys += ['SampleHeight', 'SampleRadius', 'ContainerRadius']
             if geometry_type == 'Annulus':
-                required_keys += ['Height', 'InnerRadius', 'OuterRadius', 'ContainerInnerRadius', 'ContainerOuterRadius']
+                required_keys += ['SampleHeight', 'SampleInnerRadius', 'SampleOuterRadius', 'ContainerInnerRadius', 'ContainerOuterRadius']
 
             for key in required_keys:
                 if key not in sampleAndEnvironmentProperties:
@@ -401,10 +401,6 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Reads the user-provided dictionary that contains sample geometry (type, dimensions) and experimental conditions,
          such as the beam size and calculates derived parameters."""
         self._sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
-        if 'n_atoms' not in self._sampleAndEnvironmentProperties:
-            self._sampleAndEnvironmentProperties['NAtoms'] = self._sampleAndEnvironmentProperties['NumberDensity'].value \
-                * self._sampleAndEnvironmentProperties['Mass'].value \
-                / float(self._sampleAndEnvironmentProperties['Density'].value)
         if 'initial_energy' not in self._sampleAndEnvironmentProperties:
             h = physical_constants['Planck constant'][0]  # in m^2 kg^2 / s^2
             neutron_mass = physical_constants['neutron mass'][0]  # in kg
@@ -427,25 +423,25 @@ class PolDiffILLReduction(PythonAlgorithm):
         kwargs['BeamHeight'] = self._sampleAndEnvironmentProperties['BeamHeight'].value
         kwargs['BeamWidth'] = self._sampleAndEnvironmentProperties['BeamWidth'].value
         kwargs['SampleDensityType'] = 'Number Density'
-        kwargs['SampleDensity'] = self._sampleAndEnvironmentProperties['NumberDensity'].value
+        kwargs['SampleDensity'] = self._sampleAndEnvironmentProperties['SampleDensity'].value
         kwargs['Height'] = self._sampleAndEnvironmentProperties['Height'].value
-        kwargs['SampleChemicalFormula'] = self._sampleAndEnvironmentProperties['ChemicalFormula'].value
+        kwargs['SampleChemicalFormula'] = self._sampleAndEnvironmentProperties['SampleChemicalFormula'].value
         if 'container_formula' in self._sampleAndEnvironmentProperties:
-            kwargs['ContainerChemicalFormula'] = self._sampleAndEnvironmentProperties['ContainerFormula'].value
+            kwargs['ContainerChemicalFormula'] = self._sampleAndEnvironmentProperties['ContainerChemicalFormula'].value
             kwargs['ContainerDensity'] = self._sampleAndEnvironmentProperties['ContainerDensity'].value
         if geometry_type == 'FlatPlate':
-            kwargs['SampleWidth'] = self._sampleAndEnvironmentProperties['Width'].value
-            kwargs['SampleThickness'] = self._sampleAndEnvironmentProperties['Thickness'].value
+            kwargs['SampleWidth'] = self._sampleAndEnvironmentProperties['SampleWidth'].value
+            kwargs['SampleThickness'] = self._sampleAndEnvironmentProperties['SampleThickness'].value
             if 'container_formula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerFrontThickness'] = self._sampleAndEnvironmentProperties['ContainerFrontThickness'].value
                 kwargs['ContainerBackThickness'] = self._sampleAndEnvironmentProperties['ContainerBackThickness'].value
         elif geometry_type == 'Cylinder':
-            kwargs['SampleRadius'] = self._sampleAndEnvironmentProperties['Radius'].value
+            kwargs['SampleRadius'] = self._sampleAndEnvironmentProperties['SampleRadius'].value
             if 'container_formula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerRadius'] = self._sampleAndEnvironmentProperties['ContainerRadius'].value
         elif geometry_type == 'Annulus':
-            kwargs['SampleInnerRadius'] = self._sampleAndEnvironmentProperties['InnerRadius'].value
-            kwargs['SampleOuterRadius']  = self._sampleAndEnvironmentProperties['OuterRadius'].value
+            kwargs['SampleInnerRadius'] = self._sampleAndEnvironmentProperties['SampleInnerRadius'].value
+            kwargs['SampleOuterRadius']  = self._sampleAndEnvironmentProperties['SampleOuterRadius'].value
             if 'container_formula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerInnerRadius'] = self._sampleAndEnvironmentProperties['ContainerInnerRadius'].value
                 kwargs['ContainerOuterRadius'] = self._sampleAndEnvironmentProperties['ContainerOuterRadius'].value
@@ -486,7 +482,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Performs normalisation of the vanadium data to the expected cross-section."""
         vanadium_expected_cross_section = 0.404 # barns
         CreateSingleValuedWorkspace(DataValue=vanadium_expected_cross_section
-                                    * self._sampleAndEnvironmentProperties['NAtoms'].value,
+                                    * self._sampleAndEnvironmentProperties['FormulaUnits'].value,
                                     OutputWorkspace='norm')
         Divide(LHSWorkspace='norm', RHSWorkspace=ws, OutputWorkspace=ws)
         DeleteWorkspace(Workspace='norm')
