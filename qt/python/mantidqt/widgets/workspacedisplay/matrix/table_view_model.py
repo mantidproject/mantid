@@ -59,7 +59,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         self.ws = ws
         self.ws_spectrum_info = self.ws.spectrumInfo()
         self.row_count = self.ws.getNumberHistograms()
-        self.column_count = self._get_max_column_count()
+        self.column_count = self.get_max_column_count()
 
         self.masked_rows_cache = []
         self.monitor_rows_cache = []
@@ -86,7 +86,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         else:
             raise ValueError("Unknown model type {0}".format(self.type))
 
-    def _get_max_column_count(self):
+    def get_max_column_count(self):
         max_column_count = 0
         for i in range(self.ws.getNumberHistograms()):
             column_count = len(self.ws.readY(i))
