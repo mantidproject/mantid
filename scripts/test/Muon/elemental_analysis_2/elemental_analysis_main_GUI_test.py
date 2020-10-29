@@ -6,7 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from qtpy.QtGui import QCloseEvent as event
-from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 from Muon.GUI.ElementalAnalysis2.elemental_analysis import ElementalAnalysisGui
 
