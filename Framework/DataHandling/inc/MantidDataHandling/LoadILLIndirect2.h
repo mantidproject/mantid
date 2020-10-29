@@ -63,7 +63,7 @@ private:
   size_t m_numberOfPixelsPerTube;   // number of pixels per tube - Y
   size_t m_numberOfChannels;        // time channels - Z
   size_t m_numberOfSimpleDetectors; // number of simple detector
-  size_t m_numberOfMonitors;        // number of monitors
+  size_t m_numberOfMonitors{1};     // number of monitors
   std::set<int> m_activeSDIndices;  // set of Single Detector indices,
                                     // that were actually active
   bool m_bats{false};               // A flag marking the BATS mode
