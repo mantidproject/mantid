@@ -41,6 +41,7 @@ class GUIRegistryImpl {
 #include "MantidQtWidgets/Common/Python/Sip.h"
 #include <QMenu>
 using MantidQt::Widgets::Common::Python::extract;
+using MantidQt::Widgets::Common::Python::BorrowedRef;
 %End
 public:
 void populateMenu(QMenu&) const;
@@ -52,8 +53,19 @@ static SIP_PYOBJECT Instance() const;
 void subscribe(SIP_PYOBJECT);
 %MethodCode
 try {
-   auto cppGuiLauncher = extract<MantidQt::API::IGUILauncher>(a0);
-   sipCpp->subscribe(cppGuiLauncher);
+   MantidQt::API::IGUILauncher* cppGuiLauncher = nullptr;
+   // a0 can be either a python instance or a class name, try class first
+   try {
+        auto pyGuiLauncher = BorrowedRef(PyObject_CallObject(a0, nullptr));
+        cppGuiLauncher = extract<MantidQt::API::IGUILauncher>(pyGuiLauncher);
+   } catch(...) {
+        cppGuiLauncher = extract<MantidQt::API::IGUILauncher>(a0);
+   }
+   if (cppGuiLauncher) {
+        sipCpp->subscribe(cppGuiLauncher);
+   } else {
+       throw std::runtime_error("Unable to register a launcher neither via class nor via instance.");
+   }
 } catch (std::runtime_error &sipExceptionRef)
 {
    const char *detail = sipExceptionRef.what();

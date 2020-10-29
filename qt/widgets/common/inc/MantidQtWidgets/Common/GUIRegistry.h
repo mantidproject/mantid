@@ -13,6 +13,7 @@
 
 #include <map>
 #include <string>
+#include <type_traits>
 #include <vector>
 #include <QMenu>
 
@@ -22,7 +23,7 @@ namespace API {
 using namespace Mantid::Kernel;
 
 using LauncherRegistry =
-    std::map<std::string, std::map<std::string, IGUILauncher *>>;
+    std::map<std::string, std::map<std::string, IGUILauncher_uptr>>;
 
 /** GUIRegistry : Manages the list of subscribed plugin GUIs.
  */
@@ -70,7 +71,8 @@ public:
       throw std::runtime_error("GUI is already registered: " + category +
                                " > " + name);
     }
-    m_registry[category][name] = gui;
+    // transfer the ownership to the registry
+    m_registry[category][name] = std::unique_ptr<IGUILauncher>(gui);
   }
 
   /**
