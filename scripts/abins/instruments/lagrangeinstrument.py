@@ -16,12 +16,9 @@ class LagrangeInstrument(IndirectInstrument):
     """Instrument class for IN1-LAGRANGE instrument at ILL
 
     """
-    parameters = abins.parameters.instruments['Lagrange']
-
-    _q_model_warning_given = False
-
     def __init__(self, setting='Cu(220)'):
         super().__init__(name='Lagrange', setting=setting)
+        self.parameters = abins.parameters.instruments[self._name]
 
     def get_sigma(self, frequencies):
         ei_resolution = self.parameters['settings'][self._setting].get('ei_resolution', 0)
@@ -39,31 +36,15 @@ class LagrangeInstrument(IndirectInstrument):
         sigma[low_energy_indices] = (self.parameters['settings'][self._setting]
                                      .get('low_energy_resolution_meV', 0)
                                      * MILLI_EV_TO_WAVENUMBER)
-
         return sigma
 
-    def calculate_q_powder(self, *, input_data=None, angle=None):
-        """Calculates squared Q vectors for Lagrange.
+    def get_angles(self):
+        start, end = self.parameters['scattering_angle_range']
+        n_samples = self.parameters['angles_per_detector']
+        angles, step = np.linspace(start, end, n_samples,
+                                   endpoint=False, retstep=True)
 
-        By the cosine law Q^2 = k_f^2 + k_i^2 - 2 k_f k_i cos(theta)
+        if n_samples == 1:
+            step = end - start
 
-        where k are determined from
-        abins.parameters.instruments['TOSCA']['final_neutron_energy']
-        and the input series of vibrational frequencies and cos(theta) is
-        precomputed as abins.parameters.instruments['TOSCA']['cos_scattering_angle']
-
-        :param input_data:
-            frequencies (in cm-1) which should be used to construct Q2
-        :param angle:
-            detector angle in degrees
-
-        :returns:
-            Q^2 array (in cm-1) corresponding to input frequencies,
-            constrained by conservation of mass/momentum and TOSCA geometry
-        """
-
-        if not self._q_model_warning_given:
-            print("WARNING: WORK IN PROGRESS. THIS Q POWDER MODEL IS FOR TOSCA NOT LAGRANGE")
-            self._q_model_warning_given = True
-
-        return super().calculate_q_powder(input_data=input_data, angle=angle)
+        return (angles + step/2).tolist()

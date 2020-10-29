@@ -393,19 +393,20 @@ class SPowderSemiEmpiricalCalculator:
             fundamentals_coefficients=fund_coeff,
             quantum_order=order)
 
+        angles = self._instrument.get_angles()
+
         if local_freq.any():  # check if local_freq has non-zero values
             indent = ANGLE_MESSAGE_INDENTATION
 
-            first_angle = self._instrument.get_angles()[0]
             self._report_progress(msg=indent + "Calculation for the detector at angle %s (atom=%s)" %
-                                               (first_angle, atom))
+                                               (angles[0], atom))
 
-            q2 = self._instrument.calculate_q_powder(input_data=local_freq, angle=first_angle)
+            q2 = self._instrument.calculate_q_powder(input_data=local_freq, angle=angles[0])
 
             opt_local_freq, opt_local_coeff, rebinned_broad_spectrum = self._helper_atom_angle(
                 atom=atom, local_freq=local_freq, local_coeff=local_coeff, order=order, q2=q2)
 
-            for angle in self._instrument.get_angles()[1:]:
+            for angle in angles[1:]:
                 self._report_progress(msg=indent + "Calculation for the detector at angle %s (atom=%s)" %
                                                    (angle, atom))
                 q2 = self._instrument.calculate_q_powder(input_data=local_freq, angle=angle)
@@ -422,6 +423,9 @@ class SPowderSemiEmpiricalCalculator:
 
         # multiply by k-point weight
         rebinned_broad_spectrum = rebinned_broad_spectrum * self._weight
+
+        # divide by number of angles
+        rebinned_broad_spectrum = rebinned_broad_spectrum / len(angles)
 
         return local_freq, local_coeff, rebinned_broad_spectrum
 
