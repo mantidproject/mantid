@@ -142,10 +142,10 @@
             <item>
              <widget class="QRadioButton" name="runsAutoAdd">
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, automatically watches the loaded path for runs being added/deleted and loads/unloads them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, automatically watches the loaded path for runs being added and loads them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
-               <string>Auto Add</string>
+               <string>Auto add</string>
               </property>
              </widget>
             </item>
@@ -731,8 +731,8 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="detectorGroupingType"/>
   <buttongroup name="deadTimeCorrType"/>
   <buttongroup name="calculationType"/>
+  <buttongroup name="detectorGroupingType"/>
  </buttongroups>
 </ui>
