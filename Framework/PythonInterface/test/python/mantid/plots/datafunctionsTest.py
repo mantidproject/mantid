@@ -17,11 +17,21 @@ import numpy as np
 import mantid.api
 import mantid.plots.datafunctions as funcs
 from unittest.mock import Mock
+from mantid.api import AnalysisDataService
 from mantid.kernel import config
 from mantid.plots.utility import MantidAxType
 from mantid.simpleapi import (AddSampleLog, AddTimeSeriesLog, ConjoinWorkspaces,
                               CreateMDHistoWorkspace, CreateSampleWorkspace,
                               CreateSingleValuedWorkspace, CreateWorkspace, DeleteWorkspace, LoadRaw)
+
+
+def create_ragged_workspace():
+    CreateWorkspace([0, 1, 2, 3, 4, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 3, 4, 5, 6, 7], NSpec=2, OutputWorkspace='Ragged')
+    CreateWorkspace([1, 2, 3, 4], [1, 2, 3, 4], NSpec=1, OutputWorkspace='__temp1')
+    CreateWorkspace([2, 3, 4, 5, 6], [3, 4, 5, 6, 7], NSpec=1, OutputWorkspace='__temp2')
+    ConjoinWorkspaces('Ragged', '__temp1', CheckOverlapping=False)
+    ConjoinWorkspaces('Ragged', '__temp2', CheckOverlapping=False)
+    return AnalysisDataService.retrieve('Ragged')
 
 
 def add_workspace_with_data(func):
@@ -787,6 +797,13 @@ class DataFunctionsTest(unittest.TestCase):
         self.assertTrue(np.array_equal([0, 1, 2, 3], x))
         self.assertTrue(np.array_equal([2.0, 5.0, 8.0, 11.0], y))
         self.assertTrue(np.array_equal([2.0, 5.0, 8.0, 11.0], dy))
+
+    def test_get_bins_with_a_ragged_workspace(self):
+        x, y, dy, dx = funcs.get_bins(create_ragged_workspace(), 4, withDy=True)
+
+        self.assertTrue(np.array_equal([0, 1, 3], x))
+        self.assertTrue(np.array_equal([4.0, 7.0, 7.0], y))
+        self.assertTrue(np.array_equal([0.0, 0.0, 0.0], dy))
 
     @add_md_workspace_with_data(dimensions=3)
     def test_get_md_data2d_bin_bounds_raises_AssertionException_too_many_dims(self, mdws):

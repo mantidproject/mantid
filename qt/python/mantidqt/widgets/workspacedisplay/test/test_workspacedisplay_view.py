@@ -16,21 +16,15 @@ from mantidqt.widgets.workspacedisplay.matrix.presenter import MatrixWorkspaceDi
 from qtpy.QtWidgets import QApplication
 
 
-def create_test_workspace(workspace_name, number_of_spectra=2, ragged=False):
-    workspace = CreateWorkspace([0, 1, 2, 3, 4, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 3, 4, 5, 6, 7], NSpec=number_of_spectra)
-    AnalysisDataService.addOrReplace(workspace_name, workspace)
+def create_test_workspace(workspace_name, ragged=False):
+    CreateWorkspace([0, 1, 2, 3, 4, 2, 3, 4, 5, 6], [0, 1, 2, 3, 4, 3, 4, 5, 6, 7], NSpec=2,
+                    OutputWorkspace=workspace_name)
     if ragged:
-        for j in range(number_of_spectra):
-            x, y = [], []
-            k = 0
-            for v in workspace.readX(j):
-                if 1 <= v <= 6:
-                    x.append(v)
-                    y.append(workspace.readY(j)[k])
-                k += 1
-            tmp = CreateWorkspace(x, y)
-            ConjoinWorkspaces(workspace_name, tmp, CheckOverlapping=False)
-    return workspace
+        CreateWorkspace([1, 2, 3, 4], [1, 2, 3, 4], NSpec=1, OutputWorkspace='__temp1')
+        CreateWorkspace([2, 3, 4, 5, 6], [3, 4, 5, 6, 7], NSpec=1, OutputWorkspace='__temp2')
+        ConjoinWorkspaces(workspace_name, '__temp1', CheckOverlapping=False)
+        ConjoinWorkspaces(workspace_name, '__temp2', CheckOverlapping=False)
+    return AnalysisDataService.retrieve(workspace_name)
 
 
 @start_qapplication
