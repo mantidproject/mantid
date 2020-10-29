@@ -34,10 +34,10 @@ class InstrumentViewPresenter(ObservingPresenter):
     def current_workspace_equals(self, name):
         return self.ws_name == name
 
-    def replace_workspace(self, workspace_name, workspace, new_window_name=None):
+    def replace_workspace(self, new_workspace_name, new_window_name=None):
         if new_window_name is None:
-            new_window_name = workspace_name
-        self.container.widget.replaceWorkspace(workspace_name, workspace, new_window_name)
+            new_window_name = new_workspace_name
+        self.container.widget.replaceWorkspace(new_workspace_name, new_window_name)
         # replace is handled by the InstrumentWidget inside C++
 
     def rename_workspace(self, old_name, new_name):

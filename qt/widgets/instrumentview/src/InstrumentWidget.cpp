@@ -582,10 +582,8 @@ void InstrumentWidget::setSurfaceType(const QString &typeStr) {
  * @param newInstrumentWindowName the new title of the window
  */
 void InstrumentWidget::replaceWorkspace(
-    const std::string &newWs, const std::shared_ptr<Workspace> &workspace,
-    const std::string &newInstrumentWindowName) {
+    const std::string &newWs, const std::string &newInstrumentWindowName) {
   // change inside objects
-  handleWorkspaceReplacement(m_workspaceName.toStdString(), workspace);
   renameWorkspace(newWs);
   m_instrumentActor.reset(new InstrumentActor(QString::fromStdString(newWs)));
 
