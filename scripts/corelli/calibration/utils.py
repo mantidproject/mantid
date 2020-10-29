@@ -23,6 +23,9 @@ except (ImportError, ModuleNotFoundError):
 from Calibration import tube
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
 
+# Functions exposed to the general user (public) API
+__all__ = ['load_banks', 'calibrate_tube']
+
 # Type aliases
 InputTable = Union[str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
 WorkspaceTypes = Union[str, Workspace2D]  # allowed types for the input workspace to calibrate_bank

@@ -17,6 +17,9 @@ from mantid.dataobjects import EventWorkspace, TableWorkspace,  Workspace2D
 from mantid.api import mtd, Workspace, WorkspaceGroup
 from mantid.simpleapi import CreateEmptyTableWorkspace, SaveNexusProcessed, LoadNexusProcessed
 
+# Functions exposed to the general user (public) API
+__all__ = ['load_calibration_set', 'new_corelli_calibration', 'save_calibration_set']
+
 # Custom type aliases
 CalibrationInputSetTypes = Union[str, TableWorkspace, Workspace2D, List[TableWorkspace], List[str], WorkspaceGroup]
 InputWorkspaceTypes = Union[str, Workspace2D, EventWorkspace]

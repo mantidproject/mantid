@@ -22,6 +22,9 @@ from Calibration.tube_calib_fit_params import TubeCalibFitParams
 from corelli.calibration.utils import (bank_numbers, PIXELS_PER_TUBE, calculate_peak_y_table, trim_calibration_table,
                                        TUBES_IN_BANK, wire_positions)
 
+# Functions exposed to the general user (public) API
+__all__ = ['calibrate_banks']
+
 
 def sufficient_intensity(input_workspace: WorkspaceTypes, bank_name: str, minimum_intensity:float = 10000) -> bool:
     r"""
