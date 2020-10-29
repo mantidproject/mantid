@@ -44,12 +44,12 @@ bool doesNotContainWildCard(const std::string &ext) {
  * @param path : absolute path of a file
  * @return absolute directory (i.e. without file name)
  */
-Poco::Path absolutePath(const Poco::Path& path) {
-    Poco::Path absolutePath(true);
-    for (int i = 0; i < path.depth(); ++i) {
-        absolutePath.append(path.directory(i));
-    }
-    return absolutePath;
+Poco::Path absolutePath(const Poco::Path &path) {
+  Poco::Path absolutePath(true);
+  for (int i = 0; i < path.depth(); ++i) {
+    absolutePath.append(path.directory(i));
+  }
+  return absolutePath;
 }
 
 static const std::string SUCCESS("");
@@ -374,7 +374,8 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
   // Cycle through each vector of unresolvedFileNames in allUnresolvedFileNames.
   // Remember, each vector contains files that are to be added together.
 
-  // We assume that all the files must be in the same directory in order to skip searching
+  // We assume that all the files must be in the same directory in order to skip
+  // searching
   std::string directory;
 
   for (const auto &unresolvedFileNames : allUnresolvedFileNames) {
@@ -403,21 +404,22 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       std::string fullyResolvedFile;
 
       if (!directory.empty()) {
-          Poco::Path file(unresolvedFileName);
-          if (!file.isAbsolute()) {
-            bool emptyTokenFound = false;
-            if (m_allowEmptyTokens) {
-                try {
-                  const int unresolvedInt = std::stoi(unresolvedFileName);
-                  emptyTokenFound = unresolvedInt == 0;
-                } catch (std::invalid_argument&) {}
-            }
-            if (!emptyTokenFound) {
-                Poco::Path dir(directory);
-                dir.append(file);
-                unresolvedFileName = dir.toString();
+        Poco::Path file(unresolvedFileName);
+        if (!file.isAbsolute()) {
+          bool emptyTokenFound = false;
+          if (m_allowEmptyTokens) {
+            try {
+              const int unresolvedInt = std::stoi(unresolvedFileName);
+              emptyTokenFound = unresolvedInt == 0;
+            } catch (std::invalid_argument &) {
             }
           }
+          if (!emptyTokenFound) {
+            Poco::Path dir(directory);
+            dir.append(file);
+            unresolvedFileName = dir.toString();
+          }
+        }
       }
 
       if (!useDefaultExt) {
@@ -464,16 +466,16 @@ MultipleFileProperty::setValueAsMultipleFiles(const std::string &propValue) {
       }
 
       if (fullyResolvedFile.empty()) {
-          // if the fullyResolvedFile is empty, it means it failed to find the
-          // file so keep the unresolvedFileName as a hint to be displayed
-          // later on in the error message
-          fullyResolvedFile = unresolvedFileName;
+        // if the fullyResolvedFile is empty, it means it failed to find the
+        // file so keep the unresolvedFileName as a hint to be displayed
+        // later on in the error message
+        fullyResolvedFile = unresolvedFileName;
       } else if (directory.empty()) {
-          // cache the directory
-          Poco::Path currentFile(fullyResolvedFile);
-          Poco::Path currentFileDirectory = absolutePath(currentFile);
-          directory = currentFileDirectory.toString();
-          g_log.debug("Cached first file directory " + directory);
+        // cache the directory
+        Poco::Path currentFile(fullyResolvedFile);
+        Poco::Path currentFileDirectory = absolutePath(currentFile);
+        directory = currentFileDirectory.toString();
+        g_log.debug("Cached first file directory " + directory);
       }
 
       // Append the file name to result.
