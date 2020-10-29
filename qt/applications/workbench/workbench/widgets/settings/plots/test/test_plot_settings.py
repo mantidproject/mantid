@@ -37,6 +37,7 @@ class PlotsSettingsTest(unittest.TestCase):
                                                        call(PlotProperties.SHOW_TITLE.value),
                                                        call(PlotProperties.SHOW_MINOR_TICKS.value),
                                                        call(PlotProperties.SHOW_MINOR_GRIDLINES.value),
+                                                       call(PlotProperties.SHOW_LEGEND.value),
                                                        call(PlotProperties.PLOT_FONT.value),
                                                        call(PlotProperties.X_AXES_SCALE.value),
                                                        call(PlotProperties.Y_AXES_SCALE.value),
@@ -248,6 +249,20 @@ class PlotsSettingsTest(unittest.TestCase):
 
         presenter.action_show_minor_gridlines_changed(Qt.Unchecked)
         mock_ConfigService.setString.assert_called_once_with(PlotProperties.SHOW_MINOR_GRIDLINES.value, "Off")
+
+    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
+    def test_action_show_legend_changed(self, mock_ConfigService):
+        presenter = PlotSettings(None)
+        # reset any effects from the constructor
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_show_legend_changed(Qt.Checked)
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.SHOW_LEGEND.value, "On")
+
+        mock_ConfigService.setString.reset_mock()
+
+        presenter.action_show_legend_changed(Qt.Unchecked)
+        mock_ConfigService.setString.assert_called_once_with(PlotProperties.SHOW_LEGEND.value, "Off")
 
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_action_legend_every_changed(self, mock_ConfigService):

@@ -8,7 +8,7 @@
     Specifically tests the Load function in the simple API
 """
 import unittest
-from mantid.simpleapi import Load, LoadDialog
+from mantid.simpleapi import Load
 from mantid.api import mtd, MatrixWorkspace, WorkspaceGroup
 
 
@@ -83,14 +83,6 @@ class SimpleAPILoadTest(unittest.TestCase):
         wsname = 'test_Load_accepts_EnableLogging_keyword'
         Load('IRS21360.raw',OutputWorkspace=wsname, EnableLogging=False)
         self.assertTrue( wsname in mtd )
-
-    def test_that_dialog_call_raises_runtime_error(self):
-        try:
-            LoadDialog()
-        except RuntimeError as exc:
-            msg = str(exc)
-            if msg != "Can only display properties dialog in gui mode":
-                self.fail("Dialog function raised the correct exception type but the message was wrong")
 
     def _do_name_check(self, wkspace, expected_name):
         self.assertEqual(wkspace.name(), expected_name)

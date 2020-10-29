@@ -147,8 +147,8 @@ IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);
   alg->setProperty("Function", functionString);
-  alg->setProperty("StartX", 0.0);
-  alg->setProperty("EndX", 3.0);
+  alg->setProperty("StartX", "0.0");
+  alg->setProperty("EndX", "3.0");
   alg->setProperty("SpecMin", 0);
   alg->setProperty("SpecMax", 5);
   alg->setProperty("ConvolveMembers", true);
