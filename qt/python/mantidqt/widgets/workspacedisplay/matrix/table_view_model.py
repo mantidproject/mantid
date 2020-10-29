@@ -60,10 +60,11 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         self.masked_rows_cache = []
         self.monitor_rows_cache = []
         self.masked_bins_cache = {}
+        self.blank_cell_cache = {}
 
         self.masked_color = QtGui.QColor(240, 240, 240)
-
         self.monitor_color = QtGui.QColor(255, 253, 209)
+        self.blank_cell_color = QtGui.QColor(255, 102, 153)
 
         self.type = model_type
         if self.type == MatrixWorkspaceTableViewModelType.x:
@@ -189,6 +190,10 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             elif self.checkMaskedBinCache(row, index):
                 return self.masked_color
 
+            # Checks if the cell is BLANK, if so it returns the specified color for blank cells
+            elif self.checkBlankCache(row, index.column()):
+                return self.blank_cell_color
+
         elif role == Qt.ToolTipRole:
             tooltip = QVariant()
             if self.checkMaskedCache(row):
@@ -231,3 +236,14 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             if index.column() in masked_bins:
                 self.masked_bins_cache[row] = masked_bins
                 return True
+
+    def checkBlankCache(self, row, column):
+        if row in self.blank_cell_cache and column in self.blank_cell_cache[row]:
+            return True
+        elif str(self.relevant_data(row)[column]) == "":
+            if row in self.blank_cell_cache:
+                self.blank_cell_cache[row].append(column)
+            else:
+                self.blank_cell_cache[row] = [column]
+            return True
+        return False
