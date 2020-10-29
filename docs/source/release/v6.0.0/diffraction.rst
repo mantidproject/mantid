@@ -27,7 +27,10 @@ New features
 - New algorithm to clip peaks, providing a background estimation :ref:`ClipPeaks <algm-ClipPeaks>`.
 - Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
 - New algorithm :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` uses a numerical integration method to calculate attenuation factors for all Paalmin Pings terms
+- Added a new :ref:`Transfit <algm-PEARLTransfit>` Algorithm for PEARL that uses a TransVoigt function to determine the temperature of a given sample
 - Modified :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to include several different absorption correction methods.
+- Added new absorption options from :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to Powder Diffraction Reduction GUI
+
 
 Improvements
 ############
@@ -42,6 +45,10 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+New features
+############
+- When a fit is successful the model will be stored as a Custom Setup in the fit property browser under the name of the workspace fitted. 
+- The fitting tab now creates a group of workspaces that store the model string and  the fit value and error of parameters of the model for each loaded workspace.
 
 Single Crystal Diffraction
 --------------------------
