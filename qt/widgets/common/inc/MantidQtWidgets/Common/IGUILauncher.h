@@ -22,5 +22,6 @@ public:
   virtual void show() const = 0;
 };
 
+using IGUILauncher_uptr = std::unique_ptr<IGUILauncher>;
 } // namespace API
 } // namespace MantidQt
