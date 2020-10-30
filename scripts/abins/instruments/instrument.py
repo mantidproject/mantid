@@ -115,8 +115,8 @@ class Instrument:
                 return ''
 
             if setting == '':
-                if 'default_setting' in parameters:
-                    default = parameters['default_setting']
+                if 'settings_default' in parameters:
+                    default = parameters['settings_default']
                     logger.notice(f'Using default setting "{default}" for instrument "{self.get_name()}"')
                     return default
                 raise ValueError(f'{self.get_name()} instrument does not have a default setting, '

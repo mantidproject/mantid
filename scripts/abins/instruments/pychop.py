@@ -18,9 +18,11 @@ class PyChopInstrument(Instrument):
 
     The "tthlims" data from PyChop is used to determine sampling angles.
     """
-    def __init__(self, name='MAPS', setting=''):
+    def __init__(self, name='MAPS', setting='', chopper_frequency=400):
         self._name = name
         self._e_init = None
+        self._chopper = setting
+        self._chopper_frequency = chopper_frequency
         self._polyfits = {}
         self._tthlims = PyChop.Instruments.Instrument(self._name).detector.tthlims
 
@@ -124,7 +126,7 @@ class PyChopInstrument(Instrument):
 
         resolution, _ = PyChop2.calculate(inst=self._name,
                                           package=setting_params['chopper'],
-                                          freq=setting_params['frequency'],
+                                          freq=self._chopper_frequency,
                                           ei=ei_mev,
                                           etrans=frequencies_mev.tolist())
         fit = np.polyfit(frequencies_invcm, resolution / MILLI_EV_TO_WAVENUMBER, order)

@@ -18,7 +18,7 @@ instruments = {"lagrange": LagrangeInstrument,
                "maps": (PyChopInstrument, {'name': 'MAPS'}),
                "mari": (PyChopInstrument, {'name': 'MARI'})}
 
-def get_instrument(name: str, setting: str = '') -> Instrument:
+def get_instrument(name: str, **kwargs) -> Instrument:
     """Instantiate a named Instrument
 
     Instruments inherit from abins.instruments.instrument.Instrument and
@@ -27,7 +27,8 @@ def get_instrument(name: str, setting: str = '') -> Instrument:
 
     Args:
         name: Instrument name as defined in abins.constants.ALL_INSTRUMENTS
-        setting: Instrument setting as supported by instrument parameters
+        kwargs: remaining arguments are instrument parameters passed to 
+            instrument class
 
     Returns:
         Instrument object
@@ -36,10 +37,10 @@ def get_instrument(name: str, setting: str = '') -> Instrument:
     if name.lower() in instruments:
         instrument_factory = instruments.get(name.lower())
         if isinstance(instrument_factory, tuple):
-            return instrument_factory[0](setting=setting,
-                                         **instrument_factory[1])
-        else:
-            return instrument_factory(setting=setting)
+            instrument_factory, extra_args = instrument_factory
+            kwargs.update(extra_args)
+
+        return instrument_factory(**kwargs)
 
     elif name not in ALL_INSTRUMENTS:
         raise ValueError(f'Unknown instrument: "{name}". Known instruments: '

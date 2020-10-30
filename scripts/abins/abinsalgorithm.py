@@ -9,7 +9,7 @@
 # another part of AbinsModules.
 import os
 import re
-from typing import Dict, Optional, Tuple
+from typing import Dict, Iterable, List, Optional, Tuple
 
 import numpy as np
 from mantid.api import mtd, FileAction, FileProperty, WorkspaceGroup, WorkspaceProperty
@@ -42,12 +42,13 @@ class AbinsAlgorithm:
         # conversion from str to int
         self._num_quantum_order_events = int(self.getProperty("QuantumOrderEventsNumber").value)
 
-        self._setting = self.getProperty("Setting").value
+    def set_instrument(self) -> None:
+        """Instantiate self._instrument using name and self._instrument_kwargs"""
         instrument_name = self.getProperty("Instrument").value
         if instrument_name in ALL_INSTRUMENTS:
             self._instrument_name = instrument_name
             self._instrument = get_instrument(self._instrument_name,
-                                              setting=self._setting)
+                                              **self._instrument_kwargs)
         else:
             raise ValueError("Unknown instrument %s" % instrument_name)
 
@@ -105,26 +106,56 @@ class AbinsAlgorithm:
                              doc="Number of quantum order effects included in the calculation "
                                  "(1 -> FUNDAMENTALS, 2-> first overtone + FUNDAMENTALS + 2nd order combinations")
 
-    def declare_instrument_properties(self, *, default="TOSCA", choices=ALL_INSTRUMENTS):
+    def declare_instrument_properties(
+            self, default: str = "TOSCA",
+            choices: Iterable = ALL_INSTRUMENTS,
+            multiple_choice_settings: List[Tuple[str, str, str]] = [],
+            freeform_settings: List[Tuple[str, str, str]] = []):
+        """Declare properties related to instrument
+
+        Args:
+            default: default instrument
+            choices: Iterable of available instruments for "Instrument" combo box
+            multiple_choice_settings: 
+                List of field names, corresponding parameter and tooltip for additional instrument settings, e.g.::
+
+                    [('Setting', 'settings', 'Setting choice for this instrument (e.g. monochromator)'), ...]
+
+                This should correspond to a dict in abins.parameters.instruments[instrument]
+
+
+            freeform_settings: 
+                List of field names, defaults and tooltips for additional instrument settings, e.g.::
+
+                    [('IncidentEnergy', '4100', 'Incident energy in wavenumber'), ...]
+            """
+
         self.declareProperty(name="Instrument",
                              direction=Direction.Input,
                              defaultValue=default,
                              validator=StringListValidator(choices),
                              doc="Name of an instrument for which analysis should be performed.")
 
-        # Populate list of possible instrument settings
-        valid_choices = ['']
-        for instrument in choices:
-            if ((instrument in abins.parameters.instruments)
-                    and ('settings' in abins.parameters.instruments[instrument])):
-                valid_choices += sorted(list(abins.parameters.instruments[instrument]['settings']))
-        valid_choices = sorted(list(set(valid_choices)))
+        for property_name, parameter_name, doc in multiple_choice_settings:
+            # Populate list of possible instrument settings
+            valid_choices = ['']
+            for instrument in choices:
+                if ((instrument in abins.parameters.instruments)
+                    and (parameter_name in abins.parameters.instruments[instrument])):
+                    valid_choices += sorted(list(abins.parameters.instruments[instrument][parameter_name]))
+            valid_choices = sorted(list(set(valid_choices)))
 
-        self.declareProperty(name="Setting",
-                             direction=Direction.Input,
-                             defaultValue="",
-                             validator=StringListValidator(valid_choices),
-                             doc="Setting choice for this instrument (e.g. monochromator)")
+            self.declareProperty(name=property_name,
+                                 direction=Direction.Input,
+                                 defaultValue="",
+                                 validator=StringListValidator(valid_choices),
+                                 doc=doc)
+
+        for property_name, default, doc in freeform_settings:
+            self.declareProperty(name=property_name,
+                                 direction=Direction.Input,
+                                 defaultValue=default,
+                                 doc=doc)
 
     def validate_common_inputs(self, issues: dict = None) -> Dict[str, str]:
         """Validate inputs common to Abins 1D and 2D versions
@@ -173,14 +204,12 @@ class AbinsAlgorithm:
         if not (isinstance(bin_width, float) and 1.0 <= bin_width <= 10.0):
             issues["BinWidthInWavenumber"] = "Invalid bin width. Valid range is [1.0, 10.0] cm^-1"
 
-        issues.update(self._validate_instrument_settings())
-
         return issues
 
-    def _validate_instrument_settings(self) -> Dict[str, str]:
-        """Check that Setting is compatible with selected Instrument"""
+    def _validate_instrument_settings(self, name='Setting', parameter='setting') -> Dict[str, str]:
+        """Check that multiple-choice parameter is compatible with selected Instrument"""
         instrument_name = self.getProperty("Instrument").value
-        setting = self.getProperty("Setting").value
+        setting = self.getProperty(name).value
 
         if instrument_name not in abins.parameters.instruments:
             # If an instrument lacks an entry in abins.parameters, we cannot
@@ -189,11 +218,11 @@ class AbinsAlgorithm:
 
         parameters = abins.parameters.instruments.get(instrument_name)
 
-        if 'settings' not in parameters:
+        if parameter not in parameters:
             return {}
 
         if setting == '':
-            if 'default_setting' in parameters:
+            if parameter + '_default' in parameters:
                 return {}
             else:
                 return {"Setting":
