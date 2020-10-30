@@ -182,6 +182,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 else:
                     color = artist.get_color()
                 self._color_queue[axis_number] += color
+                self._color_queue[axis_number] += color
 
     # Ads observer functions
     def replace_specified_workspace_in_plot(self, workspace):
@@ -233,6 +234,15 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
                 ymax = ymax_i
 
         plt.setp(self.fig.axes, ylim=[ymin, ymax])
+
+    @property
+    def get_xlim_list(self):
+        xlim_list=[]
+        for axis in self.fig.axes:
+            min, max = axis.get_xlim()
+            print("values0.", min, max)
+            xlim_list.append([min,max])
+        return xlim_list
 
     def autoscale_selected_y_axis(self, axis_number):
         if axis_number >= len(self.fig.axes):
@@ -306,3 +316,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
 
     def add_disable_autoscale_subscriber(self, observer):
         self.toolBar.uncheck_autoscale_notifier.add_subscriber(observer)
+
+    def add_range_changed_subscriber(self, observer):
+        self.toolBar.range_changed_notifier.add_subscriber(observer)
+

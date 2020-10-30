@@ -7,25 +7,18 @@
 from typing import List
 
 
-def check_values(values: List[float]):
-    if values[0] > values[1]:
-        return [values[1], values[0]]
-    return values
-
 class PlotEditContext(object):
     def __init__(self):
         self._xlim = [0.0, 15.]
         self._ylim = [-0.3, 0.3]
-        self._index = 0
+        self._plot_index = 0
         self._errors = False
         self._auto = False
 
     def update_xlim(self, values: List[float]):
-        check_values(values)
         self._xlim = values
 
     def update_ylim(self, values: List[float]):
-        check_values(values)
         self._ylim = values
 
     def update_error_state(self, state: bool):
@@ -35,11 +28,11 @@ class PlotEditContext(object):
         self._auto = state
 
     def set_axis(self,index:int):
-        self._index = index
+        self._plot_index = index
 
     @property
     def axis(self)->int:
-        return self._index
+        return self._plot_index
 
     @property
     def get_xlim(self) -> List[float]:

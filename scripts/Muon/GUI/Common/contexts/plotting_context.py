@@ -68,11 +68,6 @@ class PlottingContext(object):
         for name in list(self._subplots.keys()):
             del self._subplots[name]
 
-    def remove_subplot(self,name:str):
-        if name not in list(self._subplots.keys()):
-            return
-        del self._subplots[name]
-
     def update_xlim(self, name:str, values:List[float]):
         if name == "All":
             for subplot in list(self._subplots.keys()):
@@ -120,10 +115,6 @@ class PlottingContext(object):
         if name == "All":
             return self._subplots[self._subplots.keys[0]].get_error_state()
         return self._subplots[name].get_error_state()
-
-    @property
-    def get_subplot_names()->List[str]:
-        return list(self._subplots.keys())
 
     def get_axis(self, name:str)->int:
         return self._subplots[name].axis

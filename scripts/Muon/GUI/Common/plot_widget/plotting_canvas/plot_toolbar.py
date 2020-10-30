@@ -41,6 +41,7 @@ class PlotToolbar(NavigationToolbar):
         self.uncheck_autoscale_notifier = GenericObservable()
         self.enable_autoscale_notifier = GenericObservable()
         self.disable_autoscale_notifier = GenericObservable()
+        self.range_changed_notifier = GenericObservable()
 
     def _init_toolbar(self):
         for text, tooltip_text, mdi_icon, callback in self.toolitems:
@@ -107,6 +108,8 @@ class PlotToolbar(NavigationToolbar):
         if self._active == 'ZOOM':
             self._active = None
             self.enable_autoscale_notifier.notify_subscribers()
+            self.range_changed_notifier.notify_subscribers()
+
         else:
             self.uncheck_autoscale_notifier.notify_subscribers()
             self.disable_autoscale_notifier.notify_subscribers()

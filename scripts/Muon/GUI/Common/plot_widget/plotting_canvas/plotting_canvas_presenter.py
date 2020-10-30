@@ -182,6 +182,8 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._options_presenter.connect_y_range_changed(self._handle_ylim_changed_in_quick_edit_options)
         self._options_presenter.connect_autoscale_changed(self._handle_autoscale_y_axes)
         self._options_presenter.connect_plot_selection(self._handle_subplot_changed_in_quick_edit_widget)
+        self.range_changed_observer = GenericObserver(self.update_range)
+        self._view.add_range_changed_subscriber(self.range_changed_observer)
 
     def _setup_autoscale_observer(self):
         self.uncheck_autoscale_observer = GenericObserver(self._options_presenter.uncheck_autoscale)
@@ -297,3 +299,12 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             return None, None
         else:
             return xlims, ylims
+
+    def update_range(self):
+        # force off all
+        xlim_list = self._view.get_xlim_list
+        for axis, name in enumerate(self._context._subplots.keys()):
+            print("test", name, xlim_list[axis])
+            self._context.update_xlim(name, xlim_list[axis])
+            # add some logic so it only updates the one it has to
+            self._options_presenter.set_plot_x_range(xlim_list[axis])
