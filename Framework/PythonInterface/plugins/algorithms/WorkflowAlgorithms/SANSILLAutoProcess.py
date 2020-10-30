@@ -312,7 +312,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.copyProperties('SANSILLReduction', ['NormaliseBy'])
 
-        self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.),
+        self.declareProperty('SampleThickness', 0.1,
+                             validator=FloatBoundedValidator(lower=-1),
                              doc='Sample thickness [cm]')
 
         self.declareProperty('TransmissionBeamRadius', 0.1,

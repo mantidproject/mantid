@@ -71,7 +71,8 @@ class SANSILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['sens'], 'Sensitivity')
 
     def test_sample(self):
-        SANSILLReduction(Run='010569', ProcessAs='Sample', OutputWorkspace='sample')
+        SANSILLReduction(Run='010569', ProcessAs='Sample',
+                         OutputWorkspace='sample')
         self._check_output(mtd['sample'], True, 1, 128*128+2)
         self._check_process_flag(mtd['sample'], 'Sample')
 
@@ -111,6 +112,13 @@ class SANSILLReductionTest(unittest.TestCase):
         SANSILLReduction(Run='093410', ProcessAs='Sample', OutputWorkspace='sample')
         self._check_output(mtd['sample'], True, 30, 256*256+2)
         self._check_process_flag(mtd['sample'], 'Sample')
+
+    def test_sample_thickness(self):
+        SANSILLReduction(Run='010569', ProcessAs='Sample', SampleThickness=-1,
+                         OutputWorkspace='sample')
+        a = mtd["sample"].getHistory().lastAlgorithm()
+        thickness = a.getProperty("SampleThickness").value
+        self.assertEqual(thickness, 0.1)
 
     def _check_process_flag(self, ws, value):
         self.assertTrue(ws.getRun().getLogData('ProcessedAs').value, value)

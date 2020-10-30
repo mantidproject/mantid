@@ -44,7 +44,8 @@ def get_value(log):
 
     if isinstance(log, TimeSeriesProperties):
         if log.size() == 1:
-            return '{} (1 entry)'.format(log.firstValue())
+            # for logs which are filtered or not
+            return '{} (1 entry)'.format(log.filtered_value[0])
         else:
             entry_descr = '({} entries)'.format(log.size())
 

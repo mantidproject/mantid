@@ -142,6 +142,9 @@ public:
     const auto &material = inputWS->sample().getMaterial();
     TS_ASSERT_EQUALS("V", material.name());
     TS_ASSERT_DELTA(0.0722, material.numberDensity(), 1e-04);
+    TS_ASSERT_EQUALS(material.numberDensityEffective(),
+                     material.numberDensity())
+    TS_ASSERT_EQUALS(material.packingFraction(), 1.0)
   }
 
   void test_Setting_Container_Material() {
@@ -156,6 +159,9 @@ public:
     const auto &material = container.material();
     TS_ASSERT_EQUALS("V", material.name());
     TS_ASSERT_DELTA(0.0722, material.numberDensity(), 1e-04);
+    TS_ASSERT_EQUALS(material.numberDensityEffective(),
+                     material.numberDensity())
+    TS_ASSERT_EQUALS(material.packingFraction(), 1.0)
   }
 
   void test_Setting_Geometry_With_Material_Already_Set_Keeps_Material() {
@@ -182,6 +188,9 @@ public:
     const auto &material = inputWS->sample().getMaterial();
     TS_ASSERT_EQUALS("Al", material.name());
     TS_ASSERT_DELTA(2.6989, material.numberDensity(), 1e-04);
+    TS_ASSERT_EQUALS(material.numberDensityEffective(),
+                     material.numberDensity())
+    TS_ASSERT_EQUALS(material.packingFraction(), 1.0)
   }
 
   void test_Setting_Environment_No_Geometry_Overrides() {
@@ -679,6 +688,9 @@ public:
     const auto &material = inputWS->sample().getMaterial();
     TS_ASSERT_EQUALS("V", material.name());
     TS_ASSERT_DELTA(0.0722, material.numberDensity(), 1e-04);
+    TS_ASSERT_EQUALS(material.numberDensityEffective(),
+                     material.numberDensity())
+    TS_ASSERT_EQUALS(material.packingFraction(), 1.0)
   }
 
   void test_Setting_Geometry_As_HollowCylinder() {

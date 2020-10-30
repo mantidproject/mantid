@@ -143,7 +143,6 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
         InterfaceManager().showCustomInterfaceHelp(self.doc)
 
     def open_settings(self):
-        self.settings_presenter.load_existing_settings()
         self.settings_presenter.show()
 
     def get_rb_no(self):

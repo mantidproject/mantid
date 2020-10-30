@@ -116,6 +116,7 @@ set(TEST_PY_FILES
     VesuvioResolutionTest.py
     VesuvioThicknessTest.py
     VesuvioTOFFitTest.py
+    PEARLTransfitTest.py
     PoldiCreatePeaksFromFileTest.py
     LoadCIFTest.py
     SaveYDATest.py

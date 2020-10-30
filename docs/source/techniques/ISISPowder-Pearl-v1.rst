@@ -109,7 +109,7 @@ On PEARL the following parameters are required when executing *focus*:
 The following parameter is required if
 :ref:`perform_attenuation_pearl_isis-powder-diffraction-ref` is set to **True**
 
-- :ref:`attenuation_file_path_pearl_isis-powder-diffraction-ref`
+- :ref:`attenuation_file_pearl_isis-powder-diffraction-ref`
 
 The following parameters may also be optionally set:
 
@@ -124,12 +124,10 @@ Example
   # Notice how the filename ends with .yaml
   cal_mapping_file = r"C:\path\to\cal_mapping.yaml"
 
-  attenuation_path = r"C:\path\to\attenuation_file"
-
   pearl_example.focus(calibration_mapping_file=cal_mapping_file,
                       focus_mode="all", long_mode=True,
                       perform_attenuation=True,
-                      attenuation_file_path=attenuation_path,
+                      attenuation_file="ZTA",
                       run_number="100-110", tt_mode="tt88",
                       vanadium_normalisation=True)
 
@@ -236,28 +234,51 @@ Example Input:
   pearl_example.focus(generate_absorb_corrections=True,
                       absorb_corrections_out_filename=r"C:\PEARL\pearl_absorb_sphere_17_2.nxs"...)
 
-.. _attenuation_file_path_pearl_isis-powder-diffraction-ref:
+.. _attenuation_file_pearl_isis-powder-diffraction-ref:
 
-attenuation_file_path
-^^^^^^^^^^^^^^^^^^^^^
+attenuation_file
+^^^^^^^^^^^^^^^^
 Required if :ref:`perform_attenuation_pearl_isis-powder-diffraction-ref`
 is set to **True**
 
-The full path to the attenuation file to use within the
-:ref:`focus_pearl_isis-powder-diffraction-ref` method.
+The name of the attenuation file to use within the
+:ref:`focus_pearl_isis-powder-diffraction-ref` method. The name must match the name
+of one of the entries in the :ref:`attenuation_files_pearl_isis-powder-diffraction-ref` setting
 
 The workspace will be attenuated with the specified file
 if the :ref:`focus_mode_pearl_isis-powder-diffraction-ref`
 is set to **all** or **trans**. For more details see
 :ref:`PearlMCAbsorption<algm-PearlMCAbsorption>`
 
-*Note: The path to the file must include the file extension*
-
 Example Input:
 
 ..  code-block:: python
 
-  pearl_example(attenuation_file_path=r"C:\path\to\attenuation_file.out", ...)
+  pearl_example.focus(attenuation_file="ZTA", ...)
+
+.. _attenuation_files_pearl_isis-powder-diffraction-ref:
+
+attenuation_files
+^^^^^^^^^^^^^^^^^
+
+A list of attenuation file names and paths that are available for use in the Focus process.
+It is expected that this setting will be specified in a configuration yaml file as follows:
+
+.. code-block:: yaml
+
+  attenuation_files:
+    - name : ZTA
+      path : C:\path\to\anvil_atten_files\PRL112_DC25_10MM_FF.OUT
+    - name : WC
+      path : C:\path\to\anvil_atten_files\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT
+
+It can alternatively be supplied as part of the call to focus:
+
+..  code-block:: python
+
+  pearl_example.focus(attenuation_file="ZTA", attenuation_files=r'[{"name": "ZTA", "path": r"C:\path\to\anvil_atten_files\PRL112_DC25_10MM_FF.OUT"}]' ...)
+
+*Note: The path to the file must include the file extension*
 
 .. _calibration_directory_pearl_isis-powder-diffraction-ref:
 
@@ -485,7 +506,7 @@ For more details of the corrections performed see:
 :ref:`PearlMCAbsorption<algm-PearlMCAbsorption>`
 
 If this is set to **True**
-:ref:`attenuation_file_path_pearl_isis-powder-diffraction-ref`
+:ref:`attenuation_file_pearl_isis-powder-diffraction-ref`
 must be set too.
 
 *Note: This correction will only be performed if 'focus_mode'
@@ -1112,7 +1133,7 @@ A template for the filename of the generated GSAS file.
 
 dat_files_directory
 ^^^^^^^^^^^^^^^^^^^
-The subdirectory of the output directory where the .dat files are saved
+The subdirectory of the output directory where the .xye files are saved
 
 .. _tof_xye_filename_pearl_isis-powder-diffraction-ref:
 

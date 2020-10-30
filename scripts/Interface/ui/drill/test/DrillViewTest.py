@@ -360,7 +360,7 @@ class DrillViewTest(unittest.TestCase):
 
     def test_setTable(self):
         self.view.set_table(["test", "test"])
-        self.view.table.setColumnCount.assert_called_once_with(2)
+        self.view.table.setColumnCount.assert_called_with(2)
 
     def test_fillTable(self):
         # empty contents
@@ -420,20 +420,29 @@ class DrillViewTest(unittest.TestCase):
     def test_setVisualSettings(self):
         self.view.columns = ["test"]
         self.view.setVisualSettings(dict())
-        self.view.table.setHeaderFoldingState.assert_not_called()
+        self.view.table.setFoldedColumns.assert_not_called()
         self.view.setVisualSettings({"FoldedColumns": {}})
-        self.view.table.setHeaderFoldingState.assert_called_once_with([False])
+        self.view.table.setFoldedColumns.assert_called_once_with([])
         self.view.table.reset_mock()
         self.view.setVisualSettings({"FoldedColumns": {"test": True}})
-        self.view.table.setHeaderFoldingState.assert_called_once_with([True])
+        self.view.table.setFoldedColumns.assert_called_once_with(["test"])
         self.view.table.reset_mock()
         self.view.setVisualSettings({"FoldedColumns": {"test1": True}})
-        self.view.table.setHeaderFoldingState.assert_called_once_with([False])
+        self.view.table.setFoldedColumns.assert_called_once_with(["test1"])
+        self.view.table.reset_mock()
+        self.view.setVisualSettings({"FoldedColumns": ["test"]})
+        self.view.table.setFoldedColumns.assert_called_once_with(["test"])
 
     def test_getVisualSettings(self):
         self.view.columns = ["test1", "test2", "test3"]
-        self.view.table.getHeaderFoldingState.return_value = [True, False, True]
-        d = {"FoldedColumns": {"test1": True, "test3": True}}
+        self.view.table.getFoldedColumns.return_value = ["test1", "test3"]
+        self.view.table.getHiddenColumns.return_value = ["test1", "test2"]
+        self.view.table.getColumnsOrder.return_value  = ["test1",
+                                                         "test2",
+                                                         "test3"]
+        d = {"FoldedColumns": ["test1", "test3"],
+             "HiddenColumns": ["test1", "test2"],
+             "ColumnsOrder": ["test1", "test2", "test3"]}
         self.assertDictEqual(self.view.getVisualSettings(), d)
 
 

@@ -60,7 +60,7 @@ class PaalmanPingsMonteCarloAbsorption(DataProcessorAlgorithm):
         return "Workflow\\Inelastic;CorrectionFunctions\\AbsorptionCorrections;Workflow\\MIDAS"
 
     def seeAlso(self):
-        return ["MonteCarloAbsorption", "ApplyPaalmanPingsCorrection"]
+        return ["MonteCarloAbsorption", "ApplyPaalmanPingsCorrection", "PaalmanPingsAbsorptionCorrection"]
 
     def summary(self):
         return "Calculates absorption corrections in Paalman & Pings formalism for a given sample " \
