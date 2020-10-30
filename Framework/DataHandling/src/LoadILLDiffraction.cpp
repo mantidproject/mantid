@@ -481,7 +481,8 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
   std::vector<double> monitor = getMonitor(scan);
   auto d2bNumberPixelsInTubes = 0;
   if (m_instName == "D2B") {
-      d2bNumberPixelsInTubes = m_outWorkspace->getInstrument()->getIntParameter("number_pixels_in_tubes")[0];
+    d2bNumberPixelsInTubes = m_outWorkspace->getInstrument()->getIntParameter(
+        "number_pixels_in_tubes")[0];
   }
   // First load the monitors
   for (size_t i = 0; i < NUMBER_MONITORS; ++i) {
@@ -532,7 +533,8 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
   loadStaticInstrument();
   auto d2bNumberPixelsInTubes = 0;
   if (m_instName == "D2B") {
-      d2bNumberPixelsInTubes = m_outWorkspace->getInstrument()->getIntParameter("number_pixels_in_tubes")[0];
+    d2bNumberPixelsInTubes = m_outWorkspace->getInstrument()->getIntParameter(
+        "number_pixels_in_tubes")[0];
   }
 
   // Assign monitor counts
