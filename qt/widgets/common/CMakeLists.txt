@@ -25,6 +25,7 @@ set(
   src/FunctionBrowser/FunctionBrowserUtils.cpp
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
+  src/FunctionModelDataset.cpp
   src/FunctionMultiDomainPresenter.cpp
   src/FunctionTreeView.cpp
   src/GenericDialog.cpp
@@ -439,6 +440,7 @@ set(
   src/FunctionBrowser/FunctionBrowserUtils.cpp
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
+  src/FunctionModelDataset.cpp
   src/FunctionMultiDomainPresenter.cpp
   src/FunctionTreeView.cpp
   src/HintingLineEdit.cpp
@@ -713,6 +715,7 @@ set(
   inc/MantidQtWidgets/Common/ParseKeyValueString.h
   inc/MantidQtWidgets/Common/ParseNumerics.h
   inc/MantidQtWidgets/Common/FunctionModel.h
+  inc/MantidQtWidgets/Common/FunctionModelDataset.h
   inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
   inc/MantidQtWidgets/Common/HintStrategy.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
