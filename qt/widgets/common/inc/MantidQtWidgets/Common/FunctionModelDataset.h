@@ -23,12 +23,14 @@ struct Spectra {
   QList<std::size_t> m_spectraList;
 };
 
-class Dataset {
+struct Dataset {
 public:
   Dataset(const QString &workspaceName, const QList<std::size_t> &spectra);
 
   QString datasetName() const;
   QStringList domainNames() const;
+
+  QList<std::size_t> spectraList() const;
 
 private:
   QString m_workspaceName;

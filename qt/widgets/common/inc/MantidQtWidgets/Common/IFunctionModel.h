@@ -8,6 +8,7 @@
 
 #include "DllOption.h"
 
+#include "FunctionModelDataset.h"
 #include "MantidAPI/IFunction_fwd.h"
 
 #include <QList>
@@ -42,8 +43,7 @@ public:
   virtual IFunction_sptr getSingleFunction(int index) const = 0;
   virtual IFunction_sptr getCurrentFunction() const = 0;
   virtual void setNumberDomains(int) = 0;
-  virtual void
-  setDatasets(const QList<QPair<QString, QList<std::size_t>>> &datasets) = 0;
+  virtual void setDatasets(const QList<Dataset> &datasets) = 0;
   virtual QStringList getDatasetNames() const = 0;
   virtual QStringList getDatasetDomainNames() const = 0;
   virtual int getNumberDomains() const = 0;

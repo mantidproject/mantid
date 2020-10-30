@@ -29,10 +29,14 @@ QStringList Dataset::domainNames() const {
     return QStringList(m_workspaceName);
   else {
     QStringList domainNames;
-    for (const auto &specNum : m_spectra.m_spectraList)
+    for (const auto &specNum : spectraList())
       domainNames << m_workspaceName + " (" + QString::number(specNum) + ")";
     return domainNames;
   }
+}
+
+QList<std::size_t> Dataset::spectraList() const {
+  return m_spectra.m_spectraList;
 }
 
 } // namespace MantidWidgets

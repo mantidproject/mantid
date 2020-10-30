@@ -277,9 +277,9 @@ void FunctionModel::setNumberDomains(int nDomains) {
 /// a single spectrum in the workspaces being fitted.
 /// @param datasetNames :: Names of the workspaces to be fitted.
 void FunctionModel::setDatasets(const QStringList &datasetNames) {
-  QList<QPair<QString, QList<std::size_t>>> datasets;
+  QList<Dataset> datasets;
   for (const auto &datasetName : datasetNames)
-    datasets.append(QPair(datasetName, QList<std::size_t>({0u})));
+    datasets.append(Dataset(datasetName, QList<std::size_t>({0u})));
 
   setDatasets(datasets);
 }
@@ -288,8 +288,7 @@ void FunctionModel::setDatasets(const QStringList &datasetNames) {
 /// should be used when the workspaces being fitted have multiple spectra.
 /// @param datasets :: Names of workspaces to be fitted paired to a spectra
 /// list.
-void FunctionModel::setDatasets(
-    const QList<QPair<QString, QList<std::size_t>>> &datasets) {
+void FunctionModel::setDatasets(const QList<Dataset> &datasets) {
   checkNumberOfDomains(datasets);
   m_datasets = datasets;
 }
@@ -299,7 +298,7 @@ void FunctionModel::setDatasets(
 /// @param datasetNames :: Names of the workspaces to be added.
 void FunctionModel::addDatasets(const QStringList &datasetNames) {
   for (const auto &datasetName : datasetNames)
-    m_datasets.append(QPair(datasetName, QList<std::size_t>({0u})));
+    m_datasets.append(Dataset(datasetName, QList<std::size_t>({0u})));
 
   setNumberDomains(numberOfDomains(m_datasets));
 }
@@ -330,9 +329,9 @@ void FunctionModel::removeDatasets(QList<int> &indices) {
 QStringList FunctionModel::getDatasetNames() const {
   QStringList datasetNames;
   for (const auto &dataset : m_datasets)
-    for (const auto &specNum : dataset.second) {
+    for (const auto &specNum : dataset.spectraList()) {
       UNUSED_ARG(specNum);
-      datasetNames << dataset.first;
+      datasetNames << dataset.datasetName();
     }
   return datasetNames;
 }
@@ -342,14 +341,8 @@ QStringList FunctionModel::getDatasetNames() const {
 /// a workspace. This is required for EditLocalParameterDialog.
 QStringList FunctionModel::getDatasetDomainNames() const {
   QStringList domainNames;
-  for (const auto &dataset : m_datasets) {
-    if (dataset.second.size() == 1)
-      domainNames << dataset.first;
-    else {
-      for (const auto &specNum : dataset.second)
-        domainNames << dataset.first + " (" + QString::number(specNum) + ")";
-    }
-  }
+  for (const auto &dataset : m_datasets)
+    domainNames << dataset.domainNames();
   return domainNames;
 }
 
@@ -505,24 +498,22 @@ void FunctionModel::checkDatasets() {
   if (numberOfDomains(m_datasets) != static_cast<int>(m_numberDomains)) {
     m_datasets.clear();
     for (auto i = 0u; i < m_numberDomains; ++i)
-      m_datasets.append(QPair(QString::number(i), QList<std::size_t>({0u})));
+      m_datasets.append(Dataset(QString::number(i), QList<std::size_t>({0u})));
   }
 }
 
 /// Check that the datasets supplied have the expected total number of domains.
-void FunctionModel::checkNumberOfDomains(
-    const QList<QPair<QString, QList<std::size_t>>> &datasets) const {
+void FunctionModel::checkNumberOfDomains(const QList<Dataset> &datasets) const {
   if (numberOfDomains(datasets) != static_cast<int>(m_numberDomains)) {
     throw std::runtime_error(
         "Number of dataset domains doesn't match the number of domains.");
   }
 }
 
-int FunctionModel::numberOfDomains(
-    const QList<QPair<QString, QList<std::size_t>>> &datasets) const {
+int FunctionModel::numberOfDomains(const QList<Dataset> &datasets) const {
   int totalNumberOfDomains{0};
   for (const auto &dataset : datasets)
-    totalNumberOfDomains += dataset.second.size();
+    totalNumberOfDomains += dataset.spectraList().size();
 
   return totalNumberOfDomains;
 }
