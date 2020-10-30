@@ -95,9 +95,10 @@ private:
   void setSampleLogs();
   void computeThetaOffset();
   void convertAxisAndTranspose();
+  void cropWorkspace();
 
   ///< the 2theta offset for D20 to account for dead pixels
-  double m_offsetTheta{0.};
+  double m_offsetTheta;
   size_t m_sizeDim1; ///< size of dim1, number of tubes (D2B) or the whole
                      /// detector (D20)
   size_t m_sizeDim2; ///< size of dim2, number of pixels (1 for D20!)
@@ -111,8 +112,11 @@ private:
   std::string m_filename;               ///< file name to load
   Types::Core::DateAndTime m_startTime; ///< start time of acquisition
   ScanType m_scanType;                  ///< NoScan, DetectorScan or OtherScan
-  double m_pixelHeight{0.};             ///< height of the pixel in D2B
-  double m_maxHeight{0.}; ///< maximum absolute height of the D2B tubes
+  double m_pixelHeight;                 ///< height of the pixel in D2B
+  double m_maxHeight; ///< maximum absolute height of the D2B tubes
+
+  double m_pixelSize;        ///< angular pixel size in D20
+  size_t m_numberDeadPixels; ///< number of dead pixels in D20
 
   std::vector<ScannedVariables> m_scanVar;  ///< holds the scan info
   LoadHelper m_loadHelper;                  ///< a helper for metadata

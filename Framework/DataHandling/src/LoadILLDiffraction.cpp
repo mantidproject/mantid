@@ -1,4 +1,4 @@
-// Mantid Repository : https://github.com/mantidproject/mantid
+﻿// Mantid Repository : https://github.com/mantidproject/mantid
 //
 // Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
@@ -42,13 +42,9 @@ namespace {
 // This defines the number of physical pixels in D20 (low resolution mode)
 // Then each pixel can be split into 2 (nominal) or 3 (high resolution) by DAQ
 constexpr size_t D20_NUMBER_PIXELS = 1600;
-// This defines the number of dead pixels on each side in low resolution mode
-constexpr size_t D20_NUMBER_DEAD_PIXELS = 32;
 // This defines the number of monitors in the instrument. If there are cases
 // where this is no longer one this decleration should be moved.
 constexpr size_t NUMBER_MONITORS = 1;
-// This is the angular size of a pixel in degrees (in low resolution mode)
-constexpr double D20_PIXEL_SIZE = 0.1;
 // The conversion factor from radian to degree
 constexpr double RAD_TO_DEG = 180. / M_PI;
 // A factor to compute E from lambda: E (mev) = waveToE/lambda(A)
@@ -218,7 +214,6 @@ void LoadILLDiffraction::loadDataScan() {
 
   resolveInstrument();
   resolveScanType();
-  computeThetaOffset();
 
   std::string start_time = firstEntry.getString("start_time");
   start_time = m_loadHelper.dateTimeInIsoFormat(start_time);
@@ -295,7 +290,11 @@ void LoadILLDiffraction::initMovingWorkspace(const NXDouble &scan,
   const auto instrumentWorkspace = loadEmptyInstrument(start_time);
   const auto &instrument = instrumentWorkspace->getInstrument();
   auto &params = instrumentWorkspace->instrumentParameters();
-
+  if (m_instName == "D20") {
+    m_pixelSize = instrument->getNumberParameter("pixel_size")[0];
+    m_numberDeadPixels = instrument->getIntParameter("number_dead_pixels")[0];
+    computeThetaOffset();
+  }
   const auto &referenceComponentPosition =
       getReferenceComponentPosition(instrumentWorkspace);
 
@@ -483,6 +482,12 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
   if (m_instName == "D2B") {
     d2bNumberPixelsInTubes = m_outWorkspace->getInstrument()->getIntParameter(
         "number_pixels_in_tubes")[0];
+  } else if (m_instName == "D20") {
+    m_numberDeadPixels = m_outWorkspace->getInstrument()->getIntParameter(
+        "number_dead_pixels")[0];
+    m_numberDetectorsActual =
+        m_resolutionMode * (D20_NUMBER_PIXELS - 2 * m_numberDeadPixels);
+    cropWorkspace();
   }
   // First load the monitors
   for (size_t i = 0; i < NUMBER_MONITORS; ++i) {
@@ -535,6 +540,15 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
   if (m_instName == "D2B") {
     d2bNumberPixelsInTubes = m_outWorkspace->getInstrument()->getIntParameter(
         "number_pixels_in_tubes")[0];
+  } else if (m_instName == "D20") {
+    m_pixelSize =
+        m_outWorkspace->getInstrument()->getNumberParameter("pixel_size")[0];
+    m_numberDeadPixels = m_outWorkspace->getInstrument()->getIntParameter(
+        "number_dead_pixels")[0];
+    computeThetaOffset();
+    m_numberDetectorsActual =
+        m_resolutionMode * (D20_NUMBER_PIXELS - 2 * m_numberDeadPixels);
+    cropWorkspace();
   }
 
   // Assign monitor counts
@@ -770,16 +784,20 @@ void LoadILLDiffraction::resolveInstrument() {
       // subtracted
       // correspondingly dependent on the resolution mode
       m_resolutionMode = m_numberDetectorsRead / D20_NUMBER_PIXELS;
-      size_t activePixels = D20_NUMBER_PIXELS - 2 * D20_NUMBER_DEAD_PIXELS;
+      size_t activePixels = D20_NUMBER_PIXELS;
       m_numberDetectorsActual = m_resolutionMode * activePixels;
-
-      if (m_resolutionMode > 3 || m_resolutionMode < 1) {
+      auto const tolerance = 0.05; // tolerance due to not including number of
+                                   // dead pixels at this moment
+      if (static_cast<double>(m_resolutionMode) > 3 + tolerance ||
+          static_cast<double>(m_resolutionMode) < 1 - tolerance) {
         throw std::runtime_error("Unknown resolution mode for instrument " +
                                  m_instName);
       }
-      if (m_resolutionMode == 1) {
+      if (static_cast<double>(m_resolutionMode) > 1 - tolerance &&
+          static_cast<double>(m_resolutionMode) < 1 + tolerance) {
         m_instName += "_lr";
-      } else if (m_resolutionMode == 3) {
+      } else if (static_cast<double>(m_resolutionMode) > 3 - tolerance &&
+                 static_cast<double>(m_resolutionMode) < 3 + tolerance) {
         m_instName += "_hr";
       }
     }
@@ -865,7 +883,7 @@ void LoadILLDiffraction::setSampleLogs() {
   run.addLogData(
       new PropertyWithValue<std::string>("ScanType", std::move(scanTypeStr)));
   run.addLogData(new PropertyWithValue<double>(
-      "PixelSize", D20_PIXEL_SIZE / static_cast<double>(m_resolutionMode)));
+      "PixelSize", m_pixelSize / static_cast<double>(m_resolutionMode)));
   std::string resModeStr = "Nominal";
   if (m_resolutionMode == 1) {
     resModeStr = "Low";
@@ -911,8 +929,8 @@ bool LoadILLDiffraction::containsCalibratedData(
  * Computes the 2theta offset of the decoder for D20
  */
 void LoadILLDiffraction::computeThetaOffset() {
-  m_offsetTheta = static_cast<double>(D20_NUMBER_DEAD_PIXELS) * D20_PIXEL_SIZE -
-                  D20_PIXEL_SIZE / (static_cast<double>(m_resolutionMode) * 2);
+  m_offsetTheta = static_cast<double>(m_numberDeadPixels) * m_pixelSize -
+                  m_pixelSize / (static_cast<double>(m_resolutionMode) * 2);
 }
 
 /**
@@ -939,6 +957,22 @@ void LoadILLDiffraction::convertAxisAndTranspose() {
   API::MatrixWorkspace_sptr transposed =
       transposer->getProperty("OutputWorkspace");
   m_outWorkspace = transposed;
+}
+
+/**
+ * Crops the output workspace to take into account dead pixels.
+ */
+void LoadILLDiffraction::cropWorkspace() {
+  auto nSpectra = static_cast<int>((m_numberDetectorsActual + NUMBER_MONITORS));
+  if (m_scanType == DetectorScan) {
+    nSpectra *= m_numberScanPoints;
+  }
+  auto cropWs = createChildAlgorithm("CropWorkspace");
+  cropWs->setProperty("InputWorkspace", m_outWorkspace);
+  cropWs->setProperty("EndWorkspaceIndex", nSpectra - 1);
+  cropWs->setProperty("OutputWorkspace", "__unused");
+  cropWs->execute();
+  m_outWorkspace = cropWs->getProperty("OutputWorkspace");
 }
 
 } // namespace DataHandling
