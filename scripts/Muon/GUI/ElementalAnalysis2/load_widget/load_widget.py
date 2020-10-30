@@ -64,6 +64,7 @@ class LoadRunWidgetModel(object):
         self._data_context = context.data_context
         self._runs = []
         self._current_run = None
+        self._directory = ""
 
     # Used with load thread
     def loadData(self, runs):
@@ -74,7 +75,9 @@ class LoadRunWidgetModel(object):
         failed_files = []
         for run in self._runs:
             try:
-                LoadElementalAnalysisData(Run=run, GroupWorkspace=str(run))
+                ws, path = LoadElementalAnalysisData(Run=run, GroupWorkspace=str(run))
+                self._directory = path
+                print("The directory is=", self._directory)
             except ValueError as error:
                 failed_files += [(run, error)]
                 continue

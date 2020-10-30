@@ -13,6 +13,7 @@ from Muon.GUI.Common.utilities.run_string_utils import flatten_run_list
 from mantidqt.utils.observer_pattern import Observable
 
 
+
 class LoadRunWidgetPresenterEA(object):
 
     def __init__(self, view, model):
@@ -66,6 +67,9 @@ class LoadRunWidgetPresenterEA(object):
         self._view.clear()
         self._model.clear_loaded_data()
 
+    # def get_current_instrument(self):
+    #     return str(self._instrument)
+
     @property
     def workspaces(self):
         return self._model.loaded_workspaces
@@ -111,24 +115,13 @@ class LoadRunWidgetPresenterEA(object):
             self.load_runs(self.run_list)
         else:
             self.on_loading_finished()
+
     # ------------------------------------------------------------------------------------------------------------------
     # Loading from current run button
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_load_current_run(self):
-        return
-        # try:
-        #     current_run_file = file_utils.get_current_run_filename(self.get_current_instrument())
-        # except ValueError as error:
-        #     self._view.warning_popup(error.args[0])
-        #     return
-        #
-        # if current_run_file == "":
-        #     self._view.warning_popup("Cannot find directory for current instrument : " + self._instrument)
-        #     return
-        #
-        # self.run_list = ['Current']
-        # self.load_runs([current_run_file])
+        self._view.warning_popup("Load Current Run is not available")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Loading from increment/decrement run buttons
@@ -161,7 +154,6 @@ class LoadRunWidgetPresenterEA(object):
         Updates list of runs by adding a run equal to 1 after to the highest run.
         """
         run_list = load_utils.flatten_run_list(copy.copy(self._model.current_runs))
-        print("Have acquired the run_list for get_incremented_run_list")
         if run_list is None or len(run_list) == 0:
             return []
         if len(run_list) == 1:
@@ -241,7 +233,6 @@ class LoadRunWidgetPresenterEA(object):
                     self.run_list[0] = latest_loaded_run
                 self._model.current_run = self.run_list
             run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
-
             self._model.current_runs = run_list
 
             if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
