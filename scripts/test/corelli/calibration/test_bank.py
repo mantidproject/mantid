@@ -34,7 +34,7 @@ class TestBank(unittest.TestCase):
         CORELLI_124023_bank14, wire shadows very faint, only slightly larger than fluctuations of the background
         CORELLI_124023_bank15, one spurious shadow in tube14
         Load the test case for calibrate_banks, consisting of data for two banks
-        CORELLI_124023_banks_14_15
+        CORELLI_124023_banks_10_15
         """
         config.appendDataSearchSubDir('CORELLI/calibration')
         for directory in config.getDataSearchDirs():
@@ -43,7 +43,7 @@ class TestBank(unittest.TestCase):
                 break
         cls.cases = dict()
         for bank_case in ('123454_bank58', '124018_bank45', '123555_bank20', '123455_bank20',
-                          '124023_bank10', '124023_bank14', '124023_bank15', '124023_banks_14_15'):
+                          '124023_bank10', '124023_bank14', '124023_bank15', '124023_banks_10_15'):
             workspace = 'CORELLI_' + bank_case
             LoadNexusProcessed(Filename=path.join(data_dir, workspace + '.nxs'), OutputWorkspace=workspace)
             cls.cases[bank_case] = workspace
@@ -134,13 +134,6 @@ class TestBank(unittest.TestCase):
         assert_equal(actual, expected)
         DeleteWorkspaces(['CalibTable', 'ParametersTable', 'PeakTable', 'PeakYTable'])  # a bit of clean-up
 
-        # tubes 3, 8, and 13 have very faint wire shadows
-        fit_bank(self.cases['124023_bank14'], 'bank14')
-        expected = np.array([1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1], dtype=bool)
-        actual = criterion_peak_vertical_position('PeakYTable', zscore_threshold=2.5, deviation_threshold=0.0035)
-        assert_equal(actual, expected)
-        DeleteWorkspaces(['CalibTable', 'ParametersTable', 'PeakTable', 'PeakYTable'])  # a bit of clean-up
-
         # one spurious shadow in tube14 throws away the fit
         fit_bank(self.cases['124023_bank15'], 'bank15')
         expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1], dtype=bool)
@@ -182,12 +175,6 @@ class TestBank(unittest.TestCase):
         # tube 13 has shadows at pixel numbers quite different from the rest
         fit_bank(self.cases['124023_bank10'], 'bank10')
         expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1], dtype=bool)
-        assert_equal(criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
-        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
-
-        # tubes 3, 8, and 13 have very faint wire shadows
-        fit_bank(self.cases['124023_bank14'], 'bank14')
-        expected = np.array([1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1], dtype=bool)
         assert_equal(criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
         DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
 
@@ -234,17 +221,6 @@ class TestBank(unittest.TestCase):
         purge_table(self.cases['124018_bank45'], 'CalibTable', tube_fit_success)
         assert mtd['CalibTable'].rowCount() == unpurged_row_count - 256
         self.assert_missing_tube('CalibTable', 11)
-        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
-
-        # tubes 3, 8, and 13 have very faint wire shadows. Thus, purge three tubes
-        fit_bank(self.cases['124023_bank14'], 'bank14')
-        tube_fit_success = criterion_peak_vertical_position('PeakYTable', zscore_threshold=2.5,
-                                                            deviation_threshold=0.0035)
-        unpurged_row_count = mtd['CalibTable'].rowCount()
-        purge_table(self.cases['124023_bank14'], 'CalibTable', tube_fit_success)
-        assert mtd['CalibTable'].rowCount() == unpurged_row_count - 256 * 3
-        for tube_number in (3, 8, 13):
-            self.assert_missing_tube('CalibTable', tube_number)
         DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
 
     def test_mask_bank(self):
@@ -330,12 +306,12 @@ class TestBank(unittest.TestCase):
         assert AnalysisDataService.doesExist('MaskTable') is False
         DeleteWorkspaces(['calibration_table'])  # clean-up
 
-        # tubes 3, 8, and 13 have very faint wire shadows. Thus, mask these tubes
-        calibration, mask = calibrate_bank(self.cases['124023_bank14'], 'bank14', 'calibration_table')
-        assert calibration.rowCount() == 256 * (16 - 3)
+        # beam center intensity spills over adjacent tubes, tube15 and tube16
+        calibration, mask = calibrate_bank(self.cases['123454_bank58'], 'bank58', 'calibration_table')
+        assert calibration.rowCount() == 256 * (16 - 2)
         assert calibration.columnCount() == 2  # Detector ID, Position
         assert AnalysisDataService.doesExist('calibration_table')
-        assert mask.rowCount() == 256 * 3
+        assert mask.rowCount() == 256 * 2
         assert mask.columnCount() == 1
         assert AnalysisDataService.doesExist('MaskTable')
         DeleteWorkspaces(['calibration_table', 'MaskTable'])  # clean-up
@@ -354,21 +330,20 @@ class TestBank(unittest.TestCase):
         DeleteWorkspaces(['calibration_table', 'fits'])  # a bit of clean-up
 
     def test_calibrate_banks(self):
-        calibrations, masks = calibrate_banks(self.cases['124023_banks_14_15'], '14-15')
-        assert list(calibrations.getNames()) == ['calib14', 'calib15']
-        assert list(masks.getNames()) == ['mask14', 'mask15']
-        assert mtd['calib14'].rowCount() == 256 * (16 - 3)  # three uncalibrated tubes
-        assert mtd['mask14'].rowCount() == 256 * 3
+        calibrations, masks = calibrate_banks(self.cases['124023_banks_10_15'], '10,15')
+        assert list(calibrations.getNames()) == ['calib10', 'calib15']
+        assert list(masks.getNames()) == ['mask15']
+        assert mtd['calib10'].rowCount() == 256 * 16
         assert mtd['calib15'].rowCount() == 256 * (16 - 1)  # one uncalibrated tubes
         assert mtd['mask15'].rowCount() == 256
         # Check for success status
-        self.assertEqual(mtd['fit14'].readY(0).tolist(), [1, 1, 0., 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1])
+        self.assertEqual(mtd['fit10'].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         self.assertEqual(mtd['fit15'].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1])
         # Check for A1 coefficient values
-        self.assertAlmostEqual(max(mtd['fit14'].readY(4)), 0.0044, delta=0.0001)
+        self.assertAlmostEqual(max(mtd['fit10'].readY(4)), 0.0044, delta=0.0001)
         self.assertAlmostEqual(max(mtd['fit15'].readY(4)), 0.0037, delta=0.0001)
         # Check for A2 coefficient errors
-        self.assertAlmostEqual(max(mtd['fit14'].readE(4)), 0.0224, delta=0.0001)
+        self.assertAlmostEqual(max(mtd['fit10'].readE(4)), 0.0224, delta=0.0001)
         self.assertAlmostEqual(max(mtd['fit15'].readE(4)), 0.0221, delta=0.0001)
         DeleteWorkspaces(['calibrations', 'masks', 'fits'])
 
