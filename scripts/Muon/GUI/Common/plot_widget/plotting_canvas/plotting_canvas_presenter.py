@@ -30,48 +30,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._setup_quick_edit_widget()
         self._setup_autoscale_observer()
 
-    def _setup_quick_edit_widget(self):
-        self._options_presenter.connect_errors_changed(self.handle_error_selection_changed)
-        self._options_presenter.connect_x_range_changed(self._handle_xlim_changed_in_quick_edit_options)
-        self._options_presenter.connect_y_range_changed(self._handle_ylim_changed_in_quick_edit_options)
-        self._options_presenter.connect_autoscale_changed(self._handle_autoscale_y_axes)
-        self._options_presenter.connect_plot_selection(self._handle_subplot_changed_in_quick_edit_widget)
-
-    def _setup_autoscale_observer(self):
-        self.uncheck_autoscale_observer = GenericObserver(self._options_presenter.uncheck_autoscale)
-        self.enable_yaxis_changer_observer = GenericObserver(self._options_presenter.enable_yaxis_changer)
-        self._view.add_uncheck_autoscale_subscriber(self.uncheck_autoscale_observer)
-        self._view.add_uncheck_autoscale_subscriber(self.enable_yaxis_changer_observer)
-
-        self.enable_autoscale_observer = GenericObserver(self._options_presenter.enable_autoscale)
-        self._view.add_enable_autoscale_subscriber(self.enable_autoscale_observer)
-
-        self.disable_autoscale_observer = GenericObserver(self._options_presenter.disable_autoscale)
-        self._view.add_disable_autoscale_subscriber(self.disable_autoscale_observer)
-
-    # Interface implementation
-    def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool,
-                        autoscale: bool):
-        """Plots the input workspace names and indices in the figure window
-        If hold_on is True the existing workspaces plotted in the figure are kept"""
-        # Create workspace information named tuple from input list
-        workspace_plot_info = self._model.create_workspace_plot_information(workspace_names, workspace_indices,
-                                                                            self._options_presenter.get_errors())
-        if not hold_on:
-            # Remove data which is currently plotted and not in the new workspace_plot_info
-            workspaces_info_to_remove = [plot_info for plot_info in self._view.plotted_workspace_information
-                                         if plot_info not in workspace_plot_info]
-            self._view.remove_workspace_info_from_plot(workspaces_info_to_remove)
-
-        # Add workspace info which is currently not plotted
-        workspace_info_to_add = [plot_info for plot_info in workspace_plot_info if plot_info
-                                 not in self._view.plotted_workspace_information]
-
-        self._view.add_workspaces_to_plot(workspace_info_to_add)
-        # check if to force autoscale
-        if self._options_presenter.autoscale:
-            autoscale = True
-        self._set_axes_limits_and_titles(autoscale)
 
     def remove_workspace_names_from_plot(self, workspace_names: List[str]):
         """Removes the input workspace names from the plot"""
@@ -155,6 +113,96 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         """Sets the title for a specified axis in the figure"""
         self._view.set_title(ax_num, title)
 
+    def _handle_xlim_changed_in_quick_edit_options(self, xlims):
+        selected_subplots = self._get_selected_subplots_from_quick_edit_widget()
+        print("boo", selected_subplots)
+        for subplot in selected_subplots:
+            self._view.set_axis_xlimits(subplot, xlims)
+        self._view.redraw_figure()
+
+    def _handle_ylim_changed_in_quick_edit_options(self, ylims):
+        selected_subplots = self._get_selected_subplots_from_quick_edit_widget()
+        for subplot in selected_subplots:
+            self._view.set_axis_ylimits(subplot, ylims)
+        self._view.redraw_figure()
+
+    def _set_axes_limits_and_titles(self, autoscale):
+        xlims, ylims = self._get_axes_limits_from_quick_edit_widget()
+        if xlims is None or ylims is None:
+            self._view.set_axes_limits(DEFAULT_X_LIMITS, DEFAULT_Y_LIMITS)
+            self._view.autoscale_y_axes()
+        else:
+            self._view.set_axes_limits(xlims, ylims)
+            # override y values
+            if autoscale:
+                self._view.autoscale_y_axes()
+        titles = self._model.create_axes_titles()
+        for axis_number, title in enumerate(titles):
+            self._view.set_title(axis_number, title)
+        self._update_quickedit_widget()
+        self._view.redraw_figure()
+
+#    def _set_axes_limits_and_titles(self, autoscale):
+#        xlims, ylims = self._get_axes_limits_from_quick_edit_widget()
+#        if xlims is None or ylims is None:
+#            self._view.set_axes_limits(DEFAULT_X_LIMITS, DEFAULT_Y_LIMITS)
+#            self._view.autoscale_y_axes()
+#        else:
+#           self._view.set_axes_limits(xlims, ylims)
+#
+#        if autoscale:
+#            self._options_presenter.disable_yaxis_changer()
+#            self._view.autoscale_y_axes()
+#        else:
+#            self._options_presenter.enable_yaxis_changer()#
+#
+#        titles = self._model.create_axes_titles()
+#        for axis_number, title in enumerate(titles):
+#            self._view.set_title(axis_number, title)
+#        self._update_quickedit_widget()
+#        self._view.redraw_figure()
+
+
+    def _setup_quick_edit_widget(self):
+        self._options_presenter.connect_errors_changed(self.handle_error_selection_changed)
+        self._options_presenter.connect_x_range_changed(self._handle_xlim_changed_in_quick_edit_options)
+        self._options_presenter.connect_y_range_changed(self._handle_ylim_changed_in_quick_edit_options)
+        self._options_presenter.connect_autoscale_changed(self._handle_autoscale_y_axes)
+        self._options_presenter.connect_plot_selection(self._handle_subplot_changed_in_quick_edit_widget)
+
+    def _setup_autoscale_observer(self):
+        self.uncheck_autoscale_observer = GenericObserver(self._options_presenter.uncheck_autoscale)
+        self._view.add_uncheck_autoscale_subscriber(self.uncheck_autoscale_observer)
+
+        self.enable_autoscale_observer = GenericObserver(self._options_presenter.enable_autoscale)
+        self._view.add_enable_autoscale_subscriber(self.enable_autoscale_observer)
+
+        self.disable_autoscale_observer = GenericObserver(self._options_presenter.disable_autoscale)
+        self._view.add_disable_autoscale_subscriber(self.disable_autoscale_observer)
+
+    # Interface implementation
+    def plot_workspaces(self, workspace_names: List[str], workspace_indices: List[int], hold_on: bool,
+                        autoscale: bool):
+        """Plots the input workspace names and indices in the figure window
+        If hold_on is True the existing workspaces plotted in the figure are kept"""
+        # Create workspace information named tuple from input list
+        workspace_plot_info = self._model.create_workspace_plot_information(workspace_names, workspace_indices,
+                                                                            self._options_presenter.get_errors())
+        if not hold_on:
+            # Remove data which is currently plotted and not in the new workspace_plot_info
+            workspaces_info_to_remove = [plot_info for plot_info in self._view.plotted_workspace_information
+                                         if plot_info not in workspace_plot_info]
+            self._view.remove_workspace_info_from_plot(workspaces_info_to_remove)
+
+        # Add workspace info which is currently not plotted
+        workspace_info_to_add = [plot_info for plot_info in workspace_plot_info if plot_info
+                                 not in self._view.plotted_workspace_information]
+        self._view.add_workspaces_to_plot(workspace_info_to_add)
+        # check if to force autoscale
+        if self._options_presenter.autoscale:
+            autoscale = True
+        self._set_axes_limits_and_titles(autoscale)
+
     def get_plot_x_range(self):
         """Returns the x range of the first plot
         :return: a tuple contained the start and end ranges"""
@@ -172,28 +220,16 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def _update_quick_widget_subplots_menu(self):
         self._options_presenter.clear_subplots()
-        for i in range(self._view.number_of_axes):
-            self._options_presenter.add_subplot(str(i + 1))
+        for title in  self._model.create_axes_titles():
+            self._options_presenter.add_subplot(title)
 
     def _handle_subplot_changed_in_quick_edit_widget(self):
+        return
         selected_subplots = self._get_selected_subplots_from_quick_edit_widget()
         index = selected_subplots[0]
         xmin, xmax, ymin, ymax = self._view.get_axis_limits(index)
         self._options_presenter.set_plot_x_range([xmin, xmax])
         self._options_presenter.set_plot_y_range([ymin, ymax])
-
-    def _handle_xlim_changed_in_quick_edit_options(self, xlims):
-        selected_subplots = self._get_selected_subplots_from_quick_edit_widget()
-        for subplot in selected_subplots:
-            self._view.set_axis_xlimits(subplot, xlims)
-        self._view.redraw_figure()
-
-    def _handle_ylim_changed_in_quick_edit_options(self, ylims):
-        selected_subplots = self._get_selected_subplots_from_quick_edit_widget()
-        for subplot in selected_subplots:
-            self._view.set_axis_ylimits(subplot, ylims)
-        self._view.redraw_figure()
-
     def _handle_autoscale_y_axes(self):
         if not self._options_presenter.autoscale:
             self._options_presenter.enable_yaxis_changer()
@@ -229,23 +265,3 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             return None, None
         else:
             return xlims, ylims
-
-    def _set_axes_limits_and_titles(self, autoscale):
-        xlims, ylims = self._get_axes_limits_from_quick_edit_widget()
-        if xlims is None or ylims is None:
-            self._view.set_axes_limits(DEFAULT_X_LIMITS, DEFAULT_Y_LIMITS)
-            self._view.autoscale_y_axes()
-        else:
-            self._view.set_axes_limits(xlims, ylims)
-
-        if autoscale:
-            self._options_presenter.disable_yaxis_changer()
-            self._view.autoscale_y_axes()
-        else:
-            self._options_presenter.enable_yaxis_changer()
-
-        titles = self._model.create_axes_titles()
-        for axis_number, title in enumerate(titles):
-            self._view.set_title(axis_number, title)
-        self._update_quickedit_widget()
-        self._view.redraw_figure()

@@ -15,7 +15,7 @@ from Muon.GUI.Common.plot_widget.plotting_canvas.plotting_canvas_presenter_inter
 from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 from Muon.GUI.Common.plot_widget.plot_widget_model import PlotWidgetModel
 from Muon.GUI.Common.plot_widget.plot_widget_view_interface import PlotWidgetViewInterface
-from Muon.GUI.Common.contexts.muon_gui_context import PlotMode
+from Muon.GUI.Common.contexts.plotting_context import PlotMode
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 from mantid.dataobjects import Workspace2D
 
