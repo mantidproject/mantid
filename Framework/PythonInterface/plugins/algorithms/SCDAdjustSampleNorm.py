@@ -5,9 +5,9 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, PropertyMode, \
-    MultipleFileProperty, WorkspaceProperty, mtd
+    MultipleFileProperty, WorkspaceProperty
 from mantid.kernel import Direction, FloatBoundedValidator, V3D
-from mantid.simpleapi import DeleteWorkspace, Load, ConvertWANDSCDtoQ, MoveInstrumentComponent
+from mantid.simpleapi import DeleteWorkspace, Load, ConvertWANDSCDtoQ
 import os
 
 
@@ -47,19 +47,6 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
             WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
             doc="Output MDWorkspace in Q-space, name is prefix if multiple input files were provided.")
 
-    def validateInputs(self):
-        issues = dict()
-
-        # Are height and distance supposed to be set together?
-        height = self.getProperty("DetectorHeightOffset").isDefault
-        distance = self.getProperty("DetectorDistanceOffset").isDefault
-        if not height and distance:
-            issues['DetectorHeightOffset'] = "Must set the detector height offset with the detector distance offset."
-        if height and not distance:
-            issues['DetectorDistanceOffset'] = "Must set the detector distance with the detector height offset."
-
-        return issues
-
     def PyExec(self):
         datafiles = self.getProperty("Filename").value
         vanadiumfile = self.getProperty("VanadiumFile").value
@@ -72,6 +59,9 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
 
         has_multiple = True if len(datafiles) > 1 else False
 
+        # Default wavelength in WANDSCDtoQ if not set in the input file
+        wavelength = 1.488
+
         for file in datafiles:
             scan = Load(file)
 
@@ -81,10 +71,12 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
             if has_multiple:
                 out_ws_name = out_ws + "_" + os.path.basename(file)
 
+            exp_info = scan.getExperimentInfo(0)
+
             # Adjust detector height and distance with new offsets
-            if height > 0.0:
+            if height > 0.0 or distance > 0.0:
                 # Move all the instrument banks
-                component = scan.getExperimentInfo(0).componentInfo()
+                component = exp_info.componentInfo()
                 for bank in range(1, 4):
                     index = component.indexOfAny("bank{}".format(bank))
 
@@ -95,8 +87,13 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
 
                     component.setPosition(index, offset)
 
+            # Get the wavelength from the file if it exists
+            if (exp_info.run().hasProperty("wavelength")):
+                wavelength = exp_info.run().getProperty("wavelength").value
+
             # Convert to Q space and normalize with from the vanadium
             ConvertWANDSCDtoQ(InputWorkspace=scan, NormalisationWorkspace=van_norm, Frame='Q_sample',
+                              Wavelength=wavelength,
                               NormaliseBy='Monitor', OutputWorkspace=out_ws_name)
 
         DeleteWorkspace("van_norm")
