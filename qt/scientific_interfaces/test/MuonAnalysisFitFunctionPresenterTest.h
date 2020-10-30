@@ -23,6 +23,7 @@ using MantidQt::CustomInterfaces::Muon::MultiFitState;
 using MantidQt::MantidWidgets::IFunctionBrowser;
 using MantidQt::MantidWidgets::IMuonFitFunctionModel;
 using namespace testing;
+using namespace MantidQt::MantidWidgets;
 
 // Mock function browser widget
 class MockFunctionBrowser : public IFunctionBrowser {
@@ -43,8 +44,7 @@ public:
   MOCK_METHOD1(setFunction, void(const QString &));
   MOCK_METHOD1(setNumberOfDatasets, void(int));
   MOCK_METHOD1(setDatasets, void(const QStringList &));
-  MOCK_METHOD1(setDatasets,
-               void(const QList<QPair<QString, QList<std::size_t>>> &));
+  MOCK_METHOD1(setDatasets, void(const QList<Dataset> &));
   MOCK_METHOD1(updateMultiDatasetParameters,
                void(const Mantid::API::IFunction &));
   MOCK_METHOD1(updateMultiDatasetParameters,

@@ -11,25 +11,26 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
+
 #include <cxxtest/TestSuite.h>
 
 #include <memory>
 
+using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
+
 namespace {
 
-QList<QPair<QString, QList<std::size_t>>>
-createDatasetMap(QStringList const &datasetNames,
-                 QList<std::size_t> const &spectraList) {
-  QList<QPair<QString, QList<std::size_t>>> datasets;
+QList<Dataset> createDatasets(QStringList const &datasetNames,
+                              QList<std::size_t> const &spectraList) {
+  QList<Dataset> datasets;
   for (const auto &datasetName : datasetNames)
-    datasets.append(QPair(datasetName, spectraList));
+    datasets.append(Dataset(datasetName, spectraList));
   return datasets;
 }
 
 } // namespace
-
-using namespace MantidQt::MantidWidgets;
-using namespace Mantid::API;
 
 class FunctionModelTest : public CxxTest::TestSuite {
 
@@ -361,8 +362,8 @@ public:
 
   void
   test_that_getDatasetNames_returns_the_expected_workspace_names_for_multi_spectra_workspaces() {
-    auto const datasets = createDatasetMap(QStringList({"WSName1", "WSName2"}),
-                                           QList<std::size_t>({0u, 2u, 3u}));
+    auto const datasets = createDatasets(QStringList({"WSName1", "WSName2"}),
+                                         QList<std::size_t>({0u, 2u, 3u}));
 
     m_model->setNumberDomains(6);
     m_model->setDatasets(datasets);
@@ -375,8 +376,8 @@ public:
 
   void
   test_that_getDatasetDomainNames_returns_the_expected_domain_names_for_multi_spectra_workspaces() {
-    auto const datasets = createDatasetMap(QStringList({"WSName1", "WSName2"}),
-                                           QList<std::size_t>({0u, 2u, 3u}));
+    auto const datasets = createDatasets(QStringList({"WSName1", "WSName2"}),
+                                         QList<std::size_t>({0u, 2u, 3u}));
 
     m_model->setNumberDomains(6);
     m_model->setDatasets(datasets);
@@ -389,8 +390,8 @@ public:
 
   void
   test_that_getDatasetNames_and_getDatasetDomainNames_returns_the_same_number_of_names() {
-    auto const datasets = createDatasetMap(QStringList({"WSName1", "WSName2"}),
-                                           QList<std::size_t>({0u, 2u, 3u}));
+    auto const datasets = createDatasets(QStringList({"WSName1", "WSName2"}),
+                                         QList<std::size_t>({0u, 2u, 3u}));
 
     m_model->setNumberDomains(6);
     m_model->setDatasets(datasets);

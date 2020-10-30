@@ -57,7 +57,7 @@ public:
   void updateMultiDatasetParameters(const IFunction &fun);
   void updateParameters(const IFunction &fun);
   void setCurrentDataset(int i);
-  void setDatasets(const QList<QPair<QString, QList<std::size_t>>> &datasets);
+  void setDatasets(const QList<Dataset> &datasets);
   void setErrorsEnabled(bool enabled);
   void
   updateParameterEstimationData(DataForParameterEstimationCollection &&data);

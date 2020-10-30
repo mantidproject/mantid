@@ -12,6 +12,7 @@
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
 
 #include <QDockWidget>
 #include <QList>
@@ -73,7 +74,7 @@ public:
   void setCurrentDataset(FitDomainIndex i);
   FitDomainIndex currentDataset() const;
   void updateFunctionBrowserData(
-      int nData, const QList<QPair<QString, QList<std::size_t>>> &datasets,
+      int nData, const QList<MantidWidgets::Dataset> &datasets,
       const std::vector<double> &qValues,
       const std::vector<std::pair<std::string, size_t>> &fitResolutions);
   void updatePlotGuess(const MatrixWorkspace_const_sptr &sampleWorkspace);

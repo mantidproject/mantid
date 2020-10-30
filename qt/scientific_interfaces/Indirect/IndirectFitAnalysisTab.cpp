@@ -24,6 +24,7 @@
 Mantid::Kernel::Logger g_log("IndirectFitAnalysisTab");
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 namespace {
 bool doesExistInADS(std::string const &workspaceName) {
@@ -733,9 +734,8 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
           SLOT(fitAlgorithmComplete(bool)));
 }
 
-QList<QPair<QString, QList<std::size_t>>>
-IndirectFitAnalysisTab::getDatasets() const {
-  QList<QPair<QString, QList<std::size_t>>> datasets;
+QList<Dataset> IndirectFitAnalysisTab::getDatasets() const {
+  QList<Dataset> datasets;
 
   for (auto i = 0u; i < m_fittingModel->numberOfWorkspaces().value; ++i) {
     TableDatasetIndex index{i};
@@ -745,7 +745,7 @@ IndirectFitAnalysisTab::getDatasets() const {
       spectraList << spectrum.value;
 
     auto const name = m_fittingModel->getWorkspace(index)->getName();
-    datasets.append(QPair(QString::fromStdString(name), spectraList));
+    datasets.append(Dataset(QString::fromStdString(name), spectraList));
   }
   return datasets;
 }

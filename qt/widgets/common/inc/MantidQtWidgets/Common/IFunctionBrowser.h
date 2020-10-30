@@ -8,6 +8,7 @@
 
 #include "DllOption.h"
 
+#include "FunctionModelDataset.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 
@@ -34,8 +35,7 @@ public:
   virtual void setFunction(const QString &funStr) = 0;
   virtual void setNumberOfDatasets(int n) = 0;
   virtual void setDatasets(const QStringList &datasetNames) = 0;
-  virtual void
-  setDatasets(const QList<QPair<QString, QList<std::size_t>>> &datasets) = 0;
+  virtual void setDatasets(const QList<Dataset> &datasets) = 0;
   virtual Mantid::API::IFunction_sptr getGlobalFunction() = 0;
   virtual void
   updateMultiDatasetParameters(const Mantid::API::IFunction &fun) = 0;

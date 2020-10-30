@@ -10,6 +10,7 @@
 #include "IndexTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
 #include "ParameterEstimation.h"
 
 #include <QList>
@@ -50,8 +51,7 @@ public:
   virtual IFunction_sptr getFunction() const = 0;
   virtual void setNumberOfDatasets(int) = 0;
   virtual int getNumberOfDatasets() const = 0;
-  virtual void
-  setDatasets(const QList<QPair<QString, QList<std::size_t>>> &datasets) = 0;
+  virtual void setDatasets(const QList<MantidWidgets::Dataset> &datasets) = 0;
   virtual QStringList getGlobalParameters() const = 0;
   virtual QStringList getLocalParameters() const = 0;
   virtual void setGlobalParameters(const QStringList &globals) = 0;

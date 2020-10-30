@@ -49,7 +49,7 @@ public:
   void updateParameters(const IFunction &fun);
   void setCurrentDataset(int i);
   int getCurrentDataset();
-  void setDatasets(const QList<QPair<QString, QList<std::size_t>>> &datasets);
+  void setDatasets(const QList<Dataset> &datasets);
   void setViewParameterDescriptions();
   void setErrorsEnabled(bool enabled);
   void tieIntensities(bool on);
