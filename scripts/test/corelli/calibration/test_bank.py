@@ -340,10 +340,10 @@ class TestBank(unittest.TestCase):
         self.assertEqual(mtd['fit10'].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
         self.assertEqual(mtd['fit15'].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1])
         # Check for A1 coefficient values
-        self.assertAlmostEqual(max(mtd['fit10'].readY(4)), 0.0044, delta=0.0001)
+        self.assertAlmostEqual(max(mtd['fit10'].readY(4)), 0.0038, delta=0.0001)
         self.assertAlmostEqual(max(mtd['fit15'].readY(4)), 0.0037, delta=0.0001)
         # Check for A2 coefficient errors
-        self.assertAlmostEqual(max(mtd['fit10'].readE(4)), 0.0224, delta=0.0001)
+        self.assertAlmostEqual(max(mtd['fit10'].readE(4)), 0.0219, delta=0.0001)
         self.assertAlmostEqual(max(mtd['fit15'].readE(4)), 0.0221, delta=0.0001)
         DeleteWorkspaces(['calibrations', 'masks', 'fits'])
 
