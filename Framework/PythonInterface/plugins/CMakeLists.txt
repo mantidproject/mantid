@@ -124,6 +124,7 @@ set(PYTHON_PLUGINS
     algorithms/MedianBinWidth.py
     algorithms/MergeCalFiles.py
     algorithms/MuonMaxent.py
+    algorithms/MuscatElasticReactor.py
     algorithms/MuscatSofQW.py
     algorithms/NMoldyn4Interpolation.py
     algorithms/NormaliseSpectra.py
