@@ -449,7 +449,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
             CosT = 1. - QQ*QQ/(2.*self._vkinc*self._vkinc)
             if CosT > -1.0 and CosT < 1.0:
                 return m, QQ, CosT
-		return m, QQ, 0.0
+        return m, QQ, 0.0
 
 			
 #   Geometry routines
