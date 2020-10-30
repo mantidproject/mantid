@@ -26,7 +26,7 @@ class LoadElementalAnalysisTest(systemtesting.MantidSystemTest):
         AnalysisDataService.clear()
 
     def runTest(self):
-        LoadElementalAnalysisData(Run='9999',
+        ws = LoadElementalAnalysisData(Run='9999',
                                   GroupWorkspace='9999')
 
         #Check the Groupworkspace contains 4 Workspaces
@@ -46,6 +46,8 @@ class LoadElementalAnalysisTest(systemtesting.MantidSystemTest):
         #Check that the Bin 4083 of the Total spectra of the workspace of Detecror 4 is 120.457
         detector4_ws = AnalysisDataService.retrieve('9999; Detector 4')
         self.assertAlmostEqual(detector4_ws.extractY()[2, 4083], 120.457, places=4, delta=0.0001)
+        #Check that the directory output is not empty
+        self.assertIsNotNone(ws[1])
 
     def validate(self):
         return ['9999', 'ElementalAnalysisLoad.nxs']
@@ -62,7 +64,7 @@ class LoadPartialElementalAnalysisTest(systemtesting.MantidSystemTest):
         AnalysisDataService.clear()
 
     def runTest(self):
-        LoadElementalAnalysisData(Run='2683',
+        ws = LoadElementalAnalysisData(Run='2683',
                                   GroupWorkspace='2683')
 
         #Check the Groupworkspace contains 2 Workspaces
@@ -85,6 +87,8 @@ class LoadPartialElementalAnalysisTest(systemtesting.MantidSystemTest):
         #Check that Bin 4697 of the Total spectra of the workspace of Detector 3 is 10.0
         detector3_ws = AnalysisDataService.retrieve('2683; Detector 3')
         self.assertAlmostEqual(detector3_ws.extractY()[2, 4697], 10.0, places=4, delta=0.0001)
+        # Check that the directory output is not empty
+        self.assertIsNotNone(ws[1])
 
     def validate(self):
         return ['2683', 'PartialElementalAnalysisLoad.nxs']

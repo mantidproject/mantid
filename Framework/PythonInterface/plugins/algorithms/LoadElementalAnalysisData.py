@@ -14,10 +14,10 @@ from mantid.kernel import Direction, IntBoundedValidator
 from mantid.simpleapi import ConvertToHistogram, ConvertToPointData, DeleteWorkspace, LoadAscii, WorkspaceFactory
 
 
-type_keys = {"10": "Prompt", "20": "Delayed", "99": "Total"}
-spectrum_index = {"Delayed": 1, "Prompt": 2, "Total": 3}
-num_files_per_detector = 3
-run_number_length = 5
+TYPE_KEYS = {"10": "Prompt", "20": "Delayed", "99": "Total"}
+SPECTRUM_INDEX = {"Delayed": 1, "Prompt": 2, "Total": 3}
+NUM_FILES_PER_DETECTOR = 3
+RUN_NUMBER_LENGTH = 5
 
 
 class LoadElementalAnalysisData(PythonAlgorithm):
@@ -34,6 +34,9 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         self.declareProperty(WorkspaceGroupProperty(name='GroupWorkspace', defaultValue='',
                                                     direction=Direction.Output),
                              doc='Output group workspace for run')
+
+        self.declareProperty(name="directory", defaultValue="", direction=Direction.Output,
+                             doc="provides the directory where the run files were acquired")
 
     def validateInputs(self):
         issues = dict()
@@ -60,15 +63,17 @@ class LoadElementalAnalysisData(PythonAlgorithm):
 
     def pad_run(self):
         """ Pads run number: i.e. 123 -> 00123; 2695 -> 02695 """
-        return str(self.getProperty("Run").value).zfill(run_number_length)
+        return str(self.getProperty("Run").value).zfill(RUN_NUMBER_LENGTH)
 
     def search_user_dirs(self):
         """ Finds all files for the run number provided """
         files = []
-        for user_dir in config["datasearch.directories"].split(";"):
+        for user_dir in config.getDataSearchDirs():
             path = os.path.join(user_dir, "ral{}.rooth*.dat".format(self.pad_run()))
             files.extend([file for file in glob.iglob(path)])
-        return files
+            if files:
+                self.setProperty("directory", user_dir)
+                return files
 
     def get_filename(self, path, run):
         """
@@ -76,7 +81,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         """
         try:
             detectors_num = str(int(path.rsplit(".", 2)[1][5]) - 1)
-            run_type = type_keys[path.rsplit(".")[1][-2:]]
+            run_type = TYPE_KEYS[path.rsplit(".")[1][-2:]]
             return "_".join([detectors_num, run_type, str(run)])
         except KeyError:
             return None
@@ -104,11 +109,11 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         for detector, workspace_list in detectors.items():
             if workspace_list:
                 # sort workspace list according to type_index
-                sorted_workspace_list = [None] * num_files_per_detector
+                sorted_workspace_list = [None] * NUM_FILES_PER_DETECTOR
                 # sort workspace list according to type_index
                 for workspace in workspace_list:
                     data_type = workspace.rsplit("_")[1]
-                    sorted_workspace_list[spectrum_index[data_type] - 1] = workspace
+                    sorted_workspace_list[SPECTRUM_INDEX[data_type] - 1] = workspace
                 workspace_list = sorted_workspace_list
                 # create merged workspace
                 merged_ws = self.create_merged_workspace(workspace_list)
@@ -127,11 +132,11 @@ class LoadElementalAnalysisData(PythonAlgorithm):
 
             # create single ws for the merged data, use original ws as a template
             template_ws = next(ws for ws in workspace_list if ws is not None)
-            merged_ws = WorkspaceFactory.create(AnalysisDataService.retrieve(template_ws), NVectors=num_files_per_detector,
+            merged_ws = WorkspaceFactory.create(AnalysisDataService.retrieve(template_ws), NVectors=NUM_FILES_PER_DETECTOR,
                                                 XLength=max_num_bins, YLength=max_num_bins)
 
             # create a merged workspace based on every entry from workspace list
-            for i in range(0, num_files_per_detector):
+            for i in range(0, NUM_FILES_PER_DETECTOR):
                 # load in ws - first check workspace exists
                 if workspace_list[i]:
                     ws = AnalysisDataService.retrieve(workspace_list[i])
@@ -157,7 +162,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                     merged_ws.setE(i, E_padded)
 
                     #set y axis labels
-                    self.set_y_axis_labels(merged_ws, spectrum_index)
+                    self.set_y_axis_labels(merged_ws, SPECTRUM_INDEX)
 
                     # remove workspace from ADS
                     DeleteWorkspace(ws)
