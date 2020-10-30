@@ -102,7 +102,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         # 0 argument is arbitrary and has no effect on fit widget size
         # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
         if QT_VERSION >= LooseVersion("5.6"):
-            self.resizeDocks({self.dockable_plot_widget_window}, {0}, QtCore.Qt.Horizontal)
+            self.resizeDocks({self.dockable_plot_widget_window}, {1}, QtCore.Qt.Horizontal)
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)

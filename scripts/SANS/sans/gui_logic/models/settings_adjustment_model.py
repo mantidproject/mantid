@@ -13,6 +13,7 @@ are not available in the model associated with the data table.
 from sans.common.enums import SANSInstrument, DataType, DetectorType, RebinType
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.state.StateObjects.StateCalculateTransmission import StateTransmissionFit
+from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter)
 
 
 class SettingsAdjustmentModel(ModelCommon):
@@ -256,22 +257,22 @@ class SettingsAdjustmentModel(ModelCommon):
     def transmission_mn_4_shift(self):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
         val = getattr(self._user_file_items.move, "monitor_4_offset", None)
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @transmission_mn_4_shift.setter
     def transmission_mn_4_shift(self, value):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
         if hasattr(self._user_file_items.move, "monitor_4_offset"):
-            self._user_file_items.move.monitor_4_offset = value
+            self._user_file_items.move.monitor_4_offset = millimeter_2_meter(value)
 
     @property
     def transmission_mn_5_shift(self):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
         val = getattr(self._user_file_items.move, "monitor_5_offset", None)
-        return val if val else ""
+        return meter_2_millimeter(val) if val else ""
 
     @transmission_mn_5_shift.setter
     def transmission_mn_5_shift(self, value):
         # Note that this is actually part of the move operation, but is conceptually part of transmission
         if hasattr(self._user_file_items.move, "monitor_5_offset"):
-            self._user_file_items.move.monitor_5_offset = value
+            self._user_file_items.move.monitor_5_offset = millimeter_2_meter(value)

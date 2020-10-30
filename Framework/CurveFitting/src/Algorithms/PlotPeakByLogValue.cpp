@@ -82,12 +82,12 @@ void PlotPeakByLogValue::init() {
                   "Name of the log value to plot the "
                   "parameters against. Default: use spectra "
                   "numbers.");
-  declareProperty("StartX", EMPTY_DBL(),
+  declareProperty(std::make_unique<ArrayProperty<double>>("StartX"),
                   "A value of x in, or on the low x "
                   "boundary of, the first bin to "
                   "include in\n"
                   "the fit (default lowest value of x)");
-  declareProperty("EndX", EMPTY_DBL(),
+  declareProperty(std::make_unique<ArrayProperty<double>>("EndX"),
                   "A value in, or on the high x boundary "
                   "of, the last bin the fitting range\n"
                   "(default the highest value of x)");
@@ -188,6 +188,8 @@ void PlotPeakByLogValue::exec() {
   bool outputConvolvedMembers = getProperty("ConvolveMembers");
   bool outputFitStatus = getProperty("OutputFitStatus");
   m_baseName = getPropertyValue("OutputWorkspace");
+  std::vector<double> startX = getProperty("StartX");
+  std::vector<double> endX = getProperty("EndX");
 
   bool isDataName = false; // if true first output column is of type string and
                            // is the data source name
@@ -252,9 +254,20 @@ void PlotPeakByLogValue::exec() {
     IFunction_sptr ifun =
         setupFunction(individual, passWSIndexToFunction, inputFunction,
                       initialParams, isMultiDomainFunction, i, data);
-
-    auto fit = runSingleFit(createFitOutput, outputCompositeMembers,
-                            outputConvolvedMembers, ifun, data);
+    std::shared_ptr<Algorithm> fit;
+    if (startX.size() == 0) {
+      fit = runSingleFit(createFitOutput, outputCompositeMembers,
+                         outputConvolvedMembers, ifun, data, EMPTY_DBL(),
+                         EMPTY_DBL());
+    } else if (startX.size() == 1) {
+      fit =
+          runSingleFit(createFitOutput, outputCompositeMembers,
+                       outputConvolvedMembers, ifun, data, startX[0], endX[0]);
+    } else {
+      fit =
+          runSingleFit(createFitOutput, outputCompositeMembers,
+                       outputConvolvedMembers, ifun, data, startX[i], endX[i]);
+    }
 
     ifun = fit->getProperty("Function");
     double chi2 = fit->getProperty("OutputChi2overDoF");
@@ -415,7 +428,7 @@ PlotPeakByLogValue::createResultsTable(const std::string &logName,
 std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(
     bool createFitOutput, bool outputCompositeMembers,
     bool outputConvolvedMembers, const IFunction_sptr &ifun,
-    const InputSpectraToFit &data) {
+    const InputSpectraToFit &data, double startX, double endX) {
   g_log.debug() << "Fitting " << data.ws->getName() << " index " << data.i
                 << " with \n";
   g_log.debug() << ifun->asString() << '\n';
@@ -437,8 +450,8 @@ std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(
   fit->setProperty("Function", ifun);
   fit->setProperty("InputWorkspace", data.ws);
   fit->setProperty("WorkspaceIndex", data.i);
-  fit->setPropertyValue("StartX", this->getPropertyValue("StartX"));
-  fit->setPropertyValue("EndX", this->getPropertyValue("EndX"));
+  fit->setProperty("StartX", startX);
+  fit->setProperty("EndX", endX);
   fit->setProperty("IgnoreInvalidData", ignoreInvalidData);
   fit->setPropertyValue("Minimizer",
                         this->getMinimizerString(data.name, spectrum_index));

@@ -39,8 +39,6 @@ class FittingTabWidget(object):
 
         self.fitting_tab_view.function_browser.functionStructureChanged.connect(
             self.fitting_tab_presenter.handle_function_structure_changed)
-        self.fitting_tab_view.function_browser.functionStructureChanged.connect(
-            self.fitting_tab_presenter.handle_plot_guess_changed)
         self.fitting_tab_view.function_name_line_edit.textChanged.connect(
             self.fitting_tab_presenter.handle_fit_name_changed_by_user)
         self.fitting_tab_view.undo_fit_button.clicked.connect(self.fitting_tab_presenter.handle_undo_fit_clicked)

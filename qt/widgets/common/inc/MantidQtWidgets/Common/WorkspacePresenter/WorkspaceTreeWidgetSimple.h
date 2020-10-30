@@ -62,6 +62,12 @@ signals:
   void workspaceDoubleClicked(const QString &workspaceName);
   void treeSelectionChanged();
 
+  // Signal when plot MDHistogram clicked
+  void plotMDHistoClicked(const QStringList &workspaceNames);
+  void overplotMDHistoClicked(const QStringList &workspaceNames);
+  void plotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
+  void overplotMDHistoWithErrorsClicked(const QStringList &workspaceNames);
+
 private slots:
   void onPlotSpectrumClicked();
   void onPlotBinClicked();
@@ -79,13 +85,19 @@ private slots:
   void onPlotSurfaceClicked();
   void onPlotWireframeClicked();
   void onPlotContourClicked();
+  void onPlotMDHistoWorkspaceClicked(); // Linked to plotMDHistoClicked
+  void onOverPlotMDHistoWorkspaceClicked();
+  void onPlotMDHistoWorkspaceWithErrorsClicked();
+  void onOverPlotMDHistoWorkspaceWithErrorsClicked();
 
 private:
   QAction *m_plotSpectrum, *m_plotBin, *m_overplotSpectrum,
       *m_plotSpectrumWithErrs, *m_overplotSpectrumWithErrs, *m_plotColorfill,
       *m_sampleLogs, *m_sliceViewer, *m_showInstrument, *m_showData,
       *m_showAlgorithmHistory, *m_showDetectors, *m_plotAdvanced,
-      *m_plotSurface, *m_plotWireframe, *m_plotContour;
+      *m_plotSurface, *m_plotWireframe, *m_plotContour, *m_plotMDHisto1D,
+      *m_overplotMDHisto1D, *m_plotMDHisto1DWithErrs,
+      *m_overplotMDHisto1DWithErrs;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

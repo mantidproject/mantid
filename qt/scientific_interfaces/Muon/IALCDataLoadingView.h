@@ -34,6 +34,10 @@ public:
   /// @return Vector of file names
   virtual std::vector<std::string> getRuns() const = 0;
 
+  /// @return String containing error message from runs widget, empty on no
+  /// errors
+  virtual std::string getRunsErrorMessage() const = 0;
+
   /// Returns the name of the log to use
   /// @return Log name
   virtual std::string log() const = 0;

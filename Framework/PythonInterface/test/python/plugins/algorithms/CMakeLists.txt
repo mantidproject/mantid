@@ -64,6 +64,7 @@ set(TEST_PY_FILES
     LoadNMoldyn4Ascii1DTest.py
     LoadNMoldyn4AsciiTest.py
     LoadWANDSCDTest.py
+    LRDirectBeamSortTest.py
     LRPeakSelectionTest.py
     MatchSpectraTest.py
     MaskAngleTest.py
@@ -114,6 +115,7 @@ set(TEST_PY_FILES
     VesuvioResolutionTest.py
     VesuvioThicknessTest.py
     VesuvioTOFFitTest.py
+    PEARLTransfitTest.py
     PoldiCreatePeaksFromFileTest.py
     LoadCIFTest.py
     SaveYDATest.py

@@ -272,6 +272,11 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
 
     .. math:: F(pix) = RealRelativePosition
 
+    The fitting framework of Mantid stores values and errors for the optimized coefficients of the polynomial
+    in a table (of type TableWorkspace). These tables can be grouped into a WorkspaceGroup by passing
+    the name of this workspace to option **parameters_table_group**. The name of each table workspace will
+    the string **parameters_table_group** plus a suffix which is the index of the tube in the input **tubeSet**.
+
     **Define the new position for the detectors**
 
     Finally, the position of the detectors are defined as a vector operation
@@ -376,6 +381,10 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     :rtype: calibrationTable, a TableWorkspace with two columns DetectorID(int) and DetectorPositions(V3D).
 
     """
+    # Legacy code requires kwargs to contain only the list of parameters specify below. Thus, we pop other
+    # arguments into temporary variables, such as `parameters_table_group`
+    parameters_table_group = kwargs.pop('parameters_table_group') if 'parameters_table_group' in kwargs else None
+
     FITPAR = 'fitPar'
     MARGIN = 'margin'
     RANGELIST = 'rangeList'
@@ -429,11 +438,12 @@ def calibrate(ws, tubeSet, knownPositions, funcForm, **kwargs):
     plot_tube = param_helper.get_parameter(PLOTTUBE, kwargs)
     exclude_short_tubes = param_helper.get_parameter(EXCLUDESHORT, kwargs)
     override_peaks = param_helper.get_parameter(OVERRIDEPEAKS, kwargs, tube_set=tubeSet, ideal_tube=ideal_tube)
-    polin_fit = param_helper.get_parameter(FITPOLIN, kwargs)
+    polin_fit = param_helper.get_parameter(FITPOLIN, kwargs)  # order of the fiting polynomial. Default is 2
     output_peak, delete_peak_table_after = param_helper.get_parameter(OUTPUTPEAK, kwargs, ideal_tube=ideal_tube)
 
     getCalibration(ws, tubeSet, calib_table, fit_par, ideal_tube, output_peak,
-                   override_peaks, exclude_short_tubes, plot_tube, range_list, polin_fit)
+                   override_peaks, exclude_short_tubes, plot_tube, range_list, polin_fit,
+                   parameters_table_group=parameters_table_group)
 
     if delete_peak_table_after:
         DeleteWorkspace(str(output_peak))
@@ -678,13 +688,10 @@ def correctMisalignedTubes(ws, calibrationTable, peaksTable, spec, idealTube,
                            PeakPositions=fitPar.getPeaks(),
                            PeaksList='RefittedPeaks')
         centers = [row['centre'] for row in fit_ws]
-        detIDList, detPosList = \
-            getCalibratedPixelPositions(ws, centers, idealTube.getArray(),
-                                        tube_dets)
+        detIDList, detPosList = getCalibratedPixelPositions(ws, centers, idealTube.getArray(), tube_dets)
 
         for id, pos in zip(detIDList, detPosList):
-            corrections_table.addRow({'Detector ID': id,
-                                      'Detector Position': V3D(*pos)})
+            corrections_table.addRow({'Detector ID': id, 'Detector Position': V3D(*pos)})
 
         cleanUpFit()
 
@@ -817,6 +824,7 @@ class _CalibrationParameterHelper(object):
             return output_peak, delete_peak_table_after
 
     def _get_fit_polin(self, args):
+        r"""Order of the polynomial used to fit the observed peaks against known positions"""
         if self.FITPOLIN in args:
             polin_fit = args[self.FITPOLIN]
             if polin_fit not in [1, 2, 3]:
@@ -941,8 +949,9 @@ class _CalibrationParameterHelper(object):
     def _get_fit_par(self, args, tube_set, ideal_tube):
         if self.FITPAR in args:
             fit_par = args[self.FITPAR]
-            # fitPar must be a TubeCalibFitParams
-            if not isinstance(fit_par, TubeCalibFitParams):
+            try:
+                assert getattr(fit_par, 'setAutomatic')  # duck typing check for correct type
+            except AssertionError:
                 raise RuntimeError(
                     "Wrong argument {0}. This argument, when given, must be a valid TubeCalibFitParams object".
                     format(self.FITPAR))

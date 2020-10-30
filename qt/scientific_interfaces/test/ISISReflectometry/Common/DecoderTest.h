@@ -310,7 +310,7 @@ const static QString BATCH_JSON_STRING{
     "    }"
     "}"};
 
-const static QString EMPTY_BATCH_JSON_STRING{
+const static QString EMPTY_EVENT_JSON_STRING{
     "{"
     "    \"eventView\": {"
     "        \"customButton\": false,"
@@ -323,7 +323,9 @@ const static QString EMPTY_BATCH_JSON_STRING{
     "        \"uniformEdit\": 1,"
     "        \"uniformEvenButton\": false,"
     "        \"uniformEvenEdit\": 1"
-    "    },"
+    "    },"};
+
+const static QString EMPTY_EXPERIMENT_JSON_STRING{
     "    \"experimentView\": {"
     "        \"analysisModeComboBox\": 0,"
     "        \"backgroundMethodComboBox\": 0,"
@@ -360,7 +362,9 @@ const static QString EMPTY_BATCH_JSON_STRING{
     "        \"summationTypeComboBox\": 0,"
     "        \"transScaleRHSCheckBox\": true,"
     "        \"transStitchParamsEdit\": \"\""
-    "    },"
+    "    },"};
+
+const static QString EMPTY_INSTRUMENT_JSON_STRING{
     "    \"instrumentView\": {"
     "        \"I0MonitorIndex\": 2,"
     "        \"correctDetectorsCheckBox\": true,"
@@ -372,7 +376,9 @@ const static QString EMPTY_BATCH_JSON_STRING{
     "        \"monBgMinEdit\": 17,"
     "        \"monIntMaxEdit\": 10,"
     "        \"monIntMinEdit\": 4"
-    "    },"
+    "    },"};
+
+const static QString EMPTY_RUNS_JSON_STRING{
     "    \"runsView\": {"
     "        \"comboSearchInstrument\": 0,"
     "        \"runsTable\": {"
@@ -392,7 +398,9 @@ const static QString EMPTY_BATCH_JSON_STRING{
     "        },"
     "        \"textCycle\": \"\","
     "        \"textSearch\": \"\""
-    "    },"
+    "    },"};
+
+const static QString EMPTY_SAVE_JSON_STRING{
     "    \"saveView\": {"
     "        \"commaRadioButton\": true,"
     "        \"fileFormatComboBox\": 0,"
@@ -407,6 +415,57 @@ const static QString EMPTY_BATCH_JSON_STRING{
     "        \"headerCheckBox\": false"
     "    }"
     "}"};
+
+const static QString EMPTY_BATCH_JSON_STRING{
+    EMPTY_EVENT_JSON_STRING + EMPTY_EXPERIMENT_JSON_STRING +
+    EMPTY_INSTRUMENT_JSON_STRING + EMPTY_RUNS_JSON_STRING +
+    EMPTY_SAVE_JSON_STRING};
+
+// This batch file has an incorrect number of columns (9 instead of 10) for the
+// experiment tab's table - this needs to be supported for backwards
+// compatibility
+const static QString EXPERIMENT_JSON_STRING_9_COLUMNS{
+    "    \"experimentView\": {"
+    "        \"analysisModeComboBox\": 0,"
+    "        \"backgroundMethodComboBox\": 0,"
+    "        \"costFunctionComboBox\": 0,"
+    "        \"debugCheckbox\": false,"
+    "        \"endOverlapEdit\": 12,"
+    "        \"floodCorComboBox\": 0,"
+    "        \"floodWorkspaceWsSelector\": 0,"
+    "        \"includePartialBinsCheckBox\": false,"
+    "        \"perAngleDefaults\": {"
+    "            \"columnsNum\": 9,"
+    "            \"rows\": ["
+    "                ["
+    "                    \"\","
+    "                    \"\","
+    "                    \"\","
+    "                    \"\","
+    "                    \"\","
+    "                    \"\","
+    "                    \"\","
+    "                    \"\","
+    "                    \"\""
+    "                ]"
+    "            ],"
+    "            \"rowsNum\": 1"
+    "        },"
+    "        \"polCorrCheckBox\": false,"
+    "        \"polynomialDegreeSpinBox\": 3,"
+    "        \"reductionTypeComboBox\": 0,"
+    "        \"startOverlapEdit\": 10,"
+    "        \"stitchEdit\": \"\","
+    "        \"subtractBackgroundCheckBox\": false,"
+    "        \"summationTypeComboBox\": 0,"
+    "        \"transScaleRHSCheckBox\": true,"
+    "        \"transStitchParamsEdit\": \"\""
+    "    },"};
+
+const static QString BATCH_JSON_STRING_9_COLUMNS{
+    EMPTY_EVENT_JSON_STRING + EXPERIMENT_JSON_STRING_9_COLUMNS +
+    EMPTY_INSTRUMENT_JSON_STRING + EMPTY_RUNS_JSON_STRING +
+    EMPTY_SAVE_JSON_STRING};
 
 const static QString MAINWINDOW_JSON_STRING{
     QString("{\"batches\": [") + BATCH_JSON_STRING + QString(", ") +
@@ -474,6 +533,21 @@ public:
     decoder.decodeBatch(&mwv, 0, map);
 
     tester.testBatch(gui, &mwv, map);
+  }
+
+  void test_decodeOldBatchFile() {
+    CoderCommonTester tester;
+    QtMainWindowView mwv;
+    mwv.initLayout();
+    auto gui = dynamic_cast<QtBatchView *>(mwv.batches()[0]);
+    Decoder decoder;
+    // Decode from the old 9-column format
+    auto oldMap =
+        MantidQt::API::loadJSONFromString(BATCH_JSON_STRING_9_COLUMNS);
+    decoder.decodeBatch(&mwv, 0, oldMap);
+    // Check that the result matches the new 10-column format
+    auto newMap = MantidQt::API::loadJSONFromString(EMPTY_BATCH_JSON_STRING);
+    tester.testBatch(gui, &mwv, newMap);
   }
 };
 } // namespace ISISReflectometry

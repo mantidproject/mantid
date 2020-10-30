@@ -41,7 +41,7 @@ class SliceViewerModel:
                 raise ValueError("workspace must contain at least 2 bin")
         elif isinstance(ws, MultipleExperimentInfos):
             if ws.isMDHistoWorkspace():
-                if len(ws.getNonIntegratedDimensions()) < 2:
+                if ws.getNumNonIntegratedDims() < 2:
                     raise ValueError("workspace must have at least 2 non-integrated dimensions")
             else:
                 if ws.getNumDims() < 2:

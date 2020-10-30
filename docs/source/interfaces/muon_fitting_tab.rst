@@ -44,7 +44,7 @@ If it is unchecked it will use the rebinned data as specified on the home tab.
 
 **Evaluate Function As** Select if to fit to histogram or point data.
 
-**TF Asymmetry Mode** Evaluate the fit in TF asymmetry mode, see :ref:`Calculate Muon Asymmetry <algm-CalculateMuonAsymmetry>`.
+**TF Asymmetry Mode** Evaluate the fit in TF asymmetry mode, see :ref:`Calculate Muon Asymmetry <algm-CalculateMuonAsymmetry>`. Note that currently the TF asymmetry parameters will not automatically update when a new run is loaded.
 
 Used By
 ^^^^^^^

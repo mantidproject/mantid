@@ -15,6 +15,7 @@ factor for scattering and absorption in sample), :math:`A_{s,sc}` (scattering in
 sample and absorption in sample and container), :math:`A_{c,sc}` (scattering in
 container and absorption in sample and container) and  :math:`A_{c,c}`
 (scattering and absorption in container).
+This uses the equations from Kendig Pings 1965 which account for partially illuminated samples.
 
 Restrictions on the input workspace
 ###################################
@@ -81,6 +82,14 @@ Output:
 .. testoutput:: ExCylinderPaalmanPingsCorrection
 
     Correction workspaces: corr_ass, corr_assc, corr_acsc, corr_acc
+
+References
+----------
+
+#. Kendig, A. P., and C. J. Pings. *X‐Ray Absorption Factors for Cylindrical Samples
+   in Annular Sample Cells Exposed to Incident Beams of Limited Width.* Journal of
+   Applied Physics **36.5** (1965): 1692-1698
+   `doi: 10.1063/1.1703111 <https://doi.org/10.1063/1.1703111>`__
 
 Related Algorithms
 ------------------

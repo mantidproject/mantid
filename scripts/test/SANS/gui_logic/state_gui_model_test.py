@@ -7,11 +7,10 @@
 import unittest
 
 from sans.common.enums import (ReductionDimensionality, ReductionMode, RangeStepType, SampleShape, SaveType,
-                               SANSInstrument, FitModeForMerge, CanonicalCoordinates)
+                               SANSInstrument, FitModeForMerge, DetectorType)
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.state.AllStates import AllStates
-from sans.user_file.settings_tags import (OtherId, event_binning_string_values, DetectorId)
-from sans.user_file.settings_tags import (det_fit_range)
+from sans.state.StateObjects.StateMoveDetectors import StateMoveDetectors
 
 
 class StateGuiModelTest(unittest.TestCase):
@@ -104,13 +103,18 @@ class StateGuiModelTest(unittest.TestCase):
 
     def test_that_is_set_to_2D_reduction(self):
         state_gui_model = StateGuiModel(AllStates())
-        state_gui_model.reduction_dimensionality = ReductionDimensionality.TWO_DIM
-        self.assertEqual(state_gui_model.reduction_dimensionality, ReductionDimensionality.TWO_DIM)
+        expected = ReductionDimensionality.TWO_DIM
+        state_gui_model.reduction_dimensionality = expected
+
+        self.assertEqual(expected, state_gui_model.reduction_dimensionality)
+        self.assertEqual(expected, state_gui_model.all_states.convert_to_q.reduction_dimensionality)
+        self.assertEqual(expected, state_gui_model.all_states.reduction.reduction_dimensionality)
 
     def test_that_raises_when_not_setting_with_reduction_dim_enum(self):
         def red_dim_wrapper():
             state_gui_model = StateGuiModel(AllStates())
             state_gui_model.reduction_dimensionality = "string"
+
         self.assertRaises(ValueError, red_dim_wrapper)
 
     def test_that_can_update_reduction_dimensionality(self):
@@ -150,6 +154,7 @@ class StateGuiModelTest(unittest.TestCase):
         def red_mode_wrapper():
             state_gui_model = StateGuiModel(AllStates())
             state_gui_model.reduction_mode = "string"
+
         self.assertRaises(ValueError, red_mode_wrapper)
 
     def test_that_can_update_reduction_mode(self):
@@ -214,7 +219,7 @@ class StateGuiModelTest(unittest.TestCase):
         state.reduction.merge_fit_mode = FitModeForMerge.SHIFT_ONLY
         state.reduction.merge_range_min = 1.
         state.reduction.merge_range_max = 7.
-        
+
         state_gui_model = StateGuiModel(state)
         self.assertEqual(state_gui_model.merge_scale, 12.)
         self.assertEqual(state_gui_model.merge_shift, 234.)
@@ -246,8 +251,13 @@ class StateGuiModelTest(unittest.TestCase):
         self.assertTrue(not state_gui_model.wavelength_max)
         self.assertTrue(not state_gui_model.wavelength_step)
 
-    def test_that_default_wavelength_step_type_is_linear(self):
+    def test_that_wavelength_step_type_defaults_to_linear_if_none(self):
         state_gui_model = StateGuiModel(AllStates())
+        self.assertEqual(state_gui_model.wavelength_step_type, RangeStepType.LIN)
+
+    def test_that_wavelength_step_type_defaults_to_linear_if_not_set(self):
+        state_gui_model = StateGuiModel(AllStates())
+        state_gui_model.wavelength_step_type = RangeStepType.NOT_SET
         self.assertEqual(state_gui_model.wavelength_step_type, RangeStepType.LIN)
 
     def test_that_can_set_wavelength(self):
@@ -257,11 +267,29 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model.wavelength_step = .5
         state_gui_model.wavelength_step_type = RangeStepType.LIN
         state_gui_model.wavelength_step_type = RangeStepType.LOG
-        self.assertEqual(state_gui_model.all_states.adjustment.calculate_transmission.wavelength_low, [1.])
-        self.assertEqual(state_gui_model.all_states.adjustment.calculate_transmission.wavelength_high, [2.])
-        self.assertEqual(state_gui_model.all_states.adjustment.calculate_transmission.wavelength_step, .5)
-        self.assertEqual(state_gui_model.all_states.adjustment.calculate_transmission.wavelength_step_type,
-                         RangeStepType.LOG)
+        self._assert_all_wavelengths_match(state_gui_model, [1.], [2.], .5, RangeStepType.LOG)
+
+    def _assert_all_wavelengths_match(self, model, low, high, step, step_type):
+        # Transmission
+        self.assertEqual(model.all_states.adjustment.calculate_transmission.wavelength_low, low)
+        self.assertEqual(model.all_states.adjustment.calculate_transmission.wavelength_high, high)
+        self.assertEqual(model.all_states.adjustment.calculate_transmission.wavelength_step, step)
+        self.assertEqual(model.all_states.adjustment.calculate_transmission.wavelength_step_type, step_type)
+        # Monitor
+        self.assertEqual(model.all_states.adjustment.normalize_to_monitor.wavelength_low, low)
+        self.assertEqual(model.all_states.adjustment.normalize_to_monitor.wavelength_high, high)
+        self.assertEqual(model.all_states.adjustment.normalize_to_monitor.wavelength_step, step)
+        self.assertEqual(model.all_states.adjustment.normalize_to_monitor.wavelength_step_type, step_type)
+        # Wavelength and pixel adjustment
+        self.assertEqual(model.all_states.adjustment.wavelength_and_pixel_adjustment.wavelength_low, low)
+        self.assertEqual(model.all_states.adjustment.wavelength_and_pixel_adjustment.wavelength_high, high)
+        self.assertEqual(model.all_states.adjustment.wavelength_and_pixel_adjustment.wavelength_step, step)
+        self.assertEqual(model.all_states.adjustment.wavelength_and_pixel_adjustment.wavelength_step_type, step_type)
+        # Wavelength
+        self.assertEqual(model.all_states.wavelength.wavelength_low, low)
+        self.assertEqual(model.all_states.wavelength.wavelength_high, high)
+        self.assertEqual(model.all_states.wavelength.wavelength_step, step)
+        self.assertEqual(model.all_states.wavelength.wavelength_step_type, step_type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale
@@ -447,6 +475,49 @@ class StateGuiModelTest(unittest.TestCase):
         state_gui_model = StateGuiModel(AllStates())
         state_gui_model.mask_files = ["file.txt", "file2.txt"]
         self.assertEqual(state_gui_model.mask_files, ["file.txt", "file2.txt"])
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # User files - focus on fields that are displayed in mm and stored in m
+    # ------------------------------------------------------------------------------------------------------------------
+    def test_that_user_file_items_interpreted_correctly(self):
+        state = AllStates()
+        state.move.sample_offset = 1.78 / 1000.
+        state.scale.width = 1.2
+        state.scale.height = 1.6
+        state.scale.thickness = 1.8
+        state.scale.shape = SampleShape.FLAT_PLATE
+        state.convert_to_q.radius_cutoff = 45. / 1000.
+        state.convert_to_q.q_resolution_a1 = 1.5 / 1000.
+        state.convert_to_q.q_resolution_a2 = 2.5 / 1000.
+        state.convert_to_q.q_resolution_h1 = 1.5 / 1000.
+        state.convert_to_q.q_resolution_h2 = 2.5 / 1000.
+        state.convert_to_q.q_resolution_delta_r = 0.1 / 1000.
+        state.mask.radius_min = 12. / 1000.
+        state.mask.radius_max = 13. / 1000.
+        state.move.detectors = {DetectorType.LAB.value: StateMoveDetectors(),
+                                DetectorType.HAB.value: StateMoveDetectors()}
+        state.move.detectors[DetectorType.LAB.value].sample_centre_pos1 = 21.5 / 1000.
+        state.move.detectors[DetectorType.LAB.value].sample_centre_pos2 = 17.8 / 1000.
+        state.move.detectors[DetectorType.HAB.value].sample_centre_pos1 = 25.1 / 1000.
+        state.move.detectors[DetectorType.HAB.value].sample_centre_pos2 = 16.9 / 1000.
+        state_gui_model = StateGuiModel(state)
+        self.assertEqual(state_gui_model.sample_width, 1.2)
+        self.assertEqual(state_gui_model.sample_height, 1.6)
+        self.assertEqual(state_gui_model.sample_thickness, 1.8)
+        self.assertEqual(state_gui_model.z_offset, 1.78)
+        self.assertEqual(state_gui_model.sample_shape, SampleShape.FLAT_PLATE)
+        self.assertEqual(state_gui_model.r_cut, 45.)
+        self.assertEqual(state_gui_model.q_resolution_source_a, 1.5)
+        self.assertEqual(state_gui_model.q_resolution_sample_a, 2.5)
+        self.assertEqual(state_gui_model.q_resolution_source_h, 1.5)
+        self.assertEqual(state_gui_model.q_resolution_sample_h, 2.5)
+        self.assertEqual(state_gui_model.q_resolution_delta_r, 0.1)
+        self.assertEqual(state_gui_model.radius_limit_min, 12.)
+        self.assertEqual(state_gui_model.radius_limit_max, 13.)
+        self.assertEqual(state_gui_model.lab_pos_1, 21.5)
+        self.assertEqual(state_gui_model.lab_pos_2, 17.8)
+        self.assertEqual(state_gui_model.hab_pos_1, 25.1)
+        self.assertEqual(state_gui_model.hab_pos_2, 16.9)
 
 
 if __name__ == '__main__':

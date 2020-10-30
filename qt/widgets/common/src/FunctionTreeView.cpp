@@ -48,6 +48,7 @@
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
+#include <regex>
 #include <utility>
 
 namespace {
@@ -55,6 +56,11 @@ const char *globalOptionName = "Global";
 Mantid::Kernel::Logger g_log("Function Browser");
 QString removePrefix(QString &param) { return param.split(QString("."))[1]; }
 QString addPrefix(QString &param) { return QString("f0.") + param; }
+
+const std::regex PREFIX_REGEX("(^[f][0-9](.*))");
+inline bool variableIsPrefixed(const std::string &name) {
+  return std::regex_match(name, PREFIX_REGEX);
+}
 } // namespace
 
 namespace MantidQt {
@@ -482,13 +488,13 @@ protected:
   /// Create string property
   FunctionTreeView::AProperty apply(const std::string &str) const override {
     QtProperty *prop = nullptr;
-    if (m_attName == "FileName") {
+    if (m_attName.indexOf("FileName") != -1) {
       prop = m_browser->m_filenameManager->addProperty(m_attName);
       m_browser->m_filenameManager->setValue(prop, QString::fromStdString(str));
-    } else if (m_attName == "Formula") {
+    } else if (m_attName.indexOf("Formula") != -1) {
       prop = m_browser->m_formulaManager->addProperty(m_attName);
       m_browser->m_formulaManager->setValue(prop, QString::fromStdString(str));
-    } else if (m_attName == "Workspace") {
+    } else if (m_attName.indexOf("Workspace") != -1) {
       prop = m_browser->m_workspaceManager->addProperty(m_attName);
       m_browser->m_workspaceManager->setValue(prop,
                                               QString::fromStdString(str));
@@ -644,9 +650,11 @@ void FunctionTreeView::addAttributeAndParameterProperties(
 
   // add attribute properties
   auto attributeNames = fun->getAttributeNames();
-  for (auto att = attributeNames.begin(); att != attributeNames.end(); ++att) {
-    QString attName = QString::fromStdString(*att);
-    addAttributeProperty(prop, attName, fun->getAttribute(*att));
+  for (const auto &att : attributeNames) {
+    if (!variableIsPrefixed(att)) {
+      QString attName = QString::fromStdString(att);
+      addAttributeProperty(prop, attName, fun->getAttribute(att));
+    }
   }
 
   auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);

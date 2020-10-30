@@ -67,10 +67,11 @@
             <item row="0" column="2">
              <widget class="QCheckBox" name="runAuto">
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, loads all files in directory&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, tries to find current run automatically in the same directory as the given first run&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
-               <string>Auto</string>
+               <string>Auto Find 
+Current Run</string>
               </property>
              </widget>
             </item>
@@ -642,8 +643,8 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="detectorGroupingType"/>
   <buttongroup name="deadTimeCorrType"/>
   <buttongroup name="calculationType"/>
+  <buttongroup name="detectorGroupingType"/>
  </buttongroups>
 </ui>

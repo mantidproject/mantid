@@ -20,10 +20,6 @@ Data Required
 
 You will need to run a sample which will create good clean peaks at known reference dSpacing positions.  To get a good calibration you will want good statistics on this calibration data.  Vanadium and Ceria are common samples used for calibration.
 
-.. interface:: Engineering Diffraction
-  :align: right
-  :width: 400
-
 Using the Engineering GUI
 #########################
 
@@ -34,7 +30,7 @@ It is possible to load an existing calibration (as a CSV file) and to
 generate a new calibration file (which becomes the new current
 calibration).
 
-A description of the inte3rface and all of it's controls can be found 
+A description of the interface and all of it's controls can be found 
 :ref:`here <ui engineering calibration>`.
 
 Calibrating the entire instrument

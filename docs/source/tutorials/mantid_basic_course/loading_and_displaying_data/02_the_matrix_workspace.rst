@@ -25,7 +25,6 @@ Workspace Matrix View - Show Data
 
 The dialog below is the workspace matrix view, and
 can be used to look at histogram or event data. To create one, right-click the workspace name and select "Show Data".
-The next dialog gives you options to limit the amount of data displayed; just click "OK".
 
 .. figure:: /images/WorkspaceMatrixAnnotated.png
    :alt: WorkspaceMatrixAnnotated

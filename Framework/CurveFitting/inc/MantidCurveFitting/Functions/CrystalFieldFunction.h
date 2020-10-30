@@ -201,7 +201,6 @@ private:
   size_t makeMapsForFunction(const IFunction &fun, size_t iFirst,
                              const std::string &prefix) const;
   void cacheSourceParameters() const;
-
   /// Function that creates the source function.
   mutable CrystalFieldControl m_control;
   /// Function that calculates parameters of the target function.

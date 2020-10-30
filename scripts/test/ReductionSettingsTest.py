@@ -8,6 +8,7 @@ import unittest
 from mantid.simpleapi import *
 from reduction_settings import *
 
+
 class BasicSettingsObjectUsageTest(unittest.TestCase):
     def setUp(self):
         self.settings = get_settings_object("BasicSettingsObjectUsageTest")
@@ -79,6 +80,6 @@ class BasicSettingsObjectUsageTest(unittest.TestCase):
 
         self.assertFalse("a" in c)
 
+
 if __name__ == '__main__':
     unittest.main()
-

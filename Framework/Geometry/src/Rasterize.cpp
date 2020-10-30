@@ -103,7 +103,7 @@ double calcDistanceInShapeNoCheck(const V3D &beamDirection,
   Track incoming(position, -beamDirection);
 
   shape.interceptSurface(incoming);
-  return incoming.front().distFromStart;
+  return incoming.totalDistInsideObject();
 }
 
 Raster calculateGeneric(const V3D &beamDirection, const IObject &shape,
@@ -167,7 +167,7 @@ Raster calculateGeneric(const V3D &beamDirection, const IObject &shape,
           // just chuck away the element in this case. This will also throw
           // away points that are inside a gauge volume but outside the sample
           if (shape.interceptSurface(incoming) > 0) {
-            result.l1.emplace_back(incoming.cbegin()->distFromStart);
+            result.l1.emplace_back(incoming.totalDistInsideObject());
             result.position.emplace_back(currentPosition);
             result.volume.emplace_back(elementVolume);
           }

@@ -32,62 +32,69 @@ Here is an example of fitting a 2D histogram:
 .. code-block:: python
     :linenos:
 
-    from matplotlib.mlab import bivariate_normal
-    import numpy as np
+    # import mantid algorithms, numpy and matplotlib
     from mantid.simpleapi import *
     import matplotlib.pyplot as plt
+    from scipy.stats import multivariate_normal
+    import numpy as np
     import BivariateGaussian as BVG
 
-    # Generate some data to fit
-    x = np.linspace(-0.5,0.5,100)
-    y = np.linspace(-0.5,0.5,100)
-    X,Y = np.meshgrid(x,y,indexing='ij')
     sigmaX = 0.05
     sigmaY = 0.15
     sigmaXY = 0.0
     muX = 0.1
     muY = 0.1
-    Z = 1.0*bivariate_normal(X, Y, sigmax=sigmaX, sigmay=sigmaY,
-                                 sigmaxy=sigmaXY, mux=muX, muy=muY)
-    Z += 0.1*(np.random.random(X.shape) - 0.5) # Noise 
+    p = 0.0
+    covariance = np.matrix([[sigmaX*sigmaX, p*sigmaX*sigmaY],
+                            [p*sigmaX*sigmaY,sigmaY*sigmaY]])
+    rv = multivariate_normal([muX,muY], covariance)
+
+    # Generate some data to fit
+    x, y = np.mgrid[-0.5:0.5:.01, -0.5:0.5:.01]
+    pos = np.dstack((x, y))
+    Z = rv.pdf(pos)
+    Z += 0.1*(np.random.random(x.shape) - 0.5) # Noise
 
     # Here we'll format it so we can fit this as a 1D function:
     ZForFitting = np.empty(Z.shape + (2,))
     ZForFitting[:,:,0] = Z
     ZForFitting[:,:,1] = Z
 
-    pos = np.empty(X.shape + (2,))
-    pos[:, :, 0] = X
-    pos[:, :, 1] = Y
+    pos = np.empty(x.shape + (2,))
+    pos[:, :, 0] = x
+    pos[:, :, 1] = y
     bvgWS = CreateWorkspace(OutputWorkspace='bvgWS', DataX=pos.ravel(
             ), DataY=ZForFitting.ravel())
 
     # Now we declare our function - we create one separately
-    # so that later we have access to functions which are not 
+    # so that later we have access to functions which are not
     # accessible to Function1D (e.g. 2D and 3D versions of the
     # function.  The parameters we set here are an initial guess.
     bvg = BVG.BivariateGaussian()
     bvg.init()
     bvg['A'] = 1.
-    bvg['sigX'] = 0.1
-    bvg['sigY'] = 0.1
-    bvg['sigP'] = 0.
+    bvg['SigX'] = 0.05
+    bvg['SigY'] = 0.15
+    bvg['SigP'] = 0.
+    bvg['MuX']=0.1
+    bvg['MuY']=0.1
     bvg.setAttributeValue('nX', Z.shape[0])
     bvg.setAttributeValue('nY', Z.shape[1])
     Fit(Function=bvg, InputWorkspace='bvgWS', Output='bvgfit',
-                             Minimizer='Levenberg-MarquardtMD')
-                             
+                            Minimizer='Levenberg-MarquardtMD')
+
     ZFit = bvg.function2D(pos)
 
     #Plot the results
     plt.figure(1)
     plt.clf()
     plt.subplot(1,2,1)
-    plt.imshow(Z)
+    plt.imshow(Z, origin='lower')
     plt.title('Data')
     plt.subplot(1,2,2)
-    plt.imshow(ZFit)
+    plt.imshow(ZFit, origin='lower')
     plt.title('Fit')
+    plt.show()
 
 
 

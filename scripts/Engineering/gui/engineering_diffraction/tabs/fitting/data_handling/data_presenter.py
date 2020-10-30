@@ -7,7 +7,7 @@
 from Engineering.gui.engineering_diffraction.tabs.common import create_error_message
 from mantid.simpleapi import logger
 from mantidqt.utils.asynchronous import AsyncTask
-from mantidqt.utils.observer_pattern import GenericObservable
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 
 
 class FittingDataPresenter(object):
@@ -21,17 +21,24 @@ class FittingDataPresenter(object):
 
         # Connect view signals to local methods
         self.view.set_on_load_clicked(self.on_load_clicked)
-        self.view.set_enable_button_connection(self._enable_load_button)
+        self.view.set_enable_load_button_connection(self._enable_load_button)
+        self.view.set_enable_inspect_bg_button_connection(self._enable_inspect_bg_button)
         self.view.set_on_remove_selected_clicked(self._remove_selected_tracked_workspaces)
         self.view.set_on_remove_all_clicked(self._remove_all_tracked_workspaces)
         self.view.set_on_plotBG_clicked(self._plotBG)
         self.view.set_on_table_cell_changed(self._handle_table_cell_changed)
         self.view.set_on_xunit_changed(self._log_xunit_change)
+        self.view.set_table_selection_changed(self._handle_selection_changed)
 
         # Observable Setup
         self.plot_added_notifier = GenericObservable()
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
+        # Obeservers
+        self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
+
+    def fit_completed(self, results_dict):
+        self.model.update_fit(results_dict)
 
     def _log_xunit_change(self, xunit):
         logger.notice("Subsequent files will be loaded with the x-axis unit:\t{}".format(xunit))
@@ -46,10 +53,11 @@ class FittingDataPresenter(object):
             removed = self.get_loaded_workspaces().pop(ws_name)
             self.plot_removed_notifier.notify_subscribers(removed)
             self.plotted.discard(ws_name)
+            self.model.remove_log_rows([self.row_numbers[ws_name]])
+            self.model.update_log_workspace_group()
             self._repopulate_table()
-            self.model.repopulate_logs()  # so matches new table
         elif ws_name in self.model.get_log_workspaces_name():
-            logger.warning('Deleting the log workspace may cause unexpected errors.')
+            self.model.update_log_workspace_group()
 
     def rename_workspace(self, old_name, new_name):
         if old_name in self.get_loaded_workspaces():
@@ -58,7 +66,7 @@ class FittingDataPresenter(object):
                 self.plotted.remove(old_name)
                 self.plotted.add(new_name)
             self._repopulate_table()
-            self.model.repopulate_logs()  # so matches new table
+            self.model.update_log_workspace_group()  # so matches new table
 
     def clear_workspaces(self):
         self.get_loaded_workspaces().clear()
@@ -83,13 +91,13 @@ class FittingDataPresenter(object):
         """
         self.worker = AsyncTask(self.model.load_files, (filenames, xunit),
                                 error_cb=self._on_worker_error,
-                                finished_cb=self._emit_enable_button_signal,
+                                finished_cb=self._emit_enable_load_button_signal,
                                 success_cb=self._on_worker_success)
         self.worker.start()
 
     def _on_worker_error(self, _):
         logger.error("Error occurred when loading files.")
-        self._emit_enable_button_signal()
+        self._emit_enable_load_button_signal()
 
     def _on_worker_success(self, _):
         if self.view.get_add_to_plot():
@@ -129,7 +137,6 @@ class FittingDataPresenter(object):
             self.plot_removed_notifier.notify_subscribers(removed)
             self.plotted.discard(ws_name)
         self._repopulate_table()
-        self.model.repopulate_logs()
 
     def _remove_all_tracked_workspaces(self):
         self.clear_workspaces()
@@ -172,11 +179,22 @@ class FittingDataPresenter(object):
                     bg_params = self.view.read_bg_params_from_table(row)
                     self.model.do_background_subtraction(ws_name, bg_params)
 
+    def _handle_selection_changed(self):
+        rows = self.view.get_selected_rows()
+        enabled = False
+        for row in rows:
+            if self.view.get_item_checked(row, 3):
+                enabled = True
+        self._enable_inspect_bg_button(enabled)
+
     def _enable_load_button(self, enabled):
         self.view.set_load_button_enabled(enabled)
 
-    def _emit_enable_button_signal(self):
+    def _emit_enable_load_button_signal(self):
         self.view.sig_enable_load_button.emit(True)
+
+    def _enable_inspect_bg_button(self, enabled):
+        self.view.set_inspect_bg_button_enabled(enabled)
 
     def _get_filenames(self):
         return self.view.get_filenames_to_load()

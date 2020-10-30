@@ -5,9 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
-#
-#
+# import icon resources
+from mantidqt import resources  # noqa: F401
 from mantidqt.utils.qt import import_qt
-
 
 InterfaceManager = import_qt('._common', 'mantidqt', 'InterfaceManager')

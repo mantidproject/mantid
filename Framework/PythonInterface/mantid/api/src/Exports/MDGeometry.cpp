@@ -43,7 +43,8 @@ void export_MDGeometry() {
   class_<MDGeometry, boost::noncopyable>("MDGeometry", no_init)
       .def("getNumDims", &MDGeometry::getNumDims, arg("self"),
            "Returns the number of dimensions present")
-
+      .def("getNumNonIntegratedDims", &MDGeometry::getNumDims, arg("self"),
+           "Returns the number of non-integrated dimensions present")
       .def("getDimension", &MDGeometry::getDimension,
            (arg("self"), arg("index")),
            return_value_policy<RemoveConstSharedPtr>(),

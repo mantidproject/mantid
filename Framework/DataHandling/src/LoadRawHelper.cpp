@@ -1308,7 +1308,10 @@ LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
     pos = fileName.find("txt");
     if (pos == std::string::npos)
       continue;
-    logfilesList.insert(std::string(path).append("/").append(fileName));
+    // The log files must exist to count
+    const auto logFilePath = std::string(path).append("/").append(fileName);
+    if (Poco::File(logFilePath).exists())
+      logfilesList.insert(logFilePath);
   }
   return (logfilesList);
 }

@@ -25,21 +25,22 @@ class CropHelperTest(unittest.TestCase):
 
     def test_that_can_get_component_name_for_sans2d(self):
         workspace = self._get_workspace("SANS2D00022024")
-        self.assertEqual("front-detector",  get_component_name(workspace, DetectorType.HAB))
-        self.assertEqual("rear-detector",  get_component_name(workspace, DetectorType.LAB))
+        self.assertEqual("front-detector", get_component_name(workspace, DetectorType.HAB))
+        self.assertEqual("rear-detector", get_component_name(workspace, DetectorType.LAB))
 
     def test_that_can_get_component_name_for_loq(self):
         workspace = self._get_workspace("LOQ48127")
-        self.assertEqual("HAB",  get_component_name(workspace, DetectorType.HAB))
-        self.assertEqual("main-detector-bank",  get_component_name(workspace, DetectorType.LAB))
+        self.assertEqual("HAB", get_component_name(workspace, DetectorType.HAB))
+        self.assertEqual("main-detector-bank", get_component_name(workspace, DetectorType.LAB))
 
     def test_that_can_get_component_name_for_larmor(self):
         workspace = self._get_workspace("LARMOR00002260")
-        self.assertEqual("DetectorBench",  get_component_name(workspace, DetectorType.HAB))
+        self.assertEqual("DetectorBench", get_component_name(workspace, DetectorType.HAB))
 
     def test_that_can_get_component_name_for_zoom(self):
         # TODO when test data is available
         pass
+
 
 if __name__ == '__main__':
     unittest.main()

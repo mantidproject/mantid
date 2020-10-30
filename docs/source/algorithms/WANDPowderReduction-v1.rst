@@ -117,6 +117,46 @@ Usage
 
 .. figure:: /images/WANDPowderReduction_silicon_powder_bkg.png
 
+**Using multiple input workspaces**
+
+.. code-block:: python
+
+   si1 = LoadWAND('/HFIR/HB2C/IPTS-22745/nexus/HB2C_320234.nxs.h5')
+   si2 = LoadWAND('/HFIR/HB2C/IPTS-22745/nexus/HB2C_320235.nxs.h5')
+   va0 = LoadWAND('/HFIR/HB2C/IPTS-23858/nexus/HB2C_320259.nxs.h5')
+
+   # single ws
+   WANDPowderReduction(
+         InputWorkspace=si1,
+         CalibrationWorkspace=va0,
+         Target='Theta',
+         NumberBins=1000,
+         NormaliseBy='Time',
+         OutputWorkspace=f'si1_reduced',
+         )
+
+   # single ws
+   WANDPowderReduction(
+         InputWorkspace=si2,
+         CalibrationWorkspace=va0,
+         Target='Theta',
+         NumberBins=1000,
+         NormaliseBy='Time',
+         OutputWorkspace=f'si2_reduced',
+         )
+
+   # merged ws
+   WANDPowderReduction(
+         InputWorkspace=[si1, si2],
+         CalibrationWorkspace=va0,
+         Target='Theta',
+         NumberBins=1000,
+         NormaliseBy='Time',
+         OutputWorkspace=f'si_reduced',
+         )
+
+.. figure:: /images/WANDPowderReduction_silicon_powder_multiple_input.png
+
 .. categories::
 
 .. sourcelink::
