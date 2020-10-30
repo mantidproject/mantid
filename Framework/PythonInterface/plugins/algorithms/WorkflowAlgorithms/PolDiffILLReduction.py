@@ -54,11 +54,11 @@ class PolDiffILLReduction(PythonAlgorithm):
             if geometry_type != 'None':
                 required_keys += ['BeamHeight', 'BeamWidth', 'ContainerDensity',]
             if geometry_type == 'FlatPlate':
-                required_keys += ['Height', 'Width', 'Thickness', 'ContainerFrontThickness', 'ContainerBackThickness']
+                required_keys += ['Height', 'SampleWidth', 'SampleThickness', 'ContainerFrontThickness', 'ContainerBackThickness']
             if geometry_type == 'Cylinder':
-                required_keys += ['SampleHeight', 'SampleRadius', 'ContainerRadius']
+                required_keys += ['Height', 'SampleRadius', 'ContainerRadius']
             if geometry_type == 'Annulus':
-                required_keys += ['SampleHeight', 'SampleInnerRadius', 'SampleOuterRadius', 'ContainerInnerRadius', 'ContainerOuterRadius']
+                required_keys += ['Height', 'SampleInnerRadius', 'SampleOuterRadius', 'ContainerInnerRadius', 'ContainerOuterRadius']
 
             for key in required_keys:
                 if key not in sampleAndEnvironmentProperties:
@@ -415,26 +415,29 @@ class PolDiffILLReduction(PythonAlgorithm):
         kwargs['BeamHeight'] = self._sampleAndEnvironmentProperties['BeamHeight'].value
         kwargs['BeamWidth'] = self._sampleAndEnvironmentProperties['BeamWidth'].value
         kwargs['SampleDensityType'] = 'Number Density'
+        kwargs['SampleNumberDensityUnit'] = 'Formula Units'
+        kwargs['ContainerDensityType'] = 'Number Density'
+        kwargs['ContainerNumberDensityUnit'] = 'Formula Units'
         kwargs['SampleDensity'] = self._sampleAndEnvironmentProperties['SampleDensity'].value
         kwargs['Height'] = self._sampleAndEnvironmentProperties['Height'].value
         kwargs['SampleChemicalFormula'] = self._sampleAndEnvironmentProperties['SampleChemicalFormula'].value
-        if 'container_formula' in self._sampleAndEnvironmentProperties:
+        if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
             kwargs['ContainerChemicalFormula'] = self._sampleAndEnvironmentProperties['ContainerChemicalFormula'].value
             kwargs['ContainerDensity'] = self._sampleAndEnvironmentProperties['ContainerDensity'].value
         if geometry_type == 'FlatPlate':
             kwargs['SampleWidth'] = self._sampleAndEnvironmentProperties['SampleWidth'].value
             kwargs['SampleThickness'] = self._sampleAndEnvironmentProperties['SampleThickness'].value
-            if 'container_formula' in self._sampleAndEnvironmentProperties:
+            if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerFrontThickness'] = self._sampleAndEnvironmentProperties['ContainerFrontThickness'].value
                 kwargs['ContainerBackThickness'] = self._sampleAndEnvironmentProperties['ContainerBackThickness'].value
         elif geometry_type == 'Cylinder':
             kwargs['SampleRadius'] = self._sampleAndEnvironmentProperties['SampleRadius'].value
-            if 'container_formula' in self._sampleAndEnvironmentProperties:
+            if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerRadius'] = self._sampleAndEnvironmentProperties['ContainerRadius'].value
         elif geometry_type == 'Annulus':
             kwargs['SampleInnerRadius'] = self._sampleAndEnvironmentProperties['SampleInnerRadius'].value
             kwargs['SampleOuterRadius']  = self._sampleAndEnvironmentProperties['SampleOuterRadius'].value
-            if 'container_formula' in self._sampleAndEnvironmentProperties:
+            if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerInnerRadius'] = self._sampleAndEnvironmentProperties['ContainerInnerRadius'].value
                 kwargs['ContainerOuterRadius'] = self._sampleAndEnvironmentProperties['ContainerOuterRadius'].value
 

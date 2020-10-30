@@ -77,8 +77,8 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396983', ProcessAs='Beam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
                             BeamInputWorkspace='beam_ws_1')
-        sampleProperties = {'SampleMass': 8.54, 'SampleDensity': 6.0, 'FormulaUnits': 50, 'SampleChemicalFormula': 'V',
-                            'SampleThickness': 2, 'SampleHeight': 2, 'SampleWidth': 2, 'BeamWidth': 2.5, 'BeamHeight': 2.5,
+        sampleProperties = {'SampleMass': 8.54, 'FormulaUnits': 50, 'SampleChemicalFormula': 'V',
+                            'SampleThickness': 2, 'Height': 2, 'SampleWidth': 2, 'BeamWidth': 2.5, 'BeamHeight': 2.5,
                             'SampleDensity': 1.18, 'ContainerFormula': 'Al', 'ContainerDensity': 2.7,
                             'ContainerFrontThickness': 0.02, 'ContainerBackThickness': 0.02}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
@@ -92,8 +92,8 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396983', ProcessAs='Beam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
                             BeamInputWorkspace='beam_ws_1')
-        sampleProperties = {'SampleMass': 8.54, 'SampleDensity': 6.0, 'FormulaUnits': 50, 'SampleChemicalFormula': 'V',
-                            'SampleThickness': 2, 'SampleHeight': 2, 'SampleWidth': 2, 'BeamWidth': 2.5, 'BeamHeight': 2.5,
+        sampleProperties = {'SampleMass': 8.54, 'FormulaUnits': 50, 'SampleChemicalFormula': 'V',
+                            'SampleThickness': 2, 'Height': 2, 'SampleWidth': 2, 'BeamWidth': 2.5, 'BeamHeight': 2.5,
                             'SampleDensity': 1.18, 'ContainerFormula': 'Al', 'ContainerDensity': 2.7,
                             'ContainerFrontThickness': 0.02, 'ContainerBackThickness': 0.02}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
@@ -110,8 +110,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
 
         sampleProperties = {'SampleMass': 2.932, 'SampleDensity': 2.0, 'FormulaUnits': 182.54,
                             'SampleChemicalFormula': 'Mn0.5-Fe0.5-P-S3', 'SampleThickness': 2,
-                            'SampleHeight': 2, 'SampleWidth': 2,
-                            'BeamWidth': 2.5, 'BeamHeight': 2.5, 'SampleDensity': 1.18,
+                            'Height': 2, 'SampleWidth': 2, 'BeamWidth': 2.5, 'BeamHeight': 2.5,
                             'ContainerFormula': 'Al', 'ContainerDensity': 2.7,
                             'ContainerFrontThickness': 0.02, 'ContainerBackThickness': 0.02}
         PolDiffILLReduction(Run='396986', ProcessAs='Transmission', OutputWorkspace='sample_transmission',
