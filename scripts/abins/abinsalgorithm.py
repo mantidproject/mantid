@@ -116,7 +116,7 @@ class AbinsAlgorithm:
         Args:
             default: default instrument
             choices: Iterable of available instruments for "Instrument" combo box
-            multiple_choice_settings: 
+            multiple_choice_settings:
                 List of field names, corresponding parameter and tooltip for additional instrument settings, e.g.::
 
                     [('Setting', 'settings', 'Setting choice for this instrument (e.g. monochromator)'), ...]
@@ -124,7 +124,7 @@ class AbinsAlgorithm:
                 This should correspond to a dict in abins.parameters.instruments[instrument]
 
 
-            freeform_settings: 
+            freeform_settings:
                 List of field names, defaults and tooltips for additional instrument settings, e.g.::
 
                     [('IncidentEnergy', '4100', 'Incident energy in wavenumber'), ...]
@@ -140,8 +140,9 @@ class AbinsAlgorithm:
             # Populate list of possible instrument settings
             valid_choices = ['']
             for instrument in choices:
-                if ((instrument in abins.parameters.instruments)
-                    and (parameter_name in abins.parameters.instruments[instrument])):
+                if (
+                        (instrument in abins.parameters.instruments)
+                        and (parameter_name in abins.parameters.instruments[instrument])):
                     valid_choices += sorted(list(abins.parameters.instruments[instrument][parameter_name]))
             valid_choices = sorted(list(set(valid_choices)))
 

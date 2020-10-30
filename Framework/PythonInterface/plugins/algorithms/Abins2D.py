@@ -14,7 +14,6 @@ from mantid.api import WorkspaceFactory, AnalysisDataService
 
 # noinspection PyProtectedMember
 from mantid.simpleapi import GroupWorkspaces
-from mantid.kernel import Direction
 import abins
 from abins.abinsalgorithm import AbinsAlgorithm
 
@@ -256,7 +255,6 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         start = abins.parameters.sampling['min_wavenumber']
         stop = abins.parameters.sampling['max_wavenumber'] + step
         self._bins = np.arange(start=start, stop=stop, step=step, dtype=abins.constants.FLOAT_TYPE)
-
 
 
 AlgorithmFactory.subscribe(Abins2D)
