@@ -476,7 +476,8 @@ def calibrate_bank(workspace: WorkspaceTypes,
 def calibrate_banks(workspace: WorkspaceTypes, bank_selection: str,
                     calibration_group: str = 'calibrations',
                     mask_group: str = 'masks',
-                    fit_group: str = 'fits') -> Tuple[WorkspaceGroup, Optional[WorkspaceGroup]]:
+                    fit_group: str = 'fits',
+                    **kwargs) -> Tuple[WorkspaceGroup, Optional[WorkspaceGroup]]:
     r"""
     Calibrate the tubes in a selection of banks, and assess their goodness-of-fit with an acceptance function.
 
@@ -498,6 +499,7 @@ def calibrate_banks(workspace: WorkspaceTypes, bank_selection: str,
     :param fit_group: name of the output WorkspaceGroup gathering the Workspace2D objects that hold the tube
         success criterion results, as well as the optimized polynomial coefficients of the quadratic function
         fitting the shadow locations in the tube to the known Y-coordinate for the wires.
+    :param kwargs: optional parameters to be passed on to `calibrate_bank`
 
     :return: handles to the calibrations and masks WorkspaceGroup objects
     """
@@ -506,7 +508,8 @@ def calibrate_banks(workspace: WorkspaceTypes, bank_selection: str,
     # Calibrate each bank
     calibrations, masks, fits = list(), list(), list()
     for n in bank_numbers(bank_selection):
-        calibration, mask = calibrate_bank(workspace, 'bank' + n, 'calib' + n, 'mask' + n, fit_results='fit' + n)
+        calibration, mask = calibrate_bank(workspace, 'bank' + n, 'calib' + n, 'mask' + n,
+                                           fit_results='fit' + n, **kwargs)
         fits.append(mtd['fit' + n])
         calibrations.append(calibration)
         if mask is not None:

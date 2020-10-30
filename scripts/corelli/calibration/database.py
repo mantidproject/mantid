@@ -15,6 +15,7 @@ from typing import List, Optional, Tuple, Union
 
 from mantid.dataobjects import EventWorkspace, TableWorkspace,  Workspace2D
 from mantid.api import mtd, Workspace, WorkspaceGroup
+from mantid.kernel import logger
 from mantid.simpleapi import CreateEmptyTableWorkspace, SaveNexusProcessed, LoadNexusProcessed
 
 # Functions exposed to the general user (public) API
@@ -237,6 +238,7 @@ def load_bank_table(bank_id: int, database_path: str, date: str, table_type: str
     TableType.assert_valid_type(table_type)
     verify_date_format('load_bank_table', date)
     filename: str = filename_bank_table(bank_id, database_path, date, table_type)
+    logger.notice(f'Loading bank{bank_id} {table_type} file from database')
     outputWS = LoadNexusProcessed(filename)
     return outputWS
 
@@ -429,16 +431,23 @@ def new_corelli_calibration(database_path: str,
 
     file_paths = dict()
     for table_type in ('calibration', 'mask'):
+        logger.notice(f'** Gathering {table_type} tables from individual banks')
         bank_tables, bank_stamps = combine_temporal_banks(database_path, date, table_type)
+        if len(bank_stamps) == 0:
+            logger.warning(f'No bank {table_type} files found with date < {date}')
+            continue
+        logger.notice(f'** Combining {table_type} tables from individual banks')
         table = combine_spatial_banks(bank_tables, table_type=table_type)
 
         bank_numbers, day_stamps = zip(*bank_stamps)
         last_day_stamp = sorted(day_stamps)[-1]
         filename = str(pathlib.Path(database_path) / f'{table_type}_corelli_{last_day_stamp}.nxs.h5')
+        logger.notice(f'** Saving instrument {table_type} to the database')
         SaveNexusProcessed(InputWorkspace=table, Filename=filename)
         file_paths[table_type] = filename
 
         if table_type == 'calibration':
+            logger.notice('** Creating and saving the manifest file')
             file_paths['manifest'] = save_manifest_file(database_path, bank_numbers, day_stamps,
                                                         manifest_day_stamp=last_day_stamp)
 
@@ -489,4 +498,8 @@ def load_calibration_set(input_workspace: Union[str, Workspace],
         if filename is not None:
             instrument_tables[table_type] = LoadNexusProcessed(Filename=filename,
                                                                OutputWorkspace=workspace_names[table_type])
+        else:
+            message = f'No calibration file found prior to {run_start}. Oldest calibration dates {available_dates[0]}'
+            logger.warning(message)
+
     return instrument_tables.values()
