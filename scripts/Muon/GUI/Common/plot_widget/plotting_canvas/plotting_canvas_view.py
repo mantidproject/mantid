@@ -248,6 +248,7 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         axis.set_title(title)
 
     def get_axis_limits(self, axis_number):
+        print("hi", len(self.fig.axes))
         xmin, xmax = self.fig.axes[axis_number].get_xlim()
         ymin, ymax = self.fig.axes[axis_number].get_ylim()
 

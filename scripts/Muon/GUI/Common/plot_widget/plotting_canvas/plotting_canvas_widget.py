@@ -19,7 +19,7 @@ class PlottingCanvasWidget(object):
         self._plotting_view = PlottingCanvasView(parent)
         self._plotting_view.add_widget(self._figure_options.widget)
         self._model = PlottingCanvasModel(context)
-        self._presenter = PlottingCanvasPresenter(self._plotting_view, self._model, self._figure_options)
+        self._presenter = PlottingCanvasPresenter(self._plotting_view, self._model, self._figure_options, context.plotting_context)
 
     @property
     def presenter(self):

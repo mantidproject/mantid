@@ -16,20 +16,20 @@ from mantidqt.utils.observer_pattern import GenericObserver
 DEFAULT_X_LIMITS = [0, 15]
 DEFAULT_Y_LIMITS = [-1, 1]
 
-
 class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def __init__(self, view: PlottingCanvasViewInterface, model: PlottingCanvasModel,
-                 options_presenter: QuickEditPresenter):
+                 options_presenter: QuickEditPresenter, context):
         self._view = view
         self._model = model
         self._options_view = None
         self._options_presenter = options_presenter
-
+        self._context = context
         # connection to quick edit widget
         self._setup_quick_edit_widget()
         self._setup_autoscale_observer()
-
+        self._options_presenter.add_subplot("one")
+        self._context.update_axis("one", 0)
 
     def remove_workspace_names_from_plot(self, workspace_names: List[str]):
         """Removes the input workspace names from the plot"""
@@ -71,12 +71,20 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
     def create_tiled_plot(self, keys, tiled_by):
         """Creates a blank tiled plot specified by the keys and tiled by type"""
         self._model.update_tiled_axis_map(keys, tiled_by)
+        self._context.clear_subplots()
+        self._options_presenter.clear_subplots()
         num_axes = len(keys) if len(keys) > 0 else 1
         self._view.create_new_plot_canvas(num_axes)
 
     def create_single_plot(self):
         """Creates a blank single plot """
         self._model.is_tiled = False
+        self._context.clear_subplots()
+        self._options_presenter.clear_subplots()
+
+        self._options_presenter.add_subplot("one")
+        self._context.update_axis("one", 0)
+        print("bbbb")
         self._view.create_new_plot_canvas(1)
 
     def get_plotted_workspaces_and_indices(self):
@@ -115,7 +123,8 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def _handle_xlim_changed_in_quick_edit_options(self, xlims):
         selected_subplots = self._get_selected_subplots_from_quick_edit_widget()
-        print("boo", selected_subplots)
+        print("boo", selected_subplots, list(self._context._subplots.keys()))
+
         for subplot in selected_subplots:
             self._view.set_axis_xlimits(subplot, xlims)
         self._view.redraw_figure()
@@ -219,17 +228,20 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
         self._handle_subplot_changed_in_quick_edit_widget()
 
     def _update_quick_widget_subplots_menu(self):
-        self._options_presenter.clear_subplots()
-        for title in  self._model.create_axes_titles():
+        #self._options_presenter.clear_subplots()
+        for i, title in  enumerate(self._model.create_axes_titles()):
             self._options_presenter.add_subplot(title)
+            self._context.update_axis(title, i)
 
     def _handle_subplot_changed_in_quick_edit_widget(self):
-        return
         selected_subplots = self._get_selected_subplots_from_quick_edit_widget()
+        if selected_subplots == []:
+            return
         index = selected_subplots[0]
         xmin, xmax, ymin, ymax = self._view.get_axis_limits(index)
         self._options_presenter.set_plot_x_range([xmin, xmax])
         self._options_presenter.set_plot_y_range([ymin, ymax])
+
     def _handle_autoscale_y_axes(self):
         if not self._options_presenter.autoscale:
             self._options_presenter.enable_yaxis_changer()
@@ -252,8 +264,10 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def _get_selected_subplots_from_quick_edit_widget(self):
         subplots = self._options_presenter.get_selection()
+        print("waa", subplots)
         if len(subplots) > 0:
-            selected_subplots = [ix - 1 for ix in list(map(int, subplots))]
+            selected_subplots = [self._context.get_axis(name) for name in subplots]
+            print("mff", selected_subplots)
             return selected_subplots
         else:
             return []  # no subplots are available

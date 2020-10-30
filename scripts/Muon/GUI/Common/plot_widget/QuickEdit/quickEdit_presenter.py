@@ -14,6 +14,7 @@ class QuickEditPresenter(object):
         self.set_plot_x_range(self._context.default_xlims)
         self.set_plot_y_range(self._context.default_ylims)
 
+
     @property
     def widget(self):
         return self._view
@@ -94,7 +95,7 @@ class QuickEditPresenter(object):
 
     def get_selection(self):
         name = self.widget.current_selection()
-        print("baa",name)
+        print("baa",name, self.all())
         if name == "All":
             return self.all()
         return [name]

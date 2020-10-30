@@ -27,6 +27,7 @@ class PlottingContext(object):
         self._default_xlim = [-0.1,0.1]
         self._default_ylim = [-10,10]
 
+
     def set_defaults(self, default_xlim:List[float], default_ylim:List[float]):
         self._default_xlim = default_xlim
         self._default_ylim = default_ylim
@@ -38,10 +39,15 @@ class PlottingContext(object):
     def default_ylims(self):
         return self._default_ylim
 
-    def add_subplot(self, name:str):
+    def add_subplot(self, name:str, index:int):
         self._subplots[name] = PlotEditContext()
-        self._subplots[name].set_xlim(self._default_xlim)
-        self._subplots[name].set_ylim(self._default_ylim)
+        self._subplots[name].update_xlim(self._default_xlim)
+        self._subplots[name].update_ylim(self._default_ylim)
+        self._subplots[name].set_axis(index)
+
+    def clear_subplots(self):
+        for name in list(self._subplots.keys()):
+            del self._subplots[name]
 
     def remove_subplot(self,name:str):
         if name not in list(self._subplots.keys()):
@@ -103,3 +109,12 @@ class PlottingContext(object):
     @property
     def get_subplot_names()->List[str]:
         return list(self._subplots.keys())
+
+    def get_axis(self, name:str)->int:
+        return self._subplots[name].axis
+
+    def update_axis(self,name:str, index:int):
+        if name not in self._subplots.keys():
+            self.add_subplot(name, index)
+        else:
+            self._subplots[name].set_axis(index)

@@ -67,10 +67,7 @@ class QuickEditWidget(object):
         return self._presenter.all()
 
     def get_selection(self):
-        name = self._presenter.widget.current_selection()
-        if name == "All":
-            return self.get_subplots()
-        return [name]
+        return self._presenter.get_selection()
 
     def set_plot_x_range(self, range):
         self._presenter.set_plot_x_range(range)
