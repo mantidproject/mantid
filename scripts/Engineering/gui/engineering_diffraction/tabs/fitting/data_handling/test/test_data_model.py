@@ -8,7 +8,7 @@ import unittest
 
 from unittest import mock
 from unittest.mock import patch
-from numpy import isnan
+from numpy import isnan, nan
 from Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model import FittingDataModel
 
 file_path = "Engineering.gui.engineering_diffraction.tabs.fitting.data_handling.data_model"
@@ -330,12 +330,12 @@ class TestFittingDataModel(unittest.TestCase):
             'Error': [1.0, 10.0, 2.0, 1.0, 10.0, 2.0, 0.0]}
         mock_ads.retrieve.return_value = mock_table
         func_str = 'name=Gaussian,Height=11,PeakCentre=38837,Sigma=54;name=Gaussian,Height=10,PeakCentre=33638,Sigma=51'
-        results_dict = {'name': 'Fit', 'properties': {'ConvolveMembers': True, 'EndX': 52000,
-                                                      'Function': func_str,
-                                                      'InputWorkspace': "name1", 'Output': "name1",
-                                                      'OutputCompositeMembers': True, 'StartX': 50000}, 'version': 1}
+        fitprop = {'name': 'Fit', 'properties': {'ConvolveMembers': True, 'EndX': 52000,
+                                                 'Function': func_str,
+                                                 'InputWorkspace': "name1", 'Output': "name1",
+                                                 'OutputCompositeMembers': True, 'StartX': 50000}, 'version': 1}
 
-        self.model.update_fit(results_dict)
+        self.model.update_fit([fitprop])
 
         self.assertEqual(self.model._fit_results['name1']['model'], func_str)
         self.assertEqual(self.model._fit_results['name1']['results'], {'Gaussian_Height': [[11.0, 1.0], [10.0, 1.0]],
@@ -345,11 +345,7 @@ class TestFittingDataModel(unittest.TestCase):
                                                                                           [51.0, 2.0]]})
         mock_create_fit_tables.assert_called_once()
 
-    @patch(file_path + '.FittingDataModel.write_table_row')
-    @patch(file_path + ".GroupWorkspaces")
-    @patch(file_path + ".CreateEmptyTableWorkspace")
-    @patch(file_path + ".CreateWorkspace")
-    def test_create_fit_tables(self, mock_create_ws, mock_create_table, mock_groupws, mock_writerow):
+    def setup_test_create_fit_tables(self, mock_create_ws, mock_create_table, mock_groupws):
         mock_ws_list = [mock.MagicMock(), mock.MagicMock(), mock.MagicMock()]
         mock_create_ws.side_effect = mock_ws_list
         mock_create_table.return_value = mock.MagicMock()
@@ -365,16 +361,29 @@ class TestFittingDataModel(unittest.TestCase):
                                                         'Gaussian_PeakCentre': [[38837.0, 10.0],
                                                                                 [33638.0, 10.0]],
                                                         'Gaussian_Sigma': [[54.0, 2.0],
-                                                                           [51.0, 2.0]]}}
+                                                                           [51.0, 2.0]]},
+                                            'costFunction': 1.0}
+        return mock_ws_list, mock_create_table, mock_create_ws
+
+    @patch(file_path + '.FittingDataModel.write_table_row')
+    @patch(file_path + ".GroupWorkspaces")
+    @patch(file_path + ".CreateEmptyTableWorkspace")
+    @patch(file_path + ".CreateWorkspace")
+    def test_create_fit_tables(self, mock_create_ws, mock_create_table, mock_groupws, mock_writerow):
+        mock_ws_list, mock_create_table, mock_create_ws = self.setup_test_create_fit_tables(mock_create_ws,
+                                                                                            mock_create_table,
+                                                                                            mock_groupws)
 
         self.model.create_fit_tables()
 
         # test the workspaces were created and added to fit_workspaces
         self.assertEqual(self.model._fit_workspaces, mock_ws_list + [mock_create_table.return_value])
         # test the table stores the correct function strings (empty string if no function present)
-        mock_writerow.assert_any_call(mock_create_table.return_value, ['name1', func_str], 0)
-        mock_writerow.assert_any_call(mock_create_table.return_value, ['', ''], 1)  # name2 has no entry in fit_results
-        # check the matrix workspaces corresponding to the fit parametes
+        mock_writerow.assert_any_call(mock_create_table.return_value,
+                                      ['name1', self.model._fit_results['name1']['costFunction'],
+                                       self.model._fit_results['name1']['model']], 0)
+        mock_writerow.assert_any_call(mock_create_table.return_value, ['', nan, ''], 1)  # name2 has no entry
+        # check the matrix workspaces corresponding to the fit parameters
         ws_names = [mock_create_ws.mock_calls[iws][2]['OutputWorkspace'] for iws in range(0, 3)]  # 3 params in gauss
         self.assertEqual(sorted(ws_names), sorted(self.model._fit_results['name1']['results'].keys()))
         # check the first call to setY and setE for one of the parameters
@@ -397,41 +406,71 @@ class TestFittingDataModel(unittest.TestCase):
     @patch(file_path + ".CreateEmptyTableWorkspace")
     @patch(file_path + ".CreateWorkspace")
     def test_create_fit_tables_different_funcs(self, mock_create_ws, mock_create_table, mock_groupws, mock_writerow):
-        mock_ws_list = [mock.MagicMock(), mock.MagicMock(), mock.MagicMock(), mock.MagicMock()]
-        mock_create_ws.side_effect = mock_ws_list
-        mock_create_table.return_value = mock.MagicMock()
-        mock_groupws.side_effect = lambda wslist, OutputWorkspace: wslist
-        # setup fit results
-        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws}
-        self.model._log_workspaces = mock.MagicMock()
-        self.model._log_workspaces.name.return_value = 'some_log'
-        func_str1 = 'name=Gaussian,Height=11,PeakCentre=38837,Sigma=54;name=Gaussian,Height=10,PeakCentre=33638,Sigma=51'
-        self.model._fit_results = dict()
-        self.model._fit_results['name1'] = {'model': func_str1,
-                                            'results': {'Gaussian_Height': [[11.0, 1.0], [10.0, 1.0]],
-                                                        'Gaussian_PeakCentre': [[38837.0, 10.0],
-                                                                                [33638.0, 10.0]],
-                                                        'Gaussian_Sigma': [[54.0, 2.0],
-                                                                           [51.0, 2.0]]}}
-        func_str2 = func_str1 + ';name=FlatBackground,A0=1'
+        mock_ws_list, mock_create_table, mock_create_ws = self.setup_test_create_fit_tables(mock_create_ws,
+                                                                                            mock_create_table,
+                                                                                            mock_groupws)
+        mock_ws_list.append(mock.MagicMock())  # adding an additional parameter into model for name2
+        func_str2 = self.model._fit_results['name1']['model'] + ';name=FlatBackground,A0=1'
         self.model._fit_results['name2'] = {'model': func_str2,
                                             'results': dict(self.model._fit_results['name1']['results'],
-                                                            FlatBackground_A0=[[1.0, 0.1]])}
+                                                            FlatBackground_A0=[[1.0, 0.1]]),
+                                            'costFunction': 2.0}
 
         self.model.create_fit_tables()
 
         # test the workspaces were created and added to fit_workspaces
         self.assertEqual(self.model._fit_workspaces, mock_ws_list + [mock_create_table.return_value])
         # test the table stores the correct function strings (empty string if no function present)
-        mock_writerow.assert_any_call(mock_create_table.return_value, ['name1', func_str1], 0)
-        mock_writerow.assert_any_call(mock_create_table.return_value, ['name2', func_str2], 1)
-        # check the matrix workspaces corresponding to the fit parametes
+        mock_writerow.assert_any_call(mock_create_table.return_value,
+                                      ['name1', self.model._fit_results['name1']['costFunction'],
+                                       self.model._fit_results['name1']['model']], 0)
+        mock_writerow.assert_any_call(mock_create_table.return_value,
+                                      ['name2', self.model._fit_results['name2']['costFunction'],
+                                       self.model._fit_results['name2']['model']], 1)
+        # check the matrix workspaces corresponding to the fit parameters
         ws_names = [mock_create_ws.mock_calls[iws][2]['OutputWorkspace'] for iws in range(0, 4)]  # 4 unique params
         # get list of all unique params across both models
         param_names = list(set(list(self.model._fit_results['name1']['results'].keys()) + list(
             self.model._fit_results['name2']['results'].keys())))
         # test only table for unique parameter
         self.assertEqual(sorted(ws_names), sorted(param_names))
+
+    @patch(file_path + '.get_setting')
+    @patch(file_path + '.ADS')
+    def test_get_ws_sorted_by_primary_log_ascending(self, mock_ads, mock_getsetting):
+        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws, "name3": self.mock_ws}
+        mock_getsetting.side_effect = ['log', 'true']  # primary log, sort_ascending
+        mock_log_table = mock.MagicMock()
+        mock_log_table.column.return_value = [2, 0, 1]  # fake log values
+        mock_ads.retrieve.return_value = mock_log_table
+
+        ws_list = self.model.get_ws_sorted_by_primary_log()
+
+        self.assertEqual(ws_list, ["name2", "name3", "name1"])
+
+    @patch(file_path + '.get_setting')
+    @patch(file_path + '.ADS')
+    def test_get_ws_sorted_by_primary_log_descending(self, mock_ads, mock_getsetting):
+        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws, "name3": self.mock_ws}
+        mock_getsetting.side_effect = ['log', 'false']  # primary log, sort_ascending
+        mock_log_table = mock.MagicMock()
+        mock_log_table.column.return_value = [2, 0, 1]  # fake log values
+        mock_ads.retrieve.return_value = mock_log_table
+
+        ws_list = self.model.get_ws_sorted_by_primary_log()
+
+        self.assertEqual(ws_list, ["name1", "name3", "name2"])
+
+    @patch(file_path + '.get_setting')
+    @patch(file_path + '.ADS')
+    def test_get_ws_sorted_by_primary_log_not_specified(self, mock_ads, mock_getsetting):
+        self.model._loaded_workspaces = {"name1": self.mock_ws, "name2": self.mock_ws, "name3": self.mock_ws}
+        mock_getsetting.side_effect = ['', 'false']  # primary log, sort_ascending
+
+        ws_list = self.model.get_ws_sorted_by_primary_log()
+
+        self.assertEqual(ws_list, list(self.model._loaded_workspaces.keys())[::-1])
+        mock_ads.retrieve.assert_not_called()
 
 
 if __name__ == '__main__':

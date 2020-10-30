@@ -45,10 +45,20 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+
+Bugfixes
+############
+- Settings are now saved only when the Apply or OK button are clicked (i.e. clicking cancel will not update the settings).
+
+Improvements
+############
+- The user is no longer asked to overwrite an automatically generated model that is saved in as a Custom Setup in the fit browser (it is overwritten).
+
 New features
 ############
 - When a fit is successful the model will be stored as a Custom Setup in the fit property browser under the name of the workspace fitted. 
-- The fitting tab now creates a group of workspaces that store the model string and  the fit value and error of parameters of the model for each loaded workspace.
+- The fitting tab now creates a group of workspaces that store the model string and the fit value and error of parameters of the model for each loaded workspace.
+- Sequential fitting of workspaces now provided in fitting tab by average value of a log set in settings.
 
 Single Crystal Diffraction
 --------------------------

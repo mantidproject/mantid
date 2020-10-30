@@ -120,6 +120,14 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
             ax.autoscale()
         self.update_figure()
 
+    def read_fitprop_from_browser(self):
+        return self.fit_browser.read_current_fitprop()
+
+    def update_browser_setup(self, func_str, setup_name):
+        # update browser with output function and save setup
+        self.fit_browser.loadFunction(func_str)
+        self.fit_browser.save_current_setup(setup_name)
+
     # =================
     # Component Getters
     # =================

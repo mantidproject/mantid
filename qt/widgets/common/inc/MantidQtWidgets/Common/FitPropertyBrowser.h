@@ -182,6 +182,8 @@ public:
   /// Get the X limits of the workspace
   QVector<double> getXRange();
 
+  /// Get the function as a string
+  std::string getFunctionString() const;
   /// Get the start X
   double startX() const;
   /// Set the start X
@@ -342,6 +344,7 @@ public slots:
   void executeSetupMenu(const QString & /*item*/);
   void executeSetupManageMenu(const QString & /*item*/);
   void workspaceDoubleClicked(QListWidgetItem *item);
+  void executeCustomSetupRemove(const QString &name);
 
 signals:
   void currentChanged() const;
@@ -450,7 +453,6 @@ private slots:
   void processMultiBGResults();
 
   void executeCustomSetupLoad(const QString &name);
-  void executeCustomSetupRemove(const QString &name);
 
   /// Update structure tooltips for all functions
   void updateStructureTooltips();
