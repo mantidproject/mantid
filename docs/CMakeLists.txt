@@ -3,7 +3,7 @@
 # Build options
 option(DOCS_DOTDIAGRAMS "If enabled include workflow diagrams generated with dot" OFF)
 option(DOCS_SCREENSHOTS "If enabled include automatically generated screenshots of interfaces" OFF)
-set(DOCS_MATH_EXT "sphinx.ext.mathjax" CACHE STRING "Sphinx extension to be used for rendering math equations. Default uses mathjax for speed")
+set(DOCS_MATH_EXT "sphinx.ext.imgmath" CACHE STRING "Sphinx extension to be used for rendering math equations in qtassistant. mathjax is used in html.")
 set_property(CACHE DOCS_MATH_EXT PROPERTY STRINGS "sphinx.ext.imgmath" "sphinx.ext.mathjax")
 option(DOCS_PLOTDIRECTIVE "If enabled include plots generated with the plot directive. " OFF)
 option(DOCS_QTHELP "If enabled add a target to build the qthelp documentation" ON)
@@ -45,32 +45,34 @@ endif()
 # Add a sphinx build target to build documentation
 #   builder - Name of the sphinx builder: html, qthelp etc
 #   target_name - Optional target name. Default=docs-${builder}
-function (add_sphinx_build_target builder)
-  set(runner ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidpython)
+function (add_sphinx_build_target builder math_renderer)
+  set(runner ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidpython$<$<BOOL:${WIN32}>:.bat>)
   set(runner_args "--classic")
-  if(ARGC GREATER 1)
-    set(target_name ${ARGV1})
+  if(ARGC GREATER 2)  # the target name is last
+    set(target_name ${ARGV2})
   else()
     set(target_name docs-${builder})
   endif()
+
   set(output_dir ${SPHINX_BUILD_DIR}/${builder})
   if(EXISTS ${SPHINX_CONF_DIR}/conf-${builder}.py)
     set(conf_builder ${SPHINX_CONF_DIR}/conf-${builder}.py)
   endif()
+
   add_custom_target(${target_name}
       COMMAND
         ${CMAKE_COMMAND} -E env
              SCREENSHOTS_DIR=${SCREENSHOTS_DIR}
              DIAGRAMS_DIR=${DIAGRAMS_DIR}
              DOT_EXECUTABLE=${DOT_EXECUTABLE}
-             MATH_EXT=${DOCS_MATH_EXT}
+             MATH_EXT=${math_renderer}
              ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE}
              ${runner} ${runner_args} -m ${SPHINX_MAIN} ${SPHINX_NOCOLOR} -b ${builder} -d ${DOCTREES_DIR} ${SPHINX_CONF_DIR} ${output_dir}
       DEPENDS Framework
               mantidqt
               ${SPHINX_CONF_DIR}/conf.py
               ${conf_builder}
-      COMMENT "Building ${builder} documentation"
+      COMMENT "Building ${builder} documentation using ${math_renderer}"
   )
   # Group within VS and exclude from whole build
   set_target_properties(${target_name}
@@ -81,16 +83,17 @@ function (add_sphinx_build_target builder)
 endfunction()
 
 # Documentation types
-add_sphinx_build_target(html)
-add_sphinx_build_target(doctest)
+add_sphinx_build_target(html "sphinx.ext.mathjax")
+add_sphinx_build_target(doctest "sphinx.ext.mathjax")
 
 # qthelp if building workbench
 if(DOCS_QTHELP AND ENABLE_WORKBENCH)
   find_package(Qt5 COMPONENTS Help REQUIRED)
-  add_sphinx_build_target(qthelp docs-qtassistant)
+  add_sphinx_build_target(qthelp ${DOCS_MATH_EXT} docs-qtassistant)
   add_custom_target(docs-qthelp
                       COMMAND Qt5::qcollectiongenerator qthelp/MantidProject.qhcp
                       COMMENT "Compiling Qt help documentation")
+  #add_dependencies(docs-qthelp ${DOCS_MATH_EXT} docs-qtassistant)
   add_dependencies(docs-qthelp docs-qtassistant)
 endif()
 

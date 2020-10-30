@@ -448,12 +448,36 @@
     <property name="title">
      <string>&amp;Edit</string>
     </property>
-    <addaction name="actionAddRow"/>
-    <addaction name="actionDelRow"/>
-    <addaction name="actionCopyRow"/>
-    <addaction name="actionCutRow"/>
-    <addaction name="actionPasteRow"/>
-    <addaction name="actionErase"/>
+    <widget class="QMenu" name="menuRow_s">
+     <property name="title">
+      <string>Row(s)</string>
+     </property>
+     <addaction name="actionAddRow"/>
+     <addaction name="actionDelRow"/>
+     <addaction name="actionCopyRow"/>
+     <addaction name="actionCutRow"/>
+     <addaction name="actionPasteRow"/>
+    </widget>
+    <widget class="QMenu" name="menuColumns_s">
+     <property name="title">
+      <string>Columns(s)</string>
+     </property>
+     <widget class="QMenu" name="menuAddRemoveColumn">
+      <property name="title">
+       <string>Add/remove column</string>
+      </property>
+     </widget>
+     <addaction name="menuAddRemoveColumn"/>
+    </widget>
+    <widget class="QMenu" name="menuCell_s">
+     <property name="title">
+      <string>Cell(s)</string>
+     </property>
+     <addaction name="actionErase"/>
+    </widget>
+    <addaction name="menuColumns_s"/>
+    <addaction name="menuRow_s"/>
+    <addaction name="menuCell_s"/>
    </widget>
    <widget class="QMenu" name="menuProcess_2">
     <property name="title">
@@ -539,7 +563,7 @@
   </action>
   <action name="actionErase">
    <property name="text">
-    <string>Erase seleced cell(s)</string>
+    <string>Erase selected cell(s)</string>
    </property>
   </action>
   <action name="actionAddRow">
@@ -571,6 +595,11 @@
   <action name="actionHelp">
    <property name="text">
     <string>DrILL help</string>
+   </property>
+  </action>
+  <action name="actiona">
+   <property name="text">
+    <string>a</string>
    </property>
   </action>
  </widget>

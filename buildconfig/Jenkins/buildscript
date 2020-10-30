@@ -264,7 +264,7 @@ fi
 # Packaging options
 ###############################################################################
 if [[ ${DO_BUILD_PKG} == true ]]; then
-    PACKAGINGVARS="-DPACKAGE_DOCS=ON -DDOCS_DIAGRAMS=ON -DDOCS_SCREENSHOTS=ON -DDOCS_MATHEXT=sphinx.ext.imgmath -DDOCS_PLOTDIRECTIVE=ON"
+    PACKAGINGVARS="-DPACKAGE_DOCS=ON -DDOCS_DOTDIAGRAMS=ON -DDOCS_SCREENSHOTS=ON -DDOCS_MATH_EXT=sphinx.ext.imgmath -DDOCS_PLOTDIRECTIVE=ON"
     # Set some variables relating to the linux packages
     if [[ "${ON_MACOS}" == true ]]; then
         PACKAGINGVARS="${PACKAGINGVARS} -DCPACK_PACKAGE_SUFFIX="

@@ -10,7 +10,7 @@
 import unittest
 import testhelpers
 import platform
-from mantid.simpleapi import CreateWorkspace, EvaluateFunction, Fit, FitDialog 
+from mantid.simpleapi import CreateWorkspace, EvaluateFunction, Fit
 from mantid.simpleapi import FunctionWrapper, CompositeFunctionWrapper, ProductFunctionWrapper, ConvolutionWrapper, MultiDomainFunctionWrapper 
 from mantid.simpleapi import Gaussian, LinearBackground, Polynomial, MultiDomainFunction, Convolution, ProductFunction,\
     CompositeFunction, IFunction1D, FunctionFactory, Fit

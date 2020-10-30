@@ -13,7 +13,21 @@ from testhelpers import (assertRaisesNothing, create_algorithm)
 
 
 class GetFakeLiveInstrumentValue(DataProcessorAlgorithm):
+    """Fake algorithm that simulates getting values from an instrument for known
+    block names"""
+    def __init__(self):
+        super(GetFakeLiveInstrumentValue, self).__init__()
+        self._theta_name = 'THETA'
+        self._s1vg_name = 'S1VG'
+        self._s2vg_name = 'S2VG'
+
     def PyInit(self):
+        self._declare_properties()
+
+    def PyExec(self):
+        self._do_execute()
+
+    def _declare_properties(self):
         self.declareProperty(name='Instrument', defaultValue='', direction=Direction.Input,
                              validator=StringListValidator(['CRISP', 'INTER', 'OFFSPEC', 'POLREF', 'SURF']),
                              doc='Instrument to find live value for.')
@@ -29,18 +43,57 @@ class GetFakeLiveInstrumentValue(DataProcessorAlgorithm):
         self.declareProperty(name='Value', defaultValue='', direction=Direction.Output,
                              doc='The live value from the instrument, or an empty string if not found')
 
-    def PyExec(self):
+    def _do_execute(self):
         propertyName = self.getProperty('PropertyName').value
-        if propertyName == 'Theta':
+        if propertyName == self._theta_name:
             self.setProperty('Value', '0.5')
-        elif propertyName == 'S1VG':
+        elif propertyName == self._s1vg_name:
             self.setProperty('Value', '1.001')
-        elif propertyName == 'S2VG':
+        elif propertyName == self._s2vg_name:
             self.setProperty('Value', '0.5')
         else:
             raise RuntimeError('Requested live value for unexpected property name ' + propertyName)
 
+
 AlgorithmFactory.subscribe(GetFakeLiveInstrumentValue)
+
+
+class GetFakeLiveInstrumentValueAlternativeNames(GetFakeLiveInstrumentValue):
+    """Fake algorithm that simulates getting values from an instrument for
+    alternative block names"""
+    def __init__(self):
+        super(GetFakeLiveInstrumentValueAlternativeNames, self).__init__()
+        self._theta_name = 'Theta'
+        self._s1vg_name = 's1vg'
+        self._s2vg_name = 's2vg'
+
+    def PyInit(self):
+        self._declare_properties()
+
+    def PyExec(self):
+        self._do_execute()
+
+
+AlgorithmFactory.subscribe(GetFakeLiveInstrumentValueAlternativeNames)
+
+
+class GetFakeLiveInstrumentValuesInvalidNames(GetFakeLiveInstrumentValue):
+    """Fake algorithm that simulates a failure when attempting to get values from
+    an instrument for invalid block names"""
+    def __init__(self):
+        super(GetFakeLiveInstrumentValuesInvalidNames, self).__init__()
+        self._theta_name = 'badTheta'
+        self._s1vg_name = 'bads1vg'
+        self._s2vg_name = 'bads2vg'
+
+    def PyInit(self):
+        self._declare_properties()
+
+    def PyExec(self):
+        self._do_execute()
+
+
+AlgorithmFactory.subscribe(GetFakeLiveInstrumentValuesInvalidNames)
 
 
 class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
@@ -109,7 +162,7 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
     def test_sample_log_values_were_set_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
 
-        names = ['Theta', 'S1VG', 'S2VG']
+        names = ['THETA', 'S1VG', 'S2VG']
         values = [0.5, 1.001, 0.5]
         units = ['deg', 'm', 'm']
         logs = workspace.getRun().getProperties()
@@ -121,6 +174,30 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
                 self.assertEqual(log.value, values[idx])
                 self.assertEqual(log.units, units[idx])
         self.assertEqual(sorted(matched_names), sorted(names))
+
+    def test_sample_log_values_were_set_on_output_workspace_for_alternative_block_names(self):
+        workspace = self._run_algorithm_with_alternative_names()
+
+        expected_names = ['THETA', 'S1VG', 'S2VG']
+        expected_values = [0.5, 1.001, 0.5]
+        expected_units = ['deg', 'm', 'm']
+        actual_logs = workspace.getRun().getProperties()
+        matched_names = list()
+        for log in actual_logs:
+            if log.name in expected_names:
+                matched_names.append(log.name)
+                idx = expected_names.index(log.name)
+                self.assertEqual(log.value, expected_values[idx])
+                self.assertEqual(log.units, expected_units[idx])
+        self.assertEqual(sorted(matched_names), sorted(expected_names))
+
+    def test_algorithm_fails_for_invalid_block_names(self):
+        self.assertRaises(RuntimeError,
+                          ReflectometryReductionOneLiveData,
+                          InputWorkspace=self.__class__._input_ws,
+                          OutputWorkspace='output',
+                          Instrument='INTER',
+                          GetLiveValueAlgorithm='GetFakeLiveInstrumentValueInvalidNames')
 
     def test_slits_gaps_are_set_up_on_output_workspace(self):
         workspace = self._run_algorithm_with_defaults()
@@ -174,6 +251,13 @@ class ReflectometryReductionOneLiveDataTest(unittest.TestCase):
 
     def _run_algorithm_with_defaults(self):
         alg = create_algorithm('ReflectometryReductionOneLiveData', **self._default_args)
+        assertRaisesNothing(self, alg.execute)
+        return mtd['output']
+
+    def _run_algorithm_with_alternative_names(self):
+        args = self._default_args
+        args['GetLiveValueAlgorithm'] = 'GetFakeLiveInstrumentValueAlternativeNames'
+        alg = create_algorithm('ReflectometryReductionOneLiveData', **args)
         assertRaisesNothing(self, alg.execute)
         return mtd['output']
 

@@ -66,7 +66,7 @@ Usage
         Material={"ChemicalFormula": "La-(B11)5.94-(B10)0.06", "SampleNumberDensity": 0.1},
         ContainerGeometry={"Shape": 'HollowCylinder', 'Height': 5.68, 'InnerRadius': 0.295, 'OuterRadius': 0.315},
         ContainerMaterial={"ChemicalFormula": "V", "SampleNumberDensity": 0.0721})
-    abs = AbsorptionCorrectionPaalmanPings(ws)
+    abs = PaalmanPingsAbsorptionCorrection(ws)
     for a in ["ass", "assc", "acc", "acsc"]:
         print("{:4} {:.4f}(θ=10) {:.4f}(θ=90) {:.4f}(θ=170) {:.4f}(θ=90,φ=45)".format(a, *(mtd["abs_"+a].readY(i)[0] for i in range(4))))
 

@@ -434,12 +434,14 @@ namespace CxxTest
     // TS_ASSERT_THROWS_ASSERT
 #   define ___TS_ASSERT_THROWS_ASSERT(f,l,e,t,a,m) { \
             bool _ts_threw_expected = false, _ts_threw_else = false; \
+            NODISCARD_WARNING_OFF \
             _TS_TRY { e; } \
             _TS_CATCH_TYPE( (t), { a; _ts_threw_expected = true; } ) \
             _TS_CATCH_ABORT( { throw; } ) \
             _TS_CATCH_STD( ex, { _ts_threw_expected = true; CxxTest::doFailAssertThrows((f), (l), #e, #t, true, (m), ex.what() ); } ) \
             _TS_LAST_CATCH( { _ts_threw_else = true; } ) \
-            if ( !_ts_threw_expected ) { CxxTest::doFailAssertThrows( (f), (l), #e, #t, _ts_threw_else, (m), 0 ); } }
+            if ( !_ts_threw_expected ) { CxxTest::doFailAssertThrows( (f), (l), #e, #t, _ts_threw_else, (m), 0 ); } } \
+            NODISCARD_WARNING_ON
 
 #   define _TS_ASSERT_THROWS_ASSERT(f,l,e,t,a) ___TS_ASSERT_THROWS_ASSERT(f,l,e,t,a,0)
 #   define TS_ASSERT_THROWS_ASSERT(e,t,a) _TS_ASSERT_THROWS_ASSERT(__FILE__,__LINE__,e,t,a)
@@ -494,10 +496,12 @@ namespace CxxTest
 
     // TS_ASSERT_THROWS_NOTHING
 #   define ___TS_ASSERT_THROWS_NOTHING(f,l,e,m) { \
+            NODISCARD_WARNING_OFF \
             _TS_TRY { e; } \
             _TS_CATCH_ABORT( { throw; } ) \
             _TS_CATCH_STD(ex, { CxxTest::doFailAssertThrowsNot( (f), (l), #e, (m), ex.what() ); } ) \
-            _TS_LAST_CATCH( { CxxTest::doFailAssertThrowsNot( (f), (l), #e, (m), 0 ); } ) }
+            _TS_LAST_CATCH( { CxxTest::doFailAssertThrowsNot( (f), (l), #e, (m), 0 ); } ) } \
+            NODISCARD_WARNING_ON
 
 #   define _TS_ASSERT_THROWS_NOTHING(f,l,e) ___TS_ASSERT_THROWS_NOTHING(f,l,e,0)
 #   define TS_ASSERT_THROWS_NOTHING(e) _TS_ASSERT_THROWS_NOTHING(__FILE__,__LINE__,e)
@@ -585,6 +589,26 @@ namespace CxxTest
 #ifdef __INTEL_COMPILER
   #pragma warning disable 68
 #endif
+
+// Disable nodiscard warnings : This is necessary for tests using TS_ASSERT_..THORWS..,
+// Where the return value is inherently discarded. For functions marked as no discard
+// this will cause a compiler warning
+// clang format off
+#if defined(_MSC_VER)
+#define NODISCARD_WARNING_OFF                                                  \
+  __pragma(warning(push)) __pragma(warning(disable : 4834))
+#define NODISCARD_WARNING_ON __pragma(warning(pop))
+#elif defined(__clang__) || defined(__GNUC__)
+#define DO_PRAGMA(x) _Pragma(#x)
+#define NODISCARD_WARNING_OFF                                                  \
+  DO_PRAGMA(GCC diagnostic push)                                               \
+  DO_PRAGMA(GCC diagnostic ignored "-Wunused-result")
+#define NODISCARD_WARNING_ON DO_PRAGMA(GCC diagnostic pop)
+#else
+#define NODISCARD_WARNING_OFF
+#define NODISCARD_WARNING_ON
+#endif
+// clang-format on
 
 // Copyright 2008 Sandia Corporation. Under the terms of Contract
 // DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government

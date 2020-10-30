@@ -8,6 +8,7 @@
 #
 #
 import datetime
+from itertools import tee
 
 import numpy as np
 from matplotlib.collections import PolyCollection, QuadMesh
@@ -466,7 +467,7 @@ def common_x(arr):
 
 
 def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, transpose=False,
-                         extent=None, xbins=100, ybins=100, spec_info=None):
+                         extent=None, xbins=100, ybins=100, spec_info=None, maxpooling=False):
     if spec_info is None:
         try:
             spec_info = workspace.spectrumInfo()
@@ -513,7 +514,8 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
         x_centers = mantid.plots.datafunctions.points_from_boundaries(x_edges)
         y = np.linspace(y_low, y_high, int(ybins))
 
-    counts = interpolate_y_data(workspace, x_centers, y, normalize_by_bin_width, spectrum_info=spec_info)
+    counts = interpolate_y_data(workspace, x_centers, y, normalize_by_bin_width, spectrum_info=spec_info,
+                                maxpooling=maxpooling)
 
     if histogram2D and extent is not None:
         x = x_edges
@@ -528,16 +530,47 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
         return x, y, counts
 
 
-def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=None):
-    counts = np.full([y.size, x.size], np.nan, dtype=np.float64)
-    previous_index = -1
-    index = -1
-    for y_value in y:
-        index += 1
+def pairwise(iterable):
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
+
+def _workspace_indices(y_bins, workspace):
+    workspace_indices = []
+    for y in y_bins:
         try:
-            workspace_index = int(workspace.getAxis(1).indexOfValue(y_value))
+            workspace_index = workspace.getAxis(1).indexOfValue(y)
+            workspace_indices.append(workspace_index)
         except IndexError:
             continue
+    return workspace_indices
+
+
+def _workspace_indices_maxpooling(y_bins, workspace):
+    from mantid.simpleapi import Integration
+    summed_spectra_workspace = Integration(workspace)
+    summed_spectra = summed_spectra_workspace.extractY()
+    workspace_indices = []
+    for y_range in pairwise(y_bins):
+        try:
+            workspace_range = range(workspace.getAxis(1).indexOfValue(np.math.floor(y_range[0])),
+                                    workspace.getAxis(1).indexOfValue(np.math.ceil(y_range[1])))
+            workspace_index = workspace_range[np.argmax(summed_spectra[workspace_range])]
+            workspace_indices.append(workspace_index)
+        except IndexError:
+            continue
+    return workspace_indices
+
+
+def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=None, maxpooling=False):
+    workspace_indices = _workspace_indices_maxpooling(y, workspace) \
+        if maxpooling else _workspace_indices(y, workspace)
+    counts = np.full([len(workspace_indices), x.size], np.nan, dtype=np.float64)
+    previous_index = -1
+    index = -1
+    for workspace_index in workspace_indices:
+        index += 1
         # avoid repeating calculations
         if previous_index == workspace_index:
             counts[index, :] = counts[index - 1]
