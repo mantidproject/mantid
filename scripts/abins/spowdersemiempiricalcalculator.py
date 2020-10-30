@@ -230,9 +230,14 @@ class SPowderSemiEmpiricalCalculator:
         """
         self._prepare_data(k_point=q_indx)
 
-        return {f"atom_{atom_index}":
-                {"s": self._calculate_s_powder_one_atom(atom=atom_index, report_progress=True)}
-                for atom_index in range(self._num_atoms)}
+        s_by_atom = {}
+
+        for atom_index in range(self._num_atoms):
+            s_by_atom[f"atom_{atom_index}"] = {"s": self._calculate_s_powder_one_atom(atom=atom_index,
+                                                                                      q_index=q_indx)}
+            self._report_progress(msg=f"S for atom {atom_index} has been calculated at qpt {q_indx}.",
+                                  reporter=self.progress_reporter)
+        return s_by_atom
 
     def _prepare_data(self, k_point=None):
         """
@@ -294,10 +299,9 @@ class SPowderSemiEmpiricalCalculator:
 
         logger.information(msg)
 
-    def _calculate_s_powder_one_atom(self, atom=None, report_progress=False):
+    def _calculate_s_powder_one_atom(self, atom=None, q_index=None):
         """
         :param atom: number of atom
-        :param report_progress: Write to logger after calculating data
 
         :returns: s, and corresponding frequencies for all quantum events taken into account
         """
@@ -329,18 +333,12 @@ class SPowderSemiEmpiricalCalculator:
 
                         s["order_%s" % lg_order] += part_broad_spectrum
 
-                return s
-
             # if relatively small array of transitions then process it in one shot
             else:
 
                 local_freq, local_coeff, s["order_%s" % order] = self._helper_atom(
                     atom=atom, local_freq=local_freq, local_coeff=local_coeff,
                     fundamentals_freq=self._fundamentals_freq, fund_coeff=fund_coeff, order=order)
-
-        if report_progress:
-            self._report_progress(msg=f"S for atom {atom} has been calculated.", reporter=self.progress_reporter)
-
         return s
 
     def _prepare_chunks(self, local_freq=None, order=None, s=None):
