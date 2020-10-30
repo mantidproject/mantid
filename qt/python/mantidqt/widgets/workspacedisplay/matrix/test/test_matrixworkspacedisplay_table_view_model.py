@@ -103,10 +103,9 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
     def test_row_and_column_count(self):
         ws = MockWorkspace()
         model_type = MatrixWorkspaceTableViewModelType.x
-        model = MatrixWorkspaceTableViewModel(ws, model_type)
+        MatrixWorkspaceTableViewModel(ws, model_type)
         # these are called when the TableViewModel is initialised
         ws.getNumberHistograms.assert_called()
-        model.get_max_column_count.assert_called_once()
 
     def test_data_background_role_masked_row(self):
         ws, model, row, index = setup_common_for_test_data()
@@ -134,7 +133,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
 
         # assert that the row was called twice with no parameters
         self.assertEqual(2, index.row.call_count)
-        self.assertFalse(index.column.called)
+        self.assertEqual(2, index.column.call_count)
 
     def test_data_background_role_monitor_row(self):
         ws, model, row, index = setup_common_for_test_data()
@@ -167,7 +166,7 @@ class MatrixWorkspaceDisplayTableViewModelTest(unittest.TestCase):
 
         # assert that the row was called twice with no parameters
         self.assertEqual(2, index.row.call_count)
-        self.assertFalse(index.column.called)
+        self.assertEqual(2, index.column.call_count)
 
     def test_data_background_role_masked_bin(self):
         ws, model, row, index = setup_common_for_test_data()
