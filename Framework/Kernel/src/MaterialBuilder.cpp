@@ -29,8 +29,8 @@ inline bool isEmpty(const boost::optional<double> &value) {
  */
 MaterialBuilder::MaterialBuilder()
     : m_name(), m_formula(), m_atomicNo(), m_massNo(0), m_numberDensity(),
-      m_zParam(), m_cellVol(), m_massDensity(), m_totalXSection(),
-      m_cohXSection(), m_incXSection(), m_absSection(),
+      m_packingFraction(), m_zParam(), m_cellVol(), m_massDensity(),
+      m_totalXSection(), m_cohXSection(), m_incXSection(), m_absSection(),
       m_numberDensityUnit(NumberDensityUnit::Atoms) {}
 
 /**
@@ -107,7 +107,8 @@ MaterialBuilder &MaterialBuilder::setMassNumber(int massNumber) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setNumberDensity(double rho) {
-  m_numberDensity = rho;
+  if (rho != Mantid::EMPTY_DBL())
+    m_numberDensity = rho;
   return *this;
 }
 
@@ -122,15 +123,34 @@ MaterialBuilder &MaterialBuilder::setNumberDensityUnit(NumberDensityUnit unit) {
 }
 
 /**
+ * Set the effective number density of the sample in atoms or formula units /
+ * Angstrom^3
+ * @param rho_eff effective density of the sample in atoms or formula units /
+ * Angstrom^3
+ * @return A reference to the this object to allow chaining
+ */
+MaterialBuilder &MaterialBuilder::setEffectiveNumberDensity(double rho_eff) {
+  if (rho_eff != Mantid::EMPTY_DBL())
+    m_numberDensityEff = rho_eff;
+  return *this;
+}
+
+/**
+ * Set the packing fraction of the material (default is 1). This is used to
+ * infer the effective number density
+ */
+MaterialBuilder &MaterialBuilder::setPackingFraction(double fraction) {
+  if (fraction != Mantid::EMPTY_DBL())
+    m_packingFraction = fraction;
+  return *this;
+}
+
+/**
  * Set the number of formula units in the unit cell
  * @param zparam Number of formula units
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setZParameter(double zparam) {
-  if (m_massDensity) {
-    throw std::runtime_error("MaterialBuilder::setZParameter() - Mass density "
-                             "already set, cannot use Z parameter as well.");
-  }
   m_zParam = zparam;
   return *this;
 }
@@ -141,11 +161,6 @@ MaterialBuilder &MaterialBuilder::setZParameter(double zparam) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setUnitCellVolume(double cellVolume) {
-  if (m_massDensity) {
-    throw std::runtime_error(
-        "MaterialBuilder::setUnitCellVolume() - Mass density "
-        "already set, cannot use unit cell volume as well.");
-  }
   m_cellVol = cellVolume;
   return *this;
 }
@@ -156,15 +171,6 @@ MaterialBuilder &MaterialBuilder::setUnitCellVolume(double cellVolume) {
  * @return A reference to the this object to allow chaining
  */
 MaterialBuilder &MaterialBuilder::setMassDensity(double massDensity) {
-  if (m_zParam) {
-    throw std::runtime_error("MaterialBuilder::setMassDensity() - Z parameter "
-                             "already set, cannot use mass density as well.");
-  }
-  if (m_cellVol) {
-    throw std::runtime_error(
-        "MaterialBuilder::setMassDensity() - Unit cell "
-        "volume already set, cannot use mass density as well.");
-  }
   m_massDensity = massDensity;
   return *this;
 }
@@ -249,13 +255,18 @@ Material MaterialBuilder::build() const {
                              "density.");
   }
 
-  const double density = getOrCalculateRho(formula);
+  const auto density_struct = getOrCalculateRhoAndPacking(formula);
+
   std::unique_ptr<Material> material;
   if (hasOverrideNeutronProperties()) {
     PhysicalConstants::NeutronAtom neutron = generateCustomNeutron();
-    material = std::make_unique<Material>(m_name, neutron, density);
+    material = std::make_unique<Material>(m_name, neutron,
+                                          density_struct.number_density,
+                                          density_struct.packing_fraction);
   } else {
-    material = std::make_unique<Material>(m_name, formula, density);
+    material = std::make_unique<Material>(m_name, formula,
+                                          density_struct.number_density,
+                                          density_struct.packing_fraction);
   }
   if (m_attenuationProfileFileName) {
     AttenuationProfile materialAttenuation(m_attenuationProfileFileName.get(),
@@ -287,41 +298,98 @@ MaterialBuilder::createCompositionFromAtomicNumber() const {
  * @param formula The chemical formula to calculate the number density from
  * @return The number density in atoms / Angstrom^3
  */
-double MaterialBuilder::getOrCalculateRho(
+MaterialBuilder::density_packing MaterialBuilder::getOrCalculateRhoAndPacking(
     const Material::ChemicalFormula &formula) const {
-  double density;
-  if (m_numberDensity && m_numberDensityUnit == NumberDensityUnit::Atoms) {
-    density = m_numberDensity.get();
-  } else {
-    const double totalNumAtoms =
-        std::accumulate(formula.cbegin(), formula.cend(), 0.,
-                        [](double n, const Material::FormulaUnit &f) {
-                          return n + f.multiplicity;
-                        });
-    if (m_numberDensity &&
-        m_numberDensityUnit == NumberDensityUnit::FormulaUnits) {
-      density = m_numberDensity.get() * totalNumAtoms;
-    } else if (m_zParam && m_cellVol) {
-      density = totalNumAtoms * m_zParam.get() / m_cellVol.get();
-    } else if (m_massDensity) {
-      // g / cc -> atoms / Angstrom^3
-      const double rmm =
-          std::accumulate(formula.cbegin(), formula.cend(), 0.,
-                          [](double sum, const Material::FormulaUnit &f) {
-                            return sum + f.atom->mass * f.multiplicity;
-                          });
-      density = (m_massDensity.get() * totalNumAtoms / rmm) *
-                PhysicalConstants::N_A * 1e-24;
-    } else if (!m_formula.empty() && m_formula.size() == 1) {
-      density = m_formula.front().atom->number_density;
-    } else {
-      throw std::runtime_error(
-          "The number density could not be determined. Please "
-          "provide the number density, ZParameter and unit "
-          "cell volume or mass density.");
+  // set packing fraction and both number densities to zero to start
+  density_packing result{0., 0., 0.};
+
+  // get the packing fraction
+  if (m_packingFraction)
+    result.packing_fraction = m_packingFraction.get();
+
+  // if effective density has been specified
+  if (m_numberDensityEff)
+    result.effective_number_density = m_numberDensityEff.get();
+
+  // total number of atoms is used in both density calculations
+  const double totalNumAtoms =
+      std::accumulate(formula.cbegin(), formula.cend(), 0.,
+                      [](double n, const Material::FormulaUnit &f) {
+                        return n + f.multiplicity;
+                      });
+
+  // calculate the number density by one of many ways
+  if (m_numberDensity) {
+    result.number_density = m_numberDensity.get();
+    if (m_numberDensityUnit == NumberDensityUnit::FormulaUnits &&
+        totalNumAtoms > 0.) {
+      result.number_density = m_numberDensity.get() * totalNumAtoms;
     }
+  } else if (m_zParam && m_cellVol) {
+    result.number_density = totalNumAtoms * m_zParam.get() / m_cellVol.get();
+  } else if (!m_formula.empty() && m_formula.size() == 1) {
+    result.number_density = m_formula.front().atom->number_density;
   }
-  return density;
+
+  // calculate the effective number density
+  if (m_massDensity) {
+    // g / cc -> atoms / Angstrom^3
+    const double rmm =
+        std::accumulate(formula.cbegin(), formula.cend(), 0.,
+                        [](double sum, const Material::FormulaUnit &f) {
+                          return sum + f.atom->mass * f.multiplicity;
+                        });
+    result.effective_number_density =
+        (m_massDensity.get() * totalNumAtoms / rmm) * PhysicalConstants::N_A *
+        1e-24;
+  }
+
+  // count the number of values that were set and generate errors
+  int count = 0;
+  if (result.packing_fraction > 0.)
+    count++;
+  if (result.effective_number_density > 0.)
+    count++;
+  if (result.number_density > 0.)
+    count++;
+
+  // use this information to set the "missing" of the 3
+  if (count == 0) {
+    throw std::runtime_error(
+        "The number density could not be determined. Please "
+        "provide the number density, ZParameter and unit "
+        "cell volume or mass density.");
+  } else if (count == 1) {
+    result.packing_fraction = 1.;
+    if (result.number_density > 0.)
+      result.effective_number_density = result.number_density;
+    else if (result.effective_number_density > 0.)
+      result.number_density = result.effective_number_density;
+    else
+      throw std::runtime_error("Must specify the number density in some way");
+  } else if (count == 2) {
+    if (result.number_density > 0.) {
+      if (result.effective_number_density > 0.)
+        result.packing_fraction =
+            result.effective_number_density / result.number_density;
+      else if (result.packing_fraction > 0.)
+        result.effective_number_density =
+            result.packing_fraction * result.number_density;
+    } else if (result.effective_number_density > 0.) {
+      if (result.number_density > 0.)
+        result.packing_fraction =
+            result.effective_number_density / result.number_density;
+      else if (result.packing_fraction > 0.)
+        result.number_density =
+            result.effective_number_density / result.packing_fraction;
+    }
+    // do something
+  } else if (count == 3) {
+    throw std::runtime_error(
+        "The number density and effective density were over-determined");
+  }
+
+  return result;
 }
 
 bool MaterialBuilder::hasOverrideNeutronProperties() const {

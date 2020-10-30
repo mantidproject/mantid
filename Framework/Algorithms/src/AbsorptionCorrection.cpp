@@ -322,7 +322,7 @@ void AbsorptionCorrection::retrieveBaseProperties() {
   if (createMaterial) {
     // get values from the existing material
     if (isEmpty(rho))
-      rho = m_material.numberDensity();
+      rho = m_material.numberDensityEffective();
     if (isEmpty(sigma_s))
       sigma_s = m_material.totalScatterXSection();
     if (isEmpty(sigma_atten))
@@ -343,8 +343,8 @@ void AbsorptionCorrection::retrieveBaseProperties() {
 
   // NOTE: the angstrom^-2 to barns and the angstrom^-1 to cm^-1
   // will cancel for mu to give units: cm^-1
-  m_linearCoefTotScatt =
-      -m_material.totalScatterXSection() * m_material.numberDensity() * 100;
+  m_linearCoefTotScatt = -m_material.totalScatterXSection() *
+                         m_material.numberDensityEffective() * 100;
 
   m_num_lambda = getProperty("NumberOfWavelengthPoints");
 
@@ -435,39 +435,8 @@ void AbsorptionCorrection::calculateDistances(const IDetector &detector,
     // detector
     const V3D direction = normalize(detectorPos - m_elementPositions[i]);
     Track outgoing(m_elementPositions[i], direction);
-    int temp = m_sampleObject->interceptSurface(outgoing);
-
-    /* Most of the time, the number of hits is 1. Sometime, we have more than
-     * one intersection due to
-     * arithmetic imprecision. If it is the case, then selecting the first
-     * intersection is valid.
-     * In principle, one could check the consistency of all distances if hits is
-     * larger than one by doing:
-     * Mantid::Geometry::Track::LType::const_iterator it=outgoing.begin();
-     * and looping until outgoing.end() checking the distances with it->Dist
-     */
-    // Not hitting the cylinder from inside, usually means detector is badly
-    // defined,
-    // i.e, position is (0,0,0).
-    if (temp < 1) {
-      // FOR NOW AT LEAST, JUST IGNORE THIS ERROR AND USE A ZERO PATH LENGTH,
-      // WHICH I RECKON WILL MAKE A
-      // NEGLIGIBLE DIFFERENCE ANYWAY (ALWAYS SEEMS TO HAPPEN WITH ELEMENT RIGHT
-      // AT EDGE OF SAMPLE)
-      L2s[i] = 0.0;
-
-      // std::ostringstream message;
-      // message << "Problem with detector at " << detectorPos << " ID:" <<
-      // detector->getID() << '\n';
-      // message << "This usually means that this detector is defined inside the
-      // sample cylinder";
-      // g_log.error(message.str());
-      // throw std::runtime_error("Problem in
-      // AbsorptionCorrection::calculateDistances");
-    } else // The normal situation
-    {
-      L2s[i] = outgoing.cbegin()->distFromStart;
-    }
+    m_sampleObject->interceptSurface(outgoing);
+    L2s[i] = outgoing.totalDistInsideObject();
   }
 }
 

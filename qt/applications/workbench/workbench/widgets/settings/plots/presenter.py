@@ -34,11 +34,13 @@ class PlotProperties(Enum):
     NORMALIZATION = "graph1d.autodistribution"
     SHOW_TITLE = "plots.ShowTitle"
     PLOT_FONT = "plots.font"
+    SHOW_LEGEND = "plots.ShowLegend"
     LEGEND_FONT_SIZE = "plots.legend.FontSize"
     LEGEND_LOCATION = "plots.legend.Location"
     SHOW_MINOR_TICKS = "plots.ShowMinorTicks"
     SHOW_MINOR_GRIDLINES = "plots.ShowMinorGridlines"
     COLORMAP = "plots.images.Colormap"
+    COLORBAR_SCALE = "plots.images.ColorBarScale"
 
 
 class PlotSettings(object):
@@ -67,18 +69,21 @@ class PlotSettings(object):
         self.view.draw_style.addItems(VALID_DRAW_STYLE)
         self.view.marker_style.addItems(MARKER_STYLES.keys())
         self.view.default_colormap_combo_box.addItems(get_colormap_names())
+        self.view.colorbar_scale.addItems(self.AXES_SCALE)
 
     def load_general_setting_values(self):
         normalize_to_bin_width = "on" == ConfigService.getString(PlotProperties.NORMALIZATION.value).lower()
         show_title = "on" == ConfigService.getString(PlotProperties.SHOW_TITLE.value).lower()
         show_minor_ticks = "on" == ConfigService.getString(PlotProperties.SHOW_MINOR_TICKS.value).lower()
         show_minor_gridlines = "on" == ConfigService.getString(PlotProperties.SHOW_MINOR_GRIDLINES.value).lower()
+        show_legend = "on" == ConfigService.getString(PlotProperties.SHOW_LEGEND.value).lower()
 
         self.view.normalize_to_bin_width.setChecked(normalize_to_bin_width)
         self.view.show_title.setChecked(show_title)
         self.view.show_minor_ticks.setChecked(show_minor_ticks)
         self.view.show_minor_gridlines.setEnabled(show_minor_ticks)
         self.view.show_minor_gridlines.setChecked(show_minor_gridlines)
+        self.view.show_legend.setChecked(show_legend)
         self.populate_font_combo_box()
 
     def setup_axes_group(self):
@@ -144,6 +149,11 @@ class PlotSettings(object):
             self.view.default_colormap_combo_box.setCurrentIndex(
                 self.view.default_colormap_combo_box.findText(colormap[:-2]))
             self.view.reverse_colormap_check_box.setChecked(True)
+        colorbar_scale = ConfigService.getString(PlotProperties.COLORBAR_SCALE.value)
+        if colorbar_scale in self.AXES_SCALE:
+            self.view.colorbar_scale.setCurrentIndex(self.view.colorbar_scale.findText(colorbar_scale))
+        else:
+            self.view.colorbar_scale.setCurrentIndex(0)
 
     @staticmethod
     def _setup_style_combo_boxes(current_style, style_combo, combo_items):
@@ -157,6 +167,7 @@ class PlotSettings(object):
         self.view.show_title.stateChanged.connect(self.action_show_title_changed)
         self.view.show_minor_ticks.stateChanged.connect(self.action_show_minor_ticks_changed)
         self.view.show_minor_gridlines.stateChanged.connect(self.action_show_minor_gridlines_changed)
+        self.view.show_legend.stateChanged.connect(self.action_show_legend_changed)
         self.view.x_axes_scale.currentTextChanged.connect(self.action_default_x_axes_changed)
         self.view.y_axes_scale.currentTextChanged.connect(self.action_default_y_axes_changed)
         self.view.line_style.currentTextChanged.connect(self.action_line_style_changed)
@@ -173,6 +184,7 @@ class PlotSettings(object):
         self.view.default_colormap_combo_box.currentTextChanged.connect(self.action_default_colormap_changed)
         self.view.reverse_colormap_check_box.stateChanged.connect(self.action_default_colormap_changed)
         self.view.plot_font.currentTextChanged.connect(self.action_font_combo_changed)
+        self.view.colorbar_scale.currentTextChanged.connect(self.action_colorbar_scale_changed)
 
     def action_normalization_changed(self, state):
         ConfigService.setString(PlotProperties.NORMALIZATION.value, "On" if state == Qt.Checked else "Off")
@@ -192,6 +204,9 @@ class PlotSettings(object):
 
     def action_font_combo_changed(self, font_name):
         ConfigService.setString(PlotProperties.PLOT_FONT.value, font_name)
+
+    def action_show_legend_changed(self, state):
+        ConfigService.setString(PlotProperties.SHOW_LEGEND.value, "On" if state == Qt.Checked else "Off")
 
     def action_default_x_axes_changed(self, axes_scale):
         ConfigService.setString(PlotProperties.X_AXES_SCALE.value, axes_scale)
@@ -231,6 +246,9 @@ class PlotSettings(object):
 
     def action_legend_size_changed(self, value):
         ConfigService.setString(PlotProperties.LEGEND_FONT_SIZE.value, str(value))
+
+    def action_colorbar_scale_changed(self, value):
+        ConfigService.setString(PlotProperties.COLORBAR_SCALE.value, value)
 
     def action_default_colormap_changed(self):
         colormap = self.view.default_colormap_combo_box.currentText()

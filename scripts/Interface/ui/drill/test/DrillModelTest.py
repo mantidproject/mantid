@@ -35,15 +35,15 @@ class DrillModelTest(unittest.TestCase):
             }
 
     SETTINGS = {
-            "a1": {
-                "str": "test",
-                "int": 1,
-                "float": "0.9",
-                "bool": False
-                },
-            "a2": {
-                "test": "test"
-                }
+            "a1": [
+                "str",
+                "int",
+                "float",
+                "bool"
+                ],
+            "a2": [
+                "test"
+                ]
             }
 
     def setUp(self):
@@ -51,6 +51,10 @@ class DrillModelTest(unittest.TestCase):
         patch = mock.patch('Interface.ui.drill.model.DrillModel.sapi')
         self.mSapi = patch.start()
         self.addCleanup(patch.stop)
+
+        # mock properties
+        self.mSapi.AlgorithmManager.createUnmanaged.return_value.getProperty \
+            .return_value.value = "test"
 
         # mock open
         patch = mock.patch('Interface.ui.drill.model.DrillModel.open')
@@ -179,7 +183,8 @@ class DrillModelTest(unittest.TestCase):
         self.assertNotEqual(self.model.columns, co)
         self.assertEqual(self.model.columns, self.COLUMNS["a2"])
         self.assertNotEqual(self.model.settings, se)
-        self.assertEqual(self.model.settings, self.SETTINGS["a2"])
+        self.assertEqual(self.model.settings,
+                         dict.fromkeys(self.SETTINGS["a2"], "test"))
         self.mController.assert_called_once()
 
     def test_getAcquisitionMode(self):
@@ -215,20 +220,23 @@ class DrillModelTest(unittest.TestCase):
         self.mController.assert_called_once_with("a1")
 
     def test_setSettings(self):
-        self.assertEqual(self.model.settings, self.SETTINGS["a1"])
+        params_a1 = dict.fromkeys(self.SETTINGS["a1"], "test")
+        self.assertEqual(self.model.settings, params_a1)
         self.model.setSettings({"str": "test2"})
-        self.assertNotEqual(self.model.settings, self.SETTINGS["a1"])
+        self.assertNotEqual(self.model.settings, params_a1)
         self.model.setSettings({"str": "test"})
-        self.assertEqual(self.model.settings, self.SETTINGS["a1"])
+        self.assertEqual(self.model.settings, params_a1)
         self.model.setSettings({"str2": "test"})
-        self.assertEqual(self.model.settings, self.SETTINGS["a1"])
+        self.assertEqual(self.model.settings, params_a1)
 
     def test_getSettings(self):
-        self.assertEqual(self.model.getSettings(), self.SETTINGS["a1"])
+        self.assertEqual(self.model.getSettings(),
+                         dict.fromkeys(self.SETTINGS["a1"], "test"))
         self.assertEqual(self.model.getSettings(), self.model.settings)
 
     def test_getSettingsTypes(self):
         alg = self.mSapi.AlgorithmManager.createUnmanaged.return_value
+        self.mSapi.reset_mock()
         self.model.getSettingsTypes()
         self.mSapi.AlgorithmManager.createUnmanaged.assert_called_once_with(
                 self.model.algorithm)
@@ -332,6 +340,26 @@ class DrillModelTest(unittest.TestCase):
                                     "float": "test doc",
                                     "bool": "test doc"})
 
+        # array property
+        self.mSapi.reset_mock()
+        prop = mock.Mock(spec=FloatArrayProperty)
+        prop.allowedValues = ["test", "test"]
+        prop.documentation = "test doc"
+        alg.getProperty.return_value = prop
+        types, values, docs = self.model.getSettingsTypes()
+        self.assertDictEqual(types, {"str": "floatArray",
+                                     "int": "floatArray",
+                                     "float": "floatArray",
+                                     "bool": "floatArray"})
+        self.assertDictEqual(values, {"str": ["test", "test"],
+                                      "int": ["test", "test"],
+                                      "float": ["test", "test"],
+                                      "bool": ["test", "test"]})
+        self.assertDictEqual(docs, {"str": "test doc",
+                                    "int": "test doc",
+                                    "float": "test doc",
+                                    "bool": "test doc"})
+
         # other property
         self.mSapi.reset_mock()
         prop = mock.Mock()
@@ -351,6 +379,20 @@ class DrillModelTest(unittest.TestCase):
                                     "int": "test doc",
                                     "float": "test doc",
                                     "bool": "test doc"})
+
+    def test_setDefaultSettings(self):
+        alg = self.mSapi.AlgorithmManager.createUnmanaged.return_value
+        self.mSapi.reset_mock()
+        alg.getProperty.return_value.value = "defaultValue"
+
+        self.model._setDefaultSettings()
+        self.mSapi.AlgorithmManager.createUnmanaged.assert_called_once_with(
+                self.model.algorithm)
+        alg.initialize.assert_called_once()
+        self.assertDictEqual(self.model.settings,  {"str": "defaultValue",
+                                                    "int": "defaultValue",
+                                                    "float": "defaultValue",
+                                                    "bool": "defaultValue"})
 
     def test_changeParameter(self):
         self.model.samples = [{}, {}]
@@ -389,8 +431,7 @@ class DrillModelTest(unittest.TestCase):
         self.mController.return_value.addParameter.assert_called()
 
     def test_getProcessingParameters(self):
-        params = dict()
-        params.update(self.SETTINGS["a1"])
+        params = dict.fromkeys(self.SETTINGS["a1"], "test")
         params["OutputWorkspace"] = "sample_1"
         self.model.samples = [{}]
         self.assertEqual(self.model.getProcessingParameters(0), params)
@@ -458,7 +499,8 @@ class DrillModelTest(unittest.TestCase):
         self.model.importRundexData("test")
         self.mOpen.assert_called_once_with("test")
         self.mJson.load.assert_called_once()
-        self.assertDictEqual(self.model.settings, self.SETTINGS["a1"])
+        self.assertDictEqual(self.model.settings,
+                             dict.fromkeys(self.SETTINGS["a1"], "test"))
         self.assertEqual(self.model.samples, list())
         self.assertEqual(self.model.instrument, "i1")
         self.assertEqual(self.model.acquisitionMode, "a1")
@@ -471,7 +513,7 @@ class DrillModelTest(unittest.TestCase):
         self.assertEquals(written, {
             "Instrument": "i1",
             "AcquisitionMode": "a1",
-            "GlobalSettings": self.SETTINGS["a1"],
+            "GlobalSettings": dict.fromkeys(self.SETTINGS["a1"], "test"),
             "Samples": []
             })
 

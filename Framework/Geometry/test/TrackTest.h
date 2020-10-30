@@ -134,4 +134,25 @@ public:
     B.addLink(V3D(1, 3, 1), V3D(1, 5, 1), 2.0, shape);
     TS_ASSERT_EQUALS(B.nonComplete(), 0);
   }
+
+  void testAddPoint() {
+    Track A(V3D(1, 1, 1), V3D(1.0, 0.0, 0.0));
+    CSGObject shape;
+    // check point addition including duplicate removal
+    A.addPoint(TrackDirection::ENTERING, V3D(-5.0, -2.0, 0.0),
+               shape); // Entry at -5,-2,0
+    A.addPoint(TrackDirection::LEAVING, V3D(-5.0, 2.0, 0.0),
+               shape); // Exit point at -5,2,0
+    A.addPoint(TrackDirection::LEAVING, V3D(-5.0, 2.0, 0.0),
+               shape); // Duplicate exit point at -5,2,0
+    TS_ASSERT_EQUALS(A.surfPointsCount(), 2);
+
+    // check point addition works on reused track
+    A.clearIntersectionResults();
+    A.addPoint(TrackDirection::LEAVING, V3D(-5.0, 2.0, 0.0),
+               shape); // Exit point at -5,2,0
+    A.addPoint(TrackDirection::ENTERING, V3D(-5.0, -2.0, 0.0),
+               shape); // Entry at -5,-2,0
+    TS_ASSERT_EQUALS(A.surfPointsCount(), 2);
+  }
 };

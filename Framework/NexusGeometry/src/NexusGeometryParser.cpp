@@ -69,25 +69,27 @@ template <typename ExpectedT> void validateStorageType(const DataSet &data) {
   if (std::is_floating_point<ExpectedT>::value) {
     if (H5T_FLOAT != typeClass) {
       throw std::runtime_error("Storage type mismatch. Expecting to extract a "
-                               "floating point number");
+                               "floating point number from " +
+                               H5_OBJ_NAME(data));
     }
     if (sizeOfType != sizeof(ExpectedT)) {
       throw std::runtime_error(
           "Storage type mismatch for floats. This operation "
           "is dangerous. Nexus stored has byte size:" +
-          std::to_string(sizeOfType));
+          std::to_string(sizeOfType) + " in " + H5_OBJ_NAME(data));
     }
   } else if (std::is_integral<ExpectedT>::value) {
     if (H5T_INTEGER != typeClass) {
       throw std::runtime_error(
-          "Storage type mismatch. Expecting to extract a integer");
+          "Storage type mismatch. Expecting to extract a integer from " +
+          H5_OBJ_NAME(data));
     }
     if (sizeOfType > sizeof(ExpectedT)) {
       // endianness not checked
       throw std::runtime_error(
           "Storage type mismatch for integer. Result "
           "would result in truncation. Nexus stored has byte size:" +
-          std::to_string(sizeOfType));
+          std::to_string(sizeOfType) + " in " + H5_OBJ_NAME(data));
     }
   }
 }
@@ -483,8 +485,9 @@ private:
         Eigen::AngleAxisd rotation(angle, transformVector);
         transforms = rotation * transforms;
       } else {
-        throw std::runtime_error(
-            "Unknown Transform type in Nexus Geometry Parsing");
+        throw std::runtime_error("Unknown Transform type \"" + transformType +
+                                 "\" found in " + H5_OBJ_NAME(transformation) +
+                                 " when parsing Nexus geometry");
       }
     }
     return transforms;
@@ -672,7 +675,7 @@ private:
       throw std::runtime_error("Expect to have as many detector_face entries "
                                "as detector_number entries");
     if (detFaces.size() % 2 != 0)
-      throw std::runtime_error("Unequal pairs of face incides to detector "
+      throw std::runtime_error("Unequal pairs of face indices to detector "
                                "indices in detector_faces");
     if (detFaces.size() / 2 > faceIndices.size())
       throw std::runtime_error(

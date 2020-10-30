@@ -7,7 +7,7 @@
 from Engineering.gui.engineering_diffraction.tabs.common import create_error_message
 from mantid.simpleapi import logger
 from mantidqt.utils.asynchronous import AsyncTask
-from mantidqt.utils.observer_pattern import GenericObservable
+from mantidqt.utils.observer_pattern import GenericObservable, GenericObserverWithArgPassing
 
 
 class FittingDataPresenter(object):
@@ -34,6 +34,11 @@ class FittingDataPresenter(object):
         self.plot_added_notifier = GenericObservable()
         self.plot_removed_notifier = GenericObservable()
         self.all_plots_removed_notifier = GenericObservable()
+        # Obeservers
+        self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
+
+    def fit_completed(self, results_dict):
+        self.model.update_fit(results_dict)
 
     def _log_xunit_change(self, xunit):
         logger.notice("Subsequent files will be loaded with the x-axis unit:\t{}".format(xunit))
@@ -48,10 +53,11 @@ class FittingDataPresenter(object):
             removed = self.get_loaded_workspaces().pop(ws_name)
             self.plot_removed_notifier.notify_subscribers(removed)
             self.plotted.discard(ws_name)
+            self.model.remove_log_rows([self.row_numbers[ws_name]])
+            self.model.update_log_workspace_group()
             self._repopulate_table()
-            self.model.repopulate_logs()  # so matches new table
         elif ws_name in self.model.get_log_workspaces_name():
-            logger.warning('Deleting the log workspace may cause unexpected errors.')
+            self.model.update_log_workspace_group()
 
     def rename_workspace(self, old_name, new_name):
         if old_name in self.get_loaded_workspaces():
@@ -60,7 +66,7 @@ class FittingDataPresenter(object):
                 self.plotted.remove(old_name)
                 self.plotted.add(new_name)
             self._repopulate_table()
-            self.model.repopulate_logs()  # so matches new table
+            self.model.update_log_workspace_group()  # so matches new table
 
     def clear_workspaces(self):
         self.get_loaded_workspaces().clear()
@@ -131,7 +137,6 @@ class FittingDataPresenter(object):
             self.plot_removed_notifier.notify_subscribers(removed)
             self.plotted.discard(ws_name)
         self._repopulate_table()
-        self.model.repopulate_logs()
 
     def _remove_all_tracked_workspaces(self):
         self.clear_workspaces()

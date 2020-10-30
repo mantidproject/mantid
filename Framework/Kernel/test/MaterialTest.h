@@ -63,11 +63,14 @@ public:
 
   void test_Vanadium() {
     const std::string name("Vanadium");
+    const double numberDensity = 0.072;
     NeutronAtom atom = getNeutronAtom(23);
-    Material material(name, atom, 0.072);
+    Material material(name, atom, numberDensity);
 
     TS_ASSERT_EQUALS(material.name(), name);
-    TS_ASSERT_EQUALS(material.numberDensity(), 0.072);
+    TS_ASSERT_EQUALS(material.numberDensity(), numberDensity);
+    TS_ASSERT_EQUALS(material.numberDensityEffective(), numberDensity);
+    TS_ASSERT_EQUALS(material.packingFraction(), 1.);
     TS_ASSERT_EQUALS(material.temperature(), 300);
     TS_ASSERT_EQUALS(material.pressure(),
                      Mantid::PhysicalConstants::StandardAtmosphere);
@@ -85,9 +88,13 @@ public:
   // highly absorbing material
   void test_Gadolinium() {
     const std::string name("Gadolinium");
+    const double numberDensity = 0.0768; // mass density is 7.90 g/cm3
     NeutronAtom atom = getNeutronAtom(64);
-    Material material(name, atom, 0.0768); // mass density is 7.90 g/cm3
+    Material material(name, atom, numberDensity);
     TS_ASSERT_EQUALS(material.name(), name);
+    TS_ASSERT_EQUALS(material.numberDensity(), numberDensity);
+    TS_ASSERT_EQUALS(material.numberDensityEffective(), numberDensity);
+    TS_ASSERT_EQUALS(material.packingFraction(), 1.);
 
     // check everything with (default) reference wavelength
     checkMatching(material, atom);
@@ -98,8 +105,17 @@ public:
 
   // "null scatterer" has only incoherent scattering
   void test_TiZr() {
-    Material TiZr("TiZr", Material::parseChemicalFormula("Ti2.082605 Zr"),
-                  0.542);
+    const std::string name("TiZr");
+    const double numberDensity = 0.542;
+    const double packingFraction = .6;
+    Material TiZr(name, Material::parseChemicalFormula("Ti2.082605 Zr"),
+                  numberDensity, packingFraction);
+
+    TS_ASSERT_EQUALS(TiZr.name(), name);
+    TS_ASSERT_EQUALS(TiZr.numberDensity(), numberDensity);
+    TS_ASSERT_EQUALS(TiZr.numberDensityEffective(),
+                     numberDensity * packingFraction);
+    TS_ASSERT_EQUALS(TiZr.packingFraction(), packingFraction);
 
     TS_ASSERT_EQUALS(TiZr.cohScatterLengthImg(), 0.);
     TS_ASSERT_DELTA(TiZr.cohScatterLengthReal(), 0., 1.e-5);
@@ -126,8 +142,8 @@ public:
   /** Save then re-load from a NXS file */
   void test_nexus() {
     Material testA("testMaterial",
-                   Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072, 273,
-                   1.234);
+                   Mantid::PhysicalConstants::getNeutronAtom(23, 0), 0.072, 2.,
+                   273, 1.234);
     NexusTestHelper th(true);
     th.createFile("MaterialTest.nxs");
 

@@ -5,9 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from unittest import mock
 
-from sans.common.enums import SANSFacility, SANSInstrument
+from sans.common.enums import SANSFacility
 from sans.gui_logic.models.diagnostics_page_model import create_state
 from sans.gui_logic.models.state_gui_model import StateGuiModel
 from sans.test_helper.user_file_test_helper import sample_user_file, create_user_file

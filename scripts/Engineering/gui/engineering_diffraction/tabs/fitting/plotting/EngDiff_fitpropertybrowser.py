@@ -8,8 +8,11 @@
 #
 #
 
+from qtpy.QtCore import Slot
 from mantidqt.utils.qt import import_qt
+from mantidqt.utils.observer_pattern import GenericObservable
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
+from mantid.api import AnalysisDataService
 
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
 
@@ -22,6 +25,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
 
     def __init__(self, canvas, toolbar_manager, parent=None):
         super(EngDiffFitPropertyBrowser, self).__init__(canvas, toolbar_manager, parent)
+        self.fit_notifier = GenericObservable()
 
     def set_output_window_names(self):
         """
@@ -47,3 +51,17 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
             except AttributeError:  # scripted plots have no tracked_workspaces
                 pass
         return allowed_spectra
+
+    @Slot(str)
+    def fitting_done_slot(self, name):
+        """
+        This is called after Fit finishes to update the fit curves.
+        :param name: The name of Fit's output workspace.
+        """
+
+        ws = AnalysisDataService.retrieve(name)
+        self.do_plot(ws, plot_diff=self.plotDiff())
+        self.fit_result_ws_name = name
+        self.saveFunction(self.workspaceName())
+        results_dict = eval(self.getFitAlgorithmParameters().replace('true', 'True').replace('false', 'False'))
+        self.fit_notifier.notify_subscribers(results_dict)

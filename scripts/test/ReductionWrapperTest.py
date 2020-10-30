@@ -50,6 +50,7 @@ class test_helper(ReductionWrapper):
         return lambda: custom_name(self.reducer.prop_man)
         # use this method to use standard file name generating function
         #return None
+
     @iliad
     def reduce(self, input_file=None, output_directory=None):
 

@@ -9,7 +9,7 @@ import unittest
 from mantid.api import FunctionFactory, MultiDomainFunction
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
-from qtpy import QtWidgets
+from qtpy.QtWidgets import QApplication
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
@@ -38,7 +38,7 @@ def retrieve_combobox_info(combo_box):
 def wait_for_thread(thread_model):
     if thread_model:
         thread_model._thread.wait()
-        QtWidgets.QApplication.instance().processEvents()
+        QApplication.sendPostedEvents()
 
 
 def create_multi_domain_function(function_list):
@@ -708,6 +708,19 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         self.view.warning_popup.assert_called_once_with('No data selected to fit')
         self.presenter.perform_fit.assert_not_called()
+
+    def test_update_fit_status_information_in_view(self):
+        self.view.get_index_for_start_end_times = mock.MagicMock(return_value = 1)
+        self.view.update_global_fit_state = mock.MagicMock()
+        self.view.update_with_fit_outputs = mock.MagicMock()
+
+        self.presenter._fit_function = ["FlatBackground", "LinearBackground"]
+        self.presenter._fit_status = ["failure", "success"]
+        self.presenter._fit_chi_squared = [23.0, 3.2]
+
+        self.presenter.update_fit_status_information_in_view()
+        self.view.update_with_fit_outputs.assert_called_with("LinearBackground", "success", 3.2)
+        self.view.update_global_fit_state.assert_called_with(self.presenter._fit_status, 1)
 
 
 if __name__ == '__main__':

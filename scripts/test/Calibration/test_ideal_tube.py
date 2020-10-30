@@ -32,7 +32,5 @@ class TestIdealTube(unittest.TestCase):
         self.assertTrue(isinstance(tube.getArray(), np.ndarray))
 
 
-
-
 if __name__ == '__main__':
     unittest.main()

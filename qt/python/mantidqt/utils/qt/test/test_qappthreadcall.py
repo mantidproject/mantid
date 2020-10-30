@@ -37,7 +37,7 @@ class QAppThreadCallTest(unittest.TestCase):
         thread = AsyncTask(self.task, error_cb=collect_error)
         thread.start()
         while thread.is_alive():
-            QApplication.processEvents()
+            QApplication.sendPostedEvents()
         thread.join(0.5)
         self.assertTrue(isinstance(self.exc.exc_value, CustomException))
         self.assertEqual(TaskExitCode.ERROR, thread.exit_code)
