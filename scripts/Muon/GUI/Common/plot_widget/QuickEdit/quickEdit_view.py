@@ -100,23 +100,18 @@ class QuickEditView(QtWidgets.QWidget):
 
     """ y axis selection """
     def connect_y_range_changed(self, slot):
-        return
-        self.y_axis_changer.on_bound_changed(slot)
+        self.y_axis_changer.on_range_changed(slot)
 
-    def set_plot_y_range(self, y_range):
-        return
-        self.y_axis_changer.set_bounds(y_range)
+    def set_plot_y_range(self, limits):
+        self.y_axis_changer.set_limits(limits)
 
     def get_y_bounds(self):
-        return [0,4]
-        return self.y_axis_changer.get_bounds()
+        return self.y_axis_changer.get_limits()
 
     def disable_yaxis_changer(self):
-        return
         self.y_axis_changer.view.setEnabled(False)
 
     def enable_yaxis_changer(self):
-        return
         self.y_axis_changer.view.setEnabled(True)
 
     """ auto scale selection """

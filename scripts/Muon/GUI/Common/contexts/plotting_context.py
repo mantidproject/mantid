@@ -26,18 +26,37 @@ class PlottingContext(object):
         self._subplots = {}
         self._default_xlim = [-0.1,0.1]
         self._default_ylim = [-10,10]
+        self._xlim_all = self._default_xlim
+        self._ylim_all = self._default_ylim
 
 
     def set_defaults(self, default_xlim:List[float], default_ylim:List[float]):
         self._default_xlim = default_xlim
         self._default_ylim = default_ylim
+        self._xlim_all = self._default_xlim
+        self._ylim_all = self._default_ylim
 
     @property
     def default_xlims(self):
         return self._default_xlim
+
     @property
     def default_ylims(self):
         return self._default_ylim
+
+    def update_xlim_all(self, values:List[float]):
+        self._xlim_all = values
+
+    @property
+    def get_xlim_all(self):
+        return self._xlim_all
+
+    def update_ylim_all(self, values:List[float]):
+        self._ylim_all = values
+
+    @property
+    def get_ylim_all(self):
+        return self._ylim_all
 
     def add_subplot(self, name:str, index:int):
         self._subplots[name] = PlotEditContext()
@@ -82,29 +101,25 @@ class PlottingContext(object):
             return
         self._subplots[name].update_autoscale_state(state)
 
-    @property
     def get_xlim(self, name:str)->List[float]:
         if name == "All":
             return self._subplots[self._subplots.keys[0]].get_xlim()
-        return self.subplots[name].get_xlim()
+        return self._subplots[name].get_xlim
 
-    @property
     def get_ylim(self, name:str)->List[float]:
         if name == "All":
             return self._subplots[self._subplots.keys[0]].get_ylim()
-        return self.subplots[name].get_ylim()
+        return self._subplots[name].get_ylim
 
-    @property
     def get_autoscale_state(self, name:str)->bool:
         if name == "All":
             return self._subplots[self._subplots.keys[0]].get_autoscale_state()
-        return self.subplots[name].get_autoscale_state()
+        return self._subplots[name].get_autoscale_state()
 
-    @property
     def get_error_state(self, name:str)->bool:
         if name == "All":
             return self._subplots[self._subplots.keys[0]].get_error_state()
-        return self.subplots[name].get_error_state()
+        return self._subplots[name].get_error_state()
 
     @property
     def get_subplot_names()->List[str]:
