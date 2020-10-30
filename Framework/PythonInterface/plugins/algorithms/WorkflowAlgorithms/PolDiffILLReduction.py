@@ -41,16 +41,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         if process == 'Transmission' and self.getProperty('BeamInputWorkspace').isDefault:
             issues['BeamInputWorkspace'] = 'Beam input workspace is mandatory for transmission calculation.'
 
-        if ( (not self.getProperty('AbsorberInputWorkspace').isDefault and self.getProperty('ContainerInputWorkspace').isDefault)
-             or (not self.getProperty('AbsorberInputWorkspace').isDefault and self.getProperty('ContainerInputWorkspace').isDefault) ):
-            issues['AbsorberInputWorkspace'] = 'Both Container and Absorber input workspaces are mandatory for background subtraction.'
-            issues['ContainerInputWorkspace'] = 'Both Container and Absorber input workspaces are mandatory for background subtraction.'
-
         if process == 'Quartz' and self.getProperty('TransmissionInputWorkspace').isDefault:
             issues['TransmissionInputWorkspace'] = 'Quartz transmission is mandatory for polarisation correction calculation.'
-
-        if process == 'Vanadium' and self.getProperty('TransmissionInputWorkspace').isDefault :
-            issues['TransmissionInputWorkspace'] = 'Vanadium transmission is mandatory for vanadium data reduction.'
 
         if process == 'Sample' or process == 'Vanadium':
             if len(self.getProperty('SampleAndEnvironmentProperties').value) == 0:
@@ -555,9 +547,9 @@ class PolDiffILLReduction(PythonAlgorithm):
             self._normalise(ws)
 
         if process in ['Quartz', 'Vanadium', 'Sample']:
+            container_ws = self.getPropertyValue('ContainerInputWorkspace')
             if not self.getProperty('ContainerInputWorkspace').isDefault and not self.getProperty('TransmissionInputWorkspace').isDefault:
                 # Subtracts background if the workspaces for container and transmission are provided
-                container_ws = self.getPropertyValue('ContainerInputWorkspace')
                 transmission_ws = self.getPropertyValue('TransmissionInputWorkspace')
                 progress.report('Subtracting backgrounds')
                 self._subtract_background(ws, container_ws, transmission_ws)
@@ -572,7 +564,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     progress.report('Applying polarisation corrections')
                     self._apply_polarisation_corrections(ws, pol_eff_ws)
                 self._read_experiment_properties(ws)
-                if self.getPropertyValue('SampleGeometry') != 'None':
+                if self.getPropertyValue('SampleGeometry') != 'None' and container_ws != '' :
                     progress.report('Applying self-attenuation correction')
                     self._apply_self_attenuation_correction(ws, container_ws)
                 if self.getProperty('OutputTreatment').value == 'Average':
