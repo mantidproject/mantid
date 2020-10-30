@@ -96,12 +96,41 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             'SampleThickness': 2, 'Height': 2, 'SampleWidth': 2, 'BeamWidth': 2.5, 'BeamHeight': 2.5,
                             'SampleDensity': 1.18, 'ContainerFormula': 'Al', 'ContainerDensity': 2.7,
                             'ContainerFrontThickness': 0.02, 'ContainerBackThickness': 0.02}
-        PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
+        PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium_sum',
                             TransmissionInputWorkspace='vanadium_transmission',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Sum', OutputUnits='TwoTheta')
-        self._check_output(mtd['vanadium_1'], 1, 132, 'Wavelength', 'Wavelength', 'Scattering angle', 'Degrees')
-        self._check_process_flag(mtd['vanadium_1'], 'Vanadium')
+        self._check_output(mtd['vanadium_sum_1'], 1, 132, 'Wavelength', 'Wavelength', 'Scattering angle', 'Degrees')
+        self._check_process_flag(mtd['vanadium_sum_1'], 'Vanadium')
+
+    def test_vanadium_flat_plate(self):
+        PolDiffILLReduction(Run='396917', ProcessAs='Container', OutputWorkspace='container_ws')
+        sampleProperties = {'SampleMass': 8.54, 'FormulaUnits': 50, 'SampleChemicalFormula': 'V',
+                            'SampleThickness': 2, 'Height': 2, 'SampleWidth': 2, 'BeamWidth': 2.5, 'BeamHeight': 2.5,
+                            'SampleDensity': 1.18, 'ContainerChemicalFormula': 'Al', 'ContainerDensity': 2.7,
+                            'ContainerFrontThickness': 0.02, 'ContainerBackThickness': 0.02}
+        PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium_flat_plate',
+                            ContainerInputWorkspace='container_ws',
+                            SampleAndEnvironmentProperties=sampleProperties,
+                            SampleGeometry='FlatPlate',
+                            OutputTreatment='Individual')
+        self._check_output(mtd['vanadium_flat_plate'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['vanadium_flat_plate'], 'Vanadium')
+
+    def test_vanadium_annulus(self):
+        PolDiffILLReduction(Run='396917', ProcessAs='Container', OutputWorkspace='container_ws')
+        sampleProperties = {'SampleMass': 8.54, 'FormulaUnits': 50, 'SampleChemicalFormula': 'V',
+                            'SampleInnerRadius': 2, 'SampleOuterRadius': 2.5, 'Height': 2,
+                            'BeamWidth': 2.6, 'BeamHeight': 2.6, 'SampleDensity': 1.18,
+                            'ContainerChemicalFormula': 'Al', 'ContainerDensity': 2.7,
+                            'ContainerInnerRadius': 0.1, 'ContainerOuterRadius': 2.51}
+        PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium_annulus',
+                            ContainerInputWorkspace='container_ws',
+                            SampleAndEnvironmentProperties=sampleProperties,
+                            SampleGeometry='Annulus',
+                            OutputTreatment='Individual')
+        self._check_output(mtd['vanadium_annulus'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['vanadium_annulus'], 'Vanadium')
 
     def test_sample(self):
         PolDiffILLReduction(Run='396983', ProcessAs='Beam', OutputWorkspace='beam_ws')
