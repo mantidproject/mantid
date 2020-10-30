@@ -21,13 +21,13 @@ class AxisChangerView(QtWidgets.QWidget):
         self.lower_bound = QtWidgets.QLineEdit()
         self.lower_bound.setMaxLength(maximum_bound_precision)
         self.lower_bound.setValidator(QtGui.QDoubleValidator())
-        #self.lower_bound.returnPressed.connect(self._bound_changed)
+        self.lower_bound.returnPressed.connect(self._bound_changed)
 
         self._max_label =  QtWidgets.QLabel(label+" max")
         self.upper_bound = QtWidgets.QLineEdit()
         self.upper_bound.setMaxLength(maximum_bound_precision)
         self.upper_bound.setValidator(QtGui.QDoubleValidator())
-        #self.upper_bound.returnPressed.connect(self._bound_changed)
+        self.upper_bound.returnPressed.connect(self._bound_changed)
 
         layout.addWidget(self._min_label)
         layout.addWidget(self.lower_bound)
@@ -42,5 +42,8 @@ class AxisChangerView(QtWidgets.QWidget):
         self.lower_bound.setText(str(limits[0]))
         self.upper_bound.setText(str(limits[1]))
 
-    def on_range_changed(self,slot):
+    def _bound_changed(self):
         self.sig_bound_changed.emit(self.get_limits())
+
+    def on_range_changed(self,slot):
+        self.sig_bound_changed.connect(slot)

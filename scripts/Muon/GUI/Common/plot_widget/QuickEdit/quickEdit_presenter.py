@@ -94,6 +94,7 @@ class QuickEditPresenter(object):
 
     def get_selection(self):
         name = self.widget.current_selection()
+        print("baa",name)
         if name == "All":
             return self.all()
         return [name]
