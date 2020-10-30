@@ -59,11 +59,15 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
                              doc='Scale the intensity by the given factor. Default is no scaling.')
 
         # Declare Instrument-related properties
-        self.declare_instrument_properties(default="TOSCA", choices=ONE_DIMENSIONAL_INSTRUMENTS)
+        self.declare_instrument_properties(
+            default="TOSCA", choices=ONE_DIMENSIONAL_INSTRUMENTS,
+            multiple_choice_settings=[('Setting', 'settings',
+                                       'Setting choice for this instrument (e.g. monochromator)')])
 
     def validateInputs(self) -> Dict[str,str]:
         issues = dict()
         issues = self.validate_common_inputs(issues)
+        issues.update(self._validate_instrument_settings())
 
         scale = self.getProperty("Scale").value
         if scale < 0:
@@ -279,6 +283,8 @@ class Abins(PythonAlgorithm, AbinsAlgorithm):
         from abins.constants import FLOAT_TYPE
 
         self.get_common_properties()
+        self._instrument_kwargs = {"setting": self.getProperty("Setting").value}
+        self.set_instrument()
 
         self._experimental_file = self.getProperty("ExperimentalFile").value
         self._scale = self.getProperty("Scale").value

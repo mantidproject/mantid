@@ -2,6 +2,8 @@ from __future__ import (absolute_import, division, print_function)
 import numpy as np
 import math
 
+from mantid.kernel import logger
+
 import abins
 from abins.constants import FLOAT_TYPE, WAVENUMBER_TO_INVERSE_A
 from .instrument import Instrument
@@ -10,10 +12,11 @@ from .broadening import broaden_spectrum, prebin_required_schemes
 
 class TwoDMap(Instrument):
     """An instrument for q-resolved 2D maps"""
-    def __init__(self, setting=''):
+    def __init__(self, setting='', chopper_frequency=None):
         super().__init__(setting=setting)
         self._name = 'TwoDMap'
         self._e_init = None
+        logger.information("Ignoring chopper settings, not used by TwoDMap")
 
     def get_angles(self):
         parameters = abins.parameters.instruments[self._name]

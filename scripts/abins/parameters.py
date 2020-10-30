@@ -34,22 +34,25 @@ instruments = {
         'q_size': 100,
         'e_init': [400],
         'angles_per_detector': 20,
-        'default_setting': 'A-400',
-        'settings': {'A-300': {'chopper': 'A', 'frequency': 300},
-                     'A-400': {'chopper': 'A', 'frequency': 400},
-                     'S-300': {'chopper': 'S', 'frequency': 300},
-                     'S-400': {'chopper': 'S', 'frequency': 400},}
+        'settings_default': 'A',
+        'settings': {'A': {'chopper': 'A'},
+                     'S': {'chopper': 'S'},
+                     },
+        #'chopper_frequency_default': 400,
+        'chopper_allowed_frequencies': list(range(50, 601, 50))
         },
     'MARI': {
         'resolution': 'pychop',
         'q_size': 100,
         'e_init': [400],
         'angles_per_detector': 10,
-        'default_setting': 'A-400',
-        'settings': {'A-300': {'chopper': 'A', 'frequency': 300},
-                     'A-400': {'chopper': 'A', 'frequency': 400},
-                     'S-300': {'chopper': 'S', 'frequency': 300},
-                     'S-400': {'chopper': 'S', 'frequency': 400},}
+        'settings_default': 'A-400',
+        'settings': {'A': {'chopper': 'A'},
+                     'R': {'chopper': 'A'},
+                     'G': {'chopper': 'S'},
+                     'S': {'chopper': 'S'},},
+        'chopper_frequency_default': 400,
+        'chopper_allowed_frequencies': list(range(50, 601, 50))
         },
     'TOSCA': {
         #    TOSCA parameters for calculating Q^2
@@ -57,7 +60,7 @@ instruments = {
         'angles': [134.98885653282196],  # Forward detector angle; rather specific as test-data is based on truncated value in radians
         'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians (NO LONGER USED)
         'settings': {'forward': None, 'backward': None},
-        'default_setting': 'forward',
+        'settings_default': 'forward',
         # TOSCA parameters for resolution function
         # sigma = tosca_a * omega * omega + tosca_b * omega + tosca_c
         # where sigma is width of Gaussian function
@@ -70,7 +73,7 @@ instruments = {
         #'scattering_angle_range': (math.pi * (10 / 180), math.pi / 2),
         'scattering_angle_range': (10, 90),
         'angles_per_detector': 5,
-        'default_setting': 'Cu(220)',
+        'settings_default': 'Cu(220)',
         'settings': {'Cu(220)': {'Ei_range_meV': (26, 500),
                                  'abs_resolution_meV': [7.6987e-5, 2.156e-2, -3.5961e-2],
                                  'low_energy_cutoff_meV': 25, 'low_energy_resolution_meV': 0.8},
