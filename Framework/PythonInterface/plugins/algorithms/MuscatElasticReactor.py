@@ -95,9 +95,11 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                              doc='Switch Save result to nxs file Off/On')
  
     def PyExec(self):
+        import pydevd_pycharm
+        pydevd_pycharm.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+        np.random.seed(1234)
         # Set up progress reporting
         prog = Progress(self, 0.0, 1.0, 2)
-
         self._setup()
         self._sample()
         self._calc_angles()
@@ -117,6 +119,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         data_S4 = []
         data_S5 = []
         q = np.zeros(self._number_angles)
+
         for idx_ang in range(0, self._number_angles):
             self._new_vector()
             theta_t = self._angles[idx_ang]
@@ -132,6 +135,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
             self._att = 0.0                   #attenuation
             QS_sum = np.zeros(6)
 #start loop over scatterings
+
             for ne in range(0,self._numb_scat+1):
                 prog.report('Angle %i of %i ; Scatter %i of %i' % (idx_ang, self._number_angles, ne, self._numb_scat+1))
                 if ne == 0:                   #first time no absorption
@@ -261,6 +265,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         if Q <= self._q_values[self._number_q -2]:                            #find S(Q)
             SQ = self._sofq_inter(Q)
             AT2 = math.exp(-self._vmu*dl)                 #attenuation along path
+            # DH this is for the final path section (l_out in the Mancinelli paper)
             weight = self._B9*AT2*SQ*self._sigt/four_pi     #weighting of scattering
             self._total[ne] += weight
             if ne == 1:
@@ -287,7 +292,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         else:
             logger.information('Number of scatterings : %i ' % (self._numb_scat))
         self._thickness = self.getProperty('Thickness').value
-        self._width = self.getProperty('Width').value
+        self._width = [self.getProperty('Width').value]
         self._height = self.getProperty('Height').value
         self._wave = self.getProperty('Wavelength').value
         self._number_angles = self.getProperty('NumberAngles').value
@@ -364,12 +369,12 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         self._ireg = self._nreg
         if self._geom == 'Flat':
             X = 0.0
-            Y = random.random() * self._surface_g[3]          #random width
-            Z = random.random() * self._surface_g[1]          #random height
+            Y = (random.random() - 0.5) * self._width[0]       #random width
+            Z = (random.random() - 0.5) * self._height         #random height
             self._position = [X, Y, Z]                      #entry flat face
         if self._geom == 'Cylinder':
-            Y = random.random() * self._surface_g[self._nsurf + self._nreg -1]  #random width
-            Z = random.random() * self._surface_g[1]           #random height
+            Y = (random.random() - 0.5) * self._width[self._nreg -1]  #random width
+            Z = (random.random() - 0.5) * self._height           #random height
             X = -math.sqrt(-self._surface_g[self._nsurf - 1] - Y*Y)    #entry curved face
             self._position = [X, Y, Z]    #entry curved face
         self._isurf = 0
@@ -389,6 +394,9 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
             if IVKM <= 0:                 #< Qmin
                 sig_scat = math.exp(self._sigss[0])
             else:                          #interpolate scatt x-sec
+                # DH assume log(cross section) is quadratic in q
+                # set up up new q scale q' such that q'=0 for the q value where interpolating to
+                # q' is variable U in following code
                 if IVKM > self._number_q-2:
                     IVKM = self._number_q-2
                 U = (self._vkinc - (IVKM*self._delta_q))/self._delta_q
@@ -427,8 +435,10 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
             self._QSS += QQ*SQ
             self._B9 = self._B9*self._sigt*SQ*QQ
             FI = random.random()*6.28318531     #random scattering angle
+            # FI is scattering angle in the plane perpendicular to original trajectory
             B3 = math.sqrt(1. - CosT*CosT)
             B2 = CosT
+            # Rodrigues formula? Doesn't quite match (UQ terms are different)
             if Uk[2] < 1.0:
                 A2 = math.sqrt(1.0 - Uk[2]*Uk[2])
                 UQTZ = math.cos(FI)*A2
@@ -438,6 +448,8 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                 UKY = B2*Uk[1] + B3*UQTY
                 UKZ = B2*Uk[2] + B3*UQTZ
             else:
+                # Uk[2]=1, Uk[0]=Uk[1]=0 ie track going vertically up
+                # A2=0 so can't use other formulae
                 UKX = B3*math.cos(FI)
                 UKY = B3*math.sin(FI)
                 UKZ = B2
@@ -451,10 +463,12 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                 return m, QQ, CosT
         return m, QQ, 0.0
 
-			
+
 #   Geometry routines
 
     def _set_geom(self):
+        # each face is a quadratic 3d surface of form:
+        # aX^2 + bX + cY^2 +dY + eZ^2 + fZ + g = 0
         self._nreg = 1
         self._surface_a = []
         self._surface_b = []
@@ -463,32 +477,37 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         self._surface_e = []
         self._surface_f = []
         self._surface_g = []
-        half_width = 0.5*float(self._width)
+
+        half_width = [0.5*float(x) for x in self._width]
         half_height = 0.5*float(self._height)
         if self._geom == 'Flat':
-            self._surface_g = [-half_height, half_height, -half_width, half_width, 0, -float(self._thickness)]
+            self._surface_g = [-half_height, half_height, -half_width[0], half_width[0], 0, -float(self._thickness)]
             self._surface_f = [1.0, 1.0, 0, 0, 0, 0]
             self._surface_e = [0, 0, 0, 0, 0, 0]
             self._surface_d = [0, 0, 1.0, 1.0, 0, 0]
             self._surface_c = [0, 0, 0, 0, 0, 0]
             self._surface_b = [0, 0, 0, 0, 1.0, 1.0]
             self._surface_a = [0, 0, 0, 0, 0, 0]
-            self._nsurf = 4+2*self._nreg            #is 6
+            # assume additional containers share the top and bottom surface
+            self._nsurf = 4+2*self._nreg
+            # igeom specifies which surfaces are part of the region and further which side of each surface is inside
+            # or outside the region
             self._igeom = [-1, 1, -1, 1, 1, -1]
         if self._geom == 'Cylinder':
             if self._vector[1] != 0.0:
                 raise ValueError('Vky not 0.0')
 #  IF NREG>1 ,REG1 IS INNERMOST CYLINDER(SAMPLE) & REG2 NEXT RING(CONT)
 #   REG3 WOULD BE OUTSIDE REG2 & SO ON
-            self._nsurf = self._nreg+2            #is 3
-            self._surface_g = [-half_height, half_height, -half_width*half_width, half_width]
-            self._surface_f = [1.0, 1.0, 0, 0]
-            self._surface_e = [0, 0, 0, 0]
-            self._surface_d = [0, 0, 1.0, 1.0]
-            self._surface_c = [0, 0, 1.0, 0]
-            self._surface_b = [0, 0, 0, 0]
-            self._surface_a = [0, 0, 1.0, 0]
-            self._igeom = [-1, 1, -1, 1, 1, -1]
+            # assume additional containers share top and bottom surface
+            self._nsurf = self._nreg+2
+            self._surface_g = [-half_height, half_height, -half_width[0]*half_width[0]]
+            self._surface_f = [1.0, 1.0, 0]
+            self._surface_e = [0, 0, 0]
+            self._surface_d = [0, 0, 0]
+            self._surface_c = [0, 0, 1.0]
+            self._surface_b = [0, 0, 0]
+            self._surface_a = [0, 0, 1.0]
+            self._igeom = [-1, 1, -1]
 
     def _test_in_reg(self):
 # formerly TESTIN with COMMON/DEF/X,Y,Z,IREG
@@ -499,8 +518,9 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         VX = self._direction[0]
         VY = self._direction[1]
         VZ = self._direction[2]
+
         for i in range(0,self._nsurf):
-            if self._igeom[i] != 0 or i != self.isurf:
+            if self._igeom[i] != 0 and i != self.isurf:
                 PP1 = self._surface_a[i]*X*X + self._surface_b[i]*X
                 PP2 = self._surface_c[i]*Y*Y + self._surface_d[i]*Y
                 PP3 = self._surface_e[i]*Z*Z + self._surface_f[i]*Z
@@ -529,18 +549,12 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         for I in range(0,self._nsurf):
             if self._ireg != 0:
                 if self._igeom[I] == 0:
-                    self._isurf = II
-                    if ex_dist == 100000.0:
-                        ex_dist=-1.0
+                    continue
             DD = self._distance(I)
             if DD <= 0.0:
-                    self._isurf = II
-                    if ex_dist == 100000.0:
-                        ex_dist=-1.0
+                continue
             if DD > ex_dist:
-                    self._isurf = II
-                    if ex_dist == 100000.0:
-                        ex_dist=-1.0
+                continue
             II = I
             ex_dist = DD
         self._isurf = II
