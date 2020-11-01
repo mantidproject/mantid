@@ -11,8 +11,9 @@
 Description
 -----------
 
-This is the algorithm that performs magnetic, nuclear coherent, and spin-incoherent cross-section separation and allows for sample data normalisation to
-absolute scale using either the output from cross-section separation or a vanadium reference sample for polarised diffraction and spectroscopy data measured
+This is the algorithm that performs cross-section separation and allows for sample data normalisation to absolute scale.
+The cross-section separation provides information about magnetic, nuclear coherent, and spin-incoherent contributions to the measured cross-section.
+The absolute scale normalisation uses either the output from cross-section separation or a vanadium reference sample for polarised diffraction and spectroscopy data measured
 by D7 instrument at the ILL. 
 
 Three types of cross-section separation are supported: `Uniaxial`, `XYZ`, and `10p`, for which 2, 6, and 10 distributions with spin-flip and non-spin-flip cross-sections
