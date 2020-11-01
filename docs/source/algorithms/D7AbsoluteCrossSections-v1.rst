@@ -134,7 +134,7 @@ Usage
 
 .. testcode:: ExD7AbsoluteCrossSections_XYZ_separation
 
-   Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz')
+   Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz') # loads already reduced data
    D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
                                 OutputWorkspace='xyz')
    print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
