@@ -37,6 +37,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         return 'Separates magnetic, nuclear coherent, and incoherent components for diffraction and spectroscopy data,' \
                'and corrects the sample data for detector efficiency and normalises it to the chosen standard.'
 
+    def seeAlso(self):
+        return ['D7YIGPositionCalibration', 'PolDiffILLReduction']
+
     def name(self):
         return 'D7AbsoluteCrossSections'
 

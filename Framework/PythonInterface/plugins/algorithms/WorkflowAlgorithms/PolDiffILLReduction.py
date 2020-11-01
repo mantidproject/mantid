@@ -32,6 +32,9 @@ class PolDiffILLReduction(PythonAlgorithm):
     def summary(self):
         return 'Performs polarized diffraction and spectroscopy data reduction for the D7 instrument at the ILL.'
 
+    def seeAlso(self):
+        return ['D7YIGPositionCalibration', 'D7AbsoluteCrossSections']
+
     def name(self):
         return 'PolDiffILLReduction'
 
