@@ -41,54 +41,48 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
     def test_uniaxial_separation(self):
         D7AbsoluteCrossSections(InputWorkspace='vanadium_uniaxial', OutputWorkspace='uniaxial',
                                      CrossSectionSeparationMethod='Uniaxial')
-        self.assertTrue(mtd['uniaxial'].getNumberOfEntries() == 2)
-        self._check_output('uniaxial', 1, 132, onlySeparation=True)
+        self._check_output('uniaxial', 1, 132, 2, onlySeparation=True)
 
     def test_xyz_separation(self):
         D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', OutputWorkspace='xyz',
                                      CrossSectionSeparationMethod='XYZ', NormalisationMethod='None')
-        self.assertTrue(mtd['xyz'].getNumberOfEntries() == 3)
-        self._check_output('xyz', 1, 132, onlySeparation=True)
+        self._check_output('xyz', 1, 132, 3, onlySeparation=True)
 
     def test_10p_separation(self):
         D7AbsoluteCrossSections(InputWorkspace='vanadium_10p', OutputWorkspace='10p',
                                      CrossSectionSeparationMethod='10p', ThetaOffset=1.0,
                                      NormalisationMethod='None')
-        self.assertTrue(mtd['10p'].getNumberOfEntries() == 3)
-        self._check_output('10p', 1, 132, onlySeparation=True)
+        self._check_output('10p', 1, 132, 3, onlySeparation=True)
 
     def test_10p_separation_double_xyz(self):
         D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', RotatedXYZWorkspace='vanadium_xyz',
                                      OutputWorkspace='10p_double_xyz',
                                      CrossSectionSeparationMethod='10p', ThetaOffset=1.0,
                                      NormalisationMethod='None')
-        self.assertTrue(mtd['10p_double_xyz'].getNumberOfEntries() == 3)
-        self._check_output('10p_double_xyz', 1, 132, onlySeparation=True)
+        self._check_output('10p_double_xyz', 1, 132, 3, onlySeparation=True)
 
     def test_vanadium_normalisation(self):
         D7AbsoluteCrossSections(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_vanadium',
                                      CrossSectionSeparationMethod='XYZ', NormalisationMethod='Vanadium',
                                      VanadiumInputWorkspace='vanadium_data', AbsoluteUnitsNormalisation=False)
-        self.assertTrue(mtd['normalised_sample_vanadium'].getNumberOfEntries() == 6)
-        self._check_output('normalised_sample_vanadium', 1, 132, onlySeparation=False)
+        self._check_output('normalised_sample_vanadium', 1, 132, 6, onlySeparation=False)
 
     def test_paramagnetic_normalisation(self):
         D7AbsoluteCrossSections(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_magnetic',
                                      CrossSectionSeparationMethod='XYZ', NormalisationMethod='Paramagnetic',
                                      SampleSpin = 0.5, AbsoluteUnitsNormalisation=False)
-        self.assertTrue(mtd['normalised_sample_magnetic'].getNumberOfEntries() == 6)
-        self._check_output('normalised_sample_magnetic', 1, 132, onlySeparation=False)
+        self._check_output('normalised_sample_magnetic', 1, 132, 6, onlySeparation=False)
 
     def test_incoherent_normalisation(self):
         D7AbsoluteCrossSections(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_incoherent',
                                      CrossSectionSeparationMethod='XYZ', NormalisationMethod='Incoherent',
                                      AbsoluteUnitsNormalisation=False)
-        self.assertTrue(mtd['normalised_sample_incoherent'].getNumberOfEntries() == 6)
-        self._check_output('normalised_sample_incoherent', 1, 132, onlySeparation=False)
+        self._check_output('normalised_sample_incoherent', 1, 132, 3, onlySeparation=False)
 
-    def _check_output(self, ws, blocksize, spectra, onlySeparation):
+    def _check_output(self, ws, blocksize, spectra, nEntries, onlySeparation):
         self.assertTrue(mtd[ws])
         self.assertTrue(isinstance(mtd[ws], WorkspaceGroup))
+        self.assertTrue(mtd[ws].getNumberOfEntries(), nEntries)
         for entry in mtd[ws]:
             self.assertTrue(isinstance(entry, MatrixWorkspace))
             self.assertTrue(entry.isHistogramData())

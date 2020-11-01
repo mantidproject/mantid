@@ -34,13 +34,13 @@ class PolDiffILLReductionTest(unittest.TestCase):
 
     def test_absorber_transmission(self):
         PolDiffILLReduction(Run='396991', ProcessAs='Beam', OutputWorkspace='cadmium_ws')
-        self._check_output(mtd['cadmium_ws'], 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['cadmium_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['cadmium_ws'], 'Absorber')
         self.assertAlmostEqual(mtd['cadmium_ws_1'].readY(0)[0], 116, delta=1)
 
     def test_beam(self):
         PolDiffILLReduction(Run='396983', ProcessAs='Beam', OutputWorkspace='beam_ws')
-        self._check_output(mtd['beam_ws'], 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['beam_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['beam_ws'], 'Beam')
         self.assertAlmostEqual(mtd['beam_ws_1'].readY(0)[0], 10769, delta=1)
 
@@ -49,18 +49,18 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396991', ProcessAs='Beam', OutputWorkspace='cadmium_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
                             AbsorberTransmissionInputWorkspace='cadmium_ws_1', BeamInputWorkspace='beam_ws_1',)
-        self._check_output(mtd['quartz_transmission'], 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['quartz_transmission'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self.assertAlmostEqual(mtd['quartz_transmission_1'].readY(0)[0], 0.692, delta=1e-3)
         self._check_process_flag(mtd['quartz_transmission'], 'Transmission')
 
     def test_absorber(self):
         PolDiffILLReduction(Run='396928', ProcessAs='Absorber', OutputWorkspace='absorber_ws')
-        self._check_output(mtd['absorber_ws'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['absorber_ws'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['absorber_ws'], 'Absorber')
 
     def test_container(self):
         PolDiffILLReduction(Run='396917', ProcessAs='Container', OutputWorkspace='container_ws')
-        self._check_output(mtd['container_ws'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['container_ws'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['container_ws'], 'Container')
 
     def test_quartz(self):
@@ -70,7 +70,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             AbsorberTransmissionInputWorkspace='cadmium_ws_1', BeamInputWorkspace='beam_ws_1',)
         PolDiffILLReduction(Run='396939', ProcessAs='Quartz', TransmissionInputWorkspace='quartz_transmission_1',
                             OutputTreatment='Average', OutputWorkspace='quartz')
-        self._check_output(mtd['quartz'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['quartz'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['quartz'], 'Quartz')
     
     def test_vanadium(self):
@@ -85,7 +85,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             TransmissionInputWorkspace='vanadium_transmission',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_1'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['vanadium_1'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_1'], 'Vanadium')
 
     def test_vanadium_sum_scans(self):
@@ -100,7 +100,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             TransmissionInputWorkspace='vanadium_transmission',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Sum', OutputUnits='TwoTheta')
-        self._check_output(mtd['vanadium_sum_1'], 1, 132, 'Wavelength', 'Wavelength', 'Scattering angle', 'Degrees')
+        self._check_output(mtd['vanadium_sum_1'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Scattering angle', 'Degrees')
         self._check_process_flag(mtd['vanadium_sum_1'], 'Vanadium')
 
     def test_vanadium_flat_plate(self):
@@ -114,7 +114,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             SampleAndEnvironmentProperties=sampleProperties,
                             SampleGeometry='FlatPlate',
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_flat_plate'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['vanadium_flat_plate'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_flat_plate'], 'Vanadium')
 
     def test_vanadium_annulus(self):
@@ -129,7 +129,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             SampleAndEnvironmentProperties=sampleProperties,
                             SampleGeometry='Annulus',
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_annulus'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['vanadium_annulus'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_annulus'], 'Vanadium')
 
     def test_sample(self):
@@ -148,15 +148,16 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             TransmissionInputWorkspace='sample_transmission_1',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['sample'], 1, 132, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['sample'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['sample'], 'Sample')
     
     def _check_process_flag(self, ws, value):
         self.assertTrue(ws[0].getRun().getLogData('ProcessedAs').value, value)
 
-    def _check_output(self, ws, blocksize, spectra, x_unit, x_unit_id, y_unit, y_unit_id):
+    def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, WorkspaceGroup))
+        self.assertTrue(ws.getNumberOfEntries(), nEntries)
         for entry in ws:
             self.assertTrue(isinstance(entry, MatrixWorkspace))
             self.assertTrue(entry.isHistogramData())
