@@ -66,10 +66,6 @@ void IndirectFitPropertyBrowser::initFunctionBrowser() {
   connect(m_functionBrowser,
           SIGNAL(parameterChanged(const QString &, const QString &)), this,
           SIGNAL(functionChanged()));
-  connect(m_functionBrowser, SIGNAL(tiesChanged()), this,
-          SIGNAL(functionChanged()));
-  connect(m_functionBrowser, SIGNAL(constraintsChanged()), this,
-          SIGNAL(functionChanged()));
   connect(m_functionBrowser, SIGNAL(globalsChanged()), this,
           SIGNAL(functionChanged()));
   connect(m_functionBrowser,

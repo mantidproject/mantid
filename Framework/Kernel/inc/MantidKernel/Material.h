@@ -71,11 +71,13 @@ public:
   /// temperature and pressure
   explicit Material(
       const std::string &name, const ChemicalFormula &formula,
-      const double numberDensity, const double temperature = 300,
+      const double numberDensity, const double packingFraction = 1,
+      const double temperature = 300,
       const double pressure = PhysicalConstants::StandardAtmosphere);
   explicit Material(
       const std::string &name, const PhysicalConstants::NeutronAtom &atom,
-      const double numberDensity, const double temperature = 300,
+      const double numberDensity, const double packingFraction = 1,
+      const double temperature = 300,
       const double pressure = PhysicalConstants::StandardAtmosphere);
   /// Virtual destructor.
   virtual ~Material() = default;
@@ -92,6 +94,10 @@ public:
   //@{
   /// Get the number density
   double numberDensity() const;
+  /// Get the effective number density
+  double numberDensityEffective() const;
+  /// Get the packing fraction
+  double packingFraction() const;
   /// Get the temperature
   double temperature() const;
   /// Get the pressure
@@ -206,6 +212,8 @@ private:
   double m_atomTotal;
   /// Number density in atoms per A^-3
   double m_numberDensity;
+  /// Packing fraction should be between 0 and 2
+  double m_packingFraction;
   /// Temperature
   double m_temperature;
   /// Pressure

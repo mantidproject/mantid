@@ -54,6 +54,7 @@ digraph isisPowderfocus{
         alg_RebinToWorkspaceVan         [label="Rebin: Van ws to match data binning"]
         alg_Subtract_sample_empty       [label="Subtract: runs - sample empty"]
         alg_Subtract_van_empty          [label="Subtract: runs - instrument empty"]
+        alg_Load                        [label="Load"]
     }
 
     // **Decisions
@@ -63,6 +64,7 @@ digraph isisPowderfocus{
         if_apply_absorb                 [label="If: absorb corrections"]
         if_van_normalisation            [label="If: Vanadium normalisation"]
         if_sample_empty_provided_1      [label="If: Sample empty given"]
+        if_presummed_empty_exists       [label="If: Pre-summed empty exists"]
     }
 
     // **Graph layout
@@ -73,13 +75,16 @@ digraph isisPowderfocus{
 
         // Load empty workspace
         param_calMapping_1              ->      param_emptyRunNumber
-        param_emptyRunNumber            ->      proc_LoadCurrentNormWS_1
+        param_emptyRunNumber            ->      if_presummed_empty_exists
+        if_presummed_empty_exists       ->      proc_LoadCurrentNormWS_1    [label="False"]
+        if_presummed_empty_exists       ->      alg_Load                    [label="True"]
 
         // Load sample empty run numbers
         if_sample_empty_provided_1      ->      param_sampleEmptyRunNumber
         param_sampleEmptyRunNumber      ->      proc_LoadCurrentNormWS_1
 
         // Subtract empty instrument
+        alg_Load                        ->      alg_Subtract_van_empty
         proc_LoadCurrentNormWS_1        ->      alg_Subtract_van_empty
 
         // Subtract sample empty

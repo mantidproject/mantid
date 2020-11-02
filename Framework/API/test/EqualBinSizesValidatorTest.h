@@ -60,8 +60,8 @@ public:
     Mantid::MantidVec xData{1, 2, 5};
     ws->setPoints(0, xData);
     EqualBinSizesValidator val(0.1);
-    TS_ASSERT_EQUALS(
-        val.isValid(ws),
-        "X axis must be linear (all bins must have the same width)");
+    TS_ASSERT_EQUALS(val.isValid(ws),
+                     "X axis must be linear (all bins must have the same "
+                     "width) dx=1 reference dx=2 bin number=0");
   }
 };

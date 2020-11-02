@@ -396,6 +396,7 @@ void FunctionMultiDomainPresenter::editLocalParameterFinish(int result) {
     }
   }
   m_editLocalParameterDialog = nullptr;
+  emit functionStructureChanged();
 }
 
 void FunctionMultiDomainPresenter::updateViewFromModel() {

@@ -724,6 +724,14 @@ void SetSample::setMaterial(ReadMaterial::MaterialParameters &materialParams,
   if (materialArgs.existsProperty("MassDensity")) {
     materialParams.massDensity = materialArgs.getProperty("MassDensity");
   }
+  if (materialArgs.existsProperty("EffectiveNumberDensity")) {
+    materialParams.numberDensityEffective =
+        materialArgs.getProperty("numberDensityEffective");
+  }
+  if (materialArgs.existsProperty("PackingFraction")) {
+    materialParams.packingFraction =
+        materialArgs.getProperty("packingFraction");
+  }
   if (materialArgs.existsProperty("Mass")) {
     materialParams.mass = materialArgs.getProperty("Mass");
   }
@@ -1116,6 +1124,24 @@ PropertyManager SetSample::materialSettingsEnsureLegacyCompatibility(
       compatible.declareProperty("NumberDensity", numberDensity);
     } else {
       compatible.setProperty("NumberDesnity", numberDensity);
+    }
+  }
+  if (materialArgs.existsProperty("SampleEffectiveNumberDensity")) {
+    const double numberDensityEff =
+        materialArgs.getProperty("SampleEffectiveNumberDensity");
+    if (!compatible.existsProperty("EffectiveNumberDensity")) {
+      compatible.declareProperty("EffectiveNumberDensity", numberDensityEff);
+    } else {
+      compatible.setProperty("EffectiveNumberDesnity", numberDensityEff);
+    }
+  }
+  if (materialArgs.existsProperty("SamplePackingFraction")) {
+    const double packingFraction =
+        materialArgs.getProperty("SamplePackingFraction");
+    if (!compatible.existsProperty("PackingFraction")) {
+      compatible.declareProperty("PackingFraction", packingFraction);
+    } else {
+      compatible.setProperty("PackingFraction", packingFraction);
     }
   }
   if (materialArgs.existsProperty("SampleMassDensity")) {

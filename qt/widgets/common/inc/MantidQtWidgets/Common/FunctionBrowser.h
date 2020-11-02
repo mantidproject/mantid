@@ -132,8 +132,6 @@ signals:
   /// In multi-dataset context a button value editor was clicked
   void localParameterButtonClicked(const QString &parName);
   void globalsChanged();
-  void constraintsChanged();
-  void tiesChanged();
 
 public slots:
 

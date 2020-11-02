@@ -66,22 +66,6 @@ public:
                      const std::invalid_argument &);
   }
 
-  void test_empty_startX_is_not_allowed() {
-    ConvolutionFitSequential alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-
-    TS_ASSERT_THROWS(alg.setPropertyValue("StartX", ""),
-                     const std::invalid_argument &);
-  }
-
-  void test_empty_endX_is_not_allowed() {
-    ConvolutionFitSequential alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-
-    TS_ASSERT_THROWS(alg.setPropertyValue("EndX", ""),
-                     const std::invalid_argument &);
-  }
-
   void test_empty_specMin_is_not_allowed() {
     ConvolutionFitSequential alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
@@ -156,8 +140,8 @@ public:
                     "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
                     "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
                     "0175)))");
-    alg.setProperty("StartX", 0.0);
-    alg.setProperty("EndX", 3.0);
+    alg.setProperty("StartX", "0.0");
+    alg.setProperty("EndX", "3.0");
     alg.setProperty("SpecMin", 0);
     alg.setProperty("SpecMax", 5);
     alg.setProperty("ConvolveMembers", true);
@@ -200,8 +184,8 @@ public:
     // Check oringal Log was copied correctly
     auto &memberRun = matrixMember->mutableRun();
     auto &originalRun = redWs->mutableRun();
-
-    TS_ASSERT_EQUALS(memberRun.getLogData().at(1)->value(),
+    auto foo = memberRun.getLogData();
+    TS_ASSERT_EQUALS(memberRun.getLogData().at(3)->value(),
                      originalRun.getLogData().at(1)->value());
 
     // Check new Log data is present
@@ -234,8 +218,8 @@ public:
                     "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
                     "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
                     "0175)))");
-    alg.setProperty("StartX", 0.0);
-    alg.setProperty("EndX", 5.0);
+    alg.setProperty("StartX", "0.0");
+    alg.setProperty("EndX", "5.0");
     alg.setProperty("SpecMin", 0);
     alg.setProperty("SpecMax", 0);
     alg.setProperty("ConvolveMembers", true);
@@ -285,8 +269,8 @@ public:
                     "WorkspaceIndex=0;((composite=ProductFunction,NumDeriv="
                     "false;name=Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0."
                     "0175)))");
-    alg.setProperty("StartX", 0.0);
-    alg.setProperty("EndX", 3.0);
+    alg.setProperty("StartX", "0.0");
+    alg.setProperty("EndX", "3.0");
     alg.setProperty("SpecMin", boost::numeric_cast<int>(specMin));
     alg.setProperty("SpecMax", boost::numeric_cast<int>(specMax));
     alg.setProperty("OutputCompositeMembers", true);

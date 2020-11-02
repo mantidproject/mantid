@@ -614,3 +614,7 @@ class CrystalFieldMultiSiteTests(unittest.TestCase):
         self.assertTrue('ion0.IntensityScaling=0.2*ion2.IntensityScaling' in ties)
         self.assertTrue('ion1.IntensityScaling=0.8*ion2.IntensityScaling' in ties)
         self.assertTrue('ion3.IntensityScaling=0.1*ion2.IntensityScaling' in ties)
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -296,6 +296,23 @@ class CrystalFieldTests(unittest.TestCase):
         self.assertAlmostEqual(y1[139], 0.17385222868511149, 8)
         self.assertAlmostEqual(y1[142], 0.17671738547959939, 8)
 
+    def test_api_CrystalField_when_using_cubic_crystal_structures(self):
+        from CrystalField import CrystalField
+
+        cf = CrystalField('Ce', 'Oh', B40=1, B60=0.1, Temperature=0.01, FWHM=1)
+
+        np.testing.assert_allclose(np.array(cf.getEigenvalues()), np.array([0.0, 0.0, 360.0, 360.0, 360.0, 360.0]))
+        np.testing.assert_allclose(np.array(cf.getPeakList()[0]), np.array([360.0, 0.0]))
+
+    def test_api_CrystalField_when_setting_a_structures_symmetry_as_being_cubic(self):
+        from CrystalField import CrystalField
+
+        cf = CrystalField('Ce', 'C1', B40=1, B60=0.1, Temperature=0.01, FWHM=1)
+        cf.Symmetry = 'Oh'
+
+        np.testing.assert_allclose(np.array(cf.getEigenvalues()), np.array([0.0, 0.0, 360.0, 360.0, 360.0, 360.0]))
+        np.testing.assert_allclose(np.array(cf.getPeakList()[0]), np.array([360.0, 0.0]))
+
     def test_api_CrystalField_spectrum_background(self):
         from CrystalField import CrystalField, Background, Function
         cf = CrystalField('Ce', 'C2v', B20=0.035, B40=-0.012, B43=-0.027, B60=-0.00012, B63=0.0025, B66=0.0068,
@@ -319,6 +336,65 @@ class CrystalFieldTests(unittest.TestCase):
         y = y / c_mbsr
         self.assertAlmostEqual(y[80], 2.1309638244891764, 8)
         self.assertAlmostEqual(y[90], 5.47632096610588, 8)
+
+    def test_that_the_peak_and_background_in_a_Background_object_are_stored_in_the_functions_variable(self):
+        from CrystalField import CrystalField, Background, Function
+        parameters = {'B20': 0.2, 'B40': -0.00164, 'B60': 0.0001146, 'B66': 0.001509}
+        cf = CrystalField('Pr', 'C6v', Temperature=5, **parameters)
+
+        cf.background = Background(peak=Function('PseudoVoigt', Intensity=101, FWHM=0.8, Mixing=0.84),
+                                   background=Function('Gaussian', Height=1.8, Sigma=0.27, PeakCentre=9.0))
+
+        self.assertEqual(cf.background.functions[0].param['Intensity'], 101)
+        self.assertEqual(cf.background.functions[0].param['FWHM'], 0.8)
+        self.assertEqual(cf.background.functions[0].param['Mixing'], 0.84)
+        self.assertEqual(cf.background.functions[1].param['Height'], 1.8)
+        self.assertEqual(cf.background.functions[1].param['Sigma'], 0.27)
+        self.assertEqual(cf.background.functions[1].param['PeakCentre'], 9.0)
+
+    def test_that_multiple_Background_functions_are_instantiated_correctly_in_the_background_object(self):
+        from CrystalField import CrystalField, Background, Function
+        parameters = {'B20': 0.2, 'B40': -0.00164, 'B60': 0.0001146, 'B66': 0.001509}
+        cf = CrystalField('Pr', 'C6v', Temperature=5, **parameters)
+
+        cf.background = Background(functions=[Function('PseudoVoigt', Intensity=101, FWHM=0.8, Mixing=0.84),
+                                              Function('Gaussian', Height=1.8, Sigma=0.27, PeakCentre=9.0),
+                                              Function('LinearBackground', A0=34, A1=0.01)])
+
+        self.assertEqual(cf.background.functions[0].param['Intensity'], 101)
+        self.assertEqual(cf.background.functions[0].param['FWHM'], 0.8)
+        self.assertEqual(cf.background.functions[0].param['Mixing'], 0.84)
+        self.assertEqual(cf.background.functions[1].param['Height'], 1.8)
+        self.assertEqual(cf.background.functions[1].param['Sigma'], 0.27)
+        self.assertEqual(cf.background.functions[1].param['PeakCentre'], 9.0)
+        self.assertEqual(cf.background.functions[2].param['A0'], 34)
+        self.assertEqual(cf.background.functions[2].param['A1'], 0.01)
+
+    def test_that_the_Background_composite_returns_the_expected_function_string(self):
+        from CrystalField import Background, Function
+
+        background = Background(functions=[Function('PseudoVoigt', Intensity=101, FWHM=0.8, Mixing=0.84),
+                                           Function('Gaussian', Height=1.8, Sigma=0.27, PeakCentre=9.0),
+                                           Function('LinearBackground', A0=34, A1=0.01)])
+
+        self.assertEqual(background.toString(), "(name=PseudoVoigt,Mixing=0.84,Intensity=101,PeakCentre=0,FWHM=0.8;"
+                                                "name=Gaussian,Height=1.8,PeakCentre=9,Sigma=0.27;"
+                                                "name=LinearBackground,A0=34,A1=0.01)")
+
+    def test_that_the_Background_composite_returns_the_expected_function_string_with_ties(self):
+        from CrystalField import Background, Function
+
+        background = Background(functions=[Function('PseudoVoigt', Intensity=101, FWHM=0.8, Mixing=0.84),
+                                           Function('Gaussian', Height=1.8, Sigma=0.27, PeakCentre=9.0),
+                                           Function('LinearBackground', A0=34, A1=0.01)])
+        background.functions[0].ties(FWHM=0.8, Mixing=0.84, PeakCentre=-0.1)
+        background.functions[1].ties(PeakCentre=9.0, Height=1.8)
+
+        self.assertEqual(background.toString(), "(name=PseudoVoigt,Mixing=0.84,Intensity=101,PeakCentre=-0.1,FWHM=0.8,"
+                                                "ties=(Mixing=0.84,PeakCentre=-0.1,FWHM=0.8);"
+                                                "name=Gaussian,Height=1.8,PeakCentre=9,Sigma=0.27,"
+                                                "ties=(Height=1.8,PeakCentre=9);"
+                                                "name=LinearBackground,A0=34,A1=0.01)")
 
     def test_api_CrystalField_spectrum_background_no_peak(self):
         from CrystalField import CrystalField, Background, Function

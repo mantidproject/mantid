@@ -6,15 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import numpy as np
-from numpy.testing import assert_equal
+from numpy.testing import assert_equal, assert_allclose
 from os import path
 import unittest
 
 # Mantid imports
-from corelli.calibration.bank import (calibrate_bank, calibrate_banks, criterium_peak_pixel_position, fit_bank,
-                                      mask_bank, purge_table, sufficient_intensity)
 from mantid import AnalysisDataService, config, mtd
 from mantid.simpleapi import DeleteWorkspaces, LoadNexusProcessed
+
+from corelli.calibration.bank import (calibrate_bank, calibrate_banks, collect_bank_fit_results,
+                                      criterion_peak_pixel_position, criterion_peak_vertical_position, fit_bank,
+                                      mask_bank, purge_table, sufficient_intensity)
+from corelli.calibration.utils import TUBES_IN_BANK
 
 
 class TestBank(unittest.TestCase):
@@ -58,7 +61,7 @@ class TestBank(unittest.TestCase):
         cls.assert_missing_tube = assert_missing_tube
 
     @classmethod
-    def tearDown(cls) -> None:
+    def tearDownClass(cls) -> None:
         r"""Delete the workspaces associated to the test cases"""
         DeleteWorkspaces(list(cls.cases.values()))
 
@@ -67,11 +70,10 @@ class TestBank(unittest.TestCase):
         assert sufficient_intensity(self.cases['123455_bank20'], 'bank20')
 
     def test_fit_bank(self):
+        control = self.cases['123455_bank20']  # a bank with a reasonable wire scan
+
         with self.assertRaises(AssertionError) as exception_info:
             fit_bank('I_am_not_here', 'bank42')
-        assert 'Input workspace I_am_not_here does not exists' in str(exception_info.exception)
-
-        control = self.cases['123455_bank20']  # a bank with a reasonable wire scan
         with self.assertRaises(AssertionError) as exception_info:
             fit_bank(control, 'bank20', shadow_height=-1000)
         assert 'shadow height must be positive' in str(exception_info.exception)
@@ -84,63 +86,130 @@ class TestBank(unittest.TestCase):
             fit_bank(self.cases['123555_bank20'], 'bank20')
         assert 'Insufficient counts per pixel in workspace CORELLI_123555_bank20' in str(exception_info.exception)
 
-        fit_bank(control, 'bank20')
+        fit_bank(control, 'bank20', parameters_table_group='parameters_table')
         # Expect default name for calibration table
         assert AnalysisDataService.doesExist('CalibTable')
         # Expect default name for peak pixel position table
         assert AnalysisDataService.doesExist('PeakTable')
-        DeleteWorkspaces(['CalibTable', 'PeakTable'])
+        # Expect default name for peak pixel position table
+        assert AnalysisDataService.doesExist('PeakYTable')
+        # assert the parameters tables are created
+        assert AnalysisDataService.doesExist('parameters_table')
+        for tube_number in range(TUBES_IN_BANK):
+            assert AnalysisDataService.doesExist(f'parameters_table_{tube_number}')
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'parameters_table'])
 
         fit_bank(control, 'bank20', calibration_table='table_20', peak_pixel_positions_table='pixel_20')
         assert AnalysisDataService.doesExist('table_20')
         assert AnalysisDataService.doesExist('pixel_20')
+        DeleteWorkspaces(['table_20', 'pixel_20', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
 
-        DeleteWorkspaces(['CalibTable', 'PeakTable'])  # a bit of clean-up
+    def test_criterion_peak_vertical_position(self):
 
-    def test_criterium_peak_pixel_position(self):
         # control bank, it has no problems
         fit_bank(self.cases['123455_bank20'], 'bank20')
         expected = np.ones(16, dtype=bool)
-        assert_equal(criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
+        actual = criterion_peak_vertical_position('PeakYTable', zscore_threshold=2.5, deviation_threshold=0.0035)
+        assert_equal(actual, expected)
+        DeleteWorkspaces(['CalibTable', 'ParametersTable', 'PeakTable', 'PeakYTable'])  # a bit of clean-up
 
         # beam center intensity spills over adjacent tubes, tube15 and tube16
         fit_bank(self.cases['123454_bank58'], 'bank58')
         expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0], dtype=bool)
-        assert_equal(criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
+        actual = criterion_peak_vertical_position('PeakYTable', zscore_threshold=2.5, deviation_threshold=0.0035)
+        assert_equal(actual, expected)
+        DeleteWorkspaces(['CalibTable', 'ParametersTable', 'PeakTable', 'PeakYTable'])  # a bit of clean-up
 
         # tube11 is not working at all
         fit_bank(self.cases['124018_bank45'], 'bank45')
         expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1], dtype=bool)
-        assert_equal(criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
+        actual = criterion_peak_vertical_position('PeakYTable', zscore_threshold=2.5, deviation_threshold=0.0035)
+        assert_equal(actual, expected)
+        DeleteWorkspaces(['CalibTable', 'ParametersTable', 'PeakTable', 'PeakYTable'])  # a bit of clean-up
 
-        # tube 13 has shadows at pixel numbers quite different from the rest
+        # tube 13 has shadows at pixel numbers quite different from the rest, but similar vertical positions
         fit_bank(self.cases['124023_bank10'], 'bank10')
-        expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1], dtype=bool)
-        assert_equal(criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
+        expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], dtype=bool)
+        actual = criterion_peak_vertical_position('PeakYTable', zscore_threshold=2.5, deviation_threshold=0.0035)
+        assert_equal(actual, expected)
+        DeleteWorkspaces(['CalibTable', 'ParametersTable', 'PeakTable', 'PeakYTable'])  # a bit of clean-up
 
         # tubes 3, 8, and 13 have very faint wire shadows
         fit_bank(self.cases['124023_bank14'], 'bank14')
         expected = np.array([1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1], dtype=bool)
-        assert_equal(criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
+        actual = criterion_peak_vertical_position('PeakYTable', zscore_threshold=2.5, deviation_threshold=0.0035)
+        assert_equal(actual, expected)
+        DeleteWorkspaces(['CalibTable', 'ParametersTable', 'PeakTable', 'PeakYTable'])  # a bit of clean-up
+
+        # one spurious shadow in tube14 throws away the fit
+        fit_bank(self.cases['124023_bank15'], 'bank15')
+        expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1], dtype=bool)
+        actual = criterion_peak_vertical_position('PeakYTable', zscore_threshold=2.5, deviation_threshold=0.0035)
+        assert_equal(actual, expected)
+        DeleteWorkspaces(['CalibTable', 'ParametersTable', 'PeakTable', 'PeakYTable'])  # a bit of clean-up
+
+        # check for the summary workspace
+        fit_bank(self.cases['123455_bank20'], 'bank20')
+        criterion_peak_vertical_position('PeakYTable', summary='summary',
+                                         zscore_threshold=2.5, deviation_threshold=0.0035)
+        assert AnalysisDataService.doesExist('summary')
+        workspace = mtd['summary']
+        axis = workspace.getAxis(1)
+        assert [axis.label(workspace_index) for workspace_index in (0, 1, 2)] == ['success', 'deviation', 'Z-score']
+        self.assertEqual(min(workspace.readY(0)), 1.0)  # check success of first tube
+        self.assertAlmostEqual(max(workspace.readY(2)), 2.73, delta=0.01)  # check maximum Z-score
+        DeleteWorkspaces(['CalibTable', 'ParametersTable', 'PeakTable', 'PeakYTable', 'summary'])  # a bit of clean-up
+
+    def test_criterion_peak_pixel_position(self):
+        # control bank, it has no problems
+        fit_bank(self.cases['123455_bank20'], 'bank20')
+        expected = np.ones(16, dtype=bool)
+        assert_equal(criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
+
+        # beam center intensity spills over adjacent tubes, tube15 and tube16
+        fit_bank(self.cases['123454_bank58'], 'bank58')
+        expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0], dtype=bool)
+        assert_equal(criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
+
+        # tube11 is not working at all
+        fit_bank(self.cases['124018_bank45'], 'bank45')
+        expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1], dtype=bool)
+        assert_equal(criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
+
+        # tube 13 has shadows at pixel numbers quite different from the rest
+        fit_bank(self.cases['124023_bank10'], 'bank10')
+        expected = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1], dtype=bool)
+        assert_equal(criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
+
+        # tubes 3, 8, and 13 have very faint wire shadows
+        fit_bank(self.cases['124023_bank14'], 'bank14')
+        expected = np.array([1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1], dtype=bool)
+        assert_equal(criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
 
         # one spurious shadow in tube14, not enough to flag a discrepancy
         fit_bank(self.cases['124023_bank15'], 'bank15')
         expected = np.ones(16, dtype=bool)
-        assert_equal(criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
+        assert_equal(criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3), expected)
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
 
         # check for the summary workspace
         fit_bank(self.cases['123455_bank20'], 'bank20')
-        criterium_peak_pixel_position('PeakTable', summary='summary', zscore_threshold=2.5, deviation_threshold=3)
+        criterion_peak_pixel_position('PeakTable', summary='summary', zscore_threshold=2.5, deviation_threshold=3)
         assert AnalysisDataService.doesExist('summary')
         workspace = mtd['summary']
         axis = workspace.getAxis(1)
         assert [axis.label(workspace_index) for workspace_index in (0, 1, 2)] == ['success', 'deviation', 'Z-score']
         self.assertEqual(min(workspace.readY(0)), 1.0)
         self.assertAlmostEqual(max(workspace.readY(2)), 1.728, delta=0.001)
-
-        DeleteWorkspaces(['CalibTable', 'PeakTable', 'summary'])  # a bit of clean-up
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable', 'summary'])  # a bit of clean-up
 
     def test_purge_table(self):
+        r"""We use either of two criterion functions"""
         with self.assertRaises(AssertionError) as exception_info:
             purge_table('I am not here', 'table', [True, False])
         assert 'Input workspace I am not here does not exists' in str(exception_info.exception)
@@ -151,95 +220,157 @@ class TestBank(unittest.TestCase):
 
         # control bank, it has no problems. Thus, no tubes to purge
         fit_bank(self.cases['123455_bank20'], 'bank20')
-        tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        tube_fit_success = criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
         unpurged_row_count = mtd['CalibTable'].rowCount()
         purge_table(self.cases['123455_bank20'], 'CalibTable', tube_fit_success)
         assert mtd['CalibTable'].rowCount() == unpurged_row_count
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
 
         # tube11 is not working at all. Thus, purge only one tube
         fit_bank(self.cases['124018_bank45'], 'bank45')
-        tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        tube_fit_success = criterion_peak_vertical_position('PeakYTable', zscore_threshold=2.5,
+                                                            deviation_threshold=0.0035)
         unpurged_row_count = mtd['CalibTable'].rowCount()
         purge_table(self.cases['124018_bank45'], 'CalibTable', tube_fit_success)
         assert mtd['CalibTable'].rowCount() == unpurged_row_count - 256
         self.assert_missing_tube('CalibTable', 11)
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
 
         # tubes 3, 8, and 13 have very faint wire shadows. Thus, purge three tubes
         fit_bank(self.cases['124023_bank14'], 'bank14')
-        tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        tube_fit_success = criterion_peak_vertical_position('PeakYTable', zscore_threshold=2.5,
+                                                            deviation_threshold=0.0035)
         unpurged_row_count = mtd['CalibTable'].rowCount()
         purge_table(self.cases['124023_bank14'], 'CalibTable', tube_fit_success)
         assert mtd['CalibTable'].rowCount() == unpurged_row_count - 256 * 3
         for tube_number in (3, 8, 13):
             self.assert_missing_tube('CalibTable', tube_number)
-
-        DeleteWorkspaces(['CalibTable', 'PeakTable'])  # a bit of clean-up
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])  # a bit of clean-up
 
     def test_mask_bank(self):
         # control bank, it has no problems. Thus, no mask to be created
         fit_bank(self.cases['123455_bank20'], 'bank20')
-        tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        tube_fit_success = criterion_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
         assert mask_bank('bank20', tube_fit_success, 'masked_tubes') is None
+        DeleteWorkspaces(['CalibTable', 'PeakTable', 'PeakYTable', 'ParametersTable'])
 
         # tube11 is not working at all. Thus, mask this tube
         fit_bank(self.cases['124018_bank45'], 'bank45')
-        tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        tube_fit_success = criterion_peak_vertical_position('PeakTable', zscore_threshold=2.5,
+                                                            deviation_threshold=0.0035)
         mask_bank('bank45', tube_fit_success, 'masked_tubes')
         detector_ids = mtd['masked_tubes'].column(0)
         assert detector_ids[0], detector_ids[-1] == [182784, 182784 + 256]
+        DeleteWorkspaces(['CalibTable', 'masked_tubes', 'PeakTable', 'PeakYTable', 'ParametersTable'])
 
         # tubes 3, 8, and 13 have very faint wire shadows. Thus, mask these tubes
         fit_bank(self.cases['124023_bank14'], 'bank14')
-        tube_fit_success = criterium_peak_pixel_position('PeakTable', zscore_threshold=2.5, deviation_threshold=3)
+        tube_fit_success = criterion_peak_vertical_position('PeakTable', zscore_threshold=2.5,
+                                                            deviation_threshold=0.0035)
         mask_bank('bank14', tube_fit_success, 'masked_tubes')
         detector_ids = mtd['masked_tubes'].column(0)
         assert detector_ids[0], detector_ids[-1] == [182784, 182784 + 3 * 256]
+        DeleteWorkspaces(['CalibTable', 'masked_tubes', 'PeakTable', 'PeakYTable', 'ParametersTable'])
 
-        DeleteWorkspaces(['CalibTable', 'PeakTable', 'masked_tubes'])  # a bit of clean-up
+    def test_collect_bank_fit_results(self):
+
+        def spectra_labels(workspace_name):
+            workspace = mtd[str(workspace_name)]
+            axis = workspace.getAxis(1)
+            return [axis.label(spectrum_index) for spectrum_index in range(workspace.getNumberHistograms())]
+
+        fit_bank(self.cases['123455_bank20'], 'bank20', parameters_table_group='parameters_tables')
+        criterion_peak_vertical_position('PeakTable', summary='summary',
+                                         zscore_threshold=2.5, deviation_threshold=0.0035)
+
+        with self.assertRaises(AssertionError) as exception_info:
+            collect_bank_fit_results('fit_results', acceptance_summary=None, parameters_table_group=None)
+        assert 'fit results should be different than None' in str(exception_info.exception)
+
+        # collect only the acceptance criteria results
+        collect_bank_fit_results('fit_results', acceptance_summary='summary', parameters_table_group=None)
+        assert spectra_labels('fit_results') == ['success', 'deviation', 'Z-score']
+        assert_allclose(mtd['fit_results'].readY(0), mtd['summary'].readY(0))
+        DeleteWorkspaces(['fit_results'])
+
+        # collect only the polynomial coefficients
+        collect_bank_fit_results('fit_results', acceptance_summary=None, parameters_table_group='parameters_tables')
+        assert spectra_labels('fit_results') == ['A0', 'A1', 'A2']
+        for coefficient_idx in range(3):  # we have three polynomial coefficients
+            for tube_idx in range(TUBES_IN_BANK):
+                self.assertAlmostEqual(mtd['fit_results'].readY(coefficient_idx)[tube_idx],
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Value'], delta=1e-6)
+                self.assertAlmostEqual(mtd['fit_results'].readE(coefficient_idx)[tube_idx],
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Error'], delta=1e-6)
+        DeleteWorkspaces(['fit_results'])
+
+        # collect both acceptance criteria and polynomial coefficients
+        collect_bank_fit_results('fit_results', acceptance_summary='summary',
+                                 parameters_table_group='parameters_tables')
+        assert spectra_labels('fit_results') == ['success', 'deviation', 'Z-score', 'A0', 'A1', 'A2']
+        for spectrum_idx in [0, 1, 2]:
+            assert_allclose(mtd['fit_results'].readY(spectrum_idx), mtd['summary'].readY(spectrum_idx))
+            assert_allclose(mtd['fit_results'].readE(spectrum_idx), mtd['summary'].readE(spectrum_idx))
+        for coefficient_idx, spectrum_idx in [(0, 3), (1, 4), (2, 5)]:  # we have three polynomial coefficients
+            for tube_idx in range(TUBES_IN_BANK):
+                self.assertAlmostEqual(mtd['fit_results'].readY(spectrum_idx)[tube_idx],
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Value'], delta=1e-6)
+                self.assertAlmostEqual(mtd['fit_results'].readE(spectrum_idx)[tube_idx],
+                                       mtd[f'parameters_tables_{tube_idx}'].row(coefficient_idx)['Error'], delta=1e-6)
+        DeleteWorkspaces(['CalibTable', 'fit_results', 'parameters_tables', 'PeakTable', 'PeakYTable', 'summary'])
 
     def test_calibrate_bank(self):
 
         # control bank, it has no problems. Thus, no mask to be created
         calibration, mask = calibrate_bank(self.cases['123455_bank20'], 'bank20', 'calibration_table')
         assert calibration.rowCount() == 256 * 16
-        assert calibration.columnCount() == 3
+        assert calibration.columnCount() == 2
         assert AnalysisDataService.doesExist('calibration_table')
         assert mask is None
         assert AnalysisDataService.doesExist('MaskTable') is False
+        DeleteWorkspaces(['calibration_table'])  # clean-up
 
         # tubes 3, 8, and 13 have very faint wire shadows. Thus, mask these tubes
-        calibration, mask = calibrate_bank(self.cases['124023_bank14'], 'bank14',
-                                           calibration_table='calibration_table')
+        calibration, mask = calibrate_bank(self.cases['124023_bank14'], 'bank14', 'calibration_table')
         assert calibration.rowCount() == 256 * (16 - 3)
         assert calibration.columnCount() == 2  # Detector ID, Position
         assert AnalysisDataService.doesExist('calibration_table')
         assert mask.rowCount() == 256 * 3
         assert mask.columnCount() == 1
         assert AnalysisDataService.doesExist('MaskTable')
+        DeleteWorkspaces(['calibration_table', 'MaskTable'])  # clean-up
 
-        # check for the summary workspace
-        calibrate_bank(self.cases['123455_bank20'], 'bank20', 'calibration_table',
-                       criterium_kwargs=dict(summary='summary'))
-        assert AnalysisDataService.doesExist('summary')
-        workspace = mtd['summary']
+        # check for the fits workspace
+        calibrate_bank(self.cases['123455_bank20'], 'bank20', 'calibration_table', fit_results='fits')
+        assert AnalysisDataService.doesExist('fits')
+        workspace = mtd['fits']
         axis = workspace.getAxis(1)
-        assert [axis.label(workspace_index) for workspace_index in (0, 1, 2)] == ['success', 'deviation', 'Z-score']
-        self.assertEqual(min(workspace.readY(0)), 1.0)
-        self.assertAlmostEqual(max(workspace.readY(2)), 1.728, delta=0.001)
-
-        DeleteWorkspaces(['calibration_table', 'MaskTable', 'summary'])  # a bit of clean-up
+        labels = [axis.label(i) for i in range(workspace.getNumberHistograms())]
+        assert labels == ['success', 'deviation', 'Z-score', 'A0', 'A1', 'A2']
+        assert_allclose(workspace.readY(0), [1.0] * TUBES_IN_BANK)  # success status for first tube
+        self.assertAlmostEqual(max(workspace.readY(2)), 2.73, delta=0.01)  # maximum Z-score
+        self.assertAlmostEqual(max(workspace.readY(3)), -0.445, delta=0.001)  # maximum A0 value
+        self.assertAlmostEqual(max(workspace.readE(3)), 1.251, delta=0.001)  # maximum A0 error
+        DeleteWorkspaces(['calibration_table', 'fits'])  # a bit of clean-up
 
     def test_calibrate_banks(self):
         calibrations, masks = calibrate_banks(self.cases['124023_banks_14_15'], '14-15')
         assert list(calibrations.getNames()) == ['calib14', 'calib15']
-        assert list(masks.getNames()) == ['mask14']
-        assert mtd['calib14'].rowCount() == 256 * (16 - 3)
+        assert list(masks.getNames()) == ['mask14', 'mask15']
+        assert mtd['calib14'].rowCount() == 256 * (16 - 3)  # three uncalibrated tubes
         assert mtd['mask14'].rowCount() == 256 * 3
-        assert mtd['calib15'].rowCount() == 256 * 16
-        self.assertEqual(mtd['acceptance14'].readY(0).tolist(), [1, 1, 0., 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1])
-        self.assertEqual(mtd['acceptance15'].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1])
-
-        DeleteWorkspaces(['calibrations', 'masks', 'acceptances'])
+        assert mtd['calib15'].rowCount() == 256 * (16 - 1)  # one uncalibrated tubes
+        assert mtd['mask15'].rowCount() == 256
+        # Check for success status
+        self.assertEqual(mtd['fit14'].readY(0).tolist(), [1, 1, 0., 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1])
+        self.assertEqual(mtd['fit15'].readY(0).tolist(), [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1])
+        # Check for A1 coefficient values
+        self.assertAlmostEqual(max(mtd['fit14'].readY(4)), 0.0044, delta=0.0001)
+        self.assertAlmostEqual(max(mtd['fit15'].readY(4)), 0.0037, delta=0.0001)
+        # Check for A2 coefficient errors
+        self.assertAlmostEqual(max(mtd['fit14'].readE(4)), 0.0224, delta=0.0001)
+        self.assertAlmostEqual(max(mtd['fit15'].readE(4)), 0.0221, delta=0.0001)
+        DeleteWorkspaces(['calibrations', 'masks', 'fits'])
 
 
 if __name__ == "__main__":

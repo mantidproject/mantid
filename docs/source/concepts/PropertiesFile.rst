@@ -262,6 +262,8 @@ Plotting Settings
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.ShowMinorGridlines``     |Whether to show minor gridlines on plots                          | ``On``, ``Off``     |
 +---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.ShowLegend``             |Whether to show legend on plots                                   | ``On``, ``Off``     |
++---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.font``                   |The default font for labels and titles on plots.                  |``Helvetica``        |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.xAxesScale``             |The default x scale on 1d plots                                   |``Linear``, ``Log``  |
@@ -292,6 +294,8 @@ Plotting Settings
 |``plots.legend.Location``        |Default legend location                                           |``best``             |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 |``plots.images.Colormap``        |Default colormap for image plots                                  |``viridis``          |
++---------------------------------+------------------------------------------------------------------+---------------------+
+|``plots.images.ColorBarScale``   |Default colorbar scale for image plots                            |``Linear``           |
 +---------------------------------+------------------------------------------------------------------+---------------------+
 
 Getting access to Mantid properties
