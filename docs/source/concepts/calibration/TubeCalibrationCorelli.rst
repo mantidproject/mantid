@@ -1,19 +1,18 @@
 .. _Tube_Calibration_Corelli:
 
-==================
 Corelli Tube Calibration
-==================
+========================
 
 Introduction
-============
+------------
 
-Mantid has specific functionality for the Corelli instrument at Oak Ridge National Laboratory (ORNL). The Python scripts are located at: **MANTIDINSTALL**/scripts/corelli/Calibration (`github link <https://github.com/mantidproject/mantid/tree/master/scripts/corelli/calibration>`__).
+Mantid has specific functionality for the Corelli instrument at Oak Ridge National Laboratory (ORNL). The Python scripts are located at: ``**MANTIDINSTALL**/scripts/corelli/calibration`` (`github link <https://github.com/mantidproject/mantid/tree/master/scripts/corelli/calibration>`__).
 These scripts can be launched on MantidWorkbench.
 
 The overarching goal is to create and update the information from the applied calibration functions as new cycles are performed. The result is a database of calibrated vertical "Y"-coordinates stored for each bank as a `TableWorkspace <http://www.mantidproject.org/TableWorkspace>`_ with pixel_id and Y-coordinate columns.
 
 Performing a Calibration
-========================
+------------------------
 
 The following example illustrates the steps to follow for bank calibration.
 - Load counts from instrument file
@@ -37,29 +36,31 @@ Open the instrument view for workspaces counts and counts_10, then look at bank1
 
 
 Calibration Database
-====================
+--------------------
 
 Calibrated banks can then be stored in a database which follows the current structure:
 
-.. code-block:: bash
+
+.. code-block::
 
     database_path/
-                  manifest_corelli_20201201.csv 
-                  manifest_corelli_20210601.csv
-                  bank001/
-                          calibration_corelli_bank001_20201201.nxs.h5
-                          mask_corelli_bank001_20201201.nxs.h5
-                          fit_corelli_bank001_20201201.nxs.h5
-                          calibration_corelli_bank001_20210601.nxs.h5
-                          mask_corelli_bank001_20210601.nxs.h5
-                          fit_corelli_bank001_20210601.nxs.h5
+      manifest_corelli_20201201.csv 
+      manifest_corelli_20210601.csv
+      bank001/
+              calibration_corelli_bank001_20201201.nxs.h5
+              mask_corelli_bank001_20201201.nxs.h5
+              fit_corelli_bank001_20201201.nxs.h5
+              calibration_corelli_bank001_20210601.nxs.h5
+              mask_corelli_bank001_20210601.nxs.h5
+              fit_corelli_bank001_20210601.nxs.h5
                           
                           
-                  bank002/
-                  bank003/
-                   ...
+      bank002/
+      bank003
 
-where each bank subdirectory contains 3 binary NeXus hdf5 files per calibration cycle (identified by the date timestamp) corresponding to a workspace that be loaded directly on MantidWorkbench for:
+
+Each bank subdirectory contains 3 binary NeXus HDF5 files per calibration cycle (identified by the date timestamp) corresponding to a workspace that be loaded directly on MantidWorkbench for:
+
    - calibration: correctly calibrated pixel_id and Y-coordinates
    - mask: flagged pixel_id that didn't pass calibration criteria
    - fit: summary 
@@ -88,11 +89,11 @@ The user should only be dealing with the following functions when saving/loading
    database/load_calibration_set
 
 
-As an example we can use 
+As an example we can use:
 
 .. code-block:: Python
    
-   from corelli.calibration.database import (combine_spatial_banks, combine_temporal_banks, day_stamp, filename_bank_table, has_valid_columns, init_corelli_table, load_bank_table, load_calibration_set, new_corelli_calibration, save_bank_table, save_calibration_set, save_manifest_file, verify_date_format)
+   from corelli.calibration.database import save_calibration_set, load_bank_table, load_calibration_set
    from corelli.calibration.bank import calibrate_banks
                                           
    # populate a calibration database with a few cases. There should be at least one bank with two calibrations
