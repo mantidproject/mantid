@@ -1115,7 +1115,7 @@ PropertyManager SetSample::materialSettingsEnsureLegacyCompatibility(
     if (!compatible.existsProperty("NumberDensity")) {
       compatible.declareProperty("NumberDensity", numberDensity);
     } else {
-      compatible.setProperty("NumberDesnity", numberDensity);
+      compatible.setProperty("NumberDensity", numberDensity);
     }
   }
   if (materialArgs.existsProperty("SampleMassDensity")) {
