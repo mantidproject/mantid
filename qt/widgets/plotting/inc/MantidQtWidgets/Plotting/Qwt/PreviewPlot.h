@@ -93,6 +93,11 @@ public:
   void setCurveStyle(const QString &curveName, const int style);
   void setCurveSymbol(const QString &curveName, const int symbol);
 
+  void setOverrideAxisLabel(AxisID const &axisID, char const *const label);
+
+  void styleTickLabels(const char *axis, const char *style,
+                       const bool useOffset);
+
   RangeSelector *
   addRangeSelector(const QString &rsName,
                    RangeSelector::SelectType type = RangeSelector::XMINMAX);

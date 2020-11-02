@@ -143,7 +143,6 @@ void PreviewPlot::addSpectrum(const QString &lineName,
       QSharedPointer<PlotCurveConfiguration>(new PlotCurveConfiguration(
           ws, lineName, wsIndex, lineColour, plotKwargs));
   m_plottedLines.insert(lineName, plotCurveConfig);
-
   if (auto const xLabel = overrideAxisLabel(AxisID::XBottom))
     setAxisLabel(AxisID::XBottom, xLabel.get());
   if (auto const yLabel = overrideAxisLabel(AxisID::YLeft))
@@ -775,6 +774,15 @@ void PreviewPlot::toggleLegend(const bool checked) {
     removeLegend();
   }
   this->replot();
+}
+
+void PreviewPlot::styleTickLabels(const char *axis, const char *style,
+                                  const bool useOffset) {
+  try {
+    m_canvas->gca().styleTickLabels(axis, style, useOffset);
+  } catch (Mantid::PythonInterface::PythonException &e) {
+    throw std::runtime_error(e.what());
+  }
 }
 
 } // namespace MantidWidgets

@@ -5,11 +5,15 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/MplCpp/Axes.h"
+#include "MantidQtWidgets/Common/Python/QHashToDict.h"
+
 #include "MantidPythonInterface/core/CallMethod.h"
 #include "MantidPythonInterface/core/Converters/VectorToNDArray.h"
 #include "MantidPythonInterface/core/Converters/WrapWithNDArray.h"
 #include "MantidPythonInterface/core/ErrorHandling.h"
 #include "MantidPythonInterface/core/VersionCompat.h"
+
+#include <iostream>
 
 namespace MantidQt {
 namespace Widgets {
@@ -54,7 +58,11 @@ std::tuple<double, double> limitsToTuple(const Python::Object &axes,
  * Construct an Axes wrapper around an existing Axes instance
  * @param obj A matplotlib.axes.Axes instance
  */
-Axes::Axes(Python::Object obj) : InstanceHolder(std::move(obj), "plot") {}
+Axes::Axes(Python::Object obj) : InstanceHolder(std::move(obj), "plot") {
+  QHash<QString, QVariant> otherkwargs;
+  otherkwargs.insert("useOffset", false);
+  Python::Dict lll = Python::qHashToDict(otherkwargs);
+}
 
 /**
  * Clear all artists from the axes
@@ -115,6 +123,34 @@ void Axes::setXLabel(const char *label) {
   callMethodNoCheck<void, const char *>(pyobj(), "set_xlabel", label);
 }
 
+Python::Dict createPythonDict() {
+  QHash<QString, QVariant> otherkwargs;
+  otherkwargs.insert("useOffset", false);
+  Python::Dict dict = Python::qHashToDict(otherkwargs);
+  return dict;
+}
+
+void Axes::setXUseOffset(QHash<QString, QVariant> const &args) {
+  // Python::Dict kwargs = Python::qHashToDict(args);
+  GlobalInterpreterLock lock;
+  try {
+    try {
+      // auto kwargs = createPythonDict();
+      // int scilimits[2] = { 0, 0};
+      // callMethodNoCheck<void, Python::Dict>(pyobj(),
+      // "ticklabel_format",kwargs);
+      Python::Dict kwargs;
+      Python::List args;
+      kwargs["useOffset"] = false;
+      pyobj().attr("ticklabel_format")(*args, **kwargs);
+    } catch (...) {
+      throw PythonException();
+    }
+  } catch (PythonException const &ex) {
+    throw std::runtime_error(ex.what());
+  }
+}
+
 /**
  * @brief Set the Y-axis label
  * @param label String for the axis label
@@ -129,6 +165,25 @@ void Axes::setYLabel(const char *label) {
  */
 void Axes::setTitle(const char *label) {
   callMethodNoCheck<void, const char *>(pyobj(), "set_title", label);
+}
+
+/**
+ * Format the tick labels on an axis or axes
+ * @param char* axis :: [ 'x' | 'y' | 'both' ]
+ * @param char* style :: [ 'sci' (or 'scientific') | 'plain' ] plain turns off
+ * scientific notation
+ * @param bool useOffset :: True, the offset will be
+ * calculated as needed, False no offset will be used
+ */
+void Axes::styleTickLabels(const char *axis, const char *style,
+                           const bool useOffset) {
+  GlobalInterpreterLock lock;
+  Python::List args;
+  Python::Dict kwargs;
+  kwargs["axis"] = axis;
+  kwargs["style"] = style;
+  kwargs["useOffset"] = useOffset;
+  pyobj().attr("ticklabel_format")(*args, **kwargs);
 }
 
 /**

@@ -1021,3 +1021,7 @@ void PreviewPlot::disableContextMenu() {
   disconnect(m_uiForm.plot, SIGNAL(customContextMenuRequested(QPoint)), this,
              SLOT(showContextMenu(QPoint)));
 }
+
+void PreviewPlot::styleTickLabels(const char *axis, const char *style, const bool useOffset) {}
+
+void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID, char const *const label) {}

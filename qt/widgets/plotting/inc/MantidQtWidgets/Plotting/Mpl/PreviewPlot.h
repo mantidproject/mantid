@@ -85,6 +85,8 @@ public:
 
   void setOverrideAxisLabel(AxisID const &axisID, char const *const label);
 
+  void styleTickLabels(const char *axis, const char *style, const bool useOffset);
+
   void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);

@@ -172,6 +172,12 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace,
 #endif
 
   m_ui.dataPlot->clear();
+  auto _log = log();
+  m_ui.dataPlot->setOverrideAxisLabel(MantidQt::MantidWidgets::AxisID::XBottom, _log.c_str());
+  // If x scale is run number, ensure plain format
+  if (log() == "run_number")
+    m_ui.dataPlot->styleTickLabels("x", "plain", false);
+
   m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black,
                              kwargs);
 }

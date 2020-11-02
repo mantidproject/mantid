@@ -11,6 +11,7 @@
 #include <boost/python/borrowed.hpp>
 #include <boost/python/dict.hpp>
 #include <boost/python/object.hpp>
+#include <boost/python/list.hpp>
 
 /**
  * The intetion of this module is to centralize the access
@@ -29,6 +30,8 @@ using Object = boost::python::object;
 
 // Alias for boost python dict wrapper
 using Dict = boost::python::dict;
+
+using List = boost::python::list;
 
 // Alias for handle wrapping a raw PyObject*
 template <typename T = PyObject> using Handle = boost::python::handle<T>;
