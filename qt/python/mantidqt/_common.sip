@@ -984,6 +984,7 @@ public:
     void setFileExtensions(const QStringList &extensions);
     void findFiles(bool isModified);
     void isOptional(bool);
+	void setLastDirectory(const QString &lastDir);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);
