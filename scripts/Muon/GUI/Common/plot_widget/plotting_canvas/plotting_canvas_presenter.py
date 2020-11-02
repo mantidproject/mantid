@@ -285,7 +285,6 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
 
     def _get_selected_subplots_from_quick_edit_widget(self):
         subplots = self._options_presenter.get_selection()
-        print("waa", subplots)
         if len(subplots) > 0:
             indicies = [self._context.get_axis(name) for name in subplots]
             return subplots, indicies
@@ -301,10 +300,21 @@ class PlottingCanvasPresenter(PlottingCanvasPresenterInterface):
             return xlims, ylims
 
     def update_range(self):
-        # force off all
+        # get the updated values first
+        # changing the selection first changes the result
         xlim_list = self._view.get_xlim_list
+        ylim_list = self._view.get_ylim_list
         for axis, name in enumerate(self._context._subplots.keys()):
-            print("test", name, xlim_list[axis])
             self._context.update_xlim(name, xlim_list[axis])
-            # add some logic so it only updates the one it has to
-            self._options_presenter.set_plot_x_range(xlim_list[axis])
+            self._context.update_ylim(name, ylim_list[axis])
+
+        # force all to be not selected
+        selection_index = self._options_presenter.get_selection_index()
+        if selection_index==0:
+            self._options_presenter.set_selection_by_index(1)
+
+        # Logic to only update the quick edit once
+        selection = self._options_presenter.get_selection()
+        x_values = self._context.get_xlim(selection[0])       
+        y_values = self._context.get_ylim(selection[0])       
+        self._options_presenter.set_plot_x_range(x_values)

@@ -69,6 +69,12 @@ class QuickEditWidget(object):
     def get_selection(self):
         return self._presenter.get_selection()
 
+    def get_selection_index(self):
+        return self._presenter.get_selection_index()
+
+    def set_selection_by_index(self, index = 0):
+        self._presenter.set_selection_by_index(index)
+
     def set_plot_x_range(self, range):
         self._presenter.set_plot_x_range(range)
 

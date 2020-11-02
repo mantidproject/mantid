@@ -65,8 +65,11 @@ class QuickEditView(QtWidgets.QWidget):
     def find_subplot(self, name):
         return self.plot_selector.findText(name)
 
-    def set_selection(self, index):
+    def set_selection(self, index:int):
         self.plot_selector.setCurrentIndex(index)
+
+    def get_selection_index(self)->int:
+        return self.plot_selector.currentIndex()
 
     def plot_at_index(self, index):
         return self.plot_selector.itemText(index)
@@ -149,16 +152,4 @@ class QuickEditView(QtWidgets.QWidget):
     def get_errors(self):
         return self.errors.isChecked()
 
-    """ load/save from/to context """
 
-    def loadFromContext(self, context):
-        return
-        self.x_axis_changer.set_bounds(context["x bounds"])
-        self.y_axis_changer.set_bounds(context["y bounds"])
-
-    def getSubContext(self):
-        return
-        subcontext = {}
-        subcontext["x bounds"] = self.x_axis_changer.get_bounds()
-        subcontext["y bounds"] = self.y_axis_changer.get_bounds()
-        return subcontext

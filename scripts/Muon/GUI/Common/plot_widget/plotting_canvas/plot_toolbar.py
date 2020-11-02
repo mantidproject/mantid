@@ -146,6 +146,8 @@ class PlotToolbar(NavigationToolbar):
         if self._active == 'PAN':
             self._active = None
             self.enable_autoscale_notifier.notify_subscribers()
+            self.range_changed_notifier.notify_subscribers()
+
         else:
             self.uncheck_autoscale_notifier.notify_subscribers()
             self.disable_autoscale_notifier.notify_subscribers()

@@ -240,9 +240,16 @@ class PlottingCanvasView(QtWidgets.QWidget, PlottingCanvasViewInterface):
         xlim_list=[]
         for axis in self.fig.axes:
             min, max = axis.get_xlim()
-            print("values0.", min, max)
             xlim_list.append([min,max])
         return xlim_list
+
+    @property
+    def get_ylim_list(self):
+        ylim_list=[]
+        for axis in self.fig.axes:
+            min, max = axis.get_ylim()
+            ylim_list.append([min,max])
+        return ylim_list
 
     def autoscale_selected_y_axis(self, axis_number):
         if axis_number >= len(self.fig.axes):

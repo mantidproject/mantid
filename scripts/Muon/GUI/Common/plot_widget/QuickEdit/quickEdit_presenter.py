@@ -100,6 +100,12 @@ class QuickEditPresenter(object):
             return self.all()
         return [name]
 
+    def get_selection_index(self)->int:
+        return self._view.get_selection_index()
+
+    def set_selection_by_index(self, index:int = 0):
+        self._view.set_selection(index)
+
     def rm_subplot(self, name):
         current = self._view.current_selection()
         if current == name:
