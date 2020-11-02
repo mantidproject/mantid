@@ -588,6 +588,9 @@ void InstrumentWidget::replaceWorkspace(
   renameWorkspace(newWs);
   m_instrumentActor.reset(new InstrumentActor(QString::fromStdString(newWs)));
 
+  // update the integration widget
+  updateIntegrationWidget();
+
   // update the view and colormap
   auto surface = getSurface();
   surface->resetInstrumentActor(m_instrumentActor.get());
@@ -595,9 +598,6 @@ void InstrumentWidget::replaceWorkspace(
 
   // reset the instrument position
   m_renderTab->resetView();
-
-  // update the integration widget
-  updateIntegrationWidget();
 
   // reset the plot and the info widget in the pick tab
   m_pickTab->clearWidgets();
@@ -608,7 +608,10 @@ void InstrumentWidget::replaceWorkspace(
 }
 
 /**
+ * @brief InstrumentWidget::updateIntegrationWidget
  * Update the range of the integration widget, and show or hide it is needed
+ * @param init : boolean set to true if the integration widget is still being
+ * initialized
  */
 void InstrumentWidget::updateIntegrationWidget(bool init) {
   m_xIntegration->setTotalRange(m_instrumentActor->minBinValue(),

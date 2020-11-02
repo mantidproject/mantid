@@ -304,7 +304,8 @@ InstrumentWidgetPickTab::InstrumentWidgetPickTab(InstrumentWidget *instrWidget)
 void InstrumentWidgetPickTab::collapsePlotPanel() {
   if (!m_instrWidget->isIntegrable()) {
     m_plotPanel->collapseCaption();
-  }
+  } else
+    m_plotPanel->expandCaption();
 }
 
 /**
