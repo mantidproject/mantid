@@ -5,6 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtCore
+from os import path
 
 from mantidqt.utils.qt import load_ui
 
@@ -63,6 +64,11 @@ class FittingDataView(QtWidgets.QWidget, Ui_data):
     # =================
     # Component Setters
     # =================
+
+    def set_file_last(self, filepath):
+        self.finder_data.setUserInput(filepath)
+        directory, discard = path.split(filepath)
+        self.finder_data.setLastDirectory(directory)
 
     def set_load_button_enabled(self, enabled):
         self.button_load.setEnabled(enabled)
