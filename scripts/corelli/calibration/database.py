@@ -19,7 +19,7 @@ from mantid.kernel import logger
 from mantid.simpleapi import CreateEmptyTableWorkspace, SaveNexusProcessed, LoadNexusProcessed
 
 # Functions exposed to the general user (public) API
-__all__ = ['load_calibration_set', 'new_corelli_calibration', 'save_calibration_set']
+__all__ = ['day_stamp', 'load_calibration_set', 'new_corelli_calibration', 'save_calibration_set']
 
 # Custom type aliases
 CalibrationInputSetTypes = Union[str, TableWorkspace, Workspace2D, List[TableWorkspace], List[str], WorkspaceGroup]
@@ -496,10 +496,12 @@ def load_calibration_set(input_workspace: Union[str, Workspace],
                 filename = date_to_file[available_dates[available_dates_index - 1]]
                 break
         if filename is not None:
+            logger.notice(f'Found {filename} for {str(input_workspace)} with run start {run_start}')
             instrument_tables[table_type] = LoadNexusProcessed(Filename=filename,
                                                                OutputWorkspace=workspace_names[table_type])
         else:
-            message = f'No calibration file found prior to {run_start}. Oldest calibration dates {available_dates[0]}'
+            message = f'No {table_type} file found for {str(input_workspace)} with run start {run_start}. ' \
+                      f'Oldest calibration dates {available_dates[0]}'
             logger.warning(message)
 
     return instrument_tables.values()
