@@ -34,6 +34,11 @@ class InstrumentViewPresenter(ObservingPresenter):
     def current_workspace_equals(self, name):
         return self.ws_name == name
 
+    """
+    Replace the workspace being shown by the instrument widget.
+    @param new_workspace_name : the name of the new workspace to set
+    @param new_window_name : the new title of the window. Optional, if none provided, uses the name of the workspace.
+    """
     def replace_workspace(self, new_workspace_name, new_window_name=None):
         if new_window_name is None:
             new_window_name = new_workspace_name
