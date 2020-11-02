@@ -270,7 +270,6 @@ void LoadILLDiffraction::initStaticWorkspace() {
   } else if (m_scanType == OtherScan) {
     nBins = m_numberScanPoints;
   }
-
   m_outWorkspace = WorkspaceFactory::Instance().create("Workspace2D", nSpectra,
                                                        nBins, nBins);
 }
@@ -557,7 +556,6 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
   std::transform(monitor.begin(), monitor.end(),
                  m_outWorkspace->mutableE(0).begin(),
                  [](double e) { return sqrt(e); });
-
   // Assign detector counts
   PARALLEL_FOR_IF(Kernel::threadSafe(*m_outWorkspace))
   for (int i = NUMBER_MONITORS;
@@ -965,7 +963,7 @@ void LoadILLDiffraction::convertAxisAndTranspose() {
 void LoadILLDiffraction::cropWorkspace() {
   auto nSpectra = static_cast<int>((m_numberDetectorsActual + NUMBER_MONITORS));
   if (m_scanType == DetectorScan) {
-    nSpectra *= m_numberScanPoints;
+    nSpectra *= static_cast<int>(m_numberScanPoints);
   }
   auto cropWs = createChildAlgorithm("CropWorkspace");
   cropWs->setProperty("InputWorkspace", m_outWorkspace);
