@@ -30,5 +30,6 @@ Bugfixes
 - Only display slice viewer widget for MDEventWorkspaces with 2 or more dimensions.
 - Fix Workbench crashes upon deleting rows or columns in a TableWorkspace.
 - Fix crash on second call to ManageUserDirectories after pressing Esc to close it.
+- A bug in plot config where changing an axes title in the axis tab did not change the title in the curves tab.
 
 :ref:`Release 6.0.0 <v6.0.0>`
