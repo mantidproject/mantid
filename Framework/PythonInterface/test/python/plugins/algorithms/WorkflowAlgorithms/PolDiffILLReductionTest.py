@@ -103,20 +103,6 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_output(mtd['vanadium_sum_1'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Scattering angle', 'Degrees')
         self._check_process_flag(mtd['vanadium_sum_1'], 'Vanadium')
 
-    def test_vanadium_flat_plate(self):
-        PolDiffILLReduction(Run='396917', ProcessAs='Container', OutputWorkspace='container_ws')
-        sampleProperties = {'SampleMass': 8.54, 'FormulaUnits': 50, 'SampleChemicalFormula': 'V',
-                            'SampleThickness': 2, 'Height': 2, 'SampleWidth': 2, 'BeamWidth': 2.5, 'BeamHeight': 2.5,
-                            'SampleDensity': 1.18, 'ContainerChemicalFormula': 'Al', 'ContainerDensity': 2.7,
-                            'ContainerFrontThickness': 0.02, 'ContainerBackThickness': 0.02}
-        PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium_flat_plate',
-                            ContainerInputWorkspace='container_ws',
-                            SampleAndEnvironmentProperties=sampleProperties,
-                            SampleGeometry='FlatPlate',
-                            OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_flat_plate'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
-        self._check_process_flag(mtd['vanadium_flat_plate'], 'Vanadium')
-
     def test_vanadium_annulus(self):
         PolDiffILLReduction(Run='396917', ProcessAs='Container', OutputWorkspace='container_ws')
         sampleProperties = {'SampleMass': 8.54, 'FormulaUnits': 50, 'SampleChemicalFormula': 'V',
