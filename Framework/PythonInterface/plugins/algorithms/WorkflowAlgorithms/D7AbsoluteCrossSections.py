@@ -88,6 +88,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='The output workspace.')
 
+        self.declareProperty(WorkspaceGroupProperty('CrossSectionsOutputWorkspace', '',
+                                                    direction=Direction.Output,
+                                                    optional=PropertyMode.Optional),
+                             doc='The output workspace with separated cross-sections.')
+
         self.declareProperty(name="CrossSectionSeparationMethod",
                              defaultValue="Uniaxial",
                              validator=StringListValidator(["None", "Uniaxial", "XYZ", "10p"]),
@@ -150,7 +155,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                                                                LogicOperator.And))
 
     def _data_structure_helper(self, ws):
-        nComponents = 0
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
         measurements = set()
         for name in mtd[ws].getNames():
@@ -387,12 +391,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         input_ws = self.getPropertyValue('InputWorkspace')
         if self.getPropertyValue('CrossSectionSeparationMethod') != 'None':
             component_ws = self._cross_section_separation(input_ws)
+            if not self.getProperty('CrossSectionsOutputWorkspace').isDefault:
+                self.setProperty('CrossSectionsOutputWorkspace', mtd[component_ws])
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         if normalisation_method == 'None':
-            if self.getPropertyValue('CrossSectionSeparationMethod') != 'None':
-                output_ws = component_ws
-            else:
-                output_ws = input_ws
+            output_ws = input_ws
         else:
             if normalisation_method != 'Vanadium':
                 det_efficiency_input = self._conjoin_cross_sections(component_ws)
@@ -401,6 +404,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
             output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
             DeleteWorkspaces([det_efficiency_ws, det_efficiency_input]) # cleanup
+            Transpose(InputWorkspace=output_ws, OutputWorkspace=output_ws)
         self.setProperty('OutputWorkspace', mtd[output_ws])
 
 
