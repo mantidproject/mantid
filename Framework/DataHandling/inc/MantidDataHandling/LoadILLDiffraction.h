@@ -113,7 +113,7 @@ private:
   Types::Core::DateAndTime m_startTime; ///< start time of acquisition
   ScanType m_scanType;                  ///< NoScan, DetectorScan or OtherScan
   double m_pixelHeight;                 ///< height of the pixel in D2B
-  double m_maxHeight; ///< maximum absolute height of the D2B tubes
+  double m_maxHeight{0.}; ///< maximum absolute height of the D2B tubes
 
   double m_pixelSize;        ///< angular pixel size in D20
   size_t m_numberDeadPixels; ///< number of dead pixels in D20
