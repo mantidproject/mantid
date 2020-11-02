@@ -29,7 +29,7 @@ class LoadRunWidgetIncrementDecrementMultipleFileModeTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         if thread_model:
             thread_model._thread.wait()
-            QApplication.instance().processEvents()
+            QApplication.sendPostedEvents()
 
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly

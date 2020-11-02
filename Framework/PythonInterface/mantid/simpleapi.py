@@ -85,15 +85,6 @@ def extract_progress_kwargs(kwargs):
     end = kwargs.pop('endProgress', None)
     return start, end, kwargs
 
-def _show_dialog_fn_deprecation_warning(name):
-    """Raise a deprecation warning for a *Dialog being used.
-    """
-    import warnings
-    help_msg = "{} has been deprecated. " \
-               "All Dialog functions will be removed in a future release.".format(name)
-    warnings.warn(help_msg, UserWarning)
-    logger.warning(help_msg)
-
 
 def Load(*args, **kwargs):
     """
@@ -179,50 +170,6 @@ def Load(*args, **kwargs):
 
 
 ######################################################################
-
-
-def LoadDialog(*args, **kwargs):
-    """Popup a dialog for the Load algorithm. More help on the Load function
-    is available via help(Load).
-
-    Additional arguments available here (as keyword only) are:
-      - Enable :: A CSV list of properties to keep enabled in the dialog
-      - Disable :: A CSV list of properties to disable in the dialog
-      - Message :: An optional message string
-    """
-    _show_dialog_fn_deprecation_warning("LoadDialog")
-
-    arguments = {}
-    filename = None
-    wkspace = None
-    if len(args) == 2:
-        filename = args[0]
-        wkspace = args[1]
-    elif len(args) == 1:
-        if 'Filename' in kwargs:
-            filename = kwargs['Filename']
-            wkspace = args[0]
-        elif 'OutputWorkspace' in kwargs:
-            wkspace = kwargs['OutputWorkspace']
-            filename = args[0]
-    arguments['Filename'] = filename
-    arguments['OutputWorkspace'] = wkspace
-    arguments.update(kwargs)
-
-    if 'Enable' not in arguments:
-        arguments['Enable'] = ''
-    if 'Disable' not in arguments:
-        arguments['Disable'] = ''
-    if 'Message' not in arguments:
-        arguments['Message'] = ''
-
-    algm = _create_algorithm_object('Load')
-    set_properties_dialog(algm, **arguments)
-    algm.execute()
-    return algm
-
-
-# ------------------------------------------------------------------------------
 
 
 def StartLiveData(*args, **kwargs):
@@ -456,37 +403,6 @@ def IqtFitSimultaneous(*args, **kwargs):
     The data set is defined in a way similar to Fit algorithm.
     """
     return None
-
-
-def FitDialog(*args, **kwargs):
-    """Popup a dialog for the Load algorithm. More help on the Load function
-    is available via help(Load).
-
-    Additional arguments available here (as keyword only) are:
-      - Enable :: A CSV list of properties to keep enabled in the dialog
-      - Disable :: A CSV list of properties to disable in the dialog
-      - Message :: An optional message string
-    """
-    # default values will be overridden
-    arguments = {'Enable': '',
-                 'Disable': '',
-                 'Message': ''}
-    try:
-        function, inputworkspace = _get_mandatory_args('FitDialog', ['Function', 'InputWorkspace'], *args, **kwargs)
-        arguments['Function'] = function
-        arguments['InputWorkspace'] = inputworkspace
-    except RuntimeError:
-        pass
-    arguments.update(kwargs)
-
-    (_startProgress, _endProgress, kwargs) = extract_progress_kwargs(kwargs)
-
-    algm = _create_algorithm_object('Fit', startProgress=_startProgress,
-                                    endProgress=_endProgress)
-    set_properties_dialog(algm, **arguments)
-    algm.execute()
-    return algm
-
 
 # --------------------------------------------------- --------------------------
 
@@ -1206,111 +1122,7 @@ def _find_parent_pythonalgorithm(frame):
     else:
         return None
 
-
-# -------------------------------------------------------------------------------------------------------------
-
-
-def set_properties_dialog(algm_object, *args, **kwargs):
-    """
-    Set the properties all in one go assuming that you are preparing for a
-    dialog box call. If the dialog is cancelled raise a runtime error, otherwise
-    return the algorithm ready to execute.
-
-    :param algm_object An initialized algorithm object
-    """
-    if not __gui__:
-        raise RuntimeError("Can only display properties dialog in gui mode")
-
-    # generic setup
-    enabled_list = [s.lstrip(' ') for s in kwargs.pop("Enable", "").split(',')]  # no longer needed
-    disabled_list = [s.lstrip(' ') for s in kwargs.pop("Disable", "").split(',')]  # no longer needed
-    message = kwargs.pop("Message", "")
-    presets = '|'
-
-    # -------------------------------------------------------------------------------
-    def make_str(value_to_use):
-        """Make a string out of a value_to_use such that the Mantid properties can understand it
-        """
-        import numpy
-
-        if isinstance(value_to_use, numpy.ndarray):
-            value_to_use = list(value_to_use)  # Temp until more complete solution available (#2340)
-        if isinstance(value_to_use, list) or \
-                isinstance(value_to_use, _kernel.std_vector_dbl) or \
-                isinstance(value_to_use, _kernel.std_vector_int) or \
-                isinstance(value_to_use, _kernel.std_vector_long) or \
-                isinstance(value_to_use, _kernel.std_vector_size_t):
-            return str(value_to_use).lstrip('[').rstrip(']')
-        elif isinstance(value_to_use, tuple):
-            return str(value_to_use).lstrip('(').rstrip(')')
-        elif isinstance(value_to_use, bool):
-            if value_to_use:  # not sure why these are set to '0' and '1'
-                return '1'
-            else:
-                return '0'
-        else:
-            return str(value_to_use)
-
-    # Translate positional arguments and add them to the keyword list
-    ordered_props = algm_object.orderedProperties()
-    for index, value in enumerate(args):
-        propname = ordered_props[index]
-        kwargs[propname] = args[index]
-
-    # configure everything for the dialog
-    for name in kwargs.keys():
-        value = kwargs[name]
-        if value is not None:
-            presets += name + '=' + make_str(value) + '|'
-
-    # finally run the configured dialog
-    import mantidplot
-    dialog_accepted = mantidplot.createScriptInputDialog(algm_object, presets, message,
-                                                         enabled_list, disabled_list)
-    if not dialog_accepted:
-        raise RuntimeError('Algorithm input cancelled')
-
-
 # ----------------------------------------------------------------------------------------------------------------------
-
-
-def _create_algorithm_dialog(algorithm, version, _algm_object):
-    """
-        Create a function that will set up and execute an algorithm dialog.
-        The help that will be displayed is that of the most recent version.
-        :param algorithm: name of the algorithm
-        :param _algm_object: the created algorithm object.
-    """
-
-    def algorithm_wrapper(*args, **kwargs):
-        _show_dialog_fn_deprecation_warning("{}Dialog".format(algorithm))
-
-        _version = version
-        if "Version" in kwargs:
-            _version = kwargs["Version"]
-            del kwargs["Version"]
-        for item in ["Message", "Enable", "Disable"]:
-            if item not in kwargs:
-                kwargs[item] = ""
-
-        algm = _create_algorithm_object(algorithm, _version)
-        set_properties_dialog(algm, *args, **kwargs)  # throws if input cancelled
-        algm.execute()
-        return algm
-
-    # enddef
-    arg_list = []
-    for p in _algm_object.orderedProperties():
-        arg_list.append("%s=None" % p)
-    arg_str = ','.join(arg_list)
-    signature = ("\b%s" % arg_str, "\b\bMessage=\"\", Enable=\"\", Disable=\"\", Version=%d" % version)
-    algm_wrapper = _customise_func(algorithm_wrapper, "%sDialog" % algorithm,
-                                   signature, "\n\n%s dialog" % algorithm)
-
-    globals()["{}Dialog".format(algorithm)] = algm_wrapper
-    # Register aliases
-    for alias in _algm_object.alias().strip().split():  # split on whitespace
-        globals()["{}Dialog".format(alias)] = algm_wrapper
 
 
 def _create_fake_function(name):
@@ -1408,9 +1220,6 @@ def _translate():
             _attach_algorithm_func_as_method(method_name, algorithm_wrapper, algm_object)
             new_methods[method_name] = algm_object.name()
         new_func_attrs.append(name)
-
-        # Dialog variant
-        _create_algorithm_dialog(name, max(versions), algm_object)
 
     return new_func_attrs
 

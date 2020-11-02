@@ -45,10 +45,10 @@ std::string InstrumentValidator::checkValidity(
     return "The workspace must have an instrument defined";
 
   std::list<std::string> missing;
-  if ((m_requires & SourcePosition) && !inst->getSource()) {
+  if ((m_requires & SourcePosition) && !inst->hasSource()) {
     missing.emplace_back("source");
   }
-  if ((m_requires & SamplePosition) && !inst->getSample()) {
+  if ((m_requires & SamplePosition) && !inst->hasSample()) {
     missing.emplace_back("sample holder");
   }
 

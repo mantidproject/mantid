@@ -88,7 +88,6 @@ public:
   void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
   std::tuple<double, double> getAxisRange(AxisID axisID = AxisID::XBottom);
-  void disableContextMenu();
 
   void allowRedraws(bool state);
   void replotData();
@@ -197,7 +196,6 @@ private:
   QActionGroup *m_contextXScale, *m_contextYScale;
   QAction *m_contextLegend;
   QActionGroup *m_contextErrorBars;
-  bool m_context_enabled;
 };
 
 } // namespace MantidWidgets

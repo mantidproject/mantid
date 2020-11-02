@@ -169,6 +169,23 @@ class GeneralSettingsTest(unittest.TestCase):
         mock_CONF.set.assert_called_once_with(GeneralProperties.PROMPT_SAVE_EDITOR_MODIFIED.value, False)
 
     @patch(WORKBENCH_CONF_CLASSPATH)
+    def test_action_prompt_deleting_workspace(self, mock_CONF):
+        presenter = GeneralSettings(None)
+        presenter.settings_presenter = MagicMock()
+
+        presenter.action_prompt_deleting_workspace(True)
+
+        mock_CONF.set.assert_called_once_with(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, True)
+        presenter.settings_presenter.register_change_needs_restart.assert_called_once()
+        mock_CONF.set.reset_mock()
+        presenter.settings_presenter.reset_mock()
+
+        presenter.action_prompt_deleting_workspace(False)
+
+        mock_CONF.set.assert_called_once_with(GeneralProperties.PROMPT_ON_DELETING_WORKSPACE.value, False)
+        presenter.settings_presenter.register_change_needs_restart.assert_called_once()
+
+    @patch(WORKBENCH_CONF_CLASSPATH)
     @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
     def test_load_current_setting_values(self, mock_ConfigService, mock_CONF):
         # load current setting is called automatically in the constructor

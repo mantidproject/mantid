@@ -8,7 +8,7 @@
 from copy import deepcopy
 import numpy as np
 import re
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 from corelli.calibration.utils import InputTable, WorkspaceGroupTypes, WorkspaceTypes  # custom type aliases
 # imports from Mantid
 from mantid import AnalysisDataService, mtd
@@ -200,6 +200,7 @@ def criterion_peak_vertical_position(peak_table: InputTable,
     Flag tubes whose wire shadows vertical positions (Y-coordinate) deviate considerably from the
     vertical positions when averaged for all tubes in the bank.
 
+
     .. math::
 
       <p_i> = \frac{1}{n_t} \Sum_{j=1}^{n_t} p_{ij}
@@ -210,6 +211,7 @@ def criterion_peak_vertical_position(peak_table: InputTable,
     :param summary: name of output Workspace2D containing deviations and Z-score for each tube.
     :param zscore_threshold: maximum Z-score for the vertical positions of a tube.
     :param deviation_threshold: maximum deviation (in meters) for the vertical positions of the wire shadows.
+        Default value (0.00035m) approximately corresponds to the height of three CORELLI pixels.
     :return: array of booleans, one per tube. `True` is the tube passes the acceptance criterion, `False` otherwise.
     """
     table = mtd[str(peak_table)]  # handle to the peak table
@@ -217,7 +219,7 @@ def criterion_peak_vertical_position(peak_table: InputTable,
     # `positions_average` stores the vertical position for each wire shadow, averaged for all tubes
     positions_average = [np.mean(table.column(column_number)) for column_number in range(1, 1 + peak_count)]
 
-    deviations = list()  # a measure of how much the vertical positions deviate from the mean positions
+    deviations: List[float] = list()  # a measure of how much the vertical positions deviate from the mean positions
     tube_count = table.rowCount()  # number of tubes in the bank
     for tube_index in range(tube_count):
         positions = np.array(list(table.row(tube_index).values())[1:])  # peak positions for the current tube
@@ -268,7 +270,7 @@ def criterion_peak_vertical_position(peak_table: InputTable,
 def criterion_peak_pixel_position(peak_table: InputTable,
                                   summary: Optional[str] = None,
                                   zscore_threshold: float = 2.5,
-                                  deviation_threshold: float = 0.0035) -> np.ndarray:
+                                  deviation_threshold: float = 3) -> np.ndarray:
     r"""
     Flag tubes whose peak pixel positions deviate considerably from the peak pixel positions when
     averaged for all tubes in the bank.
@@ -282,7 +284,8 @@ def criterion_peak_pixel_position(peak_table: InputTable,
     :param peak_table: pixel positions of the peaks for each tube
     :param summary: name of output Workspace2D containing deviations and Z-score for each tube.
     :param zscore_threshold: maximum Z-score for the pixels positions of a tube.
-    :param deviation_threshold: maximum deviation (in pixels) for the pixels positions of a tube.
+    :param deviation_threshold: maximum deviation (in pixels) for the pixels positions of a tube. The
+        default value (3) corresponds to the height of three pixels.
     :return: array of booleans, one per tube. `True` is the tube passes the acceptance criterion, `False` otherwise.
     """
     table = mtd[str(peak_table)]  # handle to the peak table

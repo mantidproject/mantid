@@ -56,6 +56,9 @@ public:
 
   Instrument *clone() const override;
 
+  bool hasSource() const;
+  bool hasSample() const;
+
   IComponent_const_sptr getSource() const;
   IComponent_const_sptr getSample() const;
   Kernel::V3D getBeamDirection() const;

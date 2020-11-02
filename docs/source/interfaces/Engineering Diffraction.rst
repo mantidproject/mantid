@@ -35,7 +35,8 @@ Settings
     Provides a range of options that apply across the entire interface, currently
     providing the option to change the default output directory and force the
     recalculation of the vanadium correction files. The user can also select the
-    log values from a list which are loaded with data in the fitting tab.
+    log values from a list which are loaded with data in the fitting tab and select 
+    a log by which to sort the runs in a sequential fit.
 
 Close
     Close the interface.
@@ -49,7 +50,7 @@ Red Stars
 
 Status Bar
     The status bar shows the calibration run numbers the GUI is currently using.
-	It also displays the save directory (which can be changed in the settings).
+    It also displays the save directory (which can be changed in the settings).
 
 Saved File Outputs
     The location of files saved by the GUI during processing will be shown in the mantid
@@ -57,6 +58,8 @@ Saved File Outputs
 
     *Note*: The locations are shown at "Notice" level, so may not appear if the messages log
     is on the incorrect setting.
+
+.. _ui engineering calibration:
 
 Calibration
 -----------
@@ -167,14 +170,17 @@ This tab will allow for single peak fitting of focused run files.
 
 Focused run files can be loaded from the file system into mantid from the interface and converted to units TOF or d-sapcing. The interface will keep track of all the
 workspaces that it has created from these files. When a focussed run is loaded, the proton charge weighted average (and standard deviation) of the log values set in the 
-settings options are calculated and stroed in a grouped workspace accessible in the main mantid window.
+settings options are calculated and stored in a grouped workspace accessible in the main mantid window.
 
 Loaded workspaces can be plotted in the interface and the mantid fitting capability can be accessed from the 'Fit' button on the plot toolbar.
 This allows for the user to select peaks of any supported type (e.g. :ref:`Pseudo-Voigt <func-PseudoVoigt>` and
 :ref:`BackToBackExponential <func-BackToBackExponential>`) by right-clicking on the plot. The inital parameters can be varied interactively by dragging sliders (vertical lines on the plot).
+After a successful fit the best-fit model is stored as a setup in the fit browser (Setup > Custom Setup) with the name of the workspace fitted. 
+Selecting this loads the function and the parameters and the curve can be inspected by doing Display > Plot Guess.
 
-The output from the fit is currently stored in a table workspace. In future the plan is to store the fit and metadata (in the form of the grouped table worksapces 
-containing the average log vlaues) in a nexus format which can also be loaded to provide a guess for the fit to another run.
+The output from the fit is stored in a group of workspaces that contains a matrix workspace of the fit value and error for each parameter in the model. If there is more than one of the same function, the parameters are stored in the same workspace with different x-values. For example, if there were two Gaussian peaks then there would be a workspace for each parameter of the Gaussian (i.e. Height, PeakCentre, Sigma) each of which will have two columns corresponding to each peak. Each workspace has a spectra per run loaded (each row in the table of the UI fitting tab). In general different models/functions could be fitted to each run, so when there is a parameter that does not exist for a run (or that run has not yet been fitted), the Y and E fields in the relevant row are filled with NaNs. The group of fit workspaces also contains a table workspace that stores the model string that can be copied into the fit browser (Setup > Manage Setup > Load From String).
+
+The workspaces can be fit sequentially (sorted by the average of a chosen log in the settings). If a valid model is present in the fit browser then the Sequential Fit button will be enabled - it is not necessary to run an initial fit. The user may want to fix or constrain certain model parameters, which can be done in the usual way in the fit browser. The sequential fit will popoulate the fit tables as above and store the model in the Custom Setups.
 
 Parameters
 ^^^^^^^^^^
@@ -185,3 +191,5 @@ Focused Run Files
 
 Peak Positions
     A comma separated list of peak positions to be used when performing the fit.
+
+.. categories:: Interfaces Diffraction
