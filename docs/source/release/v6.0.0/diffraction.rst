@@ -29,7 +29,7 @@ New features
 Improvements
 ############
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
-- :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` is fixed when treating more than one scans merged.
+- :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` is corrected when treating multiple scans merged.
 
 Bugfixes
 ########
