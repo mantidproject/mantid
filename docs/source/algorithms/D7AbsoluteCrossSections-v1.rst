@@ -137,7 +137,7 @@ Usage
 
    Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz') # loads already reduced data
    D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
-                                OutputWorkspace='xyz')
+                           CrossSectionsOutputWorkspace='xyz', OutputWorkspace='_unused')
    print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
    SumSpectra(InputWorkspace=mtd['xyz'][1], EndWorkspaceIndex=mtd['xyz'][1].getNumberHistograms()-1,
               OutputWorkspace='sum_incoherent')
