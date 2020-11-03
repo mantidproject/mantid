@@ -88,15 +88,14 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
         self.assertTrue(mtd[ws].getNumberOfEntries(), nEntries)
         for entry in mtd[ws]:
             self.assertTrue(isinstance(entry, MatrixWorkspace))
+            self.assertTrue(entry.isDistribution())
             if onlySeparation:
                 name = entry.name()
                 name = name[name.rfind("_")+1:]
                 self.assertTrue(name in ['Coherent', 'Incoherent', 'Magnetic'])
                 self.assertTrue(entry.isHistogramData())
-                self.assertTrue(not entry.isDistribution())
             else:
                 self.assertTrue(not entry.isHistogramData())
-                self.assertTrue(not entry.isDistribution())
             self.assertEqual(entry.blocksize(), blocksize)
             self.assertEqual(entry.getNumberHistograms(), spectra)
             self.assertTrue(entry.getHistory())

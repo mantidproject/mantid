@@ -387,12 +387,20 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_name)
         return output_name
 
+    def _set_as_distribution(self, ws):
+        for entry in mtd[ws]:
+            entry.setDistribution(True)
+        return ws
+
     def PyExec(self):
         input_ws = self.getPropertyValue('InputWorkspace')
+
         if self.getPropertyValue('CrossSectionSeparationMethod') != 'None':
             component_ws = self._cross_section_separation(input_ws)
+            self._set_as_distribution(component_ws)
             if not self.getProperty('CrossSectionsOutputWorkspace').isDefault:
                 self.setProperty('CrossSectionsOutputWorkspace', mtd[component_ws])
+
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         if normalisation_method == 'None':
             output_ws = input_ws
@@ -405,6 +413,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
             DeleteWorkspaces([det_efficiency_ws, det_efficiency_input]) # cleanup
             Transpose(InputWorkspace=output_ws, OutputWorkspace=output_ws)
+            self._set_as_distribution(output_ws)
         self.setProperty('OutputWorkspace', mtd[output_ws])
 
 
