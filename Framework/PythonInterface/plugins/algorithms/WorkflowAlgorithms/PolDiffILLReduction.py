@@ -283,11 +283,20 @@ class PolDiffILLReduction(PythonAlgorithm):
         CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace=unit_ws)
         background_ws = 'background_ws'
         tmp_names = [unit_ws, background_ws]
+        nMeasurements = self._data_structure_helper()
+        singleContainerPerPOL = mtd[container_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
+        singleAbsorberPerPOL = mtd[container_ws].getNumberOfEntries() < mtd[ws].getNumberOfEntries()
         for entry_no, entry in enumerate(mtd[ws]):
-            container_entry = mtd[container_ws][entry_no].name()
+            if singleContainerPerPOL:
+                container_entry = mtd[container_ws][entry_no % nMeasurements].name()
+            else:
+                container_entry = mtd[container_ws][entry_no].name()
+            if singleAbsorberPerPOL:
+                absorber_entry = mtd[absorber_ws][entry_no % nMeasurements].name()
+            else:
+                absorber_entry = mtd[absorber_ws][entry_no].name()
             mtd[container_entry].setYUnit('')
             mtd[transmission_ws].setYUnit('')
-            absorber_entry = mtd[absorber_ws][entry_no].name()
             mtd[absorber_entry].setYUnit('')
             entry.setYUnit('')
             container_corr = container_entry + '_corr'
@@ -512,9 +521,12 @@ class PolDiffILLReduction(PythonAlgorithm):
             entry.setYUnitLabel(unit)
         return ws
 
-    def _finalize(self, ws, process):
+    def _finalize(self, ws, process, progress):
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
+        if process != 'Quartz' and self.getProperty('OutputTreatment').value == 'Average':
+            progress.report('Merging polarisations')
+            self._merge_polarisations(ws, average_detectors=True)
         mtd[ws][0].getRun().addProperty('ProcessedAs', process, True)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
@@ -577,15 +589,12 @@ class PolDiffILLReduction(PythonAlgorithm):
                 if self.getPropertyValue('SampleGeometry') != 'None' and container_ws != '' :
                     progress.report('Applying self-attenuation correction')
                     self._apply_self_attenuation_correction(ws, container_ws)
-                if self.getProperty('OutputTreatment').value == 'Average':
-                    progress.report('Merging polarisations')
-                    self._merge_polarisations(ws, average_detectors=True)
                 if process == 'Vanadium':
                     progress.report('Normalising vanadium output')
                     self._normalise_vanadium(ws)
                 self._set_units(ws)
 
-        self._finalize(ws, process)
+        self._finalize(ws, process, progress)
 
 
 AlgorithmFactory.subscribe(PolDiffILLReduction)
