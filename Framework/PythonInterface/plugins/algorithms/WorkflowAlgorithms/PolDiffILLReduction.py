@@ -443,6 +443,10 @@ class PolDiffILLReduction(PythonAlgorithm):
             if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerInnerRadius'] = self._sampleAndEnvironmentProperties['ContainerInnerRadius'].value
                 kwargs['ContainerOuterRadius'] = self._sampleAndEnvironmentProperties['ContainerOuterRadius'].value
+        if 'EventsPerPoint' in self._sampleAndEnvironmentProperties:
+            kwargs['EventsPerPoint'] = self._sampleAndEnvironmentProperties['EventsPerPoint'].value
+        else:
+            kwargs['EventsPerPoint'] = 5000
 
         self._enforce_uniform_units(sample_ws, container_ws)
         if geometry_type == 'Custom':
