@@ -480,7 +480,7 @@ class ReductionWrapper(object):
             return(False,self._last_runnum_added_to_archive,
                    'Error accessing log file {0}'.format(propman.archive_upload_log_file))
         # If the file is modified during the read operation, the read can return anything
-        # Let's be on the safe and check this operation too.
+        # Let's be on a safe side and guard the contents parsing too.
         try:
             contents = contents.split()
             run_written = int(contents[1])
