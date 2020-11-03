@@ -451,7 +451,8 @@ void export_MatrixWorkspace() {
            "the bin-width.")
       .def("replaceAxis", &pythonReplaceAxis,
            (arg("self"), arg("axisIndex"), arg("newAxis")),
-           "Replaces one of the workspace's axes with the new one provided.")
+           "Replaces one of the workspace's axes with the new one provided. "
+           "The axis is cloned.")
       .def("applyBinEdgesFromAnotherWorkspace",
            &applyBinEdgesFromAnotherWorkspace,
            (arg("self"), arg("ws"), arg("getIndex"), arg("setIndex")),
