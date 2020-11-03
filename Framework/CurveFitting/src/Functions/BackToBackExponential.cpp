@@ -13,7 +13,7 @@
 #include <cmath>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_sf_erf.h>
-#include <gsl\gsl_sf_lambert.h>
+#include <gsl/gsl_sf_lambert.h>
 
 namespace Mantid {
 namespace CurveFitting {
