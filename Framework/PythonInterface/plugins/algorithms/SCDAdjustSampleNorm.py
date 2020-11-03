@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, PropertyMode, \
     MultipleFileProperty, WorkspaceProperty
-from mantid.kernel import Direction, FloatBoundedValidator, V3D
+from mantid.kernel import Direction, V3D
 from mantid.simpleapi import DeleteWorkspace, Load, ConvertWANDSCDtoQ
 import os
 
