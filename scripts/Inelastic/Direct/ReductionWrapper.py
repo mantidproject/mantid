@@ -471,15 +471,23 @@ class ReductionWrapper(object):
             run_num = self._last_runnum_added_to_archive
             return (run_num >= run_number_requested,run_num,'no new data have been added to archive')
         self._last_commit_log_modification_time = mod_time
+        # Here the file may be modified during the access. Let's try to catch
+        # any errors, which may occur due to this modification
         try:
             with open(propman.archive_upload_log_file) as fh:
                 contents = fh.read()
         except:
             return(False,self._last_runnum_added_to_archive,
                    'Error accessing log file {0}'.format(propman.archive_upload_log_file))
-        #
-        contents = contents.split()
-        run_written = int(contents[1])
+        # If the file is modified during the read operation, the read can return anything
+        # Let's be on the safe and check this operation too.
+        try:
+            contents = contents.split()
+            run_written = int(contents[1])
+        except:
+            return(False,self._last_runnum_added_to_archive,
+                   'Error processing the contents of the log file {0}'.format(propman.archive_upload_log_file))
+
         self._last_runnum_added_to_archive = run_written
         return(run_written >= run_number_requested,run_written,'')
 
