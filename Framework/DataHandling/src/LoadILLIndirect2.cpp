@@ -233,7 +233,7 @@ void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
           static_cast<size_t>(std::round(10 * firstTubeAngle[0]));
     } catch (...) {
       m_firstTubeAngleRounded = 251;
-      g_log.information() << "Unable to read first tube anlge, assuming 251";
+      g_log.information() << "Unable to read first tube angle, assuming 251";
     }
   } else {
     m_numberOfSimpleDetectors = 0;
