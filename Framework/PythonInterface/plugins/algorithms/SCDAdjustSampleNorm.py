@@ -37,10 +37,8 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
             doc="File with Vanadium normalization scan data")
 
         self.declareProperty("DetectorHeightOffset", defaultValue=0.0, direction=Direction.Input,
-                             validator=FloatBoundedValidator(0.0),
                              doc="Optional distance to move detector height (relative to current position)")
         self.declareProperty("DetectorDistanceOffset", defaultValue=0.0, direction=Direction.Input,
-                             validator=FloatBoundedValidator(0.0),
                              doc="Optional distance to move detector distance (relative to current position)")
 
         self.declareProperty(
@@ -55,7 +53,7 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
         out_ws = self.getPropertyValue("OutputWorkspace")
         out_ws_name = out_ws
 
-        van_norm = Load(vanadiumfile)
+        van_norm = Load(vanadiumfile, OutputWorkspace="_van_norm")
 
         has_multiple = True if len(datafiles) > 1 else False
 
@@ -63,7 +61,7 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
         wavelength = 1.488
 
         for file in datafiles:
-            scan = Load(file)
+            scan = Load(file, OutputWorkspace="_scan")
 
             self.log().information("Processing file '{}'".format(file))
 
@@ -74,7 +72,7 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
             exp_info = scan.getExperimentInfo(0)
 
             # Adjust detector height and distance with new offsets
-            if height > 0.0 or distance > 0.0:
+            if height != 0.0 or distance != 0.0:
                 # Move all the instrument banks
                 component = exp_info.componentInfo()
                 for bank in range(1, 4):
@@ -96,8 +94,8 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
                               Wavelength=wavelength,
                               NormaliseBy='Monitor', OutputWorkspace=out_ws_name)
 
-        DeleteWorkspace("van_norm")
-        DeleteWorkspace("scan")
+        DeleteWorkspace(van_norm)
+        DeleteWorkspace(scan)
 
         self.setProperty("OutputWorkspace", out_ws_name)
 
