@@ -12,7 +12,7 @@ from mantid.api import (MatrixWorkspace, MatrixWorkspaceProperty, WorkspacePrope
                         ExperimentInfo, AnalysisDataService, WorkspaceFactory, NumericAxis)
 from mantid.geometry import Detector
 from mantid.kernel import Direction, V3D
-from mantid.simpleapi import CreateSampleWorkspace, Rebin, DeleteWorkspaces
+from mantid.simpleapi import CreateSampleWorkspace, Rebin
 import numpy as np
 
 
