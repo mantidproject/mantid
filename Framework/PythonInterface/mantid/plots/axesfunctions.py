@@ -113,9 +113,12 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
         workspace_index, distribution, kwargs = get_wksp_index_dist_and_label(
             workspace, axis, **kwargs)
         if axis == MantidAxType.BIN:
-            # Overwrite any user specified xlabel
             axes.set_xlabel("Spectrum")
             x, y, dy, dx = get_bins(workspace, workspace_index, with_dy)
+            vertical_axis = workspace.getAxis(1)
+            if isinstance(vertical_axis, mantid.api.NumericAxis):
+                x = vertical_axis.extractValues()
+                axes.set_xlabel(vertical_axis.getUnit().unitID())
         elif axis == MantidAxType.SPECTRUM:
             x, y, dy, dx = get_spectrum(workspace, workspace_index, normalize_by_bin_width, with_dy,
                                         with_dx)
