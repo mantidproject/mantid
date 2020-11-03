@@ -299,7 +299,7 @@ class ReductionWrapperTest(unittest.TestCase):
         # clear up rubbish from previous runs if any
         if os.path.isfile(test_log):
             os.remove(test_log)
-        propman.arhive_upload_log_file = test_log
+        propman.archive_upload_log_file = test_log
 
         # no log file at all
         ok,run_num,info = th._check_progress_log_run_completed(10)
@@ -311,7 +311,7 @@ class ReductionWrapperTest(unittest.TestCase):
         with open(test_log,'w') as fh:
             fh.write('MAR 1000 0 \n')
         # need to set up the test log value again, as log test had been disabled automatically if no log file was found
-        propman.arhive_upload_log_file = test_log
+        propman.archive_upload_log_file = test_log
 
         # log file states data available
         ok,run_num,info = th._check_progress_log_run_completed(10)

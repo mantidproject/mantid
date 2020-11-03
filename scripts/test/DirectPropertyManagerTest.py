@@ -1262,15 +1262,15 @@ class DirectPropertyManagerTest(unittest.TestCase):
     #
     def test_lastrun_log_default(self):
         #
-        if platform == "linux" or platform == "linux2":
-            self.assertEqual(PropertyManager.arhive_upload_log_template,
+        if platform.startswith("linux"):
+            self.assertEqual(PropertyManager.archive_upload_log_template,
                              '/archive/NDX{0}/Instrument/logs/lastrun.txt')
             log_dir = '/archive/NDXMARI/Instrument/logs/'
         elif platform == "darwin":
-            self.assertEqual(PropertyManager.arhive_upload_log_template,'')
+            self.assertEqual(PropertyManager.archive_upload_log_template,'')
             log_dir = ''
         elif platform == "win32":
-            self.assertEqual(PropertyManager.arhive_upload_log_template,
+            self.assertEqual(PropertyManager.archive_upload_log_template,
                              r'\\isis\inst$\NDX{0}\Instrument\logs\lastrun.txt')
             log_dir = r'\\isis\inst$\NDXMARI\Instrument\logs\\'
 
@@ -1278,10 +1278,10 @@ class DirectPropertyManagerTest(unittest.TestCase):
 
         if os.path.isdir(log_dir):
             # in case test server or test machine is connected to the archive
-            self.assertEqual(propman.arhive_upload_log_file,
+            self.assertEqual(propman.archive_upload_log_file,
                              os.path.normpath(log_dir+'lastrun.txt'))
         else:
-            self.assertEqual(propman.arhive_upload_log_file,'')
+            self.assertEqual(propman.archive_upload_log_file,'')
 
         test_dir = config.getString('defaultsave.directory')
         test_file = os.path.normpath(test_dir + 'lastrun.txt')
@@ -1289,8 +1289,8 @@ class DirectPropertyManagerTest(unittest.TestCase):
         f.write('aaaaaa')
         f.close()
 
-        propman.arhive_upload_log_file = test_file
-        self.assertEqual(propman.arhive_upload_log_file,test_file)
+        propman.archive_upload_log_file = test_file
+        self.assertEqual(propman.archive_upload_log_file,test_file)
 
         os.remove(test_file)
 

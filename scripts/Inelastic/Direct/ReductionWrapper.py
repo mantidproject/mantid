@@ -97,7 +97,7 @@ class ReductionWrapper(object):
             self.reducer.prop_man.set_input_parameters(**web_vars)
         # if run on ISIS, information about the log files, responsible for
         # storing data in archive
-        self._lat_commit_log_modification_time = None
+        self._last_commit_log_modification_time = None
         self._last_runnum_added_to_archive = 0
 
     @property
@@ -463,20 +463,20 @@ class ReductionWrapper(object):
             so further checks are necessary to verify if actual file is indeed available
         """
         propman = self.reducer.prop_man
-        if len(propman.arhive_upload_log_file)==0 :
+        if len(propman.archive_upload_log_file)==0 :
             return (True,0,'log test disabled as no log file available')
 
-        mod_time = os.path.getmtime(propman.arhive_upload_log_file)
-        if self._lat_commit_log_modification_time == mod_time: # Still old data in archive
+        mod_time = os.path.getmtime(propman.archive_upload_log_file)
+        if self._last_commit_log_modification_time == mod_time: # Still old data in archive
             run_num = self._last_runnum_added_to_archive
             return (run_num >= run_number_requested,run_num,'no new data have been added to archive')
-        self._lat_commit_log_modification_time = mod_time
+        self._last_commit_log_modification_time = mod_time
         try:
-            with open(propman.arhive_upload_log_file) as fh:
+            with open(propman.archive_upload_log_file) as fh:
                 contents = fh.read()
         except:
             return(False,self._last_runnum_added_to_archive,
-                   'Error accessing log file {0}'.format(propman.arhive_upload_log_file))
+                   'Error accessing log file {0}'.format(propman.archive_upload_log_file))
         #
         contents = contents.split()
         run_written = int(contents[1])
