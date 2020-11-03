@@ -5,17 +5,16 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import mantid
 
-from isis_reducer import ReductionStateTransferer
 import ISISCommandInterface as ici
+from isis_reducer import ReductionStateTransferer
 
 
 class TestReductionStateTransferer(unittest.TestCase):
     def test_that_state_is_transfered(self):
         """
         This test shows that some state can be transferred between the logic instances
-        of the ReducerSingelton. 
+        of the ReducerSingelton.
         """
         # 1. Create a ReudcerSingleton and apply the user file settings
         ici.SANS2D()

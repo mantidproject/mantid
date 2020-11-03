@@ -48,6 +48,7 @@ private:
   void ungroupWorkspaces();
   void sortWorkspaces();
   void deleteWorkspaces();
+  void clearWorkspaces();
   void saveSingleWorkspace();
   void saveWorkspaceCollection();
   void filterWorkspaces();

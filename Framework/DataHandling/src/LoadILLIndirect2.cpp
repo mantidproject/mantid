@@ -98,7 +98,8 @@ void LoadILLIndirect2::exec() {
 
   m_loadOption = getPropertyValue("LoadDetectors");
 
-  Progress progress(this, 0., 1., 7);
+  size_t progressSteps = m_loadOption == "Diffractometer" ? 5 : 7;
+  Progress progress(this, 0., 1., progressSteps);
 
   // open the root node
   NeXus::NXRoot dataRoot(filenameData);
@@ -157,29 +158,32 @@ void LoadILLIndirect2::setInstrumentName(
   g_log.debug() << "Instrument name set to: " + m_instrumentName << '\n';
 }
 
+std::string LoadILLIndirect2::getDataPath(NeXus::NXEntry &entry) {
+  NeXus::NXClass instrument = entry.openNXGroup("instrument");
+  if (m_loadOption == "Diffractometer") {
+
+    if (instrument.containsGroup("DiffDet")) {
+      return "instrument/DiffDet/data";
+    } else if (entry.containsGroup("dataDiffDet")) {
+      return "dataDiffDet/DiffDet_data";
+    } else {
+      throw std::runtime_error(
+          "Cannot find diffraction detector data in the Nexus file. Make sure "
+          "they exist or load the spectrometer data instead.");
+    }
+  } else {
+    return "data";
+  }
+}
+
 /**
  * Load Data details (number of tubes, channels, etc)
  * @param entry First entry of nexus file
  */
 void LoadILLIndirect2::loadDataDetails(NeXus::NXEntry &entry) {
-  NeXus::NXClass instrument = entry.openNXGroup("instrument");
 
   // find the data
-  std::string dataPath;
-
-  if (m_loadOption == "Diffractometer") {
-
-    if (instrument.containsGroup("DiffDet")) {
-      dataPath = "instrument/DiffDet/data";
-    } else if (entry.containsGroup("dataDiffDet")) {
-      dataPath = "dataDiffDet/DiffDet_data";
-    } else {
-      throw std::runtime_error("Dataset path not found.");
-    }
-
-  } else {
-    dataPath = "data";
-  }
+  std::string dataPath = getDataPath(entry);
 
   // read in the data
   NXData dataGroup = entry.openNXData(dataPath);
@@ -323,14 +327,7 @@ void LoadILLIndirect2::loadDiffractionData(NeXus::NXEntry &entry) {
   bool newVersion = instrument.containsDataSet("version");
 
   // find the path to the data
-  std::string dataPath;
-  if (instrument.containsGroup("DiffDet")) {
-    dataPath = "instrument/DiffDet/data";
-  } else if (entry.containsGroup("dataDiffDet")) {
-    dataPath = "dataDiffDet/DiffDet_data";
-  } else {
-    throw std::runtime_error("Dataset path not found.");
-  }
+  std::string dataPath = getDataPath(entry);
 
   NXData dataGroup = entry.openNXData(dataPath);
 
@@ -350,12 +347,12 @@ void LoadILLIndirect2::loadDiffractionData(NeXus::NXEntry &entry) {
   std::transform(monitor_p, monitor_p + m_numberOfChannels, E.begin(),
                  [](const double v) { return std::sqrt(v); });
 
-  if (!newVersion) {
-    // Then Tubes
-    PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-    for (int i = 0; i < static_cast<int>(m_numberOfTubes); ++i) {
-      for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-        size_t index;
+  PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
+  for (int i = 0; i < static_cast<int>(m_numberOfTubes); ++i) {
+    for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
+      size_t index;
+      if (!newVersion) {
+        // Then Tubes
         if (i == 2 || i == 3) {
           index = (m_numberOfTubes - 1 - i) * m_numberOfPixelsPerTube +
                   (m_numberOfPixelsPerTube - 1 - j) + m_numberOfMonitors;
@@ -363,30 +360,17 @@ void LoadILLIndirect2::loadDiffractionData(NeXus::NXEntry &entry) {
           index = (m_numberOfTubes - 1 - i) * m_numberOfPixelsPerTube + j +
                   m_numberOfMonitors;
         }
-        // Assign Y
-        int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-        m_localWorkspace->dataY(index).assign(data_p,
-                                              data_p + m_numberOfChannels);
-        // Assign Error
-        MantidVec &E = m_localWorkspace->dataE(index);
-        std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                       [](const double v) { return std::sqrt(v); });
+      } else {
+        index = i * m_numberOfPixelsPerTube + j + m_numberOfMonitors;
       }
-    }
-  } else {
-    PARALLEL_FOR_IF(Kernel::threadSafe(*m_localWorkspace))
-    for (int i = 0; i < static_cast<int>(m_numberOfTubes); ++i) {
-      for (size_t j = 0; j < m_numberOfPixelsPerTube; ++j) {
-        size_t index = i * m_numberOfPixelsPerTube + j + m_numberOfMonitors;
-        // Assign Y
-        int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
-        m_localWorkspace->dataY(index).assign(data_p,
-                                              data_p + m_numberOfChannels);
-        // Assign Error
-        MantidVec &E = m_localWorkspace->dataE(index);
-        std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
-                       [](const double v) { return std::sqrt(v); });
-      }
+      // Assign Y
+      int *data_p = &data(static_cast<int>(i), static_cast<int>(j), 0);
+      m_localWorkspace->dataY(index).assign(data_p,
+                                            data_p + m_numberOfChannels);
+      // Assign Error
+      MantidVec &E = m_localWorkspace->dataE(index);
+      std::transform(data_p, data_p + m_numberOfChannels, E.begin(),
+                     [](const double v) { return std::sqrt(v); });
     }
   }
 }

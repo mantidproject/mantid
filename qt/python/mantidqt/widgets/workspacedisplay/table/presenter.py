@@ -19,12 +19,17 @@ from mantidqt.widgets.workspacedisplay.table.error_column import ErrorColumn
 from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayModel
 from mantidqt.widgets.workspacedisplay.table.plot_type import PlotType
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
-from mantidqt.widgets.workspacedisplay.table.workbench_table_widget_item import WorkbenchTableWidgetItem
+from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import (
+    QStandardItem,
+    create_table_item,
+    RevertibleItem,
+)
 
 
 class TableWorkspaceDataPresenter(object):
     """Presenter to handle just displaying data from a table-like object.
     Useful for other widgets wishing to embed just the table display"""
+
     __slots__ = ("model", "view")
 
     def __init__(self, model=None, view=None):
@@ -50,50 +55,71 @@ class TableWorkspaceDataPresenter(object):
         # deep copy the original headers so that they are not changed by the appending of the label
         column_headers = self.model.original_column_headers()
         num_headers = len(column_headers)
-        self.view.setColumnCount(num_headers)
+        data_model = self.view.model()
+        data_model.setColumnCount(num_headers)
 
         extra_labels = self.model.build_current_labels()
         if len(extra_labels) > 0:
             for index, label in extra_labels:
                 column_headers[index] += str(label)
 
-        self.view.setHorizontalHeaderLabels(column_headers)
+        data_model.setHorizontalHeaderLabels(column_headers)
 
     def load_data(self, table):
         num_rows = self.model.get_number_of_rows()
-        table.setRowCount(num_rows)
+        data_model = table.model()
+        data_model.setRowCount(num_rows)
 
         num_cols = self.model.get_number_of_columns()
-        table.setColumnCount(num_cols)
+        data_model.setColumnCount(num_cols)
 
         for col in range(num_cols):
             column_data = self.model.get_column(col)
             editable = self.model.is_editable_column(col)
             for row in range(num_rows):
-                item = WorkbenchTableWidgetItem(column_data[row], editable=editable)
-                table.setItem(row, col, item)
+                data_model.setItem(row, col, self.create_item(column_data[row], editable))
+
+    def create_item(self, data, editable):
+        """Create a QStandardItemModel for the data
+        :param data: The typed data to store
+        :param editable: True if it should be editable in the view
+        """
+        return create_table_item(data, editable)
 
 
 class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, DataCopier):
-    A_LOT_OF_THINGS_TO_PLOT_MESSAGE = "You selected {} spectra to plot. Are you sure you want to plot that many?"
-    TOO_MANY_SELECTED_FOR_X = "Too many columns are selected to use as X. Please select only 1."
-    TOO_MANY_SELECTED_TO_SORT = "Too many columns are selected to sort by. Please select only 1."
-    TOO_MANY_SELECTED_FOR_PLOT = "Too many columns are selected to plot. Please select only 1."
+    A_LOT_OF_THINGS_TO_PLOT_MESSAGE = (
+        "You selected {} spectra to plot. Are you sure you want to plot that many?")
+    TOO_MANY_SELECTED_FOR_X = ("Too many columns are selected to use as X. Please select only 1.")
+    TOO_MANY_SELECTED_TO_SORT = ("Too many columns are selected to sort by. Please select only 1.")
+    TOO_MANY_SELECTED_FOR_PLOT = ("Too many columns are selected to plot. Please select only 1.")
     NUM_SELECTED_FOR_CONFIRMATION = 10
     NO_COLUMN_MARKED_AS_X = "No columns marked as X."
-    ITEM_CHANGED_INVALID_DATA_MESSAGE = "Error: Trying to set invalid data for the column."
+    ITEM_CHANGED_INVALID_DATA_MESSAGE = ("Error: Trying to set invalid data for the column.")
     ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE = "Unknown error occurred: {}"
     TOO_MANY_TO_SET_AS_Y_ERR_MESSAGE = "Too many selected to set as Y Error"
     CANNOT_PLOT_AGAINST_SELF_MESSAGE = "Cannot plot column against itself."
-    NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE = "Column '{}' does not have an associated Y error column." \
-                                            "\n\nPlease set it by doing: Right click on column ->" \
-                                            " Set error for Y -> The label shown on the Y column"
+    NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE = (
+        "Column '{}' does not have an associated Y error column."
+        "\n\nPlease set it by doing: Right click on column ->"
+        " Set error for Y -> The label shown on the Y column")
     PLOT_FUNCTION_ERROR_MESSAGE = "One or more of the columns being plotted contain invalid data for Matplotlib.\n\nError message:\n{}"
     INVALID_DATA_WINDOW_TITLE = "Invalid data - Mantid Workbench"
-    COLUMN_DISPLAY_LABEL = 'Column {}'
+    COLUMN_DISPLAY_LABEL = "Column {}"
 
-    def __init__(self, ws, plot=None, parent=None, model=None, view=None, name=None, ads_observer=None, container=None,
-                 window_width=600, window_height=400):
+    def __init__(
+            self,
+            ws,
+            plot=None,
+            parent=None,
+            model=None,
+            view=None,
+            name=None,
+            ads_observer=None,
+            container=None,
+            window_width=600,
+            window_height=400,
+    ):
         """
         Creates a display for the provided workspace.
 
@@ -111,11 +137,19 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         view = view if view else TableWorkspaceDisplayView(self, parent)
         TableWorkspaceDataPresenter.__init__(self, model, view)
 
+        # from mantid.api import IPeaksWorkspace
+
+        # self.is_peaks_worksapce = isinstance(ws, IPeaksWorkspace)
+
         self.name = name if name else self.model.get_name()
-        self.container = container if container else StatusBarView(parent, self.view, self.name,
-                                                                   window_width=window_width,
-                                                                   window_height=window_height,
-                                                                   presenter=self)
+        self.container = (container if container else StatusBarView(
+            parent,
+            self.view,
+            self.name,
+            window_width=window_width,
+            window_height=window_height,
+            presenter=self,
+        ))
 
         DataCopier.__init__(self, self.container.status_bar)
 
@@ -123,12 +157,12 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         self.plot = plot
         self.view.set_context_menu_actions(self.view)
 
-        self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self)
+        self.ads_observer = (ads_observer if ads_observer else WorkspaceDisplayADSObserver(self))
 
         self.refresh()
 
         # connect to cellChanged signal after the data has been loaded
-        self.view.itemChanged.connect(self.handleItemChanged)
+        self.view.model().itemChanged.connect(self.handleItemChanged)
 
     def show_view(self):
         self.container.show()
@@ -153,19 +187,24 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
 
             self.view.emit_repaint()
 
-    def handleItemChanged(self, item):
+    def handleItemChanged(self, item: QStandardItem):
         """
-        :type item: WorkbenchTableWidgetItem
+        :type item: A reference to the item that has been edited
         """
+        if not isinstance(item, RevertibleItem):
+            # Do not perform any additional task for standard QStandardItem
+            return
         try:
-            self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole), item.is_v3d)
-            item.update()
+            self.model.set_cell_data(item.row(), item.column(), item.data(Qt.DisplayRole),
+                                     item.is_v3d)
         except ValueError:
+            item.reset()
             self.view.show_warning(self.ITEM_CHANGED_INVALID_DATA_MESSAGE)
         except Exception as x:
-            self.view.show_warning(self.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(x))
-        finally:
             item.reset()
+            self.view.show_warning(self.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(x))
+        else:
+            item.sync()
 
     def action_copy_cells(self):
         self.copy_cells(self.view)
@@ -221,7 +260,9 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
             return
 
         stats = self.model.get_statistics(selected_columns)
-        TableWorkspaceDisplay(stats, parent=self.parent, name="Column Statistics of {}".format(self.name))
+        TableWorkspaceDisplay(stats,
+                              parent=self.parent,
+                              name="Column Statistics of {}".format(self.name))
 
     def action_hide_selected(self):
         try:
@@ -276,7 +317,7 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         # reset it's type to None
         for col in removed_items:
             if col != selected_column:
-                self.model.set_column_type(int(col),0)
+                self.model.set_column_type(int(col), 0)
         self.model.set_column_type(selected_column, 5, related_y_column)
         self.update_column_headers()
 
@@ -335,7 +376,7 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         self._do_plot(selected_columns, selected_x, plot_type)
 
     def _is_error_plot(self, plot_type):
-        return plot_type == PlotType.LINEAR_WITH_ERR or plot_type == PlotType.SCATTER_WITH_ERR
+        return (plot_type == PlotType.LINEAR_WITH_ERR or plot_type == PlotType.SCATTER_WITH_ERR)
 
     def _do_plot(self, selected_columns, selected_x, plot_type):
         if self._is_error_plot(plot_type):
@@ -350,12 +391,13 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
                     pass
             if len(yerr) != len(selected_columns):
                 column_headers = self.model.original_column_headers()
-                self.view.show_warning(self.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE.format(
-                    ",".join([column_headers[col] for col in selected_columns])))
+                self.view.show_warning(
+                    self.NO_ASSOCIATED_YERR_FOR_EACH_Y_MESSAGE.format(",".join(
+                        [column_headers[col] for col in selected_columns])))
                 return
         x = self.model.get_column(selected_x)
 
-        fig, ax = self.plot.subplots(subplot_kw={'projection': 'mantid'})
+        fig, ax = self.plot.subplots(subplot_kw={"projection": "mantid"})
         fig.canvas.set_window_title(self.model.get_name())
         ax.set_xlabel(self.model.get_column_header(selected_x))
         ax.wsName = self.model.get_name()
@@ -389,11 +431,11 @@ class TableWorkspaceDisplay(TableWorkspaceDataPresenter, ObservingPresenter, Dat
         elif type == PlotType.SCATTER:
             plot_func = ax.scatter
         elif type == PlotType.LINE_AND_SYMBOL:
-            plot_func = partial(ax.plot, marker='o')
+            plot_func = partial(ax.plot, marker="o")
         elif type == PlotType.LINEAR_WITH_ERR:
             plot_func = ax.errorbar
         elif type == PlotType.SCATTER_WITH_ERR:
-            plot_func = partial(ax.errorbar, fmt='o')
+            plot_func = partial(ax.errorbar, fmt="o")
         else:
             raise ValueError("Plot Type: {} not currently supported!".format(type))
         return plot_func

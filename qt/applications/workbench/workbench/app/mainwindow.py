@@ -12,6 +12,7 @@ Defines the QMainWindow of the application and the main() entry point.
 """
 import os
 
+from mantid.api import FrameworkManager
 from mantid.kernel import ConfigService, logger
 from workbench.app import MAIN_WINDOW_OBJECT_NAME, MAIN_WINDOW_TITLE
 from workbench.utils.windowfinder import find_window
@@ -33,13 +34,13 @@ from mantidqt.widgets.codeeditor.execution import PythonCodeExecution  # noqa
 from mantidqt.utils.qt import (add_actions, create_action, widget_updates_disabled)  # noqa
 from mantidqt.project.project import Project  # noqa
 from mantidqt.usersubwindowfactory import UserSubWindowFactory  # noqa
-from mantidqt.usersubwindow import UserSubWindow  # noqa
 
 from workbench.config import CONF  # noqa
 from workbench.plotting.globalfiguremanager import GlobalFigureManager  # noqa
 from workbench.utils.windowfinder import find_all_windows_that_are_savable  # noqa
 from workbench.utils.workspacehistorygeneration import get_all_workspace_history_from_ads  # noqa
 from workbench.projectrecovery.projectrecovery import ProjectRecovery  # noqa
+from workbench.utils.recentlyclosedscriptsmenu import RecentlyClosedScriptsMenu # noqa
 from mantidqt.utils.asynchronous import BlockingAsyncTaskWithCallback  # noqa
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall  # noqa
 
@@ -251,11 +252,19 @@ class MainWindow(QMainWindow):
                                     "&Quit",
                                     on_triggered=self.close,
                                     shortcut="Ctrl+Q")
+        action_clear_all_memory = create_action(self,
+                                                "Clear All Memory",
+                                                on_triggered=self.clear_all_memory_action,
+                                                shortcut="Ctrl+Shift+L")
+
+        menu_recently_closed_scripts = RecentlyClosedScriptsMenu(self)
+        self.editor.editors.sig_tab_closed.connect(menu_recently_closed_scripts.add_script_to_settings)
+
         self.file_menu_actions = [
             action_open, action_load_project, None, action_save_script, action_save_script_as,
-            action_generate_ws_script, None, action_save_project, action_save_project_as, None,
-            action_settings, None, action_manage_directories, None, action_script_repository, None,
-            action_quit
+            menu_recently_closed_scripts, action_generate_ws_script, None, action_save_project,
+            action_save_project_as, None, action_settings, None, action_manage_directories, None,
+            action_script_repository, None, action_clear_all_memory, None, action_quit
         ]
 
         # view menu
@@ -614,6 +623,26 @@ class MainWindow(QMainWindow):
         settings = SettingsPresenter(self)
         settings.show()
         settings.general_settings.focus_layout_box()
+
+    def clear_all_memory_action(self):
+        """
+        Creates Question QMessageBox to check user wants to clear all memory
+        when action is pressed from file menu
+        """
+        msg = QMessageBox(QMessageBox.Question,
+                          "Clear All", "All workspaces and windows will be removed.\nAre you sure?")
+        msg.addButton(QMessageBox.Ok)
+        msg.addButton(QMessageBox.Cancel)
+        msg.setWindowIcon(QIcon(':/images/MantidIcon.ico'))
+        reply = msg.exec()
+        if reply == QMessageBox.Ok:
+            self.clear_all_memory()
+
+    def clear_all_memory(self):
+        """
+        Wrapper for call to FrameworkManager to clear all memory
+        """
+        FrameworkManager.Instance().clear()
 
     def config_updated(self):
         """

@@ -9,7 +9,7 @@
 import unittest
 from unittest.mock import MagicMock, call
 
-from mantidqt.widgets.sliceviewer.cursortracker import CursorTracker
+from mantidqt.widgets.sliceviewer.cursor import CursorTracker
 
 
 class CursorTrackerTest(unittest.TestCase):

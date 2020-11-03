@@ -143,7 +143,7 @@ void interpolateYCSplineInplace(const Mantid::HistogramData::Histogram &input,
   std::vector<double> ypp(xs.size() - 2);
   // would be quicker to solve linear equation rather than invert h but also
   // need h-1 elements later on
-  h.Invert();
+  h.invertTridiagonal();
   ypp = h * d;
 
   // add in the zero second derivatives at extreme pts to give natural splines

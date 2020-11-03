@@ -80,6 +80,19 @@ class SANSFileInformationTest(unittest.TestCase):
         self.assertEqual(file_information.get_thickness(),  2.0)
         self.assertEqual(file_information.get_shape(), SampleShape.FLAT_PLATE)
 
+    def test_two_file_informations_are_eq(self):
+        # Arrange
+        # The file is a multi period and event-based
+        file_name = "LARMOR00003368"
+        factory = SANSFileInformationFactory()
+
+        # Act
+        file_information = factory.create_sans_file_information(file_name)
+        file_information_2 = factory.create_sans_file_information(file_name)
+
+        # Two identical file informations should be equal even if they are different objects
+        self.assertEqual(file_information, file_information_2)
+
     def test_that_can_extract_information_for_added_histogram_data_and_nexus_format(self):
         # Arrange
         # The file is a single period, histogram-based and added

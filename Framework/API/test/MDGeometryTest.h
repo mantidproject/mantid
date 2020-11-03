@@ -41,6 +41,7 @@ public:
     g.initGeometry(dims);
 
     TS_ASSERT_EQUALS(g.getNumDims(), 2);
+    TS_ASSERT_EQUALS(g.getNumNonIntegratedDims(), 2);
     TS_ASSERT_EQUALS(g.getDimension(0)->getName(), "Qx");
     TS_ASSERT_EQUALS(g.getDimension(1)->getName(), "Qy");
     // Now set the basis vectors
@@ -114,6 +115,7 @@ public:
     MDGeometry g2(g);
 
     TS_ASSERT_EQUALS(g2.getNumDims(), 2);
+    TS_ASSERT_EQUALS(g2.getNumNonIntegratedDims(), 2);
     TS_ASSERT_EQUALS(g2.getBasisVector(0), VMD(1.2, 3.4));
     TS_ASSERT_EQUALS(g2.getBasisVector(1), VMD(1.2, 3.4));
     TS_ASSERT_EQUALS(g2.getOrigin(), VMD(4, 5));
@@ -151,6 +153,7 @@ public:
         new MDHistoDimension("Qy", "Qy", frame, -1, +1, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim2);)
     TS_ASSERT_EQUALS(g.getNumDims(), 2);
+    TS_ASSERT_EQUALS(g.getNumNonIntegratedDims(), 2);
     TS_ASSERT_EQUALS(g.getDimension(0)->getName(), "Qx");
     TS_ASSERT_EQUALS(g.getDimension(1)->getName(), "Qy");
     TS_ASSERT_EQUALS(g.getDimensionIndexByName("Qx"), 0);
@@ -168,6 +171,7 @@ public:
         new MDHistoDimension("Qy", "Qy", frame, -2, +2, 0));
     TS_ASSERT_THROWS_NOTHING(g.addDimension(dim2);)
     TS_ASSERT_EQUALS(g.getNumDims(), 2);
+    TS_ASSERT_EQUALS(g.getNumNonIntegratedDims(), 2);
     std::shared_ptr<WorkspaceTester> ws = std::make_shared<WorkspaceTester>();
     g.setOriginalWorkspace(ws);
     TS_ASSERT(g.hasOriginalWorkspace());

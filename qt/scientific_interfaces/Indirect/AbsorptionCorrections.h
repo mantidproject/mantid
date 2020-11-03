@@ -100,6 +100,8 @@ private:
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
 
+  bool m_saveAlgRunning{false};
+
   Ui::AbsorptionCorrections m_uiForm;
 
   std::shared_ptr<Densities> m_sampleDensities;

@@ -46,6 +46,7 @@ public:
   // These are the main methods for dimensions, that CAN be overridden (e.g. by
   // MatrixWorkspace)
   virtual size_t getNumDims() const;
+  virtual size_t getNumNonIntegratedDims() const;
   virtual std::shared_ptr<const Mantid::Geometry::IMDDimension>
   getDimension(size_t index) const;
   virtual std::shared_ptr<const Mantid::Geometry::IMDDimension>

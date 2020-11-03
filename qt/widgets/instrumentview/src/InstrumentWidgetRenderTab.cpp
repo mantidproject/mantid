@@ -53,6 +53,11 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
 
   setupSurfaceTypeOptions();
 
+  // Reset view button
+  m_resetView = new QPushButton(tr("Reset View"));
+  m_resetView->setToolTip("Reset the instrument view to default");
+  connect(m_resetView, SIGNAL(clicked()), this, SLOT(resetView()));
+
   // Save image control
   mSaveImage = new QPushButton(tr("Save image"));
   mSaveImage->setToolTip("Save the instrument image to a file");
@@ -76,6 +81,7 @@ InstrumentWidgetRenderTab::InstrumentWidgetRenderTab(
   renderControlsLayout->addWidget(m_surfaceTypeButton);
   renderControlsLayout->addLayout(unwrappedControlsLayout);
   renderControlsLayout->addWidget(axisViewFrame);
+  renderControlsLayout->addWidget(m_resetView);
   renderControlsLayout->addWidget(displaySettings);
   renderControlsLayout->addWidget(mSaveImage);
   renderControlsLayout->addWidget(m_colorBarWidget);
@@ -603,6 +609,14 @@ void InstrumentWidgetRenderTab::flipUnwrappedView(bool on) {
   m_flipCheckBox->blockSignals(true);
   m_flipCheckBox->setChecked(on);
   m_flipCheckBox->blockSignals(false);
+}
+
+/**
+ * Resets the render tab view to its default position and zoom.
+ */
+void InstrumentWidgetRenderTab::resetView() {
+  // just recreate the surface from scratch
+  m_instrWidget->setSurfaceType(int(m_instrWidget->getSurfaceType()));
 }
 
 /**

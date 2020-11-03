@@ -12,7 +12,7 @@ from abc import ABCMeta, abstractmethod
 
 from qtpy.QtCore import QRegExp
 from qtpy.QtGui import (QDoubleValidator, QIntValidator, QRegExpValidator)
-from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow)
+from qtpy.QtWidgets import (QListWidgetItem, QMessageBox, QFileDialog, QMainWindow, QLineEdit)
 from mantid.kernel import (Logger, UsageService, FeatureType)
 from enum import Enum
 from mantidqt import icons
@@ -32,6 +32,7 @@ from sans.gui_logic.models.SumRunsModel import SumRunsModel
 from sans.gui_logic.presenter.add_runs_presenter import AddRunsPagePresenter
 from ui.sans_isis.SANSSaveOtherWindow import SANSSaveOtherDialog
 from ui.sans_isis.work_handler import WorkHandler
+from ui.sans_isis.modified_qt_field_factory import ModifiedQtFieldFactory
 
 Ui_SansDataProcessorWindow, _ = load_ui(__file__, "sans_data_processor_window.ui")
 
@@ -146,6 +147,13 @@ class SANSDataProcessorGui(QMainWindow,
         def on_save_other(self):
             pass
 
+        @abstractmethod
+        def on_field_edit(self):
+            """
+            Emitted when the view changes off settings tab
+            """
+            pass
+
     def __init__(self):
         """
         Initialise the interface
@@ -190,17 +198,7 @@ class SANSDataProcessorGui(QMainWindow,
         self.insert_row_button.setIcon(icons.get_icon("mdi.table-row-plus-after"))
         self.export_table_button.setIcon(icons.get_icon("mdi.file-export"))
 
-        self.paste_button.clicked.connect(self._paste_rows_requested)
-        self.copy_button.clicked.connect(self._copy_rows_requested)
-        self.erase_button.clicked.connect(self._erase_rows)
-        self.cut_button.clicked.connect(self._cut_rows)
-        self.delete_row_button.clicked.connect(self._remove_rows_requested_from_button)
-        self.insert_row_button.clicked.connect(self._on_insert_button_pressed)
-        self.export_table_button.clicked.connect(self._export_table_clicked)
-
-        self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
-        self.save_can_checkBox.clicked.connect(self._on_save_can_clicked)
-        self.reduction_dimensionality_1D.toggled.connect(self._on_reduction_dimensionality_changed)
+        self._attach_signal_slots()
 
         # Attach validators
         self._attach_validators()
@@ -210,6 +208,21 @@ class SANSDataProcessorGui(QMainWindow,
 
         # At a later date we can drop new once we confirm the old GUI is not using "ISIS SANS"
         UsageService.registerFeatureUsage(FeatureType.Interface, "ISIS SANS (new)", False)
+
+    def _attach_signal_slots(self):
+        self.paste_button.clicked.connect(self._paste_rows_requested)
+        self.copy_button.clicked.connect(self._copy_rows_requested)
+        self.erase_button.clicked.connect(self._erase_rows)
+        self.cut_button.clicked.connect(self._cut_rows)
+        self.delete_row_button.clicked.connect(self._remove_rows_requested_from_button)
+        self.insert_row_button.clicked.connect(self._on_insert_button_pressed)
+        self.export_table_button.clicked.connect(self._export_table_clicked)
+        self.save_other_pushButton.clicked.connect(self._on_save_other_button_pressed)
+        self.save_can_checkBox.clicked.connect(self._on_save_can_clicked)
+        self.reduction_dimensionality_1D.toggled.connect(self._on_reduction_dimensionality_changed)
+
+        modified_field_factory = ModifiedQtFieldFactory(self._on_field_edit)
+        modified_field_factory.attach_to_children(self.settings_page)
 
     def _setup_progress_bar(self):
         self.batch_progress_bar.setMinimum(0)
@@ -364,7 +377,7 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_wavelength_step_type_changed(self):
         if self.wavelength_step_type == RangeStepType.RANGE_LIN:
             self.wavelength_stacked_widget.setCurrentIndex(1)
-            self.wavelength_step_label.setText(u'Step [\u00c5^-1]')
+            self.wavelength_step_label.setText(u'Step [\u00c5]')
         elif self.wavelength_step_type == RangeStepType.RANGE_LOG:
             self.wavelength_stacked_widget.setCurrentIndex(1)
             self.wavelength_step_label.setText(u'Step [d\u03BB/\u03BB]')
@@ -373,7 +386,7 @@ class SANSDataProcessorGui(QMainWindow,
             self.wavelength_step_label.setText(u'Step [d\u03BB/\u03BB]')
         elif self.wavelength_step_type == RangeStepType.LIN:
             self.wavelength_stacked_widget.setCurrentIndex(0)
-            self.wavelength_step_label.setText(u'Step [\u00c5^-1]')
+            self.wavelength_step_label.setText(u'Step [\u00c5]')
 
     def create_data_table(self):
         # Delete an already existing table
@@ -514,6 +527,16 @@ class SANSDataProcessorGui(QMainWindow,
     def _on_save_other_button_pressed(self):
         self._call_settings_listeners(lambda listener: listener.on_save_other())
 
+    def _on_field_edit(self):
+        sender = self.sender()
+        if isinstance(sender, QLineEdit) and not sender.isModified():
+            # We only want editingFinished to fire if a user has modified. This
+            # prevents a warning appearing after the first one - commonly when
+            # clicking another line edit with invalid input or attempting to close the interface
+            return
+
+        self._call_settings_listeners(lambda listener: listener.on_field_edit())
+
     @staticmethod
     def _on_help_button_clicked():
         InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/'
@@ -547,8 +570,8 @@ class SANSDataProcessorGui(QMainWindow,
         Load the user file
         """
         # Load the user file
-        load_file(self.user_file_line_edit, "*.txt", self.__generic_settings, self.__path_key,
-                  self.get_user_file_path)
+        load_file(self.user_file_line_edit, "TOML Files (*.toml, *.TOML);; Text Files (*.txt)",
+                  self.__generic_settings, self.__path_key, self.get_user_file_path)
 
         # Set full user file path for default loading
         self.gui_properties_handler.set_setting("user_file", self.get_user_file_path())
@@ -609,7 +632,7 @@ class SANSDataProcessorGui(QMainWindow,
         Load the batch file
         """
         UsageService.registerFeatureUsage(FeatureType.Feature, ["ISIS SANS", "Loaded Batch File"], False)
-        load_file(self.batch_line_edit, "*.*", self.__generic_settings, self.__batch_file_key,
+        load_file(self.batch_line_edit, "CSV Files(*.csv)", self.__generic_settings, self.__batch_file_key,
                   self.get_batch_file_path)
         self._call_settings_listeners(lambda listener: listener.on_batch_file_load())
 
@@ -963,6 +986,22 @@ class SANSDataProcessorGui(QMainWindow,
     # FRONT TAB
     # ==================================================================================================================
     # ==================================================================================================================
+
+    @property
+    def user_file(self):
+        return self.user_file_line_edit.text()
+
+    @user_file.setter
+    def user_file(self, val):
+        self.user_file_line_edit.setText(val)
+
+    @property
+    def batch_file(self):
+        return self.batch_line_edit.text()
+
+    @batch_file.setter
+    def batch_file(self, val):
+        self.batch_line_edit.setText(val)
 
     # -----------------------------------------------------------------
     # Save Options
@@ -1448,7 +1487,10 @@ class SANSDataProcessorGui(QMainWindow,
     @property
     def transmission_sample_fit_type(self):
         fit_type_as_string = self.fit_sample_fit_type_combo_box.currentText()
-        return FitType(fit_type_as_string)
+        try:
+            return FitType(fit_type_as_string)
+        except (RuntimeError, ValueError):
+            return
 
     @transmission_sample_fit_type.setter
     def transmission_sample_fit_type(self, value):
@@ -1461,7 +1503,10 @@ class SANSDataProcessorGui(QMainWindow,
     @property
     def transmission_can_fit_type(self):
         fit_type_as_string = self.fit_can_fit_type_combo_box.currentText()
-        return FitType(fit_type_as_string)
+        try:
+            return FitType(fit_type_as_string)
+        except (RuntimeError, ValueError):
+            return None
 
     @transmission_can_fit_type.setter
     def transmission_can_fit_type(self, value):
@@ -1682,7 +1727,7 @@ class SANSDataProcessorGui(QMainWindow,
         q_xy_step_type_as_string = self.q_xy_step_type_combo_box.currentText()
         try:
             return RangeStepType(q_xy_step_type_as_string)
-        except RuntimeError:
+        except ValueError:
             return None
 
     @q_xy_step_type.setter

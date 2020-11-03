@@ -6,6 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.kernel import Logger
 from sans.common.enums import (FindDirectionEnum, DetectorType, SANSInstrument)
+from sans.state.AllStates import AllStates
+from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter)
 
 
 class BeamCentreModel(object):
@@ -18,13 +20,11 @@ class BeamCentreModel(object):
         self._r_max = 0
         self._left_right = True
         self._up_down = True
-        self._tolerance = 0.0001251
+        self._tolerance = 1.251E-07 # metres
         self._lab_pos_1 = ''
         self._lab_pos_2 = ''
         self._hab_pos_2 = ''
         self._hab_pos_1 = ''
-        self.scale_1 = 1000
-        self.scale_2 = 1000
         self.COM = False
         self.verbose = False
         self.q_min = 0.01
@@ -42,25 +42,16 @@ class BeamCentreModel(object):
 
     def reset_inst_defaults(self, instrument):
         if instrument is SANSInstrument.LOQ:
-            self._r_min = 96
-            self._r_max = 216
+            self._r_min = 0.096 # metres
+            self._r_max = 0.216 # metres
 
             # TODO HAB on LOQ prefers 96-750
         else:
             # All other instruments hard-code this as follows
-            self._r_min = 60
-            self._r_max = 280
+            self._r_min = 0.06 # metres
+            self._r_max = 0.280 # metres
 
-        self.set_scaling(instrument=instrument)
-
-    def set_scaling(self, instrument):
-        self.scale_1 = 1000
-        self.scale_2 = 1000
-
-        if instrument == SANSInstrument.LARMOR:
-            self.scale_1 = 1.0
-
-    def find_beam_centre(self, state):
+    def find_beam_centre(self, state: AllStates):
         """
         This is called from the GUI and runs the find beam centre algorithm given a state model and a beam_centre_model object.
 
@@ -101,11 +92,11 @@ class BeamCentreModel(object):
 
     def _update_centre_positions(self, results):
         if self.component is DetectorType.LAB:
-            self.lab_pos_1 = results["pos1"]
-            self.lab_pos_2 = results["pos2"]
+            self._lab_pos_1 = results["pos1"]
+            self._lab_pos_2 = results["pos2"]
         elif self.component is DetectorType.HAB:
-            self.hab_pos_1 = results['pos1']
-            self.hab_pos_2 = results['pos2']
+            self._hab_pos_1 = results['pos1']
+            self._hab_pos_2 = results['pos2']
         else:
             raise RuntimeError("Unexpected detector type, got %r" % results)
 
@@ -130,19 +121,19 @@ class BeamCentreModel(object):
 
     @property
     def r_min(self):
-        return self._r_min
+        return meter_2_millimeter(self._r_min)
 
     @r_min.setter
     def r_min(self, value):
-        self._r_min = value
+        self._r_min = millimeter_2_meter(value)
 
     @property
     def r_max(self):
-        return self._r_max
+        return meter_2_millimeter(self._r_max)
 
     @r_max.setter
     def r_max(self, value):
-        self._r_max = value
+        self._r_max = millimeter_2_meter(value)
 
     @property
     def q_min(self):
@@ -194,43 +185,43 @@ class BeamCentreModel(object):
 
     @property
     def tolerance(self):
-        return self._tolerance
+        return meter_2_millimeter(self._tolerance)
 
     @tolerance.setter
     def tolerance(self, value):
-        self._tolerance = value
+        self._tolerance = millimeter_2_meter(value)
 
     @property
     def lab_pos_1(self):
-        return self._lab_pos_1
+        return meter_2_millimeter(self._lab_pos_1) if self._lab_pos_1 else ''
 
     @lab_pos_1.setter
     def lab_pos_1(self, value):
-        self._lab_pos_1 = value
+        self._lab_pos_1 = millimeter_2_meter(value)
 
     @property
     def lab_pos_2(self):
-        return self._lab_pos_2
+        return meter_2_millimeter(self._lab_pos_2) if self._lab_pos_2 else ''
 
     @lab_pos_2.setter
     def lab_pos_2(self, value):
-        self._lab_pos_2 = value
+        self._lab_pos_2 = millimeter_2_meter(value)
 
     @property
     def hab_pos_1(self):
-        return self._hab_pos_1
+        return meter_2_millimeter(self._hab_pos_1) if self._hab_pos_1 else ''
 
     @hab_pos_1.setter
     def hab_pos_1(self, value):
-        self._hab_pos_1 = value
+        self._hab_pos_1 = millimeter_2_meter(value)
 
     @property
     def hab_pos_2(self):
-        return self._hab_pos_2
+        return meter_2_millimeter(self._hab_pos_2) if self._hab_pos_2 else ''
 
     @hab_pos_2.setter
     def hab_pos_2(self, value):
-        self._hab_pos_2 = value
+        self._hab_pos_2 = millimeter_2_meter(value)
 
     @property
     def component(self):

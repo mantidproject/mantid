@@ -385,7 +385,7 @@ bool CalculatePaalmanPings::doValidation(bool silent) {
 /**
  * Handles completion of the correction algorithm.
  *
- * @param error True of the algorithm failed
+ * @param error True if the algorithm failed
  */
 void CalculatePaalmanPings::absCorComplete(bool error) {
   disconnect(m_batchAlgoRunner, SIGNAL(batchComplete(bool)), this,

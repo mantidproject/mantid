@@ -124,12 +124,21 @@ Fitting.
 Data Loading
 ~~~~~~~~~~~~
 
-In the Data Loading step, a sequence of runs are loaded through the fields **First** and **Last**.
-All datasets with run number between these limits will be loaded, and a warning message
-will be shown if any of them is missing. Instead of selecting the **Last** dataset manually, the
-**Auto** checkbox can be ticked. In this case, the text box and button are disabled and the interface
-automatically selects the most recently modified file in the directory. The data will be automatically
-updated when new files are added to the directory.
+The data loaded will be assumed to belong to the instrument you set as the `Default instrument` when you started Mantid.
+If you’d like to load data collected on a different instrument you will need to change the `Default instrument`.
+
+The interface will attempt to locate runs by first searching any user defined directories and then the `Data archive` (only useful if you’re at ISIS).
+To get runs to load it is quite likely you’ll need to modify the way files are located.
+
+To change either the `Default instrument` or the way files are located select the `Help` menu in `Mantid Workbench` and then `About Mantid Workbench`.
+The pop up that opens will allow you to immediately change the `Default instrument` and also gives access to a dialog (through the `Manage User Directories <http://www.mantidproject.org/ManageUserDirectories>`_ option)
+this will allow you to define a set of `Search directories` and select whether the `Data Archive` is searched. 
+If the ALC interface is open, you will need to close and reopen it for the change to take effect.
+
+In the Data Loading step, a sequence of runs are loaded through the field **Runs** by entering a valid range. 
+Instead of choosing a range, after entering a valid first file the **Auto Find Current Run** checkbox can be ticked. In this case, 
+the runs text box is disabled and the interface automatically tries to find all valid runs in the range of the first file 
+and the most recently modified file found in the same directory as the first file provided. 
 
 The input files must be Muon Nexus files with names beginning with at least one letter
 and followed by a number. In addition, the user must supply the **Log** data that will
@@ -144,17 +153,14 @@ if the option **Subtract** is checked, and finally the type of **Calculation** t
 with the time limits. A click on the **Load** button results in the calculation of the
 asymmetry, displayed on the right panel.
 
-.. figure:: ../images/ALCDataLoading3.7.png
+.. figure:: ../images/MuonALCDataLoading.png
    :align: center
    :width: 800
 
 Options
 ^^^^^^^
-First
-  The path to the first nexus file in the series.
-
-Last
-  The path to the last nexus file in the series.
+Runs
+  The range of nexus files in the series
 
 Log
   The name of the log value which will be used as the X-axis in the output workspace. The list of

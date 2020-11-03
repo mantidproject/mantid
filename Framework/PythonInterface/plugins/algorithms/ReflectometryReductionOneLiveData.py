@@ -10,9 +10,17 @@ from mantid.api import *
 
 
 class LiveValue():
-    def __init__(self, value, unit):
+    """Hold the value and unit of a live instrument block value. Also hold an
+    alternative block name - this is not ideal but is required because
+    instruments are switching between instrument control software and could
+    have different block names. Longer term it would be good to configure these
+    so they don't need to be hard coded but we may end up removing this
+    approach altogether in the long run so this is sufficient for now.
+    """
+    def __init__(self, value, unit, alternative_name):
         self.value = value
         self.unit = unit
+        self.alternative_name = alternative_name
 
 
 class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
@@ -129,41 +137,49 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
     def _get_live_values_from_instrument(self):
         # get values from instrument
         liveValues = self._live_value_list()
-        for key in liveValues:
-            if liveValues[key].value is None:
-                liveValues[key].value = self._get_block_value_from_instrument(key)
+        for name, liveValue in liveValues.items():
+            if liveValue.value is None:
+                try:
+                    liveValue.value = self._get_block_value_from_instrument(name)
+                except:
+                    self.log().information("Failed to get value " + name
+                                           + " from the instrument; trying " + liveValue.alternative_name)
+                    liveValue.value = \
+                        self._get_block_value_from_instrument(liveValue.alternative_name)
         # check we have all we need
         self._validate_live_values(liveValues)
         return liveValues
 
+    def _live_value_list(self):
+        """Get the list of required live value names and their unit type"""
+        liveValues = {self._theta_name(): LiveValue(None, 'deg', self._alternative_theta_name()),
+                      self._s1vg_name(): LiveValue(None, 'm', self._alternative_s1vg_name()),
+                      self._s2vg_name(): LiveValue(None, 'm', self._alternative_s2vg_name())}
+        return liveValues
+
+    def _theta_name(self):
+        return 'THETA'
+
+    def _alternative_theta_name(self):
+        return 'Theta'
+
     def _s1vg_name(self):
-        if self._instrument == 'INTER' or self._instrument == 'SURF':
-            return 'S1VG'
-        elif self._instrument == 'OFFSPEC':
-            return 's1vgap'
-        else:
-            return 's1vg'
+        return 's1vgap' if self._instrument == 'OFFSPEC' else 'S1VG'
+
+    def _alternative_s1vg_name(self):
+        return 'S1VG' if self._instrument == 'OFFSPEC' else 's1vg'
 
     def _s2vg_name(self):
-        if self._instrument == 'INTER' or self._instrument == 'SURF':
-            return 'S2VG'
-        elif self._instrument == 'OFFSPEC':
-            return 's2vgap'
-        else:
-            return 's2vg'
+        return 's2vgap' if self._instrument == 'OFFSPEC' else 'S2VG'
+
+    def _alternative_s2vg_name(self):
+        return 'S1VG' if self._instrument == 'OFFSPEC' else 's2vg'
 
     def _get_double_or_none(self, propertyName):
         value = self.getProperty(propertyName)
         if value == Property.EMPTY_DBL:
             return None
         return value.value
-
-    def _live_value_list(self):
-        """Get the list of required live value names and their unit type"""
-        liveValues = {'Theta': LiveValue(None, 'deg'),
-                      self._s1vg_name(): LiveValue(None, 'm'),
-                      self._s2vg_name(): LiveValue(None, 'm')}
-        return liveValues
 
     def _get_block_value_from_instrument(self, logName):
         algName = self.getProperty('GetLiveValueAlgorithm').value
@@ -178,7 +194,7 @@ class ReflectometryReductionOneLiveData(DataProcessorAlgorithm):
         for key in liveValues:
             if liveValues[key].value is None:
                 raise RuntimeError('Required value ' + key + ' was not found for instrument')
-        if float(liveValues['Theta'].value) <= 1e-06:
+        if float(liveValues[self._theta_name()].value) <= 1e-06:
             raise RuntimeError('Theta must be greater than zero')
 
 

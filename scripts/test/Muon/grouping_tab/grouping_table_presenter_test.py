@@ -10,7 +10,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QWidget
 
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter
+from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_presenter import GroupingTablePresenter, RowValid
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import GroupingTableView, inverse_group_table_columns
 from Muon.GUI.Common.muon_group import MuonGroup
 from mantidqt.utils.observer_pattern import Observer
@@ -376,7 +376,7 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         valid = self.presenter.validate_periods('1-5')
 
-        self.assertFalse(valid)
+        self.assertEquals(RowValid.invalid_for_all_runs, valid)
 
     def test_that_period_valid_for_at_least_one_run_returns_valid(self):
         self.presenter._model._context = mock.MagicMock()
@@ -385,22 +385,52 @@ class GroupingTablePresenterTest(unittest.TestCase):
 
         valid = self.presenter.validate_periods('1-4')
 
-        self.assertTrue(valid)
+        self.assertEquals(RowValid.valid_for_some_runs, valid)
 
     def test_that_period_string_containing_not_matching_run_entry_regex_returns_invalid(self):
         valid = self.presenter.validate_periods('Invalid string')
 
-        self.assertFalse(valid)
+        self.assertEquals(RowValid.invalid_for_all_runs, valid)
 
     def _fake_num_periods(self, run):
         num_periods_dict = {'[84447]': 4, '[84448]': 4, '[84449]': 4, '[84450]':2, '[84451]' :1}
         return num_periods_dict[str(run)]
 
     def test_when_adding_group_to_empty_table_it_is_selected(self):
-        self.presenter.add_group(MuonGroup('group_1', [1,2,3,4]))
-        self.presenter.add_group(MuonGroup('group_2', [1,2,3,4]))
+        self.presenter.add_group(MuonGroup(group_name='group_1', detector_ids=[1,2,3,4]))
+        self.presenter.add_group(MuonGroup(group_name='group_2', detector_ids=[1,2,3,4]))
 
         self.assertEquals(self.model.selected_groups, ['group_1'])
+
+    def test_update_view_from_model_correctly_adds_warnings_for_invalid_periods(self):
+        self.presenter._model.validate_periods_list = mock.MagicMock(return_value=RowValid.invalid_for_all_runs)
+        self.presenter._view.add_entry_to_table = mock.MagicMock()
+        self.presenter.add_group_to_model(MuonGroup(group_name='group_1', detector_ids=[1,2,3,4], periods=[3]))
+
+        self.presenter.update_view_from_model()
+
+        self.presenter._view.add_entry_to_table.assert_called_once_with(['group_1', '3', False, '1-4', '4'],
+                                                                        (255, 0, 0), 'Warning: group periods invalid for all runs')
+
+    def test_update_view_from_model_correctly_adds_warnings_for_semi_invalid_periods(self):
+        self.presenter._model.validate_periods_list = mock.MagicMock(return_value=RowValid.valid_for_some_runs)
+        self.presenter._view.add_entry_to_table = mock.MagicMock()
+        self.presenter.add_group_to_model(MuonGroup(group_name='group_1', detector_ids=[1,2,3,4], periods=[3]))
+
+        self.presenter.update_view_from_model()
+
+        self.presenter._view.add_entry_to_table.assert_called_once_with(['group_1', '3', False, '1-4', '4'],
+                                                                        (255, 255, 0), 'Warning: group periods invalid for some runs')
+
+    def test_update_view_from_model_correctly_adds_warnings_for_valid(self):
+        self.presenter._model.validate_periods_list = mock.MagicMock(return_value=RowValid.valid_for_all_runs)
+        self.presenter._view.add_entry_to_table = mock.MagicMock()
+        self.presenter.add_group_to_model(MuonGroup(group_name='group_1', detector_ids=[1,2,3,4], periods=[3]))
+
+        self.presenter.update_view_from_model()
+
+        self.presenter._view.add_entry_to_table.assert_called_once_with(['group_1', '3', False, '1-4', '4'],
+                                                                        (255, 255, 255), '')
 
 
 if __name__ == '__main__':

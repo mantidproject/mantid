@@ -14,6 +14,8 @@ from mantid.api import AlgorithmFactory, Progress
 from sans.algorithm_detail.mask_workspace import mask_bins
 from sans.common.enums import DetectorType
 
+import os
+
 
 class SANSReductionCore(SANSReductionCoreBase):
     def category(self):
@@ -141,6 +143,11 @@ class SANSReductionCore(SANSReductionCoreBase):
         # ------------------------------------------------------------
         # Populate the output
         # ------------------------------------------------------------
+        replace_prop = False
+        if state.save.user_file:
+            workspace.getRun().addProperty("UserFile", os.path.basename(state.save.user_file), replace_prop)
+        if state.save.batch_file:
+            workspace.getRun().addProperty("BatchFile", os.path.basename(state.save.batch_file), replace_prop)
         self.setProperty("OutputWorkspace", workspace)
 
         # ------------------------------------------------------------

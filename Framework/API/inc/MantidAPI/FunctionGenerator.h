@@ -103,6 +103,9 @@ public:
   void setAttribute(const std::string &name, const Attribute &) override;
   /// Check if attribute attName exists
   bool hasAttribute(const std::string &name) const override;
+  // Get ith attribute name
+  std::string attributeName(size_t i) const override;
+
   //@}
 
   /// Evaluate the function

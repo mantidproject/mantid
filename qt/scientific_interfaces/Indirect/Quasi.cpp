@@ -567,7 +567,7 @@ void Quasi::plotClicked() {
               auto const workspaceIndices =
                   std::to_string(spectraIndices[0]) + "," +
                   std::to_string(spectraIndices[1]) + "," +
-                  std::to_string(spectraIndices[1]);
+                  std::to_string(spectraIndices[2]);
               m_plotter->plotSpectra(resultName, workspaceIndices);
             }
           } else

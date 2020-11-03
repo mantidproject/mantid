@@ -5,11 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import mantid.simpleapi as simpleapi
-from mantid.api import ITableWorkspace, WorkspaceGroup
-from mantid.dataobjects import Workspace2D
 
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+
+import mantid.simpleapi as simpleapi
+from mantid.api import ITableWorkspace
+from mantid.dataobjects import Workspace2D
 
 
 def create_simple_workspace(data_x, data_y):

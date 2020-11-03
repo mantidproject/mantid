@@ -91,6 +91,19 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
         self.figure.tight_layout()
         self.update_legend(self.get_axes()[0])
         self.figure.canvas.draw()
+        self.update_fitbrowser()
+
+    def update_fitbrowser(self):
+        is_visible = self.fit_browser.isVisible()
+        self.toolbar.set_fit_checkstate(False)
+        self.fit_browser.hide()
+        if self.fit_browser.getWorkspaceNames() and is_visible:
+            self.toolbar.set_fit_checkstate(True)
+            self.fit_browser.show()
+
+    def remove_ws_from_fitbrowser(self, ws):
+        # only one spectra per workspace
+        self.fit_browser.removeWorkspaceAndSpectra(ws.name())
 
     def update_legend(self, ax):
         if ax.get_lines():
@@ -106,6 +119,14 @@ class FittingPlotView(QtWidgets.QWidget, Ui_plot):
                 ax.relim()
             ax.autoscale()
         self.update_figure()
+
+    def read_fitprop_from_browser(self):
+        return self.fit_browser.read_current_fitprop()
+
+    def update_browser_setup(self, func_str, setup_name):
+        # update browser with output function and save setup
+        self.fit_browser.loadFunction(func_str)
+        self.fit_browser.save_current_setup(setup_name)
 
     # =================
     # Component Getters

@@ -389,7 +389,7 @@ public:
     TS_ASSERT_DELTA(calculatedAttFactor, yData[0], delta);
   }
 
-  void test_Workspace_Beam_Size_Set() {
+  void test_Workspace_Slit_Beam_Size_Set() {
     using namespace Mantid::Geometry;
 
     using Mantid::Kernel::DeltaEMode;
@@ -400,6 +400,7 @@ public:
     auto inst = testWS->getInstrument();
     auto &pmap = testWS->instrumentParameters();
     auto source = inst->getSource();
+    pmap.addString(source->getComponentID(), "beam-shape", "Slit");
     pmap.addDouble(source->getComponentID(), "beam-width", 0.01);
     pmap.addDouble(source->getComponentID(), "beam-height", 0.01);
 
@@ -424,6 +425,27 @@ public:
     TS_ASSERT_DELTA(calculatedAttFactor1, yData[0], delta);
   }
 
+  void test_Workspace_Circle_Beam_Size_Set() {
+    using namespace Mantid::Geometry;
+
+    using Mantid::Kernel::DeltaEMode;
+    TestWorkspaceDescriptor wsProps = {
+        1, 2, false, Environment::CubeRotatedSampleOnly, DeltaEMode::Elastic,
+        -1};
+    auto testWS = setUpWS(wsProps);
+    auto inst = testWS->getInstrument();
+    auto &pmap = testWS->instrumentParameters();
+    auto source = inst->getSource();
+    pmap.addString(source->getComponentID(), "beam-shape", "Circle");
+    pmap.addDouble(source->getComponentID(), "beam-radius", 0.01);
+
+    auto mcAbsorb = createAlgorithm();
+    constexpr int NEVENTS = 500000;
+    mcAbsorb->setProperty("EventsPerPoint", NEVENTS);
+
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->setProperty("InputWorkspace", testWS));
+    TS_ASSERT_THROWS_NOTHING(mcAbsorb->execute());
+  }
   //---------------------------------------------------------------------------
   // Unit tests
   //---------------------------------------------------------------------------

@@ -8,6 +8,7 @@
 #
 #
 import datetime
+from itertools import tee
 
 import numpy as np
 from matplotlib.collections import PolyCollection, QuadMesh
@@ -67,7 +68,7 @@ def get_normalize_by_bin_width(workspace, axes, **kwargs):
     :param workspace: :class:`mantid.api.MatrixWorkspace` workspace being plotted
     :param axes: The axes being plotted on
     """
-    normalize_by_bin_width = kwargs.get('normalize_by_bin_width', None)
+    normalize_by_bin_width = kwargs.pop('normalize_by_bin_width', None)
     if normalize_by_bin_width is not None:
         return normalize_by_bin_width, kwargs
     distribution = kwargs.get('distribution', None)
@@ -382,7 +383,11 @@ def get_bin_indices(workspace):
     if is_range:
         return range(range_start + 1, range_end)
     else:
-        indices = np.where(np.isin(range(total_range), monitors_indices, invert=True))
+        # the following two lines can be replaced by np.isin when > version 1.7.0 is used on RHEL7
+        total_range = np.asarray(range(total_range))
+        indices = np.where(np.in1d(total_range, monitors_indices, invert=True).reshape(total_range.shape))
+        # this check is necessary as numpy may return a tuple or a plain array based on platform.
+        indices = indices[0] if isinstance(indices, tuple) else indices
         return indices
 
 
@@ -462,7 +467,7 @@ def common_x(arr):
 
 
 def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, transpose=False,
-                         extent=None, xbins=100, ybins=100, spec_info=None):
+                         extent=None, xbins=100, ybins=100, spec_info=None, maxpooling=False):
     if spec_info is None:
         try:
             spec_info = workspace.spectrumInfo()
@@ -476,7 +481,7 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
         max_value = np.finfo(np.float64).min
 
         for spectrum_index in range(workspace.getNumberHistograms()):
-            if not(spec_info and spec_info.hasDetectors(spectrum_index) and spec_info.isMonitor(spectrum_index)):
+            if not (spec_info and spec_info.hasDetectors(spectrum_index) and spec_info.isMonitor(spectrum_index)):
                 xtmp = workspace.readX(spectrum_index)
                 if workspace.isHistogramData():
                     # input x is edges
@@ -497,15 +502,20 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
             min_value = xtmp.min()
         if max_value == np.finfo(np.float64).min:
             max_value = xtmp.max()
-        num_edges = int(np.ceil((max_value - min_value)/delta)) + 1
+        num_edges = int(np.ceil((max_value - min_value) / delta)) + 1
         x_centers = np.linspace(min_value, max_value, num=num_edges)
-        y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())   
+        y = mantid.plots.datafunctions.boundaries_from_points(workspace.getAxis(1).extractValues())
     else:
-        x_edges = np.linspace(extent[0], extent[1], int(xbins + 1))
-        x_centers = mantid.plots.datafunctions.points_from_boundaries(x_edges)
-        y = np.linspace(extent[2], extent[3], int(ybins))
+        x_low, x_high, y_low, y_high = extent[0], extent[1], extent[2], extent[3]
+        if transpose:
+            x_low, x_high, y_low, y_high = extent[2], extent[3], extent[0], extent[1]
 
-    counts = interpolate_y_data(workspace, x_centers, y, normalize_by_bin_width, spectrum_info=spec_info)
+        x_edges = np.linspace(x_low, x_high, int(xbins + 1))
+        x_centers = mantid.plots.datafunctions.points_from_boundaries(x_edges)
+        y = np.linspace(y_low, y_high, int(ybins))
+
+    counts = interpolate_y_data(workspace, x_centers, y, normalize_by_bin_width, spectrum_info=spec_info,
+                                maxpooling=maxpooling)
 
     if histogram2D and extent is not None:
         x = x_edges
@@ -520,29 +530,62 @@ def get_matrix_2d_ragged(workspace, normalize_by_bin_width, histogram2D=False, t
         return x, y, counts
 
 
-def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=None):
-    counts = np.full([y.size, x.size], np.nan, dtype=np.float64)
-    previous_index = -1
-    index = -1
-    for y_value in y:
-        index += 1
+def pairwise(iterable):
+    a, b = tee(iterable)
+    next(b, None)
+    return zip(a, b)
+
+
+def _workspace_indices(y_bins, workspace):
+    workspace_indices = []
+    for y in y_bins:
         try:
-            workspace_index = int(workspace.getAxis(1).indexOfValue(y_value))
+            workspace_index = workspace.getAxis(1).indexOfValue(y)
+            workspace_indices.append(workspace_index)
         except IndexError:
             continue
+    return workspace_indices
+
+
+def _workspace_indices_maxpooling(y_bins, workspace):
+    from mantid.simpleapi import Integration
+    summed_spectra_workspace = Integration(workspace)
+    summed_spectra = summed_spectra_workspace.extractY()
+    workspace_indices = []
+    for y_range in pairwise(y_bins):
+        try:
+            workspace_range = range(workspace.getAxis(1).indexOfValue(np.math.floor(y_range[0])),
+                                    workspace.getAxis(1).indexOfValue(np.math.ceil(y_range[1])))
+            workspace_index = workspace_range[np.argmax(summed_spectra[workspace_range])]
+            workspace_indices.append(workspace_index)
+        except IndexError:
+            continue
+    return workspace_indices
+
+
+def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=None, maxpooling=False):
+    workspace_indices = _workspace_indices_maxpooling(y, workspace) \
+        if maxpooling else _workspace_indices(y, workspace)
+    counts = np.full([len(workspace_indices), x.size], np.nan, dtype=np.float64)
+    previous_index = -1
+    index = -1
+    for workspace_index in workspace_indices:
+        index += 1
         # avoid repeating calculations
         if previous_index == workspace_index:
             counts[index, :] = counts[index - 1]
             continue
         previous_index = workspace_index
-        if not (spectrum_info and spectrum_info.hasDetectors(workspace_index) and spectrum_info.isMonitor(workspace_index)):
-            centers, ztmp, _, _ = get_spectrum(workspace, workspace_index, normalize_by_bin_width=normalize_by_bin_width,
+        if not (spectrum_info and spectrum_info.hasDetectors(workspace_index) and spectrum_info.isMonitor(
+                workspace_index)):
+            centers, ztmp, _, _ = get_spectrum(workspace, workspace_index,
+                                               normalize_by_bin_width=normalize_by_bin_width,
                                                withDy=False, withDx=False)
             interpolation_function = interp1d(centers, ztmp, kind='nearest', bounds_error=False,
                                               fill_value="extrapolate")
             # only set values in the range of workspace
             x_range = np.where((x >= workspace.readX(workspace_index)[0]) &
-                                   (x <= workspace.readX(workspace_index)[-1]))
+                               (x <= workspace.readX(workspace_index)[-1]))
             # set values outside x data to nan
             counts[index, x_range] = interpolation_function(x[x_range])
     counts = np.ma.masked_invalid(counts, copy=False)

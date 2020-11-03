@@ -63,7 +63,7 @@ class LoadFileWidgetModelTest(unittest.TestCase):
             self.model.execute()
 
         self.assertCountEqual([os.path.split(filename)[-1] for filename in self.model.loaded_filenames],
-                             ['EMU00019489.nxs', 'emu00006473.nxs'])
+                              ['EMU00019489.nxs', 'emu00006473.nxs'])
         self.assertCountEqual(self.model.loaded_runs, [[19489], [6473]])
 
 

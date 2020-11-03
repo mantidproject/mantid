@@ -29,7 +29,6 @@ class StateSliceEventBuilderTest(unittest.TestCase):
         data_builder.set_sample_scatter("LOQ74044")
         data_info = data_builder.build()
 
-
         # Act
         builder = get_scale_builder(data_info, file_information)
         self.assertTrue(builder)
@@ -43,10 +42,10 @@ class StateSliceEventBuilderTest(unittest.TestCase):
         # Assert
         state = builder.build()
         self.assertEqual(state.shape, SampleShape.FLAT_PLATE)
-        self.assertEqual(state.scale,  1.0)
-        self.assertEqual(state.thickness,  3.6)
-        self.assertEqual(state.width,  3.7)
-        self.assertEqual(state.height,  5.8)
+        self.assertEqual(state.scale, 1.0)
+        self.assertEqual(state.thickness, 3.6)
+        self.assertEqual(state.width, 3.7)
+        self.assertEqual(state.height, 5.8)
 
 
 if __name__ == '__main__':

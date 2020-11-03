@@ -238,7 +238,7 @@ class FigureManagerWorkbench(FigureManagerBase, QObject):
         # 0 argument is arbitrary and has no effect on fit widget size
         # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
         if QT_VERSION >= LooseVersion("5.6"):
-            self.window.resizeDocks([self.fit_browser], [0], Qt.Horizontal)
+            self.window.resizeDocks([self.fit_browser], [1], Qt.Horizontal)
         self.fit_browser.hide()
 
         if matplotlib.is_interactive():

@@ -159,6 +159,48 @@ public:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
   }
 
+  void testClearWorkspacesWhenUserPressNo() {
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    auto ws2 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().add("ws1", ws1);
+    AnalysisDataService::Instance().add("ws2", ws2);
+
+    ON_CALL(*mockView.get(), clearWorkspacesConfirmation())
+        .WillByDefault(Return(false));
+
+    EXPECT_CALL(*mockView.get(), clearWorkspacesConfirmation())
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::ClearWorkspaces);
+
+    auto workspaces = AnalysisDataService::Instance().getObjectNames();
+    TS_ASSERT(!workspaces.empty());
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+    AnalysisDataService::Instance().remove("ws1");
+    AnalysisDataService::Instance().remove("ws2");
+  }
+
+  void testClearWorkspacesWhenUserPressYes() {
+    auto ws1 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    auto ws2 = WorkspaceCreationHelper::create2DWorkspace(10, 10);
+    AnalysisDataService::Instance().add("ws1", ws1);
+    AnalysisDataService::Instance().add("ws2", ws2);
+
+    ON_CALL(*mockView.get(), clearWorkspacesConfirmation())
+        .WillByDefault(Return(true));
+
+    EXPECT_CALL(*mockView.get(), clearWorkspacesConfirmation())
+        .Times(Exactly(1));
+
+    presenter->notifyFromView(ViewNotifiable::Flag::ClearWorkspaces);
+
+    auto workspaces = AnalysisDataService::Instance().getObjectNames();
+    TS_ASSERT(workspaces.empty());
+
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&mockView));
+  }
+
   void testADSCleared() {
     auto wksp = WorkspaceCreationHelper::create2DWorkspace(10, 10);
 

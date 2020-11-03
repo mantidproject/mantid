@@ -52,7 +52,7 @@ class ProjectSaver(object):
             saved_workspaces = ADS.getObjectNames()
 
         # Generate plots
-        plots_to_save_list = PlotsSaver().save_plots(plots_to_save)
+        plots_to_save_list = PlotsSaver().save_plots(plots_to_save, not project_recovery)
 
         # Save interfaces
         if interfaces_to_save is None:

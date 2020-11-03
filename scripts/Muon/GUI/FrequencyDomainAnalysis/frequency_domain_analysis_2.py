@@ -102,7 +102,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         # 0 argument is arbitrary and has no effect on fit widget size
         # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
         if QT_VERSION >= LooseVersion("5.6"):
-            self.resizeDocks({self.dockable_plot_widget_window}, {0}, QtCore.Qt.Horizontal)
+            self.resizeDocks({self.dockable_plot_widget_window}, {1}, QtCore.Qt.Horizontal)
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
@@ -264,11 +264,17 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
             self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
 
+        self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
+            self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
+
         self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
             self.plot_widget.presenter.added_group_or_pair_observer)
 
+        self.grouping_tab_widget.pairing_table_widget.selected_pair_changed_notifier.add_subscriber(
+            self.transform.GroupPairObserver)
+
         self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
-            self.fitting_tab.fitting_tab_presenter.selected_group_pair_observer)
+            self.transform.GroupPairObserver)
 
         self.grouping_tab_widget.grouping_table_widget.selected_group_changed_notifier.add_subscriber(
             self.plot_widget.presenter.added_group_or_pair_observer)

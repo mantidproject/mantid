@@ -79,6 +79,9 @@ private:
                        size_t nspec, const std::vector<double> &result,
                        bool complex, API::MatrixWorkspace_sptr &outWS,
                        bool autoShift);
+  /// Checks the bin spacing is equal
+  void validateBinEdges(const std::string &wsName,
+                        std::map<std::string, std::string> &messages);
 };
 
 } // namespace Algorithms

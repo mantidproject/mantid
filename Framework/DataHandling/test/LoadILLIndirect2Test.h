@@ -111,7 +111,8 @@ public:
   }
 
   void test_diffraction_bats() {
-    // checks bats in the older version of IN16B diffraction mode
+    // checks loading IN16B diffraction data acquired in bats mode with the data
+    // written in the older way in the Nexus
     LoadILLIndirect2 loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())
@@ -137,7 +138,8 @@ public:
     AnalysisDataService::Instance().clear();
   }
   void test_diffraction_doppler() {
-    // checks doppler in the newer version of IN16B diffraction mode
+    // checks loading IN16B diffration data acquired in Doppler mode with the
+    // data written in the newer way in the Nexus
     LoadILLIndirect2 loader;
     TS_ASSERT_THROWS_NOTHING(loader.initialize())
     TS_ASSERT(loader.isInitialized())

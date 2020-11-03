@@ -30,6 +30,7 @@ set(TEST_PY_FILES
     PCRmagnetZFKTTest.py
     PCRmagnetRedfieldTest.py
     PCRmagnetfnormTest.py
+    PEARLTransVoigtTest.py
     RFresonanceTest.py
     SpinGlassTest.py
     StandardSCTest.py
