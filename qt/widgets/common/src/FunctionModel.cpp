@@ -5,11 +5,14 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionModel.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidKernel/Logger.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 
 namespace {
@@ -25,11 +28,13 @@ void FunctionModel::setFunction(IFunction_sptr fun) {
   m_globalParameterNames.clear();
   m_function = std::dynamic_pointer_cast<MultiDomainFunction>(fun);
   if (m_function) {
+    setResolutionFromWorkspace(m_function);
     return;
   }
   m_function = MultiDomainFunction_sptr(new MultiDomainFunction);
   if (fun) {
     auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
+    setResolutionFromWorkspace(fun);
     for (int i = 0; i < nf; ++i) {
       m_function->addFunction(fun->clone());
       m_function->setDomainIndex(i, i);
@@ -45,6 +50,7 @@ IFunction_sptr FunctionModel::getFitFunction() const {
   if (nf > 1) {
     auto fun =
         std::dynamic_pointer_cast<MultiDomainFunction>(m_function->clone());
+
     auto const singleFun = m_function->getFunction(0);
     for (auto par = m_globalParameterNames.begin();
          par != m_globalParameterNames.end();) {
@@ -479,6 +485,37 @@ void FunctionModel::updateGlobals() {
       it = m_globalParameterNames.erase(it);
     } else {
       ++it;
+    }
+  }
+}
+
+void FunctionModel::setResolutionFromWorkspace(IFunction_sptr fun) {
+  auto n = fun->getNumberDomains();
+  if (n > 1) {
+    for (size_t index = 0; index < n; index++) {
+      setResolutionFromWorkspace(fun->getFunction(index));
+    }
+  } else {
+    if (fun->hasAttribute("f0.Workspace")) {
+      std::string wsName = fun->getAttribute("f0.Workspace").asString();
+      if (AnalysisDataService::Instance().doesExist(wsName)) {
+        const auto ws =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+        auto inst = ws->getInstrument();
+        auto analyser = inst->getStringParameter("analyser");
+        if (analyser.size() > 0) {
+          auto comp = inst->getComponentByName(analyser[0]);
+          if (comp) {
+            auto params = comp->getNumberParameter("resolution", true);
+            auto funString = fun->asString();
+            for (auto param : fun->getParameterNames()) {
+              if (param.find("FWHM") != std::string::npos) {
+                fun->setParameter(param, params[0]);
+              }
+            }
+          }
+        }
+      }
     }
   }
 }

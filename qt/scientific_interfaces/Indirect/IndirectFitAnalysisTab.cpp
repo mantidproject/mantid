@@ -419,7 +419,7 @@ void IndirectFitAnalysisTab::updateParameterValues(
         params) {
   try {
     updateFitBrowserParameterValues(params);
-  } catch (const std::out_of_range &error) {
+  } catch (const std::out_of_range &) {
     g_log.warning(
         "Warning issue updating parameter values in fit property browser");
   } catch (const std::invalid_argument &) {

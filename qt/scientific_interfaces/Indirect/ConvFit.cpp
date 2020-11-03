@@ -127,38 +127,6 @@ void ConvFit::setModelResolution(const std::string &resolutionName,
   setModelFitFunction();
 }
 
-void ConvFit::setDefaultResolution(
-    const Mantid::API::MatrixWorkspace_const_sptr &ws,
-    const QPair<double, double> &range) {
-  auto inst = ws->getInstrument();
-  auto analyser = inst->getStringParameter("analyser");
-
-  if (analyser.size() > 0) {
-    auto comp = inst->getComponentByName(analyser[0]);
-
-    if (comp) {
-      auto params = comp->getNumberParameter("resolution", true);
-      
-      // set the default instrument resolution
-      if (!params.empty()) {
-        double res = params[0];
-        m_dblManager->setValue(m_properties["InstrumentResolution"], res);
-        m_dblManager->setValue(m_properties["IntegrationStart"], -res);
-        m_dblManager->setValue(m_properties["IntegrationEnd"], res);
-
-        m_dblManager->setValue(m_properties["BackgroundStart"], -10 * res);
-        m_dblManager->setValue(m_properties["BackgroundEnd"], -9 * res);
-      } else {
-        m_dblManager->setValue(m_properties["IntegrationStart"], range.first);
-        m_dblManager->setValue(m_properties["IntegrationEnd"], range.second);
-      }
-    } else {
-      showMessageBox("Warning: The instrument definition file for the input "
-                     "workspace contains an invalid value.");
-    }
-  }
-}
-
 void ConvFit::fitFunctionChanged() {
   m_convFittingModel->setFitTypeString(fitTypeString());
 }

@@ -82,6 +82,7 @@ protected:
 private:
   void checkIndex(int) const;
   void updateGlobals();
+  void setResolutionFromWorkspace(IFunction_sptr fun);
   size_t m_currentDomainIndex = 0;
   mutable QStringList m_datasetNames;
   mutable QStringList m_globalParameterNames;
