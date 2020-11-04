@@ -83,8 +83,33 @@ Output:
 Wavelength and position calibration
 ===================================
 
-.. include:: ../usagedata-note.txt
+The first step of working with D7 data is to ensure that there exist a proper calibration of the wavelenght, bank positions, and detector positions relative to their bank. This calibration can be either taken from a previous experiment performed in comparable conditions or obtained from the :math:`\text{Y}_{3}\text{Fe}_{5}\text{O}_{12}` (YIG) scan data with a dedicated algorithm :ref:`D7YIGPositionCalibration <D7YIGPositionCalibration>`. The method follows the description presented in Ref. [1].
 
+This algorithm performs wavelength and position calibration for both individual detectors and detector banks using measurement of a sample of powdered YIG. This data is fitted with Gaussian distributions at the expected peak positions. The output is an :ref:`Instrument Parameter File <InstrumentParameterFile>` readable by the :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` algorithm that will place the detector banks and detectors using the output of this algorithm.
+
+The provided YIG d-spacing values are loaded from an XML list. The default d-spacing distribution for YIG is coming from Ref. [2]. The peak positions are converted into :math:`2\theta` positions using the initial assumption of the neutron wavelength. YIG peaks in the detector's scan are fitted separately using a Gaussian distribution.
+
+The workspace containing the peak fitting results is then fitted using a `Multidomain` function of the form:
+
+.. math:: 2\theta_{fit} = m \cdot (2.0 \cdot \text{asin} ( \lambda / 2d ) + offset_{\text{pixel}} + offset_{\text{bank}}),
+
+where `m` is the bank slope, :math:`offset_{\text{pixel}}` is the relative offset to the initial assumption of the position inside the detector bank, and :math:`offset_{\text{bank}}` is the offset of the entire bank. This function allows to extract the information about the wavelength, detector bank slopes and offsets, and the distribution of detector offsets.
+
+
+**Example - D7YIGPositionCalibration - calibration at the shortest wavelength**
+
+.. code-block:: python
+
+   approximate_wavelength = '3.1' # Angstrom
+   D7YIGPositionCalibration(Filenames='402652:403041', ApproximateWavelength=approximate_wavelength,
+                               YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
+                               MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1", ClearCache=True,
+                               FitOutputWorkspace='shortWavelength')
+
+   print('The calibrated wavelength is: {0:.2f}'.format(float(approximate_wavelength)*mtd['shortWavelength'].column(1)[1]))
+   print('The bank2 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[0]))
+   print('The bank3 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[176]))
+   print('The bank4 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[352]))
 
 
 	     
@@ -107,6 +132,16 @@ Sample data normalisation
 
 #. Spin-incoherent normalisation
 
+
+#. T. Fennell, L. Mangin-Thro, H.Mutka, G.J. Nilsen, A.R. Wildes.
+   *Wavevector and energy resolution of the polarized diffuse scattering spectrometer D7*,
+   Nuclear Instruments and Methods in Physics Research A **857** (2017) 24–30
+   `doi: 10.1016/j.nima.2017.03.024 <https://doi.org/10.1016/j.nima.2017.03.024>`_
+
+#. A. Nakatsuka, A. Yoshiasa, and S. Takeno.
+   *Site preference of cations and structural variation in Y3Fe5O12 solid solutions with garnet structure*,
+   Acta Crystallographica Section B **51** (1995) 737–745
+   `doi: 10.1107/S0108768194014813 <https://doi.org/10.1107/S0108768194014813>`_
 
 
 .. categories:: Techniques
