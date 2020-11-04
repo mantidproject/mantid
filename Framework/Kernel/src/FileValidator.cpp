@@ -11,6 +11,7 @@
 #include <boost/algorithm/string/case_conv.hpp>
 #include <fstream>
 #include <memory>
+#include <sstream>
 
 namespace Mantid {
 namespace Kernel {
@@ -95,9 +96,9 @@ std::string FileValidator::checkValidity(const std::string &value) const {
     std::ifstream in;
     in.open(value.c_str());
     if (!in) {
-      auto e = std::system_error(errno, std::generic_category(),
-                                 "Failed to open " + value);
-      return e.what();
+      std::stringstream error;
+      error << "Failed to open " + value + ": " << strerror(errno);
+      return error.str();
     }
   }
 
