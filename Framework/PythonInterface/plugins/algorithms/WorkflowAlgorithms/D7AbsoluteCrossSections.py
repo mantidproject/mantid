@@ -428,6 +428,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             self._set_y_units(output_ws)
             Transpose(InputWorkspace=output_ws, OutputWorkspace=output_ws)
             self._set_as_distribution(output_ws)
+            # clean-up
+            DeleteWorkspace(det_efficiency_ws)
+            if normalisation_method != 'Vanadium':
+                DeleteWorkspace(det_efficiency_input)
         self.setProperty('OutputWorkspace', mtd[output_ws])
 
 
