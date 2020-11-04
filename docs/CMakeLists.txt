@@ -48,7 +48,7 @@ endif()
 function (add_sphinx_build_target builder math_renderer)
   set(runner ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/mantidpython$<$<BOOL:${WIN32}>:.bat>)
   set(runner_args "--classic")
-  if(ARGC GREATER 2)  # the target name is last
+  if(ARGC GREATER 2)
     set(target_name ${ARGV2})
   else()
     set(target_name docs-${builder})
@@ -59,6 +59,12 @@ function (add_sphinx_build_target builder math_renderer)
     set(conf_builder ${SPHINX_CONF_DIR}/conf-${builder}.py)
   endif()
 
+  set(sphinx_options ${SPHINX_NOCOLOR} -b ${builder} -d ${DOCTREES_DIR})
+  # add a tag to differentiate between html/qthelp in conf
+  if(ARGC GREATER 3)
+    set(sphinx_options ${sphinx_options} -t ${ARGV3})
+  endif()
+
   add_custom_target(${target_name}
       COMMAND
         ${CMAKE_COMMAND} -E env
@@ -67,7 +73,7 @@ function (add_sphinx_build_target builder math_renderer)
              DOT_EXECUTABLE=${DOT_EXECUTABLE}
              MATH_EXT=${math_renderer}
              ENABLE_PLOTDIRECTIVE=${ENABLE_PLOTDIRECTIVE}
-             ${runner} ${runner_args} -m ${SPHINX_MAIN} ${SPHINX_NOCOLOR} -b ${builder} -d ${DOCTREES_DIR} ${SPHINX_CONF_DIR} ${output_dir}
+             ${runner} ${runner_args} -m ${SPHINX_MAIN} ${sphinx_options} ${SPHINX_CONF_DIR} ${output_dir}
       DEPENDS Framework
               mantidqt
               ${SPHINX_CONF_DIR}/conf.py
@@ -89,7 +95,7 @@ add_sphinx_build_target(doctest "sphinx.ext.mathjax")
 # qthelp if building workbench
 if(DOCS_QTHELP AND ENABLE_WORKBENCH)
   find_package(Qt5 COMPONENTS Help REQUIRED)
-  add_sphinx_build_target(qthelp ${DOCS_MATH_EXT} docs-qtassistant)
+  add_sphinx_build_target(qthelp ${DOCS_MATH_EXT} docs-qtassistant qthelp)
   add_custom_target(docs-qthelp
                       COMMAND Qt5::qcollectiongenerator qthelp/MantidProject.qhcp
                       COMMENT "Compiling Qt help documentation")

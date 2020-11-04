@@ -10,12 +10,13 @@ from numpy.testing import assert_allclose
 from os import path
 import unittest
 
-from corelli.calibration.utils import (apply_calibration, bank_numbers, calibrate_tube, load_banks, calculate_peak_y_table,
-                                       wire_positions)
 from mantid import AnalysisDataService, config
-from mantid.dataobjects import TableWorkspace
+from mantid.kernel import V3D
 from mantid.simpleapi import (CreateEmptyTableWorkspace, DeleteWorkspaces, GroupWorkspaces, LoadEmptyInstrument,
                               LoadNexusProcessed)
+
+from corelli.calibration.utils import (apply_calibration, bank_numbers, calculate_peak_y_table, calibrate_tube,
+                                       load_banks, trim_calibration_table, wire_positions)
 
 
 class TestUtils(unittest.TestCase):
@@ -120,6 +121,7 @@ class TestUtils(unittest.TestCase):
         with self.assertRaises(AssertionError) as exception_info:
             load_banks('I_am_no_here', '58', output_workspace='jambalaya')
         assert 'File I_am_no_here does not exist' in str(exception_info.exception)
+
         # loading an event nexus file will take too much time, so it's left as a system test.
         # loading a nexus processed file
         for directory in config.getDataSearchDirs():
@@ -131,9 +133,26 @@ class TestUtils(unittest.TestCase):
         self.assertAlmostEqual(workspace.readY(42)[0], 13297.0)
         DeleteWorkspaces(['jambalaya'])
 
+    def test_trim_calibration_table(self):
+        # create a table with detector id and detector XYZ positions
+        table = CreateEmptyTableWorkspace(OutputWorkspace='CalibTable')
+        table.addColumn(type='int', name='Detector ID')
+        table.addColumn(type='V3D', name='Detector Position')
+        table.addRow([0, V3D(0, 1, 2)])  # add two detectors with ID's 0 and 1
+        table.addRow([1, V3D(3, 4, 5)])
+        y_values = [1, 4]
+        # call trim_calibration_table and save to new table
+        table_calibrated = trim_calibration_table(table, output_workspace='table_calibrated')
+        # assert the Y-coordinate hasn't changed
+        assert_allclose(table_calibrated.column(1), y_values, atol=0.0001)
+        # call trim_calibration_table and overwrite the table
+        table_calibrated = trim_calibration_table(table)
+        assert table_calibrated.name() == 'CalibTable'  # table workspace has been overwritten with the calibrated one
+        assert_allclose(table_calibrated.column(1), y_values, atol=0.0001)
+
     def test_peak_y_table(self) -> None:
         # Mock PeakTable with two tubes and three peaks. Simple, integer values
-        def peak_pixels_table(table_name, peak_count, tube_names=None, pixel_positions=None) -> TableWorkspace:
+        def peak_pixels_table(table_name, peak_count, tube_names=None, pixel_positions=None):
             table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
             table.addColumn(type='str', name='TubeId')
             for i in range(peak_count):
@@ -149,7 +168,7 @@ class TestUtils(unittest.TestCase):
         peak_table = peak_pixels_table('PeakTable', 3, ['tube1'], [[0, 1, 2]])
 
         # Mock ParametersTableGroup with one parameter table. Simple parabola
-        def parameters_optimized_table(table_name, values=None, errors=None) -> TableWorkspace:
+        def parameters_optimized_table(table_name, values=None, errors=None):
             table = CreateEmptyTableWorkspace(OutputWorkspace=table_name)
             for column_type, column_name in [('str', 'Name'), ('float', 'Value'), ('float', 'Error')]:
                 table.addColumn(type=column_type, name=column_name)
@@ -189,7 +208,7 @@ class TestUtils(unittest.TestCase):
         assert 'The fit domain cannot be larger than the distance between consecutive' in str(exception_info.exception)
 
         table = calibrate_tube(self.workspace, 'bank42/sixteenpack/tube8')
-        calibrated_y = np.array([v.Y() for v in table.column(1)])
+        calibrated_y = table.column(1)
         assert_allclose(calibrated_y, self.calibrated_y, atol=1e-3)
 
         # Check for existence of all table workspaces
