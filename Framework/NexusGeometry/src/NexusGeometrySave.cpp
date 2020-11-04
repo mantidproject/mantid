@@ -1382,7 +1382,7 @@ public:
       H5::Group pixelShapeGroup =
           simpleNXSubGroup(grp, PIXEL_SHAPE, NX_CYLINDER);
       // write cylinder only once, using the first index
-      auto &geometry = firstShapeInfo.cylinderGeometry();
+      auto const &geometry = firstShapeInfo.cylinderGeometry();
       const Eigen::Vector3d &base =
           Kernel::toVector3d(geometry.centreOfBottomBase);
       const Eigen::Vector3d &axis = Kernel::toVector3d(geometry.axis);
