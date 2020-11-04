@@ -740,12 +740,9 @@ QList<Dataset> IndirectFitAnalysisTab::getDatasets() const {
   for (auto i = 0u; i < m_fittingModel->numberOfWorkspaces().value; ++i) {
     TableDatasetIndex index{i};
 
-    QList<std::size_t> spectraList;
-    for (auto const &spectrum : m_fittingModel->getSpectra(index))
-      spectraList << spectrum.value;
-
     auto const name = m_fittingModel->getWorkspace(index)->getName();
-    datasets.append(Dataset(QString::fromStdString(name), spectraList));
+    datasets.append(Dataset(QString::fromStdString(name),
+                            m_fittingModel->getSpectra(index)));
   }
   return datasets;
 }

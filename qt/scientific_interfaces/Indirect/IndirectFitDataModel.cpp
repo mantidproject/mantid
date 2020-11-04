@@ -7,11 +7,12 @@
 #include <string>
 
 #include "DllConfig.h"
-#include "IndexTypes.h"
 #include "IndirectFitData.h"
 #include "IndirectFitDataModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+
+using namespace MantidQt::MantidWidgets;
 
 namespace {
 

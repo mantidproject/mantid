@@ -9,13 +9,15 @@
 
 #include "DllConfig.h"
 #include "IIndirectFitData.h"
-#include "IndexTypes.h"
 #include "IndirectFitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+using namespace MantidWidgets;
 
 /*
     IIndirectFitData - Specifies an interface for updating, querying and

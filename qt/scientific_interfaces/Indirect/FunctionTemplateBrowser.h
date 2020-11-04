@@ -7,10 +7,10 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "IndexTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FunctionModelDataset.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 #include "ParameterEstimation.h"
 
 #include <QList>
@@ -33,6 +33,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 using namespace Mantid::API;
+using namespace MantidWidgets;
 
 /**
  * Class FunctionTemplateBrowser implements QtPropertyBrowser to display

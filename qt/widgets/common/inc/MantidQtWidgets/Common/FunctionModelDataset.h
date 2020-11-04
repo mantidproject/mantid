@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 
 #include <QList>
 #include <QString>
@@ -15,22 +16,14 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-struct Spectra {
-  Spectra(const QList<std::size_t> &spectra);
-
-  int numberOfSpectra() const;
-
-  QList<std::size_t> m_spectraList;
-};
-
 struct EXPORT_OPT_MANTIDQT_COMMON Dataset {
 public:
-  Dataset(const QString &workspaceName, const QList<std::size_t> &spectra);
+  Dataset(const QString &workspaceName, const Spectra &spectra);
 
   QString datasetName() const;
   QStringList domainNames() const;
 
-  QList<std::size_t> spectraList() const;
+  std::size_t numberOfSpectra() const;
 
 private:
   QString m_workspaceName;

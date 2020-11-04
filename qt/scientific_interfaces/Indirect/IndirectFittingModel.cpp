@@ -24,6 +24,7 @@
 #include <utility>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 using IDAWorkspaceIndex = MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 namespace {

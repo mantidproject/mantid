@@ -279,7 +279,7 @@ void FunctionModel::setNumberDomains(int nDomains) {
 void FunctionModel::setDatasets(const QStringList &datasetNames) {
   QList<Dataset> datasets;
   for (const auto &datasetName : datasetNames)
-    datasets.append(Dataset(datasetName, QList<std::size_t>({0u})));
+    datasets.append(Dataset(datasetName, Spectra("0")));
 
   setDatasets(datasets);
 }
@@ -298,7 +298,7 @@ void FunctionModel::setDatasets(const QList<Dataset> &datasets) {
 /// @param datasetNames :: Names of the workspaces to be added.
 void FunctionModel::addDatasets(const QStringList &datasetNames) {
   for (const auto &datasetName : datasetNames)
-    m_datasets.append(Dataset(datasetName, QList<std::size_t>({0u})));
+    m_datasets.append(Dataset(datasetName, Spectra("0")));
 
   setNumberDomains(numberOfDomains(m_datasets));
 }
@@ -329,8 +329,8 @@ void FunctionModel::removeDatasets(QList<int> &indices) {
 QStringList FunctionModel::getDatasetNames() const {
   QStringList datasetNames;
   for (const auto &dataset : m_datasets)
-    for (const auto &specNum : dataset.spectraList()) {
-      UNUSED_ARG(specNum);
+    for (auto i = 0u; i < dataset.numberOfSpectra(); ++i) {
+      UNUSED_ARG(i);
       datasetNames << dataset.datasetName();
     }
   return datasetNames;
@@ -498,7 +498,7 @@ void FunctionModel::checkDatasets() {
   if (numberOfDomains(m_datasets) != static_cast<int>(m_numberDomains)) {
     m_datasets.clear();
     for (auto i = 0u; i < m_numberDomains; ++i)
-      m_datasets.append(Dataset(QString::number(i), QList<std::size_t>({0u})));
+      m_datasets.append(Dataset(QString::number(i), Spectra("0")));
   }
 }
 
@@ -511,11 +511,11 @@ void FunctionModel::checkNumberOfDomains(const QList<Dataset> &datasets) const {
 }
 
 int FunctionModel::numberOfDomains(const QList<Dataset> &datasets) const {
-  int totalNumberOfDomains{0};
+  std::size_t totalNumberOfDomains{0u};
   for (const auto &dataset : datasets)
-    totalNumberOfDomains += dataset.spectraList().size();
+    totalNumberOfDomains += dataset.numberOfSpectra();
 
-  return totalNumberOfDomains;
+  return static_cast<int>(totalNumberOfDomains);
 }
 
 /// Check a domain/function index to be in range.
