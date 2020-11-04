@@ -156,14 +156,14 @@ class SamplingImage(mimage.AxesImage):
 
     def _is_workspace_ragged(self):
         """
-        Checks to see if the workspace is ragged or not.
+        Checks to see if the workspace is ragged or not. blocksize will fail if the workspace is ragged.
         :return: True if the workspace is ragged (i.e. not all spectra have the same length)
         """
-        row_length = len(self.ws.readY(0))
-        for i in range(1, self.ws.getNumberHistograms()):
-            if len(self.ws.readY(i)) != row_length:
-                return True
-        return False
+        try:
+            _ = self.ws.blocksize()
+            return False
+        except RuntimeError:
+            return True
 
 
 def imshow_sampling(axes,
