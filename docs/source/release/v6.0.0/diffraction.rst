@@ -25,7 +25,7 @@ New features
 Improvements
 ############
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
-- The height of the :ref:`BackToBackExponential <algm-BackToBackExponential>` peak is now preserved when changing the FWHM sliders when fitting.
+- The height of the :ref:`func-BackToBackExponential` peak is now preserved when changing the FWHM sliders when fitting.
 
 New features
 ############
