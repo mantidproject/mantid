@@ -514,10 +514,10 @@ class PolDiffILLReduction(PythonAlgorithm):
         for entry in mtd[ws]:
             unit = ''
             if output_unit == 'TwoTheta':
-                unit = 'S (TwoTheta)'
+                unit = 'dS / d(TwoTheta)'
             elif output_unit == 'Q':
-                unit = 'S (Q)'
-            entry.setYUnit("")
+                unit = 'dS / dQ '
+            entry.setYUnit(unit)
             entry.setYUnitLabel(unit)
         return ws
 

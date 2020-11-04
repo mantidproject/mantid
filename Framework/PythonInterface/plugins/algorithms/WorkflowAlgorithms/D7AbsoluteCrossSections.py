@@ -387,6 +387,20 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_name)
         return output_name
 
+    def _set_y_units(self, ws):
+        unit = '(barn / sr / formula unit)'
+        x_unit = ''
+        x_unit_entry0 = mtd[ws][0].getAxis(1).getUnit().unitID()
+        if x_unit_entry0 == 'MomentumTransfer':
+            x_unit = 'Q'
+        elif x_unit_entry0 == 'Degrees':
+            x_unit = '(TwoTheta)'
+        elif x_unit_entry0 == 'Wavelength':
+            x_unit = '(DetectorNumber)'
+        for entry in mtd[ws]:
+            entry.setYUnitLabel("dS / d{0} {1}".format(x_unit, unit))
+        return ws
+
     def _set_as_distribution(self, ws):
         for entry in mtd[ws]:
             entry.setDistribution(True)
@@ -411,7 +425,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
             det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
             output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
-            DeleteWorkspaces([det_efficiency_ws, det_efficiency_input]) # cleanup
+            self._set_y_units(output_ws)
             Transpose(InputWorkspace=output_ws, OutputWorkspace=output_ws)
             self._set_as_distribution(output_ws)
         self.setProperty('OutputWorkspace', mtd[output_ws])
