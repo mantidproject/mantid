@@ -10,8 +10,7 @@ from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.run_string_utils as run_utils
 import Muon.GUI.Common.utilities.load_utils as load_utils
 from Muon.GUI.Common.utilities.run_string_utils import flatten_run_list
-from mantidqt.utils.observer_pattern import Observable
-
+from mantidqt.utils.observer_pattern import GenericObservable, Observable
 
 
 class LoadRunWidgetPresenterEA(object):
@@ -33,6 +32,8 @@ class LoadRunWidgetPresenterEA(object):
         self._set_connections()
         self.enable_notifier = self.EnableEditingNotifier(self)
         self.disable_notifier = self.DisableEditingNotifier(self)
+
+        self.updated_directory = GenericObservable()
 
     def _set_connections(self):
         self._view.on_load_current_run_clicked(self.handle_load_current_run)
@@ -67,8 +68,8 @@ class LoadRunWidgetPresenterEA(object):
         self._view.clear()
         self._model.clear_loaded_data()
 
-    # def get_current_instrument(self):
-    #     return str(self._instrument)
+    def clear_data(self):
+        self._model.clear_data()
 
     @property
     def workspaces(self):
@@ -176,6 +177,8 @@ class LoadRunWidgetPresenterEA(object):
         return run_list
 
     def load_runs(self, runs):
+        self._model._data_context.clear_run_info()
+        self._model.clear_loaded_data()
         self.disable_notifier.notify_subscribers()
         self.handle_loading(runs, self._use_threading)
 
@@ -224,7 +227,6 @@ class LoadRunWidgetPresenterEA(object):
 
     def on_loading_finished(self):
         try:
-            #if self.run_list and self.run_list[0] == 'Current':
             if self.run_list:
                 latest_loaded_run = self._model.get_latest_loaded_run()
                 if isinstance(latest_loaded_run, list):
@@ -236,12 +238,12 @@ class LoadRunWidgetPresenterEA(object):
             self._model.current_runs = run_list
 
             if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
-                run_list_to_add = [run for run in self.run_list if self._model.get_data(run=[run])]
-                run_list = [[run for run in self.run_list if self._model.get_data(run=[run])]]
-                load_utils.combine_loaded_runs(self._model, run_list_to_add, delete_added=True)
-                self._model.current_runs = run_list
+                run_list_to_add = list(self._model._data_context._run_info.keys())
+                if len(run_list_to_add) >1 :
+                    load_utils.combine_loaded_runs_ea(self._model, run_list_to_add, delete_added=True)
 
             self.update_view_from_model(run_list)
+            self.updated_directory.notify_subscribers(self._model._directory)
             self._view.notify_loading_finished()
         except ValueError:
             self._view.warning_popup('Attempting to co-add data with different time bins. This is not currently supported.')
@@ -250,8 +252,14 @@ class LoadRunWidgetPresenterEA(object):
             self._view.warning_popup(error)
             self._view.reset_run_edit_from_cache()
         finally:
-            #self.enable_loading()
             self.enable_notifier.notify_subscribers()
+
+    def handle_updated_path_text(self):
+        """
+        Handles the current directory path being observed
+        """
+        path = self._model._directory
+        return path
 
     class DisableEditingNotifier(Observable):
 

@@ -15,6 +15,8 @@ from Muon.GUI.ElementalAnalysis2.load_widget.load_run_widget_presenter import Lo
 from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
 from Muon.GUI.ElementalAnalysis2.load_widget.load_widget_presenter import LoadWidgetPresenterEA
 
+from Muon.GUI.ElementalAnalysis2.context.context import RunObject
+
 
 class LoadWidgetModel(object):
     def __init__(self, loaded_data_store=MuonLoadData(), context=None):
@@ -57,6 +59,9 @@ class BrowseFileWidgetModel(object):
     def current_runs(self, value):
         self._data_context.current_runs = value
 
+    def clear(self):
+        self._loaded_data_store.clear()
+
 
 class LoadRunWidgetModel(object):
     def __init__(self, loaded_data_store=MuonLoadData(), context=None):
@@ -75,13 +80,20 @@ class LoadRunWidgetModel(object):
         failed_files = []
         for run in self._runs:
             try:
-                ws, path = LoadElementalAnalysisData(Run=run, GroupWorkspace=str(run))
+                groupws, path = LoadElementalAnalysisData(Run=run, GroupWorkspace=str(run))
                 self._directory = path
-                print("The directory is=", self._directory)
+                detectors = []
+                workspace_list = groupws.getNames()
+                for item in workspace_list:
+                    detector_name = item.split(';', 1)[-1].lstrip()
+                    detectors.append(detector_name)
+                runResults = RunObject(run, detectors, groupws)
+                self._data_context.run_info_update(run, runResults)
             except ValueError as error:
                 failed_files += [(run, error)]
                 continue
-            self._loaded_data_store.add_data(run=[run])
+            self._loaded_data_store.add_data(run=[run], workspace=groupws)
+
         if failed_files:
             message = "The requested run could not be found. This could be due to: \n - The run does not yet exist." \
                       "\n - The file was not found locally (please check the user directories)."
@@ -93,6 +105,9 @@ class LoadRunWidgetModel(object):
 
     def cancel(self):
         pass
+
+    def clear_loaded_data(self):
+        self._loaded_data_store.clear()
 
     @property
     def current_runs(self):
@@ -136,6 +151,8 @@ class LoadWidget(object):
         self.load_widget.set_load_run_widget(self.run_widget)
 
         self.load_widget.set_current_instrument(context.data_context.instrument)
+
+        self.run_widget.updated_directory.add_subscriber(self.file_widget.updated_file_path)
 
         #context.update_view_from_model_notifier.add_subscriber(self.load_widget.update_view_from_model_observer)
 
