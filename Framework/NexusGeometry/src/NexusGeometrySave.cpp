@@ -1449,7 +1449,7 @@ public:
                          H5::Group &grp, size_t idx) {
 
     if (compInfo.hasValidShape(idx)) {
-      auto &shapeObj = compInfo.shape(idx);
+      auto const &shapeObj = compInfo.shape(idx);
       if (const auto mesh =
               dynamic_cast<const Geometry::MeshObject *>(&shapeObj)) {
 
@@ -1479,12 +1479,12 @@ public:
 
           H5::Group shapeGroup = simpleNXSubGroup(grp, SHAPE, NX_CYLINDER);
 
-          auto &geometry = shapeInfo.cylinderGeometry();
+          auto const &geometry = shapeInfo.cylinderGeometry();
           const Eigen::Vector3d &base =
               Kernel::toVector3d(geometry.centreOfBottomBase);
           const Eigen::Vector3d &axis = Kernel::toVector3d(geometry.axis);
-          double &height = geometry.height;
-          double &radius = geometry.radius;
+          double const &height = geometry.height;
+          double const &radius = geometry.radius;
 
           Eigen::Vector3d orthogonalToBase{base[1], base[0], base[2]};
           if (!isApproxZero(orthogonalToBase.dot(orthogonalToBase), PRECISION))
