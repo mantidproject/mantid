@@ -59,7 +59,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         self.ws = ws
         self.ws_spectrum_info = self.ws.spectrumInfo()
         self.row_count = self.ws.getNumberHistograms()
-        self.column_count = self.get_max_column_count()
+        self.column_count = self._get_column_count()
 
         self.masked_rows_cache = []
         self.monitor_rows_cache = []
@@ -86,7 +86,22 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         else:
             raise ValueError("Unknown model type {0}".format(self.type))
 
-    def get_max_column_count(self):
+    def _get_column_count(self):
+        """
+        Gets the size of the spectrum data in the workspace (i.e. number of bins). If blocksize fails, then the
+        workspace is ragged.
+        :return: The number of columns required to display the workspace in a table.
+        """
+        try:
+            return self.ws.blocksize()
+        except RuntimeError:
+            return self._get_max_column_count()
+
+    def _get_max_column_count(self):
+        """
+        Gets the number of columns required to display the workspace. This method is used for ragged workspaces.
+        :return: The number of columns required to display the workspace in a table.
+        """
         max_column_count = 0
         for i in range(self.ws.getNumberHistograms()):
             column_count = len(self.ws.readY(i))
@@ -230,6 +245,11 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             return QVariant()
 
     def checkMaskedCache(self, row):
+        """
+        Checks to see if a spectrum is masked.
+        :param row: The index of the spectrum in the workspace.
+        :return: True if the spectrum is masked.
+        """
         if row in self.masked_rows_cache:
             return True
         elif self.ws_spectrum_info.hasDetectors(row) and self.ws_spectrum_info.isMasked(row):
@@ -237,6 +257,11 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             return True
 
     def checkMonitorCache(self, row):
+        """
+        Checks to see if a spectrum represents a monitor.
+        :param row: The index of the spectrum in the workspace.
+        :return: True if the spectrum is a monitor.
+        """
         if row in self.monitor_rows_cache:
             return True
         elif self.ws_spectrum_info.hasDetectors(row) and self.ws_spectrum_info.isMonitor(row):
@@ -244,6 +269,12 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             return True
 
     def checkMaskedBinCache(self, row, column):
+        """
+        Checks to see if a specific cell is masked.
+        :param row: The row index of the cell.
+        :param column: The column index of the cell.
+        :return: True if the cell is masked.
+        """
         if row in self.masked_bins_cache:
             # retrieve the masked bins IDs from the cache
             if column in self.masked_bins_cache[row]:
@@ -256,6 +287,12 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
                 return True
 
     def checkBlankCache(self, row, column):
+        """
+        Checks to see if a specific cell should be blank (because the workspace is ragged).
+        :param row: The row index of the cell.
+        :param column: The column index of the cell.
+        :return: True if the cell should be blank.
+        """
         if row in self.blank_cell_cache and column in self.blank_cell_cache[row]:
             return True
         elif not self.has_data_at(row, column):
@@ -267,8 +304,14 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         return False
 
     def has_data_at(self, row, column):
+        """
+        Checks to see if data exists at a specific location in the relevant_data.
+        :param row: The row index of the data to check.
+        :param column: The column index of the data to check.
+        :return: True if data exists at a specific location.
+        """
         try:
             row_data = self.relevant_data(row)
             return column < len(row_data)
-        except:
+        except IndexError:
             return False

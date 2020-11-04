@@ -31,15 +31,15 @@ def create_test_workspace(workspace_name, ragged=False):
 class WorkspaceDisplayViewTest(unittest.TestCase, QtWidgetFinder):
     @classmethod
     def setUpClass(cls):
-        cls.normal_workspace = create_test_workspace("normal")
+        cls.non_ragged_workspace = create_test_workspace("non-ragged")
         cls.ragged_workspace = create_test_workspace("ragged", ragged=True)
 
     @classmethod
     def tearDownClass(cls):
         AnalysisDataService.clear()
 
-    def test_that_the_workspace_display_opens_and_closes_ok_with_a_normal_workspace(self):
-        presenter = MatrixWorkspaceDisplay(self.normal_workspace)
+    def test_that_the_workspace_display_opens_and_closes_ok_with_a_non_ragged_workspace(self):
+        presenter = MatrixWorkspaceDisplay(self.non_ragged_workspace)
         presenter.show_view()
         self.assert_widget_created()
 
