@@ -48,8 +48,7 @@ A very basic reduction would include a vanadium reference and a sample, without 
 
 .. testcode:: BasicReduction
 
-    # Uncomment to add a temporary data search directory.
-    #mantid.config.appendDataSearchDir('path/to/data/')
+    mantid.config.appendDataSearchDir('ILL/D7')
 
     # Define vanadium properties:
     vanadiumProperties = {'FormulaUnits': 50}
