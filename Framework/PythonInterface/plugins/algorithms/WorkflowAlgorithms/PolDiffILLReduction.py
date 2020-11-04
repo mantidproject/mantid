@@ -53,9 +53,9 @@ class PolDiffILLReduction(PythonAlgorithm):
 
             sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
             geometry_type = self.getPropertyValue('SampleGeometry')
-            required_keys = ['SampleMass', 'FormulaUnits', 'SampleChemicalFormula', 'SampleDensity']
+            required_keys = ['FormulaUnits']
             if geometry_type != 'None':
-                required_keys += ['BeamHeight', 'BeamWidth', 'ContainerDensity',]
+                required_keys += ['SampleChemicalFormula', 'SampleDensity', 'BeamHeight', 'BeamWidth', 'ContainerDensity']
             if geometry_type == 'FlatPlate':
                 required_keys += ['Height', 'SampleWidth', 'SampleThickness', 'ContainerFrontThickness', 'ContainerBackThickness']
             if geometry_type == 'Cylinder':
