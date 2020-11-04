@@ -94,7 +94,7 @@ public:
   CollectionValueType &back() { return m_collection.back(); }
   const CollectionValueType &front() const { return m_collection.front(); }
   const CollectionValueType &back() const { return m_collection.back(); }
-  template <class... Args> void emplace_back(Args &&...args) {
+  template <class... Args> void emplace_back(Args &&... args) {
     m_collection.emplace_back(args...);
   }
   void remove(const CollectionIndexType &dataIndex) {

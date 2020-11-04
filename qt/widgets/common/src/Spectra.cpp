@@ -62,7 +62,9 @@ Spectra &Spectra::operator=(Spectra &&vec) {
 
 [[nodiscard]] bool Spectra::empty() const { return m_vec.empty(); }
 
-FitDomainIndex Spectra::size() const { return FitDomainIndex{m_vec.size()}; }
+FitDomainIndex Spectra::size() const {
+  return FitDomainIndex{m_vec.size()};
+}
 
 std::string Spectra::getString() const {
   if (empty())
