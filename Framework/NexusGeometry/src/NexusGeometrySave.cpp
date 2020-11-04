@@ -1273,7 +1273,7 @@ public:
                                  std::vector<size_t> &meshes, size_t bankIdx) {
 
     // shape type of the first detector in children detectors
-    auto &firstShapeObj = compInfo.shape(meshes.front());
+    auto const &firstShapeObj = compInfo.shape(meshes.front());
     auto fMeshObj = dynamic_cast<const T *>(&firstShapeObj);
     auto fVertices = fMeshObj->getVertices();
     auto fWindingOrder = fMeshObj->getTriangles();
