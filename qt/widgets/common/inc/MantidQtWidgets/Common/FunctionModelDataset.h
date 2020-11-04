@@ -7,7 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
-#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
+#include "MantidQtWidgets/Common/Spectra.h"
 
 #include <QList>
 #include <QString>
