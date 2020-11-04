@@ -35,7 +35,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                                                     direction=Direction.Output),
                              doc='Output group workspace for run')
 
-        self.declareProperty(name="directory", defaultValue="", direction=Direction.Output,
+        self.declareProperty(name="Directory", defaultValue="", direction=Direction.Output,
                              doc="provides the directory where the run files were acquired")
 
     def validateInputs(self):
@@ -72,7 +72,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
             path = os.path.join(user_dir, "ral{}.rooth*.dat".format(self.pad_run()))
             files.extend([file for file in glob.iglob(path)])
             if files:
-                self.setProperty("directory", user_dir)
+                self.setProperty("Directory", user_dir)
                 return files
 
     def get_filename(self, path, run):
