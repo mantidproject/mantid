@@ -11,8 +11,6 @@
 #include "MantidQtWidgets/MplCpp/Line2D.h"
 
 #include <QString>
-#include <QVariant>
-#include <QHash>
 #include <functional>
 #include <tuple>
 
@@ -32,7 +30,6 @@ public:
   void forEachArtist(const char *containerAttr, const ArtistOperation &op);
   void removeArtists(const char *containerAttr, const QString &label);
   void setXLabel(const char *label);
-  void setXUseOffset(QHash<QString, QVariant> const &args);
   void setYLabel(const char *label);
   void setTitle(const char *label);
   void styleTickLabels(const char *axis, const char *style, const bool useOffset);

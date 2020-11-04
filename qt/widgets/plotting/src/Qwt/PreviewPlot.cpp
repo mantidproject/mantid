@@ -41,7 +41,7 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool init)
       m_zoomTool(nullptr), m_contextMenu(new QMenu(this)),
       m_showLegendAction(nullptr), m_showErrorsMenuAction(nullptr),
       m_showErrorsMenu(nullptr), m_errorBarOptionCache(), m_curveStyle(),
-      m_curveSymbol() {
+      m_curveSymbol(), m_axis("both"), m_style("sci"), m_useOffset(true) {
   m_uiForm.setupUi(this);
   m_uiForm.loLegend->addStretch();
   watchADS(init);
@@ -1022,6 +1022,8 @@ void PreviewPlot::disableContextMenu() {
              SLOT(showContextMenu(QPoint)));
 }
 
-void PreviewPlot::styleTickLabels(const char *axis, const char *style, const bool useOffset) {}
-
-void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID, char const *const label) {}
+// Empty implementations for qt < 5
+void PreviewPlot::styleTickLabels() {}
+void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID,
+                                       char const *const label) {}
+void PreviewPlot::setStyleTickLabels(char *axis, char *style, bool useOffset) {}

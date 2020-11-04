@@ -85,7 +85,9 @@ public:
 
   void setOverrideAxisLabel(AxisID const &axisID, char const *const label);
 
-  void styleTickLabels(const char *axis, const char *style, const bool useOffset);
+  void setStyleTickLabels(char *axis, char *style, bool useOffset);
+
+  void styleTickLabels();
 
   void setAxisRange(const QPair<double, double> &range,
                     AxisID axisID = AxisID::XBottom);
@@ -182,6 +184,11 @@ private:
   QMap<QString, SingleSelector *> m_singleSelectors;
   // Whether or not a selector is currently being moved
   bool m_selectorActive;
+
+  // Tick label style
+  char *m_axis;
+  char *m_style;
+  bool m_useOffset;
 
   // Canvas tools
   Widgets::MplCpp::PanZoomTool m_panZoomTool;

@@ -59,7 +59,8 @@ PreviewPlot::PreviewPlot(QWidget *parent, bool observeADS)
                                                    parent)},
       m_panZoomTool(m_canvas),
       m_wsRemovedObserver(*this, &PreviewPlot::onWorkspaceRemoved),
-      m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced) {
+      m_wsReplacedObserver(*this, &PreviewPlot::onWorkspaceReplaced),
+      m_axis("both"), m_style("sci"), m_useOffset(true) {
   createLayout();
   createActions();
 
@@ -335,6 +336,7 @@ std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) {
 
 void PreviewPlot::replot() {
   if (m_allowRedraws) {
+    styleTickLabels();
     m_canvas->draw();
     emit redraw();
   }
@@ -776,13 +778,27 @@ void PreviewPlot::toggleLegend(const bool checked) {
   this->replot();
 }
 
-void PreviewPlot::styleTickLabels(const char *axis, const char *style,
-                                  const bool useOffset) {
+/**
+ * Makes a call to the python object for styling tick labels
+ */
+void PreviewPlot::styleTickLabels() {
   try {
-    m_canvas->gca().styleTickLabels(axis, style, useOffset);
-  } catch (Mantid::PythonInterface::PythonException &e) {
-    throw std::runtime_error(e.what());
-  }
+    m_canvas->gca().styleTickLabels(m_axis, m_style, m_useOffset);
+  } catch (Mantid::PythonInterface::PythonException &e) {}
+}
+
+/**
+ * Set variables used for styling tick labels
+ * @param char* axis :: [ 'x' | 'y' | 'both' ]
+ * @param char* style :: [ 'sci' (or 'scientific') | 'plain' ] plain turns off
+ * scientific notation
+ * @param bool useOffset :: True, the offset will be
+ * calculated as needed, False no offset will be used
+ */
+void PreviewPlot::setStyleTickLabels(char* axis, char* style, bool useOffset) {
+  m_axis = axis;
+  m_style = style;
+  m_useOffset = useOffset;
 }
 
 } // namespace MantidWidgets

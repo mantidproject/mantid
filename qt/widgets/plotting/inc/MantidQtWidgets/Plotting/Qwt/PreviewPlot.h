@@ -95,8 +95,9 @@ public:
 
   void setOverrideAxisLabel(AxisID const &axisID, char const *const label);
 
-  void styleTickLabels(const char *axis, const char *style,
-                       const bool useOffset);
+  void setStyleTickLabels(char *axis, char *style, bool useOffset);
+
+  void styleTickLabels();
 
   RangeSelector *
   addRangeSelector(const QString &rsName,
@@ -190,6 +191,11 @@ private:
   QMap<QString, bool> m_rsVisibility;
   /// Cache of single selector visibility
   QMap<QString, bool> m_ssVisibility;
+
+  // Tick label style
+  char *m_axis;
+  char *m_style;
+  bool m_useOffset;
 
   /// Poco Observers for ADS Notifications
   Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification>
