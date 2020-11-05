@@ -192,7 +192,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         name_list = []
         for entry_no, entry in enumerate(mtd[scan_data_name]):
             # normalize to monitor1 as monitor2 is sometimes empty:
-            monitor1_counts = entry.readY(self._D7NumberPixels-2)[0]
+            monitor1_counts = entry.readY(self._D7NumberPixels)[0]
             if monitor1_counts != 0:
                 monitor_name = '__monitor_' + entry.name()
                 CreateSingleValuedWorkspace(DataValue=monitor1_counts, ErrorValue=np.sqrt(monitor1_counts),
