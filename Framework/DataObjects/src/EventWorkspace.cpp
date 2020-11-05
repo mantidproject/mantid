@@ -136,6 +136,21 @@ void EventWorkspace::init(const HistogramData::Histogram &histogram) {
   m_axes[1] = std::make_unique<API::SpectraAxis>(this);
 }
 
+///  Returns true if the workspace is ragged (has differently sized spectra).
+/// @returns true if the workspace is ragged.
+bool EventWorkspace::isRaggedWorkspace() const {
+  if (data.empty()) {
+    throw std::runtime_error("There are no pixels in the event workspace, "
+                             "therefore cannot determine if it is ragged.");
+  } else {
+    const auto numberOfBins = data[0]->histogram_size();
+    for (const auto &eventList : data)
+      if (numberOfBins != eventList->histogram_size())
+        return true;
+    return false;
+  }
+}
+
 /// The total size of the workspace
 /// @returns the number of single indexable items in the workspace
 size_t EventWorkspace::size() const {
