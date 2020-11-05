@@ -45,10 +45,9 @@ A very basic reduction would include a vanadium reference and a sample, without 
 
    config['default.facility'] = 'ILL'
    config['default.instrument'] = 'D7'
+   config.appendDataSearchSubDir('ILL/D7/')
 
 .. testcode:: BasicReduction
-
-    mantid.config.appendDataSearchDir('ILL/D7')
 
     # Define vanadium properties:
     vanadiumProperties = {'FormulaUnits': 50}
