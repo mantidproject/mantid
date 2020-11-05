@@ -336,7 +336,6 @@ std::tuple<double, double> PreviewPlot::getAxisRange(AxisID axisID) {
 
 void PreviewPlot::replot() {
   if (m_allowRedraws) {
-    styleTickLabels();
     m_canvas->draw();
     emit redraw();
   }
@@ -759,6 +758,11 @@ void PreviewPlot::setScaleType(AxisID id, const QString &actionName) {
   default:
     break;
   }
+
+  // If linear scale need to reset tick labels
+  if (strcmp(scaleType.constData(), "linear") == 0)
+    tickLabelFormat(m_axis, m_style, m_useOffset);
+
   this->replot();
 }
 
@@ -779,23 +783,17 @@ void PreviewPlot::toggleLegend(const bool checked) {
 }
 
 /**
- * Makes a call to the python object for styling tick labels
- */
-void PreviewPlot::styleTickLabels() {
-  try {
-    m_canvas->gca().styleTickLabels(m_axis, m_style, m_useOffset);
-  } catch (Mantid::PythonInterface::PythonException &e) {}
-}
-
-/**
- * Set variables used for styling tick labels
+ * Format tick labels for linear scale
  * @param char* axis :: [ 'x' | 'y' | 'both' ]
  * @param char* style :: [ 'sci' (or 'scientific') | 'plain' ] plain turns off
  * scientific notation
  * @param bool useOffset :: True, the offset will be
  * calculated as needed, False no offset will be used
  */
-void PreviewPlot::setStyleTickLabels(char* axis, char* style, bool useOffset) {
+void PreviewPlot::tickLabelFormat(char* axis, char* style, bool useOffset) {
+  m_canvas->gca().tickLabelFormat(axis, style, useOffset);
+
+  // Need to save parameters to re-format on scale change
   m_axis = axis;
   m_style = style;
   m_useOffset = useOffset;

@@ -32,7 +32,8 @@ public:
   void setXLabel(const char *label);
   void setYLabel(const char *label);
   void setTitle(const char *label);
-  void styleTickLabels(const char *axis, const char *style, const bool useOffset);
+  void tickLabelFormat(const char *axis, const char *style,
+                       const bool useOffset);
   /// @}
 
   /// @name Drawing

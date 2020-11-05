@@ -1023,7 +1023,6 @@ void PreviewPlot::disableContextMenu() {
 }
 
 // Empty implementations for qt < 5
-void PreviewPlot::styleTickLabels() {}
 void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID,
                                        char const *const label) {}
-void PreviewPlot::setStyleTickLabels(char *axis, char *style, bool useOffset) {}
+void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {}

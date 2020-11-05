@@ -139,7 +139,7 @@ void Axes::setTitle(const char *label) {
  * @param bool useOffset :: True, the offset will be
  * calculated as needed, False no offset will be used
  */
-void Axes::styleTickLabels(const char *axis, const char *style,
+void Axes::tickLabelFormat(const char *axis, const char *style,
                            const bool useOffset) {
   try {
     GlobalInterpreterLock lock;

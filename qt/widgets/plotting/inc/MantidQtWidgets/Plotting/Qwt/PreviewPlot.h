@@ -95,9 +95,7 @@ public:
 
   void setOverrideAxisLabel(AxisID const &axisID, char const *const label);
 
-  void setStyleTickLabels(char *axis, char *style, bool useOffset);
-
-  void styleTickLabels();
+  void tickLabelFormat(char *axis, char *style, bool useOffset);
 
   RangeSelector *
   addRangeSelector(const QString &rsName,
