@@ -85,6 +85,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
 
     def closeEvent(self, event):
         self.fitting_presenter.data_widget.ads_observer.unsubscribe()
+        self.fitting_presenter.plot_widget.view.ensure_fit_dock_closed()
 
     def setup_settings(self):
         model = SettingsModel()
