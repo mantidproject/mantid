@@ -8,7 +8,8 @@ from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorit
     MultipleFileProperty, WorkspaceProperty
 from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, V3D, FloatArrayProperty, \
     FloatArrayLengthValidator
-from mantid.simpleapi import DeleteWorkspace, Load, ConvertWANDSCDtoQ
+from mantid.simpleapi import ConvertHFIRSCDtoMDE, ConvertWANDSCDtoQ, DeleteWorkspace, DeleteWorkspaces, DivideMD, \
+    Load, MergeMD, ReplicateMD
 import os
 
 
@@ -106,6 +107,8 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
         if method:
             minvals = self.getProperty("MinValues").value
             maxvals = self.getProperty("MaxValues").value
+            merge = self.getProperty("MergeInputs").value
+            wslist = []
         else:
             bin0 = self.getProperty("BinningDim0").value
             bin1 = self.getProperty("BinningDim1").value
@@ -114,7 +117,7 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
         out_ws = self.getPropertyValue("OutputWorkspace")
         out_ws_name = out_ws
 
-        van_norm = Load(vanadiumfile)
+        vanws = Load(vanadiumfile)
 
         has_multiple = True if len(datafiles) > 1 else False
 
@@ -152,15 +155,29 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
 
             # Use ConvertHFIRSCDtoQ (and normalize van), or use ConvertWANDSCtoQ which handles normalization itself
             if method:
-
+                van_norm = ReplicateMD(ShapeWorkspace=scan, DataWorkspace=vanws)
+                van_norm = DivideMD(LHSWorkspace=scan, RHSWorkspace=van_norm)
+                ConvertHFIRSCDtoMDE(InputWorkspace=scan, Wavelength=wavelength, MinValues=minvals,
+                                    MaxValues=maxvals, OutputWorkspace=out_ws_name)
+                if merge:
+                    wslist.append(out_ws_name)
             else:
                 # Convert to Q space and normalize with from the vanadium
-                ConvertWANDSCDtoQ(InputWorkspace=scan, NormalisationWorkspace=van_norm, Frame='Q_sample',
+                ConvertWANDSCDtoQ(InputWorkspace=scan, NormalisationWorkspace=vanws, Frame='Q_sample',
                                   Wavelength=wavelength, NormaliseBy='Monitor', BinningDim0=bin0, BinningDim1=bin1,
                                   BinningDim2=bin2,
                                   OutputWorkspace=out_ws_name)
 
-        DeleteWorkspace(van_norm)
+        if method:
+            if merge:
+                out_ws_name = out_ws
+                MergeMD(InputWorkspaces=wslist, OutputWorkspace=out_ws_name)
+                print("Workspace list: {}".format(wslist))
+                DeleteWorkspaces(wslist)
+
+            DeleteWorkspace(van_norm)
+
+        DeleteWorkspace(vanws)
         DeleteWorkspace(scan)
 
         self.setProperty("OutputWorkspace", out_ws_name)
