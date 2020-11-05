@@ -154,6 +154,8 @@ private:
   void testRuns(const QtRunsView *gui, const ReductionJobs *redJobs,
                 const QMap<QString, QVariant> &map) {
     testRunsTable(gui->m_tableView, redJobs, map[QString("runsTable")].toMap());
+    testSearchModel(gui->searchResults(),
+                    map[QString("searchResults")].toList());
     TS_ASSERT_EQUALS(gui->m_ui.comboSearchInstrument->currentIndex(),
                      map[QString("comboSearchInstrument")].toInt())
     TS_ASSERT_EQUALS(gui->m_ui.textSearch->text(),
@@ -258,6 +260,32 @@ private:
     }
     TS_ASSERT_EQUALS(pair.firstTransmissionRunNumbers(), firstTransRunNums)
     TS_ASSERT_EQUALS(pair.secondTransmissionRunNumbers(), secondTransRunNums)
+  }
+
+  void testSearchModel(const ISearchModel &searchModel,
+                       const QList<QVariant> &list) {
+    auto const &rows = searchModel.getRows();
+    for (auto index = 0u; index < rows.size(); ++index) {
+      testSearchResult(rows[index], list[index].toMap());
+    }
+  }
+
+  void testSearchResult(const SearchResult &searchResult,
+                        const QMap<QString, QVariant> &map) {
+    TS_ASSERT_EQUALS(searchResult.runNumber(),
+                     map[QString("runNumber")].toString().toStdString());
+    TS_ASSERT_EQUALS(searchResult.title(),
+                     map[QString("title")].toString().toStdString());
+    TS_ASSERT_EQUALS(searchResult.groupName(),
+                     map[QString("groupName")].toString().toStdString());
+    TS_ASSERT_EQUALS(searchResult.theta(),
+                     map[QString("theta")].toString().toStdString());
+    TS_ASSERT_EQUALS(searchResult.error(),
+                     map[QString("error")].toString().toStdString());
+    TS_ASSERT_EQUALS(searchResult.excludeReason(),
+                     map[QString("excludeReason")].toString().toStdString());
+    TS_ASSERT_EQUALS(searchResult.comment(),
+                     map[QString("comment")].toString().toStdString());
   }
 
   void testReductionWorkspaces(const ReductionWorkspaces &redWs,

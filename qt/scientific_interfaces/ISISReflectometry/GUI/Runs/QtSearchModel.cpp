@@ -15,6 +15,9 @@ using namespace Mantid::API;
 
 QtSearchModel::QtSearchModel() : m_runDetails() {}
 
+/** Merge new results into the existing results list. Keep the existing row if
+ * a run already exists.
+ */
 void QtSearchModel::mergeNewResults(SearchResults const &source) {
   if (source.empty())
     return;
@@ -26,6 +29,23 @@ void QtSearchModel::mergeNewResults(SearchResults const &source) {
 
   m_runDetails.insert(m_runDetails.end(), source.begin(), source.end());
 
+  endInsertRows();
+}
+
+/** Clear the existing results list and replace it with a new one
+ */
+void QtSearchModel::replaceResults(SearchResults const &source) {
+  m_runDetails.clear();
+
+  if (source.empty())
+    return;
+
+  // We need to tell the Qt model where we are inserting and how many items
+  // we're adding
+  const auto first = 0;
+  const auto last = static_cast<int>(source.size());
+  beginInsertRows(QModelIndex(), first, last);
+  m_runDetails.insert(m_runDetails.end(), source.begin(), source.end());
   endInsertRows();
 }
 
@@ -172,6 +192,8 @@ void QtSearchModel::clear() {
 SearchResult const &QtSearchModel::getRowData(int index) const {
   return m_runDetails[index];
 }
+
+SearchResults const &QtSearchModel::getRows() const { return m_runDetails; }
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
 } // namespace MantidQt

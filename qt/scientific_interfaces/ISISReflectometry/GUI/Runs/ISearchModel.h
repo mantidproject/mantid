@@ -23,7 +23,9 @@ manipulate the view's model.
 class MANTIDQT_ISISREFLECTOMETRY_DLL ISearchModel {
 public:
   virtual void mergeNewResults(std::vector<SearchResult> const &source) = 0;
+  virtual void replaceResults(std::vector<SearchResult> const &source) = 0;
   virtual SearchResult const &getRowData(int index) const = 0;
+  virtual SearchResults const &getRows() const = 0;
   virtual void clear() = 0;
 };
 } // namespace ISISReflectometry

@@ -75,7 +75,7 @@ public:
 
   // Search methods
   virtual void resizeSearchResultsColumnsToContents() = 0;
-  virtual ISearchModel const &searchResults() = 0;
+  virtual ISearchModel const &searchResults() const = 0;
   virtual ISearchModel &mutableSearchResults() = 0;
 
   // Setter methods

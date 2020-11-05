@@ -29,7 +29,9 @@ public:
   QtSearchModel();
   // ISearchModel overrides
   void mergeNewResults(SearchResults const &source) override;
+  void replaceResults(SearchResults const &source) override;
   virtual SearchResult const &getRowData(int index) const override;
+  virtual SearchResults const &getRows() const override;
   void clear() override;
 
   // QAbstractTableModel overrides

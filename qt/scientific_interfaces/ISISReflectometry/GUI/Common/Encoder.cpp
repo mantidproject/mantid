@@ -94,6 +94,8 @@ QMap<QString, QVariant> Encoder::encodeRuns(const QtRunsView *gui,
              QVariant(gui->m_ui.comboSearchInstrument->currentIndex()));
   map.insert(QString("textSearch"), QVariant(gui->m_ui.textSearch->text()));
   map.insert(QString("textCycle"), QVariant(gui->m_ui.textCycle->text()));
+  map.insert(QString("searchResults"),
+             QVariant(encodeSearchModel(gui->searchResults())));
   return map;
 }
 
@@ -231,6 +233,30 @@ QMap<QString, QVariant> Encoder::encodeRow(
              QVariant(encodeReductionWorkspace(row.m_reducedWorkspaceNames)));
   map.insert(QString("reductionOptions"),
              QVariant(encodeReductionOptions(row.m_reductionOptions)));
+  return map;
+}
+
+QList<QVariant> Encoder::encodeSearchModel(const ISearchModel &searchModel) {
+  QList<QVariant> list;
+  auto const &rows = searchModel.getRows();
+  for (const auto &row : rows)
+    list.append(QVariant(encodeSearchResult(row)));
+  return list;
+}
+
+QMap<QString, QVariant> Encoder::encodeSearchResult(const SearchResult &row) {
+  QMap<QString, QVariant> map;
+  map.insert(QString("runNumber"),
+             QVariant(QString::fromStdString(row.runNumber())));
+  map.insert(QString("title"), QVariant(QString::fromStdString(row.title())));
+  map.insert(QString("groupName"),
+             QVariant(QString::fromStdString(row.groupName())));
+  map.insert(QString("theta"), QVariant(QString::fromStdString(row.theta())));
+  map.insert(QString("error"), QVariant(QString::fromStdString(row.error())));
+  map.insert(QString("excludeReason"),
+             QVariant(QString::fromStdString(row.excludeReason())));
+  map.insert(QString("comment"),
+             QVariant(QString::fromStdString(row.comment())));
   return map;
 }
 

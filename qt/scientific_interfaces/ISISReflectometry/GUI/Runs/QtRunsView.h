@@ -46,7 +46,7 @@ public:
 
   // Search methods
   void resizeSearchResultsColumnsToContents() override;
-  ISearchModel const &searchResults() override;
+  ISearchModel const &searchResults() const override;
   ISearchModel &mutableSearchResults() override;
 
   // Setter methods

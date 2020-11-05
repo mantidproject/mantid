@@ -193,6 +193,8 @@ void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs,
       map[QString("comboSearchInstrument")].toInt());
   gui->m_ui.textSearch->setText(map[QString("textSearch")].toString());
   gui->m_ui.textCycle->setText(map[QString("textCycle")].toString());
+  gui->mutableSearchResults().replaceResults(
+      decodeSearchResults(map[QString("searchResults")].toList()));
 }
 
 namespace HIDDEN_LOCAL {
@@ -420,6 +422,28 @@ Decoder::decodeTransmissionRunPair(const QMap<QString, QVariant> &map) {
     secondTransRuns.emplace_back(item.toString().toStdString());
   }
   return TransmissionRunPair(firstTransRuns, secondTransRuns);
+}
+
+MantidQt::CustomInterfaces::ISISReflectometry::SearchResults
+Decoder::decodeSearchResults(const QList<QVariant> &list) {
+  SearchResults rows;
+  for (const auto &rowMap : list) {
+    rows.emplace_back(decodeSearchResult(rowMap.toMap()));
+  }
+  return rows;
+}
+
+MantidQt::CustomInterfaces::ISISReflectometry::SearchResult
+Decoder::decodeSearchResult(const QMap<QString, QVariant> &map) {
+  SearchResult searchResult(
+      map[QString("runNumber")].toString().toStdString(),
+      map[QString("title")].toString().toStdString(),
+      map[QString("groupName")].toString().toStdString(),
+      map[QString("theta")].toString().toStdString(),
+      map[QString("error")].toString().toStdString(),
+      map[QString("excludeReason")].toString().toStdString(),
+      map[QString("comment")].toString().toStdString());
+  return searchResult;
 }
 
 ReductionWorkspaces

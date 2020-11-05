@@ -19,6 +19,16 @@ SearchResult::SearchResult(const std::string &runNumber,
   parseMetadataFromTitle();
 }
 
+SearchResult::SearchResult(const std::string &runNumber,
+                           const std::string &title,
+                           const std::string &groupName,
+                           const std::string &theta, const std::string &error,
+                           const std::string &excludeReason,
+                           const std::string &comment)
+    : m_runNumber(runNumber), m_title(title), m_groupName(groupName),
+      m_theta(theta), m_error(error), m_excludeReason(excludeReason),
+      m_comment(comment) {}
+
 void SearchResult::parseRun(std::string const &runNumber) {
   auto const maybeRunNumber = parseRunNumber(runNumber);
   if (maybeRunNumber.is_initialized())

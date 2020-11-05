@@ -41,6 +41,8 @@ class IBatchPresenter;
 class IMainWindowView;
 class RangeInQ;
 class TransmissionRunPair;
+class SearchResult;
+using SearchResults = std::vector<SearchResult>;
 
 class MANTIDQT_ISISREFLECTOMETRY_DLL Decoder
     : public MantidQt::API::BaseDecoder,
@@ -84,6 +86,10 @@ private:
   RangeInQ decodeRangeInQ(const QMap<QString, QVariant> &map);
   TransmissionRunPair
   decodeTransmissionRunPair(const QMap<QString, QVariant> &map);
+  MantidQt::CustomInterfaces::ISISReflectometry::SearchResults
+  decodeSearchResults(const QList<QVariant> &list);
+  MantidQt::CustomInterfaces::ISISReflectometry::SearchResult
+  decodeSearchResult(const QMap<QString, QVariant> &map);
   ReductionWorkspaces
   decodeReductionWorkspace(const QMap<QString, QVariant> &map);
   void decodeSave(const QtSaveView *gui, const QMap<QString, QVariant> &map);
