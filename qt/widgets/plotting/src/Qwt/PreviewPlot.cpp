@@ -1022,7 +1022,15 @@ void PreviewPlot::disableContextMenu() {
              SLOT(showContextMenu(QPoint)));
 }
 
-// Empty implementations for qt < 5
+// Needed for mpl, but can also be used for qwt
 void PreviewPlot::setOverrideAxisLabel(AxisID const &axisID,
-                                       char const *const label) {}
-void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {}
+                                       char const *const label) {
+  m_uiForm.plot->setAxisTitle(static_cast<int>(axisID), label);
+}
+
+// This is a mpl thing so not used here
+void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {
+  Q_UNUSED(axis);
+  Q_UNUSED(style);
+  Q_UNUSED(useOffset);
+}
