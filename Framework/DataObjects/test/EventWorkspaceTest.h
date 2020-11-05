@@ -149,11 +149,14 @@ public:
 
   void
   test_that_isRaggedWorkspace_returns_false_for_a_non_ragged_EventWorkspace() {
+    ew = createEventWorkspace(true, false);
+
     TS_ASSERT(!ew->isRaggedWorkspace());
     TS_ASSERT_EQUALS(ew->blocksize(), 1);
   }
 
   void test_that_isRaggedWorkspace_returns_true_for_a_ragged_EventWorkspace() {
+    ew = createEventWorkspace(true, false);
     ew->getSpectrum(0).setHistogram(BinEdges({0., 10., 20.}));
 
     TS_ASSERT(ew->isRaggedWorkspace());
