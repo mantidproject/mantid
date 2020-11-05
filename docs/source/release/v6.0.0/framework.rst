@@ -14,6 +14,7 @@ Concepts
 
 - Change sphinx documentation to use mathjax to render equations
 - Added packing fraction to :ref:`Material <Materials>` to separate number density and effective number density.
+- Added a feature allowing time-dependent values for individual instrument parameters.
 
 Algorithms
 ----------
