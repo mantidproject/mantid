@@ -127,7 +127,7 @@ private:
   QStringList m_globals;
   MOCK_METHOD2(setDoubleAttribute, void(const QString &, double));
   MOCK_METHOD2(setIntAttribute, void(const QString &, int));
-  MOCK_METHOD2(setStringAttribute, void(const QString &, QString &));
+  MOCK_METHOD2(setStringAttribute, void(const QString &, std::string &));
   MOCK_METHOD2(setBooleanAttribute, void(const QString &, bool));
   MOCK_METHOD2(setVectorAttribute,
                void(const QString &, std::vector<double> &));

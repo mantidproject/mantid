@@ -64,7 +64,8 @@ public:
 protected:
   virtual void setDoubleAttribute(const QString &paramName, double value) = 0;
   virtual void setIntAttribute(const QString &paramName, int value) = 0;
-  virtual void setStringAttribute(const QString &paramName, QString &value) = 0;
+  virtual void setStringAttribute(const QString &paramName,
+                                  std::string &value) = 0;
   virtual void setBooleanAttribute(const QString &paramName, bool value) = 0;
   virtual void setVectorAttribute(const QString &paramName,
                                   std::vector<double> &val) = 0;

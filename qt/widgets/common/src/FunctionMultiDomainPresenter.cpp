@@ -25,37 +25,6 @@ namespace MantidWidgets {
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 
-/**
- * Attribute visitor to set an attribute in an IFunctionView.
- */
-class SetAttributeInView : public IFunction::AttributeVisitor<> {
-public:
-  SetAttributeInView(IFunctionView *view, QString attrName)
-      : m_view(view), m_attrName(attrName){};
-
-protected:
-  void apply(double &d) const override {
-    m_view->setAttributeValue(m_attrName, d);
-  }
-  void apply(std::string &str) const override {
-    auto attrVal = QString::fromStdString(str);
-    m_view->setAttributeValue(m_attrName, attrVal);
-  };
-  void apply(int &i) const override {
-    m_view->setAttributeValue(m_attrName, i);
-  }
-  void apply(bool &b) const override {
-    m_view->setAttributeValue(m_attrName, b);
-  };
-  void apply(std::vector<double> &v) const override {
-    m_view->setAttributeValue(m_attrName, v);
-  };
-
-private:
-  IFunctionView *m_view;
-  QString m_attrName;
-};
-
 FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
     : m_view(view), m_model(std::make_unique<FunctionModel>()),
       m_editLocalParameterDialog(nullptr) {
@@ -462,9 +431,13 @@ void FunctionMultiDomainPresenter::updateViewFromModel() {
 
 void FunctionMultiDomainPresenter::updateViewAttributesFromModel() {
   for (const auto &name : m_model->getAttributeNames()) {
+    // Create a single lambda expression capable of visiting each attribute
+    auto visitAttribute = [&](auto val) {
+      m_view->setAttributeValue(name, val);
+    };
     auto value = m_model->getAttribute(name);
-    SetAttributeInView tmp(m_view, name);
-    value.apply(tmp);
+    auto visitor = AttributeLambdaVisitor{visitAttribute};
+    value.apply(visitor);
   }
 }
 

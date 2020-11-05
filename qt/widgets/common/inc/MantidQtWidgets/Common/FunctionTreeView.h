@@ -370,7 +370,7 @@ private:
   /// Update a double attribute
   void setDoubleAttribute(const QString &attrName, double value) override;
   void setIntAttribute(const QString &attrName, int value) override;
-  void setStringAttribute(const QString &attrName, QString &value) override;
+  void setStringAttribute(const QString &attrName, std::string &value) override;
   void setBooleanAttribute(const QString &attrName, bool value) override;
   void setVectorAttribute(const QString &attrName,
                           std::vector<double> &val) override;

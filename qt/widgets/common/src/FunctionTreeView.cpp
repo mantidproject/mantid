@@ -1445,10 +1445,11 @@ void FunctionTreeView::setIntAttribute(const QString &attrName, int value) {
 /**
  * Updates the value of a string attribute
  * @param attrName :: Attribute name
- * @param value :: New value
+ * @param valueAsStdStr :: New value
  */
 void FunctionTreeView::setStringAttribute(const QString &attrName,
-                                          QString &value) {
+                                          std::string &valueAsStdStr) {
+  QString value = QString::fromStdString(valueAsStdStr);
   auto prop = getAttributeProperty(attrName);
   ScopedFalse _false(m_emitAttributeValueChange);
   // attName is the un-prefixed attribute name
