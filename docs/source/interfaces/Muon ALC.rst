@@ -125,16 +125,16 @@ Data Loading
 ~~~~~~~~~~~~
 
 In the Data Loading step, the instrument will be decided by the users default instrument 
-in workbench otherwise HIFI will be selected instead. The instrument can be manually 
+in workbench, otherwise HIFI will be selected instead. The instrument can be manually 
 changed. Once changed if there are already runs found using the previous instrument, 
-the interface will automatically try to find the same runs on the new instrument. 
-A sequence of runs are loaded through the field **Runs** by entering a valid expression of 
+the interface will automatically try to find the same runs for the new instrument. 
+A sequence of runs are loaded through the **Runs** field by entering a valid expression of 
 run numbers. The path is set once the entered run numbers have been found and is for 
 display purposes only i.e. it is not editable.
 
 The interface will attempt to locate runs by first searching any user defined directories 
 and then the Data archive (only useful if you’re at ISIS). You can manage your user directories
-with the manage user directories button. 
+with the :ref:`manage user directories <ManageUserDirectories>` button at the bottom of the interface.
 
 The input files must be Muon Nexus files with names beginning with at least one letter
 and followed by a number. In addition, the user must supply the **Log** data that will

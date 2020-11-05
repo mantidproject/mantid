@@ -77,7 +77,7 @@ public:
   void setLoadStatus(const std::string &status) override;
   void runsAutoAddToggled(bool on) override;
   void setRunsTextWithoutSearch(const std::string &text) override;
-  void toggleRunsAutoAdd(const bool on) override;
+  void toggleRunsAutoAdd(const bool autoAdd) override;
 
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------

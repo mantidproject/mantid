@@ -154,7 +154,7 @@ public slots:
   virtual void setLoadStatus(const std::string &status) = 0;
 
   /// Handle check/uncheck of runs auto add
-  virtual void runsAutoAddToggled(bool on) = 0;
+  virtual void runsAutoAddToggled(bool autoAdd) = 0;
 
   /// Sets text and ensure runs are not searched for
   virtual void setRunsTextWithoutSearch(const std::string &text) = 0;

@@ -25,6 +25,10 @@
 #include <QFileInfo>
 #include <sstream>
 
+namespace {
+const int RUNS_WARNING_LIMIT = 200;
+}
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -81,15 +85,15 @@ void ALCDataLoadingPresenter::handleRunsFound() {
     updateAvailableInfo();
     m_view->enableLoad(true);
     m_view->setLoadStatus("Found files");
-  } catch (const std::runtime_error &e) {
-    m_view->displayError(e.what());
+  } catch (const std::runtime_error &errroUpdateInfo) {
+    m_view->displayError(errroUpdateInfo.what());
     m_view->setLoadStatus("");
   }
 }
 
 /**
  * Called when the Load button is clicked.
- * Displays a warning if trying to load over 200 files
+ * Displays a warning if trying to load over RUNS_WARNING_LIMIT files
  * Passes files to load
  */
 void ALCDataLoadingPresenter::handleLoadRequested() {
@@ -102,7 +106,7 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
   }
 
   // Warning message if trying to load excessive number of files
-  if (files.size() > 200) {
+  if (files.size() > RUNS_WARNING_LIMIT) {
     auto continueLoad = m_view->displayWarning(
         "You are attempting to load " + std::to_string(files.size()) +
         " runs, are you sure you want to do this?");
@@ -116,8 +120,8 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
     m_filesLoaded = files;
     m_view->setLoadStatus("Loaded files");
     m_view->enableRunsAutoAdd(true);
-  } catch (const std::runtime_error &e) {
-    m_view->displayError(e.what());
+  } catch (const std::runtime_error &errorLoadFiles) {
+    m_view->displayError(errorLoadFiles.what());
     m_view->setLoadStatus("");
     m_view->enableRunsAutoAdd(false);
     m_view->enableAll();
@@ -243,9 +247,9 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
     emit dataChanged();
 
   } catch (const std::invalid_argument &e) {
-    throw std::runtime_error(e.what());
+    throw std::runtime_error(e.what()); // Caught in handle load request
   } catch (std::exception &e) {
-    throw std::runtime_error(e.what());
+    throw std::runtime_error(e.what()); // Caught in handle load request
   }
   m_view->enableAll();
   m_loadingData = false;
@@ -278,9 +282,9 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     auto path = loadAlg->getPropertyValue("Filename");
     path = path.substr(0, path.find_last_of("/\\"));
     m_view->setPath(path);
-  } catch (const std::exception &e) {
+  } catch (const std::exception &error) {
     m_view->setAvailableInfoToEmpty();
-    throw std::runtime_error(e.what());
+    throw std::runtime_error(error.what());
   }
 
   // Set logs
@@ -431,7 +435,7 @@ void ALCDataLoadingPresenter::startWatching(bool watch) {
     killTimer(m_timerID);
 
     // Reset latest auto run number and was range
-    m_lastRunLoadedAuto = -2;
+    m_lastRunLoadedAuto = -2; // Ensures negative if +1 to not be valid
     m_wasLastAutoRange = false;
   }
 }
@@ -452,7 +456,7 @@ void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
 
     // Check if file found
     if (latestFile.empty()) {
-      // Error message?
+      // Could not find file this time, but don't reset directory changed flag
       return;
     }
     // If not currently loading load new files
@@ -469,8 +473,7 @@ void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
 
         // If new run number is less then error
         if (runNumber <= m_lastRunLoadedAuto) {
-          // error
-          std::cout << "error " << std::endl;
+          // Is error but continue to watch
           return;
         } else if (m_lastRunLoadedAuto + 1 == runNumber) {
           // Add as range
@@ -490,7 +493,18 @@ void ALCDataLoadingPresenter::timerEvent(QTimerEvent *timeup) {
         m_lastRunLoadedAuto = runNumber;
         // Set text without search, call manual load
         m_view->setRunsTextWithoutSearch(newText);
-        load(m_filesLoaded);
+        try {
+          load(m_filesLoaded);
+        } catch (const std::runtime_error &loadError) {
+          // Stop watching and display error
+          m_directoryChanged = false;
+          m_view->enableAll();
+          m_loadingData = false;
+          m_wasLastAutoRange = false;
+          m_lastRunLoadedAuto = -2;
+          m_view->displayError(loadError.what());
+          m_view->toggleRunsAutoAdd(false);
+        }
       }
 
       m_directoryChanged = false;

@@ -427,16 +427,14 @@ public:
   void test_warning_shows_and_press_yes() {
     // Ensure files greater than 200
     std::vector<std::string> files(201, "MUSR00015189.nxs");
+    auto warningMessage = "You are attempting to load 201 runs, are you "
+                          "sure you want to do this?";
     ON_CALL(*m_view, getFiles()).WillByDefault(Return(files));
-    ON_CALL(*m_view, displayWarning("You are attempting to load 201 runs, are "
-                                    "you sure you want to do this?"))
+    ON_CALL(*m_view, displayWarning(warningMessage))
         .WillByDefault(Return(true));
 
     EXPECT_CALL(*m_view, getFiles()).Times(1);
-    EXPECT_CALL(*m_view,
-                displayWarning("You are attempting to load 201 runs, are "
-                               "you sure you want to do this?"))
-        .Times(1);
+    EXPECT_CALL(*m_view, displayWarning(warningMessage)).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
@@ -447,16 +445,14 @@ public:
   void test_warning_shows_and_press_no() {
     // Ensure files greater than 200
     std::vector<std::string> files(201, "MUSR00015189.nxs");
+    auto warningMessage = "You are attempting to load 201 runs, are you "
+                          "sure you want to do this?";
     ON_CALL(*m_view, getFiles()).WillByDefault(Return(files));
-    ON_CALL(*m_view, displayWarning("You are attempting to load 201 runs, are "
-                                    "you sure you want to do this?"))
+    ON_CALL(*m_view, displayWarning(warningMessage))
         .WillByDefault(Return(false));
 
     EXPECT_CALL(*m_view, getFiles()).Times(1);
-    EXPECT_CALL(*m_view,
-                displayWarning("You are attempting to load 201 runs, are "
-                               "you sure you want to do this?"))
-        .Times(1);
+    EXPECT_CALL(*m_view, displayWarning(warningMessage)).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(0);
     EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(0);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(0);
@@ -466,6 +462,7 @@ public:
 
   void test_warning_does_not_show() {
     EXPECT_CALL(*m_view, getFiles()).Times(1);
+
     EXPECT_CALL(*m_view, displayWarning(StrNe(""))).Times(0);
     EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(1);
     EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(1);

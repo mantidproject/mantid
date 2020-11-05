@@ -206,13 +206,13 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace,
 }
 
 void ALCDataLoadingView::displayError(const std::string &error) {
-  QMessageBox::critical(m_widget, "Loading error",
+  QMessageBox::critical(m_widget, "ALC Loading error",
                         QString::fromStdString(error));
 }
 
 bool ALCDataLoadingView::displayWarning(const std::string &warning) {
   auto reply = QMessageBox::warning(
-      m_widget, "Warning", QString::fromStdString(warning),
+      m_widget, "ALC Warning", QString::fromStdString(warning),
       QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
   if (reply == QMessageBox::Yes)
     return true;
@@ -386,8 +386,8 @@ void ALCDataLoadingView::setRunsTextWithoutSearch(const std::string &text) {
   m_ui.runs->setFileTextWithoutSearch(QString::fromStdString(text));
 }
 
-void ALCDataLoadingView::toggleRunsAutoAdd(const bool on) {
-  m_ui.runsAutoAdd->setChecked(on);
+void ALCDataLoadingView::toggleRunsAutoAdd(const bool autoAdd) {
+  m_ui.runsAutoAdd->setChecked(autoAdd);
 }
 
 } // namespace CustomInterfaces
