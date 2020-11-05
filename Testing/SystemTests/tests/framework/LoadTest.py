@@ -11,7 +11,7 @@
    algorithm is capable of.
 """
 import systemtesting
-from ISIS_SANS_tests.isis_sans_system_test import ISISSansSystemTest
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantid.api import AnalysisDataService, IEventWorkspace, MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import Load

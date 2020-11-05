@@ -8,6 +8,7 @@
 
 import systemtesting
 import mantid  # noqa
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantid.api import (AnalysisDataService, FileFinder)
 from sans.command_interface.ISISCommandInterface import (SANS2D, Set1D, Detector, MaskFile, Gravity,
@@ -15,8 +16,10 @@ from sans.command_interface.ISISCommandInterface import (SANS2D, Set1D, Detector
                                                          LARMOR, BatchReduce)
 
 # test batch mode with sans2d and selecting a period in batch mode
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMultiPeriodSingleTest_V2(systemtesting.MantidSystemTest):
 
     reduced = ''
@@ -43,6 +46,7 @@ class SANS2DMultiPeriodSingleTest_V2(systemtesting.MantidSystemTest):
         return AnalysisDataService[self.reduced][6].name(),'SANS2DBatch.nxs'
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMultiPeriodBatchTest_V2(SANS2DMultiPeriodSingleTest_V2):
 
     def runTest(self):
@@ -58,6 +62,7 @@ class SANS2DMultiPeriodBatchTest_V2(SANS2DMultiPeriodSingleTest_V2):
         self.reduced = '5512_SANS2DBatch_rear_1DPhi-45.0_45.0'
 
 
+@ISISSansSystemTest(SANSInstrument.LARMOR)
 class LARMORMultiPeriodEventModeLoadingTest_V2(systemtesting.MantidSystemTest):
     """
     This test checks if the positioning of all workspaces of a

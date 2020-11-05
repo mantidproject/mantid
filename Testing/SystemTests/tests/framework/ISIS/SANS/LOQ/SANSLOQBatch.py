@@ -7,13 +7,17 @@
 #pylint: disable=no-init
 
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 from mantid import config
 from ISISCommandInterface import *
 from SANSBatchMode import *
 import os.path
 
+from sans.common.enums import SANSInstrument
 
+
+@ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQBatch(systemtesting.MantidSystemTest):
 
     def runTest(self):

@@ -10,13 +10,17 @@
 #pylint: disable=too-many-public-methods
 import unittest
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 from isis_reduction_steps import DarkRunSubtraction
 from SANSUserFileParser import DarkRunSettings
 from SANSUtility import getFileAndName
 import numpy as np
 
+from sans.common.enums import SANSInstrument
 
+
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class DarkRunSubtractionTest(unittest.TestCase):
     def test_that_specifying_more_than_two_run_numbers_per_category_raises_error(self):
         # Arrange

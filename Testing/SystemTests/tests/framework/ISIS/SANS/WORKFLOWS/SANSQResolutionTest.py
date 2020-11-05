@@ -7,10 +7,13 @@
 #pylint: disable=no-init
 
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 from ISISCommandInterface import *
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANSQResolutionWithoutGravity(systemtesting.MantidSystemTest):
     def runTest(self):
         SANS2D()
@@ -37,6 +40,7 @@ class SANSQResolutionWithoutGravity(systemtesting.MantidSystemTest):
         return True
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANSQResolutionWithGravity(systemtesting.MantidSystemTest):
     def runTest(self):
         SANS2D()

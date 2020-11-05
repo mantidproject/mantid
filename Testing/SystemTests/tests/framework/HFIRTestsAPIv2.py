@@ -17,27 +17,16 @@ import types
 
 import traceback
 import math
-import os
 
 import systemtesting
-from mantid.api import *
 from mantid.simpleapi import *
 from reduction_workflow.instruments.sans.hfir_command_interface import *
 from reduction_workflow.command_interface import AppendDataFile, Reduce, Reduce1D
 from functools import reduce
 
 
-# Set directory containing the test data, relative to the Mantid release
-# directory.
-TEST_DIR = "."
-data_search_dirs = ConfigService.Instance(
-)["datasearch.directories"].split(';')
-for item in data_search_dirs:
-    if item.endswith("SANS2D/"):
-        TEST_DIR = item
-if len(TEST_DIR) == 0:
-    raise RuntimeError(
-        "Could not locate test data directory: [...]/Data/SANS2D")
+# Set directory containing the System test dir
+TEST_DIR = ConfigService.Instance()["datasearch.directories"].split(';')[0]
 
 
 def _diff_iq(x, y):

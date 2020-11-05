@@ -10,11 +10,12 @@ from os import path
 
 import systemtesting
 from systemtesting import MantidSystemTest
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantid import config
 from mantid.api import AnalysisDataService
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (SANSFacility, ReductionMode, OutputMode)
+from sans.common.enums import (SANSFacility, ReductionMode, OutputMode, SANSInstrument)
 from sans.common.file_information import SANSFileInformationFactory
 from sans.common.general_functions import create_unmanaged_algorithm
 from sans.sans_batch import SANSBatchReduction
@@ -27,6 +28,7 @@ from sans.state.StateObjects.StateData import get_data_builder
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANSBatchReductionTest(unittest.TestCase):
 
     def _run_batch_reduction(self, states, use_optimizations=False):

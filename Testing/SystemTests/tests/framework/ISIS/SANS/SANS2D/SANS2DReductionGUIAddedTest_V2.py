@@ -13,6 +13,8 @@ One test has been removed from the port since it uses the ReductionSingleton.
 import mantid  # noqa
 import systemtesting
 import os
+
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.api import AnalysisDataService
 from mantid.kernel import config
 from mantid.simpleapi import DeleteWorkspace
@@ -20,8 +22,10 @@ import SANSadd2
 from sans.command_interface.ISISCommandInterface import (SANS2DTUBES, MaskFile, SetDetectorOffsets, Gravity, Set1D,
                                                          AddRuns, AssignSample, AssignCan, TransmissionSample,
                                                          TransmissionCan, WavRangeReduction, UseCompatibilityMode)
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithOverlayTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
@@ -61,6 +65,7 @@ class SANS2DAddedEventFilesWithOverlayTest_V2(systemtesting.MantidSystemTest):
         os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028797-add.nxs'))
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
@@ -105,6 +110,7 @@ class SANS2DAddedEventFilesWithOverlayAndTimeShiftTest_V2(systemtesting.MantidSy
         os.remove(os.path.join(config['defaultsave.directory'], 'SANS2D00028797-add.nxs'))
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DAddedEventFilesWithoutOverlayTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()

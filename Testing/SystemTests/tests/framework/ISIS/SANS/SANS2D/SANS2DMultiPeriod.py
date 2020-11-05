@@ -8,11 +8,14 @@
 
 # test batch mode with sans2d and selecting a period in batch mode
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.api import AnalysisDataService
 from ISISCommandInterface import *
 from SANSBatchMode import *
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMultiPeriodSingle(systemtesting.MantidSystemTest):
 
     reduced=''
@@ -55,6 +58,7 @@ class SANS2DMultiPeriodBatch(SANS2DMultiPeriodSingle):
         self.reduced = '5512_SANS2DBatch'
 
 
+@ISISSansSystemTest(SANSInstrument.LARMOR)
 class LARMORMultiPeriodEventModeLoading(systemtesting.MantidSystemTest):
     """
     This test checks if the positioning of all workspaces of a

@@ -7,12 +7,15 @@
 #pylint: disable=no-init
 
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 
 # Test is giving odd results on Linux, but only this 2D one.
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQCan2D(systemtesting.MantidSystemTest):
 
     def runTest(self):

@@ -7,13 +7,16 @@
 #pylint: disable=invalid-name
 
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import DeleteWorkspace, mtd
 from sans.command_interface.ISISCommandInterface import (SANS2DTUBES, MaskFile, SetDetectorOffsets, Gravity, Set1D,
                                                          SetFrontDetRescaleShift, WavRangeReduction, AssignSample,
                                                          AssignCan, TransmissionSample, TransmissionCan,
                                                          UseCompatibilityMode)
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANSMergedDetectorsTest_V2(systemtesting.MantidSystemTest):
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)

@@ -11,11 +11,12 @@ import os
 import systemtesting
 
 import mantid
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.api import AlgorithmManager
 from sans.state.Serializer import Serializer
 
 from sans.state.StateObjects.StateData import get_data_builder
-from sans.common.enums import (DetectorType, DataType, SANSFacility)
+from sans.common.enums import (DetectorType, DataType, SANSFacility, SANSInstrument)
 
 from sans.common.constants import EMPTY_NAME
 from sans.common.general_functions import create_unmanaged_algorithm
@@ -28,6 +29,7 @@ from sans.common.file_information import SANSFileInformationFactory
 from sans.user_file.txt_parsers.UserFileReaderAdapter import UserFileReaderAdapter
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANSReductionCoreTest(unittest.TestCase):
     def _load_workspace(self, state):
         load_alg = AlgorithmManager.createUnmanaged("SANSLoad")

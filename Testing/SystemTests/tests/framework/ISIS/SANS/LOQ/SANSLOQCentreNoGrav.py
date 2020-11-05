@@ -6,10 +6,13 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 from ISISCommandInterface import *
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQCentreNoGrav(systemtesting.MantidSystemTest):
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)
@@ -37,6 +40,7 @@ class SANSLOQCentreNoGrav(systemtesting.MantidSystemTest):
         return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
 
 
+@ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQCentreNoGravDefineCentre(systemtesting.MantidSystemTest):
     def runTest(self):
 

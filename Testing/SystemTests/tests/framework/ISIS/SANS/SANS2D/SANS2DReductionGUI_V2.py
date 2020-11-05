@@ -11,17 +11,16 @@ include details about the ReductionSingleton
 """
 
 import systemtesting
-from mantid.kernel import (config)
-from mantid.api import (FileFinder)
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
+from mantid.kernel import config
 from mantid.simpleapi import RenameWorkspace
 from sans.command_interface.ISISCommandInterface import (BatchReduce, SANS2D, MaskFile, AssignSample, AssignCan,
                                                          TransmissionSample, TransmissionCan, WavRangeReduction,
                                                          UseCompatibilityMode, FindBeamCentre)
-
-MASKFILE = FileFinder.getFullPath('MaskSANS2DReductionGUI.txt')
-BATCHFILE = FileFinder.getFullPath('sans2d_reduction_gui_batch.csv')
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMinimalBatchReductionTest_V2(systemtesting.MantidSystemTest):
     """Minimal script to perform full reduction in batch mode
     """
@@ -34,14 +33,15 @@ class SANS2DMinimalBatchReductionTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2D()
-        MaskFile(MASKFILE)
-        BatchReduce(BATCHFILE, '.nxs', combineDet='rear')
+        MaskFile('MaskSANS2DReductionGUI.txt')
+        BatchReduce('sans2d_reduction_gui_batch.csv', '.nxs', combineDet='rear')
 
     def validate(self):
         self.disableChecking.append('Instrument')
         return "trans_test_rear_1D_1.5_12.5", "SANSReductionGUI.nxs"
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMinimalSingleReductionTest_V2(systemtesting.MantidSystemTest):
     """Minimal script to perform full reduction in single mode"""
 
@@ -54,7 +54,7 @@ class SANS2DMinimalSingleReductionTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2D()
-        MaskFile(MASKFILE)
+        MaskFile('MaskSANS2DReductionGUI.txt')
         AssignSample('22048')
         AssignCan('22023')
         TransmissionSample('22041', '22024')
@@ -67,6 +67,7 @@ class SANS2DMinimalSingleReductionTest_V2(systemtesting.MantidSystemTest):
         return "trans_test_rear", "SANSReductionGUI.nxs"
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DSearchCentreGUI_V2(systemtesting.MantidSystemTest):
     """Minimal script to perform FindBeamCentre"""
 
@@ -79,7 +80,7 @@ class SANS2DSearchCentreGUI_V2(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
         SANS2D()
-        MaskFile(MASKFILE)
+        MaskFile('MaskSANS2DReductionGUI.txt')
         AssignSample('22048')
         AssignCan('22023')
         TransmissionSample('22041', '22024')

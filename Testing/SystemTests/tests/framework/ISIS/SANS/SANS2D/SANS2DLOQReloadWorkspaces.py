@@ -6,10 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=invalid-name,no-init
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 from ISISCommandInterface import *
 import unittest
 
+from sans.common.enums import SANSInstrument
 
 """
 Allowing the reduction to use already loaded workspace will make it easier to
@@ -35,6 +37,7 @@ from files.
 """
 
 
+@ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
     """
     The following tests is to ensure that the reload obeys the following requirement:
@@ -106,6 +109,7 @@ class SANSLOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         self.assertRaises(RuntimeError, AssignSample, my_workspace, False)
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DReductionShouldAcceptLoadedWorkspace(SANSLOQReductionShouldAcceptLoadedWorkspace):
     def setUp(self):
         self.load_run = '2500.nxs'
@@ -149,6 +153,7 @@ class SANS2DReductionShouldAcceptLoadedWorkspaceSystemTest2(SANSLOQReductionShou
     cl = SANS2DReductionShouldAcceptLoadedWorkspaceRawFile
 
 
+@ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQTransFitWorkspace2DWithLoadedWorkspace(systemtesting.MantidSystemTest):
     def runTest(self):
         config["default.instrument"] = "LOQ"
@@ -181,6 +186,7 @@ class SANSLOQTransFitWorkspace2DWithLoadedWorkspace(systemtesting.MantidSystemTe
         return '54431main_2D_3.0_4.0_suff','LOQTransFitWorkspace2D.nxs'
 
 
+@ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(systemtesting.MantidSystemTest):
     """ It will repeat the test done at SANSLOQCentreNoGrav but using
     loaded workspaces
@@ -219,6 +225,7 @@ class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1(systemtesting.
         return '54431main_1D_3.0_9.0','LOQCentreNoGravSearchCentreFixed.nxs'
 
 
+@ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(systemtesting.MantidSystemTest):
     """Before ticket #8461 test SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_1 used
     to produce a workspace that matches SANSLOQCentreNoGrav.nxs. This test is created to ensure
@@ -260,6 +267,7 @@ class SANSLOQReductionOnLoadedWorkspaceMustProduceTheSameResult_2(systemtesting.
         return '54431main_1D_3.0_9.0','LOQCentreNoGrav_V2.nxs'
 
 
+@ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQCan2DReloadWorkspace(systemtesting.MantidSystemTest):
 
     def runTest(self):
@@ -290,6 +298,7 @@ class SANSLOQCan2DReloadWorkspace(systemtesting.MantidSystemTest):
         return '53615main_2D_2.2_10.0','SANSLOQCan2D.nxs'
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DFrontNoGravReloadWorkspace(systemtesting.MantidSystemTest):
 
     def runTest(self):
@@ -311,6 +320,7 @@ class SANS2DFrontNoGravReloadWorkspace(systemtesting.MantidSystemTest):
         return '2500front_1D_4.6_12.85','SANS2DFrontNoGrav.nxs'
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DWaveloopsReloadWorkspace(systemtesting.MantidSystemTest):
 
     def runTest(self):

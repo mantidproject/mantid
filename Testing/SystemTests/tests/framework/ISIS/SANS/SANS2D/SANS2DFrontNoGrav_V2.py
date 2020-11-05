@@ -7,10 +7,13 @@
 #pylint: disable=no-init
 import systemtesting
 import mantid  # noqa
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from sans.command_interface.ISISCommandInterface import (SANS2D, MaskFile, SetDetectorOffsets, Gravity, Set1D,
                                                          UseCompatibilityMode, AssignSample, WavRangeReduction)
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DFrontNoGravTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()
@@ -32,6 +35,7 @@ class SANS2DFrontNoGravTest_V2(systemtesting.MantidSystemTest):
         return '2500_front_1D_4.6_12.85', 'SANS2DFrontNoGrav.nxs'
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DWithExtraLengthGravityTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()

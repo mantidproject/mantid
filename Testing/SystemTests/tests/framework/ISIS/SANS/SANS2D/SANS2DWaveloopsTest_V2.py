@@ -6,11 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from sans.command_interface.ISISCommandInterface import (SANS2D, MaskFile, Gravity, Set1D, AssignSample,
                                                          TransmissionSample, AssignCan, TransmissionCan,
                                                          CompWavRanges, UseCompatibilityMode)
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DWaveloopsTest_V2(systemtesting.MantidSystemTest):
     def runTest(self):
         UseCompatibilityMode()

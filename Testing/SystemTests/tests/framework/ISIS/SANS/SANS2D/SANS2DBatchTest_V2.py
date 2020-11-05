@@ -7,6 +7,7 @@
 #pylint: disable=no-init,attribute-defined-outside-init
 
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 
 from mantid import config
 from mantid.api import (FileFinder)
@@ -15,7 +16,10 @@ from sans.command_interface.ISISCommandInterface import (SANS2DTUBES, SANS2D, Se
                                                          MaskFile, Gravity, BatchReduce, UseCompatibilityMode)
 import os.path
 
+from sans.common.enums import SANSInstrument
 
+
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DBatchTest_V2(systemtesting.MantidSystemTest):
 
     def runTest(self):
@@ -38,6 +42,7 @@ class SANS2DBatchTest_V2(systemtesting.MantidSystemTest):
         return '5512p7_SANS2DBatch_p7rear_1D_2.0_14.0Phi-45.0_45.0', 'SANS2DBatch.nxs'
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DNewSettingsCarriedAcrossInBatchModeTest_V2(systemtesting.MantidSystemTest):
     """
     We want to make sure that any settings saved in the PropertyManager objects
@@ -75,6 +80,7 @@ class SANS2DNewSettingsCarriedAcrossInBatchModeTest_V2(systemtesting.MantidSyste
         return "iteration_2_rear_1D_1.5_12.5", "SANS2DNewSettingsCarriedAcross.nxs"
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DTUBESBatchWithZeroErrorCorrectionTest_V2(systemtesting.MantidSystemTest):
     """
     We want to make sure that the BatchMode can remove zero error values

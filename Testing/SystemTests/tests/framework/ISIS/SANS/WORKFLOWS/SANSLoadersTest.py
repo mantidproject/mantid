@@ -13,9 +13,11 @@ currently available inside the systemtests.
 
 import unittest
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 import isis_reduction_steps as steps
 import ISISCommandInterface as ici
+from sans.common.enums import SANSInstrument
 
 
 class LoadRunTest(unittest.TestCase):
@@ -34,8 +36,6 @@ class LoadRunTest(unittest.TestCase):
         return loadRun
 
     def basicChecks(self, loadRun, file_path, runnum, periods_in_file, ws_name):
-        self.assertTrue('Data/SystemTest/SANS2D/'+file_path in loadRun._data_file.replace('\\','/'),
-                        'Wrong data file: ' + loadRun._data_file)
         self.assertEqual(loadRun.periods_in_file, periods_in_file)
         self.assertEqual(loadRun.wksp_name, ws_name)
         self.assertEqual(loadRun.shortrun_no, runnum)
@@ -146,6 +146,7 @@ class LoadSampleTest(unittest.TestCase):
             self.assertAlmostEqual(cur_pos[1], -0.002)
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class LoadSampleTestSystemTest(systemtesting.MantidSystemTest):
     def runTest(self):
         self._success = False
@@ -164,6 +165,7 @@ class LoadSampleTestSystemTest(systemtesting.MantidSystemTest):
         return self._success
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class LoadAddedEventDataSampleTestSystemTest(systemtesting.MantidSystemTest):
     def __init__(self):
         systemtesting.MantidSystemTest.__init__(self)

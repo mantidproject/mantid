@@ -6,13 +6,16 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #pylint: disable=no-init
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 
 
 from mantid import config
 from ISISCommandInterface import *
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANS2DMultiPeriodAddFiles(systemtesting.MantidSystemTest):
 
     def requiredMemoryMB(self):
@@ -50,6 +53,7 @@ class SANS2DMultiPeriodAddFiles(systemtesting.MantidSystemTest):
         return '5512p7rear_1D_2.0_4.0Phi-45.0_45.0','SANS2DMultiPeriodAddFiles.nxs'
 
 
+@ISISSansSystemTest(SANSInstrument.LARMOR)
 class LARMORMultiPeriodAddEventFiles(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
         """Requires 2.5Gb"""

@@ -7,10 +7,13 @@
 #pylint: disable=no-init
 
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.simpleapi import *
 from ISISCommandInterface import *
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.LOQ)
 class SANSLOQTransFitWorkspace2D(systemtesting.MantidSystemTest):
     """
         Tests the SANS interface commands TransFit() and TransWorkspace(). Also tests
