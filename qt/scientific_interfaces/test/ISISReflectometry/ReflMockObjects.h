@@ -240,7 +240,9 @@ public:
 class MockSearchModel : public ISearchModel {
 public:
   MOCK_METHOD1(mergeNewResults, void(SearchResults const &));
+  MOCK_METHOD1(replaceResults, void(SearchResults const &));
   MOCK_CONST_METHOD1(getRowData, SearchResult const &(int));
+  MOCK_CONST_METHOD0(getRows, SearchResults const &());
   MOCK_METHOD2(setError, void(int, std::string const &));
   MOCK_METHOD0(clear, void());
 

@@ -84,6 +84,10 @@ private:
       Mantid::API::ITableWorkspace_sptr tableWorkspace);
   SearchResults convertJournalResultsTableToSearchResults(
       Mantid::API::ITableWorkspace_sptr tableWorkspace);
+
+  friend class Encoder;
+  friend class Decoder;
+  friend class CoderCommonTester;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

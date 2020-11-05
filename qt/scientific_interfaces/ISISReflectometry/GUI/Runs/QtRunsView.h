@@ -49,7 +49,7 @@ public:
   int getSearchResultsTableWidth() const override;
   int getSearchResultsColumnWidth(int column) const override;
   void setSearchResultsColumnWidth(int column, int width) override;
-  ISearchModel const &searchResults() override;
+  ISearchModel const &searchResults() const override;
   ISearchModel &mutableSearchResults() override;
 
   // Setter methods

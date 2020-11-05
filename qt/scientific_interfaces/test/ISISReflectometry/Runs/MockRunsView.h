@@ -28,7 +28,7 @@ public:
   MOCK_CONST_METHOD0(getSearchResultsTableWidth, int());
   MOCK_CONST_METHOD1(getSearchResultsColumnWidth, int(int));
   MOCK_METHOD2(setSearchResultsColumnWidth, void(int, int));
-  MOCK_METHOD0(searchResults, ISearchModel const &());
+  MOCK_CONST_METHOD0(searchResults, ISearchModel const &());
   MOCK_METHOD0(mutableSearchResults, ISearchModel &());
 
   MOCK_METHOD1(setInstrumentList, void(const std::vector<std::string> &));

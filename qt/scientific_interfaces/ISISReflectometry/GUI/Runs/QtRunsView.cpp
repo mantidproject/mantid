@@ -252,7 +252,7 @@ void QtRunsView::setSearchResultsColumnWidth(int column, int width) {
 /**
  * Get the model containing the search results
  */
-ISearchModel const &QtRunsView::searchResults() { return m_searchModel; }
+ISearchModel const &QtRunsView::searchResults() const { return m_searchModel; }
 
 ISearchModel &QtRunsView::mutableSearchResults() { return m_searchModel; }
 
