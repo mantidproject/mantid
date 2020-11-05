@@ -33,5 +33,6 @@ Bugfixes
 - Fix Workbench crashes upon deleting rows or columns in a TableWorkspace.
 - Fix crash on second call to ManageUserDirectories after pressing Esc to close it.
 - A bug in plot config where changing an axes title in the axis tab did not change the title in the curves tab.
+- Fixed a Workbench crash when attempting to show the data in a ragged workspace.
 
 :ref:`Release 6.0.0 <v6.0.0>`
