@@ -6,9 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 import systemtesting
+from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from sans.command_interface.ISISCommandInterface import *
+from sans.common.enums import SANSInstrument
 
 
+@ISISSansSystemTest(SANSInstrument.SANS2D)
 class SANSTomlWavLoops_SANS2D(systemtesting.MantidSystemTest):
     def runTest(self):
         SANS2D()
