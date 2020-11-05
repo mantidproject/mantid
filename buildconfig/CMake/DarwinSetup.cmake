@@ -90,6 +90,7 @@ if(NOT TARGET mantidpython)
   if(MAKE_VATES)
     # Python packages go into bundle Python site-packages
     set(PARAVIEW_PYTHON_PATHS "")
+    set(PV_PLUGIN_INSTALL_PATH "PV_PLUGIN_PATH=\"${INSTALLDIR}/PlugIns/paraview/qt4\"")
   else()
     set(PARAVIEW_PYTHON_PATHS "")
   endif()
