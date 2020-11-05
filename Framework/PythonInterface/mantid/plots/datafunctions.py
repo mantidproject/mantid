@@ -551,7 +551,7 @@ def _workspace_indices(y_bins, workspace):
 
 def _workspace_indices_maxpooling(y_bins, workspace):
     from mantid.simpleapi import Integration
-    summed_spectra_workspace = Integration(workspace, StoreInADS=False)
+    summed_spectra_workspace = Integration(workspace, StoreInADS=False, EnableLogging=False)
     summed_spectra = summed_spectra_workspace.extractY()
     workspace_indices = []
     for y_range in pairwise(y_bins):
