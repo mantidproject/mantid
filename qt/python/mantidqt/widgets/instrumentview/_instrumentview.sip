@@ -16,7 +16,9 @@ qRegisterMetaType<Mantid::API::Workspace_sptr>("Workspace");
 // ---------------------------------------------------------------------------
 
 
-// Tab
+//------------------------------------------------
+// InstrumentWidgetTab
+//-------------------------------------------------
 class InstrumentWidgetTab: QFrame
 {
 %TypeHeaderCode
@@ -33,7 +35,9 @@ private:
 };
 
 
-
+//---------------------------------------------------
+// InstrumentWidget
+//---------------------------------------------------
 class InstrumentWidget : QWidget {
 %TypeHeaderCode
 #include "MantidQtWidgets/InstrumentView/InstrumentWidget.h"
@@ -91,6 +95,9 @@ public:
 
   // get render tab
   InstrumentWidgetRenderTab *getRenderTab(const Tab tab) const;
+
+  // select tab
+  void selectTab(Tab tab);
 
 
   void setBinRange(double min_value, double max_value);

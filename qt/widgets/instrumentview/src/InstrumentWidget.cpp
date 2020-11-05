@@ -922,6 +922,7 @@ void InstrumentWidget::setIntegrationRange(double xmin, double xmax) {
  * python.
  */
 void InstrumentWidget::setBinRange(double xmin, double xmax) {
+  std::cout << "[DEBUG] set bin range: " << xmin << ", " << xmax << "\n";
   if (m_isIntegrable) {
     m_xIntegration->setRange(xmin, xmax);
   }

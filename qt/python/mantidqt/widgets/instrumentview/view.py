@@ -68,6 +68,9 @@ class InstrumentView(QWidget, ObservingView):
 
         return self.widget.getRenderTab(0)
 
+    def select_tab(self, tab_index):
+        self.widget.selectTab(tab_index)
+
 
     @Slot()
     def _run_close(self):
