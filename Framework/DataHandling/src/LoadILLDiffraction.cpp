@@ -113,6 +113,7 @@ void LoadILLDiffraction::init() {
                   "Select the type of data, with or without calibration "
                   "already applied. If Auto then the calibrated data is "
                   "loaded if available, otherwise the raw data is loaded.");
+  declareProperty("2ThetaOffset", 0.0, "2 theta offset for D1B data.");
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("AlignTubes", true,
                                                 Direction::Input),
@@ -203,15 +204,20 @@ void LoadILLDiffraction::loadDataScan() {
   axis.load();
 
   // read the starting two theta
-  std::string twoThetaPath;
-  if (m_instName != "D1B") {
-    twoThetaPath = "instrument/2theta/value";
+  double twoThetaValue;
+  if (m_instName == "D1B") {
+    if (getPointerToProperty("2ThetaOffset")->isDefault()) {
+      g_log.warning("A 2theta offset angle is necessary for D1B data.");
+      twoThetaValue = 0;
+    } else {
+      twoThetaValue = getProperty("2ThetaOffset");
+    }
   } else {
-    twoThetaPath = "instrument/Omega/value";
+    std::string twoThetaPath = "instrument/2theta/value";
+    NXFloat twoTheta0 = firstEntry.openNXFloat(twoThetaPath);
+    twoTheta0.load();
+    twoThetaValue = double(twoTheta0[0]);
   }
-  NXFloat twoTheta0 = firstEntry.openNXFloat(twoThetaPath);
-  ;
-  twoTheta0.load();
 
   // figure out the dimensions
   m_sizeDim1 = static_cast<size_t>(data.dim1());
@@ -239,7 +245,7 @@ void LoadILLDiffraction::loadDataScan() {
     fillMovingInstrumentScan(data, scan);
   } else {
     initStaticWorkspace();
-    fillStaticInstrumentScan(data, scan, twoTheta0);
+    fillStaticInstrumentScan(data, scan, twoThetaValue);
   }
 
   fillDataScanMetaData(scan);
@@ -531,7 +537,7 @@ void LoadILLDiffraction::fillMovingInstrumentScan(const NXUInt &data,
  */
 void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
                                                   const NXDouble &scan,
-                                                  const NXFloat &twoTheta0) {
+                                                  const double &twoTheta0) {
 
   const std::vector<double> axis = getAxis(scan);
   const std::vector<double> monitor = getMonitor(scan);
@@ -567,7 +573,7 @@ void LoadILLDiffraction::fillStaticInstrumentScan(const NXUInt &data,
   loadStaticInstrument();
 
   // Move to the starting 2theta
-  moveTwoThetaZero(double(twoTheta0[0]));
+  moveTwoThetaZero(twoTheta0);
 }
 
 /**
