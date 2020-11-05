@@ -68,14 +68,14 @@ A very basic reduction would include a vanadium reference and a sample, without 
                             NormalisationMethod='Vanadium', VanadiumInputWorkspace='reduced_vanadium')
 
     SofQ = mtd['normalised_sample']
-    qAxis = SofQ[0].readX(0)  # Q axis
-    print('S(Q): Q range: {:.3}...{:.3}A'.format(qAxis[0], qAxis[-1]))
+    sAxis = SofQ[0].readY(0)  # S axis
+    print('S(Q): S range: {:.2}...{:.2} barn/sr/formula unit'.format(np.min(sAxis), np.max(sAxis)))
 
 Output:
 
 .. testoutput:: BasicReduction
 
-    S(Q): Q range: 0.455...3.781A
+    S(Q): S range: 0.016...0.06 barn/sr/formula unit
 
    
 
