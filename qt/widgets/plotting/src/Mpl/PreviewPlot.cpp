@@ -790,7 +790,7 @@ void PreviewPlot::toggleLegend(const bool checked) {
  * @param bool useOffset :: True, the offset will be
  * calculated as needed, False no offset will be used
  */
-void PreviewPlot::tickLabelFormat(char* axis, char* style, bool useOffset) {
+void PreviewPlot::tickLabelFormat(char *axis, char *style, bool useOffset) {
   m_canvas->gca().tickLabelFormat(axis, style, useOffset);
 
   // Need to save parameters to re-format on scale change

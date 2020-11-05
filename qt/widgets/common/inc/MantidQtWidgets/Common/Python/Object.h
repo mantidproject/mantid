@@ -10,8 +10,8 @@
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include <boost/python/borrowed.hpp>
 #include <boost/python/dict.hpp>
-#include <boost/python/object.hpp>
 #include <boost/python/list.hpp>
+#include <boost/python/object.hpp>
 
 /**
  * The intetion of this module is to centralize the access
