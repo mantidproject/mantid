@@ -179,7 +179,7 @@ public:
 private:
   template <typename Workspace, typename... Workspaces>
   void addWorkspacesToModel(Spectra const &spectra, Workspace const &workspace,
-                            Workspaces const &...workspaces) {
+                            Workspaces const &... workspaces) {
     m_model->addWorkspace(workspace, spectra);
     addWorkspacesToModel(spectra, workspaces...);
   }
