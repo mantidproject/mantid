@@ -148,22 +148,8 @@ class SamplingImage(mimage.AxesImage):
         If the workspace is large, or ragged, we skip this maxpooling step and set the option as False
         """
         axis = self.ws.getAxis(1)
-        is_ragged = self._is_workspace_ragged()
-        if self.ws.getNumberHistograms() <= MAX_HISTOGRAMS and axis.isSpectra() and not is_ragged:
-            self._maxpooling = True
-        else:
-            self._maxpooling = False
-
-    def _is_workspace_ragged(self):
-        """
-        Checks to see if the workspace is ragged or not. blocksize will fail if the workspace is ragged.
-        :return: True if the workspace is ragged (i.e. not all spectra have the same length)
-        """
-        try:
-            _ = self.ws.blocksize()
-            return False
-        except RuntimeError:
-            return True
+        self._maxpooling = (self.ws.getNumberHistograms() <= MAX_HISTOGRAMS and axis.isSpectra() and
+                            not self.ws.isRaggedWorkspace())
 
 
 def imshow_sampling(axes,
