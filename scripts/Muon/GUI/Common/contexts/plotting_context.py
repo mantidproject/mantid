@@ -28,7 +28,8 @@ class PlottingContext(object):
         self._default_ylim = [-10,10]
         self._xlim_all = self._default_xlim
         self._ylim_all = self._default_ylim
-
+        self._autoscale_all = False
+        self._errors_all = False
 
     def set_defaults(self, default_xlim:List[float], default_ylim:List[float]):
         self._default_xlim = default_xlim
@@ -57,6 +58,22 @@ class PlottingContext(object):
     @property
     def get_ylim_all(self):
         return self._ylim_all
+
+    @property
+    def get_autoscale_all(self)->bool:
+        return self._autoscale_all
+
+    def set_autoscale_all(self, state:bool):
+        self._autoscale_all = state
+
+    @property
+    def get_error_all(self):
+        print("out",self._errors_all)
+        return self._errors_all
+
+    def set_error_all(self, state:bool):
+        print("error",state)
+        self._errors_all = state
 
     def add_subplot(self, name:str, index:int):
         self._subplots[name] = PlotEditContext()
@@ -94,7 +111,7 @@ class PlottingContext(object):
             for subplot in list(self._subplots.keys()):
                 self._subplots[subplot].update_error_state(state)
             return
-        self._subplots[name].update_autoscale_state(state)
+        self._subplots[name].update_error_state(state)
 
     def get_xlim(self, name:str)->List[float]:
         if name == "All":
@@ -108,13 +125,13 @@ class PlottingContext(object):
 
     def get_autoscale_state(self, name:str)->bool:
         if name == "All":
-            return self._subplots[self._subplots.keys[0]].get_autoscale_state()
-        return self._subplots[name].get_autoscale_state()
+            return self._subplots[self._subplots.keys[0]].get_autoscale_state
+        return self._subplots[name].get_autoscale_state
 
     def get_error_state(self, name:str)->bool:
         if name == "All":
-            return self._subplots[self._subplots.keys[0]].get_error_state()
-        return self._subplots[name].get_error_state()
+            return self._subplots[self._subplots.keys[0]].get_error_state
+        return self._subplots[name].get_error_state
 
     def get_axis(self, name:str)->int:
         return self._subplots[name].axis

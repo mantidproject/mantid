@@ -75,6 +75,9 @@ class QuickEditWidget(object):
     def set_selection_by_index(self, index = 0):
         self._presenter.set_selection_by_index(index)
 
+    def set_autoscale(self, state:bool):
+        self._presenter.set_autoscale(state)
+
     def set_plot_x_range(self, range):
         self._presenter.set_plot_x_range(range)
 

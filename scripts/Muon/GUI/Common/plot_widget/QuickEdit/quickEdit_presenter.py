@@ -51,6 +51,9 @@ class QuickEditPresenter(object):
     def uncheck_autoscale(self):
         self._view.uncheck_autoscale()
 
+    def set_autoscale(self, state:bool):
+        self._view.set_autoscale(state)
+
     def connect_autoscale_changed(self, slot):
         self._view.connect_autoscale_changed(slot)
 
