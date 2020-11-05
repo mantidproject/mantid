@@ -403,20 +403,18 @@ InstrumentWidgetTab *InstrumentWidget::getTab(const Tab tab) const {
  */
 InstrumentWidgetRenderTab *InstrumentWidget::getRenderTab(const Tab tab) const {
 
-    // Call to get Q widget
-    InstrumentWidgetTab *widget_tab = getTab(tab);
+  // Call to get Q widget
+  InstrumentWidgetTab *widget_tab = getTab(tab);
 
-    // Cast
-    if (widget_tab != nullptr)
-    {
-        InstrumentWidgetRenderTab *render_tab = dynamic_cast<InstrumentWidgetRenderTab *>(widget_tab);
-        return render_tab;
-    }
+  // Cast
+  if (widget_tab != nullptr) {
+    InstrumentWidgetRenderTab *render_tab =
+        dynamic_cast<InstrumentWidgetRenderTab *>(widget_tab);
+    return render_tab;
+  }
 
-
-    return nullptr;
+  return nullptr;
 }
-
 
 /**
  * Opens Qt file dialog to select the filename.

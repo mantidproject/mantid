@@ -71,6 +71,9 @@ class InstrumentView(QWidget, ObservingView):
     def select_tab(self, tab_index):
         self.widget.selectTab(tab_index)
 
+    def set_range(self, min_value, max_value):
+        self.widget.setBinRange(min_value, max_value)
+
 
     @Slot()
     def _run_close(self):

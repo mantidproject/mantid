@@ -254,7 +254,11 @@ void XIntegrationControl::setRange(double minimum, double maximum) {
                    (m_maximum - m_totalMinimum) / w);
 
   updateTextBoxes();
+  std::cout << "Updated text boxes\n";
+
+  // FIXME TODO - revive emit
   emit changed(m_minimum, m_maximum);
+  std::cout << "Signal 'changed' is sent\n";
 }
 
 void XIntegrationControl::setWholeRange() {
