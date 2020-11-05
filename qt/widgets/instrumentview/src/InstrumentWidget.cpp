@@ -397,6 +397,28 @@ InstrumentWidgetTab *InstrumentWidget::getTab(const Tab tab) const {
 }
 
 /**
+ * @brief getRenderTab
+ * @param tab
+ * @return
+ */
+InstrumentWidgetRenderTab *InstrumentWidget::getRenderTab(const Tab tab) const {
+
+    // Call to get Q widget
+    InstrumentWidgetTab *widget_tab = getTab(tab);
+
+    // Cast
+    if (widget_tab != nullptr)
+    {
+        InstrumentWidgetRenderTab *render_tab = dynamic_cast<InstrumentWidgetRenderTab *>(widget_tab);
+        return render_tab;
+    }
+
+
+    return nullptr;
+}
+
+
+/**
  * Opens Qt file dialog to select the filename.
  * The dialog opens in the directory used last for saving or the default user
  * directory.

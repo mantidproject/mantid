@@ -19,8 +19,9 @@ from mantidqt.utils.qt import import_qt
 # import widget class from C++ wrappers
 from mantidqt.widgets.observers.observing_view import ObservingView
 
-InstrumentWidget = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
-                             'InstrumentWidget')
+# _instrumentview.sip --> _instrumentview
+
+InstrumentWidget = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview', 'InstrumentWidget')
 
 
 class InstrumentView(QWidget, ObservingView):
@@ -53,6 +54,20 @@ class InstrumentView(QWidget, ObservingView):
         self.setLayout(layout)
 
         self.close_signal.connect(self._run_close)
+
+    def get_tab(self, tab_index):
+        tab_name = [InstrumentWidget.RENDER,
+                    InstrumentWidget.PICK,
+                    InstrumentWidget.MASK,
+                    InstrumentWidget.TREE][tab_index]
+        print(f'Tab: {tab_name}')
+
+        return self.widget.getTab(tab_name)
+
+    def get_render_tab(self):
+
+        return self.widget.getRenderTab(0)
+
 
     @Slot()
     def _run_close(self):

@@ -137,6 +137,9 @@ public:
   void selectTab(Tab tab) { selectTab(int(tab)); }
   InstrumentWidgetTab *getTab(const QString &title = "") const;
   InstrumentWidgetTab *getTab(const Tab tab) const;
+  /// Get a specific tab
+  InstrumentWidgetRenderTab *getRenderTab(const Tab tab) const;
+
   /// Get a filename for saving
   QString getSaveFileName(const QString &title, const QString &filters,
                           QString *selectedFilter = nullptr);
