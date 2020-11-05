@@ -23,10 +23,10 @@ using namespace MantidQt::MantidWidgets;
 namespace {
 
 QList<Dataset> createDatasets(QStringList const &datasetNames,
-                              QList<std::size_t> const &spectraList) {
+                              std::string const &spectraString) {
   QList<Dataset> datasets;
   for (const auto &datasetName : datasetNames)
-    datasets.append(Dataset(datasetName, spectraList));
+    datasets.append(Dataset(datasetName, Spectra(spectraString)));
   return datasets;
 }
 
@@ -362,8 +362,8 @@ public:
 
   void
   test_that_getDatasetNames_returns_the_expected_workspace_names_for_multi_spectra_workspaces() {
-    auto const datasets = createDatasets(QStringList({"WSName1", "WSName2"}),
-                                         QList<std::size_t>({0u, 2u, 3u}));
+    auto const datasets =
+        createDatasets(QStringList({"WSName1", "WSName2"}), "0,2-3");
 
     m_model->setNumberDomains(6);
     m_model->setDatasets(datasets);
@@ -376,8 +376,8 @@ public:
 
   void
   test_that_getDatasetDomainNames_returns_the_expected_domain_names_for_multi_spectra_workspaces() {
-    auto const datasets = createDatasets(QStringList({"WSName1", "WSName2"}),
-                                         QList<std::size_t>({0u, 2u, 3u}));
+    auto const datasets =
+        createDatasets(QStringList({"WSName1", "WSName2"}), "0,2-3");
 
     m_model->setNumberDomains(6);
     m_model->setDatasets(datasets);
@@ -390,8 +390,8 @@ public:
 
   void
   test_that_getDatasetNames_and_getDatasetDomainNames_returns_the_same_number_of_names() {
-    auto const datasets = createDatasets(QStringList({"WSName1", "WSName2"}),
-                                         QList<std::size_t>({0u, 2u, 3u}));
+    auto const datasets =
+        createDatasets(QStringList({"WSName1", "WSName2"}), "0,2-3");
 
     m_model->setNumberDomains(6);
     m_model->setDatasets(datasets);

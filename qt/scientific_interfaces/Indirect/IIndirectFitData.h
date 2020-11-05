@@ -12,6 +12,7 @@
 #include "IndirectFitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
+#include "MantidQtWidgets/Common/Spectra.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {

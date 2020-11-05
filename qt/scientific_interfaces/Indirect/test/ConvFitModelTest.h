@@ -21,6 +21,7 @@
 using namespace Mantid::API;
 using namespace Mantid::IndirectFitDataCreationHelper;
 using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::MantidWidgets;
 
 namespace {
 
@@ -178,7 +179,7 @@ public:
 private:
   template <typename Workspace, typename... Workspaces>
   void addWorkspacesToModel(Spectra const &spectra, Workspace const &workspace,
-                            Workspaces const &... workspaces) {
+                            Workspaces const &...workspaces) {
     m_model->addWorkspace(workspace, spectra);
     addWorkspacesToModel(spectra, workspaces...);
   }

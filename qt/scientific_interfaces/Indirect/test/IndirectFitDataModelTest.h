@@ -16,6 +16,7 @@
 #include "MantidTestHelpers/IndirectFitDataCreationHelper.h"
 
 using namespace MantidQt::CustomInterfaces::IDA;
+using namespace MantidQt::MantidWidgets;
 
 class IndirectFitDataModelTest : public CxxTest::TestSuite {
 public:
@@ -70,10 +71,10 @@ public:
   void test_that_setting_startX_on_non_existent_workspace_throws_exception() {
     TS_ASSERT_THROWS(m_fitData->setStartX(0, TableDatasetIndex{1}),
                      const std::out_of_range &)
-    TS_ASSERT_THROWS(m_fitData->setStartX(
-                         0, TableDatasetIndex{1},
-                         MantidQt::CustomInterfaces::IDA::WorkspaceIndex{10}),
-                     const std::out_of_range &)
+    TS_ASSERT_THROWS(
+        m_fitData->setStartX(0, TableDatasetIndex{1},
+                             MantidQt::MantidWidgets::WorkspaceIndex{10}),
+        const std::out_of_range &)
   }
 
 private:
