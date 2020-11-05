@@ -11,11 +11,14 @@
    algorithm is capable of.
 """
 import systemtesting
+from ISIS_SANS_tests.isis_sans_system_test import ISISSansSystemTest
 
 from mantid.api import AnalysisDataService, IEventWorkspace, MatrixWorkspace, WorkspaceGroup
 from mantid.simpleapi import Load
 
 import unittest
+
+from sans.common.enums import SANSInstrument
 
 DIFF_PLACES = 8
 
@@ -46,6 +49,7 @@ class LoadTest(systemtesting.MantidSystemTest):
 # work horse
 
 
+@ISISSansSystemTest(SANSInstrument.LOQ)  # Helper to find LOQ data
 class LoadTests(unittest.TestCase):
 
     wsname = "__LoadTest"
