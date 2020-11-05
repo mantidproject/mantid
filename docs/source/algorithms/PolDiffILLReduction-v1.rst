@@ -146,18 +146,18 @@ This example below performs a complete reduction for D7 data.
         'ContainerFormula':'Al','ContainerDensity':2.7,'ContainerFrontThickness':0.02,
         'ContainerBackThickness':0.02}
 
-    # Cadmium absorber transmission
+    # Beam with cadmium absorber, used for transmission
     PolDiffILLReduction(
         Run='396991',
         OutputWorkspace='cadmium_ws',
-        ProcessAs='Beam'
+        ProcessAs='BeamWithAbsorber'
     )
     # Beam measurement for transmisison
     PolDiffILLReduction(
         Run='396983',
         OutputWorkspace='beam_ws',
         AbsorberTransmissionInputWorkspace='cadmium_ws_1',
-        ProcessAs='Beam'
+        ProcessAs='EmptyBeam'
     )
     print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium_ws_1'].readY(0)[0] / mtd['beam_ws_1'].readY(0)[0]))
 

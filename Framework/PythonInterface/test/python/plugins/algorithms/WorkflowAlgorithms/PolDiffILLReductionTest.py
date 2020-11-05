@@ -33,20 +33,20 @@ class PolDiffILLReductionTest(unittest.TestCase):
         mtd.clear()
 
     def test_absorber_transmission(self):
-        PolDiffILLReduction(Run='396991', ProcessAs='Beam', OutputWorkspace='cadmium_ws')
+        PolDiffILLReduction(Run='396991', ProcessAs='BeamWithAbsorber', OutputWorkspace='cadmium_ws')
         self._check_output(mtd['cadmium_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['cadmium_ws'], 'Absorber')
         self.assertAlmostEqual(mtd['cadmium_ws_1'].readY(0)[0], 116, delta=1)
 
     def test_beam(self):
-        PolDiffILLReduction(Run='396983', ProcessAs='Beam', OutputWorkspace='beam_ws')
+        PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         self._check_output(mtd['beam_ws'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['beam_ws'], 'Beam')
         self.assertAlmostEqual(mtd['beam_ws_1'].readY(0)[0], 10769, delta=1)
 
     def test_transmission(self):
-        PolDiffILLReduction(Run='396983', ProcessAs='Beam', OutputWorkspace='beam_ws')
-        PolDiffILLReduction(Run='396991', ProcessAs='Beam', OutputWorkspace='cadmium_ws')
+        PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
+        PolDiffILLReduction(Run='396991', ProcessAs='BeamWithAbsorber', OutputWorkspace='cadmium_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
                             AbsorberTransmissionInputWorkspace='cadmium_ws_1', BeamInputWorkspace='beam_ws_1',)
         self._check_output(mtd['quartz_transmission'], 1, 1, 1, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
@@ -64,17 +64,16 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['container_ws'], 'Container')
 
     def test_quartz(self):
-        PolDiffILLReduction(Run='396983', ProcessAs='Beam', OutputWorkspace='beam_ws')
-        PolDiffILLReduction(Run='396991', ProcessAs='Beam', OutputWorkspace='cadmium_ws')
+        PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396985', ProcessAs='Transmission', OutputWorkspace='quartz_transmission',
-                            AbsorberTransmissionInputWorkspace='cadmium_ws_1', BeamInputWorkspace='beam_ws_1',)
+                            BeamInputWorkspace='beam_ws_1')
         PolDiffILLReduction(Run='396939', ProcessAs='Quartz', TransmissionInputWorkspace='quartz_transmission_1',
                             OutputTreatment='Average', OutputWorkspace='quartz')
         self._check_output(mtd['quartz'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['quartz'], 'Quartz')
     
     def test_vanadium(self):
-        PolDiffILLReduction(Run='396983', ProcessAs='Beam', OutputWorkspace='beam_ws')
+        PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
                             BeamInputWorkspace='beam_ws_1')
         sampleProperties = {'FormulaUnits': 50}
@@ -86,7 +85,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['vanadium_1'], 'Vanadium')
 
     def test_vanadium_sum_scans(self):
-        PolDiffILLReduction(Run='396983', ProcessAs='Beam', OutputWorkspace='beam_ws')
+        PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
                             BeamInputWorkspace='beam_ws_1')
         sampleProperties = {'FormulaUnits': 50}
@@ -113,7 +112,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['vanadium_annulus'], 'Vanadium')
 
     def test_sample(self):
-        PolDiffILLReduction(Run='396983', ProcessAs='Beam', OutputWorkspace='beam_ws')
+        PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
         PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
                             BeamInputWorkspace='beam_ws_1')
         sampleProperties = {'FormulaUnits': 182.54}

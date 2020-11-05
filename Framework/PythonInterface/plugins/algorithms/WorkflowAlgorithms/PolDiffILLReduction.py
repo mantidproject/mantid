@@ -74,7 +74,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.declareProperty(MultipleFileProperty('Run', extensions=['nxs']),
                              doc='File path of run(s).')
 
-        options = ['Absorber', 'Beam', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample']
+        options = ['Absorber', 'EmptyBeam', 'BeamWithAbsorber', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample']
 
         self.declareProperty(name='ProcessAs',
                              defaultValue='Sample',
@@ -86,7 +86,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                              doc='The output workspace based on the value of ProcessAs.')
 
         absorber = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Absorber')
-        beam = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Beam')
+        beam = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'EmptyBeam')
         container = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Container')
         sample = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Sample')
         quartz = EnabledWhenProperty('ProcessAs', PropertyCriterion.IsEqualTo, 'Quartz')
@@ -210,7 +210,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         elif entries_per_numor == 2:
             self._method_data_structure = 'Uniaxial'
         else:
-            if self.getPropertyValue("ProcessAs") not in ['Beam', 'Transmission']:
+            if self.getPropertyValue("ProcessAs") not in ['EmptyBeam', 'BeamWithAbsorber', 'Transmission']:
                 raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
                                    + "The provided input does not fit in any of these measurement types.")
 
@@ -533,8 +533,8 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def PyExec(self):
         process = self.getPropertyValue('ProcessAs')
-        processes = ['Absorber', 'Beam', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample']
-        nReports = [3, 2, 3, 3, 3, 10, 10]
+        processes = ['Absorber', 'EmptyBeam', 'BeamWithAbsorber', 'Transmission', 'Container', 'Quartz', 'Vanadium', 'Sample']
+        nReports = [3, 2, 2, 3, 3, 3, 10, 10]
         progress = Progress(self, start=0.0, end=1.0, nreports=nReports[processes.index(process)])
         ws = '__' + self.getPropertyValue('OutputWorkspace')
 
@@ -552,7 +552,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             raise RuntimeError("TOF data reduction is not supported at the moment.")
         self._figure_out_measurement_method(ws)
 
-        if process in ['Beam', 'Transmission']:
+        if process in ['EmptyBeam', 'BeamWithAbsorber', 'Transmission']:
             if mtd[ws].getNumberOfEntries() > 1:
                 self._merge_polarisations(ws, average_detectors=True)
             absorber_transmission_ws = self.getPropertyValue('AbsorberTransmissionInputWorkspace')
