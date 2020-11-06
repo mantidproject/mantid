@@ -394,7 +394,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             denominator = 2.0 * fp * mtd[phi]
             Divide(LHSWorkspace=nominator, RHSWorkspace=denominator,
                    OutputWorkspace=tmp_names[1])
-
+            CopyLogs(InputWorkspace=intensity_0, OutputWorkspace=tmp_names[0], MergeStrategy='WipeExisting')
+            CopyLogs(InputWorkspace=intensity_1, OutputWorkspace=tmp_names[1], MergeStrategy='WipeExisting')
             RenameWorkspace(tmp_names[0], intensity_0)
             RenameWorkspace(tmp_names[1], intensity_1)
 
