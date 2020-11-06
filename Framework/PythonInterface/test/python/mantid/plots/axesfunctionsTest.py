@@ -17,7 +17,7 @@ import mantid.plots.axesfunctions as funcs
 from mantid.plots.utility import MantidAxType
 from mantid.kernel import config
 from mantid.simpleapi import (CreateWorkspace, CreateEmptyTableWorkspace, DeleteWorkspace,
-                              CreateMDHistoWorkspace, ConjoinWorkspaces, AddTimeSeriesLog)
+                              CreateMDHistoWorkspace, ConjoinWorkspaces, AddTimeSeriesLog, CloneWorkspace)
 
 
 class PlotFunctionsTest(unittest.TestCase):
@@ -97,6 +97,29 @@ class PlotFunctionsTest(unittest.TestCase):
         funcs.plot(ax, self.ws2d_histo, 'rs', specNum=1)
         funcs.plot(ax, self.ws2d_histo, specNum=2, linewidth=6)
         funcs.plot(ax, self.ws_MD_1d, 'bo')
+
+    def test_1d_bin(self):
+        fig, ax = plt.subplots()
+        funcs.plot(ax, self.ws2d_histo, 'rs', specNum=1, axis=MantidAxType.BIN)
+
+    def test_1d_bin_numeric_axis(self):
+        fig, ax = plt.subplots()
+        x_axis = mantid.api.NumericAxis.create(2)
+        x_axis.setValue(0,3.)
+        x_axis.setValue(1,5.)
+        ws_local = CloneWorkspace(self.ws2d_histo, StoreInADS=False)
+        ws_local.replaceAxis(1, x_axis)
+        funcs.plot(ax, ws_local, 'rs', specNum=1, axis=MantidAxType.BIN)
+
+    def test_1d_bin_binedge_axis(self):
+        fig, ax = plt.subplots()
+        x_axis = mantid.api.BinEdgeAxis.create(3)
+        x_axis.setValue(0,3.)
+        x_axis.setValue(1,5.)
+        x_axis.setValue(2,7.)
+        ws_local = CloneWorkspace(self.ws2d_histo, StoreInADS=False)
+        ws_local.replaceAxis(1, x_axis)
+        funcs.plot(ax, ws_local, 'rs', specNum=1, axis=MantidAxType.BIN)
 
     def test_1d_log(self):
         fig, ax = plt.subplots()
@@ -196,6 +219,27 @@ class PlotFunctionsTest(unittest.TestCase):
         fig, ax = plt.subplots()
         funcs.plot(ax, self.ws2d_histo_non_dist, 'rs', specNum=1, axis=MantidAxType.BIN)
         self.assertEqual(ax.get_xlabel(), "Spectrum")
+
+    def test_1d_x_axes_label_numeric_axis_bin_plot(self):
+        fig, ax = plt.subplots()
+        x_axis = mantid.api.NumericAxis.create(2)
+        x_axis.setValue(0, 3.)
+        x_axis.setValue(1, 5.)
+        ws_local = CloneWorkspace(self.ws2d_histo_non_dist, StoreInADS=False)
+        ws_local.replaceAxis(1, x_axis)
+        funcs.plot(ax, ws_local, 'rs', specNum=1, axis=MantidAxType.BIN)
+        self.assertEqual(ax.get_xlabel(), "")
+
+    def test_1d_x_axes_label_numeric_axis_with_unit_bin_plot(self):
+        fig, ax = plt.subplots()
+        x_axis = mantid.api.NumericAxis.create(2)
+        x_axis.setValue(0, 3.)
+        x_axis.setValue(1, 5.)
+        x_axis.setUnit('MomentumTransfer')
+        ws_local = CloneWorkspace(self.ws2d_histo_non_dist, StoreInADS=False)
+        ws_local.replaceAxis(1, x_axis)
+        funcs.plot(ax, ws_local, 'rs', specNum=1, axis=MantidAxType.BIN)
+        self.assertEqual(ax.get_xlabel(), "q ($\\AA^{-1}$)")
 
     def test_1d_y_axes_label_auto_distribution_on(self):
         fig, ax = plt.subplots()

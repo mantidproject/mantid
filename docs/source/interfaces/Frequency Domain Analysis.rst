@@ -15,7 +15,7 @@ Interface Overview
 
 This interface is used to analyse the data collected on Muon instruments in the frequency domain. The interface can be
 accessed from the main menu of MantidPlot, in *Interfaces → Muon → Frequency Domain Analysis*. For sample
-datasets, please visit `Muon - Downloads <http://www.isis.stfc.ac.uk/groups/muons/downloads/downloads4612.html>`_.
+datasets, please visit `Muon - Downloads <http://sourceforge.net/projects/mantid/files/Sample%20Data/SampleData-Muon.zip/download>`_.
 
 Analysis of the frequency spectrum can be achieved by clicking the fit function icon.
 

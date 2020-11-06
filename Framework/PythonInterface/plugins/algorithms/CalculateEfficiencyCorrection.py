@@ -13,7 +13,7 @@ from mantid.api import \
     AlgorithmFactory, CommonBinsValidator, PropertyMode, PythonAlgorithm, \
     MatrixWorkspaceProperty
 from mantid.kernel import \
-    Direction, FloatBoundedValidator, MaterialBuilder, \
+    Direction, FloatBoundedValidator, \
     StringListValidator, StringMandatoryValidator
 
 TABULATED_WAVELENGTH = 1.7982
@@ -188,11 +188,21 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
                                        StoreInADS=False)
 
         if self.getProperty('Alpha').isDefault:
-            SetSampleMaterial(
-                InputWorkspace=self._output_ws,
-                ChemicalFormula=self._chemical_formula,
-                SampleNumberDensity=self._density,
-                StoreInADS=False)
+            if self._density_type == 'Mass Density':
+                SetSampleMaterial(
+                    InputWorkspace=self._output_ws,
+                    ChemicalFormula=self._chemical_formula,
+                    SampleMassDensity=self._density,
+                    StoreInADS=False)
+                self._density = self._output_ws.sample().getMaterial().numberDensityEffective
+            elif self._density_type == 'Number Density':
+                SetSampleMaterial(
+                    InputWorkspace=self._output_ws,
+                    ChemicalFormula=self._chemical_formula,
+                    SampleNumberDensity=self._density,
+                    StoreInADS=False)
+            else:
+                raise RuntimeError(f'Unknown "DensityType": {self._density_type}')
             if self.getProperty('MeasuredEfficiency').isDefault:
                 self._calculate_area_density_from_density()
             else:
@@ -219,10 +229,6 @@ class CalculateEfficiencyCorrection(PythonAlgorithm):
 
     def _calculate_area_density_from_density(self):
         """Calculates area density (atom/cm^2) using number density and thickness."""
-        if self._density_type == 'Mass Density':
-            builder = MaterialBuilder().setFormula(self._chemical_formula)
-            mat = builder.setMassDensity(self._density).build()
-            self._density = mat.numberDensity
         self._area_density = self._density * self._thickness
 
     def _calculate_alpha_absXS_term(self):

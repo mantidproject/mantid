@@ -22,8 +22,9 @@ To create a parameters file it is advisable to consult the parameter file schema
 General Structure
 ~~~~~~~~~~~~~~~~~
 
-The Instrument parameter files, like the :ref:`IDFs<InstrumentDefinitionFile>`, are written in XML. They must contain a root element <parameter-file> with an attribute 'name' equal to the name of the instrument. Within the <parameter-file> element, goes all the rest of the information. To specify a parameter for a component defined the :ref:`IDF<InstrumentDefinitionFile>`, use a <component-link> element with attribute 'name' equal to the name of the component. Within the <component-link> element, the various parameters can be defined in exactly the same way as described in the parameters section of the IDF Page. 
-The below example shows some of the elements featured in IN10_silicon_111_Parameters.xml. It defines a parameter 'analysis-type' for the component IN10 i.e. the whole instrument. The component link is closed and then a new one is opened to define parameters for the component 'silicon'.
+The Instrument parameter files, like the :ref:`IDFs<InstrumentDefinitionFile>`, are written in XML. They must contain a root element <parameter-file> with an attribute 'name' equal to the name of the instrument. Within the <parameter-file> element, goes all the rest of the information. To specify a parameter for a component defined the :ref:`IDF<InstrumentDefinitionFile>`, use a <component-link> element with attribute 'name' equal to the name of the component. Within the <component-link> element, the various parameters can be defined mostly in the same way as described in the parameters section of the IDF Page.
+It is possible to set multiple values for a parameter, each one with a defined time range.
+The below example shows some of the elements featured in IN10_silicon_111_Parameters.xml, slightly modified. It defines a parameter 'analysis-type' for the component IN10 i.e. the whole instrument. The component link is closed and then a new one is opened to define parameters for the component 'silicon'.
 
 
 .. code-block:: xml
@@ -39,7 +40,9 @@ The below example shows some of the elements featured in IN10_silicon_111_Parame
    
     <component-link name="silicon">
       <parameter name="Efixed">
-        <value val="2.082" />
+        <value val="2.0" valid-to="2011-12-31T23:59:59"/>
+        <value val="2.082" valid-from="2012-01-01T00:00:00" valid-to="2012-12-31T23:59:59"/>
+        <value val="3.0" valid-from="2013-01-01T00:00:00"/>
       </parameter>
     </component-link>
    

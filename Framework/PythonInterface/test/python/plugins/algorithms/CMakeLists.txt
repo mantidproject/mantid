@@ -53,6 +53,7 @@ set(TEST_PY_FILES
     IndexSatellitePeaksTest.py
     LoadAndMergeTest.py
     LoadDNSLegacyTest.py
+    LoadElementalAnalysisRunTest.py
     LoadEmptyVesuvioTest.py
     LoadFullprofFileTest.py
     LoadGudrunOutputTest.py
@@ -115,6 +116,7 @@ set(TEST_PY_FILES
     VesuvioResolutionTest.py
     VesuvioThicknessTest.py
     VesuvioTOFFitTest.py
+    PEARLTransfitTest.py
     PoldiCreatePeaksFromFileTest.py
     LoadCIFTest.py
     SaveYDATest.py
