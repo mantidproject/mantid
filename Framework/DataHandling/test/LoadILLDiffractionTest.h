@@ -36,6 +36,7 @@ public:
   LoadILLDiffractionTest() {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D20/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D2B/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D1B/");
   }
 
   void setUp() override {
@@ -478,6 +479,33 @@ public:
     TS_ASSERT(run.hasProperty("ScanType"));
     const auto type = run.getLogData("ScanType");
     TS_ASSERT_EQUALS(type->value(), "DetectorScan");
+  }
+
+  void test_D1B() {
+    const int NUMBER_OF_TUBES = 1280;
+    const int NUMBER_OF_MONITORS = 1;
+
+    LoadILLDiffraction alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "473432.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("2ThetaOffset", "0.0"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    const auto run = outputWS->run();
+
+    const auto &detInfo = outputWS->detectorInfo();
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),
+                     NUMBER_OF_TUBES + NUMBER_OF_MONITORS)
+
+    TS_ASSERT(!detInfo.isMonitor({0, 0}))
+    auto firstTube = detInfo.position({0, 0});
+    TS_ASSERT_DELTA(firstTube.angle(V3D(0, 0, -1)) * RAD_2_DEG, 0.0, 1e-6)
+
+    TS_ASSERT_EQUALS(outputWS->y(13)[0], 1394)
   }
 
 private:
