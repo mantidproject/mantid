@@ -70,7 +70,7 @@ This can be performed directly with :ref:`algm-FilterByTime` or indirectly with 
 
 - Look at the effect this filter has on the Temperature Sample Log and in particular on the data in
   spectrum number 1000.
-  Note that the time for the High Temp Sample log data has reset its minimum value to 0 as it doesn't have the start
+  Note that the time for the high temperature sample log data has reset its minimum value to 0 as it doesn't have the start
   time value needed to calculate the relative time (the start of the logs here is where we made the cut).
 
 .. plot::
@@ -142,7 +142,7 @@ This is a more interactive way of filtering data. A few differences from the "Sh
 are not plotted with a step drawstyle and a normal workbench plot cannot be created.
 
 In the same way as above you can select the sample log of interest and set a Min/Max value. When you click 'Filter'
-there will be output to the Workspaces Toolbox:
+the following workspaces will be outputted to the Workspace Toolbox:
 a TableWorkspace, which can be used as a SplitterWorkspace (an outline of where to apply the filter), and a
 WorkspaceGroup containing the filtered and unfiltered data.
 
