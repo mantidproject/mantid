@@ -183,11 +183,6 @@ private:
   // Whether or not a selector is currently being moved
   bool m_selectorActive;
 
-  // Tick label style
-  char *m_axis;
-  char *m_style;
-  bool m_useOffset;
-
   // Canvas tools
   Widgets::MplCpp::PanZoomTool m_panZoomTool;
 
@@ -196,6 +191,11 @@ private:
       m_wsRemovedObserver;
   Poco::NObserver<PreviewPlot, Mantid::API::WorkspaceBeforeReplaceNotification>
       m_wsReplacedObserver;
+
+  // Tick label style
+  char *m_axis;
+  char *m_style;
+  bool m_useOffset;
 
   // Context menu actions
   QActionGroup *m_contextPlotTools;

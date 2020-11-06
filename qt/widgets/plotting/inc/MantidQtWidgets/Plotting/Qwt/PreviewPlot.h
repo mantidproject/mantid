@@ -190,11 +190,6 @@ private:
   /// Cache of single selector visibility
   QMap<QString, bool> m_ssVisibility;
 
-  // Tick label style
-  char *m_axis;
-  char *m_style;
-  bool m_useOffset;
-
   /// Poco Observers for ADS Notifications
   Poco::NObserver<PreviewPlot, Mantid::API::WorkspacePreDeleteNotification>
       m_removeObserver;
@@ -234,6 +229,11 @@ private:
 
   QMap<QString, QwtPlotCurve::CurveStyle> m_curveStyle;
   QMap<QString, QwtSymbol::Style> m_curveSymbol;
+
+  // Tick label style
+  char *m_axis;
+  char *m_style;
+  bool m_useOffset;
 
   friend class DisplayCurveFit;
 
