@@ -157,6 +157,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
             data_S0.append(D0)
             D1= self._total[1]/self._nrun1           #single scatt  with abs
             data_S1.append(D1)
+            # divide by QS_sum^(nscatter-1)=((nscatter-1)*nrun2*QS_sum_dedup)^(nscatter-1)
             if self._numb_scat >= 2:
                 D2 = self._total[2]/QS_sum[2]              #second scatt
                 data_S2.append(D2)
@@ -336,6 +337,10 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
 
     def _calc_angles(self):
         Qmax = 4.0*math.pi/self._wave
+        if Qmax < self._q_values.max():
+            maxWavelength = 4.0*math.pi/self._q_values.max()
+            raise ValueError(f"Supplied wavelength {self._wave} is too large for the supplied q range."
+                             f"It must be less than {maxWavelength}")
         theta_r = np.arcsin(self._q_values/Qmax)
         theta_d = 2.0*np.rad2deg(theta_r)
         ang_inc = (theta_d[len(theta_d) - 1] - theta_d[0])/self._number_angles
@@ -380,7 +385,8 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         self._isurf = 0
         dl = self._dist_exit()                   #find distance to exit =exdist
         self._B9 = 1.0 - math.exp(-self._vmu*dl)            #atten to exit
-        self._vl = random.random()*dl             #random point along DL =VL
+        self._vl = -(self._vmfp * math.log(1.0 - random.random() * self._B9))  # random path length
+        #self._vl = random.random()*dl             #random point along DL =VL
         self._B1 = math.exp(-self._vmu*self._vl)               #atten to VL
         self._B9 = self._B9/self._sigt                    #new weighting
         self._inc_xyz()                  #new xyz position
@@ -438,7 +444,10 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
             # FI is scattering angle in the plane perpendicular to original trajectory
             B3 = math.sqrt(1. - CosT*CosT)
             B2 = CosT
-            # Rodrigues formula? Doesn't quite match (UQ terms are different)
+            # Rodrigues formula with final term equal to zero
+            # v_rot = cosT*v + sinT(k x v)
+            # with rotation axis k orthogonal to v and defined as:
+            # sin(phi)*(vy,-vx,0) + cos(phi)*(-vx*vz, -vy*vz, 1-vz*vz)
             if Uk[2] < 1.0:
                 A2 = math.sqrt(1.0 - Uk[2]*Uk[2])
                 UQTZ = math.cos(FI)*A2
@@ -525,11 +534,13 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                 PP2 = self._surface_c[i]*Y*Y + self._surface_d[i]*Y
                 PP3 = self._surface_e[i]*Z*Z + self._surface_f[i]*Z
                 PP=PP1 + PP2 + PP3 + self._surface_g[i]
+                # IF ON SURFACE, USE FIRST DERIVATIVE
                 if PP == 0.:
                     PPx = (self._surface_a[i]*X + self._surface_b[i])*VX
                     PPy = (self._surface_c[i]*Y + self._surface_d[i])*VY
                     PPz = (self._surface_e[i]*Z + self._surface_f[i])*VZ
                     PP=2.*(PPx + PPy + PPz)
+                # IF ON SURFACE AND PARALLEL TO IT, TRY SECOND DERIVATIVE
                 if PP == 0.:
                     PP=self._surface_a[i]*VX*VX + self._surface_c[i]*VY*VY + self._surface_e[i]*VZ*VZ
                 if PP*self._igeom[i] < 0.:
