@@ -550,7 +550,7 @@ class ReductionWrapper(object):
         timeToWait = self._wait_for_file
         if timeToWait > 0:
             _, fext_requested = PropertyManager.sample_run.file_hint()
-            run_number_requsted = PropertyManager.sample_run.run_number
+            run_number_requsted = PropertyManager.sample_run.run_number()
             available,_,info = self._check_progress_log_run_completed(run_number_requsted)
             if len(info) > 0: # report if archive upload log is not available
                 self.reducer.prop_man.log("*** "+info, 'warning')
@@ -636,7 +636,7 @@ class ReductionWrapper(object):
                     # here we have run numbers. Let's get real file names
                     prop_man = self.reducer.prop_man
                     instr_name = prop_man.short_instr_name
-                    run_number_requsted = PropertyManager.sample_run.run_number
+                    run_number_requsted = PropertyManager.sample_run.run_number()
                     available,_,_ = self._check_progress_log_run_completed(run_number_requsted)
                     if available:
                         is_found, fname = PropertyManager.sample_run.find_file(prop_man, instr_name, run)
