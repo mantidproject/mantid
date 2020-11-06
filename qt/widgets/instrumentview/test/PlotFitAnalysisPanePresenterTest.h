@@ -109,6 +109,31 @@ public:
     TS_ASSERT(m_model->hasEstimate());
   }
 
+  void
+  test_that_updateEstimateAfterExtraction_calls_calculateEstimate_if_an_estimate_does_not_exist() {
+    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
+    m_presenter->addSpectrum(m_workspaceName);
+
+    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
+
+    m_presenter->updateEstimateAfterExtraction();
+    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 1);
+    TS_ASSERT(m_model->hasEstimate());
+  }
+
+  void
+  test_that_updateEstimateAfterExtraction_does_not_call_calculateEstimate_if_an_estimate_already_exists() {
+    EXPECT_CALL(*m_view, addSpectrum(m_workspaceName)).Times(1);
+    m_presenter->addSpectrum(m_workspaceName);
+
+    EXPECT_CALL(*m_view, getRange()).Times(1).WillOnce(Return(m_range));
+
+    m_presenter->updateEstimate();
+    m_presenter->updateEstimateAfterExtraction();
+    TS_ASSERT_EQUALS(m_model->getEstimateCount(), 1);
+    TS_ASSERT(m_model->hasEstimate());
+  }
+
 private:
   NiceMock<MockPlotFitAnalysisPaneView> *m_view;
   MockPlotFitAnalysisPaneModel *m_model;
