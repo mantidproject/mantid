@@ -4,12 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory, FileAction, FileProperty, PythonAlgorithm, PropertyMode, \
-    MultipleFileProperty, WorkspaceProperty
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, IMDHistoWorkspaceProperty, PythonAlgorithm, \
+    PropertyMode, MultipleFileProperty, WorkspaceProperty
 from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, V3D, FloatArrayProperty, \
     FloatArrayLengthValidator
 from mantid.simpleapi import ConvertHFIRSCDtoMDE, ConvertWANDSCDtoQ, DeleteWorkspace, DeleteWorkspaces, DivideMD, \
-    Load, MergeMD, ReplicateMD
+    Load, MergeMD, ReplicateMD, mtd
 import os
 
 
@@ -19,25 +19,33 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
         return "Crystal\\Corrections"
 
     def seeAlso(self):
-        return ["ConvertWANDSCDtoQ", "SingleCrystalDiffuseReduction"]
+        return ["ConvertWANDSCDtoQ", "ConvertHFIRSCDtoQ"]
 
     def name(self):
         return "SCDAdjustSampleNorm"
 
     def summary(self):
-        return 'Takes detector scan data files, adjusts the detector position based on detector height and distance ' \
-               'if the options are given. Normalizes with detector efficiency from input vanadium file, ' \
-               'and converts to Q-space. '
+        return 'Takes detector scan data files or workspaces and adjusts the detector position based on detector ' \
+               'height and distance if those options are given. Normalizes with detector efficiency from input ' \
+               'vanadium file, and converts to Q-space.'
 
     def PyInit(self):
         # Input params
         self.declareProperty(MultipleFileProperty(name="Filename",
-                                                  extensions=["_event.nxs", ".nxs.h5", ".nxs"]),
-                             "Input autoreduced detector scan data files to convert to Q-space.")
+                                                  extensions=["_event.nxs", ".nxs.h5", ".nxs"],
+                                                  action=FileAction.OptionalLoad),
+                             doc="Input autoreduced detector scan data files to convert to Q-space.")
         self.declareProperty(
             FileProperty(name="VanadiumFile", defaultValue="", extensions=[".nxs"], direction=Direction.Input,
-                         action=FileAction.Load),
+                         action=FileAction.OptionalLoad),
             doc="File with Vanadium normalization scan data")
+
+        # Alternative WS inputs
+        self.declareProperty("InputWorkspaces", defaultValue="", direction=Direction.Input,
+                             doc="Workspace or comma-separated workspace list containing input MDHisto scan data.")
+        self.declareProperty(IMDHistoWorkspaceProperty("VanadiumWorkspace", defaultValue="", direction=Direction.Input,
+                                                       optional=PropertyMode.Optional),
+                             doc="MDHisto workspace containing vanadium normalization data")
 
         # Detector adjustment options
         self.declareProperty("DetectorHeightOffset", defaultValue=0.0, direction=Direction.Input,
@@ -77,6 +85,11 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
                              "comma-separated list of values with the"
                              "format: 'minimum,maximum,number_of_bins'.")
 
+        self.setPropertySettings("Filename", EnabledWhenProperty('InputWorkspaces', PropertyCriterion.IsDefault))
+        self.setPropertySettings("VanadiumFile", EnabledWhenProperty('VanadiumWorkspace', PropertyCriterion.IsDefault))
+        self.setPropertySettings("InputWorkspaces", EnabledWhenProperty('Filename', PropertyCriterion.IsDefault))
+        self.setPropertySettings("VanadiumWorkspace", EnabledWhenProperty('VanadiumFile', PropertyCriterion.IsDefault))
+
         event_settings = EnabledWhenProperty('OutputAsMDEventWorkspace', PropertyCriterion.IsDefault)
         self.setPropertyGroup("MinValues", "MDEvent Settings")
         self.setPropertyGroup("MaxValues", "MDEvent Settings")
@@ -97,9 +110,48 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
             WorkspaceProperty("OutputWorkspace", "", optional=PropertyMode.Mandatory, direction=Direction.Output),
             doc="Output MDWorkspace in Q-space, name is prefix if multiple input files were provided.")
 
+    def validateInputs(self):
+        issues = dict()
+
+        filelist = self.getProperty("Filename").value
+        vanfile = self.getProperty("VanadiumFile").value
+        input_ws = self.getProperty("InputWorkspaces")
+        van_ws = self.getProperty("VanadiumWorkspace")
+
+        # Make sure files and workspaces aren't both set
+        if len(filelist) >= 1:
+            if not input_ws.isDefault:
+                issues['InputWorkspaces'] = "Cannot specify both a filename and input workspace"
+        else:
+            if input_ws.isDefault:
+                issues['Filename'] = "Either a file or input workspace must be specified"
+
+        if len(vanfile) <= 0 and van_ws.isDefault:
+            issues['VanadiumFile'] = "Either a vanadium file or vanadium workspace must be specified!"
+
+        if len(vanfile) > 0 and not van_ws.isDefault:
+            issues['VanadiumWorkspace'] = "Cannot specify both a vanadium file and workspace"
+
+        # Verify given workspaces exist
+        if not input_ws.isDefault:
+            input_ws_list = input_ws.value.split(",")
+            for ws in input_ws_list:
+                if not mtd.doesExist(ws):
+                    issues['InputWorkspaces'] = "Could not find input workspace '{}'".format(ws)
+
+        return issues
+
     def PyExec(self):
-        datafiles = self.getProperty("Filename").value
+        load_van = not self.getProperty("VanadiumFile").isDefault
+        load_files = not self.getProperty("Filename").isDefault
+
+        if load_files:
+            datafiles = self.getProperty("Filename").value
+        else:
+            datafiles = self.getProperty("InputWorkspaces").value.split(",")
+
         vanadiumfile = self.getProperty("VanadiumFile").value
+        vanws = self.getProperty("VanadiumWorkspace").value
         height = self.getProperty("DetectorHeightOffset").value
         distance = self.getProperty("DetectorDistanceOffset").value
         method = self.getProperty("OutputAsMDEventWorkspace").value
@@ -117,7 +169,8 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
         out_ws = self.getPropertyValue("OutputWorkspace")
         out_ws_name = out_ws
 
-        vanws = Load(vanadiumfile)
+        if load_van:
+            vanws = Load(vanadiumfile, StoreInADS=False)
 
         has_multiple = True if len(datafiles) > 1 else False
 
@@ -125,13 +178,19 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
         wavelength = 1.488
 
         for file in datafiles:
-            scan = Load(file, LoadHistory=False)
+            if load_files:
+                scan = Load(file, LoadHistory=False, StoreInADS=False)
+            else:
+                scan = mtd[file]
 
             self.log().information("Processing file '{}'".format(file))
 
             # If processing multiple files, append the base name to the given output name
             if has_multiple:
-                out_ws_name = out_ws + "_" + os.path.basename(file).strip(',.nxs')
+                if load_files:
+                    out_ws_name = out_ws + "_" + os.path.basename(file).strip(',.nxs')
+                else:
+                    out_ws_name = out_ws + "_" + file
 
             exp_info = scan.getExperimentInfo(0)
 
@@ -155,8 +214,8 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
 
             # Use ConvertHFIRSCDtoQ (and normalize van), or use ConvertWANDSCtoQ which handles normalization itself
             if method:
-                van_norm = ReplicateMD(ShapeWorkspace=scan, DataWorkspace=vanws)
-                van_norm = DivideMD(LHSWorkspace=scan, RHSWorkspace=van_norm)
+                van_norm = ReplicateMD(ShapeWorkspace=scan, DataWorkspace=vanws, StoreInADS=False)
+                van_norm = DivideMD(LHSWorkspace=scan, RHSWorkspace=van_norm, StoreInADS=False)
                 ConvertHFIRSCDtoMDE(InputWorkspace=scan, Wavelength=wavelength, MinValues=minvals,
                                     MaxValues=maxvals, OutputWorkspace=out_ws_name)
                 if merge:
@@ -169,16 +228,17 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
                                   OutputWorkspace=out_ws_name)
 
         if method:
-            if merge:
+            if merge and len(wslist) > 1:
                 out_ws_name = out_ws
                 MergeMD(InputWorkspaces=wslist, OutputWorkspace=out_ws_name)
-                print("Workspace list: {}".format(wslist))
                 DeleteWorkspaces(wslist)
-
             DeleteWorkspace(van_norm)
 
-        DeleteWorkspace(vanws)
-        DeleteWorkspace(scan)
+        # Don't delete workspaces if they were passed in
+        if load_van:
+            DeleteWorkspace(vanws)
+        if load_files:
+            DeleteWorkspace(scan)
 
         self.setProperty("OutputWorkspace", out_ws_name)
 
