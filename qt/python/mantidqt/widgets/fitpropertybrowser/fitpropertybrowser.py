@@ -385,6 +385,7 @@ class FitPropertyBrowser(FitPropertyBrowserBase):
         fun = self.addFunction(self.defaultPeakType())
         self.setPeakCentreOf(fun, centre)
         self.setPeakFwhmOf(fun, fwhm)
+        print("Parameter width name", fun.getWidthParameterName())
         if height != 0:
             self.setPeakHeightOf(fun, height)
         self.peak_ids[peak_id] = fun

@@ -28,5 +28,9 @@ void export_IPeakFunction() {
       .def("setIntensity", &IPeakFunction::setIntensity,
            (arg("self"), arg("new_intensity")),
            "Changes the integral intensity of the peak function by setting its "
-           "height.");
+           "height.")
+      .def("getWidthParameterName", &IPeakFunction::getWidthParameterName,
+           arg("self"),
+           "Returns parameter name chanegd when fwhm is set (empty if not "
+           "overridden in individual functions))");
 }

@@ -52,6 +52,7 @@ public:
   void setIntensity(const double newIntensity) override {
     setParameter("I", newIntensity);
   }
+  virtual std::string getWidthParameterName() const { return "S"; }
 
   /// overwrite IFunction base class methods
   std::string name() const override { return "BackToBackExponential"; }
