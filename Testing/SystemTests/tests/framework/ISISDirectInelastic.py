@@ -16,7 +16,7 @@ from Direct.PropertyManager  import PropertyManager
 #----------------------------------------------------------------------
 
 
-class ISISDirectInelasticReduction(metaclass=ABCMeta):
+class ISISDirectInelasticReduction(systemtesting.MantidSystemTest, metaclass=ABCMeta):
     """A base class for the ISIS direct inelastic tests
 
     The workflow is defined in the runTest() method, simply
