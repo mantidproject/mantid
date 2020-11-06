@@ -27,6 +27,7 @@ public:
   MOCK_METHOD0(isCloseEventPrevented, bool());
   MOCK_CONST_METHOD1(isCloseBatchPrevented, bool(int));
   MOCK_CONST_METHOD1(isOverwriteBatchPrevented, bool(int));
+  MOCK_CONST_METHOD1(isOverwriteBatchPrevented, bool(IBatchPresenter const *));
   MOCK_CONST_METHOD0(isOverwriteAllBatchesPrevented, bool());
   MOCK_CONST_METHOD0(isProcessAllPrevented, bool());
   MOCK_CONST_METHOD0(isProcessPartialGroupPrevented, bool());

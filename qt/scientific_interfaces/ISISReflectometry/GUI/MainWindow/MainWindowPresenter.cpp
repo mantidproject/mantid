@@ -199,13 +199,14 @@ boost::optional<int> MainWindowPresenter::roundPrecision() const {
   return boost::none;
 }
 
+bool MainWindowPresenter::discardChanges() const {
+  return !isWarnDiscardChangesChecked() ||
+         m_messageHandler->askUserDiscardChanges();
+}
+
 bool MainWindowPresenter::isCloseEventPrevented() {
-  if (isAnyBatchProcessing() || isAnyBatchAutoreducing())
-    return true;
-  else if (isWarnDiscardChangesChecked() && isAnyBatchUnsaved()) {
-    return !m_messageHandler->askUserDiscardChanges();
-  }
-  return false;
+  return (isAnyBatchProcessing() || isAnyBatchAutoreducing() ||
+          (isAnyBatchUnsaved() && !discardChanges()));
 }
 
 bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
@@ -215,24 +216,22 @@ bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
         "Cannot close batch while processing or autoprocessing is in progress",
         "Error");
     return true;
-  } else if (isWarnDiscardChangesChecked() && isBatchUnsaved(batchIndex)) {
-    return !m_messageHandler->askUserDiscardChanges();
   }
-  return false;
+
+  return isBatchUnsaved(batchIndex) && !discardChanges();
 }
 
 bool MainWindowPresenter::isOverwriteBatchPrevented(int tabIndex) const {
-  if (isWarnDiscardChangesChecked() && isBatchUnsaved(tabIndex)) {
-    return !m_messageHandler->askUserDiscardChanges();
-  }
-  return false;
+  return isOverwriteBatchPrevented(m_batchPresenters[tabIndex].get());
+}
+
+bool MainWindowPresenter::isOverwriteBatchPrevented(
+    IBatchPresenter const *batchPresenter) const {
+  return (batchPresenter->isBatchUnsaved() && !discardChanges());
 }
 
 bool MainWindowPresenter::isOverwriteAllBatchesPrevented() const {
-  if (isWarnDiscardChangesChecked() && isAnyBatchUnsaved()) {
-    return !m_messageHandler->askUserDiscardChanges();
-  }
-  return false;
+  return (isAnyBatchUnsaved() && !discardChanges());
 }
 
 bool MainWindowPresenter::isProcessAllPrevented() const {

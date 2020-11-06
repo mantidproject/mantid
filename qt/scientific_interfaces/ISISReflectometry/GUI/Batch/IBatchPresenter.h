@@ -54,7 +54,7 @@ public:
   virtual bool isAutoreducing() const = 0;
   virtual bool isAnyBatchProcessing() const = 0;
   virtual bool isAnyBatchAutoreducing() const = 0;
-  virtual bool isWarnDiscardChangesChecked() const = 0;
+  virtual bool isOverwriteBatchPrevented() const = 0;
   virtual bool requestClose() const = 0;
   virtual int percentComplete() const = 0;
   virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;

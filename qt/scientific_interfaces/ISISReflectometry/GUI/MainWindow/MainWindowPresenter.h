@@ -58,6 +58,8 @@ public:
   bool isAnyBatchAutoreducing() const override;
   bool isCloseEventPrevented() override;
   bool isOverwriteBatchPrevented(int tabIndex) const override;
+  bool isOverwriteBatchPrevented(
+      IBatchPresenter const *batchPresenter) const override;
   bool isOverwriteAllBatchesPrevented() const override;
   bool isProcessAllPrevented() const override;
   bool isProcessPartialGroupPrevented() const override;
@@ -99,13 +101,14 @@ private:
 
   bool isBatchUnsaved(int batchIndex) const override;
   bool isAnyBatchUnsaved() const override;
-  bool isWarnDiscardChangesChecked() const override;
   bool isRoundChecked() const override;
   int &getRoundPrecision() const override;
   boost::optional<int> roundPrecision() const override;
   bool isWarnProcessAllChecked() const override;
   bool isWarnProcessPartialGroupChecked() const override;
   bool isCloseBatchPrevented(int batchIndex) const override;
+  bool isWarnDiscardChangesChecked() const;
+  bool discardChanges() const;
   void optionsChanged() const;
   void showHelp();
   void addNewBatch(IBatchView *batchView);
