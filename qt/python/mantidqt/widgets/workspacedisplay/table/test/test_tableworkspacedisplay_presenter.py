@@ -22,7 +22,7 @@ from mantidqt.widgets.workspacedisplay.table.model import TableWorkspaceDisplayM
 from mantidqt.widgets.workspacedisplay.table.plot_type import PlotType
 from mantidqt.widgets.workspacedisplay.table.presenter import TableWorkspaceDisplay
 from mantidqt.widgets.workspacedisplay.table.view import TableWorkspaceDisplayView
-from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import QStandardItem
+from mantidqt.widgets.workspacedisplay.table.tableworkspace_item import QStandardItem, RevertibleItem
 
 
 class MockQTable:
@@ -114,63 +114,63 @@ class TableWorkspaceDisplayPresenterTest(unittest.TestCase):
 
     @with_mock_presenter
     def test_handleItemChanged(self, ws, view, twd):
-        item = Mock(spec=QStandardItem)
-        item.row.return_value = 5
-        item.column.return_value = 5
-        item.data.return_value = "magic parameter"
-        item.is_v3d = False
+        items = [Mock(spec=RevertibleItem), Mock(spec=QStandardItem)]
+        for item in items:
+            item.row.return_value = 5
+            item.column.return_value = 5
+            item.data.return_value = "magic parameter"
 
-        twd.handleItemChanged(item)
+            twd.handleItemChanged(item)
 
-        item.row.assert_called_once_with()
-        item.column.assert_called_once_with()
-        ws.setCell.assert_called_once_with(5, 5, "magic parameter", notify_replace=False)
-        item.update.assert_called_once_with()
-        item.reset.assert_called_once_with()
+            item.row.assert_called_once_with()
+            item.column.assert_called_once_with()
+            ws.setCell.assert_called_once_with(5, 5, "magic parameter", notify_replace=False)
+            item.update.assert_called_once_with()
+            item.reset.assert_called_once_with()
 
     @with_mock_presenter
     def test_handleItemChanged_raises_ValueError(self, ws, view, twd):
-        item = Mock(spec=QStandardItem)
-        item.row.return_value = 5
-        item.column.return_value = 5
-        item.data.return_value = "magic parameter"
-        item.is_v3d = False
+        items = [Mock(spec=RevertibleItem), Mock(spec=QStandardItem)]
+        for item in items:
+            item.row.return_value = 5
+            item.column.return_value = 5
+            item.data.return_value = "magic parameter"
 
-        # setCell will throw an exception as a side effect
-        ws.setCell.side_effect = ValueError
+            # setCell will throw an exception as a side effect
+            ws.setCell.side_effect = ValueError
 
-        twd.handleItemChanged(item)
+            twd.handleItemChanged(item)
 
-        item.row.assert_called_once_with()
-        item.column.assert_called_once_with()
-        ws.setCell.assert_called_once_with(5, 5, "magic parameter")
-        view.show_warning.assert_called_once_with(
-            TableWorkspaceDisplay.ITEM_CHANGED_INVALID_DATA_MESSAGE)
-        self.assertNotCalled(item.update)
-        item.reset.assert_called_once_with()
+            item.row.assert_called_once_with()
+            item.column.assert_called_once_with()
+            ws.setCell.assert_called_once_with(5, 5, "magic parameter")
+            view.show_warning.assert_called_once_with(
+                TableWorkspaceDisplay.ITEM_CHANGED_INVALID_DATA_MESSAGE)
+            self.assertNotCalled(item.update)
+            item.reset.assert_called_once_with()
 
     @with_mock_presenter
     def test_handleItemChanged_raises_Exception(self, ws, view, twd):
-        item = Mock(spec=QStandardItem)
+        items = [Mock(spec=RevertibleItem), Mock(spec=QStandardItem)]
+        for item in items:
+            item.row.return_value = ws.ROWS
+            item.column.return_value = ws.COLS
+            item.data.return_value = "magic parameter"
+            item.is_v3d = False
 
-        item.row.return_value = ws.ROWS
-        item.column.return_value = ws.COLS
-        item.data.return_value = "magic parameter"
-        item.is_v3d = False
+            # setCell will throw an exception as a side effect
+            error_message = "TEST_EXCEPTION_MESSAGE"
+            ws.setCell.side_effect = Exception(error_message)
 
-        # setCell will throw an exception as a side effect
-        error_message = "TEST_EXCEPTION_MESSAGE"
-        ws.setCell.side_effect = Exception(error_message)
+            twd.handleItemChanged(item)
 
-        twd.handleItemChanged(item)
-
-        item.row.assert_called_once_with()
-        item.column.assert_called_once_with()
-        ws.setCell.assert_called_once_with(ws.ROWS, ws.COLS, "magic parameter")
-        view.show_warning.assert_called_once_with(
-            TableWorkspaceDisplay.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(error_message))
-        self.assertNotCalled(item.update)
-        item.reset.assert_called_once_with()
+            item.row.assert_called_once_with()
+            item.column.assert_called_once_with()
+            ws.setCell.assert_called_once_with(ws.ROWS, ws.COLS, "magic parameter")
+            view.show_warning.assert_called_once_with(
+                TableWorkspaceDisplay.ITEM_CHANGED_UNKNOWN_ERROR_MESSAGE.format(error_message))
+            self.assertNotCalled(item.update)
+            item.reset.assert_called_once_with()
 
     @with_mock_presenter
     def test_update_column_headers(self, ws, view, twd):

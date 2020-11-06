@@ -592,6 +592,56 @@ public:
     AnalysisDataService::Instance().remove("InputWS");
   }
 
+  void test_startX_single_value() {
+    auto ws = createTestWorkspace();
+    AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input", "PLOTPEAKBYLOGVALUETEST_WS,v0:2");
+    alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
+    alg.setProperty("StartX", "1000.0");
+    alg.setProperty("EndX", "3000.0");
+    alg.setProperty("PassWSIndexToFunction", true);
+    alg.setProperty("CreateOutput", true);
+    alg.setProperty("OutputCompositeMembers", true);
+    alg.setProperty("ConvolveMembers", true);
+    alg.setPropertyValue(
+        "Function",
+        "name=LinearBackground,A0=0,A1=0;"
+        "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+        "name=Resolution,Workspace=PLOTPEAKBYLOGVALUETEST_WS,WorkspaceIndex=0;"
+        "name=Gaussian,Height=3000,PeakCentre=6493,Sigma=50;);");
+    alg.execute();
+
+    TS_ASSERT(alg.isExecuted());
+    AnalysisDataService::Instance().remove("PLOTPEAKBYLOGVALUETEST_WS");
+  }
+
+  void test_startX_multiple_value() {
+    auto ws = createTestWorkspace();
+    AnalysisDataService::Instance().add("PLOTPEAKBYLOGVALUETEST_WS", ws);
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input", "PLOTPEAKBYLOGVALUETEST_WS,v0:2");
+    alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
+    alg.setProperty("StartX", "1000.0,1000.0");
+    alg.setProperty("EndX", "3000.0,3000.0");
+    alg.setProperty("PassWSIndexToFunction", true);
+    alg.setProperty("CreateOutput", true);
+    alg.setProperty("OutputCompositeMembers", true);
+    alg.setProperty("ConvolveMembers", true);
+    alg.setPropertyValue(
+        "Function",
+        "name=LinearBackground,A0=0,A1=0;"
+        "(composite=Convolution,FixResolution=true,NumDeriv=true;"
+        "name=Resolution,Workspace=PLOTPEAKBYLOGVALUETEST_WS,WorkspaceIndex=0;"
+        "name=Gaussian,Height=3000,PeakCentre=6493,Sigma=50;);");
+    alg.execute();
+
+    TS_ASSERT(alg.isExecuted());
+    AnalysisDataService::Instance().remove("PLOTPEAKBYLOGVALUETEST_WS");
+  }
+
 private:
   WorkspaceGroup_sptr m_wsg;
 

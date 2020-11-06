@@ -6,10 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """
 Mantid system testing framework. This module contains all of the necessary code
-to run sets of system tests on the Mantid framework by executing scripts directly
-or by importing them into MantidPlot.
-
-File change history is stored at: <https://github.com/mantidproject/systemtests>.
+to run sets of system tests on the Mantid framework.
 """
 # == for testing conda build of mantid-framework ==========
 import os

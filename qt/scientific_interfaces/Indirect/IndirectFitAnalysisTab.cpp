@@ -848,6 +848,8 @@ void IndirectFitAnalysisTab::respondToBackgroundChanged(double value) {
 
 void IndirectFitAnalysisTab::respondToFunctionChanged() {
   setModelFitFunction();
+  m_fittingModel->removeFittingData();
+  m_plotPresenter->updatePlots();
   m_plotPresenter->updateFit();
   emit functionChanged();
 }

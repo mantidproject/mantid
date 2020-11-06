@@ -7,12 +7,12 @@
 #  This file is part of the mantid workbench.
 
 import unittest
+from unittest.mock import Mock, call, patch
 
 from matplotlib import use as mpl_use
 mpl_use('Agg')  # noqa
 from matplotlib.pyplot import figure
 
-from unittest.mock import Mock, patch
 from mantidqt.widgets.plotconfigdialog.presenter import PlotConfigDialogPresenter
 
 
@@ -160,6 +160,28 @@ class PlotConfigDialogPresenterTest(unittest.TestCase):
                               (self.curves_mock.return_value.view, 'Curves')]
         self.assert_called_x_times_with(2, expected_call_args,
                                         mock_view.add_tab_widget)
+
+    def test_tabs_present_updated_properties_from_figure_when_apply_clicked(self):
+        fig = figure()
+        ax = fig.add_subplot(111)
+        ax.plot([0], [0])
+        mock_view = Mock()
+        presenter = PlotConfigDialogPresenter(fig, mock_view)
+
+        # use mock manager to ensure all user properties are applied before view update
+        mock_axes_presenter = presenter.tab_widget_presenters[1]
+        mock_curves_presenter = presenter.tab_widget_presenters[2]
+        mock_manager = Mock()
+        mock_manager.attach_mock(mock_axes_presenter, "mock_axes_presenter")
+        mock_manager.attach_mock(mock_curves_presenter, "mock_curves_presenter")
+
+        presenter.apply_properties()
+        mock_manager.assert_has_calls([
+            call.mock_curves_presenter.apply_properties,
+            call.mock_axes_presenter.apply_properties,
+            call.mock_curves_presenter.update_view,
+            call.mock_axes_presenter.update_view
+        ])
 
 
 if __name__ == '__main__':
