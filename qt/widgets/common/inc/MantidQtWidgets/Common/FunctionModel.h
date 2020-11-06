@@ -43,7 +43,7 @@ public:
   IFunction_sptr getCurrentFunction() const override;
   void setNumberDomains(int) override;
   void setDatasets(const QStringList &datasetNames);
-  void setDatasets(const QList<Dataset> &datasets) override;
+  void setDatasets(const QList<FunctionModelDataset> &datasets) override;
   void addDatasets(const QStringList &datasetNames);
   void removeDatasets(QList<int> &indices);
   QStringList getDatasetNames() const override;
@@ -85,14 +85,14 @@ protected:
 
 private:
   void checkDatasets();
-  void checkNumberOfDomains(const QList<Dataset> &datasets) const;
-  int numberOfDomains(const QList<Dataset> &datasets) const;
+  void checkNumberOfDomains(const QList<FunctionModelDataset> &datasets) const;
+  int numberOfDomains(const QList<FunctionModelDataset> &datasets) const;
   void checkIndex(int) const;
   void updateGlobals();
   size_t m_currentDomainIndex = 0;
   // The datasets being fitted. A list of workspace names paired to lists of
   // spectra.
-  mutable QList<Dataset> m_datasets;
+  mutable QList<FunctionModelDataset> m_datasets;
   mutable QStringList m_globalParameterNames;
 };
 

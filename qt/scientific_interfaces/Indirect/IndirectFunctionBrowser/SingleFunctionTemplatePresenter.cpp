@@ -129,7 +129,7 @@ void SingleFunctionTemplatePresenter::setCurrentDataset(int i) {
 }
 
 void SingleFunctionTemplatePresenter::setDatasets(
-    const QList<Dataset> &datasets) {
+    const QList<FunctionModelDataset> &datasets) {
   m_model.setDatasets(datasets);
 }
 

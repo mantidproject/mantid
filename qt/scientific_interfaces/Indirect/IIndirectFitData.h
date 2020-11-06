@@ -32,7 +32,7 @@ public:
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(TableDatasetIndex index) const = 0;
-  virtual Spectra getSpectra(TableDatasetIndex index) const = 0;
+  virtual MantidWidgets::Spectra getSpectra(TableDatasetIndex index) const = 0;
   virtual bool isMultiFit() const = 0;
   virtual TableDatasetIndex numberOfWorkspaces() const = 0;
   virtual size_t getNumberOfSpectra(TableDatasetIndex index) const = 0;
@@ -46,16 +46,17 @@ public:
 
   virtual void setSpectra(const std::string &spectra,
                           TableDatasetIndex dataIndex) = 0;
-  virtual void setSpectra(Spectra &&spectra, TableDatasetIndex dataIndex) = 0;
-  virtual void setSpectra(const Spectra &spectra,
+  virtual void setSpectra(MantidWidgets::Spectra &&spectra,
+                          TableDatasetIndex dataIndex) = 0;
+  virtual void setSpectra(const MantidWidgets::Spectra &spectra,
                           TableDatasetIndex dataIndex) = 0;
   virtual void addWorkspace(const std::string &workspaceName) = 0;
   virtual void addWorkspace(const std::string &workspaceName,
                             const std::string &spectra) = 0;
   virtual void addWorkspace(const std::string &workspaceName,
-                            const Spectra &spectra) = 0;
+                            const MantidWidgets::Spectra &spectra) = 0;
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                            const Spectra &spectra) = 0;
+                            const MantidWidgets::Spectra &spectra) = 0;
   virtual void removeWorkspace(TableDatasetIndex index) = 0;
   virtual void removeDataByIndex(FitDomainIndex fitDomainIndex) = 0;
   virtual void clear() = 0;

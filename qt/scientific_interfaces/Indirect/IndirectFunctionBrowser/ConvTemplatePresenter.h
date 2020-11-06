@@ -49,7 +49,7 @@ public:
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable);
   void updateParameters(const IFunction &fun);
   void setCurrentDataset(int i);
-  void setDatasets(const QList<Dataset> &datasets);
+  void setDatasets(const QList<FunctionModelDataset> &datasets);
   void setErrorsEnabled(bool enabled);
   void setResolution(std::string const &name, TableDatasetIndex const &index);
   void setResolution(

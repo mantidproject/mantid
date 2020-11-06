@@ -181,7 +181,8 @@ int IqtTemplatePresenter::getCurrentDataset() {
   return m_model.currentDomainIndex();
 }
 
-void IqtTemplatePresenter::setDatasets(const QList<Dataset> &datasets) {
+void IqtTemplatePresenter::setDatasets(
+    const QList<FunctionModelDataset> &datasets) {
   m_model.setDatasets(datasets);
 }
 

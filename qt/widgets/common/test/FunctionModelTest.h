@@ -22,11 +22,11 @@ using namespace MantidQt::MantidWidgets;
 
 namespace {
 
-QList<Dataset> createDatasets(QStringList const &datasetNames,
-                              std::string const &spectraString) {
-  QList<Dataset> datasets;
+QList<FunctionModelDataset> createDatasets(QStringList const &datasetNames,
+                                           std::string const &spectraString) {
+  QList<FunctionModelDataset> datasets;
   for (const auto &datasetName : datasetNames)
-    datasets.append(Dataset(datasetName, Spectra(spectraString)));
+    datasets.append(FunctionModelDataset(datasetName, Spectra(spectraString)));
   return datasets;
 }
 

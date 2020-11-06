@@ -404,7 +404,8 @@ void IqtFunctionModel::removeConstraint(const QString &paramName) {
   m_model.removeConstraint(paramName);
 }
 
-void IqtFunctionModel::setDatasets(const QList<Dataset> &datasets) {
+void IqtFunctionModel::setDatasets(
+    const QList<FunctionModelDataset> &datasets) {
   m_model.setDatasets(datasets);
 }
 

@@ -98,7 +98,8 @@ int ConvTemplateBrowser::getNumberOfDatasets() const {
   return m_presenter.getNumberOfDatasets();
 }
 
-void ConvTemplateBrowser::setDatasets(const QList<Dataset> &datasets) {
+void ConvTemplateBrowser::setDatasets(
+    const QList<FunctionModelDataset> &datasets) {
   m_presenter.setDatasets(datasets);
 }
 

@@ -50,7 +50,7 @@ public:
   boost::optional<QString> currentFunctionIndex() const;
   void setNumberOfDatasets(int);
   void setDatasets(const QStringList &datasetNames);
-  void setDatasets(const QList<Dataset> &datasets);
+  void setDatasets(const QList<FunctionModelDataset> &datasets);
   void addDatasets(const QStringList &datasetNames);
   QStringList getDatasetNames() const;
   QStringList getDatasetDomainNames() const;

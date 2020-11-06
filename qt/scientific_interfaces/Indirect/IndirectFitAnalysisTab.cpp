@@ -734,15 +734,15 @@ void IndirectFitAnalysisTab::setupFit(IAlgorithm_sptr fitAlgorithm) {
           SLOT(fitAlgorithmComplete(bool)));
 }
 
-QList<Dataset> IndirectFitAnalysisTab::getDatasets() const {
-  QList<Dataset> datasets;
+QList<FunctionModelDataset> IndirectFitAnalysisTab::getDatasets() const {
+  QList<FunctionModelDataset> datasets;
 
   for (auto i = 0u; i < m_fittingModel->numberOfWorkspaces().value; ++i) {
     TableDatasetIndex index{i};
 
     auto const name = m_fittingModel->getWorkspace(index)->getName();
-    datasets.append(Dataset(QString::fromStdString(name),
-                            m_fittingModel->getSpectra(index)));
+    datasets.append(FunctionModelDataset(QString::fromStdString(name),
+                                         m_fittingModel->getSpectra(index)));
   }
   return datasets;
 }

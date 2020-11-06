@@ -221,7 +221,8 @@ int IqtTemplateBrowser::getNumberOfDatasets() const {
   return m_presenter.getNumberOfDatasets();
 }
 
-void IqtTemplateBrowser::setDatasets(const QList<Dataset> &datasets) {
+void IqtTemplateBrowser::setDatasets(
+    const QList<FunctionModelDataset> &datasets) {
   m_presenter.setDatasets(datasets);
 }
 

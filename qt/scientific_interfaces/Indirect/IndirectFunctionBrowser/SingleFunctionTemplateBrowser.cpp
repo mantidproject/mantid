@@ -117,7 +117,7 @@ int SingleFunctionTemplateBrowser::getNumberOfDatasets() const {
 }
 
 void SingleFunctionTemplateBrowser::setDatasets(
-    const QList<Dataset> &datasets) {
+    const QList<FunctionModelDataset> &datasets) {
   m_presenter.setDatasets(datasets);
 }
 

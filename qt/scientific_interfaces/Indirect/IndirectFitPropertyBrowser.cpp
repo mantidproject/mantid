@@ -394,7 +394,7 @@ FitDomainIndex IndirectFitPropertyBrowser::currentDataset() const {
 }
 
 void IndirectFitPropertyBrowser::updateFunctionBrowserData(
-    int nData, const QList<Dataset> &datasets,
+    int nData, const QList<FunctionModelDataset> &datasets,
     const std::vector<double> &qValues,
     const std::vector<std::pair<std::string, size_t>> &fitResolutions) {
   m_functionBrowser->setNumberOfDatasets(nData);

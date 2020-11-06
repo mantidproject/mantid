@@ -43,7 +43,7 @@ public:
   virtual IFunction_sptr getSingleFunction(int index) const = 0;
   virtual IFunction_sptr getCurrentFunction() const = 0;
   virtual void setNumberDomains(int) = 0;
-  virtual void setDatasets(const QList<Dataset> &datasets) = 0;
+  virtual void setDatasets(const QList<FunctionModelDataset> &datasets) = 0;
   virtual QStringList getDatasetNames() const = 0;
   virtual QStringList getDatasetDomainNames() const = 0;
   virtual int getNumberDomains() const = 0;

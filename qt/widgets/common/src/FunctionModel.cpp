@@ -277,9 +277,9 @@ void FunctionModel::setNumberDomains(int nDomains) {
 /// a single spectrum in the workspaces being fitted.
 /// @param datasetNames :: Names of the workspaces to be fitted.
 void FunctionModel::setDatasets(const QStringList &datasetNames) {
-  QList<Dataset> datasets;
+  QList<FunctionModelDataset> datasets;
   for (const auto &datasetName : datasetNames)
-    datasets.append(Dataset(datasetName, Spectra("0")));
+    datasets.append(FunctionModelDataset(datasetName, Spectra("0")));
 
   setDatasets(datasets);
 }
@@ -288,7 +288,7 @@ void FunctionModel::setDatasets(const QStringList &datasetNames) {
 /// should be used when the workspaces being fitted have multiple spectra.
 /// @param datasets :: Names of workspaces to be fitted paired to a spectra
 /// list.
-void FunctionModel::setDatasets(const QList<Dataset> &datasets) {
+void FunctionModel::setDatasets(const QList<FunctionModelDataset> &datasets) {
   checkNumberOfDomains(datasets);
   m_datasets = datasets;
 }
@@ -298,7 +298,7 @@ void FunctionModel::setDatasets(const QList<Dataset> &datasets) {
 /// @param datasetNames :: Names of the workspaces to be added.
 void FunctionModel::addDatasets(const QStringList &datasetNames) {
   for (const auto &datasetName : datasetNames)
-    m_datasets.append(Dataset(datasetName, Spectra("0")));
+    m_datasets.append(FunctionModelDataset(datasetName, Spectra("0")));
 
   setNumberDomains(numberOfDomains(m_datasets));
 }
@@ -498,19 +498,21 @@ void FunctionModel::checkDatasets() {
   if (numberOfDomains(m_datasets) != static_cast<int>(m_numberDomains)) {
     m_datasets.clear();
     for (auto i = 0u; i < m_numberDomains; ++i)
-      m_datasets.append(Dataset(QString::number(i), Spectra("0")));
+      m_datasets.append(FunctionModelDataset(QString::number(i), Spectra("0")));
   }
 }
 
 /// Check that the datasets supplied have the expected total number of domains.
-void FunctionModel::checkNumberOfDomains(const QList<Dataset> &datasets) const {
+void FunctionModel::checkNumberOfDomains(
+    const QList<FunctionModelDataset> &datasets) const {
   if (numberOfDomains(datasets) != static_cast<int>(m_numberDomains)) {
     throw std::runtime_error(
         "Number of dataset domains doesn't match the number of domains.");
   }
 }
 
-int FunctionModel::numberOfDomains(const QList<Dataset> &datasets) const {
+int FunctionModel::numberOfDomains(
+    const QList<FunctionModelDataset> &datasets) const {
   std::size_t totalNumberOfDomains{0u};
   for (const auto &dataset : datasets)
     totalNumberOfDomains += dataset.numberOfSpectra();

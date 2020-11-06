@@ -16,9 +16,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-struct EXPORT_OPT_MANTIDQT_COMMON Dataset {
+struct EXPORT_OPT_MANTIDQT_COMMON FunctionModelDataset {
 public:
-  Dataset(const QString &workspaceName, const Spectra &spectra);
+  FunctionModelDataset(const QString &workspaceName, const Spectra &spectra);
 
   QString datasetName() const;
   QStringList domainNames() const;

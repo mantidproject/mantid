@@ -11,12 +11,13 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-Dataset::Dataset(const QString &workspaceName, const Spectra &spectra)
+FunctionModelDataset::FunctionModelDataset(const QString &workspaceName,
+                                           const Spectra &spectra)
     : m_workspaceName(workspaceName), m_spectra(spectra) {}
 
-QString Dataset::datasetName() const { return m_workspaceName; }
+QString FunctionModelDataset::datasetName() const { return m_workspaceName; }
 
-QStringList Dataset::domainNames() const {
+QStringList FunctionModelDataset::domainNames() const {
   const auto numberOfSpectra = m_spectra.size().value;
   if (numberOfSpectra == 0u)
     throw std::runtime_error("There are no spectra in this Dataset.");
@@ -31,7 +32,9 @@ QStringList Dataset::domainNames() const {
   }
 }
 
-std::size_t Dataset::numberOfSpectra() const { return m_spectra.size().value; }
+std::size_t FunctionModelDataset::numberOfSpectra() const {
+  return m_spectra.size().value;
+}
 
 } // namespace MantidWidgets
 } // namespace MantidQt
