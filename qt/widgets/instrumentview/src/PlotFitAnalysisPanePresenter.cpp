@@ -16,13 +16,22 @@ namespace MantidWidgets {
 
 PlotFitAnalysisPanePresenter::PlotFitAnalysisPanePresenter(
     IPlotFitAnalysisPaneView *view, PlotFitAnalysisPaneModel *model)
-    : m_fitObserver(nullptr), m_view(view), m_model(model), m_currentName("") {
+    : m_fitObserver(nullptr), m_updateEstimateObserver(nullptr), m_view(view),
+      m_model(model), m_currentName("") {
 
   m_fitObserver = new VoidObserver();
+  m_updateEstimateObserver = new VoidObserver();
+
   m_view->observeFitButton(m_fitObserver);
+  m_view->observeUpdateEstimateButton(m_updateEstimateObserver);
+
   std::function<void()> fitBinder =
       std::bind(&PlotFitAnalysisPanePresenter::doFit, this);
+  std::function<void()> updateEstimateBinder =
+      std::bind(&PlotFitAnalysisPanePresenter::updateEstimate, this);
+
   m_fitObserver->setSlot(fitBinder);
+  m_updateEstimateObserver->setSlot(updateEstimateBinder);
 }
 
 void PlotFitAnalysisPanePresenter::doFit() {
@@ -40,6 +49,8 @@ void PlotFitAnalysisPanePresenter::doFit() {
         "Need to have extracted a data and selected a function to fit");
   }
 }
+
+void PlotFitAnalysisPanePresenter::updateEstimate() {}
 
 void PlotFitAnalysisPanePresenter::addFunction(
     Mantid::API::IFunction_sptr func) {

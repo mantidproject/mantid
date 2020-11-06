@@ -27,6 +27,7 @@ public:
   IPlotFitAnalysisPaneView(){};
   virtual ~IPlotFitAnalysisPaneView(){};
   virtual void observeFitButton(Observer *listener) = 0;
+  virtual void observeUpdateEstimateButton(Observer *listener) = 0;
   virtual std::pair<double, double> getRange() = 0;
   virtual Mantid::API::IFunction_sptr getFunction() = 0;
   virtual void addSpectrum(const std::string &wsName) = 0;
@@ -50,6 +51,10 @@ public:
 
   void observeFitButton(Observer *listener) override {
     m_fitObservable->attach(listener);
+  };
+
+  void observeUpdateEstimateButton(Observer *listener) override {
+    m_updateEstimateObservable->attach(listener);
   };
 
   std::pair<double, double> getRange() override;
@@ -77,6 +82,7 @@ private:
   QPushButton *m_fitButton;
   QPushButton *m_updateEstimateButton;
   Observable *m_fitObservable;
+  Observable *m_updateEstimateObservable;
 };
 } // namespace MantidWidgets
 } // namespace MantidQt

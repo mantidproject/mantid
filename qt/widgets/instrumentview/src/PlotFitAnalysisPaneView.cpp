@@ -24,7 +24,8 @@ PlotFitAnalysisPaneView::PlotFitAnalysisPaneView(const double &start,
                                                  const double &end,
                                                  QWidget *parent)
     : QWidget(parent), m_plot(nullptr), m_fitBrowser(nullptr), m_start(nullptr),
-      m_end(nullptr), m_fitButton(nullptr), m_fitObservable(nullptr) {
+      m_end(nullptr), m_fitButton(nullptr), m_fitObservable(nullptr),
+      m_updateEstimateObservable(nullptr) {
   setupPlotFitSplitter(start, end);
 }
 
@@ -52,6 +53,7 @@ QWidget *PlotFitAnalysisPaneView::createFitPane(const double &start,
   m_fitButton = new QPushButton("Fit");
   m_updateEstimateButton = new QPushButton("Update Estimate");
   m_fitObservable = new Observable();
+  m_updateEstimateObservable = new Observable();
   connect(m_fitButton, SIGNAL(clicked()), this, SLOT(doFit()));
   connect(m_updateEstimateButton, SIGNAL(clicked()), this,
           SLOT(updateEstimate()));
@@ -93,10 +95,7 @@ void PlotFitAnalysisPaneView::doFit() {
 }
 
 void PlotFitAnalysisPaneView::updateEstimate() {
-  auto function = m_fitBrowser->getFunction();
-  if (function) {
-    m_fitObservable->notify();
-  }
+  m_updateEstimateObservable->notify();
 }
 
 void PlotFitAnalysisPaneView::addSpectrum(const std::string &wsName) {
