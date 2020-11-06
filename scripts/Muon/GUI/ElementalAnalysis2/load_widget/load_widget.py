@@ -89,7 +89,7 @@ class LoadRunWidgetModel(object):
                     detectors.append(detector_name)
                 runResults = RunObject(run, detectors, groupws)
                 self._data_context.run_info_update(run, runResults)
-            except ValueError as error:
+            except Exception as error:
                 failed_files += [(run, error)]
                 continue
             self._loaded_data_store.add_data(run=[run], workspace=groupws)
@@ -138,6 +138,8 @@ class LoadWidget(object):
         self.load_file_view = BrowseFileWidgetView(parent)
         self.load_file_view.hide_browse()
         self.load_run_view = LoadRunWidgetView(parent)
+        self.load_run_view.hide_current_run_button()
+        self.load_run_view.hide_instrument_label()
         self.load_widget_view = LoadWidgetView(parent=parent,
                                                load_file_view=self.load_file_view,
                                                load_run_view=self.load_run_view)
