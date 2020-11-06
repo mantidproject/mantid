@@ -124,6 +124,17 @@ Fitting.
 Data Loading
 ~~~~~~~~~~~~
 
+The data loaded will be assumed to belong to the instrument you set as the `Default instrument` when you started Mantid.
+If you’d like to load data collected on a different instrument you will need to change the `Default instrument`.
+
+The interface will attempt to locate runs by first searching any user defined directories and then the `Data archive` (only useful if you’re at ISIS).
+To get runs to load it is quite likely you’ll need to modify the way files are located.
+
+To change either the `Default instrument` or the way files are located select the `Help` menu in `Mantid Workbench` and then `About Mantid Workbench`.
+The pop up that opens will allow you to immediately change the `Default instrument` and also gives access to a dialog (through the `Manage User Directories <http://www.mantidproject.org/ManageUserDirectories>`_ option)
+this will allow you to define a set of `Search directories` and select whether the `Data Archive` is searched. 
+If the ALC interface is open, you will need to close and reopen it for the change to take effect.
+
 In the Data Loading step, a sequence of runs are loaded through the field **Runs** by entering a valid range. 
 Instead of choosing a range, after entering a valid first file the **Auto Find Current Run** checkbox can be ticked. In this case, 
 the runs text box is disabled and the interface automatically tries to find all valid runs in the range of the first file 

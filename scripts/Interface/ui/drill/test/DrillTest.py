@@ -136,7 +136,9 @@ class DrillTest(unittest.TestCase):
 
     def setUp(self):
         self.facility = config['default.facility']
+        self.instrument = config['default.instrument']
         config['default.facility'] = "ILL"
+        config['default.instrument'] = "D11"
         # avoid popup messages
         patch = mock.patch('Interface.ui.drill.view.DrillView.QMessageBox')
         self.mMessageBox = patch.start()
@@ -165,6 +167,7 @@ class DrillTest(unittest.TestCase):
 
     def tearDown(self):
         config['default.facility'] = self.facility
+        config['default.instrument'] = self.instrument
 
     def test_changeInstrument(self):
         for i in range(self.view.instrumentselector.count()):
@@ -286,7 +289,9 @@ class DrillTest(unittest.TestCase):
                 'Instrument': 'D11',
                 'AcquisitionMode': 'SANS',
                 'VisualSettings': {
-                    'FoldedColumns': {}
+                    'FoldedColumns': [],
+                    'HiddenColumns': [],
+                    'ColumnsOrder': RundexSettings.COLUMNS['SANS']
                     },
                 'GlobalSettings': self.model.settings,
                 'Samples': []

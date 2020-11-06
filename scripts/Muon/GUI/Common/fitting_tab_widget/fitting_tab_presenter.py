@@ -562,7 +562,7 @@ class FittingTabPresenter(object):
         self.view.update_with_fit_outputs(self._fit_function[current_index],
                                           self._fit_status[current_index],
                                           self._fit_chi_squared[current_index])
-        self.view.update_global_fit_state(self._fit_status)
+        self.view.update_global_fit_state(self._fit_status, current_index)
 
     def update_view_from_model(self, workspace_removed=None):
         if workspace_removed:
