@@ -50,12 +50,16 @@ QWidget *PlotFitAnalysisPaneView::createFitPane(const double &start,
   auto fitButtons = new QWidget();
   auto layout = new QHBoxLayout(fitButtons);
   m_fitButton = new QPushButton("Fit");
+  m_updateEstimateButton = new QPushButton("Update Estimate");
   m_fitObservable = new Observable();
   connect(m_fitButton, SIGNAL(clicked()), this, SLOT(doFit()));
+  connect(m_updateEstimateButton, SIGNAL(clicked()), this,
+          SLOT(updateEstimate()));
 
   layout->addWidget(m_fitButton);
   layout->addItem(
       new QSpacerItem(80, 0, QSizePolicy::Expanding, QSizePolicy::Fixed));
+  layout->addWidget(m_updateEstimateButton);
 
   fitPaneLayout->addWidget(fitButtons);
 
@@ -82,6 +86,13 @@ QWidget *PlotFitAnalysisPaneView::createFitPane(const double &start,
 }
 
 void PlotFitAnalysisPaneView::doFit() {
+  auto function = m_fitBrowser->getFunction();
+  if (function) {
+    m_fitObservable->notify();
+  }
+}
+
+void PlotFitAnalysisPaneView::updateEstimate() {
   auto function = m_fitBrowser->getFunction();
   if (function) {
     m_fitObservable->notify();

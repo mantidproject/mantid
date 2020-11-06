@@ -63,6 +63,7 @@ public:
 
 public slots:
   void doFit();
+  void updateEstimate();
 
 protected:
   void setupPlotFitSplitter(const double &start, const double &end) override;
@@ -74,6 +75,7 @@ private:
   QLineEdit *m_start, *m_end;
   QSplitter *m_fitPlotLayout;
   QPushButton *m_fitButton;
+  QPushButton *m_updateEstimateButton;
   Observable *m_fitObservable;
 };
 } // namespace MantidWidgets
