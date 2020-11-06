@@ -22,13 +22,21 @@ void QtSearchModel::mergeNewResults(SearchResults const &source) {
   if (source.empty())
     return;
 
-  // To append, insert the new runs after the last element in the model
+  // Extract the results that are not already in our list
+  SearchResults newResults;
+  std::copy_if(source.begin(), source.end(), std::back_inserter(newResults),
+               [this](const auto &searchResult) {
+                 return std::find(m_runDetails.cbegin(), m_runDetails.cend(),
+                                  searchResult) == m_runDetails.cend();
+               });
+
+  // Append the new results to our list. We need to tell the Qt model where we
+  // are inserting and how many items we're adding
   const auto first = static_cast<int>(m_runDetails.size());
-  const auto last = static_cast<int>(m_runDetails.size() + source.size() - 1);
+  const auto last =
+      static_cast<int>(m_runDetails.size() + newResults.size() - 1);
   beginInsertRows(QModelIndex(), first, last);
-
-  m_runDetails.insert(m_runDetails.end(), source.begin(), source.end());
-
+  m_runDetails.insert(m_runDetails.end(), newResults.begin(), newResults.end());
   endInsertRows();
 }
 

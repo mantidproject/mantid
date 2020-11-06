@@ -92,7 +92,6 @@ RunsTable &RunsPresenter::mutableRunsTable() {
 */
 
 void RunsPresenter::notifySearch() {
-  m_searcher->reset();
   updateWidgetEnabledState();
   search();
 }
@@ -262,9 +261,16 @@ void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
  * there was a problem */
 bool RunsPresenter::search() {
   auto const searchString = m_view->getSearchString();
+  auto const instrument = m_view->getSearchInstrument();
+  auto const cycle = m_view->getSearchCycle();
+
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
     return false;
+
+  // Clear existing results if performing a different search
+  if (m_searcher->searchSettingsChanged(searchString, instrument, cycle))
+    m_searcher->reset();
 
   if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
                                     m_view->getSearchCycle())) {
