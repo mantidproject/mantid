@@ -21,6 +21,7 @@ New features
 - New algorithm to clip peaks, providing a background estimation :ref:`ClipPeaks <algm-ClipPeaks>`.
 - Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
 - New algorithm :ref:`AbsorptionCorrectionPaalmanPings <algm-AbsorptionCorrectionPaalmanPings>` uses a numerical integration method to calculate attenuation factors for all Paalmin Pings terms
+- Files from ILL's instrument D1B can now be loaded.
 
 Improvements
 ############
