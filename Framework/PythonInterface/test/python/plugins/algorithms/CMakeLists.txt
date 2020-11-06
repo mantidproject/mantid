@@ -53,6 +53,7 @@ set(TEST_PY_FILES
     IndexSatellitePeaksTest.py
     LoadAndMergeTest.py
     LoadDNSLegacyTest.py
+    LoadElementalAnalysisRunTest.py
     LoadEmptyVesuvioTest.py
     LoadFullprofFileTest.py
     LoadGudrunOutputTest.py

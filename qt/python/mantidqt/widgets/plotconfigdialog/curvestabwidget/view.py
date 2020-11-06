@@ -13,7 +13,7 @@ from mantidqt.widgets.plotconfigdialog.curvestabwidget.errorbarstabwidget.view i
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.linetabwidget.view import LineTabWidgetView
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.markertabwidget.view import MarkerTabWidgetView
 from mantidqt.widgets.plotconfigdialog.curvestabwidget import CurveProperties
-from mantidqt.utils.qt import load_ui
+from mantidqt.utils.qt import load_ui, block_signals
 
 
 class CurvesTabWidgetView(QWidget):
@@ -33,10 +33,14 @@ class CurvesTabWidgetView(QWidget):
         self.setAttribute(Qt.WA_DeleteOnClose, True)
 
     def populate_select_axes_combo_box(self, axes_names):
-        self.select_axes_combo_box.addItems(axes_names)
+        with block_signals(self.select_axes_combo_box):
+            self.select_axes_combo_box.clear()
+            self.select_axes_combo_box.addItems(axes_names)
 
     def populate_select_curve_combo_box(self, curve_names):
-        self.select_curve_combo_box.addItems(curve_names)
+        with block_signals(self.select_curve_combo_box):
+            self.select_curve_combo_box.clear()
+            self.select_curve_combo_box.addItems(curve_names)
 
     def set_selected_curve_selector_text(self, new_text):
         current_index = self.select_curve_combo_box.currentIndex()

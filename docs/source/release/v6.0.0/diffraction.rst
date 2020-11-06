@@ -35,6 +35,7 @@ New features
 Improvements
 ############
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
+- The default loadpath in the fitting tab of the Engineering Diffraction UI is now set to the most recently focused files.
 
 Bugfixes
 ########
