@@ -118,7 +118,7 @@ class FocusTest(systemtesting.MantidSystemTest):
         # Gen vanadium calibration first
         setup_mantid_paths()
         inst_object = setup_inst_object(tt_mode="tt88", focus_mode="Trans")
-        self.focus_results = run_focus(inst_object, tt_mode="tt70")
+        self.focus_results = run_focus(inst_object, tt_mode="tt70", subtract_empty=True)
 
         # Make sure that inst settings reverted to the default after focus
         self.assertEqual(inst_object._inst_settings.tt_mode, "tt88")
@@ -165,7 +165,7 @@ class FocusLongThenShortTest(systemtesting.MantidSystemTest):
         inst_object = setup_inst_object(tt_mode="tt88", focus_mode="Trans")
         inst_object.focus(run_number=98507, vanadium_normalisation=False, do_absorb_corrections=False,
                           long_mode=True, perform_attenuation=False, tt_mode="tt70")
-        self.focus_results = run_focus(inst_object, tt_mode="tt70")
+        self.focus_results = run_focus(inst_object, tt_mode="tt70", subtract_empty=True)
 
         # Make sure that inst settings reverted to the default after focus
         self.assertEqual(inst_object._inst_settings.tt_mode, "tt88")
@@ -227,6 +227,30 @@ class FocusWithAbsorbCorrectionsTest(systemtesting.MantidSystemTest):
             mantid.mtd.clear()
 
 
+class FocusWithoutEmptySubtractionTest(systemtesting.MantidSystemTest):
+
+    focus_results = None
+    existing_config = config['datasearch.directories']
+
+    def requiredFiles(self):
+        return _gen_required_files()
+
+    def runTest(self):
+        setup_mantid_paths()
+        inst_object = setup_inst_object(tt_mode="tt70", focus_mode="Trans")
+        self.focus_results = run_focus(inst_object, tt_mode="tt70", subtract_empty=False)
+
+    def validate(self):
+        return "PEARL98507_tt70-Results-D-Grp", "ISIS_Powder-PEARL00098507_tt70NoEmptySub.nxs"
+
+    def cleanup(self):
+        try:
+            _try_delete(spline_path)
+            _try_delete(output_dir)
+        finally:
+            config['datasearch.directories'] = self.existing_config
+            mantid.mtd.clear()
+
 class CreateCalTest(systemtesting.MantidSystemTest):
 
     calibration_results = None
@@ -279,7 +303,7 @@ def run_vanadium_calibration(inst_object, focus_mode):
     inst_object.create_vanadium(run_in_cycle=vanadium_run, do_absorb_corrections=True, focus_mode=focus_mode)
 
 
-def run_focus(inst_object, tt_mode):
+def run_focus(inst_object, tt_mode, subtract_empty):
     run_number = 98507
     attenuation_file_name = "PRL112_DC25_10MM_FF.OUT"
 
@@ -292,7 +316,8 @@ def run_focus(inst_object, tt_mode):
 
     return inst_object.focus(run_number=run_number, vanadium_normalisation=True, do_absorb_corrections=False,
                              perform_attenuation=True, attenuation_file='ZTA',
-                             attenuation_files=[{"name": "ZTA", "path": attenuation_path}], tt_mode=tt_mode)
+                             attenuation_files=[{"name": "ZTA", "path": attenuation_path}], tt_mode=tt_mode,
+                             subtract_empty_instrument=subtract_empty)
 
 
 def run_focus_with_absorb_corrections():
