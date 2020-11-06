@@ -72,7 +72,7 @@ public:
   MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
   MOCK_METHOD0(notifyReductionPaused, void());
 
-  MOCK_METHOD1(notifyChangeInstrumentRequested, void(const std::string &));
+  MOCK_METHOD1(notifyChangeInstrumentRequested, bool(const std::string &));
   MOCK_METHOD1(notifyInstrumentChanged, void(const std::string &));
   MOCK_METHOD0(notifyUpdateInstrumentRequested, void());
   MOCK_METHOD0(notifyRestoreDefaultsRequested, void());
@@ -101,7 +101,7 @@ public:
   MOCK_METHOD0(initInstrumentList, void());
   MOCK_CONST_METHOD0(runsTable, RunsTable const &());
   MOCK_METHOD0(mutableRunsTable, RunsTable &());
-  MOCK_METHOD1(notifyChangeInstrumentRequested, void(std::string const &));
+  MOCK_METHOD1(notifyChangeInstrumentRequested, bool(std::string const &));
   MOCK_METHOD0(notifyResumeReductionRequested, void());
   MOCK_METHOD0(notifyPauseReductionRequested, void());
   MOCK_METHOD0(notifyRowStateChanged, void());
@@ -132,6 +132,8 @@ public:
   MOCK_METHOD1(setRoundPrecision, void(int &));
   MOCK_METHOD0(resetRoundPrecision, void());
   MOCK_METHOD0(notifySearchComplete, void());
+  MOCK_METHOD0(notifySearchResultsChanged, void());
+  MOCK_CONST_METHOD0(instrumentName, std::string());
 };
 
 class MockEventPresenter : public IEventPresenter {
@@ -222,6 +224,7 @@ class MockSearcherSubscriber : public SearcherSubscriber {
 public:
   MOCK_METHOD0(notifySearchComplete, void());
   MOCK_METHOD0(notifySearchFailed, void());
+  MOCK_METHOD0(notifySearchResultsChanged, void());
 };
 
 class MockRunNotifier : public IRunNotifier {

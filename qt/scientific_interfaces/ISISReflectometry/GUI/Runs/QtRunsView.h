@@ -72,6 +72,7 @@ public:
   std::set<int> getAllSearchRows() const override;
   std::string getSearchInstrument() const override;
   void setSearchInstrument(std::string const &instrumentName) override;
+  void clearSearchText() override;
   std::string getSearchString() const override;
   std::string getSearchCycle() const override;
   int getLiveDataUpdateInterval() const override;
@@ -122,6 +123,7 @@ private slots:
   void on_buttonMonitor_clicked();
   void on_buttonStopMonitor_clicked();
   void onStartMonitorComplete();
+  void onSearchResultsChanged(const QModelIndex &, const QModelIndex &);
   void onSearchComplete();
   void onInstrumentChanged(int index);
   void onShowSearchContextMenuRequested(const QPoint &pos);

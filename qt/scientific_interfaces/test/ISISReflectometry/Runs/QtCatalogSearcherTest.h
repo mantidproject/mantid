@@ -301,6 +301,14 @@ public:
     verifyAndClear();
   }
 
+  void test_notify_search_results_changed_notifies_subscriber() {
+    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg, true);
+    searcher.subscribe(&m_notifyee);
+    EXPECT_CALL(m_notifyee, notifySearchResultsChanged()).Times(1);
+    searcher.notifySearchResultsChanged();
+    verifyAndClear();
+  }
+
 private:
   NiceMock<MockRunsView> m_view;
   NiceMock<MockSearcherSubscriber> m_notifyee;

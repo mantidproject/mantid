@@ -58,13 +58,14 @@ public:
   bool isAnyBatchAutoreducing() const override;
   bool isCloseEventPrevented() override;
   bool isOverwriteBatchPrevented(int tabIndex) const override;
+  bool isOverwriteAllBatchesPrevented() const override;
   bool isProcessAllPrevented() const override;
   bool isProcessPartialGroupPrevented() const override;
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyAnyBatchReductionResumed() override;
   void notifyAnyBatchReductionPaused() override;
-  void
+  bool
   notifyChangeInstrumentRequested(std::string const &instrumentName) override;
   void notifyUpdateInstrumentRequested() override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
@@ -97,7 +98,7 @@ private:
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
 
   bool isBatchUnsaved(int batchIndex) const override;
-  bool isAnyBatchUnsaved() override;
+  bool isAnyBatchUnsaved() const override;
   bool isWarnDiscardChangesChecked() const override;
   bool isRoundChecked() const override;
   int &getRoundPrecision() const override;

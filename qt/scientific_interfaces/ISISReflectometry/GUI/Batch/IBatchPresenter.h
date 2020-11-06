@@ -36,7 +36,7 @@ public:
   virtual void notifyResumeAutoreductionRequested() = 0;
   virtual void notifyPauseAutoreductionRequested() = 0;
   virtual void notifyAutoreductionCompleted() = 0;
-  virtual void
+  virtual bool
   notifyChangeInstrumentRequested(const std::string &instrumentName) = 0;
   virtual void notifyInstrumentChanged(const std::string &instrumentName) = 0;
   virtual void notifyUpdateInstrumentRequested() = 0;
