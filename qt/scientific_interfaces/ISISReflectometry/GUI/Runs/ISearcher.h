@@ -18,6 +18,7 @@ class SearcherSubscriber {
 public:
   virtual void notifySearchComplete() = 0;
   virtual void notifySearchFailed() = 0;
+  virtual void notifySearchResultsChanged() = 0;
 };
 
 /** @class ISearcher

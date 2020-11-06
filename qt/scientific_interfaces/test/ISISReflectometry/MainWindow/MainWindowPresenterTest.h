@@ -323,6 +323,76 @@ public:
     verifyAndClear();
   }
 
+  void testChangeInstrumentRequestedDoesNotUpdateInstrumentIfUnsavedChanges() {
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
+    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto const instrument = std::string("POLREF");
+    expectWarnDiscardChanges(optionsDialogPresenterRaw, true);
+    auto const batchIndex = 0;
+    expectBatchUnsaved(batchIndex);
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
+        .Times(1)
+        .WillOnce(Return(false));
+    presenter.notifyChangeInstrumentRequested(instrument);
+    TS_ASSERT_EQUALS(presenter.instrumentName(), "");
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentRequestedUpdatesInstrumentIfDiscardUnsavedChanges() {
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
+    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto const instrument = std::string("POLREF");
+    expectWarnDiscardChanges(optionsDialogPresenterRaw, true);
+    auto const batchIndex = 0;
+    expectBatchUnsaved(batchIndex);
+    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
+        .Times(1)
+        .WillOnce(Return(true));
+    presenter.notifyChangeInstrumentRequested(instrument);
+    TS_ASSERT_EQUALS(presenter.instrumentName(), instrument);
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentRequestedReturnsTrueIfSuccessful() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("POLREF");
+    auto const success = presenter.notifyChangeInstrumentRequested(instrument);
+    TS_ASSERT_EQUALS(success, true);
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentRequestedReturnsFalseIfCannotBeChanged() {
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
+    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto const instrument = std::string("POLREF");
+    expectWarnDiscardChanges(optionsDialogPresenterRaw, true);
+    expectBatchUnsaved(0);
+    expectUserDoesNotDiscardChanges();
+    auto const success = presenter.notifyChangeInstrumentRequested(instrument);
+    TS_ASSERT_EQUALS(success, false);
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentRequestedReturnsTrueIfUserDiscardsChanges() {
+    auto optionsDialogPresenter =
+        std::make_unique<NiceMock<MockOptionsDialogPresenter>>();
+    auto optionsDialogPresenterRaw = optionsDialogPresenter.get();
+    auto presenter = makePresenter(std::move(optionsDialogPresenter));
+    auto const instrument = std::string("POLREF");
+    expectWarnDiscardChanges(optionsDialogPresenterRaw, true);
+    expectBatchUnsaved(0);
+    expectUserDiscardsChanges();
+    auto const success = presenter.notifyChangeInstrumentRequested(instrument);
+    TS_ASSERT_EQUALS(success, true);
+    verifyAndClear();
+  }
+
   void testChangeInstrumentRequestedUpdatesInstrumentInChildPresenters() {
     auto presenter = makePresenter();
     setupInstrument(presenter, "INTER");

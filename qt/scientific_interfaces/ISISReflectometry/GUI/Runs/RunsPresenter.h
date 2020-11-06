@@ -76,7 +76,8 @@ public:
   int percentComplete() const override;
   void setRoundPrecision(int &precision) override;
   void resetRoundPrecision() override;
-  void
+  std::string instrumentName() const override;
+  bool
   notifyChangeInstrumentRequested(std::string const &instrumentName) override;
   void notifyResumeReductionRequested() override;
   void notifyPauseReductionRequested() override;
@@ -120,6 +121,7 @@ public:
   // SearcherSubscriber overrides
   void notifySearchComplete() override;
   void notifySearchFailed() override;
+  void notifySearchResultsChanged() override;
 
 protected:
   IRunsTablePresenter *tablePresenter() const;

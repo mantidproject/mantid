@@ -191,6 +191,10 @@ void QtCatalogSearcher::notifySearchComplete() {
   m_notifyee->notifySearchComplete();
 }
 
+void QtCatalogSearcher::notifySearchResultsChanged() {
+  m_notifyee->notifySearchResultsChanged();
+}
+
 bool QtCatalogSearcher::searchInProgress() const { return m_searchInProgress; }
 
 SearchResult const &QtCatalogSearcher::getSearchResult(int index) const {

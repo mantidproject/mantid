@@ -124,9 +124,15 @@ void MainWindowPresenter::notifyAnyBatchReductionPaused() {
   enableSaveAndLoadBatch();
 }
 
-void MainWindowPresenter::notifyChangeInstrumentRequested(
+// Top level function to handle when user has requested to change the
+// instrument. Goes ahead and changes it and returns true if successful;
+// returns false if it cannot be changed
+bool MainWindowPresenter::notifyChangeInstrumentRequested(
     std::string const &newInstrumentName) {
   auto const hasChanged = (newInstrumentName != instrumentName());
+  if (hasChanged && isOverwriteAllBatchesPrevented())
+    return false;
+
   // Re-load instrument regardless of whether it has changed, e.g. if we are
   // creating a new batch the instrument may not have changed but we still want
   // the most up to date settings
@@ -135,6 +141,8 @@ void MainWindowPresenter::notifyChangeInstrumentRequested(
   // may trigger overriding of user-specified settings
   if (hasChanged)
     onInstrumentChanged();
+
+  return true;
 }
 
 void MainWindowPresenter::notifyUpdateInstrumentRequested() {
@@ -220,6 +228,13 @@ bool MainWindowPresenter::isOverwriteBatchPrevented(int tabIndex) const {
   return false;
 }
 
+bool MainWindowPresenter::isOverwriteAllBatchesPrevented() const {
+  if (isWarnDiscardChangesChecked() && isAnyBatchUnsaved()) {
+    return !m_messageHandler->askUserDiscardChanges();
+  }
+  return false;
+}
+
 bool MainWindowPresenter::isProcessAllPrevented() const {
   if (isWarnProcessAllChecked()) {
     return !m_messageHandler->askUserYesNo(
@@ -244,7 +259,7 @@ bool MainWindowPresenter::isBatchUnsaved(int batchIndex) const {
 }
 
 /** Checks whether there are unsaved changes in any batch and returns a bool */
-bool MainWindowPresenter::isAnyBatchUnsaved() {
+bool MainWindowPresenter::isAnyBatchUnsaved() const {
   for (auto it = m_batchPresenters.begin(); it != m_batchPresenters.end();
        ++it) {
     auto batchIndex =

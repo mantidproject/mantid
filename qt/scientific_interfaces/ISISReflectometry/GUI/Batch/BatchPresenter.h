@@ -64,7 +64,7 @@ public:
   void notifyResumeAutoreductionRequested() override;
   void notifyPauseAutoreductionRequested() override;
   void notifyAutoreductionCompleted() override;
-  void
+  bool
   notifyChangeInstrumentRequested(const std::string &instrumentName) override;
   void notifyInstrumentChanged(const std::string &instrumentName) override;
   void notifyUpdateInstrumentRequested() override;

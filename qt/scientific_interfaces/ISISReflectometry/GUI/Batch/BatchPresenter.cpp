@@ -77,9 +77,9 @@ void BatchPresenter::initInstrumentList() {
 
 bool BatchPresenter::requestClose() const { return true; }
 
-void BatchPresenter::notifyChangeInstrumentRequested(
+bool BatchPresenter::notifyChangeInstrumentRequested(
     const std::string &instrumentName) {
-  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
+  return m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
 void BatchPresenter::notifyInstrumentChanged(

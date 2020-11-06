@@ -51,6 +51,7 @@ class RunsViewSearchSubscriber {
 public:
   virtual ~RunsViewSearchSubscriber() = default;
   virtual void notifySearchComplete() = 0;
+  virtual void notifySearchResultsChanged() = 0;
 };
 
 /** @class IRunsView
@@ -93,6 +94,7 @@ public:
   virtual void setSearchButtonEnabled(bool enabled) = 0;
   virtual void setSearchResultsEnabled(bool enabled) = 0;
   virtual void setSearchInstrument(std::string const &instrumentName) = 0;
+  virtual void clearSearchText() = 0;
   virtual void setStartMonitorButtonEnabled(bool enabled) = 0;
   virtual void setStopMonitorButtonEnabled(bool enabled) = 0;
   virtual void setUpdateIntervalSpinBoxEnabled(bool enabled) = 0;

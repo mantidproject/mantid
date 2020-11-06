@@ -114,19 +114,27 @@ void RunsPresenter::notifySearchFailed() {
   }
 }
 
+void RunsPresenter::notifySearchResultsChanged() {
+  m_mainPresenter->setBatchUnsaved();
+}
+
 void RunsPresenter::notifyTransfer() {
   transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
   notifyRowStateChanged();
 }
 
+// Notification from our own view that the instrument should be changed
 void RunsPresenter::notifyChangeInstrumentRequested() {
-  auto const instrumentName = m_view->getSearchInstrument();
-  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
+  auto const newName = m_view->getSearchInstrument();
+  // If the instrument cannot be changed, revert it on the view
+  if (!m_mainPresenter->notifyChangeInstrumentRequested(newName))
+    m_view->setSearchInstrument(instrumentName());
 }
 
-void RunsPresenter::notifyChangeInstrumentRequested(
+// Notification from a child presenter that the instrument needs to be changed
+bool RunsPresenter::notifyChangeInstrumentRequested(
     std::string const &instrumentName) {
-  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
+  return m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
 void RunsPresenter::notifyResumeReductionRequested() {
@@ -195,7 +203,6 @@ bool RunsPresenter::resumeAutoreduction() {
   // Check if starting an autoreduction with new settings, reset the previous
   // search results and clear the main table
   if (m_searcher->searchSettingsChanged(searchString, instrument, cycle)) {
-    // If there are unsaved changes, ask the user first
     if (isOverwritingTablePrevented()) {
       return false;
     }
@@ -249,7 +256,12 @@ void RunsPresenter::autoreductionCompleted() {
 void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   m_searcher->reset();
   m_view->setSearchInstrument(instrumentName);
+  m_view->clearSearchText();
   tablePresenter()->notifyInstrumentChanged(instrumentName);
+}
+
+std::string RunsPresenter::instrumentName() const {
+  return m_mainPresenter->instrumentName();
 }
 
 void RunsPresenter::notifyTableChanged() { m_mainPresenter->setBatchUnsaved(); }
@@ -269,8 +281,12 @@ bool RunsPresenter::search() {
     return false;
 
   // Clear existing results if performing a different search
-  if (m_searcher->searchSettingsChanged(searchString, instrument, cycle))
+  if (m_searcher->searchSettingsChanged(searchString, instrument, cycle)) {
+    if (isOverwritingTablePrevented()) {
+      return false;
+    }
     m_searcher->reset();
+  }
 
   if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
                                     m_view->getSearchCycle())) {

@@ -47,6 +47,7 @@ public:
 
   // RunsViewSearchSubscriber overrides
   void notifySearchComplete() override;
+  void notifySearchResultsChanged() override;
 
 protected:
   void finishHandle(const Mantid::API::IAlgorithm *alg) override;

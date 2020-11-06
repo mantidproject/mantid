@@ -84,6 +84,11 @@ void QtRunsView::initLayout() {
   // Connect signal for when search algorithm completes
   connect(m_algoRunner.get(), SIGNAL(algorithmComplete(bool)), this,
           SLOT(onSearchComplete()), Qt::UniqueConnection);
+  // Connect signal for when user edits the search results table
+  connect(
+      &m_searchModel,
+      SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
+      SLOT(onSearchResultsChanged(const QModelIndex &, const QModelIndex &)));
 }
 
 /**
@@ -257,6 +262,15 @@ ISearchModel const &QtRunsView::searchResults() const { return m_searchModel; }
 ISearchModel &QtRunsView::mutableSearchResults() { return m_searchModel; }
 
 /**
+This slot notifies the presenter that the user has modified some values in the
+search results table
+*/
+void QtRunsView::onSearchResultsChanged(const QModelIndex &,
+                                        const QModelIndex &) {
+  m_searchNotifyee->notifySearchResultsChanged();
+}
+
+/**
 This slot notifies the presenter that the search was completed
 */
 void QtRunsView::onSearchComplete() {
@@ -331,7 +345,6 @@ void QtRunsView::onInstrumentChanged(int index) {
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       Mantid::Kernel::FeatureType::Feature,
       {"ISIS Reflectometry", "RunsTab", "InstrumentChanged"}, false);
-  m_ui.textSearch->clear();
   m_notifyee->notifyChangeInstrumentRequested();
 }
 
@@ -346,6 +359,8 @@ std::string QtRunsView::getSearchInstrument() const {
 void QtRunsView::setSearchInstrument(std::string const &instrumentName) {
   setSelected(*m_ui.comboSearchInstrument, instrumentName);
 }
+
+void QtRunsView::clearSearchText() { m_ui.textSearch->clear(); }
 
 /**
 Get the indices of the highlighted search result rows

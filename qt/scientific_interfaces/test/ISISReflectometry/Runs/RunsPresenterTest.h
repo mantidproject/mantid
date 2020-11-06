@@ -503,6 +503,13 @@ public:
     verifyAndClear();
   }
 
+  void testSetBatchUnsavedWhenSearchResultsChanged() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(m_mainPresenter, setBatchUnsaved(true)).Times(1);
+    presenter.notifySearchResultsChanged();
+    verifyAndClear();
+  }
+
   void testChangeInstrumentRequestedGetsInstrumentAndNotifiesMainPresenter() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
@@ -539,10 +546,18 @@ public:
     verifyAndClear();
   }
 
-  void testInstrumentChangedClearsPreviousSearchResults() {
+  void testInstrumentChangedClearsPreviousSearchResultsModel() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
     EXPECT_CALL(*m_searcher, reset()).Times(1);
+    presenter.notifyInstrumentChanged(instrument);
+    verifyAndClear();
+  }
+
+  void testInstrumentChangedClearsSearchTextOnView() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    EXPECT_CALL(m_view, clearSearchText()).Times(1);
     presenter.notifyInstrumentChanged(instrument);
     verifyAndClear();
   }
