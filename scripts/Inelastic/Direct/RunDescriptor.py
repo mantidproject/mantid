@@ -1063,7 +1063,7 @@ class RunDescriptor(PropDescriptor):
             fname,fex = os.path.splitext(file_name)
             if old_ext != fex:
                 if 'force_extension' in kwargs:
-                    message= '*** Rejecting file matching hint: {0} with wrong extension {1} found on Mantid search paths '.\
+                    message= '*** Rejecting file matching hint: {0} as found file has wrong extension: {1}'.\
                             format(file_hint,fex)
                     if 'be_quet' not in kwargs:
                         RunDescriptor._logger(message,'warning')
