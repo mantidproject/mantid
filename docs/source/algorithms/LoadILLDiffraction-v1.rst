@@ -115,7 +115,7 @@ Output:
 
 .. testoutput:: LoadILLDiffractionD1BExample
 
-  The output has 1 bin (detector scan) and 128 spectra
+  The output has 1 bin (detector scan) and 1280 spectra
 
 .. categories::
 
