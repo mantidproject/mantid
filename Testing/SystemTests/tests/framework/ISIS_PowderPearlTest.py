@@ -251,6 +251,7 @@ class FocusWithoutEmptySubtractionTest(systemtesting.MantidSystemTest):
             config['datasearch.directories'] = self.existing_config
             mantid.mtd.clear()
 
+
 class CreateCalTest(systemtesting.MantidSystemTest):
 
     calibration_results = None
