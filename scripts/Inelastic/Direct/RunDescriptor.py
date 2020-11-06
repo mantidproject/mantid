@@ -1059,13 +1059,13 @@ class RunDescriptor(PropDescriptor):
         #
         file_hint,old_ext = self.file_hint(run_num_str,filePath,fileExt,**kwargs)
 
-        def _check_ext(file_name,file_hint='missing'):
+        def _check_ext(file_name):
             fname,fex = os.path.splitext(file_name)
             if old_ext != fex:
                 if 'force_extension' in kwargs:
+                    message= '*** Rejecting file matching hint: {0} with wrong extension {1} found on Mantid search paths '.\
+                            format(file_hint,fex)
                     if 'be_quet' not in kwargs:
-                        message= '*** Cannot find file matching hint: {0} with the requested extension {1} on Mantid search paths '.\
-                                format(file_hint,old_ext)
                         RunDescriptor._logger(message,'warning')
                     raise RuntimeError(message)
                 else:
@@ -1078,7 +1078,7 @@ class RunDescriptor(PropDescriptor):
         #------------------------------------------------
         try:
             file_name = FileFinder.findRuns(file_hint)[0]
-            _check_ext(file_name,file_hint)
+            _check_ext(file_name)
             return (True,file_name)
         except RuntimeError as Err:
             if 'force_extension' in kwargs:
@@ -1088,7 +1088,7 @@ class RunDescriptor(PropDescriptor):
 #pylint: disable=unused-variable
                     file_hint,oext = os.path.splitext(file_hint)
                     file_name = FileFinder.findRuns(file_hint)[0]
-                    _check_ext(file_name,file_hint)
+                    _check_ext(file_name)
                     return (True,file_name)
                 except RuntimeError:
                     message = '*** Cannot find file matching hint {0} on Mantid search paths '.\
