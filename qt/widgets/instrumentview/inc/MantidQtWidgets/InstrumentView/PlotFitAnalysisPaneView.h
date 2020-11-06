@@ -34,7 +34,7 @@ public:
   virtual void addFitSpectrum(const std::string &wsName) = 0;
   virtual void addFunction(Mantid::API::IFunction_sptr func) = 0;
   virtual void updateFunction(const Mantid::API::IFunction_sptr func) = 0;
-  virtual void fitWarning(const std::string &message) = 0;
+  virtual void displayWarning(const std::string &message) = 0;
   virtual QWidget *getQWidget() = 0;
   virtual void setupPlotFitSplitter(const double &start, const double &end) = 0;
   virtual QWidget *createFitPane(const double &start, const double &end) = 0;
@@ -63,7 +63,7 @@ public:
   void addFitSpectrum(const std::string &wsName) override;
   void addFunction(Mantid::API::IFunction_sptr func) override;
   void updateFunction(const Mantid::API::IFunction_sptr func) override;
-  void fitWarning(const std::string &message) override;
+  void displayWarning(const std::string &message) override;
   QWidget *getQWidget() override { return static_cast<QWidget *>(this); };
 
 public slots:

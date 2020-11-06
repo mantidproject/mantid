@@ -124,8 +124,8 @@ void PlotFitAnalysisPaneView::addFunction(Mantid::API::IFunction_sptr func) {
   m_fitBrowser->setFunction(std::move(func));
 }
 
-void PlotFitAnalysisPaneView::fitWarning(const std::string &message) {
-  QMessageBox::warning(this, "Fit error", message.c_str());
+void PlotFitAnalysisPaneView::displayWarning(const std::string &message) {
+  QMessageBox::warning(this, "Warning!", message.c_str());
 }
 
 } // namespace MantidWidgets

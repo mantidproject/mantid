@@ -23,6 +23,9 @@ public:
   virtual IFunction_sptr doFit(const std::string &wsName,
                                const std::pair<double, double> &range,
                                const IFunction_sptr func);
+  virtual IFunction_sptr
+  calculateEstimate(const std::string &workspaceName,
+                    const std::pair<double, double> &range);
 };
 
 } // namespace MantidWidgets

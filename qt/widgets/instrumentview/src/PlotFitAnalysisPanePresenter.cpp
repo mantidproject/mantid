@@ -41,16 +41,23 @@ void PlotFitAnalysisPanePresenter::doFit() {
       func = m_model->doFit(m_currentName, m_view->getRange(), func);
       m_view->updateFunction(func);
     } catch (...) {
-      m_view->fitWarning("Fit failed");
+      m_view->displayWarning("Fit failed");
     }
     m_view->addFitSpectrum(m_currentName + "_fits_Workspace");
   } else {
-    m_view->fitWarning(
+    m_view->displayWarning(
         "Need to have extracted a data and selected a function to fit");
   }
 }
 
-void PlotFitAnalysisPanePresenter::updateEstimate() {}
+void PlotFitAnalysisPanePresenter::updateEstimate() {
+  if (!m_currentName.empty())
+    m_view->updateFunction(
+        m_model->calculateEstimate(m_currentName, m_view->getRange()));
+  else
+    m_view->displayWarning(
+        "Could not update estimate: data has not been extracted.");
+}
 
 void PlotFitAnalysisPanePresenter::addFunction(
     Mantid::API::IFunction_sptr func) {
