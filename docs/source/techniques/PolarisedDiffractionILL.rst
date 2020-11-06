@@ -82,7 +82,7 @@ Output:
 Wavelength and position calibration
 ===================================
 
-The first step of working with D7 data is to ensure that there exist a proper calibration of the wavelenght, bank positions, and detector positions relative to their bank. This calibration can be either taken from a previous experiment performed in comparable conditions or obtained from the :math:`\text{Y}_{3}\text{Fe}_{5}\text{O}_{12}` (YIG) scan data with a dedicated algorithm :ref:`D7YIGPositionCalibration <D7YIGPositionCalibration>`. The method follows the description presented in Ref. [1].
+The first step of working with D7 data is to ensure that there exist a proper calibration of the wavelenght, bank positions, and detector positions relative to their bank. This calibration can be either taken from a previous experiment performed in comparable conditions or obtained from the :math:`\text{Y}_{3}\text{Fe}_{5}\text{O}_{12}` (YIG) scan data with a dedicated algorithm :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>`. The method follows the description presented in Ref. [1].
 
 This algorithm performs wavelength and position calibration for both individual detectors and detector banks using measurement of a sample of powdered YIG. This data is fitted with Gaussian distributions at the expected peak positions. The output is an :ref:`Instrument Parameter File <InstrumentParameterFile>` readable by the :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` algorithm that will place the detector banks and detectors using the output of this algorithm.
 
