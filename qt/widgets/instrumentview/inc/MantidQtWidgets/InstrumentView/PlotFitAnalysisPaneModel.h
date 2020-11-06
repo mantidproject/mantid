@@ -18,7 +18,7 @@ namespace MantidWidgets {
 class EXPORT_OPT_MANTIDQT_INSTRUMENTVIEW PlotFitAnalysisPaneModel {
 
 public:
-  PlotFitAnalysisPaneModel(){};
+  PlotFitAnalysisPaneModel();
   virtual ~PlotFitAnalysisPaneModel(){};
   virtual IFunction_sptr doFit(const std::string &wsName,
                                const std::pair<double, double> &range,
@@ -26,6 +26,11 @@ public:
   virtual IFunction_sptr
   calculateEstimate(const std::string &workspaceName,
                     const std::pair<double, double> &range);
+
+  virtual bool hasEstimate() const;
+
+private:
+  IFunction_sptr m_estimateFunction;
 };
 
 } // namespace MantidWidgets

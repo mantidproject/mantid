@@ -92,6 +92,9 @@ using namespace Mantid::API;
 namespace MantidQt {
 namespace MantidWidgets {
 
+PlotFitAnalysisPaneModel::PlotFitAnalysisPaneModel()
+    : m_estimateFunction(nullptr) {}
+
 IFunction_sptr
 PlotFitAnalysisPaneModel::doFit(const std::string &wsName,
                                 const std::pair<double, double> &range,
@@ -123,10 +126,18 @@ IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(
     const auto background = std::accumulate(yData.begin(), yData.end(), 0.0) /
                             static_cast<double>(yData.size());
 
-    return createCompositeFunction(createFlatBackground(background),
-                                   createGaussian(xData, yData, background));
+    m_estimateFunction =
+        createCompositeFunction(createFlatBackground(background),
+                                createGaussian(xData, yData, background));
+    return m_estimateFunction;
+  } else {
+    m_estimateFunction = nullptr;
+    return createCompositeFunction(createFlatBackground(), createGaussian());
   }
-  return createCompositeFunction(createFlatBackground(), createGaussian());
+}
+
+bool PlotFitAnalysisPaneModel::hasEstimate() const {
+  return m_estimateFunction != nullptr;
 }
 
 } // namespace MantidWidgets

@@ -50,13 +50,19 @@ void PlotFitAnalysisPanePresenter::doFit() {
   }
 }
 
+void PlotFitAnalysisPanePresenter::updateEstimateAfterExtraction() {
+  if (!m_model->hasEstimate())
+    updateEstimate();
+}
+
 void PlotFitAnalysisPanePresenter::updateEstimate() {
-  if (!m_currentName.empty())
+  if (!m_currentName.empty()) {
     m_view->updateFunction(
         m_model->calculateEstimate(m_currentName, m_view->getRange()));
-  else
+  } else {
     m_view->displayWarning(
         "Could not update estimate: data has not been extracted.");
+  }
 }
 
 void PlotFitAnalysisPanePresenter::addFunction(
