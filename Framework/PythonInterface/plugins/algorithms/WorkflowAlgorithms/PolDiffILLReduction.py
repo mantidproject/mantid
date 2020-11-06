@@ -363,7 +363,6 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _apply_polarisation_corrections(self, ws, pol_eff_ws):
         """Applies the polarisation correction based on the output from quartz reduction."""
-        fp = 1 # flipper efficiency, placeholder
         nPolarisations = None
         singleCorrectionPerPOL = False
         if mtd[ws].getNumberOfEntries() != 2*mtd[pol_eff_ws].getNumberOfEntries():
@@ -372,6 +371,10 @@ class PolDiffILLReduction(PythonAlgorithm):
             nPolarisations = math.floor(nMeasurements / 2.0)
             if mtd[pol_eff_ws].getNumberOfEntries() != nPolarisations:
                 raise RuntimeError("Incompatible number of polarisations between quartz input and sample.")
+
+        CreateSingleValuedWorkspace(DataValue=1.0, OutputWorkspace='unity')
+        CreateSingleValuedWorkspace(DataValue=2.0, OutputWorkspace='double_fp')
+        to_clean = ['unity', 'double_fp']
 
         for entry_no in range(mtd[ws].getNumberOfEntries()):
             if entry_no % 2 != 0:
@@ -383,23 +386,25 @@ class PolDiffILLReduction(PythonAlgorithm):
             intensity_0 = mtd[ws][entry_no].name()
             intensity_1 = mtd[ws][entry_no+1].name()
             tmp_names = [intensity_0 + '_tmp', intensity_1 + '_tmp']
-
-            nominator = ((1.0-mtd[phi])*(1.0-fp) + fp*(1+mtd[phi])) * mtd[intensity_0] \
-                - (1.0-mtd[phi]) * mtd[intensity_1]
-            denominator = 2.0 * fp * mtd[phi]
-            Divide(LHSWorkspace=nominator, RHSWorkspace=denominator,
-                   OutputWorkspace=tmp_names[0])
-            nominator = (1+mtd[phi])*mtd[intensity_1] \
-                - ( (1+mtd[phi])*(1-fp) - fp*(1-mtd[phi]) )*mtd[intensity_0]
-            denominator = 2.0 * fp * mtd[phi]
-            Divide(LHSWorkspace=nominator, RHSWorkspace=denominator,
-                   OutputWorkspace=tmp_names[1])
-            CopyLogs(InputWorkspace=intensity_0, OutputWorkspace=tmp_names[0], MergeStrategy='WipeExisting')
-            CopyLogs(InputWorkspace=intensity_1, OutputWorkspace=tmp_names[1], MergeStrategy='WipeExisting')
+            # helper ws
+            Minus(LHSWorkspace='unity', RHSWorkspace=phi, Outputworkspace='one_m_pol')
+            Plus(LHSWorkspace='unity', RHSWorkspace=phi, Outputworkspace='one_p_pol')
+            # spin-flip:
+            Multiply(LHSWorkspace=intensity_0, RHSWorkspace='one_p_pol', OutputWorkspace='lhs_nominator')
+            Multiply(LHSWorkspace=intensity_1, RHSWorkspace='one_m_pol', OutputWorkspace='rhs_nominator')
+            Minus(LHSWorkspace='lhs_nominator', RHSWorkspace='rhs_nominator', OutputWorkspace='nominator')
+            Multiply(LHSWorkspace=phi, RHSWorkspace='double_fp', OutputWorkspace='denominator')
+            Divide(LHSWorkspace='nominator', RHSWorkspace='denominator', OutputWorkspace=tmp_names[0])
+            # non-spin-flip:
+            Multiply(LHSWorkspace=intensity_0, RHSWorkspace='one_m_pol', OutputWorkspace='lhs_nominator')
+            Multiply(LHSWorkspace=intensity_1, RHSWorkspace='one_p_pol', OutputWorkspace='rhs_nominator')
+            Minus(LHSWorkspace='rhs_nominator', RHSWorkspace='lhs_nominator', OutputWorkspace='nominator')
+            Divide(LHSWorkspace='nominator', RHSWorkspace='denominator', OutputWorkspace=tmp_names[1])
             RenameWorkspace(tmp_names[0], intensity_0)
             RenameWorkspace(tmp_names[1], intensity_1)
 
-        DeleteWorkspaces(WorkspaceList=[nominator, denominator])
+        to_clean = ['one_m_pol', 'one_p_pol', 'lhs_nominator', 'rhs_nominator', 'nominator', 'denominator']
+        DeleteWorkspaces(WorkspaceList=to_clean)
         return ws
 
     def _read_experiment_properties(self, ws):
