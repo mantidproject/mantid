@@ -8,9 +8,11 @@
 
 #include "DllOption.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
-#include <map>
 #include <string>
+#include <utility>
+
 using namespace Mantid::API;
 namespace MantidQt {
 namespace MantidWidgets {
@@ -30,6 +32,9 @@ public:
   virtual bool hasEstimate() const;
 
 private:
+  IFunction_sptr calculateEstimate(MatrixWorkspace_sptr &workspace,
+                                   const std::pair<double, double> &range);
+
   IFunction_sptr m_estimateFunction;
 };
 

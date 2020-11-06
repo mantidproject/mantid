@@ -10,7 +10,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "MantidAPI/MatrixWorkspace.h"
 
 #include <algorithm>
 #include <numeric>
@@ -117,23 +116,27 @@ IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(
   if (ads.doesExist(workspaceName)) {
     auto workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName);
 
-    workspace = cropWorkspace(workspace, range.first, range.second);
-    workspace = convertToPointData(workspace);
-
-    const auto xData = workspace->readX(0);
-    const auto yData = workspace->readY(0);
-
-    const auto background = std::accumulate(yData.begin(), yData.end(), 0.0) /
-                            static_cast<double>(yData.size());
-
-    m_estimateFunction =
-        createCompositeFunction(createFlatBackground(background),
-                                createGaussian(xData, yData, background));
+    m_estimateFunction = calculateEstimate(workspace, range);
     return m_estimateFunction;
   } else {
     m_estimateFunction = nullptr;
     return createCompositeFunction(createFlatBackground(), createGaussian());
   }
+}
+
+IFunction_sptr PlotFitAnalysisPaneModel::calculateEstimate(
+    MatrixWorkspace_sptr &workspace, const std::pair<double, double> &range) {
+  workspace = cropWorkspace(workspace, range.first, range.second);
+  workspace = convertToPointData(workspace);
+
+  const auto xData = workspace->readX(0);
+  const auto yData = workspace->readY(0);
+
+  const auto background = std::accumulate(yData.begin(), yData.end(), 0.0) /
+                          static_cast<double>(yData.size());
+
+  return createCompositeFunction(createFlatBackground(background),
+                                 createGaussian(xData, yData, background));
 }
 
 bool PlotFitAnalysisPaneModel::hasEstimate() const {
