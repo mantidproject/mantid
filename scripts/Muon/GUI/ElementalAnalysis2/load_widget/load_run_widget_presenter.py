@@ -9,6 +9,7 @@ import copy
 from Muon.GUI.Common import thread_model
 import Muon.GUI.Common.utilities.run_string_utils as run_utils
 import Muon.GUI.Common.utilities.load_utils as load_utils
+import Muon.GUI.ElementalAnalysis2.load_widget.load_utils_ea as load_utils_ea
 from Muon.GUI.Common.utilities.run_string_utils import flatten_run_list
 from mantidqt.utils.observer_pattern import GenericObservable, Observable
 
@@ -240,7 +241,7 @@ class LoadRunWidgetPresenterEA(object):
             if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
                 run_list_to_add = list(self._model._data_context._run_info.keys())
                 if len(run_list_to_add) >1 :
-                    load_utils.combine_loaded_runs_ea(self._model, run_list_to_add, delete_added=True)
+                    load_utils_ea.combine_loaded_runs(self._model, run_list_to_add, delete_added=True)
 
             self.update_view_from_model(run_list)
             self.updated_directory.notify_subscribers(self._model._directory)

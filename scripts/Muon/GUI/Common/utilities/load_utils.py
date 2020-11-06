@@ -320,35 +320,3 @@ def exception_message_for_failed_files(failed_file_list):
     for failure in failed_file_list:
         message += '{} ; {}'.format(os.path.split(failure[0])[-1], failure[1])
     return message
-
-
-def combine_loaded_runs_ea(model, run_list, delete_added=False):
-    coAddWorkspace_name = str(run_list[0]) + "-" + str(run_list[-1])
-    coAddWorkspace = WorkspaceGroup()
-    finished_detectors = []
-    ws_remove = []
-    for run in run_list:
-        run_detectors = model._data_context._run_info.get(run)._detectors
-        unused_detectors = list(set(run_detectors).difference(finished_detectors))
-        current_run = run
-        if unused_detectors:
-            for detector in run_detectors:
-                current_detector = detector
-                if current_detector not in finished_detectors:
-                    new_ws_name = current_detector
-                    workspace_place1 = run_detectors.index(current_detector)
-                    new_ws = model._loaded_data_store.get_data(run=[run])["workspace"].getItem(workspace_place1)
-                    for secondrun in run_list:
-                        if secondrun != current_run:
-                            all_detectors = model._data_context._run_info.get(secondrun)._detectors
-                            if current_detector in all_detectors:
-                                workspace_place = all_detectors.index(current_detector)
-                                load_workspace = model._loaded_data_store.get_data(run=[secondrun])["workspace"].getItem(workspace_place)
-                                new_ws = new_ws + load_workspace
-                    coAddWorkspace.addWorkspace(new_ws.clone(OutputWorkspace=new_ws_name))
-                    finished_detectors.append(current_detector)
-                    DeleteWorkspace(new_ws)
-                    ws_remove.append(new_ws_name)
-    coAddWorkspace.clone(OutputWorkspace=coAddWorkspace_name)
-    for item in ws_remove:
-        DeleteWorkspace(item)
