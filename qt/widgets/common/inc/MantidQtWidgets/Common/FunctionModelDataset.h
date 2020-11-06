@@ -16,14 +16,21 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+/*
+ * Represents a workspace containing a number of spectra to be fitted.
+ *
+ * Holds a workspace name, and a Spectra object which can represent
+ * a continuous or discontinuous spectra range.
+ */
 struct EXPORT_OPT_MANTIDQT_COMMON FunctionModelDataset {
 public:
   FunctionModelDataset(const QString &workspaceName, const Spectra &spectra);
+  FunctionModelDataset(QString workspaceName, Spectra &&spectra);
 
-  QString datasetName() const;
+  inline QString datasetName() const noexcept;
   QStringList domainNames() const;
 
-  std::size_t numberOfSpectra() const;
+  inline std::size_t numberOfSpectra() const noexcept;
 
 private:
   QString m_workspaceName;
