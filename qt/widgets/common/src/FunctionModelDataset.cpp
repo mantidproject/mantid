@@ -24,11 +24,13 @@ FunctionModelDataset::FunctionModelDataset(QString workspaceName,
  *
  * @returns the name of the workspace related to this dataset object.
  */
-QString FunctionModelDataset::datasetName() const { return m_workspaceName; }
+inline QString FunctionModelDataset::datasetName() const noexcept {
+  return m_workspaceName;
+}
 
 /**
  * Returns the names given to each domain (i.e. spectrum) in this dataset. This
- * is required for display in the EditLocalParameterDialog.
+ * is required for display in the EditLocalParameter Dialog.
  *
  * @returns the names given to each domain (i.e. spectrum) in this dataset.
  */
@@ -52,7 +54,7 @@ QStringList FunctionModelDataset::domainNames() const {
  *
  * @returns the number of spectra in this dataset object.
  */
-std::size_t FunctionModelDataset::numberOfSpectra() const {
+inline std::size_t FunctionModelDataset::numberOfSpectra() const noexcept {
   return m_spectra.size().value;
 }
 
