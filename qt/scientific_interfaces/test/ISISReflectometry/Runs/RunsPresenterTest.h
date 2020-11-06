@@ -90,9 +90,28 @@ public:
     verifyAndClear();
   }
 
-  void testStartingSearchClearsPreviousResults() {
+  void testStartingSearchDoesNotClearPreviousResults() {
     auto presenter = makePresenter();
+    EXPECT_CALL(*m_searcher, reset()).Times(0);
+    presenter.notifySearch();
+    verifyAndClear();
+  }
+
+  void testStartingSearchClearsPreviousResultsIfSettingsChanged() {
+    auto presenter = makePresenter();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
     EXPECT_CALL(*m_searcher, reset()).Times(AtLeast(1));
+    presenter.notifySearch();
+    verifyAndClear();
+  }
+
+  void testStartingSearchDoesNotClearPreviousResultsIfOverwritePrevented() {
+    auto presenter = makePresenter();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
+    expectOverwriteBatchPrevented();
+    EXPECT_CALL(*m_searcher, reset()).Times(0);
     presenter.notifySearch();
     verifyAndClear();
   }
@@ -198,114 +217,63 @@ public:
     verifyAndClear();
   }
 
-  void testWarningGivenIfUnsavedBatchAutoreductionResumedOptionChecked() {
+  void testNoCheckOnOverwritingBatchOnAutoreductionResumed() {
     auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
-    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
-        .WillByDefault(Return(true));
-    expectAutoreductionSettingsChanged();
-    expectUserRespondsYes();
+    expectSearchString(m_searchString);
+    EXPECT_CALL(m_mainPresenter, isOverwriteBatchPrevented()).Times(0);
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
-  void testNoWarningGivenIfUnsavedBatchAutoreductionResumedOptionChecked() {
+  void testCheckOverwritingBatchOnAutoreductionResumedIfSettingsChanged() {
     auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
-    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
-        .WillByDefault(Return(false));
-    expectAutoreductionSettingsChanged();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
+    EXPECT_CALL(m_mainPresenter, isOverwriteBatchPrevented()).Times(AtLeast(1));
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
-  void testWarningNotGivenIfSavedBatchAutoreductionResumedOptionUnchecked() {
+  void
+  testDoNotStartAutoreductionWhenOverwritePreventedOnResumeAutoreductionWithNewSettings() {
     auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(false));
-    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
-        .WillByDefault(Return(true));
-    expectAutoreductionSettingsChanged();
-    expectUserNotPrompted();
-    presenter.resumeAutoreduction();
-    verifyAndClear();
-  }
-
-  const std::string autoReductionSearch = "1120015";
-
-  void testResumeAutoreductionWithNewSettings() {
-    auto presenter = makePresenter();
-    expectAutoreductionSettingsChanged();
-    expectClearExistingTable();
-    expectCheckForNewRuns();
-    presenter.resumeAutoreduction();
-    verifyAndClear();
-  }
-
-  void testResumeAutoreductionWithSameSettings() {
-    auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    expectAutoreductionSettingsUnchanged();
-    expectDoNotClearExistingTable();
-    expectCheckForNewRuns();
-    presenter.resumeAutoreduction();
-    verifyAndClear();
-  }
-
-  void testResumeAutoreductionWarnsUserIfTableChanged() {
-    auto presenter = makePresenter();
-    auto runsTable = makeRunsTableWithContent();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
-    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
-        .WillByDefault(Return(true));
-    expectAutoreductionSettingsChanged();
-    expectUserRespondsYes();
-    expectCheckForNewRuns();
-    presenter.resumeAutoreduction();
-    verifyAndClear();
-  }
-
-  void testResumeAutoreductionDoesNotWarnUserIfTableEmpty() {
-    auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(false));
-    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
-        .WillByDefault(Return(true));
-    expectAutoreductionSettingsChanged();
-    expectUserNotPrompted();
-    expectCheckForNewRuns();
-    presenter.resumeAutoreduction();
-    verifyAndClear();
-  }
-
-  void testResumeAutoreductionCancelledByUserIfTableChanged() {
-    auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString())
-        .WillByDefault(Return(autoReductionSearch));
-    ON_CALL(m_mainPresenter, isBatchUnsaved()).WillByDefault(Return(true));
-    ON_CALL(m_mainPresenter, isWarnDiscardChangesChecked())
-        .WillByDefault(Return(true));
-    auto runsTable = makeRunsTableWithContent();
-    expectAutoreductionSettingsChanged();
-    expectUserRespondsNo();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
+    expectOverwriteBatchPrevented();
     expectDoNotStartAutoreduction();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testTableNotClearedWhenResumeAutoreduction() {
+    auto presenter = makePresenter();
+    expectSearchString(m_searchString);
+    expectDoNotClearExistingTable();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testTableClearedWhenResumeAutoreductionWithNewSettings() {
+    auto presenter = makePresenter();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
+    expectClearExistingTable();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testTableNotClearedWhenOverwritePreventedOnResumeAutoreduction() {
+    auto presenter = makePresenter();
+    expectSearchSettingsChanged();
+    expectOverwriteBatchPrevented();
+    expectDoNotClearExistingTable();
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
   void testResumeAutoreductionCancelledIfSearchStringIsEmpty() {
     auto presenter = makePresenter();
-    ON_CALL(m_view, getSearchString()).WillByDefault(Return(""));
-    auto runsTable = makeRunsTableWithContent();
+    expectSearchString("");
     expectDoNotStartAutoreduction();
     presenter.resumeAutoreduction();
     verifyAndClear();
@@ -721,11 +689,6 @@ private:
     return presenter;
   }
 
-  RunsTable makeRunsTableWithContent() {
-    auto reductionJobs = oneGroupWithARowModel();
-    return RunsTable(m_instruments, m_thetaTolerance, reductionJobs);
-  }
-
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_runsTableView));
@@ -787,14 +750,10 @@ private:
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
   }
 
-  void expectAutoreductionSettingsChanged() {
+  void expectSearchSettingsChanged() {
     EXPECT_CALL(*m_searcher, searchSettingsChanged(_, _, _))
-        .WillOnce(Return(true));
-  }
-
-  void expectAutoreductionSettingsUnchanged() {
-    EXPECT_CALL(*m_searcher, searchSettingsChanged(_, _, _))
-        .WillOnce(Return(false));
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
   }
 
   void expectClearExistingTable() {
@@ -1085,6 +1044,18 @@ private:
     // the presenter to be able to run live data
     expectGetLiveDataOptions();
     expectGetAlgorithmRunner();
+  }
+
+  void expectOverwriteBatchPrevented() {
+    EXPECT_CALL(m_mainPresenter, isOverwriteBatchPrevented())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+  }
+
+  void expectOverwriteBatchNotPrevented() {
+    EXPECT_CALL(m_mainPresenter, isOverwriteBatchPrevented())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
   }
 
   void assertAlgorithmPropertiesContainOptions(

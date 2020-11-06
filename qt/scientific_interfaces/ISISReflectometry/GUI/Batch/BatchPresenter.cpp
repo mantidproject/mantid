@@ -324,13 +324,8 @@ bool BatchPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
-/**
-    Checks whether the requested operation is prevented by unsaved
-    * changes and user input to avoid losing them
-    * @return : Bool on whether the calling function should continue
-    */
-bool BatchPresenter::isWarnDiscardChangesChecked() const {
-  return m_mainPresenter->isWarnDiscardChangesChecked();
+bool BatchPresenter::isOverwriteBatchPrevented() const {
+  return m_mainPresenter->isOverwriteBatchPrevented(this);
 }
 
 /** Returns whether there are any unsaved changes in the current batch */

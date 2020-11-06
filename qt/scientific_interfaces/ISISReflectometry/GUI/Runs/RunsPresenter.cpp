@@ -357,12 +357,7 @@ bool RunsPresenter::isAnyBatchAutoreducing() const {
 }
 
 bool RunsPresenter::isOverwritingTablePrevented() const {
-  return m_mainPresenter->isBatchUnsaved() && isOverwriteBatchPrevented();
-}
-
-bool RunsPresenter::isOverwriteBatchPrevented() const {
-  return m_mainPresenter->isWarnDiscardChangesChecked() &&
-         !m_messageHandler->askUserDiscardChanges();
+  return m_mainPresenter->isOverwriteBatchPrevented();
 }
 
 bool RunsPresenter::searchInProgress() const {

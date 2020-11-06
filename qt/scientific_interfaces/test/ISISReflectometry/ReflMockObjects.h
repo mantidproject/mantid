@@ -83,7 +83,7 @@ public:
   MOCK_CONST_METHOD0(isAutoreducing, bool());
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
-  MOCK_CONST_METHOD0(isWarnDiscardChangesChecked, bool());
+  MOCK_CONST_METHOD0(isOverwriteBatchPrevented, bool());
   MOCK_CONST_METHOD0(getUnsavedBatchFlag, bool());
   MOCK_METHOD1(setUnsavedBatchFlag, void(bool));
   MOCK_CONST_METHOD0(percentComplete, int());

@@ -103,7 +103,6 @@ public:
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
   bool isOverwritingTablePrevented() const override;
-  bool isOverwriteBatchPrevented() const override;
 
   // RunsViewSubscriber overrides
   void notifySearch() override;
