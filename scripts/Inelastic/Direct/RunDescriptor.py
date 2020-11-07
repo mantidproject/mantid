@@ -1061,7 +1061,7 @@ class RunDescriptor(PropDescriptor):
 
         def _check_ext(file_name):
             fname,fex = os.path.splitext(file_name)
-            if old_ext != fex:
+            if old_ext.lower() != fex.lower():
                 if 'force_extension' in kwargs:
                     message= '*** Rejecting file matching hint: {0} as found file has wrong extension: {1}'.\
                             format(file_hint,fex)

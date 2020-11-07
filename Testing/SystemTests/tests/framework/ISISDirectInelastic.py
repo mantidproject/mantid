@@ -147,6 +147,7 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
         self.tolerance = 1e-9
         from ISIS_MariReduction import ReduceMARIFromFile
         self._file_to_clear = None
+        self._test_log_file = ''
         self.red = ReduceMARIFromFile()
         self.red.def_advanced_properties()
         self.red.def_main_properties()
@@ -157,30 +158,67 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
           would copy run file 11001 into 11002 emulating
           appearance of this file from instrument
       """
+
         self._counter+=1
+        if self._counter == 1:
+            # first step -- nothing happens. No target file
+            # the script reports "waiting for file"
+            print('******  Fake pause. step: 1. Preparing test file')
+            return
         if self._counter == 2:
+            # second step. File is there but log have not been updated
+            # nothing happens, the script reports "waiting for file"
+            print('******  Fake pause. step: 2')
             source =  FileFinder.findRuns('MAR11001')[0]
             targ_path = config['defaultsave.directory']
             targ_file = os.path.join(targ_path,'MAR11002.nxs')
             shutil.copy2(source ,targ_file )
-            self._file_to_clear = targ_file
-        if self._counter>= 3:
-            if os.path.exists(self._file_to_clear):
-                os.remove(self._file_to_clear)
+            self._file_to_clear +=[targ_file]
+            return
+        if self._counter == 3:
+            # this is fake step as logs should be updated
+            # when both files are added to archive,
+            # but let's run it to test additional branch
+            # of the code: invalid extension found
+            print('******  Fake pause. step: 3')
+            test_log = self._test_log_file
+            with open(test_log ,'w') as fh:
+                fh.write('MAR 11002 0 \n')
+            m_time = os.path.getmtime(test_log)
+            # Update modification time manually as Unix may
+            # run the test too fast and mtime will be the same 
+            # as the log has been generated initially
+            m_time  = m_time +1
+            os.utime(test_log,(m_time,m_time))
+            return
+
+        if self._counter>= 4:
+            print('******  Fake pause. step: {0}'.format(self._counter))
+
             source =  FileFinder.findRuns('MAR11001')[0]
             targ_path = config['defaultsave.directory']
             targ_file = os.path.join(targ_path,'MAR11002.raw')
             shutil.copy2(source ,targ_file )
+            # Reduction should run now
 
-            self._file_to_clear = targ_file
-            self._counter = 0
+            self._file_to_clear +=[targ_file]
+            #self._counter = 0
 
     def runTest(self):
         self.red.wait_for_file = 10
         self.red._debug_wait_for_files_operation = self.prepare_test_file
         self._counter=0
-        self._file_to_clear=""
 
+        # Add test log files, which mimicks information,
+        # recorded when file have been added to archive
+        test_dir = config.getString('defaultsave.directory')
+        test_log = os.path.join(test_dir,'lastrun.txt')
+        self._test_log_file = test_log
+        with open(test_log,'w') as fh:
+            fh.write('MAR 11001 0 \n')
+        self._file_to_clear = [test_log]
+
+        self.red.reducer.prop_man.archive_upload_log_file = test_log
         self.red.reducer.prop_man.sample_run = [11001,11002]
        # self.red.reducer.background_range = (10000,12000)
         MARreducedRuns = self.red.run_reduction()
@@ -190,7 +228,8 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
 
         self.red.wait_for_file =0
         self.red._debug_wait_for_files_operation = None
-        os.remove(self._file_to_clear)
+        for file in self._file_to_clear:
+            os.remove(file)
 
     def validate(self):
         """Returns the name of the workspace & file to compare"""
