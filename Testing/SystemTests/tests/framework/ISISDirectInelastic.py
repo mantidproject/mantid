@@ -168,7 +168,7 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
         if self._counter == 2:
             # second step. File is there but log have not been updated
             # nothing happens, the script reports "waiting for file"
-            print('******  Fake pause. step: 2')
+            print('******  Fake pause. step: 2. Fake nxs file created to ignore')
             source =  FileFinder.findRuns('MAR11001')[0]
             targ_path = config['defaultsave.directory']
             targ_file = os.path.join(targ_path,'MAR11002.nxs')
@@ -180,20 +180,20 @@ class MARIReductionFromFileCache(ISISDirectInelasticReduction):
             # when both files are added to archive,
             # but let's run it to test additional branch
             # of the code: invalid extension found
-            print('******  Fake pause. step: 3')
+            print('******  Fake pause. step: 3. Run log updated but file is not there')
             test_log = self._test_log_file
             with open(test_log ,'w') as fh:
                 fh.write('MAR 11002 0 \n')
             m_time = os.path.getmtime(test_log)
             # Update modification time manually as Unix may
-            # run the test too fast and mtime will be the same 
+            # run the test too fast and mtime will be the same
             # as the log has been generated initially
             m_time  = m_time +1
             os.utime(test_log,(m_time,m_time))
             return
 
         if self._counter>= 4:
-            print('******  Fake pause. step: {0}'.format(self._counter))
+            print('******  Fake pause. step: {0}. Created fake source. Reduction should run'.format(self._counter))
 
             source =  FileFinder.findRuns('MAR11001')[0]
             targ_path = config['defaultsave.directory']
