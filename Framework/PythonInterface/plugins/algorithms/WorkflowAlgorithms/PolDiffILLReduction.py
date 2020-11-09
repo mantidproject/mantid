@@ -154,7 +154,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.declareProperty(name="SampleGeometry",
                              defaultValue="None",
-                             validator=StringListValidator(["None", "FlatPlate", "Cylinder", "Annulus", "Custom"]),
+                             validator=StringListValidator(["None", "FlatPlate", "Cylinder", "Annulus"]),
                              direction=Direction.Input,
                              doc="Sample geometry for self-attenuation correction to be applied.")
 
@@ -177,8 +177,8 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.setPropertySettings('SampleGeometryFile', EnabledWhenProperty('SampleGeometry', PropertyCriterion.IsEqualTo, 'Custom'))
 
         self.declareProperty(name="OutputUnits",
-                             defaultValue="Wavelength",
-                             validator=StringListValidator(["Wavelength", "TwoTheta", "Q"]),
+                             defaultValue="TwoTheta",
+                             validator=StringListValidator(["TwoTheta", "Q"]),
                              direction=Direction.Input,
                              doc="The choice to display the reduced data either as a function of the raw data units, the detector twoTheta,"
                                  +" or the momentum exchange.")
