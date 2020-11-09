@@ -303,6 +303,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         calibrationType = self.getPropertyValue('NormalisationMethod')
         normaliseToAbsoluteUnits = self.getProperty('AbsoluteUnitsNormalisation').value
         det_efficiency_ws = cross_section_ws + '_det_efficiency'
+        norm_ws = 'normalisation_ws'
         tmp_name = 'det_eff'
         tmp_names = []
         to_clean = []
@@ -315,9 +316,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 dataE = np.sqrt(normalisationFactors)
                 entry0 = mtd[cross_section_ws][0]
                 CreateWorkspace(dataX=entry0.readX(0), dataY=normalisationFactors, dataE=dataE,
-                                NSpec=entry0.getNumberHistograms(), OutputWorkspace='normalisation_ws')
+                                NSpec=entry0.getNumberHistograms(), OutputWorkspace=norm_ws)
+                mtd[norm_ws].getAxis(0).setUnit(entry0.getAxis(0).getUnit().unitID())
+                mtd[norm_ws].getAxis(1).setUnit(entry0.getAxis(1).getUnit().unitID())
             Divide(LHSWorkspace=cross_section_ws,
-                   RHSWorkspace='normalisation_ws',
+                   RHSWorkspace=norm_ws,
                    OutputWorkspace=det_efficiency_ws)
         elif calibrationType in  ['Paramagnetic', 'Incoherent']:
             if calibrationType == 'Paramagnetic':
@@ -331,14 +334,14 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     normalisation_name = 'normalisation_{}'.format(ws_name)
                     to_clean.append(normalisation_name)
                     CreateSingleValuedWorkspace(DataValue=const * spin * (spin+1), OutputWorkspace=normalisation_name)
-                    Divide(LHSWorkspace=normalisation_name,
-                           RHSWorkspace=paramagneticComponent,
+                    Divide(LHSWorkspace=paramagneticComponent,
+                           RHSWorkspace=normalisation_name,
                            OutputWorkspace=ws_name)
             else: # Incoherent
                 for spectrum_no in range(mtd[cross_section_ws][1].getNumberHistograms()):
                     if normaliseToAbsoluteUnits:
                         normFactor = float(self.getPropertyValue('IncoherentCrossSection'))
-                        CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace='normalisation_ws')
+                        CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace=norm_ws)
                     else:
                         normalisationFactors = self._max_value_per_detector(mtd[cross_section_ws][1].name())
                         dataE = np.sqrt(normalisationFactors)
@@ -350,12 +353,12 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                             CreateWorkspace(dataX=mtd[cross_section_ws][1].readX(0), dataY=normalisationFactors,
                                             dataE=dataE,
                                             NSpec=mtd[cross_section_ws][1].getNumberHistograms(),
-                                            OutputWorkspace='normalisation_ws')
+                                            OutputWorkspace=norm_ws)
                     ws_name = '{0}_{1}'.format(tmp_name, spectrum_no)
                     tmp_names.append(ws_name)
 
-                    Divide(LHSWorkspace='normalisation_ws',
-                           RHSWorkspace=cross_section_ws,
+                    Divide(LHSWorkspace=cross_section_ws,
+                           RHSWorkspace=norm_ws,
                            OutputWorkspace=ws_name)
 
             GroupWorkspaces(tmp_names, OutputWorkspace=det_efficiency_ws)
@@ -380,9 +383,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     det_eff_entry_no -= 1
             ws_name = entry.name() + '_normalised'
             tmp_names.append(ws_name)
-            Multiply(LHSWorkspace=entry,
-                     RHSWorkspace=mtd[det_efficiency_ws][det_eff_entry_no],
-                     OutputWorkspace=ws_name)
+            Divide(LHSWorkspace=entry,
+                   RHSWorkspace=mtd[det_efficiency_ws][det_eff_entry_no],
+                   OutputWorkspace=ws_name)
         output_name = self.getPropertyValue('OutputWorkspace')
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_name)
         return output_name
