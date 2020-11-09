@@ -5,6 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
+from mantid import logger
+
 parNamePattern = re.compile(r'([a-zA-Z][\w.]+)')
 
 
@@ -82,6 +84,42 @@ class Function(object):
     def param(self):
         return self._params
 
+    def fix(self, *args):
+        """
+        Set fixes for the parameters in the function.
+
+        @param args: A list of parameters to fix. Specifying 'all' will fix all of the parameters in a function.
+        """
+        params = self._validate_parameter_args(*args)
+
+        if "all" in [param.lower() for param in params]:
+            self.function.fixAll()
+        else:
+            for param in params:
+                if self.function.hasParameter(self.prefix + param):
+                    self.function.fixParameter(self.prefix + param)
+                else:
+                    logger.warning(f"Cannot fix parameter '{param}' as it does not exist in the Function.")
+
+    @staticmethod
+    def _validate_parameter_args(*args):
+        """
+        Validates the parameter arguments passed to the 'fix' function.
+        @param args: The arguments to be validated.
+        @return: A list of validate parameter names.
+        """
+        params = []
+        for param in args:
+            if not isinstance(param, str):
+                logger.warning(f"Ignoring {repr(param)} because a string was expected.")
+            else:
+                params.append(param)
+
+        if not args:
+            logger.warning("No parameters were passed to fix. If you intended to fix all use: fix('all')")
+
+        return params
+
     def ties(self, **kwargs):
         """Set ties on the parameters.
 
@@ -90,7 +128,10 @@ class Function(object):
                 tie(A0 = 0.1, A1 = '2*A0')
         """
         for param in kwargs:
-            self.function.tie(self.prefix + param, str(kwargs[param]))
+            if self.function.hasParameter(self.prefix + param):
+                self.function.tie(self.prefix + param, str(kwargs[param]))
+            else:
+                logger.warning(f"Cannot tie parameter '{param}' as it does not exist in the Function.")
 
     def constraints(self, *args):
         """
