@@ -94,7 +94,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
             try:
                 for ws_name, artists in ax.tracked_workspaces.items():
                     # don't allow existing output workspaces (fitted curves) to be added
-                    if ws_name not in output_wsnames:
+                    if ws_name not in output_wsnames and ws_name[-3:] == 'TOF':
                         spectrum_list = [artist.spec_num for artist in artists]
                         allowed_spectra[ws_name] = spectrum_list
             except AttributeError:  # scripted plots have no tracked_workspaces
