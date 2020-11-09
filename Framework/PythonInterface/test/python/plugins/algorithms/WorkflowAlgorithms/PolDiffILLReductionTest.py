@@ -73,28 +73,20 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['quartz'], 'Quartz')
     
     def test_vanadium(self):
-        PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
-        PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
-                            BeamInputWorkspace='beam_ws_1')
         sampleProperties = {'FormulaUnits': 50}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
-                            TransmissionInputWorkspace='vanadium_transmission',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_1'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
-        self._check_process_flag(mtd['vanadium_1'], 'Vanadium')
+        self._check_output(mtd['vanadium'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_process_flag(mtd['vanadium'], 'Vanadium')
 
     def test_vanadium_sum_scans(self):
-        PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
-        PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
-                            BeamInputWorkspace='beam_ws_1')
         sampleProperties = {'FormulaUnits': 50}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium_sum',
-                            TransmissionInputWorkspace='vanadium_transmission',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Sum', OutputUnits='TwoTheta')
-        self._check_output(mtd['vanadium_sum_1'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Scattering angle', 'Degrees')
-        self._check_process_flag(mtd['vanadium_sum_1'], 'Vanadium')
+        self._check_output(mtd['vanadium_sum'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Scattering angle', 'Degrees')
+        self._check_process_flag(mtd['vanadium_sum'], 'Vanadium')
 
     def test_vanadium_annulus(self):
         PolDiffILLReduction(Run='396917', ProcessAs='Container', OutputWorkspace='container_ws')
@@ -112,14 +104,8 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['vanadium_annulus'], 'Vanadium')
 
     def test_sample(self):
-        PolDiffILLReduction(Run='396983', ProcessAs='EmptyBeam', OutputWorkspace='beam_ws')
-        PolDiffILLReduction(Run='396990', ProcessAs='Transmission', OutputWorkspace='vanadium_transmission',
-                            BeamInputWorkspace='beam_ws_1')
         sampleProperties = {'FormulaUnits': 182.54}
-        PolDiffILLReduction(Run='396986', ProcessAs='Transmission', OutputWorkspace='sample_transmission',
-                            BeamInputWorkspace='beam_ws_1')
         PolDiffILLReduction(Run='397004', ProcessAs='Sample', OutputWorkspace='sample',
-                            TransmissionInputWorkspace='sample_transmission_1',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')
         self._check_output(mtd['sample'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
