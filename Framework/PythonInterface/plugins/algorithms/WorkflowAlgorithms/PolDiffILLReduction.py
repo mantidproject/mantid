@@ -200,6 +200,40 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('InstrumentCalibration', scan)
 
+    @staticmethod
+    def _normalise(ws):
+        """Normalises the provided WorkspaceGroup to the monitor 1."""
+        for entry_no, entry in enumerate(mtd[ws]):
+            mon = ws + '_mon'
+            ExtractMonitors(InputWorkspace=entry, DetectorWorkspace=entry,
+                            MonitorWorkspace=mon)
+            if 0 in mtd[mon].readY(0):
+                raise RuntimeError('Cannot normalise to monitor; monitor has 0 counts.')
+            else:
+                CreateSingleValuedWorkspace(DataValue=mtd[mon].readY(0)[0], ErrorValue=mtd[mon].readE(0)[0],
+                                            OutputWorkspace=mon)
+                Divide(LHSWorkspace=entry, RHSWorkspace=mon, OutputWorkspace=entry)
+                DeleteWorkspace(Workspace=mon)
+        return ws
+
+    @staticmethod
+    def _calculate_transmission(ws, beam_ws):
+        """Calculates transmission based on the measurement of the current sample and empty beam."""
+        # extract Monitor2 values
+        if 0 in mtd[ws][0].readY(0):
+            raise RuntimeError('Cannot calculate transmission; monitor has 0 counts.')
+        if 0 in mtd[beam_ws].readY(0):
+            raise RuntimeError('Cannot calculate transmission; beam monitor has 0 counts.')
+        Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
+        return ws
+
+    @staticmethod
+    def _enforce_uniform_units(origin_ws, target_ws):
+        for entry_tuple in zip(mtd[origin_ws], mtd[target_ws]):
+            entry_origin, entry_target = entry_tuple
+            if entry_origin.YUnit() != entry_target.YUnit():
+                entry_target.setYUnit(entry_origin.YUnit())
+
     def _figure_out_measurement_method(self, ws):
         """Figures out the measurement method based on the structure of the input files."""
         entries_per_numor = mtd[ws].getNumberOfEntries() / len(self.getPropertyValue('Run').split(','))
@@ -247,31 +281,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                 names_list.append(name)
             DeleteWorkspaces(WorkspaceList=ws)
             GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace=ws)
-        return ws
-
-    def _normalise(self, ws):
-        """Normalises the provided WorkspaceGroup to the monitor 1."""
-        for entry_no, entry in enumerate(mtd[ws]):
-            mon = ws + '_mon'
-            ExtractMonitors(InputWorkspace=entry, DetectorWorkspace=entry,
-                            MonitorWorkspace=mon)
-            if 0 in mtd[mon].readY(0):
-                raise RuntimeError('Cannot normalise to monitor; monitor has 0 counts.')
-            else:
-                CreateSingleValuedWorkspace(DataValue=mtd[mon].readY(0)[0], ErrorValue=mtd[mon].readE(0)[0],
-                                            OutputWorkspace=mon)
-                Divide(LHSWorkspace=entry, RHSWorkspace=mon, OutputWorkspace=entry)
-                DeleteWorkspace(Workspace=mon)
-        return ws
-
-    def _calculate_transmission(self, ws, beam_ws):
-        """Calculates transmission based on the measurement of the current sample and empty beam."""
-        # extract Monitor2 values
-        if 0 in mtd[ws][0].readY(0):
-            raise RuntimeError('Cannot calculate transmission; monitor has 0 counts.')
-        if 0 in mtd[beam_ws].readY(0):
-            raise RuntimeError('Cannot calculate transmission; beam monitor has 0 counts.')
-        Divide(LHSWorkspace=ws, RHSWorkspace=beam_ws, OutputWorkspace=ws)
         return ws
 
     def _subtract_background(self, ws, container_ws, transmission_ws):
