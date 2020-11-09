@@ -224,6 +224,24 @@ void QtRunsView::resizeSearchResultsColumnsToContents() {
   m_ui.tableSearchResults->resizeColumnsToContents();
 }
 
+/** Get the width of the search results table
+ */
+int QtRunsView::getSearchResultsTableWidth() const {
+  return m_ui.tableSearchResults->width();
+}
+
+/** Get the width of a particular column in the search results table
+ */
+int QtRunsView::getSearchResultsColumnWidth(int column) const {
+  return m_ui.tableSearchResults->columnWidth(column);
+}
+
+/** Set the width of column in the search results table
+ */
+void QtRunsView::setSearchResultsColumnWidth(int column, int width) {
+  m_ui.tableSearchResults->setColumnWidth(column, width);
+}
+
 /**
  * Get the model containing the search results
  */

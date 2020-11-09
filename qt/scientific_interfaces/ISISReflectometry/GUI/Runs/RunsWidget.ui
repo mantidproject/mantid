@@ -257,7 +257,7 @@
           <enum>QAbstractItemView::SelectItems</enum>
          </property>
          <attribute name="horizontalHeaderDefaultSectionSize">
-          <number>60</number>
+          <number>80</number>
          </attribute>
          <attribute name="horizontalHeaderMinimumSectionSize">
           <number>20</number>

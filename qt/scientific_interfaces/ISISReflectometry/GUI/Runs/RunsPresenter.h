@@ -152,6 +152,7 @@ private:
 
   /// searching
   bool search();
+  void resizeSearchResultsColumns();
   bool searchInProgress() const;
   /// autoreduction
   bool requireNewAutoreduction() const;

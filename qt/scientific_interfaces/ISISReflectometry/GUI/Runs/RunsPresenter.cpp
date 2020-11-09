@@ -100,7 +100,7 @@ void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
 
 void RunsPresenter::notifySearchComplete() {
   if (!isAutoreducing())
-    m_view->resizeSearchResultsColumnsToContents();
+    resizeSearchResultsColumns();
 
   updateWidgetEnabledState();
 
@@ -295,6 +295,25 @@ bool RunsPresenter::search() {
   }
 
   return true;
+}
+
+/** Resize the search results table columns to something sensible
+ */
+void RunsPresenter::resizeSearchResultsColumns() {
+  // Resize to content
+  m_view->resizeSearchResultsColumnsToContents();
+
+  // Limit columns' widths to a sensible maximum, based on a % of the table
+  // width
+  static auto constexpr numColumns =
+      static_cast<int>(ISearchModel::Column::NUM_COLUMNS);
+  auto const factor = 0.4;
+  auto const maxWidth =
+      static_cast<int>(m_view->getSearchResultsTableWidth() * factor);
+  for (auto column = 0; column < numColumns; ++column) {
+    if (m_view->getSearchResultsColumnWidth(column) > maxWidth)
+      m_view->setSearchResultsColumnWidth(column, maxWidth);
+  }
 }
 
 /** Start a single autoreduction process. Called periodially to add and process

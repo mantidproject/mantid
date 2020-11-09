@@ -7,6 +7,7 @@
 #include "QtSearchModel.h"
 #include "MantidAPI/TableRow.h"
 #include <QColor>
+#include <QSize>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -77,8 +78,8 @@ role.
 */
 QVariant QtSearchModel::data(const QModelIndex &index, int role) const {
 
-  const int colNumber = index.column();
   const int rowNumber = index.row();
+  const auto column = static_cast<Column>(index.column());
 
   if (rowNumber < 0 || rowNumber >= static_cast<int>(m_runDetails.size()))
     return QVariant();
@@ -110,13 +111,13 @@ QVariant QtSearchModel::data(const QModelIndex &index, int role) const {
     }
   }
   /*SETTING DATA FOR RUNS*/
-  if (colNumber == 0)
+  if (column == Column::RUN)
     return QString::fromStdString(run.runNumber());
-  if (colNumber == 1)
+  if (column == Column::TITLE)
     return QString::fromStdString(run.title());
-  if (colNumber == 2)
+  if (column == Column::EXCLUDE)
     return QString::fromStdString(run.excludeReason());
-  if (colNumber == 3)
+  if (column == Column::COMMENT)
     return QString::fromStdString(run.comment());
 
   return QVariant();
@@ -127,17 +128,17 @@ bool QtSearchModel::setData(const QModelIndex &index, const QVariant &value,
   if (role != Qt::EditRole)
     return true;
 
-  const int colNumber = index.column();
   const int rowNumber = index.row();
+  const auto column = static_cast<Column>(index.column());
 
   if (rowNumber < 0 || rowNumber >= static_cast<int>(m_runDetails.size()))
     return false;
 
   auto &run = m_runDetails[rowNumber];
 
-  if (colNumber == 2)
+  if (column == Column::EXCLUDE)
     run.addExcludeReason(value.toString().toStdString());
-  else if (colNumber == 3)
+  else if (column == Column::COMMENT)
     run.addComment(value.toString().toStdString());
   else
     return false;
@@ -155,23 +156,42 @@ Get the heading for a given section, orientation and role.
 */
 QVariant QtSearchModel::headerData(int section, Qt::Orientation orientation,
                                    int role) const {
-  if (role != Qt::DisplayRole)
-    return QVariant();
-
-  if (orientation == Qt::Horizontal) {
-    switch (section) {
-    case 0:
-      return "Run";
-    case 1:
-      return "Description";
-    case 2:
-      return "Exclude reason";
-    case 3:
-      return "Comment";
-    default:
-      return "";
+  const auto column = static_cast<Column>(section);
+  if (role == Qt::DisplayRole) {
+    if (orientation == Qt::Horizontal) {
+      switch (column) {
+      case Column::RUN:
+        return QString("Run");
+      case Column::TITLE:
+        return QString("Description");
+      case Column::EXCLUDE:
+        return QString("Exclude");
+      case Column::COMMENT:
+        return QString("Comment");
+      default:
+        return "";
+      }
+    }
+  } else if (role == Qt::ToolTipRole) {
+    if (orientation == Qt::Horizontal) {
+      switch (column) {
+      case Column::RUN:
+        return QString("The run number from the catalog (not editable)");
+      case Column::TITLE:
+        return QString("The run title from the catalog (not editable)");
+      case Column::EXCLUDE:
+        return QString("User-specified exclude reason. Double-click to edit. "
+                       "If set, the run will be excluded from autoprocessing "
+                       "and/or transfers to the main table");
+      case Column::COMMENT:
+        return QString("User-specified annotation. Double-click to edit. Does "
+                       "not affect the reduction.");
+      default:
+        return "";
+      }
     }
   }
+
   return QVariant();
 }
 
@@ -180,9 +200,10 @@ Provide flags on an index by index basis
 @param index: To generate a flag for.
 */
 Qt::ItemFlags QtSearchModel::flags(const QModelIndex &index) const {
+  const auto column = static_cast<Column>(index.column());
   if (!index.isValid())
     return nullptr;
-  else if (index.column() == 2 || index.column() == 3)
+  else if (column == Column::EXCLUDE || column == Column::COMMENT)
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable;
   else
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;

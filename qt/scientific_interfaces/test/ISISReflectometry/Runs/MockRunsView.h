@@ -25,6 +25,9 @@ public:
   MOCK_METHOD1(startTimer, void(const int));
   MOCK_METHOD0(stopTimer, void());
   MOCK_METHOD0(resizeSearchResultsColumnsToContents, void());
+  MOCK_CONST_METHOD0(getSearchResultsTableWidth, int());
+  MOCK_CONST_METHOD1(getSearchResultsColumnWidth, int(int));
+  MOCK_METHOD2(setSearchResultsColumnWidth, void(int, int));
   MOCK_CONST_METHOD0(searchResults, ISearchModel const &());
   MOCK_METHOD0(mutableSearchResults, ISearchModel &());
 

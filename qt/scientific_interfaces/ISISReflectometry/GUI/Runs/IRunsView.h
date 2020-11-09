@@ -76,6 +76,9 @@ public:
 
   // Search methods
   virtual void resizeSearchResultsColumnsToContents() = 0;
+  virtual int getSearchResultsTableWidth() const = 0;
+  virtual int getSearchResultsColumnWidth(int column) const = 0;
+  virtual void setSearchResultsColumnWidth(int column, int width) = 0;
   virtual ISearchModel const &searchResults() const = 0;
   virtual ISearchModel &mutableSearchResults() = 0;
 
