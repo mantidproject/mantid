@@ -27,10 +27,12 @@ public:
   FunctionModelDataset(const QString &workspaceName, const Spectra &spectra);
   FunctionModelDataset(QString workspaceName, Spectra &&spectra);
 
-  inline QString datasetName() const noexcept;
+  inline QString datasetName() const noexcept { return m_workspaceName; }
   QStringList domainNames() const;
 
-  inline std::size_t numberOfSpectra() const noexcept;
+  inline std::size_t numberOfSpectra() const noexcept {
+    return m_spectra.size().value;
+  }
 
 private:
   QString m_workspaceName;

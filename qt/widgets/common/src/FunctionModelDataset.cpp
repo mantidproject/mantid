@@ -20,15 +20,6 @@ FunctionModelDataset::FunctionModelDataset(QString workspaceName,
     : m_workspaceName(workspaceName), m_spectra(std::move(spectra)) {}
 
 /**
- * Returns the name of the workspace related to this dataset object.
- *
- * @returns the name of the workspace related to this dataset object.
- */
-inline QString FunctionModelDataset::datasetName() const noexcept {
-  return m_workspaceName;
-}
-
-/**
  * Returns the names given to each domain (i.e. spectrum) in this dataset. This
  * is required for display in the EditLocalParameter Dialog.
  *
@@ -47,15 +38,6 @@ QStringList FunctionModelDataset::domainNames() const {
                          ")";
     return domainNames;
   }
-}
-
-/**
- * Returns the number of spectra in this dataset object.
- *
- * @returns the number of spectra in this dataset object.
- */
-inline std::size_t FunctionModelDataset::numberOfSpectra() const noexcept {
-  return m_spectra.size().value;
 }
 
 } // namespace MantidWidgets
