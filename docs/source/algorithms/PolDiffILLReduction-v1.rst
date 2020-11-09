@@ -12,7 +12,7 @@ Description
 This algorithm performs polarised diffraction reduction for the D7 instrument at the ILL.
 With each call, this algorithm processes one type of data which is a part of the whole experiment.
 The logic is resolved by the property **ProcessAs**, which governs the reduction steps based on the requested type.
-It can be one of the 7: absorber, beam, transmission, container, quartz, vanadium, and sample.
+It can be one of the 8: absorber, empty beam, beam-with-absorber, transmission, container, quartz, vanadium, and sample.
 The full data treatment of the complete experiment should be build up as a chain with multiple calls of this algorithm over various types of acquisitions.
 The sequence should be logical, typically as enumerated above, since the later processes need the outputs of earlier processes as input.
 The common mandatory input is a run file (numor), or a list of them. In case a list is provided, coming for example from a scan over twoTheta angle,
@@ -28,36 +28,37 @@ ProcessAs
 ---------
 Different input properties can be specified depending on the value of **ProcessAs**, as summarized in the table:
 
-+--------------+--------------------------------------+--------------------------------------------+
-| ProcessAs    | Input Workspace Properties           | Other Input Properties                     |
-+==============+======================================+============================================+
-| Absorber     |                                      |                                            |
-+--------------+--------------------------------------+--------------------------------------------+
-| Beam         | * AbsorberTransmissionInputWorkspace |                                            |
-|              |                                      |                                            |
-+--------------+--------------------------------------+--------------------------------------------+
-| Transmission | * AbsorberTransmissionInputWorkspace |                                            |
-|              | * **BeamInputWorkspace**             |                                            |
-+--------------+--------------------------------------+--------------------------------------------+
-| Container    |                                      |                                            |
-+--------------+--------------------------------------+--------------------------------------------+
-| Quartz       | * AbsorberInputWorkspace             | * OutputTreatment                          |
-|              | * ContainerInputWorkspace            |                                            |
-|              | * **TransmissionInputWorkspace**     |                                            |
-+--------------+--------------------------------------+--------------------------------------------+
-| Vanadium     | * AbsorberInputWorkspace             | * SampleGeometry                           |
-|              | * ContainerInputWorkspace            | * SampleAndEnvironmentProperties           |
-|              | * TransmissionInputWorkspace         | * OutputTreatment                          |
-|              | * QuartzInputWorkspace               | * OutputUnits                              |
-|              |                                      | * ScatteringAngleBinSize                   |
-+--------------+--------------------------------------+--------------------------------------------+
-| Sample       | * AbsorberInputWorkspace             | * SampleGeometry                           |
-|              | * ContainerInputWorkspace            | * ComponentSeparationMethod                |
-|              | * TransmissionInputWorkspace         | * SampleAndEnvironmentProperties           |
-|              | * QuartzInputWorkspace               | * OutputTreatment                          |
-|              |                                      | * OutputUnits                              |
-|              |                                      | * ScatteringAngleBinSize                   |
-+--------------+--------------------------------------+--------------------------------------------+
++------------------+--------------------------------------+--------------------------------------------+
+| ProcessAs        | Input Workspace Properties           | Other Input Properties                     |
++==================+======================================+============================================+
+| BeamWithAbsorber |                                      |                                            |
++------------------+--------------------------------------+--------------------------------------------+
+| EmptyBeam        | * AbsorberTransmissionInputWorkspace |                                            |
+|                  |                                      |                                            |
++------------------+--------------------------------------+--------------------------------------------+
+| Transmission     | * AbsorberTransmissionInputWorkspace |                                            |
+|                  | * **BeamInputWorkspace**             |                                            |
++------------------+--------------------------------------+--------------------------------------------+
+| Absorber         |                                      |                                            |
++------------------+--------------------------------------+--------------------------------------------+
+| Container        |                                      |                                            |
++------------------+--------------------------------------+--------------------------------------------+
+| Quartz           | * AbsorberInputWorkspace             | * OutputTreatment                          |
+|                  | * ContainerInputWorkspace            |                                            |
+|                  | * **TransmissionInputWorkspace**     |                                            |
++------------------+--------------------------------------+--------------------------------------------+
+| Vanadium         | * AbsorberInputWorkspace             | * SampleGeometry                           |
+|                  | * ContainerInputWorkspace            | * SampleAndEnvironmentProperties           |
+|                  | * TransmissionInputWorkspace         | * OutputTreatment                          |
+|                  | * QuartzInputWorkspace               | * OutputUnits                              |
+|                  |                                      | * ScatteringAngleBinSize                   |
++------------------+--------------------------------------+--------------------------------------------+
+| Sample           | * AbsorberInputWorkspace             | * SampleGeometry                           |
+|                  | * ContainerInputWorkspace            | * SampleAndEnvironmentProperties           |
+|                  | * TransmissionInputWorkspace         | * OutputTreatment                          |
+|                  | * QuartzInputWorkspace               | * OutputUnits                              |
+|                  |                                      | * ScatteringAngleBinSize                   |
++------------------+--------------------------------------+--------------------------------------------+
 
 All the input workspace properties above are optional, unless bolded.
 For example, if processing as sample, if a container and absorber inputs are specified, subtraction will be performed, if not, the step will be skipped.
@@ -106,9 +107,9 @@ Full Treatment
 ##############
 
 Full treatment is built by stacking up unary reductions with corresponding **ProcessAs**. The diagram below illustrates the flow of processing.
-Letters denote absorber transmission (AT), beam (B), transmission (T), absorber (A), container (C), quartz (Q), vanadium (V), sample (S).
+Letters denote beam with absorber (AT), beam (B), transmission (T), absorber (A), container (C), quartz (Q), vanadium (V), sample (S).
 AT is processed first, and passed to all the other processes.
-B takes only AT as input, and the output of B is needed by the rest.
+B takes only AT as optional input, and the output of B is needed by all transmisison calculations.
 T takes AT and B as inputs, and the calculated transmission is used by Q, V, and S respectively.
 C and A are supplied to Q, V, and S respectively.
 Q takes A, C, its T, and the output is provided to V and S.
