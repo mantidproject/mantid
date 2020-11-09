@@ -70,6 +70,8 @@ void ALCDataLoadingPresenter::handleRunsChanged() {
   m_view->setLoadStatus("Finding " + m_view->getInstrument() + " -\n" +
                             m_view->getRunsText(),
                         "orange");
+  m_view->enableAlpha(false);
+  m_view->setAlphaValue("");
 }
 
 void ALCDataLoadingPresenter::handleRunsFound() {
@@ -328,6 +330,14 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
     periods.emplace_back(buffer.str());
   }
   m_view->setAvailablePeriods(periods);
+
+  // If single period, enable alpha, otherwise disable
+  if (numPeriods == 1) {
+    m_view->enableAlpha(true);
+    m_view->setAlphaValue("1");
+  } else {
+    m_view->enableAlpha(false);
+  }
 
   // Set time limits if this is the first data loaded (will both be zero)
   if (auto timeLimits = m_view->timeRange()) {

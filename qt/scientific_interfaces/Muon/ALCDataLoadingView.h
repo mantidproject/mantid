@@ -80,6 +80,8 @@ public:
   void runsAutoAddToggled(bool on) override;
   void setRunsTextWithoutSearch(const std::string &text) override;
   void toggleRunsAutoAdd(const bool autoAdd) override;
+  void enableAlpha(const bool alpha) override;
+  void setAlphaValue(const std::string &alpha) override;
 
   // -- End of IALCDataLoadingView interface
   // -----------------------------------------------------

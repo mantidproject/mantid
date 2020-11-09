@@ -37,6 +37,7 @@ void ALCDataLoadingView::initialize() {
   m_ui.logValueSelector->setEnabled(true);
   enableLoad(false);
   enableRunsAutoAdd(false);
+  enableAlpha(false);
   connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this,
@@ -415,6 +416,17 @@ std::string ALCDataLoadingView::getRunsFirstRunText() const {
     return text.substr(0, rangeSearchResult); // Must have range
   return text.substr(0, commaSearchResult);   // Must have comma
 }
+
+void ALCDataLoadingView::enableAlpha(const bool alpha) {
+  m_ui.alpha->setEnabled(alpha);
+  m_ui.alphaLabel->setEnabled(alpha);
+  m_ui.alphaMessage->setVisible(!alpha);
+}
+
+void ALCDataLoadingView::setAlphaValue(const std::string &alpha) {
+  m_ui.alpha->setText(QString::fromStdString(alpha));
+}
+
 
 } // namespace CustomInterfaces
 } // namespace MantidQt
