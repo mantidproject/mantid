@@ -105,7 +105,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
     def _generate_mask(self, n_pix, instrument):
         """
         Generates the DetectorList input for MaskDetectors
-        Masks the bottom and top n_pix pixels in each tube
+        Masks the bottom and top n_pix pixels in each tube, for D2B only
         @param n_pix : Number of pixels to mask from top and bottom of each tube
         @param instrument : Instrument
         @return the DetectorList string
@@ -179,7 +179,7 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
     def PyExec(self):
         data_type = 'Raw'
         if self.getProperty('UseCalibratedData').value:
-            data_type = 'Calibrated'
+            data_type = 'Auto' # this will use calibrated data, if they exist
         align_tubes = self.getProperty('AlignTubes').value
 
         self._progress = Progress(self, start=0.0, end=1.0, nreports=6)
@@ -212,9 +212,11 @@ class PowderILLDetectorScan(DataProcessorAlgorithm):
                 ExtractMonitors(InputWorkspace=name, DetectorWorkspace=name)
                 ApplyDetectorScanEffCorr(InputWorkspace=name,DetectorEfficiencyWorkspace='__det_eff',OutputWorkspace=name)
 
+        instrument = input_group[0].getInstrument()
+        instrument_name = instrument.getName()
         pixels_to_mask = self.getProperty('InitialMask').value
-        if pixels_to_mask != 0:
-            mask = self._generate_mask(pixels_to_mask, input_group[0].getInstrument())
+        if pixels_to_mask != 0 and instrument_name == 'D2B':
+            mask = self._generate_mask(pixels_to_mask, instrument)
             for ws in input_group:
                 MaskDetectors(Workspace=ws, DetectorList=mask)
         components_to_mask = self.getPropertyValue('ComponentsToMask')
