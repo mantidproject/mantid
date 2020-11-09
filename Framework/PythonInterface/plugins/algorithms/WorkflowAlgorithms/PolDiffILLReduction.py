@@ -412,7 +412,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             RenameWorkspace(tmp_names[0], intensity_0)
             RenameWorkspace(tmp_names[1], intensity_1)
 
-        to_clean = ['one_m_pol', 'one_p_pol', 'lhs_nominator', 'rhs_nominator', 'nominator', 'denominator']
+        to_clean += ['one_m_pol', 'one_p_pol', 'lhs_nominator', 'rhs_nominator', 'nominator', 'denominator']
         DeleteWorkspaces(WorkspaceList=to_clean)
         return ws
 
