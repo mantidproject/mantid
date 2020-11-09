@@ -76,7 +76,7 @@ public:
   MOCK_METHOD0(getRunsError, std::string());
   MOCK_METHOD0(getFiles, std::vector<std::string>());
   MOCK_METHOD0(getFirstFile, std::string());
-  MOCK_METHOD1(setLoadStatus, void(const std::string &));
+  MOCK_METHOD2(setLoadStatus, void(const std::string &, const std::string &));
   MOCK_METHOD1(runsAutoAddToggled, void(bool));
   MOCK_METHOD1(setRunsTextWithoutSearch, void(const std::string &));
   MOCK_METHOD1(toggleRunsAutoAdd, void(const bool));
@@ -154,7 +154,8 @@ public:
   void test_defaultLoad() {
     InSequence s;
 
-    EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Loading\n15189,15191-92", "orange"))
+        .Times(1);
     EXPECT_CALL(*m_view, disableAll());
     EXPECT_CALL(
         *m_view,
@@ -164,7 +165,9 @@ public:
                   WorkspaceY(0, 1, 0.128, 1E-3), WorkspaceY(0, 2, 0.109, 1E-3)),
             0));
     EXPECT_CALL(*m_view, enableAll());
-    EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(1);
+    EXPECT_CALL(*m_view,
+                setLoadStatus("Successfully loaded\n15189,15191-92", "green"))
+        .Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
 
     TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
@@ -174,8 +177,11 @@ public:
     // Change to differential calculation type
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Differential"));
 
-    EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Loading\n15189,15191-92", "orange"))
+        .Times(1);
+    EXPECT_CALL(*m_view,
+                setLoadStatus("Successfully loaded\n15189,15191-92", "green"))
+        .Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 3.00349, 1E-3),
                                             WorkspaceY(0, 1, 2.47935, 1E-3),
@@ -190,8 +196,11 @@ public:
     ON_CALL(*m_view, timeRange())
         .WillByDefault(Return(boost::make_optional(std::make_pair(5.0, 10.0))));
 
-    EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Loading\n15189,15191-92", "orange"))
+        .Times(1);
+    EXPECT_CALL(*m_view,
+                setLoadStatus("Successfully loaded\n15189,15191-92", "green"))
+        .Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.137, 1E-3),
                                             WorkspaceY(0, 1, 0.111, 1E-3),
@@ -260,9 +269,12 @@ public:
     ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("49-96"));
 
     EXPECT_CALL(*m_view, enableLoad(true)).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Found files")).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("")).Times(1);
+    EXPECT_CALL(*m_view,
+                setLoadStatus("Successfully found\n15189,15191-92", "green"))
+        .Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Loading\n15189,15191-92", "orange"))
+        .Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(false)).Times(1);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
@@ -276,7 +288,7 @@ public:
 
     EXPECT_CALL(*m_view, setAvailableInfoToEmpty()).Times(1);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
 
     m_view->foundRuns();
   }
@@ -287,7 +299,7 @@ public:
 
     EXPECT_CALL(*m_view, setAvailableInfoToEmpty()).Times(1);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
 
     m_view->foundRuns();
   }
@@ -297,8 +309,9 @@ public:
     ON_CALL(*m_view, getFiles()).WillByDefault(Return(nonExistent));
 
     EXPECT_CALL(*m_view, setDataCurve(_, _)).Times(0);
-    EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Loading\n15189,15191-92", "orange"))
+        .Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(false)).Times(1);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
@@ -311,9 +324,8 @@ public:
     ON_CALL(*m_view, getFiles()).WillByDefault(Return(emptyVec));
 
     EXPECT_CALL(*m_view, setDataCurve(_, _)).Times(0);
-    EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(0);
-    EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(0);
-    EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(0);
+    EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(false)).Times(1);
     EXPECT_CALL(*m_view, displayError("The list of files to load is empty"))
         .Times(1);
 
@@ -328,8 +340,11 @@ public:
     EXPECT_CALL(*m_view, deadTimeType()).Times(2);
     EXPECT_CALL(*m_view, deadTimeFile()).Times(0);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Loading\n15189,15191-92", "orange"))
+        .Times(1);
+    EXPECT_CALL(*m_view,
+                setLoadStatus("Successfully loaded\n15189,15191-92", "green"))
+        .Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.151202, 1E-3),
                                             WorkspaceY(0, 1, 0.129347, 1E-3),
@@ -361,9 +376,14 @@ public:
     EXPECT_CALL(*m_view, getBackwardGrouping()).Times(2);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
     EXPECT_CALL(*m_view, enableLoad(true)).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Found files")).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(1);
+    EXPECT_CALL(*m_view,
+                setLoadStatus("Successfully found\n15189,15191-92", "green"))
+        .Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Loading\n15189,15191-92", "orange"))
+        .Times(1);
+    EXPECT_CALL(*m_view,
+                setLoadStatus("Successfully loaded\n15189,15191-92", "green"))
+        .Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
     EXPECT_CALL(
         *m_view,
@@ -385,8 +405,11 @@ public:
     ON_CALL(*m_view, redPeriod()).WillByDefault(Return("2"));
     ON_CALL(*m_view, greenPeriod()).WillByDefault(Return("1"));
 
-    EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Loading\n15189,15191-92", "orange"))
+        .Times(1);
+    EXPECT_CALL(*m_view,
+                setLoadStatus("Successfully loaded\n15189,15191-92", "green"))
+        .Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
     EXPECT_CALL(*m_view, greenPeriod()).Times(1);
     // Check results
@@ -405,8 +428,11 @@ public:
     ON_CALL(*m_view, log()).WillByDefault(Return("Field_Danfysik"));
 
     EXPECT_CALL(*m_view, getFiles()).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Loading\n15189,15191-92", "orange"))
+        .Times(1);
+    EXPECT_CALL(*m_view,
+                setLoadStatus("Successfully loaded\n15189,15191-92", "green"))
+        .Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1364.520, 1E-3),
                                             WorkspaceX(0, 1, 1380.000, 1E-3),
@@ -435,8 +461,11 @@ public:
 
     EXPECT_CALL(*m_view, getFiles()).Times(1);
     EXPECT_CALL(*m_view, displayWarning(warningMessage)).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Loading\n15189,15191-92", "orange"))
+        .Times(1);
+    EXPECT_CALL(*m_view,
+                setLoadStatus("Successfully loaded\n15189,15191-92", "green"))
+        .Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
 
     TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
@@ -453,8 +482,6 @@ public:
 
     EXPECT_CALL(*m_view, getFiles()).Times(1);
     EXPECT_CALL(*m_view, displayWarning(warningMessage)).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(0);
-    EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(0);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(0);
 
     TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
@@ -464,8 +491,6 @@ public:
     EXPECT_CALL(*m_view, getFiles()).Times(1);
 
     EXPECT_CALL(*m_view, displayWarning(StrNe(""))).Times(0);
-    EXPECT_CALL(*m_view, setLoadStatus("Loading files")).Times(1);
-    EXPECT_CALL(*m_view, setLoadStatus("Loaded files")).Times(1);
     EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
 
     TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());

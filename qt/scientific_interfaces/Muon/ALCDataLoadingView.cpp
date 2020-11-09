@@ -366,18 +366,23 @@ std::string ALCDataLoadingView::getRunsText() const {
   return m_ui.runs->getText().toStdString();
 }
 
-void ALCDataLoadingView::setLoadStatus(const std::string &status) {
-  m_ui.loadStatusLabel->setText(QString::fromStdString(status));
+void ALCDataLoadingView::setLoadStatus(const std::string &status,
+                                       const std::string &colour) {
+  m_ui.loadStatusLabel->setText(QString::fromStdString("Status: " + status));
+  m_ui.loadStatusLabel->setStyleSheet(
+      QString::fromStdString("color: " + colour));
 }
 
 void ALCDataLoadingView::runsAutoAddToggled(bool on) {
   if (on) {
     m_ui.runs->setReadOnly(true);
     m_ui.load->setEnabled(false);
+    setLoadStatus("Auto Add", "orange");
     emit autoAddToggledSignal(true);
   } else {
     m_ui.runs->setReadOnly(false);
     m_ui.load->setEnabled(true);
+    setLoadStatus("Waiting", "orange");
     emit autoAddToggledSignal(false);
   }
 }

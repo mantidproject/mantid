@@ -151,7 +151,8 @@ public slots:
   virtual std::string getFirstFile() = 0;
 
   /// Set status label for loading
-  virtual void setLoadStatus(const std::string &status) = 0;
+  virtual void setLoadStatus(const std::string &status,
+                             const std::string &colour) = 0;
 
   /// Handle check/uncheck of runs auto add
   virtual void runsAutoAddToggled(bool autoAdd) = 0;

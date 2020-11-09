@@ -74,7 +74,8 @@ public:
   std::string getRunsError() override;
   std::vector<std::string> getFiles() override;
   std::string getFirstFile() override;
-  void setLoadStatus(const std::string &status) override;
+  void setLoadStatus(const std::string &status,
+                     const std::string &colour) override;
   void runsAutoAddToggled(bool on) override;
   void setRunsTextWithoutSearch(const std::string &text) override;
   void toggleRunsAutoAdd(const bool autoAdd) override;

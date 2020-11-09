@@ -63,20 +63,20 @@ void ALCDataLoadingPresenter::handleRunsChanged() {
   m_view->setPath(std::string{});
   m_view->enableRunsAutoAdd(false);
   m_view->setAvailableInfoToEmpty();
-  m_view->setLoadStatus("Attempting to find files");
+  m_view->setLoadStatus("Finding\n" + m_view->getRunsText(), "orange");
 }
 
 void ALCDataLoadingPresenter::handleRunsFound() {
   // Do a quick check for an empty input, do nothing in this case
   if (m_view->getRunsText().empty()) {
-    m_view->setLoadStatus("");
+    m_view->setLoadStatus("Waiting", "orange");
     return;
   }
 
   // Check for errors as files might not have been found
   if (!m_view->getRunsError().empty()) {
+    m_view->setLoadStatus("Error", "red");
     m_view->displayError(m_view->getRunsError());
-    m_view->setLoadStatus("");
     return;
   }
 
@@ -84,10 +84,11 @@ void ALCDataLoadingPresenter::handleRunsFound() {
   try {
     updateAvailableInfo();
     m_view->enableLoad(true);
-    m_view->setLoadStatus("Found files");
+    m_view->setLoadStatus("Successfully found\n" + m_view->getRunsText(),
+                          "green");
   } catch (const std::runtime_error &errroUpdateInfo) {
+    m_view->setLoadStatus("Error", "red");
     m_view->displayError(errroUpdateInfo.what());
-    m_view->setLoadStatus("");
   }
 }
 
@@ -101,7 +102,9 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
 
   // Check there are files
   if (files.empty()) {
+    m_view->setLoadStatus("Error", "red");
     m_view->displayError("The list of files to load is empty");
+    m_view->enableRunsAutoAdd(false);
     return;
   }
 
@@ -114,15 +117,16 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
       return;
   }
 
-  m_view->setLoadStatus("Loading files");
+  m_view->setLoadStatus("Loading\n" + m_view->getRunsText(), "orange");
   try {
     load(files);
     m_filesLoaded = files;
-    m_view->setLoadStatus("Loaded files");
+    m_view->setLoadStatus("Successfully loaded\n" + m_view->getRunsText(),
+                          "green");
     m_view->enableRunsAutoAdd(true);
   } catch (const std::runtime_error &errorLoadFiles) {
+    m_view->setLoadStatus("Error", "red");
     m_view->displayError(errorLoadFiles.what());
-    m_view->setLoadStatus("");
     m_view->enableRunsAutoAdd(false);
     m_view->enableAll();
     m_loadingData = false;
