@@ -73,11 +73,11 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_process_flag(mtd['quartz'], 'Quartz')
     
     def test_vanadium(self):
-        sampleProperties = {'FormulaUnits': 50}
+        sampleProperties = {'FormulaUnits': 1, 'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['vanadium'], 132, 1, 6, 'Scattering angle', 'Degrees', 'Wavelength', 'Wavelength', True)
         self._check_process_flag(mtd['vanadium'], 'Vanadium')
 
     def test_vanadium_sum_scans(self):
@@ -90,9 +90,9 @@ class PolDiffILLReductionTest(unittest.TestCase):
 
     def test_vanadium_annulus(self):
         PolDiffILLReduction(Run='396917', ProcessAs='Container', OutputWorkspace='container_ws')
-        sampleProperties = {'FormulaUnits': 50, 'SampleChemicalFormula': 'V',
+        sampleProperties = {'FormulaUnits': 1, 'SampleChemicalFormula': 'V', 'SampleMass': 8.54, 'FormulaUnitMass': 50.94,
                             'SampleInnerRadius': 2, 'SampleOuterRadius': 2.5, 'Height': 2,
-                            'BeamWidth': 2.6, 'BeamHeight': 2.6, 'SampleDensity': 1.18,
+                            'BeamWidth': 2.6, 'BeamHeight': 2.6, 'SampleDensity': 1,
                             'ContainerChemicalFormula': 'Al', 'ContainerDensity': 2.7,
                             'ContainerInnerRadius': 0.1, 'ContainerOuterRadius': 2.51}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium_annulus',
@@ -100,27 +100,29 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             SampleAndEnvironmentProperties=sampleProperties,
                             SampleGeometry='Annulus',
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_annulus'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['vanadium_annulus'], 132, 1, 6, 'Scattering angle', 'Degrees', 'Wavelength', 'Wavelength',
+                           True)
         self._check_process_flag(mtd['vanadium_annulus'], 'Vanadium')
 
     def test_sample(self):
-        sampleProperties = {'FormulaUnits': 182.54}
+        sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.93, 'FormulaUnitMass': 182.56}
         PolDiffILLReduction(Run='397004', ProcessAs='Sample', OutputWorkspace='sample',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['sample'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
+        self._check_output(mtd['sample'], 132, 1, 6, 'Scattering angle', 'Degrees', 'Wavelength', 'Wavelength', True)
         self._check_process_flag(mtd['sample'], 'Sample')
     
     def _check_process_flag(self, ws, value):
         self.assertTrue(ws[0].getRun().getLogData('ProcessedAs').value, value)
 
-    def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id):
+    def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id, transposed=False):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, WorkspaceGroup))
         self.assertTrue(ws.getNumberOfEntries(), nEntries)
         for entry in ws:
             self.assertTrue(isinstance(entry, MatrixWorkspace))
-            self.assertTrue(entry.isHistogramData())
+            if not transposed:
+                self.assertTrue(entry.isHistogramData())
             self.assertTrue(not entry.isDistribution())
             self.assertEqual(entry.getAxis(0).getUnit().caption(), x_unit)
             self.assertEqual(entry.getAxis(0).getUnit().unitID(), x_unit_id)

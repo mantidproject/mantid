@@ -53,7 +53,7 @@ class PolDiffILLReduction(PythonAlgorithm):
 
             sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
             geometry_type = self.getPropertyValue('SampleGeometry')
-            required_keys = ['FormulaUnits']
+            required_keys = ['FormulaUnits', 'SampleMass', 'FormulaUnitMass']
             if geometry_type != 'None':
                 required_keys += ['SampleChemicalFormula', 'SampleDensity', 'BeamHeight', 'BeamWidth', 'ContainerDensity']
             if geometry_type == 'FlatPlate':
@@ -411,18 +411,18 @@ class PolDiffILLReduction(PythonAlgorithm):
         """Reads the user-provided dictionary that contains sample geometry (type, dimensions) and experimental conditions,
          such as the beam size and calculates derived parameters."""
         self._sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
-        if 'initial_energy' not in self._sampleAndEnvironmentProperties:
+        if 'InitialEnergy' not in self._sampleAndEnvironmentProperties:
             h = physical_constants['Planck constant'][0]  # in m^2 kg^2 / s^2
             neutron_mass = physical_constants['neutron mass'][0]  # in kg
             wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value * 1e-10  # in m
             joules_to_mev = 1e3 / physical_constants['electron volt'][0]
             self._sampleAndEnvironmentProperties['InitialEnergy'] = joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
 
-    def _enforce_uniform_units(self, origin_ws, target_ws):
-        for entry_tuple in zip(mtd[origin_ws], mtd[target_ws]):
-            entry_origin, entry_target = entry_tuple
-            if entry_origin.YUnit() != entry_target.YUnit():
-                entry_target.setYUnit(entry_origin.YUnit())
+        if 'NMoles' not in self._sampleAndEnvironmentProperties:
+            sample_mass = self._sampleAndEnvironmentProperties['SampleMass'].value
+            formula_units = self._sampleAndEnvironmentProperties['FormulaUnits'].value
+            formula_unit_mass = self._sampleAndEnvironmentProperties['FormulaUnitMass'].value
+            self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass) * formula_units
 
     def _apply_self_attenuation_correction(self, sample_ws, container_ws):
         """Applies the self-attenuation correction based on the Palmaan-Pings Monte-Carlo calculation, taking into account
@@ -497,26 +497,40 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _normalise_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
-        vanadium_expected_cross_section = 0.404 # barns
-        CreateSingleValuedWorkspace(DataValue=vanadium_expected_cross_section
-                                    * self._sampleAndEnvironmentProperties['FormulaUnits'].value,
-                                    OutputWorkspace='norm')
-        Divide(LHSWorkspace='norm', RHSWorkspace=ws, OutputWorkspace=ws)
-        DeleteWorkspace(Workspace='norm')
+        if self.getPropertyValue('OutputTreatment') == 'Sum':
+            vanadium_expected_cross_section = 0.404 # barns
+            CreateSingleValuedWorkspace(DataValue=vanadium_expected_cross_section
+                                        * self._sampleAndEnvironmentProperties['NMoles'].value,
+                                        OutputWorkspace='norm')
+            tmp_name = '{}_1'.format(self.getPropertyValue('OutputWorkspace'))
+            RenameWorkspace(InputWorkspace=mtd[ws][0].name(), OutputWorkspace=tmp_name)
+            to_remove = ['norm']
+            for entry_no in range(1, mtd[ws].getNumberOfEntries()):
+                ws_name = mtd[ws][entry_no].name()
+                Plus(LHSWorkspace=tmp_name, RHSWorkspace=ws_name, OutputWorkspace=tmp_name)
+                to_remove.append(ws_name)
+            Divide(LHSWorkspace='norm', RHSWorkspace=tmp_name, OutputWorkspace=tmp_name)
+            DeleteWorkspaces(WorkspaceList=to_remove)
+            GroupWorkspaces(InputWorkspaces=tmp_name, OutputWorkspace=ws)
+
+        elif self.getProperty('OutputTreatment').value == 'Average':
+                self._merge_polarisations(ws, average_detectors=True)
+
         return ws
 
-    def _set_units(self, ws):
+    def _set_units(self, ws, process):
         output_unit = self.getPropertyValue('OutputUnits')
         if output_unit == 'TwoTheta':
-            if (len(self.getPropertyValue('Run').split(',')) > 1
+            if (process == 'Sample' and len(self.getPropertyValue('Run').split(',')) > 1
                     and self.getProperty('OutputTreatment').value == 'Sum'):
                 self._merge_polarisations(ws)
             else:
-                ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta')
+                ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta', OrderAxis=False)
             ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
         elif output_unit == 'Q':
             ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ',
-                                EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
+                                EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
+                                OrderAxis=False)
         for entry in mtd[ws]:
             unit = ''
             if output_unit == 'TwoTheta':
@@ -530,9 +544,6 @@ class PolDiffILLReduction(PythonAlgorithm):
     def _finalize(self, ws, process, progress):
         ReplaceSpecialValues(InputWorkspace=ws, OutputWorkspace=ws, NaNValue=0,
                              NaNError=0, InfinityValue=0, InfinityError=0)
-        if process != 'Quartz' and self.getProperty('OutputTreatment').value == 'Average':
-            progress.report('Merging polarisations')
-            self._merge_polarisations(ws, average_detectors=True)
         mtd[ws][0].getRun().addProperty('ProcessedAs', process, True)
         RenameWorkspace(InputWorkspace=ws, OutputWorkspace=ws[2:])
         self.setProperty('OutputWorkspace', mtd[ws[2:]])
@@ -598,7 +609,8 @@ class PolDiffILLReduction(PythonAlgorithm):
                 if process == 'Vanadium':
                     progress.report('Normalising vanadium output')
                     self._normalise_vanadium(ws)
-                self._set_units(ws)
+                self._set_units(ws, process)
+                Transpose(InputWorkspace=ws, OutputWorkspace=ws)
 
         self._finalize(ws, process, progress)
 
