@@ -68,7 +68,7 @@ public:
   /// func).This is intended for the BackToBackExponential-based peaks where
   /// the width parameter (S) can be set in the intsurment parameter file and
   /// this needs to be checked when a peak is added.
-  virtual std::string getWidthParameterName() const { return ""; }
+  virtual std::string getWidthParameterName() const { return std::string(); }
 
   /// Fix a parameter or set up a tie such that value returned
   /// by intensity() is constant during fitting.

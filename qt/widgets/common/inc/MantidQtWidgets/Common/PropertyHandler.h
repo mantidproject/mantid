@@ -177,6 +177,8 @@ public:
   double height() const;
   double centre() const;
   double fwhm() const;
+  std::string getWidthParameterName() const;
+  bool getParameterNameExplicitlySet(const std::string &param) const;
   double base() const { return m_base; }
 
   void addTie(const QString &tieStr);

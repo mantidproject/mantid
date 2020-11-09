@@ -321,6 +321,9 @@ public:
   double getPeakHeightOf(const QString &prefix);
   void setPeakFwhmOf(const QString &prefix, double value);
   double getPeakFwhmOf(const QString &prefix);
+  std::string getWidthParameterNameOf(const QString &prefix);
+  bool getParameterNameExplicitlySetOf(const QString &prefix,
+                                       const std::string &param);
   QStringList getPeakPrefixes() const;
 
   // Emits a signal for when the sequential fit has finished

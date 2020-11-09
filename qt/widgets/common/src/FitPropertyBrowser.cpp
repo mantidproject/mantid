@@ -3587,6 +3587,16 @@ double FitPropertyBrowser::getPeakFwhmOf(const QString &prefix) {
   return handler->fwhm();
 }
 
+std::string FitPropertyBrowser::getWidthParameterNameOf(const QString &prefix) {
+  auto handler = getPeakHandler(prefix);
+  return handler->getWidthParameterName();
+}
+
+bool FitPropertyBrowser::getParameterNameExplicitlySetOf(const QString &prefix, const std::string &param) {
+  auto handler = getPeakHandler(prefix);
+  return handler->getParameterNameExplicitlySet(param);
+}
+
 QStringList FitPropertyBrowser::getPeakPrefixes() const {
   QStringList peaks;
   auto parentHandler = getHandler();

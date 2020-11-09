@@ -551,6 +551,8 @@ SIP_PYOBJECT defaultBackgroundType();
     void setPeakHeightOf(QString, double);
     double getPeakFwhmOf(QString);
     void setPeakFwhmOf(QString, double);
+    std::string getWidthParameterNameOf(QString);
+    bool getParameterNameExplicitlySetOf(QString, std::string);
     void normaliseData(bool on);
     QMenu *getFitMenu() const;
     QListWidget* getWorkspaceList() const;
