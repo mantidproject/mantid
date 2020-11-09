@@ -541,11 +541,11 @@ class PolDiffILLReduction(PythonAlgorithm):
                                 EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
                                 OrderAxis=False)
         for entry in mtd[ws]:
-            unit = ''
+            unit = 'dSigma / dOmega'
             if output_unit == 'TwoTheta':
-                unit = 'dS / d(TwoTheta)'
+                unit += ' (TwoTheta)'
             elif output_unit == 'Q':
-                unit = 'dS / dQ '
+                unit += ' (Q)'
             entry.setYUnit(unit)
             entry.setYUnitLabel(unit)
         return ws
