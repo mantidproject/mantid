@@ -90,14 +90,35 @@ class Function(object):
 
         @param args: A list of parameters to fix. Specifying 'all' will fix all of the parameters in a function.
         """
-        if "all" in [param.lower() for param in args]:
+        params = self._validate_parameter_args(*args)
+
+        if "all" in [param.lower() for param in params]:
             self.function.fixAll()
         else:
-            for param in args:
+            for param in params:
                 if self.function.hasParameter(self.prefix + param):
                     self.function.fixParameter(self.prefix + param)
                 else:
                     logger.warning(f"Cannot fix parameter '{param}' as it does not exist in the Function.")
+
+    @staticmethod
+    def _validate_parameter_args(*args):
+        """
+        Validates the parameter arguments passed to the 'fix' function.
+        @param args: The arguments to be validated.
+        @return: A list of validate parameter names.
+        """
+        params = []
+        for param in args:
+            if not isinstance(param, str):
+                logger.warning(f"Ignoring {repr(param)} because expected a string.")
+            else:
+                params.append(param)
+
+        if not args:
+            logger.warning("No parameters were passed to fix. If you intended to fix all use: fix('all')")
+
+        return params
 
     def ties(self, **kwargs):
         """Set ties on the parameters.
