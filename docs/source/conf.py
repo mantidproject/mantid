@@ -145,13 +145,6 @@ pngmath_latex_preamble = r'\usepackage[active]{preview}'
 # See http://sphinx-doc.org/ext/math.html#confval-pngmath_use_preview
 pngmath_use_preview = True
 
-# -- Fix up angstrom symbol for mathjax which shouldn't have an effect on pngmath
-rst_prolog = r"""
-
-:math:`\renewcommand\AA{\unicode{x212B}}`
-
-"""
-
 # -- HTML output ----------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
