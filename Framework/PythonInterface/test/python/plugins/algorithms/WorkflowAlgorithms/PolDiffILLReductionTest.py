@@ -80,14 +80,6 @@ class PolDiffILLReductionTest(unittest.TestCase):
         self._check_output(mtd['vanadium'], 132, 1, 6, 'Scattering angle', 'Degrees', 'Wavelength', 'Wavelength', True)
         self._check_process_flag(mtd['vanadium'], 'Vanadium')
 
-    def test_vanadium_sum_scans(self):
-        sampleProperties = {'FormulaUnits': 50}
-        PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium_sum',
-                            SampleAndEnvironmentProperties=sampleProperties,
-                            OutputTreatment='Sum', OutputUnits='TwoTheta')
-        self._check_output(mtd['vanadium_sum'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Scattering angle', 'Degrees')
-        self._check_process_flag(mtd['vanadium_sum'], 'Vanadium')
-
     def test_vanadium_annulus(self):
         PolDiffILLReduction(Run='396917', ProcessAs='Container', OutputWorkspace='container_ws')
         sampleProperties = {'FormulaUnits': 1, 'SampleChemicalFormula': 'V', 'SampleMass': 8.54, 'FormulaUnitMass': 50.94,
