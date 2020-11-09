@@ -228,7 +228,6 @@ Fixing Background Parameters
 .. code-block:: python
 
    from CrystalField import Background, CrystalField, Function
-   from mantid.simpleapi import *
 
    # Sets up the crystal field model
    refpars = {'B20':0.2, 'B40':-0.00164, 'B60':0.0001146, 'B66':0.001509}
@@ -255,7 +254,6 @@ Tying Background Parameters
 .. code-block:: python
 
    from CrystalField import Background, CrystalField, Function
-   from mantid.simpleapi import *
 
    # Sets up the crystal field model
    refpars = {'B20':0.2, 'B40':-0.00164, 'B60':0.0001146, 'B66':0.001509}

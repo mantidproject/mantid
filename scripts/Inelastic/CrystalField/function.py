@@ -111,7 +111,7 @@ class Function(object):
         params = []
         for param in args:
             if not isinstance(param, str):
-                logger.warning(f"Ignoring {repr(param)} because expected a string.")
+                logger.warning(f"Ignoring {repr(param)} because a string was expected.")
             else:
                 params.append(param)
 
