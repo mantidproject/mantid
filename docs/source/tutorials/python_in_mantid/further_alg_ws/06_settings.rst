@@ -1,4 +1,4 @@
-.. _05_settings:
+.. _06_settings:
 
 ========
 Settings
