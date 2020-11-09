@@ -112,6 +112,7 @@ class EngineeringDiffractionGui(QtWidgets.QMainWindow, Ui_main_window):
     def setup_fitting(self):
         fitting_view = FittingView()
         self.fitting_presenter = FittingPresenter(fitting_view)
+        self.focus_presenter.add_focus_subscriber(self.fitting_presenter.data_widget.presenter.focus_run_observer)
         self.tabs.addTab(fitting_view, "Fitting")
 
     def setup_calibration_notifier(self):

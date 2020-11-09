@@ -93,14 +93,30 @@ new_legend_props = {
     'marker_label_padding': 1.0}
 
 
+class CurveNameSideEffect:
+    def __init__(self, old_name, new_name, switch_count):
+        self.old_name = old_name
+        self.new_name = new_name
+        self.switch_count = switch_count
+
+        self.call_count = 0
+
+    def __call__(self):
+        self.call_count += 1
+        if self.call_count <= self.switch_count:
+            return self.old_name
+        return self.new_name
+
+
 def mock_axes_tab_presenter_update_view(presenter):
     presenter.current_view_props = new_ax_view_props
 
 
-def _run_apply_properties_on_figure_with_curve():
+def _run_apply_properties_on_figure_with_curve(curve_view_mock):
     fig = figure()
     ax = fig.add_subplot(111)
     ax.errorbar([0, 1], [0, 1], yerr=[0.1, 0.2], label='old label')
+    curve_view_mock.get_selected_curve_name = CurveNameSideEffect('old label', 'New label', switch_count=6)
 
     with patch.object(AxesTabWidgetPresenter, 'update_view', mock_axes_tab_presenter_update_view):
         presenter = PlotConfigDialogPresenter(fig, view=Mock())
@@ -130,12 +146,14 @@ def _run_apply_properties_on_figure_with_image():
     return img_ax
 
 
-def _run_apply_properties_on_figure_with_legend():
+def _run_apply_properties_on_figure_with_legend(curve_view_mock):
     fig = figure()
     ax = fig.add_subplot(111)
     ax.plot([1, 2, 3], label='old label')
     legend = ax.legend()
     legend.get_frame().set_alpha(0.5)
+    curve_view_mock.get_selected_curve_name = CurveNameSideEffect('old label', 'New label', switch_count=3)
+
     with patch.object(AxesTabWidgetPresenter, 'update_view', mock_axes_tab_presenter_update_view):
         presenter = PlotConfigDialogPresenter(fig, view=Mock())
     with patch.object(presenter.tab_widget_presenters[1], 'update_view',
@@ -159,13 +177,12 @@ class ApplyAllPropertiesTest(unittest.TestCase):
 
         # Mock curves tab view
         cls.curve_view_mock = Mock(
-            get_selected_curve_name=lambda: 'old label',
             get_selected_ax_name=lambda: '(0, 0)',
             get_properties=lambda: CurveProperties(new_curve_view_props))
         cls.curve_view_patch = patch(CURVE_VIEW, lambda x: cls.curve_view_mock)
         cls.curve_view_patch.start()
 
-        cls.ax = _run_apply_properties_on_figure_with_curve()
+        cls.ax = _run_apply_properties_on_figure_with_curve(cls.curve_view_mock)
         cls.new_curve = cls.ax.containers[0]
 
         # Mock images tab view
@@ -184,7 +201,7 @@ class ApplyAllPropertiesTest(unittest.TestCase):
         cls.legend_view_patch = patch(LEGEND_VIEW, lambda x: cls.legend_view_mock)
         cls.legend_view_patch.start()
 
-        cls.legend_ax = _run_apply_properties_on_figure_with_legend()
+        cls.legend_ax = _run_apply_properties_on_figure_with_legend(cls.curve_view_mock)
         cls.new_legend = cls.legend_ax.get_legend()
 
     @classmethod

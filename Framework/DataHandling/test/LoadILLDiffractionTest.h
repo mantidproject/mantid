@@ -19,6 +19,7 @@
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/V3D.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -82,6 +83,7 @@ public:
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
     TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "Degrees")
+    checkTimeFormat(outputWS);
   }
 
   void test_D20_no_scan() {
@@ -169,6 +171,7 @@ public:
     TS_ASSERT_EQUALS(
         outputWS->run().getProperty("Detector.calibration_file")->value(),
         "none")
+    checkTimeFormat(outputWS);
   }
 
   void test_D20_no_scan_requesting_calibrated_throws() {
@@ -255,6 +258,7 @@ public:
         "4.8\n2017-Feb-15 08:59:02.423509996  5\n";
 
     TS_ASSERT_EQUALS(omega->value(), omegaTimeSeriesValue)
+    checkTimeFormat(outputWS);
   }
 
   void test_D20_detector_scan_offset() {
@@ -278,6 +282,7 @@ public:
     position.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 5.825, 0.001);
     TS_ASSERT_LESS_THAN(position.X(), 0.);
+    checkTimeFormat(outputWS);
   }
 
   void test_D20_multifile() {
@@ -301,6 +306,7 @@ public:
     TS_ASSERT(outputWS->detectorInfo().isMonitor(0))
     TS_ASSERT(!outputWS->isHistogramData())
     TS_ASSERT(!outputWS->isDistribution())
+    checkTimeFormat(outputWS);
   }
 
   void test_D2B_alignment() {
@@ -349,6 +355,7 @@ public:
     TS_ASSERT_DELTA(tube128CentreTime2.Y(), 0., 0.001)
     tube128CentreTime2.getSpherical(r, theta, phi);
     TS_ASSERT_DELTA(theta, 147.55, 0.001)
+    checkTimeFormat(outputWS);
   }
 
   void do_test_D2B_single_file(const std::string &dataType) {
@@ -439,6 +446,7 @@ public:
                      ANGULAR_DETECTOR_SPACING * double(i)),
             1e-2)
       }
+      checkTimeFormat(outputWS);
     }
 
     TS_ASSERT(outputWS->run().hasProperty("Multi.TotalCount"))
@@ -478,6 +486,13 @@ public:
     TS_ASSERT(run.hasProperty("ScanType"));
     const auto type = run.getLogData("ScanType");
     TS_ASSERT_EQUALS(type->value(), "DetectorScan");
+    checkTimeFormat(outputWS);
+  }
+
+  void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
+    TS_ASSERT(outputWS->run().hasProperty("start_time"));
+    TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
+        outputWS->run().getProperty("start_time")->value()));
   }
 
 private:

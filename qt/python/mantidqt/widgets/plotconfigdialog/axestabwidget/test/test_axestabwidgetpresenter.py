@@ -78,6 +78,27 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                 ax_mock.set_facecolor.assert_called_once_with(
                     presenter.current_view_props.canvas_color)
 
+    def test_ampersand_removed_from_current_axis_title(self):
+        ax_title = "test"
+
+        # KDE prepends & to axes title
+        mock_kde_view = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)",
+                                  get_axis=lambda: f"&{ax_title}",
+                                  get_properties=lambda: {})
+        ax_props_dict = {
+            # Mock out some properties that presenter.axis_changed depends on.
+            'canvas_color': (1.0, 1.0, 1.0, 1.0),
+            f"{ax_title}lim": (0, 1),
+            f"{ax_title}label": ax_title,
+            f"{ax_title}scale": "Linear",
+        }
+        presenter = Presenter(self.fig, view=mock_kde_view)
+        presenter.current_view_props = ax_props_dict
+
+        presenter.axis_changed()
+
+        self.assertEqual(presenter.current_axis, ax_title.replace('&', ''))
+
     def test_apply_all_properties_calls_setters_with_correct_properties(self):
         ax_mock_1 = mock.MagicMock()
         ax_mock_2 = mock.MagicMock()

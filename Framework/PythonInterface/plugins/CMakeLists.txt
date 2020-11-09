@@ -47,6 +47,7 @@ set(PYTHON_PLUGINS
     algorithms/DSFinterp.py
     algorithms/DakotaChiSquared.py
     algorithms/DeltaPDF3D.py
+    algorithms/LoadElementalAnalysisData.py
     algorithms/EnggCalibrate.py
     algorithms/EnggCalibrateFull.py
     algorithms/EnggEstimateFocussedBackground.py

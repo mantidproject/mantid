@@ -36,6 +36,8 @@ Improvements
 ############
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
 - The plot pane in the Engineering Diffraction interface can now be undocked from the main window, making this more readable when the fit property view is open.
+- The default loadpath in the fitting tab of the Engineering Diffraction UI is now set to the most recently focused files.
+
 
 Bugfixes
 ########
