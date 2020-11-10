@@ -44,3 +44,21 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         self.assertEqual(None, p.ads_observer)
         self.assert_widget_not_present("instr")
         self.assert_no_toplevel_widgets()
+
+    def test_instrument_view_launch_and_close(self):
+        """Test launch and close instrument view with ARCS data
+        """
+        # create workspace
+        ws = CreateSampleWorkspace()
+        LoadInstrument(ws, InstrumentName='ARCS', RewriteSpectraMap=False)
+
+        # create instrument view presenter
+        iv_presenter = InstrumentViewPresenter(ws, parent=None, ads_observer=None)
+        self.assert_widget_created()
+
+        # close
+        iv_presenter.close(ws.name())
+        self.assert_no_toplevel_widgets()
+
+        # break it
+        assert 1 == 100, 'I want to see how it fails'
