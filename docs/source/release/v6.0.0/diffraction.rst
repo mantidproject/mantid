@@ -36,8 +36,6 @@ Improvements
 ############
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
 - The height of the :ref:`func-BackToBackExponential` peak is now preserved when changing the FWHM sliders when fitting.
-- Modify filenames of xye outputs from running a focus in the Pearl power diffraction scripts
-- Remove _noatten workspace that was produced by the Pearl powder diffraction scripts when run with perform_attenuation=True
 - The default loadpath in the fitting tab of the Engineering Diffraction UI is now set to the most recently focused files.
 
 Bugfixes
