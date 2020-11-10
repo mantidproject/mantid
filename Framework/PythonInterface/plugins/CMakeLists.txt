@@ -145,6 +145,7 @@ set(PYTHON_PLUGINS
     algorithms/RetrieveRunInfo.py
     algorithms/SANSSubtract.py
     algorithms/SANSWideAngleCorrection.py
+    algorithms/SCDFindPeaks.py
     algorithms/SNAPReduce.py
     algorithms/SNSPowderReduction.py
     algorithms/SaveGEMMAUDParamFile.py
