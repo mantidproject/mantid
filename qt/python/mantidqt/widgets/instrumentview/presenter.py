@@ -36,7 +36,7 @@ class InstrumentViewPresenter(ObservingPresenter):
         # TODO FIXME - this may not be a good design.  It violates the OO principles
         # Update the instrument view manager
         # InstrumentViewManager.last_view = self
-        InstrumentViewManager.register(self, self.ws_name)
+        # FAIL??? FIXME InstrumentViewManager.register(self, self.ws_name)
 
     def current_workspace_equals(self, name):
         return self.ws_name == name
@@ -65,6 +65,18 @@ class InstrumentViewPresenter(ObservingPresenter):
     def select_pick_tab(self):
         self.container.select_tab(1)
 
+    def close(self, workspace_name):
+        """
+        extend close()
+        :param workspace_name:
+        :return:
+        """
+        if InstrumentViewManager.last_view == self:
+            InstrumentViewManager.last_view = None
+        InstrumentViewManager.remove(self.ws_name)
+
+        super(InstrumentViewPresenter, self).close(self.ws_name)
+
 
 class InstrumentViewManager:
     last_view = 'Hello Kitty'
@@ -78,3 +90,7 @@ class InstrumentViewManager:
     @staticmethod
     def get_instrument_view(ws_name):
         return InstrumentViewManager.view_dict[ws_name]
+
+    @staticmethod
+    def remove(ws_name):
+        del InstrumentViewManager.view_dict[ws_name]
