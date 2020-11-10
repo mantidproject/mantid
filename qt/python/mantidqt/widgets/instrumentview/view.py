@@ -64,8 +64,15 @@ class InstrumentView(QWidget, ObservingView):
 
         return self.widget.getTab(tab_name)
 
-    def get_render_tab(self):
+    def get_current_tab(self):
+        """Get current tab
+        :return: InstrumentWidgetTab
+        """
+        curr_index = self.widget.getCurrentTab()
 
+        return self.get_tab(curr_index)
+
+    def get_render_tab(self):
         return self.widget.getRenderTab(0)
 
     def select_tab(self, tab_index):

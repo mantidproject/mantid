@@ -64,6 +64,16 @@ public:
   Overlay ... whatever
 %End
 
+  int getCurrentTab() const;
+%Docstring
+  Get the index of the current tab.
+  It can be used with getTab(tab)
+
+  Returns:
+       an integer as the index of current tab
+%End
+
+
   // get tab (1)
   InstrumentWidgetTab * getTab(const QString & title) const;
 %Docstring

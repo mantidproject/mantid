@@ -53,6 +53,18 @@ class InstrumentViewPresenter(ObservingPresenter):
     def show_view(self):
         self.container.show()
 
+    def get_current_tab(self):
+        return self.container.get_current_tab()
+
+    def get_render_tab(self):
+        return self.container.get_render_tab()
+
+    def select_render_tab(self):
+        self.container.select_tab(0)
+
+    def select_pick_tab(self):
+        self.container.select_tab(1)
+
 
 class InstrumentViewManager:
     last_view = 'Hello Kitty'

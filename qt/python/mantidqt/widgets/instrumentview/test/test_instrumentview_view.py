@@ -45,7 +45,7 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         self.assert_widget_not_present("instr")
         self.assert_no_toplevel_widgets()
 
-    def test_instrument_view_launch_and_close(self):
+    def f_test_select_and_get_tab(self):
         """Test launch and close instrument view with ARCS data
         """
         # create workspace
@@ -55,6 +55,19 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         # create instrument view presenter
         iv_presenter = InstrumentViewPresenter(ws, parent=None, ads_observer=None)
         self.assert_widget_created()
+
+        # select tab
+        # select pick tab
+        iv_presenter.select_pick_tab()
+        # current_tab = iv_presenter.get_current_tab()
+        # pick_tab = iv_presenter.get_pick_tab()
+        # assert current_tab == pick_tab, f'{current_tab} != {pick_tab}'
+
+        # render tab
+        iv_presenter.select_render_tab()
+        current_tab = iv_presenter.get_current_tab()
+        render_tab = iv_presenter.get_render_tab()
+        assert current_tab == render_tab, f'{current_tab} != {render_tab}'
 
         # close
         iv_presenter.close(ws.name())
