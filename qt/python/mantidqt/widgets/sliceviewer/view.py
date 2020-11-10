@@ -16,7 +16,7 @@ from mantid.plots.datafunctions import get_normalize_by_bin_width
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Signal, Slot
 from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter,
                             QStatusBar, QVBoxLayout, QWidget)
 
@@ -35,6 +35,8 @@ from .peaksviewer.representation.painter import MplPainter
 from .zoom import ScrollZoomMixin
 
 # Constants
+from ..observers.observing_view import ObservingView
+
 DBLMAX = sys.float_info.max
 
 SCALENORM = "SliceViewer/scale_norm"
@@ -523,8 +525,10 @@ class SliceViewerDataView(QWidget):
             self.conf.set(POWERSCALE, exponent)
 
 
-class SliceViewerView(QWidget):
+class SliceViewerView(QWidget, ObservingView):
     """Combines the data view for the slice viewer with the optional peaks viewer."""
+    close_signal = Signal()
+
     def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
 
@@ -546,6 +550,8 @@ class SliceViewerView(QWidget):
 
         # connect up additional peaks signals
         self.data_view.mpl_toolbar.peaksOverlayClicked.connect(self.peaks_overlay_clicked)
+
+        self.close_signal.connect(self._run_close)
 
     @property
     def data_view(self):
@@ -592,3 +598,7 @@ class SliceViewerView(QWidget):
     def closeEvent(self, event):
         self.deleteLater()
         super().closeEvent(event)
+
+    @Slot()
+    def _run_close(self):
+        self.close()

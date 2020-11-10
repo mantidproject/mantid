@@ -44,18 +44,19 @@ class SliceViewerADSObserver(AnalysisDataServiceObserver):
     @_catch_exceptions
     def clearHandle(self):
         """Called when the ADS is deleted all of its workspaces"""
-        self.logger.notice("Cleared")
+        self.view.emit_close()
 
     @_catch_exceptions
-    def deleteHandle(self, _, workspace):
+    def deleteHandle(self, ws_name, _):
         """
         Called when the ADS has deleted a workspace. Checks if
         the deleted workspace is the same as the one used for the
         sliceviewer model. If so, sliceviewer is closed.
-        :param _: The name of the workspace. Unused
-        :param workspace: A pointer to the workspace
+        :param ws_name: The name of the workspace.
+        :param _: A pointer to the workspace. Unused
         """
-        self.logger.notice("delete" + str(workspace))
+        if ws_name == str(self.presenter.model._get_ws()):
+            self.view.emit_close()
 
     @_catch_exceptions
     def replaceHandle(self, _, workspace):

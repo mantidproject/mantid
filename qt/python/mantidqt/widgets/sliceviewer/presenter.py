@@ -16,10 +16,12 @@ from .model import SliceViewerModel, WS_TYPE
 from .sliceinfo import SliceInfo
 from .toolbar import ToolItemText
 from .view import SliceViewerView
+from .adsobsever import SliceViewerADSObserver
 from .peaksviewer import PeaksViewerPresenter, PeaksViewerCollectionPresenter
+from ..observers.observing_presenter import ObservingPresenter
 
 
-class SliceViewer(object):
+class SliceViewer(ObservingPresenter):
     TEMPORARY_STATUS_TIMEOUT = 2000
 
     def __init__(self, ws, parent=None, model=None, view=None, conf=None):
@@ -66,6 +68,8 @@ class SliceViewer(object):
 
         # Start the GUI with zoom selected.
         self.view.data_view.activate_tool(ToolItemText.ZOOM)
+
+        self.ads_observer = SliceViewerADSObserver(self)
 
     def new_plot_MDH(self):
         """
