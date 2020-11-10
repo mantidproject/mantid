@@ -36,7 +36,7 @@ class InstrumentViewPresenter(ObservingPresenter):
         # TODO FIXME - this may not be a good design.  It violates the OO principles
         # Update the instrument view manager
         # InstrumentViewManager.last_view = self
-        # FAIL??? FIXME InstrumentViewManager.register(self, self.ws_name)
+        InstrumentViewManager.register(self, self.ws_name)
 
     def current_workspace_equals(self, name):
         return self.ws_name == name
@@ -86,6 +86,7 @@ class InstrumentViewManager:
     def register(instrument_view_obj, ws_name):
         InstrumentViewManager.last_view = instrument_view_obj
         InstrumentViewManager.view_dict[ws_name] = instrument_view_obj
+        print(f'[DEBUG] Add workspace {ws_name} instrument view to manager dictionary')
 
     @staticmethod
     def get_instrument_view(ws_name):
@@ -93,4 +94,9 @@ class InstrumentViewManager:
 
     @staticmethod
     def remove(ws_name):
-        del InstrumentViewManager.view_dict[ws_name]
+        try:
+            del InstrumentViewManager.view_dict[ws_name]
+        except KeyError as ke:
+            raise RuntimeError(f'workspace {ws_name} does not exist in dictionary. '
+                               f'The available includes {InstrumentViewManager.view_dict.keys()},'
+                               f'FYI: {ke}')
