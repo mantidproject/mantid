@@ -7,20 +7,22 @@
 #  This file is part of the mantid workbench.
 #
 #
+import sys
+
 from mantid.kernel import ConfigService
 from mantid.plots.utility import mpl_version_info, get_current_cmap
 from mantidqt.MPLwidgets import FigureCanvas
 from matplotlib.colorbar import Colorbar
 from matplotlib.figure import Figure
-from matplotlib.colors import Normalize, SymLogNorm, PowerNorm
+from matplotlib.colors import Normalize, SymLogNorm, PowerNorm, LogNorm
 from matplotlib import cm
 import numpy as np
 from qtpy.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLineEdit, QComboBox, QCheckBox, QLabel
 from qtpy.QtCore import Signal
 from qtpy.QtGui import QDoubleValidator
 
-
-NORM_OPTS = ["Linear", "SymmetricLog10", "Power"]
+NORM_OPTS = ["Linear", "Log", "SymmetricLog10", "Power"]
+MIN_LOG_VALUE = 1e-4
 
 
 class ColorbarWidget(QWidget):
@@ -53,12 +55,12 @@ class ColorbarWidget(QWidget):
         self.cmin_layout.addWidget(self.cmin)
         self.cmin_layout.addStretch()
 
+        self.linear_validator = QDoubleValidator(parent=self)
+        self.log_validator = QDoubleValidator(MIN_LOG_VALUE, sys.float_info.max, 3, self)
         self.cmax = QLineEdit()
         self.cmax_value = 1
         self.cmax.setMaximumWidth(100)
         self.cmax.editingFinished.connect(self.clim_changed)
-        self.cmin.setValidator(QDoubleValidator())
-        self.cmax.setValidator(QDoubleValidator())
         self.cmax_layout = QHBoxLayout()
         self.cmax_layout.addStretch()
         self.cmax_layout.addWidget(self.cmax)
@@ -78,11 +80,12 @@ class ColorbarWidget(QWidget):
         self.norm.addItems(NORM_OPTS)
         self.norm.setCurrentText(norm_scale)
         self.norm.currentIndexChanged.connect(self.norm_changed)
+        self.update_clim_validator()
 
         self.powerscale = QLineEdit()
         self.powerscale_value = powerscale_value
         self.powerscale.setText(str(powerscale_value))
-        self.powerscale.setValidator(QDoubleValidator(0.001,100,3))
+        self.powerscale.setValidator(QDoubleValidator(0.001, 100, 3))
         self.powerscale.setMaximumWidth(50)
         self.powerscale.editingFinished.connect(self.norm_changed)
         self.powerscale_label = QLabel("n=")
@@ -104,11 +107,11 @@ class ColorbarWidget(QWidget):
         if parent:
             # Set facecolor to match parent
             self.canvas.figure.set_facecolor(parent.palette().window().color().getRgbF())
-        self.ax = self.canvas.figure.add_axes([0.0,0.02,0.2,0.97])
+        self.ax = self.canvas.figure.add_axes([0.0, 0.02, 0.2, 0.97])
 
         # layout
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
         self.layout.setSpacing(2)
         self.layout.addWidget(self.cmap)
         self.layout.addWidget(self.crev)
@@ -185,7 +188,7 @@ class ColorbarWidget(QWidget):
             self.powerscale_label.hide()
         self.colorbar.mappable.set_norm(self.get_norm())
         self.set_mappable(self.colorbar.mappable)
-
+        self.update_clim_validator()
         self.scaleNormChanged.emit()
 
     def get_norm(self):
@@ -203,8 +206,11 @@ class ColorbarWidget(QWidget):
                 self.powerscale_value = float(self.powerscale.text())
             return PowerNorm(gamma=self.powerscale_value, vmin=cmin, vmax=cmax)
         elif NORM_OPTS[idx] == "SymmetricLog10":
-            return SymLogNorm(1e-8 if cmin is None else max(1e-8, abs(cmin)*1e-3),
+            return SymLogNorm(1e-8 if cmin is None else max(1e-8, abs(cmin) * 1e-3),
                               vmin=cmin, vmax=cmax)
+        elif NORM_OPTS[idx] == "Log":
+            cmin = MIN_LOG_VALUE if cmin is not None and cmin <= 0 else cmin
+            return LogNorm(vmin=cmin, vmax=cmax)
         else:
             return Normalize(vmin=cmin, vmax=cmax)
 
@@ -214,6 +220,8 @@ class ColorbarWidget(QWidget):
         kwargs = {}
         if isinstance(norm, SymLogNorm):
             scale = 'symlog'
+        elif isinstance(norm, LogNorm):
+            scale = 'log'
         elif isinstance(norm, PowerNorm):
             scale = 'function'
             kwargs = {'functions': (lambda x: np.power(x, norm.gamma), lambda x: np.power(x, 1 / norm.gamma))}
@@ -233,31 +241,10 @@ class ColorbarWidget(QWidget):
         This will update the clim of the plot based on min, max, and autoscale
         """
         if self.autoscale.isChecked():
-            data = self.colorbar.mappable.get_array()
-            try:
-                try:
-                    self.cmin_value = data[~data.mask].min()
-                    self.cmax_value = data[~data.mask].max()
-                except (AttributeError, IndexError):
-                    self.cmin_value = np.nanmin(data)
-                    self.cmax_value = np.nanmax(data)
-            except (ValueError, RuntimeWarning):
-                # all values mask
-                pass
-            self.update_clim_text()
+            self._autoscale_clim()
         else:
-            if self.cmin.hasAcceptableInput():
-                cmin = float(self.cmin.text())
-                if cmin < self.cmax_value:
-                    self.cmin_value = cmin
-                else: # reset values back
-                    self.update_clim_text()
-            if self.cmax.hasAcceptableInput():
-                cmax = float(self.cmax.text())
-                if cmax > self.cmin_value:
-                    self.cmax_value = cmax
-                else:  # reset values back
-                    self.update_clim_text()
+            self._manual_clim()
+
         self.colorbar.mappable.set_clim(self.cmin_value, self.cmax_value)
         self.redraw()
 
@@ -276,3 +263,47 @@ class ColorbarWidget(QWidget):
         self.colorbar.draw_all()
         self.canvas.draw_idle()
         self.colorbarChanged.emit()
+
+    def update_clim_validator(self):
+        if NORM_OPTS[self.norm.currentIndex()] == "Log":
+            self.cmin.setValidator(self.log_validator)
+            self.cmax.setValidator(self.log_validator)
+        else:
+            self.cmin.setValidator(self.linear_validator)
+            self.cmax.setValidator(self.linear_validator)
+
+    def _autoscale_clim(self):
+        """Update stored colorbar limits
+        The new limits are found from the colobar data """
+        data = self.colorbar.mappable.get_array()
+        norm = NORM_OPTS[self.norm.currentIndex()]
+        try:
+            try:
+                masked_data = data[~data.mask]
+                masked_data = masked_data[np.nonzero(data)] if norm == "Log" else masked_data
+                self.cmin_value = masked_data.min()
+                self.cmax_value = masked_data.max()
+            except (AttributeError, IndexError):
+                data = data[np.nonzero(data)] if norm == "Log" else data
+                self.cmin_value = np.nanmin(data)
+                self.cmax_value = np.nanmax(data)
+        except (ValueError, RuntimeWarning):
+            # all values mask
+            pass
+        self.update_clim_text()
+
+    def _manual_clim(self):
+        """Update stored colorbar limits
+        The new limits are found from user input"""
+        if self.cmin.hasAcceptableInput():
+            cmin = float(self.cmin.text())
+            if cmin < self.cmax_value:
+                self.cmin_value = cmin
+            else:  # reset values back
+                self.update_clim_text()
+        if self.cmax.hasAcceptableInput():
+            cmax = float(self.cmax.text())
+            if cmax > self.cmin_value:
+                self.cmax_value = cmax
+            else:  # reset values back
+                self.update_clim_text()

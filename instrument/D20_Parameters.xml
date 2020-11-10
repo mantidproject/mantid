@@ -12,5 +12,13 @@
 			<value val="False" />
 	  </parameter>
 
+		<parameter name="sample_logs_sum" type="string">
+		  <value val="ScanSteps" />
+		</parameter>
+
+		<parameter name="sample_logs_time_series" type="string">
+		  <value val="2theta.position" />
+		</parameter>
+
 	</component-link>
 </parameter-file>

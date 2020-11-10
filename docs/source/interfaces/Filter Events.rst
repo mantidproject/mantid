@@ -1,3 +1,6 @@
+.. _Filter_Events_Interface:
+
+=======================
 Filter Events Interface
 =======================
 
