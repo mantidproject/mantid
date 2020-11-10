@@ -52,6 +52,9 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         ws = CreateSampleWorkspace()
         LoadInstrument(ws, InstrumentName='ARCS', RewriteSpectraMap=False)
 
+        # No Qt widgets so far
+        self.assert_no_toplevel_widgets()
+
         # create instrument view presenter
         iv_presenter = InstrumentViewPresenter(ws, parent=None, ads_observer=None)
         self.assert_widget_created()
@@ -61,19 +64,16 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         iv_presenter.select_pick_tab()
         current_tab_index = iv_presenter.container.widget.getCurrentTab()
         assert current_tab_index == 1
-        pick_tab = iv_presenter.get_pick_tab()
-        assert pick_tab
+        # pick_tab = iv_presenter.get_pick_tab()
+        # assert pick_tab
 
         # render tab
         iv_presenter.select_render_tab()
         current_tab_index = iv_presenter.container.widget.getCurrentTab()
         assert current_tab_index == 0
-        render_tab = iv_presenter.get_render_tab()
-        assert render_tab
+        # render_tab = iv_presenter.get_render_tab()
+        # assert render_tab
 
         # close
         iv_presenter.close(ws.name())
         self.assert_no_toplevel_widgets()
-
-        # break it
-        assert 1 == 100, 'I want to see how it fails'
