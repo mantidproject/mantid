@@ -13,6 +13,7 @@ Description
 This is the loader for the raw `.nxs` files produced by the powder diffractometers at ILL.
 Currently it supports the instruments D20, D1B and D2B.
 
+The *TwoThetaOffset* parameter corresponding to the rotation of the detector is optional and only used for D1B. It is to be provided in degrees.
 Loading D20
 ###########
 
@@ -115,7 +116,7 @@ Output:
 
 .. testoutput:: LoadILLDiffractionD1BExample
 
-  The output has 1 bin (detector scan) and 1280 spectra
+  The output has 1 bin (detector scan) and 1281 spectra
 
 .. categories::
 

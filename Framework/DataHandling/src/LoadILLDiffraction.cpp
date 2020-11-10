@@ -113,7 +113,8 @@ void LoadILLDiffraction::init() {
                   "Select the type of data, with or without calibration "
                   "already applied. If Auto then the calibrated data is "
                   "loaded if available, otherwise the raw data is loaded.");
-  declareProperty("TwoThetaOffset", 0.0, "2 theta offset for D1B data.");
+  declareProperty("TwoThetaOffset", 0.0,
+                  "2 theta offset for D1B data, in degrees.");
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("AlignTubes", true,
                                                 Direction::Input),
