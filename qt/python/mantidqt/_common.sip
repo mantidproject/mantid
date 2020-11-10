@@ -552,6 +552,7 @@ SIP_PYOBJECT defaultBackgroundType();
     double getPeakFwhmOf(QString);
     void setPeakFwhmOf(QString, double);
     std::string getWidthParameterNameOf(QString);
+    std::string getCentreParameterNameOf(QString);
     bool getParameterNameExplicitlySetOf(QString, std::string);
     void normaliseData(bool on);
     QMenu *getFitMenu() const;

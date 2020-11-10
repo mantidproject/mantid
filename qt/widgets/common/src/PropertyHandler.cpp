@@ -1386,6 +1386,13 @@ std::string PropertyHandler::getWidthParameterName() const {
   return std::string();
 }
 
+std::string PropertyHandler::getCentreParameterName() const {
+  if (m_pf) {
+    return m_pf->getCentreParameterName();
+  }
+  return std::string();
+}
+
 bool PropertyHandler::getParameterNameExplicitlySet(const std::string &param) const {
   if (m_pf) {
     return m_pf->isExplicitlySet(m_pf->parameterIndex(param));

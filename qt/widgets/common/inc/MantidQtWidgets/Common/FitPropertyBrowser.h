@@ -322,6 +322,7 @@ public:
   void setPeakFwhmOf(const QString &prefix, double value);
   double getPeakFwhmOf(const QString &prefix);
   std::string getWidthParameterNameOf(const QString &prefix);
+  std::string getCentreParameterNameOf(const QString &prefix);
   bool getParameterNameExplicitlySetOf(const QString &prefix,
                                        const std::string &param);
   QStringList getPeakPrefixes() const;
