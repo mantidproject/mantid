@@ -73,7 +73,10 @@ class InstrumentView(QWidget, ObservingView):
         return self.get_tab(curr_index)
 
     def get_render_tab(self):
-        return self.widget.getRenderTab(0)
+        return self.widget.getRenderTab(InstrumentWidget.RENDER)
+
+    def get_pick_tab(self):
+        return self.widget.getPickTab(InstrumentWidget.PICK)
 
     def select_tab(self, tab_index):
         self.widget.selectTab(tab_index)

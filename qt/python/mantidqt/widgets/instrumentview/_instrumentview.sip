@@ -106,6 +106,9 @@ public:
   // get render tab
   InstrumentWidgetRenderTab *getRenderTab(const Tab tab) const;
 
+  // get pick tab
+  InstrumentWidgetPickTab *getPickTab(const Tab tab) const;
+
   // select tab
   void selectTab(Tab tab);
 
@@ -179,5 +182,19 @@ private:
   // constructors all private
   InstrumentWidgetRenderTab();
   InstrumentWidgetRenderTab(const InstrumentWidgetRenderTab &);
+
+};
+
+// Pick tab
+class InstrumentWidgetPickTab: InstrumentWidgetTab
+{
+    %TypeHeaderCode
+#include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
+    %End
+
+    private:
+        // constructors all private
+        InstrumentWidgetPickTab();
+        InstrumentWidgetPickTab(const InstrumentWidgetPickTab &);
 
 };

@@ -59,6 +59,9 @@ class InstrumentViewPresenter(ObservingPresenter):
     def get_render_tab(self):
         return self.container.get_render_tab()
 
+    def get_pick_tab(self):
+        return self.container.get_pick_tab()
+
     def select_render_tab(self):
         self.container.select_tab(0)
 

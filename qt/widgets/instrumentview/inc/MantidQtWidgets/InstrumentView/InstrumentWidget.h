@@ -139,6 +139,8 @@ public:
   InstrumentWidgetTab *getTab(const Tab tab) const;
   /// Get a specific tab
   InstrumentWidgetRenderTab *getRenderTab(const Tab tab) const;
+  /// Get a Pick tab
+  InstrumentWidgetPickTab *getPickTab(const Tab tab) const;
 
   /// Get a filename for saving
   QString getSaveFileName(const QString &title, const QString &filters,
