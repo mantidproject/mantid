@@ -45,7 +45,7 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         self.assert_widget_not_present("instr")
         self.assert_no_toplevel_widgets()
 
-    def f_test_select_and_get_tab(self):
+    def test_select_and_get_tab(self):
         """Test launch and close instrument view with ARCS data
         """
         # create workspace
