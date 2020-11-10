@@ -16,7 +16,6 @@
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetMaskTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetRenderTab.h"
-#include "MantidQtWidgets/InstrumentView/InstrumentWidgetPickTab.h"
 #include "MantidQtWidgets/InstrumentView/InstrumentWidgetTreeTab.h"
 
 #include "MantidAPI/Axis.h"
@@ -423,18 +422,18 @@ InstrumentWidgetRenderTab *InstrumentWidget::getRenderTab(const Tab tab) const {
  * @return
  */
 InstrumentWidgetPickTab *InstrumentWidget::getPickTab(const Tab tab) const {
-    // Call to get base class Q widget
-    InstrumentWidgetTab *tab_widget = getTab(tab);
+  // Call to get base class Q widget
+  InstrumentWidgetTab *tab_widget = getTab(tab);
 
-    // Cast
-    if (tab_widget != nullptr) {
-        InstrumentWidgetPickTab *pick_tab = dynamic_cast<InstrumentWidgetPickTab *>(tab_widget);
-        return pick_tab;
-    }
+  // Cast
+  if (tab_widget != nullptr) {
+    InstrumentWidgetPickTab *pick_tab =
+        dynamic_cast<InstrumentWidgetPickTab *>(tab_widget);
+    return pick_tab;
+  }
 
-    return nullptr;
+  return nullptr;
 }
-
 
 /**
  * Opens Qt file dialog to select the filename.
