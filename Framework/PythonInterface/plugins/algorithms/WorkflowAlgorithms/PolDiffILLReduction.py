@@ -523,7 +523,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             GroupWorkspaces(InputWorkspaces=tmp_name, OutputWorkspace=ws)
 
         elif self.getProperty('OutputTreatment').value == 'Average':
-                self._merge_polarisations(ws, average_detectors=True)
+            self._merge_polarisations(ws, average_detectors=True)
 
         return ws
 
