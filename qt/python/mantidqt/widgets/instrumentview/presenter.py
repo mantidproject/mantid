@@ -38,7 +38,6 @@ class InstrumentViewPresenter(ObservingPresenter):
         # InstrumentViewManager.last_view = self
         InstrumentViewManager.register(self, self.ws_name)
 
-
     def current_workspace_equals(self, name):
         return self.ws_name == name
 
@@ -67,6 +66,3 @@ class InstrumentViewManager:
     @staticmethod
     def get_instrument_view(ws_name):
         return InstrumentViewManager.view_dict[ws_name]
-
-
-

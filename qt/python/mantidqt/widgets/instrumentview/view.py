@@ -74,7 +74,6 @@ class InstrumentView(QWidget, ObservingView):
     def set_range(self, min_value, max_value):
         self.widget.setBinRange(min_value, max_value)
 
-
     @Slot()
     def _run_close(self):
         self.close()
