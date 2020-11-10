@@ -28,6 +28,10 @@ Engineering Diffraction
 
 Single Crystal Diffraction
 --------------------------
+Bugfixes
+########
+- Fix bug in :ref:`SaveHKL <algm-SaveHKL>` where the direction cosines were calculated incorrectly
+
 
 Imaging
 -------
