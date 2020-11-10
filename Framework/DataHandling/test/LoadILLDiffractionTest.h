@@ -504,7 +504,7 @@ public:
     alg.setChild(true);
     alg.initialize();
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "473432.nxs"))
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("2ThetaOffset", "0.0"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TwoThetaOffset", "0.0"))
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__"))
     TS_ASSERT_THROWS_NOTHING(alg.execute())
     TS_ASSERT(alg.isExecuted())

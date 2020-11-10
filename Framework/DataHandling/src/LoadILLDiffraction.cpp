@@ -113,7 +113,7 @@ void LoadILLDiffraction::init() {
                   "Select the type of data, with or without calibration "
                   "already applied. If Auto then the calibrated data is "
                   "loaded if available, otherwise the raw data is loaded.");
-  declareProperty("2ThetaOffset", 0.0, "2 theta offset for D1B data.");
+  declareProperty("TwoThetaOffset", 0.0, "2 theta offset for D1B data.");
   declareProperty(
       std::make_unique<PropertyWithValue<bool>>("AlignTubes", true,
                                                 Direction::Input),
@@ -206,11 +206,11 @@ void LoadILLDiffraction::loadDataScan() {
   // read the starting two theta
   double twoThetaValue;
   if (m_instName == "D1B") {
-    if (getPointerToProperty("2ThetaOffset")->isDefault()) {
-      g_log.warning("A 2theta offset angle is necessary for D1B data.");
+    if (getPointerToProperty("TwoThetaOffset")->isDefault()) {
+      g_log.notice("A 2theta offset angle is necessary for D1B data.");
       twoThetaValue = 0;
     } else {
-      twoThetaValue = getProperty("2ThetaOffset");
+      twoThetaValue = getProperty("TwoThetaOffset");
     }
   } else {
     std::string twoThetaPath = "instrument/2theta/value";
