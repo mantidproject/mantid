@@ -24,7 +24,10 @@ DECLARE_FUNCTION(Polynomial)
 //----------------------------------------------------------------------------------------------
 /** Constructor
  */
-Polynomial::Polynomial() : m_n(0) { declareParameter("A0"); }
+Polynomial::Polynomial() : m_n(0) {
+  declareParameter("A0");
+  declareAttribute("n", Attribute(0));
+}
 
 //----------------------------------------------------------------------------------------------
 /** Function to calcualte polynomial

@@ -80,7 +80,7 @@ private:
   getScannedVaribleByPropertyName(const NeXus::NXDouble &scan,
                                   const std::string &propertyName) const;
 
-  void initStaticWorkspace();
+  void initStaticWorkspace(const std::string &start_time);
   void initMovingWorkspace(const NeXus::NXDouble &scan,
                            const std::string &start_time);
 

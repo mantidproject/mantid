@@ -212,14 +212,6 @@ class SimpleAPITest(unittest.TestCase):
         simpleapi.DeleteWorkspace(ws2)
         simpleapi.DeleteWorkspace(ws3)
 
-    def test_that_dialog_call_raises_runtime_error(self):
-        try:
-            simpleapi.LoadEventNexusDialog()
-        except RuntimeError as exc:
-            msg = str(exc)
-            if msg != "Can only display properties dialog in gui mode":
-                self.fail("Dialog function raised the correct exception type but the message was wrong")
-
     def test_call_inside_function_uses_new_variable_name(self):
         def rebin(workspace):
             # Should replace the input workspace
