@@ -75,7 +75,8 @@ class InstrumentViewPresenter(ObservingPresenter):
     def close(self, workspace_name):
         """
         extend close()
-        :param workspace_name:
+        :param workspace_name: str
+            workspace name
         :return:
         """
         if InstrumentViewManager.last_view == self:

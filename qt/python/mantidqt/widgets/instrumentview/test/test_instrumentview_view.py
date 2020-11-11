@@ -94,6 +94,13 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         iv_presenter = InstrumentViewPresenter(ws, parent=None, ads_observer=None)
         self.assert_widget_created()
 
+        # get render tab
+        render_tab = iv_presenter.get_render_tab()
+        assert render_tab
+
+        # select projection
+        render_tab.setSurfaceType(0)
+
         # close
         iv_presenter.close(ws.name())
         # process events to close all the widgets

@@ -121,7 +121,6 @@ public:
     Args:
         min_value The minimum value over which the data is integrated
         max_value The maximum value over which the data is integrated
-
 %End
 
 };
@@ -160,7 +159,7 @@ class InstrumentWidgetRenderTab: InstrumentWidgetTab
 public:
 
   // set surface type
-  void setSurfaceType(int type);
+  void setSurfaceType(int index);
 %Docstring
     Set the surface type of the current window.
 
@@ -176,7 +175,6 @@ public:
   void setMaxValue(double value, bool apply);
   // set Axis at Full 3D
   void setAxis(const QString &axisNameArg);
-
 
 private:
   // constructors all private
