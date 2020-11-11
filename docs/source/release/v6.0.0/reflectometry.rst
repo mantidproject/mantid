@@ -9,6 +9,13 @@ Reflectometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+ISIS Reflectometry Interface
+############################
+
+- You can now exclude or annotate runs in the search results list, e.g. to
+  exclude them from autoprocessing. See the
+  :ref:`ISIS Reflectometry Interface <interface-isis-refl>` documentation for details.
+
 Bugfixes
 ########
 
