@@ -61,7 +61,7 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
 
         # select tab
         # select pick tab
-        iv_presenter.select_pick_tab()
+        # iv_presenter.select_pick_tab()
         # current_tab_index = iv_presenter.container.widget.getCurrentTab()
         # assert current_tab_index == 1
 
@@ -69,7 +69,7 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         # assert pick_tab
 
         # render tab
-        iv_presenter.select_render_tab()
+        # iv_presenter.select_render_tab()
         # current_tab_index = iv_presenter.container.widget.getCurrentTab()
         # assert current_tab_index == 0
 
@@ -78,4 +78,7 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
 
         # close
         iv_presenter.close(ws.name())
+        # process events to close all the widgets
+        QApplication.processEvents()
+        # asset no more widgets
         self.assert_no_toplevel_widgets()
