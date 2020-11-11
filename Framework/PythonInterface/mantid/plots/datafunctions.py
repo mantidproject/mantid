@@ -550,8 +550,7 @@ def _workspace_indices(y_bins, workspace):
 
 
 def _workspace_indices_maxpooling(y_bins, workspace):
-    from mantid.simpleapi import Integration
-    summed_spectra_workspace = Integration(workspace, StoreInADS=False)
+    summed_spectra_workspace = _integrate_workspace(workspace)
     summed_spectra = summed_spectra_workspace.extractY()
     workspace_indices = []
     for y_range in pairwise(y_bins):
@@ -563,6 +562,19 @@ def _workspace_indices_maxpooling(y_bins, workspace):
         except IndexError:
             continue
     return workspace_indices
+
+
+def _integrate_workspace(workspace):
+    from mantid.api import AlgorithmManager
+    integration = AlgorithmManager.createUnmanaged("Integration")
+    integration.initialize()
+    integration.setAlwaysStoreInADS(False)
+    integration.setLogging(False)
+    integration.setChild(True)
+    integration.setProperty("InputWorkspace", workspace)
+    integration.setProperty("OutputWorkspace", "__dummy")
+    integration.execute()
+    return integration.getProperty("OutputWorkspace").value
 
 
 def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=None, maxpooling=False):
