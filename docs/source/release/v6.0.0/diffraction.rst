@@ -48,6 +48,7 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+- PaalmanPingsMonteCarloAbsorption can now use tabulated density values, and allows for overridden X Sections
 
 Bugfixes
 ############
