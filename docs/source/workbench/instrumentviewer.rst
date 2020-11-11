@@ -117,7 +117,7 @@ To set the integration range (time-of-flight), use
 
 .. code-block:: python
 
-  myiv.set_tof_range(1, 10000)
+  myiv.set_x_range(1, 10000)
 
 To switch to a different tab, use
 
