@@ -415,7 +415,7 @@ void IndirectFitAnalysisTab::updateParameterValues() {
  * @param parameters  The parameter values to update the browser with.
  */
 void IndirectFitAnalysisTab::updateParameterValues(
-    const std::unordered_map<std::string, ParameterValue> params) {
+    const std::unordered_map<std::string, ParameterValue> &params) {
   try {
     updateFitBrowserParameterValues(params);
   } catch (const std::out_of_range &) {
