@@ -175,6 +175,8 @@ public:
   void setMaxValue(double value, bool apply);
   // set Axis at Full 3D
   void setAxis(const QString &axisNameArg);
+  // Enable/disable auto scaling checkbox
+  void setColorMapAutoscaling(bool on);
 
 private:
   // constructors all private
