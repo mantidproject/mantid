@@ -72,6 +72,7 @@ void ALCDataLoadingPresenter::handleRunsChanged() {
                         "orange");
   m_view->enableAlpha(false);
   m_view->setAlphaValue("");
+  m_view->showAlphaMessage(false);
 }
 
 void ALCDataLoadingPresenter::handleRunsFound() {
@@ -220,6 +221,9 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
       alg->setProperty("BackwardSpectra", m_view->getBackwardGrouping());
     }
 
+    // Set alpha for balance parameter
+    alg->setProperty("Alpha", m_view->getAlphaValue());
+
     // If Subtract checkbox is selected, set green period
     if (m_view->subtractIsChecked()) {
       alg->setProperty("Green", m_view->greenPeriod());
@@ -335,8 +339,10 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   if (numPeriods == 1) {
     m_view->enableAlpha(true);
     m_view->setAlphaValue("1");
+    m_view->showAlphaMessage(false);
   } else {
     m_view->enableAlpha(false);
+    m_view->showAlphaMessage(true);
   }
 
   // Set time limits if this is the first data loaded (will both be zero)

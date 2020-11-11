@@ -406,6 +406,9 @@
             </item>
             <item>
              <widget class="QLabel" name="alphaLabel">
+              <property name="toolTip">
+               <string>The balance parameter for the back spectra</string>
+              </property>
               <property name="text">
                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Alpha:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>

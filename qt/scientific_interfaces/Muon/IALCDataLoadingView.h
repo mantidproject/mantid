@@ -88,6 +88,12 @@ public:
   /// Set value of alpha
   virtual void setAlphaValue(const std::string &alpha) = 0;
 
+  /// Get alpha value
+  virtual double getAlphaValue() const = 0;
+
+  /// Show/hide alpha explanation
+  virtual void showAlphaMessage(const bool alpha) = 0;
+
 public slots:
   /// Performs any necessary initialization
   virtual void initialize() = 0;
