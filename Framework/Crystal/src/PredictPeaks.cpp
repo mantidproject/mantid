@@ -196,7 +196,7 @@ void PredictPeaks::exec() {
     // Sort peaks by run number so that peaks with equal goniometer matrices are
     // adjacent
     std::vector<std::pair<std::string, bool>> criteria;
-    criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
+    criteria.emplace_back("RunNumber", true);
 
     peaksWS->sort(criteria);
 
@@ -360,8 +360,8 @@ void PredictPeaks::exec() {
   // Sort peaks by run number so that peaks with equal goniometer matrices are
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
-  criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
+  criteria.emplace_back("RunNumber", true);
+  criteria.emplace_back("BankName", true);
   m_pw->sort(criteria);
 
   auto &peaks = m_pw->getPeaks();

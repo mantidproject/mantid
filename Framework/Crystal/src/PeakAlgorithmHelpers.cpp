@@ -170,8 +170,8 @@ generateOffsetVectors(const std::vector<Kernel::V3D> &modVectors,
           for (auto p = -maxOrder; p <= maxOrder; ++p) {
             if (m == 0 && n == 0 && p == 0)
               continue;
-            offsets.emplace_back(std::make_tuple(
-                m, n, p, modVector0 * m + modVector1 * n + modVector2 * p));
+            offsets.emplace_back(
+                m, n, p, modVector0 * m + modVector1 * n + modVector2 * p);
           }
         }
       }
@@ -188,13 +188,13 @@ generateOffsetVectors(const std::vector<Kernel::V3D> &modVectors,
         V3D offset{modVector * order};
         switch (i) {
         case 0:
-          offsets.emplace_back(std::make_tuple(order, 0, 0, std::move(offset)));
+          offsets.emplace_back(order, 0, 0, std::move(offset));
           break;
         case 1:
-          offsets.emplace_back(std::make_tuple(0, order, 0, std::move(offset)));
+          offsets.emplace_back(0, order, 0, std::move(offset));
           break;
         case 2:
-          offsets.emplace_back(std::make_tuple(0, 0, order, std::move(offset)));
+          offsets.emplace_back(0, 0, order, std::move(offset));
           break;
         }
       }

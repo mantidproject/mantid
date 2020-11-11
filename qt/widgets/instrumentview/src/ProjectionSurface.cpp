@@ -978,8 +978,7 @@ void ProjectionSurface::alignPeaks(const QRect &rect) {
         });
 
     if (result == m_selectedAlignmentPlane.cend()) {
-      m_selectedAlignmentPlane.emplace_back(
-          std::make_pair(peak->getQSampleFrame(), origin));
+      m_selectedAlignmentPlane.emplace_back(peak->getQSampleFrame(), origin);
     }
   } else {
     m_selectedAlignmentPeak = std::make_pair(peak, origin);

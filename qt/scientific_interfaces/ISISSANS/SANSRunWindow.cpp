@@ -2176,12 +2176,12 @@ bool SANSRunWindow::handleLoadButtonClick() {
           tuple<QLineEdit *, function<double(const Sample *)>, std::string>;
 
       std::vector<GeomSampleInfo> sampleInfoList;
-      sampleInfoList.emplace_back(make_tuple(
-          m_uiForm.sample_thick, &Sample::getThickness, "thickness"));
-      sampleInfoList.emplace_back(
-          make_tuple(m_uiForm.sample_width, &Sample::getWidth, "width"));
-      sampleInfoList.emplace_back(
-          make_tuple(m_uiForm.sample_height, &Sample::getHeight, "height"));
+      sampleInfoList.emplace_back(m_uiForm.sample_thick, &Sample::getThickness,
+                                  "thickness");
+      sampleInfoList.emplace_back(m_uiForm.sample_width, &Sample::getWidth,
+                                  "width");
+      sampleInfoList.emplace_back(m_uiForm.sample_height, &Sample::getHeight,
+                                  "height");
 
       // Populate the sample geometry fields, but replace any zero values with
       // 1.0, and warn the user where this has occured.

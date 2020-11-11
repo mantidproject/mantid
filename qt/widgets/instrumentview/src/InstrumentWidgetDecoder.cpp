@@ -371,7 +371,7 @@ void InstrumentWidgetDecoder::decodeAlignmentInfo(
                                qLabMap[QString("y")].toDouble(),
                                qLabMap[QString("z")].toDouble());
 
-    alignmentPlane.emplace_back(std::make_pair(qValue, marker));
+    alignmentPlane.emplace_back(qValue, marker);
   }
   obj->m_selectedAlignmentPlane = alignmentPlane;
 }
