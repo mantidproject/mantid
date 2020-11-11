@@ -35,17 +35,15 @@ class SliceViewer(ObservingPresenter):
         self._logger = mantid.kernel.Logger("SliceViewer")
         self._peaks_presenter = None
         self.model = model if model else SliceViewerModel(ws)
+        self.parent = parent
+        self.conf = conf
 
-        if self.model.get_ws_type() == WS_TYPE.MDH:
-            self.new_plot = self.new_plot_MDH
-            self.update_plot_data = self.update_plot_data_MDH
-        elif self.model.get_ws_type() == WS_TYPE.MDE:
-            self.new_plot = self.new_plot_MDE
-            self.update_plot_data = self.update_plot_data_MDE
-        else:
-            self.new_plot = self.new_plot_matrix
-            self.update_plot_data = self.update_plot_data_matrix
+        # Acts as a 'time capsule' to the properties of the model at this
+        # point in the execution. By the time the ADS observer calls self.replace_workspace,
+        # the workspace associated with self.model has already been changed.
+        self.initial_model_properties = self.model.get_properties()
 
+        self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
         self.normalization = False
 
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
@@ -53,7 +51,6 @@ class SliceViewer(ObservingPresenter):
                                                       conf)
         self.view.data_view.create_axes_orthogonal(
             redraw_on_zoom=not self.model.can_support_dynamic_rebinning())
-        self.view.data_view.image_info_widget.setWorkspace(ws)
 
         if self.model.can_normalize_workspace():
             self.view.data_view.set_normalization(ws)
@@ -63,8 +60,7 @@ class SliceViewer(ObservingPresenter):
         if not self.model.can_support_nonorthogonal_axes():
             self.view.data_view.disable_tool_button(ToolItemText.NONORTHOGONAL_AXES)
 
-        self.view.setWindowTitle(self.model.get_title())
-        self.new_plot()
+        self._update_view()
 
         # Start the GUI with zoom selected.
         self.view.data_view.activate_tool(ToolItemText.ZOOM)
@@ -350,6 +346,32 @@ class SliceViewer(ObservingPresenter):
         else:
             self.view.peaks_view.hide()
 
+    def replace_workspace(self, workspace_name, workspace):
+        """
+        Called when the SliceViewerADSObserver has detected that a workspace has changed
+        @param workspace_name: the name of the workspace that has changed
+        @param workspace: the workspace that has changed
+        """
+        if not self.model.workspace_equals(workspace_name):
+            return
+
+        try:
+            candidate_model = SliceViewerModel(workspace)
+            candidate_model_properties = candidate_model.get_properties()
+            for (property, value) in candidate_model_properties.items():
+                if self.initial_model_properties[property] != value:
+                    raise ValueError(f"The property {property} is different on the new workspace.")
+
+            # New model is OK, proceed with updating Slice Viewer
+            self.model = candidate_model
+            self.new_plot, self.update_plot_data = self._decide_plot_update_methods()
+            self._update_view()
+        except ValueError as err:
+            self._close_view_with_message(
+                f"Closing Sliceviewer as the underlying workspace was changed: {str(err)}"
+            )
+            return
+
     # private api
     def _create_peaks_presenter_if_necessary(self):
         if self._peaks_presenter is None:
@@ -383,3 +405,30 @@ class SliceViewer(ObservingPresenter):
             current_workspaces = self._peaks_presenter.workspace_names()
 
         return current_workspaces
+
+    def _decide_plot_update_methods(self):
+        """
+        Checks the type of workspace in self.model and decides which of the
+        new_plot and update_plot_data methods to use
+        :return: the new_plot method to use
+        """
+        if self.model.get_ws_type() == WS_TYPE.MDH:
+            return self.new_plot_MDH, self.update_plot_data_MDH
+        elif self.model.get_ws_type() == WS_TYPE.MDE:
+            return self.new_plot_MDE, self.update_plot_data_MDE
+        else:
+            return self.new_plot_matrix, self.update_plot_data_matrix
+
+    def _update_view(self):
+        """
+        Updates the view to enable/disable certain options depending on the model.
+        """
+        # we don't want to use model.get_ws for the image info widget as this needs
+        # extra arguments depending on workspace type.
+        self.view.data_view.image_info_widget.setWorkspace(self.model._ws)
+        self.view.setWindowTitle(self.model.get_title())
+        self.new_plot()
+
+    def _close_view_with_message(self, message: str):
+        self.view.emit_close()
+        self._logger.warning(message)

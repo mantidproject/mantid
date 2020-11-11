@@ -55,19 +55,22 @@ class SliceViewerADSObserver(AnalysisDataServiceObserver):
         :param ws_name: The name of the workspace.
         :param _: A pointer to the workspace. Unused
         """
-        if ws_name == str(self.presenter.model._get_ws()):
+        if ws_name == str(self.presenter.model.get_ws()):
             self.view.emit_close()
 
     @_catch_exceptions
-    def replaceHandle(self, _, workspace):
+    def replaceHandle(self, ws_name, workspace):
         """
         Called when the ADS has replaced a workspace with one of the same name.
         If this workspace is the same as that of the sliceviewer model, the model
-        is updated.
-        :param _: The name of the workspace. Unused
+        is replaced.
+        :param ws_name: The name of the workspace.
         :param workspace: A reference to the new workspace
         """
-        self.logger.notice("replace" + str(workspace))
+        import pydevd_pycharm
+        pydevd_pycharm.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True, suspend=False)
+
+        self.presenter.replace_workspace(ws_name, workspace)
 
     @_catch_exceptions
     def renameHandle(self, oldName, newName):

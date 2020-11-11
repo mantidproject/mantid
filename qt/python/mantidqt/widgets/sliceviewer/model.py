@@ -223,6 +223,23 @@ class SliceViewerModel:
         else:
             raise ValueError("Unsupported workspace type")
 
+    def get_properties(self):
+        """
+        @return: a dictionary of properties about this model to compare new models against,
+        for example when the model workspace changes outside of the slice viewer.
+        """
+        return {
+            "workspace_type": self.get_ws_type(),
+            "supports_normalise": self.can_normalize_workspace(),
+            "supports_nonorthogonal_axes": self.can_support_nonorthogonal_axes(),
+            "supports_dynamic_rebinning": self.can_support_dynamic_rebinning(),
+            "supports_peaks_overlays": self.can_support_peaks_overlays()
+        }
+
+    def set_ws_name(self, name):
+        # TODO: Set the name of the workspace
+        pass
+
     def create_nonorthogonal_transform(self, slice_info: SliceInfo):
         """
         Calculate the transform object for nonorthogonal axes.
@@ -469,6 +486,9 @@ class SliceViewerModel:
             extract_roi_matrix(workspace, xpos, xpos, None, None, True, ycut_name)
 
         return help_msg
+
+    def workspace_equals(self, ws_name):
+        return str(self.get_ws()) == ws_name
 
     # private api
     def _get_ws(self):
