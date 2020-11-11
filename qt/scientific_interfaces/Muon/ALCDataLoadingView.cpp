@@ -41,8 +41,6 @@ void ALCDataLoadingView::initialize() {
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this,
           SLOT(instrumentChanged(QString)));
-  connect(m_ui.path, SIGNAL(textChanged(QString)), this,
-          SLOT(pathChanged(QString)));
   connect(m_ui.runs, SIGNAL(findingFiles()), SIGNAL(runsChangedSignal()));
   connect(m_ui.runs, SIGNAL(fileFindingFinished()), SIGNAL(runsFoundSignal()));
   connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()),
