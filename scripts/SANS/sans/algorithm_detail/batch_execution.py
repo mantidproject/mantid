@@ -541,9 +541,8 @@ def get_reduction_packages(state, workspaces, monitors):
     This function creates a set of reduction packages which contain the necessary state for a single reduction
     as well as the required workspaces.
 
-    There are several reasons why a state can (and should) split up:
-    1. Multi-period files were loaded. This means that we need to perform one reduction per (loaded) period
-    2. Event slices were specified. We event slice after initial reduction has taken place, as some operations can
+    There is one workflow where a state can (and should) split up:
+    Event slices were specified. We event slice after initial reduction has taken place, as some operations can
             be performed before event slicing. We do this for more efficient reduction, as we are not performing the
             same operations multiple times needlessly.
 
@@ -552,11 +551,7 @@ def get_reduction_packages(state, workspaces, monitors):
     :param monitors: The monitors contributing to the reduction
     :return: A set of "Reduction packages" where each reduction package defines a single reduction.
     """
-    # First: Split the state on a per-period basis
     reduction_packages = create_initial_reduction_packages(state, workspaces, monitors)
-
-    if reduction_packages_require_splitting_for_wavelength_range(reduction_packages):
-        reduction_packages = split_reduction_packages_for_wavelength_range(reduction_packages)
     return reduction_packages
 
 
@@ -580,70 +575,6 @@ def reduction_packages_require_splitting_for_event_slices(reduction_packages):
     else:
         requires_split = False
     return requires_split
-
-
-def reduction_packages_require_splitting_for_wavelength_range(reduction_packages):
-    """
-        Creates reduction packages from a list of reduction packages by splitting up wavelength ranges.
-
-        The SANSSingleReduction algorithm can handle only a single wavelength range. For each wavelength range, we require an individual
-        reduction. Hence we split the states up at this point.
-        :param reduction_packages: a list of reduction packages.
-        :return: a list of reduction packages which has at least the same length as the input
-        """
-    # Determine if the event slice sub-state object contains multiple event slice requests. This is given
-    # by the number of elements in start_tof
-    reduction_package = reduction_packages[0]
-    state = reduction_package.state
-    wavelength_info = state.wavelength
-    start_wavelength = wavelength_info.wavelength_low
-    if start_wavelength is not None and len(start_wavelength) > 1:
-        requires_split = True
-    else:
-        requires_split = False
-    return requires_split
-
-
-def split_reduction_packages_for_wavelength_range(reduction_packages):
-    reduction_packages_split = []
-    for reduction_package in reduction_packages:
-        state = reduction_package.state
-        wavelength_info = state.wavelength
-        start_wavelength = wavelength_info.wavelength_low
-        end_wavelength = wavelength_info.wavelength_high
-
-        states = []
-        for start, end in zip(start_wavelength, end_wavelength):
-            state_copy = deepcopy(state)
-
-            state_copy.wavelength.wavelength_low = [start]
-            state_copy.wavelength.wavelength_high = [end]
-
-            state_copy.adjustment.normalize_to_monitor.wavelength_low = [start]
-            state_copy.adjustment.normalize_to_monitor.wavelength_high = [end]
-
-            state_copy.adjustment.calculate_transmission.wavelength_low = [start]
-            state_copy.adjustment.calculate_transmission.wavelength_high = [end]
-
-            state_copy.adjustment.wavelength_and_pixel_adjustment.wavelength_low = [start]
-            state_copy.adjustment.wavelength_and_pixel_adjustment.wavelength_high = [end]
-
-            states.append(state_copy)
-
-        workspaces = reduction_package.workspaces
-        monitors = reduction_package.monitors
-        is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
-        is_part_of_event_slice_reduction = reduction_package.is_part_of_event_slice_reduction
-        for state in states:
-            new_state = deepcopy(state)
-            new_reduction_package = ReductionPackage(state=new_state,
-                                                     workspaces=workspaces,
-                                                     monitors=monitors,
-                                                     is_part_of_multi_period_reduction=is_part_of_multi_period_reduction,
-                                                     is_part_of_event_slice_reduction=is_part_of_event_slice_reduction,
-                                                     is_part_of_wavelength_range_reduction=True)
-            reduction_packages_split.append(new_reduction_package)
-    return reduction_packages_split
 
 
 def split_reduction_packages_for_event_slice_packages(reduction_packages):

@@ -152,9 +152,9 @@ def _convert_to_wavelength(workspace, normalize_to_monitor_state):
     :param normalize_to_monitor_state: a SANSStateNormalizeToMonitor object.
     :return: a wavelength workspace.
     """
-    wavelength_low = normalize_to_monitor_state.wavelength_low[0]
-    wavelength_high = normalize_to_monitor_state.wavelength_high[0]
-    wavelength_step = normalize_to_monitor_state.wavelength_step
+    wavelength_low = normalize_to_monitor_state.wavelength_interval.wavelength_min
+    wavelength_high = normalize_to_monitor_state.wavelength_interval.wavelength_max
+    wavelength_step = normalize_to_monitor_state.wavelength_interval.wavelength_step
     wavelength_step_type = normalize_to_monitor_state.wavelength_step_type_lin_log
     wavelength_rebin_mode = normalize_to_monitor_state.rebin_type
     convert_name = "SANSConvertToWavelengthAndRebin"

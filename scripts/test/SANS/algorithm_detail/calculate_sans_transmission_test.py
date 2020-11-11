@@ -111,11 +111,11 @@ class CalculateSansTransmissionTest(unittest.TestCase):
         if rebin_type:
             calculate_transmission_obj.rebin_type = rebin_type
         if wavelength_low:
-            calculate_transmission_obj.wavelength_low = [wavelength_low]
+            calculate_transmission_obj.wavelength_interval.wavelength_min = wavelength_low
         if wavelength_high:
-            calculate_transmission_obj.wavelength_high = [wavelength_high]
+            calculate_transmission_obj.wavelength_interval.wavelength_max = wavelength_high
         if wavelength_step:
-            calculate_transmission_obj.wavelength_step = wavelength_step
+            calculate_transmission_obj.wavelength_interval.wavelength_step = wavelength_step
         if wavelength_step_type:
             calculate_transmission_obj.wavelength_step_type = wavelength_step_type
         if use_full_wavelength_range:

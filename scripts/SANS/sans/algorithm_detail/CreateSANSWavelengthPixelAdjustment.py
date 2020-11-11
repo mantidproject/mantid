@@ -175,9 +175,9 @@ class CreateSANSWavelengthPixelAdjustment(object):
 
     @staticmethod
     def _get_rebin_string(wavelength_and_pixel_adjustment_state):
-        wavelength_low = wavelength_and_pixel_adjustment_state.wavelength_low[0]
-        wavelength_high = wavelength_and_pixel_adjustment_state.wavelength_high[0]
-        wavelength_step = wavelength_and_pixel_adjustment_state.wavelength_step
+        wavelength_low = wavelength_and_pixel_adjustment_state.wavelength_interval.wavelength_min
+        wavelength_high = wavelength_and_pixel_adjustment_state.wavelength_interval.wavelength_max
+        wavelength_step = wavelength_and_pixel_adjustment_state.wavelength_interval.wavelength_step
         wavelength_step_type = -1.0 if wavelength_and_pixel_adjustment_state.wavelength_step_type_lin_log \
                                        is RangeStepType.LOG else 1.0  # noqa
 

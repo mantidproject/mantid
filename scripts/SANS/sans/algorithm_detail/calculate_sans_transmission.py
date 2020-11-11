@@ -84,9 +84,9 @@ def _perform_fit(transmission_workspace, direct_workspace,
     :param data_type: the data type which is currently being investigated, ie if it is a sample or a can run.
     :return: a fitted workspace and an unfitted workspace
     """
-    wavelength_low = calculate_transmission_state.wavelength_low[0]
-    wavelength_high = calculate_transmission_state.wavelength_high[0]
-    wavelength_step = calculate_transmission_state.wavelength_step
+    wavelength_low = calculate_transmission_state.wavelength_interval.wavelength_min
+    wavelength_high = calculate_transmission_state.wavelength_interval.wavelength_max
+    wavelength_step = calculate_transmission_state.wavelength_interval.wavelength_step
     wavelength_step_type = calculate_transmission_state.wavelength_step_type_lin_log
     prefix = 1.0 if wavelength_step_type is RangeStepType.LIN else -1.0
     wavelength_step *= prefix
@@ -250,11 +250,11 @@ def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_trans
     else:
         fit_state = calculate_transmission_state.fit[data_type.value]
         wavelength_low = fit_state.wavelength_low if fit_state.wavelength_low \
-            else calculate_transmission_state.wavelength_low[0]
+            else calculate_transmission_state.wavelength_interval.wavelength_min
         wavelength_high = fit_state.wavelength_high if fit_state.wavelength_high \
-            else calculate_transmission_state.wavelength_high[0]
+            else calculate_transmission_state.wavelength_interval.wavelength_max
 
-    wavelength_step = calculate_transmission_state.wavelength_step
+    wavelength_step = calculate_transmission_state.wavelength_interval.wavelength_step
     rebin_type = calculate_transmission_state.rebin_type
     wavelength_step_type = calculate_transmission_state.wavelength_step_type_lin_log
 

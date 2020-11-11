@@ -85,8 +85,8 @@ class SANSFunctionsTest(unittest.TestCase):
 
         state.reduction.dimensionality = ReductionDimensionality.ONE_DIM
 
-        state.wavelength.wavelength_low = [12.0]
-        state.wavelength.wavelength_high = [34.0]
+        state.wavelength.wavelength_interval.wavelength_min = 12.0
+        state.wavelength.wavelength_interval.wavelength_max = 34.0
 
         state.mask.phi_min = 12.0
         state.mask.phi_max = 56.0
@@ -554,43 +554,43 @@ class SANSFunctionsTest(unittest.TestCase):
 class SANSEventSliceParsing(unittest.TestCase):
     def test_simple_range(self):
         input_range = "10-20"
-        expected = [[10.0, 20.0]]
+        expected = [(10.0, 20.0)]
         returned = parse_event_slice_setting(input_range)
         self.assertEqual(returned, expected)
 
     def test_multiple_simple_ranges(self):
         input_range = "10-20, 20-30, 40-45"
-        expected = [[10.0, 20.0], [20.0, 30.0], [40.0, 45.0]]
+        expected = [(10.0, 20.0), (20.0, 30.0), (40.0, 45.0)]
         returned = parse_event_slice_setting(input_range)
         self.assertEqual(returned, expected)
 
     def test_unbounded_range(self):
         input_range = "10-20 , >25"
-        expected = [[10.0, 20.0], [25.0, -1]]
+        expected = [(10.0, 20.0), (25.0, -1)]
         returned = parse_event_slice_setting(input_range)
         self.assertEqual(returned, expected)
 
     def test_bounded_start(self):
         input_range = "< 15, 20-21"
-        expected = [[-1, 15.0], [20.0, 21.0]]
+        expected = [(-1, 15.0), (20.0, 21.0)]
         returned = parse_event_slice_setting(input_range)
         self.assertEqual(returned, expected)
 
     def test_steps_range(self):
         input_range = "20:2:26"
-        expected = [[20.0, 22.0], [22.0, 24.0], [24.0, 26.0]]
+        expected = [(20.0, 22.0), (22.0, 24.0), (24.0, 26.0)]
         returned = parse_event_slice_setting(input_range)
         self.assertEqual(returned, expected)
 
     def test_comma_separated_steps(self):
         input_range = "1,2, 3, 5, 11"
-        expected = [[1.0, 2.0], [2.0, 3.0], [3.0, 5.0], [5.0, 11.0]]
+        expected = [(1.0, 2.0), (2.0, 3.0), (3.0, 5.0), (5.0, 11.0)]
         returned = parse_event_slice_setting(input_range)
         self.assertEqual(returned, expected)
 
     def test_comma_separated_float(self):
         input_range = "1.2, 2.4, 4"
-        expected = [[1.2, 2.4], [2.4, 4.0]]
+        expected = [(1.2, 2.4), (2.4, 4.0)]
         returned = parse_event_slice_setting(input_range)
         self.assertEqual(returned, expected)
 
