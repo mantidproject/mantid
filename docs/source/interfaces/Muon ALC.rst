@@ -143,8 +143,9 @@ Some additional options may be specified: the **Dead Time Corrections**, if any,
 loaded from the input dataset itself or from a custom file specified by the user. The
 detector **Grouping** is defaulted to **Auto**, in which case the grouping information
 is read from the run data, although it can be customized by setting the list of spectra
-for the forward and backward groups. The user can also choose the **Period** number
-that corresponds to the red period, and the number corresponding to the green period,
+for the forward and backward groups. **Alpha** (the balance parameter) is defaulted to 1.0 and 
+can only be changed when analysing single period data.The user can also choose the **Period** 
+number that corresponds to the red period, and the number corresponding to the green period,
 if the option **Subtract** is checked, and finally the type of **Calculation** together
 with the time limits. A click on the **Load** button results in the calculation of the
 asymmetry, displayed on the right panel.
@@ -192,7 +193,8 @@ Dead Time Correction
 Grouping
   Detector grouping to apply. *Auto* will load the grouping information contained 
   in the run file, while *Custom* allows to specify the list of spectra for both the 
-  forward and backward groups.
+  forward and backward groups. *Alpha* is the balanace parameter and is only available 
+  for single period data.
 
 Periods
   Period number to use as red data. The *Subtract* option, if checked, allows to 
