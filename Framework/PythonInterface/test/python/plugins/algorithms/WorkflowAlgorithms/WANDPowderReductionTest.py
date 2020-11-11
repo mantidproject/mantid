@@ -358,6 +358,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="None",
+            MultipleOutput="",
         )
 
         x = pd_out.extractX()
@@ -374,6 +375,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="None",
+            MultipleOutput="",
         )
 
         x = pd_out.extractX()
