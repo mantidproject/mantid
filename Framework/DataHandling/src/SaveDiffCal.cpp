@@ -155,13 +155,13 @@ void SaveDiffCal::writeIntFieldFromSVWS(
     for (size_t i = 0; i < m_numValues; ++i) {
       auto &ids = ws->getSpectrum(i).getDetectorIDs(); // set of detector ID's
       // check if the first detector ID in the set is in the calibration table
-      auto found = m_detidToIndex.find(*(ids.begin()));  // (detID, row_index)
+      auto found = m_detidToIndex.find(*(ids.begin())); // (detID, row_index)
       if (found != m_detidToIndex.end()) {
         auto value = static_cast<int32_t>(ws->getValue(found->first));
         // in maskworkspace 0=use, 1=dontuse - backwards from the file
         if (isMask) {
           if (value == 0)
-            value = 1;  // thus "use" means a calibrated detector, good for use
+            value = 1; // thus "use" means a calibrated detector, good for use
           else
             value = 0;
         }

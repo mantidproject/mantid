@@ -101,7 +101,7 @@ public:
     for (; minIndex < Y.size(); ++minIndex) {
       if (isNonZero(Y[minIndex])) {
         tofMin = X[minIndex];
-        break;  // we found the first bin with non-zero counts
+        break; // we found the first bin with non-zero counts
       }
     }
 
@@ -146,10 +146,10 @@ public:
   detid_t detid;
   double tofMin; // TOF of bin with minimum TOF and non-zero counts
   double tofMax; // TOF of bin with maximum TOF and non-zero counts
-  std::vector<double> inTofPos;  // peak centers, in TOF
+  std::vector<double> inTofPos; // peak centers, in TOF
   // left and right fit ranges for each peak center, in TOF
   std::vector<double> inTofWindows;
-  std::vector<double> inDPos;  // peak centers, in d-spacing
+  std::vector<double> inDPos; // peak centers, in d-spacing
 };
 
 //----------------------------------------------------------------------------------------------
@@ -334,11 +334,11 @@ bool hasDasIDs(const API::ITableWorkspace_const_sptr &table) {
 
 /**
  * Conversion factor between fit-function width and FWHM. Factors are calculated
- * for "Gaussian" and "Lorentzian" functions. For other functions, a value of 1.0 is
- * returned
+ * for "Gaussian" and "Lorentzian" functions. For other functions, a value
+ * of 1.0 is returned
  *
  * @param peakshape :: name of the fitting function
-*/
+ */
 double getWidthToFWHM(const std::string &peakshape) {
   if (peakshape == "Gaussian") {
     return 2 * std::sqrt(2. * std::log(2.));
@@ -426,7 +426,7 @@ void PDCalibration::exec() {
             .empty())) { //"PreviousCalibrationTable"
     createCalTableFromExisting();
   } else {
-    createCalTableNew();  // calculates "difc" values from instrument geometry
+    createCalTableNew(); // calculates "difc" values from instrument geometry
   }
   createInformationWorkspaces();
 
@@ -568,8 +568,8 @@ void PDCalibration::exec() {
     const size_t numPeaks = m_peaksInDspacing.size();
     // TOF of fitted peak centers, default `nan` for failed fitted peaks
     std::vector<double> tof_vec_full(numPeaks, std::nan(""));
-    std::vector<double> d_vec;  // nominal peak centers of fitted peaks
-    std::vector<double> tof_vec;  // TOF of fitted peak centers only
+    std::vector<double> d_vec;   // nominal peak centers of fitted peaks
+    std::vector<double> tof_vec; // TOF of fitted peak centers only
     // width of fitted peak centers, default `nan` for failed fitted peaks
     std::vector<double> width_vec_full(numPeaks, std::nan(""));
     // height of fitted peak centers, default `nan` for failed fitted peaks
@@ -602,19 +602,19 @@ void PDCalibration::exec() {
 
       // check chi-square
       if (chi2 > maxChiSquared || chi2 < 0.) {
-        continue;  // peak fit deemed as failure
+        continue; // peak fit deemed as failure
       }
 
       // rule out of peak with wrong position. `centre` should be within its
       // left and right window ranges
       if (peaks.inTofWindows[2 * peakIndex] >= centre ||
           peaks.inTofWindows[2 * peakIndex + 1] <= centre) {
-        continue;  // peak fit deemed as failure
+        continue; // peak fit deemed as failure
       }
 
       // check height: make sure 0 is smaller than 0
       if (height < minPeakHeight + 1.E-15) {
-        continue;  // peak fit deemed as failure
+        continue; // peak fit deemed as failure
       }
 
       // background value at the fitted peak center
@@ -634,7 +634,7 @@ void PDCalibration::exec() {
 
       // ban peaks that are not outside of error bars for the background
       if (height < 0.5 * std::sqrt(height + background)) {
-        continue;  // peak fit deemed as failure
+        continue; // peak fit deemed as failure
       }
       // the peak fit was a success. Collect info
       d_vec.emplace_back(m_peaksInDspacing[peakIndex]);
@@ -783,7 +783,6 @@ double gsl_costFunction(const gsl_vector *v, void *peaks) {
   return errsum;
 }
 
-
 /**
  * Linear regression of  the nominal peak center positions, in d-spacing
  * against the fitted peak center positions, in TOF units.
@@ -873,7 +872,6 @@ double fitDIFCtZeroDIFA(std::vector<double> &peaks, double &difc, double &t0,
 }
 
 } // end of anonymous namespace
-
 
 /**
  * Fit the nominal peak center positions, in d-spacing against the fitted
@@ -967,7 +965,6 @@ void PDCalibration::fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
     difa = best_difa;
   }
 }
-
 
 /**
  * Fitting ranges to the left and right of peak center
@@ -1235,7 +1232,6 @@ void PDCalibration::createCalTableNew() {
   }
 }
 
-
 /**
  * Table workspaces where the first column is the detector ID and subsequent
  * columns are termed "@x.xxxxx" where x.xxxxx are the peak positions of the
@@ -1346,7 +1342,6 @@ PDCalibration::sortTableWorkspace(API::ITableWorkspace_sptr &table) {
 
   return table;
 }
-
 
 /**
  *  A pair of workspaces, one containing the nominal peak centers in TOF units,
