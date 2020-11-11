@@ -73,6 +73,27 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         render_tab = iv_presenter.get_render_tab()
         assert render_tab
 
+        # set TOF bin range
+        iv_presenter.set_bin_range(1000, 12000)
+
+        # close
+        iv_presenter.close(ws.name())
+        # process events to close all the widgets
+        QApplication.processEvents()
+        # asset no more widgets
+        self.assert_no_toplevel_widgets()
+
+    def test_render_tab(self):
+        """Test setting view and setting axis in the render tab
+        """
+        # create workspace
+        ws = CreateSampleWorkspace()
+        LoadInstrument(ws, InstrumentName='ARCS', RewriteSpectraMap=False)
+
+        # create instrument view presenter
+        iv_presenter = InstrumentViewPresenter(ws, parent=None, ads_observer=None)
+        self.assert_widget_created()
+
         # close
         iv_presenter.close(ws.name())
         # process events to close all the widgets

@@ -35,7 +35,6 @@ class InstrumentViewPresenter(ObservingPresenter):
 
         # TODO FIXME - this may not be a good design.  It violates the OO principles
         # Update the instrument view manager
-        # InstrumentViewManager.last_view = self
         InstrumentViewManager.register(self, self.ws_name)
 
     def current_workspace_equals(self, name):
@@ -67,6 +66,11 @@ class InstrumentViewPresenter(ObservingPresenter):
 
     def select_pick_tab(self):
         self.container.select_tab(1)
+
+    def set_bin_range(self, min_x: float, max_x: float):
+        """Set the binning range on X-axis
+        """
+        self.container.set_range(min_x, max_x)
 
     def close(self, workspace_name):
         """
