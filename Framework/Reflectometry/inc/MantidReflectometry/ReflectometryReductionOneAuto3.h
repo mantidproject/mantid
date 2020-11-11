@@ -67,8 +67,7 @@ private:
 
   void init() override;
   void exec() override;
-  std::string
-  getRunNumberForWorkspaceGroup(const WorkspaceGroup_const_sptr &workspace);
+  std::string getRunNumberForWorkspaceGroup(std::string const &wsName);
   WorkspaceNames getOutputWorkspaceNames();
   void setDefaultOutputWorkspaceNames();
   /// Get the name of the detectors of interest based on processing instructions
@@ -111,21 +110,28 @@ private:
                               const double defaultValue, bool &isDefault);
   void setTransmissionProperties(Algorithm_sptr alg,
                                  std::string const &propertyName);
-  WorkspaceNames getOutputNamesForGroupMember(const std::string &inputName,
-                                              const std::string &runNumber,
-                                              const size_t wsGroupNumber);
+  WorkspaceNames
+  getOutputNamesForGroupMember(const std::vector<std::string> &inputNames,
+                               const std::string &runNumber,
+                               const size_t wsGroupNumber);
   void getTransmissionRun(std::map<std::string, std::string> &results,
                           WorkspaceGroup_sptr &workspaceGroup,
                           const std::string &transmissionRun);
   Algorithm_sptr
-  createAlgorithmForWorkspaceInGroup(std::string const &inputName,
-                                     WorkspaceNames const &outputNames,
-                                     bool skipCorrections = false);
-  void setOutputWorkspaces(std::vector<std::string> IvsQGroup,
-                           std::vector<std::string> IvsQBinnedGroup,
-                           std::vector<std::string> IvsLamGroup,
-                           WorkspaceNames const &outputNames);
-  void setOutputProperties(OutputProperties const &outputProperties);
+  createAlgorithmForGroupMember(std::string const &inputName,
+                                WorkspaceNames const &outputNames,
+                                bool recalculateIvsQ = false);
+  void
+  setOutputGroupedWorkspaces(std::vector<WorkspaceNames> const &outputNames,
+                             WorkspaceNames const &outputGroupNames);
+  void setOutputPropertyFromChild(Algorithm_sptr alg, std::string const &name);
+  void setOutputPropertiesFromChild(Algorithm_sptr alg);
+  auto processGroupMembers(std::vector<std::string> const &inputNames,
+                           std::vector<std::string> const &originalNames,
+                           std::string const &runNumber,
+                           bool recalculateIvsQ = false);
+  void groupWorkspaces(std::vector<std::string> workspaceNames,
+                       std::string const &outputName);
 };
 } // namespace Reflectometry
 } // namespace Mantid
