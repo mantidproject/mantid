@@ -67,12 +67,11 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         assert pick_tab
 
         # render tab
-        # iv_presenter.select_render_tab()
-        # current_tab_index = iv_presenter.container.widget.getCurrentTab()
-        # assert current_tab_index == 0
-
-        # render_tab = iv_presenter.get_render_tab()
-        # assert render_tab
+        iv_presenter.select_render_tab()
+        current_tab_index = iv_presenter.container.widget.getCurrentTab()
+        assert current_tab_index == 0
+        render_tab = iv_presenter.get_render_tab()
+        assert render_tab
 
         # close
         iv_presenter.close(ws.name())
