@@ -230,7 +230,7 @@ void ParamFunction::setError(size_t i, double err) {
 /**
  * Get the fitting error for a parameter by name.
  * @param name :: The name of a parameter
- * @return :: the error
+ * @param err :: The error value to set
  */
 void ParamFunction::setError(const std::string &name, double err) {
   auto it = std::find(m_parameterNames.cbegin(), m_parameterNames.cend(), name);
