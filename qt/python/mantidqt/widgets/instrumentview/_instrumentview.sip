@@ -61,7 +61,7 @@ public:
 
   bool overlay(const QString & ws_name);
 %Docstring
-  Overlay ... whatever
+  Overlay
 %End
 
   int getCurrentTab() const;
@@ -74,10 +74,9 @@ public:
 %End
 
 
-  // get tab (1)
   InstrumentWidgetTab * getTab(const QString & title) const;
 %Docstring
-    Returns a handler to the requested tab
+    Returns a handler to the requested tab by tab name/title
 
     Args:
 
@@ -91,7 +90,7 @@ public:
   // get tab (2)
   InstrumentWidgetTab * getTab(const Tab tab) const;
 %Docstring
-    Returns a handler to the requested tab
+    Returns a handler to the requested tab by tab index
 
     Args:
         tab One of the Tab enumeration types:
@@ -105,16 +104,56 @@ public:
 
   // get render tab
   InstrumentWidgetRenderTab *getRenderTab(const Tab tab) const;
+%Docstring
+  InstrumentWidgetRenderTab *getRenderTab(const Tab tab) const
+  ------------------------------------------------------------
+      Get the handler to the 'RENDER' tab inside instrument view
+      if the given tab is a Render tag
+
+      Args:
+        tab: One of the Tab enumeration types
+
+      Returns:
+          a pointer to the InstrumentWidgetRenderTab object.
+
+%End
+
 
   // get pick tab
   InstrumentWidgetPickTab *getPickTab(const Tab tab) const;
+%Docstring
+  InstrumentWidgetRenderTab *getPickTab(const Tab tab) const
+  ----------------------------------------------------------
+     Get the handler to the 'PICK' tab inside instrument view
+     if the given tab is a pick tag
+
+    Args:
+       tab: One of the Tab enumeration types
+
+     Returns:
+         a pointer to the InstrumentWidgetPickTab object.
+
+%End
 
   // select tab
   void selectTab(Tab tab);
+%Docstring
+  void selectTab(Tab tab)
+  ---------------------------------------------------------
+   Select tab
 
+   Args:
+     tab: One of the Tab enumeration types
+
+   Returns:
+       a pointer to the InstrumentWidgetPickTab object.
+
+%End
 
   void setBinRange(double min_value, double max_value);
 %Docstring
+    void setBinRange(double min_value, double max_value)
+    ----------------------------------------------------
     Updates the integration range over which the colours
     are calculated
 
@@ -169,14 +208,51 @@ public:
                                   SPHERICAL_Z
 %End
 
-  // set min value
   void setMinValue(double value, bool apply);
-  // set max value
-  void setMaxValue(double value, bool apply);
+%Docstring
+    void setBinRange(double value, bool apply)
+    ----------------------------------------------------
+    Updates the integration range over which the colours
+    are calculated
+
+    Args:
+        value: minimum value for the color bar
+        apply: flag to apply the change other than color bar by sending singal out.
+%End
+
+    void setMaxValue(double value, bool apply);
+%Docstring
+    void setBinRange(double value, bool apply)
+    ----------------------------------------------------
+    Updates the integration range over which the colours
+    are calculated
+
+    Args:
+        value: maximum value for the color bar
+        apply: flag to apply the change other than color bar by sending singal out.
+%End
+
   // set Axis at Full 3D
   void setAxis(const QString &axisNameArg);
+%Docstring
+    void setAxis(const QString &axisNameArg)
+    ----------------------------------------------------
+    Set axis to plot in FULL3D surface type
+
+    Args:
+       axisNameAr: name of the Axis to plot against including (Z+, Z-, Y+, Y-, X+, X-)
+%End
+
   // Enable/disable auto scaling checkbox
   void setColorMapAutoscaling(bool on);
+%Docstring
+    setColorMapAutoscaling(bool on)
+    ----------------------------------------------------
+    Enable or disable autoscaling option for color map
+
+    Args:
+       on: turn on or off autoscaling
+%End
 
 private:
   // constructors all private
