@@ -615,6 +615,7 @@ Output:
 
 .. testcode:: shareFit3
 
+    from mantid.simpleapi import *
     import numpy as np
 
     # Create workspaces
