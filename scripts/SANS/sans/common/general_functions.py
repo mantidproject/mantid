@@ -499,9 +499,10 @@ class EventSliceParser(object):
             return False
 
         split_line = stripped_line.split(',')
-        for character in split_line:
-            if len(character) == 0 or not character.isdigit():
-                # We likely have something like ',,'
+        for val in split_line:
+            try:
+                float(val)
+            except ValueError:
                 return False
 
         # Forward on result
