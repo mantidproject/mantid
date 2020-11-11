@@ -51,6 +51,8 @@ FunctionMultiDomainPresenter::FunctionMultiDomainPresenter(IFunctionView *view)
           SLOT(viewChangedGlobals(const QStringList &)));
   connect(m_view, SIGNAL(functionHelpRequest()), this,
           SLOT(viewRequestedFunctionHelp()));
+  connect(m_view, SIGNAL(attributePropertyChanged(const QString &)), this,
+          SLOT(viewChangedAttribute(const QString &)));
 }
 
 void FunctionMultiDomainPresenter::setFunction(IFunction_sptr fun) {
@@ -116,6 +118,12 @@ void FunctionMultiDomainPresenter::updateParameters(const IFunction &fun) {
 void FunctionMultiDomainPresenter::updateMultiDatasetParameters(
     const IFunction &fun) {
   m_model->updateMultiDatasetParameters(fun);
+  updateViewFromModel();
+}
+
+void FunctionMultiDomainPresenter::updateMultiDatasetAttributes(
+    const IFunction &fun) {
+  m_model->updateMultiDatasetAttributes(fun);
   updateViewFromModel();
 }
 
@@ -346,6 +354,12 @@ void FunctionMultiDomainPresenter::viewChangedParameter(
   emit parameterChanged(parts.first, parts.second);
 }
 
+void FunctionMultiDomainPresenter::viewChangedAttribute(
+    const QString &attrName) {
+  auto value = m_view->getAttribute(attrName);
+  m_model->setAttribute(attrName, value);
+}
+
 /**
  * Launches the Edit Local Parameter dialog and deals with the input from it.
  * @param parName :: Name of parameter that button was clicked for.
@@ -412,6 +426,19 @@ void FunctionMultiDomainPresenter::updateViewFromModel() {
     }
     m_view->setParameterConstraint(
         name, m_model->getLocalParameterConstraint(name, index));
+  }
+  updateViewAttributesFromModel();
+}
+
+void FunctionMultiDomainPresenter::updateViewAttributesFromModel() {
+  for (const auto &name : m_model->getAttributeNames()) {
+    // Create a single lambda expression capable of visiting each attribute
+    auto visitAttribute = [&](auto val) {
+      m_view->setAttributeValue(name, val);
+    };
+    auto value = m_model->getAttribute(name);
+    auto visitor = AttributeLambdaVisitor{visitAttribute};
+    value.apply(visitor);
   }
 }
 

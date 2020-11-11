@@ -94,7 +94,7 @@ size_t IndirectFitDataModel::getNumberOfDomains() const {
 }
 
 std::vector<double> IndirectFitDataModel::getQValuesForData() const {
-  std::vector<double> qValues{1};
+  std::vector<double> qValues;
   for (auto &fitData : *m_fittingData) {
     auto indexQValues = fitData.getQValues();
     qValues.insert(std::end(qValues), std::begin(indexQValues),
