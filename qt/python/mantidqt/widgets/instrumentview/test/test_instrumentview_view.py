@@ -13,6 +13,7 @@ from mantid.simpleapi import CreateSampleWorkspace, LoadInstrument
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
+from mantidqt.widgets.instrumentview.view import InstrumentWidget
 
 
 @start_qapplication
@@ -99,7 +100,18 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
         assert render_tab
 
         # select projection
-        render_tab.setSurfaceType(0)
+        render_tab.setSurfaceType(InstrumentWidget.CYLINDRICAL_X)
+        render_tab.setSurfaceType(InstrumentWidget.FULL3D)
+
+        # select axis under Full3D
+        render_tab.setAxis('Y+')
+
+        # disable autoscaling
+        render_tab.setColorMapAutoscaling(False)
+
+        # set min and max value to color bar
+        render_tab.setMinValue(10, False)
+        render_tab.setMaxValue(40, False)
 
         # close
         iv_presenter.close(ws.name())

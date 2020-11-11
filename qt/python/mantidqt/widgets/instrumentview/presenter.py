@@ -87,7 +87,7 @@ class InstrumentViewPresenter(ObservingPresenter):
 
 
 class InstrumentViewManager:
-    last_view = 'Hello Kitty'
+    last_view = None
     view_dict = dict()
 
     @staticmethod
