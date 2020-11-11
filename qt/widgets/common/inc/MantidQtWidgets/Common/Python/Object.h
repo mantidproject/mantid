@@ -25,12 +25,9 @@ namespace Widgets {
 namespace Common {
 namespace Python {
 
-// Alias for boost python object wrapper
+// Alias for boost python object/dict/list wrapper
 using Object = boost::python::object;
-
-// Alias for boost python dict wrapper
 using Dict = boost::python::dict;
-
 using List = boost::python::list;
 
 // Alias for handle wrapping a raw PyObject*
