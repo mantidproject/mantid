@@ -35,6 +35,7 @@ New features
 Improvements
 ############
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
+- The height of the :ref:`func-BackToBackExponential` peak is now preserved when changing the FWHM sliders when fitting.
 - :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` is corrected when treating multiple scans merged.
 - The default loadpath in the fitting tab of the Engineering Diffraction UI is now set to the most recently focused files.
 
