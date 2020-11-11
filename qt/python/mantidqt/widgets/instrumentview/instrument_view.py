@@ -88,7 +88,7 @@ class pyInstrumentView:
 
 
 if __name__ == "__main__":
-    from mantid.simpleapi import LoadEventNexus, mtd
+    from mantid.simpleapi import LoadEventNexus
 
     nexus_path = (
         "/SNS/EQSANS/shared/sans-backend/data/new/ornl/sans/hfir/gpsans/CG2_9177.nxs.h5"
