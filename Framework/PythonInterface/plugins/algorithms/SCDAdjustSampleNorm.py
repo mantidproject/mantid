@@ -19,7 +19,7 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
         return "Crystal\\Corrections"
 
     def seeAlso(self):
-        return ["ConvertWANDSCDtoQ", "ConvertHFIRSCDtoQ"]
+        return ["ConvertWANDSCDtoQ", "ConvertHFIRSCDtoMDE"]
 
     def name(self):
         return "SCDAdjustSampleNorm"
