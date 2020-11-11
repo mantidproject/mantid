@@ -61,9 +61,8 @@ class InstrumentViewTest(unittest.TestCase, QtWidgetFinder):
 
         # select pick tab
         iv_presenter.select_pick_tab()
-        # current_tab_index = iv_presenter.container.widget.getCurrentTab()
-        # assert current_tab_index == 1
-
+        current_tab_index = iv_presenter.container.widget.getCurrentTab()
+        assert current_tab_index == 1
         # pick_tab = iv_presenter.get_pick_tab()
         # assert pick_tab
 
