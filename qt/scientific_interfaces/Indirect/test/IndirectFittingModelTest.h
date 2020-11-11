@@ -715,6 +715,5 @@ public:
     TS_ASSERT(paramMap.find("f0.f0.f1.f1.Amplitude") != paramMap.end());
     TS_ASSERT(paramMap.at("f0.f0.f1.f0.Amplitude").value == 1.5);
     TS_ASSERT(paramMap.at("f0.f0.f1.f1.Amplitude").value == 1.5);
-    
   }
 };

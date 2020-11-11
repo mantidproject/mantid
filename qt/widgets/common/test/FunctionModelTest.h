@@ -101,12 +101,13 @@ public:
         "composite=Convolution,NumDeriv=true,FixResolution=true;name="
         "Resolution,"
         "Workspace=iris26173_graphite002_res,WorkspaceIndex=0,X=(),Y=();name="
-        "Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175,constraints=(0<Amplitude,0<"
+        "Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175,constraints=(0<"
+        "Amplitude,0<"
         "FWHM)";
     model.setFunctionString(initialFunString);
     auto fun = model.getFitFunction();
     auto funString = fun->asString();
-    TS_ASSERT(funString==correctedFunString);
+    TS_ASSERT(funString == correctedFunString);
   }
 
   void test_globals() {
