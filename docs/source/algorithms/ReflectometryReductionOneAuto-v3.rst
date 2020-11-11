@@ -111,7 +111,7 @@ and values specified in the parameters file to run
 :ref:`algm-PolarizationCorrectionWildes` as appropriate.
 
 The result will be a new workspace in wavelength, which will override the
-previous one. This will then be used as in input to re-run
+previous one. This will then be used as an input to re-run
 :ref:`algm-ReflectometryReductionOne` to calculate the new output workspaces in
 Q, which in turn will override the existing workspaces in Q. Note that when run
 with a workspace that is already summed and converted to wavelength,
