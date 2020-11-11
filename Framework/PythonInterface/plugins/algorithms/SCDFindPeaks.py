@@ -4,12 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory, IMDWorkspaceProperty, IPeaksWorkspaceProperty, PythonAlgorithm, PropertyMode, \
-    WorkspaceProperty
-from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, PropertyCriterion, \
-    StringListValidator
+from mantid.api import AlgorithmFactory, IMDWorkspaceProperty, IPeaksWorkspaceProperty, PythonAlgorithm, PropertyMode
+from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, StringListValidator
 from mantid.simpleapi import DeleteWorkspace, FindPeaksMD, FindUBUsingIndexedPeaks, \
-    FindUBUsingLatticeParameters, IndexPeaks, ShowPossibleCells, SelectCellOfType, OptimizeLatticeForCellType, mtd
+    FindUBUsingLatticeParameters, IndexPeaks, ShowPossibleCells, SelectCellOfType, OptimizeLatticeForCellType
 
 
 class SCDFindPeaks(PythonAlgorithm):
