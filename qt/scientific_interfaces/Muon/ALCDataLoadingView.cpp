@@ -428,9 +428,9 @@ void ALCDataLoadingView::setAlphaValue(const std::string &alpha) {
 }
 
 // Get alpha value, defualt value 1
-double ALCDataLoadingView::getAlphaValue() const { 
+double ALCDataLoadingView::getAlphaValue() const {
   if (!m_ui.alpha->text().isEmpty())
-    return std::stod(m_ui.alpha->text().toStdString()); 
+    return std::stod(m_ui.alpha->text().toStdString());
   return 1.0;
 }
 

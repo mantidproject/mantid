@@ -488,7 +488,7 @@ public:
 
     EXPECT_CALL(*m_view, enableAlpha(false)).Times(1);
     EXPECT_CALL(*m_view, showAlphaMessage(true)).Times(1);
-    
+
     TS_ASSERT_THROWS_NOTHING(m_view->foundRuns());
   }
 
