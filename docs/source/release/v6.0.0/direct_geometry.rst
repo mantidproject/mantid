@@ -46,6 +46,8 @@ New
 BugFixes
 ########
 - Fixed a bug in the :ref:`Crystal Field Python Interface` where ties were not being applied properly for cubic crystal structures.
+- Fixed a bug in the :ref:`LoadCIF <algm-LoadCIF>` algorithm caused when a **.cif** file has 2 sections, with the first not having
+  the required data keys.
 
 
 DGSPlanner
