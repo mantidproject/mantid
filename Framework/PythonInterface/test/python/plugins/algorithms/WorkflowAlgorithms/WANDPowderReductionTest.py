@@ -358,7 +358,17 @@ class WANDPowderReductionTest(unittest.TestCase):
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="None",
-            MultipleOutput="",
+            MultipleOutput="True",
+        )
+        
+        pd_out = WANDPowderReduction(
+            InputWorkspace=event_data,
+            CalibrationWorkspace=event_cal,
+            BackgroundWorkspace=event_bkg,
+            Target="Theta",
+            NumberBins=1000,
+            NormaliseBy="None",
+            MultipleOutput="False",
         )
 
         x = pd_out.extractX()
@@ -375,7 +385,17 @@ class WANDPowderReductionTest(unittest.TestCase):
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="None",
-            MultipleOutput="",
+            MultipleOutput="True",
+        )
+        
+        pd_out = WANDPowderReduction(
+            InputWorkspace=[event_data, event_data],
+            CalibrationWorkspace=event_cal,
+            BackgroundWorkspace="event_bkg,event_bkg",
+            Target="Theta",
+            NumberBins=1000,
+            NormaliseBy="None",
+            MultipleOutput="False",
         )
 
         x = pd_out.extractX()
