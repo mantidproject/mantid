@@ -82,7 +82,7 @@ public:
   void toggleRunsAutoAdd(const bool autoAdd) override;
   void enableAlpha(const bool alpha) override;
   void setAlphaValue(const std::string &alpha) override;
-  double getAlphaValue() const override;
+  std::string getAlphaValue() const override;
   void showAlphaMessage(const bool alpha) override;
 
   // -- End of IALCDataLoadingView interface

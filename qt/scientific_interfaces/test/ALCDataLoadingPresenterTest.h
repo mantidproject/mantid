@@ -54,7 +54,7 @@ public:
   MOCK_CONST_METHOD0(subtractIsChecked, bool());
   MOCK_CONST_METHOD0(getRunsText, std::string());
   MOCK_CONST_METHOD0(getRunsFirstRunText, std::string());
-  MOCK_CONST_METHOD0(getAlphaValue, double());
+  MOCK_CONST_METHOD0(getAlphaValue, std::string());
 
   MOCK_METHOD0(initialize, void());
   MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace,
@@ -151,7 +151,7 @@ public:
     ON_CALL(*m_view, detectorGroupingType()).WillByDefault(Return("Auto"));
     ON_CALL(*m_view, redPeriod()).WillByDefault(Return("1"));
     ON_CALL(*m_view, subtractIsChecked()).WillByDefault(Return(false));
-    ON_CALL(*m_view, getAlphaValue()).WillByDefault(Return(1.0));
+    ON_CALL(*m_view, getAlphaValue()).WillByDefault(Return("1.0"));
   }
 
   void tearDown() override {
@@ -493,7 +493,7 @@ public:
   }
 
   void test_alpha_single_period_data() {
-    std::string singlePeriod = "MUSR00062260.nxs";
+    std::string singlePeriod = "EMU00019489.nxs";
     ON_CALL(*m_view, getFirstFile()).WillByDefault(Return(singlePeriod));
 
     EXPECT_CALL(*m_view, enableAlpha(true)).Times(1);

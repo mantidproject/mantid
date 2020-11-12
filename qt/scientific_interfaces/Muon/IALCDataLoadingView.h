@@ -89,7 +89,7 @@ public:
   virtual void setAlphaValue(const std::string &alpha) = 0;
 
   /// Get alpha value
-  virtual double getAlphaValue() const = 0;
+  virtual std::string getAlphaValue() const = 0;
 
   /// Show/hide alpha explanation
   virtual void showAlphaMessage(const bool alpha) = 0;
