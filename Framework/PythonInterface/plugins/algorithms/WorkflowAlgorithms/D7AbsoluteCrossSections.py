@@ -417,9 +417,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def _set_units(self, ws):
         output_unit = self.getPropertyValue('OutputUnits')
         unit_symbol = 'barn / sr / formula unit'
-        unit = 'd sigma / d Omega ({})'
+        unit = 'd sigma / d Omega ({0})'
         if output_unit == 'TwoTheta':
-            unit.format('TwoTheta')
+            unit = unit.format('TwoTheta')
             if mtd[ws].getNumberOfEntries() > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
                 self._call_sum_data(ws)
                 ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula='-x')
@@ -428,7 +428,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
                 Transpose(InputWorkspace=ws, OutputWorkspace=ws)
         elif output_unit == 'Q':
-            unit.format('Q')
+            unit = unit.format('Q')
             if self.getPropertyValue('OutputTreatment') == 'Sum':
                 self._merge_polarisations(ws)
                 ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ',
