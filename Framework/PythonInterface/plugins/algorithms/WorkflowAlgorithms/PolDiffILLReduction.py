@@ -176,15 +176,6 @@ class PolDiffILLReduction(PythonAlgorithm):
 
         self.setPropertySettings('SampleGeometryFile', EnabledWhenProperty('SampleGeometry', PropertyCriterion.IsEqualTo, 'Custom'))
 
-        self.declareProperty(name="OutputUnits",
-                             defaultValue="TwoTheta",
-                             validator=StringListValidator(["TwoTheta", "Q"]),
-                             direction=Direction.Input,
-                             doc="The choice to display the reduced data either as a function of the raw data units, the detector twoTheta,"
-                                 +" or the momentum exchange.")
-
-        self.setPropertySettings('OutputUnits', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
-
         self.declareProperty(name="ScatteringAngleBinSize",
                              defaultValue=0.5,
                              validator=FloatBoundedValidator(lower=0),
@@ -528,24 +519,11 @@ class PolDiffILLReduction(PythonAlgorithm):
         return ws
 
     def _set_units(self, ws, process):
-        output_unit = self.getPropertyValue('OutputUnits')
-        if output_unit == 'TwoTheta':
-            if (process == 'Sample' and len(self.getPropertyValue('Run').split(',')) > 1
-                    and self.getProperty('OutputTreatment').value == 'Sum'):
-                self._merge_polarisations(ws)
-            else:
-                ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta', OrderAxis=False)
-            ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
-        elif output_unit == 'Q':
-            ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ',
-                                EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
-                                OrderAxis=False)
+        if process == 'Sample' and self.getPropertyValue('OutputTreatment') in  ['Average','Sum']:
+            self._merge_polarisations(ws, average_detectors=(self.getPropertyValue('OutputTreatment') == 'Average'))
+
         for entry in mtd[ws]:
-            unit = 'dSigma / dOmega'
-            if output_unit == 'TwoTheta':
-                unit += ' (TwoTheta)'
-            elif output_unit == 'Q':
-                unit += ' (Q)'
+            unit = 'dSigma / dOmega (detector number)'
             entry.setYUnit(unit)
             entry.setYUnitLabel(unit)
         return ws
@@ -619,7 +597,6 @@ class PolDiffILLReduction(PythonAlgorithm):
                     progress.report('Normalising vanadium output')
                     self._normalise_vanadium(ws)
                 self._set_units(ws, process)
-                Transpose(InputWorkspace=ws, OutputWorkspace=ws)
 
         self._finalize(ws, process, progress)
 

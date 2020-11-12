@@ -77,7 +77,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium'], 132, 1, 6, 'Scattering angle', 'Degrees', 'Wavelength', 'Wavelength', True)
+        self._check_output(mtd['vanadium'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium'], 'Vanadium')
 
     def test_vanadium_annulus(self):
@@ -92,8 +92,7 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             SampleAndEnvironmentProperties=sampleProperties,
                             SampleGeometry='Annulus',
                             OutputTreatment='Individual')
-        self._check_output(mtd['vanadium_annulus'], 132, 1, 6, 'Scattering angle', 'Degrees', 'Wavelength', 'Wavelength',
-                           True)
+        self._check_output(mtd['vanadium_annulus'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['vanadium_annulus'], 'Vanadium')
 
     def test_sample(self):
@@ -101,20 +100,19 @@ class PolDiffILLReductionTest(unittest.TestCase):
         PolDiffILLReduction(Run='397004', ProcessAs='Sample', OutputWorkspace='sample',
                             SampleAndEnvironmentProperties=sampleProperties,
                             OutputTreatment='Individual')
-        self._check_output(mtd['sample'], 132, 1, 6, 'Scattering angle', 'Degrees', 'Wavelength', 'Wavelength', True)
+        self._check_output(mtd['sample'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
         self._check_process_flag(mtd['sample'], 'Sample')
     
     def _check_process_flag(self, ws, value):
         self.assertTrue(ws[0].getRun().getLogData('ProcessedAs').value, value)
 
-    def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id, transposed=False):
+    def _check_output(self, ws, blocksize, spectra, nEntries, x_unit, x_unit_id, y_unit, y_unit_id):
         self.assertTrue(ws)
         self.assertTrue(isinstance(ws, WorkspaceGroup))
         self.assertTrue(ws.getNumberOfEntries(), nEntries)
         for entry in ws:
             self.assertTrue(isinstance(entry, MatrixWorkspace))
-            if not transposed:
-                self.assertTrue(entry.isHistogramData())
+            self.assertTrue(entry.isHistogramData())
             self.assertTrue(not entry.isDistribution())
             self.assertEqual(entry.getAxis(0).getUnit().caption(), x_unit)
             self.assertEqual(entry.getAxis(0).getUnit().unitID(), x_unit_id)

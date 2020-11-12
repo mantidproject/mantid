@@ -22,12 +22,12 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     @staticmethod
     def _max_value_per_detector(ws):
         if isinstance(mtd[ws], WorkspaceGroup):
-            max_values = np.zeros(shape=(mtd[ws][0].blocksize(),
+            max_values = np.zeros(shape=(mtd[ws][0].getNumberHistograms(),
                                          mtd[ws].getNumberOfEntries()))
             for entry_no, entry in enumerate(mtd[ws]):
-                max_values[:, entry_no] = entry.extractY()
+                max_values[:, entry_no] = entry.extractY().T
         else:
-            max_values = mtd[ws].extractY()
+            max_values = mtd[ws].extractY().T
         return np.amax(max_values, axis=1)
 
     def category(self):
@@ -98,6 +98,13 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              validator=StringListValidator(["None", "Uniaxial", "XYZ", "10p"]),
                              direction=Direction.Input,
                              doc="What type of cross-section separation to perform.")
+
+        self.declareProperty(name="OutputUnits",
+                             defaultValue="TwoTheta",
+                             validator=StringListValidator(["TwoTheta", "Q"]),
+                             direction=Direction.Input,
+                             doc="The choice to display the output either as a function of detector twoTheta,"
+                                 +" or the momentum exchange.")
 
         self.declareProperty(name="ThetaOffset",
                              defaultValue=0.0,
@@ -390,23 +397,41 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_name)
         return output_name
 
-    def _set_y_units(self, ws):
-        unit = '(barn / sr / formula unit)'
-        x_unit = ''
-        x_unit_entry0 = mtd[ws][0].getAxis(1).getUnit().unitID()
-        if x_unit_entry0 == 'MomentumTransfer':
-            x_unit = 'Q'
-        elif x_unit_entry0 == 'Degrees':
-            x_unit = '(TwoTheta)'
-        elif x_unit_entry0 == 'Wavelength':
-            x_unit = '(DetectorNumber)'
+    def _set_units(self, ws):
+        output_unit = self.getPropertyValue('OutputUnits')
+        unit_symbol = 'barn / sr / formula unit'
+        unit = 'd sigma / d Omega ({})'
+        print(output_unit, self.getProperty('OutputTreatment'))
+        if output_unit == 'TwoTheta':
+            unit.format('TwoTheta')
+            if mtd[ws].getNumberOfEntries() > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
+                self._call_sum_data(ws)
+                ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula='-x')
+            elif self.getProperty('OutputTreatment').value == 'Individual':
+                ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta', OrderAxis=False)
+                ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
+                Transpose(InputWorkspace=ws, OutputWorkspace=ws)
+        elif output_unit == 'Q':
+            unit.format('Q')
+            if self.getPropertyValue('OutputTreatment') == 'Sum':
+                self._merge_polarisations(ws)
+                ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ',
+                             EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
+                # ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula='')
+            else:
+                ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ',
+                                    EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
+                                    OrderAxis=False)
+                Transpose(InputWorkspace=ws, OutputWorkspace=ws)
+
         for entry in mtd[ws]:
-            entry.setYUnitLabel("dS / d{0} {1}".format(x_unit, unit))
+            entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
         return ws
 
-    def _set_as_distribution(self, ws):
-        for entry in mtd[ws]:
-            entry.setDistribution(True)
+    def _call_sum_data(self, ws):
+        SumOverlappingTubes(InputWorkspaces=ws, OutputWorkspace=ws,
+                            OutputType='1D', ScatteringAngleBinning=self.getProperty('ScatteringAngleBinSize').value,
+                            Normalise=True, HeightAxis='-0.1,0.1')
         return ws
 
     def PyExec(self):
@@ -428,13 +453,25 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
             det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
             output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
-            self._set_y_units(output_ws)
-            Transpose(InputWorkspace=output_ws, OutputWorkspace=output_ws)
+            self._set_units(output_ws)
             self._set_as_distribution(output_ws)
             # clean-up
             DeleteWorkspace(det_efficiency_ws)
             if normalisation_method != 'Vanadium':
                 DeleteWorkspace(det_efficiency_input)
+            else:
+                self._set_units(det_efficiency_input)
+
+        else:
+            output_ws = input_ws
+
+        if ( self.getPropertyValue('CrossSectionSeparationMethod') != 'None'
+             and normalisation_method not in ['Paramagnetic', 'Incoherent'] ):
+            if mtd[input_ws].getNumberOfEntries() != 1 and self.getProperty('OutputTreatment') == 'Sum':
+                self._call_sum_data(input_ws)
+            component_ws = self._call_cross_section_separation(input_ws)
+            self._set_units(component_ws)
+
         self.setProperty('OutputWorkspace', mtd[output_ws])
 
 
