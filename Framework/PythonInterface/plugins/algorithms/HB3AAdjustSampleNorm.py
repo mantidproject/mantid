@@ -134,7 +134,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         # Verify given workspaces exist
         if not input_ws.isDefault:
-            input_ws_list = input_ws.value.split(",")
+            input_ws_list = list(map(str.strip, input_ws.value.split(",")))
             for ws in input_ws_list:
                 if not mtd.doesExist(ws):
                     issues['InputWorkspaces'] = "Could not find input workspace '{}'".format(ws)
@@ -150,7 +150,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         if load_files:
             datafiles = self.getProperty("Filename").value
         else:
-            datafiles = self.getProperty("InputWorkspaces").value.split(",")
+            datafiles = list(map(str.strip, self.getProperty("InputWorkspaces").value.split(",")))
 
         vanadiumfile = self.getProperty("VanadiumFile").value
         vanws = self.getProperty("VanadiumWorkspace").value
@@ -198,20 +198,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                     out_ws_name = out_ws + "_" + file
 
             exp_info = scan.getExperimentInfo(0)
-
-            # Adjust detector height and distance with new offsets
-            if height != 0.0 or distance != 0.0:
-                # Move all the instrument banks (MoveInstrumentComponents does not work on MDHisto Workspaces)
-                component = exp_info.componentInfo()
-                for bank in range(1, 4):
-                    index = component.indexOfAny("bank{}".format(bank))
-
-                    offset = V3D(distance, height, distance)
-                    pos = component.position(index)
-
-                    offset += pos
-
-                    component.setPosition(index, offset)
+            self.__move_components(exp_info, height, distance)
 
             # Get the wavelength from the file sample logs if it exists
             if exp_info.run().hasProperty("wavelength"):
@@ -259,6 +246,21 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             DeleteWorkspace(scan)
 
         self.setProperty("OutputWorkspace", out_ws_name)
+
+    def __move_components(self, exp_info, height, distance):
+        # Adjust detector height and distance with new offsets
+        if height != 0.0 or distance != 0.0:
+            # Move all the instrument banks (MoveInstrumentComponents does not work on MDHisto Workspaces)
+            component = exp_info.componentInfo()
+            for bank in range(1, 4):
+                index = component.indexOfAny("bank{}".format(bank))
+
+                offset = V3D(distance, height, distance)
+                pos = component.position(index)
+
+                offset += pos
+
+                component.setPosition(index, offset)
 
 
 AlgorithmFactory.subscribe(HB3AAdjustSampleNorm)
