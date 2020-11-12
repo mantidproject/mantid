@@ -86,20 +86,24 @@ class HB2AReduce(PythonAlgorithm):
                               "",
                               optional=PropertyMode.Mandatory,
                               direction=Direction.Output), "Output Workspace")
-        # extend functionality by HB2A users
+        # extend functionality requested by HB2A users
         self.declareProperty(name='SaveData',
                              defaultValue=True,
                              doc="By default saving the reduced data to either GSAS or XYE")
+        condition = EnabledWhenProperty('SaveData', PropertyCriterion.IsDefault)
         self.declareProperty(name='OutputFormat',
                              defaultValue="GSAS",
                              validator=StringListValidator(['XYE', 'GSAS']),
                              doc="Supportted output format: XYE (.dat), GSAS (.gss)")
-        self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory),
-                             "Saving directory for output file")
+        self.setPropertySettings('OutputFormat', condition)
+        self.declareProperty(
+            FileProperty(name="OutputDirectory", defaultValue="", action=FileAction.Directory),
+            "Saving directory for output file")
+        self.setPropertySettings('OutputDirectory', condition)
+        # group the GUI
+        self.setPropertyGroup('SaveData', 'output')
         self.setPropertyGroup('OutputFormat', 'output')
         self.setPropertyGroup('OutputDirectory', 'output')
-        self.setPropertySettings('output',
-                                 EnabledWhenProperty('SaveData', PropertyCriterion.IsDefault))
 
     def validateInputs(self):
         issues = dict()
