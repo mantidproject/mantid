@@ -69,14 +69,14 @@ A very basic reduction would include a vanadium reference and a sample, without 
                             NormalisationMethod='Vanadium', VanadiumInputWorkspace='reduced_vanadium')
 
     SofQ = mtd['normalised_sample']
-    sAxis = SofQ[0].readY(0)  # S axis
-    print('S(Q): S range: {:.2}...{:.2} barn/sr/formula unit'.format(np.min(sAxis), np.max(sAxis)))
+    xAxis = SofQ[0].readX(0)  # TwoTheta axis
+    print('dS/dOmega (TwoTheta) detector position range: {:.2f}...{:.2f} (degrees)'.format(xAxis[0], xAxis[-1]))
 
 Output:
 
 .. testoutput:: BasicReduction
 
-    S(Q): S range: 0.016...0.06 barn/sr/formula unit
+    dS/dOmega (TwoTheta) detector position range: 13.14...144.06 (degrees)
 
    
 
