@@ -54,6 +54,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.view.set_context_menu_actions(self.view.table_y)
         self.view.set_context_menu_actions(self.view.table_x)
         self.view.set_context_menu_actions(self.view.table_e)
+        self.view.set_context_menu_actions(self.view.table_dx)
 
         # connect to replace_signal signal to handle replacement of the workspace
         self.container.replace_signal.connect(self.action_replace_workspace)
@@ -203,5 +204,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             return self.model._ws.readX
         elif type == MatrixWorkspaceTableViewModelType.e:
             return self.model._ws.readE
+        elif type == MatrixWorkspaceTableViewModelType.dx:
+            return self.model._ws.readDx
         else:
             raise ValueError("Unknown TableViewModel type {}".format(type))
