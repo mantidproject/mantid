@@ -1017,9 +1017,9 @@ PDCalibration::dSpacingWindows(const std::vector<double> &centres,
 /**
  * Return a function that converts from d-spacing to TOF units for a particular
  * pixel, evaulating the GSAS conversion formula:
- *                 TOF = DIFC∗d + DIFA∗d^2 + TZERO
+ *                  TOF = DIFC∗d + DIFA∗d^2 + TZERO
  *
- * @param det_id :: detector ID
+ * @param detid :: detector ID
  */
 std::function<double(double)>
 PDCalibration::getDSpacingToTof(const detid_t detid) {
@@ -1056,8 +1056,7 @@ void PDCalibration::setCalibrationValues(const detid_t detid, const double difc,
  * Adjustment of TofMin and TofMax values, to ensure positive values of
  * d-spacing when converting from TOF to d-spacing using the GSAS equation
  *               TOF = DIFC∗d + DIFA∗d^2 + TZERO
- * See Mantid::Kernel::Diffraction::calcTofMin (and ::calcTofMax) for
- * adjustments to TofMin and TofMax.
+ * See calcTofMin and calcTofMax for adjustments to TofMin and TofMax.
  *
  * @return two-item array containing adjusted TofMin and TofMax values
  */
@@ -1184,11 +1183,9 @@ void PDCalibration::createCalTableFromExisting() {
 }
 
 /**
- * Initialize the calibration table workspace
- *
- * The output calibration has columns "detid", "difc", "difa", "tzero",
- * "tofmin", and "tofmax".
- * "difc" from the instrument geometry: m_n * (L1 + L2)  * 2 * sin(\theta) / h
+ * Initialize the calibration table workspace. The output calibration
+ * has columns "detid", "difc", "difa", "tzero", "tofmin", and "tofmax".
+ * "difc" from the instrument geometry: m_n * (L1 + L2)  * 2 * sin(theta) / h
  * "difa", "tzero", and "tofmin" set to zero, "tofmax" to DBL_MAX
  */
 void PDCalibration::createCalTableNew() {
