@@ -215,7 +215,7 @@ class AlignComponents(PythonAlgorithm):
             if maskWS.id() != 'MaskWorkspace':
                 issues['MaskWorkspace'] = "MaskWorkspace must be empty or of type \"MaskWorkspace\""
             # The mask workspace should contain as many spectra as rows in the calibration table
-            if maskWS.getNumberHistograms() != maskWS.rowCount():
+            if maskWS.getNumberHistograms() != calWS.rowCount():
                 error_message = 'The mask workspace must contain as many spectra as rows in the calibration table'
                 issues['MaskWorkspace'] = error_message
 
