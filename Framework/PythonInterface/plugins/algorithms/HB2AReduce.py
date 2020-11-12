@@ -125,6 +125,31 @@ class HB2AReduce(PythonAlgorithm):
                         "Exp"] = 'Multiple experiments found in IPTS-{}. You must set Exp to one of {}'.format(
                             ipts, exps)
 
+        # validate output format options
+        # Def_x    GSAS    XYE
+        #  2theta   Y       Y
+        #  others   N       Y
+        if self.getProperty("SaveData").value & (self.getProperty('OutputFormat').value == "GSAS"):
+            filenames = self.getProperty("Filename").value
+            if not filenames:
+                ipts = self.getProperty("IPTS").value
+                exp = self.getProperty("Exp").value
+                if self.getProperty("Exp").value == Property.EMPTY_INT:
+                    exp = int([
+                        e for e in os.listdir('/HFIR/HB2A/IPTS-{0}'.format(ipts)) if 'exp' in e
+                    ][0].replace('exp', ''))
+                filenames = [
+                    '/HFIR/HB2A/IPTS-{0}/exp{1}/Datafiles/HB2A_exp{1:04}_scan{2:04}.dat'.format(
+                        ipts, exp, scan) for scan in self.getProperty("ScanNumbers").value
+                ]
+            filenames = filenames if isinstance(filenames, list) else [filenames]
+            _target = "# def_x = 2theta"
+            for fn in filenames:
+                with open(fn) as f:
+                    if not any([_target in line for line in f.readlines()]):
+                        issues[
+                            'OutputFormat'] = f"{fn} can't be saved to GSAS due to missing header:\n{_target}"
+                        break
         return issues
 
     def PyExec(self):
