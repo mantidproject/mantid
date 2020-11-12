@@ -97,7 +97,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                  +' measurements rotated by 45 degress.')
 
         self.declareProperty(WorkspaceGroupProperty('OutputWorkspace', '',
-                                                    direction=Direction.Output),
+                                                    direction=Direction.Output,
+                                                    optional=PropertyMode.Optional),
                              doc='The output workspace.')
 
         self.declareProperty(WorkspaceGroupProperty('CrossSectionsOutputWorkspace', '',
@@ -476,9 +477,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 DeleteWorkspace(det_efficiency_input)
             else:
                 self._set_units(det_efficiency_input)
-
-        else:
-            output_ws = input_ws
+            self.setProperty('OutputWorkspace', mtd[output_ws])
 
         if ( self.getPropertyValue('CrossSectionSeparationMethod') != 'None'
              and normalisation_method not in ['Paramagnetic', 'Incoherent'] ):
@@ -487,7 +486,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             component_ws = self._call_cross_section_separation(input_ws)
             self._set_units(component_ws)
 
-        self.setProperty('OutputWorkspace', mtd[output_ws])
 
 
 AlgorithmFactory.subscribe(D7AbsoluteCrossSections)
