@@ -142,10 +142,8 @@ Usage
 	                   SampleAndEnvironmentProperties=sampleProperties,
                            CrossSectionsOutputWorkspace='xyz', OutputWorkspace='_unused')
    print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
-   SumSpectra(InputWorkspace=mtd['xyz'][1], EndWorkspaceIndex=mtd['xyz'][1].getNumberHistograms()-1,
-              OutputWorkspace='sum_incoherent')
-   SumSpectra(InputWorkspace=mtd['xyz'][0], EndWorkspaceIndex=mtd['xyz'][0].getNumberHistograms()-1,
-              OutputWorkspace='sum_coherent')
+   Integration(InputWorkspace=mtd['xyz'][0], OutputWorkspace='sum_coherent')
+   Integration(InputWorkspace=mtd['xyz'][1], OutputWorkspace='sum_incoherent')
    Divide(LHSWorkspace='sum_incoherent', RHSWorkspace='sum_coherent', OutputWorkspace='ratio')
    print("Ratio of spin-incoherent to nuclear coherent cross-sections measured for vanadium is equal to: {0:.1f}".format(mtd['ratio'].readY(0)[0]))
 
