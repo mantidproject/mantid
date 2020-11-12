@@ -272,38 +272,6 @@ class DrillViewTest(unittest.TestCase):
         self.view.setMasterRow(1)
         self.view.setMaster.emit.assert_called_once_with(1)
 
-    def test_processSelectedRows(self):
-        self.view.process = mock.Mock()
-        # no selection
-        self.view.table.getSelectedRows.return_value = []
-        self.view.table.getRowsFromSelectedCells.return_value = []
-        self.view.process_selected_rows()
-        self.view.table.process.emit.assert_not_called()
-        # rows selection
-        self.view.table.getSelectedRows.return_value = [0, 2]
-        self.view.process_selected_rows()
-        calls = [mock.call([0, 2])]
-        self.view.process.emit.assert_has_calls(calls)
-        # cells selection
-        self.view.process.reset_mock()
-        self.view.table.getSelectedRows.return_value = []
-        self.view.table.getRowsFromSelectedCells.return_value = [1, 3]
-        self.view.process_selected_rows()
-        calls = [mock.call([1, 3])]
-        self.view.process.emit.assert_has_calls(calls)
-
-    def test_processAllRows(self):
-        self.view.process = mock.Mock()
-        # empty table
-        self.view.table.getAllRows.return_value = []
-        self.view.process_all_rows()
-        self.view.table.process.emit.assert_not_called()
-        # not empty
-        self.view.table.getAllRows.return_value = [0, 1, 2]
-        self.view.process_all_rows()
-        calls = [mock.call([0, 1, 2])]
-        self.view.process.emit.assert_has_calls(calls)
-
     def test_automaticFilling(self):
         self.view.increment = mock.Mock()
         # positive increment
@@ -382,6 +350,20 @@ class DrillViewTest(unittest.TestCase):
         self.view.set_table(["test", "test"])
         self.view.table.setColumnCount.assert_called_with(2)
 
+    def test_getSelectedRows(self):
+        self.view.table.getSelectedRows.return_value = [0, 2]
+        rows = self.view.getSelectedRows()
+        self.assertEqual(rows, [0, 2])
+        self.view.table.getSelectedRows.return_value = []
+        self.view.table.getRowsFromSelectedCells.return_value = [1, 3]
+        rows = self.view.getSelectedRows()
+        self.assertEqual(rows, [1, 3])
+
+    def test_getAllRows(self):
+        self.view.table.getAllRows.return_value = [0, 1, 4]
+        rows = self.view.getAllRows()
+        self.assertEqual(rows, [0, 1, 4])
+
     def test_getCellContents(self):
         self.view.getCellContents(1, 2)
         self.view.table.getCellContents.assert_called_once_with(1, 2)
@@ -432,17 +414,17 @@ class DrillViewTest(unittest.TestCase):
     def test_setCellOk(self):
         self.view.table.rowCount.return_value = 1
         self.view.columns = ["test"]
-        self.view.set_cell_ok(1, "test1")
+        self.view.setCellOk(1, "test1")
         self.view.table.removeCellBackground.assert_not_called()
-        self.view.set_cell_ok(0, "test")
+        self.view.setCellOk(0, "test")
         self.view.table.removeCellBackground.assert_called_once()
 
     def test_setCellError(self):
         self.view.table.rowCount.return_value = 1
         self.view.columns = ["test"]
-        self.view.set_cell_error(1, "test1", "")
+        self.view.setCellError(1, "test1", "")
         self.view.table.setCellBackground.assert_not_called()
-        self.view.set_cell_error(0, "test", "")
+        self.view.setCellError(0, "test", "")
         self.view.table.setCellBackground.assert_called_once()
 
     def test_setVisualSettings(self):

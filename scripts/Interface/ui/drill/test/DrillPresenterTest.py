@@ -39,11 +39,44 @@ class DrillPresenterTest(unittest.TestCase):
         self.view.unsetRowBackground.assert_called_once_with(1)
         self.view.setWindowModified.assert_called_once_with(True)
 
+    def test_onParamOk(self):
+        self.presenter._invalidCells = {(0, "test1"), (4, "test2")}
+        self.presenter.onParamOk(4, "test2")
+        self.assertEqual(self.presenter._invalidCells, {(0, "test1")})
+        self.view.setCellOk.assert_called_once_with(4, "test2")
+
+    def test_onParamError(self):
+        self.assertEqual(self.presenter._invalidCells, set())
+        self.presenter.onParamError(1, "test", "message")
+        self.assertEqual(self.presenter._invalidCells, {(1, "test")})
+        self.view.setCellError.assert_called_once_with(1, "test", "message")
+
+    def test_onProcess(self):
+        self.presenter._process = mock.Mock()
+        self.view.getSelectedRows.return_value = [1, 2]
+        self.presenter.onProcess()
+        self.presenter._process.assert_called_once_with([1, 2])
+        self.presenter._process.reset_mock()
+        self.view.getSelectedRows.return_value = []
+        self.view.getAllRows.return_value = [0, 1, 2, 3, 4]
+        self.presenter.onProcess()
+        self.presenter._process.assert_called_once_with([0, 1, 2, 3, 4])
+
+    def test_onProcessAll(self):
+        self.presenter._process = mock.Mock()
+        self.view.getAllRows.return_value = [0, 1, 2, 3, 4]
+        self.presenter.onProcessAll()
+        self.presenter._process.assert_called_once_with([0, 1, 2, 3, 4])
+
     def test_process(self):
-        self.presenter.process(["test", "test"])
-        self.model.process.assert_called_once_with(["test", "test"])
+        self.presenter._process([])
+        self.assertEqual(self.presenter._processError, set())
+        self.view.set_disabled.assert_not_called()
+        self.model.process.assert_not_called()
+        self.presenter._process([0, 1, 4])
+        self.assertEqual(self.presenter._processError, set())
         self.view.set_disabled.assert_called_once_with(True)
-        self.view.set_progress.assert_called_once_with(0, 100)
+        self.model.process.assert_called_once_with([0, 1, 4])
 
     def test_stopProcessing(self):
         self.presenter.stopProcessing()

@@ -397,7 +397,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QToolButton" name="processAll">
+       <widget class="QToolButton" name="buttonProcessAll">
         <property name="toolTip">
          <string>Process all</string>
         </property>

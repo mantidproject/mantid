@@ -99,11 +99,14 @@ class DrillView(QMainWindow):
     setMaster = Signal(int)
 
     """
-    Sent when the user asks for a row processing.
-    Args:
-        int: row index
+    Sent when the user asks to process the selected row(s).
     """
-    process = Signal(list)
+    process = Signal()
+
+    """
+    Sent when the user asks to process all rows.
+    """
+    processAll = Signal()
 
     """
     Sent when the user wants to stop the current processing.
@@ -147,7 +150,6 @@ class DrillView(QMainWindow):
 
         self.buffer = list()  # for cells cut-copy-paste
         self.bufferShape = tuple() # (n_rows, n_columns) shape of self.buffer
-        self.invalidCells = set()
 
         self._presenter = DrillPresenter(self)
 
@@ -167,8 +169,8 @@ class DrillView(QMainWindow):
         self.actionCutRow.triggered.connect(self.cutSelectedCells)
         self.actionPasteRow.triggered.connect(self.pasteCells)
         self.actionErase.triggered.connect(self.eraseSelectedCells)
-        self.actionProcessRow.triggered.connect(self.process_selected_rows)
-        self.actionProcessAll.triggered.connect(self.process_all_rows)
+        self.actionProcessRow.triggered.connect(self.process.emit)
+        self.actionProcessAll.triggered.connect(self.processAll.emit)
         self.actionStopProcessing.triggered.connect(self.processStopped.emit)
         self.actionHelp.triggered.connect(self.helpWindow)
 
@@ -221,10 +223,10 @@ class DrillView(QMainWindow):
         self.fill.clicked.connect(self.automatic_filling)
 
         self.processRows.setIcon(icons.get_icon("mdi.play"))
-        self.processRows.clicked.connect(self.process_selected_rows)
+        self.processRows.clicked.connect(self.process.emit)
 
-        self.processAll.setIcon(icons.get_icon("mdi.fast-forward"))
-        self.processAll.clicked.connect(self.process_all_rows)
+        self.buttonProcessAll.setIcon(icons.get_icon("mdi.fast-forward"))
+        self.buttonProcessAll.clicked.connect(self.processAll.emit)
 
         self.stop.setIcon(icons.get_icon("mdi.stop"))
         self.stop.clicked.connect(self.processStopped.emit)
@@ -461,36 +463,6 @@ class DrillView(QMainWindow):
         """
         self.setMaster.emit(row)
 
-    def process_selected_rows(self):
-        """
-        Ask for the processing of the selected rows. If the selected rows
-        contain invalid values, this function display an error message dialog.
-        """
-        rows = self.table.getSelectedRows()
-        if not rows:
-            rows = self.table.getRowsFromSelectedCells()
-        if rows:
-            for cell in self.invalidCells:
-                if cell[0] in rows:
-                    QMessageBox.warning(self, "Error", "Please check the "
-                                        + "parameters value before processing")
-                    return
-            self.process.emit(rows)
-
-    def process_all_rows(self):
-        """
-        Ask for the processing of all the rows. If the rows contain invalid
-        values, this function display an error message dialog.
-        """
-        rows = self.table.getAllRows()
-        if rows:
-            for cell in self.invalidCells:
-                if cell[0] in rows:
-                    QMessageBox.warning(self, "Error", "Please check the "
-                                        + "parameters value before processing")
-                    return
-            self.process.emit(rows)
-
     def helpWindow(self):
         """
         Popup the help window.
@@ -694,7 +666,6 @@ class DrillView(QMainWindow):
         """
         self.columns = columns
         self.table.clear()
-        self.invalidCells = set()
         self.table.setRowCount(0)
         self.table.setColumnCount(0)
         self.table.horizontalHeader().reset()
@@ -708,6 +679,28 @@ class DrillView(QMainWindow):
                 lambda : self.setAddRemoveColumnMenu(columns))
         self.table.resizeColumnsToContents()
         self.setWindowModified(False)
+
+    def getSelectedRows(self):
+        """
+        Get the list of selected row indexes. If the user did not select any
+        full row, the selected rows are extracted from the selected cells.
+
+        Returns:
+            list(int): row indexes
+        """
+        rows = self.table.getSelectedRows()
+        if not rows:
+            rows = self.table.getRowsFromSelectedCells()
+        return rows
+
+    def getAllRows(self):
+        """
+        Get the list of all row indexes.
+
+        Returns:
+            list(int): row indexes
+        """
+        return self.table.getAllRows()
 
     def getCellContents(self, row, column):
         """
@@ -800,7 +793,7 @@ class DrillView(QMainWindow):
         self.fill.setDisabled(state)
         self.help.setDisabled(state)
         self.processRows.setDisabled(state)
-        self.processAll.setDisabled(state)
+        self.buttonProcessAll.setDisabled(state)
         self.stop.setDisabled(not state)
         self.table.setDisabled(state)
         self.table.clearSelection()
@@ -845,10 +838,9 @@ class DrillView(QMainWindow):
         """
         self.table.setRowBackground(row, self.ERROR_COLOR)
 
-    def set_cell_ok(self, row, columnTitle):
+    def setCellOk(self, row, columnTitle):
         """
-        Set a cell as OK. Remove it from the invalid cells set, change its
-        color and remove the tooltip itf it exists.
+        Set a cell as OK. Change its color and remove the tooltip if it exists.
 
         Args:
             row (int): row index
@@ -860,13 +852,11 @@ class DrillView(QMainWindow):
         column = self.columns.index(columnTitle)
         self.table.removeCellBackground(row, column)
         self.table.setCellToolTip(row, column, "")
-        self.invalidCells.discard((row, column))
 
-    def set_cell_error(self, row, columnTitle, msg):
+    def setCellError(self, row, columnTitle, msg):
         """
         Set a cell a containing an invalid value. Change its colors, add a
-        tooltip containing the provided message and add it to the set of
-        invalid cells.
+        tooltip containing the provided message.
 
         Args:
             row (int): row index
@@ -879,7 +869,6 @@ class DrillView(QMainWindow):
         column = self.columns.index(columnTitle)
         self.table.setCellBackground(row, column, self.ERROR_COLOR)
         self.table.setCellToolTip(row, column, msg)
-        self.invalidCells.add((row, column))
 
     def setVisualSettings(self, visualSettings):
         """

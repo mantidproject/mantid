@@ -14,6 +14,12 @@ from ..model.DrillModel import DrillModel
 class DrillPresenter:
 
     """
+    Set of invalid cells. This is used to avoid the submission of invalid
+    parameters for processing.
+    """
+    _invalidCells = set()
+
+    """
     Set of rows for which processing failed. This is used to display a report.
     """
     _processError = set()
@@ -29,6 +35,7 @@ class DrillPresenter:
         """
         self.model = DrillModel()
         self.view = view
+        self._invalidCells = set()
         self._processError = set()
 
         # view signals connection
@@ -42,7 +49,8 @@ class DrillPresenter:
         self.view.groupRequested.connect(self.onGroupRequested)
         self.view.ungroupRequested.connect(self.onUngroupRequested)
         self.view.setMaster.connect(self.onMasterRowRequested)
-        self.view.process.connect(self.process)
+        self.view.process.connect(self.onProcess)
+        self.view.processAll.connect(self.onProcessAll)
         self.view.processStopped.connect(self.stopProcessing)
         self.view.loadRundex.connect(self.onLoad)
         self.view.saveRundex.connect(self.onSave)
@@ -57,8 +65,8 @@ class DrillPresenter:
                 lambda progress: self.view.set_progress(progress, 100)
                 )
         self.model.processingDone.connect(self.onProcessingDone)
-        self.model.paramOk.connect(self.view.set_cell_ok)
-        self.model.paramError.connect(self.view.set_cell_error)
+        self.model.paramOk.connect(self.onParamOk)
+        self.model.paramError.connect(self.onParamError)
 
         self.updateViewFromModel()
 
@@ -103,14 +111,59 @@ class DrillPresenter:
             rows = self.model.getSamplesGroups()[group]
             self.view.labelRowsInGroup(group, rows, row)
 
-    def process(self, rows):
+    def onParamOk(self, row, columnName):
         """
-        Handles the row processing asked by the view. It forwards it to the
-        model, takes care of the progress and the potential exceptions.
+        Triggered when a parameter is valid.
 
         Args:
-            rows (list(int)): list of rows to be processed
+            row (int): row index
+            columnName (str): parameter name
         """
+        self._invalidCells.discard((row, columnName))
+        self.view.setCellOk(row, columnName)
+
+    def onParamError(self, row, columnName, msg):
+        """
+        Triggered when a parameter is invalid.
+
+        Args:
+            row (int): row index
+            columnName (str): parameter name
+            msg (str): error message
+        """
+        self._invalidCells.add((row, columnName))
+        self.view.setCellError(row, columnName, msg)
+
+    def onProcess(self):
+        """
+        Handles the processing of selected rows.
+        """
+        rows = self.view.getSelectedRows()
+        if not rows:
+            rows = self.view.getAllRows()
+        self._process(rows)
+
+    def onProcessAll(self):
+        """
+        Handles the processing of all rows.
+        """
+        rows = self.view.getAllRows()
+        self._process(rows)
+
+    def _process(self, rows):
+        """
+        Submit the processing.
+
+        Args:
+            rows (set(int)): row indexes
+        """
+        if not rows:
+            return
+        for cell in self._invalidCells:
+            if cell[0] in rows:
+                QMessageBox.warning(self, "Error", "Please check the "
+                                    "parameters value before processing.")
+                return
         self._processError = set()
         self.view.set_disabled(True)
         self.view.set_progress(0, 100)
@@ -297,6 +350,7 @@ class DrillPresenter:
         self.view.set_table(columns, tooltips)
         contents = self.model.getRowsContents()
         self.view.fill_table(contents)
+        self._invalidCells = set()
         groups = self.model.getSamplesGroups()
         masters = self.model.getMasterSamples()
         for group in groups:
