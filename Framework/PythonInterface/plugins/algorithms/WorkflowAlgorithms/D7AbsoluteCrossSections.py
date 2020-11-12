@@ -404,14 +404,18 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         if mtd[ws].getNumberOfEntries() != mtd[det_efficiency_ws].getNumberOfEntries():
             single_efficiency_per_POL = True
         tmp_names = []
+        normalisation_method = self.getPropertyValue('NormalisationMethod')
         for entry_no, entry in enumerate(mtd[ws]):
             det_eff_entry_no = int(entry_no / 2)
-            if single_efficiency_per_POL:
+            if normalisation_method == 'Vanadium':
+                det_eff_entry_no = 0
+            elif single_efficiency_per_POL:
                 det_eff_entry_no = int(entry_no / 2)
                 if entry_no % 2 != 0:
                     det_eff_entry_no -= 1
             ws_name = entry.name() + '_normalised'
             tmp_names.append(ws_name)
+
             Divide(LHSWorkspace=entry,
                    RHSWorkspace=mtd[det_efficiency_ws][det_eff_entry_no],
                    OutputWorkspace=ws_name)
