@@ -111,7 +111,7 @@ IndirectFitDataModel::getResolutionsForFit() const {
     auto spectra = getSpectra(TableDatasetIndex{index});
     if (!resolutionWorkspace) {
       for (auto &spectraIndex : spectra) {
-        resolutionVector.emplace_back(std::make_pair("", spectraIndex.value));
+        resolutionVector.emplace_back("", spectraIndex.value);
       }
       continue;
     }
@@ -120,8 +120,8 @@ IndirectFitDataModel::getResolutionsForFit() const {
         m_resolutions->at(index).lock()->getNumberHistograms() == 1;
     for (auto &spectraIndex : spectra) {
       auto resolutionIndex = singleSpectraResolution ? 0 : spectraIndex.value;
-      resolutionVector.emplace_back(std::make_pair(
-          m_resolutions->at(index).lock()->getName(), resolutionIndex));
+      resolutionVector.emplace_back(m_resolutions->at(index).lock()->getName(),
+                                    resolutionIndex);
     }
   }
   return resolutionVector;
@@ -297,7 +297,7 @@ void IndirectFitDataModel::setExcludeRegion(const std::string &exclude,
 void IndirectFitDataModel::addNewWorkspace(
     const Mantid::API::MatrixWorkspace_sptr &workspace,
     const Spectra &spectra) {
-  m_fittingData->emplace_back(IndirectFitData(workspace, spectra));
+  m_fittingData->emplace_back(workspace, spectra);
 }
 
 void IndirectFitDataModel::removeWorkspace(TableDatasetIndex index) {
