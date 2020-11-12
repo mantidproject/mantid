@@ -96,9 +96,10 @@ class HB2AReduce(PythonAlgorithm):
                              validator=StringListValidator(['XYE', 'GSAS']),
                              doc="Supportted output format: XYE (.dat), GSAS (.gss)")
         self.setPropertySettings('OutputFormat', condition)
-        self.declareProperty(
-            FileProperty(name="OutputDirectory", defaultValue="", action=FileAction.OptionalLoad),
-            "Saving directory for output file")
+        self.declareProperty(FileProperty(name="OutputDirectory",
+                                          defaultValue="",
+                                          action=FileAction.OptionalDirectory),
+                             doc="Saving directory for output file")
         self.setPropertySettings('OutputDirectory', condition)
         # group the GUI
         groupname = "Save Reduction Results"
