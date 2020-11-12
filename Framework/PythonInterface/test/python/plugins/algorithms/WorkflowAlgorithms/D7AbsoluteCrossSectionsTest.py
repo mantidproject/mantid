@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.api import WorkspaceGroup, MatrixWorkspace
-from mantid.simpleapi import Load, config, mtd, D7AbsoluteCrossSections
+from mantid.simpleapi import Load, config, mtd, D7AbsoluteCrossSections, GroupWorkspaces
 
 class D7AbsoluteCrossSectionsTest(unittest.TestCase):
 
@@ -25,7 +25,8 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
         Load('vanadium_uniaxial.nxs', OutputWorkspace='vanadium_uniaxial')
         Load('vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz')
         Load('vanadium_10p.nxs', OutputWorkspace='vanadium_10p')
-        Load('396993_reduced.nxs', OutputWorkspace='vanadium_data')
+        Load('396993_reduced.nxs', OutputWorkspace='396993_reduced.nxs')
+        GroupWorkspaces('396993_reduced.nxs', OutputWorkspace='vanadium_data') # workaround for a single-entry workspace group
         Load('397004_reduced.nxs', OutputWorkspace='sample_data')
 
     def tearDown(self):
