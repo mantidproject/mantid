@@ -8,7 +8,7 @@
 from mantid.api import AlgorithmFactory, NumericAxis, PropertyMode, \
     PythonAlgorithm, WorkspaceGroupProperty, WorkspaceGroup
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, \
-    LogicOperator, PropertyCriterion, PropertyManagerProperty, StringListValidator
+    PropertyCriterion, PropertyManagerProperty, StringListValidator
 
 from mantid.simpleapi import *
 
@@ -149,8 +149,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         self.setPropertySettings('VanadiumInputWorkspace', EnabledWhenProperty('NormalisationMethod',
                                                                                PropertyCriterion.IsEqualTo, 'Vanadium'))
-
-        absoluteNormalisation = EnabledWhenProperty('AbsoluteUnitsNormalisation', PropertyCriterion.IsDefault)
 
         self.declareProperty('AbsoluteUnitsNormalisation', True,
                              doc='Whether or not express the output in absolute units.')
@@ -485,7 +483,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 self._call_sum_data(input_ws)
             component_ws = self._call_cross_section_separation(input_ws)
             self._set_units(component_ws)
-
 
 
 AlgorithmFactory.subscribe(D7AbsoluteCrossSections)
