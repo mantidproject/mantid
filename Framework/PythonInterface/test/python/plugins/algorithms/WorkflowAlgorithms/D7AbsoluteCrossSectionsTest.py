@@ -73,8 +73,10 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
 
     def test_paramagnetic_normalisation(self):
         D7AbsoluteCrossSections(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_magnetic',
-                                CrossSectionSeparationMethod='XYZ', NormalisationMethod='Paramagnetic',
+                                CrossSectionSeparationMethod='XYZ', CrossSectionsOutputWorkspace='sample_xyz',
+                                NormalisationMethod='Paramagnetic',
                                 SampleSpin = 0.5, AbsoluteUnitsNormalisation=False)
+        self.assertTrue(mtd['sample_xyz'])
         self._check_output('normalised_sample_magnetic', 132, 1, 6, onlySeparation=False)
 
     def test_incoherent_normalisation(self):
