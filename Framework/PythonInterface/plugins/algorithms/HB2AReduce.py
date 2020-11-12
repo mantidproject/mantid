@@ -7,7 +7,8 @@
 from mantid.api import (PythonAlgorithm, AlgorithmFactory, PropertyMode, WorkspaceProperty,
                         FileProperty, FileAction, MultipleFileProperty)
 from mantid.kernel import (Direction, IntArrayProperty, FloatTimeSeriesProperty,
-                           FloatBoundedValidator, EnabledWhenProperty, PropertyCriterion, Property)
+                           StringListValidator, FloatBoundedValidator, EnabledWhenProperty,
+                           PropertyCriterion, Property)
 from mantid import logger
 import numpy as np
 import datetime
@@ -84,6 +85,20 @@ class HB2AReduce(PythonAlgorithm):
                               "",
                               optional=PropertyMode.Mandatory,
                               direction=Direction.Output), "Output Workspace")
+        # extend functionality by HB2A users
+        self.declareProperty(name='SaveData',
+                             defaultValue=True,
+                             doc="By default saving the reduced data to either GSAS or XYE")
+        self.declareProperty(name='OutputFormat',
+                             defaultValue="GSAS",
+                             validator=StringListValidator(['XYE', 'GSAS']),
+                             doc="Supportted output format: XYE (.dat), GSAS (.gss)")
+        self.declareProperty(FileProperty("OutputDirectory", "", FileAction.Directory),
+                             "Saving directory for output file")
+        self.setPropertyGroup('OutputFormat', 'output')
+        self.setPropertyGroup('OutputDirectory', 'output')
+        self.setPropertySettings('output',
+                                 EnabledWhenProperty('SaveData', PropertyCriterion.IsDefault))
 
     def validateInputs(self):
         issues = dict()
