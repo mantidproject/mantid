@@ -67,7 +67,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
         if len(sampleAndEnvironmentProperties) == 0:
-                issues['SampleAndEnvironmentProperties'] = 'Sample parameters need to be defined.'
+            issues['SampleAndEnvironmentProperties'] = 'Sample parameters need to be defined.'
         required_keys = ['FormulaUnits', 'SampleMass', 'FormulaUnitMass']
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         if normalisation_method == 'Incoherent' and self.getProperty('AbsoluteUnitsNormalisation').value:
