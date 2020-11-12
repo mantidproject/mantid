@@ -37,6 +37,9 @@ class SliceViewerADSObserver(AnalysisDataServiceObserver):
         self.view = self.presenter.view
         self.logger = mantid.kernel.Logger("SliceViewerADSObserver")
 
+        self.on_replace_workspace = QAppThreadCall(self.presenter.replace_workspace)
+        self.on_rename_workspace = QAppThreadCall(self.presenter.rename_workspace)
+
         self.observeClear(True)
         self.observeDelete(True)
         self.observeReplace(True)
@@ -68,7 +71,7 @@ class SliceViewerADSObserver(AnalysisDataServiceObserver):
         :param ws_name: The name of the workspace.
         :param workspace: A reference to the new workspace
         """
-        QAppThreadCall(self.presenter.replace_workspace(ws_name, workspace))
+        self.on_replace_workspace(ws_name, workspace)
 
     @_catch_exceptions
     def renameHandle(self, oldName, newName):
@@ -79,4 +82,4 @@ class SliceViewerADSObserver(AnalysisDataServiceObserver):
         :param oldName: The old name of the workspace.
         :param newName: The new name of the workspace
         """
-        self.logger.notice("rename" + str(oldName) + str(newName))
+        self.on_rename_workspace(oldName, newName)

@@ -372,6 +372,11 @@ class SliceViewer(ObservingPresenter):
             )
             return
 
+    def rename_workspace(self, old_name, new_name):
+        if str(self.model.get_ws()) == old_name:
+            self.model.set_workspace_name(new_name)
+            self.view.setWindowTitle(self.model.get_title())
+
     # private api
     def _create_peaks_presenter_if_necessary(self):
         if self._peaks_presenter is None:
