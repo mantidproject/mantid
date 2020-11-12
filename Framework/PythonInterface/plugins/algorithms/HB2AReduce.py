@@ -356,8 +356,15 @@ class HB2AReduce(PythonAlgorithm):
             e = np.sqrt(counts) / vcorr[:, np.newaxis] / monitor
         else:
             y = counts / vanadium_count[:, np.newaxis] * vanadium_monitor / monitor
-            e = np.sqrt(1 / counts + 1 / vanadium_count[:, np.newaxis] + 1 / vanadium_monitor +
-                        1 / monitor) * y
+            e = (
+                np.sqrt(
+                    1 / counts
+                    + 1 / vanadium_count[:, np.newaxis]
+                    + 1 / vanadium_monitor
+                    + 1 / monitor
+                )
+                * y
+            )
         np.seterr(**old_settings)
         return np.nan_to_num(y * scale), np.nan_to_num(e * scale)
 
