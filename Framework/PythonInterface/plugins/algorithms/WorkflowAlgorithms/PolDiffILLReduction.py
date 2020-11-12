@@ -161,10 +161,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.setPropertySettings('SampleGeometry', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
         self.declareProperty(PropertyManagerProperty('SampleAndEnvironmentProperties', dict()),
-                             doc="Dictionary for the geometry used for self-attenuation correction.")
-
-        self.setPropertySettings('SampleAndEnvironmentProperties',
-                                 EnabledWhenProperty('SampleGeometry', PropertyCriterion.IsNotEqualTo, 'Custom'))
+                             doc="Dictionary for the information about sample and its environment.")
 
         self.setPropertySettings('SampleAndEnvironmentProperties',
                                  EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
