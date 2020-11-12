@@ -400,9 +400,20 @@ class HB2AReduce(PythonAlgorithm):
             y = (counts_binned / vcorr_binned * number_binned / monitor_binned)[1:]
             e = (np.sqrt(1 / counts_binned)[1:]) * y
         else:
-            y = (counts_binned / vanadium_binned * vanadium_monitor_binned / monitor_binned)[1:]
-            e = (np.sqrt(1 / counts_binned + 1 / vanadium_binned + 1 / vanadium_monitor +
-                         1 / monitor_binned)[1:]) * y
+            y = (
+                counts_binned
+                / vanadium_binned
+                * vanadium_monitor_binned
+                / monitor_binned
+            )[1:]
+            e = (
+                np.sqrt(
+                    1 / counts_binned
+                    + 1 / vanadium_binned
+                    + 1 / vanadium_monitor
+                    + 1 / monitor_binned
+                )[1:]
+            ) * y
         np.seterr(**old_settings)
         x = bins
 
