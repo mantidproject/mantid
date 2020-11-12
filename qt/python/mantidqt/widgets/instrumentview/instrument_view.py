@@ -59,7 +59,7 @@ class pyInstrumentView:
         return self.rendertab.setAxis(newaxis)
 
     @safe_qthread
-    def set_tof_range(self, minval, maxval):
+    def set_x_range(self, minval, maxval):
         return self.presenter.container.set_range(minval, maxval)
 
     @safe_qthread
