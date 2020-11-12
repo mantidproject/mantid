@@ -11,6 +11,7 @@ from functools import wraps
 
 import mantid
 from mantid.api import AnalysisDataServiceObserver
+from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 
 
 def _catch_exceptions(func):
@@ -67,10 +68,7 @@ class SliceViewerADSObserver(AnalysisDataServiceObserver):
         :param ws_name: The name of the workspace.
         :param workspace: A reference to the new workspace
         """
-        import pydevd_pycharm
-        pydevd_pycharm.settrace('localhost', port=44444, stdoutToServer=True, stderrToServer=True, suspend=False)
-
-        self.presenter.replace_workspace(ws_name, workspace)
+        QAppThreadCall(self.presenter.replace_workspace(ws_name, workspace))
 
     @_catch_exceptions
     def renameHandle(self, oldName, newName):
