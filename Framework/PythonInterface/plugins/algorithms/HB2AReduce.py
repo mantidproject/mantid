@@ -97,7 +97,7 @@ class HB2AReduce(PythonAlgorithm):
                              doc="Supportted output format: XYE (.dat), GSAS (.gss)")
         self.setPropertySettings('OutputFormat', condition)
         self.declareProperty(
-            FileProperty(name="OutputDirectory", defaultValue="", action=FileAction.Directory),
+            FileProperty(name="OutputDirectory", defaultValue="", action=FileAction.OptionalLoad),
             "Saving directory for output file")
         self.setPropertySettings('OutputDirectory', condition)
         # group the GUI
