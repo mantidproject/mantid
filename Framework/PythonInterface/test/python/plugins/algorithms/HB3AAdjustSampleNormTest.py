@@ -9,7 +9,7 @@ from mantid.simpleapi import DeleteWorkspace, Load, SCDAdjustSampleNorm, mtd
 from mantid.kernel import V3D
 
 
-class SCDAdjustSampleNormTest(unittest.TestCase):
+class HB3AAdjustSampleNormTest(unittest.TestCase):
     _tolerance = 1.0e-7
 
     def setUp(self):

@@ -9,11 +9,11 @@ from mantid.api import AlgorithmFactory, FileAction, FileProperty, IMDHistoWorks
 from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, V3D, FloatArrayProperty, \
     FloatArrayLengthValidator
 from mantid.simpleapi import ConvertHFIRSCDtoMDE, ConvertWANDSCDtoQ, DeleteWorkspace, DeleteWorkspaces, DivideMD, \
-    Load, MergeMD, ReplicateMD, mtd
+    LoadMD, MergeMD, ReplicateMD, mtd
 import os
 
 
-class SCDAdjustSampleNorm(PythonAlgorithm):
+class HB3AAdjustSampleNorm(PythonAlgorithm):
 
     def category(self):
         return "Crystal\\Corrections"
@@ -22,7 +22,7 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
         return ["ConvertWANDSCDtoQ", "ConvertHFIRSCDtoMDE"]
 
     def name(self):
-        return "SCDAdjustSampleNorm"
+        return "HB3AAdjustSampleNorm"
 
     def summary(self):
         return 'Takes detector scan data files or workspaces and adjusts the detector position based on detector ' \
@@ -32,7 +32,7 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
     def PyInit(self):
         # Input params
         self.declareProperty(MultipleFileProperty(name="Filename",
-                                                  extensions=["_event.nxs", ".nxs.h5", ".nxs"],
+                                                  extensions=[".nxs.h5", ".nxs"],
                                                   action=FileAction.OptionalLoad),
                              doc="Input autoreduced detector scan data files to convert to Q-space.")
         self.declareProperty(
@@ -126,9 +126,6 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
             if input_ws.isDefault:
                 issues['Filename'] = "Either a file or input workspace must be specified"
 
-        if len(vanfile) <= 0 and van_ws.isDefault:
-            issues['VanadiumFile'] = "Either a vanadium file or vanadium workspace must be specified!"
-
         if len(vanfile) > 0 and not van_ws.isDefault:
             issues['VanadiumWorkspace'] = "Cannot specify both a vanadium file and workspace"
 
@@ -144,6 +141,8 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
     def PyExec(self):
         load_van = not self.getProperty("VanadiumFile").isDefault
         load_files = not self.getProperty("Filename").isDefault
+
+        has_van = not self.getProperty("VanadiumWorkspace").isDefault and not load_van
 
         if load_files:
             datafiles = self.getProperty("Filename").value
@@ -170,7 +169,7 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
         out_ws_name = out_ws
 
         if load_van:
-            vanws = Load(vanadiumfile, StoreInADS=False)
+            vanws = LoadMD(vanadiumfile, StoreInADS=False)
 
         has_multiple = True if len(datafiles) > 1 else False
 
@@ -179,7 +178,7 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
 
         for file in datafiles:
             if load_files:
-                scan = Load(file, LoadHistory=False, StoreInADS=False)
+                scan = LoadMD(file, LoadHistory=False, StoreInADS=False)
             else:
                 scan = mtd[file]
 
@@ -214,25 +213,36 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
 
             # Use ConvertHFIRSCDtoQ (and normalize van), or use ConvertWANDSCtoQ which handles normalization itself
             if method:
-                van_norm = ReplicateMD(ShapeWorkspace=scan, DataWorkspace=vanws, StoreInADS=False)
-                van_norm = DivideMD(LHSWorkspace=scan, RHSWorkspace=van_norm, StoreInADS=False)
-                ConvertHFIRSCDtoMDE(InputWorkspace=scan, Wavelength=wavelength, MinValues=minvals,
-                                    MaxValues=maxvals, OutputWorkspace=out_ws_name)
+                if has_van:
+                    van_norm = ReplicateMD(ShapeWorkspace=scan, DataWorkspace=vanws, StoreInADS=False)
+                    van_norm = DivideMD(LHSWorkspace=scan, RHSWorkspace=van_norm, StoreInADS=False)
+                    ConvertHFIRSCDtoMDE(InputWorkspace=van_norm, Wavelength=wavelength, MinValues=minvals,
+                                        MaxValues=maxvals, OutputWorkspace=out_ws_name)
+                else:
+                    ConvertHFIRSCDtoMDE(InputWorkspace=scan, Wavelength=wavelength, MinValues=minvals,
+                                        MaxValues=maxvals, OutputWorkspace=out_ws_name)
                 if merge:
                     wslist.append(out_ws_name)
             else:
                 # Convert to Q space and normalize with from the vanadium
-                ConvertWANDSCDtoQ(InputWorkspace=scan, NormalisationWorkspace=vanws, Frame='Q_sample',
-                                  Wavelength=wavelength, NormaliseBy='Monitor', BinningDim0=bin0, BinningDim1=bin1,
-                                  BinningDim2=bin2,
-                                  OutputWorkspace=out_ws_name)
+                if has_van:
+                    ConvertWANDSCDtoQ(InputWorkspace=scan, NormalisationWorkspace=vanws, Frame='Q_sample',
+                                      Wavelength=wavelength, NormaliseBy='Monitor', BinningDim0=bin0, BinningDim1=bin1,
+                                      BinningDim2=bin2,
+                                      OutputWorkspace=out_ws_name)
+                else:
+                    ConvertWANDSCDtoQ(InputWorkspace=scan, Frame='Q_sample',
+                                      Wavelength=wavelength, NormaliseBy='Monitor', BinningDim0=bin0, BinningDim1=bin1,
+                                      BinningDim2=bin2,
+                                      OutputWorkspace=out_ws_name)
 
         if method:
             if merge and len(wslist) > 1:
                 out_ws_name = out_ws
                 MergeMD(InputWorkspaces=wslist, OutputWorkspace=out_ws_name)
                 DeleteWorkspaces(wslist)
-            DeleteWorkspace(van_norm)
+            if has_van:
+                DeleteWorkspace(van_norm)
 
         # Don't delete workspaces if they were passed in
         if load_van:
@@ -243,4 +253,4 @@ class SCDAdjustSampleNorm(PythonAlgorithm):
         self.setProperty("OutputWorkspace", out_ws_name)
 
 
-AlgorithmFactory.subscribe(SCDAdjustSampleNorm)
+AlgorithmFactory.subscribe(HB3AAdjustSampleNorm)
