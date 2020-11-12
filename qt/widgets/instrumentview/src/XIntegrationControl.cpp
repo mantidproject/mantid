@@ -131,6 +131,8 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
     int step = 1;
     int sliderx = m_slider->x();
     int slidery = m_slider->y();
+    int sliderWidth = m_slider->width();
+    int sliderHeight = m_slider->height();
     int totalWidth = this->width();
 
     switch (keyEv->key()) {
@@ -145,10 +147,47 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
       break;
 
     case Qt::Key_Right:
-      if (sliderx + slider->width() + step < totalWidth) {
+      if (sliderx + sliderWidth + step < totalWidth) {
         m_slider->move(sliderx + step, slidery);
       } else {
-        m_slider->move(totalWidth - slider->width(), slidery);
+        m_slider->move(totalWidth - sliderWidth, slidery);
+      }
+      m_changed = true;
+      updateMinMax();
+      break;
+
+    case Qt::Key_Up:
+      if (sliderWidth + step <= totalWidth) {
+        if (sliderx > step) {
+          m_slider->resize(sliderWidth + step, sliderHeight);
+          m_slider->move(sliderx - step, slidery);
+        } else {
+          m_slider->resize(sliderWidth + sliderx, sliderHeight);
+          m_slider->move(0, slidery);
+        }
+
+        if (sliderx + sliderWidth + step <= totalWidth) {
+          m_slider->resize(m_slider->width() + step, sliderHeight);
+        } else {
+          m_slider->resize(totalWidth - m_slider->x(), sliderHeight);
+        }
+      } else {
+        m_slider->move(0, slidery);
+        m_slider->resize(totalWidth, sliderHeight);
+      }
+      m_changed = true;
+      updateMinMax();
+      break;
+
+    case Qt::Key_Down:
+      if (sliderWidth > m_resizeMargin) {
+        if (sliderWidth - 2 * step >= m_resizeMargin) {
+          m_slider->move(sliderx + step, slidery);
+          m_slider->resize(sliderWidth - 2 * step, sliderHeight);
+        } else {
+          m_slider->move(sliderx + (sliderWidth - m_resizeMargin) / 2, slidery);
+          m_slider->resize(m_resizeMargin, sliderHeight);
+        }
       }
       m_changed = true;
       updateMinMax();
@@ -160,7 +199,8 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
     return true;
   } else if (e->type() == QEvent::KeyRelease) {
     QKeyEvent *keyEv = static_cast<QKeyEvent *>(e);
-    if ((keyEv->key() == Qt::Key_Left || keyEv->key() == Qt::Key_Right) &&
+    if ((keyEv->key() == Qt::Key_Left || keyEv->key() == Qt::Key_Right ||
+         keyEv->key() == Qt::Key_Up || keyEv->key() == Qt::Key_Down) &&
         !keyEv->isAutoRepeat()) {
       emit changed(m_minimum, m_maximum);
     }
