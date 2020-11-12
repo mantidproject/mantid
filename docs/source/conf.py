@@ -3,6 +3,15 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+# Workaround a segfault importing readline with doctests and PyQt5.
+# doctest.py initializes a custom pdb to be able to redirect stdout:
+#   https://github.com/python/cpython/blob/750c5abf43b7b1627ab59ead237bef4c2314d29e/Lib/doctest.py#L367
+# and in turn this attempts to import readline:
+#   https://github.com/python/cpython/blob/750c5abf43b7b1627ab59ead237bef4c2314d29e/Lib/pdb.py#L157
+# The workaround is discussed in https://groups.google.com/forum/#!topic/leo-editor/ghiIN7irzY0
+# and simply amounts to importing readline before a QApplication is created in the screenshots
+# directive
+import readline
 import sys
 import os
 from sphinx import __version__ as sphinx_version
