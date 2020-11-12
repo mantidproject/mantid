@@ -101,9 +101,10 @@ class HB2AReduce(PythonAlgorithm):
             "Saving directory for output file")
         self.setPropertySettings('OutputDirectory', condition)
         # group the GUI
-        self.setPropertyGroup('SaveData', 'output')
-        self.setPropertyGroup('OutputFormat', 'output')
-        self.setPropertyGroup('OutputDirectory', 'output')
+        groupname = "Save Reduction Results"
+        self.setPropertyGroup('SaveData', groupname)
+        self.setPropertyGroup('OutputFormat', groupname)
+        self.setPropertyGroup('OutputDirectory', groupname)
 
     def validateInputs(self):
         issues = dict()
