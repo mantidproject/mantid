@@ -50,21 +50,22 @@ A very basic reduction would include a vanadium reference and a sample, without 
 .. testcode:: BasicReduction
 
     # Define vanadium properties:
-    vanadiumProperties = {'FormulaUnits': 50}
+    vanadiumProperties = {'FormulaUnits': 1, 'SampleMass': 8.54, 'FormulaUnitMass': 50.94}
     
     # Vanadium reduction
-    PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='reduced_vanadium',
+    PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputTreatment='Sum',
+	                OutputWorkspace='reduced_vanadium',
                         SampleAndEnvironmentProperties=vanadiumProperties)
 
     # Define the number of formula units for the sample
-    sampleProperties = {'FormulaUnits': 182.54}
+    sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 182.54}
     # Sample reduction
     PolDiffILLReduction(Run='397004', ProcessAs='Sample', OutputWorkspace='reduced_sample',
                             SampleAndEnvironmentProperties=sampleProperties)
 
     # normalise sample and set the output to absolute units with vanadium
     D7AbsoluteCrossSections(InputWorkspace='reduced_sample', OutputWorkspace='normalised_sample',
-                            FormulaUnits=sampleProperties['FormulaUnits'],
+                            SampleAndEnvironmentProperties=sampleProperties,
                             NormalisationMethod='Vanadium', VanadiumInputWorkspace='reduced_vanadium')
 
     SofQ = mtd['normalised_sample']

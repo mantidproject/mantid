@@ -135,8 +135,11 @@ Usage
 
 .. testcode:: ExD7AbsoluteCrossSections_XYZ_separation
 
+   sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 182.54}
+
    Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz') # loads already reduced data
    D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
+	                   SampleAndEnvironmentProperties=sampleProperties,
                            CrossSectionsOutputWorkspace='xyz', OutputWorkspace='_unused')
    print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
    SumSpectra(InputWorkspace=mtd['xyz'][1], EndWorkspaceIndex=mtd['xyz'][1].getNumberHistograms()-1,
@@ -162,10 +165,14 @@ Output:
 
 .. testcode:: ExD7AbsoluteCrossSections_vanadium_normalisation
 
-   Load('ILL/D7/396993_reduced.nxs', OutputWorkspace='vanadium_data')
+   sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 182.54}
+
+   Load('ILL/D7/396993_reduced.nxs', OutputWorkspace='vanadium_input')
+   GroupWorkspaces(InputWorkspaces='vanadium_input', OutputWorkspace='vanadium_data')
    Load('ILL/D7/397004_reduced.nxs', OutputWorkspace='sample_data')
    D7AbsoluteCrossSections(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_vanadium',
                            CrossSectionSeparationMethod='XYZ', NormalisationMethod='Vanadium',
+			   SampleAndEnvironmentProperties=sampleProperties,
                            VanadiumInputWorkspace='vanadium_data', AbsoluteUnitsNormalisation=False)
    print("The number of entries in the normalised data is: {}".format(mtd['normalised_sample_vanadium'].getNumberOfEntries()))
 
@@ -185,10 +192,12 @@ Output:
 
 .. testcode:: ExD7AbsoluteCrossSections_paramagnetic_normalisation
 
+   sampleProperties = {'FormulaUnits': 1, 'SampleMass': 2.932, 'FormulaUnitMass': 182.54, 'SampleSpin':0.5}
+
    Load('ILL/D7/397004_reduced.nxs', OutputWorkspace='sample_data')
    D7AbsoluteCrossSections(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_magnetic',
                            CrossSectionSeparationMethod='XYZ', NormalisationMethod='Paramagnetic',
-                           SampleSpin = 0.5, AbsoluteUnitsNormalisation=False)
+                           SampleAndEnvironmentProperties=sampleProperties, AbsoluteUnitsNormalisation=False)
    print("The number of entries in the normalised data is: {}".format(mtd['normalised_sample_magnetic'].getNumberOfEntries()))
 		
 Output:

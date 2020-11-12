@@ -8,7 +8,7 @@
 from mantid.api import AlgorithmFactory, NumericAxis, PropertyMode, \
     PythonAlgorithm, WorkspaceGroupProperty, WorkspaceGroup
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, \
-    LogicOperator, PropertyCriterion, StringListValidator
+    LogicOperator, PropertyCriterion, PropertyManagerProperty, StringListValidator
 
 from mantid.simpleapi import *
 
@@ -18,6 +18,8 @@ import math
 
 
 class D7AbsoluteCrossSections(PythonAlgorithm):
+
+    _sampleAndEnvironmentProperties = None
 
     @staticmethod
     def _max_value_per_detector(ws):
@@ -51,17 +53,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        separationMethod = self.getPropertyValue('CrossSectionSeparationMethod')
-        if separationMethod == '10p' and self.getProperty('ThetaOffset').isDefault:
-            issues['ThetaOffset'] = "The value for theta_0 needs to be defined for the component separation in 10p method."
 
         if self.getPropertyValue('NormalisationMethod') == 'Vanadium':
             if self.getProperty('VanadiumInputWorkspace').isDefault:
                 issues['VanadiumInputWorkspace'] = 'Vanadium input workspace is mandatory for when detector efficiency calibration' \
                                                     ' is "Vanadium".'
-
-            if self.getProperty('AbsoluteUnitsNormalisation').value and self.getProperty('FormulaUnits').isDefault:
-                issues['FormulaUnits'] = 'Formula units need to be defined for absolute unit normalisation.'
 
         if ( (self.getPropertyValue('NormalisationMethod') == 'Incoherent'
              or self.getPropertyValue('NormalisationMethod') == 'Paramagnetic')
@@ -69,12 +65,22 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             issues['NormalisationMethod'] = 'Chosen sample normalisation requires input from the cross-section separation.'
             issues['CrossSectionSeparationMethod'] = 'Chosen sample normalisation requires input from the cross-section separation.'
 
-        if self.getProperty('NormalisationMethod') == 'Incoherent':
-            if self.getProperty('AbsoluteUnitsNormalisation').value and self.getProperty('IncoherentCrossSection').isDefault:
-                issues['IncoherentCrossSection'] = 'Spin-incoherent cross-section is required for the absolute scale normalisation.'
+        sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
+        if len(sampleAndEnvironmentProperties) == 0:
+                issues['SampleAndEnvironmentProperties'] = 'Sample parameters need to be defined.'
+        required_keys = ['FormulaUnits', 'SampleMass', 'FormulaUnitMass']
+        normalisation_method = self.getPropertyValue('NormalisationMethod')
+        if normalisation_method == 'Incoherent' and self.getProperty('AbsoluteUnitsNormalisation').value:
+            required_keys.append('IncoherentCrossSection')
+        elif normalisation_method == 'Paramagnetic':
+            required_keys.append('SampleSpin')
 
-            if self.getProperty('SampleSpin').isDefault:
-                issues['SampleSpin'] = 'Sample spin is required for the incoherent-spin sample normalisation.'
+        if self.getPropertyValue('CrossSectionSeparationMethod') == '10p':
+            required_keys.append('ThetaOffset')
+
+        for key in required_keys:
+            if key not in sampleAndEnvironmentProperties:
+                issues['SampleAndEnvironmentProperties'] = '{} needs to be defined.'.format(key)
 
         return issues
 
@@ -112,14 +118,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              doc="The choice to display the output either as a function of detector twoTheta,"
                                  +" or the momentum exchange.")
 
-        self.declareProperty(name="ThetaOffset",
-                             defaultValue=0.0,
-                             validator=FloatBoundedValidator(lower=-180, upper=180),
-                             direction=Direction.Input,
-                             doc="Theta_0 offset used in 10p method.")
-        self.setPropertySettings('ThetaOffset', EnabledWhenProperty("CrossSectionSeparationMethod",
-                                                                    PropertyCriterion.IsEqualTo, '10p'))
-
         self.declareProperty(name="NormalisationMethod",
                              defaultValue="None",
                              validator=StringListValidator(["None", "Vanadium", "Incoherent",  "Paramagnetic"]),
@@ -131,6 +129,9 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              validator=StringListValidator(["Individual", "Sum"]),
                              direction=Direction.Input,
                              doc="Which treatment of the provided scan should be used to create output.")
+
+        self.declareProperty(PropertyManagerProperty('SampleAndEnvironmentProperties', dict()),
+                             doc="Dictionary for the information about sample and its environment.")
 
         self.declareProperty(name="ScatteringAngleBinSize",
                              defaultValue=0.5,
@@ -148,38 +149,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         self.setPropertySettings('VanadiumInputWorkspace', EnabledWhenProperty('NormalisationMethod',
                                                                                PropertyCriterion.IsEqualTo, 'Vanadium'))
 
-        self.declareProperty(name="FormulaUnits",
-                             defaultValue=0.0,
-                             validator=FloatBoundedValidator(lower=0),
-                             direction=Direction.Input,
-                             doc="Number of formula units of the sample.")
-
-        self.setPropertySettings('FormulaUnits', EnabledWhenProperty('NormalisationMethod',
-                                                                     PropertyCriterion.IsEqualTo, 'Vanadium'))
-
-        self.declareProperty(name="SampleSpin",
-                             defaultValue=0.0,
-                             direction=Direction.Input,
-                             doc="Spin of the sample.")
-
-        self.setPropertySettings('SampleSpin', EnabledWhenProperty('NormalisationMethod',
-                                                                   PropertyCriterion.IsEqualTo, 'Incoherent'))
-
-        self.declareProperty(name="IncoherentCrossSection",
-                             defaultValue=0.0,
-                             validator=FloatBoundedValidator(lower=0),
-                             direction=Direction.Input,
-                             doc="Cross-section for incoherent scattering, necessary for setting the output on the absolute scale.")
-
-        incoherent = EnabledWhenProperty('NormalisationMethod', PropertyCriterion.IsEqualTo, 'Incoherent')
-
         absoluteNormalisation = EnabledWhenProperty('AbsoluteUnitsNormalisation', PropertyCriterion.IsDefault)
 
         self.declareProperty('AbsoluteUnitsNormalisation', True,
                              doc='Whether or not express the output in absolute units.')
-
-        self.setPropertySettings('IncoherentCrossSection', EnabledWhenProperty(incoherent, absoluteNormalisation,
-                                                                               LogicOperator.And))
 
     def _data_structure_helper(self, ws):
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
@@ -205,6 +178,23 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
                                + "The provided input does not fit in any of these measurement types.")
         return nMeasurements, nComponents
+
+    def _read_experiment_properties(self, ws):
+        """Reads the user-provided dictionary that contains sample geometry (type, dimensions) and experimental conditions,
+         such as the beam size and calculates derived parameters."""
+        self._sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
+        if 'InitialEnergy' not in self._sampleAndEnvironmentProperties:
+            h = physical_constants['Planck constant'][0]  # in m^2 kg^2 / s^2
+            neutron_mass = physical_constants['neutron mass'][0]  # in0 kg
+            wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value * 1e-10  # in m
+            joules_to_mev = 1e3 / physical_constants['electron volt'][0]
+            self._sampleAndEnvironmentProperties['InitialEnergy'] = joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
+
+        if 'NMoles' not in self._sampleAndEnvironmentProperties:
+            sample_mass = self._sampleAndEnvironmentProperties['SampleMass'].value
+            formula_units = self._sampleAndEnvironmentProperties['FormulaUnits'].value
+            formula_unit_mass = self._sampleAndEnvironmentProperties['FormulaUnitMass'].value
+            self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass) * formula_units
 
     def _cross_section_separation(self, ws):
         """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
@@ -261,7 +251,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                             sigma_xpy_sf = mtd[second_xyz_ws][entry_no+4].readY(spectrum)
                             sigma_xpy_nsf = mtd[second_xyz_ws][entry_no+5].readY(spectrum)
                         # Magnetic component
-                        theta_0 = DEG_2_RAD * self.getProperty('ThetaOffset').value
+                        theta_0 = DEG_2_RAD * self._sampleAndEnvironmentProperties['ThetaOffset'].value
                         theta = mtd[ws][entry_no].detectorInfo().twoTheta(spectrum)
                         alpha = theta - 0.5*np.pi - theta_0
                         c0 = math.pow(math.cos(alpha), 2)
@@ -337,7 +327,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         to_clean = []
         if calibrationType == 'Vanadium':
             if normaliseToAbsoluteUnits:
-                normFactor = self.getProperty('FormulaUnits').value
+                normFactor = self._sampleAndEnvironmentProperties['NMoles'].value
                 CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace=norm_ws)
             else:
                 normalisationFactors = self._max_value_per_detector(cross_section_ws)
@@ -353,7 +343,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                    OutputWorkspace=det_efficiency_ws)
         elif calibrationType in  ['Paramagnetic', 'Incoherent']:
             if calibrationType == 'Paramagnetic':
-                spin = self.getProperty('SampleSpin').value
+                spin = self._sampleAndEnvironmentProperties['SampleSpin'].value
                 for entry_no, entry in enumerate(mtd[cross_section_ws]):
                     ws_name = '{0}_{1}'.format(tmp_name, entry_no)
                     tmp_names.append(ws_name)
@@ -369,10 +359,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             else: # Incoherent
                 for spectrum_no in range(mtd[cross_section_ws][1].getNumberHistograms()):
                     if normaliseToAbsoluteUnits:
-                        normFactor = float(self.getPropertyValue('IncoherentCrossSection'))
+                        normFactor = self._sampleAndEnvironmentProperties['IncoherentCrossSection'].value
                         CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace=norm_ws)
                     else:
-                        normalisationFactors = self._max_value_per_detector(mtd[cross_section_ws][1].name())
+                        normalisationFactors = self._max_value_per_detector(mtd[cross_section_ws].name())
                         dataE = np.sqrt(normalisationFactors)
                         if len(normalisationFactors) == 1:
                             CreateSingleValuedWorkspace(DataValue=normalisationFactors[0],
@@ -468,7 +458,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
     def PyExec(self):
         input_ws = self.getPropertyValue('InputWorkspace')
-
+        self._read_experiment_properties(input_ws)
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         if normalisation_method != 'None':
             if normalisation_method =='Vanadium':
