@@ -249,14 +249,18 @@ class HB2AReduce(PythonAlgorithm):
         if save_data:
             outputdir = self.getProperty("OutputDirectory").value
             outputdir = outputdir if outputdir != "" else f"/HFIR/HB2A/IPTS-{metadata['proposal']}/shared"
-            #
             _outputfunc = {
                 'XYE': SaveFocusedXYE,
                 'GSAS': SaveGSS
             }[self.getProperty('OutputFormat').value]
+            _outputext = {
+                "XYE": 'dat',
+                "GSAS": 'gss',
+            }[self.getProperty('OutputFormat').value]
+            outputbase = os.path.join(outputdir, os.path.basename(filename).split(".")[0])
             _outputfunc(
                 InputWorkspace=outWS,
-                Filename=outputdir,
+                Filename=f"{outputbase}.{_outputext}",
                 SplitFiles=False,
             )
 
