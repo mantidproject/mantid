@@ -1114,8 +1114,8 @@ API::MatrixWorkspace_sptr PDCalibration::rebin(API::MatrixWorkspace_sptr wksp) {
  *
  * Every pixel may need adjustment of TofMin and TofMax values, to ensure
  * positive values of d-spacing when converting from TOF to d-spacing using
- * the GSAS equation TOF = DIFC∗d + DIFA∗d^2 + TZERO. See
- * Mantid::Kernel::Diffraction::calcTofMin (and ::calcTofMax) for adjustments
+ * the GSAS equation TOF = DIFC∗d + DIFA∗d^2 + TZERO. See calcTofMin and
+ * calcTofMax for adjustments
  * to TofMin and TofMax.
  *
  * The output calibration has columns "detid", "difc", "difa", "tzero",
