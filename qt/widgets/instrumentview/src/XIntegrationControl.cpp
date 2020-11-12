@@ -157,30 +157,34 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
       break;
 
     case Qt::Key_Up:
-      if (sliderWidth + step <= totalWidth) {
-        if (sliderx > step) {
-          m_slider->resize(sliderWidth + step, sliderHeight);
-          m_slider->move(sliderx - step, slidery);
-        } else {
-          m_slider->resize(sliderWidth + sliderx, sliderHeight);
-          m_slider->move(0, slidery);
-        }
+      // widen the range
 
-        if (sliderx + sliderWidth + step <= totalWidth) {
-          m_slider->resize(m_slider->width() + step, sliderHeight);
-        } else {
-          m_slider->resize(totalWidth - m_slider->x(), sliderHeight);
-        }
+      // expand to the left, depending on the space on this side
+      if (sliderx > step) {
+        m_slider->resize(sliderWidth + step, sliderHeight);
+        m_slider->move(sliderx - step, slidery);
       } else {
+        m_slider->resize(sliderWidth + sliderx, sliderHeight);
         m_slider->move(0, slidery);
-        m_slider->resize(totalWidth, sliderHeight);
+      }
+
+      // then expand to the right, depending on the space on this side
+      if (sliderx + sliderWidth + step <= totalWidth) {
+        m_slider->resize(m_slider->width() + step, sliderHeight);
+      } else {
+        m_slider->resize(totalWidth - m_slider->x(), sliderHeight);
       }
       m_changed = true;
       updateMinMax();
       break;
 
     case Qt::Key_Down:
+      // shrink the range
+
+      // only change the range if it is not already minimal
       if (sliderWidth > m_resizeMargin) {
+
+        // shrink depending on how far the range is from being minimal
         if (sliderWidth - 2 * step >= m_resizeMargin) {
           m_slider->move(sliderx + step, slidery);
           m_slider->resize(sliderWidth - 2 * step, sliderHeight);
@@ -207,7 +211,7 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
     return true;
   }
   return false;
-}
+} // namespace MantidWidgets
 
 /**
  * Return the minimum value (between 0 and 1)
