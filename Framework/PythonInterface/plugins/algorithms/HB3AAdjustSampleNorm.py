@@ -53,6 +53,9 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.declareProperty("DetectorDistanceOffset", defaultValue=0.0, direction=Direction.Input,
                              doc="Optional distance to move detector distance (relative to current position)")
 
+        self.declareProperty("Wavelength", defaultValue="",
+                             doc="Optional wavelength value to use as backup if one was not found in the sample log")
+
         # Which conversion algorithm to use
         self.declareProperty("OutputAsMDEventWorkspace", defaultValue=True, direction=Direction.Input,
                              doc="Whether to use ConvertHFIRSCDtoQ for an MDEvent, or ConvertWANDSCDtoQ for an MDHisto")
@@ -155,6 +158,12 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         distance = self.getProperty("DetectorDistanceOffset").value
         method = self.getProperty("OutputAsMDEventWorkspace").value
 
+        wavelength = -1
+        # Set the back-up wavelength value
+        wl_prop = self.getProperty("Wavelength")
+        if not wl_prop.isDefault:
+            wavelength = wl_prop.value
+
         if method:
             minvals = self.getProperty("MinValues").value
             maxvals = self.getProperty("MaxValues").value
@@ -172,9 +181,6 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             vanws = LoadMD(vanadiumfile, StoreInADS=False)
 
         has_multiple = True if len(datafiles) > 1 else False
-
-        # Default wavelength in WANDSCDtoQ if not set in the input file
-        wavelength = 1.488
 
         for file in datafiles:
             if load_files:
@@ -200,7 +206,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                 for bank in range(1, 4):
                     index = component.indexOfAny("bank{}".format(bank))
 
-                    offset = V3D(0.0, height, distance)
+                    offset = V3D(distance, height, distance)
                     pos = component.position(index)
 
                     offset += pos
@@ -210,6 +216,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             # Get the wavelength from the file sample logs if it exists
             if exp_info.run().hasProperty("wavelength"):
                 wavelength = exp_info.run().getProperty("wavelength").value
+            elif wavelength == -1:
+                raise RuntimeError("Wavelength not found in sample log and was not provided as input to algorithm")
 
             # Use ConvertHFIRSCDtoQ (and normalize van), or use ConvertWANDSCtoQ which handles normalization itself
             if method:

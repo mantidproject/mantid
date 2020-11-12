@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import DeleteWorkspace, Load, SCDAdjustSampleNorm, mtd
+from mantid.simpleapi import DeleteWorkspace, LoadMD, HB3AAdjustSampleNorm, mtd
 from mantid.kernel import V3D
 
 
@@ -25,13 +25,13 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
             new_ind = new_component.indexOfAny("bank{}".format(bank))
             new_pos = new_component.position(new_ind)
 
-            self.assertAlmostEqual(new_pos, orig_pos + V3D(0, offset, offset), self._tolerance)
+            self.assertAlmostEqual(new_pos, orig_pos + V3D(offset, offset, offset), self._tolerance)
 
     def testAdjustDetector(self):
-        orig = Load("HB2C_WANDSCD_data.nxs", MetadataOnly=True)
+        orig = LoadMD("HB3A_data.nxs", MetadataOnly=True)
         orig_component = orig.getExperimentInfo(0).componentInfo()
-        result = SCDAdjustSampleNorm(Filename="HB2C_WANDSCD_data.nxs", VanadiumFile="HB2C_WANDSCD_norm.nxs",
-                                     DetectorHeightOffset=2.0, DetectorDistanceOffset=2.0)
+        result = HB3AAdjustSampleNorm(Filename="HB3A_data.nxs", VanadiumFile="HB2C_WANDSCD_norm.nxs",
+                                      DetectorHeightOffset=2.0, DetectorDistanceOffset=2.0)
         result_component = result.getExperimentInfo(0).componentInfo()
 
         self.__compareBanks(orig_component, result_component, 2.0)
@@ -39,9 +39,9 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         DeleteWorkspace(orig, result)
 
     def testDoNotAdjustDetector(self):
-        orig = Load("HB2C_WANDSCD_data.nxs", MetadataOnly=True)
+        orig = LoadMD("HB3A_data.nxs", MetadataOnly=True)
         orig_component = orig.getExperimentInfo(0).componentInfo()
-        result = SCDAdjustSampleNorm(Filename="HB2C_WANDSCD_data.nxs", VanadiumFile="HB2C_WANDSCD_norm.nxs")
+        result = HB3AAdjustSampleNorm(Filename="HB3A_data.nxs", VanadiumFile="HB2C_WANDSCD_norm.nxs")
         result_component = result.getExperimentInfo(0).componentInfo()
 
         self.__compareBanks(orig_component, result_component, 0.0)
