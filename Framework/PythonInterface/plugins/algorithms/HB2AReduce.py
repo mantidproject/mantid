@@ -244,12 +244,15 @@ class HB2AReduce(PythonAlgorithm):
         self.add_metadata(outWS, metadata, data)
 
         # save reduced workspace to requested format
-        save_data = self.getProperty("SaveData")
+        save_data = self.getProperty("SaveData").value
         if save_data:
-            outputdir = self.getProperty("OutputDirectory")
+            outputdir = self.getProperty("OutputDirectory").value
             outputdir = outputdir if outputdir != "" else f"/HFIR/HB2A/IPTS-{metadata['proposal']}/shared"
             #
-            _outputfunc = {'XYE': SaveFocusedXYE, 'GSAS': SaveGSS}[self.getProperty('OutputFormat')]
+            _outputfunc = {
+                'XYE': SaveFocusedXYE,
+                'GSAS': SaveGSS
+            }[self.getProperty('OutputFormat').value]
             _outputfunc(
                 InputWorkspace=outWS,
                 Filename=outputdir,
