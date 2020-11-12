@@ -30,6 +30,12 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             max_values = mtd[ws].extractY().T
         return np.amax(max_values, axis=1)
 
+    @staticmethod
+    def _set_as_distribution(ws):
+        for entry in mtd[ws]:
+            entry.setDistribution(True)
+        return ws
+
     def category(self):
         return 'ILL\\Diffraction'
 
@@ -304,8 +310,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         return output_name
 
     def _detector_efficiency_correction(self, cross_section_ws):
-        """Calculates detector efficiency using either vanadium, incoherent scattering,
-        or paramagnetic scattering."""
+        """Calculates detector efficiency using either vanadium data, incoherent,
+        or paramagnetic scattering cross-sections."""
 
         calibrationType = self.getPropertyValue('NormalisationMethod')
         normaliseToAbsoluteUnits = self.getProperty('AbsoluteUnitsNormalisation').value
@@ -317,7 +323,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         if calibrationType == 'Vanadium':
             if normaliseToAbsoluteUnits:
                 normFactor = self.getProperty('FormulaUnits').value
-                CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace='normalisation_ws')
+                CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace=norm_ws)
             else:
                 normalisationFactors = self._max_value_per_detector(cross_section_ws)
                 dataE = np.sqrt(normalisationFactors)
@@ -326,6 +332,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                 NSpec=entry0.getNumberHistograms(), OutputWorkspace=norm_ws)
                 mtd[norm_ws].getAxis(0).setUnit(entry0.getAxis(0).getUnit().unitID())
                 mtd[norm_ws].getAxis(1).setUnit(entry0.getAxis(1).getUnit().unitID())
+            to_clean.append(norm_ws)
             Divide(LHSWorkspace=cross_section_ws,
                    RHSWorkspace=norm_ws,
                    OutputWorkspace=det_efficiency_ws)
@@ -401,7 +408,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         output_unit = self.getPropertyValue('OutputUnits')
         unit_symbol = 'barn / sr / formula unit'
         unit = 'd sigma / d Omega ({})'
-        print(output_unit, self.getProperty('OutputTreatment'))
         if output_unit == 'TwoTheta':
             unit.format('TwoTheta')
             if mtd[ws].getNumberOfEntries() > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
