@@ -459,6 +459,13 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                             Normalise=True, HeightAxis='-0.1,0.1')
         return ws
 
+    def _call_cross_section_separation(self, input_ws):
+        component_ws = self._cross_section_separation(input_ws)
+        self._set_as_distribution(component_ws)
+        if not self.getProperty('CrossSectionsOutputWorkspace').isDefault:
+            self.setProperty('CrossSectionsOutputWorkspace', mtd[component_ws])
+        return component_ws
+
     def PyExec(self):
         input_ws = self.getPropertyValue('InputWorkspace')
 
