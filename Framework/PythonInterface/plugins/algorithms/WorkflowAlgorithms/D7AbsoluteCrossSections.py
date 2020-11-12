@@ -126,6 +126,20 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                              direction=Direction.Input,
                              doc="Method to correct detector efficiency and normalise data.")
 
+        self.declareProperty(name="OutputTreatment",
+                             defaultValue="Individual",
+                             validator=StringListValidator(["Individual", "Sum"]),
+                             direction=Direction.Input,
+                             doc="Which treatment of the provided scan should be used to create output.")
+
+        self.declareProperty(name="ScatteringAngleBinSize",
+                             defaultValue=0.5,
+                             validator=FloatBoundedValidator(lower=0),
+                             direction=Direction.Input,
+                             doc="Scattering angle bin size in degrees used for expressing scan data on a single TwoTheta axis.")
+
+        self.setPropertySettings("ScatteringAngleBinSize", EnabledWhenProperty('OutputTreatment', PropertyCriterion.IsEqualTo, 'Sum'))
+
         self.declareProperty(WorkspaceGroupProperty('VanadiumInputWorkspace', '',
                                                     direction=Direction.Input,
                                                     optional=PropertyMode.Optional),
@@ -443,27 +457,20 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def PyExec(self):
         input_ws = self.getPropertyValue('InputWorkspace')
 
-        if self.getPropertyValue('CrossSectionSeparationMethod') != 'None':
-            component_ws = self._cross_section_separation(input_ws)
-            self._set_as_distribution(component_ws)
-            if not self.getProperty('CrossSectionsOutputWorkspace').isDefault:
-                self.setProperty('CrossSectionsOutputWorkspace', mtd[component_ws])
-
         normalisation_method = self.getPropertyValue('NormalisationMethod')
-        if normalisation_method == 'None':
-            output_ws = input_ws
-        else:
-            if normalisation_method != 'Vanadium':
-                det_efficiency_input = self._conjoin_cross_sections(component_ws)
-            else:
+        if normalisation_method != 'None':
+            if normalisation_method =='Vanadium':
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
+            elif normalisation_method in ['Paramagnetic', 'Incoherent']:
+                det_efficiency_input = self._call_cross_section_separation(input_ws)
+
             det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
             output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
             self._set_units(output_ws)
             self._set_as_distribution(output_ws)
             # clean-up
             DeleteWorkspace(det_efficiency_ws)
-            if normalisation_method != 'Vanadium':
+            if self.getProperty('CrossSectionsOutputWorkspace').isDefault:
                 DeleteWorkspace(det_efficiency_input)
             else:
                 self._set_units(det_efficiency_input)
