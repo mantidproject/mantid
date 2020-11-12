@@ -66,9 +66,8 @@ class DrillView(QMainWindow):
     Args:
         int: row index
         int: column index
-        str: new cell contents
     """
-    dataChanged = Signal(int, int, str)
+    dataChanged = Signal(int, int)
 
     """
     Sent when a new group is requested.
@@ -149,18 +148,8 @@ class DrillView(QMainWindow):
         self.buffer = list()  # for cells cut-copy-paste
         self.bufferShape = tuple() # (n_rows, n_columns) shape of self.buffer
         self.invalidCells = set()
-        self.coloredRows = set()
-        self.errorRows = set()
 
         self._presenter = DrillPresenter(self)
-
-    def show(self):
-        """
-        Override QMainWindow::show. It calls the base class method and
-        updates the instrument.
-        """
-        super(DrillView, self).show()
-        self._changeInstrument(self.instrumentselector.currentText())
 
     def setup_header(self):
         """
@@ -187,10 +176,10 @@ class DrillView(QMainWindow):
         self.instrumentselector.setToolTip("Instrument")
         self.toolbar.insertWidget(0, self.instrumentselector, 0, Qt.AlignLeft)
         self.instrumentselector.instrumentSelectionChanged.connect(
-                self._changeInstrument)
+                self.instrumentChanged.emit)
 
         self.modeSelector.currentTextChanged.connect(
-                self._changeAcquisitionMode)
+                self.acquisitionModeChanged.emit)
 
         self.cycleNumber.editingFinished.connect(self._changeCycleOrExperiment)
         self.experimentId.editingFinished.connect(self._changeCycleOrExperiment)
@@ -244,7 +233,7 @@ class DrillView(QMainWindow):
         """
         Setup the main table widget.
         """
-        self.table.cellChanged.connect(self.on_cell_changed)
+        self.table.cellChanged.connect(self.dataChanged.emit)
         self.table.setContextMenuPolicy(Qt.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self.showContextMenu)
 
@@ -256,50 +245,15 @@ class DrillView(QMainWindow):
         Args:
             event (QCloseEvent): the close event
         """
-        if self.isWindowModified():
-            self._saveDataQuestion()
         children = self.findChildren(QDialog)
         for child in children:
             child.close()
+        self._presenter.onClose()
         super(DrillView, self).closeEvent(event)
 
     ###########################################################################
     # actions                                                                 #
     ###########################################################################
-
-    def _saveDataQuestion(self):
-        """
-        Opens a popup message asking if the user wants to save its data.
-        """
-        q = QMessageBox.question(self, "DrILL: Unsaved data", "You have "
-                                 + "unsaved modifications, do you want to save "
-                                 + "them before?")
-        if (q == QMessageBox.Yes):
-            self.saveRundex()
-
-    def _changeInstrument(self, instrument):
-        """
-        Triggered when the instrument selection changed.
-
-        Args:
-            instrument(str): instrument name
-        """
-        if self.isHidden():
-            return
-        if self.isWindowModified():
-            self._saveDataQuestion()
-        self.instrumentChanged.emit(instrument)
-
-    def _changeAcquisitionMode(self, acquisitionMode):
-        """
-        Triggered when the acquisition mode is changed.
-
-        Args:
-            acquisitionMode(str): acquisition mode name
-        """
-        if self.isWindowModified():
-            self._saveDataQuestion()
-        self.acquisitionModeChanged.emit(acquisitionMode)
 
     def _changeCycleOrExperiment(self):
         """
@@ -521,7 +475,6 @@ class DrillView(QMainWindow):
                     QMessageBox.warning(self, "Error", "Please check the "
                                         + "parameters value before processing")
                     return
-            self.errorRows = set()
             self.process.emit(rows)
 
     def process_all_rows(self):
@@ -536,7 +489,6 @@ class DrillView(QMainWindow):
                     QMessageBox.warning(self, "Error", "Please check the "
                                         + "parameters value before processing")
                     return
-            self.errorRows = set()
             self.process.emit(rows)
 
     def helpWindow(self):
@@ -652,15 +604,6 @@ class DrillView(QMainWindow):
         """
         manageuserdirectories.ManageUserDirectories(self).exec_()
 
-    def on_cell_changed(self, row, column):
-        if row in self.coloredRows:
-            self.table.removeRowBackground(row)
-            self.coloredRows.remove(row)
-
-        self.dataChanged.emit(row, column,
-                              self.table.getCellContents(row, column))
-        self.setWindowModified(True)
-
     def showContextMenu(self, pos):
         """
         Context menu. It contains:
@@ -752,7 +695,6 @@ class DrillView(QMainWindow):
         self.columns = columns
         self.table.clear()
         self.invalidCells = set()
-        self.coloredRows = set()
         self.table.setRowCount(0)
         self.table.setColumnCount(0)
         self.table.horizontalHeader().reset()
@@ -766,6 +708,16 @@ class DrillView(QMainWindow):
                 lambda : self.setAddRemoveColumnMenu(columns))
         self.table.resizeColumnsToContents()
         self.setWindowModified(False)
+
+    def getCellContents(self, row, column):
+        """
+        Get the contents of a specific cell.
+
+        Args:
+            row (int): row index
+            column (int): column index
+        """
+        return self.table.getCellContents(row, column)
 
     def setAddRemoveColumnMenu(self, columns):
         """
@@ -857,39 +809,40 @@ class DrillView(QMainWindow):
         else:
             self.table.setCursor(Qt.ArrowCursor)
 
-    def set_row_processing(self, row):
+    def unsetRowBackground(self, row):
+        """
+        Remove any background for a specific row.
+
+        Args:
+            row (int): row index
+        """
+        self.table.removeRowBackground(row)
+
+    def setRowProcessing(self, row):
         """
         Set a row as currently processing.
 
         Args:
             row (int): the row index
         """
-        if row not in self.coloredRows:
-            self.coloredRows.add(row)
         self.table.setRowBackground(row, self.PROCESSING_COLOR)
 
-    def set_row_done(self, row):
+    def setRowDone(self, row):
         """
         Set a row as done with success.
 
         Args:
             row (int): the row index
         """
-        if row not in self.coloredRows:
-            self.coloredRows.add(row)
         self.table.setRowBackground(row, self.OK_COLOR)
 
-    def set_row_error(self, row):
+    def setRowError(self, row):
         """
         Set a row as done with error.
 
         Args:
             row (int): the row index
         """
-        if row not in self.coloredRows:
-            self.coloredRows.add(row)
-        if row not in self.errorRows:
-            self.errorRows.add(row)
         self.table.setRowBackground(row, self.ERROR_COLOR)
 
     def set_cell_ok(self, row, columnTitle):
@@ -975,29 +928,3 @@ class DrillView(QMainWindow):
         vs["ColumnsOrder"] = self.table.getColumnsOrder()
 
         return vs
-
-    def errorPopup(self, title, msg, details=None):
-        """
-        Display an error popup to inform the user.
-
-        Args:
-            title (str): popup title
-            msg (str): popup message
-            details (str): facultative detailed text
-        """
-        w = QMessageBox(QMessageBox.Critical, title, msg, QMessageBox.Ok, self)
-        if details:
-            w.setDetailedText(details)
-        w.exec()
-
-    def displayProcessingReport(self):
-        """
-        Display a popup listing row(s) that have been pushed to the errorRows
-        set.
-        """
-        if self.errorRows:
-            names = [str(r + 1) for r in self.errorRows]
-            rows = ", ".join(names)
-            self.errorPopup("Processing error(s)",
-                            "Check logs for processing errors concerning rows: "
-                            + rows)

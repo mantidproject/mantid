@@ -143,6 +143,10 @@ class DrillTest(unittest.TestCase):
         patch = mock.patch('Interface.ui.drill.view.DrillView.QMessageBox')
         self.mMessageBox = patch.start()
         self.addCleanup(patch.stop)
+        patch = mock.patch('Interface.ui.drill.presenter.DrillPresenter'
+                           '.QMessageBox')
+        self.mMessageBoxP = patch.start()
+        self.addCleanup(patch.stop)
         # mock the controller
         patch = mock.patch(
                 'Interface.ui.drill.model.DrillModel.DrillParameterController')

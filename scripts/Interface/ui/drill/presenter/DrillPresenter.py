@@ -5,13 +5,18 @@
 #     & Institut Laue - Langevin
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from qtpy.QtWidgets import QFileDialog
+from qtpy.QtWidgets import QFileDialog, QMessageBox
 
 from ..view.DrillSettingsDialog import DrillSettingsDialog
 from ..model.DrillModel import DrillModel
 
 
 class DrillPresenter:
+
+    """
+    Set of rows for which processing failed. This is used to display a report.
+    """
+    _processError = set()
 
     def __init__(self, view):
         """
@@ -24,6 +29,7 @@ class DrillPresenter:
         """
         self.model = DrillModel()
         self.view = view
+        self._processError = set()
 
         # view signals connection
         self.view.instrumentChanged.connect(self.instrumentChanged)
@@ -32,7 +38,7 @@ class DrillPresenter:
                 self.model.setCycleAndExperiment)
         self.view.rowAdded.connect(self.model.addSample)
         self.view.rowDeleted.connect(self.model.deleteSample)
-        self.view.dataChanged.connect(self.model.changeParameter)
+        self.view.dataChanged.connect(self.onDataChanged)
         self.view.groupRequested.connect(self.onGroupRequested)
         self.view.ungroupRequested.connect(self.onUngroupRequested)
         self.view.setMaster.connect(self.onMasterRowRequested)
@@ -44,17 +50,32 @@ class DrillPresenter:
         self.view.showSettings.connect(self.settingsWindow)
 
         # model signals connection
-        self.model.processStarted.connect(self.view.set_row_processing)
-        self.model.processSuccess.connect(self.view.set_row_done)
-        self.model.processError.connect(self.view.set_row_error)
+        self.model.processStarted.connect(self.onProcessBegin)
+        self.model.processSuccess.connect(self.onProcessSuccess)
+        self.model.processError.connect(self.onProcessError)
         self.model.progressUpdate.connect(
                 lambda progress: self.view.set_progress(progress, 100)
                 )
-        self.model.processingDone.connect(self.processingDone)
+        self.model.processingDone.connect(self.onProcessingDone)
         self.model.paramOk.connect(self.view.set_cell_ok)
         self.model.paramError.connect(self.view.set_cell_error)
 
         self.updateViewFromModel()
+
+    def onDataChanged(self, row, column):
+        """
+        Triggered when the view notifies a change in the table.
+
+        Args:
+            row (int): row index
+            column (int): column index
+        """
+        contents = self.view.getCellContents(row, column)
+        self.model.changeParameter(row, column, contents)
+        self.view.unsetRowBackground(row)
+        if row in self._processError:
+            self._processError.remove(row)
+        self.view.setWindowModified(True)
 
     def onGroupRequested(self, rows):
         """
@@ -90,6 +111,7 @@ class DrillPresenter:
         Args:
             rows (list(int)): list of rows to be processed
         """
+        self._processError = set()
         self.view.set_disabled(True)
         self.view.set_progress(0, 100)
         self.model.process(rows)
@@ -102,13 +124,49 @@ class DrillPresenter:
         self.view.set_disabled(False)
         self.view.set_progress(0, 100)
 
-    def processingDone(self):
+    def onProcessBegin(self, sample):
+        """
+        Triggered when the model signals that the processing of a specific
+        sample started.
+
+        Args:
+            sample (int): sample index
+        """
+        self.view.setRowProcessing(sample)
+
+    def onProcessError(self, sample):
+        """
+        Triggered when the model signals that the processing of a specific
+        sample finished with an error.
+
+        Args:
+            sample (int): sample index
+        """
+        self._processError.add(sample)
+        self.view.setRowError(sample)
+
+    def onProcessSuccess(self, sample):
+        """
+        Triggered when the model signals that the processing of a specific
+        sample finished with success.
+
+        Args:
+            sample (int): sample index
+        """
+        self.view.setRowDone(sample)
+
+    def onProcessingDone(self):
         """
         Forward the processing done signal to the view.
         """
         self.view.set_disabled(False)
         self.view.set_progress(0, 100)
-        self.view.displayProcessingReport()
+        if self._processError:
+            w = QMessageBox(QMessageBox.Critical, "Processing error(s)",
+                            "Unable to process the row(s) {}. Please check the "
+                            "logs.".format(str(self._processError)[1:-1]),
+                            QMessageBox.Ok, self.view)
+            w.exec()
 
     def instrumentChanged(self, instrument):
         """
@@ -117,6 +175,9 @@ class DrillPresenter:
         Args:
             instrument (str): instrument name
         """
+        if self.view.isWindowModified():
+            self._saveDataQuestion()
+
         self.model.setInstrument(instrument)
         self.model.resetIOFile()
         self.updateViewFromModel()
@@ -128,6 +189,9 @@ class DrillPresenter:
         Args:
             mode (str): acquisition mode name
         """
+        if self.view.isWindowModified():
+            self._saveDataQuestion()
+
         self.model.setAcquisitionMode(mode)
         self.model.resetIOFile()
         self.updateViewFromModel()
@@ -197,6 +261,26 @@ class DrillPresenter:
                 lambda : self.model.setSettings(sw.getSettings())
                 )
         sw.show()
+
+    def onClose(self):
+        """
+        Triggered when the view is closed.
+        """
+        if self.view.isWindowModified():
+            self._saveDataQuestion()
+
+    def _saveDataQuestion(self):
+        """
+        Open a dialog to ask the user if he wants to save the rundex file.
+        """
+        if self.view.isHidden():
+            return
+        q = QMessageBox.question(self.view, "DrILL: Unsaved data", "You have "
+                                 "unsaved modifications, do you want to save "
+                                 "them before?",
+                                 QMessageBox.Yes | QMessageBox.No)
+        if (q == QMessageBox.Yes):
+            self.onSaveAs()
 
     def updateViewFromModel(self):
         """

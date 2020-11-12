@@ -8,6 +8,8 @@
 import unittest
 from unittest import mock
 
+from qtpy.QtWidgets import QMessageBox
+
 from Interface.ui.drill.presenter.DrillPresenter import DrillPresenter
 
 
@@ -30,6 +32,13 @@ class DrillPresenterTest(unittest.TestCase):
         self.presenter = DrillPresenter(self.view)
         self.model = self.mModel.return_value
 
+    def test_onDataChanged(self):
+        self.view.getCellContents.return_value = "test"
+        self.presenter.onDataChanged(1, 2)
+        self.view.getCellContents.assert_called_once_with(1, 2)
+        self.view.unsetRowBackground.assert_called_once_with(1)
+        self.view.setWindowModified.assert_called_once_with(True)
+
     def test_process(self):
         self.presenter.process(["test", "test"])
         self.model.process.assert_called_once_with(["test", "test"])
@@ -42,17 +51,40 @@ class DrillPresenterTest(unittest.TestCase):
         self.view.set_disabled.assert_called_once_with(False)
         self.view.set_progress.assert_called_once_with(0, 100)
 
-    def test_processingDone(self):
-        self.presenter.processingDone()
+    def test_onProcessBegin(self):
+        self.presenter.onProcessBegin(0)
+        self.view.setRowProcessing.assert_called_once_with(0)
+
+    def test_onProcessError(self):
+        self.presenter.onProcessError(0)
+        self.view.setRowError.assert_called_once_with(0)
+
+    def test_onProcessSuccess(self):
+        self.presenter.onProcessSuccess(0)
+        self.view.setRowDone.assert_called_once_with(0)
+
+    @mock.patch("Interface.ui.drill.presenter.DrillPresenter.QMessageBox")
+    def test_onProcessingDone(self, mQmessageBox):
+        self.presenter.onProcessingDone()
         self.view.set_disabled.assert_called_once_with(False)
         self.view.set_progress.assert_called_once_with(0, 100)
+        mQmessageBox.assert_not_called()
+        self.presenter._processError = {0, 1, 3}
+        self.presenter.onProcessingDone()
+        mQmessageBox.assert_called_once()
 
     def test_instrumentChanged(self):
+        self.view.isWindowModified.return_value = True
+        self.presenter._saveDataQuestion = mock.Mock()
         self.presenter.instrumentChanged("test")
+        self.presenter._saveDataQuestion.assert_called_once()
         self.model.setInstrument.assert_called_once_with("test")
 
     def test_acquisitionModeChanged(self):
+        self.view.isWindowModified.return_value = True
+        self.presenter._saveDataQuestion = mock.Mock()
         self.presenter.acquisitionModeChanged("test")
+        self.presenter._saveDataQuestion.assert_called_once()
         self.model.setAcquisitionMode.assert_called_once_with("test")
 
     @mock.patch("Interface.ui.drill.presenter.DrillPresenter.QFileDialog")
@@ -89,6 +121,25 @@ class DrillPresenterTest(unittest.TestCase):
                 {}, {}, {})
         self.mSettings.return_value.setSettings.assert_called_once()
         self.model.getSettings.assert_called_once()
+
+    def test_onClose(self):
+        self.view.isWindowModified.return_value = True
+        self.presenter._saveDataQuestion = mock.Mock()
+        self.presenter.onClose()
+        self.presenter._saveDataQuestion.assert_called_once()
+
+    @mock.patch("Interface.ui.drill.presenter.DrillPresenter.QMessageBox")
+    def test_saveDataQuestion(self, mQMessageBox):
+        mQMessageBox.Yes = "yes"
+        mQMessageBox.question.return_value = "yes"
+        self.view.isHidden.return_value = True
+        self.presenter._saveDataQuestion()
+        mQMessageBox.assert_not_called()
+        self.view.isHidden.return_value = False
+        self.presenter.onSaveAs = mock.Mock()
+        self.presenter._saveDataQuestion()
+        mQMessageBox.question.assert_called_once()
+        self.presenter.onSaveAs.assert_called_once()
 
     def test_updateViewFromModel(self):
         self.view.reset_mock()

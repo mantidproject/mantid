@@ -50,6 +50,7 @@ class DrillViewTest(unittest.TestCase):
         c1.close.assert_called_once()
         c2.close.assert_called_once()
         c3.close.assert_not_called()
+        self.mPresenter.return_value.onClose.assert_called_once()
 
     def test_getSelectionShape(self):
         # no selection
@@ -381,6 +382,10 @@ class DrillViewTest(unittest.TestCase):
         self.view.set_table(["test", "test"])
         self.view.table.setColumnCount.assert_called_with(2)
 
+    def test_getCellContents(self):
+        self.view.getCellContents(1, 2)
+        self.view.table.getCellContents.assert_called_once_with(1, 2)
+
     def test_fillTable(self):
         # empty contents
         self.view.fill_table([])
@@ -408,16 +413,20 @@ class DrillViewTest(unittest.TestCase):
         self.view.set_disabled(True)
         self.view.set_disabled(False)
 
+    def test_unsetRowBackground(self):
+        self.view.unsetRowBackground(0)
+        self.view.table.removeRowBackground.assert_called_once_with(0)
+
     def test_setRowProcessing(self):
-        self.view.set_row_processing(0)
+        self.view.setRowProcessing(0)
         self.view.table.setRowBackground.assert_called_once()
 
     def test_setRowDone(self):
-        self.view.set_row_done(0)
+        self.view.setRowDone(0)
         self.view.table.setRowBackground.assert_called_once()
 
     def test_setRowError(self):
-        self.view.set_row_error(0)
+        self.view.setRowError(0)
         self.view.table.setRowBackground.assert_called_once()
 
     def test_setCellOk(self):
