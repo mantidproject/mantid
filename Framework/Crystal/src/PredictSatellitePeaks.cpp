@@ -231,11 +231,11 @@ void PredictSatellitePeaks::exec() {
   // Sort peaks by run number so that peaks with equal goniometer matrices are
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
-  criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
-  criteria.emplace_back(std::pair<std::string, bool>("h", true));
-  criteria.emplace_back(std::pair<std::string, bool>("k", true));
-  criteria.emplace_back(std::pair<std::string, bool>("l", true));
+  criteria.emplace_back("RunNumber", true);
+  criteria.emplace_back("BankName", true);
+  criteria.emplace_back("h", true);
+  criteria.emplace_back("k", true);
+  criteria.emplace_back("l", true);
   outPeaks->sort(criteria);
 
   for (int i = 0; i < static_cast<int>(outPeaks->getNumberPeaks()); ++i) {
@@ -317,11 +317,11 @@ void PredictSatellitePeaks::exec_peaks() {
   // Sort peaks by run number so that peaks with equal goniometer matrices are
   // adjacent
   std::vector<std::pair<std::string, bool>> criteria;
-  criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
-  criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
-  criteria.emplace_back(std::pair<std::string, bool>("h", true));
-  criteria.emplace_back(std::pair<std::string, bool>("k", true));
-  criteria.emplace_back(std::pair<std::string, bool>("l", true));
+  criteria.emplace_back("RunNumber", true);
+  criteria.emplace_back("BankName", true);
+  criteria.emplace_back("h", true);
+  criteria.emplace_back("k", true);
+  criteria.emplace_back("l", true);
   outPeaks->sort(criteria);
 
   for (int i = 0; i < static_cast<int>(outPeaks->getNumberPeaks()); ++i) {

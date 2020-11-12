@@ -473,7 +473,7 @@ if(ENABLE_CPACK)
         set(CPACK_DEBIAN_PACKAGE_DEPENDS
             "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqscintilla2-qt5-13")
       endif()
-    else()
+    elseif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
       message(WARNING "Unsupported Debian-like OS: ${UNIX_CODENAME}. Packaging is unlikely to work correctly.")
     endif()
     # python requirements
