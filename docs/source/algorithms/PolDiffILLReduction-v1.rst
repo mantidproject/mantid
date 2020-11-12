@@ -50,14 +50,12 @@ Different input properties can be specified depending on the value of **ProcessA
 | Vanadium         | * AbsorberInputWorkspace             | * SampleGeometry                           |
 |                  | * ContainerInputWorkspace            | * SampleAndEnvironmentProperties           |
 |                  | * TransmissionInputWorkspace         | * OutputTreatment                          |
-|                  | * QuartzInputWorkspace               | * OutputUnits                              |
-|                  |                                      | * ScatteringAngleBinSize                   |
+|                  | * QuartzInputWorkspace               |                                            |
 +------------------+--------------------------------------+--------------------------------------------+
 | Sample           | * AbsorberInputWorkspace             | * SampleGeometry                           |
 |                  | * ContainerInputWorkspace            | * SampleAndEnvironmentProperties           |
 |                  | * TransmissionInputWorkspace         | * OutputTreatment                          |
-|                  | * QuartzInputWorkspace               | * OutputUnits                              |
-|                  |                                      | * ScatteringAngleBinSize                   |
+|                  | * QuartzInputWorkspace               |                                            |
 +------------------+--------------------------------------+--------------------------------------------+
 
 All the input workspace properties above are optional, unless bolded.
@@ -239,7 +237,7 @@ This example below performs a complete reduction for D7 data.
         ContainerInputWorkspace='container_ws',
         TransmissionInputWorkspace='sample_transmission_1',
         QuartzInputWorkspace='pol_corrections',
-        OutputTreatment='Average',
+        OutputTreatment='Individual',
         SampleGeometry='None',
         SampleAndEnvironmentProperties=sample_dictionary,
 	ProcessAs='Sample'
