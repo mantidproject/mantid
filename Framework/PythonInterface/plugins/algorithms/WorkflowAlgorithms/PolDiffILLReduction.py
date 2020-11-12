@@ -497,11 +497,12 @@ class PolDiffILLReduction(PythonAlgorithm):
 
     def _normalise_vanadium(self, ws):
         """Performs normalisation of the vanadium data to the expected cross-section."""
+
+        vanadium_expected_cross_section = 0.404 # barns
+        CreateSingleValuedWorkspace(DataValue=3.0 * vanadium_expected_cross_section
+                                    * self._sampleAndEnvironmentProperties['NMoles'].value,
+                                    OutputWorkspace='norm')
         if self.getPropertyValue('OutputTreatment') == 'Sum':
-            vanadium_expected_cross_section = 0.404 # barns
-            CreateSingleValuedWorkspace(DataValue=vanadium_expected_cross_section
-                                        * self._sampleAndEnvironmentProperties['NMoles'].value,
-                                        OutputWorkspace='norm')
             tmp_name = '{}_1'.format(self.getPropertyValue('OutputWorkspace'))
             RenameWorkspace(InputWorkspace=mtd[ws][0].name(), OutputWorkspace=tmp_name)
             to_remove = ['norm']
@@ -509,13 +510,15 @@ class PolDiffILLReduction(PythonAlgorithm):
                 ws_name = mtd[ws][entry_no].name()
                 Plus(LHSWorkspace=tmp_name, RHSWorkspace=ws_name, OutputWorkspace=tmp_name)
                 to_remove.append(ws_name)
+            # expected total cross-section of unpolarised neutrons in V is 1/3 * sum of all measured c-s,
+            # and normalised to 0.404 barns times the number of moles of V:
             Divide(LHSWorkspace='norm', RHSWorkspace=tmp_name, OutputWorkspace=tmp_name)
             DeleteWorkspaces(WorkspaceList=to_remove)
             GroupWorkspaces(InputWorkspaces=tmp_name, OutputWorkspace=ws)
-
-        elif self.getProperty('OutputTreatment').value == 'Average':
-            self._merge_polarisations(ws, average_detectors=True)
-
+        else:
+            if self.getPropertyValue('OutputTreatment') == 'Average':
+                self._merge_polarisations(ws, average_detectors=True)
+            Divide(LHSWorkspace='norm', RHSWorkspace=ws, OutputWorkspace=ws)
         return ws
 
     def _set_units(self, ws, process):
