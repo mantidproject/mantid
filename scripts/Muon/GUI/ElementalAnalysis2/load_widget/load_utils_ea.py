@@ -8,9 +8,15 @@ from mantid.api import WorkspaceGroup
 from mantid.simpleapi import CloneWorkspace, DeleteWorkspace
 
 
-def combine_loaded_runs(model, run_list, delete_added=False):
-    coAddWorkspace_name = str(run_list[0]) + "-" + str(run_list[-1])
-    coAddWorkspace = WorkspaceGroup()
+def combine_loaded_runs(model, run_list):
+    """
+        As a result of this function there should be:-
+            - a groupworkspace named after the range of runs used e.g. '1234-1237'
+            - a workspace for each detector named [detector]_[groupworkspace]
+                e.g. 'Detector 1_1234-1237'
+    """
+    co_add_workspace_name = str(run_list[0]) + "-" + str(run_list[-1])
+    co_add_workspace = WorkspaceGroup()
     finished_detectors = []
     ws_remove = []
     for run in run_list:
@@ -26,9 +32,9 @@ def combine_loaded_runs(model, run_list, delete_added=False):
                         if detector in all_detectors:
                             workspace_to_add = find_ws_to_use(model, run_detectors, detector, current_run)
                             new_ws = new_ws + workspace_to_add
-                add_detector_workspace_to_group(coAddWorkspace, new_ws, new_ws_name, detector, finished_detectors,
+                add_detector_workspace_to_group(co_add_workspace, new_ws, new_ws_name, detector, finished_detectors,
                                                 ws_remove)
-    finalise_groupworkspace(coAddWorkspace, coAddWorkspace_name, ws_remove)
+    finalise_groupworkspace(co_add_workspace, co_add_workspace_name, ws_remove)
 
 
 def check_all_detectors_complete(run_detectors, finished_detectors):
@@ -39,23 +45,23 @@ def check_all_detectors_complete(run_detectors, finished_detectors):
         return False
 
 
-def add_detector_workspace_to_group(grpWS, newWS, newWSName, detector, finished_detectors, wsList):
+def add_detector_workspace_to_group(grpws, new_ws, new_ws_name, detector, finished_detectors, ws_list):
     """
        Adds the Detector workspace for the combined runs to the group workspace, adds the detector
        to the list of detectors that have been completed and removes any unnecessary workspaces.
     """
-    grpWS.addWorkspace(newWS.clone(OutputWorkspace=newWSName))
+    grpws.addWorkspace(new_ws.clone(OutputWorkspace=new_ws_name))
     finished_detectors.append(detector)
-    DeleteWorkspace(newWS)
-    wsList.append(newWSName)
+    DeleteWorkspace(new_ws)
+    ws_list.append(new_ws_name)
 
 
-def finalise_groupworkspace(grpWS, grpWSName, wsList):
+def finalise_groupworkspace(grpws, grpws_name, ws_list):
     """
        Adds the groupworkspace with suitable name and removes any unnecessary workspaces
     """
-    grpWS.clone(OutputWorkspace=grpWSName)
-    for ws in wsList:
+    grpws.clone(OutputWorkspace=grpws_name)
+    for ws in ws_list:
         DeleteWorkspace(ws)
 
 
@@ -66,4 +72,6 @@ def find_ws_to_use(model, run_detectors, detector, run):
 
 
 def get_detectors(model, run):
-    return model._data_context._run_info.get(run)._detectors
+    run_object = next((runObject for runObject in model._data_context._run_info if runObject._run_number == run), None)
+    if run_object:
+        return run_object._detectors
