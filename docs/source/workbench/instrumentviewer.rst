@@ -44,7 +44,7 @@ Right mouse click undoes the last zoom.
     :align: left
     :width: 635
 
-The next control is Axis View, visible only in the 3D mode, resets the view so that the instrument is fully visible and the specified axis is perpendicular to the screen.
+The next control is Axis View, visible only in the 3D mode, which resets the view so that the instrument is fully visible and the specified axis is perpendicular to the screen.
 
 The Display Settings button controls the appearance of the instrument in the view. 
 It's worth mentioning the "Use OpenGL" option. 
