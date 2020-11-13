@@ -211,7 +211,7 @@ class AxesTabWidgetPresenter:
         self.view.show_minor_gridlines_check_box.setVisible(not plot_is_3d)
         self.view.show_minor_ticks_check_box.setVisible(not plot_is_3d)
 
-        ax = self.view.get_axis()
+        ax = self.current_axis
         self.view.set_title(ax_props.title)
 
         color_hex = convert_color_to_hex(ax_props["canvas_color"])
@@ -232,7 +232,6 @@ class AxesTabWidgetPresenter:
 
     def axis_changed(self):
         ax = self.current_axis
-
         self.current_view_props['title'] = self.view.get_title()
         self.current_view_props['minor_ticks'] = self.view.get_show_minor_ticks()
         self.current_view_props['minor_gridlines'] = self.view.get_show_minor_gridlines()
@@ -241,7 +240,8 @@ class AxesTabWidgetPresenter:
         self.current_view_props[f"{ax}scale"] = self.view.get_scale()
         self.current_view_props["canvas_color"] = self.view.get_canvas_color()
 
-        new_ax = self.view.get_axis()
+        # On Kubuntu, QT prepends the & on characters used as shortcut keys, which causes KeyErrors
+        new_ax = self.view.get_axis().replace('&', '')
         self.current_axis = new_ax
 
         if f"{new_ax}lim" in self.current_view_props:
@@ -252,7 +252,7 @@ class AxesTabWidgetPresenter:
             self.view.set_scale(self.current_view_props[f"{new_ax}scale"])
         else:
             ax_props = self.get_selected_ax_properties()
-            ax = self.view.get_axis()
+            ax = self.view.get_axis().replace('&', '')
             lim = ax_props[f"{ax}lim"]
             self.view.set_lower_limit(lim[0])
             self.view.set_upper_limit(lim[1])

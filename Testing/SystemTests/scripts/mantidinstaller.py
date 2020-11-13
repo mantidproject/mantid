@@ -301,7 +301,7 @@ class DMGInstaller(MantidInstaller):
         mantidInstallerName = os.path.basename(self.mantidInstaller)
         mantidInstallerName = mantidInstallerName.replace('.dmg','')
         try:
-            run('sudo cp -r /Volumes/'+ mantidInstallerName + '/MantidWorkbench.app /Applications/')
+            run('sudo cp -a /Volumes/'+ mantidInstallerName + '/MantidWorkbench.app /Applications/')
         finally:
             run('hdiutil detach /Volumes/'+ mantidInstallerName + '/')
 

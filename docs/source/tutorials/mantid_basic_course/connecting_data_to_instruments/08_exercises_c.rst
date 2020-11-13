@@ -1,4 +1,4 @@
-.. _06_exercises_c:
+.. _08_exercises_c:
 
 =========
 Exercises 

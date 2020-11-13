@@ -143,6 +143,7 @@ class DrillModel(QObject):
         self.settings = dict()
         self.columns = list()
         self.visualSettings = dict()
+        self.visualSettings = None
         self.instrument = None
         self.acquisitionMode = None
         self.algorithm = None

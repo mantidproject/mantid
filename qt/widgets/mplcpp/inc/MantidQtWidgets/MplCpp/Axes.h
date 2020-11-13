@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidQtWidgets/Common/Python/Object.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/Line2D.h"
 
@@ -31,6 +32,8 @@ public:
   void setXLabel(const char *label);
   void setYLabel(const char *label);
   void setTitle(const char *label);
+  void tickLabelFormat(const char *axis, const char *style,
+                       const bool useOffset);
   /// @}
 
   /// @name Drawing

@@ -788,6 +788,13 @@ class DataFunctionsTest(unittest.TestCase):
         self.assertTrue(np.array_equal([2.0, 5.0, 8.0, 11.0], y))
         self.assertTrue(np.array_equal([2.0, 5.0, 8.0, 11.0], dy))
 
+    def test_get_bins_with_a_ragged_workspace(self):
+        x, y, dy, dx = funcs.get_bins(self.ws2d_point_uneven, 3, withDy=True)
+
+        self.assertTrue(np.array_equal([1], x))
+        self.assertTrue(np.array_equal([4.0], y))
+        self.assertTrue(np.array_equal([0.0], dy))
+
     @add_md_workspace_with_data(dimensions=3)
     def test_get_md_data2d_bin_bounds_raises_AssertionException_too_many_dims(self, mdws):
         self.assertRaises(AssertionError, funcs.get_md_data2d_bin_bounds, mdws, False)

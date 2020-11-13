@@ -10,6 +10,7 @@
 #include "MantidAlgorithms/RunCombinationHelpers/SampleLogsBehaviour.h"
 #include "MantidDataHandling/LoadParameterFile.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTypes/Core/DateAndTime.h"
 #include <cxxtest/TestSuite.h>
 
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -19,6 +20,7 @@ using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 using namespace Mantid::Kernel;
 using namespace WorkspaceCreationHelper;
+using namespace Mantid::Types::Core;
 
 class SampleLogsBehaviourTest : public CxxTest::TestSuite {
 public:
@@ -170,7 +172,8 @@ public:
     TS_ASSERT_EQUALS(base->getLog("A")->units(), "A_unit")
   }
 
-  void test_time_series_unit() {
+  void test_time_series_from_scalars() {
+    // Tests when no time series logs are merged into a time series log
     Logger log("testLog");
     auto ws = createWorkspace(2.65, 1.56, 8.55, "2018-11-30T16:17:01");
     auto base = createWorkspace(4.5, 3.2, 7.9, "2018-11-30T16:17:03");
@@ -186,6 +189,48 @@ public:
     // B units must not have changed:
     TS_ASSERT_EQUALS(ws->getLog("B")->units(), "B_unit")
     TS_ASSERT_EQUALS(base->getLog("B")->units(), "B_unit")
+  }
+
+  void test_time_series_merge() {
+    // Tests when two time series logs are merged
+    Logger log("testLog");
+    auto ws1 = createWorkspaceWithTimeSeriesLog(2.65, "2018-11-30T16:17:01");
+    auto ws2 = createWorkspaceWithTimeSeriesLog(3.15, "2018-11-30T16:25:01");
+    SampleLogsBehaviour::SampleLogNames sampleLogNames;
+    sampleLogNames.sampleLogsTimeSeries = "A";
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws1, log, sampleLogNames);
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws2, ws1));
+    const std::string A = ws1->run().getLogData("A")->value();
+    TS_ASSERT_EQUALS(A,
+                     "2018-Nov-30 16:17:01  2.65\n2018-Nov-30 16:25:01  3.15\n")
+  }
+
+  void test_time_series_merge_with_scalar() {
+    // Tests when one time series log is merged with a scalar log as time series
+    Logger log("testLog");
+    auto ws1 = createWorkspaceWithTimeSeriesLog(4.47, "2018-11-30T16:17:01");
+    auto ws2 = createWorkspace(2.65, 1.56, 8.55, "2018-11-30T16:25:01");
+    SampleLogsBehaviour::SampleLogNames sampleLogNames;
+    sampleLogNames.sampleLogsTimeSeries = "A";
+    SampleLogsBehaviour sbh = SampleLogsBehaviour(ws1, log, sampleLogNames);
+    TS_ASSERT_THROWS_NOTHING(sbh.mergeSampleLogs(ws2, ws1));
+    const std::string A = ws1->run().getLogData("A")->value();
+    TS_ASSERT_EQUALS(A,
+                     "2018-Nov-30 16:17:01  4.47\n2018-Nov-30 16:25:01  2.65\n")
+  }
+
+  MatrixWorkspace_sptr
+  createWorkspaceWithTimeSeriesLog(const double A, const std::string &time) {
+    MatrixWorkspace_sptr ws = create2DWorkspaceWithFullInstrument(
+        3, 3, true, false, true, m_instrName);
+    DateAndTime dateTime;
+    dateTime.setFromISO8601(time);
+    std::vector<DateAndTime> series;
+    series.emplace_back(dateTime);
+    TimeSeriesProperty<double> *ts =
+        new TimeSeriesProperty<double>("A", series, std::vector<double>({A}));
+    ws->mutableRun().addLogData(ts);
+    return ws;
   }
 
   MatrixWorkspace_sptr createWorkspace(const double A, const double B,
