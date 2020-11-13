@@ -93,12 +93,12 @@ class HB2AReduceTest(unittest.TestCase):
             'HB2A_exp0660_scan0146.dat',
             Vanadium='HB2A_exp0644_scan0018.dat',
             IndividualDetectors=True,
-            OutputWorkspace="HB2AReduce_ws",
             OutputFormat='XYE',
             OutputDirectory=self._default_save_directory,
         )
         self.assertTrue(HB2AReduce_ws)
-        # the saved file cannot be reliable located in the build system
+        self.assertTrue(
+            os.path.exists(os.path.join(self._default_save_directory, f"{HB2AReduce_ws}.dat")))
         HB2AReduce_ws.delete()
 
 
