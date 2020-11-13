@@ -475,10 +475,25 @@ class DrillModel(QObject):
 
         self.groups = {k:v for k,v in self.groups.items() if v}
 
+        def incrementName(name):
+            """
+            Increment the group name from A to Z, AA to AZ, ...
+
+            Args:
+                name (str): group name
+            """
+            name = list(name)
+            if name[-1] == 'Z':
+                name[-1] = 'A'
+                name += 'A'
+            else:
+                name[-1] = chr(ord(name[-1]) + 1)
+            return ''.join(name)
+
         if not groupName:
             groupName = 'A'
             while groupName in self.groups:
-                groupName = chr(ord(groupName) + 1)
+                groupName = incrementName(groupName)
         self.groups[groupName] = samples
 
         return groupName
