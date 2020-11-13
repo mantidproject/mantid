@@ -13,6 +13,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
@@ -34,6 +35,8 @@ DECLARE_SUBWINDOW(StepScan)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+
+Logger g_log("StepScan");
 
 /// Constructor
 StepScan::StepScan(QWidget *parent)
@@ -83,8 +86,15 @@ void StepScan::initLayout() {
 
   connect(m_uiForm.helpButton, SIGNAL(clicked()), SLOT(helpClicked()));
   connect(m_uiForm.startButton, SIGNAL(clicked()), SLOT(runStepScanAlg()));
-  connect(m_uiForm.closeButton, SIGNAL(clicked()), this->parent(),
-          SLOT(close()));
+  if (this->parent()) {
+    // note connection to the parent window, otherwise an empty frame window
+    // may remain open and visible after this close.
+    connect(m_uiForm.closeButton, SIGNAL(released()), this, SLOT(close()));
+  } else {
+    // In MantidWorkbench this->parent() returns NULL. Connecting to this->close()
+    // appears to work.
+    connect(m_uiForm.closeButton, SIGNAL(released()), this, SLOT(close()));
+  }
 }
 
 void StepScan::cleanupWorkspaces() {
@@ -358,7 +368,7 @@ void StepScan::launchInstrumentWindow() {
   std::string pyCode = "instrument_view = getInstrumentView('" + m_inputWSName +
                        "',2)\n"
                        "instrument_view.show()";
-
+  g_log.warning(pyCode); 
   runPythonCode(QString::fromStdString(pyCode));
 
   // Attach the observers so that if a mask workspace is generated over in the
