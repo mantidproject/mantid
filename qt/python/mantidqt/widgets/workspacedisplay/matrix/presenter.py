@@ -102,19 +102,23 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             table_ws.addColumn("double", "XS" + str(row))
             table_ws.addColumn("double", "YS" + str(row))
             table_ws.addColumn("double", "ES" + str(row))
+            table_ws.addColumn("double", "DXS" + str(row))
 
-            col_x = 3 * i
-            col_y = 3 * i + 1
-            col_e = 3 * i + 2
+            col_x = 4 * i
+            col_y = 4 * i + 1
+            col_e = 4 * i + 2
+            col_dx = 4 * i + 3
 
             data_y = ws.readY(row)
             data_x = ws.readX(row)
             data_e = ws.readE(row)
+            data_dx = ws.readDx(row)
 
             for j in range(num_rows):
                 table_ws.setCell(j, col_x, data_x[j])
                 table_ws.setCell(j, col_y, data_y[j])
                 table_ws.setCell(j, col_e, data_e[j])
+                table_ws.setCell(j, col_dx, data_dx[j])
 
     def action_copy_bin_to_table(self, table):
         selected_cols = [i.column() for i in table.selectionModel().selectedColumns()]
@@ -129,13 +133,16 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         for i, col in enumerate(selected_cols):
             table_ws.addColumn("double", "YB" + str(col))
             table_ws.addColumn("double", "YE" + str(col))
+            table_ws.addColumn("double", "XE" + str(col))
 
-            col_y = 2 * i + 1
-            col_e = 2 * i + 2
+            col_y = 3 * i + 1
+            col_e = 3 * i + 2
+            col_dx = 3 * i + 3
 
             for j in range(num_rows):
                 data_y = ws.readY(j)
                 data_e = ws.readE(j)
+                data_dx = ws.readDx(j)
 
                 if i == 0:
                     if ws.axes() > 1:
@@ -144,6 +151,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
                         table_ws.setCell(j, 0, j)
                 table_ws.setCell(j, col_y, data_y[col])
                 table_ws.setCell(j, col_e, data_e[col])
+                table_ws.setCell(j, col_dx, data_dx[col])
 
     def action_copy_cells(self, table):
         self.copy_cells(table)
