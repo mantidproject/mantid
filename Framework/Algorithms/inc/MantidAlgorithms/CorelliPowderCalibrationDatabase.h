@@ -38,10 +38,16 @@ public:
     return ".... ....";  // TODO
   };
 
+  static std::string convertTimeStamp(std::string run_start_time);
+
 private:
   std::map<std::string, std::string> validateInputs() override;
   void init() override;
   void exec() override;
+
+  /// append the newly calibration to each component csv file
+  void updateComponentDatabaseFiles();
+
 
   /// Input workspace
   API::MatrixWorkspace_const_sptr inputWS;

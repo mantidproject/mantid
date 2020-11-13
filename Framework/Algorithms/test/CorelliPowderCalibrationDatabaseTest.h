@@ -155,6 +155,11 @@ public:
       // Clean memory
   }
 
+  void test_timestamp_conversion() {
+      std::string yyyymmdd = CorelliPowderCalibrationDatabase::convertTimeStamp("2018-02-20T12:57:17");
+      TS_ASSERT_EQUALS(yyyymmdd, "20180220");
+  }
+
 private:
 
   /**
@@ -179,9 +184,7 @@ private:
           "CorelliPowderCalibrationDatabaseTest_OutputWS");
 
       // Add property start_time
-      auto runObj = ws->mutableRun();
-      runObj.addProperty<std::string>("start_time", "2018-02-20T12:57:17", "", true);
-      std::cout << "run object now has " << runObj.getProperties().size() << " properties" << "\n";
+      ws->mutableRun().addProperty<std::string>("start_time", "2018-02-20T12:57:17", "", true);
 
       return ws;
   }
@@ -211,7 +214,33 @@ private:
       Mantid::API::TableRow bank1Row = tablews->appendRow();
       bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999 << 0.3424 << 5.67;
 
+      return tablews;
+  }
 
+  TableWorkspace_sptr createIncorrectTestCalibrationTableWorkspace() {
+      // Name of the output calibration workspace
+      std::string outWSName("CorelliPowderCalibrationDatabaseTest_TableWS");
+
+      ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
+      AnalysisDataService::Instance().addOrReplace(outWSName, itablews);
+
+      TableWorkspace_sptr tablews = std::dynamic_pointer_cast<TableWorkspace>(itablews);
+      TS_ASSERT(tablews);
+
+      // Set up columns
+      for (size_t i = 0; i < CorelliCalibration::calibrationTableColumnNames.size(); ++i) {
+          std::string colname = CorelliCalibration::calibrationTableColumnNames[i];
+          std::string type = CorelliCalibration::calibrationTableColumnTypes[i];
+          tablews->addColumn(type, colname);
+      }
+
+      // append rows
+      Mantid::API::TableRow sourceRow = tablews->appendRow();
+      sourceRow << "source" << 0. << 0. << -15.560 << 0. << 0. << 0. << 0.;
+      Mantid::API::TableRow sampleRow = tablews->appendRow();
+      sampleRow << "sample" << 0.0001 << -0.0002 << 0.003 << 0. << 0. << 0. << 0.;
+      Mantid::API::TableRow bank1Row = tablews->appendRow();
+      bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999 << 0.3424 << 5.67;
 
       return tablews;
   }

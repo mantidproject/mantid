@@ -20,6 +20,8 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <sstream>
+#include <string>
+#include <filesystem>
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
 
@@ -115,16 +117,73 @@ std::map<std::string, std::string> CorelliPowderCalibrationDatabase::validateInp
   return errors;
 }
 
+//-----------------------------------------------------------------------------
 /** Execute the algorithm.
  */
 void CorelliPowderCalibrationDatabase::exec() {
   // parse input
-  inputWS = getProperty("InputWorkspace");
-  inputCalibrationTableWS = getProperty("InputCalibrationPatchWorkspace");
+    if (!inputWS)
+        throw std::runtime_error("input workspace not specified");
+    if (!inputCalibrationTableWS)
+        throw std::runtime_error("input calibration workspace not specified");
+
+    std::string output_dir = getProperty("DatabaseDirectory");
+    std::cout << "Output directory: " << output_dir << "\n";
+
+    // Update component CSV files with
+    // ... ...
+
+    // Create the summary CSV file
+    // ... ...
 
 
   // output
   // setProperty("OutputWorkspace", outputWS);
+}
+
+/**
+ * @brief a
+ * And the day stamp for this calibration is 20201025, the following line will be appended to file corelli_source.csv :
+20201025, 0, 0, -15.560, 0, 0, 0, 0
+the following line will be appended to file corelli_sample.csv:
+20201025, 0.0001, -0.0002, 0.003, 0, 0, 0, 0
+and the following lines to corelli_bank001.csv:
+20201025, 0.9678, 0.0056, 0.0003, 0.4563, -0.9999, 0.3424, 5.67
+The header for files corelli_source.csv, corelli_sample.csv, and files corelli_bankXXX.csv should be:
+# YYYMMDD, Xposition, Yposition, Zposition, XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle
+ */
+void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles() {
+
+    std::string component = "sample";
+
+    std::filesystem::exists("helloworld.txt");
+
+
+}
+
+//-----------------------------------------------------------------------------
+/**
+ * @brief A static method to convert Mantid datetime string to YYYYMMDD format
+ * @param run_start_time: str as run start time in format of YYYY-MM-DDTHH:MM:SS
+ * @return
+ */
+std::string CorelliPowderCalibrationDatabase::convertTimeStamp(std::string run_start_time) {
+    // Get the first sub string by
+    std::string date_str = run_start_time.substr(0, run_start_time.find("T"));
+    std::cout << date_str << "\n";
+
+    // Separate year date and time
+    std::string year = date_str.substr(0, date_str.find("-"));
+    std::string monthday = date_str.substr(date_str.find("-") + 1, date_str.size());  // +1 to ignore delimit '-'
+    std::cout << "MondayDay = " << monthday << "\n";
+    std::string month = monthday.substr(0, monthday.find("-"));
+    std::string day = monthday.substr(monthday.find("-") + 1, monthday.size());  // +1 to ignore delimit
+
+    std::cout << "Y M D: " << year << ", " << month << ", " << day << "\n";
+
+    std::string datestamp = year + month + day;
+
+    return datestamp;
 }
 
 } // namespace Algorithms
