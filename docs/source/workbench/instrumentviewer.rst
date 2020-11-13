@@ -32,7 +32,7 @@ The control panel of the instrument view has four tabs: Render, Pick, Mask, and 
 
 Render Tab
 ----------
-The Render tab contains controls managing appearance of the instrument and the data on screen.
+The Render tab contains controls for managing the on-screen appearance of the instrument and collected data"```
 The top-most combo-box control allows the user to select the way the instrument is projected onto the screen.
 The default setting is "Full 3D" which gives a 3D view of the instrument in an orthogonal projection.
 The other options are "unwrapped views" projecting the instrument onto a curved surface and then unwrapping it onto the screen.
@@ -144,4 +144,3 @@ To elect the range for the data (intensity, color map legend), use
   myiv.set_intensity_min(1)
   myiv.set_intensity_max(1000)
   myiv.set_intensity_range(1, 1000)
-
