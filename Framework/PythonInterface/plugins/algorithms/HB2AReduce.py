@@ -282,7 +282,7 @@ class HB2AReduce(PythonAlgorithm):
                 "XYE": 'dat',
                 "GSAS": 'gss',
             }[self.getProperty('OutputFormat').value]
-            outputbase = os.path.join(outputdir, os.path.basename(filename).split(".")[0])
+            outputbase = os.path.join(outputdir, self.getProperty("OutputWorkspace").value)
             _outputfunc(
                 InputWorkspace=outWS,
                 Filename=f"{outputbase}.{_outputext}",
