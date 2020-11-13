@@ -4,8 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory, FileAction, FileProperty, IMDHistoWorkspaceProperty, PythonAlgorithm, \
-    PropertyMode, MultipleFileProperty, WorkspaceProperty
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, IMDHistoWorkspace, IMDHistoWorkspaceProperty, \
+    PythonAlgorithm, PropertyMode, MultipleFileProperty, WorkspaceProperty
 from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, V3D, FloatArrayProperty, \
     FloatArrayLengthValidator
 from mantid.simpleapi import ConvertHFIRSCDtoMDE, ConvertWANDSCDtoQ, DeleteWorkspace, DeleteWorkspaces, DivideMD, \
@@ -138,6 +138,12 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             for ws in input_ws_list:
                 if not mtd.doesExist(ws):
                     issues['InputWorkspaces'] = "Could not find input workspace '{}'".format(ws)
+                else:
+                    # If it does exist, make sure the workspace is an MDHisto with 3 dimensions
+                    if not isinstance(mtd[ws], IMDHistoWorkspace):
+                        issues['InputWorkspaces'] = "Workspace '{}' must be a MDHistoWorkspace".format(ws)
+                    elif mtd[ws].getNumDims() != 3:
+                        issues['InputWorkspaces'] = "Workspace '{}' expected to have 3 dimensions".format(ws)
 
         return issues
 
