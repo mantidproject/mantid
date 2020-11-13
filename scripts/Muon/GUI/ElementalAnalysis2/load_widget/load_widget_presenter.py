@@ -41,7 +41,7 @@ class LoadWidgetPresenterEA(object):
         self.view.on_clear_button_clicked(self.clear_data_and_view)
 
         self._view.on_multiple_load_type_changed(
-            self.handle_multiple_files_option_changed)
+            self.handle_multiple_runs_option_changed)
         self._use_threading = True
 
         self.instrumentObserver = LoadWidgetPresenterEA.InstrumentObserver(self)
@@ -60,7 +60,7 @@ class LoadWidgetPresenterEA(object):
         self.load_file_widget = widget
         self.load_file_widget.update_view_from_model([])
 
-    def handle_multiple_files_option_changed(self, unused=None):
+    def handle_multiple_runs_option_changed(self):
         selection = self._view.get_multiple_loading_state()
         if selection:
             self.load_file_widget.update_multiple_loading_behaviour(CO_ADD)
@@ -72,9 +72,9 @@ class LoadWidgetPresenterEA(object):
                 SIMULTANEOUS)
         self.load_run_widget.handle_run_changed_by_user()
 
-    def enable_multiple_files(self, enabled=True):
-        self.load_run_widget.enable_multiple_files(enabled)
-        self.load_file_widget.enable_multiple_files(enabled)
+    def enable_multiple_runs(self, enabled=True):
+        self.load_run_widget.enable_multiple_runs(enabled)
+        self.load_file_widget.enable_multiple_runs(enabled)
 
     def handle_file_widget_data_changed(self):
         self.load_run_widget.update_view_from_model(self._model.runs)

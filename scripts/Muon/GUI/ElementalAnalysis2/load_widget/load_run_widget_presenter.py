@@ -4,13 +4,12 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-
 import copy
 from Muon.GUI.Common import thread_model
-import Muon.GUI.Common.utilities.run_string_utils as run_utils
 import Muon.GUI.Common.utilities.load_utils as load_utils
-import Muon.GUI.ElementalAnalysis2.load_widget.load_utils_ea as load_utils_ea
+import Muon.GUI.Common.utilities.run_string_utils as run_utils
 from Muon.GUI.Common.utilities.run_string_utils import flatten_run_list
+import Muon.GUI.ElementalAnalysis2.load_widget.load_utils_ea as load_utils_ea
 from mantidqt.utils.observer_pattern import GenericObservable, Observable
 
 
@@ -22,8 +21,7 @@ class LoadRunWidgetPresenterEA(object):
         self._load_thread = None
 
         self._load_multiple_runs = True
-        self._use_threading = True
-        self._multiple_file_mode = "Simultaneous"
+        self._multiple_run_mode = "Simultaneous"
 
         self._instrument = self._model.instrument
         self._view.set_current_instrument(self._instrument)
@@ -85,7 +83,7 @@ class LoadRunWidgetPresenterEA(object):
         self.set_run_edit_from_list(run_list)
 
     def update_multiple_loading_behaviour(self, text):
-        self._multiple_file_mode = text
+        self._multiple_run_mode = text
 
     def set_run_edit_from_list(self, run_list):
         new_list = []
@@ -181,23 +179,10 @@ class LoadRunWidgetPresenterEA(object):
         self._model._data_context.clear_run_info()
         self._model.clear_loaded_data()
         self.disable_notifier.notify_subscribers()
-        self.handle_loading(runs, self._use_threading)
+        self.handle_loading(runs)
 
-    def handle_loading(self, runs, threaded=True):
-        if threaded:
-            self.handle_load_thread_start(runs, self.handle_load_thread_finished)
-        else:
-            self.handle_load_no_threading(runs, self.on_loading_finished)
-
-    def handle_load_no_threading(self, runs, finished_callback):
-        self.on_loading_start()
-        self._model.loadData(runs)
-        try:
-            self._model.execute()
-        except ValueError as error:
-            self._view.warning_popup(error.args[0])
-            self.run_list = flatten_run_list(self._model.current_runs)
-        finished_callback()
+    def handle_loading(self, runs):
+        self.handle_load_thread_start(runs, self.handle_load_thread_finished)
 
     def on_loading_start(self):
         self._view.notify_loading_started()
@@ -234,20 +219,20 @@ class LoadRunWidgetPresenterEA(object):
                     self.run_list = latest_loaded_run
                 else:
                     self.run_list[0] = latest_loaded_run
-                self._model.current_run = self.run_list
             run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
             self._model.current_runs = run_list
 
-            if self._load_multiple_runs and self._multiple_file_mode == "Co-Add":
-                run_list_to_add = list(self._model._data_context._run_info.keys())
-                if len(run_list_to_add) >1 :
-                    load_utils_ea.combine_loaded_runs(self._model, run_list_to_add, delete_added=True)
+            if self._load_multiple_runs and self._multiple_run_mode == "Co-Add":
+                run_list_to_add = [runObject._run_number for runObject in self._model._data_context._run_info]
+                if len(run_list_to_add) > 1:
+                    load_utils_ea.combine_loaded_runs(self._model, run_list_to_add)
 
             self.update_view_from_model(run_list)
             self.updated_directory.notify_subscribers(self._model._directory)
             self._view.notify_loading_finished()
         except ValueError:
-            self._view.warning_popup('Attempting to co-add data with different time bins. This is not currently supported.')
+            self._view.warning_popup('Attempting to co-add data with different time bins. '
+                                     'This is not currently supported.')
             self._view.reset_run_edit_from_cache()
         except RuntimeError as error:
             self._view.warning_popup(error)
