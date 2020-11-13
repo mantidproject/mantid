@@ -75,7 +75,7 @@ The text box below the tool bar show textual information about selected detector
     :align: left
     :width: 635
 
-More doc will be migrated from MantidPlot as new features being consolidated.
+Documentation will be updated as additional features are added.
 
 
 Draw Tab
