@@ -160,7 +160,7 @@ class HB2AReduce(PythonAlgorithm):
     def PyExec(self):
         scale = self.getProperty("Scale").value
         filenames = self.getProperty("Filename").value
-        outputfn = str(self.getProperty("OutputWorkspace").value)
+        outputfn = self.getPropertyValue("OutputWorkspace")
 
         if not filenames:
             ipts = self.getProperty("IPTS").value
@@ -272,7 +272,6 @@ class HB2AReduce(PythonAlgorithm):
         outWS = createWS_alg.getProperty("OutputWorkspace").value
 
         self.setProperty("OutputWorkspace", outWS)
-
         self.add_metadata(outWS, metadata, data)
 
         # save reduced workspace to requested format
