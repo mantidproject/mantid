@@ -574,7 +574,9 @@ class DrillModel(QObject):
         master = None
         for group in self.groups:
             if sample in self.groups[group]:
-                master = self.masterSamples[group]
+                master = None
+                if group in self.masterSamples:
+                    master = self.masterSamples[group]
                 if master is not None:
                     params.update(self.samples[master])
 
