@@ -77,7 +77,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                              "Binning parameters for the 0th dimension. Enter it as a"
                              "comma-separated list of values with the"
                              "format: 'minimum,maximum,number_of_bins'.")
-        self.declareProperty(FloatArrayProperty("BinningDim1", [-0.82, 0.82, 41], FloatArrayLengthValidator(3),
+        self.declareProperty(FloatArrayProperty("BinningDim1", [-2.52, 2.52, 126], FloatArrayLengthValidator(3),
                                                 direction=Direction.Input),
                              "Binning parameters for the 1st dimension. Enter it as a"
                              "comma-separated list of values with the"
