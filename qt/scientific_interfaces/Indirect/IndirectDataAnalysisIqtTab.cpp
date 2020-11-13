@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "Iqt.h"
+#include "IndirectDataAnalysisIqtTab.h"
 
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -148,14 +148,14 @@ calculateBinParameters(std::string const &wsName, std::string const &resName,
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-Iqt::Iqt(QWidget *parent)
+IndirectDataAnalysisIqtTab::IndirectDataAnalysisIqtTab(QWidget *parent)
     : IndirectDataAnalysisTab(parent), m_iqtTree(nullptr), m_iqtResFileType() {
   m_uiForm.setupUi(parent);
   setOutputPlotOptionsPresenter(std::make_unique<IndirectPlotOptionsPresenter>(
       m_uiForm.ipoPlotOptions, this, PlotWidget::SpectraTiled));
 }
 
-void Iqt::setup() {
+void IndirectDataAnalysisIqtTab::setup() {
   m_iqtTree = new QtTreePropertyBrowser();
   m_uiForm.properties->addWidget(m_iqtTree);
 
@@ -232,7 +232,7 @@ void Iqt::setup() {
   m_uiForm.dsResolution->isOptional(true);
 }
 
-void Iqt::run() {
+void IndirectDataAnalysisIqtTab::run() {
   m_uiForm.ppPlot->watchADS(false);
   setRunIsRunning(true);
 
@@ -276,7 +276,7 @@ void Iqt::run() {
  *
  * @param error If the algorithm failed
  */
-void Iqt::algorithmComplete(bool error) {
+void IndirectDataAnalysisIqtTab::algorithmComplete(bool error) {
   m_uiForm.ppPlot->watchADS(true);
   setRunIsRunning(false);
   if (error)
@@ -288,22 +288,22 @@ void Iqt::algorithmComplete(bool error) {
 /**
  * Handle saving of workspace
  */
-void Iqt::saveClicked() {
+void IndirectDataAnalysisIqtTab::saveClicked() {
   checkADSForPlotSaveWorkspace(m_pythonExportWsName, false);
   addSaveWorkspaceToQueue(QString::fromStdString(m_pythonExportWsName));
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-void Iqt::runClicked() {
+void IndirectDataAnalysisIqtTab::runClicked() {
   clearOutputPlotOptionsWorkspaces();
   runTab();
 }
 
-void Iqt::errorsClicked() {
+void IndirectDataAnalysisIqtTab::errorsClicked() {
   m_uiForm.spIterations->setEnabled(isErrorsEnabled());
 }
 
-bool Iqt::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
+bool IndirectDataAnalysisIqtTab::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
 
 /**
  * Ensure we have present and valid file/ws inputs.
@@ -311,7 +311,7 @@ bool Iqt::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
  * The underlying Fourier transform of Iqt
  * also means we must enforce several rules on the parameters.
  */
-bool Iqt::validate() {
+bool IndirectDataAnalysisIqtTab::validate() {
   UserInputValidator uiv;
 
   uiv.checkDataSelectorIsValid("Sample", m_uiForm.dsInput);
@@ -353,7 +353,7 @@ bool Iqt::validate() {
 /**
  * Calculates binning parameters.
  */
-void Iqt::updateDisplayedBinParameters() {
+void IndirectDataAnalysisIqtTab::updateDisplayedBinParameters() {
   auto const sampleName = m_uiForm.dsInput->getCurrentDataName().toStdString();
   auto const resolutionName =
       m_uiForm.dsResolution->getCurrentDataName().toStdString();
@@ -400,14 +400,14 @@ void Iqt::updateDisplayedBinParameters() {
   }
 }
 
-void Iqt::loadSettings(const QSettings &settings) {
+void IndirectDataAnalysisIqtTab::loadSettings(const QSettings &settings) {
   m_uiForm.dsInput->readSettings(settings.group());
   m_uiForm.dsResolution->readSettings(settings.group());
 }
 
-void Iqt::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
+void IndirectDataAnalysisIqtTab::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
 
-void Iqt::setFileExtensionsByName(bool filter) {
+void IndirectDataAnalysisIqtTab::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
   auto const tabName("Iqt");
   m_uiForm.dsInput->setFBSuffixes(filter ? getSampleFBSuffixes(tabName)
@@ -420,7 +420,7 @@ void Iqt::setFileExtensionsByName(bool filter) {
                                               : noSuffixes);
 }
 
-void Iqt::plotInput(const QString &wsname) {
+void IndirectDataAnalysisIqtTab::plotInput(const QString &wsname) {
   MatrixWorkspace_sptr workspace;
   try {
     workspace = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
@@ -433,7 +433,7 @@ void Iqt::plotInput(const QString &wsname) {
   }
 
   setPreviewSpectrumMaximum(
-      static_cast<int>(inputWorkspace()->getNumberHistograms()) - 1);
+      static_cast<int>(getInputWorkspace()->getNumberHistograms()) - 1);
 
   IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
@@ -482,7 +482,7 @@ void Iqt::plotInput(const QString &wsname) {
   updateDisplayedBinParameters();
 }
 
-void Iqt::setPreviewSpectrumMaximum(int value) {
+void IndirectDataAnalysisIqtTab::setPreviewSpectrumMaximum(int value) {
   m_uiForm.spPreviewSpec->setMaximum(value);
 }
 
@@ -492,7 +492,7 @@ void Iqt::setPreviewSpectrumMaximum(int value) {
  * @param min Range selector min value
  * @param max Range selector max value
  */
-void Iqt::rangeChanged(double min, double max) {
+void IndirectDataAnalysisIqtTab::rangeChanged(double min, double max) {
   double oldMin = m_dblManager->value(m_properties["ELow"]);
   double oldMax = m_dblManager->value(m_properties["EHigh"]);
 
@@ -534,7 +534,7 @@ void Iqt::rangeChanged(double min, double max) {
  * @param prop The property which has been changed
  * @param val The new position for the range selector
  */
-void Iqt::updateRangeSelector(QtProperty *prop, double val) {
+void IndirectDataAnalysisIqtTab::updateRangeSelector(QtProperty *prop, double val) {
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
@@ -569,25 +569,25 @@ void Iqt::updateRangeSelector(QtProperty *prop, double val) {
   updateDisplayedBinParameters();
 }
 
-void Iqt::updateEnergyRange(int state) {
+void IndirectDataAnalysisIqtTab::updateEnergyRange(int state) {
   if (state != 0) {
     auto const value = m_dblManager->value(m_properties["ELow"]);
     m_dblManager->setValue(m_properties["EHigh"], -value);
   }
 }
 
-void Iqt::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void IndirectDataAnalysisIqtTab::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
 
-void Iqt::setSaveResultEnabled(bool enabled) {
+void IndirectDataAnalysisIqtTab::setSaveResultEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);
 }
 
-void Iqt::setButtonsEnabled(bool enabled) {
+void IndirectDataAnalysisIqtTab::setButtonsEnabled(bool enabled) {
   setRunEnabled(enabled);
   setSaveResultEnabled(enabled);
 }
 
-void Iqt::setRunIsRunning(bool running) {
+void IndirectDataAnalysisIqtTab::setRunIsRunning(bool running) {
   m_uiForm.pbRun->setText(running ? "Running..." : "Run");
   setButtonsEnabled(!running);
 }

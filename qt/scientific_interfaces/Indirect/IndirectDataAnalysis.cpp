@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysis.h"
 
-#include "ConvFit.h"
-#include "Elwin.h"
-#include "Iqt.h"
-#include "IqtFit.h"
-#include "JumpFit.h"
-#include "MSDFit.h"
+#include "IndirectDataAnalysisConvFitTab.h"
+#include "IndirectDataAnalysisElwinTab.h"
+#include "IndirectDataAnalysisIqtTab.h"
+#include "IndirectDataAnalysisIqtFitTab.h"
+#include "IndirectDataAnalysisJumpFitTab.h"
+#include "IndirectDataAnalysisMSDFitTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -31,12 +31,12 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
   // All tabs MUST appear here to be shown in interface.
   // We make the assumption that each map key corresponds to the order in which
   // the tabs appear.
-  m_tabs.emplace(ELWIN, new Elwin(m_uiForm.twIDATabs->widget(ELWIN)));
-  m_tabs.emplace(MSD_FIT, new MSDFit(m_uiForm.twIDATabs->widget(MSD_FIT)));
-  m_tabs.emplace(IQT, new Iqt(m_uiForm.twIDATabs->widget(IQT)));
-  m_tabs.emplace(IQT_FIT, new IqtFit(m_uiForm.twIDATabs->widget(IQT_FIT)));
-  m_tabs.emplace(CONV_FIT, new ConvFit(m_uiForm.twIDATabs->widget(CONV_FIT)));
-  m_tabs.emplace(JUMP_FIT, new JumpFit(m_uiForm.twIDATabs->widget(JUMP_FIT)));
+  m_tabs.emplace(ELWIN, new IndirectDataAnalysisElwinTab(m_uiForm.twIDATabs->widget(ELWIN)));
+  m_tabs.emplace(MSD_FIT, new IndirectDataAnalysisMSDFitTab(m_uiForm.twIDATabs->widget(MSD_FIT)));
+  m_tabs.emplace(IQT, new IndirectDataAnalysisIqtTab(m_uiForm.twIDATabs->widget(IQT)));
+  m_tabs.emplace(IQT_FIT, new IndirectDataAnalysisIqtFitTab(m_uiForm.twIDATabs->widget(IQT_FIT)));
+  m_tabs.emplace(CONV_FIT, new IndirectDataAnalysisConvFitTab(m_uiForm.twIDATabs->widget(CONV_FIT)));
+  m_tabs.emplace(JUMP_FIT, new IndirectDataAnalysisJumpFitTab(m_uiForm.twIDATabs->widget(JUMP_FIT)));
 }
 
 void IndirectDataAnalysis::applySettings(

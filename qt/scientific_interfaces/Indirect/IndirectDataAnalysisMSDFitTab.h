@@ -17,19 +17,15 @@ namespace CustomInterfaces {
 namespace IDA {
 class IDAFunctionParameterEstimation;
 
-class DLLExport MSDFit : public IndirectFitAnalysisTab {
+class DLLExport IndirectDataAnalysisMSDFitTab : public IndirectFitAnalysisTab {
   Q_OBJECT
 
 public:
-  MSDFit(QWidget *parent = nullptr);
+  IndirectDataAnalysisMSDFitTab(QWidget *parent = nullptr);
 
-  std::string tabName() const override { return "MSDFit"; }
+  std::string getTabName() const override { return "MSDFit"; }
 
   bool hasResolution() const override { return false; }
-
-protected slots:
-  void runClicked();
-  void fitFunctionChanged();
 
 protected:
   void setRunIsRunning(bool running) override;
@@ -38,10 +34,15 @@ protected:
 private:
   void setupFitTab() override;
   EstimationDataSelector getEstimationDataSelector() const override;
-  std::string fitTypeString() const;
-  MSDFitModel *m_msdFittingModel;
-  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
+  std::string getFitTypeString() const;
   IDAFunctionParameterEstimation createParameterEstimation() const;
+
+  std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
+  MSDFitModel *m_msdFittingModel;
+
+protected slots:
+  void runClicked();
+  void fitFunctionChanged();
 };
 } // namespace IDA
 } // namespace CustomInterfaces

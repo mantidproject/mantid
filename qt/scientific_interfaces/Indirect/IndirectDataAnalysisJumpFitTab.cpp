@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "JumpFit.h"
+#include "IndirectDataAnalysisJumpFitTab.h"
 #include "FQFitConstants.h"
 #include "IDAFunctionParameterEstimation.h"
 #include "JumpFitDataPresenter.h"
@@ -42,12 +42,12 @@ std::vector<std::string> FQFIT_HIDDEN_PROPS = std::vector<std::string>(
      "OutputCompositeMembers", "OutputWorkspace", "IgnoreInvalidData", "Output",
      "PeakRadius", "PlotParameter"});
 
-JumpFit::JumpFit(QWidget *parent)
+IndirectDataAnalysisJumpFitTab::IndirectDataAnalysisJumpFitTab(QWidget *parent)
     : IndirectFitAnalysisTab(new JumpFitModel, parent),
       m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
 
-  m_jumpFittingModel = dynamic_cast<JumpFitModel *>(fittingModel());
+  m_jumpFittingModel = dynamic_cast<JumpFitModel *>(getFittingModel());
   auto parameterEstimation = createParameterEstimation();
   auto templateBrowser = new SingleFunctionTemplateBrowser(
       widthFits,
@@ -72,7 +72,7 @@ JumpFit::JumpFit(QWidget *parent)
   setEditResultVisible(false);
 }
 
-void JumpFit::setupFitTab() {
+void IndirectDataAnalysisJumpFitTab::setupFitTab() {
   m_uiForm->svSpectrumView->hideSpectrumSelector();
   m_uiForm->svSpectrumView->hideMaskSpectrumSelector();
 
@@ -83,11 +83,11 @@ void JumpFit::setupFitTab() {
           SLOT(updateModelFitTypeString()));
 }
 
-void JumpFit::updateModelFitTypeString() {
-  m_jumpFittingModel->setFitType(fitTypeString());
+void IndirectDataAnalysisJumpFitTab::updateModelFitTypeString() {
+  m_jumpFittingModel->setFitType(getFitTypeString());
 }
 
-std::string JumpFit::fitTypeString() const {
+std::string IndirectDataAnalysisJumpFitTab::getFitTypeString() const {
   if (!m_jumpFittingModel->getFittingFunction() ||
       m_jumpFittingModel->getFittingFunction()->nFunctions() == 0) {
     return "NoCurrentFunction";
@@ -101,17 +101,17 @@ std::string JumpFit::fitTypeString() const {
   }
 }
 
-void JumpFit::runClicked() { runTab(); }
+void IndirectDataAnalysisJumpFitTab::runClicked() { runTab(); }
 
-void JumpFit::setRunIsRunning(bool running) {
+void IndirectDataAnalysisJumpFitTab::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
 }
 
-void JumpFit::setRunEnabled(bool enable) {
+void IndirectDataAnalysisJumpFitTab::setRunEnabled(bool enable) {
   m_uiForm->pbRun->setEnabled(enable);
 }
 
-EstimationDataSelector JumpFit::getEstimationDataSelector() const {
+EstimationDataSelector IndirectDataAnalysisJumpFitTab::getEstimationDataSelector() const {
   return
       [](const std::vector<double> &x, const std::vector<double> &y,
          const std::pair<double, double> range) -> DataForParameterEstimation {
@@ -201,7 +201,7 @@ void estimateFickDiffusion(::Mantid::API::IFunction_sptr &function,
 }
 } // namespace
 
-IDAFunctionParameterEstimation JumpFit::createParameterEstimation() const {
+IDAFunctionParameterEstimation IndirectDataAnalysisJumpFitTab::createParameterEstimation() const {
 
   IDAFunctionParameterEstimation parameterEstimation;
   parameterEstimation.addParameterEstimationFunction("ChudleyElliot",

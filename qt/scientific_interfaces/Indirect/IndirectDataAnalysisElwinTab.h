@@ -8,30 +8,16 @@
 
 #include "IndirectDataAnalysisTab.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
-#include "ui_Elwin.h"
+#include "ui_IndirectDataAnalysisElwinTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport Elwin : public IndirectDataAnalysisTab {
+class DLLExport IndirectDataAnalysisElwinTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  Elwin(QWidget *parent = nullptr);
-
-private slots:
-  void newInputFiles();
-  void newPreviewFileSelected(int index);
-  void plotInput();
-  void handlePreviewSpectrumChanged();
-  void twoRanges(QtProperty *prop, bool /*val*/);
-  void minChanged(double val);
-  void maxChanged(double val);
-  void updateRS(QtProperty *prop, double val);
-  void unGroupInput(bool error);
-  void runClicked();
-  void saveClicked();
-  void updateIntegrationRange();
+  IndirectDataAnalysisElwinTab(QWidget *parent = nullptr);
 
 private:
   void run() override;
@@ -54,8 +40,22 @@ private:
   void setRunEnabled(const bool &enabled);
   void setSaveResultEnabled(const bool &enabled);
 
-  Ui::Elwin m_uiForm;
+  Ui::IndirectDataAnalysisElwinTab m_uiForm;
   QtTreePropertyBrowser *m_elwTree;
+
+private slots:
+  void newInputFiles();
+  void newPreviewFileSelected(int index);
+  void plotInput();
+  void handlePreviewSpectrumChanged();
+  void twoRanges(QtProperty *prop, bool enabled);
+  void minChanged(double val);
+  void maxChanged(double val);
+  void updateRS(QtProperty *prop, double val);
+  void unGroupInput(bool error);
+  void runClicked();
+  void saveClicked();
+  void updateIntegrationRange();
 };
 } // namespace IDA
 } // namespace CustomInterfaces

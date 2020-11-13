@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Elwin</class>
- <widget class="QWidget" name="Elwin">
+ <class>IndirectDataAnalysisElwinTab</class>
+ <widget class="QWidget" name="IndirectDataAnalysisElwinTab">
   <property name="geometry">
    <rect>
     <x>0</x>

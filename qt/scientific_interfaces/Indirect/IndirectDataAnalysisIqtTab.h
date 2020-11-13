@@ -7,16 +7,16 @@
 #pragma once
 
 #include "IndirectDataAnalysisTab.h"
-#include "ui_Iqt.h"
+#include "ui_IndirectDataAnalysisIqtTab.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport Iqt : public IndirectDataAnalysisTab {
+class DLLExport IndirectDataAnalysisIqtTab : public IndirectDataAnalysisTab {
   Q_OBJECT
 
 public:
-  Iqt(QWidget *parent = nullptr);
+  IndirectDataAnalysisIqtTab(QWidget *parent = nullptr);
 
 private:
   void run() override;
@@ -31,6 +31,11 @@ private:
   void setSaveResultEnabled(bool enabled);
   void setButtonsEnabled(bool enabled);
   void setRunIsRunning(bool running);
+  void setPreviewSpectrumMaximum(int value);
+
+  Ui::IndirectDataAnalysisIqtTab m_uiForm;
+  QtTreePropertyBrowser *m_iqtTree;
+  bool m_iqtResFileType;
 
 private slots:
   void algorithmComplete(bool error);
@@ -44,12 +49,6 @@ private slots:
   void errorsClicked();
   void updateEnergyRange(int state);
 
-private:
-  void setPreviewSpectrumMaximum(int value);
-
-  Ui::Iqt m_uiForm;
-  QtTreePropertyBrowser *m_iqtTree;
-  bool m_iqtResFileType;
 };
 } // namespace IDA
 } // namespace CustomInterfaces
