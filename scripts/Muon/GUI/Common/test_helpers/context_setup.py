@@ -17,7 +17,6 @@ from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
 from unittest import mock
 
 
-
 def setup_context_for_tests(parent_object):
     parent_object.loaded_data = MuonLoadData()
     parent_object.loaded_data.get_main_field_direction = mock.MagicMock(return_value='transverse')

@@ -107,7 +107,7 @@ class EAFileUtilsTest(unittest.TestCase):
         ws1 = CreateSampleWorkspace()
         ws2 = CreateSampleWorkspace()
         ws3 = CreateSampleWorkspace()
-        ws_list = ['ws1', 'ws2', 'ws3']
+        ws_list = [ws1, ws2, ws3]
         load_utils_ea.finalise_groupworkspace(grpws, grpws_name, ws_list)
         self.assertTrue(AnalysisDataService.doesExist('New Group Workspace'))
 

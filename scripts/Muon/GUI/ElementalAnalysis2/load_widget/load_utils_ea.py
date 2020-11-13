@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import WorkspaceGroup
-from mantid.simpleapi import CloneWorkspace, DeleteWorkspace
+from mantid.simpleapi import DeleteWorkspace
 
 
 def combine_loaded_runs(model, run_list):
