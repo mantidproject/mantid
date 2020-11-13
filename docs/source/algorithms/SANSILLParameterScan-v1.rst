@@ -21,7 +21,10 @@ The OutputJoinedWorkspace contains, if asked for, the reduced data on one worksp
 
 .. testsetup:: ExSANSILLParameterScan
 
+    default_facility_orig = config['default.facility']
+    default_instrument_orig = config['default.instrument']
     config['default.facility'] = 'ILL'
+    config['default.instrument'] = 'D16'
     config.appendDataSearchSubDir('ILL/D16/')
 
 .. testcode:: ExSANSILLParameterScan
@@ -36,6 +39,8 @@ The OutputJoinedWorkspace contains, if asked for, the reduced data on one worksp
 
 .. testcleanup:: ExSANSILLParameterScan
 
+    config['default.facility'] = default_facility_orig
+    config['default.instrument'] = default_instrument_orig
     mtd.clear()
 
 

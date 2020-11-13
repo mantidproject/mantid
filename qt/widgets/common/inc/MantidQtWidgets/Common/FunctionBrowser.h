@@ -105,6 +105,8 @@ public:
   IFunction_sptr getGlobalFunction() override;
   /// Update parameter values in the browser to match those of a function.
   void updateMultiDatasetParameters(const IFunction &fun) override;
+  /// Update parameter values in the browser to match those of a function.
+  void updateMultiDatasetAttributes(const IFunction &fun);
   /// Update parameter values in the browser to match those in a table
   /// workspace.
   void updateMultiDatasetParameters(const ITableWorkspace &paramTable) override;
@@ -132,8 +134,6 @@ signals:
   /// In multi-dataset context a button value editor was clicked
   void localParameterButtonClicked(const QString &parName);
   void globalsChanged();
-  void constraintsChanged();
-  void tiesChanged();
 
 public slots:
 

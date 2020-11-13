@@ -15,7 +15,7 @@ New features
 - New algorithm :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` to perform polarised diffraction data reduction for the ILL D7 instrument.
 - New algorithm :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` to separate magnetic, nuclear coherent, and incoherent cross-sections using spin-flip and non-spin-flip cross-sections, and to normalise D7 data to a given standard.
 - New algorithm :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` to perform wavelength and detector position calibration for the ILL D7 instrument.
-    
+
 Powder Diffraction
 ------------------
 New features
@@ -37,6 +37,9 @@ New features
 Improvements
 ############
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
+- The height of the :ref:`func-BackToBackExponential` peak is now preserved when changing the FWHM sliders when fitting.
+- :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` is corrected when treating multiple scans merged.
+- The default loadpath in the fitting tab of the Engineering Diffraction UI is now set to the most recently focused files.
 
 Bugfixes
 ########
@@ -47,10 +50,21 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+- PaalmanPingsMonteCarloAbsorption can now use tabulated density values, and allows for overridden X Sections
+
+Bugfixes
+############
+- Settings are now saved only when the Apply or OK button are clicked (i.e. clicking cancel will not update the settings).
+
+Improvements
+############
+- The user is no longer asked to overwrite an automatically generated model that is saved in as a Custom Setup in the fit browser (it is overwritten).
+
 New features
 ############
 - When a fit is successful the model will be stored as a Custom Setup in the fit property browser under the name of the workspace fitted. 
-- The fitting tab now creates a group of workspaces that store the model string and  the fit value and error of parameters of the model for each loaded workspace.
+- The fitting tab now creates a group of workspaces that store the model string and the fit value and error of parameters of the model for each loaded workspace.
+- Sequential fitting of workspaces now provided in fitting tab by average value of a log set in settings.
 
 Single Crystal Diffraction
 --------------------------

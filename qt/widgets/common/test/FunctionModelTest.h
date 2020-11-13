@@ -9,6 +9,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
 #include <cxxtest/TestSuite.h>
 
@@ -248,5 +249,83 @@ public:
       TS_ASSERT_EQUALS(fun->getParameter(0), 3.0);
       TS_ASSERT_EQUALS(fun->getParameter(1), 4.0);
     }
+  }
+  void test_getAttributeNames_returns_correctly() {
+    FunctionModel model;
+    model.addFunction("", "name = TeixeiraWaterSQE, Q = 3.14,"
+                          "WorkspaceIndex = 4, Height = 1,"
+                          "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+                          "constraints=(Height>0, DiffCoeff>0, "
+                          "Tau>0);name=FlatBackground;name=LinearBackground");
+    QStringList expectedAttributes = {QString("NumDeriv"), QString("f0.Q"),
+                                      QString("f0.WorkspaceIndex")};
+
+    auto attributes = model.getAttributeNames();
+
+    TS_ASSERT_EQUALS(expectedAttributes.size(), attributes.size());
+
+    for (int i = 0; i < attributes.size(); ++i) {
+      TS_ASSERT_EQUALS(attributes[i], expectedAttributes[i]);
+    }
+  }
+  void test_setAttribute_correctly_updates_stored_function() {
+    FunctionModel model;
+    model.addFunction("", "name = TeixeiraWaterSQE, Q = 3.14,"
+                          "WorkspaceIndex = 4, Height = 1,"
+                          "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+                          "constraints=(Height>0, DiffCoeff>0, "
+                          "Tau>0);name=FlatBackground;name=LinearBackground");
+    model.setAttribute("f0.Q", IFunction::Attribute(41.3));
+
+    TS_ASSERT_EQUALS(
+        model.getCurrentFunction()->getAttribute("f0.Q").asDouble(), 41.3);
+  }
+  void test_getAttribute_correctly_retrives_attributes() {
+    FunctionModel model;
+    model.addFunction("", "name=TeixeiraWaterSQE, Q = 3.14,"
+                          "WorkspaceIndex = 4, Height = 1,"
+                          "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+                          "constraints=(Height>0, DiffCoeff>0, "
+                          "Tau>0);name=FlatBackground;name=LinearBackground");
+    TS_ASSERT_EQUALS(model.getAttribute("f0.Q").asDouble(), 3.14);
+    TS_ASSERT_EQUALS(model.getAttribute("NumDeriv").asBool(), false);
+  }
+  void test_getAttribute_throws_for_non_exisitng_attribute() {
+    FunctionModel model;
+    model.addFunction("", "name=TeixeiraWaterSQE, Q = 3.14,"
+                          "WorkspaceIndex = 4, Height = 1,"
+                          "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+                          "constraints=(Height>0, DiffCoeff>0, "
+                          "Tau>0);name=FlatBackground;name=LinearBackground");
+    TS_ASSERT_THROWS(model.getAttribute("f0.B").asDouble(),
+                     std::invalid_argument &);
+  }
+  void test_updateMultiDatasetAttributes_correctly_updates_stored_attributes() {
+    FunctionModel model;
+    model.setNumberDomains(3);
+    model.addFunction("", "name=TeixeiraWaterSQE, Q = 3.14,"
+                          "WorkspaceIndex = 4, Height = 1,"
+                          "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+                          "constraints=(Height>0, DiffCoeff>0, "
+                          "Tau>0);name=FlatBackground;name=LinearBackground");
+    auto function =
+        FunctionFactory::Instance().createInitializedMultiDomainFunction(
+            "name=TeixeiraWaterSQE, Q=41.3, "
+            "Height=1, DiffCoeff=2.3, Tau=1.25, Centre=0, "
+            "constraints=(Height>0, DiffCoeff>0, "
+            "Tau>0);name=FlatBackground;name=LinearBackground",
+            3);
+    function->setAttribute("f0.f0.Q", IFunction::Attribute(11.3));
+    function->setAttribute("f1.f0.Q", IFunction::Attribute(21.6));
+    function->setAttribute("f2.f0.Q", IFunction::Attribute(32.9));
+
+    model.updateMultiDatasetAttributes(*function);
+
+    TS_ASSERT_EQUALS(model.getFitFunction()->getAttribute("f0.f0.Q").asDouble(),
+                     11.3);
+    TS_ASSERT_EQUALS(model.getFitFunction()->getAttribute("f1.f0.Q").asDouble(),
+                     21.6);
+    TS_ASSERT_EQUALS(model.getFitFunction()->getAttribute("f2.f0.Q").asDouble(),
+                     32.9);
   }
 };

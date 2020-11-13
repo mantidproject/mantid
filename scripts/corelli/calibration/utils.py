@@ -23,6 +23,9 @@ except (ImportError, ModuleNotFoundError):
 from Calibration import tube
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
 
+# Functions exposed to the general user (public) API
+__all__ = ['apply_calibration', 'load_banks', 'calibrate_tube']
+
 # Type aliases
 InputTable = Union[str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
 WorkspaceTypes = Union[str, Workspace2D]  # allowed types for the input workspace to calibrate_bank
@@ -57,7 +60,7 @@ def wire_positions(units: str = 'pixels') -> np.ndarray:
 
 def bank_numbers(bank_selection: str) -> List[str]:
     r"""
-    Expand a bank selection string into a list of bank numbers
+    Expand a bank selection string into a list of bank numbers, from smallest to highest
 
     :param bank_selection: selection string, such as '10,12-15,17-21'
     """
@@ -66,31 +69,70 @@ def bank_numbers(bank_selection: str) -> List[str]:
     for r in ranges:
         if '-' in r:
             start, end = [int(n.strip()) for n in r.split('-')]
-            banks.extend([str(n) for n in range(start, end + 1)])
+            banks.extend(list(range(start, end + 1)))
         else:
-            banks.append(r)
-    return banks
+            banks.append(int(r))
+    return [str(n) for n in sorted(banks)]
 
 
-def load_banks(filename: str, bank_selection: str, output_workspace: str) -> Workspace2D:
+def load_banks(run: Union[int, str], bank_selection: str, output_workspace: str) -> Workspace2D:
     r"""
     Load events only for the selected banks, and don't load metadata.
 
     If the file is not an events file, but a Nexus processed file, the bank_selection is ignored.
-    :param filename: Filename to an Event nexus file or a processed nexus file
+    :param run: run-number or filename to an Event nexus file or a processed nexus file
     :param bank_selection: selection string, such as '10,12-15,17-21'
     :param output_workspace: name of the output workspace containing counts per pixel
     :return: workspace containing counts per pixel. Events in each pixel are integrated into neutron counts.
     """
-    assert path.exists(filename), f'File {filename} does not exist'
+    # Resolve the input run
+    if isinstance(run, int):
+        file_descriptor = f'CORELLI_{run}'
+    else:  # a run number given as a string, or the path to a file
+        try:
+            file_descriptor = f'CORELLI_{str(int(run))}'
+        except ValueError:  # run is path to a file
+            filename = run
+            assert path.exists(filename), f'File {filename} does not exist'
+            file_descriptor = filename
+
     bank_names = ','.join(['bank' + b for b in bank_numbers(bank_selection)])
     try:
-        LoadEventNexus(Filename=filename, OutputWorkspace=output_workspace,
-                       BankName=bank_names, LoadMonitors=False, LoadLogs=False)
+        LoadEventNexus(Filename=file_descriptor, OutputWorkspace=output_workspace,
+                       BankName=bank_names, LoadMonitors=False, LoadLogs=True)
     except (RuntimeError, ValueError):
-        LoadNexusProcessed(Filename=filename, OutputWorkspace=output_workspace)
+        LoadNexusProcessed(Filename=file_descriptor, OutputWorkspace=output_workspace)
     Integration(InputWorkspace=output_workspace, OutputWorkspace=output_workspace)
     return mtd[output_workspace]
+
+
+def trim_calibration_table(input_workspace: InputTable, output_workspace: Optional[str] = None) -> TableWorkspace:
+    r"""
+    Discard trim the X and Z pixel coordinates, since we are only interested in the calibrated Y-coordinate
+
+    :param input_workspace:
+    :param output_workspace:
+
+    :return: handle to the trimmed table workspace
+    """
+    if output_workspace is None:
+        output_workspace = str(input_workspace)  # overwrite the input table
+
+    # Extract detector ID's and Y-coordinates from the input table
+    table = mtd[str(input_workspace)]
+    detector_ids = table.column(0)
+    y_coordinates = [v.Y() for v in table.column(1)]
+
+    # create the (empty) trimmed table
+    table_trimmed = CreateEmptyTableWorkspace(OutputWorkspace=output_workspace)
+    table_trimmed.addColumn(type='int', name='Detector ID')
+    table_trimmed.addColumn(type='double', name='Detector Y Coordinate')
+
+    # fill the rows of the trimmed table
+    for detector_id, y_coordinate in zip(detector_ids, y_coordinates):
+        table_trimmed.addRow([detector_id, y_coordinate])
+
+    return table_trimmed
 
 
 def calculate_peak_y_table(peak_table: InputTable,
@@ -181,6 +223,8 @@ def calibrate_tube(workspace: WorkspaceTypes,
     calibration_table, _ = tube.calibrate(workspace, tube_name, wire_positions(units='meters')[1: -1], peaks_form,
                                           fitPar=fit_par, outputPeak=True,
                                           parameters_table_group='ParametersTableGroup')
+    calibration_table = trim_calibration_table(calibration_table)  # discard X and Z coordinates
+
     # Additional workspaces
     # Table with shadow positions along the tube, in pixel units
     if output_peak_table != 'PeakTable':  # 'PeakTable' is output by tube.calibrate

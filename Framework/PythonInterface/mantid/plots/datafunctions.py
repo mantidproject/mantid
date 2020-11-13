@@ -391,25 +391,27 @@ def get_bin_indices(workspace):
         return indices
 
 
-def get_bins(workspace, wkspIndex, withDy=False):
+def get_bins(workspace, bin_index, withDy=False):
     """
     Extract all the bins for a spectrum
 
     :param workspace: a Workspace2D or an EventWorkspace
-    :param wkspIndex: workspace index
+    :param bin_index: the index of a bin
     :param withDy: if True, it will return the error in the "counts", otherwise None
 
     """
-    bins = get_bin_indices(workspace)
-    y_values = []
+    indices = get_bin_indices(workspace)
+    x_values, y_values = [], []
     dy = [] if withDy else None
-    for bin_index in bins:
-        y_values.append(workspace.readY(int(bin_index))[wkspIndex])
-        if withDy:
-            dy.append(workspace.readE(int(bin_index))[wkspIndex])
-
+    for row_index in indices:
+        y_data = workspace.readY(int(row_index))
+        if bin_index < len(y_data):
+            x_values.append(row_index)
+            y_values.append(y_data[bin_index])
+            if withDy:
+                dy.append(workspace.readE(int(row_index))[bin_index])
     dx = None
-    return bins, y_values, dy, dx
+    return x_values, y_values, dy, dx
 
 
 def get_md_data2d_bin_bounds(workspace, normalization, indices=None, transpose=False):
@@ -548,8 +550,7 @@ def _workspace_indices(y_bins, workspace):
 
 
 def _workspace_indices_maxpooling(y_bins, workspace):
-    from mantid.simpleapi import Integration
-    summed_spectra_workspace = Integration(workspace)
+    summed_spectra_workspace = _integrate_workspace(workspace)
     summed_spectra = summed_spectra_workspace.extractY()
     workspace_indices = []
     for y_range in pairwise(y_bins):
@@ -561,6 +562,19 @@ def _workspace_indices_maxpooling(y_bins, workspace):
         except IndexError:
             continue
     return workspace_indices
+
+
+def _integrate_workspace(workspace):
+    from mantid.api import AlgorithmManager
+    integration = AlgorithmManager.createUnmanaged("Integration")
+    integration.initialize()
+    integration.setAlwaysStoreInADS(False)
+    integration.setLogging(False)
+    integration.setChild(True)
+    integration.setProperty("InputWorkspace", workspace)
+    integration.setProperty("OutputWorkspace", "__dummy")
+    integration.execute()
+    return integration.getProperty("OutputWorkspace").value
 
 
 def interpolate_y_data(workspace, x, y, normalize_by_bin_width, spectrum_info=None, maxpooling=False):
