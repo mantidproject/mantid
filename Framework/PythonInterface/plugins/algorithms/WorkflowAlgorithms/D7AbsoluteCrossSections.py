@@ -274,7 +274,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 tmp_names.append(tmp_name)
                 CreateWorkspace(DataX=dataX, DataY=dataY[component], dataE=dataE,
                                 Nspec=mtd[ws][entry_no].getNumberHistograms(),
-                                ParentWorkspace=mtd[ws][component],
+                                ParentWorkspace=mtd[ws][entry_no],
                                 OutputWorkspace=tmp_name)
         output_name = ws + '_separated_cs'
         GroupWorkspaces(tmp_names, OutputWorkspace=output_name)
