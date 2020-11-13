@@ -93,7 +93,7 @@ More doc will be migrated from MantidPlot as new features being consolidated.
 Python Control
 --------------
 Many aspects of the instrument view can be controlled from Python.
-To use the Python interface for InstrumentViewer, use the following code to import necessary library
+To use the Python interface for InstrumentViewer, use the following code to import the necessary libraries
 
 .. code-block:: python
 
