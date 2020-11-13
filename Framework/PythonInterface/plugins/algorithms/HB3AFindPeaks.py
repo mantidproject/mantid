@@ -10,7 +10,7 @@ from mantid.simpleapi import DeleteWorkspace, FindPeaksMD, FindUBUsingIndexedPea
     FindUBUsingLatticeParameters, IndexPeaks, ShowPossibleCells, SelectCellOfType, OptimizeLatticeForCellType
 
 
-class SCDFindPeaks(PythonAlgorithm):
+class HB3AFindPeaks(PythonAlgorithm):
 
     def category(self):
         return "Crystal\\Corrections"
@@ -19,7 +19,7 @@ class SCDFindPeaks(PythonAlgorithm):
         return ["FindPeaksMD"]
 
     def name(self):
-        return "SCDFindPeaks"
+        return "HB3AFindPeaks"
 
     def summary(self):
         return 'Given a MD workspace in Q-space, calculates the UB matrix and finds peaks; the UB matrix can be ' \
@@ -131,4 +131,4 @@ class SCDFindPeaks(PythonAlgorithm):
         DeleteWorkspace(peak_ws)
 
 
-AlgorithmFactory.subscribe(SCDFindPeaks)
+AlgorithmFactory.subscribe(HB3AFindPeaks)
