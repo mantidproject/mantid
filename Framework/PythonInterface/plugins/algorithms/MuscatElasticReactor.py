@@ -29,11 +29,11 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
     _save = False
     _sigc = None
     _sigi = None
-    _sigt = None
+    _sigs = None
     _siga_in = None
     _siga = None
     _sigss = None
-    _sigss = None
+    _sigt = None
     _sofq = None
     _vector = None
     _vkinc = None
@@ -95,8 +95,8 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                              doc='Switch Save result to nxs file Off/On')
  
     def PyExec(self):
-        import pydevd_pycharm
-        pydevd_pycharm.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+        #import pydevd_pycharm
+        #pydevd_pycharm.settrace('localhost', stdoutToServer=True, stderrToServer=True)
         np.random.seed(1234)
         # Set up progress reporting
         prog = Progress(self, 0.0, 1.0, 2)
@@ -267,7 +267,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
             SQ = self._sofq_inter(Q)
             AT2 = math.exp(-self._vmu*dl)                 #attenuation along path
             # DH this is for the final path section (l_out in the Mancinelli paper)
-            weight = self._B9*AT2*SQ*self._sigt/four_pi     #weighting of scattering
+            weight = self._B9*AT2*SQ*self._sigs/four_pi     #weighting of scattering
             self._total[ne] += weight
             if ne == 1:
                 self._B1 = self._B1*AT2                #b1=atten to 1st scatt
@@ -327,13 +327,13 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         # Sample cross section
         self._sigc = sam_material.cohScatterXSection()
         self._sigi = sam_material.incohScatterXSection()
-        self._sigt = sam_material.totalScatterXSection()
-        self._siga_in = sam_material.absorbXSection()
+        self._sigs = sam_material.totalScatterXSection()
+        self._siga_in = sam_material.absorbXSection(self._wave)
         self._siga = self._siga_in
 
         self._sigss = self._sofq*self._sigc + self._sigi    #q_dependent total scatt X-sect
         self._sigss = np.log(self._sigss)                   #interpolation later on
-        self._sofq = np.log(self._sofq/self._sigt)          #S(Q) normalised
+        self._sofq = np.log(self._sofq/self._sigs)          #S(Q) normalised
 
     def _calc_angles(self):
         Qmax = 4.0*math.pi/self._wave
@@ -410,8 +410,8 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                 B =(-3*self._sigss[IVKM] + 4*self._sigss[IVKM+1] - self._sigss[IVKM+2])/2
                 C = self._sigss[IVKM]
                 sig_scat = math.exp(A*U*U + B*U + C)
-        sig_total = sig_scat + self._siga            #new total x-sec
-        self._vmu = self._sample_number_density*sig_total                #new trans coeff
+        self._sigt = sig_scat + self._siga            #new total x-sec
+        self._vmu = self._sample_number_density*self._sigt                #new trans coeff
         self._vmfp = 1.00/self._vmu               #new mean free path
 
     def _sofq_inter(self, Q):                #interpolate S(Q)
@@ -439,7 +439,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         else:
             SQ = self._sofq_inter(QQ)                     #find S(Q) =SQ
             self._QSS += QQ*SQ
-            self._B9 = self._B9*self._sigt*SQ*QQ
+            self._B9 = self._B9*self._sigs*SQ*QQ
             FI = random.random()*6.28318531     #random scattering angle
             # FI is scattering angle in the plane perpendicular to original trajectory
             B3 = math.sqrt(1. - CosT*CosT)

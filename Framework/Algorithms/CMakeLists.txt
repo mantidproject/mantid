@@ -208,6 +208,7 @@ set(SRC_FILES
     src/MostLikelyMean.cpp
     src/Multiply.cpp
     src/MultiplyRange.cpp
+    src/MuscatElastic.cpp
     src/NormaliseByCurrent.cpp
     src/NormaliseByDetector.cpp
     src/NormaliseToMonitor.cpp
@@ -540,6 +541,7 @@ set(INC_FILES
     inc/MantidAlgorithms/MostLikelyMean.h
     inc/MantidAlgorithms/Multiply.h
     inc/MantidAlgorithms/MultiplyRange.h
+    inc/MantidAlgorithms/MuscatElastic.h
     inc/MantidAlgorithms/NormaliseByCurrent.h
     inc/MantidAlgorithms/NormaliseByDetector.h
     inc/MantidAlgorithms/NormaliseToMonitor.h
