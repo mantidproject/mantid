@@ -16,7 +16,7 @@ class HB3AFindPeaks(PythonAlgorithm):
         return "Crystal\\Corrections"
 
     def seeAlso(self):
-        return ["FindPeaksMD"]
+        return ["FindPeaksMD", "OptimizeLatticeForCellType"]
 
     def name(self):
         return "HB3AFindPeaks"
@@ -52,17 +52,17 @@ class HB3AFindPeaks(PythonAlgorithm):
         self.declareProperty("UseLattice", False, direction=Direction.Input,
                              doc="Whether to refine UB matrix based on given lattice parameters")
 
-        self.declareProperty("a", "", doc="The a value of the lattice")
-        self.declareProperty("b", "", doc="The b value of the lattice")
-        self.declareProperty("c", "", doc="The c value of the lattice")
-        self.declareProperty("alpha", "", doc="The alpha value of the lattice")
-        self.declareProperty("beta", "", doc="The beta value of the lattice")
-        self.declareProperty("gamma", "", doc="The gamma value of the lattice")
+        self.declareProperty("LatticeA", "", doc="The a value of the lattice")
+        self.declareProperty("LatticeB", "", doc="The b value of the lattice")
+        self.declareProperty("LatticeC", "", doc="The c value of the lattice")
+        self.declareProperty("LatticeAlpha", "", doc="The alpha value of the lattice")
+        self.declareProperty("LatticeBeta", "", doc="The beta value of the lattice")
+        self.declareProperty("LatticeGamma", "", doc="The gamma value of the lattice")
 
         self.declareProperty(IPeaksWorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output,
                                                      optional=PropertyMode.Mandatory), doc="Output peaks workspace")
 
-        lattice_params = ["a", "b", "c", "alpha", "beta", "gamma"]
+        lattice_params = ["LatticeA", "LatticeB", "LatticeC", "LatticeAlpha", "LatticeBeta", "LatticeGamma"]
         for param in lattice_params:
             self.setPropertyGroup(param, "Lattice Settings")
             self.setPropertySettings(param, EnabledWhenProperty("UseLattice", PropertyCriterion.IsNotDefault))
@@ -70,14 +70,14 @@ class HB3AFindPeaks(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        lattice_params = ["a", "b", "c", "alpha", "beta", "gamma"]
+        lattice_params = ["LatticeA", "LatticeB", "LatticeC", "LatticeAlpha", "LatticeBeta", "LatticeGamma"]
         set_count = 0
         for param in lattice_params:
             prop = self.getProperty(param)
             if not prop.isDefault:
                 if prop.value <= 0.0:
                     issues[param] = "Lattice parameter must be greater than 0"
-                if param == "alpha" or param == "beta" or param == "gamma":
+                if param == "LatticeAlpha" or param == "LatticeBeta" or param == "LatticeGamma":
                     if prop.value < 5.0 or prop.value > 175.0:
                         issues[param] = "Lattice parameter must have an angle between 5 and 175."
                 set_count += 1
@@ -98,12 +98,12 @@ class HB3AFindPeaks(PythonAlgorithm):
 
         lattice = self.getProperty("UseLattice").value
         if lattice:
-            a = self.getProperty("a").value
-            b = self.getProperty("b").value
-            c = self.getProperty("c").value
-            alpha = self.getProperty("alpha").value
-            beta = self.getProperty("beta").value
-            gamma = self.getProperty("gamma").value
+            a = self.getProperty("LatticeA").value
+            b = self.getProperty("LatticeB").value
+            c = self.getProperty("LatticeC").value
+            alpha = self.getProperty("LatticeAlpha").value
+            beta = self.getProperty("LatticeBeta").value
+            gamma = self.getProperty("LatticeGamma").value
 
         peak_ws = self.getProperty("OutputWorkspace")
 
@@ -120,6 +120,7 @@ class HB3AFindPeaks(PythonAlgorithm):
         if lattice:
             FindUBUsingLatticeParameters(PeaksWorkspace=peak_ws, a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
         else:
+            # Using IndexedPeaks seems to work in some cases where FindUBUsingFFT fails sometimes..?
             FindUBUsingIndexedPeaks(PeaksWorkspace=peak_ws)
 
         ShowPossibleCells(PeaksWorkspace=peak_ws)
