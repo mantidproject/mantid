@@ -280,39 +280,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         GroupWorkspaces(tmp_names, OutputWorkspace=output_name)
         return output_name
 
-    def _conjoin_cross_sections(self, ws):
-        """Conjoins the component workspaces coming from a theta scan."""
-        components = [[], []]
-        componentNames = ['Incoherent', 'Coherent', 'Magnetic']
-        user_method = self.getPropertyValue('CrossSectionSeparationMethod')
-        if ( mtd[ws].getNumberOfEntries() == 2 and user_method == 'Uniaxial'
-             or mtd[ws].getNumberOfEntries() == 3 and user_method != 'Uniaxial'):
-            return ws
-
-        if user_method in ['10p', 'XYZ']:
-            components.append([])
-        for entry in mtd[ws]:
-            entryName = entry.name()
-            ConvertToPointData(InputWorkspace=entry, OutputWorkspace=entry)
-            for component_no, componentName in enumerate(componentNames):
-                if componentName in entryName:
-                    components[component_no].append(entryName)
-
-        x_axis = NumericAxis.create(len(components[0]))
-        for index in range(len(components[0])):
-            x_axis.setValue(index, index)
-        x_axis.setUnit("Label").setLabel('Scan step', '')
-
-        ws_names = []
-        for component_no, compList in enumerate(components):
-            ws_name = '{}_component'.format(componentNames[component_no])
-            ws_names.append(ws_name)
-            ConjoinXRuns(InputWorkspaces=compList, OutputWorkspace=ws_name)
-            mtd[ws_name].replaceAxis(0, x_axis)
-        output_name = '{}_conjoined_cross_sections'.format(ws)
-        GroupWorkspaces(ws_names, OutputWorkspace=output_name)
-        return output_name
-
     def _detector_efficiency_correction(self, cross_section_ws):
         """Calculates detector efficiency using either vanadium data, incoherent,
         or paramagnetic scattering cross-sections."""
