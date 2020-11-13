@@ -4,20 +4,16 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.kernel import ConfigService
 from mantid.simpleapi import HB2AReduce
 import os
+import tempfile
 import unittest
 import numpy as np
 
 
 class HB2AReduceTest(unittest.TestCase):
     def setUp(self):
-        self.config = ConfigService.Instance()
-        self._default_save_directory = self.config.getString("defaultsave.directory")
-
-    def tearDown(self):
-        self.config.setString("defaultsave.directory", self._default_save_directory)
+        self._default_save_directory = tempfile.gettempdir()
 
     def test_IndividualDetectors(self):
         HB2AReduce_ws = HB2AReduce('HB2A_exp0666_scan0024.dat',
