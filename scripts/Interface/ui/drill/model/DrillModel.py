@@ -492,7 +492,8 @@ class DrillModel(QObject):
         """
         for sample in samples:
             for group in self.groups:
-                self.groups[group].discard(sample)
+                if sample in self.groups[group]:
+                    self.groups[group].remove(sample)
                 if ((group in self.masterSamples)
                         and (self.masterSamples[group] == sample)):
                     del self.masterSamples[group]
