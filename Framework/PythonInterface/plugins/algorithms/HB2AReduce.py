@@ -160,6 +160,7 @@ class HB2AReduce(PythonAlgorithm):
     def PyExec(self):
         scale = self.getProperty("Scale").value
         filenames = self.getProperty("Filename").value
+        outputfn = str(self.getProperty("OutputWorkspace").value)
 
         if not filenames:
             ipts = self.getProperty("IPTS").value
@@ -287,7 +288,7 @@ class HB2AReduce(PythonAlgorithm):
                 "XYE": 'dat',
                 "GSAS": 'gss',
             }[self.getProperty('OutputFormat').value]
-            outputbase = os.path.join(outputdir, self.getProperty("OutputWorkspace").value)
+            outputbase = os.path.join(outputdir, outputfn)
             _outputfunc(
                 InputWorkspace=outWS,
                 Filename=f"{outputbase}.{_outputext}",
