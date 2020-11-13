@@ -131,9 +131,8 @@ class HB2AReduce(PythonAlgorithm):
         #  others   N       Y
         if self.getProperty("SaveData").value & (self.getProperty('OutputFormat').value == "GSAS"):
             _defx = self.getProperty("DefX").value
-            if not _defx:  # DefX is given, check if defx == 2theta
-                if _defx.lower() != "2theta":
-                    issues['OutputFormat'] = f"Find incorrect defx in given options: {_defx}"
+            if _defx != "" & _defx.lower() != "2theta":  # DefX is given, check if defx == 2theta
+                issues['OutputFormat'] = f"Find incorrect defx in given options: {_defx}"
             else:  # DefX is not given, need to query from file
                 filenames = self.getProperty("Filename").value
                 if not filenames:
