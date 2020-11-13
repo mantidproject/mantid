@@ -105,14 +105,17 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedor
   if ( "${UNIX_CODENAME}" MATCHES "Santiago" )
     set ( WRAPPER_PREFIX "scl enable mantidlibs34 \"" )
     set ( WRAPPER_POSTFIX "\"" )
-  elseif ("${UNIX_DIST}" MATCHES "^Fedora")
-    # The instrument view doesn't work with the wayland compositor
-    # Override it to use X11 https://doc.qt.io/qt-5/embedded-linux.html#xcb
-    set ( WRAPPER_PREFIX "QT_QPA_PLATFORM=xcb " )
-    set ( WRAPPER_POSTFIX "" )
   else()
     set ( WRAPPER_PREFIX "" )
     set ( WRAPPER_POSTFIX "" )
+  endif()
+
+  if ("${UNIX_DIST}" MATCHES "^Fedora")
+    # The instrument view doesn't work with the wayland compositor
+    # Override it to use X11 https://doc.qt.io/qt-5/embedded-linux.html#xcb
+    set ( QT_QPA "QT_QPA_PLATFORM=xcb " )
+  else()
+    set ( QT_QPA "" )
   endif()
 
   if ( NOT MPI_BUILD )
