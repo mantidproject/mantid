@@ -23,7 +23,24 @@ static const std::vector<std::string> calibrationTableColumnNames {"ComponentNam
 static const std::vector<std::string> calibrationTableColumnTypes {"str", "double", "double",
                                                          "double", "double", "double",
                                                          "double", "double"};
+
+class MANTID_ALGORITHMS_DLL CalibrationTableHandler {
+public:
+    CalibrationTableHandler();
+    void setCalibrationTable(DataObjects::TableWorkspace_sptr calibws);
+    std::vector<std::string> getComponentNames();
+    void load(const std::string &filename);
+    void saveCompomentDatabase(const std::string &filename);
+    void saveCalibrationTable(const std::string &filename);
+    static inline std::string corelliComponentDatabaseName(const std::string &componentname, const std::string &directory);
+    static inline std::string corelliCalibrationDatabaseName(const std::string &datestamp, const std::string &directory);
+private:
+    DataObjects::TableWorkspace_sptr mCalibWS;
+};
+
 }
+
+
 
 /** CorelliPowderCalibrationDatabase: blablabla TODO
  */

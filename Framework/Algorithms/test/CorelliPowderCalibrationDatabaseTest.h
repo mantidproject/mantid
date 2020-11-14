@@ -135,7 +135,9 @@ public:
 
       // Create workspaces
       EventWorkspace_sptr input_ws = createTestEventWorkspace();
-      TableWorkspace_sptr calib_ws = createTestCalibrationTableWorkspace();
+      // Name of the output calibration workspace
+      std::string outwsname("CorelliPowderCalibrationDatabaseTest_TableWS");
+      TableWorkspace_sptr calib_ws = createTestCalibrationTableWorkspace(outwsname);
       TS_ASSERT(input_ws);
       TS_ASSERT(calib_ws);
 
@@ -155,9 +157,28 @@ public:
       // Clean memory
   }
 
+  /**
+   * @brief Test algorithm to convert datetime string to date stamp
+   */
   void test_timestamp_conversion() {
       std::string yyyymmdd = CorelliPowderCalibrationDatabase::convertTimeStamp("2018-02-20T12:57:17");
       TS_ASSERT_EQUALS(yyyymmdd, "20180220");
+  }
+
+  void test_calibration_workspace_handler() {
+
+      std::string outwsname("CorelliPowderCalibrationDatabaseTest_TableWS2");
+      TableWorkspace_sptr calib_ws = createTestCalibrationTableWorkspace(outwsname);
+
+      CorelliCalibration::CalibrationTableHandler calib_handler = CorelliCalibration::CalibrationTableHandler();
+      calib_handler.setCalibrationTable(calib_ws);
+
+      // name
+      std::vector<std::string> compNames = calib_handler.getComponentNames();
+      TS_ASSERT_EQUALS(compNames.size(), 3);
+
+      calib_handler.saveCompomentDatabase(compNames[0]);
+
   }
 
 private:
@@ -189,9 +210,12 @@ private:
       return ws;
   }
 
-  TableWorkspace_sptr createTestCalibrationTableWorkspace() {
-      // Name of the output calibration workspace
-      std::string outWSName("CorelliPowderCalibrationDatabaseTest_TableWS");
+  /**
+   * @brief Create Test Calibration TableWorkspace
+   * @param outWSName
+   * @return
+   */
+  TableWorkspace_sptr createTestCalibrationTableWorkspace(std::string outWSName) {
 
       ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
       AnalysisDataService::Instance().addOrReplace(outWSName, itablews);
@@ -219,7 +243,7 @@ private:
 
   TableWorkspace_sptr createIncorrectTestCalibrationTableWorkspace() {
       // Name of the output calibration workspace
-      std::string outWSName("CorelliPowderCalibrationDatabaseTest_TableWS");
+      std::string outWSName("CorelliPowderCalibrationDatabaseTest_IncorrectTableWS");
 
       ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
       AnalysisDataService::Instance().addOrReplace(outWSName, itablews);

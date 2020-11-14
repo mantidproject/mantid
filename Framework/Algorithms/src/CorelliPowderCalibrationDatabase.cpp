@@ -34,6 +34,46 @@ using namespace Geometry;
 using namespace DataObjects;
 using Types::Core::DateAndTime;
 
+
+namespace CorelliCalibration {
+
+CalibrationTableHandler::CalibrationTableHandler() {
+    mCalibWS = nullptr;
+}
+
+void CalibrationTableHandler::setCalibrationTable(DataObjects::TableWorkspace_sptr calibws) {
+    mCalibWS = calibws;
+}
+
+std::vector<std::string> CalibrationTableHandler::getComponentNames() {
+    std::vector<std::string> names {"source", "sample", "bank1"};
+    return names;
+}
+
+void CalibrationTableHandler::load(const std::string &filename){
+    std::cout << "Load from " << filename << "\n";
+}
+
+void CalibrationTableHandler::saveCompomentDatabase(const std::string &filename) {
+    std::cout << "Save to " << filename << "\n";
+}
+
+void CalibrationTableHandler::saveCalibrationTable(const std::string &filename) {
+    std::cout << "Save to " << filename << "\n";
+}
+
+std::string CalibrationTableHandler::corelliComponentDatabaseName(const std::string &componentname, const std::string &directory) {
+    std::string filename = directory + "/" + componentname + ".csv";
+    return filename;
+}
+
+std::string CalibrationTableHandler::corelliCalibrationDatabaseName(const std::string &datestamp, const std::string &directory) {
+    std::string filename = directory + "/" + datestamp + ".csv";
+    return filename;
+}
+}
+
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CorelliPowderCalibrationDatabase)
 
