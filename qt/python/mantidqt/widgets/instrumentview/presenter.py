@@ -31,8 +31,6 @@ class InstrumentViewPresenter(ObservingPresenter):
         else:
             self.ads_observer = WorkspaceDisplayADSObserver(self, observe_replace=False)
 
-        print(f'[DEBUG] InstrumnetViewPresenter: called....')
-
         # TODO FIXME - this may not be a good design.  It violates the OO principles
         # Update the instrument view manager
         InstrumentViewManager.register(self, self.ws_name)
@@ -94,7 +92,6 @@ class InstrumentViewManager:
     def register(instrument_view_obj, ws_name):
         InstrumentViewManager.last_view = instrument_view_obj
         InstrumentViewManager.view_dict[ws_name] = instrument_view_obj
-        print(f'[DEBUG] Add workspace {ws_name} instrument view to manager dictionary')
 
     @staticmethod
     def get_instrument_view(ws_name):

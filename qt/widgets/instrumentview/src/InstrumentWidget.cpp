@@ -407,13 +407,9 @@ InstrumentWidgetRenderTab *InstrumentWidget::getRenderTab(const Tab tab) const {
   InstrumentWidgetTab *widget_tab = getTab(tab);
 
   // Cast
-  if (widget_tab != nullptr) {
-    InstrumentWidgetRenderTab *render_tab =
+  InstrumentWidgetRenderTab *render_tab =
         dynamic_cast<InstrumentWidgetRenderTab *>(widget_tab);
-    return render_tab;
-  }
-
-  return nullptr;
+  return render_tab;
 }
 
 /**
@@ -426,13 +422,8 @@ InstrumentWidgetPickTab *InstrumentWidget::getPickTab(const Tab tab) const {
   InstrumentWidgetTab *tab_widget = getTab(tab);
 
   // Cast
-  if (tab_widget != nullptr) {
-    InstrumentWidgetPickTab *pick_tab =
-        dynamic_cast<InstrumentWidgetPickTab *>(tab_widget);
-    return pick_tab;
-  }
-
-  return nullptr;
+  InstrumentWidgetPickTab *pick_tab = dynamic_cast<InstrumentWidgetPickTab *>(tab_widget);
+  return pick_tab;
 }
 
 /**
@@ -939,7 +930,6 @@ void InstrumentWidget::setIntegrationRange(double xmin, double xmax) {
  * python.
  */
 void InstrumentWidget::setBinRange(double xmin, double xmax) {
-  std::cout << "[DEBUG] set bin range: " << xmin << ", " << xmax << "\n";
   if (m_isIntegrable) {
     m_xIntegration->setRange(xmin, xmax);
   }
