@@ -63,6 +63,12 @@ public:
 
   static std::string convertTimeStamp(std::string run_start_time);
 
+  /// Check whether a given file does exist
+  static inline bool isFileExist(const std::string &filepath);
+
+  /// Join two string for a new path
+  static inline std::string joinPath(const std::string directory, const std::string basename);
+
 private:
   std::map<std::string, std::string> validateInputs() override;
   void init() override;

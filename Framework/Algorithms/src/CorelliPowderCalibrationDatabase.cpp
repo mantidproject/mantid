@@ -21,7 +21,6 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <filesystem>
 #include <sstream>
 #include <string>
 
@@ -210,7 +209,6 @@ void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles() {
       CorelliCalibration::CalibrationTableHandler::corelliComponentDatabaseName(
           component, "/tmp");
 
-  std::cout << std::filesystem::exists(filename) << "\n";
 }
 
 //-----------------------------------------------------------------------------
@@ -240,6 +238,27 @@ CorelliPowderCalibrationDatabase::convertTimeStamp(std::string run_start_time) {
 
   return datestamp;
 }
+
+//-----------------------------------------------------------------------------
+bool
+CorelliPowderCalibrationDatabase::isFileExist(const std::string &filepath) {
+
+    // TODO - replace by std::filesystem::exists(filename) until C++17 is properly supported
+    return false;
+}
+
+std::string
+CorelliPowderCalibrationDatabase::joinPath(const std::string directory, const std::string basename) {
+    std::string dirsep{"/"};
+#ifdef _WIN32
+    dirsep = "\\";
+#endif
+    std::string fullpath = directory + dirsep + basename;
+
+    return fullpath;
+}
+
+
 
 } // namespace Algorithms
 } // namespace Mantid
