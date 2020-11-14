@@ -21,9 +21,9 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <sstream>
 #include <string>
-#include <boost/filesystem/operations.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -209,7 +209,6 @@ void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles() {
   std::string filename =
       CorelliCalibration::CalibrationTableHandler::corelliComponentDatabaseName(
           component, "/tmp");
-
 }
 
 //-----------------------------------------------------------------------------
@@ -241,25 +240,25 @@ CorelliPowderCalibrationDatabase::convertTimeStamp(std::string run_start_time) {
 }
 
 //-----------------------------------------------------------------------------
-bool
-CorelliPowderCalibrationDatabase::isFileExist(const std::string &filepath) {
+bool CorelliPowderCalibrationDatabase::isFileExist(
+    const std::string &filepath) {
 
-    // TODO - replace by std::filesystem::exists(filename) until C++17 is properly supported
-    return boost::filesystem::exists(filepath);
+  // TODO - replace by std::filesystem::exists(filename) until C++17 is properly
+  // supported
+  return boost::filesystem::exists(filepath);
 }
 
 std::string
-CorelliPowderCalibrationDatabase::joinPath(const std::string directory, const std::string basename) {
-    std::string dirsep{"/"};
+CorelliPowderCalibrationDatabase::joinPath(const std::string directory,
+                                           const std::string basename) {
+  std::string dirsep{"/"};
 #ifdef _WIN32
-    dirsep = "\\";
+  dirsep = "\\";
 #endif
-    std::string fullpath = directory + dirsep + basename;
+  std::string fullpath = directory + dirsep + basename;
 
-    return fullpath;
+  return fullpath;
 }
-
-
 
 } // namespace Algorithms
 } // namespace Mantid
