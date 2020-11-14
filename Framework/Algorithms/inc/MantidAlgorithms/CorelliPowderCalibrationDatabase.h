@@ -7,52 +7,58 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
-
 
 namespace Mantid {
 namespace Algorithms {
 
 namespace CorelliCalibration {
-static const std::vector<std::string> calibrationTableColumnNames {"ComponentName", "Xposition", "Yposition",
-                                                         "Zposition", "XdirectionCosine", "YdirectionCosine",
-                                                         "ZdirectionCosine", "RotationAngle"};
-static const std::vector<std::string> calibrationTableColumnTypes {"str", "double", "double",
-                                                         "double", "double", "double",
-                                                         "double", "double"};
+static const std::vector<std::string> calibrationTableColumnNames{
+    "ComponentName",    "Xposition",        "Yposition",
+    "Zposition",        "XdirectionCosine", "YdirectionCosine",
+    "ZdirectionCosine", "RotationAngle"};
+static const std::vector<std::string> calibrationTableColumnTypes{
+    "str",    "double", "double", "double",
+    "double", "double", "double", "double"};
 
 class MANTID_ALGORITHMS_DLL CalibrationTableHandler {
 public:
-    CalibrationTableHandler();
-    void setCalibrationTable(DataObjects::TableWorkspace_sptr calibws);
-    std::vector<std::string> getComponentNames();
-    void load(const std::string &filename);
-    void saveCompomentDatabase(const std::string &filename);
-    void saveCalibrationTable(const std::string &filename);
-    static inline std::string corelliComponentDatabaseName(const std::string &componentname, const std::string &directory);
-    static inline std::string corelliCalibrationDatabaseName(const std::string &datestamp, const std::string &directory);
+  CalibrationTableHandler();
+  void setCalibrationTable(DataObjects::TableWorkspace_sptr calibws);
+  std::vector<std::string> getComponentNames();
+  void load(const std::string &filename);
+  void saveCompomentDatabase(const std::string &filename);
+  void saveCalibrationTable(const std::string &filename);
+  static inline std::string
+  corelliComponentDatabaseName(const std::string &componentname,
+                               const std::string &directory);
+  static inline std::string
+  corelliCalibrationDatabaseName(const std::string &datestamp,
+                                 const std::string &directory);
+
 private:
-    DataObjects::TableWorkspace_sptr mCalibWS;
+  DataObjects::TableWorkspace_sptr mCalibWS;
 };
 
-}
-
-
+} // namespace CorelliCalibration
 
 /** CorelliPowderCalibrationDatabase: blablabla TODO
  */
-class MANTID_ALGORITHMS_DLL CorelliPowderCalibrationDatabase: public API::Algorithm {
+class MANTID_ALGORITHMS_DLL CorelliPowderCalibrationDatabase
+    : public API::Algorithm {
 public:
-  const std::string name() const override { return "CorelliPowderCalibrationDatabase"; };
+  const std::string name() const override {
+    return "CorelliPowderCalibrationDatabase";
+  };
   int version() const override { return 1; };
   const std::string category() const override {
     return "Diffraction\\Calibration;Events";
   };
   const std::string summary() const override {
-    return ".... ....";  // TODO
+    return ".... ...."; // TODO
   };
 
   static std::string convertTimeStamp(std::string run_start_time);
@@ -65,12 +71,10 @@ private:
   /// append the newly calibration to each component csv file
   void updateComponentDatabaseFiles();
 
-
   /// Input workspace
   API::MatrixWorkspace_const_sptr inputWS;
   DataObjects::TableWorkspace_const_sptr inputCalibrationTableWS;
   DataObjects::TableWorkspace_sptr outputWS;
-
 };
 
 } // namespace Algorithms

@@ -10,15 +10,14 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/CorelliPowderCalibrationDatabase.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/ITableWorkspace.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidAPI/WorkspaceFactory.h"
-
 
 using Mantid::Algorithms::CorelliPowderCalibrationDatabase;
 using namespace Mantid::API;
@@ -35,7 +34,9 @@ public:
   static CorelliPowderCalibrationDatabaseTest *createSuite() {
     return new CorelliPowderCalibrationDatabaseTest();
   }
-  static void destroySuite(CorelliPowderCalibrationDatabaseTest *suite) { delete suite; }
+  static void destroySuite(CorelliPowderCalibrationDatabaseTest *suite) {
+    delete suite;
+  }
 
   void test_Init() {
     CorelliPowderCalibrationDatabase alg;
@@ -52,7 +53,6 @@ public:
     // std::string datestampe = alg.convertRunStartToDateStamp();
     // TS_ASSERT_
   }
-
 
   void template_test_exec() {
     // Name of the output workspace.
@@ -133,81 +133,85 @@ public:
 
   void test_exec() {
 
-      // Create workspaces
-      EventWorkspace_sptr input_ws = createTestEventWorkspace();
-      // Name of the output calibration workspace
-      std::string outwsname("CorelliPowderCalibrationDatabaseTest_TableWS");
-      TableWorkspace_sptr calib_ws = createTestCalibrationTableWorkspace(outwsname);
-      TS_ASSERT(input_ws);
-      TS_ASSERT(calib_ws);
+    // Create workspaces
+    EventWorkspace_sptr input_ws = createTestEventWorkspace();
+    // Name of the output calibration workspace
+    std::string outwsname("CorelliPowderCalibrationDatabaseTest_TableWS");
+    TableWorkspace_sptr calib_ws =
+        createTestCalibrationTableWorkspace(outwsname);
+    TS_ASSERT(input_ws);
+    TS_ASSERT(calib_ws);
 
-      // Init algorithm
-      CorelliPowderCalibrationDatabase alg;
-      TS_ASSERT_THROWS_NOTHING(alg.initialize());
+    // Init algorithm
+    CorelliPowderCalibrationDatabase alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
 
-      // Set up
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input_ws));
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputCalibrationPatchWorkspace", calib_ws));
-      TS_ASSERT_THROWS_NOTHING(alg.setProperty("DatabaseDirectory", "/tmp/"));
+    // Set up
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputCalibrationPatchWorkspace", calib_ws));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DatabaseDirectory", "/tmp/"));
 
-      // Execute
-      alg.execute();
-      TS_ASSERT(alg.isExecuted());
+    // Execute
+    alg.execute();
+    TS_ASSERT(alg.isExecuted());
 
-      // Clean memory
+    // Clean memory
   }
 
   /**
    * @brief Test algorithm to convert datetime string to date stamp
    */
   void test_timestamp_conversion() {
-      std::string yyyymmdd = CorelliPowderCalibrationDatabase::convertTimeStamp("2018-02-20T12:57:17");
-      TS_ASSERT_EQUALS(yyyymmdd, "20180220");
+    std::string yyyymmdd = CorelliPowderCalibrationDatabase::convertTimeStamp(
+        "2018-02-20T12:57:17");
+    TS_ASSERT_EQUALS(yyyymmdd, "20180220");
   }
 
   void test_calibration_workspace_handler() {
 
-      std::string outwsname("CorelliPowderCalibrationDatabaseTest_TableWS2");
-      TableWorkspace_sptr calib_ws = createTestCalibrationTableWorkspace(outwsname);
+    std::string outwsname("CorelliPowderCalibrationDatabaseTest_TableWS2");
+    TableWorkspace_sptr calib_ws =
+        createTestCalibrationTableWorkspace(outwsname);
 
-      CorelliCalibration::CalibrationTableHandler calib_handler = CorelliCalibration::CalibrationTableHandler();
-      calib_handler.setCalibrationTable(calib_ws);
+    CorelliCalibration::CalibrationTableHandler calib_handler =
+        CorelliCalibration::CalibrationTableHandler();
+    calib_handler.setCalibrationTable(calib_ws);
 
-      // name
-      std::vector<std::string> compNames = calib_handler.getComponentNames();
-      TS_ASSERT_EQUALS(compNames.size(), 3);
+    // name
+    std::vector<std::string> compNames = calib_handler.getComponentNames();
+    TS_ASSERT_EQUALS(compNames.size(), 3);
 
-      calib_handler.saveCompomentDatabase(compNames[0]);
-
+    calib_handler.saveCompomentDatabase(compNames[0]);
   }
 
 private:
-
   /**
    * @brief Create testing CORELLI event workspace
    * @return
    */
   EventWorkspace_sptr createTestEventWorkspace() {
-      // Name of the output workspace.
-      std::string outWSName("CorelliPowderCalibrationDatabaseTest_matrixWS");
+    // Name of the output workspace.
+    std::string outWSName("CorelliPowderCalibrationDatabaseTest_matrixWS");
 
-      IAlgorithm_sptr lei =
-          AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
-      lei->initialize();
-      lei->setPropertyValue("Filename", "CORELLI_Definition.xml");
-      lei->setPropertyValue("OutputWorkspace",
-                            "CorelliPowderCalibrationDatabaseTest_OutputWS");
-      lei->setPropertyValue("MakeEventWorkspace", "1");
-      lei->execute();
+    IAlgorithm_sptr lei =
+        AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
+    lei->initialize();
+    lei->setPropertyValue("Filename", "CORELLI_Definition.xml");
+    lei->setPropertyValue("OutputWorkspace",
+                          "CorelliPowderCalibrationDatabaseTest_OutputWS");
+    lei->setPropertyValue("MakeEventWorkspace", "1");
+    lei->execute();
 
-      EventWorkspace_sptr ws;
-      ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-          "CorelliPowderCalibrationDatabaseTest_OutputWS");
+    EventWorkspace_sptr ws;
+    ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
+        "CorelliPowderCalibrationDatabaseTest_OutputWS");
 
-      // Add property start_time
-      ws->mutableRun().addProperty<std::string>("start_time", "2018-02-20T12:57:17", "", true);
+    // Add property start_time
+    ws->mutableRun().addProperty<std::string>("start_time",
+                                              "2018-02-20T12:57:17", "", true);
 
-      return ws;
+    return ws;
   }
 
   /**
@@ -215,59 +219,65 @@ private:
    * @param outWSName
    * @return
    */
-  TableWorkspace_sptr createTestCalibrationTableWorkspace(std::string outWSName) {
+  TableWorkspace_sptr
+  createTestCalibrationTableWorkspace(std::string outWSName) {
 
-      ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
-      AnalysisDataService::Instance().addOrReplace(outWSName, itablews);
+    ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
+    AnalysisDataService::Instance().addOrReplace(outWSName, itablews);
 
-      TableWorkspace_sptr tablews = std::dynamic_pointer_cast<TableWorkspace>(itablews);
-      TS_ASSERT(tablews);
+    TableWorkspace_sptr tablews =
+        std::dynamic_pointer_cast<TableWorkspace>(itablews);
+    TS_ASSERT(tablews);
 
-      // Set up columns
-      for (size_t i = 0; i < CorelliCalibration::calibrationTableColumnNames.size(); ++i) {
-          std::string colname = CorelliCalibration::calibrationTableColumnNames[i];
-          std::string type = CorelliCalibration::calibrationTableColumnTypes[i];
-          tablews->addColumn(type, colname);
-      }
+    // Set up columns
+    for (size_t i = 0;
+         i < CorelliCalibration::calibrationTableColumnNames.size(); ++i) {
+      std::string colname = CorelliCalibration::calibrationTableColumnNames[i];
+      std::string type = CorelliCalibration::calibrationTableColumnTypes[i];
+      tablews->addColumn(type, colname);
+    }
 
-      // append rows
-      Mantid::API::TableRow sourceRow = tablews->appendRow();
-      sourceRow << "source" << 0. << 0. << -15.560 << 0. << 0. << 0. << 0.;
-      Mantid::API::TableRow sampleRow = tablews->appendRow();
-      sampleRow << "sample" << 0.0001 << -0.0002 << 0.003 << 0. << 0. << 0. << 0.;
-      Mantid::API::TableRow bank1Row = tablews->appendRow();
-      bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999 << 0.3424 << 5.67;
+    // append rows
+    Mantid::API::TableRow sourceRow = tablews->appendRow();
+    sourceRow << "source" << 0. << 0. << -15.560 << 0. << 0. << 0. << 0.;
+    Mantid::API::TableRow sampleRow = tablews->appendRow();
+    sampleRow << "sample" << 0.0001 << -0.0002 << 0.003 << 0. << 0. << 0. << 0.;
+    Mantid::API::TableRow bank1Row = tablews->appendRow();
+    bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999
+             << 0.3424 << 5.67;
 
-      return tablews;
+    return tablews;
   }
 
   TableWorkspace_sptr createIncorrectTestCalibrationTableWorkspace() {
-      // Name of the output calibration workspace
-      std::string outWSName("CorelliPowderCalibrationDatabaseTest_IncorrectTableWS");
+    // Name of the output calibration workspace
+    std::string outWSName(
+        "CorelliPowderCalibrationDatabaseTest_IncorrectTableWS");
 
-      ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
-      AnalysisDataService::Instance().addOrReplace(outWSName, itablews);
+    ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
+    AnalysisDataService::Instance().addOrReplace(outWSName, itablews);
 
-      TableWorkspace_sptr tablews = std::dynamic_pointer_cast<TableWorkspace>(itablews);
-      TS_ASSERT(tablews);
+    TableWorkspace_sptr tablews =
+        std::dynamic_pointer_cast<TableWorkspace>(itablews);
+    TS_ASSERT(tablews);
 
-      // Set up columns
-      for (size_t i = 0; i < CorelliCalibration::calibrationTableColumnNames.size(); ++i) {
-          std::string colname = CorelliCalibration::calibrationTableColumnNames[i];
-          std::string type = CorelliCalibration::calibrationTableColumnTypes[i];
-          tablews->addColumn(type, colname);
-      }
+    // Set up columns
+    for (size_t i = 0;
+         i < CorelliCalibration::calibrationTableColumnNames.size(); ++i) {
+      std::string colname = CorelliCalibration::calibrationTableColumnNames[i];
+      std::string type = CorelliCalibration::calibrationTableColumnTypes[i];
+      tablews->addColumn(type, colname);
+    }
 
-      // append rows
-      Mantid::API::TableRow sourceRow = tablews->appendRow();
-      sourceRow << "source" << 0. << 0. << -15.560 << 0. << 0. << 0. << 0.;
-      Mantid::API::TableRow sampleRow = tablews->appendRow();
-      sampleRow << "sample" << 0.0001 << -0.0002 << 0.003 << 0. << 0. << 0. << 0.;
-      Mantid::API::TableRow bank1Row = tablews->appendRow();
-      bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999 << 0.3424 << 5.67;
+    // append rows
+    Mantid::API::TableRow sourceRow = tablews->appendRow();
+    sourceRow << "source" << 0. << 0. << -15.560 << 0. << 0. << 0. << 0.;
+    Mantid::API::TableRow sampleRow = tablews->appendRow();
+    sampleRow << "sample" << 0.0001 << -0.0002 << 0.003 << 0. << 0. << 0. << 0.;
+    Mantid::API::TableRow bank1Row = tablews->appendRow();
+    bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999
+             << 0.3424 << 5.67;
 
-      return tablews;
+    return tablews;
   }
-
-
 };
