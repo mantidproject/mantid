@@ -179,3 +179,6 @@ To start the app outside ``MantidWorkbench``, use the following code snippet as 
   # if running as a standalone app, start the QApp
   if not within_mantid:
       sys.exit(app.exec_())
+
+NOTE: If the instrument view app is launched outside ``MantidWorkbench``, the user need to hit ``Reset View`` at least once to get the display widget renderes properly.
+This is a known issue and will be fixed in a future release.
