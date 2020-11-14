@@ -131,12 +131,17 @@ class pyInstrumentView:
 
 
 if __name__ == "__main__":
+    import sys
+    from mantidqt.gui_helper import get_qapplication
     from mantid.simpleapi import LoadEventNexus
 
-    nexus_path = (
-        "/SNS/EQSANS/shared/sans-backend/data/new/ornl/sans/hfir/gpsans/CG2_9177.nxs.h5"
-    )
+    app, within_mantid = get_qapplication()
+
+    nexus_path = ("/SNS/EQSANS/shared/sans-backend/data/new/ornl/sans/hfir/gpsans/CG2_9177.nxs.h5")
     ws = LoadEventNexus(Filename=nexus_path, NumberOfBins=10)
 
     myiv = pyInstrumentView(ws)
     myiv.show_view()
+
+    if not within_mantid:
+        sys.exit(app.exec_())
