@@ -23,6 +23,7 @@
 #include <boost/algorithm/string/split.hpp>
 #include <sstream>
 #include <string>
+#include <boost/filesystem/operations.hpp>
 
 namespace Mantid {
 namespace Algorithms {
@@ -244,7 +245,7 @@ bool
 CorelliPowderCalibrationDatabase::isFileExist(const std::string &filepath) {
 
     // TODO - replace by std::filesystem::exists(filename) until C++17 is properly supported
-    return false;
+    return boost::filesystem::exists(filepath);
 }
 
 std::string
