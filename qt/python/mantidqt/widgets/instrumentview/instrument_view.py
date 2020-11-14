@@ -73,6 +73,10 @@ class pyInstrumentView:
         return self.rendertab.setMaxValue(val, True)
 
     def set_intensity_range(self, minval, maxval):
+        """set the intensity
+        :param minval: minimum intensity
+        :param maxval: maximum intesnity
+        """
         self.set_intensity_min(minval)
         self.set_intensity_max(maxval)
 
