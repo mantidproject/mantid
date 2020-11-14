@@ -32,7 +32,7 @@ The control panel of the instrument view has four tabs: Render, Pick, Mask, and 
 
 Render Tab
 ----------
-The Render tab contains controls managing appearance of the instrument and the data on screen.
+The Render tab contains controls for managing the on-screen appearance of the instrument and collected data"```
 The top-most combo-box control allows the user to select the way the instrument is projected onto the screen.
 The default setting is "Full 3D" which gives a 3D view of the instrument in an orthogonal projection.
 The other options are "unwrapped views" projecting the instrument onto a curved surface and then unwrapping it onto the screen.
@@ -44,7 +44,7 @@ Right mouse click undoes the last zoom.
     :align: left
     :width: 635
 
-The next control is Axis View, visible only in the 3D mode, resets the view so that the instrument is fully visible and the specified axis is perpendicular to the screen.
+The next control is Axis View, visible only in the 3D mode, which resets the view so that the instrument is fully visible and the specified axis is perpendicular to the screen.
 
 The Display Settings button controls the appearance of the instrument in the view. 
 It's worth mentioning the "Use OpenGL" option. 
@@ -75,7 +75,7 @@ The text box below the tool bar show textual information about selected detector
     :align: left
     :width: 635
 
-More doc will be migrated from MantidPlot as new features being consolidated.
+Documentation will be updated as additional features are added.
 
 
 Draw Tab
@@ -93,7 +93,7 @@ More doc will be migrated from MantidPlot as new features being consolidated.
 Python Control
 --------------
 Many aspects of the instrument view can be controlled from Python.
-To use the Python interface for InstrumentViewer, use the following code to import necessary library
+To use the Python interface for InstrumentViewer, use the following code to import the necessary libraries
 
 .. code-block:: python
 
@@ -144,4 +144,3 @@ To elect the range for the data (intensity, color map legend), use
   myiv.set_intensity_min(1)
   myiv.set_intensity_max(1000)
   myiv.set_intensity_range(1, 1000)
-
