@@ -206,7 +206,9 @@ void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles() {
 
   std::string component = "sample";
 
-  std::string filename = CorelliCalibration::CalibrationTableHandler::corelliComponentDatabaseName(component, "/tmp");
+  std::string filename =
+      CorelliCalibration::CalibrationTableHandler::corelliComponentDatabaseName(
+          component, "/tmp");
 
   std::cout << std::filesystem::exists(filename) << "\n";
 }
