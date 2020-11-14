@@ -32,7 +32,7 @@ The control panel of the instrument view has four tabs: Render, Pick, Mask, and 
 
 Render Tab
 ----------
-The Render tab contains controls for managing the on-screen appearance of the instrument and collected data"```
+The Render tab contains controls for managing the on-screen appearance of the instrument and collected data.
 The top-most combo-box control allows the user to select the way the instrument is projected onto the screen.
 The default setting is "Full 3D" which gives a 3D view of the instrument in an orthogonal projection.
 The other options are "unwrapped views" projecting the instrument onto a curved surface and then unwrapping it onto the screen.
@@ -144,3 +144,38 @@ To elect the range for the data (intensity, color map legend), use
   myiv.set_intensity_min(1)
   myiv.set_intensity_max(1000)
   myiv.set_intensity_range(1, 1000)
+
+To start the app outside ``MantidWorkbench``, use the following code snippet as a starting point
+
+.. code-block:: python
+
+  import sys
+  from mantidqt.gui_helper import get_qapplication
+  from mantid.simpleapi import LoadEventNexus
+  from mantidqt.widgets.instrumentview.instrument_view import pyInstrumentView
+  from mantidqt.widgets.instrumentview.instrument_view import SurfaceType, TabName
+  # check if launched within Workbench, if not return a parent QApp for this widget
+  # to attach to
+  app, within_mantid = get_qapplication()
+  # prepare a valid workspace from any nexus file
+  nexus_path = '/SNS/EQSANS/shared/sans-backend/data/new/ornl/sans/hfir/gpsans/CG2_9177.nxs.h5'
+  ws = LoadEventNexus(Filename=nexus_path, NumberOfBins=10)
+  # setup the instrument view
+  myiv = pyInstrumentView(ws)
+  # to open the app
+  myiv.show_view()
+  # select tab
+  myiv.select_tab(TabName.Render)
+  # select projection (surface type)
+  myiv.select_surface_type(SurfaceType.Full3D)
+  # select axis
+  myiv.set_axis("Z-")
+  # select the range for the data (intensity, color map legend)
+  myiv.set_intensity_min(1)
+  myiv.set_intensity_max(1000)
+  myiv.set_intensity_range(1, 1000)
+  # select the integration range (time of flight)
+  myiv.set_x_range(1, 10000)
+  # if running as a standalone app, start the QApp
+  if not within_mantid:
+      sys.exit(app.exec_())
