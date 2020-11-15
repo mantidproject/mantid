@@ -18,6 +18,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include <boost/filesystem.hpp>
 
 using Mantid::Algorithms::CorelliPowderCalibrationDatabase;
 using namespace Mantid::API;
@@ -42,16 +43,6 @@ public:
     CorelliPowderCalibrationDatabase alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
-  }
-
-  // Test the method to create date stamp YYYYMMDD
-  void test_createDateStamp() {
-    // Create the algorithm
-    CorelliPowderCalibrationDatabase alg;
-
-    // Do the parsing
-    // std::string datestampe = alg.convertRunStartToDateStamp();
-    // TS_ASSERT_
   }
 
   void template_test_exec() {
@@ -159,6 +150,7 @@ public:
     // Clean memory
   }
 
+  //-----------------------------------------------------------------------------
   /**
    * @brief Test algorithm to convert datetime string to date stamp
    */
@@ -168,6 +160,18 @@ public:
     TS_ASSERT_EQUALS(yyyymmdd, "20180220");
   }
 
+
+  void test_file_io() {
+      // create directory
+      std::string test_dir{"TestCorelliPowderCalibrationX"};
+      boost::filesystem::create_directory(test_dir);
+      TS_ASSERT(boost::filesystem::is_directory(test_dir));
+
+      // clean
+      boost::filesystem::remove_all(test_dir);
+  }
+
+  //-----------------------------------------------------------------------------
   void test_calibration_workspace_handler() {
 
     std::string outwsname("CorelliPowderCalibrationDatabaseTest_TableWS2");
