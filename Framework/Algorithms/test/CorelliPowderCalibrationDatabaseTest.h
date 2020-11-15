@@ -160,15 +160,14 @@ public:
     TS_ASSERT_EQUALS(yyyymmdd, "20180220");
   }
 
-
   void test_file_io() {
-      // create directory
-      std::string test_dir{"TestCorelliPowderCalibrationX"};
-      boost::filesystem::create_directory(test_dir);
-      TS_ASSERT(boost::filesystem::is_directory(test_dir));
+    // create directory
+    std::string test_dir{"TestCorelliPowderCalibrationX"};
+    boost::filesystem::create_directory(test_dir);
+    TS_ASSERT(boost::filesystem::is_directory(test_dir));
 
-      // clean
-      boost::filesystem::remove_all(test_dir);
+    // clean
+    boost::filesystem::remove_all(test_dir);
   }
 
   //-----------------------------------------------------------------------------

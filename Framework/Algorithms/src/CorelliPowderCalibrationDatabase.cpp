@@ -21,8 +21,8 @@
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
-#include <boost/filesystem/operations.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>
 #include <sstream>
 #include <string>
 
@@ -261,17 +261,17 @@ CorelliPowderCalibrationDatabase::joinPath(const std::string directory,
   boost::filesystem::path file(basename);
   boost::filesystem::path fullpath = dir / file;
 
-/**
-#include <boost/filesystem.hpp>
+  /**
+  #include <boost/filesystem.hpp>
 
-namespace fs = boost::filesystem;
+  namespace fs = boost::filesystem;
 
-int main ()
-{
-    fs::path dir ("/tmp");
-    fs::path file ("foo.txt");
-    fs::path full_path = dir / file;
-  */
+  int main ()
+  {
+      fs::path dir ("/tmp");
+      fs::path file ("foo.txt");
+      fs::path full_path = dir / file;
+    */
 
   return fullpath.string();
 }
