@@ -404,7 +404,8 @@ class DrillView(QMainWindow):
             self.rowDeleted.emit(row)
             self.setWindowModified(True)
 
-    def labelRowsInGroup(self, groupName, rows, masterRow):
+    def labelRowsInGroup(self, groupName, rows, masterRow, toolTip=None,
+                         masterToolTip=None):
         """
         Change the row label to contain the name of the group and a number.
 
@@ -415,8 +416,10 @@ class DrillView(QMainWindow):
         rowName = 1
         for row in rows:
             bold = (row == masterRow)
+            _toolTip = masterToolTip if row == masterRow else toolTip
             if groupName:
-                self.table.setRowLabel(row, groupName + str(rowName), bold)
+                self.table.setRowLabel(row, groupName + str(rowName), bold,
+                                       _toolTip)
             else:
                 self.table.delRowLabel(row)
             rowName += 1

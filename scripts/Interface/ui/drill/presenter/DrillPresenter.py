@@ -93,7 +93,10 @@ class DrillPresenter:
             rows (list(int)): row indexes
         """
         group = self.model.groupSamples(rows)
-        self.view.labelRowsInGroup(group, rows, None)
+        self.view.labelRowsInGroup(group, rows, None,
+                                   "This row belongs to the sample group {}"
+                                   .format(group),
+                                   None)
 
     def onUngroupRequested(self, rows):
         """
@@ -109,7 +112,9 @@ class DrillPresenter:
         group = self.model.setGroupMaster(row)
         if group:
             rows = self.model.getSamplesGroups()[group]
-            self.view.labelRowsInGroup(group, rows, row)
+            self.view.labelRowsInGroup(group, rows, row, None,
+                                       "This is the master row of the group {}"
+                                       .format(group))
 
     def onParamOk(self, row, columnName):
         """

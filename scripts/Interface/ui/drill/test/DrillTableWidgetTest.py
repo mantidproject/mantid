@@ -251,8 +251,11 @@ class DrillTableWidgetTest(unittest.TestCase):
                          "tooltip")
 
     def test_setRowLabel(self):
-        self.table.setRowLabel(0, "test")
+        self.table.setRowLabel(0, "test", False)
         self.assertEqual(self.table.verticalHeaderItem(0).text(), "test")
+        self.table.setRowLabel(0, "test", False, "tooltip")
+        self.assertEqual(self.table.verticalHeaderItem(0).text(), "test")
+        self.assertEqual(self.table.verticalHeaderItem(0).toolTip(), "tooltip")
 
     def test_getRowLabel(self):
         self.assertEqual(self.table.getRowLabel(0), "1")

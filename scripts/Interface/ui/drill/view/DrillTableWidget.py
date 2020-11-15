@@ -352,7 +352,7 @@ class DrillTableWidget(QTableWidget):
             if item and c < len(tooltips):
                 item.setToolTip(tooltips[c])
 
-    def setRowLabel(self, row, label, bold=False):
+    def setRowLabel(self, row, label, bold=False, tooltip=None):
         """
         Set the label of a specific row.
 
@@ -369,6 +369,8 @@ class DrillTableWidget(QTableWidget):
         font = self.verticalHeaderItem(row).font()
         font.setBold(bold)
         self.verticalHeaderItem(row).setFont(font)
+        if tooltip:
+            self.verticalHeaderItem(row).setToolTip(tooltip)
 
     def getRowLabel(self, row):
         """
