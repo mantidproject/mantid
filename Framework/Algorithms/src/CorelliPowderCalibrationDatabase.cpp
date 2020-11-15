@@ -253,25 +253,9 @@ bool CorelliPowderCalibrationDatabase::isFileExist(
 std::string
 CorelliPowderCalibrationDatabase::joinPath(const std::string directory,
                                            const std::string basename) {
-  std::string dirsep{"/"};
-#ifdef _WIN32
-  dirsep = "\\";
-#endif
   boost::filesystem::path dir(directory);
   boost::filesystem::path file(basename);
   boost::filesystem::path fullpath = dir / file;
-
-  /**
-  #include <boost/filesystem.hpp>
-
-  namespace fs = boost::filesystem;
-
-  int main ()
-  {
-      fs::path dir ("/tmp");
-      fs::path file ("foo.txt");
-      fs::path full_path = dir / file;
-    */
 
   return fullpath.string();
 }
