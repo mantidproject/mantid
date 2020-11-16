@@ -408,7 +408,7 @@ InstrumentWidgetRenderTab *InstrumentWidget::getRenderTab(const Tab tab) const {
 
   // Cast
   InstrumentWidgetRenderTab *render_tab =
-        dynamic_cast<InstrumentWidgetRenderTab *>(widget_tab);
+      dynamic_cast<InstrumentWidgetRenderTab *>(widget_tab);
   return render_tab;
 }
 
@@ -422,7 +422,8 @@ InstrumentWidgetPickTab *InstrumentWidget::getPickTab(const Tab tab) const {
   InstrumentWidgetTab *tab_widget = getTab(tab);
 
   // Cast
-  InstrumentWidgetPickTab *pick_tab = dynamic_cast<InstrumentWidgetPickTab *>(tab_widget);
+  InstrumentWidgetPickTab *pick_tab =
+      dynamic_cast<InstrumentWidgetPickTab *>(tab_widget);
   return pick_tab;
 }
 
