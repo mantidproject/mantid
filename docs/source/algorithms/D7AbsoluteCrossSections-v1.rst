@@ -26,6 +26,20 @@ to `'None'`.
 
 This algorithm is indended to be invoked on sample data that is fully corrected and needs to be normalised to the absolute scale.
 
+SampleAndEnvironmentProperties
+##############################
+
+This property is a dictionary containing all of the information about the sample and its environment, in the same fashion as in :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>`.
+This information is used for proper normalisation of the given sample.
+
+The following keys need to be defined:
+
+- *SampleMass*
+- *FormulaUnits*
+- *FormulaUnitMass*
+- *SampleSpin* if the `NormalisationMethod` is set to `Paramagnetic`
+- *IncoherentCrossSection* if the `NormalisationMethod` is set to `Incoherent` and `AbsoluteUnitsNormalisation` is *True*
+
 Cross-section separation method
 ###############################
 
