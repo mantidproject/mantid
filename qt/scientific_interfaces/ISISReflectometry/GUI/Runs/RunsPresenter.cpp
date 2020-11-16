@@ -206,7 +206,7 @@ bool RunsPresenter::resumeAutoreduction() {
     if (isOverwritingTablePrevented()) {
       return false;
     }
-    m_searcher->reset();
+    m_searcher->reset(searchString, instrument, cycle);
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
   }
 
@@ -254,7 +254,7 @@ void RunsPresenter::autoreductionCompleted() {
 }
 
 void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
-  m_searcher->reset();
+  m_searcher->reset("", instrumentName, "");
   m_view->setSearchInstrument(instrumentName);
   m_view->clearSearchText();
   tablePresenter()->notifyInstrumentChanged(instrumentName);
@@ -285,7 +285,7 @@ bool RunsPresenter::search() {
     if (isOverwritingTablePrevented()) {
       return false;
     }
-    m_searcher->reset();
+    m_searcher->reset(searchString, instrument, cycle);
   }
 
   if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),

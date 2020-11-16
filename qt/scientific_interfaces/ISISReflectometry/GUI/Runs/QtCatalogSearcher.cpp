@@ -201,10 +201,12 @@ SearchResult const &QtCatalogSearcher::getSearchResult(int index) const {
   return results().getRowData(index);
 }
 
-void QtCatalogSearcher::reset() {
-  m_searchText.clear();
-  m_instrument.clear();
-  results().clear();
+void QtCatalogSearcher::reset(std::string const &text,
+                              std::string const &instrument,
+                              std::string const &cycle) {
+  m_searchText = text;
+  m_instrument = instrument;
+  m_cycle = cycle;
 }
 
 bool QtCatalogSearcher::searchSettingsChanged(const std::string &text,
