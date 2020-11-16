@@ -121,6 +121,9 @@ private:
 
   /// Last run added by auto was addes as range
   std::atomic_bool m_wasLastAutoRange;
+
+  /// Previous first run number (INSTNAMERUNNUMBER)
+  std::string m_previousFirstRun;
 };
 
 } // namespace CustomInterfaces

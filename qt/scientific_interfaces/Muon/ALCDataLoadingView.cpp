@@ -328,6 +328,11 @@ void ALCDataLoadingView::enableLoad(bool enable) {
 
 void ALCDataLoadingView::setPath(const std::string &path) {
   m_ui.path->setText(QString::fromStdString(path));
+  if (path.empty()) {
+    m_ui.path->setEnabled(false);
+  } else {
+    m_ui.path->setEnabled(true);
+  }
 }
 
 void ALCDataLoadingView::enableRunsAutoAdd(bool enable) {
@@ -391,6 +396,22 @@ void ALCDataLoadingView::setRunsTextWithoutSearch(const std::string &text) {
 
 void ALCDataLoadingView::toggleRunsAutoAdd(const bool autoAdd) {
   m_ui.runsAutoAdd->setChecked(autoAdd);
+}
+
+std::string ALCDataLoadingView::getRunsFirstRunText() const {
+  std::string text = m_ui.runs->getText().toStdString();
+
+  auto commaSearchResult = text.find_first_of(",");
+  auto rangeSearchResult = text.find_first_of("-");
+
+  if (commaSearchResult == std::string::npos &&
+      rangeSearchResult == std::string::npos) {
+    return text; // Only one run
+  }
+
+  if (commaSearchResult == std::string::npos)
+    return text.substr(0, rangeSearchResult); // Must have range
+  return text.substr(0, commaSearchResult);   // Must have comma
 }
 
 } // namespace CustomInterfaces

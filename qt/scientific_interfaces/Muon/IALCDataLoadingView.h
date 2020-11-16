@@ -80,6 +80,8 @@ public:
   /// Manual override of Auto add runs
   virtual void toggleRunsAutoAdd(const bool on) = 0;
 
+  virtual std::string getRunsFirstRunText() const = 0;
+
 public slots:
   /// Performs any necessary initialization
   virtual void initialize() = 0;

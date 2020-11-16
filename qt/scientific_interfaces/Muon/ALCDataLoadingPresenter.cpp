@@ -39,7 +39,7 @@ namespace CustomInterfaces {
 ALCDataLoadingPresenter::ALCDataLoadingPresenter(IALCDataLoadingView *view)
     : m_view(view), m_numDetectors(0), m_loadingData(false),
       m_directoryChanged(false), m_timerID(), m_lastRunLoadedAuto(-2),
-      m_filesLoaded(), m_wasLastAutoRange(false) {}
+      m_filesLoaded(), m_wasLastAutoRange(false), m_previousFirstRun("") {}
 
 void ALCDataLoadingPresenter::initialize() {
   m_view->initialize();
@@ -62,8 +62,14 @@ void ALCDataLoadingPresenter::handleRunsChanged() {
   m_view->enableLoad(false);
   m_view->setPath(std::string{});
   m_view->enableRunsAutoAdd(false);
-  m_view->setAvailableInfoToEmpty();
-  m_view->setLoadStatus("Finding\n" + m_view->getRunsText(), "orange");
+
+  if (m_previousFirstRun !=
+      m_view->getInstrument() + m_view->getRunsFirstRunText())
+    m_view->setAvailableInfoToEmpty();
+
+  m_view->setLoadStatus("Finding " + m_view->getInstrument() + "\n" +
+                            m_view->getRunsText(),
+                        "orange");
 }
 
 void ALCDataLoadingPresenter::handleRunsFound() {
@@ -84,8 +90,11 @@ void ALCDataLoadingPresenter::handleRunsFound() {
   try {
     updateAvailableInfo();
     m_view->enableLoad(true);
-    m_view->setLoadStatus("Successfully found\n" + m_view->getRunsText(),
+    m_view->setLoadStatus("Successfully found " + m_view->getInstrument() +
+                              "\n" + m_view->getRunsText(),
                           "green");
+    m_previousFirstRun =
+        m_view->getInstrument() + m_view->getRunsFirstRunText();
   } catch (const std::runtime_error &errroUpdateInfo) {
     m_view->setLoadStatus("Error", "red");
     m_view->displayError(errroUpdateInfo.what());
@@ -117,11 +126,14 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
       return;
   }
 
-  m_view->setLoadStatus("Loading\n" + m_view->getRunsText(), "orange");
+  m_view->setLoadStatus("Loading " + m_view->getInstrument() + "\n" +
+                            m_view->getRunsText(),
+                        "orange");
   try {
     load(files);
     m_filesLoaded = files;
-    m_view->setLoadStatus("Successfully loaded\n" + m_view->getRunsText(),
+    m_view->setLoadStatus("Successfully loaded " + m_view->getInstrument() +
+                              "\n" + m_view->getRunsText(),
                           "green");
     m_view->enableRunsAutoAdd(true);
   } catch (const std::runtime_error &errorLoadFiles) {

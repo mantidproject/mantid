@@ -53,6 +53,7 @@ public:
   std::string calculationType() const override;
   boost::optional<std::pair<double, double>> timeRange() const override;
   std::string getRunsText() const override;
+  std::string getRunsFirstRunText() const override;
 
   void setDataCurve(Mantid::API::MatrixWorkspace_sptr workspace,
                     std::size_t const &workspaceIndex = 0) override;
