@@ -112,10 +112,10 @@ bool Workspace2D::isRaggedWorkspace() const {
                              "therefore cannot determine if it is ragged.");
   } else {
     const auto numberOfBins = data[0]->size();
-    for (const auto &histogram : data)
-      if (numberOfBins != histogram->size())
-        return true;
-    return false;
+    return std::any_of(data.cbegin(), data.cend(),
+                       [&numberOfBins](const auto &histogram) {
+                         return numberOfBins != histogram->size();
+                       });
   }
 }
 

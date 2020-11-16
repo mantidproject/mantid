@@ -135,11 +135,11 @@ public:
       throw std::runtime_error(
           "Vector data is empty, cannot check for ragged workspace.");
     } else {
-      auto numberOfBins = m_vec[0].dataY().size();
-      for (const auto &spectrum : m_vec)
-        if (spectrum.dataY().size() != numberOfBins)
-          return true;
-      return false;
+      const auto numberOfBins = m_vec[0].dataY().size();
+      return std::any_of(m_vec.cbegin(), m_vec.cend(),
+                         [&numberOfBins](const auto &spectrum) {
+                           return numberOfBins != spectrum.dataY().size();
+                         });
     }
   }
 

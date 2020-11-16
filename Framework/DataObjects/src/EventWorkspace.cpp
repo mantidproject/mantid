@@ -25,6 +25,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "tbb/parallel_for.h"
+#include <algorithm>
 #include <limits>
 #include <numeric>
 
@@ -144,10 +145,10 @@ bool EventWorkspace::isRaggedWorkspace() const {
                              "therefore cannot determine if it is ragged.");
   } else {
     const auto numberOfBins = data[0]->histogram_size();
-    for (const auto &eventList : data)
-      if (numberOfBins != eventList->histogram_size())
-        return true;
-    return false;
+    return std::any_of(data.cbegin(), data.cend(),
+                       [&numberOfBins](const auto &eventList) {
+                         return numberOfBins != eventList->histogram_size();
+                       });
   }
 }
 
