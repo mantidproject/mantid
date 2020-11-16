@@ -272,37 +272,62 @@ MatrixWorkspace_sptr MuonPreProcess::applyCropping(MatrixWorkspace_sptr ws,
        Workspace_sptr returnWs =
            cropRagged->getProperty("OutputWorkspace");
        return std::dynamic_pointer_cast<MatrixWorkspace>(returnWs);*/
-      auto clone = cloneWorkspace(ws);
+
+      // copy ws to new ws
+      // read data in ws 
+      // save data within range
+      // create workspace from save data
+      // replace old data with new data
+
+      // Clone data to new ws
+      auto newWs = cloneWorkspace(ws);
+
+      // Loop spectrum and find all valid data
       for (int i = 0; i < ws->getNumberHistograms(); ++i) {
-        std::vector<double> X;
-        std::vector<double> Y;
-        auto dataY = ws->mutableY(i);
-        int k = 0;
-        for (auto &x : ws->readX(i)) {
+        // place to store new data
+        std::vector<double> X{};
+        std::vector<double> Y{};
+        std::vector<double> E{};
+
+        // get Y and E data
+        auto dataY = ws->readY(i);
+        auto dataE = ws->readE(i);
+
+        // counter for y and e data
+        int index = 0;
+
+        for (auto& x : ws->readX(i)) {
+          // Check if in valid range
           if (x >= xMin && x <= xMax) {
+            // Save all data
             X.emplace_back(x);
-            Y.emplace_back(dataY[k]);
+            Y.emplace_back(dataY[index]);
+            E.emplace_back(dataE[index]);
           }
-          ++k;
+
+          // Increment index for Y and E
+          ++index;
         }
-        IAlgorithm_sptr create = createChildAlgorithm("CreateWorkspace");
-        create->setProperty("DataX", X);
-        create->setProperty("DataY", Y);
-        std::cout << X.size() << std::endl;
-        std::cout << Y.size() << std::endl;
-        // create->setProperty("NSpec",
-        // static_cast<int>(ws->getNumberHistograms()));
-        create->execute();
-        MatrixWorkspace_sptr temp = create->getProperty("OutputWorkspace");
-        IAlgorithm_sptr conjoin = createChildAlgorithm("ConjoinWorkspaces");
-        conjoin->setProperty("InputWorkspace1", ws);
-        conjoin->setProperty("InputWorkspace2", temp);
-        conjoin->setProperty("CheckOverlapping", false);
-        conjoin->execute();
-        clone = conjoin->getProperty("InputWorkspace1");
+
+        // Create workspace for this spectrum
+        IAlgorithm_sptr createWsAlg = createChildAlgorithm("CreateWorkspace");
+        createWsAlg->setProperty("DataX", X);
+        createWsAlg->setProperty("DataY", Y);
+        createWsAlg->setProperty("DataE", E);
+        createWsAlg->execute();
+        MatrixWorkspace_sptr temp = createWsAlg->getProperty("OutputWorkspace");
+
+        // Replace data of temp in newWs
+        IAlgorithm_sptr copyDataRangeAlg = createChildAlgorithm("CopyDataRange");
+        copyDataRangeAlg->setProperty("InputWorkspace", temp);
+        copyDataRangeAlg->setProperty("DestWorkspace", newWs);
+        //copyDataRangeAlg->setProperty("InsertionXIndex", i);
+        copyDataRangeAlg->setProperty("OutputWorkspace", "_hello");
+        copyDataRangeAlg->execute();
+        newWs = copyDataRangeAlg->getProperty("OutputWorkspace");
       }
 
-      return clone;
+      return newWs;
 
     } else {
       IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
