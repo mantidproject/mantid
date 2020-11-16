@@ -17,8 +17,8 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
-#include "MantidQtWidgets/Common/Spectra.h"
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>

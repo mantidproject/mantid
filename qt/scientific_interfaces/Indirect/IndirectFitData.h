@@ -9,8 +9,8 @@
 #include "DllConfig.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/Strings.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
-#include "MantidQtWidgets/Common/Spectra.h"
 
 #include <boost/optional.hpp>
 #include <memory>

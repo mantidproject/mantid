@@ -26,6 +26,7 @@ set(
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
   src/FunctionModelDataset.cpp
+  src/FunctionModelSpectra.cpp
   src/FunctionMultiDomainPresenter.cpp
   src/FunctionTreeView.cpp
   src/GenericDialog.cpp
@@ -85,7 +86,6 @@ set(
   src/SelectFunctionDialog.cpp
   src/SelectWorkspacesDialog.cpp
   src/SlitCalculator.cpp
-  src/Spectra.cpp
   src/TextPropertyWidget.cpp
   src/TSVSerialiser.cpp
   src/UserFunctionDialog.cpp
@@ -443,6 +443,7 @@ set(
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
   src/FunctionModelDataset.cpp
+  src/FunctionModelSpectra.cpp
   src/FunctionMultiDomainPresenter.cpp
   src/FunctionTreeView.cpp
   src/HintingLineEdit.cpp
@@ -475,7 +476,6 @@ set(
   src/SequentialFitDialog.cpp
   src/SlicingAlgorithmDialog.cpp
   src/SlitCalculator.cpp
-  src/Spectra.cpp
   src/TrackedAction.cpp
   src/UserFunctionDialog.cpp
   src/WorkspacePresenter/ADSAdapter.cpp
@@ -720,6 +720,7 @@ set(
   inc/MantidQtWidgets/Common/ParseNumerics.h
   inc/MantidQtWidgets/Common/FunctionModel.h
   inc/MantidQtWidgets/Common/FunctionModelDataset.h
+  inc/MantidQtWidgets/Common/FunctionModelSpectra.h
   inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
   inc/MantidQtWidgets/Common/HintStrategy.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
@@ -740,7 +741,6 @@ set(
   inc/MantidQtWidgets/Common/ProgressPresenter.h
   inc/MantidQtWidgets/Common/ProjectSavePresenter.h
   inc/MantidQtWidgets/Common/ProjectSaveModel.h
-  inc/MantidQtWidgets/Common/Spectra.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ADSAdapter.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/IWorkspaceDockView.h
   inc/MantidQtWidgets/Common/WorkspacePresenter/ViewNotifiable.h

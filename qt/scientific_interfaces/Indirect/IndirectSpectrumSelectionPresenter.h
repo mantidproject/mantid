@@ -10,7 +10,7 @@
 #include "IndirectSpectrumSelectionView.h"
 
 #include "DllConfig.h"
-#include "MantidQtWidgets/Common/Spectra.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <boost/optional.hpp>
