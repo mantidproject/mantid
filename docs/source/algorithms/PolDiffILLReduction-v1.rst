@@ -194,16 +194,9 @@ This example below performs a complete reduction for D7 data.
 
 .. testcode:: ExPolDiffILLReduction
 
-    vanadium_dictionary = {'SampleMass':8.54,'SampleDensity':6.0,'FormulaUnits':1,'FormulaUnitMass':50.94,
-	'SampleChemicalFormula':'V','SampleThickness':2,'SampleHeight':2,'SampleWidth':2,'BeamWidth':2.5,
-	'BeamHeight':2.5,'SampleDensity':1.18,'ContainerFormula':'Al','ContainerDensity':2.7,
-	'ContainerFrontThickness':0.02,'ContainerBackThickness':0.02}
+    vanadium_dictionary = {'SampleMass':8.54,'SampleDensity':6.0,'FormulaUnits':1,'FormulaUnitMass':50.94}
 
-    sample_dictionary = {'SampleMass':2.932,'SampleDensity':2.0,'FormulaUnits':1, 'FormulaUnitMass':182.56,
-        'SampleChemicalFormula':'Mn0.5-Fe0.5-P-S3','SampleThickness':2,'SampleHeight':2,'SampleWidth':2,
-	'BeamWidth':2.5,'BeamHeight':2.5,'SampleDensity':1.18, 'ContainerFormula':'Al','ContainerDensity':2.7,
-	'ContainerFrontThickness':0.02,
-        'ContainerBackThickness':0.02}
+    sample_dictionary = {'SampleMass':2.932,'SampleDensity':2.0,'FormulaUnits':1, 'FormulaUnitMass':182.56}
 
     # Beam with cadmium absorber, used for transmission
     PolDiffILLReduction(
