@@ -505,7 +505,7 @@ void FunctionModel::setResolutionFromWorkspace(IFunction_sptr fun) {
         auto analyser = inst->getStringParameter("analyser");
         if (analyser.size() > 0) {
           auto comp = inst->getComponentByName(analyser[0]);
-          if (comp) {
+          if (comp && comp->hasParameter("resolution")) {
             auto params = comp->getNumberParameter("resolution", true);
             auto funString = fun->asString();
             for (auto param : fun->getParameterNames()) {
