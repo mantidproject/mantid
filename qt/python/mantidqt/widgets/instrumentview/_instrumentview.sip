@@ -212,8 +212,7 @@ public:
 %Docstring
     void setMinValue(double value, bool apply)
     ----------------------------------------------------
-    Updates the integration range over which the colours
-    are calculated
+    Set minimum value on the colormap scale.
 
     Args:
         value: minimum value for the color bar
@@ -224,8 +223,7 @@ public:
 %Docstring
     void setMaxValue(double value, bool apply)
     ----------------------------------------------------
-    Updates the integration range over which the colours
-    are calculated
+    Set maximum value on the colormap scale.
 
     Args:
         value: maximum value for the color bar
