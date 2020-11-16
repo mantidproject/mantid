@@ -10,6 +10,7 @@
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -85,11 +86,7 @@ public:
 
     // convert workspace index into detector id
     const auto &spectrum = wksp->getSpectrum(wkspIndex);
-    const auto &detIds = spectrum.getDetectorIDs();
-    if (detIds.size() != 1) {
-      throw std::runtime_error("Summed pixels is not currently supported");
-    }
-    this->detid = *(detIds.begin());
+    this->detid = spectrum.getDetectorIDs();
 
     const auto &X = spectrum.x();
     const auto &Y = spectrum.y();
@@ -143,7 +140,7 @@ public:
   }
 
   std::size_t wkspIndex;
-  detid_t detid;
+  std::set<detid_t> detid;
   double tofMin; // TOF of bin with minimum TOF and non-zero counts
   double tofMax; // TOF of bin with maximum TOF and non-zero counts
   std::vector<double> inTofPos; // peak centers, in TOF
@@ -340,6 +337,7 @@ bool hasDasIDs(const API::ITableWorkspace_const_sptr &table) {
  * @param peakshape :: name of the fitting function
  */
 double getWidthToFWHM(const std::string &peakshape) {
+  // could we use actual peak function here?
   if (peakshape == "Gaussian") {
     return 2 * std::sqrt(2. * std::log(2.));
   } else if (peakshape == "Lorentzian") {
@@ -548,10 +546,13 @@ void PDCalibration::exec() {
   // parameters for peaks that were successfully fitting, then use this info
   // to obtain difc, difa, and tzero for each pixel
   // cppcheck-suppress syntaxError
+  const auto &spectrumInfo = m_uncalibratedWS->spectrumInfo();
   PRAGMA_OMP(parallel for schedule(dynamic, 1) )
   for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
     PARALLEL_START_INTERUPT_REGION
-    if (isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) {
+    if ((isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) ||
+        !spectrumInfo.hasDetectors(wkspIndex) ||
+        spectrumInfo.isMonitor(wkspIndex)) {
       prog.report();
       continue;
     }
@@ -559,7 +560,9 @@ void PDCalibration::exec() {
     // object to hold the information about the peak positions, detid, and wksp
     // index
     PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
-    auto toTof = getDSpacingToTof(peaks.detid);
+    auto toTof = getDSpacingToTof(
+        *peaks.detid
+             .begin()); // doesn't matter which one - all have same difc etc.
     peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, toTof);
 
     // includes peaks that aren't used in the fit
@@ -655,39 +658,41 @@ void PDCalibration::exec() {
       // in d-spacing against the fitted peak center positions, in TOF units.
       double difc = 0., t0 = 0., difa = 0.;
       fitDIFCtZeroDIFA_LM(d_vec, tof_vec, height2, difc, t0, difa);
+      for (auto iter = peaks.detid.begin(); iter != peaks.detid.end(); ++iter) {
+        auto det = *iter;
+        const auto rowIndexOutputPeaks = m_detidToRow[det];
+        // chisq represent the deviations between the nominal peak positions and
+        // the peak positions using the GSAS formula with optimized difc, difa,
+        // and tzero
+        double chisq = 0.;
+        // `converter` if a function that returns a d-spacing for an input TOF
+        auto converter =
+            Kernel::Diffraction::getTofToDConversionFunc(difc, difa, t0);
+        for (std::size_t i = 0; i < numPeaks; ++i) {
+          if (std::isnan(tof_vec_full[i]))
+            continue;
+          // Find d-spacing using the GSAS formula with optimized difc, difa, t0
+          // for the TOF of the current peak's center.
+          const double dspacing = converter(tof_vec_full[i]);
+          // `temp` is residual between the nominal position in d-spacing for
+          // the current peak, and the fitted position in d-spacing
+          const double temp = m_peaksInDspacing[i] - dspacing;
+          chisq += (temp * temp);
+          m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) =
+              dspacing;
+          m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
+              WIDTH_TO_FWHM * converter(width_vec_full[i]);
+          m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) =
+              height_vec_full[i];
+        }
+        m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
+                                          m_peaksInDspacing.size() + 1) = chisq;
+        m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
+                                          m_peaksInDspacing.size() + 2) =
+            chisq / static_cast<double>(numPeaks - 1);
 
-      const auto rowIndexOutputPeaks = m_detidToRow[peaks.detid];
-      // chisq represent the deviations between the nominal peak positions and
-      // the peak positions using the GSAS formula with optimized difc, difa,
-      // and tzero
-      double chisq = 0.;
-      // `converter` if a function that returns a d-spacing for an input TOF
-      auto converter =
-          Kernel::Diffraction::getTofToDConversionFunc(difc, difa, t0);
-      for (std::size_t i = 0; i < numPeaks; ++i) {
-        if (std::isnan(tof_vec_full[i]))
-          continue;
-        // Find d-spacing using the GSAS formula with optimized difc, difa, t0
-        // for the TOF of the current peak's center.
-        const double dspacing = converter(tof_vec_full[i]);
-        // `temp` is residual between the nominal position in d-spacing for the
-        // current peak, and the fitted position in d-spacing
-        const double temp = m_peaksInDspacing[i] - dspacing;
-        chisq += (temp * temp);
-        m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-            dspacing;
-        m_peakWidthTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-            WIDTH_TO_FWHM * converter(width_vec_full[i]);
-        m_peakHeightTable->cell<double>(rowIndexOutputPeaks, i + 1) =
-            height_vec_full[i];
+        setCalibrationValues(det, difc, difa, t0);
       }
-      m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
-                                        m_peaksInDspacing.size() + 1) = chisq;
-      m_peakPositionTable->cell<double>(rowIndexOutputPeaks,
-                                        m_peaksInDspacing.size() + 2) =
-          chisq / static_cast<double>(numPeaks - 1);
-
-      setCalibrationValues(peaks.detid, difc, difa, t0);
     }
     prog.report();
 
@@ -1036,6 +1041,7 @@ PDCalibration::getDSpacingToTof(const detid_t detid) {
 void PDCalibration::setCalibrationValues(const detid_t detid, const double difc,
                                          const double difa,
                                          const double tzero) {
+
   auto rowNum = m_detidToRow[detid];
 
   // detid is already there
@@ -1210,7 +1216,7 @@ void PDCalibration::createCalTableNew() {
   setProperty("OutputCalibrationTable", m_calibrationTable);
 
   const detid2index_map allDetectors =
-      difcWS->getDetectorIDToWorkspaceIndexMap(true);
+      difcWS->getDetectorIDToWorkspaceIndexMap(false);
 
   // copy over the values
   auto it = allDetectors.begin();
@@ -1305,10 +1311,8 @@ API::MatrixWorkspace_sptr PDCalibration::calculateResolutionTable() {
                                 pos);
       }
     }
-
     if (resolution.empty()) {
-      resolutionWksp->setValue(detId, 0.,
-                               0.); // instrument view doesn't like nan
+      resolutionWksp->setValue(detId, 0., 0.); // instview doesn't like nan
     } else {
       // calculate the mean
       const double mean =
@@ -1388,7 +1392,7 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
     PDCalibration::FittedPeaks peaks(dataws, static_cast<size_t>(iws));
     // toTof is a function that converts from d-spacing to TOF for a particular
     // pixel
-    auto toTof = getDSpacingToTof(peaks.detid);
+    auto toTof = getDSpacingToTof(*peaks.detid.begin());
     // setpositions initializes peaks.inTofPos and peaks.inTofWindows
     peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, toTof);
     peak_pos_ws->setPoints(iws, peaks.inTofPos);
