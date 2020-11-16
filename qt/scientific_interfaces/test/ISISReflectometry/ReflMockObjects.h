@@ -214,7 +214,8 @@ public:
                                       const std::string &));
   MOCK_CONST_METHOD0(searchInProgress, bool());
   MOCK_CONST_METHOD1(getSearchResult, SearchResult const &(int));
-  MOCK_METHOD0(reset, void());
+  MOCK_METHOD3(reset, void(std::string const &, std::string const &,
+                           std::string const &));
   MOCK_CONST_METHOD3(searchSettingsChanged,
                      bool(const std::string &, const std::string &,
                           const std::string &));
