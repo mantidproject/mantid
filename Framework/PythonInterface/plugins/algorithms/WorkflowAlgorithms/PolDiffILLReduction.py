@@ -57,7 +57,8 @@ class PolDiffILLReduction(PythonAlgorithm):
             if geometry_type != 'None':
                 required_keys += ['SampleChemicalFormula', 'SampleDensity', 'BeamHeight', 'BeamWidth', 'ContainerDensity']
             if geometry_type == 'FlatPlate':
-                required_keys += ['Height', 'SampleWidth', 'SampleThickness', 'ContainerFrontThickness', 'ContainerBackThickness']
+                required_keys += ['Height', 'SampleWidth', 'SampleThickness', 'SampleAngle', 'ContainerFrontThickness',
+                                  'ContainerBackThickness']
             if geometry_type == 'Cylinder':
                 required_keys += ['Height', 'SampleRadius', 'ContainerRadius']
             if geometry_type == 'Annulus':
@@ -442,6 +443,7 @@ class PolDiffILLReduction(PythonAlgorithm):
         if geometry_type == 'FlatPlate':
             kwargs['SampleWidth'] = self._sampleAndEnvironmentProperties['SampleWidth'].value
             kwargs['SampleThickness'] = self._sampleAndEnvironmentProperties['SampleThickness'].value
+            kwargs['SampleAngle'] = self._sampleAndEnvironmentProperties['SampleAngle'].value
             if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerFrontThickness'] = self._sampleAndEnvironmentProperties['ContainerFrontThickness'].value
                 kwargs['ContainerBackThickness'] = self._sampleAndEnvironmentProperties['ContainerBackThickness'].value
