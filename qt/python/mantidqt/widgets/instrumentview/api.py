@@ -37,10 +37,11 @@ def get_instrumentview(workspace):
     #       wrapped in QAppThreadCall again
     ivp.select_tab = ivp.container.select_tab
     ivp.select_surface_type = ivp.get_render_tab().setSurfaceType
-    ivp.set_min_value = safe_qthread(ivp.get_render_tab().setMinValue)
-    ivp.set_max_value = safe_qthread(ivp.get_render_tab().setMaxValue)
     ivp.set_auto_scaling = ivp.get_render_tab().setColorMapAutoscaling
     ivp.set_axis = ivp.get_render_tab().setAxis
+    ivp.set_color_min = safe_qthread(ivp.get_render_tab().setMinValue)
+    ivp.set_color_max = safe_qthread(ivp.get_render_tab().setMaxValue)
+    ivp.set_color_range = safe_qthread(ivp.get_render_tab().setRange)
     return ivp
 
 
