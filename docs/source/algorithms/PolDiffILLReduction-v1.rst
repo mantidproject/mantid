@@ -63,6 +63,65 @@ For example, if processing as sample, if a container and absorber inputs are spe
 The rare exceptions are when processing as transmission, when beam input workspace is mandatory, and to calculate polarising efficiencies,
 where input from transmission is indispensable.
 
+SampleAndEnvironmentProperties
+##############################
+
+This property is a dictionary containing all of the information about the sample and its environment. This information is used in self-attenuation
+calculations and in normalisation.
+
+The complete list of keys can is summarised below:
+
+Sample-only keys:
+
+- *SampleMass*
+- *FormulaUnits*
+- *FormulaUnitMass*
+- *SampleChemicalFormula*
+- *SampleDensity*
+- *Height*
+
+Container-only keys:
+
+- *ContainerChemicalFormula*
+- *ContainerDensity*
+
+Beam-only keys:
+
+- *BeamHeight*
+- *BeamWidth*
+
+Then, depending on the chosen sample geometry, additional parameters need to be defined:
+
+* For FlatPlate:
+
+  - *SampleThickness*
+  - *SampleWidth*
+  - *SampleCenter*
+  - *SampleAngle*
+  - *ContainerFrontThickness*
+  - *ContainerBackThickness*
+
+* For Cylinder:
+
+  - *SampleRadius*
+  - *ContainerRadius*
+
+* For Annulus:
+
+  - *SampleInnerRadius*
+  - *SampleOuterRadius*
+  - *ContainerInnerRadius*
+  - *ContainerOuterRadius*
+
+Optional keys:
+
+- *InitialEnergy* - if not provided, the value will be calculated from the wavelength in the SampleLogs
+- *NMoles* - if not provided, the value will be calculated based on the *SampleMass* and *FormulaUnitMass*
+
+
+Workflows
+#########
+
 In the flowcharts below the yellow ovals represent the inputs, the grey parallelograms are the outputs for each process type.
 
 Absorber transmission
