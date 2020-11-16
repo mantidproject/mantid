@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 
-from mantid.api import AlgorithmFactory, NumericAxis, PropertyMode, \
-    PythonAlgorithm, WorkspaceGroupProperty, WorkspaceGroup
+from mantid.api import AlgorithmFactory, PropertyMode, PythonAlgorithm, \
+    WorkspaceGroupProperty, WorkspaceGroup
 from mantid.kernel import Direction, EnabledWhenProperty, FloatBoundedValidator, \
     PropertyCriterion, PropertyManagerProperty, StringListValidator
 
@@ -398,7 +398,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 self._merge_polarisations(ws)
                 ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ',
                              EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
-                # ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula='')
             else:
                 ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ',
                                     EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
