@@ -12,11 +12,11 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 FunctionModelDataset::FunctionModelDataset(const QString &workspaceName,
-                                           const Spectra &spectra)
+                                           const FunctionModelSpectra &spectra)
     : m_workspaceName(workspaceName), m_spectra(spectra) {}
 
 FunctionModelDataset::FunctionModelDataset(QString workspaceName,
-                                           Spectra &&spectra)
+                                           FunctionModelSpectra &&spectra)
     : m_workspaceName(workspaceName), m_spectra(std::move(spectra)) {}
 
 /**

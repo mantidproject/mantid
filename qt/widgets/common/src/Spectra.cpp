@@ -27,12 +27,13 @@ workspaceIndexVectorFromString(const std::string &listString) {
 namespace MantidQt {
 namespace MantidWidgets {
 
-Spectra::Spectra(const std::string &str)
+FunctionModelSpectra::FunctionModelSpectra(const std::string &str)
     : m_vec(workspaceIndexVectorFromString(str)), m_isContinuous(true) {
   checkContinuous();
 }
 
-Spectra::Spectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
+FunctionModelSpectra::FunctionModelSpectra(WorkspaceIndex minimum,
+                                           WorkspaceIndex maximum) {
   if (maximum < minimum) {
     std::swap(minimum, maximum);
   }
@@ -41,32 +42,34 @@ Spectra::Spectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
   m_isContinuous = true;
 }
 
-Spectra::Spectra(const Spectra &vec)
+FunctionModelSpectra::FunctionModelSpectra(const FunctionModelSpectra &vec)
     : m_vec(vec.m_vec), m_isContinuous(vec.m_isContinuous) {}
 
-Spectra::Spectra(Spectra &&vec)
+FunctionModelSpectra::FunctionModelSpectra(FunctionModelSpectra &&vec)
     : m_vec(std::move(vec.m_vec)),
       m_isContinuous(std::move(vec.m_isContinuous)) {}
 
-Spectra &Spectra::operator=(const Spectra &vec) {
+FunctionModelSpectra &
+FunctionModelSpectra::operator=(const FunctionModelSpectra &vec) {
   m_vec = vec.m_vec;
   m_isContinuous = vec.m_isContinuous;
   return *this;
 }
 
-Spectra &Spectra::operator=(Spectra &&vec) {
+FunctionModelSpectra &
+FunctionModelSpectra::operator=(FunctionModelSpectra &&vec) {
   m_vec = std::move(vec.m_vec);
   m_isContinuous = std::move(vec.m_isContinuous);
   return *this;
 }
 
-[[nodiscard]] bool Spectra::empty() const { return m_vec.empty(); }
+[[nodiscard]] bool FunctionModelSpectra::empty() const { return m_vec.empty(); }
 
-FitDomainIndex Spectra::size() const {
+FitDomainIndex FunctionModelSpectra::size() const {
   return FitDomainIndex{m_vec.size()};
 }
 
-std::string Spectra::getString() const {
+std::string FunctionModelSpectra::getString() const {
   if (empty())
     return "";
   if (m_isContinuous)
@@ -79,19 +82,20 @@ std::string Spectra::getString() const {
   return Mantid::Kernel::Strings::toString(out);
 }
 
-std::pair<WorkspaceIndex, WorkspaceIndex> Spectra::getMinMax() const {
+std::pair<WorkspaceIndex, WorkspaceIndex>
+FunctionModelSpectra::getMinMax() const {
   if (empty())
     return std::make_pair(WorkspaceIndex{0}, WorkspaceIndex{0});
   return std::make_pair(m_vec.front(), m_vec.back());
 }
 
-bool Spectra::operator==(Spectra const &spec) const {
+bool FunctionModelSpectra::operator==(FunctionModelSpectra const &spec) const {
   return this->getString() == spec.getString();
 }
 
-bool Spectra::isContinuous() const { return m_isContinuous; }
+bool FunctionModelSpectra::isContinuous() const { return m_isContinuous; }
 
-FitDomainIndex Spectra::indexOf(WorkspaceIndex i) const {
+FitDomainIndex FunctionModelSpectra::indexOf(WorkspaceIndex i) const {
   auto const it = std::find(begin(), end(), i);
   if (it == end()) {
     throw std::runtime_error("Spectrum index " + std::to_string(i.value) +
@@ -100,18 +104,20 @@ FitDomainIndex Spectra::indexOf(WorkspaceIndex i) const {
   return FitDomainIndex{static_cast<size_t>(std::distance(begin(), it))};
 }
 
-Spectra Spectra::combine(const Spectra &other) const {
+FunctionModelSpectra
+FunctionModelSpectra::combine(const FunctionModelSpectra &other) const {
   std::set<WorkspaceIndex> indices(begin(), end());
   indices.insert(other.begin(), other.end());
-  return Spectra(indices);
+  return FunctionModelSpectra(indices);
 }
 
-Spectra::Spectra(const std::set<WorkspaceIndex> &indices)
+FunctionModelSpectra::FunctionModelSpectra(
+    const std::set<WorkspaceIndex> &indices)
     : m_vec(indices.begin(), indices.end()) {
   checkContinuous();
 }
 
-void Spectra::checkContinuous() {
+void FunctionModelSpectra::checkContinuous() {
   m_isContinuous = true;
   if (m_vec.size() > 1) {
     for (size_t i = 1; i < m_vec.size(); ++i) {
@@ -123,7 +129,7 @@ void Spectra::checkContinuous() {
   }
 }
 
-void Spectra::erase(WorkspaceIndex workspaceIndex) {
+void FunctionModelSpectra::erase(WorkspaceIndex workspaceIndex) {
   auto iteratorToErase = std::find(m_vec.begin(), m_vec.end(), workspaceIndex);
   if (iteratorToErase != m_vec.end()) {
     m_vec.erase(iteratorToErase);

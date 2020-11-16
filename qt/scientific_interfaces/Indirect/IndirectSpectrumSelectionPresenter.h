@@ -57,7 +57,7 @@ private slots:
 
 private:
   void setSpectraRange(WorkspaceIndex minimum, WorkspaceIndex maximum);
-  void setModelSpectra(MantidWidgets::Spectra const &spectra);
+  void setModelSpectra(MantidWidgets::FunctionModelSpectra const &spectra);
 
   UserInputValidator validateSpectraString();
   UserInputValidator &validateSpectraString(UserInputValidator &validator);

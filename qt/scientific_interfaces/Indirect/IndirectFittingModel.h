@@ -50,7 +50,7 @@ public:
   virtual bool hasWorkspace(std::string const &workspaceName) const;
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(TableDatasetIndex index) const;
-  MantidWidgets::Spectra getSpectra(TableDatasetIndex index) const;
+  FunctionModelSpectra getSpectra(TableDatasetIndex index) const;
   virtual bool isMultiFit() const;
   virtual TableDatasetIndex numberOfWorkspaces() const;
   size_t getNumberOfSpectra(TableDatasetIndex index) const;
@@ -64,17 +64,16 @@ public:
   void clear();
 
   void setSpectra(const std::string &spectra, TableDatasetIndex dataIndex);
-  void setSpectra(MantidWidgets::Spectra &&spectra,
-                  TableDatasetIndex dataIndex);
-  void setSpectra(const MantidWidgets::Spectra &spectra,
+  void setSpectra(FunctionModelSpectra &&spectra, TableDatasetIndex dataIndex);
+  void setSpectra(const FunctionModelSpectra &spectra,
                   TableDatasetIndex dataIndex);
   virtual void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
                     const std::string &spectra);
   void addWorkspace(const std::string &workspaceName,
-                    const MantidWidgets::Spectra &spectra);
+                    const FunctionModelSpectra &spectra);
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                            const MantidWidgets::Spectra &spectra);
+                            const FunctionModelSpectra &spectra);
   virtual void removeWorkspace(TableDatasetIndex index);
 
   // IIndirectFitRegion

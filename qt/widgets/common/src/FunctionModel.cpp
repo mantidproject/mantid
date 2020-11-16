@@ -279,7 +279,8 @@ void FunctionModel::setNumberDomains(int nDomains) {
 void FunctionModel::setDatasets(const QStringList &datasetNames) {
   QList<FunctionModelDataset> datasets;
   for (const auto &datasetName : datasetNames)
-    datasets.append(FunctionModelDataset(datasetName, Spectra("0")));
+    datasets.append(
+        FunctionModelDataset(datasetName, FunctionModelSpectra("0")));
 
   setDatasets(datasets);
 }
@@ -298,7 +299,8 @@ void FunctionModel::setDatasets(const QList<FunctionModelDataset> &datasets) {
 /// @param datasetNames :: Names of the workspaces to be added.
 void FunctionModel::addDatasets(const QStringList &datasetNames) {
   for (const auto &datasetName : datasetNames)
-    m_datasets.append(FunctionModelDataset(datasetName, Spectra("0")));
+    m_datasets.append(
+        FunctionModelDataset(datasetName, FunctionModelSpectra("0")));
 
   setNumberDomains(numberOfDomains(m_datasets));
 }
@@ -498,7 +500,8 @@ void FunctionModel::checkDatasets() {
   if (numberOfDomains(m_datasets) != static_cast<int>(m_numberDomains)) {
     m_datasets.clear();
     for (auto i = 0u; i < m_numberDomains; ++i)
-      m_datasets.append(FunctionModelDataset(QString::number(i), Spectra("0")));
+      m_datasets.append(
+          FunctionModelDataset(QString::number(i), FunctionModelSpectra("0")));
   }
 }
 

@@ -29,7 +29,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr getWorkspace() const;
   Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const;
   Mantid::API::MatrixWorkspace_sptr getGuessWorkspace() const;
-  MantidWidgets::Spectra getSpectra() const;
+  MantidWidgets::FunctionModelSpectra getSpectra() const;
 
   Mantid::API::MatrixWorkspace_sptr appendGuessToInput(
       const Mantid::API::MatrixWorkspace_sptr &guessWorkspace) const;

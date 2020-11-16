@@ -27,14 +27,14 @@ namespace MantidWidgets {
  *
  * Holds a string and vector representation.
  */
-class EXPORT_OPT_MANTIDQT_COMMON Spectra {
+class EXPORT_OPT_MANTIDQT_COMMON FunctionModelSpectra {
 public:
-  explicit Spectra(const std::string &str);
-  Spectra(WorkspaceIndex minimum, WorkspaceIndex maximum);
-  Spectra(const Spectra &vec);
-  Spectra(Spectra &&vec);
-  Spectra &operator=(const Spectra &vec);
-  Spectra &operator=(Spectra &&vec);
+  explicit FunctionModelSpectra(const std::string &str);
+  FunctionModelSpectra(WorkspaceIndex minimum, WorkspaceIndex maximum);
+  FunctionModelSpectra(const FunctionModelSpectra &vec);
+  FunctionModelSpectra(FunctionModelSpectra &&vec);
+  FunctionModelSpectra &operator=(const FunctionModelSpectra &vec);
+  FunctionModelSpectra &operator=(FunctionModelSpectra &&vec);
   bool empty() const;
   FitDomainIndex size() const;
   std::string getString() const;
@@ -50,14 +50,14 @@ public:
   const WorkspaceIndex &operator[](FitDomainIndex index) const {
     return m_vec[index.value];
   }
-  bool operator==(Spectra const &spec) const;
+  bool operator==(FunctionModelSpectra const &spec) const;
   bool isContinuous() const;
   FitDomainIndex indexOf(WorkspaceIndex i) const;
-  Spectra combine(const Spectra &other) const;
+  FunctionModelSpectra combine(const FunctionModelSpectra &other) const;
   void erase(WorkspaceIndex index);
 
 private:
-  explicit Spectra(const std::set<WorkspaceIndex> &indices);
+  explicit FunctionModelSpectra(const std::set<WorkspaceIndex> &indices);
   void checkContinuous();
   std::vector<WorkspaceIndex> m_vec;
   bool m_isContinuous;
@@ -66,7 +66,7 @@ private:
 template <typename F> struct ApplySpectra {
   explicit ApplySpectra(F &&functor) : m_functor(std::forward<F>(functor)) {}
 
-  void operator()(const Spectra &spectra) const {
+  void operator()(const FunctionModelSpectra &spectra) const {
     for (const auto &spectrum : spectra)
       m_functor(spectrum);
   }
@@ -79,7 +79,7 @@ template <typename F> struct ApplyEnumeratedSpectra {
   ApplyEnumeratedSpectra(F &&functor, WorkspaceIndex start = WorkspaceIndex{0})
       : m_start(start), m_functor(std::forward<F>(functor)) {}
 
-  WorkspaceIndex operator()(const Spectra &spectra) const {
+  WorkspaceIndex operator()(const FunctionModelSpectra &spectra) const {
     auto i = m_start;
     for (const auto &spectrum : spectra)
       m_functor(i++, spectrum);

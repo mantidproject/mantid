@@ -24,8 +24,9 @@ namespace MantidWidgets {
  */
 struct EXPORT_OPT_MANTIDQT_COMMON FunctionModelDataset {
 public:
-  FunctionModelDataset(const QString &workspaceName, const Spectra &spectra);
-  FunctionModelDataset(QString workspaceName, Spectra &&spectra);
+  FunctionModelDataset(const QString &workspaceName,
+                       const FunctionModelSpectra &spectra);
+  FunctionModelDataset(QString workspaceName, FunctionModelSpectra &&spectra);
 
   inline QString datasetName() const noexcept { return m_workspaceName; }
   QStringList domainNames() const;
@@ -36,7 +37,7 @@ public:
 
 private:
   QString m_workspaceName;
-  Spectra m_spectra;
+  FunctionModelSpectra m_spectra;
 };
 
 } // namespace MantidWidgets

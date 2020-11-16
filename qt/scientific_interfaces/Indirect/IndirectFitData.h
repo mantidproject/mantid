@@ -32,7 +32,7 @@ using namespace MantidWidgets;
 class MANTIDQT_INDIRECT_DLL IndirectFitData {
 public:
   IndirectFitData(const Mantid::API::MatrixWorkspace_sptr &workspace,
-                  const Spectra &spectra);
+                  const FunctionModelSpectra &spectra);
 
   std::string displayName(const std::string &formatString,
                           const std::string &rangeDelimiter) const;
@@ -41,8 +41,8 @@ public:
   std::string getBasename() const;
 
   Mantid::API::MatrixWorkspace_sptr workspace() const;
-  const Spectra &spectra() const;
-  Spectra &getMutableSpectra();
+  const FunctionModelSpectra &spectra() const;
+  FunctionModelSpectra &getMutableSpectra();
   WorkspaceIndex getSpectrum(FitDomainIndex index) const;
   FitDomainIndex numberOfSpectra() const;
   bool zeroSpectra() const;
@@ -66,8 +66,8 @@ public:
   }
 
   void setSpectra(std::string const &spectra);
-  void setSpectra(Spectra &&spectra);
-  void setSpectra(Spectra const &spectra);
+  void setSpectra(FunctionModelSpectra &&spectra);
+  void setSpectra(FunctionModelSpectra const &spectra);
   void setStartX(double const &startX, WorkspaceIndex const &index);
   void setStartX(double const &startX);
   void setEndX(double const &endX, WorkspaceIndex const &spectrum);
@@ -76,10 +76,10 @@ public:
                               WorkspaceIndex const &spectrum);
 
 private:
-  void validateSpectra(Spectra const &spectra);
+  void validateSpectra(FunctionModelSpectra const &spectra);
 
   Mantid::API::MatrixWorkspace_sptr m_workspace;
-  Spectra m_spectra;
+  FunctionModelSpectra m_spectra;
   std::map<WorkspaceIndex, std::string> m_excludeRegions;
   std::map<WorkspaceIndex, std::pair<double, double>> m_ranges;
 };

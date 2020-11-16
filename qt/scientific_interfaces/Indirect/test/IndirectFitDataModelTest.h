@@ -58,14 +58,16 @@ public:
   void test_can_set_spectra_on_existing_workspace() {
     m_fitData->setSpectra("1", TableDatasetIndex{0});
 
-    TS_ASSERT_EQUALS(m_fitData->getSpectra(TableDatasetIndex{0}), Spectra("1"));
+    TS_ASSERT_EQUALS(m_fitData->getSpectra(TableDatasetIndex{0}),
+                     FunctionModelSpectra("1"));
   }
 
   void test_that_setting_spectra_on_non_existent_workspace_throws_exception() {
     TS_ASSERT_THROWS(m_fitData->setSpectra("1", TableDatasetIndex{1}),
                      const std::out_of_range &)
-    TS_ASSERT_THROWS(m_fitData->setSpectra(Spectra("1"), TableDatasetIndex{1}),
-                     const std::out_of_range &)
+    TS_ASSERT_THROWS(
+        m_fitData->setSpectra(FunctionModelSpectra("1"), TableDatasetIndex{1}),
+        const std::out_of_range &)
   }
 
   void test_that_setting_startX_on_non_existent_workspace_throws_exception() {

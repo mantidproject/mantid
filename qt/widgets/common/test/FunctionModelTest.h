@@ -26,7 +26,8 @@ QList<FunctionModelDataset> createDatasets(QStringList const &datasetNames,
                                            std::string const &spectraString) {
   QList<FunctionModelDataset> datasets;
   for (const auto &datasetName : datasetNames)
-    datasets.append(FunctionModelDataset(datasetName, Spectra(spectraString)));
+    datasets.append(
+        FunctionModelDataset(datasetName, FunctionModelSpectra(spectraString)));
   return datasets;
 }
 
