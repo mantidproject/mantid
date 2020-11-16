@@ -450,7 +450,7 @@
     </property>
     <widget class="QMenu" name="menuRow_s">
      <property name="title">
-      <string>Row(s)</string>
+      <string>&amp;Row(s)</string>
      </property>
      <addaction name="actionAddRow"/>
      <addaction name="actionDelRow"/>
@@ -460,18 +460,18 @@
     </widget>
     <widget class="QMenu" name="menuColumns_s">
      <property name="title">
-      <string>Columns(s)</string>
+      <string>&amp;Columns(s)</string>
      </property>
      <widget class="QMenu" name="menuAddRemoveColumn">
       <property name="title">
-       <string>Add/remove column</string>
+       <string>&amp;Add/remove column</string>
       </property>
      </widget>
      <addaction name="menuAddRemoveColumn"/>
     </widget>
     <widget class="QMenu" name="menuCell_s">
      <property name="title">
-      <string>Cell(s)</string>
+      <string>Cell(&amp;s)</string>
      </property>
      <addaction name="actionErase"/>
     </widget>
@@ -500,7 +500,7 @@
   </widget>
   <action name="actionLoadRundex">
    <property name="text">
-    <string>Load rundex</string>
+    <string>&amp;Load rundex</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -518,67 +518,67 @@
   </action>
   <action name="actionSaveAs">
    <property name="text">
-    <string>Save rundex as</string>
+    <string>&amp;Save rundex as</string>
    </property>
   </action>
   <action name="actionManageDirectories">
    <property name="text">
-    <string>Manage data directories</string>
+    <string>&amp;Manage data directories</string>
    </property>
   </action>
   <action name="actionSettings">
    <property name="text">
-    <string>Settings</string>
+    <string>S&amp;ettings</string>
    </property>
   </action>
   <action name="actionProcessRow">
    <property name="text">
-    <string>Process select row(s)</string>
+    <string>&amp;Process select row(s)</string>
    </property>
   </action>
   <action name="actionProcessAll_2">
    <property name="text">
-    <string>Process all rows</string>
+    <string>Process all &amp;rows</string>
    </property>
   </action>
   <action name="actionStopProcessing">
    <property name="text">
-    <string>Stop processing</string>
+    <string>&amp;Stop processing</string>
    </property>
   </action>
   <action name="actionCopyRow">
    <property name="text">
-    <string>Copy selected row(s)</string>
+    <string>&amp;Copy selected row(s)</string>
    </property>
   </action>
   <action name="actionCutRow">
    <property name="text">
-    <string>Cut selected row(s)</string>
+    <string>Cut &amp;selected row(s)</string>
    </property>
   </action>
   <action name="actionPasteRow">
    <property name="text">
-    <string>Paste row(s)</string>
+    <string>&amp;Paste row(s)</string>
    </property>
   </action>
   <action name="actionErase">
    <property name="text">
-    <string>Erase selected cell(s)</string>
+    <string>&amp;Erase selected cell(s)</string>
    </property>
   </action>
   <action name="actionAddRow">
    <property name="text">
-    <string>Add a row</string>
+    <string>&amp;Add a row</string>
    </property>
   </action>
   <action name="actionDelRow">
    <property name="text">
-    <string>Remove selected row(s)</string>
+    <string>&amp;Remove selected row(s)</string>
    </property>
   </action>
   <action name="actionSave">
    <property name="text">
-    <string>Save rundex</string>
+    <string>Save &amp;rundex</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -586,7 +586,7 @@
   </action>
   <action name="actionClose">
    <property name="text">
-    <string>Close</string>
+    <string>&amp;Close</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+Q</string>
@@ -594,7 +594,7 @@
   </action>
   <action name="actionHelp">
    <property name="text">
-    <string>DrILL help</string>
+    <string>&amp;DrILL help</string>
    </property>
   </action>
   <action name="actiona">
