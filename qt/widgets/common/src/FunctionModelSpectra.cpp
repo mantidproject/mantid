@@ -49,15 +49,15 @@ FunctionModelSpectra::FunctionModelSpectra(FunctionModelSpectra &&vec)
     : m_vec(std::move(vec.m_vec)),
       m_isContinuous(std::move(vec.m_isContinuous)) {}
 
-FunctionModelSpectra &
-FunctionModelSpectra::operator=(const FunctionModelSpectra &vec) {
+FunctionModelSpectra &FunctionModelSpectra::
+operator=(const FunctionModelSpectra &vec) {
   m_vec = vec.m_vec;
   m_isContinuous = vec.m_isContinuous;
   return *this;
 }
 
-FunctionModelSpectra &
-FunctionModelSpectra::operator=(FunctionModelSpectra &&vec) {
+FunctionModelSpectra &FunctionModelSpectra::
+operator=(FunctionModelSpectra &&vec) {
   m_vec = std::move(vec.m_vec);
   m_isContinuous = std::move(vec.m_isContinuous);
   return *this;
