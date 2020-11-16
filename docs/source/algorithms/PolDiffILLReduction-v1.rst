@@ -48,12 +48,12 @@ Different input properties can be specified depending on the value of **ProcessA
 |                  | * **TransmissionInputWorkspace**     |                                            |
 +------------------+--------------------------------------+--------------------------------------------+
 | Vanadium         | * AbsorberInputWorkspace             | * SampleGeometry                           |
-|                  | * ContainerInputWorkspace            | * SampleAndEnvironmentProperties           |
+|                  | * ContainerInputWorkspace            | * **SampleAndEnvironmentProperties**       |
 |                  | * TransmissionInputWorkspace         | * OutputTreatment                          |
 |                  | * QuartzInputWorkspace               |                                            |
 +------------------+--------------------------------------+--------------------------------------------+
 | Sample           | * AbsorberInputWorkspace             | * SampleGeometry                           |
-|                  | * ContainerInputWorkspace            | * SampleAndEnvironmentProperties           |
+|                  | * ContainerInputWorkspace            | * **SampleAndEnvironmentProperties**       |
 |                  | * TransmissionInputWorkspace         | * OutputTreatment                          |
 |                  | * QuartzInputWorkspace               |                                            |
 +------------------+--------------------------------------+--------------------------------------------+
