@@ -530,19 +530,19 @@ class DrillModelTest(unittest.TestCase):
         self.model.stopProcess()
         self.model.tasksPool.abortProcessing.assert_called_once()
 
-    @mock.patch("Interface.ui.drill.model.DrillModel.DrillIOModel")
-    def test_setIOFile(self, mIOModel):
+    @mock.patch("Interface.ui.drill.model.DrillModel.DrillRundexIO")
+    def test_setIOFile(self, mRundexIO):
         self.model.setIOFile("test")
-        mIOModel.assert_called_once_with("test", self.model)
+        mRundexIO.assert_called_once_with("test", self.model)
 
     def test_resetIOFile(self):
-        self.model.ioModel = "test"
+        self.model.rundexIO = "test"
         self.model.resetIOFile()
-        self.assertIsNone(self.model.ioModel)
+        self.assertIsNone(self.model.rundexIO)
 
     def test_getIOFile(self):
-        self.model.ioModel = mock.Mock()
-        self.model.ioModel.getFilename.return_value = "test"
+        self.model.rundexIO = mock.Mock()
+        self.model.rundexIO.getFilename.return_value = "test"
         self.assertEqual(self.model.getIOFile(), "test")
 
     def test_getVisualSettings(self):

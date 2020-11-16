@@ -2,7 +2,7 @@ set(PYUNITTEST_QT_API pyqt5)
 
 set(TEST_PY_FILES
   DrillTableWidgetTest.py
-  DrillIOModelTest.py
+  DrillRundexIOTest.py
   DrillModelTest.py
   DrillPresenterTest.py
   DrillViewTest.py

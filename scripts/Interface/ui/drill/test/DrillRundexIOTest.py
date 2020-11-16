@@ -8,25 +8,25 @@
 import unittest
 from unittest import mock
 
-from Interface.ui.drill.model.DrillIOModel import DrillIOModel
+from Interface.ui.drill.model.DrillRundexIO import DrillRundexIO
 
 
-class DrillIOModelTest(unittest.TestCase):
+class DrillRundexIOTest(unittest.TestCase):
 
     def setUp(self):
         # mock open
-        patch = mock.patch('Interface.ui.drill.model.DrillIOModel.open')
+        patch = mock.patch('Interface.ui.drill.model.DrillRundexIO.open')
         self.mOpen = patch.start()
         self.addCleanup(patch.stop)
 
         # mock json
-        patch = mock.patch('Interface.ui.drill.model.DrillIOModel.json')
+        patch = mock.patch('Interface.ui.drill.model.DrillRundexIO.json')
         self.mJson = patch.start()
         self.addCleanup(patch.stop)
 
         self.filename = "test"
         self.mDrillModel = mock.Mock()
-        self.model = DrillIOModel(self.filename, self.mDrillModel)
+        self.model = DrillRundexIO(self.filename, self.mDrillModel)
 
     def test_getFilename(self):
         self.assertEqual(self.model.getFilename(), self.filename)

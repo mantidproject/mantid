@@ -12,7 +12,7 @@ from mantid.kernel import *
 from .configurations import RundexSettings
 
 
-class DrillIOModel:
+class DrillRundexIO:
 
     """
     Name of the file where the data will be read or saved.
@@ -33,7 +33,7 @@ class DrillIOModel:
                             read and saved
             drillModel (DrillModel): data model
         """
-        super(DrillIOModel, self).__init__()
+        super(DrillRundexIO, self).__init__()
         self._filename = filename
         self._drillModel = drillModel
 

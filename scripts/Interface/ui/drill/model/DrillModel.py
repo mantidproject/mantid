@@ -19,7 +19,7 @@ from .configurations import RundexSettings
 from .DrillAlgorithmPool import DrillAlgorithmPool
 from .DrillTask import DrillTask
 from .DrillParameterController import DrillParameter, DrillParameterController
-from .DrillIOModel import DrillIOModel
+from .DrillRundexIO import DrillRundexIO
 
 
 class DrillModel(QObject):
@@ -115,7 +115,7 @@ class DrillModel(QObject):
         self.settings = dict()
         self.controller = None
         self.visualSettings = dict()
-        self.ioModel = None
+        self.rundexIO = None
 
         # set the instrument and default acquisition mode
         self.tasksPool = DrillAlgorithmPool()
@@ -691,35 +691,35 @@ class DrillModel(QObject):
         Args:
             filename (str): the filename
         """
-        self.ioModel = DrillIOModel(filename, self)
+        self.rundexIO = DrillRundexIO(filename, self)
 
     def resetIOFile(self):
         """
         Reset the IO service.
         """
-        self.ioModel = None
+        self.rundexIO = None
 
     def getIOFile(self):
         """
         Get the filename used by the IO service.
         """
-        if self.ioModel:
-            return self.ioModel.getFilename()
+        if self.rundexIO:
+            return self.rundexIO.getFilename()
         return None
 
     def importRundexData(self):
         """
         Import data.
         """
-        if self.ioModel:
-            self.ioModel.load()
+        if self.rundexIO:
+            self.rundexIO.load()
 
     def exportRundexData(self):
         """
         Export data.
         """
-        if self.ioModel:
-            self.ioModel.save()
+        if self.rundexIO:
+            self.rundexIO.save()
 
     def setVisualSettings(self, vs):
         """
