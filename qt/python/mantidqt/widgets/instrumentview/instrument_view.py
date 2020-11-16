@@ -17,6 +17,7 @@ def safe_qthread(func):
 
 class SurfaceType(IntEnum):
     """Enumertor for the surface type in Instrument View"""
+
     Full3D = 0
     CylindricalX = 1
     CylindricalY = 2
@@ -29,6 +30,7 @@ class SurfaceType(IntEnum):
 
 class TabName(IntEnum):
     """Enumerator for the Tab in Instrument View"""
+
     Render = 0
     Pick = 1
     Draw = 2
@@ -121,7 +123,7 @@ class pyInstrumentView:
     @safe_qthread
     def select_surface_type(self, surface_type):
         """select surafce type (projection style)
-        :param surface_type: [SurfaceType.Full3D | 
+        :param surface_type: [SurfaceType.Full3D |
                               SurfaceType.CylindricalX | SurfaceType.CylindricalY | SurfaceType.CylindricalZ |
                               SurfaceType.SphericalX   | SurfaceType.SphericalY   | SurfaceType.SphericalZ   |
                               SurfaceType.SideBySide]
