@@ -230,6 +230,18 @@ public:
         apply: flag to apply the change other than color bar by sending singal out.
 %End
 
+    void setRange(double minValue, double maxValue, bool apply);
+%Docstring
+    void setRange(double minValue, double maxValue, bool apply)
+    -----------------------------------------------------------
+    Set minimum and maximum values on the colormap scale.
+
+    Args:
+        minValue: minimum value for the color bar
+        maxValue: maximum value for the color bar
+        apply: flag to apply the change other than color bar by sending singal out.
+%End
+
   // set Axis at Full 3D
   void setAxis(const QString &axisNameArg);
 %Docstring
