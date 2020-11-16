@@ -804,6 +804,7 @@ class DrillView(QMainWindow):
         self.fill.setDisabled(state)
         self.help.setDisabled(state)
         self.processRows.setDisabled(state)
+        self.buttonProcessGroup.setDisabled(state)
         self.buttonProcessAll.setDisabled(state)
         self.stop.setDisabled(not state)
         self.table.setDisabled(state)
