@@ -210,7 +210,7 @@ public:
 
   void setMinValue(double value, bool apply);
 %Docstring
-    void setBinRange(double value, bool apply)
+    void setMinValue(double value, bool apply)
     ----------------------------------------------------
     Updates the integration range over which the colours
     are calculated
@@ -222,7 +222,7 @@ public:
 
     void setMaxValue(double value, bool apply);
 %Docstring
-    void setBinRange(double value, bool apply)
+    void setMaxValue(double value, bool apply)
     ----------------------------------------------------
     Updates the integration range over which the colours
     are calculated
