@@ -220,7 +220,7 @@ getUniqueWorkspaceNames(std::vector<std::string> &&workspaceNames) {
   std::set<std::string> uniqueNames(workspaceNames.begin(),
                                     workspaceNames.end());
   workspaceNames.assign(uniqueNames.begin(), uniqueNames.end());
-  return workspaceNames;
+  return std::move(workspaceNames);
 }
 
 auto getNumericAxisValueReader(std::size_t axisIndex) {

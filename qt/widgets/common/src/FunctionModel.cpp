@@ -205,7 +205,7 @@ QStringList FunctionModel::getParameterNames() const {
   QStringList names;
   if (hasFunction()) {
     const auto paramNames = getCurrentFunction()->getParameterNames();
-    for (auto const name : paramNames) {
+    for (auto const &name : paramNames) {
       names << QString::fromStdString(name);
     }
   }
