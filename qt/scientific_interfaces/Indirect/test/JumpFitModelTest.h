@@ -241,7 +241,7 @@ private:
   template <typename Workspace, typename... Workspaces>
   void addWorkspacesToModel(FunctionModelSpectra const &spectra,
                             Workspace const &workspace,
-                            Workspaces const &...workspaces) {
+                            Workspaces const &... workspaces) {
     m_model->addWorkspace(workspace->getName());
     addWorkspacesToModel(spectra, workspaces...);
   }
