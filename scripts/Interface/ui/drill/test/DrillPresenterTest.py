@@ -62,6 +62,18 @@ class DrillPresenterTest(unittest.TestCase):
         self.presenter.onProcess()
         self.presenter._process.assert_called_once_with([0, 1, 2, 3, 4])
 
+    def test_onProcessGroup(self):
+        self.presenter._process = mock.Mock()
+        self.model.getSamplesGroups.return_value = {'A': [1, 2, 3],
+                                                    'B': [5, 6, 8]}
+        self.view.getSelectedRows.return_value = [1]
+        self.presenter.onProcessGroup()
+        self.presenter._process.assert_called_once_with({1, 2, 3})
+        self.presenter._process.reset_mock()
+        self.view.getSelectedRows.return_value = [1, 5]
+        self.presenter.onProcessGroup()
+        self.presenter._process.assert_called_once_with({1, 2, 3, 5, 6, 8})
+
     def test_onProcessAll(self):
         self.presenter._process = mock.Mock()
         self.view.getAllRows.return_value = [0, 1, 2, 3, 4]

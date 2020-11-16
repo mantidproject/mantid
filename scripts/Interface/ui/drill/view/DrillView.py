@@ -109,6 +109,11 @@ class DrillView(QMainWindow):
     processAll = Signal()
 
     """
+    Sent when the user asks to process selected groups.
+    """
+    processGroup = Signal()
+
+    """
     Sent when the user wants to stop the current processing.
     """
     processStopped = Signal()
@@ -224,6 +229,9 @@ class DrillView(QMainWindow):
 
         self.processRows.setIcon(icons.get_icon("mdi.play"))
         self.processRows.clicked.connect(self.process.emit)
+
+        self.buttonProcessGroup.setIcon(icons.get_icon("mdi.skip-forward"))
+        self.buttonProcessGroup.clicked.connect(self.processGroup.emit)
 
         self.buttonProcessAll.setIcon(icons.get_icon("mdi.fast-forward"))
         self.buttonProcessAll.clicked.connect(self.processAll.emit)

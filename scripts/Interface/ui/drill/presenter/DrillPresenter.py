@@ -50,6 +50,7 @@ class DrillPresenter:
         self.view.ungroupRequested.connect(self.onUngroupRequested)
         self.view.setMaster.connect(self.onMasterRowRequested)
         self.view.process.connect(self.onProcess)
+        self.view.processGroup.connect(self.onProcessGroup)
         self.view.processAll.connect(self.onProcessAll)
         self.view.processStopped.connect(self.stopProcessing)
         self.view.loadRundex.connect(self.onLoad)
@@ -146,6 +147,19 @@ class DrillPresenter:
         rows = self.view.getSelectedRows()
         if not rows:
             rows = self.view.getAllRows()
+        self._process(rows)
+
+    def onProcessGroup(self):
+        """
+        Handles the processing of selected groups.
+        """
+        groups = self.model.getSamplesGroups()
+        selectedRows = self.view.getSelectedRows()
+        rows = set()
+        for row in selectedRows:
+            for group in groups:
+                if row in groups[group]:
+                    rows.update(groups[group])
         self._process(rows)
 
     def onProcessAll(self):
