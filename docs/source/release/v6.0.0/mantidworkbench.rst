@@ -35,5 +35,6 @@ Bugfixes
 - Fix crash on second call to ManageUserDirectories after pressing Esc to close it.
 - A bug in plot config where changing an axes title in the axis tab did not change the title in the curves tab.
 - Fixed a Workbench crash when attempting to show the data in a ragged workspace.
+- Fixed a bug which would cause unrealistic errorbars on the fit calc curve.
 
 :ref:`Release 6.0.0 <v6.0.0>`
