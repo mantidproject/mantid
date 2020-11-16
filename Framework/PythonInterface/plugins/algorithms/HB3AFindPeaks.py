@@ -48,6 +48,14 @@ class HB3AFindPeaks(PythonAlgorithm):
         centering_type.addAllowedValue("R")
         self.declareProperty("Centering", "P", centering_type, doc="Centering to use for selecting cells")
 
+        # Some of the options to pass through to FindPeaksMD (options like CalculateGoniometerForCW, FlipX, etc are
+        # assumed to be True)
+        self.declareProperty("MaxPeaks", 1000, doc="Maximum number of peaks to find.")
+        self.declareProperty("PeakDistanceThreshold", 0.25, doc="Threshold distance for rejecting peaks that are found "
+                                                                "to be too close from each other")
+        self.declareProperty("Wavelength", defaultValue=1.008,
+                             doc="Wavelength value to use if one was not found in the sample log")
+
         # Lattice parameter validators from same as FindUBUsingLatticeParameters
         self.declareProperty("UseLattice", False, direction=Direction.Input,
                              doc="Whether to refine UB matrix based on given lattice parameters")
@@ -96,6 +104,9 @@ class HB3AFindPeaks(PythonAlgorithm):
         cell_type = self.getProperty("CellType").value
         centering = self.getProperty("Centering").value
 
+        npeaks = self.getProperty("MaxPeaks").value
+        dist_thresh = self.getProperty("PeakDistanceThreshold").value
+
         lattice = self.getProperty("UseLattice").value
         if lattice:
             a = self.getProperty("LatticeA").value
@@ -107,13 +118,13 @@ class HB3AFindPeaks(PythonAlgorithm):
 
         peak_ws = self.getProperty("OutputWorkspace")
 
-        wavelength = 1.008
+        wavelength =self.getProperty("Wavelength").value
         exp_info = input_ws.getExperimentInfo(0)
         if exp_info.run().hasProperty("wavelength"):
             wavelength = exp_info.run().getProperty("wavelength").value
 
-        peak_ws = FindPeaksMD(InputWorkspace=input_ws, PeakDistanceThreshold=0.25, CalculateGoniometerForCW=True,
-                              Wavelength=wavelength, FlipX=True, InnerGoniometer=True)
+        peak_ws = FindPeaksMD(InputWorkspace=input_ws, PeakDistanceThreshold=dist_thresh, CalculateGoniometerForCW=True,
+                              Wavelength=wavelength, FlipX=True, InnerGoniometer=True, MaxPeaks=npeaks)
 
         IndexPeaks(PeaksWorkspace=peak_ws)
 
