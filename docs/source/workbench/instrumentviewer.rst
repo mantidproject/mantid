@@ -97,8 +97,7 @@ To use the Python interface for InstrumentViewer, use the following code to impo
 
 .. code-block:: python
 
-  from mantidqt.widgets.instrumentview.instrument_view import pyInstrumentView
-  from mantidqt.widgets.instrumentview.instrument_view import SurfaceType, TabName
+  from mantidqt.widgets.instrumentview.api import get_instrumentview 
 
 then load the Nexus data into a workspace
 
@@ -110,40 +109,47 @@ Now we are done with the necesary preparation, time to get a handle to the windo
 
 .. code-block:: python
 
-  myiv = pyInstrumentView(ws)
+  myiv = get_instrumentview(ws)
   myiv.show_view()
 
 To set the integration range (time-of-flight), use
 
 .. code-block:: python
 
-  myiv.set_x_range(1, 10000)
+  myiv.set_bin_range(1, 10000)
 
 To switch to a different tab, use
 
 .. code-block:: python
 
-  myiv.select_tab(TabName.Render)
+  myiv.select_tab(0)  # TabIndex
+                      # 0: Render, 1: Pick, 2: Draw, 3: Instrument
 
 To select the projection type (surface type), use
 
 .. code-block:: python
 
-  myiv.select_surface_type(SurfaceType.SphericalY)
+  myiv.select_surface_type(0) # SurfaceTypeIndex
+                              # 0: FULL3D
+                              # 1: CYLINDRICAL_X, 2: CYLINDRICAL_Y, 3: CYLINDRICAL_Z,
+                              # 4: SPHERICAL_X,   5: SPHERICAL_Y,   6: SPHERICAL_Z,
+                              # 7: SideBySide
 
 To switch to a different viewing axis, use
 
 .. code-block:: python
 
-  myiv.set_axis("Y+")
+  myiv.set_axis("Y+")  # (Z+, Z-, Y+, Y-, X+, X-)
 
 To elect the range for the data (intensity, color map legend), use
 
 .. code-block:: python
 
-  myiv.set_intensity_min(1)
-  myiv.set_intensity_max(1000)
-  myiv.set_intensity_range(1, 1000)
+  myiv.set_color_min(1, True)          # minimum value for the colorbar
+  myiv.set_color_max(1000, True)       # maximum value for the colorbar
+  myiv.set_color_range(1, 1000, True)  # full range of the colorbar
+  myiv.set_color_scale(0)              # color legend scale type
+                                       # 0: Linear, 1: SymmetricLog10, 2: Power
 
 To start the app outside ``MantidWorkbench``, use the following code snippet as a starting point
 
@@ -152,8 +158,7 @@ To start the app outside ``MantidWorkbench``, use the following code snippet as 
   import sys
   from mantidqt.gui_helper import get_qapplication
   from mantid.simpleapi import LoadEventNexus
-  from mantidqt.widgets.instrumentview.instrument_view import pyInstrumentView
-  from mantidqt.widgets.instrumentview.instrument_view import SurfaceType, TabName
+  from mantidqt.widgets.instrumentview.api import get_instrumentview 
   # check if launched within Workbench, if not return a parent QApp for this widget
   # to attach to
   app, within_mantid = get_qapplication()
@@ -161,24 +166,26 @@ To start the app outside ``MantidWorkbench``, use the following code snippet as 
   nexus_path = '/SNS/EQSANS/shared/sans-backend/data/new/ornl/sans/hfir/gpsans/CG2_9177.nxs.h5'
   ws = LoadEventNexus(Filename=nexus_path, NumberOfBins=10)
   # setup the instrument view
-  myiv = pyInstrumentView(ws)
+  myiv = get_instrumentview(ws)
   # to open the app
   myiv.show_view()
   # select tab
-  myiv.select_tab(TabName.Render)
+  myiv.select_tab(0)
   # select projection (surface type)
-  myiv.select_surface_type(SurfaceType.Full3D)
+  myiv.select_surface_type(0)
   # select axis
   myiv.set_axis("Z-")
   # select the range for the data (intensity, color map legend)
-  myiv.set_intensity_min(1)
-  myiv.set_intensity_max(1000)
-  myiv.set_intensity_range(1, 1000)
+  myiv.set_color_min(1, True)
+  myiv.set_color_max(1000, True)
+  myiv.set_color_range(1, 1000, True)
+  myiv.set_color_scale(0)
   # select the integration range (time of flight)
-  myiv.set_x_range(1, 10000)
+  myiv.set_bin_range(1, 10000)
   # if running as a standalone app, start the QApp
   if not within_mantid:
-      sys.exit(app.exec_())
+    myiv.reset_view()
+    sys.exit(app.exec_())
 
-NOTE: If the instrument view app is launched outside ``MantidWorkbench``, the user need to hit ``Reset View`` at least once to get the display widget renderes properly.
-This is a known issue and will be fixed in a future release.
+NOTE: If the instrument view app is launched outside ``MantidWorkbench`` on RHEL_7, the user need click on the viewing widget to get it rendered properly.
+For other OS, the instrument viewing widget should display the instrument properly upon launching.
