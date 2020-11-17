@@ -116,7 +116,7 @@ where `m` is the bank slope, :math:`offset_{\text{pixel}}` is the relative offse
 Transmission calculation
 ========================
 
-The transmission (T) is calculated using counts measured by Monitor 2 (M2), and according to the following formula:
+The transmission (T) is calculated using counts measured by monitor 2 (M2), and according to the following formula:
 
 .. math:: T = \frac{S - E_{Cd}}{E - E_{Cd}},
 
@@ -124,6 +124,8 @@ where :math:`S` is M2 counts measured with the current sample, :math:`E_{Cd}` is
 
 The measurement of the cadmium absorber is optional and does not have to be provided as input for the transmission to be calculated. However, it allows
 to take into account dark currents in the readout system electronics and thus this measurement is advised to be included in transmission calculations.
+
+The output of the transmission calculation is given as a histogram with a single value containing the calculated polarisation.
 
 Below are the relevant workflow diagrams describing reduction steps of the transmission calculation.
 
@@ -187,8 +189,114 @@ Output:
 Polarisation correction
 =======================
 
+The polarisation correction is estimated using quartz sample. The scattering is purely diffuse and, to a good approximation, non-spin flip.
+Ideally, the quartz should have the same geometry and attenuation as the sample as then the same gauge volume of the beam is measured
+and the reduction will give an accurate estimation of the polarizing efficiency. However, the correction is usually fairly insensitive to small
+differences in the polarizing efficiency and choosing the quartz to have the same outer dimensions is normally satisfactory. Multiple scattering
+is not a problem, as the correction is given by a ratio and there is no spin-flip scattering to depolarize the beam. The polarization efficiencies
+are calculated from ratios of non-spin-flip to spin-flip scattering, hence absolute numbers are not necessary.
+
+First, the data is normalised to monitor 1 (M1). Then, if the necessary inputs of container and absorber (please note this is a different measurement
+than mentioned in the `Transmission` section) measurements are provided, the background can be subtracted from the data: 
+
+.. math:: \dot{I}_{B} = \dot{I} - T\dot{E} - (1-T) \dot{C},
+
+where :math:`\dot{I}` denotes monitor-normalised quartz data, :math:`T` is transmission, and :math:`\dot{E}` and :math:`\dot{C}` are the normalised counts
+measured with empty container and cadmium absorber, respectively.
+
+In the case where either absorber or empty container inputs are not provided, this correction is not performed.
+
+Finally, the polariser-analyser efficiency can be calculated, using the following formula:
+
+.. math:: \phi = \frac{\dot{I_{B}}(00) - \dot{I_{B}}(01)}{(2f_{p}-1) \dot{I_{B}}(00) + \dot{I_{B}}(01)},
+
+where :math:`f_{p}` is the flipper efficiency, currently assumed to be 1.0, and :math:`\dot{I_{B}}(00)` and :math:`\dot{I_{B}}(01)` denote normalised
+and background-subtracted data with flipper states off and on respectively.
+
+The output is given in the form of a histogram with a single value per detector per polarisation direction.
+
+Below are the relevant workflow diagrams describing reduction steps of the quartz reduction.
+
+.. diagram:: PolDiffILLReduction-v1_quartz_wkflw.dot
+
+.. include:: ../usagedata-note.txt
+
+**Example - full treatment of a sample**
+
+.. testsetup:: ExPolarisedDifffractionQuartz
+
+    config['default.facility'] = 'ILL'
+    config.appendDataSearchSubDir('ILL/D7/')
+
+.. testcode:: ExPolarisedDifffractionQuartz
+
+    # Beam with cadmium absorber, used for transmission
+    PolDiffILLReduction(
+        Run='396991',
+        OutputWorkspace='cadmium_ws',
+        ProcessAs='BeamWithAbsorber'
+    )
+
+    # Beam measurement for transmisison
+    PolDiffILLReduction(
+        Run='396983',
+        OutputWorkspace='beam_ws',
+        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        ProcessAs='EmptyBeam'
+    )
+
+    # Quartz transmission
+    PolDiffILLReduction(
+        Run='396985',
+        OutputWorkspace='quartz_transmission',
+        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        BeamInputWorkspace='beam_ws_1',
+       ProcessAs='Transmission'
+    )
+
+    # Empty container
+    PolDiffILLReduction(
+        Run='396917',
+        OutputWorkspace='container_ws',
+        ProcessAs='Container'
+    )
+
+    # Absorber
+    PolDiffILLReduction(
+        Run='396928',
+        OutputWorkspace='absorber_ws',
+        ProcessAs='Absorber'
+    )
+
+    # Polarisation correction
+    PolDiffILLReduction(
+        Run='396939',
+        OutputWorkspace='pol_corrections',
+        AbsorberInputWorkspace='absorber_ws',
+        ContainerInputWorkspace='container_ws',
+        TransmissionInputWorkspace='quartz_transmission_1',
+        OutputTreatment='Average',
+        ProcessAs='Quartz'
+    )
+
+    SumSpectra(InputWorkspace='pol_corrections_ZPO_0', OutputWorkspace='sum',
+	       StartWorkspaceIndex=0, EndWorkspaceIndex=131)
+    print("The average polarisation efficiency in the Z direction is {0:.2f}".format(mtd['sum'].readY(0)[0] / 132.0))
+
+Output:
+
+.. testoutput:: ExPolarisedDifffractionQuartz
+
+    The average polarisation efficiency in the Z direction is 0.90
+
+.. testcleanup:: ExPolarisedDifffractionQuartz
+
+    mtd.clear()
+
+
 Sample data reduction
 =====================
+
 
 Sample data normalisation
 -------------------------
