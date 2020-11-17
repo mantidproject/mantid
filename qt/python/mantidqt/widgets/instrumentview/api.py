@@ -40,7 +40,7 @@ def get_instrumentview(workspace):
     ivp.select_surface_type = ivp.get_render_tab().setSurfaceType
     ivp.set_auto_scaling = ivp.get_render_tab().setColorMapAutoscaling
     ivp.set_axis = ivp.get_render_tab().setAxis
-    ivp.set_bin_range = safe_qthread(ivp.container.set_range)
+    ivp.set_bin_range = safe_qthread(ivp.container.widget.setBinRange)
     ivp.set_color_min = safe_qthread(ivp.get_render_tab().setMinValue)
     ivp.set_color_max = safe_qthread(ivp.get_render_tab().setMaxValue)
     ivp.set_color_range = safe_qthread(ivp.get_render_tab().setRange)
