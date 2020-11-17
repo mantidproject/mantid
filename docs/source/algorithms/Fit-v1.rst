@@ -95,7 +95,7 @@ with :math:`\mathbf{\sigma_f}` defined as,
 
 where :math:`\mathbf{C}_{jk}` is the covriance matrix and :math:`\chi_{\nu}^2` the reduced chi squared value.
 This interval defines the region where there is a 68.3% chance to find the true value of :math:`f(\mathbf{p})`.
-For further details see https://www.astro.rug.nl/software/kapteyn/kmpfittutorial.html#confidence-and-prediction-intervals
+For further details see reference [1].
 
 Setting a simple function
 #########################
@@ -687,6 +687,11 @@ Output:
     Workspace1 LinearBackground.A1: 2.00
     Workspace2 ExpDecay.Height: 8.44
     Workspace2 ExpDecay.Lifetime: 1.40
+
+References
+----------
+
+[1] Vogelaar, M.G.R., kmpfit. University of Groningen, The Netherlands (https://www.astro.rug.nl/software/kapteyn/kmpfittutorial.html)
 
 .. categories::
 
