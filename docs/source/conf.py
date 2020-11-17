@@ -11,8 +11,9 @@
 # The workaround is discussed in https://groups.google.com/forum/#!topic/leo-editor/ghiIN7irzY0
 # and simply amounts to importing readline before a QApplication is created in the screenshots
 # directive
-import readline
 import sys
+if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == "darwin":
+    import readline
 import os
 from sphinx import __version__ as sphinx_version
 import sphinx_bootstrap_theme  # checked at cmake time
