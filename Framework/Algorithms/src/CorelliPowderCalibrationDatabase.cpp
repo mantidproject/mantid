@@ -67,8 +67,8 @@ CalibrationTableHandler::createComponentCalibrationTable(
 
   // Set up columns
   tablews->addColumn("str", "YYYMMDD"); // first column as date stamp
-  for (size_t i = 1;
-       i < CorelliCalibration::calibrationTableColumnNames.size(); ++i) {
+  for (size_t i = 1; i < CorelliCalibration::calibrationTableColumnNames.size();
+       ++i) {
     std::string colname = CorelliCalibration::calibrationTableColumnNames[i];
     std::string type = CorelliCalibration::calibrationTableColumnTypes[i];
     tablews->addColumn(type, colname);
@@ -87,7 +87,8 @@ void CalibrationTableHandler::appendCalibration(
     DataObjects::TableWorkspace_sptr tablews, const std::string &datestamp,
     ComponentPosition &pos) {
   if (tablews->columnCount() != 8) {
-      throw std::runtime_error("Single component calibration table workspace is not correct.");
+    throw std::runtime_error(
+        "Single component calibration table workspace is not correct.");
   }
 
   // Append a new row
@@ -247,7 +248,7 @@ void CalibrationTableHandler::saveCompomentDatabase(
   saveAsciiAlg->setPropertyValue(
       "InputWorkspace",
       tablewsname); // std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));
-                        // //mCalibWS->getName());
+                    // //mCalibWS->getName());
   saveAsciiAlg->setProperty("Filename", filename);
   saveAsciiAlg->setPropertyValue("CommentIndicator", "#");
   saveAsciiAlg->setPropertyValue("Separator", "CSV");

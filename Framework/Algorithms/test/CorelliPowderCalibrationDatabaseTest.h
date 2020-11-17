@@ -250,17 +250,21 @@ public:
     // Test: load calibration table
     // TODO - later. not important now
     //    calib_handler.load(testcompfilename);
-    //    TableWorkspace_sptr compcalibws = calib_handler.getCalibrationWorkspace();
+    //    TableWorkspace_sptr compcalibws =
+    //    calib_handler.getCalibrationWorkspace();
 
     // Test: save single component file
     const std::string testsamplecalfilename{"/tmp/testsampledb2.csv"};
     boost::filesystem::remove(testsamplecalfilename);
     // save
-    calib_handler.saveCompomentDatabase("20201117", "sample", testsamplecalfilename);
+    calib_handler.saveCompomentDatabase("20201117", "sample",
+                                        testsamplecalfilename);
     TS_ASSERT(boost::filesystem::exists(testsamplecalfilename));
 
     // load
-    TableWorkspace_sptr dupsampletable = calib_handler.loadComponentCalibrationTable(testsamplecalfilename, "TestSampleCalib1");
+    TableWorkspace_sptr dupsampletable =
+        calib_handler.loadComponentCalibrationTable(testsamplecalfilename,
+                                                    "TestSampleCalib1");
     // check row number and value
     TS_ASSERT_EQUALS(dupsampletable->rowCount(), 1);
     TS_ASSERT_DELTA(dupsampletable->cell<double>(0, 2), -0.0002, 0.000001);
