@@ -197,7 +197,7 @@ class WANDPowderReductionTest(unittest.TestCase):
         pd_out3_multi = WANDPowderReduction(
             InputWorkspace=[data, data],
             CalibrationWorkspace=cal,
-            BackgroundWorkspace="bkg,bkg",
+            BackgroundWorkspace=bkg,
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="Time",
@@ -234,7 +234,7 @@ class WANDPowderReductionTest(unittest.TestCase):
         pd_out4_multi = WANDPowderReduction(
             InputWorkspace=[data, data],
             CalibrationWorkspace=cal,
-            BackgroundWorkspace="bkg,bkg",
+            BackgroundWorkspace=bkg,
             Target="ElasticDSpacing",
             EFixed=30,
             NumberBins=1000,
@@ -274,7 +274,7 @@ class WANDPowderReductionTest(unittest.TestCase):
         pd_out4_multi = WANDPowderReduction(
             InputWorkspace=[data, data],
             CalibrationWorkspace=cal,
-            BackgroundWorkspace="bkg,bkg",
+            BackgroundWorkspace=bkg,
             Target="ElasticQ",
             EFixed=30,
             NumberBins=2000,
@@ -313,7 +313,7 @@ class WANDPowderReductionTest(unittest.TestCase):
         pd_out4_multi = WANDPowderReduction(
             InputWorkspace=[data, data],
             CalibrationWorkspace=cal,
-            BackgroundWorkspace="bkg,bkg",
+            BackgroundWorkspace=bkg,
             BackgroundScale=0.5,
             Target="Theta",
             NumberBins=1000,
@@ -362,7 +362,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             WorkspaceType="Event",
             Function="Flat background",
         )
-        
+
         #CASE 1
         #input single workspace, output single workspace
         pd_out = WANDPowderReduction(
@@ -382,13 +382,13 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(x.max(), 70.3119282)
         self.assertAlmostEqual(y[0, 0], 0.0)
         assert isinstance(pd_out, MatrixWorkspace)
-        
+
         #CASE 2
         #input multiple single ws, output (single) summed ws
         pd_out = WANDPowderReduction(
             InputWorkspace=[event_data, event_data],
             CalibrationWorkspace=event_cal,
-            BackgroundWorkspace="event_bkg,event_bkg",
+            BackgroundWorkspace=event_bkg,
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="None",
@@ -402,18 +402,18 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(x.max(), 70.3119282)
         self.assertAlmostEqual(y[0, 0], 0.0)
         assert isinstance(pd_out, MatrixWorkspace)
-        
+
         #CASE 3
         #DOES NOT WORK YET -- currently outputs Workspace2D -- will modify when algorithm is updated
         #input group ws containing several ws, output group ws containing several ws
         groupWS = WorkspaceGroup()
         groupWS.addWorkspace(event_data)
         groupWS.addWorkspace(event_data2)
-        
+
         pd_out = WANDPowderReduction(
             InputWorkspace=groupWS,
             CalibrationWorkspace=event_cal,
-            BackgroundWorkspace="event_bkg,event_bkg",
+            BackgroundWorkspace=event_bkg,
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="None",
@@ -428,14 +428,14 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(y[0, 0], 0.0)
         assert isinstance(pd_out, WorkspaceGroup)
         assert len(pd_out) == 2
-        
+
         #CASE 4
         #DOES NOT WORK YET -- currently outputs Workspace2D -- will modify when algorithm is updated
         #input multiple single ws, output group ws containing several ws
         pd_out = WANDPowderReduction(
             InputWorkspace=[event_data, event_data],
             CalibrationWorkspace=event_cal,
-            BackgroundWorkspace="event_bkg,event_bkg",
+            BackgroundWorkspace=event_bkg,
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="None",
