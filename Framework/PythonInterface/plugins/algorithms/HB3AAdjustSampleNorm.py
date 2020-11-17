@@ -147,7 +147,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                         issues['InputWorkspaces'] = "Workspace '{}' expected to have 3 dimensions".format(ws)
 
         if not wavelength.isDefault:
-            if wavelength <= 0.0:
+            if wavelength.value <= 0.0:
                 issues['Wavelength'] = "Wavelength should be greater than zero"
 
         return issues
@@ -163,7 +163,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         else:
             datafiles = list(map(str.strip, self.getProperty("InputWorkspaces").value.split(",")))
 
-        prog = Progress(self, 0.0, 1.0, len(datafiles)+1)
+        prog = Progress(self, 0.0, 1.0, len(datafiles) + 1)
 
         vanadiumfile = self.getProperty("VanadiumFile").value
         vanws = self.getProperty("VanadiumWorkspace").value
@@ -200,6 +200,10 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                 scan = LoadMD(in_file, LoadHistory=False, StoreInADS=False)
             else:
                 scan = mtd[in_file]
+
+            # Make sure the workspace has experiment info, otherwise SetGoniometer will add some, causing issues.
+            if scan.getNumExperimentInfo() == 0:
+                raise RuntimeError("No experiment info was found in '{}'".format(in_file))
 
             prog.report()
             self.log().information("Processing '{}'".format(in_file))
