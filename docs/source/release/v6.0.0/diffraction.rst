@@ -67,6 +67,10 @@ New features
 
 Single Crystal Diffraction
 --------------------------
+Bugfixes
+########
+- Fix bug in :ref:`SaveHKL <algm-SaveHKL>` where the direction cosines were calculated incorrectly
+
 
 New features
 ############
