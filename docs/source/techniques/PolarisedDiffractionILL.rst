@@ -125,7 +125,12 @@ where :math:`S` is M2 counts measured with the current sample, :math:`E_{Cd}` is
 The measurement of the cadmium absorber is optional and does not have to be provided as input for the transmission to be calculated. However, it allows
 to take into account dark currents in the readout system electronics and thus this measurement is advised to be included in transmission calculations.
 
-The output of the transmission calculation is given as a histogram with a single value containing the calculated polarisation.
+It is possible to provide more than one numor as input for the transmission calculation. In such a case, the input workspaces are averaged.
+
+The output of the transmission calculation is given as a :ref:`WorkspaceGroup <WorkspaceGroup>` with a single workspace containing a single value of the calculated polarisation.
+
+Workflow diagrams and working example
+-------------------------------------
 
 Below are the relevant workflow diagrams describing reduction steps of the transmission calculation.
 
@@ -213,7 +218,11 @@ Finally, the polariser-analyser efficiency can be calculated, using the followin
 where :math:`f_{p}` is the flipper efficiency, currently assumed to be 1.0, and :math:`\dot{I_{B}}(00)` and :math:`\dot{I_{B}}(01)` denote normalised
 and background-subtracted data with flipper states off and on respectively.
 
-The output is given in the form of a histogram with a single value per detector per polarisation direction.
+The output is given in as a :ref:`WorkspaceGroup <WorkspaceGroup>` with the number of entries consistent with the number of measured polarisation directions.
+Each workspace in the group contains a single value of the polariser-analyser efficiency per detector.
+
+Workflow diagram and working example
+------------------------------------
 
 Below is the relevant workflow diagram describing reduction steps of the quartz reduction.
 
@@ -407,12 +416,16 @@ Output
 
 The corrected counts in each each detector are normalised to the expected total cross-section for vanadium
 of :math:`0.404 \frac{\text{barn}}{\text{steradian} \cdot \text{atom}}`. The output of vanadium reduction
-is given as a histogram with a single value per detector.
+is a :ref:`WorkspaceGroup <WorkspaceGroup>` with one entry if the `OutputTreatment` is set to `Sum`, or
+the same number of entries as input data if `Individual` was selected.
 
 In case it is desireable to separate cross-sections, for example for diagnostic purposes, it can be done
 using the reduced data described as above using :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
 algorithm. More details on working with this algorithm are given in the sample normalisation section.
 
+
+Workflow diagrams and working example
+-------------------------------------
 
 Below is the relevant workflow diagram describing reduction steps of the vanadium reduction.
 
@@ -420,7 +433,7 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
 
 .. include:: ../usagedata-note.txt
 
-**Example - full treatment of a sample**
+**Example - Vanadium reduction with annulus geometry**
 
 .. testsetup:: ExPolarisedDifffractionVanadium
 
@@ -507,15 +520,15 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
         SampleAndEnvironmentProperties=vanadium_dictionary,
         ProcessAs='Vanadium'
     )
-    print("The vanadium reduction output contains {} set of counts with {} bins.".format(mtd['vanadium_ws'].getNumberOfEntries(),
-	      mtd['vanadium_ws'][0].getNumberHistograms()))
+    print("The vanadium reduction output contains {} entry with {} spectra and {} bin.".format(mtd['vanadium_ws'].getNumberOfEntries(),
+	      mtd['vanadium_ws'][0].getNumberHistograms(), mtd['vanadium_ws'][0].blocksize()))
 
 Output:
 
 .. testoutput:: ExPolarisedDifffractionVanadium
 
    Vanadium transmission is 0.886
-   The vanadium reduction output contains 1 set of counts with 132 bins.
+   The vanadium reduction output contains 1 entry with 132 spectra and 1 bin.
 
 .. testcleanup:: ExPolarisedDifffractionVanadium
 
