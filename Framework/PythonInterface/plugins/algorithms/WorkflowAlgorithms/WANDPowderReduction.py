@@ -135,8 +135,6 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         data = self.getProperty("InputWorkspace").value  # [1~n]
         bkg = self.getProperty("BackgroundWorkspace").value  # [1~n]
         cal = self.getProperty("CalibrationWorkspace").value  # [1]
-        xMin = self.getProperty("XMin").value
-        xMax = self.getProperty("XMax").value
         numberBins = self.getProperty("NumberBins").value
         outWS = self.getPropertyValue("OutputWorkspace")
 
@@ -149,20 +147,19 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 for me in map(str.strip, bkg.split(","))
             ]
 
-        # NOTE:
-        # xMin and xMax are initialized as empty numpy.array (np.array([])).
-        _xMin, _xMax = self._locate_global_xlimit()
-        xMin = _xMin if xMin.size == 0 else xMin
-        xMax = _xMax if xMax.size == 0 else xMax
+        # convert all of the input workspaces into spectrum of "target" units (generally angle)
+        data = self._convert_data(data)
+
+        # determine x-range
+        xMin, xMax = self._locate_global_xlimit(data)
 
         # BEGIN_FOR: prcess_spectra
         for n, _wsn in enumerate(data):
             _mskn = f"__mask_{n}"  # calculated in previous loop
-            _ws = AnalysisDataService.retrieve(_wsn)
 
             # resample spectra
             _ws_resampled = ResampleX(
-                InputWorkspace=f"__ws_{n}",
+                InputWorkspace=_wsn,
                 XMin=xMin,
                 XMax=xMax,
                 NumberBins=numberBins,
@@ -171,7 +168,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
             # calibration
             if cal is not None:
-                _ws_cal_resampled = self._resample_calibration(_ws, _mskn, xMin, xMax)
+                _ws_cal_resampled = self._resample_calibration(_wsn, _mskn, xMin, xMax)
                 _ws_resampled = Divide(
                     LHSWorkspace=_ws_resampled,
                     RHSWorkspace=_ws_cal_resampled,
@@ -182,7 +179,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
             _ws_resampled = Scale(
                 InputWorkspace=_ws_resampled,
-                Factor=self._get_scale(cal) / self._get_scale(_ws),
+                Factor=self._get_scale(cal) / self._get_scale(_wsn),
                 EnableLogging=False,
             )
 
@@ -191,7 +188,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 bgn = bkg[n] if isinstance(bkg, list) else bkg
 
                 _ws_bkg_resampled = self._resample_background(
-                    bgn, _ws, _mskn, xMin, xMax, _ws_cal_resampled
+                    bgn, _wsn, _mskn, xMin, xMax, _ws_cal_resampled
                 )
 
                 _ws_resampled = Minus(
@@ -254,66 +251,93 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             if str(normaliseBy).lower() == "none":
                 return 1
             elif str(normaliseBy).lower() == "monitor":
-                return x.run().getProtonCharge()
+                return mtd[str(x)].run().getProtonCharge()
             elif str(normaliseBy).lower() == "time":
-                return x.run().getLogData("duration").value
+                return mtd[str(x)].run().getLogData("duration").value
             else:
                 raise ValueError(f"Unknown normalize type: {normaliseBy}")
 
-    def _locate_global_xlimit(self):
-        """Find the global bin from all spectrum"""
-        input_workspaces = self.getProperty("InputWorkspace").value
+    def _convert_data(self, input_workspaces):
         mask = self.getProperty("MaskWorkspace").value
-        maks_angle = self.getProperty("MaskAngle").value
+        mask_angle = self.getProperty("MaskAngle").value
         target = self.getProperty("Target").value
         e_fixed = self.getProperty("EFixed").value
 
         # NOTE:
         # Due to range difference among incoming spectra, a common bin para is needed
         # such that all data can be binned exactly the same way.
-        _xMin, _xMax = 1e16, -1e16
 
         # BEGIN_FOR: located_global_xMin&xMax
-        for n, _wsn in enumerate(input_workspaces):
-            _ws = AnalysisDataService.retrieve(_wsn)
-            _mskn = f"__mask_{n}"
-            self.temp_workspace_list.append(_mskn)
+        output_workspaces = []  # names will
+        for n, _wksp_in in enumerate(input_workspaces):
+            _mask_n = f'__mask_{n}'  # mask for n-th
+            _wksp_out = f'__ws_{n}'    # output workspace for n-th
+            self.temp_workspace_list.append(_mask_n)
 
-            ExtractMask(_ws, OutputWorkspace=_mskn, EnableLogging=False)
-            if maks_angle != Property.EMPTY_DBL:
+            ExtractMask(InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False)
+            if mask_angle != Property.EMPTY_DBL:
                 MaskAngle(
-                    Workspace=_mskn,
-                    MinAngle=maks_angle,
+                    Workspace=_mask_n,
+                    MinAngle=mask_angle,
                     Angle="Phi",
                     EnableLogging=False,
                 )
             if mask is not None:
+                # might be a bug if the mask angle isn't set
                 BinaryOperateMasks(
-                    InputWorkspace1=_mskn,
+                    InputWorkspace1=_mask_n,
                     InputWorkspace2=mask,
-                    OperationType="OR",
-                    OutputWorkspace=_mskn,
+                    OperationType='OR',
+                    OutputWorkspace=_mask_n,
                     EnableLogging=False,
                 )
 
-            _ws_tmp = ExtractUnmaskedSpectra(
-                InputWorkspace=_ws, MaskWorkspace=_mskn, EnableLogging=False
+            ExtractUnmaskedSpectra(
+                InputWorkspace=_wksp_in, OutputWorkspace=_wksp_out,
+                MaskWorkspace=_mask_n, EnableLogging=False
             )
-            if isinstance(mtd["_ws_tmp"], IEventWorkspace):
-                _ws_tmp = Integration(InputWorkspace=_ws_tmp, EnableLogging=False)
-            _ws_tmp = ConvertSpectrumAxis(
-                InputWorkspace=_ws_tmp,
+            if isinstance(mtd[_wksp_out], IEventWorkspace):
+                Integration(InputWorkspace=_wksp_out, OutputWorkspace=_wksp_out, EnableLogging=False)
+            ConvertSpectrumAxis(
+                InputWorkspace=_wksp_out,
+                OutputWorkspace=_wksp_out,
                 Target=target,
                 EFixed=e_fixed,
                 EnableLogging=False,
             )
-            _ws_tmp = Transpose(
-                InputWorkspace=_ws_tmp, OutputWorkspace=f"__ws_{n}", EnableLogging=False
+            Transpose(
+                InputWorkspace=_wksp_out, OutputWorkspace=_wksp_out, EnableLogging=False
             )
 
+            # append to the list of processed workspaces
+            output_workspaces.append(_wksp_out)
+
+        return output_workspaces
+
+
+    def _locate_global_xlimit(self, workspaces):
+        """Find the global bin from all spectrum"""
+        # Due to range difference among incoming spectra, a common bin para is needed
+        # such that all data can be binned exactly the same way.
+
+        # use the supplied start value
+        if self.getProperty('xMin').isDefault:
+            _xMin = 1e16
+        else:
+            _xMin = self.getProperty("XMin").value
+        if self.getProperty('xMax').isDefault:
+            _xMax = -1e16
+        else:
+            _xMax = self.getProperty("XMax").value
+        # if both were set there is nothing to do
+        if _xMin < _xMax and _xMin < 1e16 and _xMax > -1e16:
+            return _xMin, _xMax
+
+        # update values based on all workspaces
+        for name in workspaces:
+            _ws_tmp = mtd[name]
             _xMin = min(_xMin, _ws_tmp.readX(0).min())
             _xMax = max(_xMax, _ws_tmp.readX(0).max())
-        # END_FOR: located_global_xMin&xMax
 
         return _xMin, _xMax
 
