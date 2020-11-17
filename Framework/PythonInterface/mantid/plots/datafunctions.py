@@ -393,7 +393,7 @@ def get_bin_indices(workspace):
 
 def get_bins(workspace, bin_index, withDy=False):
     """
-    Extract all the bins for a spectrum
+    Extract a requested bin from each spectrum
 
     :param workspace: a Workspace2D or an EventWorkspace
     :param bin_index: the index of a bin
