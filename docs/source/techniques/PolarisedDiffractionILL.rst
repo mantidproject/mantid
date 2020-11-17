@@ -538,16 +538,218 @@ Output:
 Sample data reduction
 =====================
 
+The sample data reduction follows the same steps of monitor normalisation, background subtraction, polarisation correction, and
+self-attenuation correction as vanadium data reduction. Should the self-attenuation correction be taken into account, the relevant
+sample and environment parameters need to be defined in a dictionary that is provided to `SampleAndEnvironmentProperty` with
+keys described in the vanadium reduction section.
+
+The output of the  is a :ref:`WorkspaceGroup <WorkspaceGroup>` with the number of entries equal to number of measured polarisations
+times number of steps in a :math:`2\theta` scan. This output can be provided to :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
+for cross-section separation, e.g. for diagnostic purposes, or for the final normalisation.
+
+Cross-section separation
+------------------------
+
+The :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` algorithm allows for either cross-section separation or sample data
+normalisation. It is possible to use only one of the possibilities, for example, to separate cross-sections of the reduced vanadium
+data without the normalisation subroutines to be invoked. This is especially useful for diagnostic purposes.
+
+
+The cross-section separation is done according to formulae presented in Ref. [3-5]. More details on the exact calculations is given in
+documentation of the :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` algorithm. It is possible to perform uniaxial,
+6-point (or XYZ), and 10-point measurement separation of magnetic, nuclear coherent, and nuclear-spin-incoherent components of the total
+measured scattering cross-section. The specifics of the 10-point measurement as a set of two separate 6-point measurements are taken into account.
+In that case, the second set of 6-point data needs to be provided to `RotatedXYZWorkspace` property of the :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
+algorithm, and the '10-p' needs to be chosen as the `CrossSectionSeparationMethod`.
+
 
 Sample data normalisation
 -------------------------
 
+The output from sample data reduction still needs to be normalised to the relevant standard to set the units to absolute scale.
+The normalisation is handled by :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` algorithm, and there are three
+options available to normalise the sample data:
+
 #. Vanadium normalisation
+
+   Uses output from the vanadium data reduction. The units chosen for both the sample and vanadium data during reduction should agree.
 
 #. Paramagnetic normalisation
 
+   This normalisation approach uses the output from the cross-section separation to set the sample output to absolute units. An additional parameter
+   needs to be defined in the sample properties dictionary, named `SampleSpin`, to define the spin of the sample.
+
+
 #. Spin-incoherent normalisation
 
+   This normalisation approach also uses the output from the cross-section separation. If the goal is to set the output data to absolute scale,
+   an additional parameter needs to be defined in the sample properties dictionary, named `IncoherentCrossSection`, to provide the total
+   nuclear-spin-incoherent cross-section of the sample.
+
+
+Output
+------
+
+The output of the reduction and normalisation is a :ref:`WorkspaceGroup <WorkspaceGroup>` with the number of entries consistent with the input.
+Each entry is a transposed workspace with X-axis unit being either momentum exchange :math:`Q` or the scattering angle :math:`2\theta`.
+
+
+Workflow diagrams and working example
+-------------------------------------
+
+Below is the relevant workflow diagram describing reduction steps of the sample reduction.
+
+.. diagram:: PolDiffILLReduction-v1_sample_wkflw.dot
+
+.. include:: ../usagedata-note.txt
+
+**Example - Complete sample reduction with normalisation**
+
+.. testsetup:: ExPolarisedDifffractionSampleFull
+
+    config['default.facility'] = 'ILL'
+    config.appendDataSearchSubDir('ILL/D7/')
+
+.. testcode:: ExPolarisedDifffractionSampleFull
+
+    vanadium_dictionary = {'SampleMass':8.54,'FormulaUnits':1,'FormulaUnitMass':50.94}
+
+    sample_dictionary = {'SampleMass':2.932,'SampleDensity':2.0,'FormulaUnits':1,'FormulaUnitMass':182.56,
+                         'SampleChemicalFormula':'Mn0.5-Fe0.5-P-S3','Height':2,'SampleDensity':1.18,
+			 'SampleInnerRadius':2, 'SampleOuterRadius':2.49,'BeamWidth':2.5,'BeamHeight':2.5,
+                         'ContainerChemicalFormula':'Al','ContainerDensity':2.7,'ContainerOuterRadius':2.52,
+                         'ContainerInnerRadius':1.99}
+
+
+    # Beam with cadmium absorber, used for transmission
+    PolDiffILLReduction(
+        Run='396991',
+        OutputWorkspace='cadmium_ws',
+        ProcessAs='BeamWithAbsorber'
+    )
+    # Beam measurement for transmisison
+    PolDiffILLReduction(
+        Run='396983',
+        OutputWorkspace='beam_ws',
+        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        ProcessAs='EmptyBeam'
+    )
+
+    # Quartz transmission
+    PolDiffILLReduction(
+        Run='396985, 396986',
+        OutputWorkspace='quartz_transmission',
+        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        BeamInputWorkspace='beam_ws_1',
+       ProcessAs='Transmission'
+    )
+
+    # Empty container
+    PolDiffILLReduction(
+        Run='396917, 396918',
+        OutputWorkspace='container_ws',
+        ProcessAs='Container'
+    )
+
+    # Absorber
+    PolDiffILLReduction(
+        Run='396928, 396929',
+        OutputWorkspace='absorber_ws',
+        ProcessAs='Absorber'
+    )
+
+    # Polarisation correction
+    PolDiffILLReduction(
+        Run='396939, 396940',
+        OutputWorkspace='pol_corrections',
+        AbsorberInputWorkspace='absorber_ws',
+        ContainerInputWorkspace='container_ws',
+        TransmissionInputWorkspace='quartz_transmission_1',
+        OutputTreatment='Average',
+        ProcessAs='Quartz'
+    )
+
+    # Vanadium transmission
+    PolDiffILLReduction(
+        Run='396990',
+        OutputWorkspace='vanadium_transmission',
+        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        BeamInputWorkspace='beam_ws_1',
+        ProcessAs='Transmission'
+    )
+
+    # Vanadium reduction
+    PolDiffILLReduction(
+        Run='396993, 396994',
+        OutputWorkspace='vanadium_ws',
+        AbsorberInputWorkspace='absorber_ws',
+        ContainerInputWorkspace='container_ws',
+        TransmissionInputWorkspace='vanadium_transmission_1',
+        QuartzInputWorkspace='pol_corrections',
+        OutputTreatment='Sum',
+        SampleGeometry='None',
+        SampleAndEnvironmentProperties=vanadium_dictionary,
+        ProcessAs='Vanadium'
+    )
+    # Sample transmission
+    PolDiffILLReduction(
+       Run='396986, 396987',
+       OutputWorkspace='sample_transmission',
+       AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+       BeamInputWorkspace='beam_ws_1',
+       ProcessAs='Transmission'
+    )
+    print('Sample transmission is {0:.3f}'.format(mtd['sample_transmission_1'].readY(0)[0]))
+
+    # Sample reduction
+    PolDiffILLReduction(
+        Run='397004, 397005',
+        OutputWorkspace='sample_ws',
+        AbsorberInputWorkspace='absorber_ws',
+        ContainerInputWorkspace='container_ws',
+        TransmissionInputWorkspace='sample_transmission_1',
+        QuartzInputWorkspace='pol_corrections',
+        OutputTreatment='Individual',
+        SampleGeometry='Annulus',
+        SampleAndEnvironmentProperties=sample_dictionary,
+	ProcessAs='Sample'
+    )
+    print("The reduced sample data contains {} entries with {} spectra and {} bins.".format(mtd['sample_ws'].getNumberOfEntries(),
+	      mtd['sample_ws'][0].getNumberHistograms(), mtd['sample_ws'][0].blocksize()))
+
+    # Normalise sample data
+    D7AbsoluteCrossSections(
+	InputWorkspace='sample_ws',
+        OutputWorkspace='sample_norm',
+        CrossSectionSeparationMethod='None',
+        NormalisationMethod='Vanadium',
+        VanadiumInputWorkspace='vanadium_ws',
+        OutputTreatment='Individual',
+        OutputUnits='TwoTheta',
+        ScatteringAngleBinSize=1.0, # degrees
+        SampleAndEnvironmentProperties=sample_dictionary,
+        AbsoluteUnitsNormalisation=False
+    )
+
+    print("The normalised sample data contains {} entries with {} spectra and {} bins.".format(mtd['sample_norm'].getNumberOfEntries(),
+	      mtd['sample_norm'][0].getNumberHistograms(), mtd['sample_norm'][0].blocksize()))
+
+
+Output:
+
+.. testoutput:: ExPolarisedDifffractionSampleFull
+
+   Sample transmission is 0.962
+   The reduced sample data contains 12 entries with 132 spectra and 1 bins.
+   The normalised sample data contains 12 entries with 1 spectra and 132 bins.
+
+.. testcleanup:: ExPolarisedDifffractionSampleFull
+
+    mtd.clear()
+
+
+References
+----------
 
 #. T. Fennell, L. Mangin-Thro, H.Mutka, G.J. Nilsen, A.R. Wildes.
    *Wavevector and energy resolution of the polarized diffuse scattering spectrometer D7*,
@@ -558,6 +760,21 @@ Sample data normalisation
    *Site preference of cations and structural variation in Y3Fe5O12 solid solutions with garnet structure*,
    Acta Crystallographica Section B **51** (1995) 737–745
    `doi: 10.1107/S0108768194014813 <https://doi.org/10.1107/S0108768194014813>`_
+
+#. Scharpf, O. and Capellmann, H.
+   *The XYZ‐Difference Method with Polarized Neutrons and the Separation of Coherent, Spin Incoherent, and Magnetic Scattering Cross Sections in a Multidetector*
+   Physica Status Solidi (A) **135** (1993) 359-379
+   `doi: 10.1002/pssa.2211350204 <https://doi.org/10.1002/pssa.2211350204>`_
+
+#. Stewart, J. R. and Deen, P. P. and Andersen, K. H. and Schober, H. and Barthelemy, J.-F. and Hillier, J. M. and Murani, A. P. and Hayes, T. and Lindenau, B.
+   *Disordered materials studied using neutron polarization analysis on the multi-detector spectrometer, D7*
+   Journal of Applied Crystallography **42** (2009) 69-84
+   `doi: 10.1107/S0021889808039162 <https://doi.org/10.1107/S0021889808039162>`_
+
+#. G. Ehlers, J. R. Stewart, A. R. Wildes, P. P. Deen, and K. H. Andersen
+   *Generalization of the classical xyz-polarization analysis technique to out-of-plane and inelastic scattering*
+   Review of Scientific Instruments **84** (2013), 093901
+   `doi: 10.1063/1.4819739 <https://doi.org/10.1063/1.4819739>`_
 
 
 .. categories:: Techniques
