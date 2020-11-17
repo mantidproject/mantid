@@ -242,6 +242,18 @@ public:
         apply: flag to apply the change other than color bar by sending singal out.
 %End
 
+    void setLegendScaleType(int index);
+%Docstring
+    void setLegendScaleType(int index)
+    ----------------------------------
+
+    Args:
+      index: valid option including [0, 1, 2] where
+          0: Linear
+          1: SymmetricLog10
+          2: Power
+%End
+
   // set Axis at Full 3D
   void setAxis(const QString &axisNameArg);
 %Docstring
