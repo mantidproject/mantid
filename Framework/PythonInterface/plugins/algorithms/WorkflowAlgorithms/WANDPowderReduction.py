@@ -148,15 +148,13 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             ]
 
         # convert all of the input workspaces into spectrum of "target" units (generally angle)
-        data = self._convert_data(data)
+        data, masks = self._convert_data(data)
 
         # determine x-range
         xMin, xMax = self._locate_global_xlimit(data)
 
         # BEGIN_FOR: prcess_spectra
-        for n, _wsn in enumerate(data):
-            _mskn = f"__mask_{n}"  # calculated in previous loop
-
+        for n, (_wsn, _mskn) in enumerate(zip(data, masks)):
             # resample spectra
             _ws_resampled = ResampleX(
                 InputWorkspace=_wsn,
@@ -269,10 +267,11 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
         # BEGIN_FOR: located_global_xMin&xMax
         output_workspaces = []  # names will
+        mask_workspaces = []
         for n, _wksp_in in enumerate(input_workspaces):
             _mask_n = f'__mask_{n}'  # mask for n-th
-            _wksp_out = f'__ws_{n}'    # output workspace for n-th
-            self.temp_workspace_list.append(_mask_n)
+            _wksp_out = f'__wskp_{n}'    # output workspace for n-th
+            self.temp_workspace_list.append(_mask_n)  # cleanup later
 
             ExtractMask(InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False)
             if mask_angle != Property.EMPTY_DBL:
@@ -311,9 +310,9 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
             # append to the list of processed workspaces
             output_workspaces.append(_wksp_out)
+            mask_workspaces.append(_mask_n)
 
-        return output_workspaces
-
+        return output_workspaces, mask_workspaces
 
     def _locate_global_xlimit(self, workspaces):
         """Find the global bin from all spectrum"""
