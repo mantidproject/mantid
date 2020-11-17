@@ -43,6 +43,7 @@ def get_instrumentview(workspace):
     ivp.set_color_min = safe_qthread(ivp.get_render_tab().setMinValue)
     ivp.set_color_max = safe_qthread(ivp.get_render_tab().setMaxValue)
     ivp.set_color_range = safe_qthread(ivp.get_render_tab().setRange)
+    ivp.set_color_scale = ivp.get_render_tab().setLegendScaleType
     return ivp
 
 
