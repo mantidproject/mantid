@@ -64,19 +64,19 @@ Usage
                                MinimalDistanceBetweenPeaks=1.5, BankOffsets="-4,-4,0",
                                FitOutputWorkspace='intermediateWavelength')
 		       
-   print('The calibrated wavelength is: {0:.2f}'.format(float(approximate_wavelength)*mtd['intermediateWavelength'].column(1)[1]))
-   print('The bank2 gradient is: {0:.2f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[0]))
-   print('The bank3 gradient is: {0:.2f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[176]))
-   print('The bank4 gradient is: {0:.2f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[352]))
+   print('The calibrated wavelength is: {0:.1f}'.format(float(approximate_wavelength)*mtd['intermediateWavelength'].column(1)[1]))
+   print('The bank2 gradient is: {0:.1f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[0]))
+   print('The bank3 gradient is: {0:.1f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[176]))
+   print('The bank4 gradient is: {0:.1f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[352]))
 
 Output:
 
 .. testoutput:: D7YIGCalibrationIntermediateExample
 
-   The calibrated wavelength is: 4.86
-   The bank2 gradient is: 0.99
-   The bank3 gradient is: 1.00
-   The bank4 gradient is: 1.00
+   The calibrated wavelength is: 4.9
+   The bank2 gradient is: 1.0
+   The bank3 gradient is: 1.0
+   The bank4 gradient is: 1.0
 
 #. T. Fennell, L. Mangin-Thro, H.Mutka, G.J. Nilsen, A.R. Wildes.
    *Wavevector and energy resolution of the polarized diffuse scattering spectrometer D7*,
