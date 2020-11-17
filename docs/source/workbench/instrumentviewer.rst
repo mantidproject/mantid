@@ -41,7 +41,7 @@ The unwrapped (or flat) views allow zooming by selecting a rectangular region wi
 Right mouse click undoes the last zoom.
 
 .. figure:: ../images/Workbench/InstrumentViewer/RenderTab.png
-    :align: left
+    :align: center
     :width: 635
 
 The next control is Axis View, visible only in the 3D mode, which resets the view so that the instrument is fully visible and the specified axis is perpendicular to the screen.
@@ -51,7 +51,7 @@ It's worth mentioning the "Use OpenGL" option.
 It toggles between two display modes of a flat view: the one that uses OpenGL to render the instrument and the one that doesn't.
 
 .. figure:: ../images/Workbench/InstrumentViewer/DisplaySettings.png
-    :align: left
+    :align: center
     :width: 635
 
 This option can be useful if the instrument is viewed over a slow network connection for example.
@@ -72,7 +72,7 @@ At the top of the tab there is a tool bar for switching between different intera
 The text box below the tool bar show textual information about selected detector: its name, ID, index in the workspace, cartesian coordinates of the detector (xyz) in metres, spherical coordinates of the detector (rtp, which stands for r, \theta, and \phi) where the distance is in metres and the angles are in degrees, the full path of the detector in the instrument tree, integrated counts, and the units of the X vector in the underlying workspace.
 
 .. figure:: ../images/Workbench/InstrumentViewer/PickTab.png
-    :align: left
+    :align: center
     :width: 635
 
 Documentation will be updated as additional features are added.
@@ -84,7 +84,7 @@ The Draw tab contains tools for creating and editing geometrical shapes which ca
 The tab contains a mini toolbar, a shape property browser and a set of buttons to use the shapes.
 
 .. figure:: ../images/Workbench/InstrumentViewer/DrawTab.png
-    :align: left
+    :align: center
     :width: 635
 
 More doc will be migrated from MantidPlot as new features being consolidated.
@@ -141,10 +141,11 @@ To switch to a different viewing axis, use
 
   myiv.set_axis("Y+")  # (Z+, Z-, Y+, Y-, X+, X-)
 
-To elect the range for the data (intensity, color map legend), use
+To select the range for the data (intensity, color map legend), use
 
 .. code-block:: python
 
+  myiv.set_auto_scaling(False)         # need to turn off autoscaling before changing anything
   myiv.set_color_min(1, True)          # minimum value for the colorbar
   myiv.set_color_max(1000, True)       # maximum value for the colorbar
   myiv.set_color_range(1, 1000, True)  # full range of the colorbar
@@ -176,6 +177,7 @@ To start the app outside ``MantidWorkbench``, use the following code snippet as 
   # select axis
   myiv.set_axis("Z-")
   # select the range for the data (intensity, color map legend)
+  myiv.set_auto_scaling(False)
   myiv.set_color_min(1, True)
   myiv.set_color_max(1000, True)
   myiv.set_color_range(1, 1000, True)
