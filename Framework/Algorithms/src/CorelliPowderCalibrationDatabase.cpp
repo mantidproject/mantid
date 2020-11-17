@@ -18,6 +18,9 @@
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -37,42 +40,186 @@ using Types::Core::DateAndTime;
 
 namespace CorelliCalibration {
 
-CalibrationTableHandler::CalibrationTableHandler() { mCalibWS = nullptr; }
+CalibrationTableHandler::CalibrationTableHandler() : mCalibWS {nullptr}, isSingleComponentTable {false} {}
 
-void CalibrationTableHandler::setCalibrationTable(
-    DataObjects::TableWorkspace_sptr calibws) {
-  mCalibWS = calibws;
+//-----------------------------------------------------------------------------
+/**
+ * @brief Create single component calibration table
+ * @param wsname
+ * @return
+ */
+DataObjects::TableWorkspace_sptr CalibrationTableHandler::createComponentCalibrationTable(const std::string &wsname) {
+
+    // Create table workspace
+    ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
+
+    // Add to ADS if workspace name is given
+    if (wsname.size() > 0) {
+        AnalysisDataService::Instance().addOrReplace(wsname, itablews);
+    }
+
+    TableWorkspace_sptr tablews =
+        std::dynamic_pointer_cast<TableWorkspace>(itablews);
+
+    // Set up columns
+    tablews->addColumn("str", "YYYMMDD");  // first column as date stamp
+    for (size_t i = 1;
+         i < CorelliCalibration::calibrationTableColumnNames.size() - 1; ++i) {
+      std::string colname = CorelliCalibration::calibrationTableColumnNames[i];
+      std::string type = CorelliCalibration::calibrationTableColumnTypes[i];
+      tablews->addColumn(type, colname);
+    }
+
+    return tablews;
 }
 
+
+/**
+ * @brief Set a valid calibration table to the handler
+ * @param calibws
+ */
+void CalibrationTableHandler::setCalibrationTable(
+    DataObjects::TableWorkspace_sptr calibws) {
+
+    // Check the column of input calibration workspace
+    std::vector<std::string> colnames = calibws->getColumnNames();
+    if (colnames.size() != calibrationTableColumnNames.size())
+        throw std::runtime_error("Input TableWorkspace does not have expected number of columns");
+    for(size_t i = 0; i < colnames.size(); ++i)
+        if (colnames[i] != calibrationTableColumnNames[i])
+            throw std::runtime_error("Input TableWorkspace does not have the expected column name");
+
+    // Set
+    mCalibWS = calibws;
+}
+
+/**
+ * @brief Get column names of the table workspace
+ * @return
+ */
 std::vector<std::string> CalibrationTableHandler::getComponentNames() {
-  std::vector<std::string> names{"source", "sample", "bank1"};
+
+  // Check workspace type
+  if (isSingleComponentTable)
+      throw std::runtime_error("TableWorkspace contains a single component's calibration in various dates");
+
+  std::vector<std::string> names{};
+
+  for (size_t i = 0; i < mCalibWS->rowCount(); ++i) {
+      std::string compname = mCalibWS->cell<std::string>(i, 0);
+      names.push_back(compname);
+  }
+
   return names;
 }
 
+/**
+ * @brief Get the calibration position of a single
+ * @param component
+ * @return
+ */
+ComponentPosition CalibrationTableHandler::getComponentCalibratedPosition(const std::string &component) {
+    // Check
+    if (!mCalibWS)
+        throw std::runtime_error("Calibration workspace has not been set up yet.");
+
+    // Get the row number of the specified component
+    size_t row_number = mCalibWS->rowCount();
+    for (size_t i = 0; i < row_number; ++i) {
+        if (mCalibWS->cell<std::string>(i, 0) == component)
+        {
+            row_number = i;
+            break;
+        }
+    }
+    // Check
+    if (row_number == mCalibWS->rowCount())
+        throw std::runtime_error("Specified component does not exist");
+
+    // Get the values
+    ComponentPosition pos;
+    pos.x = mCalibWS->cell<double>(row_number, 1);
+    pos.y = mCalibWS->cell<double>(row_number, 2);
+    pos.z = mCalibWS->cell<double>(row_number, 3);
+    pos.xCosine = mCalibWS->cell<double>(row_number, 4);
+    pos.yCosine = mCalibWS->cell<double>(row_number, 5);
+    pos.zCosine = mCalibWS->cell<double>(row_number, 6);
+    pos.rotAngle = mCalibWS->cell<double>(row_number, 7);
+
+    return pos;
+}
+
+/**
+ * @brief CalibrationTableHandler::load
+ * @param filename
+ */
 void CalibrationTableHandler::load(const std::string &filename) {
-  std::cout << "Load from " << filename << "\n";
+  std::cout << "Load from " << filename << ": existence = " << boost::filesystem::exists(filename) << "\n";
 }
 
-void CalibrationTableHandler::saveCompomentDatabase(
+//-----------------------------------------------------------------------------
+/**
+ * @brief Save a specific component to database (csv) file
+ * @param component
+ * @param filename
+ */
+void CalibrationTableHandler::saveCompomentDatabase(const std::string &datestamp,
+    const std::string &component,
     const std::string &filename) {
-  std::cout << "Save to " << filename << "\n";
+
+  // Check whether the file does exist or not: new or append
+  TableWorkspace_sptr compcaltable = nullptr;
+  bool appendmode{false};
+  if (boost::filesystem::exists(filename)) {
+      compcaltable = loadComponentCalibrationTable(filename);
+      appendmode = true;
+  } else {
+      compcaltable = createComponentCalibrationTable("");
+  }
+
+  // Append the row
+  ComponentPosition componentpos = getComponentCalibratedPosition(component);
+  appendCalibration(compcaltable, datestamp, componentpos);
+
+  std::cout << "Save " << mCalibWS->getName() << " to " << filename << "\n";
+
+  // create algorithm: only version 2 of SaveAscii can work with TableWorkspace
+  IAlgorithm_sptr saveAsciiAlg =
+      AlgorithmFactory::Instance().create("SaveAscii", 2);
+  saveAsciiAlg->initialize();
+  saveAsciiAlg->setPropertyValue("InputWorkspace", mCalibWS->getName());  // std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));  //mCalibWS->getName());
+  saveAsciiAlg->setProperty("Filename", filename);
+  saveAsciiAlg->setPropertyValue("CommentIndicator", "#");
+  saveAsciiAlg->setPropertyValue("Separator", "CSV");
+  saveAsciiAlg->setProperty("ColumnHeader", true);
+  saveAsciiAlg->setProperty("AppendToFile", appendmode);
+
+  std::cout << "Execute Save .... \n";
+  saveAsciiAlg->execute();
+
+  return;
 }
 
+//-----------------------------------------------------------------------------
+/**
+ * @brief Save full calibration table to a database (CSV) file
+ * @param filename
+ */
 void CalibrationTableHandler::saveCalibrationTable(
     const std::string &filename) {
-  std::cout << "Save to " << filename << "\n";
-}
+  std::cout << "Save calibration table" << mCalibWS->getName() << " to " << filename << "\n";
+  // create algorithm: only version 2 of SaveAscii can work with TableWorkspace
+  IAlgorithm_sptr saveAsciiAlg =
+      AlgorithmFactory::Instance().create("SaveAscii", 2);
+  saveAsciiAlg->initialize();
+  saveAsciiAlg->setPropertyValue("InputWorkspace", mCalibWS->getName());  // std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));  //mCalibWS->getName());
+  saveAsciiAlg->setProperty("Filename", filename);
+  saveAsciiAlg->setPropertyValue("CommentIndicator", "#");
+  saveAsciiAlg->setPropertyValue("Separator", "CSV");
+  saveAsciiAlg->setProperty("ColumnHeader", true);
 
-std::string CalibrationTableHandler::corelliComponentDatabaseName(
-    const std::string &componentname, const std::string &directory) {
-  std::string filename = directory + "/" + componentname + ".csv";
-  return filename;
-}
-
-std::string CalibrationTableHandler::corelliCalibrationDatabaseName(
-    const std::string &datestamp, const std::string &directory) {
-  std::string filename = directory + "/" + datestamp + ".csv";
-  return filename;
+  std::cout << "Execute Save .... \n";
+  saveAsciiAlg->execute();
 }
 } // namespace CorelliCalibration
 
@@ -207,8 +354,7 @@ void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles() {
 
   std::string component = "sample";
 
-  std::string filename =
-      CorelliCalibration::CalibrationTableHandler::corelliComponentDatabaseName(
+  std::string filename = corelliComponentDatabaseName(
           component, "/tmp");
   std::cout << isFileExist(filename);
 }
@@ -242,6 +388,39 @@ CorelliPowderCalibrationDatabase::convertTimeStamp(std::string run_start_time) {
 }
 
 //-----------------------------------------------------------------------------
+/**
+ * @brief Compose a standard full path of a component CSV file
+ * @param componentname
+ * @param directory
+ * @return
+ */
+std::string CorelliPowderCalibrationDatabase::corelliComponentDatabaseName(const std::string &componentname, const std::string &directory) {
+  std::string basename = componentname + ".csv";
+  std::string filename = joinPath(directory, basename);
+
+  return filename;
+}
+
+//-----------------------------------------------------------------------------
+/**
+ * @brief Compose a standard full path of a calibration table CSV file
+ * @param datestamp
+ * @param directory
+ * @return
+ */
+std::string CorelliPowderCalibrationDatabase::corelliCalibrationDatabaseName(
+    const std::string &datestamp, const std::string &directory) {
+  std::string basename = datestamp + ".csv";
+  std::string filename = joinPath(directory, basename);
+  return filename;
+}
+
+//-----------------------------------------------------------------------------
+/**
+ * @brief Check whether a file does exist
+ * @param filepath
+ * @return
+ */
 bool CorelliPowderCalibrationDatabase::isFileExist(
     const std::string &filepath) {
 
@@ -250,6 +429,13 @@ bool CorelliPowderCalibrationDatabase::isFileExist(
   return boost::filesystem::exists(filepath);
 }
 
+//-----------------------------------------------------------------------------
+/**
+ * @brief Join directory and base file name for a full path
+ * @param directory
+ * @param basename
+ * @return
+ */
 std::string
 CorelliPowderCalibrationDatabase::joinPath(const std::string directory,
                                            const std::string basename) {

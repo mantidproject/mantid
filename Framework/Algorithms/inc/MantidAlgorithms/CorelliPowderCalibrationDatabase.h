@@ -24,23 +24,52 @@ static const std::vector<std::string> calibrationTableColumnTypes{
     "str",    "double", "double", "double",
     "double", "double", "double", "double"};
 
+/// Structure to handle all the calibration component positions
+struct ComponentPosition {
+  double x;
+  double y;
+  double z;
+  double xCosine;
+  double yCosine;
+  double zCosine;
+  double rotAngle;
+
+  bool equalTo(const ComponentPosition &otherpos, double abstol) {
+    if (fabs(x - otherpos.x) >= abstol || fabs(y - otherpos.y) >= abstol ||
+        fabs(z - otherpos.z) >= abstol ||
+        fabs(xCosine - otherpos.xCosine) >= abstol || fabs(yCosine - otherpos.yCosine) >= abstol ||
+        fabs(zCosine - otherpos.zCosine) >= abstol || fabs(rotAngle - otherpos.rotAngle) >= abstol) {
+      return false;
+    }
+    return true;
+  }
+};
+
+/// Class containing static and member methods to work with calibration table workspaces
 class MANTID_ALGORITHMS_DLL CalibrationTableHandler {
 public:
   CalibrationTableHandler();
   void setCalibrationTable(DataObjects::TableWorkspace_sptr calibws);
   std::vector<std::string> getComponentNames();
+  DataObjects::TableWorkspace_sptr getCalibrationWorkspace() {
+      return mCalibWS;
+  }
   void load(const std::string &filename);
-  void saveCompomentDatabase(const std::string &filename);
-  void saveCalibrationTable(const std::string &filename);
-  static inline std::string
-  corelliComponentDatabaseName(const std::string &componentname,
-                               const std::string &directory);
-  static inline std::string
-  corelliCalibrationDatabaseName(const std::string &datestamp,
-                                 const std::string &directory);
+  void saveCompomentDatabase(const std::string &datestamp, const std::string &component, const std::string &filename);
+  /// Save the calibration table (of a single date)
+  void saveCalibrationTable(const std::string &filename);  
+  /// Load a single component calibration table
+  static DataObjects::TableWorkspace_sptr loadComponentCalibrationTable(const std::string &filename);
+  /// Create a single component calibration TableWorkspace from scratch
+  static DataObjects::TableWorkspace_sptr createComponentCalibrationTable(const std::string &wsname);
+  /// Get the calibration of a component
+  ComponentPosition getComponentCalibratedPosition(const std::string &component);
+  /// Append a new row to single component calibration table
+  static void appendCalibration(DataObjects::TableWorkspace_sptr tablews, const std::string &datestamp, ComponentPosition& pos);
 
 private:
   DataObjects::TableWorkspace_sptr mCalibWS;
+  bool isSingleComponentTable;
 };
 
 } // namespace CorelliCalibration
@@ -60,6 +89,15 @@ public:
   const std::string summary() const override {
     return ".... ...."; // TODO
   };
+
+  /// get standard component calibration database (CSV) file name
+  static inline std::string
+  corelliComponentDatabaseName(const std::string &componentname,
+                               const std::string &directory);
+  /// get standard date-base calibration database (CSV) file name
+  static inline std::string
+  corelliCalibrationDatabaseName(const std::string &datestamp,
+                                 const std::string &directory);
 
   static std::string convertTimeStamp(std::string run_start_time);
 
