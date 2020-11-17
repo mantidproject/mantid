@@ -647,10 +647,7 @@ def create_group_from_spectra_list(group_detectors, spectra_list):
 
 
 def create_individual_spectra_groups(group_detectors, grouping_string):
-    workspaces = []
-    for spectrum_number in create_range_from(grouping_string, ':'):
-        workspaces.append(create_group_from_spectra_list(group_detectors, [spectrum_number]))
-    return workspaces
+    return [create_group_from_spectra_list(group_detectors, [i]) for i in create_range_from(grouping_string, ':')]
 
 
 def add_group_from_string(groups, group_detectors, grouping_string):
@@ -662,7 +659,6 @@ def add_group_from_string(groups, group_detectors, grouping_string):
         groups.append(create_group_from_spectra_list(group_detectors, [int(i) for i in grouping_string.split('+')]))
     else:
         groups.append(create_group_from_spectra_list(group_detectors, [int(grouping_string)]))
-    return groups
 
 
 def conjoin_workspaces(*workspaces):
@@ -676,7 +672,7 @@ def group_on_string(group_detectors, grouping_string):
     grouping_string.replace(' ', '')
     groups = []
     for sub_string in grouping_string.split(','):
-        groups = add_group_from_string(groups, group_detectors, sub_string)
+        add_group_from_string(groups, group_detectors, sub_string)
     return conjoin_workspaces(*groups)
 
 
