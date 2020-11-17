@@ -19,6 +19,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include <boost/filesystem.hpp>
+#include <fstream>
 
 using Mantid::Algorithms::CorelliPowderCalibrationDatabase;
 using namespace Mantid::API;
@@ -39,90 +40,41 @@ public:
     delete suite;
   }
 
+  //-----------------------------------------------------------------------------
   void test_Init() {
     CorelliPowderCalibrationDatabase alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize())
     TS_ASSERT(alg.isInitialized())
   }
 
-  void template_test_exec() {
-    // Name of the output workspace.
-    std::string outWSName("CorelliPowderCalibrationDatabaseTest_OutputWS");
+  //-----------------------------------------------------------------------------
+  /**
+   * @brief Test basic file IO library methods
+   */
+  void test_file_io() {
+    // create directory
+    std::string test_dir{"TestCorelliPowderCalibrationX"};
+    boost::filesystem::create_directory(test_dir);
+    TS_ASSERT(boost::filesystem::is_directory(test_dir));
 
-    IAlgorithm_sptr lei =
-        AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
-    lei->initialize();
-    lei->setPropertyValue("Filename", "CORELLI_Definition.xml");
-    lei->setPropertyValue("OutputWorkspace",
-                          "CorelliPowderCalibrationDatabaseTest_OutputWS");
-    lei->setPropertyValue("MakeEventWorkspace", "1");
-    lei->execute();
-
-    EventWorkspace_sptr ws;
-    ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-        "CorelliPowderCalibrationDatabaseTest_OutputWS");
-
-    DateAndTime startTime("2007-11-30T16:17:00");
-    auto &evlist = ws->getSpectrum(0);
-
-    // Add some events to the workspace.
-    evlist.addEventQuickly(TofEvent(10.0, startTime + 0.007));
-    evlist.addEventQuickly(TofEvent(100.0, startTime + 0.012));
-    evlist.addEventQuickly(TofEvent(1000.0, startTime + 0.012));
-    evlist.addEventQuickly(TofEvent(10000.0, startTime + 0.012));
-    evlist.addEventQuickly(TofEvent(1222.0, startTime + 0.03));
-
-    ws->getAxis(0)->setUnit("TOF");
-
-    ws->sortAll(PULSETIME_SORT, nullptr);
-
-    // Add some chopper TDCs to the workspace.
-    double period = 1 / 293.383;
-    auto tdc = new TimeSeriesProperty<int>("chopper4_TDC");
-    for (int i = 0; i < 10; i++) {
-      double tdcTime = i * period;
-      tdc->addValue(startTime + tdcTime, 1);
-    }
-    ws->mutableRun().addLogData(tdc);
-
-    // Add motorSpeed to the workspace
-    auto motorSpeed =
-        new TimeSeriesProperty<double>("BL9:Chop:Skf4:MotorSpeed");
-    motorSpeed->addValue(startTime, 293.383);
-    ws->mutableRun().addLogData(motorSpeed);
-
-    CorelliPowderCalibrationDatabase alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize())
-    TS_ASSERT(alg.isInitialized())
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "InputWorkspace", "CorelliPowderCalibrationDatabaseTest_OutputWS"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue(
-        "OutputWorkspace", "CorelliPowderCalibrationDatabaseTest_OutputWS"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TimingOffset", "20000"));
-    TS_ASSERT_THROWS_NOTHING(alg.execute(););
-    TS_ASSERT(alg.isExecuted());
-
-    // Retrieve the workspace from data service.
-    TS_ASSERT_THROWS_NOTHING(
-        ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-            "CorelliPowderCalibrationDatabaseTest_OutputWS"));
-    TS_ASSERT(ws);
-    if (!ws)
-      return;
-
-    std::vector<WeightedEvent> &events = evlist.getWeightedEvents();
-
-    TS_ASSERT_DELTA(events[0].weight(), -0.993919, 0.00001)
-    TS_ASSERT_DELTA(events[1].weight(), -0.993919, 0.00001)
-    TS_ASSERT_DELTA(events[2].weight(), 1.0, 0.00001)
-    TS_ASSERT_DELTA(events[3].weight(), -0.993919, 0.00001)
-    TS_ASSERT_DELTA(events[4].weight(), 1.0, 0.00001)
-
-    // Remove workspace from the data service.
-    AnalysisDataService::Instance().remove(outWSName);
+    // clean
+    boost::filesystem::remove_all(test_dir);
   }
 
+  //-----------------------------------------------------------------------------
+  /**
+   * @brief Test main features required by the algorithm CorelliPowderCalibrationDatabase
+   */
   void test_exec() {
+
+    // Create the test environment
+    // create directory
+    std::string calibdir{"TestCorelliPowderCalibration1117"};
+    // clean previous
+    boost::filesystem::remove_all(calibdir);
+    // create a previously generated database file
+    std::vector<std::string> banks {"bank2", "bank3"};
+    create_existing_database_files(calibdir, banks);
 
     // Create workspaces
     EventWorkspace_sptr input_ws = createTestEventWorkspace();
@@ -141,13 +93,20 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input_ws));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("InputCalibrationPatchWorkspace", calib_ws));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DatabaseDirectory", "/tmp/"));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DatabaseDirectory", calibdir));
 
     // Execute
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
+    // Verifying results
+    // Option 2
+    // Option 3
+    // Option 1 (files)
+
     // Clean memory
+    // Remove workspace from the data service.
+    // AnalysisDataService::Instance().remove(outWSName);
   }
 
   //-----------------------------------------------------------------------------
@@ -160,15 +119,7 @@ public:
     TS_ASSERT_EQUALS(yyyymmdd, "20180220");
   }
 
-  void test_file_io() {
-    // create directory
-    std::string test_dir{"TestCorelliPowderCalibrationX"};
-    boost::filesystem::create_directory(test_dir);
-    TS_ASSERT(boost::filesystem::is_directory(test_dir));
 
-    // clean
-    boost::filesystem::remove_all(test_dir);
-  }
 
   //-----------------------------------------------------------------------------
   /**
@@ -394,5 +345,24 @@ private:
         AnalysisDataService::Instance().retrieve(tablewsname));
 
     return tablews;
+  }
+
+  /**
+   * @brief Create some existing database (csv) files
+   */
+  void create_existing_database_files(calibdir, banks){
+
+	  boost::filesystem::Path dir(calibdir);
+
+	  for (auto bankname: banks) {
+		  std::string basename = banks + ".csv"
+			  std::filesystem::Path basepath(basename);
+			std::filesystem:Path fullpath = dir / basepath;
+		 	std::string filename = fullpath.string()
+	  std::ofstream bankofs(filename);
+		  bankofs << "# YYYMMDD , Xposition , Yposition , Zposition , XdirectionCosine , YdirectionCosine , ZdirectionCosine , RotationAngle\n";
+		  bankofs << "# str , double , double , double , double , double , double , double\n";
+		  bankofs << "20201117,0.0001,-0.0002,0.003,0,-23.3,98.02,0"
+
   }
 };
