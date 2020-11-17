@@ -239,8 +239,10 @@ void CalibrationTableHandler::saveCompomentDatabase(
       AlgorithmFactory::Instance().create("SaveAscii", 2);
   saveAsciiAlg->initialize();
   saveAsciiAlg->setPropertyValue(
-      "InputWorkspace", mCalibWS->getName()); // std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));
-                                              // //mCalibWS->getName());
+      "InputWorkspace",
+      mCalibWS
+          ->getName()); // std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));
+                        // //mCalibWS->getName());
   saveAsciiAlg->setProperty("Filename", filename);
   saveAsciiAlg->setPropertyValue("CommentIndicator", "#");
   saveAsciiAlg->setPropertyValue("Separator", "CSV");
@@ -267,8 +269,10 @@ void CalibrationTableHandler::saveCalibrationTable(
       AlgorithmFactory::Instance().create("SaveAscii", 2);
   saveAsciiAlg->initialize();
   saveAsciiAlg->setPropertyValue(
-      "InputWorkspace", mCalibWS->getName()); // std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));
-                                              // //mCalibWS->getName());
+      "InputWorkspace",
+      mCalibWS
+          ->getName()); // std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));
+                        // //mCalibWS->getName());
   saveAsciiAlg->setProperty("Filename", filename);
   saveAsciiAlg->setPropertyValue("CommentIndicator", "#");
   saveAsciiAlg->setPropertyValue("Separator", "CSV");
