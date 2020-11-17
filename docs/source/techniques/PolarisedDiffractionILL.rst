@@ -311,6 +311,10 @@ efficiency and even for shape effects from the sample. If the sample stoichiomet
 nuclear-spin-incoherent cross-section can be derived, this cross-section can be used to express the sample data in absolute units.
 In this case, the vanadium cross-section is unnecessary.
 
+For the best results of using the reduced vanadium data as input for sample data normalisation, the `OutputTreatment` property of the
+:ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` algorithm needs to be set to `Sum`.
+
+
 Reduction workflow
 ------------------
 
@@ -404,6 +408,11 @@ Output
 The corrected counts in each each detector are normalised to the expected total cross-section for vanadium
 of :math:`0.404 \frac{\text{barn}}{\text{steradian} \cdot \text{atom}}`. The output of vanadium reduction
 is given as a histogram with a single value per detector.
+
+In case it is desireable to separate cross-sections, for example for diagnostic purposes, it can be done
+using the reduced data described as above using :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`
+algorithm. More details on working with this algorithm are given in the sample normalisation section.
+
 
 Below is the relevant workflow diagram describing reduction steps of the vanadium reduction.
 
