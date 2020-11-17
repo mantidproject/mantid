@@ -7,7 +7,7 @@
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, IMDHistoWorkspace, IMDHistoWorkspaceProperty, \
     PythonAlgorithm, Progress, PropertyMode, MultipleFileProperty, WorkspaceProperty
 from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, FloatArrayProperty, \
-    FloatArrayLengthValidator, V3D
+    FloatArrayLengthValidator, FloatPropertyWithValue, V3D
 from mantid.simpleapi import ConvertHFIRSCDtoMDE, ConvertWANDSCDtoQ, DeleteWorkspace, DeleteWorkspaces, DivideMD, \
     LoadMD, MergeMD, ReplicateMD, SetGoniometer, mtd
 import os
@@ -53,7 +53,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.declareProperty("DetectorDistanceOffset", defaultValue=0.0, direction=Direction.Input,
                              doc="Optional distance (in meters) to move detector distance (relative to current position)")
 
-        self.declareProperty("Wavelength", defaultValue="",
+        self.declareProperty(FloatPropertyWithValue("Wavelength", # EMPTY_DBL so it shows as blank in GUI
+                                                    FloatPropertyWithValue.EMPTY_DBL),
                              doc="Optional wavelength value to use as backup if one was not found in the sample log")
 
         # Which conversion algorithm to use
@@ -191,7 +192,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         for in_file in datafiles:
             if load_files:
-                scan = LoadMD(in_file, LoadHistory=False, StoreInADS=False)
+                scan = LoadMD(in_file, LoadHistory=False, OutputWorkspace="__scan")
             else:
                 scan = mtd[in_file]
 
