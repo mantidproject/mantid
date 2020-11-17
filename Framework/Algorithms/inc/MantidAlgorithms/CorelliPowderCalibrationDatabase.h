@@ -59,7 +59,7 @@ public:
   /// Save the calibration table (of a single date)
   void saveCalibrationTable(const std::string &filename);  
   /// Load a single component calibration table
-  static DataObjects::TableWorkspace_sptr loadComponentCalibrationTable(const std::string &filename);
+  static DataObjects::TableWorkspace_sptr loadComponentCalibrationTable(const std::string &filename, const std::string &tablewsname);
   /// Create a single component calibration TableWorkspace from scratch
   static DataObjects::TableWorkspace_sptr createComponentCalibrationTable(const std::string &wsname);
   /// Get the calibration of a component

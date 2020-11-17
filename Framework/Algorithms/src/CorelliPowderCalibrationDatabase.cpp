@@ -21,6 +21,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/TableRow.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -71,6 +72,19 @@ DataObjects::TableWorkspace_sptr CalibrationTableHandler::createComponentCalibra
     }
 
     return tablews;
+}
+
+/**
+ * @brief Append a calibration position to the table
+ * @param tablews
+ * @param datestamp
+ * @param pos
+ */
+void CalibrationTableHandler::appendCalibration(DataObjects::TableWorkspace_sptr tablews, const std::string &datestamp, ComponentPosition& pos) {
+    // Append a new row
+    Mantid::API::TableRow sourceRow = tablews->appendRow();
+    // Date and positions
+    sourceRow << datestamp << pos.x << pos.y << pos.z << pos.xCosine << pos.yCosine << pos.zCosine << pos.rotAngle;
 }
 
 
@@ -150,6 +164,30 @@ ComponentPosition CalibrationTableHandler::getComponentCalibratedPosition(const 
 }
 
 /**
+ * @brief Load single component calibration file to table workspace
+ * @param filename
+ * @return
+ */
+DataObjects::TableWorkspace_sptr CalibrationTableHandler::loadComponentCalibrationTable(const std::string &filename,
+                                                                                        const std::string &tablewsname) {
+    // Get algorithm handler
+    IAlgorithm_sptr loadAsciiAlg =
+        AlgorithmFactory::Instance().create("LoadAscii", 2);
+    // Set parameters
+    loadAsciiAlg->initialize();
+    loadAsciiAlg->setPropertyValue("Filename", filename);
+    loadAsciiAlg->setPropertyValue("OutputWorkspace", tablewsname);
+    loadAsciiAlg->setPropertyValue("Separator", "CSV");
+    loadAsciiAlg->setPropertyValue("CommentIndicator", "#");
+    loadAsciiAlg->execute();
+    // Convert to TableWorkspace
+    TableWorkspace_sptr tablews = std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve(tablewsname));
+
+    return tablews;
+}
+
+
+/**
  * @brief CalibrationTableHandler::load
  * @param filename
  */
@@ -167,14 +205,17 @@ void CalibrationTableHandler::saveCompomentDatabase(const std::string &datestamp
     const std::string &component,
     const std::string &filename) {
 
+  // create worksapce name
+  std::string tablewsname = component + "_" + datestamp;
+
   // Check whether the file does exist or not: new or append
   TableWorkspace_sptr compcaltable = nullptr;
   bool appendmode{false};
   if (boost::filesystem::exists(filename)) {
-      compcaltable = loadComponentCalibrationTable(filename);
+      compcaltable = loadComponentCalibrationTable(filename, tablewsname);
       appendmode = true;
   } else {
-      compcaltable = createComponentCalibrationTable("");
+      compcaltable = createComponentCalibrationTable(tablewsname);
   }
 
   // Append the row

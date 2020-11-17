@@ -192,7 +192,6 @@ public:
     std::string outwsname("CorelliPowderCalibrationDatabaseTest_TableWS2");
     TableWorkspace_sptr calib_ws =
         createTestCalibrationTableWorkspace(outwsname);
-    std::cout << "[DEBUG 2] Table workspace rows: " << calib_ws->rowCount() << "\n";
 
     // Create an incorrect calibration workspace
     std::string wrongwsname{"CorelliPowderCalibrationDatabaseTest_TableWS_Wrong"};
@@ -215,20 +214,29 @@ public:
     for (size_t i = 0; i < 3; ++i)
         TS_ASSERT_EQUALS(componentnames[i], expectednames[i]);
 
-    // name
+    // Test: get component names
     std::vector<std::string> compNames = calib_handler.getComponentNames();
     TS_ASSERT_EQUALS(compNames.size(), 3);
 
-    // Test save
+    // Test: get component calibrated positions
+    CorelliCalibration::ComponentPosition goldsourcepos{0., 0., -15.560, 0., 0., 0., 0.};
+    CorelliCalibration::ComponentPosition testsourcepos = calib_handler.getComponentCalibratedPosition("source");
+    TS_ASSERT(testsourcepos.equalTo(goldsourcepos, 1.E-10));
+
+    CorelliCalibration::ComponentPosition goldbank1pos{0.9678, 0.0056, 0.0003, 0.4563, -0.9999, 0.3424, 5.67};
+    CorelliCalibration::ComponentPosition testbank1pos = calib_handler.getComponentCalibratedPosition("bank1");
+    TS_ASSERT(testbank1pos.equalTo(goldbank1pos, 1.E-10));
+
+    // Test: save calibration
     // component file: name, remove file if it does exist, save and check file existence
-    const std::string testcompfilename{"/tmp/testsourcedb2.csv"};
+    const std::string testcompfilename{"testsourcedb2.csv"};
     boost::filesystem::remove(testcompfilename);
     calib_handler.saveCalibrationTable(testcompfilename);
     TS_ASSERT(boost::filesystem::exists(testcompfilename));
 
     // Load and check
     TableWorkspace_sptr duptable = loadCSVtoTable(testcompfilename, "DuplicatedSource");
-    TS_ASSERT_EQUALS(duptable->rowCount(), 1);
+    TS_ASSERT_EQUALS(duptable->rowCount(), 3);
 
     // load back
     calib_handler.load(testcompfilename);
