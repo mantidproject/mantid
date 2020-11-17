@@ -5,11 +5,11 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, IMDHistoWorkspace, IMDHistoWorkspaceProperty, \
-    PythonAlgorithm, PropertyMode, MultipleFileProperty, WorkspaceProperty
-from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, V3D, FloatArrayProperty, \
-    FloatArrayLengthValidator
+    PythonAlgorithm, Progress, PropertyMode, MultipleFileProperty, WorkspaceProperty
+from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, FloatArrayProperty, \
+    FloatArrayLengthValidator, V3D
 from mantid.simpleapi import ConvertHFIRSCDtoMDE, ConvertWANDSCDtoQ, DeleteWorkspace, DeleteWorkspaces, DivideMD, \
-    LoadMD, MergeMD, ReplicateMD, mtd
+    LoadMD, MergeMD, ReplicateMD, SetGoniometer, mtd
 import os
 
 
@@ -49,9 +49,9 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         # Detector adjustment options
         self.declareProperty("DetectorHeightOffset", defaultValue=0.0, direction=Direction.Input,
-                             doc="Optional distance to move detector height (relative to current position)")
+                             doc="Optional distance (in meters) to move detector height (relative to current position)")
         self.declareProperty("DetectorDistanceOffset", defaultValue=0.0, direction=Direction.Input,
-                             doc="Optional distance to move detector distance (relative to current position)")
+                             doc="Optional distance (in meters) to move detector distance (relative to current position)")
 
         self.declareProperty("Wavelength", defaultValue="",
                              doc="Optional wavelength value to use as backup if one was not found in the sample log")
@@ -120,6 +120,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         vanfile = self.getProperty("VanadiumFile").value
         input_ws = self.getProperty("InputWorkspaces")
         van_ws = self.getProperty("VanadiumWorkspace")
+        wavelength = self.getProperty("Wavelength")
 
         # Make sure files and workspaces aren't both set
         if len(filelist) >= 1:
@@ -145,18 +146,24 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                     elif mtd[ws].getNumDims() != 3:
                         issues['InputWorkspaces'] = "Workspace '{}' expected to have 3 dimensions".format(ws)
 
+        if not wavelength.isDefault:
+            if wavelength <= 0.0:
+                issues['Wavelength'] = "Wavelength should be greater than zero"
+
         return issues
 
     def PyExec(self):
         load_van = not self.getProperty("VanadiumFile").isDefault
         load_files = not self.getProperty("Filename").isDefault
 
-        has_van = not self.getProperty("VanadiumWorkspace").isDefault and not load_van
+        has_van = not self.getProperty("VanadiumWorkspace").isDefault or load_van
 
         if load_files:
             datafiles = self.getProperty("Filename").value
         else:
             datafiles = list(map(str.strip, self.getProperty("InputWorkspaces").value.split(",")))
+
+        prog = Progress(self, 0.0, 1.0, len(datafiles)+1)
 
         vanadiumfile = self.getProperty("VanadiumFile").value
         vanws = self.getProperty("VanadiumWorkspace").value
@@ -188,20 +195,22 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
 
         has_multiple = True if len(datafiles) > 1 else False
 
-        for file in datafiles:
+        for in_file in datafiles:
             if load_files:
-                scan = LoadMD(file, LoadHistory=False, StoreInADS=False)
+                scan = LoadMD(in_file, LoadHistory=False, StoreInADS=False)
             else:
-                scan = mtd[file]
+                scan = mtd[in_file]
 
-            self.log().information("Processing file '{}'".format(file))
+            prog.report()
+            self.log().information("Processing '{}'".format(in_file))
 
+            SetGoniometer(Workspace=scan, Axis0='omega,0,1,0,-1', Axis1='chi,0,0,1,-1', Axis2='phi,0,1,0,-1')
             # If processing multiple files, append the base name to the given output name
             if has_multiple:
                 if load_files:
-                    out_ws_name = out_ws + "_" + os.path.basename(file).strip(',.nxs')
+                    out_ws_name = out_ws + "_" + os.path.basename(in_file).strip(',.nxs')
                 else:
-                    out_ws_name = out_ws + "_" + file
+                    out_ws_name = out_ws + "_" + in_file
 
             exp_info = scan.getExperimentInfo(0)
             self.__move_components(exp_info, height, distance)
@@ -254,19 +263,34 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         self.setProperty("OutputWorkspace", out_ws_name)
 
     def __move_components(self, exp_info, height, distance):
+        """
+        Moves all instrument banks by a given height (y) and distance (x-z) in meters,
+        relative to the current instrument position.
+        :param exp_info: experiment info of the run, used to get the instrument components
+        :param height: Distance to move the instrument along y axis
+        :param distance: Distance to move the instrument in the x-z plane
+        """
         # Adjust detector height and distance with new offsets
-        if height != 0.0 or distance != 0.0:
-            # Move all the instrument banks (MoveInstrumentComponents does not work on MDHisto Workspaces)
-            component = exp_info.componentInfo()
-            for bank in range(1, 4):
-                index = component.indexOfAny("bank{}".format(bank))
+        component = exp_info.componentInfo()
+        for bank in range(1, 4):
+            # Set height offset (y) first on bank?
+            index = component.indexOfAny("bank{}".format(bank))
 
-                offset = V3D(distance, height, distance)
+            if height != 0.0:
+                offset = V3D(0, height, 0)
                 pos = component.position(index)
-
                 offset += pos
-
                 component.setPosition(index, offset)
+
+            # Set distance offset to detector (x,z) on bank?/panel
+            if distance != 0.0:
+                panel_index = int(component.children(index)[0])  # should only have one child
+                panel_pos = component.position(panel_index)
+                panel_rel_pos = component.relativePosition(panel_index)
+                # need to move detector in direction in x-z plane
+                panel_offset = panel_rel_pos * (distance / panel_rel_pos.norm())
+                panel_offset += panel_pos
+                component.setPosition(panel_index, panel_offset)
 
 
 AlgorithmFactory.subscribe(HB3AAdjustSampleNorm)
