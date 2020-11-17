@@ -280,6 +280,13 @@ public:
        on: turn on or off autoscaling
 %End
 
+  void resetView();
+%Docstring
+    void resetView()
+    ----------------
+    Reset the view widget
+%End
+
 private:
   // constructors all private
   InstrumentWidgetRenderTab();
