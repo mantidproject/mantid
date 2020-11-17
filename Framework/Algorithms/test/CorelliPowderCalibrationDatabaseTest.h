@@ -175,12 +175,13 @@ public:
    * @brief Test ComponentPosition
    */
   void test_component() {
-      // compare:
-      CorelliCalibration::ComponentPosition pos1{0., 0., 0., 20., 30., 40., 50};
-      CorelliCalibration::ComponentPosition pos2{0., 0., 0., 20., 30., 40., 50};
-      CorelliCalibration::ComponentPosition pos3{0., 0., 0., 20.003, 30., 40., 50};
-      TS_ASSERT(pos1.equalTo(pos2, 1E-7));
-      TS_ASSERT(!pos1.equalTo(pos3, 1E-7));
+    // compare:
+    CorelliCalibration::ComponentPosition pos1{0., 0., 0., 20., 30., 40., 50};
+    CorelliCalibration::ComponentPosition pos2{0., 0., 0., 20., 30., 40., 50};
+    CorelliCalibration::ComponentPosition pos3{0.,  0.,  0., 20.003,
+                                               30., 40., 50};
+    TS_ASSERT(pos1.equalTo(pos2, 1E-7));
+    TS_ASSERT(!pos1.equalTo(pos3, 1E-7));
   }
 
   //-----------------------------------------------------------------------------
@@ -194,7 +195,8 @@ public:
         createTestCalibrationTableWorkspace(outwsname);
 
     // Create an incorrect calibration workspace
-    std::string wrongwsname{"CorelliPowderCalibrationDatabaseTest_TableWS_Wrong"};
+    std::string wrongwsname{
+        "CorelliPowderCalibrationDatabaseTest_TableWS_Wrong"};
     TableWorkspace_sptr calib_wrong_ws =
         createIncorrectTestCalibrationTableWorkspace(wrongwsname);
 
@@ -203,7 +205,8 @@ public:
         CorelliCalibration::CalibrationTableHandler();
 
     // Expect to fail set a wrong
-    TS_ASSERT_THROWS_ANYTHING(calib_handler.setCalibrationTable(calib_wrong_ws));
+    TS_ASSERT_THROWS_ANYTHING(
+        calib_handler.setCalibrationTable(calib_wrong_ws));
     // Shall not throw
     TS_ASSERT_THROWS_NOTHING(calib_handler.setCalibrationTable(calib_ws));
 
@@ -212,30 +215,36 @@ public:
     std::vector<std::string> expectednames{"source", "sample", "bank1"};
     TS_ASSERT_EQUALS(componentnames.size(), expectednames.size());
     for (size_t i = 0; i < 3; ++i)
-        TS_ASSERT_EQUALS(componentnames[i], expectednames[i]);
+      TS_ASSERT_EQUALS(componentnames[i], expectednames[i]);
 
     // Test: get component names
     std::vector<std::string> compNames = calib_handler.getComponentNames();
     TS_ASSERT_EQUALS(compNames.size(), 3);
 
     // Test: get component calibrated positions
-    CorelliCalibration::ComponentPosition goldsourcepos{0., 0., -15.560, 0., 0., 0., 0.};
-    CorelliCalibration::ComponentPosition testsourcepos = calib_handler.getComponentCalibratedPosition("source");
+    CorelliCalibration::ComponentPosition goldsourcepos{0., 0., -15.560, 0.,
+                                                        0., 0., 0.};
+    CorelliCalibration::ComponentPosition testsourcepos =
+        calib_handler.getComponentCalibratedPosition("source");
     TS_ASSERT(testsourcepos.equalTo(goldsourcepos, 1.E-10));
 
-    CorelliCalibration::ComponentPosition goldbank1pos{0.9678, 0.0056, 0.0003, 0.4563, -0.9999, 0.3424, 5.67};
-    CorelliCalibration::ComponentPosition testbank1pos = calib_handler.getComponentCalibratedPosition("bank1");
+    CorelliCalibration::ComponentPosition goldbank1pos{
+        0.9678, 0.0056, 0.0003, 0.4563, -0.9999, 0.3424, 5.67};
+    CorelliCalibration::ComponentPosition testbank1pos =
+        calib_handler.getComponentCalibratedPosition("bank1");
     TS_ASSERT(testbank1pos.equalTo(goldbank1pos, 1.E-10));
 
     // Test: save calibration
-    // component file: name, remove file if it does exist, save and check file existence
+    // component file: name, remove file if it does exist, save and check file
+    // existence
     const std::string testcompfilename{"testsourcedb2.csv"};
     boost::filesystem::remove(testcompfilename);
     calib_handler.saveCalibrationTable(testcompfilename);
     TS_ASSERT(boost::filesystem::exists(testcompfilename));
 
     // Load and check
-    TableWorkspace_sptr duptable = loadCSVtoTable(testcompfilename, "DuplicatedSource");
+    TableWorkspace_sptr duptable =
+        loadCSVtoTable(testcompfilename, "DuplicatedSource");
     TS_ASSERT_EQUALS(duptable->rowCount(), 3);
 
     // load back
@@ -248,8 +257,6 @@ public:
     boost::filesystem::remove(testcalibfilename);
     calib_handler.saveCalibrationTable(testcalibfilename);
     TS_ASSERT(boost::filesystem::exists(testcalibfilename));
-
-
 
     // Clean
     AnalysisDataService::Instance().remove(outwsname);
@@ -307,7 +314,8 @@ private:
       tablews->addColumn(type, colname);
     }
 
-    std::cout << "[DEBUG 0] Table workspace rows: " << tablews->rowCount() << "\n";
+    std::cout << "[DEBUG 0] Table workspace rows: " << tablews->rowCount()
+              << "\n";
 
     // append rows
     Mantid::API::TableRow sourceRow = tablews->appendRow();
@@ -318,17 +326,20 @@ private:
     bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999
              << 0.3424 << 5.67;
 
-    std::cout << "[DEBUG 1] Table workspace rows: " << tablews->rowCount() << "\n";
+    std::cout << "[DEBUG 1] Table workspace rows: " << tablews->rowCount()
+              << "\n";
 
     return tablews;
   }
 
   /**
-   * @brief Create an incompatile table workspace for algorithm to throw exception
+   * @brief Create an incompatile table workspace for algorithm to throw
+   * exception
    * @param outWSName
    * @return
    */
-  TableWorkspace_sptr createIncorrectTestCalibrationTableWorkspace(const std::string &outWSName) {
+  TableWorkspace_sptr
+  createIncorrectTestCalibrationTableWorkspace(const std::string &outWSName) {
     // Create table workspace
     ITableWorkspace_sptr itablews = WorkspaceFactory::Instance().createTable();
     AnalysisDataService::Instance().addOrReplace(outWSName, itablews);
@@ -347,29 +358,30 @@ private:
 
     // append rows
     Mantid::API::TableRow sourceRow = tablews->appendRow();
-    sourceRow << "source" << 0. << 0. << -15.560 << 0. << 0. << 0. ;
+    sourceRow << "source" << 0. << 0. << -15.560 << 0. << 0. << 0.;
     Mantid::API::TableRow sampleRow = tablews->appendRow();
-    sampleRow << "sample" << 0.0001 << -0.0002 << 0.003 << 0. << 0. << 0. ;
+    sampleRow << "sample" << 0.0001 << -0.0002 << 0.003 << 0. << 0. << 0.;
     Mantid::API::TableRow bank1Row = tablews->appendRow();
     bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999
-             << 0.3424 ;
+             << 0.3424;
 
     return tablews;
   }
 
-  TableWorkspace_sptr loadCSVtoTable(const std::string &csvname, const std::string &tablewsname) {
-      IAlgorithm_sptr loadAsciiAlg =
-          AlgorithmFactory::Instance().create("LoadAscii", 2);
-      loadAsciiAlg->initialize();
-      loadAsciiAlg->setPropertyValue("Filename", csvname);
-      loadAsciiAlg->setPropertyValue("OutputWorkspace", tablewsname);
-      loadAsciiAlg->setPropertyValue("Separator", "CSV");
-      loadAsciiAlg->setPropertyValue("CommentIndicator", "#");
-      loadAsciiAlg->execute();
+  TableWorkspace_sptr loadCSVtoTable(const std::string &csvname,
+                                     const std::string &tablewsname) {
+    IAlgorithm_sptr loadAsciiAlg =
+        AlgorithmFactory::Instance().create("LoadAscii", 2);
+    loadAsciiAlg->initialize();
+    loadAsciiAlg->setPropertyValue("Filename", csvname);
+    loadAsciiAlg->setPropertyValue("OutputWorkspace", tablewsname);
+    loadAsciiAlg->setPropertyValue("Separator", "CSV");
+    loadAsciiAlg->setPropertyValue("CommentIndicator", "#");
+    loadAsciiAlg->execute();
 
-      TableWorkspace_sptr tablews = std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve(tablewsname));
+    TableWorkspace_sptr tablews = std::dynamic_pointer_cast<TableWorkspace>(
+        AnalysisDataService::Instance().retrieve(tablewsname));
 
-      return tablews;
+    return tablews;
   }
-
 };

@@ -37,35 +37,46 @@ struct ComponentPosition {
   bool equalTo(const ComponentPosition &otherpos, double abstol) {
     if (fabs(x - otherpos.x) >= abstol || fabs(y - otherpos.y) >= abstol ||
         fabs(z - otherpos.z) >= abstol ||
-        fabs(xCosine - otherpos.xCosine) >= abstol || fabs(yCosine - otherpos.yCosine) >= abstol ||
-        fabs(zCosine - otherpos.zCosine) >= abstol || fabs(rotAngle - otherpos.rotAngle) >= abstol) {
+        fabs(xCosine - otherpos.xCosine) >= abstol ||
+        fabs(yCosine - otherpos.yCosine) >= abstol ||
+        fabs(zCosine - otherpos.zCosine) >= abstol ||
+        fabs(rotAngle - otherpos.rotAngle) >= abstol) {
       return false;
     }
     return true;
   }
 };
 
-/// Class containing static and member methods to work with calibration table workspaces
+/// Class containing static and member methods to work with calibration table
+/// workspaces
 class MANTID_ALGORITHMS_DLL CalibrationTableHandler {
 public:
   CalibrationTableHandler();
   void setCalibrationTable(DataObjects::TableWorkspace_sptr calibws);
   std::vector<std::string> getComponentNames();
   DataObjects::TableWorkspace_sptr getCalibrationWorkspace() {
-      return mCalibWS;
+    return mCalibWS;
   }
   void load(const std::string &filename);
-  void saveCompomentDatabase(const std::string &datestamp, const std::string &component, const std::string &filename);
+  void saveCompomentDatabase(const std::string &datestamp,
+                             const std::string &component,
+                             const std::string &filename);
   /// Save the calibration table (of a single date)
-  void saveCalibrationTable(const std::string &filename);  
+  void saveCalibrationTable(const std::string &filename);
   /// Load a single component calibration table
-  static DataObjects::TableWorkspace_sptr loadComponentCalibrationTable(const std::string &filename, const std::string &tablewsname);
+  static DataObjects::TableWorkspace_sptr
+  loadComponentCalibrationTable(const std::string &filename,
+                                const std::string &tablewsname);
   /// Create a single component calibration TableWorkspace from scratch
-  static DataObjects::TableWorkspace_sptr createComponentCalibrationTable(const std::string &wsname);
+  static DataObjects::TableWorkspace_sptr
+  createComponentCalibrationTable(const std::string &wsname);
   /// Get the calibration of a component
-  ComponentPosition getComponentCalibratedPosition(const std::string &component);
+  ComponentPosition
+  getComponentCalibratedPosition(const std::string &component);
   /// Append a new row to single component calibration table
-  static void appendCalibration(DataObjects::TableWorkspace_sptr tablews, const std::string &datestamp, ComponentPosition& pos);
+  static void appendCalibration(DataObjects::TableWorkspace_sptr tablews,
+                                const std::string &datestamp,
+                                ComponentPosition &pos);
 
 private:
   DataObjects::TableWorkspace_sptr mCalibWS;
