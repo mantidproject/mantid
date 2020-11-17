@@ -386,7 +386,7 @@ class TestFittingDataModel(unittest.TestCase):
 
         # test the workspaces were created and added to fit_workspaces
         self.assertEqual(self.model._fit_workspaces, (mock_ws_list + [mock_create_table.return_value,
-                                                                           mock_create_table.return_value]))
+                                                                      mock_create_table.return_value]))
         # test the table stores the correct function strings (empty string if no function present)
         mock_writerow.assert_any_call(mock_create_table.return_value,
                                       ['name1', self.model._fit_results['name1']['costFunction'],
@@ -433,8 +433,8 @@ class TestFittingDataModel(unittest.TestCase):
         self.model.create_fit_tables(mock_peak_centre_params)
 
         # test the workspaces were created and added to fit_workspaces
-        self.assertEqual(self.model._fit_workspaces, mock_ws_list +
-                         [mock_create_table.return_value, mock_create_table.return_value])
+        self.assertEqual(self.model._fit_workspaces, mock_ws_list
+                         + [mock_create_table.return_value, mock_create_table.return_value])
         # check that the dspacing peaks tables have been made
         mock_create_table.assert_any_call(OutputWorkspace='Gaussian_PeakCentre_dSpacing')
         # test the table stores the correct function strings (empty string if no function present)
