@@ -199,7 +199,7 @@ are calculated from ratios of non-spin-flip to spin-flip scattering, hence absol
 First, the data is normalised to monitor 1 (M1). Then, if the necessary inputs of container and absorber (please note this is a different measurement
 than mentioned in the `Transmission` section) measurements are provided, the background can be subtracted from the data: 
 
-.. math:: \dot{I}_{B} = \dot{I} - T\dot{E} - (1-T) \dot{C},
+.. math:: \dot{I_{B}} = \dot{I} - T\dot{E} - (1-T) \dot{C},
 
 where :math:`\dot{I}` denotes monitor-normalised quartz data, :math:`T` is transmission, and :math:`\dot{E}` and :math:`\dot{C}` are the normalised counts
 measured with empty container and cadmium absorber, respectively.
@@ -215,7 +215,7 @@ and background-subtracted data with flipper states off and on respectively.
 
 The output is given in the form of a histogram with a single value per detector per polarisation direction.
 
-Below are the relevant workflow diagrams describing reduction steps of the quartz reduction.
+Below is the relevant workflow diagram describing reduction steps of the quartz reduction.
 
 .. diagram:: PolDiffILLReduction-v1_quartz_wkflw.dot
 
@@ -290,6 +290,225 @@ Output:
     The average polarisation efficiency in the Z direction is 0.90
 
 .. testcleanup:: ExPolarisedDifffractionQuartz
+
+    mtd.clear()
+
+
+Vanadium data reduction
+=======================
+
+Vanadium provides a measure of the relative detector efficiencies and its count rate can be used for the calibration
+of sample data to absolute units. Multiple scattering and sample self-attenuation are issues here and the correction
+works best if the vanadium has, as close as possible, the same attenuation and shape as the sample.
+
+The scattering from the vanadium is considered to be purely elastic scattering and the cross-section considered to be purely
+due to the nuclear spin-incoherent contribution. The reduced vanadium data can be used to normalise the results of the sample
+data reduction in :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>`. The vanadium data can also be used as a consistency
+check for polarization and multiple scattering corrections.
+
+If the sample has a large nuclear-spin-incoherent cross-section, this separated cross-section can be used as a self-correction for detector
+efficiency and even for shape effects from the sample. If the sample stoichiometry is well-known and an accurate estimate for the
+nuclear-spin-incoherent cross-section can be derived, this cross-section can be used to express the sample data in absolute units.
+In this case, the vanadium cross-section is unnecessary.
+
+Reduction workflow
+------------------
+
+The first two steps of the reduction of vanadium data are the same as for quartz, with normalisation to the monitor and background
+subtraction (provided the necessary inputs). The polarisation efficiency of the instrument can be corrected using the previously reduced
+quartz data. The correction is applied according to the following formula:
+
+.. math::   \begin{bmatrix}
+                \dot{I_{B}}(+) \\
+                \dot{I_{B}}(-) \\
+            \end{bmatrix} = \frac{1}{2 f_{p} \phi}  \begin{bmatrix}
+                                                    (1-\phi)(1-f_{p}) + f_{p}(1+\phi) & -(1-\phi) \\
+                                                    -(1+\phi)(1-f_{p}) - f_{p}(1-\phi) & (1+\phi) \\
+                                                    \end{bmatrix}  \begin{bmatrix}
+						                       \dot{I_{B}}(0) \\
+								       \dot{I_{B}}(1) \\
+								   \end{bmatrix},
+
+
+where :math:`\dot{I_{B}}(+)` and :math:`\dot{I_{B}}(-)` denote the spin-flip and the non-spin-flip scattering events, respectively,
+and :math:`\dot{I_{B}}(0)` and :math:`\dot{I_{B}}(1)` are the events with the flipper state on and off, respectively.
+
+Self-attenuation correction
+---------------------------
+
+The self-attenuation is estimated using :ref:`PaalmanPingsMonteCarloCorrection <algm-PaalmanPingsMonteCarloCorrection>` and applied to data
+with :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>`. The :ref:`PaalmanPingsMonteCarloCorrection <algm-PaalmanPingsMonteCarloCorrection>`
+algorithm requires multiple parameters of the sample and its environment, such as the geometry, density, and chemical composition to be defined.
+The communication of these parameters is done via `SampleAndEnvironmentProperties` property of the :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>`
+algorithm. Below there are all the necessary keys that can and need to be defined for the sample self-attenuation to be properly corrected.
+
+The `SampleAndEnvironmentProperties` property of the :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` algorithm is a dictionary containing
+all of the information about the sample and its environment. This information is used in self-attenuation calculations and also can be reused
+in data normalisation in the :ref:`D7AbsoluteCrossSections <algm-D7AbsoluteCrossSections>` algorithm.
+
+The complete list of keys can is summarised below:
+
+Sample-only keys:
+
+- *SampleMass*
+- *FormulaUnits*
+- *FormulaUnitMass*
+- *SampleChemicalFormula*
+- *SampleDensity*
+- *Height*
+
+The first three keys need to be always defined, so that the number of moles of the sample can be calculated, to ensure proper data normalisation.
+
+Container-only keys:
+
+- *ContainerChemicalFormula*
+- *ContainerDensity*
+
+Beam-only keys:
+
+- *BeamHeight*
+- *BeamWidth*
+
+Then, depending on the chosen sample geometry, additional parameters need to be defined:
+
+* For FlatPlate:
+
+  - *SampleThickness*
+  - *SampleWidth*
+  - *SampleCenter*
+  - *SampleAngle*
+  - *ContainerFrontThickness*
+  - *ContainerBackThickness*
+
+* For Cylinder:
+
+  - *SampleRadius*
+  - *ContainerRadius*
+
+* For Annulus:
+
+  - *SampleInnerRadius*
+  - *SampleOuterRadius*
+  - *ContainerInnerRadius*
+  - *ContainerOuterRadius*
+
+Optional keys:
+
+- *InitialEnergy* - if not provided, the value will be calculated from the wavelength in the SampleLogs
+- *NMoles* - if not provided, the value will be calculated based on the *SampleMass* and *FormulaUnitMass*
+
+
+Output
+------
+
+The corrected counts in each each detector are normalised to the expected total cross-section for vanadium
+of :math:`0.404 \frac{\text{barn}}{\text{steradian} \cdot \text{atom}}`. The output of vanadium reduction
+is given as a histogram with a single value per detector.
+
+Below is the relevant workflow diagram describing reduction steps of the vanadium reduction.
+
+.. diagram:: PolDiffILLReduction-v1_vanadium_wkflw.dot
+
+.. include:: ../usagedata-note.txt
+
+**Example - full treatment of a sample**
+
+.. testsetup:: ExPolarisedDifffractionVanadium
+
+    config['default.facility'] = 'ILL'
+    config.appendDataSearchSubDir('ILL/D7/')
+
+.. testcode:: ExPolarisedDifffractionVanadium
+
+    vanadium_dictionary = {'SampleMass':8.54,'FormulaUnits':1,'FormulaUnitMass':50.94,'SampleChemicalFormula':'V',
+	                   'Height':2,'SampleDensity':1.18,'SampleInnerRadius':2, 'SampleOuterRadius':2.49,
+			   'BeamWidth':2.5,'BeamHeight':2.5,
+                           'ContainerChemicalFormula':'Al','ContainerDensity':2.7,'ContainerOuterRadius':2.52,
+                           'ContainerInnerRadius':1.99}
+
+
+    # Beam with cadmium absorber, used for transmission
+    PolDiffILLReduction(
+        Run='396991',
+        OutputWorkspace='cadmium_ws',
+        ProcessAs='BeamWithAbsorber'
+    )
+    # Beam measurement for transmisison
+    PolDiffILLReduction(
+        Run='396983',
+        OutputWorkspace='beam_ws',
+        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        ProcessAs='EmptyBeam'
+    )
+
+    # Quartz transmission
+    PolDiffILLReduction(
+        Run='396985',
+        OutputWorkspace='quartz_transmission',
+        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        BeamInputWorkspace='beam_ws_1',
+       ProcessAs='Transmission'
+    )
+
+    # Empty container
+    PolDiffILLReduction(
+        Run='396917',
+        OutputWorkspace='container_ws',
+        ProcessAs='Container'
+    )
+
+    # Absorber
+    PolDiffILLReduction(
+        Run='396928',
+        OutputWorkspace='absorber_ws',
+        ProcessAs='Absorber'
+    )
+
+    # Polarisation correction
+    PolDiffILLReduction(
+        Run='396939',
+        OutputWorkspace='pol_corrections',
+        AbsorberInputWorkspace='absorber_ws',
+        ContainerInputWorkspace='container_ws',
+        TransmissionInputWorkspace='quartz_transmission_1',
+        OutputTreatment='Average',
+        ProcessAs='Quartz'
+    )
+
+    # Vanadium transmission
+    PolDiffILLReduction(
+        Run='396990',
+        OutputWorkspace='vanadium_transmission',
+        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        BeamInputWorkspace='beam_ws_1',
+        ProcessAs='Transmission'
+    )
+    print('Vanadium transmission is {0:.3f}'.format(mtd['vanadium_transmission_1'].readY(0)[0]))
+
+    # Vanadium reduction
+    PolDiffILLReduction(
+        Run='396993',
+        OutputWorkspace='vanadium_ws',
+        AbsorberInputWorkspace='absorber_ws',
+        ContainerInputWorkspace='container_ws',
+        TransmissionInputWorkspace='vanadium_transmission_1',
+        QuartzInputWorkspace='pol_corrections',
+        OutputTreatment='Sum',
+        SampleGeometry='Annulus',
+        SampleAndEnvironmentProperties=vanadium_dictionary,
+        ProcessAs='Vanadium'
+    )
+    print("The vanadium reduction output contains {} set of counts with {} bins.".format(mtd['vanadium_ws'].getNumberOfEntries(),
+	      mtd['vanadium_ws'][0].getNumberHistograms()))
+
+Output:
+
+.. testoutput:: ExPolarisedDifffractionVanadium
+
+   Vanadium transmission is 0.886
+   The vanadium reduction output contains 1 set of counts with 132 bins.
+
+.. testcleanup:: ExPolarisedDifffractionVanadium
 
     mtd.clear()
 
