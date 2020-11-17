@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 import numpy as np
-from mantid.simpleapi import DeleteWorkspace, LoadMD, HB3AAdjustSampleNorm
+from mantid.simpleapi import CreateMDHistoWorkspace, DeleteWorkspace, HB3AAdjustSampleNorm, LoadMD
 
 
 class HB3AAdjustSampleNormTest(unittest.TestCase):
@@ -20,7 +20,7 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
 
     def __checkAdjustments(self, orig_pos, new_pos, height, distance):
         # Check the changed height
-        np.testing.assert_allclose(new_pos.getY() - orig_pos.getY(), height)
+        np.testing.assert_allclose(new_pos.getY() - orig_pos.getY(), height, self._tolerance)
 
         # Check the changed distance along x-z
         dist = np.linalg.norm([new_pos.getX() - orig_pos.getX(), new_pos.getZ() - orig_pos.getZ()])
@@ -57,6 +57,23 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
         self.__checkAdjustments(orig_pos, new_pos, 0.0, 0.0)
 
         DeleteWorkspace(orig, result)
+
+    def testInputFail(self):
+        signal = range(0, 1000)
+        error = range(0, 1000)
+        samplews = CreateMDHistoWorkspace(Dimensionality=3, SignalInput=signal, ErrorInput=error,
+                                          Extents='-3,3,-3,3,-3,3', NumberOfBins='10,10,10', Names='x,y,z',
+                                          Units='MomentumTransfer,EnergyTransfer,EnergyTransfer')
+
+        # A MDHisto WS with no experiment info should fail
+        with self.assertRaises(RuntimeError):
+            HB3AAdjustSampleNorm(InputWorkspaces=samplews,
+                                 DetectorHeightOffset=0.0,
+                                 DetectorDistanceOffset=0.0,
+                                 OutputWorkspace="__tmpout",
+                                 Wavelength=2.0)
+
+        DeleteWorkspace(samplews)
 
 
 if __name__ == '__main__':
