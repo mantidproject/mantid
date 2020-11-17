@@ -1,8 +1,8 @@
 .. _PolarisedDiffractionILL:
 
-======================================
-Data reduction for ILL's D7 instrument
-======================================
+===========================================
+Data reduction for D7 instrument at the ILL
+===========================================
 
 .. contents:: Table of contents
     :local:
@@ -115,6 +115,73 @@ where `m` is the bank slope, :math:`offset_{\text{pixel}}` is the relative offse
 	     
 Transmission calculation
 ========================
+
+The transmission (T) is calculated using counts measured by Monitor 2 (M2), and according to the following formula:
+
+.. math:: T = \frac{S - E_{Cd}}{E - E_{Cd}},
+
+where :math:`S` is M2 counts measured with the current sample, :math:`E_{Cd}` is counts when cadmium absorber is measured, and :math:`E` is counts from the direct beam.
+
+The measurement of the cadmium absorber is optional and does not have to be provided as input for the transmission to be calculated. However, it allows
+to take into account dark currents in the readout system electronics and thus this measurement is advised to be included in transmission calculations.
+
+Below are the relevant workflow diagrams describing reduction steps of the transmission calculation.
+
+.. diagram:: PolDiffILLReduction-v1_absorber_wkflw.dot
+
+
+.. diagram:: PolDiffILLReduction-v1_beam_wkflw.dot
+
+
+.. diagram:: PolDiffILLReduction-v1_transmission_wkflw.dot
+
+
+.. include:: ../usagedata-note.txt
+
+**Example - transmission calculation for quartz sample**
+
+.. testsetup:: ExPolarisedDifffractionTransmission
+
+    config['default.facility'] = 'ILL'
+    config.appendDataSearchSubDir('ILL/D7/')
+
+.. testcode:: ExPolarisedDifffractionTransmission
+
+    # Beam with cadmium absorber, used for transmission
+    PolDiffILLReduction(
+        Run='396991',
+        OutputWorkspace='cadmium_ws',
+        ProcessAs='BeamWithAbsorber'
+    )
+    # Beam measurement for transmisison
+    PolDiffILLReduction(
+        Run='396983',
+        OutputWorkspace='beam_ws',
+        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        ProcessAs='EmptyBeam'
+    )
+    print('Cadmium absorber transmission is {0:.3f}'.format(mtd['cadmium_ws_1'].readY(0)[0] / mtd['beam_ws_1'].readY(0)[0]))
+
+    # Quartz transmission
+    PolDiffILLReduction(
+        Run='396985',
+        OutputWorkspace='quartz_transmission',
+        AbsorberTransmissionInputWorkspace='cadmium_ws_1',
+        BeamInputWorkspace='beam_ws_1',
+       ProcessAs='Transmission'
+    )
+    print('Quartz transmission is {0:.3f}'.format(mtd['quartz_transmission_1'].readY(0)[0]))
+
+Output:
+
+.. testoutput:: ExPolarisedDifffractionTransmission
+
+    Cadmium absorber transmission is 0.011
+    Quartz transmission is 0.700
+
+.. testcleanup:: ExPolarisedDifffractionTransmission
+
+    mtd.clear()
 
 
 Polarisation correction
