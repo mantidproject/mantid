@@ -12,6 +12,11 @@ from mantid.simpleapi import (
     CloneWorkspace,
     AddSampleLog,
 )
+from mantid.api import (
+    IEventWorkspace,
+    MatrixWorkspace,
+    WorkspaceGroup,
+)
 from mantid.kernel import V3D
 import unittest
 import numpy as np
@@ -334,6 +339,13 @@ class WANDPowderReductionTest(unittest.TestCase):
             BankPixelWidth=100,
             WorkspaceType="Event",
         )
+        event_data2 = CreateSampleWorkspace(
+            NumBanks=1,
+            BinWidth=20000,
+            PixelSpacing=0.1,
+            BankPixelWidth=100,
+            WorkspaceType="Event",
+        )
         event_cal = CreateSampleWorkspace(
             NumBanks=1,
             BinWidth=20000,
@@ -350,7 +362,9 @@ class WANDPowderReductionTest(unittest.TestCase):
             WorkspaceType="Event",
             Function="Flat background",
         )
-
+        
+        #CASE 1
+        #input single workspace, output single workspace
         pd_out = WANDPowderReduction(
             InputWorkspace=event_data,
             CalibrationWorkspace=event_cal,
@@ -358,6 +372,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="None",
+            Sum=False,
         )
 
         x = pd_out.extractX()
@@ -366,7 +381,10 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(x.min(), 0.03517355)
         self.assertAlmostEqual(x.max(), 70.3119282)
         self.assertAlmostEqual(y[0, 0], 0.0)
-
+        assert isinstance(pd_out, MatrixWorkspace)
+        
+        #CASE 2
+        #input multiple single ws, output (single) summed ws
         pd_out = WANDPowderReduction(
             InputWorkspace=[event_data, event_data],
             CalibrationWorkspace=event_cal,
@@ -374,6 +392,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             Target="Theta",
             NumberBins=1000,
             NormaliseBy="None",
+            Sum=True,
         )
 
         x = pd_out.extractX()
@@ -382,6 +401,55 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(x.min(), 0.03517355)
         self.assertAlmostEqual(x.max(), 70.3119282)
         self.assertAlmostEqual(y[0, 0], 0.0)
+        assert isinstance(pd_out, MatrixWorkspace)
+        
+        #CASE 3
+        #DOES NOT WORK YET -- currently outputs Workspace2D -- will modify when algorithm is updated
+        #input group ws containing several ws, output group ws containing several ws
+        groupWS = WorkspaceGroup()
+        groupWS.addWorkspace(event_data)
+        groupWS.addWorkspace(event_data2)
+        
+        pd_out = WANDPowderReduction(
+            InputWorkspace=groupWS,
+            CalibrationWorkspace=event_cal,
+            BackgroundWorkspace="event_bkg,event_bkg",
+            Target="Theta",
+            NumberBins=1000,
+            NormaliseBy="None",
+            Sum=False,
+        )
+
+        x = pd_out.extractX()
+        y = pd_out.extractY()
+
+        self.assertAlmostEqual(x.min(), 0.03517355)
+        self.assertAlmostEqual(x.max(), 70.3119282)
+        self.assertAlmostEqual(y[0, 0], 0.0)
+        assert isinstance(pd_out, WorkspaceGroup)
+        assert len(pd_out) == 2
+        
+        #CASE 4
+        #DOES NOT WORK YET -- currently outputs Workspace2D -- will modify when algorithm is updated
+        #input multiple single ws, output group ws containing several ws
+        pd_out = WANDPowderReduction(
+            InputWorkspace=[event_data, event_data],
+            CalibrationWorkspace=event_cal,
+            BackgroundWorkspace="event_bkg,event_bkg",
+            Target="Theta",
+            NumberBins=1000,
+            NormaliseBy="None",
+            Sum=False,
+        )
+
+        x = pd_out.extractX()
+        y = pd_out.extractY()
+
+        self.assertAlmostEqual(x.min(), 0.03517355)
+        self.assertAlmostEqual(x.max(), 70.3119282)
+        self.assertAlmostEqual(y[0, 0], 0.0)
+        assert isinstance(pd_out, WorkspaceGroup)
+        assert len(pd_out) == 2
 
 
 if __name__ == "__main__":
