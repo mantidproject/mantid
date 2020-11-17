@@ -171,12 +171,6 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         distance = self.getProperty("DetectorDistanceOffset").value
         method = self.getProperty("OutputAsMDEventWorkspace").value
 
-        wavelength = -1
-        # Set the back-up wavelength value
-        wl_prop = self.getProperty("Wavelength")
-        if not wl_prop.isDefault:
-            wavelength = wl_prop.value
-
         if method:
             minvals = self.getProperty("MinValues").value
             maxvals = self.getProperty("MaxValues").value
@@ -219,11 +213,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             exp_info = scan.getExperimentInfo(0)
             self.__move_components(exp_info, height, distance)
 
-            # Get the wavelength from the file sample logs if it exists
-            if exp_info.run().hasProperty("wavelength"):
-                wavelength = exp_info.run().getProperty("wavelength").value
-            elif wavelength == -1:
-                raise RuntimeError("Wavelength not found in sample log and was not provided as input to algorithm")
+            # Get the wavelength from experiment info if it exists, or fallback on property value
+            wavelength = self.__get_wavelength(exp_info)
 
             # Use ConvertHFIRSCDtoQ (and normalize van), or use ConvertWANDSCtoQ which handles normalization itself
             if method:
@@ -295,6 +286,24 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                 panel_offset = panel_rel_pos * (distance / panel_rel_pos.norm())
                 panel_offset += panel_pos
                 component.setPosition(panel_index, panel_offset)
+
+    def __get_wavelength(self, exp_info):
+        """
+        Gets the wavelength from experiment info if provided, otherwise it will try to get the value
+        from the algorithm property. Throws a RuntimeError if a wavelength cannot be found from either.
+        :param exp_info: The experiment info of the run to lookup set wavelength value
+        :return: wavelength value from experiment info if set, or from wavelength property
+        """
+        if exp_info.run().hasProperty("wavelength"):
+            return exp_info.run().getProperty("wavelength").value
+        else:
+            # Set wavelength value from the backup property, if provided
+            wl_prop = self.getProperty("Wavelength")
+            if not wl_prop.isDefault:
+                return wl_prop.value
+            else:
+                # If wavelength value not set, throw an error
+                raise RuntimeError("Wavelength not found in sample log and was not provided as input to the algorithm")
 
 
 AlgorithmFactory.subscribe(HB3AAdjustSampleNorm)
