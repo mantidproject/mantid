@@ -380,6 +380,32 @@ public:
     verifyAndClear();
   }
 
+  void testChangeInstrumentUpdatesInstrumentInSlitCalculator() {
+    auto presenter = makePresenter();
+    setupInstrument(presenter, "INTER");
+    auto const instrument = std::string("POLREF");
+    expectSlitCalculatorInstrumentUpdated(instrument);
+    presenter.notifyChangeInstrumentRequested(instrument);
+    verifyAndClear();
+  }
+
+  void
+  testChangeInstrumentDoesNotUpdateInstrumentInSlitCalculatorIfNotChanged() {
+    auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "POLREF");
+    expectSlitCalculatorInstrumentNotUpdated();
+    presenter.notifyChangeInstrumentRequested(instrument);
+    verifyAndClear();
+  }
+
+  void testUpdateInstrumentDoesNotUpdateInstrumentInSlitCalculator() {
+    auto presenter = makePresenter();
+    auto const instrument = setupInstrument(presenter, "POLREF");
+    expectSlitCalculatorInstrumentNotUpdated();
+    presenter.notifyUpdateInstrumentRequested();
+    verifyAndClear();
+  }
+
   void testUpdateInstrumentDoesNotUpdateInstrumentInChildPresenters() {
     auto presenter = makePresenter();
     auto const instrument = setupInstrument(presenter, "POLREF");
@@ -387,14 +413,6 @@ public:
         .Times(0);
     EXPECT_CALL(*m_batchPresenters[1], notifyInstrumentChanged(instrument))
         .Times(0);
-    presenter.notifyUpdateInstrumentRequested();
-    verifyAndClear();
-  }
-
-  void testUpdateInstrumentUpdatesInstrumentInSlitCalculator() {
-    auto presenter = makePresenter();
-    auto const instrument = setupInstrument(presenter, "POLREF");
-    expectSlitCalculatorInstrumentUpdated(instrument);
     presenter.notifyUpdateInstrumentRequested();
     verifyAndClear();
   }
@@ -594,6 +612,7 @@ private:
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_fileHandler));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_encoder));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_decoder));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_slitCalculator));
     for (auto batchPresenter : m_batchPresenters)
       TS_ASSERT(Mock::VerifyAndClearExpectations(batchPresenter));
     m_batchPresenters.clear();
@@ -701,6 +720,11 @@ private:
     EXPECT_CALL(*m_slitCalculator, setCurrentInstrumentName(instrument))
         .Times(1);
     EXPECT_CALL(*m_slitCalculator, processInstrumentHasBeenChanged()).Times(1);
+  }
+
+  void expectSlitCalculatorInstrumentNotUpdated() {
+    EXPECT_CALL(*m_slitCalculator, setCurrentInstrumentName(_)).Times(0);
+    EXPECT_CALL(*m_slitCalculator, processInstrumentHasBeenChanged()).Times(0);
   }
 
   void expectBatchIsSavedToFile(int batchIndex) {
