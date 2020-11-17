@@ -97,7 +97,7 @@ class SaveReflections(PythonAlgorithm):
                              direction=Direction.Input,
                              defaultValue="Fullprof",
                              validator=StringListValidator(
-                                 [fmt for fmt in dir(ReflectionFormat) if not fmt.startswith('__')]),
+                                 [fmt.name for fmt in ReflectionFormat]),
                              doc="The output format to export reflections to")
 
         self.declareProperty(name="SplitFiles",
