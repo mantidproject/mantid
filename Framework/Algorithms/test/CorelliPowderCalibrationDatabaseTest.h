@@ -234,29 +234,36 @@ public:
         calib_handler.getComponentCalibratedPosition("bank1");
     TS_ASSERT(testbank1pos.equalTo(goldbank1pos, 1.E-10));
 
-    // Test: save calibration
+    // Test: save calibration table
     // component file: name, remove file if it does exist, save and check file
     // existence
-    const std::string testcompfilename{"testsourcedb2.csv"};
-    boost::filesystem::remove(testcompfilename);
-    calib_handler.saveCalibrationTable(testcompfilename);
-    TS_ASSERT(boost::filesystem::exists(testcompfilename));
-
-    // Load and check
+    const std::string testcalibtablefilename{"testsourcedb2.csv"};
+    boost::filesystem::remove(testcalibtablefilename);
+    calib_handler.saveCalibrationTable(testcalibtablefilename);
+    TS_ASSERT(boost::filesystem::exists(testcalibtablefilename));
+    // load file and check
     TableWorkspace_sptr duptable =
-        loadCSVtoTable(testcompfilename, "DuplicatedSource");
+        loadCSVtoTable(testcalibtablefilename, "DuplicatedSource");
     TS_ASSERT_EQUALS(duptable->rowCount(), 3);
+    TS_ASSERT_DELTA(duptable->cell<double>(2, 6), 0.3424, 0.00001);
 
-    // load back
-    calib_handler.load(testcompfilename);
-    TableWorkspace_sptr compcalibws = calib_handler.getCalibrationWorkspace();
+    // Test: load calibration table
+    // TODO - later. not important now
+    //    calib_handler.load(testcompfilename);
+    //    TableWorkspace_sptr compcalibws = calib_handler.getCalibrationWorkspace();
 
-    return;
+    // Test: save single component file
+    const std::string testsamplecalfilename{"/tmp/testsampledb2.csv"};
+    boost::filesystem::remove(testsamplecalfilename);
+    // save
+    calib_handler.saveCompomentDatabase("20201117", "sample", testsamplecalfilename);
+    TS_ASSERT(boost::filesystem::exists(testsamplecalfilename));
 
-    const std::string testcalibfilename("testtable2.csv");
-    boost::filesystem::remove(testcalibfilename);
-    calib_handler.saveCalibrationTable(testcalibfilename);
-    TS_ASSERT(boost::filesystem::exists(testcalibfilename));
+    // load
+    TableWorkspace_sptr dupsampletable = calib_handler.loadComponentCalibrationTable(testsamplecalfilename, "TestSampleCalib1");
+    // check row number and value
+    TS_ASSERT_EQUALS(dupsampletable->rowCount(), 1);
+    TS_ASSERT_DELTA(dupsampletable->cell<double>(0, 2), -0.0002, 0.000001);
 
     // Clean
     AnalysisDataService::Instance().remove(outwsname);

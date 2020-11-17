@@ -68,7 +68,7 @@ CalibrationTableHandler::createComponentCalibrationTable(
   // Set up columns
   tablews->addColumn("str", "YYYMMDD"); // first column as date stamp
   for (size_t i = 1;
-       i < CorelliCalibration::calibrationTableColumnNames.size() - 1; ++i) {
+       i < CorelliCalibration::calibrationTableColumnNames.size(); ++i) {
     std::string colname = CorelliCalibration::calibrationTableColumnNames[i];
     std::string type = CorelliCalibration::calibrationTableColumnTypes[i];
     tablews->addColumn(type, colname);
@@ -86,6 +86,10 @@ CalibrationTableHandler::createComponentCalibrationTable(
 void CalibrationTableHandler::appendCalibration(
     DataObjects::TableWorkspace_sptr tablews, const std::string &datestamp,
     ComponentPosition &pos) {
+  if (tablews->columnCount() != 8) {
+      throw std::runtime_error("Single component calibration table workspace is not correct.");
+  }
+
   // Append a new row
   Mantid::API::TableRow sourceRow = tablews->appendRow();
   // Date and positions
@@ -174,6 +178,7 @@ ComponentPosition CalibrationTableHandler::getComponentCalibratedPosition(
 /**
  * @brief Load single component calibration file to table workspace
  * @param filename
+ * @package tablewsname : name for TableWorkspace the file is loaded to
  * @return
  */
 DataObjects::TableWorkspace_sptr
@@ -219,6 +224,7 @@ void CalibrationTableHandler::saveCompomentDatabase(
   std::string tablewsname = component + "_" + datestamp;
 
   // Check whether the file does exist or not: new or append
+  std::cout << "Create single component calibration table\n";
   TableWorkspace_sptr compcaltable = nullptr;
   bool appendmode{false};
   if (boost::filesystem::exists(filename)) {
@@ -240,8 +246,7 @@ void CalibrationTableHandler::saveCompomentDatabase(
   saveAsciiAlg->initialize();
   saveAsciiAlg->setPropertyValue(
       "InputWorkspace",
-      mCalibWS
-          ->getName()); // std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));
+      tablewsname); // std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));
                         // //mCalibWS->getName());
   saveAsciiAlg->setProperty("Filename", filename);
   saveAsciiAlg->setPropertyValue("CommentIndicator", "#");
