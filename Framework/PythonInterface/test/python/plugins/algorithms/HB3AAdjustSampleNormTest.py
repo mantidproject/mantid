@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import DeleteWorkspace, LoadMD, HB3AAdjustSampleNorm, mtd
-from mantid.kernel import V3D
+import numpy as np
+from mantid.simpleapi import DeleteWorkspace, LoadMD, HB3AAdjustSampleNorm
 
 
 class HB3AAdjustSampleNormTest(unittest.TestCase):
@@ -18,33 +18,43 @@ class HB3AAdjustSampleNormTest(unittest.TestCase):
     def tearDown(self):
         return
 
-    def __compareBanks(self, orig_component, new_component, offset):
-        for bank in range(1, 4):
-            orig_ind = orig_component.indexOfAny("bank{}".format(bank))
-            orig_pos = orig_component.position(orig_ind)
-            new_ind = new_component.indexOfAny("bank{}".format(bank))
-            new_pos = new_component.position(new_ind)
+    def __checkAdjustments(self, orig_pos, new_pos, height, distance):
+        # Check the changed height
+        np.testing.assert_allclose(new_pos.getY() - orig_pos.getY(), height)
 
-            self.assertAlmostEqual(new_pos, orig_pos + V3D(offset, offset, offset), self._tolerance)
+        # Check the changed distance along x-z
+        dist = np.linalg.norm([new_pos.getX() - orig_pos.getX(), new_pos.getZ() - orig_pos.getZ()])
+        np.testing.assert_allclose(dist, distance, self._tolerance)
 
     def testAdjustDetector(self):
-        orig = LoadMD("HB3A_data.nxs", MetadataOnly=True)
-        orig_component = orig.getExperimentInfo(0).componentInfo()
-        result = HB3AAdjustSampleNorm(Filename="HB3A_data.nxs", VanadiumFile="HB2C_WANDSCD_norm.nxs",
-                                      DetectorHeightOffset=2.0, DetectorDistanceOffset=2.0)
-        result_component = result.getExperimentInfo(0).componentInfo()
+        # Test a slight adjustment of the detector position
+        height_adj = 0.75
+        dist_adj = 0.25
+        orig = LoadMD("HB3A_data.nxs", LoadHistory=False)
+        # Get the original detector position before adjustment
+        orig_pos = orig.getExperimentInfo(0).getInstrument().getDetector(1).getPos()
+        result = HB3AAdjustSampleNorm(InputWorkspaces=orig,
+                                      DetectorHeightOffset=height_adj,
+                                      DetectorDistanceOffset=dist_adj)
+        # Get the updated detector position
+        new_pos = result.getExperimentInfo(0).getInstrument().getDetector(1).getPos()
 
-        self.__compareBanks(orig_component, result_component, 2.0)
+        # Verify detector adjustment
+        self.__checkAdjustments(orig_pos, new_pos, height_adj, dist_adj)
 
         DeleteWorkspace(orig, result)
 
     def testDoNotAdjustDetector(self):
-        orig = LoadMD("HB3A_data.nxs", MetadataOnly=True)
-        orig_component = orig.getExperimentInfo(0).componentInfo()
-        result = HB3AAdjustSampleNorm(Filename="HB3A_data.nxs", VanadiumFile="HB2C_WANDSCD_norm.nxs")
-        result_component = result.getExperimentInfo(0).componentInfo()
+        # Ensure detector position does not change when no offsets are given
+        orig = LoadMD("HB3A_data.nxs", LoadHistory=False)
+        orig_pos = orig.getExperimentInfo(0).getInstrument().getDetector(1).getPos()
+        result = HB3AAdjustSampleNorm(InputWorkspaces=orig,
+                                      DetectorHeightOffset=0.0,
+                                      DetectorDistanceOffset=0.0)
+        new_pos = result.getExperimentInfo(0).getInstrument().getDetector(1).getPos()
 
-        self.__compareBanks(orig_component, result_component, 0.0)
+        # Verify detector adjustment
+        self.__checkAdjustments(orig_pos, new_pos, 0.0, 0.0)
 
         DeleteWorkspace(orig, result)
 
