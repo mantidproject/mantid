@@ -200,12 +200,16 @@ public:
   // set surface type
   void setSurfaceType(int index);
 %Docstring
+    void setSurfaceType(int index)
+    ------------------------------
     Set the surface type of the current window.
 
     Args:
-        type A known suface type: FULL3D, CYLINDRICAL_X, CYLINDRICAL_Y,
-                                  CYLINDRICAL_Z,SPHERICAL_X, SPHERICAL_Y,
-                                  SPHERICAL_Z
+      index: index of the type of known surface type (0-7), including
+             0: FULL3D
+             1: CYLINDRICAL_X, 2: CYLINDRICAL_Y, 3: CYLINDRICAL_Z,
+             4: SPHERICAL_X,   5: SPHERICAL_Y,   6: SPHERICAL_Z,
+             7: SideBySide
 %End
 
   void setMinValue(double value, bool apply);
@@ -219,7 +223,7 @@ public:
         apply: flag to apply the change other than color bar by sending singal out.
 %End
 
-    void setMaxValue(double value, bool apply);
+  void setMaxValue(double value, bool apply);
 %Docstring
     void setMaxValue(double value, bool apply)
     ----------------------------------------------------
@@ -230,7 +234,7 @@ public:
         apply: flag to apply the change other than color bar by sending singal out.
 %End
 
-    void setRange(double minValue, double maxValue, bool apply);
+  void setRange(double minValue, double maxValue, bool apply);
 %Docstring
     void setRange(double minValue, double maxValue, bool apply)
     -----------------------------------------------------------
@@ -242,7 +246,7 @@ public:
         apply: flag to apply the change other than color bar by sending singal out.
 %End
 
-    void setLegendScaleType(int index);
+  void setLegendScaleType(int index);
 %Docstring
     void setLegendScaleType(int index)
     ----------------------------------
