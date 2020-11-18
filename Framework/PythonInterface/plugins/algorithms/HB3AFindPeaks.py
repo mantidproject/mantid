@@ -53,7 +53,11 @@ class HB3AFindPeaks(PythonAlgorithm):
         self.declareProperty("MaxPeaks", 1000, doc="Maximum number of peaks to find.")
         self.declareProperty("PeakDistanceThreshold", 0.25, doc="Threshold distance for rejecting peaks that are found "
                                                                 "to be too close from each other")
-        self.declareProperty("Wavelength", defaultValue=1.008,
+        self.declareProperty("DensityThresholdFactor", 50.0,
+                             doc="Scaling factor which the overall signal density will be multiplied by to determine "
+                                 "a threshold for determining peaks.")
+
+        self.declareProperty("Wavelength", defaultValue=1.558,
                              doc="Wavelength value to use if one was not found in the sample log")
 
         # Lattice parameter validators from same as FindUBUsingLatticeParameters
@@ -106,6 +110,7 @@ class HB3AFindPeaks(PythonAlgorithm):
 
         npeaks = self.getProperty("MaxPeaks").value
         dist_thresh = self.getProperty("PeakDistanceThreshold").value
+        density_thresh = self.getProperty("DensityThresholdFactor").value
 
         lattice = self.getProperty("UseLattice").value
         if lattice:
@@ -118,13 +123,23 @@ class HB3AFindPeaks(PythonAlgorithm):
 
         peak_ws = self.getProperty("OutputWorkspace")
 
-        wavelength =self.getProperty("Wavelength").value
-        exp_info = input_ws.getExperimentInfo(0)
-        if exp_info.run().hasProperty("wavelength"):
-            wavelength = exp_info.run().getProperty("wavelength").value
+        # Initially set the back-up wavelength to use. This is overwritten if found in sample logs.
+        wavelength = self.getProperty("Wavelength").value
 
-        peak_ws = FindPeaksMD(InputWorkspace=input_ws, PeakDistanceThreshold=dist_thresh, CalculateGoniometerForCW=True,
-                              Wavelength=wavelength, FlipX=True, InnerGoniometer=True, MaxPeaks=npeaks)
+        if input_ws.getNumExperimentInfo() == 0:
+            # Warn if we could extract a wavelength from the workspace
+            raise RuntimeWarning("No experiment info was found in input '{}'".format(input_ws.getName()))
+        else:
+            exp_info = input_ws.getExperimentInfo(0)
+            if exp_info.run().hasProperty("wavelength"):
+                wavelength = exp_info.run().getProperty("wavelength").value
+
+        peak_ws = FindPeaksMD(InputWorkspace=input_ws,
+                              PeakDistanceThreshold=dist_thresh, DensityThresholdFactor=density_thresh,
+                              CalculateGoniometerForCW=True,
+                              Wavelength=wavelength,
+                              FlipX=True, InnerGoniometer=True,
+                              MaxPeaks=npeaks)
 
         IndexPeaks(PeaksWorkspace=peak_ws)
 
