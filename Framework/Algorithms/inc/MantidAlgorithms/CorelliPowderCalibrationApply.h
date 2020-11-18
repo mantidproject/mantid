@@ -9,6 +9,7 @@
 
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAlgorithms/CorelliPowderCalibrationDatabase.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -17,6 +18,34 @@ namespace Mantid
 {
     namespace Algorithms
     {
+        /**
+         * @brief Apply calibration table for Corelli Powder Diffraction
+         * 
+         */
+        class MANTID_ALGORITHMS_DLL CorelliPowderCalibrationApply : public API::Algorithm {
+            public:
+                /// Algorithm's name for identification
+                const std::string name() const override {return "CorelliPowderCalibrationApply";};
+                
+                /// Summary of algorithm's purpose
+                const std::string summary() const override {
+                    return "Apply Corelli calibration results onto input workspace";
+                };
+
+                /// Algorithm's version, overriding a virtual method
+                int version() const override {return 1; };
+
+                /// Algorithm's category, overriding a virtual method
+                const std::string category() const override {
+                    return "DataHandling\\Instrument\\Corelli";
+                };
+
+            private:
+                /// Overwrites Algorithm method. Does nothing at present
+                void init() override;
+                /// Overwrites Algorithm method
+                void exec() override;
+        };
         
     } // namespace Algorithms
     
