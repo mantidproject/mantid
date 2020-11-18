@@ -176,11 +176,6 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element *elem) {
   if (m_instruments.empty()) {
     throw std::runtime_error("Facility " + m_name +
                              " does not have any instruments;");
-  } else {
-    sort(begin(m_instruments), end(m_instruments),
-         [](const InstrumentInfo i1, const InstrumentInfo i2) {
-           return i1.name() < i2.name();
-         });
   }
 }
 
