@@ -254,6 +254,7 @@ void XIntegrationControl::setRange(double minimum, double maximum) {
                    (m_maximum - m_totalMinimum) / w);
 
   updateTextBoxes();
+
   emit changed(m_minimum, m_maximum);
 }
 

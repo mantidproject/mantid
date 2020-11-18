@@ -344,6 +344,10 @@ void export_MatrixWorkspace() {
          boost::noncopyable>("MatrixWorkspace", no_init)
       //--------------------------------------- Meta information
       //-----------------------------------------------------------------------
+      .def("isRaggedWorkspace", &MatrixWorkspace::isRaggedWorkspace,
+           arg("self"),
+           "Returns true if the workspace is ragged (has differently sized "
+           "spectra).")
       .def("blocksize", &MatrixWorkspace::blocksize, arg("self"),
            "Returns size of the Y data array")
       .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms,

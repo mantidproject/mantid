@@ -537,6 +537,16 @@ bool InstrumentWidgetRenderTab::areAxesOn() const {
 }
 
 /**
+ * Change the type of the legend scale.
+ * @param index :: Index selected in the color scale type combo box.
+ */
+void InstrumentWidgetRenderTab::setLegendScaleType(int index) {
+  if ((int)m_colorBarWidget->getScaleType() != index) {
+    m_colorBarWidget->setScaleType(index);
+  }
+}
+
+/**
  * Show ResetView combo box only with 3D view
  * @param iv Index of a render mode in RenderMode combo box. iv == 0 is 3D view
  */

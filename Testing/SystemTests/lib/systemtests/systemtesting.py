@@ -19,6 +19,15 @@ if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
     import matplotlib
 
 # =========================================================
+try:
+    import mantid
+except ModuleNotFoundError:
+    import setuptools
+    from packaging import version
+    if version.parse(setuptools.__version__) >= version.parse("49.0.0"):
+        raise EnvironmentError("Setup tools is v49 or greater. This is likely causing the Mantid import to fail. See \n"
+                                "https://github.com/mantidproject/mantid/issues/29010")
+
 import datetime
 import difflib
 import importlib.util
