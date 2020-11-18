@@ -19,8 +19,9 @@ from mantidqt.utils.qt import import_qt
 # import widget class from C++ wrappers
 from mantidqt.widgets.observers.observing_view import ObservingView
 
-InstrumentWidget = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview',
-                             'InstrumentWidget')
+# _instrumentview.sip --> _instrumentview
+
+InstrumentWidget = import_qt('._instrumentview', 'mantidqt.widgets.instrumentview', 'InstrumentWidget')
 
 
 class InstrumentView(QWidget, ObservingView):
@@ -53,6 +54,35 @@ class InstrumentView(QWidget, ObservingView):
         self.setLayout(layout)
 
         self.close_signal.connect(self._run_close)
+
+    def get_tab(self, tab_index):
+        tab_name = [InstrumentWidget.RENDER,
+                    InstrumentWidget.PICK,
+                    InstrumentWidget.MASK,
+                    InstrumentWidget.TREE][tab_index]
+        print(f'Tab: {tab_name}')
+
+        return self.widget.getTab(tab_name)
+
+    def get_current_tab(self):
+        """Get current tab
+        :return: InstrumentWidgetTab
+        """
+        curr_index = self.widget.getCurrentTab()
+
+        return self.get_tab(curr_index)
+
+    def get_render_tab(self):
+        return self.widget.getRenderTab(InstrumentWidget.RENDER)
+
+    def get_pick_tab(self):
+        return self.widget.getPickTab(InstrumentWidget.PICK)
+
+    def select_tab(self, tab_index):
+        self.widget.selectTab(tab_index)
+
+    def set_range(self, min_value, max_value):
+        self.widget.setBinRange(min_value, max_value)
 
     @Slot()
     def _run_close(self):
