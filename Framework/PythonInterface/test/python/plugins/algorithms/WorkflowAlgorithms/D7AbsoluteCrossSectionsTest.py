@@ -48,28 +48,26 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
     def test_uniaxial_separation(self):
         D7AbsoluteCrossSections(InputWorkspace='vanadium_uniaxial', OutputWorkspace='_unused',
                                 CrossSectionsOutputWorkspace='uniaxial',
-                                SampleAndEnvironmentProperties=self._sampleProperties,
                                 CrossSectionSeparationMethod='Uniaxial')
         self._check_output('uniaxial', 132, 1, 2, onlySeparation=True)
 
     def test_xyz_separation(self):
         D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', OutputWorkspace='_unused',
                                 CrossSectionsOutputWorkspace='xyz',
-                                SampleAndEnvironmentProperties=self._sampleProperties,
                                 CrossSectionSeparationMethod='XYZ', NormalisationMethod='None')
         self._check_output('xyz', 132, 1, 3, onlySeparation=True)
 
     def test_10p_separation(self):
         D7AbsoluteCrossSections(InputWorkspace='vanadium_10p', OutputWorkspace='_unused',
-                                CrossSectionsOutputWorkspace='10p',
                                 SampleAndEnvironmentProperties=self._sampleProperties,
+                                CrossSectionsOutputWorkspace='10p',
                                 CrossSectionSeparationMethod='10p', NormalisationMethod='None')
         self._check_output('10p', 132, 1, 3, onlySeparation=True)
 
     def test_10p_separation_double_xyz(self):
         D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', RotatedXYZWorkspace='vanadium_xyz',
-                                CrossSectionsOutputWorkspace='10p_double_xyz', OutputWorkspace='_unused',
                                 SampleAndEnvironmentProperties=self._sampleProperties,
+                                CrossSectionsOutputWorkspace='10p_double_xyz', OutputWorkspace='_unused',
                                 CrossSectionSeparationMethod='10p', NormalisationMethod='None')
         self._check_output('10p_double_xyz', 132, 1, 3, onlySeparation=True)
 

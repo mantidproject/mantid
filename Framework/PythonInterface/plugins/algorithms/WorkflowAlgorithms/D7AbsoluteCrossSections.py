@@ -54,33 +54,36 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        if self.getPropertyValue('NormalisationMethod') == 'Vanadium':
-            if self.getProperty('VanadiumInputWorkspace').isDefault:
-                issues['VanadiumInputWorkspace'] = 'Vanadium input workspace is mandatory for when detector efficiency calibration' \
+        normalisation_method = self.getPropertyValue('NormalisationMethod')
+
+        if normalisation_method == 'Vanadium' and self.getProperty('VanadiumInputWorkspace').isDefault:
+            issues['VanadiumInputWorkspace'] = 'Vanadium input workspace is mandatory for when detector efficiency calibration' \
                                                     ' is "Vanadium".'
 
-        if ( (self.getPropertyValue('NormalisationMethod') == 'Incoherent'
-             or self.getPropertyValue('NormalisationMethod') == 'Paramagnetic')
+        if ( (normalisation_method == 'Incoherent' or normalisation_method == 'Paramagnetic')
              and self.getProperty('CrossSectionSeparationMethod').isDefault):
             issues['NormalisationMethod'] = 'Chosen sample normalisation requires input from the cross-section separation.'
             issues['CrossSectionSeparationMethod'] = 'Chosen sample normalisation requires input from the cross-section separation.'
 
-        sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
-        if len(sampleAndEnvironmentProperties) == 0:
-            issues['SampleAndEnvironmentProperties'] = 'Sample parameters need to be defined.'
-        required_keys = ['FormulaUnits', 'SampleMass', 'FormulaUnitMass']
-        normalisation_method = self.getPropertyValue('NormalisationMethod')
-        if normalisation_method == 'Incoherent' and self.getProperty('AbsoluteUnitsNormalisation').value:
-            required_keys.append('IncoherentCrossSection')
-        elif normalisation_method == 'Paramagnetic':
-            required_keys.append('SampleSpin')
+        if normalisation_method != 'None' or self.getPropertyValue('CrossSectionSeparationMethod') == '10p':
+            sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
+            if len(sampleAndEnvironmentProperties) == 0:
+                issues['SampleAndEnvironmentProperties'] = 'Sample parameters need to be defined.'
+            else:
+                required_keys = []
+                if normalisation_method == 'Incoherent':
+                    required_keys = ['FormulaUnits', 'SampleMass', 'FormulaUnitMass']
+                elif normalisation_method == 'Incoherent' and self.getProperty('AbsoluteUnitsNormalisation').value:
+                    required_keys.append('IncoherentCrossSection')
+                elif normalisation_method == 'Paramagnetic':
+                    required_keys.append('SampleSpin')
 
-        if self.getPropertyValue('CrossSectionSeparationMethod') == '10p':
-            required_keys.append('ThetaOffset')
+                if self.getPropertyValue('CrossSectionSeparationMethod') == '10p':
+                    required_keys.append('ThetaOffset')
 
-        for key in required_keys:
-            if key not in sampleAndEnvironmentProperties:
-                issues['SampleAndEnvironmentProperties'] = '{} needs to be defined.'.format(key)
+                for key in required_keys:
+                    if key not in sampleAndEnvironmentProperties:
+                        issues['SampleAndEnvironmentProperties'] = '{} needs to be defined.'.format(key)
 
         return issues
 
@@ -189,7 +192,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             joules_to_mev = 1e3 / physical_constants['electron volt'][0]
             self._sampleAndEnvironmentProperties['InitialEnergy'] = joules_to_mev * math.pow(h / wavelength, 2) / (2 * neutron_mass)
 
-        if 'NMoles' not in self._sampleAndEnvironmentProperties:
+        if self.getPropertyValue('NormalisationMethod') != 'None' and 'NMoles' not in self._sampleAndEnvironmentProperties:
             sample_mass = self._sampleAndEnvironmentProperties['SampleMass'].value
             formula_units = self._sampleAndEnvironmentProperties['FormulaUnits'].value
             formula_unit_mass = self._sampleAndEnvironmentProperties['FormulaUnitMass'].value
