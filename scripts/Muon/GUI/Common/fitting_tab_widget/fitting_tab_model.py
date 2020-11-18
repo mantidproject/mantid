@@ -37,6 +37,7 @@ class FittingTabModel(object):
         # fitting options from view
         self.fitting_options = {}
         self.ws_fit_function_map = {}
+        self.start_time_biggest = False
 
     @property
     def fit_function(self):
@@ -141,6 +142,7 @@ class FittingTabModel(object):
 
     # single fitting
     def evaluate_single_fit(self, workspace):
+        params = []
         if self.fitting_options["fit_type"] == "Single":
             if self.fitting_options["tf_asymmetry_mode"]:
                 params = self.get_parameters_for_single_tf_fit(workspace[0])
@@ -157,6 +159,10 @@ class FittingTabModel(object):
                 params = self.get_parameters_for_simultaneous_fit(workspace)
                 function_object, output_status, output_chi_squared = \
                     self.do_simultaneous_fit(params, self.fitting_options["global_parameters"])
+
+        if(params['StartX'] > params['EndX']):
+            self.start_time_biggest = True
+
         return function_object, output_status, output_chi_squared
 
     def do_single_fit(self, parameter_dict):

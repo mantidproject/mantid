@@ -564,6 +564,12 @@ class FittingTabPresenter(object):
                                           self._fit_chi_squared[current_index])
         self.view.update_global_fit_state(self._fit_status, current_index)
 
+        if (self.model.start_time_biggest):
+            self.view.start_time, self.view.end_time = self.view.end_time, self.view.start_time
+            self.handle_start_x_updated()
+            self.handle_end_x_updated()
+            self.model.start_time_biggest = False
+
     def update_view_from_model(self, workspace_removed=None):
         if workspace_removed:
             self.selected_data = [
