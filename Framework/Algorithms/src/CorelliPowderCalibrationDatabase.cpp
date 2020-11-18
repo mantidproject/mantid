@@ -406,7 +406,8 @@ void CorelliPowderCalibrationDatabase::exec() {
   // Load data file if necessary and possible: component_caibws_map
   // ... ...
 
-  // Create summary calibrtion workspace: input: component_caibws_map output: new calibration workspace
+  // Create summary calibrtion workspace: input: component_caibws_map output:
+  // new calibration workspace
   // ... ...
 
   // Create the summary CSV file
