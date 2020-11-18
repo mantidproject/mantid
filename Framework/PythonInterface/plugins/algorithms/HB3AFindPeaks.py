@@ -7,7 +7,8 @@
 from mantid.api import AlgorithmFactory, IMDWorkspaceProperty, IPeaksWorkspaceProperty, PythonAlgorithm, PropertyMode
 from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, StringListValidator
 from mantid.simpleapi import DeleteWorkspace, FindPeaksMD, FindUBUsingIndexedPeaks, \
-    FindUBUsingLatticeParameters, IndexPeaks, ShowPossibleCells, SelectCellOfType, OptimizeLatticeForCellType
+    FindUBUsingLatticeParameters, IndexPeaks, ShowPossibleCells, SelectCellOfType, OptimizeLatticeForCellType, \
+    PredictFractionalPeaks
 
 
 class HB3AFindPeaks(PythonAlgorithm):
@@ -153,9 +154,11 @@ class HB3AFindPeaks(PythonAlgorithm):
         SelectCellOfType(PeaksWorkspace=peak_ws, CellType=cell_type, Centering=centering, Apply=True)
         OptimizeLatticeForCellType(PeaksWorkspace=peak_ws, CellType=cell_type, Apply=True)
 
-        self.setProperty("OutputWorkspace", peak_ws)
+        frac_peaks = PredictFractionalPeaks(Peaks=peak_ws, Hoffset=[0.33,0.33,0], FracPeaks="__peaks")
 
-        DeleteWorkspace(peak_ws)
+        self.setProperty("OutputWorkspace", frac_peaks)
+
+        DeleteWorkspace(peak_ws, frac_peaks)
 
 
 AlgorithmFactory.subscribe(HB3AFindPeaks)
