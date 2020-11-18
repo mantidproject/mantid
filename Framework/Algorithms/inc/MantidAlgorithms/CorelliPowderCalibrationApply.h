@@ -14,10 +14,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
-namespace Mantid
-{
-    namespace Algorithms
-    {
+namespace Mantid {
+    namespace Algorithms {
         /**
          * @brief Apply calibration table for Corelli Powder Diffraction
          * 
