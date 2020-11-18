@@ -639,6 +639,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.function_browser.setFunction(fit_function_string)
         self.view.function_browser.setGlobalParameters(['A'])
         self.view.function_browser.blockSignals(False)
+        self.presenter.model.start_time_biggest = False
 
         self.view.function_browser.functionStructureChanged.emit()
 
@@ -713,6 +714,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.get_index_for_start_end_times = mock.MagicMock(return_value = 1)
         self.view.update_global_fit_state = mock.MagicMock()
         self.view.update_with_fit_outputs = mock.MagicMock()
+        self.presenter.model.start_time_biggest = False
 
         self.presenter._fit_function = ["FlatBackground", "LinearBackground"]
         self.presenter._fit_status = ["failure", "success"]

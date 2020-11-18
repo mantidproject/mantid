@@ -160,8 +160,9 @@ class FittingTabModel(object):
                 function_object, output_status, output_chi_squared = \
                     self.do_simultaneous_fit(params, self.fitting_options["global_parameters"])
 
-        if(params['StartX'] > params['EndX']):
-            self.start_time_biggest = True
+        if('StartX' in params and 'EndX' in params):
+            if(params['StartX'] > params['EndX']):
+                self.start_time_biggest = True
 
         return function_object, output_status, output_chi_squared
 
