@@ -6,7 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 
 #include "MantidAlgorithms/CorelliPowderCalibrationApply.h"
+#include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
@@ -15,28 +17,33 @@
 
 namespace Mantid {
     namespace Algorithms {
+
+        using namespace Kernel;
+        using namespace API;
         namespace {
-        Kernel::Logger logger("CorelliPowderCalibrationApply");
+        Logger logger("CorelliPowderCalibrationApply");
         }
 
         DECLARE_ALGORITHM(CorelliPowderCalibrationApply)
 
-        using namespace Kernel;
-        using namespace API;
-
-        /// Init method
+        /**
+         * @brief Initialization
+         * 
+         */
         void CorelliPowderCalibrationApply::init() {
             
             //
             // InputWorkspace
             // [Input, Required, MatrixWorkspace or EventsWorkspace]
             // workspace to which the calibration should be applied
+            auto wsValidator = std::make_shared<InstrumentValidator>();
             declareProperty(
-                std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                     "InputWorkspace",
                     "",
-                    Direction::InOut,
-                    PropertyMode::Mandatory),
+                    Direction::Input,
+                    PropertyMode::Mandatory,
+                    wsValidator),
                 "Input workspace for calibration");
 
             //
@@ -44,7 +51,7 @@ namespace Mantid {
             // [Input, Optional, TableWorkspace]
             // workspace resulting from uploading
             declareProperty(
-                std::make_unique<API::WorkspaceProperty<API::ITableWorkspace>>(
+                std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                     "CalibrationTable",
                     "",
                     Direction::Input,
@@ -56,52 +63,69 @@ namespace Mantid {
             // [Input, Optional, string]
             // absolute path to the database.
             declareProperty(
-                "DatabaseDirectory",
-                "/SNS/CORELLI",
+                std::make_unique<FileProperty>(
+                    "DatabaseDirectory",
+                    "/SNS/CORELLI",
+                    FileProperty::Directory),
                 "absolute path to the CORELLI database");
 
             //
             // OutputWorkspace
             // if emtpy, InputWorkspace will be calibrated.
             declareProperty(
-                std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
+                std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                     "OutputWorkspace",
                     "",
                     Direction::Output,
                     PropertyMode::Optional),
-                    "Calibrated input workspace clone");
+                "Calibrated input workspace clone");
+        }
+
+        /**
+         * @brief Validate algorithm inputs
+         * 
+         * @return std::map<std::string, std::string> 
+         */
+        std::map<std::string, std::string>
+        CorelliPowderCalibrationApply::validateInputs() {
+            std::map<std::string, std::string> issues;
+            inputWS = getProperty("InputWorkspace");
+            // TODO: add necessary validations
+            return issues;
         }
     
-    /**
-     * @brief Executes the algorithm.
-     * 
-     */
-    void CorelliPowderCalibrationApply::exec(){
-        g_log.notice() << "Start applying CORELLI calibration\n";
+        /**
+         * @brief Executes the algorithm.
+         * 
+         */
+        void CorelliPowderCalibrationApply::exec(){
+            g_log.notice() << "Start applying CORELLI calibration\n";
 
-        // Get input arguments
-        API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
-        API::ITableWorkspace_sptr calTable = getProperty("CalibrationTable");
-        const std::string dbDir = getProperty("DatabaseDirectory");
-        API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-        if (outputWS != inputWS) {
-            outputWS = inputWS->clone();
-            }
+            // Get input arguments
+            inputWS = getProperty("InputWorkspace");
+            calTable = getProperty("CalibrationTable");
+            const std::string dbDir = getProperty("DatabaseDirectory");
+            outputWS = getProperty("OutputWorkspace");
+            if (outputWS != inputWS) {
+                outputWS = inputWS->clone();
+                }
 
-        // Parse calibration table
+            // Parse calibration table
 
-        // Translate each component in the instrument
-        // [source, sample, bank1,.. bank92]
-        auto mvCmpAlg = API::AlgorithmFactory::Instance().create("MoveInstrumentComponent");
-        mvCmpAlg -> initialize();
+            // Translate each component in the instrument
+            // [source, sample, bank1,.. bank92]
+            auto mvCmpAlg = AlgorithmFactory::Instance().create("MoveInstrumentComponent");
+            mvCmpAlg -> initialize();
 
-        // Rotate each component in the instrument
-        auto rtCmpAlg = API::AlgorithmFactory::Instance().create("RotateInstrumentComponent");
-        rtCmpAlg -> initialize();
+            // Rotate each component in the instrument
+            auto rtCmpAlg = AlgorithmFactory::Instance().create("RotateInstrumentComponent");
+            rtCmpAlg -> initialize();
 
-        // Config output
-        setProperty("OutputWorkspace", outputWS);
-    }
+            // Config output
+            setProperty("OutputWorkspace", outputWS);
+
+            g_log.notice() << "Finished applying CORELLI calibration\n";
+        }
 
     } // namespace Algorithm
 
