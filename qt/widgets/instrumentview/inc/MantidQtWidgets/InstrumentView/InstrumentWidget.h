@@ -44,7 +44,6 @@ class QDropEvent;
 class QStackedLayout;
 class QSettings;
 class QVBoxLayout;
-class QHBoxLayout;
 
 namespace MantidQt {
 namespace MantidWidgets {

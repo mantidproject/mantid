@@ -588,13 +588,13 @@ void InstrumentWidget::replaceWorkspace(
   renameWorkspace(newWs);
   m_instrumentActor.reset(new InstrumentActor(QString::fromStdString(newWs)));
 
-  // update the integration widget
-  updateIntegrationWidget();
-
   // update the view and colormap
   auto surface = getSurface();
   surface->resetInstrumentActor(m_instrumentActor.get());
   setupColorMap();
+
+  // update the integration widget
+  updateIntegrationWidget();
 
   // reset the instrument position
   m_renderTab->resetView();
