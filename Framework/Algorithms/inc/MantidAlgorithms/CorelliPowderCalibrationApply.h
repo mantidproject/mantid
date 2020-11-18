@@ -11,6 +11,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/CorelliPowderCalibrationDatabase.h"
 #include "MantidAlgorithms/DllConfig.h"
+#include "MantidDataHandling/MoveInstrumentComponent.h"
+#include "MantidDataHandling/RotateInstrumentComponent.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/TableWorkspace.h"
 
@@ -41,6 +43,7 @@ namespace Mantid {
             private:
                 /// Overwrites Algorithm method. Does nothing at present
                 void init() override;
+
                 /// Overwrites Algorithm method
                 void exec() override;
         };
