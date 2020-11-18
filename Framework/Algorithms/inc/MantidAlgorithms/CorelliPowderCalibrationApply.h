@@ -8,8 +8,10 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid
 {
