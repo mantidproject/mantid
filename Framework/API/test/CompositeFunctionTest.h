@@ -43,6 +43,8 @@ public:
 
   ~CompositeFunctionTest_MocMatrixWorkspace() override {}
 
+  bool isRaggedWorkspace() const override { return false; }
+
   // Section required for iteration
   /// Returns the number of single indexable items in the workspace
   std::size_t size() const override { return m_spectra.size() * m_blocksize; }

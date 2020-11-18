@@ -155,6 +155,10 @@ class PlotFunctionsTest(unittest.TestCase):
         funcs.pcolorfast(ax, self.ws2d_point_uneven, vmin=-1)
         funcs.imshow(ax, self.ws2d_histo)
 
+    def test_imshow_works_with_a_ragged_workspace(self):
+        fig, ax = plt.subplots()
+        funcs.imshow(ax, self.ws2d_point_uneven)
+
     def _do_update_colorplot_datalimits(self, color_func):
         fig, ax = plt.subplots()
         mesh = color_func(ax, self.ws2d_histo)
