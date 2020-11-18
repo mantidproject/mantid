@@ -63,7 +63,8 @@ public:
 
   //-----------------------------------------------------------------------------
   /**
-   * @brief Test main features required by the algorithm CorelliPowderCalibrationDatabase
+   * @brief Test main features required by the algorithm
+   * CorelliPowderCalibrationDatabase
    */
   void test_exec() {
 
@@ -72,14 +73,17 @@ public:
     std::string calibdir{"TestCorelliPowderCalibration1117"};
     // clean previous
     boost::filesystem::remove_all(calibdir);
+    // create data base
+    boost::filesystem::create_directory(calibdir);
     // create a previously generated database file
-    std::vector<std::string> banks {"bank2", "bank3"};
+    std::vector<std::string> banks{"bank2", "bank42"};
     create_existing_database_files(calibdir, banks);
 
     // Create workspaces
     EventWorkspace_sptr input_ws = createTestEventWorkspace();
     // Name of the output calibration workspace
-    std::string outwsname("CorelliPowderCalibrationDatabaseTest_TableWS");
+    std::string outwsname(
+        "CorelliPowderCalibrationDatabaseTest_CombinedTableWS");
     TableWorkspace_sptr calib_ws =
         createTestCalibrationTableWorkspace(outwsname);
     TS_ASSERT(input_ws);
@@ -93,16 +97,42 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input_ws));
     TS_ASSERT_THROWS_NOTHING(
         alg.setProperty("InputCalibrationPatchWorkspace", calib_ws));
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DatabaseDirectory", calibdir));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("DatabaseDirectory", calibdir));
 
     // Execute
     alg.execute();
     TS_ASSERT(alg.isExecuted());
 
     // Verifying results
-    // Option 2
-    // Option 3
-    // Option 1 (files)
+    // Output 3: the combined calibration workspace
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outwsname));
+    TableWorkspace_sptr combinedcalibws =
+        std::dynamic_pointer_cast<TableWorkspace>(
+            AnalysisDataService::Instance().retrieve(outwsname));
+    TS_ASSERT(combinedcalibws);
+    // shall be 5 components
+    TS_ASSERT_EQUALS(combinedcalibws->rowCount(), 5);
+    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(1, 0), "sample");
+    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(2, 0), "bank1");
+    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(4, 0), "bank42");
+
+    // Output 2: search the saved output calibration file
+    boost::filesystem::path pdir(calibdir);
+    boost::filesystem::path pbase("20201117.csv");
+    boost::filesystem::path ptodaycalfile = pdir / pbase;
+    std::string todaycalfile = ptodaycalfile.string();
+    TS_ASSERT(boost::filesystem::exists(todaycalfile));
+    // load and compare
+    // ... ...
+
+    // Output 1: check all the files
+    std::vector<std::string> compnames{"source", "sample", "bank1", "bank2",
+                                       "bank42"};
+    std::vector<size_t> expectedrows{1, 1, 1, 2, 2};
+    for (size_t i = 0; i < 5; ++i) {
+      verify_component_files(calibdir, compnames[i], expectedrows[i]);
+    }
 
     // Clean memory
     // Remove workspace from the data service.
@@ -118,8 +148,6 @@ public:
         "2018-02-20T12:57:17");
     TS_ASSERT_EQUALS(yyyymmdd, "20180220");
   }
-
-
 
   //-----------------------------------------------------------------------------
   /**
@@ -248,7 +276,7 @@ private:
 
     // Add property start_time
     ws->mutableRun().addProperty<std::string>("start_time",
-                                              "2018-02-20T12:57:17", "", true);
+                                              "2020-11-17T12:57:17", "", true);
 
     return ws;
   }
@@ -350,19 +378,52 @@ private:
   /**
    * @brief Create some existing database (csv) files
    */
-  void create_existing_database_files(calibdir, banks){
+  void create_existing_database_files(const std::string &calibdir,
+                                      std::vector<std::string> &banks) {
 
-	  boost::filesystem::Path dir(calibdir);
+    boost::filesystem::path dir(calibdir);
 
-	  for (auto bankname: banks) {
-		  std::string basename = banks + ".csv"
-			  std::filesystem::Path basepath(basename);
-			std::filesystem:Path fullpath = dir / basepath;
-		 	std::string filename = fullpath.string()
-	  std::ofstream bankofs(filename);
-		  bankofs << "# YYYMMDD , Xposition , Yposition , Zposition , XdirectionCosine , YdirectionCosine , ZdirectionCosine , RotationAngle\n";
-		  bankofs << "# str , double , double , double , double , double , double , double\n";
-		  bankofs << "20201117,0.0001,-0.0002,0.003,0,-23.3,98.02,0"
+    for (auto bankname : banks) {
+      // create full path database name
+      std::string basename = bankname + ".csv";
+      boost::filesystem::path basepath(basename);
+      boost::filesystem::path fullpath = dir / basename;
+      std::string filename = fullpath.string();
+      // write file
+      std::ofstream bankofs(filename, std::ofstream::out);
+      bankofs
+          << "# YYYMMDD , Xposition , Yposition , Zposition , XdirectionCosine "
+             ", YdirectionCosine , ZdirectionCosine , RotationAngle\n";
+      bankofs << "# str , double , double , double , double , double , double "
+                 ", double\n";
+      bankofs << "20001117,0.0001,-0.0002,0.003,0,-23.3,98.02,0";
+      bankofs.close();
+    }
+  }
 
+  /**
+   * @brief verify single component file existence and check some specific value
+   * @param calfiledir
+   * @param component
+   * @param expectedrecordsnumber
+   */
+  void verify_component_files(const std::string &calfiledir,
+                              const std::string &component,
+                              size_t expectedrecordsnumber) {
+    // Create full file path
+    boost::filesystem::path pdir(calfiledir);
+    boost::filesystem::path pbase(component + ".csv");
+    boost::filesystem::path pcompcalfile = pdir / pbase;
+    std::string compcalfile = pcompcalfile.string();
+
+    // Assert file existence
+    TS_ASSERT(boost::filesystem::exists(compcalfile));
+
+    // Load table
+    TableWorkspace_sptr tablews =
+        loadCSVtoTable(compcalfile, "CorelliVerify_" + component);
+
+    // Check records
+    TS_ASSERT_EQUALS(tablews->rowCount(), expectedrecordsnumber);
   }
 };
