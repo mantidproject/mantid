@@ -532,6 +532,7 @@ void StepScan::runStepScanAlg() {
   IAlgorithm_sptr stepScan = setupStepScanAlg();
   if (!stepScan)
     return;
+
   // Block mouse clicks while the algorithm runs. Also set the busy cursor.
   DisableGUI_RAII _blockclicks(this);
 
@@ -668,6 +669,7 @@ void StepScan::generateCurve(const QString &var) {
     MatrixWorkspace_sptr bottom = norm->getProperty("OutputWorkspace");
     top /= bottom;
   }
+
   plotCurve();
 }
 
@@ -711,9 +713,9 @@ void StepScan::plotCurve() {
                        "l.setAxisTitle(Layer.Bottom,'" +
                        xAxisTitle +
                        "')\n"
-                        "l.setAxisTitle(Layer.Left,'" +
+                       "l.setAxisTitle(Layer.Left,'" +
                        yAxisTitle + "')";
-  
+
   runPythonCode(QString::fromStdString(pyCode));
 #else
   using namespace MantidQt::Widgets::MplCpp;
@@ -724,13 +726,14 @@ void StepScan::plotCurve() {
   auto canvas = new FigureCanvasQt(111, "mantid");
   auto fig = canvas->gcf();
   auto ax = canvas->gca<MantidAxes>();
-  ax.setXLabel(xAxisTitle.c_str());
-  ax.setYLabel(yAxisTitle.c_str());
-  ax.setTitle(title.c_str());
+  title += " - Step Scan";
+  canvas->setWindowTitle(QString::fromStdString(title));
   QHash<QString, QVariant> hash;
   hash.insert("linestyle", "");
   hash.insert("marker", ".");
   auto line = ax.plot(ws, 0, "black", "", hash);
+  ax.setXLabel(xAxisTitle.c_str());
+  ax.setYLabel(yAxisTitle.c_str());
   canvas->draw();
   canvas->show();
 #endif
