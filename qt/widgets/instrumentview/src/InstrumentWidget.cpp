@@ -421,6 +421,7 @@ InstrumentWidgetPickTab *InstrumentWidget::getPickTab(const Tab tab) const {
   // Call to get base class Q widget
   InstrumentWidgetTab *tab_widget = getTab(tab);
 
+  //
   // Cast
   InstrumentWidgetPickTab *pick_tab =
       dynamic_cast<InstrumentWidgetPickTab *>(tab_widget);
