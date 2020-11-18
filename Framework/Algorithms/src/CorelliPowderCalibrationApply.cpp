@@ -77,7 +77,22 @@ namespace Mantid {
      * 
      */
     void CorelliPowderCalibrationApply::exec(){
+        g_log.notice() << "Start applying CORELLI calibration\n";
 
+        // Get input arguments
+        API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+        API::ITableWorkspace_sptr calTable = getProperty("CalibrationTable");
+        const std::string dbDir = getProperty("DatabaseDirectory");
+        API::MatrixWorkspace_sptr outputWS;
+
+        // Parse calibration table
+
+        // Translate each component in the instrument
+        // [source, sample, bank1,.. bank92]
+
+        // Rotate each component in the instrument
+
+        // Config output
     }
 
     } // namespace Algorithm
