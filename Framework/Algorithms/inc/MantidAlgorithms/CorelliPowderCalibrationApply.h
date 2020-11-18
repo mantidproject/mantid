@@ -8,6 +8,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/CorelliPowderCalibrationDatabase.h"
 #include "MantidAlgorithms/DllConfig.h"
@@ -44,6 +45,14 @@ namespace Mantid {
 
                 /// Overwrites Algorithm method
                 void exec() override;
+
+                /// Private validator for inputs
+                std::map<std::string, std::string> validateInputs() override;
+
+                /// Members
+                API::MatrixWorkspace_const_sptr inputWS;
+                DataObjects::TableWorkspace_const_sptr calTable;
+                API::MatrixWorkspace_sptr outputWS;
         };
         
     } // namespace Algorithms
