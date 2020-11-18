@@ -6,17 +6,23 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
 #include "MantidCrystal/SaveHKL.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/IDTypes.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/Material.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <Poco/File.h>
 #include <cxxtest/TestSuite.h>
 #include <fstream>
@@ -85,6 +91,121 @@ public:
     const double expectedTbar{0.1591}, expectedTransmission{0.9434};
     assertFileContent(assertSaveExec(ws, radius, smu, amu), expectEmptyFile,
                       expectedTbar, expectedTransmission);
+  }
+
+  void test_save_with_direction_cosines_DEMAND() {
+    // This test compares the direction cosines calculated with
+    // SaveHKL to values from other software
+    auto ws = std::make_shared<PeaksWorkspace>();
+
+    // create dummy workspace to use with LoadInstrument
+    auto dummyWS = WorkspaceCreationHelper::create2DWorkspace(1, 1);
+    auto expinfo = std::dynamic_pointer_cast<ExperimentInfo>(dummyWS);
+    auto &run = expinfo->mutableRun();
+    Types::Core::DateAndTime startTime(0);
+    auto twotheta = std::make_unique<TimeSeriesProperty<double>>("2theta");
+    twotheta->addValue(startTime, 58.0595);
+    run.addLogData(std::move(twotheta));
+    auto det_trans = std::make_unique<TimeSeriesProperty<double>>("det_trans");
+    det_trans->addValue(startTime, 399.9955);
+    run.addLogData(std::move(det_trans));
+
+    AnalysisDataService::Instance().addOrReplace("dummy_direction_cosine_test",
+                                                 dummyWS);
+    Mantid::DataHandling::LoadInstrument loader;
+    loader.initialize();
+    loader.setPropertyValue("InstrumentName", "HB3A");
+    loader.setPropertyValue("Workspace", "dummy_direction_cosine_test");
+    loader.setPropertyValue("RewriteSpectraMap", "False");
+    loader.execute();
+
+    Goniometer gon;
+    gon.pushAxis("omega", 0, 1, 0, 29.0295, -1);
+    gon.pushAxis("chi", 0, 0, 1, 15.1168, -1);
+    gon.pushAxis("phi", 0, 1, 0, 4.7395, -1);
+    run.setGoniometer(gon, false);
+
+    ws->setInstrument(dummyWS->getInstrument());
+    ws->mutableRun().setGoniometer(run.getGoniometer().getR(), false);
+
+    Mantid::Kernel::DblMatrix UBMatrix({-0.009884, -0.016780, 0.115725,
+                                        0.112280, 0.002840, 0.011331, -0.005899,
+                                        0.081084, 0.023625});
+    auto lattice = std::make_unique<OrientedLattice>();
+    lattice->setUB(UBMatrix);
+    ExperimentInfo_sptr ei = std::dynamic_pointer_cast<ExperimentInfo>(ws);
+    ei->mutableSample().setOrientedLattice(std::move(lattice));
+
+    V3D hkl(1, -2, 5);
+    V3D qSampleFrame = UBMatrix * hkl * 2 * M_PI;
+    Peak p(ws->getInstrument(), qSampleFrame, run.getGoniometer().getR());
+    p.setHKL(hkl);
+    p.setRunNumber(1000);
+    p.setBankName("bank1");
+    p.setIntensity(1.0);
+    p.setSigmaIntensity(1.0);
+    p.setBinCount(1.0);
+    ws->addPeak(p);
+
+    std::string outfile = "./SaveHKLTest_direction_cosine.hkl";
+    SaveHKL alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize())
+    TS_ASSERT(alg.isInitialized())
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", ws));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", outfile));
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("DirectionCosines", true));
+
+    TS_ASSERT_THROWS_NOTHING(alg.execute(););
+    TS_ASSERT(alg.isExecuted());
+
+    // Get the file
+    outfile = alg.getPropertyValue("Filename");
+    TS_ASSERT(Poco::File(outfile).exists());
+
+    std::ifstream in(outfile.c_str());
+    double h, k, l, fsw, sigmafsq, histnum, wl, tbar, dir_cos_1_x, dir_cos_2_x,
+        dir_cos_1_y, dir_cos_2_y, dir_cos_1_z, dir_cos_2_z, dsp, col, row;
+    in >> h >> k >> l >> fsw >> sigmafsq >> histnum >> wl >> tbar >>
+        dir_cos_1_x >> dir_cos_2_x >> dir_cos_1_y >> dir_cos_2_y >>
+        dir_cos_1_z >> dir_cos_2_z >> dsp >> col >> row;
+    in.close();
+
+    TS_ASSERT_EQUALS(h, -1);
+    TS_ASSERT_EQUALS(k, 2);
+    TS_ASSERT_EQUALS(l, -5);
+    TS_ASSERT_EQUALS(fsw, 1);
+    TS_ASSERT_EQUALS(sigmafsq, 1);
+    TS_ASSERT_EQUALS(histnum, 1);
+    TS_ASSERT_DELTA(wl, 1.55025, 1e-4);
+    TS_ASSERT_EQUALS(tbar, 0);
+    // compare to direction cosines produced with other software
+    TS_ASSERT_DELTA(dir_cos_1_x, -0.03516, 1e-4);
+    TS_ASSERT_DELTA(dir_cos_1_y, -0.71004, 1e-4);
+    TS_ASSERT_DELTA(dir_cos_1_z, -0.70328, 1e-4);
+    TS_ASSERT_DELTA(dir_cos_2_x, -0.13886, 1e-4);
+    TS_ASSERT_DELTA(dir_cos_2_y, 0.96643, 1e-4);
+    TS_ASSERT_DELTA(dir_cos_2_z, -0.21619, 1e-4);
+    TS_ASSERT_EQUALS(dsp, 1000);
+    TS_ASSERT_EQUALS(col, 0);
+    TS_ASSERT_EQUALS(row, 0);
+
+    // compare direction cosine to direct calculation
+    auto RU = ws->run().getGoniometer().getR() *
+              ws->sample().getOrientedLattice().getU();
+    RU.Transpose();
+    V3D dir_cos_1 = RU * V3D(0, 0, -1);
+    auto peaks_pos = ws->getPeak(0).getDetPos();
+    peaks_pos.normalize();
+    V3D dir_cos_2 = RU * peaks_pos;
+    TS_ASSERT_DELTA(dir_cos_1_x, dir_cos_1[0], 1e-4);
+    TS_ASSERT_DELTA(dir_cos_1_y, dir_cos_1[1], 1e-4);
+    TS_ASSERT_DELTA(dir_cos_1_z, dir_cos_1[2], 1e-4);
+    TS_ASSERT_DELTA(dir_cos_2_x, dir_cos_2[0], 1e-4);
+    TS_ASSERT_DELTA(dir_cos_2_y, dir_cos_2[1], 1e-4);
+    TS_ASSERT_DELTA(dir_cos_2_z, dir_cos_2[2], 1e-4);
+
+    if (Poco::File(outfile).exists())
+      Poco::File(outfile).remove();
   }
 
 private:
