@@ -43,7 +43,6 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesGeneral
                      ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
                      ${CORE_MANTIDLIBS}
-                     PythonInterfaceCore
                      ${POCO_LIBRARIES}
                      ${Boost_LIBRARIES}
                      ${JSONCPP_LIBRARIES}
