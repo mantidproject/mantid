@@ -591,6 +591,7 @@ void InstrumentWidget::replaceWorkspace(
   // update the view and colormap
   auto surface = getSurface();
   surface->resetInstrumentActor(m_instrumentActor.get());
+  setScaleType(ColorMap::ScaleType::Linear);
   setupColorMap();
 
   // update the integration widget
