@@ -25,6 +25,8 @@ Algorithms
 Data Objects
 ------------
 
+- Fixed a bug in :ref:`algm-LoadEventNexus` where Mantid would crash if the file does not contain the ``event_time_zero`` attribute.
+
 Python
 ------
 

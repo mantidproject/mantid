@@ -460,6 +460,10 @@ firstLastPulseTimes(::NeXus::File &file, Kernel::Logger &logger) {
       NeXus::NeXusIOHelper::readNexusVector<double>(file, "event_time_zero");
   // Remember to close the entry
   file.closeData();
+  // Check we have valid data
+  if (pulse_times.empty())
+    throw std::runtime_error(
+        "No event time zeros. Cannot establish run start or end");
   // Convert to seconds
   auto conv = Kernel::Units::timeConversionValue(units, "s");
   return std::make_pair(
