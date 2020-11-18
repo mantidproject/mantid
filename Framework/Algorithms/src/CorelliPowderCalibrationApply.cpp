@@ -83,16 +83,24 @@ namespace Mantid {
         API::MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
         API::ITableWorkspace_sptr calTable = getProperty("CalibrationTable");
         const std::string dbDir = getProperty("DatabaseDirectory");
-        API::MatrixWorkspace_sptr outputWS;
+        API::MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+        if (outputWS != inputWS) {
+            outputWS = inputWS->clone();
+            }
 
         // Parse calibration table
 
         // Translate each component in the instrument
         // [source, sample, bank1,.. bank92]
+        auto mvCmpAlg = API::AlgorithmFactory::Instance().create("MoveInstrumentComponent");
+        mvCmpAlg -> initialize();
 
         // Rotate each component in the instrument
+        auto rtCmpAlg = API::AlgorithmFactory::Instance().create("RotateInstrumentComponent");
+        rtCmpAlg -> initialize();
 
         // Config output
+        setProperty("OutputWorkspace", outputWS);
     }
 
     } // namespace Algorithm
