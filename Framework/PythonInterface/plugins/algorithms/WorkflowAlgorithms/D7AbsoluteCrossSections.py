@@ -163,19 +163,19 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             last_underscore = name.rfind("_")
             measurements.add(name[last_underscore+1:])
         nMeasurements = len(measurements)
-        error_msg = "The provided data cannot support {} measurement component separation."
+        error_msg = "The provided data cannot support {} measurement cross-section separation."
         if nMeasurements == 10:
             nComponents = 3
         elif nMeasurements == 6:
             nComponents = 3
             if user_method == '10p' and self.getProperty('RotatedXYZWorkspace').isDefault:
-                raise RunTimeError(error_msg.format(user_method))
+                raise RuntimeError(error_msg.format(user_method))
         elif nMeasurements == 2:
             nComponents = 2
             if user_method == '10p':
-                raise RunTimeError(error_msg.format(user_method))
+                raise RuntimeError(error_msg.format(user_method))
             if user_method == 'XYZ':
-                raise RunTimeError(error_msg.format(user_method))
+                raise RuntimeError(error_msg.format(user_method))
         else:
             raise RuntimeError("The analysis options are: Uniaxial, XYZ, and 10p. "
                                + "The provided input does not fit in any of these measurement types.")
