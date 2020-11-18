@@ -178,7 +178,9 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element *elem) {
                              " does not have any instruments;");
   } else {
     sort(begin(m_instruments), end(m_instruments),
-              [](const InstrumentInfo i1, const InstrumentInfo i2) { return i1.name() < i2.name(); });
+         [](const InstrumentInfo i1, const InstrumentInfo i2) {
+           return i1.name() < i2.name();
+         });
   }
 }
 
