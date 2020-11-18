@@ -33,6 +33,7 @@ class LoadFileWidgetModelEATest(unittest.TestCase):
 
     def test_model_is_cleared_correctly(self):
         self.model._loaded_data_store.add_data(run=1234)
+        self.assertEqual(self.model.loaded_runs, [1234])
         self.model.clear()
         self.assert_model_empty()
 

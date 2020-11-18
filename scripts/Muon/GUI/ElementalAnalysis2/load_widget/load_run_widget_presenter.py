@@ -121,7 +121,7 @@ class LoadRunWidgetPresenterEA(object):
     # ------------------------------------------------------------------------------------------------------------------
 
     def handle_load_current_run(self):
-        self._view.warning_popup("Load Current Run is not available")
+        self._view.warning_popup("Load Current Run is currently not available")
 
     # ------------------------------------------------------------------------------------------------------------------
     # Loading from increment/decrement run buttons
@@ -134,11 +134,7 @@ class LoadRunWidgetPresenterEA(object):
             return
         new_run = max(self.run_list)
 
-        try:
-            self.load_runs([new_run])
-        except Exception:
-            # nothing is actually being caught here as it gets handled by thread_model.run
-            return
+        self.load_runs([new_run])
 
     def handle_decrement_run(self):
         decremented_run_list = self.get_decremented_run_list()
@@ -151,7 +147,7 @@ class LoadRunWidgetPresenterEA(object):
 
     def get_incremented_run_list(self):
         """
-        Updates list of runs by adding a run equal to 1 after to the highest run.
+        Updates list of runs by adding a run equal to 1 after the highest run.
         """
         run_list = load_utils.flatten_run_list(copy.copy(self._model.current_runs))
         if run_list is None or len(run_list) == 0:
@@ -164,7 +160,7 @@ class LoadRunWidgetPresenterEA(object):
 
     def get_decremented_run_list(self):
         """
-        Updates list of runs by adding a run equal to 1 before to the lowest run.
+        Updates list of runs by adding a run equal to 1 before the lowest run.
         """
         run_list = load_utils.flatten_run_list(copy.copy(self._model.current_runs))
         if run_list is None or len(run_list) == 0:

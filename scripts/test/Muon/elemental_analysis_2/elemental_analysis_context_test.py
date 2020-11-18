@@ -30,8 +30,8 @@ class DataContextTest(unittest.TestCase):
     # ------------------------------------------------------------------------------------------------------------------
 
     def test_initialised_empty(self):
-        self.assertEqual(self.context.current_runs, [])
-        self.assertEqual(self.context.run_info, [])
+        self.assertEquals(self.context.current_runs, [])
+        self.assertEquals(self.context.run_info, [])
 
     def test_add_run_object_to_run_info(self):
         new_runObject = mock.Mock()
@@ -44,7 +44,7 @@ class DataContextTest(unittest.TestCase):
         self.assertTrue(len(self.context.run_info) == 1)
 
         self.context.clear_run_info()
-        self.assertEqual(self.context.run_info, [])
+        self.assertEquals(self.context.run_info, [])
 
 
 if __name__ == '__main__':

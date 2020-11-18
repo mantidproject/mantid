@@ -75,6 +75,9 @@ class LoadRunWidgetModel(object):
                 detectors = []
                 workspace_list = groupws.getNames()
                 for item in workspace_list:
+                    ''' The workspaces in the groupworkspace are all named in the format [run];[detector]
+                    The line below removes any text up to and including the ; which leaves behind the detector name.
+                    For example 2695; Detector 1 returns as Detector 1'''
                     detector_name = item.split(';', 1)[-1].lstrip()
                     detectors.append(detector_name)
                 run_results = RunObject(run, detectors, groupws)

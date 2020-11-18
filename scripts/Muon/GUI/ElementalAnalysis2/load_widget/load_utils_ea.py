@@ -21,7 +21,7 @@ def combine_loaded_runs(model, run_list):
     ws_remove = []
     for run in run_list:
         run_detectors = get_detectors(model, run)
-        detectors_to_check = check_all_detectors_complete(run_detectors, finished_detectors)
+        detectors_to_check = check_for_unused_detectors(run_detectors, finished_detectors)
         if detectors_to_check:
             for detector in run_detectors:
                 new_ws_name = detector
@@ -37,12 +37,8 @@ def combine_loaded_runs(model, run_list):
     finalise_groupworkspace(co_add_workspace, co_add_workspace_name, ws_remove)
 
 
-def check_all_detectors_complete(run_detectors, finished_detectors):
-    unused_detectors = list(set(run_detectors).difference(finished_detectors))
-    if unused_detectors:
-        return True
-    else:
-        return False
+def check_for_unused_detectors(run_detectors, finished_detectors):
+    return list(set(run_detectors).difference(finished_detectors))
 
 
 def add_detector_workspace_to_group(grpws, new_ws, new_ws_name, detector, finished_detectors, ws_list):

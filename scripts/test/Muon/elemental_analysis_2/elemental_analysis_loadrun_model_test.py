@@ -66,7 +66,7 @@ class LoadRunWidgetModelEATest(unittest.TestCase):
 
         self.model._runs = [1234, 1255]
         self.model.execute()
-        self.assertTrue(len(self.model.loaded_runs) > 1)
+        self.assertEquals(len(self.model.loaded_runs), 2)
         self.model.clear_loaded_data()
         self.assertEqual(self.model.loaded_runs, [])
 
