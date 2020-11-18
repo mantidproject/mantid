@@ -349,8 +349,8 @@ and :math:`\dot{I_{B}}(0)` and :math:`\dot{I_{B}}(1)` are the events with the fl
 Self-attenuation correction
 ---------------------------
 
-The self-attenuation is estimated using :ref:`PaalmanPingsMonteCarloCorrection <algm-PaalmanPingsMonteCarloCorrection>` and applied to data
-with :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>`. The :ref:`PaalmanPingsMonteCarloCorrection <algm-PaalmanPingsMonteCarloCorrection>`
+The self-attenuation is estimated using :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` and applied to data
+with :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>`. The :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`
 algorithm requires multiple parameters of the sample and its environment, such as the geometry, density, and chemical composition to be defined.
 The communication of these parameters is done via `SampleAndEnvironmentProperties` property of the :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>`
 algorithm. Below there are all the necessary keys that can and need to be defined for the sample self-attenuation to be properly corrected.
