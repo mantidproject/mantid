@@ -13,7 +13,7 @@ New features
 ------------
 
 - New algorithm :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` to perform wavelength and detector position calibration for the ILL D7 instrument.
-    
+
 Powder Diffraction
 ------------------
 New features
@@ -35,7 +35,12 @@ New features
 Improvements
 ############
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
+- The plot pane in the Engineering Diffraction interface can now be undocked from the main window, making this more readable when the fit property view is open.
+- The height of the :ref:`func-BackToBackExponential` peak is now preserved when changing the FWHM sliders when fitting.
+- :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` is corrected when treating multiple scans merged.
 - The default loadpath in the fitting tab of the Engineering Diffraction UI is now set to the most recently focused files.
+- The :ref:`HB2AReduce <algm-HB2AReduce>` now can save reduced data to GSAS or XYE file.
+
 
 Bugfixes
 ########
@@ -46,6 +51,7 @@ Bugfixes
 
 Engineering Diffraction
 -----------------------
+- PaalmanPingsMonteCarloAbsorption can now use tabulated density values, and allows for overridden X Sections
 
 Bugfixes
 ############
@@ -63,6 +69,10 @@ New features
 
 Single Crystal Diffraction
 --------------------------
+Bugfixes
+########
+- Fix bug in :ref:`SaveHKL <algm-SaveHKL>` where the direction cosines were calculated incorrectly
+
 
 New features
 ############

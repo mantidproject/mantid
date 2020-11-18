@@ -258,6 +258,12 @@ void FunctionBrowser::updateMultiDatasetParameters(const IFunction &fun) {
   m_presenter->updateMultiDatasetParameters(fun);
 }
 
+/// Update the interface to have the same attribute values as in a function.
+/// @param fun :: A function to get attribute values from.
+void FunctionBrowser::updateMultiDatasetAttributes(const IFunction &fun) {
+  m_presenter->updateMultiDatasetAttributes(fun);
+}
+
 void FunctionBrowser::updateMultiDatasetParameters(
     const ITableWorkspace &paramTable) {
   auto const nRows = paramTable.rowCount();

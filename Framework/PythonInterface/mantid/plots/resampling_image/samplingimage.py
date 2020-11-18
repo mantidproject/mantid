@@ -145,13 +145,11 @@ class SamplingImage(mimage.AxesImage):
     def _update_maxpooling_option(self):
         """
         Updates the maxpooling option, used when the image is downsampled
-        If the workspace is large, we skip this maxpooling step and set the option as False
+        If the workspace is large, or ragged, we skip this maxpooling step and set the option as False
         """
         axis = self.ws.getAxis(1)
-        if self.ws.getNumberHistograms() <= MAX_HISTOGRAMS and axis.isSpectra():
-            self._maxpooling = True
-        else:
-            self._maxpooling = False
+        self._maxpooling = (self.ws.getNumberHistograms() <= MAX_HISTOGRAMS and axis.isSpectra() and
+                            not self.ws.isRaggedWorkspace())
 
 
 def imshow_sampling(axes,

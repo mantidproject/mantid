@@ -9,6 +9,7 @@
 #include "DllOption.h"
 
 #include "IFunctionModel.h"
+#include "MantidAPI/IFunction.h"
 
 #include <QString>
 #include <QStringList>
@@ -26,15 +27,18 @@ public:
   void addFunction(const QString &prefix, const QString &funStr) override;
   void removeFunction(const QString &functionIndex) override;
   void setParameter(const QString &paramName, double value) override;
+  void setAttribute(const QString &attrName, const IFunction::Attribute &val);
   void setParameterError(const QString &paramName, double value) override;
   double getParameter(const QString &paramName) const override;
   double getParameterError(const QString &paramName) const override;
+  IFunction::Attribute getAttribute(const QString &attrName) const;
   QString getParameterDescription(const QString &paramName) const override;
   bool isParameterFixed(const QString &parName) const;
   QString getParameterTie(const QString &parName) const;
   void setParameterFixed(const QString &parName, bool fixed);
   void setParameterTie(const QString &parName, const QString &tie);
   QStringList getParameterNames() const override;
+  QStringList getAttributeNames() const;
   IFunction_sptr getSingleFunction(int index) const override;
   IFunction_sptr getCurrentFunction() const override;
   void setNumberDomains(int) override;
@@ -67,6 +71,7 @@ public:
   bool isGlobal(const QString &parName) const override;
   QStringList getLocalParameters() const override;
   void updateMultiDatasetParameters(const IFunction &fun) override;
+  void updateMultiDatasetAttributes(const IFunction &fun);
   void updateParameters(const IFunction &fun) override;
   QString setBackgroundA0(double value) override;
 

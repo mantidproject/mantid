@@ -7,12 +7,12 @@ set(SRC_FILES
 set(MOC_FILES
     ALFView.h
     ALFCustomInstrumentView.h
-    ALFCustomInstrumentPresenter.h
-    ALFCustomInstrumentModel.h
-    ALFCustomInstrumentMocks.h)
+    ALFCustomInstrumentPresenter.h)
     
 set(INC_FILES
-    DllConfig.h)
+    DllConfig.h
+    ALFCustomInstrumentModel.h
+    ALFCustomInstrumentMocks.h)
 
 # Target
 mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesDirect

@@ -9,16 +9,28 @@ Mantid system testing framework. This module contains all of the necessary code
 to run sets of system tests on the Mantid framework.
 """
 # == for testing conda build of mantid-framework ==========
+import functools
 import os
+import pathlib
+from typing import List
 
 if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
     # conda build of mantid-framework sometimes require importing matplotlib before mantid
     import matplotlib
 
 # =========================================================
+try:
+    import mantid
+except ModuleNotFoundError:
+    import setuptools
+    from packaging import version
+    if version.parse(setuptools.__version__) >= version.parse("49.0.0"):
+        raise EnvironmentError("Setup tools is v49 or greater. This is likely causing the Mantid import to fail. See \n"
+                                "https://github.com/mantidproject/mantid/issues/29010")
+
 import datetime
 import difflib
-import imp
+import importlib.util
 import inspect
 from mantid.api import FileFinder
 from mantid.api import FrameworkManager
@@ -807,12 +819,24 @@ class TestManager(object):
 
         self._tests = list_of_tests
 
-    def generateMasterTestList(self, test_sub_directories):
+    def _get_sub_dirs(self, parent_dir: str) -> List[pathlib.Path]:
+        parent = pathlib.Path(self._config.testDir) / parent_dir
+        found = []
+        for sub_dir in parent.glob('**'):
+            if '__pycache__' not in sub_dir.name:
+                found.append(sub_dir)
+        return found
+
+    def generateMasterTestList(self, test_parent_dirs):
         mod_counts, mod_tests, mod_sub_directories, mod_required_files = dict(), dict(), dict(), dict()
         data_file_lock_status = dict()
         test_stats = [0, 0, 0]
 
-        for sub_directory in test_sub_directories:
+        test_folders = []
+        for parent_dir in test_parent_dirs:
+            test_folders.extend(self._get_sub_dirs(parent_dir))
+
+        for sub_directory in test_folders:
             counts, tests, sub_directories, stats, files_required, lock_status = self.__generateTestList(sub_directory)
             mod_counts.update(counts)
             mod_tests.update(tests)
@@ -830,22 +854,20 @@ class TestManager(object):
 
         return mod_counts, mod_tests, mod_sub_directories, test_stats, mod_required_files, data_file_lock_status
 
-    def __generateTestList(self, sub_directory):
+    def __generateTestList(self, test_path: pathlib.Path):
+        if not test_path.exists():
+            print(f'Cannot find file {str(test_path)}.py. Please check the path.')
+            exit(2)
+
+        test_dir = str(test_path.resolve())
+        sys.path.append(test_dir)
+        self._runner.setTestDir(test_dir)
+
         # If given option is a directory
-        test_directory = os.path.join(self._config.testDir, sub_directory)
-        if os.path.isdir(test_directory):
-            test_dir = os.path.abspath(test_directory).replace('\\', '/')
-            sys.path.append(test_dir)
-            self._runner.setTestDir(test_dir)
+        if test_path.is_dir():
             all_loaded, full_test_list = self.loadTestsFromDir(test_dir)
         else:
-            if not os.path.exists(test_directory):
-                print('Cannot find file ' + test_directory + '.py. Please check the path.')
-                exit(2)
-            test_dir = os.path.abspath(os.path.dirname(test_directory)).replace('\\', '/')
-            sys.path.append(test_dir)
-            self._runner.setTestDir(test_dir)
-            all_loaded, full_test_list = self.loadTestsFromModule(os.path.basename(test_directory))
+            all_loaded, full_test_list = self.loadTestsFromModule(os.path.basename(test_path))
 
         if not all_loaded:
             if self._ignore_failed_imports:
@@ -884,7 +906,7 @@ class TestManager(object):
             else:
                 modcounts[key] = 1
                 modtests[key] = [t]
-                mod_sub_directories[key] = sub_directory
+                mod_sub_directories[key] = test_path
 
         # Now we scan each test module (= python file) and list all the data files
         # that are used by that module. The possible ways files are being specified
@@ -917,7 +939,7 @@ class TestManager(object):
 
             fname = modkey + ".py"
             files_required_by_test_module[modkey] = []
-            with open(os.path.join(os.path.dirname(test_directory), sub_directory, fname), "r") as pyfile:
+            with open(os.path.join(os.path.dirname(test_path), test_path, fname), "r") as pyfile:
                 for line in pyfile.readlines():
 
                     # Search for all instances of '.nxs' or '.raw'
@@ -1028,29 +1050,28 @@ class TestManager(object):
         modname = os.path.basename(filename)
         modname = modname.split('.py')[0]
         tests = []
-        module_loaded = False
         try:
-            with open(filename, 'r') as pyfile:
-                mod = imp.load_module(modname, pyfile, filename, ("", "", imp.PY_SOURCE))
-                mod_attrs = dir(mod)
-                for key in mod_attrs:
-                    value = getattr(mod, key)
-                    if key == "MantidSystemTest" or not inspect.isclass(value):
-                        continue
-                    if self.isValidTestClass(value):
-                        test_name = key
-                        tests.append(
-                            TestSuite(self._runner.getTestDir(), modname, test_name, filename))
+            spec = importlib.util.spec_from_file_location("", filename)
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+
+            mod_attrs = dir(mod)
+            for key in mod_attrs:
+                value = getattr(mod, key)
+                if key == "MantidSystemTest" or not inspect.isclass(value):
+                    continue
+                if self.isValidTestClass(value):
+                    test_name = key
+                    tests.append(
+                        TestSuite(self._runner.getTestDir(), modname, test_name, filename))
             module_loaded = True
-        except Exception as exc:
+        except Exception:
             print("Error importing module '{}':".format(modname))
             import traceback
             traceback.print_exc()
             module_loaded = False
             # append a test with a blank name to indicate it was skipped
             tests.append(TestSuite(self._runner.getTestDir(), modname, None, filename))
-        finally:
-            pyfile.close()
 
         return module_loaded, tests
 
@@ -1206,8 +1227,10 @@ class MantidFrameworkConfig:
 
 #########################################################################
 # Function to return a string describing the environment
-# (platform) of this test.
+# (platform) of this test. Cache this result so we don't query it n times
+# for every Sytem test that exists
 #########################################################################
+@functools.lru_cache(maxsize=1)
 def envAsString():
     platform_name = sys.platform
     if platform_name == 'win32':
