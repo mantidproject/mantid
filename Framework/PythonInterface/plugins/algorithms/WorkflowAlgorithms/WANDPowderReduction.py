@@ -11,6 +11,8 @@ from mantid.api import (
     MatrixWorkspaceProperty,
     PropertyMode,
     IEventWorkspace,
+    WorkspaceProperty,
+    WorkspaceGroup,
 )
 from mantid.dataobjects import MaskWorkspaceProperty
 from mantid.simpleapi import (
@@ -31,6 +33,8 @@ from mantid.simpleapi import (
     mtd,
     BinaryOperateMasks,
     Integration,
+    GroupWorkspaces,
+    RenameWorkspaces,
 )
 from mantid.kernel import (
     StringListValidator,
@@ -128,8 +132,14 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         )
 
         self.declareProperty(
-            MatrixWorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
+            WorkspaceProperty("OutputWorkspace", "", direction=Direction.Output),
             doc="Output Workspace",
+        )
+
+        self.declareProperty(
+            "Sum",
+            True,
+            doc="Specifies either single output workspace or output group workspace containing several workspaces.",
         )
 
     def PyExec(self):
@@ -138,6 +148,8 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         cal = self.getProperty("CalibrationWorkspace").value  # same calibration for all
         numberBins = self.getProperty("NumberBins").value
         outWS = self.getPropertyValue("OutputWorkspace")
+        summing = self.getProperty("Sum").value  # [Yes or No]
+        outWksp = self.getPropertyValue("OutputWorkspace")
 
         # convert all of the input workspaces into spectrum of "target" units (generally angle)
         data, masks = self._convert_data(data)
@@ -185,40 +197,47 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                     EnableLogging=False,
                 )
 
-            # conjoin
-            if n < 1:
-                CloneWorkspace(
-                    InputWorkspace=_ws_resampled,
-                    OutputWorkspace="__ws_conjoined",
-                    EnableLogging=False,
-                )
-            else:
-                ConjoinWorkspaces(
-                    InputWorkspace1="__ws_conjoined",
-                    InputWorkspace2=_ws_resampled,
-                    CheckOverlapping=False,
-                    EnableLogging=False,
-                )
+            if summing == True:
+                # conjoin
+                if n < 1:
+                    CloneWorkspace(
+                        InputWorkspace=_ws_resampled,
+                        OutputWorkspace="__ws_conjoined",
+                        EnableLogging=False,
+                    )
+                else:
+                    ConjoinWorkspaces(
+                        InputWorkspace1="__ws_conjoined",
+                        InputWorkspace2=_ws_resampled,
+                        CheckOverlapping=False,
+                        EnableLogging=False,
+                    )
+
         # END_FOR: prcess_spectra
 
         # Step_3: sum all spectra
         # ref: https://docs.mantidproject.org/nightly/algorithms/SumSpectra-v1.html
-        if cal is not None:
-            SumSpectra(
-                InputWorkspace="__ws_conjoined",
-                OutputWorkspace=outWS,
-                WeightedSum=True,
-                MultiplyBySpectra=False,
-                EnableLogging=False,
-            )
-        else:
-            SumSpectra(
-                InputWorkspace="__ws_conjoined",
-                OutputWorkspace=outWS,
-                WeightedSum=True,
-                MultiplyBySpectra=True,
-                EnableLogging=False,
-            )
+        if summing == True:
+            if cal is not None:
+                SumSpectra(
+                    InputWorkspace="__ws_conjoined",
+                    OutputWorkspace=outWS,
+                    WeightedSum=True,
+                    MultiplyBySpectra=not bool(cal),
+                    EnableLogging=False,
+                )
+            else:
+                SumSpectra(
+                    InputWorkspace="__ws_conjoined",
+                    OutputWorkspace=outWS,
+                    WeightedSum=True,
+                    MultiplyBySpectra=True,
+                    EnableLogging=False,
+                )
+
+        if summing == False:
+            outWS = GroupWorkspaces(InputWorkspaces=data, OutputWorkspace=outWS)
+
 
         self.setProperty("OutputWorkspace", outWS)
 
@@ -283,17 +302,18 @@ class WANDPowderReduction(DataProcessorAlgorithm):
     def _convert_data(self, input_workspaces):
         mask = self.getProperty("MaskWorkspace").value
         mask_angle = self.getProperty("MaskAngle").value
-
+        outname = self.getPropertyValue("OutputWorkspace")
+        
         # NOTE:
         # Due to range difference among incoming spectra, a common bin para is needed
         # such that all data can be binned exactly the same way.
 
         # BEGIN_FOR: located_global_xMin&xMax
-        output_workspaces = []  # names will
-        mask_workspaces = []
-        for n, _wksp_in in enumerate(input_workspaces):
-            _mask_n = f'__mask_{n}'  # mask for n-th
-            _wksp_out = f'__wskp_{n}'    # output workspace for n-th
+        output_workspaces = [f'{outname}{n+1}' for n in range(len(input_workspaces))]
+        mask_workspaces = [f'{mask}{n+1}' for n in range(len(input_workspaces))]
+        for _wksp_in, _mask_n, _wksp_out in zip(input_workspaces, mask_workspaces, output_workspaces):
+            #_mask_n = f'__mask_{n}'  # mask for n-th
+            #_wksp_out = f'__wskp_{n}'    # output workspace for n-th
             self.temp_workspace_list.append(_mask_n)  # cleanup later
 
             ExtractMask(InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False)
