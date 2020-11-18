@@ -9,19 +9,20 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/LiveListenerFactory.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/InstrumentInfo.h"
-#include "MantidKernel/Logger.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include <QtGlobal>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/MplCpp/Figure.h"
-#endif
+#include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
+#include "MantidQtWidgets/MplCpp/MantidAxes.h"
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#endif
 #include <QFileInfo>
 #include <QUrl>
 
@@ -40,8 +41,6 @@ DECLARE_SUBWINDOW(StepScan)
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-
-Logger g_log("StepScan");
 
 /// Constructor
 StepScan::StepScan(QWidget *parent)
@@ -94,7 +93,7 @@ void StepScan::initLayout() {
   if (this->parent()) {
     // note connection to the parent window, otherwise an empty frame window
     // may remain open and visible after this close.
-    connect(m_uiForm.closeButton, SIGNAL(released()), this, SLOT(close()));
+    connect(m_uiForm.closeButton, SIGNAL(released()), this->parent(), SLOT(close()));
   } else {
     // In MantidWorkbench this->parent() returns NULL. Connecting to this->close()
     // appears to work.
@@ -370,11 +369,19 @@ void StepScan::setupOptionControls() {
 
 void StepScan::launchInstrumentWindow() {
   // Gotta do this in python
-  std::string pyCode = "from mantidqt.widgets.instrumentview.instrument_view import pyInstrumentView\n"
-                       "instrument_view = pyInstrumentView('" + m_inputWSName + "')\n"
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
+  std::string pyCode = "instrument_view = getInstrumentView('" + m_inputWSName +
+                       "',2)\n"
+                       "instrument_view.show()";
+  runPythonCode(QString::fromStdString(pyCode));
+#else
+  std::string pyCode = "from mantidqt.widgets.instrumentview.api import get_instrumentview\n"
+                       "instrument_view = get_instrumentview('" + m_inputWSName + "')\n"
+                       "instrument_view.select_tab(2)\n"
                        "instrument_view.show_view()";
   Mantid::PythonInterface::GlobalInterpreterLock lock;
   PyRun_SimpleString(pyCode.c_str()); 
+#endif
   // Attach the observers so that if a mask workspace is generated over in the
   // instrument view,
   // it is automatically selected by the combobox over here
@@ -661,7 +668,6 @@ void StepScan::generateCurve(const QString &var) {
     MatrixWorkspace_sptr bottom = norm->getProperty("OutputWorkspace");
     top /= bottom;
   }
-  g_log.warning("plotCurve!");
   plotCurve();
 }
 
@@ -711,14 +717,22 @@ void StepScan::plotCurve() {
   runPythonCode(QString::fromStdString(pyCode));
 #else
   using namespace MantidQt::Widgets::MplCpp;
-  const std::vector<std::string> workspaces = {m_plotWSName};
-  const std::vector<int> index = {0};
-  //QHash<QString, QVariant> plt_hash, ax_hash;
-  //plt_hash.insert(QString("linestyle"),QVariant(""));
-  //plt_hash.insert(QString("marker"),QVariant("."));
-  g_log.warning(xAxisTitle+" "+yAxisTitle+" "+title);
- //plot(workspaces, boost::none, index, boost::none, plt_hash, ax_hash, title);
-  
+  using namespace MantidQt::Widgets::Common;
+  auto ws = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(m_plotWSName);
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  Python::Object module{Python::NewRef(PyImport_ImportModule("mantid.plots"))};
+  auto canvas = new FigureCanvasQt(111, "mantid");
+  auto fig = canvas->gcf();
+  auto ax = canvas->gca<MantidAxes>();
+  ax.setXLabel(xAxisTitle.c_str());
+  ax.setYLabel(yAxisTitle.c_str());
+  ax.setTitle(title.c_str());
+  QHash<QString, QVariant> hash;
+  hash.insert("linestyle", "");
+  hash.insert("marker", ".");
+  auto line = ax.plot(ws, 0, "black", "", hash);
+  canvas->draw();
+  canvas->show();
 #endif
 }
 
