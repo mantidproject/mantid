@@ -12,6 +12,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/SampleCorrections/SparseWorkspace.h"
+#include "MantidGeometry/IComponent.h"
+#include "MantidKernel/PseudoRandomNumberGenerator.h"
 
 namespace Mantid {
 namespace API {
@@ -64,9 +66,28 @@ private:
   std::tuple<double, double> new_vector(double absorbXsection,
                                         double numberDensity,
                                         double totalScatterXsection);
-  double interpolateSigmaS(const API::MatrixWorkspace_sptr sigmaS, double kinc);
-  void scatter(bool doMultipleScattering, int nScatters, double absorbXsection);
-  Kernel::V3D start_point();
+  double interpolateLogQuadratic(
+      const API::MatrixWorkspace_sptr workspaceToInterpolate, double x);
+  double scatter(const bool doMultipleScattering, const int nScatters,
+                 const double absorbXsection, const API::Sample &sample,
+                 const Geometry::Instrument &instrument,
+                 Kernel::PseudoRandomNumberGenerator &rng, const double vmfp,
+                 const double sigma_total, const API::MatrixWorkspace_sptr SOfQ,
+                 const double kinc);
+  Geometry::Track start_point(const API::Sample &sample,
+                              const Geometry::Instrument &instrument,
+                              Kernel::PseudoRandomNumberGenerator &rng);
+  Geometry::Track
+  generateInitialTrack(const API::Sample &sample,
+                       const Geometry::Instrument &instrument,
+                       Kernel::PseudoRandomNumberGenerator &rng);
+  void inc_xyz(Geometry::Track &track, double vl);
+  void updateWeightAndPosition(Geometry::Track &track, double &weight,
+                               double vmfp, double sigma_total,
+                               Kernel::PseudoRandomNumberGenerator &rng);
+  void q_dir(Geometry::Track track, const API::MatrixWorkspace_sptr SOfQ,
+             const double kinc, Kernel::PseudoRandomNumberGenerator &rng,
+             double &QSS, double &weight);
 };
 } // namespace Algorithms
 } // namespace Mantid

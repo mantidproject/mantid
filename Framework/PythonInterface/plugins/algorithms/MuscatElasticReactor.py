@@ -95,8 +95,8 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                              doc='Switch Save result to nxs file Off/On')
  
     def PyExec(self):
-        #import pydevd_pycharm
-        #pydevd_pycharm.settrace('localhost', stdoutToServer=True, stderrToServer=True)
+        import pydevd_pycharm
+        pydevd_pycharm.settrace('localhost', stdoutToServer=True, stderrToServer=True)
         np.random.seed(1234)
         # Set up progress reporting
         prog = Progress(self, 0.0, 1.0, 2)
@@ -393,6 +393,8 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
 #        self._noinc += 1                 #increment ntn number
 
     def _new_vector(self):                #calc new V-mean-free-path
+        # this seems to assume that the first k value is zero. DISCUS manual suggests first k value
+        # is perhaps dq
         IVKM = int(self._vkinc/self._delta_q) -1               #find Q value
         if IVKM >= self._number_q:                     #> Qmax
             sig_scat = math.exp(self._sigss[self._number_q -1])
@@ -401,7 +403,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                 sig_scat = math.exp(self._sigss[0])
             else:                          #interpolate scatt x-sec
                 # DH assume log(cross section) is quadratic in q
-                # set up up new q scale q' such that q'=0 for the q value where interpolating to
+                # set up up new q scale q' such that q'=0 for the q value we're interpolating to
                 # q' is variable U in following code
                 if IVKM > self._number_q-2:
                     IVKM = self._number_q-2
@@ -421,6 +423,8 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
             return math.exp(self._sofq[self._number_q -2])
         else:                                #interpolate
             IQ0 = int((Q - self._q_values[0])/self._delta_q)
+            # DH need at one point to the left and two to the right of the q value
+            # in order for the interpolation to work
             if IQ0 > self._number_q -3:
                 IQ0 = self._number_q -3
             IQ1 = IQ0+1
