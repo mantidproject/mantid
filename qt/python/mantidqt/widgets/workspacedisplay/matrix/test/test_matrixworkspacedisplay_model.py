@@ -43,7 +43,6 @@ class MatrixWorkspaceDisplayModelTest(unittest.TestCase):
         self.assertEqual(e_model.type, MatrixWorkspaceTableViewModelType.e)
         self.assertEqual(dx_model.type, MatrixWorkspaceTableViewModelType.dx)
 
-
     def test_raises_with_unsupported_workspace(self):
         self.assertRaises(ValueError, lambda: MatrixWorkspaceDisplayModel([]))
         self.assertRaises(ValueError, lambda: MatrixWorkspaceDisplayModel(1))

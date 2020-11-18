@@ -115,3 +115,5 @@ class MockWorkspace:
         self.getPlotType = StrictMock()
 
         self.getLinkedYCol = StrictMock()
+
+        self.hasDx = lambda x: x < len(read_return)
