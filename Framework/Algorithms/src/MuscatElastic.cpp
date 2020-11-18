@@ -111,6 +111,8 @@ void MuscatElastic::init() {
 void MuscatElastic::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
+  
+  //std::vector<MatrixWorkspace_uptr> outputWSs(nhists);
   auto outputWS = createOutputWorkspace(*inputWS);
 
   const MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
@@ -130,7 +132,7 @@ void MuscatElastic::exec() {
   auto instrument = instrumentWS.getInstrument();
   const auto nhists = static_cast<int64_t>(instrumentWS.getNumberHistograms());
 
-  const int nScatters = getProperty("NumberScatterings");
+  const size_t nScatters = getProperty("NumberScatterings");
   const int seed = getProperty("SeedValue");
 
   PARALLEL_FOR_IF(Kernel::threadSafe(simulationWS))
@@ -140,7 +142,9 @@ void MuscatElastic::exec() {
     double vmfp, sigma_total, scatteringXSection;
     auto numberDensity =
         inputWS->sample().getMaterial().numberDensityEffective();
-    for (int bin = 0; bin < inputWS->blocksize(); bin++) {
+    auto nbins = inputWS->blocksize();
+    auto histnew = simulationWS.histogram(i);
+    for (int bin = 0; bin < nbins; bin++) {
       // use Kernel::UnitConversion::run instead?? Momentum, MomentumTransfer
       double kinc = inputWS->histogram(i).x()[bin] /
                     (2 * sin(0.5 * inputWS->detectorInfo().twoTheta(i)));
@@ -168,18 +172,33 @@ void MuscatElastic::exec() {
       auto &y = SQWS->mutableY(0);
       std::transform(y.begin(), y.end(), y.begin(),
                      static_cast<double (*)(double)>(std::log));
+      auto detPos = inputWS->detectorInfo().position(i);
+
       scatter(false, nSingleScatterEvents, 0, inputWS->sample(), *instrument,
-              rng, vmfp, sigma_total, SQWS, kinc);
+              rng, vmfp, sigma_total, scatteringXSection, SQWS, kinc, detPos);
       scatter(false, nSingleScatterEvents, absorbXsection, inputWS->sample(),
-              *instrument, rng, vmfp, sigma_total, SQWS, kinc);
-      for (int ne = 0; ne < nScatters; ne++) {
-        double total = scatter(true, nMultiScatterEvents, absorbXsection, inputWS->sample(),
-                *instrument, rng, vmfp, sigma_total, SQWS, kinc);
+              *instrument, rng, vmfp, sigma_total, scatteringXSection, SQWS,
+              kinc, detPos);
+      std::vector<double> total(nScatters);
+      for (size_t ne = 0; ne < nScatters; ne++) {
+        total[ne] =
+            scatter(true, nMultiScatterEvents, absorbXsection,
+                    inputWS->sample(), *instrument, rng, vmfp, sigma_total,
+                    scatteringXSection, SQWS, kinc, detPos);
+        total[ne] = total[ne] / (nMultiScatterEvents * ne);
       }
+      // just output the factor for largest ne for now
+      // Could have a separate WS for each scatter order perhaps??
+      histnew.mutableY()[bin] = total[nScatters - 1];
     }
+    outputWS->setHistogram(i, histnew);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  //if (useSparseInstrument) {
+  //  interpolateFromSparse(*outputWS, *sparseWS, interpolateOpt);
+  //}
 }
 
 std::tuple<double, double>
@@ -224,35 +243,85 @@ double MuscatElastic::interpolateLogQuadratic(
   return exp(A * U * U + B * U + C);
 }
 
-double MuscatElastic::scatter(const bool doMultipleScattering, const int nScatters,
-                            const double absorbXsection, const Sample &sample,
-                            const Geometry::Instrument &instrument,
-                            Kernel::PseudoRandomNumberGenerator &rng,
-                            const double vmfp, const double sigma_total,
-                            const MatrixWorkspace_sptr SOfQ, const double kinc) {
+double MuscatElastic::scatter(const bool doMultipleScattering,
+                              const int nScatters, const double absorbXsection,
+                              const Sample &sample,
+                              const Geometry::Instrument &instrument,
+                              Kernel::PseudoRandomNumberGenerator &rng,
+                              const double vmfp, const double sigma_total,
+                              double scatteringXSection,
+                              const MatrixWorkspace_sptr SOfQ,
+                              const double kinc, Kernel::V3D detPos) {
   auto track = start_point(sample, instrument, rng);
   double weight = 1;
   updateWeightAndPosition(track, weight, vmfp, sigma_total, rng);
   if (doMultipleScattering) {
+    double QSS = 0;
     for (int i = 0; i < nScatters; i++) {
-      double QSS = 0;
-      q_dir(track, SOfQ, kinc, rng, QSS, weight);
+      q_dir(track, SOfQ, kinc, scatteringXSection, rng, QSS, weight);
+      int nlinks = sample.getShape().interceptSurface(track);
       updateWeightAndPosition(track, weight, vmfp, sigma_total, rng);
     }
+    // divide by QSS here rather than outside scatter (as was done in original
+    // Fortan) to avoid the magic 1/(nscatter-1)^(nscatter-1) factors
+    weight = weight / QSS;
   }
+  Kernel::V3D directionToDetector = detPos - track.startPoint();
+  auto &prevDirection = track.direction();
+  track.reset(track.startPoint(), directionToDetector);
+  int nlinks = sample.getShape().interceptSurface(track);
+  double dl = track.front().distInsideObject;
+  auto q = directionToDetector - prevDirection;
+  auto SQ = interpolateLogQuadratic(SOfQ, q.norm());
+  auto AT2 = exp(-dl / vmfp);
+  weight = weight * AT2 * SQ * scatteringXSection / (4 * M_PI);
+
   return weight;
 }
 
+// update track direction, QSS and weight
 void MuscatElastic::q_dir(Geometry::Track track,
-                          const MatrixWorkspace_sptr SOfQ, double kinc,
-                          Kernel::PseudoRandomNumberGenerator &rng, double& QSS, double& weight) {
+                          const MatrixWorkspace_sptr SOfQ, const double kinc,
+                          double scatteringXSection,
+                          Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
+                          double &weight) {
   auto qvalues = SOfQ->histogram(0).x().rawData();
   double QQ = qvalues.back() * rng.nextValue();
   // T = 2theta
   double cosT = 1 - QQ * QQ / (2 * kinc * kinc);
   double SQ = interpolateLogQuadratic(SOfQ, QQ);
   QSS += QQ * SQ;
-  //weight = weight * sigs * SQ * QQ;
+  weight = weight * scatteringXSection * SQ * QQ;
+  auto phi = rng.nextValue() * 2 * M_PI;
+  auto B3 = sqrt(1 - cosT * cosT);
+  auto B2 = cosT;
+  // possible to do this using the Quat class instead??
+  // Quat(const double _deg, const V3D &_axis);
+  // Quat(acos(cosT)*180/M_PI,
+  // Kernel::V3D(track.direction()[],track.direction()[],0))
+
+  // Rodrigues formula with final term equal to zero
+  // v_rot = cosT * v + sinT(k x v)
+  // with rotation axis k orthogonal to v and defined as:
+  // sin(phi) * (vy, -vx, 0) + cos(phi) * (-vx * vz, -vy * vz, 1 - vz * vz)
+  auto horiz = track.direction()[0];
+  auto up = track.direction()[1];
+  auto beam = track.direction()[2];
+  double UKX, UKY, UKZ;
+  if (up < 1) {
+    auto A2 = sqrt(1 - up * up);
+    auto UQTZ = cos(phi) * A2;
+    auto UQTX = -cos(phi) * up * beam / A2 + sin(phi) * horiz / A2;
+    auto UQTY = -cos(phi) * up * horiz / A2 - sin(phi) * beam / A2;
+    UKX = B2 * beam + B3 * UQTX;
+    UKY = B2 * horiz + B3 * UQTY;
+    UKZ = B2 * up + B3 * UQTZ;
+  } else {
+    UKX = B2 * cos(phi);
+    UKY = B3 * sin(phi);
+    UKZ = B2;
+  }
+  track.reset(track.startPoint(), Kernel::V3D(UKX, UKY, UKZ));
 }
 
 Geometry::Track
@@ -271,13 +340,14 @@ MuscatElastic::start_point(const Sample &sample,
                            "generate entry point into sample");
 }
 
+// update track start point and weight
 void MuscatElastic::updateWeightAndPosition(
-    Geometry::Track &track, double &weight, double vmfp, double sigma_total,
-    Kernel::PseudoRandomNumberGenerator &rng) {
+    Geometry::Track &track, double &weight, const double vmfp,
+    const double sigma_total, Kernel::PseudoRandomNumberGenerator &rng) {
   double dl = track.front().distInsideObject;
-  double B9 = 1.0 - exp(-dl / vmfp);
-  double vl = -(vmfp * log(1 - rng.nextValue() * B9));
-  B9 = B9 / sigma_total;
+  weight = weight * (1.0 - exp(-dl / vmfp));
+  double vl = -(vmfp * log(1 - rng.nextValue() * weight));
+  weight = weight / sigma_total;
   inc_xyz(track, vl);
 }
 
@@ -313,6 +383,7 @@ void MuscatElastic::inc_xyz(Geometry::Track &track, double vl) {
   auto z = position[2] + vl * direction[2];
   auto startPoint = track.startPoint();
   startPoint = V3D(x, y, z);
+  track.reset(startPoint, track.direction());
 }
 
 /**

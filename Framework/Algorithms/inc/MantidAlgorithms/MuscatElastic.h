@@ -72,8 +72,9 @@ private:
                  const double absorbXsection, const API::Sample &sample,
                  const Geometry::Instrument &instrument,
                  Kernel::PseudoRandomNumberGenerator &rng, const double vmfp,
-                 const double sigma_total, const API::MatrixWorkspace_sptr SOfQ,
-                 const double kinc);
+                 const double sigma_total, double scatteringXSection,
+                 const API::MatrixWorkspace_sptr SOfQ, const double kinc,
+                 Kernel::V3D detPos);
   Geometry::Track start_point(const API::Sample &sample,
                               const Geometry::Instrument &instrument,
                               Kernel::PseudoRandomNumberGenerator &rng);
@@ -83,11 +84,12 @@ private:
                        Kernel::PseudoRandomNumberGenerator &rng);
   void inc_xyz(Geometry::Track &track, double vl);
   void updateWeightAndPosition(Geometry::Track &track, double &weight,
-                               double vmfp, double sigma_total,
+                               const double vmfp, const double sigma_total,
                                Kernel::PseudoRandomNumberGenerator &rng);
   void q_dir(Geometry::Track track, const API::MatrixWorkspace_sptr SOfQ,
-             const double kinc, Kernel::PseudoRandomNumberGenerator &rng,
-             double &QSS, double &weight);
+             const double kinc, double scatteringXSection,
+             Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
+             double &weight);
 };
 } // namespace Algorithms
 } // namespace Mantid
