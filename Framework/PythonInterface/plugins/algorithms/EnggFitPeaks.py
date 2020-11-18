@@ -497,7 +497,7 @@ class EnggFitPeaks(PythonAlgorithm):
         center = self._find_peak_center_in_params(fitted_params)
         intensity = self._find_peak_intensity_in_params(fitted_params)
         return (spec_x_axis.min() <= center <= spec_x_axis.max()
-                and intensity > 0 and fitted_params['Chi'] < 10
+                and intensity > 0 and fitted_params['Chi'] < 17
                 and self._b2bexp_is_acceptable(fitted_params))
 
     def _find_peak_center_in_params(self, fitted_params):
