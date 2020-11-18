@@ -85,23 +85,41 @@ class InstrumentViewPresenter(ObservingPresenter):
 
 
 class InstrumentViewManager:
+    """
+    InstrumentViewManager provide a singleton for client to access "Instrument View"
+    in python/iPython console environment
+    """
+    # static instance to the last InstrumentView instance launched
     last_view = None
+    # a dictionary to trace all the InstrumentView instances launched
+    # key is the name of the workspace associated with the InstrumentView widget
     view_dict = dict()
 
     @staticmethod
     def register(instrument_view_obj, ws_name):
+        """Register an InstrumentViewPresenter instance
+        """
         InstrumentViewManager.last_view = instrument_view_obj
         InstrumentViewManager.view_dict[ws_name] = instrument_view_obj
 
     @staticmethod
-    def get_instrument_view(ws_name):
+    def get_instrument_view(ws_name: str):
+        """Get an InstrumentView widget by the name of the workspace associated with it
+        """
+        if ws_name not in InstrumentViewManager.view_dict:
+            # return None if the workspace does not exist
+            return None
         return InstrumentViewManager.view_dict[ws_name]
 
     @staticmethod
-    def remove(ws_name):
+    def remove(ws_name: str):
+        """Remove a registered InstrumentView
+        """
         try:
+            # delete the record
             del InstrumentViewManager.view_dict[ws_name]
         except KeyError as ke:
+            # if it does not exist
             raise RuntimeError(f'workspace {ws_name} does not exist in dictionary. '
                                f'The available includes {InstrumentViewManager.view_dict.keys()},'
                                f'FYI: {ke}')
