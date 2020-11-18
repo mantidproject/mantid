@@ -241,7 +241,18 @@
      <property name="bottomMargin">
       <number>4</number>
      </property>
-     <item row="4" column="0">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label_autoscale">
+       <property name="text">
+        <string>Auto-scale Limits</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QCheckBox" name="autoscale">
+      </widget>
+     </item>
+     <item row="5" column="0">
       <widget class="QLabel" name="label_2">
        <property name="text">
         <string>Canvas Color</string>
@@ -296,7 +307,7 @@
        </property>
       </spacer>
      </item>
-     <item row="1" column="0">
+     <item row="2" column="0">
       <widget class="QLabel" name="right_limit_label">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -309,10 +320,10 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
+     <item row="1" column="2">
       <widget class="QLineEdit" name="lower_limit_line_edit"/>
      </item>
-     <item row="2" column="2">
+     <item row="3" column="2">
       <widget class="QLineEdit" name="label_line_edit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -328,7 +339,7 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="0">
+     <item row="3" column="0">
       <widget class="QLabel" name="label_label">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -357,7 +368,7 @@
        </property>
       </spacer>
      </item>
-     <item row="3" column="2">
+     <item row="4" column="2">
       <widget class="QComboBox" name="scale_combo_box">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -387,7 +398,7 @@
        </item>
       </widget>
      </item>
-     <item row="3" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="scale_label">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -400,7 +411,7 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="2">
+     <item row="2" column="2">
       <widget class="QLineEdit" name="upper_limit_line_edit"/>
      </item>
      <item row="4" column="1">
@@ -419,7 +430,7 @@
        </property>
       </spacer>
      </item>
-     <item row="0" column="0">
+     <item row="1" column="0">
       <widget class="QLabel" name="left_limit_label">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
@@ -432,8 +443,24 @@
        </property>
       </widget>
      </item>
-     <item row="4" column="2">
+     <item row="5" column="2">
       <widget class="QWidget" name="color_selector_dummy_widget" native="true"/>
+     </item>
+     <item row="5" column="1">
+      <spacer name="horizontalSpacer_8">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>58</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
      </item>
     </layout>
    </item>

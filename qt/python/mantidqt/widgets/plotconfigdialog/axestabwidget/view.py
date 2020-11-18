@@ -81,6 +81,9 @@ class AxesTabWidgetView(QWidget):
     def get_canvas_color(self):
         return self.color_selector_widget.get_color()
 
+    def get_autoscale_enabled(self):
+        return self.autoscale.isChecked()
+
     def set_lower_limit(self, limit):
         self.lower_limit_line_edit.setText(str(limit))
 
@@ -95,6 +98,13 @@ class AxesTabWidgetView(QWidget):
 
     def set_canvas_color(self, color_hex):
         self.color_selector_widget.set_color(color_hex)
+
+    def set_autoscale_enabled(self, enabled):
+        self.autoscale.setChecked(enabled)
+
+    def set_limit_input_enabled(self, enabled):
+        self.lower_limit_line_edit.setEnabled(enabled)
+        self.upper_limit_line_edit.setEnabled(enabled)
 
     def get_axis(self):
         return self.axis_button_group.checkedButton().text()
