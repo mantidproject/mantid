@@ -9,6 +9,7 @@ import unittest
 from os import path
 
 import systemtesting
+from systemtesting import MantidSystemTest
 
 from mantid import config
 from mantid.api import AnalysisDataService
@@ -41,9 +42,9 @@ class SANSBatchReductionTest(unittest.TestCase):
         load_alg.execute()
         reference_workspace = load_alg.getProperty("OutputWorkspace").value
 
-        # Save the workspace out
+        # Save the workspace out if the comparison fails (i.e. they are not equal)
         f_name = path.join(config.getString('defaultsave.directory'),
-                           workspace + '-mismatch.nxs')
+                           MantidSystemTest.mismatchWorkspaceName(reference_file_name))
 
         save_name = "SaveNexus"
         save_options = {"Filename": f_name,
