@@ -140,7 +140,6 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
             mpl.rcParams['font.family'][0] = plot_font
         else:
             mpl.rcParams['font.family'].insert(0, plot_font)
-
     if plot_kwargs is None:
         plot_kwargs = {}
     _validate_plot_inputs(workspaces, spectrum_nums, wksp_indices, tiled, overplot)

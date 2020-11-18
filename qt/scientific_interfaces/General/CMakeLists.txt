@@ -43,6 +43,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesGeneral
                      ${Boost_INCLUDE_DIRS}
                    LINK_LIBS
                      ${CORE_MANTIDLIBS}
+                     PythonInterfaceCore
                      ${POCO_LIBRARIES}
                      ${Boost_LIBRARIES}
                      ${JSONCPP_LIBRARIES}
@@ -78,7 +79,7 @@ mtd_add_qt_library(TARGET_NAME MantidScientificInterfacesGeneral
                      ${JSONCPP_LIBRARIES}
                    MTD_QT_LINK_LIBS
                      MantidQtWidgetsCommon
-                     MantidQtWidgetsPlotting
+                     MantidQtWidgetsMplCpp
                    INSTALL_DIR_BASE
                      ${PLUGINS_DIR}
                    OSX_INSTALL_RPATH
