@@ -211,7 +211,7 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
     return true;
   }
   return false;
-} // namespace MantidWidgets
+}
 
 /**
  * Return the minimum value (between 0 and 1)
