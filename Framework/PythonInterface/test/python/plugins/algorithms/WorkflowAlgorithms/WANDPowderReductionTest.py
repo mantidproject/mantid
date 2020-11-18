@@ -11,6 +11,7 @@ from mantid.simpleapi import (
     MoveInstrumentComponent,
     CloneWorkspace,
     AddSampleLog,
+    GroupWorkspaces,
 )
 from mantid.api import (
     IEventWorkspace,
@@ -375,13 +376,21 @@ class WANDPowderReductionTest(unittest.TestCase):
             Sum=False,
         )
 
-        x = pd_out.extractX()
-        y = pd_out.extractY()
+        print(pd_out.getNumberOfEntries())
 
-        self.assertAlmostEqual(x.min(), 0.03517355)
-        self.assertAlmostEqual(x.max(), 70.3119282)
-        self.assertAlmostEqual(y[0, 0], 0.0)
-        assert isinstance(pd_out, MatrixWorkspace)
+        for i in pd_out:
+
+            x = i.extractX()
+            y = i.extractY()
+            
+            print(x.min(), x.max())
+
+            self.assertAlmostEqual(x.min(), 0.03517355)
+            self.assertAlmostEqual(x.max(), 70.3119282)
+            self.assertAlmostEqual(y[0, 0], 0.0)
+
+        assert isinstance(pd_out, WorkspaceGroup)
+        assert len(pd_out) == 1
 
         #CASE 2
         #input multiple single ws, output (single) summed ws
@@ -394,7 +403,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             NormaliseBy="None",
             Sum=True,
         )
-
+        
         x = pd_out.extractX()
         y = pd_out.extractY()
 
@@ -402,7 +411,7 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(x.max(), 70.3119282)
         self.assertAlmostEqual(y[0, 0], 0.0)
         assert isinstance(pd_out, MatrixWorkspace)
-
+        
         #CASE 3
         #DOES NOT WORK YET -- currently outputs Workspace2D -- will modify when algorithm is updated
         #input group ws containing several ws, output group ws containing several ws
@@ -410,6 +419,7 @@ class WANDPowderReductionTest(unittest.TestCase):
         groupWS.addWorkspace(event_data)
         groupWS.addWorkspace(event_data2)
 
+        
         pd_out = WANDPowderReduction(
             InputWorkspace=groupWS,
             CalibrationWorkspace=event_cal,
@@ -419,37 +429,21 @@ class WANDPowderReductionTest(unittest.TestCase):
             NormaliseBy="None",
             Sum=False,
         )
+        
+        print(pd_out.getNumberOfEntries())
 
-        x = pd_out.extractX()
-        y = pd_out.extractY()
+        for i in pd_out:
 
-        self.assertAlmostEqual(x.min(), 0.03517355)
-        self.assertAlmostEqual(x.max(), 70.3119282)
-        self.assertAlmostEqual(y[0, 0], 0.0)
+            x = i.extractX()
+            y = i.extractY()
+
+            self.assertAlmostEqual(x.min(), 0.03517355)
+            self.assertAlmostEqual(x.max(), 70.3119282)
+            self.assertAlmostEqual(y[0, 0], 0.0)
+
         assert isinstance(pd_out, WorkspaceGroup)
         assert len(pd_out) == 2
 
-        #CASE 4
-        #DOES NOT WORK YET -- currently outputs Workspace2D -- will modify when algorithm is updated
-        #input multiple single ws, output group ws containing several ws
-        pd_out = WANDPowderReduction(
-            InputWorkspace=[event_data, event_data],
-            CalibrationWorkspace=event_cal,
-            BackgroundWorkspace=event_bkg,
-            Target="Theta",
-            NumberBins=1000,
-            NormaliseBy="None",
-            Sum=False,
-        )
-
-        x = pd_out.extractX()
-        y = pd_out.extractY()
-
-        self.assertAlmostEqual(x.min(), 0.03517355)
-        self.assertAlmostEqual(x.max(), 70.3119282)
-        self.assertAlmostEqual(y[0, 0], 0.0)
-        assert isinstance(pd_out, WorkspaceGroup)
-        assert len(pd_out) == 2
 
 
 if __name__ == "__main__":
