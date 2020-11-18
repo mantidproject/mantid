@@ -17,6 +17,11 @@
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
+#include <QtGlobal>
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/MplCpp/Figure.h"
+#endif
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include <QFileInfo>
 #include <QUrl>
 
@@ -365,12 +370,11 @@ void StepScan::setupOptionControls() {
 
 void StepScan::launchInstrumentWindow() {
   // Gotta do this in python
-  std::string pyCode = "instrument_view = getInstrumentView('" + m_inputWSName +
-                       "',2)\n"
-                       "instrument_view.show()";
-  g_log.warning(pyCode); 
-  runPythonCode(QString::fromStdString(pyCode));
-
+  std::string pyCode = "from mantidqt.widgets.instrumentview.instrument_view import pyInstrumentView\n"
+                       "instrument_view = pyInstrumentView('" + m_inputWSName + "')\n"
+                       "instrument_view.show_view()";
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  PyRun_SimpleString(pyCode.c_str()); 
   // Attach the observers so that if a mask workspace is generated over in the
   // instrument view,
   // it is automatically selected by the combobox over here
@@ -521,7 +525,6 @@ void StepScan::runStepScanAlg() {
   IAlgorithm_sptr stepScan = setupStepScanAlg();
   if (!stepScan)
     return;
-
   // Block mouse clicks while the algorithm runs. Also set the busy cursor.
   DisableGUI_RAII _blockclicks(this);
 
@@ -658,7 +661,7 @@ void StepScan::generateCurve(const QString &var) {
     MatrixWorkspace_sptr bottom = norm->getProperty("OutputWorkspace");
     top /= bottom;
   }
-
+  g_log.warning("plotCurve!");
   plotCurve();
 }
 
@@ -683,6 +686,7 @@ void StepScan::plotCurve() {
   else
     yAxisTitle += " / " + normalization;
 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0) 
   // Has to be done via python
   std::string pyCode = "g = graph('" + title +
                        "')\n"
@@ -701,10 +705,21 @@ void StepScan::plotCurve() {
                        "l.setAxisTitle(Layer.Bottom,'" +
                        xAxisTitle +
                        "')\n"
-                       "l.setAxisTitle(Layer.Left,'" +
+                        "l.setAxisTitle(Layer.Left,'" +
                        yAxisTitle + "')";
-
+  
   runPythonCode(QString::fromStdString(pyCode));
+#else
+  using namespace MantidQt::Widgets::MplCpp;
+  const std::vector<std::string> workspaces = {m_plotWSName};
+  const std::vector<int> index = {0};
+  //QHash<QString, QVariant> plt_hash, ax_hash;
+  //plt_hash.insert(QString("linestyle"),QVariant(""));
+  //plt_hash.insert(QString("marker"),QVariant("."));
+  g_log.warning(xAxisTitle+" "+yAxisTitle+" "+title);
+ //plot(workspaces, boost::none, index, boost::none, plt_hash, ax_hash, title);
+  
+#endif
 }
 
 void StepScan::handleAddEvent(Mantid::API::WorkspaceAddNotification_ptr pNf) {
