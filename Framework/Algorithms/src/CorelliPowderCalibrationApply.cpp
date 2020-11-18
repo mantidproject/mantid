@@ -55,11 +55,15 @@ namespace Mantid {
             // DatabaseDirectory
             // [Input, Optional, string]
             // absolute path to the database.
+            declareProperty(
+                "DatabaseDirectory",
+                "/SNS/CORELLI",
+                "absolute path to the CORELLI database");
 
             //
             // OutputWorkspace
             // if emtpy, InputWorkspace will be calibrated.
-            declareOrReplaceProperty(
+            declareProperty(
                 std::make_unique<API::WorkspaceProperty<API::MatrixWorkspace>>(
                     "OutputWorkspace",
                     "",
