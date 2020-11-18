@@ -396,7 +396,7 @@ void CorelliPowderCalibrationDatabase::exec() {
   std::cout << "Output directory: " << output_dir << "\n";
 
   // map for (component name, component calibration workspace
-  std::map<std::string, ITableWorkspace_sptr> component_caibws_map;
+  // TODO - activate std::map<std::string, ITableWorkspace_sptr> component_caibws_map;
 
   // Update component CSV files with
   // ... ...
