@@ -25,9 +25,8 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         return "HB3AAdjustSampleNorm"
 
     def summary(self):
-        return 'Takes detector scan data files or workspaces and adjusts the detector position based on detector ' \
-               'height and distance if those options are given. Normalizes with detector efficiency from input ' \
-               'vanadium file, and converts to Q-space.'
+        return 'Adjusts the detector position based on a detector height and distance offset and normalizes with ' \
+               'detector efficiency from a vanadium file or workspace, and converts the input to Q-space.'
 
     def PyInit(self):
         # Input params
