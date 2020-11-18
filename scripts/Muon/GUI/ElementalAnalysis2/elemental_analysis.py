@@ -13,6 +13,7 @@ from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
 from Muon.GUI.ElementalAnalysis2.load_widget.load_widget import LoadWidget
+from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_widget import EAGroupingTabWidget
 
 
 class ElementalAnalysisGui(QtWidgets.QMainWindow):
@@ -52,7 +53,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
     def setup_dummy(self):
         self.load_widget = LoadWidget(self.loaded_data, self.context, parent=self)
         self.home_tab = QtWidgets.QLineEdit("home")
-        self.grouping_tab_widget = QtWidgets.QLineEdit("grouping")
+        self.grouping_tab_widget = EAGroupingTabWidget(self.context)
         self.fitting_tab = QtWidgets.QLineEdit("fitting")
 
     def setup_tabs(self):
@@ -62,7 +63,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         """
         self.tabs = DetachableTabWidget(self)
         self.tabs.addTabWithOrder(self.home_tab, 'Home')
-        self.tabs.addTabWithOrder(self.grouping_tab_widget,
+        self.tabs.addTabWithOrder(self.grouping_tab_widget.group_tab_view,
                                   'Grouping')
         self.tabs.addTabWithOrder(self.fitting_tab, 'Fitting')
 
