@@ -702,7 +702,6 @@ CorelliPowderCalibrationDatabase::retrieveInstrumentComponents(
 
   // Loop over all the compoments for bank
   const size_t num_components = component_info.size();
-  std::vector<std::string> banknames{};
   for (size_t i = 0; i < num_components; ++i) {
     std::string compname = component_info.name(i);
     if (compname[0] == 'b') {
