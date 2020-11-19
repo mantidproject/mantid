@@ -18,7 +18,6 @@ class SearcherSubscriber {
 public:
   virtual void notifySearchComplete() = 0;
   virtual void notifySearchFailed() = 0;
-  virtual void notifySearchResultsChanged() = 0;
 };
 
 /** @class ISearcher
@@ -38,8 +37,9 @@ public:
                                 const std::string &cycle) = 0;
   virtual bool searchInProgress() const = 0;
   virtual SearchResult const &getSearchResult(int index) const = 0;
-  virtual void reset(std::string const &text, std::string const &instrument,
-                     std::string const &cycle) = 0;
+  virtual void reset() = 0;
+  virtual bool hasUnsavedChanges() const = 0;
+  virtual void setSaved() = 0;
   virtual bool searchSettingsChanged(const std::string &text,
                                      const std::string &instrument,
                                      const std::string &cycle) const = 0;

@@ -60,7 +60,8 @@ public:
   virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;
 
   virtual bool isBatchUnsaved() const = 0;
-  virtual void setBatchUnsaved(bool isUnsaved = true) = 0;
+  virtual void setBatchUnsaved() = 0;
+  virtual void notifyChangesSaved() = 0;
   virtual Mantid::Geometry::Instrument_const_sptr instrument() const = 0;
   virtual std::string instrumentName() const = 0;
 };

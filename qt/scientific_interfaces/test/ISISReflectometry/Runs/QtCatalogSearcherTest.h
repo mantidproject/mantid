@@ -301,11 +301,18 @@ public:
     verifyAndClear();
   }
 
-  void test_notify_search_results_changed_notifies_subscriber() {
+  void test_set_saved_flag() {
     auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg, true);
-    searcher.subscribe(&m_notifyee);
-    EXPECT_CALL(m_notifyee, notifySearchResultsChanged()).Times(1);
+    searcher.setSaved();
+    TS_ASSERT_EQUALS(searcher.hasUnsavedChanges(), false);
+    verifyAndClear();
+  }
+
+  void test_notify_search_results_changed_sets_unsaved_flag() {
+    auto searcher = MockQtCatalogSearcher(&m_view, m_searchAlg, true);
+    searcher.setSaved();
     searcher.notifySearchResultsChanged();
+    TS_ASSERT_EQUALS(searcher.hasUnsavedChanges(), true);
     verifyAndClear();
   }
 

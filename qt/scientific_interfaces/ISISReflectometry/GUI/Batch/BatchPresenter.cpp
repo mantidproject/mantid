@@ -329,11 +329,16 @@ bool BatchPresenter::isOverwriteBatchPrevented() const {
 }
 
 /** Returns whether there are any unsaved changes in the current batch */
-bool BatchPresenter::isBatchUnsaved() const { return m_unsavedBatchFlag; }
+bool BatchPresenter::isBatchUnsaved() const {
+  // The search results are treated separately so check both
+  return m_unsavedBatchFlag || m_runsPresenter->hasUnsavedSearchResults();
+}
 
-/** Set the state of unsaved changes in the current batch */
-void BatchPresenter::setBatchUnsaved(bool isUnsaved) {
-  m_unsavedBatchFlag = isUnsaved;
+void BatchPresenter::setBatchUnsaved() { m_unsavedBatchFlag = true; }
+
+void BatchPresenter::notifyChangesSaved() {
+  m_unsavedBatchFlag = false;
+  m_runsPresenter->notifyChangesSaved();
 }
 
 void BatchPresenter::notifySetRoundPrecision(int &precision) {

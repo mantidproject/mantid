@@ -92,7 +92,8 @@ public:
   MOCK_CONST_METHOD0(instrument, Mantid::Geometry::Instrument_const_sptr());
   MOCK_CONST_METHOD0(instrumentName, std::string());
   MOCK_CONST_METHOD0(isBatchUnsaved, bool());
-  MOCK_METHOD1(setBatchUnsaved, void(bool));
+  MOCK_METHOD0(setBatchUnsaved, void());
+  MOCK_METHOD0(notifyChangesSaved, void());
 };
 
 class MockRunsPresenter : public IRunsPresenter {
@@ -121,6 +122,8 @@ public:
   MOCK_METHOD1(notifyInstrumentChanged, void(std::string const &));
   MOCK_METHOD0(notifyTableChanged, void());
   MOCK_METHOD0(settingsChanged, void());
+  MOCK_METHOD0(notifyChangesSaved, void());
+  MOCK_CONST_METHOD0(hasUnsavedSearchResults, bool());
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
   MOCK_CONST_METHOD0(isOperationPrevented, bool());
@@ -132,7 +135,6 @@ public:
   MOCK_METHOD1(setRoundPrecision, void(int &));
   MOCK_METHOD0(resetRoundPrecision, void());
   MOCK_METHOD0(notifySearchComplete, void());
-  MOCK_METHOD0(notifySearchResultsChanged, void());
   MOCK_CONST_METHOD0(instrumentName, std::string());
 };
 
@@ -214,8 +216,9 @@ public:
                                       const std::string &));
   MOCK_CONST_METHOD0(searchInProgress, bool());
   MOCK_CONST_METHOD1(getSearchResult, SearchResult const &(int));
-  MOCK_METHOD3(reset, void(std::string const &, std::string const &,
-                           std::string const &));
+  MOCK_METHOD0(reset, void());
+  MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
+  MOCK_METHOD0(setSaved, void());
   MOCK_CONST_METHOD3(searchSettingsChanged,
                      bool(const std::string &, const std::string &,
                           const std::string &));
@@ -225,7 +228,6 @@ class MockSearcherSubscriber : public SearcherSubscriber {
 public:
   MOCK_METHOD0(notifySearchComplete, void());
   MOCK_METHOD0(notifySearchFailed, void());
-  MOCK_METHOD0(notifySearchResultsChanged, void());
 };
 
 class MockRunNotifier : public IRunNotifier {

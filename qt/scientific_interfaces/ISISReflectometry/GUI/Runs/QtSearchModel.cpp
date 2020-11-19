@@ -143,6 +143,7 @@ bool QtSearchModel::setData(const QModelIndex &index, const QVariant &value,
   else
     return false;
 
+  setUnsaved();
   emit dataChanged(index, index);
   return true;
 }
@@ -216,7 +217,15 @@ void QtSearchModel::clear() {
   beginResetModel();
   m_runDetails.clear();
   endResetModel();
+  // Reset the unsaved changes flag
+  setSaved();
 }
+
+bool QtSearchModel::hasUnsavedChanges() const { return m_hasUnsavedChanges; }
+
+void QtSearchModel::setUnsaved() { m_hasUnsavedChanges = true; }
+
+void QtSearchModel::setSaved() { m_hasUnsavedChanges = false; }
 
 SearchResult const &QtSearchModel::getRowData(int index) const {
   return m_runDetails[index];

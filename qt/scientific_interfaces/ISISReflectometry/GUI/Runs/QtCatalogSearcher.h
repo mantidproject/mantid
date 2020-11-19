@@ -40,8 +40,9 @@ public:
                         const std::string &cycle) override;
   bool searchInProgress() const override;
   SearchResult const &getSearchResult(int index) const override;
-  void reset(std::string const &text, std::string const &instrument,
-             std::string const &cycle) override;
+  void reset() override;
+  bool hasUnsavedChanges() const override;
+  void setSaved() override;
   bool searchSettingsChanged(const std::string &text,
                              const std::string &instrument,
                              const std::string &cycle) const override;

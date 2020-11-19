@@ -99,10 +99,11 @@ public:
   void notifyInstrumentChanged(std::string const &instrumentName) override;
   void notifyTableChanged() override;
   void settingsChanged() override;
+  void notifyChangesSaved() override;
+  bool hasUnsavedSearchResults() const override;
 
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
-  bool isOverwritingTablePrevented() const override;
 
   // RunsViewSubscriber overrides
   void notifySearch() override;
@@ -120,7 +121,6 @@ public:
   // SearcherSubscriber overrides
   void notifySearchComplete() override;
   void notifySearchFailed() override;
-  void notifySearchResultsChanged() override;
 
 protected:
   IRunsTablePresenter *tablePresenter() const;
@@ -183,6 +183,8 @@ private:
   void updateViewWhenMonitorStarting();
   void updateViewWhenMonitorStarted();
   void updateViewWhenMonitorStopped();
+
+  bool isOverwritePrevented() const;
 
   friend class Encoder;
   friend class Decoder;

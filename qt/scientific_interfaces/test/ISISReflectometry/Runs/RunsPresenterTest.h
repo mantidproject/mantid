@@ -92,7 +92,7 @@ public:
 
   void testStartingSearchDoesNotClearPreviousResults() {
     auto presenter = makePresenter();
-    EXPECT_CALL(*m_searcher, reset(_, _, _)).Times(0);
+    EXPECT_CALL(*m_searcher, reset()).Times(0);
     presenter.notifySearch();
     verifyAndClear();
   }
@@ -101,7 +101,7 @@ public:
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
     expectSearchSettingsChanged();
-    EXPECT_CALL(*m_searcher, reset(_, _, _)).Times(AtLeast(1));
+    EXPECT_CALL(*m_searcher, reset()).Times(AtLeast(1));
     presenter.notifySearch();
     verifyAndClear();
   }
@@ -111,7 +111,7 @@ public:
     expectSearchString(m_searchString);
     expectSearchSettingsChanged();
     expectOverwriteBatchPrevented();
-    EXPECT_CALL(*m_searcher, reset(_, _, _)).Times(0);
+    EXPECT_CALL(*m_searcher, reset()).Times(0);
     presenter.notifySearch();
     verifyAndClear();
   }
@@ -469,13 +469,6 @@ public:
     verifyAndClear();
   }
 
-  void testSetBatchUnsavedWhenSearchResultsChanged() {
-    auto presenter = makePresenter();
-    EXPECT_CALL(m_mainPresenter, setBatchUnsaved(true)).Times(1);
-    presenter.notifySearchResultsChanged();
-    verifyAndClear();
-  }
-
   void testChangeInstrumentRequestedGetsInstrumentAndNotifiesMainPresenter() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
@@ -515,7 +508,7 @@ public:
   void testInstrumentChangedClearsPreviousSearchResultsModel() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
-    EXPECT_CALL(*m_searcher, reset("", instrument, "")).Times(1);
+    EXPECT_CALL(*m_searcher, reset()).Times(1);
     presenter.notifyInstrumentChanged(instrument);
     verifyAndClear();
   }
@@ -757,13 +750,13 @@ private:
   }
 
   void expectClearExistingTable() {
-    EXPECT_CALL(*m_searcher, reset(_, _, _)).Times(1);
+    EXPECT_CALL(*m_searcher, reset()).Times(1);
     EXPECT_CALL(*m_runsTablePresenter, notifyRemoveAllRowsAndGroupsRequested())
         .Times(1);
   }
 
   void expectDoNotClearExistingTable() {
-    EXPECT_CALL(*m_searcher, reset(_, _, _)).Times(0);
+    EXPECT_CALL(*m_searcher, reset()).Times(0);
     EXPECT_CALL(*m_runsTablePresenter, notifyRemoveAllRowsAndGroupsRequested())
         .Times(0);
   }
