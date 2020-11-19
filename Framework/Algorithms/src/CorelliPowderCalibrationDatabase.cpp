@@ -455,6 +455,7 @@ void CorelliPowderCalibrationDatabase::exec() {
   // Clean up memory
   for (auto &[compname, calibws] : component_caibws_map) {
     if (calibws) {
+      g_log.debug() << "Removing " << compname << "calibration table from ADS\n";
       AnalysisDataService::Instance().remove(calibws->getName());
     }
   }

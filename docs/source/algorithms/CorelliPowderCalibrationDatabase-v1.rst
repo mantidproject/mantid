@@ -15,15 +15,19 @@ a `TableWorkspace` object. The contents of the calibration table patch are:
 
 
  | ComponentName | Xposition | Yposition| Zposition| XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
- |----------|-----------|----------|----------|------------------|------------------|------------------|---------------|
 
 
 This issue will create algorithm `CORELLIPowderCalibrationDatabase` that will receive as input `CalibrationTablePatch` and `InputWorkspace`. 
 A more detailed list of inputs:
+
 - `InputWorkspace` [Input]: `EventsWorkspace` or `MatrixWorkspace`, the run used for the calibration. The day the experiment ran will be extracted
+
 - `CalibrationTablePatch` [Input] A `TableWorkspace` object, the output of `CORELLIPowderCalibrationGenerate`
+
 - `DatabaseDirectory` [Optional Input]: absolute path to the database, with a default location to be determined by the instrument scientists.
+
 - `DayStamp` [Optional Input]: to be used in place of the `InputWorkspace`
+
 - `CalibrationTable` [Optional Output]: a `TableWorkspace`
 
 `CORELLIPowderCalibrationDatabase` creates the following outputs:  
@@ -34,16 +38,18 @@ A more detailed list of inputs:
 For instance, if the contents of `CalibrationTablePatch` are:
 
  | ComponentName | Xposition | Yposition| Zposition| XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
- |----------|-----------|----------|----------|------------------|------------------|------------------|---------------|
  | source | 0 | 0 | -15.560 | 0 | 0 | 0 | 0 |
  | sample | 0.0001 | -0.0002 | 0.003 | 0 | 0 | 0 | 0 |
  | bank1 | 0.9678 | 0.0056 | 0.0003 | 0.4563 | -0.9999 | 0.3424 | 5.67 |
 
 And the day stamp for this calibration is 20201025, the following line will be *appended* to file *corelli_source.csv* :
+
 ```
 20201025, 0, 0, -15.560, 0, 0, 0, 0
 ```
+
 the following line will be *appended* to file *corelli_sample.csv*:
+
 ```
 20201025, 0.0001, -0.0002, 0.003, 0, 0, 0, 0
 ```
