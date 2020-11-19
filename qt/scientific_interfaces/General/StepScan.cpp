@@ -19,9 +19,9 @@
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include <QtGlobal>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 #include "MantidQtWidgets/MplCpp/MantidAxes.h"
-#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #endif
 #include <QFileInfo>
 #include <QUrl>
@@ -93,10 +93,11 @@ void StepScan::initLayout() {
   if (this->parent()) {
     // note connection to the parent window, otherwise an empty frame window
     // may remain open and visible after this close.
-    connect(m_uiForm.closeButton, SIGNAL(released()), this->parent(), SLOT(close()));
+    connect(m_uiForm.closeButton, SIGNAL(released()), this->parent(),
+            SLOT(close()));
   } else {
-    // In MantidWorkbench this->parent() returns NULL. Connecting to this->close()
-    // appears to work.
+    // In MantidWorkbench this->parent() returns NULL. Connecting to
+    // this->close() appears to work.
     connect(m_uiForm.closeButton, SIGNAL(released()), this, SLOT(close()));
   }
 }
@@ -375,12 +376,15 @@ void StepScan::launchInstrumentWindow() {
                        "instrument_view.show()";
   runPythonCode(QString::fromStdString(pyCode));
 #else
-  std::string pyCode = "from mantidqt.widgets.instrumentview.api import get_instrumentview\n"
-                       "instrument_view = get_instrumentview('" + m_inputWSName + "')\n"
-                       "instrument_view.select_tab(2)\n"
-                       "instrument_view.show_view()";
+  std::string pyCode =
+      "from mantidqt.widgets.instrumentview.api import get_instrumentview\n"
+      "instrument_view = get_instrumentview('" +
+      m_inputWSName +
+      "')\n"
+      "instrument_view.select_tab(2)\n"
+      "instrument_view.show_view()";
   Mantid::PythonInterface::GlobalInterpreterLock lock;
-  PyRun_SimpleString(pyCode.c_str()); 
+  PyRun_SimpleString(pyCode.c_str());
 #endif
   // Attach the observers so that if a mask workspace is generated over in the
   // instrument view,
@@ -694,7 +698,7 @@ void StepScan::plotCurve() {
   else
     yAxisTitle += " / " + normalization;
 
-#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0) 
+#if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   // Has to be done via python
   std::string pyCode = "g = graph('" + title +
                        "')\n"
@@ -720,7 +724,9 @@ void StepScan::plotCurve() {
 #else
   using namespace MantidQt::Widgets::MplCpp;
   using namespace MantidQt::Widgets::Common;
-  auto ws = AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(m_plotWSName);
+  auto ws =
+      AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+          m_plotWSName);
   Mantid::PythonInterface::GlobalInterpreterLock lock;
   Python::Object module{Python::NewRef(PyImport_ImportModule("mantid.plots"))};
   auto canvas = new FigureCanvasQt(111, "mantid");
