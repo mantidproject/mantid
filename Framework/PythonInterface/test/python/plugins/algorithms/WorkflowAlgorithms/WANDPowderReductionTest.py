@@ -11,10 +11,8 @@ from mantid.simpleapi import (
     MoveInstrumentComponent,
     CloneWorkspace,
     AddSampleLog,
-    GroupWorkspaces,
 )
 from mantid.api import (
-    IEventWorkspace,
     MatrixWorkspace,
     WorkspaceGroup,
 )
@@ -368,12 +366,12 @@ class WANDPowderReductionTest(unittest.TestCase):
             NormaliseBy="None",
             Sum=False,
         )
-        
+
         assert isinstance(pd_out, MatrixWorkspace)
 
         x = pd_out.extractX()
         y = pd_out.extractY()
-        
+
         print(x.min(), x.max())
 
         self.assertAlmostEqual(x.min(), 0.03517355)
@@ -391,7 +389,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             NormaliseBy="None",
             Sum=True,
         )
-        
+
         x = pd_out.extractX()
         y = pd_out.extractY()
 
@@ -399,7 +397,7 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(x.max(), 70.3119282)
         self.assertAlmostEqual(y[0, 0], 0.0)
         assert isinstance(pd_out, MatrixWorkspace)
-        
+
         #CASE 3
         #DOES NOT WORK YET -- currently outputs Workspace2D -- will modify when algorithm is updated
         #input group ws containing several ws, output group ws containing several ws
@@ -412,7 +410,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             NormaliseBy="None",
             Sum=False,
         )
-        
+
         print(pd_out.getNumberOfEntries())
 
         for i in pd_out:
@@ -426,7 +424,6 @@ class WANDPowderReductionTest(unittest.TestCase):
 
         assert isinstance(pd_out, WorkspaceGroup)
         assert len(pd_out) == 2
-
 
 
 if __name__ == "__main__":
