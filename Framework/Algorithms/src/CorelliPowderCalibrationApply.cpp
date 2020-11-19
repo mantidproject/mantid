@@ -145,9 +145,18 @@ namespace Mantid {
             if (outputWS != inputWS) {
                 outputWS = inputWS->clone();
                 }
-
+            
             // Parse calibration table
+            auto componentNames = calTable->getColumn(0);
+            auto x_poss = calTable->getColumn(1);
+            auto y_poss = calTable->getColumn(2);
+            auto z_poss = calTable->getColumn(3);
+            auto rotxs = calTable->getColumn(4);
+            auto rotys = calTable->getColumn(5);
+            auto rotzs = calTable->getColumn(6);
+            auto rotangs = calTable->getColumn(7);
 
+            // 
             // Translate each component in the instrument
             // [source, sample, bank1,.. bank92]
             // dev reference:
@@ -155,19 +164,36 @@ namespace Mantid {
             // Question: single thread or parallel
             //           for parallel, any suggestions
             g_log.notice() << "Translating each component using given Calibration table";
+            // Question: createChildAlgorithm or AlgorithmFactory::Instance().create?
+            // https://github.com/mantidproject/mantid/blob/eaa3bd10b5a8dc847de16dabecd95314f73f6dd2/Framework/DataHandling/src/MoveInstrumentComponent.cpp
             auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
-            for (size_t i; i < calTable->rowCount(); i++){
+            for (size_t row_num; row_num < calTable->rowCount(); row_num++) {
+                auto componentName = calTable->getColumn(0);
                 moveAlg -> initialize();
-                // todo
+                moveAlg->setProperty("Workspace", outputWS);
+                moveAlg->setProperty("ComponentName", componentNames->cell<std::string>(row_num));
+                moveAlg->setProperty("X", x_poss->cell<double>(row_num));
+                moveAlg->setProperty("Y", y_poss->cell<double>(row_num));
+                moveAlg->setProperty("Z", z_poss->cell<double>(row_num));
+                // Question: Is this assumption correct, all translation data in calibration is relative trans
+                moveAlg->setProperty("RelativePosition", true);
                 moveAlg->execute();
             }
 
             // Rotate each component in the instrument
             g_log.notice() << "Rotating each component using given Calibration table";
+            // https://github.com/mantidproject/mantid/blob/eaa3bd10b5a8dc847de16dabecd95314f73f6dd2/Framework/DataHandling/src/RotateInstrumentComponent.cpp
             auto rotateAlg = createChildAlgorithm("RotateInstrumentComponent");
-            for (size_t i; i < calTable->rowCount(); i++){
+            for (size_t row_num; row_num < calTable->rowCount(); row_num++) {
                 rotateAlg -> initialize();
-                // todo
+                rotateAlg->setProperty("Workspace", outputWS);
+                rotateAlg->setProperty("ComponentName", componentNames->cell<std::string>(row_num));
+                rotateAlg->setProperty("X", rotxs->cell<double>(row_num));
+                rotateAlg->setProperty("Y", rotys->cell<double>(row_num));
+                rotateAlg->setProperty("Z", rotzs->cell<double>(row_num));
+                rotateAlg->setProperty("Angle", rotangs->cell<double>(row_num));
+                // Question: Is this assumption correct, all rotation data in calibration is relative rotation
+                rotateAlg->setProperty("RelativeRotation", true);
                 rotateAlg->execute();
             }
 
