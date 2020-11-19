@@ -37,12 +37,14 @@ namespace Mantid {
             // InputWorkspace
             // [Input, Required, MatrixWorkspace or EventsWorkspace]
             // workspace to which the calibration should be applied
+            // Question: Can we only use a inputworkspace for in&out given that
+            //           the size of CORELLI workspace is fairly large
             auto wsValidator = std::make_shared<InstrumentValidator>();
             declareProperty(
                 std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                     "InputWorkspace",
                     "",
-                    Direction::Input,
+                    Direction::InOut,
                     PropertyMode::Mandatory,
                     wsValidator),
                 "Input workspace for calibration");
@@ -63,6 +65,10 @@ namespace Mantid {
             // DatabaseDirectory
             // [Input, Optional, string]
             // absolute path to the database.
+            // Question:  can we drop this option?
+            //            it might be a better idea to keep one type of input instead
+            //            of trying to create a "smart" input detector at c++ level,
+            //            which can be error prone (espeically user errors)
             declareProperty(
                 std::make_unique<FileProperty>(
                     "DatabaseDirectory",
@@ -73,6 +79,9 @@ namespace Mantid {
             //
             // OutputWorkspace
             // if emtpy, InputWorkspace will be calibrated.
+            // Question: similar to the question for inputworkspace,
+            //           we might need some input form the CIS about
+            //           their expectations
             declareProperty(
                 std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                     "OutputWorkspace",
