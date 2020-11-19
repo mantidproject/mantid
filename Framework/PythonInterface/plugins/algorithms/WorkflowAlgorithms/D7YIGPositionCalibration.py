@@ -489,6 +489,10 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                     pixel_offset -= self._RAD_2_DEG * 0.011 / (2.0 * (1.5177 - 0.01252)) # repeats calculation from the D7 IDF
                 pixel_offsets.append(pixel_offset)
                 pixel_no += 1
+        self.log().notice('The calibrated wavelength is: {0:.2f}'.format(wavelength))
+        self.log().notice('The bank2 gradient is: {0:.3f}'.format(bank2_slope))
+        self.log().notice('The bank3 gradient is: {0:.3f}'.format(bank3_slope))
+        self.log().notice('The bank4 gradient is: {0:.3f}'.format(bank4_slope))
         return wavelength, pixel_offsets, bank_offsets, bank_slopes
 
     def _prettify(self, elem):
