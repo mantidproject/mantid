@@ -51,10 +51,44 @@ struct ComponentPosition {
 /// workspaces
 class MANTID_ALGORITHMS_DLL CalibrationTableHandler {
 public:
+    /// Load a single component calibration table
+    static DataObjects::TableWorkspace_sptr
+    loadComponentCalibrationTable(const std::string &filename,
+                                  const std::string &tablewsname);
+
+    /// Check whether a TableWorkspace is a valid Corelli geometry calibration table for all components
+    static bool isValidCalibrationTableWorkspace(DataObjects::TableWorkspace_sptr calibws, std::string &errormsg);
+
+    /// Create a calibration TableWorkspace from scratch for either single
+    /// component or full set of components
+    static DataObjects::TableWorkspace_sptr
+    createCalibrationTableWorkspace(const std::string &wsname, bool iscomponent);
+
+    /// Get the calibration of a component
+    ComponentPosition
+    getComponentCalibratedPosition(const std::string &component);
+
+    /// Append a new row to single component calibration table
+    static void appendCalibration(DataObjects::TableWorkspace_sptr tablews,
+                                  const std::string &datestamp,
+                                  ComponentPosition &pos);
+
+    /// Get the last entry (latest update) of a compoent calibrated position
+    static ComponentPosition getLatestCalibratedPosition(
+        DataObjects::TableWorkspace_sptr componentcaltable);
+
+    /// Get the calibration position in the table (component table or full
+    /// calibration table)
+    static ComponentPosition
+    getCalibratedPosition(DataObjects::TableWorkspace_sptr componentcaltable,
+                          size_t rownumber);
+
   /// Constructor
   CalibrationTableHandler();
+
   /// Set calibration table file
   void setCalibrationTable(DataObjects::TableWorkspace_sptr calibws);
+
   /// Get component name from the table
   std::vector<std::string> getComponentNames();
   /// Get calibration workspace
@@ -70,29 +104,6 @@ public:
                         const std::string &filename);
   /// Save the calibration table (of a single date)
   void saveCalibrationTable(const std::string &filename);
-  /// Load a single component calibration table
-  static DataObjects::TableWorkspace_sptr
-  loadComponentCalibrationTable(const std::string &filename,
-                                const std::string &tablewsname);
-  /// Create a calibration TableWorkspace from scratch for either single
-  /// component or full set of components
-  static DataObjects::TableWorkspace_sptr
-  createCalibrationTableWorkspace(const std::string &wsname, bool iscomponent);
-  /// Get the calibration of a component
-  ComponentPosition
-  getComponentCalibratedPosition(const std::string &component);
-  /// Append a new row to single component calibration table
-  static void appendCalibration(DataObjects::TableWorkspace_sptr tablews,
-                                const std::string &datestamp,
-                                ComponentPosition &pos);
-  /// Get the last entry (latest update) of a compoent calibrated position
-  static ComponentPosition getLatestCalibratedPosition(
-      DataObjects::TableWorkspace_sptr componentcaltable);
-  /// Get the calibration position in the table (component table or full
-  /// calibration table)
-  static ComponentPosition
-  getCalibratedPosition(DataObjects::TableWorkspace_sptr componentcaltable,
-                        size_t rownumber);
 
 private:
   DataObjects::TableWorkspace_sptr mCalibWS;
