@@ -247,7 +247,8 @@ CalibrationTableHandler::loadComponentCalibrationTable(
       AlgorithmFactory::Instance().create("LoadAscii", 2);
   // Set parameters
   if (tablewsname.size() == 0) {
-    throw std::runtime_error("Failed to load ASCII as OutputWorkspace nam is empty string.");
+    throw std::runtime_error(
+        "Failed to load ASCII as OutputWorkspace nam is empty string.");
   }
   loadAsciiAlg->initialize();
   loadAsciiAlg->setPropertyValue("Filename", filename);
@@ -517,9 +518,8 @@ void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles(
         handler.saveCompomentDatabase(mDateStamp, compname, compdbname);
     // add the map
     calibwsmap[compname] = comptablews;
-    g_log.debug() << "Component " << compname << " is updated to "
-                   << compdbname << " and saved to " << comptablews->getName()
-                   << "\n";
+    g_log.debug() << "Component " << compname << " is updated to " << compdbname
+                  << " and saved to " << comptablews->getName() << "\n";
   }
 }
 
@@ -544,7 +544,7 @@ void CorelliPowderCalibrationDatabase::loadNonCalibratedComponentDatabase(
     {
       // skip if the database file does not exist
       g_log.debug() << "Component " << componentname
-                     << ": No database file is found at " << compdbname << "\n";
+                    << ": No database file is found at " << compdbname << "\n";
       continue;
     }
 
@@ -555,8 +555,8 @@ void CorelliPowderCalibrationDatabase::loadNonCalibratedComponentDatabase(
     calibwsmap[componentname] = loaded_compcalibws;
 
     g_log.debug() << "Component " << componentname << " is loaded from "
-                   << compdbname << " and saved to "
-                   << loaded_compcalibws->getName() << "\n";
+                  << compdbname << " and saved to "
+                  << loaded_compcalibws->getName() << "\n";
   }
 }
 
