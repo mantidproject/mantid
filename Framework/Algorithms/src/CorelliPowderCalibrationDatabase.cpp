@@ -453,10 +453,10 @@ void CorelliPowderCalibrationDatabase::exec() {
   saveCalibrtionTable(calibDatabaseDir);
 
   // Clean up memory
-  for (auto &[compname, calibws]: component_caibws_map) {
-      if (calibws) {
-          AnalysisDataService::Instance().remove(calibws->getName());
-      }
+  for (auto &[compname, calibws] : component_caibws_map) {
+    if (calibws) {
+      AnalysisDataService::Instance().remove(calibws->getName());
+    }
   }
 
   // output
