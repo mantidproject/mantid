@@ -131,6 +131,40 @@ tooltip (visible when the mouse moves over the cell) explains the error. A
 single red cell prevent the processing of the concerned row.
 
 
+Groups
+------
+
+To avoid entering exactly the same value several times in the table, it is also
+possible to create groups of samples. Within a group, a master sample can be
+designated. The values of the parameters of the master sample will be used when
+processinga all rows in the group.
+
+Paramaters can still be overriden manually whithin a group by entering a sample
+specific value in the table. The priority for the parameter values is as follow:
+
+sample > master sample > global settings
+
+Example:
+
+=========  =====  ===========  ===========
+Sample     Group  parameter 1  parameter 2
+=========  =====  ===========  ===========
+1(master)  g1     v1           v2
+2          g1
+3          g1                  v2'
+=========  =====  ===========  ===========
+
+* For processing sample 2: `parameter1=v1` and `parameter2=v2`
+* For processing sample 3: `parameter1=v1` and `parameter2=v2'`
+
+To group samples, one has to select them (at least one cell per row) and press
+Ctrl + G or use the context menu. To set a row as master, one has to select it
+(again, one cell is sufficient) and press Ctrl + M or use the context menu.
+Grouped samples will appear with a specific label in the table. The master
+of a group will have a bold label. One can also ungroup samples by selecting
+them and pressing Ctrl + Alt + G or using the context menu.
+
+
 Processing
 ----------
 
