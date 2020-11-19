@@ -368,22 +368,17 @@ class WANDPowderReductionTest(unittest.TestCase):
             NormaliseBy="None",
             Sum=False,
         )
+        
+        assert isinstance(pd_out, MatrixWorkspace)
 
-        print(pd_out.getNumberOfEntries())
+        x = pd_out.extractX()
+        y = pd_out.extractY()
+        
+        print(x.min(), x.max())
 
-        for i in pd_out:
-
-            x = i.extractX()
-            y = i.extractY()
-            
-            print(x.min(), x.max())
-
-            self.assertAlmostEqual(x.min(), 0.03517355)
-            self.assertAlmostEqual(x.max(), 70.3119282)
-            self.assertAlmostEqual(y[0, 0], 0.0)
-
-        assert isinstance(pd_out, WorkspaceGroup)
-        assert len(pd_out) == 1
+        self.assertAlmostEqual(x.min(), 0.03517355)
+        self.assertAlmostEqual(x.max(), 70.3119282)
+        self.assertAlmostEqual(y[0, 0], 0.0)
 
         #CASE 2
         #input multiple single ws, output (single) summed ws
