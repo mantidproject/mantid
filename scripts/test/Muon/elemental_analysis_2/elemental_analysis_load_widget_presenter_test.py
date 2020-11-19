@@ -51,8 +51,8 @@ class LoadWidgetPresenterTest(unittest.TestCase):
         self.assertEqual(self.model.runs, [])
 
     def test_clear_data(self):
-        self.model.current_runs = [[1234], [1235]]
-        self.assertEqual(len(self.model.runs), 2)
+        self.model.current_runs = mock.Mock()
+        self.assertTrue(self.model.runs)
         self.presenter.clear_data()
         self.assertEqual(self.model.runs, [])
 

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantidqt.utils.observer_pattern import Observer, Observable, GenericObserver
+from mantidqt.utils.observer_pattern import Observable, GenericObserver
 
 CO_ADD = 'Co-Add'
 SIMULTANEOUS = 'Simultaneous'

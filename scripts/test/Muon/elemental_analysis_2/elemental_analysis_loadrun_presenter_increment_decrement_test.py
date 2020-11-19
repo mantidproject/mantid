@@ -12,7 +12,6 @@ from qtpy.QtWidgets import QApplication, QWidget
 
 from Muon.GUI.ElementalAnalysis2.load_widget.load_models import LoadRunWidgetModel
 from Muon.GUI.ElementalAnalysis2.load_widget.load_run_widget_presenter import LoadRunWidgetPresenterEA
-from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_ea_tests
 
 
@@ -29,7 +28,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
 
         setup_context_for_ea_tests(self)
 
-        self.view = LoadRunWidgetView(parent=self.obj)
+        self.view = mock.Mock()
         self.model = LoadRunWidgetModel(self.loaded_data, self.context)
         self.presenter = LoadRunWidgetPresenterEA(self.view, self.model)
 
@@ -44,7 +43,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
     def load_single_run(self):
         self._loaded_run = 5647
 
-        self.view.set_run_edit_text(str(self._loaded_run))
+        self.view.get_run_edit_text.return_value = str(self._loaded_run)
 
         self.presenter.handle_run_changed_by_user()
 
@@ -52,12 +51,6 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         for run in self.model._runs:
             self.model._loaded_data_store.add_data(run=[run], workspace=grpws)
         self.wait_for_thread(self.presenter._load_thread)
-
-    def assert_model_has_not_changed(self):
-        self.assertEqual(self.model.loaded_runs, [[self._loaded_run]])
-
-    def assert_view_has_not_changed(self):
-        self.assertEqual(self.view.get_run_edit_text(), str(self._loaded_run))
 
     @staticmethod
     def load_failure(self):
@@ -77,6 +70,8 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
 
         self.wait_for_thread(self.presenter._load_thread)
 
+        self.view.get_run_edit_text.return_value = str(self.presenter.runs[0][0])
+
         self.assertEqual(self.presenter.runs, [[original_run - 1]])
 
         run_in_view = self.view.get_run_edit_text()
@@ -89,6 +84,8 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.presenter.handle_increment_run()
         for run in self.model._runs:
             self.model._loaded_data_store.add_data(run=[run], workspace=grpws)
+
+        self.view.get_run_edit_text.return_value = str(self.presenter.runs[0][0])
 
         self.wait_for_thread(self.presenter._load_thread)
         self.assertEqual(self.presenter.runs, [[original_run + 1]])
