@@ -10,6 +10,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidGeometry/Objects/IObject.h"
@@ -90,7 +91,14 @@ namespace Mantid {
         CorelliPowderCalibrationApply::validateInputs() {
             std::map<std::string, std::string> issues;
             inputWS = getProperty("InputWorkspace");
-            // TODO: add necessary validations
+            
+            // 1_check: input workspace is from CORELLI
+            if (inputWS->getInstrument()->getName() != "CORELLI") {
+                issues["InputWorkspace"] = "CORELLI only algorithm, aborting";
+            }
+
+            // 2_check: TODO
+
             return issues;
         }
     
@@ -105,6 +113,11 @@ namespace Mantid {
             inputWS = getProperty("InputWorkspace");
             calTable = getProperty("CalibrationTable");
             const std::string dbDir = getProperty("DatabaseDirectory");
+            if (isDefault("DatabaseDirectory")) {
+                g_log.notice() << "Using default database directory\n";
+            } 
+
+            //
             outputWS = getProperty("OutputWorkspace");
             if (outputWS != inputWS) {
                 outputWS = inputWS->clone();
@@ -114,12 +127,18 @@ namespace Mantid {
 
             // Translate each component in the instrument
             // [source, sample, bank1,.. bank92]
-            auto mvCmpAlg = AlgorithmFactory::Instance().create("MoveInstrumentComponent");
-            mvCmpAlg -> initialize();
+            // dev reference:
+            // https://github.com/mantidproject/mantid/blob/f0fad29ee0496901b8d453c738ea948644c7c6a6/Framework/Reflectometry/src/SpecularReflectionPositionCorrect2.cpp#L241
+            auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
+            moveAlg -> initialize();
+            // Todo ...
+            moveAlg->execute();
 
             // Rotate each component in the instrument
-            auto rtCmpAlg = AlgorithmFactory::Instance().create("RotateInstrumentComponent");
-            rtCmpAlg -> initialize();
+            auto rotateAlg = createChildAlgorithm("RotateInstrumentComponent");
+            rotateAlg -> initialize();
+            // Todo ...
+            rotateAlg->execute();
 
             // Config output
             setProperty("OutputWorkspace", outputWS);
