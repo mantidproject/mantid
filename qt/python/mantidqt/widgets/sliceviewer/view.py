@@ -550,7 +550,6 @@ class SliceViewerView(QWidget, ObservingView):
 
         # connect up additional peaks signals
         self.data_view.mpl_toolbar.peaksOverlayClicked.connect(self.peaks_overlay_clicked)
-
         self.close_signal.connect(self._run_close)
 
     @property
@@ -594,11 +593,6 @@ class SliceViewerView(QWidget, ObservingView):
         """
         self.peaks_view.set_visible(on)
 
-    # event handlers
-    def closeEvent(self, event):
-        self.deleteLater()
-        super().closeEvent(event)
-
-    @Slot()
     def _run_close(self):
+        # handles the signal emitted from ObservingView.emit_close
         self.close()

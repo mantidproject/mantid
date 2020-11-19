@@ -31,14 +31,16 @@ def _catch_exceptions(func):
 
 class SliceViewerADSObserver(AnalysisDataServiceObserver):
 
-    def __init__(self, presenter):
+    def __init__(self, on_replace, on_rename, on_clear, on_delete):
         super(SliceViewerADSObserver, self).__init__()
-        self.presenter = presenter
-        self.view = self.presenter.view
-        self.logger = mantid.kernel.Logger("SliceViewerADSObserver")
 
-        self.on_replace_workspace = QAppThreadCall(self.presenter.replace_workspace)
-        self.on_rename_workspace = QAppThreadCall(self.presenter.rename_workspace)
+        # self.on_replace_workspace = QAppThreadCall(self.presenter.replace_workspace)
+        # self.on_rename_workspace = QAppThreadCall(self.presenter.rename_workspace)
+
+        self.on_replace_workspace = QAppThreadCall(on_replace)
+        self.on_rename_workspace = QAppThreadCall(on_rename)
+        self.on_clear = QAppThreadCall(on_clear)
+        self.on_delete_workspace = QAppThreadCall(on_delete)
 
         self.observeClear(True)
         self.observeDelete(True)
@@ -48,7 +50,7 @@ class SliceViewerADSObserver(AnalysisDataServiceObserver):
     @_catch_exceptions
     def clearHandle(self):
         """Called when the ADS is deleted all of its workspaces"""
-        self.view.emit_close()
+        self.on_clear()
 
     @_catch_exceptions
     def deleteHandle(self, ws_name, _):
@@ -59,8 +61,7 @@ class SliceViewerADSObserver(AnalysisDataServiceObserver):
         :param ws_name: The name of the workspace.
         :param _: A pointer to the workspace. Unused
         """
-        if ws_name == str(self.presenter.model.get_ws()):
-            self.view.emit_close()
+        self.on_delete_workspace(ws_name)
 
     @_catch_exceptions
     def replaceHandle(self, ws_name, workspace):

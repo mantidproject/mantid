@@ -65,7 +65,9 @@ class SliceViewer(ObservingPresenter):
         # Start the GUI with zoom selected.
         self.view.data_view.activate_tool(ToolItemText.ZOOM)
 
-        self.ads_observer = SliceViewerADSObserver(self)
+        self.ads_observer = SliceViewerADSObserver(
+            self.replace_workspace, self.rename_workspace, self.ADS_cleared, self.delete_workspace
+        )
 
     def new_plot_MDH(self):
         """
@@ -377,6 +379,16 @@ class SliceViewer(ObservingPresenter):
             self.model.set_workspace_name(new_name)
             self.view.setWindowTitle(self.model.get_title())
 
+    def delete_workspace(self, ws_name):
+        if ws_name == str(self.model._ws):
+            self.view.emit_close()
+
+    def ADS_cleared(self):
+        self.view.emit_close()
+
+    def clear_observer(self):
+        self.ads_observer = None
+
     # private api
     def _create_peaks_presenter_if_necessary(self):
         if self._peaks_presenter is None:
@@ -430,10 +442,10 @@ class SliceViewer(ObservingPresenter):
         """
         # we don't want to use model.get_ws for the image info widget as this needs
         # extra arguments depending on workspace type.
-        self.view.data_view.image_info_widget.setWorkspace(self.model._ws)
+        self.view.data_view.image_info_widget.setWorkspace(self.model._get_ws())
         self.view.setWindowTitle(self.model.get_title())
         self.new_plot()
 
     def _close_view_with_message(self, message: str):
-        self.view.emit_close()
+        self.view.emit_close()  # inherited from ObservingView
         self._logger.warning(message)
