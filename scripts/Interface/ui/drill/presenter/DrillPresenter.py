@@ -81,8 +81,8 @@ class DrillPresenter:
         """
         contents = self.view.getCellContents(row, column)
         self.model.changeParameter(row, column, contents)
-        self.view.unsetRowBackground(row)
         if row in self._processError:
+            self.view.unsetRowBackground(row)
             self._processError.remove(row)
         self.view.setWindowModified(True)
 
