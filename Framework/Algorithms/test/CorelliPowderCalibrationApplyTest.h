@@ -35,4 +35,7 @@ class CorelliPowderCalibrationAppyTest : public CxxTest::TestSuite {
         CorelliPowderCalibrationApply corelliPCA;
         TS_ASSERT_EQUALS(corelliPCA.name(), "CorelliPowderCalibrationApply");
     }
+
+    // Question: what kind of unit test should I put in here given that
+    //           this algorithm does zero actual calculation
 };
