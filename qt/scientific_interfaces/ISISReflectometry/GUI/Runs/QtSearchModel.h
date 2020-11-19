@@ -33,6 +33,9 @@ public:
   virtual SearchResult const &getRowData(int index) const override;
   virtual SearchResults const &getRows() const override;
   void clear() override;
+  bool hasUnsavedChanges() const override;
+  void setUnsaved() override;
+  void setSaved() override;
 
   // QAbstractTableModel overrides
   // row and column counts
@@ -52,6 +55,8 @@ public:
 protected:
   // Details about each run returned from the search
   SearchResults m_runDetails;
+  // Flag to indicate whether there are unsaved changes
+  bool m_hasUnsavedChanges;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

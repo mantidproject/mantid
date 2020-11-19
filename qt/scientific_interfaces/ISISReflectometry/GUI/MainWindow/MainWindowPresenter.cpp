@@ -320,7 +320,7 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
     return;
   auto map = m_encoder->encodeBatch(m_view, tabIndex, false);
   m_fileHandler->saveJSONToFile(filename, map);
-  m_batchPresenters[tabIndex].get()->setBatchUnsaved(false);
+  m_batchPresenters[tabIndex].get()->notifyChangesSaved();
 }
 
 void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
@@ -340,7 +340,7 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
     return;
   }
   m_decoder->decodeBatch(m_view, tabIndex, map);
-  m_batchPresenters[tabIndex].get()->setBatchUnsaved(false);
+  m_batchPresenters[tabIndex].get()->notifyChangesSaved();
 }
 
 void MainWindowPresenter::disableSaveAndLoadBatch() {

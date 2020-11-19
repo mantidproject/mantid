@@ -191,9 +191,7 @@ void QtCatalogSearcher::notifySearchComplete() {
   m_notifyee->notifySearchComplete();
 }
 
-void QtCatalogSearcher::notifySearchResultsChanged() {
-  m_notifyee->notifySearchResultsChanged();
-}
+void QtCatalogSearcher::notifySearchResultsChanged() { results().setUnsaved(); }
 
 bool QtCatalogSearcher::searchInProgress() const { return m_searchInProgress; }
 
@@ -201,14 +199,18 @@ SearchResult const &QtCatalogSearcher::getSearchResult(int index) const {
   return results().getRowData(index);
 }
 
-void QtCatalogSearcher::reset(std::string const &text,
-                              std::string const &instrument,
-                              std::string const &cycle) {
+void QtCatalogSearcher::reset() {
   results().clear();
-  m_searchText = text;
-  m_instrument = instrument;
-  m_cycle = cycle;
+  m_searchText.clear();
+  m_instrument.clear();
+  m_cycle.clear();
 }
+
+bool QtCatalogSearcher::hasUnsavedChanges() const {
+  return results().hasUnsavedChanges();
+}
+
+void QtCatalogSearcher::setSaved() { results().setSaved(); }
 
 bool QtCatalogSearcher::searchSettingsChanged(const std::string &text,
                                               const std::string &instrument,

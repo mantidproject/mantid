@@ -114,10 +114,6 @@ void RunsPresenter::notifySearchFailed() {
   }
 }
 
-void RunsPresenter::notifySearchResultsChanged() {
-  m_mainPresenter->setBatchUnsaved();
-}
-
 void RunsPresenter::notifyTransfer() {
   transfer(m_view->getSelectedSearchRows(), TransferMatch::Any);
   notifyRowStateChanged();
@@ -203,10 +199,10 @@ bool RunsPresenter::resumeAutoreduction() {
   // Check if starting an autoreduction with new settings, reset the previous
   // search results and clear the main table
   if (m_searcher->searchSettingsChanged(searchString, instrument, cycle)) {
-    if (isOverwritingTablePrevented()) {
+    if (isOverwritePrevented()) {
       return false;
     }
-    m_searcher->reset(searchString, instrument, cycle);
+    m_searcher->reset();
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
   }
 
@@ -254,7 +250,7 @@ void RunsPresenter::autoreductionCompleted() {
 }
 
 void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
-  m_searcher->reset("", instrumentName, "");
+  m_searcher->reset();
   m_view->setSearchInstrument(instrumentName);
   m_view->clearSearchText();
   tablePresenter()->notifyInstrumentChanged(instrumentName);
@@ -267,6 +263,8 @@ std::string RunsPresenter::instrumentName() const {
 void RunsPresenter::notifyTableChanged() { m_mainPresenter->setBatchUnsaved(); }
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
+
+void RunsPresenter::notifyChangesSaved() { m_searcher->setSaved(); }
 
 /** Searches for runs that can be used
  * @return : true if the search algorithm was started successfully, false if
@@ -282,10 +280,10 @@ bool RunsPresenter::search() {
 
   // Clear existing results if performing a different search
   if (m_searcher->searchSettingsChanged(searchString, instrument, cycle)) {
-    if (isOverwritingTablePrevented()) {
+    if (hasUnsavedSearchResults() && isOverwritePrevented()) {
       return false;
     }
-    m_searcher->reset(searchString, instrument, cycle);
+    m_searcher->reset();
   }
 
   if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
@@ -356,8 +354,12 @@ bool RunsPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
-bool RunsPresenter::isOverwritingTablePrevented() const {
+bool RunsPresenter::isOverwritePrevented() const {
   return m_mainPresenter->isOverwriteBatchPrevented();
+}
+
+bool RunsPresenter::hasUnsavedSearchResults() const {
+  return m_searcher->hasUnsavedChanges();
 }
 
 bool RunsPresenter::searchInProgress() const {

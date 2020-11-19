@@ -29,6 +29,9 @@ public:
   virtual SearchResult const &getRowData(int index) const = 0;
   virtual SearchResults const &getRows() const = 0;
   virtual void clear() = 0;
+  virtual bool hasUnsavedChanges() const = 0;
+  virtual void setUnsaved() = 0;
+  virtual void setSaved() = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

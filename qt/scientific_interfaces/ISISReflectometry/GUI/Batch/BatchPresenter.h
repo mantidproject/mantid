@@ -83,7 +83,8 @@ public:
   bool isAnyBatchAutoreducing() const override;
   bool isOverwriteBatchPrevented() const override;
   bool isBatchUnsaved() const override;
-  void setBatchUnsaved(bool isUnsaved = true) override;
+  void setBatchUnsaved() override;
+  void notifyChangesSaved() override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   std::string instrumentName() const override;
   int percentComplete() const override;
