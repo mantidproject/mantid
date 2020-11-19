@@ -78,28 +78,66 @@ Usage
 
 **Example - CorelliPowderCalibrateDatabase**
 
-.. testcode:: CorelliCrossCorrelateExample
+.. testcode:: CorelliPowderCalibrationExample
     
-    # Load a Corelli data file.
-    ws = Load('CORELLI_2100')
-
-    # You will need to load the instrument if the one in the NeXus file doesn't contain the chopper sequence.
-    LoadInstrument(ws, InstrumentName='CORELLI', RewriteSpectraMap=False)
-
-    # Run the cross-correlation. This is using a TDC timing offset of 56000ns.
-    wsOut = CorelliCrossCorrelate(ws, 56000)
-
-    print('The detector 172305 has {} events.'.format(ws.getSpectrum(172305).getNumberEvents()))
-    print('The event weights before cross-correlation are {}'.format(ws.getSpectrum(172305).getWeights()))
-    print('The event weights after  cross-correlation are {}'.format(wsOut.getSpectrum(172305).getWeights()))
+    # Import modules
+    import numpy as np
+    import os
+    
+    # Enpty workspace
+    input = LoadEmptyInstrument(InstrumentName='CORELLI')
+    # add start timedelta64
+    AddSampleLog(Workspace=input, LogName='start_time', LogText='2020-02-20T12:57:17', LogType='String')
+    
+    # generate simulated stored database files
+    bank2_str = "# YYYMMDD , Xposition , Yposition , Zposition , XdirectionCosine , YdirectionCosine , ZdirectionCosine , RotationAngle\n" \
+                "# str , double , double , double , double , double , double , double\n" \
+                "20001117,0.0001,-0.0002,0.003,0,-23.3,98.02,0"
+    
+    # generate simulated stored database files
+    bank12_str = "# YYYMMDD , Xposition , Yposition , Zposition , XdirectionCosine , YdirectionCosine , ZdirectionCosine , RotationAngle\n" \
+                "# str , double , double , double , double , double , double , double\n" \
+                "20011117,1.0001,-2.0002,3.003,4,-23.3,98.02,0"
+    
+    calib_dir = 'sim_corelli_cal'
+    if not os.path.exists(calib_dir):
+        os.mkdir(calib_dir)
+    
+    for bank, content in [('bank2', bank2_str), ('bank12', bank12_str)]:
+        bankfile = open(os.path.join(calib_dir, bank + '.csv'), 'w')
+        bankfile.write(content)
+        bankfile.close()
+    
+    # Create table
+    calib_table = CreateEmptyTableWorkspace("CorelliCalibrationTestTable");
+    calib_table.addColumn("str", "ComponentName")
+    for colname in ["Xposition", "Yposition", "Zposition","XdirectionCosine", "YdirectionCosine", "ZdirectionCosine", "RotationAngle"]:
+        calib_table.addColumn("double", colname)
+    
+    # add entry
+    calib_table.addRow(["source" , 0. , 0. , -15.560 , 0. , 0. , 0., 0.])
+    calib_table.addRow(["sample" , 0.0001 , -0.0002 , 0.003 , 0. , 0.,  0., 0.])
+    calib_table.addRow(["bank1" , 0.9678 , 0.0056 , 0.0003 , 0.4563 , -0.9999, 0.3424, 0.321])
+    
+    # save for powder calibration database
+    CorelliPowderCalibrationDatabase(InputWorkspace='input', InputCalibrationPatchWorkspace='calib_table',
+                                     DatabaseDirectory='sim_corelli_cal',
+                                     OutputWorkspace='mergedcalibrationtable')
+    
+    # check
+    print('Number of components = {}'.format(mtd['mergedcalibrationtable'].rowCount()))
+    bank1_file = os.path.join('sim_corelli_cal', 'bank1.csv')
+    print('bank1 file {} exist = {}'.format(bank1_file, os.path.exists(bank1_file)))
+    calib_file = os.path.join('sim_corelli_cal', 'corelli_instrument_20200220.csv')
+    print('calibration file {} exist = {}'.format(calib_file, os.path.exists(calib_file)))
 
 Output:
 
-.. testoutput:: CorelliCrossCorrelateExample 
+.. testoutput:: CorelliPowderCalibrationExample
 
-    The detector 172305 has 3 events.
-    The event weights before cross-correlation are [ 1.  1.  1.]
-    The event weights after  cross-correlation are [-0.99391854  1.          1.        ]
+    Number of components = 5
+    bank1 file sim_corelli_cal/bank1.csv exist = True
+    calibration file sim_corelli_cal/corelli_instrument_20200220.csv exist = True
 
 .. categories::
 

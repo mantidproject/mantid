@@ -246,11 +246,8 @@ CalibrationTableHandler::loadComponentCalibrationTable(
   IAlgorithm_sptr loadAsciiAlg =
       AlgorithmFactory::Instance().create("LoadAscii", 2);
   // Set parameters
-  std::cout << "About to load " << filename << " to workspace " << tablewsname
-            << "\n";
   if (tablewsname.size() == 0) {
-    std::cout << "[BUG........] OutputWorkspace is empty string\n";
-    throw std::runtime_error("Failed to load ascii.");
+    throw std::runtime_error("Failed to load ASCII as OutputWorkspace nam is empty string.");
   }
   loadAsciiAlg->initialize();
   loadAsciiAlg->setPropertyValue("Filename", filename);
@@ -290,7 +287,6 @@ CalibrationTableHandler::saveCompomentDatabase(const std::string &datestamp,
   std::string tablewsname = component + "_" + datestamp;
 
   // Check whether the file does exist or not: new or append
-  std::cout << "Create single component calibration table\n";
   TableWorkspace_sptr compcaltable = nullptr;
   if (boost::filesystem::exists(filename)) {
     compcaltable = loadComponentCalibrationTable(filename, tablewsname);
@@ -302,17 +298,10 @@ CalibrationTableHandler::saveCompomentDatabase(const std::string &datestamp,
   ComponentPosition componentpos = getComponentCalibratedPosition(component);
   appendCalibration(compcaltable, datestamp, componentpos);
 
-  std::cout << "Save " << mCalibWS->getName() << " to " << filename << "\n";
-
   // create algorithm: only version 2 of SaveAscii can work with TableWorkspace
   IAlgorithm_sptr saveAsciiAlg =
       AlgorithmFactory::Instance().create("SaveAscii", 2);
   saveAsciiAlg->initialize();
-  //  saveAsciiAlg->setPropertyValue(
-  //      "InputWorkspace",
-  //      tablewsname); //
-  //      std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));
-  //                    // //mCalibWS->getName());
   saveAsciiAlg->setProperty("InputWorkspace", compcaltable);
   saveAsciiAlg->setProperty("Filename", filename);
   saveAsciiAlg->setPropertyValue("CommentIndicator", "#");
@@ -320,8 +309,7 @@ CalibrationTableHandler::saveCompomentDatabase(const std::string &datestamp,
   saveAsciiAlg->setProperty("ColumnHeader", true);
   saveAsciiAlg->setProperty("AppendToFile",
                             false); // always overwrite original file
-
-  std::cout << "Execute Save .... \n";
+  // run
   saveAsciiAlg->execute();
 
   return compcaltable;
@@ -334,25 +322,16 @@ CalibrationTableHandler::saveCompomentDatabase(const std::string &datestamp,
  */
 void CalibrationTableHandler::saveCalibrationTable(
     const std::string &filename) {
-  std::cout << "Save calibration table" << mCalibWS->getName() << " to "
-            << filename << "\n";
   // create algorithm: only version 2 of SaveAscii can work with TableWorkspace
   IAlgorithm_sptr saveAsciiAlg =
       AlgorithmFactory::Instance().create("SaveAscii", 2);
   saveAsciiAlg->initialize();
-  //  saveAsciiAlg->setPropertyValue(
-  //      "InputWorkspace",
-  //      mCalibWS
-  //          ->getName()); //
-  //          std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));
-  //                        // //mCalibWS->getName());
   saveAsciiAlg->setProperty("InputWorkspace", mCalibWS);
   saveAsciiAlg->setProperty("Filename", filename);
   saveAsciiAlg->setPropertyValue("CommentIndicator", "#");
   saveAsciiAlg->setPropertyValue("Separator", "CSV");
   saveAsciiAlg->setProperty("ColumnHeader", true);
-
-  std::cout << "Execute Save .... \n";
+  // run
   saveAsciiAlg->execute();
 }
 
@@ -435,13 +414,6 @@ CorelliPowderCalibrationDatabase::validateInputs() {
   else if (!mInputWS->run().hasProperty("start_time"))
     errors["InputWorkspace"] = "Workspace is missing property start_time.";
 
-  auto run = mInputWS->run();
-  auto properties = run.getProperties();
-  std::cout << "Number of properties: " << properties.size() << "\n";
-  for (auto p : properties) {
-    std::cout << "Property: " << p->name() << "\n";
-  }
-
   // check for calibration patch table workspace
   mInputCalibrationTableWS = getProperty("InputCalibrationPatchWorkspace");
   if (!mInputCalibrationTableWS) {
@@ -474,7 +446,6 @@ void CorelliPowderCalibrationDatabase::exec() {
     throw std::runtime_error("input calibration workspace not specified");
 
   std::string calibDatabaseDir = getProperty("DatabaseDirectory");
-  std::cout << "Output directory: " << calibDatabaseDir << "\n";
 
   // map for (component name, component calibration workspace
   std::vector<std::string> orderedcomponents =
@@ -546,7 +517,7 @@ void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles(
         handler.saveCompomentDatabase(mDateStamp, compname, compdbname);
     // add the map
     calibwsmap[compname] = comptablews;
-    m_log.notice() << "Component " << compname << " is updated to "
+    g_log.debug() << "Component " << compname << " is updated to "
                    << compdbname << " and saved to " << comptablews->getName()
                    << "\n";
   }
@@ -572,7 +543,7 @@ void CorelliPowderCalibrationDatabase::loadNonCalibratedComponentDatabase(
     if (!isFileExist(compdbname)) // skip if the file does not exist
     {
       // skip if the database file does not exist
-      g_log.notice() << "Component " << componentname
+      g_log.debug() << "Component " << componentname
                      << ": No database file is found at " << compdbname << "\n";
       continue;
     }
@@ -583,7 +554,7 @@ void CorelliPowderCalibrationDatabase::loadNonCalibratedComponentDatabase(
             compdbname, componentname + "_" + mDateStamp);
     calibwsmap[componentname] = loaded_compcalibws;
 
-    m_log.notice() << "Component " << componentname << " is loaded from "
+    g_log.debug() << "Component " << componentname << " is loaded from "
                    << compdbname << " and saved to "
                    << loaded_compcalibws->getName() << "\n";
   }
@@ -647,19 +618,14 @@ std::string
 CorelliPowderCalibrationDatabase::convertTimeStamp(std::string run_start_time) {
   // Get the first sub string by
   std::string date_str = run_start_time.substr(0, run_start_time.find("T"));
-  std::cout << date_str << "\n";
 
   // Separate year date and time
   std::string year = date_str.substr(0, date_str.find("-"));
   std::string monthday = date_str.substr(
       date_str.find("-") + 1, date_str.size()); // +1 to ignore delimit '-'
-  std::cout << "MondayDay = " << monthday << "\n";
   std::string month = monthday.substr(0, monthday.find("-"));
   std::string day = monthday.substr(monthday.find("-") + 1,
                                     monthday.size()); // +1 to ignore delimit
-
-  std::cout << "Y M D: " << year << ", " << month << ", " << day << "\n";
-
   std::string datestamp = year + month + day;
 
   return datestamp;
