@@ -192,7 +192,6 @@ set(
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
-  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RenameParDialog.h
   inc/MantidQtWidgets/Common/RepoModel.h
@@ -520,7 +519,6 @@ set(
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
-  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RepoTreeView.h
   inc/MantidQtWidgets/Common/RepoModel.h
@@ -1026,6 +1024,7 @@ set(
   test/ImageInfoModelMDTest.h
   test/ImageInfoPresenterTest.h
   test/InterfaceManagerTest.h
+  test/ManageUserDirectoriesTest.h
   test/QtJSONUtilsTest.h
   test/RepoModelTest.h
   test/Batch/BuildSubtreeItemsTest.h
@@ -1067,6 +1066,7 @@ mtd_add_qt_tests(
     PythonInterfaceCore
     DataObjects
     gmock
+    Qt5::Test
   MTD_QT_LINK_LIBS MantidQtWidgetsCommon
   PARENT_DEPENDENCIES GUITests
 )

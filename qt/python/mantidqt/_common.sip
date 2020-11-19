@@ -492,14 +492,18 @@ public:
     }
 %End
     int sizeOfFunctionsGroup() const;
+    bool isFitEnabled() const;
+    std::string getFunctionString() const;
     void loadFunction(QString funStr);
     void saveFunction(const QString &fnName);
+    void executeCustomSetupRemove(const QString &name);
     double startX() const;
     void setStartX(double start);
     double endX() const;
     void setEndX(double end);
     void setXRange(double start, double end);
     QVector<double> getXRange() throw(std::invalid_argument);
+    std::string getExcludeRange() const;
     QString getXColumnName() const;
     QString getYColumnName() const;
     QString getErrColumnName() const;
@@ -980,6 +984,7 @@ public:
     void setFileExtensions(const QStringList &extensions);
     void findFiles(bool isModified);
     void isOptional(bool);
+    void setLastDirectory(const QString &lastDir);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);

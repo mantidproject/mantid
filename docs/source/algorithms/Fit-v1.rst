@@ -611,6 +611,70 @@ Output:
     Constant 1: 2.86
     Constant 2: 14.14
 
+**Example - Fit to two data sets with one shared parameter, and different fit functions:**
+
+.. testcode:: shareFit3
+
+    from mantid.simpleapi import *
+    import numpy as np
+
+    # Create workspaces
+    x_values = np.linspace(start=1.0,stop=10.0,num=22)
+    y_values1 = [2.0*x + 10.0 for x in x_values]
+    y_values2 = [5.0/x + 10.0 for x in x_values]
+
+    input_workspace1 = CreateWorkspace(x_values, y_values1)
+    input_workspace2 = CreateWorkspace(x_values, y_values2)
+
+    # Create MultiDomainFunction where datasets have different fitting functions
+    multi_domain_function = FunctionFactory.createInitializedMultiDomainFunction('name=CompositeFunction', 2)
+
+    flat_background = FunctionFactory.createInitialized("name=FlatBackground")
+    linear_background = FunctionFactory.createInitialized("name=LinearBackground")
+    exp_decay = FunctionFactory.createInitialized("name=ExpDecay")
+
+    composite1 = multi_domain_function.getFunction(0)
+    composite1.add(flat_background)
+    composite1.add(linear_background)
+
+    composite2 = multi_domain_function.getFunction(1)
+    composite2.add(flat_background)
+    composite2.add(exp_decay)
+
+    # Tie the FlatBackground which is common for both datasets
+    function_string = str(multi_domain_function)
+    function_string += ";ties=(f1.f0.A0=f0.f0.A0)"
+
+    # Perform the fit
+    fit_output = Fit(Function=function_string,
+                     InputWorkspace=input_workspace1, WorkspaceIndex=0, StartX = 1.0, EndX=10.0,
+                     InputWorkspace_1=input_workspace2, WorkspaceIndex_1=0, StartX_1 = 1.0, EndX_1=10.0,
+                     Output='fit')
+
+    # Print Results
+    param_values = fit_output.OutputParameters.column(1)
+    print("Tied parameters (shared):")
+    print("Workspace1 FlatBackground.A0: {0:.2f}".format(param_values[0]))
+    print("Workspace2 FlatBackground.A0: {0:.2f}".format(param_values[3]))
+    print("Other Parameters:")
+    print("Workspace1 LinearBackground.A0: {0:.2f}".format(param_values[1]))
+    print("Workspace1 LinearBackground.A1: {0:.2f}".format(param_values[2]))
+    print("Workspace2 ExpDecay.Height: {0:.2f}".format(param_values[4]))
+    print("Workspace2 ExpDecay.Lifetime: {0:.2f}".format(param_values[5]))
+
+Output:
+
+.. testoutput:: shareFit3
+
+    Tied parameters (shared):
+    Workspace1 FlatBackground.A0: 10.64
+    Workspace2 FlatBackground.A0: 10.64
+    Other Parameters:
+    Workspace1 LinearBackground.A0: -0.64
+    Workspace1 LinearBackground.A1: 2.00
+    Workspace2 ExpDecay.Height: 8.44
+    Workspace2 ExpDecay.Lifetime: 1.40
+
 .. categories::
 
 .. sourcelink::

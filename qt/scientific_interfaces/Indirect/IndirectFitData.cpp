@@ -311,7 +311,7 @@ IndirectFitData::IndirectFitData(const MatrixWorkspace_sptr &workspace,
   setSpectra(spectra);
   auto const range =
       !spectra.empty() ? getBinRange(workspace) : std::make_pair(0.0, 0.0);
-  for (auto const spectrum : spectra) {
+  for (auto const &spectrum : spectra) {
     m_ranges[spectrum] = range;
   }
 }
@@ -418,7 +418,7 @@ void IndirectFitData::setSpectra(Spectra const &spectra) {
 void IndirectFitData::validateSpectra(Spectra const &spectra) {
   size_t maxValue = workspace()->getNumberHistograms() - 1;
   std::vector<size_t> notInRange;
-  for (auto const i : spectra) {
+  for (auto const &i : spectra) {
     if (i.value > maxValue)
       notInRange.emplace_back(i.value);
   }
@@ -446,7 +446,7 @@ void IndirectFitData::setStartX(double const &startX,
 }
 
 void IndirectFitData::setStartX(double const &startX) {
-  for (auto const spectrum : m_spectra) {
+  for (auto const &spectrum : m_spectra) {
     setStartX(startX, spectrum);
   }
 }
@@ -463,7 +463,7 @@ void IndirectFitData::setEndX(double const &endX,
 }
 
 void IndirectFitData::setEndX(double const &endX) {
-  for (auto const spectrum : m_spectra) {
+  for (auto const &spectrum : m_spectra) {
     setEndX(endX, spectrum);
   }
 }

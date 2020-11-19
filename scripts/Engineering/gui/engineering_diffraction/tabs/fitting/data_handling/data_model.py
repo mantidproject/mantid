@@ -13,10 +13,10 @@ from Engineering.gui.engineering_diffraction.tabs.common import path_handling
 from mantid.api import AnalysisDataService as ADS
 from mantid.api import TextAxis
 from matplotlib.pyplot import subplots
-from numpy import full, nan, max, array, vstack
+from numpy import full, nan, max, array, vstack, argsort
 from itertools import chain
-from re import findall
 from collections import defaultdict
+from re import findall, sub
 
 
 class FittingDataModel(object):
@@ -147,23 +147,44 @@ class FittingDataModel(object):
         else:
             self.clear_logs()
 
-    def update_fit(self, results_dict):
-        wsname = results_dict['properties']['InputWorkspace']
-        self._fit_results[wsname] = {'model': results_dict['properties']['Function']}
-        self._fit_results[wsname]['results'] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
-        fnames = [x.split('=')[-1] for x in findall('name=[^,]*', results_dict['properties']['Function'])]
-        # get num params for each function (first elem empty as str begins with 'name='
-        nparams = [s.count('=') for s in results_dict['properties']['Function'].split('name=')[1:]]
-        params_dict = ADS.retrieve(results_dict['properties']['Output'] + '_Parameters').toDict()
-        # loop over rows in output workspace to get value and error for each parameter
-        istart = 0
-        for ifunc, fname in enumerate(fnames):
-            for iparam in range(0, nparams[ifunc]):
-                irow = istart + iparam
-                key = '_'.join([fname, params_dict['Name'][irow].split('.')[-1]])  # funcname_param
-                self._fit_results[wsname]['results'][key].append([
-                    params_dict['Value'][irow], params_dict['Error'][irow]])
-            istart += nparams[ifunc]
+    def get_ws_sorted_by_primary_log(self):
+        ws_list = list(self._loaded_workspaces.keys())
+        primary_log = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+                                  "primary_log")
+        sort_ascending = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
+                                     "sort_ascending")
+        if primary_log:
+            log_table = ADS.retrieve(primary_log)
+            isort = argsort(array(log_table.column('avg')))
+            ws_list = [ws_list[iws] for iws in isort]
+        if not sort_ascending == 'true':
+            # settings can only be saved as text
+            ws_list = ws_list[::-1]
+        return ws_list
+
+    def update_fit(self, fitprops):
+        for fitprop in fitprops:
+            wsname = fitprop['properties']['InputWorkspace']
+            self._fit_results[wsname] = {'model': fitprop['properties']['Function']}
+            self._fit_results[wsname]['results'] = defaultdict(list)  # {function_param: [[Y1, E1], [Y2,E2],...] }
+            fnames = [x.split('=')[-1] for x in findall('name=[^,]*', fitprop['properties']['Function'])]
+            # get num params for each function (first elem empty as str begins with 'name=')
+            # need to remove ties and constrtaints which are enclosed in ()
+            nparams = [s.count('=') for s in
+                       sub(r'=\([^)]*\)', '', fitprop['properties']['Function']).split('name=')[1:]]
+            params_dict = ADS.retrieve(fitprop['properties']['Output'] + '_Parameters').toDict()
+            # loop over rows in output workspace to get value and error for each parameter
+            istart = 0
+            for ifunc, fname in enumerate(fnames):
+                for iparam in range(0, nparams[ifunc]):
+                    irow = istart + iparam
+                    key = '_'.join([fname, params_dict['Name'][irow].split('.')[-1]])  # funcname_param
+                    self._fit_results[wsname]['results'][key].append([
+                        params_dict['Value'][irow], params_dict['Error'][irow]])
+                istart += nparams[ifunc]
+            # append the cost function value (in this case always chisq/DOF) as don't let user change cost func
+            # always last row in parameters table
+            self._fit_results[wsname]['costFunction'] = params_dict['Value'][-1]
         self.create_fit_tables()
 
     def create_fit_tables(self):
@@ -196,13 +217,14 @@ class FittingDataModel(object):
         # table for model summary/info
         model = CreateEmptyTableWorkspace(OutputWorkspace='model')
         model.addColumn(type="str", name="Workspace")
+        model.addColumn(type="float", name="chisq/DOF")  # always is for LM minimiser (users can't change)
         model.addColumn(type="str", name="Model")
         for iws, wsname in enumerate(self._loaded_workspaces.keys()):
             if wsname in self._fit_results:
-                row = [wsname, self._fit_results[wsname]['model']]
+                row = [wsname, self._fit_results[wsname]['costFunction'], self._fit_results[wsname]['model']]
                 self.write_table_row(model, row, iws)
             else:
-                self.write_table_row(model, ['', ''], iws)
+                self.write_table_row(model, ['', nan, ''], iws)
         wslist += [model]
         group_name = self._log_workspaces.name().split('_log')[0] + '_fits'
         self._fit_workspaces = GroupWorkspaces(wslist, OutputWorkspace=group_name)

@@ -12,6 +12,7 @@
 #include "MantidAPI/RegisterFileLoader.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadHelper.h"
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -118,7 +119,7 @@ void LoadILLSANS::exec() {
   NXRoot root(filename);
   NXEntry firstEntry = root.openFirstEntry();
   const std::string instrumentPath =
-      m_loader.findInstrumentNexusPath(firstEntry);
+      m_loadHelper.findInstrumentNexusPath(firstEntry);
   setInstrumentName(firstEntry, instrumentPath);
   Progress progress(this, 0.0, 1.0, 4);
   progress.report("Initializing the workspace for " + m_instrumentName);
@@ -149,13 +150,13 @@ void LoadILLSANS::exec() {
     initWorkSpace(firstEntry, instrumentPath);
     progress.report("Loading the instrument " + m_instrumentName);
     runLoadInstrument();
-    double distance = m_loader.getDoubleFromNexusPath(
+    double distance = m_loadHelper.getDoubleFromNexusPath(
         firstEntry, instrumentPath + "/detector/det_calc");
 
     progress.report("Moving detectors");
     moveDetectorDistance(distance, "detector");
     if (m_instrumentName == "D22") {
-      double offset = m_loader.getDoubleFromNexusPath(
+      double offset = m_loadHelper.getDoubleFromNexusPath(
           firstEntry, instrumentPath + "/detector/dtr_actual");
       moveDetectorHorizontal(-offset / 1000, "detector"); // mm to meter
       /*TODO: DO NOT ROTATE UNTIL CONFIRMED BY INSTRUMENT SCIENTIST
@@ -181,8 +182,8 @@ void LoadILLSANS::setInstrumentName(const NeXus::NXEntry &firstEntry,
     g_log.error(message);
     throw std::runtime_error(message);
   }
-  m_instrumentName =
-      m_loader.getStringFromNexusPath(firstEntry, instrumentNamePath + "/name");
+  m_instrumentName = m_loadHelper.getStringFromNexusPath(
+      firstEntry, instrumentNamePath + "/name");
   const auto inst = std::find(m_supportedInstruments.begin(),
                               m_supportedInstruments.end(), m_instrumentName);
   if (inst == m_supportedInstruments.end()) {
@@ -202,24 +203,24 @@ LoadILLSANS::getDetectorPositionD33(const NeXus::NXEntry &firstEntry,
                                     const std::string &instrumentNamePath) {
   std::string detectorPath(instrumentNamePath + "/detector");
   DetectorPosition pos;
-  pos.distanceSampleRear =
-      m_loader.getDoubleFromNexusPath(firstEntry, detectorPath + "/det2_calc");
-  pos.distanceSampleBottomTop =
-      m_loader.getDoubleFromNexusPath(firstEntry, detectorPath + "/det1_calc");
+  pos.distanceSampleRear = m_loadHelper.getDoubleFromNexusPath(
+      firstEntry, detectorPath + "/det2_calc");
+  pos.distanceSampleBottomTop = m_loadHelper.getDoubleFromNexusPath(
+      firstEntry, detectorPath + "/det1_calc");
   pos.distanceSampleRightLeft =
       pos.distanceSampleBottomTop +
-      m_loader.getDoubleFromNexusPath(firstEntry,
-                                      detectorPath + "/det1_panel_separation");
-  pos.shiftLeft = m_loader.getDoubleFromNexusPath(
+      m_loadHelper.getDoubleFromNexusPath(
+          firstEntry, detectorPath + "/det1_panel_separation");
+  pos.shiftLeft = m_loadHelper.getDoubleFromNexusPath(
                       firstEntry, detectorPath + "/OxL_actual") *
                   1e-3;
-  pos.shiftRight = m_loader.getDoubleFromNexusPath(
+  pos.shiftRight = m_loadHelper.getDoubleFromNexusPath(
                        firstEntry, detectorPath + "/OxR_actual") *
                    1e-3;
-  pos.shiftUp = m_loader.getDoubleFromNexusPath(firstEntry,
-                                                detectorPath + "/OyT_actual") *
+  pos.shiftUp = m_loadHelper.getDoubleFromNexusPath(
+                    firstEntry, detectorPath + "/OyT_actual") *
                 1e-3;
-  pos.shiftDown = m_loader.getDoubleFromNexusPath(
+  pos.shiftDown = m_loadHelper.getDoubleFromNexusPath(
                       firstEntry, detectorPath + "/OyB_actual") *
                   1e-3;
   pos >> g_log.debug();
@@ -366,16 +367,16 @@ void LoadILLSANS::initWorkSpaceD33(NeXus::NXEntry &firstEntry,
         // LTOF mode
         std::string binPathPrefix(instrumentPath +
                                   "/tof/tof_wavelength_detector");
-        binningRear = m_loader.getTimeBinningFromNexusPath(firstEntry,
-                                                           binPathPrefix + "1");
-        binningRight = m_loader.getTimeBinningFromNexusPath(
+        binningRear = m_loadHelper.getTimeBinningFromNexusPath(
+            firstEntry, binPathPrefix + "1");
+        binningRight = m_loadHelper.getTimeBinningFromNexusPath(
             firstEntry, binPathPrefix + "2");
-        binningLeft = m_loader.getTimeBinningFromNexusPath(firstEntry,
-                                                           binPathPrefix + "3");
-        binningDown = m_loader.getTimeBinningFromNexusPath(firstEntry,
-                                                           binPathPrefix + "4");
-        binningUp = m_loader.getTimeBinningFromNexusPath(firstEntry,
-                                                         binPathPrefix + "5");
+        binningLeft = m_loadHelper.getTimeBinningFromNexusPath(
+            firstEntry, binPathPrefix + "3");
+        binningDown = m_loadHelper.getTimeBinningFromNexusPath(
+            firstEntry, binPathPrefix + "4");
+        binningUp = m_loadHelper.getTimeBinningFromNexusPath(
+            firstEntry, binPathPrefix + "5");
       } catch (std::runtime_error &e) {
         throw std::runtime_error(
             "Unable to load the wavelength axes for TOF data " +
@@ -737,7 +738,7 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
     // merge runs
     wavelengthRes = std::round(wavelengthRes * 100) / 100.;
     runDetails.addProperty<double>("wavelength", wavelength);
-    double ei = m_loader.calculateEnergy(wavelength);
+    double ei = m_loadHelper.calculateEnergy(wavelength);
     runDetails.addProperty<double>("Ei", ei, true);
     // wavelength
     m_defaultBinning[0] = wavelength - wavelengthRes * wavelength * 0.01 / 2;
@@ -746,6 +747,11 @@ void LoadILLSANS::loadMetaData(const NeXus::NXEntry &entry,
   // Add a log called timer with the value of duration
   const double duration = entry.getFloat("duration");
   runDetails.addProperty<double>("timer", duration);
+
+  // the start time is needed in the workspace when loading the parameter file
+  std::string startDate = entry.getString("start_time");
+  runDetails.addProperty<std::string>(
+      "start_time", m_loadHelper.dateTimeInIsoFormat(startDate));
 }
 
 /**
@@ -759,7 +765,7 @@ void LoadILLSANS::setFinalProperties(const std::string &filename) {
   NXstatus nxStat = NXopen(filename.c_str(), NXACC_READ, &nxHandle);
 
   if (nxStat != NX_ERROR) {
-    m_loader.addNexusFieldsToWsRun(nxHandle, runDetails);
+    m_loadHelper.addNexusFieldsToWsRun(nxHandle, runDetails);
     NXclose(&nxHandle);
   }
 }

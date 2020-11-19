@@ -25,6 +25,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include "tbb/parallel_for.h"
+#include <algorithm>
 #include <limits>
 #include <numeric>
 
@@ -134,6 +135,21 @@ void EventWorkspace::init(const HistogramData::Histogram &histogram) {
   m_axes.resize(2);
   m_axes[0] = std::make_unique<API::RefAxis>(this);
   m_axes[1] = std::make_unique<API::SpectraAxis>(this);
+}
+
+///  Returns true if the workspace is ragged (has differently sized spectra).
+/// @returns true if the workspace is ragged.
+bool EventWorkspace::isRaggedWorkspace() const {
+  if (data.empty()) {
+    throw std::runtime_error("There are no pixels in the event workspace, "
+                             "therefore cannot determine if it is ragged.");
+  } else {
+    const auto numberOfBins = data[0]->histogram_size();
+    return std::any_of(data.cbegin(), data.cend(),
+                       [&numberOfBins](const auto &eventList) {
+                         return numberOfBins != eventList->histogram_size();
+                       });
+  }
 }
 
 /// The total size of the workspace

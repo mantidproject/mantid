@@ -79,6 +79,7 @@ void Figure::setFaceColor(const char *color) {
  * @param args A hash of parameters to pass to set_tight_layout
  */
 void Figure::setTightLayout(QHash<QString, QVariant> const &args) {
+  GlobalInterpreterLock lock;
   pyobj().attr("set_tight_layout")(Python::qHashToDict(args));
 }
 

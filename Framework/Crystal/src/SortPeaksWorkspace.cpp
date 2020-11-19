@@ -70,7 +70,7 @@ void SortPeaksWorkspace::exec() {
 
   // Perform the sorting.
   std::vector<PeaksWorkspace::ColumnAndDirection> sortCriteria;
-  sortCriteria.emplace_back(std::make_pair(columnToSortBy, sortAscending));
+  sortCriteria.emplace_back(columnToSortBy, sortAscending);
   outputWS->sort(sortCriteria);
   setProperty("OutputWorkspace", outputWS);
 }

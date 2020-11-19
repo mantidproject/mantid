@@ -223,7 +223,7 @@ void DetectorEfficiencyCor::correctForEfficiency(
   const auto &detectorInfo = m_inputWS->detectorInfo();
   const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(spectraIn);
 
-  for (const auto index : spectrumDefinition) {
+  for (const auto &index : spectrumDefinition) {
     const auto detIndex = index.first;
     const auto &det_member = detectorInfo.detector(detIndex);
     Parameter_sptr par =

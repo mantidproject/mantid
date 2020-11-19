@@ -26,6 +26,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
     def __init__(self, canvas, toolbar_manager, parent=None):
         super(EngDiffFitPropertyBrowser, self).__init__(canvas, toolbar_manager, parent)
         self.fit_notifier = GenericObservable()
+        self.fit_enabled_notifier = GenericObservable()
 
     def set_output_window_names(self):
         """
@@ -33,6 +34,54 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         :return: None
         """
         return None
+
+    def get_fitprop(self):
+        """
+        Get the algorithm parameters updated post-fit
+        :return: dictionary of parameters
+        """
+        dict_str = self.getFitAlgorithmParameters()
+        if dict_str:
+            # evalaute string to make a dict (replace case of bool values)
+            return eval(dict_str.replace('true', 'True').replace('false', 'False'))
+        else:
+            # if no fit has been performed
+            return None
+
+    def read_current_fitprop(self):
+        """
+        Get algorithm parameters currently displayed in the UI browser (incl. defaults that user cannot change)
+        :return: dict in style of self.getFitAlgorithmParameters()
+        """
+        fitprop = {'properties': {'InputWorkspace': self.workspaceName(),
+                                  'Output': self.outputName(),
+                                  'StartX': self.startX(),
+                                  'EndX': self.endX(),
+                                  'Function': self.getFunctionString(),
+                                  'ConvolveMembers': True,
+                                  'OutputCompositeMembers': True}}
+        exclude = self.getExcludeRange()
+        if exclude:
+            fitprop['properties']['Exclude'] = [int(s) for s in exclude.split(',')]
+        return fitprop
+
+    def save_current_setup(self, name):
+        self.executeCustomSetupRemove(name)
+        self.saveFunction(name)
+
+    def show(self):
+        """
+        Override the base class method. Hide the peak editing tool.
+        """
+        super(EngDiffFitPropertyBrowser, self).show()
+        self.fit_enabled_notifier.notify_subscribers(self.isFitEnabled() and self.isVisible())
+
+    def hide(self):
+        """
+        Override the base class method. Hide the peak editing tool.
+        """
+        super(EngDiffFitPropertyBrowser, self).hide()
+        self.fit_enabled_notifier.notify_subscribers(self.isFitEnabled() and self.isVisible())
 
     def _get_allowed_spectra(self):
         """
@@ -58,10 +107,17 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         This is called after Fit finishes to update the fit curves.
         :param name: The name of Fit's output workspace.
         """
-
         ws = AnalysisDataService.retrieve(name)
         self.do_plot(ws, plot_diff=self.plotDiff())
         self.fit_result_ws_name = name
-        self.saveFunction(self.workspaceName())
-        results_dict = eval(self.getFitAlgorithmParameters().replace('true', 'True').replace('false', 'False'))
-        self.fit_notifier.notify_subscribers(results_dict)
+        self.save_current_setup(self.workspaceName())
+        self.fit_notifier.notify_subscribers([self.get_fitprop()])  # needs to be passed a list
+
+    @Slot()
+    def function_changed_slot(self):
+        """
+        Update the peak editing tool after function structure has changed in
+        the browser: functions added and/or removed.
+        """
+        super(EngDiffFitPropertyBrowser, self).function_changed_slot()
+        self.fit_enabled_notifier.notify_subscribers(self.isFitEnabled() and self.isVisible())
