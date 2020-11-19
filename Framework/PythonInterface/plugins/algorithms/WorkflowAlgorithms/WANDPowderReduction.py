@@ -34,7 +34,7 @@ from mantid.simpleapi import (
     BinaryOperateMasks,
     Integration,
     GroupWorkspaces,
-    RenameWorkspaces,
+    RenameWorkspace,
 )
 from mantid.kernel import (
     StringListValidator,
@@ -235,7 +235,6 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                     MultiplyBySpectra=True,
                     EnableLogging=False,
                 )
-
         else:
             if len(data) == 1:
                 outWS = RenameWorkspace(InputWorkspace=data[0],
@@ -315,14 +314,10 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         # such that all data can be binned exactly the same way.
 
         # BEGIN_FOR: located_global_xMin&xMax
-        #output_workspaces = [f'{outname}{n+1}' for n in range(len(input_workspaces))]
-        #mask_workspaces = [f'{mask}{n+1}' for n in range(len(input_workspaces))]
-        #for _wksp_in, _mask_n, _wksp_out in zip(input_workspaces, mask_workspaces, output_workspaces):
         output_workspaces = [f'{outname}{n+1}' for n in range(len(input_workspaces))]
         mask_workspaces = []
         for n, (_wksp_in, _wksp_out) in enumerate(zip(input_workspaces, output_workspaces)):
             _mask_n = f'__mask_{n}'  # mask for n-th
-            #_wksp_out = output_workspaces[n]    # output workspace for n-th
             self.temp_workspace_list.append(_mask_n)  # cleanup later
 
             ExtractMask(InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False)
@@ -344,9 +339,8 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 )
 
             self._to_spectrum_axis(_wksp_in, _wksp_out, _mask_n)
-
-            # append to the list of processed workspaces
-            output_workspaces.append(_wksp_out)
+            
+            #append to the list of processed workspaces
             mask_workspaces.append(_mask_n)
 
         return output_workspaces, mask_workspaces
