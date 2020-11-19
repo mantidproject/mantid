@@ -43,6 +43,11 @@ public:
   void reset() override;
   bool hasUnsavedChanges() const override;
   void setSaved() override;
+  std::string getSearchString() const override;
+  void setSearchString(std::string const &searchString) override;
+  std::string getSearchCycle() const override;
+  void setSearchCycle(std::string const &cycle) override;
+  void setSearchInstrument(std::string const &instrument) override;
   bool searchSettingsChanged(const std::string &text,
                              const std::string &instrument,
                              const std::string &cycle) const override;

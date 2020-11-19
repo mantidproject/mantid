@@ -89,6 +89,10 @@ void QtRunsView::initLayout() {
       &m_searchModel,
       SIGNAL(dataChanged(const QModelIndex &, const QModelIndex &)), this,
       SLOT(onSearchResultsChanged(const QModelIndex &, const QModelIndex &)));
+  // Connect signals for when search criteria have changed
+  connect(m_ui.textSearch, SIGNAL(editingFinished()),
+          SLOT(onSearchTextEdited()));
+  connect(m_ui.textCycle, SIGNAL(editingFinished()), SLOT(onCycleTextEdited()));
 }
 
 /**
@@ -269,10 +273,16 @@ void QtRunsView::onSearchComplete() {
 This slot notifies the presenter that the "search" button has been pressed
 */
 void QtRunsView::on_actionSearch_triggered() {
+  m_ui.textSearch->blockSignals(true);
+  m_ui.textCycle->blockSignals(true);
+
   Mantid::Kernel::UsageService::Instance().registerFeatureUsage(
       Mantid::Kernel::FeatureType::Feature,
       {"ISIS Reflectometry", "RunsTab", "Search"}, false);
   m_notifyee->notifySearch();
+
+  m_ui.textSearch->blockSignals(false);
+  m_ui.textCycle->blockSignals(false);
 }
 
 /**
@@ -336,6 +346,18 @@ void QtRunsView::onInstrumentChanged(int index) {
   m_notifyee->notifyChangeInstrumentRequested();
 }
 
+void QtRunsView::onSearchTextEdited() {
+  m_ui.textSearch->blockSignals(true);
+  m_notifyee->notifySearchTextEdited();
+  m_ui.textSearch->blockSignals(false);
+}
+
+void QtRunsView::onCycleTextEdited() {
+  m_ui.textCycle->blockSignals(true);
+  m_notifyee->notifyCycleTextEdited();
+  m_ui.textCycle->blockSignals(false);
+}
+
 /**
 Get the selected instrument for searching
 @returns the selected instrument to search for
@@ -389,26 +411,22 @@ QtRunsView::getMonitorAlgorithmRunner() const {
   return m_monitorAlgoRunner;
 }
 
-/**
-Get the string the user wants to search for.
-@returns The search string
-*/
 std::string QtRunsView::getSearchString() const {
   return m_ui.textSearch->text().toStdString();
 }
 
-/**
-Get the string the user wants to search for.
-@returns The search string
-*/
+void QtRunsView::setSearchString(std::string const &searchString) {
+  return m_ui.textSearch->setText(QString::fromStdString(searchString));
+}
+
 std::string QtRunsView::getSearchCycle() const {
   return m_ui.textCycle->text().toStdString();
 }
 
-/**
-Get the live data update interval value given by the user.
-@returns The live data update interval
-*/
+void QtRunsView::setSearchCycle(std::string const &cycle) {
+  m_ui.textCycle->setText(QString::fromStdString(cycle));
+}
+
 int QtRunsView::getLiveDataUpdateInterval() const {
   return m_ui.spinBoxUpdateInterval->value();
 }

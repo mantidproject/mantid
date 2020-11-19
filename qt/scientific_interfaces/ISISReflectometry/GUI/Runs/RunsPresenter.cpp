@@ -87,9 +87,41 @@ RunsTable &RunsPresenter::mutableRunsTable() {
   return tablePresenter()->mutableRunsTable();
 }
 
-/**
-   Used by the view to tell the presenter something has changed
-*/
+bool RunsPresenter::searchSettingsChanged() const {
+  return m_searcher->searchSettingsChanged(m_view->getSearchString(),
+                                           m_view->getSearchInstrument(),
+                                           m_view->getSearchCycle());
+}
+
+/** If search text has changed, reset the search results, unless the user
+ * cancels the operation, in which case restore the original search text
+ */
+void RunsPresenter::notifySearchTextEdited() {
+  if (m_view->getSearchString() == m_searcher->getSearchString())
+    return;
+
+  if (hasUnsavedSearchResults() && isOverwritePrevented())
+    m_view->setSearchString(m_searcher->getSearchString());
+  else {
+    m_searcher->reset();
+    m_searcher->setSearchString(m_view->getSearchString());
+  }
+}
+
+/** If cycle text has changed, reset the search results, unless the user
+ * cancels the operation, in which case restore the original cycle text
+ */
+void RunsPresenter::notifyCycleTextEdited() {
+  if (m_view->getSearchCycle() == m_searcher->getSearchCycle())
+    return;
+
+  if (hasUnsavedSearchResults() && isOverwritePrevented())
+    m_view->setSearchCycle(m_searcher->getSearchCycle());
+  else {
+    m_searcher->reset();
+    m_searcher->setSearchCycle(m_view->getSearchCycle());
+  }
+}
 
 void RunsPresenter::notifySearch() {
   updateWidgetEnabledState();
@@ -188,21 +220,17 @@ void RunsPresenter::notifyReductionPaused() {
  */
 bool RunsPresenter::resumeAutoreduction() {
   auto const searchString = m_view->getSearchString();
-  auto const instrument = m_view->getSearchInstrument();
-  auto const cycle = m_view->getSearchCycle();
 
   if (searchString == "") {
     m_messageHandler->giveUserInfo("Search field is empty", "Search Issue");
     return false;
   }
 
-  // Check if starting an autoreduction with new settings, reset the previous
-  // search results and clear the main table
-  if (m_searcher->searchSettingsChanged(searchString, instrument, cycle)) {
+  // If starting an autoreduction with new settings, clear the main table
+  if (searchSettingsChanged()) {
     if (isOverwritePrevented()) {
       return false;
     }
-    m_searcher->reset();
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
   }
 
@@ -252,7 +280,9 @@ void RunsPresenter::autoreductionCompleted() {
 void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   m_searcher->reset();
   m_view->setSearchInstrument(instrumentName);
+  m_searcher->setSearchInstrument(instrumentName);
   m_view->clearSearchText();
+  m_searcher->setSearchString("");
   tablePresenter()->notifyInstrumentChanged(instrumentName);
 }
 
@@ -271,19 +301,20 @@ void RunsPresenter::notifyChangesSaved() { m_searcher->setSaved(); }
  * there was a problem */
 bool RunsPresenter::search() {
   auto const searchString = m_view->getSearchString();
-  auto const instrument = m_view->getSearchInstrument();
-  auto const cycle = m_view->getSearchCycle();
 
   // Don't bother searching if they're not searching for anything
   if (searchString.empty())
     return false;
 
-  // Clear existing results if performing a different search
-  if (m_searcher->searchSettingsChanged(searchString, instrument, cycle)) {
+  if (searchSettingsChanged()) {
     if (hasUnsavedSearchResults() && isOverwritePrevented()) {
+      m_view->setSearchString(m_searcher->getSearchString());
+      m_view->setSearchCycle(m_searcher->getSearchCycle());
       return false;
     }
     m_searcher->reset();
+    m_searcher->setSearchString(m_view->getSearchString());
+    m_searcher->setSearchCycle(m_view->getSearchCycle());
   }
 
   if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),

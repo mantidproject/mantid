@@ -77,7 +77,9 @@ public:
   void setSearchInstrument(std::string const &instrumentName) override;
   void clearSearchText() override;
   std::string getSearchString() const override;
+  void setSearchString(std::string const &searchString) override;
   std::string getSearchCycle() const override;
+  void setSearchCycle(std::string const &cycle) override;
   int getLiveDataUpdateInterval() const override;
 
   std::shared_ptr<MantidQt::API::AlgorithmRunner>
@@ -128,6 +130,8 @@ private slots:
   void onStartMonitorComplete();
   void onSearchResultsChanged(const QModelIndex &, const QModelIndex &);
   void onSearchComplete();
+  void onSearchTextEdited();
+  void onCycleTextEdited();
   void onInstrumentChanged(int index);
   void onShowSearchContextMenuRequested(const QPoint &pos);
 };

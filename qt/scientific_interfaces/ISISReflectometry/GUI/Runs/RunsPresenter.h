@@ -106,6 +106,8 @@ public:
   bool isAnyBatchAutoreducing() const override;
 
   // RunsViewSubscriber overrides
+  void notifySearchTextEdited() override;
+  void notifyCycleTextEdited() override;
   void notifySearch() override;
   void notifyResumeAutoreductionRequested() override;
   void notifyPauseAutoreductionRequested() override;
@@ -153,6 +155,7 @@ private:
   bool search();
   void resizeSearchResultsColumns();
   bool searchInProgress() const;
+  bool searchSettingsChanged() const;
   /// autoreduction
   bool requireNewAutoreduction() const;
   void checkForNewRuns();

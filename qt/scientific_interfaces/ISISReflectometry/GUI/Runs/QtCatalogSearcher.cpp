@@ -199,18 +199,29 @@ SearchResult const &QtCatalogSearcher::getSearchResult(int index) const {
   return results().getRowData(index);
 }
 
-void QtCatalogSearcher::reset() {
-  results().clear();
-  m_searchText.clear();
-  m_instrument.clear();
-  m_cycle.clear();
-}
+void QtCatalogSearcher::reset() { results().clear(); }
 
 bool QtCatalogSearcher::hasUnsavedChanges() const {
   return results().hasUnsavedChanges();
 }
 
 void QtCatalogSearcher::setSaved() { results().setSaved(); }
+
+std::string QtCatalogSearcher::getSearchString() const { return m_searchText; }
+
+void QtCatalogSearcher::setSearchString(std::string const &searchString) {
+  m_searchText = searchString;
+}
+
+std::string QtCatalogSearcher::getSearchCycle() const { return m_cycle; }
+
+void QtCatalogSearcher::setSearchCycle(std::string const &cycle) {
+  m_cycle = cycle;
+}
+
+void QtCatalogSearcher::setSearchInstrument(std::string const &instrument) {
+  m_instrument = instrument;
+}
 
 bool QtCatalogSearcher::searchSettingsChanged(const std::string &text,
                                               const std::string &instrument,

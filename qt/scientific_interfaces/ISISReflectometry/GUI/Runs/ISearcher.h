@@ -40,6 +40,11 @@ public:
   virtual void reset() = 0;
   virtual bool hasUnsavedChanges() const = 0;
   virtual void setSaved() = 0;
+  virtual std::string getSearchString() const = 0;
+  virtual void setSearchString(std::string const &searchString) = 0;
+  virtual std::string getSearchCycle() const = 0;
+  virtual void setSearchCycle(std::string const &cycle) = 0;
+  virtual void setSearchInstrument(std::string const &instrument) = 0;
   virtual bool searchSettingsChanged(const std::string &text,
                                      const std::string &instrument,
                                      const std::string &cycle) const = 0;
