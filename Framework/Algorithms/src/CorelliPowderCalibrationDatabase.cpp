@@ -226,8 +226,9 @@ void CalibrationTableHandler::load(const std::string &filename) {
 //-----------------------------------------------------------------------------
 /**
  * @brief Save a specific component to database (csv) file
- * @param component
- * @param filename
+ * @param datestamp: YYYYMMDD date stamp
+ * @param component: component name
+ * @param filename: full path of the database file
  */
 TableWorkspace_sptr
 CalibrationTableHandler::saveCompomentDatabase(const std::string &datestamp,
@@ -500,8 +501,8 @@ void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles(
 
 /**
  * @brief Load data file if necessary and possible: component_caibws_map
- * @param calibdrdir : calibration database directory
- * @param calibwsmap
+ * @param calibdbdir: calibration database directory
+ * @param calibwsmap: map from component name to calibration table workspace
  */
 void CorelliPowderCalibrationDatabase::loadNonCalibratedComponentDatabase(
     const std::string &calibdbdir,
