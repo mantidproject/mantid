@@ -12,6 +12,8 @@ from math import (acos, sqrt, degrees)
 import re
 from copy import deepcopy
 import json
+from typing import Tuple
+
 import numpy as np
 from mantid.api import (AlgorithmManager, AnalysisDataService, isSameWorkspaceObject)
 from sans.common.constant_containers import (SANSInstrument_enum_list, SANSInstrument_string_list,
@@ -636,7 +638,12 @@ def get_ranges_for_rebin_array(rebin_array):
 # ----------------------------------------------------------------------------------------------------------------------
 # Functions related to workspace names
 # ----------------------------------------------------------------------------------------------------------------------
-def get_standard_output_workspace_name(state, reduction_data_type,
+def get_wav_range_from_ws(workspace) -> Tuple[float, float]:
+    range_str = workspace.getRun().getProperty("Wavelength Range").valueAsStr
+    return range_str.split('-')
+
+
+def get_standard_output_workspace_name(state, reduction_data_type, wav_range,
                                        include_slice_limits=True, custom_run_name=None):
     """
     Creates the name of the output workspace from a state object.
@@ -694,9 +701,7 @@ def get_standard_output_workspace_name(state, reduction_data_type,
         dimensionality_as_string = "_2D"
 
     # 5. Wavelength range
-    wavelength = state.wavelength
-    wavelength_range_string = "_" + str(wavelength.wavelength_interval.wavelength_min) \
-                              + "_" + str(wavelength.wavelength_interval.wavelength_max)
+    wavelength_range_string = f"_{wav_range[0]}_{wav_range[1]}"
 
     # 6. Phi Limits
     mask = state.mask
@@ -730,49 +735,52 @@ def get_standard_output_workspace_name(state, reduction_data_type,
     return output_workspace_name, output_workspace_base_name
 
 
-def get_transmission_output_name(state, data_type=DataType.SAMPLE, multi_reduction_type=None, fitted=True):
+def get_transmission_output_name(state, ws_group, data_type=DataType.SAMPLE,
+                                 multi_reduction_type=None, fitted=True,):
     user_specified_output_name = state.save.user_specified_output_name
 
     data = state.data
     short_run_number = data.sample_scatter_run_number
     short_run_number_as_string = str(short_run_number)
 
-    calculated_transmission_state = state.adjustment.calculate_transmission
-    fit = calculated_transmission_state.fit[DataType.SAMPLE.value]
-    wavelength_range_string = "_" + str(fit.wavelength_low) + "_" + str(fit.wavelength_high)
+    output_names, output_base_names = [], []
 
-    trans_suffix = "_trans_Sample" if data_type == DataType.SAMPLE else "_trans_Can"
-    trans_suffix = trans_suffix + '_unfitted' if not fitted else trans_suffix
+    for workspace in ws_group:
+        range_str = workspace.getRun().getProperty("Wavelength Range").valueAsStr
+        wav_range = range_str.split('-')
+        wavelength_range_string = f"_{wav_range[0]}_{wav_range[1]}"
 
-    if user_specified_output_name:
-        output_name = user_specified_output_name + trans_suffix
-        output_base_name = user_specified_output_name + '_trans'
-    else:
-        output_name = short_run_number_as_string + trans_suffix + wavelength_range_string
-        output_base_name = short_run_number_as_string + '_trans' + wavelength_range_string
+        trans_suffix = "_trans_Sample" if data_type == DataType.SAMPLE else "_trans_Can"
+        trans_suffix = trans_suffix + '_unfitted' if not fitted else trans_suffix
 
-    if multi_reduction_type and fitted:
-        if multi_reduction_type["wavelength_range"]:
-            wavelength = state.wavelength
-            wavelength_range_string = "_" + str(wavelength.wavelength_interval.wavelength_min) + "_" + str(
-                wavelength.wavelength_interval.wavelength_max)
-            output_name += wavelength_range_string
+        if user_specified_output_name:
+            output_name = user_specified_output_name + trans_suffix
+            output_base_name = user_specified_output_name + '_trans'
+        else:
+            output_name = short_run_number_as_string + trans_suffix + wavelength_range_string
+            output_base_name = short_run_number_as_string + '_trans'
 
-    return output_name, output_base_name
+        if multi_reduction_type and fitted:
+            if multi_reduction_type["wavelength_range"]:
+                output_name += wavelength_range_string
+        output_names.append(output_name)
+        output_base_names.append(output_base_name)
+
+    return output_names, output_base_names
 
 
-def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_type=None,
-                    event_slice_optimisation=False):
+def get_output_name(state, reduction_mode, is_group, wav_range, suffix="",
+                    multi_reduction_type=None, event_slice_optimisation=False):
     # Get the external settings from the save state
     save_info = state.save
     user_specified_output_name = save_info.user_specified_output_name
     user_specified_output_name_suffix = save_info.user_specified_output_name_suffix
 
     # Get the standard workspace name
-    workspace_name, \
-        workspace_base_name = get_standard_output_workspace_name(state, reduction_mode,
-                                                                 include_slice_limits=(not event_slice_optimisation),
-                                                                 custom_run_name=user_specified_output_name)
+    workspace_name, workspace_base_name = \
+        get_standard_output_workspace_name(state, reduction_mode, wav_range=wav_range,
+                                           include_slice_limits=(not event_slice_optimisation),
+                                           custom_run_name=user_specified_output_name)
 
     # If user specified output name is not none then we use it for the base name
     output_name = workspace_name
@@ -795,12 +803,6 @@ def get_output_name(state, reduction_mode, is_group, suffix="", multi_reduction_
                 start_time_as_string = ""
                 end_time_as_string = ""
             output_name += start_time_as_string + end_time_as_string
-
-        if multi_reduction_type["wavelength_range"]:
-            wavelength = state.wavelength
-            wavelength_range_string = "_" + str(wavelength.wavelength_interval.wavelength_min) + "_" + str(
-                wavelength.wavelength_interval.wavelength_max)
-            output_name += wavelength_range_string
 
     # Add a suffix if the user has specified one
     if user_specified_output_name_suffix:

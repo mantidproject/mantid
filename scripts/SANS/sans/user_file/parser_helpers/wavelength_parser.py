@@ -4,7 +4,7 @@
 #     NScD Oak Ridge National Laboratory, European Spallation Source
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from typing import Tuple, List
+from typing import Tuple
 
 from mantid.py36compat import dataclass
 from sans.common.enums import RangeStepType
@@ -13,6 +13,7 @@ from sans.state.StateObjects.StateCalculateTransmission import StateCalculateTra
 from sans.state.StateObjects.StateNormalizeToMonitor import StateNormalizeToMonitor
 from sans.state.StateObjects.StateWavelength import StateWavelength
 from sans.state.StateObjects.StateWavelengthAndPixelAdjustment import StateWavelengthAndPixelAdjustment
+from sans.state.StateObjects.wavelength_interval import WavRangePairs, WavRange
 from sans.user_file.parser_helpers.toml_parser_impl_base import TomlParserImplBase
 
 
@@ -32,17 +33,17 @@ class DuplicateWavelengthStates:
                 self.wavelength, self.pixel]
 
 
-def parse_range_wavelength(wavelength_range: str) -> Tuple[float, float, List[Tuple[float, float]]]:
+def parse_range_wavelength(wavelength_range: str) -> Tuple[WavRange, WavRangePairs]:
     """
     Parses a wavelength range and outputs a tuple of wavelength_start
     and wavelength_stop in the format StateObjects expect.
     This method exists to unify the GUI and TOML file parsing into a single place
-    return: min_val, max_val, wavelength pairs - e.g. [(1., 2.), (2., 4.)]
+    return: full wavelength as tuple - (min, max), wavelength pairs - e.g. [(1., 2.), (2., 4.)]
     """
     wavelength_pairs = get_ranges_from_event_slice_setting(wavelength_range)
-    min_val = min(wavelength_pairs, key=lambda v: v[0])[0]
-    max_val = max(wavelength_pairs, key=lambda v: v[1])[1]
-    return min_val, max_val, wavelength_pairs
+    full_wavelength = (min(wavelength_pairs, key=lambda v: v[0])[0],  max(wavelength_pairs, key=lambda v: v[1])[1])
+    wavelength_pairs.append(full_wavelength)
+    return full_wavelength, wavelength_pairs
 
 
 class WavelengthTomlParser(TomlParserImplBase):
@@ -70,11 +71,10 @@ class WavelengthTomlParser(TomlParserImplBase):
 
     def _parse_range_wavelength(self, state_objs):
         range_binning = self.get_mandatory_val(["binning", "wavelength", "binning"])
-        min_val, max_val, pairs = parse_range_wavelength(range_binning)
+        full_range, pairs = parse_range_wavelength(range_binning)
 
         for state_obj in state_objs.iterate_fields():
-            state_obj.wavelength_interval.wavelength_min = min_val
-            state_obj.wavelength_interval.wavelength_max = max_val
+            state_obj.wavelength_interval.wavelength_full_range = full_range
             state_obj.wavelength_interval.selected_ranges = pairs
 
     def _parse_linear_wavelength(self, state_objs):
@@ -82,5 +82,4 @@ class WavelengthTomlParser(TomlParserImplBase):
         wavelength_stop = self.get_mandatory_val(["binning", "wavelength", "stop"])
 
         for state_obj in state_objs.iterate_fields():
-            state_obj.wavelength_interval.wavelength_min = wavelength_start
-            state_obj.wavelength_interval.wavelength_max = wavelength_stop
+            state_obj.wavelength_interval.wavelength_full_range = (wavelength_start, wavelength_stop)

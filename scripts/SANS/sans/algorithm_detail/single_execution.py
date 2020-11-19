@@ -10,10 +10,10 @@ import sys
 from mantid.kernel import mpisetup
 from sans.algorithm_detail.bundles import (EventSliceSettingBundle, OutputBundle,
                                            OutputPartsBundle, OutputTransmissionBundle)
-from sans.algorithm_detail.merge_reductions import (MergeFactory, is_sample, is_can)
+from sans.algorithm_detail.merge_reductions import MergeFactory
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.constants import EMPTY_NAME
-from sans.common.enums import (DetectorType, ReductionMode, OutputParts, TransmissionType)
+from sans.common.enums import (DetectorType, ReductionMode, OutputParts, TransmissionType, DataType)
 from sans.common.general_functions import (create_child_algorithm, get_reduced_can_workspace_from_ads,
                                            get_transmission_workspaces_from_ads,
                                            write_hash_into_reduced_can_workspace)
@@ -85,40 +85,18 @@ def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
 
     reduction_alg.setProperty("DataType", reduction_setting_bundle.data_type.value)
 
-    reduction_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+    reduction_alg.setProperty("OutputWorkspaces", EMPTY_NAME)
     reduction_alg.setProperty("SumOfCounts", EMPTY_NAME)
     reduction_alg.setProperty("SumOfNormFactors", EMPTY_NAME)
 
     # Run the reduction core
     reduction_alg.execute()
 
-    # Get the results
-    output_workspace = reduction_alg.getProperty("OutputWorkspace").value
-    output_workspace_count = reduction_alg.getProperty("SumOfCounts").value
-    output_workspace_norm = reduction_alg.getProperty("SumOfNormFactors").value
-    output_calculated_transmission_workspace = reduction_alg.getProperty("CalculatedTransmissionWorkspace").value
-    output_unfitted_transmission_workspace = reduction_alg.getProperty("UnfittedTransmissionWorkspace").value
-
     # Pull the result out of the workspace
-    output_bundle = OutputBundle(state=reduction_setting_bundle.state,
-                                 data_type=reduction_setting_bundle.data_type,
-                                 reduction_mode=reduction_setting_bundle.reduction_mode,
-                                 output_workspace=output_workspace)
+    output_bundles, output_part_bundles, output_transmission_bundles = _pack_bundles(reduction_alg,
+                                                                                     reduction_setting_bundle)
 
-    output_parts_bundle = OutputPartsBundle(state=reduction_setting_bundle.state,
-                                            data_type=reduction_setting_bundle.data_type,
-                                            reduction_mode=reduction_setting_bundle.reduction_mode,
-                                            output_workspace_count=output_workspace_count,
-                                            output_workspace_norm=output_workspace_norm)
-
-    output_transmission_bundle = OutputTransmissionBundle(state=reduction_setting_bundle.state,
-                                                          data_type=reduction_setting_bundle.data_type,
-                                                          calculated_transmission_workspace=
-                                                          output_calculated_transmission_workspace,
-                                                          unfitted_transmission_workspace=
-                                                          output_unfitted_transmission_workspace,
-                                                          )
-    return output_bundle, output_parts_bundle, output_transmission_bundle
+    return output_bundles, output_part_bundles, output_transmission_bundles
 
 
 def run_core_reduction(reduction_alg, reduction_setting_bundle):
@@ -146,7 +124,7 @@ def run_core_reduction(reduction_alg, reduction_setting_bundle):
     if reduction_setting_bundle.direct_workspace is not None:
         reduction_alg.setProperty("DirectWorkspace", reduction_setting_bundle.direct_workspace)
 
-    reduction_alg.setProperty("OutputWorkspace", EMPTY_NAME)
+    reduction_alg.setProperty("OutputWorkspaces", EMPTY_NAME)
     reduction_alg.setProperty("SumOfCounts", EMPTY_NAME)
     reduction_alg.setProperty("SumOfNormFactors", EMPTY_NAME)
 
@@ -154,62 +132,74 @@ def run_core_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.execute()
 
     # Get the results
-    output_workspace = reduction_alg.getProperty("OutputWorkspace").value
-    output_workspace_count = reduction_alg.getProperty("SumOfCounts").value
-    output_workspace_norm = reduction_alg.getProperty("SumOfNormFactors").value
-    output_calculated_transmission_workspace = reduction_alg.getProperty("CalculatedTransmissionWorkspace").value
-    output_unfitted_transmission_workspace = reduction_alg.getProperty("UnfittedTransmissionWorkspace").value
-    # Pull the result out of the workspace
-    output_bundle = OutputBundle(state=reduction_setting_bundle.state,
-                                 data_type=reduction_setting_bundle.data_type,
-                                 reduction_mode=reduction_setting_bundle.reduction_mode,
-                                 output_workspace=output_workspace)
+    output_bundles, output_part_bundles, output_transmission_bundles = _pack_bundles(reduction_alg,
+                                                                                     reduction_setting_bundle)
 
-    output_parts_bundle = OutputPartsBundle(state=reduction_setting_bundle.state,
-                                            data_type=reduction_setting_bundle.data_type,
-                                            reduction_mode=reduction_setting_bundle.reduction_mode,
-                                            output_workspace_count=output_workspace_count,
-                                            output_workspace_norm=output_workspace_norm)
-
-    output_transmission_bundle = OutputTransmissionBundle(state=reduction_setting_bundle.state,
-                                                          data_type=reduction_setting_bundle.data_type,
-                                                          calculated_transmission_workspace=output_calculated_transmission_workspace,
-                                                          unfitted_transmission_workspace=output_unfitted_transmission_workspace
-                                                          )
-    return output_bundle, output_parts_bundle, output_transmission_bundle
+    return output_bundles, output_part_bundles, output_transmission_bundles
 
 
-def get_final_output_workspaces(output_bundles, parent_alg):
+def _pack_bundles(reduction_alg, reduction_setting_bundle):
+    output_workspaces = reduction_alg.getProperty("OutputWorkspaces").value
+    output_workspace_counts = reduction_alg.getProperty("SumOfCounts").value
+    output_workspace_norms = reduction_alg.getProperty("SumOfNormFactors").value
+    output_calculated_transmission_workspaces = reduction_alg.getProperty("CalculatedTransmissionWorkspaces").value
+    output_unfitted_transmission_workspaces = reduction_alg.getProperty("UnfittedTransmissionWorkspaces").value
+
+    output_bundles, output_part_bundles, output_transmission_bundles = [], [], []
+    for i in range(output_workspaces.getNumberOfEntries()):
+        output_bundles.append(OutputBundle(state=reduction_setting_bundle.state,
+                                           data_type=reduction_setting_bundle.data_type,
+                                           reduction_mode=reduction_setting_bundle.reduction_mode,
+                                           output_workspace=output_workspaces.getItem(i)))
+
+        output_part_bundles.append(OutputPartsBundle(
+            state=reduction_setting_bundle.state, data_type=reduction_setting_bundle.data_type,
+            reduction_mode=reduction_setting_bundle.reduction_mode,
+            output_workspace_count=output_workspace_counts.getItem(i),
+            output_workspace_norm=output_workspace_norms.getItem(i)))
+
+        output_transmission_bundles.append(OutputTransmissionBundle(
+            state=reduction_setting_bundle.state, data_type=reduction_setting_bundle.data_type,
+            calculated_transmission_workspace=output_calculated_transmission_workspaces.getItem(i),
+            unfitted_transmission_workspace=output_unfitted_transmission_workspaces.getItem(i)))
+    return output_bundles, output_part_bundles, output_transmission_bundles
+
+
+def get_final_output_workspaces(completed_event_slices, parent_alg):
     """
     This function provides the final steps for the data reduction.
 
     The final steps are:
     1. Can Subtraction (if required)
     2. Data clean up (if required)
-    :param output_bundles: A set of outputBundles
+    :param completed_event_slices: A list of completed output bundles
     :param parent_alg: a handle to the parent algorithm.
     :return: a map of ReductionMode vs final output workspaces.
     """
-
-    reduction_mode_vs_output_bundles = get_reduction_mode_vs_output_bundles(output_bundles)
+    can_outputs, sample_outputs = get_reduction_mode_vs_output_bundles(completed_event_slices)
 
     # For each reduction mode, we need to perform a can subtraction (and potential cleaning of the workspace)
     final_output_workspaces = {}
-    for reduction_mode, output_bundles in reduction_mode_vs_output_bundles.items():
-        # Find the sample and the can in the data collection
-        output_sample_workspace = next((output_bundle.output_workspace for output_bundle in output_bundles
-                                        if is_sample(output_bundle)), None)
-        output_can_workspace = next((output_bundle.output_workspace for output_bundle in output_bundles
-                                     if is_can(output_bundle)), None)
-        # Perform the can subtraction
-        if output_can_workspace is not None:
-            final_output_workspace = perform_can_subtraction(output_sample_workspace, output_can_workspace, parent_alg)
-        else:
-            final_output_workspace = output_sample_workspace
+    for bank in sample_outputs.keys():
+        can_list = can_outputs.get(bank, None)
+        sample_list = sample_outputs[bank]
+        final_output_workspaces[bank] = []
 
-        # Tidy up the workspace by removing start/end-NANs and start/end-INFs
-        final_output_workspace = strip_end_nans(final_output_workspace, parent_alg)
-        final_output_workspaces.update({reduction_mode: final_output_workspace})
+        # Iterate through the sample list to pair up the cans too
+        for i, output_sample_bundle in enumerate(sample_list):
+            output_can_bundle = can_list[i] if i < len(can_list) else None
+
+            # Perform the can subtraction
+            if output_can_bundle is not None:
+                final_output_workspace = perform_can_subtraction(output_sample_bundle.output_workspace,
+                                                                 output_can_bundle.output_workspace,
+                                                                 parent_alg)
+            else:
+                final_output_workspace = output_sample_bundle.output_workspace
+
+            # Tidy up the workspace by removing start/end-NANs and start/end-INFs
+            final_output_workspace = strip_end_nans(final_output_workspace, parent_alg)
+            final_output_workspaces[bank].append(final_output_workspace)
 
     # Finally add sample log information
     # TODO: Add log information
@@ -282,20 +272,31 @@ def get_merge_bundle_for_merge_request(output_bundles, parent_alg):
     return merged
 
 
-def get_reduction_mode_vs_output_bundles(output_bundles):
+def get_reduction_mode_vs_output_bundles(completed_event_slice_bundles):
     """
     Groups the reduction information by the reduction mode, e.g. all information regarding HAB is collated, similarly
     for LAB.
     """
-    outputs = {}
-    # Pair up the different reduction modes
-    for output_bundle in output_bundles:
-        key = output_bundle.reduction_mode
-        if key in outputs:
-            outputs[key].append(output_bundle)
+    can_outputs = {}
+    sample_outputs = {}
+
+    def pack_reduction_modes(output_dict, bundle):
+        key = bundle.reduction_mode
+        if key in output_dict:
+            output_dict[key].append(output)
         else:
-            outputs.update({key: [output_bundle]})
-    return outputs
+            output_dict.update({key: [bundle]})
+
+    # Pair up the different reduction modes
+
+    for event_slice in completed_event_slice_bundles:
+        for output in event_slice.output_bundles:
+            if output.data_type is DataType.CAN:
+                pack_reduction_modes(can_outputs, output)
+            else:
+                pack_reduction_modes(sample_outputs, output)
+
+    return can_outputs, sample_outputs
 
 
 def get_component_to_reduce(reduction_setting_bundle):
@@ -341,10 +342,11 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
     output_parts_bundle = OutputPartsBundle(state=state, data_type=data_type, reduction_mode=reduction_mode,
                                             output_workspace_count=reduced_can_workspace_count,
                                             output_workspace_norm=reduced_can_workspace_norm)
-    output_transmission_bundle = OutputTransmissionBundle(state=reduction_setting_bundle.state, data_type=data_type,
-                                                          calculated_transmission_workspace=output_calculated_transmission_workspace,
-                                                          unfitted_transmission_workspace=output_unfitted_transmission_workspace
-                                                          )
+    output_transmission_bundle = OutputTransmissionBundle(
+        state=reduction_setting_bundle.state, data_type=data_type,
+        calculated_transmission_workspace=output_calculated_transmission_workspace,
+        unfitted_transmission_workspace=output_unfitted_transmission_workspace)
+
     # The logic table for the recalculation of the partial outputs is:
     # | output_parts | reduced_can_workspace_count is None |  reduced_can_workspace_norm is None | Recalculate |
     # ----------------------------------------------------------------------------------------------------------
@@ -381,30 +383,28 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
                 output_transmission_bundle = run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle)
 
         # Now we need to tag the workspaces and add it to the ADS
-        if output_bundle.output_workspace is not None:
-            write_hash_into_reduced_can_workspace(state=output_bundle.state,
-                                                  workspace=output_bundle.output_workspace,
+        for bundle in output_bundle:
+            write_hash_into_reduced_can_workspace(state=bundle.state,
+                                                  workspace=bundle.output_workspace,
                                                   partial_type=None,
                                                   reduction_mode=reduction_mode)
-        if output_transmission_bundle.calculated_transmission_workspace is not None and \
-                output_transmission_bundle.unfitted_transmission_workspace is not None:
-            write_hash_into_reduced_can_workspace(state=output_transmission_bundle.state,
-                                                  workspace=output_transmission_bundle.calculated_transmission_workspace,
+        for bundle in output_transmission_bundle:
+            write_hash_into_reduced_can_workspace(state=bundle.state,
+                                                  workspace=bundle.calculated_transmission_workspace,
                                                   partial_type=TransmissionType.CALCULATED,
                                                   reduction_mode=reduction_mode)
-            write_hash_into_reduced_can_workspace(state=output_transmission_bundle.state,
-                                                  workspace=output_transmission_bundle.unfitted_transmission_workspace,
+            write_hash_into_reduced_can_workspace(state=bundle.state,
+                                                  workspace=bundle.unfitted_transmission_workspace,
                                                   partial_type=TransmissionType.UNFITTED,
                                                   reduction_mode=reduction_mode)
-        if (output_parts_bundle.output_workspace_count is not None
-                and output_parts_bundle.output_workspace_norm is not None):
-            write_hash_into_reduced_can_workspace(state=output_parts_bundle.state,
-                                                  workspace=output_parts_bundle.output_workspace_count,
+        for bundle in output_parts_bundle:
+            write_hash_into_reduced_can_workspace(state=bundle.state,
+                                                  workspace=bundle.output_workspace_count,
                                                   partial_type=OutputParts.COUNT,
                                                   reduction_mode=reduction_mode)
 
-            write_hash_into_reduced_can_workspace(state=output_parts_bundle.state,
-                                                  workspace=output_parts_bundle.output_workspace_norm,
+            write_hash_into_reduced_can_workspace(state=bundle.state,
+                                                  workspace=bundle.output_workspace_norm,
                                                   partial_type=OutputParts.NORM,
                                                   reduction_mode=reduction_mode)
 

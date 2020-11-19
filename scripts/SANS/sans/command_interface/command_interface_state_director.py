@@ -544,8 +544,8 @@ class CommandInterfaceStateDirector(object):
         # something is wrong
         if self._processed_state_obj and self._processed_state_obj.wavelength:
             existing_wavelength = self._processed_state_obj.wavelength
-            new_wav_min = wav_min if wav_min else existing_wavelength.wavelength_interval.wavelength_min
-            new_wav_max = wav_max if wav_max else existing_wavelength.wavelength_interval.wavelength_max
+            new_wav_min = wav_min if wav_min else existing_wavelength.wavelength_interval.wavelength_full_range[0]
+            new_wav_max = wav_max if wav_max else existing_wavelength.wavelength_interval.wavelength_full_range[1]
             new_range = simple_range(start=new_wav_min, stop=new_wav_max,
                                      step=existing_wavelength.wavelength_interval.wavelength_step,
                                      step_type=existing_wavelength.wavelength_step_type)
