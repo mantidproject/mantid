@@ -19,6 +19,7 @@
 #include <sstream>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
@@ -30,7 +31,7 @@ using namespace Mantid::Kernel::Strings;
  * @param workspace workspace possibly containing Q values.
  */
 std::vector<double> extractQValues(const MatrixWorkspace_sptr &workspace,
-                                   const Spectra &spectra) {
+                                   const FunctionModelSpectra &spectra) {
   std::vector<double> qs;
   // Check if the vertical axis has units of momentum transfer, then extract Q
   // values...
@@ -185,129 +186,15 @@ std::string createExcludeRegionString(std::string regionString) {
   return orderExcludeRegionString(bounds);
 }
 
-std::vector<MantidQt::CustomInterfaces::IDA::WorkspaceIndex>
-workspaceIndexVectorFromString(const std::string &listString) {
-  auto const intVec = vectorFromString<size_t>(listString);
-  std::vector<MantidQt::CustomInterfaces::IDA::WorkspaceIndex> output;
-  for (auto const i : intVec) {
-    output.emplace_back(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{i});
-  }
-  return output;
-}
-
 } // namespace
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-Spectra::Spectra(const std::string &str)
-    : m_vec(workspaceIndexVectorFromString(str)), m_isContinuous(true) {
-  checkContinuous();
-}
-
-Spectra::Spectra(WorkspaceIndex minimum, WorkspaceIndex maximum) {
-  if (maximum < minimum) {
-    std::swap(minimum, maximum);
-  }
-  m_vec.resize(maximum.value - minimum.value + 1);
-  std::iota(m_vec.begin(), m_vec.end(), minimum);
-  m_isContinuous = true;
-}
-
-Spectra::Spectra(const Spectra &vec)
-    : m_vec(vec.m_vec), m_isContinuous(vec.m_isContinuous) {}
-
-Spectra::Spectra(Spectra &&vec)
-    : m_vec(std::move(vec.m_vec)),
-      m_isContinuous(std::move(vec.m_isContinuous)) {}
-
-Spectra &Spectra::operator=(const Spectra &vec) {
-  m_vec = vec.m_vec;
-  m_isContinuous = vec.m_isContinuous;
-  return *this;
-}
-
-Spectra &Spectra::operator=(Spectra &&vec) {
-  m_vec = std::move(vec.m_vec);
-  m_isContinuous = std::move(vec.m_isContinuous);
-  return *this;
-}
-
-[[nodiscard]] bool Spectra::empty() const { return m_vec.empty(); }
-
-FitDomainIndex Spectra::size() const {
-  return FitDomainIndex{m_vec.size()};
-}
-
-std::string Spectra::getString() const {
-  if (empty())
-    return "";
-  if (m_isContinuous)
-    return m_vec.size() > 1 ? std::to_string(m_vec.front().value) + "-" +
-                                  std::to_string(m_vec.back().value)
-                            : std::to_string(m_vec.front().value);
-  std::vector<size_t> out(m_vec.size());
-  std::transform(m_vec.begin(), m_vec.end(), out.begin(),
-                 [](WorkspaceIndex i) { return i.value; });
-  return Mantid::Kernel::Strings::toString(out);
-}
-
-std::pair<WorkspaceIndex, WorkspaceIndex> Spectra::getMinMax() const {
-  if (empty())
-    return std::make_pair(WorkspaceIndex{0}, WorkspaceIndex{0});
-  return std::make_pair(m_vec.front(), m_vec.back());
-}
-
-bool Spectra::operator==(Spectra const &spec) const {
-  return this->getString() == spec.getString();
-}
-
-bool Spectra::isContinuous() const { return m_isContinuous; }
-
-FitDomainIndex Spectra::indexOf(WorkspaceIndex i) const {
-  auto const it = std::find(begin(), end(), i);
-  if (it == end()) {
-    throw std::runtime_error("Spectrum index " + std::to_string(i.value) +
-                             " not found.");
-  }
-  return FitDomainIndex{static_cast<size_t>(std::distance(begin(), it))};
-}
-
-Spectra Spectra::combine(const Spectra &other) const {
-  std::set<WorkspaceIndex> indices(begin(), end());
-  indices.insert(other.begin(), other.end());
-  return Spectra(indices);
-}
-
-Spectra::Spectra(const std::set<WorkspaceIndex> &indices)
-    : m_vec(indices.begin(), indices.end()) {
-  checkContinuous();
-}
-
-void Spectra::checkContinuous() {
-  m_isContinuous = true;
-  if (m_vec.size() > 1) {
-    for (size_t i = 1; i < m_vec.size(); ++i) {
-      if (m_vec[i].value - m_vec[i - 1].value != 1) {
-        m_isContinuous = false;
-        break;
-      }
-    }
-  }
-}
-
-void Spectra::erase(WorkspaceIndex workspaceIndex) {
-  auto iteratorToErase = std::find(m_vec.begin(), m_vec.end(), workspaceIndex);
-  if (iteratorToErase != m_vec.end()) {
-    m_vec.erase(iteratorToErase);
-    checkContinuous();
-  }
-}
-
 IndirectFitData::IndirectFitData(const MatrixWorkspace_sptr &workspace,
-                                 const Spectra &spectra)
-    : m_workspace(workspace), m_spectra(Spectra("")) {
+                                 const FunctionModelSpectra &spectra)
+    : m_workspace(workspace), m_spectra(FunctionModelSpectra("")) {
   setSpectra(spectra);
   auto const range =
       !spectra.empty() ? getBinRange(workspace) : std::make_pair(0.0, 0.0);
@@ -348,9 +235,11 @@ Mantid::API::MatrixWorkspace_sptr IndirectFitData::workspace() const {
   return m_workspace;
 }
 
-const Spectra &IndirectFitData::spectra() const { return m_spectra; }
+const FunctionModelSpectra &IndirectFitData::spectra() const {
+  return m_spectra;
+}
 
-Spectra &IndirectFitData::getMutableSpectra() { return m_spectra; }
+FunctionModelSpectra &IndirectFitData::getMutableSpectra() { return m_spectra; }
 
 WorkspaceIndex IndirectFitData::getSpectrum(FitDomainIndex index) const {
   return m_spectra[index];
@@ -397,7 +286,8 @@ std::vector<double> IndirectFitData::getQValues() const {
 
 void IndirectFitData::setSpectra(std::string const &spectra) {
   try {
-    const Spectra spec = Spectra(createSpectraString(spectra));
+    const FunctionModelSpectra spec =
+        FunctionModelSpectra(createSpectraString(spectra));
     setSpectra(spec);
   } catch (std::exception &ex) {
     throw std::runtime_error("Spectra too large for cast: " +
@@ -405,17 +295,17 @@ void IndirectFitData::setSpectra(std::string const &spectra) {
   }
 }
 
-void IndirectFitData::setSpectra(Spectra &&spectra) {
+void IndirectFitData::setSpectra(FunctionModelSpectra &&spectra) {
   validateSpectra(spectra);
   m_spectra = std::move(spectra);
 }
 
-void IndirectFitData::setSpectra(Spectra const &spectra) {
+void IndirectFitData::setSpectra(FunctionModelSpectra const &spectra) {
   validateSpectra(spectra);
   m_spectra = spectra;
 }
 
-void IndirectFitData::validateSpectra(Spectra const &spectra) {
+void IndirectFitData::validateSpectra(FunctionModelSpectra const &spectra) {
   size_t maxValue = workspace()->getNumberHistograms() - 1;
   std::vector<size_t> notInRange;
   for (auto const &i : spectra) {

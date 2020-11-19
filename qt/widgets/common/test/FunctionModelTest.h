@@ -11,10 +11,27 @@
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
+
 #include <cxxtest/TestSuite.h>
 
-using namespace MantidQt::MantidWidgets;
+#include <memory>
+
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
+
+namespace {
+
+QList<FunctionModelDataset> createDatasets(QStringList const &datasetNames,
+                                           std::string const &spectraString) {
+  QList<FunctionModelDataset> datasets;
+  for (const auto &datasetName : datasetNames)
+    datasets.append(
+        FunctionModelDataset(datasetName, FunctionModelSpectra(spectraString)));
+  return datasets;
+}
+
+} // namespace
 
 class FunctionModelTest : public CxxTest::TestSuite {
 
@@ -27,54 +44,53 @@ public:
     FrameworkManager::Instance();
   }
 
-  void test_empty() {
-    FunctionModel model;
-    TS_ASSERT(!model.getFitFunction());
-  }
+  void setUp() override { m_model = std::make_unique<FunctionModel>(); }
+
+  void tearDown() override { m_model.reset(); }
+
+  void test_empty() { TS_ASSERT(!m_model->getFitFunction()); }
 
   void test_simple() {
-    FunctionModel model;
-    model.setFunctionString("name=LinearBackground,A0=1,A1=2");
-    auto fun = model.getFitFunction();
+    m_model->setFunctionString("name=LinearBackground,A0=1,A1=2");
+    auto fun = m_model->getFitFunction();
     TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
     TS_ASSERT_EQUALS(fun->getParameter("A0"), 1.0);
     TS_ASSERT_EQUALS(fun->getParameter("A1"), 2.0);
   }
 
   void test_simple_multidomain() {
-    FunctionModel model;
-    model.setFunctionString("name=LinearBackground,A0=1,A1=2");
-    model.setNumberDomains(2);
-    TS_ASSERT_EQUALS(model.getNumberDomains(), 2);
-    TS_ASSERT_EQUALS(model.currentDomainIndex(), 0);
-    model.setCurrentDomainIndex(1);
-    TS_ASSERT_EQUALS(model.currentDomainIndex(), 1);
-    TS_ASSERT_THROWS_EQUALS(model.setCurrentDomainIndex(2),
+    m_model->setFunctionString("name=LinearBackground,A0=1,A1=2");
+    m_model->setNumberDomains(2);
+    TS_ASSERT_EQUALS(m_model->getNumberDomains(), 2);
+    TS_ASSERT_EQUALS(m_model->currentDomainIndex(), 0);
+    m_model->setCurrentDomainIndex(1);
+    TS_ASSERT_EQUALS(m_model->currentDomainIndex(), 1);
+    TS_ASSERT_THROWS_EQUALS(m_model->setCurrentDomainIndex(2),
                             std::runtime_error & e, std::string(e.what()),
                             "Domain index is out of range: 2 out of 2");
     {
-      auto fun = model.getCurrentFunction();
+      auto fun = m_model->getCurrentFunction();
       TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
       TS_ASSERT_EQUALS(fun->getParameter("A0"), 1.0);
       TS_ASSERT_EQUALS(fun->getParameter("A1"), 2.0);
     }
     {
-      auto fun = model.getSingleFunction(0);
+      auto fun = m_model->getSingleFunction(0);
       TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
       TS_ASSERT_EQUALS(fun->getParameter("A0"), 1.0);
       TS_ASSERT_EQUALS(fun->getParameter("A1"), 2.0);
     }
     {
-      auto fun = model.getSingleFunction(1);
+      auto fun = m_model->getSingleFunction(1);
       TS_ASSERT_EQUALS(fun->name(), "LinearBackground");
       TS_ASSERT_EQUALS(fun->getParameter("A0"), 1.0);
       TS_ASSERT_EQUALS(fun->getParameter("A1"), 2.0);
     }
-    TS_ASSERT_THROWS_EQUALS(model.getSingleFunction(2), std::runtime_error & e,
-                            std::string(e.what()),
+    TS_ASSERT_THROWS_EQUALS(m_model->getSingleFunction(2),
+                            std::runtime_error & e, std::string(e.what()),
                             "Domain index is out of range: 2 out of 2");
     {
-      auto fun = model.getFitFunction();
+      auto fun = m_model->getFitFunction();
       TS_ASSERT_EQUALS(fun->name(), "MultiDomainFunction");
       TS_ASSERT_EQUALS(fun->getParameter("f0.A0"), 1.0);
       TS_ASSERT_EQUALS(fun->getParameter("f0.A1"), 2.0);
@@ -84,56 +100,53 @@ public:
   }
 
   void test_globals() {
-    FunctionModel model;
-    model.setFunctionString("name=LinearBackground,A0=1,A1=2");
-    model.setNumberDomains(3);
+    m_model->setFunctionString("name=LinearBackground,A0=1,A1=2");
+    m_model->setNumberDomains(3);
     QStringList globals("A1");
-    model.setGlobalParameters(globals);
-    auto fun = model.getFitFunction();
+    m_model->setGlobalParameters(globals);
+    auto fun = m_model->getFitFunction();
     TS_ASSERT(!fun->getTie(1));
     TS_ASSERT_EQUALS(fun->getTie(3)->asString(), "f1.A1=f0.A1");
     TS_ASSERT_EQUALS(fun->getTie(5)->asString(), "f2.A1=f0.A1");
-    auto locals = model.getLocalParameters();
+    auto locals = m_model->getLocalParameters();
     TS_ASSERT_EQUALS(locals[0], "A0");
     globals.clear();
     globals << "A0";
-    model.setGlobalParameters(globals);
-    fun = model.getFitFunction();
+    m_model->setGlobalParameters(globals);
+    fun = m_model->getFitFunction();
     TS_ASSERT(!fun->getTie(0));
     TS_ASSERT(!fun->getTie(1));
     TS_ASSERT(!fun->getTie(3));
     TS_ASSERT(!fun->getTie(5));
     TS_ASSERT_EQUALS(fun->getTie(2)->asString(), "f1.A0=f0.A0");
     TS_ASSERT_EQUALS(fun->getTie(4)->asString(), "f2.A0=f0.A0");
-    locals = model.getLocalParameters();
+    locals = m_model->getLocalParameters();
     TS_ASSERT_EQUALS(locals[0], "A1");
   }
 
   void test_set_number_domains_after_clear() {
-    FunctionModel model;
-    model.clear();
-    model.setNumberDomains(1);
-    TS_ASSERT_EQUALS(model.getNumberDomains(), 1);
+    m_model->clear();
+    m_model->setNumberDomains(1);
+    TS_ASSERT_EQUALS(m_model->getNumberDomains(), 1);
   }
 
   void test_add_function_top_level() {
-    FunctionModel model;
     {
-      model.addFunction("", "name=LinearBackground,A0=1,A1=2");
+      m_model->addFunction("", "name=LinearBackground,A0=1,A1=2");
       auto testFun = FunctionFactory::Instance().createInitialized(
           "name=LinearBackground,A0=3,A1=4");
-      model.updateMultiDatasetParameters(*testFun);
-      auto fun = model.getFitFunction();
+      m_model->updateMultiDatasetParameters(*testFun);
+      auto fun = m_model->getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 2);
       TS_ASSERT_EQUALS(fun->getParameter(0), 3.0);
       TS_ASSERT_EQUALS(fun->getParameter(1), 4.0);
     }
     {
-      model.addFunction("", "name=LinearBackground,A0=1,A1=2");
+      m_model->addFunction("", "name=LinearBackground,A0=1,A1=2");
       auto testFun = FunctionFactory::Instance().createInitialized(
           "name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6");
-      model.updateMultiDatasetParameters(*testFun);
-      auto fun = model.getFitFunction();
+      m_model->updateMultiDatasetParameters(*testFun);
+      auto fun = m_model->getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 4);
       TS_ASSERT_EQUALS(fun->getParameter(0), 3.0);
       TS_ASSERT_EQUALS(fun->getParameter(1), 4.0);
@@ -141,12 +154,12 @@ public:
       TS_ASSERT_EQUALS(fun->getParameter(3), 6.0);
     }
     {
-      model.addFunction("", "name=LinearBackground,A0=1,A1=2");
+      m_model->addFunction("", "name=LinearBackground,A0=1,A1=2");
       auto testFun = FunctionFactory::Instance().createInitialized(
           "name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6;"
           "name=LinearBackground,A0=7,A1=8");
-      model.updateMultiDatasetParameters(*testFun);
-      auto fun = model.getFitFunction();
+      m_model->updateMultiDatasetParameters(*testFun);
+      auto fun = m_model->getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 6);
       TS_ASSERT_EQUALS(fun->getParameter(0), 3.0);
       TS_ASSERT_EQUALS(fun->getParameter(1), 4.0);
@@ -158,15 +171,14 @@ public:
   }
 
   void test_add_function_nested() {
-    FunctionModel model;
-    model.addFunction(
+    m_model->addFunction(
         "", "name=LinearBackground,A0=1,A1=2;(composite=CompositeFunction)");
     {
-      model.addFunction("f1.", "name=LinearBackground,A0=1,A1=2");
+      m_model->addFunction("f1.", "name=LinearBackground,A0=1,A1=2");
       auto testFun = FunctionFactory::Instance().createInitialized(
           "name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6");
-      model.updateMultiDatasetParameters(*testFun);
-      auto fun = model.getFitFunction();
+      m_model->updateMultiDatasetParameters(*testFun);
+      auto fun = m_model->getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 4);
       TS_ASSERT_EQUALS(fun->getParameter(0), 3.0);
       TS_ASSERT_EQUALS(fun->getParameter(1), 4.0);
@@ -174,12 +186,12 @@ public:
       TS_ASSERT_EQUALS(fun->getParameter(3), 6.0);
     }
     {
-      model.addFunction("f1.", "name=LinearBackground,A0=1,A1=2");
+      m_model->addFunction("f1.", "name=LinearBackground,A0=1,A1=2");
       auto testFun = FunctionFactory::Instance().createInitialized(
           "name=LinearBackground,A0=3,A1=4;"
           "(name=LinearBackground,A0=5,A1=6;name=LinearBackground,A0=7,A1=8)");
-      model.updateMultiDatasetParameters(*testFun);
-      auto fun = model.getFitFunction();
+      m_model->updateMultiDatasetParameters(*testFun);
+      auto fun = m_model->getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 6);
       TS_ASSERT_EQUALS(fun->getParameter(0), 3.0);
       TS_ASSERT_EQUALS(fun->getParameter(1), 4.0);
@@ -189,13 +201,13 @@ public:
       TS_ASSERT_EQUALS(fun->getParameter(5), 8.0);
     }
     {
-      model.addFunction("f1.", "name=LinearBackground,A0=1,A1=2");
+      m_model->addFunction("f1.", "name=LinearBackground,A0=1,A1=2");
       auto testFun = FunctionFactory::Instance().createInitialized(
           "name=LinearBackground,A0=3,A1=4;"
           "(name=LinearBackground,A0=5,A1=6;name=LinearBackground,A0=7,A1=8;"
           "name=LinearBackground,A0=9,A1=10)");
-      model.updateMultiDatasetParameters(*testFun);
-      auto fun = model.getFitFunction();
+      m_model->updateMultiDatasetParameters(*testFun);
+      auto fun = m_model->getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 8);
       TS_ASSERT_EQUALS(fun->getParameter(0), 3.0);
       TS_ASSERT_EQUALS(fun->getParameter(1), 4.0);
@@ -209,16 +221,16 @@ public:
   }
 
   void test_remove_function() {
-    FunctionModel model;
-    model.addFunction("", "name=LinearBackground,A0=1,A1=2;name="
-                          "LinearBackground,A0=1,A1=2;name=LinearBackground,A0="
-                          "1,A1=2");
+    m_model->addFunction("",
+                         "name=LinearBackground,A0=1,A1=2;name="
+                         "LinearBackground,A0=1,A1=2;name=LinearBackground,A0="
+                         "1,A1=2");
     {
       auto testFun = FunctionFactory::Instance().createInitialized(
           "name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6;"
           "name=LinearBackground,A0=7,A1=8");
-      model.updateMultiDatasetParameters(*testFun);
-      auto fun = model.getFitFunction();
+      m_model->updateMultiDatasetParameters(*testFun);
+      auto fun = m_model->getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 6);
       TS_ASSERT_EQUALS(fun->getParameter(0), 3.0);
       TS_ASSERT_EQUALS(fun->getParameter(1), 4.0);
@@ -228,11 +240,11 @@ public:
       TS_ASSERT_EQUALS(fun->getParameter(5), 8.0);
     }
     {
-      model.removeFunction("f1.");
+      m_model->removeFunction("f1.");
       auto testFun = FunctionFactory::Instance().createInitialized(
           "name=LinearBackground,A0=3,A1=4;name=LinearBackground,A0=5,A1=6");
-      model.updateMultiDatasetParameters(*testFun);
-      auto fun = model.getFitFunction();
+      m_model->updateMultiDatasetParameters(*testFun);
+      auto fun = m_model->getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 4);
       TS_ASSERT_EQUALS(fun->getParameter(0), 3.0);
       TS_ASSERT_EQUALS(fun->getParameter(1), 4.0);
@@ -240,27 +252,27 @@ public:
       TS_ASSERT_EQUALS(fun->getParameter(3), 6.0);
     }
     {
-      model.removeFunction("f1.");
+      m_model->removeFunction("f1.");
       auto testFun = FunctionFactory::Instance().createInitialized(
           "name=LinearBackground,A0=3,A1=4");
-      model.updateMultiDatasetParameters(*testFun);
-      auto fun = model.getFitFunction();
+      m_model->updateMultiDatasetParameters(*testFun);
+      auto fun = m_model->getFitFunction();
       TS_ASSERT_EQUALS(fun->nParams(), 2);
       TS_ASSERT_EQUALS(fun->getParameter(0), 3.0);
       TS_ASSERT_EQUALS(fun->getParameter(1), 4.0);
     }
   }
   void test_getAttributeNames_returns_correctly() {
-    FunctionModel model;
-    model.addFunction("", "name = TeixeiraWaterSQE, Q = 3.14,"
-                          "WorkspaceIndex = 4, Height = 1,"
-                          "DiffCoeff=2.3, Tau=1.25, Centre=0, "
-                          "constraints=(Height>0, DiffCoeff>0, "
-                          "Tau>0);name=FlatBackground;name=LinearBackground");
+    m_model->addFunction("",
+                         "name = TeixeiraWaterSQE, Q = 3.14,"
+                         "WorkspaceIndex = 4, Height = 1,"
+                         "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+                         "constraints=(Height>0, DiffCoeff>0, "
+                         "Tau>0);name=FlatBackground;name=LinearBackground");
     QStringList expectedAttributes = {QString("NumDeriv"), QString("f0.Q"),
                                       QString("f0.WorkspaceIndex")};
 
-    auto attributes = model.getAttributeNames();
+    auto attributes = m_model->getAttributeNames();
 
     TS_ASSERT_EQUALS(expectedAttributes.size(), attributes.size());
 
@@ -269,45 +281,45 @@ public:
     }
   }
   void test_setAttribute_correctly_updates_stored_function() {
-    FunctionModel model;
-    model.addFunction("", "name = TeixeiraWaterSQE, Q = 3.14,"
-                          "WorkspaceIndex = 4, Height = 1,"
-                          "DiffCoeff=2.3, Tau=1.25, Centre=0, "
-                          "constraints=(Height>0, DiffCoeff>0, "
-                          "Tau>0);name=FlatBackground;name=LinearBackground");
-    model.setAttribute("f0.Q", IFunction::Attribute(41.3));
+    m_model->addFunction("",
+                         "name = TeixeiraWaterSQE, Q = 3.14,"
+                         "WorkspaceIndex = 4, Height = 1,"
+                         "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+                         "constraints=(Height>0, DiffCoeff>0, "
+                         "Tau>0);name=FlatBackground;name=LinearBackground");
+    m_model->setAttribute("f0.Q", IFunction::Attribute(41.3));
 
     TS_ASSERT_EQUALS(
-        model.getCurrentFunction()->getAttribute("f0.Q").asDouble(), 41.3);
+        m_model->getCurrentFunction()->getAttribute("f0.Q").asDouble(), 41.3);
   }
   void test_getAttribute_correctly_retrives_attributes() {
-    FunctionModel model;
-    model.addFunction("", "name=TeixeiraWaterSQE, Q = 3.14,"
-                          "WorkspaceIndex = 4, Height = 1,"
-                          "DiffCoeff=2.3, Tau=1.25, Centre=0, "
-                          "constraints=(Height>0, DiffCoeff>0, "
-                          "Tau>0);name=FlatBackground;name=LinearBackground");
-    TS_ASSERT_EQUALS(model.getAttribute("f0.Q").asDouble(), 3.14);
-    TS_ASSERT_EQUALS(model.getAttribute("NumDeriv").asBool(), false);
+    m_model->addFunction("",
+                         "name=TeixeiraWaterSQE, Q = 3.14,"
+                         "WorkspaceIndex = 4, Height = 1,"
+                         "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+                         "constraints=(Height>0, DiffCoeff>0, "
+                         "Tau>0);name=FlatBackground;name=LinearBackground");
+    TS_ASSERT_EQUALS(m_model->getAttribute("f0.Q").asDouble(), 3.14);
+    TS_ASSERT_EQUALS(m_model->getAttribute("NumDeriv").asBool(), false);
   }
   void test_getAttribute_throws_for_non_exisitng_attribute() {
-    FunctionModel model;
-    model.addFunction("", "name=TeixeiraWaterSQE, Q = 3.14,"
-                          "WorkspaceIndex = 4, Height = 1,"
-                          "DiffCoeff=2.3, Tau=1.25, Centre=0, "
-                          "constraints=(Height>0, DiffCoeff>0, "
-                          "Tau>0);name=FlatBackground;name=LinearBackground");
-    TS_ASSERT_THROWS(model.getAttribute("f0.B").asDouble(),
+    m_model->addFunction("",
+                         "name=TeixeiraWaterSQE, Q = 3.14,"
+                         "WorkspaceIndex = 4, Height = 1,"
+                         "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+                         "constraints=(Height>0, DiffCoeff>0, "
+                         "Tau>0);name=FlatBackground;name=LinearBackground");
+    TS_ASSERT_THROWS(m_model->getAttribute("f0.B").asDouble(),
                      std::invalid_argument &);
   }
   void test_updateMultiDatasetAttributes_correctly_updates_stored_attributes() {
-    FunctionModel model;
-    model.setNumberDomains(3);
-    model.addFunction("", "name=TeixeiraWaterSQE, Q = 3.14,"
-                          "WorkspaceIndex = 4, Height = 1,"
-                          "DiffCoeff=2.3, Tau=1.25, Centre=0, "
-                          "constraints=(Height>0, DiffCoeff>0, "
-                          "Tau>0);name=FlatBackground;name=LinearBackground");
+    m_model->setNumberDomains(3);
+    m_model->addFunction("",
+                         "name=TeixeiraWaterSQE, Q = 3.14,"
+                         "WorkspaceIndex = 4, Height = 1,"
+                         "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+                         "constraints=(Height>0, DiffCoeff>0, "
+                         "Tau>0);name=FlatBackground;name=LinearBackground");
     auto function =
         FunctionFactory::Instance().createInitializedMultiDomainFunction(
             "name=TeixeiraWaterSQE, Q=41.3, "
@@ -319,13 +331,78 @@ public:
     function->setAttribute("f1.f0.Q", IFunction::Attribute(21.6));
     function->setAttribute("f2.f0.Q", IFunction::Attribute(32.9));
 
-    model.updateMultiDatasetAttributes(*function);
+    m_model->updateMultiDatasetAttributes(*function);
 
-    TS_ASSERT_EQUALS(model.getFitFunction()->getAttribute("f0.f0.Q").asDouble(),
-                     11.3);
-    TS_ASSERT_EQUALS(model.getFitFunction()->getAttribute("f1.f0.Q").asDouble(),
-                     21.6);
-    TS_ASSERT_EQUALS(model.getFitFunction()->getAttribute("f2.f0.Q").asDouble(),
-                     32.9);
+    TS_ASSERT_EQUALS(
+        m_model->getFitFunction()->getAttribute("f0.f0.Q").asDouble(), 11.3);
+    TS_ASSERT_EQUALS(
+        m_model->getFitFunction()->getAttribute("f1.f0.Q").asDouble(), 21.6);
+    TS_ASSERT_EQUALS(
+        m_model->getFitFunction()->getAttribute("f2.f0.Q").asDouble(), 32.9);
   }
+
+  void
+  test_that_getDatasetNames_returns_the_expected_workspace_names_for_single_spectra_workspaces() {
+    auto const datasetNames = QStringList({"WSName1", "WSName2", "WSName3"});
+
+    m_model->setNumberDomains(3);
+    m_model->setDatasets(datasetNames);
+
+    TS_ASSERT_EQUALS(m_model->getDatasetNames(), datasetNames);
+  }
+
+  void
+  test_that_getDatasetDomainNames_returns_the_expected_domain_names_for_single_spectra_workspaces() {
+    auto const datasetNames = QStringList({"WSName1", "WSName2", "WSName3"});
+
+    m_model->setNumberDomains(3);
+    m_model->setDatasets(datasetNames);
+
+    TS_ASSERT_EQUALS(m_model->getDatasetDomainNames(), datasetNames);
+  }
+
+  void
+  test_that_getDatasetNames_returns_the_expected_workspace_names_for_multi_spectra_workspaces() {
+    auto const datasets =
+        createDatasets(QStringList({"WSName1", "WSName2"}), "0,2-3");
+
+    m_model->setNumberDomains(6);
+    m_model->setDatasets(datasets);
+
+    auto const expectedNames = QStringList(
+        {"WSName1", "WSName1", "WSName1", "WSName2", "WSName2", "WSName2"});
+    TS_ASSERT_EQUALS(m_model->getDatasetNames().size(), 6);
+    TS_ASSERT_EQUALS(m_model->getDatasetNames(), expectedNames);
+  }
+
+  void
+  test_that_getDatasetDomainNames_returns_the_expected_domain_names_for_multi_spectra_workspaces() {
+    auto const datasets =
+        createDatasets(QStringList({"WSName1", "WSName2"}), "0,2-3");
+
+    m_model->setNumberDomains(6);
+    m_model->setDatasets(datasets);
+
+    auto const expectedNames =
+        QStringList({"WSName1 (0)", "WSName1 (2)", "WSName1 (3)", "WSName2 (0)",
+                     "WSName2 (2)", "WSName2 (3)"});
+    TS_ASSERT_EQUALS(m_model->getDatasetDomainNames(), expectedNames);
+  }
+
+  void
+  test_that_getDatasetNames_and_getDatasetDomainNames_returns_the_same_number_of_names() {
+    auto const datasets =
+        createDatasets(QStringList({"WSName1", "WSName2"}), "0,2-3");
+
+    m_model->setNumberDomains(6);
+    m_model->setDatasets(datasets);
+
+    /// This is essential for EditLocalParameterDialog to find the sample logs
+    /// of each dataset
+    TS_ASSERT_EQUALS(m_model->getDatasetNames().size(),
+                     m_model->getDatasetDomainNames().size());
+  }
+
+private:
+  std::unique_ptr<FunctionModel> m_model;
 };

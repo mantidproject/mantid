@@ -8,9 +8,9 @@
 
 #include "IAddWorkspaceDialog.h"
 #include "IIndirectFitDataView.h"
-#include "IndexTypes.h"
 #include "IndirectDataTablePresenter.h"
 #include "IndirectFittingModel.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include "DllConfig.h"
 #include "MantidAPI/AnalysisDataServiceObserver.h"
@@ -21,6 +21,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+using namespace MantidWidgets;
 
 class MANTIDQT_INDIRECT_DLL IndirectFitDataPresenter
     : public QObject,

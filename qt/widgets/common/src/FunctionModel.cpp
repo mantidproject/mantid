@@ -12,6 +12,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 
+#include <utility>
+
 namespace {
 Mantid::Kernel::Logger g_log("FitFunction");
 }
@@ -271,22 +273,79 @@ void FunctionModel::setNumberDomains(int nDomains) {
   }
 }
 
-void FunctionModel::setDatasetNames(const QStringList &names) {
-  if (static_cast<size_t>(names.size()) != m_numberDomains) {
-    throw std::runtime_error(
-        "Number of dataset names doesn't match the number of domains.");
-  }
-  m_datasetNames = names;
+/// Sets the datasets based on their workspace names. This assumes there is only
+/// a single spectrum in the workspaces being fitted.
+/// @param datasetNames :: Names of the workspaces to be fitted.
+void FunctionModel::setDatasets(const QStringList &datasetNames) {
+  QList<FunctionModelDataset> datasets;
+  for (const auto &datasetName : datasetNames)
+    datasets.append(
+        FunctionModelDataset(datasetName, FunctionModelSpectra("0")));
+
+  setDatasets(datasets);
 }
 
+/// Sets the datasets using a map of <workspace name, spectra list>. This
+/// should be used when the workspaces being fitted have multiple spectra.
+/// @param datasets :: Names of workspaces to be fitted paired to a spectra
+/// list.
+void FunctionModel::setDatasets(const QList<FunctionModelDataset> &datasets) {
+  checkNumberOfDomains(datasets);
+  m_datasets = datasets;
+}
+
+/// Adds datasets based on their workspace names. This assumes there is only
+/// a single spectrum in the added workspaces.
+/// @param datasetNames :: Names of the workspaces to be added.
+void FunctionModel::addDatasets(const QStringList &datasetNames) {
+  for (const auto &datasetName : datasetNames)
+    m_datasets.append(
+        FunctionModelDataset(datasetName, FunctionModelSpectra("0")));
+
+  setNumberDomains(numberOfDomains(m_datasets));
+}
+
+/// Removes datasets (i.e. workspaces) from the Function model based on the
+/// index of the dataset in the QList.
+void FunctionModel::removeDatasets(QList<int> &indices) {
+  checkDatasets();
+
+  // Sort in reverse order
+  qSort(indices.begin(), indices.end(), [](int a, int b) { return a > b; });
+  for (auto i = indices.constBegin(); i != indices.constEnd(); ++i)
+    m_datasets.erase(m_datasets.begin() + *i);
+
+  const auto nDomains = numberOfDomains(m_datasets);
+  setNumberDomains(nDomains);
+
+  auto currentIndex = currentDomainIndex();
+  if (currentIndex >= nDomains)
+    currentIndex = m_datasets.isEmpty() ? 0 : nDomains - 1;
+
+  setCurrentDomainIndex(currentIndex);
+}
+
+/// Returns the workspace names of the datasets. If a dataset has N spectra,
+/// then the workspace name is multiplied by N. This is required for
+/// EditLocalParameterDialog.
 QStringList FunctionModel::getDatasetNames() const {
-  if (static_cast<size_t>(m_datasetNames.size()) != m_numberDomains) {
-    m_datasetNames.clear();
-    for (size_t i = 0; i < m_numberDomains; ++i) {
-      m_datasetNames << QString::number(i);
+  QStringList datasetNames;
+  for (const auto &dataset : m_datasets)
+    for (auto i = 0u; i < dataset.numberOfSpectra(); ++i) {
+      UNUSED_ARG(i);
+      datasetNames << dataset.datasetName();
     }
-  }
-  return m_datasetNames;
+  return datasetNames;
+}
+
+/// Returns names for the domains of each dataset. If a dataset has multiple
+/// spectra, then a domain name will include the spectrum number of a domain in
+/// a workspace. This is required for EditLocalParameterDialog.
+QStringList FunctionModel::getDatasetDomainNames() const {
+  QStringList domainNames;
+  for (const auto &dataset : m_datasets)
+    domainNames << dataset.domainNames();
+  return domainNames;
 }
 
 int FunctionModel::getNumberDomains() const {
@@ -434,6 +493,34 @@ QStringList FunctionModel::getLocalParameters() const {
       locals << name;
   }
   return locals;
+}
+
+/// Check that the number of domains is correct for m_datasets
+void FunctionModel::checkDatasets() {
+  if (numberOfDomains(m_datasets) != static_cast<int>(m_numberDomains)) {
+    m_datasets.clear();
+    for (auto i = 0u; i < m_numberDomains; ++i)
+      m_datasets.append(
+          FunctionModelDataset(QString::number(i), FunctionModelSpectra("0")));
+  }
+}
+
+/// Check that the datasets supplied have the expected total number of domains.
+void FunctionModel::checkNumberOfDomains(
+    const QList<FunctionModelDataset> &datasets) const {
+  if (numberOfDomains(datasets) != static_cast<int>(m_numberDomains)) {
+    throw std::runtime_error(
+        "Number of dataset domains doesn't match the number of domains.");
+  }
+}
+
+int FunctionModel::numberOfDomains(
+    const QList<FunctionModelDataset> &datasets) const {
+  std::size_t totalNumberOfDomains{0u};
+  for (const auto &dataset : datasets)
+    totalNumberOfDomains += dataset.numberOfSpectra();
+
+  return static_cast<int>(totalNumberOfDomains);
 }
 
 /// Check a domain/function index to be in range.

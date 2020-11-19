@@ -9,7 +9,6 @@
 #include "IIndirectFitData.h"
 #include "IIndirectFitOutput.h"
 #include "IIndirectFitResult.h"
-#include "IndexTypes.h"
 #include "IndirectFitData.h"
 #include "IndirectWorkspaceNames.h"
 #include "ParameterEstimation.h"
@@ -18,6 +17,8 @@
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/FunctionModelSpectra.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <boost/optional.hpp>
 #include <boost/variant.hpp>
@@ -25,6 +26,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+using namespace MantidWidgets;
 
 enum class FittingMode { SEQUENTIAL, SIMULTANEOUS };
 extern std::unordered_map<FittingMode, std::string> fitModeToName;
@@ -48,7 +50,7 @@ public:
   virtual bool hasWorkspace(std::string const &workspaceName) const;
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(TableDatasetIndex index) const;
-  Spectra getSpectra(TableDatasetIndex index) const;
+  FunctionModelSpectra getSpectra(TableDatasetIndex index) const;
   virtual bool isMultiFit() const;
   virtual TableDatasetIndex numberOfWorkspaces() const;
   size_t getNumberOfSpectra(TableDatasetIndex index) const;
@@ -62,14 +64,16 @@ public:
   void clear();
 
   void setSpectra(const std::string &spectra, TableDatasetIndex dataIndex);
-  void setSpectra(Spectra &&spectra, TableDatasetIndex dataIndex);
-  void setSpectra(const Spectra &spectra, TableDatasetIndex dataIndex);
+  void setSpectra(FunctionModelSpectra &&spectra, TableDatasetIndex dataIndex);
+  void setSpectra(const FunctionModelSpectra &spectra,
+                  TableDatasetIndex dataIndex);
   virtual void addWorkspace(const std::string &workspaceName);
   void addWorkspace(const std::string &workspaceName,
                     const std::string &spectra);
-  void addWorkspace(const std::string &workspaceName, const Spectra &spectra);
+  void addWorkspace(const std::string &workspaceName,
+                    const FunctionModelSpectra &spectra);
   virtual void addWorkspace(Mantid::API::MatrixWorkspace_sptr workspace,
-                            const Spectra &spectra);
+                            const FunctionModelSpectra &spectra);
   virtual void removeWorkspace(TableDatasetIndex index);
 
   // IIndirectFitRegion

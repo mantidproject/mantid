@@ -254,9 +254,9 @@ public:
   test_that_getSpectra_returns_a_correct_spectra_when_the_index_provided_is_valid() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 3);
 
-    Spectra const inputSpectra = Spectra("0-1");
+    FunctionModelSpectra const inputSpectra = FunctionModelSpectra("0-1");
     model->setSpectra(inputSpectra, 0);
-    Spectra const spectra = model->getSpectra(0);
+    FunctionModelSpectra const spectra = model->getSpectra(0);
 
     TS_ASSERT_EQUALS(spectra, inputSpectra);
   }
@@ -265,8 +265,8 @@ public:
   test_that_getSpectra_returns_an_empty_DiscontinuousSpectra_when_provided_an_out_of_range_index() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 3);
 
-    Spectra const emptySpectra(Spectra(""));
-    Spectra const spectra = model->getSpectra(3);
+    FunctionModelSpectra const emptySpectra(FunctionModelSpectra(""));
+    FunctionModelSpectra const spectra = model->getSpectra(3);
 
     TS_ASSERT_EQUALS(spectra, emptySpectra);
   }
@@ -299,7 +299,7 @@ public:
 
     model->setStartX(1.2, 0, 0);
     model->setEndX(5.6, 0, 0);
-    Spectra const emptySpec("");
+    FunctionModelSpectra const emptySpec("");
     model->setSpectra(emptySpec, 0);
 
     TS_ASSERT_EQUALS(model->getFittingRange(0, 0).first, 0.0);
@@ -329,7 +329,7 @@ public:
     auto model = createModelWithSingleWorkspace("WorkspaceName", 1);
 
     model->setExcludeRegion("0,1,3,4", 0, 0);
-    Spectra const emptySpec("");
+    FunctionModelSpectra const emptySpec("");
     model->setSpectra(emptySpec, 0);
 
     TS_ASSERT_EQUALS(model->getExcludeRegion(1, 0), "");
@@ -422,7 +422,7 @@ public:
     auto const workspace = std::make_shared<Workspace2D>();
     SetUpADSWithWorkspace ads("WorkspaceEmpty", workspace);
 
-    model->addWorkspace("WorkspaceEmpty", Spectra(""));
+    model->addWorkspace("WorkspaceEmpty", FunctionModelSpectra(""));
 
     TS_ASSERT_EQUALS(model->getSpectra(TableDatasetIndex(0)).size(), 0);
   }
@@ -503,9 +503,9 @@ public:
   test_that_setSpectra_will_set_the_spectra_to_the_provided_inputSpectra() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 10);
 
-    Spectra const inputSpectra = Spectra("2,4,6-8");
+    FunctionModelSpectra const inputSpectra = FunctionModelSpectra("2,4,6-8");
     model->setSpectra(inputSpectra, 0);
-    Spectra const spectra = model->getSpectra(0);
+    FunctionModelSpectra const spectra = model->getSpectra(0);
 
     TS_ASSERT_EQUALS(spectra, inputSpectra);
   }
@@ -514,10 +514,10 @@ public:
   test_that_setSpectra_will_set_the_spectra_when_provided_a_spectra_pair() {
     auto model = createModelWithSingleWorkspace("WorkspaceName", 10);
 
-    Spectra const inputSpectra =
-        Spectra(IDA::WorkspaceIndex(0), IDA::WorkspaceIndex(5));
+    FunctionModelSpectra const inputSpectra =
+        FunctionModelSpectra(IDA::WorkspaceIndex(0), IDA::WorkspaceIndex(5));
     model->setSpectra(inputSpectra, 0);
-    Spectra const spectra = model->getSpectra(0);
+    FunctionModelSpectra const spectra = model->getSpectra(0);
 
     TS_ASSERT_EQUALS(spectra, inputSpectra);
   }
