@@ -149,7 +149,6 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         numberBins = self.getProperty("NumberBins").value
         outWS = self.getPropertyValue("OutputWorkspace")
         summing = self.getProperty("Sum").value  # [Yes or No]
-        outWksp = self.getPropertyValue("OutputWorkspace")
 
         # convert all of the input workspaces into spectrum of "target" units (generally angle)
         data, masks = self._convert_data(data)
@@ -221,7 +220,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         # ref: https://docs.mantidproject.org/nightly/algorithms/SumSpectra-v1.html
         if summing:
             if cal is not None:
-                SumSpectra(
+                outWS = SumSpectra(
                     InputWorkspace="__ws_conjoined",
                     OutputWorkspace=outWS,
                     WeightedSum=True,
@@ -229,7 +228,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                     EnableLogging=False,
                 )
             else:
-                SumSpectra(
+                outWS = SumSpectra(
                     InputWorkspace="__ws_conjoined",
                     OutputWorkspace=outWS,
                     WeightedSum=True,
@@ -238,8 +237,12 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 )
 
         else:
-            outWS = GroupWorkspaces(data)
-            print(outWS.getNames())
+            if len(data) == 1:
+                outWS = RenameWorkspace(InputWorkspace=data[0],
+                                OutputWorkspace=outWS)
+            else:
+                outWS = GroupWorkspaces(InputWorkspaces=data,
+                                        OutputWorkspace=outWS)
 
         self.setProperty("OutputWorkspace", outWS)
 
@@ -306,7 +309,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         mask = self.getProperty("MaskWorkspace").value
         mask_angle = self.getProperty("MaskAngle").value
         outname = self.getProperty("OutputWorkspace").valueAsStr
-        
+
         # NOTE:
         # Due to range difference among incoming spectra, a common bin para is needed
         # such that all data can be binned exactly the same way.
