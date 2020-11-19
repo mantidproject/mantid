@@ -340,13 +340,6 @@ class WANDPowderReductionTest(unittest.TestCase):
             BankPixelWidth=100,
             WorkspaceType="Event",
         )
-        event_data2 = CreateSampleWorkspace(
-            NumBanks=1,
-            BinWidth=20000,
-            PixelSpacing=0.1,
-            BankPixelWidth=100,
-            WorkspaceType="Event",
-        )
         event_cal = CreateSampleWorkspace(
             NumBanks=1,
             BinWidth=20000,
@@ -415,13 +408,8 @@ class WANDPowderReductionTest(unittest.TestCase):
         #CASE 3
         #DOES NOT WORK YET -- currently outputs Workspace2D -- will modify when algorithm is updated
         #input group ws containing several ws, output group ws containing several ws
-        groupWS = WorkspaceGroup()
-        groupWS.addWorkspace(event_data)
-        groupWS.addWorkspace(event_data2)
-
-        
         pd_out = WANDPowderReduction(
-            InputWorkspace=groupWS,
+            InputWorkspace=[event_data,event_data],
             CalibrationWorkspace=event_cal,
             BackgroundWorkspace=event_bkg,
             Target="Theta",
