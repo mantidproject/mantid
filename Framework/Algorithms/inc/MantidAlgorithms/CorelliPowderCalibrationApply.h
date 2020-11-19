@@ -36,7 +36,7 @@ namespace Mantid {
 
                 /// Algorithm's category, overriding a virtual method
                 const std::string category() const override {
-                    return "DataHandling\\Instrument\\Corelli";
+                    return "Diffraction\\Calibration";
                 };
 
             private:
