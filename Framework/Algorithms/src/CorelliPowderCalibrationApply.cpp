@@ -152,16 +152,24 @@ namespace Mantid {
             // [source, sample, bank1,.. bank92]
             // dev reference:
             // https://github.com/mantidproject/mantid/blob/f0fad29ee0496901b8d453c738ea948644c7c6a6/Framework/Reflectometry/src/SpecularReflectionPositionCorrect2.cpp#L241
+            // Question: single thread or parallel
+            //           for parallel, any suggestions
+            g_log.notice() << "Translating each component using given Calibration table";
             auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
-            moveAlg -> initialize();
-            // Todo ...
-            moveAlg->execute();
+            for (size_t i; i < calTable->rowCount(); i++){
+                moveAlg -> initialize();
+                // todo
+                moveAlg->execute();
+            }
 
             // Rotate each component in the instrument
+            g_log.notice() << "Rotating each component using given Calibration table";
             auto rotateAlg = createChildAlgorithm("RotateInstrumentComponent");
-            rotateAlg -> initialize();
-            // Todo ...
-            rotateAlg->execute();
+            for (size_t i; i < calTable->rowCount(); i++){
+                rotateAlg -> initialize();
+                // todo
+                rotateAlg->execute();
+            }
 
             // Config output
             setProperty("OutputWorkspace", outputWS);
