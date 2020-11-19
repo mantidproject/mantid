@@ -30,7 +30,6 @@
 #include <boost/filesystem/operations.hpp>
 #include <sstream>
 #include <string>
-#include <sstream>
 
 namespace Mantid {
 namespace Algorithms {
@@ -90,43 +89,47 @@ CalibrationTableHandler::createCalibrationTableWorkspace(
 
 //-----------------------------------------------------------------------------
 /**
- * @brief Check whether a TableWorkspace is a valid Corelli calibraion table for all components
+ * @brief Check whether a TableWorkspace is a valid Corelli calibraion table for
+ * all components
  * @param calibws: Calibration table workspace
  * @param errormsg: (output) error message
  * @return
  */
-bool CalibrationTableHandler::isValidCalibrationTableWorkspace(DataObjects::TableWorkspace_sptr calibws, std::string &errormsg) {
-    // Check columns of
-    std::vector<std::string> colNames =
-        calibws->getColumnNames();
+bool CalibrationTableHandler::isValidCalibrationTableWorkspace(
+    DataObjects::TableWorkspace_sptr calibws, std::string &errormsg) {
+  // Check columns of
+  std::vector<std::string> colNames = calibws->getColumnNames();
 
-    bool valid = true;
+  bool valid = true;
 
-    if (colNames.size() !=
-        CorelliCalibration::calibrationTableColumnNames.size()) {
-        // column numbers mismatch
-        std::stringstream errorss;
-        errorss << "Calibration table workspace requirs " << CorelliCalibration::calibrationTableColumnNames.size()
-                << " columns.  Input workspace " << calibws->getName() << " get "
-                << calibws->getColumnNames().size() << "instead.";
-        errormsg = errorss.str();
-        valid = false;
-    } else {
+  if (colNames.size() !=
+      CorelliCalibration::calibrationTableColumnNames.size()) {
+    // column numbers mismatch
+    std::stringstream errorss;
+    errorss << "Calibration table workspace requirs "
+            << CorelliCalibration::calibrationTableColumnNames.size()
+            << " columns.  Input workspace " << calibws->getName() << " get "
+            << calibws->getColumnNames().size() << "instead.";
+    errormsg = errorss.str();
+    valid = false;
+  } else {
 
     // Check columns one by one
     for (size_t i = 0; i < colNames.size(); ++i) {
       if (colNames[i] != CorelliCalibration::calibrationTableColumnNames[i]) {
         std::stringstream errorss;
-        errorss << i << "-th column is supposed to be " << CorelliCalibration::calibrationTableColumnNames[i]
-                << ", but instead in TableWorkspace " << calibws->getName() << " it is " << colNames[i];
+        errorss << i << "-th column is supposed to be "
+                << CorelliCalibration::calibrationTableColumnNames[i]
+                << ", but instead in TableWorkspace " << calibws->getName()
+                << " it is " << colNames[i];
         errormsg = errorss.str();
         valid = false;
         break;
       }
     }
-    }
+  }
 
-    return valid;
+  return valid;
 }
 
 //-----------------------------------------------------------------------------
@@ -448,13 +451,13 @@ CorelliPowderCalibrationDatabase::validateInputs() {
   }
   // Check columns
   else {
-      std::string error_msg {""};
-      bool isvalid = CorelliCalibration::CalibrationTableHandler::isValidCalibrationTableWorkspace(mInputCalibrationTableWS,
-                                                                                                   error_msg);
+    std::string error_msg{""};
+    bool isvalid = CorelliCalibration::CalibrationTableHandler::
+        isValidCalibrationTableWorkspace(mInputCalibrationTableWS, error_msg);
 
-      if (!isvalid) {
-        errors["InputCalibrationPatchWorkspace"] = error_msg;
-      }
+    if (!isvalid) {
+      errors["InputCalibrationPatchWorkspace"] = error_msg;
+    }
   }
 
   return errors;
