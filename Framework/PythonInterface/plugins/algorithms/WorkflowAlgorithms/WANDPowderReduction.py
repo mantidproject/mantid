@@ -12,7 +12,6 @@ from mantid.api import (
     PropertyMode,
     IEventWorkspace,
     WorkspaceProperty,
-    WorkspaceGroup,
 )
 from mantid.dataobjects import MaskWorkspaceProperty
 from mantid.simpleapi import (
@@ -159,8 +158,9 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         # BEGIN_FOR: prcess_spectra
         for n, (_wsn, _mskn) in enumerate(zip(data, masks)):
             # resample spectra
-            _ws_resampled = ResampleX(
+            ResampleX(
                 InputWorkspace=_wsn,
+                OutputWorkspace=_wsn,
                 XMin=xMin,
                 XMax=xMax,
                 NumberBins=numberBins,
@@ -170,17 +170,19 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             # calibration
             if cal is not None:
                 _ws_cal_resampled = self._resample_calibration(_wsn, _mskn, xMin, xMax)
-                _ws_resampled = Divide(
-                    LHSWorkspace=_ws_resampled,
+                Divide(
+                    LHSWorkspace=_wsn,
                     RHSWorkspace=_ws_cal_resampled,
+                    OutputWorkspace=_wsn,
                     EnableLogging=False,
                 )
             else:
                 _ws_cal_resampled = None
 
 
-            _ws_resampled = Scale(
-                InputWorkspace=_ws_resampled,
+            Scale(
+                InputWorkspace=_wsn,
+                OutputWorkspace=_wsn,
                 Factor=self._get_scale(cal) / self._get_scale(_wsn),
                 EnableLogging=False,
             )
@@ -192,8 +194,9 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 )
 
                 _ws_resampled = Minus(
-                    LHSWorkspace=_ws_resampled,
+                    LHSWorkspace=_wsn,
                     RHSWorkspace=_ws_bkg_resampled,
+                    OutputWorkspace=_wsn,
                     EnableLogging=False,
                 )
 
@@ -201,14 +204,15 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 # conjoin
                 if n < 1:
                     CloneWorkspace(
-                        InputWorkspace=_ws_resampled,
+                        InputWorkspace=_wsn,
                         OutputWorkspace="__ws_conjoined",
                         EnableLogging=False,
                     )
                 else:
+                    # this adds to `InputWorkspace1`
                     ConjoinWorkspaces(
                         InputWorkspace1="__ws_conjoined",
-                        InputWorkspace2=_ws_resampled,
+                        InputWorkspace2=_wsn,
                         CheckOverlapping=False,
                         EnableLogging=False,
                     )
@@ -339,7 +343,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 )
 
             self._to_spectrum_axis(_wksp_in, _wksp_out, _mask_n)
-            
+
             #append to the list of processed workspaces
             mask_workspaces.append(_mask_n)
 
