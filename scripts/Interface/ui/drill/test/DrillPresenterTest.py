@@ -34,10 +34,13 @@ class DrillPresenterTest(unittest.TestCase):
 
     def test_onDataChanged(self):
         self.view.getCellContents.return_value = "test"
+        self.presenter._processError = set((2, 2))
         self.presenter.onDataChanged(1, 2)
         self.view.getCellContents.assert_called_once_with(1, 2)
-        self.view.unsetRowBackground.assert_called_once_with(1)
+        self.view.unsetRowBackground.assert_not_called()
         self.view.setWindowModified.assert_called_once_with(True)
+        self.presenter.onDataChanged(2, 2)
+        self.view.unsetRowBackground.assert_called_once_with(2)
 
     def test_onParamOk(self):
         self.presenter._invalidCells = {(0, "test1"), (4, "test2")}
