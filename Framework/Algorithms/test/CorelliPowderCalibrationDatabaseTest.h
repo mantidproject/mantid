@@ -63,86 +63,6 @@ public:
 
   //-----------------------------------------------------------------------------
   /**
-   * @brief Test main features required by the algorithm
-   * CorelliPowderCalibrationDatabase
-   */
-  void failed_test_exec() {
-
-    // Create the test environment
-    // create directory
-    std::string calibdir{"TestCorelliPowderCalibration1117"};
-    // clean previous
-    boost::filesystem::remove_all(calibdir);
-    // create data base
-    boost::filesystem::create_directory(calibdir);
-    // create a previously generated database file
-    std::vector<std::string> banks{"bank2", "bank42"};
-    create_existing_database_files(calibdir, banks);
-
-    // Create workspaces
-    EventWorkspace_sptr input_ws = createTestEventWorkspace();
-    // Name of the output calibration workspace
-    std::string outwsname(
-        "CorelliPowderCalibrationDatabaseTest_CombinedTableWS");
-    TableWorkspace_sptr calib_ws =
-        createTestCalibrationTableWorkspace(outwsname);
-    TS_ASSERT(input_ws);
-    TS_ASSERT(calib_ws);
-
-    // Init algorithm
-    CorelliPowderCalibrationDatabase alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-
-    // Set up
-    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setProperty("InputCalibrationPatchWorkspace", calib_ws));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("DatabaseDirectory", calibdir));
-    TS_ASSERT_THROWS_NOTHING(
-        alg.setPropertyValue("OutputWorkspace", "TestCorellPowderFullsetWS"));
-
-    // Execute
-    alg.execute();
-    TS_ASSERT(alg.isExecuted());
-
-    // Verifying results
-    // Output 3: the combined calibration workspace
-    TS_ASSERT(AnalysisDataService::Instance().doesExist(outwsname));
-    TableWorkspace_sptr combinedcalibws =
-        std::dynamic_pointer_cast<TableWorkspace>(
-            AnalysisDataService::Instance().retrieve(outwsname));
-    TS_ASSERT(combinedcalibws);
-    // shall be 5 components
-    TS_ASSERT_EQUALS(combinedcalibws->rowCount(), 5);
-    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(1, 0), "sample");
-    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(2, 0), "bank1");
-    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(4, 0), "bank42");
-
-    // Output 2: search the saved output calibration file
-    boost::filesystem::path pdir(calibdir);
-    boost::filesystem::path pbase("20201117.csv");
-    boost::filesystem::path ptodaycalfile = pdir / pbase;
-    std::string todaycalfile = ptodaycalfile.string();
-    TS_ASSERT(boost::filesystem::exists(todaycalfile));
-    // load and compare
-    // ... ...
-
-    // Output 1: check all the files
-    std::vector<std::string> compnames{"source", "sample", "bank1", "bank2",
-                                       "bank42"};
-    std::vector<size_t> expectedrows{1, 1, 1, 2, 2};
-    for (size_t i = 0; i < 5; ++i) {
-      verify_component_files(calibdir, compnames[i], expectedrows[i]);
-    }
-
-    // Clean memory
-    // Remove workspace from the data service.
-    // AnalysisDataService::Instance().remove(outWSName);
-  }
-
-  //-----------------------------------------------------------------------------
-  /**
    * @brief Test algorithm to convert datetime string to date stamp
    */
   void test_timestamp_conversion() {
@@ -252,6 +172,87 @@ public:
 
     // Clean
     AnalysisDataService::Instance().remove(outwsname);
+  }
+
+
+  //-----------------------------------------------------------------------------
+  /**
+   * @brief Test main features required by the algorithm
+   * CorelliPowderCalibrationDatabase
+   */
+  void test_exec() {
+
+    // Create the test environment
+    // create directory
+    std::string calibdir{"TestCorelliPowderCalibration1117"};
+    // clean previous
+    boost::filesystem::remove_all(calibdir);
+    // create data base
+    boost::filesystem::create_directory(calibdir);
+    // create a previously generated database file
+    std::vector<std::string> banks{"source", "sample", "bank2", "bank42"};
+    create_existing_database_files(calibdir, banks);
+
+    // Create workspaces
+    EventWorkspace_sptr input_ws = createTestEventWorkspace();
+    // Name of the output calibration workspace
+    std::string outwsname(
+        "CorelliPowderCalibrationDatabaseTest_CombinedTableWS");
+    TableWorkspace_sptr calib_ws =
+        createTestCalibrationTableWorkspace(outwsname);
+    TS_ASSERT(input_ws);
+    TS_ASSERT(calib_ws);
+
+    // Init algorithm
+    CorelliPowderCalibrationDatabase alg;
+    TS_ASSERT_THROWS_NOTHING(alg.initialize());
+
+    // Set up
+    TS_ASSERT_THROWS_NOTHING(alg.setProperty("InputWorkspace", input_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setProperty("InputCalibrationPatchWorkspace", calib_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("DatabaseDirectory", calibdir));
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("OutputWorkspace", outwsname));
+
+    // Execute
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT(alg.isExecuted());
+
+    // Verifying results
+    // Output 3: the combined calibration workspace
+    TS_ASSERT(AnalysisDataService::Instance().doesExist(outwsname));
+    TableWorkspace_sptr combinedcalibws =
+        std::dynamic_pointer_cast<TableWorkspace>(
+            AnalysisDataService::Instance().retrieve(outwsname));
+    TS_ASSERT(combinedcalibws);
+    // shall be 5 components
+    TS_ASSERT_EQUALS(combinedcalibws->rowCount(), 5);
+    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(1, 0), "sample");
+    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(2, 0), "bank1");
+    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(4, 0), "bank42");
+
+    // Output 2: search the saved output calibration file
+    boost::filesystem::path pdir(calibdir);
+    boost::filesystem::path pbase("corelli_instrument_20201117.csv");
+    boost::filesystem::path ptodaycalfile = pdir / pbase;
+    std::string todaycalfile = ptodaycalfile.string();
+    TS_ASSERT(boost::filesystem::exists(todaycalfile));
+    // load and compare
+    // ... ...
+
+    // Output 1: check all the files
+    std::vector<std::string> compnames{"source", "sample", "bank1", "bank2",
+                                       "bank42"};
+    std::vector<size_t> expectedrows{2, 2, 1, 1, 1};
+    for (size_t i = 0; i < 5; ++i) {
+      verify_component_files(calibdir, compnames[i], expectedrows[i]);
+    }
+
+    // Clean memory
+    // Remove workspace from the data service.
+    // AnalysisDataService::Instance().remove(outWSName);
   }
 
 private:
@@ -398,7 +399,7 @@ private:
              ", YdirectionCosine , ZdirectionCosine , RotationAngle\n";
       bankofs << "# str , double , double , double , double , double , double "
                  ", double\n";
-      bankofs << "20001117,0.0001,-0.0002,0.003,0,-23.3,98.02,0";
+      bankofs << "20120321,0.0001,-0.0002,0.003,0,-23.3,98.02,0";
       bankofs.close();
     }
   }

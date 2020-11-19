@@ -130,6 +130,10 @@ public:
   static inline std::string joinPath(const std::string directory,
                                      const std::string basename);
 
+  /// Retrieve the bank level components names in order
+  static std::vector<std::string> retrieveInstrumentComponents(API::MatrixWorkspace_sptr ws);
+
+
 private:
   std::map<std::string, std::string> validateInputs() override;
   void init() override;
@@ -142,11 +146,12 @@ private:
   void loadNonCalibratedComponentDatabase(const std::string &calibddir,
           std::map<std::string, DataObjects::TableWorkspace_sptr> &calibwsmap);
   /// Create output full set calibration workspace
-  void createOutputCalibrationTable(std::map<std::string, DataObjects::TableWorkspace_sptr> &calibwsmap);
+  void createOutputCalibrationTable(std::map<std::string, DataObjects::TableWorkspace_sptr> &calibwsmap,
+                                    std::vector<std::string> orderedcomponents);
   // Create the summary CSV file
   void saveCalibrtionTable(const std::string &calibdbdir);
   /// Set up a component name - TableWorkspace map for single component calibration
-  std::map<std::string, DataObjects::TableWorkspace_sptr> setComponentMap();
+  void setComponentMap(std::vector<std::string> componentnames, std::map<std::string, DataObjects::TableWorkspace_sptr> &compmap);
 
   /// Input workspace where the calibration is from
   API::MatrixWorkspace_sptr mInputWS;
