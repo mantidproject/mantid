@@ -44,10 +44,10 @@ public:
       const Kernel::V3D &endPos, Geometry::Track &beforeScatter,
       Geometry::Track &afterScatter,
       MCInteractionStatistics &stats) const override;
-  virtual double calculateAbsorption(const Geometry::Track &beforeScatter,
-                                     const Geometry::Track &afterScatter,
-                                     double lambdaBefore,
-                                     double lambdaAfter) const override;
+  virtual double calculateAttenuation(const Geometry::Track &beforeScatter,
+                                      const Geometry::Track &afterScatter,
+                                      double lambdaBefore,
+                                      double lambdaAfter) const override;
   ComponentScatterPoint
   generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const;
   void setActiveRegion(const Geometry::BoundingBox &region) override;

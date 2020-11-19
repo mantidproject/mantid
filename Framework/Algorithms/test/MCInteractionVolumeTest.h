@@ -85,7 +85,7 @@ public:
     afterScatter.addLink({-0.05, -0.05, -0.05},
                          {0.024407241, 0.024407241, 0.093853999}, 0.021495255,
                          sample.getShape());
-    const double factor = interactor.calculateAbsorption(
+    const double factor = interactor.calculateAttenuation(
         beforeScatter, afterScatter, lambdaBefore, lambdaAfter);
     TS_ASSERT_DELTA(0.0028357258, factor, 1e-8);
   }
@@ -141,7 +141,7 @@ public:
     afterScatter.addLink({0.071709799, -0.069697236, -0.034848618},
                          {0.133981248, -0.067446460, -0.033723230}, 0.209151816,
                          sample.getShape());
-    const double factorSeg1 = interactor.calculateAbsorption(
+    const double factorSeg1 = interactor.calculateAttenuation(
         beforeScatter, afterScatter, lambdaBefore, lambdaAfter);
     TS_ASSERT_DELTA(0.030489479, factorSeg1, 1e-8);
   }
@@ -187,7 +187,7 @@ public:
                                          afterScatter, trackStatistics);
     TestGeneratedTracks(startPos, endPos, beforeScatter, afterScatter,
                         sample.getShape());
-    const double factorSample = interactor.calculateAbsorption(
+    const double factorSample = interactor.calculateAttenuation(
         beforeScatter, afterScatter, lambdaBefore, lambdaAfter);
     TS_ASSERT_DELTA(0.73100698, factorSample, 1e-8);
     TS_ASSERT(Mock::VerifyAndClearExpectations(&rng));
@@ -209,7 +209,7 @@ public:
                          sample.getShape());
     afterScatter.addLink({0.0046, 0, 0}, {0.005, 0, 0}, 0.0098,
                          sample.getEnvironment().getContainer().getShape());
-    const double factorContainer = interactor.calculateAbsorption(
+    const double factorContainer = interactor.calculateAttenuation(
         beforeScatter, afterScatter, lambdaBefore, lambdaAfter);
     TS_ASSERT_DELTA(0.69223681, factorContainer, 1e-8);
 
@@ -232,7 +232,7 @@ public:
         {0.003866481, -0.002492052, -0.012460259},
         {0.004335042, -0.002491467, -0.012457334}, 0.006835181,
         sample.getEnvironment().getContainer().getShape());
-    const double factorSample = interactor.calculateAbsorption(
+    const double factorSample = interactor.calculateAttenuation(
         beforeScatterSample, afterScatterSample, lambdaBefore, lambdaAfter);
     TS_ASSERT_DELTA(0.73100698, factorSample, 1e-8);
   }

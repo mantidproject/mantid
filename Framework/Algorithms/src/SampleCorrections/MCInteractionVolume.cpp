@@ -215,13 +215,13 @@ bool MCInteractionVolume::calculateBeforeAfterTrack(
  * @param lambdaAfter Lambda after scattering
  * @return Absorption factor
  */
-double MCInteractionVolume::calculateAbsorption(const Track &beforeScatter,
-                                                const Track &afterScatter,
-                                                double lambdaBefore,
-                                                double lambdaAfter) const {
+double MCInteractionVolume::calculateAttenuation(const Track &beforeScatter,
+                                                 const Track &afterScatter,
+                                                 double lambdaBefore,
+                                                 double lambdaAfter) const {
 
   // Function to calculate total attenuation for a track
-  auto calculateAttenuation = [](const Track &path, double lambda) {
+  auto calculateAttenuationForTrack = [](const Track &path, double lambda) {
     double factor(1.0);
     for (const auto &segment : path) {
       const double length = segment.distInsideObject;
@@ -231,8 +231,8 @@ double MCInteractionVolume::calculateAbsorption(const Track &beforeScatter,
     return factor;
   };
 
-  return calculateAttenuation(beforeScatter, lambdaBefore) *
-         calculateAttenuation(afterScatter, lambdaAfter);
+  return calculateAttenuationForTrack(beforeScatter, lambdaBefore) *
+         calculateAttenuationForTrack(afterScatter, lambdaAfter);
 }
 
 } // namespace Algorithms

@@ -112,7 +112,7 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
           } else {
             // elastic case already initialized
           }
-          const double wgt = m_scatterVol.calculateAbsorption(
+          const double wgt = m_scatterVol.calculateAttenuation(
               beforeScatter, afterScatter, lambdaIn, lambdaOut);
           attenuationFactors[j] += wgt;
           // increment standard deviation using Welford algorithm

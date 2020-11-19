@@ -38,10 +38,10 @@ public:
       Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
       const Kernel::V3D &endPos, Geometry::Track &beforeScatter,
       Geometry::Track &afterScatter, MCInteractionStatistics &stats) const = 0;
-  virtual double calculateAbsorption(const Geometry::Track &beforeScatter,
-                                     const Geometry::Track &afterScatter,
-                                     double lambdaBefore,
-                                     double lambdaAfter) const = 0;
+  virtual double calculateAttenuation(const Geometry::Track &beforeScatter,
+                                      const Geometry::Track &afterScatter,
+                                      double lambdaBefore,
+                                      double lambdaAfter) const = 0;
   virtual const Geometry::BoundingBox &getBoundingBox() const = 0;
   virtual const Geometry::BoundingBox getFullBoundingBox() const = 0;
   virtual void setActiveRegion(const Geometry::BoundingBox &region) = 0;

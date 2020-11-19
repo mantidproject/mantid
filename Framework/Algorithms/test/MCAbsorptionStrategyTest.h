@@ -177,7 +177,7 @@ public:
         .WillOnce(Return(true))
         .WillOnce(Return(true))
         .WillOnce(Return(true));
-    EXPECT_CALL(testInteractionVolume, calculateAbsorption(_, _, _, _))
+    EXPECT_CALL(testInteractionVolume, calculateAttenuation(_, _, _, _))
         .Times(Exactly(5))
         .WillOnce(Return(1.0))
         .WillOnce(Return(2.0))
@@ -249,7 +249,7 @@ private:
                             Mantid::Geometry::Track &beforeScatter,
                             Mantid::Geometry::Track &afterScatter,
                             MCInteractionStatistics &stats));
-    MOCK_CONST_METHOD4(calculateAbsorption,
+    MOCK_CONST_METHOD4(calculateAttenuation,
                        double(const Mantid::Geometry::Track &beforeScatter,
                               const Mantid::Geometry::Track &afterScatter,
                               double lambdaBefore, double lambdaAfter));
