@@ -174,7 +174,6 @@ public:
     AnalysisDataService::Instance().remove(outwsname);
   }
 
-
   //-----------------------------------------------------------------------------
   /**
    * @brief Test main features required by the algorithm

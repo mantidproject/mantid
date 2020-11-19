@@ -64,16 +64,18 @@ public:
   /// Load latest Corelli calibrtion file
   void load(const std::string &filename);
   /// Save a single component in the calibration workspace
-  DataObjects::TableWorkspace_sptr saveCompomentDatabase(const std::string &datestamp,
-                             const std::string &component,
-                             const std::string &filename);
+  DataObjects::TableWorkspace_sptr
+  saveCompomentDatabase(const std::string &datestamp,
+                        const std::string &component,
+                        const std::string &filename);
   /// Save the calibration table (of a single date)
   void saveCalibrationTable(const std::string &filename);
   /// Load a single component calibration table
   static DataObjects::TableWorkspace_sptr
   loadComponentCalibrationTable(const std::string &filename,
                                 const std::string &tablewsname);
-  /// Create a calibration TableWorkspace from scratch for either single component or full set of components
+  /// Create a calibration TableWorkspace from scratch for either single
+  /// component or full set of components
   static DataObjects::TableWorkspace_sptr
   createCalibrationTableWorkspace(const std::string &wsname, bool iscomponent);
   /// Get the calibration of a component
@@ -84,10 +86,13 @@ public:
                                 const std::string &datestamp,
                                 ComponentPosition &pos);
   /// Get the last entry (latest update) of a compoent calibrated position
-  static ComponentPosition getLatestCalibratedPosition(DataObjects::TableWorkspace_sptr componentcaltable);
-  /// Get the calibration position in the table (component table or full calibration table)
+  static ComponentPosition getLatestCalibratedPosition(
+      DataObjects::TableWorkspace_sptr componentcaltable);
+  /// Get the calibration position in the table (component table or full
+  /// calibration table)
   static ComponentPosition
-  getCalibratedPosition(DataObjects::TableWorkspace_sptr componentcaltable, size_t rownumber);
+  getCalibratedPosition(DataObjects::TableWorkspace_sptr componentcaltable,
+                        size_t rownumber);
 
 private:
   DataObjects::TableWorkspace_sptr mCalibWS;
@@ -131,8 +136,8 @@ public:
                                      const std::string basename);
 
   /// Retrieve the bank level components names in order
-  static std::vector<std::string> retrieveInstrumentComponents(API::MatrixWorkspace_sptr ws);
-
+  static std::vector<std::string>
+  retrieveInstrumentComponents(API::MatrixWorkspace_sptr ws);
 
 private:
   std::map<std::string, std::string> validateInputs() override;
@@ -140,18 +145,24 @@ private:
   void exec() override;
 
   /// append the newly calibration to each component csv file
-  void updateComponentDatabaseFiles(const std::string &calibdbdir,
-          std::map<std::string, DataObjects::TableWorkspace_sptr> &calibwsmap);
+  void updateComponentDatabaseFiles(
+      const std::string &calibdbdir,
+      std::map<std::string, DataObjects::TableWorkspace_sptr> &calibwsmap);
   /// Load data file if necessary and possible: component_caibws_map
-  void loadNonCalibratedComponentDatabase(const std::string &calibddir,
-          std::map<std::string, DataObjects::TableWorkspace_sptr> &calibwsmap);
+  void loadNonCalibratedComponentDatabase(
+      const std::string &calibddir,
+      std::map<std::string, DataObjects::TableWorkspace_sptr> &calibwsmap);
   /// Create output full set calibration workspace
-  void createOutputCalibrationTable(std::map<std::string, DataObjects::TableWorkspace_sptr> &calibwsmap,
-                                    std::vector<std::string> orderedcomponents);
+  void createOutputCalibrationTable(
+      std::map<std::string, DataObjects::TableWorkspace_sptr> &calibwsmap,
+      std::vector<std::string> orderedcomponents);
   // Create the summary CSV file
   void saveCalibrtionTable(const std::string &calibdbdir);
-  /// Set up a component name - TableWorkspace map for single component calibration
-  void setComponentMap(std::vector<std::string> componentnames, std::map<std::string, DataObjects::TableWorkspace_sptr> &compmap);
+  /// Set up a component name - TableWorkspace map for single component
+  /// calibration
+  void setComponentMap(
+      std::vector<std::string> componentnames,
+      std::map<std::string, DataObjects::TableWorkspace_sptr> &compmap);
 
   /// Input workspace where the calibration is from
   API::MatrixWorkspace_sptr mInputWS;

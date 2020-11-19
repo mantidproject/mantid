@@ -17,12 +17,12 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ComponentInfo.h"
 #include "MantidGeometry/muParser_Silent.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidGeometry/Instrument/ComponentInfo.h"
 
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/split.hpp>
@@ -71,7 +71,7 @@ CalibrationTableHandler::createCalibrationTableWorkspace(
   if (iscomponent)
     tablews->addColumn("str", "YYYMMDD"); // first column as date stamp
   else {
-     tablews->addColumn("str", "ComponentName"); // first column as date stamp
+    tablews->addColumn("str", "ComponentName"); // first column as date stamp
   }
   for (size_t i = 1; i < CorelliCalibration::calibrationTableColumnNames.size();
        ++i) {
@@ -195,7 +195,8 @@ CalibrationTableHandler::loadComponentCalibrationTable(
   IAlgorithm_sptr loadAsciiAlg =
       AlgorithmFactory::Instance().create("LoadAscii", 2);
   // Set parameters
-  std::cout << "About to load " << filename  << " to workspace " << tablewsname << "\n";
+  std::cout << "About to load " << filename << " to workspace " << tablewsname
+            << "\n";
   if (tablewsname.size() == 0) {
     std::cout << "[BUG........] OutputWorkspace is empty string\n";
     throw std::runtime_error("Failed to load ascii.");
@@ -228,9 +229,10 @@ void CalibrationTableHandler::load(const std::string &filename) {
  * @param component
  * @param filename
  */
-TableWorkspace_sptr CalibrationTableHandler::saveCompomentDatabase(
-    const std::string &datestamp, const std::string &component,
-    const std::string &filename) {
+TableWorkspace_sptr
+CalibrationTableHandler::saveCompomentDatabase(const std::string &datestamp,
+                                               const std::string &component,
+                                               const std::string &filename) {
 
   // create worksapce name
   std::string tablewsname = component + "_" + datestamp;
@@ -254,18 +256,18 @@ TableWorkspace_sptr CalibrationTableHandler::saveCompomentDatabase(
   IAlgorithm_sptr saveAsciiAlg =
       AlgorithmFactory::Instance().create("SaveAscii", 2);
   saveAsciiAlg->initialize();
-//  saveAsciiAlg->setPropertyValue(
-//      "InputWorkspace",
-//      tablewsname); // std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));
-//                    // //mCalibWS->getName());
-  saveAsciiAlg->setProperty(
-      "InputWorkspace",
-      compcaltable);
+  //  saveAsciiAlg->setPropertyValue(
+  //      "InputWorkspace",
+  //      tablewsname); //
+  //      std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));
+  //                    // //mCalibWS->getName());
+  saveAsciiAlg->setProperty("InputWorkspace", compcaltable);
   saveAsciiAlg->setProperty("Filename", filename);
   saveAsciiAlg->setPropertyValue("CommentIndicator", "#");
   saveAsciiAlg->setPropertyValue("Separator", "CSV");
   saveAsciiAlg->setProperty("ColumnHeader", true);
-  saveAsciiAlg->setProperty("AppendToFile", false);  // always overwrite original file
+  saveAsciiAlg->setProperty("AppendToFile",
+                            false); // always overwrite original file
 
   std::cout << "Execute Save .... \n";
   saveAsciiAlg->execute();
@@ -286,14 +288,13 @@ void CalibrationTableHandler::saveCalibrationTable(
   IAlgorithm_sptr saveAsciiAlg =
       AlgorithmFactory::Instance().create("SaveAscii", 2);
   saveAsciiAlg->initialize();
-//  saveAsciiAlg->setPropertyValue(
-//      "InputWorkspace",
-//      mCalibWS
-//          ->getName()); // std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));
-//                        // //mCalibWS->getName());
-  saveAsciiAlg->setProperty(
-      "InputWorkspace",
-      mCalibWS);
+  //  saveAsciiAlg->setPropertyValue(
+  //      "InputWorkspace",
+  //      mCalibWS
+  //          ->getName()); //
+  //          std::dynamic_pointer_cast<ITableWorkspace>(mCalibWS));
+  //                        // //mCalibWS->getName());
+  saveAsciiAlg->setProperty("InputWorkspace", mCalibWS);
   saveAsciiAlg->setProperty("Filename", filename);
   saveAsciiAlg->setPropertyValue("CommentIndicator", "#");
   saveAsciiAlg->setPropertyValue("Separator", "CSV");
@@ -304,17 +305,19 @@ void CalibrationTableHandler::saveCalibrationTable(
 }
 
 //-----------------------------------------------------------------------------
-ComponentPosition CalibrationTableHandler::getLatestCalibratedPosition(DataObjects::TableWorkspace_sptr componentcaltable) {
+ComponentPosition CalibrationTableHandler::getLatestCalibratedPosition(
+    DataObjects::TableWorkspace_sptr componentcaltable) {
 
   size_t num_rows = componentcaltable->rowCount();
-  ComponentPosition pos = CalibrationTableHandler::getCalibratedPosition(componentcaltable, num_rows -1);
+  ComponentPosition pos = CalibrationTableHandler::getCalibratedPosition(
+      componentcaltable, num_rows - 1);
 
   return pos;
 }
 
 //-----------------------------------------------------------------------------
-ComponentPosition
-CalibrationTableHandler::getCalibratedPosition(DataObjects::TableWorkspace_sptr componentcaltable, size_t rownumber) {
+ComponentPosition CalibrationTableHandler::getCalibratedPosition(
+    DataObjects::TableWorkspace_sptr componentcaltable, size_t rownumber) {
   // Get the values
   ComponentPosition pos;
 
@@ -328,7 +331,6 @@ CalibrationTableHandler::getCalibratedPosition(DataObjects::TableWorkspace_sptr 
 
   return pos;
 }
-
 
 } // namespace CorelliCalibration
 
@@ -357,10 +359,9 @@ void CorelliPowderCalibrationDatabase::init() {
                   "The directory that the database (csv) files are saved to");
 
   // Optional output calibration TableWorkspace
-  declareProperty(
-      std::make_unique<WorkspaceProperty<TableWorkspace>>(
-          "OutputWorkspace", "", Direction::Output),
-      "An output calibration workspace.");
+  declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "An output calibration workspace.");
 }
 
 // Validate inputs workspace first.
@@ -431,7 +432,8 @@ void CorelliPowderCalibrationDatabase::exec() {
   std::cout << "Output directory: " << calibDatabaseDir << "\n";
 
   // map for (component name, component calibration workspace
-  std::vector<std::string> orderedcomponents = retrieveInstrumentComponents(mInputWS);
+  std::vector<std::string> orderedcomponents =
+      retrieveInstrumentComponents(mInputWS);
 
   std::map<std::string, TableWorkspace_sptr> component_caibws_map;
   setComponentMap(orderedcomponents, component_caibws_map);
@@ -464,27 +466,35 @@ The header for files corelli_source.csv, corelli_sample.csv, and files
 corelli_bankXXX.csv should be: # YYYMMDD, Xposition, Yposition, Zposition,
 XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle
  */
-void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles(const std::string &calibdbdir,
-		std::map<std::string, TableWorkspace_sptr> &calibwsmap) {
+void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles(
+    const std::string &calibdbdir,
+    std::map<std::string, TableWorkspace_sptr> &calibwsmap) {
   // Date stamp
-  mDateStamp = convertTimeStamp(mInputWS->run().getProperty("start_time")->value());
+  mDateStamp =
+      convertTimeStamp(mInputWS->run().getProperty("start_time")->value());
 
   // Handler
-  CorelliCalibration::CalibrationTableHandler handler = CorelliCalibration::CalibrationTableHandler();
+  CorelliCalibration::CalibrationTableHandler handler =
+      CorelliCalibration::CalibrationTableHandler();
   handler.setCalibrationTable(mInputCalibrationTableWS);
 
-  // Loop over all the components that have been calibrated in the calibration table
+  // Loop over all the components that have been calibrated in the calibration
+  // table
   size_t num_rows = mInputCalibrationTableWS->rowCount();
   for (size_t i = 0; i < num_rows; ++i) {
     // get component name
-    std::string compname = mInputCalibrationTableWS->cell<const std::string>(i, 0);
+    std::string compname =
+        mInputCalibrationTableWS->cell<const std::string>(i, 0);
     // get file name
     std::string compdbname = corelliComponentDatabaseName(compname, calibdbdir);
     // save
-    TableWorkspace_sptr comptablews = handler.saveCompomentDatabase(mDateStamp, compname, compdbname);
+    TableWorkspace_sptr comptablews =
+        handler.saveCompomentDatabase(mDateStamp, compname, compdbname);
     // add the map
     calibwsmap[compname] = comptablews;
-    m_log.notice() << "Component " << compname << " is updated to " << compdbname << " and saved to " << comptablews->getName() << "\n";
+    m_log.notice() << "Component " << compname << " is updated to "
+                   << compdbname << " and saved to " << comptablews->getName()
+                   << "\n";
   }
 }
 
@@ -493,72 +503,85 @@ void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles(const std::s
  * @param calibdrdir : calibration database directory
  * @param calibwsmap
  */
-void CorelliPowderCalibrationDatabase::loadNonCalibratedComponentDatabase(const std::string &calibdbdir,
-        std::map<std::string, TableWorkspace_sptr> &calibwsmap) {
+void CorelliPowderCalibrationDatabase::loadNonCalibratedComponentDatabase(
+    const std::string &calibdbdir,
+    std::map<std::string, TableWorkspace_sptr> &calibwsmap) {
   // go through all the components
-  for (auto& [componentname, componentcaltable]: calibwsmap) {
+  for (auto &[componentname, componentcaltable] : calibwsmap) {
     // check whether the calibration workspace has been loaded
-    if (componentcaltable)  // skip if it has been loaded
+    if (componentcaltable) // skip if it has been loaded
       continue;
 
     // locate the file
-    std::string compdbname = corelliComponentDatabaseName(componentname, calibdbdir);
-    if(!isFileExist(compdbname))  // skip if the file does not exist
+    std::string compdbname =
+        corelliComponentDatabaseName(componentname, calibdbdir);
+    if (!isFileExist(compdbname)) // skip if the file does not exist
     {
       // skip if the database file does not exist
-      g_log.notice() << "Component " << componentname << ": No database file is found at " << compdbname << "\n";
+      g_log.notice() << "Component " << componentname
+                     << ": No database file is found at " << compdbname << "\n";
       continue;
     }
 
     // load the database (csv) file and set
-    TableWorkspace_sptr loaded_compcalibws = CorelliCalibration::CalibrationTableHandler::loadComponentCalibrationTable(compdbname, componentname + "_" + mDateStamp);
+    TableWorkspace_sptr loaded_compcalibws = CorelliCalibration::
+        CalibrationTableHandler::loadComponentCalibrationTable(
+            compdbname, componentname + "_" + mDateStamp);
     calibwsmap[componentname] = loaded_compcalibws;
 
-    m_log.notice() << "Component " << componentname << " is loaded from " << compdbname << " and saved to " << loaded_compcalibws->getName() << "\n";
-
+    m_log.notice() << "Component " << componentname << " is loaded from "
+                   << compdbname << " and saved to "
+                   << loaded_compcalibws->getName() << "\n";
   }
 }
 
 // Create summary calibrtion workspace: input: component_caibws_map output:
 // new calibration workspace
-void CorelliPowderCalibrationDatabase::createOutputCalibrationTable(std::map<std::string, TableWorkspace_sptr> &calibwsmap, std::vector<std::string> orderedcomponents) {
+void CorelliPowderCalibrationDatabase::createOutputCalibrationTable(
+    std::map<std::string, TableWorkspace_sptr> &calibwsmap,
+    std::vector<std::string> orderedcomponents) {
   // Create an empty calibration table without setting to analysis data service
-  mOutputWS = CorelliCalibration::CalibrationTableHandler::createCalibrationTableWorkspace("", false);
-  CorelliCalibration::CalibrationTableHandler handler = CorelliCalibration::CalibrationTableHandler();
+  mOutputWS = CorelliCalibration::CalibrationTableHandler::
+      createCalibrationTableWorkspace("", false);
+  CorelliCalibration::CalibrationTableHandler handler =
+      CorelliCalibration::CalibrationTableHandler();
   handler.setCalibrationTable(mOutputWS);
 
-  for (auto componentname: orderedcomponents) {
-      auto componentcaltable = calibwsmap[componentname];
-          if(componentcaltable) {
-            // only take care of calibrated components (before and now)
-          auto lastpos = CorelliCalibration::CalibrationTableHandler::getLatestCalibratedPosition(componentcaltable);
-          handler.appendCalibration(mOutputWS, componentname, lastpos);
-          }
+  for (auto componentname : orderedcomponents) {
+    auto componentcaltable = calibwsmap[componentname];
+    if (componentcaltable) {
+      // only take care of calibrated components (before and now)
+      auto lastpos = CorelliCalibration::CalibrationTableHandler::
+          getLatestCalibratedPosition(componentcaltable);
+      handler.appendCalibration(mOutputWS, componentname, lastpos);
+    }
   }
 
-//  // set values to the output table workspace
-//  for (auto& [componentname, componentcaltable]: calibwsmap) {
-//    if(componentcaltable) {
-//      // only take care of calibrated components (before and now)
-//    auto lastpos = CorelliCalibration::CalibrationTableHandler::getLatestCalibratedPosition(componentcaltable);
-//    handler.appendCalibration(mOutputWS, mDateStamp, lastpos);
-//    }
-//  }
+  //  // set values to the output table workspace
+  //  for (auto& [componentname, componentcaltable]: calibwsmap) {
+  //    if(componentcaltable) {
+  //      // only take care of calibrated components (before and now)
+  //    auto lastpos =
+  //    CorelliCalibration::CalibrationTableHandler::getLatestCalibratedPosition(componentcaltable);
+  //    handler.appendCalibration(mOutputWS, mDateStamp, lastpos);
+  //    }
+  //  }
 }
 
 // Create the summary CSV file
-// File name exampe: corelli_instrument_20202015.csv 
-void CorelliPowderCalibrationDatabase::saveCalibrtionTable(const std::string &calibdbdir) {
+// File name exampe: corelli_instrument_20202015.csv
+void CorelliPowderCalibrationDatabase::saveCalibrtionTable(
+    const std::string &calibdbdir) {
   // file name
   std::string filename = "corelli_instrument_" + mDateStamp + ".csv";
   filename = joinPath(calibdbdir, filename);
 
   // Call the handler: set and save
-  CorelliCalibration::CalibrationTableHandler handler = CorelliCalibration::CalibrationTableHandler();
+  CorelliCalibration::CalibrationTableHandler handler =
+      CorelliCalibration::CalibrationTableHandler();
   handler.setCalibrationTable(mOutputWS);
   handler.saveCalibrationTable(filename);
 }
-
 
 //-----------------------------------------------------------------------------
 /**
@@ -648,43 +671,46 @@ CorelliPowderCalibrationDatabase::joinPath(const std::string directory,
   return fullpath.string();
 }
 
-
 /**
  * @brief Set up component map
  * @param componentnames
  * @param compmap
  */
-void CorelliPowderCalibrationDatabase::setComponentMap(std::vector<std::string> componentnames,
-                                                       std::map<std::string, DataObjects::TableWorkspace_sptr> &compmap) {
-    // Add entries
-    for (auto compname: componentnames)
-        compmap[compname] = nullptr;
+void CorelliPowderCalibrationDatabase::setComponentMap(
+    std::vector<std::string> componentnames,
+    std::map<std::string, DataObjects::TableWorkspace_sptr> &compmap) {
+  // Add entries
+  for (auto compname : componentnames)
+    compmap[compname] = nullptr;
 }
 
 /**
- * @brief Retrieve the compoments including banks, source and sample names from an workspace
+ * @brief Retrieve the compoments including banks, source and sample names from
+ * an workspace
  * @param ws : Any workspace containing instrument
- * @return  : vector including of all the compoments in the order as source, sample, bank1, bank2, ...
+ * @return  : vector including of all the compoments in the order as source,
+ * sample, bank1, bank2, ...
  */
-std::vector<std::string> CorelliPowderCalibrationDatabase::retrieveInstrumentComponents(MatrixWorkspace_sptr ws) {
-    // Get access to instrument information
-    const auto &component_info = ws->componentInfo();
+std::vector<std::string>
+CorelliPowderCalibrationDatabase::retrieveInstrumentComponents(
+    MatrixWorkspace_sptr ws) {
+  // Get access to instrument information
+  const auto &component_info = ws->componentInfo();
 
-    // Init output
-    std::vector<std::string> componentnames = {"source", "sample"};
+  // Init output
+  std::vector<std::string> componentnames = {"source", "sample"};
 
-    // Loop over all the compoments for bank
-    const size_t num_components = component_info.size();
-    std::vector<std::string> banknames {};
-    for (size_t i = 0; i < num_components; ++i) {
-        std::string compname = component_info.name(i);
-        if (compname[0] == 'b') {
-            componentnames.push_back(compname);
-        }
+  // Loop over all the compoments for bank
+  const size_t num_components = component_info.size();
+  std::vector<std::string> banknames{};
+  for (size_t i = 0; i < num_components; ++i) {
+    std::string compname = component_info.name(i);
+    if (compname[0] == 'b') {
+      componentnames.push_back(compname);
     }
+  }
 
-    return componentnames;
-
+  return componentnames;
 }
 
 } // namespace Algorithms
