@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, IMDWorkspaceProperty, IPeaksWorkspaceProperty, PythonAlgorithm, PropertyMode
-from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, StringListValidator
-from mantid.simpleapi import DeleteWorkspace, FindPeaksMD, FindUBUsingIndexedPeaks, \
-    FindUBUsingLatticeParameters, IndexPeaks, ShowPossibleCells, SelectCellOfType, OptimizeLatticeForCellType, \
-    PredictFractionalPeaks
+from mantid.kernel import Direction, EnabledWhenProperty, FloatPropertyWithValue, PropertyCriterion, StringListValidator
+from mantid.simpleapi import DeleteWorkspace, FindPeaksMD, FindUBUsingFFT, FindUBUsingLatticeParameters, IndexPeaks, \
+    ShowPossibleCells, SelectCellOfType, OptimizeLatticeForCellType
+import numpy as np
 
 
 class HB3AFindPeaks(PythonAlgorithm):
@@ -58,8 +58,8 @@ class HB3AFindPeaks(PythonAlgorithm):
                              doc="Scaling factor which the overall signal density will be multiplied by to determine "
                                  "a threshold for determining peaks.")
 
-        self.declareProperty("Wavelength", defaultValue=1.558,
-                             doc="Wavelength value to use if one was not found in the sample log")
+        self.declareProperty("Wavelength", FloatPropertyWithValue.EMPTY_DBL,
+                             doc="Wavelength value to use only if one was not found in the sample log")
 
         # Lattice parameter validators from same as FindUBUsingLatticeParameters
         self.declareProperty("UseLattice", False, direction=Direction.Input,
@@ -102,6 +102,11 @@ class HB3AFindPeaks(PythonAlgorithm):
         if self.getProperty("InputWorkspace").value.getNumDims() != 3:
             issues["InputWorkspace"] = "Workspace has the wrong number of dimensions"
 
+        wavelength = self.getProperty("Wavelength")
+        if not wavelength.isDefault:
+            if wavelength.value <= 0.0:
+                issues['Wavelength'] = "Wavelength should be greater than zero"
+
         return issues
 
     def PyExec(self):
@@ -122,10 +127,17 @@ class HB3AFindPeaks(PythonAlgorithm):
             beta = self.getProperty("LatticeBeta").value
             gamma = self.getProperty("LatticeGamma").value
 
+        # Whether to use the inner goniometer depending on omega and phi in sample logs
+        use_inner = False
+
         peak_ws = self.getProperty("OutputWorkspace")
 
         # Initially set the back-up wavelength to use. This is overwritten if found in sample logs.
-        wavelength = self.getProperty("Wavelength").value
+        wavelength = 0.0
+        use_wavelength = False
+        if not self.getProperty("Wavelength").isDefault:
+            wavelength = self.getProperty("Wavelength").value
+            use_wavelength = True
 
         if input_ws.getNumExperimentInfo() == 0:
             # Warn if we could extract a wavelength from the workspace
@@ -134,31 +146,46 @@ class HB3AFindPeaks(PythonAlgorithm):
             exp_info = input_ws.getExperimentInfo(0)
             if exp_info.run().hasProperty("wavelength"):
                 wavelength = exp_info.run().getProperty("wavelength").value
+                use_wavelength = True
 
-        peak_ws = FindPeaksMD(InputWorkspace=input_ws,
-                              PeakDistanceThreshold=dist_thresh, DensityThresholdFactor=density_thresh,
-                              CalculateGoniometerForCW=True,
-                              Wavelength=wavelength,
-                              FlipX=True, InnerGoniometer=True,
-                              MaxPeaks=npeaks)
+            if exp_info.run().hasProperty("omega"):
+                if np.isclose(exp_info.run().getTimeAveragedStd("omega"), 0.0):
+                    use_inner = True
+            if exp_info.run().hasProperty("phi"):
+                if np.isclose(exp_info.run().getTimeAveragedStd("phi"), 0.0):
+                    use_inner = False
+            self.log().information("Using inner goniometer: {}".format(use_inner))
 
-        IndexPeaks(PeaksWorkspace=peak_ws)
+        if use_wavelength:
+            peak_ws = FindPeaksMD(InputWorkspace=input_ws,
+                                  PeakDistanceThreshold=dist_thresh, DensityThresholdFactor=density_thresh,
+                                  CalculateGoniometerForCW=True,
+                                  Wavelength=wavelength,
+                                  FlipX=True,
+                                  InnerGoniometer=use_inner,
+                                  MaxPeaks=npeaks)
+        else:
+            peak_ws = FindPeaksMD(InputWorkspace=input_ws,
+                                  PeakDistanceThreshold=dist_thresh, DensityThresholdFactor=density_thresh,
+                                  CalculateGoniometerForCW=True,
+                                  FlipX=True,
+                                  InnerGoniometer=use_inner,
+                                  MaxPeaks=npeaks)
 
         if lattice:
             FindUBUsingLatticeParameters(PeaksWorkspace=peak_ws, a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
         else:
-            # Using IndexedPeaks seems to work in some cases where FindUBUsingFFT fails sometimes..?
-            FindUBUsingIndexedPeaks(PeaksWorkspace=peak_ws)
+            FindUBUsingFFT(PeaksWorkspace=peak_ws, MinD=3, MaxD=20)
 
         ShowPossibleCells(PeaksWorkspace=peak_ws)
         SelectCellOfType(PeaksWorkspace=peak_ws, CellType=cell_type, Centering=centering, Apply=True)
         OptimizeLatticeForCellType(PeaksWorkspace=peak_ws, CellType=cell_type, Apply=True)
 
-        frac_peaks = PredictFractionalPeaks(Peaks=peak_ws, Hoffset=[0.33,0.33,0], FracPeaks="__peaks")
+        IndexPeaks(PeaksWorkspace=peak_ws, RoundHKLs=False)
 
-        self.setProperty("OutputWorkspace", frac_peaks)
+        self.setProperty("OutputWorkspace", peak_ws)
 
-        DeleteWorkspace(peak_ws, frac_peaks)
+        DeleteWorkspace(peak_ws)
 
 
 AlgorithmFactory.subscribe(HB3AFindPeaks)
