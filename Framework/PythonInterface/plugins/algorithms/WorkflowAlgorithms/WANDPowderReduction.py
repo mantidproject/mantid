@@ -179,6 +179,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             else:
                 _ws_cal_resampled = None
 
+
             _ws_resampled = Scale(
                 InputWorkspace=_ws_resampled,
                 Factor=self._get_scale(cal) / self._get_scale(_wsn),
@@ -197,7 +198,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                     EnableLogging=False,
                 )
 
-            if summing == True:
+            if summing:
                 # conjoin
                 if n < 1:
                     CloneWorkspace(
@@ -213,11 +214,12 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                         EnableLogging=False,
                     )
 
+
         # END_FOR: prcess_spectra
 
         # Step_3: sum all spectra
         # ref: https://docs.mantidproject.org/nightly/algorithms/SumSpectra-v1.html
-        if summing == True:
+        if summing:
             if cal is not None:
                 SumSpectra(
                     InputWorkspace="__ws_conjoined",
@@ -235,9 +237,9 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                     EnableLogging=False,
                 )
 
-        if summing == False:
-            outWS = GroupWorkspaces(InputWorkspaces=data, OutputWorkspace=outWS)
-
+        else:
+            outWS = GroupWorkspaces(data)
+            print(outWS.getNames())
 
         self.setProperty("OutputWorkspace", outWS)
 
@@ -263,6 +265,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 return mtd[str(x)].run().getLogData("duration").value
             else:
                 raise ValueError(f"Unknown normalize type: {normaliseBy}")
+
 
     def _to_spectrum_axis(self, workspace_in, workspace_out, mask, instrument_donor=None):
         target = self.getProperty("Target").value
@@ -302,18 +305,21 @@ class WANDPowderReduction(DataProcessorAlgorithm):
     def _convert_data(self, input_workspaces):
         mask = self.getProperty("MaskWorkspace").value
         mask_angle = self.getProperty("MaskAngle").value
-        outname = self.getPropertyValue("OutputWorkspace")
+        outname = self.getProperty("OutputWorkspace").valueAsStr
         
         # NOTE:
         # Due to range difference among incoming spectra, a common bin para is needed
         # such that all data can be binned exactly the same way.
 
         # BEGIN_FOR: located_global_xMin&xMax
+        #output_workspaces = [f'{outname}{n+1}' for n in range(len(input_workspaces))]
+        #mask_workspaces = [f'{mask}{n+1}' for n in range(len(input_workspaces))]
+        #for _wksp_in, _mask_n, _wksp_out in zip(input_workspaces, mask_workspaces, output_workspaces):
         output_workspaces = [f'{outname}{n+1}' for n in range(len(input_workspaces))]
-        mask_workspaces = [f'{mask}{n+1}' for n in range(len(input_workspaces))]
-        for _wksp_in, _mask_n, _wksp_out in zip(input_workspaces, mask_workspaces, output_workspaces):
-            #_mask_n = f'__mask_{n}'  # mask for n-th
-            #_wksp_out = f'__wskp_{n}'    # output workspace for n-th
+        mask_workspaces = []
+        for n, (_wksp_in, _wksp_out) in enumerate(zip(input_workspaces, output_workspaces)):
+            _mask_n = f'__mask_{n}'  # mask for n-th
+            #_wksp_out = output_workspaces[n]    # output workspace for n-th
             self.temp_workspace_list.append(_mask_n)  # cleanup later
 
             ExtractMask(InputWorkspace=_wksp_in, OutputWorkspace=_mask_n, EnableLogging=False)
