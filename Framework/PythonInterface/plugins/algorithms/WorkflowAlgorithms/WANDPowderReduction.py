@@ -179,7 +179,6 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             else:
                 _ws_cal_resampled = None
 
-
             Scale(
                 InputWorkspace=_wsn,
                 OutputWorkspace=_wsn,
@@ -193,7 +192,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                     bkg, _wsn, _mskn, xMin, xMax, _ws_cal_resampled
                 )
 
-                _ws_resampled = Minus(
+                Minus(
                     LHSWorkspace=_wsn,
                     RHSWorkspace=_ws_bkg_resampled,
                     OutputWorkspace=_wsn,
@@ -217,9 +216,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                         EnableLogging=False,
                     )
 
-
         # END_FOR: prcess_spectra
-
         # Step_3: sum all spectra
         # ref: https://docs.mantidproject.org/nightly/algorithms/SumSpectra-v1.html
         if summing:
@@ -242,7 +239,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         else:
             if len(data) == 1:
                 outWS = RenameWorkspace(InputWorkspace=data[0],
-                                OutputWorkspace=outWS)
+                                        OutputWorkspace=outWS)
             else:
                 outWS = GroupWorkspaces(InputWorkspaces=data,
                                         OutputWorkspace=outWS)
@@ -271,7 +268,6 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 return mtd[str(x)].run().getLogData("duration").value
             else:
                 raise ValueError(f"Unknown normalize type: {normaliseBy}")
-
 
     def _to_spectrum_axis(self, workspace_in, workspace_out, mask, instrument_donor=None):
         target = self.getProperty("Target").value
