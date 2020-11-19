@@ -44,7 +44,7 @@ void QtSearchModel::mergeNewResults(SearchResults const &source) {
 /** Clear the existing results list and replace it with a new one
  */
 void QtSearchModel::replaceResults(SearchResults const &source) {
-  m_runDetails.clear();
+  clear();
 
   if (source.empty())
     return;

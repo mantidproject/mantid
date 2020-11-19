@@ -204,6 +204,7 @@ SearchResult const &QtCatalogSearcher::getSearchResult(int index) const {
 void QtCatalogSearcher::reset(std::string const &text,
                               std::string const &instrument,
                               std::string const &cycle) {
+  results().clear();
   m_searchText = text;
   m_instrument = instrument;
   m_cycle = cycle;
