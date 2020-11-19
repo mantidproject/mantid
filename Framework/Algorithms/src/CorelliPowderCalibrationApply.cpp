@@ -97,7 +97,21 @@ namespace Mantid {
                 issues["InputWorkspace"] = "CORELLI only algorithm, aborting";
             }
 
-            // 2_check: TODO
+            // 2_check: headers of calibration table
+            calTable = getProperty("CalibrationTable");
+            auto refCalTableHeader = CorelliCalibration::calibrationTableColumnNames;
+            std::vector<std::string> colnames = calTable->getColumnNames();
+            if (colnames.size() != refCalTableHeader.size()) {
+                issues["CalibrationTable"] = "Headers of input calibration table does not match required";
+            }
+            for (size_t i=0; i<colnames.size(); i++){
+                if (colnames[i] != refCalTableHeader[i]){
+                    issues["CalibrationTable"] = "Header mismatch at " + std::to_string(i);
+                    break;
+                }
+            }
+
+            // 3_check: any other things to check
 
             return issues;
         }
