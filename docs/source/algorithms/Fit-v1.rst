@@ -84,6 +84,19 @@ Browser <http://www.mantidproject.org/MantidPlot:_Data_Analysis_and_Curve_Fittin
 which allows all the settings to be specified via its graphical user
 interface.
 
+The confidence bands (CB) on the calculated fit curve (:math:`\mathbf{\hat{y}}`) are obtained using the method outlined in `kmpfit`.
+For a function, :math:`f(\mathbf{p})`, with fit parameters :math:`\mathbf{p}`, the confidence interval is given by,
+
+.. math:: CB=\mathbf{f}(\mathbf{p}) \pm \mathbf{\sigma_f}
+
+with :math:`\mathbf{\sigma_f}` defined as,
+
+.. math:: \mathbf{\sigma_f}^2= \chi_{\nu}^2 \sum_{j=0}^{j=n}\sum_{k=0}^{k=n}\frac{\partial f}{\partial p_j}\frac{\partial f}{\partial p_k}\, \mathbf{C}_{jk}
+
+where :math:`\mathbf{C}_{jk}` is the covriance matrix and :math:`\chi_{\nu}^2` the reduced chi squared value.
+This interval defines the region where there is a 68.3% chance to find the true value of :math:`f(\mathbf{p})`.
+For further details see reference [1].
+
 Setting a simple function
 #########################
 
@@ -674,6 +687,11 @@ Output:
     Workspace1 LinearBackground.A1: 2.00
     Workspace2 ExpDecay.Height: 8.44
     Workspace2 ExpDecay.Lifetime: 1.40
+
+References
+----------
+
+[1] Vogelaar, M.G.R., kmpfit. University of Groningen, The Netherlands (https://www.astro.rug.nl/software/kapteyn/kmpfittutorial.html)
 
 .. categories::
 

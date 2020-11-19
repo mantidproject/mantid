@@ -38,5 +38,6 @@ Bugfixes
 - A bug in plot config where changing an axes title in the axis tab did not change the title in the curves tab.
 - Fixed a Workbench crash when attempting to show the data in a ragged workspace.
 - Show spectrum numbers instead of workspace index in plotBin
+- Fixed a bug which would cause unrealistic errorbars on the fit calc curve.
 
 :ref:`Release 6.0.0 <v6.0.0>`

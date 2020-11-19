@@ -30,6 +30,8 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/EmptyValues.h"
 
+#include <boost/math/distributions/students_t.hpp>
+
 namespace Mantid {
 namespace CurveFitting {
 
@@ -465,6 +467,15 @@ void TableWorkspaceDomainCreator::addFunctionValuesToWS(
     const std::shared_ptr<API::FunctionValues> &resultValues) const {
   const size_t nData = resultValues->size();
   resultValues->zeroCalculated();
+  // Confidence bands are calculated based on the example in
+  // www.astro.rug.nl/software/kapteyn/kmpfittutorial.html#confidence-and-prediction-intervals,
+  // which references J.Wolberg, Data Analysis Using the Method of Least
+  // Squares, 2006, Springer.
+  // Here we asusme a confidence band of 1 sigma
+  double sigma = 1;
+  double prob = std::erf(sigma / sqrt(2));
+  // critical value for t distribution
+  double alpha = (1 + prob) / 2;
 
   // Function value
   function->function(*domain, *resultValues);
@@ -511,12 +522,18 @@ void TableWorkspaceDomainCreator::addFunctionValuesToWS(
         E[k] = s;
       }
 
-      double chi2 = function->getChiSquared();
+      double chi2Reduced = function->getReducedChiSquared();
+      size_t dof = nData - nParams;
       auto &yValues = ws->mutableY(wsIndex);
       auto &eValues = ws->mutableE(wsIndex);
+      double T = 1.0;
+      if (dof != 0) {
+        boost::math::students_t dist(static_cast<double>(dof));
+        T = boost::math::quantile(dist, alpha);
+      }
       for (size_t i = 0; i < nData; i++) {
         yValues[i] = resultValues->getCalculated(i);
-        eValues[i] = std::sqrt(E[i] * chi2);
+        eValues[i] = T * std::sqrt(E[i] * chi2Reduced);
       }
 
     } else {
