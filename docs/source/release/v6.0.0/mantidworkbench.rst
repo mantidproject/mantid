@@ -8,6 +8,7 @@ Mantid Workbench Changes
 Improvements
 ############
 
+- Migrate MantidPlot's Step Scan interface to workbench.
 - Expose :ref:`Instrument View <instrumentviewer>` control to Python.
 - Enable workbench to plot 1D spectrum (plot, overplot, plot_with_error, overplot_with_error) from an IMDHistoWorkspace whose non-integrated dimension is equal to 1 but not to launch slice viewer.
 
