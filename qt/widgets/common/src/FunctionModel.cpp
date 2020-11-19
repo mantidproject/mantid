@@ -9,7 +9,6 @@
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
-#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MultiDomainFunction.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
@@ -501,19 +500,23 @@ void FunctionModel::setResolutionFromWorkspace(IFunction_sptr fun) {
       if (AnalysisDataService::Instance().doesExist(wsName)) {
         const auto ws =
             AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
-        auto inst = ws->getInstrument();
-        auto analyser = inst->getStringParameter("analyser");
-        if (analyser.size() > 0) {
-          auto comp = inst->getComponentByName(analyser[0]);
-          if (comp && comp->hasParameter("resolution")) {
-            auto params = comp->getNumberParameter("resolution", true);
-            auto funString = fun->asString();
-            for (auto param : fun->getParameterNames()) {
-              if (param.find("FWHM") != std::string::npos) {
-                fun->setParameter(param, params[0]);
-              }
-            }
-          }
+        setResolutionFromWorkspace(fun, ws);
+      }
+    }
+  }
+}
+
+void FunctionModel::setResolutionFromWorkspace(IFunction_sptr fun,
+                                               MatrixWorkspace_sptr workspace) {
+  auto inst = workspace->getInstrument();
+  auto analyser = inst->getStringParameter("analyser");
+  if (!analyser.empty()) {
+    auto comp = inst->getComponentByName(analyser[0]);
+    if (comp && comp->hasParameter("resolution")) {
+      auto params = comp->getNumberParameter("resolution", true);
+      for (auto param : fun->getParameterNames()) {
+        if (param.find("FWHM") != std::string::npos) {
+          fun->setParameter(param, params[0]);
         }
       }
     }
