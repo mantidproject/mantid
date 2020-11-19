@@ -42,13 +42,13 @@ class EAFileUtilsTest(unittest.TestCase):
     def test_check_all_detectors_complete_true(self):
         run_detectors = ['Detector 1', 'Detector 3', 'Detector 5']
         finished_detectors = []
-        result = load_utils_ea.check_all_detectors_complete(run_detectors, finished_detectors)
+        result = load_utils_ea.check_for_unused_detectors(run_detectors, finished_detectors)
         self.assertTrue(result)
 
     def test_check_all_detectors_complete_false(self):
         run_detectors = ['Detector 1', 'Detector 4']
         finished_detectors = ['Detector 1', 'Detector 4']
-        result = load_utils_ea.check_all_detectors_complete(run_detectors, finished_detectors)
+        result = load_utils_ea.check_for_unused_detectors(run_detectors, finished_detectors)
         self.assertFalse(result)
 
     def test_get_detectors(self):

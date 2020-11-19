@@ -48,11 +48,11 @@ class LoadRunWidgetModelEATest(unittest.TestCase):
         self.model._runs = [1234]
         self.model.execute()
         self.assertEqual(self.model._directory, mocked_path)
-        for run_info in self.model._data_context.run_info:
-            self.assertIsInstance(run_info, RunObject)
-            self.assertEqual(run_info._run_number, 1234)
-            self.assertEqual(run_info._detectors, ["Detector 1", "Detector 3"])
-            self.assertEqual(run_info._groupworkspace, grpws)
+        run_info = self.model._data_context.run_info[0]
+        self.assertIsInstance(run_info, RunObject)
+        self.assertEqual(run_info._run_number, 1234)
+        self.assertEqual(run_info._detectors, ["Detector 1", "Detector 3"])
+        self.assertEqual(run_info._groupworkspace, grpws)
         self.assertTrue(len(self.model.loaded_runs) > 0)
 
     @mock.patch('Muon.GUI.ElementalAnalysis2.load_widget.load_models.LoadElementalAnalysisData')
@@ -66,7 +66,7 @@ class LoadRunWidgetModelEATest(unittest.TestCase):
 
         self.model._runs = [1234, 1255]
         self.model.execute()
-        self.assertEquals(len(self.model.loaded_runs), 2)
+        self.assertEqual(len(self.model.loaded_runs), 2)
         self.model.clear_loaded_data()
         self.assertEqual(self.model.loaded_runs, [])
 

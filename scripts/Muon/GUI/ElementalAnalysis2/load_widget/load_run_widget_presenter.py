@@ -23,8 +23,7 @@ class LoadRunWidgetPresenterEA(object):
         self._load_multiple_runs = True
         self._multiple_run_mode = "Simultaneous"
 
-        self._instrument = self._model.instrument
-        self._view.set_current_instrument(self._instrument)
+        self._view.set_current_instrument(self._model.instrument)
 
         self.run_list = []
 
@@ -53,7 +52,6 @@ class LoadRunWidgetPresenterEA(object):
             self._load_thread.cancel()
 
     def set_current_instrument(self, instrument):
-        self._instrument = instrument
         self._view.set_current_instrument(instrument)
 
     def disable_loading(self):
@@ -82,8 +80,8 @@ class LoadRunWidgetPresenterEA(object):
     def update_view_from_model(self, run_list):
         self.set_run_edit_from_list(run_list)
 
-    def update_multiple_loading_behaviour(self, text):
-        self._multiple_run_mode = text
+    def update_multiple_loading_behaviour(self, multiple_run_mode):
+        self._multiple_run_mode = multiple_run_mode
 
     def set_run_edit_from_list(self, run_list):
         new_list = []

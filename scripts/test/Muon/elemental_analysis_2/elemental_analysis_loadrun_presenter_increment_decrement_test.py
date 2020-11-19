@@ -69,10 +69,9 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
 
     def test_that_decrement_run_attempts_to_load_the_correct_run(self):
         original_run = self._loaded_run
+        grpws = mock.Mock()
 
         self.presenter.handle_decrement_run()
-
-        grpws = mock.Mock()
         for run in self.model._runs:
             self.model._loaded_data_store.add_data(run=[run], workspace=grpws)
 
@@ -85,9 +84,9 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
 
     def test_that_increment_run_attempts_to_load_the_correct_run(self):
         original_run = self._loaded_run
+        grpws = mock.Mock()
 
         self.presenter.handle_increment_run()
-        grpws = mock.Mock()
         for run in self.model._runs:
             self.model._loaded_data_store.add_data(run=[run], workspace=grpws)
 

@@ -44,11 +44,10 @@ class LoadWidgetPresenterEA(object):
             self.handle_multiple_runs_option_changed)
         self._use_threading = True
 
-        self.instrumentObserver = LoadWidgetPresenterEA.InstrumentObserver(self)
-        self.loadNotifier = LoadWidgetPresenterEA.LoadNotifier(self)
+        self.loadNotifier = Observable()
 
-        self.disable_observer = LoadWidgetPresenterEA.DisableObserver(self)
-        self.enable_observer = LoadWidgetPresenterEA.EnableObserver(self)
+        self.disable_observer = GenericObserver(self.disable_loading)
+        self.enable_observer = GenericObserver(self.enable_loading)
 
         self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
 
@@ -119,47 +118,3 @@ class LoadWidgetPresenterEA(object):
         self._model.instrument = instrument
         self.load_file_widget.set_current_instrument(instrument)
         self.load_run_widget.set_current_instrument(instrument)
-
-    def update_new_instrument(self, instrument):
-        self.set_current_instrument(instrument)
-        self._model.current_runs = []
-        self.handle_run_widget_data_changed()
-
-    class LoadNotifier(Observable):
-
-        """
-        Notify when loaded data changes from file widget or run widget, or when clear button is pressed.
-        """
-
-        def __init__(self, outer):
-            Observable.__init__(self)
-            self.outer = outer  # handle to containing class
-
-        def notify_subscribers(self, arg=None):
-            Observable.notify_subscribers(self, arg)
-
-    class InstrumentObserver(Observer):
-
-        def __init__(self, outer):
-            Observer.__init__(self)
-            self.outer = outer
-
-        def update(self, observable, arg):
-            print("update called : ", arg)
-            self.outer.update_new_instrument(arg)
-
-    class EnableObserver(Observer):
-        def __init__(self, outer):
-            Observer.__init__(self)
-            self.outer = outer
-
-        def update(self, observable, arg):
-            self.outer.enable_loading()
-
-    class DisableObserver(Observer):
-        def __init__(self, outer):
-            Observer.__init__(self)
-            self.outer = outer
-
-        def update(self, observable, arg):
-            self.outer.disable_loading()
