@@ -452,6 +452,13 @@ void CorelliPowderCalibrationDatabase::exec() {
   // Create the summary CSV file
   saveCalibrtionTable(calibDatabaseDir);
 
+  // Clean up memory
+  for (auto &[compname, calibws]: component_caibws_map) {
+      if (calibws) {
+          AnalysisDataService::Instance().remove(calibws->getName());
+      }
+  }
+
   // output
   setProperty("OutputWorkspace", mOutputWS);
 }
