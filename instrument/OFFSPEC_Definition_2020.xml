@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument xmlns="http://www.mantidproject.org/IDF/1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mantidproject.org/IDF/1.0 http://schema.mantidproject.org/IDF/1.0/IDFSchema.xsd" name="OFFSPEC" valid-from="2020-01-01 00:00:00" valid-to="2115-01-02 23:59:59" last-modified="2020-10-23 13:51:00">
+   <defaults>
+      <length unit="meter" />
+      <angle unit="degree" />
+      <reference-frame>
+         <along-beam axis="z" />
+         <pointing-up axis="y" />
+         <handedness val="right" />
+      </reference-frame>
+      <components-are-facing x="0.0" y="0.0" z="0.0" />
+   </defaults>
+   
+   <!-- source and sample-position components -->
+   <component type="source">
+      <location z="-23.83" />
+   </component>
+   <type name="source" is="Source" />
+   <component type="some-surface-holder">
+      <location x="0.0" y="0.0" z="0.0" />
+   </component>
+   <type name="some-surface-holder" is="SamplePos" />
+   
+   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+   <!-- detector components (including monitors) -->
+   <component type="monitor1" idlist="monitor1">
+      <location r="11.38" t="180.0" />
+   </component>
+   <type name="monitor1" is="monitor">
+      <percent-transparency val="95" />
+      <cylinder id="shape">
+         <centre-of-bottom-base x="0.0" y="-0.02" z="0.0" />
+         <axis x="0.0" y="1.0" z="0.0" />
+         <radius val="0.015" />
+         <height val="0.04" />
+      </cylinder>
+      <algebra val="shape" />
+   </type>
+   
+   <component type="monitor2" idlist="monitor2">
+      <location r="5.62" t="180.0" />
+   </component>
+   <type name="monitor2" is="monitor">
+      <percent-transparency val="95" />
+      <cylinder id="shape">
+         <centre-of-bottom-base x="-0.02" y="0.0" z="0.0" />
+         <axis x="1.0" y="0.0" z="0.0" />
+         <radius val="0.015" />
+         <height val="0.04" />
+      </cylinder>
+      <algebra val="shape" />
+   </type>
+   
+   <component type="monitor3" idlist="monitor3">
+      <location r="0.55" t="180.0" />
+   </component>
+   <type name="monitor3" is="monitor">
+      <percent-transparency val="95" />
+      <cylinder id="top">
+         <centre-of-bottom-base x="0.0" y="-0.05" z="0.0" />
+         <axis x="0.0" y="1.0" z="0.0" />
+         <radius val="0.04" />
+         <height val="0.1" />
+      </cylinder>
+      <cylinder id="base">
+         <centre-of-bottom-base x="0.0" y="-0.15" z="0.0" />
+         <axis x="0.0" y="1.0" z="0.0" />
+         <radius val="0.02" />
+         <height val="0.1" />
+      </cylinder>
+      <algebra val="base : top" />
+   </type>
+   
+   <component type="DetectorBench" idlist="DetectorBench">
+      <location r="0.0" t="0.0">
+         <facing x="0" y="0" z="0" />
+      </location>
+   </component>
+   
+   <type name="DetectorBench">
+      <component type="WLSFDetector">
+         <location z="3.62 " />
+      </component>
+   </type>
+   
+   <type name="WLSFDetector">
+      <component type="wlsfpixel">
+         <locations y="-0.2074" y-end="0.190808" n-elements="768" />
+      </component>
+   </type>
+   
+   <type name="wlsfpixel" is="detector">
+      <cuboid id="shape">
+         <left-front-bottom-point x="-0.025" y="-0.00025925" z="0.0" />
+         <left-front-top-point x="-0.025" y="0.00025925" z="0.0" />
+         <left-back-bottom-point x="-0.025" y="-0.00025925" z="0.05" />
+         <right-front-bottom-point x="0.025" y="-0.00025925" z="0.0" />
+      </cuboid>
+      <algebra val="shape" />
+   </type>
+   <!-- other components -->
+   
+   <!-- DETECTOR and MONITOR ID LISTS -->
+   <idlist idname="monitor1">
+      <id val="1" />
+   </idlist>
+   <idlist idname="monitor2">
+      <id val="2" />
+   </idlist>
+   <idlist idname="monitor3">
+      <id val="3" />
+   </idlist>
+   
+   <!-- detector IDs required NOT spectrum numbers (See documentation) -->
+   <idlist idname="DetectorBench">
+      <id start="3001" end="3768" />
+   </idlist>
+</instrument>
