@@ -32,7 +32,7 @@ using namespace Mantid::DataObjects;
 ///
 /// The base class CxxTest doc is available at
 /// http://cxxtest.com/guide.html
-class CorelliPowderCalibrationAppyTest : public CxxTest::TestSuite {
+class CorelliPowderCalibrationApplyTest : public CxxTest::TestSuite {
 public:
   void testName() {
     CorelliPowderCalibrationApply corelliPCA;
