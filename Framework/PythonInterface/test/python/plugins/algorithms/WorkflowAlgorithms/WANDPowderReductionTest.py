@@ -372,8 +372,6 @@ class WANDPowderReductionTest(unittest.TestCase):
         x = pd_out.extractX()
         y = pd_out.extractY()
 
-        print(x.min(), x.max())
-
         self.assertAlmostEqual(x.min(), 0.03517355)
         self.assertAlmostEqual(x.max(), 70.3119282)
         self.assertAlmostEqual(y[0, 0], 0.0)
@@ -398,11 +396,16 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(y[0, 0], 0.0)
         assert isinstance(pd_out, MatrixWorkspace)
 
+        event_data2 = CloneWorkspace(event_data)
+
+        group = WorkspaceGroup()
+        group.addWorkspace(event_data)
+        group.addWorkspace(event_data2)
+
         #CASE 3
-        #DOES NOT WORK YET -- currently outputs Workspace2D -- will modify when algorithm is updated
         #input group ws containing several ws, output group ws containing several ws
         pd_out = WANDPowderReduction(
-            InputWorkspace=[event_data,event_data],
+            InputWorkspace=group,
             CalibrationWorkspace=event_cal,
             BackgroundWorkspace=event_bkg,
             Target="Theta",
@@ -411,10 +414,36 @@ class WANDPowderReductionTest(unittest.TestCase):
             Sum=False,
         )
 
-        print(pd_out.getNumberOfEntries())
-
         for i in pd_out:
 
+            x = i.extractX()
+            y = i.extractY()
+
+            self.assertAlmostEqual(x.min(), 0.03517355)
+            self.assertAlmostEqual(x.max(), 70.3119282)
+            self.assertAlmostEqual(y[0, 0], 0.0)
+
+        assert isinstance(pd_out, WorkspaceGroup)
+        assert len(pd_out) == 2
+
+        event_data2 = CloneWorkspace(event_data)
+
+        group = WorkspaceGroup()
+        group.addWorkspace(event_data)
+        group.addWorkspace(event_data2)
+
+        #CASE 4 - input group ws, output group ws
+        pd_out = WANDPowderReduction(
+            InputWorkspace=group,
+            CalibrationWorkspace=event_cal,
+            BackgroundWorkspace=event_bkg,
+            Target="Theta",
+            NumberBins=1000,
+            NormaliseBy="None",
+            Sum=False,
+        )
+
+        for i in pd_out:
             x = i.extractX()
             y = i.extractY()
 
