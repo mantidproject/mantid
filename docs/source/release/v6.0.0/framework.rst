@@ -9,6 +9,11 @@ Framework Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+Installation
+------------
+
+- The macOS bundle is now suffixed with ``Nightly`` if it comes from a nightly development build and can be installed alongside a full release build.
+
 Concepts
 --------
 
@@ -38,25 +43,6 @@ Python
 ------
 
 - Created a new module :ref:`mantid.utils <mantid.utils>` to allow for code sharing between algorithms.
-
-.. contents:: Table of Contents
-   :local:
-
-.. warning:: **Developers:** Sort changes under appropriate heading
-    putting new features at the top of the section, followed by
-    improvements, followed by bug fixes.
-
-Installation
-------------
-
-
-MantidWorkbench
----------------
-
-See :doc:`mantidworkbench`.
-
-SliceViewer and Vates Simple Interface
---------------------------------------
 
 Improvements
 ############
