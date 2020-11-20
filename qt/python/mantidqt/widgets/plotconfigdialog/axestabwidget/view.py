@@ -66,6 +66,13 @@ class AxesTabWidgetView(QWidget):
     def set_show_minor_gridlines(self, check):
         self.show_minor_gridlines_check_box.setChecked(check)
 
+    def set_minor_grid_tick_controls_visible(self, visible):
+        self.show_minor_gridlines_check_box.setVisible(visible)
+        self.show_minor_ticks_check_box.setVisible(visible)
+
+    def set_minor_gridlines_check_box_enabled(self, eneabled):
+        self.show_minor_gridlines_check_box.setEnabled(eneabled)
+
     def get_lower_limit(self):
         return float(self.lower_limit_line_edit.text())
 
@@ -83,6 +90,9 @@ class AxesTabWidgetView(QWidget):
 
     def get_autoscale_enabled(self):
         return self.autoscale.isChecked()
+
+    def get_z_radio_button_checked(self):
+        return self.z_radio_button.isChecked()
 
     def set_lower_limit(self, limit):
         self.lower_limit_line_edit.setText(str(limit))
@@ -105,6 +115,15 @@ class AxesTabWidgetView(QWidget):
     def set_limit_input_enabled(self, enabled):
         self.lower_limit_line_edit.setEnabled(enabled)
         self.upper_limit_line_edit.setEnabled(enabled)
+
+    def set_z_radio_button_enabled(self, enabled):
+        self.z_radio_button.setEnabled(enabled)
+
+    def set_x_radio_button_click(self):
+        self.x_radio_button.click()
+
+    def set_scale_combo_box_enabled(self, eneabled):
+        self.scale_combo_box.setEnabled(eneabled)
 
     def get_axis(self):
         return self.axis_button_group.checkedButton().text()

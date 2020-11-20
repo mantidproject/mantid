@@ -215,19 +215,18 @@ class AxesTabWidgetPresenter:
         plot_is_3d = isinstance(ax, Axes3D)
 
         # Enable the z-axis option if the plot is 3D.
-        self.view.z_radio_button.setEnabled(plot_is_3d)
+        self.view.set_z_radio_button_enabled(plot_is_3d)
 
         # For tiled plots
-        if not plot_is_3d and self.view.z_radio_button.isChecked():
-            self.view.x_radio_button.click()
+        if not plot_is_3d and self.view.get_z_radio_button_checked():
+            self.view.set_x_radio_button_click()
 
         # Changing the axis scale doesn't work with 3D plots, this is a known matplotlib issue,
         # so the scale option is disabled.
-        self.view.scale_combo_box.setEnabled(not plot_is_3d)
+        self.view.set_scale_combo_box_enabled(not plot_is_3d)
 
         # Minor ticks/gridlines are currently not supported for 3D plots.
-        self.view.show_minor_gridlines_check_box.setVisible(not plot_is_3d)
-        self.view.show_minor_ticks_check_box.setVisible(not plot_is_3d)
+        self.view.set_minor_grid_tick_controls_visible(not plot_is_3d)
 
         ax = self.current_axis
         self.view.set_title(ax_props.title)
@@ -237,7 +236,7 @@ class AxesTabWidgetPresenter:
 
         if not plot_is_3d:
             self.view.set_show_minor_ticks(ax_props.minor_ticks)
-            self.view.show_minor_gridlines_check_box.setEnabled(ax_props.minor_ticks)
+            self.view.set_minor_gridlines_check_box_enabled(ax_props.minor_ticks)
             self.view.set_show_minor_gridlines(ax_props.minor_gridlines)
 
         self.view.set_autoscale_enabled(ax_props[f"{ax}autoscale"])
@@ -291,7 +290,7 @@ class AxesTabWidgetPresenter:
 
     def show_minor_ticks_checked(self, checked):
         # Can't have minor gridlines without minor ticks
-        self.view.show_minor_gridlines_check_box.setEnabled(checked)
+        self.view.set_minor_gridlines_check_box_enabled(checked)
 
         if not checked:
-            self.view.show_minor_gridlines_check_box.setChecked(False)
+            self.view.set_show_minor_gridlines(False)
