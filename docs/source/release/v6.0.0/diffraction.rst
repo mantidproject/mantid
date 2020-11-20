@@ -31,7 +31,7 @@ New features
 - Modified :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to include several different absorption correction methods.
 - Added new absorption options from :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to Powder Diffraction Reduction GUI
 - New algorithm :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` to convert DEMAND data to Q-space and allow the detector position to be adjusted by offsets.
-
+- Files from ILL's instrument D1B can now be loaded.
 
 Improvements
 ############
@@ -64,7 +64,7 @@ Improvements
 
 New features
 ############
-- When a fit is successful the model will be stored as a Custom Setup in the fit property browser under the name of the workspace fitted. 
+- When a fit is successful the model will be stored as a Custom Setup in the fit property browser under the name of the workspace fitted.
 - The fitting tab now creates a group of workspaces that store the model string and the fit value and error of parameters of the model for each loaded workspace.
 - Sequential fitting of workspaces now provided in fitting tab by average value of a log set in settings.
 
