@@ -19,7 +19,7 @@ struct JumpFitParameters {
   std::vector<std::size_t> eisfSpectra;
 };
 
-class DLLExport JumpFitModel : public IndirectFittingModel {
+class MANTIDQT_INDIRECT_DLL JumpFitModel : public IndirectFittingModel {
 public:
   JumpFitModel();
   using IndirectFittingModel::addWorkspace;
