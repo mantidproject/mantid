@@ -15,6 +15,7 @@
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/CorelliPowderCalibrationApply.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -28,6 +29,7 @@
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
 
 class CorelliPowderCalibrationAppyTest : public CxxTest::TestSuite {
     public:
