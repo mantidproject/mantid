@@ -14,6 +14,7 @@ from Muon.GUI.ElementalAnalysis2.load_widget.load_models import LoadRunWidgetMod
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.ElementalAnalysis2.load_widget.load_run_widget_presenter import LoadRunWidgetPresenterEA
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_ea_tests
+from Muon.GUI.ElementalAnalysis2.context.context import DataContext
 
 
 @start_qapplication
@@ -30,7 +31,8 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         setup_context_for_ea_tests(self)
 
         self.view = mock.create_autospec(LoadRunWidgetView, autospec=True)
-        self.model = LoadRunWidgetModel(self.loaded_data, self.context)
+        self.model = mock.Mock(LoadRunWidgetModel, autospec=True)
+        self.model._data_context = mock.Mock(DataContext, autospec=True)
         self.presenter = LoadRunWidgetPresenterEA(self.view, self.model)
 
     def tearDown(self):
@@ -52,9 +54,10 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
         self.presenter.handle_run_changed_by_user()
 
-        grpws = mock.Mock()
-        for run in self.model._runs:
-            self.model._loaded_data_store.add_data(run=[run], workspace=grpws)
+        self.model.get_latest_loaded_run.return_value = 5555
+        self.model._loaded_data_store = mock.Mock(run=5555)
+        self.model._directory = mock.Mock()
+        self.model.loaded_runs = [[5555]]
 
         self.wait_for_thread(self.presenter._load_thread)
 
@@ -62,22 +65,13 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
     def test_clear_loaded_data(self):
         """
-            Tests that clearing loaded data clears both
+            Tests that clearing loaded data sends calls to clear both
             the loaded_data in the model and the view
         """
-        run = 1265
-        self.view.get_run_edit_text.return_value = str(run)
-
-        grpws = mock.Mock()
-        self.model._loaded_data_store.add_data(run=[run], workspace=grpws)
-
-        self.assertTrue(len(self.model.loaded_runs) > 0)
-        self.assertEqual(self.view.get_run_edit_text(), str(run))
-
         self.presenter.clear_loaded_data()
 
-        self.assertTrue(len(self.model.loaded_runs) == 0)
         self.assertEqual(self.view.clear.call_count, 1)
+        self.assertEqual(self.model.clear_loaded_data.call_count, 1)
 
 
 if __name__ == '__main__':

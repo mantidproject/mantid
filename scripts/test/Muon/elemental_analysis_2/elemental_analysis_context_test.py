@@ -34,8 +34,7 @@ class DataContextTest(unittest.TestCase):
         self.assertEquals(self.context.run_info, [])
 
     def test_add_run_object_to_run_info(self):
-        new_run_object = mock.Mock()
-        new_run_object.run_number.return_value = 1234
+        new_run_object = mock.Mock(run_number=1234)
         self.context.run_info_update(new_run_object)
         self.assertEqual(len(self.context.run_info), 1)
         self.assertEquals(self.context.run_info[0].run_number, 1234)
