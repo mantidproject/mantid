@@ -24,7 +24,6 @@ set(TEST_PY_FILES
     CorrectTOFTest.py
     CreateWorkspaceTest.py
     CropWorkspaceForMDNormTest.py
-    CropWorkspaceRaggedTest.py
     CylinderPaalmanPingsCorrection2Test.py
     DakotaChiSquaredTest.py
     DeltaPDF3DTest.py
