@@ -108,7 +108,7 @@ namespace Mantid {
             auto rotxs = calTable->getColumn(4);
             auto rotys = calTable->getColumn(5);
             auto rotzs = calTable->getColumn(6);
-            auto rotangs = calTable->getColumn(7);
+            auto rotangs = calTable->getColumn(7);  //unit: degrees
 
             // Translate each component in the instrument
             // [source, sample, bank1,.. bank92]
