@@ -32,63 +32,30 @@ namespace Mantid {
          * 
          */
         void CorelliPowderCalibrationApply::init() {
-            
-            //
+
             // InputWorkspace
             // [Input, Required, MatrixWorkspace or EventsWorkspace]
             // workspace to which the calibration should be applied
-            // Question: Can we only use a inputworkspace for in&out given that
-            //           the size of CORELLI workspace is fairly large
             auto wsValidator = std::make_shared<InstrumentValidator>();
             declareProperty(
                 std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                    "InputWorkspace",
+                    "Workspace",
                     "",
                     Direction::InOut,
                     PropertyMode::Mandatory,
                     wsValidator),
-                "Input workspace for calibration");
+                "CORELLI workspace to calibrate");
 
-            //
             // CalibrationTable
-            // [Input, Optional, TableWorkspace]
+            // [Input, Mandatory, TableWorkspace]
             // workspace resulting from uploading
             declareProperty(
                 std::make_unique<WorkspaceProperty<ITableWorkspace>>(
                     "CalibrationTable",
                     "",
                     Direction::Input,
-                    PropertyMode::Optional),
+                    PropertyMode::Mandatory),
                 "TableWorkspace containing calibration table");
-
-            //
-            // DatabaseDirectory
-            // [Input, Optional, string]
-            // absolute path to the database.
-            // Question:  can we drop this option?
-            //            it might be a better idea to keep one type of input instead
-            //            of trying to create a "smart" input detector at c++ level,
-            //            which can be error prone (espeically user errors)
-            declareProperty(
-                std::make_unique<FileProperty>(
-                    "DatabaseDirectory",
-                    "/SNS/CORELLI",
-                    FileProperty::Directory),
-                "absolute path to the CORELLI database");
-
-            //
-            // OutputWorkspace
-            // if emtpy, InputWorkspace will be calibrated.
-            // Question: similar to the question for inputworkspace,
-            //           we might need some input form the CIS about
-            //           their expectations
-            declareProperty(
-                std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                    "OutputWorkspace",
-                    "",
-                    Direction::Output,
-                    PropertyMode::Optional),
-                "Calibrated input workspace clone");
         }
 
         /**
@@ -99,11 +66,11 @@ namespace Mantid {
         std::map<std::string, std::string>
         CorelliPowderCalibrationApply::validateInputs() {
             std::map<std::string, std::string> issues;
-            inputWS = getProperty("InputWorkspace");
+            ws = getProperty("Workspace");
             
             // 1_check: input workspace is from CORELLI
-            if (inputWS->getInstrument()->getName() != "CORELLI") {
-                issues["InputWorkspace"] = "CORELLI only algorithm, aborting";
+            if (ws->getInstrument()->getName() != "CORELLI") {
+                issues["Workspace"] = "CORELLI only algorithm, aborting";
             }
 
             // 2_check: headers of calibration table
@@ -132,21 +99,10 @@ namespace Mantid {
         void CorelliPowderCalibrationApply::exec(){
             g_log.notice() << "Start applying CORELLI calibration\n";
 
-            // Get input arguments
-            inputWS = getProperty("InputWorkspace");
-            calTable = getProperty("CalibrationTable");
-            const std::string dbDir = getProperty("DatabaseDirectory");
-            if (isDefault("DatabaseDirectory")) {
-                g_log.notice() << "Using default database directory\n";
-            } 
+            // Parse input arguments
+            ws = getProperty("Workspace");
 
-            //
-            outputWS = getProperty("OutputWorkspace");
-            if (outputWS != inputWS) {
-                outputWS = inputWS->clone();
-                }
-            
-            // Parse calibration table
+            calTable = getProperty("CalibrationTable");
             auto componentNames = calTable->getColumn(0);
             auto x_poss = calTable->getColumn(1);
             auto y_poss = calTable->getColumn(2);
@@ -156,7 +112,6 @@ namespace Mantid {
             auto rotzs = calTable->getColumn(6);
             auto rotangs = calTable->getColumn(7);
 
-            // 
             // Translate each component in the instrument
             // [source, sample, bank1,.. bank92]
             // dev reference:
@@ -170,7 +125,7 @@ namespace Mantid {
             for (size_t row_num=0; row_num < calTable->rowCount(); row_num++) {
                 auto componentName = calTable->getColumn(0);
                 moveAlg -> initialize();
-                moveAlg->setProperty("Workspace", outputWS);
+                moveAlg->setProperty("Workspace", ws);
                 moveAlg->setProperty("ComponentName", componentNames->cell<std::string>(row_num));
                 moveAlg->setProperty("X", x_poss->cell<double>(row_num));
                 moveAlg->setProperty("Y", y_poss->cell<double>(row_num));
@@ -186,7 +141,7 @@ namespace Mantid {
             auto rotateAlg = createChildAlgorithm("RotateInstrumentComponent");
             for (size_t row_num=0; row_num < calTable->rowCount(); row_num++) {
                 rotateAlg -> initialize();
-                rotateAlg->setProperty("Workspace", outputWS);
+                rotateAlg->setProperty("Workspace", ws);
                 rotateAlg->setProperty("ComponentName", componentNames->cell<std::string>(row_num));
                 rotateAlg->setProperty("X", rotxs->cell<double>(row_num));
                 rotateAlg->setProperty("Y", rotys->cell<double>(row_num));
@@ -198,7 +153,7 @@ namespace Mantid {
             }
 
             // Config output
-            setProperty("OutputWorkspace", outputWS);
+            setProperty("Workspace", ws);
 
             g_log.notice() << "Finished applying CORELLI calibration\n";
         }
