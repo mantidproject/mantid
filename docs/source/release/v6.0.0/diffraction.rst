@@ -24,6 +24,10 @@ Improvements
 ############
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
 
+Bugfixes
+########
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` once again accepts multiple input workspaces and outputs a group workspace when specified by user.
+
 Engineering Diffraction
 -----------------------
 
@@ -32,7 +36,6 @@ Single Crystal Diffraction
 Bugfixes
 ########
 - Fix bug in :ref:`SaveHKL <algm-SaveHKL>` where the direction cosines were calculated incorrectly
-- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` once again accepts multiple input workspaces and outputs a group workspace when specified by user.
 
 
 Imaging
