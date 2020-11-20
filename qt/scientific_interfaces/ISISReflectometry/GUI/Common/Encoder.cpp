@@ -101,11 +101,13 @@ QMap<QString, QVariant> Encoder::encodeRuns(const QtRunsView *gui,
   // important so use the cached search criteria, i.e. only save the search
   // criteria if they have been used to perform a search
   map.insert(QString("textSearch"),
-             QVariant(QString::fromStdString(searcher->m_searchText)));
-  map.insert(QString("textCycle"),
-             QVariant(QString::fromStdString(searcher->m_cycle)));
-  map.insert(QString("textInstrument"),
-             QVariant(QString::fromStdString(searcher->m_instrument)));
+             QVariant(QString::fromStdString(
+                 searcher->searchCriteria().investigation)));
+  map.insert(QString("textCycle"), QVariant(QString::fromStdString(
+                                       searcher->searchCriteria().cycle)));
+  map.insert(
+      QString("textInstrument"),
+      QVariant(QString::fromStdString(searcher->searchCriteria().instrument)));
   map.insert(QString("searchResults"),
              QVariant(encodeSearchModel(gui->searchResults())));
   return map;

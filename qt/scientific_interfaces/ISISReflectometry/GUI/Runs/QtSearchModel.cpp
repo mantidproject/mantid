@@ -14,7 +14,7 @@ namespace CustomInterfaces {
 namespace ISISReflectometry {
 using namespace Mantid::API;
 
-QtSearchModel::QtSearchModel() : m_runDetails() {}
+QtSearchModel::QtSearchModel() : m_runDetails(), m_hasUnsavedChanges{false} {}
 
 /** Merge new results into the existing results list. Keep the existing row if
  * a run already exists.

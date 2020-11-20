@@ -55,6 +55,8 @@ public:
         m_instrument("INTER"), m_cycle("19_4") {
     Mantid::API::FrameworkManager::Instance();
     ON_CALL(m_view, table()).WillByDefault(Return(&m_runsTableView));
+    ON_CALL(m_view, getSearchInstrument()).WillByDefault(Return(m_instrument));
+    ON_CALL(m_view, getSearchCycle()).WillByDefault(Return(m_cycle));
     ON_CALL(m_runsTableView, jobs()).WillByDefault(ReturnRef(m_jobs));
   }
 
@@ -150,7 +152,8 @@ public:
     expectSearchString(searchString);
     expectSearchInstrument(instrument);
     expectSearchCycle(cycle);
-    EXPECT_CALL(*m_searcher, startSearchAsync(searchString, instrument, cycle))
+    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{instrument, cycle,
+                                                             searchString}))
         .Times(1);
     presenter.notifySearch();
     verifyAndClear();
@@ -160,7 +163,7 @@ public:
     auto presenter = makePresenter();
     auto searchString = std::string("");
     expectSearchString(searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _)).Times(0);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_)).Times(0);
     presenter.notifySearch();
     verifyAndClear();
   }
@@ -168,7 +171,8 @@ public:
   void testStartingSearchFails() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _))
+    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{
+                                 m_instrument, m_cycle, m_searchString}))
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(m_messageHandler,
@@ -181,7 +185,8 @@ public:
   void testStartingSearchSucceeds() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
-    EXPECT_CALL(*m_searcher, startSearchAsync(m_searchString, _, _))
+    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{
+                                 m_instrument, m_cycle, m_searchString}))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -795,6 +800,7 @@ private:
     // Return an empty table by default
     ON_CALL(*m_runsTablePresenter, runsTable())
         .WillByDefault(ReturnRef(m_runsTable));
+
     return presenter;
   }
 
@@ -860,9 +866,11 @@ private:
   }
 
   void expectSearchSettingsChanged() {
-    EXPECT_CALL(*m_searcher, searchSettingsChanged(_, _, _))
+    auto const newCriteria =
+        SearchCriteria{"new_instrument", "new cycle", "new search string"};
+    EXPECT_CALL(*m_searcher, searchCriteria())
         .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+        .WillRepeatedly(Return(newCriteria));
   }
 
   void expectClearExistingTable() {
@@ -882,8 +890,8 @@ private:
     expectSearchInstrument(m_instrument);
     expectSearchString(m_searchString);
     expectSearchCycle(m_cycle);
-    EXPECT_CALL(*m_searcher,
-                startSearchAsync(m_searchString, m_instrument, m_cycle))
+    EXPECT_CALL(*m_searcher, startSearchAsync(SearchCriteria{
+                                 m_instrument, m_cycle, m_searchString}))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(m_messageHandler, giveUserCritical(_, _)).Times(0);
@@ -891,7 +899,7 @@ private:
 
   void expectDoNotStartAutoreduction() {
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(0);
-    EXPECT_CALL(*m_searcher, startSearchAsync(_, _, _)).Times(0);
+    EXPECT_CALL(*m_searcher, startSearchAsync(_)).Times(0);
   }
 
   void expectGetValidSearchRowSelection() {

@@ -26,6 +26,7 @@
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/ISearchModel.h"
 #include "GUI/Runs/ISearcher.h"
+#include "GUI/Runs/SearchCriteria.h"
 #include "GUI/Save/IAsciiSaver.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -211,18 +212,14 @@ public:
 class MockSearcher : public ISearcher {
 public:
   MOCK_METHOD1(subscribe, void(SearcherSubscriber *notifyee));
-  MOCK_METHOD3(search, SearchResults(const std::string &, const std::string &,
-                                     const std::string &));
-  MOCK_METHOD3(startSearchAsync, bool(const std::string &, const std::string &,
-                                      const std::string &));
+  MOCK_METHOD1(search, SearchResults(SearchCriteria));
+  MOCK_METHOD1(startSearchAsync, bool(SearchCriteria));
   MOCK_CONST_METHOD0(searchInProgress, bool());
   MOCK_CONST_METHOD1(getSearchResult, SearchResult const &(int));
   MOCK_METHOD0(reset, void());
   MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
   MOCK_METHOD0(setSaved, void());
-  MOCK_CONST_METHOD3(searchSettingsChanged,
-                     bool(const std::string &, const std::string &,
-                          const std::string &));
+  MOCK_CONST_METHOD0(searchCriteria, SearchCriteria());
 };
 
 class MockSearcherSubscriber : public SearcherSubscriber {
@@ -249,7 +246,6 @@ public:
   MOCK_METHOD1(replaceResults, void(SearchResults const &));
   MOCK_CONST_METHOD1(getRowData, SearchResult const &(int));
   MOCK_CONST_METHOD0(getRows, SearchResults const &());
-  MOCK_METHOD2(setError, void(int, std::string const &));
   MOCK_METHOD0(clear, void());
   MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
   MOCK_METHOD0(setUnsaved, void());

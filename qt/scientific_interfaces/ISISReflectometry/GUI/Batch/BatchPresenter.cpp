@@ -287,7 +287,10 @@ std::string BatchPresenter::instrumentName() const {
   return m_mainPresenter->instrumentName();
 }
 
-void BatchPresenter::settingsChanged() { m_runsPresenter->settingsChanged(); }
+void BatchPresenter::settingsChanged() {
+  setBatchUnsaved();
+  m_runsPresenter->settingsChanged();
+}
 
 /**
    Checks whether or not data is currently being processed in this batch

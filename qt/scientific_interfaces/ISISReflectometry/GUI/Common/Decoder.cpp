@@ -201,9 +201,11 @@ void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs,
       decodeSearchResults(map[QString("searchResults")].toList()));
   // To avoid thinking we are doing a "new search" we need to set the cached
   // search criteria to be the same as the displayed criteria.
-  searcher->m_searchText = map[QString("textSearch")].toString().toStdString();
-  searcher->m_cycle = map[QString("textCycle")].toString().toStdString();
-  searcher->m_instrument =
+  searcher->m_searchCriteria.investigation =
+      map[QString("textSearch")].toString().toStdString();
+  searcher->m_searchCriteria.cycle =
+      map[QString("textCycle")].toString().toStdString();
+  searcher->m_searchCriteria.instrument =
       map[QString("textInstrument")].toString().toStdString();
 }
 

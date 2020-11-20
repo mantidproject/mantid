@@ -150,11 +150,16 @@ private:
   double m_thetaTolerance;
   /// Flag to indicate we have unsaved changes in the runs table
   bool m_tableUnsaved;
+  /// Cache last-used autoreduction search criteria
+  std::optional<SearchCriteria> m_lastAutoreductionSearch;
 
   /// searching
   bool search();
   void resizeSearchResultsColumns();
   bool searchInProgress() const;
+  SearchCriteria searchCriteria() const;
+  bool newSearchCriteria() const;
+  bool newAutoreductionCriteria() const;
   /// autoreduction
   bool requireNewAutoreduction() const;
   void checkForNewRuns();
@@ -187,8 +192,10 @@ private:
   void updateViewWhenMonitorStopped();
 
   bool changeInstrumentPrevented(std::string const &newName) const;
+  bool autoreductionPrevented() const;
+  bool overwriteSearchResultsAndTablePrevented() const;
+  bool overwriteTablePrevented() const;
   bool overwriteSearchResultsPrevented() const;
-  bool resumeAutoreductionPrevented() const;
 
   friend class Encoder;
   friend class Decoder;

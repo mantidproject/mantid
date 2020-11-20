@@ -347,7 +347,6 @@ void RunsTablePresenter::resetTablePrecision() {
 
 void RunsTablePresenter::settingsChanged() {
   m_model.resetState();
-  notifyTableChanged();
   notifyRowStateChanged();
 }
 

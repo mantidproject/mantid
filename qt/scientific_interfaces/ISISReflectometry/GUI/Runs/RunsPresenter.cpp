@@ -88,9 +88,12 @@ RunsTable &RunsPresenter::mutableRunsTable() {
   return tablePresenter()->mutableRunsTable();
 }
 
-/**
-   Used by the view to tell the presenter something has changed
-*/
+/** Returns true if performing a new search i.e. with different criteria to any
+ * previous search
+ */
+bool RunsPresenter::newSearchCriteria() const {
+  return searchCriteria() != m_searcher->searchCriteria();
+}
 
 void RunsPresenter::notifySearch() {
   updateWidgetEnabledState();
@@ -100,9 +103,7 @@ void RunsPresenter::notifySearch() {
     return;
 
   // Clear existing results if performing a different search
-  if (m_searcher->searchSettingsChanged(m_view->getSearchString(),
-                                        m_view->getSearchInstrument(),
-                                        m_view->getSearchCycle())) {
+  if (searchCriteria() != m_searcher->searchCriteria()) {
     if (overwriteSearchResultsPrevented()) {
       return;
     }
@@ -208,34 +209,51 @@ void RunsPresenter::notifyReductionPaused() {
   tablePresenter()->notifyReductionPaused();
 }
 
-bool RunsPresenter::resumeAutoreductionPrevented() const {
-  return hasUnsavedChanges() &&
-         !m_mainPresenter->discardChanges(
-             "This will cause unsaved changes in the search results "
-             "and/or main table to be lost. Continue?");
+/** Returns true if performing a new autoreduction search i.e. with different
+ * criteria to any previous autoreduction
+ */
+bool RunsPresenter::newAutoreductionCriteria() const {
+  return searchCriteria() != m_lastAutoreductionSearch;
+}
+
+/** Return true if starting a new autoreduction (with new criteria) is
+ * prevented e.g. if the user does not want to discard changes
+ */
+bool RunsPresenter::autoreductionPrevented() const {
+  // There's slight duplication in the checks here to ensure the user gets an
+  // informative warning message
+  if (newAutoreductionCriteria() && newSearchCriteria() && m_tableUnsaved &&
+      m_searcher->hasUnsavedChanges())
+    return overwriteSearchResultsAndTablePrevented();
+  else if (newAutoreductionCriteria() && m_tableUnsaved)
+    return overwriteTablePrevented();
+  else if (newSearchCriteria() && m_searcher->hasUnsavedChanges())
+    return overwriteSearchResultsPrevented();
+
+  return false;
 }
 
 /** Resume autoreduction. Clears any existing table data first and then
  * starts a search to check if there are new runs.
  */
 bool RunsPresenter::resumeAutoreduction() {
-  auto const searchString = m_view->getSearchString();
-  auto const instrument = m_view->getSearchInstrument();
-  auto const cycle = m_view->getSearchCycle();
-
-  if (searchString == "") {
+  if (m_view->getSearchString().empty()) {
     m_messageHandler->giveUserInfo("Search field is empty", "Search Issue");
     return false;
   }
 
-  // Check if starting an autoreduction with new settings, reset the previous
-  // search results and clear the main table
-  if (m_searcher->searchSettingsChanged(searchString, instrument, cycle)) {
-    if (resumeAutoreductionPrevented()) {
-      return false;
-    }
+  if (autoreductionPrevented())
+    return false;
+
+  // Clear the search results if it's a new search
+  if (newSearchCriteria())
     m_searcher->reset();
+
+  // Clear the main table if it's a new autoreduction
+  if (newAutoreductionCriteria()) {
+    m_lastAutoreductionSearch = searchCriteria();
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
+    m_tableUnsaved = false;
   }
 
   checkForNewRuns();
@@ -304,12 +322,7 @@ void RunsPresenter::notifyChangesSaved() {
  * @return : true if the search algorithm was started successfully, false if
  * there was a problem */
 bool RunsPresenter::search() {
-  auto const searchString = m_view->getSearchString();
-  auto const instrument = m_view->getSearchInstrument();
-  auto const cycle = m_view->getSearchCycle();
-
-  if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
-                                    m_view->getSearchCycle())) {
+  if (!m_searcher->startSearchAsync(searchCriteria())) {
     m_messageHandler->giveUserCritical("Error starting search", "Error");
     return false;
   }
@@ -385,15 +398,33 @@ bool RunsPresenter::hasUnsavedChanges() const {
   return m_tableUnsaved || m_searcher->hasUnsavedChanges();
 }
 
+bool RunsPresenter::overwriteSearchResultsAndTablePrevented() const {
+  return hasUnsavedChanges() &&
+         !m_mainPresenter->discardChanges(
+             "This will cause unsaved changes in the search results "
+             "and main table to be lost. Continue?");
+}
+
+bool RunsPresenter::overwriteTablePrevented() const {
+  return m_tableUnsaved &&
+         !m_mainPresenter->discardChanges("This will cause unsaved changes in "
+                                          "the table to be lost. Continue?");
+}
+
 bool RunsPresenter::overwriteSearchResultsPrevented() const {
   return m_searcher->hasUnsavedChanges() &&
          !m_mainPresenter->discardChanges(
-             "This will cause unsaved annotations in the search results to be "
+             "This will cause unsaved changes in the search results to be "
              "lost. Continue?");
 }
 
 bool RunsPresenter::searchInProgress() const {
   return m_searcher->searchInProgress();
+}
+
+SearchCriteria RunsPresenter::searchCriteria() const {
+  return SearchCriteria{m_view->getSearchInstrument(), m_view->getSearchCycle(),
+                        m_view->getSearchString()};
 }
 
 int RunsPresenter::percentComplete() const {

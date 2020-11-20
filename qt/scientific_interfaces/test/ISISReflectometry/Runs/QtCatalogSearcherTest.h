@@ -341,6 +341,7 @@ private:
   void verifyAndClear() {
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_view));
     TS_ASSERT(Mock::VerifyAndClearExpectations(&m_notifyee));
+    TS_ASSERT(Mock::VerifyAndClearExpectations(&m_searchResults));
   }
 
   std::shared_ptr<NiceMock<MockAlgorithmRunner>> expectGetAlgorithmRunner() {
@@ -368,22 +369,23 @@ private:
 
   SearchResults doJournalSearch(MockQtCatalogSearcher &searcher) {
     // Passing non-empty cycle performs journal search
-    return searcher.search("6543210", "INTER", "19_4");
+    return searcher.search(SearchCriteria{"INTER", "19_4", "6543210"});
   }
 
   SearchResults doCatalogSearch(MockQtCatalogSearcher &searcher,
                                 std::string const &instrument = "INTER") {
     // Passing empty cycle performs catalog search
-    return searcher.search("6543210", instrument, "");
+    return searcher.search(SearchCriteria{instrument, "", "6543210"});
   }
 
   bool startAsyncJournalSearch(MockQtCatalogSearcher &searcher) {
     // Passing non-empty cycle performs journal search
-    return searcher.startSearchAsync("6543210", "INTER", "19_4");
+    return searcher.startSearchAsync(
+        SearchCriteria{"INTER", "19_4", "6543210"});
   }
 
   bool startAsyncCatalogSearch(MockQtCatalogSearcher &searcher) {
     // Passing empty cycle performs catalog search
-    return searcher.startSearchAsync("6543210", "INTER", "");
+    return searcher.startSearchAsync(SearchCriteria{"INTER", "", "6543210"});
   }
 };
