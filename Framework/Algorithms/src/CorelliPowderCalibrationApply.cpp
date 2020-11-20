@@ -128,8 +128,8 @@ namespace Mantid {
                 moveAlg->setProperty("X", x_poss->cell<double>(row_num));
                 moveAlg->setProperty("Y", y_poss->cell<double>(row_num));
                 moveAlg->setProperty("Z", z_poss->cell<double>(row_num));
-                // Question: Is this assumption correct, all translation data in calibration is relative trans
-                moveAlg->setProperty("RelativePosition", true);
+                // [IMPORTANT] the position data from calibration table are ABSOLUTE values w.r.t. the sample
+                moveAlg->setProperty("RelativePosition", false);
                 moveAlg->execute();
             }
 
@@ -145,8 +145,8 @@ namespace Mantid {
                 rotateAlg->setProperty("Y", rotys->cell<double>(row_num));
                 rotateAlg->setProperty("Z", rotzs->cell<double>(row_num));
                 rotateAlg->setProperty("Angle", rotangs->cell<double>(row_num));
-                // Question: Is this assumption correct, all rotation data in calibration is relative rotation
-                rotateAlg->setProperty("RelativeRotation", true);
+                // [IMPORTANT] The rotation required here has to be the ABSOLUTE rotation angle
+                rotateAlg->setProperty("RelativeRotation", false);
                 rotateAlg->execute();
             }
 
