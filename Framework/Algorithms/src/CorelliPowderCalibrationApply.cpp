@@ -21,6 +21,7 @@ namespace Algorithms {
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 namespace {
 Logger logger("CorelliPowderCalibrationApply");
 }
@@ -46,7 +47,7 @@ void CorelliPowderCalibrationApply::init() {
   // [Input, Mandatory, TableWorkspace]
   // workspace resulting from uploading
   declareProperty(
-      std::make_unique<WorkspaceProperty<ITableWorkspace>>(
+      std::make_unique<WorkspaceProperty<TableWorkspace>>(
           "CalibrationTable", "", Direction::Input, PropertyMode::Mandatory),
       "TableWorkspace containing calibration table");
 }
