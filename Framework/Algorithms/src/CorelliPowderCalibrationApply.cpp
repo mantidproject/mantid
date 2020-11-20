@@ -107,13 +107,7 @@ void CorelliPowderCalibrationApply::exec() {
 
   // Translate each component in the instrument
   // [source, sample, bank1,.. bank92]
-  // dev reference:
-  // https://github.com/mantidproject/mantid/blob/f0fad29ee0496901b8d453c738ea948644c7c6a6/Framework/Reflectometry/src/SpecularReflectionPositionCorrect2.cpp#L241
-  // Question: single thread or parallel
-  //           for parallel, any suggestions
   g_log.notice() << "Translating each component using given Calibration table";
-  // Question: createChildAlgorithm or AlgorithmFactory::Instance().create?
-  // https://github.com/mantidproject/mantid/blob/eaa3bd10b5a8dc847de16dabecd95314f73f6dd2/Framework/DataHandling/src/MoveInstrumentComponent.cpp
   auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
   moveAlg->initialize();
   moveAlg->setProperty("Workspace", wsName);
@@ -132,7 +126,6 @@ void CorelliPowderCalibrationApply::exec() {
 
   // Rotate each component in the instrument
   g_log.notice() << "Rotating each component using given Calibration table";
-  // https://github.com/mantidproject/mantid/blob/eaa3bd10b5a8dc847de16dabecd95314f73f6dd2/Framework/DataHandling/src/RotateInstrumentComponent.cpp
   auto rotateAlg = createChildAlgorithm("RotateInstrumentComponent");
   rotateAlg->initialize();
   rotateAlg->setProperty("Workspace", wsName);
