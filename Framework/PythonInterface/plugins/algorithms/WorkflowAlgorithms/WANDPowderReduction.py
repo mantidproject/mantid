@@ -202,7 +202,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             if summing:
                 # conjoin
                 if n < 1:
-                    CloneWorkspace(
+                    RenameWorkspace(
                         InputWorkspace=_wsn,
                         OutputWorkspace="__ws_conjoined",
                         EnableLogging=False,
@@ -308,6 +308,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         mask = self.getProperty("MaskWorkspace").value
         mask_angle = self.getProperty("MaskAngle").value
         outname = self.getProperty("OutputWorkspace").valueAsStr
+        summing = self.getProperty("Sum").value
 
         # NOTE:
         # Due to range difference among incoming spectra, a common bin para is needed
@@ -317,6 +318,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         output_workspaces = [f'{outname}{n+1}' for n in range(len(input_workspaces))]
         mask_workspaces = []
         for n, (_wksp_in, _wksp_out) in enumerate(zip(input_workspaces, output_workspaces)):
+            _wksp_in = str(_wksp_in)
             _mask_n = f'__mask_{n}'  # mask for n-th
             self.temp_workspace_list.append(_mask_n)  # cleanup later
 
@@ -392,6 +394,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
         # create unique name for this background
         outname = str(current_background) + str(current_workspace)
+        self.temp_workspace_list.append(outname)
 
         self._to_spectrum_axis_resample(current_background, outname, make_name,
                                         current_workspace, x_min, x_max)
