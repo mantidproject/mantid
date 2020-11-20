@@ -16,44 +16,47 @@
 #include "MantidDataObjects/TableWorkspace.h"
 
 namespace Mantid {
-    namespace Algorithms {
-        /**
-         * @brief Apply calibration table for Corelli Powder Diffraction
-         * 
-         */
-        class MANTID_ALGORITHMS_DLL CorelliPowderCalibrationApply : public API::Algorithm {
-            public:
-                /// Algorithm's name for identification
-                const std::string name() const override {return "CorelliPowderCalibrationApply";};
-                
-                /// Summary of algorithm's purpose
-                const std::string summary() const override {
-                    return "Apply Corelli calibration results onto input workspace";
-                };
+namespace Algorithms {
+/**
+ * @brief Apply calibration table for Corelli Powder Diffraction
+ *
+ */
+class MANTID_ALGORITHMS_DLL CorelliPowderCalibrationApply
+    : public API::Algorithm {
+public:
+  /// Algorithm's name for identification
+  const std::string name() const override {
+    return "CorelliPowderCalibrationApply";
+  };
 
-                /// Algorithm's version, overriding a virtual method
-                int version() const override {return 1; };
+  /// Summary of algorithm's purpose
+  const std::string summary() const override {
+    return "Apply Corelli calibration results onto input workspace";
+  };
 
-                /// Algorithm's category, overriding a virtual method
-                const std::string category() const override {
-                    return "Diffraction\\Calibration";
-                };
+  /// Algorithm's version, overriding a virtual method
+  int version() const override { return 1; };
 
-            private:
-                /// Overwrites Algorithm method. Does nothing at present
-                void init() override;
+  /// Algorithm's category, overriding a virtual method
+  const std::string category() const override {
+    return "Diffraction\\Calibration";
+  };
 
-                /// Overwrites Algorithm method
-                void exec() override;
+private:
+  /// Overwrites Algorithm method. Does nothing at present
+  void init() override;
 
-                /// Private validator for inputs
-                std::map<std::string, std::string> validateInputs() override;
+  /// Overwrites Algorithm method
+  void exec() override;
 
-                /// Members
-                API::MatrixWorkspace_const_sptr ws;
-                DataObjects::TableWorkspace_const_sptr calTable;
-        };
-        
-    } // namespace Algorithms
-    
+  /// Private validator for inputs
+  std::map<std::string, std::string> validateInputs() override;
+
+  /// Members
+  API::MatrixWorkspace_const_sptr ws;
+  DataObjects::TableWorkspace_const_sptr calTable;
+};
+
+} // namespace Algorithms
+
 } // namespace Mantid
