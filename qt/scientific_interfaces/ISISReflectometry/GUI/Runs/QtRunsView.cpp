@@ -370,8 +370,6 @@ void QtRunsView::setSearchInstrument(std::string const &instrumentName) {
   setSelected(*m_ui.comboSearchInstrument, instrumentName);
 }
 
-void QtRunsView::clearSearchText() { m_ui.textSearch->clear(); }
-
 /**
 Get the indices of the highlighted search result rows
 @returns a set of ints containing the selected row numbers

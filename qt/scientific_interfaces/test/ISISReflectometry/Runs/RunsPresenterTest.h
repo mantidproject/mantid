@@ -761,22 +761,6 @@ private:
         .Times(0);
   }
 
-  void expectUserRespondsYes() {
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
-        .Times(1)
-        .WillOnce(Return(true));
-  }
-
-  void expectUserRespondsNo() {
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
-        .Times(1)
-        .WillOnce(Return(false));
-  }
-
-  void expectUserNotPrompted() {
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
-  }
-
   void expectCheckForNewRuns() {
     EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
     expectSearchInstrument(m_instrument);

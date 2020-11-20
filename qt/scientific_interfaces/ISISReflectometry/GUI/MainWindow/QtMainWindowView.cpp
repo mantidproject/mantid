@@ -213,19 +213,12 @@ void QtMainWindowView::giveUserInfo(const std::string &prompt,
                            QMessageBox::Ok);
 }
 
-bool QtMainWindowView::askUserYesNo(const std::string &prompt,
-                                    const std::string &title) {
+bool QtMainWindowView::askUserOkCancel(const std::string &prompt,
+                                       const std::string &title) {
   auto reply = QMessageBox::question(this, QString::fromStdString(title),
                                      QString::fromStdString(prompt),
-                                     QMessageBox::Yes | QMessageBox::No);
-  if (reply == QMessageBox::Yes)
-    return true;
-
-  return false;
-}
-
-bool QtMainWindowView::askUserDiscardChanges() {
-  return askUserYesNo("There are unsaved changes. Continue?", "Warning");
+                                     QMessageBox::Ok | QMessageBox::Cancel);
+  return (reply == QMessageBox::Ok);
 }
 
 std::string

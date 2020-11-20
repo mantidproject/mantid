@@ -167,7 +167,7 @@ public:
     expectBatchIsNotProcessing(batchIndex);
     expectWarnDiscardChanges(true);
     expectBatchUnsaved(batchIndex);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
+    expectAskDiscardChanges();
     presenter.notifyCloseBatchRequested(batchIndex);
     verifyAndClear();
   }
@@ -178,7 +178,7 @@ public:
     expectBatchIsNotAutoreducing(batchIndex);
     expectBatchIsNotProcessing(batchIndex);
     expectBatchSaved(batchIndex);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
+    expectDoNotAskDiscardChanges();
     presenter.notifyCloseBatchRequested(batchIndex);
     verifyAndClear();
   }
@@ -189,7 +189,7 @@ public:
     expectBatchIsNotAutoreducing(batchIndex);
     expectBatchIsNotProcessing(batchIndex);
     expectBatchSaved(batchIndex);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
+    expectDoNotAskDiscardChanges();
     presenter.notifyCloseBatchRequested(batchIndex);
     verifyAndClear();
   }
@@ -200,7 +200,7 @@ public:
     expectBatchIsNotAutoreducing(batchIndex);
     expectBatchIsNotProcessing(batchIndex);
     expectBatchSaved(batchIndex);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
+    expectDoNotAskDiscardChanges();
     presenter.notifyCloseBatchRequested(batchIndex);
     verifyAndClear();
   }
@@ -472,7 +472,7 @@ public:
     auto const batchIndex = 1;
     expectWarnDiscardChanges(true);
     expectBatchUnsaved(batchIndex);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
+    expectAskDiscardChanges();
     presenter.notifyLoadBatchRequested(batchIndex);
     verifyAndClear();
   }
@@ -481,7 +481,7 @@ public:
     auto presenter = makePresenter();
     auto const batchIndex = 1;
     expectBatchSaved(batchIndex);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
+    expectDoNotAskDiscardChanges();
     presenter.notifyLoadBatchRequested(batchIndex);
     verifyAndClear();
   }
@@ -510,7 +510,7 @@ public:
     auto const batchIndex = 1;
     expectWarnDiscardChanges(true);
     expectBatchUnsaved(batchIndex);
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(1);
+    expectAskDiscardChanges();
     presenter.isCloseEventPrevented();
     verifyAndClear();
   }
@@ -751,14 +751,26 @@ private:
     EXPECT_CALL(*m_decoder, decodeBatch(&m_view, batchIndex, map)).Times(1);
   }
 
+  void expectAskDiscardChanges() {
+    EXPECT_CALL(
+        m_messageHandler,
+        askUserOkCancel("This will cause unsaved changes to be lost. Continue?",
+                        "Discard changes?"))
+        .Times(1);
+  }
+
+  void expectDoNotAskDiscardChanges() {
+    EXPECT_CALL(m_messageHandler, askUserOkCancel(_, _)).Times(0);
+  }
+
   void expectUserDiscardsChanges() {
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
+    EXPECT_CALL(m_messageHandler, askUserOkCancel(_, _))
         .Times(1)
         .WillOnce(Return(true));
   }
 
   void expectUserDoesNotDiscardChanges() {
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
+    EXPECT_CALL(m_messageHandler, askUserOkCancel(_, _))
         .Times(1)
         .WillOnce(Return(false));
   }

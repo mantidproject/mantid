@@ -281,8 +281,6 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   m_searcher->reset();
   m_view->setSearchInstrument(instrumentName);
   m_searcher->setSearchInstrument(instrumentName);
-  m_view->clearSearchText();
-  m_searcher->setSearchString("");
   tablePresenter()->notifyInstrumentChanged(instrumentName);
 }
 

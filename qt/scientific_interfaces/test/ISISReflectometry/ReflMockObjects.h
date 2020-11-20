@@ -265,8 +265,7 @@ public:
   MOCK_METHOD2(giveUserCritical,
                void(const std::string &, const std::string &));
   MOCK_METHOD2(giveUserInfo, void(const std::string &, const std::string &));
-  MOCK_METHOD2(askUserYesNo, bool(const std::string &, const std::string &));
-  MOCK_METHOD0(askUserDiscardChanges, bool());
+  MOCK_METHOD2(askUserOkCancel, bool(const std::string &, const std::string &));
   MOCK_METHOD1(askUserForLoadFileName, std::string(const std::string &));
   MOCK_METHOD1(askUserForSaveFileName, std::string(const std::string &));
 };
