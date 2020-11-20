@@ -27,7 +27,7 @@ using Mantid::DataObjects::Workspace2D;
 namespace {
 constexpr int DEFAULT_NEVENTS = 1000;
 constexpr int DEFAULT_SEED = 123456789;
-constexpr int DEFAULT_NSCATTERINGS = 1;
+constexpr size_t DEFAULT_NSCATTERINGS = 1;
 constexpr int DEFAULT_LATITUDINAL_DETS = 5;
 constexpr int DEFAULT_LONGITUDINAL_DETS = 10;
 } // namespace
@@ -57,8 +57,9 @@ void MuscatElastic::init() {
       "The name of the workspace containing S(q).  The input workspace must "
       "have X units of momentum transfer.");
   declareProperty(
-      std::make_unique<WorkspaceProperty<>>("ScatteringCrossSection", "",
-                                            Direction::Input, wsValidator),
+      std::make_unique<WorkspaceProperty<>>(
+          "ScatteringCrossSection", "", Direction::Input,
+          PropertyMode::Optional, wsValidator),
       "A workspace containing the scattering cross section as a function of "
       "k.");
 
@@ -73,7 +74,7 @@ void MuscatElastic::init() {
   declareProperty("SeedValue", DEFAULT_SEED, positiveInt,
                   "Seed the random number generator with this value");
   auto nScatteringsValidator =
-      std::make_shared<Kernel::BoundedValidator<int>>();
+      std::make_shared<Kernel::BoundedValidator<size_t>>();
   nScatteringsValidator->setLower(1);
   nScatteringsValidator->setUpper(5);
   declareProperty("NumberScatterings", DEFAULT_NSCATTERINGS,
@@ -111,8 +112,8 @@ void MuscatElastic::init() {
 void MuscatElastic::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
-  
-  //std::vector<MatrixWorkspace_uptr> outputWSs(nhists);
+
+  // std::vector<MatrixWorkspace_uptr> outputWSs(nhists);
   auto outputWS = createOutputWorkspace(*inputWS);
 
   const MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
@@ -135,6 +136,10 @@ void MuscatElastic::exec() {
   const size_t nScatters = getProperty("NumberScatterings");
   const int seed = getProperty("SeedValue");
 
+  Progress prog(this, 0.0, 1.0, nhists);
+  prog.setNotifyStep(0.01);
+  const std::string reportMsg = "Computing corrections";
+
   PARALLEL_FOR_IF(Kernel::threadSafe(simulationWS))
   for (int64_t i = 0; i < nhists; ++i) {
     PARALLEL_START_INTERUPT_REGION
@@ -144,59 +149,63 @@ void MuscatElastic::exec() {
         inputWS->sample().getMaterial().numberDensityEffective();
     auto nbins = inputWS->blocksize();
     auto histnew = simulationWS.histogram(i);
-    for (int bin = 0; bin < nbins; bin++) {
-      // use Kernel::UnitConversion::run instead?? Momentum, MomentumTransfer
-      double kinc = inputWS->histogram(i).x()[bin] /
-                    (2 * sin(0.5 * inputWS->detectorInfo().twoTheta(i)));
-      double wavelength = 2 * M_PI / kinc;
-      auto absorbXsection =
-          inputWS->sample().getMaterial().absorbXSection(wavelength);
-      if (sigmaSSWS) {
-        // take log of sigmaSSWS and store it this way
-        auto &y = sigmaSSWS->mutableY(0);
+    if (!inputWS->detectorInfo().isMonitor(i)) { // no two theta for monitors
+      for (int bin = 0; bin < nbins; bin++) {
+        // use Kernel::UnitConversion::run instead?? Momentum, MomentumTransfer
+        double kinc = inputWS->histogram(i).x()[bin] /
+                      (2 * sin(0.5 * inputWS->detectorInfo().twoTheta(i)));
+        double wavelength = 2 * M_PI / kinc;
+        auto absorbXsection =
+            inputWS->sample().getMaterial().absorbXSection(wavelength);
+        if (sigmaSSWS) {
+          // take log of sigmaSSWS and store it this way
+          auto &y = sigmaSSWS->mutableY(0);
+          std::transform(y.begin(), y.end(), y.begin(),
+                         static_cast<double (*)(double)>(std::log));
+          scatteringXSection = interpolateLogQuadratic(sigmaSSWS, kinc);
+        } else {
+          scatteringXSection =
+              inputWS->sample().getMaterial().totalScatterXSection();
+        }
+
+        std::tie(vmfp, sigma_total) =
+            new_vector(absorbXsection, numberDensity, scatteringXSection);
+
+        const int nSingleScatterEvents = getProperty("NeutronEventsSingle");
+        const int nMultiScatterEvents = getProperty("NeutronEventsMultiple");
+
+        // take log of S(Q) and store it this way
+        auto y = SQWS->y(0);
         std::transform(y.begin(), y.end(), y.begin(),
                        static_cast<double (*)(double)>(std::log));
-        scatteringXSection = interpolateLogQuadratic(sigmaSSWS, kinc);
-      } else {
-        scatteringXSection =
-            inputWS->sample().getMaterial().totalScatterXSection();
+        auto detPos = inputWS->detectorInfo().position(i);
+
+        scatter(false, nSingleScatterEvents, 0, inputWS->sample(), *instrument,
+                rng, vmfp, sigma_total, scatteringXSection, SQWS, kinc, detPos);
+        scatter(false, nSingleScatterEvents, absorbXsection, inputWS->sample(),
+                *instrument, rng, vmfp, sigma_total, scatteringXSection, SQWS,
+                kinc, detPos);
+        std::vector<double> total(nScatters);
+        for (size_t ne = 0; ne < nScatters; ne++) {
+          total[ne] =
+              scatter(true, nMultiScatterEvents, absorbXsection,
+                      inputWS->sample(), *instrument, rng, vmfp, sigma_total,
+                      scatteringXSection, SQWS, kinc, detPos);
+          total[ne] = total[ne] / (nMultiScatterEvents * ne);
+        }
+        // just output the factor for largest ne for now
+        // Could have a separate WS for each scatter order perhaps??
+        histnew.mutableY()[bin] = total[nScatters - 1];
       }
-
-      std::tie(vmfp, sigma_total) =
-          new_vector(absorbXsection, numberDensity, scatteringXSection);
-
-      const int nSingleScatterEvents = getProperty("NeutronEventsSingle");
-      const int nMultiScatterEvents = getProperty("NeutronEventsMultiple");
-
-      // take log of S(Q) and store it this way
-      auto &y = SQWS->mutableY(0);
-      std::transform(y.begin(), y.end(), y.begin(),
-                     static_cast<double (*)(double)>(std::log));
-      auto detPos = inputWS->detectorInfo().position(i);
-
-      scatter(false, nSingleScatterEvents, 0, inputWS->sample(), *instrument,
-              rng, vmfp, sigma_total, scatteringXSection, SQWS, kinc, detPos);
-      scatter(false, nSingleScatterEvents, absorbXsection, inputWS->sample(),
-              *instrument, rng, vmfp, sigma_total, scatteringXSection, SQWS,
-              kinc, detPos);
-      std::vector<double> total(nScatters);
-      for (size_t ne = 0; ne < nScatters; ne++) {
-        total[ne] =
-            scatter(true, nMultiScatterEvents, absorbXsection,
-                    inputWS->sample(), *instrument, rng, vmfp, sigma_total,
-                    scatteringXSection, SQWS, kinc, detPos);
-        total[ne] = total[ne] / (nMultiScatterEvents * ne);
-      }
-      // just output the factor for largest ne for now
-      // Could have a separate WS for each scatter order perhaps??
-      histnew.mutableY()[bin] = total[nScatters - 1];
     }
     outputWS->setHistogram(i, histnew);
+
+    prog.report(reportMsg);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  //if (useSparseInstrument) {
+  // if (useSparseInstrument) {
   //  interpolateFromSparse(*outputWS, *sparseWS, interpolateOpt);
   //}
 }
@@ -268,6 +277,7 @@ double MuscatElastic::scatter(const bool doMultipleScattering,
   }
   Kernel::V3D directionToDetector = detPos - track.startPoint();
   auto &prevDirection = track.direction();
+  directionToDetector.normalize();
   track.reset(track.startPoint(), directionToDetector);
   int nlinks = sample.getShape().interceptSurface(track);
   double dl = track.front().distInsideObject;
@@ -286,42 +296,57 @@ void MuscatElastic::q_dir(Geometry::Track track,
                           Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
                           double &weight) {
   auto qvalues = SOfQ->histogram(0).x().rawData();
-  double QQ = qvalues.back() * rng.nextValue();
-  // T = 2theta
-  double cosT = 1 - QQ * QQ / (2 * kinc * kinc);
-  double SQ = interpolateLogQuadratic(SOfQ, QQ);
-  QSS += QQ * SQ;
-  weight = weight * scatteringXSection * SQ * QQ;
-  auto phi = rng.nextValue() * 2 * M_PI;
-  auto B3 = sqrt(1 - cosT * cosT);
-  auto B2 = cosT;
-  // possible to do this using the Quat class instead??
-  // Quat(const double _deg, const V3D &_axis);
-  // Quat(acos(cosT)*180/M_PI,
-  // Kernel::V3D(track.direction()[],track.direction()[],0))
-
-  // Rodrigues formula with final term equal to zero
-  // v_rot = cosT * v + sinT(k x v)
-  // with rotation axis k orthogonal to v and defined as:
-  // sin(phi) * (vy, -vx, 0) + cos(phi) * (-vx * vz, -vy * vz, 1 - vz * vz)
-  auto horiz = track.direction()[0];
-  auto up = track.direction()[1];
-  auto beam = track.direction()[2];
-  double UKX, UKY, UKZ;
-  if (up < 1) {
-    auto A2 = sqrt(1 - up * up);
-    auto UQTZ = cos(phi) * A2;
-    auto UQTX = -cos(phi) * up * beam / A2 + sin(phi) * horiz / A2;
-    auto UQTY = -cos(phi) * up * horiz / A2 - sin(phi) * beam / A2;
-    UKX = B2 * beam + B3 * UQTX;
-    UKY = B2 * horiz + B3 * UQTY;
-    UKZ = B2 * up + B3 * UQTZ;
-  } else {
-    UKX = B2 * cos(phi);
-    UKY = B3 * sin(phi);
-    UKZ = B2;
+  // For elastic just select a q value in range 0 to 2k
+  // The following will eventually be used for inelastic where it's less trivial
+  double QQ, cosT;
+  bool foundQ = false;
+  for (auto m = 0; m < 1000; m++) {
+    QQ = qvalues.back() * rng.nextValue();
+    // T = 2theta
+    cosT = 1 - QQ * QQ / (2 * kinc * kinc);
+    if (abs(cosT) <= 1) {
+      foundQ = true;
+      break;
+    }
   }
-  track.reset(track.startPoint(), Kernel::V3D(UKX, UKY, UKZ));
+  if (!foundQ) {
+    throw std::runtime_error("Unable to select a new q for kinc=" +
+                             std::to_string(kinc));
+  } else {
+    double SQ = interpolateLogQuadratic(SOfQ, QQ);
+    QSS += QQ * SQ;
+    weight = weight * scatteringXSection * SQ * QQ;
+    auto phi = rng.nextValue() * 2 * M_PI;
+    auto B3 = sqrt(1 - cosT * cosT);
+    auto B2 = cosT;
+    // possible to do this using the Quat class instead??
+    // Quat(const double _deg, const V3D &_axis);
+    // Quat(acos(cosT)*180/M_PI,
+    // Kernel::V3D(track.direction()[],track.direction()[],0))
+
+    // Rodrigues formula with final term equal to zero
+    // v_rot = cosT * v + sinT(k x v)
+    // with rotation axis k orthogonal to v and defined as:
+    // sin(phi) * (vy, -vx, 0) + cos(phi) * (-vx * vz, -vy * vz, 1 - vz * vz)
+    auto horiz = track.direction()[0];
+    auto up = track.direction()[1];
+    auto beam = track.direction()[2];
+    double UKX, UKY, UKZ;
+    if (up < 1) {
+      auto A2 = sqrt(1 - up * up);
+      auto UQTZ = cos(phi) * A2;
+      auto UQTX = -cos(phi) * up * beam / A2 + sin(phi) * horiz / A2;
+      auto UQTY = -cos(phi) * up * horiz / A2 - sin(phi) * beam / A2;
+      UKX = B2 * beam + B3 * UQTX;
+      UKY = B2 * horiz + B3 * UQTY;
+      UKZ = B2 * up + B3 * UQTZ;
+    } else {
+      UKX = B2 * cos(phi);
+      UKY = B3 * sin(phi);
+      UKZ = B2;
+    }
+    track.reset(track.startPoint(), Kernel::V3D(UKX, UKY, UKZ));
+  }
 }
 
 Geometry::Track
@@ -374,8 +399,14 @@ MuscatElastic::generateInitialTrack(const API::Sample &sample,
   return trackToSample;
 }
 
+/**
+ * Update the x, y, z position of the neutron (or dV volume element
+ * to integrate over). Save new start point in to the track object
+ * supplied along
+ * @param track A track defining the current trajectory
+ * @param vl A distance to move along the current trajectory
+ */
 void MuscatElastic::inc_xyz(Geometry::Track &track, double vl) {
-  track.clearIntersectionResults();
   Kernel::V3D position = track.front().entryPoint;
   Kernel::V3D direction = track.direction();
   auto x = position[0] + vl * direction[0];
@@ -383,6 +414,7 @@ void MuscatElastic::inc_xyz(Geometry::Track &track, double vl) {
   auto z = position[2] + vl * direction[2];
   auto startPoint = track.startPoint();
   startPoint = V3D(x, y, z);
+  track.clearIntersectionResults();
   track.reset(startPoint, track.direction());
 }
 
@@ -391,7 +423,28 @@ void MuscatElastic::inc_xyz(Geometry::Track &track, double vl) {
  * @return a map where keys are property names and values the found issues
  */
 std::map<std::string, std::string> MuscatElastic::validateInputs() {
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   std::map<std::string, std::string> issues;
+  Geometry::IComponent_const_sptr sample =
+      inputWS->getInstrument()->getSample();
+  if (!sample) {
+    issues["InputWorkspace"] = "Input workspace does not have a Sample";
+  } else {
+    if (inputWS->sample().hasEnvironment()) {
+      issues["InputWorkspace"] = "Sample must not have a sample environment";
+    }
+
+    if (inputWS->sample().getMaterial().numberDensity() == 0) {
+      issues["InputWorkspace"] =
+          "Sample must have a material set up with a non-zero number density";
+    }
+  }
+  MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
+  auto y = SQWS->y(0);
+  if (std::any_of(y.cbegin(), y.cend(),
+                  [](const auto yval) { return (yval <= 0); })) {
+    issues["SofqWorkspace"] = "S(Q) workspace must have all y > 0";
+  }
   return issues;
 }
 
