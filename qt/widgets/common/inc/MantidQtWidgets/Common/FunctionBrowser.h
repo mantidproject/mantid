@@ -12,7 +12,6 @@
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IFunctionBrowser.h"
 
-#include <QMap>
 #include <QWidget>
 
 #include <boost/optional.hpp>
@@ -81,6 +80,8 @@ public:
   int getNumberOfDatasets() const override;
   /// Get the names of datasets
   QStringList getDatasetNames() const override;
+  /// Get the names of the dataset domains
+  QStringList getDatasetDomainNames() const override;
   /// Get value of a local parameter
   double getLocalParameterValue(const QString &parName, int i) const override;
   /// Set value of a local parameter
@@ -139,7 +140,8 @@ public slots:
 
   // Handling of multiple datasets
   void setNumberOfDatasets(int n) override;
-  void setDatasetNames(const QStringList &names) override;
+  void setDatasets(const QStringList &datasetNames) override;
+  void setDatasets(const QList<FunctionModelDataset> &datasets) override;
   void resetLocalParameters();
   void setCurrentDataset(int i) override;
   void removeDatasets(const QList<int> &indices);

@@ -68,6 +68,7 @@ public slots:
   void displayDetectorsOnly(bool yes);
   void enableGL(bool on);
   void setColorMapAutoscaling(bool /*on*/);
+  void setLegendScaleType(int /*index*/);
   void changeColorMap(const QString &filename = "");
   void setSurfaceType(int /*index*/);
   void flipUnwrappedView(bool /*on*/);

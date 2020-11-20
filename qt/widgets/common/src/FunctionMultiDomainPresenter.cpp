@@ -138,12 +138,27 @@ void FunctionMultiDomainPresenter::setNumberOfDatasets(int n) {
   m_model->setNumberDomains(n);
 }
 
-void FunctionMultiDomainPresenter::setDatasetNames(const QStringList &names) {
-  m_model->setDatasetNames(names);
+void FunctionMultiDomainPresenter::setDatasets(
+    const QStringList &datasetNames) {
+  m_model->setDatasets(datasetNames);
+}
+
+void FunctionMultiDomainPresenter::setDatasets(
+    const QList<FunctionModelDataset> &datasets) {
+  m_model->setDatasets(datasets);
+}
+
+void FunctionMultiDomainPresenter::addDatasets(
+    const QStringList &datasetNames) {
+  m_model->addDatasets(datasetNames);
 }
 
 QStringList FunctionMultiDomainPresenter::getDatasetNames() const {
   return m_model->getDatasetNames();
+}
+
+QStringList FunctionMultiDomainPresenter::getDatasetDomainNames() const {
+  return m_model->getDatasetDomainNames();
 }
 
 int FunctionMultiDomainPresenter::getNumberOfDatasets() const {
@@ -162,19 +177,8 @@ void FunctionMultiDomainPresenter::setCurrentDataset(int index) {
 }
 
 void FunctionMultiDomainPresenter::removeDatasets(QList<int> indices) {
-  auto datasetNames = getDatasetNames();
-  // Sort in reverse order
-  qSort(indices.begin(), indices.end(), [](int a, int b) { return a > b; });
-  for (auto i = indices.constBegin(); i != indices.constEnd(); ++i) {
-    datasetNames.removeAt(*i);
-  }
-  m_model->setNumberDomains(datasetNames.size());
-  m_model->setDatasetNames(datasetNames);
-  auto currentIndex = m_model->currentDomainIndex();
-  if (currentIndex >= datasetNames.size()) {
-    currentIndex = datasetNames.isEmpty() ? 0 : datasetNames.size() - 1;
-  }
-  setCurrentDataset(currentIndex);
+  m_model->removeDatasets(indices);
+  setCurrentDataset(m_model->currentDomainIndex());
 }
 
 double
@@ -365,12 +369,13 @@ void FunctionMultiDomainPresenter::viewChangedAttribute(
  * @param parName :: Name of parameter that button was clicked for.
  */
 void FunctionMultiDomainPresenter::editLocalParameter(const QString &parName) {
-  auto const wsNames = m_model->getDatasetNames();
+  auto const datasetNames = getDatasetNames();
+  auto const domainNames = getDatasetDomainNames();
   QList<double> values;
   QList<bool> fixes;
   QStringList ties;
   QStringList constraints;
-  const int n = wsNames.size();
+  const int n = domainNames.size();
   for (int i = 0; i < n; ++i) {
     const double value = getLocalParameterValue(parName, i);
     values.push_back(value);
@@ -382,8 +387,9 @@ void FunctionMultiDomainPresenter::editLocalParameter(const QString &parName) {
     constraints.push_back(constraint);
   }
 
-  m_editLocalParameterDialog = new EditLocalParameterDialog(
-      m_view, parName, wsNames, values, fixes, ties, constraints);
+  m_editLocalParameterDialog =
+      new EditLocalParameterDialog(m_view, parName, datasetNames, domainNames,
+                                   values, fixes, ties, constraints);
   connect(m_editLocalParameterDialog, SIGNAL(finished(int)), this,
           SLOT(editLocalParameterFinish(int)));
   m_editLocalParameterDialog->open();

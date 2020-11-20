@@ -474,6 +474,16 @@ class MantidSystemTest(unittest.TestCase):
         if not was_raised:
             raise Exception('{} not raised'.format(excClass.__name__))
 
+    @staticmethod
+    def mismatchWorkspaceName(reference_filename):
+        """
+        Returns the name of the workspace which will be saved if
+        there is a mismatch between the reference and calculated workspace.
+        :param reference_filename: The reference file name of the form "name_of_file.nxs"
+        :return: Name of the file containing the mismatch workspace
+        """
+        name = reference_filename.split('.')[0]
+        return name + '-mismatch.nxs'
 
 #########################################################################
 # A class to store the results of a test

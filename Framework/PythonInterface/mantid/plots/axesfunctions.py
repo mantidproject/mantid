@@ -122,6 +122,9 @@ def _get_data_for_plot(axes, workspace, kwargs, with_dy=False, with_dx=False):
                     # for bin edge axis we have one more edge than content
                     values = (values[0:-1] + values[1:])/2.
                 x = values
+            if isinstance(vertical_axis, mantid.api.SpectraAxis):
+                spectrum_numbers = workspace.getSpectrumNumbers()
+                x = [spectrum_numbers[i] for i in x]
 
         elif axis == MantidAxType.SPECTRUM:
             x, y, dy, dx = get_spectrum(workspace, workspace_index, normalize_by_bin_width, with_dy,

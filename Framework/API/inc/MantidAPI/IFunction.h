@@ -556,10 +556,10 @@ public:
   std::shared_ptr<const Kernel::Matrix<double>> getCovarianceMatrix() const {
     return m_covar;
   }
-  /// Set the chi^2
-  void setChiSquared(double chi2) { m_chiSquared = chi2; }
-  /// Get the chi^2
-  [[nodiscard]] double getChiSquared() const { return m_chiSquared; }
+  /// Set the reduced chi^2
+  void setReducedChiSquared(double chi2) { m_chiSquared = chi2; }
+  /// Get the reduced chi^2
+  [[nodiscard]] double getReducedChiSquared() const { return m_chiSquared; }
 
   /// Set the parallel hint
   void setParallel(bool on) {
