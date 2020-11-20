@@ -87,8 +87,6 @@ namespace Mantid {
                 }
             }
 
-            // 3_check: any other things to check
-
             return issues;
         }
     
