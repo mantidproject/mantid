@@ -83,8 +83,7 @@ public:
     // setup alg
     CorelliPowderCalibrationApply alg;
     alg.initialize();
-    alg.setPropertyValue("Workspace",
-                         "CorelliPowderCalibrationApplyTest_matrixWS");
+    alg.setPropertyValue("Workspace", "correctWs");
     alg.setPropertyValue("CalibrationTable", calTableName);
 
     // ensure that an exception is thrown here
