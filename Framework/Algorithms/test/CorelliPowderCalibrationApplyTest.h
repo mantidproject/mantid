@@ -38,6 +38,27 @@ class CorelliPowderCalibrationAppyTest : public CxxTest::TestSuite {
         TS_ASSERT_EQUALS(corelliPCA.name(), "CorelliPowderCalibrationApply");
     }
 
-    // Question: what kind of unit test should I put in here given that
-    //           this algorithm does zero actual calculation
+    void testInit() {
+        CorelliPowderCalibrationApply crlCalApp;
+        crlCalApp.initialize();
+        TS_ASSERT(crlCalApp.isInitialized());
+    }
+
+    void testValidateWS(){
+
+    }
+
+    void testValidateCalTable() {
+
+    }
+
+    void testExec() {
+        // setup input workspace ??
+
+        // setup input calibration table
+        ITableWorkspace_sptr calTable = WorkspaceFactory::Instance().createTable();
+
+        // test for what??
+    }
+
 };
