@@ -72,7 +72,7 @@ void CropWorkspaceRagged::exec() {
   }
 
   // Its easier to work with point data -> index is same for x, y, E
-  bool pointData = false;
+  bool histogramData = false;
   if (outputWS->isHistogramData()) {
     auto alg = createChildAlgorithm("ConvertToPointData");
     alg->initialize();
@@ -81,6 +81,7 @@ void CropWorkspaceRagged::exec() {
     alg->setProperty("OutputWorkspace", outputWS);
     alg->execute();
     outputWS = alg->getProperty("OutputWorkspace");
+    histogramData = true;
   }
 
   MatrixWorkspace_sptr tmp;
@@ -119,7 +120,7 @@ void CropWorkspaceRagged::exec() {
     outputWS->mutableE(i) = std::move(newE);
   }
   // return the same ws type as we recieved
-  if (pointData) {
+  if (histogramData) {
     auto alg = createChildAlgorithm("ConvertToHistogram");
     alg->initialize();
     alg->setRethrows(true);
