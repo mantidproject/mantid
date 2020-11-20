@@ -14,10 +14,10 @@ import numpy as np
 class HB3AFindPeaks(PythonAlgorithm):
 
     def category(self):
-        return "Crystal\\Corrections"
+        return "Crystal\\Peaks;Crystal\\UBMatrix"
 
     def seeAlso(self):
-        return ["FindPeaksMD", "OptimizeLatticeForCellType"]
+        return ["FindPeaksMD", "OptimizeLatticeForCellType", "FindUBUsingFFT", "SelectCellOfType", "IndexPeaks"]
 
     def name(self):
         return "HB3AFindPeaks"
