@@ -4,9 +4,9 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "JumpFitDataPresenter.h"
+#include "FqFitDataPresenter.h"
 #include "IDAFunctionParameterEstimation.h"
-#include "JumpFitDataTablePresenter.h"
+#include "FqFitDataTablePresenter.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -14,12 +14,12 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-JumpFitDataPresenter::JumpFitDataPresenter(
-    JumpFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType,
+FqFitDataPresenter::FqFitDataPresenter(
+    FqFitModel *model, IndirectFitDataView *view, QComboBox *cbParameterType,
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter,
     IFQFitObserver *SingleFunctionTemplateBrowser)
     : IndirectFitDataPresenter(model, view,
-                               std::make_unique<JumpFitDataTablePresenter>(
+                               std::make_unique<FqFitDataTablePresenter>(
                                    model, view->getDataTable())),
       m_activeParameterType("Width"), m_dataIndex(TableDatasetIndex{0}),
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
@@ -44,7 +44,7 @@ JumpFitDataPresenter::JumpFitDataPresenter(
   showParameterComboBoxes();
 }
 
-void JumpFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
+void FqFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
   setModelWorkspace(workspaceName);
   updateAvailableParameterTypes();
   updateAvailableParameters();
@@ -56,13 +56,13 @@ void JumpFitDataPresenter::handleSampleLoaded(const QString &workspaceName) {
   emit updateAvailableFitTypes();
 }
 
-void JumpFitDataPresenter::handleMultipleInputSelected() {
+void FqFitDataPresenter::handleMultipleInputSelected() {
   m_notifier.notify([](IFQFitObserver &obs) {
     obs.updateAvailableFunctions(availableFits.at(DataType::ALL));
   });
 }
 
-void JumpFitDataPresenter::handleSingleInputSelected() {
+void FqFitDataPresenter::handleSingleInputSelected() {
   m_dataIndex = TableDatasetIndex{0};
   std::string currentText = m_cbParameterType->currentText().toStdString();
   auto dataType = m_cbParameterType->currentText() == QString("Width")
@@ -73,37 +73,37 @@ void JumpFitDataPresenter::handleSingleInputSelected() {
   });
 }
 
-void JumpFitDataPresenter::hideParameterComboBoxes() {
+void FqFitDataPresenter::hideParameterComboBoxes() {
   m_cbParameter->hide();
   m_cbParameterType->hide();
   m_lbParameter->hide();
   m_lbParameterType->hide();
 }
 
-void JumpFitDataPresenter::showParameterComboBoxes() {
+void FqFitDataPresenter::showParameterComboBoxes() {
   m_cbParameter->show();
   m_cbParameterType->show();
   m_lbParameter->show();
   m_lbParameterType->show();
 }
 
-void JumpFitDataPresenter::setActiveParameterType(const std::string &type) {
+void FqFitDataPresenter::setActiveParameterType(const std::string &type) {
   m_activeParameterType = type;
 }
 
-void JumpFitDataPresenter::updateActiveDataIndex() {
+void FqFitDataPresenter::updateActiveDataIndex() {
   m_dataIndex = m_jumpModel->numberOfWorkspaces();
 }
 
-void JumpFitDataPresenter::updateActiveDataIndex(int index) {
+void FqFitDataPresenter::updateActiveDataIndex(int index) {
   m_dataIndex = index;
 }
 
-void JumpFitDataPresenter::updateAvailableParameters() {
+void FqFitDataPresenter::updateAvailableParameters() {
   updateAvailableParameters(m_cbParameterType->currentText());
 }
 
-void JumpFitDataPresenter::updateAvailableParameters(const QString &type) {
+void FqFitDataPresenter::updateAvailableParameters(const QString &type) {
   if (type == "Width")
     setAvailableParameters(m_jumpModel->getWidths(TableDatasetIndex{0}));
   else if (type == "EISF")
@@ -115,21 +115,21 @@ void JumpFitDataPresenter::updateAvailableParameters(const QString &type) {
     setSingleModelSpectrum(m_cbParameter->currentIndex());
 }
 
-void JumpFitDataPresenter::updateAvailableParameterTypes() {
+void FqFitDataPresenter::updateAvailableParameterTypes() {
   MantidQt::API::SignalBlocker blocker(m_cbParameterType);
   m_cbParameterType->clear();
   for (const auto &type : getParameterTypes(m_dataIndex))
     m_cbParameterType->addItem(QString::fromStdString(type));
 }
 
-void JumpFitDataPresenter::updateParameterSelectionEnabled() {
+void FqFitDataPresenter::updateParameterSelectionEnabled() {
   const auto enabled = m_jumpModel->numberOfWorkspaces() > TableDatasetIndex{0};
   m_cbParameter->setEnabled(enabled);
   m_cbParameterType->setEnabled(enabled);
   m_lbParameter->setEnabled(enabled);
 }
 
-void JumpFitDataPresenter::setAvailableParameters(
+void FqFitDataPresenter::setAvailableParameters(
     const std::vector<std::string> &parameters) {
   MantidQt::API::SignalBlocker blocker(m_cbParameter);
   m_cbParameter->clear();
@@ -137,11 +137,11 @@ void JumpFitDataPresenter::setAvailableParameters(
     m_cbParameter->addItem(QString::fromStdString(parameter));
 }
 
-void JumpFitDataPresenter::setParameterLabel(const QString &parameter) {
+void FqFitDataPresenter::setParameterLabel(const QString &parameter) {
   m_lbParameter->setText(parameter + ":");
 }
 
-void JumpFitDataPresenter::handleParameterTypeChanged(
+void FqFitDataPresenter::handleParameterTypeChanged(
     const QString &parameter) {
   m_lbParameter->setText(parameter + ":");
   updateAvailableParameters(parameter);
@@ -153,8 +153,8 @@ void JumpFitDataPresenter::handleParameterTypeChanged(
   });
 }
 
-void JumpFitDataPresenter::setDialogParameterNames(
-    JumpFitAddWorkspaceDialog *dialog, const std::string &workspace) {
+void FqFitDataPresenter::setDialogParameterNames(
+    FqFitAddWorkspaceDialog *dialog, const std::string &workspace) {
   try {
     addWorkspace(m_jumpModel, workspace);
     dialog->enableParameterSelection();
@@ -165,14 +165,14 @@ void JumpFitDataPresenter::setDialogParameterNames(
   updateParameterOptions(dialog);
 }
 
-void JumpFitDataPresenter::dialogParameterTypeUpdated(
-    JumpFitAddWorkspaceDialog *dialog, const std::string &type) {
+void FqFitDataPresenter::dialogParameterTypeUpdated(
+    FqFitAddWorkspaceDialog *dialog, const std::string &type) {
   setActiveParameterType(type);
   updateParameterOptions(dialog);
 }
 
-void JumpFitDataPresenter::updateParameterOptions(
-    JumpFitAddWorkspaceDialog *dialog) {
+void FqFitDataPresenter::updateParameterOptions(
+    FqFitAddWorkspaceDialog *dialog) {
   setDataIndexToCurrentWorkspace(dialog);
   if (m_activeParameterType == "Width")
     dialog->setParameterNames(m_jumpModel->getWidths(m_dataIndex));
@@ -182,14 +182,14 @@ void JumpFitDataPresenter::updateParameterOptions(
     dialog->setParameterNames({});
 }
 
-void JumpFitDataPresenter::updateParameterTypes(
-    JumpFitAddWorkspaceDialog *dialog) {
+void FqFitDataPresenter::updateParameterTypes(
+    FqFitAddWorkspaceDialog *dialog) {
   setDataIndexToCurrentWorkspace(dialog);
   dialog->setParameterTypes(getParameterTypes(m_dataIndex));
 }
 
 std::vector<std::string>
-JumpFitDataPresenter::getParameterTypes(TableDatasetIndex dataIndex) const {
+FqFitDataPresenter::getParameterTypes(TableDatasetIndex dataIndex) const {
   std::vector<std::string> types;
   if (!m_jumpModel->zeroWidths(dataIndex))
     types.emplace_back("Width");
@@ -198,16 +198,16 @@ JumpFitDataPresenter::getParameterTypes(TableDatasetIndex dataIndex) const {
   return types;
 }
 
-void JumpFitDataPresenter::addWorkspace(IndirectFittingModel *model,
+void FqFitDataPresenter::addWorkspace(IndirectFittingModel *model,
                                         const std::string &name) {
   if (model->numberOfWorkspaces() > m_dataIndex)
     model->removeWorkspace(m_dataIndex);
   model->addWorkspace(name);
 }
 
-void JumpFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
+void FqFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
   if (const auto jumpDialog =
-          dynamic_cast<JumpFitAddWorkspaceDialog const *>(dialog)) {
+          dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
     setDataIndexToCurrentWorkspace(jumpDialog);
     // here we can say that we are in multiple mode so we can append the spectra
     // to the current one and then setspectra
@@ -216,7 +216,7 @@ void JumpFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
   }
 }
 
-void JumpFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
+void FqFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
   auto index = static_cast<std::size_t>(parameterIndex);
   if (m_cbParameterType->currentIndex() == 0)
     m_jumpModel->setActiveWidth(index, TableDatasetIndex{0});
@@ -224,12 +224,12 @@ void JumpFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
     m_jumpModel->setActiveEISF(index, TableDatasetIndex{0});
 }
 
-void JumpFitDataPresenter::handleSpectrumSelectionChanged(int parameterIndex) {
+void FqFitDataPresenter::handleSpectrumSelectionChanged(int parameterIndex) {
   setSingleModelSpectrum(parameterIndex);
   emit dataChanged();
 }
 
-void JumpFitDataPresenter::setModelSpectrum(int index) {
+void FqFitDataPresenter::setModelSpectrum(int index) {
   if (index < 0)
     throw std::runtime_error("No valid parameter was selected.");
   else if (m_activeParameterType == "Width")
@@ -240,7 +240,7 @@ void JumpFitDataPresenter::setModelSpectrum(int index) {
                                false);
 }
 
-void JumpFitDataPresenter::setDataIndexToCurrentWorkspace(
+void FqFitDataPresenter::setDataIndexToCurrentWorkspace(
     IAddWorkspaceDialog const *dialog) {
   //  update active data index with correct index based on the workspace name
   //  and the vector in m_fitDataModel which is in the base class
@@ -255,36 +255,36 @@ void JumpFitDataPresenter::setDataIndexToCurrentWorkspace(
   updateActiveDataIndex(index);
 }
 
-void JumpFitDataPresenter::closeDialog() {
+void FqFitDataPresenter::closeDialog() {
   if (m_jumpModel->numberOfWorkspaces() > m_dataIndex)
     m_jumpModel->removeWorkspace(m_dataIndex);
   IndirectFitDataPresenter::closeDialog();
 }
 
 std::unique_ptr<IAddWorkspaceDialog>
-JumpFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
-  auto dialog = std::make_unique<JumpFitAddWorkspaceDialog>(parent);
+FqFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
+  auto dialog = std::make_unique<FqFitAddWorkspaceDialog>(parent);
   connect(dialog.get(),
-          SIGNAL(workspaceChanged(JumpFitAddWorkspaceDialog *,
+          SIGNAL(workspaceChanged(FqFitAddWorkspaceDialog *,
                                   const std::string &)),
           this,
-          SLOT(setDialogParameterNames(JumpFitAddWorkspaceDialog *,
+          SLOT(setDialogParameterNames(FqFitAddWorkspaceDialog *,
                                        const std::string &)));
   connect(dialog.get(),
-          SIGNAL(parameterTypeChanged(JumpFitAddWorkspaceDialog *,
+          SIGNAL(parameterTypeChanged(FqFitAddWorkspaceDialog *,
                                       const std::string &)),
           this,
-          SLOT(dialogParameterTypeUpdated(JumpFitAddWorkspaceDialog *,
+          SLOT(dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *,
                                           const std::string &)));
   return dialog;
 }
 
-void JumpFitDataPresenter::setMultiInputResolutionFBSuffixes(
+void FqFitDataPresenter::setMultiInputResolutionFBSuffixes(
     IAddWorkspaceDialog *dialog) {
   UNUSED_ARG(dialog);
 }
 
-void JumpFitDataPresenter::setMultiInputResolutionWSSuffixes(
+void FqFitDataPresenter::setMultiInputResolutionWSSuffixes(
     IAddWorkspaceDialog *dialog) {
   UNUSED_ARG(dialog);
 }

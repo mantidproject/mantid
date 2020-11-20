@@ -86,11 +86,11 @@ set(
         IndirectFunctionBrowser/SingleFunctionTemplateModel.cpp
         IndirectFunctionBrowser/SingleFunctionTemplateBrowser.cpp
         IndirectFunctionBrowser/SingleFunctionTemplatePresenter.cpp
-        IndirectDataAnalysisJumpFitTab.cpp
-        JumpFitAddWorkspaceDialog.cpp
-        JumpFitDataPresenter.cpp
-        JumpFitDataTablePresenter.cpp
-        JumpFitModel.cpp
+        IndirectDataAnalysisFqFitTab.cpp
+        FqFitAddWorkspaceDialog.cpp
+        FqFitDataPresenter.cpp
+        FqFitDataTablePresenter.cpp
+        FqFitModel.cpp
         IndirectDataAnalysisMSDFitTab.cpp
         MSDFitModel.cpp
         Quasi.cpp
@@ -120,7 +120,7 @@ set(
         IqtFitModel.h
         IndirectFunctionBrowser/ConvFunctionModel.h
         IndirectFunctionBrowser/IqtFunctionModel.h
-        JumpFitModel.h
+        FqFitModel.h
         MSDFitModel.h
         Notifier.h
         IFQFitObserver.h
@@ -201,10 +201,10 @@ set(
         ISISCalibration.h
         ISISDiagnostics.h
         ISISEnergyTransfer.h
-        JumpFitAddWorkspaceDialog.h
-        JumpFitDataPresenter.h
-        JumpFitDataTablePresenter.h
-        IndirectDataAnalysisJumpFitTab.h
+        FqFitAddWorkspaceDialog.h
+        FqFitDataPresenter.h
+        FqFitDataTablePresenter.h
+        IndirectDataAnalysisFqFitTab.h
         LazyAsyncRunner.h
         IndirectDataAnalysisMSDFitTab.h
         Quasi.h
@@ -251,7 +251,7 @@ set(
         IndirectTransmission.ui
         IndirectTransmissionCalc.ui
         IndirectDataAnalysisIqtTab.ui
-        JumpFitAddWorkspaceDialog.ui
+        FqFitAddWorkspaceDialog.ui
         Quasi.ui
         ResNorm.ui
         Stretch.ui
@@ -384,11 +384,11 @@ set(
         IndirectFunctionBrowser/SingleFunctionTemplateModel.cpp
         IndirectFunctionBrowser/SingleFunctionTemplateBrowser.cpp
         IndirectFunctionBrowser/SingleFunctionTemplatePresenter.cpp
-        IndirectDataAnalysisJumpFitTab.cpp
-        JumpFitAddWorkspaceDialog.cpp
-        JumpFitDataPresenter.cpp
-        JumpFitDataTablePresenter.cpp
-        JumpFitModel.cpp
+        IndirectDataAnalysisFqFitTab.cpp
+        FqFitAddWorkspaceDialog.cpp
+        FqFitDataPresenter.cpp
+        FqFitDataTablePresenter.cpp
+        FqFitModel.cpp
         IndirectDataAnalysisMSDFitTab.cpp
         MSDFitModel.cpp
         Quasi.cpp
@@ -470,10 +470,10 @@ set(
         IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h
         IndirectFunctionBrowser/SingleFunctionTemplatePresenter.h
         IndirectDataAnalysisIqtTab.h
-        JumpFitAddWorkspaceDialog.h
-        JumpFitDataPresenter.h
-        JumpFitDataTablePresenter.h
-        IndirectDataAnalysisJumpFitTab.h
+        FqFitAddWorkspaceDialog.h
+        FqFitDataPresenter.h
+        FqFitDataTablePresenter.h
+        IndirectDataAnalysisFqFitTab.h
         LazyAsyncRunner.h
         IndirectDataAnalysisMSDFitTab.h
         Quasi.h
@@ -498,7 +498,7 @@ set(
         IPythonRunner.h
         IqtFitModel.h
         IndirectFunctionBrowser/ConvFunctionModel.h
-        JumpFitModel.h
+        FqFitModel.h
         MSDFitModel.h
         Notifier.h
         IFQFitObserver.h
@@ -545,7 +545,7 @@ set(
         IndirectTransmission.ui
         IndirectTransmissionCalc.ui
         IndirectDataAnalysisIqtTab.ui
-        JumpFitAddWorkspaceDialog.ui
+        FqFitAddWorkspaceDialog.ui
         Quasi.ui
         ResNorm.ui
         Stretch.ui

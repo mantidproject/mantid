@@ -7,7 +7,7 @@
 #pragma once
 
 #include "IndirectFitAnalysisTab.h"
-#include "JumpFitModel.h"
+#include "FqFitModel.h"
 #include "ui_IndirectFitTab.h"
 
 #include "IFQFitObserver.h"
@@ -19,11 +19,11 @@ namespace CustomInterfaces {
 namespace IDA {
 class IDAFunctionParameterEstimation;
 
-class DLLExport IndirectDataAnalysisJumpFitTab : public IndirectFitAnalysisTab {
+class DLLExport IndirectDataAnalysisFqFitTab : public IndirectFitAnalysisTab {
   Q_OBJECT
 
 public:
-  IndirectDataAnalysisJumpFitTab(QWidget *parent = nullptr);
+  IndirectDataAnalysisFqFitTab(QWidget *parent = nullptr);
 
   std::string getTabName() const override { return "FQFit"; }
 
@@ -36,7 +36,7 @@ private:
   IDAFunctionParameterEstimation createParameterEstimation() const;
 
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
-  JumpFitModel *m_jumpFittingModel;
+  FqFitModel *m_FqFittingModel;
 
 protected:
   void setRunIsRunning(bool running) override;

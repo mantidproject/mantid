@@ -27,24 +27,9 @@ IndirectDataAnalysis[tabname (Elwin)]Tab
 
       - ConvFit
       - IqtFit
-      - JumpFit
+      - FqFit
       - MSDFit
   - DataReduction
 
-    - ILLEnergyTransfer
-    - IndirectMoments
-    - IndirectSqw
-    - IndirectSymmetrise
-    - IndirectTransmission
-    - ISISCalibration
-    - ISISDiagnostics
-    - ISISEnergyTransfer
-  - Simulation
+Models
 
-    - DensityOfStates
-    - IndirectMolDyn
-    - IndirectSassena
-  - Tools
-
-    - IndirectLoadILL
-    - IndirectTransmissionCalc

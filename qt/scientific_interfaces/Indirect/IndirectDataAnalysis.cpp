@@ -10,7 +10,7 @@
 #include "IndirectDataAnalysisElwinTab.h"
 #include "IndirectDataAnalysisIqtTab.h"
 #include "IndirectDataAnalysisIqtFitTab.h"
-#include "IndirectDataAnalysisJumpFitTab.h"
+#include "IndirectDataAnalysisFqFitTab.h"
 #include "IndirectDataAnalysisMSDFitTab.h"
 
 namespace MantidQt {
@@ -36,7 +36,7 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
   m_tabs.emplace(IQT, new IndirectDataAnalysisIqtTab(m_uiForm.twIDATabs->widget(IQT)));
   m_tabs.emplace(IQT_FIT, new IndirectDataAnalysisIqtFitTab(m_uiForm.twIDATabs->widget(IQT_FIT)));
   m_tabs.emplace(CONV_FIT, new IndirectDataAnalysisConvFitTab(m_uiForm.twIDATabs->widget(CONV_FIT)));
-  m_tabs.emplace(JUMP_FIT, new IndirectDataAnalysisJumpFitTab(m_uiForm.twIDATabs->widget(JUMP_FIT)));
+  m_tabs.emplace(JUMP_FIT, new IndirectDataAnalysisFqFitTab(m_uiForm.twIDATabs->widget(JUMP_FIT)));
 }
 
 void IndirectDataAnalysis::applySettings(

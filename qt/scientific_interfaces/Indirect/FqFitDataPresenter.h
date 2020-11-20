@@ -10,8 +10,8 @@
 #include "IFQFitObserver.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
-#include "JumpFitAddWorkspaceDialog.h"
-#include "JumpFitModel.h"
+#include "FqFitAddWorkspaceDialog.h"
+#include "FqFitModel.h"
 #include "Notifier.h"
 
 #include <QComboBox>
@@ -21,11 +21,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class MANTIDQT_INDIRECT_DLL JumpFitDataPresenter
+class MANTIDQT_INDIRECT_DLL FqFitDataPresenter
     : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  JumpFitDataPresenter(JumpFitModel *model, IIndirectFitDataView *view,
+  FqFitDataPresenter(FqFitModel *model, IndirectFitDataView *view,
                        QComboBox *cbParameterType, QComboBox *cbParameter,
                        QLabel *lbParameterType, QLabel *lbParameter,
                        IFQFitObserver *SingleFunctionTemplateBrowser);
@@ -38,9 +38,9 @@ private slots:
   void updateAvailableParameters(const QString &type);
   void updateParameterSelectionEnabled();
   void setParameterLabel(const QString &parameter);
-  void dialogParameterTypeUpdated(JumpFitAddWorkspaceDialog *dialog,
+  void dialogParameterTypeUpdated(FqFitAddWorkspaceDialog *dialog,
                                   const std::string &type);
-  void setDialogParameterNames(JumpFitAddWorkspaceDialog *dialog,
+  void setDialogParameterNames(FqFitAddWorkspaceDialog *dialog,
                                const std::string &workspace);
   void setActiveParameterType(const std::string &type);
   void updateActiveDataIndex();
@@ -63,8 +63,8 @@ private:
   void closeDialog() override;
   std::unique_ptr<IAddWorkspaceDialog>
   getAddWorkspaceDialog(QWidget *parent) const override;
-  void updateParameterOptions(JumpFitAddWorkspaceDialog *dialog);
-  void updateParameterTypes(JumpFitAddWorkspaceDialog *dialog);
+  void updateParameterOptions(FqFitAddWorkspaceDialog *dialog);
+  void updateParameterTypes(FqFitAddWorkspaceDialog *dialog);
   std::vector<std::string> getParameterTypes(TableDatasetIndex dataIndex) const;
   void addWorkspace(IndirectFittingModel *model, const std::string &name);
   void setModelSpectrum(int index);
@@ -80,7 +80,7 @@ private:
   QComboBox *m_cbParameter;
   QLabel *m_lbParameterType;
   QLabel *m_lbParameter;
-  JumpFitModel *m_jumpModel;
+  FqFitModel *m_jumpModel;
   Notifier<IFQFitObserver> m_notifier;
 };
 

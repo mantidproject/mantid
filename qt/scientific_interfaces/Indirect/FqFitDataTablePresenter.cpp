@@ -4,14 +4,14 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "JumpFitDataTablePresenter.h"
+#include "FqFitDataTablePresenter.h"
 #include "MantidAPI/TextAxis.h"
 
 #include <QComboBox>
 #include <QHeaderView>
 
 namespace {
-QStringList jumpFitHeaders() {
+QStringList FqFitHeaders() {
   QStringList headers;
   headers << "Workspace"
           << "Parameter"
@@ -27,10 +27,10 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-JumpFitDataTablePresenter::JumpFitDataTablePresenter(JumpFitModel *model,
+FqFitDataTablePresenter::FqFitDataTablePresenter(FqFitModel *model,
                                                      QTableWidget *dataTable)
     : IndirectDataTablePresenter(model->m_fitDataModel.get(), dataTable,
-                                 jumpFitHeaders()) {
+                                 FqFitHeaders()) {
   auto header = dataTable->horizontalHeader();
 #if QT_VERSION < QT_VERSION_CHECK(5, 0, 0)
   header->setResizeMode(1, QHeaderView::Stretch);
@@ -39,15 +39,15 @@ JumpFitDataTablePresenter::JumpFitDataTablePresenter(JumpFitModel *model,
 #endif
 }
 
-int JumpFitDataTablePresenter::workspaceIndexColumn() const { return 2; }
+int FqFitDataTablePresenter::workspaceIndexColumn() const { return 2; }
 
-int JumpFitDataTablePresenter::startXColumn() const { return 3; }
+int FqFitDataTablePresenter::startXColumn() const { return 3; }
 
-int JumpFitDataTablePresenter::endXColumn() const { return 4; }
+int FqFitDataTablePresenter::endXColumn() const { return 4; }
 
-int JumpFitDataTablePresenter::excludeColumn() const { return 5; }
+int FqFitDataTablePresenter::excludeColumn() const { return 5; }
 
-void JumpFitDataTablePresenter::addTableEntry(FitDomainIndex row) {
+void FqFitDataTablePresenter::addTableEntry(FitDomainIndex row) {
   IndirectDataTablePresenter::addTableEntry(row);
 
   auto subIndices = m_model->getSubIndices(row);

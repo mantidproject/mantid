@@ -8,7 +8,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "JumpFitModel.h"
+#include "FqFitModel.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -31,19 +31,19 @@ std::vector<std::string> getNoEISFLabels() { return {"f1.Width", "f1.FWHM"}; }
 
 } // namespace
 
-class JumpFitModelTest : public CxxTest::TestSuite {
+class FqFitModelTest : public CxxTest::TestSuite {
 public:
   /// WorkflowAlgorithms do not appear in the FrameworkManager without this line
-  JumpFitModelTest() { FrameworkManager::Instance(); }
+  FqFitModelTest() { FrameworkManager::Instance(); }
 
-  static JumpFitModelTest *createSuite() { return new JumpFitModelTest(); }
+  static FqFitModelTest *createSuite() { return new FqFitModelTest(); }
 
-  static void destroySuite(JumpFitModelTest *suite) { delete suite; }
+  static void destroySuite(FqFitModelTest *suite) { delete suite; }
 
   void setUp() override {
     m_workspace = createWorkspaceWithTextAxis(4, getParameterLabels());
     m_ads = std::make_unique<SetUpADSWithWorkspace>("Name", m_workspace);
-    m_model = std::make_unique<JumpFitModel>();
+    m_model = std::make_unique<FqFitModel>();
   }
 
   void tearDown() override {
@@ -253,5 +253,5 @@ private:
 
   MatrixWorkspace_sptr m_workspace;
   std::unique_ptr<SetUpADSWithWorkspace> m_ads;
-  std::unique_ptr<JumpFitModel> m_model;
+  std::unique_ptr<FqFitModel> m_model;
 };

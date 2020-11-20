@@ -12,16 +12,16 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-struct JumpFitParameters {
+struct FqFitParameters {
   std::vector<std::string> widths;
   std::vector<std::size_t> widthSpectra;
   std::vector<std::string> eisf;
   std::vector<std::size_t> eisfSpectra;
 };
 
-class MANTIDQT_INDIRECT_DLL JumpFitModel : public IndirectFittingModel {
+class MANTIDQT_INDIRECT_DLL FqFitModel : public IndirectFittingModel {
 public:
-  JumpFitModel();
+  FqFitModel();
   using IndirectFittingModel::addWorkspace;
 
   void addWorkspace(const std::string &workspaceName) override;
@@ -49,14 +49,14 @@ public:
 private:
   bool
   allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
-  JumpFitParameters &
-  addJumpFitParameters(Mantid::API::MatrixWorkspace *workspace,
+  FqFitParameters &
+  addFqFitParameters(Mantid::API::MatrixWorkspace *workspace,
                        const std::string &hwhmName);
-  std::unordered_map<std::string, JumpFitParameters>::const_iterator
-  findJumpFitParameters(TableDatasetIndex dataIndex) const;
+  std::unordered_map<std::string, FqFitParameters>::const_iterator
+  findFqFitParameters(TableDatasetIndex dataIndex) const;
   std::string getResultXAxisUnit() const override;
   std::string getResultLogName() const override;
-  std::unordered_map<std::string, JumpFitParameters> m_jumpParameters;
+  std::unordered_map<std::string, FqFitParameters> m_jumpParameters;
 };
 
 } // namespace IDA

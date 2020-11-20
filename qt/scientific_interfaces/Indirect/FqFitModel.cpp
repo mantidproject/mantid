@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "JumpFitModel.h"
+#include "FqFitModel.h"
 
 #include <utility>
 
@@ -13,7 +13,7 @@
 #include "MantidKernel/Logger.h"
 
 namespace {
-Mantid::Kernel::Logger logger("JumpFitModel");
+Mantid::Kernel::Logger logger("FqFitModel");
 }
 
 using namespace Mantid::API;
@@ -78,12 +78,12 @@ std::string getHWHMName(const std::string &resultName) {
   return resultName + "_HWHM";
 }
 
-JumpFitParameters createJumpFitParameters(MatrixWorkspace *workspace) {
+FqFitParameters createFqFitParameters(MatrixWorkspace *workspace) {
   auto foundWidths =
       findAxisLabels(workspace, ContainsOneOrMore({".Width", ".FWHM"}));
   auto foundEISF = findAxisLabels(workspace, ContainsOneOrMore({".EISF"}));
 
-  JumpFitParameters parameters;
+  FqFitParameters parameters;
   parameters.widths = foundWidths.first;
   parameters.widthSpectra = foundWidths.second;
   parameters.eisf = foundEISF.first;
@@ -212,7 +212,7 @@ createHWHMWorkspace(MatrixWorkspace_sptr workspace, const std::string &hwhmName,
 }
 
 boost::optional<std::vector<std::size_t>>
-getSpectrum(const JumpFitParameters &parameters) {
+getSpectrum(const FqFitParameters &parameters) {
   if (!parameters.widthSpectra.empty())
     return parameters.widthSpectra;
   else if (!parameters.eisfSpectra.empty())
@@ -225,14 +225,14 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-JumpFitModel::JumpFitModel() { m_fitType = FQFIT_STRING; }
+FqFitModel::FqFitModel() { m_fitType = FQFIT_STRING; }
 
-void JumpFitModel::addWorkspace(const std::string &workspaceName) {
+void FqFitModel::addWorkspace(const std::string &workspaceName) {
   auto workspace =
       Mantid::API::AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
           workspaceName);
   const auto name = getHWHMName(workspace->getName());
-  const auto parameters = addJumpFitParameters(workspace.get(), name);
+  const auto parameters = addFqFitParameters(workspace.get(), name);
 
   const auto spectrum = getSpectrum(parameters);
   if (!spectrum)
@@ -247,42 +247,42 @@ void JumpFitModel::addWorkspace(const std::string &workspaceName) {
                                      FunctionModelSpectra(""));
 }
 
-void JumpFitModel::removeWorkspace(TableDatasetIndex index) {
+void FqFitModel::removeWorkspace(TableDatasetIndex index) {
   m_jumpParameters.erase(getWorkspace(index)->getName());
   IndirectFittingModel::removeWorkspace(index);
 }
 
-JumpFitParameters &
-JumpFitModel::addJumpFitParameters(MatrixWorkspace *workspace,
+FqFitParameters &
+FqFitModel::addFqFitParameters(MatrixWorkspace *workspace,
                                    const std::string &hwhmName) {
   const auto &foundParameters = m_jumpParameters.find(hwhmName);
   if (foundParameters != m_jumpParameters.end())
     return foundParameters->second;
 
-  const auto parameters = createJumpFitParameters(workspace);
+  const auto parameters = createFqFitParameters(workspace);
   if (parameters.widths.empty() && parameters.eisf.empty())
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
   return m_jumpParameters[hwhmName] = std::move(parameters);
 }
 
-std::unordered_map<std::string, JumpFitParameters>::const_iterator
-JumpFitModel::findJumpFitParameters(TableDatasetIndex dataIndex) const {
+std::unordered_map<std::string, FqFitParameters>::const_iterator
+FqFitModel::findFqFitParameters(TableDatasetIndex dataIndex) const {
   const auto ws = getWorkspace(dataIndex);
   if (!ws)
     return m_jumpParameters.end();
   return m_jumpParameters.find(ws->getName());
 }
 
-std::string JumpFitModel::getFitParameterName(TableDatasetIndex dataIndex,
+std::string FqFitModel::getFitParameterName(TableDatasetIndex dataIndex,
                                               WorkspaceIndex spectrum) const {
   const auto ws = getWorkspace(dataIndex);
   const auto axis = dynamic_cast<TextAxis *>(ws->getAxis(1));
   return axis->label(spectrum.value);
 }
 
-void JumpFitModel::setActiveWidth(std::size_t widthIndex,
+void FqFitModel::setActiveWidth(std::size_t widthIndex,
                                   TableDatasetIndex dataIndex, bool single) {
-  const auto parametersIt = findJumpFitParameters(dataIndex);
+  const auto parametersIt = findFqFitParameters(dataIndex);
   if (parametersIt != m_jumpParameters.end() &&
       parametersIt->second.widthSpectra.size() > widthIndex) {
     const auto &widthSpectra = parametersIt->second.widthSpectra;
@@ -303,9 +303,9 @@ void JumpFitModel::setActiveWidth(std::size_t widthIndex,
     logger.warning("Invalid width index specified.");
 }
 
-void JumpFitModel::setActiveEISF(std::size_t eisfIndex,
+void FqFitModel::setActiveEISF(std::size_t eisfIndex,
                                  TableDatasetIndex dataIndex, bool single) {
-  const auto parametersIt = findJumpFitParameters(dataIndex);
+  const auto parametersIt = findFqFitParameters(dataIndex);
   if (parametersIt != m_jumpParameters.end() &&
       parametersIt->second.eisfSpectra.size() > eisfIndex) {
     const auto &eisfSpectra = parametersIt->second.eisfSpectra;
@@ -326,50 +326,50 @@ void JumpFitModel::setActiveEISF(std::size_t eisfIndex,
     logger.warning("Invalid EISF index specified.");
 }
 
-void JumpFitModel::setFitType(const std::string &fitType) {
+void FqFitModel::setFitType(const std::string &fitType) {
   m_fitString = fitType;
 }
 
-bool JumpFitModel::zeroWidths(TableDatasetIndex dataIndex) const {
-  const auto parameters = findJumpFitParameters(dataIndex);
+bool FqFitModel::zeroWidths(TableDatasetIndex dataIndex) const {
+  const auto parameters = findFqFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end())
     return parameters->second.widths.empty();
   return true;
 }
 
-bool JumpFitModel::zeroEISF(TableDatasetIndex dataIndex) const {
-  const auto parameters = findJumpFitParameters(dataIndex);
+bool FqFitModel::zeroEISF(TableDatasetIndex dataIndex) const {
+  const auto parameters = findFqFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end())
     return parameters->second.eisf.empty();
   return true;
 }
 
-bool JumpFitModel::isMultiFit() const {
+bool FqFitModel::isMultiFit() const {
   if (numberOfWorkspaces() == TableDatasetIndex{0})
     return false;
   return !allWorkspacesEqual(getWorkspace(TableDatasetIndex{0}));
 }
 
 std::vector<std::string>
-JumpFitModel::getWidths(TableDatasetIndex dataIndex) const {
-  const auto parameters = findJumpFitParameters(dataIndex);
+FqFitModel::getWidths(TableDatasetIndex dataIndex) const {
+  const auto parameters = findFqFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end())
     return parameters->second.widths;
   return std::vector<std::string>();
 }
 
 std::vector<std::string>
-JumpFitModel::getEISF(TableDatasetIndex dataIndex) const {
-  const auto parameters = findJumpFitParameters(dataIndex);
+FqFitModel::getEISF(TableDatasetIndex dataIndex) const {
+  const auto parameters = findFqFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end())
     return parameters->second.eisf;
   return std::vector<std::string>();
 }
 
 boost::optional<std::size_t>
-JumpFitModel::getWidthSpectrum(std::size_t widthIndex,
+FqFitModel::getWidthSpectrum(std::size_t widthIndex,
                                TableDatasetIndex dataIndex) const {
-  const auto parameters = findJumpFitParameters(dataIndex);
+  const auto parameters = findFqFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end() &&
       parameters->second.widthSpectra.size() > widthIndex)
     return parameters->second.widthSpectra[widthIndex];
@@ -377,20 +377,20 @@ JumpFitModel::getWidthSpectrum(std::size_t widthIndex,
 }
 
 boost::optional<std::size_t>
-JumpFitModel::getEISFSpectrum(std::size_t eisfIndex,
+FqFitModel::getEISFSpectrum(std::size_t eisfIndex,
                               TableDatasetIndex dataIndex) const {
-  const auto parameters = findJumpFitParameters(dataIndex);
+  const auto parameters = findFqFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end() &&
       parameters->second.eisfSpectra.size() > eisfIndex)
     return parameters->second.eisfSpectra[eisfIndex];
   return boost::none;
 }
 
-std::string JumpFitModel::getResultXAxisUnit() const { return ""; }
+std::string FqFitModel::getResultXAxisUnit() const { return ""; }
 
-std::string JumpFitModel::getResultLogName() const { return "SourceName"; }
+std::string FqFitModel::getResultLogName() const { return "SourceName"; }
 
-bool JumpFitModel::allWorkspacesEqual(
+bool FqFitModel::allWorkspacesEqual(
     const Mantid::API::MatrixWorkspace_sptr &workspace) const {
   for (auto i = TableDatasetIndex{1}; i < numberOfWorkspaces(); ++i) {
     if (getWorkspace(i) != workspace)
