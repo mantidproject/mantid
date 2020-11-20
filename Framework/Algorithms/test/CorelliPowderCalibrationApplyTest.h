@@ -102,8 +102,7 @@ public:
     // setup alg
     CorelliPowderCalibrationApply alg;
     alg.initialize();
-    alg.setPropertyValue("Workspace",
-                         "correctWs");
+    alg.setPropertyValue("Workspace", "correctWs");
     alg.setPropertyValue("CalibrationTable", calTableName);
 
     // make sure no exception is thrown here
@@ -119,8 +118,7 @@ private:
         AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
     lei->initialize();
     lei->setPropertyValue("Filename", "CORELLI_Definition.xml");
-    lei->setPropertyValue("OutputWorkspace",
-                          outWSName);
+    lei->setPropertyValue("OutputWorkspace", outWSName);
     lei->setPropertyValue("MakeEventWorkspace", "1");
     lei->execute();
 
