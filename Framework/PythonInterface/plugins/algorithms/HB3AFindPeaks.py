@@ -54,7 +54,8 @@ class HB3AFindPeaks(PythonAlgorithm):
         self.declareProperty("MaxPeaks", 1000, doc="Maximum number of peaks to find.")
         self.declareProperty("PeakDistanceThreshold", 0.25, doc="Threshold distance for rejecting peaks that are found "
                                                                 "to be too close from each other")
-        self.declareProperty("DensityThresholdFactor", 50.0,
+        # Having this number too low will likely cause FindUBUsingFFT to fail since not enough peaks will be found
+        self.declareProperty("DensityThresholdFactor", 2000.0,
                              doc="Scaling factor which the overall signal density will be multiplied by to determine "
                                  "a threshold for determining peaks.")
 
@@ -65,12 +66,12 @@ class HB3AFindPeaks(PythonAlgorithm):
         self.declareProperty("UseLattice", False, direction=Direction.Input,
                              doc="Whether to refine UB matrix based on given lattice parameters")
 
-        self.declareProperty("LatticeA", "", doc="The a value of the lattice")
-        self.declareProperty("LatticeB", "", doc="The b value of the lattice")
-        self.declareProperty("LatticeC", "", doc="The c value of the lattice")
-        self.declareProperty("LatticeAlpha", "", doc="The alpha value of the lattice")
-        self.declareProperty("LatticeBeta", "", doc="The beta value of the lattice")
-        self.declareProperty("LatticeGamma", "", doc="The gamma value of the lattice")
+        self.declareProperty("LatticeA", FloatPropertyWithValue.EMPTY_DBL, doc="The a value of the lattice")
+        self.declareProperty("LatticeB", FloatPropertyWithValue.EMPTY_DBL, doc="The b value of the lattice")
+        self.declareProperty("LatticeC", FloatPropertyWithValue.EMPTY_DBL, doc="The c value of the lattice")
+        self.declareProperty("LatticeAlpha", FloatPropertyWithValue.EMPTY_DBL, doc="The alpha value of the lattice")
+        self.declareProperty("LatticeBeta", FloatPropertyWithValue.EMPTY_DBL, doc="The beta value of the lattice")
+        self.declareProperty("LatticeGamma", FloatPropertyWithValue.EMPTY_DBL, doc="The gamma value of the lattice")
 
         self.declareProperty(IPeaksWorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output,
                                                      optional=PropertyMode.Mandatory), doc="Output peaks workspace")
