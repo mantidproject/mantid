@@ -87,24 +87,25 @@ RunsTable &RunsPresenter::mutableRunsTable() {
   return tablePresenter()->mutableRunsTable();
 }
 
-bool RunsPresenter::searchSettingsChanged() const {
-  return m_searcher->searchSettingsChanged(m_view->getSearchString(),
-                                           m_view->getSearchInstrument(),
-                                           m_view->getSearchCycle());
+/** Return the current search criteria on the view
+ */
+SearchCriteria RunsPresenter::searchCriteria() const {
+  return SearchCriteria{m_view->getSearchInstrument(), m_view->getSearchCycle(),
+                        m_view->getSearchString()};
 }
 
 /** If search text has changed, reset the search results, unless the user
  * cancels the operation, in which case restore the original search text
  */
 void RunsPresenter::notifySearchTextEdited() {
-  if (m_view->getSearchString() == m_searcher->getSearchString())
+  if (m_view->getSearchString() == m_searcher->investigation())
     return;
 
   if (hasUnsavedSearchResults() && isOverwritePrevented())
-    m_view->setSearchString(m_searcher->getSearchString());
+    m_view->setSearchString(m_searcher->investigation());
   else {
     m_searcher->reset();
-    m_searcher->setSearchString(m_view->getSearchString());
+    m_searcher->setInvestigation(m_view->getSearchString());
   }
 }
 
@@ -112,19 +113,43 @@ void RunsPresenter::notifySearchTextEdited() {
  * cancels the operation, in which case restore the original cycle text
  */
 void RunsPresenter::notifyCycleTextEdited() {
-  if (m_view->getSearchCycle() == m_searcher->getSearchCycle())
+  if (m_view->getSearchCycle() == m_searcher->cycle())
     return;
 
   if (hasUnsavedSearchResults() && isOverwritePrevented())
-    m_view->setSearchCycle(m_searcher->getSearchCycle());
+    m_view->setSearchCycle(m_searcher->cycle());
   else {
     m_searcher->reset();
-    m_searcher->setSearchCycle(m_view->getSearchCycle());
+    m_searcher->setCycle(m_view->getSearchCycle());
   }
 }
 
+/** Notification for when the user performs the search action
+ */
 void RunsPresenter::notifySearch() {
   updateWidgetEnabledState();
+
+  if (m_view->getSearchString().empty()) {
+    m_messageHandler->giveUserInfo("Search field is empty", "Search Issue");
+    return;
+  }
+
+  // If this will overwrite annotations, ask the user if it's ok to discard
+  // changes. Note that although we check this in e.g. notifySearchTextEdited,
+  // if the user presses Enter that gets skipped so we have to check here too.
+  if (searchCriteria() != m_searcher->searchCriteria()) {
+    if (hasUnsavedSearchResults() && isOverwritePrevented()) {
+      // Don't discard; revert the change and exit
+      m_view->setSearchString(m_searcher->investigation());
+      m_view->setSearchCycle(m_searcher->cycle());
+      return;
+    }
+    m_searcher->reset();
+    m_searcher->setInvestigation(m_view->getSearchString());
+    m_searcher->setCycle(m_view->getSearchCycle());
+  }
+
+  // Execute the search
   search();
 }
 
@@ -219,19 +244,19 @@ void RunsPresenter::notifyReductionPaused() {
  * starts a search to check if there are new runs.
  */
 bool RunsPresenter::resumeAutoreduction() {
-  auto const searchString = m_view->getSearchString();
-
-  if (searchString == "") {
+  if (m_view->getSearchString().empty()) {
     m_messageHandler->giveUserInfo("Search field is empty", "Search Issue");
     return false;
   }
 
   // If starting an autoreduction with new settings, clear the main table
-  if (searchSettingsChanged()) {
+  if (!m_lastAutoreductionSearch ||
+      *m_lastAutoreductionSearch != searchCriteria()) {
     if (isOverwritePrevented()) {
       return false;
     }
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
+    m_lastAutoreductionSearch = searchCriteria();
   }
 
   checkForNewRuns();
@@ -280,7 +305,7 @@ void RunsPresenter::autoreductionCompleted() {
 void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   m_searcher->reset();
   m_view->setSearchInstrument(instrumentName);
-  m_searcher->setSearchInstrument(instrumentName);
+  m_searcher->setInstrument(instrumentName);
   tablePresenter()->notifyInstrumentChanged(instrumentName);
 }
 
@@ -298,24 +323,8 @@ void RunsPresenter::notifyChangesSaved() { m_searcher->setSaved(); }
  * @return : true if the search algorithm was started successfully, false if
  * there was a problem */
 bool RunsPresenter::search() {
-  auto const searchString = m_view->getSearchString();
-
-  // Don't bother searching if they're not searching for anything
-  if (searchString.empty())
-    return false;
-
-  if (searchSettingsChanged()) {
-    if (hasUnsavedSearchResults() && isOverwritePrevented()) {
-      m_view->setSearchString(m_searcher->getSearchString());
-      m_view->setSearchCycle(m_searcher->getSearchCycle());
-      return false;
-    }
-    m_searcher->reset();
-    m_searcher->setSearchString(m_view->getSearchString());
-    m_searcher->setSearchCycle(m_view->getSearchCycle());
-  }
-
-  if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
+  if (!m_searcher->startSearchAsync(m_view->getSearchString(),
+                                    m_view->getSearchInstrument(),
                                     m_view->getSearchCycle())) {
     m_messageHandler->giveUserCritical("Error starting search", "Error");
     return false;

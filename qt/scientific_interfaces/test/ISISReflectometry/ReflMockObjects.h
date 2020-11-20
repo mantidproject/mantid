@@ -26,6 +26,7 @@
 #include "GUI/Runs/IRunsPresenter.h"
 #include "GUI/Runs/ISearchModel.h"
 #include "GUI/Runs/ISearcher.h"
+#include "GUI/Runs/SearchCriteria.h"
 #include "GUI/Save/IAsciiSaver.h"
 #include "GUI/Save/ISavePresenter.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -219,14 +220,13 @@ public:
   MOCK_METHOD0(reset, void());
   MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
   MOCK_METHOD0(setSaved, void());
-  MOCK_CONST_METHOD0(getSearchString, std::string());
-  MOCK_METHOD1(setSearchString, void(std::string const &));
-  MOCK_CONST_METHOD0(getSearchCycle, std::string());
-  MOCK_METHOD1(setSearchCycle, void(std::string const &));
-  MOCK_METHOD1(setSearchInstrument, void(std::string const &));
-  MOCK_CONST_METHOD3(searchSettingsChanged,
-                     bool(const std::string &, const std::string &,
-                          const std::string &));
+  MOCK_CONST_METHOD0(investigation, std::string());
+  MOCK_METHOD1(setInvestigation, void(std::string const &));
+  MOCK_CONST_METHOD0(cycle, std::string());
+  MOCK_METHOD1(setCycle, void(std::string const &));
+  MOCK_CONST_METHOD0(instrument, std::string());
+  MOCK_METHOD1(setInstrument, void(std::string const &));
+  MOCK_CONST_METHOD0(searchCriteria, SearchCriteria());
 };
 
 class MockSearcherSubscriber : public SearcherSubscriber {
@@ -253,11 +253,10 @@ public:
   MOCK_METHOD1(replaceResults, void(SearchResults const &));
   MOCK_CONST_METHOD1(getRowData, SearchResult const &(int));
   MOCK_CONST_METHOD0(getRows, SearchResults const &());
-  MOCK_METHOD2(setError, void(int, std::string const &));
   MOCK_METHOD0(clear, void());
-
-private:
-  SearchResult m_searchResult;
+  MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
+  MOCK_METHOD0(setUnsaved, void());
+  MOCK_METHOD0(setSaved, void());
 };
 
 class MockMessageHandler : public IMessageHandler {

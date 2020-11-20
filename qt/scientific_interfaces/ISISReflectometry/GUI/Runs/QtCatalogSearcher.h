@@ -43,14 +43,13 @@ public:
   void reset() override;
   bool hasUnsavedChanges() const override;
   void setSaved() override;
-  std::string getSearchString() const override;
-  void setSearchString(std::string const &searchString) override;
-  std::string getSearchCycle() const override;
-  void setSearchCycle(std::string const &cycle) override;
-  void setSearchInstrument(std::string const &instrument) override;
-  bool searchSettingsChanged(const std::string &text,
-                             const std::string &instrument,
-                             const std::string &cycle) const override;
+  std::string investigation() const override;
+  void setInvestigation(std::string const &investigation) override;
+  std::string cycle() const override;
+  void setCycle(std::string const &cycle) override;
+  std::string instrument() const override;
+  void setInstrument(std::string const &instrument) override;
+  SearchCriteria searchCriteria() const override;
 
   // RunsViewSearchSubscriber overrides
   void notifySearchComplete() override;
@@ -73,9 +72,7 @@ private slots:
 private:
   IRunsView *m_view;
   SearcherSubscriber *m_notifyee;
-  std::string m_searchText;
-  std::string m_instrument;
-  std::string m_cycle;
+  SearchCriteria m_searchCriteria;
   bool m_searchInProgress;
 
   void execLoginDialog(const Mantid::API::IAlgorithm_sptr &alg);

@@ -9,6 +9,7 @@
 #include <string>
 
 #include "GUI/Runs/IRunsPresenter.h"
+#include "GUI/Runs/SearchCriteria.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -40,14 +41,13 @@ public:
   virtual void reset() = 0;
   virtual bool hasUnsavedChanges() const = 0;
   virtual void setSaved() = 0;
-  virtual std::string getSearchString() const = 0;
-  virtual void setSearchString(std::string const &searchString) = 0;
-  virtual std::string getSearchCycle() const = 0;
-  virtual void setSearchCycle(std::string const &cycle) = 0;
-  virtual void setSearchInstrument(std::string const &instrument) = 0;
-  virtual bool searchSettingsChanged(const std::string &text,
-                                     const std::string &instrument,
-                                     const std::string &cycle) const = 0;
+  virtual std::string investigation() const = 0;
+  virtual void setInvestigation(std::string const &investigation) = 0;
+  virtual std::string cycle() const = 0;
+  virtual void setCycle(std::string const &cycle) = 0;
+  virtual std::string instrument() const = 0;
+  virtual void setInstrument(std::string const &instrument) = 0;
+  virtual SearchCriteria searchCriteria() const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces

@@ -513,14 +513,6 @@ public:
     verifyAndClear();
   }
 
-  void testInstrumentChangedClearsSearchTextOnView() {
-    auto presenter = makePresenter();
-    auto const instrument = std::string("TEST-instrumnet");
-    EXPECT_CALL(m_view, clearSearchText()).Times(1);
-    presenter.notifyInstrumentChanged(instrument);
-    verifyAndClear();
-  }
-
   void testNotifyRowStateChanged() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
@@ -744,9 +736,11 @@ private:
   }
 
   void expectSearchSettingsChanged() {
-    EXPECT_CALL(*m_searcher, searchSettingsChanged(_, _, _))
+    auto const newCriteria =
+        SearchCriteria{"new search string", "new cycle", "new_instrument"};
+    EXPECT_CALL(*m_searcher, searchCriteria())
         .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
+        .WillRepeatedly(Return(newCriteria));
   }
 
   void expectClearExistingTable() {
