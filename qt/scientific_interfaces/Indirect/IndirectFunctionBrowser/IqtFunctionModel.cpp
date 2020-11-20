@@ -404,12 +404,17 @@ void IqtFunctionModel::removeConstraint(const QString &paramName) {
   m_model.removeConstraint(paramName);
 }
 
-void IqtFunctionModel::setDatasetNames(const QStringList &names) {
-  m_model.setDatasetNames(names);
+void IqtFunctionModel::setDatasets(
+    const QList<FunctionModelDataset> &datasets) {
+  m_model.setDatasets(datasets);
 }
 
 QStringList IqtFunctionModel::getDatasetNames() const {
   return m_model.getDatasetNames();
+}
+
+QStringList IqtFunctionModel::getDatasetDomainNames() const {
+  return m_model.getDatasetDomainNames();
 }
 
 double IqtFunctionModel::getLocalParameterValue(const QString &parName,

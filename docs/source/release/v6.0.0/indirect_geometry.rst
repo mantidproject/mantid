@@ -21,5 +21,6 @@ Improvements
 Bug Fixes
 #########
 - A bug has been fixed in Indirect data analysis on the Elwin tab that causes the integration range to be reset when changing between plotted workspaces.
+- A bug in Indirect Data Analysis causing logs not to load in the Edit Local Fit Parameters dialog has been fixed.
 
 :ref:`Release 6.0.0 <v6.0.0>`

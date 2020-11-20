@@ -6,9 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 import unittest
+from os import path
 
 import systemtesting
+from systemtesting import MantidSystemTest
 
+from mantid import config
 from mantid.api import AnalysisDataService
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (SANSFacility, ReductionMode, OutputMode)
@@ -39,6 +42,15 @@ class SANSBatchReductionTest(unittest.TestCase):
         load_alg.execute()
         reference_workspace = load_alg.getProperty("OutputWorkspace").value
 
+        # Save the workspace out if the comparison fails (i.e. they are not equal)
+        f_name = path.join(config.getString('defaultsave.directory'),
+                           MantidSystemTest.mismatchWorkspaceName(reference_file_name))
+
+        save_name = "SaveNexus"
+        save_options = {"Filename": f_name,
+                        "InputWorkspace": workspace}
+        save_alg = create_unmanaged_algorithm(save_name, **save_options)
+
         # Compare reference file with the output_workspace
         # We need to disable the instrument comparison, it takes way too long
         # We need to disable the sample -- Not clear why yet
@@ -59,6 +71,9 @@ class SANSBatchReductionTest(unittest.TestCase):
         compare_alg.setChild(False)
         compare_alg.execute()
         result = compare_alg.getProperty("Result").value
+
+        if not result:
+            save_alg.execute()
 
         self.assertTrue(result)
 
@@ -96,11 +111,10 @@ class SANSBatchReductionTest(unittest.TestCase):
         states = [state]
         self._run_batch_reduction(states, use_optimizations=False)
         workspace_name = "34484_rear_1D_1.75_16.5"
-        output_workspace = AnalysisDataService.retrieve(workspace_name)
 
         # Evaluate it up to a defined point
         reference_file_name = "SANS2D_ws_D20_reference_LAB_1D.nxs"
-        self._compare_workspace(output_workspace, reference_file_name)
+        self._compare_workspace(workspace_name, reference_file_name)
 
         if AnalysisDataService.doesExist(workspace_name):
             AnalysisDataService.remove(workspace_name)

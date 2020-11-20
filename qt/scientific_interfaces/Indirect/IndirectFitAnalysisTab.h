@@ -17,12 +17,18 @@
 #include "IndirectSpectrumSelectionPresenter.h"
 #include "IndirectSpectrumSelectionView.h"
 
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
+
 #include <boost/optional.hpp>
 
 #include <QtCore>
 
 #include <memory>
 #include <type_traits>
+
+#include <QList>
+#include <QPair>
+#include <QString>
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -153,7 +159,7 @@ private:
   std::string getOutputBasename() const;
   Mantid::API::WorkspaceGroup_sptr getResultWorkspace() const;
   std::vector<std::string> getFitParameterNames() const;
-  QStringList getDatasetNames() const;
+  QList<MantidWidgets::FunctionModelDataset> getDatasets() const;
   void enableFitButtons(bool enable);
   void enableOutputOptions(bool enable);
   void setPDFWorkspace(std::string const &workspaceName);
