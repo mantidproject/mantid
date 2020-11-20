@@ -45,11 +45,15 @@ public:
   QString getParameterTie(const QString &parName) const;
   void updateParameters(const IFunction &fun);
   void updateMultiDatasetParameters(const IFunction &fun);
+  void updateMultiDatasetAttributes(const IFunction &fun);
   void clearErrors();
   boost::optional<QString> currentFunctionIndex() const;
   void setNumberOfDatasets(int);
-  void setDatasetNames(const QStringList &names);
+  void setDatasets(const QStringList &datasetNames);
+  void setDatasets(const QList<FunctionModelDataset> &datasets);
+  void addDatasets(const QStringList &datasetNames);
   QStringList getDatasetNames() const;
+  QStringList getDatasetDomainNames() const;
   int getNumberOfDatasets() const;
   int getCurrentDataset() const;
   void setCurrentDataset(int);
@@ -79,6 +83,7 @@ signals:
   void parameterChanged(const QString &funcIndex, const QString &paramName);
 private slots:
   void viewChangedParameter(const QString &parName);
+  void viewChangedAttribute(const QString &attrName);
   void viewPastedFunction(const QString &funStr);
   void viewAddedFunction(const QString &funStr);
   void viewRemovedFunction(const QString &functionIndex);
@@ -94,6 +99,7 @@ private slots:
 
 private:
   void updateViewFromModel();
+  void updateViewAttributesFromModel();
 
 private:
   IFunctionView *m_view;

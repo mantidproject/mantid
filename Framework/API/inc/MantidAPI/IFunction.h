@@ -44,6 +44,19 @@ class Workspace;
 class MatrixWorkspace;
 class FunctionHandler;
 
+/**
+ * Attribute visitor structure supporting lambda expressions
+ * Example usage: AttributeLambdaVisitor{[](const int val) {...}, [] (const
+ * double val) {}} would create a visitor capable of "visiting" an integer and
+ * double attribute*
+ * It functions by inheriting the () operator defined in each lambda
+ */
+template <class... Ts> struct AttributeLambdaVisitor : Ts... {
+  using Ts::operator()...;
+};
+template <class... Ts>
+AttributeLambdaVisitor(Ts...)->AttributeLambdaVisitor<Ts...>;
+
 /** This is an interface to a fitting function - a semi-abstarct class.
     Functions derived from IFunction can be used with the Fit algorithm.
     IFunction defines the structure of a fitting funtion.
@@ -249,6 +262,10 @@ public:
     /// Apply a const attribute visitor
     template <typename T> T apply(ConstAttributeVisitor<T> &v) const {
       return boost::apply_visitor(v, m_data);
+    }
+    /// Apply a lambda visitor
+    template <typename... Ts> void apply(AttributeLambdaVisitor<Ts...> &v) {
+      boost::apply_visitor(v, m_data);
     }
 
     /// Returns type of the attribute
@@ -539,10 +556,10 @@ public:
   std::shared_ptr<const Kernel::Matrix<double>> getCovarianceMatrix() const {
     return m_covar;
   }
-  /// Set the chi^2
-  void setChiSquared(double chi2) { m_chiSquared = chi2; }
-  /// Get the chi^2
-  [[nodiscard]] double getChiSquared() const { return m_chiSquared; }
+  /// Set the reduced chi^2
+  void setReducedChiSquared(double chi2) { m_chiSquared = chi2; }
+  /// Get the reduced chi^2
+  [[nodiscard]] double getReducedChiSquared() const { return m_chiSquared; }
 
   /// Set the parallel hint
   void setParallel(bool on) {

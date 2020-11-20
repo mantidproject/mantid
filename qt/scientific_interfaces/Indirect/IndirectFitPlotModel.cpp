@@ -177,7 +177,7 @@ MatrixWorkspace_sptr IndirectFitPlotModel::getWorkspace() const {
   return m_fittingModel->getWorkspace(m_activeIndex);
 }
 
-Spectra IndirectFitPlotModel::getSpectra() const {
+FunctionModelSpectra IndirectFitPlotModel::getSpectra() const {
   return m_fittingModel->getSpectra(m_activeIndex);
 }
 

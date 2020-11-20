@@ -121,6 +121,9 @@ public:
 
   bool hasGroupedDetectors() const;
 
+  /// Returns true if the workspace is ragged (has differently sized spectra).
+  virtual bool isRaggedWorkspace() const = 0;
+
   /// Get the footprint in memory in bytes.
   size_t getMemorySize() const override;
   virtual size_t getMemorySizeForXAxes() const;

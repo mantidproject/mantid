@@ -131,7 +131,7 @@
    <item row="0" column="0">
     <widget class="QLabel" name="select_axes_label">
      <property name="text">
-      <string>Select an axes</string>
+      <string>Select a set of axes</string>
      </property>
     </widget>
    </item>

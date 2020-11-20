@@ -7,11 +7,12 @@
 #include <string>
 
 #include "DllConfig.h"
-#include "IndexTypes.h"
 #include "IndirectFitData.h"
 #include "IndirectFitDataModel.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+
+using namespace MantidQt::MantidWidgets;
 
 namespace {
 
@@ -61,10 +62,11 @@ IndirectFitDataModel::getWorkspace(TableDatasetIndex index) const {
   return nullptr;
 }
 
-Spectra IndirectFitDataModel::getSpectra(TableDatasetIndex index) const {
+FunctionModelSpectra
+IndirectFitDataModel::getSpectra(TableDatasetIndex index) const {
   if (index < m_fittingData->size())
     return m_fittingData->at(index.value).spectra();
-  return Spectra("");
+  return FunctionModelSpectra("");
 }
 
 TableDatasetIndex IndirectFitDataModel::numberOfWorkspaces() const {
@@ -94,7 +96,7 @@ size_t IndirectFitDataModel::getNumberOfDomains() const {
 }
 
 std::vector<double> IndirectFitDataModel::getQValuesForData() const {
-  std::vector<double> qValues{1};
+  std::vector<double> qValues;
   for (auto &fitData : *m_fittingData) {
     auto indexQValues = fitData.getQValues();
     qValues.insert(std::end(qValues), std::begin(indexQValues),
@@ -111,7 +113,7 @@ IndirectFitDataModel::getResolutionsForFit() const {
     auto spectra = getSpectra(TableDatasetIndex{index});
     if (!resolutionWorkspace) {
       for (auto &spectraIndex : spectra) {
-        resolutionVector.emplace_back(std::make_pair("", spectraIndex.value));
+        resolutionVector.emplace_back("", spectraIndex.value);
       }
       continue;
     }
@@ -120,8 +122,8 @@ IndirectFitDataModel::getResolutionsForFit() const {
         m_resolutions->at(index).lock()->getNumberHistograms() == 1;
     for (auto &spectraIndex : spectra) {
       auto resolutionIndex = singleSpectraResolution ? 0 : spectraIndex.value;
-      resolutionVector.emplace_back(std::make_pair(
-          m_resolutions->at(index).lock()->getName(), resolutionIndex));
+      resolutionVector.emplace_back(m_resolutions->at(index).lock()->getName(),
+                                    resolutionIndex);
     }
   }
   return resolutionVector;
@@ -148,17 +150,18 @@ void IndirectFitDataModel::setResolution(const std::string &name,
 
 void IndirectFitDataModel::setSpectra(const std::string &spectra,
                                       TableDatasetIndex dataIndex) {
-  setSpectra(Spectra(spectra), dataIndex);
+  setSpectra(FunctionModelSpectra(spectra), dataIndex);
 }
 
-void IndirectFitDataModel::setSpectra(Spectra &&spectra,
+void IndirectFitDataModel::setSpectra(FunctionModelSpectra &&spectra,
                                       TableDatasetIndex dataIndex) {
   if (m_fittingData->empty())
     return;
-  m_fittingData->at(dataIndex.value).setSpectra(std::forward<Spectra>(spectra));
+  m_fittingData->at(dataIndex.value)
+      .setSpectra(std::forward<FunctionModelSpectra>(spectra));
 }
 
-void IndirectFitDataModel::setSpectra(const Spectra &spectra,
+void IndirectFitDataModel::setSpectra(const FunctionModelSpectra &spectra,
                                       TableDatasetIndex dataIndex) {
   if (m_fittingData->empty())
     return;
@@ -176,8 +179,9 @@ std::vector<std::string> IndirectFitDataModel::getWorkspaceNames() const {
 void IndirectFitDataModel::addWorkspace(const std::string &workspaceName) {
   auto ws = Mantid::API::AnalysisDataService::Instance()
                 .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
-  addWorkspace(ws, Spectra(WorkspaceIndex{0},
-                           WorkspaceIndex{ws->getNumberHistograms() - 1}));
+  addWorkspace(
+      ws, FunctionModelSpectra(WorkspaceIndex{0},
+                               WorkspaceIndex{ws->getNumberHistograms() - 1}));
 }
 
 void IndirectFitDataModel::addWorkspace(const std::string &workspaceName,
@@ -190,21 +194,22 @@ void IndirectFitDataModel::addWorkspace(const std::string &workspaceName,
     throw std::runtime_error("A valid sample file needs to be selected.");
 
   try {
-    addWorkspace(workspaceName, Spectra(spectra));
+    addWorkspace(workspaceName, FunctionModelSpectra(spectra));
   } catch (std::logic_error &e) {
     throw std::runtime_error(e.what());
   }
 }
 
 void IndirectFitDataModel::addWorkspace(const std::string &workspaceName,
-                                        const Spectra &spectra) {
+                                        const FunctionModelSpectra &spectra) {
   auto ws = Mantid::API::AnalysisDataService::Instance()
                 .retrieveWS<Mantid::API::MatrixWorkspace>(workspaceName);
   addWorkspace(ws, spectra);
 }
 
 void IndirectFitDataModel::addWorkspace(
-    Mantid::API::MatrixWorkspace_sptr workspace, const Spectra &spectra) {
+    Mantid::API::MatrixWorkspace_sptr workspace,
+    const FunctionModelSpectra &spectra) {
   if (!m_fittingData->empty()) {
     for (auto i : *m_fittingData) {
       if (equivalentWorkspaces(workspace, i.workspace())) {
@@ -296,8 +301,8 @@ void IndirectFitDataModel::setExcludeRegion(const std::string &exclude,
 
 void IndirectFitDataModel::addNewWorkspace(
     const Mantid::API::MatrixWorkspace_sptr &workspace,
-    const Spectra &spectra) {
-  m_fittingData->emplace_back(IndirectFitData(workspace, spectra));
+    const FunctionModelSpectra &spectra) {
+  m_fittingData->emplace_back(workspace, spectra);
 }
 
 void IndirectFitDataModel::removeWorkspace(TableDatasetIndex index) {

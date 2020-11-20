@@ -1,4 +1,4 @@
-.. _08_pim_ex_4:
+.. _09_pim_ex_4:
 
 ============================
 Python in Mantid: Exercise 4
@@ -21,6 +21,10 @@ A - Create a MatrixWorkspace
 B - Create a TableWorkspace
 ---------------------------
 
-Instead of creating a MatrixWorkspace as an output as we did in Part One, create a :ref:`table workspace <04_table_ws_py>` for the output, using :ref:`algm-CreateEmptyTableWorkspace`. Create a table workspace containing 3 columns called *Spectrum Number*, *Max* and *Min*. Use the same rebinned input workspace in Part One, as the source.
+Instead of creating a MatrixWorkspace as an output as we did in Part One, create a
+:ref:`table workspace <04_table_ws_py>` for the output, using :ref:`algm-CreateEmptyTableWorkspace`. Create a table
+workspace containing 3 columns called *Spectrum Number*, *Max* and *Min*. Use the same rebinned input workspace in Part
+One, as the source.
+
 
 :ref:`Solutions <04_pim_sol>`

@@ -112,24 +112,24 @@ void SaveParameterFile::exec() {
         V3D pos;
         std::istringstream pValueSS(pValue);
         pos.readPrinted(pValueSS);
-        toSave[cID].emplace_back(boost::make_tuple(
-            "x", "double", boost::lexical_cast<std::string>(pos.X())));
-        toSave[cID].emplace_back(boost::make_tuple(
-            "y", "double", boost::lexical_cast<std::string>(pos.Y())));
-        toSave[cID].emplace_back(boost::make_tuple(
-            "z", "double", boost::lexical_cast<std::string>(pos.Z())));
+        toSave[cID].emplace_back("x", "double",
+                                 boost::lexical_cast<std::string>(pos.X()));
+        toSave[cID].emplace_back("y", "double",
+                                 boost::lexical_cast<std::string>(pos.Y()));
+        toSave[cID].emplace_back("z", "double",
+                                 boost::lexical_cast<std::string>(pos.Z()));
       }
     } else if (pName == "rot") {
       if (saveLocationParams) {
         V3D rot;
         std::istringstream pValueSS(pValue);
         rot.readPrinted(pValueSS);
-        toSave[cID].emplace_back(boost::make_tuple(
-            "rotx", "double", boost::lexical_cast<std::string>(rot.X())));
-        toSave[cID].emplace_back(boost::make_tuple(
-            "roty", "double", boost::lexical_cast<std::string>(rot.Y())));
-        toSave[cID].emplace_back(boost::make_tuple(
-            "rotz", "double", boost::lexical_cast<std::string>(rot.Z())));
+        toSave[cID].emplace_back("rotx", "double",
+                                 boost::lexical_cast<std::string>(rot.X()));
+        toSave[cID].emplace_back("roty", "double",
+                                 boost::lexical_cast<std::string>(rot.Y()));
+        toSave[cID].emplace_back("rotz", "double",
+                                 boost::lexical_cast<std::string>(rot.Z()));
       }
     }
     // If it isn't a position or rotation parameter, we can just add it to the

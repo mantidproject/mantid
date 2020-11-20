@@ -19,6 +19,14 @@ FOCUSED_OUTPUT_WORKSPACE_NAME = "engggui_focusing_output_ws_bank_"
 
 
 class FocusModel(object):
+
+    def __init__(self):
+        self._last_path = None
+        self._last_path_ws = None
+
+    def get_last_path(self):
+        return self._last_path
+
     def focus_run(self, sample_paths, banks, plot_output, instrument, rb_num, spectrum_numbers):
         """
         Focus some data using the current calibration.
@@ -53,6 +61,8 @@ class FocusModel(object):
                     workspaces_for_run.append(output_workspace_name)
                     # Save the output to the file system.
                     self._save_output(instrument, sample_path, name, output_workspace_name, rb_num)
+                    if name == banks[0] and sample_path == sample_paths[0]:
+                        self._last_path_ws = (instrument + '_' + run_no + '_bank_' + name + '.nxs')
                 output_workspaces.append(workspaces_for_run)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
         else:
@@ -65,6 +75,10 @@ class FocusModel(object):
                 output_workspaces.append([output_workspace_name])
                 self._save_output(instrument, sample_path, "cropped", output_workspace_name, rb_num)
                 self._output_sample_logs(instrument, run_no, sample_workspace, rb_num)
+        if rb_num:
+            self._last_path = path.join(path_handling.get_output_path(), rb_num, 'Focus', str(self._last_path_ws))
+        else:
+            self._last_path = path.join(path_handling.get_output_path(), 'Focus', str(self._last_path_ws))
         # Plot the output
         if plot_output:
             for ws_names in output_workspaces:
