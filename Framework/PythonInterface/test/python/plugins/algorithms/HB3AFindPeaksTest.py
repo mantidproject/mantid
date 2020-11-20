@@ -51,6 +51,32 @@ class HB3AFindPeaksTest(unittest.TestCase):
 
             self.assertEqual(peaks_md.getNumberPeaks(), peaks.getNumberPeaks())
 
+    def test_find_ub_lattice(self):
+        # Test if the algorithm finds a UB matrix based on given lattice parameters
+
+        self.__load_data()
+
+        for scan in self._data_ws:
+            # Remove the UB matrix from the input data
+            ClearUB(mtd[scan])
+
+            peaks = HB3AFindPeaks(InputWorkspace=mtd[scan],
+                                  CellType="Orthorhombic",
+                                  Centering="F",
+                                  UseLattice=True,
+                                  LatticeA=5.2384,
+                                  LatticeB=5.2384,
+                                  LatticeC=19.6519,
+                                  LatticeAlpha=90.0,
+                                  LatticeBeta=90.0,
+                                  LatticeGamma=90.0)
+
+            # Verify that the algorithm found a UB matrix from lattice params
+            self.assertTrue(HasUB(peaks))
+
+            # Check that peaks were actually found
+            self.assertTrue(peaks.getNumberPeaks() > 0)
+
 
 if __name__ == '__main__':
     unittest.main()
