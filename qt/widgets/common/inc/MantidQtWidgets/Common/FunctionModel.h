@@ -10,6 +10,7 @@
 
 #include "IFunctionModel.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 #include <QString>
 #include <QStringList>
@@ -89,6 +90,9 @@ private:
   int numberOfDomains(const QList<FunctionModelDataset> &datasets) const;
   void checkIndex(int) const;
   void updateGlobals();
+  void setResolutionFromWorkspace(IFunction_sptr fun);
+  void setResolutionFromWorkspace(IFunction_sptr fun,
+                                  const MatrixWorkspace_sptr workspace);
   size_t m_currentDomainIndex = 0;
   // The datasets being fitted. A list of workspace names paired to lists of
   // spectra.

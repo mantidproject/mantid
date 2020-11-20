@@ -159,8 +159,14 @@ template <typename Map> Map combine(const Map &mapA, const Map &mapB) {
 std::unordered_map<std::string, std::string>
 shortToLongParameterNames(const IFunction_sptr &function) {
   std::unordered_map<std::string, std::string> shortToLong;
-  for (const auto &name : function->getParameterNames())
-    shortToLong[name.substr(name.rfind(".") + 1)] = name;
+  for (const auto &name : function->getParameterNames()) {
+    auto shortName = name.substr(name.rfind(".") + 1);
+    if (shortToLong.find(shortName) != shortToLong.end()) {
+      shortToLong[shortName] += "," + name;
+    } else {
+      shortToLong[shortName] = name;
+    }
+  }
   return shortToLong;
 }
 
@@ -169,8 +175,13 @@ Map mapKeys(const Map &map, const KeyMap &mapping) {
   Map mapped;
   for (const auto &value : map) {
     auto it = mapping.find(value.first);
-    if (it != mapping.end())
-      mapped[it->second] = value.second;
+    if (it != mapping.end()) {
+      std::stringstream paramNames(it->second);
+      std::string paramName;
+      while (std::getline(paramNames, paramName, ',')) {
+        mapped[paramName] = value.second;
+      }
+    }
   }
   return mapped;
 }

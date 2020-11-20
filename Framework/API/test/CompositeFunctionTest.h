@@ -1422,4 +1422,20 @@ public:
     TS_ASSERT_EQUALS(mfun->attributeName(2), "f1.GaussAttribute");
     TS_ASSERT_EQUALS(mfun->attributeName(3), "f2.CubicAttribute");
   }
+
+  void test_setError_with_name() {
+    auto mfun = std::make_unique<CompositeFunction>();
+    auto gauss = std::make_shared<Gauss<false>>();
+    auto background = std::make_shared<Linear<true>>();
+    auto cubic = std::make_shared<Cubic<true>>();
+
+    mfun->addFunction(background);
+    mfun->addFunction(gauss);
+    mfun->addFunction(cubic);
+
+    mfun->setError(0, 1.0);
+    TS_ASSERT_EQUALS(mfun->getError(0), 1.0);
+    mfun->setError("f1.s", 5.0);
+    TS_ASSERT_EQUALS(mfun->getError("f1.s"), 5.0);
+  }
 };
