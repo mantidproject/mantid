@@ -130,6 +130,19 @@ public:
                               Mantid::Parallel::StorageMode::Cloned)
       : MatrixWorkspace(storageMode), m_spec(0) {}
 
+  bool isRaggedWorkspace() const override {
+    if (m_vec.empty()) {
+      throw std::runtime_error(
+          "Vector data is empty, cannot check for ragged workspace.");
+    } else {
+      const auto numberOfBins = m_vec[0].dataY().size();
+      return std::any_of(m_vec.cbegin(), m_vec.cend(),
+                         [&numberOfBins](const auto &spectrum) {
+                           return numberOfBins != spectrum.dataY().size();
+                         });
+    }
+  }
+
   // Empty overrides of virtual methods
   size_t getNumberHistograms() const override { return m_spec; }
   const std::string id() const override { return "AxeslessWorkspaceTester"; }

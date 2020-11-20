@@ -25,6 +25,8 @@ set(
   src/FunctionBrowser/FunctionBrowserUtils.cpp
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
+  src/FunctionModelDataset.cpp
+  src/FunctionModelSpectra.cpp
   src/FunctionMultiDomainPresenter.cpp
   src/FunctionTreeView.cpp
   src/GenericDialog.cpp
@@ -39,6 +41,7 @@ set(
   src/ImageInfoModelMD.cpp
   src/ImageInfoPresenter.cpp
   src/ImageInfoWidget.cpp
+  src/IndexTypes.cpp
   src/InputController.cpp
   src/InstrumentSelector.cpp
   src/InterfaceManager.cpp
@@ -192,7 +195,6 @@ set(
   inc/MantidQtWidgets/Common/PropertyHandler.h
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
-  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RenameParDialog.h
   inc/MantidQtWidgets/Common/RepoModel.h
@@ -439,10 +441,13 @@ set(
   src/FunctionBrowser/FunctionBrowserUtils.cpp
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
+  src/FunctionModelDataset.cpp
+  src/FunctionModelSpectra.cpp
   src/FunctionMultiDomainPresenter.cpp
   src/FunctionTreeView.cpp
   src/HintingLineEdit.cpp
   src/IFunctionModel.cpp
+  src/IndexTypes.cpp
   src/InputController.cpp
   src/InstrumentSelector.cpp
   src/LineEditWithClear.cpp
@@ -520,7 +525,6 @@ set(
   inc/MantidQtWidgets/Common/PropertyWidget.h
   inc/MantidQtWidgets/Common/PythonRunner.h
   inc/MantidQtWidgets/Common/QScienceSpinBox.h
-  inc/MantidQtWidgets/Common/QSettingsHelper.h
   inc/MantidQtWidgets/Common/QtSignalChannel.h
   inc/MantidQtWidgets/Common/RepoTreeView.h
   inc/MantidQtWidgets/Common/RepoModel.h
@@ -713,6 +717,8 @@ set(
   inc/MantidQtWidgets/Common/ParseKeyValueString.h
   inc/MantidQtWidgets/Common/ParseNumerics.h
   inc/MantidQtWidgets/Common/FunctionModel.h
+  inc/MantidQtWidgets/Common/FunctionModelDataset.h
+  inc/MantidQtWidgets/Common/FunctionModelSpectra.h
   inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
   inc/MantidQtWidgets/Common/HintStrategy.h
   inc/MantidQtWidgets/Common/IFunctionBrowser.h
@@ -720,6 +726,7 @@ set(
   inc/MantidQtWidgets/Common/IMuonFitDataModel.h
   inc/MantidQtWidgets/Common/IMuonFitDataSelector.h
   inc/MantidQtWidgets/Common/IMuonFitFunctionModel.h
+  inc/MantidQtWidgets/Common/IndexTypes.h
   inc/MantidQtWidgets/Common/IProjectSaveView.h
   inc/MantidQtWidgets/Common/IWorkspaceFitControl.h
   inc/MantidQtWidgets/Common/LogValueSelector.h

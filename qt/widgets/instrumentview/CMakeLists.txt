@@ -232,6 +232,7 @@ set(
   test/InstrumentWidgetDecoderTest.h
   test/InstrumentWidgetEncoderTest.h
   test/BaseCustomInstrumentPresenterTest.h
+  test/PlotFitAnalysisPaneModelTest.h
   test/PlotFitAnalysisPanePresenterTest.h
 )
 

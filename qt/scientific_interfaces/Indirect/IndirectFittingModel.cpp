@@ -24,13 +24,14 @@
 #include <utility>
 
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
 using IDAWorkspaceIndex = MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 namespace {
 using namespace MantidQt::CustomInterfaces::IDA;
 
 std::string getFitDataName(const std::string &baseWorkspaceName,
-                           const Spectra &workspaceIndexes) {
+                           const FunctionModelSpectra &workspaceIndexes) {
   return baseWorkspaceName + " (" + workspaceIndexes.getString() + ")";
 }
 
@@ -158,18 +159,29 @@ template <typename Map> Map combine(const Map &mapA, const Map &mapB) {
 std::unordered_map<std::string, std::string>
 shortToLongParameterNames(const IFunction_sptr &function) {
   std::unordered_map<std::string, std::string> shortToLong;
-  for (const auto &name : function->getParameterNames())
-    shortToLong[name.substr(name.rfind(".") + 1)] = name;
+  for (const auto &name : function->getParameterNames()) {
+    auto shortName = name.substr(name.rfind(".") + 1);
+    if (shortToLong.find(shortName) != shortToLong.end()) {
+      shortToLong[shortName] += "," + name;
+    } else {
+      shortToLong[shortName] = name;
+    }
+  }
   return shortToLong;
 }
 
 template <typename Map, typename KeyMap>
 Map mapKeys(const Map &map, const KeyMap &mapping) {
   Map mapped;
-  for (const auto value : map) {
+  for (const auto &value : map) {
     auto it = mapping.find(value.first);
-    if (it != mapping.end())
-      mapped[it->second] = value.second;
+    if (it != mapping.end()) {
+      std::stringstream paramNames(it->second);
+      std::string paramName;
+      while (std::getline(paramNames, paramName, ',')) {
+        mapped[paramName] = value.second;
+      }
+    }
   }
   return mapped;
 }
@@ -274,7 +286,8 @@ IndirectFittingModel::getWorkspace(TableDatasetIndex index) const {
   return m_fitDataModel->getWorkspace(index);
 }
 
-Spectra IndirectFittingModel::getSpectra(TableDatasetIndex index) const {
+FunctionModelSpectra
+IndirectFittingModel::getSpectra(TableDatasetIndex index) const {
   return m_fitDataModel->getSpectra(index);
 }
 
@@ -386,15 +399,16 @@ IndirectFittingModel::getFittingFunction() const {
 
 void IndirectFittingModel::setSpectra(const std::string &spectra,
                                       TableDatasetIndex dataIndex) {
-  setSpectra(Spectra(spectra), dataIndex);
+  setSpectra(FunctionModelSpectra(spectra), dataIndex);
 }
 
-void IndirectFittingModel::setSpectra(Spectra &&spectra,
+void IndirectFittingModel::setSpectra(FunctionModelSpectra &&spectra,
                                       TableDatasetIndex dataIndex) {
-  m_fitDataModel->setSpectra(std::forward<Spectra>(spectra), dataIndex);
+  m_fitDataModel->setSpectra(std::forward<FunctionModelSpectra>(spectra),
+                             dataIndex);
 }
 
-void IndirectFittingModel::setSpectra(const Spectra &spectra,
+void IndirectFittingModel::setSpectra(const FunctionModelSpectra &spectra,
                                       TableDatasetIndex dataIndex) {
   m_fitDataModel->setSpectra(spectra, dataIndex);
 }
@@ -438,14 +452,15 @@ void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
 }
 
 void IndirectFittingModel::addWorkspace(const std::string &workspaceName,
-                                        const Spectra &spectra) {
+                                        const FunctionModelSpectra &spectra) {
   m_fitDataModel->addWorkspace(workspaceName, spectra);
   m_defaultParameters.emplace_back(
       createDefaultParameters(TableDatasetIndex{0}));
 }
 
 void IndirectFittingModel::addWorkspace(
-    Mantid::API::MatrixWorkspace_sptr workspace, const Spectra &spectra) {
+    Mantid::API::MatrixWorkspace_sptr workspace,
+    const FunctionModelSpectra &spectra) {
   m_fitDataModel->addWorkspace(workspace, spectra);
   m_defaultParameters.emplace_back(
       createDefaultParameters(TableDatasetIndex{0}));

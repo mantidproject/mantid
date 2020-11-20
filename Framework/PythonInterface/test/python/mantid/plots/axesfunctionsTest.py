@@ -72,6 +72,11 @@ class PlotFunctionsTest(unittest.TestCase):
                                                 DataY=[1, 2, 3],
                                                 NSpec=1,
                                                 OutputWorkspace='ws2d_point_uneven')
+        cls.ws_spec = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
+                                      DataY=[2, 3, 4, 5, 2, 3],
+                                      DataE=[1, 2, 3, 4, 1, 2],
+                                      NSpec=3,
+                                      OutputWorkspace='ws_spec')
         wp = CreateWorkspace(DataX=[15, 25, 35, 45], DataY=[1, 2, 3, 4], NSpec=1)
         ConjoinWorkspaces(cls.ws2d_point_uneven, wp, CheckOverlapping=False)
         cls.ws2d_point_uneven = mantid.mtd['ws2d_point_uneven']
@@ -154,6 +159,10 @@ class PlotFunctionsTest(unittest.TestCase):
         funcs.pcolormesh(ax, self.ws_MD_2d)
         funcs.pcolorfast(ax, self.ws2d_point_uneven, vmin=-1)
         funcs.imshow(ax, self.ws2d_histo)
+
+    def test_imshow_works_with_a_ragged_workspace(self):
+        fig, ax = plt.subplots()
+        funcs.imshow(ax, self.ws2d_point_uneven)
 
     def _do_update_colorplot_datalimits(self, color_func):
         fig, ax = plt.subplots()
@@ -269,6 +278,19 @@ class PlotFunctionsTest(unittest.TestCase):
         finally:
             config['graph1d.autodistribution'] = 'On'
 
+    def test_get_data_for_plot_binplot_binedgeaxis(self):
+        fig, ax = plt.subplots()
+        kwargs = {'wkspIndex': 0, 'axis': MantidAxType.BIN}
+        x, y, dy, dx, indices, axis, kwargs = funcs._get_data_for_plot(ax, self.ws2d_histo, kwargs)
+        self.assertTrue(np.array_equal([5., 7.], x))
+        self.assertTrue(np.array_equal([2., 4.], y))
+
+    def test_get_data_for_plot_binplot_spectrumaxis(self):
+        fig, ax = plt.subplots()
+        kwargs = {'wkspIndex': 0, 'axis': MantidAxType.BIN}
+        x, y, dy, dx, indices, axis, kwargs = funcs._get_data_for_plot(ax, self.ws_spec, kwargs)
+        self.assertTrue(np.array_equal([1, 2, 3], x))
+        self.assertTrue(np.array_equal([2., 4., 2.], y))
 
 if __name__ == '__main__':
     unittest.main()

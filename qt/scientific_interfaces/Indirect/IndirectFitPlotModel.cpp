@@ -177,7 +177,7 @@ MatrixWorkspace_sptr IndirectFitPlotModel::getWorkspace() const {
   return m_fittingModel->getWorkspace(m_activeIndex);
 }
 
-Spectra IndirectFitPlotModel::getSpectra() const {
+FunctionModelSpectra IndirectFitPlotModel::getSpectra() const {
   return m_fittingModel->getSpectra(m_activeIndex);
 }
 
@@ -246,8 +246,9 @@ std::string IndirectFitPlotModel::getLastFitDataName() const {
 
 boost::optional<double> IndirectFitPlotModel::getFirstHWHM() const {
   auto fwhm = findFirstFWHM(m_fittingModel->getFittingFunction());
-  if (fwhm)
+  if (fwhm) {
     return *fwhm / 2.0;
+  }
   return boost::none;
 }
 

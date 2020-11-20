@@ -133,7 +133,7 @@ list getSpectrumNumbers(const MatrixWorkspace &self) {
   const auto &spectrumNums = self.indexInfo().spectrumNumbers();
   list spectra;
 
-  for (const auto index : spectrumNums) {
+  for (const auto &index : spectrumNums) {
     spectra.append(static_cast<int32_t>(index));
   }
 
@@ -344,6 +344,10 @@ void export_MatrixWorkspace() {
          boost::noncopyable>("MatrixWorkspace", no_init)
       //--------------------------------------- Meta information
       //-----------------------------------------------------------------------
+      .def("isRaggedWorkspace", &MatrixWorkspace::isRaggedWorkspace,
+           arg("self"),
+           "Returns true if the workspace is ragged (has differently sized "
+           "spectra).")
       .def("blocksize", &MatrixWorkspace::blocksize, arg("self"),
            "Returns size of the Y data array")
       .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms,

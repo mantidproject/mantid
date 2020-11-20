@@ -63,7 +63,10 @@ class PlotsLoader(object):
                 if "workspaces" in cargs:
                     workspace_name = cargs.pop("workspaces")
                     workspace = ADS.retrieve(workspace_name)
-                    self.plot_func(workspace, ax, ax.figure, cargs)
+                    self.workspace_plot_func(workspace, ax, ax.figure, cargs)
+                elif "function" in cargs:
+                    self.plot_func(ax, cargs)
+
             ax.creation_args = creation_args_copy
 
         # Update the fig
@@ -77,7 +80,7 @@ class PlotsLoader(object):
         else:
             return fig
 
-    def plot_func(self, workspace, axes, fig, creation_arg):
+    def workspace_plot_func(self, workspace, axes, fig, creation_arg):
         """
         Plot's the graph from the given workspace, axes and creation_args. then returns the function used to create it.
         :param workspace: mantid.Workspace; Workspace to create the graph from
@@ -115,6 +118,22 @@ class PlotsLoader(object):
             self.color_bar_remade = True
         else:
             func(workspace, **creation_arg)
+
+    def plot_func(self, axes, creation_arg):
+        """
+        Calls plotting functions that aren't associated with workspaces, such as axhline and axvline.
+        :param axes: matplotlib.Axes; Axes to call the function on
+        :param creation_arg: The functions' arguments when it was originally called.
+        """
+
+        function_to_call = creation_arg.pop('function')
+        function_dict = {
+            "axhline": axes.axhline,
+            "axvline": axes.axvline
+        }
+
+        func = function_dict[function_to_call]
+        func(*creation_arg['args'], **creation_arg['kwargs'])
 
     def restore_figure_data(self, fig, dic):
         self.restore_fig_properties(fig, dic["properties"])

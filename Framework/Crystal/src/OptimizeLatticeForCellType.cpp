@@ -100,7 +100,7 @@ void OptimizeLatticeForCellType::exec() {
   if (perRun) {
     std::vector<std::pair<std::string, bool>> criteria;
     // Sort by run number
-    criteria.emplace_back(std::pair<std::string, bool>("runnumber", true));
+    criteria.emplace_back("runnumber", true);
     ws->sort(criteria);
     const std::vector<Peak> &peaks_all = ws->getPeaks();
     int run = 0;
