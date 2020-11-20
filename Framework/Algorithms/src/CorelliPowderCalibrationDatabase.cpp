@@ -263,15 +263,6 @@ CalibrationTableHandler::loadComponentCalibrationTable(
   return tablews;
 }
 
-/**
- * @brief CalibrationTableHandler::load
- * @param filename
- */
-void CalibrationTableHandler::load(const std::string &filename) {
-  std::cout << "Load from " << filename
-            << ": existence = " << boost::filesystem::exists(filename) << "\n";
-}
-
 //-----------------------------------------------------------------------------
 /**
  * @brief Save a specific component to database (csv) file

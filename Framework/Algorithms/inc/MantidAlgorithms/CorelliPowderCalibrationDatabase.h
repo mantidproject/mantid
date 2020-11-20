@@ -98,8 +98,7 @@ public:
   DataObjects::TableWorkspace_sptr getCalibrationWorkspace() {
     return mCalibWS;
   }
-  /// Load latest Corelli calibrtion file
-  void load(const std::string &filename);
+
   /// Save a single component in the calibration workspace
   DataObjects::TableWorkspace_sptr
   saveCompomentDatabase(const std::string &datestamp,
