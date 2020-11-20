@@ -141,8 +141,9 @@ namespace Mantid {
             rotateAlg -> initialize();
             rotateAlg->setProperty("Workspace", wsName);
             for (size_t row_num=0; row_num < calTable->rowCount(); row_num++) {
-                rotateAlg -> initialize();
-                rotateAlg->setProperty("Workspace", ws);
+                if (abs(rotangs->cell<double>(row_num)) < 1e-8){
+                    continue;
+                }
                 rotateAlg->setProperty("ComponentName", componentNames->cell<std::string>(row_num));
                 rotateAlg->setProperty("X", rotxs->cell<double>(row_num));
                 rotateAlg->setProperty("Y", rotys->cell<double>(row_num));
