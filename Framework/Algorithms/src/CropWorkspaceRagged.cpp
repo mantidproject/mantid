@@ -22,12 +22,10 @@ DECLARE_ALGORITHM(CropWorkspaceRagged)
 /// Init function
 void CropWorkspaceRagged::init() {
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "InputWorkspace", "",
-                                                        Direction::Input),
+                      "InputWorkspace", "", Direction::Input),
                   "The input workspace");
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                      "OutputWorkspace", "",
-                                                        Direction::Output),
+                      "OutputWorkspace", "", Direction::Output),
                   "Name to be given to the cropped workspace.");
 
   auto required = std::make_shared<MandatoryValidator<std::vector<double>>>();
@@ -44,13 +42,13 @@ std::map<std::string, std::string> CropWorkspaceRagged::validateInputs() {
   auto numSpectra = ws->getNumberHistograms();
   std::vector<double> xMin = getProperty("XMin");
   std::vector<double> xMax = getProperty("XMax");
-  if (xMin.size() == 0 || (xMin.size() != numSpectra &&xMin.size() > 1) ) {
-    issues["XMin"] =
-        "Either one XMin value must be a single value or one value per spectrum.";
+  if (xMin.size() == 0 || (xMin.size() != numSpectra && xMin.size() > 1)) {
+    issues["XMin"] = "Either one XMin value must be a single value or one "
+                     "value per spectrum.";
   }
   if (xMax.size() == 0 || (xMax.size() > 1 && xMax.size() != numSpectra)) {
-    issues["XMax"] =
-        "Either one XMax value must be a single value or one value per spectrum.";
+    issues["XMax"] = "Either one XMax value must be a single value or one "
+                     "value per spectrum.";
   }
   return issues;
 }
@@ -93,8 +91,7 @@ void CropWorkspaceRagged::exec() {
     auto &dataE = outputWS->dataE(i);
 
     // get iterators for cropped region
-    auto low =
-        std::lower_bound(dataX.begin(), dataX.end(), xMin[i]);
+    auto low = std::lower_bound(dataX.begin(), dataX.end(), xMin[i]);
     auto up = std::upper_bound(dataX.begin(), dataX.end(), xMax[i]);
     // convert to index
     auto lowerIndex = std::distance(dataX.begin(), low);

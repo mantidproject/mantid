@@ -164,7 +164,8 @@ void GenericDialog::accept() {
     // algorithm)
     // If got there, there were errors
     for (auto it = m_errors.begin(); it != m_errors.end(); it++) {
-       // if these assert is encounted, the property and validate keys may not match (check case)
+      // if these assert is encounted, the property and validate keys may not
+      // match (check case)
       assert(m_algoPropertiesWidget->m_propWidgets[it.key()]);
       m_algoPropertiesWidget->m_propWidgets[it.key()]->updateIconVisibility(
           it.value());
