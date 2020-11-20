@@ -98,7 +98,7 @@ class AxesTabWidgetPresenter:
                 else:
                     ax.set_ylim(self.current_view_props['ylim'])
 
-        if "zlabel" in self.current_view_props:
+        if isinstance(ax, Axes3D) and "zlabel" in self.current_view_props:
             ax.set_zlabel(self.current_view_props['zlabel'])
             ax.set_zscale(self.current_view_props['zscale'])
             if self.current_view_props['zautoscale']:
@@ -159,7 +159,7 @@ class AxesTabWidgetPresenter:
                     else:
                         ax.set_ylim(view_props['ylim'])
 
-            if "zlabel" in view_props:
+            if isinstance(ax, Axes3D) and "zlabel" in view_props:
                 ax.set_zlabel(view_props['zlabel'])
                 ax.set_zscale(view_props['zscale'])
                 if self.current_view_props['zautoscale']:
@@ -211,7 +211,8 @@ class AxesTabWidgetPresenter:
         self.current_view_props.clear()
         ax_props = self.get_selected_ax_properties()
 
-        plot_is_3d = "zlim" in ax_props
+        ax = self.get_selected_ax()
+        plot_is_3d = isinstance(ax, Axes3D)
 
         # Enable the z-axis option if the plot is 3D.
         self.view.z_radio_button.setEnabled(plot_is_3d)
@@ -222,7 +223,7 @@ class AxesTabWidgetPresenter:
 
         # Changing the axis scale doesn't work with 3D plots, this is a known matplotlib issue,
         # so the scale option is disabled.
-        self.view.scale_combo_box.setEnabled("zlim" not in ax_props)
+        self.view.scale_combo_box.setEnabled(not plot_is_3d)
 
         # Minor ticks/gridlines are currently not supported for 3D plots.
         self.view.show_minor_gridlines_check_box.setVisible(not plot_is_3d)
