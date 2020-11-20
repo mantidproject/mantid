@@ -141,6 +141,8 @@ endif()
 if(ENABLE_MANTIDPLOT OR ENABLE_WORKBENCH)
   set(CPACK_GENERATOR DragNDrop)
   set(CMAKE_INSTALL_PREFIX "")
+  # Replace hdiutil command to retry on detach failure
+  set(CPACK_COMMAND_HDIUTIL ${CMAKE_SOURCE_DIR}/installers/MacInstaller/hdiutilwrap)
   set(CPACK_PACKAGE_EXECUTABLES MantidPlot)
   set(CMAKE_MACOSX_RPATH 1)
   set(CPACK_DMG_BACKGROUND_IMAGE
