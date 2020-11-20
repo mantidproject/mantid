@@ -28,6 +28,7 @@ Improvements
 - Dynamic binning has been enabled for MDHistoWorkspaces with an attached original in the SliceViewer. Manual rebinning options are now also shown.
 - Vertical and horizontal markers on a plot should no longer appear in front of the legend.
 - Plots containing axvline's and axhline's can be saved and are reproduced when loading a project that contains them.
+- In the instrument widget, the integration scroll bar can be moved, widened and shrunk using the arrow keys.
 
 Bugfixes
 ########
