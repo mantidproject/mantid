@@ -40,5 +40,6 @@ Bugfixes
 - Fixed a Workbench crash when attempting to show the data in a ragged workspace.
 - Show spectrum numbers instead of workspace index in plotBin
 - Fixed a bug which would cause unrealistic errorbars on the fit calc curve.
+- Fix sort order of peaks in the peaks overlay on SliceViewer.
 
 :ref:`Release 6.0.0 <v6.0.0>`
