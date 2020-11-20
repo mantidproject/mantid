@@ -246,8 +246,9 @@ std::string IndirectFitPlotModel::getLastFitDataName() const {
 
 boost::optional<double> IndirectFitPlotModel::getFirstHWHM() const {
   auto fwhm = findFirstFWHM(m_fittingModel->getFittingFunction());
-  if (fwhm)
+  if (fwhm) {
     return *fwhm / 2.0;
+  }
   return boost::none;
 }
 

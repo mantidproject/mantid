@@ -17,6 +17,7 @@ Improvements
 - Plotted fits in indirect data analysis are cleared when the fit parameters are changed.
 - The context menu for plots in the  indirect data analysis GUI is now enabled.
 - The function browser in the ConvFit tab should now correctly show Q values for Q dependent functions.
+- The ConvFit tab in the Indirect Data Analysis GUI will now set default parameters for the FWHM when a resolution file is loaded.
 
 Bug Fixes
 #########
