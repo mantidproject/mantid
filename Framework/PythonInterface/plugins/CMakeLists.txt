@@ -38,7 +38,6 @@ set(PYTHON_PLUGINS
     algorithms/CreateEmptyTableWorkspace.py
     algorithms/CreateLeBailFitInput.py
     algorithms/CropWorkspaceForMDNorm.py
-    algorithms/CropWorkspaceRagged.py
     algorithms/CylinderPaalmanPingsCorrection2.py
     algorithms/DNSComputeDetEffCorrCoefs.py
     algorithms/DNSFlippingRatioCorr.py

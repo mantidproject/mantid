@@ -91,6 +91,7 @@ set(SRC_FILES
     src/CreateUserDefinedBackground.cpp
     src/CreateWorkspace.cpp
     src/CropToComponent.cpp
+    src/CropWorkspaceRagged.cpp
     src/CropWorkspace.cpp
     src/CrossCorrelate.cpp
     src/CuboidGaugeVolumeAbsorption.cpp
@@ -419,6 +420,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CreateUserDefinedBackground.h
     inc/MantidAlgorithms/CreateWorkspace.h
     inc/MantidAlgorithms/CropToComponent.h
+    inc/MantidAlgorithms/CropWorkspaceRagged.h
     inc/MantidAlgorithms/CropWorkspace.h
     inc/MantidAlgorithms/CrossCorrelate.h
     inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h
