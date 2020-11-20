@@ -442,17 +442,18 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
   const bool isSave = this->getProperty(Prop::SAVEMODINFO);
   const bool isMOZero = (args.satellites.maxOrder == 0);
   bool isAllVecZero = true;
-  for (int vecNo = 0; vecNo < args.satellites.modVectors.size(); vecNo++) {
+  for (size_t vecNo = 0; vecNo < args.satellites.modVectors.size(); vecNo++) {
     if (args.satellites.modVectors[vecNo] != V3D(0.0, 0.0, 0.0)) {
       isAllVecZero = false;
     }
   }
   if (!isMOZero && isAllVecZero) {
-    helpMsgs["ModVector1"] = "At least one Modulation Vector must be supplied if Max Order set.";
+    helpMsgs["ModVector1"] =
+        "At least one Modulation Vector must be supplied if Max Order set.";
   }
   if (isSave && isAllVecZero) {
-    helpMsgs[Prop::SAVEMODINFO] =
-        "Modulation info cannot be saved with no valid Modulation Vectors supplied.";
+    helpMsgs[Prop::SAVEMODINFO] = "Modulation info cannot be saved with no "
+                                  "valid Modulation Vectors supplied.";
   }
   if (isSave && isMOZero) {
     helpMsgs["MaxOrder"] =

@@ -495,7 +495,7 @@ public:
     return alg;
   }
 
-  bool
+  void
   assert_helpmsgs_error_from_validate_inputs(std::shared_ptr<IndexPeaks> alg,
                                              std::string prop,
                                              std::string err_substring) {
