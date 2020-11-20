@@ -200,8 +200,12 @@ boost::optional<int> MainWindowPresenter::roundPrecision() const {
 }
 
 bool MainWindowPresenter::discardChanges() const {
-  return !isWarnDiscardChangesChecked() ||
-         m_messageHandler->askUserDiscardChanges();
+  if (!isWarnDiscardChangesChecked())
+    return true;
+
+  return m_messageHandler->askUserOkCancel(
+      "This will cause unsaved changes to be lost. Continue?",
+      "Discard changes?");
 }
 
 bool MainWindowPresenter::isCloseEventPrevented() {
@@ -236,7 +240,7 @@ bool MainWindowPresenter::isOverwriteAllBatchesPrevented() const {
 
 bool MainWindowPresenter::isProcessAllPrevented() const {
   if (isWarnProcessAllChecked()) {
-    return !m_messageHandler->askUserYesNo(
+    return !m_messageHandler->askUserOkCancel(
         "This will process all rows in the table. Continue?",
         "Process all rows?");
   }
@@ -245,7 +249,7 @@ bool MainWindowPresenter::isProcessAllPrevented() const {
 
 bool MainWindowPresenter::isProcessPartialGroupPrevented() const {
   if (isWarnProcessPartialGroupChecked()) {
-    return !m_messageHandler->askUserYesNo(
+    return !m_messageHandler->askUserOkCancel(
         "Some groups will not be fully processed. Continue?",
         "Process partial group?");
   }

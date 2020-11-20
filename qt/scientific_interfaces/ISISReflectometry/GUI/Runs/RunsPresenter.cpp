@@ -252,7 +252,6 @@ void RunsPresenter::autoreductionCompleted() {
 void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   m_searcher->reset();
   m_view->setSearchInstrument(instrumentName);
-  m_view->clearSearchText();
   tablePresenter()->notifyInstrumentChanged(instrumentName);
 }
 

@@ -515,14 +515,6 @@ public:
     verifyAndClear();
   }
 
-  void testInstrumentChangedClearsSearchTextOnView() {
-    auto presenter = makePresenter();
-    auto const instrument = std::string("TEST-instrumnet");
-    EXPECT_CALL(m_view, clearSearchText()).Times(1);
-    presenter.notifyInstrumentChanged(instrument);
-    verifyAndClear();
-  }
-
   void testNotifyRowStateChanged() {
     auto presenter = makePresenter();
     EXPECT_CALL(*m_runsTablePresenter, notifyRowStateChanged()).Times(1);
@@ -761,22 +753,6 @@ private:
     EXPECT_CALL(*m_searcher, reset()).Times(0);
     EXPECT_CALL(*m_runsTablePresenter, notifyRemoveAllRowsAndGroupsRequested())
         .Times(0);
-  }
-
-  void expectUserRespondsYes() {
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
-        .Times(1)
-        .WillOnce(Return(true));
-  }
-
-  void expectUserRespondsNo() {
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges())
-        .Times(1)
-        .WillOnce(Return(false));
-  }
-
-  void expectUserNotPrompted() {
-    EXPECT_CALL(m_messageHandler, askUserDiscardChanges()).Times(0);
   }
 
   void expectCheckForNewRuns() {
