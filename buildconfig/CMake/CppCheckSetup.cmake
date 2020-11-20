@@ -15,6 +15,9 @@ if ( CPPCHECK_EXECUTABLE )
   # Force cppcheck to check when we use project-wide macros
   -DDLLExport=
   -DMANTID_ALGORITHMS_DLL=
+  # Undefine problematic macros:
+  #   Causes errors such as there was an internal error: bad macro syntax"
+  -UQT_TESTCASE_BUILDDIR
   )
 
   set (_cppcheck_args "${CPPCHECK_ARGS}")

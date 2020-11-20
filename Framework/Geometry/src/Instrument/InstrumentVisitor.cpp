@@ -175,7 +175,7 @@ InstrumentVisitor::registerComponentAssembly(const ICompAssembly &assembly) {
   m_parentComponentIndices->emplace_back(componentIndex);
   const size_t componentStop = m_assemblySortedComponentIndices->size();
 
-  m_detectorRanges->emplace_back(std::make_pair(detectorStart, detectorStop));
+  m_detectorRanges->emplace_back(detectorStart, detectorStop);
   m_componentRanges->emplace_back(
       std::make_pair(componentStart, componentStop));
 
@@ -213,7 +213,7 @@ InstrumentVisitor::registerGenericComponent(const IComponent &component) {
   // updated later in the register call of the parent.
   m_parentComponentIndices->emplace_back(componentIndex);
   // Generic components are not assemblies and do not therefore have children.
-  m_children->emplace_back(std::vector<size_t>());
+  m_children->emplace_back();
   return componentIndex;
 }
 
@@ -228,21 +228,19 @@ size_t InstrumentVisitor::registerInfiniteComponent(
    * For a generic leaf component we extend the component ids list, but
    * the detector indexes entries will of course be empty
    */
-  m_detectorRanges->emplace_back(
-      std::make_pair(0, 0)); // Represents an empty range
-                             // Record the ID -> index mapping
+  m_detectorRanges->emplace_back(0, 0); // Represents an empty range
+                                        // Record the ID -> index mapping
   const size_t componentIndex = commonRegistration(component);
   m_componentType->emplace_back(Beamline::ComponentType::Infinite);
 
   const size_t componentStart = m_assemblySortedComponentIndices->size();
-  m_componentRanges->emplace_back(
-      std::make_pair(componentStart, componentStart + 1));
+  m_componentRanges->emplace_back(componentStart, componentStart + 1);
   m_assemblySortedComponentIndices->emplace_back(componentIndex);
   // Unless this is the root component this parent is not correct and will be
   // updated later in the register call of the parent.
   m_parentComponentIndices->emplace_back(componentIndex);
   // Generic components are not assemblies and do not therefore have children.
-  m_children->emplace_back(std::vector<size_t>());
+  m_children->emplace_back();
   return componentIndex;
 }
 

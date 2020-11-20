@@ -383,6 +383,10 @@ void LoadILLReflectometry::initWorkspace(
     m_localWorkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
+
+  // the start time is needed in the workspace when loading the parameter file
+  m_localWorkspace->mutableRun().addProperty<std::string>(
+      "start_time", m_startTime.toISO8601String());
 }
 
 /**
@@ -640,6 +644,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   NXstatus stat = NXopen(filename.c_str(), NXACC_READ, &nxfileID);
   if (stat == NX_ERROR)
     throw Kernel::Exception::FileError("Unable to open File:", filename);
+
   m_loader.addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
   NXclose(&nxfileID);
 }

@@ -16,9 +16,11 @@ Improvements
 - :ref:`QENSFitSequential <algm-QENSFitSequential>` now accepts multiple inputs for `StartX` and `EndX` for each spectra.
 - Plotted fits in indirect data analysis are cleared when the fit parameters are changed.
 - The context menu for plots in the  indirect data analysis GUI is now enabled.
+- The function browser in the ConvFit tab should now correctly show Q values for Q dependent functions.
 
 Bug Fixes
 #########
 - A bug has been fixed in Indirect data analysis on the Elwin tab that causes the integration range to be reset when changing between plotted workspaces.
+- A bug in Indirect Data Analysis causing logs not to load in the Edit Local Fit Parameters dialog has been fixed.
 
 :ref:`Release 6.0.0 <v6.0.0>`

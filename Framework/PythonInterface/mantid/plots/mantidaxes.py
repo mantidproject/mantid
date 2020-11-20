@@ -44,17 +44,25 @@ WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
 def plot_decorator(func):
     def wrapper(self, *args, **kwargs):
         func_value = func(self, *args, **kwargs)
+        func_name = func.__name__
         # Saves saving it on array objects
         if datafunctions.validate_args(*args, **kwargs):
             # Fill out kwargs with the values of args
             kwargs["workspaces"] = args[0].name()
-            kwargs["function"] = func.__name__
+            kwargs["function"] = func_name
 
             if 'wkspIndex' not in kwargs and 'specNum' not in kwargs:
                 kwargs['specNum'] = MantidAxes.get_spec_number_or_bin(args[0], kwargs)
             if "cmap" in kwargs and isinstance(kwargs["cmap"], Colormap):
                 kwargs["cmap"] = kwargs["cmap"].name
             self.creation_args.append(kwargs)
+        elif func_name == "axhline" or func_name == "axvline":
+            self.creation_args.append({
+                'function': func_name,
+                'args': args,
+                'kwargs': kwargs
+            })
+
         return func_value
 
     return wrapper
@@ -759,6 +767,14 @@ class MantidAxes(Axes):
             return artist
         else:
             return Axes.errorbar(self, *args, **kwargs)
+
+    @plot_decorator
+    def axhline(self, *args, **kwargs):
+        return Axes.axhline(self, *args, **kwargs)
+
+    @plot_decorator
+    def axvline(self, *args, **kwargs):
+        return Axes.axvline(self, *args, **kwargs)
 
     @plot_decorator
     def pcolor(self, *args, **kwargs):

@@ -44,7 +44,7 @@ allow us to keep developing the Workbench long after MantidPlot is no longer ava
     * :ref:`WorkbenchPlotWindow` The new way that plots are created and manipulated in Workbench, includes plot options
       and fitting.
     * *Workspace data views*: Display data from ``MatrixWorkspace`` / ``TableWorkspace`` and edit ``TableWorkspace``
-    * `Instrument view <https://www.mantidproject.org/MantidPlot:_Instrument_View>`_: Visualize an instrument attached to a workspace
+    * :ref:`InstrumentViewer`: Visualize an instrument attached to a workspace
     * *Sample log viewer*: Display information, plots and statistics about the sample logs in a workspace
     * :ref:`WorkbenchWorkspaceHistoryWindow` displays the algorithms that have been applied to a workspace
     * :ref:`Plotting <plotting>` describes how mantid workspaces have been integrated with the matplotlib framework and

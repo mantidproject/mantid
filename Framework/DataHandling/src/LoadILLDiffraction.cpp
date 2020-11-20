@@ -229,7 +229,7 @@ void LoadILLDiffraction::loadDataScan() {
     initMovingWorkspace(scan, start_time);
     fillMovingInstrumentScan(data, scan);
   } else {
-    initStaticWorkspace();
+    initStaticWorkspace(start_time);
     fillStaticInstrumentScan(data, scan, twoTheta0);
   }
 
@@ -267,8 +267,10 @@ void LoadILLDiffraction::loadMetaData() {
 /**
  * Initializes the output workspace based on the resolved instrument, scan
  * points, and scan type
+ *
+ * @param start_time :: the date the run started, in ISO compliant format
  */
-void LoadILLDiffraction::initStaticWorkspace() {
+void LoadILLDiffraction::initStaticWorkspace(const std::string &start_time) {
   size_t nSpectra = m_numberDetectorsActual + NUMBER_MONITORS;
   size_t nBins = 1;
 
@@ -280,6 +282,9 @@ void LoadILLDiffraction::initStaticWorkspace() {
 
   m_outWorkspace = WorkspaceFactory::Instance().create("Workspace2D", nSpectra,
                                                        nBins, nBins);
+
+  // the start time is needed in the workspace when loading the parameter file
+  m_outWorkspace->mutableRun().addProperty("start_time", start_time);
 }
 
 /**
@@ -804,7 +809,10 @@ LoadILLDiffraction::loadEmptyInstrument(const std::string &start_time) {
   loadInst->setPropertyValue("InstrumentName", m_instName);
   auto ws = WorkspaceFactory::Instance().create("Workspace2D", 1, 1, 1);
   auto &run = ws->mutableRun();
-  run.addProperty("run_start", start_time);
+
+  // the start time is needed in the workspace when loading the parameter file
+  run.addProperty("start_time", start_time);
+
   loadInst->setProperty<MatrixWorkspace_sptr>("Workspace", ws);
   loadInst->setProperty("RewriteSpectraMap", OptionalBool(true));
   loadInst->execute();

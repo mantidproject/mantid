@@ -449,12 +449,10 @@ public:
     TS_ASSERT_EQUALS(peakdataws->x(0).rawData(), peakdataws->x(2).rawData());
     TS_ASSERT_EQUALS(peakdataws->x(0).rawData(), peakdataws->x(3).rawData());
     TS_ASSERT_EQUALS(peakdataws->x(0).rawData(), peakdataws->x(4).rawData());
-    TS_ASSERT_DELTA(peakdataws->y(0)[0], 0.4302, 0.0001);
-    TS_ASSERT_DELTA(peakdataws->y(2)[0], 0.4302, 0.0001);
-    TS_ASSERT_DELTA(peakdataws->y(0)[500], 0.4163, 0.0001);
-    TS_ASSERT_DELTA(peakdataws->y(2)[500], 0.4163, 0.0001);
-    TS_ASSERT_DELTA(peakdataws->y(0)[1000], 0.4331, 0.0001);
-    TS_ASSERT_DELTA(peakdataws->y(2)[1000], 0.4331, 0.0001);
+    // checking difference = data in regions not fitted
+    TS_ASSERT_DELTA(peakdataws->y(0)[0], peakdataws->y(2)[0], 0.0001);
+    TS_ASSERT_DELTA(peakdataws->y(0)[500], peakdataws->y(2)[500], 0.0001);
+    TS_ASSERT_DELTA(peakdataws->y(0)[1100], peakdataws->y(2)[1100], 0.0001);
 
     // Output Bragg peaks parameters
     DataObjects::TableWorkspace_sptr outbraggws =
@@ -463,12 +461,12 @@ public:
     TS_ASSERT(outbraggws);
     if (!outbraggws) {
       return;
-    }
-    TS_ASSERT_EQUALS(outbraggws->rowCount(), 11);
+    } // checking chisq for some peaks
+    TS_ASSERT_EQUALS(outbraggws->rowCount(), 12);
     TS_ASSERT_EQUALS(outbraggws->columnCount(), 10);
-    TS_ASSERT_DELTA(outbraggws->Double(0, 9), 1.83, 0.3);
-    TS_ASSERT_DELTA(outbraggws->Double(4, 9), 0.44, 0.01);
-    TS_ASSERT_DELTA(outbraggws->Double(8, 9), 0.52, 0.3);
+    TS_ASSERT_DELTA(outbraggws->Double(0, 9), 0.47, 0.1);
+    TS_ASSERT_DELTA(outbraggws->Double(5, 9), 0.57, 0.1);
+    TS_ASSERT_DELTA(outbraggws->Double(9, 9), 0.52, 0.1);
 
     AnalysisDataService::Instance().remove("DataWorkspace");
     AnalysisDataService::Instance().remove("PeakParameters");

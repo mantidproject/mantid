@@ -119,16 +119,16 @@ void SaveLauenorm::exec() {
   // We must sort the peaks
   std::vector<std::pair<std::string, bool>> criteria;
   if (type.compare(0, 2, "Ba") == 0)
-    criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
+    criteria.emplace_back("BankName", true);
   else if (type.compare(0, 2, "Ru") == 0)
-    criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
+    criteria.emplace_back("RunNumber", true);
   else {
-    criteria.emplace_back(std::pair<std::string, bool>("RunNumber", true));
-    criteria.emplace_back(std::pair<std::string, bool>("BankName", true));
+    criteria.emplace_back("RunNumber", true);
+    criteria.emplace_back("BankName", true);
   }
-  criteria.emplace_back(std::pair<std::string, bool>("h", true));
-  criteria.emplace_back(std::pair<std::string, bool>("k", true));
-  criteria.emplace_back(std::pair<std::string, bool>("l", true));
+  criteria.emplace_back("h", true);
+  criteria.emplace_back("k", true);
+  criteria.emplace_back("l", true);
   ws->sort(criteria);
 
   std::vector<Peak> peaks = ws->getPeaks();
