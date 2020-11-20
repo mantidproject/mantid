@@ -939,7 +939,7 @@ FitPeaks::fitPeaks() {
       fit_result_vector(num_fit_result);
 
   // cppcheck-suppress syntaxError
-  PRAGMA_OMP(parallel for schedule(dynamic, 1) )
+  PRAGMA_OMP(parallel for schedule(dynamic, 1))
   for (auto wi = static_cast<int>(m_startWorkspaceIndex);
        wi <= static_cast<int>(m_stopWorkspaceIndex); ++wi) {
 
@@ -955,7 +955,6 @@ FitPeaks::fitPeaks() {
     std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result =
         std::make_shared<FitPeaksAlgorithm::PeakFitResult>(m_numPeaksToFit,
                                                            numfuncparams);
-
     fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers,
                      fit_result);
 
@@ -1031,7 +1030,6 @@ void FitPeaks::fitSpectrumPeaks(
       fit_result->setBadRecord(i, -1.);
     return; // don't do anything
   }
-
   // Set up sub algorithm Fit for peak and background
   IAlgorithm_sptr peak_fitter; // both peak and background (combo)
   try {
@@ -1292,7 +1290,6 @@ void FitPeaks::calculateFittedPeaks(
   for (auto iws = static_cast<int64_t>(m_startWorkspaceIndex);
        iws <= static_cast<int64_t>(m_stopWorkspaceIndex); ++iws) {
     PARALLEL_START_INTERUPT_REGION
-
     // get a copy of peak function and background function
     IPeakFunction_sptr peak_function =
         std::dynamic_pointer_cast<IPeakFunction>(m_peakFunction->clone());
@@ -1318,10 +1315,9 @@ void FitPeaks::calculateFittedPeaks(
         bkgd_function->setParameter(iparam,
                                     fit_result_i->getParameterValue(
                                         ipeak, num_peakfunc_params + iparam));
-
       // use domain and function to calcualte
       // get the range of start and stop to construct a function domain
-      const auto &vec_x = m_fittedPeakWS->x(static_cast<size_t>(iws));
+      const auto &vec_x = m_fittedPeakWS->points(static_cast<size_t>(iws));
       std::pair<double, double> peakwindow =
           getPeakFitWindow(static_cast<size_t>(iws), ipeak);
       auto start_x_iter =
@@ -1343,9 +1339,12 @@ void FitPeaks::calculateFittedPeaks(
       // copy over the values
       size_t istart = static_cast<size_t>(start_x_iter - vec_x.begin());
       size_t istop = static_cast<size_t>(stop_x_iter - vec_x.begin());
-      for (size_t yindex = istart; yindex < istop; ++yindex)
+
+      // xvals are bin edges so only loop to istop - 1
+      for (size_t yindex = istart; yindex < istop; ++yindex) {
         m_fittedPeakWS->dataY(static_cast<size_t>(iws))[yindex] =
             values.getCalculated(yindex - istart);
+      }
     } // END-FOR (ipeak)
     PARALLEL_END_INTERUPT_REGION
   } // END-FOR (iws)

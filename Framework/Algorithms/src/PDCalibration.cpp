@@ -542,12 +542,14 @@ void PDCalibration::exec() {
   const auto windowsInDSpacing =
       dSpacingWindows(m_peaksInDspacing, peakWindowMaxInDSpacing);
 
+  // get spectrum info to check workspace index correpsonds to a valid spectrum
+  const auto &spectrumInfo = m_uncalibratedWS->spectrumInfo();
+
   // Scan the table containing the fit parameters for every peak, retrieve the
   // parameters for peaks that were successfully fitting, then use this info
   // to obtain difc, difa, and tzero for each pixel
   // cppcheck-suppress syntaxError
-  const auto &spectrumInfo = m_uncalibratedWS->spectrumInfo();
-  PRAGMA_OMP(parallel for schedule(dynamic, 1) )
+  PRAGMA_OMP(parallel for schedule(dynamic, 1))
   for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
     PARALLEL_START_INTERUPT_REGION
     if ((isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) ||
