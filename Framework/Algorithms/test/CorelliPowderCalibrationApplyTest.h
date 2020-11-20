@@ -78,7 +78,7 @@ public:
     // get a mock calTable with wrong header
     std::string calTableName = "wrongCalTable";
     auto calTable = createTestCalibrationTableWorkspace(calTableName);
-    calTable->removeRow(1);
+    calTable->removeColumn("Xposition");
 
     // setup alg
     CorelliPowderCalibrationApply alg;
