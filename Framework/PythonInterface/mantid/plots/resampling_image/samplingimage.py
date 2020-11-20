@@ -4,16 +4,16 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import matplotlib.image as mimage
 import matplotlib.colors
 import numpy as np
 
 from mantid.plots.datafunctions import get_matrix_2d_ragged, get_normalize_by_bin_width
+from mantid.plots.mantidimage import MantidImage
 
 MAX_HISTOGRAMS = 5000
 
 
-class SamplingImage(mimage.AxesImage):
+class SamplingImage(MantidImage):
     def __init__(self,
                  ax,
                  workspace,
