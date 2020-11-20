@@ -99,6 +99,7 @@ namespace Mantid {
 
             // Parse input arguments
             ws = getProperty("Workspace");
+            auto wsName = ws->getName();
 
             calTable = getProperty("CalibrationTable");
             auto componentNames = calTable->getColumn(0);
@@ -120,10 +121,10 @@ namespace Mantid {
             // Question: createChildAlgorithm or AlgorithmFactory::Instance().create?
             // https://github.com/mantidproject/mantid/blob/eaa3bd10b5a8dc847de16dabecd95314f73f6dd2/Framework/DataHandling/src/MoveInstrumentComponent.cpp
             auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
+            moveAlg -> initialize();
+            moveAlg -> setProperty("Workspace", wsName);
+            auto componentName = calTable->getColumn(0);
             for (size_t row_num=0; row_num < calTable->rowCount(); row_num++) {
-                auto componentName = calTable->getColumn(0);
-                moveAlg -> initialize();
-                moveAlg->setProperty("Workspace", ws);
                 moveAlg->setProperty("ComponentName", componentNames->cell<std::string>(row_num));
                 moveAlg->setProperty("X", x_poss->cell<double>(row_num));
                 moveAlg->setProperty("Y", y_poss->cell<double>(row_num));
@@ -137,6 +138,8 @@ namespace Mantid {
             g_log.notice() << "Rotating each component using given Calibration table";
             // https://github.com/mantidproject/mantid/blob/eaa3bd10b5a8dc847de16dabecd95314f73f6dd2/Framework/DataHandling/src/RotateInstrumentComponent.cpp
             auto rotateAlg = createChildAlgorithm("RotateInstrumentComponent");
+            rotateAlg -> initialize();
+            rotateAlg->setProperty("Workspace", wsName);
             for (size_t row_num=0; row_num < calTable->rowCount(); row_num++) {
                 rotateAlg -> initialize();
                 rotateAlg->setProperty("Workspace", ws);
