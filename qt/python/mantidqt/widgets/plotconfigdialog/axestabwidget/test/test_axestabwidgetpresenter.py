@@ -274,6 +274,17 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
             for setter, value in zip(setters, expected_vals):
                 getattr(new_view_mock, setter).assert_called_once_with(value)
 
+    def test_autoscale_changed(self):
+        mock_view = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)",
+                              get_axis=lambda: "x",
+                              get_properties=lambda: {},
+                              get_autoscale_enabled=mock.Mock(return_value=True))
+        presenter = Presenter(self.fig, view=mock_view)
+        mock_view.reset_mock()
+        presenter.autoscale_changed()
+        mock_view.get_autoscale_enabled.assert_called_once_with()
+        mock_view.set_limit_input_enabled.assert_called_once_with(False)
+
 
 if __name__ == '__main__':
     unittest.main()
