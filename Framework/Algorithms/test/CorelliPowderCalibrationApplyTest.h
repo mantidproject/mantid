@@ -96,14 +96,14 @@ public:
     auto ws = createTestEventWorkspace();
 
     // get a correct mock calibration table
-    std::string calTableName = "wrongCalTable";
+    std::string calTableName = "correctCalTable";
     auto calTable = createTestCalibrationTableWorkspace(calTableName);
 
     // setup alg
     CorelliPowderCalibrationApply alg;
     alg.initialize();
     alg.setPropertyValue("Workspace",
-                         "CorelliPowderCalibrationApplyTest_matrixWS");
+                         "correctWs");
     alg.setPropertyValue("CalibrationTable", calTableName);
 
     // make sure no exception is thrown here
@@ -113,20 +113,19 @@ public:
 private:
   EventWorkspace_sptr createTestEventWorkspace() {
     // Name of the output workspace.
-    std::string outWSName("CorelliPowderCalibrationApplyTest_matrixWS");
+    std::string outWSName("correctWs");
 
     IAlgorithm_sptr lei =
         AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
     lei->initialize();
     lei->setPropertyValue("Filename", "CORELLI_Definition.xml");
     lei->setPropertyValue("OutputWorkspace",
-                          "CorelliPowderCalibrationApplyTest_OutputWS");
+                          outWSName);
     lei->setPropertyValue("MakeEventWorkspace", "1");
     lei->execute();
 
     EventWorkspace_sptr ws;
-    ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(
-        "CorelliPowderCalibrationApplyTest_OutputWS");
+    ws = AnalysisDataService::Instance().retrieveWS<EventWorkspace>(outWSName);
     return ws;
   }
 
