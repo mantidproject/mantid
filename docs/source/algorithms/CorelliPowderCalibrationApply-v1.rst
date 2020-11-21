@@ -71,12 +71,6 @@ and the calibrated instrument view (notice one panel is rotated to the right of 
     :width: 635
     :alt: calirated layout of CORELLI instrument
 
-
-Related Algorithms
-------------------
-
-:ref:`CorelliPowderCalibratoinDatabase <algm-CorelliPowderCalibratoinDatabase>` provide definition of caliration table.
-
 .. categories::
 
 .. sourcelink::
