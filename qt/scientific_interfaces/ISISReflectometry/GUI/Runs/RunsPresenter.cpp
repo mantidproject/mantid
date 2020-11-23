@@ -511,6 +511,7 @@ void RunsPresenter::updateWidgetEnabledState() const {
                                     !isAnyBatchAutoreducing());
   m_view->setSearchTextEntryEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setSearchButtonEnabled(!isAutoreducing() && !searchInProgress());
+  m_view->setSearchResultsEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setAutoreduceButtonEnabled(!isAnyBatchAutoreducing() &&
                                      !isProcessing() && !searchInProgress());
   m_view->setAutoreducePauseButtonEnabled(isAutoreducing());

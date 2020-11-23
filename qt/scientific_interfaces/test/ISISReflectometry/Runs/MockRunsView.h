@@ -39,6 +39,7 @@ public:
   MOCK_METHOD1(setInstrumentComboEnabled, void(bool));
   MOCK_METHOD1(setSearchTextEntryEnabled, void(bool));
   MOCK_METHOD1(setSearchButtonEnabled, void(bool));
+  MOCK_METHOD1(setSearchResultsEnabled, void(bool));
   MOCK_METHOD1(setStartMonitorButtonEnabled, void(bool));
   MOCK_METHOD1(setStopMonitorButtonEnabled, void(bool));
   MOCK_METHOD1(setUpdateIntervalSpinBoxEnabled, void(bool));

@@ -160,6 +160,18 @@ void QtRunsView::setSearchButtonEnabled(bool enabled) {
 }
 
 /**
+ * Sets editing the search results table enabled or disabled
+ * @param enabled : Whether to enable or disable the button
+ */
+void QtRunsView::setSearchResultsEnabled(bool enabled) {
+  static const auto editTriggers = m_ui.tableSearchResults->editTriggers();
+  if (enabled)
+    m_ui.tableSearchResults->setEditTriggers(editTriggers);
+  else
+    m_ui.tableSearchResults->setEditTriggers(QAbstractItemView::NoEditTriggers);
+}
+
+/**
  * Sets the start-monitor button enabled or disabled
  * @param enabled : Whether to enable or disable the button
  */
