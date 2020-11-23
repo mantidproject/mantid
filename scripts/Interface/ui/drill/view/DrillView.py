@@ -7,7 +7,8 @@
 
 import os
 
-from qtpy.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog
+from qtpy.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDialog, \
+                           QMenu, QAction
 from qtpy.QtCore import *
 from qtpy import uic
 
@@ -465,7 +466,8 @@ class DrillView(QMainWindow):
         Ask for the saving of the table in a rundex file.
         """
         filename = QFileDialog.getSaveFileName(
-                self, 'Save rundex', '.', "Rundex (*.mrd)"
+                self, 'Save rundex', './*.mrd',
+                "Rundex (*.mrd);;All files (*.*)"
                 )
         if not filename[0]:
             return
@@ -644,12 +646,42 @@ class DrillView(QMainWindow):
         self.invalidCells = set()
         self.coloredRows = set()
         self.table.setRowCount(0)
+        self.table.setColumnCount(0)
+        self.table.horizontalHeader().reset()
         self.table.setColumnCount(len(columns))
         self.table.setHorizontalHeaderLabels(columns)
         if tooltips:
             self.table.setColumnHeaderToolTips(tooltips)
+        for i in range(len(columns)):
+            self.table.setColumnHidden(i, False)
+        self.menuAddRemoveColumn.aboutToShow.connect(
+                lambda : self.setAddRemoveColumnMenu(columns))
         self.table.resizeColumnsToContents()
         self.setWindowModified(False)
+
+    def setAddRemoveColumnMenu(self, columns):
+        """
+        Fill the "add/remove column" menu. This function is triggered each time
+        the menu is displayed to display a correct icon depending on the status
+        of the column (hidden or not).
+
+        Args:
+            columns (list(str)): list of column titles
+        """
+        if self.menuAddRemoveColumn.receivers(QMenu.triggered):
+            self.menuAddRemoveColumn.triggered.disconnect()
+        self.menuAddRemoveColumn.clear()
+        hidden = self.table.getHiddenColumns()
+        for c in columns:
+            action = QAction(c, self.menuAddRemoveColumn)
+            if c in hidden:
+                action.setIcon(icons.get_icon("mdi.close"))
+            else:
+                action.setIcon(icons.get_icon("mdi.check"))
+            self.menuAddRemoveColumn.addAction(action)
+
+        self.menuAddRemoveColumn.triggered.connect(
+                lambda action: self.table.toggleColumnVisibility(action.text()))
 
     def fill_table(self, rows_contents):
         """
@@ -805,15 +837,23 @@ class DrillView(QMainWindow):
             visualSettings (dict): dictionnary containing some visual
                                    parameters that the view can deal with
         """
-        # folding state
+        # folded columns
         if ("FoldedColumns" in visualSettings):
-            f = list()
-            for c in self.columns:
-                if (c not in visualSettings["FoldedColumns"]):
-                    f.append(False)
-                    continue
-                f.append(visualSettings["FoldedColumns"][c])
-            self.table.setHeaderFoldingState(f)
+            if isinstance(visualSettings["FoldedColumns"], list):
+                self.table.setFoldedColumns(visualSettings["FoldedColumns"])
+            else:
+                self.table.setFoldedColumns(
+                        [c for c in visualSettings["FoldedColumns"]
+                            if visualSettings["FoldedColumns"][c]]
+                        )
+
+        # hidden columns
+        if ("HiddenColumns" in visualSettings):
+            self.table.setHiddenColumns(visualSettings["HiddenColumns"])
+
+        # columns order
+        if ("ColumnsOrder" in visualSettings):
+            self.table.setColumnsOrder(visualSettings["ColumnsOrder"])
 
     def getVisualSettings(self):
         """
@@ -825,12 +865,15 @@ class DrillView(QMainWindow):
             dict: visual settings dictionnay
         """
         vs = dict()
-        # folding state
-        vs["FoldedColumns"] = dict()
-        f = self.table.getHeaderFoldingState()
-        for i in range(len(self.columns)):
-            if f[i]:
-                vs["FoldedColumns"][self.columns[i]] = f[i]
+
+        # folded columns
+        vs["FoldedColumns"] = self.table.getFoldedColumns()
+
+        # hidden columns
+        vs["HiddenColumns"] = self.table.getHiddenColumns()
+
+        # columns order
+        vs["ColumnsOrder"] = self.table.getColumnsOrder()
 
         return vs
 

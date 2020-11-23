@@ -48,13 +48,27 @@
 
 #include <algorithm>
 #include <boost/lexical_cast.hpp>
+#include <regex>
 #include <utility>
 
 namespace {
 const char *globalOptionName = "Global";
 Mantid::Kernel::Logger g_log("Function Browser");
-QString removePrefix(QString &param) { return param.split(QString("."))[1]; }
 QString addPrefix(QString &param) { return QString("f0.") + param; }
+const std::regex PREFIX_REGEX("(^[f][0-9](.*))");
+inline bool variableIsPrefixed(const std::string &name) {
+  return std::regex_match(name, PREFIX_REGEX);
+}
+QString removePrefix(QString &param) {
+  if (variableIsPrefixed(param.toStdString()))
+    return param.split(QString("."))[1];
+  else {
+    return param;
+  }
+}
+// These attributes require the function to be fully reconstructed, as a
+// different number of properties will be required
+const std::vector<QString> REQUIRESRECONSTRUCTIONATTRIBUTES = {QString("n")};
 } // namespace
 
 namespace MantidQt {
@@ -482,41 +496,55 @@ protected:
   /// Create string property
   FunctionTreeView::AProperty apply(const std::string &str) const override {
     QtProperty *prop = nullptr;
-    if (m_attName == "FileName") {
+    if (m_attName.indexOf("FileName") != -1) {
+      m_browser->m_filenameManager->blockSignals(true);
       prop = m_browser->m_filenameManager->addProperty(m_attName);
       m_browser->m_filenameManager->setValue(prop, QString::fromStdString(str));
-    } else if (m_attName == "Formula") {
+      m_browser->m_filenameManager->blockSignals(false);
+    } else if (m_attName.indexOf("Formula") != -1) {
+      m_browser->m_formulaManager->blockSignals(true);
       prop = m_browser->m_formulaManager->addProperty(m_attName);
       m_browser->m_formulaManager->setValue(prop, QString::fromStdString(str));
-    } else if (m_attName == "Workspace") {
+      m_browser->m_formulaManager->blockSignals(false);
+    } else if (m_attName.indexOf("Workspace") != -1) {
+      m_browser->m_workspaceManager->blockSignals(true);
       prop = m_browser->m_workspaceManager->addProperty(m_attName);
       m_browser->m_workspaceManager->setValue(prop,
                                               QString::fromStdString(str));
+      m_browser->m_workspaceManager->blockSignals(false);
     } else {
+      m_browser->m_attributeStringManager->blockSignals(true);
       prop = m_browser->m_attributeStringManager->addProperty(m_attName);
       m_browser->m_attributeStringManager->setValue(
           prop, QString::fromStdString(str));
+      m_browser->m_attributeStringManager->blockSignals(false);
     }
     return m_browser->addProperty(m_parent, prop);
   }
   /// Create double property
   FunctionTreeView::AProperty apply(const double &d) const override {
+    m_browser->m_attributeDoubleManager->blockSignals(true);
     QtProperty *prop =
         m_browser->m_attributeDoubleManager->addProperty(m_attName);
     m_browser->m_attributeDoubleManager->setValue(prop, d);
+    m_browser->m_attributeDoubleManager->blockSignals(false);
     return m_browser->addProperty(m_parent, prop);
   }
   /// Create int property
   FunctionTreeView::AProperty apply(const int &i) const override {
+    m_browser->m_attributeIntManager->blockSignals(true);
     QtProperty *prop = m_browser->m_attributeIntManager->addProperty(m_attName);
     m_browser->m_attributeIntManager->setValue(prop, i);
+    m_browser->m_attributeIntManager->blockSignals(false);
     return m_browser->addProperty(m_parent, prop);
   }
   /// Create bool property
   FunctionTreeView::AProperty apply(const bool &b) const override {
+    m_browser->m_attributeBoolManager->blockSignals(true);
     QtProperty *prop =
         m_browser->m_attributeBoolManager->addProperty(m_attName);
     m_browser->m_attributeBoolManager->setValue(prop, b);
+    m_browser->m_attributeBoolManager->blockSignals(false);
     return m_browser->addProperty(m_parent, prop);
   }
   /// Create vector property
@@ -595,7 +623,6 @@ protected:
   }
   /// Set vector attribute
   void apply(std::vector<double> &v) const override {
-    // throw std::runtime_error("Vector setter not implemented.");
     QList<QtProperty *> members = m_prop->subProperties();
     if (members.empty())
       throw std::runtime_error(
@@ -644,9 +671,11 @@ void FunctionTreeView::addAttributeAndParameterProperties(
 
   // add attribute properties
   auto attributeNames = fun->getAttributeNames();
-  for (auto att = attributeNames.begin(); att != attributeNames.end(); ++att) {
-    QString attName = QString::fromStdString(*att);
-    addAttributeProperty(prop, attName, fun->getAttribute(*att));
+  for (const auto &att : attributeNames) {
+    if (!variableIsPrefixed(att)) {
+      QString attName = QString::fromStdString(att);
+      addAttributeProperty(prop, attName, fun->getAttribute(att));
+    }
   }
 
   auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
@@ -836,7 +865,6 @@ bool FunctionTreeView::isParameter(QtProperty *prop) const {
 double FunctionTreeView::getParameter(QtProperty *prop) const {
   return m_parameterManager->value(prop);
 }
-
 /**
  * Check if a property is an index
  * @param prop :: A property
@@ -880,6 +908,17 @@ QString FunctionTreeView::getParameterName(QtProperty *prop) const {
     auto parent = getParentParameterProperty(prop);
     return getIndex(prop) + parent->propertyName();
   }
+}
+/**
+ * Get name of the attribute for a property
+ * @param prop :: A property
+ */
+QString FunctionTreeView::getAttributeName(QtProperty *prop) const {
+  if (isAttribute(prop)) {
+    return getIndex(prop) + prop->propertyName();
+  }
+  throw std::logic_error("QtProperty " + prop->propertyName().toStdString() +
+                         " is not an attribute property.");
 }
 
 /**
@@ -1382,7 +1421,74 @@ void FunctionTreeView::setParameterError(const QString &paramName,
     }
   }
 }
-
+/**
+ * Updates the value of a double attribute
+ * @param attrName :: Attribute name
+ * @param value :: New value
+ */
+void FunctionTreeView::setDoubleAttribute(const QString &attrName,
+                                          double value) {
+  auto prop = getAttributeProperty(attrName);
+  ScopedFalse _false(m_emitAttributeValueChange);
+  m_attributeDoubleManager->setValue(prop, value);
+}
+/**
+ * Updates the value of a integer attribute
+ * @param attrName :: Attribute name
+ * @param value :: New value
+ */
+void FunctionTreeView::setIntAttribute(const QString &attrName, int value) {
+  auto prop = getAttributeProperty(attrName);
+  ScopedFalse _false(m_emitAttributeValueChange);
+  m_attributeIntManager->setValue(prop, value);
+}
+/**
+ * Updates the value of a string attribute
+ * @param attrName :: Attribute name
+ * @param valueAsStdStr :: New value
+ */
+void FunctionTreeView::setStringAttribute(const QString &attrName,
+                                          std::string &valueAsStdStr) {
+  QString value = QString::fromStdString(valueAsStdStr);
+  auto prop = getAttributeProperty(attrName);
+  ScopedFalse _false(m_emitAttributeValueChange);
+  // attName is the un-prefixed attribute name
+  auto attName = prop->propertyName();
+  if (attName == "FileName") {
+    m_filenameManager->setValue(prop, value);
+  } else if (attName == "Formula") {
+    m_formulaManager->setValue(prop, value);
+  } else if (attName == "Workspace") {
+    m_workspaceManager->setValue(prop, value);
+  } else {
+    m_attributeStringManager->setValue(prop, value);
+  }
+}
+/**
+ * Updates the value of a boolean attribute
+ * @param attrName :: Attribute name
+ * @param value :: New value
+ */
+void FunctionTreeView::setBooleanAttribute(const QString &attrName,
+                                           bool value) {
+  auto prop = getAttributeProperty(attrName);
+  ScopedFalse _false(m_emitAttributeValueChange);
+  m_attributeBoolManager->setValue(prop, value);
+}
+/**
+ * Updates the value of a vector attribute
+ * NOTE: This is currently not implemented as there is no need for it
+ * as the use of vector attributes is limited to tabulated functions (e.g
+ * resolution) which create their attributes 'on-the-fly' when the fit is
+ * performed
+ * @param attrName :: Attribute name
+ * @param value :: New value
+ */
+void FunctionTreeView::setVectorAttribute(const QString &attrName,
+                                          std::vector<double> &value) {
+  UNUSED_ARG(attrName);
+  UNUSED_ARG(value);
+}
 /**
  * Get a value of a parameter
  * @param paramName :: Parameter name
@@ -1391,7 +1497,29 @@ double FunctionTreeView::getParameter(const QString &paramName) const {
   auto prop = getParameterProperty(paramName);
   return m_parameterManager->value(prop);
 }
-
+/**
+ * Get a value of a attribute
+ * @param attrName :: Attribute name
+ */
+IFunction::Attribute
+FunctionTreeView::getAttribute(const QString &attrName) const {
+  auto prop = getAttributeProperty(attrName);
+  if (isDoubleAttribute(prop)) {
+    return IFunction::Attribute(m_attributeDoubleManager->value(prop));
+  } else if (isIntAttribute(prop)) {
+    return IFunction::Attribute(m_attributeIntManager->value(prop));
+  } else if (isStringAttribute(prop)) {
+    return IFunction::Attribute(
+        m_attributeStringManager->value(prop).toStdString());
+  } else if (isBoolAttribute(prop)) {
+    return IFunction::Attribute(m_attributeBoolManager->value(prop));
+  } else if (isVectorAttribute(prop)) {
+    return IFunction::Attribute(m_attributeVectorDoubleManager->value(prop));
+  } else {
+    throw std::runtime_error("Unknown function attribute " +
+                             attrName.toStdString());
+  }
+}
 /// Get a property for a parameter
 QtProperty *
 FunctionTreeView::getParameterProperty(const QString &paramName) const {
@@ -1409,6 +1537,29 @@ FunctionTreeView::getParameterProperty(const QString &paramName) const {
                         paramName.toStdString() +
                         "\n\n This may happen if there is a CompositeFunction "
                         "containing only one function.";
+  throw std::runtime_error(message);
+}
+/// Get a property for an attribute
+QtProperty *
+FunctionTreeView::getAttributeProperty(const QString &attributeName) const {
+  QString index, name;
+  QtProperty *prop;
+  std::tie(index, name) = splitParameterName(attributeName);
+  if (!variableIsPrefixed(attributeName.toStdString())) {
+    // If variable is unprefixed then we are on the top level composite
+    // function so grab first property from the tree
+    prop = m_browser->properties()[0];
+  } else {
+    prop = getFunctionProperty(index);
+  }
+  auto children = prop->subProperties();
+  foreach (QtProperty *child, children) {
+    if (isAttribute(child) && child->propertyName() == name) {
+      return child;
+    }
+  }
+  std::string message =
+      "Unknown function attribute " + attributeName.toStdString();
   throw std::runtime_error(message);
 }
 
@@ -1719,7 +1870,7 @@ FunctionTreeView::getFunctionAndConstraint(QtProperty *prop) const {
     return std::make_pair(functionIndex, getConstraint(name, lower, upper));
   }
   return std::make_pair("", "");
-} // namespace MantidWidgets
+}
 
 /**
  * Slot connected to all function attribute managers. Update the corresponding
@@ -1727,16 +1878,29 @@ FunctionTreeView::getFunctionAndConstraint(QtProperty *prop) const {
  * @param prop :: An attribute property that was changed
  */
 void FunctionTreeView::attributeChanged(QtProperty *prop) {
-  auto funProp = m_properties[prop].parent;
-  if (!funProp)
-    return;
-  // get function with the changed attribute (it is set from prop's value)
-  auto fun = getFunction(funProp, true);
+  auto attributeName = getAttributeName(prop);
+  // Some attributes require the function to be fully reconstructed, in this
+  // case we'd need to emit a function replaced signal. If its not one of these
+  // attributes emit an attributeValueChanged signal.
+  if (std::find(REQUIRESRECONSTRUCTIONATTRIBUTES.begin(),
+                REQUIRESRECONSTRUCTIONATTRIBUTES.end(),
+                removePrefix(attributeName)) !=
+      REQUIRESRECONSTRUCTIONATTRIBUTES.end()) {
+    auto funProp = m_properties[prop].parent;
+    if (!funProp)
+      return;
+    auto fun = getFunction(funProp, true);
 
-  // delete and recreate all function's properties (attributes, parameters, etc)
-  setFunction(funProp, fun);
-  updateFunctionIndices();
-  emit functionReplaced(QString::fromStdString(getFunction()->asString()));
+    // delete and recreate all function's properties (attributes, parameters,
+    // etc)
+    setFunction(funProp, fun);
+    updateFunctionIndices();
+    if (m_emitAttributeValueChange)
+      emit functionReplaced(QString::fromStdString(getFunction()->asString()));
+  } else {
+    if (m_emitAttributeValueChange)
+      emit attributePropertyChanged(attributeName);
+  }
 }
 
 /** Called when the size of a vector attribute is changed

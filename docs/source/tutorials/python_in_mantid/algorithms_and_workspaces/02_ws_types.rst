@@ -15,11 +15,11 @@ Returns a string with any comment that was loaded into the workspace, usually wh
 `getMemorySize()`
 Returns the number of kilobytes of RAM that the workspace is currently using.
 
-`getName()`
-Returns the name of the workspace as a string.
-
 `getTitle()`
 Returns a string containing the title that was loaded into the workspace.
+
+`name()`
+Returns the name of the workspace as a string.
 
 Example
 -------
@@ -29,6 +29,6 @@ Example
     ws = Load(Filename="GEM38370_Focussed.nxs", OutputWorkspace="myWS")
     print(ws.getComment())
     print(ws.getMemorySize())
-    print(ws.getName())
     print(ws.getTitle())
+    print(ws.name())
     print(ws)

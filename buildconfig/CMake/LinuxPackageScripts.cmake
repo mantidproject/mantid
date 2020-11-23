@@ -42,21 +42,37 @@ set ( CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION /opt /usr/share/applications
 ###########################################################################
 # Environment scripts (profile.d)
 ###########################################################################
-# default shell (bash-like)
-file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
-  "#!/bin/sh\n"
-  "PV_PLUGIN_PATH=${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\n"
-  "PATH=$PATH:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
+if(MAKE_VATES)
+  # default shell (bash-like)
+  file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
+    "#!/bin/sh\n"
+    "PV_PLUGIN_PATH=${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\n"
+    "PATH=$PATH:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
 
-  "export PV_PLUGIN_PATH PATH\n"
-)
+    "export PV_PLUGIN_PATH PATH\n"
+  )
 
-# c-shell
-file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
-  "#!/bin/csh\n"
-  "setenv PV_PLUGIN_PATH \"${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\"\n"
-  "setenv PATH \"\${PATH}:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
-)
+  # c-shell
+  file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
+    "#!/bin/csh\n"
+    "setenv PV_PLUGIN_PATH \"${CMAKE_INSTALL_PREFIX}/${PVPLUGINS_DIR}\"\n"
+    "setenv PATH \"\${PATH}:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
+  )
+else()
+  # default shell (bash-like)
+  file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
+    "#!/bin/sh\n"
+    "PATH=$PATH:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
+
+    "export PATH\n"
+  )
+
+  # c-shell
+  file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
+    "#!/bin/csh\n"
+    "setenv PATH \"\${PATH}:${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
+  )
+endif()
 
 install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh
   ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
@@ -224,6 +240,9 @@ if (ENABLE_MANTIDPLOT)
   # Needs to be executable
   execute_process ( COMMAND "chmod" "+x" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/launch_mantidplot.sh"
                     OUTPUT_QUIET ERROR_QUIET )
+  if(MAKE_VATES)
+    set(PV_PLUGIN_INSTALL_PATH "PV_PLUGIN_PATH=\"${INSTALLDIR}/plugins/paraview/qt4\"")
+  endif()
 endif ()
 if (ENABLE_WORKBENCH)
   set ( MANTIDWORKBENCH_EXEC workbench ) # what the actual thing is called

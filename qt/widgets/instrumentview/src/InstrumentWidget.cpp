@@ -138,6 +138,7 @@ InstrumentWidget::InstrumentWidget(const QString &wsName, QWidget *parent,
   // Create the display widget
   m_InstrumentDisplay = new MantidGLWidget(this);
   m_InstrumentDisplay->installEventFilter(this);
+  m_InstrumentDisplay->setMinimumWidth(600);
   connect(this, SIGNAL(enableLighting(bool)), m_InstrumentDisplay,
           SLOT(enableLighting(bool)));
 
@@ -394,6 +395,38 @@ InstrumentWidgetTab *InstrumentWidget::getTab(const Tab tab) const {
     return qobject_cast<InstrumentWidgetTab *>(widget);
   else
     return nullptr;
+}
+
+/**
+ * @brief Get render tab from user specified tab
+ * @param tab :: render tab index
+ * @return
+ */
+InstrumentWidgetRenderTab *InstrumentWidget::getRenderTab(const Tab tab) const {
+
+  // Call to get Q widget
+  InstrumentWidgetTab *widget_tab = getTab(tab);
+
+  // Cast
+  InstrumentWidgetRenderTab *render_tab =
+      dynamic_cast<InstrumentWidgetRenderTab *>(widget_tab);
+  return render_tab;
+}
+
+/**
+ * @brief Get Pick tab from user specified tab
+ * @param tab :: pick tab index
+ * @return
+ */
+InstrumentWidgetPickTab *InstrumentWidget::getPickTab(const Tab tab) const {
+  // Call to get base class Q widget
+  InstrumentWidgetTab *tab_widget = getTab(tab);
+
+  //
+  // Cast
+  InstrumentWidgetPickTab *pick_tab =
+      dynamic_cast<InstrumentWidgetPickTab *>(tab_widget);
+  return pick_tab;
 }
 
 /**
@@ -1282,10 +1315,10 @@ void InstrumentWidget::createTabs(QSettings &settings) {
 
   connect(mControlsTab, SIGNAL(currentChanged(int)), this,
           SLOT(tabChanged(int)));
-  m_stateOfTabs.emplace_back(std::make_pair(std::string("Render"), true));
-  m_stateOfTabs.emplace_back(std::make_pair(std::string("Pick"), true));
-  m_stateOfTabs.emplace_back(std::make_pair(std::string("Draw"), true));
-  m_stateOfTabs.emplace_back(std::make_pair(std::string("Instrument"), true));
+  m_stateOfTabs.emplace_back(std::string("Render"), true);
+  m_stateOfTabs.emplace_back(std::string("Pick"), true);
+  m_stateOfTabs.emplace_back(std::string("Draw"), true);
+  m_stateOfTabs.emplace_back(std::string("Instrument"), true);
   addSelectedTabs();
   m_tabs << m_renderTab << m_pickTab << m_maskTab << m_treeTab;
 }

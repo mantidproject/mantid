@@ -5,10 +5,10 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-import mantid
-import isis_instrument as instruments
-import ISISCommandInterface as command_iface
+
 from reducer_singleton import ReductionSingleton
+
+import ISISCommandInterface as command_iface
 import isis_reduction_steps as reduction_steps
 
 
@@ -204,7 +204,6 @@ class TestQResolutionInUserFile(unittest.TestCase):
         error = user_file._read_q_resolution_line(value, reducer)
         # Assert
         self.assertNotEqual(error,  None)
-
 
 
 if __name__ == "__main__":

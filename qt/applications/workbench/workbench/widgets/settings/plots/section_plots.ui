@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>801</width>
-    <height>620</height>
+    <width>922</width>
+    <height>704</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -33,8 +33,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>767</width>
-        <height>971</height>
+        <width>885</width>
+        <height>834</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -98,6 +98,16 @@
              <widget class="QCheckBox" name="show_minor_gridlines">
               <property name="text">
                <string>Show Minor Gridlines</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QCheckBox" name="show_legend">
+              <property name="text">
+               <string>Show legend</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -539,6 +549,27 @@
             <string>Images</string>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_10">
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_16">
+              <item>
+               <widget class="QLabel" name="colorbar_scale_label">
+                <property name="text">
+                 <string>Colorbar Scale</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="colorbar_scale">
+                <property name="maximumSize">
+                 <size>
+                  <width>202</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_13">
               <property name="spacing">

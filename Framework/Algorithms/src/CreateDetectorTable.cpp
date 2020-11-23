@@ -183,23 +183,23 @@ createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws,
 std::vector<std::pair<std::string, std::string>>
 createColumns(const bool isScanning, const bool includeData, const bool calcQ) {
   std::vector<std::pair<std::string, std::string>> colNames;
-  colNames.emplace_back(std::make_pair("double", "Index"));
-  colNames.emplace_back(std::make_pair("int", "Spectrum No"));
-  colNames.emplace_back(std::make_pair("str", "Detector ID(s)"));
+  colNames.emplace_back("double", "Index");
+  colNames.emplace_back("int", "Spectrum No");
+  colNames.emplace_back("str", "Detector ID(s)");
   if (isScanning)
-    colNames.emplace_back(std::make_pair("str", "Time Indexes"));
+    colNames.emplace_back("str", "Time Indexes");
   if (includeData) {
-    colNames.emplace_back(std::make_pair("double", "Data Value"));
-    colNames.emplace_back(std::make_pair("double", "Data Error"));
+    colNames.emplace_back("double", "Data Value");
+    colNames.emplace_back("double", "Data Error");
   }
 
-  colNames.emplace_back(std::make_pair("double", "R"));
-  colNames.emplace_back(std::make_pair("double", "Theta"));
+  colNames.emplace_back("double", "R");
+  colNames.emplace_back("double", "Theta");
   if (calcQ) {
-    colNames.emplace_back(std::make_pair("double", "Q"));
+    colNames.emplace_back("double", "Q");
   }
-  colNames.emplace_back(std::make_pair("double", "Phi"));
-  colNames.emplace_back(std::make_pair("str", "Monitor"));
+  colNames.emplace_back("double", "Phi");
+  colNames.emplace_back("str", "Monitor");
   return colNames;
 }
 

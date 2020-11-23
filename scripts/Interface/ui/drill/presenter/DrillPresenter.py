@@ -110,7 +110,9 @@ class DrillPresenter:
             self.updateViewFromModel()
         except Exception as ex:
             self.view.errorPopup("Import error",
-                                 "Unable to open {0}".format(filename),
+                                 "Unable to load file {0}, please select a "
+                                 "rundex file (.mrd) saved from this interface."
+                                 .format(filename),
                                  str(ex))
 
     def rundexSaved(self, filename):

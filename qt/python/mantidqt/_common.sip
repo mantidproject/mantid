@@ -441,6 +441,38 @@ public:
 };
 
 // ---------------------------------
+// Property Handler
+// ---------------------------------
+class PropertyHandler
+    : public QObject {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/PropertyHandler.h"
+#include "MantidPythonInterface/core/ExtractSharedPtr.h"
+#include <boost/python/extract.hpp>
+#include <boost/python/to_python_value.hpp>
+%End
+public:
+    PropertyHandler(SIP_PYOBJECT, SIP_PYOBJECT, FitPropertyBrowser *)[(const Mantid::API::IFunction_sptr &,
+ Mantid::API::CompositeFunction_sptr,  FitPropertyBrowser *)];
+    %MethodCode
+    auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
+    auto compositeFunction = boost::python::extract<Mantid::API::CompositeFunction_sptr>(a1)();
+    sipCpp = new sipPropertyHandler(function, compositeFunction,  a2);
+    %End
+    SIP_PYOBJECT ifun();
+    %MethodCode
+    sipRes = boost::python::to_python_value<const Mantid::API::IFunction_sptr &>()(sipCpp->ifun());
+    %End
+    void setHasPlot(bool);
+    QString functionPrefix() const;
+    PropertyHandler * findHandler(SIP_PYOBJECT);
+    %MethodCode
+    auto function = boost::python::extract<const Mantid::API::IFunction_sptr &>(a0)();
+    sipRes = sipCpp->findHandler(function);
+    %End
+};
+
+// ---------------------------------
 // Fit Property Browser
 // ---------------------------------
 class FitPropertyBrowser : public QDockWidget {
@@ -460,13 +492,18 @@ public:
     }
 %End
     int sizeOfFunctionsGroup() const;
+    bool isFitEnabled() const;
+    std::string getFunctionString() const;
     void loadFunction(QString funStr);
+    void saveFunction(const QString &fnName);
+    void executeCustomSetupRemove(const QString &name);
     double startX() const;
     void setStartX(double start);
     double endX() const;
     void setEndX(double end);
     void setXRange(double start, double end);
     QVector<double> getXRange() throw(std::invalid_argument);
+    std::string getExcludeRange() const;
     QString getXColumnName() const;
     QString getYColumnName() const;
     QString getErrColumnName() const;
@@ -487,6 +524,7 @@ public:
     void postDeleteHandle(const std::string &wsName);
     void removeWorkspaceAndSpectra(const std::string &wsName);
     std::string getFitAlgorithmParameters() const;
+    PropertyHandler * currentHandler() const;
 
     SIP_PYOBJECT defaultPeakType();
 %MethodCode
@@ -538,14 +576,20 @@ SIP_PYOBJECT defaultBackgroundType();
 
 signals:
     void functionChanged();
+    void functionRemoved();
     void startXChanged(double);
     void endXChanged(double);
     void changedParameterOf(const QString &prefix);
     void algorithmFinished(const QString &);
     void removeFitCurves();
+    void removeGuess();
+    void removeCurrentGuess();
     void plotGuess();
+    void plotCurrentGuess();
     void sequentialFitDone() const;
     void workspaceClicked(const QString &);
+    void removePlotSignal(PropertyHandler *);
+
 };
 
 // ---------------------------------
@@ -826,7 +870,7 @@ public:
     void setNumberOfDatasets(int n);
     void setCurrentDataset(int i);
     int getCurrentDataset() const;
-    void setDatasetNames(const QStringList &names);
+    void setDatasets(const QStringList &datasetNames);
     void addDatasets(const QStringList &names);
     void removeDatasets(QList<int> indices);
     QStringList getDatasetNames() const;
@@ -940,6 +984,7 @@ public:
     void setFileExtensions(const QStringList &extensions);
     void findFiles(bool isModified);
     void isOptional(bool);
+    void setLastDirectory(const QString &lastDir);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);

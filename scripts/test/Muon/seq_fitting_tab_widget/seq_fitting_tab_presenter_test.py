@@ -5,22 +5,22 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
+from unittest import mock
 
 from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_widget import SeqFittingTabWidget
-from mantid.api import FunctionFactory, MultiDomainFunction
-from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace
-from unittest import mock
-from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.observer_pattern import GenericObservable
-from Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter import SeqFittingTabPresenter
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
-from qtpy import QtWidgets
+from qtpy.QtWidgets import QApplication
+from mantidqt.utils.observer_pattern import GenericObservable
+from mantidqt.utils.qt.testing import start_qapplication
+
+from mantid.api import FunctionFactory
+from mantid.simpleapi import CreateSampleWorkspace, DeleteWorkspace
 
 
 def wait_for_thread(thread_model):
     if thread_model:
         thread_model._thread.wait()
-        QtWidgets.QApplication.instance().processEvents()
+        QApplication.sendPostedEvents()
 
 
 @start_qapplication
@@ -66,7 +66,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
 
     def test_handle_fit_function_changed_correctly_updates_fit_table_parameters(self):
         fit_values = [0.2, 0.2, 0.1, 0]
-        fit_function = self._setup_test_fit_function(fit_values)
+        self._setup_test_fit_function(fit_values)
         self.view.fit_table.get_number_of_fits.return_value = 2
 
         self.presenter.handle_fit_function_updated()
@@ -93,7 +93,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
     def test_handle_fit_selected_correctly_sets_up_fit(self, mock_function_tools):
         workspace = "EMU20884; Group; fwd; Asymmetry"
         self.view.fit_table.get_selected_rows = mock.MagicMock(return_value=[0])
-        fit_function = self._setup_test_fit_function([0.2, 0.1, 0, 0])
+        self._setup_test_fit_function([0.2, 0.1, 0, 0])
         self.presenter.get_workspaces_for_row_in_fit_table = mock.MagicMock(return_value=workspace)
 
         self.presenter.handle_fit_selected_pressed()
@@ -111,7 +111,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
 
     @mock.patch('Muon.GUI.Common.seq_fitting_tab_widget.seq_fitting_tab_presenter.functools')
     def test_handle_fit_selected_pressed_does_nothing_if_no_fit_selected(self, mock_function_tools):
-        fit_function = self._setup_test_fit_function([0.2, 0.1, 0, 0])
+        self._setup_test_fit_function([0.2, 0.1, 0, 0])
         self.view.fit_table.get_selected_rows = mock.MagicMock(return_value=[])
 
         self.presenter.handle_fit_selected_pressed()
@@ -135,7 +135,7 @@ class SeqFittingTabPresenterTest(unittest.TestCase):
     def test_handle_sequential_fit_correctly_sets_up_fit(self, mock_function_tools):
         workspaces = ["EMU20884; Group; fwd; Asymmetry"]
         number_of_entries = 3
-        fit_function = self._setup_test_fit_function([0.2, 0.2, 0.1, 0])
+        self._setup_test_fit_function([0.2, 0.2, 0.1, 0])
         self.view.fit_table.get_number_of_fits = mock.MagicMock(return_value=number_of_entries)
         self.presenter.get_workspaces_for_row_in_fit_table = mock.MagicMock(return_value=workspaces)
 

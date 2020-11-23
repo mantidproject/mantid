@@ -134,10 +134,11 @@ void Track::addPoint(const TrackDirection direction, const V3D &endPoint,
   } else {
     auto lowestPtr =
         std::lower_bound(m_surfPoints.begin(), m_surfPoints.end(), newPoint);
-
-    // Make sure same point isn't added twice
-    if (newPoint == *lowestPtr) {
-      return;
+    if (lowestPtr != m_surfPoints.end()) {
+      // Make sure same point isn't added twice
+      if (newPoint == *lowestPtr) {
+        return;
+      }
     }
 
     m_surfPoints.insert(lowestPtr, newPoint);

@@ -6,36 +6,96 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidDataHandling/LoadRawHelper.h"
 #include "LoadRaw/isisraw2.h"
+
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectrumDetectorMapping.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/WorkspaceGroup.h"
-#include "MantidDataHandling/LoadLog.h"
 #include "MantidDataHandling/RawFileInfo.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Glob.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/OptionalBool.h"
 #include "MantidKernel/Strings.h"
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/UnitFactory.h"
-
-#include <boost/algorithm/string/predicate.hpp>
-#include <boost/date_time/gregorian/gregorian.hpp>
-#include <memory>
-
-#include <Poco/DateTimeFormat.h>
-#include <Poco/DateTimeParser.h>
-#include <Poco/DirectoryIterator.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <boost/algorithm/string/predicate.hpp>
+#include <cstdio>
 
-#include <cmath>
-#include <cstdio> //Required for gcc 4.4
+namespace {
+/**
+ * Return the path to the alternate data stream for the given path
+ * @param filePath The full path to the main data path
+ */
+inline std::string alternateDataStream(const Poco::Path &filePath) {
+  return filePath.toString() + ":checksum";
+}
+
+/**
+ * This method looks for ADS with name checksum exists
+ * @param pathToFile The path and name of the file.
+ * @return True if ADS stream checksum exists
+ */
+#ifdef _WIN32
+inline bool hasAlternateDataStream(const Poco::Path &pathToFile) {
+  std::ifstream adsStream(alternateDataStream(pathToFile));
+  if (!adsStream) {
+    return false;
+  }
+  adsStream.close();
+  return true;
+}
+#else
+inline bool hasAlternateDataStream([
+    [maybe_unused]] const Poco::Path &pathToFile) {
+  return false;
+}
+#endif
+
+/**
+ * This method reads the checksum alternate data stream associated with the raw
+ * file and returns the filenames of the log files that exist in the same
+ * directory as the given file
+ * @param pathToRawFile The path and name of the raw file.
+ * @return list of logfile names.
+ */
+std::set<std::string>
+logFilesFromAlternateDataStream(const Poco::Path &pathToRawFile) {
+  std::set<std::string> logfilesList;
+  std::ifstream adsStream(alternateDataStream(pathToRawFile));
+  if (!adsStream) {
+    return logfilesList;
+  }
+
+  // An example of alternate stream content:
+  // ad0bc56c4c556fa368565000f01e77f7 *IRIS00055132.log
+  // d5ace6dc7ac6c4365d48ee1f2906c6f4 *IRIS00055132.nxs
+  // 9c70ad392023515f775af3d3984882f3 *IRIS00055132.raw
+  // 66f74b6c0cc3eb497b92d4956ed8d6b5 *IRIS00055132_ICPdebug.txt
+  // e200aa65186b61e487175d5263b315aa *IRIS00055132_ICPevent.txt
+  // 91be40aa4f54d050a9eb4abea394720e *IRIS00055132_ICPstatus.txt
+  // 50aa2872110a9b862b01c6c83f8ce9a8 *IRIS00055132_Status.txt
+  Poco::Path dirOfFile(pathToRawFile.parent());
+  std::string line;
+  while (Mantid::Kernel::Strings::extractToEOL(adsStream, line)) {
+    if (boost::algorithm::iends_with(line, ".txt") ||
+        boost::algorithm::iends_with(line, ".log")) {
+      const size_t asteriskPos = line.find('*');
+      if (asteriskPos == std::string::npos)
+        continue;
+      Poco::Path logFilePath(dirOfFile.append(line.substr(asteriskPos + 1)));
+      if (Poco::File(logFilePath).exists()) {
+        logfilesList.insert(logFilePath.toString());
+      }
+    }
+  }
+  return logfilesList;
+}
+
+} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -99,16 +159,18 @@ void LoadRawHelper::init() {
 FILE *LoadRawHelper::openRawFile(const std::string &fileName) {
   FILE *file = fopen(fileName.c_str(), "rb");
   if (file == nullptr) {
-    g_log.error("Unable to open file " + fileName);
     throw Exception::FileError("Unable to open File:", fileName);
   }
   // Need to check that the file is not a text file as the ISISRAW routines
   // don't deal with these very well, i.e
   // reading continues until a bad_alloc is encountered.
-  if (isAscii(file)) {
-    g_log.error() << "File \"" << fileName << "\" is not a valid RAW file.\n";
+  if (Kernel::FileDescriptor::isAscii(file)) {
     fclose(file);
-    throw std::invalid_argument("Incorrect file type encountered.");
+    std::stringstream os;
+    os << "File \"" << fileName
+       << "\" is not a valid RAW file. The first 256 bytes suggest it is an "
+          "ascii file.\n";
+    throw std::invalid_argument(os.str());
   }
 
   return file;
@@ -370,8 +432,7 @@ void LoadRawHelper::setWorkspaceProperty(
     const std::string &propertyName, const std::string &title,
     const WorkspaceGroup_sptr &grpws_sptr,
     const DataObjects::Workspace2D_sptr &ws_sptr, int64_t numberOfPeriods,
-    bool bMonitor, API::Algorithm *const pAlg) {
-  UNUSED_ARG(bMonitor);
+    [[maybe_unused]] bool bMonitor, API::Algorithm *const pAlg) {
   Property *ws = pAlg->getProperty("OutputWorkspace");
   if (!ws)
     return;
@@ -470,17 +531,7 @@ LoadRawHelper::getmonitorSpectrumList(const SpectrumDetectorMapping &mapping) {
  *  @return WorkspaceGroup_sptr shared pointer to the workspace
  */
 WorkspaceGroup_sptr LoadRawHelper::createGroupWorkspace() {
-  WorkspaceGroup_sptr workspacegrp(new WorkspaceGroup);
-  return workspacegrp;
-}
-
-/**
- * Check if a file is a text file
- * @param file :: The file pointer
- * @returns true if the file an ascii text file, false otherwise
- */
-bool LoadRawHelper::isAscii(FILE *file) const {
-  return Kernel::FileDescriptor::isAscii(file);
+  return WorkspaceGroup_sptr(new WorkspaceGroup);
 }
 
 /** Constructs the time channel (X) vector(s)
@@ -692,7 +743,7 @@ void LoadRawHelper::runLoadLog(
     const DataObjects::Workspace2D_sptr &localWorkspace, double progStart,
     double progEnd) {
   // search for the log file to load, and save their names in a set.
-  std::list<std::string> logFiles = searchForLogFiles(fileName);
+  std::list<std::string> logFiles = searchForLogFiles(Poco::Path(fileName));
 
   g_log.debug("Loading the log files...");
   if (progStart < progEnd) {
@@ -1176,7 +1227,7 @@ int LoadRawHelper::confidence(Kernel::FileDescriptor &descriptor) const {
  * @returns A set containing paths to log files related to RAW file used.
  */
 std::list<std::string>
-LoadRawHelper::searchForLogFiles(const std::string &pathToRawFile) {
+LoadRawHelper::searchForLogFiles(const Poco::Path &pathToRawFile) {
   // If pathToRawFile is the filename of a raw datafile then search for
   // potential log files
   // in the directory of this raw datafile. Otherwise check if it is a potential
@@ -1191,47 +1242,32 @@ LoadRawHelper::searchForLogFiles(const std::string &pathToRawFile) {
 
   // File property checks whether the given path exists, just check that is
   // actually a file
-  Poco::File l_path(pathToRawFile);
-  if (l_path.isDirectory()) {
-    g_log.error("In LoadLog: " + pathToRawFile +
-                " must be a filename not a directory.");
-    throw Exception::FileError("Filename is a directory:", pathToRawFile);
+  if (Poco::File(pathToRawFile).isDirectory()) {
+    throw Exception::FileError("Filename is a directory:",
+                               pathToRawFile.toString());
   }
 
   // start the process or populating potential log files into the container:
   // potentialLogFiles
-  std::string l_filenamePart =
-      Poco::Path(l_path.path()).getFileName(); // get filename part only
-  if (isAscii(pathToRawFile) &&
-      l_filenamePart.rfind('_') != std::string::npos) {
+  // have we been given what looks like a log file
+  const auto fileExt = pathToRawFile.getExtension();
+  if (boost::algorithm::iequals(fileExt, "log") ||
+      boost::algorithm::iequals(fileExt, "txt")) {
     // then we will assume that the file is an ISIS log file
-    potentialLogFiles.insert(pathToRawFile);
+    potentialLogFiles.insert(pathToRawFile.toString());
   } else {
     // then we will assume that the file is an ISIS raw file. The file validator
     // will have warned the user if the extension is not one of the suggested
     // ones.
-
-    // strip out the raw data file identifier
-    std::string l_rawID;
-    size_t idx = l_filenamePart.rfind('.');
-
-    if (idx != std::string::npos) {
-      l_rawID = l_filenamePart.substr(0, l_filenamePart.rfind('.'));
-    } else {
-      l_rawID = l_filenamePart;
-    }
-    /// check for alternate data stream exists for raw file
-    /// if exists open the stream and read  log files name  from ADS
-    if (adsExists(pathToRawFile)) {
-      potentialLogFiles = getLogFilenamesfromADS(pathToRawFile);
+    if (hasAlternateDataStream(pathToRawFile)) {
+      /// read list of log files from alternate data stream
+      potentialLogFiles = logFilesFromAlternateDataStream(pathToRawFile);
     } else {
       // look for log files in the directory of the raw datafile
-      std::string pattern(l_rawID + "_*.txt");
-      Poco::Path dir(pathToRawFile);
-      dir.makeParent();
-
+      Poco::Path pattern = pathToRawFile;
+      pattern.setFileName(pathToRawFile.getBaseName() + "_*.txt");
       try {
-        Kernel::Glob::glob(Poco::Path(dir).resolve(pattern), potentialLogFiles);
+        Kernel::Glob::glob(pattern, potentialLogFiles);
       } catch (std::exception &) {
       }
     }
@@ -1240,102 +1276,16 @@ LoadRawHelper::searchForLogFiles(const std::string &pathToRawFile) {
     potentialLogFilesList.insert(potentialLogFilesList.begin(),
                                  potentialLogFiles.begin(),
                                  potentialLogFiles.end());
-
-    // Remove extension from path, and append .log to path.
-    std::string logName =
-        pathToRawFile.substr(0, pathToRawFile.rfind('.')) + ".log";
-    // Check if log file exists in current directory.
-    std::ifstream fileExists(logName.c_str());
-    if (fileExists) {
+    // Check for .log
+    const Poco::File combinedLogPath(
+        Poco::Path(pathToRawFile).setExtension("log"));
+    if (combinedLogPath.exists()) {
       // Push three column filename to end of list.
-      potentialLogFilesList.insert(potentialLogFilesList.end(), logName);
+      potentialLogFilesList.insert(potentialLogFilesList.end(),
+                                   combinedLogPath.path());
     }
   }
-  return (potentialLogFilesList);
-}
-
-/**
- * This method looks for ADS with name checksum exists
- * @param pathToFile The path and name of the file.
- * @return True if ADS stream checksum exists
- */
-bool LoadRawHelper::adsExists(const std::string &pathToFile) {
-#ifdef _WIN32
-  std::string adsname(pathToFile + ":checksum");
-  std::ifstream adstream(adsname.c_str());
-  if (!adstream) {
-    return false;
-  }
-  adstream.close();
-  return true;
-#else
-  UNUSED_ARG(pathToFile);
-  return (false);
-#endif
-}
-
-/**
- * This method reads the checksum ADS associated with the raw file and returns
- * the filenames of the log files
- * @param pathToRawFile The path and name of the raw file.
- * @return list of logfile names.
- */
-std::set<std::string>
-LoadRawHelper::getLogFilenamesfromADS(const std::string &pathToRawFile) {
-  std::string adsname(pathToRawFile + ":checksum");
-  std::ifstream adstream(adsname.c_str());
-  if (!adstream) {
-    return (std::set<std::string>());
-  }
-
-  std::string str;
-  std::string path;
-  std::set<std::string> logfilesList;
-  Poco::Path logpath(pathToRawFile);
-  size_t pos = pathToRawFile.find_last_of('/');
-  if (pos == std::string::npos) {
-    pos = pathToRawFile.find_last_of('\\');
-  }
-  if (pos != std::string::npos) {
-    path = pathToRawFile.substr(0, pos);
-  }
-  while (Mantid::Kernel::Strings::extractToEOL(adstream, str)) {
-    std::string fileName;
-    pos = str.find('*');
-    if (pos == std::string::npos)
-      continue;
-    fileName = str.substr(pos + 1, str.length() - pos);
-    pos = fileName.find("txt");
-    if (pos == std::string::npos)
-      continue;
-    // The log files must exist to count
-    const auto logFilePath = std::string(path).append("/").append(fileName);
-    if (Poco::File(logFilePath).exists())
-      logfilesList.insert(logFilePath);
-  }
-  return (logfilesList);
-}
-
-/**
- * Checks whether filename is a simple text file
- * @param filename :: The filename to inspect
- * @returns true if the filename has the .txt extension
- */
-bool LoadRawHelper::isAscii(const std::string &filename) {
-  FILE *file = fopen(filename.c_str(), "rb");
-  char data[256];
-  size_t n = fread(data, 1, sizeof(data), file);
-  fclose(file);
-  char *pend = &data[n];
-  // Call it a binary file if we find a non-ascii character in the first 256
-  // bytes of the file.
-  for (char *p = data; p < pend; ++p) {
-    auto ch = static_cast<unsigned long>(*p);
-    if (!(ch <= 0x7F)) {
-      return false;
-    }
-  }
-  return true;
+  return potentialLogFilesList;
 }
 
 /** This method checks the value of LoadMonitors property and returns true or

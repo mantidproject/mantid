@@ -12,3 +12,9 @@ tt_mode: "tt88"
 
 # Or maybe turn long mode off by default
 long_mode : False
+
+attenuation_files:
+    - name : ZTA
+      path : C:\pearl\anvil_atten_files\PRL112_DC25_10MM_FF.OUT
+    - name : WC
+      path : C:\pearl\anvil_atten_files\PRL985_WC_HOYBIDE_NK_10MM_FF.OUT

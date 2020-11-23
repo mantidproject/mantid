@@ -104,6 +104,15 @@ class ISISIndirectEnergyTransferTest(unittest.TestCase):
         red_ws = wks.getItem(0)
         self.assertEqual(red_ws.getNumberHistograms(), 51)
 
+    def test_ISISIndirectEnergyTransfer_with_different_custom_groupings_creates_a_workspace_with_the_correct_size(self):
+        custom_grouping_strings = {"3:53": 51, "3:25,27:53": 50, "3-53": 1, "3-25,26:53": 29, "3+5+7,8-40,41:53": 15}
+
+        for custom_string, expected_size in custom_grouping_strings.items():
+            reduced_workspace = ISISIndirectEnergyTransfer(InputFiles=['IRS26176.RAW'], Instrument='IRIS',
+                                                           Analyser='graphite', Reflection='002', SpectraRange=[3, 53],
+                                                           GroupingMethod='Custom', GroupingString=custom_string)
+
+            self.assertEqual(reduced_workspace.getItem(0).getNumberHistograms(), expected_size)
 
     def test_reduction_with_background_subtraction(self):
         """

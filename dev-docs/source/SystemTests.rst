@@ -178,6 +178,14 @@ Usage differs depending on whether you are using a single-configuration
 generator with CMake, for example Makefiles/Ninja, or a
 multi-configuration generator such as Visual Studio or Xcode.
 
+Downloading the test data
+-------------------------
+
+The ``systemtest`` script will automatically attempt to download any missing
+data files but will time-out after 2 minutes. The time out limit can be set in two
+variables ``ExternalData_TIMEOUT_INACTIVITY`` and ``ExternalData_TIMEOUT_ABSOLUTE``.
+If using CMake these will need to be added as new string entries (value is in seconds).
+
 Visual Studio/Xcode
 -------------------
 
@@ -254,7 +262,7 @@ would run the tests on 8 cores.
 Some tests write or delete in the same directories, using the same file
 names, which causes issues when running in parallel. To resolve this,
 a global list of test modules (= different Python files in the
-``Testing/SystemTests/tests/analysis`` directory) is first created.
+``Testing/SystemTests/tests/framework`` directory) is first created.
 Now we scan each test module line by line and list all the data files
 that are used by that module. The possible ways files are being
 specified are:

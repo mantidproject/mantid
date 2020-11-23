@@ -1767,7 +1767,7 @@ void LeBailFit::setupRandomWalkStrategyFromTable(
       giter->second.emplace_back(parname);
     } else {
       // First instance in the new group.
-      m_MCGroups.emplace(group, vector<string>{parname});
+      m_MCGroups.emplace(group, std::initializer_list<std::string>{parname});
     }
 
     // 3. Set up MC parameters, A0, A1, non-negative

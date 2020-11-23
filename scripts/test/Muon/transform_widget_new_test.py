@@ -76,7 +76,7 @@ class Transform2Test(unittest.TestCase):
 
         self.widget.handle_new_instrument()
         self.widget._maxent.clear.assert_called_once_with()
- 
+
     def test_handle_new_group_pair(self):
         self.mock_widgets()
         self.widget.handle_new_group_pair()
@@ -93,14 +93,14 @@ class Transform2Test(unittest.TestCase):
     def test_set_up_calculation_observers(self):
         enable = mock.Mock()
         disable = mock.Mock()
-        
+
         self.widget.set_up_calculation_observers(enable, disable)
         self.widget._maxent._presenter.calculation_finished_notifier.add_subscriber.assert_called_once_with(enable)
         self.widget._maxent._presenter.calculation_started_notifier.add_subscriber.assert_called_once_with(disable)
 
     def test_new_data_observers(self):
         observer = mock.Mock()
-        
+
         self.widget.new_data_observer(observer)
         self.widget._maxent._presenter.calculation_finished_notifier.add_subscriber.assert_called_once_with(observer)
         self.widget._fft._presenter.calculation_finished_notifier.add_subscriber.assert_called_once_with(observer)

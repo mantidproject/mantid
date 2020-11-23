@@ -80,6 +80,20 @@ public:
     }
   }
 
+  void
+  test_that_isRaggedWorkspace_returns_false_for_a_non_ragged_Workspace2D() {
+    TS_ASSERT(!ws->isRaggedWorkspace());
+    TS_ASSERT_EQUALS(ws->blocksize(), 5);
+  }
+
+  void test_that_isRaggedWorkspace_returns_true_for_a_ragged_Workspace2D() {
+    Workspace2D_sptr cloned(ws->clone());
+    cloned->setHistogram(0, Points(0), Counts(0));
+
+    TS_ASSERT(cloned->isRaggedWorkspace());
+    TS_ASSERT_THROWS(cloned->blocksize(), const std::logic_error &);
+  }
+
   void testUnequalBins() {
     // try normal kind first
     TS_ASSERT_EQUALS(ws->blocksize(), 5);

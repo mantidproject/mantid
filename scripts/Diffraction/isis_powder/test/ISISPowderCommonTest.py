@@ -553,42 +553,78 @@ class ISISPowderCommonTest(unittest.TestCase):
             mantid.DeleteWorkspace(input_ws)
             mantid.DeleteWorkspace(splined_ws)
 
+    def test_generate_summed_runs_scale_factor(self):
+        sample_empty_number = "100"
+        ws_file_name = "POL" + sample_empty_number
+        original_ws = mantid.Load(ws_file_name)
+        original_y = original_ws.readY(0)
+        scale_factor = 0.75
+
+        scaled_ws = common.generate_summed_runs(empty_sample_ws_string=sample_empty_number, instrument=ISISPowderMockInst(),
+                                                scale_factor=scale_factor)
+        scaled_y_values = scaled_ws.readY(0)
+        self.assertAlmostEqual(scaled_y_values[2], original_y[2]*scale_factor)
+        self.assertAlmostEqual(scaled_y_values[4], original_y[4]*scale_factor)
+        self.assertAlmostEqual(scaled_y_values[7], original_y[7]*scale_factor)
+
+        mantid.DeleteWorkspace(original_ws)
+        mantid.DeleteWorkspace(scaled_ws)
+
     def test_subtract_summed_runs(self):
         # Load a vanadium workspace for this test
         sample_empty_number = "100"
         ws_file_name = "POL" + sample_empty_number
         original_ws = mantid.Load(ws_file_name)
+        # add a current to ensure subtract_summed_runs gets past initial check
         mantid.AddSampleLog(Workspace=original_ws, LogName='gd_prtn_chrg', LogText="10.0", LogType='Number')
-        no_scale_ws = mantid.CloneWorkspace(InputWorkspace=original_ws, OutputWorkspace="test_subtract_sample_empty_ws")
+        no_scale_ws = mantid.CloneWorkspace(InputWorkspace=original_ws)
+        empty_ws = mantid.CloneWorkspace(InputWorkspace=original_ws)
+        empty_ws = empty_ws * 0.3
 
-        # Subtracting from self should equal 0
-        returned_ws = common.subtract_summed_runs(ws_to_correct=no_scale_ws, instrument=ISISPowderMockInst(),
-                                                  empty_sample_ws_string=sample_empty_number)
+        returned_ws = common.subtract_summed_runs(ws_to_correct=no_scale_ws,
+                                                  empty_sample=empty_ws)
         y_values = returned_ws.readY(0)
+        original_y_values = original_ws.readY(0)
         for i in range(returned_ws.blocksize()):
-            self.assertAlmostEqual(y_values[i], 0)
+            self.assertAlmostEqual(y_values[i], original_y_values[i]*0.7)
 
-        # Check what happens when we specify scale as a half
-        scaled_ws = common.subtract_summed_runs(ws_to_correct=original_ws, instrument=ISISPowderMockInst(),
-                                                scale_factor=0.75, empty_sample_ws_string=sample_empty_number)
-        scaled_y_values = scaled_ws.readY(0)
-        self.assertAlmostEqual(scaled_y_values[2], 0.20257424)
-        self.assertAlmostEqual(scaled_y_values[4], 0.31700152)
-        self.assertAlmostEqual(scaled_y_values[7], 0.35193970)
-
+        mantid.DeleteWorkspace(no_scale_ws)
+        mantid.DeleteWorkspace(empty_ws)
         mantid.DeleteWorkspace(returned_ws)
-        mantid.DeleteWorkspace(scaled_ws)
+
+    def test_subtract_summed_runs_no_current(self):
+        # Load a vanadium workspace for this test
+        sample_empty_number = "100"
+        ws_file_name = "POL" + sample_empty_number
+        original_ws = mantid.Load(ws_file_name)
+
+        ws_to_correct = mantid.CloneWorkspace(InputWorkspace=original_ws)
+        empty_ws = mantid.CloneWorkspace(InputWorkspace=original_ws)
+        empty_ws = empty_ws * 0.3
+
+        returned_ws = common.subtract_summed_runs(ws_to_correct=ws_to_correct,
+                                                  empty_sample=empty_ws)
+        y_values = returned_ws.readY(0)
+        original_y_values = original_ws.readY(0)
+        # subtraction should be skipped leaving original values
+        for i in range(returned_ws.blocksize()):
+            self.assertAlmostEqual(y_values[i], original_y_values[i])
+
+        mantid.DeleteWorkspace(ws_to_correct)
+        mantid.DeleteWorkspace(empty_ws)
+        mantid.DeleteWorkspace(returned_ws)
 
     def test_subtract_summed_runs_throw_on_tof_mismatch(self):
         # Create a sample workspace which will have mismatched TOF range
         sample_ws = mantid.CreateSampleWorkspace()
         mantid.AddSampleLog(Workspace=sample_ws, LogName='gd_prtn_chrg', LogText="10.0", LogType='Number')
-        ws_file_name = "100"  # Load POL100
+        ws_file_name = "POL100" # Load POL100
+        empty_ws = mantid.Load(ws_file_name)
 
         # This should throw as the TOF ranges do not match
         with self.assertRaisesRegex(ValueError, "specified for this file do not have matching binning. Do the "):
-            common.subtract_summed_runs(ws_to_correct=sample_ws, instrument=ISISPowderMockInst(),
-                                        empty_sample_ws_string=ws_file_name)
+            common.subtract_summed_runs(ws_to_correct=sample_ws,
+                                        empty_sample=empty_ws)
 
         mantid.DeleteWorkspace(sample_ws)
 

@@ -127,11 +127,6 @@ protected:
                   MantidQt::MantidWidgets::PreviewPlot *fitPreviewPlot,
                   MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot);
 
-  void updatePlotRange(const QString &rangeName,
-                       MantidQt::MantidWidgets::PreviewPlot *previewPlot,
-                       const QString &startRangePropName = "",
-                       const QString &endRangePropName = "");
-
   /// DoubleEditorFactory
   DoubleEditorFactory *m_dblEdFac;
   /// QtCheckBoxFactory
