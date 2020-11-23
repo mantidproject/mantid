@@ -126,6 +126,23 @@ void CorelliPowderCalibrationApply::exec() {
   }
 
   // Rotate each component in the instrument
+  // IMPORTANT NOTE:
+  // 1. The upstream rotation angle is calculated by comparing two orientation state,
+  //    therefore the rotation angle here is acutally a RELATIVE rotation.
+  // 2. In Mantid, the same component, let's take bank42 as an example, can have
+  //    different reference frameworks depending how it is called.
+  //    - bank42:  the reference framework is the lab, where the origin (0,0,0) is
+  //               the sample location;
+  //    - bank42/sixteenpack: the reference framework is the sixteenpack, where the origin
+  //                          is the geometry center of the sixteenpack.
+  //    Given that the rotation angle is calucated w.r.t. sixteenpack, we need to make sure
+  //    that the provided table has the correct component names defined in it.
+  // 3. The Algorithm, RotateInstrumentComponent, actually does the rotation in three steps:
+  //    - translate the component to the origin of the defined reference framework (lab for
+  //      bank42, and sixteenpack for bank42/sixteenpack)
+  //    - perform the rotation using given rotation axis and rotation angle (in degrees)
+  //    - translate the component back to its starting position
+  //    More information can be found in the documentation of the algorithm.
   g_log.notice() << "Rotating each component using given Calibration table";
   auto rotateAlg = createChildAlgorithm("RotateInstrumentComponent");
   rotateAlg->initialize();
@@ -140,9 +157,9 @@ void CorelliPowderCalibrationApply::exec() {
     rotateAlg->setProperty("Y", rotys->cell<double>(row_num));
     rotateAlg->setProperty("Z", rotzs->cell<double>(row_num));
     rotateAlg->setProperty("Angle", rotangs->cell<double>(row_num));
-    // [IMPORTANT] The rotation required here has to be the ABSOLUTE rotation
+    // [IMPORTANT] The rotation required here has to be the RELATIVE rotation
     // angle
-    rotateAlg->setProperty("RelativeRotation", false);
+    rotateAlg->setProperty("RelativeRotation", true);
     rotateAlg->execute();
   }
 
