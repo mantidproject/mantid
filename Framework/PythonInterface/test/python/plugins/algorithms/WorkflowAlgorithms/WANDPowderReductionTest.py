@@ -355,8 +355,8 @@ class WANDPowderReductionTest(unittest.TestCase):
             Function="Flat background",
         )
 
-        #CASE 1
-        #input single workspace, output single workspace
+        # CASE 1
+        # input single workspace, output single workspace
         pd_out = WANDPowderReduction(
             InputWorkspace=event_data,
             CalibrationWorkspace=event_cal,
@@ -376,8 +376,8 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(x.max(), 70.3119282)
         self.assertAlmostEqual(y[0, 0], 0.0)
 
-        #CASE 2
-        #input multiple single ws, output (single) summed ws
+        # CASE 2
+        # input multiple single ws, output (single) summed ws
         pd_out = WANDPowderReduction(
             InputWorkspace=[event_data, event_data],
             CalibrationWorkspace=event_cal,
@@ -402,8 +402,8 @@ class WANDPowderReductionTest(unittest.TestCase):
         group.addWorkspace(event_data)
         group.addWorkspace(event_data2)
 
-        #CASE 3
-        #input group ws containing several ws, output group ws containing several ws
+        # CASE 3
+        # input group ws containing several ws, output group ws containing several ws
         pd_out = WANDPowderReduction(
             InputWorkspace=group,
             CalibrationWorkspace=event_cal,
@@ -432,7 +432,7 @@ class WANDPowderReductionTest(unittest.TestCase):
         group.addWorkspace(event_data)
         group.addWorkspace(event_data2)
 
-        #CASE 4 - input group ws, output group ws
+        # CASE 4 - input group ws, output group ws
         pd_out = WANDPowderReduction(
             InputWorkspace=group,
             CalibrationWorkspace=event_cal,
