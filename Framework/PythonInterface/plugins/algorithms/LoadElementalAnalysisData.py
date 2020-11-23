@@ -9,7 +9,8 @@ import glob
 import os
 import numpy as np
 from mantid import config
-from mantid.api import AlgorithmFactory, AnalysisDataService, PythonAlgorithm, TextAxis, WorkspaceGroup, WorkspaceGroupProperty
+from mantid.api import AlgorithmFactory, AnalysisDataService, PythonAlgorithm, TextAxis, WorkspaceGroup, \
+    WorkspaceGroupProperty
 from mantid.kernel import Direction, IntBoundedValidator
 from mantid.simpleapi import ConvertToHistogram, ConvertToPointData, DeleteWorkspace, LoadAscii, WorkspaceFactory
 
@@ -40,8 +41,8 @@ class LoadElementalAnalysisData(PythonAlgorithm):
 
     def validateInputs(self):
         issues = dict()
-        checkRun = self.search_user_dirs()
-        if not checkRun:
+        check_run = self.search_user_dirs()
+        if not check_run:
             issues['Run'] = "Cannot find files for run " + self.getPropertyValue("Run")
         return issues
 
@@ -79,9 +80,10 @@ class LoadElementalAnalysisData(PythonAlgorithm):
         """
         Returns the overall workspace name
         """
+        filename = os.path.basename(path)
         try:
-            detectors_num = str(int(path.rsplit(".", 2)[1][5]) - 1)
-            run_type = TYPE_KEYS[path.rsplit(".")[1][-2:]]
+            detectors_num = str(int(filename.rsplit(".", 2)[1][5]) - 1)
+            run_type = TYPE_KEYS[filename.rsplit(".")[1][-2:]]
             return "_".join([detectors_num, run_type, str(run)])
         except KeyError:
             return None
@@ -132,8 +134,9 @@ class LoadElementalAnalysisData(PythonAlgorithm):
 
             # create single ws for the merged data, use original ws as a template
             template_ws = next(ws for ws in workspace_list if ws is not None)
-            merged_ws = WorkspaceFactory.create(AnalysisDataService.retrieve(template_ws), NVectors=NUM_FILES_PER_DETECTOR,
-                                                XLength=max_num_bins, YLength=max_num_bins)
+            merged_ws = WorkspaceFactory.create(AnalysisDataService.retrieve(template_ws),
+                                                NVectors=NUM_FILES_PER_DETECTOR, XLength=max_num_bins,
+                                                YLength=max_num_bins)
 
             # create a merged workspace based on every entry from workspace list
             for i in range(0, NUM_FILES_PER_DETECTOR):
@@ -161,7 +164,7 @@ class LoadElementalAnalysisData(PythonAlgorithm):
                     merged_ws.setY(i, Y_padded)
                     merged_ws.setE(i, E_padded)
 
-                    #set y axis labels
+                    # set y axis labels
                     self.set_y_axis_labels(merged_ws, SPECTRUM_INDEX)
 
                     # remove workspace from ADS
