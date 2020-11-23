@@ -42,6 +42,11 @@ public:
     return "Diffraction\\Calibration";
   };
 
+  /// Extra help info
+  const std::vector<std::string> seeAlso() const override {
+    return {"CorelliPowderCalibrationGenerate & CorelliPowderCalibrationDatabase"};
+  };
+
 private:
   /// Overwrites Algorithm method. Does nothing at present
   void init() override;
