@@ -106,17 +106,19 @@ void CorelliPowderCalibrationApply::exec() {
   auto rotzs = calTable->getColumn(6);
   auto rotangs = calTable->getColumn(7); // unit: degrees
 
-  // Translate each component in the instrument
-  // [moderator, sample-position, bank1,.. bank92]
-  // NOTE:
-  // 1. moderator: this is often called "source" in other settings, but CORELLI
-  //               instrument uses the term moderator for it.
-  // 2. sample-position: this is often referred to as "sample" in other instrument
-  //                     definition, but the CORELLI instrument uses a more verbose
-  //                     version here.
-  // 3. the tranlation vector calcuated in upstream is the absolute coordinates of
-  //    each component (in lab frame), therefore we need to toggle the option
-  //    RelativePosition off here.
+  /**
+  Translate each component in the instrument
+  [moderator, sample-position, bank1,.. bank92]
+  NOTE:
+  1. moderator: this is often called "source" in other settings, but CORELLI
+                instrument uses the term moderator for it.
+  2. sample-position: this is often referred to as "sample" in other
+                      instrument definition, but the CORELLI instrument uses
+                      a more verbose version here.
+  3. the tranlation vector calcuated in upstream is the absolute coordinates
+     of each component (in lab frame), therefore we need to toggle the option
+     RelativePosition off here.
+  */
   g_log.notice() << "Translating each component using given Calibration table";
   auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
   moveAlg->initialize();
@@ -134,24 +136,30 @@ void CorelliPowderCalibrationApply::exec() {
     moveAlg->execute();
   }
 
-  // Rotate each component in the instrument
-  // IMPORTANT NOTE:
-  // 1. The upstream rotation angle is calculated by comparing two orientation state,
-  //    therefore the rotation angle here is acutally a RELATIVE rotation.
-  // 2. In Mantid, the same component, let's take bank42 as an example, can have
-  //    different reference frameworks depending how it is called.
-  //    - bank42:  the reference framework is the lab, where the origin (0,0,0) is
-  //               the sample location;
-  //    - bank42/sixteenpack: the reference framework is the sixteenpack, where the origin
-  //                          is the geometry center of the sixteenpack.
-  //    Given that the rotation angle is calucated w.r.t. sixteenpack, we need to make sure
-  //    that the provided table has the correct component names defined in it.
-  // 3. The Algorithm, RotateInstrumentComponent, actually does the rotation in three steps:
-  //    - translate the component to the origin of the defined reference framework (lab for
-  //      bank42, and sixteenpack for bank42/sixteenpack)
-  //    - perform the rotation using given rotation axis and rotation angle (in degrees)
-  //    - translate the component back to its starting position
-  //    More information can be found in the documentation of the algorithm.
+  /**
+  Rotate each component in the instrument
+  IMPORTANT NOTE:
+  1. The upstream rotation angle is calculated by comparing two orientations,
+     therefore the rotation angle here is acutally a RELATIVE rotation.
+  2. In Mantid, the same component, let's take bank42 as an example, can have
+     different reference frameworks depending how it is called.
+     - bank42:  the reference framework is the lab, where the origin (0,0,0)
+                is the sample location;
+     - bank42/sixteenpack: the reference framework is the sixteenpack, where
+                           the origin is the geometry center of the 
+                           sixteenpack.
+     Given that the rotation angle is calucated w.r.t. sixteenpack, we need
+     to make sure that the provided table has the correct component names
+     defined in it.
+  3. The Algorithm, RotateInstrumentComponent, actually does the rotation in
+  three steps:
+     - translate the component to the origin of the defined reference
+       framework (lab for bank42, and sixteenpack for bank42/sixteenpack)
+     - perform the rotation using given rotation axis and rotation angle 
+       (in degrees)
+     - translate the component back to its starting position
+     More information can be found in the documentation of the algorithm.
+  */
   g_log.notice() << "Rotating each component using given Calibration table";
   auto rotateAlg = createChildAlgorithm("RotateInstrumentComponent");
   rotateAlg->initialize();
@@ -167,7 +175,8 @@ void CorelliPowderCalibrationApply::exec() {
     rotateAlg->setProperty("Z", rotzs->cell<double>(row_num));
     rotateAlg->setProperty("Angle", rotangs->cell<double>(row_num));
     // [IMPORTANT]
-    // The rotation required here has to be the RELATIVE rotation angle in degrees
+    // The rotation required here has to be the RELATIVE rotation angle in
+    // degrees
     rotateAlg->setProperty("RelativeRotation", true);
     rotateAlg->execute();
   }
