@@ -27,8 +27,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
     _D7NumberPixelsBank = 44
     # an approximate universal peak width:
     _peakWidth = None
-    _beamMask1 = None
-    _beamMask2 = None
+    _detectorMasks = None
     _minDistance = None
     _created_ws_names = []
 
@@ -120,9 +119,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
 
         self._peakWidth = self.getProperty("BraggPeakWidth").value
-        masked_bins_range = self.getProperty("MaskedBinsRange").value
-        self._beamMask1 = masked_bins_range[0]
-        self._beamMask2 = masked_bins_range[1]
+        self._detectorMasks = self.getProperty("MaskedBinsRange").value
         self._minDistance = self.getProperty("MinimalDistanceBetweenPeaks").value
 
         # load the chosen YIG scan
@@ -171,6 +168,20 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             DeleteWorkspaces(WorkspaceList=self._created_ws_names)
         self._created_ws_names.clear() #cleanup
 
+    def _prepare_masking_criteria(self):
+        """Builds list of string criterions readable by MaskBinsIf algorithm"""
+        criterions = []
+        if len(self._detectorMasks) != 0:
+            index_start = 0
+            if len(self._detectorMasks) % 2 != 0:
+                criterions.append('x<{0}'.format(self._detectorMasks[0]))
+                index_start = 1
+            for index in range(index_start, len(self._detectorMasks), 2):
+                lowerRange = self._detectorMasks[index]
+                upperRange = self._detectorMasks[index+1]
+                criterions.append('x>{0} && x<{1}'.format(lowerRange, upperRange))
+        return criterions
+
     def _get_scan_data(self, ws_name, progress):
         """ Loads YIG scan data, removes monitors, and prepares
         a workspace for Bragg peak fitting"""
@@ -189,6 +200,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         # Fill the intensity and position tables with all the data from scans
         conjoined_scan_name = "conjoined_input_{}".format(ws_name)
         self._created_ws_names.append(conjoined_scan_name)
+        masking_criteria = self._prepare_masking_criteria()
         name_list = []
         for entry_no, entry in enumerate(mtd[scan_data_name]):
             # normalize to monitor1 as monitor2 is sometimes empty:
@@ -211,10 +223,11 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                  Axis='X',
                                  Formula='-180.0 * signedtwotheta / pi',
                                  OutputWorkspace=entry)
-            # mask bins too close to the beam axis
-            MaskBinsIf(InputWorkspace=entry,
-                       Criterion='x>{0} && x<{1}'.format(self._beamMask1, self._beamMask2),
-                       OutputWorkspace=entry)
+            # mask bins using predefined ranges
+            for criterion in masking_criteria:
+                MaskBinsIf(InputWorkspace=entry,
+                           Criterion=criterion,
+                           OutputWorkspace=entry)
             # append the new row to a new MatrixWorkspace
             ConvertToPointData(InputWorkspace=entry, OutputWorkspace=entry)
             name_list.append(entry.name())
@@ -268,19 +281,16 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         used for further fitting. Removes all peaks that would require scattering
         angle above 180 degrees and returns the peak positions in degrees"""
         yig2theta = self._remove_unwanted_yig_peaks(yig_d_spacing)
-        lower_mask_range = self._beamMask1 - self._peakWidth * 2
-        upper_mask_range = self._beamMask2 + self._peakWidth * 2
         peak_list = []
 
         for pixel_no in range(mtd[ws].getNumberHistograms()):
             detector_2theta = mtd[ws].readX(pixel_no)
             intensity = mtd[ws].readY(pixel_no)
-            min2Theta = detector_2theta[0] + self._peakWidth * 2
-            max2Theta = detector_2theta[-1] - self._peakWidth * 2
+            min2Theta = detector_2theta[0] + self._peakWidth
+            max2Theta = detector_2theta[-1] - self._peakWidth
             single_spectrum_peaks = []
             for peak in yig2theta:
-                if min2Theta < peak < max2Theta and not lower_mask_range < peak < upper_mask_range:
-                    peak_intensity = 0
+                if min2Theta < peak < max2Theta:
                     for bin_no in range(len(detector_2theta)):
                         twoTheta = detector_2theta[bin_no]
                         if abs(twoTheta - peak) < 1: # within 1 degree from the expected peak position
@@ -289,6 +299,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                                & (detector_2theta < twoTheta+self._minDistance))
                             slice_intensity = intensity[indices[0][0]:indices[0][-1]]
                             peak_intensity = slice_intensity.max()
+                            if peak_intensity == 0:
+                                break
                             index_maximum = indices[0][0]+slice_intensity.argmax()
                             expected_pos = peak
                             single_spectrum_peaks.append((peak_intensity, detector_2theta[index_maximum], expected_pos))
