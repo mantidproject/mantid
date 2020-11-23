@@ -316,7 +316,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         max_n_peaks = len(max(yig_peaks, key=len))
         conjoined_peak_fit_name = 'conjoined_peak_fit_{}'.format(self.getPropertyValue('FitOutputWorkspace'))
         ws_names = []
-        function = "name=LinearBackground, A0=1e-4, A1=1e-4;name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}"
+        function = "name=FlatBackground, A0=1e-4;name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}"
         constraints = "f1.Height > 0, f1.Sigma < {0}, {1} < f1.PeakCentre < {2}"
         for pixel_no in range(mtd[ws].getNumberHistograms()):
             # create the needed columns in the output workspace
