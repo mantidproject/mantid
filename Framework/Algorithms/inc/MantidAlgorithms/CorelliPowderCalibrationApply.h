@@ -44,7 +44,8 @@ public:
 
   /// Extra help info
   const std::vector<std::string> seeAlso() const override {
-    return {"CorelliPowderCalibrationGenerate & CorelliPowderCalibrationDatabase"};
+    return {
+        "CorelliPowderCalibrationGenerate & CorelliPowderCalibrationDatabase"};
   };
 
 private:
