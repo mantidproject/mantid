@@ -265,6 +265,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         for index in range(len(yig_list)-1):
             if abs(yig_list[index]-yig_list[index+1]) >= 2*self._minDistance:
                 yig_peaks.append(yig_list[index])
+        yig_peaks.append(yig_list[-1])
         return self._include_other_quadrants(yig_peaks)
 
     def _include_other_quadrants(self, yig_list):
