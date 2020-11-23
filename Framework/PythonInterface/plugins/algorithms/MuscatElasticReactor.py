@@ -159,10 +159,11 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
             data_S1.append(D1)
             # divide by QS_sum^(nscatter-1)=((nscatter-1)*nrun2*QS_sum_dedup)^(nscatter-1)
 
-            # want to divide by QS_sum_dedup^(nscatter-1) to normalize
-            # also want to divide by nrun2 because of MC integration
-            # so divide by nrun2*(QS_sum_dedup^(nscatter-1))
-            # actually have QS_sum = (nscatter-1)*nrun2*QS_sum_dedup
+            # Want to divide by QS_sum_dedup^(nscatter-1) to normalize - one factor of QS_sum_dedup
+            # for each path section that isn't the first or last section
+            # Also want to divide by nrun2 because of MC integration
+            # So divide by nrun2*(QS_sum_dedup^(nscatter-1))
+            # Actually have QS_sum = (nscatter-1)*nrun2*QS_sum_dedup
             # so if divide by QS_sum^(nscatter-1) we need an additional correcting factor of
             # (nscatter-1)^(nscatter-1)*(nruns2)^(nscatter-2)
             if self._numb_scat >= 2:
