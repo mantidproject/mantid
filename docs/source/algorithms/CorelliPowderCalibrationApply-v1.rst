@@ -47,8 +47,10 @@ Usage
     for dt, hd in zip(datatypes, headers):
         calitable.addColumn(dt, hd)
 
-    calitable.addRow(["bank1", 0., 0., 0., 0,0,0,0])       # bank1 is unaffected
-    calitable.addRow(["bank42", 0., 0, 0., 0,1,0,180])  # rotate bank42 180 around y
+    calitable.addRow(["moderator", 0, 0,-19.9997, 0, 0, 0, 0])  # a.k.a. source
+    calitable.addRow(["sample-position", 0, 0, 0, 0, 0, 0, 0])  # a.k.a. sample
+    calitable.addRow(["bank1/sixteenpack", 0., 0., 0., 0,0,0,0])  # bank1 is unaffected
+    calitable.addRow(["bank42/sixteenpack", 0., 0, 0., 0,1,0,180])  # rotate bank42 180 around y
 
     # laod emptry instrument
     ws_original = LoadEmptyInstrument("CORELLI_Definition.xml")
