@@ -146,7 +146,7 @@ void CorelliPowderCalibrationApply::exec() {
      - bank42:  the reference framework is the lab, where the origin (0,0,0)
                 is the sample location;
      - bank42/sixteenpack: the reference framework is the sixteenpack, where
-                           the origin is the geometry center of the 
+                           the origin is the geometry center of the
                            sixteenpack.
      Given that the rotation angle is calucated w.r.t. sixteenpack, we need
      to make sure that the provided table has the correct component names
@@ -155,7 +155,7 @@ void CorelliPowderCalibrationApply::exec() {
   three steps:
      - translate the component to the origin of the defined reference
        framework (lab for bank42, and sixteenpack for bank42/sixteenpack)
-     - perform the rotation using given rotation axis and rotation angle 
+     - perform the rotation using given rotation axis and rotation angle
        (in degrees)
      - translate the component back to its starting position
      More information can be found in the documentation of the algorithm.
