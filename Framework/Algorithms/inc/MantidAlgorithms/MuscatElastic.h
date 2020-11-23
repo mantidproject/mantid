@@ -68,8 +68,8 @@ private:
                                         double totalScatterXsection);
   double interpolateLogQuadratic(
       const API::MatrixWorkspace_sptr workspaceToInterpolate, double x);
-  double scatter(const bool doMultipleScattering, const int nScatters,
-                 const double absorbXsection, const API::Sample &sample,
+  double scatter(const int nEvents, const size_t nScatters, const double absorbXsection,
+                 const API::Sample &sample,
                  const Geometry::Instrument &instrument,
                  Kernel::PseudoRandomNumberGenerator &rng, const double vmfp,
                  const double sigma_total, double scatteringXSection,

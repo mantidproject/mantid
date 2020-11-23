@@ -158,6 +158,13 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
             D1= self._total[1]/self._nrun1           #single scatt  with abs
             data_S1.append(D1)
             # divide by QS_sum^(nscatter-1)=((nscatter-1)*nrun2*QS_sum_dedup)^(nscatter-1)
+
+            # want to divide by QS_sum_dedup^(nscatter-1) to normalize
+            # also want to divide by nrun2 because of MC integration
+            # so divide by nrun2*(QS_sum_dedup^(nscatter-1))
+            # actually have QS_sum = (nscatter-1)*nrun2*QS_sum_dedup
+            # so if divide by QS_sum^(nscatter-1) we need an additional correcting factor of
+            # (nscatter-1)^(nscatter-1)*(nruns2)^(nscatter-2)
             if self._numb_scat >= 2:
                 D2 = self._total[2]/QS_sum[2]              #second scatt
                 data_S2.append(D2)

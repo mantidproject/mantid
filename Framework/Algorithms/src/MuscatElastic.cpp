@@ -8,6 +8,7 @@
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
+#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -149,11 +150,11 @@ void MuscatElastic::exec() {
         inputWS->sample().getMaterial().numberDensityEffective();
     auto nbins = inputWS->blocksize();
     auto histnew = simulationWS.histogram(i);
-    if (!inputWS->detectorInfo().isMonitor(i)) { // no two theta for monitors
+    if (!inputWS->spectrumInfo().isMonitor(i)) { // no two theta for monitors
       for (int bin = 0; bin < nbins; bin++) {
         // use Kernel::UnitConversion::run instead?? Momentum, MomentumTransfer
         double kinc = inputWS->histogram(i).x()[bin] /
-                      (2 * sin(0.5 * inputWS->detectorInfo().twoTheta(i)));
+                      (2 * sin(0.5 * inputWS->spectrumInfo().twoTheta(i)));
         double wavelength = 2 * M_PI / kinc;
         auto absorbXsection =
             inputWS->sample().getMaterial().absorbXSection(wavelength);
@@ -180,18 +181,17 @@ void MuscatElastic::exec() {
                        static_cast<double (*)(double)>(std::log));
         auto detPos = inputWS->detectorInfo().position(i);
 
-        scatter(false, nSingleScatterEvents, 0, inputWS->sample(), *instrument,
-                rng, vmfp, sigma_total, scatteringXSection, SQWS, kinc, detPos);
-        scatter(false, nSingleScatterEvents, absorbXsection, inputWS->sample(),
-                *instrument, rng, vmfp, sigma_total, scatteringXSection, SQWS,
-                kinc, detPos);
+        double totalSingleScatterNoAbs = scatter(
+            nSingleScatterEvents, 1, 0, inputWS->sample(), *instrument, rng,
+            vmfp, sigma_total, scatteringXSection, SQWS, kinc, detPos);
+
         std::vector<double> total(nScatters);
         for (size_t ne = 0; ne < nScatters; ne++) {
-          total[ne] =
-              scatter(true, nMultiScatterEvents, absorbXsection,
-                      inputWS->sample(), *instrument, rng, vmfp, sigma_total,
-                      scatteringXSection, SQWS, kinc, detPos);
-          total[ne] = total[ne] / (nMultiScatterEvents * ne);
+          int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
+
+          total[ne] = scatter(
+              nEvents, ne + 1, absorbXsection, inputWS->sample(), *instrument,
+              rng, vmfp, sigma_total, scatteringXSection, SQWS, kinc, detPos);
         }
         // just output the factor for largest ne for now
         // Could have a separate WS for each scatter order perhaps??
@@ -252,41 +252,43 @@ double MuscatElastic::interpolateLogQuadratic(
   return exp(A * U * U + B * U + C);
 }
 
-double MuscatElastic::scatter(const bool doMultipleScattering,
-                              const int nScatters, const double absorbXsection,
-                              const Sample &sample,
+double MuscatElastic::scatter(const int nEvents, const size_t nScatters,
+                              const double absorbXsection, const Sample &sample,
                               const Geometry::Instrument &instrument,
                               Kernel::PseudoRandomNumberGenerator &rng,
                               const double vmfp, const double sigma_total,
                               double scatteringXSection,
                               const MatrixWorkspace_sptr SOfQ,
                               const double kinc, Kernel::V3D detPos) {
-  auto track = start_point(sample, instrument, rng);
-  double weight = 1;
-  updateWeightAndPosition(track, weight, vmfp, sigma_total, rng);
-  if (doMultipleScattering) {
+  double sumOfWeights = 0;
+  for (int ie = 0; ie < nEvents; ie++) {
+    double weight = 1;
+    auto track = start_point(sample, instrument, rng);
+    updateWeightAndPosition(track, weight, vmfp, sigma_total, rng);
+
     double QSS = 0;
-    for (int i = 0; i < nScatters; i++) {
+    for (size_t is = 0; is < nScatters - 1; is++) {
       q_dir(track, SOfQ, kinc, scatteringXSection, rng, QSS, weight);
       int nlinks = sample.getShape().interceptSurface(track);
       updateWeightAndPosition(track, weight, vmfp, sigma_total, rng);
     }
     // divide by QSS here rather than outside scatter (as was done in original
     // Fortan) to avoid the magic 1/(nscatter-1)^(nscatter-1) factors
-    weight = weight / QSS;
-  }
-  Kernel::V3D directionToDetector = detPos - track.startPoint();
-  auto &prevDirection = track.direction();
-  directionToDetector.normalize();
-  track.reset(track.startPoint(), directionToDetector);
-  int nlinks = sample.getShape().interceptSurface(track);
-  double dl = track.front().distInsideObject;
-  auto q = directionToDetector - prevDirection;
-  auto SQ = interpolateLogQuadratic(SOfQ, q.norm());
-  auto AT2 = exp(-dl / vmfp);
-  weight = weight * AT2 * SQ * scatteringXSection / (4 * M_PI);
+    weight = weight / pow(QSS, nScatters - 1);
 
-  return weight;
+    Kernel::V3D directionToDetector = detPos - track.startPoint();
+    auto &prevDirection = track.direction();
+    directionToDetector.normalize();
+    track.reset(track.startPoint(), directionToDetector);
+    int nlinks = sample.getShape().interceptSurface(track);
+    double dl = track.front().distInsideObject;
+    auto q = directionToDetector - prevDirection;
+    auto SQ = interpolateLogQuadratic(SOfQ, q.norm());
+    auto AT2 = exp(-dl / vmfp);
+    weight = weight * AT2 * SQ * scatteringXSection / (4 * M_PI);
+    sumOfWeights += weight;
+  }
+  return sumOfWeights / nEvents;
 }
 
 // update track direction, QSS and weight
