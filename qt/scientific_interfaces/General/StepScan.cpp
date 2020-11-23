@@ -720,18 +720,27 @@ void StepScan::plotCurve() {
 
   runPythonCode(QString::fromStdString(pyCode));
 #else
-  std::string pyCode = "from mantid.simpleapi import *\n"
-                       "import matplotlib.pyplot as plt\n"
-                       "from mantid import plots\n"
-                       "fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})\n"
-                       "ws = mtd['"+m_plotWSName+"']\n"
-                       "ax.plot(ws,'k.')\n"
-                       "ax.set_xlabel('"+xAxisTitle+"')\n"
-                       "ax.set_ylabel('"+yAxisTitle+"')\n"
-                       "fig.canvas.set_window_title('"+title+" - Step Scan')\n"
-                       "fig.show()";
+  std::string pyCode =
+      "from mantid.simpleapi import *\n"
+      "import matplotlib.pyplot as plt\n"
+      "from mantid import plots\n"
+      "fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})\n"
+      "ws = mtd['" +
+      m_plotWSName +
+      "']\n"
+      "ax.plot(ws,'k.')\n"
+      "ax.set_xlabel('" +
+      xAxisTitle +
+      "')\n"
+      "ax.set_ylabel('" +
+      yAxisTitle +
+      "')\n"
+      "fig.canvas.set_window_title('" +
+      title +
+      " - Step Scan')\n"
+      "fig.show()";
   Mantid::PythonInterface::GlobalInterpreterLock lock;
-  PyRun_SimpleString(pyCode.c_str());  
+  PyRun_SimpleString(pyCode.c_str());
 #endif
 }
 
