@@ -417,7 +417,7 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
   try {
     ws->sample().getOrientedLattice();
   } catch (std::runtime_error &exc) {
-    helpMsgs[Prop::PEAKSWORKSPACE] = exc.what();
+    helpMsgs[Prop::PEAKSWORKSPACE] = "No UB Matrix defined in the lattice.";
     return helpMsgs;
   }
 
@@ -446,6 +446,10 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
     if (args.satellites.modVectors[vecNo] != V3D(0.0, 0.0, 0.0)) {
       isAllVecZero = false;
     }
+  }
+  if (isMOZero && !isAllVecZero) {
+    helpMsgs["MaxOrder"] =
+        "Max Order cannot be zero if a Modulation Vector has been supplied.";
   }
   if (!isMOZero && isAllVecZero) {
     helpMsgs["ModVector1"] =

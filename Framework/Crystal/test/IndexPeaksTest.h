@@ -530,10 +530,21 @@ public:
   void
   test_inputs_with_max_order_set_and_empty_mod_vectors_gives_validateInputs_error() {
     auto alg = setup_validate_inputs_test_alg();
-    alg->setProperty("MaxOrder", 3); // arbitary non-zero
+    alg->setProperty("MaxOrder", 3); // arbitary non-zero max order
 
     assert_helpmsgs_error_from_validate_inputs(alg, "ModVector1",
                                                "At least one Modulation");
+  }
+
+  void
+  test_inputs_with_zero_max_order_and_valid_mod_vector_gives_validateInputs_error() {
+    auto alg = setup_validate_inputs_test_alg();
+    alg->setProperty(
+        "ModVector1",
+        std::vector<double>{1.0, 2.0, 3.0}); // arbitary non-zero mod vector
+
+    assert_helpmsgs_error_from_validate_inputs(alg, "MaxOrder",
+                                               "cannot be zero");
   }
 
   void test_workspace_with_no_oriented_lattice_gives_validateInputs_error() {
@@ -543,7 +554,7 @@ public:
     alg->setProperty("PeaksWorkspace", peaksWS);
 
     assert_helpmsgs_error_from_validate_inputs(alg, "PeaksWorkspace",
-                                               "OrientedLattice");
+                                               "No UB Matrix");
   }
 
   void test_negative_max_order_throws_error() {
