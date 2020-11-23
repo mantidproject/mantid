@@ -139,9 +139,10 @@ void CorelliPowderCalibrationApply::exec() {
   /**
   Rotate each component in the instrument
   IMPORTANT NOTE:
-  1. The upstream rotation angle is calculated by comparing two orientations,
-     therefore the rotation angle here is acutally a RELATIVE rotation.
-  2. In Mantid, the same component, let's take bank42 as an example, can have
+  0. The upstream calcualtion is a minimization routine that searches the
+     detector position by minimizaing DIFC, therefore the reported values
+     are ABSOLUTE values.
+  1. In Mantid, the same component, let's take bank42 as an example, can have
      different reference frameworks depending how it is called.
      - bank42:  the reference framework is the lab, where the origin (0,0,0)
                 is the sample location;
@@ -151,7 +152,7 @@ void CorelliPowderCalibrationApply::exec() {
      Given that the rotation angle is calucated w.r.t. sixteenpack, we need
      to make sure that the provided table has the correct component names
      defined in it.
-  3. The Algorithm, RotateInstrumentComponent, actually does the rotation in
+  2. The Algorithm, RotateInstrumentComponent, actually does the rotation in
   three steps:
      - translate the component to the origin of the defined reference
        framework (lab for bank42, and sixteenpack for bank42/sixteenpack)
@@ -177,7 +178,7 @@ void CorelliPowderCalibrationApply::exec() {
     // [IMPORTANT]
     // The rotation required here has to be the RELATIVE rotation angle in
     // degrees
-    rotateAlg->setProperty("RelativeRotation", true);
+    rotateAlg->setProperty("RelativeRotation", false);
     rotateAlg->execute();
   }
 
