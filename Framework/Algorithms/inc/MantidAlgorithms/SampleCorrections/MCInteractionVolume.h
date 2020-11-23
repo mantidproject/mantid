@@ -39,15 +39,12 @@ public:
 
   const Geometry::BoundingBox &getBoundingBox() const override;
   const Geometry::BoundingBox getFullBoundingBox() const override;
-  virtual bool calculateBeforeAfterTrack(
-      Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
-      const Kernel::V3D &endPos, Geometry::Track &beforeScatter,
-      Geometry::Track &afterScatter,
-      MCInteractionStatistics &stats) const override;
-  virtual double calculateAttenuation(const Geometry::Track &beforeScatter,
-                                      const Geometry::Track &afterScatter,
-                                      double lambdaBefore,
-                                      double lambdaAfter) const override;
+  virtual std::tuple<bool, std::shared_ptr<Geometry::Track>,
+                     std::shared_ptr<Geometry::Track>>
+  calculateBeforeAfterTrack(Kernel::PseudoRandomNumberGenerator &rng,
+                            const Kernel::V3D &startPos,
+                            const Kernel::V3D &endPos,
+                            MCInteractionStatistics &stats) const override;
   ComponentScatterPoint
   generatePoint(Kernel::PseudoRandomNumberGenerator &rng) const;
   void setActiveRegion(const Geometry::BoundingBox &region) override;

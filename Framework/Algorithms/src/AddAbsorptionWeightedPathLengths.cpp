@@ -152,8 +152,8 @@ void AddAbsorptionWeightedPathLengths::exec() {
       Track afterScatter(samplePos, detDir);
       sampleShape->interceptSurface(afterScatter);
 
-      absFactors[0] = interactionVol.calculateAttenuation(
-          beforeScatter, afterScatter, lambdas[0], lambdas[0]);
+      absFactors[0] = beforeScatter.calculateAttenuation(lambdas[0]) *
+                      afterScatter.calculateAttenuation(lambdas[0]);
 
     } else {
       MersenneTwister rng(seed + int(i));

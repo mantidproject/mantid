@@ -34,14 +34,12 @@ struct ComponentScatterPoint {
 class MANTID_ALGORITHMS_DLL IMCInteractionVolume {
 public:
   virtual ~IMCInteractionVolume() = default;
-  virtual bool calculateBeforeAfterTrack(
-      Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
-      const Kernel::V3D &endPos, Geometry::Track &beforeScatter,
-      Geometry::Track &afterScatter, MCInteractionStatistics &stats) const = 0;
-  virtual double calculateAttenuation(const Geometry::Track &beforeScatter,
-                                      const Geometry::Track &afterScatter,
-                                      double lambdaBefore,
-                                      double lambdaAfter) const = 0;
+  virtual std::tuple<bool, std::shared_ptr<Geometry::Track>,
+                     std::shared_ptr<Geometry::Track>>
+  calculateBeforeAfterTrack(Kernel::PseudoRandomNumberGenerator &rng,
+                            const Kernel::V3D &startPos,
+                            const Kernel::V3D &endPos,
+                            MCInteractionStatistics &stats) const = 0;
   virtual const Geometry::BoundingBox &getBoundingBox() const = 0;
   virtual const Geometry::BoundingBox getFullBoundingBox() const = 0;
   virtual void setActiveRegion(const Geometry::BoundingBox &region) = 0;

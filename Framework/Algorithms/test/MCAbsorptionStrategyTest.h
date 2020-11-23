@@ -17,6 +17,7 @@
 #include "MantidDataObjects/Histogram1D.h"
 #include "MantidGeometry/Instrument/ReferenceFrame.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
+#include "MantidGeometry/Objects/Track.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MonteCarloTesting.h"
@@ -168,22 +169,45 @@ public:
         .Times(1)
         .WillOnce(ReturnRef(emptyBoundingBox));
 
-    EXPECT_CALL(testInteractionVolume,
-                calculateBeforeAfterTrack(_, _, _, _, _, _))
+    auto beforeScatter = std::make_shared<MockTrack>();
+    auto afterScatter = std::make_shared<MockTrack>();
+    auto ReturnTracksAndTrue = [beforeScatter,
+                                afterScatter](auto &arg0, auto &arg1,
+                                              auto &arg2, auto &arg3) {
+      UNUSED_ARG(arg0);
+      UNUSED_ARG(arg1);
+      UNUSED_ARG(arg2);
+      UNUSED_ARG(arg3);
+      return std::tuple{true, beforeScatter, afterScatter};
+    };
+    auto ReturnNullTracksAndFalse = [beforeScatter,
+                                     afterScatter](auto &arg0, auto &arg1,
+                                                   auto &arg2, auto &arg3) {
+      UNUSED_ARG(arg0);
+      UNUSED_ARG(arg1);
+      UNUSED_ARG(arg2);
+      UNUSED_ARG(arg3);
+      return std::tuple{false, nullptr, nullptr};
+    };
+    EXPECT_CALL(testInteractionVolume, calculateBeforeAfterTrack(_, _, _, _))
         .Times(Exactly(6))
-        .WillOnce(Return(true))
-        .WillOnce(Return(false))
-        .WillOnce(Return(true))
-        .WillOnce(Return(true))
-        .WillOnce(Return(true))
-        .WillOnce(Return(true));
-    EXPECT_CALL(testInteractionVolume, calculateAttenuation(_, _, _, _))
+        .WillOnce(Invoke(ReturnTracksAndTrue))
+        .WillOnce(Invoke(ReturnNullTracksAndFalse))
+        .WillOnce(Invoke(ReturnTracksAndTrue))
+        .WillOnce(Invoke(ReturnTracksAndTrue))
+        .WillOnce(Invoke(ReturnTracksAndTrue))
+        .WillOnce(Invoke(ReturnTracksAndTrue));
+
+    EXPECT_CALL(*beforeScatter, calculateAttenuation(_))
         .Times(Exactly(5))
         .WillOnce(Return(1.0))
         .WillOnce(Return(2.0))
         .WillOnce(Return(3.0))
         .WillOnce(Return(4.0))
         .WillOnce(Return(5.0));
+    EXPECT_CALL(*afterScatter, calculateAttenuation(_))
+        .Times(Exactly(5))
+        .WillRepeatedly(Return(1.0));
     testStrategy.calculate(rng, {0., 0., 0.}, {1.0}, 0., attenuationFactors,
                            attenuationFactorErrors, trackStatistics);
     TS_ASSERT_EQUALS(attenuationFactors[0], 3.0);
@@ -242,21 +266,23 @@ private:
   class MockMCInteractionVolume final : public IMCInteractionVolume {
   public:
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
-    MOCK_CONST_METHOD6(calculateBeforeAfterTrack,
-                       bool(Mantid::Kernel::PseudoRandomNumberGenerator &rng,
-                            const Mantid::Kernel::V3D &startPos,
-                            const Mantid::Kernel::V3D &endPos,
-                            Mantid::Geometry::Track &beforeScatter,
-                            Mantid::Geometry::Track &afterScatter,
-                            MCInteractionStatistics &stats));
-    MOCK_CONST_METHOD4(calculateAttenuation,
-                       double(const Mantid::Geometry::Track &beforeScatter,
-                              const Mantid::Geometry::Track &afterScatter,
-                              double lambdaBefore, double lambdaAfter));
+    MOCK_CONST_METHOD4(
+        calculateBeforeAfterTrack,
+        std::tuple<bool, std::shared_ptr<Mantid::Geometry::Track>,
+                   std::shared_ptr<Mantid::Geometry::Track>>(
+            Mantid::Kernel::PseudoRandomNumberGenerator &rng,
+            const Mantid::Kernel::V3D &startPos,
+            const Mantid::Kernel::V3D &endPos, MCInteractionStatistics &stats));
     MOCK_CONST_METHOD0(getBoundingBox, Mantid::Geometry::BoundingBox &());
     MOCK_CONST_METHOD0(getFullBoundingBox,
                        const Mantid::Geometry::BoundingBox());
     MOCK_METHOD1(setActiveRegion, void(const Mantid::Geometry::BoundingBox &));
+    GNU_DIAG_ON_SUGGEST_OVERRIDE
+  };
+  class MockTrack final : public Mantid::Geometry::Track {
+  public:
+    GNU_DIAG_OFF_SUGGEST_OVERRIDE
+    MOCK_CONST_METHOD1(calculateAttenuation, double(double));
     GNU_DIAG_ON_SUGGEST_OVERRIDE
   };
 
