@@ -9,7 +9,6 @@
 import sys
 from functools import wraps
 
-import mantid
 from mantid.api import AnalysisDataServiceObserver
 from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
 

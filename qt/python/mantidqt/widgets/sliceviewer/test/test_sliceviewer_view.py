@@ -174,7 +174,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         pres = SliceViewer(ws)
         old_title = pres.model.get_title()
 
-        renamed = RenameWorkspace(ws)
+        renamed = RenameWorkspace(ws)  # noqa F841
 
         # View didn't close
         self.assertTrue(pres.view in self.find_widgets_of_type(str(type(pres.view))))
@@ -191,7 +191,7 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
         pres = SliceViewer(ws)
         title = pres.model.get_title()
         other_workspace = CreateSampleWorkspace()
-        other_renamed = RenameWorkspace(other_workspace)
+        other_renamed = RenameWorkspace(other_workspace)  # noqa F841
 
         self.assertEqual(pres.model.get_title(), title)
         self.assertEqual(pres.view.windowTitle(), pres.model.get_title())

@@ -16,7 +16,7 @@ from mantid.plots.datafunctions import get_normalize_by_bin_width
 from matplotlib.figure import Figure
 from mpl_toolkits.axisartist import Subplot as CurveLinearSubPlot
 from mpl_toolkits.axisartist.grid_helper_curvelinear import GridHelperCurveLinear
-from qtpy.QtCore import Qt, Signal, Slot
+from qtpy.QtCore import Qt, Signal
 from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayout, QSplitter,
                             QStatusBar, QVBoxLayout, QWidget)
 
