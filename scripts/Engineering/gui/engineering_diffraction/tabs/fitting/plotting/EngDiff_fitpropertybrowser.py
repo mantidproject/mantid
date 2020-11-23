@@ -12,7 +12,7 @@ from qtpy.QtCore import Slot
 from mantidqt.utils.qt import import_qt
 from mantidqt.utils.observer_pattern import GenericObservable
 from mantidqt.widgets.fitpropertybrowser import FitPropertyBrowser
-from mantid.api import AnalysisDataService
+from mantid.api import AnalysisDataService as ADS
 
 BaseBrowser = import_qt('.._common', 'mantidqt.widgets', 'FitPropertyBrowser')
 
@@ -94,7 +94,8 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
             try:
                 for ws_name, artists in ax.tracked_workspaces.items():
                     # don't allow existing output workspaces (fitted curves) to be added
-                    if ws_name not in output_wsnames and ws_name[-3:] == 'TOF':
+                    if ws_name not in output_wsnames and \
+                            ADS.retrieve(ws_name).getAxis(0).getUnit().caption() == 'Time-of-flight':
                         spectrum_list = [artist.spec_num for artist in artists]
                         allowed_spectra[ws_name] = spectrum_list
             except AttributeError:  # scripted plots have no tracked_workspaces
@@ -107,7 +108,7 @@ class EngDiffFitPropertyBrowser(FitPropertyBrowser):
         This is called after Fit finishes to update the fit curves.
         :param name: The name of Fit's output workspace.
         """
-        ws = AnalysisDataService.retrieve(name)
+        ws = ADS.retrieve(name)
         self.do_plot(ws, plot_diff=self.plotDiff())
         self.fit_result_ws_name = name
         self.save_current_setup(self.workspaceName())

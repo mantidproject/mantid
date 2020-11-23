@@ -38,7 +38,6 @@ class FittingDataPresenter(object):
         self.all_plots_removed_notifier = GenericObservable()
         self.seq_fit_started_notifier = GenericObservable()
         # Observers
-        # TODO observer for fpb fit complete
         self.fit_observer = GenericObserverWithArgPassing(self.fit_completed)
         #
         self.fit_enabled_observer = GenericObserverWithArgPassing(self.set_fit_enabled)

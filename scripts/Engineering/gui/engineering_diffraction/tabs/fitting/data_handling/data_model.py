@@ -154,6 +154,8 @@ class FittingDataModel(object):
 
     def get_ws_sorted_by_primary_log(self):
         ws_list = list(self._loaded_workspaces.keys())
+        tof_ws_inds = [ind for ind, ws in enumerate(ws_list) if
+                       ADS.retrieve(ws).getAxis(0).getUnit().caption() == 'Time-of-flight']
         primary_log = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
                                   "primary_log")
         sort_ascending = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
@@ -161,11 +163,11 @@ class FittingDataModel(object):
         if primary_log:
             log_table = ADS.retrieve(primary_log)
             isort = argsort(array(log_table.column('avg')))
-            ws_list = [ws_list[iws] for iws in isort]
+            ws_list_tof = [ws_list[iws] for iws in isort if iws in tof_ws_inds]
         if not sort_ascending == 'true':
             # settings can only be saved as text
-            ws_list = ws_list[::-1]
-        return ws_list
+            ws_list_tof = ws_list_tof[::-1]
+        return ws_list_tof
 
     def update_fit(self, args):
         fit_props, peak_centre_params = ([], ) * 2
