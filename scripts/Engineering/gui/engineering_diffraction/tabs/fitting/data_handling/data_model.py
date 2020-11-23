@@ -155,7 +155,7 @@ class FittingDataModel(object):
     def get_ws_sorted_by_primary_log(self):
         ws_list = list(self._loaded_workspaces.keys())
         tof_ws_inds = [ind for ind, ws in enumerate(ws_list) if
-                       ADS.retrieve(ws).getAxis(0).getUnit().caption() == 'Time-of-flight']
+                       self._loaded_workspaces[ws].getAxis(0).getUnit().caption() == 'Time-of-flight']
         primary_log = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
                                   "primary_log")
         sort_ascending = get_setting(path_handling.INTERFACES_SETTINGS_GROUP, path_handling.ENGINEERING_PREFIX,
