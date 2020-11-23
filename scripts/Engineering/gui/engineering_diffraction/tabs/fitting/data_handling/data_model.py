@@ -164,7 +164,9 @@ class FittingDataModel(object):
             log_table = ADS.retrieve(primary_log)
             isort = argsort(array(log_table.column('avg')))
             ws_list_tof = [ws_list[iws] for iws in isort if iws in tof_ws_inds]
-        if not sort_ascending == 'true':
+        else:
+            ws_list_tof = ws_list
+        if sort_ascending == 'false':
             # settings can only be saved as text
             ws_list_tof = ws_list_tof[::-1]
         return ws_list_tof

@@ -32,6 +32,11 @@ class TestFittingDataModel(unittest.TestCase):
         self.mock_ws.getInstrument.return_value = self.mock_inst
         self.mock_ws.getRunNumber.return_value = 1
         self.mock_ws.getTitle.return_value = 'title'
+        mock_axis = mock.MagicMock()
+        mock_unit = mock.MagicMock()
+        self.mock_ws.getAxis.return_value = mock_axis
+        mock_axis.getUnit.return_value = mock_unit
+        mock_unit.caption.return_value = 'Time-of-flight'
 
     @patch(data_model_path + '.ConvertUnits')
     @patch(data_model_path + ".Load")
