@@ -162,6 +162,7 @@ private:
   bool requireNewAutoreduction() const;
   void checkForNewRuns();
   void autoreduceNewRuns();
+  bool autoreductionPrevented() const;
 
   ProgressPresenter setupProgressBar(const std::set<int> &rowsToTransfer);
   void transfer(const std::set<int> &rowsToTransfer,

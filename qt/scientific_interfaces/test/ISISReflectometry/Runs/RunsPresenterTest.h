@@ -225,7 +225,8 @@ public:
     verifyAndClear();
   }
 
-  void testCheckOverwritingBatchOnAutoreductionResumedIfSettingsChanged() {
+  void
+  testCheckOverwritingBatchOnAutoreductionResumedIfSearchSettingsChanged() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
     expectSearchSettingsChanged();
@@ -235,18 +236,47 @@ public:
   }
 
   void
-  testDoNotStartAutoreductionWhenOverwritePreventedOnResumeAutoreductionWithNewSettings() {
+  testCheckOverwritingBatchOnAutoreductionResumedIfAutoreductionSettingsChanged() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
     expectSearchSettingsChanged();
+    EXPECT_CALL(m_mainPresenter, isOverwriteBatchPrevented()).Times(AtLeast(1));
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void
+  testAutoreductionNotStartedWhenOverwritePreventedOnResumeAutoreduction() {
+    auto presenter = makePresenter();
+    expectAutoreductionSettingsChanged(presenter);
+    expectSearchString(m_searchString);
     expectOverwriteBatchPrevented();
     expectDoNotStartAutoreduction();
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
-  void testTableNotClearedWhenResumeAutoreduction() {
+  void testTableNotClearedWhenOverwritePreventedOnResumeAutoreduction() {
     auto presenter = makePresenter();
+    expectAutoreductionSettingsChanged(presenter);
+    expectSearchString(m_searchString);
+    expectOverwriteBatchPrevented();
+    expectDoNotClearExistingTable();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testTableClearedWhenStartAutoreductionFirstTime() {
+    auto presenter = makePresenter();
+    expectSearchString(m_searchString);
+    expectClearExistingTable();
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testTableNotClearedWhenResumeAutoreductionWithSameSettings() {
+    auto presenter = makePresenter();
+    expectAutoreductionSettingsChanged(presenter);
     expectSearchString(m_searchString);
     expectDoNotClearExistingTable();
     presenter.resumeAutoreduction();
@@ -255,23 +285,14 @@ public:
 
   void testTableClearedWhenResumeAutoreductionWithNewSettings() {
     auto presenter = makePresenter();
-    expectSearchString(m_searchString);
-    expectSearchSettingsChanged();
+    expectAutoreductionSettingsChanged(presenter);
+    expectSearchString("new search string");
     expectClearExistingTable();
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
 
-  void testTableNotClearedWhenOverwritePreventedOnResumeAutoreduction() {
-    auto presenter = makePresenter();
-    expectSearchSettingsChanged();
-    expectOverwriteBatchPrevented();
-    expectDoNotClearExistingTable();
-    presenter.resumeAutoreduction();
-    verifyAndClear();
-  }
-
-  void testResumeAutoreductionCancelledIfSearchStringIsEmpty() {
+  void testAutoreductionNotStartedIfSearchStringIsEmpty() {
     auto presenter = makePresenter();
     expectSearchString("");
     expectDoNotStartAutoreduction();
@@ -731,16 +752,22 @@ private:
     EXPECT_CALL(m_view, setUpdateIntervalSpinBoxEnabled(true));
   }
 
-  void expectStopAutoreduction() {
-    EXPECT_CALL(*m_runNotifier, stopPolling()).Times(1);
-  }
-
+  // Set the cached search settings to "old" values so that the value
+  // returned from the view will be different
   void expectSearchSettingsChanged() {
-    auto const newCriteria =
-        SearchCriteria{"new search string", "new cycle", "new_instrument"};
+    auto const oldCriteria =
+        SearchCriteria{"old search string", "old cycle", "old_instrument"};
     EXPECT_CALL(*m_searcher, searchCriteria())
         .Times(AtLeast(1))
-        .WillRepeatedly(Return(newCriteria));
+        .WillRepeatedly(Return(oldCriteria));
+  }
+
+  void expectAutoreductionSettingsChanged(RunsPresenter &presenter) {
+    // Start and stop autoreduction with "old" settings
+    expectSearchString("old search string");
+    presenter.resumeAutoreduction();
+    presenter.notifyAutoreductionPaused();
+    verifyAndClear();
   }
 
   void expectClearExistingTable() {
@@ -967,6 +994,7 @@ private:
         .WillRepeatedly(Return(instrument));
   }
 
+  // Expect the view to return a non-empty search string
   void expectSearchString(std::string const &searchString) {
     EXPECT_CALL(m_view, getSearchString())
         .Times(AtLeast(1))

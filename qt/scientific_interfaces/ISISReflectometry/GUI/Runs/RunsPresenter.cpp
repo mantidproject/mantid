@@ -51,7 +51,8 @@ RunsPresenter::RunsPresenter(
       m_searcher(std::make_unique<QtCatalogSearcher>(mainView)),
       m_view(mainView), m_progressView(progressableView),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_instruments(instruments), m_thetaTolerance(thetaTolerance) {
+      m_instruments(instruments), m_thetaTolerance(thetaTolerance),
+      m_lastAutoreductionSearch() {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -134,19 +135,16 @@ void RunsPresenter::notifySearch() {
     return;
   }
 
-  // If this will overwrite annotations, ask the user if it's ok to discard
-  // changes. Note that although we check this in e.g. notifySearchTextEdited,
-  // if the user presses Enter that gets skipped so we have to check here too.
-  if (searchCriteria() != m_searcher->searchCriteria()) {
-    if (hasUnsavedSearchResults() && isOverwritePrevented()) {
-      // Don't discard; revert the change and exit
-      m_view->setSearchString(m_searcher->investigation());
-      m_view->setSearchCycle(m_searcher->cycle());
-      return;
-    }
-    m_searcher->reset();
-    m_searcher->setInvestigation(m_view->getSearchString());
-    m_searcher->setCycle(m_view->getSearchCycle());
+  // If search criteria have changed the existing results will be lost. Check
+  // if this is ok. Note that although we check this in
+  // e.g. notifySearchTextEdited, if the user presses Enter that gets skipped
+  // so we have to check here too.
+  if (searchCriteria() != m_searcher->searchCriteria() &&
+      hasUnsavedSearchResults() && isOverwritePrevented()) {
+    // Revert to the previous search and quit
+    m_view->setSearchString(m_searcher->investigation());
+    m_view->setSearchCycle(m_searcher->cycle());
+    return;
   }
 
   // Execute the search
@@ -240,21 +238,34 @@ void RunsPresenter::notifyReductionPaused() {
   tablePresenter()->notifyReductionPaused();
 }
 
+bool RunsPresenter::autoreductionPrevented() const {
+  // Nothing to do if the search string is emtpy
+  if (m_view->getSearchString().empty()) {
+    m_messageHandler->giveUserInfo("Search field is empty", "Search Issue");
+    return true;
+  }
+
+  // If the search criteria have changed then we'll lose changes in the
+  // table. Ask the user if this is ok.
+  if ((!m_lastAutoreductionSearch ||
+       *m_lastAutoreductionSearch != searchCriteria()) &&
+      isOverwritePrevented()) {
+    return true;
+  }
+
+  return false;
+}
+
 /** Resume autoreduction. Clears any existing table data first and then
  * starts a search to check if there are new runs.
  */
 bool RunsPresenter::resumeAutoreduction() {
-  if (m_view->getSearchString().empty()) {
-    m_messageHandler->giveUserInfo("Search field is empty", "Search Issue");
+  if (autoreductionPrevented())
     return false;
-  }
 
   // If starting an autoreduction with new settings, clear the main table
   if (!m_lastAutoreductionSearch ||
       *m_lastAutoreductionSearch != searchCriteria()) {
-    if (isOverwritePrevented()) {
-      return false;
-    }
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
     m_lastAutoreductionSearch = searchCriteria();
   }
@@ -323,6 +334,12 @@ void RunsPresenter::notifyChangesSaved() { m_searcher->setSaved(); }
  * @return : true if the search algorithm was started successfully, false if
  * there was a problem */
 bool RunsPresenter::search() {
+  if (searchCriteria() != m_searcher->searchCriteria()) {
+    m_searcher->reset();
+    m_searcher->setInvestigation(m_view->getSearchString());
+    m_searcher->setCycle(m_view->getSearchCycle());
+  }
+
   if (!m_searcher->startSearchAsync(m_view->getSearchString(),
                                     m_view->getSearchInstrument(),
                                     m_view->getSearchCycle())) {
