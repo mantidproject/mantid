@@ -107,7 +107,16 @@ void CorelliPowderCalibrationApply::exec() {
   auto rotangs = calTable->getColumn(7); // unit: degrees
 
   // Translate each component in the instrument
-  // [source, sample, bank1,.. bank92]
+  // [moderator, sample-position, bank1,.. bank92]
+  // NOTE:
+  // 1. moderator: this is often called "source" in other settings, but CORELLI
+  //               instrument uses the term moderator for it.
+  // 2. sample-position: this is often referred to as "sample" in other instrument
+  //                     definition, but the CORELLI instrument uses a more verbose
+  //                     version here.
+  // 3. the tranlation vector calcuated in upstream is the absolute coordinates of
+  //    each component (in lab frame), therefore we need to toggle the option
+  //    RelativePosition off here.
   g_log.notice() << "Translating each component using given Calibration table";
   auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
   moveAlg->initialize();
@@ -119,8 +128,8 @@ void CorelliPowderCalibrationApply::exec() {
     moveAlg->setProperty("X", x_poss->cell<double>(row_num));
     moveAlg->setProperty("Y", y_poss->cell<double>(row_num));
     moveAlg->setProperty("Z", z_poss->cell<double>(row_num));
-    // [IMPORTANT] the position data from calibration table are ABSOLUTE values
-    // w.r.t. the sample
+    // [IMPORTANT]
+    // The position data from calibration table are ABSOLUTE values (lab frame)
     moveAlg->setProperty("RelativePosition", false);
     moveAlg->execute();
   }
@@ -157,8 +166,8 @@ void CorelliPowderCalibrationApply::exec() {
     rotateAlg->setProperty("Y", rotys->cell<double>(row_num));
     rotateAlg->setProperty("Z", rotzs->cell<double>(row_num));
     rotateAlg->setProperty("Angle", rotangs->cell<double>(row_num));
-    // [IMPORTANT] The rotation required here has to be the RELATIVE rotation
-    // angle
+    // [IMPORTANT]
+    // The rotation required here has to be the RELATIVE rotation angle in degrees
     rotateAlg->setProperty("RelativeRotation", true);
     rotateAlg->execute();
   }
