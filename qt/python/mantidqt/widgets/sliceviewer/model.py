@@ -130,9 +130,12 @@ class SliceViewerModel:
         """Return the coordinate system of the workspace"""
         return self._ws.getSpecialCoordinateSystem()
 
-    def get_title(self) -> str:
-        """Return a title for model"""
-        ws_name = self.get_ws_name()
+    def get_title(self, ws_name=None) -> str:
+        """Return a title for the model, given a workspace name. Default to the name
+        of the model's workspace if none supplied.
+        """
+        if not ws_name:
+            ws_name = self.get_ws_name()
         return f'Sliceviewer - {ws_name}'
 
     def get_ws_MDE(self,
@@ -235,10 +238,6 @@ class SliceViewerModel:
             "supports_dynamic_rebinning": self.can_support_dynamic_rebinning(),
             "supports_peaks_overlays": self.can_support_peaks_overlays()
         }
-
-    def set_ws_name(self, name):
-        # TODO: Set the name of the workspace
-        pass
 
     def create_nonorthogonal_transform(self, slice_info: SliceInfo):
         """
@@ -488,7 +487,7 @@ class SliceViewerModel:
         return help_msg
 
     def workspace_equals(self, ws_name):
-        return str(self.get_ws()) == ws_name
+        return str(self._get_ws()) == ws_name
 
     # private api
     def _get_ws(self):

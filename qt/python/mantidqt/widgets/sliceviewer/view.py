@@ -528,6 +528,7 @@ class SliceViewerDataView(QWidget):
 class SliceViewerView(QWidget, ObservingView):
     """Combines the data view for the slice viewer with the optional peaks viewer."""
     close_signal = Signal()
+    rename_signal = Signal(str)
 
     def __init__(self, presenter, dims_info, can_normalise, parent=None, conf=None):
         super().__init__(parent)
@@ -551,6 +552,7 @@ class SliceViewerView(QWidget, ObservingView):
         # connect up additional peaks signals
         self.data_view.mpl_toolbar.peaksOverlayClicked.connect(self.peaks_overlay_clicked)
         self.close_signal.connect(self._run_close)
+        self.rename_signal.connect(self._on_rename)
 
     @property
     def data_view(self):
@@ -596,3 +598,6 @@ class SliceViewerView(QWidget, ObservingView):
     def _run_close(self):
         # handles the signal emitted from ObservingView.emit_close
         self.close()
+
+    def _on_rename(self, new_title):
+        self.setWindowTitle(new_title)

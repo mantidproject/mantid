@@ -49,6 +49,7 @@ class SliceViewer(ObservingPresenter):
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
                                                       self.model.can_normalize_workspace(), parent,
                                                       conf)
+        self.view.setWindowTitle(self.model.get_title())
         self.view.data_view.create_axes_orthogonal(
             redraw_on_zoom=not self.model.can_support_dynamic_rebinning())
 
@@ -356,7 +357,7 @@ class SliceViewer(ObservingPresenter):
         """
         if not self.model.workspace_equals(workspace_name):
             return
-
+        print("replace")
         try:
             candidate_model = SliceViewerModel(workspace)
             candidate_model_properties = candidate_model.get_properties()
@@ -375,9 +376,8 @@ class SliceViewer(ObservingPresenter):
             return
 
     def rename_workspace(self, old_name, new_name):
-        if str(self.model.get_ws()) == old_name:
-            self.model.set_workspace_name(new_name)
-            self.view.setWindowTitle(self.model.get_title())
+        if str(self.model._get_ws()) == old_name:
+            self.view.emit_rename(self.model.get_title(new_name))
 
     def delete_workspace(self, ws_name):
         if ws_name == str(self.model._ws):
@@ -443,7 +443,6 @@ class SliceViewer(ObservingPresenter):
         # we don't want to use model.get_ws for the image info widget as this needs
         # extra arguments depending on workspace type.
         self.view.data_view.image_info_widget.setWorkspace(self.model._get_ws())
-        self.view.setWindowTitle(self.model.get_title())
         self.new_plot()
 
     def _close_view_with_message(self, message: str):
