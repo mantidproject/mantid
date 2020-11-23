@@ -23,30 +23,10 @@ namespace Algorithms {
 
     Optional Properties:
     <UL>
-    <LI> XMin - The X value to start the cropped workspace at (default 0)</LI>
-    <LI> XMax - The X value to end the cropped workspace at (default max)</LI>
-    <LI> StartSpectrum - The workspace index number to start the cropped
-   workspace from (default 0)</LI>
-    <LI> EndSpectrum - The workspace index number to end the cropped workspace
-   at (default max)</LI>
+    <LI> XMin - The X values to start the croping the spectra at</LI>
+    <LI> XMax - The X values to end the croping the spectra at</LI>
     </UL>
 
-    If the input workspace must has common bin boundaries/X values then cropping
-   in X will
-    lead to an output workspace with fewer bins than the input one. If the
-   boundaries are
-    not common then the output workspace will have the same number of bins as
-   the input one,
-    but with data values outside the X range given set to zero.
-    If an X value given does not exactly match a bin boundary, then the closest
-   bin boundary
-    within the range will be used.
-    Note that if none of the optional properties are given, then the output
-   workspace will be
-    a copy of the input one.
-
-    @author Russell Taylor, Tessella Support Services plc
-    @date 15/10/2008
 */
 class MANTID_ALGORITHMS_DLL CropWorkspaceRagged
     : public API::DistributedAlgorithm {
@@ -55,7 +35,7 @@ public:
   const std::string name() const override { return "CropWorkspaceRagged"; }
   /// Summary of algorithms purpose
   const std::string summary() const override {
-    return "Extracts a 'block' from a workspace and places it in a new "
+    return "Crops each spectrum of a workspace and produces a new "
            "workspace.";
   }
 
@@ -74,7 +54,7 @@ private:
   void init() override;
   /// Execution code
   void exec() override;
-  std::map<std::string, std::string> validateInputs();
+  std::map<std::string, std::string> validateInputs() override;
 };
 
 } // namespace Algorithms
