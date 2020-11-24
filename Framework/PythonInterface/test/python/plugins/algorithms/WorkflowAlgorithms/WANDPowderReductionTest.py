@@ -396,16 +396,10 @@ class WANDPowderReductionTest(unittest.TestCase):
         self.assertAlmostEqual(y[0, 0], 0.0)
         assert isinstance(pd_out, MatrixWorkspace)
 
-        event_data2 = CloneWorkspace(event_data)
-
-        group = WorkspaceGroup()
-        group.addWorkspace(event_data)
-        group.addWorkspace(event_data2)
-
         # CASE 3
         # input group ws containing several ws, output group ws containing several ws
         pd_out = WANDPowderReduction(
-            InputWorkspace=group,
+            InputWorkspace=[event_data,event_data],
             CalibrationWorkspace=event_cal,
             BackgroundWorkspace=event_bkg,
             Target="Theta",
