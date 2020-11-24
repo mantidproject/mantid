@@ -104,14 +104,6 @@ class AboutPresenter(object):
         self.action_facility_changed(default_facility)
         self.view.cb_facility.currentTextChanged.connect(self.action_facility_changed)
 
-        try:
-            default_instrument = ConfigService.getInstrument().name()
-            self.view.cb_instrument.setCurrentIndex(self.view.cb_instrument.findText(default_instrument))
-        except RuntimeError:
-            default_instrument = self.view.cb_instrument.itemText(0)
-        self.action_instrument_changed(default_instrument)
-        self.view.cb_instrument.currentTextChanged.connect(self.action_instrument_changed)
-
     def action_facility_changed(self, new_facility):
         """
         When the facility is changed, refreshes all available instruments that can be selected in the dropdown.
@@ -119,9 +111,7 @@ class AboutPresenter(object):
         """
         self.store_facility(new_facility)
         # refresh the instrument selection to contain instruments about the selected facility only
-        self.view.cb_instrument.clear()
-        self.view.cb_instrument.addItems(
-            [instr.name() for instr in ConfigService.getFacility(new_facility).instruments()])
+        self.view.cb_instrument.facility = new_facility
 
     def store_facility(self, new_facility):
         current_value = ConfigService.getFacility().name()
