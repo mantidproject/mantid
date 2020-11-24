@@ -265,8 +265,7 @@ class AxesTabWidgetPresenter:
         self.current_view_props[f"{ax}autoscale"] = self.view.get_autoscale_enabled()
         self.current_view_props["canvas_color"] = self.view.get_canvas_color()
 
-        # On Kubuntu, QT prepends the & on characters used as shortcut keys, which causes KeyErrors
-        new_ax = self.view.get_axis().replace('&', '')
+        new_ax = self.view.get_axis()
         self.current_axis = new_ax
 
         if f"{new_ax}lim" in self.current_view_props:
@@ -279,7 +278,7 @@ class AxesTabWidgetPresenter:
             self.view.set_scale(self.current_view_props[f"{new_ax}scale"])
         else:
             ax_props = self.get_selected_ax_properties()
-            ax = self.view.get_axis().replace('&', '')
+            ax = self.view.get_axis()
             self.view.set_autoscale_enabled(ax_props[f"{ax}autoscale"])
             self.view.set_limit_input_enabled(not ax_props[f"{ax}autoscale"])
             lim = ax_props[f"{ax}lim"]
