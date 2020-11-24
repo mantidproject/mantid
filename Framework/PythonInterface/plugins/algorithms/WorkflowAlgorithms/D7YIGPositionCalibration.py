@@ -30,7 +30,6 @@ class D7YIGPositionCalibration(PythonAlgorithm):
     _beamMask1 = None
     _beamMask2 = None
     _minDistance = None
-    _scanStepSize = None
     _created_ws_names = []
 
     def category(self):
@@ -82,15 +81,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                              doc="The minimal allowable distance between two YIG peaks (in degrees 2theta).")
 
         self.declareProperty(name="BankOffsets",
-                             defaultValue=[0, 0, 0],
+                             defaultValue=[0.0, 0.0, 0.0],
                              direction=Direction.Input,
                              doc="List of values of offset for each bank (in degrees).")
-
-        self.declareProperty(name="ScanStepSize",
-                             defaultValue=0.25,
-                             validator=FloatBoundedValidator(lower=0),
-                             direction=Direction.Input,
-                             doc="The length of each step during YIG scan (in degrees).")
 
         self.declareProperty(name="BraggPeakWidth",
                              defaultValue=2.0,
@@ -126,7 +119,6 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             nreports = 6
         progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
 
-        self._scanStepSize = self.getProperty("ScanStepSize").value
         self._peakWidth = self.getProperty("BraggPeakWidth").value
         masked_bins_range = self.getProperty("MaskedBinsRange").value
         self._beamMask1 = masked_bins_range[0]
@@ -200,7 +192,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         name_list = []
         for entry_no, entry in enumerate(mtd[scan_data_name]):
             # normalize to monitor1 as monitor2 is sometimes empty:
-            monitor1_counts = entry.readY(self._D7NumberPixels-2)[0]
+            monitor1_counts = entry.readY(self._D7NumberPixels)[0]
             if monitor1_counts != 0:
                 monitor_name = '__monitor_' + entry.name()
                 CreateSingleValuedWorkspace(DataValue=monitor1_counts, ErrorValue=np.sqrt(monitor1_counts),
@@ -293,14 +285,11 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                         twoTheta = detector_2theta[bin_no]
                         if abs(twoTheta - peak) < 1: # within 1 degree from the expected peak position
                             # scan for the local maximum:
-                            peak_intensity = intensity[bin_no]
-                            min_index = bin_no-int(self._minDistance / self._scanStepSize)
-                            max_index = bin_no+int(self._minDistance / self._scanStepSize)
-                            index_maximum = bin_no
-                            for index in range(min_index, max_index):
-                                if intensity[index] > peak_intensity:
-                                    peak_intensity = intensity[index]
-                                    index_maximum = index
+                            indices = np.where((twoTheta-self._minDistance < detector_2theta)
+                                               & (detector_2theta < twoTheta+self._minDistance))
+                            slice_intensity = intensity[indices[0][0]:indices[0][-1]]
+                            peak_intensity = slice_intensity.max()
+                            index_maximum = indices[0][0]+slice_intensity.argmax()
                             expected_pos = peak
                             single_spectrum_peaks.append((peak_intensity, detector_2theta[index_maximum], expected_pos))
                             break
@@ -500,6 +489,10 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                     pixel_offset -= self._RAD_2_DEG * 0.011 / (2.0 * (1.5177 - 0.01252)) # repeats calculation from the D7 IDF
                 pixel_offsets.append(pixel_offset)
                 pixel_no += 1
+        self.log().notice('The calibrated wavelength is: {0:.2f}'.format(wavelength))
+        self.log().notice('The bank2 gradient is: {0:.3f}'.format(bank2_slope))
+        self.log().notice('The bank3 gradient is: {0:.3f}'.format(bank3_slope))
+        self.log().notice('The bank4 gradient is: {0:.3f}'.format(bank4_slope))
         return wavelength, pixel_offsets, bank_offsets, bank_slopes
 
     def _prettify(self, elem):

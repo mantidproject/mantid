@@ -11,15 +11,15 @@ import matplotlib as mpl
 
 from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE
 
-mpl.use('Agg')  # noqa
-from mantid.simpleapi import (CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace,
-                              SetUB)
-from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
-from mantidqt.widgets.sliceviewer.presenter import SliceViewer
-from mantidqt.widgets.sliceviewer.toolbar import ToolItemText
-from qtpy.QtWidgets import QApplication
-from math import inf
+mpl.use('Agg')
+from mantid.simpleapi import (  # noqa: E402
+    CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, SetUB)
+from mantidqt.utils.qt.testing import start_qapplication  # noqa: E402
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder  # noqa: E402
+from mantidqt.widgets.sliceviewer.presenter import SliceViewer  # noqa: E402
+from mantidqt.widgets.sliceviewer.toolbar import ToolItemText  # noqa: E402
+from qtpy.QtWidgets import QApplication  # noqa: E402
+from math import inf  # noqa: E402
 
 
 @start_qapplication

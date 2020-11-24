@@ -9,6 +9,7 @@ import unittest
 from mantid.api import AnalysisDataService
 from mantid.simpleapi import AlgorithmManager, LoadElementalAnalysisData
 
+
 class LoadElementalAnalysisRunTest(unittest.TestCase):
 
     def test_incorrect_run_number(self):
@@ -21,6 +22,7 @@ class LoadElementalAnalysisRunTest(unittest.TestCase):
         self.assertTrue("Run" in errors)
         self.assertEquals(len(errors), 1)
         self.assertFalse(AnalysisDataService.doesExist("1"))
+
 
 if __name__ == '__main__':
     unittest.main()

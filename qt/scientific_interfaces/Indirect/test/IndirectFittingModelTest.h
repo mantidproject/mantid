@@ -695,4 +695,25 @@ public:
     model->cleanFailedSingleRun(alg, 0);
     TS_ASSERT(!ads.doesExist("__ConvolutionFitSequential_ws1"));
   }
+
+  void
+  test_that_getDefaultParameters_returns_full_list_of_names_for_multi_domain_functions() {
+
+    auto model = createModelWithSingleWorkspace("Name", 1);
+
+    auto const function = getFunction(
+        "composite=MultiDomainFunction,NumDeriv=true;(composite=Convolution,"
+        "NumDeriv=true,FixResolution=true,$domains=i;name=Resolution,"
+        "WorkspaceIndex=0,X=(),Y=();(name=Lorentzian,Amplitude=1,PeakCentre=0,"
+        "FWHM=1,constraints=(0<Amplitude,0<FWHM);name=Lorentzian,Amplitude=1,"
+        "PeakCentre=0,FWHM=1,constraints=(0<Amplitude,0<FWHM)));");
+    model->setFitFunction(function);
+    model->setDefaultParameterValue("Amplitude", 1.5, 0);
+
+    auto paramMap = model->getDefaultParameters(0);
+    TS_ASSERT(paramMap.find("f0.f0.f1.f0.Amplitude") != paramMap.end());
+    TS_ASSERT(paramMap.find("f0.f0.f1.f1.Amplitude") != paramMap.end());
+    TS_ASSERT(paramMap.at("f0.f0.f1.f0.Amplitude").value == 1.5);
+    TS_ASSERT(paramMap.at("f0.f0.f1.f1.Amplitude").value == 1.5);
+  }
 };
