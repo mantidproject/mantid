@@ -40,7 +40,7 @@ void createInputWorkspace() {
           errors.push_back(sqrt(double(k+1)));
           m_ws->dataX(j)[k] = k;
         }
-        m_ws->dataX(j)[m_numberOfYPoints+1] = m_numberOfYPoints+1;
+        //m_ws->dataX(j)[m_numberOfYPoints+1] = m_numberOfYPoints+1;
         m_ws->dataY(j) = ydata;
         m_ws->dataE(j) = errors;
       }
@@ -141,7 +141,7 @@ void createInputWorkspace() {
         m_alg.setProperty("InputWorkspace", m_ws));
     TS_ASSERT_THROWS_NOTHING(
         m_alg.setPropertyValue("OutputWorkspace", "nothing"));
-    std::vector<double> xMin{2.,3.,4.,5.,6.};
+    std::vector<double> xMin{2.,5.,6.,7.,1.};
 
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "2., 5., 6., 7., 1."));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11"));

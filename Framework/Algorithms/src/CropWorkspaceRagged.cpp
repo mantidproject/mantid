@@ -11,6 +11,17 @@
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/MandatoryValidator.h"
 
+namespace {
+    std::vector<double> getSubVector(Mantid::MantidVec &data, const int &lowerIndex, const int &upperIndex) {
+  auto low = std::next(data.begin(), lowerIndex);
+  auto up = std::next(data.begin(), upperIndex);
+  // get new vectors
+  std::vector<double> newData(low, up);
+  return newData;
+    }
+
+}
+
 namespace Mantid {
 namespace Algorithms {
 
@@ -72,7 +83,8 @@ void CropWorkspaceRagged::exec() {
   }
 
   // Its easier to work with point data -> index is same for x, y, E
-  bool histogramData = false;
+  MatrixWorkspace_sptr tmp = outputWS;
+  int offset = 0;
   if (outputWS->isHistogramData()) {
     auto alg = createChildAlgorithm("ConvertToPointData");
     alg->initialize();
@@ -80,34 +92,33 @@ void CropWorkspaceRagged::exec() {
     alg->setProperty("InputWorkspace", outputWS);
     alg->setProperty("OutputWorkspace", outputWS);
     alg->execute();
-    outputWS = alg->getProperty("OutputWorkspace");
-    histogramData = true;
+    tmp = alg->getProperty("OutputWorkspace");
+    offset = 1;
   }
 
-  MatrixWorkspace_sptr tmp;
   for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
-
+    auto &points = tmp->points(i);
     auto &dataX = outputWS->dataX(i);
     auto &dataY = outputWS->dataY(i);
     auto &dataE = outputWS->dataE(i);
 
-    // get iterators for cropped region
-    auto low = std::lower_bound(dataX.begin(), dataX.end(), xMin[i]);
-    auto up = std::upper_bound(dataX.begin(), dataX.end(), xMax[i]);
+    // get iterators for cropped region using points
+    auto low = std::lower_bound(points.begin(), points.end(), xMin[i]);
+    auto up = std::upper_bound(points.begin(), points.end(), xMax[i]);
     // convert to index
-    auto lowerIndex = std::distance(dataX.begin(), low);
-    auto upperIndex = std::distance(dataX.begin(), up);
+    auto lowerIndex = std::distance(points.begin(), low);
+    auto upperIndex = std::distance(points.begin(), up);
 
     // get new vectors
-    std::vector<double> newX(low, up);
-
-    low = std::next(dataY.begin(), lowerIndex);
-    up = std::next(dataY.begin(), upperIndex);
-    std::vector<double> newY(low, up);
-
-    low = std::next(dataE.begin(), lowerIndex);
-    up = std::next(dataE.begin(), upperIndex);
-    std::vector<double> newE(low, up);
+    std::vector<double> newY = getSubVector(dataY, lowerIndex, upperIndex);
+    std::vector<double> newE = getSubVector(dataE, lowerIndex, upperIndex);
+    if (upperIndex + 1 < dataX.size()) {
+      // the offset adds one to the upper index for histograms
+      // only use the offset if the end is cropped
+      upperIndex += 1;
+    }
+    std::vector<double> newX =
+        getSubVector(dataX, lowerIndex, upperIndex);
 
     // resize the data
     dataX.resize(newX.size());
@@ -115,20 +126,11 @@ void CropWorkspaceRagged::exec() {
     dataE.resize(newE.size());
 
     // update the data
-    outputWS->setPoints(i, std::move(newX));
+    outputWS->mutableX(i)= std::move(newX);
     outputWS->setCounts(i, std::move(newY));
     outputWS->mutableE(i) = std::move(newE);
   }
-  // return the same ws type as we recieved
-  if (histogramData) {
-    auto alg = createChildAlgorithm("ConvertToHistogram");
-    alg->initialize();
-    alg->setRethrows(true);
-    alg->setProperty("InputWorkspace", outputWS);
-    alg->setProperty("OutputWorkspace", outputWS);
-    alg->execute();
-    outputWS = alg->getProperty("OutputWorkspace");
-  }
+
 
   setProperty("OutputWorkspace", outputWS);
 }
