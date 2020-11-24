@@ -1977,9 +1977,12 @@ void FunctionTreeView::tieChanged(QtProperty *prop) {
 
 /// Called when a constraint property changes
 void FunctionTreeView::constraintChanged(QtProperty *prop) {
-  for (const auto &constraint : m_constraints) {
-    const bool isLower = constraint.lower == prop;
-    const bool isUpper = constraint.upper == prop;
+  // Needed more control over loop here to prevent exceptions being thrown
+  QMultiMap<QtProperty *, AConstraint>::iterator it =
+      m_constraints.begin();
+  for (int i = 0; i < m_constraints.size(); ++i) {
+    const bool isLower = it.value().lower == prop;
+    const bool isUpper = it.value().upper == prop;
     if (isLower || isUpper) {
       auto paramProp = getParentParameterProperty(prop);
       QString functionIndex, constraint;
@@ -1988,6 +1991,9 @@ void FunctionTreeView::constraintChanged(QtProperty *prop) {
         emit parameterConstraintAdded(functionIndex, constraint);
       }
     }
+    // Increment constarint map only if we know it is safe to do so
+    if (i + 1 != m_constraints.size())
+      ++it;
   }
 }
 
