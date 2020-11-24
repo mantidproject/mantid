@@ -14,7 +14,7 @@ from mantid.simpleapi import RotateInstrumentComponent
 from mantid.simpleapi import CorelliPowderCalibrationApply
 
 
-class CorelliPowderCalibrationApply(MantidSystemTest):
+class CorelliPowderCalibrationApplyTest(MantidSystemTest):
     """
     Build an empty/reference CORELLI instrument and a calibration
     table to test the apply functionality.
