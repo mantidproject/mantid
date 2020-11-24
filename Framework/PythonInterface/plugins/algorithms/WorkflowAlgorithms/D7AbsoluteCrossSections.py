@@ -389,18 +389,23 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         if output_unit == 'TwoTheta':
             unit = unit.format('TwoTheta')
             if mtd[ws].getNumberOfEntries() > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
-                self._call_sum_data(ws)
+                self._merge_polarisations(ws)
                 ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula='-x')
-            elif self.getProperty('OutputTreatment').value == 'Individual':
+            else:
                 ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='SignedTheta', OrderAxis=False)
                 ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
                 Transpose(InputWorkspace=ws, OutputWorkspace=ws)
         elif output_unit == 'Q':
             unit = unit.format('Q')
-            if self.getPropertyValue('OutputTreatment') == 'Sum':
+            if mtd[ws].getNumberOfEntries() > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
                 self._merge_polarisations(ws)
-                ConvertUnits(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ',
-                             EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value)
+                wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value # in Angstrom
+                # flips axis sign and converts detector 2theta to momentum exchange
+                formula = '4*pi*sin(-0.5*pi*x/180.0)/{}'.format(wavelength)
+                ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula=formula)
+                # manually set the correct x-axis unit
+                for entry in mtd[ws]:
+                    entry.getAxis(0).setUnit('MomentumTransfer')
             else:
                 ConvertSpectrumAxis(InputWorkspace=ws, OutputWorkspace=ws, Target='ElasticQ',
                                     EFixed=self._sampleAndEnvironmentProperties['InitialEnergy'].value,
@@ -414,11 +419,33 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             mtd[ws].setYUnitLabel("{} ({})".format(unit, unit_symbol))
         return ws
 
-    def _call_sum_data(self, ws):
-        SumOverlappingTubes(InputWorkspaces=ws, OutputWorkspace=ws,
+    def _merge_polarisations(self, ws):
+        pol_directions = set()
+        numors = set()
+        for name in mtd[ws].getNames():
+            first_underscore = name.find("_")
+            numors.add(name[:first_underscore])
+            pol_directions.add(name[first_underscore+1:])
+        if len(numors) > 1:
+            names_list = []
+            for direction in sorted(list(pol_directions)):
+                name = '{0}_{1}'.format(ws, direction)
+                list_pol = []
+                for numor in numors:
+                    list_pol.append('{0}_{1}'.format(numor, direction))
+                self._call_sum_data(input_name=','.join(list_pol), output_name=name)
+                names_list.append(name)
+            DeleteWorkspaces(WorkspaceList=ws)
+            GroupWorkspaces(InputWorkspaces=names_list, OutputWorkspace=ws)
+        return ws
+
+    def _call_sum_data(self, input_name, output_name=''):
+        if output_name == '':
+            output_name = input_name
+        SumOverlappingTubes(InputWorkspaces=input_name, OutputWorkspace=output_name,
                             OutputType='1D', ScatteringAngleBinning=self.getProperty('ScatteringAngleBinSize').value,
                             Normalise=True, HeightAxis='-0.1,0.1')
-        return ws
+        return output_name
 
     def _call_cross_section_separation(self, input_ws):
         component_ws = self._cross_section_separation(input_ws)
