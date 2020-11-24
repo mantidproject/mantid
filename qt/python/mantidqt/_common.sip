@@ -1066,3 +1066,40 @@ public:
     WorkspaceSelector(QWidget *parent = nullptr, bool init = true) /KeywordArgs="All"/;
     void setOptional(bool optional);
 };
+
+// ----------------------------------------------------------------------------
+// FitScriptGeneratorModel
+// ----------------------------------------------------------------------------
+
+class FitScriptGeneratorModel {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
+%End
+public:
+    FitScriptGeneratorModel();
+};
+
+// ----------------------------------------------------------------------------
+// FitScriptGeneratorView
+// ----------------------------------------------------------------------------
+
+class FitScriptGeneratorView : QWidget{
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
+%End
+public:
+    FitScriptGeneratorView();
+};
+
+// ----------------------------------------------------------------------------
+// FitScriptGeneratorPresenter
+// ----------------------------------------------------------------------------
+
+class FitScriptGeneratorPresenter {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
+%End
+public:
+    FitScriptGeneratorPresenter(FitScriptGeneratorView *view,
+                                FitScriptGeneratorModel *model);
+};

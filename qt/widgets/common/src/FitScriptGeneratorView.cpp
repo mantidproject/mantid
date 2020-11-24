@@ -4,12 +4,11 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "FitScriptGeneratorView.h"
-#include "FitScriptGeneratorPresenter.h"
+#include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
+#include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-namespace Fitting {
 
 FitScriptGeneratorView::FitScriptGeneratorView() : m_presenter() {
   m_ui.setupUi(this);
@@ -29,6 +28,5 @@ void FitScriptGeneratorView::onRemoveClicked() {
   m_presenter->notifyPresenter(ViewEvent::RemoveClicked);
 }
 
-} // namespace Fitting
 } // namespace MantidWidgets
 } // namespace MantidQt

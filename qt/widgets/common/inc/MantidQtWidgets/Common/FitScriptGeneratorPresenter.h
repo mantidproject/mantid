@@ -6,14 +6,14 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "FitScriptGeneratorModel.h"
 #include "FitScriptGeneratorView.h"
 
 namespace MantidQt {
 namespace MantidWidgets {
-namespace Fitting {
 
 using ViewEvent = FitScriptGeneratorView::Event;
+
+class FitScriptGeneratorModel;
 
 class FitScriptGeneratorPresenter {
 public:
@@ -28,6 +28,5 @@ private:
   FitScriptGeneratorView *m_view;
 };
 
-} // namespace Fitting
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -13,7 +13,6 @@
 
 namespace MantidQt {
 namespace MantidWidgets {
-namespace Fitting {
 
 class FitScriptGeneratorPresenter;
 
@@ -38,6 +37,5 @@ private:
   Ui::FitScriptGenerator m_ui;
 };
 
-} // namespace Fitting
 } // namespace MantidWidgets
 } // namespace MantidQt
