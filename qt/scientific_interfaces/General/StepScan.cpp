@@ -721,7 +721,6 @@ void StepScan::plotCurve() {
   runPythonCode(QString::fromStdString(pyCode));
 #else
   std::string pyCode =
-      "from mantid.simpleapi import *\n"
       "import matplotlib.pyplot as plt\n"
       "from mantid import plots\n"
       "fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})\n"
