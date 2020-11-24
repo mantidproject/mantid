@@ -385,7 +385,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def _set_units(self, ws):
         output_unit = self.getPropertyValue('OutputUnits')
         unit_symbol = 'barn / sr / formula unit'
-        unit = 'd sigma / d Omega ({0})'
+        unit = 'd$\sigma$/d$\Omega$ ({0})'
         if output_unit == 'TwoTheta':
             unit = unit.format('TwoTheta')
             if mtd[ws].getNumberOfEntries() > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
@@ -407,8 +407,11 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                     OrderAxis=False)
                 Transpose(InputWorkspace=ws, OutputWorkspace=ws)
 
-        for entry in mtd[ws]:
-            entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
+        if isinstance(mtd[ws], WorkspaceGroup):
+            for entry in mtd[ws]:
+                entry.setYUnitLabel("{} ({})".format(unit, unit_symbol))
+        else:
+            mtd[ws].setYUnitLabel("{} ({})".format(unit, unit_symbol))
         return ws
 
     def _call_sum_data(self, ws):
