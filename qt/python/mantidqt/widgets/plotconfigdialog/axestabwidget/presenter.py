@@ -38,7 +38,7 @@ class AxesTabWidgetPresenter:
         # Signals
         self.view.select_axes_combo_box.currentIndexChanged.connect(
             self.update_view)
-        self.view.axis_button_group.buttonClicked.connect(
+        self.view.axis_tab_bar.currentChanged.connect(
             self.axis_changed)
         self.view.apply_all_button.clicked.connect(self.apply_all_properties)
         self.view.show_minor_ticks_check_box.toggled.connect(
@@ -215,11 +215,11 @@ class AxesTabWidgetPresenter:
         plot_is_3d = isinstance(ax, Axes3D)
 
         # Enable the z-axis option if the plot is 3D.
-        self.view.set_z_radio_button_enabled(plot_is_3d)
+        self.view.set_z_axis_selector_enabled(plot_is_3d)
 
         # For tiled plots
-        if not plot_is_3d and self.view.get_z_radio_button_checked():
-            self.view.set_x_radio_button_click()
+        if not plot_is_3d and self.view.get_z_axis_selector_checked():
+            self.view.set_x_axis_selector_click()
 
         # Changing the axis scale doesn't work with 3D plots, this is a known matplotlib issue,
         # so the scale option is disabled.
