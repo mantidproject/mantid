@@ -68,19 +68,29 @@ private:
                                         double totalScatterXsection);
   double interpolateLogQuadratic(
       const API::MatrixWorkspace_sptr workspaceToInterpolate, double x);
-  double scatter(const int nEvents, const size_t nScatters, const double absorbXsection,
-                 const API::Sample &sample,
-                 const Geometry::Instrument &instrument,
-                 Kernel::PseudoRandomNumberGenerator &rng, const double vmfp,
-                 const double sigma_total, double scatteringXSection,
-                 const API::MatrixWorkspace_sptr SOfQ, const double kinc,
-                 Kernel::V3D detPos);
+  double simulateEvents(const int nEvents, const size_t nScatters,
+                        const double absorbXsection, const API::Sample &sample,
+                        const Geometry::Instrument &instrument,
+                        Kernel::PseudoRandomNumberGenerator &rng,
+                        const double vmfp, const double sigma_total,
+                        double scatteringXSection,
+                        const API::MatrixWorkspace_sptr SOfQ, const double kinc,
+                        Kernel::V3D detPos);
+  std::tuple<bool, double>
+  scatter(const size_t nScatters, const double absorbXsection,
+          const API::Sample &sample, const Geometry::Instrument &instrument,
+          Kernel::V3D sourcePos, Kernel::PseudoRandomNumberGenerator &rng,
+          const double vmfp, const double sigma_total,
+          double scatteringXSection, const API::MatrixWorkspace_sptr SOfQ,
+          const double kinc, Kernel::V3D detPos);
   Geometry::Track start_point(const API::Sample &sample,
-                              const Geometry::Instrument &instrument,
+                              std::shared_ptr<const Geometry::ReferenceFrame>,
+                              Kernel::V3D sourcePos,
                               Kernel::PseudoRandomNumberGenerator &rng);
   Geometry::Track
   generateInitialTrack(const API::Sample &sample,
-                       const Geometry::Instrument &instrument,
+                       std::shared_ptr<const Geometry::ReferenceFrame> frame,
+                       const Kernel::V3D sourcePos,
                        Kernel::PseudoRandomNumberGenerator &rng);
   void inc_xyz(Geometry::Track &track, double vl);
   void updateWeightAndPosition(Geometry::Track &track, double &weight,
@@ -90,6 +100,7 @@ private:
              const double kinc, double scatteringXSection,
              Kernel::PseudoRandomNumberGenerator &rng, double &QSS,
              double &weight);
+  int m_callsToInterceptSurface;
 };
 } // namespace Algorithms
 } // namespace Mantid

@@ -133,11 +133,12 @@ void MuscatElastic::exec() {
       useSparseInstrument ? simulationWS : *inputWS;
   auto instrument = instrumentWS.getInstrument();
   const auto nhists = static_cast<int64_t>(instrumentWS.getNumberHistograms());
+  auto nbins = inputWS->blocksize();
 
   const size_t nScatters = getProperty("NumberScatterings");
   const int seed = getProperty("SeedValue");
 
-  Progress prog(this, 0.0, 1.0, nhists);
+  Progress prog(this, 0.0, 1.0, nhists * nbins);
   prog.setNotifyStep(0.01);
   const std::string reportMsg = "Computing corrections";
 
@@ -148,7 +149,6 @@ void MuscatElastic::exec() {
     double vmfp, sigma_total, scatteringXSection;
     auto numberDensity =
         inputWS->sample().getMaterial().numberDensityEffective();
-    auto nbins = inputWS->blocksize();
     auto histnew = simulationWS.histogram(i);
     if (!inputWS->spectrumInfo().isMonitor(i)) { // no two theta for monitors
       for (int bin = 0; bin < nbins; bin++) {
@@ -181,7 +181,7 @@ void MuscatElastic::exec() {
                        static_cast<double (*)(double)>(std::log));
         auto detPos = inputWS->detectorInfo().position(i);
 
-        double totalSingleScatterNoAbs = scatter(
+        double totalSingleScatterNoAbs = simulateEvents(
             nSingleScatterEvents, 1, 0, inputWS->sample(), *instrument, rng,
             vmfp, sigma_total, scatteringXSection, SQWS, kinc, detPos);
 
@@ -189,18 +189,18 @@ void MuscatElastic::exec() {
         for (size_t ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
-          total[ne] = scatter(
+          total[ne] = simulateEvents(
               nEvents, ne + 1, absorbXsection, inputWS->sample(), *instrument,
               rng, vmfp, sigma_total, scatteringXSection, SQWS, kinc, detPos);
         }
         // just output the factor for largest ne for now
         // Could have a separate WS for each scatter order perhaps??
         histnew.mutableY()[bin] = total[nScatters - 1];
+        prog.report(reportMsg);
       }
     }
     outputWS->setHistogram(i, histnew);
 
-    prog.report(reportMsg);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -208,6 +208,9 @@ void MuscatElastic::exec() {
   // if (useSparseInstrument) {
   //  interpolateFromSparse(*outputWS, *sparseWS, interpolateOpt);
   //}
+
+  g_log.warning() << "Calls to interceptSurface= " +
+                         std::to_string(m_callsToInterceptSurface) + "\n";
 }
 
 std::tuple<double, double>
@@ -252,43 +255,69 @@ double MuscatElastic::interpolateLogQuadratic(
   return exp(A * U * U + B * U + C);
 }
 
-double MuscatElastic::scatter(const int nEvents, const size_t nScatters,
-                              const double absorbXsection, const Sample &sample,
-                              const Geometry::Instrument &instrument,
-                              Kernel::PseudoRandomNumberGenerator &rng,
-                              const double vmfp, const double sigma_total,
-                              double scatteringXSection,
-                              const MatrixWorkspace_sptr SOfQ,
-                              const double kinc, Kernel::V3D detPos) {
+double MuscatElastic::simulateEvents(
+    const int nEvents, const size_t nScatters, const double absorbXsection,
+    const Sample &sample, const Geometry::Instrument &instrument,
+    Kernel::PseudoRandomNumberGenerator &rng, const double vmfp,
+    const double sigma_total, double scatteringXSection,
+    const MatrixWorkspace_sptr SOfQ, const double kinc, Kernel::V3D detPos) {
   double sumOfWeights = 0;
+  auto sourcePos = instrument.getSource()->getPos();
   for (int ie = 0; ie < nEvents; ie++) {
-    double weight = 1;
-    auto track = start_point(sample, instrument, rng);
-    updateWeightAndPosition(track, weight, vmfp, sigma_total, rng);
-
-    double QSS = 0;
-    for (size_t is = 0; is < nScatters - 1; is++) {
-      q_dir(track, SOfQ, kinc, scatteringXSection, rng, QSS, weight);
-      int nlinks = sample.getShape().interceptSurface(track);
-      updateWeightAndPosition(track, weight, vmfp, sigma_total, rng);
-    }
-    // divide by QSS here rather than outside scatter (as was done in original
-    // Fortan) to avoid the magic 1/(nscatter-1)^(nscatter-1) factors
-    weight = weight / pow(QSS, nScatters - 1);
-
-    Kernel::V3D directionToDetector = detPos - track.startPoint();
-    auto &prevDirection = track.direction();
-    directionToDetector.normalize();
-    track.reset(track.startPoint(), directionToDetector);
-    int nlinks = sample.getShape().interceptSurface(track);
-    double dl = track.front().distInsideObject;
-    auto q = directionToDetector - prevDirection;
-    auto SQ = interpolateLogQuadratic(SOfQ, q.norm());
-    auto AT2 = exp(-dl / vmfp);
-    weight = weight * AT2 * SQ * scatteringXSection / (4 * M_PI);
-    sumOfWeights += weight;
+    auto [success, weight] =
+        scatter(nScatters, absorbXsection, sample, instrument, sourcePos, rng,
+                vmfp, sigma_total, scatteringXSection, SOfQ, kinc, detPos);
+    if (success)
+      sumOfWeights += weight;
+    else
+      ie--;
   }
   return sumOfWeights / nEvents;
+}
+
+std::tuple<bool, double> MuscatElastic::scatter(
+    const size_t nScatters, const double absorbXsection, const Sample &sample,
+    const Geometry::Instrument &instrument, const V3D sourcePos,
+    Kernel::PseudoRandomNumberGenerator &rng, const double vmfp,
+    const double sigma_total, double scatteringXSection,
+    const MatrixWorkspace_sptr SOfQ, const double kinc, Kernel::V3D detPos) {
+  double weight = 1;
+  auto track =
+      start_point(sample, instrument.getReferenceFrame(), sourcePos, rng);
+  updateWeightAndPosition(track, weight, vmfp, sigma_total, rng);
+
+  double QSS = 0;
+  for (size_t is = 0; is < nScatters - 1; is++) {
+    q_dir(track, SOfQ, kinc, scatteringXSection, rng, QSS, weight);
+    int nlinks = sample.getShape().interceptSurface(track);
+    m_callsToInterceptSurface++;
+    if (nlinks == 0) {
+      return {false, 0};
+    }
+    updateWeightAndPosition(track, weight, vmfp, sigma_total, rng);
+  }
+  // divide by QSS here rather than outside scatter (as was done in original
+  // Fortan) to avoid the magic 1/(nscatter-1)^(nscatter-1) factors
+  weight = weight / pow(QSS, nScatters - 1);
+
+  Kernel::V3D directionToDetector = detPos - track.startPoint();
+  auto &prevDirection = track.direction();
+  directionToDetector.normalize();
+  track.reset(track.startPoint(), directionToDetector);
+  int nlinks = sample.getShape().interceptSurface(track);
+  m_callsToInterceptSurface++;
+  // due to VALID_INTERCEPT_POINT_SHIFT some tracks that skim the surface
+  // of a CSGObject sample may not generate valid tracks. Start over again
+  // for this event
+  if (nlinks == 0) {
+    return {false, 0};
+  }
+  double dl = track.front().distInsideObject;
+  auto q = directionToDetector - prevDirection;
+  auto SQ = interpolateLogQuadratic(SOfQ, q.norm());
+  auto AT2 = exp(-dl / vmfp);
+  weight = weight * AT2 * SQ * scatteringXSection / (4 * M_PI);
+  return {true, weight};
 }
 
 // update track direction, QSS and weight
@@ -351,15 +380,19 @@ void MuscatElastic::q_dir(Geometry::Track track,
   }
 }
 
-Geometry::Track
-MuscatElastic::start_point(const Sample &sample,
-                           const Geometry::Instrument &instrument,
-                           Kernel::PseudoRandomNumberGenerator &rng) {
+Geometry::Track MuscatElastic::start_point(
+    const Sample &sample, std::shared_ptr<const Geometry::ReferenceFrame> frame,
+    const V3D sourcePos, Kernel::PseudoRandomNumberGenerator &rng) {
   int MAX_ATTEMPTS = 100;
   for (int i = 0; i < MAX_ATTEMPTS; i++) {
-    auto t = generateInitialTrack(sample, instrument, rng);
+    auto t = generateInitialTrack(sample, frame, sourcePos, rng);
     int nlinks = sample.getShape().interceptSurface(t);
+    m_callsToInterceptSurface++;
     if (nlinks > 0) {
+      if (i > 0) {
+        g_log.warning() << "Generating initial track required " +
+                               std::to_string(i + 1) + " attempts.\n";
+      }
       return t;
     }
   }
@@ -378,11 +411,19 @@ void MuscatElastic::updateWeightAndPosition(
   inc_xyz(track, vl);
 }
 
-Geometry::Track
-MuscatElastic::generateInitialTrack(const API::Sample &sample,
-                                    const Geometry::Instrument &instrument,
-                                    Kernel::PseudoRandomNumberGenerator &rng) {
-  const auto frame = instrument.getReferenceFrame();
+/**
+ * Generate an initial track starting at the source and entering
+ * the sample at a random point on its front surface
+ * @param sample The sample
+ * @param frame The instrument's reference frame
+ * @param sourcePos The source position
+ * @param rng Random number generator
+ * @return a track
+ */
+Geometry::Track MuscatElastic::generateInitialTrack(
+    const API::Sample &sample,
+    std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D sourcePos,
+    Kernel::PseudoRandomNumberGenerator &rng) {
   auto sampleBox = sample.getShape().getBoundingBox();
   // generate random point on front surface of sample bounding box
   auto ptx = sampleBox.minPoint()[frame->pointingHorizontal()] +
@@ -394,7 +435,7 @@ MuscatElastic::generateInitialTrack(const API::Sample &sample,
   ptOnBeamProfile[frame->pointingHorizontal()] = ptx;
   ptOnBeamProfile[frame->pointingUp()] = pty;
   ptOnBeamProfile[frame->pointingAlongBeam()] =
-      instrument.getSource()->getPos()[frame->pointingAlongBeam()];
+      sourcePos[frame->pointingAlongBeam()];
   auto toSample = Kernel::V3D();
   toSample[frame->pointingAlongBeam()] = 1.;
   Geometry::Track trackToSample = Geometry::Track(ptOnBeamProfile, toSample);
