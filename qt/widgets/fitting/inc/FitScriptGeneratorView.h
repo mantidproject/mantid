@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
+#include "ui_FitScriptGenerator.h"
 
 #include <QWidget>
 
@@ -17,16 +18,24 @@ namespace Fitting {
 class FitScriptGeneratorPresenter;
 
 class FitScriptGeneratorView : public QWidget {
+  Q_OBJECT
+
 public:
-  enum class Event { StartXChanged, EndXChanged } const;
+  enum class Event { RemoveClicked, StartXChanged, EndXChanged } const;
 
   FitScriptGeneratorView();
   ~FitScriptGeneratorView() = default;
 
   void subscribePresenter(FitScriptGeneratorPresenter *presenter);
 
+private slots:
+  void onRemoveClicked();
+
 private:
+  void connectSignals();
+
   FitScriptGeneratorPresenter *m_presenter;
+  Ui::FitScriptGenerator m_ui;
 };
 
 } // namespace Fitting
