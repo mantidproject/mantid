@@ -98,21 +98,21 @@ class CorelliPowderCalibrationApplyTest(MantidSystemTest):
                                   Y=-0.99953,
                                   Z=-0.0184843,
                                   Angle=69.4926,
-                                  RelativePosition=False)
+                                  RelativeRotation=False)
         RotateInstrumentComponent(Workspace=self.ws_target,
                                   ComponentName="bank42/sixteenpack",
                                   X=-0.011362,
                                   Y=-0.999935,
                                   Z=-0.000173303,
                                   Angle=91.8796,
-                                  RelativePosition=False)
+                                  RelativeRotation=False)
         RotateInstrumentComponent(Workspace=self.ws_target,
                                   ComponentName="bank42/sixteenpack",
                                   X=-0.0158497,
                                   Y=-0.999694,
                                   Z=0.0189818,
                                   Angle=169.519,
-                                  RelativePosition=False)
+                                  RelativeRotation=False)
 
     def runTest(self):
         # apply the calibration to a reference CORELLI instrument
@@ -135,6 +135,6 @@ class CorelliPowderCalibrationApplyTest(MantidSystemTest):
         _ws_tgt = mtd[self.ws_target]
 
         # check if the calibrated workspace matches the target
-        rst, _ = CompareWorkspaces(_ws_tgt, _ws_cal)
+        rst, msg = CompareWorkspaces(_ws_tgt, _ws_cal)
         if rst is False:
             raise ValueError("The calibration did not return correct results.")
