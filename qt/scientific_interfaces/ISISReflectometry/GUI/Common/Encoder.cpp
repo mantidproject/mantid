@@ -69,11 +69,12 @@ QMap<QString, QVariant> Encoder::encodeBatch(const IMainWindowView *mwv,
   auto runsTablePresenter =
       dynamic_cast<RunsTablePresenter *>(runsPresenter->m_tablePresenter.get());
   auto reductionJobs = &runsTablePresenter->m_model.m_reductionJobs;
+  auto searcher = runsPresenter->m_searcher.get();
 
   QMap<QString, QVariant> map;
-  map.insert(
-      QString("runsView"),
-      QVariant(encodeRuns(gui->m_runs.get(), projectSave, reductionJobs)));
+  map.insert(QString("runsView"),
+             QVariant(encodeRuns(gui->m_runs.get(), projectSave, reductionJobs,
+                                 searcher)));
   map.insert(QString("eventView"),
              QVariant(encodeEvent(gui->m_eventHandling.get())));
   map.insert(QString("experimentView"),
@@ -86,14 +87,21 @@ QMap<QString, QVariant> Encoder::encodeBatch(const IMainWindowView *mwv,
 
 QMap<QString, QVariant> Encoder::encodeRuns(const QtRunsView *gui,
                                             bool projectSave,
-                                            const ReductionJobs *redJobs) {
+                                            const ReductionJobs *redJobs,
+                                            ISearcher *searcher) {
   QMap<QString, QVariant> map;
   map.insert(QString("runsTable"),
              QVariant(encodeRunsTable(gui->m_tableView, projectSave, redJobs)));
   map.insert(QString("comboSearchInstrument"),
              QVariant(gui->m_ui.comboSearchInstrument->currentIndex()));
-  map.insert(QString("textSearch"), QVariant(gui->m_ui.textSearch->text()));
-  map.insert(QString("textCycle"), QVariant(gui->m_ui.textCycle->text()));
+  // This is not ideal but the search criteria may be changed on the view and
+  // no longer be relevant for the search results. The latter are more
+  // important so use the cached search criteria, i.e. only save the search
+  // criteria if they have been used to perform a search
+  map.insert(QString("textSearch"),
+             QVariant(QString::fromStdString(searcher->investigation())));
+  map.insert(QString("textCycle"),
+             QVariant(QString::fromStdString(searcher->cycle())));
   map.insert(QString("searchResults"),
              QVariant(encodeSearchModel(gui->searchResults())));
   return map;

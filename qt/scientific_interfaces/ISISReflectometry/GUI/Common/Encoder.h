@@ -39,6 +39,7 @@ class IBatchPresenter;
 class IMainWindowView;
 class ISearchModel;
 class RangeInQ;
+class ISearcher;
 class SearchResult;
 class TransmissionRunPair;
 class QtEventView;
@@ -65,7 +66,8 @@ private:
                                              int rowsNum, int columnsNum);
   QMap<QString, QVariant> encodeInstrument(const QtInstrumentView *gui);
   QMap<QString, QVariant> encodeRuns(const QtRunsView *gui, bool projectSave,
-                                     const ReductionJobs *redJobs);
+                                     const ReductionJobs *redJobs,
+                                     ISearcher *searcher);
   QMap<QString, QVariant> encodeRunsTable(const QtRunsTableView *gui,
                                           bool projectSave,
                                           const ReductionJobs *redJobs);

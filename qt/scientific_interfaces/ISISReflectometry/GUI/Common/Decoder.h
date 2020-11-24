@@ -41,6 +41,7 @@ class IBatchPresenter;
 class IMainWindowView;
 class RangeInQ;
 class TransmissionRunPair;
+class ISearcher;
 class SearchResult;
 using SearchResults = std::vector<SearchResult>;
 
@@ -70,7 +71,7 @@ private:
   void decodeRuns(QtRunsView *gui, ReductionJobs *redJobs,
                   RunsTablePresenter *presenter,
                   const QMap<QString, QVariant> &map,
-                  boost::optional<int> precision);
+                  boost::optional<int> precision, ISearcher *searcher);
   void decodeRunsTable(QtRunsTableView *gui, ReductionJobs *redJobs,
                        RunsTablePresenter *presenter,
                        const QMap<QString, QVariant> &map,

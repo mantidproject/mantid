@@ -14,6 +14,7 @@
 #include "../Experiment/QtExperimentView.h"
 #include "../Instrument/QtInstrumentView.h"
 #include "../MainWindow/QtMainWindowView.h"
+#include "../Runs/QtCatalogSearcher.h"
 #include "../Runs/QtRunsView.h"
 #include "../Runs/RunsPresenter.h"
 #include "../RunsTable/QtRunsTableView.h"
@@ -78,12 +79,13 @@ void Decoder::decodeBatch(const IMainWindowView *mwv, int batchIndex,
       dynamic_cast<RunsTablePresenter *>(runsPresenter->m_tablePresenter.get());
   auto reductionJobs = &runsTablePresenter->m_model.m_reductionJobs;
   auto destinationPrecision = batchPresenter->m_mainPresenter->roundPrecision();
+  auto searcher = runsPresenter->m_searcher.get();
   // We must do the Runs tab first because this sets the instrument, which
   // other settings may need to be correct. There is also a notification to set
   // defaults for this instrument so we need to do that before other settings
   // or it will override them.
   decodeRuns(gui->m_runs.get(), reductionJobs, runsTablePresenter,
-             map[QString("runsView")].toMap(), destinationPrecision);
+             map[QString("runsView")].toMap(), destinationPrecision, searcher);
   decodeEvent(gui->m_eventHandling.get(), map[QString("eventView")].toMap());
   decodeExperiment(gui->m_experiment.get(),
                    map[QString("experimentView")].toMap());
@@ -186,7 +188,7 @@ void Decoder::decodeInstrument(const QtInstrumentView *gui,
 void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs,
                          RunsTablePresenter *presenter,
                          const QMap<QString, QVariant> &map,
-                         boost::optional<int> precision) {
+                         boost::optional<int> precision, ISearcher *searcher) {
   decodeRunsTable(gui->m_tableView, redJobs, presenter,
                   map[QString("runsTable")].toMap(), precision);
   gui->m_ui.comboSearchInstrument->setCurrentIndex(
@@ -195,6 +197,11 @@ void Decoder::decodeRuns(QtRunsView *gui, ReductionJobs *redJobs,
   gui->m_ui.textCycle->setText(map[QString("textCycle")].toString());
   gui->mutableSearchResults().replaceResults(
       decodeSearchResults(map[QString("searchResults")].toList()));
+  // To avoid thinking we are doing a "new search" we need to set the cached
+  // search criteria to be the same as the displayed criteria.
+  searcher->setInvestigation(
+      map[QString("textSearch")].toString().toStdString());
+  searcher->setCycle(map[QString("textCycle")].toString().toStdString());
 }
 
 namespace HIDDEN_LOCAL {

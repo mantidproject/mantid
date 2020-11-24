@@ -150,16 +150,14 @@ private:
   std::vector<std::string> m_instruments;
   /// The tolerance used when looking up settings by theta
   double m_thetaTolerance;
-  /// Cache last-used autoreduction search criteria
-  std::optional<SearchCriteria> m_lastAutoreductionSearch;
 
   /// searching
   bool search();
   void resizeSearchResultsColumns();
   bool searchInProgress() const;
-  SearchCriteria searchCriteria() const;
+  SearchCriteria searchCriteriaFromView() const;
+  SearchCriteria lastSearchCriteria() const;
   /// autoreduction
-  bool requireNewAutoreduction() const;
   void checkForNewRuns();
   void autoreduceNewRuns();
   bool autoreductionPrevented() const;
