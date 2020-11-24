@@ -25,61 +25,143 @@ public:
   static CropWorkspaceRaggedTest *createSuite() { return new CropWorkspaceRaggedTest(); }
   static void destroySuite(CropWorkspaceRaggedTest *suite) { delete suite; }
 
- Workspace_sptr createInputWorkspace() {
-    std::string name = "toCrop";
+void createInputWorkspace() {
+     std::string name = "toCrop";
      // Set up a small workspace for testing
      Workspace_sptr space =
           WorkspaceFactory::Instance().create("Workspace2D", m_numberOfSpectra, m_numberOfYPoints+1, m_numberOfYPoints);
-      Workspace2D_sptr space2D = std::dynamic_pointer_cast<Workspace2D>(space);
-      std::vector<double> ydata(m_numberOfYPoints*m_numberOfSpectra), errors(m_numberOfYPoints*m_numberOfSpectra);
+      m_ws = std::dynamic_pointer_cast<Workspace2D>(space);
+      std::vector<double> ydata, errors;
       for (int j = 0; j < m_numberOfSpectra; ++j) {
-        for (int k = 0; k < m_numberOfYPoints+1; ++k) {
-          ydata[k+j*m_numberOfYPoints] = k+1;
-          errors[k+j*m_numberOfYPoints] = sqrt(double(k+1));
-          space2D->dataX(j)[k] = k;
+	ydata.clear();
+	errors.clear();
+        for (int k = 0; k < m_numberOfYPoints; ++k) {
+          ydata.push_back(double(k+1));
+          errors.push_back(sqrt(double(k+1)));
+          m_ws->dataX(j)[k] = k;
         }
-        auto beginY = std::next(ydata.begin(), j * m_numberOfYPoints);
-        space2D->dataY(j) = std::vector<double>(beginY, std::next(beginY, m_numberOfYPoints));
-        auto beginE = std::next(errors.begin(), j * m_numberOfYPoints);
-        space2D->dataE(j) = std::vector<double>(beginE, std::next(beginE, m_numberOfYPoints));
+        m_ws->dataX(j)[m_numberOfYPoints+1] = m_numberOfYPoints+1;
+        m_ws->dataY(j) = ydata;
+        m_ws->dataE(j) = errors;
       }
-    return space2D;
   }
+
   void setUp() override{
     m_numberOfYPoints = 15;
     m_numberOfSpectra = 5;
-    auto a = createInputWorkspace();
+    createInputWorkspace();
   }
   void test_Name() { TS_ASSERT_EQUALS(m_alg.name(), "CropWorkspaceRagged"); }
 
-  void test_Version() { TS_ASSERT_EQUALS(m_alg.version(), 1); }
+  void test_Version() {TS_ASSERT_EQUALS(m_alg.version(), 1); }
 
   void test_Init() {
+	  return;
     TS_ASSERT_THROWS_NOTHING(m_alg.initialize());
     TS_ASSERT(m_alg.isInitialized());
   }
 
-  void test_InvalidInputs() {
-	  return;
-    std::string inputName = createInputWorkspace();
+  void test_NoInputs() {
     if (!m_alg.isInitialized())
       m_alg.initialize();
 
     TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
-    TS_ASSERT(!m_alg.isExecuted());
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("InputWorkspace", inputName));
-    TS_ASSERT_THROWS_NOTHING(
-        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
-    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "2"));
-    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "1"));
-    TS_ASSERT_THROWS_NOTHING(m_alg.execute());
-    TS_ASSERT(m_alg.isExecuted());
   }
 
+  void test_TooFewXMins(){
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setProperty("InputWorkspace", m_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "5."));
+
+    TS_ASSERT_THROWS(m_alg.setPropertyValue("XMin", ""), const std::invalid_argument &);
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1,2"));
+    TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
+  }
+
+  void test_TooFewXMaxs(){
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setProperty("InputWorkspace", m_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1."));
+
+    TS_ASSERT_THROWS(m_alg.setPropertyValue("XMax", ""), const std::invalid_argument &);
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11,12"));
+    TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
+  }
+
+  void test_TooManyMins(){
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setProperty("InputWorkspace", m_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11."));
+
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1,2,3,4,5,6"));
+    TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
+  }
+
+  void test_TooManyXMaxs(){
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setProperty("InputWorkspace", m_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1."));
+
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11,12,13,14,15,16"));
+    TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
+  }
+
+  void test_SingleValueCrop(){
+     TS_ASSERT_THROWS_NOTHING(
+        m_alg.setProperty("InputWorkspace", m_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "2."));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.execute());
+
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
+    for(int spec=0; spec<m_numberOfSpectra; spec++){
+    TS_ASSERT_DELTA(out->readX(spec)[0], 2.0, 1e-6);
+    TS_ASSERT_DELTA(out->readY(spec)[0], 3.0, 1e-6);
+    TS_ASSERT_DELTA(out->readE(spec)[0],1.732051, 1e-6);//sqrt(3)
+ 
+    TS_ASSERT_DELTA(out->readX(spec).back(), 11.0, 1e-6);
+    TS_ASSERT_DELTA(out->readY(spec).back(), 11.0, 1e-6);
+    TS_ASSERT_DELTA(out->readE(spec).back(), 3.316625, 1e-6);//sqrt(11)
+    }
+  
+  }
+
+  void test_MinListCrop(){
+     TS_ASSERT_THROWS_NOTHING(
+        m_alg.setProperty("InputWorkspace", m_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    std::vector<double> xMin{2.,3.,4.,5.,6.};
+
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "2., 5., 6., 7., 1."));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "11"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.execute());
+
+    MatrixWorkspace_sptr out = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
+    for(int spec=0; spec<m_numberOfSpectra; spec++){
+    TS_ASSERT_DELTA(out->readX(spec)[0],xMin[spec],  1e-6);
+    //TS_ASSERT_DELTA(out->readY(spec)[0],xMin[spec]+1. , 1e-6);
+    //TS_ASSERT_DELTA(out->readE(spec)[0],sqrt(xMin[spec]+1.), 1e-6);
+ 
+    TS_ASSERT_DELTA(out->readX(spec).back(), 11.0, 1e-6);
+    TS_ASSERT_DELTA(out->readY(spec).back(), 11.0, 1e-6);
+    TS_ASSERT_DELTA(out->readE(spec).back(), 3.316625, 1e-6);//sqrt(11)
+    }
+  
+  }
 
 private:
- std::string m_name;
+  Workspace2D_sptr m_ws;
   CropWorkspaceRagged m_alg;
   int m_numberOfSpectra;
   int m_numberOfYPoints;
