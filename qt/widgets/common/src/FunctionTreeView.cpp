@@ -1990,7 +1990,7 @@ void FunctionTreeView::constraintChanged(QtProperty *prop) {
         emit parameterConstraintAdded(functionIndex, constraint);
       }
     }
-    // Increment constarint map only if we know it is safe to do so
+    // Increment iterator only if we know it is safe to do so
     if (i + 1 != m_constraints.size())
       ++it;
   }
