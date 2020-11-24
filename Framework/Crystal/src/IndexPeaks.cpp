@@ -416,7 +416,7 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
   PeaksWorkspace_sptr ws = this->getProperty(Prop::PEAKSWORKSPACE);
   try {
     ws->sample().getOrientedLattice();
-  } catch (std::runtime_error &exc) {
+  } catch (std::runtime_error &) {
     helpMsgs[Prop::PEAKSWORKSPACE] = "No UB Matrix defined in the lattice.";
     return helpMsgs;
   }
