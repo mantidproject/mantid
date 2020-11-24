@@ -385,7 +385,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def _set_units(self, ws):
         output_unit = self.getPropertyValue('OutputUnits')
         unit_symbol = 'barn / sr / formula unit'
-        unit = 'd$\sigma$/d$\Omega$ ({0})'
+        unit = r'd$\sigma$/d$\Omega$ ({0})'
         if output_unit == 'TwoTheta':
             unit = unit.format('TwoTheta')
             if mtd[ws].getNumberOfEntries() > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
