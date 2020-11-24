@@ -23,7 +23,7 @@ class CorelliPowderCalibrationApplyTest(MantidSystemTest):
         """Generate the calibration table with correct format"""
         self.cali_table_name = "corelli_pd_cali_apl_tab"
         CreateEmptyTableWorkspace(OutputWorkspace=self.cali_table_name)
-        _calitab = mdt[self.cali_table_name]
+        _calitab = mtd[self.cali_table_name]
         # fix headers
         headers = [
             "ComponentName",
@@ -126,7 +126,7 @@ class CorelliPowderCalibrationApplyTest(MantidSystemTest):
         # ensure that the calibration application take place
         _ws_ref = mtd[self.ws_reference]
         _ws_cal = mtd[self.ws_calbrated]
-        rst, msg = CompareWorkspaces(_ws_ref, _ws_tgt)
+        rst, _ = CompareWorkspaces(_ws_ref, _ws_cal)
         if rst is True:
             raise ValueError("The Calibration is not applied to workspace")
 
@@ -135,6 +135,6 @@ class CorelliPowderCalibrationApplyTest(MantidSystemTest):
         _ws_tgt = mtd[self.ws_target]
 
         # check if the calibrated workspace matches the target
-        rst, msg = CompareWorkspaces(_ws_tgt, _ws_tgt)
+        rst, _ = CompareWorkspaces(_ws_tgt, _ws_cal)
         if rst is False:
             raise ValueError("The calibration did not return correct results.")
