@@ -96,16 +96,9 @@ class FittingTabPresenter(object):
     def end_x(self):
         return self._end_x
 
-    # Respond to changes on view
-    def handle_select_fit_data_clicked(self):
-        selected_data, dialog_return = WorkspaceSelectorView.get_selected_data(
-            self.context.data_context.current_runs,
-            self.context.data_context.instrument, self.selected_data,
-            self.view.fit_to_raw, self._plot_type, self.context, self.view)
-
-        if dialog_return:
-            self.selected_data = selected_data
-            self.manual_selection_made = True
+    def handle_fit_wizard_clicked(self):
+        # Open Fit Wizard interface
+        pass
 
     def handle_new_data_loaded(self):
         self.manual_selection_made = False

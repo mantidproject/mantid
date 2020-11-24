@@ -24,7 +24,7 @@ class FittingTabWidget(object):
         self.fitting_tab_model = FittingTabModel(context)
         self.fitting_tab_presenter = FittingTabPresenter(self.fitting_tab_view, self.fitting_tab_model, context)
 
-        self.fitting_tab_view.set_slot_for_select_workspaces_to_fit(self.fitting_tab_presenter.handle_select_fit_data_clicked)
+        self.fitting_tab_view.set_slot_for_fit_wizard_clicked(self.fitting_tab_presenter.handle_fit_wizard_clicked)
         self.fitting_tab_view.set_slot_for_display_workspace_changed(self.fitting_tab_presenter.handle_display_workspace_changed)
         self.fitting_tab_view.set_slot_for_display_workspace_changed(self.fitting_tab_presenter.handle_plot_guess_changed)
         self.fitting_tab_view.set_slot_for_simul_fit_by_changed(self.fitting_tab_presenter.handle_fit_by_changed)

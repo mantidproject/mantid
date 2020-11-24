@@ -139,12 +139,12 @@
       </widget>
      </item>
      <item row="4" column="4">
-      <widget class="QPushButton" name="select_workspaces_to_fit_button">
+      <widget class="QPushButton" name="fit_wizard_button">
        <property name="enabled">
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Select data to fit</string>
+        <string>Fit Wizard</string>
        </property>
       </widget>
      </item>

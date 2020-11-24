@@ -48,6 +48,8 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             table_utils.setRowName(self.fit_options_table, FIT_END_TABLE_ROW, "End X")
             self.end_time = DEFAULT_FREQUENCY_FIT_END_X
 
+        #self.fit_wizard_button.hide()
+
     def update_displayed_data_combo_box(self, data_list):
         self.parameter_display_combo.blockSignals(True)
         name = self.parameter_display_combo.currentText()
@@ -139,8 +141,8 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
                 '{} of {} fits failed'.format(len(boolean_list) - sum(boolean_list), len(boolean_list)))
             self.global_fit_status_label.setStyleSheet('color: red')
 
-    def set_slot_for_select_workspaces_to_fit(self, slot):
-        self.select_workspaces_to_fit_button.clicked.connect(slot)
+    def set_slot_for_fit_wizard_clicked(self, slot):
+        self.fit_wizard_button.clicked.connect(slot)
 
     def set_slot_for_display_workspace_changed(self, slot):
         self.parameter_display_combo.currentIndexChanged.connect(slot)
@@ -292,13 +294,11 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def disable_simul_fit_options(self):
         self.simul_fit_by_combo.setEnabled(False)
         self.simul_fit_by_specifier.setEnabled(False)
-        self.select_workspaces_to_fit_button.setEnabled(False)
 
     def hide_simultaneous_fit_options(self):
         self.simul_fit_checkbox.hide()
         self.simul_fit_by_combo.hide()
         self.simul_fit_by_specifier.hide()
-        self.select_workspaces_to_fit_button.hide()
 
     def enable_simul_fit_options(self):
         self.simul_fit_by_combo.setEnabled(True)
