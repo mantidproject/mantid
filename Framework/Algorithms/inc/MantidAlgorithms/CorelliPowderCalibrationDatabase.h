@@ -170,7 +170,7 @@ private:
       std::map<std::string, DataObjects::TableWorkspace_sptr> &calibwsmap,
       std::vector<std::string> orderedcomponents);
   // Create the summary CSV file
-  void saveCalibrtionTable(const std::string &calibdbdir);
+  void saveCalibrationTable(const std::string &calibdbdir);
   /// Set up a component name - TableWorkspace map for single component
   /// calibration
   void setComponentMap(
@@ -179,7 +179,7 @@ private:
 
   /// Input workspace where the calibration is from
   API::MatrixWorkspace_sptr mInputWS;
-  /// Inpout calibration worksapce
+  /// Input calibration worksapce
   DataObjects::TableWorkspace_sptr mInputCalibrationTableWS;
   /// Output calibration worksapce (merged with previous calibrated data)
   DataObjects::TableWorkspace_sptr mOutputWS;
