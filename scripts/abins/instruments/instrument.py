@@ -24,6 +24,9 @@ class Instrument:
         """Get a list of detector angles to sample"""
         raise NotImplementedError()
 
+    def get_setting(self):
+        return self._setting
+
     def calculate_q_powder(self, *, input_data=None, angle=None):
         """
         Calculates Q2.
