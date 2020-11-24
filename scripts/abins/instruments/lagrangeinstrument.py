@@ -21,8 +21,9 @@ class LagrangeInstrument(IndirectInstrument):
         self.parameters = abins.parameters.instruments[self._name]
 
     def get_sigma(self, frequencies):
-        ei_resolution = self.parameters['settings'][self._setting].get('ei_resolution', 0)
-        abs_resolution_meV = self.parameters['settings'][self._setting].get('abs_resolution_meV', 0)
+        setting = self.get_setting()
+        ei_resolution = self.parameters['settings'][setting].get('ei_resolution', 0)
+        abs_resolution_meV = self.parameters['settings'][setting].get('abs_resolution_meV', 0)
 
         if isinstance(abs_resolution_meV, list):  # interpret as polynomial in energy units
             abs_resolution_meV = np.abs(np.polyval(abs_resolution_meV, frequencies / MILLI_EV_TO_WAVENUMBER))
@@ -31,9 +32,9 @@ class LagrangeInstrument(IndirectInstrument):
 
         sigma = frequencies * ei_resolution + abs_resolution_cm
 
-        low_energy_indices = frequencies < (self.parameters['settings'][self._setting]
+        low_energy_indices = frequencies < (self.parameters['settings'][setting]
                                             .get('low_energy_cutoff_meV', float('-Inf')))
-        sigma[low_energy_indices] = (self.parameters['settings'][self._setting]
+        sigma[low_energy_indices] = (self.parameters['settings'][setting]
                                      .get('low_energy_resolution_meV', 0)
                                      * MILLI_EV_TO_WAVENUMBER)
         return sigma

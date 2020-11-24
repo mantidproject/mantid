@@ -20,9 +20,6 @@ class ToscaInstrument(IndirectInstrument):
     def __init__(self, setting: str = ''):
         super().__init__(name='TOSCA', setting=setting)
 
-        if self._setting != '':
-            print('WIP: TOSCA Instrument settings not yet implemented')
-
     @classmethod
     def get_sigma(cls, frequencies):
         """Frequency-dependent broadening width from empirical fit"""

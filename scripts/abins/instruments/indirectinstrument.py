@@ -22,7 +22,11 @@ class IndirectInstrument(Instrument, abins.FrequencyPowderGenerator):
 
     def get_angles(self):
         parameters = abins.parameters.instruments[self._name]
-        return parameters['angles']
+        if ('settings' in parameters
+                and 'angles' in parameters['settings'][self.get_setting()]):
+            return parameters['settings'][self.get_setting()]['angles']
+        else:
+            return parameters['angles']
 
     def calculate_q_powder(self, *, input_data=None, angle=None):
         """Calculates squared Q vectors.

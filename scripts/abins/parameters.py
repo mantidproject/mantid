@@ -55,11 +55,13 @@ instruments = {
         'chopper_allowed_frequencies': list(range(50, 601, 50))
         },
     'TOSCA': {
-        #    TOSCA parameters for calculating Q^2
+        # TOSCA parameters for calculating Q^2
         'final_neutron_energy': 32.0,  # Final energy on the crystal analyser in cm-1
-        'angles': [134.98885653282196],  # Forward detector angle; rather specific as test-data is based on truncated value in radians
         'cos_scattering_angle': math.cos(2.356),  # Angle of the crystal analyser radians (NO LONGER USED)
-        'settings': {'forward': None, 'backward': None},
+        # The forward detector angle israther specific as test-data was based on truncated value in radians
+        'settings': {'forward': {'angles': [134.98885653282196]},
+                     'backward': {'angles': [45.]},
+                     'both': {'angles': [45., 134.98885653282196]}},
         'settings_default': 'forward',
         # TOSCA parameters for resolution function
         # sigma = tosca_a * omega * omega + tosca_b * omega + tosca_c
