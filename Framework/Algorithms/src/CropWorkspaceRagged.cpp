@@ -100,7 +100,7 @@ void CropWorkspaceRagged::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*tmp, *outputWS))
   for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    auto points = tmp->points(i);
+    auto &points = tmp->points(i);
     auto &dataX = outputWS->dataX(i);
     auto &dataY = outputWS->dataY(i);
     auto &dataE = outputWS->dataE(i);
@@ -115,7 +115,7 @@ void CropWorkspaceRagged::exec() {
     // get new vectors
     std::vector<double> newY = getSubVector(dataY, lowerIndex, upperIndex);
     std::vector<double> newE = getSubVector(dataE, lowerIndex, upperIndex);
-    if (histogram && upperIndex + (unsigned)1 <= dataX.size()) {
+    if (histogram && upperIndex + (size_t)1 <= dataX.size()) {
       // the offset adds one to the upper index for histograms
       // only use the offset if the end is cropped
       upperIndex += 1;
@@ -129,7 +129,7 @@ void CropWorkspaceRagged::exec() {
 
     // update the data
     outputWS->mutableX(i) = std::move(newX);
-    outputWS->setCounts(i, std::move(newY));
+    outputWS->mutableY(i) = std::move(newY);
     outputWS->mutableE(i) = std::move(newE);
     PARALLEL_END_INTERUPT_REGION
   }

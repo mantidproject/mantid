@@ -48,11 +48,6 @@ public:
       m_ws->dataY(j) = ydata;
       m_ws->dataE(j) = errors;
     }
-    auto a = m_ws->isHistogramData();
-    auto xx = m_ws->dataX(0);
-    auto ll = m_ws->dataX(0).size();
-    auto mm = m_ws->dataY(0).size();
-    auto b = 1;
   }
 
   // check x data -> single should fail: 1.5 versus 2

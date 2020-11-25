@@ -35,8 +35,8 @@ Usage
     
     new=CropWorkspaceRagged(ws,x_min,x_max)
 
-    print("The number of bins in spectrum 1 is: {}".format(new.readX(0).size()))
-    print("The number of bins in spectrum 2 is: {}".format(new.readX(1).size()))
+    print("The number of bins in spectrum 1 is: {}".format(new.readX(0).size))
+    print("The number of bins in spectrum 2 is: {}".format(new.readX(1).size))
 
 Output:
 
