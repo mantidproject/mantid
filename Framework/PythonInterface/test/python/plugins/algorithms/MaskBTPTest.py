@@ -8,7 +8,7 @@ import unittest
 from mantid.simpleapi import *
 from mantid.api import *
 from testhelpers import WorkspaceCreationHelper
-from numpy import *
+from numpy import concatenate, arange, sort, array_equal, where
 
 # tests run x10 slower with this on, but it may be useful to track down issues refactoring
 CHECK_CONSISTENCY = False
@@ -43,10 +43,10 @@ class MaskBTPTest(unittest.TestCase):
                             'Detector index={} should be masked'.format(detIndex))
 
     def testMaskBTPWrongInstrument(self):
-        w=WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30,5,False,False)
+        w = WorkspaceCreationHelper.create2DWorkspaceWithFullInstrument(30, 5, False, False)
         AnalysisDataService.add('w',w)
         try:
-            MaskBTP(Workspace=w,Pixel="1")
+            MaskBTP(Workspace=w, Pixel="1")
             self.fail("Should not have got here. Should throw because wrong instrument.")
         except RuntimeError:
             pass
@@ -79,17 +79,17 @@ class MaskBTPTest(unittest.TestCase):
         DeleteWorkspace("SEQUOIAMaskBTP")
 
     def testMaskBTP(self):
-        m1=MaskBTP(Instrument='CNCS', Pixel="1-3,5")
-        m2=MaskBTP(Workspace='CNCSMaskBTP', Bank="1-2")
-        m3=MaskBTP(Workspace='CNCSMaskBTP', Bank='5-7', Tube='3')
-        p1=arange(400)*128
-        m1p=sort(concatenate((p1,p1+1,p1+2,p1+4)))
-        self.assertTrue(array_equal(m1,m1p))
-        self.assertTrue(array_equal(m2,arange(2048)))
-        b5t3=arange(128)+4*1024+2*128
-        self.assertTrue(array_equal(m3,concatenate((b5t3,b5t3+1024,b5t3+2048))))
-        #check whether some pixels are masked when they should
-        w=mtd['CNCSMaskBTP']
+        m1 = MaskBTP(Instrument='CNCS', Pixel="1-3,5")
+        m2 = MaskBTP(Workspace='CNCSMaskBTP', Bank="1-2")
+        m3 = MaskBTP(Workspace='CNCSMaskBTP', Bank='5-7', Tube='3')
+        p1 = arange(400)*128
+        m1p = sort(concatenate((p1, p1+1, p1+2, p1+4)))
+        self.assertTrue(array_equal(m1, m1p))
+        self.assertTrue(array_equal(m2, arange(2048)))
+        b5t3 = arange(128)+4*1024+2*128
+        self.assertTrue(array_equal(m3, concatenate((b5t3, b5t3+1024, b5t3+2048))))
+        # check whether some pixels are masked when they should
+        w = mtd['CNCSMaskBTP']
         detInfo = w.detectorInfo()
         detIds = detInfo.detectorIDs()
 
@@ -223,6 +223,10 @@ class MaskBTPTest(unittest.TestCase):
 
         self.assertEqual(len(mask_rear), 256 * 128)
         self.assertEqual(len(mask_front), 4 * 11)
+        global CHECK_CONSISTENCY
+        CHECK_CONSISTENCY = True
+        self.checkConsistentMask(ws, concatenate((mask_rear, mask_front)))
+        CHECK_CONSISTENCY = False
 
     def test_d11(self):
         ws = LoadEmptyInstrument(InstrumentName="d11", OutputWorkspace="D11")
@@ -230,18 +234,30 @@ class MaskBTPTest(unittest.TestCase):
 
         self.assertEquals(len(mask), 256*11)
 
+        global CHECK_CONSISTENCY
+        CHECK_CONSISTENCY = True
+        self.checkConsistentMask(ws, mask)
+        CHECK_CONSISTENCY = False
+
     def test_d22(self):
         ws = LoadEmptyInstrument(InstrumentName="d22", OutputWorkspace="D22")
         mask = MaskBTP(Workspace=ws, Tube="2-5")
 
         self.assertEquals(len(mask), 256*4)
+        global CHECK_CONSISTENCY
+        CHECK_CONSISTENCY = True
+        self.checkConsistentMask(ws, mask)
+        CHECK_CONSISTENCY = False
 
     def test_d16(self):
         ws = LoadEmptyInstrument(InstrumentName="d16", OutputWorkspace="D16")
         mask = MaskBTP(Workspace=ws, Tube="319", Pixel="319")
 
         self.assertEquals(len(mask), 1)
-
+        global CHECK_CONSISTENCY
+        CHECK_CONSISTENCY = True
+        self.checkConsistentMask(ws, mask)
+        CHECK_CONSISTENCY = False
 
 
 if __name__ == '__main__':
