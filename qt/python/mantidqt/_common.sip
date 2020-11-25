@@ -1102,6 +1102,6 @@ class FitScriptGeneratorPresenter {
 public:
     FitScriptGeneratorPresenter(FitScriptGeneratorView *view,
                                 FitScriptGeneratorModel *model);
-	
-	void openFitScriptGenerator();
+
+    void openFitScriptGenerator();
 };

@@ -23,11 +23,11 @@ FitScriptGeneratorPresenter::~FitScriptGeneratorPresenter() {}
 void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event) {
   switch (event) {
   case ViewEvent::RemoveClicked:
-    break;
+    return;
   case ViewEvent::StartXChanged:
-    break;
+    return;
   case ViewEvent::EndXChanged:
-    break;
+    return;
   }
 
   throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");

@@ -57,8 +57,7 @@ if(ENABLE_WORKBENCH)
                      TARGET_NAME mantidqt_commonqt5
                      HEADER_DEPS
                        ${_header_depends}
-                     SIP_SRCS 
-                       _common.sip
+                     SIP_SRCS _common.sip
                      PYQT_VERSION 5
                      INCLUDE_DIRS
                        ${CMAKE_CURRENT_LIST_DIR}
