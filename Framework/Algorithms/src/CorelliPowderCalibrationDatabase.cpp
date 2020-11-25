@@ -184,11 +184,6 @@ std::vector<std::string> CalibrationTableHandler::getComponentNames() {
 
   std::vector<std::string> names = mCalibWS->getColVector<std::string>(0);
 
-  // for (size_t i = 0; i < mCalibWS->rowCount(); ++i) {
-  //   std::string compname = mCalibWS->cell<std::string>(i, 0);
-  //   names.push_back(compname);
-  // }
-
   return names;
 }
 
@@ -686,11 +681,12 @@ void CorelliPowderCalibrationDatabase::setComponentMap(
 }
 
 /**
- * @brief Retrieve the compoments including banks, source and sample names from
+ * @brief Retrieve the compoments including banks, source (moderator) and sample (sample-position)
+ * names from
  * an workspace
  * @param ws : Any workspace containing instrument
- * @return  : vector including of all the compoments in the order as source,
- * sample, bank1, bank2, ...
+ * @return  : vector including of all the compoments in the order as
+ * moderator, sample-position, bank1, bank2, ...
  */
 std::vector<std::string>
 CorelliPowderCalibrationDatabase::retrieveInstrumentComponents(
@@ -699,7 +695,7 @@ CorelliPowderCalibrationDatabase::retrieveInstrumentComponents(
   const auto &component_info = ws->componentInfo();
 
   // Init output
-  std::vector<std::string> componentnames = {"source", "sample"};
+  std::vector<std::string> componentnames = {"moderator", "sample-position"};
 
   // Loop over all the compoments for bank
   const size_t num_components = component_info.size();

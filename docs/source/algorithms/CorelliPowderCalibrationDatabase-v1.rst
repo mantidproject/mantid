@@ -38,17 +38,17 @@ A more detailed list of inputs:
 For instance, if the contents of `CalibrationTablePatch` are:
 
  | ComponentName | Xposition | Yposition| Zposition| XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
- | source | 0 | 0 | -15.560 | 0 | 0 | 0 | 0 |
- | sample | 0.0001 | -0.0002 | 0.003 | 0 | 0 | 0 | 0 |
+ | moderator | 0 | 0 | -15.560 | 0 | 0 | 0 | 0 |
+ | sample-position | 0.0001 | -0.0002 | 0.003 | 0 | 0 | 0 | 0 |
  | bank1 | 0.9678 | 0.0056 | 0.0003 | 0.4563 | -0.9999 | 0.3424 | 5.67 |
 
-And the day stamp for this calibration is 20201025, the following line will be *appended* to file *corelli_source.csv* :
+And the day stamp for this calibration is 20201025, the following line will be *appended* to file *corelli_moderator.csv* :
 
 ```
 20201025, 0, 0, -15.560, 0, 0, 0, 0
 ```
 
-the following line will be *appended* to file *corelli_sample.csv*:
+the following line will be *appended* to file *corelli_sample-position.csv*:
 
 ```
 20201025, 0.0001, -0.0002, 0.003, 0, 0, 0, 0
@@ -57,12 +57,12 @@ the following line will be *appended* to file *corelli_sample.csv*:
 and the following lines to *corelli_bank001.csv*:
 20201025, 0.9678, 0.0056, 0.0003, 0.4563, -0.9999, 0.3424, 5.67
 
-The header for files *corelli_source.csv*, *corelli_sample.csv*, and files *corelli_bankXXX.csv* should be:
+The header for files *corelli_moderator.csv*, *corelli_sample-position.csv*, and files *corelli_bankXXX.csv* should be:
 ```
 # YYYMMDD, Xposition, Yposition, Zposition, XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle
 ```
 
-**Combined Calibrtion Database File**: The last line of *corelli_source.csv*, *corelli_sample.csv*, and each of existing files *corelli_bankXXX.csv* will be collected and gathered into file *corelli_instrument_20202015.csv*. The header for this file should be:
+**Combined Calibrtion Database File**: The last line of *corelli_moderator.csv*, *corelli_sample-position.csv*, and each of existing files *corelli_bankXXX.csv* will be collected and gathered into file *corelli_instrument_20202015.csv*. The header for this file should be:
 ```
 # ComponentName, Xposition, Yposition, Zposition, XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle
 ```
@@ -115,8 +115,8 @@ Usage
         calib_table.addColumn("double", colname)
     
     # add entry
-    calib_table.addRow(["source" , 0. , 0. , -15.560 , 0. , 0. , 0., 0.])
-    calib_table.addRow(["sample" , 0.0001 , -0.0002 , 0.003 , 0. , 0.,  0., 0.])
+    calib_table.addRow(["moderator" , 0. , 0. , -15.560 , 0. , 0. , 0., 0.])
+    calib_table.addRow(["sample-position" , 0.0001 , -0.0002 , 0.003 , 0. , 0.,  0., 0.])
     calib_table.addRow(["bank1" , 0.9678 , 0.0056 , 0.0003 , 0.4563 , -0.9999, 0.3424, 0.321])
     
     # save for powder calibration database
