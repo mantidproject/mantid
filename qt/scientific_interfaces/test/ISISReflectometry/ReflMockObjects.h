@@ -124,7 +124,7 @@ public:
   MOCK_METHOD0(notifyTableChanged, void());
   MOCK_METHOD0(settingsChanged, void());
   MOCK_METHOD0(notifyChangesSaved, void());
-  MOCK_CONST_METHOD0(hasUnsavedSearchResults, bool());
+  MOCK_CONST_METHOD0(hasUnsavedChanges, bool());
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
   MOCK_CONST_METHOD0(isOperationPrevented, bool());

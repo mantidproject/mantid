@@ -334,8 +334,7 @@ bool BatchPresenter::discardChanges(std::string const &message) const {
 
 /** Returns whether there are any unsaved changes in the current batch */
 bool BatchPresenter::isBatchUnsaved() const {
-  // The search results are treated separately so check both
-  return m_unsavedBatchFlag || m_runsPresenter->hasUnsavedSearchResults();
+  return m_unsavedBatchFlag || m_runsPresenter->hasUnsavedChanges();
 }
 
 void BatchPresenter::setBatchUnsaved() { m_unsavedBatchFlag = true; }

@@ -100,7 +100,7 @@ public:
   void notifyTableChanged() override;
   void settingsChanged() override;
   void notifyChangesSaved() override;
-  bool hasUnsavedSearchResults() const override;
+  bool hasUnsavedChanges() const override;
 
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
@@ -148,6 +148,8 @@ private:
   std::vector<std::string> m_instruments;
   /// The tolerance used when looking up settings by theta
   double m_thetaTolerance;
+  /// Flag to indicate we have unsaved changes in the runs table
+  bool m_tableUnsaved;
 
   /// searching
   bool search();
@@ -184,8 +186,9 @@ private:
   void updateViewWhenMonitorStarted();
   void updateViewWhenMonitorStopped();
 
-  bool isOverwritePrevented() const;
   bool changeInstrumentPrevented(std::string const &newName) const;
+  bool overwriteSearchResultsPrevented() const;
+  bool resumeAutoreductionPrevented() const;
 
   friend class Encoder;
   friend class Decoder;

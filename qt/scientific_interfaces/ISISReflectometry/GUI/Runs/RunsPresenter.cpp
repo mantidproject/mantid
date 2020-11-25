@@ -51,7 +51,8 @@ RunsPresenter::RunsPresenter(
       m_searcher(std::make_unique<QtCatalogSearcher>(mainView)),
       m_view(mainView), m_progressView(progressableView),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_instruments(instruments), m_thetaTolerance(thetaTolerance) {
+      m_instruments(instruments),
+      m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -93,6 +94,21 @@ RunsTable &RunsPresenter::mutableRunsTable() {
 
 void RunsPresenter::notifySearch() {
   updateWidgetEnabledState();
+
+  // Don't bother searching if they're not searching for anything
+  if (m_view->getSearchString().empty())
+    return;
+
+  // Clear existing results if performing a different search
+  if (m_searcher->searchSettingsChanged(m_view->getSearchString(),
+                                        m_view->getSearchInstrument(),
+                                        m_view->getSearchCycle())) {
+    if (overwriteSearchResultsPrevented()) {
+      return;
+    }
+    m_searcher->reset();
+  }
+
   search();
 }
 
@@ -192,6 +208,13 @@ void RunsPresenter::notifyReductionPaused() {
   tablePresenter()->notifyReductionPaused();
 }
 
+bool RunsPresenter::resumeAutoreductionPrevented() const {
+  return hasUnsavedChanges() &&
+         !m_mainPresenter->discardChanges(
+             "This will cause unsaved changes in the search results "
+             "and/or main table to be lost. Continue?");
+}
+
 /** Resume autoreduction. Clears any existing table data first and then
  * starts a search to check if there are new runs.
  */
@@ -208,9 +231,10 @@ bool RunsPresenter::resumeAutoreduction() {
   // Check if starting an autoreduction with new settings, reset the previous
   // search results and clear the main table
   if (m_searcher->searchSettingsChanged(searchString, instrument, cycle)) {
-    if (isOverwritePrevented()) {
+    if (resumeAutoreductionPrevented()) {
       return false;
     }
+    m_searcher->reset();
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
   }
 
@@ -267,11 +291,14 @@ std::string RunsPresenter::instrumentName() const {
   return m_mainPresenter->instrumentName();
 }
 
-void RunsPresenter::notifyTableChanged() { m_mainPresenter->setBatchUnsaved(); }
+void RunsPresenter::notifyTableChanged() { m_tableUnsaved = true; }
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
 
-void RunsPresenter::notifyChangesSaved() { m_searcher->setSaved(); }
+void RunsPresenter::notifyChangesSaved() {
+  m_searcher->setSaved();
+  m_tableUnsaved = false;
+}
 
 /** Searches for runs that can be used
  * @return : true if the search algorithm was started successfully, false if
@@ -280,18 +307,6 @@ bool RunsPresenter::search() {
   auto const searchString = m_view->getSearchString();
   auto const instrument = m_view->getSearchInstrument();
   auto const cycle = m_view->getSearchCycle();
-
-  // Don't bother searching if they're not searching for anything
-  if (searchString.empty())
-    return false;
-
-  // Clear existing results if performing a different search
-  if (m_searcher->searchSettingsChanged(searchString, instrument, cycle)) {
-    if (hasUnsavedSearchResults() && isOverwritePrevented()) {
-      return false;
-    }
-    m_searcher->reset();
-  }
 
   if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
                                     m_view->getSearchCycle())) {
@@ -361,20 +376,20 @@ bool RunsPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
-bool RunsPresenter::isOverwritePrevented() const {
-  return m_mainPresenter->isOverwriteBatchPrevented();
-}
-
 bool RunsPresenter::changeInstrumentPrevented(
     std::string const &newName) const {
-  return newName != instrumentName() && hasUnsavedSearchResults() &&
+  return newName != instrumentName() && overwriteSearchResultsPrevented();
+}
+
+bool RunsPresenter::hasUnsavedChanges() const {
+  return m_tableUnsaved || m_searcher->hasUnsavedChanges();
+}
+
+bool RunsPresenter::overwriteSearchResultsPrevented() const {
+  return m_searcher->hasUnsavedChanges() &&
          !m_mainPresenter->discardChanges(
              "This will cause unsaved annotations in the search results to be "
              "lost. Continue?");
-}
-
-bool RunsPresenter::hasUnsavedSearchResults() const {
-  return m_searcher->hasUnsavedChanges();
 }
 
 bool RunsPresenter::searchInProgress() const {

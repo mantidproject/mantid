@@ -51,7 +51,7 @@ public:
   virtual void notifyTableChanged() = 0;
   virtual void settingsChanged() = 0;
   virtual void notifyChangesSaved() = 0;
-  virtual bool hasUnsavedSearchResults() const = 0;
+  virtual bool hasUnsavedChanges() const = 0;
 
   virtual bool isAnyBatchProcessing() const = 0;
   virtual bool isAnyBatchAutoreducing() const = 0;

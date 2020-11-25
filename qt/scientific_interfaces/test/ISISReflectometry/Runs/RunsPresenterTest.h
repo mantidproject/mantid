@@ -110,8 +110,7 @@ public:
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
     expectSearchSettingsChanged();
-    expectUnsavedSearchResults();
-    expectOverwriteBatchPrevented();
+    expectOverwriteSearchResultsPrevented();
     EXPECT_CALL(*m_searcher, reset()).Times(0);
     presenter.notifySearch();
     verifyAndClear();
@@ -228,11 +227,38 @@ public:
     verifyAndClear();
   }
 
-  void testCheckOverwritingBatchOnAutoreductionResumedIfSettingsChanged() {
+  void testNoCheckOnDiscardChangesOnAutoreductionResumed() {
+    auto presenter = makePresenter();
+    expectSearchString(m_searchString);
+    EXPECT_CALL(m_mainPresenter, discardChanges(_)).Times(0);
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testCheckDiscardChangesOnAutoreductionResumedIfUnsavedSearchResults() {
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
     expectSearchSettingsChanged();
-    EXPECT_CALL(m_mainPresenter, isOverwriteBatchPrevented()).Times(AtLeast(1));
+    expectUnsavedSearchResults();
+    EXPECT_CALL(
+        m_mainPresenter,
+        discardChanges("This will cause unsaved changes in the search results "
+                       "and/or main table to be lost. Continue?"))
+        .Times(AtLeast(1));
+    presenter.resumeAutoreduction();
+    verifyAndClear();
+  }
+
+  void testCheckDiscardChangesOnAutoreductionResumedIfUnsavedTable() {
+    auto presenter = makePresenter();
+    presenter.notifyTableChanged();
+    expectSearchString(m_searchString);
+    expectSearchSettingsChanged();
+    EXPECT_CALL(
+        m_mainPresenter,
+        discardChanges("This will cause unsaved changes in the search results "
+                       "and/or main table to be lost. Continue?"))
+        .Times(AtLeast(1));
     presenter.resumeAutoreduction();
     verifyAndClear();
   }
@@ -242,7 +268,7 @@ public:
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
     expectSearchSettingsChanged();
-    expectOverwriteBatchPrevented();
+    expectOverwriteSearchResultsPrevented();
     expectDoNotStartAutoreduction();
     presenter.resumeAutoreduction();
     verifyAndClear();
@@ -269,7 +295,7 @@ public:
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
     expectSearchSettingsChanged();
-    expectOverwriteBatchPrevented();
+    expectOverwriteSearchResultsPrevented();
     expectDoNotClearExistingTable();
     presenter.resumeAutoreduction();
     verifyAndClear();
@@ -706,6 +732,28 @@ public:
     verifyAndClear();
   }
 
+  void testNotifyTableChangedSetsUnsavedFlag() {
+    auto presenter = makePresenter();
+    presenter.notifyTableChanged();
+    TS_ASSERT_EQUALS(presenter.hasUnsavedChanges(), true);
+    verifyAndClear();
+  }
+
+  void testNotifyChangsSavedClearsUnsavedFlag() {
+    auto presenter = makePresenter();
+    presenter.notifyTableChanged();
+    presenter.notifyChangesSaved();
+    TS_ASSERT_EQUALS(presenter.hasUnsavedChanges(), false);
+    verifyAndClear();
+  }
+
+  void testNotifyChangsSavedUpdatesSearcher() {
+    auto presenter = makePresenter();
+    EXPECT_CALL(*m_searcher, setSaved()).Times(1);
+    presenter.notifyChangesSaved();
+    verifyAndClear();
+  }
+
 private:
   class RunsPresenterFriend : public RunsPresenter {
     friend class RunsPresenterTest;
@@ -1113,14 +1161,9 @@ private:
     expectGetAlgorithmRunner();
   }
 
-  void expectOverwriteBatchPrevented() {
-    EXPECT_CALL(m_mainPresenter, isOverwriteBatchPrevented())
-        .Times(AtLeast(1))
-        .WillRepeatedly(Return(true));
-  }
-
-  void expectOverwriteBatchNotPrevented() {
-    EXPECT_CALL(m_mainPresenter, isOverwriteBatchPrevented())
+  void expectOverwriteSearchResultsPrevented() {
+    expectUnsavedSearchResults();
+    EXPECT_CALL(m_mainPresenter, discardChanges(_))
         .Times(AtLeast(1))
         .WillRepeatedly(Return(false));
   }
