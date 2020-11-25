@@ -164,7 +164,7 @@ void CalibrationTableHandler::setCalibrationTable(
 
   std::string errmsg{""};
 
-  if(!isValidCalibrationTableWorkspace(calibws, errmsg))
+  if (!isValidCalibrationTableWorkspace(calibws, errmsg))
     throw std::runtime_error(errmsg);
 
   // Set
@@ -393,7 +393,8 @@ CorelliPowderCalibrationDatabase::validateInputs() {
   if (mInputWS->getInstrument()->getName() != "CORELLI")
     errors["InputWorkspace"] = "This Algorithm will only work for Corelli.";
   // Must include start_time
-  else if (!mInputWS->run().hasProperty("start_time") && !mInputWS->run().hasProperty("run_start"))
+  else if (!mInputWS->run().hasProperty("start_time") &&
+           !mInputWS->run().hasProperty("run_start"))
     errors["InputWorkspace"] = "Workspace is missing property start_time.";
 
   // check for calibration patch table workspace
@@ -473,17 +474,16 @@ void CorelliPowderCalibrationDatabase::updateComponentDatabaseFiles(
   // Date stamp
   std::string timestampstr{""};
   if (mInputWS->run().hasProperty("start_time")) {
-      // string value from start_time
-      timestampstr = mInputWS->run().getProperty("start_time")->value();
+    // string value from start_time
+    timestampstr = mInputWS->run().getProperty("start_time")->value();
   } else {
-      // string value from run_start if start_time does not exist.
-      // with input workspace validate, there must be at least one exist
-      // between start_time and run_start
-      timestampstr = mInputWS->run().getProperty("run_start")->value();
+    // string value from run_start if start_time does not exist.
+    // with input workspace validate, there must be at least one exist
+    // between start_time and run_start
+    timestampstr = mInputWS->run().getProperty("run_start")->value();
   }
   // convert
-  mDateStamp =
-      convertTimeStamp(timestampstr);
+  mDateStamp = convertTimeStamp(timestampstr);
 
   // Handler
   CorelliCalibration::CalibrationTableHandler handler =
@@ -681,9 +681,8 @@ void CorelliPowderCalibrationDatabase::setComponentMap(
 }
 
 /**
- * @brief Retrieve the compoments including banks, source (moderator) and sample (sample-position)
- * names from
- * an workspace
+ * @brief Retrieve the compoments including banks, source (moderator) and sample
+ * (sample-position) names from an workspace
  * @param ws : Any workspace containing instrument
  * @return  : vector including of all the compoments in the order as
  * moderator, sample-position, bank1, bank2, ...
