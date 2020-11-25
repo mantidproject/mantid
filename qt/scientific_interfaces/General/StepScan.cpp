@@ -20,6 +20,10 @@
 #include <QtGlobal>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#include "boost/python.hpp"
+#include "MantidQtWidgets/MplCpp/Figure.h"
+#include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
+#include "MantidQtWidgets/MplCpp/MantidAxes.h"
 #endif
 #include <QFileInfo>
 #include <QUrl>
@@ -723,23 +727,28 @@ void StepScan::plotCurve() {
   std::string pyCode =
       "import matplotlib.pyplot as plt\n"
       "from mantid import plots\n"
-      "fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})\n"
-      "ws = mtd['" +
-      m_plotWSName +
-      "']\n"
-      "ax.plot(ws,'k.')\n"
-      "ax.set_xlabel('" +
-      xAxisTitle +
-      "')\n"
-      "ax.set_ylabel('" +
-      yAxisTitle +
-      "')\n"
-      "fig.canvas.set_window_title('" +
-      title +
-      " - Step Scan')\n"
-      "fig.show()";
+      "fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})";
   Mantid::PythonInterface::GlobalInterpreterLock lock;
-  PyRun_SimpleString(pyCode.c_str());
+  using namespace boost::python;
+  using namespace MantidQt::Widgets::MplCpp;
+  object main_module = import("__main__");
+  object main_namespace = main_module.attr("__dict__");
+  object ignored = exec(pyCode.c_str(), main_namespace);
+  auto fig = Figure(extract<object>(main_namespace["fig"]));
+  auto ax = MantidAxes(extract<object>(main_namespace["ax"]));
+  auto ws =
+      AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+          m_plotWSName);
+  title += " - Step Scan";
+  fig.pyobj().attr("canvas").attr("set_window_title")(title.c_str());
+  QHash<QString, QVariant> hash;
+  hash.insert("linestyle", "");
+  hash.insert("marker", ".");
+  auto line = ax.plot(ws, 0, "black", "", hash);
+  ax.setXLabel(xAxisTitle.c_str());
+  ax.setYLabel(yAxisTitle.c_str());
+  fig.pyobj().attr("show")();
+  //canvas->show();
 #endif
 }
 
