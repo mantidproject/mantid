@@ -12,15 +12,16 @@
 #include "MantidKernel/MandatoryValidator.h"
 
 namespace {
-    std::vector<double> getSubVector(Mantid::MantidVec &data, const int &lowerIndex, const int &upperIndex) {
+std::vector<double> getSubVector(Mantid::MantidVec &data, const int &lowerIndex,
+                                 const int &upperIndex) {
   auto low = std::next(data.begin(), lowerIndex);
   auto up = std::next(data.begin(), upperIndex);
   // get new vectors
   std::vector<double> newData(low, up);
   return newData;
-    }
-
 }
+
+} // namespace
 
 namespace Mantid {
 namespace Algorithms {
@@ -85,6 +86,7 @@ void CropWorkspaceRagged::exec() {
   // Its easier to work with point data -> index is same for x, y, E
   MatrixWorkspace_sptr tmp = outputWS;
   int offset = 0;
+  bool histogram = false;
   if (outputWS->isHistogramData()) {
     auto alg = createChildAlgorithm("ConvertToPointData");
     alg->initialize();
@@ -93,10 +95,11 @@ void CropWorkspaceRagged::exec() {
     alg->setProperty("OutputWorkspace", outputWS);
     alg->execute();
     tmp = alg->getProperty("OutputWorkspace");
-    offset = 1;
+    histogram = true;
   }
-
+  PARALLEL_FOR_IF(Kernel::threadSafe(*tmp, *outputWS))
   for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
+    PARALLEL_START_INTERUPT_REGION
     auto &points = tmp->points(i);
     auto &dataX = outputWS->dataX(i);
     auto &dataY = outputWS->dataY(i);
@@ -112,13 +115,12 @@ void CropWorkspaceRagged::exec() {
     // get new vectors
     std::vector<double> newY = getSubVector(dataY, lowerIndex, upperIndex);
     std::vector<double> newE = getSubVector(dataE, lowerIndex, upperIndex);
-    if (upperIndex + 1 < dataX.size()) {
+    if (histogram && upperIndex + 1 <= dataX.size()) {
       // the offset adds one to the upper index for histograms
       // only use the offset if the end is cropped
       upperIndex += 1;
     }
-    std::vector<double> newX =
-        getSubVector(dataX, lowerIndex, upperIndex);
+    std::vector<double> newX = getSubVector(dataX, lowerIndex, upperIndex);
 
     // resize the data
     dataX.resize(newX.size());
@@ -126,11 +128,12 @@ void CropWorkspaceRagged::exec() {
     dataE.resize(newE.size());
 
     // update the data
-    outputWS->mutableX(i)= std::move(newX);
+    outputWS->mutableX(i) = std::move(newX);
     outputWS->setCounts(i, std::move(newY));
     outputWS->mutableE(i) = std::move(newE);
+    PARALLEL_END_INTERUPT_REGION
   }
-
+  PARALLEL_CHECK_INTERUPT_REGION
 
   setProperty("OutputWorkspace", outputWS);
 }
