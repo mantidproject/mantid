@@ -178,6 +178,10 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def display_workspace(self):
         return str(self.parameter_display_combo.currentText())
 
+    @property
+    def loaded_workspaces(self):
+        return [self.parameter_display_combo.itemText(i) for i in range(self.parameter_display_combo.count())]
+
     @display_workspace.setter
     def display_workspace(self, value):
         self.parameter_display_combo.blockSignals(True)

@@ -70,9 +70,9 @@ class FittingTabPresenter(object):
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
 
-        self.fsg_model = FitScriptGeneratorModel()
-        self.fsg_view = FitScriptGeneratorView()
-        self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model)
+        self.fsg_model = None
+        self.fsg_view = None
+        self.fsg_presenter = None
 
     def disable_view(self):
         self.view.setEnabled(False)
@@ -102,6 +102,15 @@ class FittingTabPresenter(object):
         return self._end_x
 
     def handle_fit_generator_clicked(self):
+        fit_options = {"FittingType": "Simultaneous" if self.view.is_simul_fit() else "Sequential",
+                       "Minimizer": self.view.minimizer,
+                       "EvaluationType": self.view.evaluation_type}
+
+        self.fsg_model = FitScriptGeneratorModel()
+        self.fsg_view = FitScriptGeneratorView(None, self.view.loaded_workspaces, self.view.start_time,
+                                               self.view.end_time, fit_options)
+        self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model)
+
         self.fsg_presenter.openFitScriptGenerator()
 
     def handle_new_data_loaded(self):
