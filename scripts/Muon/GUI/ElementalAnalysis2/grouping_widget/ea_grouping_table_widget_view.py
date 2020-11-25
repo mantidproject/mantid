@@ -8,14 +8,13 @@ from qtpy import QtWidgets, QtGui, QtCore
 from qtpy.QtCore import Signal
 from Muon.GUI.Common import message_box
 
-group_table_columns = {0: 'group_name', 2: 'to_analyse', 3: 'detector_ids', 4: 'number_of_detectors', 1: 'periods'}
-inverse_group_table_columns = {'group_name': 0, 'to_analyse': 2,  'detector_ids': 3,  'number_of_detectors': 4,
-                               'periods': 1}
-table_column_flags = {'group_name': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+group_table_columns = {0: 'run', 1: 'detector', 2: 'to_analyse', 3: 'rebin', 4: 'rebin_options'}
+inverse_group_table_columns = {'run': 0, 'detector': 1, 'to_analyse': 2,  'rebin': 3, 'rebin_options': 4}
+table_column_flags = {'run': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+                      'detector': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
                       'to_analyse': QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled,
-                      'detector_ids': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable,
-                      'number_of_detectors': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
-                      'periods': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable}
+                      'rebin': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable,
+                      'rebin_options': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable}
 
 
 class EAGroupingTableView(QtWidgets.QWidget):
@@ -37,7 +36,6 @@ class EAGroupingTableView(QtWidgets.QWidget):
         self.grouping_table.cellChanged.connect(self.on_cell_changed)
 
         self._validate_group_name_entry = lambda text: True
-        self._validate_detector_ID_entry = lambda text: True
         self._on_table_data_changed = lambda: 0
 
         # whether the table is updating and therefore we shouldn't respond to signals
@@ -68,31 +66,28 @@ class EAGroupingTableView(QtWidgets.QWidget):
 
     def set_up_table(self):
         self.grouping_table.setColumnCount(5)
-        self.grouping_table.setHorizontalHeaderLabels(["Group Name", "Periods", "Analyse (plot/fit)", "Detector IDs",
-                                                       "N Detectors"])
+        self.grouping_table.setHorizontalHeaderLabels(["Run", "Detector", "Analyse (plot/fit)", "Rebin", "Rebin Options"])
         header = self.grouping_table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
-        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeToContents)
         vertical_headers = self.grouping_table.verticalHeader()
         vertical_headers.setSectionsMovable(False)
         vertical_headers.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         vertical_headers.setVisible(True)
 
-        self.grouping_table.horizontalHeaderItem(0).setToolTip("The name of the group :"
-                                                               "\n    - The name must be unique across all groups/pairs"
-                                                               "\n    - The name can only use digits, characters and _")
-        self.grouping_table.horizontalHeaderItem(1).setToolTip("Periods to use when calculating this group.")
+        self.grouping_table.horizontalHeaderItem(1).setToolTip("The run :"
+                                                               "\n    - The run can only use digits, characters and _")
+        self.grouping_table.horizontalHeaderItem(1).setToolTip("The detector :"
+                                                               "\n    - The detector can only use digits, characters and _")
         self.grouping_table.horizontalHeaderItem(2).setToolTip("Whether to include this group in the analysis.")
 
-        self.grouping_table.horizontalHeaderItem(3).setToolTip("The sorted list of detectors :"
-                                                               "\n  - The list can only contain integers."
-                                                               "\n  - , is used to separate detectors or ranges."
-                                                               "\n  - \"-\" denotes a range, i,e \"1-5\" is the same as"
-                                                               " \"1,2,3,4,5\" ")
-        self.grouping_table.horizontalHeaderItem(4).setToolTip("The number of detectors in the group.")
+        self.grouping_table.horizontalHeaderItem(3).setToolTip("A list of Rebins :"
+                                                               "\n  - Select None, Fixed or Variable from the list.")
+        self.grouping_table.horizontalHeaderItem(4).setToolTip("Rebin Options :"
+                                                               "\n  - TBC")
 
     def num_rows(self):
         return self.grouping_table.rowCount()
@@ -144,7 +139,7 @@ class EAGroupingTableView(QtWidgets.QWidget):
             self.grouping_table.removeRow(last_row)
 
     def enter_group_name(self):
-        new_group_name, ok = QtWidgets.QInputDialog.getText(self, 'Group Name', 'Enter name of new group:')
+        new_group_name, ok = QtWidgets.QInputDialog.getText(self, 'Detector', 'Enter name of new detector:')
         if ok:
             return new_group_name
 
@@ -162,9 +157,9 @@ class EAGroupingTableView(QtWidgets.QWidget):
     def _context_menu_remove_group_action(self, slot):
         if len(self._get_selected_row_indices()) > 1:
             # use plural if >1 item selected
-            remove_group_action = QtWidgets.QAction('Remove Groups', self)
+            remove_group_action = QtWidgets.QAction('Remove Detectors', self)
         else:
-            remove_group_action = QtWidgets.QAction('Remove Group', self)
+            remove_group_action = QtWidgets.QAction('Remove Detector', self)
         if self.num_rows() == 0:
             remove_group_action.setEnabled(False)
         remove_group_action.triggered.connect(slot)
@@ -176,9 +171,6 @@ class EAGroupingTableView(QtWidgets.QWidget):
 
     def on_user_changes_group_name(self, slot):
         self._validate_group_name_entry = slot
-
-    def on_user_changes_detector_IDs(self, slot):
-        self._validate_detector_ID_entry = slot
 
     def on_table_data_changed(self, slot):
         self._on_table_data_changed = slot

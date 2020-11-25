@@ -32,7 +32,6 @@ class EAGroupingTablePresenter(object):
         self._model = model
 
         self._view.on_user_changes_group_name(self.validate_group_name)
-        self._view.on_user_changes_detector_IDs(self.validate_detector_ids)
 
         self._view.on_table_data_changed(self.handle_data_change)
 
@@ -65,27 +64,6 @@ class EAGroupingTablePresenter(object):
             return False
         return True
 
-    def validate_detector_ids(self, text):
-        try:
-            if re.match(run_utils.run_string_regex, text) and run_utils.run_string_to_list(text, False) and \
-                    max(run_utils.run_string_to_list(text, False)) <= self._model._data.num_detectors \
-                    and min(run_utils.run_string_to_list(text, False)) > 0:
-                return True
-        except OverflowError:
-            pass
-
-        self._view.warning_popup("Invalid detector list.")
-        return False
-
-    def validate_periods(self, period_text):
-        try:
-            period_list = run_utils.run_string_to_list(period_text)
-        except IndexError:
-            # An IndexError thrown here implies that the input string is not a valid
-            # number list.
-            return RowValid.invalid_for_all_runs
-        return self._model.validate_periods_list(period_list)
-
     def disable_editing(self):
         self._view.disable_editing()
 
@@ -112,8 +90,8 @@ class EAGroupingTablePresenter(object):
     def add_group_to_view(self, group, state, color, tooltip):
         self._view.disable_updates()
         assert isinstance(group, MuonGroup)
-        entry = [str(group.name), run_utils.run_list_to_string(group.periods), state, run_utils.run_list_to_string(group.detectors, False),
-                 str(group.n_detectors)]
+        entry = [str(group.name), run_utils.run_list_to_string(group.periods), state,
+                 run_utils.run_list_to_string(group.detectors, False), str(group.n_detectors)]
         self._view.add_entry_to_table(entry, color, tooltip)
         self._view.enable_updates()
 
@@ -134,16 +112,11 @@ class EAGroupingTablePresenter(object):
         changed_item = self._view.get_table_item(row, col)
         group_name = self._view.get_table_item(row, inverse_group_table_columns['group_name']).text()
         update_model = True
-        if col == inverse_group_table_columns['group_name'] and not self.validate_group_name(changed_item.text()):
-            update_model = False
-        if col == inverse_group_table_columns['detector_ids'] and not self.validate_detector_ids(changed_item.text()):
+        if col == inverse_group_table_columns['detector'] and not self.validate_group_name(changed_item.text()):
             update_model = False
         if col == inverse_group_table_columns['to_analyse']:
             update_model = False
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, group_name)
-        if col == inverse_group_table_columns['periods'] and self.validate_periods(changed_item.text()) == RowValid.invalid_for_all_runs:
-            self._view.warning_popup("One or more of the periods specified missing from all runs")
-            update_model = False
 
         if not update_model:
             # Reset the view back to model values and exit early as the changes are invalid.
