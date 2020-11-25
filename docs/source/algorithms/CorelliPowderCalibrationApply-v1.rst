@@ -12,26 +12,32 @@ Description
 
 Update the CORELLI instrument geometry with calibration data stored in a predefined calibration table workspace.
 The current inputs are:
+
 - Workspace:  EventWorkspace generated from CORELLI instrument
 - CalibrationTable: TableWorkspace with predefined layout.
 
 The calibration table must have the following columns
+
 - ComponentName: name of each component in the CORELLI instrument
 - Xposition, Yposition, Zposition: these three columns specify the absolute translation in the calibration for each component
 - XdirectionCosine, YdirectionCosine, ZdirectionCosine: these three columns specify the rotation axis (direction cosione) for each component
 - RotationAngle: the absolute rotation angle in degrees for each component
 
 Applying the calibration involves the folloing steps:
+
 - translate each component by ``(Xposition, Yposition, Zposition)``
 - rotate each component by ``RotationAngle`` degrees around rotation axis ``(directionCosine, YdirectionCosine, ZdirectionCosine)``
 
 Usage
 -----
-** Example -  move bank42 (perpendicular to x-axis) 180 around y-axis
+
+* Example -  move bank42 (perpendicular to x-axis) 180 around y-axis
 
 .. testcode::
 
+    # import mantid algorithms, numpy and matplotlib
     from mantid.simpleapi import *
+    import matplotlib.pyplot as plt
     import numpy as np
 
     # setting up a mocked calibration table
@@ -47,17 +53,14 @@ Usage
     for dt, hd in zip(datatypes, headers):
         calitable.addColumn(dt, hd)
 
-    calitable.addRow(["moderator", 0, 0,-19.9997, 0, 0, 0, 0])  # a.k.a. source
-    calitable.addRow(["sample-position", 0, 0, 0, 0, 0, 0, 0])  # a.k.a. sample
-    calitable.addRow(["bank1/sixteenpack", 0., 0., 0., 0,0,0,0])  # bank1 is unaffected
-    calitable.addRow(["bank42/sixteenpack", 0., 0, 0., 0,1,0,180])  # rotate bank42 180 around y
+    calitable.addRow(["bank42/sixteenpack", 0., 0, 0., 0,1,0,180])  # move to (0,0,0) and rotate to (0,1,0)@180degree
 
     # laod emptry instrument
     ws_original = LoadEmptyInstrument("CORELLI_Definition.xml")
     ws_calibrated = ConvertToEventWorkspace(ws_original)
 
     # apply the calibration to ws
-    CorelliPowderCalibrationApply(ws_calibrated, calitable)
+    CorelliPowderCalibrationApply(ws_calibrated, calitable)  # in-place operation
 
 The original instrument view
 
@@ -66,7 +69,7 @@ The original instrument view
     :width: 635
     :alt: original layout of CORELLI instrument
 
-and the calibrated instrument view (notice one panel is rotated to the right of the image)
+and the calibrated instrument view (notice one panel is moved to the center and rotate to (0,1,0)@180 degree)
 
 .. image:: ../images/CorelliPowderCalibrationApply_calibrated.png
     :align: center
