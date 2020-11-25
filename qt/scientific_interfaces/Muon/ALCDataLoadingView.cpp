@@ -225,6 +225,13 @@ bool ALCDataLoadingView::displayWarning(const std::string &warning) {
 void ALCDataLoadingView::setAvailableLogs(
     const std::vector<std::string> &logs) {
   setAvailableItems(m_ui.logValueSelector->getLogComboBox(), logs);
+  // Set defualt as run number
+  if (!logs.empty()) {
+    auto index =
+        m_ui.logValueSelector->getLogComboBox()->findText("run_number");
+    if (index >= 0)
+      m_ui.logValueSelector->getLogComboBox()->setCurrentIndex(index);
+  }
 }
 
 /**
@@ -328,11 +335,6 @@ void ALCDataLoadingView::enableLoad(bool enable) {
 
 void ALCDataLoadingView::setPath(const std::string &path) {
   m_ui.path->setText(QString::fromStdString(path));
-  if (path.empty()) {
-    m_ui.path->setEnabled(false);
-  } else {
-    m_ui.path->setEnabled(true);
-  }
 }
 
 void ALCDataLoadingView::enableRunsAutoAdd(bool enable) {
