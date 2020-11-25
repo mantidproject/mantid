@@ -217,7 +217,7 @@ class MaskBTPTest(unittest.TestCase):
         self.assertEqual(10 * 90, len(masked))
 
     def test_d33(self):
-        ws = LoadEmptyInstrument(InstrumentName='D33', OutputWorkspace="D33")
+        ws = LoadEmptyInstrument(InstrumentName='D33')
         mask_rear = MaskBTP(Workspace=ws, Components='back_detector')
         mask_front = MaskBTP(Workspace=ws, Bank="1-4", Tube="15", Pixel='0-10')
 
@@ -229,7 +229,7 @@ class MaskBTPTest(unittest.TestCase):
         CHECK_CONSISTENCY = False
 
     def test_d11(self):
-        ws = LoadEmptyInstrument(InstrumentName="d11", OutputWorkspace="D11")
+        ws = LoadEmptyInstrument(InstrumentName="d11")
         mask = MaskBTP(Workspace=ws, Pixel="0-10")
 
         self.assertEquals(len(mask), 256*11)
@@ -240,7 +240,7 @@ class MaskBTPTest(unittest.TestCase):
         CHECK_CONSISTENCY = False
 
     def test_d22(self):
-        ws = LoadEmptyInstrument(InstrumentName="d22", OutputWorkspace="D22")
+        ws = LoadEmptyInstrument(InstrumentName="d22")
         mask = MaskBTP(Workspace=ws, Tube="2-5")
 
         self.assertEquals(len(mask), 256*4)
@@ -250,10 +250,34 @@ class MaskBTPTest(unittest.TestCase):
         CHECK_CONSISTENCY = False
 
     def test_d16(self):
-        ws = LoadEmptyInstrument(InstrumentName="d16", OutputWorkspace="D16")
+        ws = LoadEmptyInstrument(InstrumentName="d16")
         mask = MaskBTP(Workspace=ws, Tube="319", Pixel="319")
 
         self.assertEquals(len(mask), 1)
+        global CHECK_CONSISTENCY
+        CHECK_CONSISTENCY = True
+        self.checkConsistentMask(ws, mask)
+        CHECK_CONSISTENCY = False
+
+    def test_d11_lr(self):
+        path = config["instrumentDefinition.directory"] + "D11lr_Definition.xml"
+
+        ws = LoadEmptyInstrument(Filename=path)
+        mask = MaskBTP(Workspace=ws, Tube="127")
+
+        self.assertEquals(len(mask), 128)
+        global CHECK_CONSISTENCY
+        CHECK_CONSISTENCY = True
+        self.checkConsistentMask(ws, mask)
+        CHECK_CONSISTENCY = False
+
+    def test_d22lr(self):
+        path = config["instrumentDefinition.directory"] + "D22lr_Definition.xml"
+
+        ws = LoadEmptyInstrument(Filename=path)
+        mask = MaskBTP(Workspace=ws, Pixel="20-28")
+
+        self.assertEquals(len(mask), 9*128)
         global CHECK_CONSISTENCY
         CHECK_CONSISTENCY = True
         self.checkConsistentMask(ws, mask)
