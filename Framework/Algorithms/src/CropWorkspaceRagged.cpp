@@ -85,7 +85,6 @@ void CropWorkspaceRagged::exec() {
 
   // Its easier to work with point data -> index is same for x, y, E
   MatrixWorkspace_sptr tmp = outputWS;
-  int offset = 0;
   bool histogram = false;
   if (outputWS->isHistogramData()) {
     auto alg = createChildAlgorithm("ConvertToPointData");
