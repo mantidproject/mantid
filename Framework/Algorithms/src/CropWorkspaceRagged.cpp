@@ -12,8 +12,9 @@
 #include "MantidKernel/MandatoryValidator.h"
 
 namespace {
-std::vector<double> getSubVector(Mantid::MantidVec &data, const int &lowerIndex,
-                                 const int &upperIndex) {
+std::vector<double> getSubVector(Mantid::MantidVec &data,
+                                 const int64_t &lowerIndex,
+                                 const int64_t &upperIndex) {
   auto low = std::next(data.begin(), lowerIndex);
   auto up = std::next(data.begin(), upperIndex);
   // get new vectors
@@ -99,7 +100,7 @@ void CropWorkspaceRagged::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*tmp, *outputWS))
   for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    auto &points = tmp->points(i);
+    auto points = tmp->points(i);
     auto &dataX = outputWS->dataX(i);
     auto &dataY = outputWS->dataY(i);
     auto &dataE = outputWS->dataE(i);
@@ -108,13 +109,13 @@ void CropWorkspaceRagged::exec() {
     auto low = std::lower_bound(points.begin(), points.end(), xMin[i]);
     auto up = std::upper_bound(points.begin(), points.end(), xMax[i]);
     // convert to index
-    auto lowerIndex = std::distance(points.begin(), low);
-    auto upperIndex = std::distance(points.begin(), up);
+    int64_t lowerIndex = std::distance(points.begin(), low);
+    int64_t upperIndex = std::distance(points.begin(), up);
 
     // get new vectors
     std::vector<double> newY = getSubVector(dataY, lowerIndex, upperIndex);
     std::vector<double> newE = getSubVector(dataE, lowerIndex, upperIndex);
-    if (histogram && upperIndex + 1 <= dataX.size()) {
+    if (histogram && upperIndex + (unsigned)1 <= dataX.size()) {
       // the offset adds one to the upper index for histograms
       // only use the offset if the end is cropped
       upperIndex += 1;
