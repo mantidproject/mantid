@@ -135,7 +135,7 @@ public:
 
     MatrixWorkspace_sptr out =
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
-   for (int spec = 0; spec < m_numberOfSpectra; spec++) {
+    for (int spec = 0; spec < m_numberOfSpectra; spec++) {
       TS_ASSERT_DELTA(out->readX(spec)[0], 2.0, 1e-6);
       TS_ASSERT_DELTA(out->readY(spec)[0], 3.0, 1e-6);
       TS_ASSERT_DELTA(out->readE(spec)[0], 1.732051, 1e-6); // sqrt(3)
