@@ -148,7 +148,8 @@ private:
     Mantid::API::TableRow sourceRow = tablews->appendRow();
     sourceRow << "moderator" << 0. << 0. << -15.560 << 0. << 0. << 0. << 0.;
     Mantid::API::TableRow sampleRow = tablews->appendRow();
-    sampleRow << "sample-position" << 0.0001 << -0.0002 << 0.003 << 0. << 0. << 0. << 0.;
+    sampleRow << "sample-position" << 0.0001 << -0.0002 << 0.003 << 0. << 0.
+              << 0. << 0.;
     Mantid::API::TableRow bank1Row = tablews->appendRow();
     bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999
              << 0.3424 << 5.67;

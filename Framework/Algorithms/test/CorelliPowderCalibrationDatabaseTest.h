@@ -113,7 +113,8 @@ public:
 
     // Test method to retrieve components names (rows)
     std::vector<std::string> componentnames = calib_handler.getComponentNames();
-    std::vector<std::string> expectednames{"moderator", "sample-position", "bank1"};
+    std::vector<std::string> expectednames{"moderator", "sample-position",
+                                           "bank1"};
     TS_ASSERT_EQUALS(componentnames.size(), expectednames.size());
     for (size_t i = 0; i < 3; ++i)
       TS_ASSERT_EQUALS(componentnames[i], expectednames[i]);
@@ -183,7 +184,8 @@ public:
     // create data base
     boost::filesystem::create_directory(calibdir);
     // create a previously generated database file
-    std::vector<std::string> banks{"moderator", "sample-position", "bank2", "bank42"};
+    std::vector<std::string> banks{"moderator", "sample-position", "bank2",
+                                   "bank42"};
     create_existing_database_files(calibdir, banks);
 
     // Create workspaces
@@ -222,7 +224,8 @@ public:
     TS_ASSERT(combinedcalibws);
     // shall be 5 components
     TS_ASSERT_EQUALS(combinedcalibws->rowCount(), 5);
-    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(1, 0), "sample-position");
+    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(1, 0),
+                     "sample-position");
     TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(2, 0), "bank1");
     TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(4, 0), "bank42");
 
@@ -236,8 +239,8 @@ public:
     // ... ...
 
     // Output 1: check all the files
-    std::vector<std::string> compnames{"moderator", "sample-position", "bank1", "bank2",
-                                       "bank42"};
+    std::vector<std::string> compnames{"moderator", "sample-position", "bank1",
+                                       "bank2", "bank42"};
     std::vector<size_t> expectedrows{2, 2, 1, 1, 1};
     for (size_t i = 0; i < 5; ++i) {
       verify_component_files(calibdir, compnames[i], expectedrows[i]);
@@ -307,7 +310,8 @@ private:
     Mantid::API::TableRow sourceRow = tablews->appendRow();
     sourceRow << "moderator" << 0. << 0. << -15.560 << 0. << 0. << 0. << 0.;
     Mantid::API::TableRow sampleRow = tablews->appendRow();
-    sampleRow << "sample-position" << 0.0001 << -0.0002 << 0.003 << 0. << 0. << 0. << 0.;
+    sampleRow << "sample-position" << 0.0001 << -0.0002 << 0.003 << 0. << 0.
+              << 0. << 0.;
     Mantid::API::TableRow bank1Row = tablews->appendRow();
     bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999
              << 0.3424 << 5.67;
@@ -346,7 +350,8 @@ private:
     Mantid::API::TableRow sourceRow = tablews->appendRow();
     sourceRow << "moderator" << 0. << 0. << -15.560 << 0. << 0. << 0.;
     Mantid::API::TableRow sampleRow = tablews->appendRow();
-    sampleRow << "sample-position" << 0.0001 << -0.0002 << 0.003 << 0. << 0. << 0.;
+    sampleRow << "sample-position" << 0.0001 << -0.0002 << 0.003 << 0. << 0.
+              << 0.;
     Mantid::API::TableRow bank1Row = tablews->appendRow();
     bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999
              << 0.3424;
