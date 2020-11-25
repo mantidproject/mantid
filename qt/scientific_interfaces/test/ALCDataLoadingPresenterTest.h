@@ -303,7 +303,7 @@ public:
     m_view->foundRuns();
   }
 
-  void xtest_load_nonExistentFile() {
+  void test_load_nonExistentFile() {
     std::vector<std::string> nonExistent{"non-existent-file"};
     ON_CALL(*m_view, getFiles()).WillByDefault(Return(nonExistent));
 
