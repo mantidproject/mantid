@@ -60,7 +60,6 @@ class GeneralSettings(object):
         if not facilities:
             return
         self.view.facility.addItems(facilities)
-        
         self.view.instrument = instrumentselector.InstrumentSelector()
         self.view.horizontalLayout_4.replaceWidget(self.view.instrument_dummy, self.view.instrument)
 
