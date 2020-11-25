@@ -37,6 +37,7 @@ Improvements
 - The matplotlib `zoom` selection box is now more visible on colorfill and sliceviewer plots.
 - Add an autoscale checkbox to plot config dialog.
 - Add a Python function to replace the workspace being shown by an instrument window.
+- Slice Viewer replots the workspace when it is modified outside the Slice Viewer.
 
 Bugfixes
 ########
