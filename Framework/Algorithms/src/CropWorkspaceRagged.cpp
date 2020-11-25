@@ -100,7 +100,7 @@ void CropWorkspaceRagged::exec() {
   PARALLEL_FOR_IF(Kernel::threadSafe(*tmp, *outputWS))
   for (int64_t i = 0; i < int64_t(numSpectra); ++i) {
     PARALLEL_START_INTERUPT_REGION
-    auto &points = tmp->points(i);
+    auto points = tmp->points(i);
     auto &dataX = outputWS->dataX(i);
     auto &dataY = outputWS->dataY(i);
     auto &dataE = outputWS->dataE(i);
