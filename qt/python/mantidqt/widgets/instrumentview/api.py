@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
 # Copyright &copy; 2017 ISIS Rutherford Appleton Laboratory UKRI,
@@ -46,20 +45,3 @@ def get_instrumentview(workspace):
     ivp.set_color_range = safe_qthread(ivp.get_render_tab().setRange)
     ivp.set_color_scale = ivp.get_render_tab().setLegendScaleType
     return ivp
-
-
-if __name__ == "__main__":
-    import sys
-    from mantidqt.gui_helper import get_qapplication
-    from mantid.simpleapi import LoadEventNexus
-
-    app, within_mantid = get_qapplication()
-
-    nexus_path = ("/SNS/EQSANS/shared/sans-backend/data/new/ornl/sans/hfir/gpsans/CG2_9177.nxs.h5")
-    ws = LoadEventNexus(Filename=nexus_path, NumberOfBins=10)
-
-    myiv = get_instrumentview(ws)
-    myiv.show_view()
-
-    if not within_mantid:
-        sys.exit(app.exec_())
