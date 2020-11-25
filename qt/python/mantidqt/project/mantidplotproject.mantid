@@ -1,0 +1,58 @@
+MantidPlot 0.9.5 project file
+<scripting-lang>	Python
+<windows>	1
+<mantidworkspaces>
+WorkspaceNames	MUSR00062261
+</mantidworkspaces>
+<multiLayer>
+MUSR00062261-1	1	1	24/11/2020 14:59:04
+geometry	499	197	873	636	active
+WindowLabel		2
+Margins	5	5	5	5
+Spacing	5	5
+LayerCanvasSize	400	300
+Alignment	0	0
+<graph>
+ggeometry	5	5	860	606
+PlotTitle	MUSR00062261	#000000	4228
+<Antialiasing>1</Antialiasing>
+<SyncScales>1</SyncScales>
+Background	#ffffff	255
+Margin	0
+Border	0	#000000
+grid	0	0	0	0	#0000ff	0	0.5	#a0a0a4	2	0.4	#0000ff	0	0.5	#a0a0a4	2	0.4	0	0	2	0	0
+EnabledAxes	1	1	1	1
+AxesTitles	Time (μs)	Counts (μs)⁻¹	 	 
+AxesTitleColors	#000000	#000000	#000000	#000000
+AxesTitleAlignment	5124	5124	5124	5124
+TitleFont	MS Shell Dlg 2	10	75	0	0	0
+ScaleFont0	MS Shell Dlg 2	8	75	0	0	0
+ScaleFont1	MS Shell Dlg 2	8	75	0	0	0
+ScaleFont2	MS Shell Dlg 2	8	75	0	0	0
+ScaleFont3	MS Shell Dlg 2	8	75	0	0	0
+AxisFont0	MS Shell Dlg 2	8	50	0	0	0
+AxisFont1	MS Shell Dlg 2	8	50	0	0	0
+AxisFont2	MS Shell Dlg 2	8	50	0	0	0
+AxisFont3	MS Shell Dlg 2	8	50	0	0	0
+EnabledTickLabels	1	0	1	0
+AxesColors	#000000	#000000	#000000	#000000
+AxesNumberColors	#000000	#000000	#000000	#000000
+AxesBaseline	0	0	0	0
+CanvasFrame	1	#000000
+CanvasBackground	#ffffff	255
+MantidMatrixCurve	MUSR00062261	 sp 	0	0	1	22	1	0	0	1	3	1	0	0	0	0	0	
+scale	0	0	350000	0	8	5	0	0
+scale	1	0	350000	0	8	5	0	0
+scale	2	-5	35	0	8	5	0	0
+scale	3	-5	35	0	8	5	0	0
+LabelsFormat	0	4	0	4	0	4	0	4
+AxisType	0	0	0	0
+MajorTicks	3	3	3	3
+MinorTicks	3	3	3	3
+TicksLength	5	9
+DrawAxesBackbone	0
+AxesLineWidth	1
+LabelsRotation	0	0
+<legend>	62	53	MS Shell Dlg 2	8	50	0	0	0	#000000	1	0	#ffffff	255	\l(1)MUSR00062261-sp-1</legend>
+</graph>
+</multiLayer>
