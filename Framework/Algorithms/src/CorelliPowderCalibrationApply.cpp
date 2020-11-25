@@ -139,7 +139,7 @@ void CorelliPowderCalibrationApply::exec() {
   /**
   Rotate each component in the instrument
   IMPORTANT NOTE:
-  0. The upstream calcualtion is a minimization routine that searches the
+  0. The upstream calculation is a minimization routine that searches the
      detector position by minimizaing DIFC, therefore the reported values
      are ABSOLUTE values.
   1. In Mantid, the same component, let's take bank42 as an example, can have
