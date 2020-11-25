@@ -23,7 +23,7 @@ The calibration table must have the following columns
 - XdirectionCosine, YdirectionCosine, ZdirectionCosine: these three columns specify the rotation axis (direction cosione) for each component
 - RotationAngle: the absolute rotation angle in degrees for each component
 
-Applying the calibration involves the folloing steps:
+Applying the calibration involves the following steps:
 
 - translate each component by ``(Xposition, Yposition, Zposition)``
 - rotate each component by ``RotationAngle`` degrees around rotation axis ``(directionCosine, YdirectionCosine, ZdirectionCosine)``
