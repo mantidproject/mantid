@@ -22,6 +22,8 @@ FitScriptGeneratorPresenter::~FitScriptGeneratorPresenter() {}
 
 void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event) {
   switch (event) {
+  case ViewEvent::RemoveClicked:
+    break;
   case ViewEvent::StartXChanged:
     break;
   case ViewEvent::EndXChanged:
@@ -30,6 +32,8 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event) {
 
   throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
 }
+
+void FitScriptGeneratorPresenter::openFitScriptGenerator() { m_view->show(); }
 
 } // namespace MantidWidgets
 } // namespace MantidQt

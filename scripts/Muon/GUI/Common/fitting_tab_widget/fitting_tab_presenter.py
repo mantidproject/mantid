@@ -7,6 +7,8 @@
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_model import FitPlotInformation
 from Muon.GUI.Common.fitting_tab_widget.workspace_selector_view import WorkspaceSelectorView
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
+from mantidqt.widgets.fitscriptgenerator import (FitScriptGeneratorModel, FitScriptGeneratorPresenter,
+                                                 FitScriptGeneratorView)
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapperWithOutput
 from Muon.GUI.Common.contexts.frequency_domain_analysis_context import FrequencyDomainAnalysisContext
 from Muon.GUI.Common import thread_model
@@ -69,6 +71,10 @@ class FittingTabPresenter(object):
         self.enable_editing_notifier = GenericObservable()
         self.disable_editing_notifier = GenericObservable()
 
+        self.fsg_model = FitScriptGeneratorModel()
+        self.fsg_view = FitScriptGeneratorView()
+        self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model)
+
     def disable_view(self):
         self.view.setEnabled(False)
 
@@ -96,9 +102,8 @@ class FittingTabPresenter(object):
     def end_x(self):
         return self._end_x
 
-    def handle_fit_wizard_clicked(self):
-        # Open Fit Wizard interface
-        pass
+    def handle_fit_generator_clicked(self):
+        self.fsg_presenter.openFitScriptGenerator()
 
     def handle_new_data_loaded(self):
         self.manual_selection_made = False

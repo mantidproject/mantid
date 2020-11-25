@@ -6,13 +6,15 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllOption.h"
+
 namespace MantidQt {
 namespace MantidWidgets {
 
-class FitScriptGeneratorModel {
+class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorModel {
 public:
   FitScriptGeneratorModel();
-  ~FitScriptGeneratorModel() = default;
+  ~FitScriptGeneratorModel();
 };
 
 } // namespace MantidWidgets

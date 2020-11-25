@@ -1068,6 +1068,18 @@ public:
 };
 
 // ----------------------------------------------------------------------------
+// FitScriptGeneratorView
+// ----------------------------------------------------------------------------
+
+class FitScriptGeneratorView : QWidget {
+%TypeHeaderCode
+#include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
+%End
+public:
+    FitScriptGeneratorView(QWidget *parent = nullptr) /KeywordArgs="All"/;
+};
+
+// ----------------------------------------------------------------------------
 // FitScriptGeneratorModel
 // ----------------------------------------------------------------------------
 
@@ -1077,18 +1089,6 @@ class FitScriptGeneratorModel {
 %End
 public:
     FitScriptGeneratorModel();
-};
-
-// ----------------------------------------------------------------------------
-// FitScriptGeneratorView
-// ----------------------------------------------------------------------------
-
-class FitScriptGeneratorView : QWidget{
-%TypeHeaderCode
-#include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
-%End
-public:
-    FitScriptGeneratorView();
 };
 
 // ----------------------------------------------------------------------------
@@ -1102,4 +1102,6 @@ class FitScriptGeneratorPresenter {
 public:
     FitScriptGeneratorPresenter(FitScriptGeneratorView *view,
                                 FitScriptGeneratorModel *model);
+	
+	void openFitScriptGenerator();
 };

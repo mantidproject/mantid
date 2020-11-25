@@ -10,12 +10,15 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-FitScriptGeneratorView::FitScriptGeneratorView() : m_presenter() {
+FitScriptGeneratorView::FitScriptGeneratorView(QWidget *parent)
+    : API::MantidWidget(parent), m_presenter() {
   m_ui.setupUi(this);
-  connectSignals();
+  connectUiSignals();
 }
 
-void FitScriptGeneratorView::connectSignals() {
+FitScriptGeneratorView::~FitScriptGeneratorView() {}
+
+void FitScriptGeneratorView::connectUiSignals() {
   connect(m_ui.pbRemove, SIGNAL(clicked()), this, SLOT(onRemoveClicked()));
 }
 

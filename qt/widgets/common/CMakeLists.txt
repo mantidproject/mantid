@@ -445,6 +445,9 @@ set(
   src/FindReplaceDialog.cpp
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
+  src/FitScriptGeneratorModel.cpp
+  src/FitScriptGeneratorPresenter.cpp
+  src/FitScriptGeneratorView.cpp
   src/FunctionBrowser/FunctionBrowserUtils.cpp
   src/FunctionBrowser.cpp
   src/FunctionModel.cpp
@@ -563,6 +566,7 @@ set(
   inc/MantidQtWidgets/Common/FindDialog.h
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FitOptionsBrowser.h
+  inc/MantidQtWidgets/Common/FitScriptGeneratorView.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
   inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
   inc/MantidQtWidgets/Common/FunctionTreeView.h
@@ -640,6 +644,8 @@ set(
   inc/MantidQtWidgets/Common/FlowLayout.h
   inc/MantidQtWidgets/Common/GraphOptions.h
   inc/MantidQtWidgets/Common/DistributionOptions.h
+  inc/MantidQtWidgets/Common/FitScriptGeneratorModel.h
+  inc/MantidQtWidgets/Common/FitScriptGeneratorPresenter.h
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/Hint.h
   inc/MantidQtWidgets/Common/IFunctionView.h
@@ -803,6 +809,7 @@ set(UI_FILES
     inc/MantidQtWidgets/Common/MultifitSetupDialog.ui
     inc/MantidQtWidgets/Common/MuonFitDataSelector.ui
     inc/MantidQtWidgets/Common/FileFinderWidget.ui
+    inc/MantidQtWidgets/Common/FitScriptGenerator.ui
     inc/MantidQtWidgets/Common/ProcessingAlgoWidget.ui
     inc/MantidQtWidgets/Common/RenameParDialog.ui
     inc/MantidQtWidgets/Common/ScriptRepositoryView.ui

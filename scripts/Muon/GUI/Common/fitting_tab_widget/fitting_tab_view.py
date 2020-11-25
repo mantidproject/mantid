@@ -141,8 +141,8 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
                 '{} of {} fits failed'.format(len(boolean_list) - sum(boolean_list), len(boolean_list)))
             self.global_fit_status_label.setStyleSheet('color: red')
 
-    def set_slot_for_fit_wizard_clicked(self, slot):
-        self.fit_wizard_button.clicked.connect(slot)
+    def set_slot_for_fit_generator_clicked(self, slot):
+        self.fit_generator_button.clicked.connect(slot)
 
     def set_slot_for_display_workspace_changed(self, slot):
         self.parameter_display_combo.currentIndexChanged.connect(slot)

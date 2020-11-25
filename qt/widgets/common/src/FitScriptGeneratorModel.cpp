@@ -11,5 +11,7 @@ namespace MantidWidgets {
 
 FitScriptGeneratorModel::FitScriptGeneratorModel() {}
 
+FitScriptGeneratorModel::~FitScriptGeneratorModel() {}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

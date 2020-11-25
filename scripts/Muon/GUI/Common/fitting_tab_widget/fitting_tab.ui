@@ -139,12 +139,12 @@
       </widget>
      </item>
      <item row="4" column="4">
-      <widget class="QPushButton" name="fit_wizard_button">
+      <widget class="QPushButton" name="fit_generator_button">
        <property name="enabled">
         <bool>true</bool>
        </property>
        <property name="text">
-        <string>Fit Wizard</string>
+        <string>Fit Generator</string>
        </property>
       </widget>
      </item>
