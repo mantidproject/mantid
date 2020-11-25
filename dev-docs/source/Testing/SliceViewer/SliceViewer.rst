@@ -138,8 +138,12 @@ For the data types above:
 
 - Select the toolbar button for region of interest integration
 - Draw a shape to integrate over on the image and notice the line subplots change
-- Test the keyboard options in the bottom status bar message to output roi/cuts to workspaces
+- Test the keyboard options in the bottom status bar message to output to workspaces
+	- Output the cuts displayed on line-subplots, for axis: x = X , y = Y, c = Both
+	- Output slice over the region of interest box: r = roi
+
 - Also, test that the basic Line-subplots toolbar button (to the left of ROI integration button) works.
+	- Check keyboard options for cuts displayed on line-subplots, for axis: x = X , y = Y, c = Both
 
 .. figure:: ../../../../docs/source/images/wb-sliceviewer51-roi.png
    :class: screenshot
