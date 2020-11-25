@@ -20,10 +20,10 @@
 #include <QtGlobal>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
-#include "boost/python.hpp"
 #include "MantidQtWidgets/MplCpp/Figure.h"
 #include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
 #include "MantidQtWidgets/MplCpp/MantidAxes.h"
+#include "boost/python.hpp"
 #endif
 #include <QFileInfo>
 #include <QUrl>
@@ -748,7 +748,7 @@ void StepScan::plotCurve() {
   ax.setXLabel(xAxisTitle.c_str());
   ax.setYLabel(yAxisTitle.c_str());
   fig.pyobj().attr("show")();
-  //canvas->show();
+  // canvas->show();
 #endif
 }
 
