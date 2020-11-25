@@ -122,15 +122,24 @@ void RunsPresenter::notifyTransfer() {
 // Notification from our own view that the instrument should be changed
 void RunsPresenter::notifyChangeInstrumentRequested() {
   auto const newName = m_view->getSearchInstrument();
-  // If the instrument cannot be changed, revert it on the view
-  if (!m_mainPresenter->notifyChangeInstrumentRequested(newName))
+
+  // If the instrument cannot be changed, revert it on the view and quit
+  if (changeInstrumentPrevented(newName))
     m_view->setSearchInstrument(instrumentName());
+  else
+    m_mainPresenter->notifyChangeInstrumentRequested(newName);
 }
 
 // Notification from a child presenter that the instrument needs to be changed
+// Returns true and continues to change the instrument if possible; returns
+// false if not
 bool RunsPresenter::notifyChangeInstrumentRequested(
     std::string const &instrumentName) {
-  return m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
+  if (changeInstrumentPrevented(instrumentName))
+    return false;
+
+  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
+  return true;
 }
 
 void RunsPresenter::notifyResumeReductionRequested() {
@@ -202,7 +211,6 @@ bool RunsPresenter::resumeAutoreduction() {
     if (isOverwritePrevented()) {
       return false;
     }
-    m_searcher->reset();
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
   }
 
@@ -355,6 +363,14 @@ bool RunsPresenter::isAnyBatchAutoreducing() const {
 
 bool RunsPresenter::isOverwritePrevented() const {
   return m_mainPresenter->isOverwriteBatchPrevented();
+}
+
+bool RunsPresenter::changeInstrumentPrevented(
+    std::string const &newName) const {
+  return newName != instrumentName() && hasUnsavedSearchResults() &&
+         !m_mainPresenter->discardChanges(
+             "This will cause unsaved annotations in the search results to be "
+             "lost. Continue?");
 }
 
 bool RunsPresenter::hasUnsavedSearchResults() const {

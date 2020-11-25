@@ -125,14 +125,11 @@ void MainWindowPresenter::notifyAnyBatchReductionPaused() {
 }
 
 // Top level function to handle when user has requested to change the
-// instrument. Goes ahead and changes it and returns true if successful;
-// returns false if it cannot be changed
-bool MainWindowPresenter::notifyChangeInstrumentRequested(
+// instrument
+void MainWindowPresenter::notifyChangeInstrumentRequested(
     std::string const &newInstrumentName) {
+  // Cache changed state before calling updateInstrument
   auto const hasChanged = (newInstrumentName != instrumentName());
-  if (hasChanged && isOverwriteAllBatchesPrevented())
-    return false;
-
   // Re-load instrument regardless of whether it has changed, e.g. if we are
   // creating a new batch the instrument may not have changed but we still want
   // the most up to date settings
@@ -141,8 +138,6 @@ bool MainWindowPresenter::notifyChangeInstrumentRequested(
   // may trigger overriding of user-specified settings
   if (hasChanged)
     onInstrumentChanged();
-
-  return true;
 }
 
 void MainWindowPresenter::notifyUpdateInstrumentRequested() {
@@ -199,13 +194,14 @@ boost::optional<int> MainWindowPresenter::roundPrecision() const {
   return boost::none;
 }
 
-bool MainWindowPresenter::discardChanges() const {
-  if (!isWarnDiscardChangesChecked())
-    return true;
+bool MainWindowPresenter::discardChanges(std::string const &message) const {
+  return !isWarnDiscardChangesChecked() ||
+         m_messageHandler->askUserOkCancel(message, "Discard changes?");
+}
 
-  return m_messageHandler->askUserOkCancel(
-      "This will cause unsaved changes to be lost. Continue?",
-      "Discard changes?");
+bool MainWindowPresenter::discardChanges() const {
+  return discardChanges(
+      "This will cause unsaved changes to be lost. Continue?");
 }
 
 bool MainWindowPresenter::isCloseEventPrevented() {
@@ -232,10 +228,6 @@ bool MainWindowPresenter::isOverwriteBatchPrevented(int tabIndex) const {
 bool MainWindowPresenter::isOverwriteBatchPrevented(
     IBatchPresenter const *batchPresenter) const {
   return (batchPresenter->isBatchUnsaved() && !discardChanges());
-}
-
-bool MainWindowPresenter::isOverwriteAllBatchesPrevented() const {
-  return (isAnyBatchUnsaved() && !discardChanges());
 }
 
 bool MainWindowPresenter::isProcessAllPrevented() const {

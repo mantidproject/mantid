@@ -185,6 +185,7 @@ private:
   void updateViewWhenMonitorStopped();
 
   bool isOverwritePrevented() const;
+  bool changeInstrumentPrevented(std::string const &newName) const;
 
   friend class Encoder;
   friend class Decoder;

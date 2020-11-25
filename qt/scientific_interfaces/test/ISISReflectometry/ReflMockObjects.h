@@ -72,7 +72,7 @@ public:
   MOCK_METHOD0(notifyAnyBatchAutoreductionPaused, void());
   MOCK_METHOD0(notifyReductionPaused, void());
 
-  MOCK_METHOD1(notifyChangeInstrumentRequested, bool(const std::string &));
+  MOCK_METHOD1(notifyChangeInstrumentRequested, void(const std::string &));
   MOCK_METHOD1(notifyInstrumentChanged, void(const std::string &));
   MOCK_METHOD0(notifyUpdateInstrumentRequested, void());
   MOCK_METHOD0(notifyRestoreDefaultsRequested, void());
@@ -84,6 +84,7 @@ public:
   MOCK_CONST_METHOD0(isAnyBatchProcessing, bool());
   MOCK_CONST_METHOD0(isAnyBatchAutoreducing, bool());
   MOCK_CONST_METHOD0(isOverwriteBatchPrevented, bool());
+  MOCK_CONST_METHOD1(discardChanges, bool(std::string const &));
   MOCK_CONST_METHOD0(getUnsavedBatchFlag, bool());
   MOCK_METHOD1(setUnsavedBatchFlag, void(bool));
   MOCK_CONST_METHOD0(percentComplete, int());

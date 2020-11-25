@@ -64,7 +64,7 @@ public:
   void notifyResumeAutoreductionRequested() override;
   void notifyPauseAutoreductionRequested() override;
   void notifyAutoreductionCompleted() override;
-  bool
+  void
   notifyChangeInstrumentRequested(const std::string &instrumentName) override;
   void notifyInstrumentChanged(const std::string &instrumentName) override;
   void notifyUpdateInstrumentRequested() override;
@@ -82,6 +82,7 @@ public:
   bool isAnyBatchProcessing() const override;
   bool isAnyBatchAutoreducing() const override;
   bool isOverwriteBatchPrevented() const override;
+  bool discardChanges(std::string const &message) const override;
   bool isBatchUnsaved() const override;
   void setBatchUnsaved() override;
   void notifyChangesSaved() override;

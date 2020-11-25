@@ -303,60 +303,6 @@ public:
     verifyAndClear();
   }
 
-  void testChangeInstrumentRequestedDoesNotUpdateInstrumentIfUnsavedChanges() {
-    auto presenter = makePresenter();
-    auto const instrument = std::string("POLREF");
-    expectWarnDiscardChanges(true);
-    auto const batchIndex = 0;
-    expectBatchUnsaved(batchIndex);
-    expectUserDoesNotDiscardChanges();
-    presenter.notifyChangeInstrumentRequested(instrument);
-    TS_ASSERT_EQUALS(presenter.instrumentName(), "");
-    verifyAndClear();
-  }
-
-  void testChangeInstrumentRequestedUpdatesInstrumentIfDiscardUnsavedChanges() {
-    auto presenter = makePresenter();
-    auto const instrument = std::string("POLREF");
-    expectWarnDiscardChanges(true);
-    auto const batchIndex = 0;
-    expectBatchUnsaved(batchIndex);
-    expectUserDiscardsChanges();
-    presenter.notifyChangeInstrumentRequested(instrument);
-    TS_ASSERT_EQUALS(presenter.instrumentName(), instrument);
-    verifyAndClear();
-  }
-
-  void testChangeInstrumentRequestedReturnsTrueIfSuccessful() {
-    auto presenter = makePresenter();
-    auto const instrument = std::string("POLREF");
-    auto const success = presenter.notifyChangeInstrumentRequested(instrument);
-    TS_ASSERT_EQUALS(success, true);
-    verifyAndClear();
-  }
-
-  void testChangeInstrumentRequestedReturnsFalseIfCannotBeChanged() {
-    auto presenter = makePresenter();
-    auto const instrument = std::string("POLREF");
-    expectWarnDiscardChanges(true);
-    expectBatchUnsaved(0);
-    expectUserDoesNotDiscardChanges();
-    auto const success = presenter.notifyChangeInstrumentRequested(instrument);
-    TS_ASSERT_EQUALS(success, false);
-    verifyAndClear();
-  }
-
-  void testChangeInstrumentRequestedReturnsTrueIfUserDiscardsChanges() {
-    auto presenter = makePresenter();
-    auto const instrument = std::string("POLREF");
-    expectWarnDiscardChanges(true);
-    expectBatchUnsaved(0);
-    expectUserDiscardsChanges();
-    auto const success = presenter.notifyChangeInstrumentRequested(instrument);
-    TS_ASSERT_EQUALS(success, true);
-    verifyAndClear();
-  }
-
   void testChangeInstrumentRequestedUpdatesInstrumentInChildPresenters() {
     auto presenter = makePresenter();
     setupInstrument(presenter, "INTER");

@@ -77,9 +77,9 @@ void BatchPresenter::initInstrumentList() {
 
 bool BatchPresenter::requestClose() const { return true; }
 
-bool BatchPresenter::notifyChangeInstrumentRequested(
+void BatchPresenter::notifyChangeInstrumentRequested(
     const std::string &instrumentName) {
-  return m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
+  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
 }
 
 void BatchPresenter::notifyInstrumentChanged(
@@ -326,6 +326,10 @@ bool BatchPresenter::isAnyBatchAutoreducing() const {
 
 bool BatchPresenter::isOverwriteBatchPrevented() const {
   return m_mainPresenter->isOverwriteBatchPrevented(this);
+}
+
+bool BatchPresenter::discardChanges(std::string const &message) const {
+  return m_mainPresenter->discardChanges(message);
 }
 
 /** Returns whether there are any unsaved changes in the current batch */

@@ -36,7 +36,7 @@ public:
   virtual void notifyResumeAutoreductionRequested() = 0;
   virtual void notifyPauseAutoreductionRequested() = 0;
   virtual void notifyAutoreductionCompleted() = 0;
-  virtual bool
+  virtual void
   notifyChangeInstrumentRequested(const std::string &instrumentName) = 0;
   virtual void notifyInstrumentChanged(const std::string &instrumentName) = 0;
   virtual void notifyUpdateInstrumentRequested() = 0;
@@ -55,6 +55,7 @@ public:
   virtual bool isAnyBatchProcessing() const = 0;
   virtual bool isAnyBatchAutoreducing() const = 0;
   virtual bool isOverwriteBatchPrevented() const = 0;
+  virtual bool discardChanges(std::string const &message) const = 0;
   virtual bool requestClose() const = 0;
   virtual int percentComplete() const = 0;
   virtual AlgorithmRuntimeProps rowProcessingProperties() const = 0;

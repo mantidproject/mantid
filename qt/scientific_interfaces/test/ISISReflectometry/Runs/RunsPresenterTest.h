@@ -110,6 +110,7 @@ public:
     auto presenter = makePresenter();
     expectSearchString(m_searchString);
     expectSearchSettingsChanged();
+    expectUnsavedSearchResults();
     expectOverwriteBatchPrevented();
     EXPECT_CALL(*m_searcher, reset()).Times(0);
     presenter.notifySearch();
@@ -266,6 +267,7 @@ public:
 
   void testTableNotClearedWhenOverwritePreventedOnResumeAutoreduction() {
     auto presenter = makePresenter();
+    expectSearchString(m_searchString);
     expectSearchSettingsChanged();
     expectOverwriteBatchPrevented();
     expectDoNotClearExistingTable();
@@ -471,7 +473,7 @@ public:
     verifyAndClear();
   }
 
-  void testChangeInstrumentRequestedGetsInstrumentAndNotifiesMainPresenter() {
+  void testChangeInstrumentOnViewNotifiesMainPresenter() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
     expectSearchInstrument(instrument);
@@ -481,12 +483,84 @@ public:
     verifyAndClear();
   }
 
-  void testChangeInstrumentRequestedWithGivenNameNotifiesMainPresenter() {
+  void testChangeInstrumentOnViewPromptsToDiscardChangesIfUnsaved() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    expectSearchInstrument(instrument);
+    expectUnsavedSearchResults();
+    EXPECT_CALL(
+        m_mainPresenter,
+        discardChanges(
+            "This will cause unsaved annotations in the search results to be "
+            "lost. Continue?"))
+        .Times(1);
+    presenter.notifyChangeInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnViewDoesNotPromptToDiscardChangesIfSaved() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    expectSearchInstrument(instrument);
+    expectNoUnsavedSearchResults();
+    EXPECT_CALL(m_mainPresenter, discardChanges(_)).Times(0);
+    presenter.notifyChangeInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnViewDoesNotNotifyMainPresenterIfPrevented() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    expectSearchInstrument(instrument);
+    expectChangeInstrumentPrevented();
+    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(_)).Times(0);
+    presenter.notifyChangeInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnViewRevertsChangeIfPrevented() {
+    auto presenter = makePresenter();
+    auto const oldInstrument = presenter.instrumentName();
+    auto const instrument = std::string("TEST-instrumnet");
+    expectSearchInstrument(instrument);
+    expectChangeInstrumentPrevented();
+    EXPECT_CALL(m_view, setSearchInstrument(oldInstrument)).Times(1);
+    presenter.notifyChangeInstrumentRequested();
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnChildNotifiesMainPresenter() {
     auto presenter = makePresenter();
     auto const instrument = std::string("TEST-instrumnet");
     EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(instrument))
         .Times(1);
     presenter.notifyChangeInstrumentRequested(instrument);
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnChildDoesNotNotifyMainPresenterIfPrevented() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    expectChangeInstrumentPrevented();
+    EXPECT_CALL(m_mainPresenter, notifyChangeInstrumentRequested(_)).Times(0);
+    presenter.notifyChangeInstrumentRequested(instrument);
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnChildReturnsTrueIfSuccess() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    auto success = presenter.notifyChangeInstrumentRequested(instrument);
+    TS_ASSERT_EQUALS(success, true);
+    verifyAndClear();
+  }
+
+  void testChangeInstrumentOnChildReturnsFalseIfPrevented() {
+    auto presenter = makePresenter();
+    auto const instrument = std::string("TEST-instrumnet");
+    expectChangeInstrumentPrevented();
+    auto success = presenter.notifyChangeInstrumentRequested(instrument);
+    TS_ASSERT_EQUALS(success, false);
     verifyAndClear();
   }
 
@@ -968,6 +1042,25 @@ private:
     EXPECT_CALL(m_view, getSearchInstrument())
         .Times(AtLeast(1))
         .WillRepeatedly(Return(instrument));
+  }
+
+  void expectUnsavedSearchResults() {
+    EXPECT_CALL(*m_searcher, hasUnsavedChanges())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(true));
+  }
+
+  void expectNoUnsavedSearchResults() {
+    EXPECT_CALL(*m_searcher, hasUnsavedChanges())
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
+  }
+
+  void expectChangeInstrumentPrevented() {
+    expectUnsavedSearchResults();
+    EXPECT_CALL(m_mainPresenter, discardChanges(_))
+        .Times(AtLeast(1))
+        .WillRepeatedly(Return(false));
   }
 
   void expectSearchString(std::string const &searchString) {

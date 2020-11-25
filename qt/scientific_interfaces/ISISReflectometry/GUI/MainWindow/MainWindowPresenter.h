@@ -60,18 +60,18 @@ public:
   bool isOverwriteBatchPrevented(int tabIndex) const override;
   bool isOverwriteBatchPrevented(
       IBatchPresenter const *batchPresenter) const override;
-  bool isOverwriteAllBatchesPrevented() const override;
   bool isProcessAllPrevented() const override;
   bool isProcessPartialGroupPrevented() const override;
   void notifyAnyBatchAutoreductionResumed() override;
   void notifyAnyBatchAutoreductionPaused() override;
   void notifyAnyBatchReductionResumed() override;
   void notifyAnyBatchReductionPaused() override;
-  bool
+  void
   notifyChangeInstrumentRequested(std::string const &instrumentName) override;
   void notifyUpdateInstrumentRequested() override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   std::string instrumentName() const override;
+  bool discardChanges(std::string const &message) const override;
 
   // MainWindowSubscriber overrides
   void notifyHelpPressed() override;
