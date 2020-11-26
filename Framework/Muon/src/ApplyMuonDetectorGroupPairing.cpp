@@ -409,7 +409,7 @@ Muon::AnalysisOptions ApplyMuonDetectorGroupPairing::getUserInput() {
   const double alpha = static_cast<double>(getProperty("Alpha"));
   grouping.pairAlphas.emplace_back(alpha);
   grouping.pairNames.emplace_back(this->getPropertyValue("PairName"));
-  grouping.pairs.emplace_back(std::make_pair(0, 1));
+  grouping.pairs.emplace_back(0, 1);
 
   options.grouping = grouping;
   options.summedPeriods = this->getPropertyValue("SummedPeriods");

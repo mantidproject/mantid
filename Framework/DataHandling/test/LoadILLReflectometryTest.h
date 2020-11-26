@@ -19,6 +19,7 @@
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
 
 using namespace Mantid::API;
 using Mantid::DataHandling::LoadILLReflectometry;
@@ -28,6 +29,7 @@ class LoadILLReflectometryTest : public CxxTest::TestSuite {
 private:
   const std::string m_d17DirectBeamFile{"ILL/D17/317369.nxs"};
   const std::string m_d17File{"ILL/D17/317370.nxs"};
+  const std::string m_d17Cycle203File{"ILL/D17/564343.nxs"};
   const std::string m_figaroFile{"ILL/Figaro/598488.nxs"};
   const std::string m_d17File_2018{"ILL/D17/000001.nxs"};
   const std::string m_figaroFile_2018{"ILL/Figaro/000002.nxs"};
@@ -54,6 +56,10 @@ private:
                      std::set<Mantid::detid_t>{0})
     // sample log entry must exist
     TS_ASSERT(output->run().hasProperty("reduction.line_position"))
+
+    TS_ASSERT(output->run().hasProperty("start_time"));
+    TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
+        output->run().getProperty("start_time")->value()));
   }
 
   static double detCounts(const MatrixWorkspace_sptr &output) {
@@ -157,6 +163,8 @@ public:
         run.getPropertyValueAsType<double>("VirtualChopper.poff");
     const auto openOffset =
         run.getPropertyValueAsType<double>("VirtualChopper.open_offset");
+    const auto chopperWindow =
+        run.getPropertyValueAsType<double>("ChopperWindow");
     const auto tof0 =
         tofDelay -
         60.e6 * (pOffset - 45. + chopper2Phase - chopper1Phase + openOffset) /
@@ -180,6 +188,19 @@ public:
         run.getProperty("VirtualChopper.chopper2_phase_average")->units(), "")
     TS_ASSERT_EQUALS(run.getProperty("VirtualChopper.poff")->units(), "")
     TS_ASSERT_EQUALS(run.getProperty("VirtualChopper.open_offset")->units(), "")
+    TS_ASSERT_EQUALS(chopperWindow, 45.)
+  }
+
+  void testD17Cycle203ChopperWindow() {
+    MatrixWorkspace_sptr output;
+    auto prop = emptyProperties();
+    prop.emplace_back("XUnit", "TimeOfFlight");
+    getWorkspaceFor(output, m_d17Cycle203File, m_outWSName, prop);
+    TS_ASSERT_EQUALS(
+        output->run().getPropertyValueAsType<double>("ChopperWindow"), 20.)
+    TS_ASSERT_DELTA(
+        output->run().getPropertyValueAsType<double>("Distance.ChopperGap"),
+        0.075, 1e-3)
   }
 
   void testTOFFigaro() {
@@ -251,6 +272,7 @@ public:
     TS_ASSERT_EQUALS(run.getProperty("VirtualChopper.dist_chop_samp")->units(),
                      "meter")
     TS_ASSERT_EQUALS(run.getProperty("Distance.ChopperGap")->units(), "meter")
+    TS_ASSERT_DELTA(chopperSeparation, 0.082, 1e-3)
   }
 
   void testSampleAndSourcePositionsFigaro() {

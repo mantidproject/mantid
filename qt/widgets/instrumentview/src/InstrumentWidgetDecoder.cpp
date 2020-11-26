@@ -53,7 +53,14 @@ void InstrumentWidgetDecoder::decode(const QMap<QString, QVariant> &map,
   const auto energyTransferList = map[QString("energyTransfer")].toList();
   const auto min = energyTransferList[0].toDouble();
   const auto max = energyTransferList[1].toDouble();
-  obj.setBinRange(min, max);
+  if (energyTransferList.size() == 3) {
+    const bool isIntegrable = energyTransferList[2].toBool();
+    if (isIntegrable) {
+      obj.setBinRange(min, max);
+    }
+  } else {
+    obj.setBinRange(min, max);
+  }
 
   this->decodeSurface(map[QString("surface")].toMap(), obj.getSurface());
   this->decodeActor(map[QString("actor")].toMap(), obj.m_instrumentActor);
@@ -81,6 +88,8 @@ void InstrumentWidgetDecoder::decodeMaskTab(const QMap<QString, QVariant> &map,
   obj->m_ring_rectangle->setChecked(
       activeTools["ringRectangleButton"].toBool());
   obj->m_free_draw->setChecked(activeTools["freeFrawButton"].toBool());
+  obj->m_pixel->setChecked(activeTools["pixelButton"].toBool());
+  obj->m_tube->setChecked(activeTools["tubeButton"].toBool());
 
   // Decode the active type
   obj->m_masking_on->setChecked(activeType["maskingOn"].toBool());
@@ -339,7 +348,7 @@ InstrumentWidgetDecoder::decodeFree(const QMap<QString, QVariant> &map) {
   QPolygonF polygon;
 
   const auto parameters = map[QString("paramaters")].toList();
-  for (const auto param : parameters) {
+  for (const auto &param : parameters) {
     const auto paramList = param.toList();
     const double x = paramList[0].toDouble();
     const double y = paramList[1].toDouble();
@@ -362,7 +371,7 @@ void InstrumentWidgetDecoder::decodeAlignmentInfo(
                                qLabMap[QString("y")].toDouble(),
                                qLabMap[QString("z")].toDouble());
 
-    alignmentPlane.emplace_back(std::make_pair(qValue, marker));
+    alignmentPlane.emplace_back(qValue, marker);
   }
   obj->m_selectedAlignmentPlane = alignmentPlane;
 }

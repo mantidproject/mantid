@@ -109,6 +109,27 @@ validModulationVectors(const std::vector<double> &modVector1,
 }
 
 /**
+ * Direct add modulation a list to return.
+ * @param modVector1 List of 3 doubles specifying an offset
+ * @param modVector2 List of 3 doubles specifying an offset
+ * @param modVector3 List of 3 doubles specifying an offset
+ * @return A list of valid modulation vectors
+ */
+std::vector<Kernel::V3D>
+addModulationVectors(const std::vector<double> &modVector1,
+                     const std::vector<double> &modVector2,
+                     const std::vector<double> &modVector3) {
+  std::vector<V3D> modVectors;
+  auto addVec = [&modVectors](const auto &modVec) {
+    modVectors.emplace_back(V3D(modVec[0], modVec[1], modVec[2]));
+  };
+  addVec(modVector1);
+  addVec(modVector2);
+  addVec(modVector3);
+  return modVectors;
+}
+
+/**
  * @param maxOrder Integer specifying the multiples of the
  * modulation vector.
  * @param modVectors A list of modulation vectors form the user
@@ -149,8 +170,8 @@ generateOffsetVectors(const std::vector<Kernel::V3D> &modVectors,
           for (auto p = -maxOrder; p <= maxOrder; ++p) {
             if (m == 0 && n == 0 && p == 0)
               continue;
-            offsets.emplace_back(std::make_tuple(
-                m, n, p, modVector0 * m + modVector1 * n + modVector2 * p));
+            offsets.emplace_back(
+                m, n, p, modVector0 * m + modVector1 * n + modVector2 * p);
           }
         }
       }
@@ -167,13 +188,13 @@ generateOffsetVectors(const std::vector<Kernel::V3D> &modVectors,
         V3D offset{modVector * order};
         switch (i) {
         case 0:
-          offsets.emplace_back(std::make_tuple(order, 0, 0, std::move(offset)));
+          offsets.emplace_back(order, 0, 0, std::move(offset));
           break;
         case 1:
-          offsets.emplace_back(std::make_tuple(0, order, 0, std::move(offset)));
+          offsets.emplace_back(0, order, 0, std::move(offset));
           break;
         case 2:
-          offsets.emplace_back(std::make_tuple(0, 0, order, std::move(offset)));
+          offsets.emplace_back(0, 0, order, std::move(offset));
           break;
         }
       }

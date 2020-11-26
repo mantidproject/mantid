@@ -3,10 +3,20 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
+# Workaround a segfault importing readline with doctests and PyQt5.
+# doctest.py initializes a custom pdb to be able to redirect stdout:
+#   https://github.com/python/cpython/blob/750c5abf43b7b1627ab59ead237bef4c2314d29e/Lib/doctest.py#L367
+# and in turn this attempts to import readline:
+#   https://github.com/python/cpython/blob/750c5abf43b7b1627ab59ead237bef4c2314d29e/Lib/pdb.py#L157
+# The workaround is discussed in https://groups.google.com/forum/#!topic/leo-editor/ghiIN7irzY0
+# and simply amounts to importing readline before a QApplication is created in the screenshots
+# directive
 import sys
+if sys.platform == "linux" or sys.platform == "linux2" or sys.platform == "darwin":
+    import readline
 import os
 from sphinx import __version__ as sphinx_version
-import sphinx_bootstrap_theme # checked at cmake time
+import sphinx_bootstrap_theme  # checked at cmake time
 import mantid
 from mantid.kernel import ConfigService
 from distutils.version import LooseVersion
@@ -19,6 +29,7 @@ sys.path.insert(0, os.path.abspath(os.path.join('..', 'sphinxext')))
 # -- General configuration ------------------------------------------------
 
 if LooseVersion(sphinx_version) > LooseVersion("1.6"):
+
     def setup(app):
         """Called automatically by Sphinx when starting the build process
         """
@@ -32,20 +43,31 @@ if LooseVersion(sphinx_version) > LooseVersion("1.6"):
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-     # we use pngmath over mathjax so that the the offline help isn't reliant on
-     # anything external and we don't need to include the large mathjax package
+    # we use pngmath over mathjax so that the the offline help isn't reliant on
+    # anything external and we don't need to include the large mathjax package
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.doctest',
-    'mantiddoc.directives',
+    'mantiddoc.directives.algorithm',
+    'mantiddoc.directives.attributes',
+    'mantiddoc.directives.categories',
+    'mantiddoc.directives.diagram',
+    'mantiddoc.directives.interface',
+    'mantiddoc.directives.plot_directive',
+    'mantiddoc.directives.properties',
+    'mantiddoc.directives.relatedalgorithms',
+    'mantiddoc.directives.sourcelink',
+    'mantiddoc.directives.summary',
     'mantiddoc.autodoc',
     'mantiddoc.doctest',
-    'matplotlib.sphinxext.plot_directive'
 ]
-if LooseVersion(sphinx_version) > LooseVersion("1.8"):
-    extensions.append('sphinx.ext.imgmath')
-else:
+# Deal with math extension. Can be overridden with MATH_EXT environment variable
+# If set to imgmath we deal with the fact that < 1.8 is was called pngmath
+mathext = os.environ.get('MATH_EXT', 'sphinx.ext.imgmath')
+if mathext.endswith('imgmath') and LooseVersion(sphinx_version) <= LooseVersion("1.8"):
     extensions.append('sphinx.ext.pngmath')
+else:
+    extensions.append(mathext)
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -77,9 +99,12 @@ pygments_style = 'sphinx'
 
 # Store certain config options so they can be restored to initial
 # settings after each test.
-mantid_init_config_keys = ('datasearch.directories', 'defaultsave.directory',
-                           'default.facility', 'default.instrument')
-mantid_config_reset = ["_cfg['{0}'] = '{1}'".format(k, ConfigService.Instance()[k]) for k in mantid_init_config_keys]
+mantid_init_config_keys = ('datasearch.directories', 'defaultsave.directory', 'default.facility',
+                           'default.instrument')
+mantid_config_reset = [
+    "_cfg['{0}'] = '{1}'".format(k,
+                                 ConfigService.Instance()[k]) for k in mantid_init_config_keys
+]
 mantid_config_reset = '\n'.join(mantid_config_reset)
 
 # Run this before each test is executed
@@ -124,7 +149,7 @@ if MemoryStats().getFreeRatio() < 0.75:
 # -- Options for pngmath --------------------------------------------------
 
 # Load the preview package into latex
-pngmath_latex_preamble=r'\usepackage[active]{preview}'
+pngmath_latex_preamble = r'\usepackage[active]{preview}'
 
 # Ensures that the vertical alignment of equations is correct.
 # See http://sphinx-doc.org/ext/math.html#confval-pngmath_use_preview
@@ -197,7 +222,7 @@ epub_identifier = "www.mantidproject.org"
 #The publication scheme for the epub_identifier. This is put in the Dublin Core metadata.
 #For published books the scheme is 'ISBN'. If you use the project homepage, 'URL' seems reasonable.
 #The default value is 'unknown'.
-epub_scheme='URL'
+epub_scheme = 'URL'
 
 #A unique identifier for the document. This is put in the Dublin Core metadata. You may use a random string.
 #The default value is 'unknown'.
@@ -219,5 +244,5 @@ intersphinx_mapping = {
     'SciPy': ('https://docs.scipy.org/doc/scipy/reference', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable', None),
     'pystog': ('https://pystog.readthedocs.io/en/latest/', None),
-    'mantid-dev':('https://developer.mantidproject.org/', None)
+    'mantid-dev': ('https://developer.mantidproject.org/', None)
 }

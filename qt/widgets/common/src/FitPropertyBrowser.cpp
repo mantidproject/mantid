@@ -746,11 +746,11 @@ PropertyHandler *FitPropertyBrowser::addFunction(const std::string &fnName) {
 
 void FitPropertyBrowser::removeFunction(PropertyHandler *handler) {
   if (handler) {
+    emit functionRemoved();
+    emit functionChanged();
     emit removePlotSignal(getHandler());
     handler->removeFunction();
     compositeFunction()->checkFunction();
-    emit functionRemoved();
-    emit functionChanged();
   }
 }
 
@@ -1646,8 +1646,7 @@ void FitPropertyBrowser::doFit(int maxIterations) {
     }
     m_fitActionUndoFit->setEnabled(true);
 
-    auto function = getFittingFunction();
-    const std::string funStr = function->asString();
+    const std::string funStr = getFunctionString();
 
     Mantid::API::IAlgorithm_sptr alg =
         Mantid::API::AlgorithmManager::Instance().create("Fit");
@@ -1758,6 +1757,11 @@ void FitPropertyBrowser::finishHandle(const Mantid::API::IAlgorithm *alg) {
   if (m_compositeFunction->name() == "MultiBG") {
     emit multifitFinished();
   }
+}
+
+std::string FitPropertyBrowser::getFunctionString() const {
+  auto function = getFittingFunction();
+  return function->asString();
 }
 
 /// Display the status string returned from Fit
@@ -1871,6 +1875,10 @@ void FitPropertyBrowser::addHandle(
 
 /// workspace was removed
 void FitPropertyBrowser::postDeleteHandle(const std::string &wsName) {
+  removeWorkspace(wsName);
+}
+
+void FitPropertyBrowser::removeWorkspace(const std::string &wsName) {
   QString oldName = QString::fromStdString(workspaceName());
   int i = m_workspaceNames.indexOf(QString(wsName.c_str()));
   if (i >= 0) {
@@ -3502,6 +3510,13 @@ void FitPropertyBrowser::addAllowedSpectra(const QString &wsName,
   } else {
     throw std::runtime_error("Workspace " + name + " is not a MatrixWorkspace");
   }
+}
+
+void FitPropertyBrowser::removeWorkspaceAndSpectra(const std::string &wsName) {
+  removeWorkspace(wsName);
+  // remove spectra
+  QString qWsName = QString::fromStdString(wsName);
+  m_allowedSpectra.erase(m_allowedSpectra.find(qWsName));
 }
 
 void FitPropertyBrowser::addAllowedTableWorkspace(const QString &wsName) {

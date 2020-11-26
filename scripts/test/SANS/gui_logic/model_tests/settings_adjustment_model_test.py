@@ -115,8 +115,8 @@ class SettingsTransmissionModelTest(unittest.TestCase):
 
     def test_that_transmission_mn_shift_can_be_set(self):
         state_gui_model = self.create_model({})
-        state_gui_model.transmission_mn_shift = 234
-        self.assertEqual(state_gui_model.transmission_mn_shift, 234)
+        state_gui_model.transmission_mn_4_shift = 234
+        self.assertEqual(state_gui_model.transmission_mn_4_shift, 234)
 
     def test_that_default_for_adjustment_files_are_empty(self):
         state_gui_model = self.create_model({})

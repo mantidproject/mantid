@@ -151,6 +151,7 @@ if(ENABLE_WORKBENCH)
                           Gui
                           Widgets
                           OpenGL
+                          Test
                REQUIRED)
   if(Qt5_FOUND)
     message(STATUS "Found Qt ${Qt5_VERSION}: ${Qt5_DIR}")
@@ -244,30 +245,26 @@ add_subdirectory(scripts)
 # Docs requirements
 option(ENABLE_DOCS "Enable Building user and developer documentation" ON)
 if (ENABLE_DOCS)
-  find_package(Sphinx 1.2)
-  if(SPHINX_FOUND)
-    # run python to see if the theme is installed
-    execute_process(COMMAND ${Python_EXECUTABLE} -c
-                            "import sphinx_bootstrap_theme"
-                    OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
-                    ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
-                    OUTPUT_STRIP_TRAILING_WHITESPACE
-                    ERROR_STRIP_TRAILING_WHITESPACE)
-    if(SPHINX_BOOTSTRAP_THEME_ERR)
-      message(ERROR " Did not find sphinx_bootstrap_theme")
-      message(STATUS "${Python_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
-      message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
-      message(
-        FATAL_ERROR
-          " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/"
-        )
-    endif()
-
-    add_subdirectory(dev-docs)
-    if(ENABLE_MANTIDPLOT)
-      add_subdirectory(docs)
-    endif()
+  find_package(Sphinx REQUIRED)
+  # run python to see if the theme is installed
+  execute_process(COMMAND ${Python_EXECUTABLE} -c
+                          "import sphinx_bootstrap_theme"
+                  OUTPUT_VARIABLE SPHINX_BOOTSTRAP_THEME_OUT
+                  ERROR_VARIABLE SPHINX_BOOTSTRAP_THEME_ERR
+                  OUTPUT_STRIP_TRAILING_WHITESPACE
+                  ERROR_STRIP_TRAILING_WHITESPACE)
+  if(SPHINX_BOOTSTRAP_THEME_ERR)
+    message(ERROR " Did not find sphinx_bootstrap_theme")
+    message(STATUS "${Python_EXECUTABLE} -c \"import sphinx_bootstrap_theme\"")
+    message(STATUS "${SPHINX_BOOTSTRAP_THEME_ERR}")
+    message(
+      FATAL_ERROR
+        " Install instructions at https://pypi.python.org/pypi/sphinx-bootstrap-theme/"
+      )
   endif()
+
+  add_subdirectory(dev-docs)
+  add_subdirectory(docs)
 endif()
 
 # System test data target
@@ -291,8 +288,10 @@ endif()
 
 # Installation settings
 
-# N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
-install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
+if(ENABLE_MANTIDPLOT)
+  # N.B. INBUNDLE variable is empty except on Mac (set in DarwinSetup.cmake)
+  install(DIRECTORY installers/colormaps/ DESTINATION ${INBUNDLE}colormaps)
+endif()
 
 # Install the files (.desktop and icon) to create a menu items
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
@@ -474,7 +473,7 @@ if(ENABLE_CPACK)
         set(CPACK_DEBIAN_PACKAGE_DEPENDS
             "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqscintilla2-qt5-13")
       endif()
-    else()
+    elseif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
       message(WARNING "Unsupported Debian-like OS: ${UNIX_CODENAME}. Packaging is unlikely to work correctly.")
     endif()
     # python requirements

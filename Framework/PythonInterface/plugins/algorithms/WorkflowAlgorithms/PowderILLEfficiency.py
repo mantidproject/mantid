@@ -190,6 +190,18 @@ class PowderILLEfficiency(PythonAlgorithm):
             overlapping region, taking into account the relative scale factor.
             Updates the reference workspace to contain the weighted sum of the two, or the clone
             of one or the other if the scale factor is pathological.
+
+            For example:
+                ws:  10-20 degrees
+                cropped_ws: 10-18 degrees
+                ref_ws: 8-18 degrees
+
+            In this case in the new reference should cover 10-20 degrees as follows:
+                10-18: as the weighted mean of the previous reference and the cropped_ws*factor
+                18-20: containing the data only from cropped_ws*factor
+
+            8-10 bit is cropped out to keep the reference of the same size for the next iteration.
+
             @param ws: input workspace containing data from the current pixel
             @param cropped_ws: same as ws, but last bins cropped to match the size of the reference
             @param ref_ws: current reference workspace
@@ -205,8 +217,8 @@ class PowderILLEfficiency(PythonAlgorithm):
             Scale(InputWorkspace=cropped_ws, OutputWorkspace=cropped_ws, Factor=factor)
             Scale(InputWorkspace=last_bins, OutputWorkspace=last_bins, Factor=factor)
             WeightedMean(InputWorkspace1=ref_ws, InputWorkspace2=cropped_ws, OutputWorkspace=ref_ws)
-
         ConjoinXRuns(InputWorkspaces=[ref_ws,last_bins], OutputWorkspace=ref_ws)
+        SortXAxis(InputWorkspace=ref_ws, OutputWorkspace=ref_ws)
         x = mtd[ref_ws].readX(0)[self._bin_offset]
         CropWorkspace(InputWorkspace=ref_ws, XMin=x, OutputWorkspace=ref_ws)
         DeleteWorkspace(last_bins)
@@ -344,7 +356,7 @@ class PowderILLEfficiency(PythonAlgorithm):
             Configures the calibration with SequentialSummedReference1D method (D20)
             @param : the name of the raw detector scan (merged) workspace
         """
-        self._scan_points = mtd[raw_ws].getRun().getLogData('ScanSteps').value
+        self._scan_points = int(mtd[raw_ws].getRun().getLogData('ScanSteps').value)
         self.log().information('Number of scan steps is: ' + str(self._scan_points))
         self._n_det = mtd[raw_ws].detectorInfo().size() - 1
         self.log().information('Number of detector pixels is: ' + str(self._n_det))
@@ -354,8 +366,9 @@ class PowderILLEfficiency(PythonAlgorithm):
         self._bin_offset = int(math.ceil(scan_step_in_pixel_numbers))
         self.log().information('Bin offset is: ' + str(self._bin_offset))
         if (abs(self._bin_offset - scan_step_in_pixel_numbers) > 0.1 and not self._interpolate):
-            self.log().warning('Scan step is not an integer multiple of the pixel size. '
-                               'Consider checking the option InterpolateOverlappingAngles.')
+            self.log().warning('Scan step is not an integer multiple of the pixel size: {0:.3f}. '
+                               'Consider checking the option InterpolateOverlappingAngles.'
+                               .format(scan_step_in_pixel_numbers))
         if self._pixel_range[1] > self._n_det:
             self.log().warning('Last pixel number provided is larger than total number of pixels. '
                                'Taking the last existing pixel.')
@@ -448,7 +461,7 @@ class PowderILLEfficiency(PythonAlgorithm):
         x_2d = mtd[ws_2d].extractX()
         x[0:self._scan_points] = x_2d[0,...]
         index = self._scan_points
-        for pixel in range(0,self._n_det):
+        for pixel in range(0,self._n_det-1):
             x[index:(index+self._bin_offset)] = x_2d[pixel,-self._bin_offset:]
             index += self._bin_offset
         CreateWorkspace(DataX=x, DataY=y, DataE=e, NSpec=1, UnitX='Degrees', OutputWorkspace=response_ws)
@@ -484,13 +497,16 @@ class PowderILLEfficiency(PythonAlgorithm):
         CreateWorkspace(DataX=zeros, DataY=constants, DataE=zeros, NSpec=self._n_det, OutputWorkspace=constants_ws)
 
         # loop over all the requested pixels to derive the calibration sequentially
-        # this is a serial loop of about 3K iterations, so performance is critical
+        # this is a serial loop of about 3K iterations (number of pixels), so performance is critical
+        # this is due to the method that is sequential; that is, to calibrate pixel N,
+        # you need to have the factors derived for all the pixels up to N-1 included
         nreports = int(self._pixel_range[1] - self._pixel_range[0] + 1)
         self._progress = Progress(self, start=0.0, end=1.0, nreports=nreports)
         for det in range(self._pixel_range[0] - 1, self._pixel_range[1]):
-            self._progress.report('Computing the relative calibration factor for pixel #' + str(det))
+            self._progress.report('Computing the relative calibration factor for pixel #' + str(det+1))
             ws = '__det_' + str(det)
             ExtractSingleSpectrum(InputWorkspace=ws_2d, WorkspaceIndex=det, OutputWorkspace=ws)
+            SortXAxis(InputWorkspace=ws, OutputWorkspace=ws)
             y = mtd[ws].readY(0)
             x = mtd[ws].readX(0)
             # keep track of dead pixels
@@ -503,7 +519,14 @@ class PowderILLEfficiency(PythonAlgorithm):
                 ratio_ws = ws + '_ratio'
                 cropped_ws = ws + '_cropped'
                 CropWorkspace(InputWorkspace=ws, OutputWorkspace=cropped_ws, XMax=x[-(self._bin_offset+1)])
-
+                ref_bins = mtd[ref_ws].blocksize()
+                current_pixel_bins = mtd[cropped_ws].blocksize()
+                log_message = 'Pixel #{0}: number of bins in reference is {1}, in current cropped is {2}'\
+                    .format(det, ref_bins, current_pixel_bins)
+                self.log().information(log_message)
+                if current_pixel_bins != ref_bins:
+                    # after cropping these should always be equal
+                    raise RuntimeError('Unequal number of bins in the reference and the cropped workspace. '+log_message)
                 if self._interpolate and self._live_pixels[det]:
                     # SplineInterpolation invalidates the errors, so we need to copy them over
                     interp_ws = ws + '_interp'

@@ -45,7 +45,7 @@ using Kernel::Tolerance;
 using Kernel::V3D;
 
 Plane::Plane()
-    : Quadratic(), NormV(1.0, 0.0, 0.0), Dist(0)
+    : Quadratic(), m_normVec(1.0, 0.0, 0.0), m_distance(0)
 /**
   Constructor: sets plane in y-z plane and throught origin
 */
@@ -107,16 +107,16 @@ int Plane::setSurface(const std::string &Pstr)
       Kernel::V3D C = Kernel::V3D(surf[6], surf[7], surf[8]);
       B -= A;
       C -= A;
-      NormV = B * C;
-      NormV.normalize();
-      Dist = A.scalar_prod(NormV);
+      m_normVec = B * C;
+      m_normVec.normalize();
+      m_distance = A.scalar_prod(m_normVec);
     } else // Norm Equation:
     {
-      NormV = Kernel::V3D(surf[0], surf[1], surf[2]);
-      const double ll = NormV.normalize();
+      m_normVec = Kernel::V3D(surf[0], surf[1], surf[2]);
+      const double ll = m_normVec.normalize();
       if (ll < Tolerance) // avoid
         return -4;
-      Dist = surf[3] / ll;
+      m_distance = surf[3] / ll;
     }
   } else if (item.size() == 2) //  PROCESS px type PLANE
   {
@@ -124,9 +124,9 @@ int Plane::setSurface(const std::string &Pstr)
     if (ptype < 0 || ptype > 2) // Not x,y,z
       return -5;
     surf[ptype] = 1.0;
-    if (!Mantid::Kernel::Strings::convert(Line, Dist))
+    if (!Mantid::Kernel::Strings::convert(Line, m_distance))
       return -6; // Too short or no number
-    NormV = Kernel::V3D(surf[0], surf[1], surf[2]);
+    m_normVec = Kernel::V3D(surf[0], surf[1], surf[2]);
   } else
     return -3; // WRONG NAME
 
@@ -143,11 +143,11 @@ int Plane::setPlane(const Kernel::V3D &P, const Kernel::V3D &N)
 */
 {
   try {
-    NormV = normalize(N);
+    m_normVec = normalize(N);
   } catch (std::runtime_error &) {
     throw std::invalid_argument("Attempt to create Plane with zero normal");
   }
-  Dist = P.scalar_prod(NormV);
+  m_distance = P.scalar_prod(m_normVec);
   setBaseEqn();
   return 0;
 }
@@ -158,8 +158,8 @@ void Plane::rotate(const Kernel::Matrix<double> &MA)
   @param MA :: direct rotation matrix (3x3)
 */
 {
-  NormV.rotate(MA);
-  NormV.normalize();
+  m_normVec.rotate(MA);
+  m_normVec.normalize();
   Quadratic::rotate(MA);
 }
 
@@ -170,7 +170,7 @@ void Plane::displace(const Kernel::V3D &Sp)
   @param Sp :: point value of displacement
 */
 {
-  Dist += NormV.scalar_prod(Sp);
+  m_distance += m_normVec.scalar_prod(Sp);
   Quadratic::displace(Sp);
 }
 
@@ -182,7 +182,7 @@ double Plane::distance(const Kernel::V3D &A) const
   @return singed distance from point
 */
 {
-  return A.scalar_prod(NormV) - Dist;
+  return A.scalar_prod(m_normVec) - m_distance;
 }
 
 double Plane::dotProd(const Plane &A) const
@@ -191,7 +191,7 @@ double Plane::dotProd(const Plane &A) const
   @return the Normal.A.Normal dot product
 */
 {
-  return NormV.scalar_prod(A.NormV);
+  return m_normVec.scalar_prod(A.m_normVec);
 }
 
 Kernel::V3D Plane::crossProd(const Plane &A) const
@@ -201,7 +201,7 @@ Kernel::V3D Plane::crossProd(const Plane &A) const
   @return the Normal x A.Normal cross product
 */
 {
-  return NormV.cross_prod(A.NormV);
+  return m_normVec.cross_prod(A.m_normVec);
 }
 
 int Plane::side(const Kernel::V3D &A) const
@@ -213,7 +213,7 @@ int Plane::side(const Kernel::V3D &A) const
   @retval 0 :: A is on the plane itself (within tolerence)
 */
 {
-  const double Dp = NormV.scalar_prod(A) - Dist;
+  const double Dp = m_normVec.scalar_prod(A) - m_distance;
   if (Tolerance < std::abs(Dp))
     return (Dp > 0) ? 1 : -1;
   return 0;
@@ -239,20 +239,20 @@ void Plane::print() const
 */
 {
   Quadratic::print();
-  logger.debug() << "NormV == " << NormV << " : " << Dist << '\n';
+  logger.debug() << "m_normVec == " << m_normVec << " : " << m_distance << '\n';
 }
 
 std::size_t Plane::planeType() const
 /**
    Find if the normal vector allows it to be a special
    type of plane (x,y,z direction)
-   (Assumes NormV is a unit vector)
+   (Assumes m_normVec is a unit vector)
    @retval 1-3 :: on the x,y,z axis
    @retval 0 :: general plane
 */
 {
   for (std::size_t i = 0; i < 3; i++)
-    if (fabs(NormV[i]) > (1.0 - Tolerance))
+    if (fabs(m_normVec[i]) > (1.0 - Tolerance))
       return i + 1;
   return 0;
 }
@@ -261,16 +261,16 @@ std::size_t Plane::planeType() const
  *   Sets the general equation for a plane
  */
 void Plane::setBaseEqn() {
-  BaseEqn[0] = 0.0;      // A x^2
-  BaseEqn[1] = 0.0;      // B y^2
-  BaseEqn[2] = 0.0;      // C z^2
-  BaseEqn[3] = 0.0;      // D xy
-  BaseEqn[4] = 0.0;      // E xz
-  BaseEqn[5] = 0.0;      // F yz
-  BaseEqn[6] = NormV[0]; // G x
-  BaseEqn[7] = NormV[1]; // H y
-  BaseEqn[8] = NormV[2]; // J z
-  BaseEqn[9] = -Dist;    // K const
+  BaseEqn[0] = 0.0;          // A x^2
+  BaseEqn[1] = 0.0;          // B y^2
+  BaseEqn[2] = 0.0;          // C z^2
+  BaseEqn[3] = 0.0;          // D xy
+  BaseEqn[4] = 0.0;          // E xz
+  BaseEqn[5] = 0.0;          // F yz
+  BaseEqn[6] = m_normVec[0]; // G x
+  BaseEqn[7] = m_normVec[1]; // H y
+  BaseEqn[8] = m_normVec[2]; // J z
+  BaseEqn[9] = -m_distance;  // K const
 }
 
 /**
@@ -284,13 +284,14 @@ void Plane::write(std::ostream &OX) const {
   cx.precision(Surface::Nprecision);
   const std::size_t ptype = planeType();
   if (!ptype)
-    cx << "p " << NormV[0] << " " << NormV[1] << " " << NormV[2] << " " << Dist;
-  else if (NormV[ptype - 1] < 0)
+    cx << "p " << m_normVec[0] << " " << m_normVec[1] << " " << m_normVec[2]
+       << " " << m_distance;
+  else if (m_normVec[ptype - 1] < 0)
     cx << "p"
-       << "xyz"[ptype - 1] << " " << -Dist;
+       << "xyz"[ptype - 1] << " " << -m_distance;
   else
     cx << "p"
-       << "xyz"[ptype - 1] << " " << Dist;
+       << "xyz"[ptype - 1] << " " << m_distance;
 
   Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
 }
@@ -306,20 +307,21 @@ int Plane::LineIntersectionWithPlane(V3D startpt, V3D endpt, V3D &output) {
   double const sprod = this->getNormal().scalar_prod(startpt - endpt);
   if (sprod == 0)
     return 0;
-  double const projection =
-      NormV[0] * startpt[0] + NormV[1] * startpt[1] + NormV[2] * startpt[2];
-  double s1 = (projection - Dist) / sprod;
+  double const projection = m_normVec[0] * startpt[0] +
+                            m_normVec[1] * startpt[1] +
+                            m_normVec[2] * startpt[2];
+  double s1 = (projection - m_distance) / sprod;
   if (s1 < 0 || s1 > 1)
     return 0;
   // The expressions below for resolving the point of intersection are
-  // resilient to the corner Dist << sprod.
+  // resilient to the corner m_distance << sprod.
   double const ratio = projection / sprod;
   output[0] = ratio * endpt[0] + (1 - ratio) * startpt[0] -
-              ((endpt[0] - startpt[0]) / sprod) * Dist;
+              ((endpt[0] - startpt[0]) / sprod) * m_distance;
   output[1] = ratio * endpt[1] + (1 - ratio) * startpt[1] -
-              ((endpt[1] - startpt[1]) / sprod) * Dist;
+              ((endpt[1] - startpt[1]) / sprod) * m_distance;
   output[2] = ratio * endpt[2] + (1 - ratio) * startpt[2] -
-              ((endpt[2] - startpt[2]) / sprod) * Dist;
+              ((endpt[2] - startpt[2]) / sprod) * m_distance;
   return 1;
 }
 

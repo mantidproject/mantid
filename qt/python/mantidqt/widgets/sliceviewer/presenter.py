@@ -47,7 +47,8 @@ class SliceViewer(object):
         self.normalization = False
 
         self.view = view if view else SliceViewerView(self, self.model.get_dimensions_info(),
-                                                      self.model.can_normalize_workspace(), parent, conf)
+                                                      self.model.can_normalize_workspace(), parent,
+                                                      conf)
         self.view.data_view.create_axes_orthogonal(
             redraw_on_zoom=not self.model.can_support_dynamic_rebinning())
         self.view.data_view.image_info_widget.setWorkspace(ws)
@@ -70,8 +71,14 @@ class SliceViewer(object):
         """
         Tell the view to display a new plot of an MDHistoWorkspace
         """
-        self.view.data_view.plot_MDH(self.model.get_ws(), slicepoint=self.get_slicepoint())
-        self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
+        data_view = self.view.data_view
+        limits = data_view.get_axes_limits()
+
+        if limits is None or not self.model.can_support_dynamic_rebinning():
+            data_view.plot_MDH(self.model.get_ws(), slicepoint=self.get_slicepoint())
+            self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
+        else:
+            self.new_plot_MDE()
 
     def new_plot_MDE(self):
         """
@@ -95,10 +102,9 @@ class SliceViewer(object):
                 limits = xlim, ylim
 
         data_view.plot_MDH(
-            self.model.get_ws(
-                slicepoint=self.get_slicepoint(),
-                bin_params=data_view.dimensions.get_bin_params(),
-                limits=limits))
+            self.model.get_ws_MDE(slicepoint=self.get_slicepoint(),
+                                  bin_params=data_view.dimensions.get_bin_params(),
+                                  limits=limits))
         self._call_peaks_presenter_if_created("notify", PeaksViewerPresenter.Event.OverlayPeaks)
 
     def new_plot_matrix(self):
@@ -110,8 +116,8 @@ class SliceViewer(object):
         Update the view to display an updated MDHistoWorkspace slice/cut
         """
         self.view.data_view.update_plot_data(
-            self.model.get_data(
-                self.get_slicepoint(), transpose=self.view.data_view.dimensions.transpose))
+            self.model.get_data(self.get_slicepoint(),
+                                transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_MDE(self):
         """
@@ -119,11 +125,10 @@ class SliceViewer(object):
         """
         data_view = self.view.data_view
         data_view.update_plot_data(
-            self.model.get_data(
-                self.get_slicepoint(),
-                bin_params=data_view.dimensions.get_bin_params(),
-                limits=data_view.get_axes_limits(),
-                transpose=self.view.data_view.dimensions.transpose))
+            self.model.get_data(self.get_slicepoint(),
+                                bin_params=data_view.dimensions.get_bin_params(),
+                                limits=data_view.get_axes_limits(),
+                                transpose=self.view.data_view.dimensions.transpose))
 
     def update_plot_data_matrix(self):
         # should never be called, since this workspace type is only 2D the plot dimensions never change
@@ -250,14 +255,13 @@ class SliceViewer(object):
 
         try:
             self._show_status_message(
-                self.model.export_roi_to_workspace(
-                    self.get_slicepoint(),
-                    bin_params=data_view.dimensions.get_bin_params(),
-                    limits=limits,
-                    transpose=data_view.dimensions.transpose))
+                self.model.export_roi_to_workspace(self.get_slicepoint(),
+                                                   bin_params=data_view.dimensions.get_bin_params(),
+                                                   limits=limits,
+                                                   transpose=data_view.dimensions.transpose))
         except Exception as exc:
             self._logger.error(str(exc))
-            self._show_status_message(f"Error exporting ROI")
+            self._show_status_message("Error exporting ROI")
 
     def export_cut(self, limits, cut_type):
         """Notify that an roi has been selected for export to a workspace
@@ -277,7 +281,7 @@ class SliceViewer(object):
                     cut=cut_type))
         except Exception as exc:
             self._logger.error(str(exc))
-            self._show_status_message(f"Error exporting roi cut")
+            self._show_status_message("Error exporting roi cut")
 
     def export_pixel_cut(self, pos, axis):
         """Notify a single pixel line plot has been requested from the
@@ -297,7 +301,7 @@ class SliceViewer(object):
                     axis=axis))
         except Exception as exc:
             self._logger.error(str(exc))
-            self._show_status_message(f"Error exporting single-pixel cut")
+            self._show_status_message("Error exporting single-pixel cut")
 
     def nonorthogonal_axes(self, state: bool):
         """

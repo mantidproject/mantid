@@ -6,8 +6,9 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import DataProcessorAlgorithm, MatrixWorkspaceProperty, MultipleFileProperty, PropertyMode, Progress, \
     WorkspaceGroupProperty, FileAction
-from mantid.kernel import Direction, FloatBoundedValidator
+from mantid.kernel import Direction, FloatBoundedValidator, FloatArrayProperty
 from mantid.simpleapi import *
+import numpy as np
 from os import path
 
 EMPTY_TOKEN = '000000'
@@ -115,45 +116,80 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         return 'SANSILLAutoProcess'
 
     def validateInputs(self):
+        self.setUp()
+
         result = dict()
-        message = 'Wrong number of {0} runs: {1}. Provide one or as many as sample runs: {2}.'
-        tr_message = 'Wrong number of {0} runs: {1}. Provide one or multiple runs summed with +.'
-        sample_dim = self.getPropertyValue('SampleRuns').count(',')
-        abs_dim = self.getPropertyValue('AbsorberRuns').count(',')
-        beam_dim = self.getPropertyValue('BeamRuns').count(',')
-        flux_dim = self.getPropertyValue('FluxRuns').count(',')
-        can_dim = self.getPropertyValue('ContainerRuns').count(',')
-        str_dim = self.getPropertyValue('SampleTransmissionRuns').count(',')
-        ctr_dim = self.getPropertyValue('ContainerTransmissionRuns').count(',')
-        btr_dim = self.getPropertyValue('TransmissionBeamRuns').count(',')
-        atr_dim = self.getPropertyValue('TransmissionAbsorberRuns').count(',')
-        mask_dim = self.getPropertyValue('MaskFiles').count(',')
-        sens_dim = self.getPropertyValue('SensitivityMaps').count(',')
-        ref_dim = self.getPropertyValue('ReferenceFiles').count(',')
+        message = 'Wrong number of {0} runs: {1}. Provide one or as many as '\
+                  'sample runs: {2}.'
+        message_value = 'Wrong number of {0} values: {1}. Provide one or as ' \
+                        'many as sample runs: {2}.'
+        tr_message = 'Wrong number of {0} runs: {1}. Provide one or multiple ' \
+                     'runs summed with +.'
+
+        # array parameters checks
+        sample_dim = len(self.sample)
+        abs_dim = len(self.absorber)
+        beam_dim = len(self.beam)
+        flux_dim = len(self.flux)
+        can_dim = len(self.container)
+        mask_dim = len(self.mask)
+        sens_dim = len(self.sensitivity)
+        ref_dim = len(self.reference)
+        maxqxy_dim = len(self.maxqxy)
+        deltaq_dim = len(self.deltaq)
+        radius_dim = len(self.radius)
         if self.getPropertyValue('SampleRuns') == '':
             result['SampleRuns'] = 'Please provide at least one sample run.'
-        if abs_dim != sample_dim and abs_dim != 0:
-            result['AbsorberRuns'] = message.format('Absorber', abs_dim, sample_dim)
-        if beam_dim != sample_dim and beam_dim != 0:
+        if abs_dim != sample_dim and abs_dim > 1:
+            result['AbsorberRuns'] = \
+                message.format('Absorber', abs_dim, sample_dim)
+        if beam_dim != sample_dim and beam_dim > 1:
             result['BeamRuns'] = message.format('Beam', beam_dim, sample_dim)
-        if can_dim != sample_dim and can_dim != 0:
-            result['ContainerRuns'] = message.format('Container', can_dim, sample_dim)
-        if str_dim != 0:
-            result['SampleTransmissionRuns'] = tr_message.format('SampleTransmission', str_dim)
-        if ctr_dim != 0:
-            result['ContainerTransmissionRuns'] = tr_message.format('ContainerTransmission', ctr_dim)
-        if btr_dim != 0:
-            result['TransmissionBeamRuns'] = tr_message.format('TransmissionBeam', btr_dim)
-        if atr_dim != 0:
-            result['TransmissionAbsorberRuns'] = tr_message.format('TransmissionAbsorber', atr_dim)
-        if mask_dim != sample_dim and mask_dim != 0:
+        if can_dim != sample_dim and can_dim > 1:
+            result['ContainerRuns'] = \
+                message.format('Container', can_dim, sample_dim)
+        if mask_dim != sample_dim and mask_dim > 1:
             result['MaskFiles'] = message.format('Mask', mask_dim, sample_dim)
-        if ref_dim != sample_dim and ref_dim != 0:
-            result['ReferenceFiles'] = message.format('Reference', ref_dim, sample_dim)
-        if sens_dim != sample_dim and sens_dim != 0:
-            result['SensitivityMaps'] = message.format('Sensitivity', sens_dim, sample_dim)
-        if flux_dim != flux_dim and flux_dim != 0:
+        if ref_dim != sample_dim and ref_dim > 1:
+            result['ReferenceFiles'] = \
+                    message.format('Reference', ref_dim, sample_dim)
+        if sens_dim != sample_dim and sens_dim > 1:
+            result['SensitivityMaps'] = \
+                    message.format('Sensitivity', sens_dim, sample_dim)
+        if flux_dim != sample_dim and flux_dim > 1:
             result['FluxRuns'] = message.format('Flux')
+        if maxqxy_dim != sample_dim and maxqxy_dim > 1:
+            result['MaxQxy'] = \
+                message_value.format('MaxQxy', maxqxy_dim, sample_dim)
+        if deltaq_dim != sample_dim and deltaq_dim > 1:
+            result['DeltaQ'] = \
+                message_value.format('DeltaQ', deltaq_dim, sample_dim)
+        if radius_dim != sample_dim and radius_dim > 1:
+            result['BeamRadius'] = \
+                    message_value.format('BeamRadius', radius_dim, sample_dim)
+
+        # transmission runs checks
+        str_dim = len(self.stransmission.split(','))
+        ctr_dim = len(self.ctransmission.split(','))
+        btr_dim = len(self.btransmission.split(','))
+        atr_dim = len(self.atransmission.split(','))
+        if str_dim > 1:
+            result['SampleTransmissionRuns'] = \
+                tr_message.format('SampleTransmission', str_dim)
+        if ctr_dim > 1:
+            result['ContainerTransmissionRuns'] = \
+                tr_message.format('ContainerTransmission', ctr_dim)
+        if btr_dim > 1:
+            result['TransmissionBeamRuns'] = \
+                tr_message.format('TransmissionBeam', btr_dim)
+        if atr_dim > 1:
+            result['TransmissionAbsorberRuns'] = \
+                tr_message.format('TransmissionAbsorber', atr_dim)
+
+        # other checks
+        if self.output_type == 'I(Phi,Q)' and self.n_wedges == 0:
+            result['NumberOfWedges'] = "For I(Phi,Q) processing, the number " \
+                                       "of wedges must be different from 0."
 
         return result
 
@@ -175,13 +211,19 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.reference = self.getPropertyValue('ReferenceFiles') \
             .replace(' ', '').split(',')
         self.output = self.getPropertyValue('OutputWorkspace')
+        self.output_panels = self.output + "_panels"
         self.output_sens = self.getPropertyValue('SensitivityOutputWorkspace')
         self.normalise = self.getPropertyValue('NormaliseBy')
         self.theta_dependent = self.getProperty('ThetaDependent').value
-        self.radius = self.getProperty('BeamRadius').value
+        self.tr_radius = self.getProperty('TransmissionBeamRadius').value
+        self.radius = self.getPropertyValue('BeamRadius').split(',')
         self.dimensionality = len(self.sample)
         self.progress = Progress(self, start=0.0, end=1.0, nreports=10 * self.dimensionality)
         self.cleanup = self.getProperty('ClearCorrected2DWorkspace').value
+        self.n_wedges = self.getProperty('NumberOfWedges').value
+        self.maxqxy = self.getPropertyValue('MaxQxy').split(',')
+        self.deltaq = self.getPropertyValue('DeltaQ').split(',')
+        self.output_type = self.getPropertyValue('OutputType')
 
     def PyInit(self):
 
@@ -270,11 +312,18 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.copyProperties('SANSILLReduction', ['NormaliseBy'])
 
-        self.declareProperty('SampleThickness', 0.1, validator=FloatBoundedValidator(lower=0.),
+        self.declareProperty('SampleThickness', 0.1,
+                             validator=FloatBoundedValidator(lower=-1),
                              doc='Sample thickness [cm]')
 
-        self.declareProperty('BeamRadius', 0.05, validator=FloatBoundedValidator(lower=0.),
-                             doc='Beam radius [m]; used for beam center finding, transmission and flux calculations.')
+        self.declareProperty('TransmissionBeamRadius', 0.1,
+                             validator=FloatBoundedValidator(lower=0.),
+                             doc='Beam radius [m]; used for transmission '
+                             'calculations.')
+
+        self.declareProperty(FloatArrayProperty('BeamRadius', values=[0.1]),
+                             doc='Beam radius [m]; used for beam center '
+                             'finding and flux calculations.')
 
         self.declareProperty('WaterCrossSection', 1., doc='Provide water cross-section; '
                                                           'used only if the absolute scale is done by dividing to water.')
@@ -287,12 +336,24 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         self.setPropertyGroup('NormaliseBy', 'Options')
         self.setPropertyGroup('SampleThickness', 'Options')
         self.setPropertyGroup('BeamRadius', 'Options')
+        self.setPropertyGroup('TransmissionBeamRadius', 'Options')
         self.setPropertyGroup('WaterCrossSection', 'Options')
 
+        self.declareProperty(FloatArrayProperty('MaxQxy', values=[-1]),
+                             doc='Maximum of absolute Qx and Qy.')
+        self.declareProperty(FloatArrayProperty('DeltaQ', values=[-1]),
+                             doc='The dimension of a Qx-Qy cell.')
+
+        self.declareProperty('OutputPanels', False,
+                             doc='Whether or not process the individual '
+                             'detector panels.')
+
         self.copyProperties('SANSILLIntegration',
-                            ['OutputType', 'CalculateResolution', 'DefaultQBinning', 'BinningFactor', 'OutputBinning',
-                             'NPixelDivision', 'NumberOfWedges', 'WedgeWorkspace', 'WedgeAngle', 'WedgeOffset',
-                             'AsymmetricWedges', 'MaxQxy', 'DeltaQ', 'IQxQyLogBinning', 'PanelOutputWorkspaces'])
+                            ['OutputType', 'CalculateResolution',
+                             'DefaultQBinning', 'BinningFactor',
+                             'OutputBinning', 'NPixelDivision',
+                             'NumberOfWedges', 'WedgeAngle', 'WedgeOffset',
+                             'AsymmetricWedges', 'IQxQyLogBinning'])
 
         self.setPropertyGroup('OutputType', 'Integration Options')
         self.setPropertyGroup('CalculateResolution', 'Integration Options')
@@ -303,7 +364,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
 
         self.setUp()
         outputs = []
-        panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
         panel_output_groups = []
 
         container_transmission, sample_transmission = \
@@ -319,23 +379,74 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                     beam, flux = self.processBeam(d, absorber)
                 container = self.processContainer(d, beam, absorber,
                                                   container_transmission)
-                self.processSample(d, flux, sample_transmission, beam, absorber,
-                                   container)
-                outputs.append(self.output+ '_' + str(d + 1))
-                panel_ws_group = panel_outputs + '_' + str(d + 1)
-                if mtd.doesExist(panel_ws_group) and panel_outputs:
-                    panel_output_groups.append(panel_ws_group)
+                sample, panels = self.processSample(d, flux,
+                                                    sample_transmission, beam,
+                                                    absorber, container)
+                outputs.append(sample)
+                if panels:
+                    panel_output_groups.append(panels)
             else:
                 self.log().information('Skipping empty token run.')
 
+        for output in outputs:
+            ConvertToPointData(InputWorkspace=output,
+                               OutputWorkspace=output)
+        if len(outputs) > 1 and self.getPropertyValue('OutputType') == 'I(Q)':
+            try:
+                stitched = self.output + "_stitched"
+                Stitch1DMany(InputWorkspaces=outputs,
+                             OutputWorkspace=stitched)
+                outputs.append(stitched)
+            except RuntimeError as re:
+                self.log().warning("Unable to stitch automatically, consider "
+                                   "stitching manually: " + str(re))
+
         GroupWorkspaces(InputWorkspaces=outputs, OutputWorkspace=self.output)
+
+        # group wedge workspaces
+        if self.output_type == "I(Q)":
+            for w in range(self.n_wedges):
+                wedge_ws = [self.output + "_wedge_" + str(w + 1) + "_" + str(d + 1)
+                            for d in range(self.dimensionality)]
+                # convert to point data and remove nan and 0 from edges
+                for ws in wedge_ws:
+                    ConvertToPointData(InputWorkspace=ws,
+                                       OutputWorkspace=ws)
+                    ReplaceSpecialValues(InputWorkspace=ws,
+                                         OutputWorkspace=ws,
+                                         NaNValue=0)
+                    y = mtd[ws].readY(0)
+                    x = mtd[ws].readX(0)
+                    nonzero = np.nonzero(y)
+
+                    CropWorkspace(InputWorkspace=ws,
+                                  XMin=x[nonzero][0] - 1,
+                                  XMax=x[nonzero][-1],
+                                  OutputWorkspace=ws)
+
+                # and stitch if possible
+                if len(wedge_ws) > 1:
+                    try:
+                        stitched = self.output + "_wedge_" + str(w + 1) \
+                                   + "_stitched"
+                        Stitch1DMany(InputWorkspaces=wedge_ws,
+                                     OutputWorkspace=stitched)
+                        wedge_ws.append(stitched)
+                    except RuntimeError as re:
+                        self.log().warning("Unable to stitch automatically, "
+                                           "consider stitching manually: "
+                                           + str(re))
+                GroupWorkspaces(InputWorkspaces=wedge_ws,
+                                OutputWorkspace=self.output + "_wedge_" + str(w + 1))
+
         self.setProperty('OutputWorkspace', mtd[self.output])
         if self.output_sens:
             self.setProperty('SensitivityOutputWorkspace', mtd[self.output_sens])
 
-        if panel_outputs and len(panel_output_groups) != 0:
-            GroupWorkspaces(InputWorkspaces=panel_output_groups, OutputWorkspace=panel_outputs)
-            self.setProperty('PanelOutputWorkspaces', mtd[panel_outputs])
+        # group panels
+        if panel_output_groups:
+            GroupWorkspaces(InputWorkspaces=panel_output_groups,
+                            OutputWorkspace=self.output_panels)
 
     def processTransmissions(self):
         [process_transmission_absorber, transmission_absorber_name] = \
@@ -356,7 +467,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              ProcessAs='Beam',
                              NormaliseBy=self.normalise,
                              OutputWorkspace=transmission_beam_name,
-                             BeamRadius=self.radius,
+                             BeamRadius=self.tr_radius,
                              FluxOutputWorkspace=flux_name,
                              AbsorberInputWorkspace=
                              transmission_absorber_name)
@@ -372,7 +483,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              transmission_absorber_name,
                              BeamInputWorkspace=transmission_beam_name,
                              NormaliseBy=self.normalise,
-                             BeamRadius=self.radius)
+                             BeamRadius=self.tr_radius)
 
         [process_sample_transmission, sample_transmission_name] = \
             needs_processing(self.stransmission, 'Transmission')
@@ -385,7 +496,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              transmission_absorber_name,
                              BeamInputWorkspace=transmission_beam_name,
                              NormaliseBy=self.normalise,
-                             BeamRadius=self.radius)
+                             BeamRadius=self.tr_radius)
         return container_transmission_name, sample_transmission_name
 
     def processAbsorber(self, i):
@@ -406,6 +517,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         beam = (self.beam[i]
                 if len(self.beam) == self.dimensionality
                 else self.beam[0])
+        radius = (self.radius[i]
+                  if len(self.radius) == self.dimensionality
+                  else self.radius[0])
         [process_beam, beam_name] = needs_processing(beam, 'Beam')
         flux_name = beam_name + '_Flux' if not self.flux[0] else ''
         self.progress.report('Processing beam')
@@ -414,7 +528,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              ProcessAs='Beam',
                              OutputWorkspace=beam_name,
                              NormaliseBy=self.normalise,
-                             BeamRadius=self.radius,
+                             BeamRadius=radius,
                              AbsorberInputWorkspace=absorber_name,
                              FluxOutputWorkspace=flux_name)
         return beam_name, flux_name
@@ -424,6 +538,9 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             flux = (self.flux[i]
                     if len(self.flux) == self.dimensionality
                     else self.flux[0])
+            radius = (self.radius[i]
+                      if len(self.radius) == self.dimensionality
+                      else self.radius[0])
             [process_flux, flux_name] = needs_processing(flux, 'Flux')
             self.progress.report('Processing flux')
             if process_flux:
@@ -432,7 +549,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  OutputWorkspace=flux_name.replace('Flux',
                                                                    'Beam'),
                                  NormaliseBy=self.normalise,
-                                 BeamRadius=self.radius,
+                                 BeamRadius=radius,
                                  AbsorberInputWorkspace=absorber_name,
                                  FluxOutputWorkspace=flux_name)
             return flux_name
@@ -535,30 +652,59 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                 self.getProperty('WaterCrossSection').value
                 )
 
-        panel_outputs = self.getPropertyValue('PanelOutputWorkspaces')
-        panel_ws_group = (panel_outputs + '_' + str(i + 1)
-                          if panel_outputs
-                          else '')
+        if self.getProperty('OutputPanels').value:
+            panel_ws_group = self.output_panels + '_' + str(i + 1)
+        else:
+            panel_ws_group = ""
+
+        if self.n_wedges and self.output_type == "I(Q)":
+            output_wedges = self.output + "_wedge_d" + str(i + 1)
+        else:
+            output_wedges = ""
 
         SANSILLIntegration(
                 InputWorkspace=sample_name,
                 OutputWorkspace=output,
-                OutputType=self.getPropertyValue('OutputType'),
+                OutputType=self.output_type,
                 CalculateResolution=
                 self.getPropertyValue('CalculateResolution'),
                 DefaultQBinning=self.getPropertyValue('DefaultQBinning'),
                 BinningFactor=self.getProperty('BinningFactor').value,
                 OutputBinning=self.getPropertyValue('OutputBinning'),
                 NPixelDivision=self.getProperty('NPixelDivision').value,
-                NumberOfWedges=self.getProperty('NumberOfWedges').value,
+                NumberOfWedges=self.n_wedges,
                 WedgeAngle=self.getProperty('WedgeAngle').value,
                 WedgeOffset=self.getProperty('WedgeOffset').value,
+                WedgeWorkspace=output_wedges,
                 AsymmetricWedges=self.getProperty('AsymmetricWedges').value,
-                PanelOutputWorkspaces=panel_ws_group
+                PanelOutputWorkspaces=panel_ws_group,
+                MaxQxy=(self.maxqxy[i]
+                        if len(self.maxqxy) == self.dimensionality
+                        else self.maxqxy[0]),
+                DeltaQ=(self.deltaq[i]
+                        if len(self.deltaq) == self.dimensionality
+                        else self.deltaq[0]),
+                IQxQyLogBinning=self.getProperty('IQxQyLogBinning').value
                 )
+
+        # wedges ungrouping and renaming
+        if self.n_wedges and self.output_type == "I(Q)":
+            wedges_old_names = [output_wedges + "_" + str(w + 1)
+                                for w in range(self.n_wedges)]
+            wedges_new_names = [self.output + "_wedge_" + str(w + 1)
+                                + "_" + str(i + 1)
+                                for w in range(self.n_wedges)]
+            UnGroupWorkspace(InputWorkspace=output_wedges)
+            RenameWorkspaces(InputWorkspaces=wedges_old_names,
+                             WorkspaceNames=wedges_new_names)
 
         if self.cleanup:
             DeleteWorkspace(sample_name)
+
+        if not mtd.doesExist(panel_ws_group):
+            panel_ws_group = ""
+
+        return output, panel_ws_group
 
 
 AlgorithmFactory.subscribe(SANSILLAutoProcess)

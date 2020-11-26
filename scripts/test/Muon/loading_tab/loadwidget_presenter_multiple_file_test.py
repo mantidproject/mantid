@@ -30,9 +30,9 @@ from Muon.GUI.MuonAnalysis.load_widget.load_widget_view import LoadWidgetView
 class LoadRunWidgetPresenterMultipleFileTest(unittest.TestCase):
     def wait_for_thread(self, thread_model):
         while(thread_model._thread.isRunning()):
-            QApplication.instance().processEvents()
+            QApplication.sendPostedEvents()
             time.sleep(0.1)
-        QApplication.instance().processEvents()
+        QApplication.sendPostedEvents()
 
     def setUp(self):
         # Store an empty widget to parent all the views, and ensure they are deleted correctly

@@ -11,6 +11,7 @@
 #include "MantidDataHandling/LoadHelper.h"
 #include "MantidKernel/NexusDescriptor.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidTypes/Core/DateAndTime.h"
 
 namespace Mantid {
 namespace DataHandling {
@@ -96,6 +97,7 @@ private:
   double m_sampleZOffset{0.0};
   double m_sourceDistance{0.0};
   Mantid::DataHandling::LoadHelper m_loader;
+  Mantid::Types::Core::DateAndTime m_startTime;
 };
 
 } // namespace DataHandling

@@ -12,6 +12,9 @@ from qtpy.QtWidgets import (QDialog, QFrame)  # noqa
 from qtpy.QtGui import (QDoubleValidator, QIntValidator)  # noqa
 from reduction_gui.widgets.base_widget import BaseWidget
 from reduction_gui.reduction.diffraction.diffraction_adv_setup_script import AdvancedSetupScript
+from mantid.kernel import MaterialBuilder
+from mantidqt.interfacemanager import InterfaceManager
+import functools
 try:
     from mantidqt.utils.qt import load_ui
 except ImportError:
@@ -91,6 +94,23 @@ class AdvancedSetupWidget(BaseWidget):
         dv7.setBottom(0.0)
         self._content.scaledata_edit.setValidator(dv7)
 
+        dv8 = QDoubleValidator(self._content.numberdensity_edit)
+        dv8.setBottom(0.0)
+        self._content.numberdensity_edit.setValidator(dv8)
+        self._content.numberdensity_edit.editingFinished.connect(self._calculate_packing_fraction)
+
+        dv9 = QDoubleValidator(self._content.massdensity_edit)
+        dv9.setBottom(0.0)
+        self._content.massdensity_edit.setValidator(dv9)
+        self._content.massdensity_edit.editingFinished.connect(self._calculate_packing_fraction)
+
+        self._content.sampleformula_edit.textEdited.connect(self._validate_formula)
+        self._content.sampleformula_edit.editingFinished.connect(self._calculate_packing_fraction)
+
+        dv10 = QDoubleValidator(self._content.vanadiumradius_edit)
+        dv10.setBottom(0.0)
+        self._content.vanadiumradius_edit.setValidator(dv10)
+
         # Default states
         self._content.stripvanpeaks_chkbox.setChecked(True)
         self._syncStripVanPeakWidgets(True)
@@ -108,6 +128,9 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.help_button.clicked.connect(self._show_help)
         # Handler for events
         # TODO - Need to add an event handler for the change of instrument and facility
+
+        self._content.material_help_button.clicked.connect(functools.partial(self._show_concept_help, "Materials"))
+        self._content.absorption_help_button.clicked.connect(functools.partial(self._show_concept_help, "AbsorptionAndMultipleScattering"))
 
         # Validated widgets
 
@@ -132,6 +155,13 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.vanpeakfwhm_edit.setText(str(state.vanadiumfwhm))
         self._content.vanpeaktol_edit.setText(str(state.vanadiumpeaktol))
         self._content.vansmoothpar_edit.setText(str(state.vanadiumsmoothparams))
+        self._content.vanadiumradius_edit.setText(str(state.vanadiumradius))
+
+        self._content.sampleformula_edit.setText(str(state.sampleformula))
+        self._content.numberdensity_edit.setText(str(state.samplenumberdensity))
+        self._content.massdensity_edit.setText(str(state.measuredmassdensity))
+        self._content.containertype_combo.setCurrentIndex(self._content.containertype_combo.findText(state.containershape))
+        self._content.correctiontype_combo.setCurrentIndex(self._content.correctiontype_combo.findText(state.typeofcorrection))
 
         self._content.preserveevents_checkbox.setChecked(state.preserveevents)
         self._content.outputfileprefix_edit.setText(state.outputfileprefix)
@@ -163,6 +193,13 @@ class AdvancedSetupWidget(BaseWidget):
         s.vanadiumfwhm = self._content.vanpeakfwhm_edit.text()
         s.vanadiumpeaktol = self._content.vanpeaktol_edit.text()
         s.vanadiumsmoothparams = self._content.vansmoothpar_edit.text()
+        s.vanadiumradius = self._content.vanadiumradius_edit.text()
+
+        s.sampleformula = self._content.sampleformula_edit.text()
+        s.samplenumberdensity = self._content.numberdensity_edit.text()
+        s.measuredmassdensity = self._content.massdensity_edit.text()
+        s.containershape = self._content.containertype_combo.currentText()
+        s.typeofcorrection = self._content.correctiontype_combo.currentText()
 
         s.preserveevents = self._content.preserveevents_checkbox.isChecked()
 
@@ -193,7 +230,9 @@ class AdvancedSetupWidget(BaseWidget):
         dialog = HelpDialog(self)
         dialog.exec_()
 
-        return
+    def _show_concept_help(self, concept):
+        InterfaceManager().showHelpPage('qthelp://org.sphinx.mantidproject/doc/'
+                                        f'concepts/{concept}.html')
 
     def _syncStripVanPeakWidgets(self, stripvanpeak):
         """ Synchronize the other widgets with vanadium peak
@@ -202,6 +241,23 @@ class AdvancedSetupWidget(BaseWidget):
         self._content.vansmoothpar_edit.setEnabled(stripvanpeak)
         self._content.vanpeaktol_edit.setEnabled(stripvanpeak)
 
-        return
+    def _validate_formula(self):
+        try:
+            MaterialBuilder().setFormula(self._content.sampleformula_edit.text())
+            self._content.sampleformula_edit.setToolTip("")
+            self._content.sampleformula_edit.setStyleSheet("QLineEdit{}")
+        except ValueError as e:
+            self._content.sampleformula_edit.setToolTip(str(e).replace("MaterialBuilder::setFormula() - ",""))
+            self._content.sampleformula_edit.setStyleSheet("QLineEdit{background:salmon;}")
+
+    def _calculate_packing_fraction(self):
+        try:
+            self._content.packingfraction_edit.setText('{:.5f}'.format(MaterialBuilder()
+                                                                       .setFormula(self._content.sampleformula_edit.text())
+                                                                       .setNumberDensity(float(self._content.numberdensity_edit.text()))
+                                                                       .setMassDensity(float(self._content.massdensity_edit.text()))
+                                                                       .build().packingFraction))
+        except ValueError:  # boost.python.ArgumentError are not catchable
+            self._content.packingfraction_edit.setText(str(1))
 
 #ENDCLASSDEF

@@ -60,6 +60,9 @@ public:
 
   //------------------------------------------------------------
 
+  /// Returns true if the workspace is ragged (has differently sized spectra).
+  bool isRaggedWorkspace() const override;
+
   // Returns the number of single indexable items in the workspace
   std::size_t size() const override;
 

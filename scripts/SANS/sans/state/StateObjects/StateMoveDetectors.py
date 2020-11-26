@@ -276,7 +276,13 @@ class StateMoveLARMORBuilder(object):
 
     def _set_conversion_value(self, data_info):
         run_number = data_info.sample_scatter_run_number
-        self.conversion_value = 1000. if run_number <= 2217 else 1.
+
+        # If we are going through init before file was selected, lets assume were using
+        # a newer file so in the probable-case the division is the same as Pos 2
+        # When a run number is entered this re-runs anyway overwriting our assumptions
+        # User files after 2217 use Si. units for x but not y
+        if run_number is None or run_number > 2217:
+            self.conversion_value = 1.
 
     def build(self):
         return copy.copy(self.state)

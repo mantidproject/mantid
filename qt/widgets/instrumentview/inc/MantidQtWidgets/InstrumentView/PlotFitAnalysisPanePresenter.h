@@ -25,6 +25,8 @@ public:
   virtual std::string getCurrentWS() = 0;
   virtual void clearCurrentWS() = 0;
   virtual void doFit() = 0;
+  virtual void updateEstimateAfterExtraction() = 0;
+  virtual void updateEstimate() = 0;
   virtual void addSpectrum(const std::string &wsName) = 0;
   virtual void addFunction(Mantid::API::IFunction_sptr func) = 0;
 };
@@ -46,11 +48,14 @@ public:
   std::string getCurrentWS() override { return m_currentName; };
   void clearCurrentWS() override { m_currentName = ""; };
   void doFit() override;
+  void updateEstimateAfterExtraction() override;
+  void updateEstimate() override;
   void addSpectrum(const std::string &wsName) override;
   void addFunction(Mantid::API::IFunction_sptr func) override;
 
 private:
   VoidObserver *m_fitObserver;
+  VoidObserver *m_updateEstimateObserver;
   IPlotFitAnalysisPaneView *m_view;
   PlotFitAnalysisPaneModel *m_model;
   std::string m_currentName;

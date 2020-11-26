@@ -65,23 +65,27 @@ struct IndexPeaksArgs {
     std::vector<V3D> modVectorsToUse;
     modVectorsToUse.reserve(3);
     bool crossTermToUse{false};
-    if (maxOrderFromAlg > 0) {
-      // Use inputs from algorithm
-      maxOrderToUse = maxOrderFromAlg;
-      crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
-      modVectorsToUse = validModulationVectors(
-          alg.getProperty(ModulationProperties::ModVector1),
-          alg.getProperty(ModulationProperties::ModVector2),
-          alg.getProperty(ModulationProperties::ModVector3));
-    } else {
+
+    // default behavior: map everything automatically
+    maxOrderToUse = maxOrderFromAlg;
+    crossTermToUse = alg.getProperty(ModulationProperties::CrossTerms);
+    modVectorsToUse =
+        addModulationVectors(alg.getProperty(ModulationProperties::ModVector1),
+                             alg.getProperty(ModulationProperties::ModVector2),
+                             alg.getProperty(ModulationProperties::ModVector3));
+
+    // deal with special cases
+    if (maxOrderFromAlg <= 0) {
       // Use lattice definitions if they exist
       const auto &lattice = peaksWS->sample().getOrientedLattice();
-      maxOrderToUse = lattice.getMaxOrder();
+      crossTermToUse = lattice.getCrossTerm();
+      maxOrderToUse = lattice.getMaxOrder(); // the lattice can return a 0 here
+      // if lattice has maxOrder, we will use the modVec from it, otherwise
+      // stick to the input got from previous assignment
       if (maxOrderToUse > 0) {
         modVectorsToUse = validModulationVectors(
             lattice.getModVec(0), lattice.getModVec(1), lattice.getModVec(2));
       }
-      crossTermToUse = lattice.getCrossTerm();
     }
 
     return {peaksWS,
@@ -412,11 +416,12 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
   PeaksWorkspace_sptr ws = this->getProperty(Prop::PEAKSWORKSPACE);
   try {
     ws->sample().getOrientedLattice();
-  } catch (std::runtime_error &exc) {
-    helpMsgs[Prop::PEAKSWORKSPACE] = exc.what();
+  } catch (std::runtime_error &) {
+    helpMsgs[Prop::PEAKSWORKSPACE] = "No UB Matrix defined in the lattice.";
+    return helpMsgs;
   }
 
-  // get all runs which have peaksin the table
+  // get all runs which have peaks in the table
   const bool commonUB = this->getProperty(Prop::COMMONUB);
   if (commonUB) {
     const auto &allPeaks = ws->getPeaks();
@@ -433,6 +438,31 @@ std::map<std::string, std::string> IndexPeaks::validateInputs() {
     };
   };
 
+  const auto args = Prop::IndexPeaksArgs::parse(*this);
+  const bool isSave = this->getProperty(Prop::SAVEMODINFO);
+  const bool isMOZero = (args.satellites.maxOrder == 0);
+  bool isAllVecZero = true;
+  for (size_t vecNo = 0; vecNo < args.satellites.modVectors.size(); vecNo++) {
+    if (args.satellites.modVectors[vecNo] != V3D(0.0, 0.0, 0.0)) {
+      isAllVecZero = false;
+    }
+  }
+  if (isMOZero && !isAllVecZero) {
+    helpMsgs["MaxOrder"] =
+        "Max Order cannot be zero if a Modulation Vector has been supplied.";
+  }
+  if (!isMOZero && isAllVecZero) {
+    helpMsgs["ModVector1"] =
+        "At least one Modulation Vector must be supplied if Max Order set.";
+  }
+  if (isSave && isAllVecZero) {
+    helpMsgs[Prop::SAVEMODINFO] = "Modulation info cannot be saved with no "
+                                  "valid Modulation Vectors supplied.";
+  }
+  if (isSave && isMOZero) {
+    helpMsgs["MaxOrder"] =
+        "Modulation info cannot be saved with Max Order = 0.";
+  }
   return helpMsgs;
 }
 
@@ -453,9 +483,24 @@ void IndexPeaks::exec() {
     auto &lattice = args.workspace->mutableSample().getOrientedLattice();
     lattice.setMaxOrder(args.satellites.maxOrder);
     lattice.setCrossTerm(args.satellites.crossTerms);
-    lattice.setModVec1(args.satellites.modVectors[0]);
-    lattice.setModVec2(args.satellites.modVectors[1]);
-    lattice.setModVec3(args.satellites.modVectors[2]);
+
+    if (args.satellites.modVectors.size() >= 1) {
+      lattice.setModVec1(args.satellites.modVectors[0]);
+    } else {
+      g_log.warning("empty modVector 1, skipping saving");
+    }
+
+    if (args.satellites.modVectors.size() >= 2) {
+      lattice.setModVec2(args.satellites.modVectors[1]);
+    } else {
+      g_log.warning("empty modVector 2, skipping saving");
+    }
+
+    if (args.satellites.modVectors.size() >= 3) {
+      lattice.setModVec3(args.satellites.modVectors[2]);
+    } else {
+      g_log.warning("empty modVector 3, skipping saving");
+    }
   }
 
   CombinedIndexingStats indexingInfo;

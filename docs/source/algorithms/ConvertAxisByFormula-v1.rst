@@ -38,6 +38,7 @@ The formula is defined in a simple math syntax. For example:
 * Exponent - *exp(y)*
 * Round to nearest integer - *rint(y/10)*
 * Absolute value - *abs(y-100)*
+* Sine function (angle in radians) - *sin(x)*
 
 *x* and *y* can be used interchangeably to refer to the current axis value.
 

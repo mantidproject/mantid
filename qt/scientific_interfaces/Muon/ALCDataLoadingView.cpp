@@ -86,6 +86,13 @@ std::vector<std::string> ALCDataLoadingView::getRuns() const {
   return returnFiles;
 }
 
+/**
+ * Returns an error message from file finder, empty string if no error
+ */
+std::string ALCDataLoadingView::getRunsErrorMessage() const {
+  return m_ui.runs->getFileProblem().toStdString();
+}
+
 std::string ALCDataLoadingView::log() const {
   return m_ui.logValueSelector->getLog().toStdString();
 }
@@ -165,6 +172,15 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace,
 #endif
 
   m_ui.dataPlot->clear();
+  auto _log = log();
+  m_ui.dataPlot->setOverrideAxisLabel(MantidQt::MantidWidgets::AxisID::XBottom,
+                                      _log.c_str());
+  // If x scale is run number, ensure plain format
+  if (log() == "run_number")
+    m_ui.dataPlot->tickLabelFormat("x", "plain", false);
+  else
+    m_ui.dataPlot->tickLabelFormat("x", "sci", true);
+
   m_ui.dataPlot->addSpectrum("Data", workspace, workspaceIndex, Qt::black,
                              kwargs);
 }

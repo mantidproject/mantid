@@ -1051,13 +1051,16 @@ void InstrumentActor::setDataIntegrationRange(const double &xmin,
     m_DataMaxValue = -DBL_MAX;
 
     const auto &spectrumInfo = workspace->spectrumInfo();
+    auto maskWksp = getMaskWorkspace();
 
     // Ignore monitors if multiple detectors aren't grouped.
     for (size_t i = 0; i < m_specIntegrs.size(); i++) {
       const auto &spectrumDefinition = spectrumInfo.spectrumDefinition(i);
+      // Ignore monitors if they are masked on the view
       if (spectrumDefinition.size() == 1 &&
-          std::find(monitorIndices.begin(), monitorIndices.end(), i) !=
-              monitorIndices.end())
+          (std::find(monitorIndices.begin(), monitorIndices.end(), i) !=
+               monitorIndices.end() ||
+           maskWksp->isMasked(static_cast<int>(i))))
         continue;
 
       auto sum = m_specIntegrs[i];

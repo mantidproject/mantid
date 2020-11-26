@@ -16,9 +16,6 @@ if [ -n "${LD_LIBRARY_PATH}" ]; then
   LOCAL_LDPATH=${LOCAL_LDPATH}:${LD_LIBRARY_PATH}
 fi
 
-# Define paraview information
-PV_PLUGIN_PATH="${INSTALLDIR}/plugins/paraview/qt4"
-
 # Define where python libraries are
 LOCAL_PYTHONPATH=@LOCAL_PYPATH@@PARAVIEW_PYTHON_PATHS@
 if [ -n "${PYTHONPATH}" ]; then
@@ -29,7 +26,7 @@ fi
 if [ -n "${QT_API}" ]; then
     LOCAL_QT_API=${QT_API}
 else
-    LOCAL_QT_API="pyqt" # force to use qt4
+    LOCAL_QT_API="pyqt5" # force to use qt5
 fi
 
 # Find private sip module if it exists. Required by qtpy
@@ -51,10 +48,9 @@ else
     set -- @WRAPPER_PREFIX@@Python_EXECUTABLE@ @PYTHON_ARGS@ -c "${IPYTHON_STARTUP}" "$@"@WRAPPER_POSTFIX@
 fi
 
+# Define paraview information
 LD_PRELOAD=${LOCAL_PRELOAD} \
-    @MTD_PATH_DEFINITION@ \
     PYTHONPATH=${LOCAL_PYTHONPATH} \
-    QT_API=${LOCAL_QT_API} \
+    @QT_QPA@QT_API=${LOCAL_QT_API} \
     LD_LIBRARY_PATH=${LOCAL_LDPATH} \
-    PV_PLUGIN_PATH=${PV_PLUGIN_PATH} \
-    exec "$@"
+    @PV_PLUGIN_INSTALL_PATH@ exec "$@"

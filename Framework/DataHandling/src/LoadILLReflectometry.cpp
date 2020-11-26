@@ -29,7 +29,11 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/V3D.h"
 
+using Mantid::Types::Core::DateAndTime;
+
 namespace {
+const DateAndTime CYCLE203TIME = DateAndTime("2020-07-31T23:59:59");
+
 /// Component coordinates for FIGARO, in meter.
 namespace FIGARO {
 constexpr double DH1Z{1.135}; // Motor DH1 horizontal position
@@ -379,6 +383,10 @@ void LoadILLReflectometry::initWorkspace(
     m_localWorkspace->getAxis(0)->unit() =
         UnitFactory::Instance().create("TOF");
   m_localWorkspace->setYUnitLabel("Counts");
+
+  // the start time is needed in the workspace when loading the parameter file
+  m_localWorkspace->mutableRun().addProperty<std::string>(
+      "start_time", m_startTime.toISO8601String());
 }
 
 /**
@@ -389,6 +397,9 @@ void LoadILLReflectometry::initWorkspace(
 void LoadILLReflectometry::loadDataDetails(NeXus::NXEntry &entry) {
   // PSD data D17 256 x 1 x 1000
   // PSD data FIGARO 1 x 256 x 1000
+
+  m_startTime =
+      DateAndTime(m_loader.dateTimeInIsoFormat(entry.getString("start_time")));
 
   if (m_acqMode) {
     NXFloat timeOfFlight = entry.openNXFloat("instrument/PSD/time_of_flight");
@@ -540,7 +551,19 @@ std::vector<double> LoadILLReflectometry::getXValues() {
         g_log.error() << "First chopper velocity " << chop1Speed
                       << ". Check you NeXus file.\n";
       }
-      const double chopWindow = 45.0;
+
+      double chopWindow = 45.0;
+      if (m_startTime > CYCLE203TIME) {
+        // this is a workaround for the chopper window which has a different
+        // value since cycle 203 at the moment it is not possible to achieve
+        // this via IPF without duplicating the IDF neither it is properly
+        // written in the nexus, so this is the only solution
+        chopWindow = 20.;
+      }
+      m_localWorkspace->mutableRun().addProperty("ChopperWindow", chopWindow,
+                                                 "degree", true);
+      g_log.debug() << "Chopper Opening Window [degrees]" << chopWindow << '\n';
+
       const double t_TOF2 = m_tofDelay - 1.e+6 * 60.0 *
                                              (POFF - chopWindow + chop2Phase -
                                               chop1Phase + openOffset) /
@@ -621,6 +644,7 @@ void LoadILLReflectometry::loadNexusEntriesIntoProperties() {
   NXstatus stat = NXopen(filename.c_str(), NXACC_READ, &nxfileID);
   if (stat == NX_ERROR)
     throw Kernel::Exception::FileError("Unable to open File:", filename);
+
   m_loader.addNexusFieldsToWsRun(nxfileID, m_localWorkspace->mutableRun());
   NXclose(&nxfileID);
 }
@@ -937,13 +961,15 @@ double LoadILLReflectometry::sampleHorizontalOffset() const {
  */
 double LoadILLReflectometry::sourceSampleDistance() const {
   if (m_instrument != Supported::FIGARO) {
+    // the Distance.ChopperGap in the nexus file was initially in cm, then in m,
+    // now in mm between the first two generations we can flag on the
+    // dist_chop_samp vs MidChopper_Sample_distance however between the 2nd and
+    // 3rd we have to check the time, since all the rest is consistent
     double pairCentre;
     double pairSeparation;
     try {
       pairCentre = doubleFromRun("VirtualChopper.dist_chop_samp"); // in [m]
       pairSeparation = doubleFromRun("Distance.ChopperGap") / 100; // in [m]
-      m_localWorkspace->mutableRun().addProperty("Distance.ChopperGap",
-                                                 pairSeparation, "meter", true);
       m_localWorkspace->mutableRun().addProperty(
           "VirtualChopper.dist_chop_samp", pairCentre, "meter", true);
       pairCentre -= 0.5 * pairSeparation;
@@ -952,8 +978,9 @@ double LoadILLReflectometry::sourceSampleDistance() const {
         pairCentre = mmToMeter(doubleFromRun(
             "VirtualChopper.MidChopper_Sample_distance"));     // in [m]
         pairSeparation = doubleFromRun("Distance.ChopperGap"); // in [m]
-        m_localWorkspace->mutableRun().addProperty(
-            "Distance.ChopperGap", pairSeparation, "meter", true);
+        if (m_startTime > CYCLE203TIME) {
+          pairSeparation = mmToMeter(pairSeparation);
+        }
         m_localWorkspace->mutableRun().addProperty(
             "VirtualChopper.MidChopper_Sample_distance", pairCentre, "meter",
             true);
@@ -962,6 +989,8 @@ double LoadILLReflectometry::sourceSampleDistance() const {
             "Unable to extract chopper to sample distance");
       }
     }
+    m_localWorkspace->mutableRun().addProperty("Distance.ChopperGap",
+                                               pairSeparation, "meter", true);
     return pairCentre;
   } else {
     const double chopperDist =

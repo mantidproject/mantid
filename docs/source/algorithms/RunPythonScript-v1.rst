@@ -33,6 +33,7 @@ Usage
     ws = CreateSampleWorkspace("Histogram","Multiple Peaks")
 
     script = """
+    from mantid.simpleapi import Integration, SumSpectra, logger
     logger.notice('Logging from within the python script!')
     wsOut = Integration(input,OutputWorkspace=output)
     wsOut = SumSpectra(wsOut)

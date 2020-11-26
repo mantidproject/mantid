@@ -68,9 +68,11 @@ public slots:
   void displayDetectorsOnly(bool yes);
   void enableGL(bool on);
   void setColorMapAutoscaling(bool /*on*/);
+  void setLegendScaleType(int /*index*/);
   void changeColorMap(const QString &filename = "");
   void setSurfaceType(int /*index*/);
   void flipUnwrappedView(bool /*on*/);
+  void resetView();
   void saveImage(const QString &filename = "");
 
 private slots:
@@ -107,6 +109,7 @@ private: // methods
 
 private: // members
   QPushButton *m_surfaceTypeButton;
+  QPushButton *m_resetView;
   QPushButton *mSaveImage;
   ColorBar *m_colorBarWidget;
   QFrame *m_resetViewFrame;

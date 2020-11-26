@@ -941,7 +941,7 @@ QGroupBox::title {
                           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;The z offset of the sample position.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                          </property>
                          <property name="text">
-                          <string>Z Offset</string>
+                          <string>Z Offset [mm]</string>
                          </property>
                         </widget>
                        </item>

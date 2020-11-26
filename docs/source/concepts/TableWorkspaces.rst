@@ -56,9 +56,12 @@ Most of the time Table workspaces are the output of certain algorithms, but you 
     tableWS = CreateEmptyTableWorkspace()
 
     # Add some columns, Recognized types are: int,float,double,bool,str,V3D,long64
-    tableWS.addColumn(type="int",name="Detector ID")  
-    tableWS.addColumn(type="str",name="Detector Name")  
-    tableWS.addColumn(type="V3D",name="Detector Position")
+    tableWS.addColumn(type="int",name="Detector ID",plottype=6)
+    tableWS.addColumn(type="str",name="Detector Name",plottype=6)
+    tableWS.addColumn(type="V3D",name="Detector Position",plottype=6)
+    tableWS.addColumn(type='float',name="Value",plottype=2)
+    tableWS.addColumn(type='float',name="Error",plottype=5)
+    tableWS.setLinkedYCol(4, 3)
 
     # Populate the columns for three detectors
     detIDList = range(1,4)
@@ -66,7 +69,9 @@ Most of the time Table workspaces are the output of certain algorithms, but you 
     for j in range(len(detIDList)):
         nextRow = { 'Detector ID': detIDList[j], 
                     'Detector Name': "Detector {0}".format(detIDList[j]),
-                    'Detector Position': detPosList[j] }
+                    'Detector Position': detPosList[j],
+                    'Value': 10,
+                    'Error': 1 }
         tableWS.addRow ( nextRow )
 
 Table Workspace Properties

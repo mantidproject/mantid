@@ -104,6 +104,8 @@ Output:
 C - ILL Data
 ============
 
+For point 5., you are expected to open the docs page for :ref:`algm-ConvertUnits` and notice that `EFixed` should be set to the Ei value (Found in Show Sample Logs). This docs page also mentions that for Ei, the parameter EMode='Direct' is required. These parameters are required by the target of the unit conversion - DeltaE.
+
 .. code-block:: python
 
     from mantid.simpleapi import *
@@ -123,7 +125,7 @@ C - ILL Data
     bad_spectra = [1,2,3,4,5,6,11,14,30,69,90,93,95,97,175,184,190,215,216,217,251,252,253,255,289,317,335,337]
     MaskDetectors(Workspace = data_merged, SpectraList = bad_spectra)
     scaled = MultiplyRange(data_merged, Factor = 0.95)
-    ws = ConvertUnits(scaled, Target = 'DeltaE', EFixed = 4.7728189558864003, EMode = 'Direct')
+    ws = ConvertUnits(scaled, Target = 'DeltaE', EFixed = 4.7728189558864003, EMode = 'Direct') # See explanation above
     wsCorrected = DetectorEfficiencyCorUser(ws)
 
     print("The corrected value in spectrum with ws index {}, bin {} is {:.2f} compared to {:.2f}".format(6,4,wsCorrected.readY(6)[4],ws.readY(6)[4]))

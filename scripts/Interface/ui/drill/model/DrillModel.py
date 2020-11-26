@@ -8,6 +8,7 @@
 import json
 import os
 import sys
+import numpy
 
 from qtpy.QtCore import QObject, Signal, QThread
 
@@ -115,9 +116,9 @@ class DrillModel(QObject):
         self.visualSettings = None
 
         # set the instrument and default acquisition mode
-        self.setInstrument(config['default.instrument'])
-
         self.tasksPool = DrillAlgorithmPool()
+        self.setInstrument(config['default.instrument'], log=False)
+
         # setup the thread pool
         self.tasksPool.signals.taskStarted.connect(self._onTaskStarted)
         self.tasksPool.signals.taskSuccess.connect(self._onTaskSuccess)
@@ -125,7 +126,7 @@ class DrillModel(QObject):
         self.tasksPool.signals.progressUpdate.connect(self._onProcessingProgress)
         self.tasksPool.signals.processingDone.connect(self._onProcessingDone)
 
-    def setInstrument(self, instrument):
+    def setInstrument(self, instrument, log=True):
         """
         Set the instrument. This methods change the current instrument and all
         the associated parameters (acquisition mode, algorithm, parameters). It
@@ -137,25 +138,25 @@ class DrillModel(QObject):
         self.rundexFile = None
         self.samples = list()
         self.settings = dict()
+        self.columns = list()
+        self.visualSettings = None
+        self.instrument = None
+        self.acquisitionMode = None
+        self.algorithm = None
+
+        # When the user changes the facility after DrILL has been started
+        if config['default.facility'] != 'ILL':
+            logger.error('Drill is enabled only if the facility is set to ILL.')
+            return
 
         if (instrument in RundexSettings.ACQUISITION_MODES):
             config['default.instrument'] = instrument
             self.instrument = instrument
-            self.acquisitionMode = \
-                RundexSettings.ACQUISITION_MODES[instrument][0]
-            self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
-            self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
-            self.settings.update(
-                    RundexSettings.SETTINGS[self.acquisitionMode])
-            self._initController()
+            self.setAcquisitionMode(RundexSettings.ACQUISITION_MODES[instrument][0])
         else:
-            logger.error('Instrument {0} is not supported yet.'
-                         .format(instrument))
-            self.instrument = None
-            self.acquisitionMode = None
-            self.columns = list()
-            self.algorithm = None
-            self.settings = dict()
+            if log:
+                logger.error('Instrument {0} is not supported yet.'
+                             .format(instrument))
 
     def getInstrument(self):
         """
@@ -165,16 +166,6 @@ class DrillModel(QObject):
             str: the instrument name
         """
         return self.instrument
-
-    def getAvailableTechniques(self):
-        """
-        Get the list of techniques available.
-
-        Returns:
-            list(str): list of techniques
-        """
-        return [technique for (instrument, technique)
-                in RundexSettings.TECHNIQUE.items()]
 
     def setAcquisitionMode(self, mode):
         """
@@ -191,6 +182,7 @@ class DrillModel(QObject):
             return
         self.rundexFile = None
         self.samples = list()
+        self.visualSettings = None
         self.acquisitionMode = mode
         self.columns = RundexSettings.COLUMNS[self.acquisitionMode]
         self.algorithm = RundexSettings.ALGORITHM[self.acquisitionMode]
@@ -199,8 +191,9 @@ class DrillModel(QObject):
         else:
             nThreads = QThread.idealThreadCount()
         self.tasksPool.setMaxThreadCount(nThreads)
-        self.settings = dict()
-        self.settings.update(RundexSettings.SETTINGS[self.acquisitionMode])
+        self.settings = dict.fromkeys(
+                RundexSettings.SETTINGS[self.acquisitionMode])
+        self._setDefaultSettings()
         self._initController()
 
     def getAcquisitionMode(self):
@@ -335,20 +328,22 @@ class DrillModel(QObject):
                 of them uses the setting name as key. The type is a str:
                 "file", "workspace", "combobox", "bool" or "string".
         """
-        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
-        alg.initialize()
-
         types = dict()
         values = dict()
         docs = dict()
+        if not self.algorithm:
+            return types, values, docs
+
+        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
+        alg.initialize()
         for s in self.settings:
             p = alg.getProperty(s)
             if (isinstance(p, FileProperty)):
                 t = "file"
             elif (isinstance(p, MultipleFileProperty)):
                 t = "files"
-            elif ((isinstance(p, WorkspaceGroupProperty))
-                  or (isinstance(p, MatrixWorkspaceProperty))):
+            elif (isinstance(p, (WorkspaceGroupProperty,
+                                 MatrixWorkspaceProperty))):
                 t = "workspace"
             elif (isinstance(p, StringPropertyWithValue)):
                 if (p.allowedValues):
@@ -357,6 +352,10 @@ class DrillModel(QObject):
                     t = "string"
             elif (isinstance(p, BoolPropertyWithValue)):
                 t = "bool"
+            elif (isinstance(p, FloatArrayProperty)):
+                t = "floatArray"
+            elif (isinstance(p, IntArrayProperty)):
+                t = "intArray"
             else:
                 t = "string"
 
@@ -365,6 +364,24 @@ class DrillModel(QObject):
             docs[s] = p.documentation
 
         return (types, values, docs)
+
+    def _setDefaultSettings(self):
+        """
+        Set the settings to their defautl values. This method takes the default
+        values directly from the algorithm.
+        """
+        if not self.algorithm:
+            return
+        alg = sapi.AlgorithmManager.createUnmanaged(self.algorithm)
+        alg.initialize()
+
+        for s in self.settings:
+            p = alg.getProperty(s)
+            v = p.value
+            if (isinstance(v, numpy.ndarray)):
+                self.settings[s] = v.tolist()
+            else:
+                self.settings[s] = v
 
     def checkParameter(self, param, value, sample=-1):
         """

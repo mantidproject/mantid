@@ -7,7 +7,7 @@
 #  This file is part of the mantid workbench.
 #
 from enum import Enum
-from typing import Dict, List, Sequence, Optional
+from typing import Dict, List, Sequence, Tuple, Optional
 
 from mantid.api import MatrixWorkspace, MultipleExperimentInfos, SpecialCoordinateSystem
 from mantid.plots.datafunctions import get_indices
@@ -41,7 +41,7 @@ class SliceViewerModel:
                 raise ValueError("workspace must contain at least 2 bin")
         elif isinstance(ws, MultipleExperimentInfos):
             if ws.isMDHistoWorkspace():
-                if len(ws.getNonIntegratedDimensions()) < 2:
+                if ws.getNumNonIntegratedDims() < 2:
                     raise ValueError("workspace must have at least 2 non-integrated dimensions")
             else:
                 if ws.getNumDims() < 2:
@@ -118,7 +118,9 @@ class SliceViewerModel:
         """
         Check if the given workspace can multiple BinMD calls.
         """
-        return self.get_ws_type() == WS_TYPE.MDE
+        ws_type = self.get_ws_type()
+        return ws_type == WS_TYPE.MDE or (ws_type == WS_TYPE.MDH
+                                          and self._get_ws().hasOriginalWorkspace(0))
 
     def get_ws_name(self) -> str:
         """Return the name of the workspace being viewed"""
@@ -135,30 +137,20 @@ class SliceViewerModel:
 
     def get_ws_MDE(self,
                    slicepoint: Sequence[Optional[float]],
-                   bin_params: Sequence[float],
+                   bin_params: Optional[Sequence[float]],
                    limits: Optional[tuple] = None):
         """
         :param slicepoint: ND sequence of either None or float. A float defines the point
                         in that dimension for the slice.
-        :param bin_params: ND sequence containing the number of bins for each dimension
+        :param bin_params: ND sequence containing the number of bins for each dimension or None to use
+                           the existing data
         :param limits: An optional 2-tuple sequence containing limits for plotting dimensions. If
                        not provided the full extent of each dimension is used
         """
         workspace = self._get_ws()
-        dim_limits = _dimension_limits(workspace, slicepoint, limits)
-        params = {'EnableLogging': LOG_GET_WS_MDE_ALGORITHM_CALLS}
-        for n in range(workspace.getNumDims()):
-            dimension = workspace.getDimension(n)
-            slice_pt = slicepoint[n]
-            nbins = bin_params[n]
-            if slice_pt is None:
-                dim_min, dim_max = dim_limits[n]
-            else:
-                dim_min, dim_max = slice_pt - nbins / 2, slice_pt + nbins / 2
-                nbins = 1
-            params[f'AlignedDim{n}'] = f'{dimension.name},{dim_min},{dim_max},{nbins}'
-
-        return BinMD(InputWorkspace=self._get_ws(), OutputWorkspace=self._rebinned_name, **params)
+        params, _, __ = _roi_binmd_parameters(workspace, slicepoint, bin_params, limits)
+        params['EnableLogging'] = LOG_GET_WS_MDE_ALGORITHM_CALLS
+        return BinMD(InputWorkspace=workspace, OutputWorkspace=self._rebinned_name, **params)
 
     def get_data_MDH(self, slicepoint, transpose=False):
         indices, _ = get_indices(self.get_ws(), slicepoint=slicepoint)
@@ -197,7 +189,8 @@ class SliceViewerModel:
 
     def get_dim_info(self, n: int) -> dict:
         """
-        returns dict of (minimum, maximun, number_of_bins, width, name, units) for dimension n
+        returns dict of (minimum :float, maximum :float, number_of_bins :int,
+                         width :float, name :str, units :str, type :str, has_original: bool, qdim: bool) for dimension n
         """
         workspace = self._get_ws()
         dim = workspace.getDimension(n)
@@ -209,6 +202,7 @@ class SliceViewerModel:
             'name': dim.name,
             'units': dim.getUnits(),
             'type': self.get_ws_type().name,
+            'has_original': workspace.hasOriginalWorkspace(0),
             'qdim': dim.getMDFrame().isQ()
         }
 
@@ -503,7 +497,8 @@ class SliceViewerModel:
 
 # private functions
 def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
-                          bin_params: Optional[Sequence[float]], limits: tuple):
+                          bin_params: Optional[Sequence[float]],
+                          limits: tuple) -> Tuple[dict, int, int]:
     """
     Return a sequence of 2-tuples defining the limits for MDEventWorkspace binning
     :param workspace: MDEventWorkspace that is to be binned
@@ -512,6 +507,7 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
     :param bin_params: A list of binning paramaters for each dimension or thickness for slicing dimensions
     :param limits: An optional Sequence of length 2 containing limits for plotting dimensions. If
                     not provided the full extent of each dimension is used.
+    :return: 3-tuple (binmd parameters, index of X dimension, index of Y dimension)
     """
     xindex, yindex = _display_indices(slicepoint)
     dim_limits = _dimension_limits(workspace, slicepoint, limits)
@@ -541,7 +537,7 @@ def _roi_binmd_parameters(workspace, slicepoint: Sequence[Optional[float]],
 
 def _dimension_limits(workspace,
                       slicepoint: Sequence[Optional[float]],
-                      limits: Optional[Sequence[tuple]] = None):
+                      limits: Optional[Sequence[tuple]] = None) -> Sequence[tuple]:
     """
     Return a sequence of 2-tuples defining the limits for MDEventWorkspace binning
     :param workspace: MDEventWorkspace that is to be binned
@@ -558,6 +554,16 @@ def _dimension_limits(workspace,
         dim_limits[yindex] = limits[1]
 
     return dim_limits
+
+
+def _dimension_bins(workspace) -> Sequence[float]:
+    """
+    Given a workspace return a sequence of float containing the number of bins
+    in each dimension
+    :param workspace: A reference to an MDHistoWorkspace
+    :return: A sequence of floats
+    """
+    return [workspace.getDimension(i).getNBins() for i in range(workspace.getNumDims())]
 
 
 def _display_indices(slicepoint: Sequence[Optional[float]], transpose: bool = False):

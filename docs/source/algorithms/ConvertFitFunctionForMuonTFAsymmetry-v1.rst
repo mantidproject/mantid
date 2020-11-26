@@ -19,6 +19,8 @@ The second mode is extract, if the TF normalisation function is given it will re
 
 This algorithm works for both single and multi domain functions.
 
+The algorithm takes an optional boolean parameter `CopyTies`, which when true will copy the ties present in the input function. By default it is set to true.
+
 Usage
 -----
 

@@ -34,7 +34,14 @@ Usage:
 
 **Example: Analysis of polyethylene**
 
-.. testcode::
+.. testsetup:: ExVesuvioAnalysis
+
+    default_facility_orig = config['default.facility']
+    default_instrument_orig = config['default.instrument']
+    config['default.facility'] = 'ISIS'
+    config['default.instrument'] = 'Vesuvio'
+
+.. testcode:: ExVesuvioAnalysis
 
    # create table of elements
    table = CreateEmptyTableWorkspace() 
@@ -64,10 +71,15 @@ Usage:
    print("variable", "value")
    for row in range(fit_results.rowCount()):
        print(fit_results.column(0)[row],"{:.3f}".format(fit_results.column(1)[row]))
-   
+
+.. testcleanup:: ExVesuvioAnalysis
+
+    config['default.facility'] = default_facility_orig
+    config['default.instrument'] = default_instrument_orig
+
 Output:
 
-.. testoutput::
+.. testoutput:: ExVesuvioAnalysis
 
    variable value
    f1.sigma1 4.931

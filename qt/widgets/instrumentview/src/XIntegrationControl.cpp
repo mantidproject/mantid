@@ -126,6 +126,89 @@ bool XIntegrationScrollBar::eventFilter(QObject *object, QEvent *e) {
       }
     }
     return true;
+  } else if (e->type() == QEvent::KeyPress) {
+    QKeyEvent *keyEv = static_cast<QKeyEvent *>(e);
+    int step = 1;
+    int sliderx = m_slider->x();
+    int slidery = m_slider->y();
+    int sliderWidth = m_slider->width();
+    int sliderHeight = m_slider->height();
+    int totalWidth = this->width();
+
+    switch (keyEv->key()) {
+    case Qt::Key_Left:
+      if (sliderx >= step) {
+        m_slider->move(sliderx - step, slidery);
+      } else {
+        m_slider->move(0, slidery);
+      }
+      m_changed = true;
+      updateMinMax();
+      break;
+
+    case Qt::Key_Right:
+      if (sliderx + sliderWidth + step < totalWidth) {
+        m_slider->move(sliderx + step, slidery);
+      } else {
+        m_slider->move(totalWidth - sliderWidth, slidery);
+      }
+      m_changed = true;
+      updateMinMax();
+      break;
+
+    case Qt::Key_Up:
+      // widen the range
+
+      // expand to the left, depending on the space on this side
+      if (sliderx > step) {
+        m_slider->resize(sliderWidth + step, sliderHeight);
+        m_slider->move(sliderx - step, slidery);
+      } else {
+        m_slider->resize(sliderWidth + sliderx, sliderHeight);
+        m_slider->move(0, slidery);
+      }
+
+      // then expand to the right, depending on the space on this side
+      if (sliderx + sliderWidth + step <= totalWidth) {
+        m_slider->resize(m_slider->width() + step, sliderHeight);
+      } else {
+        m_slider->resize(totalWidth - m_slider->x(), sliderHeight);
+      }
+      m_changed = true;
+      updateMinMax();
+      break;
+
+    case Qt::Key_Down:
+      // shrink the range
+
+      // only change the range if it is not already minimal
+      if (sliderWidth > m_resizeMargin) {
+
+        // shrink depending on how far the range is from being minimal
+        if (sliderWidth - 2 * step >= m_resizeMargin) {
+          m_slider->move(sliderx + step, slidery);
+          m_slider->resize(sliderWidth - 2 * step, sliderHeight);
+        } else {
+          m_slider->move(sliderx + (sliderWidth - m_resizeMargin) / 2, slidery);
+          m_slider->resize(m_resizeMargin, sliderHeight);
+        }
+      }
+      m_changed = true;
+      updateMinMax();
+      break;
+
+    default:
+      break;
+    }
+    return true;
+  } else if (e->type() == QEvent::KeyRelease) {
+    QKeyEvent *keyEv = static_cast<QKeyEvent *>(e);
+    if ((keyEv->key() == Qt::Key_Left || keyEv->key() == Qt::Key_Right ||
+         keyEv->key() == Qt::Key_Up || keyEv->key() == Qt::Key_Down) &&
+        !keyEv->isAutoRepeat()) {
+      emit changed(m_minimum, m_maximum);
+    }
+    return true;
   }
   return false;
 }
@@ -178,7 +261,6 @@ void XIntegrationScrollBar::updateMinMax() {
 XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
     : QFrame(instrWindow), m_instrWindow(instrWindow), m_totalMinimum(0),
       m_totalMaximum(1), m_minimum(0), m_maximum(1) {
-  m_scrollBar = new XIntegrationScrollBar(this);
   auto *layout = new QHBoxLayout();
   m_minText = new QLineEdit(this);
   m_minText->setMaximumWidth(100);
@@ -189,6 +271,7 @@ XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
   m_units = new QLabel("TOF", this);
   m_setWholeRange = new QPushButton("Reset");
   m_setWholeRange->setToolTip("Reset integration range to maximum");
+  m_scrollBar = new XIntegrationScrollBar(this);
 
   layout->addWidget(m_units, 0);
   layout->addWidget(m_minText, 0);
@@ -196,6 +279,7 @@ XIntegrationControl::XIntegrationControl(InstrumentWidget *instrWindow)
   layout->addWidget(m_maxText, 0);
   layout->addWidget(m_setWholeRange, 0);
   setLayout(layout);
+
   connect(m_scrollBar, SIGNAL(changed(double, double)), this,
           SLOT(sliderChanged(double, double)));
   connect(m_scrollBar, SIGNAL(running(double, double)), this,
@@ -251,7 +335,9 @@ void XIntegrationControl::setRange(double minimum, double maximum) {
   double w = m_totalMaximum - m_totalMinimum;
   m_scrollBar->set((m_minimum - m_totalMinimum) / w,
                    (m_maximum - m_totalMinimum) / w);
+
   updateTextBoxes();
+
   emit changed(m_minimum, m_maximum);
 }
 

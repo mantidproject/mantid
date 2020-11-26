@@ -44,12 +44,15 @@ CircularBeamProfile::CircularBeamProfile(const Geometry::ReferenceFrame &frame,
 IBeamProfile::Ray CircularBeamProfile::generatePoint(
     Kernel::PseudoRandomNumberGenerator &rng) const {
   V3D pt;
-  const double R = rng.nextValue() * m_radius;
-  const double theta = rng.nextValue() * 360.0;
-  pt.spherical(R, theta, m_beamIdx);
-  pt[0] += m_center[m_upIdx];
-  pt[1] += m_center[m_horIdx];
-  pt[2] += m_min[m_beamIdx];
+  const double rsq = m_radius * m_radius;
+  const double R = std::sqrt(rng.nextValue() * rsq);
+  const double theta = rng.nextValue() * M_PI * 2;
+  pt[m_upIdx] = R * cos(theta);
+  pt[m_horIdx] = R * sin(theta);
+  // Correct for centre point
+  pt[m_upIdx] += m_center[m_upIdx];
+  pt[m_horIdx] += m_center[m_horIdx];
+  pt[m_beamIdx] = m_center[m_beamIdx];
   return {pt, m_beamDir};
 }
 

@@ -49,8 +49,14 @@ InstrumentWidgetEncoder::encode(const InstrumentWidget &obj,
     map.insert(QString("currentTab"), QVariant(obj.getCurrentTab()));
 
     QList<QVariant> energyTransferList;
-    energyTransferList.append(QVariant(obj.m_xIntegration->getMinimum()));
-    energyTransferList.append(QVariant(obj.m_xIntegration->getMaximum()));
+    if (obj.isIntegrable()) {
+      energyTransferList.append(QVariant(obj.m_xIntegration->getMinimum()));
+      energyTransferList.append(QVariant(obj.m_xIntegration->getMaximum()));
+    } else {
+      energyTransferList.append(QVariant(0));
+      energyTransferList.append(QVariant(1));
+    }
+    energyTransferList.append(QVariant(obj.isIntegrable()));
     map.insert(QString("energyTransfer"), QVariant(energyTransferList));
 
     map.insert(QString("surface"),
@@ -89,7 +95,7 @@ InstrumentWidgetEncoder::encodeTreeTab(const InstrumentWidgetTreeTab *tab) {
 
   QList<QString> list;
   const auto names = tab->m_instrumentTree->findExpandedComponents();
-  for (const auto name : names) {
+  for (const auto &name : names) {
     list.append(name);
   }
   map.insert(QString("expandedItems"), QVariant(list));
@@ -158,6 +164,9 @@ InstrumentWidgetEncoder::encodeMaskTab(const InstrumentWidgetMaskTab *tab) {
                      QVariant(tab->m_ring_rectangle->isChecked()));
   activeTools.insert(QString("freeDrawButton"),
                      QVariant(tab->m_free_draw->isChecked()));
+  activeTools.insert(QString("pixelButton"),
+                     QVariant(tab->m_pixel->isChecked()));
+  activeTools.insert(QString("tubeButton"), QVariant(tab->m_tube->isChecked()));
   map.insert(QString("activeTools"), QVariant(activeTools));
 
   activeType.insert(QString("maskingOn"),

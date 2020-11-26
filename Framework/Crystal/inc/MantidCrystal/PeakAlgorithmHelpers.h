@@ -45,6 +45,12 @@ validModulationVectors(const std::vector<double> &modVector1,
                        const std::vector<double> &modVector2,
                        const std::vector<double> &modVector3);
 
+/// Create a list of valid modulation vectors from the input
+std::vector<Kernel::V3D>
+addModulationVectors(const std::vector<double> &modVector1,
+                     const std::vector<double> &modVector2,
+                     const std::vector<double> &modVector3);
+
 /// Calculate a list of HKL offsets from the given modulation vectors.
 std::vector<MNPOffset>
 generateOffsetVectors(const std::vector<Kernel::V3D> &modVectors,

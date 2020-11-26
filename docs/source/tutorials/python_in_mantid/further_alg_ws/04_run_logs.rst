@@ -34,9 +34,9 @@ Most logs are a time-series property with the attributes described here. The val
 
 
 Filtering
-=========
+#########
 
-Note that you may find the algorithms :ref:`algm-FilterByLogValue` or :ref:`algm-FilterByTime`
+Note that you can use the algorithms :ref:`algm-FilterByLogValue` or :ref:`algm-FilterByTime`.
 The LogFilter class can be used to filter logs using other logs. For instance, a log value describes a sine wave (Right-click > **Show Sample logs** on the Loaded workspace below).
 
 Two additional logs mask out the positive and negative portions of this log. We can filter according to either.
@@ -75,3 +75,17 @@ Output:
 	Unfiltered log contains 100 values
 	Filtered log contains 50 positive values
 	Filtered log contains 50 negative values
+
+Sample Log Algorithms
+#####################
+
+As well as the filtering algorithms, there are plenty of other Sample Log operations that are encompassed in algorithms:
+
+- :ref:`algm-CopyLogs`
+- :ref:`algm-MergeRuns`
+- :ref:`algm-RemoveLogs`
+- :ref:`algm-AddTimeSeriesLog`
+- :ref:`algm-AddSampleLog`
+- :ref:`algm-ExportExperimentLog`
+- :ref:`algm-CheckForSampleLogs`
+

@@ -41,7 +41,7 @@ def _create_mock_histoworkspace(ndims: int, coords: SpecialCoordinateSystem, ext
     ws = _create_mock_workspace(IMDHistoWorkspace, coords, has_oriented_lattice=False, ndims=ndims)
     ws.getSignalArray.return_value = signal
     ws.getErrorSquaredArray.return_value = error
-    ws.hasOriginalWorkspace.return_value = False
+    ws.hasOriginalWorkspace.side_effect = lambda index: False
     return _add_dimensions(ws, names, isq, extents, nbins, units)
 
 
@@ -53,11 +53,9 @@ def _attach_as_original(histo_ws, mde_ws):
     :param histo_ws: A mock MDHistoWorkspace
     :param mde_ws: A mock MDEventWorkspace
     """
-    histo_ws.hasOriginalWorkspace.return_value = True
-    histo_ws.getOriginalWorkspace.return_value = mde_ws
+    histo_ws.hasOriginalWorkspace.side_effect = lambda index: True
     yield
-    histo_ws.hasOriginalWorkspace.return_value = False
-    histo_ws.getOriginalWorkspace.return_value = MagicMock()
+    histo_ws.hasOriginalWorkspace.side_effect = lambda index: False
 
 
 def _create_mock_mdeventworkspace(ndims: int, coords: SpecialCoordinateSystem, extents: tuple,
@@ -123,6 +121,7 @@ def _create_mock_workspace(ws_type,
     ws = MagicMock(spec=ws_type)
     if hasattr(ws, 'getExperimentInfo'):
         ws.getNumDims.return_value = ndims
+        ws.getNumNonIntegratedDims.return_value = ndims
         if ws_type == IMDHistoWorkspace:
             ws.isMDHistoWorkspace.return_value = True
             ws.getNonIntegratedDimensions.return_value = [MagicMock(), MagicMock()]
@@ -280,12 +279,16 @@ class SliceViewerModelTest(unittest.TestCase):
         mock_binmd.return_value = self.ws_MD_3D
 
         self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4)), self.ws_MDE_3D)
-        mock_binmd.assert_called_once_with(InputWorkspace=self.ws_MDE_3D,
-                                           OutputWorkspace='ws_MDE_3D_svrebinned',
-                                           AlignedDim0='h,-3,3,1',
-                                           AlignedDim1='k,-4,4,2',
-                                           AlignedDim2='l,-2.0,2.0,1',
-                                           EnableLogging=False)
+
+        mock_binmd.assert_called_once_with(AxisAligned=False,
+                                           BasisVector0='h,rlu,1.0,0.0,0.0',
+                                           BasisVector1='k,rlu,0.0,1.0,0.0',
+                                           BasisVector2='l,rlu,0.0,0.0,1.0',
+                                           EnableLogging=False,
+                                           InputWorkspace=self.ws_MDE_3D,
+                                           OutputBins=[1, 2, 1],
+                                           OutputExtents=[-3, 3, -4, 4, -2.0, 2.0],
+                                           OutputWorkspace='ws_MDE_3D_svrebinned')
         mock_binmd.reset_mock()
         self.assertEqual(model._get_ws(), self.ws_MDE_3D)
         self.assertEqual(model.get_ws_type(), WS_TYPE.MDE)
@@ -320,12 +323,16 @@ class SliceViewerModelTest(unittest.TestCase):
 
         self.assertNotEqual(model.get_ws((None, None, 0), (1, 2, 4), ((-2, 2), (-1, 1))),
                             self.ws_MDE_3D)
-        call_params = dict(InputWorkspace=self.ws_MDE_3D,
-                           OutputWorkspace='ws_MDE_3D_svrebinned',
-                           AlignedDim0='h,-2,2,1',
-                           AlignedDim1='k,-1,1,2',
-                           AlignedDim2='l,-2.0,2.0,1',
-                           EnableLogging=False)
+
+        call_params = dict(AxisAligned=False,
+                           BasisVector0='h,rlu,1.0,0.0,0.0',
+                           BasisVector1='k,rlu,0.0,1.0,0.0',
+                           BasisVector2='l,rlu,0.0,0.0,1.0',
+                           EnableLogging=False,
+                           InputWorkspace=self.ws_MDE_3D,
+                           OutputBins=[1, 2, 1],
+                           OutputExtents=[-2, 2, -1, 1, -2.0, 2.0],
+                           OutputWorkspace='ws_MDE_3D_svrebinned')
         mock_binmd.assert_called_once_with(**call_params)
         mock_binmd.reset_mock()
 
@@ -489,8 +496,8 @@ class SliceViewerModelTest(unittest.TestCase):
                                                 IMDEventWorkspace,
                                                 has_original_workspace=False)
 
-    def test_mdhistoworkspace_does_not_support_dynamic_rebinning(self):
-        self._assert_supports_dynamic_rebinning(False,
+    def test_mdhistoworkspace_supports_dynamic_rebinning_if_original_exists(self):
+        self._assert_supports_dynamic_rebinning(True,
                                                 IMDHistoWorkspace,
                                                 has_original_workspace=True)
         self._assert_supports_dynamic_rebinning(False,
@@ -860,11 +867,9 @@ class SliceViewerModelTest(unittest.TestCase):
                                     has_oriented_lattice=False,
                                     ndims=3)
         if ws_type == MatrixWorkspace:
-            ws.hasOriginalWorkspace.return_value = False
+            ws.hasOriginalWorkspace.side_effect = lambda index: False
         elif has_original_workspace is not None:
-            ws.hasOriginalWorkspace.return_value = has_original_workspace
-            if has_original_workspace:
-                ws.getOriginalWorkspace.return_value = self.ws_MDE_3D
+            ws.hasOriginalWorkspace.side_effect = lambda index: has_original_workspace
         model = SliceViewerModel(ws)
         self.assertEqual(expectation, model.can_support_dynamic_rebinning())
 

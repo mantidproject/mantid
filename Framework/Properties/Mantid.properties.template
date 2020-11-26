@@ -238,6 +238,9 @@ plots.ShowMinorTicks = Off
 # Whether to show minor gridlines on plots
 plots.ShowMinorGridlines = Off
 
+# Whether to show the legend by default
+plots.ShowLegend = On
+
 # The default font for matplotlib plots
 plots.font=
 
@@ -280,3 +283,6 @@ plots.legend.FontSize = 8
 
 # Default colormap for image plots
 plots.images.Colormap = viridis
+
+# Default colorbar scale for image plots
+plots.images.ColorBarScale = Linear

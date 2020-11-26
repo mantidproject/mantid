@@ -45,7 +45,8 @@ public:
         .Times(Exactly(2))
         .WillRepeatedly(Return(rand));
     auto ray = profile.generatePoint(rng);
-    TS_ASSERT_EQUALS(V3D(0.0, 0.0, -0.25), ray.startPos);
+    const double testPt3 = -1 * std::sqrt(0.125);
+    TS_ASSERT_EQUALS(V3D(0.0, 0.0, testPt3), ray.startPos);
     TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
   }
 
@@ -55,7 +56,11 @@ public:
     using namespace ::testing;
 
     const double radius(0.5);
-    const V3D center(-3, 2, 1);
+    const V3D center(2, -3, 1);
+    const double testX = 2;
+    const double testY = -3;
+    const double testZ = 1 - std::sqrt(0.125);
+    constexpr const double DBL_EPS = std::numeric_limits<double>::epsilon();
     CircularBeamProfile profile(createTestFrame(), center, radius);
 
     MockRNG rng;
@@ -64,7 +69,9 @@ public:
         .Times(Exactly(2))
         .WillRepeatedly(Return(rand));
     auto ray = profile.generatePoint(rng);
-    TS_ASSERT_EQUALS(V3D(1.0, 2.0, -3.25), ray.startPos);
+    TS_ASSERT_DELTA(testX, ray.startPos.X(), DBL_EPS);
+    TS_ASSERT_DELTA(testY, ray.startPos.Y(), DBL_EPS);
+    TS_ASSERT_DELTA(testZ, ray.startPos.Z(), DBL_EPS);
     TS_ASSERT_EQUALS(V3D(1.0, 0, 0), ray.unitDir);
   }
 
@@ -76,8 +83,8 @@ public:
     const double radius(0.5);
     const V3D center;
     // values calculated using polar calculations from V3D class
-    const double testX = 0.25;
-    const double testY = 0;
+    const double testX = 0;
+    const double testY = sqrt(0.125);
     const double testZ = 0;
     constexpr const double DBL_EPS = std::numeric_limits<double>::epsilon();
     CircularBeamProfile profile(createTestFrame(), center, radius);
