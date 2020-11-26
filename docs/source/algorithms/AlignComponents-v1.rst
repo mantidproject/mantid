@@ -52,7 +52,7 @@ the instrument you don't want to use to align the sample/source
 position (*e.g.* in the *Align sample position in POWGEN* usage
 example below).
 
-The source and sample positions (in that order) are aligned before an
+The source and sample positions (in that order) are aligned before any
 components are aligned.
 
 Usage

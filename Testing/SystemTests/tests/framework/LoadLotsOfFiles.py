@@ -116,10 +116,6 @@ BANNED_FILES = ['80_tubes_Top_and_Bottom_April_2015.xml',
                 'TolueneScratchAbins.out',
                 'SingleCrystalDiffuseReduction_UB.mat',
                 'Na2SiF6_DMOL3.outmol',
-                'FE_ALPHA.cif',
-                'Fe-gamma.cif',
-                'Fe-alpha.cif',
-                'Sm2O3.cif',
                 'template_ENGINX_241391_236516_North_bank.prm',
                 'test_data_Iqxy.dat',
                 'BioSANS_test_data_Iqxy.dat',
@@ -147,6 +143,7 @@ BANNED_REGEXP = [r'SANS2D\d+.log$',
                  r'EVS.*\.raw',
                  r'.*_pulseid\.dat',
                  r'.*\.phonon',
+                 r'.*\.cif',
                  r'.*\.toml']
 
 BANNED_DIRS = ["DocTest", "UnitTest", "reference"]

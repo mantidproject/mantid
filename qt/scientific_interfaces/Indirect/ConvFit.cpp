@@ -123,6 +123,7 @@ void ConvFit::setModelResolution(const std::string &resolutionName,
   m_convFittingModel->setResolution(resolutionName, index);
   auto fitResolutions = m_convFittingModel->getResolutionsForFit();
   m_fitPropertyBrowser->setModelResolution(fitResolutions);
+  updateParameterValues();
   setModelFitFunction();
 }
 

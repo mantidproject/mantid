@@ -95,7 +95,7 @@ InstrumentWidgetEncoder::encodeTreeTab(const InstrumentWidgetTreeTab *tab) {
 
   QList<QString> list;
   const auto names = tab->m_instrumentTree->findExpandedComponents();
-  for (const auto name : names) {
+  for (const auto &name : names) {
     list.append(name);
   }
   map.insert(QString("expandedItems"), QVariant(list));

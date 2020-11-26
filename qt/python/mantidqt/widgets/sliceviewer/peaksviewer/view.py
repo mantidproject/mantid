@@ -14,6 +14,21 @@ from qtpy.QtWidgets import QGroupBox, QVBoxLayout, QWidget
 from mantidqt.widgets.workspacedisplay.table.view import QTableView, TableWorkspaceDisplayView
 
 
+class _LessThanOperatorSortFilterModel(QSortFilterProxyModel):
+    """Custom QSortFilterProxyModel. Uses __le__ operator
+    defined on the data type itself. The base method has limited
+    support for some basic types and resorts to string comparisons
+    for the rest: https://doc.qt.io/qt-5/qsortfilterproxymodel.html#lessThan
+    """
+    def lessThan(self, left_index, right_index):
+        """Return True if the data at left_index
+        is considered less than the data at the right_index.
+        """
+        left = left_index.model().data(left_index, self.sortRole())
+        right = right_index.model().data(right_index, self.sortRole())
+        return left < right
+
+
 class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
     """Specialization of a table view to display peaks
     Designed specifically to be used by PeaksViewerView
@@ -32,13 +47,15 @@ class _PeaksWorkspaceTableView(TableWorkspaceDisplayView):
         QTableView.keyPressEvent(self, event)
         self._key_handler._row_selected()
 
-    def enable_sorting(self):
+    def enable_sorting(self, sort_role: int):
         """
-        Turn on column sorting
+        Turn on column sorting by clicking headers
+        :param: Role defined as source of data for sorting
         """
         self.setSortingEnabled(True)
-        self.proxy_model = QSortFilterProxyModel()
+        self.proxy_model = _LessThanOperatorSortFilterModel()
         self.proxy_model.setSourceModel(self.source_model)
+        self.proxy_model.setSortRole(sort_role)
         self.setModel(self.proxy_model)
 
 

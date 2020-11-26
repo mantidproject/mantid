@@ -10,9 +10,17 @@ import systemtesting
 
 
 class PVPythonTest(systemtesting.MantidSystemTest):
-
     def skipTests(self):
-        return sys.platform == 'win32'
+        if sys.platform == 'win32':
+            return True
+        else:
+            skip = False
+            try:
+                import paraview.simple  # noqa: F401
+            except ModuleNotFoundError:
+                skip = True
+
+            return skip
 
     def runTest(self):
         # Make Vates/ParaView a soft requirement rather than failing on module import

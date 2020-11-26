@@ -12,15 +12,16 @@ import unittest
 from unittest import mock
 
 import matplotlib
-matplotlib.use('Agg')  # noqa: E402
+matplotlib.use('Agg')
 # Mock out simpleapi to import expensive import of something we don't use anyway
-sys.modules['mantid.simpleapi'] = mock.MagicMock()  # noqa: E402
+sys.modules['mantid.simpleapi'] = mock.MagicMock()
 
-from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE
-from mantidqt.widgets.sliceviewer.presenter import (PeaksViewerCollectionPresenter, SliceViewer)
-from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform
-from mantidqt.widgets.sliceviewer.toolbar import ToolItemText
-from mantidqt.widgets.sliceviewer.view import SliceViewerView, SliceViewerDataView
+from mantidqt.widgets.sliceviewer.model import SliceViewerModel, WS_TYPE  # noqa: E402
+from mantidqt.widgets.sliceviewer.presenter import (  # noqa: E402
+    PeaksViewerCollectionPresenter, SliceViewer)
+from mantidqt.widgets.sliceviewer.transform import NonOrthogonalTransform  # noqa: E402
+from mantidqt.widgets.sliceviewer.toolbar import ToolItemText  # noqa: E402
+from mantidqt.widgets.sliceviewer.view import SliceViewerView, SliceViewerDataView  # noqa: E402
 
 
 def _create_presenter(model, view, mock_sliceinfo_cls, enable_nonortho_axes, supports_nonortho):
