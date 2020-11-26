@@ -432,6 +432,18 @@ class DrillView(QMainWindow):
                 self.table.delRowLabel(row)
             rowName += 1
 
+    def getRowLabel(self, row):
+        """
+        Get the visual label of a row.
+
+        Args:
+            row(int): row index
+
+        Returns:
+            str: row label
+        """
+        return self.table.getRowLabel(row)
+
     def groupRows(self, rows):
         """
         Add a list of row(s) to a new group. This method changes the row labels.

@@ -234,9 +234,10 @@ class DrillPresenter:
         self.view.set_disabled(False)
         self.view.set_progress(0, 100)
         if self._processError:
+            labels = [self.view.getRowLabel(row) for row in self._processError]
             w = QMessageBox(QMessageBox.Critical, "Processing error(s)",
                             "Unable to process the row(s) {}. Please check the "
-                            "logs.".format(str(self._processError)[1:-1]),
+                            "logs.".format(str(labels)[1:-1]),
                             QMessageBox.Ok, self.view)
             w.exec()
 
