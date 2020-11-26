@@ -85,6 +85,8 @@ class MantidImage(mimage.AxesImage):
         """
         rgb = self.to_rgba(self._A, alpha=None, bytes=True, norm=True)
         r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
+        # CCIR 601 conversion from rgb to luma/greyscale
+        # see https://en.wikipedia.org/wiki/Luma_(video)
         grey = 0.2989 * r + 0.5870 * g + 0.1140 * b
         mean = np.mean(grey)
         if mean > THRESHOLD:
