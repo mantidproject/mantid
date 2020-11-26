@@ -9,6 +9,7 @@ import os
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
+from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 
 from mantid.api import WorkspaceGroup
 from mantid.kernel import ConfigServiceImpl
@@ -96,6 +97,20 @@ def construct_empty_pair(group_names, pair_names, pair_index=0):
     return MuonPair(pair_name=new_pair_name,
                     forward_group_name=group1, backward_group_name=group2, alpha=1.0)
 
+def construct_empty_phasequad(phasequad_run, phase_tables, phasequad_names, phasequad_index=0):
+    """
+    Create an empty MuonPair appropriate for adding to the current pairing table.
+    """
+    new_name = "phasequad_" + str(phasequad_index)
+    while new_name in phasequad_names:
+        # modify the name until it is unique
+        pair_index += 1
+        new_name = "phasequad_" + str(phasequad_index)
+    if len(phase_table) > 0:
+         table = phase_tables[0]
+    else:
+        table = None
+    return MuonPhasequad(new_name,phasequad_run,table)
 
 class MessageNotifier(Observable):
     def __init__(self, outer):
@@ -206,10 +221,12 @@ class MuonGroupPairContext(object):
                 return
 
     def add_pair(self, pair):
-        assert isinstance(pair, MuonPair)
-        if self._check_name_unique(pair.name):
+        if isinstance(pair, MuonPair) and self._check_name_unique(pair.name):
+            self._pairs.append(pair)
+        elif isinstance(pair, MuonPhasequad) and self._check_name_unique(pair.name):
             self._pairs.append(pair)
         else:
+            print("moo", pair, self._pairs, self._groups)
             raise ValueError('Groups and pairs must have unique names')
 
     def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction, num_periods):

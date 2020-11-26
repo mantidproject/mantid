@@ -7,7 +7,8 @@
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common import thread_model
 from Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases, run_PhaseQuad
-from mantidqt.utils.observer_pattern import Observable,GenericObserver
+from Muon.GUI.Common.muon_phasequad import MuonPhasequad
+from mantidqt.utils.observer_pattern import Observable,GenericObserver,GenericObservable
 import re
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, \
     get_phase_table_workspace_group_name, \
@@ -33,6 +34,7 @@ class PhaseTablePresenter(object):
 
         self.disable_tab_observer = GenericObserver(self.view.disable_widget)
         self.enable_tab_observer = GenericObserver(self.view.enable_widget)
+        self.selected_phasequad_changed_notifier = GenericObservable()
 
         self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
 
@@ -90,7 +92,16 @@ class PhaseTablePresenter(object):
         phase_quad = run_PhaseQuad(parameters, self.current_alg, phasequad_workspace_name)
         self.current_alg = None
 
-        self.add_phase_quad_to_ADS(parameters['InputWorkspace'], phase_quad)
+        # need to move to muon context some of this to get rebin correct
+        # run will come from new table
+        # want to make phase_quad the name of the row
+        print("hi", type(phase_quad), phase_quad)
+        phasequad_obj = MuonPhasequad(phase_quad, parameters['InputWorkspace'],parameters['PhaseTable'] )
+        phasequad_obj.update_asymmetry_workspace(
+                     phase_quad,
+                     [62260],
+                     rebin=False)
+        self.add_phase_quad_to_ADS(parameters['InputWorkspace'], phase_quad, phasequad_obj)
 
     def get_parameters_for_phase_quad(self):
         parameters = {}
@@ -103,15 +114,22 @@ class PhaseTablePresenter(object):
 
         return parameters
 
-    def add_phase_quad_to_ADS(self, input_workspace, phasequad_workspace_name):
+    def add_phase_quad_to_ADS(self, input_workspace, phasequad_workspace_name, phasequad_obj):
         run = re.search('^{}([0-9, -]+)[;,_]?'.format(self.context.data_context.instrument), input_workspace).group(1)
 
         directory = get_base_data_directory(self.context, run)
-
+        # needed to add to the correct group etc.
         muon_workspace_wrapper = MuonWorkspaceWrapper(directory + phasequad_workspace_name)
         muon_workspace_wrapper.show()
+        # add the phasequad
+        self.context.group_pair_context.add_pair(phasequad_obj)
 
-        self.context.phase_context.add_phase_quad(muon_workspace_wrapper, run)
+        self.context.group_pair_context.add_pair_to_selected_pairs(phasequad_obj.name)
+        #get state from table
+        group_info = {'is_added': True, 'name': phasequad_obj.name}
+        self.selected_phasequad_changed_notifier.notify_subscribers(group_info)
+
+        #self.context.phase_context.add_phase_quad(muon_workspace_wrapper, run)
         self.phase_quad_calculation_complete_nofifier.notify_subscribers()
 
     def handle_calculation_started(self):
