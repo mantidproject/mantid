@@ -223,41 +223,28 @@ class MaskBTPTest(unittest.TestCase):
 
         self.assertEqual(len(mask_rear), 256 * 128)
         self.assertEqual(len(mask_front), 4 * 11)
-        global CHECK_CONSISTENCY
-        CHECK_CONSISTENCY = True
         self.checkConsistentMask(ws, concatenate((mask_rear, mask_front)))
-        CHECK_CONSISTENCY = False
 
     def test_d11(self):
         ws = LoadEmptyInstrument(InstrumentName="d11")
         mask = MaskBTP(Workspace=ws, Pixel="0-10")
 
         self.assertEquals(len(mask), 256*11)
-
-        global CHECK_CONSISTENCY
-        CHECK_CONSISTENCY = True
         self.checkConsistentMask(ws, mask)
-        CHECK_CONSISTENCY = False
 
     def test_d22(self):
         ws = LoadEmptyInstrument(InstrumentName="d22")
         mask = MaskBTP(Workspace=ws, Tube="2-5")
 
         self.assertEquals(len(mask), 256*4)
-        global CHECK_CONSISTENCY
-        CHECK_CONSISTENCY = True
         self.checkConsistentMask(ws, mask)
-        CHECK_CONSISTENCY = False
 
     def test_d16(self):
         ws = LoadEmptyInstrument(InstrumentName="d16")
         mask = MaskBTP(Workspace=ws, Tube="319", Pixel="319")
 
         self.assertEquals(len(mask), 1)
-        global CHECK_CONSISTENCY
-        CHECK_CONSISTENCY = True
         self.checkConsistentMask(ws, mask)
-        CHECK_CONSISTENCY = False
 
     def test_d11_lr(self):
         path = config["instrumentDefinition.directory"] + "D11lr_Definition.xml"
@@ -266,10 +253,7 @@ class MaskBTPTest(unittest.TestCase):
         mask = MaskBTP(Workspace=ws, Tube="127")
 
         self.assertEquals(len(mask), 128)
-        global CHECK_CONSISTENCY
-        CHECK_CONSISTENCY = True
         self.checkConsistentMask(ws, mask)
-        CHECK_CONSISTENCY = False
 
     def test_d22lr(self):
         path = config["instrumentDefinition.directory"] + "D22lr_Definition.xml"
@@ -278,10 +262,7 @@ class MaskBTPTest(unittest.TestCase):
         mask = MaskBTP(Workspace=ws, Pixel="20-28")
 
         self.assertEquals(len(mask), 9*128)
-        global CHECK_CONSISTENCY
-        CHECK_CONSISTENCY = True
         self.checkConsistentMask(ws, mask)
-        CHECK_CONSISTENCY = False
 
 
 if __name__ == '__main__':
