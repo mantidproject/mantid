@@ -44,17 +44,25 @@ WATERFALL_XOFFSET_DEFAULT, WATERFALL_YOFFSET_DEFAULT = 10, 20
 def plot_decorator(func):
     def wrapper(self, *args, **kwargs):
         func_value = func(self, *args, **kwargs)
+        func_name = func.__name__
         # Saves saving it on array objects
         if datafunctions.validate_args(*args, **kwargs):
             # Fill out kwargs with the values of args
             kwargs["workspaces"] = args[0].name()
-            kwargs["function"] = func.__name__
+            kwargs["function"] = func_name
 
             if 'wkspIndex' not in kwargs and 'specNum' not in kwargs:
                 kwargs['specNum'] = MantidAxes.get_spec_number_or_bin(args[0], kwargs)
             if "cmap" in kwargs and isinstance(kwargs["cmap"], Colormap):
                 kwargs["cmap"] = kwargs["cmap"].name
             self.creation_args.append(kwargs)
+        elif func_name == "axhline" or func_name == "axvline":
+            self.creation_args.append({
+                'function': func_name,
+                'args': args,
+                'kwargs': kwargs
+            })
+
         return func_value
 
     return wrapper
@@ -761,6 +769,14 @@ class MantidAxes(Axes):
             return Axes.errorbar(self, *args, **kwargs)
 
     @plot_decorator
+    def axhline(self, *args, **kwargs):
+        return Axes.axhline(self, *args, **kwargs)
+
+    @plot_decorator
+    def axvline(self, *args, **kwargs):
+        return Axes.axvline(self, *args, **kwargs)
+
+    @plot_decorator
     def pcolor(self, *args, **kwargs):
         """
         If the **mantid** projection is chosen, it can be
@@ -1248,32 +1264,54 @@ class MantidAxes3D(Axes3D):
         return Axes.set_title(self, *args, **kwargs)
 
     def set_xlim3d(self, *args):
-        min, max = super().set_xlim3d(*args)
+        minmax_x = super().set_xlim3d(*args)
+        min = (minmax_x[0],self.get_ylim3d()[0],self.get_zlim3d()[0])
+        max = (minmax_x[1],self.get_ylim3d()[1],self.get_zlim3d()[1])
+
         self._set_overflowing_data_to_nan(min, max, 0)
 
     def set_ylim3d(self, *args):
-        min, max = super().set_ylim3d(*args)
+        minmax_y = super().set_ylim3d(*args)
+        min = (self.get_xlim3d()[0],minmax_y[0],self.get_zlim3d()[0])
+        max = (self.get_xlim3d()[1],minmax_y[1],self.get_zlim3d()[1])
 
         self._set_overflowing_data_to_nan(min, max, 1)
 
     def set_zlim3d(self, *args):
-        min, max = super().set_zlim3d(*args)
+        minmax_z = super().set_zlim3d(*args)
+        min = (self.get_xlim3d()[0],self.get_ylim3d()[0],minmax_z[0])
+        max = (self.get_xlim3d()[1],self.get_ylim3d()[1],minmax_z[1])
 
         self._set_overflowing_data_to_nan(min, max, 2)
 
     def _set_overflowing_data_to_nan(self, min, max, axis_index):
         """
-        Sets any data for the given axis that is less than min or greater than max to nan so only the parts of the plot
-        that are within the axes are visible.
-        :param min: the lower axis limit.
-        :param max: the upper axis limit.
+        Sets any data for the given axis that is less than min[axis_index] or greater than max[axis_index]
+        to nan so only the parts of the plot that are within the axes are visible.
+        :param min: tuple of the lower axis limits.
+        :param max: tuple of the upper axis limits.
         :param axis_index: the index of the axis being edited, 0 for x, 1 for y, 2 for z.
         """
-        if hasattr(self, 'original_data'):
-            axis_data = self.original_data[axis_index].copy()
-            axis_data[np.less(axis_data, min, where=~np.isnan(axis_data))] = np.nan
-            axis_data[np.greater(axis_data, max, where=~np.isnan(axis_data))] = np.nan
+        if hasattr(self, 'original_data_surface'):
+
+            axis_data = self.original_data_surface[axis_index].copy()
+            axis_data[np.less(axis_data, min[axis_index], where=~np.isnan(axis_data))] = np.nan
+            axis_data[np.greater(axis_data, max[axis_index], where=~np.isnan(axis_data))] = np.nan
             self.collections[0]._vec[axis_index] = axis_data
+
+        if hasattr(self, 'original_data_wireframe'):
+
+            all_data = copy.deepcopy(self.original_data_wireframe)
+
+            for spectrum in range(len(all_data)):
+                spectrum_data = all_data[spectrum]
+                for point in range(len(spectrum_data)):
+                    for axis in range(3):
+                        if (np.less(spectrum_data[point][axis],min[axis])
+                                or np.greater(spectrum_data[point][axis],max[axis])):
+                            all_data[spectrum][point] = np.repeat(np.nan,3)
+
+            self.collections[0].set_segments(all_data)
 
     def plot(self, *args, **kwargs):
         """
@@ -1346,9 +1384,14 @@ class MantidAxes3D(Axes3D):
         """
         if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            return axesfunctions3D.plot_wireframe(self, *args, **kwargs)
+            line_c = axesfunctions3D.plot_wireframe(self, *args, **kwargs)
         else:
-            return Axes3D.plot_wireframe(self, *args, **kwargs)
+            line_c = Axes3D.plot_wireframe(self, *args, **kwargs)
+
+        # Create a copy of the original data points because data are set to nan when the axis limits are changed.
+        self.original_data_wireframe = copy.deepcopy(line_c._segments3d)
+
+        return line_c
 
     def plot_surface(self, *args, **kwargs):
         """
@@ -1371,18 +1414,18 @@ class MantidAxes3D(Axes3D):
         """
         if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            polyc = axesfunctions3D.plot_surface(self, *args, **kwargs)
+            poly_c = axesfunctions3D.plot_surface(self, *args, **kwargs)
         else:
-            polyc = Axes3D.plot_surface(self, *args, **kwargs)
+            poly_c = Axes3D.plot_surface(self, *args, **kwargs)
 
             # This is a bit of a hack, should be able to remove
             # when matplotlib supports plotting masked arrays
-            polyc._A = safe_masked_invalid(polyc._A)
+            poly_c._A = safe_masked_invalid(poly_c._A)
 
         # Create a copy of the original data points because data are set to nan when the axis limits are changed.
-        self.original_data = copy.deepcopy(polyc._vec)
+        self.original_data_surface = copy.deepcopy(poly_c._vec)
 
-        return polyc
+        return poly_c
 
     def contour(self, *args, **kwargs):
         """

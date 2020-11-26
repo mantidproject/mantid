@@ -100,6 +100,7 @@ public:
   MOCK_METHOD0(resetAllXToSingleBin, void());
   MOCK_METHOD0(clearMRU, void());
   MOCK_CONST_METHOD0(clearMRU, void());
+  MOCK_CONST_METHOD0(isRaggedWorkspace, bool());
   MOCK_CONST_METHOD0(blocksize, std::size_t());
   MOCK_CONST_METHOD0(size, std::size_t());
   MOCK_CONST_METHOD0(getNumberHistograms, std::size_t());

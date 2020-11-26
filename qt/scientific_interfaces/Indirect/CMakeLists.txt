@@ -19,7 +19,6 @@ set(
         ISISCalibration.cpp
         ISISDiagnostics.cpp
         ISISEnergyTransfer.cpp
-        IndexTypes.cpp
         IndirectAddWorkspaceDialog.cpp
         IndirectBayes.cpp
         IndirectBayesTab.cpp
@@ -106,7 +105,6 @@ set(
         QT4_INC_FILES
         ConvFitModel.h
         DllConfig.h
-        IndexTypes.h
         IndirectDataValidationHelper.h
         IndirectFitData.h
         IndirectFitOutputOptionsModel.h

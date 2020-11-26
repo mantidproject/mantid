@@ -19,6 +19,15 @@ if os.environ.get('MANTID_FRAMEWORK_CONDA_SYSTEMTEST'):
     import matplotlib
 
 # =========================================================
+try:
+    import mantid
+except ModuleNotFoundError:
+    import setuptools
+    from packaging import version
+    if version.parse(setuptools.__version__) >= version.parse("49.0.0"):
+        raise EnvironmentError("Setup tools is v49 or greater. This is likely causing the Mantid import to fail. See \n"
+                                "https://github.com/mantidproject/mantid/issues/29010")
+
 import datetime
 import difflib
 import importlib.util
@@ -465,6 +474,16 @@ class MantidSystemTest(unittest.TestCase):
         if not was_raised:
             raise Exception('{} not raised'.format(excClass.__name__))
 
+    @staticmethod
+    def mismatchWorkspaceName(reference_filename):
+        """
+        Returns the name of the workspace which will be saved if
+        there is a mismatch between the reference and calculated workspace.
+        :param reference_filename: The reference file name of the form "name_of_file.nxs"
+        :return: Name of the file containing the mismatch workspace
+        """
+        name = reference_filename.split('.')[0]
+        return name + '-mismatch.nxs'
 
 #########################################################################
 # A class to store the results of a test

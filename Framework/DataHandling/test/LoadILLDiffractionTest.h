@@ -37,6 +37,7 @@ public:
   LoadILLDiffractionTest() {
     ConfigService::Instance().appendDataSearchSubDir("ILL/D20/");
     ConfigService::Instance().appendDataSearchSubDir("ILL/D2B/");
+    ConfigService::Instance().appendDataSearchSubDir("ILL/D1B/");
   }
 
   void setUp() override {
@@ -493,6 +494,34 @@ public:
     TS_ASSERT(outputWS->run().hasProperty("start_time"));
     TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
         outputWS->run().getProperty("start_time")->value()));
+  }
+
+  void test_D1B() {
+    const int NUMBER_OF_TUBES = 1280;
+    const int NUMBER_OF_MONITORS = 1;
+
+    LoadILLDiffraction alg;
+    alg.setChild(true);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("Filename", "473432.nxs"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("TwoThetaOffset", "0.0"))
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "__"))
+    TS_ASSERT_THROWS_NOTHING(alg.execute())
+    TS_ASSERT(alg.isExecuted())
+    MatrixWorkspace_sptr outputWS = alg.getProperty("OutputWorkspace");
+    TS_ASSERT(outputWS)
+    const auto run = outputWS->run();
+
+    const auto &detInfo = outputWS->detectorInfo();
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(),
+                     NUMBER_OF_TUBES + NUMBER_OF_MONITORS)
+
+    TS_ASSERT(!detInfo.isMonitor({1, 0}))
+    auto firstTube = detInfo.position({1, 0});
+    TS_ASSERT_DELTA(firstTube.angle(V3D(0, 0, 1)) * RAD_2_DEG, 0.85, 1e-6)
+
+    TS_ASSERT_EQUALS(outputWS->y(13)[0], 1394)
+    checkTimeFormat(outputWS);
   }
 
 private:

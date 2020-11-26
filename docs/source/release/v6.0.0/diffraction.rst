@@ -30,15 +30,18 @@ New features
 - Added a new :ref:`Transfit <algm-PEARLTransfit>` Algorithm for PEARL that uses a TransVoigt function to determine the temperature of a given sample
 - Modified :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to include several different absorption correction methods.
 - Added new absorption options from :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to Powder Diffraction Reduction GUI
-
+- New algorithm :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` to convert DEMAND data to Q-space and allow the detector position to be adjusted by offsets.
+- Files from ILL's instrument D1B can now be loaded.
 
 Improvements
 ############
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
+- The plot pane in the Engineering Diffraction interface can now be undocked from the main window, making this more readable when the fit property view is open.
 - The height of the :ref:`func-BackToBackExponential` peak is now preserved when changing the FWHM sliders when fitting.
 - :ref:`PowderILLDetectorScan <algm-PowderILLDetectorScan>` is corrected when treating multiple scans merged.
 - The default loadpath in the fitting tab of the Engineering Diffraction UI is now set to the most recently focused files.
 - The :ref:`HB2AReduce <algm-HB2AReduce>` now can save reduced data to GSAS or XYE file.
+
 
 Bugfixes
 ########
@@ -61,7 +64,7 @@ Improvements
 
 New features
 ############
-- When a fit is successful the model will be stored as a Custom Setup in the fit property browser under the name of the workspace fitted. 
+- When a fit is successful the model will be stored as a Custom Setup in the fit property browser under the name of the workspace fitted.
 - The fitting tab now creates a group of workspaces that store the model string and the fit value and error of parameters of the model for each loaded workspace.
 - Sequential fitting of workspaces now provided in fitting tab by average value of a log set in settings.
 
