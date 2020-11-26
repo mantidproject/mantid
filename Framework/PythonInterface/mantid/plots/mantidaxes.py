@@ -1264,41 +1264,29 @@ class MantidAxes3D(Axes3D):
         return Axes.set_title(self, *args, **kwargs)
 
     def set_xlim3d(self, *args):
-        minmax_x = super().set_xlim3d(*args)
-        min = (minmax_x[0],self.get_ylim3d()[0],self.get_zlim3d()[0])
-        max = (minmax_x[1],self.get_ylim3d()[1],self.get_zlim3d()[1])
-
-        self._set_overflowing_data_to_nan(min, max, 0)
+        super().set_xlim3d(*args)
+        self._set_overflowing_data_to_nan(0)
 
     def set_ylim3d(self, *args):
-        minmax_y = super().set_ylim3d(*args)
-        min = (self.get_xlim3d()[0],minmax_y[0],self.get_zlim3d()[0])
-        max = (self.get_xlim3d()[1],minmax_y[1],self.get_zlim3d()[1])
-
-        self._set_overflowing_data_to_nan(min, max, 1)
+        super().set_ylim3d(*args)
+        self._set_overflowing_data_to_nan(1)
 
     def set_zlim3d(self, *args):
-        minmax_z = super().set_zlim3d(*args)
-        min = (self.get_xlim3d()[0],self.get_ylim3d()[0],minmax_z[0])
-        max = (self.get_xlim3d()[1],self.get_ylim3d()[1],minmax_z[1])
-
-        self._set_overflowing_data_to_nan(min, max, 2)
+        super().set_zlim3d(*args)
+        self._set_overflowing_data_to_nan(2)
 
     def autoscale(self, *args, **kwargs):
         super().autoscale(*args, **kwargs)
-        min = (self.get_xlim3d()[0],self.get_ylim3d()[0],self.get_ylim3d()[0])
-        max = (self.get_xlim3d()[1],self.get_ylim3d()[1],self.get_ylim3d()[1])
+        self._set_overflowing_data_to_nan()
 
-        self._set_overflowing_data_to_nan(min, max)
-
-    def _set_overflowing_data_to_nan(self, min, max, axis_index=None):
+    def _set_overflowing_data_to_nan(self, axis_index=None):
         """
         Sets any data for the given axis that is less than min[axis_index] or greater than max[axis_index]
         to nan so only the parts of the plot that are within the axes are visible.
-        :param min: tuple of the lower axis limits.
-        :param max: tuple of the upper axis limits.
         :param axis_index: the index of the axis being edited, 0 for x, 1 for y, 2 for z.
         """
+
+        min_vals, max_vals = zip(self.get_xlim3d(),self.get_ylim3d(),self.get_zlim3d())
         if hasattr(self, 'original_data_surface'):
             if axis_index is None:
                 axis_index_list = [0,1,2]
@@ -1307,8 +1295,8 @@ class MantidAxes3D(Axes3D):
 
             for axis_index in axis_index_list:
                 axis_data = self.original_data_surface[axis_index].copy()
-                axis_data[np.less(axis_data, min[axis_index], where=~np.isnan(axis_data))] = np.nan
-                axis_data[np.greater(axis_data, max[axis_index], where=~np.isnan(axis_data))] = np.nan
+                axis_data[np.less(axis_data, min_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
+                axis_data[np.greater(axis_data, max_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
                 self.collections[0]._vec[axis_index] = axis_data
 
         if hasattr(self, 'original_data_wireframe'):
@@ -1319,8 +1307,8 @@ class MantidAxes3D(Axes3D):
                 spectrum_data = all_data[spectrum]
                 for point in range(len(spectrum_data)):
                     for axis in range(3):
-                        if (np.less(spectrum_data[point][axis],min[axis])
-                                or np.greater(spectrum_data[point][axis],max[axis])):
+                        if (np.less(spectrum_data[point][axis],min_vals[axis])
+                                or np.greater(spectrum_data[point][axis],max_vals[axis])):
                             all_data[spectrum][point] = np.repeat(np.nan,3)
 
             self.collections[0].set_segments(all_data)
