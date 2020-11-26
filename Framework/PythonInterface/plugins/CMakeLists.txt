@@ -4,6 +4,7 @@
 
 # List of python algorithms and fit functions
 set(PYTHON_PLUGINS
+<<<<<<< HEAD
     algorithms/Abins.py
     algorithms/AlignAndFocusPowderFromFiles.py
     algorithms/AlignComponents.py
@@ -143,6 +144,7 @@ set(PYTHON_PLUGINS
     algorithms/RefinePowderDiffProfileSeq.py
     algorithms/ReflectometryReductionOneLiveData.py
     algorithms/ReflectometrySliceEventWorkspace.py
+    algorithms/ResetNegatives2D.py
     algorithms/ResNorm.py
     algorithms/RetrieveRunInfo.py
     algorithms/SANSSubtract.py

@@ -20,7 +20,7 @@ Usage
 
 **Example: Reset negative values from a 2D Workspace. Remember to change the Filepath for the OutputFile!**
 
-.. testcode::PrintP2D
+.. testcode::ResetNegatives2D
 
     # create a 2D Workspace
     # repeat this block for each spectrum
@@ -48,7 +48,8 @@ Usage
 
 Output:
 
-.. testoutput:: PrintP2D
+.. testoutput:: ResetNegatives2D
+  :options: +ELLIPSIS, +NORMALIZE_WHITESPACE
 
 .. categories::
 

@@ -48,7 +48,7 @@ class ResetNegatives2D(PythonAlgorithm):
                 Y = data.dataY(cdp)[cd]
                 n += 1
                 # If intensity Y is smaller then minimum intensity intMin, set minimum intensity intMin to intensity Y
-                if Y < intMin: 
+                if Y < intMin:
                     intMin = Y
 
         # Check if minimal Intensity is negative. If it is, add -1*intMin to all intensities
