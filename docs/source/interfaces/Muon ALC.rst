@@ -134,7 +134,7 @@ display purposes only i.e. it is not editable.
 
 The interface will attempt to locate runs by first searching any user defined directories 
 and then the Data archive (only useful if you’re at ISIS). You can manage your user directories
-with the :ref:`manage user directories <ManageUserDirectories>` button at the bottom of the interface.
+with the :ref:`manage user directories <ManageUserDirectories>` button.
 
 The input files must be Muon Nexus files with names beginning with at least one letter
 and followed by a number. In addition, the user must supply the **Log** data that will
@@ -161,6 +161,9 @@ Options
 Instrument
   The instrument
   
+Manage User Directories
+  Opens a dialog where a user can specify which directories to load from
+  
 Path
   The directory data has been loaded from
 
@@ -175,6 +178,10 @@ Log
 
 Take log value at
   The function to apply to the time series log: Mean/Min/Max/First/Last.
+  
+ Load
+  Computes the asymmetry according to selected options and displays it against the 
+  chosen log value.
 
 Dead Time Correction
   Type of dead time corrections to apply. Options are *None*, in which case no 
@@ -197,13 +204,6 @@ Calculation
 ?
   Shows this help page.
  
-Manage User Directories
-  Opens a dialog where a user can specify which directories to load from
-
-Load
-  Computes the asymmetry according to selected options and displays it against the 
-  chosen log value.
-
 Loaded Data
   Graph where the asymmetry as a function of the Log value is displayed. These are the
   data passed to the BaselineModelling step.
