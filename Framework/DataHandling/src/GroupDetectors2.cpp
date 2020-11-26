@@ -1035,7 +1035,7 @@ GroupDetectors2::formGroups(const API::MatrixWorkspace_const_sptr &inputWS,
       if (originalWI < 0)
         continue;
 
-      spectrumGroups.emplace_back(std::vector<size_t>(1, originalWI));
+      spectrumGroups.emplace_back(1, originalWI);
 
       auto spectrumNumber = inputWS->getSpectrum(originalWI).getSpectrumNo();
       spectrumNumbers.emplace_back(spectrumNumber);

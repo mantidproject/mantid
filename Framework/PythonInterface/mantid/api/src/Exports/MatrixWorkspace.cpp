@@ -133,7 +133,7 @@ list getSpectrumNumbers(const MatrixWorkspace &self) {
   const auto &spectrumNums = self.indexInfo().spectrumNumbers();
   list spectra;
 
-  for (const auto index : spectrumNums) {
+  for (const auto &index : spectrumNums) {
     spectra.append(static_cast<int32_t>(index));
   }
 
@@ -250,11 +250,12 @@ std::vector<size_t> maskedBinsIndices(MatrixWorkspace &self, const int i) {
  * Raw Pointer wrapper of replaceAxis to allow it to work with python
  * @param self
  * @param axisIndex :: The index of the axis to replace
- * @param newAxis :: A pointer to the new axis. The class will take ownership.
+ * @param newAxis :: A pointer to the new axis. The class will take ownership of
+ * its clone.
  */
 void pythonReplaceAxis(MatrixWorkspace &self, const std::size_t &axisIndex,
                        Axis *newAxis) {
-  self.replaceAxis(axisIndex, std::unique_ptr<Axis>(newAxis));
+  self.replaceAxis(axisIndex, std::unique_ptr<Axis>(newAxis->clone(&self)));
 }
 
 /**
@@ -343,6 +344,10 @@ void export_MatrixWorkspace() {
          boost::noncopyable>("MatrixWorkspace", no_init)
       //--------------------------------------- Meta information
       //-----------------------------------------------------------------------
+      .def("isRaggedWorkspace", &MatrixWorkspace::isRaggedWorkspace,
+           arg("self"),
+           "Returns true if the workspace is ragged (has differently sized "
+           "spectra).")
       .def("blocksize", &MatrixWorkspace::blocksize, arg("self"),
            "Returns size of the Y data array")
       .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms,
@@ -450,7 +455,8 @@ void export_MatrixWorkspace() {
            "the bin-width.")
       .def("replaceAxis", &pythonReplaceAxis,
            (arg("self"), arg("axisIndex"), arg("newAxis")),
-           "Replaces one of the workspace's axes with the new one provided.")
+           "Replaces one of the workspace's axes with the new one provided. "
+           "The axis is cloned.")
       .def("applyBinEdgesFromAnotherWorkspace",
            &applyBinEdgesFromAnotherWorkspace,
            (arg("self"), arg("ws"), arg("getIndex"), arg("setIndex")),

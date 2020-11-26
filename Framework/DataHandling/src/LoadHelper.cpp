@@ -267,8 +267,14 @@ void LoadHelper::recurseAndAddNexusFieldsToWsRun(NXhandle nxfileID,
                   if (boost::algorithm::ends_with(property_name, "_time")) {
                     // That's a time value! Convert to Mantid standard
                     property_value = dateTimeInIsoFormat(property_value);
+                    if (runDetails.hasProperty(property_name))
+                      runDetails.getProperty(property_name)
+                          ->setValue(property_value);
+                    else
+                      runDetails.addProperty(property_name, property_value);
+                  } else {
+                    runDetails.addProperty(property_name, property_value);
                   }
-                  runDetails.addProperty(property_name, property_value);
 
                 } else if ((type == NX_FLOAT32) || (type == NX_FLOAT64) ||
                            (type == NX_INT16) || (type == NX_INT32) ||

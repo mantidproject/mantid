@@ -100,7 +100,7 @@ void saveWorkspace(const Workspace_sptr &workspace) {
 }
 
 void saveWorkspacesInGroup(const WorkspaceGroup_const_sptr &group) {
-  for (auto const workspace : *group)
+  for (auto const &workspace : *group)
     saveWorkspace(workspace);
 }
 

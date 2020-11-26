@@ -8,10 +8,10 @@
 
 #include "ConvTypes.h"
 #include "DllConfig.h"
-#include "IndexTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/ConvolutionFunctionModel.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 #include "ParameterEstimation.h"
 
 #include <QMap>
@@ -45,8 +45,9 @@ public:
   IFunction_sptr getSingleFunction(int index) const override;
   IFunction_sptr getCurrentFunction() const override;
   void setNumberDomains(int) override;
-  void setDatasetNames(const QStringList &names) override;
+  void setDatasets(const QList<FunctionModelDataset> &datasets) override;
   QStringList getDatasetNames() const override;
+  QStringList getDatasetDomainNames() const override;
   int getNumberDomains() const override;
   void setCurrentDomainIndex(int i) override;
   int currentDomainIndex() const override;

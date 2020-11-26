@@ -25,10 +25,10 @@ namespace {
 std::unique_ptr<IndirectFitData>
 getIndirectFitData(int const &numberOfSpectra) {
   auto const workspace = createWorkspace(numberOfSpectra);
-  Spectra const spec =
-      Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
-              MantidQt::CustomInterfaces::IDA::WorkspaceIndex{
-                  workspace->getNumberHistograms() - 1});
+  FunctionModelSpectra const spec =
+      FunctionModelSpectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
+                           MantidQt::CustomInterfaces::IDA::WorkspaceIndex{
+                               workspace->getNumberHistograms() - 1});
   IndirectFitData data(workspace, spec);
   return std::make_unique<IndirectFitData>(data);
 }
@@ -47,10 +47,10 @@ public:
 
   void test_data_is_instantiated() {
     auto const workspace = createWorkspace(1);
-    Spectra const spec =
-        Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
-                MantidQt::CustomInterfaces::IDA::WorkspaceIndex{
-                    workspace->getNumberHistograms() - 1});
+    FunctionModelSpectra const spec =
+        FunctionModelSpectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
+                             MantidQt::CustomInterfaces::IDA::WorkspaceIndex{
+                                 workspace->getNumberHistograms() - 1});
 
     workspace->setTitle("Test Title");
     IndirectFitData const data(workspace, spec);
@@ -61,7 +61,7 @@ public:
   }
 
   void test_that_DiscontinuousSpectra_is_set_up_correctly() {
-    Spectra const spectra = Spectra("0-5,8,10");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-5,8,10");
 
     std::string const spectraString = "0-5,8,10";
     std::vector<IDA::WorkspaceIndex> const spectraVec{
@@ -79,7 +79,7 @@ public:
     auto data = getIndirectFitData(11);
 
     std::string const inputString = "8,0-7,6,10";
-    Spectra const spectra = Spectra("0-8,10");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-8,10");
     data->setSpectra(inputString);
 
     TS_ASSERT_EQUALS(data->spectra(), spectra);
@@ -90,7 +90,7 @@ public:
     auto data = getIndirectFitData(11);
 
     std::string const inputString = "1,2,4-3,10";
-    Spectra const spectra = Spectra("1-4,10");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("1-4,10");
     data->setSpectra(inputString);
 
     TS_ASSERT_EQUALS(data->spectra(), spectra);
@@ -101,16 +101,16 @@ public:
     auto data = getIndirectFitData(11);
 
     std::string const inputString = "  8,10,  7";
-    Spectra const spectra = Spectra("7-8,10");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("7-8,10");
     data->setSpectra(inputString);
 
     TS_ASSERT_EQUALS(data->spectra(), spectra);
   }
 
   void test_erasing_non_existent_spectra_handled_gracefully() {
-    Spectra spectra = Spectra("7-8,10");
+    FunctionModelSpectra spectra = FunctionModelSpectra("7-8,10");
     spectra.erase(IDA::WorkspaceIndex{9});
-    TS_ASSERT_EQUALS(Spectra("7-8,10"), spectra);
+    TS_ASSERT_EQUALS(FunctionModelSpectra("7-8,10"), spectra);
   }
 
   void test_data_is_stored_in_the_ADS() {
@@ -169,7 +169,7 @@ public:
   void
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_workspace() {
     auto workspace = std::make_shared<Workspace2D>();
-    Spectra const spec = Spectra("");
+    FunctionModelSpectra const spec = FunctionModelSpectra("");
     IndirectFitData const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.zeroSpectra(), true);
@@ -178,7 +178,7 @@ public:
   void
   test_that_true_is_returned_from_zeroSpectra_if_data_contains_empty_spectra() {
     auto const workspace = createWorkspace(1);
-    Spectra const spec("");
+    FunctionModelSpectra const spec("");
     IndirectFitData const data(workspace, spec);
 
     TS_ASSERT_EQUALS(data.zeroSpectra(), true);
@@ -317,11 +317,13 @@ public:
   void test_throws_when_setSpectra_is_provided_an_out_of_range_spectra() {
     auto data = getIndirectFitData(10);
 
-    std::vector<Spectra> const spectraPairs{
-        Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
-                MantidQt::CustomInterfaces::IDA::WorkspaceIndex{11}),
-        Spectra(MantidQt::CustomInterfaces::IDA::WorkspaceIndex{10},
-                MantidQt::CustomInterfaces::IDA::WorkspaceIndex{10})};
+    std::vector<FunctionModelSpectra> const spectraPairs{
+        FunctionModelSpectra(
+            MantidQt::CustomInterfaces::IDA::WorkspaceIndex{0},
+            MantidQt::CustomInterfaces::IDA::WorkspaceIndex{11}),
+        FunctionModelSpectra(
+            MantidQt::CustomInterfaces::IDA::WorkspaceIndex{10},
+            MantidQt::CustomInterfaces::IDA::WorkspaceIndex{10})};
     std::vector<std::string> const spectraStrings{"10", "1,5,10",
                                                   "1,2,3,4,5,6,22"};
 
@@ -336,10 +338,10 @@ public:
   void test_no_throw_when_setSpectra_is_provided_a_valid_spectra() {
     auto data = getIndirectFitData(10);
 
-    std::vector<Spectra> const spectraPairs{
-        Spectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{9}),
-        Spectra(IDA::WorkspaceIndex{4}, IDA::WorkspaceIndex{4}),
-        Spectra(IDA::WorkspaceIndex{7}, IDA::WorkspaceIndex{4})};
+    std::vector<FunctionModelSpectra> const spectraPairs{
+        FunctionModelSpectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{9}),
+        FunctionModelSpectra(IDA::WorkspaceIndex{4}, IDA::WorkspaceIndex{4}),
+        FunctionModelSpectra(IDA::WorkspaceIndex{7}, IDA::WorkspaceIndex{4})};
     std::vector<std::string> const spectraStrings{"0", "9", "0,9,6,4,5",
                                                   "1,2,3,4,5,6"};
 
@@ -440,10 +442,13 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(Spectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{4}));
-    data2->setSpectra(Spectra(IDA::WorkspaceIndex{5}, IDA::WorkspaceIndex{9}));
+    data1->setSpectra(
+        FunctionModelSpectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{4}));
+    data2->setSpectra(
+        FunctionModelSpectra(IDA::WorkspaceIndex{5}, IDA::WorkspaceIndex{9}));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(Spectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{9}));
+    FunctionModelSpectra const spec(
+        FunctionModelSpectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{9}));
 
     TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
@@ -453,10 +458,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(Spectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{4}));
-    data2->setSpectra(Spectra(IDA::WorkspaceIndex{8}, IDA::WorkspaceIndex{9}));
+    data1->setSpectra(
+        FunctionModelSpectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{4}));
+    data2->setSpectra(
+        FunctionModelSpectra(IDA::WorkspaceIndex{8}, IDA::WorkspaceIndex{9}));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(Spectra("0-4,8-9"));
+    FunctionModelSpectra const spec(FunctionModelSpectra("0-4,8-9"));
 
     TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
@@ -466,10 +473,12 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(Spectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{8}));
-    data2->setSpectra(Spectra(IDA::WorkspaceIndex{4}, IDA::WorkspaceIndex{9}));
+    data1->setSpectra(
+        FunctionModelSpectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{8}));
+    data2->setSpectra(
+        FunctionModelSpectra(IDA::WorkspaceIndex{4}, IDA::WorkspaceIndex{9}));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(Spectra("0-9"));
+    FunctionModelSpectra const spec(FunctionModelSpectra("0-9"));
 
     TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
@@ -479,10 +488,10 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(Spectra("0-4"));
-    data2->setSpectra(Spectra("5-9"));
+    data1->setSpectra(FunctionModelSpectra("0-4"));
+    data2->setSpectra(FunctionModelSpectra("5-9"));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(Spectra("0-9"));
+    FunctionModelSpectra const spec(FunctionModelSpectra("0-9"));
 
     TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
@@ -492,10 +501,10 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(Spectra("0-7"));
-    data2->setSpectra(Spectra("2-9"));
+    data1->setSpectra(FunctionModelSpectra("0-7"));
+    data2->setSpectra(FunctionModelSpectra("2-9"));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(Spectra("0-9"));
+    FunctionModelSpectra const spec(FunctionModelSpectra("0-9"));
 
     TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
@@ -505,10 +514,11 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(Spectra("0-4"));
-    data2->setSpectra(Spectra(IDA::WorkspaceIndex{5}, IDA::WorkspaceIndex{9}));
+    data1->setSpectra(FunctionModelSpectra("0-4"));
+    data2->setSpectra(
+        FunctionModelSpectra(IDA::WorkspaceIndex{5}, IDA::WorkspaceIndex{9}));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(Spectra("0-9"));
+    FunctionModelSpectra const spec(FunctionModelSpectra("0-9"));
 
     TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }
@@ -518,10 +528,11 @@ public:
     auto data1 = getIndirectFitData(10);
     auto data2 = getIndirectFitData(10);
 
-    data1->setSpectra(Spectra("0-7"));
-    data2->setSpectra(Spectra(IDA::WorkspaceIndex{4}, IDA::WorkspaceIndex{9}));
+    data1->setSpectra(FunctionModelSpectra("0-7"));
+    data2->setSpectra(
+        FunctionModelSpectra(IDA::WorkspaceIndex{4}, IDA::WorkspaceIndex{9}));
     auto const combinedData = data2->combine(*data1);
-    Spectra const spec(Spectra("0-9"));
+    FunctionModelSpectra const spec(FunctionModelSpectra("0-9"));
 
     TS_ASSERT_EQUALS(combinedData.spectra(), spec);
   }

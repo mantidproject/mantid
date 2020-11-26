@@ -19,7 +19,11 @@ from mantid.simpleapi import (CloneWorkspace, CreateEmptyTableWorkspace, CreateW
 from Calibration import tube
 from Calibration.tube_spec import TubeSpec
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
-from corelli.calibration.utils import bank_numbers, PIXELS_PER_TUBE, calculate_peak_y_table, TUBES_IN_BANK, wire_positions
+from corelli.calibration.utils import (bank_numbers, PIXELS_PER_TUBE, calculate_peak_y_table, trim_calibration_table,
+                                       TUBES_IN_BANK, wire_positions)
+
+# Functions exposed to the general user (public) API
+__all__ = ['calibrate_banks']
 
 
 def sufficient_intensity(input_workspace: WorkspaceTypes, bank_name: str, minimum_intensity:float = 10000) -> bool:
@@ -101,9 +105,11 @@ def fit_bank(workspace: WorkspaceTypes, bank_name: str, shadow_height: float = 1
                    peaks_form, fitPar=fit_par, outputPeak=True, parameters_table_group=parameters_table_group)
     if calibration_table != 'CalibTable':
         RenameWorkspace(InputWorkspace='CalibTable', OutputWorkspace=calibration_table)
+    trim_calibration_table(calibration_table)  # discard X and Z coordinates
     if peak_pixel_positions_table != 'PeakTable':
         RenameWorkspace(InputWorkspace='PeakTable', OutputWorkspace=peak_pixel_positions_table)
-    calculate_peak_y_table(peak_pixel_positions_table, parameters_table_group, output_workspace=peak_vertical_positions_table)
+    calculate_peak_y_table(peak_pixel_positions_table, parameters_table_group,
+                           output_workspace=peak_vertical_positions_table)
 
 
 def collect_bank_fit_results(output_workspace: str,
@@ -191,8 +197,9 @@ def criterion_peak_vertical_position(peak_table: InputTable,
                                      zscore_threshold: float = 2.5,
                                      deviation_threshold: float = 0.0035) -> np.ndarray:
     r"""
-    Flag tubes whose wire shadows vertical positions deviate considerably from the vertical positions when
-    averaged for all tubes in the bank.
+    Flag tubes whose wire shadows vertical positions (Y-coordinate) deviate considerably from the
+    vertical positions when averaged for all tubes in the bank.
+
 
     .. math::
 
@@ -204,7 +211,7 @@ def criterion_peak_vertical_position(peak_table: InputTable,
     :param summary: name of output Workspace2D containing deviations and Z-score for each tube.
     :param zscore_threshold: maximum Z-score for the vertical positions of a tube.
     :param deviation_threshold: maximum deviation (in meters) for the vertical positions of the wire shadows.
-        Default value (0.00035m) corresponds approximately correspond to the height of three CORELLI pixels.
+        Default value (0.00035m) approximately corresponds to the height of three CORELLI pixels.
     :return: array of booleans, one per tube. `True` is the tube passes the acceptance criterion, `False` otherwise.
     """
     table = mtd[str(peak_table)]  # handle to the peak table
@@ -345,7 +352,7 @@ def purge_table(workspace: WorkspaceTypes, calibration_table: TableWorkspace,
 
     :param workspace: input Workspace2D containing total neutron counts per pixel
     :param calibration_table: input TableWorkspace containing one column for detector ID and one column
-    for its calibrated XYZ coordinates, in meters
+    for its calibrated Y coordinates, in meters
     :param tubes_fit_success: array of booleans of length TUBES_IN_BANK. `False` if a tube was unsuccessfully fitted.
     :param output_table: name of the purged table. If `None`, the input `calibration_table` is purged.
     """
@@ -397,7 +404,7 @@ def mask_bank(bank_name: str, tubes_fit_success: np.ndarray, output_table: str) 
     tube_numbers = ','.join([str(n) for n in tube_numbers])  # failing tubes as a string
     detector_ids = MaskBTP(Instrument='CORELLI', Bank=bank_number, Tube=tube_numbers)
     table = CreateEmptyTableWorkspace(OutputWorkspace=output_table)
-    table.addColumn('long64', 'DETECTOR ID')
+    table.addColumn('long64', 'Detector ID')
     [table.addRow([detector_id]) for detector_id in detector_ids.tolist()]
     if AnalysisDataService.doesExist('CORELLIMaskBTP'):
         DeleteWorkspaces(['CORELLIMaskBTP'])
@@ -426,7 +433,7 @@ def calibrate_bank(workspace: WorkspaceTypes,
     :param workspace: input Workspace2D containing total neutron counts per pixel
     :param bank_name: a string of the form 'bankI' where 'I' is a bank number
     :param calibration_table: output TableWorkspace containing one column for detector ID and one column
-    for its calibrated XYZ coordinates, in meters
+    for its calibrated Y coordinates, in meters
     :param mask_table: output TableWorkspace containing containing the detector ID's of the
         unsuccessfully fitted tubes
     :param peak_table: output table with pixel positions for each shadow, for each tube. If `None`, then no
@@ -472,7 +479,8 @@ def calibrate_bank(workspace: WorkspaceTypes,
 def calibrate_banks(workspace: WorkspaceTypes, bank_selection: str,
                     calibration_group: str = 'calibrations',
                     mask_group: str = 'masks',
-                    fit_group: str = 'fits') -> Tuple[WorkspaceGroup, Optional[WorkspaceGroup]]:
+                    fit_group: str = 'fits',
+                    **kwargs) -> Tuple[WorkspaceGroup, Optional[WorkspaceGroup]]:
     r"""
     Calibrate the tubes in a selection of banks, and assess their goodness-of-fit with an acceptance function.
 
@@ -494,6 +502,7 @@ def calibrate_banks(workspace: WorkspaceTypes, bank_selection: str,
     :param fit_group: name of the output WorkspaceGroup gathering the Workspace2D objects that hold the tube
         success criterion results, as well as the optimized polynomial coefficients of the quadratic function
         fitting the shadow locations in the tube to the known Y-coordinate for the wires.
+    :param kwargs: optional parameters to be passed on to `calibrate_bank`
 
     :return: handles to the calibrations and masks WorkspaceGroup objects
     """
@@ -502,7 +511,8 @@ def calibrate_banks(workspace: WorkspaceTypes, bank_selection: str,
     # Calibrate each bank
     calibrations, masks, fits = list(), list(), list()
     for n in bank_numbers(bank_selection):
-        calibration, mask = calibrate_bank(workspace, 'bank' + n, 'calib' + n, 'mask' + n, fit_results='fit' + n)
+        calibration, mask = calibrate_bank(workspace, 'bank' + n, 'calib' + n, 'mask' + n,
+                                           fit_results='fit' + n, **kwargs)
         fits.append(mtd['fit' + n])
         calibrations.append(calibration)
         if mask is not None:
