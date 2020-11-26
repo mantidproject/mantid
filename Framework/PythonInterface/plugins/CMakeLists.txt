@@ -293,6 +293,7 @@ set(PYTHON_PLUGINS
   algorithms/CompareSampleLogs.py
   algorithms/MuonMaxent.py
   algorithms/SaveP2D.py
+  algorithms/ResetNegatives2D.py
   functions/AFMZF.py
   functions/PCRmagnetZFKT.py
   functions/StretchedExpFTHelper.py
