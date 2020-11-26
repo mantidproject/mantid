@@ -1284,7 +1284,14 @@ class MantidAxes3D(Axes3D):
 
         self._set_overflowing_data_to_nan(min, max, 2)
 
-    def _set_overflowing_data_to_nan(self, min, max, axis_index):
+    def autoscale(self, *args, **kwargs):
+        super().autoscale(*args, **kwargs)
+        min = (self.get_xlim3d()[0],self.get_ylim3d()[0],self.get_ylim3d()[0])
+        max = (self.get_xlim3d()[1],self.get_ylim3d()[1],self.get_ylim3d()[1])
+
+        self._set_overflowing_data_to_nan(min, max)
+
+    def _set_overflowing_data_to_nan(self, min, max, axis_index=None):
         """
         Sets any data for the given axis that is less than min[axis_index] or greater than max[axis_index]
         to nan so only the parts of the plot that are within the axes are visible.
@@ -1293,11 +1300,16 @@ class MantidAxes3D(Axes3D):
         :param axis_index: the index of the axis being edited, 0 for x, 1 for y, 2 for z.
         """
         if hasattr(self, 'original_data_surface'):
+            if axis_index is None:
+                axis_index_list = [0,1,2]
+            else:
+                axis_index_list = [axis_index]
 
-            axis_data = self.original_data_surface[axis_index].copy()
-            axis_data[np.less(axis_data, min[axis_index], where=~np.isnan(axis_data))] = np.nan
-            axis_data[np.greater(axis_data, max[axis_index], where=~np.isnan(axis_data))] = np.nan
-            self.collections[0]._vec[axis_index] = axis_data
+            for axis_index in axis_index_list:
+                axis_data = self.original_data_surface[axis_index].copy()
+                axis_data[np.less(axis_data, min[axis_index], where=~np.isnan(axis_data))] = np.nan
+                axis_data[np.greater(axis_data, max[axis_index], where=~np.isnan(axis_data))] = np.nan
+                self.collections[0]._vec[axis_index] = axis_data
 
         if hasattr(self, 'original_data_wireframe'):
 
