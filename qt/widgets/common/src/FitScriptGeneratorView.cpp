@@ -5,9 +5,15 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
+#include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
 
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+
 #include <stdexcept>
+
+using namespace Mantid::API;
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -17,18 +23,14 @@ using FittingType = FitOptionsBrowser::FittingType;
 FitScriptGeneratorView::FitScriptGeneratorView(
     QWidget *parent, QStringList const &workspaceNames, double startX,
     double endX, QMap<QString, QString> const &fitOptions)
-    : API::MantidWidget(parent), m_presenter() {
+    : API::MantidWidget(parent), m_presenter(),
+      m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
+      m_functionBrowser(std::make_unique<FunctionBrowser>(nullptr, true)),
+      m_fitOptionsBrowser(std::make_unique<FitOptionsBrowser>(
+          nullptr, FittingType::SimultaneousAndSequential)) {
   m_ui.setupUi(this);
 
-  m_ui.twDomainData->setColumnWidth(0, 220);
-  m_ui.twDomainData->setColumnWidth(1, 90);
-  m_ui.twDomainData->setColumnWidth(2, 90);
-  m_ui.twDomainData->setColumnWidth(3, 90);
-
-  m_functionBrowser = std::make_unique<FunctionBrowser>(nullptr, true);
-  m_fitOptionsBrowser = std::make_unique<FitOptionsBrowser>(
-      nullptr, FittingType::SimultaneousAndSequential);
-
+  m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
   m_ui.splitter->addWidget(m_functionBrowser.get());
   m_ui.splitter->addWidget(m_fitOptionsBrowser.get());
 
@@ -49,7 +51,7 @@ void FitScriptGeneratorView::connectUiSignals() {
 void FitScriptGeneratorView::setWorkspaces(QStringList const &workspaceNames,
                                            double startX, double endX) {
   for (auto const &workspaceName : workspaceNames)
-    addWorkspaceDomain(workspaceName, 0, startX, endX);
+    addWorkspace(workspaceName, startX, endX);
 }
 
 void FitScriptGeneratorView::setFitBrowserOptions(
@@ -85,24 +87,25 @@ void FitScriptGeneratorView::onRemoveClicked() {
   m_presenter->notifyPresenter(ViewEvent::RemoveClicked);
 }
 
+void FitScriptGeneratorView::addWorkspace(QString const &workspaceName,
+                                          double startX, double endX) {
+  auto &ads = AnalysisDataService::Instance();
+  if (ads.doesExist(workspaceName.toStdString()))
+    addWorkspace(ads.retrieveWS<MatrixWorkspace>(workspaceName.toStdString()),
+                 startX, endX);
+}
+
+void FitScriptGeneratorView::addWorkspace(
+    MatrixWorkspace_const_sptr const &workspace, double startX, double endX) {
+  for (auto i = 0; i < static_cast<int>(workspace->getNumberHistograms()); ++i)
+    addWorkspaceDomain(QString::fromStdString(workspace->getName()), i, startX,
+                       endX);
+}
+
 void FitScriptGeneratorView::addWorkspaceDomain(QString const &workspaceName,
                                                 int workspaceIndex,
                                                 double startX, double endX) {
-  auto const rowIndex = m_ui.twDomainData->rowCount();
-  m_ui.twDomainData->insertRow(rowIndex);
-
-  setItemInDomainTable(rowIndex, ColumnIndex::WorkspaceName,
-                       QVariant(workspaceName));
-  setItemInDomainTable(rowIndex, ColumnIndex::WorkspaceIndex,
-                       QVariant(workspaceIndex));
-  setItemInDomainTable(rowIndex, ColumnIndex::StartX, QVariant(startX));
-  setItemInDomainTable(rowIndex, ColumnIndex::EndX, QVariant(endX));
-}
-
-void FitScriptGeneratorView::setItemInDomainTable(int rowIndex, int columnIndex,
-                                                  QVariant const &value) {
-  m_ui.twDomainData->setItem(rowIndex, columnIndex,
-                             new QTableWidgetItem(value.toString()));
+  m_dataTable->addWorkspaceDomain(workspaceName, workspaceIndex, startX, endX);
 }
 
 } // namespace MantidWidgets

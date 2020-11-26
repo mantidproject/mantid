@@ -21,6 +21,7 @@ set(
   src/FindReplaceDialog.cpp
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
+  src/FitScriptGeneratorDataTable.cpp
   src/FitScriptGeneratorModel.cpp
   src/FitScriptGeneratorPresenter.cpp
   src/FitScriptGeneratorView.cpp
@@ -165,6 +166,7 @@ set(
   inc/MantidQtWidgets/Common/FindReplaceDialog.h
   inc/MantidQtWidgets/Common/FitOptionsBrowser.h
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
+  inc/MantidQtWidgets/Common/FitScriptGeneratorDataTable.h
   inc/MantidQtWidgets/Common/FitScriptGeneratorView.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
   inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
@@ -445,6 +447,7 @@ set(
   src/FindReplaceDialog.cpp
   src/FitOptionsBrowser.cpp
   src/FitPropertyBrowser.cpp
+  src/FitScriptGeneratorDataTable.cpp
   src/FitScriptGeneratorModel.cpp
   src/FitScriptGeneratorPresenter.cpp
   src/FitScriptGeneratorView.cpp
@@ -566,6 +569,7 @@ set(
   inc/MantidQtWidgets/Common/FindDialog.h
   inc/MantidQtWidgets/Common/FitPropertyBrowser.h
   inc/MantidQtWidgets/Common/FitOptionsBrowser.h
+  inc/MantidQtWidgets/Common/FitScriptGeneratorDataTable.h
   inc/MantidQtWidgets/Common/FitScriptGeneratorView.h
   inc/MantidQtWidgets/Common/FunctionBrowser.h
   inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
