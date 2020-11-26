@@ -18,9 +18,9 @@ class AbinsSDataTest(unittest.TestCase):
         self.default_max_wavenumber = abins.parameters.sampling['max_wavenumber']
         self.logger = logging.getLogger('abins-sdata-test')
         self.sample_data = {'atom_0': {'s':
-                                       {'order_1': np.array([0., 0.001, 1., 1., 0., 0.,])}},
+                                       {'order_1': np.array([0., 0.001, 1., 1., 0.])}},
                             'atom_1': {'s':
-                                       {'order_1': np.array([0., 1.001, 2., 0., 3., 0.,])}}}
+                                       {'order_1': np.array([0., 1.001, 2., 0., 3.])}}}
 
         self.frequencies = np.linspace(105, 145, 5)
         self.bin_width = 10
@@ -91,8 +91,8 @@ class AbinsSDataTest(unittest.TestCase):
         self.assertIsNone(s_data_irregular_freq.get_bin_width())
 
         # Unordered frequencies are rejected at init
-        shuffled_frequencies = np.concatenate([self.frequencies[4:],
-                                               self.frequencies[:4]])
+        shuffled_frequencies = np.concatenate([self.frequencies[3:],
+                                               self.frequencies[:3]])
         with self.assertRaises(ValueError):
             SData(data=self.sample_data, frequencies=shuffled_frequencies)
 
