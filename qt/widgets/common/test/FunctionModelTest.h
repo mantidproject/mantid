@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -97,6 +99,31 @@ public:
       TS_ASSERT_EQUALS(fun->getParameter("f1.A0"), 1.0);
       TS_ASSERT_EQUALS(fun->getParameter("f1.A1"), 2.0);
     }
+  }
+
+  void test_function_resolution_from_workspace() {
+    FunctionModel model;
+    auto algo = AlgorithmManager::Instance().create("Load");
+    algo->setPropertyValue("Filename", "iris26173_graphite002_res");
+    algo->setPropertyValue("OutputWorkspace", "iris26173_graphite002_res");
+    algo->execute();
+    auto initialFunString =
+        "composite=Convolution,NumDeriv=true,FixResolution=true;name="
+        "Resolution,"
+        "Workspace=iris26173_graphite002_res,WorkspaceIndex=0,X=(),Y=();name="
+        "Lorentzian,Amplitude=1,PeakCentre=0,FWHM=1,constraints=(0<Amplitude,0<"
+        "FWHM)";
+    auto correctedFunString =
+        "composite=Convolution,NumDeriv=true,FixResolution=true;name="
+        "Resolution,"
+        "Workspace=iris26173_graphite002_res,WorkspaceIndex=0,X=(),Y=();name="
+        "Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175,constraints=(0<"
+        "Amplitude,0<"
+        "FWHM)";
+    model.setFunctionString(initialFunString);
+    auto fun = model.getFitFunction();
+    auto funString = fun->asString();
+    TS_ASSERT(funString == correctedFunString);
   }
 
   void test_globals() {

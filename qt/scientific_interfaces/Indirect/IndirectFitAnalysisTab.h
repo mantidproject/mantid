@@ -122,7 +122,9 @@ protected slots:
   void updateParameterValues();
   void updateParameterValues(
       const std::unordered_map<std::string, ParameterValue> &parameters);
-  void updateFitBrowserParameterValues();
+  void updateFitBrowserParameterValues(
+      std::unordered_map<std::string, ParameterValue> parameters =
+          std::unordered_map<std::string, ParameterValue>());
   void updateFitBrowserParameterValuesFromAlg();
   void updateFitStatus();
   void updateDataReferences();

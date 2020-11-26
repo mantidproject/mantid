@@ -105,9 +105,10 @@ void LoadILLSANS::init() {
                   "The name to use for the output workspace");
   auto mustBePositive = std::make_shared<BoundedValidator<double>>();
   mustBePositive->setLower(0);
-  declareProperty("Wavelength", 0.0, mustBePositive,
-                  "The wavelength of the experiment. Used only for D16. Will "
-                  "override the nexus' value if there is one.");
+  declareProperty(
+      "Wavelength", 0.0, mustBePositive,
+      "The wavelength of the experiment, in angstroms. Used only for D16. Will "
+      "override the nexus' value if there is one.");
 }
 
 //----------------------------------------------------------------------------------------------

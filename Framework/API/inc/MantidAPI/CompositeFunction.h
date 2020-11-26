@@ -107,8 +107,12 @@ public:
   [[nodiscard]] bool isExplicitlySet(size_t i) const override;
   /// Get the fitting error for a parameter
   [[nodiscard]] double getError(size_t i) const override;
+  /// Get the fitting error for a parameter by name
+  [[nodiscard]] double getError(const std::string &name) const override;
   /// Set the fitting error for a parameter
   void setError(size_t i, double err) override;
+  /// Set the fitting error for a parameter by name
+  void setError(const std::string &name, double err) override;
   /// Value of i-th active parameter. Override this method to make fitted
   /// parameters different from the declared
   [[nodiscard]] double activeParameter(size_t i) const override;
