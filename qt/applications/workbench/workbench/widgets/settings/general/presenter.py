@@ -56,7 +56,7 @@ class GeneralSettings(object):
         self.setup_confirmations()
 
     def setup_facilities_group(self):
-        facilities = ConfigService.getFacilityNames()
+        facilities = sorted(ConfigService.getFacilityNames())
         if not facilities:
             return
         self.view.facility.addItems(facilities)

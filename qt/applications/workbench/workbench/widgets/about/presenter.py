@@ -91,7 +91,7 @@ class AboutPresenter(object):
         return version != lastVersion
 
     def setup_facilities_group(self):
-        facilities = ConfigService.getFacilityNames()
+        facilities = sorted(ConfigService.getFacilityNames())
         if not facilities:
             return
         self.view.cb_facility.addItems(facilities)
