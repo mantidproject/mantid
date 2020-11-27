@@ -135,6 +135,10 @@ public:
   /// This throws an exception if the lengths are not identical across the
   /// spectra.
   virtual std::size_t blocksize() const = 0;
+  /// Returns the number of bins for a given histogram index.
+  virtual std::size_t getNumberBins(const std::size_t &index) const = 0;
+  /// Returns the maximum number of bins in a workspace (works on ragged data).
+  virtual std::size_t getMaxNumberBins() const = 0;
   /// Returns the number of histograms in the workspace
   virtual std::size_t getNumberHistograms() const = 0;
 
@@ -165,7 +169,7 @@ public:
     return getSpectrum(index).histogram();
   }
   template <typename... T>
-  void setHistogram(const size_t index, T &&... data) & {
+  void setHistogram(const size_t index, T &&...data) & {
     getSpectrum(index).setHistogram(std::forward<T>(data)...);
   }
   void convertToCounts(const size_t index) {
@@ -184,20 +188,19 @@ public:
   pointStandardDeviations(const size_t index) const {
     return getSpectrum(index).pointStandardDeviations();
   }
-  template <typename... T>
-  void setBinEdges(const size_t index, T &&... data) & {
+  template <typename... T> void setBinEdges(const size_t index, T &&...data) & {
     getSpectrum(index).setBinEdges(std::forward<T>(data)...);
   }
-  template <typename... T> void setPoints(const size_t index, T &&... data) & {
+  template <typename... T> void setPoints(const size_t index, T &&...data) & {
     getSpectrum(index).setPoints(std::forward<T>(data)...);
   }
   template <typename... T>
-  void setPointVariances(const size_t index, T &&... data) & {
+  void setPointVariances(const size_t index, T &&...data) & {
     getSpectrumWithoutInvalidation(index).setPointVariances(
         std::forward<T>(data)...);
   }
   template <typename... T>
-  void setPointStandardDeviations(const size_t index, T &&... data) & {
+  void setPointStandardDeviations(const size_t index, T &&...data) & {
     getSpectrumWithoutInvalidation(index).setPointStandardDeviations(
         std::forward<T>(data)...);
   }
@@ -222,31 +225,31 @@ public:
   frequencyStandardDeviations(const size_t index) const {
     return getSpectrum(index).frequencyStandardDeviations();
   }
-  template <typename... T> void setCounts(const size_t index, T &&... data) & {
+  template <typename... T> void setCounts(const size_t index, T &&...data) & {
     getSpectrumWithoutInvalidation(index).setCounts(std::forward<T>(data)...);
   }
   template <typename... T>
-  void setCountVariances(const size_t index, T &&... data) & {
+  void setCountVariances(const size_t index, T &&...data) & {
     getSpectrumWithoutInvalidation(index).setCountVariances(
         std::forward<T>(data)...);
   }
   template <typename... T>
-  void setCountStandardDeviations(const size_t index, T &&... data) & {
+  void setCountStandardDeviations(const size_t index, T &&...data) & {
     getSpectrumWithoutInvalidation(index).setCountStandardDeviations(
         std::forward<T>(data)...);
   }
   template <typename... T>
-  void setFrequencies(const size_t index, T &&... data) & {
+  void setFrequencies(const size_t index, T &&...data) & {
     getSpectrumWithoutInvalidation(index).setFrequencies(
         std::forward<T>(data)...);
   }
   template <typename... T>
-  void setFrequencyVariances(const size_t index, T &&... data) & {
+  void setFrequencyVariances(const size_t index, T &&...data) & {
     getSpectrumWithoutInvalidation(index).setFrequencyVariances(
         std::forward<T>(data)...);
   }
   template <typename... T>
-  void setFrequencyStandardDeviations(const size_t index, T &&... data) & {
+  void setFrequencyStandardDeviations(const size_t index, T &&...data) & {
     getSpectrumWithoutInvalidation(index).setFrequencyStandardDeviations(
         std::forward<T>(data)...);
   }

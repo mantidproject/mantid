@@ -178,6 +178,36 @@ size_t EventWorkspace::blocksize() const {
   }
 }
 
+/** Returns the number of bins for a given histogram index.
+ * @param index :: The histogram index to check for the number of bins.
+ * @return the number of bins for a given histogram index.
+ */
+std::size_t EventWorkspace::getNumberBins(const std::size_t &index) const {
+  if (index <= data.size())
+    return data[index]->histogram_size();
+
+  throw std::invalid_argument(
+      "Could not find number of bins in a histogram at index " +
+      std::to_string(index) + ": index is too large.");
+}
+
+/** Returns the maximum number of bins in a workspace (works on ragged data).
+ * @return the maximum number of bins in a workspace.
+ */
+std::size_t EventWorkspace::getMaxNumberBins() const {
+  if (data.empty()) {
+    return 0;
+  } else {
+    auto maxNumberOfBins = data[0]->histogram_size();
+    for (const auto &iter : data) {
+      const auto numberOfBins = iter->histogram_size();
+      if (numberOfBins > maxNumberOfBins)
+        maxNumberOfBins = numberOfBins;
+    }
+    return maxNumberOfBins;
+  }
+}
+
 /** Get the number of histograms, usually the same as the number of pixels or
  detectors.
  @returns the number of histograms / event lists
