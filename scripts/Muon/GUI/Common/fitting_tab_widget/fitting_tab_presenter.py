@@ -227,12 +227,26 @@ class FittingTabPresenter(object):
     def handle_start_x_updated(self):
         value = self.view.start_time
         index = self.view.get_index_for_start_end_times()
+        # Check start is greater than end, swap if need be
+        if value > self.end_x[index]:
+            self.view.start_time, self.view.end_time = self.end_x[index], value
+            self.update_end_x(index, value)
+            self.update_model_from_view(endX=value)
+            value = self.view.start_time
+
         self.update_start_x(index, value)
         self.update_model_from_view(startX=value)
 
     def handle_end_x_updated(self):
         value = self.view.end_time
         index = self.view.get_index_for_start_end_times()
+        # Check end is less than start, swap if need be
+        if value < self.start_x[index]:
+            self.view.start_time, self.view.end_time = value, self.start_x[index]
+            self.update_start_x(index, value)
+            self.update_model_from_view(startX=value)
+            value = self.view.end_time
+
         self.update_end_x(index, value)
         self.update_model_from_view(endX=value)
 
