@@ -255,7 +255,6 @@ void GetAllEi::exec() {
       (0.5 * 1.e+6) / chopSpeed; // 0.5 because some choppers open twice.
   // Would be nice to have it 1 or 0.5 depending on chopper type, but
   // it looks like not enough information on what chopper is available on ws;
-  double unused(0.0);
   auto destUnit = Kernel::UnitFactory::Instance().create("Energy");
 
   std::vector<double> guess_opening;
@@ -268,8 +267,7 @@ void GetAllEi::exec() {
         boost::lexical_cast<std::string>(TOF_range.second));
   } else {
     destUnit->initialize(mon1Distance, 0., 0.,
-                         static_cast<int>(Kernel::DeltaEMode::Elastic), 0.,
-                         unused);
+                         static_cast<int>(Kernel::DeltaEMode::Elastic));
     printDebugModeInfo(guess_opening, TOF_range, destUnit);
   }
   std::pair<double, double> Mon1_Erange =
@@ -287,8 +285,7 @@ void GetAllEi::exec() {
   std::vector<double> guess_ei;
   guess_ei.reserve(guess_opening.size());
   destUnit->initialize(mon1Distance, 0., 0.,
-                       static_cast<int>(Kernel::DeltaEMode::Elastic), 0.,
-                       unused);
+                       static_cast<int>(Kernel::DeltaEMode::Elastic));
   for (double time : guess_opening) {
     double eGuess = destUnit->singleFromTOF(time);
     if (eGuess > eMin && eGuess < eMax) {

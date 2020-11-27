@@ -20,9 +20,7 @@ namespace Kernel {
  * Default constructor
  * Gives the unit an empty UnitLabel
  */
-Unit::Unit()
-    : initialized(false), l1(0), l2(0), twoTheta(0), emode(0), efixed(0),
-      delta(0) {}
+Unit::Unit() : initialized(false), l1(0), l2(0), twoTheta(0), emode(0) {}
 
 bool Unit::operator==(const Unit &u) const { return unitID() == u.unitID(); }
 
@@ -118,26 +116,38 @@ void Unit::addConversion(std::string to, const double &factor,
  */
 void Unit::initialize(const double &_l1, const double &_l2,
                       const double &_twoTheta, const int &_emode,
-                      const double &_efixed, const double &_delta) {
+                      ExtraParametersMap params) {
   l1 = _l1;
   l2 = _l2;
   twoTheta = _twoTheta;
+  validateExtraParams(_emode, params);
   emode = _emode;
-  efixed = _efixed;
-  delta = _delta;
+  m_params = std::move(params);
   initialized = true;
   this->init();
 }
 
+void Unit::validateExtraParams(
+    int emode, std::map<UnitConversionParameters, double> &params) {}
+
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
  */
+
+void Unit::toTOF(
+    std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1,
+    const double &_l2, const double &_twoTheta, const int &_emode,
+    std::initializer_list<std::pair<const UnitConversionParameters, double>>
+        params) {
+  ExtraParametersMap paramsMap(params);
+  toTOF(xdata, ydata, _l1, _l2, _twoTheta, _emode, paramsMap);
+}
+
 void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                  const double &_l1, const double &_l2, const double &_twoTheta,
-                 const int &_emode, const double &_efixed,
-                 const double &_delta) {
+                 const int &_emode, ExtraParametersMap &params) {
   UNUSED_ARG(ydata);
-  this->initialize(_l1, _l2, _twoTheta, _emode, _efixed, _delta);
+  this->initialize(_l1, _l2, _twoTheta, _emode, params);
   size_t numX = xdata.size();
   for (size_t i = 0; i < numX; i++)
     xdata[i] = this->singleToTOF(xdata[i]);
@@ -152,23 +162,32 @@ void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
 @param efixed
 @param delta
 */
-double Unit::convertSingleToTOF(const double xvalue, const double &l1,
-                                const double &l2, const double &twoTheta,
-                                const int &emode, const double &efixed,
-                                const double &delta) {
-  this->initialize(l1, l2, twoTheta, emode, efixed, delta);
+double Unit::convertSingleToTOF(
+    const double xvalue, const double &l1, const double &l2,
+    const double &twoTheta, const int &emode,
+    const std::map<UnitConversionParameters, double> &params) {
+  this->initialize(l1, l2, twoTheta, emode, params);
   return this->singleToTOF(xvalue);
 }
 
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
  */
+void Unit::fromTOF(
+    std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1,
+    const double &_l2, const double &_twoTheta, const int &_emode,
+    std::initializer_list<std::pair<const UnitConversionParameters, double>>
+        params) {
+  ExtraParametersMap paramsMap(params);
+  fromTOF(xdata, ydata, _l1, _l2, _twoTheta, _emode, paramsMap);
+}
+
 void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                    const double &_l1, const double &_l2,
                    const double &_twoTheta, const int &_emode,
-                   const double &_efixed, const double &_delta) {
+                   ExtraParametersMap &params) {
   UNUSED_ARG(ydata);
-  this->initialize(_l1, _l2, _twoTheta, _emode, _efixed, _delta);
+  this->initialize(_l1, _l2, _twoTheta, _emode, params);
   size_t numX = xdata.size();
   for (size_t i = 0; i < numX; i++)
     xdata[i] = this->singleFromTOF(xdata[i]);
@@ -183,11 +202,11 @@ void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
 @param efixed
 @param delta
 */
-double Unit::convertSingleFromTOF(const double xvalue, const double &l1,
-                                  const double &l2, const double &twoTheta,
-                                  const int &emode, const double &efixed,
-                                  const double &delta) {
-  this->initialize(l1, l2, twoTheta, emode, efixed, delta);
+double Unit::convertSingleFromTOF(
+    const double xvalue, const double &l1, const double &l2,
+    const double &twoTheta, const int &emode,
+    const std::map<UnitConversionParameters, double> &params) {
+  this->initialize(l1, l2, twoTheta, emode, params);
   return this->singleFromTOF(xvalue);
 }
 
@@ -303,7 +322,7 @@ DECLARE_UNIT(Wavelength)
 
 Wavelength::Wavelength()
     : Unit(), sfpTo(DBL_MIN), factorTo(DBL_MIN), sfpFrom(DBL_MIN),
-      factorFrom(DBL_MIN), do_sfpFrom(false) {
+      factorFrom(DBL_MIN), do_sfpFrom(false), efixed(0.) {
   const double AngstromsSquared = 1e20;
   const double factor =
       (AngstromsSquared * PhysicalConstants::h * PhysicalConstants::h) /
@@ -316,12 +335,27 @@ Wavelength::Wavelength()
 
 const UnitLabel Wavelength::label() const { return Symbol::Angstrom; }
 
+void Wavelength::validateExtraParams(
+    int emode, std::map<UnitConversionParameters, double> &params) {
+  auto it = params.find(UnitConversionParameters::efixed);
+  if ((emode != 0) && (it == params.end())) {
+    throw std::runtime_error(
+        "An efixed value must be supplied in the extra parameters when "
+        "initialising wavelength for conversion via TOF");
+  }
+}
+
 void Wavelength::init() {
   // ------------ Factors to convert TO TOF ---------------------
   double ltot = 0.0;
   double TOFisinMicroseconds = 1e6;
   double toAngstroms = 1e10;
   sfpTo = 0.0;
+
+  auto it = m_params.find(UnitConversionParameters::efixed);
+  if (it != m_params.end()) {
+    efixed = it->second;
+  }
 
   if (emode == 1) {
     ltot = l2;
@@ -545,33 +579,133 @@ DECLARE_UNIT(dSpacing)
 
 const UnitLabel dSpacing::label() const { return Symbol::Angstrom; }
 
-dSpacing::dSpacing() : Unit(), factorTo(DBL_MIN), factorFrom(DBL_MIN) {
+dSpacing::dSpacing() : Unit(), difa(0), difc(DBL_MIN), tzero(0) {
   const double factor = 2.0 * M_PI;
   addConversion("MomentumTransfer", factor, -1.0);
   addConversion("QSquared", (factor * factor), -2.0);
 }
 
+void dSpacing::validateExtraParams(
+    int emode, std::map<UnitConversionParameters, double> &params) {
+  auto it = params.find(UnitConversionParameters::difc);
+  if (it == params.end()) {
+    throw std::runtime_error(
+        "A difc value must be supplied in the extra parameters when "
+        "initialising dSpacing for conversion via TOF");
+  }
+  if (it->second < 0.) {
+    throw std::runtime_error(
+        "A positive difc value must be supplied in the extra parameters when "
+        "initialising dSpacing for conversion via TOF");
+  }
+}
+
 void dSpacing::init() {
   // First the crux of the conversion
-  factorTo =
-      (2.0 * PhysicalConstants::NeutronMass * sin(twoTheta / 2.0) * (l1 + l2)) /
-      PhysicalConstants::h;
-
-  // Now adjustments for the scale of units used
-  const double TOFisinMicroseconds = 1e6;
-  const double toAngstroms = 1e10;
-  factorTo *= TOFisinMicroseconds / toAngstroms;
-  factorFrom = factorTo;
-  if (factorFrom == 0.0)
-    factorFrom = DBL_MIN; // Protect against divide by zero
+  difa = 0.;
+  difc = 0.;
+  tzero = 0.;
+  auto it = m_params.find(UnitConversionParameters::difc);
+  if (it != m_params.end()) {
+    difc = it->second;
+  }
+  it = m_params.find(UnitConversionParameters::difa);
+  if (it != m_params.end()) {
+    difa = it->second;
+  }
+  it = m_params.find(UnitConversionParameters::tzero);
+  if (it != m_params.end()) {
+    tzero = it->second;
+  }
 }
 
-double dSpacing::singleToTOF(const double x) const { return x * factorTo; }
+double dSpacing::singleToTOF(const double x) const {
+  if (!isInitialized())
+    throw std::runtime_error(
+        "dSpacing::singleToTOF called before object has been initialized.");
+  return difa * x * x + difc * x + tzero;
+}
 double dSpacing::singleFromTOF(const double tof) const {
-  return tof / factorFrom;
+  if (!isInitialized())
+    throw std::runtime_error(
+        "dSpacing::singleFromTOF called before object has been initialized.");
+  // handle special cases first...
+  if (tof == tzero) {
+    if (difa != 0)
+      return -difc / difa;
+  }
+  if ((difa == 0) && (difc == 0)) {
+    throw std::runtime_error(
+        "Cannot convert to d spacing with DIFA=0 and DIFC=0");
+  }
+  if ((difc * difc - 4 * difa * (tzero - tof)) < 0) {
+    throw std::runtime_error(
+        "Cannot convert to d spacing. Quadratic doesn't have real roots");
+  }
+  if ((difa > 0) && ((tzero - tof) > 0)) {
+    throw std::runtime_error(
+        "Cannot convert to d spacing. Quadratic doesn't have a positive root");
+  }
+  // and then solve quadratic using Muller formula
+  double sqrtTerm;
+  if (difa == 0) {
+    // avoid costly sqrt even though formula reduces to this
+    sqrtTerm = difc;
+  } else {
+    sqrtTerm = sqrt(difc * difc - 4 * difa * (tzero - tof));
+  }
+  if (sqrtTerm < difc)
+    return -2 * ((tzero - tof) / (difc - sqrtTerm));
+  else
+    return -2 * ((tzero - tof) / (difc + sqrtTerm));
 }
-double dSpacing::conversionTOFMin() const { return 0; }
-double dSpacing::conversionTOFMax() const { return DBL_MAX / factorTo; }
+double dSpacing::conversionTOFMin() const {
+  // quadratic only has a min if difa is positive
+  if (difa > 0) {
+    // min of the quadratic is at d=-difc/(2*difa)
+    return std::max(0., tzero - difc * difc / (4 * difa));
+  } else {
+    // no min so just pick value closest to zero that works
+    double TOFmin = singleToTOF(0.);
+    if (TOFmin < std::numeric_limits<double>::min()) {
+      TOFmin = 0.;
+    }
+    return TOFmin;
+  }
+}
+double dSpacing::conversionTOFMax() const {
+  // quadratic only has a max if difa is negative
+  if (difa < 0) {
+    return std::min(DBL_MAX, tzero - difc * difc / (4 * difa));
+  } else {
+    // no max so just pick value closest to DBL_MAX that works
+    double TOFmax = singleToTOF(DBL_MAX);
+    if (isinf(TOFmax)) {
+      TOFmax = DBL_MAX;
+    }
+    return TOFmax;
+  }
+}
+
+double dSpacing::calcTofMin(const double difc, const double difa,
+                            const double tzero, const double tofmin) {
+  Kernel::ExtraParametersMap params{
+      {Kernel::UnitConversionParameters::difa, difa},
+      {Kernel::UnitConversionParameters::difc, difc},
+      {Kernel::UnitConversionParameters::tzero, tzero}};
+  initialize(-1., -1., -1., 0, params);
+  return std::max(conversionTOFMin(), tofmin);
+}
+
+double dSpacing::calcTofMax(const double difc, const double difa,
+                            const double tzero, const double tofmax) {
+  Kernel::ExtraParametersMap params{
+      {Kernel::UnitConversionParameters::difa, difa},
+      {Kernel::UnitConversionParameters::difc, difc},
+      {Kernel::UnitConversionParameters::tzero, tzero}};
+  initialize(-1, -1, -1, 0, params);
+  return std::min(conversionTOFMax(), tofmax);
+}
 
 Unit *dSpacing::clone() const { return new dSpacing(*this); }
 
@@ -765,6 +899,10 @@ DeltaE::DeltaE()
 }
 
 void DeltaE::init() {
+  auto it = m_params.find(UnitConversionParameters::efixed);
+  if (it != m_params.end()) {
+    efixed = it->second;
+  }
   // Efixed must be set to something
   if (efixed == 0.0)
     throw std::invalid_argument(
@@ -949,7 +1087,7 @@ const UnitLabel Momentum::label() const { return Symbol::InverseAngstrom; }
 
 Momentum::Momentum()
     : Unit(), sfpTo(DBL_MIN), factorTo(DBL_MIN), sfpFrom(DBL_MIN),
-      factorFrom(DBL_MIN), do_sfpFrom(false) {
+      factorFrom(DBL_MIN), do_sfpFrom(false), efixed(0.) {
 
   const double AngstromsSquared = 1e20;
   const double factor =
@@ -964,12 +1102,27 @@ Momentum::Momentum()
   //
 }
 
+void Momentum::validateExtraParams(
+    int emode, std::map<UnitConversionParameters, double> &params) {
+  auto it = params.find(UnitConversionParameters::efixed);
+  if ((emode != 0) && (it == params.end())) {
+    throw std::runtime_error(
+        "An efixed value must be supplied in the extra parameters when "
+        "initialising momentum for conversion via TOF");
+  }
+}
+
 void Momentum::init() {
   // ------------ Factors to convert TO TOF ---------------------
   double ltot = 0.0;
   double TOFisinMicroseconds = 1e6;
   double toAngstroms = 1e10;
   sfpTo = 0.0;
+
+  auto it = m_params.find(UnitConversionParameters::efixed);
+  if (it != m_params.end()) {
+    efixed = it->second;
+  }
 
   if (emode == 1) {
     ltot = l2;
@@ -1065,6 +1218,10 @@ const UnitLabel SpinEchoLength::label() const { return Symbol::Nanometre; }
 SpinEchoLength::SpinEchoLength() : Wavelength() {}
 
 void SpinEchoLength::init() {
+  auto it = m_params.find(UnitConversionParameters::efixed);
+  if (it != m_params.end()) {
+    efixed = it->second;
+  }
   // Efixed must be set to something
   if (efixed == 0.0)
     throw std::invalid_argument(
@@ -1113,9 +1270,13 @@ DECLARE_UNIT(SpinEchoTime)
 
 const UnitLabel SpinEchoTime::label() const { return Symbol::Nanosecond; }
 
-SpinEchoTime::SpinEchoTime() : Wavelength() {}
+SpinEchoTime::SpinEchoTime() : Wavelength(), efixed(0.) {}
 
 void SpinEchoTime::init() {
+  auto it = m_params.find(UnitConversionParameters::efixed);
+  if (it != m_params.end()) {
+    efixed = it->second;
+  }
   // Efixed must be set to something
   if (efixed == 0.0)
     throw std::invalid_argument(

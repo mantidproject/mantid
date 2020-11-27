@@ -525,8 +525,7 @@ void LoadIsawPeaks::appendFile(const PeaksWorkspace_sptr &outWS,
       double tof = peak.getTOF();
       Kernel::Units::Wavelength wl;
 
-      wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0,
-                    peak.getInitialEnergy(), 0.0);
+      wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0);
 
       peak.setWavelength(wl.singleFromTOF(tof));
       // Add the peak to workspace

@@ -65,8 +65,9 @@ def _focus_one_ws(input_workspace, run_number, instrument, perform_vanadium_norm
                              Geometry=common.generate_sample_geometry(sample_details),
                              Material=common.generate_sample_material(sample_details))
     # Align
-    aligned_ws = mantid.AlignDetectors(InputWorkspace=input_workspace,
-                                       CalibrationFile=run_details.offset_file_path)
+    aligned_ws = mantid.ApplyDiffCal(InstrumentWorkspace=input_workspace,
+                                     CalibrationFile=run_details.offset_file_path)
+    aligned_ws = mantid.ConvertUnits(InputWorkspace=aligned_ws, OutputWorkspace=aligned_ws, Target="dspacing")
 
     solid_angle = instrument.get_solid_angle_corrections(run_details.vanadium_run_numbers, run_details)
     if solid_angle:

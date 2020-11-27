@@ -1382,33 +1382,6 @@ double tofToDSpacingFactor(const double l1, const double l2,
   return (numerator * CONSTANT) / sinTheta;
 }
 
-/** Calculate the conversion factor from tof -> d-spacing
- * for a LIST of detector ids assigned to a single spectrum.
- * @brief tofToDSpacingFactor
- * @param l1
- * @param l2
- * @param twoTheta scattering angle
- * @param detectors
- * @param offsets
- * @return
- */
-double tofToDSpacingFactor(const double l1, const double l2,
-                           const double twoTheta,
-                           const std::vector<detid_t> &detectors,
-                           const std::map<detid_t, double> &offsets) {
-  double factor = 0.;
-  double offset;
-  for (auto detector : detectors) {
-    auto off_iter = offsets.find(detector);
-    if (off_iter != offsets.cend()) {
-      offset = offsets.find(detector)->second;
-    } else {
-      offset = 0.;
-    }
-    factor += tofToDSpacingFactor(l1, l2, twoTheta, offset);
-  }
-  return factor / static_cast<double>(detectors.size());
-}
 } // namespace Conversion
 } // namespace Geometry
 } // Namespace Mantid

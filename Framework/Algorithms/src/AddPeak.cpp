@@ -81,6 +81,9 @@ void AddPeak::exec() {
   double Qz = 1.0 - cos(theta2);
   double l1 = detectorInfo.l1();
   double l2 = detectorInfo.l2(detectorIndex);
+  std::vector<int> emptyWarningVec;
+  auto [difa, difc, tzero] = detectorInfo.diffractometerConstants(
+      detectorIndex, emptyWarningVec, emptyWarningVec);
 
   Mantid::Kernel::Unit_sptr unit = runWS->getAxis(0)->unit();
   if (unit->unitID() != "TOF") {
@@ -110,7 +113,11 @@ void AddPeak::exec() {
     }
     std::vector<double> xdata(1, tof);
     std::vector<double> ydata;
-    unit->toTOF(xdata, ydata, l1, l2, theta2, emode, efixed, 0.0);
+    unit->toTOF(xdata, ydata, l1, l2, theta2, emode,
+                {{Kernel::UnitConversionParameters::efixed, efixed},
+                 {Kernel::UnitConversionParameters::difa, difa},
+                 {Kernel::UnitConversionParameters::difc, difc},
+                 {Kernel::UnitConversionParameters::tzero, tzero}});
     tof = xdata[0];
   }
 

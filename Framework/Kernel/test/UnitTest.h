@@ -100,6 +100,17 @@ std::string convert_units_check_range(const Unit &aUnit,
   return error_mess;
 }
 
+namespace {                // anonymous
+const double DIFC = 2100.; // sensible value
+const double TZERO = 10.;
+// intentionally goofy - reduces tzero by 1
+const double DIFA1 = .25 * DIFC * DIFC;
+// intentionally goofy - reduces tzero by .01
+const double DIFA2 = 25 * DIFC * DIFC;
+// intentionally goofy
+const double DIFA3 = -.25 * DIFC * DIFC;
+} // namespace
+
 class UnitTest : public CxxTest::TestSuite {
 
   class UnitTester : public Unit {
@@ -253,7 +264,9 @@ public:
 
   void test_copy_constructor_on_concrete_type() {
     Units::TOF first;
-    first.initialize(1.0, 1.0, 1.0, 2, 1.0, 1.0);
+    first.initialize(1.0, 1.0, 1.0, 2,
+                     {{UnitConversionParameters::efixed, 1.0},
+                      {UnitConversionParameters::delta, 1.0}});
     Units::TOF second(first);
     TS_ASSERT_EQUALS(first.isInitialized(), second.isInitialized());
     TS_ASSERT_EQUALS(first.unitID(), second.unitID())
@@ -264,7 +277,9 @@ public:
 
   void test_copy_assignment_operator_on_concrete_type() {
     Units::TOF first;
-    first.initialize(1.0, 1.0, 1.0, 2, 1.0, 1.0);
+    first.initialize(1.0, 1.0, 1.0, 2,
+                     {{UnitConversionParameters::efixed, 1.0},
+                      {UnitConversionParameters::delta, 1.0}});
     Units::TOF second;
     second = first;
     TS_ASSERT_EQUALS(first.isInitialized(), second.isInitialized());
@@ -291,7 +306,7 @@ public:
     std::vector<double> x(20, 9.9), y(20, 8.8);
     std::vector<double> xx = x;
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(tof.toTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(tof.toTOF(x, y, 1.0, 1.0, 1.0, 1))
     // Check vectors are unchanged
     TS_ASSERT(xx == x)
     TS_ASSERT(yy == y)
@@ -301,7 +316,7 @@ public:
     std::vector<double> x(20, 9.9), y(20, 8.8);
     std::vector<double> xx = x;
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(tof.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(tof.fromTOF(x, y, 1.0, 1.0, 1.0, 1))
     // Check vectors are unchanged
     TS_ASSERT(xx == x)
     TS_ASSERT(yy == y)
@@ -342,23 +357,28 @@ public:
   void testWavelength_toTOF() {
     std::vector<double> x(1, 1.5), y(1, 1.5);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(lambda.toTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(lambda.toTOF(
+        x, y, 1.0, 1.0, 1.0, 1, {{UnitConversionParameters::efixed, 1.0}}))
     TS_ASSERT_DELTA(x[0], 2665.4390, 0.0001) //  758.3352
     TS_ASSERT(yy == y)
 
-    TS_ASSERT_DELTA(lambda.convertSingleToTOF(1.5, 1.0, 1.0, 1.0, 1, 1.0, 1.0),
-                    2665.4390, 0.0001);
+    TS_ASSERT_DELTA(
+        lambda.convertSingleToTOF(1.5, 1.0, 1.0, 1.0, 1,
+                                  {{UnitConversionParameters::efixed, 1.0}}),
+        2665.4390, 0.0001);
   }
 
   void testWavelength_fromTOF() {
     std::vector<double> x(1, 1000.5), y(1, 1.5);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(lambda.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(lambda.fromTOF(
+        x, y, 1.0, 1.0, 1.0, 1, {{UnitConversionParameters::efixed, 1.0}}))
     TS_ASSERT_DELTA(x[0], -5.0865, 0.0001) // 1.979006
     TS_ASSERT(yy == y)
 
     TS_ASSERT_DELTA(
-        lambda.convertSingleFromTOF(1000.5, 1.0, 1.0, 1.0, 1, 1.0, 1.0),
+        lambda.convertSingleFromTOF(1000.5, 1.0, 1.0, 1.0, 1,
+                                    {{UnitConversionParameters::efixed, 1.0}}),
         -5.0865, 0.0001);
   }
 
@@ -369,8 +389,9 @@ public:
     double input = 1.1;
     double result = factor * std::pow(input, power);
     std::vector<double> x(1, input);
-    lambda.toTOF(x, x, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
-    energy.fromTOF(x, x, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
+    lambda.toTOF(x, x, 99.0, 99.0, 99.0, 99,
+                 {{UnitConversionParameters::efixed, 1.0}});
+    energy.fromTOF(x, x, 99.0, 99.0, 99.0, 99);
     TS_ASSERT_DELTA(x[0], result, 1.0e-10)
 
     TS_ASSERT(lambda.quickConversion(energyk, factor, power))
@@ -378,8 +399,9 @@ public:
     TS_ASSERT_EQUALS(result2 / result,
                      Mantid::PhysicalConstants::meVtoWavenumber)
     std::vector<double> x2(1, input);
-    lambda.toTOF(x2, x2, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
-    energyk.fromTOF(x2, x2, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
+    lambda.toTOF(x2, x2, 99.0, 99.0, 99.0, 99,
+                 {{UnitConversionParameters::efixed, 99.0}});
+    energyk.fromTOF(x2, x2, 99.0, 99.0, 99.0, 99);
     TS_ASSERT_DELTA(x2[0], result2, 1.0e-10)
   }
 
@@ -417,7 +439,7 @@ public:
   void testEnergy_toTOF() {
     std::vector<double> x(1, 4.0), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(energy.toTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(energy.toTOF(x, y, 1.0, 1.0, 1.0, 1))
     TS_ASSERT_DELTA(x[0], 2286.271, 0.001)
     TS_ASSERT(yy == y)
   }
@@ -425,7 +447,7 @@ public:
   void testEnergy_fromTOF() {
     std::vector<double> x(1, 4.0), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(energy.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(energy.fromTOF(x, y, 1.0, 1.0, 1.0, 1))
     TS_ASSERT_DELTA(x[0], 1306759.0, 1.0)
     TS_ASSERT(yy == y)
   }
@@ -438,15 +460,16 @@ public:
     double result = factor * std::pow(input, power);
     TS_ASSERT_EQUALS(result / input, Mantid::PhysicalConstants::meVtoWavenumber)
     std::vector<double> x(1, input);
-    energy.toTOF(x, x, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
-    energyk.fromTOF(x, x, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
+    energy.toTOF(x, x, 99.0, 99.0, 99.0, 99);
+    energyk.fromTOF(x, x, 99.0, 99.0, 99.0, 99);
     TS_ASSERT_DELTA(x[0], result, 1.0e-12)
 
     TS_ASSERT(energy.quickConversion(lambda, factor, power))
     result = factor * std::pow(input, power);
     std::vector<double> x2(1, input);
-    energy.toTOF(x2, x2, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
-    lambda.fromTOF(x2, x2, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
+    energy.toTOF(x2, x2, 99.0, 99.0, 99.0, 99);
+    lambda.fromTOF(x2, x2, 99.0, 99.0, 99.0, 99,
+                   {{UnitConversionParameters::efixed, 99.0}});
     TS_ASSERT_DELTA(x2[0], result, 1.0e-15)
   }
   void testEnergyRange() {
@@ -492,7 +515,7 @@ public:
   void testEnergy_inWavenumber_toTOF() {
     std::vector<double> x(1, 4.0), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(energyk.toTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(energyk.toTOF(x, y, 1.0, 1.0, 1.0, 1))
     TS_ASSERT_DELTA(x[0], 6492.989, 0.001)
     TS_ASSERT(yy == y)
   }
@@ -500,7 +523,7 @@ public:
   void testEnergy_inWavenumber_fromTOF() {
     std::vector<double> x(1, 4.0), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(energyk.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(energyk.fromTOF(x, y, 1.0, 1.0, 1.0, 1))
     TS_ASSERT_DELTA(x[0], 10539725, 1.0)
     TS_ASSERT(yy == y)
   }
@@ -513,15 +536,16 @@ public:
     double result = factor * std::pow(input, power);
     TS_ASSERT_EQUALS(input / result, Mantid::PhysicalConstants::meVtoWavenumber)
     std::vector<double> x(1, input);
-    energyk.toTOF(x, x, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
-    energy.fromTOF(x, x, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
+    energyk.toTOF(x, x, 99.0, 99.0, 99.0, 99);
+    energy.fromTOF(x, x, 99.0, 99.0, 99.0, 99);
     TS_ASSERT_DELTA(x[0], result, 1.0e-14)
 
     TS_ASSERT(energyk.quickConversion(lambda, factor, power))
     result = factor * std::pow(input, power);
     std::vector<double> x2(1, input);
-    energyk.toTOF(x2, x2, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
-    lambda.fromTOF(x2, x2, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
+    energyk.toTOF(x2, x2, 99.0, 99.0, 99.0, 99);
+    lambda.fromTOF(x2, x2, 99.0, 99.0, 99.0, 99,
+                   {{UnitConversionParameters::efixed, 99.0}});
     TS_ASSERT_DELTA(x2[0], result, 1.0e-15)
   }
 
@@ -547,16 +571,53 @@ public:
   void testdSpacing_toTOF() {
     std::vector<double> x(1, 1.0), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(d.toTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(0.5) *
+                  (1.0 + 1.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    TS_ASSERT_THROWS_NOTHING(d.toTOF(x, y, 1.0, 1.0, 1.0, 1,
+                                     {{UnitConversionParameters::difc, difc}}))
     TS_ASSERT_DELTA(x[0], 484.7537, 0.0001)
+    TS_ASSERT(yy == y)
+  }
+
+  void testdSpacing_toTOFWithDIFATZERO() {
+    std::vector<double> x(1, 2.0), y(1, 1.0);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING(d.toTOF(x, y, 1.0, 1.0, 1.0, 1,
+                                     {{UnitConversionParameters::difc, 3.0},
+                                      {UnitConversionParameters::difa, 2.0},
+                                      {UnitConversionParameters::tzero, 1.0}}))
+    TS_ASSERT_DELTA(x[0], 6.0 + 8.0 + 1.0, 0.0001)
     TS_ASSERT(yy == y)
   }
 
   void testdSpacing_fromTOF() {
     std::vector<double> x(1, 1001.1), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(d.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(0.5) *
+                  (1.0 + 1.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    TS_ASSERT_THROWS_NOTHING(d.fromTOF(
+        x, y, 1.0, 1.0, 1.0, 1, {{UnitConversionParameters::difc, difc}}))
     TS_ASSERT_DELTA(x[0], 2.065172, 0.000001)
+    TS_ASSERT(yy == y)
+  }
+
+  void testdSpacing_fromTOFWithDIFATZERO() {
+    std::vector<double> x(1, 2.0), y(1, 1.0);
+    std::vector<double> yy = y;
+    TS_ASSERT_THROWS_NOTHING(
+        d.fromTOF(x, y, 1.0, 1.0, 1.0, 1,
+                  {{UnitConversionParameters::difc, 2.0},
+                   {UnitConversionParameters::difa, 3.0},
+                   {UnitConversionParameters::tzero, 1.0}}))
+    TS_ASSERT_DELTA(x[0], 1.0 / 3.0, 0.0001)
+    TS_ASSERT(yy == y)
+    x[0] = 1.0;
+    TS_ASSERT_THROWS_NOTHING(
+        d.fromTOF(x, y, 1.0, 1.0, 1.0, 1,
+                  {{UnitConversionParameters::difc, 3.0},
+                   {UnitConversionParameters::difa, -2.0},
+                   {UnitConversionParameters::tzero, 1.0}}))
+    TS_ASSERT_DELTA(x[0], 1.5, 0.0001)
     TS_ASSERT(yy == y)
   }
 
@@ -568,8 +629,11 @@ public:
     double input = 1.1;
     double result = factor * std::pow(input, power);
     std::vector<double> x(1, input);
-    d.toTOF(x, x, 99.0, 99.0, 1.0, 0, 99.0, 99.0);
-    q.fromTOF(x, x, 99.0, 99.0, 1.0, 0, 99.0, 99.0);
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(0.5) *
+                  (99.0 + 99.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    d.toTOF(x, x, 99.0, 99.0, 1.0, 0, {{UnitConversionParameters::difc, difc}});
+    q.fromTOF(x, x, 99.0, 99.0, 1.0, 0,
+              {{UnitConversionParameters::difc, difc}});
     TS_ASSERT_DELTA(x[0], result, 1.0e-12)
 
     // To QSquared
@@ -577,13 +641,18 @@ public:
     input = 1.1;
     result = factor * std::pow(input, power);
     x[0] = input;
-    d.toTOF(x, x, 99.0, 99.0, 1.0, 0, 99.0, 99.0);
-    q2.fromTOF(x, x, 99.0, 99.0, 1.0, 0, 99.0, 99.0);
+    d.toTOF(x, x, 99.0, 99.0, 1.0, 0, {{UnitConversionParameters::difc, difc}});
+    q2.fromTOF(x, x, 99.0, 99.0, 1.0, 0,
+               {{UnitConversionParameters::difc, difc}});
     TS_ASSERT_DELTA(x[0], result, 1.0e-12)
   }
   void testdSpacingRange() {
     std::vector<double> sample, rezult;
 
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass *
+                  sin(0.5 * M_PI / 180) * (99.0 + 99.0) * 1e-4 /
+                  Mantid::PhysicalConstants::h;
+    d.initialize(99.0, 99.0, 1.0, 0, {{UnitConversionParameters::difc, difc}});
     std::string err_mess = convert_units_check_range(d, sample, rezult);
     TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
 
@@ -598,6 +667,52 @@ public:
                          rezult[i] / sample[i], 1., 10 * FLT_EPSILON);
       }
     }
+  }
+
+  void test_calcTofMin() {
+    const double TMIN = 300.;
+
+    // just difc
+    TS_ASSERT_EQUALS(d.calcTofMin(DIFC, 0., 0.), 0.);
+    TS_ASSERT_EQUALS(d.calcTofMin(DIFC, 0., 0., TMIN), TMIN);
+    // difc + tzero
+    TS_ASSERT_EQUALS(d.calcTofMin(DIFC, 0., TZERO, 0.), TZERO);
+    TS_ASSERT_EQUALS(d.calcTofMin(DIFC, 0., TZERO, TMIN), TMIN);
+
+    // difc + difa + tzero
+    TS_ASSERT_EQUALS(d.calcTofMin(DIFC, DIFA1, 0., 0.), 0.);
+    TS_ASSERT_EQUALS(d.calcTofMin(DIFC, DIFA1, 0., TMIN), TMIN);
+    TS_ASSERT_EQUALS(d.calcTofMin(DIFC, DIFA1, TZERO, 0.), TZERO - 1.);
+    TS_ASSERT_EQUALS(d.calcTofMin(DIFC, DIFA1, TZERO, TMIN), TMIN);
+
+    TS_ASSERT_EQUALS(d.calcTofMin(DIFC, DIFA2, 0., 0.), 0.);
+    TS_ASSERT_EQUALS(d.calcTofMin(DIFC, DIFA2, 0., TMIN), TMIN);
+    TS_ASSERT_EQUALS(d.calcTofMin(DIFC, DIFA2, TZERO, 0.), TZERO - .01);
+    TS_ASSERT_EQUALS(d.calcTofMin(DIFC, DIFA2, TZERO, TMIN), TMIN);
+  }
+
+  void test_calcTofMax() {
+    const double TMAX = 16666.7;
+    const double TSUPERMAX = std::numeric_limits<double>::max();
+
+    // just difc
+    TS_ASSERT_EQUALS(d.calcTofMax(DIFC, 0., 0., TMAX), TMAX);
+    TS_ASSERT_EQUALS(d.calcTofMax(DIFC, 0., 0., TSUPERMAX), TSUPERMAX);
+    // difc + tzero
+    TS_ASSERT_EQUALS(d.calcTofMax(DIFC, 0., TZERO, TMAX), TMAX);
+    TS_ASSERT_EQUALS(d.calcTofMax(DIFC, 0., TZERO, TSUPERMAX), TSUPERMAX);
+
+    // difc + difa + tzero
+    TS_ASSERT_EQUALS(d.calcTofMax(DIFC, DIFA1, 0., TMAX), TMAX);
+    TS_ASSERT_EQUALS(d.calcTofMax(DIFC, DIFA1, 0., TSUPERMAX), TSUPERMAX);
+    TS_ASSERT_EQUALS(d.calcTofMax(DIFC, DIFA1, TZERO, TMAX), TMAX);
+    TS_ASSERT_EQUALS(d.calcTofMax(DIFC, DIFA1, TZERO, TSUPERMAX), TSUPERMAX);
+
+    TS_ASSERT_DELTA(d.calcTofMax(DIFC, DIFA3, 0., TMAX), 1., 1E-10);
+    TS_ASSERT_DELTA(d.calcTofMax(DIFC, DIFA3, 0., TSUPERMAX), 1., 1E-10);
+    TS_ASSERT_DELTA(d.calcTofMax(DIFC, DIFA3, TZERO, TMAX), TZERO + 1., 1E-10);
+    TS_ASSERT_DELTA(d.calcTofMax(DIFC, DIFA3, TZERO, TSUPERMAX), TZERO + 1.,
+                    1E-10);
   }
 
   //----------------------------------------------------------------------
@@ -626,7 +741,7 @@ public:
   void testdSpacingPerpendicular_toTOF() {
     std::vector<double> x(1, 1.0), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(dp.toTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(dp.toTOF(x, y, 1.0, 1.0, 1.0, 1))
     TS_ASSERT_DELTA(x[0], 434.5529, 0.0001)
     TS_ASSERT(yy == y)
   }
@@ -634,7 +749,7 @@ public:
   void testdSpacingPerpendicular_fromTOF() {
     std::vector<double> x(1, 1001.1), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(dp.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(dp.fromTOF(x, y, 1.0, 1.0, 1.0, 1))
     TS_ASSERT_DELTA(x[0], 2.045075, 0.000001)
     TS_ASSERT(yy == y)
   }
@@ -684,7 +799,7 @@ public:
   void testQTransfer_toTOF() {
     std::vector<double> x(1, 1.1), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(q.toTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(q.toTOF(x, y, 1.0, 1.0, 1.0, 1))
     TS_ASSERT_DELTA(x[0], 2768.9067, 0.0001)
     TS_ASSERT(yy == y)
   }
@@ -692,7 +807,7 @@ public:
   void testQTransfer_fromTOF() {
     std::vector<double> x(1, 1.1), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(q.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(q.fromTOF(x, y, 1.0, 1.0, 1.0, 1))
     TS_ASSERT_DELTA(x[0], 2768.9067, 0.0001)
     TS_ASSERT(yy == y)
   }
@@ -705,8 +820,8 @@ public:
     double input = 1.1;
     double result = factor * std::pow(input, power);
     std::vector<double> x(1, input);
-    q.toTOF(x, x, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
-    q2.fromTOF(x, x, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
+    q.toTOF(x, x, 99.0, 99.0, 99.0, 99);
+    q2.fromTOF(x, x, 99.0, 99.0, 99.0, 99);
     TS_ASSERT_DELTA(x[0], result, 1.0e-30)
 
     // To dSpacing
@@ -714,8 +829,11 @@ public:
     input = 1.1;
     result = factor * std::pow(input, power);
     x[0] = input;
-    q.toTOF(x, x, 99.0, 99.0, 1.0, 99, 99.0, 99.0);
-    d.fromTOF(x, x, 99.0, 99.0, 1.0, 99, 99.0, 99.0);
+    q.toTOF(x, x, 99.0, 99.0, 1.0, 99);
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(0.5) *
+                  (99.0 + 99.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    d.fromTOF(x, x, 99.0, 99.0, 1.0, 99,
+              {{UnitConversionParameters::difc, difc}});
     TS_ASSERT_DELTA(x[0], result, 1.0e-12)
   }
   void testMomentumTransferRange() {
@@ -759,7 +877,7 @@ public:
   void testQ2_toTOF() {
     std::vector<double> x(1, 4.0), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(q2.toTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(q2.toTOF(x, y, 1.0, 1.0, 1.0, 1))
     TS_ASSERT_DELTA(x[0], 1522.899, 0.001)
     TS_ASSERT(yy == y)
   }
@@ -767,7 +885,7 @@ public:
   void testQ2_fromTOF() {
     std::vector<double> x(1, 200.0), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(q2.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(q2.fromTOF(x, y, 1.0, 1.0, 1.0, 1))
     TS_ASSERT_DELTA(x[0], 231.9220, 0.0001)
     TS_ASSERT(yy == y)
   }
@@ -780,8 +898,8 @@ public:
     double input = 1.1;
     double result = factor * std::pow(input, power);
     std::vector<double> x(1, input);
-    q2.toTOF(x, x, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
-    q.fromTOF(x, x, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
+    q2.toTOF(x, x, 99.0, 99.0, 99.0, 99);
+    q.fromTOF(x, x, 99.0, 99.0, 99.0, 99);
     TS_ASSERT_DELTA(x[0], result, 1.0e-30)
 
     // To dSpacing
@@ -789,14 +907,19 @@ public:
     input = 1.1;
     result = factor * std::pow(input, power);
     x[0] = input;
-    q2.toTOF(x, x, 99.0, 99.0, 1.0, 99, 99.0, 99.0);
-    d.fromTOF(x, x, 99.0, 99.0, 1.0, 99, 99.0, 99.0);
+    q2.toTOF(x, x, 99.0, 99.0, 1.0, 99);
+    double difc = 2.0 * Mantid::PhysicalConstants::NeutronMass * sin(0.5) *
+                  (99.0 + 99.0) * 1e-4 / Mantid::PhysicalConstants::h;
+    d.fromTOF(x, x, 99.0, 99.0, 1.0, 99,
+              {{UnitConversionParameters::difc, difc}});
     TS_ASSERT_DELTA(x[0], result, 1.0e-15)
   }
   void testQ2Range() {
     std::vector<double> sample, rezult;
 
-    q2.initialize(1.1, 1.1, 99.0, 0, 99.0, 0);
+    q2.initialize(1.1, 1.1, 99.0, 0,
+                  {{UnitConversionParameters::efixed, 99.0}});
+
     std::string err_mess =
         convert_units_check_range(q2, sample, rezult, -DBL_EPSILON);
     TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
@@ -838,40 +961,47 @@ public:
   void testDeltaE_toTOF() {
     std::vector<double> x(1, 1.1), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(dE.toTOF(x, y, 1.5, 2.5, 0.0, 1, 4.0, 0.0))
+    TS_ASSERT_THROWS_NOTHING(dE.toTOF(
+        x, y, 1.5, 2.5, 0.0, 1, {{UnitConversionParameters::efixed, 4.0}}))
     TS_ASSERT_DELTA(x[0], 5071.066, 0.001)
     TS_ASSERT(yy == y)
 
     x[0] = 1.1;
-    TS_ASSERT_THROWS_NOTHING(dE.toTOF(x, y, 1.5, 2.5, 0.0, 2, 4.0, 0.0))
+    TS_ASSERT_THROWS_NOTHING(dE.toTOF(
+        x, y, 1.5, 2.5, 0.0, 2, {{UnitConversionParameters::efixed, 4.0}}))
     TS_ASSERT_DELTA(x[0], 4376.406, 0.001)
     TS_ASSERT(yy == y)
 
     // emode = 0
-    TS_ASSERT_THROWS(dE.toTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
+    TS_ASSERT_THROWS(dE.toTOF(x, y, 1.5, 2.5, 0.0, 0,
+                              {{UnitConversionParameters::efixed, 4.0}}),
                      const std::invalid_argument &)
   }
 
   void testDeltaE_fromTOF() {
     std::vector<double> x(1, 2001.0), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(dE.fromTOF(x, y, 1.5, 2.5, 0.0, 1, 4.0, 0.0))
+    TS_ASSERT_THROWS_NOTHING(dE.fromTOF(
+        x, y, 1.5, 2.5, 0.0, 1, {{UnitConversionParameters::efixed, 4.0}}))
     TS_ASSERT_DELTA(x[0], -394.5692, 0.0001)
     TS_ASSERT(yy == y)
 
     x[0] = 3001.0;
-    TS_ASSERT_THROWS_NOTHING(dE.fromTOF(x, y, 1.5, 2.5, 0.0, 2, 4.0, 0.0))
+    TS_ASSERT_THROWS_NOTHING(dE.fromTOF(
+        x, y, 1.5, 2.5, 0.0, 2, {{UnitConversionParameters::efixed, 4.0}}))
     TS_ASSERT_DELTA(x[0], 569.8397, 0.0001)
     TS_ASSERT(yy == y)
 
     // emode = 0
-    TS_ASSERT_THROWS(dE.fromTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
+    TS_ASSERT_THROWS(dE.fromTOF(x, y, 1.5, 2.5, 0.0, 0,
+                                {{UnitConversionParameters::efixed, 4.0}}),
                      const std::invalid_argument &)
   }
   void testDERange() {
     std::vector<double> sample, rezult;
     // Direct
-    dE.initialize(2001.0, 1.0, 1.5, 1, 10., 0.0);
+    dE.initialize(2001.0, 1.0, 1.5, 1,
+                  {{UnitConversionParameters::efixed, 10.0}});
 
     std::string err_mess =
         convert_units_check_range(dE, sample, rezult, DBL_EPSILON);
@@ -891,7 +1021,8 @@ public:
         sample[3], rezult[3], 10 * FLT_EPSILON);
 
     // Indirect
-    dE.initialize(2001.0, 1.0, 1.5, 2, 10., 0.0);
+    dE.initialize(2001.0, 1.0, 1.5, 2,
+                  {{UnitConversionParameters::efixed, 10.0}});
 
     err_mess = convert_units_check_range(dE, sample, rezult);
     TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
@@ -936,40 +1067,47 @@ public:
   void testDeltaEk_toTOF() {
     std::vector<double> x(1, 1.1), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(dEk.toTOF(x, y, 1.5, 2.5, 0.0, 1, 4.0, 0.0))
+    TS_ASSERT_THROWS_NOTHING(dEk.toTOF(
+        x, y, 1.5, 2.5, 0.0, 1, {{UnitConversionParameters::efixed, 4.0}}))
     TS_ASSERT_DELTA(x[0], 4622.5452, 0.01)
     TS_ASSERT(yy == y)
 
     x[0] = 1.1;
-    TS_ASSERT_THROWS_NOTHING(dEk.toTOF(x, y, 1.5, 2.5, 0.0, 2, 4.0, 0.0))
+    TS_ASSERT_THROWS_NOTHING(dEk.toTOF(
+        x, y, 1.5, 2.5, 0.0, 2, {{UnitConversionParameters::efixed, 4.0}}))
     TS_ASSERT_DELTA(x[0], 4544.0378, 0.001)
     TS_ASSERT(yy == y)
 
     // emode = 0
-    TS_ASSERT_THROWS(dEk.toTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
+    TS_ASSERT_THROWS(dEk.toTOF(x, y, 1.5, 2.5, 0.0, 0,
+                               {{UnitConversionParameters::efixed, 4.0}}),
                      const std::invalid_argument &)
   }
 
   void testDeltaEk_fromTOF() {
     std::vector<double> x(1, 2001.0), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(dEk.fromTOF(x, y, 1.5, 2.5, 0.0, 1, 4.0, 0.0))
+    TS_ASSERT_THROWS_NOTHING(dEk.fromTOF(
+        x, y, 1.5, 2.5, 0.0, 1, {{UnitConversionParameters::efixed, 4.0}}))
     TS_ASSERT_DELTA(x[0], -3182.416, 0.001)
     TS_ASSERT(yy == y)
 
     x[0] = 3001.0;
-    TS_ASSERT_THROWS_NOTHING(dEk.fromTOF(x, y, 1.5, 2.5, 0.0, 2, 4.0, 0.0))
+    TS_ASSERT_THROWS_NOTHING(dEk.fromTOF(
+        x, y, 1.5, 2.5, 0.0, 2, {{UnitConversionParameters::efixed, 4.0}}))
     TS_ASSERT_DELTA(x[0], 4596.068, 0.001)
     TS_ASSERT(yy == y)
 
     // emode = 0
-    TS_ASSERT_THROWS(dEk.fromTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
+    TS_ASSERT_THROWS(dEk.fromTOF(x, y, 1.5, 2.5, 0.0, 0,
+                                 {{UnitConversionParameters::efixed, 4.0}}),
                      const std::invalid_argument &)
   }
   void testDE_kRange() {
     std::vector<double> sample, rezult;
     // Direct
-    dEk.initialize(2001.0, 1.0, 1.5, 1, 10., 0.0);
+    dEk.initialize(2001.0, 1.0, 1.5, 1,
+                   {{UnitConversionParameters::efixed, 10.0}});
 
     std::string err_mess = convert_units_check_range(dEk, sample, rezult);
     TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
@@ -988,7 +1126,8 @@ public:
         sample[3], rezult[3], 10 * FLT_EPSILON);
 
     // Indirect
-    dEk.initialize(2001.0, 1.0, 1.5, 2, 10., 0.0);
+    dEk.initialize(2001.0, 1.0, 1.5, 2,
+                   {{UnitConversionParameters::efixed, 10.0}});
 
     err_mess = convert_units_check_range(dEk, sample, rezult);
     TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
@@ -1034,41 +1173,48 @@ public:
     std::vector<double> x(1, 0.26597881882),
         y(1, 1.0); // 1.1meV = h*0.26597881882Ghz
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(dEf.toTOF(x, y, 1.5, 2.5, 0.0, 1, 4.0, 0.0))
+    TS_ASSERT_THROWS_NOTHING(dEf.toTOF(
+        x, y, 1.5, 2.5, 0.0, 1, {{UnitConversionParameters::efixed, 4.0}}))
     TS_ASSERT_DELTA(x[0], 5071.066, 0.001)
     TS_ASSERT(yy == y)
 
     x[0] = 0.26597881882;
-    TS_ASSERT_THROWS_NOTHING(dEf.toTOF(x, y, 1.5, 2.5, 0.0, 2, 4.0, 0.0))
+    TS_ASSERT_THROWS_NOTHING(dEf.toTOF(
+        x, y, 1.5, 2.5, 0.0, 2, {{UnitConversionParameters::efixed, 4.0}}))
     TS_ASSERT_DELTA(x[0], 4376.406, 0.001)
     TS_ASSERT(yy == y)
 
     // emode = 0
-    TS_ASSERT_THROWS(dEf.toTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
+    TS_ASSERT_THROWS(dEf.toTOF(x, y, 1.5, 2.5, 0.0, 0,
+                               {{UnitConversionParameters::efixed, 4.0}}),
                      const std::invalid_argument &)
   }
 
   void testDeltaEf_fromTOF() {
     std::vector<double> x(1, 2001.0), y(1, 1.0);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(dEf.fromTOF(x, y, 1.5, 2.5, 0.0, 1, 4.0, 0.0))
+    TS_ASSERT_THROWS_NOTHING(dEf.fromTOF(
+        x, y, 1.5, 2.5, 0.0, 1, {{UnitConversionParameters::efixed, 4.0}}))
     TS_ASSERT_DELTA(x[0], -95.4064, 0.0001)
     TS_ASSERT(yy == y)
 
     x[0] = 3001.0;
-    TS_ASSERT_THROWS_NOTHING(dEf.fromTOF(x, y, 1.5, 2.5, 0.0, 2, 4.0, 0.0))
+    TS_ASSERT_THROWS_NOTHING(dEf.fromTOF(
+        x, y, 1.5, 2.5, 0.0, 2, {{UnitConversionParameters::efixed, 4.0}}))
     TS_ASSERT_DELTA(x[0], 137.7866, 0.0001)
     TS_ASSERT(yy == y)
 
     // emode = 0
-    TS_ASSERT_THROWS(dEf.fromTOF(x, y, 1.5, 2.5, 0.0, 0, 4.0, 0.0),
+    TS_ASSERT_THROWS(dEf.fromTOF(x, y, 1.5, 2.5, 0.0, 0,
+                                 {{UnitConversionParameters::efixed, 4.0}}),
                      const std::invalid_argument &)
   }
 
   void testDE_fRange() {
     std::vector<double> sample, rezult;
     // Direct
-    dEf.initialize(2001.0, 1.0, 1.5, 1, 10., 0.0);
+    dEf.initialize(2001.0, 1.0, 1.5, 1,
+                   {{UnitConversionParameters::efixed, 10.0}});
 
     std::string err_mess =
         convert_units_check_range(dEf, sample, rezult, DBL_EPSILON);
@@ -1088,7 +1234,8 @@ public:
         sample[3], rezult[3], 10 * FLT_EPSILON);
 
     // Indirect
-    dEf.initialize(2001.0, 1.0, 1.5, 2, 10., 0.0);
+    dEf.initialize(2001.0, 1.0, 1.5, 2,
+                   {{UnitConversionParameters::efixed, 10.0}});
 
     err_mess = convert_units_check_range(dEf, sample, rezult);
     TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
@@ -1129,7 +1276,8 @@ public:
   void testMomentum_toTOF() {
     std::vector<double> x(1, 2 * M_PI / 1.5), y(1, 1.5);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(k_i.toTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(k_i.toTOF(
+        x, y, 1.0, 1.0, 1.0, 1, {{UnitConversionParameters::efixed, 1.0}}))
     // TS_ASSERT_DELTA( x[0], 2665.4390, 0.0001 ) // -- wavelength to TOF;
     TS_ASSERT_DELTA(x[0], 2665.4390, 0.0001) //
     TS_ASSERT(yy == y)
@@ -1138,7 +1286,8 @@ public:
   void testMomentum_fromTOF() {
     std::vector<double> x(1, 1000.5), y(1, 1.5);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(k_i.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 1.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(k_i.fromTOF(
+        x, y, 1.0, 1.0, 1.0, 1, {{UnitConversionParameters::efixed, 1.0}}))
     //    TS_ASSERT_DELTA( x[0], -5.0865, 0.0001 ) // wavelength from TOF
     TS_ASSERT_DELTA(x[0], 2 * M_PI / (-5.0865), 0.0001) // 1.979006
     TS_ASSERT(yy == y)
@@ -1151,8 +1300,10 @@ public:
     double input = 1.1;
     double result = factor * std::pow(input, power);
     std::vector<double> x(1, input);
-    k_i.toTOF(x, x, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
-    energy.fromTOF(x, x, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
+    k_i.toTOF(x, x, 99.0, 99.0, 99.0, 99,
+              {{UnitConversionParameters::efixed, 99.0}});
+    energy.fromTOF(x, x, 99.0, 99.0, 99.0, 99,
+                   {{UnitConversionParameters::efixed, 99.0}});
     TS_ASSERT_DELTA(x[0], result, 1.0e-10)
 
     TS_ASSERT(k_i.quickConversion(energyk, factor, power))
@@ -1160,8 +1311,10 @@ public:
     TS_ASSERT_EQUALS(result2 / result,
                      Mantid::PhysicalConstants::meVtoWavenumber)
     std::vector<double> x2(1, input);
-    k_i.toTOF(x2, x2, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
-    energyk.fromTOF(x2, x2, 99.0, 99.0, 99.0, 99, 99.0, 99.0);
+    k_i.toTOF(x2, x2, 99.0, 99.0, 99.0, 99,
+              {{UnitConversionParameters::efixed, 99.0}});
+    energyk.fromTOF(x2, x2, 99.0, 99.0, 99.0, 99,
+                    {{UnitConversionParameters::efixed, 99.0}});
     TS_ASSERT_DELTA(x2[0], result2, 1.0e-10);
 
     TS_ASSERT(k_i.quickConversion(lambda, factor, power));
@@ -1173,7 +1326,7 @@ public:
   }
   void testK_iRange() {
     std::vector<double> sample, rezult;
-    k_i.initialize(1.1, 1.1, 99.0, 0, 99.0, 99);
+    k_i.initialize(1.1, 1.1, 99.0, 0);
 
     std::string err_mess =
         convert_units_check_range(k_i, sample, rezult, DBL_EPSILON);
@@ -1193,7 +1346,8 @@ public:
       }
     }
 
-    k_i.initialize(10000, 11, 99.0, 2, 99.0, 99);
+    k_i.initialize(10000, 11, 99.0, 2,
+                   {{UnitConversionParameters::efixed, 99.0}});
 
     err_mess = convert_units_check_range(k_i, sample, rezult, DBL_EPSILON);
     TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
@@ -1212,7 +1366,7 @@ public:
       }
     }
 
-    k_i.initialize(1, 1.1, 99.0, 1, 99.0, 99);
+    k_i.initialize(1, 1.1, 99.0, 1, {{UnitConversionParameters::efixed, 99.0}});
 
     err_mess = convert_units_check_range(k_i, sample, rezult, DBL_EPSILON);
     TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
@@ -1258,30 +1412,36 @@ public:
   void testSpinEchoLength_toTOF() {
     std::vector<double> x(1, 4.5), y(1, 1.5);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(delta.toTOF(x, y, 1.0, 1.0, 1.0, 0, 2.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(delta.toTOF(
+        x, y, 1.0, 1.0, 1.0, 0, {{UnitConversionParameters::efixed, 2.0}}))
     TS_ASSERT_DELTA(x[0], 758.3352, 0.0001)
     TS_ASSERT(yy == y)
 
-    TS_ASSERT_DELTA(delta.convertSingleToTOF(4.5, 1.0, 1.0, 1.0, 0, 2.0, 1.0),
-                    758.3352, 0.0001);
+    TS_ASSERT_DELTA(
+        delta.convertSingleToTOF(4.5, 1.0, 1.0, 1.0, 0,
+                                 {{UnitConversionParameters::efixed, 2.0}}),
+        758.3352, 0.0001);
   }
 
   void testSpinEchoLength_fromTOF() {
     std::vector<double> x(1, 1000.5), y(1, 1.5);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(delta.fromTOF(x, y, 1.0, 1.0, 1.0, 0, 2.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(delta.fromTOF(
+        x, y, 1.0, 1.0, 1.0, 0, {{UnitConversionParameters::efixed, 2.0}}))
     TS_ASSERT_DELTA(x[0], 7.8329, 0.0001)
     TS_ASSERT(yy == y)
 
     TS_ASSERT_DELTA(
-        delta.convertSingleFromTOF(1000.5, 1.0, 1.0, 1.0, 0, 2.0, 1.0), 7.8329,
-        0.0001);
+        delta.convertSingleFromTOF(1000.5, 1.0, 1.0, 1.0, 0,
+                                   {{UnitConversionParameters::efixed, 2.0}}),
+        7.8329, 0.0001);
   }
 
   void testSpinEchoLength_invalidfromTOF() {
     std::vector<double> x(1, 1000.5), y(1, 1.5);
     // emode must = 0
-    TS_ASSERT_THROWS_ANYTHING(delta.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 2.0, 1.0))
+    TS_ASSERT_THROWS_ANYTHING(delta.fromTOF(
+        x, y, 1.0, 1.0, 1.0, 1, {{UnitConversionParameters::efixed, 2.0}}))
   }
 
   void testSpinEchoLength_quickConversions() {
@@ -1292,7 +1452,8 @@ public:
   }
   void testSpinEchoRange() {
     std::vector<double> sample, rezult;
-    delta.initialize(10, 1.1, 99.0, 0, 99.0, 99);
+    delta.initialize(10, 1.1, 99.0, 0,
+                     {{UnitConversionParameters::efixed, 99.0}});
 
     std::string err_mess = convert_units_check_range(delta, sample, rezult);
     TSM_ASSERT(" ERROR:" + err_mess, err_mess.size() == 0);
@@ -1336,30 +1497,36 @@ public:
   void testSpinEchoTime_toTOF() {
     std::vector<double> x(1, 4.5), y(1, 1.5);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(tau.toTOF(x, y, 1.0, 1.0, 1.0, 0, 2.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(tau.toTOF(
+        x, y, 1.0, 1.0, 1.0, 0, {{UnitConversionParameters::efixed, 2.0}}))
     TS_ASSERT_DELTA(x[0], 662.4668, 0.0001)
     TS_ASSERT(yy == y)
 
-    TS_ASSERT_DELTA(tau.convertSingleToTOF(4.5, 1.0, 1.0, 1.0, 0, 2.0, 1.0),
-                    662.4668, 0.0001);
+    TS_ASSERT_DELTA(
+        tau.convertSingleToTOF(4.5, 1.0, 1.0, 1.0, 0,
+                               {{UnitConversionParameters::efixed, 2.0}}),
+        662.4668, 0.0001);
   }
 
   void testSpinEchoTime_fromTOF() {
     std::vector<double> x(1, 1000.5), y(1, 1.5);
     std::vector<double> yy = y;
-    TS_ASSERT_THROWS_NOTHING(tau.fromTOF(x, y, 1.0, 1.0, 1.0, 0, 2.0, 1.0))
+    TS_ASSERT_THROWS_NOTHING(tau.fromTOF(
+        x, y, 1.0, 1.0, 1.0, 0, {{UnitConversionParameters::efixed, 2.0}}))
     TS_ASSERT_DELTA(x[0], 15.5014, 0.0001)
     TS_ASSERT(yy == y)
 
     TS_ASSERT_DELTA(
-        tau.convertSingleFromTOF(1000.5, 1.0, 1.0, 1.0, 0, 2.0, 1.0), 15.5014,
-        0.0001);
+        tau.convertSingleFromTOF(1000.5, 1.0, 1.0, 1.0, 0,
+                                 {{UnitConversionParameters::efixed, 2.0}}),
+        15.5014, 0.0001);
   }
 
   void testSpinEchoTime_invalidfromTOF() {
     std::vector<double> x(1, 1000.5), y(1, 1.5);
     // emode must = 0
-    TS_ASSERT_THROWS_ANYTHING(tau.fromTOF(x, y, 1.0, 1.0, 1.0, 1, 2.0, 1.0))
+    TS_ASSERT_THROWS_ANYTHING(tau.fromTOF(
+        x, y, 1.0, 1.0, 1.0, 1, {{UnitConversionParameters::efixed, 2.0}}))
   }
 
   void testSpinEchoTime_quickConversions() {
@@ -1370,7 +1537,7 @@ public:
   }
   void testSpinEchoTimeRange() {
     std::vector<double> sample, rezult;
-    tau.initialize(100, 11, 1.0, 0, 1.0, 1);
+    tau.initialize(100, 11, 1.0, 0);
 
     std::string err_mess =
         convert_units_check_range(tau, sample, rezult, DBL_EPSILON);

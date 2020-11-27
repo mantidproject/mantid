@@ -107,8 +107,10 @@ protected:
   bool getDetectorValues(const API::SpectrumInfo &spectrumInfo,
                          const Kernel::Unit &outputUnit, int emode,
                          const API::MatrixWorkspace &ws, const bool signedTheta,
-                         int64_t wsIndex, double &efixed, double &l2,
-                         double &twoTheta);
+                         int64_t wsIndex, double &l2, double &twoTheta,
+                         Kernel::ExtraParametersMap &pmap);
+  void createDetectorIdLogMessages(const std::vector<detid_t> &detids,
+                                   int64_t wsIndex) const;
 
   /// Convert the workspace units using TOF as an intermediate step in the
   /// conversion

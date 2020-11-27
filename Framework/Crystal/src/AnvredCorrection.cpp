@@ -215,7 +215,7 @@ void AnvredCorrection::exec() {
 
       double lambda =
           (unitStr == "TOF")
-              ? wl.convertSingleFromTOF(points[j], L1, L2, scattering, 0, 0, 0)
+              ? wl.convertSingleFromTOF(points[j], L1, L2, scattering, 0)
               : points[j];
 
       if (m_returnTransmissionOnly) {
@@ -306,7 +306,7 @@ void AnvredCorrection::execEvent() {
       double lambda = ev.tof();
 
       if ("TOF" == unitStr)
-        lambda = wl.convertSingleFromTOF(lambda, L1, L2, scattering, 0, 0, 0);
+        lambda = wl.convertSingleFromTOF(lambda, L1, L2, scattering, 0);
 
       double value = this->getEventWeight(lambda, scattering);
 

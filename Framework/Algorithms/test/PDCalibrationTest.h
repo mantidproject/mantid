@@ -18,7 +18,7 @@
 #include "MantidDataHandling/MoveInstrumentComponent.h"
 #include "MantidDataHandling/RotateInstrumentComponent.h"
 #include "MantidDataObjects/TableColumn.h"
-#include "MantidKernel/Diffraction.h"
+#include "MantidKernel/Unit.h"
 
 using Mantid::Algorithms::CreateSampleWorkspace;
 using Mantid::Algorithms::PDCalibration;
@@ -155,10 +155,12 @@ public:
 
   void test_exec_difc() {
     // setup the peak postions based on transformation from detID=155
+    using Mantid::Kernel::UnitConversionParameters;
     std::vector<double> dValues(PEAK_TOFS.size());
-    std::transform(
-        PEAK_TOFS.begin(), PEAK_TOFS.end(), dValues.begin(),
-        Mantid::Kernel::Diffraction::getTofToDConversionFunc(DIFC_155, 0., 0.));
+    Mantid::Kernel::Units::dSpacing dSpacingUnit;
+    dSpacingUnit.fromTOF(dValues, std::vector<double>{}, -1., -1., -1., 0,
+                         Mantid::Kernel::ExtraParametersMap{
+                             {UnitConversionParameters::difc, DIFC_155}});
 
     const std::string prefix{"PDCalibration_difc"};
 
@@ -213,12 +215,15 @@ public:
   }
 
   void test_exec_difc_tzero() {
+    using Mantid::Kernel::UnitConversionParameters;
     // setup the peak postions based on transformation from detID=155
     const double TZERO = 20.;
     std::vector<double> dValues(PEAK_TOFS.size());
-    std::transform(PEAK_TOFS.begin(), PEAK_TOFS.end(), dValues.begin(),
-                   Mantid::Kernel::Diffraction::getTofToDConversionFunc(
-                       DIFC_155, 0., TZERO));
+    Mantid::Kernel::Units::dSpacing dSpacingUnit;
+    dSpacingUnit.fromTOF(dValues, std::vector<double>{}, -1., -1., -1., 0,
+                         Mantid::Kernel::ExtraParametersMap{
+                             {UnitConversionParameters::difc, DIFC_155},
+                             {UnitConversionParameters::tzero, TZERO}});
 
     const std::string prefix{"PDCalibration_difc_tzero"};
 
@@ -276,13 +281,16 @@ public:
   }
 
   void test_exec_difc_tzero_difa() {
+    using Mantid::Kernel::UnitConversionParameters;
     // setup the peak postions based on transformation from detID=155
     // allow refining DIFA, but don't set the transformation to require it
     const double TZERO = 20.;
     std::vector<double> dValues(PEAK_TOFS.size());
-    std::transform(PEAK_TOFS.begin(), PEAK_TOFS.end(), dValues.begin(),
-                   Mantid::Kernel::Diffraction::getTofToDConversionFunc(
-                       DIFC_155, 0., TZERO));
+    Mantid::Kernel::Units::dSpacing dSpacingUnit;
+    dSpacingUnit.fromTOF(dValues, std::vector<double>{}, -1., -1., -1., 0,
+                         Mantid::Kernel::ExtraParametersMap{
+                             {UnitConversionParameters::difc, DIFC_155},
+                             {UnitConversionParameters::tzero, TZERO}});
 
     const std::string prefix{"PDCalibration_difc_tzero_difa"};
 
@@ -356,11 +364,13 @@ public:
   PDCalibrationTestPerformance() { FrameworkManager::Instance(); }
 
   void setUp() override {
+    using Mantid::Kernel::UnitConversionParameters;
     // setup the peak postions based on transformation from detID=155
     std::vector<double> dValues(PEAK_TOFS.size());
-    std::transform(
-        PEAK_TOFS.begin(), PEAK_TOFS.end(), dValues.begin(),
-        Mantid::Kernel::Diffraction::getTofToDConversionFunc(DIFC_155, 0., 0.));
+    Mantid::Kernel::Units::dSpacing dSpacingUnit;
+    dSpacingUnit.fromTOF(dValues, std::vector<double>{}, -1., -1., -1., 0,
+                         Mantid::Kernel::ExtraParametersMap{
+                             {UnitConversionParameters::difc, DIFC_155}});
     createSampleWS();
     pdc.initialize();
     pdc.setProperty("InputWorkspace", "PDCalibrationTest_WS");

@@ -268,14 +268,18 @@ void RemoveBins::transformRangeUnit(const int index, double &startX,
     startX = factor * std::pow(m_startX, power);
     endX = factor * std::pow(m_endX, power);
   } else {
-    double l1, l2, theta;
-    this->calculateDetectorPosition(index, l1, l2, theta);
+    double l1, l2, theta, difa, difc, tzero;
+    this->calculateDetectorPosition(index, l1, l2, theta, difa, difc, tzero);
     std::vector<double> endPoints;
     endPoints.emplace_back(startX);
     endPoints.emplace_back(endX);
+    ExtraParametersMap pmap = {{UnitConversionParameters::difa, difa},
+                               {UnitConversionParameters::difc, difc},
+                               {UnitConversionParameters::tzero, tzero}};
     std::vector<double> emptyVec;
-    m_rangeUnit->toTOF(endPoints, emptyVec, l1, l2, theta, 0, 0.0, 0.0);
-    inputUnit->fromTOF(endPoints, emptyVec, l1, l2, theta, 0, 0.0, 0.0);
+    // assume elastic
+    m_rangeUnit->toTOF(endPoints, emptyVec, l1, l2, theta, 0, pmap);
+    inputUnit->fromTOF(endPoints, emptyVec, l1, l2, theta, 0, pmap);
     startX = endPoints.front();
     endX = endPoints.back();
   }
@@ -297,13 +301,18 @@ void RemoveBins::transformRangeUnit(const int index, double &startX,
  *  @param twoTheta :: Returns the detector's scattering angle
  */
 void RemoveBins::calculateDetectorPosition(const int index, double &l1,
-                                           double &l2, double &twoTheta) {
+                                           double &l2, double &twoTheta,
+                                           double &difa, double &difc,
+                                           double &tzero) {
   l1 = m_spectrumInfo->l1();
   l2 = m_spectrumInfo->l2(index);
   if (m_spectrumInfo->isMonitor(index))
     twoTheta = 0.0;
   else
     twoTheta = m_spectrumInfo->twoTheta(index);
+  std::vector<int> emptyWarningVec;
+  std::tie(difa, difc, tzero) =
+      m_spectrumInfo->diffractometerConstants(index, emptyWarningVec);
 
   g_log.debug() << "Detector for index " << index << " has L1+L2=" << l1 + l2
                 << " & 2theta= " << twoTheta << '\n';

@@ -162,16 +162,15 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
     // Convert the input unit to time-of-flight
     auto checkFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
     auto checkOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
-    double checkdelta = 0;
+    ExtraParametersMap pmap{
+        {UnitConversionParameters::efixed, efixedColumn[detectorRow]}};
     checkFromUnit->toTOF(checkXValues, emptyVec, l1Column[detectorRow],
                          l2Column[detectorRow], twoThetaColumn[detectorRow],
-                         emodeColumn[detectorRow], efixedColumn[detectorRow],
-                         checkdelta);
+                         emodeColumn[detectorRow], pmap);
     // Convert from time-of-flight to the desired unit
     checkOutputUnit->fromTOF(checkXValues, emptyVec, l1Column[detectorRow],
                              l2Column[detectorRow], twoThetaColumn[detectorRow],
-                             emodeColumn[detectorRow],
-                             efixedColumn[detectorRow], checkdelta);
+                             emodeColumn[detectorRow], pmap);
   }
 
   // create the output workspace
@@ -229,16 +228,15 @@ MatrixWorkspace_sptr ConvertUnitsUsingDetectorTable::convertViaTOF(
         auto localFromUnit = std::unique_ptr<Unit>(fromUnit->clone());
         auto localOutputUnit = std::unique_ptr<Unit>(outputUnit->clone());
         /// @todo Don't yet consider hold-off (delta)
-        const double delta = 0.0;
         std::vector<double> values(outputWS->x(wsid).begin(),
                                    outputWS->x(wsid).end());
 
+        ExtraParametersMap pmap{{UnitConversionParameters::efixed, efixed}};
         // Convert the input unit to time-of-flight
-        localFromUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, efixed,
-                             delta);
+        localFromUnit->toTOF(values, emptyVec, l1, l2, twoTheta, emode, pmap);
         // Convert from time-of-flight to the desired unit
         localOutputUnit->fromTOF(values, emptyVec, l1, l2, twoTheta, emode,
-                                 efixed, delta);
+                                 pmap);
 
         outputWS->mutableX(wsid) = std::move(values);
 

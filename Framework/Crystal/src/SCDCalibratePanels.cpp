@@ -379,8 +379,7 @@ void SCDCalibratePanels::findT0(
 
     Units::Wavelength wl;
 
-    wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0,
-                  peak.getInitialEnergy(), 0.0);
+    wl.initialize(peak.getL1(), peak.getL2(), peak.getScattering(), 0);
     peak.setWavelength(wl.singleFromTOF(peak.getTOF() + mT0));
   }
 }

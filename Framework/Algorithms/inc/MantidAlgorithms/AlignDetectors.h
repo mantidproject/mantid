@@ -69,9 +69,7 @@ private:
   void exec() override;
 
   void align(const ConversionFactors &converter, API::Progress &progress,
-             API::MatrixWorkspace &outputWS);
-  void align(const ConversionFactors &converter, API::Progress &progress,
-             DataObjects::EventWorkspace &outputWS);
+             API::MatrixWorkspace_sptr &outputWS);
 
   void loadCalFile(const API::MatrixWorkspace_sptr &inputWS,
                    const std::string &filename);

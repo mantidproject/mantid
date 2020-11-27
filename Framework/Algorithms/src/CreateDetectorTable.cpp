@@ -147,8 +147,15 @@ createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws,
     calcQ = false;
   }
 
+  bool hasDiffConstants{false};
+  auto emode = ws->getEMode();
+  if (emode == DeltaEMode::Elastic) {
+    hasDiffConstants = true;
+  }
+
   // Prepare column names
-  auto colNames = createColumns(isScanning, includeData, calcQ);
+  auto colNames =
+      createColumns(isScanning, includeData, calcQ, hasDiffConstants);
 
   const int ncols = static_cast<int>(colNames.size());
   const int nrows = indices.empty()
@@ -175,13 +182,14 @@ createDetectorTableWorkspace(const MatrixWorkspace_sptr &ws,
 
   populateTable(t, ws, nrows, indices, spectrumInfo, signedThetaParamRetrieved,
                 showSignedTwoTheta, beamAxisIndex, sampleDist, isScanning,
-                includeData, calcQ, logger);
+                includeData, calcQ, hasDiffConstants, logger);
 
   return t;
 }
 
 std::vector<std::pair<std::string, std::string>>
-createColumns(const bool isScanning, const bool includeData, const bool calcQ) {
+createColumns(const bool isScanning, const bool includeData, const bool calcQ,
+              const bool hasDiffConstants) {
   std::vector<std::pair<std::string, std::string>> colNames;
   colNames.emplace_back("double", "Index");
   colNames.emplace_back("int", "Spectrum No");
@@ -200,6 +208,12 @@ createColumns(const bool isScanning, const bool includeData, const bool calcQ) {
   }
   colNames.emplace_back("double", "Phi");
   colNames.emplace_back("str", "Monitor");
+  if (hasDiffConstants) {
+    colNames.emplace_back("double", "DIFA");
+    colNames.emplace_back("double", "DIFC");
+    colNames.emplace_back("double", "DIFC - Uncalibrated");
+    colNames.emplace_back("double", "TZERO");
+  }
   return colNames;
 }
 
@@ -209,7 +223,8 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
                    bool signedThetaParamRetrieved, bool showSignedTwoTheta,
                    const PointingAlong &beamAxisIndex, const double sampleDist,
                    const bool isScanning, const bool includeData,
-                   const bool calcQ, Logger &logger) {
+                   const bool calcQ, const bool includeDiffConstants,
+                   Logger &logger) {
   PARALLEL_FOR_IF(Mantid::Kernel::threadSafe(*ws))
   for (int row = 0; row < nrows; ++row) {
     TableRow colValues = t->getRow(row);
@@ -306,6 +321,16 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
 
       colValues << phi               // rtp
                 << isMonitorDisplay; // monitor
+
+      if (includeDiffConstants) {
+        std::vector<detid_t> warnDetIds;
+        auto [difaValue, difcValue, tzeroValue] =
+            ws->spectrumInfo().diffractometerConstants(wsIndex, warnDetIds);
+        auto difcValueUncalibrated =
+            ws->spectrumInfo().difcUncalibrated(wsIndex);
+        colValues << difaValue << difcValue << difcValueUncalibrated
+                  << tzeroValue;
+      }
     } catch (const std::exception &) {
       // spectrumNo=-1, detID=0
       colValues << -1 << "0";
@@ -319,7 +344,10 @@ void populateTable(ITableWorkspace_sptr &t, const MatrixWorkspace_sptr &ws,
       }
       colValues << 0.0    // rtp
                 << "n/a"; // monitor
-    }                     // End catch for no spectrum
+      if (includeDiffConstants) {
+        colValues << 0.0 << 0.0 << 0.0;
+      }
+    } // End catch for no spectrum
   }
 }
 

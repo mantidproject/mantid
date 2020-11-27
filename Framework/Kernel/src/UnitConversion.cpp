@@ -32,8 +32,20 @@ double UnitConversion::run(const std::string &src, const std::string &dest,
                            const DeltaEMode::Type emode, const double efixed) {
   Unit_sptr srcUnit = UnitFactory::Instance().create(src);
   Unit_sptr destUnit = UnitFactory::Instance().create(dest);
+  ExtraParametersMap params{{UnitConversionParameters::efixed, efixed}};
   return UnitConversion::run(*srcUnit, *destUnit, srcValue, l1, l2, theta,
-                             emode, efixed);
+                             emode, params);
+}
+
+double UnitConversion::run(const std::string &src, const std::string &dest,
+                           const double srcValue, const double l1,
+                           const double l2, const double theta,
+                           const DeltaEMode::Type emode,
+                           const ExtraParametersMap &params) {
+  Unit_sptr srcUnit = UnitFactory::Instance().create(src);
+  Unit_sptr destUnit = UnitFactory::Instance().create(dest);
+  return UnitConversion::run(*srcUnit, *destUnit, srcValue, l1, l2, theta,
+                             emode, params);
 }
 
 /**
@@ -51,13 +63,14 @@ double UnitConversion::run(const std::string &src, const std::string &dest,
  */
 double UnitConversion::run(Unit &srcUnit, Unit &destUnit, const double srcValue,
                            const double l1, const double l2, const double theta,
-                           const DeltaEMode::Type emode, const double efixed) {
+                           const DeltaEMode::Type emode,
+                           const ExtraParametersMap &params) {
   double factor(0.0), power(0.0);
   if (srcUnit.quickConversion(destUnit, factor, power)) {
     return convertQuickly(srcValue, factor, power);
   } else {
     return convertViaTOF(srcUnit, destUnit, srcValue, l1, l2, theta, emode,
-                         efixed);
+                         params);
   }
 }
 
@@ -94,7 +107,7 @@ double UnitConversion::convertViaTOF(Unit &srcUnit, Unit &destUnit,
                                      const double srcValue, const double l1,
                                      const double l2, const double theta,
                                      const DeltaEMode::Type emode,
-                                     const double efixed) {
+                                     const ExtraParametersMap &params) {
   // Translate the emode to the int formulation
   int emodeAsInt(0);
   switch (emode) {
@@ -114,10 +127,9 @@ double UnitConversion::convertViaTOF(Unit &srcUnit, Unit &destUnit,
   };
 
   const double unused(0.0);
-  const double tof = srcUnit.convertSingleToTOF(srcValue, l1, l2, theta,
-                                                emodeAsInt, efixed, unused);
-  return destUnit.convertSingleFromTOF(tof, l1, l2, theta, emodeAsInt, efixed,
-                                       unused);
+  const double tof =
+      srcUnit.convertSingleToTOF(srcValue, l1, l2, theta, emodeAsInt, params);
+  return destUnit.convertSingleFromTOF(tof, l1, l2, theta, emodeAsInt, params);
 }
 
 /**

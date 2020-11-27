@@ -469,7 +469,7 @@ void SaveHKL::exec() {
           double l2 = p.getL2();
           Mantid::Kernel::Unit_sptr unit =
               UnitFactory::Instance().create("Wavelength");
-          unit->toTOF(xdata, ydata, l1, l2, theta2, 0, 0.0, 0.0);
+          unit->toTOF(xdata, ydata, l1, l2, theta2, 0);
           double one = xdata[0];
           double spect1 = spectrumCalc(one, iSpec, time, spectra, bank);
           relSigSpect = std::sqrt((1.0 / spect) + (1.0 / spect1));

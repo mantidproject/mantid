@@ -308,6 +308,37 @@ double DetectorInfo::azimuthal(const std::pair<size_t, size_t> &index) const {
   return atan2(dotVertical, dotHorizontal);
 }
 
+std::tuple<double, double, double> DetectorInfo::diffractometerConstants(
+    const size_t index, std::vector<detid_t> &calibratedDets,
+    std::vector<detid_t> &uncalibratedDets) const {
+  auto det = m_instrument->getDetector((*m_detectorIDs)[index]);
+  auto pmap = m_instrument->getParameterMap();
+  auto par = pmap->getRecursive(det.get(), "DIFC");
+  if (par) {
+    double difc = par->value<double>();
+    calibratedDets.push_back((*m_detectorIDs)[index]);
+    double difa = 0., tzero = 0.;
+    par = pmap->getRecursive(det.get(), "DIFA");
+    if (par)
+      difa = par->value<double>();
+    par = pmap->getRecursive(det.get(), "TZERO");
+    if (par)
+      tzero = par->value<double>();
+    return {difa, difc, tzero};
+  } else {
+    // if calibrated difc not available, revert to uncalibrated difc with other
+    // two constants=0
+    uncalibratedDets.push_back((*m_detectorIDs)[index]);
+    double difc = difcUncalibrated(index);
+    return {0., difc, 0.};
+  }
+}
+
+double DetectorInfo::difcUncalibrated(const size_t index) const {
+  return 1. / Mantid::Geometry::Conversion::tofToDSpacingFactor(
+                  l1(), l2(index), twoTheta(index), 0.);
+}
+
 std::pair<double, double>
 DetectorInfo::geographicalAngles(const size_t index) const {
   const auto samplePos = samplePosition();
@@ -383,13 +414,26 @@ void DetectorInfo::clearMaskFlags() {
 /// Set the absolute position of the detector with given index. Not thread safe.
 void DetectorInfo::setPosition(const size_t index,
                                const Kernel::V3D &position) {
+
+  clearPositionDependentParameters(index);
   m_detectorInfo->setPosition(index, Kernel::toVector3d(position));
 }
 
 /// Set the absolute position of the detector with given index. Not thread safe.
 void DetectorInfo::setPosition(const std::pair<size_t, size_t> &index,
                                const Kernel::V3D &position) {
+  clearPositionDependentParameters(index.first);
   m_detectorInfo->setPosition(index, Kernel::toVector3d(position));
+}
+
+// Clear any parameters whose value is only valid for specific positions
+// Currently diffractometer constants
+void DetectorInfo::clearPositionDependentParameters(const size_t index) {
+  auto det = m_instrument->getDetector((*m_detectorIDs)[index]);
+  auto pmap = m_instrument->getParameterMap();
+  pmap->clearParametersByName("DIFA", det.get());
+  pmap->clearParametersByName("DIFC", det.get());
+  pmap->clearParametersByName("TZERO", det.get());
 }
 
 /// Set the absolute rotation of the detector with given index. Not thread safe.

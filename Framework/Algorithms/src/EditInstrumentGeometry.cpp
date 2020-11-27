@@ -9,6 +9,8 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Objects/CSGObject.h"
+#include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/MandatoryValidator.h"
 
@@ -16,8 +18,6 @@
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
-
-using namespace std;
 
 namespace Mantid {
 namespace Algorithms {
@@ -85,12 +85,22 @@ void EditInstrumentGeometry::init() {
   declareProperty("InstrumentName", "",
                   "Name of the newly built instrument.  If left empty, "
                   "the original instrument will be used. ");
+
+  // DIFA
+  declareProperty(std::make_unique<ArrayProperty<double>>("DIFA"),
+                  "DIFA diffractometer constant for detectors");
+  // DIFC
+  declareProperty(std::make_unique<ArrayProperty<double>>("DIFC"),
+                  "DIFC diffractometer constant for detectors");
+  // TZERO
+  declareProperty(std::make_unique<ArrayProperty<double>>("TZERO"),
+                  "TZERO diffractometer constant for detectors");
 }
 
 template <typename NumT>
 std::string checkValues(const std::vector<NumT> &thingy, const size_t numHist) {
   if ((!thingy.empty()) && thingy.size() != numHist) {
-    stringstream msg;
+    std::stringstream msg;
     msg << "Must equal number of spectra or be empty (" << numHist
         << " != " << thingy.size() << ")";
     return msg.str();
@@ -145,7 +155,7 @@ std::map<std::string, std::string> EditInstrumentGeometry::validateInputs() {
   if (!error.empty())
     result["Azimuthal"] = error;
 
-  const vector<int> detids = getProperty("DetectorIDs");
+  const std::vector<int> detids = getProperty("DetectorIDs");
   error = checkValues(detids, numHist);
   if (!error.empty())
     result["DetectorIDs"] = error;
@@ -194,13 +204,19 @@ void EditInstrumentGeometry::exec() {
   }
 
   // Get the detector ids - empsy means ignore it
-  const vector<int> vec_detids = getProperty("DetectorIDs");
+  const std::vector<int> vec_detids = getProperty("DetectorIDs");
   const bool renameDetID(!vec_detids.empty());
 
   // Get individual detector geometries ordered by input spectrum Numbers
   const std::vector<double> l2s = this->getProperty("L2");
   const std::vector<double> tths = this->getProperty("Polar");
   std::vector<double> phis = this->getProperty("Azimuthal");
+  const std::vector<double> difas = this->getProperty("DIFA");
+  const bool haveDifas(!difas.empty());
+  const std::vector<double> difcs = this->getProperty("DIFC");
+  const bool haveDifcs(!difcs.empty());
+  const std::vector<double> tzeros = this->getProperty("TZERO");
+  const bool haveTZeros(!tzeros.empty());
 
   // empty list of L2 and 2-theta is not allowed
   if (l2s.empty()) {
@@ -221,7 +237,7 @@ void EditInstrumentGeometry::exec() {
                         << "  2Theta = " << tths[ib] << '\n';
     if (specids[ib] < 0) {
       // Invalid spectrum Number : less than 0.
-      stringstream errmsgss;
+      std::stringstream errmsgss;
       errmsgss << "Detector ID = " << specids[ib] << " cannot be less than 0.";
       throw std::invalid_argument(errmsgss.str());
     }
@@ -241,14 +257,17 @@ void EditInstrumentGeometry::exec() {
   std::vector<double> storL2s(nspec, 0.);
   std::vector<double> stor2Thetas(nspec, 0.);
   std::vector<double> storPhis(nspec, 0.);
-  vector<int> storDetIDs(nspec, 0);
+  std::vector<int> storDetIDs(nspec, 0);
+  std::vector<double> storDIFAs(nspec, 0.);
+  std::vector<double> storDIFCs(nspec, 0.);
+  std::vector<double> storTZEROs(nspec, 0.);
 
   // Map the properties from spectrum Number to workspace index
   for (size_t i = 0; i < specids.size(); i++) {
     // Find spectrum's workspace index
     auto it = spec2indexmap.find(specids[i]);
     if (it == spec2indexmap.end()) {
-      stringstream errss;
+      std::stringstream errss;
       errss << "Spectrum Number " << specids[i] << " is not found. "
             << "Instrument won't be edited for this spectrum. \n";
       g_log.error(errss.str());
@@ -263,6 +282,12 @@ void EditInstrumentGeometry::exec() {
     storPhis[workspaceindex] = phis[i];
     if (renameDetID)
       storDetIDs[workspaceindex] = vec_detids[i];
+    if (haveDifas)
+      storDIFAs[workspaceindex] = difas[i];
+    if (haveDifcs)
+      storDIFCs[workspaceindex] = difcs[i];
+    if (haveTZeros)
+      storTZEROs[workspaceindex] = tzeros[i];
 
     g_log.debug() << "workspace index = " << workspaceindex
                   << " is for Spectrum " << specids[i] << '\n';
@@ -285,8 +310,9 @@ void EditInstrumentGeometry::exec() {
 
   // Create a new instrument from scratch any way.
   auto instrument = std::make_shared<Geometry::Instrument>(name);
+
   if (!bool(instrument)) {
-    stringstream errss;
+    std::stringstream errss;
     errss << "Trying to use a Parametrized Instrument as an Instrument.";
     g_log.error(errss.str());
     throw std::runtime_error(errss.str());
@@ -299,8 +325,9 @@ void EditInstrumentGeometry::exec() {
   instrument->markAsSamplePos(samplepos);
   samplepos->setPos(0.0, 0.0, 0.0);
 
-  Geometry::ObjComponent *source =
-      new Geometry::ObjComponent("Source", instrument.get());
+  Geometry::ObjComponent *source = new Geometry::ObjComponent(
+      "Source", Geometry::IObject_sptr(new Geometry::CSGObject),
+      instrument.get());
   instrument->add(source);
   instrument->markAsSource(source);
   source->setPos(0.0, 0.0, -1.0 * l1);
@@ -314,8 +341,12 @@ void EditInstrumentGeometry::exec() {
       newdetid = storDetIDs[i];
     else
       newdetid = detid_t(i) + 100;
-    Geometry::Detector *detector =
-        new Geometry::Detector("det", newdetid, samplepos);
+
+    std::ostringstream detname;
+    detname << "det" << newdetid;
+    Geometry::Detector *detector = new Geometry::Detector(
+        detname.str(), newdetid,
+        Geometry::IObject_sptr(new Geometry::CSGObject), instrument.get());
 
     // Set up new detector parameters related to new instrument
     double l2 = storL2s[i];
@@ -341,6 +372,17 @@ void EditInstrumentGeometry::exec() {
 
   // Add the new instrument
   workspace->setInstrument(instrument);
+
+  auto &paramMap = workspace->instrumentParameters();
+  for (size_t i = 0; i < workspace->getNumberHistograms(); i++) {
+    auto detector = workspace->getDetector(i);
+    if (haveDifas)
+      paramMap.addDouble(detector->getComponentID(), "DIFA", storDIFAs[i]);
+    if (haveDifcs)
+      paramMap.addDouble(detector->getComponentID(), "DIFC", storDIFCs[i]);
+    if (haveTZeros)
+      paramMap.addDouble(detector->getComponentID(), "TZERO", storTZEROs[i]);
+  }
 }
 
 } // namespace Algorithms

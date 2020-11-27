@@ -140,6 +140,70 @@ Kernel::V3D SpectrumInfo::position(const size_t index) const {
   return newPos / static_cast<double>(spectrumDefinition(index).size());
 }
 
+/** Calculate average diffractometer constants (DIFA, DIFC, TZERO) of detectors
+ * associated with this spectrum. Use calibrated values where possible, filling
+ * in with uncalibrated values where they're missing
+ *  @param index Index of the spectrum that constants are required for
+ *  @param warningDets A vector containing the det ids where an uncalibrated
+ * value was used in the situation where some dets have calibrated values and
+ * some don't
+ *  @return tuple containing the average constants
+ */
+std::tuple<double, double, double>
+SpectrumInfo::diffractometerConstants(const size_t index,
+                                      std::vector<detid_t> &warningDets) const {
+  if (m_detectorInfo.isScanning()) {
+    throw std::runtime_error("Retrieval of diffractometer constants not "
+                             "implemented for scanning instrument");
+  }
+  auto spectrumDef = checkAndGetSpectrumDefinition(index);
+  std::vector<size_t> detectorIndicesOnly;
+  std::vector<detid_t> calibratedDets;
+  std::vector<detid_t> uncalibratedDets;
+  std::transform(spectrumDef.begin(), spectrumDef.end(),
+                 std::back_inserter(detectorIndicesOnly),
+                 [](auto const &pair) { return pair.first; });
+  double difa{0.}, difc{0.}, tzero{0.};
+  for (const auto &detIndex : detectorIndicesOnly) {
+    auto newDiffConstants = m_detectorInfo.diffractometerConstants(
+        detIndex, calibratedDets, uncalibratedDets);
+    difa += std::get<0>(newDiffConstants);
+    difc += std::get<1>(newDiffConstants);
+    tzero += std::get<2>(newDiffConstants);
+  }
+
+  if (calibratedDets.size() > 0 && uncalibratedDets.size() > 0) {
+    warningDets.insert(warningDets.end(), uncalibratedDets.begin(),
+                       uncalibratedDets.end());
+  };
+  return {difa / static_cast<double>(spectrumDefinition(index).size()),
+          difc / static_cast<double>(spectrumDefinition(index).size()),
+          tzero / static_cast<double>(spectrumDefinition(index).size())};
+}
+
+/** Calculate average uncalibrated DIFC value of detectors associated with this
+ * spectrum
+ *  @param index Index of the spectrum that DIFC is required for
+ *  @return The average DIFC
+ */
+double SpectrumInfo::difcUncalibrated(const size_t index) const {
+  double difc{0.0};
+
+  bool atLeastOneCalibrated = false, atLeastOneUncalibrated = false;
+  if (m_detectorInfo.isScanning()) {
+    throw std::runtime_error("Retrieval of diffractometer constants not "
+                             "implemented for scanning instrument");
+  }
+  auto spectrumDef = checkAndGetSpectrumDefinition(index);
+  std::vector<size_t> detectorIndicesOnly;
+  std::transform(spectrumDef.begin(), spectrumDef.end(),
+                 std::back_inserter(detectorIndicesOnly),
+                 [](auto const &pair) { return pair.first; });
+  for (const auto &detIndex : detectorIndicesOnly)
+    difc += m_detectorInfo.difcUncalibrated(detIndex);
+  return difc / static_cast<double>(spectrumDefinition(index).size());
+}
+
 /// Returns true if the spectrum is associated with detectors in the instrument.
 bool SpectrumInfo::hasDetectors(const size_t index) const {
   // Workspaces can contain invalid detector IDs. Those IDs will be silently

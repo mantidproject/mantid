@@ -51,8 +51,7 @@ double PawleyFit::getTransformedCenter(double d, const Unit_sptr &unit) const {
     return d;
   }
 
-  return UnitConversion::run(*m_dUnit, *unit, d, 0, 0, 0, DeltaEMode::Elastic,
-                             0);
+  return UnitConversion::run(*m_dUnit, *unit, d, 0, 0, 0, DeltaEMode::Elastic);
 }
 
 /**

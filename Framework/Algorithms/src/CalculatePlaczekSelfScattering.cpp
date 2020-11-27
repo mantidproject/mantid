@@ -168,7 +168,7 @@ void CalculatePlaczekSelfScattering::exec() {
       const double sinThetaBy2 = sin(specInfo.twoTheta(specIndex) / 2.0);
       Kernel::Units::Wavelength wavelength;
       wavelength.initialize(specInfo.l1(), specInfo.l2(specIndex),
-                            specInfo.twoTheta(specIndex), 0, 1.0, 1.0);
+                            specInfo.twoTheta(specIndex), 0);
       for (size_t xIndex = 0; xIndex < xLambda.size() - 1; xIndex++) {
         const double term1 = (f - 1.0) * phi1[xIndex];
         const double term2 = f * (1.0 - eps1[xIndex]);

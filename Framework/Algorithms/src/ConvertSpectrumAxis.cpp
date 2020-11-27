@@ -99,27 +99,32 @@ void ConvertSpectrumAxis::exec() {
       emode = 1;
     else if (emodeStr == "Indirect")
       emode = 2;
-    const double delta = 0.0;
     double efixed;
     for (size_t i = 0; i < nHist; i++) {
       std::vector<double> xval{inputWS->x(i).front(), inputWS->x(i).back()};
       double twoTheta, l1val, l2;
+      ExtraParametersMap pmap{};
       if (!spectrumInfo.isMonitor(i)) {
         twoTheta = spectrumInfo.twoTheta(i);
         l2 = spectrumInfo.l2(i);
         l1val = l1;
         efixed =
             getEfixed(spectrumInfo.detector(i), inputWS, emode); // get efixed
+        std::vector<int> emptyWarningVec;
+        auto [difa, difc, tzero] =
+            spectrumInfo.diffractometerConstants(i, emptyWarningVec);
+        pmap = {{UnitConversionParameters::efixed, efixed},
+                {UnitConversionParameters::difa, difa},
+                {UnitConversionParameters::difc, difc},
+                {UnitConversionParameters::tzero, tzero}};
       } else {
         twoTheta = 0.0;
         l2 = l1;
         l1val = 0.0;
         efixed = DBL_MIN;
       }
-      fromUnit->toTOF(xval, emptyVector, l1val, l2, twoTheta, emode, efixed,
-                      delta);
-      toUnit->fromTOF(xval, emptyVector, l1val, l2, twoTheta, emode, efixed,
-                      delta);
+      fromUnit->toTOF(xval, emptyVector, l1val, l2, twoTheta, emode, pmap);
+      toUnit->fromTOF(xval, emptyVector, l1val, l2, twoTheta, emode, pmap);
       double value = (xval.front() + xval.back()) / 2;
       indexMap.emplace(value, i);
     }

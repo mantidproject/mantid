@@ -23,7 +23,6 @@ set(SRC_FILES
     src/DateTimeValidator.cpp
     src/DateValidator.cpp
     src/DeltaEMode.cpp
-    src/Diffraction.cpp
     src/DirectoryValidator.cpp
     src/DiskBuffer.cpp
     src/DllOpen.cpp
@@ -174,7 +173,6 @@ set(INC_FILES
     inc/MantidKernel/DateTimeValidator.h
     inc/MantidKernel/DateValidator.h
     inc/MantidKernel/DeltaEMode.h
-    inc/MantidKernel/Diffraction.h
     inc/MantidKernel/DirectoryValidator.h
     inc/MantidKernel/DiskBuffer.h
     inc/MantidKernel/DllConfig.h
@@ -345,7 +343,6 @@ set(TEST_FILES
     DateTimeValidatorTest.h
     DateValidatorTest.h
     DeltaEModeTest.h
-    DiffractionTest.h
     DirectoryValidatorTest.h
     DiskBufferISaveableTest.h
     DiskBufferTest.h

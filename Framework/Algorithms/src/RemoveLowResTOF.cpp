@@ -246,17 +246,9 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
 
   const double l1 = spectrumInfo.l1();
 
-  // Get a vector of detector IDs
-  std::vector<detid_t> detNumbers;
-  const auto &detSet = m_inputWS->getSpectrum(workspaceIndex).getDetectorIDs();
-  detNumbers.assign(detSet.begin(), detSet.end());
-
   double tmin = 0.;
   if (isEmpty(m_wavelengthMin)) {
-    std::map<detid_t, double> offsets; // just an empty offsets map
-    double dspmap = Conversion::tofToDSpacingFactor(
-        l1, spectrumInfo.l2(workspaceIndex),
-        spectrumInfo.twoTheta(workspaceIndex), detNumbers, offsets);
+    double dspmap = spectrumInfo.difcUncalibrated(workspaceIndex);
 
     // this is related to the reference tof
     double sqrtdmin =
@@ -274,7 +266,7 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
     // unfortunately there isn't a good way to convert a single value
     std::vector<double> X(1), temp(1);
     X[0] = m_wavelengthMin;
-    wavelength->toTOF(X, temp, l1, l2, 0., 0, 0., 0.);
+    wavelength->toTOF(X, temp, l1, l2, 0., 0);
     tmin = X[0];
   }
 

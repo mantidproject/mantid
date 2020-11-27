@@ -93,6 +93,12 @@ public:
         "Polar", "90.1,90.2,90.3,90.4,90.5,90.6"));
     TS_ASSERT_THROWS_NOTHING(
         editdetector.setPropertyValue("Azimuthal", "1,2,3,4,5,6"));
+    TS_ASSERT_THROWS_NOTHING(
+        editdetector.setPropertyValue("DIFA", "11,12,13,14,15,16"));
+    TS_ASSERT_THROWS_NOTHING(
+        editdetector.setPropertyValue("DIFC", "21,22,23,24,25,26"));
+    TS_ASSERT_THROWS_NOTHING(
+        editdetector.setPropertyValue("TZERO", "31,32,33,34,35,36"));
 
     // 4. Run
     TS_ASSERT_THROWS_NOTHING(editdetector.execute());
@@ -108,6 +114,13 @@ public:
     checkDetectorParameters(workspace, 1, 2.2, 90.2, 2.0);
     checkDetectorParameters(workspace, 3, 4.4, 90.4, 4.0);
     checkDetectorParameters(workspace, 5, 6.6, 90.6, 6.0);
+
+    checkParameterValues(workspace, 0, "DIFA", 11);
+    checkParameterValues(workspace, 0, "DIFC", 21);
+    checkParameterValues(workspace, 0, "TZERO", 31);
+    checkParameterValues(workspace, 1, "DIFA", 12);
+    checkParameterValues(workspace, 1, "DIFC", 22);
+    checkParameterValues(workspace, 1, "TZERO", 32);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -181,5 +194,14 @@ public:
     const auto &spectrumInfo = workspace->spectrumInfo();
     TS_ASSERT_EQUALS(spectrumInfo.hasUniqueDetector(wsindex), true);
     TS_ASSERT_EQUALS(spectrumInfo.detector(wsindex).getID(), detid);
+  }
+
+  void checkParameterValues(const API::MatrixWorkspace_sptr &workspace,
+                            size_t wsindex, std::string paramName,
+                            double expectedParamValue) {
+    auto detector = workspace->getDetector(wsindex);
+    auto pmap = workspace->instrumentParameters();
+    auto pvalue = pmap.get(detector.get(), paramName);
+    TS_ASSERT_DELTA(pvalue->value<double>(), expectedParamValue, 0.00001);
   }
 };

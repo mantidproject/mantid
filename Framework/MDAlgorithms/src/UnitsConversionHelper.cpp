@@ -10,6 +10,8 @@
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
 
+using Mantid::Kernel::UnitConversionParameters;
+
 namespace Mantid {
 namespace MDAlgorithms {
 
@@ -273,9 +275,11 @@ void UnitsConversionHelper::initialize(
   if (m_pEfixedArray)
     Efix = static_cast<double>(*(m_pEfixedArray + 0));
 
-  m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, 0.);
+  m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
+                           {{UnitConversionParameters::efixed, Efix}});
   if (m_SourceWSUnit) {
-    m_SourceWSUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, 0.);
+    m_SourceWSUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
+                               {{UnitConversionParameters::efixed, Efix}});
   }
 }
 /** Method updates unit conversion given the index of detector parameters in the
@@ -287,26 +291,27 @@ void UnitsConversionHelper::updateConversion(size_t i) {
   case (CnvrtToMD::ConvertFast):
     return;
   case (CnvrtToMD::ConvertFromTOF): {
-    double delta(std::numeric_limits<double>::quiet_NaN());
     m_TwoTheta = (*m_pTwoThetas)[i];
     m_L2 = (*m_pL2s)[i];
     double Efix = m_Efix;
     if (m_pEfixedArray)
       Efix = static_cast<double>(*(m_pEfixedArray + i));
 
-    m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, delta);
+    m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
+                             {{UnitConversionParameters::efixed, Efix}});
     return;
   }
   case (CnvrtToMD::ConvertByTOF): {
-    double delta(std::numeric_limits<double>::quiet_NaN());
     m_TwoTheta = (*m_pTwoThetas)[i];
     m_L2 = (*m_pL2s)[i];
     double Efix = m_Efix;
     if (m_pEfixedArray)
       Efix = static_cast<double>(*(m_pEfixedArray + i));
 
-    m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, delta);
-    m_SourceWSUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode, Efix, delta);
+    m_TargetUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
+                             {{UnitConversionParameters::efixed, Efix}});
+    m_SourceWSUnit->initialize(m_L1, m_L2, m_TwoTheta, m_Emode,
+                               {{UnitConversionParameters::efixed, Efix}});
     return;
   }
   default:
