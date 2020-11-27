@@ -11,8 +11,9 @@ import unittest
 from unittest import mock
 
 import matplotlib as mpl
-from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace,
-                              GroupWorkspaces, CreateSingleValuedWorkspace, CreateMDHistoWorkspace)
+from mantid.api import AnalysisDataService
+from mantid.simpleapi import (CreateEmptyTableWorkspace, CreateSampleWorkspace, CreateSingleValuedWorkspace,
+                              CreateMDHistoWorkspace, CreateWorkspace, ConjoinWorkspaces, GroupWorkspaces)
 from mantidqt.utils.qt.testing import start_qapplication
 from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
 from qtpy.QtWidgets import QMainWindow
@@ -44,7 +45,7 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         ws2d_ragged = CreateWorkspace(DataX=[10, 20, 30], DataY=[1, 2, 3], NSpec=1, OutputWorkspace='Ragged')
         temp = CreateWorkspace(DataX=[15, 25, 35, 45], DataY=[1, 2, 3, 4], NSpec=1)
         ConjoinWorkspaces(ws2d_ragged, temp, CheckOverlapping=False)
-        ws2d_ragged = mantid.mtd['Ragged']
+        ws2d_ragged = AnalysisDataService.retrieve('Ragged')
 
         self.w_spaces = [mat_ws, table_ws, group_ws, single_val_ws]
         self.ws_names = ['MatWS', 'TableWS', 'GroupWS', 'SingleValWS']
