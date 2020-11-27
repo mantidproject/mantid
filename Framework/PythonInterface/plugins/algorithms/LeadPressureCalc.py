@@ -5,8 +5,8 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # Original Author: Chris Ridley
-from mantid.kernel import Direction, FloatBoundedValidator, StringMandatoryValidator
-from mantid.api import AlgorithmFactory, PythonAlgorithm, MatrixWorkspaceProperty
+from mantid.kernel import Direction, FloatBoundedValidator
+from mantid.api import AlgorithmFactory, PythonAlgorithm
 from mantid.simpleapi import CreateEmptyTableWorkspace, RenameWorkspace
 import numpy as np
 
@@ -33,8 +33,8 @@ def calculate_pressure(d_spacing, temp):
 
     return 1.5 * k_quad * (((v_calc / v_quad) ** (-2 / 3)) - 1) * (1 + ((v_calc / v_quad) ** (-2 / 3) - 1)) ** (5 / 2) \
         * (1 + ((3 / 2) * (factor - 4) * ((((v_calc / v_quad) ** (-2 / 3)) - 1) / 2)))\
-        + ((3 / 2) * (((k_quad*k00pp) + (factor - 4) * (factor - 3) + (35 / 9)) *
-                      ((((v_calc / v_quad) ** (-2 / 3))-1) / 2) ** 2))
+        + ((3 / 2) * (((k_quad*k00pp) + (factor - 4) * (factor - 3) + (35 / 9))
+                      * ((((v_calc / v_quad) ** (-2 / 3))-1) / 2) ** 2))
 
 
 class LeadPressureCalc(PythonAlgorithm):
@@ -125,4 +125,3 @@ AlgorithmFactory.subscribe(LeadPressureCalc)
 # using fcc-Pb (0 < P < 13 GPa, T > 100 K)
 # RAL Technical Report, RAL-TR-2019-002
 # https://epubs.stfc.ac.uk/work/40740875
-
