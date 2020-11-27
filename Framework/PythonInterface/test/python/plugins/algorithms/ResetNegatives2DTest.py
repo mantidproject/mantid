@@ -1,44 +1,3 @@
-from mantid.simpleapi import CreateWorkspace, ResetNegatives2D
-
-# create a 2D Workspace
-# repeat this block for each spectrum
-xData = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0,
-         9.0]  # d values for one spectrum (one dPerpendicular value)
-yData = ['1', '2', '3', '4']  # dPerpendicular binedges
-zData = [1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -2.0, 1.0, 1.0]  # intensity values
-eData = [1, 1, 1, 1, 1, 1, 1, 1, 1]  # error values
-
-# used to join all spectra
-xDataTotal = []  # d Values for all spectra
-zDataTotal = []  # intensity values for all spectra
-eDataTotal = []  # error values for all spectra
-nSpec = len(yData) - 1  # number of spectra
-
-# Create d and intensity lists for workspace
-for i in range(0, nSpec):
-    xDataTotal.extend(
-        xData
-    )  # extends the list of x values in accordance to the number of spectra used
-    zDataTotal.extend(
-        zData
-    )  # extends the list of intensity values in accordance to the number of spectra used
-    eDataTotal.extend(
-        eData
-    )  # extends the list of error values in accordance to the number of spectra used
-
-# Create a 2D Workspace containing d and dPerpendicular values with intensities
-CreateWorkspace(OutputWorkspace='Usage_Example',
-                DataX=xDataTotal,
-                DataY=zDataTotal,
-                DataE=eDataTotal,
-                WorkspaceTitle='test',
-                NSpec=nSpec,
-                UnitX='dSpacing',
-                VerticalAxisUnit='dSpacingPerpendicular',
-                VerticalAxisValues=yData)
-# Reset the negative values
-ResetNegatives2D(Workspace="Usage_Example")
-
 # Mantid Repository : https://github.com/mantidproject/mantid
 
 #
@@ -64,7 +23,7 @@ import numpy as np
 from mantid.simpleapi import ResetNegatives2D, SaveP2D, CreateWorkspace, DeleteWorkspace
 
 
-class RemoveNegativesTest(unittest.TestCase):
+class ResetNegatives2DTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
 
@@ -137,7 +96,7 @@ class RemoveNegativesTest(unittest.TestCase):
 
         return ws
 
-    def test_savep2d_raw(self):
+    def test_resetNegatives2D(self):
 
         ResetNegatives2D(self._workspace)
 
