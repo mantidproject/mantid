@@ -31,6 +31,7 @@ Improvements
 - Plots containing axvline's and axhline's can be saved and are reproduced when loading a project that contains them.
 - Wireframe plots no longer spill over the axes when their limits are reduced.
 - In the instrument widget, the integration scroll bar can be moved, widened and shrunk using the arrow keys.
+- Add an autoscale checkbox to plot config dialog.
 
 Bugfixes
 ########
