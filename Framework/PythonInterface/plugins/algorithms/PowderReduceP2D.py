@@ -4,13 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import numpy as np
-import os, math
-
-from scipy.special import lambertw
+import math
 from mantid.kernel import Direction, IntBoundedValidator, FloatBoundedValidator
 from mantid.api import (AlgorithmFactory, DistributedDataProcessorAlgorithm,
-                        FileProperty, FileAction, Progress)
+                        FileProperty, FileAction)
 from mantid.simpleapi import Load, FindDetectorsPar, FilterBadPulses, RemovePromptPulse, LoadDiffCal, MaskDetectors, AlignDetectors, \
     ConvertUnits, CylinderAbsorption, Divide, Bin2DPowderDiffraction, StripVanadiumPeaks, FFTSmooth, Minus, SaveP2D, ResetNegatives2D
 
@@ -124,8 +121,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             validator=FloatBoundedValidator(lower=0.0),
             direction=Direction.Input,
             doc=
-            'Minimum value for lambda. Everything smaller gets removed. If zero it is not used and values get calculated from '\
-                'center wavelength.'
+            'Minimum value for lambda. Everything smaller gets removed. If zero it is not used and values get calculated from '
+            'center wavelength.'
         )
         self.declareProperty(
             'LambdaMax',
@@ -133,8 +130,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             validator=FloatBoundedValidator(lower=0.0),
             direction=Direction.Input,
             doc=
-            'Maximum value for lambda. Everything bigger gets removed. If zero it is not used and values get calculated from '\
-                'center wavelength.'
+            'Maximum value for lambda. Everything bigger gets removed. If zero it is not used and values get calculated from '
+            'center wavelength.'
         )
         self.declareProperty(
             'DMin',
@@ -142,8 +139,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             validator=FloatBoundedValidator(lower=0.0),
             direction=Direction.Input,
             doc=
-            'Minimum value for d. Everything smaller gets removed. If zero it is not used and values get calculated from 2 '\
-                'theta and lambda.'
+            'Minimum value for d. Everything smaller gets removed. If zero it is not used and values get calculated from 2 '
+            'theta and lambda.'
         )
         self.declareProperty(
             'DMax',
@@ -159,8 +156,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             validator=FloatBoundedValidator(lower=0.0),
             direction=Direction.Input,
             doc=
-            'Minimum value for dp. Everything smaller gets removed. If zero it is not used and values get calculated from '\
-                '2 theta and lambda.'
+            'Minimum value for dp. Everything smaller gets removed. If zero it is not used and values get calculated from '
+            '2 theta and lambda.'
         )
         self.declareProperty(
             'DpMax',
@@ -168,8 +165,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             validator=FloatBoundedValidator(lower=0.0),
             direction=Direction.Input,
             doc=
-            'Maximum value for dp. Everything bigger gets removed. If zero it is not used and values get calculated from 2 '\
-                'theta and lambda.'
+            'Maximum value for dp. Everything bigger gets removed. If zero it is not used and values get calculated from 2 '
+            'theta and lambda.'
         )
         grp2 = 'Data Ranges'
         self.setPropertyGroup('TwoThetaMin', grp2)
@@ -244,8 +241,8 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             self.getProperty('WorkspaceName').value + '_mask',
             direction=Direction.Input,
             doc=
-            'If given but not as a SpecialWorkspace2D, the masking from this workspace will be copied. If given as a '\
-                'SpecialWorkspace2D, the masking is read from its Y values.'
+            'If given but not as a SpecialWorkspace2D, the masking from this workspace will be copied. If given as a '
+            'SpecialWorkspace2D, the masking is read from its Y values.'
         )
         self.copyProperties('MaskDetectors', [
             'SpectraList', 'DetectorList', 'WorkspaceIndexList',
@@ -272,16 +269,16 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             5.08,
             direction=Direction.Input,
             doc=
-            'The ABSORPTION cross-section, at 1.8 Angstroms, for the sample material in barns. Column 8 of a table generated '\
-                'from http://www.ncnr.nist.gov/resources/n-lengths/.'
+            'The ABSORPTION cross-section, at 1.8 Angstroms, for the sample material in barns. Column 8 of a table generated '
+            'from http://www.ncnr.nist.gov/resources/n-lengths/.'
         )
         self.declareProperty(
             'ScatteringXSection',
             5.1,
             direction=Direction.Input,
             doc=
-            'The (coherent + incoherent) scattering cross-section for the sample material in barns. Column 7 of a table generated '\
-                'from http://www.ncnr.nist.gov/resources/n-lengths/.'
+            'The (coherent + incoherent) scattering cross-section for the sample material in barns. Column 7 of a table generated '
+            'from http://www.ncnr.nist.gov/resources/n-lengths/.'
         )
         self.declareProperty(
             'SampleNumberDensity',
@@ -395,17 +392,17 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
             '20,2',
             direction=Direction.Input,
             doc=
-            'The filter parameters: For Zeroing, 1 parameter: n - an integer greater than 1 meaning that the Fourier coefficients with '\
-                'frequencies outside the 1/n of the original range will be set to zero. For Butterworth, 2 parameters: n and order, '\
-                    'giving the 1/n truncation and the smoothing order.'
+            'The filter parameters: For Zeroing, 1 parameter: n - an integer greater than 1 meaning that the Fourier coefficients with '
+            'frequencies outside the 1/n of the original range will be set to zero. For Butterworth, 2 parameters: n and order, '
+            'giving the 1/n truncation and the smoothing order.'
         )
         self.declareProperty(
             'IgnoreXBins',
             True,
             direction=Direction.Input,
             doc=
-            'Ignores the requirement that X bins be linear and of the same size. Set this to true if you are using log binning. '\
-                'The output X axis will be the same as the input either way.'
+            'Ignores the requirement that X bins be linear and of the same size. Set this to true if you are using log binning. '
+            'The output X axis will be the same as the input either way.'
         )
         self.declareProperty('AllSpectra',
                              True,
@@ -451,11 +448,9 @@ class PowderReduceP2D(DistributedDataProcessorAlgorithm):
         self._calcDMax = self._lambdaMax / (
             2. * math.sin(self._tthMin / 2. / 180. * math.pi))
         self._calcDpMin = math.sqrt(
-            self._lambdaMin**2 -
-            2. * math.log(math.cos(self._tthMin / 2. / 180. * math.pi)))
+            self._lambdaMin**2 - 2. * math.log(math.cos(self._tthMin / 2. / 180. * math.pi)))
         self._calcDpMax = math.sqrt(
-            self._lambdaMax**2 -
-            2. * math.log(math.cos(self._tthMax / 2. / 180. * math.pi)))
+            self._lambdaMax**2 - 2. * math.log(math.cos(self._tthMax / 2. / 180. * math.pi)))
         if self._calcDMin > self._dMin:
             self._dMin = self._calcDMin
         if self._calcDMax < self._dMax:

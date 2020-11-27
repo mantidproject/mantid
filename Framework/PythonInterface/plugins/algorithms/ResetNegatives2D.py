@@ -6,8 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid import mtd
-from mantid.api import (AlgorithmFactory, PythonAlgorithm, WorkspaceProperty,
-                        Progress)
+from mantid.api import (AlgorithmFactory, PythonAlgorithm, WorkspaceProperty)
 from mantid.kernel import Direction
 
 
@@ -38,7 +37,6 @@ class ResetNegatives2D(PythonAlgorithm):
         data = mtd[self.getPropertyValue('Workspace')]
         ndp = data.getDimension(1).getNBins()
         last_dp = -1
-        last_d = -1
         intMin = 1
         n = 0
 
@@ -46,7 +44,8 @@ class ResetNegatives2D(PythonAlgorithm):
         for cdp in range(ndp):
             dp = data.getDimension(1).getX(cdp)
 
-            if (dp == last_dp): continue
+            if (dp == last_dp):
+                continue
             last_dp = dp
             # iterate through each dValue
             for cd in range(data.getDimension(0).getNBins()):
