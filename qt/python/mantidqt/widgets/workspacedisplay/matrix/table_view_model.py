@@ -17,6 +17,7 @@ class MatrixWorkspaceTableViewModelType(Enum):
     x = 'x'
     y = 'y'
     e = 'e'
+    dx = 'dx'
 
 
 class MatrixWorkspaceTableViewModel(QAbstractTableModel):
@@ -52,7 +53,8 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         :type model_type: MatrixWorkspaceTableViewModelType
         """
         assert model_type in [MatrixWorkspaceTableViewModelType.x, MatrixWorkspaceTableViewModelType.y,
-                              MatrixWorkspaceTableViewModelType.e], "The Model type must be either X, Y or E."
+                              MatrixWorkspaceTableViewModelType.e, MatrixWorkspaceTableViewModelType.dx], \
+            "The Model type must be either X, Y, E or DX."
 
         super(MatrixWorkspaceTableViewModel, self).__init__()
 
@@ -83,6 +85,8 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             self.relevant_data = self.ws.readY
         elif self.type == MatrixWorkspaceTableViewModelType.e:
             self.relevant_data = self.ws.readE
+        elif self.type == MatrixWorkspaceTableViewModelType.dx:
+            self.relevant_data = self.ws.readDx
         else:
             raise ValueError("Unknown model type {0}".format(self.type))
 
