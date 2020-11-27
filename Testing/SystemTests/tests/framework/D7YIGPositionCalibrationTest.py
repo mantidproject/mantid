@@ -47,7 +47,7 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
         D7YIGPositionCalibration(InputWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
                                  MinimalDistanceBetweenPeaks=1.75, BankOffsets=[-3, -3, 1], ClearCache=True,
-                                 FitOutputWorkspace='test_shortWavelength')
+                                 FittingMethod='Individual', FitOutputWorkspace='test_shortWavelength')
         self.assertTrue(calibration_output_path)
         self._check_fit_output('test_shortWavelength')
         self._check_load_data_with_calibration(calibration_output_path)
@@ -60,7 +60,7 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
         D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
                                  MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-3, -3, 1], ClearCache=True,
-                                 FitOutputWorkspace='test_intermediateWavelength')
+                                 FittingMethod='Individual', FitOutputWorkspace='test_intermediateWavelength')
         self.assertTrue(path.exists(calibration_output_path))
         self._check_fit_output('test_intermediateWavelength')
         self._check_load_data_with_calibration(calibration_output_path)
@@ -73,7 +73,7 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
         D7YIGPositionCalibration(InputWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
                                  MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-3, -3, 1], ClearCache=True,
-                                 FitOutputWorkspace=fit_output_workspace)
+                                 FittingMethod='Individual', FitOutputWorkspace=fit_output_workspace)
         self.assertTrue(path.exists(calibration_output_path))
         self._check_fit_output('test_longWavelength')
         self._check_load_data_with_calibration(calibration_output_path)
