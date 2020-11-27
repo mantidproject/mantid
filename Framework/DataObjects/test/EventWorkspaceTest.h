@@ -163,6 +163,32 @@ public:
     TS_ASSERT_THROWS(ew->blocksize(), const std::logic_error &);
   }
 
+  void
+  test_that_getNumberBins_returns_the_correct_number_of_bins_for_different_histograms_in_a_ragged_EventWorkspace() {
+    ew = createEventWorkspace(true, false);
+    ew->getSpectrum(0).setHistogram(BinEdges({0., 10., 20.}));
+
+    TS_ASSERT(ew->isRaggedWorkspace());
+    TS_ASSERT_EQUALS(ew->getNumberBins(0), 2);
+    TS_ASSERT_EQUALS(ew->getNumberBins(1), 1025);
+  }
+
+  void
+  test_that_getNumberBins_throws_when_provided_an_index_which_is_too_large() {
+    ew = createEventWorkspace(true, false);
+    TS_ASSERT_THROWS_NOTHING(ew->getNumberBins(1024));
+    TS_ASSERT_THROWS(ew->getNumberBins(1025), const std::invalid_argument &);
+  }
+
+  void
+  test_that_getMaxNumberBins_returns_the_correct_number_for_a_ragged_EventWorkspace() {
+    ew = createEventWorkspace(true, false);
+    ew->getSpectrum(0).setHistogram(BinEdges({0., 10., 20.}));
+
+    TS_ASSERT(ew->isRaggedWorkspace());
+    TS_ASSERT_EQUALS(ew->getMaxNumberBins(), 1025);
+  }
+
   void testUnequalBins() {
     ew = createEventWorkspace(true, false);
     // normal behavior
