@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid.simpleapi import *
-from mantid.kernel import Direction, FloatBoundedValidator
+from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator
 from mantid.api import FileAction, FileProperty, MatrixWorkspaceProperty, MultipleFileProperty, \
     NumericAxis, Progress, PropertyMode, PythonAlgorithm, ITableWorkspaceProperty
 from datetime import date
@@ -110,6 +110,12 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                                      optional=PropertyMode.Optional),
                              doc="The table workspace name that will be used to store all of the calibration parameters.")
 
+        self.declareProperty(name="FittingMethod",
+                             defaultValue="None",
+                             validator=StringListValidator(["None", "Individual", "Global"]),
+                             direction=Direction.Input,
+                             doc="Option to provide the initial guesses or perform fits for Bragg peaks either individually or globally.")
+
     def PyExec(self):
         nfiles = self.getPropertyValue("Filenames").count(',')
         if nfiles > 0:
@@ -147,23 +153,25 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         # fits gaussian to peaks for each pixel, returns peaks as a function of their expected position
         progress.report('Fitting YIG peaks')
         fitted_peaks_positions, single_peaks_fits = self._fit_bragg_peaks(conjoined_scan, yig_peaks_positions)
-        self._created_ws_names.append(fitted_peaks_positions)
         self._created_ws_names.append(single_peaks_fits)
-        ReplaceSpecialValues(InputWorkspace=fitted_peaks_positions, OutputWorkspace=fitted_peaks_positions,
-                             NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, checkErrorAxis=True)
-        # fits the wavelength, bank gradients and individual
-        progress.report('Fitting bank and detector parameters')
-        detector_parameters = self._fit_detector_positions(fitted_peaks_positions)
-        # calculates pixel positions, bank offsets and slopes from the fit output
-        progress.report('Calculating detector positions')
-        wavelength, pixel_offsets, bank_offsets, bank_slopes = self._calculate_pixel_positions(detector_parameters)
-        # prints the Instrument Parameter File that can be used in the ILLPolarizedDiffraction loader
-        progress.report('Printing out calibration')
-        self._print_parameter_file(wavelength, pixel_offsets, bank_offsets, bank_slopes)
+        if self.getPropertyValue('FittingMethod') in ['Individual', 'Global']:
+            self._created_ws_names.append(fitted_peaks_positions)
+            ReplaceSpecialValues(InputWorkspace=fitted_peaks_positions, OutputWorkspace=fitted_peaks_positions,
+                                 NaNValue=0, NaNError=0, InfinityValue=0, InfinityError=0, checkErrorAxis=True)
+            # fits the wavelength, bank gradients and individual
+            progress.report('Fitting bank and detector parameters')
+            detector_parameters = self._fit_detector_positions(fitted_peaks_positions)
+            # calculates pixel positions, bank offsets and slopes from the fit output
+            progress.report('Calculating detector positions')
+            wavelength, pixel_offsets, bank_offsets, bank_slopes = self._calculate_pixel_positions(detector_parameters)
+            # prints the Instrument Parameter File that can be used in the ILLPolarizedDiffraction loader
+            progress.report('Printing out calibration')
+            self._print_parameter_file(wavelength, pixel_offsets, bank_offsets, bank_slopes)
 
-        if not self.getProperty('FitOutputWorkspace').isDefault:
-            self.setProperty('FitOutputWorkspace', detector_parameters)
-        self._created_ws_names.append(detector_parameters.name())
+            if not self.getProperty('FitOutputWorkspace').isDefault:
+                self.setProperty('FitOutputWorkspace', detector_parameters)
+            self._created_ws_names.append(detector_parameters.name())
+
         if self.getProperty('ClearCache').value:
             DeleteWorkspaces(WorkspaceList=self._created_ws_names)
         self._created_ws_names.clear() #cleanup
@@ -309,75 +317,114 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             peak_list.append(single_spectrum_peaks)
         return peak_list
 
+    def _call_fit(self, ws, out_name, fit_function, fit_constraints, initial_peak_no, pixel_no, peaks_list,
+                         results_x, results_y, results_e, startX=None, endX=None):
+        """Calls the fit algorithm using the provided parameters and updates result vectors with the fit output."""
+        fit_output = Fit(Function=';'.join(fit_function),
+                         InputWorkspace=ws,
+                         WorkspaceIndex=pixel_no,
+                         Constraints=','.join(fit_constraints),
+                         StartX=startX,
+                         EndX=endX,
+                         CreateOutput=True,
+                         IgnoreInvalidData=True,
+                         Output='out')
+        RenameWorkspace(InputWorkspace='out_Workspace', OutputWorkspace=out_name)
+        param_table = fit_output.OutputParameters
+        peak_id = initial_peak_no
+        if param_table:
+            row_count = param_table.rowCount()
+            for row_no in range(row_count):
+                row_data = param_table.row(row_no)
+                if 'PeakCentre' in row_data['Name']:
+                    _, _, peak_pos_expected = peaks_list[peak_id]
+                    results_x[peak_id] = peak_pos_expected
+                    results_y[peak_id] = row_data['Value']
+                    results_e[peak_id] = row_data['Error']
+                    peak_id += 1
+        return results_x, results_y, results_e
+
     def _fit_bragg_peaks(self, ws, yig_peaks):
         """ Fits peaks defined in the yig_peaks argument
         returns a workspace with fitted peak positions
         on the Y axis and the expected positions on the X axis"""
+        fitting_method = self.getPropertyValue('FittingMethod')
         max_n_peaks = len(max(yig_peaks, key=len))
         conjoined_peak_fit_name = 'conjoined_peak_fit_{}'.format(self.getPropertyValue('FitOutputWorkspace'))
         ws_names = []
-        function = "name=FlatBackground, A0=1e-4;name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}"
-        constraints = "f1.Height > 0, f1.Sigma < {0}, {1} < f1.PeakCentre < {2}"
+        background = 'name=FlatBackground, A0=1e-4'
+        function = "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}"
+        constraints = "f{0}.Height > 0, f{0}.Sigma < {1}, {2} < f{0}.PeakCentre < {3}"
         for pixel_no in range(mtd[ws].getNumberHistograms()):
-            # create the needed columns in the output workspace
-            results_x = np.zeros(max_n_peaks)
-            results_y = np.zeros(max_n_peaks)
-            results_e = np.zeros(max_n_peaks)
             single_spectrum_peaks = yig_peaks[pixel_no]
             if len(single_spectrum_peaks) >= 1:
+                ws_name = 'pixel_{}'.format(pixel_no)
+                if fitting_method == 'Individual':
+                    ws_name += '_peak_{}'
+                # create the needed columns in the output workspace
+                results_x = np.zeros(max_n_peaks)
+                results_y = np.zeros(max_n_peaks)
+                results_e = np.zeros(max_n_peaks)
                 peak_no = 0
+                function_no = 0
+                fit_function = [background]
+                fit_constraints = []
                 for peak_intensity, peak_centre_guess, peak_centre_expected in single_spectrum_peaks:
-                    fit_function = function.format(float(peak_centre_guess), peak_intensity, 0.5*self._peakWidth)
-                    fit_constraints = constraints.format(0.75 * self._peakWidth,
-                                                         peak_centre_guess - self._minDistance,
-                                                         peak_centre_guess + self._minDistance)
-                    ws_name = 'pixel_{0}_peak_{1}'.format(pixel_no, peak_no)
-                    ws_names.append(ws_name)
-                    fit_output = Fit(Function=fit_function,
-                                     InputWorkspace=ws,
-                                     WorkspaceIndex=pixel_no,
-                                     StartX=peak_centre_expected - self._minDistance,
-                                     EndX=peak_centre_expected + self._minDistance,
-                                     Constraints=fit_constraints,
-                                     CreateOutput=True,
-                                     IgnoreInvalidData=True,
-                                     Output='out')
-                    RenameWorkspace(InputWorkspace='out_Workspace', OutputWorkspace=ws_name)
-                    param_table = fit_output.OutputParameters
-                    row_count = 0
-                    if param_table:
-                        row_count = param_table.rowCount()
-                    for row_no in range(row_count):
-                        row_data = param_table.row(row_no)
-                        if 'A0' in row_data['Name']:
-                            background = row_data['Value']
-                        if 'PeakCentre' in row_data['Name']:
-                            intensity, peak_pos_guess, peak_pos_expected = single_spectrum_peaks[peak_no]
-                            if abs(param_table.row(row_no - 1)['Value'] / background) > 0.1:
-                                results_x[peak_no] = peak_pos_expected
-                                results_y[peak_no] = row_data['Value']
-                                results_e[peak_no] = row_data['Error']
+                    function_no += 1
+                    fit_function.append(function.format(float(peak_centre_guess), peak_intensity, 0.5*self._peakWidth))
+                    fit_constraints.append(constraints.format(function_no, self._peakWidth,
+                                                              peak_centre_guess - self._minDistance,
+                                                              peak_centre_guess + self._minDistance))
+                    if fitting_method == 'Individual':
+                        name = ws_name.format(peak_no)
+                        ws_names.append(name)
+                        results_x, results_y, results_e = self._call_fit(ws, name, fit_function, fit_constraints,
+                                                              peak_no, pixel_no, single_spectrum_peaks,
+                                                              results_x, results_y, results_e,
+                                                              startX=peak_centre_expected - self._minDistance,
+                                                              endX=peak_centre_expected + self._minDistance)
+                        fit_function = [background]
+                        fit_constraints = []
+                        function_no = 0
                     peak_no += 1
-            CreateWorkspace(OutputWorkspace='ws',
-                            DataX=results_x,
-                            DataY=results_y,
-                            DataE=results_e,
-                            UnitX='degrees',
-                            NSpec=1)
-            try:
-                ConjoinWorkspaces(InputWorkspace1=conjoined_peak_fit_name, InputWorkspace2='ws',
-                                  CheckOverlapping=False,
-                                  YAxisLabel='TwoTheta_fit',
-                                  YAxisUnit='degrees')
-            except ValueError:
-                RenameWorkspace(InputWorkspace='ws', OutputWorkspace=conjoined_peak_fit_name)
 
-        y_axis = NumericAxis.create(self._D7NumberPixels)
-        for pixel_no in range(self._D7NumberPixels):
-            y_axis.setValue(pixel_no, pixel_no+1)
-        mtd[conjoined_peak_fit_name].replaceAxis(1, y_axis)
+                if fitting_method in ['Individual', 'Global']:
+                    if fitting_method == 'Global':
+                        ws_names.append(ws_name)
+                        results_x, results_y, results_e = self._call_fit(ws, ws_name, fit_function, fit_constraints, 0, pixel_no,
+                                                              single_spectrum_peaks, results_x, results_y, results_e)
+                    CreateWorkspace(OutputWorkspace='ws',
+                                    DataX=results_x,
+                                    DataY=results_y,
+                                    DataE=results_e,
+                                    UnitX='degrees',
+                                    NSpec=1)
+                    try:
+                        ConjoinWorkspaces(InputWorkspace1=conjoined_peak_fit_name, InputWorkspace2='ws',
+                                          CheckOverlapping=False,
+                                          YAxisLabel='TwoTheta_fit',
+                                          YAxisUnit='degrees')
+                    except ValueError:
+                        RenameWorkspace(InputWorkspace='ws', OutputWorkspace=conjoined_peak_fit_name)
+                elif fitting_method == 'None':
+                    ws_names.append(ws_name)
+                    single_spectrum_name = '{}_single_spectrum'.format(ws_name)
+                    ExtractSpectra(InputWorkspace=ws, OutputWorkspace=single_spectrum_name,
+                                   WorkspaceIndexList=[pixel_no])
+                    EvaluateFunction(Function=';'.join(fit_function),
+                                     InputWorkspace=single_spectrum_name,
+                                     OutputWorkspace=ws_name)
+                    DeleteWorkspace(Workspace=single_spectrum_name)
 
-        single_peak_fit_results_name = 'single_peak_fits_{}'.format(self.getPropertyValue('FitOutputWorkspace'))
+        if fitting_method in ['Individual', 'Global']:
+            y_axis = NumericAxis.create(self._D7NumberPixels)
+            for pixel_no in range(self._D7NumberPixels):
+                y_axis.setValue(pixel_no, pixel_no+1)
+            mtd[conjoined_peak_fit_name].replaceAxis(1, y_axis)
+            # clean up after fitting:
+            DeleteWorkspaces(['out_Parameters', 'out_NormalisedCovarianceMatrix'])
+
+        single_peak_fit_results_name = 'peak_fits_{}'.format(self.getPropertyValue('FitOutputWorkspace'))
         GroupWorkspaces(InputWorkspaces=ws_names, OutputWorkspace=single_peak_fit_results_name)
 
         #clean up:

@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from mantid.simpleapi import config, mtd, D7YIGPositionCalibration, Load, LoadILLPolarizedDiffraction
-from mantid.api import ITableWorkspace
+from mantid.api import ITableWorkspace, WorkspaceGroup
 import os.path
 from os import path
 import tempfile
@@ -17,6 +17,7 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
     def setUpClass(cls):
         config.appendDataSearchSubDir('ILL/D7/')
         Load('402652_403041.nxs', OutputWorkspace='shortWavelengthScan')
+        Load('394458_394882.nxs', OutputWorkspace='longWavelengthScan')
 
     @classmethod
     def tearDownClass(cls):
@@ -29,6 +30,15 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             D7YIGPositionCalibration()
 
+    def test_no_fitting(self):
+        approximate_wavelength = '5.7' # Angstrom
+        self.assertTrue(mtd['longWavelengthScan'])
+        D7YIGPositionCalibration(InputWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
+                                 YIGPeaksFile='D7_YIG_peaks.xml', FitOutputWorkspace='test_no_fitting',
+                                 FittingMethod='None', ClearCache=False)
+        self.assertTrue(mtd['peak_fits_test_no_fitting'])
+        self.assertTrue(isinstance(mtd['peak_fits_test_no_fitting'], WorkspaceGroup))
+
     def test_shortWavelength(self):
         approximate_wavelength = '3.14' # Angstrom
         self.assertTrue(mtd['shortWavelengthScan'])
@@ -36,7 +46,7 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
         D7YIGPositionCalibration(InputWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=output_filename,
                                  MinimalDistanceBetweenPeaks=1.75, BankOffsets=[-3, -3, 1],
-                                 FitOutputWorkspace='test_shortWavelength')
+                                 FitOutputWorkspace='test_shortWavelength', FittingMethod='Individual')
         self.assertTrue(path.exists(output_filename))
         self.assertTrue(mtd['test_shortWavelength'])
         self.assertTrue(isinstance(mtd['test_shortWavelength'], ITableWorkspace))
