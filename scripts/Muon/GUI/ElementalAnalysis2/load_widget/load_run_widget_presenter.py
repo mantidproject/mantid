@@ -170,8 +170,6 @@ class LoadRunWidgetPresenterEA(object):
         return run_list
 
     def load_runs(self, runs):
-        self._model._data_context.clear_run_info()
-        self._model.clear_loaded_data()
         self.disable_notifier.notify_subscribers()
         self.handle_loading(runs)
 
@@ -207,12 +205,12 @@ class LoadRunWidgetPresenterEA(object):
 
     def on_loading_finished(self):
         try:
-            if self.run_list:
-                latest_loaded_run = self._model.get_latest_loaded_run()
-                if isinstance(latest_loaded_run, list):
-                    self.run_list = latest_loaded_run
-                else:
-                    self.run_list[0] = latest_loaded_run
+            latest_loaded_run = self._model.get_latest_loaded_run()
+            if isinstance(latest_loaded_run, list):
+                self.run_list = latest_loaded_run
+            else:
+                self.run_list[0] = latest_loaded_run
+
             run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
             self._model.current_runs = run_list
 
