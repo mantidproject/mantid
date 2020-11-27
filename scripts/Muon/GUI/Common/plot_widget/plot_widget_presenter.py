@@ -247,6 +247,7 @@ class PlotWidgetPresenterCommon(HomeTabSubWidget):
         """
         is_added = group_pair_info["is_added"]
         name = group_pair_info["name"]
+        print("boo",group_pair_info)
         if is_added:
             self.handle_added_group_or_pair_to_plot(name)
         else:

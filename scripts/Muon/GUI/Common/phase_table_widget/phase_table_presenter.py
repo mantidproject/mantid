@@ -6,14 +6,17 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common import thread_model
-from Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases, run_PhaseQuad
+from Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases, run_PhaseQuad, extract_single_spec
 from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from mantidqt.utils.observer_pattern import Observable,GenericObserver,GenericObservable
 import re
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, \
     get_phase_table_workspace_group_name, \
-    get_phase_quad_workspace_name, get_fitting_workspace_name, get_base_data_directory
+    get_phase_quad_workspace_name, get_fitting_workspace_name, get_base_data_directory, \
+    split_phasequad
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+from mantid.api import AnalysisDataService
+
 import mantid
 
 
@@ -86,7 +89,7 @@ class PhaseTablePresenter(object):
 
     def calculate_phase_quad(self):
         parameters = self.get_parameters_for_phase_quad()
-        phasequad_workspace_name = get_phase_quad_workspace_name(parameters['InputWorkspace'], parameters['PhaseTable'])
+        phasequad_workspace_name = "phaseQuad" #get_phase_quad_workspace_name(parameters['InputWorkspace'], parameters['PhaseTable'])
 
         self.current_alg = mantid.AlgorithmManager.create("PhaseQuad")
         phase_quad = run_PhaseQuad(parameters, self.current_alg, phasequad_workspace_name)
@@ -95,13 +98,14 @@ class PhaseTablePresenter(object):
         # need to move to muon context some of this to get rebin correct
         # run will come from new table
         # want to make phase_quad the name of the row
-        print("hi", type(phase_quad), phase_quad)
-        phasequad_obj = MuonPhasequad(phase_quad, parameters['InputWorkspace'],parameters['PhaseTable'] )
-        phasequad_obj.update_asymmetry_workspace(
-                     phase_quad,
-                     [62260],
-                     rebin=False)
-        self.add_phase_quad_to_ADS(parameters['InputWorkspace'], phase_quad, phasequad_obj)
+        workspaces = split_phasequad(phase_quad)
+        for name in workspaces:
+            phasequad_obj = MuonPhasequad(name, parameters['InputWorkspace'],parameters['PhaseTable'] )
+            phasequad_obj.update_asymmetry_workspace(
+                         name,
+                         [62260],
+                         rebin=False)
+            self.add_phase_quad_to_ADS(parameters['InputWorkspace'], name, phasequad_obj)
 
     def get_parameters_for_phase_quad(self):
         parameters = {}
