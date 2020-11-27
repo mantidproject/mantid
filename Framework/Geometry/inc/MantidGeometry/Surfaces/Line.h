@@ -8,6 +8,7 @@
 
 #include "MantidGeometry/DllConfig.h"
 #include "MantidKernel/V3D.h"
+#include <boost/container/small_vector.hpp>
 #include <complex>
 #include <list>
 
@@ -48,7 +49,7 @@ private:
   int lambdaPair(
       const int ix,
       const std::pair<std::complex<double>, std::complex<double>> &SQ,
-      std::vector<Kernel::V3D> &PntOut) const;
+      boost::container::small_vector<Kernel::V3D, 5> &PntOut) const;
 
 public:
   Line();
@@ -72,10 +73,14 @@ public:
   int setLine(const Kernel::V3D &,
               const Kernel::V3D &); ///< input Origin + direction
 
-  int intersect(std::vector<Kernel::V3D> &, const Quadratic &) const;
-  int intersect(std::vector<Kernel::V3D> &, const Cylinder &) const;
-  int intersect(std::vector<Kernel::V3D> &, const Plane &) const;
-  int intersect(std::vector<Kernel::V3D> &, const Sphere &) const;
+  int intersect(boost::container::small_vector<Kernel::V3D, 5> &,
+                const Quadratic &) const;
+  int intersect(boost::container::small_vector<Kernel::V3D, 5> &,
+                const Cylinder &) const;
+  int intersect(boost::container::small_vector<Kernel::V3D, 5> &,
+                const Plane &) const;
+  int intersect(boost::container::small_vector<Kernel::V3D, 5> &,
+                const Sphere &) const;
 };
 
 } // namespace Geometry

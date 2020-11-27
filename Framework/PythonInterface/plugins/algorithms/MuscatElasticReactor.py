@@ -548,6 +548,7 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                 PP=PP1 + PP2 + PP3 + self._surface_g[i]
                 # IF ON SURFACE, USE FIRST DERIVATIVE
                 if PP == 0.:
+                    # DH : should this be 2*a*X + b??
                     PPx = (self._surface_a[i]*X + self._surface_b[i])*VX
                     PPy = (self._surface_c[i]*Y + self._surface_d[i])*VY
                     PPz = (self._surface_e[i]*Z + self._surface_f[i])*VZ
@@ -597,7 +598,8 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
         X = self._position[0]
         Y = self._position[1]
         Z = self._position[2]
-        AA = self._surface_a[I]*VX*VX + self._surface_c[I]*VY*VY + self._surface_e[I]
+        # Solve a(x+t*vx)^2 + c(y+t*vy)^2 + e(z+t*vz)^2 + b(x+t*vx) + d(y+t*vy) + f(z+t*vz) + g = 0
+        AA = self._surface_a[I]*VX*VX + self._surface_c[I]*VY*VY + self._surface_e[I]*VZ*VZ
         BB1 = 2*(self._surface_a[I]*VX*X + self._surface_c[I]*VY*Y + self._surface_e[I]*VZ*Z)
         BB2 = self._surface_b[I]*VX + self._surface_d[I]*VY + self._surface_f[I]*VZ
         BB = BB1 + BB2

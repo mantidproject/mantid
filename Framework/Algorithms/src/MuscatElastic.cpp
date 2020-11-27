@@ -9,6 +9,7 @@
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
@@ -57,6 +58,9 @@ void MuscatElastic::init() {
                                             Direction::Input, wsValidator),
       "The name of the workspace containing S(q).  The input workspace must "
       "have X units of momentum transfer.");
+  declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
+                      "OutputWorkspace", "", Direction::Output),
+                  "Name for the WorkspaceGroup that will be created.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "ScatteringCrossSection", "", Direction::Input,
@@ -114,8 +118,11 @@ void MuscatElastic::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
 
+  std::vector<MatrixWorkspace_sptr> workspaces;
+
   // std::vector<MatrixWorkspace_uptr> outputWSs(nhists);
   auto outputWS = createOutputWorkspace(*inputWS);
+  auto noAbsOutputWS = createOutputWorkspace(*inputWS);
 
   const MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
 
@@ -209,16 +216,46 @@ void MuscatElastic::exec() {
   //  interpolateFromSparse(*outputWS, *sparseWS, interpolateOpt);
   //}
 
+  std::string wsname = "NoAbsorption";
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+      "NoAbsorptionWorkspace", wsname, Direction::Output));
+  setProperty("NoAbsorptionWorkspace", std::move(noAbsOutputWS));
+
+  wsname = "Corrections";
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+      "CorrectionsWorkspace", wsname, Direction::Output));
+  setProperty("CorrectionsWorkspace", std::move(outputWS));
+
+  workspaces.emplace_back(std::move(noAbsOutputWS));
+  workspaces.emplace_back(std::move(outputWS));
+
+  // Create workspace group that holds output workspaces
+  auto wsgroup = std::make_shared<WorkspaceGroup>();
+
+  for (auto &workspace : workspaces) {
+    wsgroup->addWorkspace(workspace);
+  }
+  // set the output property
+  setProperty("OutputWorkspace", wsgroup);
+
   g_log.warning() << "Calls to interceptSurface= " +
                          std::to_string(m_callsToInterceptSurface) + "\n";
 }
 
+/**
+ * Calculate a new mean free path
+ * @param absorbXsection The sample absorption cross section at a specific
+ * wavelength (barns)
+ * @param numberDensity The sample number density in atoms per cubic Angstrom
+ * @param totalScatterXsection The sample scattering cross section (barns)
+ * @return a tuple containing the mean free path (metres) and the total cross
+ * section (barns)
+ */
 std::tuple<double, double>
 MuscatElastic::new_vector(double absorbXsection, double numberDensity,
                           double totalScatterXsection) {
-  double sig_scat = 0.;
-  auto sig_total = sig_scat + absorbXsection;
-  auto vmu = numberDensity * sig_total;
+  auto sig_total = totalScatterXsection + absorbXsection;
+  auto vmu = 100 * numberDensity * sig_total;
   auto vmfp = 1.00 / vmu;
   return std::make_tuple(vmfp, sig_total);
 }
@@ -226,10 +263,10 @@ MuscatElastic::new_vector(double absorbXsection, double numberDensity,
 double MuscatElastic::interpolateLogQuadratic(
     const MatrixWorkspace_sptr workspaceToInterpolate, double x) {
   if (x > workspaceToInterpolate->x(0).back()) {
-    return workspaceToInterpolate->x(0).back();
+    return workspaceToInterpolate->y(0).back();
   }
   if (x < workspaceToInterpolate->x(0).front()) {
-    return workspaceToInterpolate->x(0).front();
+    return workspaceToInterpolate->y(0).front();
   }
   // assume log(cross section) is quadratic in k
   auto idx = workspaceToInterpolate->yIndexOfX(x);
@@ -301,7 +338,7 @@ std::tuple<bool, double> MuscatElastic::scatter(
   weight = weight / pow(QSS, nScatters - 1);
 
   Kernel::V3D directionToDetector = detPos - track.startPoint();
-  auto &prevDirection = track.direction();
+  Kernel::V3D prevDirection = track.direction();
   directionToDetector.normalize();
   track.reset(track.startPoint(), directionToDetector);
   int nlinks = sample.getShape().interceptSurface(track);
@@ -313,7 +350,7 @@ std::tuple<bool, double> MuscatElastic::scatter(
     return {false, 0};
   }
   double dl = track.front().distInsideObject;
-  auto q = directionToDetector - prevDirection;
+  auto q = (directionToDetector - prevDirection) * kinc;
   auto SQ = interpolateLogQuadratic(SOfQ, q.norm());
   auto AT2 = exp(-dl / vmfp);
   weight = weight * AT2 * SQ * scatteringXSection / (4 * M_PI);
@@ -405,9 +442,9 @@ void MuscatElastic::updateWeightAndPosition(
     Geometry::Track &track, double &weight, const double vmfp,
     const double sigma_total, Kernel::PseudoRandomNumberGenerator &rng) {
   double dl = track.front().distInsideObject;
-  weight = weight * (1.0 - exp(-dl / vmfp));
-  double vl = -(vmfp * log(1 - rng.nextValue() * weight));
-  weight = weight / sigma_total;
+  double b4 = (1.0 - exp(-dl / vmfp));
+  double vl = -(vmfp * log(1 - rng.nextValue() * b4));
+  weight = weight * b4 / sigma_total;
   inc_xyz(track, vl);
 }
 
@@ -516,7 +553,7 @@ MuscatElastic::createOutputWorkspace(const MatrixWorkspace &inputWS) const {
   // be treated as a distribution
   outputWS->setDistribution(true);
   outputWS->setYUnit("");
-  outputWS->setYUnitLabel("Attenuation factor");
+  outputWS->setYUnitLabel("Scattered Intensity");
   return outputWS;
 }
 

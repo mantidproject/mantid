@@ -26,7 +26,10 @@ LineIntersectVisit::LineIntersectVisit(const Kernel::V3D &Pt,
 /**
   Constructor
 */
-{}
+{
+  PtOut.reserve(2);
+  DOut.reserve(2);
+}
 
 void LineIntersectVisit::Accept(const Surface &Surf)
 /**
