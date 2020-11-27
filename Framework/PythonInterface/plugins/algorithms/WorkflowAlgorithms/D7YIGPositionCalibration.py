@@ -318,7 +318,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         return peak_list
 
     def _call_fit(self, ws, out_name, fit_function, fit_constraints, initial_peak_no, pixel_no, peaks_list,
-                         results_x, results_y, results_e, startX=None, endX=None):
+                  results_x, results_y, results_e, startX=None, endX=None):
         """Calls the fit algorithm using the provided parameters and updates result vectors with the fit output."""
         fit_output = Fit(Function=';'.join(fit_function),
                          InputWorkspace=ws,
@@ -379,10 +379,10 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                         name = ws_name.format(peak_no)
                         ws_names.append(name)
                         results_x, results_y, results_e = self._call_fit(ws, name, fit_function, fit_constraints,
-                                                              peak_no, pixel_no, single_spectrum_peaks,
-                                                              results_x, results_y, results_e,
-                                                              startX=peak_centre_expected - self._minDistance,
-                                                              endX=peak_centre_expected + self._minDistance)
+                                                                         peak_no, pixel_no, single_spectrum_peaks,
+                                                                         results_x, results_y, results_e,
+                                                                         startX=peak_centre_expected - self._minDistance,
+                                                                         endX=peak_centre_expected + self._minDistance)
                         fit_function = [background]
                         fit_constraints = []
                         function_no = 0
@@ -391,8 +391,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                 if fitting_method in ['Individual', 'Global']:
                     if fitting_method == 'Global':
                         ws_names.append(ws_name)
-                        results_x, results_y, results_e = self._call_fit(ws, ws_name, fit_function, fit_constraints, 0, pixel_no,
-                                                              single_spectrum_peaks, results_x, results_y, results_e)
+                        results_x, results_y, results_e = self._call_fit(ws, ws_name, fit_function, fit_constraints,
+                                                                         0, pixel_no, single_spectrum_peaks,
+                                                                         results_x, results_y, results_e)
                     CreateWorkspace(OutputWorkspace='ws',
                                     DataX=results_x,
                                     DataY=results_y,
