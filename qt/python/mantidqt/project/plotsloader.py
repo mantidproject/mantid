@@ -261,8 +261,14 @@ class PlotsLoader(object):
 
         ax.set_xscale(properties["xAxisScale"])
         ax.set_yscale(properties["yAxisScale"])
-        ax.set_xlim(properties["xLim"])
-        ax.set_ylim(properties["yLim"])
+        if "xAutoScale" in properties and properties["xAutoScale"]:
+            ax.autoscale(True, axis="x")
+        else:
+            ax.set_xlim(properties["xLim"])
+        if "yAutoScale" in properties and properties["yAutoScale"]:
+            ax.autoscale(True, axis="y")
+        else:
+            ax.set_ylim(properties["yLim"])
         ax.show_minor_gridlines = properties["showMinorGrid"]
 
     def update_axis(self, axis_, properties):

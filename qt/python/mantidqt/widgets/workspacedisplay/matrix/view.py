@@ -65,6 +65,9 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         self.table_x = self.add_table("X values")
         self.table_e = self.add_table("E values")
 
+        if self.presenter.hasDx:
+            self.table_dx = self.add_table("dX values")
+
     def add_table(self, label):
         tab = MatrixWorkspaceTableView(self)
 
@@ -156,10 +159,12 @@ class MatrixWorkspaceDisplayView(QTabWidget):
         verticalHeader.addAction(plot_spectrum_action)
         verticalHeader.addAction(plot_spectrum_with_errors_action)
 
-    def set_model(self, model_x, model_y, model_e):
+    def set_model(self, model_x, model_y, model_e, model_dx):
         self._set_table_model(self.table_x, model_x, MatrixWorkspaceTableViewModelType.x)
         self._set_table_model(self.table_y, model_y, MatrixWorkspaceTableViewModelType.y)
         self._set_table_model(self.table_e, model_e, MatrixWorkspaceTableViewModelType.e)
+        if self.presenter.hasDx:
+            self._set_table_model(self.table_dx, model_dx, MatrixWorkspaceTableViewModelType.dx)
 
     @staticmethod
     def _set_table_model(table, model, expected_model_type):

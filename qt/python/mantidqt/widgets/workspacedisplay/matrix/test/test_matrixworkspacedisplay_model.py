@@ -36,11 +36,12 @@ class MatrixWorkspaceDisplayModelTest(unittest.TestCase):
         ws.name = Mock(return_value=expected_name)
         model = MatrixWorkspaceDisplayModel(ws)
 
-        x_model, y_model, e_model = model.get_item_model()
+        x_model, y_model, e_model, dx_model = model.get_item_model()
 
         self.assertEqual(x_model.type, MatrixWorkspaceTableViewModelType.x)
         self.assertEqual(y_model.type, MatrixWorkspaceTableViewModelType.y)
         self.assertEqual(e_model.type, MatrixWorkspaceTableViewModelType.e)
+        self.assertEqual(dx_model.type, MatrixWorkspaceTableViewModelType.dx)
 
     def test_raises_with_unsupported_workspace(self):
         self.assertRaises(ValueError, lambda: MatrixWorkspaceDisplayModel([]))

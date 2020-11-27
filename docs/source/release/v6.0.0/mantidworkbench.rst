@@ -11,6 +11,7 @@ New Features
 - Added a colorbar scale option to the workbench plot settings. This allows the user to choose between a linear (default) or logarithmic scale.
 - Added a show legend checkbox to the workbench plot settings. This allows users to choose whether to display the legend on graphs by default.
 - Added a ``Log`` colorbar scale option to the Sliceviewer. This differs from the existing ``Symlog`` option as it prohibits negative values.
+- Added a Dx data tab on the data window when a workspace has Dx data.
 
 Improvements
 ############
@@ -31,6 +32,7 @@ Improvements
 - Wireframe plots no longer spill over the axes when their limits are reduced.
 - In the instrument widget, the integration scroll bar can be moved, widened and shrunk using the arrow keys.
 - The matplotlib `zoom` selection box is now more visible on colorfill and sliceviewer plots.
+- Add an autoscale checkbox to plot config dialog.
 
 Bugfixes
 ########

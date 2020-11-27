@@ -35,6 +35,8 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         :param ads_observer: ADS observer to be used by the presenter. If not provided the default
                              one is used. Mainly intended for testing.
         """
+        self.hasDx = any([ws.hasDx(i) for i in range(ws.getNumberHistograms())])
+
         # Create model and view, or accept mocked versions
         self.model = model if model else MatrixWorkspaceDisplayModel(ws)
         self.view = view if view else MatrixWorkspaceDisplayView(self, parent)
@@ -44,7 +46,6 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
                                                                    presenter=self)
 
         super(MatrixWorkspaceDisplay, self).__init__(self.container.status_bar)
-
         self.plot = plot
 
         self.ads_observer = ads_observer if ads_observer else WorkspaceDisplayADSObserver(self)
@@ -54,6 +55,8 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         self.view.set_context_menu_actions(self.view.table_y)
         self.view.set_context_menu_actions(self.view.table_x)
         self.view.set_context_menu_actions(self.view.table_e)
+        if self.hasDx:
+            self.view.set_context_menu_actions(self.view.table_dx)
 
         # connect to replace_signal signal to handle replacement of the workspace
         self.container.replace_signal.connect(self.action_replace_workspace)
@@ -97,14 +100,15 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         table_ws = CreateEmptyTableWorkspace(OutputWorkspace=ws.name() + "_spectra")
         num_rows = ws.blocksize()
         table_ws.setRowCount(num_rows)
+        num_col = 4 if self.hasDx else 3
         for i, row in enumerate(selected_rows):
             table_ws.addColumn("double", "XS" + str(row))
             table_ws.addColumn("double", "YS" + str(row))
             table_ws.addColumn("double", "ES" + str(row))
 
-            col_x = 3 * i
-            col_y = 3 * i + 1
-            col_e = 3 * i + 2
+            col_x = num_col * i
+            col_y = num_col * i + 1
+            col_e = num_col * i + 2
 
             data_y = ws.readY(row)
             data_x = ws.readX(row)
@@ -114,6 +118,14 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
                 table_ws.setCell(j, col_x, data_x[j])
                 table_ws.setCell(j, col_y, data_y[j])
                 table_ws.setCell(j, col_e, data_e[j])
+
+            # if there is DX data, add a column for it
+            if self.hasDx:
+                table_ws.addColumn("double", "DXS" + str(row))
+                col_dx = num_col * i + 3
+                data_dx = ws.readDx(row)
+                for j in range(num_rows):
+                    table_ws.setCell(j, col_dx, data_dx[j])
 
     def action_copy_bin_to_table(self, table):
         selected_cols = [i.column() for i in table.selectionModel().selectedColumns()]
@@ -125,12 +137,13 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
         num_rows = ws.getNumberHistograms()
         table_ws.setRowCount(num_rows)
         table_ws.addColumn("double", "X")
+        num_col = 3 if self.hasDx else 2
         for i, col in enumerate(selected_cols):
             table_ws.addColumn("double", "YB" + str(col))
             table_ws.addColumn("double", "YE" + str(col))
 
-            col_y = 2 * i + 1
-            col_e = 2 * i + 2
+            col_y = num_col * i + 1
+            col_e = num_col * i + 2
 
             for j in range(num_rows):
                 data_y = ws.readY(j)
@@ -141,8 +154,15 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
                         table_ws.setCell(j, 0, ws.getAxis(1).getValue(j))
                     else:
                         table_ws.setCell(j, 0, j)
-                table_ws.setCell(j, col_y, data_y[col])
                 table_ws.setCell(j, col_e, data_e[col])
+                table_ws.setCell(j, col_y, data_y[col])
+
+            if self.hasDx:
+                table_ws.addColumn("double", "XE" + str(col))
+                col_dx = num_col * i + 3
+                for j in range(num_rows):
+                    data_dx = ws.readDx(j)
+                    table_ws.setCell(j, col_dx, data_dx[col])
 
     def action_copy_cells(self, table):
         self.copy_cells(table)
@@ -203,5 +223,7 @@ class MatrixWorkspaceDisplay(ObservingPresenter, DataCopier):
             return self.model._ws.readX
         elif type == MatrixWorkspaceTableViewModelType.e:
             return self.model._ws.readE
+        elif type == MatrixWorkspaceTableViewModelType.dx:
+            return self.model._ws.readDx
         else:
             raise ValueError("Unknown TableViewModel type {}".format(type))
