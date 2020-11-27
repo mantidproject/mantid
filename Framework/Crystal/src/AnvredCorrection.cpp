@@ -207,7 +207,10 @@ void AnvredCorrection::exec() {
     // Loop through the bins in the current spectrum
     for (int64_t j = 0; j < specSize; j++) {
 
-      double lambda = (unitStr == "TOF") ? wl.convertSingleFromTOF(points[j], L1, L2, scattering, 0, 0, 0) : points[j];
+      double lambda =
+          (unitStr == "TOF")
+              ? wl.convertSingleFromTOF(points[j], L1, L2, scattering, 0)
+              : points[j];
 
       if (m_returnTransmissionOnly) {
         Y[j] = 1.0 / this->getEventWeight(lambda, scattering);
@@ -296,7 +299,7 @@ void AnvredCorrection::execEvent() {
       double lambda = ev.tof();
 
       if ("TOF" == unitStr)
-        lambda = wl.convertSingleFromTOF(lambda, L1, L2, scattering, 0, 0, 0);
+        lambda = wl.convertSingleFromTOF(lambda, L1, L2, scattering, 0);
 
       double value = this->getEventWeight(lambda, scattering);
 

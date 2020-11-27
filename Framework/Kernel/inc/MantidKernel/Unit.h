@@ -12,6 +12,7 @@
 #include "MantidKernel/UnitLabel.h"
 #include <utility>
 
+#include <map>
 #include <vector>
 #ifndef Q_MOC_RUN
 #include <memory>
@@ -21,6 +22,8 @@
 
 namespace Mantid {
 namespace Kernel {
+
+enum class UnitConversionParameters { efixed, delta, difa, difc, tzero };
 
 /** The base units (abstract) class. All concrete units should inherit from
     this class and provide implementations of the caption(), label(),
@@ -82,8 +85,16 @@ public:
    * meV)
    *  @param _delta ::    Not currently used
    */
-  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const double &_l2,
-             const double &_twoTheta, const int &_emode, const double &_efixed, const double &_delta);
+  void
+  toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
+        const double &_l1, const double &_l2, const double &_twoTheta,
+        const int &_emode,
+        std::initializer_list<std::pair<const UnitConversionParameters, double>>
+            params = {});
+  void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
+             const double &_l1, const double &_l2, const double &_twoTheta,
+             const int &_emode,
+             std::map<UnitConversionParameters, double> &params);
 
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
    *  @param xvalue ::   A single X-value to convert
@@ -97,8 +108,10 @@ public:
    *  @param delta ::    Not currently used
    *  @return the value in TOF units.
    */
-  double convertSingleToTOF(const double xvalue, const double &l1, const double &l2, const double &twoTheta,
-                            const int &emode, const double &efixed, const double &delta);
+  double
+  convertSingleToTOF(const double xvalue, const double &l1, const double &l2,
+                     const double &twoTheta, const int &emode,
+                     const std::map<UnitConversionParameters, double> &params);
 
   /** Convert from time-of-flight to the concrete unit. TOF is in microseconds.
    *  @param xdata ::    The array of X data to be converted
@@ -114,8 +127,16 @@ public:
    * meV)
    *  @param _delta ::    Not currently used
    */
-  void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1, const double &_l2,
-               const double &_twoTheta, const int &_emode, const double &_efixed, const double &_delta);
+  void fromTOF(
+      std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1,
+      const double &_l2, const double &_twoTheta, const int &_emode,
+      std::initializer_list<std::pair<const UnitConversionParameters, double>>
+          params = {});
+
+  void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
+               const double &_l1, const double &_l2, const double &_twoTheta,
+               const int &_emode,
+               std::map<UnitConversionParameters, double> &params);
 
   /** Convert from the time-of-flight to the concrete unit. TOF is in
    * microseconds.
@@ -130,8 +151,10 @@ public:
    *  @param delta ::    Not currently used
    *  @return the value in these units.
    */
-  double convertSingleFromTOF(const double xvalue, const double &l1, const double &l2, const double &twoTheta,
-                              const int &emode, const double &efixed, const double &delta);
+  double convertSingleFromTOF(
+      const double xvalue, const double &l1, const double &l2,
+      const double &twoTheta, const int &emode,
+      const std::map<UnitConversionParameters, double> &params = {});
 
   /** Initialize the unit to perform conversion using singleToTof() and
    *singleFromTof()
@@ -141,12 +164,14 @@ public:
    *  @param _twoTheta :: The scattering angle (in radians)
    *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
    *2=indirect geometry)
-   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2)
-   *(in meV)
-   *  @param _delta ::    Not currently used
+   *  @param params ::    map containing other optional parameters:
+   *                      Fixed energy: EI (emode=1) or EF (emode=2) (in meV)
+   *                      Diffractometer constants (DIFA, DIFC, TZERO)
+   *                      Delta: unused
    */
-  void initialize(const double &_l1, const double &_l2, const double &_twoTheta, const int &_emode,
-                  const double &_efixed, const double &_delta);
+  void initialize(const double &_l1, const double &_l2, const double &_twoTheta,
+                  const int &_emode,
+                  std::map<UnitConversionParameters, double> params = {});
 
   /** Finalize the initialization. This will be overridden by subclasses as
    * needed. */
@@ -184,6 +209,10 @@ protected:
   // Add a 'quick conversion' for a unit pair
   void addConversion(std::string to, const double &factor, const double &power = 1.0) const;
 
+  virtual void
+  validateExtraParams(int emode,
+                      std::map<UnitConversionParameters, double> &params);
+
   /// The unit values have been initialized
   bool initialized;
   /// l1 ::       The source-sample distance (in metres)
@@ -195,10 +224,10 @@ protected:
   /// emode ::    The energy mode (0=elastic, 1=direct geometry, 2=indirect
   /// geometry)
   int emode;
+  /// additional parameters
   /// efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in meV)
-  double efixed;
-  /// delta ::    Not currently used
-  double delta;
+  /// difc :: diffractometer constant DIFC
+  std::map<UnitConversionParameters, double> m_params;
 
 private:
   /// A 'quick conversion' requires the constant by which to multiply the input
@@ -213,6 +242,8 @@ private:
   /// The table of possible 'quick conversions'
   static ConversionsMap s_conversionFactors;
 };
+
+using ExtraParametersMap = std::map<UnitConversionParameters, double>;
 
 /// Shared pointer to the Unit base class
 using Unit_sptr = std::shared_ptr<Unit>;
@@ -306,6 +337,9 @@ public:
   Wavelength();
 
 protected:
+  void validateExtraParams(
+      int emode, std::map<UnitConversionParameters, double> &params) override;
+  double efixed;
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorTo;   ///< Constant factor for to conversion
   double sfpFrom;    ///< Extra correction factor in from conversion
@@ -374,13 +408,20 @@ public:
   Unit *clone() const override;
   double conversionTOFMin() const override;
   double conversionTOFMax() const override;
+  double calcTofMin(const double difc, const double difa, const double tzero,
+                    const double tofmin = 0.);
+  double calcTofMax(const double difc, const double difa, const double tzero,
+                    const double tofmax = 0.);
 
   /// Constructor
   dSpacing();
 
 protected:
-  double factorTo;   ///< Constant factor for to conversion
-  double factorFrom; ///< Constant factor for from conversion
+  void validateExtraParams(
+      int emode, std::map<UnitConversionParameters, double> &params) override;
+  double difa;
+  double difc;
+  double tzero;
 };
 
 //=================================================================================================
@@ -473,6 +514,7 @@ public:
   DeltaE();
 
 protected:
+  double efixed;
   double factorTo;    ///< Constant factor for to conversion
   double factorFrom;  ///< Constant factor for from conversion
   double t_other;     ///< Energy mode dependent factor in to conversion
@@ -531,6 +573,9 @@ public:
   Momentum();
 
 protected:
+  void validateExtraParams(
+      int emode, std::map<UnitConversionParameters, double> &params) override;
+  double efixed;
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorTo;   ///< Constant factor for to conversion
   double sfpFrom;    ///< Extra correction factor in from conversion
@@ -555,6 +600,9 @@ public:
 
   /// Constructor
   SpinEchoLength();
+
+private:
+  double efixed;
 };
 
 //=================================================================================================
@@ -574,6 +622,9 @@ public:
 
   /// Constructor
   SpinEchoTime();
+
+private:
+  double efixed;
 };
 
 //=================================================================================================

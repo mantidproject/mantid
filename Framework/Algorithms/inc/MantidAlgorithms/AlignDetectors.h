@@ -65,8 +65,8 @@ private:
   void init() override;
   void exec() override;
 
-  void align(const ConversionFactors &converter, API::Progress &progress, API::MatrixWorkspace &outputWS);
-  void align(const ConversionFactors &converter, API::Progress &progress, DataObjects::EventWorkspace &outputWS);
+  void align(const ConversionFactors &converter, API::Progress &progress,
+             API::MatrixWorkspace_sptr &outputWS);
 
   void loadCalFile(const API::MatrixWorkspace_sptr &inputWS, const std::string &filename);
   void getCalibrationWS(const API::MatrixWorkspace_sptr &inputWS);

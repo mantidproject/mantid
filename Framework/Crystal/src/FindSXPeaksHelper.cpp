@@ -90,7 +90,7 @@ SXPeak::SXPeak(double t, double phi, double intensity, const std::vector<int> &s
   m_nPixels = 1;
 
   const auto unit = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-  unit->initialize(l1, l2, m_twoTheta, 0, 0, 0);
+  unit->initialize(l1, l2, m_twoTheta, 0);
   m_dSpacing = unit->singleFromTOF(m_tof);
 
   const auto samplePos = spectrumInfo.samplePosition();
@@ -342,8 +342,8 @@ double PeakFindingStrategy::convertToTOF(const double xValue, const size_t works
   } else {
     const auto unit = UnitFactory::Instance().create("dSpacing");
     // we're using d-spacing, convert the point to TOF
-    unit->initialize(m_spectrumInfo.l1(), m_spectrumInfo.l2(workspaceIndex), m_spectrumInfo.twoTheta(workspaceIndex), 0,
-                     0, 0);
+    unit->initialize(m_spectrumInfo.l1(), m_spectrumInfo.l2(workspaceIndex),
+                     m_spectrumInfo.twoTheta(workspaceIndex), 0);
     return unit->singleToTOF(xValue);
   }
 }

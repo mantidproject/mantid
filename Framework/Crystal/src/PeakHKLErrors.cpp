@@ -616,7 +616,7 @@ Peak PeakHKLErrors::createNewPeak(const DataObjects::Peak &peak_old, const Geome
 
   Wavelength wl;
 
-  wl.initialize(L0, peak.getL2(), peak.getScattering(), 0, peak_old.getInitialEnergy(), 0.0);
+  wl.initialize(L0, peak.getL2(), peak.getScattering(), 0);
 
   peak.setWavelength(wl.singleFromTOF(T));
   peak.setIntensity(peak_old.getIntensity());

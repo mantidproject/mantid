@@ -42,12 +42,17 @@ private:
   void createCalTableFromExisting();
   void createCalTableNew();
   void createInformationWorkspaces();
-  std::function<double(double)> getDSpacingToTof(const std::set<detid_t> &detIds);
-  std::vector<double> dSpacingWindows(const std::vector<double> &centres, const double widthMax);
-  std::vector<double> getTOFminmax(const double difc, const double difa, const double tzero);
-  void setCalibrationValues(const detid_t detid, const double difc, const double difa, const double tzero);
-  void fitDIFCtZeroDIFA_LM(const std::vector<double> &d, const std::vector<double> &tof,
-                           const std::vector<double> &height2, double &difc, double &t0, double &difa);
+  std::tuple<double, double, double> getDSpacingToTof(const detid_t detid);
+  std::vector<double> dSpacingWindows(const std::vector<double> &centres,
+                                      const double widthMax);
+  std::vector<double> getTOFminmax(const double difc, const double difa,
+                                   const double tzero);
+  void setCalibrationValues(const detid_t detid, const double difc,
+                            const double difa, const double tzero);
+  void fitDIFCtZeroDIFA_LM(const std::vector<double> &d,
+                           const std::vector<double> &tof,
+                           const std::vector<double> &height2, double &difc,
+                           double &t0, double &difa);
   API::MatrixWorkspace_sptr calculateResolutionTable();
 
   /// NEW: convert peak positions in dSpacing to peak centers workspace
