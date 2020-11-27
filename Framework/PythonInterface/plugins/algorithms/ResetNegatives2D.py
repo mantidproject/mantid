@@ -6,8 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 
 from mantid import mtd
-from mantid.api import (AlgorithmFactory, PythonAlgorithm, WorkspaceProperty, Progress)
+from mantid.api import (AlgorithmFactory, PythonAlgorithm, WorkspaceProperty,
+                        Progress)
 from mantid.kernel import Direction
+
 
 class ResetNegatives2D(PythonAlgorithm):
     def category(self):
@@ -27,7 +29,10 @@ class ResetNegatives2D(PythonAlgorithm):
         return ["PowderReduceP2D", "Bin2DPowderDiffraction", "SaveP2D"]
 
     def PyInit(self):
-        self.declareProperty(WorkspaceProperty('Workspace', '', direction=Direction.Input), doc='Workspace that should be used.')
+        self.declareProperty(WorkspaceProperty('Workspace',
+                                               '',
+                                               direction=Direction.Input),
+                             doc='Workspace that should be used.')
 
     def PyExec(self):
         data = mtd[self.getPropertyValue('Workspace')]
@@ -43,7 +48,7 @@ class ResetNegatives2D(PythonAlgorithm):
 
             if (dp == last_dp): continue
             last_dp = dp
-            # iterate through each dValue 
+            # iterate through each dValue
             for cd in range(data.getDimension(0).getNBins()):
                 Y = data.dataY(cdp)[cd]
                 n += 1
@@ -55,7 +60,7 @@ class ResetNegatives2D(PythonAlgorithm):
         if intMin < 0:
             for cdp in range(ndp):
                 intData = data.readY(cdp)
-                data.setY(cdp, intData + intMin*-1)
+                data.setY(cdp, intData + intMin * -1)
 
 
 AlgorithmFactory.subscribe(ResetNegatives2D)
