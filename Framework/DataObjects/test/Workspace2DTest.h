@@ -100,14 +100,17 @@ public:
     cloned->setHistogram(0, Points(0), Counts(0));
 
     TS_ASSERT(cloned->isRaggedWorkspace());
-    TS_ASSERT_EQUALS(cloned->getNumberBins(0), 1);
+    TS_ASSERT_EQUALS(cloned->getNumberBins(0), 0);
     TS_ASSERT_EQUALS(cloned->getNumberBins(1), 5);
   }
 
   void
   test_that_getNumberBins_throws_when_provided_an_index_which_is_too_large() {
-    TS_ASSERT_THROWS_NOTHING(ws->getNumberBins(4));
-    TS_ASSERT_THROWS(ws->getNumberBins(5), const std::invalid_argument &);
+    const auto numberOfHistograms = ws->getNumberHistograms();
+
+    TS_ASSERT_THROWS_NOTHING(ws->getNumberBins(numberOfHistograms - 1));
+    TS_ASSERT_THROWS(ws->getNumberBins(numberOfHistograms),
+                     const std::invalid_argument &);
   }
 
   void
