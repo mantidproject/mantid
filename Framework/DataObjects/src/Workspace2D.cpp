@@ -154,7 +154,7 @@ size_t Workspace2D::blocksize() const {
  * @return the number of bins for a given histogram index.
  */
 std::size_t Workspace2D::getNumberBins(const std::size_t &index) const {
-  if (index <= data.size())
+  if (index < data.size())
     return data[index]->size();
 
   throw std::invalid_argument(

@@ -183,7 +183,7 @@ size_t EventWorkspace::blocksize() const {
  * @return the number of bins for a given histogram index.
  */
 std::size_t EventWorkspace::getNumberBins(const std::size_t &index) const {
-  if (index <= data.size())
+  if (index < data.size())
     return data[index]->histogram_size();
 
   throw std::invalid_argument(

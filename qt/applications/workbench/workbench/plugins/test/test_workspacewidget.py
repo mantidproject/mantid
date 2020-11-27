@@ -142,10 +142,12 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
             self.ws_widget._action_double_click_workspace(self.ws_names[3])
         self.assert_widget_type_exists(MATRIXWORKSPACE_DISPLAY_TYPE)
 
-    def test_double_click_with_ragged_ws_does_not_raise(self):
+    @mock.patch('mantidqt.plotting.functions.plot_from_names', autospec=True)
+    def test_double_click_with_ragged_ws_calls_plot_from_names(self, mock_plot_from_names):
         self.assertTrue(self.w_spaces[5].isRaggedWorkspace())
-        with mock.patch(MATRIXWORKSPACE_DISPLAY + '.show_view', lambda x: None):
-            self.ws_widget._action_double_click_workspace(self.ws_names[5])
+        self.ws_widget._action_double_click_workspace(self.ws_names[5])
+        mock_plot_from_names.assert_called_once_with([self.ws_names[5]], errors=False, overplot=False,
+                                                     show_colorfill_btn=True)
 
     def test_empty_workspaces(self):
         self.ws_widget._ads.clear()
