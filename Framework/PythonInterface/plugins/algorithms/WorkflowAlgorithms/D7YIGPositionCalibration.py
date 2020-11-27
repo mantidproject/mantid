@@ -96,7 +96,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                              doc="The lower and upper bound for the masked region around the direct beam (in degrees).")
 
         self.declareProperty(FileProperty(name='CalibrationOutputFile',
-                                          action=FileAction.Save,
+                                          action=FileAction.OptionalSave,
                                           extensions=['xml'],
                                           defaultValue=''),
                              doc="The output YIG calibration Instrument Parameter File.")
@@ -426,9 +426,6 @@ class D7YIGPositionCalibration(PythonAlgorithm):
 
         single_peak_fit_results_name = 'peak_fits_{}'.format(self.getPropertyValue('FitOutputWorkspace'))
         GroupWorkspaces(InputWorkspaces=ws_names, OutputWorkspace=single_peak_fit_results_name)
-
-        #clean up:
-        DeleteWorkspaces(['out_Parameters', 'out_NormalisedCovarianceMatrix'])
 
         return conjoined_peak_fit_name, single_peak_fit_results_name
 
