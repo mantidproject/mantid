@@ -18,13 +18,8 @@ namespace Algorithms {
     <UL>
     <LI> InputWorkspace - The name of the Workspace2D to take as input. </LI>
     <LI> OutputWorkspace - The name under which to store the output workspace.
-   </LI>
-    </UL>
-
-    Optional Properties:
-    <UL>
-    <LI> XMin - The X values to start the croping the spectra at</LI>
-    <LI> XMax - The X values to end the croping the spectra at</LI>
+    <LI> XMin - The X values to start the cropping the spectra at</LI>
+    <LI> XMax - The X values to end the cropping the spectra at</LI>
     </UL>
 
 */

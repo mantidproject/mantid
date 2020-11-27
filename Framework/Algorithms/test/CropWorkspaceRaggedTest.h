@@ -44,14 +44,10 @@ public:
         errors.push_back(sqrt(double(k + 1)));
         m_ws->dataX(j)[k] = k;
       }
-      // m_ws->dataX(j)[m_numberOfYPoints+1] = m_numberOfYPoints+1;
       m_ws->dataY(j) = ydata;
       m_ws->dataE(j) = errors;
     }
   }
-
-  // check x data -> single should fail: 1.5 versus 2
-  //                              bin edge v's point
 
   void setUp() override {
     m_numberOfYPoints = 15;
@@ -74,7 +70,42 @@ public:
 
     TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
   }
+  void test_XMinLarger() {
+    TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "5."));
 
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "10."));
+    TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
+  }
+  void test_XMinListBug() {
+    TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "10"));
+
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1.,2.,3.,20.,5."));
+    TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
+  }
+  void test_XMaxListBug() {
+    TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1."));
+
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "10.,20.,30.,0.4,50."));
+    TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
+  }
+  void test_ListsBug() {
+    TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setPropertyValue("OutputWorkspace", "nothing"));
+    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1.,2.,3.,20.,5."));
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setPropertyValue("XMax", "10.,20.,30.,0.4,50."));
+    TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
+  }
   void test_TooFewXMins() {
     TS_ASSERT_THROWS_NOTHING(m_alg.setProperty("InputWorkspace", m_ws));
     TS_ASSERT_THROWS_NOTHING(
@@ -179,8 +210,8 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
     for (int spec = 0; spec < m_numberOfSpectra; spec++) {
       TS_ASSERT_DELTA(out->readX(spec)[0], 2.0, 1e-6);
-      // TS_ASSERT_DELTA(out->readY(spec)[0],xMin[spec]+1. , 1e-6);
-      // TS_ASSERT_DELTA(out->readE(spec)[0],sqrt(xMin[spec]+1.), 1e-6);
+      TS_ASSERT_DELTA(out->readY(spec)[0],3.0 , 1e-6);
+      TS_ASSERT_DELTA(out->readE(spec)[0],sqrt(3.), 1e-6);
 
       TS_ASSERT_DELTA(out->readX(spec).back(), xMax[spec], 1e-6);
       TS_ASSERT_DELTA(out->readY(spec).back(), xMax[spec], 1e-6);

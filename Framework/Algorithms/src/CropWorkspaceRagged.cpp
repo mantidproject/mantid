@@ -43,9 +43,11 @@ void CropWorkspaceRagged::init() {
 
   auto required = std::make_shared<MandatoryValidator<std::vector<double>>>();
   declareProperty(std::make_unique<ArrayProperty<double>>("XMin", required),
-                  ".");
+                  "The value(s) to start the cropping from. Should be either a "
+                  "single value or a list.");
   declareProperty(std::make_unique<ArrayProperty<double>>("XMax", required),
-                  "Y-axis data values for workspace (measures).");
+                  "The value(s) to end the cropping at. Should be either a "
+                  "single value or a list.");
 }
 
 /// Input validation
@@ -56,15 +58,37 @@ std::map<std::string, std::string> CropWorkspaceRagged::validateInputs() {
   std::vector<double> xMin = getProperty("XMin");
   std::vector<double> xMax = getProperty("XMax");
   if (xMin.size() == 0 || (xMin.size() != numSpectra && xMin.size() > 1)) {
-    issues["XMin"] = "Either one XMin value must be a single value or one "
-                     "value per spectrum.";
+    issues["XMin"] = "XMin must be a single value or one value per sepctrum.";
   }
   if (xMax.size() == 0 || (xMax.size() > 1 && xMax.size() != numSpectra)) {
-    issues["XMax"] = "Either one XMax value must be a single value or one "
-                     "value per spectrum.";
+    issues["XMax"] = "XMax must be a single value or one value per sepctrum.";
   }
-  return issues;
+  if (xMin.size() == 1 && xMax.size() == 1 && xMin[0] > xMax[0]) {
+    issues["XMax"] = "XMax must be greater than XMin.";
+  } else if (xMin.size() == 1 && xMax.size() > 1) {
+    for (auto max : xMax) {
+      if (max < xMin[0]) {
+        issues["XMax"] = "XMax must be greater than XMin.";
+        return issues;
+      }
+    }
+  } else if (xMin.size() > 1 && xMax.size() == 1) {
+    for (auto min : xMin) {
+      if (min > xMax[0]) {
+        issues["XMin"] = "XMin must be less than XMax.";
+        return issues;
+      }
+    }
+  } else if (xMin.size() > 1 && xMax.size() > 1) {
+    for (int64_t k=0; k<xMin.size(); k++){
+      if (xMin[k] > xMax[k]) {
+      issues["XMin"] = "XMin must be less than XMax.";
+      return issues;
+      }
+  }
 }
+return issues;
+} // namespace Algorithms
 
 /// Exec function
 void CropWorkspaceRagged::exec() {
@@ -138,5 +162,5 @@ void CropWorkspaceRagged::exec() {
   setProperty("OutputWorkspace", outputWS);
 }
 
-} // namespace Algorithms
+} // namespace Mantid
 } // namespace Mantid
