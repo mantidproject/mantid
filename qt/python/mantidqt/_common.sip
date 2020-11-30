@@ -1078,8 +1078,6 @@ class FitScriptGeneratorView : QWidget {
 public:
     FitScriptGeneratorView(
         QWidget *parent = nullptr,
-        const QStringList &workspaceNames = QStringList(),
-        double startX = 0.0, double endX = 0.0,
         const QMap<QString, QString> &fitOptions = QMap<QString, QString>()) /KeywordArgs="All"/;
 };
 
@@ -1104,8 +1102,10 @@ class FitScriptGeneratorPresenter {
 #include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
 %End
 public:
-    FitScriptGeneratorPresenter(FitScriptGeneratorView *view,
-                                FitScriptGeneratorModel *model);
+    FitScriptGeneratorPresenter(
+	    FitScriptGeneratorView *view, FitScriptGeneratorModel *model,
+        const QStringList &workspaceNames = QStringList(),
+        double startX = 0.0, double endX = 0.0) /KeywordArgs="All"/;
 
     void openFitScriptGenerator();
 };

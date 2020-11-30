@@ -13,5 +13,12 @@ FitScriptGeneratorModel::FitScriptGeneratorModel() {}
 
 FitScriptGeneratorModel::~FitScriptGeneratorModel() {}
 
+void FitScriptGeneratorModel::removeWorkspaceDomain(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex) {}
+
+void FitScriptGeneratorModel::addWorkspaceDomain(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+    double startX, double endX) {}
+
 } // namespace MantidWidgets
 } // namespace MantidQt

@@ -11,6 +11,8 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
+#include <QDialog>
+
 #include <stdexcept>
 
 using namespace Mantid::API;
@@ -21,8 +23,7 @@ namespace MantidWidgets {
 using FittingType = FitOptionsBrowser::FittingType;
 
 FitScriptGeneratorView::FitScriptGeneratorView(
-    QWidget *parent, QStringList const &workspaceNames, double startX,
-    double endX, QMap<QString, QString> const &fitOptions)
+    QWidget *parent, QMap<QString, QString> const &fitOptions)
     : API::MantidWidget(parent), m_presenter(),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionBrowser(std::make_unique<FunctionBrowser>(nullptr, true)),
@@ -34,7 +35,6 @@ FitScriptGeneratorView::FitScriptGeneratorView(
   m_ui.splitter->addWidget(m_functionBrowser.get());
   m_ui.splitter->addWidget(m_fitOptionsBrowser.get());
 
-  setWorkspaces(workspaceNames, startX, endX);
   setFitBrowserOptions(fitOptions);
   connectUiSignals();
 }
@@ -46,12 +46,8 @@ FitScriptGeneratorView::~FitScriptGeneratorView() {
 
 void FitScriptGeneratorView::connectUiSignals() {
   connect(m_ui.pbRemove, SIGNAL(clicked()), this, SLOT(onRemoveClicked()));
-}
-
-void FitScriptGeneratorView::setWorkspaces(QStringList const &workspaceNames,
-                                           double startX, double endX) {
-  for (auto const &workspaceName : workspaceNames)
-    addWorkspace(workspaceName, startX, endX);
+  connect(m_ui.pbAddWorkspace, SIGNAL(clicked()), this,
+          SLOT(onAddWorkspaceClicked()));
 }
 
 void FitScriptGeneratorView::setFitBrowserOptions(
@@ -87,25 +83,52 @@ void FitScriptGeneratorView::onRemoveClicked() {
   m_presenter->notifyPresenter(ViewEvent::RemoveClicked);
 }
 
-void FitScriptGeneratorView::addWorkspace(QString const &workspaceName,
-                                          double startX, double endX) {
-  auto &ads = AnalysisDataService::Instance();
-  if (ads.doesExist(workspaceName.toStdString()))
-    addWorkspace(ads.retrieveWS<MatrixWorkspace>(workspaceName.toStdString()),
-                 startX, endX);
+void FitScriptGeneratorView::onAddWorkspaceClicked() {
+  m_presenter->notifyPresenter(ViewEvent::AddClicked);
 }
 
-void FitScriptGeneratorView::addWorkspace(
-    MatrixWorkspace_const_sptr const &workspace, double startX, double endX) {
-  for (auto i = 0; i < static_cast<int>(workspace->getNumberHistograms()); ++i)
-    addWorkspaceDomain(QString::fromStdString(workspace->getName()), i, startX,
-                       endX);
+std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
+  return m_dataTable->workspaceName(index);
 }
 
-void FitScriptGeneratorView::addWorkspaceDomain(QString const &workspaceName,
-                                                int workspaceIndex,
-                                                double startX, double endX) {
-  m_dataTable->addWorkspaceDomain(workspaceName, workspaceIndex, startX, endX);
+WorkspaceIndex
+FitScriptGeneratorView::workspaceIndex(FitDomainIndex index) const {
+  return m_dataTable->workspaceIndex(index);
+}
+
+double FitScriptGeneratorView::startX(FitDomainIndex index) const {
+  return m_dataTable->startX(index);
+}
+
+double FitScriptGeneratorView::endX(FitDomainIndex index) const {
+  return m_dataTable->endX(index);
+}
+
+std::vector<FitDomainIndex> FitScriptGeneratorView::selectedRows() const {
+  return m_dataTable->selectedRows();
+}
+
+void FitScriptGeneratorView::removeWorkspaceDomain(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
+  m_dataTable->removeDomain(workspaceName, workspaceIndex);
+}
+
+void FitScriptGeneratorView::addWorkspaceDomain(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+    double startX, double endX) {
+  m_dataTable->addDomain(QString::fromStdString(workspaceName), workspaceIndex,
+                         startX, endX);
+}
+
+void FitScriptGeneratorView::openAddWorkspaceDialog() {
+  auto dialog = QDialog();
+  dialog.exec();
+
+  if (static_cast<QDialog::DialogCode>(dialog.result()) ==
+      QDialog::DialogCode::Accepted)
+    return;
+  // return dialog.getWorkspaceData();
+  return;
 }
 
 } // namespace MantidWidgets

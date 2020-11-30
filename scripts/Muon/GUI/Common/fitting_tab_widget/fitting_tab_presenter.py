@@ -107,9 +107,9 @@ class FittingTabPresenter(object):
                        "EvaluationType": self.view.evaluation_type}
 
         self.fsg_model = FitScriptGeneratorModel()
-        self.fsg_view = FitScriptGeneratorView(None, self.view.loaded_workspaces, self.view.start_time,
-                                               self.view.end_time, fit_options)
-        self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model)
+        self.fsg_view = FitScriptGeneratorView(None, fit_options)
+        self.fsg_presenter = FitScriptGeneratorPresenter(self.fsg_view, self.fsg_model, self.view.loaded_workspaces,
+                                                         self.view.start_time, self.view.end_time)
 
         self.fsg_presenter.openFitScriptGenerator()
 

@@ -45,9 +45,8 @@ QTableWidgetItem *createIntTableItem(int value,
 QTableWidgetItem *createDoubleTableItem(double value,
                                         Qt::AlignmentFlag const &alignment,
                                         bool editable) {
-  QString number;
-  return createTableItem(number.setNum(value, 'f', DOUBLE_PRECISION), alignment,
-                         editable);
+  return createTableItem(QString::number(value, 'f', DOUBLE_PRECISION),
+                         alignment, editable);
 }
 
 } // namespace
@@ -138,20 +137,76 @@ FitScriptGeneratorDataTable::hoveredRowIndex(QEvent *event) {
   return index;
 }
 
-void FitScriptGeneratorDataTable::addWorkspaceDomain(
-    QString const &workspaceName, int workspaceIndex, double startX,
-    double endX) {
+std::string
+FitScriptGeneratorDataTable::workspaceName(FitDomainIndex row) const {
+  return getText(row, ColumnIndex::WorkspaceName).toStdString();
+}
+
+WorkspaceIndex
+FitScriptGeneratorDataTable::workspaceIndex(FitDomainIndex row) const {
+  return getText(row, ColumnIndex::WorkspaceIndex).toInt();
+}
+
+double FitScriptGeneratorDataTable::startX(FitDomainIndex row) const {
+  return getText(row, ColumnIndex::StartX).toDouble();
+}
+
+double FitScriptGeneratorDataTable::endX(FitDomainIndex row) const {
+  return getText(row, ColumnIndex::EndX).toDouble();
+}
+
+std::vector<FitDomainIndex> FitScriptGeneratorDataTable::selectedRows() const {
+  std::vector<FitDomainIndex> rowIndices;
+
+  auto const selectionModel = this->selectionModel();
+  if (selectionModel->hasSelection()) {
+
+    for (auto const &rowIndex : selectionModel->selectedRows())
+      rowIndices.emplace_back(
+          FitDomainIndex(static_cast<std::size_t>(rowIndex.row())));
+
+    std::sort(rowIndices.rbegin(), rowIndices.rend());
+  }
+  return rowIndices;
+}
+
+void FitScriptGeneratorDataTable::removeDomain(
+    std::string const &workspaceName,
+    MantidWidgets::WorkspaceIndex workspaceIndex) {
+  this->removeRow(indexOfDomain(workspaceName, workspaceIndex));
+}
+
+void FitScriptGeneratorDataTable::addDomain(
+    QString const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex,
+    double startX, double endX) {
   auto const rowIndex = this->rowCount();
   this->insertRow(rowIndex);
 
   this->setItem(rowIndex, ColumnIndex::WorkspaceName,
                 createTableItem(workspaceName, Qt::AlignVCenter, false));
   this->setItem(rowIndex, ColumnIndex::WorkspaceIndex,
-                createIntTableItem(workspaceIndex, Qt::AlignCenter, false));
+                createIntTableItem(static_cast<int>(workspaceIndex.value),
+                                   Qt::AlignCenter, false));
   this->setItem(rowIndex, ColumnIndex::StartX,
                 createDoubleTableItem(startX, Qt::AlignCenter, true));
   this->setItem(rowIndex, ColumnIndex::EndX,
                 createDoubleTableItem(endX, Qt::AlignCenter, true));
+}
+
+int FitScriptGeneratorDataTable::indexOfDomain(
+    std::string const &workspaceName,
+    MantidWidgets::WorkspaceIndex workspaceIndex) const {
+  for (auto rowIndex = 0; rowIndex < this->rowCount(); ++rowIndex) {
+    if (this->workspaceName(rowIndex) == workspaceName &&
+        this->workspaceIndex(rowIndex) == workspaceIndex)
+      return rowIndex;
+  }
+  return -1;
+}
+
+QString FitScriptGeneratorDataTable::getText(FitDomainIndex row,
+                                             int column) const {
+  return this->item(static_cast<int>(row.value), column)->text();
 }
 
 /**

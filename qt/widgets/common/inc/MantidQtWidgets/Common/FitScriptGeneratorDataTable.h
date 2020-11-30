@@ -6,6 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidQtWidgets/Common/IndexTypes.h"
+
+#include <string>
+#include <vector>
+
 #include <QEvent>
 #include <QModelIndex>
 #include <QObject>
@@ -42,8 +47,18 @@ public:
   FitScriptGeneratorDataTable(QWidget *parent = nullptr);
   ~FitScriptGeneratorDataTable() = default;
 
-  void addWorkspaceDomain(QString const &workspaceName, int workspaceIndex,
-                          double startX, double endX);
+  std::string workspaceName(FitDomainIndex row) const;
+  MantidWidgets::WorkspaceIndex workspaceIndex(FitDomainIndex row) const;
+  double startX(FitDomainIndex row) const;
+  double endX(FitDomainIndex row) const;
+
+  std::vector<FitDomainIndex> selectedRows() const;
+
+  void removeDomain(std::string const &workspaceName,
+                    MantidWidgets::WorkspaceIndex workspaceIndex);
+  void addDomain(QString const &workspaceName,
+                 MantidWidgets::WorkspaceIndex workspaceIndex, double startX,
+                 double endX);
 
 signals:
   void itemExited(int newRowIndex);
@@ -51,6 +66,11 @@ signals:
 private:
   bool eventFilter(QObject *widget, QEvent *event) override;
   QPersistentModelIndex hoveredRowIndex(QEvent *event);
+
+  int indexOfDomain(std::string const &workspaceName,
+                    MantidWidgets::WorkspaceIndex workspaceIndex) const;
+
+  QString getText(FitDomainIndex row, int column) const;
 
   QPersistentModelIndex m_lastIndex;
 };

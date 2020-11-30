@@ -12,9 +12,12 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include <QMap>
 #include <QString>
@@ -32,33 +35,45 @@ class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView
   Q_OBJECT
 
 public:
-  enum class Event { RemoveClicked, StartXChanged, EndXChanged } const;
+  enum class Event {
+    AddClicked,
+    RemoveClicked,
+    StartXChanged,
+    EndXChanged
+  } const;
 
   FitScriptGeneratorView(
       QWidget *parent = nullptr,
-      QStringList const &workspaceNames = QStringList(), double startX = 0.0,
-      double endX = 0.0,
       QMap<QString, QString> const &fitOptions = QMap<QString, QString>());
   ~FitScriptGeneratorView() override;
 
   void subscribePresenter(FitScriptGeneratorPresenter *presenter);
 
+  std::string workspaceName(FitDomainIndex index) const;
+  WorkspaceIndex workspaceIndex(FitDomainIndex index) const;
+  double startX(FitDomainIndex index) const;
+  double endX(FitDomainIndex index) const;
+
+  std::vector<FitDomainIndex> selectedRows() const;
+
+  void removeWorkspaceDomain(std::string const &workspaceName,
+                             WorkspaceIndex workspaceIndex);
+  void addWorkspaceDomain(std::string const &workspaceName,
+                          WorkspaceIndex workspaceIndex, double startX,
+                          double endX);
+
+  void openAddWorkspaceDialog();
+
 private slots:
   void onRemoveClicked();
+  void onAddWorkspaceClicked();
 
 private:
   void connectUiSignals();
-  void setWorkspaces(QStringList const &workspaceNames, double startX,
-                     double endX);
+
   void setFitBrowserOptions(QMap<QString, QString> const &fitOptions);
   void setFitBrowserOption(QString const &name, QString const &value);
   void setFittingType(QString const &fitType);
-
-  void addWorkspace(QString const &workspaceName, double startX, double endX);
-  void addWorkspace(MatrixWorkspace_const_sptr const &workspace, double startX,
-                    double endX);
-  void addWorkspaceDomain(QString const &workspaceName, int workspaceIndex,
-                          double startX, double endX);
 
   FitScriptGeneratorPresenter *m_presenter;
   std::unique_ptr<FitScriptGeneratorDataTable> m_dataTable;
