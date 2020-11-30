@@ -6,20 +6,20 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/XrayAbsorptionCorrection.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
 #include "MantidGeometry/Objects/IObject.h"
-#include "MantidKernel/Material.h"
-#include "MantidKernel/Interpolation.h"
 #include "MantidKernel/AttenuationProfile.h"
+#include "MantidKernel/Interpolation.h"
+#include "MantidKernel/Material.h"
 #include "MantidKernel/VectorHelper.h"
-#include "MantidAlgorithms/CompareWorkspaces.h"
-#include <math.h>
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
 #include <iostream>
+#include <math.h>
 #include <string>
 
 using namespace Mantid;
@@ -105,7 +105,8 @@ public:
 
   void test_exec_with_non_valid_shape() {
     API::MatrixWorkspace_sptr muonProfile = createWorkspace(100);
-    API::MatrixWorkspace_sptr inputWS = createWorkspaceWithDummyShape(20,false);
+    API::MatrixWorkspace_sptr inputWS =
+        createWorkspaceWithDummyShape(20, false);
     Algorithms::XrayAbsorptionCorrection algo;
     algo.initialize();
     algo.setProperty("InputWorkspace", inputWS);
@@ -117,7 +118,9 @@ public:
   }
 
 private:
-  API::MatrixWorkspace_sptr createWorkspaceWithDummyShape(double value, bool hasXrayAttenuationProfile = true) {
+  API::MatrixWorkspace_sptr
+  createWorkspaceWithDummyShape(double value,
+                                bool hasXrayAttenuationProfile = true) {
     API::MatrixWorkspace_sptr inputWS =
         WorkspaceCreationHelper::create1DWorkspaceConstant(10, value, 0, true);
 
@@ -165,5 +168,4 @@ private:
   class TestableXrayAbsorptionCorrection : public XrayAbsorptionCorrection {
     friend class XrayAbsorptionCorrectionTest;
   };
-
 };
