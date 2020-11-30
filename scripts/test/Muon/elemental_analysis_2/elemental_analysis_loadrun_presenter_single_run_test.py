@@ -14,7 +14,6 @@ from Muon.GUI.ElementalAnalysis2.load_widget.load_models import LoadRunWidgetMod
 from Muon.GUI.Common.load_run_widget.load_run_view import LoadRunWidgetView
 from Muon.GUI.ElementalAnalysis2.load_widget.load_run_widget_presenter import LoadRunWidgetPresenterEA
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_ea_tests
-from Muon.GUI.ElementalAnalysis2.context.context import DataContext
 
 
 @start_qapplication
