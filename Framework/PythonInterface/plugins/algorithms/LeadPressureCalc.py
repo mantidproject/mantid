@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 # Original Author: Chris Ridley
 from mantid.kernel import Direction, FloatBoundedValidator
-from mantid.api import AlgorithmFactory, PythonAlgorithm
-from mantid.simpleapi import CreateEmptyTableWorkspace, RenameWorkspace
+from mantid.api import AlgorithmFactory, PythonAlgorithm, ITableWorkspaceProperty
+from mantid.simpleapi import CreateEmptyTableWorkspace, DeleteWorkspace
 import numpy as np
 
 TOL = 0.01
@@ -67,6 +67,10 @@ class LeadPressureCalc(PythonAlgorithm):
                              validator=FloatBoundedValidator(lower=0),
                              doc="Optional: search for (111) position for a given pressure (GPa) and temperature, "
                                  "leave at default value to disable.")
+        self.declareProperty(ITableWorkspaceProperty(name='OutputWorkspace',
+                                                     direction=Direction.Output,
+                                                     defaultValue='LeadPressureCalcResults'),
+                             doc='Name of Output Table workspace holding the values')
 
     def PyExec(self):
         d_spacing = self.getProperty("DSpacing").value
@@ -115,7 +119,8 @@ class LeadPressureCalc(PythonAlgorithm):
                               " 2-2.95. Please try different parameters.")
             row = {"Input dSpacing-111 (A)": d_spacing, "Temperature (K)": temp, "Calculated Pressure (GPa)": p_calc}
         ws.addRow(row)
-        RenameWorkspace(ws, 'LeadPressureCalcResults')
+        self.setProperty("OutputWorkspace", ws)
+        DeleteWorkspace(ws)
 
 
 AlgorithmFactory.subscribe(LeadPressureCalc)
