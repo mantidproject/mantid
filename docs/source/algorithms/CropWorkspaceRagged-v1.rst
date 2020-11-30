@@ -54,7 +54,7 @@ the end of a workflow to generate a real-space distribution of data
 after it had been reduced into a number of "banks" or "spectra." As
 mentioned above, ``numpy.nan`` or ``math.nan`` can both be used.
 
-.. code-block:: python
+.. testcode:: RaggedWorkFlow
 
     from numpy import nan
     NOM_91796 = LoadNexusProcessed(Filename='NOM_91796_banks.nxs')
@@ -68,8 +68,17 @@ mentioned above, ``numpy.nan`` or ``math.nan`` can both be used.
     SumSpectra(InputWorkspace='cropped', OutputWorkspace='FQ',
                WeightedSum=True, RemoveSpecialValues=True)
     PDFFourierTransform(InputWorkspace='FQ', OutputWorkspace='Gr',
-                        InputSofQType='Q[S(Q)-1]', DeltaR=.02)
+                        Direction="Backward", DeltaR=.02)
+    for j in range(10,13):                     
+            print("y values: {:.4f}".format(gr.readY(0)[j]))
 
+Output:
+
+.. testoutput:: RaggedWorkFlow
+
+    y values: 0.6285
+    y values: 0.6237
+    y values: 0.6486
 
 .. categories::
 
