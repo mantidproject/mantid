@@ -8,26 +8,33 @@
 import re
 import matplotlib as mpl
 
+SCALE_OPTIONS = {0: "linear", 1: "log"}
+
 
 class MantidPlotProjectParser(object):
     plot_layer_pattern = r"<multiLayer>\s*(.*?)\s*<\/multiLayer>"
     graph_pattern = r"<graph>\s*(.*?)\s*<\/graph>"
     workspaces_pattern = r"<mantidworkspaces>\s*(.*?)\s*<\/mantidworkspaces>"
 
-    def __init__(self, text):
-        self.text = text
+    def __init__(self, filename):
+        self.filename = filename
         self.graph_text = []
         self.layer_text = []
         self.number_of_figures = 0
         self.number_of_graphs = []
-        self._load_layer_text()
+        self._load_file_text()
 
-    def _load_layer_text(self):
+    def _load_file_text(self):
+        with open(self.filename, encoding="utf8") as project_file:
+            self.text = project_file.read()
         self.layer_text = re.findall(self.plot_layer_pattern, self.text, re.DOTALL)
         self.number_of_figures = len(self.layer_text)
         self.number_of_graphs = [0] * self.number_of_figures
 
     def get_workspaces(self):
+        """
+        Get workspaces to load from project file
+        """
         ws_match = re.search(self.workspaces_pattern, self.text, re.DOTALL)
         if ws_match:
             # split by tab
@@ -37,25 +44,36 @@ class MantidPlotProjectParser(object):
                 return ws_list[1:]
 
     def get_plots(self):
+        """
+        Get plots to load from project file
+        """
         plot_list = []
         for i in range(self.number_of_figures):
             plot_list.append(self._get_plot_creation_arguments(i))
         return plot_list
 
-    def _get_plot_creation_arguments(self, layer_number):
-        if layer_number > self.number_of_figures:
+    def _get_plot_creation_arguments(self, layer_index):
+        """
+        Load plot creation arguments from a particular MantidPlot figure layer
+        :param layer_index: Layer index where the plot creation arguments will be retrieved
+        """
+        if layer_index > self.number_of_figures:
             return
-        graph_creation_args = self._get_graph_creation_arguments(layer_number)
-        axes_creation_args = self._get_axes_creation_arguments(layer_number)
-        layer_label = self._get_plot_label_from_layer(layer_number)
+        graph_creation_args = self._get_graph_creation_arguments_in_layer(layer_index)
+        axes_creation_args = self._get_axes_creation_arguments(layer_index)
+        layer_label = self._get_plot_label_from_layer(layer_index)
         layer_creation_args = {'creationArguments': graph_creation_args, 'axes': axes_creation_args,
                                'label': layer_label,
                                'properties': self._get_default_fig_properties()}
         return layer_creation_args
 
-    def _get_axes_creation_arguments(self, index):
+    def _get_axes_creation_arguments(self, layer_index):
+        """
+        Load axes creation properties from a particular MantidPlot figure layer
+        :param layer_index: Layer index where the axes properties will be retrieved
+        """
         axes_creation_arguments = []
-        layer_text = self.layer_text[index]
+        layer_text = self.layer_text[layer_index]
         graph_texts = re.findall(self.graph_pattern, layer_text, re.DOTALL)
         for graph_text in graph_texts:
             axes_args = {}
@@ -71,7 +89,36 @@ class MantidPlotProjectParser(object):
             axes_creation_arguments.append(axes_args)
         return axes_creation_arguments
 
+    def _get_plot_label_from_layer(self, layer_index):
+        """
+        Load figure label at a particular layer_index
+        :param layer_index: Layer index where the label will be retrieved
+        """
+        # label for the layer is defined as the first item in the first line of the layer settings
+        layer_text = self.layer_text[layer_index]
+        label = layer_text.split('\n', maxsplit=1)[0].split('\t')[0]
+        return label
+
+    def _get_graph_creation_arguments_in_layer(self, layer_index):
+        """
+        Get the creation settings for the graph, looks for each <graph></graph> entry within
+        each layer (with index=index) in the MantidProject file.
+        :param layer_index: Layer index where the graphs will be retrieved
+        """
+        layer_text = self.layer_text[layer_index]
+        graphs = re.findall(self.graph_pattern, layer_text, re.DOTALL)
+        self.number_of_graphs[layer_index] = len(graphs)
+        graph_creation_args = []
+        for graph in graphs:
+            creation_args = self._get_1d_graph_creation_args_from_graph_entry(graph)
+            graph_creation_args.append(creation_args)
+        return graph_creation_args
+
     def _get_line_creation_arguments_from_graph_entry(self, graph_text):
+        """
+        Load line properties from input graph text
+        :param graph_text: Text contained within a <graph> tag
+        """
         curve_entries = self.find_option_in_raw_text("MantidMatrixCurve", graph_text)
         number_of_lines = len(curve_entries)
         line_creation_arguments = []
@@ -83,42 +130,50 @@ class MantidPlotProjectParser(object):
         return line_creation_arguments
 
     def _get_axes_properties_from_graph_entry(self, graph_text):
+        """
+        Load axes properties from input graph text
+        :param graph_text: Text contained within a <graph> tag
+        """
         # Default settings
         properties = {"bounds": None, "dynamic": True, "axisOn": True, "frameOn": True, "visible": True}
-
+        # scale
         scale_lines = self.find_option_in_raw_text("scale", graph_text)
-        xbounds = scale_lines[0][1]
-        ybounds = scale_lines[2][1]
-        properties["yLim"] = [float(xbounds[2]), float(xbounds[3])]
-        properties["xLim"] = [float(ybounds[2]), float(ybounds[3])]
-        properties["xAxisScale"] = "linear"
-        properties["yAxisScale"] = "linear"
+        ybounds = scale_lines[0][1]
+        xbounds = scale_lines[2][1]
+        properties["xLim"] = [float(xbounds[2]), float(xbounds[3])]
+        properties["yLim"] = [float(ybounds[2]), float(ybounds[3])]
+        try:
+            xscale = SCALE_OPTIONS[int(float(xbounds[7]))]
+            yscale = SCALE_OPTIONS[int(float(ybounds[7]))]
+        except KeyError:
+            raise RuntimeError("Cannot load axis scale, powerscale axes are not supported")
+        properties["xAxisScale"] = xscale
+        properties["yAxisScale"] = yscale
         properties["showMinorGrid"] = False
-
+        # colorbar
         properties["colorbar"] = {}
         properties["colorbar"]["exists"] = False
-
+        # title
         _, plot_title = self.find_option_in_raw_text("PlotTitle", graph_text)[0]
         properties["title"] = plot_title[1] if plot_title else None
-        properties["xAxisProperties"] = {'majorTickLocator': 'AutoLocator', 'minorTickLocator': 'NullLocator',
-                                         'majorTickFormatter': 'ScalarFormatter', 'minorTickFormatter': 'NullFormatter',
-                                         'gridStyle': {'gridOn': False},
-                                         'visible': True, 'position': 'Bottom', 'majorTickLocatorValues': None,
-                                         'minorTickLocatorValues': None, 'majorTickFormat': None,
-                                         'minorTickFormat': None,
-                                         'fontSize': 10.0}
-
-        properties["yAxisProperties"] = {'majorTickLocator': 'AutoLocator', 'minorTickLocator': 'NullLocator',
-                                         'majorTickFormatter': 'ScalarFormatter', 'minorTickFormatter': 'NullFormatter',
-                                         'gridStyle': {'gridOn': False},
-                                         'visible': True, 'position': 'Bottom', 'majorTickLocatorValues': None,
-                                         'minorTickLocatorValues': None, 'majorTickFormat': None,
-                                         'minorTickFormat': None,
-                                         'fontSize': 10.0}
+        # axesproperties
+        default_axis_properties = {'majorTickLocator': 'AutoLocator', 'minorTickLocator': 'NullLocator',
+                                   'majorTickFormatter': 'ScalarFormatter', 'minorTickFormatter': 'NullFormatter',
+                                   'gridStyle': {'gridOn': False},
+                                   'visible': True, 'position': 'Bottom', 'majorTickLocatorValues': None,
+                                   'minorTickLocatorValues': None, 'majorTickFormat': None,
+                                   'minorTickFormat': None,
+                                   'fontSize': 10.0}
+        properties["xAxisProperties"] = default_axis_properties
+        properties["yAxisProperties"] = default_axis_properties
 
         return properties
 
     def _get_legend_properties_from_graph_entry(self, graph_text):
+        """
+        Load legend properties from input graph tag
+        :param graph_text: Text contained within a <graph> tag
+        """
         _, legend_entry = self.find_option_in_raw_text("<legend>", graph_text)[0]
         exists = bool(legend_entry)
         visible = bool(legend_entry)
@@ -130,22 +185,11 @@ class MantidPlotProjectParser(object):
                 'label_spacing': 0.5, 'marker_position': 'Left of Entries', 'markers': 1, 'border_padding': 0.4,
                 'marker_label_padding': 0.8}
 
-    def _get_graph_creation_arguments(self, layer_index):
+    def _get_1d_graph_creation_args_from_graph_entry(self, graph_text):
         """
-        Get the creation settings for the graph, looks for each <graph></graph> entry within
-        each layer (with index=index) in the MantidProject file.
-        :param layer_index: Layer index where the graphs will be retrieved
+        Get the creation settings for 1d graphs, looking within the <MantidMatrixCurve> tag
+        :param graph_text: Text contained within a <graph> tag
         """
-        layer_text = self.layer_text[layer_index]
-        graphs = re.findall(self.graph_pattern, layer_text, re.DOTALL)
-        self.number_of_graphs[layer_index] = len(graphs)
-        graph_creation_args = []
-        for graph in graphs:
-            creation_args = self._get_graph_creation_args_from_graph_entries(graph)
-            graph_creation_args.append(creation_args)
-        return graph_creation_args
-
-    def _get_graph_creation_args_from_graph_entries(self, graph_text):
         curve_entries = self.find_option_in_raw_text("MantidMatrixCurve", graph_text)
         curve_creation_args = []
         for line_number, curve_settings in curve_entries:
@@ -162,12 +206,6 @@ class MantidPlotProjectParser(object):
             creation_args["workspaces"] = workspace
             curve_creation_args.append(creation_args)
         return curve_creation_args
-
-    def _get_plot_label_from_layer(self, layer_number):
-        # label for the layer is defined as the first item in the first line of the layer settings
-        layer_text = self.layer_text[layer_number]
-        label = layer_text.split('\n', maxsplit=1)[0].split('\t')[0]
-        return label
 
     @staticmethod
     def _get_default_fig_properties():
@@ -186,12 +224,3 @@ class MantidPlotProjectParser(object):
             return "errorbar"
         else:
             return "plot"
-
-
-if __name__ == "__main__":
-    with open("mantidplotproject.mantid", encoding="utf8") as f:
-        file_text = f.read()
-        parser = MantidPlotProjectParser(file_text)
-        plot_list = parser.get_plots()
-        workspace_list = parser.get_workspaces()
-        print(plot_list, workspace_list)

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import abc
 
+
 class ProjectReaderInterface(metaclass=abc.ABCMeta):
     def __init__(self, project_file_ext, filename):
         self.workspace_names = None

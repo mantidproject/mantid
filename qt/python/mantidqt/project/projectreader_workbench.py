@@ -35,4 +35,3 @@ class ProjectReaderWorkbench(ProjectReaderInterface):
 
     def read_plots(self):
         self.plot_list = self.json_data["plots"]
-        print(self.plot_list)

@@ -14,17 +14,14 @@ from mantid import logger
 class ProjectReaderMantidPlot(ProjectReaderInterface):
     def __init__(self, project_file_ext, filename):
         super().__init__(project_file_ext, filename)
-        self.full_text = []
         self.parser = None
 
     def read_project(self):
         try:
-            with open(self.filename, encoding="utf8") as project_file:
-                self.full_text = project_file.read()
-                self.parser = MantidPlotProjectParser(self.full_text)
-                self.read_workspaces()
-                self.read_interfaces()
-                self.read_plots()
+            self.parser = MantidPlotProjectParser(self.filename)
+            self.read_workspaces()
+            self.read_interfaces()
+            self.read_plots()
         except Exception:
             logger.warning("Mantidplot project file unable to be loaded/read")
 
