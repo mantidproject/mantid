@@ -52,7 +52,7 @@ class LeadPressureCalc(PythonAlgorithm):
         return "Find the pressure of a sample given the dSpacing of the lead peak at 111."
 
     def PyInit(self):
-        self.declareProperty(name='dSpacing',
+        self.declareProperty(name='DSpacing',
                              defaultValue=2.8589,
                              validator=FloatBoundedValidator(lower=2, upper=2.95),
                              doc="Position of (111) reflection in dSpacing",
@@ -69,7 +69,7 @@ class LeadPressureCalc(PythonAlgorithm):
                                  "leave at default value to disable.")
 
     def PyExec(self):
-        d_spacing = self.getProperty("dSpacing").value
+        d_spacing = self.getProperty("DSpacing").value
         temp = self.getProperty("T").value
         p_calc = calculate_pressure(d_spacing, temp)
         self.log().notice("The calculated pressure is " + str(p_calc) + " GPa")
