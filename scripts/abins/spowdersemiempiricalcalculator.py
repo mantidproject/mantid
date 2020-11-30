@@ -333,6 +333,8 @@ class SPowderSemiEmpiricalCalculator:
 
                         s["order_%s" % lg_order] += part_broad_spectrum
 
+                return s
+
             # if relatively small array of transitions then process it in one shot
             else:
 
