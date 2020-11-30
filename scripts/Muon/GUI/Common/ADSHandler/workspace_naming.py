@@ -13,9 +13,6 @@ TF_ASYMMETRY_PREFIX = "TFAsymmetry"
 REBIN_STR = 'Rebin'
 FFT_STR = 'FFT'
 MAXENT_STR = 'MaxEnt'
-RE_STR = "Re"
-IM_STR = "Im"
-
 
 def get_raw_data_workspace_name(instrument, run, multi_period, period='1', workspace_suffix=' MA'):
     if multi_period:
@@ -54,6 +51,7 @@ def get_group_asymmetry_name(context, group_name, run, period_string, rebin):
 
 
 def get_pair_asymmetry_name(context, pair_name, run, rebin):
+    print("name",context.data_context._base_run_name(run), pair_name )
     name = context.data_context._base_run_name(run) + pair_str + pair_name + ";"
 
     if rebin:
@@ -96,13 +94,6 @@ def get_phase_table_workspace_name(raw_workspace, forward_group, backward_group)
     workspace_name = raw_workspace.replace('_raw_data', '; PhaseTable')
     workspace_name += '; ' + forward_group + '; ' + backward_group
     return workspace_name
-
-def split_phasequad(name):
-    ws = AnalysisDataService.retrieve(name)
-    Re = extract_single_spec(name, 0, name+RE_STR)
-    Im = extract_single_spec(name, 1, name+IM_STR)
-    AnalysisDataService.remove(name)
-    return [Re, Im]
 
 def get_base_run_name(run, instrument):
     if isinstance(run, int):

@@ -20,11 +20,10 @@ class MuonPhasequad(object):
     - The workspace associated to the pair can be set, but must be of type MuonWorkspaceWrapper.
     """
 
-    def __init__(self, phasequad_name, run,
+    def __init__(self, phasequad_name,
                  phase_table):
 
         self._phasequad_name = phasequad_name
-        self._run = run
         self._phase_table = phase_table
         self._workspace = {}
         self.workspace_rebin = {}
@@ -44,14 +43,6 @@ class MuonPhasequad(object):
     @property
     def name(self):
         return self._phasequad_name
-
-    @property
-    def run(self):
-        return self._run
-
-    @run.setter
-    def run(self, new_run):
-        self._run = new_run
 
     @property
     def phase_table(self):

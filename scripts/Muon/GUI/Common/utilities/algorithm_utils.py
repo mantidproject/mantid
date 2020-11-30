@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import mantid.simpleapi as mantid
 from mantid.kernel import Logger
+from mantid.api import Workspace, AnalysisDataService
 
 muon_logger = Logger('Muon-Algs')
 
@@ -82,7 +83,8 @@ def run_CalMuonDetectorPhases(parameter_dict, alg, fitted_workspace_name):
     return alg.getProperty("DetectorTable").valueAsStr, alg.getProperty('DataFitted').valueAsStr
 
 
-def run_PhaseQuad(parameters_dict, alg, phase_quad_workspace_name):
+def run_PhaseQuad(parameters_dict, phase_quad_workspace_name):
+    alg = mantid.AlgorithmManager.create("PhaseQuad")
     alg.initialize()
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
@@ -249,3 +251,10 @@ def extract_single_spec(ws, spec, output_workspace_name):
     alg.setProperty("WorkspaceIndex", spec)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
+
+def split_phasequad(name):
+    ws = AnalysisDataService.retrieve(name)
+    Re = extract_single_spec(name, 0, name)#+"_Re")
+    #Im = extract_single_spec(name, 1, name+"_Im")
+    #AnalysisDataService.remove(name)
+    return [Re]

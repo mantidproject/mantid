@@ -12,6 +12,8 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data, run_pre_processing
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
+from Muon.GUI.Common.utilities.algorithm_utils import  run_PhaseQuad, split_phasequad
+from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
 from Muon.GUI.Common.contexts.muon_gui_context import PlotMode
@@ -172,8 +174,11 @@ class MuonContext(object):
     def _calculate_pairs(self, rebin):
         for run in self._data_context.current_runs:
             for pair in self._group_pair_context.pairs:
-                pair_asymmetry_workspace = self.calculate_pair(
-                    pair, run, rebin=rebin)
+                if isinstance(pair, MuonPair):
+                    pair_asymmetry_workspace = self.calculate_pair(
+                         pair, run, rebin=rebin)
+                elif isinstance(pair, MuonPhasequad):
+                    pair_asymmetry_workspace = self.calculate_phasequad(pair, run, rebin=rebin )
                 if not pair_asymmetry_workspace:
                     continue
                 pair.update_asymmetry_workspace(
@@ -200,6 +205,37 @@ class MuonContext(object):
 
                 self.group_pair_context[group.name].update_workspaces(run, group_workspace, group_asymmetry,
                                                                       group_asymmetry_unormalised, rebin=rebin)
+
+    def calculate_phasequads(self, name, phasequad_obj):
+        self._calculate_phasequads(name,phasequad_obj,rebin=False)
+        if self._do_rebin():
+            self._calculate_phasequads(name, phasequad_obj,rebin=True)
+
+    def calculate_phasequad(self, phasequad, run, rebin):
+        parameters = {}
+        parameters['PhaseTable'] = phasequad.phase_table
+        run_string = run_list_to_string(run)
+        parameters['InputWorkspace'] = get_raw_data_workspace_name(self.data_context.instrument, run_string, multi_period=False, workspace_suffix=self.workspace_suffix)
+        ws_name = get_pair_asymmetry_name(self, phasequad.name, run_string, rebin=rebin) # breaks for some reason
+
+        phase_quad = run_PhaseQuad(parameters, ws_name)
+
+        workspaces = split_phasequad(phase_quad)
+        return workspaces[0]
+
+    def _calculate_phasequads(self, name, phasequad_obj, rebin):
+        for run in self._data_context.current_runs:
+            ws = self.calculate_phasequad(phasequad_obj, run, rebin)
+            run_string = run_list_to_string(run)
+            directory = get_base_data_directory(self, run_string)
+            muon_workspace_wrapper = MuonWorkspaceWrapper(directory + ws)
+            muon_workspace_wrapper.show()
+
+            phasequad_obj.update_asymmetry_workspace(
+                     ws,
+                     run,
+                     rebin=rebin)
+ 
 
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their

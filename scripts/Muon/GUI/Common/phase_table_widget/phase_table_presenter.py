@@ -6,24 +6,39 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common import thread_model
-from Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases, run_PhaseQuad, extract_single_spec
+from Muon.GUI.Common.utilities.algorithm_utils import run_CalMuonDetectorPhases#, run_PhaseQuad
 from Muon.GUI.Common.muon_phasequad import MuonPhasequad
-from mantidqt.utils.observer_pattern import Observable,GenericObserver,GenericObservable
+from mantidqt.utils.observer_pattern import Observable,GenericObserver,GenericObservable,  GenericObserverWithArgPassing
 import re
 from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspace_name, \
     get_phase_table_workspace_group_name, \
-    get_phase_quad_workspace_name, get_fitting_workspace_name, get_base_data_directory, \
-    split_phasequad
+    get_phase_quad_workspace_name, get_fitting_workspace_name, get_base_data_directory
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from mantid.api import AnalysisDataService
 
 import mantid
+
+class  model(object):
+    def __init__(self, context):
+        self.context= context
+
+    def add_phasquad_as_pair(self, name):
+        print("hiii2m", group_info)
+        self.context.group_pair_context.add_pair(name)
+        pair_added = True# if state == 2 else False
+        if pair_added:
+            self.context.group_pair_context.add_pair_to_selected_pairs(name)
+        #else:
+        #    #self._model.remove_pair_from_analysis(name)
+        print("this", self.context.group_pair_context.pairs)
+        #group_info = {'is_added': pair_added, 'name': name}
+        #self.selected_phasequad_changed_notifier.notify_subscribers(group_info)
 
 
 class PhaseTablePresenter(object):
     def __init__(self, view, context):
         self.view = view
         self.context = context
+        self._model=model(context)
         self.current_alg = None
 
         self.group_change_observer = GenericObserver(self.update_current_groups_list)
@@ -31,7 +46,7 @@ class PhaseTablePresenter(object):
         self.instrument_changed_observer = GenericObserver(self.update_current_phase_tables)
 
         self.phase_table_calculation_complete_notifier = Observable()
-        self.phase_quad_calculation_complete_nofifier = Observable()
+        self.phase_quad_calculation_complete_notifier = Observable()
         self.enable_editing_notifier = Observable()
         self.disable_editing_notifier = Observable()
 
@@ -40,6 +55,8 @@ class PhaseTablePresenter(object):
         self.selected_phasequad_changed_notifier = GenericObservable()
 
         self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
+        #self.add_phasequad_observer =  GenericObserverWithArgPassing(self.add_phasquad_as_pair)
+        #self.phase_quad_calculation_complete_notifier.add_subscriber(self.add_phasequad_observer)
 
         self.update_current_phase_tables()
 
@@ -78,7 +95,7 @@ class PhaseTablePresenter(object):
         self.phasequad_calculation_thread = self.create_phase_quad_calculation_thread()
 
         self.phasequad_calculation_thread.threadWrapperSetUp(self.handle_calculation_started,
-                                                             self.handle_calculation_success,
+                                                             self.handle_phasequad_calculation_success,
                                                              self.handle_calculation_error)
 
         self.phasequad_calculation_thread.start()
@@ -88,53 +105,38 @@ class PhaseTablePresenter(object):
         return thread_model.ThreadModel(self._phasequad_calculation_model)
 
     def calculate_phase_quad(self):
-        parameters = self.get_parameters_for_phase_quad()
-        phasequad_workspace_name = "phaseQuad" #get_phase_quad_workspace_name(parameters['InputWorkspace'], parameters['PhaseTable'])
-
-        self.current_alg = mantid.AlgorithmManager.create("PhaseQuad")
-        phase_quad = run_PhaseQuad(parameters, self.current_alg, phasequad_workspace_name)
-        self.current_alg = None
-
-        # need to move to muon context some of this to get rebin correct
-        # run will come from new table
-        # want to make phase_quad the name of the row
-        workspaces = split_phasequad(phase_quad)
-        for name in workspaces:
-            phasequad_obj = MuonPhasequad(name, parameters['InputWorkspace'],parameters['PhaseTable'] )
-            phasequad_obj.update_asymmetry_workspace(
-                         name,
-                         [62260],
-                         rebin=False)
-            self.add_phase_quad_to_ADS(parameters['InputWorkspace'], name, phasequad_obj)
-
-    def get_parameters_for_phase_quad(self):
-        parameters = {}
-        if self.context.phase_context.options_dict['phase_table_for_phase_quad'] == 'Construct':
-            parameters['PhaseTable'] = self.calculate_phase_table()
-        else:
-            parameters['PhaseTable'] = self.context.phase_context.options_dict['phase_table_for_phase_quad']
-
-        parameters['InputWorkspace'] = self.context.phase_context.options_dict['phase_quad_input_workspace']
-
-        return parameters
-
-    def add_phase_quad_to_ADS(self, input_workspace, phasequad_workspace_name, phasequad_obj):
-        run = re.search('^{}([0-9, -]+)[;,_]?'.format(self.context.data_context.instrument), input_workspace).group(1)
-
-        directory = get_base_data_directory(self.context, run)
-        # needed to add to the correct group etc.
-        muon_workspace_wrapper = MuonWorkspaceWrapper(directory + phasequad_workspace_name)
-        muon_workspace_wrapper.show()
-        # add the phasequad
+        table =  self.context.phase_context.options_dict['phase_table_for_phase_quad']
+        name = "bob"
+        phasequad_obj = MuonPhasequad(name, table)
         self.context.group_pair_context.add_pair(phasequad_obj)
-
-        self.context.group_pair_context.add_pair_to_selected_pairs(phasequad_obj.name)
+        self.context.calculate_phasequads(name, phasequad_obj)
+        #self._model.add_phasquad_as_pair(name)
+        #self.context.group_pair_context.add_pair(name)
         #get state from table
-        group_info = {'is_added': True, 'name': phasequad_obj.name}
-        self.selected_phasequad_changed_notifier.notify_subscribers(group_info)
+      
+
+        #group_info = {'is_added': pair_added, 'name': name}
+        #self.selected_phasequad_changed_notifier.notify_subscribers(group_info)
 
         #self.context.phase_context.add_phase_quad(muon_workspace_wrapper, run)
-        self.phase_quad_calculation_complete_nofifier.notify_subscribers()
+        self.phase_quad_calculation_complete_notifier.notify_subscribers(name)
+
+    def handle_phasequad_calculation_success(self):
+        self.enable_editing_notifier.notify_subscribers()
+        self.view.enable_widget()
+        self.view.disable_cancel()
+        print("moo",self.context.group_pair_context.pairs)
+        name = "bob"
+        self.current_alg = None
+        #self.context.group_pair_context.add_pair(name)
+        pair_added = True# if state == 2 else False
+        if pair_added:
+            self.context.group_pair_context.add_pair_to_selected_pairs(name)
+        #else:
+        #    #self._model.remove_pair_from_analysis(name)
+        print("this", self.context.group_pair_context.pairs)
+        group_info = {'is_added': pair_added, 'name': name}
+        self.selected_phasequad_changed_notifier.notify_subscribers(group_info)
 
     def handle_calculation_started(self):
         self.disable_editing_notifier.notify_subscribers()
