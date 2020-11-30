@@ -83,14 +83,13 @@ class LeadPressureCalc(PythonAlgorithm):
         if p_target == 0.0:
             use_input_target = False
             p_target = p_calc
-        candidates = []
-        for test_dspacing in np.arange(2, 2.95, 0.0001):
-            pressure = calculate_pressure(test_dspacing, temp)
-            diff = abs(pressure - p_target)
-            if diff < TOL:
-                candidates.append([diff, test_dspacing])
-        if candidates:
-            diff, found_d = candidates[np.argmin(candidates, axis=0)[0]]
+        test_dspacing = np.arange(2, 2.95, 0.0001)
+        pressure = calculate_pressure(test_dspacing, temp)
+        diff = abs(pressure - p_target)
+        index = np.argmin(diff)
+        diff = diff[index]
+        if diff < TOL:
+            found_d = test_dspacing[index]
         else:
             diff, found_d = 0, 0
         if found_d != 0:
