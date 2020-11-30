@@ -8,7 +8,7 @@ import unittest
 from mantid.simpleapi import mtd, LeadPressureCalc
 
 
-class MyTestCase(unittest.TestCase):
+class LeadPressureCalcTest(unittest.TestCase):
 
     def test_negative_temp_fails_input_validation(self):
         d = 2.1
