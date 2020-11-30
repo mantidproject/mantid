@@ -11,6 +11,7 @@ from mantid.simpleapi import (
     MoveInstrumentComponent,
     CloneWorkspace,
     AddSampleLog,
+    GroupWorkspaces,
 )
 from mantid.api import (
     MatrixWorkspace,
@@ -422,13 +423,13 @@ class WANDPowderReductionTest(unittest.TestCase):
 
         event_data2 = CloneWorkspace(event_data)
 
-        group = WorkspaceGroup()
-        group.addWorkspace(event_data)
-        group.addWorkspace(event_data2)
+        event_data_group = WorkspaceGroup()
+        event_data_group.addWorkspace(event_data)
+        event_data_group.addWorkspace(event_data2)
 
         # CASE 4 - input group ws, output group ws
         pd_out = WANDPowderReduction(
-            InputWorkspace=group,
+            InputWorkspace=event_data_group,
             CalibrationWorkspace=event_cal,
             BackgroundWorkspace=event_bkg,
             Target="Theta",
@@ -437,6 +438,30 @@ class WANDPowderReductionTest(unittest.TestCase):
             Sum=False,
         )
 
+        for i in pd_out:
+            x = i.extractX()
+            y = i.extractY()
+
+            self.assertAlmostEqual(x.min(), 0.03517355)
+            self.assertAlmostEqual(x.max(), 70.3119282)
+            self.assertAlmostEqual(y[0, 0], 0.0)
+
+        assert isinstance(pd_out, WorkspaceGroup)
+        assert len(pd_out) == 2
+
+        event_data2 = CloneWorkspace(event_data)
+        event_data_group = GroupWorkspaces([event_data,event_data2])
+
+        pd_out = WANDPowderReduction(
+            InputWorkspace=event_data_group,
+            CalibrationWorkspace=event_cal,
+            BackgroundWorkspace=event_bkg,
+            Target="Theta",
+            NumberBins=1000,
+            NormaliseBy="None",
+            Sum=False,
+        )
+        
         for i in pd_out:
             x = i.extractX()
             y = i.extractY()
