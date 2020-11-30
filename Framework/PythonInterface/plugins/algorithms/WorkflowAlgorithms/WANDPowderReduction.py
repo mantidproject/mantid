@@ -5,13 +5,14 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (
-    ADSValidator,
     AlgorithmFactory,
+    AnalysisDataService,
     DataProcessorAlgorithm,
     MatrixWorkspaceProperty,
     PropertyMode,
     IEventWorkspace,
     WorkspaceProperty,
+    WorkspaceGroup,
 )
 from mantid.dataobjects import MaskWorkspaceProperty
 from mantid.simpleapi import (
@@ -72,8 +73,9 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         self.declareProperty(
             StringArrayProperty(
                 "InputWorkspace",
+                "",
                 direction=Direction.Input,
-                validator=ADSValidator(),
+                # validator=ADSValidator(),
             ),
             doc="The main input workspace[s].",
         )
@@ -95,7 +97,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
                 optional=PropertyMode.Optional,
                 direction=Direction.Input,
             ),
-            doc="The calibration (vandiaum) workspace.",
+            doc="The calibration (vanadium) workspace.",
         )
 
         self.declareProperty(
@@ -144,10 +146,8 @@ class WANDPowderReduction(DataProcessorAlgorithm):
         )
 
     def PyExec(self):
-        data = self.getProperty("InputWorkspace").value  # [1~n]
-        bkg = self.getProperty(
-            "BackgroundWorkspace"
-        ).valueAsStr  # same background for all
+        data = self._expand_groups()
+        bkg = self.getProperty("BackgroundWorkspace").valueAsStr  # same background for all
         cal = self.getProperty("CalibrationWorkspace").value  # same calibration for all
         numberBins = self.getProperty("NumberBins").value
         outWS = self.getPropertyValue("OutputWorkspace")
@@ -254,6 +254,19 @@ class WANDPowderReduction(DataProcessorAlgorithm):
             for ws in self.temp_workspace_list
             if mtd.doesExist(ws)
         ]
+
+    def _expand_groups(self):
+        """expand workspace groups"""
+        workspaces = self.getProperty("InputWorkspace").value
+        input_workspaces = []
+        for wsname in workspaces:
+            wks = AnalysisDataService.retrieve(wsname)
+            if isinstance(wks, WorkspaceGroup):
+                input_workspaces.extend(wks.getNames())
+            else:
+                input_workspaces.append(wsname)
+
+        return input_workspaces
 
     def _get_scale(self, x):
         """return the scale factor needed during normalization"""
