@@ -97,14 +97,14 @@ void CorelliPowderCalibrationApply::exec() {
   auto wsName = ws->getName();
 
   calTable = getProperty("CalibrationTable");
-  auto componentNames = calTable->getColumn(0);
-  auto x_poss = calTable->getColumn(1);
-  auto y_poss = calTable->getColumn(2);
-  auto z_poss = calTable->getColumn(3);
-  auto rotxs = calTable->getColumn(4);
-  auto rotys = calTable->getColumn(5);
-  auto rotzs = calTable->getColumn(6);
-  auto rotangs = calTable->getColumn(7); // unit: degrees
+  const auto componentNames = calTable->getColumn(0);
+  const auto x_poss = calTable->getColumn(1);
+  const auto y_poss = calTable->getColumn(2);
+  const auto z_poss = calTable->getColumn(3);
+  const auto rotxs = calTable->getColumn(4);
+  const auto rotys = calTable->getColumn(5);
+  const auto rotzs = calTable->getColumn(6);
+  const auto rotangs = calTable->getColumn(7); // unit: degrees
 
   /**
   Translate each component in the instrument
@@ -123,7 +123,6 @@ void CorelliPowderCalibrationApply::exec() {
   auto moveAlg = createChildAlgorithm("MoveInstrumentComponent");
   moveAlg->initialize();
   moveAlg->setProperty("Workspace", wsName);
-  auto componentName = calTable->getColumn(0);
   for (size_t row_num = 0; row_num < calTable->rowCount(); row_num++) {
     moveAlg->setProperty("ComponentName",
                          componentNames->cell<std::string>(row_num));
