@@ -32,7 +32,7 @@ A more detailed list of inputs:
 
 `CORELLIPowderCalibrationDatabase` creates the following outputs:  
 
-**Merged Calibration TableWorkspace**: The contents of *corelli_instrument_20202015.csv* will be loaded into a `TableWorkspace` object, the `CalibrationTable` output. It will have the same structure as `CalibrationTablePatch` but should (ideally) contain a row for every bank in the instrument
+**Merged Calibration TableWorkspace**: The contents of *corelli_instrument_YYYYMMDD.csv* will be loaded into a `TableWorkspace` object, the `CalibrationTable` output. It will have the same structure as `CalibrationTablePatch` but should (ideally) contain a row for every bank in the instrument.  *YYYYMMDD* is the date stamp of calibration run.  For example, if the calibraton's run start time is on 2020.02.15, then its date stamp is *20200215*.
 
 **Single Component Database Files**: extract each row of `CalibrationTable` and append to appropriate component file in the the database. 
 For instance, if the contents of `CalibrationTablePatch` are:
@@ -42,7 +42,7 @@ For instance, if the contents of `CalibrationTablePatch` are:
  | sample-position | 0.0001 | -0.0002 | 0.003 | 0 | 0 | 0 | 0 |
  | bank1 | 0.9678 | 0.0056 | 0.0003 | 0.4563 | -0.9999 | 0.3424 | 5.67 |
 
-And the day stamp for this calibration is 20201025, the following line will be *appended* to file *corelli_moderator.csv* :
+And the day stamp for this calibration is *YYYYMMDD*, the following line will be *appended* to file *corelli_moderator.csv* :
 
 ```
 20201025, 0, 0, -15.560, 0, 0, 0, 0
@@ -58,11 +58,13 @@ and the following lines to *corelli_bank001.csv*:
 20201025, 0.9678, 0.0056, 0.0003, 0.4563, -0.9999, 0.3424, 5.67
 
 The header for files *corelli_moderator.csv*, *corelli_sample-position.csv*, and files *corelli_bankXXX.csv* should be:
+
 ```
 # YYYMMDD, Xposition, Yposition, Zposition, XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle
 ```
 
-**Combined Calibrtion Database File**: The last line of *corelli_moderator.csv*, *corelli_sample-position.csv*, and each of existing files *corelli_bankXXX.csv* will be collected and gathered into file *corelli_instrument_20202015.csv*. The header for this file should be:
+**Combined Calibration Database File**: The last line of *corelli_moderator.csv*, *corelli_sample-position.csv*, and each of existing files *corelli_bankXXX.csv* will be collected and gathered into file *corelli_instrument_20202015.csv*. The header for this file should be:
+
 ```
 # ComponentName, Xposition, Yposition, Zposition, XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle
 ```
