@@ -394,21 +394,21 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                 if fitting_method == 'Global':
                     ws_names.append(ws_name)
                     results_x, results_y, results_e = self._call_fit(ws, ws_name, fit_function, fit_constraints,
-                                                                         0, pixel_no, single_spectrum_peaks,
-                                                                         results_x, results_y, results_e)
+                                                                     0, pixel_no, single_spectrum_peaks,
+                                                                     results_x, results_y, results_e)
             if fitting_method != 'None':
-               CreateWorkspace(OutputWorkspace='ws',
-                               DataX=results_x,
-                               DataY=results_y,
-                               DataE=results_e,
-                               UnitX='degrees',
-                               NSpec=1)
-               try:
+                CreateWorkspace(OutputWorkspace='ws',
+                                DataX=results_x,
+                                DataY=results_y,
+                                DataE=results_e,
+                                UnitX='degrees',
+                                NSpec=1)
+                try:
                     ConjoinWorkspaces(InputWorkspace1=conjoined_peak_fit_name, InputWorkspace2='ws',
                                       CheckOverlapping=False,
                                       YAxisLabel='TwoTheta_fit',
                                       YAxisUnit='degrees')
-               except ValueError:
+                except ValueError:
                     RenameWorkspace(InputWorkspace='ws', OutputWorkspace=conjoined_peak_fit_name)
             else:
                 ws_names.append(ws_name)
