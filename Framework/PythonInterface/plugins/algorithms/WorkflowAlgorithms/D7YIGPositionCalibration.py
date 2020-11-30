@@ -359,15 +359,15 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         function = "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}"
         constraints = "f{0}.Height > 0, f{0}.Sigma < {1}, {2} < f{0}.PeakCentre < {3}"
         for pixel_no in range(mtd[ws].getNumberHistograms()):
+            # create the needed columns in the output workspace
+            results_x = np.zeros(max_n_peaks)
+            results_y = np.zeros(max_n_peaks)
+            results_e = np.zeros(max_n_peaks)
             single_spectrum_peaks = yig_peaks[pixel_no]
             if len(single_spectrum_peaks) >= 1:
                 ws_name = 'pixel_{}'.format(pixel_no)
                 if fitting_method == 'Individual':
                     ws_name += '_peak_{}'
-                # create the needed columns in the output workspace
-                results_x = np.zeros(max_n_peaks)
-                results_y = np.zeros(max_n_peaks)
-                results_e = np.zeros(max_n_peaks)
                 peak_no = 0
                 function_no = 0
                 fit_function = [background]
@@ -391,34 +391,34 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                         function_no = 0
                     peak_no += 1
 
-                if fitting_method in ['Individual', 'Global']:
-                    if fitting_method == 'Global':
-                        ws_names.append(ws_name)
-                        results_x, results_y, results_e = self._call_fit(ws, ws_name, fit_function, fit_constraints,
+                if fitting_method == 'Global':
+                    ws_names.append(ws_name)
+                    results_x, results_y, results_e = self._call_fit(ws, ws_name, fit_function, fit_constraints,
                                                                          0, pixel_no, single_spectrum_peaks,
                                                                          results_x, results_y, results_e)
-                    CreateWorkspace(OutputWorkspace='ws',
-                                    DataX=results_x,
-                                    DataY=results_y,
-                                    DataE=results_e,
-                                    UnitX='degrees',
-                                    NSpec=1)
-                    try:
-                        ConjoinWorkspaces(InputWorkspace1=conjoined_peak_fit_name, InputWorkspace2='ws',
-                                          CheckOverlapping=False,
-                                          YAxisLabel='TwoTheta_fit',
-                                          YAxisUnit='degrees')
-                    except ValueError:
-                        RenameWorkspace(InputWorkspace='ws', OutputWorkspace=conjoined_peak_fit_name)
-                elif fitting_method == 'None':
-                    ws_names.append(ws_name)
-                    single_spectrum_name = '{}_single_spectrum'.format(ws_name)
-                    ExtractSpectra(InputWorkspace=ws, OutputWorkspace=single_spectrum_name,
-                                   WorkspaceIndexList=[pixel_no])
-                    EvaluateFunction(Function=';'.join(fit_function),
-                                     InputWorkspace=single_spectrum_name,
-                                     OutputWorkspace=ws_name)
-                    DeleteWorkspace(Workspace=single_spectrum_name)
+            if fitting_method != 'None':
+               CreateWorkspace(OutputWorkspace='ws',
+                               DataX=results_x,
+                               DataY=results_y,
+                               DataE=results_e,
+                               UnitX='degrees',
+                               NSpec=1)
+               try:
+                    ConjoinWorkspaces(InputWorkspace1=conjoined_peak_fit_name, InputWorkspace2='ws',
+                                      CheckOverlapping=False,
+                                      YAxisLabel='TwoTheta_fit',
+                                      YAxisUnit='degrees')
+               except ValueError:
+                    RenameWorkspace(InputWorkspace='ws', OutputWorkspace=conjoined_peak_fit_name)
+            else:
+                ws_names.append(ws_name)
+                single_spectrum_name = '{}_single_spectrum'.format(ws_name)
+                ExtractSpectra(InputWorkspace=ws, OutputWorkspace=single_spectrum_name,
+                               WorkspaceIndexList=[pixel_no])
+                EvaluateFunction(Function=';'.join(fit_function),
+                                 InputWorkspace=single_spectrum_name,
+                                 OutputWorkspace=ws_name)
+                DeleteWorkspace(Workspace=single_spectrum_name)
 
         if fitting_method in ['Individual', 'Global']:
             y_axis = NumericAxis.create(self._D7NumberPixels)
