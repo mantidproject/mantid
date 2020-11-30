@@ -4,10 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory, IMDEventWorkspaceProperty, IPeaksWorkspaceProperty, PythonAlgorithm, \
-    PropertyMode
+from mantid.api import AlgorithmFactory, FileAction, FileProperty, IMDEventWorkspaceProperty, IPeaksWorkspaceProperty, \
+    PythonAlgorithm, PropertyMode
 from mantid.kernel import Direction, FloatBoundedValidator
-from mantid.simpleapi import DeleteWorkspace, IntegratePeaksMD
+from mantid.simpleapi import DeleteWorkspace, IntegratePeaksMD, SaveHKL
 import numpy as np
 
 
@@ -46,6 +46,14 @@ class HB3AIntegratePeaks(PythonAlgorithm):
         self.declareProperty("BackgroundOuterRadius", defaultValue=0.0, validator=positive_val,
                              doc="Outer radius used to evaluate the peak background")
 
+        self.declareProperty("OutputDirectionCosines", defaultValue=True,
+                             doc="Whether to save direction cosines in the output file")
+
+        self.declareProperty(FileProperty(name="OutputFile", defaultValue="", extensions=[".hkl"],
+                                          direction=Direction.Input,
+                                          action=FileAction.Save),
+                             doc="Filepath to save the integrated peaks workspace in HKL format")
+
         self.declareProperty(IPeaksWorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output,
                                                      optional=PropertyMode.Mandatory),
                              doc="Output peaks workspace (copy of input with updated peak intensities)")
@@ -70,6 +78,9 @@ class HB3AIntegratePeaks(PythonAlgorithm):
         inner_radius = self.getProperty("BackgroundInnerRadius").value
         outer_radius = self.getProperty("BackgroundOuterRadius").value
 
+        dir_cosines = self.getProperty("OutputDirectionCosines").value
+        filename = self.getProperty("OutputFile").value
+
         out_ws = IntegratePeaksMD(InputWorkspace=input_ws,
                                   PeakRadius=peak_radius,
                                   BackgroundInnerRadius=inner_radius,
@@ -81,6 +92,8 @@ class HB3AIntegratePeaks(PythonAlgorithm):
             peak = out_ws.getPeak(p)
             lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
             peak.setIntensity(peak.getIntensity() * lorentz)
+
+        SaveHKL(InputWorkspace=out_ws, Filename=filename, DirectionCosines=dir_cosines)
 
         self.setProperty("OutputWorkspace", out_ws)
 
