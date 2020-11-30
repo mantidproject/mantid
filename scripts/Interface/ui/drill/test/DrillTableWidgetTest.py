@@ -121,9 +121,9 @@ class DrillTableWidgetTest(unittest.TestCase):
         self.selectCell(1, 1, Qt.ControlModifier)
         self.selectCell(2, 2, Qt.ControlModifier)
         self.assertEqual(self.table.getSelectedCells(), [(0, 0),
+                                                         (4, 0),
                                                          (1, 1),
-                                                         (2, 2),
-                                                         (4, 0)])
+                                                         (2, 2)])
 
     def test_getSelectionShape(self):
         self.table.getSelectedCells = mock.Mock()

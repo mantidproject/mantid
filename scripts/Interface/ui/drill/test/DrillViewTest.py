@@ -287,6 +287,7 @@ class DrillViewTest(unittest.TestCase):
         self.view.table.getSelectedCells.return_value = [(0, 0),
                                                          (0, 1)]
         self.view.table.getCellContents.return_value = "1000,2000,3000"
+        self.view.table.getRowsFromSelectedCells.return_value = [0]
         self.view.increment.value.return_value = 1
         self.view.automatic_filling()
         calls = [mock.call(0, 1, "1001,2001,3001")]

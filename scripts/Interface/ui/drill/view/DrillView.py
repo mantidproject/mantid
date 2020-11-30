@@ -467,7 +467,9 @@ class DrillView(QMainWindow):
         Copy (and increment) the contents of the first selected cell in the
         other ones. If a numors string is detected in the first cell, the
         numors values are incremented by the number found in the ui spinbox
-        associated with this action.
+        associated with this action. If a single row is selected, the increment
+        will be propagated along that row. Otherwise, the increment is
+        propagated along columns.
         """
         def inc(numors, i):
             """
@@ -522,10 +524,15 @@ class DrillView(QMainWindow):
 
         increment = self.increment.value()
         cells = self.table.getSelectedCells()
+        # check if increment should append along columns
+        columnIncrement = (len(self.table.getRowsFromSelectedCells()) > 1)
         if not cells:
             return
         # increment or copy the content of the previous cell
         for i in range(1, len(cells)):
+            # if we increment along columns and this is a new column
+            if columnIncrement and cells[i][1] != cells[i-1][1]:
+                continue
             contents = self.table.getCellContents(cells[i-1][0], cells[i-1][1])
             self.table.setCellContents(cells[i][0], cells[i][1],
                                        inc(contents, increment))
