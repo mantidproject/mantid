@@ -776,10 +776,9 @@ class Instrument(object):
         if Etrans is None:
             Etrans = np.linspace(0.05*Ei, 0.95*Ei+0.05*0.05*Ei, 19, endpoint=True)
         Etrans = np.array(Etrans if np.shape(Etrans) else [Etrans])
-        Etrans[np.where(Etrans == Ei)] = Ei - 1e-6
         if len(np.where(Etrans > Ei)[0]) > 0:
-            raise ValueError('Cannot calculate for energy transfer greater than Ei '
-                             '(physically negative neutron energies!)')
+            warnings.warn('Cannot calculate for energy transfer greater than Ei (physically negative neutron energies!)')
+        Etrans[np.where(Etrans >= Ei)] = np.nan
         v_van, _, _ = self.getVanVar(Ei, frequency, Etrans)
         x2 = self.chopper_system.sam_det
         Ef = Ei - np.array(Etrans)
