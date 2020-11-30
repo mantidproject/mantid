@@ -322,7 +322,8 @@ const static QString BATCH_JSON_STRING{
     "           }"
     "        ],"
     "        \"textCycle\": \"11_3\","
-    "        \"textSearch\": \"1120015\""
+    "        \"textSearch\": \"1120015\","
+    "        \"textInstrument\": \"INTER\""
     "    },"
     "    \"saveView\": {"
     "        \"commaRadioButton\": false,"
@@ -427,7 +428,8 @@ const static QString EMPTY_RUNS_JSON_STRING{
     "        },"
     "        \"searchResults\": [],"
     "        \"textCycle\": \"\","
-    "        \"textSearch\": \"\""
+    "        \"textSearch\": \"\","
+    "        \"textInstrument\": \"\""
     "    },"};
 
 const static QString EMPTY_SAVE_JSON_STRING{
