@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>943</width>
-    <height>466</height>
+    <height>543</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,44 +34,131 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_5">
           <item>
-           <layout class="QGridLayout" name="runLayout">
+           <layout class="QGridLayout" name="instrumentLayout" columnstretch="0,0,0,0">
+            <property name="leftMargin">
+             <number>9</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>9</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="instrument">
+              <property name="toolTip">
+               <string>Set the instrument of the data to be loaded.</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="instrumentLabel">
+              <property name="text">
+               <string>Instrument:  </string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <spacer name="instrumentSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="3">
+             <widget class="QPushButton" name="manageDirectoriesButton">
+              <property name="text">
+               <string>Manage User Directories </string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QGridLayout" name="pathLayout" columnstretch="1,10,0">
+            <property name="leftMargin">
+             <number>9</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <property name="rightMargin">
+             <number>9</number>
+            </property>
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
+            <item row="0" column="0">
+             <widget class="QLabel" name="pathLabel">
+              <property name="text">
+               <string>Loaded From:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="path">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="toolTip">
+               <string>The path the data is loaded from. This is set once you have loaded the data. Use manage user directories to specify where to load from</string>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="runsLayout">
             <property name="leftMargin">
              <number>9</number>
             </property>
             <property name="rightMargin">
              <number>9</number>
             </property>
-            <item row="0" column="1">
+            <item>
              <widget class="MantidQt::API::FileFinderWidget" name="runs" native="true">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="toolTip">
+               <string>Specify runs by comma separated lists and ranges using '-'.</string>
+              </property>
+              <property name="findRunFiles" stdset="0">
+               <bool>true</bool>
+              </property>
               <property name="label" stdset="0">
-               <string/>
+               <string>Runs:</string>
               </property>
               <property name="multipleFiles" stdset="0">
                <bool>true</bool>
               </property>
              </widget>
             </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="runsLabel">
-              <property name="text">
-               <string>Runs</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QCheckBox" name="runAuto">
+            <item>
+             <widget class="QRadioButton" name="runsAutoAdd">
               <property name="toolTip">
-               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, tries to find current run automatically in the same directory as the given first run&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;When checked, automatically watches the loaded path for runs being added and loads them.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
               </property>
               <property name="text">
-               <string>Auto Find 
-Current Run</string>
+               <string>Auto add</string>
               </property>
              </widget>
             </item>
@@ -79,6 +166,46 @@ Current Run</string>
           </item>
           <item>
            <widget class="MantidQt::MantidWidgets::LogValueSelector" name="logValueSelector" native="true"/>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>0</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="loadStatusLabel">
+              <property name="styleSheet">
+               <string notr="true"/>
+              </property>
+              <property name="text">
+               <string>Default Textt</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QPushButton" name="load">
+              <property name="text">
+               <string>Load</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -219,7 +346,7 @@ Current Run</string>
                <bool>false</bool>
               </property>
               <property name="text">
-               <string>Forward</string>
+               <string>Forward:</string>
               </property>
              </widget>
             </item>
@@ -236,7 +363,7 @@ Current Run</string>
                <bool>false</bool>
               </property>
               <property name="text">
-               <string>Backward</string>
+               <string>Backward:</string>
               </property>
              </widget>
             </item>
@@ -377,7 +504,7 @@ Current Run</string>
                <item>
                 <widget class="QLabel" name="label_4">
                  <property name="text">
-                  <string>From [µ]</string>
+                  <string>From [µ]:</string>
                  </property>
                 </widget>
                </item>
@@ -397,7 +524,7 @@ Current Run</string>
                <item>
                 <widget class="QLabel" name="label_5">
                  <property name="text">
-                  <string>Max [µ]</string>
+                  <string>Max [µ]:</string>
                  </property>
                 </widget>
                </item>
@@ -449,7 +576,17 @@ Current Run</string>
         </spacer>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Help: </string>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QPushButton" name="help">
            <property name="maximumSize">
@@ -464,7 +601,7 @@ Current Run</string>
           </widget>
          </item>
          <item>
-          <spacer name="horizontalSpacer">
+          <spacer name="horizontalSpacer_4">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
@@ -476,14 +613,10 @@ Current Run</string>
            </property>
           </spacer>
          </item>
-         <item>
-          <widget class="QPushButton" name="load">
-           <property name="text">
-            <string>Load</string>
-           </property>
-          </widget>
-         </item>
         </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3"/>
        </item>
       </layout>
       <zorder>deadTimeGroup</zorder>
@@ -540,8 +673,6 @@ Current Run</string>
   <tabstop>differential</tabstop>
   <tabstop>minTime</tabstop>
   <tabstop>maxTime</tabstop>
-  <tabstop>help</tabstop>
-  <tabstop>load</tabstop>
  </tabstops>
  <resources/>
  <connections>
@@ -643,8 +774,8 @@ Current Run</string>
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="deadTimeCorrType"/>
   <buttongroup name="calculationType"/>
   <buttongroup name="detectorGroupingType"/>
+  <buttongroup name="deadTimeCorrType"/>
  </buttongroups>
 </ui>

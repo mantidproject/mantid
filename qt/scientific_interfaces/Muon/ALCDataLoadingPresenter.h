@@ -50,25 +50,40 @@ private slots:
   /// Updates the list of logs and number of periods
   void updateAvailableInfo();
 
-  /// Updates the run number found from auto in the view
-  void updateAutoRun();
+  /// Handle for when runs line edit changed
+  void handleRunsChanged();
 
-  void resetAutoRun();
+  /// Handle for when instrument changed
+  void handleInstrumentChanged(std::string instrument);
+
+  /// Handle for when manage user directories clicked
+  void handleManageDirectories();
+
+  /// Handle for when runs have been searched for
+  void handleRunsFound();
+
+  /// When directory contents change, set flag
+  void updateDirectoryChangedFlag(const QString &path);
+
+  /// Begin/Stop watching path
+  void startWatching(bool watch);
 
 signals:
   /// Signal emitted when data get changed
   void dataChanged();
 
+protected:
+  /// Signal emitted when timer event occurs
+  void timerEvent(QTimerEvent *timeup) override;
+
 private:
   /// Load new data and update the view accordingly
   void load(const std::vector<std::string> &files);
 
-  void updateRunsTextFromAuto(const int autoRun);
-
   /// Check custom grouping is sensible
   bool checkCustomGrouping();
 
-  /// Extract run number as in from file name string
+  /// Extract run number as int from file name string
   int extractRunNumber(const std::string &file);
 
   /// Check the group is valid
@@ -89,8 +104,26 @@ private:
   // Loading algorithm
   Mantid::API::IAlgorithm_sptr m_LoadingAlg;
 
-  /// Input entered before auto checked
-  std::string m_oldInput;
+  /// Watches the path for changes
+  QFileSystemWatcher m_watcher;
+
+  /// Flag for changes in watched directory
+  std::atomic_bool m_directoryChanged;
+
+  /// Timer ID of running timer
+  int m_timerID;
+
+  /// Last run loaded by auto
+  int m_lastRunLoadedAuto;
+
+  /// Files that are loaded
+  std::vector<std::string> m_filesLoaded;
+
+  /// Last run added by auto was addes as range
+  std::atomic_bool m_wasLastAutoRange;
+
+  /// Previous first run number (INSTNAMERUNNUMBER)
+  std::string m_previousFirstRun;
 };
 
 } // namespace CustomInterfaces
