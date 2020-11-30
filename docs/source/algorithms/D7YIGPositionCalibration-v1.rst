@@ -46,7 +46,7 @@ Usage
    D7YIGPositionCalibration(Filenames='402652:403041', ApproximateWavelength=approximate_wavelength,
                                YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
                                MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1", ClearCache=True,
-                               FitOutputWorkspace='shortWavelength')
+                               FittingMethod='Individual', FitOutputWorkspace='shortWavelength')
 		       
    print('The calibrated wavelength is: {0:.2f}'.format(float(approximate_wavelength)*mtd['shortWavelength'].column(1)[1]))
    print('The bank2 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[0]))
@@ -62,7 +62,7 @@ Usage
    D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
                                YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_intermediateWavelength.xml',
                                MinimalDistanceBetweenPeaks=1.5, BankOffsets="-4,-4,0",
-                               FitOutputWorkspace='intermediateWavelength')
+                               FittingMethod='Individual', FitOutputWorkspace='intermediateWavelength')
 		       
    print('The calibrated wavelength is: {0:.1f}'.format(float(approximate_wavelength)*mtd['intermediateWavelength'].column(1)[1]))
    print('The bank2 gradient is: {0:.1f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[0]))
