@@ -166,9 +166,7 @@ ComponentScatterPoint MCInteractionVolume::generatePoint(
  * @return A tuple containing a flag to indicate whether before/after tracks
  * were successfully generated and (if yes) the before/after tracks
  */
-std::tuple<bool, std::shared_ptr<Geometry::Track>,
-           std::shared_ptr<Geometry::Track>>
-MCInteractionVolume::calculateBeforeAfterTrack(
+TrackPair MCInteractionVolume::calculateBeforeAfterTrack(
     Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
     const Kernel::V3D &endPos, MCInteractionStatistics &stats) const {
   // Generate scatter point. If there is an environment present then

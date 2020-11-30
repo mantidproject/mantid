@@ -171,24 +171,14 @@ public:
 
     auto beforeScatter = std::make_shared<MockTrack>();
     auto afterScatter = std::make_shared<MockTrack>();
-    auto ReturnTracksAndTrue = [beforeScatter,
-                                afterScatter](auto &arg0, auto &arg1,
-                                              auto &arg2, auto &arg3) {
-      UNUSED_ARG(arg0);
-      UNUSED_ARG(arg1);
-      UNUSED_ARG(arg2);
-      UNUSED_ARG(arg3);
+    auto ReturnTracksAndTrue = [beforeScatter, afterScatter](auto &, auto &,
+                                                             auto &, auto &) {
       return std::tuple{true, beforeScatter, afterScatter};
     };
-    auto ReturnNullTracksAndFalse = [beforeScatter,
-                                     afterScatter](auto &arg0, auto &arg1,
-                                                   auto &arg2, auto &arg3) {
-      UNUSED_ARG(arg0);
-      UNUSED_ARG(arg1);
-      UNUSED_ARG(arg2);
-      UNUSED_ARG(arg3);
-      return std::tuple{false, nullptr, nullptr};
-    };
+    auto ReturnNullTracksAndFalse =
+        [beforeScatter, afterScatter](auto &, auto &, auto &, auto &) {
+          return std::tuple{false, nullptr, nullptr};
+        };
     EXPECT_CALL(testInteractionVolume, calculateBeforeAfterTrack(_, _, _, _))
         .Times(Exactly(6))
         .WillOnce(Invoke(ReturnTracksAndTrue))
@@ -266,13 +256,12 @@ private:
   class MockMCInteractionVolume final : public IMCInteractionVolume {
   public:
     GNU_DIAG_OFF_SUGGEST_OVERRIDE
-    MOCK_CONST_METHOD4(
-        calculateBeforeAfterTrack,
-        std::tuple<bool, std::shared_ptr<Mantid::Geometry::Track>,
-                   std::shared_ptr<Mantid::Geometry::Track>>(
-            Mantid::Kernel::PseudoRandomNumberGenerator &rng,
-            const Mantid::Kernel::V3D &startPos,
-            const Mantid::Kernel::V3D &endPos, MCInteractionStatistics &stats));
+    MOCK_CONST_METHOD4(calculateBeforeAfterTrack,
+                       Mantid::Algorithms::TrackPair(
+                           Mantid::Kernel::PseudoRandomNumberGenerator &rng,
+                           const Mantid::Kernel::V3D &startPos,
+                           const Mantid::Kernel::V3D &endPos,
+                           MCInteractionStatistics &stats));
     MOCK_CONST_METHOD0(getBoundingBox, Mantid::Geometry::BoundingBox &());
     MOCK_CONST_METHOD0(getFullBoundingBox,
                        const Mantid::Geometry::BoundingBox());
