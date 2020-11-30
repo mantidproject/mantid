@@ -71,7 +71,7 @@ FitScriptGeneratorDataTable::FitScriptGeneratorDataTable(QWidget *parent)
   this->horizontalHeader()->setHighlightSections(false);
   this->horizontalHeader()->setStretchLastSection(true);
 
-  this->setColumnWidth(ColumnIndex::WorkspaceName, 300);
+  this->setColumnWidth(ColumnIndex::WorkspaceName, 280);
   this->setColumnWidth(ColumnIndex::WorkspaceIndex, 80);
   this->setColumnWidth(ColumnIndex::StartX, 100);
   this->setColumnWidth(ColumnIndex::EndX, 100);

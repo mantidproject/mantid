@@ -10,6 +10,7 @@
 #include "ui_FitScriptGenerator.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
 #include "MantidQtWidgets/Common/FunctionBrowser.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
@@ -61,8 +62,13 @@ public:
   void addWorkspaceDomain(std::string const &workspaceName,
                           WorkspaceIndex workspaceIndex, double startX,
                           double endX);
+  void addWorkspaceDomains(
+      std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,
+      std::vector<WorkspaceIndex> const &workspaceIndices);
 
-  void openAddWorkspaceDialog();
+  bool openAddWorkspaceDialog();
+  std::vector<Mantid::API::MatrixWorkspace_const_sptr> getDialogWorkspaces();
+  std::vector<WorkspaceIndex> getDialogWorkspaceIndices() const;
 
 private slots:
   void onRemoveClicked();
@@ -75,7 +81,10 @@ private:
   void setFitBrowserOption(QString const &name, QString const &value);
   void setFittingType(QString const &fitType);
 
+  void displayWarning(QString const &message);
+
   FitScriptGeneratorPresenter *m_presenter;
+  AddWorkspaceDialog m_dialog;
   std::unique_ptr<FitScriptGeneratorDataTable> m_dataTable;
   std::unique_ptr<FunctionBrowser> m_functionBrowser;
   std::unique_ptr<FitOptionsBrowser> m_fitOptionsBrowser;

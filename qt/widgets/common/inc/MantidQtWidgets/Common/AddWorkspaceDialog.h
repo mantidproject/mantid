@@ -6,18 +6,20 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ui_MDFAddWorkspaceDialog.h"
+#include "DllOption.h"
+#include "ui_AddWorkspaceDialog.h"
+
 #include <QDialog>
 
 namespace MantidQt {
-namespace CustomInterfaces {
-namespace MDF {
+namespace MantidWidgets {
 
 /**
  * A dialog for selecting a workspace from the ADS.
  */
-class AddWorkspaceDialog : public QDialog {
+class EXPORT_OPT_MANTIDQT_COMMON AddWorkspaceDialog : public QDialog {
   Q_OBJECT
+
 public:
   explicit AddWorkspaceDialog(QWidget *parent);
   QString workspaceName() const { return m_workspaceName; }
@@ -37,9 +39,8 @@ private:
   std::vector<int> m_wsIndices;
   /// Maximum index in the selected workspace
   int m_maxIndex;
-  Ui::MDFAddWorkspaceDialog m_uiForm;
+  Ui::AddWorkspaceDialog m_uiForm;
 };
 
-} // namespace MDF
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt

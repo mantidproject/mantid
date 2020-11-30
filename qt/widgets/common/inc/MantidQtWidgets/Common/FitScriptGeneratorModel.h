@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <map>
@@ -17,11 +18,11 @@ namespace MantidQt {
 namespace MantidWidgets {
 
 // Workspace name, workspace index
-//using WorkspaceDomain = std::pair<std::string, std::size_t>;
+// using WorkspaceDomain = std::pair<std::string, std::size_t>;
 // StartX, EndX
-//using XRange = std::pair<double, double>;
+// using XRange = std::pair<double, double>;
 // Fit functions
-//using FitFunctions = std::vector<IFunction_sptr>;
+// using FitFunctions = std::vector<IFunction_sptr>;
 
 class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorModel {
 public:
@@ -33,10 +34,13 @@ public:
   void addWorkspaceDomain(std::string const &workspaceName,
                           WorkspaceIndex workspaceIndex, double startX,
                           double endX);
+  void addWorkspaceDomains(
+      std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,
+      std::vector<WorkspaceIndex> const &workspaceIndices);
 
-//private:
-  //std::map<WorkspaceDomain, XRange> m_fitRanges;
-  //std::map<WorkspaceDomain, FitFunctions> m_fitFunctions;
+  // private:
+  // std::map<WorkspaceDomain, XRange> m_fitRanges;
+  // std::map<WorkspaceDomain, FitFunctions> m_fitFunctions;
 };
 
 } // namespace MantidWidgets

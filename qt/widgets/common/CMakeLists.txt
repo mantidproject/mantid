@@ -1,5 +1,6 @@
 set(
   QT5_SRC_FILES
+  src/AddWorkspaceDialog.cpp
   src/AlgorithmDialog.cpp
   src/AlgorithmHistoryWindow.cpp
   src/AlgorithmInputHistory.cpp
@@ -150,6 +151,7 @@ set(
 
 set(
   QT5_MOC_FILES
+  inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmPropertiesWidget.h
@@ -312,6 +314,7 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/Python/QHashToDict.h)
 
 set(QT5_UI_FILES
+    inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
     inc/MantidQtWidgets/Common/DataSelector.ui
     inc/MantidQtWidgets/Common/EditLocalParameterDialog.ui
     inc/MantidQtWidgets/Common/LogValueSelector.ui
@@ -330,6 +333,7 @@ set(QT5_UI_FILES
 
 set(
   SRC_FILES
+  src/AddWorkspaceDialog.cpp
   src/AlgorithmDialog.cpp
   src/AlgorithmHistoryWindow.cpp
   src/AlgorithmInputHistory.cpp
@@ -516,6 +520,7 @@ set(
 
 set(
   MOC_FILES
+  inc/MantidQtWidgets/Common/AddWorkspaceDialog.h
   inc/MantidQtWidgets/Common/AlgorithmDialog.h
   inc/MantidQtWidgets/Common/AlgorithmHistoryWindow.h
   inc/MantidQtWidgets/Common/AlgorithmRunner.h
@@ -802,6 +807,7 @@ set(
 )
 
 set(UI_FILES
+    inc/MantidQtWidgets/Common/AddWorkspaceDialog.ui
     inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorOptionsDialog.ui
     inc/MantidQtWidgets/Common/DataProcessorUI/DataProcessorWidget.ui
     inc/MantidQtWidgets/Common/DataSelector.ui

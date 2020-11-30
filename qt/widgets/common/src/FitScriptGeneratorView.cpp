@@ -10,12 +10,53 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 
-#include <QDialog>
-
+#include <algorithm>
+#include <iterator>
 #include <stdexcept>
 
+#include <QMessageBox>
+
 using namespace Mantid::API;
+using namespace MantidQt::MantidWidgets;
+
+namespace {
+
+void addWorkspacesFromGroup(std::vector<MatrixWorkspace_const_sptr> &workspaces,
+                            WorkspaceGroup_const_sptr const &group) {
+  auto const groupSize = static_cast<std::size_t>(group->getNumberOfEntries());
+  for (auto i = 0u; i < groupSize; ++i) {
+    if (auto const workspace =
+            std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i))) {
+      workspaces.emplace_back(workspace);
+    }
+  }
+}
+
+std::vector<MatrixWorkspace_const_sptr>
+getWorkspaces(std::string const &workspaceName) {
+  auto &ads = AnalysisDataService::Instance();
+
+  std::vector<MatrixWorkspace_const_sptr> workspaces;
+  if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName))
+    workspaces.emplace_back(workspace);
+  else if (auto const group = ads.retrieveWS<WorkspaceGroup>(workspaceName))
+    addWorkspacesFromGroup(workspaces, group);
+  return workspaces;
+}
+
+std::vector<WorkspaceIndex>
+convertToWorkspaceIndex(std::vector<int> const indices) {
+  std::vector<WorkspaceIndex> workspaceIndices;
+  workspaceIndices.reserve(indices.size());
+  std::transform(indices.cbegin(), indices.cend(),
+                 std::back_inserter(workspaceIndices),
+                 [](int index) { return WorkspaceIndex(index); });
+  return workspaceIndices;
+}
+
+} // namespace
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -24,7 +65,7 @@ using FittingType = FitOptionsBrowser::FittingType;
 
 FitScriptGeneratorView::FitScriptGeneratorView(
     QWidget *parent, QMap<QString, QString> const &fitOptions)
-    : API::MantidWidget(parent), m_presenter(),
+    : API::MantidWidget(parent), m_presenter(), m_dialog(this),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionBrowser(std::make_unique<FunctionBrowser>(nullptr, true)),
       m_fitOptionsBrowser(std::make_unique<FitOptionsBrowser>(
@@ -120,15 +161,43 @@ void FitScriptGeneratorView::addWorkspaceDomain(
                          startX, endX);
 }
 
-void FitScriptGeneratorView::openAddWorkspaceDialog() {
-  auto dialog = QDialog();
-  dialog.exec();
+void FitScriptGeneratorView::addWorkspaceDomains(
+    std::vector<MatrixWorkspace_const_sptr> const &workspaces,
+    std::vector<WorkspaceIndex> const &workspaceIndices) {
+  for (auto const &workspace : workspaces) {
+    for (auto const &workspaceIndex : workspaceIndices) {
+      auto const xData = workspace->x(workspaceIndex.value);
+      addWorkspaceDomain(workspace->getName(), workspaceIndex, xData.front(),
+                         xData.back());
+    }
+  }
+}
 
-  if (static_cast<QDialog::DialogCode>(dialog.result()) ==
-      QDialog::DialogCode::Accepted)
-    return;
-  // return dialog.getWorkspaceData();
-  return;
+bool FitScriptGeneratorView::openAddWorkspaceDialog() {
+  return m_dialog.exec() == QDialog::Accepted;
+}
+
+std::vector<MatrixWorkspace_const_sptr>
+FitScriptGeneratorView::getDialogWorkspaces() {
+  auto const workspaceName = m_dialog.workspaceName().trimmed().toStdString();
+
+  std::vector<MatrixWorkspace_const_sptr> workspaces;
+  if (AnalysisDataService::Instance().doesExist(workspaceName))
+    workspaces = getWorkspaces(workspaceName);
+  else
+    displayWarning("Failed to add workspace '" +
+                   QString::fromStdString(workspaceName) +
+                   "' : workspace doesn't exist.");
+  return workspaces;
+}
+
+std::vector<WorkspaceIndex>
+FitScriptGeneratorView::getDialogWorkspaceIndices() const {
+  return convertToWorkspaceIndex(m_dialog.workspaceIndices());
+}
+
+void FitScriptGeneratorView::displayWarning(QString const &message) {
+  QMessageBox::warning(this, "Warning!", message);
 }
 
 } // namespace MantidWidgets

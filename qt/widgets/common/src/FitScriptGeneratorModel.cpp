@@ -6,6 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
 
+#include "MantidAPI/MatrixWorkspace.h"
+
+using namespace Mantid::API;
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -19,6 +23,10 @@ void FitScriptGeneratorModel::removeWorkspaceDomain(
 void FitScriptGeneratorModel::addWorkspaceDomain(
     std::string const &workspaceName, WorkspaceIndex workspaceIndex,
     double startX, double endX) {}
+
+void FitScriptGeneratorModel::addWorkspaceDomains(
+    std::vector<MatrixWorkspace_const_sptr> const &workspaces,
+    std::vector<WorkspaceIndex> const &workspaceIndices) {}
 
 } // namespace MantidWidgets
 } // namespace MantidQt
