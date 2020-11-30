@@ -400,7 +400,7 @@ class WANDPowderReductionTest(unittest.TestCase):
         # CASE 3
         # input group ws containing several ws, output group ws containing several ws
         pd_out = WANDPowderReduction(
-            InputWorkspace=[event_data,event_data],
+            InputWorkspace=[event_data, event_data],
             CalibrationWorkspace=event_cal,
             BackgroundWorkspace=event_bkg,
             Target="Theta",
@@ -450,7 +450,7 @@ class WANDPowderReductionTest(unittest.TestCase):
         assert len(pd_out) == 2
 
         event_data2 = CloneWorkspace(event_data)
-        event_data_group = GroupWorkspaces([event_data,event_data2])
+        event_data_group = GroupWorkspaces([event_data, event_data2])
 
         pd_out = WANDPowderReduction(
             InputWorkspace=event_data_group,
@@ -461,7 +461,7 @@ class WANDPowderReductionTest(unittest.TestCase):
             NormaliseBy="None",
             Sum=False,
         )
-        
+
         for i in pd_out:
             x = i.extractX()
             y = i.extractY()
