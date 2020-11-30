@@ -14,6 +14,11 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_StepScan.h"
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+#include "MantidQtWidgets/MplCpp/Figure.h"
+#include "MantidQtWidgets/MplCpp/MantidAxes.h"
+#endif
+
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -80,6 +85,10 @@ private:
       m_addObserver;
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAfterReplaceNotification>
       m_replObserver;
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+  std::optional<MantidQt::Widgets::MplCpp::Figure> m_fig;
+  std::optional<MantidQt::Widgets::MplCpp::MantidAxes> m_ax;
+#endif
   bool m_replaceObserverAdded;
 };
 

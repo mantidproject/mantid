@@ -83,6 +83,21 @@ void Figure::setTightLayout(QHash<QString, QVariant> const &args) {
 }
 
 /**
+ * Display the figure window
+ */
+void Figure::show() {
+  this->pyobj().attr("show")();
+}
+
+/**
+ * Set window title of a figure
+ * @param title Title displayed in the top bar of the window.
+ */
+void Figure::setWindowTitle(const char *title) {
+  this->pyobj().attr("canvas").attr("set_window_title")(title);
+}
+
+/**
  * Add an Axes of the given dimensions to the current figure
  * All quantities are in fractions of figure width and height
  * @param left The X coordinate of the lower-left corner

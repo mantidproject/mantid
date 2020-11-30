@@ -48,6 +48,8 @@ public:
   QColor faceColor() const;
   void setFaceColor(const QColor &color);
   void setFaceColor(const char *color);
+  void setWindowTitle(const char *title);
+  void show();
   Axes addAxes(double left, double bottom, double width, double height);
   Axes addSubPlot(const int subplotspec, const QString &projection = "");
   Common::Python::Object

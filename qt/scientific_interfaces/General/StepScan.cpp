@@ -21,9 +21,6 @@
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 #include "MantidPythonInterface/core/GlobalInterpreterLock.h"
 #include "boost/python.hpp"
-#include "MantidQtWidgets/MplCpp/Figure.h"
-#include "MantidQtWidgets/MplCpp/FigureCanvasQt.h"
-#include "MantidQtWidgets/MplCpp/MantidAxes.h"
 #endif
 #include <QFileInfo>
 #include <QUrl>
@@ -70,7 +67,6 @@ StepScan::~StepScan() {
 /// Set up the dialog layout
 void StepScan::initLayout() {
   m_uiForm.setupUi(this);
-
   // I couldn't see a way to set a validator on a qlineedit in designer
   m_uiForm.xmin->setValidator(new QDoubleValidator(m_uiForm.xmin));
   m_uiForm.xmax->setValidator(new QDoubleValidator(m_uiForm.xmax));
@@ -679,6 +675,26 @@ void StepScan::generateCurve(const QString &var) {
   plotCurve();
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+namespace {
+auto get_fig_ax() {
+  std::string pyCode =
+      "import matplotlib.pyplot as plt\n"
+      "from mantid import plots\n"
+      "fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})";
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  using namespace boost::python;
+  using namespace MantidQt::Widgets::MplCpp;
+  object main_module = import("__main__");
+  object main_namespace = main_module.attr("__dict__");
+  object ignored = exec(pyCode.c_str(), main_namespace);
+  auto fig = Figure(extract<object>(main_namespace["fig"]));
+  auto ax = MantidAxes(extract<object>(main_namespace["ax"]));
+  return std::make_tuple(fig,ax);
+}
+}
+#endif
+
 void StepScan::plotCurve() {
   // Get the name of the dataset to produce the plot title
   std::string title = m_inputWSName.substr(2);
@@ -724,31 +740,31 @@ void StepScan::plotCurve() {
 
   runPythonCode(QString::fromStdString(pyCode));
 #else
-  std::string pyCode =
-      "import matplotlib.pyplot as plt\n"
-      "from mantid import plots\n"
-      "fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})";
-  Mantid::PythonInterface::GlobalInterpreterLock lock;
-  using namespace boost::python;
-  using namespace MantidQt::Widgets::MplCpp;
-  object main_module = import("__main__");
-  object main_namespace = main_module.attr("__dict__");
-  object ignored = exec(pyCode.c_str(), main_namespace);
-  auto fig = Figure(extract<object>(main_namespace["fig"]));
-  auto ax = MantidAxes(extract<object>(main_namespace["ax"]));
+  if (!m_fig.has_value() | m_fig->pyobj().is_none() | !m_ax.has_value() | m_ax->pyobj().is_none()) {
+    std::tie(m_fig, m_ax) = get_fig_ax();
+  } else{ 
+    boost::python::object can = m_fig->pyobj().attr("canvas");
+    if (can.is_none()) {
+      std::tie(m_fig, m_ax) = get_fig_ax();
+    }
+  }
+ 
+
   auto ws =
       AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
           m_plotWSName);
   title += " - Step Scan";
-  fig.pyobj().attr("canvas").attr("set_window_title")(title.c_str());
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  m_fig->setWindowTitle(title.c_str());
   QHash<QString, QVariant> hash;
   hash.insert("linestyle", "");
   hash.insert("marker", ".");
-  auto line = ax.plot(ws, 0, "black", "", hash);
-  ax.setXLabel(xAxisTitle.c_str());
-  ax.setYLabel(yAxisTitle.c_str());
-  fig.pyobj().attr("show")();
-  //canvas->show();
+  auto line = m_ax->plot(ws, 0, "black", "", hash);
+  m_ax->setXLabel(xAxisTitle.c_str());
+  m_ax->setYLabel(yAxisTitle.c_str());
+  m_fig->show();
+  this->activateWindow();
+  this->raise();
 #endif
 }
 
