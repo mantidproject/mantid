@@ -50,6 +50,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                                   'is required for calibration. If both are provided, the InputWorkspace takes precedence.'
             issues['InputWorkspace'] = issues['Filenames']
 
+        if self.getPropertyValue('FittingMethod') != 'None' and self.getProperty('CalibrationOutputFile').isDefault:
+            issues['CalibrationOutputFile'] = 'The name of the calibration output needs to be defined'
+
         return issues
 
     def PyInit(self):
