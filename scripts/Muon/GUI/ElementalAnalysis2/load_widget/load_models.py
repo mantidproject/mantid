@@ -82,6 +82,8 @@ class LoadRunWidgetModel(object):
                     detectors.append(detector_name)
                 run_results = RunObject(run, detectors, groupws)
                 self._data_context.run_info_update(run_results)
+                self._data_context.current_runs.append(run)
+
             except RuntimeError as error:
                 failed_files += [(run, error)]
                 continue

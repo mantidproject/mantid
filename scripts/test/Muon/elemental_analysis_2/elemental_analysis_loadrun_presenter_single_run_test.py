@@ -32,7 +32,6 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
 
         self.view = mock.create_autospec(LoadRunWidgetView, autospec=True)
         self.model = mock.Mock(LoadRunWidgetModel, autospec=True)
-        self.model._data_context = mock.Mock(DataContext, autospec=True)
         self.presenter = LoadRunWidgetPresenterEA(self.view, self.model)
 
     def tearDown(self):
@@ -52,6 +51,7 @@ class LoadRunWidgetPresenterTest(unittest.TestCase):
         self.view.get_run_edit_text.return_value = "5555"
         self.model.execute = mock.Mock()
 
+        self.model._data_context = mock.Mock(current_runs=[5555])
         self.presenter.handle_run_changed_by_user()
 
         self.model.get_latest_loaded_run.return_value = 5555

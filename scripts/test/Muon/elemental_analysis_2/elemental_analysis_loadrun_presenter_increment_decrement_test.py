@@ -41,6 +41,7 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         self.obj = None
 
     def load_single_run(self):
+        self.model._data_context.current_runs = []
         self._loaded_run = 5647
 
         self.view.get_run_edit_text.return_value = str(self._loaded_run)
@@ -50,6 +51,8 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
         grpws = mock.Mock()
         for run in self.model._runs:
             self.model._loaded_data_store.add_data(run=[run], workspace=grpws)
+            self.model._data_context.current_runs.append(run)
+
         self.wait_for_thread(self.presenter._load_thread)
 
     @staticmethod
@@ -69,7 +72,6 @@ class LoadRunWidgetIncrementDecrementSingleFileModeTest(unittest.TestCase):
             self.model._loaded_data_store.add_data(run=[run], workspace=grpws)
 
         self.wait_for_thread(self.presenter._load_thread)
-
         self.view.get_run_edit_text.return_value = str(self.presenter.runs[-1][0])
 
         self.assertEqual(self.presenter.runs[-1], [original_run - 1])

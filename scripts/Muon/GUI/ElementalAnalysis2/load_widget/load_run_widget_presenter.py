@@ -170,6 +170,9 @@ class LoadRunWidgetPresenterEA(object):
         return run_list
 
     def load_runs(self, runs):
+        self._model._data_context.previous_runs = []
+        self._model._data_context.previous_runs = copy.copy(self._model._data_context.current_runs)
+        self._model._data_context.current_runs = []
         self.disable_notifier.notify_subscribers()
         self.handle_loading(runs)
 
@@ -205,21 +208,13 @@ class LoadRunWidgetPresenterEA(object):
 
     def on_loading_finished(self):
         try:
-            latest_loaded_run = self._model.get_latest_loaded_run()
-            if isinstance(latest_loaded_run, list):
-                self.run_list = latest_loaded_run
-            else:
-                self.run_list[0] = latest_loaded_run
-
-            run_list = [[run] for run in self.run_list if self._model._loaded_data_store.get_data(run=[run])]
-            self._model.current_runs = run_list
-
+            if not self._model._data_context.current_runs:
+                self._model._data_context.current_runs = copy.copy(self._model._data_context.previous_runs)
             if self._load_multiple_runs and self._multiple_run_mode == "Co-Add":
-                run_list_to_add = [runObject._run_number for runObject in self._model._data_context._run_info]
-                if len(run_list_to_add) > 1:
-                    load_utils_ea.combine_loaded_runs(self._model, run_list_to_add)
+                if len(self._model._data_context.current_runs) > 1:
+                    load_utils_ea.combine_loaded_runs(self._model, self._model._data_context.current_runs)
 
-            self.update_view_from_model(run_list)
+            self.update_view_from_model(self._model._data_context.current_runs)
             self.updated_directory.notify_subscribers(self._model._directory)
             self._view.notify_loading_finished()
         except ValueError:

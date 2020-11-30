@@ -14,6 +14,7 @@ class DataContext(object):
         self.current_runs = []
         self._loaded_data = load_data
         self._run_info = []
+        self.previous_runs = []
 
     @property
     def run_info(self):
