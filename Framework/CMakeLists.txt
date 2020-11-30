@@ -1,5 +1,7 @@
 # Look for dependencies - bail out if any necessary ones not found
 
+set(WORKBENCH_SITE_PACKAGES ${CMAKE_INSTALL_PREFIX})
+set(WORKBENCH_PLUGINS_DIR ${CMAKE_INSTALL_PREFIX}/plugins)
 check_include_files(stdint.h stdint)
 if(stdint)
   add_definitions(-DHAVE_STDINT_H)
