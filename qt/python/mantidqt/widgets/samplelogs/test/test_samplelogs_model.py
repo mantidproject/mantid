@@ -218,5 +218,6 @@ class SampleLogsModelTest(unittest.TestCase):
         # check if the model contains the expected number of logs
         self.assertEqual(model.rowCount(), 8)
 
+
 if __name__ == '__main__':
     unittest.main()
