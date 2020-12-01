@@ -78,6 +78,7 @@ class MockWorkspace:
         self.readX = StrictMock(return_value=read_return)
         self.readY = StrictMock(return_value=read_return)
         self.readE = StrictMock(return_value=read_return)
+        self.readDx = StrictMock(return_value=read_return)
         self.axes = StrictMock(return_value=axes)
         self.hasMaskedBins = None
         self.maskedBinsIndices = None
@@ -114,3 +115,5 @@ class MockWorkspace:
         self.getPlotType = StrictMock()
 
         self.getLinkedYCol = StrictMock()
+
+        self.hasDx = lambda x: x < len(read_return)

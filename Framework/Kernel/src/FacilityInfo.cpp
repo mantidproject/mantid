@@ -168,7 +168,9 @@ void FacilityInfo::fillInstruments(const Poco::XML::Element *elem) {
       try {
         InstrumentInfo instr(this, elem);
         m_instruments.emplace_back(instr);
-      } catch (...) { /*skip this instrument*/
+      } catch (std::runtime_error &e) { /*skip this instrument*/
+        g_log.warning("Failed to load instument for: " + m_name + ": " +
+                      e.what());
       }
     }
   }
@@ -193,7 +195,9 @@ void FacilityInfo::fillComputeResources(const Poco::XML::Element *elem) {
         m_computeResInfos.emplace_back(cr);
 
         g_log.debug() << "Compute resource found: " << cr << '\n';
-      } catch (...) { // next resource...
+      } catch (std::runtime_error &e) { // next resource...
+        g_log.warning("Failed to load compute resource for: " + m_name + ": " +
+                      e.what());
       }
 
       std::string name = elem->getAttribute("name");

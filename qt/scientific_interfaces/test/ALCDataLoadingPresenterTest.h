@@ -38,10 +38,8 @@ class MockALCDataLoadingView : public IALCDataLoadingView {
   using PAIR_OF_DOUBLES = std::pair<double, double>;
 
 public:
-  MOCK_CONST_METHOD0(firstRun, std::string());
-  MOCK_CONST_METHOD0(lastRun, std::string());
-  MOCK_CONST_METHOD0(getRuns, std::vector<std::string>());
-  MOCK_CONST_METHOD0(getRunsErrorMessage, std::string());
+  MOCK_CONST_METHOD0(getInstrument, std::string());
+  MOCK_CONST_METHOD0(getPath, std::string());
   MOCK_CONST_METHOD0(log, std::string());
   MOCK_CONST_METHOD0(function, std::string());
   MOCK_CONST_METHOD0(calculationType, std::string());
@@ -54,15 +52,14 @@ public:
   MOCK_CONST_METHOD0(redPeriod, std::string());
   MOCK_CONST_METHOD0(greenPeriod, std::string());
   MOCK_CONST_METHOD0(subtractIsChecked, bool());
-  MOCK_METHOD1(setCurrentAutoRun, void(int));
-  MOCK_METHOD0(updateRunsTextFromAuto, void());
-  MOCK_CONST_METHOD0(getCurrentRunsText, std::string());
-  MOCK_METHOD1(setRunsTextWithSearch, void(const QString &));
+  MOCK_CONST_METHOD0(getRunsText, std::string());
+  MOCK_CONST_METHOD0(getRunsFirstRunText, std::string());
 
   MOCK_METHOD0(initialize, void());
   MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace,
                                   const std::size_t &workspaceIndex));
   MOCK_METHOD1(displayError, void(const std::string &));
+  MOCK_METHOD1(displayWarning, bool(const std::string &));
   MOCK_METHOD1(setAvailableLogs, void(const std::vector<std::string> &));
   MOCK_METHOD1(setAvailablePeriods, void(const std::vector<std::string> &));
   MOCK_METHOD2(setTimeLimits, void(double, double));
@@ -70,13 +67,25 @@ public:
   MOCK_METHOD0(disableAll, void());
   MOCK_METHOD0(enableAll, void());
   MOCK_METHOD0(help, void());
-  MOCK_METHOD1(checkBoxAutoChanged, void(int));
-  MOCK_METHOD1(setCurrentAutoFile, void(const std::string &));
-  MOCK_METHOD0(handleFirstFileChanged, void());
-  MOCK_METHOD1(setRunsReadOnly, void(bool));
+  MOCK_METHOD0(setAvailableInfoToEmpty, void());
+  MOCK_METHOD0(initInstruments, void());
+  MOCK_METHOD1(instrumentChanged, void(QString));
+  MOCK_METHOD1(enableLoad, void(bool));
+  MOCK_METHOD1(setPath, void(const std::string &));
+  MOCK_METHOD1(enableRunsAutoAdd, void(bool));
+  MOCK_METHOD1(setInstrument, void(const std::string &));
+  MOCK_METHOD0(getRunsError, std::string());
+  MOCK_METHOD0(getFiles, std::vector<std::string>());
+  MOCK_METHOD0(getFirstFile, std::string());
+  MOCK_METHOD2(setLoadStatus, void(const std::string &, const std::string &));
+  MOCK_METHOD1(runsAutoAddToggled, void(bool));
+  MOCK_METHOD1(setRunsTextWithoutSearch, void(const std::string &));
+  MOCK_METHOD1(toggleRunsAutoAdd, void(const bool));
 
+  // Some dummy signals
+  void changeRuns() { emit runsChangedSignal(); }
+  void foundRuns() { emit runsFoundSignal(); }
   void requestLoading() { emit loadRequested(); }
-  void selectRuns() { emit runsSelected(); }
 };
 
 MATCHER_P4(WorkspaceX, i, j, value, delta, "") {
@@ -91,6 +100,13 @@ GNU_DIAG_ON_SUGGEST_OVERRIDE
 class ALCDataLoadingPresenterTest : public CxxTest::TestSuite {
   MockALCDataLoadingView *m_view;
   ALCDataLoadingPresenter *m_presenter;
+
+  std::string loadingString =
+      std::string("Loading MUSR -\n") + std::string("15189,15191-92");
+  std::string loadedString = std::string("Successfully loaded MUSR -\n") +
+                             std::string("15189,15191-92");
+  std::string foundString = std::string("Successfully found MUSR -\n") +
+                            std::string("15189,15191-92");
 
 public:
   // This pair of boilerplate methods prevent the suite being created statically
@@ -109,13 +125,17 @@ public:
     m_presenter = new ALCDataLoadingPresenter(m_view);
     m_presenter->initialize();
 
-    std::vector<std::string> runs = {"MUSR00015189.nxs", "MUSR00015191.nxs",
-                                     "MUSR00015192.nxs"};
-
     // Set some valid default return values for the view mock object getters
-    ON_CALL(*m_view, firstRun()).WillByDefault(Return("MUSR00015189.nxs"));
-    ON_CALL(*m_view, lastRun()).WillByDefault(Return("MUSR00015192.nxs"));
-    ON_CALL(*m_view, getRuns()).WillByDefault(Return(runs));
+    std::vector<std::string> defaultFiles = {
+        "MUSR00015189.nxs", "MUSR00015191.nxs", "MUSR00015192.nxs"};
+    ON_CALL(*m_view, getFiles()).WillByDefault(Return(defaultFiles));
+    ON_CALL(*m_view, getFirstFile())
+        .WillByDefault(Return(defaultFiles.front()));
+    ON_CALL(*m_view, getRunsText()).WillByDefault(Return("15189,15191-92"));
+    ON_CALL(*m_view, getRunsError()).WillByDefault(Return(std::string{}));
+    ON_CALL(*m_view, getRunsFirstRunText())
+        .WillByDefault(Return(std::string{}));
+    ON_CALL(*m_view, getInstrument()).WillByDefault(Return("MUSR"));
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Integral"));
     ON_CALL(*m_view, log()).WillByDefault(Return("sample_magn_field"));
     ON_CALL(*m_view, function()).WillByDefault(Return("Last"));
@@ -144,8 +164,9 @@ public:
 
   void test_defaultLoad() {
     InSequence s;
-    EXPECT_CALL(*m_view, disableAll());
 
+    EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
+    EXPECT_CALL(*m_view, disableAll());
     EXPECT_CALL(
         *m_view,
         setDataCurve(
@@ -153,8 +174,9 @@ public:
                   WorkspaceX(0, 2, 1380, 1E-8), WorkspaceY(0, 0, 0.150, 1E-3),
                   WorkspaceY(0, 1, 0.128, 1E-3), WorkspaceY(0, 2, 0.109, 1E-3)),
             0));
-
     EXPECT_CALL(*m_view, enableAll());
+    EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
 
     TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
   }
@@ -163,6 +185,9 @@ public:
     // Change to differential calculation type
     ON_CALL(*m_view, calculationType()).WillByDefault(Return("Differential"));
 
+    EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 3.00349, 1E-3),
                                             WorkspaceY(0, 1, 2.47935, 1E-3),
                                             WorkspaceY(0, 2, 1.85123, 1E-3)),
@@ -176,6 +201,9 @@ public:
     ON_CALL(*m_view, timeRange())
         .WillByDefault(Return(boost::make_optional(std::make_pair(5.0, 10.0))));
 
+    EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.137, 1E-3),
                                             WorkspaceY(0, 1, 0.111, 1E-3),
                                             WorkspaceY(0, 2, 0.109, 1E-3)),
@@ -185,29 +213,13 @@ public:
   }
 
   void test_updateAvailableInfo() {
-    EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
-    // Test logs
-    EXPECT_CALL(*m_view,
-                setAvailableLogs(
-                    AllOf(Property(&std::vector<std::string>::size, 39),
-                          Contains("run_number"), Contains("sample_magn_field"),
-                          Contains("Field_Danfysik"))))
-        .Times(1);
-    // Test periods
-    EXPECT_CALL(*m_view, setAvailablePeriods(
-                             AllOf(Property(&std::vector<std::string>::size, 2),
-                                   Contains("1"), Contains("2"))))
-        .Times(1);
     // Test time limits
     auto timeRange = std::make_pair<double, double>(0.0, 0.0);
     ON_CALL(*m_view, timeRange())
         .WillByDefault(Return(boost::make_optional(timeRange)));
-    EXPECT_CALL(*m_view, setTimeLimits(Le(0.107), Ge(31.44))).Times(1);
-    m_view->selectRuns();
-  }
 
-  void test_updateAvailableInfo_NotFirstRun() {
-    EXPECT_CALL(*m_view, firstRun()).WillRepeatedly(Return("MUSR00015189.nxs"));
+    EXPECT_CALL(*m_view, getFirstFile())
+        .WillRepeatedly(Return("MUSR00015189.nxs"));
     // Test logs
     EXPECT_CALL(*m_view,
                 setAvailableLogs(
@@ -220,14 +232,36 @@ public:
                              AllOf(Property(&std::vector<std::string>::size, 2),
                                    Contains("1"), Contains("2"))))
         .Times(1);
+    EXPECT_CALL(*m_view, setTimeLimits(Le(0.107), Ge(31.44))).Times(1);
+
+    m_view->foundRuns();
+  }
+
+  void test_updateAvailableInfo_NotFirstRun() {
     // Test time limits
     auto timeRange =
         std::make_pair<double, double>(0.1, 10.0); // not the first run loaded
     ON_CALL(*m_view, timeRange())
         .WillByDefault(Return(boost::make_optional(timeRange)));
+
+    EXPECT_CALL(*m_view, getFirstFile())
+        .WillRepeatedly(Return("MUSR00015189.nxs"));
+    // Test logs
+    EXPECT_CALL(*m_view,
+                setAvailableLogs(
+                    AllOf(Property(&std::vector<std::string>::size, 39),
+                          Contains("run_number"), Contains("sample_magn_field"),
+                          Contains("Field_Danfysik"))))
+        .Times(1);
+    // Test periods
+    EXPECT_CALL(*m_view, setAvailablePeriods(
+                             AllOf(Property(&std::vector<std::string>::size, 2),
+                                   Contains("1"), Contains("2"))))
+        .Times(1);
     EXPECT_CALL(*m_view, setTimeLimits(_, _))
         .Times(0); // shouldn't reset time limits
-    m_view->selectRuns();
+
+    m_view->foundRuns();
   }
 
   void test_badCustomGrouping() {
@@ -235,50 +269,64 @@ public:
     ON_CALL(*m_view, getForwardGrouping()).WillByDefault(Return("1-48"));
     // Too many detectors (MUSR has only 64)
     ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("49-96"));
+
+    EXPECT_CALL(*m_view, enableLoad(true)).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(foundString, "green")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(false)).Times(1);
+    EXPECT_CALL(*m_view, enableAll()).Times(1);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
-    m_view->selectRuns();
+
+    m_view->foundRuns();
     m_view->requestLoading();
   }
 
   void test_updateAvailableLogs_invalidFirstRun() {
-    ON_CALL(*m_view, firstRun()).WillByDefault(Return(""));
-    EXPECT_CALL(*m_view,
-                setAvailableLogs(ElementsAre())); // Empty array expected
-    TS_ASSERT_THROWS_NOTHING(m_view->selectRuns());
+    ON_CALL(*m_view, getFirstFile()).WillByDefault(Return(""));
+
+    EXPECT_CALL(*m_view, setAvailableInfoToEmpty()).Times(1);
+    EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
+
+    m_view->foundRuns();
   }
 
   void test_updateAvailableLogs_unsupportedFirstRun() {
-    ON_CALL(*m_view, firstRun())
+    ON_CALL(*m_view, getFirstFile())
         .WillByDefault(Return("LOQ49886.nxs")); // XXX: not a Muon file
-    EXPECT_CALL(*m_view,
-                setAvailableLogs(ElementsAre())); // Empty array expected
-    TS_ASSERT_THROWS_NOTHING(m_view->selectRuns());
-  }
 
-  void test_load_error() {
-    // Set last run to one of the different instrument - should cause error
-    // within algorithms exec
-    std::vector<std::string> diffInstrument{
-        "MUSR00015189.nxs", "MUSR00015191.nxs", "EMU00006473.nxs"};
-    ON_CALL(*m_view, getRuns()).WillByDefault(Return(diffInstrument));
-    EXPECT_CALL(*m_view, setDataCurve(_, _)).Times(0);
+    EXPECT_CALL(*m_view, setAvailableInfoToEmpty()).Times(1);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
-    m_view->requestLoading();
-  }
+    EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
 
-  void test_load_invalidRun() {
-    std::vector<std::string> emptyVec;
-    ON_CALL(*m_view, getRuns()).WillByDefault(Return(emptyVec));
-    EXPECT_CALL(*m_view, setDataCurve(_, _)).Times(0);
-    EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
-    m_view->requestLoading();
+    m_view->foundRuns();
   }
 
   void test_load_nonExistentFile() {
     std::vector<std::string> nonExistent{"non-existent-file"};
-    ON_CALL(*m_view, getRuns()).WillByDefault(Return(nonExistent));
+    ON_CALL(*m_view, getFiles()).WillByDefault(Return(nonExistent));
+
     EXPECT_CALL(*m_view, setDataCurve(_, _)).Times(0);
+    EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(false)).Times(1);
     EXPECT_CALL(*m_view, displayError(StrNe(""))).Times(1);
+    EXPECT_CALL(*m_view, enableAll()).Times(1);
+
+    m_view->requestLoading();
+  }
+
+  void test_load_empty_files() {
+    std::vector<std::string> emptyVec{};
+    ON_CALL(*m_view, getFiles()).WillByDefault(Return(emptyVec));
+
+    EXPECT_CALL(*m_view, setDataCurve(_, _)).Times(0);
+    EXPECT_CALL(*m_view, setLoadStatus("Error", "red")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(false)).Times(1);
+    EXPECT_CALL(*m_view, displayError("The list of files to load is empty"))
+        .Times(1);
+
     m_view->requestLoading();
   }
 
@@ -286,24 +334,30 @@ public:
     // Change dead time correction type
     // Test results with corrections from run data
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("FromRunData"));
+
     EXPECT_CALL(*m_view, deadTimeType()).Times(2);
     EXPECT_CALL(*m_view, deadTimeFile()).Times(0);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceY(0, 0, 0.151202, 1E-3),
                                             WorkspaceY(0, 1, 0.129347, 1E-3),
                                             WorkspaceY(0, 2, 0.109803, 1E-3)),
                                       0));
-    m_view->requestLoading();
+    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
   }
 
   void test_correctionsFromCustomFile() {
     // Change dead time correction type
-    // Test only expected number of calls
+    // Test only expected number of calls, alg will fail as no file specified
     ON_CALL(*m_view, deadTimeType()).WillByDefault(Return("FromSpecifiedFile"));
+
     EXPECT_CALL(*m_view, deadTimeType()).Times(2);
     EXPECT_CALL(*m_view, deadTimeFile()).Times(1);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
-    m_view->requestLoading();
+
+    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
   }
 
   void test_customGrouping() {
@@ -312,9 +366,15 @@ public:
     // Set grouping, the same as the default
     ON_CALL(*m_view, getForwardGrouping()).WillByDefault(Return("33-64"));
     ON_CALL(*m_view, getBackwardGrouping()).WillByDefault(Return("1-32"));
+
     EXPECT_CALL(*m_view, getForwardGrouping()).Times(2);
     EXPECT_CALL(*m_view, getBackwardGrouping()).Times(2);
     EXPECT_CALL(*m_view, enableAll()).Times(1);
+    EXPECT_CALL(*m_view, enableLoad(true)).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(foundString, "green")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
     EXPECT_CALL(
         *m_view,
         setDataCurve(
@@ -322,8 +382,9 @@ public:
                   WorkspaceX(0, 2, 1380, 1E-8), WorkspaceY(0, 0, 0.150, 1E-3),
                   WorkspaceY(0, 1, 0.128, 1E-3), WorkspaceY(0, 2, 0.109, 1E-3)),
             0));
-    m_view->selectRuns();
-    m_view->requestLoading();
+
+    m_view->foundRuns();
+    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
   }
 
   void test_customPeriods() {
@@ -334,6 +395,9 @@ public:
     ON_CALL(*m_view, redPeriod()).WillByDefault(Return("2"));
     ON_CALL(*m_view, greenPeriod()).WillByDefault(Return("1"));
 
+    EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
     EXPECT_CALL(*m_view, greenPeriod()).Times(1);
     // Check results
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1350, 1E-8),
@@ -343,13 +407,17 @@ public:
                                             WorkspaceY(0, 1, 0.038717, 1E-6),
                                             WorkspaceY(0, 2, 0.054546, 1E-6)),
                                       0));
-    m_view->requestLoading();
+    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
   }
 
   void test_logFunction() {
     ON_CALL(*m_view, function()).WillByDefault(Return("First"));
     ON_CALL(*m_view, log()).WillByDefault(Return("Field_Danfysik"));
 
+    EXPECT_CALL(*m_view, getFiles()).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
     EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 1364.520, 1E-3),
                                             WorkspaceX(0, 1, 1380.000, 1E-3),
                                             WorkspaceX(0, 2, 1398.090, 1E-3),
@@ -358,11 +426,54 @@ public:
                                             WorkspaceY(0, 2, 0.15004, 1E-5)),
                                       0));
 
-    m_view->requestLoading();
+    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
   }
 
   void test_helpPage() {
     EXPECT_CALL(*m_view, help()).Times(1);
     m_view->help();
+  }
+
+  void test_warning_shows_and_press_yes() {
+    // Ensure files greater than 200
+    std::vector<std::string> files(201, "MUSR00015189.nxs");
+    auto warningMessage = "You are attempting to load 201 runs, are you "
+                          "sure you want to do this?";
+    ON_CALL(*m_view, getFiles()).WillByDefault(Return(files));
+    ON_CALL(*m_view, displayWarning(warningMessage))
+        .WillByDefault(Return(true));
+
+    EXPECT_CALL(*m_view, getFiles()).Times(1);
+    EXPECT_CALL(*m_view, displayWarning(warningMessage)).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadingString, "orange")).Times(1);
+    EXPECT_CALL(*m_view, setLoadStatus(loadedString, "green")).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
+
+    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+  }
+
+  void test_warning_shows_and_press_no() {
+    // Ensure files greater than 200
+    std::vector<std::string> files(201, "MUSR00015189.nxs");
+    auto warningMessage = "You are attempting to load 201 runs, are you "
+                          "sure you want to do this?";
+    ON_CALL(*m_view, getFiles()).WillByDefault(Return(files));
+    ON_CALL(*m_view, displayWarning(warningMessage))
+        .WillByDefault(Return(false));
+
+    EXPECT_CALL(*m_view, getFiles()).Times(1);
+    EXPECT_CALL(*m_view, displayWarning(warningMessage)).Times(1);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(0);
+
+    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+  }
+
+  void test_warning_does_not_show() {
+    EXPECT_CALL(*m_view, getFiles()).Times(1);
+
+    EXPECT_CALL(*m_view, displayWarning(StrNe(""))).Times(0);
+    EXPECT_CALL(*m_view, enableRunsAutoAdd(true)).Times(1);
+
+    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
   }
 };
