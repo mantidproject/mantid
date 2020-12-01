@@ -10,6 +10,7 @@
 #include "FitScriptGeneratorView.h"
 
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <string>
 #include <vector>
@@ -41,10 +42,21 @@ private:
 
   void setWorkspaces(QStringList const &workspaceNames, double startX,
                      double endX);
+  void addWorkspaces(
+      std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,
+      std::vector<WorkspaceIndex> const &workspaceIndices);
   void addWorkspace(std::string const &workspaceName, double startX,
                     double endX);
-  void addWorkspace(MatrixWorkspace_const_sptr const &workspace, double startX,
-                    double endX);
+  void addWorkspace(Mantid::API::MatrixWorkspace_const_sptr const &workspace,
+                    double startX, double endX);
+  void addWorkspace(Mantid::API::MatrixWorkspace_const_sptr const &workspace,
+                    WorkspaceIndex workspaceIndex, double startX, double endX);
+  void addWorkspace(std::string const &workspaceName,
+                    WorkspaceIndex workspaceIndex, double startX, double endX);
+
+  void displayWarningMessages();
+
+  std::vector<std::string> m_warnings;
 
   FitScriptGeneratorModel *m_model;
   FitScriptGeneratorView *m_view;

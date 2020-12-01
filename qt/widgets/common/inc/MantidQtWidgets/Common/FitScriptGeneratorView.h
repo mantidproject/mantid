@@ -62,13 +62,12 @@ public:
   void addWorkspaceDomain(std::string const &workspaceName,
                           WorkspaceIndex workspaceIndex, double startX,
                           double endX);
-  void addWorkspaceDomains(
-      std::vector<Mantid::API::MatrixWorkspace_const_sptr> const &workspaces,
-      std::vector<WorkspaceIndex> const &workspaceIndices);
 
   bool openAddWorkspaceDialog();
   std::vector<Mantid::API::MatrixWorkspace_const_sptr> getDialogWorkspaces();
   std::vector<WorkspaceIndex> getDialogWorkspaceIndices() const;
+
+  void displayWarning(std::string const &message);
 
 private slots:
   void onRemoveClicked();
@@ -80,8 +79,6 @@ private:
   void setFitBrowserOptions(QMap<QString, QString> const &fitOptions);
   void setFitBrowserOption(QString const &name, QString const &value);
   void setFittingType(QString const &fitType);
-
-  void displayWarning(QString const &message);
 
   FitScriptGeneratorPresenter *m_presenter;
   AddWorkspaceDialog m_dialog;

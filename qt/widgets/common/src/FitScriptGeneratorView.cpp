@@ -161,18 +161,6 @@ void FitScriptGeneratorView::addWorkspaceDomain(
                          startX, endX);
 }
 
-void FitScriptGeneratorView::addWorkspaceDomains(
-    std::vector<MatrixWorkspace_const_sptr> const &workspaces,
-    std::vector<WorkspaceIndex> const &workspaceIndices) {
-  for (auto const &workspace : workspaces) {
-    for (auto const &workspaceIndex : workspaceIndices) {
-      auto const xData = workspace->x(workspaceIndex.value);
-      addWorkspaceDomain(workspace->getName(), workspaceIndex, xData.front(),
-                         xData.back());
-    }
-  }
-}
-
 bool FitScriptGeneratorView::openAddWorkspaceDialog() {
   return m_dialog.exec() == QDialog::Accepted;
 }
@@ -185,9 +173,8 @@ FitScriptGeneratorView::getDialogWorkspaces() {
   if (AnalysisDataService::Instance().doesExist(workspaceName))
     workspaces = getWorkspaces(workspaceName);
   else
-    displayWarning("Failed to add workspace '" +
-                   QString::fromStdString(workspaceName) +
-                   "' : workspace doesn't exist.");
+    displayWarning("Failed to add workspace '" + workspaceName +
+                   "': workspace doesn't exist.");
   return workspaces;
 }
 
@@ -196,8 +183,8 @@ FitScriptGeneratorView::getDialogWorkspaceIndices() const {
   return convertToWorkspaceIndex(m_dialog.workspaceIndices());
 }
 
-void FitScriptGeneratorView::displayWarning(QString const &message) {
-  QMessageBox::warning(this, "Warning!", message);
+void FitScriptGeneratorView::displayWarning(std::string const &message) {
+  QMessageBox::warning(this, "Warning!", QString::fromStdString(message));
 }
 
 } // namespace MantidWidgets
