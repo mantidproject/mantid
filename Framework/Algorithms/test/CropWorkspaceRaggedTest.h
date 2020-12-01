@@ -94,7 +94,8 @@ public:
         m_alg.setPropertyValue("OutputWorkspace", "nothing"));
     TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMin", "1."));
 
-    TS_ASSERT_THROWS_NOTHING(m_alg.setPropertyValue("XMax", "10.,20.,30.,0.4,50."));
+    TS_ASSERT_THROWS_NOTHING(
+        m_alg.setPropertyValue("XMax", "10.,20.,30.,0.4,50."));
     TS_ASSERT_THROWS(m_alg.execute(), const std::runtime_error &);
   }
   void test_ListsBug() {
@@ -210,8 +211,8 @@ public:
         AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>("nothing");
     for (int spec = 0; spec < m_numberOfSpectra; spec++) {
       TS_ASSERT_DELTA(out->readX(spec)[0], 2.0, 1e-6);
-      TS_ASSERT_DELTA(out->readY(spec)[0],3.0 , 1e-6);
-      TS_ASSERT_DELTA(out->readE(spec)[0],sqrt(3.), 1e-6);
+      TS_ASSERT_DELTA(out->readY(spec)[0], 3.0, 1e-6);
+      TS_ASSERT_DELTA(out->readE(spec)[0], sqrt(3.), 1e-6);
 
       TS_ASSERT_DELTA(out->readX(spec).back(), xMax[spec], 1e-6);
       TS_ASSERT_DELTA(out->readY(spec).back(), xMax[spec], 1e-6);
