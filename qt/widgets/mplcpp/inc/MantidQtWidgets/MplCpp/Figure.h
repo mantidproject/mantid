@@ -11,6 +11,7 @@
 #include "MantidQtWidgets/MplCpp/Axes.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/ScalarMappable.h"
+
 #include <QHash>
 #include <QVariant>
 
