@@ -50,6 +50,11 @@ namespace Mantid {
 
                 /// Overwrites Algorithm method
                 void exec() override;
+
+                /// Private validator for inputs
+                std::map<std::string, std::string> validateInputs() override;
+
+                /// Members
         };
 
     } // namespace Algorithms
