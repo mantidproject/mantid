@@ -11,7 +11,8 @@ Description
 
 Uses an :ref:`MDEventWorkspace <MDWorkspace>` and `PeaksWorkspace` to integrate the peaks provided in the peaks
 workspace and apply a :ref:`LorentzCorrection <algm-LorentzCorrection>`. The results are written to `OutputFile` in
-HKL format using :ref:`SaveHKL <algm-SaveHKL>` with an option for including direction cosines in the output.
+SHELX format with direction cosines using :ref:`SaveHKL <algm-SaveHKL>` or in the Fullprof format using
+:ref:`SaveReflections <algm-SaveReflections>`.
 
 The input to this algorithm is intended as part of the DEMAND data reduction workflow, using
 :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` and :ref:`HB3AFindPeaks <algm-HB3AFindPeaks>` which can be seen
@@ -20,9 +21,9 @@ below in the example usage.
 Usage
 -----
 
-**Example - DEMAND Data Reduction Workflow**
+**Example - DEMAND Workflow**
 
-.. testcode:: ReductionWorkflow
+.. testcode:: ExampleWorkflow
 
     # Input detector scan data to use. Can be a list of files, or workspaces - see HB3AAdjustSampleNorm for details
     data = "HB3A_exp0724_scan0182.nxs, HB3A_exp0724_scan0183.nxs"

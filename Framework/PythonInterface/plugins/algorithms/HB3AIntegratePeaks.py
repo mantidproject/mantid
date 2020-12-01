@@ -6,8 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, FileAction, FileProperty, IMDEventWorkspaceProperty, IPeaksWorkspaceProperty, \
     PythonAlgorithm, PropertyMode
-from mantid.kernel import Direction, FloatBoundedValidator
-from mantid.simpleapi import DeleteWorkspace, IntegratePeaksMD, SaveHKL
+from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator
+from mantid.simpleapi import DeleteWorkspace, IntegratePeaksMD, SaveHKL, SaveReflections
 import numpy as np
 
 
@@ -46,10 +46,13 @@ class HB3AIntegratePeaks(PythonAlgorithm):
         self.declareProperty("BackgroundOuterRadius", defaultValue=0.0, validator=positive_val,
                              doc="Outer radius used to evaluate the peak background")
 
-        self.declareProperty("OutputDirectionCosines", defaultValue=True,
-                             doc="Whether to save direction cosines in the output file")
+        formats = StringListValidator()
+        formats.addAllowedValue("SHELX")
+        formats.addAllowedValue("Fullprof")
+        self.declareProperty("OutputFormat", defaultValue="SHELX", validator=formats,
+                             doc="Save direction cosines in HKL, or the fullprof format")
 
-        self.declareProperty(FileProperty(name="OutputFile", defaultValue="", extensions=[".hkl"],
+        self.declareProperty(FileProperty(name="OutputFile", defaultValue="",
                                           direction=Direction.Input,
                                           action=FileAction.Save),
                              doc="Filepath to save the integrated peaks workspace in HKL format")
@@ -78,7 +81,7 @@ class HB3AIntegratePeaks(PythonAlgorithm):
         inner_radius = self.getProperty("BackgroundInnerRadius").value
         outer_radius = self.getProperty("BackgroundOuterRadius").value
 
-        dir_cosines = self.getProperty("OutputDirectionCosines").value
+        out_format = self.getProperty("OutputFormat").value
         filename = self.getProperty("OutputFile").value
 
         out_ws = IntegratePeaksMD(InputWorkspace=input_ws,
@@ -93,7 +96,14 @@ class HB3AIntegratePeaks(PythonAlgorithm):
             lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
             peak.setIntensity(peak.getIntensity() * lorentz)
 
-        SaveHKL(InputWorkspace=out_ws, Filename=filename, DirectionCosines=dir_cosines)
+        if out_format == "SHELX":
+            SaveHKL(InputWorkspace=out_ws, Filename=filename, DirectionCosines=True, OutputWorkspace="__tmp")
+            DeleteWorkspace("__tmp")
+        elif out_format == "Fullprof":
+            SaveReflections(InputWorkspace=out_ws, Filename=filename, Format="Fullprof")
+        else:
+            # This shouldn't happen
+            RuntimeError("Invalid output format given")
 
         self.setProperty("OutputWorkspace", out_ws)
 
