@@ -758,6 +758,7 @@ set(TEST_FILES
     CorelliCrossCorrelateTest.h
     CorelliPowderCalibrationApplyTest.h
     CorelliPowderCalibrationDatabaseTest.h
+    CorelliPowderCalibrationLoadTest.h
     CorrectKiKfTest.h
     CorrectTOFAxisTest.h
     CorrectToFileTest.h
