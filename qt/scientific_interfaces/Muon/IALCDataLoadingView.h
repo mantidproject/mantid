@@ -85,6 +85,8 @@ public:
   /// Enable/disable alpha to be editable
   virtual void enableAlpha(const bool alpha) = 0;
 
+  virtual bool isAlphaEnabled() const = 0;
+
   /// Set value of alpha
   virtual void setAlphaValue(const std::string &alpha) = 0;
 

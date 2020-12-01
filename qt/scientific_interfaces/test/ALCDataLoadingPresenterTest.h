@@ -55,6 +55,7 @@ public:
   MOCK_CONST_METHOD0(getRunsText, std::string());
   MOCK_CONST_METHOD0(getRunsFirstRunText, std::string());
   MOCK_CONST_METHOD0(getAlphaValue, std::string());
+  MOCK_CONST_METHOD0(isAlphaEnabled, bool());
 
   MOCK_METHOD0(initialize, void());
   MOCK_METHOD2(setDataCurve, void(MatrixWorkspace_sptr workspace,

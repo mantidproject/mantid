@@ -81,6 +81,7 @@ public:
   void setRunsTextWithoutSearch(const std::string &text) override;
   void toggleRunsAutoAdd(const bool autoAdd) override;
   void enableAlpha(const bool alpha) override;
+  bool isAlphaEnabled() const override;
   void setAlphaValue(const std::string &alpha) override;
   std::string getAlphaValue() const override;
   void showAlphaMessage(const bool alpha) override;

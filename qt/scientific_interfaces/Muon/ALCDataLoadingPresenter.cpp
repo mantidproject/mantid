@@ -139,6 +139,10 @@ void ALCDataLoadingPresenter::handleLoadRequested() {
                               " -\n" + m_view->getRunsText(),
                           "green");
     m_view->enableRunsAutoAdd(true);
+
+    // If alpha empty, default used is 1 so update interface
+    if (m_view->getAlphaValue() == "1.0" && m_view->isAlphaEnabled())
+      m_view->setAlphaValue("1.0");
   } catch (const std::runtime_error &errorLoadFiles) {
     m_view->setLoadStatus("Error", "red");
     m_view->displayError(errorLoadFiles.what());
@@ -338,7 +342,7 @@ void ALCDataLoadingPresenter::updateAvailableInfo() {
   // If single period, enable alpha, otherwise disable
   if (numPeriods == 1) {
     m_view->enableAlpha(true);
-    m_view->setAlphaValue("1");
+    m_view->setAlphaValue("1.0");
     m_view->showAlphaMessage(false);
   } else {
     m_view->enableAlpha(false);

@@ -74,6 +74,9 @@ void ALCDataLoadingView::initialize() {
   QValidator *validator = new QRegExpValidator(re, this);
   m_ui.runs->setTextValidator(validator);
 
+  // Alpha to only accept positive doubles
+  m_ui.alpha->setValidator(new QDoubleValidator(0, 99999, 10, this));
+
   m_ui.runs->doButtonOpt(MantidQt::API::FileFinderWidget::ButtonOpts::None);
 }
 
@@ -421,6 +424,10 @@ std::string ALCDataLoadingView::getRunsFirstRunText() const {
 void ALCDataLoadingView::enableAlpha(const bool alpha) {
   m_ui.alpha->setEnabled(alpha);
   m_ui.alphaLabel->setEnabled(alpha);
+}
+
+bool ALCDataLoadingView::isAlphaEnabled() const {
+  return m_ui.alpha->isEnabled();
 }
 
 void ALCDataLoadingView::setAlphaValue(const std::string &alpha) {
