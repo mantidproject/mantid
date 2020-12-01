@@ -55,6 +55,12 @@ class SampleLogsView(QSplitter):
         self.table.contextMenuEvent = self.tableMenu
         layout_left.addWidget(self.table)
         self.frame_left.setLayout(layout_left)
+        # create a line edit to allow for filtering keys
+        self.line_edit = QLineEdit()
+        self.line_edit.setClearButtonEnabled(True)
+        self.line_edit.setToolTip("Type here to filter the logs")
+        self.line_edit.editingFinished.connect(self.presenter.search_key_changed)
+        layout_left.addWidget(self.line_edit)
         self.addWidget(self.frame_left)
 
         #right hand side
