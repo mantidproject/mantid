@@ -44,7 +44,7 @@ class ResetNegatives2DTest(unittest.TestCase):
         nSpec = len(yData)  # number of spectra
 
         # Create d and intensity lists for workspace
-        for i in range(0, nSpec+1):
+        for i in range(0, nSpec):
             xDataTotal.extend(
                 xData
             )  # extends the list of x values in accordance to the number of spectra used
