@@ -86,8 +86,7 @@ private:
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAfterReplaceNotification>
       m_replObserver;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  std::optional<MantidQt::Widgets::MplCpp::Figure> m_fig;
-  std::optional<MantidQt::Widgets::MplCpp::MantidAxes> m_ax;
+  std::optional<int> m_fignum;
 #endif
   bool m_replaceObserverAdded;
 };

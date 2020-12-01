@@ -677,20 +677,31 @@ void StepScan::generateCurve(const QString &var) {
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 namespace {
-auto get_fig_ax() {
+auto get_fig_ax(std::optional<int> fignum) {
   std::string pyCode =
       "import matplotlib.pyplot as plt\n"
       "from mantid import plots\n"
-      "fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})";
+      "from workbench.plotting.globalfiguremanager import GlobalFigureManager\n"
+      "if GlobalFigureManager.has_fignum(fig_num):\n"
+      "    fig = plt.figure(fig_num)\n"
+      "    ax = plt.gca()\n"
+      "    ax.clear()\n"
+      "else:\n"    
+      "    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})";
   Mantid::PythonInterface::GlobalInterpreterLock lock;
   using namespace boost::python;
   using namespace MantidQt::Widgets::MplCpp;
   object main_module = import("__main__");
   object main_namespace = main_module.attr("__dict__");
+  if(fignum){
+    main_namespace["fig_num"] = fignum.value();
+  } else {
+    main_namespace["fig_num"] = boost::python::object();
+  }
   object ignored = exec(pyCode.c_str(), main_namespace);
   auto fig = Figure(extract<object>(main_namespace["fig"]));
   auto ax = MantidAxes(extract<object>(main_namespace["ax"]));
-  return std::make_tuple(fig,ax);
+  return std::make_tuple(fig, ax);
 }
 }
 #endif
@@ -740,29 +751,21 @@ void StepScan::plotCurve() {
 
   runPythonCode(QString::fromStdString(pyCode));
 #else
-  if (!m_fig.has_value() | m_fig->pyobj().is_none() | !m_ax.has_value() | m_ax->pyobj().is_none()) {
-    std::tie(m_fig, m_ax) = get_fig_ax();
-  } else{ 
-    boost::python::object can = m_fig->pyobj().attr("canvas");
-    if (can.is_none()) {
-      std::tie(m_fig, m_ax) = get_fig_ax();
-    }
-  }
- 
-
+  auto [fig, ax] = get_fig_ax(m_fignum);
+  m_fignum = fig.number();
   auto ws =
       AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
           m_plotWSName);
   title += " - Step Scan";
   Mantid::PythonInterface::GlobalInterpreterLock lock;
-  m_fig->setWindowTitle(title.c_str());
+  fig.setWindowTitle(title.c_str());
   QHash<QString, QVariant> hash;
   hash.insert("linestyle", "");
   hash.insert("marker", ".");
-  auto line = m_ax->plot(ws, 0, "black", "", hash);
-  m_ax->setXLabel(xAxisTitle.c_str());
-  m_ax->setYLabel(yAxisTitle.c_str());
-  m_fig->show();
+  auto line = ax.plot(ws, 0, "black", "", hash);
+  ax.setXLabel(xAxisTitle.c_str());
+  ax.setYLabel(yAxisTitle.c_str());
+  fig.show();
   this->activateWindow();
   this->raise();
 #endif

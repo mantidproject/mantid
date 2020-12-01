@@ -11,7 +11,7 @@
 #include "MantidQtWidgets/MplCpp/Axes.h"
 #include "MantidQtWidgets/MplCpp/DllConfig.h"
 #include "MantidQtWidgets/MplCpp/ScalarMappable.h"
-
+#include "boost/python.hpp"
 #include <QHash>
 #include <QVariant>
 
@@ -42,6 +42,11 @@ public:
   inline Axes axes(size_t index) const {
     Mantid::PythonInterface::GlobalInterpreterLock lock;
     return Axes{pyobj().attr("axes")[index]};
+  }
+  
+  inline int number() const {
+    Mantid::PythonInterface::GlobalInterpreterLock lock;
+    return boost::python::extract<int>(pyobj().attr("number"));
   }
 
   void setTightLayout(QHash<QString, QVariant> const &args);
