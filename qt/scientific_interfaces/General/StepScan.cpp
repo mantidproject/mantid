@@ -686,14 +686,14 @@ auto get_fig_ax(std::optional<int> fignum) {
       "    fig = plt.figure(fig_num)\n"
       "    ax = plt.gca()\n"
       "    ax.clear()\n"
-      "else:\n"    
+      "else:\n"
       "    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})";
   Mantid::PythonInterface::GlobalInterpreterLock lock;
   using namespace boost::python;
   using namespace MantidQt::Widgets::MplCpp;
   object main_module = import("__main__");
   object main_namespace = main_module.attr("__dict__");
-  if(fignum){
+  if (fignum) {
     main_namespace["fig_num"] = fignum.value();
   } else {
     main_namespace["fig_num"] = boost::python::object();
@@ -703,7 +703,7 @@ auto get_fig_ax(std::optional<int> fignum) {
   auto ax = MantidAxes(extract<object>(main_namespace["ax"]));
   return std::make_tuple(fig, ax);
 }
-}
+} // namespace
 #endif
 
 void StepScan::plotCurve() {

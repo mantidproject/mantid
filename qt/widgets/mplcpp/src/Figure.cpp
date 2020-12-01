@@ -85,9 +85,7 @@ void Figure::setTightLayout(QHash<QString, QVariant> const &args) {
 /**
  * Display the figure window
  */
-void Figure::show() {
-  this->pyobj().attr("show")();
-}
+void Figure::show() { this->pyobj().attr("show")(); }
 
 /**
  * Set window title of a figure

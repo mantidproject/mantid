@@ -19,7 +19,6 @@
 #include "MantidQtWidgets/MplCpp/MantidAxes.h"
 #endif
 
-
 namespace MantidQt {
 namespace CustomInterfaces {
 

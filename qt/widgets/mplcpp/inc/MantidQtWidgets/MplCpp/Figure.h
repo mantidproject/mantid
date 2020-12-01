@@ -43,7 +43,7 @@ public:
     Mantid::PythonInterface::GlobalInterpreterLock lock;
     return Axes{pyobj().attr("axes")[index]};
   }
-  
+
   inline int number() const {
     Mantid::PythonInterface::GlobalInterpreterLock lock;
     return boost::python::extract<int>(pyobj().attr("number"));
