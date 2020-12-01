@@ -54,7 +54,7 @@ class GeneralSettingsTest(unittest.TestCase):
         self.assertEqual(0, mock_ConfigService.mock_instrument.name.call_count)
         presenter = GeneralSettings(None)
         self.assertEqual(0, mock_ConfigService.setFacility.call_count)
-        self.assertEqual(3, mock_ConfigService.getFacility.call_count)
+        self.assertEqual(2, mock_ConfigService.getFacility.call_count)
         self.assertEqual(2, mock_ConfigService.mock_facility.name.call_count)
         self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
 
@@ -105,7 +105,7 @@ class GeneralSettingsTest(unittest.TestCase):
 
         mock_ConfigService.setFacility.assert_called_once_with(new_facility)
 
-        self.assertEqual(6, presenter.view.instrument.count())
+        self.assertEqual(43, presenter.view.instrument.count())
 
     def test_setup_confirmations(self):
         presenter = GeneralSettings(None)
