@@ -41,6 +41,12 @@ namespace Mantid {
             return issues;
         }
 
+        void CorelliPowderCalibrationLoad::exec() {
+            g_log.notice() << "Start loading CORELLI calibration table from database\n";
+
+            g_log.notice() << "Finished loading CORELLI calibration table\n";
+        }
+
     } // namespace Algorithms
 
 } // namespace Mantid
