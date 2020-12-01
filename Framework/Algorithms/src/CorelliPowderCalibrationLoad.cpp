@@ -5,9 +5,11 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/Run.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAlgorithms/CorelliPowderCalibrationLoad.h"
 #include "MantidAlgorithms/CorelliPowderCalibrationDatabase.h"
@@ -87,6 +89,28 @@ namespace Mantid {
         }
 
         /**
+         * @brief 
+         * 
+         * @param ws: input workspace
+         * @return std::string : deduced filename with YYYYMMDD format
+         */
+        std::string CorelliPowderCalibrationLoad::deduce_database_name(API::MatrixWorkspace_sptr ws){
+            std::string timeStamp{""};
+            if (ws->run().hasProperty("start_time")){
+                timeStamp = ws->run().getProperty("start_time")->name();
+            }else {
+                timeStamp = ws->run().getProperty("run_start")->name();
+            }
+            // convert date to YYYYMMDD
+            std::string timeStampStr = CorelliPowderCalibrationDatabase::convertTimeStamp(timeStamp);
+
+            // dedeuced file name
+            std::string dbFileName = "corelli_instrument_" + timeStampStr + ".csv";
+
+            return dbFileName;
+        }
+
+        /**
          * @brief Executes the algorithm.
          * 
          */
@@ -97,12 +121,24 @@ namespace Mantid {
             ws = getProperty("Workspace");
             wsName = getPropertyValue("Workspace");
             dbdir = getPropertyValue("DatabaseDir");
+            calTableName = getPropertyValue("CalibrationTable");
 
             // Locate the time stamp in ws, and form the db file path
+            std::string dbFileName = deduce_database_name(ws);
+            std::string dbFullPath = CorelliPowderCalibrationDatabase::joinPath(dbdir, dbFileName);
 
             // Load the csv file into a table
+            auto alg = createChildAlgorithm("LoadAscii");
+            alg -> initialize();
+            alg -> setProperty("Filename", dbFullPath);
+            alg -> setProperty("Separator", "CSV");
+            alg -> setProperty("CommentIndicator", "#");
+            alg -> setProperty("OutputWorkspace", calTableName);
+            alg -> execute();
 
-            // Set the table as the output
+            // get the table and set it as the output
+            calTable = std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve(calTableName));
+            setProperty("CalibrationTable", calTable);
 
             g_log.notice() << "Finished loading CORELLI calibration table\n";
         }
