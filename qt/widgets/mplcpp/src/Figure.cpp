@@ -48,8 +48,7 @@ Figure::Figure(bool tightLayout)
 /**
  * @return The number attribute of the current figure
  */
-int Figure::number() const;
-{
+int Figure::number() const {
   Mantid::PythonInterface::GlobalInterpreterLock lock;
   return boost::python::extract<int>(pyobj().attr("number"));
 }
