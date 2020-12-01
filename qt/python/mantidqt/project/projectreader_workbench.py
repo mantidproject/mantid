@@ -24,8 +24,8 @@ class ProjectReaderWorkbench(ProjectReaderInterface):
                 self.read_workspaces()
                 self.read_interfaces()
                 self.read_plots()
-        except Exception:
-            logger.warning("JSON project file unable to be loaded/read")
+        except Exception as err:
+            logger.warning("JSON project file unable to be loaded/read", err)
 
     def read_workspaces(self):
         self.workspace_names = self.json_data["workspaces"]

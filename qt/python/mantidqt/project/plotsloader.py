@@ -173,8 +173,7 @@ class PlotsLoader(object):
 
         # Update/set text
         if "texts" in dic:
-            text_list = dic["texts"]
-            for text_ in text_list:
+            for text_ in dic["texts"]:
                 self.create_text_from_dict(ax, text_)
 
         # Update artists that are text
@@ -253,7 +252,7 @@ class PlotsLoader(object):
             LegendProperties.create_legend(legend, ax)
 
     def update_properties(self, ax, properties):
-        if properties["bounds"] is not None:
+        if properties["bounds"]:
             ax.set_position(properties["bounds"])
         ax.set_navigate(properties["dynamic"])
         ax.axison = properties["axisOn"]

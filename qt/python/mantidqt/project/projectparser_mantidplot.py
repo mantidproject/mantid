@@ -38,10 +38,31 @@ class MantidPlotProjectParser(object):
         ws_match = re.search(self.workspaces_pattern, self.text, re.DOTALL)
         if ws_match:
             # split by tab
-            ws_list = ws_match.group(1).split('\t')
-            if len(ws_list) > 1 and ws_list[0] == "WorkspaceNames":
-                # the first entry is just an identification tag
-                return ws_list[1:]
+            mantid_workspace_entries = ws_match.group(1).split('\t')
+            if len(mantid_workspace_entries) > 1 and mantid_workspace_entries[0] == "WorkspaceNames":
+                # Load workspace groups
+                return self._load_workspaces(mantid_workspace_entries[1:])
+            else:
+                return []
+
+    def _load_workspaces(self, workspace_entries):
+        """
+        Identify workspaces within a <mantidworkspaces> tag
+        :param workspace_entries: The entries within the mantidworkspaces tag
+        :return list of workspaces found within the <mantidworkspaces> tag
+        """
+        ws_list = []
+        ws_group_members = []
+        for ws_entry in workspace_entries:
+            # if the entry within the <mantidworkspaces> contains a "," it defines a workspace group
+            if ',' in ws_entry:
+                ws_group = ws_entry.split(',')
+                # First entry is group name, remainder of the line contains members of the group
+                ws_group_members.extend(ws_group[1:])
+            else:
+                if ws_entry not in ws_group_members:
+                    ws_list.append(ws_entry)
+        return ws_group_members + ws_list
 
     def get_plots(self):
         """
@@ -78,8 +99,7 @@ class MantidPlotProjectParser(object):
         for graph_text in graph_texts:
             axes_args = {}
             _, title_line = self.find_option_in_raw_text("PlotTitle", graph_text)[0]
-            title = title_line[1] if title_line else None
-            axes_args["title"] = title
+            axes_args["title"] = title_line[1] if title_line else None
             _, axes_titles = self.find_option_in_raw_text("AxesTitles", graph_text)[0]
             axes_args["xAxisTitle"] = axes_titles[1] if axes_titles else None
             axes_args["yAxisTitle"] = axes_titles[2] if axes_titles else None

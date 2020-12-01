@@ -22,8 +22,8 @@ class ProjectReaderMantidPlot(ProjectReaderInterface):
             self.read_workspaces()
             self.read_interfaces()
             self.read_plots()
-        except Exception:
-            logger.warning("Mantidplot project file unable to be loaded/read")
+        except Exception as err:
+            logger.warning("Mantidplot project file unable to be loaded/read", err)
 
     def read_workspaces(self):
         logger.notice("Loading workspaces from Mantidplot project file " + self.filename)

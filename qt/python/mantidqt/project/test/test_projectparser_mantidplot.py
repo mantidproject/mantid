@@ -21,6 +21,7 @@ class ProjectParserMantidPlotTest(unittest.TestCase):
                 cls.base_path = path.join(directory, 'project_load', 'Mantidplot')
                 break
         cls.project_with_multiple_workspaces = path.join(cls.base_path, "mantidplot_project_multiple_workspaces.mantid")
+        cls.project_with_workspace_group = path.join(cls.base_path, "mantidplot_project_workspace_group.mantid")
         cls.project_with_simple_1d_plot = path.join(cls.base_path, "mantidplot_project_simple_plot.mantid")
         cls.project_with_multiple_1d_plots = path.join(cls.base_path, "mantidplot_project_multiple_plots.mantid")
         cls.project_plot_with_multiple_lines = path.join(cls.base_path,
@@ -35,7 +36,14 @@ class ProjectParserMantidPlotTest(unittest.TestCase):
 
         workspace_list = parser.get_workspaces()
 
-        self.assertEqual(len(workspace_list), len(expected_workspaces))
+        self.assertCountEqual(workspace_list, expected_workspaces)
+
+    def test_parsing_workspace_group(self):
+        expected_workspaces = ['MUSR00015189_1', 'MUSR00015189_2', 'MUSR00062260', 'MUSR00062261']
+        parser = MantidPlotProjectParser(self.project_with_workspace_group)
+
+        workspace_list = parser.get_workspaces()
+
         self.assertCountEqual(workspace_list, expected_workspaces)
 
     def test_parsing_simple_1d_plot(self):
