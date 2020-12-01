@@ -62,31 +62,6 @@ class GeneralSettingsTest(unittest.TestCase):
         self.assertEqual(2, mock_ConfigService.mock_instrument.name.call_count)
         self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
 
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_setup_facilities_with_invalid_default_facility_chooses_first(self, mock_ConfigService):
-        mock_ConfigService.getFacility.side_effect = [RuntimeError("Invalid facility name"),
-                                                      mock_ConfigService.mock_facility,
-                                                      mock_ConfigService.mock_facility]
-        presenter = GeneralSettings(None)
-
-        self.assertEqual(mock_ConfigService.mock_facility.name(),
-                         presenter.view.facility.currentText())
-        self.assertEqual(mock_ConfigService.mock_instrument.name(),
-                         presenter.view.instrument.currentText())
-        self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
-        self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
-
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_setup_facilities_with_invalid_default_instrument_chooses_first(self, mock_ConfigService):
-        mock_ConfigService.getInstrument.side_effect = [RuntimeError("Invalid instrument name"),
-                                                        mock_ConfigService.mock_instrument]
-        presenter = GeneralSettings(None)
-
-        self.assertEqual(mock_ConfigService.mock_instrument.name(),
-                         presenter.view.instrument.currentText())
-        self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
-        self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
-
     def test_setup_checkbox_signals(self):
         presenter = GeneralSettings(None)
 
@@ -125,12 +100,12 @@ class GeneralSettingsTest(unittest.TestCase):
         presenter = GeneralSettings(None)
         mock_ConfigService.setFacility.reset_mock()
 
-        new_facility = "WWW"
+        new_facility = "TEST_LIVE"
         presenter.action_facility_changed(new_facility)
 
         mock_ConfigService.setFacility.assert_called_once_with(new_facility)
 
-        self.assertEqual(2, presenter.view.instrument.count())
+        self.assertEqual(6, presenter.view.instrument.count())
 
     def test_setup_confirmations(self):
         presenter = GeneralSettings(None)

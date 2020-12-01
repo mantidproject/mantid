@@ -71,6 +71,13 @@ class GeneralSettings(object):
         self.action_facility_changed(default_facility)
         self.view.facility.currentTextChanged.connect(self.action_facility_changed)
 
+        try:
+            default_instrument = ConfigService.getInstrument().name()
+        except RuntimeError:
+            default_instrument = self.view.instrument.itemText(0)
+        self.action_instrument_changed(default_instrument)
+        self.view.instrument.currentTextChanged.connect(self.action_instrument_changed)
+
     def update_facilities_group(self):
         default_facility = ConfigService.getFacility().name()
         if not self.view.facility.findText(default_facility) == -1:
@@ -175,6 +182,11 @@ class GeneralSettings(object):
 
     def action_crystallography_convention(self, state):
         ConfigService.setString(GeneralProperties.CRYSTALLOGRAPY_CONV.value, "Crystallography" if state == Qt.Checked else "Inelastic")
+
+    def action_instrument_changed(self, new_instrument):
+        current_value = ConfigService.getString(GeneralProperties.INSTRUMENT.value)
+        if new_instrument != current_value:
+            ConfigService.setString(GeneralProperties.INSTRUMENT.value, new_instrument)
 
     def action_show_invisible_workspaces(self, state):
         ConfigService.setString(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value, str(bool(state)))
