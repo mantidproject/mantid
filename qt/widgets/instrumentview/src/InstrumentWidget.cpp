@@ -626,6 +626,18 @@ void InstrumentWidget::replaceWorkspace(
   setScaleType(ColorMap::ScaleType::Linear);
   setupColorMap();
 
+  // set the view type to the instrument's default view
+  QString defaultView =
+      QString::fromStdString(m_instrumentActor->getDefaultView());
+  if (defaultView == "3D" &&
+      !Mantid::Kernel::ConfigService::Instance()
+           .getValue<bool>("MantidOptions.InstrumentView.UseOpenGL")
+           .get_value_or(true)) {
+    // if OpenGL is switched off we don't open the 3D view
+    defaultView = "CYLINDRICAL_Y";
+  }
+  setSurfaceType(defaultView);
+
   // update the integration widget
   updateIntegrationWidget();
 
