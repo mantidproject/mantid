@@ -78,6 +78,10 @@ New features
 
 Single Crystal Diffraction
 --------------------------
+New features
+############
+- New algorithm :ref:`HB3AFindPeaks <algm-HB3AFindPeaks>` to find peaks and set the UB matrix for DEMAND data.
+
 Bugfixes
 ########
 - Fix bug in :ref:`SaveHKL <algm-SaveHKL>` where the direction cosines were calculated incorrectly
