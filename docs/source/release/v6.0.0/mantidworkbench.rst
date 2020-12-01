@@ -31,6 +31,7 @@ Improvements
 - Plots containing axvline's and axhline's can be saved and are reproduced when loading a project that contains them.
 - Wireframe plots no longer spill over the axes when their limits are reduced.
 - In the instrument widget, the integration scroll bar can be moved, widened and shrunk using the arrow keys.
+- Add an autoscale checkbox to plot config dialog.
 
 Bugfixes
 ########
@@ -43,5 +44,6 @@ Bugfixes
 - Show spectrum numbers instead of workspace index in plotBin
 - Fixed a bug which would cause unrealistic errorbars on the fit calc curve.
 - Fix sort order of peaks in the peaks overlay on SliceViewer.
+- The colorfill plot on ragged workspaces will have the correct horizontal extent.
 
 :ref:`Release 6.0.0 <v6.0.0>`

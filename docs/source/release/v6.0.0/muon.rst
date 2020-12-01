@@ -5,6 +5,7 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
+=======
    
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
@@ -22,6 +23,7 @@ Improvements
 Bug fixes
 #########
 - Fixed a bug where ties and constraints were not being respected.
+- Fixed a bug to swap start and end time fit properties on the interface if start > end
 - Fixed a bug where editing constraints would result in a crash
 
 ALC
@@ -29,6 +31,7 @@ ALC
 
 New Features
 ############
+- The data loading section has been updated for this release. See :ref:`Muon ALC <MuonALC-ref>` for more.
 
 Improvements
 ############
