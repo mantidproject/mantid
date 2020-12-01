@@ -704,8 +704,10 @@ auto get_fig_ax(std::optional<int> fignum) {
     main_namespace["fig_num"] = Python::Object();
   }
   auto ignored = boost::python::exec(pyCode.c_str(), main_namespace);
-  auto fig = Figure(boost::python::extract<Python::Object>(main_namespace["fig"]));
-  auto ax = MantidAxes(boost::python::extract<Python::Object>(main_namespace["ax"]));
+  auto fig =
+      Figure(boost::python::extract<Python::Object>(main_namespace["fig"]));
+  auto ax =
+      MantidAxes(boost::python::extract<Python::Object>(main_namespace["ax"]));
   return std::make_tuple(fig, ax);
 }
 } // namespace

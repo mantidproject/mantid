@@ -93,9 +93,9 @@ void Figure::setTightLayout(QHash<QString, QVariant> const &args) {
 /**
  * Display the figure window
  */
-void Figure::show() { 
+void Figure::show() {
   Mantid::PythonInterface::GlobalInterpreterLock lock;
-  this->pyobj().attr("show")(); 
+  this->pyobj().attr("show")();
 }
 
 /**
