@@ -4,18 +4,16 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "IndexTypes.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 #include <QMetaType>
 
 namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidWidgets {
 
 // The return variables here are needed in order for the code to compile.
 int SpectrumRoqIndexId = qRegisterMetaType<FitDomainIndex>();
 int WorkspaceIndexId = qRegisterMetaType<WorkspaceIndex>();
 int GrouppIndexId = qRegisterMetaType<WorkspaceGroupIndex>();
 
-} // namespace IDA
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt

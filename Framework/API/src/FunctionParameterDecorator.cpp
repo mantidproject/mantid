@@ -159,10 +159,20 @@ double FunctionParameterDecorator::getError(size_t i) const {
   return m_wrappedFunction->getError(i);
 }
 
+double FunctionParameterDecorator::getError(const std::string &name) const {
+  auto index = parameterIndex(name);
+  return getError(index);
+}
+
 void FunctionParameterDecorator::setError(size_t i, double err) {
   throwIfNoFunctionSet();
 
   return m_wrappedFunction->setError(i, err);
+}
+
+void FunctionParameterDecorator::setError(const std::string &name, double err) {
+  auto index = parameterIndex(name);
+  setError(index, err);
 }
 
 size_t FunctionParameterDecorator::getParameterIndex(

@@ -17,6 +17,7 @@ class MockMatrixWorkspaceDisplayView:
         self.table_x = MockQTableView()
         self.table_y = MockQTableView()
         self.table_e = MockQTableView()
+        self.table_dx = MockQTableView()
         self.set_model = Mock()
         self.ask_confirmation = None
         self.emit_close = Mock()

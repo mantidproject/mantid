@@ -15,6 +15,15 @@ Improvements
 - The instrument geometry of PANTHER has been corrected according to the findings during the hot commissioning.
 - New IDF has been added for the SHARP time-of-flight spectrometer at the ILL.
 
+ALF View
+--------
+
+New
+###
+- An estimation of fit parameters is performed when extracting a single tube for the first time. The estimate can subsequently be
+  updated using the `Update Estimate` button.
+
+
 CrystalField
 ------------
 

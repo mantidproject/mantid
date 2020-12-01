@@ -152,17 +152,29 @@ QStringList FunctionBrowser::getDatasetNames() const {
   return m_presenter->getDatasetNames();
 }
 
+/// Get the names of the dataset domains
+QStringList FunctionBrowser::getDatasetDomainNames() const {
+  return m_presenter->getDatasetDomainNames();
+}
+
 /// Set new number of the datasets
 /// @param n :: New value for the number of datasets.
 void FunctionBrowser::setNumberOfDatasets(int n) {
   m_presenter->setNumberOfDatasets(n);
 }
 
-/// Set the names of the datasets. They will be displayed by the
+/// Sets the datasets being fitted. They will be displayed by the
 /// local parameter editing dialog.
-/// @param names :: Names of the datasets
-void FunctionBrowser::setDatasetNames(const QStringList &names) {
-  m_presenter->setDatasetNames(names);
+/// @param datasetNames :: Names of the datasets
+void FunctionBrowser::setDatasets(const QStringList &datasetNames) {
+  m_presenter->setDatasets(datasetNames);
+}
+
+/// Sets the datasets being fitted. They will be displayed by the
+/// local parameter editing dialog.
+/// @param datasets :: Names of workspaces to be fitted maped to a spectra list.
+void FunctionBrowser::setDatasets(const QList<FunctionModelDataset> &datasets) {
+  m_presenter->setDatasets(datasets);
 }
 
 /**
@@ -205,12 +217,9 @@ void FunctionBrowser::removeDatasets(const QList<int> &indices) {
 }
 
 /// Add some datasets to those already set.
-/// @param names :: A list of names fr the new datasets.
+/// @param names :: A list of names for the new datasets.
 void FunctionBrowser::addDatasets(const QStringList &names) {
-  auto allNames = m_presenter->getDatasetNames();
-  allNames.append(names);
-  m_presenter->setNumberOfDatasets(allNames.size());
-  m_presenter->setDatasetNames(allNames);
+  m_presenter->addDatasets(names);
 }
 
 /// Return the multidomain function for multi-dataset fitting

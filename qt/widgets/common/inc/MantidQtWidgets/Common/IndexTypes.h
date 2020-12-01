@@ -15,8 +15,7 @@
 #include <vector>
 
 namespace MantidQt {
-namespace CustomInterfaces {
-namespace IDA {
+namespace MantidWidgets {
 
 /** A struct to impliment strongly typed integers, without implicit conversion.
  * Currently operations and comparitors are only defined between instances of
@@ -119,18 +118,16 @@ private:
   CollectionImplementationType m_collection;
 };
 
-} // namespace IDA
-} // namespace CustomInterfaces
+} // namespace MantidWidgets
 } // namespace MantidQt
 
 template <int i>
-std::ostream &
-operator<<(std::ostream &out,
-           const MantidQt::CustomInterfaces::IDA::IndexType<i> &index) {
+std::ostream &operator<<(std::ostream &out,
+                         const MantidQt::MantidWidgets::IndexType<i> &index) {
   out << index.value;
   return out;
 }
 
-Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::FitDomainIndex)
-Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::WorkspaceIndex)
-Q_DECLARE_METATYPE(MantidQt::CustomInterfaces::IDA::WorkspaceGroupIndex)
+Q_DECLARE_METATYPE(MantidQt::MantidWidgets::FitDomainIndex)
+Q_DECLARE_METATYPE(MantidQt::MantidWidgets::WorkspaceIndex)
+Q_DECLARE_METATYPE(MantidQt::MantidWidgets::WorkspaceGroupIndex)

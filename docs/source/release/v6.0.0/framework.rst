@@ -23,6 +23,11 @@ Algorithms
 - Added the ability to specify the packing fraction and effective number density to :ref:`SetSample <algm-SetSample>` and :ref:`SetSampleMaterial <algm-SetSampleMaterial>`.
 - :ref:`CropWorkspaceRagged <algm-CropWorkspaceRagged>` now produces ragged workspace and can now be used on large data sets.
 
+Fitting
+-------
+
+- Corrected a bug in the calculation of uncertainty bands on the calculated fit curve. This correction has been tested against the python fitting package `kmpfit`, where an agreement between the two was seen.
+
 Data Objects
 ------------
 
