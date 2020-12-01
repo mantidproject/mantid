@@ -59,7 +59,7 @@ class GeneralSettingsTest(unittest.TestCase):
         self.assert_connected_once(presenter.view.facility, presenter.view.facility.currentTextChanged)
 
         mock_ConfigService.getInstrument.assert_called_once_with()
-        self.assertEqual(2, mock_ConfigService.mock_instrument.name.call_count)
+        self.assertEqual(1, mock_ConfigService.mock_instrument.name.call_count)
         self.assert_connected_once(presenter.view.instrument, presenter.view.instrument.currentTextChanged)
 
     def test_setup_checkbox_signals(self):
