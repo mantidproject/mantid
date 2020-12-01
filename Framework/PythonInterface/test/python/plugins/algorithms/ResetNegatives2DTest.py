@@ -59,7 +59,7 @@ class ResetNegatives2DTest(unittest.TestCase):
                              DataY=zDataTotal,
                              DataE=eDataTotal,
                              WorkspaceTitle='test',
-                             NSpec=nSpec,
+                             NSpec=nSpec+1,
                              UnitX='dSpacing',
                              VerticalAxisUnit='dSpacingPerpendicular',
                              VerticalAxisValues=yData)
