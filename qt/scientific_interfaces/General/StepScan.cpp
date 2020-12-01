@@ -682,7 +682,7 @@ void StepScan::generateCurve(const QString &var) {
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 namespace {
-auto get_fig_ax(std::optional<int> fignum) {
+auto get_fig_ax(boost::optional<int> fignum) {
   std::string pyCode =
       "import matplotlib.pyplot as plt\n"
       "from mantid import plots\n"

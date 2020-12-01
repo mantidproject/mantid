@@ -15,6 +15,8 @@
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_StepScan.h"
 
+#include "boost/optional.hpp"
+
 namespace MantidQt {
 namespace CustomInterfaces {
 
@@ -81,7 +83,7 @@ private:
   Poco::NObserver<StepScan, Mantid::API::WorkspaceAfterReplaceNotification>
       m_replObserver;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-  std::optional<int> m_fignum;
+  boost::optional<int> m_fignum;
 #endif
   bool m_replaceObserverAdded;
 };
