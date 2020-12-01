@@ -61,9 +61,6 @@ namespace Mantid {
                 /// Members
                 API::MatrixWorkspace_sptr ws;
                 std::string wsName;
-                std::string dbdir;
-                DataObjects::TableWorkspace_sptr calTable;
-                std::string calTableName;
         };
 
     } // namespace Algorithms

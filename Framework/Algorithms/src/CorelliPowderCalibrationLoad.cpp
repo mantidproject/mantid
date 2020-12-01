@@ -7,13 +7,18 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidAlgorithms/CorelliPowderCalibrationLoad.h"
 #include "MantidAlgorithms/CorelliPowderCalibrationDatabase.h"
 #include "MantidKernel/Logger.h"
+
+#include <boost/filesystem.hpp>
+#include <boost/filesystem/operations.hpp>
 
 namespace Mantid {
 
@@ -55,17 +60,15 @@ namespace Mantid {
                 std::make_unique<FileProperty>(
                     "DatabaseDir",
                     "/SNS/CORELLI/shared/database",
-                    FileProperty::Directory,
-                    Direction::Input),
+                    FileProperty::Directory),
                 "CORELLI calibration database directory");
 
             // CalibrationTable
             declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                     "CalibrationTable", 
-                    "", 
-                    Direction::InOut, 
-                    PropertyMode::Mandatory),
-                "CORELLI calibration table");
+                    "caliTableCorreli", 
+                    Direction::Output),
+                "Name of the output CORELLI calibration table");
 
         }
 
@@ -97,9 +100,9 @@ namespace Mantid {
         std::string CorelliPowderCalibrationLoad::deduce_database_name(API::MatrixWorkspace_sptr ws){
             std::string timeStamp{""};
             if (ws->run().hasProperty("start_time")){
-                timeStamp = ws->run().getProperty("start_time")->name();
+                timeStamp = ws->run().getProperty("start_time")->value();
             }else {
-                timeStamp = ws->run().getProperty("run_start")->name();
+                timeStamp = ws->run().getProperty("run_start")->value();
             }
             // convert date to YYYYMMDD
             std::string timeStampStr = CorelliPowderCalibrationDatabase::convertTimeStamp(timeStamp);
@@ -120,26 +123,37 @@ namespace Mantid {
             // Parse input arguments
             ws = getProperty("Workspace");
             wsName = getPropertyValue("Workspace");
-            dbdir = getPropertyValue("DatabaseDir");
-            calTableName = getPropertyValue("CalibrationTable");
+            std::string dbdir = getProperty("DatabaseDir");
+
+            // Prepare output table
+            const std::string calTableName = getPropertyValue("CalibrationTable");
 
             // Locate the time stamp in ws, and form the db file path
+            // NOTE:
+            //  Using inline functions from other class leads to a not
+            //  defined warning.
             std::string dbFileName = deduce_database_name(ws);
-            std::string dbFullPath = CorelliPowderCalibrationDatabase::joinPath(dbdir, dbFileName);
+            boost::filesystem::path dir(dbdir);
+            boost::filesystem::path file(dbFileName);
+            boost::filesystem::path fullPath = dir / file;
+            std::string dbFullPath = fullPath.string();
 
             // Load the csv file into a table
+            g_log.notice() << "Loading database:\n";
+            g_log.notice() << "\t" << dbFullPath << "\n";
             auto alg = createChildAlgorithm("LoadAscii");
             alg -> initialize();
             alg -> setProperty("Filename", dbFullPath);
             alg -> setProperty("Separator", "CSV");
             alg -> setProperty("CommentIndicator", "#");
-            alg -> setProperty("OutputWorkspace", calTableName);
+            alg -> setPropertyValue("OutputWorkspace", calTableName);
             alg -> execute();
 
-            // get the table and set it as the output
-            calTable = std::dynamic_pointer_cast<TableWorkspace>(AnalysisDataService::Instance().retrieve(calTableName));
-            setProperty("CalibrationTable", calTable);
+            Workspace_sptr _outws = alg->getProperty("OutputWorkspace");
+            TableWorkspace_sptr calTable = std::dynamic_pointer_cast<TableWorkspace>(_outws);
 
+            // get the table and set it as the output
+            setProperty("CalibrationTable", calTable);
             g_log.notice() << "Finished loading CORELLI calibration table\n";
         }
 
