@@ -55,6 +55,10 @@ namespace Mantid {
                 std::map<std::string, std::string> validateInputs() override;
 
                 /// Members
+                API::MatrixWorkspace_sptr ws;
+                std::string wsName;
+                std::string dbdir;
+                DataObjects::TableWorkspace_sptr calTable;
         };
 
     } // namespace Algorithms
