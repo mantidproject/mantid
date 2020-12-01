@@ -13,6 +13,7 @@
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <QString>
@@ -29,6 +30,12 @@ struct FitDomain {
     m_workspaceIndex = workspaceIndex;
     m_startX = startX;
     m_endX = endX;
+  }
+
+  inline bool isSameDomain(std::string const &workspaceName,
+                           WorkspaceIndex workspaceIndex) const noexcept {
+    return m_workspaceName == workspaceName &&
+           m_workspaceIndex == workspaceIndex;
   }
 
   std::string m_multiDomainFunctionPrefix;
@@ -49,6 +56,16 @@ public:
                           WorkspaceIndex workspaceIndex, double startX,
                           double endX);
 
+  bool isXValid(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+                double xValue) const;
+  std::pair<double, double> xLimits(std::string const &workspaceName,
+                                    WorkspaceIndex workspaceIndex) const;
+
+  void updateStartX(std::string const &workspaceName,
+                    WorkspaceIndex workspaceIndex, double startX);
+  void updateEndX(std::string const &workspaceName,
+                  WorkspaceIndex workspaceIndex, double endX);
+
 private:
   void removeWorkspaceDomain(
       std::size_t const &removeIndex,
@@ -58,11 +75,13 @@ private:
                           WorkspaceIndex workspaceIndex, double startX,
                           double endX);
 
-  bool hasWorkspaceDomain(std::string const &workspaceName,
-                          WorkspaceIndex workspaceIndex);
+  std::size_t findDomainIndex(std::string const &workspaceName,
+                              WorkspaceIndex workspaceIndex) const;
   std::vector<FitDomain>::const_iterator
   findWorkspaceDomain(std::string const &workspaceName,
                       WorkspaceIndex workspaceIndex) const;
+  bool hasWorkspaceDomain(std::string const &workspaceName,
+                          WorkspaceIndex workspaceIndex) const;
 
   void removeCompositeAtPrefix(std::string const &prefix);
 

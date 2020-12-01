@@ -61,7 +61,8 @@ using DelegateType = CustomItemDelegate::DelegateType;
  */
 
 FitScriptGeneratorDataTable::FitScriptGeneratorDataTable(QWidget *parent)
-    : QTableWidget(parent) {
+    : QTableWidget(parent), m_selectedRow(-1), m_selectedColumn(-1),
+      m_selectedValue(0.0) {
   this->setSelectionBehavior(QAbstractItemView::SelectRows);
   this->setSelectionMode(QAbstractItemView::ExtendedSelection);
   this->setShowGrid(false);
@@ -107,6 +108,9 @@ FitScriptGeneratorDataTable::FitScriptGeneratorDataTable(QWidget *parent)
       ColumnIndex::StartX, new CustomItemDelegate(this, DelegateType::Double));
   this->setItemDelegateForColumn(
       ColumnIndex::EndX, new CustomItemDelegate(this, DelegateType::Double));
+
+  connect(this, SIGNAL(itemClicked(QTableWidgetItem *)), this,
+          SLOT(handleItemClicked(QTableWidgetItem *)));
 }
 
 bool FitScriptGeneratorDataTable::eventFilter(QObject *widget, QEvent *event) {
@@ -120,6 +124,14 @@ bool FitScriptGeneratorDataTable::eventFilter(QObject *widget, QEvent *event) {
     }
   }
   return QTableWidget::eventFilter(widget, event);
+}
+
+void FitScriptGeneratorDataTable::handleItemClicked(QTableWidgetItem *item) {
+  m_selectedRow = item->row();
+  m_selectedColumn = item->column();
+  if (m_selectedColumn == ColumnIndex::StartX ||
+      m_selectedColumn == ColumnIndex::EndX)
+    m_selectedValue = item->text().toDouble();
 }
 
 QPersistentModelIndex
@@ -179,6 +191,8 @@ void FitScriptGeneratorDataTable::removeDomain(
 void FitScriptGeneratorDataTable::addDomain(
     QString const &workspaceName, MantidWidgets::WorkspaceIndex workspaceIndex,
     double startX, double endX) {
+  this->blockSignals(true);
+
   auto const rowIndex = this->rowCount();
   this->insertRow(rowIndex);
 
@@ -191,6 +205,8 @@ void FitScriptGeneratorDataTable::addDomain(
                 createDoubleTableItem(startX, Qt::AlignCenter, true));
   this->setItem(rowIndex, ColumnIndex::EndX,
                 createDoubleTableItem(endX, Qt::AlignCenter, true));
+
+  this->blockSignals(false);
 }
 
 int FitScriptGeneratorDataTable::indexOfDomain(
@@ -207,6 +223,22 @@ int FitScriptGeneratorDataTable::indexOfDomain(
 QString FitScriptGeneratorDataTable::getText(FitDomainIndex row,
                                              int column) const {
   return this->item(static_cast<int>(row.value), column)->text();
+}
+
+void FitScriptGeneratorDataTable::formatSelection() {
+  setSelectedXValue(
+      this->item(m_selectedRow, m_selectedColumn)->text().toDouble());
+}
+
+void FitScriptGeneratorDataTable::resetSelection() {
+  setSelectedXValue(m_selectedValue);
+}
+
+void FitScriptGeneratorDataTable::setSelectedXValue(double xValue) {
+  this->blockSignals(true);
+  this->setItem(m_selectedRow, m_selectedColumn,
+                createDoubleTableItem(xValue, Qt::AlignCenter, true));
+  this->blockSignals(false);
 }
 
 /**

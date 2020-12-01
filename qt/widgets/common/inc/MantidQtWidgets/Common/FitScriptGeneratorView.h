@@ -67,11 +67,14 @@ public:
   std::vector<Mantid::API::MatrixWorkspace_const_sptr> getDialogWorkspaces();
   std::vector<WorkspaceIndex> getDialogWorkspaceIndices() const;
 
+  void resetSelection();
+
   void displayWarning(std::string const &message);
 
 private slots:
   void onRemoveClicked();
   void onAddWorkspaceClicked();
+  void onCellChanged(int row, int column);
 
 private:
   void connectUiSignals();

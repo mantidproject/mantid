@@ -39,6 +39,8 @@ public:
 private:
   void handleRemoveClicked();
   void handleAddWorkspaceClicked();
+  void handleStartXChanged();
+  void handleEndXChanged();
 
   void setWorkspaces(QStringList const &workspaceNames, double startX,
                      double endX);
@@ -54,7 +56,7 @@ private:
   void addWorkspace(std::string const &workspaceName,
                     WorkspaceIndex workspaceIndex, double startX, double endX);
 
-  void displayWarningMessages();
+  void checkForWarningMessages();
 
   std::vector<std::string> m_warnings;
 

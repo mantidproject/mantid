@@ -47,7 +47,7 @@ getWorkspaces(std::string const &workspaceName) {
 }
 
 std::vector<WorkspaceIndex>
-convertToWorkspaceIndex(std::vector<int> const indices) {
+convertToWorkspaceIndex(std::vector<int> const &indices) {
   std::vector<WorkspaceIndex> workspaceIndices;
   workspaceIndices.reserve(indices.size());
   std::transform(indices.cbegin(), indices.cend(),
@@ -61,6 +61,7 @@ convertToWorkspaceIndex(std::vector<int> const indices) {
 namespace MantidQt {
 namespace MantidWidgets {
 
+using ColumnIndex = FitScriptGeneratorDataTable::ColumnIndex;
 using FittingType = FitOptionsBrowser::FittingType;
 
 FitScriptGeneratorView::FitScriptGeneratorView(
@@ -89,6 +90,8 @@ void FitScriptGeneratorView::connectUiSignals() {
   connect(m_ui.pbRemove, SIGNAL(clicked()), this, SLOT(onRemoveClicked()));
   connect(m_ui.pbAddWorkspace, SIGNAL(clicked()), this,
           SLOT(onAddWorkspaceClicked()));
+  connect(m_dataTable.get(), SIGNAL(cellChanged(int, int)), this,
+          SLOT(onCellChanged(int, int)));
 }
 
 void FitScriptGeneratorView::setFitBrowserOptions(
@@ -126,6 +129,16 @@ void FitScriptGeneratorView::onRemoveClicked() {
 
 void FitScriptGeneratorView::onAddWorkspaceClicked() {
   m_presenter->notifyPresenter(ViewEvent::AddClicked);
+}
+
+void FitScriptGeneratorView::onCellChanged(int row, int column) {
+  UNUSED_ARG(row);
+  m_dataTable->formatSelection();
+
+  if (column == ColumnIndex::StartX)
+    m_presenter->notifyPresenter(ViewEvent::StartXChanged);
+  else if (column == ColumnIndex::EndX)
+    m_presenter->notifyPresenter(ViewEvent::EndXChanged);
 }
 
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
@@ -182,6 +195,8 @@ std::vector<WorkspaceIndex>
 FitScriptGeneratorView::getDialogWorkspaceIndices() const {
   return convertToWorkspaceIndex(m_dialog.workspaceIndices());
 }
+
+void FitScriptGeneratorView::resetSelection() { m_dataTable->resetSelection(); }
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {
   QMessageBox::warning(this, "Warning!", QString::fromStdString(message));

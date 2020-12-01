@@ -37,8 +37,10 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event) {
     handleAddWorkspaceClicked();
     return;
   case ViewEvent::StartXChanged:
+    handleStartXChanged();
     return;
   case ViewEvent::EndXChanged:
+    handleEndXChanged();
     return;
   }
 
@@ -67,12 +69,47 @@ void FitScriptGeneratorPresenter::handleAddWorkspaceClicked() {
   }
 }
 
+void FitScriptGeneratorPresenter::handleStartXChanged() {
+  auto const selectedRows = m_view->selectedRows();
+  if (!selectedRows.empty()) {
+    auto const workspaceName = m_view->workspaceName(selectedRows[0]);
+    auto const workspaceIndex = m_view->workspaceIndex(selectedRows[0]);
+    auto const startX = m_view->startX(selectedRows[0]);
+
+    if (m_model->isXValid(workspaceName, workspaceIndex, startX))
+      m_model->updateStartX(workspaceName, workspaceIndex, startX);
+    else {
+      m_view->resetSelection();
+      m_view->displayWarning(
+          "The StartX provided must be within the x limits of its workspace.");
+    }
+  }
+}
+
+void FitScriptGeneratorPresenter::handleEndXChanged() {
+  auto const selectedRows = m_view->selectedRows();
+  if (!selectedRows.empty()) {
+    auto const workspaceName = m_view->workspaceName(selectedRows[0]);
+    auto const workspaceIndex = m_view->workspaceIndex(selectedRows[0]);
+    auto const endX = m_view->endX(selectedRows[0]);
+
+    if (m_model->isXValid(workspaceName, workspaceIndex, endX))
+      m_model->updateEndX(workspaceName, workspaceIndex, endX);
+    else {
+      m_view->resetSelection();
+      m_view->displayWarning(
+          "The EndX provided must be within the x limits of its workspace.");
+    }
+  }
+}
+
 void FitScriptGeneratorPresenter::setWorkspaces(
     QStringList const &workspaceNames, double startX, double endX) {
   for (auto const &workspaceName : workspaceNames)
     addWorkspace(workspaceName.toStdString(), startX, endX);
-  displayWarningMessages();
+  checkForWarningMessages();
 }
+
 void FitScriptGeneratorPresenter::addWorkspaces(
     std::vector<MatrixWorkspace_const_sptr> const &workspaces,
     std::vector<WorkspaceIndex> const &workspaceIndices) {
@@ -81,7 +118,7 @@ void FitScriptGeneratorPresenter::addWorkspaces(
       auto const xData = workspace->x(workspaceIndex.value);
       addWorkspace(workspace, workspaceIndex, xData.front(), xData.back());
     }
-  displayWarningMessages();
+  checkForWarningMessages();
 }
 
 void FitScriptGeneratorPresenter::addWorkspace(std::string const &workspaceName,
@@ -114,7 +151,7 @@ void FitScriptGeneratorPresenter::addWorkspace(std::string const &workspaceName,
   }
 }
 
-void FitScriptGeneratorPresenter::displayWarningMessages() {
+void FitScriptGeneratorPresenter::checkForWarningMessages() {
   if (!m_warnings.empty()) {
     std::stringstream ss;
     std::copy(m_warnings.cbegin(), m_warnings.cend(),

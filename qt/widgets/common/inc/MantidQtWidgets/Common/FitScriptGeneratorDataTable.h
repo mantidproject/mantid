@@ -36,6 +36,7 @@ namespace MantidWidgets {
 class FitScriptGeneratorDataTable : public QTableWidget {
   Q_OBJECT
 
+public:
   enum ColumnIndex {
     WorkspaceName = 0,
     WorkspaceIndex = 1,
@@ -43,7 +44,6 @@ class FitScriptGeneratorDataTable : public QTableWidget {
     EndX = 3
   } const;
 
-public:
   FitScriptGeneratorDataTable(QWidget *parent = nullptr);
   ~FitScriptGeneratorDataTable() = default;
 
@@ -60,8 +60,14 @@ public:
                  MantidWidgets::WorkspaceIndex workspaceIndex, double startX,
                  double endX);
 
+  void formatSelection();
+  void resetSelection();
+
 signals:
   void itemExited(int newRowIndex);
+
+private slots:
+  void handleItemClicked(QTableWidgetItem *item);
 
 private:
   bool eventFilter(QObject *widget, QEvent *event) override;
@@ -72,6 +78,11 @@ private:
 
   QString getText(FitDomainIndex row, int column) const;
 
+  void setSelectedXValue(double xValue);
+
+  int m_selectedRow;
+  int m_selectedColumn;
+  double m_selectedValue;
   QPersistentModelIndex m_lastIndex;
 };
 

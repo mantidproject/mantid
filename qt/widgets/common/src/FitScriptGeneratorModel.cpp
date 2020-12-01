@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
 
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -14,6 +15,7 @@
 #include <boost/algorithm/string.hpp>
 
 #include <algorithm>
+#include <iterator>
 #include <stdexcept>
 
 using namespace Mantid::API;
@@ -146,21 +148,71 @@ void FitScriptGeneratorModel::addWorkspaceDomain(
       FitDomain(prefix, workspaceName, workspaceIndex, startX, endX));
 }
 
-bool FitScriptGeneratorModel::hasWorkspaceDomain(
-    std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
-  return findWorkspaceDomain(workspaceName, workspaceIndex) !=
-         m_fitDomains.end();
+std::size_t
+FitScriptGeneratorModel::findDomainIndex(std::string const &workspaceName,
+                                         WorkspaceIndex workspaceIndex) const {
+  auto const iter = findWorkspaceDomain(workspaceName, workspaceIndex);
+  if (iter != m_fitDomains.cend())
+    return std::distance(m_fitDomains.cbegin(), iter);
+
+  throw std::invalid_argument("The domain '" + workspaceName + " (" +
+                              std::to_string(workspaceIndex.value) +
+                              ")' could not be found.");
 }
 
 std::vector<FitDomain>::const_iterator
 FitScriptGeneratorModel::findWorkspaceDomain(
     std::string const &workspaceName, WorkspaceIndex workspaceIndex) const {
   auto const isMatch = [&](FitDomain const &fitDomain) {
-    return fitDomain.m_workspaceName == workspaceName &&
-           fitDomain.m_workspaceIndex == workspaceIndex;
+    return fitDomain.isSameDomain(workspaceName, workspaceIndex);
   };
 
   return std::find_if(m_fitDomains.cbegin(), m_fitDomains.cend(), isMatch);
+}
+
+bool FitScriptGeneratorModel::hasWorkspaceDomain(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex) const {
+  return findWorkspaceDomain(workspaceName, workspaceIndex) !=
+         m_fitDomains.end();
+}
+
+bool FitScriptGeneratorModel::isXValid(std::string const &workspaceName,
+                                       WorkspaceIndex workspaceIndex,
+                                       double xValue) const {
+  auto const limits = xLimits(workspaceName, workspaceIndex);
+  return limits.first <= xValue && xValue <= limits.second;
+}
+
+std::pair<double, double>
+FitScriptGeneratorModel::xLimits(std::string const &workspaceName,
+                                 WorkspaceIndex workspaceIndex) const {
+  auto &ads = AnalysisDataService::Instance();
+  if (hasWorkspaceDomain(workspaceName, workspaceIndex) &&
+      ads.doesExist(workspaceName)) {
+    auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName);
+    if (workspace) {
+      auto const xData = workspace->x(workspaceIndex.value);
+      return std::pair<double, double>(xData.front(), xData.back());
+    }
+  }
+
+  throw std::invalid_argument("The domain '" + workspaceName + " (" +
+                              std::to_string(workspaceIndex.value) +
+                              ")' could not be found.");
+}
+
+void FitScriptGeneratorModel::updateStartX(std::string const &workspaceName,
+                                           WorkspaceIndex workspaceIndex,
+                                           double startX) {
+  auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
+  m_fitDomains[domainIndex].m_startX = startX;
+}
+
+void FitScriptGeneratorModel::updateEndX(std::string const &workspaceName,
+                                         WorkspaceIndex workspaceIndex,
+                                         double endX) {
+  auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
+  m_fitDomains[domainIndex].m_endX = endX;
 }
 
 void FitScriptGeneratorModel::removeCompositeAtPrefix(
