@@ -14,10 +14,6 @@
 #include "MantidQtWidgets/Common/AlgorithmRunner.h"
 #include "MantidQtWidgets/Common/UserSubWindow.h"
 #include "ui_StepScan.h"
-#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include "MantidQtWidgets/MplCpp/Figure.h"
-#include "MantidQtWidgets/MplCpp/MantidAxes.h"
-#endif
 
 namespace MantidQt {
 namespace CustomInterfaces {

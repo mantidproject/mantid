@@ -19,8 +19,10 @@
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include <QtGlobal>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
-#include "boost/python.hpp"
+#include "MantidQtWidgets/Common/Python/Object.h"
+#include "MantidQtWidgets/MplCpp/Figure.h"
+#include "MantidQtWidgets/MplCpp/MantidAxes.h"
+#include "boost/python/exec.hpp"
 #endif
 #include <QFileInfo>
 #include <QUrl>
@@ -67,6 +69,7 @@ StepScan::~StepScan() {
 /// Set up the dialog layout
 void StepScan::initLayout() {
   m_uiForm.setupUi(this);
+
   // I couldn't see a way to set a validator on a qlineedit in designer
   m_uiForm.xmin->setValidator(new QDoubleValidator(m_uiForm.xmin));
   m_uiForm.xmax->setValidator(new QDoubleValidator(m_uiForm.xmax));
@@ -372,7 +375,9 @@ void StepScan::launchInstrumentWindow() {
   std::string pyCode = "instrument_view = getInstrumentView('" + m_inputWSName +
                        "',2)\n"
                        "instrument_view.show()";
+
   runPythonCode(QString::fromStdString(pyCode));
+
 #else
   std::string pyCode =
       "from mantidqt.widgets.instrumentview.api import get_instrumentview\n"
@@ -689,18 +694,18 @@ auto get_fig_ax(std::optional<int> fignum) {
       "else:\n"
       "    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})";
   Mantid::PythonInterface::GlobalInterpreterLock lock;
-  using namespace boost::python;
+  using namespace MantidQt::Widgets::Common;
   using namespace MantidQt::Widgets::MplCpp;
-  object main_module = import("__main__");
-  object main_namespace = main_module.attr("__dict__");
+  Python::Object main_module = import("__main__");
+  Python::Object main_namespace = main_module.attr("__dict__");
   if (fignum) {
     main_namespace["fig_num"] = fignum.value();
   } else {
-    main_namespace["fig_num"] = boost::python::object();
+    main_namespace["fig_num"] = Python::Object();
   }
-  object ignored = exec(pyCode.c_str(), main_namespace);
-  auto fig = Figure(extract<object>(main_namespace["fig"]));
-  auto ax = MantidAxes(extract<object>(main_namespace["ax"]));
+  auto ignored = boost::python::exec(pyCode.c_str(), main_namespace);
+  auto fig = Figure(extract<Python::Object>(main_namespace["fig"]));
+  auto ax = MantidAxes(extract<Python::Object>(main_namespace["ax"]));
   return std::make_tuple(fig, ax);
 }
 } // namespace
@@ -757,7 +762,6 @@ void StepScan::plotCurve() {
       AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
           m_plotWSName);
   title += " - Step Scan";
-  Mantid::PythonInterface::GlobalInterpreterLock lock;
   fig.setWindowTitle(title.c_str());
   QHash<QString, QVariant> hash;
   hash.insert("linestyle", "");
@@ -766,8 +770,6 @@ void StepScan::plotCurve() {
   ax.setXLabel(xAxisTitle.c_str());
   ax.setYLabel(yAxisTitle.c_str());
   fig.show();
-  this->activateWindow();
-  this->raise();
 #endif
 }
 
