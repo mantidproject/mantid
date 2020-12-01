@@ -41,7 +41,7 @@ class ResetNegatives2DTest(unittest.TestCase):
         xDataTotal = []  # d Values for all spectra
         zDataTotal = []  # intensity values for all spectra
         eDataTotal = []  # error values for all spectra
-        nSpec = len(yData) - 1  # number of spectra
+        nSpec = len(yData)  # number of spectra
 
         # Create d and intensity lists for workspace
         for i in range(0, nSpec+1):
