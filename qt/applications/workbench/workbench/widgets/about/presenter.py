@@ -16,7 +16,6 @@ from mantidqt.widgets import manageuserdirectories  # noqa
 
 class AboutPresenter(object):
 
-    INSTRUMENT = "default.instrument"
     USAGE_REPORTING = "usagereports.enabled"
     DO_NOT_SHOW_GROUP = "Mantid/FirstUse"
     DO_NOT_SHOW = "DoNotShowUntilNextRelease"
@@ -109,10 +108,13 @@ class AboutPresenter(object):
         When the facility is changed, refreshes all available instruments that can be selected in the dropdown.
         :param new_facility: The name of the new facility that was selected
         """
+        current_value = ConfigService.getFacility().name()
         self.store_facility(new_facility)
         # refresh the instrument selection to contain instruments about the selected facility only
         self.view.cb_instrument.facility = new_facility
-
+        if new_facility != current_value:
+            self.view.cb_instrument.setCurrentIndex(0)
+        
     def store_facility(self, new_facility):
         current_value = ConfigService.getFacility().name()
         if new_facility != current_value:

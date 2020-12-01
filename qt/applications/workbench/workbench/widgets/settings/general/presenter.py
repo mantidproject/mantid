@@ -118,6 +118,8 @@ class GeneralSettings(object):
             ConfigService.setFacility(new_facility)
         # refresh the instrument selection to contain instruments about the selected facility only
         self.view.instrument.facility = new_facility
+        if new_facility != current_value:
+            self.view.instrument.setCurrentIndex(0)
 
     def setup_confirmations(self):
         self.view.prompt_save_on_close.stateChanged.connect(self.action_prompt_save_on_close)
@@ -173,11 +175,6 @@ class GeneralSettings(object):
 
     def action_crystallography_convention(self, state):
         ConfigService.setString(GeneralProperties.CRYSTALLOGRAPY_CONV.value, "Crystallography" if state == Qt.Checked else "Inelastic")
-
-    def action_instrument_changed(self, new_instrument):
-        current_value = ConfigService.getString(GeneralProperties.INSTRUMENT.value)
-        if new_instrument != current_value:
-            ConfigService.setString(GeneralProperties.INSTRUMENT.value, new_instrument)
 
     def action_show_invisible_workspaces(self, state):
         ConfigService.setString(GeneralProperties.SHOW_INVISIBLE_WORKSPACES.value, str(bool(state)))
