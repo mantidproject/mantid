@@ -498,7 +498,7 @@ public:
     ON_CALL(*m_view, getFirstFile()).WillByDefault(Return(singlePeriod));
 
     EXPECT_CALL(*m_view, enableAlpha(true)).Times(1);
-    EXPECT_CALL(*m_view, setAlphaValue(std::string{"1"})).Times(1);
+    EXPECT_CALL(*m_view, setAlphaValue(std::string{"1.0"})).Times(1);
     EXPECT_CALL(*m_view, showAlphaMessage(false)).Times(1);
 
     TS_ASSERT_THROWS_NOTHING(m_view->foundRuns());
