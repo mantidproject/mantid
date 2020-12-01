@@ -5,7 +5,6 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/InstrumentValidator.h"
@@ -65,8 +64,8 @@ namespace Mantid {
 
             // CalibrationTable
             declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
-                    "CalibrationTable", 
-                    "caliTableCorreli", 
+                    "OutputWorkspace", 
+                    "", 
                     Direction::Output),
                 "Name of the output CORELLI calibration table");
 
@@ -126,7 +125,7 @@ namespace Mantid {
             std::string dbdir = getProperty("DatabaseDir");
 
             // Prepare output table
-            const std::string calTableName = getPropertyValue("CalibrationTable");
+            const std::string calTableName = getPropertyValue("OutputWorkspace");
 
             // Locate the time stamp in ws, and form the db file path
             // NOTE:
@@ -153,7 +152,7 @@ namespace Mantid {
             TableWorkspace_sptr calTable = std::dynamic_pointer_cast<TableWorkspace>(_outws);
 
             // get the table and set it as the output
-            setProperty("CalibrationTable", calTable);
+            setProperty("OutputWorkspace", calTable);
             g_log.notice() << "Finished loading CORELLI calibration table\n";
         }
 
