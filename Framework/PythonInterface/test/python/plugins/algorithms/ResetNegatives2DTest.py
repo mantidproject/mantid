@@ -33,7 +33,7 @@ class ResetNegatives2DTest(unittest.TestCase):
         # repeat this block for each spectrum
         xData = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0,
                  9.0]  # d values for one spectrum (one dPerpendicular value)
-        yData = ['1', '2', '3']  # dPerpendicular binedges
+        yData = ['1', '2', '3', '4']  # dPerpendicular binedges
         zData = [1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -2.0, 1.0,
                  1.0]  # intensity values
         eData = [1, 1, 1, 1, 1, 1, 1, 1, 1]  # error values
