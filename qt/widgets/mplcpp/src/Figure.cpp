@@ -93,13 +93,17 @@ void Figure::setTightLayout(QHash<QString, QVariant> const &args) {
 /**
  * Display the figure window
  */
-void Figure::show() { this->pyobj().attr("show")(); }
+void Figure::show() { 
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  this->pyobj().attr("show")(); 
+}
 
 /**
  * Set window title of a figure
  * @param title Title displayed in the top bar of the window.
  */
 void Figure::setWindowTitle(const char *title) {
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
   this->pyobj().attr("canvas").attr("set_window_title")(title);
 }
 
