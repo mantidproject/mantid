@@ -77,6 +77,7 @@ set(PYTHON_PLUGINS
     algorithms/GetLiveInstrumentValue.py
     algorithms/HB2AReduce.py
     algorithms/HB3AAdjustSampleNorm.py
+    algorithms/HB3AFindPeaks.py
     algorithms/HFIRSANS2Wavelength.py
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
