@@ -60,8 +60,8 @@ private:
 
   std::vector<std::string> m_warnings;
 
-  FitScriptGeneratorModel *m_model;
   FitScriptGeneratorView *m_view;
+  FitScriptGeneratorModel *m_model;
 };
 
 } // namespace MantidWidgets

@@ -36,12 +36,7 @@ class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorView
   Q_OBJECT
 
 public:
-  enum class Event {
-    AddClicked,
-    RemoveClicked,
-    StartXChanged,
-    EndXChanged
-  } const;
+  enum class Event { AddClicked, RemoveClicked, StartXChanged, EndXChanged };
 
   FitScriptGeneratorView(
       QWidget *parent = nullptr,

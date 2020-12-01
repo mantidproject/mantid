@@ -137,15 +137,13 @@ void FitScriptGeneratorDataTable::handleItemClicked(QTableWidgetItem *item) {
 QPersistentModelIndex
 FitScriptGeneratorDataTable::hoveredRowIndex(QEvent *event) {
   auto index = m_lastIndex;
-  switch (event->type()) {
-  case QEvent::HoverMove:
+  auto const eventType = event->type();
+  if (eventType == QEvent::HoverMove)
     index = QPersistentModelIndex(
         this->indexAt(static_cast<QHoverEvent *>(event)->pos()));
-    break;
-  case QEvent::Leave:
+  else if (eventType == QEvent::Leave)
     index = QPersistentModelIndex(QModelIndex());
-    break;
-  }
+
   return index;
 }
 
@@ -271,14 +269,18 @@ void CustomItemDelegate::handleItemExited(int newRowIndex) {
 QWidget *CustomItemDelegate::createEditor(QWidget *parent,
                                           QStyleOptionViewItem const &option,
                                           QModelIndex const &index) const {
-  auto lineEdit = new QLineEdit(parent);
+  Q_UNUSED(option);
+  Q_UNUSED(index);
 
+  auto lineEdit = new QLineEdit(parent);
   switch (m_type) {
   case DelegateType::Double:
     lineEdit->setValidator(createDoubleValidator());
     break;
   case DelegateType::Int:
     lineEdit->setValidator(createIntValidator());
+    break;
+  case DelegateType::String:
     break;
   }
 

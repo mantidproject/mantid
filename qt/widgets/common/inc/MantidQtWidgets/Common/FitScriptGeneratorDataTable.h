@@ -42,7 +42,7 @@ public:
     WorkspaceIndex = 1,
     StartX = 2,
     EndX = 3
-  } const;
+  };
 
   FitScriptGeneratorDataTable(QWidget *parent = nullptr);
   ~FitScriptGeneratorDataTable() = default;
@@ -106,7 +106,7 @@ private slots:
 
 private:
   QWidget *createEditor(QWidget *parent, QStyleOptionViewItem const &option,
-                        QModelIndex const &index) const;
+                        QModelIndex const &index) const override;
   void paint(QPainter *painter, QStyleOptionViewItem const &option,
              QModelIndex const &index) const override;
 
