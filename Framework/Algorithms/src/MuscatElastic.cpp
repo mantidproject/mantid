@@ -118,13 +118,13 @@ void MuscatElastic::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
 
-  std::vector<MatrixWorkspace_sptr> workspaces;
-
-  // std::vector<MatrixWorkspace_uptr> outputWSs(nhists);
-  auto outputWS = createOutputWorkspace(*inputWS);
-  auto noAbsOutputWS = createOutputWorkspace(*inputWS);
-
   const MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
+  if (sigmaSSWS) {
+    // take log of sigmaSSWS and store it this way
+    auto &y = sigmaSSWS->mutableY(0);
+    std::transform(y.begin(), y.end(), y.begin(),
+                   static_cast<double (*)(double)>(std::log));
+  }
 
   const bool useSparseInstrument = getProperty("SparseInstrument");
   SparseWorkspace_sptr sparseWS;
@@ -135,49 +135,51 @@ void MuscatElastic::exec() {
     sparseWS = createSparseWorkspace(*inputWS, inputNbins, latitudinalDets,
                                      longitudinalDets);
   }
-  MatrixWorkspace &simulationWS = useSparseInstrument ? *sparseWS : *outputWS;
-  const MatrixWorkspace &instrumentWS =
-      useSparseInstrument ? simulationWS : *inputWS;
-  auto instrument = instrumentWS.getInstrument();
-  const auto nhists = static_cast<int64_t>(instrumentWS.getNumberHistograms());
+  const size_t nScatters = getProperty("NumberScatterings");
+  std::vector<MatrixWorkspace_sptr> simulationWSs;
+  std::vector<MatrixWorkspace_sptr> outputWSs;
+
+  auto noAbsOutputWS = createOutputWorkspace(*inputWS);
+  for (auto i = 0; i < nScatters; i++) {
+    auto outputWS = createOutputWorkspace(*inputWS);
+    MatrixWorkspace_sptr simulationWS =
+        useSparseInstrument ? sparseWS->clone() : outputWS;
+    simulationWSs.push_back(simulationWS);
+    outputWSs.push_back(outputWS);
+  }
+
+  auto instrument = inputWS->getInstrument();
+  const auto nhists =
+      useSparseInstrument
+          ? static_cast<int64_t>(sparseWS->getNumberHistograms())
+          : inputWS->getNumberHistograms();
   auto nbins = inputWS->blocksize();
 
-  const size_t nScatters = getProperty("NumberScatterings");
+  auto &sample = inputWS->sample();
+
   const int seed = getProperty("SeedValue");
 
   Progress prog(this, 0.0, 1.0, nhists * nbins);
   prog.setNotifyStep(0.01);
   const std::string reportMsg = "Computing corrections";
 
-  PARALLEL_FOR_IF(Kernel::threadSafe(simulationWS))
+  bool enableParallelFor = true;
+  for (auto &ws : simulationWSs) {
+    enableParallelFor = enableParallelFor && Kernel::threadSafe(*ws);
+  }
+  enableParallelFor = enableParallelFor && Kernel::threadSafe(*noAbsOutputWS);
+
+  PARALLEL_FOR_IF(enableParallelFor)
   for (int64_t i = 0; i < nhists; ++i) {
     PARALLEL_START_INTERUPT_REGION
     MersenneTwister rng(seed + int(i));
-    double vmfp, sigma_total, scatteringXSection;
-    auto numberDensity =
-        inputWS->sample().getMaterial().numberDensityEffective();
-    auto histnew = simulationWS.histogram(i);
-    if (!inputWS->spectrumInfo().isMonitor(i)) { // no two theta for monitors
+    // no two theta for monitors
+    if (!simulationWSs[i]->spectrumInfo().isMonitor(i)) {
       for (int bin = 0; bin < nbins; bin++) {
         // use Kernel::UnitConversion::run instead?? Momentum, MomentumTransfer
-        double kinc = inputWS->histogram(i).x()[bin] /
-                      (2 * sin(0.5 * inputWS->spectrumInfo().twoTheta(i)));
-        double wavelength = 2 * M_PI / kinc;
-        auto absorbXsection =
-            inputWS->sample().getMaterial().absorbXSection(wavelength);
-        if (sigmaSSWS) {
-          // take log of sigmaSSWS and store it this way
-          auto &y = sigmaSSWS->mutableY(0);
-          std::transform(y.begin(), y.end(), y.begin(),
-                         static_cast<double (*)(double)>(std::log));
-          scatteringXSection = interpolateLogQuadratic(sigmaSSWS, kinc);
-        } else {
-          scatteringXSection =
-              inputWS->sample().getMaterial().totalScatterXSection();
-        }
-
-        std::tie(vmfp, sigma_total) =
-            new_vector(absorbXsection, numberDensity, scatteringXSection);
+        double kinc =
+            simulationWSs[i]->histogram(i).x()[bin] /
+            (2 * sin(0.5 * simulationWSs[i]->spectrumInfo().twoTheta(i)));
 
         const int nSingleScatterEvents = getProperty("NeutronEventsSingle");
         const int nMultiScatterEvents = getProperty("NeutronEventsMultiple");
@@ -186,27 +188,30 @@ void MuscatElastic::exec() {
         auto y = SQWS->y(0);
         std::transform(y.begin(), y.end(), y.begin(),
                        static_cast<double (*)(double)>(std::log));
-        auto detPos = inputWS->detectorInfo().position(i);
+        auto detPos = simulationWSs[i]->detectorInfo().position(i);
 
-        double totalSingleScatterNoAbs = simulateEvents(
-            nSingleScatterEvents, 1, 0, inputWS->sample(), *instrument, rng,
-            vmfp, sigma_total, scatteringXSection, SQWS, kinc, detPos);
+        double total(0);
+        total = simulateEvents(nSingleScatterEvents, 1, sample, *instrument,
+                               rng, sigmaSSWS, SQWS, kinc, detPos, true);
+        noAbsOutputWS->getSpectrum(i).dataY()[bin] = total;
 
-        std::vector<double> total(nScatters);
         for (size_t ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
 
-          total[ne] = simulateEvents(
-              nEvents, ne + 1, absorbXsection, inputWS->sample(), *instrument,
-              rng, vmfp, sigma_total, scatteringXSection, SQWS, kinc, detPos);
+          total = simulateEvents(nEvents, ne + 1, sample, *instrument, rng,
+                                 sigmaSSWS, SQWS, kinc, detPos, false);
+          simulationWSs[ne]->getSpectrum(i).dataY()[bin] = total;
+
+          // interpolate through points not simulated
+          /*if (!useSparseInstrument && lambdaStepSize > 1) {
+            auto histnew = simulationWSs[ne]->histogram(i);
+            outputWSs[ne]->setHistogram(i, histnew);
+          }*/
         }
-        // just output the factor for largest ne for now
-        // Could have a separate WS for each scatter order perhaps??
-        histnew.mutableY()[bin] = total[nScatters - 1];
+
         prog.report(reportMsg);
       }
     }
-    outputWS->setHistogram(i, histnew);
 
     PARALLEL_END_INTERUPT_REGION
   }
@@ -216,24 +221,17 @@ void MuscatElastic::exec() {
   //  interpolateFromSparse(*outputWS, *sparseWS, interpolateOpt);
   //}
 
-  std::string wsname = "NoAbsorption";
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      "NoAbsorptionWorkspace", wsname, Direction::Output));
-  setProperty("NoAbsorptionWorkspace", std::move(noAbsOutputWS));
-
-  wsname = "Corrections";
-  declareProperty(std::make_unique<WorkspaceProperty<>>(
-      "CorrectionsWorkspace", wsname, Direction::Output));
-  setProperty("CorrectionsWorkspace", std::move(outputWS));
-
-  workspaces.emplace_back(std::move(noAbsOutputWS));
-  workspaces.emplace_back(std::move(outputWS));
-
   // Create workspace group that holds output workspaces
   auto wsgroup = std::make_shared<WorkspaceGroup>();
 
-  for (auto &workspace : workspaces) {
-    wsgroup->addWorkspace(workspace);
+  std::string wsNamePrefix = "Scatter_";
+  std::string wsname = wsNamePrefix + "1_NoAbs";
+  API::AnalysisDataService::Instance().addOrReplace(wsname, noAbsOutputWS);
+  wsgroup->addWorkspace(noAbsOutputWS);
+  for (auto i = 0; i < outputWSs.size(); i++) {
+    std::string wsname = wsNamePrefix + std::to_string(i + 1);
+    API::AnalysisDataService::Instance().addOrReplace(wsname, outputWSs[i]);
+    wsgroup->addWorkspace(outputWSs[i]);
   }
   // set the output property
   setProperty("OutputWorkspace", wsgroup);
@@ -243,21 +241,36 @@ void MuscatElastic::exec() {
 }
 
 /**
- * Calculate a new mean free path
- * @param absorbXsection The sample absorption cross section at a specific
- * wavelength (barns)
- * @param numberDensity The sample number density in atoms per cubic Angstrom
- * @param totalScatterXsection The sample scattering cross section (barns)
- * @return a tuple containing the mean free path (metres) and the total cross
+ * Calculate a new mean free path using a k-specific scattering cross section
+ * Note - a separate tabulated scattering cross section is used elsewhere in the
+ * calculation
+ * @param sigmaSSWS Workspace containing log of scattering cross section as a
+ * function of k
+ * @param material The sample material
+ * @param kinc The incident wavenumber
+ * @oaram specialSingleScatterCalc Boolean indicating whether special single
+ * scatter calculation should be performed
+ * @return A tuple containing the mean free path (metres), the total cross
  * section (barns)
  */
-std::tuple<double, double>
-MuscatElastic::new_vector(double absorbXsection, double numberDensity,
-                          double totalScatterXsection) {
-  auto sig_total = totalScatterXsection + absorbXsection;
-  auto vmu = 100 * numberDensity * sig_total;
-  auto vmfp = 1.00 / vmu;
-  return std::make_tuple(vmfp, sig_total);
+double MuscatElastic::new_vector(const MatrixWorkspace_sptr sigmaSSWS,
+                                 const Material &material, double kinc,
+                                 bool specialSingleScatterCalc) {
+  double scatteringXSection, absorbXsection;
+  if (specialSingleScatterCalc) {
+    absorbXsection = 0;
+  } else {
+    double wavelength = 2 * M_PI / kinc;
+    absorbXsection = material.absorbXSection(wavelength);
+  }
+  if (sigmaSSWS) {
+    scatteringXSection = interpolateLogQuadratic(sigmaSSWS, kinc);
+  } else {
+    scatteringXSection = material.totalScatterXSection();
+  }
+
+  auto sig_total = scatteringXSection + absorbXsection;
+  return sig_total;
 }
 
 double MuscatElastic::interpolateLogQuadratic(
@@ -292,18 +305,26 @@ double MuscatElastic::interpolateLogQuadratic(
   return exp(A * U * U + B * U + C);
 }
 
-double MuscatElastic::simulateEvents(
-    const int nEvents, const size_t nScatters, const double absorbXsection,
-    const Sample &sample, const Geometry::Instrument &instrument,
-    Kernel::PseudoRandomNumberGenerator &rng, const double vmfp,
-    const double sigma_total, double scatteringXSection,
-    const MatrixWorkspace_sptr SOfQ, const double kinc, Kernel::V3D detPos) {
+double MuscatElastic::simulateEvents(const int nEvents, const size_t nScatters,
+                                     const Sample &sample,
+                                     const Geometry::Instrument &instrument,
+                                     Kernel::PseudoRandomNumberGenerator &rng,
+                                     const MatrixWorkspace_sptr sigmaSSWS,
+                                     const MatrixWorkspace_sptr SOfQ,
+                                     const double kinc, Kernel::V3D detPos,
+                                     bool specialSingleScatterCalc) {
   double sumOfWeights = 0;
   auto sourcePos = instrument.getSource()->getPos();
+
+  double sigma_total;
+  double scatteringXSection = sample.getMaterial().totalScatterXSection();
+  sigma_total = new_vector(sigmaSSWS, sample.getMaterial(), kinc,
+                           specialSingleScatterCalc);
+
   for (int ie = 0; ie < nEvents; ie++) {
-    auto [success, weight] =
-        scatter(nScatters, absorbXsection, sample, instrument, sourcePos, rng,
-                vmfp, sigma_total, scatteringXSection, SOfQ, kinc, detPos);
+    auto [success, weight] = scatter(nScatters, sample, instrument, sourcePos,
+                                     rng, sigma_total, scatteringXSection, SOfQ,
+                                     kinc, detPos, specialSingleScatterCalc);
     if (success)
       sumOfWeights += weight;
     else
@@ -313,15 +334,19 @@ double MuscatElastic::simulateEvents(
 }
 
 std::tuple<bool, double> MuscatElastic::scatter(
-    const size_t nScatters, const double absorbXsection, const Sample &sample,
+    const size_t nScatters, const Sample &sample,
     const Geometry::Instrument &instrument, const V3D sourcePos,
-    Kernel::PseudoRandomNumberGenerator &rng, const double vmfp,
-    const double sigma_total, double scatteringXSection,
-    const MatrixWorkspace_sptr SOfQ, const double kinc, Kernel::V3D detPos) {
+    Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total,
+    double scatteringXSection, const MatrixWorkspace_sptr SOfQ,
+    const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc) {
   double weight = 1;
-  auto track =
-      start_point(sample, instrument.getReferenceFrame(), sourcePos, rng);
-  updateWeightAndPosition(track, weight, vmfp, sigma_total, rng);
+  double numberDensity = sample.getMaterial().numberDensityEffective();
+  // if scale up scatteringXSection by 100*numberDensity then may not need
+  // sigma_total any more but leave it alone now to align with original code
+  double vmu = 100 * numberDensity * sigma_total;
+  auto track = start_point(sample.getShape(), instrument.getReferenceFrame(),
+                           sourcePos, rng);
+  updateWeightAndPosition(track, weight, vmu, sigma_total, rng);
 
   double QSS = 0;
   for (size_t is = 0; is < nScatters - 1; is++) {
@@ -331,7 +356,7 @@ std::tuple<bool, double> MuscatElastic::scatter(
     if (nlinks == 0) {
       return {false, 0};
     }
-    updateWeightAndPosition(track, weight, vmfp, sigma_total, rng);
+    updateWeightAndPosition(track, weight, vmu, sigma_total, rng);
   }
   // divide by QSS here rather than outside scatter (as was done in original
   // Fortan) to avoid the magic 1/(nscatter-1)^(nscatter-1) factors
@@ -352,7 +377,9 @@ std::tuple<bool, double> MuscatElastic::scatter(
   double dl = track.front().distInsideObject;
   auto q = (directionToDetector - prevDirection) * kinc;
   auto SQ = interpolateLogQuadratic(SOfQ, q.norm());
-  auto AT2 = exp(-dl / vmfp);
+  if (specialSingleScatterCalc)
+    vmu = 0;
+  auto AT2 = exp(-dl * vmu);
   weight = weight * AT2 * SQ * scatteringXSection / (4 * M_PI);
   return {true, weight};
 }
@@ -418,12 +445,13 @@ void MuscatElastic::q_dir(Geometry::Track track,
 }
 
 Geometry::Track MuscatElastic::start_point(
-    const Sample &sample, std::shared_ptr<const Geometry::ReferenceFrame> frame,
-    const V3D sourcePos, Kernel::PseudoRandomNumberGenerator &rng) {
+    const Geometry::IObject &shape,
+    std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D sourcePos,
+    Kernel::PseudoRandomNumberGenerator &rng) {
   int MAX_ATTEMPTS = 100;
   for (int i = 0; i < MAX_ATTEMPTS; i++) {
-    auto t = generateInitialTrack(sample, frame, sourcePos, rng);
-    int nlinks = sample.getShape().interceptSurface(t);
+    auto t = generateInitialTrack(shape, frame, sourcePos, rng);
+    int nlinks = shape.interceptSurface(t);
     m_callsToInterceptSurface++;
     if (nlinks > 0) {
       if (i > 0) {
@@ -439,10 +467,11 @@ Geometry::Track MuscatElastic::start_point(
 
 // update track start point and weight
 void MuscatElastic::updateWeightAndPosition(
-    Geometry::Track &track, double &weight, const double vmfp,
+    Geometry::Track &track, double &weight, const double vmu,
     const double sigma_total, Kernel::PseudoRandomNumberGenerator &rng) {
   double dl = track.front().distInsideObject;
-  double b4 = (1.0 - exp(-dl / vmfp));
+  double b4 = (1.0 - exp(-dl * vmu));
+  double vmfp = 1.0 / vmu;
   double vl = -(vmfp * log(1 - rng.nextValue() * b4));
   weight = weight * b4 / sigma_total;
   inc_xyz(track, vl);
@@ -458,10 +487,10 @@ void MuscatElastic::updateWeightAndPosition(
  * @return a track
  */
 Geometry::Track MuscatElastic::generateInitialTrack(
-    const API::Sample &sample,
+    const Geometry::IObject &shape,
     std::shared_ptr<const Geometry::ReferenceFrame> frame, const V3D sourcePos,
     Kernel::PseudoRandomNumberGenerator &rng) {
-  auto sampleBox = sample.getShape().getBoundingBox();
+  auto sampleBox = shape.getBoundingBox();
   // generate random point on front surface of sample bounding box
   auto ptx = sampleBox.minPoint()[frame->pointingHorizontal()] +
              rng.nextValue() * sampleBox.width()[frame->pointingHorizontal()];
@@ -546,7 +575,7 @@ MuscatElastic::createSparseWorkspace(const API::MatrixWorkspace &modelWS,
   return sparseWS;
 }
 
-MatrixWorkspace_uptr
+MatrixWorkspace_sptr
 MuscatElastic::createOutputWorkspace(const MatrixWorkspace &inputWS) const {
   MatrixWorkspace_uptr outputWS = DataObjects::create<Workspace2D>(inputWS);
   // The algorithm computes the signal values at bin centres so they should

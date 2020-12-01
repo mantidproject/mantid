@@ -61,34 +61,32 @@ private:
   void init() override;
   void exec() override;
   std::map<std::string, std::string> validateInputs() override;
-  API::MatrixWorkspace_uptr
+  API::MatrixWorkspace_sptr
   createOutputWorkspace(const API::MatrixWorkspace &inputWS) const;
-  std::tuple<double, double> new_vector(double absorbXsection,
-                                        double numberDensity,
-                                        double totalScatterXsection);
+  double new_vector(const API::MatrixWorkspace_sptr sigmaSSWS,
+                    const Kernel::Material &material, double kinc,
+                    bool specialSingleScatterCalc);
   double interpolateLogQuadratic(
       const API::MatrixWorkspace_sptr workspaceToInterpolate, double x);
   double simulateEvents(const int nEvents, const size_t nScatters,
-                        const double absorbXsection, const API::Sample &sample,
+                        const API::Sample &sample,
                         const Geometry::Instrument &instrument,
                         Kernel::PseudoRandomNumberGenerator &rng,
-                        const double vmfp, const double sigma_total,
-                        double scatteringXSection,
+                        const API::MatrixWorkspace_sptr sigmaSSWS,
                         const API::MatrixWorkspace_sptr SOfQ, const double kinc,
-                        Kernel::V3D detPos);
+                        Kernel::V3D detPos, bool specialSingleScatterCalc);
   std::tuple<bool, double>
-  scatter(const size_t nScatters, const double absorbXsection,
-          const API::Sample &sample, const Geometry::Instrument &instrument,
-          Kernel::V3D sourcePos, Kernel::PseudoRandomNumberGenerator &rng,
-          const double vmfp, const double sigma_total,
+  scatter(const size_t nScatters, const API::Sample &sample,
+          const Geometry::Instrument &instrument, Kernel::V3D sourcePos,
+          Kernel::PseudoRandomNumberGenerator &rng, const double sigma_total,
           double scatteringXSection, const API::MatrixWorkspace_sptr SOfQ,
-          const double kinc, Kernel::V3D detPos);
-  Geometry::Track start_point(const API::Sample &sample,
+          const double kinc, Kernel::V3D detPos, bool specialSingleScatterCalc);
+  Geometry::Track start_point(const Geometry::IObject &shape,
                               std::shared_ptr<const Geometry::ReferenceFrame>,
                               Kernel::V3D sourcePos,
                               Kernel::PseudoRandomNumberGenerator &rng);
   Geometry::Track
-  generateInitialTrack(const API::Sample &sample,
+  generateInitialTrack(const Geometry::IObject &shape,
                        std::shared_ptr<const Geometry::ReferenceFrame> frame,
                        const Kernel::V3D sourcePos,
                        Kernel::PseudoRandomNumberGenerator &rng);
