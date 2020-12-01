@@ -114,7 +114,7 @@ class AboutPresenter(object):
         self.view.cb_instrument.facility = new_facility
         if new_facility != current_value:
             self.view.cb_instrument.setCurrentIndex(0)
-        
+
     def store_facility(self, new_facility):
         current_value = ConfigService.getFacility().name()
         if new_facility != current_value:
