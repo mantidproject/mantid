@@ -36,6 +36,7 @@ New features
 - New algorithm :ref:`CorelliPowderCalibrationDatabase <algm-CorelliPowderCalibrationDatabase>` to save Corelli geometry calibration to database
 - New algorithm :ref:`CorelliPowderCalibrationApply <algm-CorelliPowderCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace.
 
+
 Improvements
 ############
 - :ref:`WANDPowderReduction <algm-WANDPowderReduction>` now accepts a sequence of input workspaces, combining them to reduce to a single spectrum.
@@ -52,6 +53,10 @@ Bugfixes
 - Dummy detectors in polaris workspaces no longer prevent unit conversion.
 - Focus in PEARL powder diffraction scripts no longer fails if previous run has left Van splines workspace group in ADS
 
+
+Bugfixes
+########
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` once again accepts multiple input workspaces and outputs a group workspace when specified by user.
 
 Engineering Diffraction
 -----------------------
@@ -78,13 +83,17 @@ Bugfixes
 - Fix bug in :ref:`SaveHKL <algm-SaveHKL>` where the direction cosines were calculated incorrectly
 
 
+=======
+
 New features
 ############
 - Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
 - Fix problem that was causing matrix diagonalization to return NaNs in certain cases. The diagonalization is used in :ref:`CalculateUMatrix <algm-CalculateUMatrix>` and :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`
 
 
+
 Imaging
 -------
 
 :ref:`Release 6.0.0 <v6.0.0>`
+
