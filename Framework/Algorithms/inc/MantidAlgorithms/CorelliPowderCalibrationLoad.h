@@ -8,6 +8,7 @@
 #pragma once
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAlgorithms/CorelliPowderCalibrationDatabase.h"
 #include "MantidAlgorithms/DllConfig.h"
 
@@ -54,11 +55,15 @@ namespace Mantid {
                 /// Private validator for inputs
                 std::map<std::string, std::string> validateInputs() override;
 
+                /// Get database filename based on given ws
+                std::string deduce_database_name(API::MatrixWorkspace_sptr ws);
+
                 /// Members
                 API::MatrixWorkspace_sptr ws;
                 std::string wsName;
                 std::string dbdir;
                 DataObjects::TableWorkspace_sptr calTable;
+                std::string calTableName;
         };
 
     } // namespace Algorithms
