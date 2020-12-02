@@ -82,12 +82,12 @@ namespace Mantid {
 
             // 1_check: input workspace is from CORELLI
             if (ws->getInstrument()->getName() != "CORELLI") {
-                issues["Workspace"] = "CORELLI only algorithm, aborting";
+                issues["InputWorkspace"] = "CORELLI only algorithm, aborting";
             }
 
             // 2_check: make sure there is a time stamp we can use in ws
             if (!ws->run().hasProperty("start_time") && !ws->run().hasProperty("run_start")) {
-                issues["Workspace"] = "InputWorkspace missing start time";
+                issues["InputWorkspace"] = "InputWorkspace missing start time";
             }
 
             // 3_check: DB dir exsits
