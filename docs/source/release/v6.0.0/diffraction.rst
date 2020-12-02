@@ -49,6 +49,10 @@ Bugfixes
 - Focus in PEARL powder diffraction scripts no longer fails if previous run has left Van splines workspace group in ADS
 
 
+Bugfixes
+########
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` once again accepts multiple input workspaces and outputs a group workspace when specified by user.
+
 Engineering Diffraction
 -----------------------
 - PaalmanPingsMonteCarloAbsorption can now use tabulated density values, and allows for overridden X Sections
@@ -76,13 +80,6 @@ New features
 Bugfixes
 ########
 - Fix bug in :ref:`SaveHKL <algm-SaveHKL>` where the direction cosines were calculated incorrectly
-
-
-New features
-############
-- Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
-- Fix problem that was causing matrix diagonalization to return NaNs in certain cases. The diagonalization is used in :ref:`CalculateUMatrix <algm-CalculateUMatrix>` and :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`
-
 
 Imaging
 -------
