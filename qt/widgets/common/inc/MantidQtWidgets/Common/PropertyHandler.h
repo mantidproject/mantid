@@ -179,7 +179,7 @@ public:
   double fwhm() const;
   std::string getWidthParameterName() const;
   std::string getCentreParameterName() const;
-  bool getParameterNameExplicitlySet(const std::string &param) const;
+  bool isParameterExplicitlySet(const std::string &param) const;
   double base() const { return m_base; }
 
   void addTie(const QString &tieStr);

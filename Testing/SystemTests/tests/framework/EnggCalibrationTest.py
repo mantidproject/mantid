@@ -342,12 +342,10 @@ class EnginXCalibrateFullThenCalibrateTest(systemtesting.MantidSystemTest):
         # straight line - but this only checks difc
         for fit1, expected in zip(self.peaks_fitted, self.peaks):
             REF_COEFF_B1 = 18405
-            print('difc', (fit1 / expected) / REF_COEFF_B1)
             self.assertTrue(rel_err_less_delta(fit1 / expected, REF_COEFF_B1, 5e-2))
 
         for fit2, expected_b2 in zip(self.peaks_fitted_b2, self.peaks_b2):
             REF_COEFF_B2 = 18385
-            print('difc B2', (fit2 / expected_b2) / REF_COEFF_B2)
             self.assertTrue(rel_err_less_delta(fit2 / expected_b2, REF_COEFF_B2, 5e-2))
 
     def cleanup(self):

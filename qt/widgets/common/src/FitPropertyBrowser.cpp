@@ -3598,10 +3598,10 @@ FitPropertyBrowser::getCentreParameterNameOf(const QString &prefix) {
   return handler->getCentreParameterName();
 }
 
-bool FitPropertyBrowser::getParameterNameExplicitlySetOf(
-    const QString &prefix, const std::string &param) {
+bool FitPropertyBrowser::isParameterExplicitlySetOf(const QString &prefix,
+                                                    const std::string &param) {
   auto handler = getPeakHandler(prefix);
-  return handler->getParameterNameExplicitlySet(param);
+  return handler->isParameterExplicitlySet(param);
 }
 
 QStringList FitPropertyBrowser::getPeakPrefixes() const {
