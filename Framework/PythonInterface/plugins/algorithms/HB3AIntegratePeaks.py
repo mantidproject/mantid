@@ -23,8 +23,8 @@ class HB3AIntegratePeaks(PythonAlgorithm):
         return "HB3AIntegratePeaks"
 
     def summary(self):
-        return 'Integrates peaks from the input MDEvent workspace and applies a Lorentz correction to the ' \
-               'output peaks workspace'
+        return 'Integrates peaks from the input MDEvent workspace and can optionally apply a Lorentz correction to ' \
+               'the output peaks workspace; output can be saved in different formats.'
 
     def PyInit(self):
         self.declareProperty(IMDEventWorkspaceProperty("InputWorkspace", defaultValue="",
@@ -46,6 +46,9 @@ class HB3AIntegratePeaks(PythonAlgorithm):
         self.declareProperty("BackgroundOuterRadius", defaultValue=0.0, validator=positive_val,
                              doc="Outer radius used to evaluate the peak background")
 
+        self.declareProperty("ApplyLorentz", defaultValue=True,
+                             doc="Whether the Lorentz correction should be applied to the integrated peaks")
+
         formats = StringListValidator()
         formats.addAllowedValue("SHELX")
         formats.addAllowedValue("Fullprof")
@@ -54,7 +57,7 @@ class HB3AIntegratePeaks(PythonAlgorithm):
 
         self.declareProperty(FileProperty(name="OutputFile", defaultValue="",
                                           direction=Direction.Input,
-                                          action=FileAction.Save),
+                                          action=FileAction.OptionalSave),
                              doc="Filepath to save the integrated peaks workspace in HKL format")
 
         self.declareProperty(IPeaksWorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output,
@@ -81,8 +84,7 @@ class HB3AIntegratePeaks(PythonAlgorithm):
         inner_radius = self.getProperty("BackgroundInnerRadius").value
         outer_radius = self.getProperty("BackgroundOuterRadius").value
 
-        out_format = self.getProperty("OutputFormat").value
-        filename = self.getProperty("OutputFile").value
+        use_lorentz = self.getProperty("ApplyLorentz").value
 
         out_ws = IntegratePeaksMD(InputWorkspace=input_ws,
                                   PeakRadius=peak_radius,
@@ -90,20 +92,26 @@ class HB3AIntegratePeaks(PythonAlgorithm):
                                   BackgroundOuterRadius=outer_radius,
                                   PeaksWorkspace=peak_ws)
 
-        # Apply Lorentz correction:
-        for p in range(out_ws.getNumberPeaks()):
-            peak = out_ws.getPeak(p)
-            lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
-            peak.setIntensity(peak.getIntensity() * lorentz)
+        if use_lorentz:
+            # Apply Lorentz correction:
+            for p in range(out_ws.getNumberPeaks()):
+                peak = out_ws.getPeak(p)
+                lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
+                peak.setIntensity(peak.getIntensity() * lorentz)
 
-        if out_format == "SHELX":
-            SaveHKL(InputWorkspace=out_ws, Filename=filename, DirectionCosines=True, OutputWorkspace="__tmp")
-            DeleteWorkspace("__tmp")
-        elif out_format == "Fullprof":
-            SaveReflections(InputWorkspace=out_ws, Filename=filename, Format="Fullprof")
-        else:
-            # This shouldn't happen
-            RuntimeError("Invalid output format given")
+        # Write output only if a file path was provided
+        if not self.getProperty("OutputFile").isDefault:
+            out_format = self.getProperty("OutputFormat").value
+            filename = self.getProperty("OutputFile").value
+
+            if out_format == "SHELX":
+                SaveHKL(InputWorkspace=out_ws, Filename=filename, DirectionCosines=True, OutputWorkspace="__tmp")
+                DeleteWorkspace("__tmp")
+            elif out_format == "Fullprof":
+                SaveReflections(InputWorkspace=out_ws, Filename=filename, Format="Fullprof")
+            else:
+                # This shouldn't happen
+                RuntimeError("Invalid output format given")
 
         self.setProperty("OutputWorkspace", out_ws)
 
