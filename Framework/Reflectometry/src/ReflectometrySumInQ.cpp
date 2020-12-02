@@ -27,6 +27,7 @@ namespace {
 /// String constants for the algorithm's properties.
 namespace Prop {
 const static std::string BEAM_CENTRE{"BeamCentre"};
+const static std::string THETA{"ThetaIn"};
 const static std::string INPUT_WS{"InputWorkspace"};
 const static std::string IS_FLAT_SAMPLE{"FlatSample"};
 const static std::string OUTPUT_WS{"OutputWorkspace"};
@@ -262,6 +263,9 @@ void ReflectometrySumInQ::init() {
   declareProperty(
       Prop::BEAM_CENTRE, EMPTY_DBL(), mandatoryNonnegative,
       "Fractional workspace index of the specular reflection centre.");
+  declareProperty(Prop::THETA, Mantid::EMPTY_DBL(), nonnegative,
+                  "The horizon angle. If not specified, this is taken from the "
+                  "Beam Centre pixel. Only used in the flat sample case.");
   declareProperty(Prop::IS_FLAT_SAMPLE, true,
                   "If true, the summation is handled as the standard divergent "
                   "beam case, otherwise as the non-flat sample case.");
@@ -514,7 +518,12 @@ ReflectometrySumInQ::referenceAngles(const API::SpectrumInfo &spectrumInfo) {
   a.referenceWSIndex = static_cast<size_t>(beamCentre);
   a.twoTheta = twoTheta;
   if (isFlat) {
-    a.horizon = twoTheta / 2.;
+    if ((*getProperty(Prop::THETA)).isDefault()) {
+      a.horizon = twoTheta / 2.;
+    } else {
+      a.horizon = getProperty(Prop::THETA);
+      a.horizon *= Geometry::deg2rad;
+    }
   } else {
     a.horizon = 0.;
   }
