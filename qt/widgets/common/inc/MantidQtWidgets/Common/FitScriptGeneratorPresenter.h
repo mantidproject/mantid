@@ -7,9 +7,8 @@
 #pragma once
 
 #include "DllOption.h"
-#include "FitScriptGeneratorView.h"
-
 #include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <string>
@@ -20,25 +19,21 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
-using ViewEvent = FitScriptGeneratorView::Event;
+class IFitScriptGeneratorModel;
+class IFitScriptGeneratorView;
 
-class FitScriptGeneratorModel;
-
-class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorPresenter {
+class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorPresenter
+    : public IFitScriptGeneratorPresenter {
 public:
-  FitScriptGeneratorPresenter(FitScriptGeneratorView *view,
-                              FitScriptGeneratorModel *model,
+  FitScriptGeneratorPresenter(IFitScriptGeneratorView *view,
+                              IFitScriptGeneratorModel *model,
                               QStringList const &workspaceNames = QStringList(),
                               double startX = 0.0, double endX = 0.0);
-  ~FitScriptGeneratorPresenter();
+  ~FitScriptGeneratorPresenter() override;
 
-  virtual void notifyPresenter(ViewEvent const &event);
+  void notifyPresenter(ViewEvent const &event) override;
 
-  virtual void openFitScriptGenerator();
-
-public:
-  /// A constructor required for testing purposes only.
-  FitScriptGeneratorPresenter();
+  void openFitScriptGenerator() override;
 
 private:
   void handleRemoveClicked();
@@ -69,8 +64,8 @@ private:
 
   std::vector<std::string> m_warnings;
 
-  FitScriptGeneratorView *m_view;
-  FitScriptGeneratorModel *m_model;
+  IFitScriptGeneratorView *m_view;
+  IFitScriptGeneratorModel *m_model;
 };
 
 } // namespace MantidWidgets

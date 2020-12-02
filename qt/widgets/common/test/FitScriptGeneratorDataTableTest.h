@@ -27,8 +27,6 @@ public:
     delete suite;
   }
 
-  FitScriptGeneratorDataTableTest() {}
-
   void setUp() override {
     assertNoTopLevelWidgets();
     m_dataTable = std::make_unique<FitScriptGeneratorDataTable>();

@@ -175,6 +175,7 @@ set(
   inc/MantidQtWidgets/Common/FunctionTreeView.h
   inc/MantidQtWidgets/Common/GenericDialog.h
   inc/MantidQtWidgets/Common/HintingLineEdit.h
+  inc/MantidQtWidgets/Common/IFitScriptGeneratorView.h
   inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/IImageInfoWidget.h
   inc/MantidQtWidgets/Common/ImageInfoWidget.h
@@ -264,6 +265,8 @@ set(QT5_INC_FILES
     inc/MantidQtWidgets/Common/FunctionMultiDomainPresenter.h
     inc/MantidQtWidgets/Common/HelpWindow.h
     inc/MantidQtWidgets/Common/Hint.h
+    inc/MantidQtWidgets/Common/IFitScriptGeneratorModel.h
+    inc/MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h
     inc/MantidQtWidgets/Common/IFunctionBrowser.h
     inc/MantidQtWidgets/Common/IFunctionView.h
     inc/MantidQtWidgets/Common/ImageInfoModel.h
@@ -582,6 +585,7 @@ set(
   inc/MantidQtWidgets/Common/HintingLineEdit.h
   inc/MantidQtWidgets/Common/CatalogSearch.h
   inc/MantidQtWidgets/Common/CatalogSelector.h
+  inc/MantidQtWidgets/Common/IFitScriptGeneratorView.h
   inc/MantidQtWidgets/Common/IImageInfoWidget.h
   inc/MantidQtWidgets/Common/ImageInfoWidget.h
   inc/MantidQtWidgets/Common/InstrumentSelector.h
@@ -657,6 +661,8 @@ set(
   inc/MantidQtWidgets/Common/FitScriptGeneratorPresenter.h
   inc/MantidQtWidgets/Common/HelpWindow.h
   inc/MantidQtWidgets/Common/Hint.h
+  inc/MantidQtWidgets/Common/IFitScriptGeneratorModel.h
+  inc/MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h
   inc/MantidQtWidgets/Common/IFunctionView.h
   inc/MantidQtWidgets/Common/ImageInfoModel.h
   inc/MantidQtWidgets/Common/ImageInfoModelMatrixWS.h

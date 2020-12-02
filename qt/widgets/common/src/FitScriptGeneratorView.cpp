@@ -6,7 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
-#include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
+#include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -63,10 +63,11 @@ namespace MantidWidgets {
 
 using ColumnIndex = FitScriptGeneratorDataTable::ColumnIndex;
 using FittingType = FitOptionsBrowser::FittingType;
+using ViewEvent = IFitScriptGeneratorView::Event;
 
 FitScriptGeneratorView::FitScriptGeneratorView(
     QWidget *parent, QMap<QString, QString> const &fitOptions)
-    : API::MantidWidget(parent), m_presenter(), m_dialog(this),
+    : IFitScriptGeneratorView(parent), m_presenter(), m_dialog(this),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionBrowser(std::make_unique<FunctionBrowser>(nullptr, true)),
       m_fitOptionsBrowser(std::make_unique<FitOptionsBrowser>(
@@ -119,7 +120,7 @@ void FitScriptGeneratorView::setFittingType(QString const &fitType) {
 }
 
 void FitScriptGeneratorView::subscribePresenter(
-    FitScriptGeneratorPresenter *presenter) {
+    IFitScriptGeneratorPresenter *presenter) {
   m_presenter = presenter;
 }
 

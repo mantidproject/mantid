@@ -10,13 +10,12 @@
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidQtWidgets/Common/IFitScriptGeneratorModel.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <string>
 #include <utility>
 #include <vector>
-
-#include <QString>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -47,25 +46,26 @@ struct FitDomain {
  * function relating to this domain data. This data is used to generate a python
  * script for complex Mantid fitting.
  */
-class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorModel {
+class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorModel
+    : public IFitScriptGeneratorModel {
 public:
   FitScriptGeneratorModel();
   ~FitScriptGeneratorModel();
 
   void removeWorkspaceDomain(std::string const &workspaceName,
-                             WorkspaceIndex workspaceIndex);
+                             WorkspaceIndex workspaceIndex) override;
   void addWorkspaceDomain(std::string const &workspaceName,
                           WorkspaceIndex workspaceIndex, double startX,
-                          double endX);
+                          double endX) override;
 
   [[nodiscard]] bool isXValid(std::string const &workspaceName,
                               WorkspaceIndex workspaceIndex,
-                              double xValue) const;
+                              double xValue) const override;
 
   void updateStartX(std::string const &workspaceName,
-                    WorkspaceIndex workspaceIndex, double startX);
+                    WorkspaceIndex workspaceIndex, double startX) override;
   void updateEndX(std::string const &workspaceName,
-                  WorkspaceIndex workspaceIndex, double endX);
+                  WorkspaceIndex workspaceIndex, double endX) override;
 
 private:
   void removeWorkspaceDomain(

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
+#include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -15,14 +16,13 @@
 #include <sstream>
 #include <stdexcept>
 
+using namespace Mantid::API;
+
 namespace MantidQt {
 namespace MantidWidgets {
 
-FitScriptGeneratorPresenter::FitScriptGeneratorPresenter()
-    : m_warnings(), m_view(nullptr), m_model(nullptr) {}
-
 FitScriptGeneratorPresenter::FitScriptGeneratorPresenter(
-    FitScriptGeneratorView *view, FitScriptGeneratorModel *model,
+    IFitScriptGeneratorView *view, IFitScriptGeneratorModel *model,
     QStringList const &workspaceNames, double startX, double endX)
     : m_warnings(), m_view(view), m_model(model) {
   m_view->subscribePresenter(this);

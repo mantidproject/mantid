@@ -67,23 +67,6 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.model.context = self.context
         self.presenter.model.get_function_name.return_value = 'GausOsc'
 
-    @mock.patch('Muon.GUI.Common.fitting_tab_widget.fitting_tab_presenter.WorkspaceSelectorView.get_selected_data')
-    def test_handle_select_fit_data_clicked_updates_current_run_list(self, dialog_mock):
-        dialog_mock.return_value = (['MUSR62260; Group; bkwd; Asymmetry; #1', 'MUSR62260; Group; bottom; Asymmetry; #1',
-                                     'MUSR62260; Group; fwd; Asymmetry; #1', 'MUSR62260; Group; top; Asymmetry; #1',
-                                     'MUSR62260; Pair Asym; long; #1', 'MUSR62260; PhaseQuad; PhaseTable MUSR62260',
-                                     'MUSR62260; PhaseQuad; PhaseTable MUSR62261'], True)
-        self.presenter._plot_type = "Time"
-
-        self.presenter.handle_select_fit_data_clicked()
-
-        dialog_mock.assert_called_once_with([[62260]], 'MUSR', [], True, "Time", self.context, self.view)
-        self.assertEqual(retrieve_combobox_info(self.view.parameter_display_combo),
-                         ['MUSR62260; Group; bkwd; Asymmetry; #1', 'MUSR62260; Group; bottom; Asymmetry; #1',
-                          'MUSR62260; Group; fwd; Asymmetry; #1', 'MUSR62260; Group; top; Asymmetry; #1',
-                          'MUSR62260; Pair Asym; long; #1', 'MUSR62260; PhaseQuad; PhaseTable MUSR62260',
-                          'MUSR62260; PhaseQuad; PhaseTable MUSR62261'])
-
     def test_that_changing_fitting_type_to_multiple_fit_changes_workspace_selector_combo_label(
             self):
         self.assertEqual(self.view.workspace_combo_box_label.text(), 'Select Workspace')

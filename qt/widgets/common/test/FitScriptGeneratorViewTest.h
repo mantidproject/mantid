@@ -7,8 +7,8 @@
 #pragma once
 
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
-#include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
+#include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
 
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
@@ -24,7 +24,7 @@ using namespace testing;
 
 namespace {
 
-class MockFitScriptGeneratorPresenter : public FitScriptGeneratorPresenter {
+class MockFitScriptGeneratorPresenter : public IFitScriptGeneratorPresenter {
 
 public:
   MockFitScriptGeneratorPresenter(FitScriptGeneratorView *view) {
@@ -48,8 +48,6 @@ public:
     return new FitScriptGeneratorViewTest;
   }
   static void destroySuite(FitScriptGeneratorViewTest *suite) { delete suite; }
-
-  FitScriptGeneratorViewTest() {}
 
   void setUp() override {
     assertNoTopLevelWidgets();
