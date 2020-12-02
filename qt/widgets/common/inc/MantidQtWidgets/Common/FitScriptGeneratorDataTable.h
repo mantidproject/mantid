@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "DllOption.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <string>
@@ -33,7 +34,8 @@ namespace MantidWidgets {
  * This table has been manually created and derived from QTableWidget to allow
  * the table rows to be highlighted when a hover event occurs.
  */
-class FitScriptGeneratorDataTable : public QTableWidget {
+class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorDataTable
+    : public QTableWidget {
   Q_OBJECT
 
 public:
