@@ -32,13 +32,13 @@ Usage
     ws_mocked.run().addProperty("start_time", "2020-11-22T12:57:17", True)
 
     # 1_method: call the function directly
-    CorelliPowderCalibrationLoad(
-        InputWorkspace='ws_mocked', 
-        DatabaseDir='/tmp',
-        OutputWorkspace='caliTable1')
+    #CorelliPowderCalibrationLoad(
+    #    InputWorkspace='ws_mocked', 
+    #    DatabaseDir='/tmp',
+    #    OutputWorkspace='caliTable1')
 
     # 2_method: call the function and return the Calibration Table to a Python handle
-    caliTable2 = CorelliPowderCalibrationLoad(InputWorkspace='ws_mocked', DatabaseDir='/tmp')
+    #caliTable2 = CorelliPowderCalibrationLoad(InputWorkspace='ws_mocked', DatabaseDir='/tmp')
 
     # 3_method
     # Launch the GUI (see attached screenshot)
@@ -49,6 +49,8 @@ The corresponding GUI is
     :align: center
     :width: 635
     :alt: Loader GUI
+
+Note: to avoid doc-test fail during buliding, the function call in the code block above is disabled.
 
 .. categories::
 
