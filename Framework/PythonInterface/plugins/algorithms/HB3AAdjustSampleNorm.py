@@ -9,7 +9,7 @@ from mantid.api import AlgorithmFactory, FileAction, FileProperty, IMDHistoWorks
 from mantid.kernel import Direction, EnabledWhenProperty, PropertyCriterion, FloatArrayProperty, \
     FloatArrayLengthValidator, FloatPropertyWithValue, V3D
 from mantid.simpleapi import ConvertHFIRSCDtoMDE, ConvertWANDSCDtoQ, DeleteWorkspace, DeleteWorkspaces, DivideMD, \
-    LoadMD, MergeMD, ReplicateMD, SetGoniometer, mtd
+    LoadMD, MergeMD, ReplicateMD, SetGoniometer, mtd, GroupWorkspaces
 import os
 
 
@@ -171,11 +171,12 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         distance = self.getProperty("DetectorDistanceOffset").value
         method = self.getProperty("OutputAsMDEventWorkspace").value
 
+        wslist = []
+
         if method:
             minvals = self.getProperty("MinValues").value
             maxvals = self.getProperty("MaxValues").value
             merge = self.getProperty("MergeInputs").value
-            wslist = []
         else:
             bin0 = self.getProperty("BinningDim0").value
             bin1 = self.getProperty("BinningDim1").value
@@ -187,7 +188,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         if load_van:
             vanws = LoadMD(vanadiumfile, StoreInADS=False)
 
-        has_multiple = True if len(datafiles) > 1 else False
+        has_multiple = len(datafiles) > 1
 
         for in_file in datafiles:
             if load_files:
@@ -209,6 +210,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                     out_ws_name = out_ws + "_" + os.path.basename(in_file).strip(',.nxs')
                 else:
                     out_ws_name = out_ws + "_" + in_file
+                wslist.append(out_ws_name)
 
             exp_info = scan.getExperimentInfo(0)
             self.__move_components(exp_info, height, distance)
@@ -227,8 +229,6 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                 else:
                     ConvertHFIRSCDtoMDE(InputWorkspace=scan, Wavelength=wavelength, MinValues=minvals,
                                         MaxValues=maxvals, OutputWorkspace=out_ws_name)
-                if merge:
-                    wslist.append(out_ws_name)
             else:
                 # Convert to Q space and normalize with from the vanadium
                 if has_van:
@@ -244,11 +244,13 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             if load_files:
                 DeleteWorkspace(scan)
 
-        if method:
-            if merge and len(wslist) > 1:
-                out_ws_name = out_ws
+        if has_multiple:
+            out_ws_name = out_ws
+            if method and merge:
                 MergeMD(InputWorkspaces=wslist, OutputWorkspace=out_ws_name)
                 DeleteWorkspaces(wslist)
+            else:
+                GroupWorkspaces(InputWorkspaces=wslist, OutputWorkspace=out_ws_name)
 
         # Don't delete workspaces if they were passed in
         if load_van:
