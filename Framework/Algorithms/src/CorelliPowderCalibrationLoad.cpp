@@ -78,13 +78,22 @@ namespace Mantid {
         std::map<std::string, std::string> CorelliPowderCalibrationLoad::validateInputs() {
             std::map<std::string, std::string> issues;
             ws = getProperty("InputWorkspace");
+            std::string dbdir = getProperty("DatabaseDir");
 
             // 1_check: input workspace is from CORELLI
             if (ws->getInstrument()->getName() != "CORELLI") {
                 issues["Workspace"] = "CORELLI only algorithm, aborting";
             }
 
-            // 2_check: anything else?
+            // 2_check: make sure there is a time stamp we can use in ws
+            if (!ws->run().hasProperty("start_time") && !ws->run().hasProperty("run_start")) {
+                issues["Workspace"] = "InputWorkspace missing start time";
+            }
+
+            // 3_check: DB dir exsits
+            if (!boost::filesystem::exists(dbdir)){
+                issues["DatabaseDir"] = "Given database dir does not exits";
+            }
 
             return issues;
         }
