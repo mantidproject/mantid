@@ -190,8 +190,8 @@ void Material::setAttenuationProfile(AttenuationProfile attenuationOverride) {
 }
 
 void Material::setXRayAttenuationProfile(
-    AttenuationProfile attenuationOverride) {
-  m_xRayAttenuationOverride = std::move(attenuationOverride);
+    AttenuationProfile attenuationProfile) {
+  m_xRayAttenuationProfile = std::move(attenuationProfile);
 }
 
 /**
@@ -309,19 +309,18 @@ double Material::attenuation(const double distance, const double lambda) const {
  */
 double Material::xRayAttenuation(const double distance,
                                  const double energy) const {
-  if (m_xRayAttenuationOverride) {
-    return exp(-m_xRayAttenuationOverride->getAttenuationCoefficient(energy) *
+  if (m_xRayAttenuationProfile) {
+    return exp(-m_xRayAttenuationProfile->getAttenuationCoefficient(energy) *
                distance);
   } else {
     throw std::runtime_error("xRayAttenuationProfile override not set");
-    return 1.0;
   }
 }
 /*
  * @returns true if m_xRayAttenuationOverride is set and false if not
  */
-bool Material::hasValidxRayAttenuationOverride() {
-  if (m_xRayAttenuationOverride) {
+bool Material::hasValidXRayAttenuationProfile() {
+  if (m_xRayAttenuationProfile) {
     return true;
   } else {
     return false;

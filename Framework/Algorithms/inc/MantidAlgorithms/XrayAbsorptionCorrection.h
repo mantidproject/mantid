@@ -10,7 +10,6 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAlgorithms/DllConfig.h"
 #include "MantidAlgorithms/InterpolationOption.h"
 #include "MantidAlgorithms/SampleCorrections/IBeamProfile.h"
 #include "MantidAlgorithms/SampleCorrections/MCAbsorptionStrategy.h"
@@ -47,20 +46,21 @@ public:
     return "Calculates attenuation of xrays produced by negative muons due"
            " to absorption in a sample for elemental analysis ";
   }
+  const std::vector<std::string> seeAlso() const override {
+    return {"SetSample", "SetSampleMaterial"};
+  }
 
 protected:
   double degreesToRadians(double degrees);
 
-  Kernel::V3D calculateDetectorPos(double detectorAngle,
+  Kernel::V3D calculateDetectorPos(double const detectorAngle,
                                    double detectorDistance);
 
   std::vector<Kernel::V3D>
   calculateMuonPos(API::MatrixWorkspace_sptr &muonProfile,
                    API::MatrixWorkspace_sptr inputWS, double detectorDistance);
 
-  std::vector<double> normaliseMuonIntensity(MantidVec const &muonIntensity);
-
-  std::vector<double> calculateMidPointOfBin(MantidVec const &energyVector);
+  std::vector<double> normaliseMuonIntensity(MantidVec muonIntensity);
 
 private:
   void init() override;

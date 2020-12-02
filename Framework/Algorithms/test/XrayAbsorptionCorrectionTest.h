@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
-
+#include "MantidAPI/Algorithm.h"
 #include "MantidAlgorithms/CompareWorkspaces.h"
 #include "MantidAlgorithms/XrayAbsorptionCorrection.h"
 #include "MantidGeometry/Instrument/SampleEnvironment.h"
@@ -17,8 +17,6 @@
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include <cxxtest/TestSuite.h>
-#include <gmock/gmock.h>
-#include <iostream>
 #include <math.h>
 #include <string>
 
@@ -36,7 +34,7 @@ public:
   void test_CalculateDetectorPos() {
     TestableXrayAbsorptionCorrection alg;
     Kernel::V3D pos = alg.calculateDetectorPos(45, 10);
-    Kernel::V3D correctPos = {0.1, 0.1, 0};
+    Kernel::V3D correctPos = {0.1, 0, 0.1};
 
     TS_ASSERT_DELTA(pos[0], correctPos[0], 0.001);
     TS_ASSERT_DELTA(pos[1], correctPos[1], 0.001);
@@ -44,16 +42,16 @@ public:
   }
   void test_CalculateMuonPos() {
     TestableXrayAbsorptionCorrection alg;
-    API::MatrixWorkspace_sptr muonProfile = createWorkspace(1);
-    API::MatrixWorkspace_sptr inputWS = createWorkspaceWithDummyShape(20);
+    API::MatrixWorkspace_sptr muonProfile = createWorkspace(1.0);
+    API::MatrixWorkspace_sptr inputWS = createWorkspaceWithDummyShape(20.0);
     std::vector<Kernel::V3D> muonPos =
-        alg.calculateMuonPos(muonProfile, inputWS, 100);
-    double y = 1.0;
+        alg.calculateMuonPos(muonProfile, inputWS, 100.0);
+    double z = 1.0;
     for (auto x : muonPos) {
-      y -= 0.01;
-      TS_ASSERT_DELTA(x[0], 0, 1e-6);
-      TS_ASSERT_DELTA(x[1], y, 1e-6);
-      TS_ASSERT_DELTA(x[2], 0, 1e-6);
+      z -= 0.01;
+      TS_ASSERT_DELTA(x[0], 0, 1.0e-6);
+      TS_ASSERT_DELTA(x[1], 0, 1.0e-6);
+      TS_ASSERT_DELTA(x[2], z, 1.0e-6);
     }
   }
   void test_NormaliseMounIntensity() {
@@ -62,7 +60,7 @@ public:
     std::vector<double> normalisedIntensity =
         alg.normaliseMuonIntensity(muonProfile->readY(0));
     for (auto intensity : normalisedIntensity) {
-      TS_ASSERT_DELTA(intensity, 0.1, 1e-6);
+      TS_ASSERT_DELTA(intensity, 0.1, 1.0e-6);
     }
   }
 
@@ -80,12 +78,12 @@ public:
   }
 
   void test_exec_with_valid_shape() {
-    API::MatrixWorkspace_sptr muonProfile = createWorkspace(100);
+    API::MatrixWorkspace_sptr muonProfile = createWorkspace(100.0);
     auto &muonDepth = muonProfile->mutableX(0);
     for (size_t i = 0; i < muonDepth.size(); i++) {
-      muonDepth[i] = 100;
+      muonDepth[i] = 100.0;
     }
-    API::MatrixWorkspace_sptr inputWS = createWorkspaceWithDummyShape(20);
+    API::MatrixWorkspace_sptr inputWS = createWorkspaceWithDummyShape(20.0);
     Algorithms::XrayAbsorptionCorrection algo;
     algo.initialize();
     algo.setProperty("InputWorkspace", inputWS);
@@ -99,7 +97,14 @@ public:
     for (size_t i = 0; i < yData.size(); i++) {
       yData[i] = std::exp(-1);
     }
-    bool result = compareWorkspace(inputWS, "outputWS", 1e-5);
+    API::IAlgorithm_sptr comparison =
+        algo.createChildAlgorithm("CompareWorkspaces");
+    comparison->setProperty("Workspace1", inputWS);
+    comparison->setProperty("Workspace2", "outputWS");
+    comparison->setProperty("Tolerance", 1.0e-05);
+    comparison->setProperty("ToleranceRelErr", true);
+    comparison->execute();
+    bool result = comparison->getProperty("Result");
     TS_ASSERT(result);
   }
 
@@ -122,18 +127,19 @@ private:
   createWorkspaceWithDummyShape(double value,
                                 bool hasXrayAttenuationProfile = true) {
     API::MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create1DWorkspaceConstant(10, value, 0, true);
+        WorkspaceCreationHelper::create1DWorkspaceConstant(10, value, 0.0,
+                                                           true);
 
     Kernel::Material sampleMaterial;
     Kernel::AttenuationProfile sampleProfile;
-    sampleProfile.setAttenuationCoefficient(1, 1);
-    sampleProfile.setAttenuationCoefficient(10, 1);
-    sampleProfile.setAttenuationCoefficient(100, 1);
-    sampleProfile.setAttenuationCoefficient(1000, 1);
+    sampleProfile.setAttenuationCoefficient(1.0, 1.0);
+    sampleProfile.setAttenuationCoefficient(10.0, 1.0);
+    sampleProfile.setAttenuationCoefficient(100.0, 1.0);
+    sampleProfile.setAttenuationCoefficient(1000.0, 1.0);
     sampleMaterial.setXRayAttenuationProfile(sampleProfile);
 
-    auto shape =
-        ComponentCreationHelper::createSphere(1, {0, 0, 0}, "sample-shape");
+    auto shape = ComponentCreationHelper::createSphere(1.0, {0.0, 0.0, 0.0},
+                                                       "sample-shape");
 
     inputWS->mutableSample().setShape(shape);
     if (hasXrayAttenuationProfile) {
@@ -147,21 +153,10 @@ private:
   API::MatrixWorkspace_sptr createWorkspace(double value) {
 
     API::MatrixWorkspace_sptr inputWS =
-        WorkspaceCreationHelper::create1DWorkspaceConstant(10, value, 0, true);
+        WorkspaceCreationHelper::create1DWorkspaceConstant(10, value, 0.0,
+                                                           true);
 
     return inputWS;
-  }
-  bool compareWorkspace(API::MatrixWorkspace_sptr workspace1,
-                        std::string workspace2, double tol) {
-    Algorithms::CompareWorkspaces comparison;
-    comparison.initialize();
-    comparison.setProperty("Workspace1", workspace1);
-    comparison.setProperty("Workspace2", workspace2);
-    comparison.setProperty("Tolerance", tol);
-    comparison.setProperty("ToleranceRelErr", true);
-    comparison.execute();
-    bool result = comparison.getProperty("Result");
-    return result;
   }
 
 private:

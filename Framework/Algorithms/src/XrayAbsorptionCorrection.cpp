@@ -5,16 +5,13 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/XrayAbsorptionCorrection.h"
-#include "MantidAPI/Axis.h"
 #include "MantidAPI/Sample.h"
 #include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/WorkspaceUnitValidator.h"
 #include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/CompositeValidator.h"
 #include "MantidKernel/Material.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/VectorHelper.h"
-#include <iostream>
 #include <math.h>
 #include <numeric>
 
@@ -22,16 +19,15 @@ using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using Mantid::DataObjects::Workspace2D;
-namespace PhysicalConstants = Mantid::PhysicalConstants;
 
-/// @cond
 namespace {
-
+// Angle in degrees
 constexpr double DEFAULT_ANGLE = 45.0;
+// distance in cm
 constexpr double DEFAULT_DETECTOR_DISTANCE = 10.0;
+constexpr double ConversionFrom_cm_to_m = 0.01;
 
 } // namespace
-/// @endcond
 
 namespace Mantid {
 namespace Algorithms {
@@ -61,14 +57,15 @@ void XrayAbsorptionCorrection::init() {
   auto positiveDouble = std::make_shared<Kernel::BoundedValidator<double>>();
   positiveDouble->setLower(0);
   declareProperty("DetectorAngle", DEFAULT_ANGLE, positiveDouble,
-                  "Angle between beam and Detector."
+                  "Angle in degrees between beam and Detector."
                   "Range of normal values for detectors are :  "
                   "Ge1 : 90-180 , Ge2 : 270-360 , Ge3 : 0 - 90 , Ge4 "
                   ": 180 -270.",
                   Direction::Input);
 
   declareProperty("DetectorDistance", DEFAULT_DETECTOR_DISTANCE, positiveDouble,
-                  "Distance between detector and sample.", Direction::Input);
+                  "Distance in cm between detector and sample.",
+                  Direction::Input);
 }
 
 std::map<std::string, std::string> XrayAbsorptionCorrection::validateInputs() {
@@ -77,17 +74,15 @@ std::map<std::string, std::string> XrayAbsorptionCorrection::validateInputs() {
   std::map<std::string, std::string> issues;
   if (!inputWS->sample().getShape().hasValidShape()) {
     issues["InputWorkspace"] = "Input workspace does not have a Sample";
-  } else {
-    auto material = inputWS->sample().getShape().material();
-    if (!material.hasValidxRayAttenuationOverride()) {
-      issues["InputWorkspace"] =
-          "Input workspace does not have a Xray Attenuation profile";
-    } else {
-      if (muonProfile->getNumberHistograms() != 1) {
-        issues["MuonImplantationProfile"] =
-            "Muon Implantation profile must have only one spectrum";
-      }
-    }
+  }
+  auto material = inputWS->sample().getShape().material();
+  if (!material.hasValidXRayAttenuationProfile()) {
+    issues["InputWorkspace"] =
+        "Input workspace does not have a Xray Attenuation profile";
+  }
+  if (muonProfile->getNumberHistograms() != 1) {
+    issues["MuonImplantationProfile"] =
+        "Muon Implantation profile must have only one spectrum";
   }
   return issues;
 }
@@ -98,8 +93,7 @@ std::map<std::string, std::string> XrayAbsorptionCorrection::validateInputs() {
  * @return A double of angle in radians
  */
 double XrayAbsorptionCorrection::degreesToRadians(double degrees) {
-  double radians = M_PI * (degrees / 180);
-  return radians;
+  return M_PI * (degrees / 180.0);
 }
 
 /**
@@ -109,14 +103,14 @@ double XrayAbsorptionCorrection::degreesToRadians(double degrees) {
  * @return V3D object of position of detector
  */
 Kernel::V3D
-XrayAbsorptionCorrection::calculateDetectorPos(double detectorAngle,
+XrayAbsorptionCorrection::calculateDetectorPos(double const detectorAngle,
                                                double detectorDistance) {
-  detectorDistance = detectorDistance / 100;
+  detectorDistance = detectorDistance * ConversionFrom_cm_to_m;
   double x = detectorDistance / std::tan(degreesToRadians(detectorAngle));
-  if (detectorAngle > 180) {
+  if (detectorAngle > 180.0) {
     detectorDistance = -detectorDistance;
   }
-  Kernel::V3D detectorPos = {x, detectorDistance, 0.};
+  Kernel::V3D detectorPos = {x, 0.0, detectorDistance};
   return detectorPos;
 }
 
@@ -126,18 +120,16 @@ XrayAbsorptionCorrection::calculateDetectorPos(double detectorAngle,
  * function  of depth
  * @return A vector of doubles which contains the normalised muon intensity
  */
-std::vector<double> XrayAbsorptionCorrection::normaliseMuonIntensity(
-    MantidVec const &muonIntensity) {
-  double sum_of_elems{0};
-  for (double elem : muonIntensity) {
-    sum_of_elems += elem;
-  }
+std::vector<double>
+XrayAbsorptionCorrection::normaliseMuonIntensity(MantidVec muonIntensity) {
 
-  std::vector<double> normalisedMuonIntensity;
-  for (double x : muonIntensity) {
-    normalisedMuonIntensity.push_back(x / sum_of_elems);
-  }
-  return normalisedMuonIntensity;
+  double sum_of_elems =
+      std::accumulate(muonIntensity.begin(), muonIntensity.end(), 0.0);
+
+  std::transform(muonIntensity.begin(), muonIntensity.end(),
+                 muonIntensity.begin(),
+                 [sum_of_elems](double d) { return d / sum_of_elems; });
+  return muonIntensity;
 }
 
 /**
@@ -152,8 +144,8 @@ std::vector<Kernel::V3D> XrayAbsorptionCorrection::calculateMuonPos(
     API::MatrixWorkspace_sptr &muonProfile, API::MatrixWorkspace_sptr inputWS,
     double detectorDistance) {
   const MantidVec muonDepth = muonProfile->readX(0);
-  Kernel::V3D muonPoint = {0., detectorDistance, 0.};
-  Kernel::V3D toStart = {0, -1, 0};
+  Kernel::V3D const muonPoint = {0.0, 0.0, detectorDistance};
+  Kernel::V3D toStart = {0.0, 0.0, -1.0};
   const Geometry::IObject *shape = &inputWS->sample().getShape();
   Geometry::Track muonPath = Geometry::Track(muonPoint, toStart);
   shape->interceptSurface(muonPath);
@@ -162,34 +154,30 @@ std::vector<Kernel::V3D> XrayAbsorptionCorrection::calculateMuonPos(
                              "depth profile and detector distance");
   }
   Kernel::V3D intersection = muonPath.cbegin()->entryPoint;
-  double sampleDepth = intersection[1];
+  double sampleDepth = intersection[2];
   std::vector<Kernel::V3D> muonPos;
   for (auto depth : muonDepth) {
-    Kernel::V3D pos = {0., sampleDepth - (depth / 100), 0.};
+    /* Muon implantation position are at x = 0 and y = 0 and z position is
+    variable*/
+    Kernel::V3D pos = {0.0, 0.0,
+                       sampleDepth - (depth * ConversionFrom_cm_to_m)};
     muonPos.push_back(pos);
   }
   return muonPos;
 }
 
 /**
- * Calculate the mid point of a bin in workspace.
- * @param energyVector a MantidVec which contains edges of bins
- * @return A vector of doubles of bin mid points
- */
-std::vector<double> XrayAbsorptionCorrection::calculateMidPointOfBin(
-    MantidVec const &energyVector) {
-  std::vector<double> midPoint;
-  for (size_t i = 0; i < energyVector.size() - 1; i++) {
-    midPoint.push_back((energyVector[i] + energyVector[i + 1]) / 2);
-  }
-  return midPoint;
-}
-/**
  * Execution
  */
 void XrayAbsorptionCorrection::exec() {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outputWS = inputWS->clone();
+  IAlgorithm_sptr convtoPoints = createChildAlgorithm("ConvertToPointData");
+  convtoPoints->setProperty("InputWorkspace", inputWS);
+  convtoPoints->execute();
+  MatrixWorkspace_sptr pointDataWS =
+      convtoPoints->getProperty("OutputWorkspace");
+
   MatrixWorkspace_sptr muonProfile = getProperty("MuonImplantationProfile");
   MantidVec muonIntensity = muonProfile->readY(0);
   std::vector<double> normalisedMuonIntensity =
@@ -200,11 +188,11 @@ void XrayAbsorptionCorrection::exec() {
       calculateDetectorPos(detectorAngle, detectorDistance);
   std::vector<Kernel::V3D> muonPos =
       calculateMuonPos(muonProfile, inputWS, detectorDistance);
+
   for (size_t j = 0; j < inputWS->getNumberHistograms(); j++) {
-    std::vector<double> energyVector =
-        calculateMidPointOfBin(inputWS->readX(j));
     auto &yData = outputWS->mutableY(j);
-    for (size_t i = 0; i < energyVector.size(); i++) {
+    MantidVec xData = pointDataWS->readX(j);
+    for (size_t i = 0; i < xData.size(); i++) {
       double totalFactor{0};
       for (size_t k = 0; k < normalisedMuonIntensity.size(); k++) {
         Kernel::V3D pos = muonPos[k];
@@ -220,7 +208,7 @@ void XrayAbsorptionCorrection::exec() {
         for (auto &link : xrayPath) {
           double distInObject = link.distInsideObject;
           factor = factor * link.object->material().xRayAttenuation(
-                                distInObject, energyVector[i]);
+                                distInObject, xData[i]);
         }
         totalFactor += (normalisedMuonIntensity[k] * factor);
       }
