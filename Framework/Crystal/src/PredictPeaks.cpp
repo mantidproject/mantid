@@ -88,6 +88,23 @@ void PredictPeaks::init() {
                       std::make_unique<EnabledWhenProperty>(
                           "CalculateGoniometerForCW", IS_NOT_DEFAULT));
 
+  declareProperty("InnerGoniometer", false,
+                  "Whether the goniometer to be calculated is the most inner "
+                  "(phi) or most outer (omega)");
+  setPropertySettings("InnerGoniometer",
+                      std::make_unique<EnabledWhenProperty>(
+                          "CalculateGoniometerForCW",
+                          Mantid::Kernel::ePropertyCriterion::IS_NOT_DEFAULT));
+
+  declareProperty("FlipX", false,
+                  "Used when calculating goniometer angle if the q_lab x value "
+                  "should be negative, hence the detector of the other side "
+                  "(right) of the beam");
+  setPropertySettings("FlipX",
+                      std::make_unique<EnabledWhenProperty>(
+                          "CalculateGoniometerForCW",
+                          Mantid::Kernel::ePropertyCriterion::IS_NOT_DEFAULT));
+
   declareProperty(std::make_unique<PropertyWithValue<double>>("MinAngle", -180,
                                                               Direction::Input),
                   "Minimum goniometer rotation angle");
@@ -304,20 +321,25 @@ void PredictPeaks::exec() {
     }
     double angleMin = getProperty("MinAngle");
     double angleMax = getProperty("MaxAngle");
+    bool innerGoniometer = getProperty("InnerGoniometer");
+    bool flipX = getProperty("FlipX");
     for (auto &possibleHKL : possibleHKLs) {
-      Geometry::Goniometer goniometer;
+      Geometry::Goniometer goniometer(gonioVec.front());
       V3D q_sample = ub * possibleHKL * (2.0 * M_PI * m_qConventionFactor);
-      goniometer.calcFromQSampleAndWavelength(q_sample, wavelength);
-      double angle = goniometer.getEulerAngles()[0];
+      goniometer.calcFromQSampleAndWavelength(q_sample, wavelength, flipX,
+                                              innerGoniometer);
+      std::vector<double> angles = goniometer.getEulerAngles("YZY");
+      double angle = innerGoniometer ? angles[2] : angles[0];
       if (!std::isfinite(angle) || angle < angleMin || angle > angleMax)
         continue;
       DblMatrix orientedUB = goniometer.getR() * ub;
       V3D q_lab = orientedUB * possibleHKL;
       double lambda = (2.0 * q_lab.Z()) / (q_lab.norm2());
       if (std::abs(wavelength - lambda) < 0.01) {
-        g_log.information() << "Found goniometer rotation to be "
-                            << goniometer.getEulerAngles()[0]
-                            << " degrees for HKL = " << possibleHKL << "\n";
+        g_log.information()
+            << "Found goniometer rotation to be in YZY convention ["
+            << angles[0] << ", " << angles[1] << ". " << angles[2]
+            << "] degrees for Q sample = " << q_sample << "\n";
         calculateQAndAddToOutput(possibleHKL, orientedUB, goniometer.getR());
         ++allowedPeakCount;
       }
