@@ -19,7 +19,10 @@
 #include "MantidQtWidgets/Common/MantidDesktopServices.h"
 #include <QtGlobal>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
-#include "MantidPythonInterface/core/GlobalInterpreterLock.h"
+#include "MantidQtWidgets/Common/Python/Object.h"
+#include "MantidQtWidgets/MplCpp/Figure.h"
+#include "MantidQtWidgets/MplCpp/MantidAxes.h"
+#include "boost/python.hpp"
 #endif
 #include <QFileInfo>
 #include <QUrl>
@@ -372,7 +375,9 @@ void StepScan::launchInstrumentWindow() {
   std::string pyCode = "instrument_view = getInstrumentView('" + m_inputWSName +
                        "',2)\n"
                        "instrument_view.show()";
+
   runPythonCode(QString::fromStdString(pyCode));
+
 #else
   std::string pyCode =
       "from mantidqt.widgets.instrumentview.api import get_instrumentview\n"
@@ -675,6 +680,39 @@ void StepScan::generateCurve(const QString &var) {
   plotCurve();
 }
 
+#if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
+namespace {
+auto get_fig_ax(boost::optional<int> fignum) {
+  std::string pyCode =
+      "import matplotlib.pyplot as plt\n"
+      "from mantid import plots\n"
+      "from workbench.plotting.globalfiguremanager import GlobalFigureManager\n"
+      "if GlobalFigureManager.has_fignum(fig_num):\n"
+      "    fig = plt.figure(fig_num)\n"
+      "    ax = plt.gca()\n"
+      "    ax.clear()\n"
+      "else:\n"
+      "    fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})";
+  Mantid::PythonInterface::GlobalInterpreterLock lock;
+  using namespace MantidQt::Widgets::Common;
+  using namespace MantidQt::Widgets::MplCpp;
+  Python::Object main_module = boost::python::import("__main__");
+  Python::Object main_namespace = main_module.attr("__dict__");
+  if (fignum) {
+    main_namespace["fig_num"] = fignum.value();
+  } else {
+    main_namespace["fig_num"] = Python::Object();
+  }
+  auto ignored = boost::python::exec(pyCode.c_str(), main_namespace);
+  auto fig =
+      Figure(boost::python::extract<Python::Object>(main_namespace["fig"]));
+  auto ax =
+      MantidAxes(boost::python::extract<Python::Object>(main_namespace["ax"]));
+  return std::make_tuple(fig, ax);
+}
+} // namespace
+#endif
+
 void StepScan::plotCurve() {
   // Get the name of the dataset to produce the plot title
   std::string title = m_inputWSName.substr(2);
@@ -720,26 +758,22 @@ void StepScan::plotCurve() {
 
   runPythonCode(QString::fromStdString(pyCode));
 #else
-  std::string pyCode =
-      "import matplotlib.pyplot as plt\n"
-      "from mantid import plots\n"
-      "fig, ax = plt.subplots(subplot_kw={'projection':'mantid'})\n"
-      "ws = mtd['" +
-      m_plotWSName +
-      "']\n"
-      "ax.plot(ws,'k.')\n"
-      "ax.set_xlabel('" +
-      xAxisTitle +
-      "')\n"
-      "ax.set_ylabel('" +
-      yAxisTitle +
-      "')\n"
-      "fig.canvas.set_window_title('" +
-      title +
-      " - Step Scan')\n"
-      "fig.show()";
-  Mantid::PythonInterface::GlobalInterpreterLock lock;
-  PyRun_SimpleString(pyCode.c_str());
+  auto [fig, ax] = get_fig_ax(m_fignum);
+  m_fignum = fig.number();
+  auto ws =
+      AnalysisDataService::Instance().retrieveWS<Mantid::API::MatrixWorkspace>(
+          m_plotWSName);
+  title += " - Step Scan";
+  fig.setWindowTitle(title.c_str());
+  QHash<QString, QVariant> hash;
+  hash.insert("linestyle", "");
+  hash.insert("marker", ".");
+  auto line = ax.plot(ws, 0, "black", "", hash);
+  ax.setXLabel(xAxisTitle.c_str());
+  ax.setYLabel(yAxisTitle.c_str());
+  fig.show();
+  this->activateWindow();
+  this->raise();
 #endif
 }
 
