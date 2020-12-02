@@ -43,7 +43,7 @@ namespace Mantid {
             auto wsValidator = std::make_shared<InstrumentValidator>();
             declareProperty(
                 std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
-                    "Workspace", 
+                    "InputWorkspace", 
                     "", 
                     Direction::Input,
                     PropertyMode::Mandatory,
@@ -68,8 +68,7 @@ namespace Mantid {
                     "", 
                     Direction::Output),
                 "Name of the output CORELLI calibration table");
-
-        }
+    }
 
         /**
          * @brief Validate algorithm inputs
@@ -78,7 +77,7 @@ namespace Mantid {
          */
         std::map<std::string, std::string> CorelliPowderCalibrationLoad::validateInputs() {
             std::map<std::string, std::string> issues;
-            ws = getProperty("Workspace");
+            ws = getProperty("InputWorkspace");
 
             // 1_check: input workspace is from CORELLI
             if (ws->getInstrument()->getName() != "CORELLI") {
@@ -120,8 +119,7 @@ namespace Mantid {
             g_log.notice() << "Start loading CORELLI calibration table from database\n";
 
             // Parse input arguments
-            ws = getProperty("Workspace");
-            wsName = getPropertyValue("Workspace");
+            ws = getProperty("InputWorkspace");
             std::string dbdir = getProperty("DatabaseDir");
 
             // Prepare output table
@@ -151,8 +149,7 @@ namespace Mantid {
             Workspace_sptr _outws = alg->getProperty("OutputWorkspace");
             TableWorkspace_sptr calTable = std::dynamic_pointer_cast<TableWorkspace>(_outws);
 
-            // get the table and set it as the output
-            setProperty("OutputWorkspace", calTable);
+            setProperty("OutputWorkspace", calTable);            
             g_log.notice() << "Finished loading CORELLI calibration table\n";
         }
 
