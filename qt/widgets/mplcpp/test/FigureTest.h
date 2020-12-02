@@ -42,11 +42,6 @@ public:
     TS_ASSERT_THROWS_NOTHING(fig.addAxes(0.1, 0.1, 0.9, 0.9));
   }
 
-  void testNumber() {
-    Figure fig{false};
-    TS_ASSERT_EQUALS(1, fig.number());
-  }
-
   void testSetFaceColorFromString() {
     Figure fig{false};
     fig.setFaceColor("r");
