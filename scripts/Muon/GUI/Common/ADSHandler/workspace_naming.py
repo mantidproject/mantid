@@ -8,7 +8,8 @@ import re
 
 group_str = "; Group; "
 pair_str = "; Pair Asym; "
-phaseQuad_str = '; PhaseQuad'
+phaseQuad_str = '; PhaseQuad; '
+PHASEQUAD_EXT = '_Re__Im_'
 TF_ASYMMETRY_PREFIX = "TFAsymmetry"
 REBIN_STR = 'Rebin'
 FFT_STR = 'FFT'
@@ -51,7 +52,6 @@ def get_group_asymmetry_name(context, group_name, run, period_string, rebin):
 
 
 def get_pair_asymmetry_name(context, pair_name, run, rebin):
-    print("name",context.data_context._base_run_name(run), pair_name )
     name = context.data_context._base_run_name(run) + pair_str + pair_name + ";"
 
     if rebin:
@@ -60,6 +60,14 @@ def get_pair_asymmetry_name(context, pair_name, run, rebin):
     name += context.workspace_suffix
     return name
 
+def get_pair_phasequad_name(context, pair_name, run, rebin):
+    name = context.data_context._base_run_name(run) + phaseQuad_str + pair_name + PHASEQUAD_EXT+";"
+
+    if rebin:
+        name += "".join([' ', REBIN_STR, ';'])
+
+    name += context.workspace_suffix
+    return name
 
 def get_group_or_pair_from_name(name):
     if group_str in name:
@@ -69,6 +77,11 @@ def get_group_or_pair_from_name(name):
         return group_found.replace(" ", "")
     elif pair_str in name:
         index = name.find(pair_str) + len(pair_str)
+        end = name.find(";", index)
+        pair_found = name[index: end]
+        return pair_found.replace(" ", "")
+    elif phaseQuad_str in name:
+        index = name.find(phaseQuad_str) + len(phaseQuad_str)
         end = name.find(";", index)
         pair_found = name[index: end]
         return pair_found.replace(" ", "")

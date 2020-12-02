@@ -10,9 +10,10 @@ from Muon.GUI.Common.muon_group import MuonRun
 import itertools
 
 
-class MuonPhasequad(object):
+
+class MuonBasePair(object):
     """
-    Simple structure to store information on a phasequad.
+    Simple structure to store information on a detector group pair.
 
     - The name is set at initialization and after that cannot be changed.
     - The pair has two groups associated to it, and we store only their names.
@@ -20,11 +21,9 @@ class MuonPhasequad(object):
     - The workspace associated to the pair can be set, but must be of type MuonWorkspaceWrapper.
     """
 
-    def __init__(self, phasequad_name,
-                 phase_table):
+    def __init__(self, pair_name):
 
-        self._phasequad_name = phasequad_name
-        self._phase_table = phase_table
+        self._pair_name = pair_name
         self._workspace = {}
         self.workspace_rebin = {}
 
@@ -42,15 +41,7 @@ class MuonPhasequad(object):
 
     @property
     def name(self):
-        return self._phasequad_name
-
-    @property
-    def phase_table(self):
-        return self._phase_table
-
-    @phase_table.setter
-    def phase_table(self, new_table):
-        self._phase_table = phase_table
+        return self._pair_name
 
     def show_raw(self, run, name):
         run_object = MuonRun(run)
@@ -125,3 +116,52 @@ class MuonPhasequad(object):
 
         _remove_workspace_from_dict_by_name(workspace_name, self._workspace)
         _remove_workspace_from_dict_by_name(workspace_name, self.workspace_rebin)
+
+
+class MuonPhasequad(object):
+    """
+    Simple structure to store information on a phasequad.
+
+    - The name is set at initialization and after that cannot be changed.
+    - The pair has two groups associated to it, and we store only their names.
+    - The balance parameter is stored and modifiable.
+    - The workspace associated to the pair can be set, but must be of type MuonWorkspaceWrapper.
+    """
+
+    def __init__(self, phasequad_name,
+                 phase_table):
+        #super().__init__(phasequad_name)
+        self._phasequad_name = phasequad_name
+        self._phase_table = phase_table
+        self._Re = MuonBasePair(phasequad_name+"_Re_")
+        self._Im = MuonBasePair(phasequad_name+"_Im_")
+
+    @property
+    def Re(self):
+        return self._Re
+
+    @property
+    def Im(self):
+        return self._Im
+
+    @property
+    def name(self):
+        return self._phasequad_name
+
+    @property
+    def phase_table(self):
+        return self._phase_table
+
+    @phase_table.setter
+    def phase_table(self, new_table):
+        self._phase_table = phase_table
+
+    def update_asymmetry_workspaces(self, ws_list, run, rebin=False):
+        self._Re.update_asymmetry_workspace(
+                        ws_list[0],
+                        run,
+                        rebin=rebin)
+        self._Im.update_asymmetry_workspace(
+                        ws_list[1],
+                        run,
+                        rebin=rebin)

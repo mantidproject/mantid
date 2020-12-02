@@ -109,26 +109,29 @@ class PhaseTablePresenter(object):
         return thread_model.ThreadModel(self._phasequad_calculation_model)
 
     def calculate_phase_quad(self):
+        self.context.group_pair_context.add_phasequad(self._phasequad_obj)
 
-        self.context.group_pair_context.add_pair(self._phasequad_obj)
         self.context.calculate_phasequads(self._phasequad_obj.name, self._phasequad_obj)
-        self.phase_quad_calculation_complete_notifier.notify_subscribers(self._phasequad_obj.name)
+        self.phase_quad_calculation_complete_notifier.notify_subscribers(self._phasequad_obj.Re.name)
+        self.phase_quad_calculation_complete_notifier.notify_subscribers(self._phasequad_obj.Im.name)
 
     def handle_phasequad_calculation_success(self):
         self.enable_editing_notifier.notify_subscribers()
         self.view.enable_widget()
         self.view.disable_cancel()
 
-        name = self._phasequad_obj.name
+        names = [self._phasequad_obj.Re.name, self._phasequad_obj.Im.name]
         self.current_alg = None
         pair_added = True# if state == 2 else False
-        if pair_added:
-            self.context.group_pair_context.add_pair_to_selected_pairs(name)
-        else:
-            self.context.group_pair_context.remove_pair_from_selected_pairs(name)
 
-        group_info = {'is_added': pair_added, 'name': name}
-        self.selected_phasequad_changed_notifier.notify_subscribers(group_info)
+        for name in names:
+            if pair_added:
+                self.context.group_pair_context.add_pair_to_selected_pairs(name)
+            else:
+                self.context.group_pair_context.remove_pair_from_selected_pairs(name)
+
+            group_info = {'is_added': pair_added, 'name': name}
+            self.selected_phasequad_changed_notifier.notify_subscribers(group_info)
         self._phasequad_obj = None
 
     def handle_calculation_started(self):
@@ -212,13 +215,6 @@ class PhaseTablePresenter(object):
         self.view.set_input_combo_box(self.context.getGroupedWorkspaceNames())
         self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)
         self.update_model_from_view()
-        # for now we will remove the phaseequads
-        pairs = self.context.group_pair_context.pairs
-        for pair in pairs:
-            if isinstance(pair, MuonPhasequad):
-                self.context.group_pair_context.remove_pair_from_selected_pairs(pair.name)
-                self.context.group_pair_context.remove_pair(pair.name)
-
 
     def update_current_groups_list(self):
         self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)

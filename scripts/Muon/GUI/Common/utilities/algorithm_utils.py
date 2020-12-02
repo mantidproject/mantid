@@ -7,6 +7,7 @@
 import mantid.simpleapi as mantid
 from mantid.kernel import Logger
 from mantid.api import Workspace, AnalysisDataService
+from copy import copy
 
 muon_logger = Logger('Muon-Algs')
 
@@ -253,8 +254,10 @@ def extract_single_spec(ws, spec, output_workspace_name):
     return alg.getProperty("OutputWorkspace").valueAsStr
 
 def split_phasequad(name):
-    ws = AnalysisDataService.retrieve(name)
-    Re = extract_single_spec(name, 0, name)#+"_Re")
-    #Im = extract_single_spec(name, 1, name+"_Im")
-    #AnalysisDataService.remove(name)
-    return [Re]
+    Re_name = copy(name).replace("_Im_","")
+    Im_name = copy(name).replace("_Re_","")
+
+    Re = extract_single_spec(name, 0, Re_name)#+"_Re")
+    Im = extract_single_spec(name, 1, Im_name)
+    AnalysisDataService.remove(name)
+    return [Re, Im]
