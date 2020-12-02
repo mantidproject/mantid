@@ -67,7 +67,7 @@ mentioned above, ``numpy.nan`` or ``math.nan`` can both be used.
     # put into a single spectrum and Fourier transform
     SumSpectra(InputWorkspace='cropped', OutputWorkspace='FQ',
                WeightedSum=True, RemoveSpecialValues=True)
-    PDFFourierTransform(InputWorkspace='FQ', OutputWorkspace='Gr',
+    gr=PDFFourierTransform(InputWorkspace='FQ', OutputWorkspace='Gr',
                         Direction="Backward", DeltaR=.02)
     for j in range(10,13):                     
             print("y values: {:.4f}".format(gr.readY(0)[j]))
