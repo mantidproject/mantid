@@ -41,7 +41,7 @@ Bug fixes
 ##########
 - Stopped scientific notation when plotting run numbers on x axis
 
-Elemental Analysis 
+Elemental Analysis
 ------------------
 
 New Features
