@@ -7,13 +7,20 @@
 #include "ALCDataLoadingView.h"
 
 #include "ALCLatestFileFinder.h"
+#include "MantidQtWidgets/Common/FileFinderWidget.h"
 #include "MantidQtWidgets/Common/HelpWindow.h"
 #include "MantidQtWidgets/Common/LogValueSelector.h"
+#include "MantidQtWidgets/Common/ManageUserDirectories.h"
 #include <Poco/File.h>
+
+#include "MantidKernel/ConfigService.h"
 
 #include <QMessageBox>
 
 using namespace Mantid::API;
+
+const std::vector<std::string> INSTRUMENTS{"ARGUS", "CHRONUS", "EMU", "HIFI",
+                                           "MUSR"};
 
 namespace MantidQt {
 namespace CustomInterfaces {
@@ -24,14 +31,22 @@ ALCDataLoadingView::~ALCDataLoadingView() {}
 
 void ALCDataLoadingView::initialize() {
   m_ui.setupUi(m_widget);
+  initInstruments();
   m_ui.logValueSelector->setCheckboxShown(false);
   m_ui.logValueSelector->setVisible(true);
   m_ui.logValueSelector->setEnabled(true);
+  enableLoad(false);
+  enableRunsAutoAdd(false);
   connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
-  connect(m_ui.runs, SIGNAL(fileFindingFinished()), SIGNAL(runsSelected()));
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
-  connect(m_ui.runAuto, SIGNAL(stateChanged(int)), this,
-          SLOT(checkBoxAutoChanged(int)));
+  connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this,
+          SLOT(instrumentChanged(QString)));
+  connect(m_ui.runs, SIGNAL(findingFiles()), SIGNAL(runsChangedSignal()));
+  connect(m_ui.runs, SIGNAL(fileFindingFinished()), SIGNAL(runsFoundSignal()));
+  connect(m_ui.manageDirectoriesButton, SIGNAL(clicked()),
+          SIGNAL(manageDirectoriesClicked()));
+  connect(m_ui.runsAutoAdd, SIGNAL(toggled(bool)), this,
+          SLOT(runsAutoAddToggled(bool)));
 
   m_ui.dataPlot->setCanvasColour(QColor(240, 240, 240));
 
@@ -50,47 +65,50 @@ void ALCDataLoadingView::initialize() {
   m_ui.detectorGroupingGroup->setPalette(palette);
   m_ui.periodsGroup->setPalette(palette);
   m_ui.calculationGroup->setPalette(palette);
-}
+  m_ui.subtractCheckbox->setEnabled(false);
 
-std::string ALCDataLoadingView::firstRun() const {
-  if (m_ui.runs->isValid()) {
-    return m_ui.runs->getFirstFilename().toStdString();
-  } else {
-    return "";
-  }
-}
+  // Regex validator for runs
+  QRegExp re("[0-9]+(,[0-9]+)*(-[0-9]+(($)|(,[0-9]+))+)*");
+  QValidator *validator = new QRegExpValidator(re, this);
+  m_ui.runs->setTextValidator(validator);
 
-/**
- * If the last run is valid, return the filename.
- * Otherwise, return an empty string.
- */
-std::string ALCDataLoadingView::lastRun() const {
-  if (m_ui.runs->isValid()) {
-    const auto files = m_ui.runs->getFilenames();
-    if (!files.empty())
-      return files.back().toStdString();
-  }
-  return "";
+  m_ui.runs->doButtonOpt(MantidQt::API::FileFinderWidget::ButtonOpts::None);
 }
 
 /**
- * If runs expression is valid, returns vector of file names
+ * Initialised instrument combo box with Muon instruments and sets index to user
+ * defualt instrument if available otherwise set as HIFI
  */
-std::vector<std::string> ALCDataLoadingView::getRuns() const {
-  std::vector<std::string> returnFiles;
-  if (m_ui.runs->isValid()) {
-    const auto fileNames = m_ui.runs->getFilenames();
-    for (const auto &file : fileNames)
-      returnFiles.emplace_back(file.toStdString());
+void ALCDataLoadingView::initInstruments() {
+  // Initialising so do not want to send signals here
+  m_ui.instrument->blockSignals(true);
+  for (const auto &instrument : INSTRUMENTS) {
+    m_ui.instrument->addItem(QString::fromStdString(instrument));
   }
-  return returnFiles;
+  const auto userInstrument =
+      Mantid::Kernel::ConfigService::Instance().getString("default.instrument");
+  const auto index =
+      m_ui.instrument->findText(QString::fromStdString(userInstrument));
+  if (index != -1)
+    m_ui.instrument->setCurrentIndex(index);
+  else
+    m_ui.instrument->setCurrentIndex(3);
+  m_ui.instrument->blockSignals(false);
+  setInstrument(m_ui.instrument->currentText().toStdString());
 }
 
 /**
- * Returns an error message from file finder, empty string if no error
+ * Returns string of selected instrument
  */
-std::string ALCDataLoadingView::getRunsErrorMessage() const {
-  return m_ui.runs->getFileProblem().toStdString();
+std::string ALCDataLoadingView::getInstrument() const {
+  return m_ui.instrument->currentText().toStdString();
+}
+
+/**
+ * Returns string of path
+ */
+std::string ALCDataLoadingView::getPath() const {
+  return m_ui.path->text().toStdString();
 }
 
 std::string ALCDataLoadingView::log() const {
@@ -186,8 +204,18 @@ void ALCDataLoadingView::setDataCurve(MatrixWorkspace_sptr workspace,
 }
 
 void ALCDataLoadingView::displayError(const std::string &error) {
-  QMessageBox::critical(m_widget, "Loading error",
+  QMessageBox::critical(m_widget, "ALC Loading error",
                         QString::fromStdString(error));
+}
+
+bool ALCDataLoadingView::displayWarning(const std::string &warning) {
+  auto reply = QMessageBox::warning(
+      m_widget, "ALC Warning", QString::fromStdString(warning),
+      QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+  if (reply == QMessageBox::Yes)
+    return true;
+  else
+    return false;
 }
 
 /**
@@ -197,6 +225,13 @@ void ALCDataLoadingView::displayError(const std::string &error) {
 void ALCDataLoadingView::setAvailableLogs(
     const std::vector<std::string> &logs) {
   setAvailableItems(m_ui.logValueSelector->getLogComboBox(), logs);
+  // Set defualt as run number
+  if (!logs.empty()) {
+    auto index =
+        m_ui.logValueSelector->getLogComboBox()->findText("run_number");
+    if (index >= 0)
+      m_ui.logValueSelector->getLogComboBox()->setCurrentIndex(index);
+  }
 }
 
 /**
@@ -287,36 +322,98 @@ void ALCDataLoadingView::enableAll() {
   m_ui.load->setEnabled(true);
 }
 
-/**
- * Called when the check state of the "Auto" checkbox changes.
- * Set text before setting read-only to validate the right text.
- * @param state :: [input] Check state - member of Qt::CheckState enum
- */
-void ALCDataLoadingView::checkBoxAutoChanged(int state) {
-
-  // Try to auto fill in rest of runs
-  if (state == Qt::Checked) {
-
-    // Update auto run
-    emit runAutoChecked();
-
-  } else {
-
-    // Reset text as before auto checked
-    emit runAutoUnchecked();
+void ALCDataLoadingView::instrumentChanged(QString instrument) {
+  emit instrumentChangedSignal(instrument.toStdString());
+  if (!m_ui.runs->getText().isEmpty()) {
+    m_ui.runs->findFiles(); // Re-search for files with new instrument
   }
 }
 
-void ALCDataLoadingView::setRunsReadOnly(bool readOnly) {
-  m_ui.runs->setReadOnly(readOnly);
+void ALCDataLoadingView::enableLoad(bool enable) {
+  m_ui.load->setEnabled(enable);
 }
 
-std::string ALCDataLoadingView::getCurrentRunsText() const {
+void ALCDataLoadingView::setPath(const std::string &path) {
+  m_ui.path->setText(QString::fromStdString(path));
+}
+
+void ALCDataLoadingView::enableRunsAutoAdd(bool enable) {
+  m_ui.runsAutoAdd->setEnabled(enable);
+}
+
+void ALCDataLoadingView::setInstrument(const std::string &instrument) {
+  m_ui.runs->setInstrumentOverride(QString::fromStdString(instrument));
+}
+
+std::string ALCDataLoadingView::getRunsError() {
+  return m_ui.runs->getFileProblem().toStdString();
+}
+
+std::vector<std::string> ALCDataLoadingView::getFiles() {
+  const auto QFiles = m_ui.runs->getFilenames();
+  std::vector<std::string> files;
+  for (const auto &file : QFiles)
+    files.emplace_back(file.toStdString());
+  return files;
+}
+
+std::string ALCDataLoadingView::getFirstFile() {
+  return m_ui.runs->getFirstFilename().toStdString();
+}
+
+void ALCDataLoadingView::setAvailableInfoToEmpty() {
+  setAvailableLogs(std::vector<std::string>());    // Empty logs list
+  setAvailablePeriods(std::vector<std::string>()); // Empty period list
+  setTimeLimits(0, 0);                             // "Empty" time limits
+}
+
+std::string ALCDataLoadingView::getRunsText() const {
   return m_ui.runs->getText().toStdString();
 }
 
-void ALCDataLoadingView::setRunsTextWithSearch(const QString &text) {
-  m_ui.runs->setFileTextWithSearch(text);
+void ALCDataLoadingView::setLoadStatus(const std::string &status,
+                                       const std::string &colour) {
+  m_ui.loadStatusLabel->setText(QString::fromStdString("Status: " + status));
+  m_ui.loadStatusLabel->setStyleSheet(
+      QString::fromStdString("color: " + colour));
+}
+
+void ALCDataLoadingView::runsAutoAddToggled(bool on) {
+  if (on) {
+    m_ui.runs->setReadOnly(true);
+    m_ui.load->setEnabled(false);
+    setLoadStatus("Auto Add", "orange");
+    emit autoAddToggledSignal(true);
+  } else {
+    m_ui.runs->setReadOnly(false);
+    m_ui.load->setEnabled(true);
+    setLoadStatus("Waiting", "orange");
+    emit autoAddToggledSignal(false);
+  }
+}
+
+void ALCDataLoadingView::setRunsTextWithoutSearch(const std::string &text) {
+  m_ui.runs->setFileTextWithoutSearch(QString::fromStdString(text));
+}
+
+void ALCDataLoadingView::toggleRunsAutoAdd(const bool autoAdd) {
+  m_ui.runsAutoAdd->setChecked(autoAdd);
+}
+
+std::string ALCDataLoadingView::getRunsFirstRunText() const {
+  std::string text = m_ui.runs->getText().toStdString();
+
+  auto commaSearchResult = text.find_first_of(",");
+  auto rangeSearchResult = text.find_first_of("-");
+
+  if (commaSearchResult == std::string::npos &&
+      rangeSearchResult == std::string::npos) {
+    return text; // Only one run
+  }
+
+  if (commaSearchResult == std::string::npos)
+    return text.substr(0, rangeSearchResult); // Must have range
+  return text.substr(0, commaSearchResult);   // Must have comma
 }
 
 } // namespace CustomInterfaces

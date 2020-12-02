@@ -30,15 +30,17 @@ AX_VIEW = 'mantidqt.widgets.plotconfigdialog.axestabwidget.presenter.AxesTabWidg
 CURVE_VIEW = 'mantidqt.widgets.plotconfigdialog.curvestabwidget.presenter.CurvesTabWidgetView'
 IMAGE_VIEW = 'mantidqt.widgets.plotconfigdialog.imagestabwidget.presenter.ImagesTabWidgetView'
 LEGEND_VIEW = 'mantidqt.widgets.plotconfigdialog.legendtabwidget.presenter.LegendTabWidgetView'
-new_ax_view_props = {
 
+new_ax_view_props = {
     'title': 'New Title',
     'xlim': [0.1, 10],
     'xlabel': 'New X Label',
     'xscale': 'log',
+    'xautoscale': False,
     'ylim': [0.2, 3],
     'ylabel': 'New Y Label',
     'yscale': 'log',
+    'yautoscale': False,
     'minor_ticks': True,
     'minor_gridlines': True,
     'canvas_color': '#ffff00'}

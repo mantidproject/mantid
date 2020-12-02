@@ -29,15 +29,18 @@ class AxProperties(dict):
         props['xlim'] = ax.get_xlim()
         props['xlabel'] = ax.get_xlabel()
         props['xscale'] = ax.get_xscale().title()
+        props['xautoscale'] = ax.get_autoscalex_on()
         props['ylim'] = ax.get_ylim()
         props['ylabel'] = ax.get_ylabel()
         props['yscale'] = ax.get_yscale().title()
+        props['yautoscale'] = ax.get_autoscaley_on()
         props['canvas_color'] = ax.get_facecolor()
 
         if isinstance(ax, Axes3D):
             props['zlim'] = ax.get_zlim()
             props['zlabel'] = ax.get_zlabel()
             props['zscale'] = ax.get_zscale().title()
+            props['zautoscale'] = ax.get_autoscalez_on()
         else:
             props['minor_ticks'] = not isinstance(ax.xaxis.minor.locator, NullLocator)
             props['minor_gridlines'] = ax.show_minor_gridlines if hasattr(ax, 'show_minor_gridlines') else False

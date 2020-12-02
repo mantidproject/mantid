@@ -34,6 +34,8 @@ New features
 - New algorithm :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` to convert DEMAND data to Q-space and allow the detector position to be adjusted by offsets.
 - Files from ILL's instrument D1B can now be loaded.
 - New algorithm :ref:`CorelliPowderCalibrationDatabase <algm-CorelliPowderCalibrationDatabase>` to save Corelli geometry calibration to database
+- New algorithm :ref:`CorelliPowderCalibrationApply <algm-CorelliPowderCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace.
+
 
 Improvements
 ############
@@ -51,6 +53,10 @@ Bugfixes
 - Dummy detectors in polaris workspaces no longer prevent unit conversion.
 - Focus in PEARL powder diffraction scripts no longer fails if previous run has left Van splines workspace group in ADS
 
+
+Bugfixes
+########
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` once again accepts multiple input workspaces and outputs a group workspace when specified by user.
 
 Engineering Diffraction
 -----------------------
@@ -72,10 +78,16 @@ New features
 
 Single Crystal Diffraction
 --------------------------
+New features
+############
+- New algorithm :ref:`HB3AFindPeaks <algm-HB3AFindPeaks>` to find peaks and set the UB matrix for DEMAND data.
+
 Bugfixes
 ########
 - Fix bug in :ref:`SaveHKL <algm-SaveHKL>` where the direction cosines were calculated incorrectly
 
+
+=======
 
 New features
 ############
@@ -83,7 +95,9 @@ New features
 - Fix problem that was causing matrix diagonalization to return NaNs in certain cases. The diagonalization is used in :ref:`CalculateUMatrix <algm-CalculateUMatrix>` and :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`
 
 
+
 Imaging
 -------
 
 :ref:`Release 6.0.0 <v6.0.0>`
+
