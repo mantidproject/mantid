@@ -7,16 +7,18 @@
 # from Interface import *
 
 import systemtesting
+from unittest import mock
 import sys
 import time
 
-from qtpy.QtWidgets import QApplication
+from qtpy.QtWidgets import QApplication, QFormLayout, QLineEdit, QComboBox
 from qtpy.QtTest import QTest
 from qtpy.QtCore import Qt, QPoint
 
 from mantid.kernel import config
 from mantid.simpleapi import mtd, GroupWorkspaces
 from Interface.ui.drill.view.DrillView import *
+from Interface.ui.drill.view.DrillSettingsDialog import *
 
 
 app = QApplication(sys.argv)
@@ -54,6 +56,44 @@ class DrillProcessTest(systemtesting.MantidSystemTest):
         QTest.keyClicks(self.drill.table.viewport().focusWidget(), text)
         QTest.keyClick(self.drill.table.viewport().focusWidget(), Qt.Key_Tab)
 
+    @mock.patch.object(DrillSettingsDialog, "show", return_value=None)
+    def editSettings(self, settingValues, mDialog):
+        """
+        Edit the settings window. This method will edit all the provided
+        settings and set them to their correcponding value.
+
+        Args:
+            settingValues (dict(str:str)): setting name and value to be set
+        """
+        QTest.mouseClick(self.drill.settings, Qt.LeftButton)
+        sw = self.drill.children()[-1]
+        form = sw.formLayout
+        widgets = dict()
+        for i in range(0, sw.formLayout.rowCount()):
+            label = form.itemAt(i, QFormLayout.LabelRole).widget().text()
+            widget = form.itemAt(i, QFormLayout.FieldRole).widget()
+            widgets[label] = widget
+        for name,value in settingValues.items():
+            if name in widgets:
+                if isinstance(widgets[name], QLineEdit):
+                    QTest.mouseClick(widgets[name], Qt.LeftButton)
+                    QTest.mouseDClick(widgets[name], Qt.LeftButton)
+                    widgets[name].clear()
+                    QTest.keyClicks(widgets[name], value)
+                    QTest.keyClick(widgets[name], Qt.Key_Tab)
+                elif isinstance(widgets[name], QComboBox):
+                    v = widgets[name].view()
+                    m = widgets[name].model()
+                    for i in range(m.rowCount()):
+                        index = m.index(i, 0)
+                        text = index.data(Qt.DisplayRole)
+                        if text == name:
+                            v.scrollTo(index)
+                            pos = index.center()
+                            Qt.mouseClick(v.viewport(), Qt.LeftButton, 0, pos)
+                            break
+        QTest.mouseClick(sw.okButton, Qt.LeftButton)
+
     def cleanup(self):
         mtd.clear()
 
@@ -74,6 +114,11 @@ class DrillProcessTest(systemtesting.MantidSystemTest):
         self.drill = DrillView()
         QTest.mouseClick(self.drill.addrow, Qt.LeftButton)
         QTest.mouseClick(self.drill.addrow, Qt.LeftButton)
+
+        self.editSettings({"SensitivityMaps": "sens-lamp.nxs",
+                           "BeamRadius": "0.05,0.05,0.05",
+                           "CalculateResolution": "MildnerCarpenter",
+                           "TransmissionBeamRadius": "0.05"})
 
         self.editCell(0, "SampleRuns", sampleRuns[0])
         self.editCell(0, "SampleTransmissionRuns", sampleTransmissionRuns[0])
