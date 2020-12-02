@@ -53,5 +53,6 @@ Bug fixes
 Algorithms
 ----------
 - :ref:`algm-LoadElementalAnalysisData` algorithm was introduced for loading runs for the new Elemental Analysis GUI, enabling it to be registered by WorkspaceHistory.
+- When removing the exponential in RemoveExpDecay and EstimateMuonAsymmetryFromCounts now point data instead of bin edges is used for the x values.
 
 :ref:`Release 6.0.0 <v6.0.0>`
