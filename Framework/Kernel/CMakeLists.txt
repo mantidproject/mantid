@@ -104,6 +104,7 @@ set(SRC_FILES
     src/StartsWithValidator.cpp
     src/Statistics.cpp
     src/StdoutChannel.cpp
+    src/PythonStdoutChannel.cpp
     src/StringContainsValidator.cpp
     src/StringTokenizer.cpp
     src/Strings.cpp
@@ -278,6 +279,7 @@ set(INC_FILES
     inc/MantidKernel/StartsWithValidator.h
     inc/MantidKernel/Statistics.h
     inc/MantidKernel/StdoutChannel.h
+    inc/MantidKernel/PythonStdoutChannel.h
     inc/MantidKernel/StringContainsValidator.h
     inc/MantidKernel/StringTokenizer.h
     inc/MantidKernel/Strings.h
@@ -426,6 +428,7 @@ set(TEST_FILES
     StartsWithValidatorTest.h
     StatisticsTest.h
     StdoutChannelTest.h
+    PythonStdoutChannelTest.h
     StringContainsValidatorTest.h
     StringTokenizerTest.h
     StringsTest.h
