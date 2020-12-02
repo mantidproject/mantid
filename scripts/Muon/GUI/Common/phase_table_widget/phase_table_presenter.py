@@ -14,32 +14,16 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import get_phase_table_workspac
     get_phase_table_workspace_group_name, \
     get_phase_quad_workspace_name, get_fitting_workspace_name, get_base_data_directory
 from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-
+from Muon.GUI.Common.utilities.run_string_utils import valid_name_regex
 import mantid
-
-class  model(object):
-    def __init__(self, context):
-        self.context= context
-
-    def add_phasquad_as_pair(self, name):
-        print("hiii2m", group_info)
-        self.context.group_pair_context.add_pair(name)
-        pair_added = True# if state == 2 else False
-        if pair_added:
-            self.context.group_pair_context.add_pair_to_selected_pairs(name)
-        #else:
-        #    #self._model.remove_pair_from_analysis(name)
-        print("this", self.context.group_pair_context.pairs)
-        #group_info = {'is_added': pair_added, 'name': name}
-        #self.selected_phasequad_changed_notifier.notify_subscribers(group_info)
 
 
 class PhaseTablePresenter(object):
     def __init__(self, view, context):
         self.view = view
         self.context = context
-        self._model=model(context)
         self.current_alg = None
+        self._phasequad_obj = None
 
         self.group_change_observer = GenericObserver(self.update_current_groups_list)
         self.run_change_observer = GenericObserver(self.update_current_run_list)
@@ -92,51 +76,60 @@ class PhaseTablePresenter(object):
 
     def handle_calculate_phase_quad_button_clicked(self):
         self.update_model_from_view()
-        self.phasequad_calculation_thread = self.create_phase_quad_calculation_thread()
+        self.handle_add_phasequad_button_clicked()
 
-        self.phasequad_calculation_thread.threadWrapperSetUp(self.handle_calculation_started,
+    def validate_pair_name(self, text):
+        if text in self.context.group_pair_context.pairs:
+            self.view.warning_popup("Groups and pairs (including phasequads) must have unique names")
+            return False
+        if not re.match(valid_name_regex, text):
+            self.view.warning_popup("Phasequad names should only contain digits, characters and _")
+            return False
+        return True
+
+    def handle_add_phasequad_button_clicked(self):
+        new_pair_name = self.view.enter_pair_name()
+        if new_pair_name is None:
+            return
+       
+        elif self.validate_pair_name(new_pair_name):
+             table =  self.context.phase_context.options_dict['phase_table_for_phase_quad']
+             self._phasequad_obj = MuonPhasequad(str(new_pair_name), table)
+        
+             self.phasequad_calculation_thread = self.create_phase_quad_calculation_thread()
+
+             self.phasequad_calculation_thread.threadWrapperSetUp(self.handle_calculation_started,
                                                              self.handle_phasequad_calculation_success,
                                                              self.handle_calculation_error)
 
-        self.phasequad_calculation_thread.start()
+             self.phasequad_calculation_thread.start()
 
     def create_phase_quad_calculation_thread(self):
         self._phasequad_calculation_model = ThreadModelWrapper(self.calculate_phase_quad)
         return thread_model.ThreadModel(self._phasequad_calculation_model)
 
     def calculate_phase_quad(self):
-        table =  self.context.phase_context.options_dict['phase_table_for_phase_quad']
-        name = "bob"
-        phasequad_obj = MuonPhasequad(name, table)
-        self.context.group_pair_context.add_pair(phasequad_obj)
-        self.context.calculate_phasequads(name, phasequad_obj)
-        #self._model.add_phasquad_as_pair(name)
-        #self.context.group_pair_context.add_pair(name)
-        #get state from table
-      
 
-        #group_info = {'is_added': pair_added, 'name': name}
-        #self.selected_phasequad_changed_notifier.notify_subscribers(group_info)
-
-        #self.context.phase_context.add_phase_quad(muon_workspace_wrapper, run)
-        self.phase_quad_calculation_complete_notifier.notify_subscribers(name)
+        self.context.group_pair_context.add_pair(self._phasequad_obj)
+        self.context.calculate_phasequads(self._phasequad_obj.name, self._phasequad_obj)
+        self.phase_quad_calculation_complete_notifier.notify_subscribers(self._phasequad_obj.name)
 
     def handle_phasequad_calculation_success(self):
         self.enable_editing_notifier.notify_subscribers()
         self.view.enable_widget()
         self.view.disable_cancel()
-        print("moo",self.context.group_pair_context.pairs)
-        name = "bob"
+
+        name = self._phasequad_obj.name
         self.current_alg = None
-        #self.context.group_pair_context.add_pair(name)
         pair_added = True# if state == 2 else False
         if pair_added:
             self.context.group_pair_context.add_pair_to_selected_pairs(name)
-        #else:
-        #    #self._model.remove_pair_from_analysis(name)
-        print("this", self.context.group_pair_context.pairs)
+        else:
+            self.context.group_pair_context.remove_pair_from_selected_pairs(name)
+
         group_info = {'is_added': pair_added, 'name': name}
         self.selected_phasequad_changed_notifier.notify_subscribers(group_info)
+        self._phasequad_obj = None
 
     def handle_calculation_started(self):
         self.disable_editing_notifier.notify_subscribers()
@@ -219,6 +212,13 @@ class PhaseTablePresenter(object):
         self.view.set_input_combo_box(self.context.getGroupedWorkspaceNames())
         self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)
         self.update_model_from_view()
+        # for now we will remove the phaseequads
+        pairs = self.context.group_pair_context.pairs
+        for pair in pairs:
+            if isinstance(pair, MuonPhasequad):
+                self.context.group_pair_context.remove_pair_from_selected_pairs(pair.name)
+                self.context.group_pair_context.remove_pair(pair.name)
+
 
     def update_current_groups_list(self):
         self.view.set_group_combo_boxes(self.context.group_pair_context.group_names)

@@ -148,6 +148,11 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
     def warning_popup(message):
         warning(message)
 
+    def enter_pair_name(self):
+        new_pair_name, ok = QtWidgets.QInputDialog.getText(self, 'Phasequad Name', 'Enter name of new phasequad:')
+        if ok:
+            return new_pair_name
+
     def enable_widget(self):
         for widget in self.children():
             if str(widget.objectName()) in ['cancel_button', 'phasequad_cancel_button']:

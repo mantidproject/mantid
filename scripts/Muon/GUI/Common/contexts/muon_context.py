@@ -178,7 +178,11 @@ class MuonContext(object):
                     pair_asymmetry_workspace = self.calculate_pair(
                          pair, run, rebin=rebin)
                 elif isinstance(pair, MuonPhasequad):
-                    pair_asymmetry_workspace = self.calculate_phasequad(pair, run, rebin=rebin )
+                    # this will create the phasequad on data changed -> need later
+                    #pair_asymmetry_workspace = self.calculate_phasequad(pair, run, rebin=rebin )
+
+                    continue
+
                 if not pair_asymmetry_workspace:
                     continue
                 pair.update_asymmetry_workspace(
