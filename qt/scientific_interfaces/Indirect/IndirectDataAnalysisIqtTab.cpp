@@ -303,7 +303,9 @@ void IndirectDataAnalysisIqtTab::errorsClicked() {
   m_uiForm.spIterations->setEnabled(isErrorsEnabled());
 }
 
-bool IndirectDataAnalysisIqtTab::isErrorsEnabled() { return m_uiForm.cbCalculateErrors->isChecked(); }
+bool IndirectDataAnalysisIqtTab::isErrorsEnabled() {
+  return m_uiForm.cbCalculateErrors->isChecked();
+}
 
 /**
  * Ensure we have present and valid file/ws inputs.
@@ -405,7 +407,9 @@ void IndirectDataAnalysisIqtTab::loadSettings(const QSettings &settings) {
   m_uiForm.dsResolution->readSettings(settings.group());
 }
 
-void IndirectDataAnalysisIqtTab::plotInput() { IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot); }
+void IndirectDataAnalysisIqtTab::plotInput() {
+  IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
+}
 
 void IndirectDataAnalysisIqtTab::setFileExtensionsByName(bool filter) {
   QStringList const noSuffixes{""};
@@ -534,7 +538,8 @@ void IndirectDataAnalysisIqtTab::rangeChanged(double min, double max) {
  * @param prop The property which has been changed
  * @param val The new position for the range selector
  */
-void IndirectDataAnalysisIqtTab::updateRangeSelector(QtProperty *prop, double val) {
+void IndirectDataAnalysisIqtTab::updateRangeSelector(QtProperty *prop,
+                                                     double val) {
   auto xRangeSelector = m_uiForm.ppPlot->getRangeSelector("IqtRange");
 
   disconnect(xRangeSelector, SIGNAL(selectionChanged(double, double)), this,
@@ -576,7 +581,9 @@ void IndirectDataAnalysisIqtTab::updateEnergyRange(int state) {
   }
 }
 
-void IndirectDataAnalysisIqtTab::setRunEnabled(bool enabled) { m_uiForm.pbRun->setEnabled(enabled); }
+void IndirectDataAnalysisIqtTab::setRunEnabled(bool enabled) {
+  m_uiForm.pbRun->setEnabled(enabled);
+}
 
 void IndirectDataAnalysisIqtTab::setSaveResultEnabled(bool enabled) {
   m_uiForm.pbSave->setEnabled(enabled);

@@ -49,9 +49,8 @@ public:
 private:
   bool
   allWorkspacesEqual(const Mantid::API::MatrixWorkspace_sptr &workspace) const;
-  FqFitParameters &
-  addFqFitParameters(Mantid::API::MatrixWorkspace *workspace,
-                       const std::string &hwhmName);
+  FqFitParameters &addFqFitParameters(Mantid::API::MatrixWorkspace *workspace,
+                                      const std::string &hwhmName);
   std::unordered_map<std::string, FqFitParameters>::const_iterator
   findFqFitParameters(TableDatasetIndex dataIndex) const;
   std::string getResultXAxisUnit() const override;

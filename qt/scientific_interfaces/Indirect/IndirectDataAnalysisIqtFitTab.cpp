@@ -68,7 +68,8 @@ void IndirectDataAnalysisIqtFitTab::setupFitTab() {
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }
 
-EstimationDataSelector IndirectDataAnalysisIqtFitTab::getEstimationDataSelector() const {
+EstimationDataSelector
+IndirectDataAnalysisIqtFitTab::getEstimationDataSelector() const {
   return
       [](const MantidVec &x, const MantidVec &y,
          const std::pair<double, double> range) -> DataForParameterEstimation {
@@ -97,7 +98,8 @@ std::string IndirectDataAnalysisIqtFitTab::getFitTypeString() const {
   return functionType;
 }
 
-void IndirectDataAnalysisIqtFitTab::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
+void IndirectDataAnalysisIqtFitTab::setupFit(
+    Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }
 
@@ -107,7 +109,9 @@ void IndirectDataAnalysisIqtFitTab::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
 }
 
-void IndirectDataAnalysisIqtFitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
+void IndirectDataAnalysisIqtFitTab::setRunEnabled(bool enable) {
+  m_uiForm->pbRun->setEnabled(enable);
+}
 
 } // namespace IDA
 } // namespace CustomInterfaces

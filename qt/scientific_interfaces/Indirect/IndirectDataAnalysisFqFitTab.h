@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndirectFitAnalysisTab.h"
 #include "FqFitModel.h"
+#include "IndirectFitAnalysisTab.h"
 #include "ui_IndirectFitTab.h"
 
 #include "IFQFitObserver.h"

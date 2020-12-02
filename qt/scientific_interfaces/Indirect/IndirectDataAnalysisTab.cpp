@@ -328,8 +328,8 @@ void IndirectDataAnalysisTab::updatePlot(
     MantidQt::MantidWidgets::PreviewPlot *diffPreviewPlot) {
   if (outputWS && getSelectedSpectrum() >= getMinimumSpectrum() &&
       getSelectedSpectrum() <= getMaximumSpectrum())
-    updatePlot(outputWS, getSelectedSpectrum() - getMinimumSpectrum(), fitPreviewPlot,
-               diffPreviewPlot);
+    updatePlot(outputWS, getSelectedSpectrum() - getMinimumSpectrum(),
+               fitPreviewPlot, diffPreviewPlot);
   else
     clearAndPlotInput(fitPreviewPlot, diffPreviewPlot);
 }

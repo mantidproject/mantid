@@ -9,10 +9,10 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IndirectFitDataView.h"
-#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "FqFitDataPresenter.h"
 #include "FqFitModel.h"
+#include "IndirectFitDataView.h"
+#include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"

@@ -5,8 +5,8 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "FqFitDataPresenter.h"
-#include "IDAFunctionParameterEstimation.h"
 #include "FqFitDataTablePresenter.h"
+#include "IDAFunctionParameterEstimation.h"
 
 #include "MantidQtWidgets/Common/SignalBlocker.h"
 
@@ -141,8 +141,7 @@ void FqFitDataPresenter::setParameterLabel(const QString &parameter) {
   m_lbParameter->setText(parameter + ":");
 }
 
-void FqFitDataPresenter::handleParameterTypeChanged(
-    const QString &parameter) {
+void FqFitDataPresenter::handleParameterTypeChanged(const QString &parameter) {
   m_lbParameter->setText(parameter + ":");
   updateAvailableParameters(parameter);
   emit dataChanged();
@@ -182,8 +181,7 @@ void FqFitDataPresenter::updateParameterOptions(
     dialog->setParameterNames({});
 }
 
-void FqFitDataPresenter::updateParameterTypes(
-    FqFitAddWorkspaceDialog *dialog) {
+void FqFitDataPresenter::updateParameterTypes(FqFitAddWorkspaceDialog *dialog) {
   setDataIndexToCurrentWorkspace(dialog);
   dialog->setParameterTypes(getParameterTypes(m_dataIndex));
 }
@@ -199,7 +197,7 @@ FqFitDataPresenter::getParameterTypes(TableDatasetIndex dataIndex) const {
 }
 
 void FqFitDataPresenter::addWorkspace(IndirectFittingModel *model,
-                                        const std::string &name) {
+                                      const std::string &name) {
   if (model->numberOfWorkspaces() > m_dataIndex)
     model->removeWorkspace(m_dataIndex);
   model->addWorkspace(name);
@@ -264,12 +262,12 @@ void FqFitDataPresenter::closeDialog() {
 std::unique_ptr<IAddWorkspaceDialog>
 FqFitDataPresenter::getAddWorkspaceDialog(QWidget *parent) const {
   auto dialog = std::make_unique<FqFitAddWorkspaceDialog>(parent);
-  connect(dialog.get(),
-          SIGNAL(workspaceChanged(FqFitAddWorkspaceDialog *,
-                                  const std::string &)),
-          this,
-          SLOT(setDialogParameterNames(FqFitAddWorkspaceDialog *,
-                                       const std::string &)));
+  connect(
+      dialog.get(),
+      SIGNAL(workspaceChanged(FqFitAddWorkspaceDialog *, const std::string &)),
+      this,
+      SLOT(setDialogParameterNames(FqFitAddWorkspaceDialog *,
+                                   const std::string &)));
   connect(dialog.get(),
           SIGNAL(parameterTypeChanged(FqFitAddWorkspaceDialog *,
                                       const std::string &)),

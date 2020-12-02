@@ -252,9 +252,8 @@ void FqFitModel::removeWorkspace(TableDatasetIndex index) {
   IndirectFittingModel::removeWorkspace(index);
 }
 
-FqFitParameters &
-FqFitModel::addFqFitParameters(MatrixWorkspace *workspace,
-                                   const std::string &hwhmName) {
+FqFitParameters &FqFitModel::addFqFitParameters(MatrixWorkspace *workspace,
+                                                const std::string &hwhmName) {
   const auto &foundParameters = m_jumpParameters.find(hwhmName);
   if (foundParameters != m_jumpParameters.end())
     return foundParameters->second;
@@ -274,14 +273,14 @@ FqFitModel::findFqFitParameters(TableDatasetIndex dataIndex) const {
 }
 
 std::string FqFitModel::getFitParameterName(TableDatasetIndex dataIndex,
-                                              WorkspaceIndex spectrum) const {
+                                            WorkspaceIndex spectrum) const {
   const auto ws = getWorkspace(dataIndex);
   const auto axis = dynamic_cast<TextAxis *>(ws->getAxis(1));
   return axis->label(spectrum.value);
 }
 
 void FqFitModel::setActiveWidth(std::size_t widthIndex,
-                                  TableDatasetIndex dataIndex, bool single) {
+                                TableDatasetIndex dataIndex, bool single) {
   const auto parametersIt = findFqFitParameters(dataIndex);
   if (parametersIt != m_jumpParameters.end() &&
       parametersIt->second.widthSpectra.size() > widthIndex) {
@@ -304,7 +303,7 @@ void FqFitModel::setActiveWidth(std::size_t widthIndex,
 }
 
 void FqFitModel::setActiveEISF(std::size_t eisfIndex,
-                                 TableDatasetIndex dataIndex, bool single) {
+                               TableDatasetIndex dataIndex, bool single) {
   const auto parametersIt = findFqFitParameters(dataIndex);
   if (parametersIt != m_jumpParameters.end() &&
       parametersIt->second.eisfSpectra.size() > eisfIndex) {
@@ -368,7 +367,7 @@ FqFitModel::getEISF(TableDatasetIndex dataIndex) const {
 
 boost::optional<std::size_t>
 FqFitModel::getWidthSpectrum(std::size_t widthIndex,
-                               TableDatasetIndex dataIndex) const {
+                             TableDatasetIndex dataIndex) const {
   const auto parameters = findFqFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end() &&
       parameters->second.widthSpectra.size() > widthIndex)
@@ -378,7 +377,7 @@ FqFitModel::getWidthSpectrum(std::size_t widthIndex,
 
 boost::optional<std::size_t>
 FqFitModel::getEISFSpectrum(std::size_t eisfIndex,
-                              TableDatasetIndex dataIndex) const {
+                            TableDatasetIndex dataIndex) const {
   const auto parameters = findFqFitParameters(dataIndex);
   if (parameters != m_jumpParameters.end() &&
       parameters->second.eisfSpectra.size() > eisfIndex)

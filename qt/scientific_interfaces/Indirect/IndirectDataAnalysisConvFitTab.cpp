@@ -103,23 +103,26 @@ void IndirectDataAnalysisConvFitTab::setupFitTab() {
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }
 
-void IndirectDataAnalysisConvFitTab::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
+void IndirectDataAnalysisConvFitTab::setupFit(
+    Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }
 
-EstimationDataSelector IndirectDataAnalysisConvFitTab::getEstimationDataSelector() const {
+EstimationDataSelector
+IndirectDataAnalysisConvFitTab::getEstimationDataSelector() const {
   return [](const MantidVec &, const MantidVec &,
             const std::pair<double, double>) -> DataForParameterEstimation {
     return DataForParameterEstimation{};
   };
 }
 
-void IndirectDataAnalysisConvFitTab::setModelResolution(const std::string &resolutionName) {
+void IndirectDataAnalysisConvFitTab::setModelResolution(
+    const std::string &resolutionName) {
   setModelResolution(resolutionName, TableDatasetIndex{0});
 }
 
-void IndirectDataAnalysisConvFitTab::setModelResolution(const std::string &resolutionName,
-                                 TableDatasetIndex index) {
+void IndirectDataAnalysisConvFitTab::setModelResolution(
+    const std::string &resolutionName, TableDatasetIndex index) {
   m_convFittingModel->setResolution(resolutionName, index);
   auto fitResolutions = m_convFittingModel->getResolutionsForFit();
   m_fitPropertyBrowser->setModelResolution(fitResolutions);

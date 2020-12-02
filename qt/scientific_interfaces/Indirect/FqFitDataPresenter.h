@@ -7,11 +7,11 @@
 #pragma once
 
 #include "FQFitConstants.h"
+#include "FqFitAddWorkspaceDialog.h"
+#include "FqFitModel.h"
 #include "IFQFitObserver.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
-#include "FqFitAddWorkspaceDialog.h"
-#include "FqFitModel.h"
 #include "Notifier.h"
 
 #include <QComboBox>
@@ -26,9 +26,9 @@ class MANTIDQT_INDIRECT_DLL FqFitDataPresenter
   Q_OBJECT
 public:
   FqFitDataPresenter(FqFitModel *model, IndirectFitDataView *view,
-                       QComboBox *cbParameterType, QComboBox *cbParameter,
-                       QLabel *lbParameterType, QLabel *lbParameter,
-                       IFQFitObserver *SingleFunctionTemplateBrowser);
+                     QComboBox *cbParameterType, QComboBox *cbParameter,
+                     QLabel *lbParameterType, QLabel *lbParameter,
+                     IFQFitObserver *SingleFunctionTemplateBrowser);
 
 private slots:
   void hideParameterComboBoxes();

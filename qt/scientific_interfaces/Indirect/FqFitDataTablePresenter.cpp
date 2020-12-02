@@ -28,7 +28,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 FqFitDataTablePresenter::FqFitDataTablePresenter(FqFitModel *model,
-                                                     QTableWidget *dataTable)
+                                                 QTableWidget *dataTable)
     : IndirectDataTablePresenter(model->m_fitDataModel.get(), dataTable,
                                  FqFitHeaders()) {
   auto header = dataTable->horizontalHeader();

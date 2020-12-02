@@ -86,9 +86,12 @@ void IndirectDataAnalysisMSDFitTab::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
 }
 
-void IndirectDataAnalysisMSDFitTab::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
+void IndirectDataAnalysisMSDFitTab::setRunEnabled(bool enable) {
+  m_uiForm->pbRun->setEnabled(enable);
+}
 
-EstimationDataSelector IndirectDataAnalysisMSDFitTab::getEstimationDataSelector() const {
+EstimationDataSelector
+IndirectDataAnalysisMSDFitTab::getEstimationDataSelector() const {
 
   return
       [](const std::vector<double> &x, const std::vector<double> &y,
@@ -147,7 +150,8 @@ std::string IndirectDataAnalysisMSDFitTab::getFitTypeString() const {
 // Create parameter estimation functions
 // These function rely on the data returned from getEstimationDataSelector,
 // which should be appropriately configured.
-IDAFunctionParameterEstimation IndirectDataAnalysisMSDFitTab::createParameterEstimation() const {
+IDAFunctionParameterEstimation
+IndirectDataAnalysisMSDFitTab::createParameterEstimation() const {
   auto estimateMsd = [](::Mantid::API::IFunction_sptr &function,
                         const DataForParameterEstimation &estimationData) {
     auto y = estimationData.y;

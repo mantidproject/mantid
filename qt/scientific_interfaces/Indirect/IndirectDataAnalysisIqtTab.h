@@ -48,7 +48,6 @@ private slots:
   void saveClicked();
   void errorsClicked();
   void updateEnergyRange(int state);
-
 };
 } // namespace IDA
 } // namespace CustomInterfaces

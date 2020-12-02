@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "IndirectDataAnalysisFqFitTab.h"
 #include "FQFitConstants.h"
-#include "IDAFunctionParameterEstimation.h"
 #include "FqFitDataPresenter.h"
+#include "IDAFunctionParameterEstimation.h"
 
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -111,7 +111,8 @@ void IndirectDataAnalysisFqFitTab::setRunEnabled(bool enable) {
   m_uiForm->pbRun->setEnabled(enable);
 }
 
-EstimationDataSelector IndirectDataAnalysisFqFitTab::getEstimationDataSelector() const {
+EstimationDataSelector
+IndirectDataAnalysisFqFitTab::getEstimationDataSelector() const {
   return
       [](const std::vector<double> &x, const std::vector<double> &y,
          const std::pair<double, double> range) -> DataForParameterEstimation {
@@ -201,7 +202,8 @@ void estimateFickDiffusion(::Mantid::API::IFunction_sptr &function,
 }
 } // namespace
 
-IDAFunctionParameterEstimation IndirectDataAnalysisFqFitTab::createParameterEstimation() const {
+IDAFunctionParameterEstimation
+IndirectDataAnalysisFqFitTab::createParameterEstimation() const {
 
   IDAFunctionParameterEstimation parameterEstimation;
   parameterEstimation.addParameterEstimationFunction("ChudleyElliot",

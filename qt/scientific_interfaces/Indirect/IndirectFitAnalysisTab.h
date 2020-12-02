@@ -8,6 +8,7 @@
 
 #include "IIndirectFitData.h"
 #include "IndirectDataAnalysisTab.h"
+#include "IndirectFitDataModel.h"
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitOutputOptionsPresenter.h"
 #include "IndirectFitOutputOptionsView.h"
