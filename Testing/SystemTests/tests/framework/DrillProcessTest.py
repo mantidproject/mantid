@@ -8,11 +8,14 @@
 
 import systemtesting
 import sys
+import time
 
 from qtpy.QtWidgets import QApplication
+from qtpy.QtTest import QTest
+from qtpy.QtCore import Qt, QPoint
 
 from mantid.kernel import config
-from mantid.simpleapi import mtd
+from mantid.simpleapi import mtd, GroupWorkspaces
 from Interface.ui.drill.view.DrillView import *
 
 
@@ -28,11 +31,85 @@ class DrillProcessTest(systemtesting.MantidSystemTest):
         config.appendDataSearchSubDir('ILL/D11/')
 
     def validate(self):
-        return ['', '']
+        self.tolerance = 1e-3
+        self.tolerance_is_rel_err = True
+        return ["out", "D11_AutoProcess_Reference.nxs"]
+
+    def editCell(self, row, column, text):
+        """
+        Edit a specific cell of the DrILL table.
+
+        Args:
+            row (int): row index
+            column (int): column index
+            text (str): string to be written in the cell
+        """
+        columnIndex = self.drill.table.columns.index(column)
+        y = self.drill.table.rowViewportPosition(row) + 5
+        x = self.drill.table.columnViewportPosition(columnIndex) + 5
+        QTest.mouseClick(self.drill.table.viewport(),
+                         Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
+        QTest.mouseDClick(self.drill.table.viewport(),
+                          Qt.LeftButton, Qt.NoModifier, QPoint(x, y))
+        QTest.keyClicks(self.drill.table.viewport().focusWidget(), text)
+        QTest.keyClick(self.drill.table.viewport().focusWidget(), Qt.Key_Tab)
 
     def cleanup(self):
         mtd.clear()
 
     def runTest(self):
-        drill = DrillView()
-        drill.close()
+        sampleRuns = ["2889,2885,2881",
+                      "2887,2883,2879",
+                      "3187,3177,3167"]
+        sampleTransmissionRuns = ["2871",
+                                  "2869",
+                                  "3172"]
+        beamRuns = "2866,2867+2868,2878"
+        transmissionBeamRuns = "2867+2868"
+        containerRuns = "2888+2971,2884+2960,2880+2949"
+        containerTransmissionRuns = "2870+2954"
+        sampleThickness = ["0.1", "0.2", "0.2"]
+        maskFiles = "mask1.nxs,mask2.nxs,mask3.nxs"
+
+        self.drill = DrillView()
+        QTest.mouseClick(self.drill.addrow, Qt.LeftButton)
+        QTest.mouseClick(self.drill.addrow, Qt.LeftButton)
+
+        self.editCell(0, "SampleRuns", sampleRuns[0])
+        self.editCell(0, "SampleTransmissionRuns", sampleTransmissionRuns[0])
+        self.editCell(0, "BeamRuns", beamRuns)
+        self.editCell(0, "TransmissionBeamRuns", transmissionBeamRuns)
+        self.editCell(0, "ContainerRuns", containerRuns)
+        self.editCell(0, "ContainerTransmissionRuns", containerTransmissionRuns)
+        self.editCell(0, "SampleThickness", sampleThickness[0])
+        self.editCell(0, "MaskFiles", maskFiles)
+        self.editCell(0, "OutputWorkspace", "iq_s1")
+
+        self.editCell(1, "SampleRuns", sampleRuns[1])
+        self.editCell(1, "SampleTransmissionRuns", sampleTransmissionRuns[1])
+        self.editCell(1, "BeamRuns", beamRuns)
+        self.editCell(1, "TransmissionBeamRuns", transmissionBeamRuns)
+        self.editCell(1, "ContainerRuns", containerRuns)
+        self.editCell(1, "ContainerTransmissionRuns", containerTransmissionRuns)
+        self.editCell(1, "SampleThickness", sampleThickness[1])
+        self.editCell(1, "MaskFiles", maskFiles)
+        self.editCell(1, "OutputWorkspace", "iq_s2")
+
+        self.editCell(2, "SampleRuns", sampleRuns[2])
+        self.editCell(2, "SampleTransmissionRuns", sampleTransmissionRuns[2])
+        self.editCell(2, "BeamRuns", beamRuns)
+        self.editCell(2, "TransmissionBeamRuns", transmissionBeamRuns)
+        self.editCell(2, "ContainerRuns", containerRuns)
+        self.editCell(2, "ContainerTransmissionRuns", containerTransmissionRuns)
+        self.editCell(2, "SampleThickness", sampleThickness[2])
+        self.editCell(2, "MaskFiles", maskFiles)
+        self.editCell(2, "OutputWorkspace", "iq_s3")
+
+        QTest.mouseClick(self.drill.processAll, Qt.LeftButton)
+
+        while (("iq_s1" not in mtd)
+               or ("iq_s2" not in mtd)
+               or ("iq_s3" not in mtd)):
+            time.sleep(1)
+
+        GroupWorkspaces(InputWorkspaces=['iq_s1', 'iq_s2', 'iq_s3'], OutputWorkspace='out')
