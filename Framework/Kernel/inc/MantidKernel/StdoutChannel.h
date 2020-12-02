@@ -26,6 +26,6 @@ public:
   StdoutChannel();
 
   /// overwrite log
-  void log(const Message& msg) override;
+  void log(const Message &msg) override;
 };
 } // namespace Poco

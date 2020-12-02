@@ -43,11 +43,10 @@
 #include <Poco/StreamCopier.h>
 #include <Poco/String.h>
 #include <Poco/URI.h>
+#include <Poco/Util/AbstractConfiguration.h>
 #include <Poco/Util/LoggingConfigurator.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
 #include <Poco/Util/SystemConfiguration.h>
-#include <Poco/Util/AbstractConfiguration.h>
-#include <Poco/Exception.h>
 #include <Poco/Version.h>
 
 #include <boost/algorithm/string/join.hpp>
@@ -138,10 +137,10 @@ ConfigServiceImpl::ConfigServiceImpl()
   // Register StdChannel with Poco
   std::cout << "[DEBUG] ....................  Register StdoutChannel\n";
 
-// What if not registered here?
-//  Poco::LoggingFactory::defaultFactory().registerChannelClass(
-//      "StdoutChannel",
-//      new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
+  // What if not registered here?
+  //  Poco::LoggingFactory::defaultFactory().registerChannelClass(
+  //      "StdoutChannel",
+  //      new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
 
   setBaseDirectory();
 
@@ -395,12 +394,13 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
   std::cout << "Rewrite:  m_pConf\n";
   Poco::Util::AbstractConfiguration::Keys keys;
   m_pConf->keys(keys);
-  for (auto key: keys)
-      try {
-        std::cout << "Key: " << key << " = " << m_pConf->getString(key) << "\n";
-  } catch (Poco::NotFoundException) {
-      std::cout << "Key: " << key << "  cannot be printed " << "\n";
-  }
+  for (auto key : keys)
+    try {
+      std::cout << "Key: " << key << " = " << m_pConf->getString(key) << "\n";
+    } catch (Poco::NotFoundException) {
+      std::cout << "Key: " << key << "  cannot be printed "
+                << "\n";
+    }
 }
 
 /**
@@ -668,7 +668,9 @@ void ConfigServiceImpl::updateConfig(const std::string &filename,
                                      const bool append,
                                      const bool update_caches) {
 
-  std::cout << "[DEBUG] ..... Load configurtion file " << filename << " append = " << append << ", update caches = " << update_caches << "\n";
+  std::cout << "[DEBUG] ..... Load configurtion file " << filename
+            << " append = " << append << ", update caches = " << update_caches
+            << "\n";
   loadConfig(filename, append);
 
   // Ensure that the default save directory makes sense
@@ -694,18 +696,17 @@ void ConfigServiceImpl::updateConfig(const std::string &filename,
   // Test to register channel: POCO CANNOT register another channel
   std::cout << "[DEBUG] ... ... Register Poco Channel\n";
 
-  std::string output_channel = getString("logging.channels.consoleChannel.class");
+  std::string output_channel =
+      getString("logging.channels.consoleChannel.class");
   std::cout << "[DEBUG] ... ... Channel = '" << output_channel << "'\n";
 
   try {
-  Poco::LoggingFactory::defaultFactory().registerChannelClass(
-      "StdoutChannel",
-      new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
-  } catch (Poco::ExistsException)
-  {
-      std::cout << "[DEBUG] ... ... Registration failure.\n";
+    Poco::LoggingFactory::defaultFactory().registerChannelClass(
+        "StdoutChannel",
+        new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
+  } catch (Poco::ExistsException) {
+    std::cout << "[DEBUG] ... ... Registration failure.\n";
   }
-
 }
 
 /**
