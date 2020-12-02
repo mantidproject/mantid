@@ -21,7 +21,7 @@ from qtpy.QtWidgets import (QCheckBox, QComboBox, QGridLayout, QLabel, QHBoxLayo
                             QStatusBar, QVBoxLayout, QWidget)
 
 # local imports
-from mantidqt.MPLwidgets import FigureCanvas
+from workbench.plotting.mantidfigurecanvas import MantidFigureCanvas
 from mantidqt.widgets.colorbar.colorbar import ColorbarWidget
 from .dimensionwidget import DimensionWidget
 from .imageinfowidget import ImageInfoWidget, ImageInfoTracker
@@ -41,7 +41,7 @@ SCALENORM = "SliceViewer/scale_norm"
 POWERSCALE = "SliceViewer/scale_norm_power"
 
 
-class SliceViewerCanvas(ScrollZoomMixin, FigureCanvas):
+class SliceViewerCanvas(ScrollZoomMixin, MantidFigureCanvas):
     pass
 
 
