@@ -7,6 +7,7 @@
 #include "MantidReflectometry/ReflectometrySumInQ.h"
 
 #include "MantidAPI/Algorithm.tcc"
+#include "MantidAPI/Axis.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/SpectrumInfo.h"
@@ -15,6 +16,9 @@
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Crystal/AngleUnits.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument.h"
+#include "MantidGeometry/Instrument/ReferenceFrame.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidHistogramData/LinearGenerator.h"
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumNumber.h"
@@ -164,6 +168,74 @@ twoThetaWidth(const size_t wsIndex,
     range.min = (twoTheta + neighbours.min) / 2.;
     range.max = (twoTheta + neighbours.max) / 2.;
   }
+  return range;
+}
+
+/**
+ * Get the topbottom extent of a detector for the given axis
+ *
+ * @param axis [in] : the axis to get the extent for
+ * @param top [in] : if true, get the max extent, or min otherwise
+ * @return : the max/min extent on the given axis
+ */
+double getBoundingBoxExtent(const Mantid::Geometry::BoundingBox &boundingBox,
+                            const Mantid::Geometry::PointingAlong axis,
+                            const bool top) {
+
+  double result = 0.0;
+  switch (axis) {
+  case Mantid::Geometry::X:
+    result = top ? boundingBox.xMax() : boundingBox.xMin();
+    break;
+  case Mantid::Geometry::Y:
+    result = top ? boundingBox.yMax() : boundingBox.yMin();
+    break;
+  case Mantid::Geometry::Z:
+    result = top ? boundingBox.zMax() : boundingBox.zMin();
+    break;
+  default:
+    throw std::runtime_error("Axis is not X/Y/Z");
+    break;
+  }
+  return result;
+}
+/** Get the twoTheta angle range for the top/bottom of the detector associated
+ * with the given spectrum
+ *
+ * @param spectrumIdx : the workspace index of the spectrum
+ * @return : the twoTheta range in radians
+ */
+Mantid::Reflectometry::ReflectometrySumInQ::MinMax
+twoThetaBoxWidth(const size_t spectrumIdx,
+                 const Mantid::API::SpectrumInfo &spectrumInfo,
+                 const Mantid::API::MatrixWorkspace &workspace) {
+
+  Mantid::Reflectometry::ReflectometrySumInQ::MinMax range;
+  auto refFrame = workspace.getInstrument()->getReferenceFrame();
+
+  // Get the sample->detector distance along the beam
+  const V3D detSample =
+      spectrumInfo.position(spectrumIdx) - spectrumInfo.samplePosition();
+  const double beamOffset =
+      refFrame->vecPointingAlongBeam().scalar_prod(detSample);
+  // Get the bounding box for this detector/group
+  Mantid::Geometry::BoundingBox boundingBox;
+  auto detector = workspace.getDetector(spectrumIdx);
+  detector->getBoundingBox(boundingBox);
+  // Get the top and bottom on the axis pointing up
+  const double top =
+      getBoundingBoxExtent(boundingBox, refFrame->pointingUp(), true);
+  const double bottom =
+      getBoundingBoxExtent(boundingBox, refFrame->pointingUp(), false);
+  // Calculate the difference in twoTheta between the top and bottom
+  range.max = std::atan(top / beamOffset);
+  range.min = std::atan(bottom / beamOffset);
+
+  // We must have non-zero width to project a range
+  if (range.max - range.min < Mantid::Kernel::Tolerance) {
+    throw std::runtime_error("Error calculating pixel size.");
+  }
+
   return range;
 }
 } // namespace
@@ -392,7 +464,7 @@ ReflectometrySumInQ::MinMax ReflectometrySumInQ::findWavelengthMinMax(
   MinMax inputLambdaRange;
   MinMax inputTwoThetaRange;
   for (const auto i : indices) {
-    const auto twoThetas = twoThetaWidth(i, spectrumInfo);
+    const auto twoThetas = twoThetaBoxWidth(i, spectrumInfo, detectorWS);
     inputTwoThetaRange.testAndSetMin(includePartialBins ? twoThetas.min
                                                         : twoThetas.max);
     inputTwoThetaRange.testAndSetMax(includePartialBins ? twoThetas.max
@@ -546,7 +618,8 @@ ReflectometrySumInQ::sumInQ(const API::MatrixWorkspace &detectorWS,
       continue;
     }
     // Get the size of this detector in twoTheta
-    const auto twoThetaRange = twoThetaWidth(spIdx, spectrumInfo);
+    const auto twoThetaRange =
+        twoThetaBoxWidth(spIdx, spectrumInfo, detectorWS);
     const auto inputBinEdges = detectorWS.binEdges(spIdx);
     const auto inputCounts = detectorWS.counts(spIdx);
     const auto inputStdDevs = detectorWS.countStandardDeviations(spIdx);
