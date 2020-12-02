@@ -76,13 +76,7 @@ void FitScriptGeneratorPresenter::handleStartXChanged() {
     auto const workspaceIndex = m_view->workspaceIndex(selectedRows[0]);
     auto const startX = m_view->startX(selectedRows[0]);
 
-    if (m_model->isXValid(workspaceName, workspaceIndex, startX))
-      m_model->updateStartX(workspaceName, workspaceIndex, startX);
-    else {
-      m_view->resetSelection();
-      m_view->displayWarning(
-          "The StartX provided must be within the x limits of its workspace.");
-    }
+    updateStartX(workspaceName, workspaceIndex, startX);
   }
 }
 
@@ -93,13 +87,7 @@ void FitScriptGeneratorPresenter::handleEndXChanged() {
     auto const workspaceIndex = m_view->workspaceIndex(selectedRows[0]);
     auto const endX = m_view->endX(selectedRows[0]);
 
-    if (m_model->isXValid(workspaceName, workspaceIndex, endX))
-      m_model->updateEndX(workspaceName, workspaceIndex, endX);
-    else {
-      m_view->resetSelection();
-      m_view->displayWarning(
-          "The EndX provided must be within the x limits of its workspace.");
-    }
+    updateEndX(workspaceName, workspaceIndex, endX);
   }
 }
 
@@ -148,6 +136,30 @@ void FitScriptGeneratorPresenter::addWorkspace(std::string const &workspaceName,
     m_view->addWorkspaceDomain(workspaceName, workspaceIndex, startX, endX);
   } catch (std::invalid_argument const &ex) {
     m_warnings.emplace_back(ex.what());
+  }
+}
+
+void FitScriptGeneratorPresenter::updateStartX(std::string const &workspaceName,
+                                               WorkspaceIndex workspaceIndex,
+                                               double startX) {
+  if (m_model->isXValid(workspaceName, workspaceIndex, startX))
+    m_model->updateStartX(workspaceName, workspaceIndex, startX);
+  else {
+    m_view->resetSelection();
+    m_view->displayWarning(
+        "The StartX provided must be within the x limits of its workspace.");
+  }
+}
+
+void FitScriptGeneratorPresenter::updateEndX(std::string const &workspaceName,
+                                             WorkspaceIndex workspaceIndex,
+                                             double endX) {
+  if (m_model->isXValid(workspaceName, workspaceIndex, endX))
+    m_model->updateEndX(workspaceName, workspaceIndex, endX);
+  else {
+    m_view->resetSelection();
+    m_view->displayWarning(
+        "The EndX provided must be within the x limits of its workspace.");
   }
 }
 

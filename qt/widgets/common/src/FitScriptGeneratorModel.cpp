@@ -94,6 +94,25 @@ IFunction_sptr getFunctionAtPrefix(std::string const &prefix,
 namespace MantidQt {
 namespace MantidWidgets {
 
+/**
+ * FitDomain struct methods.
+ */
+
+FitDomain::FitDomain(std::string const &prefix,
+                     std::string const &workspaceName,
+                     WorkspaceIndex workspaceIndex, double startX, double endX)
+    : m_multiDomainFunctionPrefix(prefix), m_workspaceName(workspaceName),
+      m_workspaceIndex(workspaceIndex), m_startX(startX), m_endX(endX) {}
+
+bool FitDomain::isSameDomain(std::string const &workspaceName,
+                             WorkspaceIndex workspaceIndex) const {
+  return m_workspaceName == workspaceName && m_workspaceIndex == workspaceIndex;
+}
+
+/**
+ * FitScriptGeneratorModel class methods.
+ */
+
 FitScriptGeneratorModel::FitScriptGeneratorModel()
     : m_fitDomains(), m_function(nullptr) {}
 
@@ -102,11 +121,13 @@ FitScriptGeneratorModel::~FitScriptGeneratorModel() {}
 void FitScriptGeneratorModel::removeWorkspaceDomain(
     std::string const &workspaceName, WorkspaceIndex workspaceIndex) {
   auto const removeIter = findWorkspaceDomain(workspaceName, workspaceIndex);
-  auto const removePrefix = removeIter->m_multiDomainFunctionPrefix;
-  auto const removeIndex = getPrefixIndexAt(removePrefix, 0);
+  if (removeIter != m_fitDomains.cend()) {
+    auto const removePrefix = removeIter->m_multiDomainFunctionPrefix;
+    auto const removeIndex = getPrefixIndexAt(removePrefix, 0);
 
-  removeWorkspaceDomain(removeIndex, removeIter);
-  removeCompositeAtPrefix(removePrefix);
+    removeWorkspaceDomain(removeIndex, removeIter);
+    removeCompositeAtPrefix(removePrefix);
+  }
 }
 
 void FitScriptGeneratorModel::removeWorkspaceDomain(
@@ -187,18 +208,25 @@ std::pair<double, double>
 FitScriptGeneratorModel::xLimits(std::string const &workspaceName,
                                  WorkspaceIndex workspaceIndex) const {
   auto &ads = AnalysisDataService::Instance();
-  if (hasWorkspaceDomain(workspaceName, workspaceIndex) &&
-      ads.doesExist(workspaceName)) {
-    auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName);
-    if (workspace) {
-      auto const xData = workspace->x(workspaceIndex.value);
-      return std::pair<double, double>(xData.front(), xData.back());
-    }
-  }
+  if (ads.doesExist(workspaceName))
+    return xLimits(ads.retrieveWS<MatrixWorkspace>(workspaceName),
+                   workspaceIndex);
 
   throw std::invalid_argument("The domain '" + workspaceName + " (" +
                               std::to_string(workspaceIndex.value) +
                               ")' could not be found.");
+}
+
+std::pair<double, double>
+FitScriptGeneratorModel::xLimits(MatrixWorkspace_const_sptr const &workspace,
+                                 WorkspaceIndex workspaceIndex) const {
+  if (workspace) {
+    auto const xData = workspace->x(workspaceIndex.value);
+    return std::pair<double, double>(xData.front(), xData.back());
+  }
+
+  throw std::invalid_argument("The workspace '" + workspace->getName() +
+                              "' is not a matrix workspace.");
 }
 
 void FitScriptGeneratorModel::updateStartX(std::string const &workspaceName,

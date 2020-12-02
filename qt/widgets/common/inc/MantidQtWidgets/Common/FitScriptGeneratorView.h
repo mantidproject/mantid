@@ -45,12 +45,12 @@ public:
 
   void subscribePresenter(FitScriptGeneratorPresenter *presenter);
 
-  std::string workspaceName(FitDomainIndex index) const;
-  WorkspaceIndex workspaceIndex(FitDomainIndex index) const;
-  double startX(FitDomainIndex index) const;
-  double endX(FitDomainIndex index) const;
+  [[nodiscard]] std::string workspaceName(FitDomainIndex index) const;
+  [[nodiscard]] WorkspaceIndex workspaceIndex(FitDomainIndex index) const;
+  [[nodiscard]] double startX(FitDomainIndex index) const;
+  [[nodiscard]] double endX(FitDomainIndex index) const;
 
-  std::vector<FitDomainIndex> selectedRows() const;
+  [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const;
 
   void removeWorkspaceDomain(std::string const &workspaceName,
                              WorkspaceIndex workspaceIndex);
@@ -58,9 +58,10 @@ public:
                           WorkspaceIndex workspaceIndex, double startX,
                           double endX);
 
-  bool openAddWorkspaceDialog();
-  std::vector<Mantid::API::MatrixWorkspace_const_sptr> getDialogWorkspaces();
-  std::vector<WorkspaceIndex> getDialogWorkspaceIndices() const;
+  [[nodiscard]] bool openAddWorkspaceDialog();
+  [[nodiscard]] std::vector<Mantid::API::MatrixWorkspace_const_sptr>
+  getDialogWorkspaces();
+  [[nodiscard]] std::vector<WorkspaceIndex> getDialogWorkspaceIndices() const;
 
   void resetSelection();
 

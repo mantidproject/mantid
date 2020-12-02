@@ -56,6 +56,11 @@ private:
   void addWorkspace(std::string const &workspaceName,
                     WorkspaceIndex workspaceIndex, double startX, double endX);
 
+  void updateStartX(std::string const &workspaceName,
+                    WorkspaceIndex workspaceIndex, double startX);
+  void updateEndX(std::string const &workspaceName,
+                  WorkspaceIndex workspaceIndex, double endX);
+
   void checkForWarningMessages();
 
   std::vector<std::string> m_warnings;

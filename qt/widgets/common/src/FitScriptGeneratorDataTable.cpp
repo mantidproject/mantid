@@ -16,15 +16,36 @@
 
 namespace {
 
-int DOUBLE_PRECISION(5);
+int WS_INDEX_MIN(0);
+int WS_INDEX_MAX(100000);
+double X_EXTENT(100000.0);
+int X_PRECISION(5);
 
-QValidator *createDoubleValidator() {
-  auto validator = new QDoubleValidator(-100000.0, 100000.0, DOUBLE_PRECISION);
+QStringList const COLUMN_HEADINGS({"Name", "WS Index", "StartX", "EndX"});
+QString const TABLE_STYLESHEET("QTableWidget {\n"
+                               "    font-size: 8pt;\n"
+                               "    border: 1px solid #828790;\n"
+                               "}\n"
+                               "\n"
+                               "QTableWidget::item:selected {\n"
+                               "    background-color: #c7e0ff;\n"
+                               "    color: #000000;\n"
+                               "}"
+                               "\n"
+                               "QTableWidget::item:hover {\n"
+                               "    background-color: #c7e0ff;\n"
+                               "    color: #000000;\n"
+                               "}");
+
+QValidator *createXValidator() {
+  auto validator = new QDoubleValidator(-X_EXTENT, X_EXTENT, X_PRECISION);
   validator->setNotation(QDoubleValidator::Notation::StandardNotation);
   return validator;
 }
 
-QValidator *createIntValidator() { return new QIntValidator(0, 100000); }
+QValidator *createWSIndexValidator() {
+  return new QIntValidator(WS_INDEX_MIN, WS_INDEX_MAX);
+}
 
 QTableWidgetItem *createTableItem(QString const &value,
                                   Qt::AlignmentFlag const &alignment,
@@ -36,17 +57,17 @@ QTableWidgetItem *createTableItem(QString const &value,
   return item;
 }
 
-QTableWidgetItem *createIntTableItem(int value,
-                                     Qt::AlignmentFlag const &alignment,
-                                     bool editable) {
+QTableWidgetItem *createWSIndexTableItem(int value,
+                                         Qt::AlignmentFlag const &alignment,
+                                         bool editable) {
   return createTableItem(QString::number(value), alignment, editable);
 }
 
-QTableWidgetItem *createDoubleTableItem(double value,
-                                        Qt::AlignmentFlag const &alignment,
-                                        bool editable) {
-  return createTableItem(QString::number(value, 'f', DOUBLE_PRECISION),
-                         alignment, editable);
+QTableWidgetItem *createXTableItem(double value,
+                                   Qt::AlignmentFlag const &alignment,
+                                   bool editable) {
+  return createTableItem(QString::number(value, 'f', X_PRECISION), alignment,
+                         editable);
 }
 
 } // namespace
@@ -54,19 +75,17 @@ QTableWidgetItem *createDoubleTableItem(double value,
 namespace MantidQt {
 namespace MantidWidgets {
 
-using DelegateType = CustomItemDelegate::DelegateType;
-
 /**
  * FitScriptGeneratorDataTable class methods.
  */
 
 FitScriptGeneratorDataTable::FitScriptGeneratorDataTable(QWidget *parent)
     : QTableWidget(parent), m_selectedRow(-1), m_selectedColumn(-1),
-      m_selectedValue(0.0) {
+      m_selectedValue(0.0), m_lastIndex(QPersistentModelIndex()) {
   this->setSelectionBehavior(QAbstractItemView::SelectRows);
   this->setSelectionMode(QAbstractItemView::ExtendedSelection);
   this->setShowGrid(false);
-  this->setColumnCount(4);
+  this->setColumnCount(COLUMN_HEADINGS.size());
   this->setRowCount(0);
   this->verticalHeader()->setVisible(false);
   this->horizontalHeader()->setHighlightSections(false);
@@ -77,37 +96,22 @@ FitScriptGeneratorDataTable::FitScriptGeneratorDataTable(QWidget *parent)
   this->setColumnWidth(ColumnIndex::StartX, 100);
   this->setColumnWidth(ColumnIndex::EndX, 100);
 
-  this->setHorizontalHeaderLabels(
-      QStringList({"Name", "WS Index", "StartX", "EndX"}));
+  this->setHorizontalHeaderLabels(COLUMN_HEADINGS);
 
-  this->setStyleSheet("QTableWidget {\n"
-                      "    font-size: 8pt;\n"
-                      "    border: 1px solid #828790;\n"
-                      "}\n"
-                      "\n"
-                      "QTableWidget::item:selected {\n"
-                      "    background-color: #c7e0ff;\n"
-                      "    color: #000000;\n"
-                      "}"
-                      "\n"
-                      "QTableWidget::item:hover {\n"
-                      "    background-color: #c7e0ff;\n"
-                      "    color: #000000;\n"
-                      "}");
+  this->setStyleSheet(TABLE_STYLESHEET);
 
-  m_lastIndex = QPersistentModelIndex();
   this->viewport()->installEventFilter(this);
 
   this->setItemDelegateForColumn(
       ColumnIndex::WorkspaceName,
-      new CustomItemDelegate(this, DelegateType::String));
+      new CustomItemDelegate(this, ColumnIndex::WorkspaceName));
   this->setItemDelegateForColumn(
       ColumnIndex::WorkspaceIndex,
-      new CustomItemDelegate(this, DelegateType::Int));
+      new CustomItemDelegate(this, ColumnIndex::WorkspaceIndex));
   this->setItemDelegateForColumn(
-      ColumnIndex::StartX, new CustomItemDelegate(this, DelegateType::Double));
+      ColumnIndex::StartX, new CustomItemDelegate(this, ColumnIndex::StartX));
   this->setItemDelegateForColumn(
-      ColumnIndex::EndX, new CustomItemDelegate(this, DelegateType::Double));
+      ColumnIndex::EndX, new CustomItemDelegate(this, ColumnIndex::EndX));
 
   connect(this, SIGNAL(itemClicked(QTableWidgetItem *)), this,
           SLOT(handleItemClicked(QTableWidgetItem *)));
@@ -197,12 +201,12 @@ void FitScriptGeneratorDataTable::addDomain(
   this->setItem(rowIndex, ColumnIndex::WorkspaceName,
                 createTableItem(workspaceName, Qt::AlignVCenter, false));
   this->setItem(rowIndex, ColumnIndex::WorkspaceIndex,
-                createIntTableItem(static_cast<int>(workspaceIndex.value),
-                                   Qt::AlignCenter, false));
+                createWSIndexTableItem(static_cast<int>(workspaceIndex.value),
+                                       Qt::AlignCenter, false));
   this->setItem(rowIndex, ColumnIndex::StartX,
-                createDoubleTableItem(startX, Qt::AlignCenter, true));
+                createXTableItem(startX, Qt::AlignCenter, true));
   this->setItem(rowIndex, ColumnIndex::EndX,
-                createDoubleTableItem(endX, Qt::AlignCenter, true));
+                createXTableItem(endX, Qt::AlignCenter, true));
 
   this->blockSignals(false);
 }
@@ -235,7 +239,7 @@ void FitScriptGeneratorDataTable::resetSelection() {
 void FitScriptGeneratorDataTable::setSelectedXValue(double xValue) {
   this->blockSignals(true);
   this->setItem(m_selectedRow, m_selectedColumn,
-                createDoubleTableItem(xValue, Qt::AlignCenter, true));
+                createXTableItem(xValue, Qt::AlignCenter, true));
   this->blockSignals(false);
 }
 
@@ -244,8 +248,9 @@ void FitScriptGeneratorDataTable::setSelectedXValue(double xValue) {
  */
 
 CustomItemDelegate::CustomItemDelegate(FitScriptGeneratorDataTable *parent,
-                                       DelegateType const &type)
-    : QStyledItemDelegate(parent), m_tableWidget(parent), m_type(type) {
+                                       ColumnIndex const &index)
+    : QStyledItemDelegate(parent), m_tableWidget(parent), m_columnIndex(index),
+      m_hoveredIndex(-1) {
   m_tableWidget = parent;
   m_tableWidget->setMouseTracking(true);
 
@@ -253,8 +258,6 @@ CustomItemDelegate::CustomItemDelegate(FitScriptGeneratorDataTable *parent,
           SLOT(handleItemEntered(QTableWidgetItem *)));
   connect(m_tableWidget, SIGNAL(itemExited(int)), this,
           SLOT(handleItemExited(int)));
-
-  m_hoveredIndex = -1;
 }
 
 void CustomItemDelegate::handleItemEntered(QTableWidgetItem *item) {
@@ -273,14 +276,17 @@ QWidget *CustomItemDelegate::createEditor(QWidget *parent,
   Q_UNUSED(index);
 
   auto lineEdit = new QLineEdit(parent);
-  switch (m_type) {
-  case DelegateType::Double:
-    lineEdit->setValidator(createDoubleValidator());
+  switch (m_columnIndex) {
+  case ColumnIndex::WorkspaceName:
     break;
-  case DelegateType::Int:
-    lineEdit->setValidator(createIntValidator());
+  case ColumnIndex::WorkspaceIndex:
+    lineEdit->setValidator(createWSIndexValidator());
     break;
-  case DelegateType::String:
+  case ColumnIndex::StartX:
+    lineEdit->setValidator(createXValidator());
+    break;
+  case ColumnIndex::EndX:
+    lineEdit->setValidator(createXValidator());
     break;
   }
 

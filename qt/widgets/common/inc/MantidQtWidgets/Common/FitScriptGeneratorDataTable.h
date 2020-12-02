@@ -47,12 +47,13 @@ public:
   FitScriptGeneratorDataTable(QWidget *parent = nullptr);
   ~FitScriptGeneratorDataTable() = default;
 
-  std::string workspaceName(FitDomainIndex row) const;
-  MantidWidgets::WorkspaceIndex workspaceIndex(FitDomainIndex row) const;
-  double startX(FitDomainIndex row) const;
-  double endX(FitDomainIndex row) const;
+  [[nodiscard]] std::string workspaceName(FitDomainIndex row) const;
+  [[nodiscard]] MantidWidgets::WorkspaceIndex
+  workspaceIndex(FitDomainIndex row) const;
+  [[nodiscard]] double startX(FitDomainIndex row) const;
+  [[nodiscard]] double endX(FitDomainIndex row) const;
 
-  std::vector<FitDomainIndex> selectedRows() const;
+  [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const;
 
   void removeDomain(std::string const &workspaceName,
                     MantidWidgets::WorkspaceIndex workspaceIndex);
@@ -86,6 +87,8 @@ private:
   QPersistentModelIndex m_lastIndex;
 };
 
+using ColumnIndex = FitScriptGeneratorDataTable::ColumnIndex;
+
 /**
  * This class is used for formating the type of data allowed in each of the
  * tables columns. It is also used for setting various column properties, and
@@ -95,10 +98,8 @@ class CustomItemDelegate : public QStyledItemDelegate {
   Q_OBJECT
 
 public:
-  enum class DelegateType { Double, Int, String };
-
-  CustomItemDelegate(FitScriptGeneratorDataTable *parent = nullptr,
-                     DelegateType const &type = DelegateType::Double);
+  CustomItemDelegate(FitScriptGeneratorDataTable *parent,
+                     ColumnIndex const &index);
 
 private slots:
   void handleItemEntered(QTableWidgetItem *item);
@@ -111,8 +112,8 @@ private:
              QModelIndex const &index) const override;
 
   FitScriptGeneratorDataTable *m_tableWidget;
+  ColumnIndex m_columnIndex;
   int m_hoveredIndex;
-  DelegateType m_type;
 };
 
 } // namespace MantidWidgets

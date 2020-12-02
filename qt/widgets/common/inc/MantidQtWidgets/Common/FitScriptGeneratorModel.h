@@ -21,22 +21,19 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+/**
+ * This struct is used to store all data relating to a single domain to be
+ * fitted. This includes the location of the domain (workspace Name & index),
+ * the location of its composite function in the multi-domain function (the
+ * prefix), and the fit range (start and end X).
+ */
 struct FitDomain {
 
   FitDomain(std::string const &prefix, std::string const &workspaceName,
-            WorkspaceIndex workspaceIndex, double startX, double endX) {
-    m_multiDomainFunctionPrefix = prefix;
-    m_workspaceName = workspaceName;
-    m_workspaceIndex = workspaceIndex;
-    m_startX = startX;
-    m_endX = endX;
-  }
+            WorkspaceIndex workspaceIndex, double startX, double endX);
 
-  inline bool isSameDomain(std::string const &workspaceName,
-                           WorkspaceIndex workspaceIndex) const noexcept {
-    return m_workspaceName == workspaceName &&
-           m_workspaceIndex == workspaceIndex;
-  }
+  [[nodiscard]] bool isSameDomain(std::string const &workspaceName,
+                                  WorkspaceIndex workspaceIndex) const;
 
   std::string m_multiDomainFunctionPrefix;
   std::string m_workspaceName;
@@ -45,6 +42,11 @@ struct FitDomain {
   double m_endX;
 };
 
+/**
+ * This class stores the domain data to be fitted to, and the multi domain
+ * function relating to this domain data. This data is used to generate a python
+ * script for complex Mantid fitting.
+ */
 class EXPORT_OPT_MANTIDQT_COMMON FitScriptGeneratorModel {
 public:
   FitScriptGeneratorModel();
@@ -56,10 +58,9 @@ public:
                           WorkspaceIndex workspaceIndex, double startX,
                           double endX);
 
-  bool isXValid(std::string const &workspaceName, WorkspaceIndex workspaceIndex,
-                double xValue) const;
-  std::pair<double, double> xLimits(std::string const &workspaceName,
-                                    WorkspaceIndex workspaceIndex) const;
+  [[nodiscard]] bool isXValid(std::string const &workspaceName,
+                              WorkspaceIndex workspaceIndex,
+                              double xValue) const;
 
   void updateStartX(std::string const &workspaceName,
                     WorkspaceIndex workspaceIndex, double startX);
@@ -75,13 +76,21 @@ private:
                           WorkspaceIndex workspaceIndex, double startX,
                           double endX);
 
-  std::size_t findDomainIndex(std::string const &workspaceName,
-                              WorkspaceIndex workspaceIndex) const;
-  std::vector<FitDomain>::const_iterator
+  [[nodiscard]] std::pair<double, double>
+  xLimits(std::string const &workspaceName,
+          WorkspaceIndex workspaceIndex) const;
+  [[nodiscard]] std::pair<double, double>
+  xLimits(Mantid::API::MatrixWorkspace_const_sptr const &workspace,
+          WorkspaceIndex workspaceIndex) const;
+
+  [[nodiscard]] std::size_t
+  findDomainIndex(std::string const &workspaceName,
+                  WorkspaceIndex workspaceIndex) const;
+  [[nodiscard]] std::vector<FitDomain>::const_iterator
   findWorkspaceDomain(std::string const &workspaceName,
                       WorkspaceIndex workspaceIndex) const;
-  bool hasWorkspaceDomain(std::string const &workspaceName,
-                          WorkspaceIndex workspaceIndex) const;
+  [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName,
+                                        WorkspaceIndex workspaceIndex) const;
 
   void removeCompositeAtPrefix(std::string const &prefix);
 
@@ -91,9 +100,9 @@ private:
 
   void removeCompositeAtIndex(std::size_t const &compositeIndex);
 
-  bool hasCompositeAtPrefix(std::string const &prefix) const;
+  [[nodiscard]] bool hasCompositeAtPrefix(std::string const &prefix) const;
 
-  std::string nextAvailablePrefix() const;
+  [[nodiscard]] std::string nextAvailablePrefix() const;
 
   [[nodiscard]] inline std::size_t numberOfDomains() const noexcept {
     return m_fitDomains.size();

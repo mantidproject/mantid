@@ -335,7 +335,6 @@ class FittingTabPresenter(object):
         self._tf_asymmetry_mode = self.view.tf_asymmetry_mode
         global_parameters = self.view.get_global_parameters()
         if self._tf_asymmetry_mode:
-            self.view.select_workspaces_to_fit_button.setEnabled(False)
             new_global_parameters = [str('f0.f1.f1.' + item) for item in global_parameters]
             if self.automatically_update_fit_name:
                 self.view.function_name += ',TFAsymmetry'
@@ -412,7 +411,6 @@ class FittingTabPresenter(object):
         self.manual_selection_made = False  # reset manual selection flag
         self.update_selected_workspace_list_for_fit()
         self.view.simul_fit_by_specifier.setEnabled(True)
-        self.view.select_workspaces_to_fit_button.setEnabled(False)
         self.update_model_from_view(fit_function=self._fit_function[0], fit_by=self.view.simultaneous_fit_by)
         self.fit_type_changed_notifier.notify_subscribers()
         self.fit_function_changed_notifier.notify_subscribers()
