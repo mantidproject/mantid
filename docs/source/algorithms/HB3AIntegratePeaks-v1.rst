@@ -23,7 +23,7 @@ Usage
 
 **Example - DEMAND Workflow**
 
-.. testcode:: ExampleWorkflow
+.. code-block:: python
 
     # Input detector scan data to use. Can be a list of files, or workspaces - see HB3AAdjustSampleNorm for details
     data = "HB3A_exp0724_scan0182.nxs, HB3A_exp0724_scan0183.nxs"
