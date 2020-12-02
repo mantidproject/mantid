@@ -70,24 +70,27 @@ class LoadRunWidgetModel(object):
     def execute(self):
         failed_files = []
         for run in self._runs:
-            try:
-                groupws, self._directory = LoadElementalAnalysisData(Run=run, GroupWorkspace=str(run))
-                detectors = []
-                workspace_list = groupws.getNames()
-                for item in workspace_list:
-                    ''' The workspaces in the groupworkspace are all named in the format [run];[detector]
-                    The line below removes any text up to and including the ; which leaves behind the detector name.
-                    For example 2695; Detector 1 returns as Detector 1'''
-                    detector_name = item.split(';', 1)[-1].lstrip()
-                    detectors.append(detector_name)
-                run_results = RunObject(run, detectors, groupws)
-                self._data_context.run_info_update(run_results)
+            if self._loaded_data_store.get_data(run=[run]):
                 self._data_context.current_runs.append(run)
+            else:
+                try:
+                    groupws, self._directory = LoadElementalAnalysisData(Run=run, GroupWorkspace=str(run))
+                    detectors = []
+                    workspace_list = groupws.getNames()
+                    for item in workspace_list:
+                        ''' The workspaces in the groupworkspace are all named in the format [run];[detector]
+                        The line below removes any text up to and including the ; which leaves behind the detector name.
+                        For example 2695; Detector 1 returns as Detector 1'''
+                        detector_name = item.split(';', 1)[-1].lstrip()
+                        detectors.append(detector_name)
+                    run_results = RunObject(run, detectors, groupws)
+                    self._data_context.run_info_update(run_results)
+                    self._data_context.current_runs.append(run)
 
-            except RuntimeError as error:
-                failed_files += [(run, error)]
-                continue
-            self._loaded_data_store.add_data(run=[run], workspace=groupws)
+                except RuntimeError as error:
+                    failed_files += [(run, error)]
+                    continue
+                self._loaded_data_store.add_data(run=[run], workspace=groupws)
 
         if failed_files:
             message = "The requested run could not be found. This could be due to: \n - The run does not yet exist." \
