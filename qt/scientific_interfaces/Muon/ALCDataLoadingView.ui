@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>943</width>
-    <height>543</height>
+    <height>615</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -84,7 +84,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QGridLayout" name="pathLayout" columnstretch="1,10,0">
+           <layout class="QGridLayout" name="pathLayout" columnstretch="1,10">
             <property name="leftMargin">
              <number>9</number>
             </property>
@@ -168,7 +168,7 @@
            <widget class="MantidQt::MantidWidgets::LogValueSelector" name="logValueSelector" native="true"/>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
+           <layout class="QHBoxLayout" name="loadLayout">
             <property name="leftMargin">
              <number>0</number>
             </property>
@@ -358,7 +358,7 @@
              </widget>
             </item>
             <item>
-             <spacer name="horizontalSpacer_4">
+             <spacer name="horizontalSpacer_6">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -373,7 +373,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="0,6,1,0,2">
+           <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="0,6,1,0,2">
             <item>
              <widget class="QLabel" name="labelBackward">
               <property name="enabled">
@@ -843,8 +843,8 @@
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="calculationType"/>
-  <buttongroup name="detectorGroupingType"/>
   <buttongroup name="deadTimeCorrType"/>
+  <buttongroup name="detectorGroupingType"/>
+  <buttongroup name="calculationType"/>
  </buttongroups>
 </ui>
