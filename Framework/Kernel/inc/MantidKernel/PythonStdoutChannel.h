@@ -24,6 +24,5 @@ class MANTID_KERNEL_DLL PythonStdoutChannel : public ConsoleChannel {
 public:
   /// Constructor for PythonStdoutChannel
   PythonStdoutChannel();
-
 };
 } // namespace Poco

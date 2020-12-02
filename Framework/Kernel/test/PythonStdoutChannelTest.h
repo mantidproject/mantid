@@ -18,7 +18,9 @@ using namespace Mantid::Kernel;
 
 class PythonStdoutChannelTest : public CxxTest::TestSuite {
 public:
-  void testContructor() { TS_ASSERT_THROWS_NOTHING(Poco::PythonStdoutChannel a;) }
+  void testContructor() {
+    TS_ASSERT_THROWS_NOTHING(Poco::PythonStdoutChannel a;)
+  }
 
   void testLogMessage() {
     // Save root channel
@@ -57,7 +59,8 @@ public:
     lbuffer.str("");
 
     // Test std channel
-    Poco::AutoPtr<Poco::PythonStdoutChannel> stdoutChannel(new Poco::PythonStdoutChannel);
+    Poco::AutoPtr<Poco::PythonStdoutChannel> stdoutChannel(
+        new Poco::PythonStdoutChannel);
     Poco::Logger::root().setChannel(stdoutChannel);
     log.error() << "Error Message 3\n";
     // the error should be in std::cout
