@@ -13,55 +13,56 @@
 #include "MantidAlgorithms/DllConfig.h"
 
 namespace Mantid {
-    namespace Algorithms {
-        /**
-         * @brief Load calibration table for CORELLI from given path
-         * 
-         */
-        class MANTID_ALGORITHMS_DLL CorelliPowderCalibrationLoad : public API::Algorithm{
-            public:
-                /// Algorithm's name for identification
-                const std::string name() const override {
-                    return "CorelliPowderCalibrationLoad";
-                };
+namespace Algorithms {
+/**
+ * @brief Load calibration table for CORELLI from given path
+ *
+ */
+class MANTID_ALGORITHMS_DLL CorelliPowderCalibrationLoad
+    : public API::Algorithm {
+public:
+  /// Algorithm's name for identification
+  const std::string name() const override {
+    return "CorelliPowderCalibrationLoad";
+  };
 
-                /// Summary of algorithm's purpose
-                const std::string summary() const override {
-                    return "Load corresponding Corelli calibration table from given path";
-                };
+  /// Summary of algorithm's purpose
+  const std::string summary() const override {
+    return "Load corresponding Corelli calibration table from given path";
+  };
 
-                /// Algorithm's version, overriding a virtual method
-                int version() const override { return 1; };
+  /// Algorithm's version, overriding a virtual method
+  int version() const override { return 1; };
 
-                /// Algorithm's category, overriding a virtual method
-                const std::string category() const override {
-                    return "Diffraction\\Calibration";
-                };
+  /// Algorithm's category, overriding a virtual method
+  const std::string category() const override {
+    return "Diffraction\\Calibration";
+  };
 
-                /// Extra help info
-                const std::vector<std::string> seeAlso() const override {
-                    return {"CorelliPowderCalibrationGenerate "
-                            "& CorelliPowderCalibrationDatabase "
-                            "& CorelliPowderCalibrationApply"};
-                };
-            
-            private:
-                /// Overwrites Algorithm method. Does nothing at present
-                void init() override;
+  /// Extra help info
+  const std::vector<std::string> seeAlso() const override {
+    return {"CorelliPowderCalibrationGenerate "
+            "& CorelliPowderCalibrationDatabase "
+            "& CorelliPowderCalibrationApply"};
+  };
 
-                /// Overwrites Algorithm method
-                void exec() override;
+private:
+  /// Overwrites Algorithm method. Does nothing at present
+  void init() override;
 
-                /// Private validator for inputs
-                std::map<std::string, std::string> validateInputs() override;
+  /// Overwrites Algorithm method
+  void exec() override;
 
-                /// Get database filename based on given ws
-                std::string deduce_database_name(API::MatrixWorkspace_sptr ws);
+  /// Private validator for inputs
+  std::map<std::string, std::string> validateInputs() override;
 
-                /// Members
-                API::MatrixWorkspace_sptr ws;
-        };
+  /// Get database filename based on given ws
+  std::string deduce_database_name(API::MatrixWorkspace_sptr ws);
 
-    } // namespace Algorithms
+  /// Members
+  API::MatrixWorkspace_sptr ws;
+};
+
+} // namespace Algorithms
 
 } // namespace Mantid
