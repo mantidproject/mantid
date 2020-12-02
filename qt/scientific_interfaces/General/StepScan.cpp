@@ -772,6 +772,8 @@ void StepScan::plotCurve() {
   ax.setXLabel(xAxisTitle.c_str());
   ax.setYLabel(yAxisTitle.c_str());
   fig.show();
+  this->activateWindow();
+  this->raise();
 #endif
 }
 
