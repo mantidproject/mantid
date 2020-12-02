@@ -2,6 +2,7 @@
 
 set(WORKBENCH_SITE_PACKAGES ${CMAKE_INSTALL_PREFIX})
 set(WORKBENCH_PLUGINS_DIR ${CMAKE_INSTALL_PREFIX}/plugins)
+set(WORKBENCH_BIN_DIR ${CMAKE_INSTALL_PREFIX})
 check_include_files(stdint.h stdint)
 if(stdint)
   add_definitions(-DHAVE_STDINT_H)
