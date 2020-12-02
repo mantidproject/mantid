@@ -138,7 +138,6 @@ class PairingTablePresenter(object):
             self._model.add_pair_to_analysis(pair_name)
         else:
             self._model.remove_pair_from_analysis(pair_name)
-        print("booo",pair_added,pair_name  )
         pair_info = {'is_added': pair_added, 'name': pair_name}
         self.selected_pair_changed_notifier.notify_subscribers(pair_info)
 

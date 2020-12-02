@@ -173,20 +173,20 @@ class MuonContext(object):
             self._calculate_pairs(rebin=True)
 
     def _update_phasequads(self, rebin):
-        for run in self._data_context.current_runs:
-            # lets remove the phasequad pairs
-            to_rm = []
-            for pair in self._group_pair_context.pairs:
-                if isinstance(pair, MuonBasePair):
-                    to_rm.append(pair)
-            # this is to force a reset of phasequads
-            for pair in to_rm:
-                self.group_pair_context.remove_pair_from_selected_pairs(pair.name)
-            # lets remove the phasequads for now -> later will recalculate
-            for pair in self.group_pair_context.phasequads:
-                self.group_pair_context.remove_phasequad(pair)
+        # lets remove the phasequad pairs
+        to_rm = []
+        for pair in self._group_pair_context.pairs:
+            if  not isinstance(pair, MuonPair) and isinstance(pair, MuonBasePair):
+                to_rm.append(pair)
+        # this is to force a reset of phasequads
+        for pair in to_rm:
+            self.group_pair_context.remove_pair_from_selected_pairs(pair.name)
+        # lets remove the phasequads for now -> later will recalculate
+        for pair in self.group_pair_context.phasequads:
+            self.group_pair_context.remove_phasequad(pair)
 
     def _calculate_pairs(self, rebin):
+        for run in self._data_context.current_runs:
 
             self._update_phasequads(rebin)
             # construct the pairs

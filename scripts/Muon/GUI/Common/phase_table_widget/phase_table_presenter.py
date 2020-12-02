@@ -39,9 +39,6 @@ class PhaseTablePresenter(object):
         self.selected_phasequad_changed_notifier = GenericObservable()
 
         self.update_view_from_model_observer = GenericObserver(self.update_view_from_model)
-        #self.add_phasequad_observer =  GenericObserverWithArgPassing(self.add_phasquad_as_pair)
-        #self.phase_quad_calculation_complete_notifier.add_subscriber(self.add_phasequad_observer)
-
         self.update_current_phase_tables()
 
     def update_view_from_model(self):

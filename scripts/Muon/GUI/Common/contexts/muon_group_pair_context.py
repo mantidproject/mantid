@@ -9,7 +9,8 @@ import os
 import Muon.GUI.Common.utilities.xml_utils as xml_utils
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair
-from Muon.GUI.Common.muon_phasequad import MuonPhasequad, MuonBasePair
+from Muon.GUI.Common.muon_phasequad import MuonPhasequad
+from Muon.GUI.Common.muon_base_pair import MuonBasePair
 
 from mantid.api import WorkspaceGroup
 from mantid.kernel import ConfigServiceImpl
@@ -228,10 +229,10 @@ class MuonGroupPairContext(object):
     def add_pair(self, pair):
         if isinstance(pair, MuonPair) and self._check_name_unique(pair.name):
             self._pairs.append(pair)
-        if isinstance(pair, MuonBasePair) and self._check_name_unique(pair.name):
+        elif isinstance(pair, MuonBasePair) and self._check_name_unique(pair.name):
             self._pairs.append(pair)
         else:
-            raise ValueError('Groups and pairs must have unique names '+pair.name+" and "+self._pairs)
+            raise ValueError('Groups and pairs must have unique names')
 
     def add_phasequad(self, phasequad):
         if isinstance(phasequad, MuonPhasequad) and self._check_name_unique(phasequad.Re.name) and self._check_name_unique(phasequad.Im.name):
@@ -239,7 +240,7 @@ class MuonGroupPairContext(object):
             self.add_pair(phasequad.Re)
             self.add_pair(phasequad.Im)
         else:
-            raise ValueError('Groups and pairs must have unique names '+pair.name+" ands "+self._pairs)
+            raise ValueError('Groups and pairs must have unique names')
 
     def remove_phasequad(self, phasequad_obj):
         for phasequad in self._phasequad:
