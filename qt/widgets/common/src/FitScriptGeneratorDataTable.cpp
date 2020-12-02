@@ -187,7 +187,9 @@ std::vector<FitDomainIndex> FitScriptGeneratorDataTable::selectedRows() const {
 void FitScriptGeneratorDataTable::removeDomain(
     std::string const &workspaceName,
     MantidWidgets::WorkspaceIndex workspaceIndex) {
-  this->removeRow(indexOfDomain(workspaceName, workspaceIndex));
+  auto const removeIndex = indexOfDomain(workspaceName, workspaceIndex);
+  if (removeIndex != -1)
+    this->removeRow(removeIndex);
 }
 
 void FitScriptGeneratorDataTable::addDomain(

@@ -67,6 +67,12 @@ public:
 
   void displayWarning(std::string const &message);
 
+public:
+  /// Testing accessors
+  FitScriptGeneratorDataTable *tableWidget() const { return m_dataTable.get(); }
+  QPushButton *removeButton() const { return m_ui.pbRemove; }
+  QPushButton *addWorkspaceButton() const { return m_ui.pbAddWorkspace; }
+
 private slots:
   void onRemoveClicked();
   void onAddWorkspaceClicked();

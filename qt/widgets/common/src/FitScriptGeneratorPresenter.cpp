@@ -18,6 +18,9 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+FitScriptGeneratorPresenter::FitScriptGeneratorPresenter()
+    : m_warnings(), m_view(nullptr), m_model(nullptr) {}
+
 FitScriptGeneratorPresenter::FitScriptGeneratorPresenter(
     FitScriptGeneratorView *view, FitScriptGeneratorModel *model,
     QStringList const &workspaceNames, double startX, double endX)

@@ -1053,6 +1053,9 @@ set(
   test/FindFilesThreadPoolManagerTest.h
   test/FindFilesWorkerTest.h
   test/FitPropertyBrowserTest.h
+  test/FitScriptGeneratorDataTableTest.h
+  test/FitScriptGeneratorPresenterTest.h
+  test/FitScriptGeneratorViewTest.h
   test/ImageInfoModelMatrixWSTest.h
   test/ImageInfoModelMDTest.h
   test/ImageInfoPresenterTest.h

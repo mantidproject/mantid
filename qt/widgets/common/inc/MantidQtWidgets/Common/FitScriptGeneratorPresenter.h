@@ -32,9 +32,13 @@ public:
                               double startX = 0.0, double endX = 0.0);
   ~FitScriptGeneratorPresenter();
 
-  void notifyPresenter(ViewEvent const &event);
+  virtual void notifyPresenter(ViewEvent const &event);
 
-  void openFitScriptGenerator();
+  virtual void openFitScriptGenerator();
+
+public:
+  /// A constructor required for testing purposes only.
+  FitScriptGeneratorPresenter();
 
 private:
   void handleRemoveClicked();
