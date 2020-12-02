@@ -80,7 +80,7 @@ std::map<std::string, std::string> CropWorkspaceRagged::validateInputs() {
       }
     }
   } else if (xMin.size() > 1 && xMax.size() > 1) {
-    for (int64_t k = 0; k < xMin.size(); k++) {
+    for (size_t k = 0; k < xMin.size(); k++) {
       if (xMin[k] > xMax[k]) {
         issues["XMin"] = "XMin must be less than XMax.";
         return issues;
