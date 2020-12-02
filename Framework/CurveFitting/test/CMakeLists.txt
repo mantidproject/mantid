@@ -1,4 +1,4 @@
-if(CXXTEST_FOUND)
+if(CXXTEST_FOUND AND NOT FRAMEWORK_ONLY_BUILD)
   include_directories(SYSTEM
                       ${CXXTEST_INCLUDE_DIR}
 )
