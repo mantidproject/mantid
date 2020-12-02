@@ -9,10 +9,12 @@
 Description
 -----------
 
-Uses an :ref:`MDEventWorkspace <MDWorkspace>` and `PeaksWorkspace` to integrate the peaks provided in the peaks
-workspace and apply a :ref:`LorentzCorrection <algm-LorentzCorrection>`. The results are written to `OutputFile` in
-SHELX format with direction cosines using :ref:`SaveHKL <algm-SaveHKL>` or in the Fullprof format using
-:ref:`SaveReflections <algm-SaveReflections>`.
+Uses a :ref:`MDEventWorkspace <MDWorkspace>` and `PeaksWorkspace` to integrate the peaks provided in the peaks
+workspace. A :ref:`LorentzCorrection <algm-LorentzCorrection>` can be optionally applied to the integrated peaks with
+the `ApplyLorentz` option.
+
+The output peaks workspace can be written to `OutputFile` in either SHELX format with direction cosines using
+:ref:`SaveHKL <algm-SaveHKL>` or in the Fullprof format using :ref:`SaveReflections <algm-SaveReflections>`.
 
 The input to this algorithm is intended as part of the DEMAND data reduction workflow, using
 :ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` and :ref:`HB3AFindPeaks <algm-HB3AFindPeaks>` which can be seen
