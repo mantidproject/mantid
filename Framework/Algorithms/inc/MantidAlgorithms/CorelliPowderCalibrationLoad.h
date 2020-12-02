@@ -60,7 +60,6 @@ namespace Mantid {
 
                 /// Members
                 API::MatrixWorkspace_sptr ws;
-                std::string wsName;
         };
 
     } // namespace Algorithms
