@@ -12,6 +12,7 @@ import sys
 from qtpy.QtWidgets import QApplication
 
 from mantid.kernel import config
+from mantid.simpleapi import mtd
 from Interface.ui.drill.view.DrillView import *
 
 
@@ -22,13 +23,16 @@ class DrillProcessTest(systemtesting.MantidSystemTest):
 
     def __init__(self):
         super().__init__()
+        config['default.facility'] = 'ILL'
+        config['default.instrument'] = 'D11'
+        config.appendDataSearchSubDir('ILL/D11/')
 
     def validate(self):
         return ['', '']
 
-    def runTest(self):
-        config['default.facility'] = 'ILL'
-        config['default.instrument'] = 'D11'
+    def cleanup(self):
+        mtd.clear()
 
+    def runTest(self):
         drill = DrillView()
         drill.close()
