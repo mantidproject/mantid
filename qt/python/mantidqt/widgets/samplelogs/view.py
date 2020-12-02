@@ -48,6 +48,12 @@ class SampleLogsView(QSplitter):
             layout_mult_expt_info.addSpacerItem(QSpacerItem(10, 10, QSizePolicy.Expanding))
             layout_left.addLayout(layout_mult_expt_info)
 
+        # create a line edit to allow for filtering keys
+        self.line_edit = QLineEdit()
+        self.line_edit.setClearButtonEnabled(True)
+        self.line_edit.setToolTip("Type here to filter the logs")
+        self.line_edit.editingFinished.connect(self.presenter.search_key_changed)
+        layout_left.addWidget(self.line_edit)
         # Create sample log table
         self.table = QTableView()
         self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -55,12 +61,6 @@ class SampleLogsView(QSplitter):
         self.table.contextMenuEvent = self.tableMenu
         layout_left.addWidget(self.table)
         self.frame_left.setLayout(layout_left)
-        # create a line edit to allow for filtering keys
-        self.line_edit = QLineEdit()
-        self.line_edit.setClearButtonEnabled(True)
-        self.line_edit.setToolTip("Type here to filter the logs")
-        self.line_edit.editingFinished.connect(self.presenter.search_key_changed)
-        layout_left.addWidget(self.line_edit)
         self.addWidget(self.frame_left)
 
         #right hand side
