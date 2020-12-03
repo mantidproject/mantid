@@ -51,12 +51,12 @@ HistogramData::Histogram
 normaliseCounts(const HistogramData::Histogram &histogram,
                 const double numGoodFrames) {
   HistogramData::Histogram result(histogram);
-  const auto xPointRawData = histogram.points().rawData();
+  const auto xPoints = result.points();
 
   auto &yData = result.mutableY();
   auto &eData = result.mutableE();
   for (size_t i = 0; i < yData.size(); ++i) {
-    const double factor = exp(xPointRawData[i] / MUON_LIFETIME_MICROSECONDS);
+    const double factor = exp(xPoints[i] / MUON_LIFETIME_MICROSECONDS);
     // Correct the Y data
     if (yData[i] != 0.0) {
       yData[i] *= factor / numGoodFrames;
