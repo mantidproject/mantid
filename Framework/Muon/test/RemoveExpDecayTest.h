@@ -21,7 +21,8 @@ using Mantid::Algorithms::MuonRemoveExpDecay;
 const std::string outputName = "MuonRemoveExpDecay_Output";
 
 namespace {
-MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt, bool useBinEdges = false) {
+MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt,
+                                     bool useBinEdges = false) {
 
   // Create a fake muon dataset
   double a = 0.1; // Amplitude of the oscillations
@@ -95,7 +96,7 @@ public:
     MatrixWorkspace_sptr outWS = alg->getProperty("OutputWorkspace");
   }
 
-    void test_EmptySpectrumListPointsWorkspace() {
+  void test_EmptySpectrumListPointsWorkspace() {
 
     auto ws = createWorkspace(2, 50);
 
