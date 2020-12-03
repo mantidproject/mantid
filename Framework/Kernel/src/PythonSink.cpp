@@ -4,21 +4,21 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MantidKernel/PythonStdoutChannel.h"
-#include <Poco/Message.h>
-#include <iostream>
+#include "MantidKernel/PythonSink.h"
 
 #include <boost/iostreams/categories.hpp> // sink_tag
 #include <iosfwd>                         // streamsize
 
-#include <fstream>
-
 // test_ostream  std::cout
 
-namespace Poco {
 
-// NOT WORK static boost::iostreams::stream<pysys_stdout_sink> pysys_stdout;
+std::streamsize pysys_stdout_sink::write( const char* s, std::streamsize n ) {
+    // PySys_WriteStdout truncates to 1000 chars
+    static const std::streamsize MAXSIZE = 1000;
 
-PythonStdoutChannel::PythonStdoutChannel() : ConsoleChannel(pysys_stdout) {}
+    std::streamsize written = std::min( n, MAXSIZE );
+    // FIXME PySys_WriteStdout( (boost::format("%%.%1%s") % written).str().c_str(), s );
+    std::cout << s;
 
-} // namespace Poco
+    return written;
+}

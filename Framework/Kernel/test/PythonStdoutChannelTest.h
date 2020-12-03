@@ -14,8 +14,10 @@
 #include <Poco/Logger.h>
 #include <Poco/NullChannel.h>
 
-#include <boost/iostreams/categories.hpp> // sink_tag
-#include <iosfwd>                         // streamsize
+//#include <boost/iostreams/categories.hpp> // sink_tag
+//#include <iosfwd>                         // streamsize
+
+#include "MantidKernel/PythonSink.h"
 
 using namespace Mantid::Kernel;
 
