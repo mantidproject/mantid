@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
@@ -22,7 +23,7 @@
 using namespace MantidQt::MantidWidgets;
 using namespace testing;
 
-namespace {
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockFitScriptGeneratorPresenter : public IFitScriptGeneratorPresenter {
 
@@ -39,7 +40,7 @@ private:
   FitScriptGeneratorView *m_view;
 };
 
-} // namespace
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class FitScriptGeneratorViewTest : public CxxTest::TestSuite {
 
@@ -77,6 +78,7 @@ public:
         .Times(1);
 
     QTest::mouseClick(m_view->removeButton(), Qt::LeftButton);
+    QTest::qWait(500);
   }
 
   void test_that_clicking_the_add_workspace_button_will_notify_the_presenter() {
@@ -85,6 +87,7 @@ public:
     EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::AddClicked)).Times(1);
 
     QTest::mouseClick(m_view->addWorkspaceButton(), Qt::LeftButton);
+    QTest::qWait(500);
   }
 
   void
@@ -162,8 +165,6 @@ public:
 
   void
   test_that_selectedRows_will_return_an_empty_vector_if_there_are_no_currently_selected_rows() {
-    int rowIndex(1);
-
     openFitScriptGeneratorWidget();
     m_view->addWorkspaceDomain("Name", WorkspaceIndex(0), 0.0, 2.0);
 

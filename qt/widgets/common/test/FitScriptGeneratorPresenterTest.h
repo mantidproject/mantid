@@ -8,6 +8,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorPresenter.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorModel.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
@@ -22,7 +23,7 @@ using namespace MantidQt::MantidWidgets;
 using namespace testing;
 using namespace WorkspaceCreationHelper;
 
-namespace {
+GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 class MockFitScriptGeneratorView : public IFitScriptGeneratorView {
 
@@ -77,7 +78,7 @@ public:
                                 WorkspaceIndex workspaceIndex, double endX));
 };
 
-} // namespace
+GNU_DIAG_ON_SUGGEST_OVERRIDE
 
 class FitScriptGeneratorPresenterTest : public CxxTest::TestSuite {
 
