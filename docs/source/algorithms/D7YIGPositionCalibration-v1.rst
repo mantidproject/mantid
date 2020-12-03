@@ -60,10 +60,11 @@ Usage
    Load('ILL/D7/396442_396831.nxs', OutputWorkspace='intermediateWavelengthScan')
    approximate_wavelength = '4.8' # Angstrom
    D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
-                               YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_intermediateWavelength.xml',
-                               MinimalDistanceBetweenPeaks=1.5, BankOffsets="-4,-4,0",
-                               FittingMethod='Individual', FitOutputWorkspace='intermediateWavelength')
-		       
+                            YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_intermediateWavelength.xml',
+                            MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-4,-4,0],
+			    MaskedBinsRange=[-50, -25, 15],
+			    FittingMethod='Individual', FitOutputWorkspace='intermediateWavelength')
+
    print('The calibrated wavelength is: {0:.1f}'.format(float(approximate_wavelength)*mtd['intermediateWavelength'].column(1)[1]))
    print('The bank2 gradient is: {0:.1f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[0]))
    print('The bank3 gradient is: {0:.1f}'.format(1.0 / mtd['intermediateWavelength'].column(1)[176]))
