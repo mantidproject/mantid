@@ -11,7 +11,14 @@
 #include <boost/iostreams/categories.hpp> // sink_tag
 #include <iosfwd>                         // streamsize
 
+#include <fstream>
+
+// test_ostream  std::cout
+
 namespace Poco {
-PythonStdoutChannel::PythonStdoutChannel() : ConsoleChannel(std::cout) {}
+
+// NOT WORK static boost::iostreams::stream<pysys_stdout_sink> pysys_stdout;
+
+PythonStdoutChannel::PythonStdoutChannel() : ConsoleChannel(test_ostream) {}
 
 } // namespace Poco

@@ -17,6 +17,7 @@
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/NetworkProxy.h"
 #include "MantidKernel/StdoutChannel.h"
+#include "MantidKernel/PythonStdoutChannel.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
@@ -137,10 +138,12 @@ ConfigServiceImpl::ConfigServiceImpl()
   // Register StdChannel with Poco
   std::cout << "[DEBUG] ....................  Register StdoutChannel\n";
 
-  // What if not registered here?
-  //  Poco::LoggingFactory::defaultFactory().registerChannelClass(
-  //      "StdoutChannel",
-  //      new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
+  // There is not need to if not registered here?
+  Poco::LoggingFactory::defaultFactory().registerChannelClass(
+        "StdoutChannel",
+        new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
+
+  std::cout << "[DEBUG ... ... End of first regisgration\n";
 
   setBaseDirectory();
 
@@ -694,7 +697,7 @@ void ConfigServiceImpl::updateConfig(const std::string &filename,
   }
 
   // Test to register channel: POCO CANNOT register another channel
-  std::cout << "[DEBUG] ... ... Register Poco Channel\n";
+  std::cout << "[DEBUG] ... ... Register Poco Channel .... .....\n";
 
   std::string output_channel =
       getString("logging.channels.consoleChannel.class");
@@ -702,10 +705,10 @@ void ConfigServiceImpl::updateConfig(const std::string &filename,
 
   try {
     Poco::LoggingFactory::defaultFactory().registerChannelClass(
-        "StdoutChannel",
-        new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
+        "PythonStdoutChannel",
+        new Poco::Instantiator<Poco::PythonStdoutChannel, Poco::Channel>);
   } catch (Poco::ExistsException) {
-    std::cout << "[DEBUG] ... ... Registration failure.\n";
+    std::cout << "[DEBUG] ... ... Registration Python Channel failure.\n";
   }
 }
 
