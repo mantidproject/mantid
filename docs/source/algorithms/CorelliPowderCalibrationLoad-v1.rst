@@ -11,13 +11,13 @@ Description
 -----------
 
 Load a Corelli calibration table that is located in a given database directory or the default location.
-The selection of the database file (*.csv) is determined by the starting time stamp inside the given InputWorkspace.
+The selection of the database file (csv) is determined by the starting time stamp inside the given InputWorkspace.
 The database files are assumed to be generated with ``CorelliPowderCalibrationDatabase``.
 
 Usage
 -----
 
-* Example - Load a example database (not provided here)
+Example - Load a example database (not provided here)
 
 .. code-block:: python
 
