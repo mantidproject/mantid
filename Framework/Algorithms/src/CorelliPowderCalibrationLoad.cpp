@@ -149,7 +149,7 @@ void CorelliPowderCalibrationLoad::exec() {
   alg->setProperty("Separator", "CSV");
   alg->setProperty("CommentIndicator", "#");
   alg->setPropertyValue("OutputWorkspace", calTableName);
-  alg->execute();
+  alg->executeAsChildAlg();
 
   Workspace_sptr _outws = alg->getProperty("OutputWorkspace");
   TableWorkspace_sptr calTable =
