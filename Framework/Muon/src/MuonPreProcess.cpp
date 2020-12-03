@@ -257,78 +257,36 @@ MatrixWorkspace_sptr MuonPreProcess::applyCropping(MatrixWorkspace_sptr ws,
                                                    const double &xMax) {
   if (xMin != EMPTY_DBL() || xMax != EMPTY_DBL()) {
     if (!getPropertyValue("TimeZeroTable").empty()) {
-      /* IAlgorithm_sptr cropRagged =
-       createChildAlgorithm("CropWorkspaceRagged");
-       cropRagged->setProperty("InputWorkspace", ws);
-       if (xMin != EMPTY_DBL()) {
-         std::vector<double> xMinVec(ws->getNumberHistograms(), xMin);
-         cropRagged->setProperty("XMin", xMinVec);
-       }
-       if (xMax != EMPTY_DBL()) {
-         std::vector<double> xMaxVec(ws->getNumberHistograms(), xMax);
-         cropRagged->setProperty("XMax", xMaxVec);
-       }
-       cropRagged->execute();
-       Workspace_sptr returnWs =
-           cropRagged->getProperty("OutputWorkspace");
-       return std::dynamic_pointer_cast<MatrixWorkspace>(returnWs);*/
-
-      // copy ws to new ws
-      // read data in ws 
-      // save data within range
-      // create workspace from save data
-      // replace old data with new data
-
-      // Clone data to new ws
-      auto newWs = cloneWorkspace(ws);
-
-      // Loop spectrum and find all valid data
-      for (int i = 0; i < ws->getNumberHistograms(); ++i) {
-        // place to store new data
-        std::vector<double> X{};
-        std::vector<double> Y{};
-        std::vector<double> E{};
-
-        // get Y and E data
-        auto dataY = ws->readY(i);
-        auto dataE = ws->readE(i);
-
-        // counter for y and e data
-        int index = 0;
-
-        for (auto& x : ws->readX(i)) {
-          // Check if in valid range
-          if (x >= xMin && x <= xMax) {
-            // Save all data
-            X.emplace_back(x);
-            Y.emplace_back(dataY[index]);
-            E.emplace_back(dataE[index]);
-          }
-
-          // Increment index for Y and E
-          ++index;
+      IAlgorithm_sptr cropRagged = createChildAlgorithm("CropWorkspaceRagged");
+      cropRagged->setProperty("InputWorkspace", ws);
+      if (xMin != EMPTY_DBL()) {
+        std::vector<double> xMinVec(ws->getNumberHistograms(), xMin);
+        cropRagged->setProperty("XMin", xMinVec);
+      } else {
+        // Get min value from each spectra independantly
+        std::vector<double> xMinVec;
+        for (auto specNum = 0u; specNum < ws->getNumberHistograms();
+             ++specNum) {
+          auto &xData = ws->mutableX(specNum);
+          xMinVec.emplace_back(xData[0]);
         }
-
-        // Create workspace for this spectrum
-        IAlgorithm_sptr createWsAlg = createChildAlgorithm("CreateWorkspace");
-        createWsAlg->setProperty("DataX", X);
-        createWsAlg->setProperty("DataY", Y);
-        createWsAlg->setProperty("DataE", E);
-        createWsAlg->execute();
-        MatrixWorkspace_sptr temp = createWsAlg->getProperty("OutputWorkspace");
-
-        // Replace data of temp in newWs
-        IAlgorithm_sptr copyDataRangeAlg = createChildAlgorithm("CopyDataRange");
-        copyDataRangeAlg->setProperty("InputWorkspace", temp);
-        copyDataRangeAlg->setProperty("DestWorkspace", newWs);
-        //copyDataRangeAlg->setProperty("InsertionXIndex", i);
-        copyDataRangeAlg->setProperty("OutputWorkspace", "_hello");
-        copyDataRangeAlg->execute();
-        newWs = copyDataRangeAlg->getProperty("OutputWorkspace");
+        cropRagged->setProperty("XMin", xMinVec);
       }
-
-      return newWs;
-
+      if (xMax != EMPTY_DBL()) {
+        std::vector<double> xMaxVec(ws->getNumberHistograms(), xMax);
+        cropRagged->setProperty("XMax", xMaxVec);
+      } else {
+        // Get max value from each spectra independantly
+        std::vector<double> xMaxVec;
+        for (auto specNum = 0u; specNum < ws->getNumberHistograms();
+             ++specNum) {
+          auto &xData = ws->mutableX(specNum);
+          xMaxVec.emplace_back(xData[xData.size() - 1]);
+        }
+        cropRagged->setProperty("XMax", xMaxVec);
+      }
+      cropRagged->execute();
+      return cropRagged->getProperty("OutputWorkspace");
     } else {
       IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
       crop->setProperty("InputWorkspace", ws);
