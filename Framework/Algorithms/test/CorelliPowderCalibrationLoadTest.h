@@ -116,8 +116,8 @@ public:
     // 2. Due to the error from child alg, the main/parent one will be marked as
     //    "not executed."
     // 3. The strange thing here is that the error from child alg is not
-    //    captured by the TS_ASSERT, which is why it seems like nothing is thrown
-    //    while in reality it is thrown, just not catched.
+    //    captured by the TS_ASSERT, which is why it seems like nothing is
+    //    thrown while in reality it is thrown, just not catched.
     TS_ASSERT_THROWS_NOTHING(alg.execute());
     TS_ASSERT(!alg.isExecuted());
   }
