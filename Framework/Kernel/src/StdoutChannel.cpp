@@ -12,7 +12,6 @@
 #include <iosfwd>                         // streamsize
 
 namespace Poco {
-StdoutChannel::StdoutChannel() : ConsoleChannel(std::cout) {
-}
+StdoutChannel::StdoutChannel() : ConsoleChannel(std::cout) {}
 
 } // namespace Poco
