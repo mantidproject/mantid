@@ -61,7 +61,10 @@ def get_pair_asymmetry_name(context, pair_name, run, rebin):
     return name
 
 def get_pair_phasequad_name(context, pair_name, run, rebin):
-    name = context.data_context._base_run_name(run) + phaseQuad_str + pair_name + PHASEQUAD_EXT+";"
+    extension =PHASEQUAD_EXT
+    if "_Re_" in pair_name or "_Im_" in pair_name:
+        extension = ""
+    name = context.data_context._base_run_name(run) + phaseQuad_str + pair_name + extension+";"
 
     if rebin:
         name += "".join([' ', REBIN_STR, ';'])

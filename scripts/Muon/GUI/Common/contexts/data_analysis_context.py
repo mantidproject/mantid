@@ -32,11 +32,7 @@ class DataAnalysisContext(MuonContext):
             run_list, pair, rebin)
 
         phasequad_names = []
-        if phasequad:
-            for run in run_list:
-                run_string = run_list_to_string(run)
-                phasequad_names += self.phase_context.get_phase_quad(
-                    self.data_context.instrument, run_string)
+        print("fddsafdfs",runs, group_and_pair)
         return group_names + pair_names + phasequad_names
 
     @property

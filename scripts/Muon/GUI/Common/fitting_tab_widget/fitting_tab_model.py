@@ -100,6 +100,7 @@ class FittingTabModel(object):
             data_ws_name = data_ws_name[0]
         if not data_ws_name:
             return
+        #print("stuff", data_ws_name, self.context.workspace_suffix, fit_function)
         if isinstance(data_ws_name, List):
             data_ws_name = data_ws_name[0]
         if self.context.workspace_suffix == MUON_ANALYSIS_SUFFIX:
@@ -522,6 +523,7 @@ class FittingTabModel(object):
         return freq
 
     def get_ws_fit_function(self, workspaces):
+        print(":(", workspaces,self.create_workspace_key(workspaces), self.ws_fit_function_map )
         workspace_key = self.create_workspace_key(workspaces)
         try:
             return self.ws_fit_function_map[workspace_key]
@@ -638,11 +640,12 @@ class FittingTabModel(object):
         selected_workspaces = self.get_selected_workspace_list()
         runs = []
         groups_and_pairs = []
-
+        print("this",self.fitting_options["fit_type"] )
         if self.fitting_options["fit_type"] == "Single":
             for workspace in selected_workspaces:
                 runs += [get_run_number_from_workspace_name(workspace, self.context.data_context.instrument)]
                 groups_and_pairs += [get_group_or_pair_from_name(workspace)]
+            print("pair", groups_and_pairs)
             run_groups_and_pairs = list(zip(runs, groups_and_pairs))
             groups_and_pairs = [grp_pair for _, grp_pair in run_groups_and_pairs]
             runs = [run for run, _ in run_groups_and_pairs]
@@ -677,7 +680,11 @@ class FittingTabModel(object):
         workspace_names = []
         for run in runs:
             for group_or_pair in groups_and_pairs:
-                if group_or_pair in self.context.group_pair_context.selected_pairs:
+                print("here", group_or_pair)
+                if ("_Im_" in group_or_pair or "_Re_" in group_or_pair) and group_or_pair in self.context.group_pair_context.selected_pairs:
+                     workspace_names += [get_pair_phasequad_name(self.context, group_or_pair, run,
+                                                                not self.fitting_options["fit_to_raw"])]
+                elif group_or_pair in self.context.group_pair_context.selected_pairs:
                     workspace_names += [get_pair_asymmetry_name(self.context, group_or_pair, run,
                                                                 not self.fitting_options["fit_to_raw"])]
                 elif group_or_pair in self.context.group_pair_context.selected_groups:
