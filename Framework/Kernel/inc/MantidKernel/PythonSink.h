@@ -38,8 +38,6 @@ public:
    typedef char char_type;
    typedef boost::iostreams::sink_tag category;
 
-
-
    //  pysys_stdout_sink() {};
 
    std::streamsize write( const char* s, std::streamsize n );

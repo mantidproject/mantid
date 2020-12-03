@@ -17,8 +17,6 @@
 
 namespace Poco {
 
-// NOT WORK static boost::iostreams::stream<pysys_stdout_sink> pysys_stdout;
-
 PythonStdoutChannel::PythonStdoutChannel() : ConsoleChannel(pysys_stdout) {}
 
 } // namespace Poco

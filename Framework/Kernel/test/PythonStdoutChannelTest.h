@@ -29,28 +29,55 @@ using namespace Mantid::Kernel;
 
 // FIXME #include <Python.h>
 
-namespace io = boost::iostreams;
+// namespace io = boost::iostreams;
 
-class my_sink {
-public:
-    typedef char      char_type;
-    typedef io::sink_tag  category;
-
-    std::streamsize write(const char* s, std::streamsize n)
-    {
-        // Write up to n characters to the underlying
-        // data sink into the buffer s, returning the
-        // number of characters written
-        std::cout << s;
-    }
-
-    /* Other members */
-};
 
 class PythonStdoutChannelTest : public CxxTest::TestSuite {
 public:
   void testContructor() {
     TS_ASSERT_THROWS_NOTHING(Poco::PythonStdoutChannel a;)
+  }
+
+  /**
+   * @brief Test class pysys_stdout_sink and how to use it with stream
+   */
+  void testPythonSink() {
+    // Create sink
+    pysys_stdout_sink testsink;
+
+    // Create stream
+    boost::iostreams::stream<pysys_stdout_sink> pysys_stdout{testsink};
+
+    pysys_stdout << "Test Test Test";
+
+    // Make it works ConsoleChannel
+    Poco::AutoPtr<Poco::PythonStdoutChannel> stdoutChannel(
+        new Poco::PythonStdoutChannel);
+    stdoutChannel->nice();
+    Poco::ConsoleChannel *testconsole = new Poco::ConsoleChannel(pysys_stdout);
+
+    // Test console channel: all go to the log channel but not std::cout channel
+    Poco::AutoPtr<Poco::ConsoleChannel> consoleChannel(
+                new Poco::ConsoleChannel{pysys_stdout});
+
+    // Set up the root channel
+    Poco::Channel *rootChannel = Poco::Logger::root().getChannel();
+    // root logger has empty name
+    Logger log("");
+    // set console channel
+    Poco::Logger::root().setChannel(consoleChannel);
+    log.notice() << "[Notice]\n" << "[Notice] 2\n";
+    log.error() << "Error Message 2\n";
+
+    // set back the channel on root
+    Poco::Logger::root().setChannel(rootChannel);
+    // close std out
+    pysys_stdout.close();
+
+  }
+
+  void testStaticPythonStream() {
+      pysys_stdout << "30";
   }
 
   void testRadomlyBoostStream() {
@@ -61,9 +88,6 @@ public:
         new Poco::PythonStdoutChannel);
     stdoutChannel2->nice();
     Poco::ConsoleChannel *testconsole2 = new Poco::ConsoleChannel(pysys_stdout);
-
-    my_sink test_sink = my_sink();
-    // io::stream<my_sink> mystream{test_sink};  NO GOOD
 
     typedef io::stream<io::file_sink> ofstream;
 
@@ -95,7 +119,10 @@ public:
 
   }
 
-  void testLogMessage() {
+  /**
+   * @brief Test Python Std output with logger
+   */
+  void testPythonStdoutChannelLogMessage() {
     // Save root channel
     Poco::Channel *rootChannel = Poco::Logger::root().getChannel();
 

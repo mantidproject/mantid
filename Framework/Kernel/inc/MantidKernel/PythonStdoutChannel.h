@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //
-PythonStdoutChannel.h
+// PythonStdoutChannel.h
 //
 // Similar to console channel for logging. The output is on std::cout instead of
 // std::clog (which is the same as std::cerr)
@@ -27,32 +27,8 @@ PythonStdoutChannel.h
 
 #include <boost/iostreams/stream.hpp>
 
-//#include <iosfwd>                          // streamsize
-//#include <boost/iostreams/categories.hpp>  // sink_tag
-
-// FIXME #include <Python.h>
-
-// namespace io = boost::iostreams;
-
-//class pysys_stdout_sink {
-//    // from https://marc.info/?l=boost-users&m=124222823630179&w=2
-//public:
-//   typedef char char_type;
-//   typedef boost::iostreams::sink_tag category;
-
-//   std::streamsize write( const char* s, std::streamsize n ) {
-//       // PySys_WriteStdout truncates to 1000 chars
-//       static const std::streamsize MAXSIZE = 1000;
-
-//       std::streamsize written = std::min( n, MAXSIZE );
-//       // FIXME PySys_WriteStdout( (boost::format("%%.%1%s") % written).str().c_str(), s );
-//       std::cout << s;
-
-//       return written;
-//   }
-//};
-
-static boost::iostreams::stream<pysys_stdout_sink> pysys_stdout;
+/// static boost stream with python sink
+static boost::iostreams::stream<pysys_stdout_sink> pysys_stdout{pysys_stdout_sink()};
 
 namespace Poco {
 
