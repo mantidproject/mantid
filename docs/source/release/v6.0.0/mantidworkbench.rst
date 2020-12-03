@@ -35,6 +35,7 @@ Improvements
 - In the instrument widget, the integration scroll bar can be moved, widened and shrunk using the arrow keys.
 - The matplotlib `zoom` selection box is now more visible on colorfill and sliceviewer plots.
 - Add an autoscale checkbox to plot config dialog.
+- Add a Python function to replace the workspace being shown by an instrument window.
 
 Bugfixes
 ########
