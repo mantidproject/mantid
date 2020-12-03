@@ -52,34 +52,34 @@ std::vector<std::string> splitStringBy(std::string const &str,
   return subStrings;
 }
 
-bool isSinglePrefix(std::string const &prefix) {
-  auto const subStrings = splitStringBy(prefix, "f.");
+bool isSingleFunctionPrefix(std::string const &functionPrefix) {
+  auto const subStrings = splitStringBy(functionPrefix, "f.");
   return subStrings.size() == 1;
 }
 
-std::size_t getPrefixIndexAt(std::string const &prefix,
+std::size_t getPrefixIndexAt(std::string const &functionPrefix,
                              std::size_t const &index) {
-  auto const subStrings = splitStringBy(prefix, "f.");
+  auto const subStrings = splitStringBy(functionPrefix, "f.");
   return std::stoull(subStrings[index]);
 }
 
-std::string getTopPrefix(std::string const &prefix) {
-  auto topPrefix = prefix;
+std::string getTopFunctionPrefix(std::string const &functionPrefix) {
+  auto topPrefix = functionPrefix;
   auto const firstDotIndex = topPrefix.find(".");
   if (firstDotIndex != std::string::npos)
     topPrefix.erase(firstDotIndex, topPrefix.size() - firstDotIndex);
   return topPrefix;
 }
 
-IFunction_sptr getFunctionAtPrefix(std::string const &prefix,
+IFunction_sptr getFunctionAtPrefix(std::string const &functionPrefix,
                                    IFunction_sptr const &function,
                                    bool isLastFunction = false) {
   if (isLastFunction)
     return function;
 
-  auto const isLast = isSinglePrefix(prefix);
-  auto const topPrefix = getTopPrefix(prefix);
-  auto const firstIndex = getPrefixIndexAt(prefix, 0);
+  auto const isLast = isSingleFunctionPrefix(functionPrefix);
+  auto const topPrefix = getTopFunctionPrefix(functionPrefix);
+  auto const firstIndex = getPrefixIndexAt(functionPrefix, 0);
 
   try {
     return getFunctionAtPrefix(topPrefix, function->getFunction(firstIndex),
@@ -103,11 +103,6 @@ FitDomain::FitDomain(std::string const &prefix,
                      WorkspaceIndex workspaceIndex, double startX, double endX)
     : m_multiDomainFunctionPrefix(prefix), m_workspaceName(workspaceName),
       m_workspaceIndex(workspaceIndex), m_startX(startX), m_endX(endX) {}
-
-bool FitDomain::isSameDomain(std::string const &workspaceName,
-                             WorkspaceIndex workspaceIndex) const {
-  return m_workspaceName == workspaceName && m_workspaceIndex == workspaceIndex;
-}
 
 /**
  * FitScriptGeneratorModel class methods.
@@ -157,16 +152,16 @@ void FitScriptGeneratorModel::addWorkspaceDomain(
                                 std::to_string(workspaceIndex.value) +
                                 ")' domain already exists.");
 
-  addWorkspaceDomain(nextAvailablePrefix(), workspaceName, workspaceIndex,
-                     startX, endX);
+  addWorkspaceDomain(nextAvailableCompositePrefix(), workspaceName,
+                     workspaceIndex, startX, endX);
 }
 
 void FitScriptGeneratorModel::addWorkspaceDomain(
-    std::string const &prefix, std::string const &workspaceName,
+    std::string const &functionPrefix, std::string const &workspaceName,
     WorkspaceIndex workspaceIndex, double startX, double endX) {
-  addEmptyCompositeAtPrefix(prefix);
+  addEmptyCompositeAtPrefix(functionPrefix);
   m_fitDomains.emplace_back(
-      FitDomain(prefix, workspaceName, workspaceIndex, startX, endX));
+      FitDomain(functionPrefix, workspaceName, workspaceIndex, startX, endX));
 }
 
 std::size_t
@@ -185,7 +180,8 @@ std::vector<FitDomain>::const_iterator
 FitScriptGeneratorModel::findWorkspaceDomain(
     std::string const &workspaceName, WorkspaceIndex workspaceIndex) const {
   auto const isMatch = [&](FitDomain const &fitDomain) {
-    return fitDomain.isSameDomain(workspaceName, workspaceIndex);
+    return fitDomain.m_workspaceName == workspaceName &&
+           fitDomain.m_workspaceIndex == workspaceIndex;
   };
 
   return std::find_if(m_fitDomains.cbegin(), m_fitDomains.cend(), isMatch);
@@ -257,47 +253,47 @@ void FitScriptGeneratorModel::updateEndX(std::string const &workspaceName,
 }
 
 void FitScriptGeneratorModel::removeCompositeAtPrefix(
-    std::string const &prefix) {
-  removeCompositeAtIndex(getPrefixIndexAt(prefix, 0));
+    std::string const &functionPrefix) {
+  removeCompositeAtIndex(getPrefixIndexAt(functionPrefix, 0));
 }
 
 void FitScriptGeneratorModel::addEmptyCompositeAtPrefix(
-    std::string const &prefix) {
+    std::string const &functionPrefix) {
   if (!m_function) {
     m_function = createMultiDomainFunction(1);
   } else {
-    addEmptyCompositeAtPrefix(getTopPrefix(prefix),
-                              getPrefixIndexAt(prefix, 0));
+    addEmptyCompositeAtPrefix(getTopFunctionPrefix(functionPrefix),
+                              getPrefixIndexAt(functionPrefix, 0));
   }
 }
 
 void FitScriptGeneratorModel::addEmptyCompositeAtPrefix(
-    std::string const &compositePrefix, std::size_t const &compositeIndex) {
-  if (compositeIndex != numberOfDomains())
+    std::string const &functionPrefix, std::size_t const &functionIndex) {
+  if (functionIndex != numberOfDomains())
     throw std::runtime_error("The composite index provided is invalid.");
 
-  if (hasCompositeAtPrefix(compositePrefix))
+  if (hasCompositeAtPrefix(functionPrefix))
     throw std::runtime_error("The composite prefix provided already exists.");
 
   m_function->addFunction(createEmptyComposite());
-  m_function->setDomainIndex(compositeIndex, compositeIndex);
+  m_function->setDomainIndex(functionIndex, functionIndex);
 }
 
 void FitScriptGeneratorModel::removeCompositeAtIndex(
-    std::size_t const &compositeIndex) {
-  if (compositeIndex > numberOfDomains())
+    std::size_t const &functionIndex) {
+  if (functionIndex > numberOfDomains())
     throw std::runtime_error("The composite prefix provided does not exist");
 
-  m_function->removeFunction(compositeIndex);
+  m_function->removeFunction(functionIndex);
 }
 
 bool FitScriptGeneratorModel::hasCompositeAtPrefix(
-    std::string const &compositePrefix) const {
+    std::string const &functionPrefix) const {
   return static_cast<bool>(
-      toComposite(getFunctionAtPrefix(compositePrefix, m_function)));
+      toComposite(getFunctionAtPrefix(functionPrefix, m_function)));
 }
 
-std::string FitScriptGeneratorModel::nextAvailablePrefix() const {
+std::string FitScriptGeneratorModel::nextAvailableCompositePrefix() const {
   return "f" + std::to_string(numberOfDomains());
 }
 

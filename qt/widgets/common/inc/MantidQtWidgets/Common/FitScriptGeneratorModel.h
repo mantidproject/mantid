@@ -31,9 +31,6 @@ struct FitDomain {
   FitDomain(std::string const &prefix, std::string const &workspaceName,
             WorkspaceIndex workspaceIndex, double startX, double endX);
 
-  [[nodiscard]] bool isSameDomain(std::string const &workspaceName,
-                                  WorkspaceIndex workspaceIndex) const;
-
   std::string m_multiDomainFunctionPrefix;
   std::string m_workspaceName;
   WorkspaceIndex m_workspaceIndex;
@@ -74,7 +71,7 @@ private:
   void removeWorkspaceDomain(
       std::size_t const &removeIndex,
       std::vector<FitDomain>::const_iterator const &removeIter);
-  void addWorkspaceDomain(std::string const &prefix,
+  void addWorkspaceDomain(std::string const &functionPrefix,
                           std::string const &workspaceName,
                           WorkspaceIndex workspaceIndex, double startX,
                           double endX);
@@ -95,17 +92,18 @@ private:
   [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName,
                                         WorkspaceIndex workspaceIndex) const;
 
-  void removeCompositeAtPrefix(std::string const &prefix);
+  void removeCompositeAtPrefix(std::string const &functionPrefix);
 
-  void addEmptyCompositeAtPrefix(std::string const &prefix);
-  void addEmptyCompositeAtPrefix(std::string const &compositePrefix,
-                                 std::size_t const &compositeIndex);
+  void addEmptyCompositeAtPrefix(std::string const &functionPrefix);
+  void addEmptyCompositeAtPrefix(std::string const &functionPrefix,
+                                 std::size_t const &functionIndex);
 
-  void removeCompositeAtIndex(std::size_t const &compositeIndex);
+  void removeCompositeAtIndex(std::size_t const &functionIndex);
 
-  [[nodiscard]] bool hasCompositeAtPrefix(std::string const &prefix) const;
+  [[nodiscard]] bool
+  hasCompositeAtPrefix(std::string const &functionPrefix) const;
 
-  [[nodiscard]] std::string nextAvailablePrefix() const;
+  [[nodiscard]] std::string nextAvailableCompositePrefix() const;
 
   [[nodiscard]] inline std::size_t numberOfDomains() const noexcept {
     return m_fitDomains.size();
