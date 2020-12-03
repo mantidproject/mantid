@@ -12,6 +12,7 @@ New Features
 - Added a show legend checkbox to the workbench plot settings. This allows users to choose whether to display the legend on graphs by default.
 - Added a ``Log`` colorbar scale option to the Sliceviewer. This differs from the existing ``Symlog`` option as it prohibits negative values.
 - Added a Dx data tab on the data window when a workspace has Dx data.
+- Added QLineEdit to SampleLogs widget to allow filtering its entries
 
 Improvements
 ############
