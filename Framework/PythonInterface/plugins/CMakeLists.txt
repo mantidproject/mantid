@@ -190,6 +190,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/BayesStretch.py
     algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/ConvertMultipleRunsToSingleCrystalMD.py
+    algorithms/WorkflowAlgorithms/CorelliPowderCalibrationCreate.py
     algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
     algorithms/WorkflowAlgorithms/DetectorFloodWeighting.py
     algorithms/WorkflowAlgorithms/DirectILLApplySelfShielding.py
