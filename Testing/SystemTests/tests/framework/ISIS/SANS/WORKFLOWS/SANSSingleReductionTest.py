@@ -7,9 +7,12 @@
 # pylint: disable=too-many-public-methods, invalid-name, too-many-arguments
 
 import unittest
+from os import path
 
 import systemtesting
+from systemtesting import MantidSystemTest
 
+from mantid import config
 from mantid.api import AlgorithmManager
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (SANSFacility, ReductionMode, ReductionDimensionality, FitModeForMerge)
@@ -62,26 +65,28 @@ class SingleReductionTest(unittest.TestCase):
         return sample_scatter, sample_scatter_monitor_workspace, transmission_workspace, direct_workspace, \
                can_scatter_workspace, can_scatter_monitor_workspace, can_transmission_workspace, can_direct_workspace  # noqa
 
-    def _compare_to_reference(self, workspace, reference_file_name, check_spectra_map=True):
+    def _compare_to_reference(self, workspace, reference_file_name, check_spectra_map=True, mismatch_name=""):
         # Load the reference file
         load_name = "LoadNexusProcessed"
         load_options = {"Filename": reference_file_name,
                         "OutputWorkspace": EMPTY_NAME}
         load_alg = create_unmanaged_algorithm(load_name, **load_options)
+        load_alg.setProperty("OutputWorkspace",reference_file_name.split('.')[0] )
         load_alg.execute()
         reference_workspace = load_alg.getProperty("OutputWorkspace").value
 
         # Compare reference file with the output_workspace
-        self._compare_workspace(workspace, reference_workspace, check_spectra_map=check_spectra_map)
+        self._compare_workspace(workspace, reference_workspace, check_spectra_map=check_spectra_map,
+                                mismatch_name=mismatch_name)
 
-    def _compare_workspace(self, workspace1, workspace2, check_spectra_map=True,
-                           tolerance=1e-6):
+    def _compare_workspace(self, input_workspace, reference_workspace, check_spectra_map=True,
+                           tolerance=1e-6, mismatch_name = ""):
         # We need to disable the instrument comparison, it takes way too long
         # We need to disable the sample -- Not clear why yet
         # operation how many entries can be found in the sample logs
         compare_name = "CompareWorkspaces"
-        compare_options = {"Workspace1": workspace1,
-                           "Workspace2": workspace2,
+        compare_options = {"Workspace1": input_workspace,
+                           "Workspace2": reference_workspace,
                            "Tolerance": tolerance,
                            "CheckInstrument": False,
                            "CheckSample": False,
@@ -95,7 +100,20 @@ class SingleReductionTest(unittest.TestCase):
         compare_alg.setChild(False)
         compare_alg.execute()
         result = compare_alg.getProperty("Result").value
+
+        if not result:
+            self._save_output(input_workspace, mismatch_name)
+
         self.assertTrue(result)
+
+    def _save_output(self, workspace, mismatch_name):
+        # Save the workspace out
+        f_name = path.join(config.getString('defaultsave.directory'), mismatch_name)
+        save_name = "SaveNexus"
+        save_options = {"Filename": f_name,
+                        "InputWorkspace": workspace}
+        save_alg = create_unmanaged_algorithm(save_name, **save_options)
+        save_alg.execute()
 
     def _run_single_reduction(self, state, sample_scatter, sample_monitor, sample_transmission=None, sample_direct=None,
                               can_scatter=None, can_monitor=None, can_transmission=None, can_direct=None,
@@ -195,18 +213,27 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # Compare the output of the reduction with the reference
         reference_file_name = "SANS2D_ws_D20_reference_LAB_1D.nxs"
-        self._compare_to_reference(output_workspace, reference_file_name)
+        self._compare_to_reference(output_workspace, reference_file_name,
+                                   mismatch_name=MantidSystemTest.mismatchWorkspaceName(reference_file_name))
 
         calculated_transmission_reference_file = "SANS2D_ws_D20_calculated_transmission_reference_LAB.nxs"
         unfitted_transmission_reference_file = "SANS2D_ws_D20_unfitted_transmission_reference_LAB.nxs"
         calculated_transmission_reference_file_can = "SANS2D_ws_D20_calculated_transmission_reference_LAB_can.nxs"
         unfitted_transmission_reference_file_can = "SANS2D_ws_D20_unfitted_transmission_reference_LAB_can.nxs"
         self._compare_to_reference(calculated_transmission, calculated_transmission_reference_file,
-                                   check_spectra_map=False)
-        self._compare_to_reference(unfitted_transmission, unfitted_transmission_reference_file)
+                                   check_spectra_map=False,
+                                   mismatch_name=MantidSystemTest.mismatchWorkspaceName(
+                                       calculated_transmission_reference_file))
+        self._compare_to_reference(unfitted_transmission, unfitted_transmission_reference_file,
+                                   mismatch_name=MantidSystemTest.mismatchWorkspaceName(
+                                       unfitted_transmission_reference_file))
         self._compare_to_reference(calculated_transmission_can, calculated_transmission_reference_file_can,
-                                   check_spectra_map=False)
-        self._compare_to_reference(unfitted_transmission_can, unfitted_transmission_reference_file_can)
+                                   check_spectra_map=False,
+                                   mismatch_name=MantidSystemTest.mismatchWorkspaceName(
+                                       calculated_transmission_reference_file_can))
+        self._compare_to_reference(unfitted_transmission_can, unfitted_transmission_reference_file_can,
+                                   mismatch_name=MantidSystemTest.mismatchWorkspaceName(
+                                       unfitted_transmission_reference_file_can))
 
     def test_that_single_reduction_evaluates_HAB(self):
         # Arrange
@@ -238,7 +265,7 @@ class SANSSingleReductionTest(SingleReductionTest):
         can_transmission, can_direct = self._load_workspace(state)  # noqa
 
         # Act
-        output_settings = {"OutputWorkspaceHAB": EMPTY_NAME}
+        output_settings = {"OutputWorkspaceHAB": "TestSingleReductionEvalHab"}
         single_reduction_alg = self._run_single_reduction(state, sample_scatter=sample,
                                                           sample_transmission=transmission_workspace,
                                                           sample_direct=direct_workspace,
@@ -252,7 +279,8 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # # Compare the output of the reduction with the reference
         reference_file_name = "SANS2D_ws_D20_reference_HAB_1D.nxs"
-        self._compare_to_reference(output_workspace, reference_file_name)
+        self._compare_to_reference(output_workspace, reference_file_name,
+                                   mismatch_name=MantidSystemTest.mismatchWorkspaceName(reference_file_name))
 
     def test_that_single_reduction_evaluates_merged(self):
         # Arrange
@@ -304,14 +332,15 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         tolerance = 1e-6
         expected_shift = 0.00278452
-        expected_scale = 0.81439154
+        expected_scale = 0.81439387
 
         self.assertTrue(abs(expected_shift - output_shift_factor) < tolerance)
         self.assertTrue(abs(expected_scale - output_scale_factor) < tolerance)
 
         # Compare the output of the reduction with the reference
         reference_file_name = "SANS2D_ws_D20_reference_Merged_1D.nxs"
-        self._compare_to_reference(output_workspace, reference_file_name)
+        self._compare_to_reference(output_workspace, reference_file_name,
+                                   mismatch_name=MantidSystemTest.mismatchWorkspaceName(reference_file_name))
 
     def test_that_single_reduction_evaluates_LAB_for_2D_reduction(self):
         # Arrange
@@ -362,7 +391,8 @@ class SANSSingleReductionTest(SingleReductionTest):
 
         # Compare the output of the reduction with the reference
         reference_file_name = "SANS2D_ws_D20_reference_LAB_2D.nxs"
-        self._compare_to_reference(output_workspace, reference_file_name)
+        self._compare_to_reference(output_workspace, reference_file_name,
+                                   mismatch_name=MantidSystemTest.mismatchWorkspaceName(reference_file_name))
 
 
 # ----------------------------------------------------------------------------------------------------------------------

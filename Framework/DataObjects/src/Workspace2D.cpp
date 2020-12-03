@@ -104,6 +104,21 @@ void Workspace2D::init(const HistogramData::Histogram &histogram) {
   m_axes[1] = std::make_unique<API::SpectraAxis>(this);
 }
 
+///  Returns true if the workspace is ragged (has differently sized spectra).
+/// @returns true if the workspace is ragged.
+bool Workspace2D::isRaggedWorkspace() const {
+  if (data.empty()) {
+    throw std::runtime_error("There is no data in the Workspace2D, "
+                             "therefore cannot determine if it is ragged.");
+  } else {
+    const auto numberOfBins = data[0]->size();
+    return std::any_of(data.cbegin(), data.cend(),
+                       [&numberOfBins](const auto &histogram) {
+                         return numberOfBins != histogram->size();
+                       });
+  }
+}
+
 /** Gets the number of histograms
 @return Integer
 */

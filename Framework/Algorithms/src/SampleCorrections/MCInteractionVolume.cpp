@@ -160,17 +160,15 @@ ComponentScatterPoint MCInteractionVolume::generatePoint(
  * @param startPos Origin of the initial track
  * @param endPos Final position of neutron after scattering (assumed to be
  * outside of the "volume")
- * @param beforeScatter Out parameter to return generated before scatter track
- * @param afterScatter Out parameter to return generated after scatter track
  * @param stats A statistics class to hold the statistics on the generated
  * tracks such as the scattering angle and count of scatter points generated in
  * each sample or environment part
- * @return Whether before/after tracks were successfully generated
+ * @return A tuple containing a flag to indicate whether before/after tracks
+ * were successfully generated and (if yes) the before/after tracks
  */
-bool MCInteractionVolume::calculateBeforeAfterTrack(
+TrackPair MCInteractionVolume::calculateBeforeAfterTrack(
     Kernel::PseudoRandomNumberGenerator &rng, const Kernel::V3D &startPos,
-    const Kernel::V3D &endPos, Geometry::Track &beforeScatter,
-    Geometry::Track &afterScatter, MCInteractionStatistics &stats) const {
+    const Kernel::V3D &endPos, MCInteractionStatistics &stats) const {
   // Generate scatter point. If there is an environment present then
   // first select whether the scattering occurs on the sample or the
   // environment. The attenuation for the path leading to the scatter point
@@ -183,56 +181,29 @@ bool MCInteractionVolume::calculateBeforeAfterTrack(
   stats.UpdateScatterPointCounts(scatterPos.componentIndex, false);
 
   const auto toStart = normalize(startPos - scatterPos.scatterPoint);
-  beforeScatter = Track(scatterPos.scatterPoint, toStart);
-  int nlinks = m_sample->interceptSurface(beforeScatter);
+  auto beforeScatter =
+      std::make_shared<Track>(scatterPos.scatterPoint, toStart);
+  int nlinks = m_sample->interceptSurface(*beforeScatter);
   if (m_env) {
-    nlinks += m_env->interceptSurfaces(beforeScatter);
+    nlinks += m_env->interceptSurfaces(*beforeScatter);
   }
   // This should not happen but numerical precision means that it can
   // occasionally occur with tracks that are very close to the surface
   if (nlinks == 0) {
-    return false;
+    return {false, nullptr, nullptr};
   }
   stats.UpdateScatterPointCounts(scatterPos.componentIndex, true);
 
   // Now track to final destination
   const V3D scatteredDirec = normalize(endPos - scatterPos.scatterPoint);
-  afterScatter = Track(scatterPos.scatterPoint, scatteredDirec);
-  m_sample->interceptSurface(afterScatter);
+  auto afterScatter =
+      std::make_shared<Track>(scatterPos.scatterPoint, scatteredDirec);
+  m_sample->interceptSurface(*afterScatter);
   if (m_env) {
-    m_env->interceptSurfaces(afterScatter);
+    m_env->interceptSurfaces(*afterScatter);
   }
   stats.UpdateScatterAngleStats(toStart, scatteredDirec);
-  return true;
-}
-
-/**
- * Calculate the attenuation correction factor the volume given a before
- * and after track.
- * @param beforeScatter Before scatter track
- * @param afterScatter After scatter track
- * @param lambdaBefore Lambda before scattering
- * @param lambdaAfter Lambda after scattering
- * @return Absorption factor
- */
-double MCInteractionVolume::calculateAbsorption(const Track &beforeScatter,
-                                                const Track &afterScatter,
-                                                double lambdaBefore,
-                                                double lambdaAfter) const {
-
-  // Function to calculate total attenuation for a track
-  auto calculateAttenuation = [](const Track &path, double lambda) {
-    double factor(1.0);
-    for (const auto &segment : path) {
-      const double length = segment.distInsideObject;
-      const auto &segObj = *(segment.object);
-      factor *= segObj.material().attenuation(length, lambda);
-    }
-    return factor;
-  };
-
-  return calculateAttenuation(beforeScatter, lambdaBefore) *
-         calculateAttenuation(afterScatter, lambdaAfter);
+  return {true, beforeScatter, afterScatter};
 }
 
 } // namespace Algorithms

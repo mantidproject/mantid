@@ -38,10 +38,10 @@ class PowderILLParameterScan(PythonAlgorithm):
         return "ILL\\Diffraction;Diffraction\\Reduction"
 
     def summary(self):
-        return 'Performs powder diffraction data reduction for ILL instrument D20.'
+        return 'Performs powder diffraction data reduction for ILL instrument D20 and D1B.'
 
     def seeAlso(self):
-        return [ "PowderILLDetectorScan","PowderILLEfficiency" ]
+        return [ "PowderILLDetectorScan", "PowderILLEfficiency"]
 
     def name(self):
         return "PowderILLParameterScan"

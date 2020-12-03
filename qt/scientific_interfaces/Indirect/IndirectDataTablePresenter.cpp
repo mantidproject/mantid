@@ -16,8 +16,6 @@
 #include <QRegExpValidator>
 
 namespace {
-using MantidQt::CustomInterfaces::IDA::Spectra;
-using MantidQt::CustomInterfaces::IDA::WorkspaceIndex;
 
 namespace Regexes {
 const QString EMPTY = "^$";

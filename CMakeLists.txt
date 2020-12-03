@@ -56,6 +56,13 @@ set_property(CACHE CPACK_PACKAGE_SUFFIX
                       unstable
                       "")
 # empty string and release are treated as the same thing
+if(CPACK_PACKAGE_SUFFIX)
+  # Camelcase version of suffix for Windows/Mac
+  string(TOUPPER ${CPACK_PACKAGE_SUFFIX} CPACK_PACKAGE_SUFFIX_CAMELCASE)
+  string(SUBSTRING ${CPACK_PACKAGE_SUFFIX_CAMELCASE} 0 1 CPACK_PACKAGE_SUFFIX_CAMELCASE)
+  string(SUBSTRING ${CPACK_PACKAGE_SUFFIX} 1 -1 _tmp_suffix_remainder)
+  string(CONCAT CPACK_PACKAGE_SUFFIX_CAMELCASE ${CPACK_PACKAGE_SUFFIX_CAMELCASE} ${_tmp_suffix_remainder})
+endif()
 
 # Set package name here
 set(CPACK_PACKAGE_NAME "mantid${CPACK_PACKAGE_SUFFIX}")
@@ -473,7 +480,7 @@ if(ENABLE_CPACK)
         set(CPACK_DEBIAN_PACKAGE_DEPENDS
             "${CPACK_DEBIAN_PACKAGE_DEPENDS},libqscintilla2-qt5-13")
       endif()
-    else()
+    elseif ( "${UNIX_DIST}" MATCHES "Ubuntu" )
       message(WARNING "Unsupported Debian-like OS: ${UNIX_CODENAME}. Packaging is unlikely to work correctly.")
     endif()
     # python requirements

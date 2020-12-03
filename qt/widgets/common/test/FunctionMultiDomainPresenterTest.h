@@ -10,6 +10,8 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
+#include "MantidAPI/MultiDomainFunction.h"
+#include "MantidKernel/EmptyValues.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 #include "MantidQtWidgets/Common/FunctionModel.h"
@@ -112,11 +114,23 @@ public:
 
   IFunction_sptr getFunction() const { return m_function; }
 
+  MOCK_CONST_METHOD1(getAttribute, IFunction::Attribute(const QString &));
+
+  void attributeChanged() { emit attributePropertyChanged(QString("f0.Q")); }
+
+  friend class FunctionMultiDomainPresenterTest;
+
 private:
   IFunction_sptr m_function;
   boost::optional<QString> m_currentFunctionIndex;
   bool m_areErrorsEnabled{true};
   QStringList m_globals;
+  MOCK_METHOD2(setDoubleAttribute, void(const QString &, double));
+  MOCK_METHOD2(setIntAttribute, void(const QString &, int));
+  MOCK_METHOD2(setStringAttribute, void(const QString &, std::string &));
+  MOCK_METHOD2(setBooleanAttribute, void(const QString &, bool));
+  MOCK_METHOD2(setVectorAttribute,
+               void(const QString &, std::vector<double> &));
 };
 
 class FunctionMultiDomainPresenterTest : public CxxTest::TestSuite {
@@ -152,13 +166,13 @@ public:
   }
 
   void test_empty() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     TS_ASSERT(!presenter.getFitFunction());
   }
 
   void test_setFunction() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=LinearBackground,A0=1,A1=2");
     TS_ASSERT_EQUALS(presenter.getNumberOfDatasets(), 0);
@@ -172,7 +186,7 @@ public:
   }
 
   void test_view_addFunction() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=FlatBackground;(name=FlatBackground,A0=1;"
                                 "name=FlatBackground,A0=2)");
@@ -184,7 +198,7 @@ public:
   }
 
   void test_view_addFunction_top_level() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=FlatBackground");
     view->addFunction("", "name=LinearBackground");
@@ -195,7 +209,7 @@ public:
   }
 
   void test_view_addFunction_to_empty() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     view->addFunction("", "name=LinearBackground");
     auto newFun = presenter.getFunction();
@@ -205,7 +219,7 @@ public:
   }
 
   void test_view_multi_addFunction() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setNumberOfDatasets(3);
     TS_ASSERT_EQUALS(presenter.getNumberOfDatasets(), 3);
@@ -229,7 +243,7 @@ public:
   }
 
   void test_view_multi_addFunction_top_level() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setNumberOfDatasets(3);
     presenter.setFunctionString("name=FlatBackground");
@@ -245,7 +259,7 @@ public:
   }
 
   void test_view_multi_addFunction_to_empty() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setNumberOfDatasets(3);
     view->addFunction("", "name=LinearBackground");
@@ -260,7 +274,7 @@ public:
   }
 
   void test_setCurrentDataset() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setNumberOfDatasets(3);
     presenter.setFunctionString("name=FlatBackground");
@@ -283,7 +297,7 @@ public:
   }
 
   void test_setCurrentDataset_composite() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setNumberOfDatasets(3);
     presenter.setFunctionString("name=FlatBackground;name=FlatBackground");
@@ -306,7 +320,7 @@ public:
   }
 
   void test_view_set_tie() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=FlatBackground;name=LinearBackground");
     view->userSetsParameterTie("f1.A0", "1.0");
@@ -325,7 +339,7 @@ public:
   }
 
   void test_view_set_tie_multi() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setNumberOfDatasets(3);
     presenter.setFunctionString("name=FlatBackground;name=LinearBackground");
@@ -349,7 +363,7 @@ public:
   }
 
   void test_presenter_set_tie() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=FlatBackground;name=LinearBackground");
     auto viewFun = view->getFunction();
@@ -362,7 +376,7 @@ public:
   }
 
   void test_presenter_set_tie_multi() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setNumberOfDatasets(3);
     presenter.setFunctionString("name=FlatBackground;name=LinearBackground");
@@ -382,7 +396,7 @@ public:
   }
 
   void test_set_datasets() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=FlatBackground");
     presenter.setNumberOfDatasets(0);
@@ -408,7 +422,7 @@ public:
   }
 
   void test_set_datasets_zero() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setNumberOfDatasets(0);
     presenter.setFunctionString("name=FlatBackground");
@@ -423,7 +437,7 @@ public:
   }
 
   void test_remove_datasets() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=FlatBackground");
     presenter.setNumberOfDatasets(5);
@@ -440,7 +454,7 @@ public:
   }
 
   void test_replace_function() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=FlatBackground");
     presenter.setNumberOfDatasets(2);
@@ -450,7 +464,7 @@ public:
   }
 
   void test_remove_function_single() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=FlatBackground");
     auto fun = presenter.getFunction();
@@ -466,7 +480,7 @@ public:
   }
 
   void test_remove_function_multi() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=FlatBackground");
     presenter.setNumberOfDatasets(2);
@@ -485,7 +499,7 @@ public:
   }
 
   void test_view_addFunction_after_remove() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=FlatBackground");
     view->removeFunction("");
@@ -497,7 +511,7 @@ public:
   }
 
   void test_set_globals() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
     presenter.setFunctionString("name=LinearBackground");
     presenter.setNumberOfDatasets(3);
@@ -526,7 +540,7 @@ public:
     auto func =
         FunctionFactory::Instance().createInitialized("name=LinearBackground");
     QString functionName = QString::fromStdString(func->name());
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
 
     EXPECT_CALL(*view, getSelectedFunction())
@@ -537,7 +551,7 @@ public:
     view->functionHelpRequested();
   }
   void test_open_function_help_window_no_function() {
-    auto view = std::make_unique<MockFunctionView>();
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
     FunctionMultiDomainPresenter presenter(view.get());
 
     EXPECT_CALL(*view, getSelectedFunction())
@@ -546,6 +560,53 @@ public:
     EXPECT_CALL(*view, showFunctionHelp(_)).Times(Exactly(0));
 
     view->functionHelpRequested();
+  }
+  void test_updateMultiDatasetAttributes_updates_view_attributes() {
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setNumberOfDatasets(1);
+    presenter.setFunctionString(
+        "name=TeixeiraWaterSQE, Q=3.14, WorkspaceIndex=4, Height=1, "
+        "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+        "constraints=(Height>0, DiffCoeff>0, "
+        "Tau>0);name=FlatBackground;name=LinearBackground");
+
+    auto function =
+        FunctionFactory::Instance().createInitializedMultiDomainFunction(
+            "name=TeixeiraWaterSQE, Q=41.3, "
+            "Height=1, DiffCoeff=2.3, Tau=1.25, Centre=0, "
+            "constraints=(Height>0, DiffCoeff>0, "
+            "Tau>0);name=FlatBackground;name=LinearBackground",
+            1);
+    auto &func = dynamic_cast<IFunction &>(*function);
+
+    // this function has three attributes: NumDeriv (boolean attribute), f0.Q (a
+    // double attribute) and f0.WorkspaceIndex (integer attribute) so we should
+    // expect those calls
+    EXPECT_CALL(*view, setBooleanAttribute(QString("NumDeriv"), false))
+        .Times(Exactly(1));
+    EXPECT_CALL(*view, setDoubleAttribute(QString("f0.Q"), 41.3))
+        .Times(Exactly(1));
+    EXPECT_CALL(*view, setIntAttribute(QString("f0.WorkspaceIndex"),
+                                       Mantid::EMPTY_INT()))
+        .Times(Exactly(1));
+
+    presenter.updateMultiDatasetAttributes(func);
+  }
+
+  void test_attribute_changed_gets_attribute_value_from_view() {
+    auto view = std::make_unique<NiceMock<MockFunctionView>>();
+    FunctionMultiDomainPresenter presenter(view.get());
+    presenter.setFunctionString(
+        "name=TeixeiraWaterSQE, Q=3, WorkspaceIndex=4, Height=1, "
+        "DiffCoeff=2.3, Tau=1.25, Centre=0, "
+        "constraints=(Height>0, DiffCoeff>0, "
+        "Tau>0);name=FlatBackground;name=LinearBackground");
+    EXPECT_CALL(*view, getAttribute(QString("f0.Q")))
+        .Times(Exactly(1))
+        .WillOnce(Return(IFunction::Attribute()));
+
+    view->attributeChanged();
   }
 };
 

@@ -126,6 +126,14 @@ if ( "${UNIX_DIST}" MATCHES "RedHatEnterprise" OR "${UNIX_DIST}" MATCHES "^Fedor
     set ( WRAPPER_POSTFIX "" )
   endif()
 
+  if ("${UNIX_DIST}" MATCHES "^Fedora")
+    # The instrument view doesn't work with the wayland compositor
+    # Override it to use X11 https://doc.qt.io/qt-5/embedded-linux.html#xcb
+    set ( QT_QPA "QT_QPA_PLATFORM=xcb " )
+  else()
+    set ( QT_QPA "" )
+  endif()
+
   if ( NOT MPI_BUILD )
     configure_file ( ${CMAKE_MODULE_PATH}/Packaging/rpm/scripts/rpm_pre_install.sh.in
                      ${PRE_INSTALL_FILE} @ONLY )

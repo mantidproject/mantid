@@ -1,5 +1,5 @@
 # This file generates two .txt files that contain relative and absolute paths
-# to remove the need for searching for all of the algorithms and fit functions 
+# to remove the need for searching for all of the algorithms and fit functions
 # on startup.
 
 # List of python algorithms and fit functions
@@ -38,7 +38,6 @@ set(PYTHON_PLUGINS
     algorithms/CreateEmptyTableWorkspace.py
     algorithms/CreateLeBailFitInput.py
     algorithms/CropWorkspaceForMDNorm.py
-    algorithms/CropWorkspaceRagged.py
     algorithms/CylinderPaalmanPingsCorrection2.py
     algorithms/DNSComputeDetEffCorrCoefs.py
     algorithms/DNSFlippingRatioCorr.py
@@ -77,6 +76,9 @@ set(PYTHON_PLUGINS
     algorithms/GetIPTS.py
     algorithms/GetLiveInstrumentValue.py
     algorithms/HB2AReduce.py
+    algorithms/HB3AAdjustSampleNorm.py
+    algorithms/HB3AFindPeaks.py
+    algorithms/HB3AIntegratePeaks.py
     algorithms/HFIRSANS2Wavelength.py
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
@@ -353,18 +355,18 @@ set(PYTHON_PLUGINS
     functions/Examples/ExamplePeakFunction.py
 )
 
-# Generate an absolute path for each relative one. 
+# Generate an absolute path for each relative one.
 set(ABS_PATHS)
 foreach(RELPATH ${PYTHON_PLUGINS})
   list(APPEND ABS_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/${RELPATH}\n)
 endforeach()
 
 
-# Write out absolute file for developer builds. 
+# Write out absolute file for developer builds.
 set(BUILD_FILE ${CMAKE_CURRENT_BINARY_DIR}/python-plugin-manifest.txt)
 file(WRITE ${BUILD_FILE} ${ABS_PATHS})
 
-# Write out relative file for packaged builds. 
+# Write out relative file for packaged builds.
 set(PACKAGE_FILE ${CMAKE_CURRENT_BINARY_DIR}/python-plugin-manifest.txt.install)
 list(JOIN PYTHON_PLUGINS "\n" PYTHON_PLUGINS)
 file(WRITE ${PACKAGE_FILE} ${PYTHON_PLUGINS})
@@ -374,4 +376,3 @@ mtd_install_files(
     INSTALL_DIRS ${PLUGINS_DIR}/python ${WORKBENCH_PLUGINS_DIR}/python
     RENAME "python-plugin-manifest.txt"
 )
-

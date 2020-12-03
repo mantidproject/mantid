@@ -6,12 +6,12 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndexTypes.h"
 #include "IndirectFittingModel.h"
 
 #include "MantidAPI/IAlgorithm.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <boost/optional.hpp>
 #include <memory>
@@ -19,6 +19,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+using namespace MantidWidgets;
 
 class DLLExport IndirectFitPlotModel {
 public:
@@ -28,7 +29,7 @@ public:
   Mantid::API::MatrixWorkspace_sptr getWorkspace() const;
   Mantid::API::MatrixWorkspace_sptr getResultWorkspace() const;
   Mantid::API::MatrixWorkspace_sptr getGuessWorkspace() const;
-  Spectra getSpectra() const;
+  MantidWidgets::FunctionModelSpectra getSpectra() const;
 
   Mantid::API::MatrixWorkspace_sptr appendGuessToInput(
       const Mantid::API::MatrixWorkspace_sptr &guessWorkspace) const;
