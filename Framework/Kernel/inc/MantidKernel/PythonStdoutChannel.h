@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //
-// PythonStdoutChannel.h
+PythonStdoutChannel.h
 //
 // Similar to console channel for logging. The output is on std::cout instead of
 // std::clog (which is the same as std::cerr)
