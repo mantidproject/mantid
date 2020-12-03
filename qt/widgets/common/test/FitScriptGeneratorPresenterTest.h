@@ -174,6 +174,144 @@ public:
     m_presenter->notifyPresenter(ViewEvent::AddClicked);
   }
 
+  void
+  test_that_changing_a_start_x_will_update_its_value_in_the_model_when_the_x_value_is_valid() {
+    auto const selectedRow = FitDomainIndex(0);
+    auto const selectedRows = std::vector<FitDomainIndex>{selectedRow};
+
+    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
+    ON_CALL(*m_view, workspaceName(selectedRow))
+        .WillByDefault(Return(m_wsName));
+    ON_CALL(*m_view, workspaceIndex(selectedRow))
+        .WillByDefault(Return(m_wsIndex));
+    ON_CALL(*m_view, startX(selectedRow)).WillByDefault(Return(m_startX));
+    ON_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_startX))
+        .WillByDefault(Return(true));
+
+    EXPECT_CALL(*m_view, selectedRows())
+        .Times(1)
+        .WillOnce(Return(selectedRows));
+    EXPECT_CALL(*m_view, workspaceName(selectedRow))
+        .Times(1)
+        .WillOnce(Return(m_wsName));
+    EXPECT_CALL(*m_view, workspaceIndex(selectedRow))
+        .Times(1)
+        .WillOnce(Return(m_wsIndex));
+    EXPECT_CALL(*m_view, startX(selectedRow))
+        .Times(1)
+        .WillOnce(Return(m_startX));
+    EXPECT_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_startX))
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_model, updateStartX(m_wsName, m_wsIndex, m_startX)).Times(1);
+
+    m_presenter->notifyPresenter(ViewEvent::StartXChanged);
+  }
+
+  void
+  test_that_changing_a_start_x_will_reset_the_view_if_its_new_value_is_invalid() {
+    auto const selectedRow = FitDomainIndex(0);
+    auto const selectedRows = std::vector<FitDomainIndex>{selectedRow};
+
+    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
+    ON_CALL(*m_view, workspaceName(selectedRow))
+        .WillByDefault(Return(m_wsName));
+    ON_CALL(*m_view, workspaceIndex(selectedRow))
+        .WillByDefault(Return(m_wsIndex));
+    ON_CALL(*m_view, startX(selectedRow)).WillByDefault(Return(m_startX));
+    ON_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_startX))
+        .WillByDefault(Return(false));
+
+    EXPECT_CALL(*m_view, selectedRows())
+        .Times(1)
+        .WillOnce(Return(selectedRows));
+    EXPECT_CALL(*m_view, workspaceName(selectedRow))
+        .Times(1)
+        .WillOnce(Return(m_wsName));
+    EXPECT_CALL(*m_view, workspaceIndex(selectedRow))
+        .Times(1)
+        .WillOnce(Return(m_wsIndex));
+    EXPECT_CALL(*m_view, startX(selectedRow))
+        .Times(1)
+        .WillOnce(Return(m_startX));
+    EXPECT_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_startX))
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_view, resetSelection()).Times(1);
+    EXPECT_CALL(*m_view, displayWarning("The StartX provided must be within "
+                                        "the x limits of its workspace."))
+        .Times(1);
+
+    m_presenter->notifyPresenter(ViewEvent::StartXChanged);
+  }
+
+  void
+  test_that_changing_a_end_x_will_update_its_value_in_the_model_when_the_x_value_is_valid() {
+    auto const selectedRow = FitDomainIndex(0);
+    auto const selectedRows = std::vector<FitDomainIndex>{selectedRow};
+
+    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
+    ON_CALL(*m_view, workspaceName(selectedRow))
+        .WillByDefault(Return(m_wsName));
+    ON_CALL(*m_view, workspaceIndex(selectedRow))
+        .WillByDefault(Return(m_wsIndex));
+    ON_CALL(*m_view, endX(selectedRow)).WillByDefault(Return(m_endX));
+    ON_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_endX))
+        .WillByDefault(Return(true));
+
+    EXPECT_CALL(*m_view, selectedRows())
+        .Times(1)
+        .WillOnce(Return(selectedRows));
+    EXPECT_CALL(*m_view, workspaceName(selectedRow))
+        .Times(1)
+        .WillOnce(Return(m_wsName));
+    EXPECT_CALL(*m_view, workspaceIndex(selectedRow))
+        .Times(1)
+        .WillOnce(Return(m_wsIndex));
+    EXPECT_CALL(*m_view, endX(selectedRow)).Times(1).WillOnce(Return(m_endX));
+    EXPECT_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_endX))
+        .Times(1)
+        .WillOnce(Return(true));
+    EXPECT_CALL(*m_model, updateEndX(m_wsName, m_wsIndex, m_endX)).Times(1);
+
+    m_presenter->notifyPresenter(ViewEvent::EndXChanged);
+  }
+
+  void
+  test_that_changing_a_end_x_will_reset_the_view_if_its_new_value_is_invalid() {
+    auto const selectedRow = FitDomainIndex(0);
+    auto const selectedRows = std::vector<FitDomainIndex>{selectedRow};
+
+    ON_CALL(*m_view, selectedRows()).WillByDefault(Return(selectedRows));
+    ON_CALL(*m_view, workspaceName(selectedRow))
+        .WillByDefault(Return(m_wsName));
+    ON_CALL(*m_view, workspaceIndex(selectedRow))
+        .WillByDefault(Return(m_wsIndex));
+    ON_CALL(*m_view, endX(selectedRow)).WillByDefault(Return(m_endX));
+    ON_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_endX))
+        .WillByDefault(Return(false));
+
+    EXPECT_CALL(*m_view, selectedRows())
+        .Times(1)
+        .WillOnce(Return(selectedRows));
+    EXPECT_CALL(*m_view, workspaceName(selectedRow))
+        .Times(1)
+        .WillOnce(Return(m_wsName));
+    EXPECT_CALL(*m_view, workspaceIndex(selectedRow))
+        .Times(1)
+        .WillOnce(Return(m_wsIndex));
+    EXPECT_CALL(*m_view, endX(selectedRow)).Times(1).WillOnce(Return(m_endX));
+    EXPECT_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_endX))
+        .Times(1)
+        .WillOnce(Return(false));
+    EXPECT_CALL(*m_view, resetSelection()).Times(1);
+    EXPECT_CALL(*m_view, displayWarning("The EndX provided must be within "
+                                        "the x limits of its workspace."))
+        .Times(1);
+
+    m_presenter->notifyPresenter(ViewEvent::EndXChanged);
+  }
+
 private:
   std::string m_wsName;
   WorkspaceIndex m_wsIndex;

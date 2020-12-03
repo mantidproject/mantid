@@ -160,6 +160,17 @@ public:
     TS_ASSERT_EQUALS(selectedIndices[0].value, rowIndex);
   }
 
+  void
+  test_that_selectedRows_will_return_an_empty_vector_if_there_are_no_currently_selected_rows() {
+    int rowIndex(1);
+
+    openFitScriptGeneratorWidget();
+    m_view->addWorkspaceDomain("Name", WorkspaceIndex(0), 0.0, 2.0);
+
+    auto const selectedIndices = m_view->selectedRows();
+    TS_ASSERT_EQUALS(selectedIndices.size(), 0);
+  }
+
 private:
   void openFitScriptGeneratorWidget() {
     EXPECT_CALL(*m_presenter, openFitScriptGenerator()).Times(1);
