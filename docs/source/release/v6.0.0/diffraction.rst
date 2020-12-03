@@ -88,9 +88,6 @@ Bugfixes
 - Fix bug in :ref:`SaveHKL <algm-SaveHKL>` where the direction cosines were calculated incorrectly
 - Updated ref:`SaveHKL <algm-SaveHKL>` to only recalculate tbar if it's not already populated in the input peaks workspace
 
-
-=======
-
 New features
 ############
 - Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
@@ -105,4 +102,3 @@ Imaging
 -------
 
 :ref:`Release 6.0.0 <v6.0.0>`
-
