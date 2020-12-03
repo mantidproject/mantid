@@ -4,6 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+from Muon.GUI.Common.ADSHandler.workspace_naming import PHASEQUAD_IM, PHASEQUAD_RE 
 import mantid.simpleapi as mantid
 from mantid.kernel import Logger
 from mantid.api import Workspace, AnalysisDataService
@@ -254,10 +255,10 @@ def extract_single_spec(ws, spec, output_workspace_name):
     return alg.getProperty("OutputWorkspace").valueAsStr
 
 def split_phasequad(name):
-    Re_name = copy(name).replace("_Im_","")
-    Im_name = copy(name).replace("_Re_","")
+    Re_name = copy(name).replace(PHASEQUAD_IM,"")
+    Im_name = copy(name).replace(PHASEQUAD_RE,"")
 
-    Re = extract_single_spec(name, 0, Re_name)#+"_Re")
+    Re = extract_single_spec(name, 0, Re_name)
     Im = extract_single_spec(name, 1, Im_name)
     AnalysisDataService.remove(name)
     return [Re, Im]

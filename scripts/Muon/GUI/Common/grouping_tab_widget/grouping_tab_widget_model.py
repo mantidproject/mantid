@@ -113,7 +113,6 @@ class GroupingTabModel(object):
         self._groups_and_pairs.add_group(group)
 
     def add_pair(self, pair):
-        print(":P")
         assert isinstance(pair, MuonPair)
         self._groups_and_pairs.add_pair(pair)
 

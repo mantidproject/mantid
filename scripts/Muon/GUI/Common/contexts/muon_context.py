@@ -9,7 +9,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_
                                                          get_group_asymmetry_name,
                                                          get_group_asymmetry_unnorm_name,
                                                          get_deadtime_data_workspace_name,
-                                                         get_pair_phasequad_name)
+                                                         get_pair_phasequad_name, add_phasequad_extensions)
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data, run_pre_processing
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
@@ -204,7 +204,6 @@ class MuonContext(object):
                      pair_asymmetry_workspace,
                      run,
                      rebin=rebin)
-            print("test", self._group_pair_context.pairs, self._group_pair_context.phasequads)
 
     def calculate_all_groups(self):
         self._calculate_groups(rebin=False)
@@ -236,7 +235,7 @@ class MuonContext(object):
         parameters['PhaseTable'] = phasequad.phase_table
         run_string = run_list_to_string(run)
         parameters['InputWorkspace'] = get_raw_data_workspace_name(self.data_context.instrument, run_string, multi_period=False, workspace_suffix=self.workspace_suffix)
-        ws_name = get_pair_phasequad_name(self, phasequad.name, run_string, rebin=rebin)
+        ws_name = get_pair_phasequad_name(self, add_phasequad_extensions(phasequad.name), run_string, rebin=rebin)
 
         phase_quad = run_PhaseQuad(parameters, ws_name)
 

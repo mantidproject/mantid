@@ -9,7 +9,8 @@ import re
 group_str = "; Group; "
 pair_str = "; Pair Asym; "
 phaseQuad_str = '; PhaseQuad; '
-PHASEQUAD_EXT = '_Re__Im_'
+PHASEQUAD_RE = '_Re_' # use _ on both sides to prevent accidental ID (e.g. Red)
+PHASEQUAD_IM = "_Im_"
 TF_ASYMMETRY_PREFIX = "TFAsymmetry"
 REBIN_STR = 'Rebin'
 FFT_STR = 'FFT'
@@ -60,16 +61,18 @@ def get_pair_asymmetry_name(context, pair_name, run, rebin):
     name += context.workspace_suffix
     return name
 
+def add_phasequad_extensions(pair_name):
+    return pair_name+PHASEQUAD_RE+PHASEQUAD_IM
+
 def get_pair_phasequad_name(context, pair_name, run, rebin):
-    extension =PHASEQUAD_EXT
-    if "_Re_" in pair_name or "_Im_" in pair_name:
-        extension = ""
-    name = context.data_context._base_run_name(run) + phaseQuad_str + pair_name + extension+";"
+
+    name = context.data_context._base_run_name(run) + phaseQuad_str + pair_name +";"
 
     if rebin:
         name += "".join([' ', REBIN_STR, ';'])
 
     name += context.workspace_suffix
+    print("test", name)
     return name
 
 def get_group_or_pair_from_name(name):

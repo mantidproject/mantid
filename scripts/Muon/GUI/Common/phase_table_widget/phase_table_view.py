@@ -73,6 +73,10 @@ class PhaseTableView(QtWidgets.QWidget, ui_muon_phases_tab):
     def phase_table_for_phase_quad(self):
         return str(self.phase_quad_phase_table_combo.currentText())
 
+    @property
+    def number_of_phase_tables(self):
+        return self.phase_quad_phase_table_combo.count()
+
     @phase_table_for_phase_quad.setter
     def phase_table_for_phase_quad(self, value):
         index = self.phase_quad_phase_table_combo.findText(value)

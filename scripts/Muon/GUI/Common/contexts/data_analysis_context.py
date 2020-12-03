@@ -17,12 +17,12 @@ class DataAnalysisContext(MuonContext):
         self.base_directory = 'Muon Data'
 
     def get_names_of_workspaces_to_fit(
-            self, runs='', group_and_pair='', phasequad=False, rebin=False, freq="None"):
+            self, runs='', group_and_pair='', rebin=False, freq="None"):
         return self.get_names_of_time_domain_workspaces_to_fit(runs=runs, group_and_pair=group_and_pair,
-                                                               phasequad=phasequad, rebin=rebin)
+                                                                rebin=rebin)
 
     def get_names_of_time_domain_workspaces_to_fit(
-            self, runs='', group_and_pair='', phasequad=False, rebin=False):
+            self, runs='', group_and_pair='', rebin=False):
         group, pair = self.get_group_and_pair(group_and_pair)
         run_list = self.get_runs(runs)
 
@@ -31,9 +31,7 @@ class DataAnalysisContext(MuonContext):
         pair_names = self.group_pair_context.get_pair_workspace_names(
             run_list, pair, rebin)
 
-        phasequad_names = []
-        print("fddsafdfs",runs, group_and_pair)
-        return group_names + pair_names + phasequad_names
+        return group_names + pair_names
 
     @property
     def default_fitting_plot_range(self):

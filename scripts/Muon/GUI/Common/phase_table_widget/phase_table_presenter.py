@@ -85,6 +85,9 @@ class PhaseTablePresenter(object):
         return True
 
     def handle_add_phasequad_button_clicked(self):
+        if self.view.number_of_phase_tables < 1:
+            self.view.warning_popup("Please generate a phase table first.")
+            return
         new_pair_name = self.view.enter_pair_name()
         if new_pair_name is None:
             return
@@ -219,6 +222,4 @@ class PhaseTablePresenter(object):
 
     def update_current_phase_tables(self):
         phase_table_list = self.context.phase_context.get_phase_table_list(self.context.data_context.instrument)
-        phase_table_list.append('Construct')
-
         self.view.set_phase_table_combo_box(phase_table_list)

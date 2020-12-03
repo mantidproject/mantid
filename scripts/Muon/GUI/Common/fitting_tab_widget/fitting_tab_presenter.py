@@ -179,7 +179,6 @@ class FittingTabPresenter(object):
     def handle_plot_guess_changed(self):
         index = self.view.get_index_for_start_end_times()
         workspaces = self.get_fit_input_workspaces()
-        print("moo", workspaces)
         self.model.change_plot_guess(self.view.plot_guess, workspaces, index)
 
     def handle_fit_clicked(self):
@@ -399,14 +398,10 @@ class FittingTabPresenter(object):
     # Perform fit
     def perform_fit(self):
         if not self.view.fit_object:
-            print("poop")
             return
-
         self._fit_function_cache = [func.clone() for func in self._fit_function]
         try:
-            print("hiiiii")
             workspaces = self.get_fit_input_workspaces()
-            print(":P",workspaces)
             self._number_of_fits_cached += 1
             calculation_function = functools.partial(
                 self.model.evaluate_single_fit, workspaces)
@@ -472,7 +467,6 @@ class FittingTabPresenter(object):
             selected_workspaces += self.context.get_names_of_workspaces_to_fit(
                 runs=selected_runs,
                 group_and_pair=grp_and_pair,
-                phasequad=False,
                 rebin=not self.view.fit_to_raw, freq=freq)
 
         selected_workspaces = list(set(self._check_data_exists(selected_workspaces)))

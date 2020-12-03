@@ -285,6 +285,13 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_tab.fitting_tab_presenter.selected_single_fit_notifier.add_subscriber(
             self.plot_widget.presenter.plot_selected_fit_observer)
 
+        self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(
+            self.plot_widget.presenter.added_group_or_pair_observer)
+
+        self.phase_tab.phase_table_presenter.selected_phasequad_changed_notifier.add_subscriber(
+            self.transform.GroupPairObserver)
+
+
     def setup_grouping_changed_observers(self):
         self.grouping_tab_widget.group_tab_presenter.groupingNotifier.add_subscriber(
             self.home_tab.home_tab_widget.groupingObserver)
