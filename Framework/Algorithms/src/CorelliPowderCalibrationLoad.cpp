@@ -98,7 +98,7 @@ CorelliPowderCalibrationLoad::validateInputs() {
  * @param ws: input workspace
  * @return std::string : deduced filename with YYYYMMDD format
  */
-std::string CorelliPowderCalibrationLoad::deduce_database_name(
+std::string CorelliPowderCalibrationLoad::deduce_calibration_filename(
     API::MatrixWorkspace_sptr ws) {
   std::string timeStamp{""};
   if (ws->run().hasProperty("start_time")) {
@@ -110,7 +110,7 @@ std::string CorelliPowderCalibrationLoad::deduce_database_name(
   std::string timeStampStr =
       CorelliPowderCalibrationDatabase::convertTimeStamp(timeStamp);
 
-  // dedeuced file name
+  // deduced file name
   std::string dbFileName = "corelli_instrument_" + timeStampStr + ".csv";
 
   return dbFileName;
@@ -134,7 +134,7 @@ void CorelliPowderCalibrationLoad::exec() {
   // NOTE:
   //  Using inline functions from other class leads to a not
   //  defined warning.
-  std::string dbFileName = deduce_database_name(ws);
+  std::string dbFileName = deduce_calibration_filename(ws);
   boost::filesystem::path dir(dbdir);
   boost::filesystem::path file(dbFileName);
   boost::filesystem::path fullPath = dir / file;

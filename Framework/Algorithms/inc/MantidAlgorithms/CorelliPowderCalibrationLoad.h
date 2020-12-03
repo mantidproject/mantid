@@ -56,8 +56,8 @@ private:
   /// Private validator for inputs
   std::map<std::string, std::string> validateInputs() override;
 
-  /// Get database filename based on given ws
-  std::string deduce_database_name(API::MatrixWorkspace_sptr ws);
+  /// Get calibration filename based on given ws
+  std::string deduce_calibration_filename(API::MatrixWorkspace_sptr ws);
 
   /// Members
   API::MatrixWorkspace_sptr ws;
