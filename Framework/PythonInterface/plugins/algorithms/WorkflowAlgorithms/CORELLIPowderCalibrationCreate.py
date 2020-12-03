@@ -12,14 +12,14 @@ from typing import List, Optional, Union
 
 from corelli.calibration.database import load_calibration_set
 from corelli.calibration.utils import apply_calibration
-from mantid.api import (AnalysisDataService, DataProcessorAlgorithm, IEventWorkspaceProperty, mtd,
-                        Progress, TextAxis, Workspace, WorkspaceGroup, WorkspaceUnitValidator)
+from mantid.api import (
+    AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, IEventWorkspaceProperty, mtd, Progress, TextAxis,
+    Workspace, WorkspaceGroup, WorkspaceUnitValidator)
 from mantid.dataobjects import TableWorkspace, Workspace2D
-from mantid.simpleapi import (AlgorithmFactory, AlignComponents, AnalysisDataService, CalculateDIFC,
-                              CloneWorkspace, CopyInstrumentParameters, ConvertUnits,
-                              CreateEmptyTableWorkspace, CreateGroupingWorkspace, CreateWorkspace,
-                              DeleteWorkspace, GroupDetectors, GroupWorkspaces, LoadEventNexus,
-                              Multiply, PDCalibration, Rebin)
+from mantid.simpleapi import (
+    AlignComponents, CalculateDIFC, CloneWorkspace, CopyInstrumentParameters, ConvertUnits, CreateEmptyTableWorkspace,
+    CreateGroupingWorkspace, CreateWorkspace, DeleteWorkspace, GroupDetectors, GroupWorkspaces, LoadEventNexus,
+    Multiply, PDCalibration, Rebin)
 from mantid.kernel import Direction, FloatBoundedValidator, logger, StringArrayProperty
 
 
@@ -83,35 +83,8 @@ class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
     adjustment_items = ['Component', 'Xposition', 'Yposition', 'Zposition',
                         'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
 
-    @staticmethod
-    def fitted_in_tof(fitted_in_dspacing: Union[str, Workspace2D],
-                      difc: Union[str, TableWorkspace],
-                      output_workspace: str,
-                      group_workspace: Union[str, WorkspaceGroup] = None):
-        r"""
-        Create a workspace of fitted spectra in TOF
-
-        @param fitted_in_dspacing : workspace of fitted spectra in d-spacing
-        @param difc : table of DIFC parameters
-        @param output_workspace : name for the workspace of fitted spectra in TOF
-        @param group_workspace : if provided, add `output_workspace` to `group_workspace`
-
-        @returns reference to the `output_workspace`
-        """
-        dspacing_workspace, difc_workspace = mtd[str(fitted_in_dspacing)], mtd[str(difc)]
-
-        # Validate number of histograms in fitted_in_dspacing is same as in difc
-        error_message = f'{dspacing_workspace} and {difc_workspace} have different number of spectra'
-        assert dspacing_workspace.getNumberHistograms() == difc_workspace.getNumberHistograms(), error_message
-
-        # Divide fitted_in_dspacing by difc, and assign output_workspace to it
-        output = Multiply(LHSWokspace=difc_workspace, RHSWorkspace=dspacing_workspace, OutputWorkspace=output_workspace)
-
-        # if group_workspace is not None, add output_workspace to group_workspace
-        if group_workspace is not None:
-            mtd[str(group_workspace)].add(output_workspace)
-
-        return output
+    def name(self):
+        return "CORELLIPowderCalibrationCreate"
 
     def category(self):
         return 'Diffraction\\Reduction'
@@ -122,6 +95,10 @@ class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
 
     def summary(self):
         return "Adjust bank positions and orientations to optimize peak determination in d-spacing"
+
+    def validateInputs(self):
+        issues = dict()
+        return issues
 
     def PyInit(self):
         self.declareProperty(
@@ -337,6 +314,36 @@ class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
         if delete_second:
             DeleteWorkspace(second)
 
+    @staticmethod
+    def fitted_in_tof(fitted_in_dspacing: Union[str, Workspace2D],
+                      difc: Union[str, TableWorkspace],
+                      output_workspace: str,
+                      group_workspace: Union[str, WorkspaceGroup] = None):
+        r"""
+        Create a workspace of fitted spectra in TOF
+
+        @param fitted_in_dspacing : workspace of fitted spectra in d-spacing
+        @param difc : table of DIFC parameters
+        @param output_workspace : name for the workspace of fitted spectra in TOF
+        @param group_workspace : if provided, add `output_workspace` to `group_workspace`
+
+        @returns reference to the `output_workspace`
+        """
+        dspacing_workspace, difc_workspace = mtd[str(fitted_in_dspacing)], mtd[str(difc)]
+
+        # Validate number of histograms in fitted_in_dspacing is same as in difc
+        error_message = f'{dspacing_workspace} and {difc_workspace} have different number of spectra'
+        assert dspacing_workspace.getNumberHistograms() == difc_workspace.getNumberHistograms(), error_message
+
+        # Divide fitted_in_dspacing by difc, and assign output_workspace to it
+        output = Multiply(LHSWokspace=difc_workspace, RHSWorkspace=dspacing_workspace, OutputWorkspace=output_workspace)
+
+        # if group_workspace is not None, add output_workspace to group_workspace
+        if group_workspace is not None:
+            mtd[str(group_workspace)].add(output_workspace)
+
+        return output
+
     def fitted_in_dspacing(self, fitted_in_tof: Union[str, Workspace2D],
                            workspace_with_instrument: Union[str, Workspace],
                            output_workspace: str,
@@ -539,5 +546,6 @@ class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
                 for status in statuses:
                     row.append(summary[status][quantity][workspace_index])
             table.addRow(row)
+
 
 AlgorithmFactory.subscribe(CORELLIPowderCalibrationCreate)
