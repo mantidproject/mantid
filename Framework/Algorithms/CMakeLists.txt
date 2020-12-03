@@ -94,6 +94,7 @@ set(SRC_FILES
     src/CreateWorkspace.cpp
     src/CropToComponent.cpp
     src/CropWorkspace.cpp
+    src/CropWorkspaceRagged.cpp
     src/CrossCorrelate.cpp
     src/CuboidGaugeVolumeAbsorption.cpp
     src/CylinderAbsorption.cpp
@@ -424,6 +425,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CreateWorkspace.h
     inc/MantidAlgorithms/CropToComponent.h
     inc/MantidAlgorithms/CropWorkspace.h
+    inc/MantidAlgorithms/CropWorkspaceRagged.h
     inc/MantidAlgorithms/CrossCorrelate.h
     inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h
     inc/MantidAlgorithms/CylinderAbsorption.h
@@ -773,6 +775,7 @@ set(TEST_FILES
     CreateWorkspaceTest.h
     CropToComponentTest.h
     CropWorkspaceTest.h
+    CropWorkspaceRaggedTest.h
     CrossCorrelateTest.h
     CuboidGaugeVolumeAbsorptionTest.h
     CylinderAbsorptionTest.h
