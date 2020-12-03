@@ -5,11 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 # pylint: disable=C0111
-from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
-from Muon.GUI.Common.muon_group import MuonRun
 from Muon.GUI.Common.muon_base_pair import MuonBasePair
-
-import itertools
 
 
 class MuonPhasequad(object):
@@ -26,8 +22,8 @@ class MuonPhasequad(object):
                  phase_table):
         self._phasequad_name = phasequad_name
         self._phase_table = phase_table
-        self._Re = MuonBasePair(phasequad_name+"_Re_")
-        self._Im = MuonBasePair(phasequad_name+"_Im_")
+        self._Re = MuonBasePair(phasequad_name + "_Re_")
+        self._Im = MuonBasePair(phasequad_name + "_Im_")
 
     @property
     def Re(self):
@@ -47,14 +43,14 @@ class MuonPhasequad(object):
 
     @phase_table.setter
     def phase_table(self, new_table):
-        self._phase_table = phase_table
+        self._phase_table = new_table
 
     def update_asymmetry_workspaces(self, ws_list, run, rebin=False):
         self._Re.update_asymmetry_workspace(
-                        ws_list[0],
-                        run,
-                        rebin=rebin)
+            ws_list[0],
+            run,
+            rebin=rebin)
         self._Im.update_asymmetry_workspace(
-                        ws_list[1],
-                        run,
-                        rebin=rebin)
+            ws_list[1],
+            run,
+            rebin=rebin)

@@ -4,10 +4,10 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.Common.ADSHandler.workspace_naming import PHASEQUAD_IM, PHASEQUAD_RE 
+from Muon.GUI.Common.ADSHandler.workspace_naming import PHASEQUAD_IM, PHASEQUAD_RE
 import mantid.simpleapi as mantid
 from mantid.kernel import Logger
-from mantid.api import Workspace, AnalysisDataService
+from mantid.api import AnalysisDataService
 from copy import copy
 
 muon_logger = Logger('Muon-Algs')
@@ -58,7 +58,10 @@ def run_MuonPairingAsymmetry(parameter_dict, workspace_name):
     return workspace_name
 
 
-def run_MuonGroupingAsymmetry(parameter_dict, workspace_name, unormalised_workspace_name):
+def run_MuonGroupingAsymmetry(
+        parameter_dict,
+        workspace_name,
+        unormalised_workspace_name):
     """
     Apply the MuonGroupingCounts algorithm with the properties supplied through
     the input dictionary of {property_name:property_value} pairs.
@@ -82,7 +85,8 @@ def run_CalMuonDetectorPhases(parameter_dict, alg, fitted_workspace_name):
     alg.setProperty("DataFitted", fitted_workspace_name)
     alg.setProperties(parameter_dict)
     alg.execute()
-    return alg.getProperty("DetectorTable").valueAsStr, alg.getProperty('DataFitted').valueAsStr
+    return alg.getProperty("DetectorTable").valueAsStr, alg.getProperty(
+        'DataFitted').valueAsStr
 
 
 def run_PhaseQuad(parameters_dict, phase_quad_workspace_name):
@@ -137,8 +141,12 @@ def run_Fit(parameters_dict, alg):
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
     alg.setProperty('CreateOutput', True)
-    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
-                             key not in ['InputWorkspace', 'StartX', 'EndX']}
+    pruned_parameter_dict = {
+        key: value for key,
+        value in parameters_dict.items() if key not in [
+            'InputWorkspace',
+            'StartX',
+            'EndX']}
     alg.setProperties(pruned_parameter_dict)
     alg.setProperty('InputWorkspace', parameters_dict['InputWorkspace'])
     alg.setProperty('StartX', parameters_dict['StartX'])
@@ -155,8 +163,12 @@ def run_simultaneous_Fit(parameters_dict, alg):
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
     alg.setProperty('CreateOutput', True)
-    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
-                             key not in ['InputWorkspace', 'StartX', 'EndX']}
+    pruned_parameter_dict = {
+        key: value for key,
+        value in parameters_dict.items() if key not in [
+            'InputWorkspace',
+            'StartX',
+            'EndX']}
     alg.setProperties(pruned_parameter_dict)
 
     for index, input_workspace in enumerate(parameters_dict['InputWorkspace']):
@@ -254,9 +266,10 @@ def extract_single_spec(ws, spec, output_workspace_name):
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
 
+
 def split_phasequad(name):
-    Re_name = copy(name).replace(PHASEQUAD_IM,"")
-    Im_name = copy(name).replace(PHASEQUAD_RE,"")
+    Re_name = copy(name).replace(PHASEQUAD_IM, "")
+    Im_name = copy(name).replace(PHASEQUAD_RE, "")
 
     Re = extract_single_spec(name, 0, Re_name)
     Im = extract_single_spec(name, 1, Im_name)

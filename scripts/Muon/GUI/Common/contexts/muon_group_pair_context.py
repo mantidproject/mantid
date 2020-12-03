@@ -17,9 +17,11 @@ from mantid.kernel import ConfigServiceImpl
 from mantidqt.utils.observer_pattern import Observable
 
 
-def get_incremental_number_for_value_in_list(name, list_copy, current_number=1):
+def get_incremental_number_for_value_in_list(
+        name, list_copy, current_number=1):
     if name + str(current_number) in list_copy:
-        return get_incremental_number_for_value_in_list(name, list_copy, current_number + 1)
+        return get_incremental_number_for_value_in_list(
+            name, list_copy, current_number + 1)
     else:
         return str(current_number)
 
@@ -32,11 +34,13 @@ def get_grouping_psi(workspace):
         workspace_run = workspace.getRun()
 
         if workspace_run.hasProperty(sample_log_label_name):
-            sample_log_value = workspace_run.getProperty(sample_log_label_name).value
+            sample_log_value = workspace_run.getProperty(
+                sample_log_label_name).value
             if sample_log_value not in sample_log_value_list:
                 grouping_list.append(MuonGroup(sample_log_value, [ii + 1]))
             else:
-                sample_log_value += get_incremental_number_for_value_in_list(sample_log_value, sample_log_value_list)
+                sample_log_value += get_incremental_number_for_value_in_list(
+                    sample_log_value, sample_log_value_list)
                 grouping_list.append(MuonGroup(sample_log_value, [ii + 1]))
             sample_log_value_list.append(sample_log_value)
 
@@ -51,9 +55,11 @@ def get_default_grouping(workspace, instrument, main_field_direction):
     if instrument != "PSI":
         try:
             if isinstance(workspace, WorkspaceGroup):
-                grouping_file = workspace[0].getInstrument().getStringParameter(parameter_name)[0]
+                grouping_file = workspace[0].getInstrument(
+                ).getStringParameter(parameter_name)[0]
             else:
-                grouping_file = workspace.getInstrument().getStringParameter(parameter_name)[0]
+                grouping_file = workspace.getInstrument(
+                ).getStringParameter(parameter_name)[0]
 
         except IndexError:
             return [], [], ''
@@ -61,7 +67,8 @@ def get_default_grouping(workspace, instrument, main_field_direction):
         return get_grouping_psi(workspace)
     instrument_directory = ConfigServiceImpl.Instance().getInstrumentDirectory()
     filename = os.path.join(instrument_directory, grouping_file)
-    new_groups, new_pairs, description, default = xml_utils.load_grouping_from_XML(filename)
+    new_groups, new_pairs, description, default = xml_utils.load_grouping_from_XML(
+        filename)
     return new_groups, new_pairs, default
 
 
@@ -95,23 +102,12 @@ def construct_empty_pair(group_names, pair_names, pair_index=0):
     else:
         group1 = None
         group2 = None
-    return MuonPair(pair_name=new_pair_name,
-                    forward_group_name=group1, backward_group_name=group2, alpha=1.0)
+    return MuonPair(
+        pair_name=new_pair_name,
+        forward_group_name=group1,
+        backward_group_name=group2,
+        alpha=1.0)
 
-def construct_empty_phasequad(phasequad_run, phase_tables, phasequad_names, phasequad_index=0):
-    """
-    Create an empty MuonPair appropriate for adding to the current pairing table.
-    """
-    new_name = "phasequad_" + str(phasequad_index)
-    while new_name in phasequad_names:
-        # modify the name until it is unique
-        pair_index += 1
-        new_name = "phasequad_" + str(phasequad_index)
-    if len(phase_table) > 0:
-         table = phase_tables[0]
-    else:
-        table = None
-    return MuonPhasequad(new_name,phasequad_run,table)
 
 class MessageNotifier(Observable):
     def __init__(self, outer):
@@ -212,7 +208,9 @@ class MuonGroupPairContext(object):
             else:
                 raise ValueError('Groups and pairs must have unique names')
         else:
-            raise ValueError('Invalid detectors in group {}'.format(group.name))
+            raise ValueError(
+                'Invalid detectors in group {}'.format(
+                    group.name))
 
     def remove_group(self, group_name):
         for group in self._groups:
@@ -235,7 +233,10 @@ class MuonGroupPairContext(object):
             raise ValueError('Groups and pairs must have unique names')
 
     def add_phasequad(self, phasequad):
-        if isinstance(phasequad, MuonPhasequad) and self._check_name_unique(phasequad.Re.name) and self._check_name_unique(phasequad.Im.name):
+        if isinstance(
+            phasequad, MuonPhasequad) and self._check_name_unique(
+            phasequad.Re.name) and self._check_name_unique(
+                phasequad.Im.name):
             self._phasequad.append(phasequad)
             self.add_pair(phasequad.Re)
             self.add_pair(phasequad.Im)
@@ -250,9 +251,14 @@ class MuonGroupPairContext(object):
                 self._phasequad.remove(phasequad_obj)
                 return
 
-
-    def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction, num_periods):
-        default_groups, default_pairs, default_selected = get_default_grouping(workspace, instrument, main_field_direction)
+    def reset_group_and_pairs_to_default(
+            self,
+            workspace,
+            instrument,
+            main_field_direction,
+            num_periods):
+        default_groups, default_pairs, default_selected = get_default_grouping(
+            workspace, instrument, main_field_direction)
         if num_periods == 1:
             self._groups = default_groups
             self._pairs = default_pairs
@@ -263,12 +269,24 @@ class MuonGroupPairContext(object):
             self._pairs = []
             for period in periods:
                 for group in default_groups:
-                    self._groups.append(MuonGroup(group.name + str(period), group.detectors, [period]))
+                    self._groups.append(
+                        MuonGroup(
+                            group.name +
+                            str(period),
+                            group.detectors,
+                            [period]))
 
             for period in periods:
                 for pair in default_pairs:
-                    self._pairs.append(MuonPair(pair.name + str(period), pair.forward_group + str(period),
-                                       pair.backward_group + str(period), pair.alpha))
+                    self._pairs.append(
+                        MuonPair(
+                            pair.name +
+                            str(period),
+                            pair.forward_group +
+                            str(period),
+                            pair.backward_group +
+                            str(period),
+                            pair.alpha))
 
             self._selected = self.pair_names[0]
 
@@ -308,7 +326,8 @@ class MuonGroupPairContext(object):
 
     def get_equivalent_group_pair(self, workspace_name):
         for item in self._groups + self._pairs:
-            equivalent_name = item.get_rebined_or_unbinned_version_of_workspace_if_it_exists(workspace_name)
+            equivalent_name = item.get_rebined_or_unbinned_version_of_workspace_if_it_exists(
+                workspace_name)
             if equivalent_name:
                 return equivalent_name
 
@@ -345,7 +364,8 @@ class MuonGroupPairContext(object):
             item.remove_workspace_by_name(workspace_name)
 
     def get_unormalisised_workspace_list(self, workspace_list):
-        return [self.find_unormalised_workspace(workspace) for workspace in workspace_list]
+        return [self.find_unormalised_workspace(
+            workspace) for workspace in workspace_list]
 
     def find_unormalised_workspace(self, workspace):
         for group in self.groups:
