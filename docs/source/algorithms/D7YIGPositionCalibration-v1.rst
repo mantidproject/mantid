@@ -44,9 +44,9 @@ Usage
 
    approximate_wavelength = '3.1' # Angstrom
    D7YIGPositionCalibration(Filenames='402652:403041', ApproximateWavelength=approximate_wavelength,
-                               YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
-                               MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1", ClearCache=True,
-                               FittingMethod='Individual', FitOutputWorkspace='shortWavelength')
+                            YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
+                            MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1", ClearCache=True,
+                            FittingMethod='Individual', FitOutputWorkspace='shortWavelength')
 		       
    print('The calibrated wavelength is: {0:.2f}'.format(float(approximate_wavelength)*mtd['shortWavelength'].column(1)[1]))
    print('The bank2 gradient is: {0:.3f}'.format(1.0 / mtd['shortWavelength'].column(1)[0]))
@@ -84,7 +84,7 @@ Output:
    `doi: 10.1016/j.nima.2017.03.024 <https://doi.org/10.1016/j.nima.2017.03.024>`_
 
 #. A. Nakatsuka, A. Yoshiasa, and S. Takeno.
-   *Site preference of cations and structural variation in Y3Fe5O12 solid solutions with garnet structure
+   *Site preference of cations and structural variation in Y3Fe5O12 solid solutions with garnet structure*
    Acta Crystallographica Section B **51** (1995) 737–745
    `doi: 10.1107/S0108768194014813 <https://doi.org/10.1107/S0108768194014813>`_
 
