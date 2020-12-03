@@ -56,8 +56,7 @@ def check_facility():
         raise AttributeError(
             "Your facility {} is not supported by MuonAnalysis 2.0, so you"
             "will not be able to load any files. \n \n"
-            "Supported facilities are :" +
-            "\n - ".join(SUPPORTED_FACILITIES))
+            "Supported facilities are :" + "\n - ".join(SUPPORTED_FACILITIES))
 
 
 class FrequencyAnalysisGui(QtWidgets.QMainWindow):

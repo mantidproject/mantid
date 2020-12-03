@@ -98,8 +98,7 @@ class MuonContext(object):
 
         # A user requirement is that processing can continue if a period is missing from some
         # of the runs. This filters out periods which are not in a given run.
-        periods = [period for period in group.periods if period <=
-                   self.num_periods(run)]
+        periods = [period for period in group.periods if period <= self.num_periods(run)]
 
         # If not periods match return nothing here. The caller then needs to
         # handle this gracefully.

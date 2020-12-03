@@ -246,8 +246,7 @@ class FittingTabModel(object):
             workspace_directory)
         self.add_workspace_to_ADS(
             covariance_matrix,
-            workspace_name +
-            '_CovarianceMatrix',
+            workspace_name + '_CovarianceMatrix',
             table_directory)
         wrapped_parameter_workspace = self.add_workspace_to_ADS(
             fitting_parameters_table, table_name, table_directory)
@@ -338,8 +337,7 @@ class FittingTabModel(object):
                 workspace_name, input_workspace_list, fit_function)
             self.add_workspace_to_ADS(
                 covariance_matrix,
-                workspace_name[0] +
-                '_CovarianceMatrix',
+                workspace_name[0] + '_CovarianceMatrix',
                 table_directory)
         else:
             table_name, table_directory = create_parameter_table_name(
@@ -352,8 +350,7 @@ class FittingTabModel(object):
                 workspace_directory)
             self.add_workspace_to_ADS(
                 covariance_matrix,
-                workspace_name +
-                '_CovarianceMatrix',
+                workspace_name +'_CovarianceMatrix',
                 table_directory)
             workspace_name = [workspace_name]
 

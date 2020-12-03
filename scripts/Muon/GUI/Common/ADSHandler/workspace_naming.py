@@ -1,5 +1,4 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
-#
 # Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
@@ -15,6 +14,7 @@ TF_ASYMMETRY_PREFIX = "TFAsymmetry"
 REBIN_STR = 'Rebin'
 FFT_STR = 'FFT'
 MAXENT_STR = 'MaxEnt'
+
 
 def get_raw_data_workspace_name(instrument, run, multi_period, period='1', workspace_suffix=' MA'):
     if multi_period:
@@ -61,9 +61,10 @@ def get_pair_asymmetry_name(context, pair_name, run, rebin):
     name += context.workspace_suffix
     return name
 
+
 def check_phasequad_name(group_or_pair):
     if (PHASEQUAD_IM in group_or_pair or PHASEQUAD_RE in group_or_pair):
-	return True
+        return True
      return False
 
 def add_phasequad_extensions(pair_name):

@@ -271,8 +271,8 @@ class MuonGroupPairContext(object):
                 for group in default_groups:
                     self._groups.append(
                         MuonGroup(
-                            group.name +
-                            str(period),
+                            group.name
+                            + str(period),
                             group.detectors,
                             [period]))
 
@@ -282,10 +282,10 @@ class MuonGroupPairContext(object):
                         MuonPair(
                             pair.name +
                             str(period),
-                            pair.forward_group +
-                            str(period),
-                            pair.backward_group +
-                            str(period),
+                            pair.forward_group
+                            + str(period),
+                            pair.backward_group
+                            + str(period),
                             pair.alpha))
 
             self._selected = self.pair_names[0]
