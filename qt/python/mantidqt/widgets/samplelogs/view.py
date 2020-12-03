@@ -53,7 +53,7 @@ class SampleLogsView(QSplitter):
         self.line_edit.setClearButtonEnabled(True)
         self.line_edit.setToolTip("Type here to filter the logs")
         self.line_edit.setPlaceholderText("Search the logs")
-        self.line_edit.editingFinished.connect(self.presenter.search_key_changed)
+        self.line_edit.textEdited.connect(self.presenter.search_key_changed)
         layout_left.addWidget(self.line_edit)
         # Create sample log table
         self.table = QTableView()
