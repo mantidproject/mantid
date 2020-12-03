@@ -280,8 +280,8 @@ class MuonGroupPairContext(object):
                 for pair in default_pairs:
                     self._pairs.append(
                         MuonPair(
-                            pair.name +
-                            str(period),
+                            pair.name
+                            + str(period),
                             pair.forward_group
                             + str(period),
                             pair.backward_group
