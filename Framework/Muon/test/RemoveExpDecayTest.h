@@ -33,11 +33,10 @@ MatrixWorkspace_sptr createWorkspace(size_t nspec, size_t maxt,
   MantidVec X;
   MantidVec Y;
   MantidVec E;
-  if (useBinEdges) {
-    X.emplace_back(0.0);
-    X.emplace_back(0.0);
-  }
   for (size_t s = 0; s < nspec; s++) {
+    if (useBinEdges) {
+      X.emplace_back(0.0);
+    }
     for (size_t t = 0; t < maxt; t++) {
       double x = static_cast<double>(t) / static_cast<double>(maxt);
       double e = exp(-x / tau);
@@ -155,13 +154,13 @@ public:
 
     // First spectrum
     // Test some X values
-    TS_ASSERT_DELTA(outWS->x(0)[10], 0.1600, 0.0001);
-    TS_ASSERT_DELTA(outWS->x(0)[19], 0.3400, 0.0001);
-    TS_ASSERT_DELTA(outWS->x(0)[49], 0.9400, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(0)[10], 0.1800, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(0)[19], 0.3600, 0.0001);
+    TS_ASSERT_DELTA(outWS->x(0)[49], 0.9600, 0.0001);
     // Test some Y values
-    TS_ASSERT_DELTA(outWS->y(0)[10], -0.0997, 0.0001);
-    TS_ASSERT_DELTA(outWS->y(0)[19], -0.0116, 0.0001);
-    TS_ASSERT_DELTA(outWS->y(0)[49], -0.063, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(0)[10], -0.0993, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(0)[19], -0.0113, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(0)[49], -0.0627, 0.0001);
     // Test some E values
     TS_ASSERT_DELTA(outWS->e(0)[10], 0.0054, 0.0001);
     TS_ASSERT_DELTA(outWS->e(0)[19], 0.0059, 0.0001);
@@ -173,9 +172,9 @@ public:
     TS_ASSERT_DELTA(outWS->x(1)[19], 0.3600, 0.0001);
     TS_ASSERT_DELTA(outWS->x(1)[49], 0.9600, 0.0001);
     // Test some Y values
-    TS_ASSERT_DELTA(outWS->y(1)[10], 0.0232, 0.0001);
-    TS_ASSERT_DELTA(outWS->y(1)[19], -0.1043, 0.0001);
-    TS_ASSERT_DELTA(outWS->y(1)[49], 0.0752, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(1)[10], 0.0275, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(1)[19], -0.1005, 0.0001);
+    TS_ASSERT_DELTA(outWS->y(1)[49], 0.0797, 0.0001);
     // Test some E values
     TS_ASSERT_DELTA(outWS->e(1)[10], 0.0054, 0.0001);
     TS_ASSERT_DELTA(outWS->e(1)[19], 0.0059, 0.0001);
