@@ -16,8 +16,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/NetworkProxy.h"
-#include "MantidKernel/StdoutChannel.h"
 #include "MantidKernel/PythonStdoutChannel.h"
+#include "MantidKernel/StdoutChannel.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
 #include "MantidKernel/System.h"
@@ -140,8 +140,8 @@ ConfigServiceImpl::ConfigServiceImpl()
 
   // There is not need to if not registered here?
   Poco::LoggingFactory::defaultFactory().registerChannelClass(
-        "StdoutChannel",
-        new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
+      "StdoutChannel",
+      new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
 
   std::cout << "[DEBUG ... ... End of first regisgration\n";
 

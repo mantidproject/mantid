@@ -13,12 +13,6 @@
 
 namespace Poco {
 StdoutChannel::StdoutChannel() : ConsoleChannel(std::cout) {
-  std::cout << "[DEBUG]...............  Am I called??";
-}
-
-/// overwrite log
-void StdoutChannel::log(const Message &msg) {
-  std::cout << "[...... OVERRIDE ] " << msg.getText() << "\n";
 }
 
 } // namespace Poco

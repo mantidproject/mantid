@@ -21,16 +21,15 @@
 
 using namespace Mantid::Kernel;
 
-#include <ostream>
-#include <iostream>
-#include <boost/iostreams/stream.hpp>
 #include <Poco/ConsoleChannel.h>
 #include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/stream.hpp>
+#include <iostream>
+#include <ostream>
 
 // FIXME #include <Python.h>
 
 // namespace io = boost::iostreams;
-
 
 class PythonStdoutChannelTest : public CxxTest::TestSuite {
 public:
@@ -58,7 +57,7 @@ public:
 
     // Test console channel: all go to the log channel but not std::cout channel
     Poco::AutoPtr<Poco::ConsoleChannel> consoleChannel(
-                new Poco::ConsoleChannel{pysys_stdout});
+        new Poco::ConsoleChannel{pysys_stdout});
 
     // Set up the root channel
     Poco::Channel *rootChannel = Poco::Logger::root().getChannel();
@@ -66,19 +65,17 @@ public:
     Logger log("");
     // set console channel
     Poco::Logger::root().setChannel(consoleChannel);
-    log.notice() << "[Notice]\n" << "[Notice] 2\n";
+    log.notice() << "[Notice]\n"
+                 << "[Notice] 2\n";
     log.error() << "Error Message 2\n";
 
     // set back the channel on root
     Poco::Logger::root().setChannel(rootChannel);
     // close std out
     pysys_stdout.close();
-
   }
 
-  void testStaticPythonStream() {
-      pysys_stdout << "30";
-  }
+  void testStaticPythonStream() { pysys_stdout << "30"; }
 
   void testRadomlyBoostStream() {
     // Start an instance with boost stream
@@ -91,23 +88,24 @@ public:
 
     typedef io::stream<io::file_sink> ofstream;
 
-   ofstream out("HeavyArtillery.txt"); // Wilfred Owen
-//    out << "Reach at that Arrogance which needs thy harm,\n"
-//           "And beat it down before its sins grow worse.\n";
-//    out.close();
+    ofstream out("HeavyArtillery.txt"); // Wilfred Owen
+    //    out << "Reach at that Arrogance which needs thy harm,\n"
+    //           "And beat it down before its sins grow worse.\n";
+    //    out.close();
 
     std::ofstream fb;
-    fb.open ("test.txt",std::ios::out);
+    fb.open("test.txt", std::ios::out);
 
-    fb << "Test again" << "\n";
+    fb << "Test again"
+       << "\n";
 
-//    std::ostream os(&fb);
-//     os << "Test sentence\n";
+    //    std::ostream os(&fb);
+    //     os << "Test sentence\n";
     fb.close();
 
-//    std::ostream stdstream;
-//    stdstream << "abc edf" << "\n";
-//    std::cout << stdstream.tostring();
+    //    std::ostream stdstream;
+    //    stdstream << "abc edf" << "\n";
+    //    std::cout << stdstream.tostring();
 
     Poco::AutoPtr<Poco::PythonStdoutChannel> stdoutChannel(
         new Poco::PythonStdoutChannel);
@@ -115,8 +113,6 @@ public:
     Poco::ConsoleChannel *testconsole = new Poco::ConsoleChannel(out);
 
     // TS_ASSERT_EQUALS(1, 3);
-
-
   }
 
   /**
@@ -154,7 +150,8 @@ public:
     Poco::AutoPtr<Poco::ConsoleChannel> consoleChannel(
         new Poco::ConsoleChannel);
     Poco::Logger::root().setChannel(consoleChannel);
-    log.notice() << "[Notice]\n" << "[Notice] 2\n";
+    log.notice() << "[Notice]\n"
+                 << "[Notice] 2\n";
     log.error() << "Error Message 2\n";
     // the error should be in std::clog (or std:err)
     std::string finalout = lbuffer.str();
@@ -171,7 +168,8 @@ public:
         new Poco::PythonStdoutChannel);
     Poco::Logger::root().setChannel(stdoutChannel);
     log.error() << "Error Message 3\n";
-    log.information() << "[Notice]\n" << "[Notice] 3\n";
+    log.information() << "[Notice]\n"
+                      << "[Notice] 3\n";
     // the error should be in std::cout
     std::string notice3 = obuffer.str();
     // FIXME TS_ASSERT_EQUALS(obuffer.str(), "Error Message 3\n");

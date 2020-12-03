@@ -23,34 +23,32 @@
 #include "MantidKernel/DllConfig.h"
 #include <Poco/ConsoleChannel.h>
 
-#include <iosfwd>                          // streamsize
-#include <boost/iostreams/categories.hpp>  // sink_tag
+#include <boost/iostreams/categories.hpp> // sink_tag
+#include <iosfwd>                         // streamsize
 
 // FIXME #include <Python.h>
 
 namespace io = boost::iostreams;
 
 class MANTID_KERNEL_DLL pysys_stdout_sink {
-    // from https://marc.info/?l=boost-users&m=124222823630179&w=2
-
+  // from https://marc.info/?l=boost-users&m=124222823630179&w=2
 
 public:
-   typedef char char_type;
-   typedef boost::iostreams::sink_tag category;
+  typedef char char_type;
+  typedef boost::iostreams::sink_tag category;
 
-   //  pysys_stdout_sink() {};
+  //  pysys_stdout_sink() {};
 
-   std::streamsize write( const char* s, std::streamsize n );
+  std::streamsize write(const char *s, std::streamsize n);
 
-//   std::streamsize write( const char* s, std::streamsize n ) {
-//       // PySys_WriteStdout truncates to 1000 chars
-//       static const std::streamsize MAXSIZE = 1000;
+  //   std::streamsize write( const char* s, std::streamsize n ) {
+  //       // PySys_WriteStdout truncates to 1000 chars
+  //       static const std::streamsize MAXSIZE = 1000;
 
-//       std::streamsize written = std::min( n, MAXSIZE );
-//       // FIXME PySys_WriteStdout( (boost::format("%%.%1%s") % written).str().c_str(), s );
-//       std::cout << s;
+  //       std::streamsize written = std::min( n, MAXSIZE );
+  //       // FIXME PySys_WriteStdout( (boost::format("%%.%1%s") %
+  //       written).str().c_str(), s ); std::cout << s;
 
-//       return written;
-//   }
+  //       return written;
+  //   }
 };
-

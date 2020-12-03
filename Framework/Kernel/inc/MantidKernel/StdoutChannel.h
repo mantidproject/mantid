@@ -24,8 +24,5 @@ class MANTID_KERNEL_DLL StdoutChannel : public ConsoleChannel {
 public:
   /// Constructor for StdChannel
   StdoutChannel();
-
-  /// overwrite log
-  void log(const Message &msg) override;
 };
 } // namespace Poco
