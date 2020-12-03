@@ -147,9 +147,9 @@ class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
                              doc='Maximum adjustment of source position along the beam (Z) axis (m)')
         self.declareProperty(StringArrayProperty('ComponentList', values=self._banks, direction=Direction.Input),
                              doc='Comma separated list on banks to refine')
-        self.declareProperty(name='ComponentMaxTranlation', defaultValue=0.01, validator=FloatBoundedValidator(0.0, 0.1),
+        self.declareProperty(name='ComponentMaxTranlation', defaultValue=0.02, validator=FloatBoundedValidator(0.0, 0.2),
                              doc='Maximum translation of each component along either of the X, Y, Z axes (m)')
-        self.declareProperty(name='ComponentMaxRotation', defaultValue=2.0, validator=FloatBoundedValidator(0.0, 10.0),
+        self.declareProperty(name='ComponentMaxRotation', defaultValue=3.0, validator=FloatBoundedValidator(0.0, 3.0),
                              doc='Maximum rotation of each component along either of the X, Y, Z axes (deg)')
         [self.setPropertyGroup(name, 'AlignComponents') for name in property_names]
 
@@ -222,6 +222,15 @@ class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
                                        grouping_workspace)
         orientation_diagnostics.append(prefix_output + 'peak_deviations_original')
 
+        # repeat with percent peak deviations for each bank, using the adjusted instrument geometry
+        self.histogram_peak_deviations(prefix_output + 'PDCalibration_diagnostics_tof',
+                                       input_workspace,
+                                       prefix_output + 'percent_peak_deviations_original',
+                                       grouping_workspace,
+                                       deviation_params=[-10, 0.01, 10],
+                                       percent_deviations=True)
+        orientation_diagnostics.append(prefix_output + 'percent_peak_deviations_original')
+
         # store the DIFC and DIFC_mask wokspace created by PDCalibration in the
         # diagnostics workspace
         mtd[diagnostics_workspaces].add(difc_table)
@@ -281,6 +290,21 @@ class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
                                        prefix_output + 'peak_deviations_adjusted',
                                        grouping_workspace)
         orientation_diagnostics.append(prefix_output + 'peak_deviations_adjusted')
+
+        # repeat with percent peak deviations for each bank, using the adjusted instrument geometry
+        self.histogram_peak_deviations(prefix_output + 'PDCalibration_diagnostics_tof',
+                                       input_workspace,
+                                       prefix_output + 'percent_peak_deviations_adjusted',
+                                       grouping_workspace,
+                                       deviation_params=[-10, 0.01, 10],
+                                       percent_deviations=True)
+        orientation_diagnostics.append(prefix_output + 'percent_peak_deviations_adjusted')
+
+        # summarize the changes observed in the histogram of percent peak deviations
+        self.peak_deviations_summarize(prefix_output + 'percent_peak_deviations_original',
+                                       prefix_output + 'percent_peak_deviations_adjusted',
+                                       prefix_output + 'percent_peak_deviations_summary')
+        orientation_diagnostics.append(prefix_output + 'percent_peak_deviations_summary')
 
         # Create a WorkspaceGroup with the orientation diagnostics
         GroupWorkspaces(InputWorkspaces=orientation_diagnostics,
@@ -383,7 +407,8 @@ class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
                                   workspace_with_instrument: Union[str, Workspace],
                                   output_workspace: str,
                                   grouping_workspace: Union[str, WorkspaceGroup],
-                                  deviation_params: List[float] = [-0.1, 0.0001, 0.1]):
+                                  deviation_params: List[float] = [-0.1, 0.0001, 0.1],
+                                  percent_deviations: bool = False):
         r"""
         Find deviations of the fitted peak centers with respect to the reference values,
         in d-spacing units. Histogram these deviations for all peaks found on each bank
@@ -396,6 +421,8 @@ class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
         @param grouping_workspace: workspace assigning group ID's (bank numbers) to each pixel
         @param deviation_params: a triad of first histogram boundary, bin width, and
             last histogram boundary, in Angstroms
+        @param percent_deviations: each deviation from the reference d-spacing will be divided by the
+            d-spacing value and multiplied by 100. Adjust `deviation_params` accordinggly
         """
         # Find DIFC values using the geometry of the instrument embbeded in `workspace_with_instrument`
         difc_workspace = self.temp_ws()  # we need a temporary workpace
@@ -406,13 +433,17 @@ class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
         tof_table = mtd[str(peak_centers_in_tof)]
         tof_dict = tof_table.toDict()  # the table as a data structure we can modify
 
-        # Calculate the peak deviations with respect to the reference peak centers, in d-spacing units
+        # Calculate the peak deviations with respect to the reference peak centers, in d-spacing or pecent units
         column_names = tof_table.getColumnNames()
         column_peaks = [name for name in column_names if '@' in name]  # column containing the peak centers
         for column in column_peaks:
             dspacing_reference = float(column.replace('@', ''))  # the column name has the reference peak center
             # peak deviations, in d-spacing units, that we use to overwrite tof_dic
-            tof_dict[column] = (np.array(tof_dict[column]) / difc_values - dspacing_reference).tolist()
+            tof_dict[column] = np.array(tof_dict[column]) / difc_values - dspacing_reference
+            # switch to percent deviations if so required
+            if percent_deviations is True:
+                tof_dict[column] *= 100 / dspacing_reference
+            tof_dict[column] = tof_dict[column].tolist() # cast to list
 
         # Extract the group ID's, which typically corresponds to bank numbers
         # grouping_workspace_y contain the group ID (bank number) of each pixel
@@ -442,8 +473,64 @@ class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
             
         # Create a workspace with the histograms
         spectra = spectra = np.array(list(histograms.values())).flatten()  # single list needed
-        CreateWorkspace(DataX=bins, DataY=spectra, NSpec=len(group_ids), UnitX='dSpacing',
-                        WorkspaceTitle='Peak deviations per pixel group', OutputWorkspace=output_workspace)
+        unit_x = 'dSpacing' if percent_deviations is False else 'Empty'
+        title_prefix = 'Peak ' if percent_deviations is False else 'Percent peak '
+        CreateWorkspace(DataX=bins, DataY=spectra, NSpec=len(group_ids), UnitX=unit_x,
+                        WorkspaceTitle=title_prefix + 'Peak deviations per pixel group',
+                        OutputWorkspace=output_workspace)
         insert_bank_numbers(output_workspace, grouping_workspace) # label each spectrum with the bank number
+
+    def peak_deviations_summarize(self, original_workspace: Union[str, Workspace2D],
+                                  adjusted_workspace: Union[str, Workspace2D],
+                                  output_workspace: str) -> None:
+        r"""
+        Basic statistics from the histograms of peak deviations
+
+        Calculate average, FHWM, and average of the absolute peak deviation for each histogram.
+        The calibration decreases the average peak deviation and the FWHM. Both changes can be
+        captured in the decrease of the average of the absolute peak deviation.
+        
+        @param original_workspace : histograms of peak deviations before calibration is applied
+        @param adjusted_workspace : histograms of peak deviations after calibration is applied
+        @param output_workspace : name of the output TableWorkspace containing statistics for each bank
+        """
+        statuses = ['original', 'adjusted']
+        quantities = ['mean(abs)', 'mean', 'fwhm']
+        handles = {s: mtd[str(w)] for s, w in zip(statuses, [original_workspace, adjusted_workspace])}
+        # Some quick validation
+        bank_count = handles['original'].getNumberHistograms()
+        assert bank_count == handles['adjusted'].getNumberHistograms()      
+        # dictionary to hold the summary data
+        summary = {status: {quantity: None for quantity in quantities} for status in statuses}
+        # Generate the summary data
+        for status, handle in handles.items():
+            counts, bin_boundaries = handle.extractY(), handle.readX(0)
+            bin_centers = (bin_boundaries[:-1] + bin_boundaries[1:]) / 2  # all bin widths are the same
+            means = np.sum(counts * bin_centers, axis=1) / np.sum(counts, axis=1)  # means.shape = (bank_count,)
+            stds = np.sum(counts * bin_centers**2, axis=1) / np.sum(counts, axis=1) - means**2
+            fwhm = np.sqrt(stds) * 2 * np.sqrt(2 * np.log(2))
+            mean_abs = np.sum(counts * np.abs(bin_centers), axis=1) / np.sum(counts, axis=1)
+            logger.error(f'mean_abs.shape = {mean_abs.shape}')
+            for quantity_name, quantity_value in zip(quantities, [mean_abs, means, fwhm]):
+                summary[status][quantity_name] = quantity_value  # quantity value for all banks
+        # save to table those banks with counts
+        table = CreateEmptyTableWorkspace(OutputWorkspace=output_workspace)
+        table.addColumn(name='bank', type='int')
+        table.addColumn(name='peak count', type='int')
+        for quantity in quantities:
+                for status in statuses:
+                    table.addColumn(name=quantity + ' ' + status, type='float')
+        for workspace_index in range(bank_count):
+            peak_count = int(sum(counts[workspace_index]))
+            if peak_count < 1:
+                continue  # this banks doesn't have peak deviations
+            bank_number = int(workspace_index + 1)
+            row = [bank_number, peak_count]
+            for quantity in quantities:
+                for status in statuses:
+                    row.append(summary[status][quantity][workspace_index])
+            table.addRow(row)
+
+
 
 AlgorithmFactory.subscribe(CORELLIPowderCalibrationCreate)
