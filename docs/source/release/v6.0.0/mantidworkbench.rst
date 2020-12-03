@@ -16,7 +16,7 @@ New Features
 Improvements
 ############
 
-- Enable workbench to plot 1D spectrum from an IMDHistoWorkspace whose non-integrated dimension is equal to 1 but not to launch slice viewer.
+- Migrate MantidPlot's Step Scan interface to workbench.
 - Removed dialogs for the Load and Fit algorithms as the dialogs were previously deprecated
 - Expose :ref:`Instrument View <instrumentviewer>` control to Python.
 - Enable workbench to plot 1D spectrum (plot, overplot, plot_with_error, overplot_with_error) from an IMDHistoWorkspace whose non-integrated dimension is equal to 1 but not to launch slice viewer.

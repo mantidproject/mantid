@@ -23,7 +23,7 @@ class InstrumentViewPresenter(ObservingPresenter):
 
     def __init__(self, ws, parent=None, ads_observer=None):
         super(InstrumentViewPresenter, self).__init__()
-        self.ws_name = ws.name()
+        self.ws_name = str(ws)
         self.container = InstrumentView(parent, self, self.ws_name)
 
         if ads_observer:
