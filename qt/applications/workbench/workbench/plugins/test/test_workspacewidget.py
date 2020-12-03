@@ -34,8 +34,9 @@ MATRIXWORKSPACE_DISPLAY_TYPE = "StatusBarView"
 @start_qapplication
 class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
 
-    def setUp(self):
-        self.ws_widget = WorkspaceWidget(QMainWindow())
+    @classmethod
+    def setUpClass(cls):
+        cls.ws_widget = WorkspaceWidget(QMainWindow())
         mat_ws = CreateSampleWorkspace()
         table_ws = CreateEmptyTableWorkspace()
         group_ws = GroupWorkspaces([mat_ws, table_ws])
@@ -47,8 +48,8 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
         ConjoinWorkspaces(ws2d_ragged, temp, CheckOverlapping=False)
         ws2d_ragged = AnalysisDataService.retrieve('Ragged')
 
-        self.w_spaces = [mat_ws, table_ws, group_ws, single_val_ws]
-        self.ws_names = ['MatWS', 'TableWS', 'GroupWS', 'SingleValWS']
+        cls.w_spaces = [mat_ws, table_ws, group_ws, single_val_ws]
+        cls.ws_names = ['MatWS', 'TableWS', 'GroupWS', 'SingleValWS']
         # create md workspace
         md_ws = CreateMDHistoWorkspace(SignalInput='1,2,3,4,2,1',
                                        ErrorInput='1,1,1,1,1,1',
@@ -60,15 +61,16 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
                                        OutputWorkspace='MDHistoWS1D')
         # self.w_spaces = [mat_ws, table_ws, group_ws, single_val_ws, md_ws]
         # self.ws_names = ['MatWS', 'TableWS', 'GroupWS', 'SingleValWS', 'MDHistoWS1D']
-        for ws_name, ws in zip(self.ws_names, self.w_spaces):
-            self.ws_widget._ads.add(ws_name, ws)
-        self.ws_names.append(md_ws.name())
-        self.w_spaces.append(md_ws)
-        self.ws_names.append(ws2d_ragged.name())
-        self.w_spaces.append(ws2d_ragged)
+        for ws_name, ws in zip(cls.ws_names, cls.w_spaces):
+            cls.ws_widget._ads.add(ws_name, ws)
+        cls.ws_names.append(md_ws.name())
+        cls.w_spaces.append(md_ws)
+        cls.ws_names.append(ws2d_ragged.name())
+        cls.w_spaces.append(ws2d_ragged)
 
-    def tearDown(self):
-        self.ws_widget._ads.clear()
+    @classmethod
+    def tearDownClass(cls):
+        cls.ws_widget._ads.clear()
 
     def test_algorithm_history_window_opens_with_workspace(self):
         with mock.patch(ALGORITHM_HISTORY_WINDOW + '.show', lambda x: None):
@@ -82,14 +84,14 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
 
     def test_algorithm_history_window_opens_multiple(self):
         """
-        There are 5 objects in ADS.  But 1 of them is WorkspaceGroup
-        This sets total number of history windows to 4.
+        There are 6 objects in ADS.  But 1 of them is WorkspaceGroup
+        This sets total number of history windows to 5.
 
         :return:
         """
         with mock.patch(ALGORITHM_HISTORY_WINDOW + '.show', lambda x: None):
             self.ws_widget._do_show_algorithm_history(self.ws_names)
-        self.assert_number_of_widgets_matching(ALGORITHM_HISTORY_WINDOW_TYPE, 4)
+        self.assert_number_of_widgets_matching(ALGORITHM_HISTORY_WINDOW_TYPE, 5)
 
     def test_detector_table_shows_with_workspace(self):
         with mock.patch(MATRIXWORKSPACE_DISPLAY + '.show_view', lambda x: None):
@@ -98,6 +100,7 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
 
     @mock.patch('workbench.plugins.workspacewidget.plot', autospec=True)
     def test_plot_with_plot_bin(self, mock_plot):
+        self.ws_widget._ads.add(self.ws_names[0], self.w_spaces[0])
         self.ws_widget._do_plot_bin([self.ws_names[0]], False, False)
         mock_plot.assert_called_once_with(mock.ANY, errors=False, overplot=False, wksp_indices=[0],
                                           plot_kwargs={'axis': MantidAxType.BIN})
@@ -142,7 +145,7 @@ class WorkspaceWidgetTest(unittest.TestCase, QtWidgetFinder):
             self.ws_widget._action_double_click_workspace(self.ws_names[3])
         self.assert_widget_type_exists(MATRIXWORKSPACE_DISPLAY_TYPE)
 
-    @mock.patch('mantidqt.plotting.functions.plot_from_names', autospec=True)
+    @mock.patch('workbench.plugins.workspacewidget.plot_from_names', autospec=True)
     def test_double_click_with_ragged_ws_calls_plot_from_names(self, mock_plot_from_names):
         self.assertTrue(self.w_spaces[5].isRaggedWorkspace())
         self.ws_widget._action_double_click_workspace(self.ws_names[5])
