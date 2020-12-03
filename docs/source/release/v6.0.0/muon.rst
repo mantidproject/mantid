@@ -6,7 +6,7 @@ MuSR Changes
    :local:
 
 =======
-   
+
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
@@ -41,7 +41,7 @@ Bug fixes
 ##########
 - Stopped scientific notation when plotting run numbers on x axis
 
-Elemental Analysis 
+Elemental Analysis
 ------------------
 
 New Features
