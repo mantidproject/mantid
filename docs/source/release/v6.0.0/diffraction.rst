@@ -81,6 +81,7 @@ Single Crystal Diffraction
 New features
 ############
 - New algorithm :ref:`HB3AFindPeaks <algm-HB3AFindPeaks>` to find peaks and set the UB matrix for DEMAND data.
+- New algorithm :ref:`HB3AIntegratePeaks <algm-HB3AIntegratePeaks>` used to integrate peaks from an MDEventWorkspace and apply Lorentz correction on DEMAND data.
 
 Bugfixes
 ########
