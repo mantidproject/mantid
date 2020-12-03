@@ -17,8 +17,12 @@ The output peaks workspace can be written to `OutputFile` in either SHELX format
 :ref:`SaveHKL <algm-SaveHKL>` or in the Fullprof format using :ref:`SaveReflections <algm-SaveReflections>`.
 
 The input to this algorithm is intended as part of the DEMAND data reduction workflow, using
-:ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` and :ref:`HB3AFindPeaks <algm-HB3AFindPeaks>` which can be seen
-below in the example usage.
+:ref:`HB3AAdjustSampleNorm <algm-HB3AAdjustSampleNorm>` and :ref:`HB3AFindPeaks <algm-HB3AFindPeaks>` which can be seen below in the example usage.
+
+Workflow
+--------
+
+.. diagram:: HB3AWorkflow.dot
 
 Usage
 -----
