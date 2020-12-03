@@ -210,6 +210,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         x_axis = NumericAxis.create(nfiles)
         # Fill the intensity and position tables with all the data from scans
         conjoined_scan_name = "conjoined_input_{}".format(ws_name)
+        # if the name exists in ADS, delete it
+        if conjoined_scan_name in mtd:
+            DeleteWorkspace(Workspace=conjoined_scan_name)
         self._created_ws_names.append(conjoined_scan_name)
         masking_criteria = self._prepare_masking_criteria()
         name_list = []
@@ -354,6 +357,9 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         fitting_method = self.getPropertyValue('FittingMethod')
         max_n_peaks = len(max(yig_peaks, key=len))
         conjoined_peak_fit_name = 'conjoined_peak_fit_{}'.format(self.getPropertyValue('FitOutputWorkspace'))
+        # if the name exists in ADS, delete it
+        if conjoined_peak_fit_name in mtd:
+            DeleteWorkspace(Workspace=conjoined_peak_fit_name)
         ws_names = []
         background = 'name=FlatBackground, A0=1e-4'
         function = "name=Gaussian, PeakCentre={0}, Height={1}, Sigma={2}"
