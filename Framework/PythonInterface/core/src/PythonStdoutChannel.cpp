@@ -5,40 +5,35 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/core/PythonStdoutChannel.h"
-#include <iostream>  // streamsize
+#include <iostream> // streamsize
 
-#include <boost/format.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/iostreams/categories.hpp> // sink_tag
 #include <Python.h>
-
-//include <fstream>
-
-// test_ostream  std::cout
+#include <boost/format.hpp>
+#include <boost/iostreams/categories.hpp> // sink_tag
+#include <boost/iostreams/stream.hpp>
 
 namespace { // anonymous namespace
- class PyStdoutSink {
- public:
-   typedef char char_type;
-   typedef boost::iostreams::sink_tag category;
+class PyStdoutSink {
+public:
+  typedef char char_type;
+  typedef boost::iostreams::sink_tag category;
 
-   std::streamsize write( const char* s, std::streamsize n ) {
-     // PySys_WriteStdout truncates to 1000 chars
-     static const std::streamsize MAXSIZE = 1000;
+  std::streamsize write(const char *s, std::streamsize n) {
+    // PySys_WriteStdout truncates to 1000 chars
+    static const std::streamsize MAXSIZE = 1000;
 
-     std::streamsize written = std::min( n, MAXSIZE );
-     PySys_WriteStdout( (boost::format("%%.%1%s") % written).str().c_str(), s );
+    std::streamsize written = std::min(n, MAXSIZE);
+    PySys_WriteStdout((boost::format("%%.%1%s") % written).str().c_str(), s);
 
-     return written;
-   }
- };
+    return written;
+  }
+};
 
-  // wrapper of that sink to be a stream
- boost::iostreams::stream<PyStdoutSink> PyStdout;
+// wrapper of that sink to be a stream
+boost::iostreams::stream<PyStdoutSink> PyStdout;
 
 } // anonymous namespace
 
-
 namespace Poco {
-  PythonStdoutChannel::PythonStdoutChannel() : ConsoleChannel(PyStdout) {}
+PythonStdoutChannel::PythonStdoutChannel() : ConsoleChannel(PyStdout) {}
 } // namespace Poco
