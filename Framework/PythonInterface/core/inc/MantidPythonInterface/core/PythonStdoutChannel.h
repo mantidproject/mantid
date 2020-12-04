@@ -23,7 +23,7 @@
 #include "MantidKernel/DllConfig.h"
 #include <Poco/ConsoleChannel.h>
 
-#include "MantidKernel/PythonSink.h"
+#include "MantidPythonInterface/core/PythonSink.h"
 
 #include <boost/iostreams/stream.hpp>
 
