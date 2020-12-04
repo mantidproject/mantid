@@ -49,6 +49,9 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
   case ViewEvent::EndXChanged:
     handleEndXChanged();
     return;
+  case ViewEvent::SelectionChanged:
+    handleSelectionChanged();
+    return;
   case ViewEvent::FunctionRemoved:
     handleFunctionRemoved(arg);
     return;
@@ -102,6 +105,16 @@ void FitScriptGeneratorPresenter::handleEndXChanged() {
 
     updateEndX(workspaceName, workspaceIndex, endX);
   }
+}
+
+void FitScriptGeneratorPresenter::handleSelectionChanged() {
+  auto const firstRowIndex = m_view->selectedRows()[0];
+
+  auto const workspaceName = m_view->workspaceName(firstRowIndex);
+  auto const workspaceIndex = m_view->workspaceIndex(firstRowIndex);
+
+  auto const composite = m_model->getFunction(workspaceName, workspaceIndex);
+  m_view->setFunction(composite);
 }
 
 void FitScriptGeneratorPresenter::handleFunctionRemoved(

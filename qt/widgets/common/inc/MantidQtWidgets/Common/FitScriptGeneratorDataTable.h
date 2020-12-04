@@ -71,7 +71,7 @@ signals:
   void itemExited(int newRowIndex);
 
 private slots:
-  void handleItemPressed(QTableWidgetItem *item);
+  void handleItemClicked(QTableWidgetItem *item);
   void handleItemSelectionChanged();
 
 private:

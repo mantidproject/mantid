@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <string>
@@ -43,6 +44,9 @@ public:
   virtual void addFunction(std::string const &workspaceName,
                            WorkspaceIndex workspaceIndex,
                            std::string const &function) = 0;
+  virtual Mantid::API::CompositeFunction_sptr
+  getFunction(std::string const &workspaceName,
+              WorkspaceIndex workspaceIndex) = 0;
 };
 
 } // namespace MantidWidgets

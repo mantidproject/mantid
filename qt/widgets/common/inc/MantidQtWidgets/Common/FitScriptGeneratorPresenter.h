@@ -41,6 +41,7 @@ private:
   void handleAddWorkspaceClicked();
   void handleStartXChanged();
   void handleEndXChanged();
+  void handleSelectionChanged();
   void handleFunctionAdded(std::string const &function);
   void handleFunctionRemoved(std::string const &function);
 

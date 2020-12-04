@@ -7,7 +7,6 @@
 #include "MantidQtWidgets/Common/FitScriptGeneratorModel.h"
 
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -87,6 +86,10 @@ IFunction_sptr getFunctionAtPrefix(std::string const &functionPrefix,
   } catch (std::exception const &) {
     return IFunction_sptr();
   }
+}
+
+std::string getFunctionNameFromString(std::string const &functionString) {
+  return splitStringBy(splitStringBy(functionString, ",")[0], "=")[1];
 }
 
 } // namespace
@@ -258,8 +261,9 @@ void FitScriptGeneratorModel::removeFunction(std::string const &workspaceName,
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
 
   auto composite = toComposite(m_function->getFunction(domainIndex));
-  if (composite && composite->hasFunction(function))
-    composite->removeFunction(composite->functionIndex(function));
+  auto const functionName = getFunctionNameFromString(function);
+  if (composite && composite->hasFunction(functionName))
+    composite->removeFunction(composite->functionIndex(functionName));
 }
 
 void FitScriptGeneratorModel::addFunction(std::string const &workspaceName,
@@ -269,6 +273,13 @@ void FitScriptGeneratorModel::addFunction(std::string const &workspaceName,
 
   if (auto composite = toComposite(m_function->getFunction(domainIndex)))
     composite->addFunction(createIFunction(function));
+}
+
+CompositeFunction_sptr
+FitScriptGeneratorModel::getFunction(std::string const &workspaceName,
+                                     WorkspaceIndex workspaceIndex) {
+  auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
+  return toComposite(m_function->getFunction(domainIndex));
 }
 
 void FitScriptGeneratorModel::removeCompositeAtPrefix(

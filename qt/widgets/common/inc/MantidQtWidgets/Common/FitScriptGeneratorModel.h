@@ -7,6 +7,7 @@
 #pragma once
 
 #include "DllOption.h"
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidAPI/MultiDomainFunction.h"
@@ -73,6 +74,9 @@ public:
   void addFunction(std::string const &workspaceName,
                    WorkspaceIndex workspaceIndex,
                    std::string const &function) override;
+  Mantid::API::CompositeFunction_sptr
+  getFunction(std::string const &workspaceName,
+              WorkspaceIndex workspaceIndex) override;
 
 private:
   void removeWorkspaceDomain(

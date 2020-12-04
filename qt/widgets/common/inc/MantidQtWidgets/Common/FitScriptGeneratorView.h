@@ -9,6 +9,7 @@
 #include "DllOption.h"
 #include "ui_FitScriptGenerator.h"
 
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
@@ -68,6 +69,9 @@ public:
 
   bool isAddFunctionToAllDomainsChecked() const override;
 
+  void
+  setFunction(Mantid::API::CompositeFunction_sptr composite) const override;
+
   void displayWarning(std::string const &message) override;
 
 public:
@@ -87,6 +91,7 @@ private slots:
   void onRemoveClicked();
   void onAddWorkspaceClicked();
   void onCellChanged(int row, int column);
+  void onItemPressed();
   void onFunctionRemoved(const QString &function);
   void onFunctionAdded(const QString &function);
 

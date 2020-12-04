@@ -157,7 +157,7 @@ public:
   [[nodiscard]] std::vector<std::shared_ptr<IFunction>>
   createEquivalentFunctions() const override;
   /// Returns true if the composite has at least one of this function.
-  bool hasFunction(const std::string &functionStr) const;
+  bool hasFunction(const std::string &functionName) const;
   /// Returns the pointer to i-th function
   [[nodiscard]] IFunction_sptr getFunction(std::size_t i) const override;
   /// Number of functions
@@ -176,8 +176,9 @@ public:
   /// Replace a function
   void replaceFunctionPtr(const IFunction_sptr &f_old,
                           const IFunction_sptr &f_new);
-  /// Get the first function index with a matching function string
-  [[nodiscard]] std::size_t functionIndex(const std::string &functionStr) const;
+  /// Get the first function index with a matching function name
+  [[nodiscard]] std::size_t
+  functionIndex(const std::string &functionName) const;
   /// Get the function index
   [[nodiscard]] std::size_t functionIndex(std::size_t i) const;
   [[nodiscard]] std::size_t attributeFunctionIndex(std::size_t i) const;

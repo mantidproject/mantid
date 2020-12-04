@@ -8,6 +8,7 @@
 
 #include "DllOption.h"
 
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 #include "MantidQtWidgets/Common/MantidWidget.h"
@@ -36,6 +37,7 @@ public:
     RemoveClicked,
     StartXChanged,
     EndXChanged,
+    SelectionChanged,
     FunctionAdded,
     FunctionRemoved
   };
@@ -71,6 +73,9 @@ public:
   virtual void resetSelection() = 0;
 
   virtual bool isAddFunctionToAllDomainsChecked() const = 0;
+
+  virtual void
+  setFunction(Mantid::API::CompositeFunction_sptr composite) const = 0;
 
   virtual void displayWarning(std::string const &message) = 0;
 

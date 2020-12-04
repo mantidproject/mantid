@@ -67,6 +67,8 @@ void FitScriptGeneratorView::connectUiSignals() {
           SLOT(onAddWorkspaceClicked()));
   connect(m_dataTable.get(), SIGNAL(cellChanged(int, int)), this,
           SLOT(onCellChanged(int, int)));
+  connect(m_dataTable.get(), SIGNAL(itemPressed(QTableWidgetItem *)), this,
+          SLOT(onItemPressed()));
 
   connect(m_functionTreeView.get(),
           SIGNAL(functionRemovedString(const QString &)), this,
@@ -120,6 +122,10 @@ void FitScriptGeneratorView::onCellChanged(int row, int column) {
     m_presenter->notifyPresenter(ViewEvent::StartXChanged);
   else if (column == ColumnIndex::EndX)
     m_presenter->notifyPresenter(ViewEvent::EndXChanged);
+}
+
+void FitScriptGeneratorView::onItemPressed() {
+  m_presenter->notifyPresenter(ViewEvent::SelectionChanged);
 }
 
 void FitScriptGeneratorView::onFunctionRemoved(QString const &function) {
@@ -192,6 +198,16 @@ void FitScriptGeneratorView::resetSelection() { m_dataTable->resetSelection(); }
 
 bool FitScriptGeneratorView::isAddFunctionToAllDomainsChecked() const {
   return m_ui.ckAddFunctionForAllDomains->isChecked();
+}
+
+void FitScriptGeneratorView::setFunction(
+    CompositeFunction_sptr composite) const {
+  if (composite->nFunctions() > 1)
+    m_functionTreeView->setFunction(composite);
+  else if (composite->nFunctions() == 1)
+    m_functionTreeView->setFunction(composite->getFunction(0));
+  else
+    m_functionTreeView->clear();
 }
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {

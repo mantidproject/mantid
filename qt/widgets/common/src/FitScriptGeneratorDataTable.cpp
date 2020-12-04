@@ -114,8 +114,8 @@ FitScriptGeneratorDataTable::FitScriptGeneratorDataTable(QWidget *parent)
   this->setItemDelegateForColumn(
       ColumnIndex::EndX, new CustomItemDelegate(this, ColumnIndex::EndX));
 
-  connect(this, SIGNAL(itemPressed(QTableWidgetItem *)), this,
-          SLOT(handleItemPressed(QTableWidgetItem *)));
+  connect(this, SIGNAL(itemClicked(QTableWidgetItem *)), this,
+          SLOT(handleItemClicked(QTableWidgetItem *)));
   connect(this, SIGNAL(itemSelectionChanged()), this,
           SLOT(handleItemSelectionChanged()));
 }
@@ -133,7 +133,7 @@ bool FitScriptGeneratorDataTable::eventFilter(QObject *widget, QEvent *event) {
   return QTableWidget::eventFilter(widget, event);
 }
 
-void FitScriptGeneratorDataTable::handleItemPressed(QTableWidgetItem *item) {
+void FitScriptGeneratorDataTable::handleItemClicked(QTableWidgetItem *item) {
   m_selectedRows = selectedRows();
   m_selectedColumn = item->column();
   if (m_selectedColumn == ColumnIndex::StartX ||
