@@ -84,11 +84,10 @@ public:
    * @brief Test the static Python stdout stream
    */
   void testStaticPythonStream() {
-      Py_Initialize();
-      pysys_stdout << "Hello, Python world!\n";
-      pysys_stdout << "30";
+    Py_Initialize();
+    pysys_stdout << "Hello, Python world!\n";
+    pysys_stdout << "30";
   }
-
 
   /**
    * @brief Test Python Std output with logger
