@@ -17,34 +17,14 @@
 
 #pragma once
 
-#include <fstream>
-#include <iostream>
-
 #include "MantidKernel/DllConfig.h"
 #include <Poco/ConsoleChannel.h>
 
-#include "MantidPythonInterface/core/PythonSink.h"
-
-#include <boost/iostreams/stream.hpp>
-
-/// static boost stream with python sink
-static boost::iostreams::stream<pysys_stdout_sink> pysys_stdout{
-    pysys_stdout_sink()};
-
 namespace Poco {
-
-static std::ofstream test_ostream("whatever.txt", std::ofstream::out);
 
 class MANTID_KERNEL_DLL PythonStdoutChannel : public ConsoleChannel {
 public:
   /// Constructor for PythonStdoutChannel
   PythonStdoutChannel();
-
-  void nice() {
-    std::cout << "\n\n"
-              << "nice "
-              << "\n";
-    test_ostream << "nice nice\n";
-  }
 };
 } // namespace Poco

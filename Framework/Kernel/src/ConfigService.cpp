@@ -16,7 +16,6 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidKernel/NetworkProxy.h"
-#include "MantidKernel/PythonStdoutChannel.h"
 #include "MantidKernel/StdoutChannel.h"
 #include "MantidKernel/StringTokenizer.h"
 #include "MantidKernel/Strings.h"
@@ -44,7 +43,6 @@
 #include <Poco/StreamCopier.h>
 #include <Poco/String.h>
 #include <Poco/URI.h>
-#include <Poco/Util/AbstractConfiguration.h>
 #include <Poco/Util/LoggingConfigurator.h>
 #include <Poco/Util/PropertyFileConfiguration.h>
 #include <Poco/Util/SystemConfiguration.h>
@@ -62,8 +60,6 @@
 #include <iostream>
 #include <stdexcept>
 #include <utility>
-
-#include <Python.h>
 
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
@@ -137,15 +133,10 @@ ConfigServiceImpl::ConfigServiceImpl()
   m_pSysConfig = new Poco::Util::SystemConfiguration();
   m_pConf = nullptr;
 
-  //  // Register StdChannel with Poco
-  //  std::cout << "[DEBUG] ....................  Register StdoutChannel\n";
-
-  //  // There is not need to if not registered here?
-  //  Poco::LoggingFactory::defaultFactory().registerChannelClass(
-  //      "StdoutChannel",
-  //      new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
-
-  //  std::cout << "[DEBUG ... ... End of first regisgration\n";
+  // Register StdChannel with Poco
+  Poco::LoggingFactory::defaultFactory().registerChannelClass(
+      "StdoutChannel",
+      new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
 
   setBaseDirectory();
 
@@ -395,10 +386,7 @@ void ConfigServiceImpl::loadConfig(const std::string &filename,
 
   // use the cached property string to initialise the POCO property file
   std::istringstream istr(m_propertyString);
-  // m_pConf is overwitten
   m_pConf = new Poco::Util::PropertyFileConfiguration(istr);
-  Poco::Util::AbstractConfiguration::Keys keys;
-  m_pConf->keys(keys);
 }
 
 /**
@@ -663,8 +651,6 @@ void ConfigServiceImpl::reset() {
 void ConfigServiceImpl::updateConfig(const std::string &filename,
                                      const bool append,
                                      const bool update_caches) {
-
-  // load configuration file
   loadConfig(filename, append);
 
   // Ensure that the default save directory makes sense
@@ -676,35 +662,6 @@ void ConfigServiceImpl::updateConfig(const std::string &filename,
       setString("defaultsave.directory", Poco::Path::home());
   }
   */
-
-  {
-    // Register POCO output channel
-    std::string output_channel =
-        getString("logging.channels.consoleChannel.class");
-
-    if (output_channel.compare("PythonConsoleChannel") == 0) {
-      // register python channel ...
-      try {
-        Py_Initialize();
-        Poco::LoggingFactory::defaultFactory().registerChannelClass(
-            "PythonStdoutChannel",
-            new Poco::Instantiator<Poco::PythonStdoutChannel, Poco::Channel>);
-      } catch (const Poco::ExistsException &e) {
-        std::cout << "Re-egistration " << output_channel
-                  << " failure: " << e.what() << "\n";
-      }
-    } else {
-      // register Poco stdout channel
-      try {
-        Poco::LoggingFactory::defaultFactory().registerChannelClass(
-            "StdoutChannel",
-            new Poco::Instantiator<Poco::StdoutChannel, Poco::Channel>);
-      } catch (const Poco::ExistsException &e) {
-        std::cout << "Re-rgistration " << output_channel
-                  << " failure: " << e.what() << "\n";
-      }
-    }
-  }
 
   if (update_caches) {
     // Only configure logging once
