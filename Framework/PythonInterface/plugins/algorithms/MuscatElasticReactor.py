@@ -351,7 +351,10 @@ class MuscatElasticReactor(DataProcessorAlgorithm):
                              f"It must be less than {maxWavelength}")
         theta_r = np.arcsin(self._q_values/Qmax)
         theta_d = 2.0*np.rad2deg(theta_r)
-        ang_inc = (theta_d[len(theta_d) - 1] - theta_d[0])/self._number_angles
+        print(theta_d)
+        with np.printoptions(threshold=np.inf):
+            print(theta_d)
+        ang_inc = (theta_d[len(theta_d) - 1] - theta_d[0])/(self._number_angles-1)
         self._angles = np.zeros(self._number_angles)
         for idx_ang in range(self._number_angles):
             self._angles[idx_ang] = theta_d[0] + idx_ang*ang_inc

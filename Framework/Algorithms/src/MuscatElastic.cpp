@@ -5,6 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAlgorithms/MuscatElastic.h"
+#include "MantidAPI/EqualBinSizesValidator.h"
 #include "MantidAPI/ISpectrum.h"
 #include "MantidAPI/InstrumentValidator.h"
 #include "MantidAPI/Sample.h"
@@ -44,27 +45,32 @@ DECLARE_ALGORITHM(MuscatElastic)
  * Initialize the algorithm
  */
 void MuscatElastic::init() {
-  // The input workspace must have an instrument and units of MomentumTransfer
+  // The input workspace must have an instrument and units of wavelength
   auto wsValidator = std::make_shared<CompositeValidator>();
-  wsValidator->add<WorkspaceUnitValidator>("MomentumTransfer");
+  wsValidator->add<WorkspaceUnitValidator>("Wavelength");
   wsValidator->add<InstrumentValidator>();
 
   declareProperty(std::make_unique<WorkspaceProperty<>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
                   "The name of the input workspace.  The input workspace must "
+                  "have X units of wavelength.");
+
+  auto wsQValidator = std::make_shared<CompositeValidator>();
+  wsQValidator->add<WorkspaceUnitValidator>("MomentumTransfer");
+  wsQValidator->add<EqualBinSizesValidator>(1.0E-07);
+
+  declareProperty(std::make_unique<WorkspaceProperty<>>(
+                      "SofqWorkspace", "", Direction::Input, wsQValidator),
+                  "The name of the workspace containing S(q).  The input "
+                  "workspace must "
                   "have X units of momentum transfer.");
-  declareProperty(
-      std::make_unique<WorkspaceProperty<>>("SofqWorkspace", "",
-                                            Direction::Input, wsValidator),
-      "The name of the workspace containing S(q).  The input workspace must "
-      "have X units of momentum transfer.");
   declareProperty(std::make_unique<WorkspaceProperty<WorkspaceGroup>>(
                       "OutputWorkspace", "", Direction::Output),
                   "Name for the WorkspaceGroup that will be created.");
   declareProperty(
       std::make_unique<WorkspaceProperty<>>(
           "ScatteringCrossSection", "", Direction::Input,
-          PropertyMode::Optional, wsValidator),
+          PropertyMode::Optional, wsQValidator),
       "A workspace containing the scattering cross section as a function of "
       "k.");
 
@@ -117,6 +123,10 @@ void MuscatElastic::init() {
 void MuscatElastic::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
+  // take log of S(Q) and store it this way
+  auto y = SQWS->y(0);
+  std::transform(y.begin(), y.end(), y.begin(),
+                 static_cast<double (*)(double)>(std::log));
 
   const MatrixWorkspace_sptr sigmaSSWS = getProperty("ScatteringCrossSection");
   if (sigmaSSWS) {
@@ -140,6 +150,8 @@ void MuscatElastic::exec() {
   std::vector<MatrixWorkspace_sptr> outputWSs;
 
   auto noAbsOutputWS = createOutputWorkspace(*inputWS);
+  auto noAbsSimulationWS =
+      useSparseInstrument ? sparseWS->clone() : noAbsOutputWS;
   for (auto i = 0; i < nScatters; i++) {
     auto outputWS = createOutputWorkspace(*inputWS);
     MatrixWorkspace_sptr simulationWS =
@@ -147,6 +159,8 @@ void MuscatElastic::exec() {
     simulationWSs.push_back(simulationWS);
     outputWSs.push_back(outputWS);
   }
+  const MatrixWorkspace &instrumentWS =
+      useSparseInstrument ? *sparseWS : *inputWS;
 
   auto instrument = inputWS->getInstrument();
   const auto nhists =
@@ -156,6 +170,9 @@ void MuscatElastic::exec() {
   auto nbins = inputWS->blocksize();
 
   auto &sample = inputWS->sample();
+
+  const int nSingleScatterEvents = getProperty("NeutronEventsSingle");
+  const int nMultiScatterEvents = getProperty("NeutronEventsMultiple");
 
   const int seed = getProperty("SeedValue");
 
@@ -174,26 +191,18 @@ void MuscatElastic::exec() {
     PARALLEL_START_INTERUPT_REGION
     MersenneTwister rng(seed + int(i));
     // no two theta for monitors
-    if (!simulationWSs[i]->spectrumInfo().isMonitor(i)) {
+    if (!instrumentWS.spectrumInfo().isMonitor(i)) {
       for (int bin = 0; bin < nbins; bin++) {
-        // use Kernel::UnitConversion::run instead?? Momentum, MomentumTransfer
-        double kinc =
-            simulationWSs[i]->histogram(i).x()[bin] /
-            (2 * sin(0.5 * simulationWSs[i]->spectrumInfo().twoTheta(i)));
+        double kinc = 2 * M_PI / instrumentWS.histogram(i).x()[bin];
 
-        const int nSingleScatterEvents = getProperty("NeutronEventsSingle");
-        const int nMultiScatterEvents = getProperty("NeutronEventsMultiple");
-
-        // take log of S(Q) and store it this way
-        auto y = SQWS->y(0);
-        std::transform(y.begin(), y.end(), y.begin(),
-                       static_cast<double (*)(double)>(std::log));
-        auto detPos = simulationWSs[i]->detectorInfo().position(i);
+        auto detPos = instrumentWS.detectorInfo().position(i);
 
         double total(0);
         total = simulateEvents(nSingleScatterEvents, 1, sample, *instrument,
                                rng, sigmaSSWS, SQWS, kinc, detPos, true);
-        noAbsOutputWS->getSpectrum(i).dataY()[bin] = total;
+        noAbsSimulationWS->getSpectrum(i).dataY()[bin] = total;
+        /*if (!useSparseInstrument && lambdaStepSize > 1) {
+        }*/
 
         for (size_t ne = 0; ne < nScatters; ne++) {
           int nEvents = ne == 0 ? nSingleScatterEvents : nMultiScatterEvents;
@@ -282,7 +291,16 @@ double MuscatElastic::interpolateLogQuadratic(
     return workspaceToInterpolate->y(0).front();
   }
   // assume log(cross section) is quadratic in k
-  auto idx = workspaceToInterpolate->yIndexOfX(x);
+  size_t idx;
+  // avoid passing tolerance into yIndexOfX for histograms (SURELY SHOULDN'T
+  // HAVE TO DO THIS??)
+  if (!workspaceToInterpolate->isHistogramData()) {
+    auto binWidth =
+        workspaceToInterpolate->x(0)[1] - workspaceToInterpolate->x(0)[0];
+    idx = workspaceToInterpolate->yIndexOfX(x, 0, 0.5 * binWidth);
+  } else {
+    idx = workspaceToInterpolate->yIndexOfX(x);
+  }
   // need at least two points to the right of the x value for the quadratic
   // interpolation to work
   auto ny = workspaceToInterpolate->blocksize();
@@ -293,7 +311,7 @@ double MuscatElastic::interpolateLogQuadratic(
   if (idx > ny - 3) {
     idx = ny - 3;
   }
-  // apply equal bins checker?
+  // this interpolation assumes the set of 3 bins\point have the same width
   auto binWidth =
       workspaceToInterpolate->x(0)[1] - workspaceToInterpolate->x(0)[0];
   // U=0 on at point or bin edge to the left of where x lies
