@@ -54,6 +54,7 @@ public:
         new Poco::PythonStdoutChannel);
     stdoutChannel->nice();
     Poco::ConsoleChannel *testconsole = new Poco::ConsoleChannel(pysys_stdout);
+    TS_ASSERT(testconsole);
 
     // Test console channel: all go to the log channel but not std::cout channel
     Poco::AutoPtr<Poco::ConsoleChannel> consoleChannel(
@@ -85,6 +86,7 @@ public:
         new Poco::PythonStdoutChannel);
     stdoutChannel2->nice();
     Poco::ConsoleChannel *testconsole2 = new Poco::ConsoleChannel(pysys_stdout);
+    TS_ASSERT(testconsole2);
 
     typedef io::stream<io::file_sink> ofstream;
 
@@ -111,6 +113,7 @@ public:
         new Poco::PythonStdoutChannel);
     stdoutChannel->nice();
     Poco::ConsoleChannel *testconsole = new Poco::ConsoleChannel(out);
+    TS_ASSERT(testconsole);
 
     // TS_ASSERT_EQUALS(1, 3);
   }
