@@ -81,9 +81,40 @@ class IO(object):
         :returns: True if they are the same, otherwise False
 
         """
+        from abins.parameters import non_performance_parameters as current_advanced_parameters
+
         previous_advanced_parameters = self.load(list_of_attributes=["advanced_parameters"])
-        return (abins.parameters.non_performance_parameters
-                == json.loads(previous_advanced_parameters["attributes"]["advanced_parameters"]))
+        previous_advanced_parameters = json.loads(
+            previous_advanced_parameters["attributes"]["advanced_parameters"])
+
+        diff = {key: (value, previous_advanced_parameters.get(key, None))
+                for key, value in current_advanced_parameters.items()
+                if previous_advanced_parameters.get(key, None) != value}
+        diff.update({key: (None, value)
+                     for key, value in previous_advanced_parameters.items()
+                     if key not in current_advanced_parameters})
+
+
+        sections = ('instruments', 'sampling', 'hdf_groups')
+
+        for section in sections:
+            if section in diff:
+                print(f"Differences in Abins {section} parameters:")
+                new_group, old_group = diff[section]
+                for key in new_group:
+                    if new_group[key] != old_group[key]:
+                        print(key)
+                        print("New values:")
+                        print(new_group[key])
+                        print("Previous values:")
+                        print(old_group[key])
+
+        if diff:
+            return False
+        else:
+            return True
+
+
 
     def get_previous_ab_initio_program(self):
         """
