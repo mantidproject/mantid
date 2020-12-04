@@ -17,12 +17,13 @@
 
 #pragma once
 
-#include "MantidKernel/DllConfig.h"
+#include "MantidPythonInterface/core/DllConfig.h"
 #include <Poco/ConsoleChannel.h>
 
 namespace Poco {
 
-class MANTID_KERNEL_DLL PythonStdoutChannel : public ConsoleChannel {
+class MANTID_PYTHONINTERFACE_CORE_DLL PythonStdoutChannel
+    : public ConsoleChannel {
 public:
   /// Constructor for PythonStdoutChannel
   PythonStdoutChannel();
