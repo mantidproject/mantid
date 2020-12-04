@@ -427,13 +427,13 @@ class DrillTableWidget(QTableWidget):
 
     def delRowLabel(self, row):
         """
-        Delete the row label. Actually, this method puts back the default label:
-        the row index (starting at 1).
+        Delete the row label.
 
         Args:
             ros (int): row index
         """
-        self.setVerticalHeaderItem(row, QTableWidgetItem(str(row + 1)))
+        self.setVerticalHeaderItem(row, None)
+        self.verticalHeader().headerDataChanged(Qt.Vertical, row, row)
 
     def setFoldedColumns(self, columns):
         """
