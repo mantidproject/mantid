@@ -252,6 +252,25 @@ void FitScriptGeneratorModel::updateEndX(std::string const &workspaceName,
   m_fitDomains[domainIndex].m_endX = endX;
 }
 
+void FitScriptGeneratorModel::removeFunction(std::string const &workspaceName,
+                                             WorkspaceIndex workspaceIndex,
+                                             std::string const &function) {
+  auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
+
+  auto composite = toComposite(m_function->getFunction(domainIndex));
+  if (composite && composite->hasFunction(function))
+    composite->removeFunction(composite->functionIndex(function));
+}
+
+void FitScriptGeneratorModel::addFunction(std::string const &workspaceName,
+                                          WorkspaceIndex workspaceIndex,
+                                          std::string const &function) {
+  auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
+
+  if (auto composite = toComposite(m_function->getFunction(domainIndex)))
+    composite->addFunction(createIFunction(function));
+}
+
 void FitScriptGeneratorModel::removeCompositeAtPrefix(
     std::string const &functionPrefix) {
   removeCompositeAtIndex(getPrefixIndexAt(functionPrefix, 0));

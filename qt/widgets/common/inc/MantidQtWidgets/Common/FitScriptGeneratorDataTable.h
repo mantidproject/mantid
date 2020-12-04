@@ -55,6 +55,7 @@ public:
   [[nodiscard]] double startX(FitDomainIndex row) const;
   [[nodiscard]] double endX(FitDomainIndex row) const;
 
+  [[nodiscard]] std::vector<FitDomainIndex> allRows() const;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const;
 
   void removeDomain(std::string const &workspaceName,
@@ -70,7 +71,8 @@ signals:
   void itemExited(int newRowIndex);
 
 private slots:
-  void handleItemClicked(QTableWidgetItem *item);
+  void handleItemPressed(QTableWidgetItem *item);
+  void handleItemSelectionChanged();
 
 private:
   bool eventFilter(QObject *widget, QEvent *event) override;
@@ -83,10 +85,10 @@ private:
 
   void setSelectedXValue(double xValue);
 
-  int m_selectedRow;
+  std::vector<FitDomainIndex> m_selectedRows;
   int m_selectedColumn;
   double m_selectedValue;
-  QPersistentModelIndex m_lastIndex;
+  QPersistentModelIndex m_lastHoveredIndex;
 };
 
 using ColumnIndex = FitScriptGeneratorDataTable::ColumnIndex;

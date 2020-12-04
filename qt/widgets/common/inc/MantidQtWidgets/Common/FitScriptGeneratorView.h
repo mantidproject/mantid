@@ -12,7 +12,7 @@
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "MantidQtWidgets/Common/AddWorkspaceDialog.h"
 #include "MantidQtWidgets/Common/FitOptionsBrowser.h"
-#include "MantidQtWidgets/Common/FunctionBrowser.h"
+#include "MantidQtWidgets/Common/FunctionTreeView.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
@@ -49,6 +49,7 @@ public:
   [[nodiscard]] double startX(FitDomainIndex index) const override;
   [[nodiscard]] double endX(FitDomainIndex index) const override;
 
+  [[nodiscard]] std::vector<FitDomainIndex> allRows() const override;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const override;
 
   void removeWorkspaceDomain(std::string const &workspaceName,
@@ -64,6 +65,8 @@ public:
   getDialogWorkspaceIndices() const override;
 
   void resetSelection() override;
+
+  bool isAddFunctionToAllDomainsChecked() const override;
 
   void displayWarning(std::string const &message) override;
 
@@ -84,6 +87,8 @@ private slots:
   void onRemoveClicked();
   void onAddWorkspaceClicked();
   void onCellChanged(int row, int column);
+  void onFunctionRemoved(const QString &function);
+  void onFunctionAdded(const QString &function);
 
 private:
   void connectUiSignals();
@@ -95,7 +100,7 @@ private:
   IFitScriptGeneratorPresenter *m_presenter;
   std::unique_ptr<AddWorkspaceDialog> m_dialog;
   std::unique_ptr<FitScriptGeneratorDataTable> m_dataTable;
-  std::unique_ptr<FunctionBrowser> m_functionBrowser;
+  std::unique_ptr<FunctionTreeView> m_functionTreeView;
   std::unique_ptr<FitOptionsBrowser> m_fitOptionsBrowser;
   Ui::FitScriptGenerator m_ui;
 };

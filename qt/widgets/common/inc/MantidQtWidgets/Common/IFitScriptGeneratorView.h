@@ -31,7 +31,14 @@ class EXPORT_OPT_MANTIDQT_COMMON IFitScriptGeneratorView
   Q_OBJECT
 
 public:
-  enum class Event { AddClicked, RemoveClicked, StartXChanged, EndXChanged };
+  enum class Event {
+    AddClicked,
+    RemoveClicked,
+    StartXChanged,
+    EndXChanged,
+    FunctionAdded,
+    FunctionRemoved
+  };
 
   IFitScriptGeneratorView(QWidget *parent = nullptr)
       : API::MantidWidget(parent) {}
@@ -46,6 +53,7 @@ public:
   [[nodiscard]] virtual double startX(FitDomainIndex index) const = 0;
   [[nodiscard]] virtual double endX(FitDomainIndex index) const = 0;
 
+  [[nodiscard]] virtual std::vector<FitDomainIndex> allRows() const = 0;
   [[nodiscard]] virtual std::vector<FitDomainIndex> selectedRows() const = 0;
 
   virtual void removeWorkspaceDomain(std::string const &workspaceName,
@@ -61,6 +69,8 @@ public:
   getDialogWorkspaceIndices() const = 0;
 
   virtual void resetSelection() = 0;
+
+  virtual bool isAddFunctionToAllDomainsChecked() const = 0;
 
   virtual void displayWarning(std::string const &message) = 0;
 

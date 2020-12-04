@@ -36,6 +36,13 @@ public:
                             WorkspaceIndex workspaceIndex, double startX) = 0;
   virtual void updateEndX(std::string const &workspaceName,
                           WorkspaceIndex workspaceIndex, double endX) = 0;
+
+  virtual void removeFunction(std::string const &workspaceName,
+                              WorkspaceIndex workspaceIndex,
+                              std::string const &function) = 0;
+  virtual void addFunction(std::string const &workspaceName,
+                           WorkspaceIndex workspaceIndex,
+                           std::string const &function) = 0;
 };
 
 } // namespace MantidWidgets

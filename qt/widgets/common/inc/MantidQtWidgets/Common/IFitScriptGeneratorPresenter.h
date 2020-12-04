@@ -9,6 +9,8 @@
 #include "DllOption.h"
 #include "IFitScriptGeneratorView.h"
 
+#include <string>
+
 namespace MantidQt {
 namespace MantidWidgets {
 
@@ -18,7 +20,8 @@ class EXPORT_OPT_MANTIDQT_COMMON IFitScriptGeneratorPresenter {
 public:
   virtual ~IFitScriptGeneratorPresenter() = default;
 
-  virtual void notifyPresenter(ViewEvent const &event) = 0;
+  virtual void notifyPresenter(ViewEvent const &event,
+                               std::string const &arg = "") = 0;
 
   virtual void openFitScriptGenerator() = 0;
 };

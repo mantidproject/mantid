@@ -1608,6 +1608,8 @@ void FunctionTreeView::removeFunction() {
   QtProperty *prop = item->property();
   if (!isFunction(prop))
     return;
+  auto const functionString =
+      QString::fromStdString(getFunction(prop)->asString());
   auto const functionIndex = getIndex(prop);
   removeProperty(prop);
   updateFunctionIndices();
@@ -1646,6 +1648,7 @@ void FunctionTreeView::removeFunction() {
       }
     }
   }
+  emit functionRemovedString(functionString);
   emit functionRemoved(functionIndex);
   setGlobalParameters(globalParameters);
   emit globalsChanged(globalParameters);

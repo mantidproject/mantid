@@ -31,7 +31,11 @@ FitScriptGeneratorPresenter::FitScriptGeneratorPresenter(
 
 FitScriptGeneratorPresenter::~FitScriptGeneratorPresenter() {}
 
-void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event) {
+void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
+                                                  std::string const &arg) {
+  if (arg.empty())
+    UNUSED_ARG(arg);
+
   switch (event) {
   case ViewEvent::RemoveClicked:
     handleRemoveClicked();
@@ -44,6 +48,12 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event) {
     return;
   case ViewEvent::EndXChanged:
     handleEndXChanged();
+    return;
+  case ViewEvent::FunctionRemoved:
+    handleFunctionRemoved(arg);
+    return;
+  case ViewEvent::FunctionAdded:
+    handleFunctionAdded(arg);
     return;
   }
 
@@ -91,6 +101,32 @@ void FitScriptGeneratorPresenter::handleEndXChanged() {
     auto const endX = m_view->endX(selectedRows[0]);
 
     updateEndX(workspaceName, workspaceIndex, endX);
+  }
+}
+
+void FitScriptGeneratorPresenter::handleFunctionRemoved(
+    std::string const &function) {
+  auto const rowIndices = m_view->isAddFunctionToAllDomainsChecked()
+                              ? m_view->allRows()
+                              : m_view->selectedRows();
+
+  for (auto const &rowIndex : rowIndices) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+    m_model->removeFunction(workspaceName, workspaceIndex, function);
+  }
+}
+
+void FitScriptGeneratorPresenter::handleFunctionAdded(
+    std::string const &function) {
+  auto const rowIndices = m_view->isAddFunctionToAllDomainsChecked()
+                              ? m_view->allRows()
+                              : m_view->selectedRows();
+
+  for (auto const &rowIndex : rowIndices) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+    m_model->addFunction(workspaceName, workspaceIndex, function);
   }
 }
 

@@ -41,13 +41,13 @@ FitScriptGeneratorView::FitScriptGeneratorView(
     : IFitScriptGeneratorView(parent), m_presenter(),
       m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
-      m_functionBrowser(std::make_unique<FunctionBrowser>(nullptr, true)),
+      m_functionTreeView(std::make_unique<FunctionTreeView>(nullptr, true)),
       m_fitOptionsBrowser(std::make_unique<FitOptionsBrowser>(
           nullptr, FittingType::SimultaneousAndSequential)) {
   m_ui.setupUi(this);
 
   m_ui.fDataTable->layout()->addWidget(m_dataTable.get());
-  m_ui.splitter->addWidget(m_functionBrowser.get());
+  m_ui.splitter->addWidget(m_functionTreeView.get());
   m_ui.splitter->addWidget(m_fitOptionsBrowser.get());
 
   setFitBrowserOptions(fitOptions);
@@ -57,7 +57,7 @@ FitScriptGeneratorView::FitScriptGeneratorView(
 FitScriptGeneratorView::~FitScriptGeneratorView() {
   m_dialog.reset();
   m_dataTable.reset();
-  m_functionBrowser.reset();
+  m_functionTreeView.reset();
   m_fitOptionsBrowser.reset();
 }
 
@@ -67,6 +67,12 @@ void FitScriptGeneratorView::connectUiSignals() {
           SLOT(onAddWorkspaceClicked()));
   connect(m_dataTable.get(), SIGNAL(cellChanged(int, int)), this,
           SLOT(onCellChanged(int, int)));
+
+  connect(m_functionTreeView.get(),
+          SIGNAL(functionRemovedString(const QString &)), this,
+          SLOT(onFunctionRemoved(const QString &)));
+  connect(m_functionTreeView.get(), SIGNAL(functionAdded(const QString &)),
+          this, SLOT(onFunctionAdded(const QString &)));
 }
 
 void FitScriptGeneratorView::setFitBrowserOptions(
@@ -116,6 +122,16 @@ void FitScriptGeneratorView::onCellChanged(int row, int column) {
     m_presenter->notifyPresenter(ViewEvent::EndXChanged);
 }
 
+void FitScriptGeneratorView::onFunctionRemoved(QString const &function) {
+  m_presenter->notifyPresenter(ViewEvent::FunctionRemoved,
+                               function.toStdString());
+}
+
+void FitScriptGeneratorView::onFunctionAdded(QString const &function) {
+  m_presenter->notifyPresenter(ViewEvent::FunctionAdded,
+                               function.toStdString());
+}
+
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
   return m_dataTable->workspaceName(index);
 }
@@ -131,6 +147,10 @@ double FitScriptGeneratorView::startX(FitDomainIndex index) const {
 
 double FitScriptGeneratorView::endX(FitDomainIndex index) const {
   return m_dataTable->endX(index);
+}
+
+std::vector<FitDomainIndex> FitScriptGeneratorView::allRows() const {
+  return m_dataTable->allRows();
 }
 
 std::vector<FitDomainIndex> FitScriptGeneratorView::selectedRows() const {
@@ -169,6 +189,10 @@ FitScriptGeneratorView::getDialogWorkspaceIndices() const {
 }
 
 void FitScriptGeneratorView::resetSelection() { m_dataTable->resetSelection(); }
+
+bool FitScriptGeneratorView::isAddFunctionToAllDomainsChecked() const {
+  return m_ui.ckAddFunctionForAllDomains->isChecked();
+}
 
 void FitScriptGeneratorView::displayWarning(std::string const &message) {
   QMessageBox::warning(this, "Warning!", QString::fromStdString(message));

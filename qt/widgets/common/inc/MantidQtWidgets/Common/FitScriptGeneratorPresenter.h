@@ -31,7 +31,8 @@ public:
                               double startX = 0.0, double endX = 0.0);
   ~FitScriptGeneratorPresenter() override;
 
-  void notifyPresenter(ViewEvent const &event) override;
+  void notifyPresenter(ViewEvent const &event,
+                       std::string const &arg = "") override;
 
   void openFitScriptGenerator() override;
 
@@ -40,6 +41,8 @@ private:
   void handleAddWorkspaceClicked();
   void handleStartXChanged();
   void handleEndXChanged();
+  void handleFunctionAdded(std::string const &function);
+  void handleFunctionRemoved(std::string const &function);
 
   void setWorkspaces(QStringList const &workspaceNames, double startX,
                      double endX);

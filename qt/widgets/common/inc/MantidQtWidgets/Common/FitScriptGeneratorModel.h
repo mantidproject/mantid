@@ -67,6 +67,13 @@ public:
   void updateEndX(std::string const &workspaceName,
                   WorkspaceIndex workspaceIndex, double endX) override;
 
+  void removeFunction(std::string const &workspaceName,
+                      WorkspaceIndex workspaceIndex,
+                      std::string const &function) override;
+  void addFunction(std::string const &workspaceName,
+                   WorkspaceIndex workspaceIndex,
+                   std::string const &function) override;
+
 private:
   void removeWorkspaceDomain(
       std::size_t const &removeIndex,
