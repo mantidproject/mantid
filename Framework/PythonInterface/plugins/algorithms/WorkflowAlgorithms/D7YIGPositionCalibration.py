@@ -370,8 +370,8 @@ class D7YIGPositionCalibration(PythonAlgorithm):
             results_y = np.zeros(max_n_peaks)
             results_e = np.zeros(max_n_peaks)
             single_spectrum_peaks = yig_peaks[pixel_no]
+            ws_name = 'pixel_{}'.format(pixel_no)
             if len(single_spectrum_peaks) >= 1:
-                ws_name = 'pixel_{}'.format(pixel_no)
                 if fitting_method == 'Individual':
                     ws_name += '_peak_{}'
                 peak_no = 0
