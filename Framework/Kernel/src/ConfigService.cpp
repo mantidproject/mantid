@@ -63,6 +63,8 @@
 #include <stdexcept>
 #include <utility>
 
+#include <Python.h>
+
 #ifdef __APPLE__
 #include <mach-o/dyld.h>
 #endif
@@ -683,6 +685,7 @@ void ConfigServiceImpl::updateConfig(const std::string &filename,
       if (output_channel.compare("PythonConsoleChannel") == 0) {
           // register python channel ...
           try {
+            Py_Initialize();
             Poco::LoggingFactory::defaultFactory().registerChannelClass(
                 "PythonStdoutChannel",
                 new Poco::Instantiator<Poco::PythonStdoutChannel, Poco::Channel>);
