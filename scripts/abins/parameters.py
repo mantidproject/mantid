@@ -72,16 +72,16 @@ instruments = {
     'Lagrange': {
         # Lagrange parameters for calculating Q^2
         'final_neutron_energy': 4.5 * MILLI_EV_TO_WAVENUMBER,  # Final energy on the crystal analyser in cm-1 (converted from eV)
-        'scattering_angle_range': (10, 90),
+        'scattering_angle_range': [10, 90],
         'angles_per_detector': 5,
         'settings_default': 'Cu(220)',
-        'settings': {'Cu(220)': {'Ei_range_meV': (26, 500),
+        'settings': {'Cu(220)': {'Ei_range_meV': [26, 500],
                                  'abs_resolution_meV': [7.6987e-5, 2.156e-2, -3.5961e-2],
                                  'low_energy_cutoff_meV': 25, 'low_energy_resolution_meV': 0.8},
                      # 'Cu(220) simple': {'Ei_range_meV': (26, 500), 'ei_resolution': 0.025},
-                     'Cu(331)': {'Ei_range_meV': (67, 500), 'ei_resolution': 0.0175},
-                     'Si(311)': {'Ei_range_meV': (16.5, 60), 'abs_resolution_meV': 0.8},
-                     'Si(111)': {'Ei_range_meV': (4.5, 20), 'abs_resolution_meV': 0.8}}}
+                     'Cu(331)': {'Ei_range_meV': [67, 500], 'ei_resolution': 0.0175},
+                     'Si(311)': {'Ei_range_meV': [16.5, 60], 'abs_resolution_meV': 0.8},
+                     'Si(111)': {'Ei_range_meV': [4.5, 20], 'abs_resolution_meV': 0.8}}}
     }
 
 # Names of groups in HDF5 cache/output file ################
