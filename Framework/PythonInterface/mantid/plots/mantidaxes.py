@@ -450,8 +450,12 @@ class MantidAxes(Axes):
         kwargs['distribution'] = not self.get_artist_normalization_state(artist)
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
 
+        # deal with MDHisto workspace
+        if workspace.isMDHistoWorkspace():
+            if 'distribution' in kwargs.keys():
+                del kwargs['distribution']
         # check if it is a sample log plot
-        if spec_num is None:
+        elif spec_num is None:
             sample_log_plot_details = self.get_artists_sample_log_plot_details(artist)
             kwargs['LogName'] = sample_log_plot_details[0]
             if sample_log_plot_details[1] is not None:
@@ -462,7 +466,7 @@ class MantidAxes(Axes):
             errorbars = False
             # neither does distribution
             if 'distribution' in kwargs.keys():
-                    del kwargs['distribution']
+                del kwargs['distribution']
         else:
             if kwargs.get('axis', None) == MantidAxType.BIN:
                 workspace_index = spec_num
