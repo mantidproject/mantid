@@ -27,13 +27,13 @@ using namespace Mantid::Kernel;
 #include <iostream>
 #include <ostream>
 
-// FIXME #include <Python.h>
+#include <Python.h>
 
 // namespace io = boost::iostreams;
 
 class PythonStdoutChannelTest : public CxxTest::TestSuite {
 public:
-  void testContructor() {
+  void FtestContructor() {
     TS_ASSERT_THROWS_NOTHING(Poco::PythonStdoutChannel a;)
   }
 
@@ -41,6 +41,10 @@ public:
    * @brief Test class pysys_stdout_sink and how to use it with stream
    */
   void testPythonSink() {
+
+    // Init
+    Py_Initialize();
+
     // Create sink
     pysys_stdout_sink testsink;
 
@@ -76,47 +80,15 @@ public:
     pysys_stdout.close();
   }
 
-  void testStaticPythonStream() { pysys_stdout << "30"; }
-
-  void testRadomlyBoostStream() {
-    // Start an instance with boost stream
-    boost::iostreams::stream<pysys_stdout_sink> pysys_stdout;
-
-    Poco::AutoPtr<Poco::PythonStdoutChannel> stdoutChannel2(
-        new Poco::PythonStdoutChannel);
-    stdoutChannel2->nice();
-    Poco::ConsoleChannel *testconsole2 = new Poco::ConsoleChannel(pysys_stdout);
-    TS_ASSERT(testconsole2);
-
-    typedef io::stream<io::file_sink> ofstream;
-
-    ofstream out("HeavyArtillery.txt"); // Wilfred Owen
-    //    out << "Reach at that Arrogance which needs thy harm,\n"
-    //           "And beat it down before its sins grow worse.\n";
-    //    out.close();
-
-    std::ofstream fb;
-    fb.open("test.txt", std::ios::out);
-
-    fb << "Test again"
-       << "\n";
-
-    //    std::ostream os(&fb);
-    //     os << "Test sentence\n";
-    fb.close();
-
-    //    std::ostream stdstream;
-    //    stdstream << "abc edf" << "\n";
-    //    std::cout << stdstream.tostring();
-
-    Poco::AutoPtr<Poco::PythonStdoutChannel> stdoutChannel(
-        new Poco::PythonStdoutChannel);
-    stdoutChannel->nice();
-    Poco::ConsoleChannel *testconsole = new Poco::ConsoleChannel(out);
-    TS_ASSERT(testconsole);
-
-    // TS_ASSERT_EQUALS(1, 3);
+  /**
+   * @brief Test the static Python stdout stream
+   */
+  void testStaticPythonStream() {
+      Py_Initialize();
+      pysys_stdout << "Hello, Python world!\n";
+      pysys_stdout << "30";
   }
+
 
   /**
    * @brief Test Python Std output with logger
@@ -175,8 +147,9 @@ public:
                       << "[Notice] 3\n";
     // the error should be in std::cout
     std::string notice3 = obuffer.str();
-    // FIXME TS_ASSERT_EQUALS(obuffer.str(), "Error Message 3\n");
-    // FIXME TS_ASSERT_EQUALS(lbuffer.str(), "[Notice]\n[Notice] 2\n");
+    std::string error3 = lbuffer.str();
+    TS_ASSERT_EQUALS(obuffer.str(), "");
+    TS_ASSERT_EQUALS(lbuffer.str(), "");
 
     // When done redirect cout to its old self
     // Otherwise, it can cause segmentation fault
@@ -187,5 +160,6 @@ public:
 
     std::cout << "\n[notice 2]: " << finalout << "\n";
     std::cout << "\n[notice 3]: " << notice3 << "\n";
+    std::cout << "\n[error  3]: " << error3 << "\n";
   }
 };

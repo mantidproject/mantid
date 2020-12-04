@@ -37,18 +37,6 @@ public:
   typedef char char_type;
   typedef boost::iostreams::sink_tag category;
 
-  //  pysys_stdout_sink() {};
-
   std::streamsize write(const char *s, std::streamsize n);
 
-  //   std::streamsize write( const char* s, std::streamsize n ) {
-  //       // PySys_WriteStdout truncates to 1000 chars
-  //       static const std::streamsize MAXSIZE = 1000;
-
-  //       std::streamsize written = std::min( n, MAXSIZE );
-  //       // FIXME PySys_WriteStdout( (boost::format("%%.%1%s") %
-  //       written).str().c_str(), s ); std::cout << s;
-
-  //       return written;
-  //   }
 };
