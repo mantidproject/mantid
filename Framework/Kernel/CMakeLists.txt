@@ -519,6 +519,7 @@ target_link_libraries(Kernel
                       ${JSONCPP_LIBRARIES}
                       ${TBB_LIBRARIES}
                       ${TBB_MALLOC_LIBRARIES}
+		      Python::Python
                       PRIVATE
                       ${GSL_LIBRARIES}
                       ${MANTIDLIBS}
