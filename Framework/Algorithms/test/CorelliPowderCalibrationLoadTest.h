@@ -13,6 +13,7 @@
 #include "MantidAlgorithms/CorelliPowderCalibrationLoad.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Logger.h"
+#include "MantidTestHelpers/ScopedFileHelper.h"
 
 #include <stdexcept>
 
@@ -104,21 +105,41 @@ public:
     ws->mutableRun().addProperty<std::string>("start_time",
                                               "2020-11-17T12:57:17", "", true);
 
+    // generate the calibration table file
+    const std::string califilename = "corelli_instrument_20201117.csv";
+    ScopedFileHelper::ScopedFile f = generateCalibrationTableFile(califilename);
+
+    // locate the temp folder location
+    const std::string dbdir = Mantid::Kernel::ConfigService::Instance().getTempDir().c_str();
+
     // setup alg
     CorelliPowderCalibrationLoad alg;
     alg.initialize();
-    alg.setPropertyValue("InputWorkspace", "correctTypeWs");
-    alg.setPropertyValue("DatabaseDir", ".");
+    // alg.setPropertyValue("InputWorkspace", "correctTypeWs");
+    alg.setProperty("InputWorkspace", ws);
+    alg.setPropertyValue("DatabaseDir", dbdir);
     alg.setPropertyValue("OutputWorkspace", "outWS");
+    alg.execute();
 
-    // NOTE:
-    // 1. When using executedAsChild, the error is indeeded thrown.
-    // 2. Due to the error from child alg, the main/parent one will be marked as
-    //    "not executed."
-    // 3. The strange thing here is that the error from child alg is not
-    //    captured by the TS_ASSERT, which is why it seems like nothing is
-    //    thrown while in reality it is thrown, just not catched.
-    TS_ASSERT_THROWS_NOTHING(alg.execute());
-    TS_ASSERT(!alg.isExecuted());
+    TS_ASSERT(alg.isExecuted());
+  }
+
+  /**
+   * @brief generate a temperory calibration table for loading test
+   * 
+   * @param califilename 
+   * @return ScopedFileHelper::ScopedFile 
+   */
+  ScopedFileHelper::ScopedFile generateCalibrationTableFile(const std::string &califilename){
+    std::ostringstream os;
+
+    os << "# Component , Xposition , Yposition , Zposition , XdirectionCosine , YdirectionCosine , ZdirectionCosine , RotationAngle\n";
+    os << "# str , double , double , double , double , double , double , double \n";
+    os << "moderator,0,0,-19.9997,0,0,0,0\n";
+    os << "sample-position,0,0,0,0,0,0,0\n";
+    os << "bank7/sixteenpack,2.25637,-0.814864,-0.883485,-0.0244456,-0.99953,-0.0184843,69.4926\n";
+    os << "bank8/sixteenpack,2.31072,-0.794864,-0.667308,-0.0191907,-0.999553,-0.0229249,73.6935\n";
+
+    return ScopedFileHelper::ScopedFile(os.str(), califilename);
   }
 };
