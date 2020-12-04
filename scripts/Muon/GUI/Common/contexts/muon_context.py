@@ -280,7 +280,7 @@ class MuonContext(object):
         if rebin:
             params = "1"
             if self.gui_context['RebinType'] == 'Variable' and self.gui_context["RebinVariable"]:
-                 params = self.gui_context["RebinVariable"]
+                params = self.gui_context["RebinVariable"]
 
             if self.gui_context['RebinType'] == 'Fixed' and self.gui_context["RebinFixed"]:
                 ws = retrieve_ws(phase_quad)

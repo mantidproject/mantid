@@ -266,6 +266,7 @@ def extract_single_spec(ws, spec, output_workspace_name):
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
 
+
 def rebin_ws(ws, params):
     alg = mantid.AlgorithmManager.create("Rebin")
     alg.initialize()
@@ -275,6 +276,7 @@ def rebin_ws(ws, params):
     alg.setProperty("params", params)
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
+
 
 def split_phasequad(name):
     Re_name = copy(name).replace(PHASEQUAD_IM, "")

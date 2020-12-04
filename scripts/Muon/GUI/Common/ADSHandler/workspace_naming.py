@@ -68,8 +68,10 @@ def check_phasequad_name(group_or_pair):
         return True
     return False
 
+
 def add_phasequad_extensions(pair_name):
     return pair_name+PHASEQUAD_RE+PHASEQUAD_IM
+
 
 def get_pair_phasequad_name(context, pair_name, run, rebin):
 
@@ -79,8 +81,8 @@ def get_pair_phasequad_name(context, pair_name, run, rebin):
         name += "".join([' ', REBIN_STR, ';'])
 
     name += context.workspace_suffix
-    print("test", name)
     return name
+
 
 def get_group_or_pair_from_name(name):
     if group_str in name:
@@ -120,6 +122,7 @@ def get_phase_table_workspace_name(raw_workspace, forward_group, backward_group)
     workspace_name = raw_workspace.replace('_raw_data', '; PhaseTable')
     workspace_name += '; ' + forward_group + '; ' + backward_group
     return workspace_name
+
 
 def get_base_run_name(run, instrument):
     if isinstance(run, int):
