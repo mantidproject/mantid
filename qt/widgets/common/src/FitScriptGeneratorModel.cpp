@@ -314,6 +314,10 @@ void FitScriptGeneratorModel::removeCompositeAtIndex(
   if (functionIndex > numberOfDomains())
     throw std::runtime_error("The composite prefix provided does not exist");
 
+  auto composite = toComposite(m_function->getFunction(functionIndex));
+  for (auto i = composite->nFunctions() - 1u; i < composite->nFunctions(); --i)
+    composite->removeFunction(i);
+
   m_function->removeFunction(functionIndex);
 }
 

@@ -69,6 +69,7 @@ public:
 
   bool isAddFunctionToAllDomainsChecked() const override;
 
+  void clearFunction() override;
   void
   setFunction(Mantid::API::CompositeFunction_sptr composite) const override;
 

@@ -74,6 +74,7 @@ public:
 
   virtual bool isAddFunctionToAllDomainsChecked() const = 0;
 
+  virtual void clearFunction() = 0;
   virtual void
   setFunction(Mantid::API::CompositeFunction_sptr composite) const = 0;
 

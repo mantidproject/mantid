@@ -226,6 +226,11 @@ void FitScriptGeneratorDataTable::removeDomain(
     this->removeRow(removeIndex);
 
   m_selectedRows = selectedRows();
+
+  if (m_selectedRows.empty() && this->rowCount() > 0)
+    this->selectRow(0);
+
+  m_selectedRows = selectedRows();
 }
 
 void FitScriptGeneratorDataTable::addDomain(

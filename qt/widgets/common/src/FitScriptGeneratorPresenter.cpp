@@ -73,6 +73,8 @@ void FitScriptGeneratorPresenter::handleRemoveClicked() {
     m_view->removeWorkspaceDomain(workspaceName, workspaceIndex);
     m_model->removeWorkspaceDomain(workspaceName, workspaceIndex);
   }
+
+  handleSelectionChanged();
 }
 
 void FitScriptGeneratorPresenter::handleAddWorkspaceClicked() {
@@ -108,13 +110,16 @@ void FitScriptGeneratorPresenter::handleEndXChanged() {
 }
 
 void FitScriptGeneratorPresenter::handleSelectionChanged() {
-  auto const firstRowIndex = m_view->selectedRows()[0];
+  auto const selectedRows = m_view->selectedRows();
+  if (!selectedRows.empty()) {
+    auto const workspaceName = m_view->workspaceName(selectedRows[0]);
+    auto const workspaceIndex = m_view->workspaceIndex(selectedRows[0]);
 
-  auto const workspaceName = m_view->workspaceName(firstRowIndex);
-  auto const workspaceIndex = m_view->workspaceIndex(firstRowIndex);
-
-  auto const composite = m_model->getFunction(workspaceName, workspaceIndex);
-  m_view->setFunction(composite);
+    auto const composite = m_model->getFunction(workspaceName, workspaceIndex);
+    m_view->setFunction(composite);
+  } else {
+    m_view->clearFunction();
+  }
 }
 
 void FitScriptGeneratorPresenter::handleFunctionRemoved(

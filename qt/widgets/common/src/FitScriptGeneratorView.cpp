@@ -200,6 +200,8 @@ bool FitScriptGeneratorView::isAddFunctionToAllDomainsChecked() const {
   return m_ui.ckAddFunctionForAllDomains->isChecked();
 }
 
+void FitScriptGeneratorView::clearFunction() { m_functionTreeView->clear(); }
+
 void FitScriptGeneratorView::setFunction(
     CompositeFunction_sptr composite) const {
   if (composite->nFunctions() > 1)
