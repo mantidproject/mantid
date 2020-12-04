@@ -7,7 +7,7 @@
 from Muon.GUI.Common.ADSHandler.workspace_naming import PHASEQUAD_IM, PHASEQUAD_RE
 import mantid.simpleapi as mantid
 from mantid.kernel import Logger
-from mantid.api import AnalysisDataService
+from Muon.GUI.Common.ADSHandler.ADS_calls import remove_ws
 from copy import copy
 
 muon_logger = Logger('Muon-Algs')
@@ -266,6 +266,15 @@ def extract_single_spec(ws, spec, output_workspace_name):
     alg.execute()
     return alg.getProperty("OutputWorkspace").valueAsStr
 
+def rebin_ws(ws, params):
+    alg = mantid.AlgorithmManager.create("Rebin")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("OutputWorkspace", ws)
+    alg.setProperty("params", params)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr
 
 def split_phasequad(name):
     Re_name = copy(name).replace(PHASEQUAD_IM, "")
@@ -273,5 +282,5 @@ def split_phasequad(name):
 
     Re = extract_single_spec(name, 0, Re_name)
     Im = extract_single_spec(name, 1, Im_name)
-    AnalysisDataService.remove(name)
+    remove_ws(name)
     return [Re, Im]

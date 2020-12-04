@@ -66,7 +66,7 @@ def get_pair_asymmetry_name(context, pair_name, run, rebin):
 def check_phasequad_name(group_or_pair):
     if (PHASEQUAD_IM in group_or_pair or PHASEQUAD_RE in group_or_pair):
         return True
-     return False
+    return False
 
 def add_phasequad_extensions(pair_name):
     return pair_name+PHASEQUAD_RE+PHASEQUAD_IM

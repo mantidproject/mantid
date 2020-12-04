@@ -17,9 +17,10 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data, run_pre_processing
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
-from Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad
+from Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad, rebin_ws
 from Muon.GUI.Common.muon_base_pair import MuonBasePair
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
+from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
 from Muon.GUI.Common.contexts.muon_group_pair_context import get_default_grouping
 from Muon.GUI.Common.contexts.muon_gui_context import PlotMode
 from Muon.GUI.Common.contexts.muon_context_ADS_observer import MuonContextADSObserver
@@ -276,6 +277,17 @@ class MuonContext(object):
                 phasequad.name), run_string, rebin=rebin)
 
         phase_quad = run_PhaseQuad(parameters, ws_name)
+        if rebin:
+            params = "1"
+            if self.gui_context['RebinType'] == 'Variable' and self.gui_context["RebinVariable"]:
+                 params = self.gui_context["RebinVariable"]
+
+            if self.gui_context['RebinType'] == 'Fixed' and self.gui_context["RebinFixed"]:
+                ws = retrieve_ws(phase_quad)
+                x_data = ws.dataX(0)
+                original_step = x_data[1] - x_data[0]
+                params = float(self.gui_context["RebinFixed"]) * original_step
+            phase_quad = rebin_ws(phase_quad,params)
 
         workspaces = split_phasequad(phase_quad)
         return workspaces
