@@ -75,7 +75,7 @@ def insert_bank_numbers(input_workspace: Union[str, Workspace2D],
     input_handle.replaceAxis(1, axis)
 
 
-class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
+class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
     peak_shapes = ['Gaussian']
     bank_count = 92
@@ -84,7 +84,7 @@ class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
                         'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
 
     def name(self):
-        return "CORELLIPowderCalibrationCreate"
+        return "CorelliPowderCalibrationCreate"
 
     def category(self):
         return 'Diffraction\\Reduction'
@@ -548,4 +548,4 @@ class CORELLIPowderCalibrationCreate(DataProcessorAlgorithm):
             table.addRow(row)
 
 
-AlgorithmFactory.subscribe(CORELLIPowderCalibrationCreate)
+AlgorithmFactory.subscribe(CorelliPowderCalibrationCreate)
