@@ -13,7 +13,7 @@ Description
 
 This is the algorithm that performs wavelength and position calibration for both individual detectors and detector banks using measurement of a sample of powdered :math:`\text{Y}_{3}\text{Fe}_{5}\text{O}_{12}` (YIG). This data is fitted with Gaussian distributions at the expected peak positions. The output is an :ref:`Instrument Parameter File <InstrumentParameterFile>` readable by the :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` algorithm that will place the detector banks and detectors using the output of this algorithm.
 
-It is crucial for a reliable calibration to first run a test without setting the BankOffsets parameter and checking the positions of the YIG Bragg peaks in the `conjoined_input` workspace. Then, the BankOffsets can be obtained by comparing the peak positions coming from the detectors with their expected location, coming from known d-spacings for YIG.
+It is crucial for a reliable calibration to first run a test without setting the `BankOffsets` parameter and with `FittingMethod` set to `None`. This allows checking the positions of the initial guesses for the positions of YIG Bragg peaks in the `conjoined_input` workspace. Then, the BankOffsets can be obtained by comparing the peak positions coming from the detectors with their expected location, coming from known d-spacings for YIG.
 
 Currently the algorithm is focused on the D7 instrument that has three detector banks and a monitor, and all of them can move individually. The detector position and wavelength calibration have to be checked each time the used wavelength is changed, since the instrument has to be manually moved into a different parking position around the monochromator.
 
