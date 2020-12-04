@@ -15,6 +15,7 @@ class DataContext(object):
         self._main_field_direction = ''
         self._loaded_data = load_data
         self._run_info = []
+        self.previous_runs = []
 
     @property
     def run_info(self):
