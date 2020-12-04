@@ -76,7 +76,8 @@ CorelliPowderCalibrationLoad::validateInputs() {
   // 1_check: input workspace is from CORELLI
   std::string instrumentName = ws->getInstrument()->getName();
   if (instrumentName != "CORELLI") {
-    issues["InputWorkspace"] = "Instrument Name: " + instrumentName + "!=CORELLI, aborting";
+    issues["InputWorkspace"] =
+        "Instrument Name: " + instrumentName + "!=CORELLI, aborting";
   }
 
   // 2_check: make sure there is a time stamp we can use in ws
