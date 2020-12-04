@@ -110,7 +110,8 @@ public:
     ScopedFileHelper::ScopedFile f = generateCalibrationTableFile(califilename);
 
     // locate the temp folder location
-    const std::string dbdir = Mantid::Kernel::ConfigService::Instance().getTempDir().c_str();
+    const std::string dbdir =
+        Mantid::Kernel::ConfigService::Instance().getTempDir().c_str();
 
     // setup alg
     CorelliPowderCalibrationLoad alg;
@@ -126,19 +127,26 @@ public:
 
   /**
    * @brief generate a temperory calibration table for loading test
-   * 
-   * @param califilename 
-   * @return ScopedFileHelper::ScopedFile 
+   *
+   * @param califilename
+   * @return ScopedFileHelper::ScopedFile
    */
-  ScopedFileHelper::ScopedFile generateCalibrationTableFile(const std::string &califilename){
+  ScopedFileHelper::ScopedFile
+  generateCalibrationTableFile(const std::string &califilename) {
     std::ostringstream os;
 
-    os << "# Component , Xposition , Yposition , Zposition , XdirectionCosine , YdirectionCosine , ZdirectionCosine , RotationAngle\n";
-    os << "# str , double , double , double , double , double , double , double \n";
+    os << "# Component , Xposition , Yposition , Zposition , XdirectionCosine "
+          ", YdirectionCosine , ZdirectionCosine , RotationAngle\n";
+    os << "# str , double , double , double , double , double , double , "
+          "double \n";
     os << "moderator,0,0,-19.9997,0,0,0,0\n";
     os << "sample-position,0,0,0,0,0,0,0\n";
-    os << "bank7/sixteenpack,2.25637,-0.814864,-0.883485,-0.0244456,-0.99953,-0.0184843,69.4926\n";
-    os << "bank8/sixteenpack,2.31072,-0.794864,-0.667308,-0.0191907,-0.999553,-0.0229249,73.6935\n";
+    os << "bank7/"
+          "sixteenpack,2.25637,-0.814864,-0.883485,-0.0244456,-0.99953,-0."
+          "0184843,69.4926\n";
+    os << "bank8/"
+          "sixteenpack,2.31072,-0.794864,-0.667308,-0.0191907,-0.999553,-0."
+          "0229249,73.6935\n";
 
     return ScopedFileHelper::ScopedFile(os.str(), califilename);
   }
