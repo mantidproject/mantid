@@ -117,13 +117,13 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         self.copyProperties('PDCalibration', property_names)
         [self.setPropertyGroup(name, 'PDCalibration') for name in property_names]
         # AlignComponents properties exposed, grouped
-        property_names = ['SourceMaxTranslation', 'ComponentList', 'ComponentMaxTranlation', 'ComponentMaxRotation']
+        property_names = ['SourceMaxTranslation', 'ComponentList', 'ComponentMaxTranslation', 'ComponentMaxRotation']
         self.declareProperty(name='SourceMaxTranslation', defaultValue=0.1,
                              validator=FloatBoundedValidator(0, 0.5),
                              doc='Maximum adjustment of source position along the beam (Z) axis (m)')
         self.declareProperty(StringArrayProperty('ComponentList', values=self._banks, direction=Direction.Input),
                              doc='Comma separated list on banks to refine')
-        self.declareProperty(name='ComponentMaxTranlation', defaultValue=0.02,
+        self.declareProperty(name='ComponentMaxTranslation', defaultValue=0.02,
                              validator=FloatBoundedValidator(0.0, 0.2),
                              doc='Maximum translation of each component along either of the X, Y, Z axes (m)')
         self.declareProperty(name='ComponentMaxRotation', defaultValue=3.0,
@@ -149,7 +149,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         # Remove delayed emission time from the moderator
         kwargs = dict(InputWorkspace=input_workspace, Emode='Elastic', OutputWorkspace=input_workspace)
-        self.run_algorithm('ModeratorTzero', 0.01, 0.1, **kwargs)
+        self.run_algorithm('ModeratorTzero', 0, 0.02, **kwargs)
         progress.report('ModeratorTzero has been applied')
 
         # Correct detector heights
@@ -224,11 +224,11 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                       FitSourcePosition=True,
                       FitSamplePosition=False,
                       Zposition=True, MinZPosition=-dz, MaxZPosition=dz)
-        self.run_algorithm('AlignComponents', 0.8, 1.0, **kwargs)
+        self.run_algorithm('AlignComponents', 0.1, 0.2, **kwargs)
 
         # Translate and rotate the each bank, only after the source has been adjusted
         # The instrument in `input_workspace` is adjusted in-place
-        dt = self.getProperty('ComponentMaxTranlation').value  # maximum translation along either axis
+        dt = self.getProperty('ComponentMaxTranslation').value  # maximum translation along either axis
         dr = self.getProperty('ComponentMaxRotation').value  # maximum rotation along either axis
         kwargs = dict(Workspace=input_workspace,
                       CalibrationTable=difc_table,
@@ -244,7 +244,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                       BetaRotation=True, MinBetaRotation=-dr, MaxBetaRotation=dr,
                       GammaRotation=True, MinGammaRotation=-dr, MaxGammaRotation=dr,
                       EulerConvention='YXZ')
-        self.run_algorithm('AlignComponents', 0.8, 1.0, **kwargs)
+        self.run_algorithm('AlignComponents', 0.2, 0.97, **kwargs)
         progress.report('AlignComponents has been applied')
 
         # AlignComponents produces two unwanted workspaces
@@ -525,7 +525,6 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
             stds = np.sum(counts * bin_centers**2, axis=1) / np.sum(counts, axis=1) - means**2
             fwhm = np.sqrt(stds) * 2 * np.sqrt(2 * np.log(2))
             mean_abs = np.sum(counts * np.abs(bin_centers), axis=1) / np.sum(counts, axis=1)
-            logger.error(f'mean_abs.shape = {mean_abs.shape}')
             for quantity_name, quantity_value in zip(quantities, [mean_abs, means, fwhm]):
                 summary[status][quantity_name] = quantity_value  # quantity value for all banks
 
