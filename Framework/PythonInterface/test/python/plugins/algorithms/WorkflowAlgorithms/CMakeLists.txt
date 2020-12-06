@@ -6,6 +6,7 @@ set(TEST_PY_FILES
     BayesQuasiTest.py
     BayesStretchTest.py
     CalculateMonteCarloAbsorptionTest.py
+    CorelliPowderCalibrationCreateTest.py
     DetectorFloodWeightingTest.py
     DirectILLApplySelfShieldingTest.py
     DirectILLCollectDataTest.py
