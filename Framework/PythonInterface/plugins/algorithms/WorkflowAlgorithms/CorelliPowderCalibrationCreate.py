@@ -17,9 +17,9 @@ from mantid.api import (
     Workspace, WorkspaceGroup, WorkspaceUnitValidator)
 from mantid.dataobjects import TableWorkspace, Workspace2D
 from mantid.simpleapi import (
-    AlignComponents, CalculateDIFC, CloneWorkspace, CopyInstrumentParameters, ConvertUnits, CreateEmptyTableWorkspace,
-    CreateGroupingWorkspace, CreateWorkspace, DeleteWorkspace, GroupDetectors, GroupWorkspaces, LoadEventNexus,
-    Multiply, PDCalibration, Rebin)
+    CalculateDIFC, CloneWorkspace, CopyInstrumentParameters, ConvertUnits, CreateEmptyTableWorkspace,
+    CreateGroupingWorkspace, CreateWorkspace, DeleteWorkspace, GroupDetectors, GroupWorkspaces, Multiply,
+    PDCalibration, Rebin)
 from mantid.kernel import Direction, FloatBoundedValidator, logger, StringArrayProperty
 
 
@@ -238,7 +238,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                       FitSamplePosition=False,
                       ComponentList=self.getProperty('ComponentList').value,
                       Xposition=True, MinXPosition=-dt, MaxXPosition=dt,
-                      Yposition=True, MinYPosition=-dt, MaxYPosition=dt, 
+                      Yposition=True, MinYPosition=-dt, MaxYPosition=dt,
                       Zposition=True, MinZPosition=-dt, MaxZPosition=dt,
                       AlphaRotation=True, MinAlphaRotation=-dr, MaxAlphaRotation=dr,
                       BetaRotation=True, MinBetaRotation=-dr, MaxBetaRotation=dr,
@@ -460,7 +460,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         # grouping_workspace_y contain the group ID (bank number) of each pixel
         grouping_workspace_y = [int(n) for n in mtd[str(grouping_workspace)].extractY().flatten()]
         group_ids = sorted(list(set(grouping_workspace_y)))  # list of group ID's (bank numbers)
-        
+
         # List all the peak deviations within a group (bank)
         deviations_in_group = {group_id: [] for group_id in group_ids}
         for row_index in range(tof_table.rowCount()):  # iterate over each pixel
@@ -481,7 +481,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
             else:
                 histogram = np.histogram(deviations, bins)[0]
             histograms[group_id] = histogram
-            
+
         # Create a workspace with the histograms
         spectra = spectra = np.array(list(histograms.values())).flatten()  # single list needed
         unit_x = 'dSpacing' if percent_deviations is False else 'Empty'
@@ -501,7 +501,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         For each histogram calculate average, FHWM, and average of the absolute peak deviation.
         The calibration decreases the average peak deviation and the FWHM. Both changes can be
         captured in the decrease of the average of the absolute peak deviation.
-        
+
         @param original_workspace : histograms of peak deviations before calibration is applied
         @param adjusted_workspace : histograms of peak deviations after calibration is applied
         @param output_workspace : name of the output TableWorkspace containing statistics for each bank
@@ -512,7 +512,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         # Validation
         bank_count = handles['original'].getNumberHistograms()
-        assert bank_count == handles['adjusted'].getNumberHistograms()      
+        assert bank_count == handles['adjusted'].getNumberHistograms()
 
         # dictionary to hold the summary data
         summary = {status: {quantity: None for quantity in quantities} for status in statuses}
