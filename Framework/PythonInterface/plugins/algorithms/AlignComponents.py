@@ -11,7 +11,7 @@ from scipy.stats import chisquare
 from typing import List
 
 from mantid.api import (AlgorithmFactory, FileAction, FileProperty, InstrumentValidator, ITableWorkspaceProperty,
-                        MatrixWorkspaceProperty, Progress, PropertyMode, PythonAlgorithm, WorkspaceFactory, WorkspaceProperty)
+                        MatrixWorkspaceProperty, Progress, PropertyMode, PythonAlgorithm, WorkspaceProperty)
 from mantid.dataobjects import MaskWorkspace, TableWorkspace
 from mantid.kernel import (Direction, EnabledWhenProperty, FloatBoundedValidator, logger, PropertyCriterion,
                            Quat, StringArrayProperty, StringListValidator, V3D)
@@ -237,7 +237,7 @@ class AlignComponents(PythonAlgorithm):
                 api.LoadEmptyInstrument(Filename=inputFilename,
                                         OutputWorkspace="alignedWorkspace")
                 wks_name = "alignedWorkspace"
-        
+
         # Check if each component listed is defined in the instrument
         components = self.getProperty("ComponentList").value
         if len(components) <= 0 and not self.getProperty("FitSourcePosition").value and not self.getProperty("FitSamplePosition").value:
@@ -267,7 +267,7 @@ class AlignComponents(PythonAlgorithm):
             issues["Xposition"] = "If fitting source or sample, you must calibrate at least one position parameter."
 
         return issues
-        
+
     #pylint: disable=too-many-branches
     def PyExec(self):
         self._eulerConvention=self.getProperty('EulerConvention').value
@@ -282,7 +282,6 @@ class AlignComponents(PythonAlgorithm):
             saving_adjustments = True
         else:
             saving_adjustments = False
-
 
         difc = calWS.column('difc')
         if maskWS is not None:
@@ -363,7 +362,7 @@ class AlignComponents(PythonAlgorithm):
                 api.MoveInstrumentComponent(wks_name, componentName, **kwargs)  # adjust workspace "alignedworkspace"
                 if self.getProperty("Workspace").value is not None:  # adjust input Workspace
                     api.MoveInstrumentComponent(self.getProperty("Workspace").value, componentName, **kwargs)
-                    
+
                 comp = api.mtd[wks_name].getInstrument().getComponentByName(componentName)
                 logger.notice("Finished " + componentName + " Final position is " + str(comp.getPos()))
                 self._move = False
@@ -442,7 +441,7 @@ class AlignComponents(PythonAlgorithm):
                 kwargs = dict(X=rotx, Y=roty, Z=rotz, Angle=rotw, RelativeRotation=False)
                 api.RotateInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace "alignedworkspace"
                 if self.getProperty("Workspace").value is not None:  # adjust input Workspace
-                    api.RotateInstrumentComponent(self.getProperty("Workspace").value, component, **kwargs)  # adjust workspace "alignedworkspace"
+                    api.RotateInstrumentComponent(self.getProperty("Workspace").value, component, **kwargs)
                 component_adjustments[3:] = [rotx, roty, rotz, rotw]
 
             if saving_adjustments and (self._move or self._rotate):
@@ -455,7 +454,6 @@ class AlignComponents(PythonAlgorithm):
 
             prog.report()
         logger.notice("Results applied to workspace "+wks_name)
-
 
     def _initialize_adjustments_table(self, table_name):
         r"""Create a table with appropriate column names for saving the adjustments to each component"""
