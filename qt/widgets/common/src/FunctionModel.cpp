@@ -48,19 +48,24 @@ IFunction_sptr FunctionModel::getFitFunction() const {
     return m_function;
   }
   auto const nf = m_function->nFunctions();
+  if (nf <= m_currentDomainIndex)
+    throw std::logic_error(
+        "The number of functions is less than the current domain index");
+
   if (nf > 1) {
     auto fun =
         std::dynamic_pointer_cast<MultiDomainFunction>(m_function->clone());
 
-    auto const singleFun = m_function->getFunction(0);
+    auto const singleFun = m_function->getFunction(m_currentDomainIndex);
     for (auto par = m_globalParameterNames.begin();
          par != m_globalParameterNames.end();) {
       if (singleFun->hasParameter(par->toStdString())) {
         QStringList ties;
-        for (size_t i = 1; i < nf; ++i) {
-          ties << "f" + QString::number(i) + "." + *par;
+        for (size_t i = 0; i < nf; ++i) {
+          if (i != m_currentDomainIndex)
+            ties << "f" + QString::number(i) + "." + *par;
         }
-        ties << "f0." + *par;
+        ties << "f" + QString::number(m_currentDomainIndex) + "." + *par;
         fun->addTies(ties.join("=").toStdString());
         ++par;
       } else {
@@ -143,13 +148,11 @@ void FunctionModel::removeFunction(const QString &functionIndex) {
 }
 
 void FunctionModel::setParameter(const QString &paramName, double value) {
-  auto fun = getCurrentFunction();
-  if (!fun) {
-    throw std::logic_error("Function is undefined.");
-  }
-  if (fun->hasParameter(paramName.toStdString())) {
-    fun->setParameter(paramName.toStdString(), value);
-  }
+  if (isGlobal(paramName))
+    setGlobalParameterValue(paramName, value);
+  else
+    setLocalParameterValue(paramName, static_cast<int>(m_currentDomainIndex),
+                           value);
 }
 
 void FunctionModel::setAttribute(const QString &attrName,
@@ -401,7 +404,9 @@ QString FunctionModel::getLocalParameterConstraint(const QString &parName,
 
 void FunctionModel::setLocalParameterValue(const QString &parName, int i,
                                            double value) {
-  getSingleFunction(i)->setParameter(parName.toStdString(), value);
+  auto function = getSingleFunction(i);
+  if (function && function->hasParameter(parName.toStdString()))
+    function->setParameter(parName.toStdString(), value);
 }
 
 void FunctionModel::setLocalParameterValue(const QString &parName, int i,
@@ -410,6 +415,13 @@ void FunctionModel::setLocalParameterValue(const QString &parName, int i,
   auto const parIndex = fun->parameterIndex(parName.toStdString());
   fun->setParameter(parIndex, value);
   fun->setError(parIndex, error);
+}
+
+void FunctionModel::setGlobalParameterValue(const QString &paramName,
+                                            double value) {
+  if (isGlobal(paramName))
+    for (auto i = 0; i < static_cast<int>(m_function->nFunctions()); ++i)
+      setLocalParameterValue(paramName, i, value);
 }
 
 void FunctionModel::setLocalParameterFixed(const QString &parName, int i,

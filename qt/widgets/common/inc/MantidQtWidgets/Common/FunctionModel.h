@@ -61,6 +61,7 @@ public:
                               double value) override;
   void setLocalParameterValue(const QString &parName, int i, double value,
                               double error) override;
+  void setGlobalParameterValue(const QString &paramName, double value);
   void setLocalParameterFixed(const QString &parName, int i,
                               bool fixed) override;
   void setLocalParameterTie(const QString &parName, int i,
