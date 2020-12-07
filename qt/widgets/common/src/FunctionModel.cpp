@@ -48,11 +48,8 @@ IFunction_sptr FunctionModel::getFitFunction() const {
     return m_function;
   }
   auto const nf = m_function->nFunctions();
-  if (nf <= m_currentDomainIndex)
-    throw std::logic_error(
-        "The number of functions is less than the current domain index");
 
-  if (nf > 1) {
+  if (nf > 1 && nf <= m_currentDomainIndex) {
     auto fun =
         std::dynamic_pointer_cast<MultiDomainFunction>(m_function->clone());
 
