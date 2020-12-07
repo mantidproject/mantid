@@ -268,7 +268,7 @@ class AlignComponents(PythonAlgorithm):
 
         return issues
 
-    #pylint: disable=too-many-branches
+    # flake8: noqa C901
     def PyExec(self):
         self._eulerConvention=self.getProperty('EulerConvention').value
         calWS = self.getProperty('CalibrationTable').value
