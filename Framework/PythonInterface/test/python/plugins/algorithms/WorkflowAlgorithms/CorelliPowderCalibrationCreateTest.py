@@ -20,15 +20,15 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
         CreateSampleWorkspace(WorkspaceType="Event", Function="Powder Diffraction", XMin=300, XMax=16666.7, BinWidth=1,
                               NumBanks=1, NumEvents=100000, PixelSpacing=0.02, OutputWorkspace="test_workspace")
         # The detector ID at the center of the detector panel is detector-ID = 155, corresponsing to workspace index 55.
-        # When the detector panel is placed perperdicular to the X axis and five meters away from the sample,
+        # When the detector panel is placed perpendicular to the X axis and five meters away from the sample,
         # detector-ID 155 shows nine peaks with the following peak-centers, in d-spacing (Angstroms) units:
         spacings_reference = [0.304670, 0.610286, 0.915385, 1.220476, 1.525575, 1.830671, 2.135765, 2.44092, 2.74598]
         # We select these d-spacings as the reference d-spacings
         # Place the detector at a position and orientation close, but not equal to, perpendicular to the X axis
         # 5 meters from the sample
-        RotateInstrumentComponent(Workspace='test_workspace_original', ComponentName='bank1', X=0, Y=1, z=0, Angle=90,
+        RotateInstrumentComponent(Workspace='test_workspace', ComponentName='bank1', X=0.1, Y=99, z=0.1, Angle=88,
                                   RelativeRotation=True)
-        MoveInstrumentComponent(Workspace='test_workspace_original', ComponentName='bank1', X=5, y=-0.1, z=0.1,
+        MoveInstrumentComponent(Workspace='test_workspace', ComponentName='bank1', X=4.98, y=-0.12, z=0.08,
                                 RelativePosition=False)
         # The calibration algorithm will attempt to correct the position and orientation of the bank so that peak
         # centers for all detectors in the bank (not just detector-ID 155) approach our reference values. As
