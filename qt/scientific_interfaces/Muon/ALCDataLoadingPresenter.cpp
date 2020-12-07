@@ -265,7 +265,6 @@ void ALCDataLoadingPresenter::load(const std::vector<std::string> &files) {
     } else {
       assert(m_loadedData->getNumberHistograms() == 4);
     }
-
     // Plot spectrum 0. It is either red period (if subtract is unchecked) or
     // red - green (if subtract is checked)
     m_view->setDataCurve(m_loadedData);

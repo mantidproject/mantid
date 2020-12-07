@@ -193,7 +193,7 @@ Dead Time Correction
 Grouping
   Detector grouping to apply. *Auto* will load the grouping information contained 
   in the run file, while *Custom* allows to specify the list of spectra for both the 
-  forward and backward groups. *Alpha* is the balanace parameter and is only available 
+  forward and backward groups. *Alpha* is the balance parameter and is only available 
   for single period data.
 
 Periods

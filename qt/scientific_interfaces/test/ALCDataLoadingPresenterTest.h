@@ -506,4 +506,17 @@ public:
     // Reset ON_CALL for other tests
     ON_CALL(*m_view, getFirstFile()).WillByDefault(Return("MUSR00015189.nxs"));
   }
+
+  void test_alpha_applied_correctly_single_period_data() {
+    std::string singlePeriod = "EMU00019489.nxs";
+    ON_CALL(*m_view, getFirstFile()).WillByDefault(Return(singlePeriod));
+    ON_CALL(*m_view, getFiles())
+        .WillByDefault(Return(std::vector<std::string>{singlePeriod}));
+    ON_CALL(*m_view, getAlphaValue()).WillByDefault(Return(std::string{"0.9"}));
+
+    EXPECT_CALL(*m_view, setDataCurve(AllOf(WorkspaceX(0, 0, 2000, 1E-3),
+                                            WorkspaceY(0, 0, 0.29773, 1E-5)),
+                                      0));
+    TS_ASSERT_THROWS_NOTHING(m_view->requestLoading());
+  }
 };
