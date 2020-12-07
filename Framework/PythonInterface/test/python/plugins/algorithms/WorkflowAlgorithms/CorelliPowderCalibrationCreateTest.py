@@ -19,7 +19,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
         # Single 10x10 rectangular detector, located 5m downstream the sample
         CreateSampleWorkspace(WorkspaceType="Event", Function="Powder Diffraction", XMin=300, XMax=16666.7, BinWidth=1,
                               NumBanks=1, NumEvents=100000, PixelSpacing=0.02, OutputWorkspace="test_workspace")
-        # The detector ID at the center of the detector panel is detector-ID = 155, corresponsing to workspace index 55.
+        # The detector ID at the center of the detector panel is detector-ID = 155, corresponding to workspace index 55.
         # When the detector panel is placed perpendicular to the X axis and five meters away from the sample,
         # detector-ID 155 shows nine peaks with the following peak-centers, in d-spacing (Angstroms) units:
         spacings_reference = [0.304670, 0.610286, 0.915385, 1.220476, 1.525575, 1.830671, 2.135765, 2.44092, 2.74598]
