@@ -14,8 +14,8 @@ Tabs
     - IndirectFitAnalysisTab
 
       - IndirectDataAnalysisConvFitTab
-      - IndirectDataAnalysisIqtFitTab
       - IndirectDataAnalysisFqFitTab
+      - IndirectDataAnalysisIqtFitTab
       - IndirectDataAnalysisMSDFitTab
 
 Fitting Models
@@ -24,6 +24,8 @@ Fitting Models
 
   - ConvFitModel
   - FqFitModel
+  - IqtFitModel
+  - MSDFitModel
 
 Fit Data Presenter
 ------------------

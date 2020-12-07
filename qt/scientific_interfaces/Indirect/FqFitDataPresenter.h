@@ -80,7 +80,7 @@ private:
   QComboBox *m_cbParameter;
   QLabel *m_lbParameterType;
   QLabel *m_lbParameter;
-  FqFitModel *m_jumpModel;
+  FqFitModel *m_fqFitModel;
   Notifier<IFQFitObserver> m_notifier;
 };
 

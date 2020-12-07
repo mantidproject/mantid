@@ -29,14 +29,14 @@ namespace {
 QString const PARAMETER_TYPE_LABEL("Fit Parameter:");
 QString const PARAMETER_LABEL("Width:");
 
-QStringList getJumpParameters() {
+QStringList getFqFitParameters() {
   QStringList parameters;
   parameters << "f1.f1.FWHM"
              << "f2.f1.FWHM";
   return parameters;
 }
 
-QStringList getJumpParameterTypes() {
+QStringList getFqFitParameterTypes() {
   QStringList parameterTypes;
   parameterTypes << "Width"
                  << "EISF";
@@ -133,8 +133,8 @@ public:
     m_model = std::make_unique<NiceMock<MockFqFitModel>>();
 
     m_dataTable = createEmptyTableWidget(6, 5);
-    m_ParameterTypeCombo = createComboBox(getJumpParameterTypes());
-    m_ParameterCombo = createComboBox(getJumpParameters());
+    m_ParameterTypeCombo = createComboBox(getFqFitParameterTypes());
+    m_ParameterCombo = createComboBox(getFqFitParameters());
     m_ParameterTypeLabel = createLabel(PARAMETER_TYPE_LABEL);
     m_ParameterLabel = createLabel(PARAMETER_LABEL);
     m_SingleFunctionTemplateBrowser =
@@ -183,8 +183,8 @@ public:
   }
 
   void test_that_the_comboboxes_contain_the_items_specified_during_the_setup() {
-    auto const parameterTypes = getJumpParameterTypes();
-    auto const parameters = getJumpParameters();
+    auto const parameterTypes = getFqFitParameterTypes();
+    auto const parameters = getFqFitParameters();
 
     TS_ASSERT_EQUALS(m_ParameterTypeCombo->itemText(0), parameterTypes[0]);
     TS_ASSERT_EQUALS(m_ParameterTypeCombo->itemText(1), parameterTypes[1]);

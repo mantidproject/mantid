@@ -24,7 +24,7 @@ FqFitDataPresenter::FqFitDataPresenter(
       m_activeParameterType("Width"), m_dataIndex(TableDatasetIndex{0}),
       m_cbParameterType(cbParameterType), m_cbParameter(cbParameter),
       m_lbParameterType(lbParameterType), m_lbParameter(lbParameter),
-      m_jumpModel(model) {
+      m_fqFitModel(model) {
   connect(view, SIGNAL(singleDataViewSelected()), this,
           SLOT(handleSingleInputSelected()));
   connect(view, SIGNAL(multipleDataViewSelected()), this,
@@ -92,7 +92,7 @@ void FqFitDataPresenter::setActiveParameterType(const std::string &type) {
 }
 
 void FqFitDataPresenter::updateActiveDataIndex() {
-  m_dataIndex = m_jumpModel->numberOfWorkspaces();
+  m_dataIndex = m_fqFitModel->numberOfWorkspaces();
 }
 
 void FqFitDataPresenter::updateActiveDataIndex(int index) {
@@ -105,9 +105,9 @@ void FqFitDataPresenter::updateAvailableParameters() {
 
 void FqFitDataPresenter::updateAvailableParameters(const QString &type) {
   if (type == "Width")
-    setAvailableParameters(m_jumpModel->getWidths(TableDatasetIndex{0}));
+    setAvailableParameters(m_fqFitModel->getWidths(TableDatasetIndex{0}));
   else if (type == "EISF")
-    setAvailableParameters(m_jumpModel->getEISF(TableDatasetIndex{0}));
+    setAvailableParameters(m_fqFitModel->getEISF(TableDatasetIndex{0}));
   else
     setAvailableParameters({});
 
@@ -123,7 +123,7 @@ void FqFitDataPresenter::updateAvailableParameterTypes() {
 }
 
 void FqFitDataPresenter::updateParameterSelectionEnabled() {
-  const auto enabled = m_jumpModel->numberOfWorkspaces() > TableDatasetIndex{0};
+  const auto enabled = m_fqFitModel->numberOfWorkspaces() > TableDatasetIndex{0};
   m_cbParameter->setEnabled(enabled);
   m_cbParameterType->setEnabled(enabled);
   m_lbParameter->setEnabled(enabled);
@@ -155,7 +155,7 @@ void FqFitDataPresenter::handleParameterTypeChanged(const QString &parameter) {
 void FqFitDataPresenter::setDialogParameterNames(
     FqFitAddWorkspaceDialog *dialog, const std::string &workspace) {
   try {
-    addWorkspace(m_jumpModel, workspace);
+    addWorkspace(m_fqFitModel, workspace);
     dialog->enableParameterSelection();
   } catch (const std::invalid_argument &) {
     dialog->disableParameterSelection();
@@ -174,9 +174,9 @@ void FqFitDataPresenter::updateParameterOptions(
     FqFitAddWorkspaceDialog *dialog) {
   setDataIndexToCurrentWorkspace(dialog);
   if (m_activeParameterType == "Width")
-    dialog->setParameterNames(m_jumpModel->getWidths(m_dataIndex));
+    dialog->setParameterNames(m_fqFitModel->getWidths(m_dataIndex));
   else if (m_activeParameterType == "EISF")
-    dialog->setParameterNames(m_jumpModel->getEISF(m_dataIndex));
+    dialog->setParameterNames(m_fqFitModel->getEISF(m_dataIndex));
   else
     dialog->setParameterNames({});
 }
@@ -189,9 +189,9 @@ void FqFitDataPresenter::updateParameterTypes(FqFitAddWorkspaceDialog *dialog) {
 std::vector<std::string>
 FqFitDataPresenter::getParameterTypes(TableDatasetIndex dataIndex) const {
   std::vector<std::string> types;
-  if (!m_jumpModel->zeroWidths(dataIndex))
+  if (!m_fqFitModel->zeroWidths(dataIndex))
     types.emplace_back("Width");
-  if (!m_jumpModel->zeroEISF(dataIndex))
+  if (!m_fqFitModel->zeroEISF(dataIndex))
     types.emplace_back("EISF");
   return types;
 }
@@ -204,12 +204,12 @@ void FqFitDataPresenter::addWorkspace(IndirectFittingModel *model,
 }
 
 void FqFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
-  if (const auto jumpDialog =
+  if (const auto fqFitDialog =
           dynamic_cast<FqFitAddWorkspaceDialog const *>(dialog)) {
-    setDataIndexToCurrentWorkspace(jumpDialog);
+    setDataIndexToCurrentWorkspace(fqFitDialog);
     // here we can say that we are in multiple mode so we can append the spectra
     // to the current one and then setspectra
-    setModelSpectrum(jumpDialog->parameterNameIndex());
+    setModelSpectrum(fqFitDialog->parameterNameIndex());
     updateActiveDataIndex();
   }
 }
@@ -217,9 +217,9 @@ void FqFitDataPresenter::addDataToModel(IAddWorkspaceDialog const *dialog) {
 void FqFitDataPresenter::setSingleModelSpectrum(int parameterIndex) {
   auto index = static_cast<std::size_t>(parameterIndex);
   if (m_cbParameterType->currentIndex() == 0)
-    m_jumpModel->setActiveWidth(index, TableDatasetIndex{0});
+    m_fqFitModel->setActiveWidth(index, TableDatasetIndex{0});
   else
-    m_jumpModel->setActiveEISF(index, TableDatasetIndex{0});
+    m_fqFitModel->setActiveEISF(index, TableDatasetIndex{0});
 }
 
 void FqFitDataPresenter::handleSpectrumSelectionChanged(int parameterIndex) {
@@ -231,10 +231,10 @@ void FqFitDataPresenter::setModelSpectrum(int index) {
   if (index < 0)
     throw std::runtime_error("No valid parameter was selected.");
   else if (m_activeParameterType == "Width")
-    m_jumpModel->setActiveWidth(static_cast<std::size_t>(index), m_dataIndex,
+    m_fqFitModel->setActiveWidth(static_cast<std::size_t>(index), m_dataIndex,
                                 false);
   else
-    m_jumpModel->setActiveEISF(static_cast<std::size_t>(index), m_dataIndex,
+    m_fqFitModel->setActiveEISF(static_cast<std::size_t>(index), m_dataIndex,
                                false);
 }
 
@@ -245,7 +245,7 @@ void FqFitDataPresenter::setDataIndexToCurrentWorkspace(
   //  indirectFittingModel get table workspace index
   const auto wsName = dialog->workspaceName().append("_HWHM");
   // This a vector of workspace names currently loaded
-  auto wsVector = m_jumpModel->m_fitDataModel->getWorkspaceNames();
+  auto wsVector = m_fqFitModel->m_fitDataModel->getWorkspaceNames();
   // this is an iterator pointing to the current wsName in wsVector
   auto wsIt = std::find(wsVector.begin(), wsVector.end(), wsName);
   // this is the index of the workspace.
@@ -254,8 +254,8 @@ void FqFitDataPresenter::setDataIndexToCurrentWorkspace(
 }
 
 void FqFitDataPresenter::closeDialog() {
-  if (m_jumpModel->numberOfWorkspaces() > m_dataIndex)
-    m_jumpModel->removeWorkspace(m_dataIndex);
+  if (m_fqFitModel->numberOfWorkspaces() > m_dataIndex)
+    m_fqFitModel->removeWorkspace(m_dataIndex);
   IndirectFitDataPresenter::closeDialog();
 }
 

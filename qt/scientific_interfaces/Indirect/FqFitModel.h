@@ -55,7 +55,7 @@ private:
   findFqFitParameters(TableDatasetIndex dataIndex) const;
   std::string getResultXAxisUnit() const override;
   std::string getResultLogName() const override;
-  std::unordered_map<std::string, FqFitParameters> m_jumpParameters;
+  std::unordered_map<std::string, FqFitParameters> m_fqFitParameters;
 };
 
 } // namespace IDA

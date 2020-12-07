@@ -248,28 +248,28 @@ void FqFitModel::addWorkspace(const std::string &workspaceName) {
 }
 
 void FqFitModel::removeWorkspace(TableDatasetIndex index) {
-  m_jumpParameters.erase(getWorkspace(index)->getName());
+  m_fqFitParameters.erase(getWorkspace(index)->getName());
   IndirectFittingModel::removeWorkspace(index);
 }
 
 FqFitParameters &FqFitModel::addFqFitParameters(MatrixWorkspace *workspace,
                                                 const std::string &hwhmName) {
-  const auto &foundParameters = m_jumpParameters.find(hwhmName);
-  if (foundParameters != m_jumpParameters.end())
+  const auto &foundParameters = m_fqFitParameters.find(hwhmName);
+  if (foundParameters != m_fqFitParameters.end())
     return foundParameters->second;
 
   const auto parameters = createFqFitParameters(workspace);
   if (parameters.widths.empty() && parameters.eisf.empty())
     throw std::invalid_argument("Workspace contains no Width or EISF spectra.");
-  return m_jumpParameters[hwhmName] = std::move(parameters);
+  return m_fqFitParameters[hwhmName] = std::move(parameters);
 }
 
 std::unordered_map<std::string, FqFitParameters>::const_iterator
 FqFitModel::findFqFitParameters(TableDatasetIndex dataIndex) const {
   const auto ws = getWorkspace(dataIndex);
   if (!ws)
-    return m_jumpParameters.end();
-  return m_jumpParameters.find(ws->getName());
+    return m_fqFitParameters.end();
+  return m_fqFitParameters.find(ws->getName());
 }
 
 std::string FqFitModel::getFitParameterName(TableDatasetIndex dataIndex,
@@ -282,7 +282,7 @@ std::string FqFitModel::getFitParameterName(TableDatasetIndex dataIndex,
 void FqFitModel::setActiveWidth(std::size_t widthIndex,
                                 TableDatasetIndex dataIndex, bool single) {
   const auto parametersIt = findFqFitParameters(dataIndex);
-  if (parametersIt != m_jumpParameters.end() &&
+  if (parametersIt != m_fqFitParameters.end() &&
       parametersIt->second.widthSpectra.size() > widthIndex) {
     const auto &widthSpectra = parametersIt->second.widthSpectra;
     if (single == true) {
@@ -305,7 +305,7 @@ void FqFitModel::setActiveWidth(std::size_t widthIndex,
 void FqFitModel::setActiveEISF(std::size_t eisfIndex,
                                TableDatasetIndex dataIndex, bool single) {
   const auto parametersIt = findFqFitParameters(dataIndex);
-  if (parametersIt != m_jumpParameters.end() &&
+  if (parametersIt != m_fqFitParameters.end() &&
       parametersIt->second.eisfSpectra.size() > eisfIndex) {
     const auto &eisfSpectra = parametersIt->second.eisfSpectra;
     if (single == true) {
@@ -331,14 +331,14 @@ void FqFitModel::setFitType(const std::string &fitType) {
 
 bool FqFitModel::zeroWidths(TableDatasetIndex dataIndex) const {
   const auto parameters = findFqFitParameters(dataIndex);
-  if (parameters != m_jumpParameters.end())
+  if (parameters != m_fqFitParameters.end())
     return parameters->second.widths.empty();
   return true;
 }
 
 bool FqFitModel::zeroEISF(TableDatasetIndex dataIndex) const {
   const auto parameters = findFqFitParameters(dataIndex);
-  if (parameters != m_jumpParameters.end())
+  if (parameters != m_fqFitParameters.end())
     return parameters->second.eisf.empty();
   return true;
 }
@@ -352,7 +352,7 @@ bool FqFitModel::isMultiFit() const {
 std::vector<std::string>
 FqFitModel::getWidths(TableDatasetIndex dataIndex) const {
   const auto parameters = findFqFitParameters(dataIndex);
-  if (parameters != m_jumpParameters.end())
+  if (parameters != m_fqFitParameters.end())
     return parameters->second.widths;
   return std::vector<std::string>();
 }
@@ -360,7 +360,7 @@ FqFitModel::getWidths(TableDatasetIndex dataIndex) const {
 std::vector<std::string>
 FqFitModel::getEISF(TableDatasetIndex dataIndex) const {
   const auto parameters = findFqFitParameters(dataIndex);
-  if (parameters != m_jumpParameters.end())
+  if (parameters != m_fqFitParameters.end())
     return parameters->second.eisf;
   return std::vector<std::string>();
 }
@@ -369,7 +369,7 @@ boost::optional<std::size_t>
 FqFitModel::getWidthSpectrum(std::size_t widthIndex,
                              TableDatasetIndex dataIndex) const {
   const auto parameters = findFqFitParameters(dataIndex);
-  if (parameters != m_jumpParameters.end() &&
+  if (parameters != m_fqFitParameters.end() &&
       parameters->second.widthSpectra.size() > widthIndex)
     return parameters->second.widthSpectra[widthIndex];
   return boost::none;
@@ -379,7 +379,7 @@ boost::optional<std::size_t>
 FqFitModel::getEISFSpectrum(std::size_t eisfIndex,
                             TableDatasetIndex dataIndex) const {
   const auto parameters = findFqFitParameters(dataIndex);
-  if (parameters != m_jumpParameters.end() &&
+  if (parameters != m_fqFitParameters.end() &&
       parameters->second.eisfSpectra.size() > eisfIndex)
     return parameters->second.eisfSpectra[eisfIndex];
   return boost::none;
