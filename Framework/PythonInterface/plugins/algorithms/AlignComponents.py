@@ -268,7 +268,7 @@ class AlignComponents(PythonAlgorithm):
 
         return issues
 
-    # flake8: noqa C901
+    # flake8: noqa: C901
     def PyExec(self):
         self._eulerConvention=self.getProperty('EulerConvention').value
         calWS = self.getProperty('CalibrationTable').value
