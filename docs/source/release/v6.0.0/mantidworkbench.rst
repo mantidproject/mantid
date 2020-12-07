@@ -13,12 +13,14 @@ New Features
 - Added a ``Log`` colorbar scale option to the Sliceviewer. This differs from the existing ``Symlog`` option as it prohibits negative values.
 - Added a Dx data tab on the data window when a workspace has Dx data.
 - Added the ability to load 1d-Plots from MantidPlot project files in workbench.
+- Added QLineEdit to SampleLogs widget to allow filtering its entries
 
 Improvements
 ############
 
 - Enable workbench to plot 1D spectrum from an IMDHistoWorkspace whose non-integrated dimension is equal to 1 but not to launch slice viewer.
 - Removed dialogs for the Load and Fit algorithms as the dialogs were previously deprecated
+- Migrate MantidPlot's Step Scan interface to workbench.
 - Expose :ref:`Instrument View <instrumentviewer>` control to Python.
 - Enable workbench to plot 1D spectrum (plot, overplot, plot_with_error, overplot_with_error) from an IMDHistoWorkspace whose non-integrated dimension is equal to 1 but not to launch slice viewer.
 - Enabled the plotting of individual functions in the Workbench fit browser. This replicates a feature that was in MantidPlot.
@@ -32,7 +34,9 @@ Improvements
 - Plots containing axvline's and axhline's can be saved and are reproduced when loading a project that contains them.
 - Wireframe plots no longer spill over the axes when their limits are reduced.
 - In the instrument widget, the integration scroll bar can be moved, widened and shrunk using the arrow keys.
+- The matplotlib `zoom` selection box is now more visible on colorfill and sliceviewer plots.
 - Add an autoscale checkbox to plot config dialog.
+- Add a Python function to replace the workspace being shown by an instrument window.
 
 Bugfixes
 ########

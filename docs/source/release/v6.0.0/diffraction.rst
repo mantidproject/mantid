@@ -35,6 +35,8 @@ New features
 - Files from ILL's instrument D1B can now be loaded.
 - New algorithm :ref:`CorelliPowderCalibrationDatabase <algm-CorelliPowderCalibrationDatabase>` to save Corelli geometry calibration to database
 - New algorithm :ref:`CorelliPowderCalibrationApply <algm-CorelliPowderCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace.
+- New algorithm :ref:`CorelliPowderCalibrationLoad <algm-CorelliPowderCalibrationLoad>` to load a CORELLI calibration table into memory.
+
 
 Improvements
 ############
@@ -52,6 +54,10 @@ Bugfixes
 - Dummy detectors in polaris workspaces no longer prevent unit conversion.
 - Focus in PEARL powder diffraction scripts no longer fails if previous run has left Van splines workspace group in ADS
 
+
+Bugfixes
+########
+- :ref:`WANDPowderReduction <algm-WANDPowderReduction>` once again accepts multiple input workspaces and outputs a group workspace when specified by user.
 
 Engineering Diffraction
 -----------------------
@@ -73,15 +79,30 @@ New features
 
 Single Crystal Diffraction
 --------------------------
+New features
+############
+- Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
+- Fix problem that was causing matrix diagonalization to return NaNs in certain cases. The diagonalization is used in :ref:`CalculateUMatrix <algm-CalculateUMatrix>` and :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`
+- New algorithm :ref:`HB3AFindPeaks <algm-HB3AFindPeaks>` to find peaks and set the UB matrix for DEMAND data.
+- New algorithm :ref:`HB3AIntegratePeaks <algm-HB3AIntegratePeaks>` used to integrate peaks from an MDEventWorkspace and apply Lorentz correction on DEMAND data.
+
+Improvements
+############
+- Support added for DEMAND (HB3A) to :ref:`PredictPeaks <algm-PredictPeaks-v1>` in order to handle additional goniometers.
+
 Bugfixes
 ########
 - Fix bug in :ref:`SaveHKL <algm-SaveHKL>` where the direction cosines were calculated incorrectly
-
+- Updated ref:`SaveHKL <algm-SaveHKL>` to only recalculate tbar if it's not already populated in the input peaks workspace
 
 New features
 ############
 - Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
 - Fix problem that was causing matrix diagonalization to return NaNs in certain cases. The diagonalization is used in :ref:`CalculateUMatrix <algm-CalculateUMatrix>` and :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`
+
+Improvements
+############
+- Support added for DEMAND (HB3A) to :ref:`PredictPeaks <algm-PredictPeaks-v1>` in order to handle additional goniometers.
 
 
 Imaging
