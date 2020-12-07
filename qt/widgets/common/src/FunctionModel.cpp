@@ -420,7 +420,7 @@ void FunctionModel::setLocalParameterValue(const QString &parName, int i,
 void FunctionModel::setGlobalParameterValue(const QString &paramName,
                                             double value) {
   if (isGlobal(paramName))
-    for (auto i = 0; i < static_cast<int>(m_function->nFunctions()); ++i)
+    for (auto i = 0; i < getNumberDomains(); ++i)
       setLocalParameterValue(paramName, i, value);
 }
 
