@@ -80,6 +80,13 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
     peak_shapes = ['Gaussian']
     bank_count = 92
     _banks = [f'bank{i}/sixteenpack' for i in range(1, bank_count)]
+    r"""The calibration attempts to adjust the location and orientation of various instrument components, namely
+    the source and detector banks. The items describing a full adjustment are as follows:
+    - Component: name of the instrument component (e.g. 'moderator', 'bank42/sixteenpack')
+    - Xposition, YPosition, ZPosition: location of the instrument component in the lab frame (units in meters)
+    - XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle: direction cosines and rotation angle
+      (in degress) defining a rotation in the lab frame that orients the instrument component
+    """
     adjustment_items = ['Component', 'Xposition', 'Yposition', 'Zposition',
                         'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
 

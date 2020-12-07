@@ -226,7 +226,7 @@ class AlignComponents(PythonAlgorithm):
 
         # Need to get instrument in order to check components are valid
         input_workspace = self.getProperty("Workspace").value
-        if input_workspace is not None:
+        if bool(input_workspace) is True:
             wks_name = input_workspace.name()
         else:
             inputFilename = self.getProperty("InstrumentFilename").value
@@ -292,7 +292,7 @@ class AlignComponents(PythonAlgorithm):
         detID = calWS.column('detid')
 
         wks_name = "alignedWorkspace"  # workspace whose counts will be DIFC values
-        if input_workspace is not None:
+        if bool(input_workspace) is True:
             api.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace=wks_name)
         else:
             api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value, OutputWorkspace=wks_name)
@@ -360,8 +360,8 @@ class AlignComponents(PythonAlgorithm):
                 # Need to grab the component again, as things have changed
                 kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
                 api.MoveInstrumentComponent(wks_name, componentName, **kwargs)  # adjust workspace "alignedworkspace"
-                if self.getProperty("Workspace").value is not None:  # adjust input Workspace
-                    api.MoveInstrumentComponent(self.getProperty("Workspace").value, componentName, **kwargs)
+                if bool(input_workspace) is True:  # adjust input Workspace
+                    api.MoveInstrumentComponent(input_workspace, componentName, **kwargs)
 
                 comp = api.mtd[wks_name].getInstrument().getComponentByName(componentName)
                 logger.notice("Finished " + componentName + " Final position is " + str(comp.getPos()))
@@ -427,21 +427,21 @@ class AlignComponents(PythonAlgorithm):
             # Apply the results to the output workspace
             xmap = self._mapOptions(results.x)
 
-            component_adjustments = [0.] * 7 # 3 for translation, 3 for rotation axis, 1 for rotation angle
+            component_adjustments = [0.] * 7  # 3 for translation, 3 for rotation axis, 1 for rotation angle
 
             if self._move:
                 kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
                 api.MoveInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace "alignedworkspace"
-                if self.getProperty("Workspace").value is not None:  # adjust input Workspace
-                    api.MoveInstrumentComponent(self.getProperty("Workspace").value, component, **kwargs)
+                if bool(input_workspace) is True:  # adjust input Workspace
+                    api.MoveInstrumentComponent(input_workspace, component, **kwargs)
                 component_adjustments[:3] = xmap[:3]
 
             if self._rotate:
                 (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5], self._eulerConvention)
                 kwargs = dict(X=rotx, Y=roty, Z=rotz, Angle=rotw, RelativeRotation=False)
                 api.RotateInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace "alignedworkspace"
-                if self.getProperty("Workspace").value is not None:  # adjust input Workspace
-                    api.RotateInstrumentComponent(self.getProperty("Workspace").value, component, **kwargs)
+                if bool(input_workspace) is True:  # adjust input Workspace
+                    api.RotateInstrumentComponent(input_workspace, component, **kwargs)
                 component_adjustments[3:] = [rotx, roty, rotz, rotw]
 
             if saving_adjustments and (self._move or self._rotate):
