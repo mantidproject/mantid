@@ -20,7 +20,7 @@ class CorelliPowderCalibrationCreateTest(MantidSystemTest):
         LoadNexus(Filename='CORELLI_124036_banks42_87.nxs', OutputWorkspace='LaB6')
         CorelliPowderCalibrationCreate(InputWorkspace='LaB6',
                                        OutputWorkspacesPrefix='LaB6_',
-                                       TubeDatabaseDir='/SNS/users/jbq/Downloads/calibration_database',
+                                       TubeDatabaseDir='/tmp',
                                        TofBinning=[3000, -0.001, 16660],
                                        PeakFunction='Gaussian',
                                        PeakPositions=[1.3143, 1.3854, 1.6967, 1.8587, 2.0781, 2.3995, 2.9388, 4.1561],
