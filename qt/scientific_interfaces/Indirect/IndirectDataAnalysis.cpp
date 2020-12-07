@@ -42,7 +42,7 @@ IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent)
   m_tabs.emplace(CONV_FIT, new IndirectDataAnalysisConvFitTab(
                                m_uiForm.twIDATabs->widget(CONV_FIT)));
   m_tabs.emplace(FQ_FIT, new IndirectDataAnalysisFqFitTab(
-                               m_uiForm.twIDATabs->widget(FQ_FIT)));
+                             m_uiForm.twIDATabs->widget(FQ_FIT)));
 }
 
 void IndirectDataAnalysis::applySettings(

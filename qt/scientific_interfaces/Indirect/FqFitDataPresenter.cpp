@@ -123,7 +123,8 @@ void FqFitDataPresenter::updateAvailableParameterTypes() {
 }
 
 void FqFitDataPresenter::updateParameterSelectionEnabled() {
-  const auto enabled = m_fqFitModel->numberOfWorkspaces() > TableDatasetIndex{0};
+  const auto enabled =
+      m_fqFitModel->numberOfWorkspaces() > TableDatasetIndex{0};
   m_cbParameter->setEnabled(enabled);
   m_cbParameterType->setEnabled(enabled);
   m_lbParameter->setEnabled(enabled);
@@ -232,10 +233,10 @@ void FqFitDataPresenter::setModelSpectrum(int index) {
     throw std::runtime_error("No valid parameter was selected.");
   else if (m_activeParameterType == "Width")
     m_fqFitModel->setActiveWidth(static_cast<std::size_t>(index), m_dataIndex,
-                                false);
+                                 false);
   else
     m_fqFitModel->setActiveEISF(static_cast<std::size_t>(index), m_dataIndex,
-                               false);
+                                false);
 }
 
 void FqFitDataPresenter::setDataIndexToCurrentWorkspace(
