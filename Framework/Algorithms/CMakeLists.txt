@@ -74,6 +74,7 @@ set(SRC_FILES
     src/CorelliCrossCorrelate.cpp
     src/CorelliPowderCalibrationApply.cpp
     src/CorelliPowderCalibrationDatabase.cpp
+    src/CorelliPowderCalibrationLoad.cpp
     src/CorrectKiKf.cpp
     src/CorrectTOFAxis.cpp
     src/CorrectToFile.cpp
@@ -405,6 +406,7 @@ set(INC_FILES
     inc/MantidAlgorithms/CorelliCrossCorrelate.h
     inc/MantidAlgorithms/CorelliPowderCalibrationApply.h
     inc/MantidAlgorithms/CorelliPowderCalibrationDatabase.h
+    inc/MantidAlgorithms/CorelliPowderCalibrationLoad.h
     inc/MantidAlgorithms/CorrectKiKf.h
     inc/MantidAlgorithms/CorrectTOFAxis.h
     inc/MantidAlgorithms/CorrectToFile.h
@@ -756,6 +758,7 @@ set(TEST_FILES
     CorelliCrossCorrelateTest.h
     CorelliPowderCalibrationApplyTest.h
     CorelliPowderCalibrationDatabaseTest.h
+    CorelliPowderCalibrationLoadTest.h
     CorrectKiKfTest.h
     CorrectTOFAxisTest.h
     CorrectToFileTest.h
