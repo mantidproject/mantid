@@ -181,7 +181,7 @@ void LoadMuonNexusV2::execLoader() {
 
   // Time Zero table should be returned if found
   if (!getPropertyValue("TimeZerotable").empty()) {
-    // Create table and set property]
+    // Create table and set property
     auto timeZeroTable = m_loadMuonStrategy->getTimeZeroTable();
     setProperty("TimeZeroTable", timeZeroTable);
   }

@@ -128,25 +128,20 @@ public:
     LoadMuonNexusV2 ld;
     ld.initialize();
     ld.setPropertyValue("Filename", "EMU00102347.nxs_v2");
-    ld.setPropertyValue("OutputWorkspace", "outWS");
+    ld.setPropertyValue("OutputWorkspace", "outWs");
     ld.setPropertyValue("TimeZeroTable", "tzt");
+    ld.setRethrows(true);
+    auto &ads = AnalysisDataService::Instance();
 
-    TS_ASSERT_THROWS_NOTHING(ld.execute());
-    TS_ASSERT(ld.isExecuted());
-    // Verify that the output workspace exists
-    MatrixWorkspace_sptr output_ws;
-    TS_ASSERT_THROWS_NOTHING(
-        output_ws = AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(
-            "outWS"));
+    ld.execute();
+    // Verify that the output workspaces exist
+    TS_ASSERT(ads.doesExist("outWs"));
+    TS_ASSERT(ads.doesExist("tzt"));
 
-    Workspace2D_sptr output2D =
-        std::dynamic_pointer_cast<Workspace2D>(output_ws);
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(
+        ads.retrieveWS<MatrixWorkspace>("outWs"));
+    TableWorkspace_sptr tbl = ads.retrieveWS<TableWorkspace>("tzt");
 
-    TableWorkspace_sptr tbl;
-    TS_ASSERT_THROWS_NOTHING(
-        tbl =
-            AnalysisDataService::Instance().retrieveWS<TableWorkspace>("tzt"));
-    TS_ASSERT(tbl);
     // Check number of rows and columns
     TS_ASSERT_EQUALS(tbl->columnCount(), 1);
     TS_ASSERT_EQUALS(tbl->rowCount(), output2D->getNumberHistograms());

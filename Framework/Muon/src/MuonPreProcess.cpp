@@ -87,21 +87,8 @@ void MuonPreProcess::init() {
   setPropertyGroup("DeadTimeTable", analysisGrp);
 }
 
-std::map<std::string, std::string> MuonPreProcess::validateInputs() {
-  std::map<std::string, std::string> errors;
-
-  double tmin = this->getProperty("TimeMin");
-  double tmax = this->getProperty("TimeMax");
-  if (tmin != EMPTY_DBL() && tmax != EMPTY_DBL()) {
-    if (tmin > tmax) {
-      errors["TimeMin"] = "TimeMin > TimeMax";
-    }
-    if (tmin != EMPTY_DBL() && tmin == tmax) {
-      errors["TimeMin"] = "TimeMin and TimeMax must be different";
-    }
-  }
-
-  // Checks for dead time table and time zero table
+void MuonPreProcess::validateTableInputs(
+    std::map<std::string, std::string> &errors) {
   Workspace_sptr inputWS = this->getProperty("InputWorkspace");
   if (auto ws = std::dynamic_pointer_cast<MatrixWorkspace>(inputWS)) {
     // Dead time
@@ -123,7 +110,26 @@ std::map<std::string, std::string> MuonPreProcess::validateInputs() {
       }
     }
   }
+}
 
+std::map<std::string, std::string> MuonPreProcess::validateInputs() {
+  std::map<std::string, std::string> errors;
+
+  double tmin = this->getProperty("TimeMin");
+  double tmax = this->getProperty("TimeMax");
+  if (tmin != EMPTY_DBL() && tmax != EMPTY_DBL()) {
+    if (tmin > tmax) {
+      errors["TimeMin"] = "TimeMin > TimeMax";
+    }
+    if (tmin != EMPTY_DBL() && tmin == tmax) {
+      errors["TimeMin"] = "TimeMin and TimeMax must be different";
+    }
+  }
+
+  // Check for and validate dead time and time zero tables
+  validateTableInputs(errors);
+
+  Workspace_sptr inputWS = this->getProperty("InputWorkspace");
   if (auto ws = std::dynamic_pointer_cast<WorkspaceGroup>(inputWS)) {
     if (ws->getNumberOfEntries() == 0) {
       errors["InputWorkspace"] = "Input WorkspaceGroup is empty.";
@@ -239,14 +245,15 @@ MatrixWorkspace_sptr
 MuonPreProcess::applyTimeZeroTable(MatrixWorkspace_sptr ws,
                                    const TableWorkspace_sptr &timeZeroTable) {
   auto cloneWs = cloneWorkspace(ws);
-  if (timeZeroTable != nullptr) {
-    const auto numSpec = cloneWs->getNumberHistograms();
-    for (auto specNum = 0u; specNum < numSpec; ++specNum) {
-      auto &xData = cloneWs->mutableX(specNum);
-      for (auto &xValue : xData) {
-        API::TableRow row = timeZeroTable->getRow(specNum);
-        xValue -= row.Double(0);
-      }
+  if (!timeZeroTable) {
+    return cloneWs;
+  }
+  const auto numSpec = cloneWs->getNumberHistograms();
+  for (auto specNum = 0u; specNum < numSpec; ++specNum) {
+    auto &xData = cloneWs->mutableX(specNum);
+    for (auto &xValue : xData) {
+      API::TableRow row = timeZeroTable->getRow(specNum);
+      xValue -= row.Double(0);
     }
   }
   return cloneWs;
@@ -255,51 +262,59 @@ MuonPreProcess::applyTimeZeroTable(MatrixWorkspace_sptr ws,
 MatrixWorkspace_sptr MuonPreProcess::applyCropping(MatrixWorkspace_sptr ws,
                                                    const double &xMin,
                                                    const double &xMax) {
-  if (xMin != EMPTY_DBL() || xMax != EMPTY_DBL()) {
-    if (!getPropertyValue("TimeZeroTable").empty()) {
-      IAlgorithm_sptr cropRagged = createChildAlgorithm("CropWorkspaceRagged");
-      cropRagged->setProperty("InputWorkspace", ws);
-      if (xMin != EMPTY_DBL()) {
-        std::vector<double> xMinVec(ws->getNumberHistograms(), xMin);
-        cropRagged->setProperty("XMin", xMinVec);
-      } else {
-        // Get min value from each spectra independantly
-        std::vector<double> xMinVec;
-        for (auto specNum = 0u; specNum < ws->getNumberHistograms();
-             ++specNum) {
-          auto &xData = ws->mutableX(specNum);
-          xMinVec.emplace_back(xData[0]);
-        }
-        cropRagged->setProperty("XMin", xMinVec);
-      }
-      if (xMax != EMPTY_DBL()) {
-        std::vector<double> xMaxVec(ws->getNumberHistograms(), xMax);
-        cropRagged->setProperty("XMax", xMaxVec);
-      } else {
-        // Get max value from each spectra independantly
-        std::vector<double> xMaxVec;
-        for (auto specNum = 0u; specNum < ws->getNumberHistograms();
-             ++specNum) {
-          auto &xData = ws->mutableX(specNum);
-          xMaxVec.emplace_back(xData[xData.size() - 1]);
-        }
-        cropRagged->setProperty("XMax", xMaxVec);
-      }
-      cropRagged->execute();
-      return cropRagged->getProperty("OutputWorkspace");
-    } else {
-      IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
-      crop->setProperty("InputWorkspace", ws);
-      if (xMin != EMPTY_DBL())
-        crop->setProperty("Xmin", xMin);
-      if (xMax != EMPTY_DBL())
-        crop->setProperty("Xmax", xMax);
-      crop->execute();
-      return crop->getProperty("OutputWorkspace");
-    }
-  } else {
+  if (xMin == EMPTY_DBL() && xMax == EMPTY_DBL())
     return ws;
+
+  if (getPropertyValue("TimeZeroTable").empty())
+    return cropWithSingleValues(ws, xMin, xMax);
+  else
+    return cropWithVectors(ws, xMin, xMax);
+}
+
+MatrixWorkspace_sptr
+MuonPreProcess::cropWithSingleValues(MatrixWorkspace_sptr ws,
+                                     const double &xMin, const double &xMax) {
+  IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
+  crop->setProperty("InputWorkspace", ws);
+  if (xMin != EMPTY_DBL())
+    crop->setProperty("Xmin", xMin);
+  if (xMax != EMPTY_DBL())
+    crop->setProperty("Xmax", xMax);
+  crop->execute();
+  return crop->getProperty("OutputWorkspace");
+}
+
+MatrixWorkspace_sptr MuonPreProcess::cropWithVectors(MatrixWorkspace_sptr ws,
+                                                     const double &xMin,
+                                                     const double &xMax) {
+  std::vector<double> xMinVec;
+  std::vector<double> xMaxVec;
+
+  if (xMin != EMPTY_DBL())
+    xMinVec.insert(xMinVec.end(), ws->getNumberHistograms(), xMin);
+  else {
+    for (auto specNum = 0u; specNum < ws->getNumberHistograms(); ++specNum) {
+      auto &xData = ws->mutableX(specNum);
+      xMinVec.emplace_back(xData[0]); // Append first value for each spectrum
+    }
   }
+
+  if (xMax != EMPTY_DBL())
+    xMaxVec.insert(xMaxVec.end(), ws->getNumberHistograms(), xMax);
+  else {
+    for (auto specNum = 0u; specNum < ws->getNumberHistograms(); ++specNum) {
+      auto &xData = ws->mutableX(specNum);
+      xMaxVec.emplace_back(
+          xData[xData.size() - 1]); // Append last value for each spectrum
+    }
+  }
+
+  IAlgorithm_sptr cropRagged = createChildAlgorithm("CropWorkspaceRagged");
+  cropRagged->setProperty("InputWorkspace", ws);
+  cropRagged->setProperty("XMin", xMinVec);
+  cropRagged->setProperty("XMax", xMaxVec);
+  cropRagged->execute();
+  return cropRagged->getProperty("OutputWorkspace");
 }
 
 MatrixWorkspace_sptr

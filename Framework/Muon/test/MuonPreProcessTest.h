@@ -233,7 +233,7 @@ public:
   // --------------------------------------------------------------------------
 
   void test_successful_execution_with_valid_time_zero_table() {
-    // workspace has 2 spectra, dead time table has 5 rows
+    // workspace has 5 spectra, time zero table has 5 rows
     auto ws = createCountsWorkspace(5, 10, 0.0);
     std::vector<double> timeZeros = {0.5, 1.0, 1.5, 2.0, 2.5};
     ITableWorkspace_sptr timeZeroTable = createTimeZeroTable(5, timeZeros);
@@ -244,7 +244,7 @@ public:
   }
 
   void test_cannot_execute_on_invalid_time_zero_table() {
-    // workspace has 2 spectra, dead time table has 5 rows
+    // workspace has 2 spectra, time zero table has 5 rows
     auto ws = createCountsWorkspace(2, 10, 0.0);
     std::vector<double> timeZeros = {0.5, 1.0, 1.5, 2.0, 2.5};
     ITableWorkspace_sptr timeZeroTable = createTimeZeroTable(5, timeZeros);

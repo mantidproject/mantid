@@ -194,7 +194,6 @@ public:
   void test_time_zero_list_loaded_correctly() {
     LoadPSIMuonBin alg;
     alg.initialize();
-    alg.isInitialized();
     alg.setProperty("SearchForTempFile", false);
 
     alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin"));
@@ -214,20 +213,15 @@ public:
   void test_time_zero_table_loaded_correctly() {
     LoadPSIMuonBin alg;
     alg.initialize();
-    alg.isInitialized();
     alg.setProperty("SearchForTempFile", false);
-
     alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin"));
     alg.setProperty("OutputWorkspace", "ws");
     alg.setPropertyValue("TimeZeroTable", "tzt");
     alg.execute();
 
-    ITableWorkspace_sptr tbl;
-    TS_ASSERT_THROWS_NOTHING(
-        tbl =
-            AnalysisDataService::Instance().retrieveWS<TableWorkspace>("tzt"));
+    auto &ads = AnalysisDataService::Instance();
+    ITableWorkspace_sptr tbl = ads.retrieveWS<TableWorkspace>("tzt");
 
-    TS_ASSERT(tbl);
     TS_ASSERT_EQUALS(tbl->columnCount(), 1);
     TS_ASSERT_EQUALS(tbl->getColumnNames(),
                      std::vector<std::string>{"time zero"});
@@ -241,7 +235,6 @@ public:
   void test_dead_time_table_loaded_correctly() {
     LoadPSIMuonBin alg;
     alg.initialize();
-    alg.isInitialized();
     alg.setProperty("SearchForTempFile", false);
 
     alg.setProperty("Filename", getTestFilePath("deltat_tdc_dolly_1529.bin"));
@@ -249,12 +242,9 @@ public:
     alg.setPropertyValue("DeadTimeTable", "dtt");
     alg.execute();
 
-    ITableWorkspace_sptr tbl;
-    TS_ASSERT_THROWS_NOTHING(
-        tbl =
-            AnalysisDataService::Instance().retrieveWS<TableWorkspace>("dtt"));
+    auto &ads = AnalysisDataService::Instance();
+    ITableWorkspace_sptr tbl = ads.retrieveWS<TableWorkspace>("dtt");
 
-    TS_ASSERT(tbl);
     TS_ASSERT_EQUALS(tbl->columnCount(), 2);
     std::vector<std::string> colNames{"spectrum", "dead-time"};
     TS_ASSERT_EQUALS(tbl->getColumnNames(), colNames);

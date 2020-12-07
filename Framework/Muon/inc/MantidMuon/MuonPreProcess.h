@@ -71,8 +71,20 @@ private:
   /// Perform validation of inputs to the algorithm
   std::map<std::string, std::string> validateInputs() override;
 
+  /// Validates the tables used in the alg (called in validateInputs)
+  void validateTableInputs(std::map<std::string, std::string> &errors);
+
   /// Allow WorkspaceGroup property to function correctly.
   bool checkGroups() override;
+
+  /// Crop workspace with single xMin and xMax values
+  MatrixWorkspace_sptr cropWithSingleValues(MatrixWorkspace_sptr ws,
+                                            const double &xMin,
+                                            const double &xMax);
+
+  /// Crop workspace with vector of doubles
+  MatrixWorkspace_sptr cropWithVectors(MatrixWorkspace_sptr ws,
+                                       const double &xMin, const double &xMax);
 };
 
 } // namespace Muon

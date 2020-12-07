@@ -20,7 +20,7 @@ namespace DataHandling {
 
 /**
  * Creates a timezero table for the loaded detectors
- * @param numSpec :: Numer of spectra (number of rows in table)
+ * @param numSpec :: Number of spectra (number of rows in table)
  * @param timeZeros :: Vector containing time zero values for each spectra
  * @return TableWorkspace of time zeros
  */
