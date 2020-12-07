@@ -19,8 +19,8 @@ from mantid.dataobjects import TableWorkspace, Workspace2D
 from mantid.simpleapi import (
     CalculateDIFC, CloneWorkspace, CopyInstrumentParameters, ConvertUnits, CreateEmptyTableWorkspace,
     CreateGroupingWorkspace, CreateWorkspace, DeleteWorkspace, GroupDetectors, GroupWorkspaces, Multiply,
-    PDCalibration, Rebin)
-from mantid.kernel import Direction, FloatBoundedValidator, logger, StringArrayProperty
+    PDCalibration, Rebin, RenameWorkspace)
+from mantid.kernel import Direction, logger, StringArrayProperty
 
 
 def unique_workspace_name(n: int = 5, prefix: Optional[str] = '',
@@ -117,17 +117,17 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         self.copyProperties('PDCalibration', property_names)
         [self.setPropertyGroup(name, 'PDCalibration') for name in property_names]
         # AlignComponents properties exposed, grouped
-        property_names = ['SourceMaxTranslation', 'ComponentList', 'ComponentMaxTranslation', 'ComponentMaxRotation']
+        property_names = ['AdjustSource', 'SourceMaxTranslation', 'ComponentList', 'ComponentMaxTranslation',
+                          'ComponentMaxRotation']
+        self.declareProperty(name='AdjustSource', defaultValue=True,
+                             doc='Adjust Z-coordinate of the source')
         self.declareProperty(name='SourceMaxTranslation', defaultValue=0.1,
-                             validator=FloatBoundedValidator(0, 0.5),
                              doc='Maximum adjustment of source position along the beam (Z) axis (m)')
         self.declareProperty(StringArrayProperty('ComponentList', values=self._banks, direction=Direction.Input),
                              doc='Comma separated list on banks to refine')
         self.declareProperty(name='ComponentMaxTranslation', defaultValue=0.02,
-                             validator=FloatBoundedValidator(0.0, 0.2),
                              doc='Maximum translation of each component along either of the X, Y, Z axes (m)')
         self.declareProperty(name='ComponentMaxRotation', defaultValue=3.0,
-                             validator=FloatBoundedValidator(0.0, 3.0),
                              doc='Maximum rotation of each component along either of the X, Y, Z axes (deg)')
         [self.setPropertyGroup(name, 'AlignComponents') for name in property_names]
 
@@ -149,7 +149,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
 
         # Remove delayed emission time from the moderator
         kwargs = dict(InputWorkspace=input_workspace, Emode='Elastic', OutputWorkspace=input_workspace)
-        self.run_algorithm('ModeratorTzero', 0, 0.02, **kwargs)
+        self.run_algorithm('ModeratorTzero', 0, 0.02, soft_crash=True, **kwargs)
         progress.report('ModeratorTzero has been applied')
 
         # Correct detector heights
@@ -213,18 +213,19 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         mtd[diagnostics_workspaces].add(difc_table)
         mtd[diagnostics_workspaces].add(difc_table + '_mask')
 
+        adjustments_table_name = f'{prefix_output}adjustments'
         # Adjust the position of the source along the beam (Z) axis
         # The instrument in `input_workspace` is adjusted in-place
-        dz = self.getProperty('SourceMaxTranslation').value
-        adjustments_table_name = f'{prefix_output}adjustments'
-        kwargs = dict(Workspace=input_workspace,
-                      CalibrationTable=difc_table,
-                      MaskWorkspace=f'{difc_table}_mask',
-                      AdjustmentsTable=adjustments_table_name,
-                      FitSourcePosition=True,
-                      FitSamplePosition=False,
-                      Zposition=True, MinZPosition=-dz, MaxZPosition=dz)
-        self.run_algorithm('AlignComponents', 0.1, 0.2, **kwargs)
+        if self.getProperty('AdjustSource').value is True:
+            dz = self.getProperty('SourceMaxTranslation').value
+            kwargs = dict(Workspace=input_workspace,
+                          CalibrationTable=difc_table,
+                          MaskWorkspace=f'{difc_table}_mask',
+                          AdjustmentsTable=adjustments_table_name,
+                          FitSourcePosition=True,
+                          FitSamplePosition=False,
+                          Zposition=True, MinZPosition=-dz, MaxZPosition=dz)
+            self.run_algorithm('AlignComponents', 0.1, 0.2, **kwargs)
 
         # Translate and rotate the each bank, only after the source has been adjusted
         # The instrument in `input_workspace` is adjusted in-place
@@ -250,8 +251,13 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         # AlignComponents produces two unwanted workspaces
         temporary_workspaces.extend(['alignedWorkspace', 'calWS'])
 
-        # Append the banks table to the source table, then delete the banks table
-        self._append_second_to_first(adjustments_table_name, adjustments_table_name + '_banks')
+        # If we adjusted the source, then append the banks table to the source table, then delete the banks table.
+        # Otherwise just rename the table containing the bank adjustments
+        if self.getProperty('AdjustSource').value is True:
+            self._append_second_to_first(adjustments_table_name, adjustments_table_name + '_banks')
+        else:
+            RenameWorkspace(InputWorkspace=adjustments_table_name + '_banks',
+                            OutputWorkspace=adjustments_table_name)
 
         # Create one spectra in d-spacing for each bank using the adjusted instrument geometry.
         # The spectra can be compare to those of prefix_output + 'PDCalibration_peaks_original'
@@ -291,12 +297,21 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         # clean up at the end (only happens if algorithm completes sucessfully)
         [DeleteWorkspace(name) for name in temporary_workspaces if AnalysisDataService.doesExist(name)]
 
-    def run_algorithm(self, name: str, start_progress: float, end_progress: float, **kwargs):
+    def run_algorithm(self, name: str, start_progress: float, end_progress: float, soft_crash=True, **kwargs):
+        r"""
+        @param soft_crash : log an error but do not raise an exception
+        """
         algorithm_align = self.createChildAlgorithm(name=name,
                                                     startProgress=start_progress, endProgress=end_progress,
                                                     enableLogging=True)
         [algorithm_align.setProperty(name, value) for name, value in kwargs.items()]
-        algorithm_align.execute()
+        try:
+            algorithm_align.execute()
+        except Exception as err:
+            if soft_crash is True:
+                logger.error('Execution continues')
+            else:
+                raise err.__class__(err)
         logger.notice(f'{name} has executed')
 
     def _append_second_to_first(self, first: Union[str, TableWorkspace],
