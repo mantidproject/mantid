@@ -43,14 +43,15 @@ Usage
                                    ComponentMaxTranslation=0.02,
                                    ComponentMaxRotation=3.0)
 
-A set of output workspaces are created, including the adjustment diagnostics
+A set of output workspaces are created, including the adjustment diagnostics.
 
 .. image:: ../images/CorelliPowderCalibrationCreate_1.png
     :align: center
     :width: 635
     :alt: original layout of CORELLI instrument
 
-A description of the output workspaces follows:
+All workspaces are prefixed by ``LaB6_``, which is the value we set for option ``OutputWorkspacesPrefix`` when we
+invoked the algorihtm. A description of the output workspaces follows:
 
 Workspace ``LaB6_adjustments`` is the main result, a table containing adjustments for different instrument components.
 In our example, we have adjusted the moderator and banks 42 and 87.
@@ -67,6 +68,7 @@ In our example, we have adjusted the moderator and banks 42 and 87.
 - ``XdirectionCosine``, ``YdirectionCosine``, ``ZdirectionCosine``: direction cosines (in the) lab's frame of references defining a rotation axis to set the orientation of ``Component``.
 - ``RotationAngle``: rotate this many degrees around the previous rotation axis to set the orientation of ``Component``.
 
+Diagnostics workspaces are stored within
 
 .. categories::
 
