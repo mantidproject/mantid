@@ -136,7 +136,13 @@ you may want to alter and those properties are detailed below.
 |                                                 |The default is information, but                    | ``error``, ``critical``     |
 |                                                 |this can be lowered to debug for more detailed     | or ``fatal``                |
 |                                                 |feedback.                                          |                             |
-|                                                 |                                                   |                             |
++-------------------------------------------------+---------------------------------------------------+-----------------------------+
+| ``logging.channels.consoleChannel.class``       | Select where log messages appear.                 | ``ConsoleChannel``,         |
+|                                                 | ``ConsoleChannel`` writes to stdlog.              | ``StdoutChannel``, or       |
+|                                                 | ``StdoutChannel`` writes to stdout and can be     | ``PythonStdoutChannel``     |
+|                                                 | redirected using pipes.                           |                             |
+|                                                 | ``PythonStdoutChannel`` writes to stdout through  |                             |
+|                                                 | python and is visible in jupyter notebooks.       |                             |
 +-------------------------------------------------+---------------------------------------------------+-----------------------------+
 
 The logging priority levels for the file logging and console logging can also be adjusted in python using the command:
