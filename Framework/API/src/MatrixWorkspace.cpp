@@ -1377,8 +1377,9 @@ Types::Core::DateAndTime MatrixWorkspace::getLastPulseTime() const {
  *                     stored value (default = 0.0). Used for point data only.
  * @returns The index corresponding to the X value provided
  */
-std::size_t MatrixWorkspace::yIndexOfX(double xValue, std::size_t const &index,
-                                       double tolerance) const {
+std::size_t MatrixWorkspace::yIndexOfX(const double xValue,
+                                       const std::size_t &index,
+                                       const double tolerance) const {
   if (index >= getNumberHistograms())
     throw std::out_of_range("MatrixWorkspace::yIndexOfX - Index out of range.");
 
@@ -1413,7 +1414,8 @@ std::size_t MatrixWorkspace::yIndexOfX(double xValue, std::size_t const &index,
  */
 std::size_t
 MatrixWorkspace::binIndexOfValue(HistogramData::HistogramX const &xValues,
-                                 double xValue, bool ascendingOrder) const {
+                                 const double xValue,
+                                 const bool ascendingOrder) const {
   std::size_t hops;
   if (ascendingOrder) {
     auto lowerIter = std::lower_bound(xValues.cbegin(), xValues.cend(), xValue);
@@ -1425,11 +1427,9 @@ MatrixWorkspace::binIndexOfValue(HistogramData::HistogramX const &xValues,
     hops = std::distance(xValues.cbegin(), lowerIter);
   } else {
     auto lowerIter =
-        std::upper_bound(xValues.crbegin(), xValues.crend(), xValue);
+        std::lower_bound(xValues.crbegin(), xValues.crend(), xValue);
 
-    if (lowerIter == xValues.crend())
-      --lowerIter;
-    else if (lowerIter == xValues.crbegin())
+    if (lowerIter == xValues.crbegin())
       ++lowerIter;
 
     hops = xValues.size() - std::distance(xValues.crbegin(), lowerIter);
@@ -1448,8 +1448,9 @@ MatrixWorkspace::binIndexOfValue(HistogramData::HistogramX const &xValues,
  * @returns The index of the X value
  */
 std::size_t
-MatrixWorkspace::xIndexOfValue(HistogramData::HistogramX const &xValues,
-                               double xValue, double tolerance) const {
+MatrixWorkspace::xIndexOfValue(const HistogramData::HistogramX &xValues,
+                               const double xValue,
+                               const double tolerance) const {
   auto const iter = std::find_if(xValues.cbegin(), xValues.cend(),
                                  [&xValue, &tolerance](double const &value) {
                                    return std::abs(xValue - value) <= tolerance;

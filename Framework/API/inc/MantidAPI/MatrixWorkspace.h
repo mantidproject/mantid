@@ -147,8 +147,8 @@ public:
   Types::Core::DateAndTime getLastPulseTime() const;
 
   /// Returns the y index which corresponds to the X Value provided
-  std::size_t yIndexOfX(double xValue, std::size_t const &index = 0,
-                        double tolerance = 0.0) const;
+  std::size_t yIndexOfX(const double xValue, const std::size_t &index = 0,
+                        const double tolerance = 0.0) const;
 
   //----------------------------------------------------------------------
   // DATA ACCESSORS
@@ -582,9 +582,9 @@ protected:
 
 private:
   std::size_t binIndexOfValue(Mantid::HistogramData::HistogramX const &xValues,
-                              double xValue, bool ascendingOrder) const;
-  std::size_t xIndexOfValue(Mantid::HistogramData::HistogramX const &xValues,
-                            double xValue, double tolerance) const;
+                              const double xValue, const bool ascendingOrder) const;
+  std::size_t xIndexOfValue(const Mantid::HistogramData::HistogramX &xValues,
+                            const double xValue, const double tolerance) const;
 
   MatrixWorkspace *doClone() const override = 0;
   MatrixWorkspace *doCloneEmpty() const override = 0;
