@@ -36,7 +36,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
         # five meters away from the sample.
         target_position, target_orientation, target_rotation = [5.18, -0.32, 0.21], [0.001, 0.999, -0.027], 98.0
         CorelliPowderCalibrationCreate(
-            InputWorkspace='test_workspace', OutputWorkpsacesPrefix='cal_', TubeDatabaseDir='/tmp',
+            InputWorkspace='test_workspace', OutputWorkspacesPrefix='cal_', TubeDatabaseDir='/tmp',
             TofBinnin=[300, 1.0, 16666.7], PeakPositions=spacings_reference, AdjustSource=False, ComponentList='bank1',
             ComponentMaxTranslation=0.2, ComponentMaxRotation=10)
         values_output = mtd['cal_adjustments'].row(0)
