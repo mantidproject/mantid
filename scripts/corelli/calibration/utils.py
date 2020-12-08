@@ -111,8 +111,11 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
         _sig_tmp = _sig_gaussian - signal1D
         _sig_tmp[_sig_tmp < 0] = 1
         _idx = np.where(_sig_tmp == 1)[0]
-        _sig_tmp[:_idx[0]] = 1
-        _sig_tmp[_idx[-1]:] = 1
+        if len(_idx) > 0:
+            # This is mostly bypassing the non-realistic testing workspace
+            # which has zero values in most tubes
+            _sig_tmp[:_idx[0]] = 1
+            _sig_tmp[_idx[-1]:] = 1
         _base = np.average(gaussian_filter(signal1D, int(pixels_per_tube / 2)))
         return _base - _sig_tmp
 
