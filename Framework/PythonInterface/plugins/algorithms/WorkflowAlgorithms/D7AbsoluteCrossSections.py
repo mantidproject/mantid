@@ -467,8 +467,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def _call_cross_section_separation(self, input_ws):
         component_ws = self._cross_section_separation(input_ws)
         self._set_as_distribution(component_ws)
-        if not self.getProperty('CrossSectionsOutputWorkspace').isDefault:
-            self.setProperty('CrossSectionsOutputWorkspace', mtd[component_ws])
         return component_ws
 
     def PyExec(self):
@@ -491,6 +489,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 DeleteWorkspace(det_efficiency_input)
             else:
                 self._set_units(det_efficiency_input)
+                self.setProperty('CrossSectionsOutputWorkspace', mtd[det_efficiency_input])
             self.setProperty('OutputWorkspace', mtd[output_ws])
 
         if ( self.getPropertyValue('CrossSectionSeparationMethod') != 'None'
@@ -499,6 +498,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 self._call_sum_data(input_ws)
             component_ws = self._call_cross_section_separation(input_ws)
             self._set_units(component_ws)
+            if not self.getProperty('CrossSectionsOutputWorkspace').isDefault:
+                self.setProperty('CrossSectionsOutputWorkspace', mtd[component_ws])
 
 
 AlgorithmFactory.subscribe(D7AbsoluteCrossSections)
