@@ -518,6 +518,7 @@ class PolDiffILLReduction(PythonAlgorithm):
             if self.getPropertyValue('OutputTreatment') == 'Average':
                 self._merge_polarisations(ws, average_detectors=True)
             Divide(LHSWorkspace='norm', RHSWorkspace=ws, OutputWorkspace=ws)
+            DeleteWorkspace(Workspace='norm')
         return ws
 
     def _set_units(self, ws, process):
