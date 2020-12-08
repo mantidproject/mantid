@@ -14,8 +14,9 @@ from typing import List, Optional, Union
 # imports from Mantid
 from mantid.api import AnalysisDataService, mtd, WorkspaceGroup
 from mantid.dataobjects import TableWorkspace, Workspace2D
-from mantid.simpleapi import (ApplyCalibration, CloneWorkspace, CreateEmptyTableWorkspace, Integration, LoadEventNexus,
-                              LoadNexusProcessed, RenameWorkspace, UnGroupWorkspace)
+from mantid.simpleapi import (ApplyCalibration, CloneWorkspace, CreateEmptyTableWorkspace,
+                              Integration, LoadEventNexus, LoadNexusProcessed, RenameWorkspace,
+                              UnGroupWorkspace)
 try:
     from mantidqt.widgets.instrumentview.presenter import InstrumentViewPresenter
     from mantidqt.utils.qt.qappthreadcall import QAppThreadCall
@@ -28,7 +29,8 @@ from Calibration.tube_calib_fit_params import TubeCalibFitParams
 __all__ = ['apply_calibration', 'load_banks', 'calibrate_tube']
 
 # Type aliases
-InputTable = Union[str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
+InputTable = Union[
+    str, TableWorkspace]  # allowed types for the input calibration table to append_bank_number
 WorkspaceTypes = Union[str, Workspace2D]  # allowed types for the input workspace to calibrate_bank
 WorkspaceGroupTypes = Union[str, WorkspaceGroup]
 
@@ -94,9 +96,9 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
     #       pre-processing only
     def clean_signals(
         signal1D: np.ndarray,
-        pixels_per_tube: int=256,
-        peak_interval_estimate: int=15,
-        ) -> np.ndarray:
+        pixels_per_tube: int = 256,
+        peak_interval_estimate: int = 15,
+    ) -> np.ndarray:
         r"""
         Replace the regions between peaks/dips with flat background to avoid confusing
         peak finding code.
@@ -105,22 +107,22 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
         :param pixels_per_tube: number of pixels per tube, should always be 256
         :param peak_interval_estimate: a rough estimate of the distance between peaks in pixels
         """
-        _sig_gaussian = gaussian_filter(signal1D, int(peak_interval_estimate/2))
+        _sig_gaussian = gaussian_filter(signal1D, int(peak_interval_estimate / 2))
         _sig_tmp = _sig_gaussian - signal1D
-        _sig_tmp[_sig_tmp<0] = 1
-        _idx = np.where(_sig_tmp==1)[0]
+        _sig_tmp[_sig_tmp < 0] = 1
+        _idx = np.where(_sig_tmp == 1)[0]
         _sig_tmp[:_idx[0]] = 1
         _sig_tmp[_idx[-1]:] = 1
-        _base = np.average(gaussian_filter(signal1D, int(pixels_per_tube/2)))
+        _base = np.average(gaussian_filter(signal1D, int(pixels_per_tube / 2)))
         return _base - _sig_tmp
 
     _ws = mtd[output_workspace]
     for i in range(0, _ws.getNumberHistograms(), PIXELS_PER_TUBE):
-        _data = np.array([_ws.readY(me) for me in range(i, i+n_pixels_per_tube)])
+        _data = np.array([_ws.readY(me) for me in range(i, i + n_pixels_per_tube)])
         _data = clean_signals(_data)
         for j in range(n_pixels_per_tube):
-            _ws.setY(i+j, _data[j])  # This apprently is the correct way to update Y
-    
+            _ws.setY(i + j, _data[j])  # This apprently is the correct way to update Y
+
     return _ws
 
 
