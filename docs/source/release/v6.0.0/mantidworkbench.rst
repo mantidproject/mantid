@@ -49,5 +49,6 @@ Bugfixes
 - Fixed a bug which would cause unrealistic errorbars on the fit calc curve.
 - Fix sort order of peaks in the peaks overlay on SliceViewer.
 - The colorfill plot on ragged workspaces will have the correct horizontal extent.
+- Fix replot of colorfill image after a workspace is replaced.
 
 :ref:`Release 6.0.0 <v6.0.0>`

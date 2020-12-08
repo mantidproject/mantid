@@ -9,6 +9,7 @@ from matplotlib.backend_bases import MouseEvent
 
 matplotlib.use('AGG')  # noqa
 import matplotlib.pyplot as plt
+from matplotlib.colors import Normalize
 from matplotlib.collections import PolyCollection
 from matplotlib.container import ErrorbarContainer
 import numpy as np
@@ -25,7 +26,7 @@ from mantid.simpleapi import (CreateWorkspace, CreateSampleWorkspace, DeleteWork
 from mantidqt.plotting.markers import SingleMarker
 
 
-class Plots__init__Test(unittest.TestCase):
+class MantidAxesTest(unittest.TestCase):
     '''
     Just test if mantid projection works
     '''
@@ -82,7 +83,7 @@ class Plots__init__Test(unittest.TestCase):
     def test_remove_workspace_artist_for_unknown_workspace_does_nothing(self):
         self.ax.plot(self.ws2d_histo, specNum=2, linewidth=6)
         unknown_ws = CreateSampleWorkspace()
-        workspace_removed  = self.ax.remove_workspace_artists(unknown_ws)
+        workspace_removed = self.ax.remove_workspace_artists(unknown_ws)
         self.assertEqual(False, workspace_removed)
         self.assertEqual(1, len(self.ax.lines))
 
@@ -220,39 +221,98 @@ class Plots__init__Test(unittest.TestCase):
         # try deleting
         self.ax.remove_workspace_artists(eb_data)
 
-    def _do_image_replace_common_bins(self, color_func, artists):
+    def _do_image_replace_common_bins(self,
+                                      color_func,
+                                      artists_func,
+                                      kwargs=None,
+                                      modifier_func=None,
+                                      extra_checks=None):
+        """Do checks for replacing a workspace that backs an image-type-plot
+
+        :param color_func: The Axes callable to use to create the plot
+        :param artists_func: A callable that will return the appropriate artists from the axes
+        :param kwargs: dict Optional kwargs to pass to plot creation
+        :param modifier_func: An optional function to apply to the axes after creation.
+        :param extra_checks: An optional function to run after the initial assertions have been made
+        """
         im_data = CreateWorkspace(DataX=[10, 20, 30, 10, 20, 30, 10, 20, 30],
                                   DataY=[3, 4, 5, 3, 4, 5],
                                   DataE=[1, 2, 3, 4, 1, 1],
                                   NSpec=3)
-        getattr(self.ax, color_func)(im_data)
+        if kwargs is None:
+            kwargs = dict()
+        # Do plot and perform any requested modifications
+        color_func(im_data, **kwargs)
+        if modifier_func is not None:
+            modifier_func(self.ax)
+
+        # Replace the workspace
         im_data = CreateWorkspace(DataX=[20, 30, 40, 20, 30, 40, 20, 30, 40],
                                   DataY=[3, 4, 5, 3, 4, 5],
                                   DataE=[.1, .2, .3, .4, .1, .1],
                                   NSpec=3,
                                   VerticalAxisValues=[2, 3, 4],
                                   VerticalAxisUnit='DeltaE')
+
         self.ax.replace_workspace_artists(im_data)
+
+        artists = artists_func(self.ax)
         self.assertEqual(1, len(artists))
         left, right, bottom, top = get_colorplot_extents(artists[0])
         self.assertAlmostEqual(20., left)
         self.assertAlmostEqual(40., right)
         self.assertAlmostEqual(1.5, bottom)
         self.assertAlmostEqual(4.5, top)
+        if extra_checks is not None:
+            extra_checks(self.ax)
+
         # try deleting
         self.ax.remove_workspace_artists(im_data)
 
-    def test_replace_workspace_data_imshow(self):
-        self._do_image_replace_common_bins('imshow', self.ax.images)
+    def test_replace_workspace_data_imshow_default_norm(self):
+        self._do_image_replace_common_bins(self.ax.imshow, lambda ax: ax.images)
+
+    def test_replace_workspace_data_imshow_with_norm_on_creation(self):
+        self._do_image_replace_common_bins(self.ax.imshow,
+                                           lambda ax: ax.images,
+                                           kwargs={'norm': Normalize()})
+
+    def test_replace_workspace_data_imshow_keeps_cmap_changed_after_creation(self):
+        new_cmap = 'copper'
+
+        def switch_cmap(axes):
+            axes.images[0].set_cmap(new_cmap)
+
+        def extra_checks(axes):
+            self.assertEquals(new_cmap, axes.images[0].get_cmap().name)
+
+        self._do_image_replace_common_bins(self.ax.imshow,
+                                           lambda ax: ax.images,
+                                           modifier_func=switch_cmap,
+                                           extra_checks=extra_checks)
+
+    def test_replace_workspace_data_imshow_keeps_properties(self):
+        interpolation = 'none'
+
+        def use_no_interpolation(axes):
+            axes.images[0].set_interpolation(interpolation)
+
+        def extra_checks(axes):
+            self.assertEquals(interpolation, axes.images[0].get_interpolation())
+
+        self._do_image_replace_common_bins(self.ax.imshow,
+                                           lambda ax: ax.images,
+                                           modifier_func=use_no_interpolation,
+                                           extra_checks=extra_checks)
 
     def test_replace_workspace_data_pcolor(self):
-        self._do_image_replace_common_bins('pcolor', self.ax.collections)
+        self._do_image_replace_common_bins(self.ax.pcolor, lambda ax: ax.collections)
 
     def test_replace_workspace_data_pcolorfast(self):
-        self._do_image_replace_common_bins('pcolorfast', self.ax.collections)
+        self._do_image_replace_common_bins(self.ax.pcolorfast, lambda ax: ax.collections)
 
     def test_replace_workspace_data_pcolormesh(self):
-        self._do_image_replace_common_bins('pcolormesh', self.ax.collections)
+        self._do_image_replace_common_bins(self.ax.pcolormesh, lambda ax: ax.collections)
 
     def test_3d_plots(self):
         fig = plt.figure()
@@ -322,7 +382,8 @@ class Plots__init__Test(unittest.TestCase):
         self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_ws.name()][0].is_normalized)
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
-    def test_artists_normalization_state_labeled_correctly_for_non_dist_workspace_and_global_setting_off(self):
+    def test_artists_normalization_state_labeled_correctly_for_non_dist_workspace_and_global_setting_off(
+            self):
         non_dist_ws = CreateWorkspace(DataX=[10, 20, 25, 30],
                                       DataY=[2, 3, 4, 5],
                                       DataE=[1, 2, 1, 2],
@@ -335,8 +396,10 @@ class Plots__init__Test(unittest.TestCase):
         del self.ax.tracked_workspaces[non_dist_ws.name()]
 
     def test_artists_normalization_state_labeled_correctly_for_2d_plots_of_dist_workspace(self):
-        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
-                      'contour', 'contourf', 'tricontour', 'tricontourf']
+        plot_funcs = [
+            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf',
+            'tricontour', 'tricontourf'
+        ]
         dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
                                      DataY=[2, 3, 2, 3],
                                      DataE=[1, 2, 1, 2],
@@ -353,9 +416,12 @@ class Plots__init__Test(unittest.TestCase):
             self.assertTrue(ws_artists[1].is_normalized)
             self.assertTrue(ws_artists[2].is_normalized)
 
-    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_false(self):
-        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
-                      'contour', 'contourf', 'tricontour', 'tricontourf']
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_false(
+            self):
+        plot_funcs = [
+            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf',
+            'tricontour', 'tricontourf'
+        ]
         non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
                                          DataY=[2, 3, 2, 3],
                                          DataE=[1, 2, 1, 2],
@@ -368,9 +434,12 @@ class Plots__init__Test(unittest.TestCase):
             self.assertTrue(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
-    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_true(self):
-        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
-                      'contour', 'contourf', 'tricontour', 'tricontourf']
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_dist_argument_true(
+            self):
+        plot_funcs = [
+            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf',
+            'tricontour', 'tricontourf'
+        ]
         non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
                                          DataY=[2, 3, 2, 3],
                                          DataE=[1, 2, 1, 2],
@@ -383,9 +452,12 @@ class Plots__init__Test(unittest.TestCase):
             self.assertFalse(self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
-    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_on(self):
-        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
-                      'contour', 'contourf', 'tricontour', 'tricontourf']
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_on(
+            self):
+        plot_funcs = [
+            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf',
+            'tricontour', 'tricontourf'
+        ]
         non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 10, 20],
                                          DataY=[2, 3, 2, 3],
                                          DataE=[1, 2, 1, 2],
@@ -396,12 +468,16 @@ class Plots__init__Test(unittest.TestCase):
             auto_dist = (config['graph1d.autodistribution'] == 'On')
             func = getattr(self.ax, plot_func)
             func(non_dist_2d_ws)
-            self.assertEqual(auto_dist, self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
+            self.assertEqual(auto_dist,
+                             self.ax.tracked_workspaces[non_dist_2d_ws.name()][0].is_normalized)
             del self.ax.tracked_workspaces[non_dist_2d_ws.name()]
 
-    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_off(self):
-        plot_funcs = ['imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor',
-                      'contour', 'contourf', 'tricontour', 'tricontourf']
+    def test_artists_normalization_labeled_correctly_for_2d_plots_of_non_dist_workspace_and_global_setting_off(
+            self):
+        plot_funcs = [
+            'imshow', 'pcolor', 'pcolormesh', 'pcolorfast', 'tripcolor', 'contour', 'contourf',
+            'tricontour', 'tricontourf'
+        ]
         non_dist_2d_ws = CreateWorkspace(DataX=[10, 20, 25, 30, 10, 20, 25, 30],
                                          DataY=[2, 3, 4, 5, 2, 3, 4, 5],
                                          DataE=[1, 2, 1, 2, 1, 2, 1, 2],
@@ -524,15 +600,7 @@ class Plots__init__Test(unittest.TestCase):
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         ax.plot([0, 1], [0, 1])
         y_min, y_max = ax.get_ylim()
-        SingleMarker(
-            fig.canvas,
-            'g',
-            0.5,
-            y_min,
-            y_max,
-            marker_type='XSingle',
-            axis=ax
-        )
+        SingleMarker(fig.canvas, 'g', 0.5, y_min, y_max, marker_type='XSingle', axis=ax)
         ax.relim()
         ax.autoscale()
         np.testing.assert_almost_equal((y_min, y_max), ax.get_ylim())
@@ -608,7 +676,8 @@ class Plots__init__Test(unittest.TestCase):
 
         self.assertFalse(ax.waterfall_has_fill())
 
-    def test_overplotting_onto_waterfall_plot_with_line_colour_fills_adds_another_filled_area_with_new_line_colour(self):
+    def test_overplotting_onto_waterfall_plot_with_line_colour_fills_adds_another_filled_area_with_new_line_colour(
+            self):
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         ax.plot([0, 1], [0, 1], color="#ff9900")
         ax.plot([0, 1], [0, 1], color="#00d1ff")
@@ -622,14 +691,16 @@ class Plots__init__Test(unittest.TestCase):
         ax.collections[1].set_facecolor(ax.lines[0].get_color())
 
         # Plot another line and make it join the waterfall.
-        ax.plot([0, 1], [0,1], color='#00fff0')
+        ax.plot([0, 1], [0, 1], color='#00fff0')
         datafunctions.convert_single_line_to_waterfall(ax, 2)
         datafunctions.waterfall_update_fill(ax)
 
         # Check that there are now three filled areas and the new line colour matches the new fill colour.
-        self.assertEqual(convert_color_to_hex(ax.collections[2].get_facecolor()[0]), ax.lines[2].get_color())
+        self.assertEqual(convert_color_to_hex(ax.collections[2].get_facecolor()[0]),
+                         ax.lines[2].get_color())
 
-    def test_overplotting_onto_waterfall_plot_with_solid_colour_fills_adds_a_filled_area_with_the_same_colour(self):
+    def test_overplotting_onto_waterfall_plot_with_solid_colour_fills_adds_a_filled_area_with_the_same_colour(
+            self):
         fig, ax = plt.subplots(subplot_kw={'projection': 'mantid'})
         ax.plot([0, 1], [0, 1])
         ax.plot([0, 1], [0, 1])
@@ -670,7 +741,10 @@ class Plots__init__Test(unittest.TestCase):
 
         # 0,0 in ax coordinates is the bottom left of figure, add 0.5 to move into canvas
         xy_pixels = self.ax.transAxes.transform((0, 0)) + (0.5, 0.5)
-        bottom_left_corner = MouseEvent("motion_notify_event", self.fig.canvas, x=xy_pixels[0], y=xy_pixels[1])
+        bottom_left_corner = MouseEvent("motion_notify_event",
+                                        self.fig.canvas,
+                                        x=xy_pixels[0],
+                                        y=xy_pixels[1])
 
         self.assertEqual(image.get_extent(), (10.0, 30.0, 9.0, 3.0))
         self.assertEqual(image.get_cursor_data(bottom_left_corner), 3.0)
@@ -680,7 +754,10 @@ class Plots__init__Test(unittest.TestCase):
 
         # 0,0 in ax coordinates is the bottom left of figure, add 0.5 to move into canvas
         xy_pixels = self.ax.transAxes.transform((0, 0)) + (0.5, 0.5)
-        bottom_left_corner = MouseEvent("motion_notify_event", self.fig.canvas, x=xy_pixels[0], y=xy_pixels[1])
+        bottom_left_corner = MouseEvent("motion_notify_event",
+                                        self.fig.canvas,
+                                        x=xy_pixels[0],
+                                        y=xy_pixels[1])
 
         self.assertEqual(image.get_extent(), (10.0, 30.0, 3.0, 9.0))
         self.assertEqual(image.get_cursor_data(bottom_left_corner), 2.0)
