@@ -36,6 +36,23 @@ class FittingDataModel(object):
         self._last_added = []  # List of workspace names loaded in the last load action.
         self._bg_params = dict()  # {ws_name: [isSub, niter, xwindow, doSG]}
 
+    def restore_files(self, files):
+        for file in files:
+            try:
+                ws = ADS.retrieve(file)
+                if ws.getNumberHistograms() == 1:
+                    self._loaded_workspaces[file] = ws
+                    if file not in self._background_workspaces:
+                        self._background_workspaces[file] = None
+                    self._last_added.append(file)
+                else:
+                    logger.warning(
+                        f"Invalid number of spectra in workspace {file}. Skipping restoration of workspace.")
+            except RuntimeError as e:
+                logger.error(
+                    f"Failed to restore workspace: {file}. Error: {e}. \n Continuing loading of other files.")
+        self.update_log_workspace_group()
+
     def load_files(self, filenames_string, xunit):
         self._last_added = []
         filenames = [name.strip() for name in filenames_string.split(",")]
