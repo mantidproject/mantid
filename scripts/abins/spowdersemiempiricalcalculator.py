@@ -6,18 +6,18 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import gc
 import numpy as np
-from typing import Union
+from typing import List, Optional, Tuple, Union
 
 import abins
 from abins.constants import (ANGLE_MESSAGE_INDENTATION,
                              CM1_2_HARTREE, INT_TYPE, K_2_HARTREE, FLOAT_TYPE, FUNDAMENTALS,
                              HIGHER_ORDER_QUANTUM_EVENTS, INCIDENT_ENERGY_MESSAGE_INDENTATION,
-                             MAX_ORDER, MIN_SIZE, PYTHON_INDEX_SHIFT,
+                             MAX_ORDER, MIN_SIZE,
                              ONE_DIMENSIONAL_INSTRUMENTS, TWO_DIMENSIONAL_INSTRUMENTS,
-                             Q_BEGIN, Q_END,
                              QUANTUM_ORDER_ONE, QUANTUM_ORDER_TWO, QUANTUM_ORDER_THREE, QUANTUM_ORDER_FOUR,
                              S_LAST_INDEX)
 from abins.instruments import Instrument
+from abins.sdata import SData, SDataByAngle
 from mantid.api import Progress
 
 
@@ -53,11 +53,6 @@ class SPowderSemiEmpiricalCalculator:
             raise ValueError("Object of type AbinsData was expected.")
 
         self._num_k = len(self._abins_data.get_kpoints_data())
-
-        if isinstance(abins_data, abins.AbinsData):
-            self._abins_data = abins_data
-        else:
-            raise ValueError("Object of type AbinsData was expected.")
 
         min_order = FUNDAMENTALS
         max_order = FUNDAMENTALS + HIGHER_ORDER_QUANTUM_EVENTS
@@ -114,9 +109,9 @@ class SPowderSemiEmpiricalCalculator:
         powder_calculator = abins.PowderCalculator(filename=self._input_filename, abins_data=self._abins_data)
         powder_calculator.get_formatted_data()
 
-        # free memory
-        self._abins_data = None
-        gc.collect()
+        # # free memory
+        # self._abins_data = None
+        # gc.collect()
 
         # calculate S
         calculate_s_powder = None
@@ -132,7 +127,7 @@ class SPowderSemiEmpiricalCalculator:
 
         return s_data
 
-    def _calculate_s_powder_1d(self):
+    def _calculate_s_powder_1d(self) -> SData:
         """
         Calculates 1D S for the powder case.
 
@@ -140,15 +135,11 @@ class SPowderSemiEmpiricalCalculator:
         """
         if self.progress_reporter:
             self.progress_reporter.setNumSteps(self._num_k * self._num_atoms + 1)
-        data = self._calculate_s_powder_over_k()
+        s_data = self._calculate_s_powder_over_k().sum_over_angles(average=True)
 
-        s_data = abins.SData(temperature=self._temperature,
-                             sample_form=self._sample_form,
-                             frequencies=self._frequencies,
-                             data=data)
         return s_data
 
-    def _calculate_s_powder_2d(self):
+    def _calculate_s_powder_2d(self) -> SData:
         """
         Calculates 2D S for the powder case.
         :return:  object of type SData with 2D dynamical structure factors for the powder case
@@ -157,16 +148,13 @@ class SPowderSemiEmpiricalCalculator:
         self._instrument.set_incident_energy(e_init)
 
         indent = INCIDENT_ENERGY_MESSAGE_INDENTATION
-
         if self.progress_reporter:
             self.progress_reporter.setNumSteps(self._num_k * self._num_atoms + 1)
-
         self._report_progress(msg=indent + "Calculation for incident energy %s [cm^-1]" % e_init)
-        data = self._calculate_s_powder_over_k()
 
-        # put 2D S into SData object
-        s_data = abins.SData(data=data, frequencies=self._frequencies,
-                             temperature=self._temperature, sample_form=self._sample_form)
+        angle_resolved_data = self._calculate_s_powder_over_k()
+        s_data = angle_resolved_data.sum_over_angles(average=True)
+
         return s_data
 
     def _calculate_s_over_threshold(self, s=None, freq=None, coeff=None):
@@ -192,45 +180,66 @@ class SPowderSemiEmpiricalCalculator:
 
         return freq, coeff
 
-    def _calculate_s_powder_over_k(self):
-        """
-        Helper function. It calculates S for all q points  and all atoms.
-        :returns: dictionary with S
-        """
-        data = self._calculate_s_powder_over_atoms(q_indx=0)
+    def _get_empty_data(self):
+        return SDataByAngle.get_empty(angles=self._instrument.get_angles(),
+                                      frequencies=self._frequencies,
+                                      atom_keys=list(self._abins_data.get_atoms_data().extract().keys()),
+                                      order_keys=[f'order_{n}' for n in range(1, self._quantum_order_num + 1)],
+                                      temperature=self._temperature, sample_form=self._sample_form)
 
-        # iterate over remaining q-points
-        for q in range(1, self._num_k):
-            local_data = self._calculate_s_powder_over_atoms(q_indx=q)
-            self._sum_s(current_val=data, addition=local_data)
-        return data
-
-    def _sum_s(self, current_val=None, addition=None):
+    def _calculate_s_powder_over_k(self, existing_data: Optional[SDataByAngle] = None) -> SDataByAngle:
         """
-        Helper functions which sums S for all atoms and all quantum events taken into account.
-        :param current_val: S accumulated so far
-        :param addition: S to be added
+        Helper function. It calculates S for all q points and all atoms.
+
+        :param existing_data: If provided, add new results to this object.
+
+        :returns: SDataByAngle
         """
+        if existing_data:
+            angle_resolved_data = existing_data
+        else:
+            angle_resolved_data = self._get_empty_data()
 
-        for atom_key in current_val:
-            for order in range(FUNDAMENTALS, self._quantum_order_num + S_LAST_INDEX):
-                temp = addition[atom_key]["s"]["order_%s" % order]
-                current_val[atom_key]["s"]["order_%s" % order] += temp
+        for q_index in range(self._num_k):
+            _ = self._calculate_s_powder_over_atoms(q_indx=q_index,
+                                                    existing_data=angle_resolved_data)
+        return angle_resolved_data
 
-    def _calculate_s_powder_over_atoms(self, q_indx=None):
+    # def _sum_s(self, current_val=None, addition=None):
+    #     """
+    #     Helper functions which sums S for all atoms and all quantum events taken into account.
+    #     :param current_val: S accumulated so far
+    #     :param addition: S to be added
+    #     """
+
+    #     for atom_key in current_val:
+    #         for order in range(FUNDAMENTALS, self._quantum_order_num + S_LAST_INDEX):
+    #             temp = addition[atom_key]["s"]["order_%s" % order]
+    #             current_val[atom_key]["s"]["order_%s" % order] += temp
+
+    def _calculate_s_powder_over_atoms(self, *, q_indx: int,
+                                       existing_data: Optional[SDataByAngle] = None
+                                       ) -> SDataByAngle:
         """
         Evaluates S for all atoms for the given q-point and checks if S is consistent.
-        :returns: Python dictionary with S data
+        :param q_indx: Index of q-point from calculated phonon data
+        :existing_data: If provided, results will be summed to this existing object
+
+        :returns: SDataByAngle
         """
         self._prepare_data(k_point=q_indx)
 
-        s_by_atom = {}
+        if existing_data:
+            s_by_atom = existing_data
+        else:
+            s_by_atom = self._get_empty_data()
 
         for atom_index in range(self._num_atoms):
-            s_by_atom[f"atom_{atom_index}"] = {"s": self._calculate_s_powder_one_atom(atom=atom_index,
-                                                                                      q_index=q_indx)}
+            self._calculate_s_powder_one_atom(atom=atom_index, q_index=q_indx,
+                                              existing_data=s_by_atom)
             self._report_progress(msg=f"S for atom {atom_index} has been calculated at qpt {q_indx}.",
                                   reporter=self.progress_reporter)
+
         return s_by_atom
 
     def _prepare_data(self, k_point=None):
@@ -293,13 +302,20 @@ class SPowderSemiEmpiricalCalculator:
 
         logger.information(msg)
 
-    def _calculate_s_powder_one_atom(self, atom=None, q_index=None):
+    def _calculate_s_powder_one_atom(self, atom=None, q_index=None,
+                                     existing_data: Optional[SDataByAngle] = None
+                                     ) -> SDataByAngle:
         """
         :param atom: number of atom
+        :param q_index: Index of q-point in phonon data
+        :param existing_data: If provided, results will be added to this existing object
 
         :returns: s, and corresponding frequencies for all quantum events taken into account
         """
-        s = {}
+        if existing_data:
+            data = existing_data
+        else:
+            data = self._get_empty_data()
 
         local_freq = np.copy(self._fundamentals_freq)
         local_coeff = np.arange(start=0.0, step=1.0, stop=self._fundamentals_freq.size, dtype=INT_TYPE)
@@ -311,7 +327,7 @@ class SPowderSemiEmpiricalCalculator:
             if local_freq.size * self._fundamentals_freq.size > abins.parameters.performance['optimal_size']:
 
                 chunked_fundamentals, chunked_fundamentals_coeff = self._prepare_chunks(local_freq=local_freq,
-                                                                                        order=order, s=s)
+                                                                                        order=order)
 
                 for fund_chunk, fund_coeff_chunk in zip(chunked_fundamentals, chunked_fundamentals_coeff):
 
@@ -320,30 +336,26 @@ class SPowderSemiEmpiricalCalculator:
 
                     # number of transitions can only go up
                     for lg_order in range(order, self._quantum_order_num + S_LAST_INDEX):
-
-                        part_loc_freq, part_loc_coeff, part_broad_spectrum = self._helper_atom(
+                        part_loc_freq, part_loc_coeff = self._helper_atom(
                             atom=atom, local_freq=part_loc_freq, local_coeff=part_loc_coeff,
-                            fundamentals_freq=fund_chunk, fund_coeff=fund_coeff_chunk, order=lg_order)
-
-                        s["order_%s" % lg_order] += part_broad_spectrum
-
-                return s
+                            fundamentals_freq=fund_chunk, fund_coeff=fund_coeff_chunk, order=lg_order,
+                            existing_data=data)
+                return data
 
             # if relatively small array of transitions then process it in one shot
             else:
-
-                local_freq, local_coeff, s["order_%s" % order] = self._helper_atom(
+                local_freq, local_coeff = self._helper_atom(
                     atom=atom, local_freq=local_freq, local_coeff=local_coeff,
-                    fundamentals_freq=self._fundamentals_freq, fund_coeff=fund_coeff, order=order)
-        return s
+                    fundamentals_freq=self._fundamentals_freq, fund_coeff=fund_coeff, order=order,
+                    existing_data=data)
+        return data
 
-    def _prepare_chunks(self, local_freq=None, order=None, s=None):
+    def _prepare_chunks(self, local_freq=None, order=None):
         """
         Helper function for _calculate_s_powder_1d_one_atom in case transitions energies have to be created from
         fundamentals chunks (chunk by chunk).
         :param local_freq: frequency from the previous transition
         :param order:  order of quantum event
-        :param s:  dictionary with s data
         :returns: 2D numpy array with fundamentals chunks, 2D array with corresponding coefficients
         """
         fund_size = self._fundamentals_freq.size
@@ -362,14 +374,14 @@ class SPowderSemiEmpiricalCalculator:
         new_fundamentals = new_fundamentals.reshape(chunk_num, int(chunk_size))
         new_fundamentals_coeff = new_fundamentals_coeff.reshape(chunk_num, int(chunk_size))
 
-        total_size = self._freq_size
-        for lg_order in range(order, self._quantum_order_num + S_LAST_INDEX):
-            s["order_%s" % lg_order] = np.zeros(shape=total_size, dtype=FLOAT_TYPE)
-
         return new_fundamentals, new_fundamentals_coeff
 
-    def _helper_atom(self, atom=None, local_freq=None, local_coeff=None, fundamentals_freq=None, fund_coeff=None,
-                     order=None):
+    def _helper_atom(self, *,
+                     atom: int,
+                     local_freq: np.ndarray, local_coeff: List[Tuple[int, ...]],
+                     fundamentals_freq: np.ndarray, fund_coeff: np.ndarray,
+                     order: int,
+                     existing_data: SDataByAngle):
         """
         Helper function. It calculates S for one atom, q-index, order and for one
         or more angles (detectors).
@@ -379,6 +391,15 @@ class SPowderSemiEmpiricalCalculator:
         :param fundamentals_freq: fundamental frequencies
         :param fund_coeff: fundamental coefficients
         :param order: order of quantum event
+        :param existing_data: object to which re-binned spectra will be added
+
+        :returntype: tuple
+        :returns:
+            (local_freq, local_coeff)
+
+            - local_freq: frequencies enumerated and used in this quantum order
+            - local_coeff: tuples of indices identifying the fundamental
+                  frequencies contributing to these frequencies
         """
         local_freq, local_coeff = self._freq_generator.construct_freq_combinations(
             previous_array=local_freq,
@@ -394,34 +415,32 @@ class SPowderSemiEmpiricalCalculator:
 
             self._report_progress(msg=indent + "Calculation for the detector at angle %s (atom=%s)" %
                                                (angles[0], atom))
-
             q2 = self._instrument.calculate_q_powder(input_data=local_freq, angle=angles[0])
 
             opt_local_freq, opt_local_coeff, rebinned_broad_spectrum = self._helper_atom_angle(
                 atom=atom, local_freq=local_freq, local_coeff=local_coeff, angle=angles[0], order=order, q2=q2)
 
-            for angle in angles[1:]:
+            existing_data.set_angle_data_from_dict(
+                angle_index=0,
+                data={f'atom_{atom}': {'s': {f'order_{order}': rebinned_broad_spectrum * self._weight}}},
+                add_to_existing=True)
+
+            for angle_index, angle in list(enumerate(angles))[1:]:
                 self._report_progress(msg=indent + "Calculation for the detector at angle %s (atom=%s)" %
                                                    (angle, atom))
                 q2 = self._instrument.calculate_q_powder(input_data=local_freq, angle=angle)
-                temp = self._helper_atom_angle(atom=atom, local_freq=local_freq, local_coeff=local_coeff,
-                                               angle=angle, order=order, return_freq=False, q2=q2)
-
-                rebinned_broad_spectrum += temp
+                existing_data.set_angle_data_from_dict(
+                    angle_index=angle_index,
+                    data={f'atom_{atom}': {'s': {f'order_{order}': self._helper_atom_angle(
+                        atom=atom, local_freq=local_freq, local_coeff=local_coeff,
+                        angle=angle, order=order, return_freq=False, q2=q2
+                        ) * self._weight}}},
+                    add_to_existing=True)
 
             local_coeff = opt_local_coeff
             local_freq = opt_local_freq
 
-        else:
-            rebinned_broad_spectrum = np.zeros_like(self._frequencies)
-
-        # multiply by k-point weight
-        rebinned_broad_spectrum = rebinned_broad_spectrum * self._weight
-
-        # divide by number of angles
-        rebinned_broad_spectrum = rebinned_broad_spectrum / len(angles)
-
-        return local_freq, local_coeff, rebinned_broad_spectrum
+        return local_freq, local_coeff
 
     def _helper_atom_angle(self, atom=None, local_freq=None, local_coeff=None, angle=None, order=None, return_freq=True, q2=None):
         """
@@ -457,23 +476,23 @@ class SPowderSemiEmpiricalCalculator:
                                                                                         s_dft=value_dft,
                                                                                         scheme=broadening_scheme)
 
-        # in case of 2D instrument rebin over q
-        # TODO: THIS NEEDS CLOSER EXAMINATION
-        if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
-            q_size = abins.parameters.instruments[self._instrument.get_name()]['q_size']
-            temp_full_s = np.zeros(shape=(q_size + 1, rebinned_broad_spectrum.size),
-                                   dtype=FLOAT_TYPE)
+        # # in case of 2D instrument rebin over q
+        # # TODO: THIS NEEDS CLOSER EXAMINATION
+        # if self._instrument.get_name() in TWO_DIMENSIONAL_INSTRUMENTS:
+        #     q_size = abins.parameters.instruments[self._instrument.get_name()]['q_size']
+        #     temp_full_s = np.zeros(shape=(q_size + 1, rebinned_broad_spectrum.size),
+        #                            dtype=FLOAT_TYPE)
 
-            all_q2 = self._instrument.calculate_q_powder(input_data=self._frequencies, angle=angle)
-            all_q = np.sqrt(all_q2)
+        #     all_q2 = self._instrument.calculate_q_powder(input_data=self._frequencies, angle=angle)
+        #     all_q = np.sqrt(all_q2)
 
-            _q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=q_size)
-            bins_q = np.digitize(all_q, _q_bins) - PYTHON_INDEX_SHIFT
+        #     _q_bins = np.linspace(start=Q_BEGIN, stop=Q_END, num=q_size)
+        #     bins_q = np.digitize(all_q, _q_bins) - PYTHON_INDEX_SHIFT
 
-            small_q_indx = all_q < Q_END
-            temp_full_s[bins_q[small_q_indx], small_q_indx] = rebinned_broad_spectrum[small_q_indx]
-            # the last q-bin stores data outside the range requested by a user so should be neglected
-            rebinned_broad_spectrum = temp_full_s[:-1]
+        #     small_q_indx = all_q < Q_END
+        #     temp_full_s[bins_q[small_q_indx], small_q_indx] = rebinned_broad_spectrum[small_q_indx]
+        #     # the last q-bin stores data outside the range requested by a user so should be neglected
+        #     rebinned_broad_spectrum = temp_full_s[:-1]
 
         # calculate transition energies for construction of higher order quantum event
         local_freq, local_coeff = self._calculate_s_over_threshold(s=value_dft, freq=local_freq, coeff=local_coeff)
