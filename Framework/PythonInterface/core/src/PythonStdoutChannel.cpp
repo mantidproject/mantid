@@ -5,9 +5,10 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidPythonInterface/core/PythonStdoutChannel.h"
+#include "MantidPythonInterface/core/WrapPython.h"
+
 #include <iostream> // streamsize
 
-#include <Python.h>
 #include <boost/format.hpp>
 #include <boost/iostreams/categories.hpp> // sink_tag
 #include <boost/iostreams/stream.hpp>
