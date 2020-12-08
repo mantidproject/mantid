@@ -245,7 +245,7 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
 
         # Incident energy currently handled differently, but this should be changed to an
         # instrument parameter as well
-        instrument_params['e_init'] = [float(self.getProperty("IncidentEnergy").value)]
+        instrument_params['e_init'] = float(self.getProperty("IncidentEnergy").value)
 
         # Sampling mesh is determined by
         # abins.parameters.sampling['min_wavenumber']

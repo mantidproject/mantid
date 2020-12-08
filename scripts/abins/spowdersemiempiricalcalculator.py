@@ -132,27 +132,37 @@ class SPowderSemiEmpiricalCalculator:
 
         return s_data
 
+    def _calculate_s_powder_1d(self):
+        """
+        Calculates 1D S for the powder case.
+
+        :returns: object of type SData with 1D dynamical structure factors for the powder case
+        """
+        if self.progress_reporter:
+            self.progress_reporter.setNumSteps(self._num_k * self._num_atoms + 1)
+        data = self._calculate_s_powder_over_k()
+
+        s_data = abins.SData(temperature=self._temperature,
+                             sample_form=self._sample_form,
+                             frequencies=self._frequencies,
+                             data=data)
+        return s_data
+
     def _calculate_s_powder_2d(self):
         """
         Calculates 2D S for the powder case.
         :return:  object of type SData with 2D dynamical structure factors for the powder case
         """
         e_init = abins.parameters.instruments[self._instrument.get_name()]['e_init']
+        self._instrument.set_incident_energy(e_init)
+
         indent = INCIDENT_ENERGY_MESSAGE_INDENTATION
 
         if self.progress_reporter:
-            self.progress_reporter.setNumSteps(self._num_k * self._num_atoms * len(e_init) + 1)
+            self.progress_reporter.setNumSteps(self._num_k * self._num_atoms + 1)
 
-        energy = e_init[0]
-        self._report_progress(msg=indent + "Calculation for incident energy %s [cm^-1]" % energy)
-        self._instrument.set_incident_energy(e_init=energy)
+        self._report_progress(msg=indent + "Calculation for incident energy %s [cm^-1]" % e_init)
         data = self._calculate_s_powder_over_k()
-
-        for energy in e_init[1:]:
-            self._report_progress(msg=indent + "Calculation for incident energy %s [cm^-1]" % energy)
-            self._instrument.set_incident_energy(e_init=energy)
-            local_data = self._calculate_s_powder_over_k()
-            self._sum_s(current_val=data, addition=local_data)
 
         # put 2D S into SData object
         s_data = abins.SData(data=data, frequencies=self._frequencies,
@@ -206,22 +216,6 @@ class SPowderSemiEmpiricalCalculator:
             for order in range(FUNDAMENTALS, self._quantum_order_num + S_LAST_INDEX):
                 temp = addition[atom_key]["s"]["order_%s" % order]
                 current_val[atom_key]["s"]["order_%s" % order] += temp
-
-    def _calculate_s_powder_1d(self):
-        """
-        Calculates 1D S for the powder case.
-
-        :returns: object of type SData with 1D dynamical structure factors for the powder case
-        """
-        if self.progress_reporter:
-            self.progress_reporter.setNumSteps(self._num_k * self._num_atoms + 1)
-        data = self._calculate_s_powder_over_k()
-
-        s_data = abins.SData(temperature=self._temperature,
-                             sample_form=self._sample_form,
-                             frequencies=self._frequencies,
-                             data=data)
-        return s_data
 
     def _calculate_s_powder_over_atoms(self, q_indx=None):
         """

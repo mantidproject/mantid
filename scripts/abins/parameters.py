@@ -32,7 +32,7 @@ instruments = {
     'MAPS': {
         'resolution': 'pychop',
         'q_size': 100,
-        'e_init': [400],
+        'e_init': 400,
         'angles_per_detector': 20,
         'settings_default': 'A',
         'settings': {'A': {'chopper': 'A'},
@@ -44,7 +44,7 @@ instruments = {
     'MARI': {
         'resolution': 'pychop',
         'q_size': 100,
-        'e_init': [400],
+        'e_init': 400,
         'angles_per_detector': 10,
         'settings_default': 'A-400',
         'settings': {'A': {'chopper': 'A'},
