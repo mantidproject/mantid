@@ -100,6 +100,9 @@ class FittingDataPresenter(object):
     def get_loaded_workspaces(self):
         return self.model.get_loaded_workspaces()
 
+    def restore_table(self):  # used when the interface is being restored from a save or crash
+        self._repopulate_table()
+
     def _start_load_worker(self, filenames, xunit):
         """
         Load one to many files into mantid that are tracked by the interface.
