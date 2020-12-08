@@ -4,10 +4,20 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory, IMDWorkspaceProperty, IPeaksWorkspaceProperty, PythonAlgorithm, PropertyMode
-from mantid.kernel import Direction, EnabledWhenProperty, FloatPropertyWithValue, PropertyCriterion, StringListValidator
-from mantid.simpleapi import DeleteWorkspace, FindPeaksMD, FindUBUsingFFT, FindUBUsingLatticeParameters, IndexPeaks, \
-    ShowPossibleCells, SelectCellOfType, OptimizeLatticeForCellType
+from mantid.api import AlgorithmFactory, WorkspaceProperty, PythonAlgorithm, PropertyMode, ADSValidator, WorkspaceGroup
+from mantid.kernel import (Direction, EnabledWhenProperty,
+                           FloatPropertyWithValue, PropertyCriterion, StringListValidator,
+                           StringArrayProperty)
+from mantid.simpleapi import (DeleteWorkspace, FindPeaksMD,
+                              FindUBUsingFFT,
+                              FindUBUsingLatticeParameters,
+                              IndexPeaks, ShowPossibleCells,
+                              SelectCellOfType,
+                              OptimizeLatticeForCellType,
+                              AnalysisDataService,
+                              CreatePeaksWorkspace,
+                              CombinePeaksWorkspaces, CopySample,
+                              GroupWorkspaces)
 import numpy as np
 
 
@@ -27,10 +37,8 @@ class HB3AFindPeaks(PythonAlgorithm):
                'optionally refined using lattice parameters.'
 
     def PyInit(self):
-        self.declareProperty(IMDWorkspaceProperty("InputWorkspace", defaultValue="", optional=PropertyMode.Mandatory,
-                                                  direction=Direction.Input),
+        self.declareProperty(StringArrayProperty('InputWorkspace', direction=Direction.Input, validator=ADSValidator()),
                              doc="Input MD workspace (in Q-space) to use for peak finding")
-
         cell_type = StringListValidator()
         cell_type.addAllowedValue("Cubic")
         cell_type.addAllowedValue("Hexagonal")
@@ -73,8 +81,8 @@ class HB3AFindPeaks(PythonAlgorithm):
         self.declareProperty("LatticeBeta", FloatPropertyWithValue.EMPTY_DBL, doc="The beta value of the lattice")
         self.declareProperty("LatticeGamma", FloatPropertyWithValue.EMPTY_DBL, doc="The gamma value of the lattice")
 
-        self.declareProperty(IPeaksWorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output,
-                                                     optional=PropertyMode.Mandatory), doc="Output peaks workspace")
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output,
+                                               optional=PropertyMode.Mandatory), doc="Output peaks workspace")
 
         lattice_params = ["LatticeA", "LatticeB", "LatticeC", "LatticeAlpha", "LatticeBeta", "LatticeGamma"]
         for param in lattice_params:
@@ -100,8 +108,8 @@ class HB3AFindPeaks(PythonAlgorithm):
             for param in lattice_params:
                 issues[param] = "Must set all or none of the optional lattice parameters."
 
-        if self.getProperty("InputWorkspace").value.getNumDims() != 3:
-            issues["InputWorkspace"] = "Workspace has the wrong number of dimensions"
+        #if self.getProperty("InputWorkspace").value.getNumDims() != 3:
+        #    issues["InputWorkspace"] = "Workspace has the wrong number of dimensions"
 
         wavelength = self.getProperty("Wavelength")
         if not wavelength.isDefault:
@@ -111,7 +119,9 @@ class HB3AFindPeaks(PythonAlgorithm):
         return issues
 
     def PyExec(self):
-        input_ws = self.getProperty("InputWorkspace").value
+        input_workspaces = self._expand_groups()
+        output_workspace_name = self.getPropertyValue("OutputWorkspace")
+
         cell_type = self.getProperty("CellType").value
         centering = self.getProperty("Centering").value
 
@@ -131,62 +141,90 @@ class HB3AFindPeaks(PythonAlgorithm):
         # Whether to use the inner goniometer depending on omega and phi in sample logs
         use_inner = False
 
-        peak_ws = self.getProperty("OutputWorkspace")
-
         # Initially set the back-up wavelength to use. This is overwritten if found in sample logs.
-        wavelength = 0.0
-        use_wavelength = False
+        wavelength = None
         if not self.getProperty("Wavelength").isDefault:
             wavelength = self.getProperty("Wavelength").value
-            use_wavelength = True
 
-        if input_ws.getNumExperimentInfo() == 0:
-            # Warn if we could extract a wavelength from the workspace
-            raise RuntimeWarning("No experiment info was found in input '{}'".format(input_ws.getName()))
-        else:
-            exp_info = input_ws.getExperimentInfo(0)
-            if exp_info.run().hasProperty("wavelength"):
-                wavelength = exp_info.run().getProperty("wavelength").value
-                use_wavelength = True
+        multi_ws = len(input_workspaces) > 1
+        output_workspaces = []
+        for input_ws in input_workspaces:
+            if multi_ws:
+                peaks_ws_name = input_ws + '_' + output_workspace_name
+                output_workspaces.append(peaks_ws_name)
+            else:
+                peaks_ws_name = output_workspace_name
+            ws = AnalysisDataService[input_ws]
+            if ws.getNumExperimentInfo() == 0:
+                # Warn if we could extract a wavelength from the workspace
+                raise RuntimeWarning("No experiment info was found in input '{}'".format(ws.getName()))
+            else:
+                exp_info = ws.getExperimentInfo(0)
+                if exp_info.run().hasProperty("wavelength"):
+                    wavelength = exp_info.run().getProperty("wavelength").value
+                if exp_info.run().hasProperty("omega"):
+                    if np.isclose(exp_info.run().getTimeAveragedStd("omega"), 0.0):
+                        use_inner = True
+                if exp_info.run().hasProperty("phi"):
+                    if np.isclose(exp_info.run().getTimeAveragedStd("phi"), 0.0):
+                        use_inner = False
+                self.log().information("Using inner goniometer: {}".format(use_inner))
 
-            if exp_info.run().hasProperty("omega"):
-                if np.isclose(exp_info.run().getTimeAveragedStd("omega"), 0.0):
-                    use_inner = True
-            if exp_info.run().hasProperty("phi"):
-                if np.isclose(exp_info.run().getTimeAveragedStd("phi"), 0.0):
-                    use_inner = False
-            self.log().information("Using inner goniometer: {}".format(use_inner))
+            FindPeaksMD(InputWorkspace=input_ws,
+                        PeakDistanceThreshold=dist_thresh,
+                        DensityThresholdFactor=density_thresh,
+                        CalculateGoniometerForCW=True,
+                        Wavelength=wavelength,
+                        FlipX=True,
+                        InnerGoniometer=use_inner,
+                        MaxPeaks=npeaks,
+                        OutputWorkspace=peaks_ws_name)
 
-        if use_wavelength:
-            peak_ws = FindPeaksMD(InputWorkspace=input_ws,
-                                  PeakDistanceThreshold=dist_thresh, DensityThresholdFactor=density_thresh,
-                                  CalculateGoniometerForCW=True,
-                                  Wavelength=wavelength,
-                                  FlipX=True,
-                                  InnerGoniometer=use_inner,
-                                  MaxPeaks=npeaks)
-        else:
-            peak_ws = FindPeaksMD(InputWorkspace=input_ws,
-                                  PeakDistanceThreshold=dist_thresh, DensityThresholdFactor=density_thresh,
-                                  CalculateGoniometerForCW=True,
-                                  FlipX=True,
-                                  InnerGoniometer=use_inner,
-                                  MaxPeaks=npeaks)
+        if multi_ws:
+            peaks_ws_name = '__tmp_peaks_ws'
+            CreatePeaksWorkspace(InstrumentWorkspace=input_workspaces[0],
+                                 NumberOfPeaks=0,
+                                 OutputWorkspace=peaks_ws_name)
+            for peak_ws in output_workspaces:
+                CombinePeaksWorkspaces(peaks_ws_name, peak_ws, OutputWorkspace=peaks_ws_name)
 
         if lattice:
-            FindUBUsingLatticeParameters(PeaksWorkspace=peak_ws, a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
+            FindUBUsingLatticeParameters(PeaksWorkspace=peaks_ws_name, a=a, b=b, c=c, alpha=alpha, beta=beta, gamma=gamma)
         else:
-            FindUBUsingFFT(PeaksWorkspace=peak_ws, MinD=3, MaxD=20)
+            FindUBUsingFFT(PeaksWorkspace=peaks_ws_name, MinD=3, MaxD=20)
 
-        ShowPossibleCells(PeaksWorkspace=peak_ws)
-        SelectCellOfType(PeaksWorkspace=peak_ws, CellType=cell_type, Centering=centering, Apply=True)
-        OptimizeLatticeForCellType(PeaksWorkspace=peak_ws, CellType=cell_type, Apply=True)
+        ShowPossibleCells(PeaksWorkspace=peaks_ws_name)
+        SelectCellOfType(PeaksWorkspace=peaks_ws_name, CellType=cell_type, Centering=centering, Apply=True)
+        OptimizeLatticeForCellType(PeaksWorkspace=peaks_ws_name, CellType=cell_type, Apply=True)
 
-        IndexPeaks(PeaksWorkspace=peak_ws, RoundHKLs=False)
+        if multi_ws:
+            for out_ws in output_workspaces:
+                CopySample(InputWorkspace=peaks_ws_name,
+                           OutputWorkspace=out_ws,
+                           CopyName=False,
+                           CopyMaterial=False,
+                           CopyEnvironment=False,
+                           CopyShape=False,
+                           CopyLattice=True)
+                IndexPeaks(PeaksWorkspace=out_ws)
 
-        self.setProperty("OutputWorkspace", peak_ws)
+            GroupWorkspaces(output_workspaces, OutputWorkspace=output_workspace_name)
+            DeleteWorkspace(peaks_ws_name)
 
-        DeleteWorkspace(peak_ws)
+        self.setProperty("OutputWorkspace", AnalysisDataService[output_workspace_name])
+
+    def _expand_groups(self):
+        """expand workspace groups"""
+        workspaces = self.getProperty("InputWorkspace").value
+        input_workspaces = []
+        for wsname in workspaces:
+            wks = AnalysisDataService.retrieve(wsname)
+            if isinstance(wks, WorkspaceGroup):
+                input_workspaces.extend(wks.getNames())
+            else:
+                input_workspaces.append(wsname)
+
+        return input_workspaces
 
 
 AlgorithmFactory.subscribe(HB3AFindPeaks)
