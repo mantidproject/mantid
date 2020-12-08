@@ -29,8 +29,8 @@ class MuonFreqContextTest(unittest.TestCase):
         self.context = FrequencyContext()
         run = "62260"
         self.context.add_maxEnt(run, self.ws_freq)
-        self.context.add_FFT(ws_freq_name=FFT_NAME_RE_2, Re_run="62260", Re="fwd", Im_run="", Im="", phasequad=False)
-        self.context.add_FFT(ws_freq_name=FFT_NAME_RE_MOD, Re_run="62260", Re="fwd", Im_run="", Im="", phasequad=False)
+        self.context.add_FFT(ws_freq_name=FFT_NAME_RE_2, Re_run="62260", Re="fwd", Im_run="", Im="")
+        self.context.add_FFT(ws_freq_name=FFT_NAME_RE_MOD, Re_run="62260", Re="fwd", Im_run="", Im="")
 
     def test_widnow_title(self):
         self.assertEquals(self.context.window_title, "Frequency Domain Analysis")
@@ -49,115 +49,104 @@ class MuonFreqContextTest(unittest.TestCase):
         self.assertEquals(self.context._FFT_freq[FFT_NAME_RE_2].Re, "fwd")
         self.assertEquals(self.context._FFT_freq[FFT_NAME_RE_2].Im, None)
         self.assertEquals(self.context._FFT_freq[FFT_NAME_RE_2].Im_run, None)
-        self.assertEquals(self.context._FFT_freq[FFT_NAME_RE_2].phasequad, False)
 
     def test_add_complex_FFT(self):
-        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_RE, Re_run="62260", Re="top", Im_run="62261", Im="fwd",
-                             phasequad=False)
-        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260", Re="top", Im_run="62261", Im="fwd",
-                             phasequad=False)
-        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260", Re="top", Im_run="62261", Im="fwd",
-                             phasequad=False)
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_RE, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
+                             
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
+
         self.assertCountEqual(list(self.context._FFT_freq.keys()),
-                              [FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD, FFT_NAME_RE_2,
-                               FFT_NAME_RE_MOD])
+                              [FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD, FFT_NAME_RE_2, FFT_NAME_RE_MOD])
         self.assertEquals(self.context._FFT_freq[FFT_NAME_COMPLEX_RE].Re_run, "62260")
         self.assertEquals(self.context._FFT_freq[FFT_NAME_COMPLEX_RE].Re, "top")
         self.assertEquals(self.context._FFT_freq[FFT_NAME_COMPLEX_RE].Im, "fwd")
         self.assertEquals(self.context._FFT_freq[FFT_NAME_COMPLEX_RE].Im_run, "62261")
-        self.assertEquals(self.context._FFT_freq[FFT_NAME_COMPLEX_RE].phasequad, False)
 
     def test_get_freq_names_maxEnt(self):
         output = self.context.get_frequency_workspace_names(run_list=[["62260", "62261", "62262"]],
-                                                            group=["fwd", "top"], pair=[], phasequad=False,
+                                                            group=["fwd", "top"], pair=[],
                                                             frequency_type="MaxEnt")
         self.assertEquals(output, ["MUSR62260_raw_data FD; MaxEnt"])
 
     def test_get_freq_names_FFT_no_Im_all_parts(self):
         output = self.context.get_frequency_workspace_names(run_list=[["62260"]], group=["fwd", "top"], pair=[],
-                                                            phasequad=False, frequency_type="FFT All")
+                                                            frequency_type="FFT All")
         self.assertCountEqual(output, [FFT_NAME_RE_2, FFT_NAME_RE_MOD])
 
     def test_get_freq_names_FFT_no_Im_Re_parts(self):
         output = self.context.get_frequency_workspace_names(run_list=[["62260"]], group=["fwd", "top"], pair=[],
-                                                            phasequad=False, frequency_type="Re")
+                                                            frequency_type="Re")
         self.assertCountEqual(output, [FFT_NAME_RE_2])
 
     def test_get_freq_names_FFT_no_Im_Mod_parts(self):
         output = self.context.get_frequency_workspace_names(run_list=[["62260"]], group=["fwd", "top"], pair=[],
-                                                            phasequad=False, frequency_type="Mod")
+                                                            frequency_type="Mod")
         self.assertCountEqual(output, [FFT_NAME_RE_MOD])
 
     def test_get_freq_names_FFT_no_Im_Im_parts(self):
         output = self.context.get_frequency_workspace_names(run_list=[["62260"]], group=["fwd", "top"], pair=[],
-                                                            phasequad=False, frequency_type="Im")
+                                                            frequency_type="Im")
         self.assertCountEqual(output, [])
 
     def test_get_freq_names_FFT_run(self):
-        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_RE, Re_run="62260", Re="top", Im_run="62261", Im="fwd",
-                             phasequad=False)
-        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260", Re="top", Im_run="62261", Im="fwd",
-                             phasequad=False)
-        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260", Re="top", Im_run="62261", Im="fwd",
-                             phasequad=False)
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_RE, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
 
         output = self.context.get_frequency_workspace_names(run_list=[["62261", "62262"]], group=["fwd", "top"],
-                                                            pair=[], phasequad=False, frequency_type="FFT All")
+                                                            pair=[], frequency_type="FFT All")
         self.assertCountEqual(output, [FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD])
 
     def test_get_freq_names_FFT_group(self):
-        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_RE, Re_run="62260", Re="top", Im_run="62261", Im="fwd",
-                             phasequad=False)
-        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260", Re="top", Im_run="62261", Im="fwd",
-                             phasequad=False)
-        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260", Re="top", Im_run="62261", Im="fwd",
-                             phasequad=False)
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_RE, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
 
         output = self.context.get_frequency_workspace_names(run_list=[["62260"]], group=["top"], pair=[],
-                                                            phasequad=False, frequency_type="FFT All")
+                                                            frequency_type="FFT All")
         self.assertCountEqual(output, [FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD])
 
     def test_get_freq_names_all(self):
-        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_RE, Re_run="62260", Re="top", Im_run="62261", Im="fwd",
-                             phasequad=False)
-        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260", Re="top", Im_run="62261", Im="fwd",
-                             phasequad=False)
-        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260", Re="top", Im_run="62261", Im="fwd",
-                             phasequad=False)
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_RE, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
+        self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
 
         output = self.context.get_frequency_workspace_names(run_list=[[62260], [62261]], group=["fwd"], pair=[],
-                                                            phasequad=False, frequency_type="All")
+                                                            frequency_type="All")
         self.assertCountEqual(output, [FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD, FFT_NAME_RE_2,
                                        FFT_NAME_RE_MOD, "MUSR62260_raw_data FD; MaxEnt"])
 
     def test_get_freq_names_all_with_phasequad(self):
-        self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_RE, Re_run="62261", Re="", Im_run="", Im="", phasequad=True)
-        self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_IM, Re_run="62261", Re="", Im_run="62260", Im="",
-                             phasequad=True)
+        # will need changing
+        pass
+        #self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_RE, Re_run="62261", Re="", Im_run="", Im="")
+        #self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_IM, Re_run="62261", Re="", Im_run="62260", Im="")
 
-        output = self.context.get_frequency_workspace_names(run_list=[[62260], [62261]], group=["fwd"], pair=[],
-                                                            phasequad=True, frequency_type="All")
-        self.assertCountEqual(output, [PHASEQUAD_NAME_RE, PHASEQUAD_NAME_IM, FFT_NAME_RE_2, FFT_NAME_RE_MOD,
-                                       "MUSR62260_raw_data FD; MaxEnt"])
+        #output = self.context.get_frequency_workspace_names(run_list=[[62260], [62261]], group=["fwd"], pair=[],
+        #                                                    frequency_type="All")
+        #self.assertCountEqual(output, [PHASEQUAD_NAME_RE, PHASEQUAD_NAME_IM, FFT_NAME_RE_2, FFT_NAME_RE_MOD,
+        #                               "MUSR62260_raw_data FD; MaxEnt"])
 
     def test_get_freq_names_all_with_phasequad_Re_run(self):
-        self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_RE, Re_run="62261", Re="", Im_run="", Im="", phasequad=True)
-        self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_IM, Re_run="62261", Re="", Im_run="62260", Im="",
-                             phasequad=True)
+        pass
+        # will need changing
+        #self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_RE, Re_run="62261", Re="", Im_run="", Im="")
+        #self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_IM, Re_run="62261", Re="", Im_run="62260", Im="")
 
-        output = self.context.get_frequency_workspace_names(run_list=[[62261]], group=["fwd"], pair=[], phasequad=True,
-                                                            frequency_type="All")
-        self.assertCountEqual(output, [PHASEQUAD_NAME_RE, PHASEQUAD_NAME_IM])
+        #output = self.context.get_frequency_workspace_names(run_list=[[62261]], group=["fwd"], pair=[],
+        #                                                    frequency_type="All")
+        #self.assertCountEqual(output, [PHASEQUAD_NAME_RE, PHASEQUAD_NAME_IM])
 
     def test_get_freq_names_all_with_phasequad_Im_run(self):
-        self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_RE, Re_run="62261", Re="", Im_run="", Im="", phasequad=True)
-        self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_IM, Re_run="62261", Re="", Im_run="62260", Im="",
-                             phasequad=True)
+        # will need changing
+        pass
+        #self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_RE, Re_run="62261", Re="", Im_run="", Im="")
+        #self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_IM, Re_run="62261", Re="", Im_run="62260", Im="")
 
-        output = self.context.get_frequency_workspace_names(run_list=[[62260]], group=["fwd"], pair=[], phasequad=True,
-                                                            frequency_type="All")
-        self.assertCountEqual(output,
-                              [PHASEQUAD_NAME_IM, FFT_NAME_RE_2, FFT_NAME_RE_MOD, "MUSR62260_raw_data FD; MaxEnt"])
+        #output = self.context.get_frequency_workspace_names(run_list=[[62260]], group=["fwd"], pair=[], frequency_type="All")
+        #self.assertCountEqual(output,
+        #                      [PHASEQUAD_NAME_IM, FFT_NAME_RE_2, FFT_NAME_RE_MOD, "MUSR62260_raw_data FD; MaxEnt"])
 
 
 if __name__ == '__main__':

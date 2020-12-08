@@ -55,9 +55,6 @@ class MuonContextTest(unittest.TestCase):
         self.context.show_all_groups()
         self.context.calculate_all_pairs()
         self.context.show_all_pairs()
-        CreateWorkspace([0], [0], OutputWorkspace='EMU19489; PhaseQuad; PhaseTable EMU19489')
-        self.context.phase_context.add_phase_quad(
-            MuonWorkspaceWrapper('EMU19489; PhaseQuad; PhaseTable EMU19489'), '19489')
 
     def _assert_list_in_ADS(self, workspace_name_list):
         ads_list = AnalysisDataService.getObjectNames()
@@ -215,11 +212,11 @@ class MuonContextTest(unittest.TestCase):
 
     def test_get_workspace_names_returns_all_stored_workspaces_if_all_selected(self):
         self.populate_ADS()
-        workspace_list = self.context.get_names_of_workspaces_to_fit('19489', 'fwd, bwd, long', True)
+        workspace_list = self.context.get_names_of_workspaces_to_fit('19489', 'fwd, bwd, long')
 
         self.assertEqual(Counter(workspace_list),
                          Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
-                                  'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489']))
+                                  'EMU19489; Pair Asym; long; MA']))
 
     def test_get_workspace_names_returns_nothing_if_no_parameters_passed(self):
         self.populate_ADS()
@@ -229,30 +226,29 @@ class MuonContextTest(unittest.TestCase):
 
     def test_get_workspaces_names_copes_with_bad_groups(self):
         self.populate_ADS()
-        workspace_list = self.context.get_names_of_workspaces_to_fit('19489', 'fwd, bwd, long, random, wrong', True)
+        workspace_list = self.context.get_names_of_workspaces_to_fit('19489', 'fwd, bwd, long, random, wrong')
 
         self.assertEqual(Counter(workspace_list),
                          Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
-                                  'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489']))
+                                  'EMU19489; Pair Asym; long; MA']))
 
     def test_get_workspaces_names_copes_with_non_existent_runs(self):
         self.populate_ADS()
 
-        workspace_list = self.context.get_names_of_workspaces_to_fit('19489, 22222', 'fwd, bwd, long', True)
+        workspace_list = self.context.get_names_of_workspaces_to_fit('19489, 22222', 'fwd, bwd, long')
 
         self.assertEqual(Counter(workspace_list),
                          Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
-                                  'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489']))
+                                  'EMU19489; Pair Asym; long; MA']))
 
     def test_that_run_ranged_correctly_parsed(self):
         self.populate_ADS()
 
-        workspace_list = self.context.get_names_of_workspaces_to_fit('19489-95', 'fwd, bwd, long',
-                                                                     True)
+        workspace_list = self.context.get_names_of_workspaces_to_fit('19489-95', 'fwd, bwd, long')
 
         self.assertEqual(Counter(workspace_list),
                          Counter(['EMU19489; Group; fwd; Asymmetry; MA', 'EMU19489; Group; bwd; Asymmetry; MA',
-                                  'EMU19489; Pair Asym; long; MA', 'EMU19489; PhaseQuad; PhaseTable EMU19489']))
+                                  'EMU19489; Pair Asym; long; MA']))
 
     def test_calculate_all_pairs(self):
         self.context._calculate_pairs = mock.Mock()
