@@ -272,7 +272,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                         magnetic_sf_cos2alpha = -(2*c0-4)*sigma_x_sf - (2*c0+2)*sigma_y_sf - (2-4*c0)*sigma_z_sf
                         magnetic_nsf_sin2alpha = (2*c4-4)*sigma_xpy_nsf + (2*c4+2)*sigma_xmy_nsf + (2-4*c4)*sigma_z_nsf
                         magnetic_sf_sin2alpha = -(2*c4-4)*sigma_xpy_sf - (2*c4+2)*sigma_xmy_sf - (2-4*c4)*sigma_z_sf
-                        dataY_nsf_magnetic[spectrum] = magnetic_nsf_cos2alpha * math.cos(2*alpha) + magnetic_nsf_sin2alpha * math.sin(2*alpha)
+                        dataY_nsf_magnetic[spectrum] = magnetic_nsf_cos2alpha * math.cos(2*alpha) \
+                            + magnetic_nsf_sin2alpha * math.sin(2*alpha)
                         dataY_sf_magnetic[spectrum] = magnetic_sf_cos2alpha * math.cos(2*alpha) + magnetic_sf_sin2alpha * math.sin(2*alpha)
                         dataY_average_magnetic[spectrum] = 0.5 * (dataY_nsf_magnetic[spectrum] + dataY_sf_magnetic[spectrum])
                         # Nuclear coherent component
