@@ -102,7 +102,7 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
             if onlySeparation:
                 name = entry.name()
                 name = name[name.rfind("_")+1:]
-                self.assertTrue(name in ['Coherent', 'Incoherent', 'Magnetic'])
+                self.assertTrue(name in ['Total', 'Coherent', 'Incoherent', 'AverageMagnetic', 'NSFMagnetic', 'SFMagnetic'])
             self.assertTrue(not entry.isHistogramData())
             self.assertTrue(entry.isDistribution())
             self.assertEqual(entry.blocksize(), blocksize)

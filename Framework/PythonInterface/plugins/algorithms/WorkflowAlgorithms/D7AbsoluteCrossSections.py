@@ -208,7 +208,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         DEG_2_RAD =  np.pi / 180.0
         nMeasurements, nComponents = self._data_structure_helper(ws)
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
-        componentNames = ['Coherent', 'Incoherent', 'Magnetic']
+        componentNames = ['Total', 'Coherent', 'Incoherent', 'AverageMagnetic', 'NSFMagnetic', 'SFMagnetic']
         number_histograms = mtd[ws][0].getNumberHistograms()
         block_size = mtd[ws][0].blocksize()
         double_xyz_method = False
@@ -218,30 +218,36 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         tmp_names = []
 
         for entry_no in range(0, mtd[ws].getNumberOfEntries(), nMeasurements):
+            dataY_total = np.zeros(shape=(number_histograms, block_size))
             dataY_nuclear = np.zeros(shape=(number_histograms, block_size))
             dataY_incoherent = np.zeros(shape=(number_histograms, block_size))
-            dataY_magnetic = np.zeros(shape=(number_histograms, block_size))
+            dataY_nsf_magnetic = np.zeros(shape=(number_histograms, block_size))
+            dataY_sf_magnetic = np.zeros(shape=(number_histograms, block_size))
+            dataY_average_magnetic = np.zeros(shape=(number_histograms, block_size))
             for spectrum in range(number_histograms):
-                sigma_z_sf = mtd[ws][entry_no].readY(spectrum)
-                sigma_z_nsf = mtd[ws][entry_no+1].readY(spectrum)
+                sigma_z_nsf = mtd[ws][entry_no].readY(spectrum)
+                sigma_z_sf = mtd[ws][entry_no+1].readY(spectrum)
                 if nMeasurements == 2:
-                    dataY_nuclear[spectrum] = 2.0 * sigma_z_nsf - sigma_z_sf  # Nuclear coherent
-                    dataY_incoherent[spectrum] = 2.0 * sigma_z_sf - sigma_z_nsf # Incoherent
-                    dataY_magnetic[spectrum] = 0 # Magnetic
+                    dataY_total[spectrum] = sigma_z_nsf + sigma_z_sf
+                    dataY_nuclear[spectrum] = sigma_z_nsf - 0.5 * sigma_z_sf  # Nuclear coherent
+                    dataY_incoherent[spectrum] = 1.5 * sigma_z_sf # Incoherent
                 elif nMeasurements == 6 or nMeasurements == 10:
-                    sigma_y_sf = mtd[ws][entry_no+2].readY(spectrum)
-                    sigma_y_nsf = mtd[ws][entry_no+3].readY(spectrum)
-                    sigma_x_sf = mtd[ws][entry_no+4].readY(spectrum)
-                    sigma_x_nsf = mtd[ws][entry_no+5].readY(spectrum)
+                    sigma_y_nsf = mtd[ws][entry_no+2].readY(spectrum)
+                    sigma_y_sf = mtd[ws][entry_no+3].readY(spectrum)
+                    sigma_x_nsf = mtd[ws][entry_no+4].readY(spectrum)
+                    sigma_x_sf = mtd[ws][entry_no+5].readY(spectrum)
                     if nMeasurements == 6 and user_method == 'XYZ':
+                        # Total cross-section:
+                        dataY_total[spectrum] = (sigma_z_nsf + sigma_x_nsf + sigma_y_nsf + sigma_z_sf + sigma_x_sf + sigma_y_sf) / 3.0
                         # Magnetic component
-                        magnetic_component = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf )
-                        dataY_magnetic[spectrum] = magnetic_component
+                        dataY_nsf_magnetic[spectrum] = 2.0 * (2.0 * sigma_z_nsf - sigma_x_nsf - sigma_y_nsf)
+                        dataY_sf_magnetic[spectrum] = 2.0 * (-2.0 * sigma_z_sf + sigma_x_sf + sigma_y_sf)
+                        dataY_average_magnetic[spectrum] = 0.5 * (dataY_nsf_magnetic[spectrum] + dataY_sf_magnetic[spectrum])
                         # Nuclear coherent component
                         dataY_nuclear[spectrum] = (2.0*(sigma_x_nsf + sigma_y_nsf + sigma_z_nsf)
                                                    - (sigma_x_sf + sigma_y_sf + sigma_z_sf)) / 6.0
                         # Incoherent component
-                        dataY_incoherent[spectrum] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - magnetic_component
+                        dataY_incoherent[spectrum] = 0.5 * (sigma_x_sf + sigma_y_sf + sigma_z_sf) - dataY_average_magnetic[spectrum]
                     else:
                         if not double_xyz_method:
                             sigma_xmy_sf = mtd[ws][entry_no+6].readY(spectrum)
@@ -262,24 +268,31 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                         alpha = theta - 0.5*np.pi - theta_0
                         c0 = math.pow(math.cos(alpha), 2)
                         c4 = math.pow(math.cos(alpha - np.pi/4.0), 2)
-                        magnetic_cos2alpha = (2*c0-4)*sigma_x_nsf + (2*c0+2)*sigma_y_nsf + (2-4*c0)*sigma_z_nsf
-                        magnetic_sin2alpha = (2*c4-4)*sigma_xpy_nsf + (2*c4+2)*sigma_xmy_nsf + (2-4*c4)*sigma_z_nsf
-                        magnetic_component = magnetic_cos2alpha * math.cos(2*alpha) + magnetic_sin2alpha * math.sin(2*alpha)
-                        dataY_magnetic[spectrum] = magnetic_component
+                        magnetic_nsf_cos2alpha = (2*c0-4)*sigma_x_nsf + (2*c0+2)*sigma_y_nsf + (2-4*c0)*sigma_z_nsf
+                        magnetic_sf_cos2alpha = -(2*c0-4)*sigma_x_sf - (2*c0+2)*sigma_y_sf - (2-4*c0)*sigma_z_sf
+                        magnetic_nsf_sin2alpha = (2*c4-4)*sigma_xpy_nsf + (2*c4+2)*sigma_xmy_nsf + (2-4*c4)*sigma_z_nsf
+                        magnetic_sf_sin2alpha = -(2*c4-4)*sigma_xpy_sf - (2*c4+2)*sigma_xmy_sf - (2-4*c4)*sigma_z_sf
+                        dataY_nsf_magnetic[spectrum] = magnetic_nsf_cos2alpha * math.cos(2*alpha) + magnetic_nsf_sin2alpha * math.sin(2*alpha)
+                        dataY_sf_magnetic[spectrum] = magnetic_sf_cos2alpha * math.cos(2*alpha) + magnetic_sf_sin2alpha * math.sin(2*alpha)
+                        dataY_average_magnetic[spectrum] = 0.5 * (dataY_nsf_magnetic[spectrum] + dataY_sf_magnetic[spectrum])
                         # Nuclear coherent component
                         dataY_nuclear[spectrum] = (2.0 * (sigma_x_nsf + sigma_y_nsf + 2*sigma_z_nsf + sigma_xpy_nsf + sigma_xmy_nsf)
                                                    - (sigma_x_sf + sigma_y_sf + 2*sigma_z_sf + sigma_xpy_sf + sigma_xmy_sf)) / 12.0
                         # Incoherent component
                         dataY_incoherent[spectrum] = 0.25 * (sigma_x_sf + sigma_y_sf + 2*sigma_z_sf + sigma_xpy_sf + sigma_xmy_sf) \
-                            - magnetic_component
+                            - dataY_average_magnetic[spectrum]
 
-            dataY = [dataY_nuclear, dataY_incoherent, dataY_magnetic]
-            for component in range(nComponents):
+            dataY = [dataY_total, dataY_nuclear, dataY_incoherent, dataY_average_magnetic, dataY_nsf_magnetic, dataY_sf_magnetic]
+            if user_method == 'XYZ' or user_method == '10p':
+                nCrossSections = 6
+            else:
+                nCrossSections = nComponents
+            for cross_section_no in range(nCrossSections):
                 dataX = mtd[ws][entry_no].readX(0)
-                dataE = np.sqrt(abs(dataY[component]))
-                tmp_name = str(mtd[ws][entry_no].name())[:-1] + componentNames[component]
+                dataE = np.sqrt(abs(dataY[cross_section_no]))
+                tmp_name = str(mtd[ws][entry_no].name())[:-1] + componentNames[cross_section_no]
                 tmp_names.append(tmp_name)
-                CreateWorkspace(DataX=dataX, DataY=dataY[component], dataE=dataE,
+                CreateWorkspace(DataX=dataX, DataY=dataY[cross_section_no], dataE=dataE,
                                 Nspec=mtd[ws][entry_no].getNumberHistograms(),
                                 ParentWorkspace=mtd[ws][entry_no],
                                 OutputWorkspace=tmp_name)
@@ -322,7 +335,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     tmp_names.append(ws_name)
                     const = (2.0/3.0) * math.pow(physical_constants['neutron gyromag. ratio'][0]
                                                  * physical_constants['classical electron radius'][0], 2)
-                    paramagneticComponent = mtd[cross_section_ws][2]
+                    paramagneticComponent = mtd[cross_section_ws][3]
                     normalisation_name = 'normalisation_{}'.format(ws_name)
                     to_clean.append(normalisation_name)
                     CreateSingleValuedWorkspace(DataValue=const * spin * (spin+1), OutputWorkspace=normalisation_name)
@@ -330,7 +343,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                            RHSWorkspace=normalisation_name,
                            OutputWorkspace=ws_name)
             else: # Incoherent
-                for spectrum_no in range(mtd[cross_section_ws][1].getNumberHistograms()):
+                for spectrum_no in range(mtd[cross_section_ws][2].getNumberHistograms()):
                     if normaliseToAbsoluteUnits:
                         normFactor = self._sampleAndEnvironmentProperties['IncoherentCrossSection'].value
                         CreateSingleValuedWorkspace(DataValue=normFactor, OutputWorkspace=norm_ws)
