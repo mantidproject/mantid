@@ -86,6 +86,8 @@ protected:
   MultiDomainFunction_sptr m_function;
 
 private:
+  IFunction_sptr getFitFunctionWithGlobals(std::size_t const &index) const;
+
   void checkDatasets();
   void checkNumberOfDomains(const QList<FunctionModelDataset> &datasets) const;
   int numberOfDomains(const QList<FunctionModelDataset> &datasets) const;

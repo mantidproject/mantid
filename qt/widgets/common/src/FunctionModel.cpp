@@ -44,42 +44,50 @@ void FunctionModel::setFunction(IFunction_sptr fun) {
 }
 
 IFunction_sptr FunctionModel::getFitFunction() const {
-  if (!m_function) {
+  if (!m_function)
     return m_function;
-  }
-  auto const nf = m_function->nFunctions();
 
-  if (nf > 1 && nf <= m_currentDomainIndex) {
-    auto fun =
-        std::dynamic_pointer_cast<MultiDomainFunction>(m_function->clone());
+  auto const numberOfFunctions = m_function->nFunctions();
 
-    auto const singleFun = m_function->getFunction(m_currentDomainIndex);
-    for (auto par = m_globalParameterNames.begin();
-         par != m_globalParameterNames.end();) {
-      if (singleFun->hasParameter(par->toStdString())) {
-        QStringList ties;
-        for (size_t i = 0; i < nf; ++i) {
-          if (i != m_currentDomainIndex)
-            ties << "f" + QString::number(i) + "." + *par;
-        }
-        ties << "f" + QString::number(m_currentDomainIndex) + "." + *par;
-        fun->addTies(ties.join("=").toStdString());
-        ++par;
-      } else {
-        par = m_globalParameterNames.erase(par);
-      }
-    }
-    return fun;
-  }
-  if (nf == 1) {
-    auto fun = m_function->getFunction(0);
-    auto compFun = std::dynamic_pointer_cast<CompositeFunction>(fun);
-    if (compFun && compFun->nFunctions() == 1) {
-      return compFun->getFunction(0);
-    }
-    return fun;
+  if (numberOfFunctions > 1) {
+    if (m_currentDomainIndex < numberOfFunctions)
+      return getFitFunctionWithGlobals(m_currentDomainIndex);
+    return getFitFunctionWithGlobals(0);
+
+  } else if (numberOfFunctions == 1) {
+    auto const function = m_function->getFunction(0);
+    auto const composite =
+        std::dynamic_pointer_cast<CompositeFunction>(function);
+
+    if (composite && composite->nFunctions() == 1)
+      return composite->getFunction(0);
+    return function;
   }
   return IFunction_sptr();
+}
+
+IFunction_sptr
+FunctionModel::getFitFunctionWithGlobals(std::size_t const &index) const {
+  auto function =
+      std::dynamic_pointer_cast<MultiDomainFunction>(m_function->clone());
+
+  auto const singleFun = m_function->getFunction(index);
+  for (auto paramIter = m_globalParameterNames.begin();
+       paramIter != m_globalParameterNames.end();) {
+    if (singleFun->hasParameter(paramIter->toStdString())) {
+      QStringList ties;
+      for (auto i = 0u; i < m_function->nFunctions(); ++i)
+        if (i != index)
+          ties << "f" + QString::number(i) + "." + *paramIter;
+
+      ties << "f" + QString::number(index) + "." + *paramIter;
+      function->addTies(ties.join("=").toStdString());
+      ++paramIter;
+    } else {
+      paramIter = m_globalParameterNames.erase(paramIter);
+    }
+  }
+  return function;
 }
 
 bool FunctionModel::hasFunction() const {
