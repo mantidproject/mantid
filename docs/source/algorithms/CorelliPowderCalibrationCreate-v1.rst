@@ -63,6 +63,10 @@ In our example, we have adjusted the moderator and banks 42 and 87.
 | bank42/sixteenpack | 2.5941     | 0.0625    | 0.0870    | 0.0009           | -0.9997          | 0.0210           |       92.3187 |
 +--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
 
+- ``Xposition``, ``Yposition``, ``Zposition``: coordinates for the center of ``Component`` in the lab's frame of reference. Units are Angstroms.
+- ``XdirectionCosine``, ``YdirectionCosine``, ``ZdirectionCosine``: direction cosines (in the) lab's frame of references defining a rotation axis to set the orientation of ``Component``.
+- ``RotationAngle``: rotate this many degrees around the previous rotation axis to set the orientation of ``Component``.
+
 
 .. categories::
 
