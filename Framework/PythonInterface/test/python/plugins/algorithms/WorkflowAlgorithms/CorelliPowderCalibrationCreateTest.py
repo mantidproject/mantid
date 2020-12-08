@@ -37,7 +37,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
         target_position, target_orientation, target_rotation = [5.18, -0.32, 0.21], [0.001, 0.999, -0.027], 98.0
         CorelliPowderCalibrationCreate(
             InputWorkspace='test_workspace', OutputWorkspacesPrefix='cal_', TubeDatabaseDir='/tmp',
-            TofBinnin=[300, 1.0, 16666.7], PeakPositions=spacings_reference, AdjustSource=False, ComponentList='bank1',
+            TofBinning=[300, 1.0, 16666.7], PeakPositions=spacings_reference, AdjustSource=False, ComponentList='bank1',
             ComponentMaxTranslation=0.2, ComponentMaxRotation=10)
         values_output = mtd['cal_adjustments'].row(0)
         assert_allclose(values_output[:3], target_position, atol=0.001)
