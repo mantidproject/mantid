@@ -8,6 +8,7 @@
 from os import path
 import numpy as np
 from numpy.polynomial.polynomial import polyval
+from scipy.ndimage import gaussian_filter
 from typing import List, Optional, Union
 
 # imports from Mantid
@@ -73,6 +74,54 @@ def bank_numbers(bank_selection: str) -> List[str]:
         else:
             banks.append(int(r))
     return [str(n) for n in sorted(banks)]
+
+
+def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D:
+    r"""
+    Clone the input workspace/run and preprocess the histograms for each tube such
+    that the peak finding algorithm can have a better chance of finding the correct
+    wire position.
+    
+    Note: the preprocess step needs to be performed after load_banks, which provided
+    the bank selection.
+    :param input_workspace: input workspace name
+    :param output_workspace: output workspace with pre-processed historgrams
+    """
+    CloneWorkspace(InputWorkspace=str(input_workspace), OutputWorkspace=output_workspace)
+
+    # inline function for 1D singal cleaning
+    # NOTE: an inline function here is by choice as it should only be used for data
+    #       pre-processing only
+    def clean_signals(
+        signal1D: np.ndarray,
+        pixels_per_tube: int=256,
+        peak_interval_estimate: int=15,
+        ) -> np.ndarray:
+        r"""
+        Replace the regions between peaks/dips with flat background to avoid confusing
+        peak finding code.
+
+        :param signal1D: 1D histogram from a single tube
+        :param pixels_per_tube: number of pixels per tube, should always be 256
+        :param peak_interval_estimate: a rough estimate of the distance between peaks in pixels
+        """
+        _sig_gaussian = gaussian_filter(signal1D, int(peak_interval_estimate/2))
+        _sig_tmp = _sig_gaussian - signal1D
+        _sig_tmp[_sig_tmp<0] = 1
+        _idx = np.where(_sig_tmp==1)[0]
+        _sig_tmp[:_idx[0]] = 1
+        _sig_tmp[_idx[-1]:] = 1
+        _base = np.average(gaussian_filter(signal1D, int(pixels_per_tube/2)))
+        return _base - _sig_tmp
+
+    _ws = mtd[output_workspace]
+    for i in range(0, _ws.getNumberHistograms(), PIXELS_PER_TUBE):
+        _data = np.array([_ws.readY(me) for me in range(i, i+n_pixels_per_tube)])
+        _data = clean_signals(_data)
+        for j in range(n_pixels_per_tube):
+            _ws.setY(i+j, _data[j])  # This apprently is the correct way to update Y
+    
+    return _ws
 
 
 def load_banks(run: Union[int, str], bank_selection: str, output_workspace: str) -> Workspace2D:
