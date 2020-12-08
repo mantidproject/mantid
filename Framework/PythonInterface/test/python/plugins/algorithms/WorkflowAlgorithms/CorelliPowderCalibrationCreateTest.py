@@ -43,7 +43,7 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
         assert_allclose([row[name] for name in ('Xposition', 'Yposition', 'Zposition')], target_position, atol=0.004)
         assert_allclose([row[name] for name in ('XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine')],
                         target_orientation, atol=0.02)
-        assert_allclose(row['RotationAngle'], target_rotation, atol=0.1)
+        assert_allclose(row['RotationAngle'], target_rotation, atol=0.2)
 
 
 if __name__ == '__main__':
