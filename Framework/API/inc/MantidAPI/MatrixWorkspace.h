@@ -582,7 +582,8 @@ protected:
 
 private:
   std::size_t binIndexOfValue(Mantid::HistogramData::HistogramX const &xValues,
-                              const double xValue, const bool ascendingOrder) const;
+                              const double xValue,
+                              const bool ascendingOrder) const;
   std::size_t xIndexOfValue(const Mantid::HistogramData::HistogramX &xValues,
                             const double xValue, const double tolerance) const;
 
