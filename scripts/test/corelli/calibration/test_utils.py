@@ -124,7 +124,6 @@ class TestUtils(unittest.TestCase):
             67199393.31820111,   # sum
             ])
         intputws = TestUtils.cases['124023_bank10']  # try to use existing data
-        ws = mtd[intputws]
         preprocess_banks(intputws, "_ws")
         _ws = mtd["_ws"]
         sig = np.array([_ws.readY(i) for i in range(_ws.getNumberHistograms())])
