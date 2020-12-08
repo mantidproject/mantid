@@ -21,6 +21,13 @@ class WavelengthIntervalTest(unittest.TestCase):
         # Should sort the full interval into the front of the queue
         self.assertEqual([(2, 6), (2, 4), (4, 6)], interval.selected_ranges)
 
+    def test_setting_full_range_inserts_into_selected(self):
+        interval = WavelengthInterval()
+        expected = (1.0, 2.0)
+        interval.wavelength_full_range = expected
+        self.assertEqual(expected, interval.wavelength_full_range)
+        self.assertEqual([expected], interval.selected_ranges)
+
 
 if __name__ == '__main__':
     unittest.main()

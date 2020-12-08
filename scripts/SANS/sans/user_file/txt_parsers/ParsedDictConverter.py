@@ -1074,14 +1074,14 @@ def _set_wavelength_limits(state_obj, user_file_items):
 
     if wavelength_limits.step_type in [RangeStepType.RANGE_LIN, RangeStepType.RANGE_LOG]:
         wavelength_range = _get_last_element(user_file_items.get(OtherId.WAVELENGTH_RANGE))
-        min, max, pairs = parse_range_wavelength(wavelength_range)
+        full_interval, pairs = parse_range_wavelength(wavelength_range)
 
-        state_obj.wavelength_interval.wavelength_min = min
-        state_obj.wavelength_interval.wavelength_max = max
+        state_obj.wavelength_interval.wavelength_full_range = full_interval
+        state_obj.wavelength_interval.selected_ranges = pairs
         state_obj.wavelength_interval.wavelength_step = wavelength_limits.step
     else:
-        state_obj.wavelength_interval.wavelength_min = wavelength_limits.start
-        state_obj.wavelength_interval.wavelength_max = wavelength_limits.stop
+        full_range = (wavelength_limits.start, wavelength_limits.stop)
+        state_obj.wavelength_interval.wavelength_full_range = full_range
         state_obj.wavelength_interval.wavelength_step = wavelength_limits.step
 
     return state_obj

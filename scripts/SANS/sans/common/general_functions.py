@@ -735,7 +735,7 @@ def get_standard_output_workspace_name(state, reduction_data_type, wav_range,
     return output_workspace_name, output_workspace_base_name
 
 
-def get_transmission_output_name(state, ws_group, data_type=DataType.SAMPLE,
+def get_transmission_output_name(state, wav_range, data_type=DataType.SAMPLE,
                                  multi_reduction_type=None, fitted=True,):
     user_specified_output_name = state.save.user_specified_output_name
 
@@ -743,30 +743,26 @@ def get_transmission_output_name(state, ws_group, data_type=DataType.SAMPLE,
     short_run_number = data.sample_scatter_run_number
     short_run_number_as_string = str(short_run_number)
 
-    output_names, output_base_names = [], []
+    calculated_transmission_state = state.adjustment.calculate_transmission
+    fit = calculated_transmission_state.fit[DataType.SAMPLE.value]
+    fit_wav_range_string = "_" + str(fit.wavelength_low) + "_" + str(fit.wavelength_high)
 
-    for workspace in ws_group:
-        range_str = workspace.getRun().getProperty("Wavelength Range").valueAsStr
-        wav_range = range_str.split('-')
-        wavelength_range_string = f"_{wav_range[0]}_{wav_range[1]}"
+    trans_suffix = "_trans_Sample" if data_type == DataType.SAMPLE else "_trans_Can"
+    trans_suffix = trans_suffix + '_unfitted' if not fitted else trans_suffix
 
-        trans_suffix = "_trans_Sample" if data_type == DataType.SAMPLE else "_trans_Can"
-        trans_suffix = trans_suffix + '_unfitted' if not fitted else trans_suffix
+    if user_specified_output_name:
+        output_name = user_specified_output_name + trans_suffix
+        output_base_name = user_specified_output_name + '_trans'
+    else:
+        output_name = short_run_number_as_string + trans_suffix + fit_wav_range_string
+        output_base_name = short_run_number_as_string + '_trans' + fit_wav_range_string
 
-        if user_specified_output_name:
-            output_name = user_specified_output_name + trans_suffix
-            output_base_name = user_specified_output_name + '_trans'
-        else:
-            output_name = short_run_number_as_string + trans_suffix + wavelength_range_string
-            output_base_name = short_run_number_as_string + '_trans'
+    if multi_reduction_type and fitted:
+        if multi_reduction_type["wavelength_range"]:
+            wavelength_range_string = f"_{wav_range[0]}_{wav_range[1]}"
+            output_name += wavelength_range_string
 
-        if multi_reduction_type and fitted:
-            if multi_reduction_type["wavelength_range"]:
-                output_name += wavelength_range_string
-        output_names.append(output_name)
-        output_base_names.append(output_base_name)
-
-    return output_names, output_base_names
+    return output_name, output_base_name
 
 
 def get_output_name(state, reduction_mode, is_group, wav_range, suffix="",

@@ -85,8 +85,9 @@ class SANSFunctionsTest(unittest.TestCase):
 
         state.reduction.dimensionality = ReductionDimensionality.ONE_DIM
 
-        state.wavelength.wavelength_interval.wavelength_min = 12.0
-        state.wavelength.wavelength_interval.wavelength_max = 34.0
+        wav_range = (12.0, 34.0)
+        state.wavelength.wavelength_interval.wavelength_full_range = wav_range
+        state.wavelength.wavelength_interval.selected_ranges = [wav_range]
 
         state.mask.phi_min = 12.0
         state.mask.phi_max = 56.0
@@ -117,22 +118,16 @@ class SANSFunctionsTest(unittest.TestCase):
         self._do_test_quaternion(angle, axis)
 
     def test_that_unknown_reduction_mode_raises(self):
-        # Arrange
         state = SANSFunctionsTest._get_state()
-
-        # Act + Assert
-        try:
-            get_standard_output_workspace_name(state, ReductionMode.ALL)
-            did_raise = False
-        except RuntimeError:
-            did_raise = True
-        self.assertTrue(did_raise)
+        with self.assertRaises(RuntimeError):
+            get_standard_output_workspace_name(state, ReductionMode.ALL, wav_range=(0., 0.))
 
     def test_that_creates_correct_workspace_name_for_1D(self):
         # Arrange
         state = SANSFunctionsTest._get_state()
         # Act
-        output_workspace, _ = get_standard_output_workspace_name(state, ReductionMode.LAB)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_workspace, _ = get_standard_output_workspace_name(state, ReductionMode.LAB, wav_range=wav_range)
         # Assert
         self.assertEqual("12345_rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37", output_workspace)
 
@@ -140,7 +135,8 @@ class SANSFunctionsTest(unittest.TestCase):
         # Arrange
         state = SANSFunctionsTest._get_state()
         # Act
-        output_workspace, _ = get_standard_output_workspace_name(state, ReductionMode.LAB,
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_workspace, _ = get_standard_output_workspace_name(state, ReductionMode.LAB, wav_range=wav_range,
                                                                  include_slice_limits=False)
         # Assert
         self.assertTrue("12345_rear_1D_12.0_34.0Phi12.0_56.0" == output_workspace)
@@ -150,7 +146,8 @@ class SANSFunctionsTest(unittest.TestCase):
         state = SANSFunctionsTest._get_state()
         state.save.user_specified_output_name = "test_output"
         # Act
-        output_workspace, group_output_name = get_transmission_output_name(state)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_workspace, group_output_name = get_transmission_output_name(state, wav_range=wav_range)
         # Assert
         self.assertEqual(output_workspace, "test_output_trans_Sample")
         self.assertEqual(group_output_name, 'test_output_trans')
@@ -160,7 +157,8 @@ class SANSFunctionsTest(unittest.TestCase):
         state = SANSFunctionsTest._get_state()
         state.save.user_specified_output_name = ''
         # Act
-        output_workspace, group_output_name = get_transmission_output_name(state)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_workspace, group_output_name = get_transmission_output_name(state, wav_range=wav_range)
         # Assert
         self.assertEqual(output_workspace, "12345_trans_Sample_1.0_10.0")
         self.assertEqual(group_output_name, "12345_trans_1.0_10.0")
@@ -173,7 +171,9 @@ class SANSFunctionsTest(unittest.TestCase):
                                 "event_slice": False,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_transmission_output_name(state, multi_reduction_type=multi_reduction_type)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_transmission_output_name(state, wav_range=wav_range,
+                                                                      multi_reduction_type=multi_reduction_type)
 
         self.assertEqual(output_name, 'user_output_name_trans_Sample_12.0_34.0')
         self.assertEqual(group_output_name, 'user_output_name_trans')
@@ -186,7 +186,9 @@ class SANSFunctionsTest(unittest.TestCase):
                                 "event_slice": False,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_transmission_output_name(state, multi_reduction_type=multi_reduction_type)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_transmission_output_name(state, wav_range=wav_range,
+                                                                      multi_reduction_type=multi_reduction_type)
 
         self.assertEqual(output_name, '12345_trans_Sample_1.0_10.0_12.0_34.0')
         self.assertEqual(group_output_name, '12345_trans_1.0_10.0')
@@ -196,7 +198,9 @@ class SANSFunctionsTest(unittest.TestCase):
         state = SANSFunctionsTest._get_state()
         state.save.user_specified_output_name = "test_output"
         # Act
-        output_workspace, group_output_name = get_transmission_output_name(state, data_type=DataType.CAN)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_workspace, group_output_name = get_transmission_output_name(state, wav_range=wav_range,
+                                                                           data_type=DataType.CAN)
         # Assert
         self.assertEqual(output_workspace, "test_output_trans_Can")
         self.assertEqual(group_output_name, 'test_output_trans')
@@ -206,7 +210,9 @@ class SANSFunctionsTest(unittest.TestCase):
         state = SANSFunctionsTest._get_state()
         state.save.user_specified_output_name = ''
         # Act
-        output_workspace, group_output_name = get_transmission_output_name(state, data_type=DataType.CAN)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_workspace, group_output_name = get_transmission_output_name(state, wav_range=wav_range,
+                                                                           data_type=DataType.CAN)
         # Assert
         self.assertEqual(output_workspace, "12345_trans_Can_1.0_10.0")
         self.assertEqual(group_output_name, '12345_trans_1.0_10.0')
@@ -219,7 +225,8 @@ class SANSFunctionsTest(unittest.TestCase):
                                 "event_slice": False,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_transmission_output_name(state,
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_transmission_output_name(state, wav_range=wav_range,
                                                                       multi_reduction_type=multi_reduction_type,
                                                                       data_type=DataType.CAN)
 
@@ -234,7 +241,8 @@ class SANSFunctionsTest(unittest.TestCase):
                                 "event_slice": False,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_transmission_output_name(state,
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_transmission_output_name(state, wav_range=wav_range,
                                                                       multi_reduction_type=multi_reduction_type,
                                                                       data_type=DataType.CAN, fitted=False)
 
@@ -266,8 +274,8 @@ class SANSFunctionsTest(unittest.TestCase):
                                               state=state,
                                               reduction_mode=ReductionMode.LAB)
         # Act
-        workspace, workspace_count, workspace_norm = get_reduced_can_workspace_from_ads(state, output_parts=True,
-                                                                                        reduction_mode=ReductionMode.LAB)  # noqa
+        workspace, workspace_count, workspace_norm = get_reduced_can_workspace_from_ads(
+            state, output_parts=True, reduction_mode=ReductionMode.LAB)
 
         # Assert
         self.assertNotEqual(workspace, None)
@@ -348,7 +356,8 @@ class SANSFunctionsTest(unittest.TestCase):
         state = self._get_state()
         state.save.user_specified_output_name = ''
 
-        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, False)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, False, wav_range=wav_range)
 
         expected = "12345_rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37"
 
@@ -361,7 +370,8 @@ class SANSFunctionsTest(unittest.TestCase):
         state.save.user_specified_output_name = custom_user_name
         state.reduction.reduction_mode = ReductionMode.LAB
 
-        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, False)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, False, wav_range=wav_range)
 
         reduction_settings = "_rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37"
 
@@ -376,7 +386,8 @@ class SANSFunctionsTest(unittest.TestCase):
         state.save.user_specified_output_name = custom_user_name
         state.reduction.reduction_mode = ReductionMode.HAB
 
-        output_name, group_output_name = get_output_name(state, ReductionMode.HAB, False)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_output_name(state, ReductionMode.HAB, False, wav_range=wav_range)
         reduction_settings = "_front_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37"
 
         expected = custom_user_name + reduction_settings
@@ -394,7 +405,8 @@ class SANSFunctionsTest(unittest.TestCase):
 
         expected = custom_user_name + '_' + reduction_settings
 
-        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, False)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, False, wav_range=wav_range)
 
         self.assertEqual(expected, output_name)
         self.assertEqual(expected, group_output_name)
@@ -409,7 +421,8 @@ class SANSFunctionsTest(unittest.TestCase):
 
         expected = custom_name + reduction_settings
 
-        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, False)
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, False, wav_range=wav_range)
 
         self.assertEqual(expected, output_name)
         self.assertEqual(expected, group_output_name)
@@ -422,7 +435,8 @@ class SANSFunctionsTest(unittest.TestCase):
                                 "event_slice": True,
                                 "wavelength_range": False}
 
-        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True,
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True, wav_range=wav_range,
                                                          multi_reduction_type=multi_reduction_type)
 
         single_ws_name = custom_name + '_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37_t4.57_T12.37'
@@ -439,10 +453,11 @@ class SANSFunctionsTest(unittest.TestCase):
                                 "event_slice": False,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True,
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True, wav_range=wav_range,
                                                          multi_reduction_type=multi_reduction_type)
 
-        single_ws_name = custom_name + '_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37_12.0_34.0'
+        single_ws_name = custom_name + '_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37'
         group_ws_name = custom_name + '_merged_1DPhi12.0_56.0'
 
         self.assertEqual(single_ws_name, output_name)
@@ -456,7 +471,8 @@ class SANSFunctionsTest(unittest.TestCase):
                                 "event_slice": False,
                                 "wavelength_range": False}
 
-        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True,
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True, wav_range=wav_range,
                                                          multi_reduction_type=multi_reduction_type)
 
         single_ws_name = custom_name + '_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37_p0'
@@ -473,10 +489,11 @@ class SANSFunctionsTest(unittest.TestCase):
                                 "event_slice": True,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True,
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True, wav_range=wav_range,
                                                          multi_reduction_type=multi_reduction_type)
 
-        single_ws_name = custom_name + "_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37_p0_t4.57_T12.37_12.0_34.0"
+        single_ws_name = custom_name + "_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37_p0_t4.57_T12.37"
         group_ws_name = custom_name + "_merged_1DPhi12.0_56.0"
 
         self.assertEqual(single_ws_name, output_name)
@@ -490,10 +507,11 @@ class SANSFunctionsTest(unittest.TestCase):
                                 "event_slice": True,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, True,
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, True, wav_range=wav_range,
                                                          multi_reduction_type=multi_reduction_type)
 
-        single_ws_name = custom_name + "_rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37_p0_t4.57_T12.37_12.0_34.0"
+        single_ws_name = custom_name + "_rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37_p0_t4.57_T12.37"
         group_expected_name = custom_name + "_rear_1DPhi12.0_56.0"
 
         self.assertEqual(single_ws_name, output_name)
@@ -507,7 +525,8 @@ class SANSFunctionsTest(unittest.TestCase):
                                 "event_slice": True,
                                 "wavelength_range": False}
 
-        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True,
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True, wav_range=wav_range,
                                                          multi_reduction_type=multi_reduction_type)
 
         self.assertEqual(output_name, '12345_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
@@ -521,7 +540,8 @@ class SANSFunctionsTest(unittest.TestCase):
                                 "event_slice": True,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True,
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_output_name(state, ReductionMode.MERGED, True, wav_range=wav_range,
                                                          multi_reduction_type=multi_reduction_type)
 
         self.assertEqual(output_name, '12345_merged_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')
@@ -535,7 +555,8 @@ class SANSFunctionsTest(unittest.TestCase):
                                 "event_slice": True,
                                 "wavelength_range": True}
 
-        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, True,
+        wav_range = state.wavelength.wavelength_interval.wavelength_full_range
+        output_name, group_output_name = get_output_name(state, ReductionMode.LAB, True, wav_range=wav_range,
                                                          multi_reduction_type=multi_reduction_type)
 
         self.assertEqual(output_name, '12345_rear_1D_12.0_34.0Phi12.0_56.0_t4.57_T12.37')

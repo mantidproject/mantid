@@ -129,8 +129,7 @@ class StateReductionBuilderTest(unittest.TestCase):
         builder.set_prompt_peak_correction_min(12.0)
         builder.set_prompt_peak_correction_max(17.0)
         builder.set_rebin_type(RebinType.REBIN)
-        builder.state.wavelength_interval.wavelength_min = 1.5
-        builder.state.wavelength_interval.wavelength_max = 2.7
+        builder.state.wavelength_interval.wavelength_full_range = (1.5, 2.7)
         builder.state.wavelength_interval.wavelength_step = 0.5
         builder.set_wavelength_step_type(RangeStepType.LIN)
         builder.set_incident_monitor(1)
@@ -145,8 +144,7 @@ class StateReductionBuilderTest(unittest.TestCase):
         self.assertEqual(state.prompt_peak_correction_min,  12.0)
         self.assertEqual(state.prompt_peak_correction_max,  17.0)
         self.assertEqual(state.rebin_type, RebinType.REBIN)
-        self.assertEqual(state.wavelength_interval.wavelength_min,  1.5)
-        self.assertEqual(state.wavelength_interval.wavelength_max,  2.7)
+        self.assertEqual(state.wavelength_interval.wavelength_full_range,  (1.5, 2.7))
         self.assertEqual(state.wavelength_interval.wavelength_step,  0.5)
         self.assertEqual(state.wavelength_step_type, RangeStepType.LIN)
         self.assertEqual(state.background_TOF_general_start,  1.4)

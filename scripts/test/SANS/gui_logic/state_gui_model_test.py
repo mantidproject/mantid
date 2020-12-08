@@ -271,28 +271,27 @@ class StateGuiModelTest(unittest.TestCase):
 
     def _assert_all_wavelengths_match(self, model, low, high, step, step_type):
         # Transmission
-        self.assertEqual(model.all_states.adjustment.calculate_transmission.wavelength_interval.wavelength_min, low)
-        self.assertEqual(model.all_states.adjustment.calculate_transmission.wavelength_interval.wavelength_max, high)
-        self.assertEqual(model.all_states.adjustment.calculate_transmission.wavelength_interval.wavelength_step, step)
-        self.assertEqual(model.all_states.adjustment.calculate_transmission.wavelength_step_type, step_type)
+        trans_state = model.all_states.adjustment.calculate_transmission
+        self.assertEqual(trans_state.wavelength_interval.wavelength_full_range, (low, high))
+        self.assertEqual(trans_state.wavelength_interval.wavelength_step, step)
+        self.assertEqual(trans_state.wavelength_step_type, step_type)
         # Monitor
-        self.assertEqual(model.all_states.adjustment.normalize_to_monitor.wavelength_interval.wavelength_min, low)
-        self.assertEqual(model.all_states.adjustment.normalize_to_monitor.wavelength_interval.wavelength_max, high)
-        self.assertEqual(model.all_states.adjustment.normalize_to_monitor.wavelength_interval.wavelength_step, step)
-        self.assertEqual(model.all_states.adjustment.normalize_to_monitor.wavelength_step_type, step_type)
+        norm_state = model.all_states.adjustment.normalize_to_monitor
+        self.assertEqual(norm_state.wavelength_interval.wavelength_full_range, (low, high))
+        self.assertEqual(norm_state.wavelength_interval.wavelength_step, step)
+        self.assertEqual(norm_state.wavelength_step_type, step_type)
+
         # Wavelength and pixel adjustment
-        self.assertEqual(model.all_states.adjustment.wavelength_and_pixel_adjustment
-                         .wavelength_interval.wavelength_min, low)
-        self.assertEqual(model.all_states.adjustment.wavelength_and_pixel_adjustment
-                         .wavelength_interval.wavelength_max, high)
-        self.assertEqual(model.all_states.adjustment.wavelength_and_pixel_adjustment
-                         .wavelength_interval.wavelength_step, step)
-        self.assertEqual(model.all_states.adjustment.wavelength_and_pixel_adjustment.wavelength_step_type, step_type)
+        adj_state = model.all_states.adjustment.wavelength_and_pixel_adjustment
+
+        self.assertEqual(adj_state.wavelength_interval.wavelength_full_range, (low, high))
+        self.assertEqual(adj_state.wavelength_interval.wavelength_step, step)
+        self.assertEqual(adj_state.wavelength_step_type, step_type)
         # Wavelength
-        self.assertEqual(model.all_states.wavelength.wavelength_interval.wavelength_min, low)
-        self.assertEqual(model.all_states.wavelength.wavelength_interval.wavelength_max, high)
-        self.assertEqual(model.all_states.wavelength.wavelength_interval.wavelength_step, step)
-        self.assertEqual(model.all_states.wavelength.wavelength_step_type, step_type)
+        wav_state = model.all_states.wavelength
+        self.assertEqual(wav_state.wavelength_interval.wavelength_full_range, (low, high))
+        self.assertEqual(wav_state.wavelength_interval.wavelength_step, step)
+        self.assertEqual(wav_state.wavelength_step_type, step_type)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Scale

@@ -374,18 +374,19 @@ class StateGuiModel(ModelCommon):
 
     @wavelength_min.setter
     def wavelength_min(self, value):
-        range = (value, self.wavelength_max)
+        range = (float(value), self.wavelength_max)
         self._set_on_all_wavelength("wavelength_full_range", range)
         self._set_on_all_wavelength("selected_ranges", [(value, self.wavelength_max)])
 
     @property
     def wavelength_max(self):
+        self._assert_all_wavelength_same("wavelength_full_range")
         val = self._all_states.wavelength.wavelength_interval.wavelength_full_range[1]
         return self._get_val_or_default(val)
 
     @wavelength_max.setter
     def wavelength_max(self, value):
-        range = (self.wavelength_min, value)
+        range = (self.wavelength_min, float(value))
         self._set_on_all_wavelength("wavelength_full_range", range)
         self._set_on_all_wavelength("selected_ranges", [(self.wavelength_min, value)])
 

@@ -868,22 +868,29 @@ def _set_alg_output_names(reduction_package, reduction_alg, event_slice_optimisa
     # ------------------------------------------------------------------------------------------------------------------
     # Set the output workspaces for the calculated and unfitted transmission
     # ------------------------------------------------------------------------------------------------------------------
+    def get_transmission_names(_trans_ws_group, data_type, is_fitted):
+        output_names, output_base_names = [], []
+        for ws in _trans_ws_group:
+            range_str = ws.getRun().getProperty("Wavelength Range").valueAsStr
+            wav_range = range_str.split('-')
+            trans_name, base_name = get_transmission_output_name(reduction_package.state, wav_range,
+                                                                 data_type, multi_reduction_type, is_fitted)
+            output_names.append(trans_name)
+            output_base_names.append(base_name)
+        return output_names, output_base_names
+
     sample_calculated_transmission, \
-        sample_calculated_transmission_base = get_transmission_output_name(reduction_package.state,
-                                                                           reduction_package.calculated_transmission,
-                                                                           DataType.SAMPLE, multi_reduction_type, True)
+        sample_calculated_transmission_base = get_transmission_names(reduction_package.calculated_transmission,
+                                                                     DataType.SAMPLE, True)
     can_calculated_transmission, \
-        can_calculated_transmission_base = get_transmission_output_name(reduction_package.state,
-                                                                        reduction_package.calculated_transmission_can,
-                                                                        DataType.CAN, multi_reduction_type, True)
+        can_calculated_transmission_base = get_transmission_names(reduction_package.calculated_transmission_can,
+                                                                  DataType.CAN, True)
     sample_unfitted_transmission, \
-        sample_unfitted_transmission_base = get_transmission_output_name(reduction_package.state,
-                                                                         reduction_package.unfitted_transmission,
-                                                                         DataType.SAMPLE, multi_reduction_type, False)
+        sample_unfitted_transmission_base = get_transmission_names(reduction_package.unfitted_transmission,
+                                                                   DataType.SAMPLE, False)
     can_unfitted_transmission, \
-        can_unfitted_transmission_base = get_transmission_output_name(reduction_package.state,
-                                                                      reduction_package.unfitted_transmission_can,
-                                                                      DataType.CAN, multi_reduction_type, False)
+        can_unfitted_transmission_base = get_transmission_names(reduction_package.unfitted_transmission_can,
+                                                                DataType.CAN, False)
 
     _set_custom_output_name(reduction_package.calculated_transmission, reduction_package,
                             sample_calculated_transmission, sample_calculated_transmission_base,
