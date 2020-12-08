@@ -39,10 +39,11 @@ class CorelliPowderCalibrationCreateTest(unittest.TestCase):
             InputWorkspace='test_workspace', OutputWorkspacesPrefix='cal_', TubeDatabaseDir='/tmp',
             TofBinning=[300, 1.0, 16666.7], PeakPositions=spacings_reference, AdjustSource=False, ComponentList='bank1',
             ComponentMaxTranslation=0.2, ComponentMaxRotation=10)
-        values_output = mtd['cal_adjustments'].row(0)
-        assert_allclose(values_output[:3], target_position, atol=0.001)
-        assert_allclose(values_output[3: 6], target_orientation, atol=0.001)
-        assert_allclose(values_output[-1], target_rotation, atol=0.1)
+        row = mtd['cal_adjustments'].row(0)
+        assert_allclose([row[name] for name in ('Xposition', 'Yposition', 'Zposition')], target_position, atol=0.001)
+        assert_allclose([row[name] for name in ('XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine')],
+                        target_orientation, atol=0.001)
+        assert_allclose(row['RotationAngle'], target_rotation, atol=0.1)
 
 
 if __name__ == '__main__':
