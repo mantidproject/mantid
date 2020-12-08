@@ -60,10 +60,14 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             issues['VanadiumInputWorkspace'] = 'Vanadium input workspace is mandatory for when detector efficiency calibration' \
                                                     ' is "Vanadium".'
 
-        if ( (normalisation_method == 'Incoherent' or normalisation_method == 'Paramagnetic')
-             and self.getProperty('CrossSectionSeparationMethod').isDefault):
-            issues['NormalisationMethod'] = 'Chosen sample normalisation requires input from the cross-section separation.'
-            issues['CrossSectionSeparationMethod'] = 'Chosen sample normalisation requires input from the cross-section separation.'
+        if normalisation_method in ['Incoherent', 'Paramagnetic']:
+            if self.getProperty('CrossSectionSeparationMethod').isDefault:
+                issues['NormalisationMethod'] = 'Chosen sample normalisation requires input from the cross-section separation.'
+                issues['CrossSectionSeparationMethod'] = 'Chosen sample normalisation requires input from the cross-section separation.'
+
+            if normalisation_method == 'Paramagnetic' and self.getPropertyValue('CrossSectionSeparationMethod') == 'Uniaxial':
+                issues['NormalisationMethod'] = 'Paramagnetic normalisation is not compatible with uniaxial measurement.'
+                issues['CrossSectionSeparationMethod'] = 'Paramagnetic normalisation is not compatible with uniaxial measurement.'
 
         if normalisation_method != 'None' or self.getPropertyValue('CrossSectionSeparationMethod') == '10p':
             sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
