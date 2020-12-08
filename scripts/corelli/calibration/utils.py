@@ -83,7 +83,7 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
     Clone the input workspace/run and preprocess the histograms for each tube such
     that the peak finding algorithm can have a better chance of finding the correct
     wire position.
-    
+
     Note: the preprocess step needs to be performed after load_banks, which provided
     the bank selection.
     :param input_workspace: input workspace name
@@ -96,7 +96,7 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
     #       pre-processing only
     def clean_signals(
         signal1D: np.ndarray,
-        pixels_per_tube: int = 256,
+        pixels_per_tube: int = PIXELS_PER_TUBE,
         peak_interval_estimate: int = 15,
     ) -> np.ndarray:
         r"""
@@ -118,9 +118,9 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
 
     _ws = mtd[output_workspace]
     for i in range(0, _ws.getNumberHistograms(), PIXELS_PER_TUBE):
-        _data = np.array([_ws.readY(me) for me in range(i, i + n_pixels_per_tube)])
+        _data = np.array([_ws.readY(me) for me in range(i, i + PIXELS_PER_TUBE)])
         _data = clean_signals(_data)
-        for j in range(n_pixels_per_tube):
+        for j in range(PIXELS_PER_TUBE):
             _ws.setY(i + j, _data[j])  # This apprently is the correct way to update Y
 
     return _ws
