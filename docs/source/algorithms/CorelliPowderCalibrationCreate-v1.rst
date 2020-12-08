@@ -55,6 +55,13 @@ A description of the output workspaces follows:
 Workspace ``LaB6_adjustments`` is the main result, a table containing adjustments for different instrument components.
 In our example, we have adjusted the moderator and banks 42 and 87.
 
++--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
+| Component          | Xposition  | Yposition | Zposition | XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
++====================+============+===========+===========+==================+==================+==================+===============+
+| moderator          | 0.0        | 0.0       | -19.9944  |      0.0         |      0.0         |      0.0         |      0.0      |
++--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
+| bank42/sixteenpack | 2.5941     | 0.0625    | 0.0870    | 0.0009           | -0.9997          | 0.0210           |       92.3187 |
++--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
 
 
 .. categories::
