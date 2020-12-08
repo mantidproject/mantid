@@ -26,6 +26,21 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Poco::XML;
 
+namespace {
+
+bool hasExtention(std::string filename, const std::string &extention) {
+  if (filename.length() < extention.length())
+    return false;
+
+  std::transform(filename.begin(), filename.end(), filename.begin(),
+                 [](unsigned char c) { return std::tolower(c); });
+
+  return filename.compare(filename.length() - extention.length(),
+                          extention.length(), extention) == 0;
+}
+
+} // namespace
+
 namespace Mantid {
 namespace DataHandling {
 
@@ -33,20 +48,23 @@ DECLARE_ALGORITHM(SaveDetectorsGrouping)
 
 /// Define input parameters
 void SaveDetectorsGrouping::init() {
+  const std::initializer_list<std::string> extentions = {".xml", ".map"};
+
   declareProperty(
       std::make_unique<API::WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           "InputWorkspace", "", Direction::Input),
-      "GroupingWorkspace to output to XML file (GroupingWorkspace)");
-  declareProperty(std::make_unique<FileProperty>("OutputFile", "",
-                                                 FileProperty::Save, ".xml"),
-                  "File to save the detectors mask in XML format");
+      "GroupingWorkspace to output to a XML or MAP file (GroupingWorkspace)");
+  declareProperty(
+      std::make_unique<FileProperty>("OutputFile", "", FileProperty::Save,
+                                     extentions),
+      "File to save the detectors grouping to. Default is an XML file.");
 }
 
 /// Main body to execute algorithm
 void SaveDetectorsGrouping::exec() {
 
   // 1. Get Input
-  const std::string xmlfilename = this->getProperty("OutputFile");
+  const std::string outputFilename = this->getProperty("OutputFile");
   mGroupWS = this->getProperty("InputWorkspace");
 
   // 2. Create Map(group ID, workspace-index vector)
@@ -59,7 +77,10 @@ void SaveDetectorsGrouping::exec() {
   this->convertToDetectorsRanges(groupIDwkspIDMap, groupIDdetectorRangeMap);
 
   // 4. Print out
-  this->printToXML(groupIDdetectorRangeMap, xmlfilename);
+  if (hasExtention(outputFilename, "map"))
+    printToMap(groupIDdetectorRangeMap, outputFilename);
+  else
+    printToXML(groupIDdetectorRangeMap, outputFilename);
 }
 
 /*
@@ -237,6 +258,10 @@ void SaveDetectorsGrouping::printToXML(
   writer.writeNode(ofs, pDoc);
   ofs.close();
 }
+
+void SaveDetectorsGrouping::printToMap(
+    const std::map<int, std::vector<detid_t>> &groupdetidrangemap,
+    const std::string &mapfilename) {}
 
 } // namespace DataHandling
 } // namespace Mantid
