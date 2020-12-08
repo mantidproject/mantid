@@ -91,6 +91,7 @@ set(PYTHON_PLUGINS
     algorithms/LRReflectivityOutput.py
     algorithms/LRScalingFactors.py
     algorithms/LRSubtractAverageBackground.py
+    algorithms/LeadPressureCalc.py
     algorithms/LinkedUBs.py
     algorithms/LiquidsReflectometryReduction.py
     algorithms/LoadAndMerge.py

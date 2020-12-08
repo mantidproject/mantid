@@ -36,7 +36,7 @@ New features
 - New algorithm :ref:`CorelliPowderCalibrationDatabase <algm-CorelliPowderCalibrationDatabase>` to save Corelli geometry calibration to database
 - New algorithm :ref:`CorelliPowderCalibrationApply <algm-CorelliPowderCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace.
 - New algorithm :ref:`CorelliPowderCalibrationLoad <algm-CorelliPowderCalibrationLoad>` to load a CORELLI calibration table into memory.
-
+- New algorithm :ref:`LeadPressureCalc <algm-LeadPressureCalc>` to calculate the pressure of a sample given the dSpacing of the Lead (111) peak and the sample temperature.
 
 Improvements
 ############
