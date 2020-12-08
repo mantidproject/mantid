@@ -26,7 +26,7 @@ from Calibration import tube
 from Calibration.tube_calib_fit_params import TubeCalibFitParams
 
 # Functions exposed to the general user (public) API
-__all__ = ['apply_calibration', 'load_banks', 'calibrate_tube']
+__all__ = ['apply_calibration', 'preprocess_banks', 'load_banks', 'calibrate_tube']
 
 # Type aliases
 InputTable = Union[
