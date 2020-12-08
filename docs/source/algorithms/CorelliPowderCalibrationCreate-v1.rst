@@ -50,6 +50,13 @@ A set of output workspaces are created, including the adjustment diagnostics
     :width: 635
     :alt: original layout of CORELLI instrument
 
+A description of the output workspaces follows:
+
+Workspace ``LaB6_adjustments`` is the main result, a table containing adjustments for different instrument components.
+In our example, we have adjusted the moderator and banks 42 and 87.
+
+
+
 .. categories::
 
 .. sourcelink::
