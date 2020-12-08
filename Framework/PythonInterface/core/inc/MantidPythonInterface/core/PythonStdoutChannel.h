@@ -5,7 +5,7 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 //
-// StdoutChannel.h
+// PythonStdoutChannel.h
 //
 // Similar to console channel for logging. The output is on std::cout instead of
 // std::clog (which is the same as std::cerr)
@@ -17,12 +17,15 @@
 
 #pragma once
 
-#include "MantidKernel/DllConfig.h"
+#include "MantidPythonInterface/core/DllConfig.h"
 #include <Poco/ConsoleChannel.h>
+
 namespace Poco {
-class MANTID_KERNEL_DLL StdoutChannel : public ConsoleChannel {
+
+class MANTID_PYTHONINTERFACE_CORE_DLL PythonStdoutChannel
+    : public ConsoleChannel {
 public:
-  /// Constructor for StdChannel
-  StdoutChannel();
+  /// Constructor for PythonStdoutChannel
+  PythonStdoutChannel();
 };
 } // namespace Poco
