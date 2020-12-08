@@ -11,19 +11,27 @@ from Engineering.gui.engineering_diffraction.engineering_diffraction import Engi
 class EngineeringDiffractionUIAttributes(object):
     # WARNING: If you delete a tag from here instead of adding a new one, it will make old project files obsolete so
     # just add an extra tag to the list e.g. ["InstrumentWidget", "IWidget"]
-    _tags = ["EngineeringDiffractionGUI"]
+    _tags = ["EngineeringDiffractionGui"]
 
 
 class EngineeringDiffractionEncoder(EngineeringDiffractionUIAttributes):
     def __init__(self):
         super(EngineeringDiffractionEncoder, self).__init__()
 
-    # TODO
-    def encode(self, obj, _=None):  # what is obj? object to encode - > in this case fitting presenter
-        data_widget = obj.data_widget
-        plot_widget = obj.plot_widget  # plot presenter
-        return {"data_loaded_workspaces": data_widget.presenter.get_loaded_workspaces(),
-                "fit_properties": plot_widget.read_current_fitprop()}
+    def encode(self, obj, _=None):  # what obj = EngineeringDiffractionGui
+        data_widget = obj.fitting_presenter.data_widget  # data widget
+        plot_widget = obj.fitting_presenter.plot_widget  # plot presenter
+        obj_dic = dict()
+        obj_dic["current_tab"] = obj.tabs.currentIndex()
+        if data_widget.presenter.get_loaded_workspaces():
+            obj_dic["data_loaded_workspaces"] = [*data_widget.presenter.get_loaded_workspaces().keys()]
+            obj_dic["plotted_workspaces"] = [*data_widget.presenter.plotted]
+            if plot_widget.view.fit_browser.get_fitprop():
+                obj_dic["fit_properties"] = plot_widget.view.fit_browser.get_fitprop()
+                obj_dic["plot_diff"] = str(plot_widget.view.fit_browser.plotDiff())
+            else:
+                obj_dic["fit_properties"] = None
+        return obj_dic
 
     @classmethod
     def tags(cls):
@@ -34,10 +42,32 @@ class EngineeringDiffractionDecoder(EngineeringDiffractionUIAttributes):
     def __init__(self):
         super(EngineeringDiffractionDecoder, self).__init__()
 
-    # TODO
     @staticmethod
     def decode(obj_dic, _=None):
-        return EngineeringDiffractionGui(restore_dict=obj_dic)
+        ws_names = obj_dic["data_loaded_workspaces"]  # workspaces are in ADS, need restoring into interface
+        gui = EngineeringDiffractionGui()
+        gui.tabs.setCurrentIndex(obj_dic["current_tab"])
+        gui.fitting_presenter.data_widget.model.restore_files(ws_names)
+        gui.fitting_presenter.data_widget.presenter.plotted = set(obj_dic["plotted_workspaces"])
+        gui.fitting_presenter.data_widget.presenter.restore_table()
+
+        if obj_dic["fit_properties"]:
+            fit_browser = gui.fitting_presenter.plot_widget.view.fit_browser
+            gui.fitting_presenter.plot_widget.view.fit_toggle()  # show the fit browser, default is off
+
+            fit_props = obj_dic["fit_properties"]["properties"]
+            fit_function = fit_props["Function"]
+            start_x, end_x = fit_props["StartX"], fit_props["EndX"]
+            output_name = fit_props["Output"]
+            is_plot_diff = obj_dic["plot_diff"]
+
+            fit_browser.setStartX(start_x)
+            fit_browser.setEndX(end_x)
+            fit_browser.loadFunction(fit_function)
+            fit_browser.setOutputName(output_name)
+            ws_name = output_name + '_Workspace'
+            fit_browser.do_plot(ADS.retrieve(ws_name), is_plot_diff)
+        return gui
 
     @classmethod
     def tags(cls):
