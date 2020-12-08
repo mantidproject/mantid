@@ -31,6 +31,7 @@ set(PYTHON_PLUGINS
     algorithms/ConjoinFiles.py
     algorithms/ConjoinSpectra.py
     algorithms/ConvertSnsRoiFileToMask.py
+    algorithms/ConvertQtoHKLHisto.py
     algorithms/ConvertWANDSCDtoQ.py
     algorithms/CorrectLogTimes.py
     algorithms/CorrectTOF.py
