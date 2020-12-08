@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IndexTypes.h"
 #include "IndirectFittingModel.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <QTableWidget>
 
@@ -18,6 +18,7 @@
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
+using namespace MantidWidgets;
 
 using DataPositionType = IndexCollectionType<TableDatasetIndex, FitDomainIndex>;
 

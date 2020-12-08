@@ -9,7 +9,6 @@ import unittest
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
 
-from Muon.GUI.Common.utilities import load_utils
 from Muon.GUI.FrequencyDomainAnalysis.FFT import fft_presenter
 from Muon.GUI.FrequencyDomainAnalysis.FFT.fft_widget import FFTWidget
 from Muon.GUI.FrequencyDomainAnalysis.MaxEnt import maxent_presenter

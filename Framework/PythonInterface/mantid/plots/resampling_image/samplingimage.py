@@ -4,14 +4,17 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import matplotlib.image as mimage
 import matplotlib.colors
 import numpy as np
 
 from mantid.plots.datafunctions import get_matrix_2d_ragged, get_normalize_by_bin_width
+from mantid.plots.mantidimage import MantidImage
+from mantid.api import MatrixWorkspace
+
+MAX_HISTOGRAMS = 5000
 
 
-class SamplingImage(mimage.AxesImage):
+class SamplingImage(MantidImage):
     def __init__(self,
                  ax,
                  workspace,
@@ -50,6 +53,7 @@ class SamplingImage(mimage.AxesImage):
                            workspace.getDimension(1).getNBins())
         self._xbins, self._ybins = 100, 100
         self.origin = origin
+        self._update_maxpooling_option()
 
     def connect_events(self):
         axes = self.axes
@@ -109,7 +113,8 @@ class SamplingImage(mimage.AxesImage):
                                               extent=extent,
                                               xbins=xbins,
                                               ybins=ybins,
-                                              spec_info=self.spectrum_info)
+                                              spec_info=self.spectrum_info,
+                                              maxpooling=self._maxpooling)
 
             # Data is an MxN matrix.
             # If origin = upper extent is set as [xmin, xmax, ymax, ymin].
@@ -137,6 +142,15 @@ class SamplingImage(mimage.AxesImage):
 
     def get_full_extent(self):
         return self._full_extent
+
+    def _update_maxpooling_option(self):
+        """
+        Updates the maxpooling option, used when the image is downsampled
+        If the workspace is large, or ragged, we skip this maxpooling step and set the option as False
+        """
+        axis = self.ws.getAxis(1)
+        self._maxpooling = (self.ws.getNumberHistograms() <= MAX_HISTOGRAMS and axis.isSpectra() and
+                            not self.ws.isRaggedWorkspace())
 
 
 def imshow_sampling(axes,
@@ -177,6 +191,21 @@ def imshow_sampling(axes,
                           workspace.getDimension(0).getMaximum(),
                           workspace.getDimension(1).getMinimum(),
                           workspace.getDimension(1).getMaximum())
+        if isinstance(workspace, MatrixWorkspace) and not workspace.isCommonBins():
+            # for MatrixWorkspace the x extent obtained from dimension 0 corresponds to the first spectrum
+            # this is not correct in case of ragged workspaces, where we need to obtain the global xmin and xmax
+            # moreover the axis might be in ascending or descending order, so x[0] is not necessarily the minimum
+            for i in range(workspace.getNumberHistograms()):
+                x_axis = workspace.readX(i)
+                x_i_first = x_axis[0]
+                x_i_last = x_axis[-1]
+                x_i_min = min(x_i_first, x_i_last)
+                x_i_max = max(x_i_first, x_i_last)
+                if x_i_min < x0:
+                    x0 = x_i_min
+                if x_i_max > x1:
+                    x1 = x_i_max 
+
         if workspace.getDimension(1).getNBins() == workspace.getAxis(1).length():
             width = workspace.getDimension(1).getBinWidth()
             y0 -= width / 2

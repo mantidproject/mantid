@@ -81,7 +81,7 @@ private:
   void adjustTOF();
   void moveSource();
 
-  LoadHelper m_loader;          ///< Load helper for metadata
+  LoadHelper m_loadHelper;      ///< Load helper for metadata
   std::string m_instrumentName; ///< Name of the instrument
   std::vector<std::string>
       m_supportedInstruments;                 ///< List of supported instruments
@@ -90,7 +90,7 @@ private:
   std::string m_resMode; ///< Resolution mode for D11 and D22
   bool m_isTOF;          ///< TOF or monochromatic flag
   double m_sourcePos;    ///< Source Z (for D33 TOF)
-  bool m_isD16Omega;
+  bool m_isD16Omega;     ///< Data come from a D16 omega scan flag
 
   void setFinalProperties(const std::string &filename);
   void setPixelSize();

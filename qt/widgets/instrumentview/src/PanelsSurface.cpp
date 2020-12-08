@@ -21,6 +21,7 @@
 #include <QApplication>
 #include <QCursor>
 #include <QMessageBox>
+#include <QPainterPath>
 #include <QtDebug>
 
 using namespace Mantid::Geometry;
@@ -189,6 +190,24 @@ size_t findNumDetectors(const ComponentInfo &componentInfo,
   }
   return numDets;
 }
+
+void initialisePolygonWithTransformedBoundingBoxPoints(
+    QPolygonF &panelPolygon, const ComponentInfo &componentInfo,
+    size_t detectorIndex, const V3D &refPos, const Quat &rotation,
+    const V3D &xaxis, const V3D &yaxis) {
+  auto bb = componentInfo.boundingBox(detectorIndex);
+  auto bbMinPoint = bb.minPoint() - refPos;
+  auto bbMaxPoint = bb.maxPoint() - refPos;
+  rotation.rotate(bbMinPoint);
+  rotation.rotate(bbMaxPoint);
+  bbMinPoint += refPos;
+  bbMaxPoint += refPos;
+  QPointF bb0(xaxis.scalar_prod(bbMinPoint), yaxis.scalar_prod(bbMinPoint));
+  QPointF bb1(xaxis.scalar_prod(bbMaxPoint), yaxis.scalar_prod(bbMaxPoint));
+  panelPolygon << bb0;
+  panelPolygon << bb1;
+}
+
 } // namespace
 
 namespace MantidQt {
@@ -316,6 +335,12 @@ void PanelsSurface::addFlatBankOfDetectors(
   QVector<QPointF> vert;
   vert << p1 << p0;
   info->polygon = QPolygonF(vert);
+
+  // initialise bank polygon with sensible bounding box points
+  initialisePolygonWithTransformedBoundingBoxPoints(
+      info->polygon, m_instrActor->componentInfo(), detectors[0], pos0,
+      info->rotation, m_xaxis, m_yaxis);
+
 #pragma omp parallel for ordered
   for (int i = 0; i < static_cast<int>(detectors.size()); ++i) { // NOLINT
     auto detector = detectors[i];
@@ -497,8 +522,9 @@ PanelsSurface::processUnstructured(size_t rootIndex,
   detectors.reserve(numDets);
 
   for (auto child : children) {
-    if (detectorInfo.isMonitor(child))
+    if (!componentInfo.isDetector(child) || detectorInfo.isMonitor(child))
       continue;
+    visited[child] = true;
     auto pos = detectorInfo.position(child);
     if (child == children[0])
       pos0 = pos;
@@ -523,7 +549,6 @@ PanelsSurface::processUnstructured(size_t rootIndex,
     }
     detectors.emplace_back(child);
   }
-  setBankVisited(componentInfo, rootIndex, visited);
   return std::make_pair(detectors, normal);
 }
 
@@ -616,12 +641,13 @@ PanelsSurface::calcBankRotation(const Mantid::Kernel::V3D &detPos,
 }
 
 void PanelsSurface::addDetector(size_t detIndex,
-                                const Mantid::Kernel::V3D &refPos, int index,
+                                const Mantid::Kernel::V3D &refPos,
+                                int bankIndex,
                                 const Mantid::Kernel::Quat &rotation) {
   const auto &detectorInfo = m_instrActor->detectorInfo();
 
   auto pos = detectorInfo.position(detIndex);
-  m_detector2bankMap[detIndex] = index;
+  m_detector2bankMap[detIndex] = bankIndex;
   // get the colour
   UnwrappedDetector udet(m_instrActor->getColor(detIndex), detIndex);
   // apply bank's rotation
@@ -700,9 +726,18 @@ bool PanelsSurface::isOverlapped(QPolygonF &polygon, int iexclude) const {
   for (int i = 0; i < m_flatBanks.size(); ++i) {
     if (i == iexclude)
       continue;
-    QPolygonF poly = polygon.intersected(m_flatBanks[i]->polygon);
-    if (poly.size() > 0)
+    const auto &testPoly = m_flatBanks[i]->polygon;
+#if (QT_VERSION <= QT_VERSION_CHECK(5, 10, 0))
+    QPainterPath subject;
+    subject.addPolygon(testPoly);
+    QPainterPath clip;
+    clip.addPolygon(polygon);
+    if (subject.intersects(clip))
       return true;
+#else
+    if (testPoly.intersects(polygon))
+      return true;
+#endif
   }
   return false;
 }

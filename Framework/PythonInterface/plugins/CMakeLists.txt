@@ -38,7 +38,6 @@ set(PYTHON_PLUGINS
     algorithms/CreateEmptyTableWorkspace.py
     algorithms/CreateLeBailFitInput.py
     algorithms/CropWorkspaceForMDNorm.py
-    algorithms/CropWorkspaceRagged.py
     algorithms/CylinderPaalmanPingsCorrection2.py
     algorithms/DNSComputeDetEffCorrCoefs.py
     algorithms/DNSFlippingRatioCorr.py
@@ -47,6 +46,7 @@ set(PYTHON_PLUGINS
     algorithms/DSFinterp.py
     algorithms/DakotaChiSquared.py
     algorithms/DeltaPDF3D.py
+    algorithms/LoadElementalAnalysisData.py
     algorithms/EnggCalibrate.py
     algorithms/EnggCalibrateFull.py
     algorithms/EnggEstimateFocussedBackground.py
@@ -91,6 +91,7 @@ set(PYTHON_PLUGINS
     algorithms/LRReflectivityOutput.py
     algorithms/LRScalingFactors.py
     algorithms/LRSubtractAverageBackground.py
+    algorithms/LeadPressureCalc.py
     algorithms/LinkedUBs.py
     algorithms/LiquidsReflectometryReduction.py
     algorithms/LoadAndMerge.py
@@ -137,6 +138,7 @@ set(PYTHON_PLUGINS
     algorithms/PDToGUDRUN.py
     algorithms/PDToPDFgetN.py
     algorithms/PearlMCAbsorption.py
+    algorithms/PEARLTransfit.py
     algorithms/PoldiCreatePeaksFromFile.py
     algorithms/PoldiLoadRuns.py
     algorithms/PoldiMerge.py
@@ -333,6 +335,7 @@ set(PYTHON_PLUGINS
     functions/PCRmagnet.py
     functions/PCRmagnetZFKT.py
     functions/PCRmagnetfnorm.py
+    functions/PEARLTransVoigt.py
     functions/Porod.py
     functions/PrimStretchedExpFT.py
     functions/RFresonance.py
@@ -370,14 +373,8 @@ set(PACKAGE_FILE ${CMAKE_CURRENT_BINARY_DIR}/python-plugin-manifest.txt.install)
 list(JOIN PYTHON_PLUGINS "\n" PYTHON_PLUGINS)
 file(WRITE ${PACKAGE_FILE} ${PYTHON_PLUGINS})
 
-install(
+mtd_install_files(
     FILES ${PACKAGE_FILE}
-    DESTINATION ${WORKBENCH_PLUGINS_DIR}/python
-    RENAME "python-plugin-manifest.txt"
-)
-
-install(
-    FILES ${PACKAGE_FILE}
-    DESTINATION ${PLUGINS_DIR}/python
+    INSTALL_DIRS ${PLUGINS_DIR}/python ${WORKBENCH_PLUGINS_DIR}/python
     RENAME "python-plugin-manifest.txt"
 )

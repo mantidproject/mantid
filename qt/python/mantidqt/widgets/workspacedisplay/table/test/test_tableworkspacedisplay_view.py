@@ -25,7 +25,7 @@ class TableWorkspaceDisplayViewQtTest(unittest.TestCase, QtWidgetFinder):
         self.assert_widget_created()
         p.close(ws.name())
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
 
         self.assertEqual(None, p.ads_observer)
         self.assert_widget_not_present("work")
@@ -38,7 +38,7 @@ class TableWorkspaceDisplayViewQtTest(unittest.TestCase, QtWidgetFinder):
         self.assert_widget_created()
         p.force_close()
 
-        QApplication.processEvents()
+        QApplication.sendPostedEvents()
 
         self.assertEqual(None, p.ads_observer)
         self.assert_widget_not_present("work")

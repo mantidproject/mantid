@@ -38,6 +38,10 @@ public:
     return std::unique_ptr<WorkspaceSingleValue>(doCloneEmpty());
   }
   WorkspaceSingleValue &operator=(const WorkspaceSingleValue &other) = delete;
+
+  /// Returns true if the workspace is ragged (has differently sized spectra).
+  bool isRaggedWorkspace() const override { return false; }
+
   /// Returns the number of single indexable items in the workspace
   std::size_t size() const override { return 1; }
 

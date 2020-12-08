@@ -203,5 +203,6 @@ class TableModelTest(unittest.TestCase):
         table_model = TableModel()
         table_model.user_file = value
 
+
 if __name__ == '__main__':
     unittest.main()

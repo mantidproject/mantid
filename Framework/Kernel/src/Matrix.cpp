@@ -538,8 +538,12 @@ Always returns 0 if the Matrix have different sizes
     for (size_t i = 0; i < m_numRows; i++)
       for (size_t j = 0; j < m_numColumns; j++) {
         const T diff = (m_rawData[i][j] - A.m_rawData[i][j]);
-        if (fabs(diff) > maxDiff)
-          maxDiff = fabs(diff);
+        if (std::isnan(static_cast<double>(diff))) {
+          maxDiff = std::numeric_limits<T>::max();
+        } else {
+          if (fabs(diff) > maxDiff)
+            maxDiff = fabs(diff);
+        }
         if (fabs(m_rawData[i][j]) > maxS)
           maxS = fabs(m_rawData[i][j]);
       }
@@ -1413,14 +1417,11 @@ Attempt to diagonalise the matrix IF symmetric
         else if (fabs(A.m_rawData[ip][iq]) > tresh) {
           double tanAngle, cosAngle, sinAngle;
           double h = Diag[iq] - Diag[ip];
-          if (static_cast<float>((fabs(h) + g)) == static_cast<float>(fabs(h)))
-            tanAngle = A.m_rawData[ip][iq] / h; // tanAngle=1/(2theta)
-          else {
-            double theta = 0.5 * h / A.m_rawData[ip][iq];
-            tanAngle = 1.0 / (fabs(theta) + sqrt(1.0 + theta * theta));
-            if (theta < 0.0)
-              tanAngle = -tanAngle;
-          }
+          double cot2Theta = 0.5 * h / A.m_rawData[ip][iq];
+          // tanAngle formula well behaved even if cot2Theta is inf
+          tanAngle = 1.0 / (fabs(cot2Theta) + sqrt(1.0 + pow(cot2Theta, 2)));
+          if (cot2Theta < 0.0)
+            tanAngle = -tanAngle;
           cosAngle = 1.0 / sqrt(1 + tanAngle * tanAngle);
           sinAngle = tanAngle * cosAngle;
           double tau = sinAngle / (1.0 + cosAngle);

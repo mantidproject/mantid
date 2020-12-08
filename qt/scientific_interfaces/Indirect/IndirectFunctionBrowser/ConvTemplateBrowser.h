@@ -37,7 +37,8 @@ public:
   void setNumberOfDatasets(int) override;
   int getCurrentDataset() override;
   int getNumberOfDatasets() const override;
-  void setDatasetNames(const QStringList &names) override;
+  void setDatasets(
+      const QList<MantidWidgets::FunctionModelDataset> &datasets) override;
   QStringList getGlobalParameters() const override;
   QStringList getLocalParameters() const override;
   void setGlobalParameters(const QStringList &globals) override;

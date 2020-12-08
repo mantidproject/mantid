@@ -147,8 +147,8 @@ IAlgorithm_sptr setupFitAlgorithm(const MatrixWorkspace_sptr &workspace,
   alg->initialize();
   alg->setProperty("InputWorkspace", workspace);
   alg->setProperty("Function", functionString);
-  alg->setProperty("StartX", 0.0);
-  alg->setProperty("EndX", 3.0);
+  alg->setProperty("StartX", "0.0");
+  alg->setProperty("EndX", "3.0");
   alg->setProperty("SpecMin", 0);
   alg->setProperty("SpecMax", 5);
   alg->setProperty("ConvolveMembers", true);
@@ -256,9 +256,9 @@ public:
   test_that_getSpectra_returns_the_same_spectra_range_which_was_provided_as_input() {
     auto const model = getFitPlotModel();
 
-    Spectra const spectra =
-        Spectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{9});
-    Spectra const storedSpectra = model.getSpectra();
+    FunctionModelSpectra const spectra =
+        FunctionModelSpectra(IDA::WorkspaceIndex{0}, IDA::WorkspaceIndex{9});
+    FunctionModelSpectra const storedSpectra = model.getSpectra();
 
     TS_ASSERT_EQUALS(storedSpectra, spectra);
   }

@@ -9,7 +9,7 @@ import unittest
 from mantid.api import FunctionFactory, MultiDomainFunction
 from unittest import mock
 from mantidqt.utils.qt.testing import start_qapplication
-from qtpy import QtWidgets
+from qtpy.QtWidgets import QApplication
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
@@ -38,7 +38,7 @@ def retrieve_combobox_info(combo_box):
 def wait_for_thread(thread_model):
     if thread_model:
         thread_model._thread.wait()
-        QtWidgets.QApplication.instance().processEvents()
+        QApplication.sendPostedEvents()
 
 
 def create_multi_domain_function(function_list):
@@ -721,6 +721,34 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.update_fit_status_information_in_view()
         self.view.update_with_fit_outputs.assert_called_with("LinearBackground", "success", 3.2)
         self.view.update_global_fit_state.assert_called_with(self.presenter._fit_status, 1)
+
+    def test_start_end_swapped_when_start_is_updated(self):
+        self.view.start_time = 4.0
+        self.presenter._end_x = [2.0]
+        self.view.get_index_for_start_end_times = mock.MagicMock(return_value = 0)
+
+        self.presenter.handle_start_x_updated()
+
+        self.assertEqual(2.0, self.view.start_time)
+        self.assertEqual(2.0, self.presenter.start_x[0])
+        self.assertEqual(4.0, self.view.end_time)
+        self.assertEqual(4.0, self.presenter.end_x[0])
+        calls = [mock.call(endX=4.0), mock.call(startX=2.0)]
+        self.presenter.model.update_model_fit_options.assert_has_calls(calls)
+
+    def test_start_end_swapped_when_end_is_updated(self):
+        self.view.end_time = 2.0
+        self.presenter._start_x = [4.0]
+        self.view.get_index_for_start_end_times = mock.MagicMock(return_value = 0)
+
+        self.presenter.handle_end_x_updated()
+
+        self.assertEqual(2.0, self.view.start_time)
+        self.assertEqual(2.0, self.presenter.start_x[0])
+        self.assertEqual(4.0, self.view.end_time)
+        self.assertEqual(4.0, self.presenter.end_x[0])
+        calls = [mock.call(startX=2.0), mock.call(endX=4.0)]
+        self.presenter.model.update_model_fit_options.assert_has_calls(calls)
 
 
 if __name__ == '__main__':

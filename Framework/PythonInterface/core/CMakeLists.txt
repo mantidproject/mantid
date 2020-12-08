@@ -61,7 +61,6 @@ set(INC_FILES
     inc/MantidPythonInterface/core/Converters/WrapWithNDArray.h
     inc/MantidPythonInterface/core/Policies/MatrixToNumpy.h
     inc/MantidPythonInterface/core/Policies/RemoveConst.h
-    inc/MantidPythonInterface/core/Policies/ToWeakPtr.h
     inc/MantidPythonInterface/core/Policies/VectorToNumpy.h
 )
 

@@ -17,6 +17,7 @@
 #include "MantidGeometry/Instrument/DetectorInfo.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Unit.h"
+#include "MantidTypes/Core/DateAndTimeHelpers.h"
 
 using Mantid::API::AnalysisDataService;
 using Mantid::API::Axis;
@@ -95,6 +96,7 @@ public:
     TS_ASSERT_DELTA(err6[0], sqrt(20), 1E-5)
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
+    checkTimeFormat(outputWS);
   }
 
   void test_D22() {
@@ -130,6 +132,7 @@ public:
     TS_ASSERT_DELTA(err6[0], sqrt(45), 1E-5)
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
+    checkTimeFormat(outputWS);
   }
 
   void test_D16() {
@@ -185,6 +188,7 @@ public:
     TS_ASSERT_DELTA(xAxis[1], 7.035, 1E-3)
     TS_ASSERT_EQUALS(spec[0], 17)
     TS_ASSERT_DELTA(err[0], sqrt(17), 1E-5)
+    checkTimeFormat(outputWS);
   }
 
   void test_D33() {
@@ -230,6 +234,7 @@ public:
     TS_ASSERT_EQUALS(bottom->getPos(), V3D(0, -0.41, 1.3118));
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
+    checkTimeFormat(outputWS);
   }
 
   void test_D33_TOF() {
@@ -259,6 +264,13 @@ public:
     TS_ASSERT_EQUALS(tof->value(), "TOF");
     const auto unit = outputWS->getAxis(0)->unit()->unitID();
     TS_ASSERT_EQUALS(unit, "Wavelength");
+    checkTimeFormat(outputWS);
+  }
+
+  void checkTimeFormat(MatrixWorkspace_const_sptr outputWS) {
+    TS_ASSERT(outputWS->run().hasProperty("start_time"));
+    TS_ASSERT(Mantid::Types::Core::DateAndTimeHelpers::stringIsISO8601(
+        outputWS->run().getProperty("start_time")->value()));
   }
 };
 

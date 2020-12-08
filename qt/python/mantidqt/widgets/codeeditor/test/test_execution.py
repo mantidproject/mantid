@@ -220,7 +220,7 @@ foo()
         executor.sig_exec_error.connect(recv.on_error)
         task = executor.execute_async(code, line_no, filename)
         task.join()
-        QCoreApplication.processEvents()
+        QCoreApplication.sendPostedEvents()
 
         return executor, recv
 

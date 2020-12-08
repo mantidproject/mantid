@@ -505,10 +505,6 @@ void Elwin::newPreviewFileSelected(int index) {
  */
 void Elwin::plotInput() {
   IndirectDataAnalysisTab::plotInput(m_uiForm.ppPlot);
-  IndirectDataAnalysisTab::updatePlotRange("ElwinIntegrationRange",
-                                           m_uiForm.ppPlot, "IntegrationStart",
-                                           "IntegrationEnd");
-
   setDefaultSampleLog(inputWorkspace());
 }
 
@@ -554,7 +550,6 @@ void Elwin::minChanged(double val) {
 
   disconnect(m_dblManager, SIGNAL(valueChanged(QtProperty *, double)), this,
              SLOT(updateRS(QtProperty *, double)));
-
   if (from == integrationRangeSelector) {
     m_dblManager->setValue(m_properties["IntegrationStart"], val);
   } else if (from == backgroundRangeSelector) {

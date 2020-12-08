@@ -86,17 +86,17 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
       wgtM2(attenuationFactors.size());
 
   for (size_t i = 0; i < m_nevents; ++i) {
-    Geometry::Track beforeScatter;
-    Geometry::Track afterScatter;
+    std::shared_ptr<Geometry::Track> beforeScatter;
+    std::shared_ptr<Geometry::Track> afterScatter;
     for (int j = 0; j < nbins; ++j) {
       size_t attempts(0);
       do {
         bool success = false;
         if (m_regenerateTracksForEachLambda || j == 0) {
           const auto neutron = m_beamProfile.generatePoint(rng, scatterBounds);
-          success = m_scatterVol.calculateBeforeAfterTrack(
-              rng, neutron.startPos, finalPos, beforeScatter, afterScatter,
-              stats);
+          std::tie(success, beforeScatter, afterScatter) =
+              m_scatterVol.calculateBeforeAfterTrack(rng, neutron.startPos,
+                                                     finalPos, stats);
         } else {
           success = true;
         }
@@ -112,8 +112,8 @@ void MCAbsorptionStrategy::calculate(Kernel::PseudoRandomNumberGenerator &rng,
           } else {
             // elastic case already initialized
           }
-          const double wgt = m_scatterVol.calculateAbsorption(
-              beforeScatter, afterScatter, lambdaIn, lambdaOut);
+          const double wgt = beforeScatter->calculateAttenuation(lambdaIn) *
+                             afterScatter->calculateAttenuation(lambdaOut);
           attenuationFactors[j] += wgt;
           // increment standard deviation using Welford algorithm
           double delta = wgt - wgtMean[j];

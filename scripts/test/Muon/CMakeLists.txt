@@ -82,6 +82,15 @@ set ( TEST_PY_FILES
    elemental_analysis/periodic_table_item_test.py
    elemental_analysis/lmodel_test.py
    elemental_analysis/load_model_test.py
+   elemental_analysis_2/elemental_analysis_context_test.py
+   elemental_analysis_2/elemental_analysis_main_GUI_test.py
+   elemental_analysis_2/elemental_analysis_load_model_test.py
+   elemental_analysis_2/elemental_analysis_load_widget_presenter_test.py
+   elemental_analysis_2/elemental_analysis_loadfile_model_test.py
+   elemental_analysis_2/elemental_analysis_loadrun_model_test.py
+   elemental_analysis_2/elemental_analysis_loadrun_presenter_single_run_test.py
+   elemental_analysis_2/elemental_analysis_loadrun_presenter_increment_decrement_test.py
+   elemental_analysis_2/elemental_analysis_loadutils_test.py
 )
 
 # LoadWidgetModel_test.py, LoadWidgetPresenter_test.py and LoadWidgetView_test.py are currently not Qt5 compatible
@@ -134,6 +143,8 @@ set ( TEST_PY_FILES_QT4
    elemental_analysis/PeriodicTableModel_test.py
    elemental_analysis/PeriodicTablePresenter_test.py
    elemental_analysis/load_utils_test.py
+   elemental_analysis_2/elemental_analysis_context_test.py
+   elemental_analysis_2/elemental_analysis_main_GUI_test.py
 )
 
 check_tests_valid(${CMAKE_CURRENT_SOURCE_DIR} ${TEST_PY_FILES})

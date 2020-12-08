@@ -177,8 +177,13 @@ def plot(workspaces, spectrum_nums=None, wksp_indices=None, errors=False,
         ax.axis('on')
         _do_single_plot(ax, workspaces, errors, show_title, nums, kw, plot_kwargs, log_name, log_values)
 
+    show_legend = "on" == ConfigService.getString("plots.ShowLegend").lower()
+    for ax in axes:
+        if ax.get_legend() is not None:
+            ax.get_legend().set_visible(show_legend)
+
     # Can't have a waterfall plot with only one line.
-    if len(nums)*len(workspaces) == 1 and waterfall:
+    if len(nums) * len(workspaces) == 1 and waterfall:
         waterfall = False
 
     # The plot's initial xlim and ylim are used to offset each curve in a waterfall plot.

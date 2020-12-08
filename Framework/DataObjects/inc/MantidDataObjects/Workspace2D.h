@@ -48,6 +48,9 @@ public:
     return std::unique_ptr<Workspace2D>(doCloneEmpty());
   }
 
+  /// Returns true if the workspace is ragged (has differently sized spectra).
+  bool isRaggedWorkspace() const override;
+
   /// Returns the histogram number
   std::size_t getNumberHistograms() const override;
 

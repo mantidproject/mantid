@@ -47,7 +47,7 @@ class WriteToSignalTest(unittest.TestCase):
             writer.sig_write_received.connect(recv.capture_text)
             txt = "I expect to see this"
             writer.write(txt)
-            QCoreApplication.processEvents()
+            QCoreApplication.sendPostedEvents()
             self.assertEqual(txt, recv.captured_txt)
             mock_stdout.fileno.assert_called_once_with()
 

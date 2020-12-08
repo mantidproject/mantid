@@ -151,6 +151,12 @@ double FunctionGenerator::getError(size_t i) const {
   }
 }
 
+/// Get the fitting error for a parameter by name
+double FunctionGenerator::getError(const std::string &name) const {
+  auto index = parameterIndex(name);
+  return getError(index);
+}
+
 /// Set the fitting error for a parameter
 void FunctionGenerator::setError(size_t i, double err) {
   if (i < m_nOwnParams) {
@@ -159,6 +165,12 @@ void FunctionGenerator::setError(size_t i, double err) {
     checkTargetFunction();
     m_target->setError(i - m_nOwnParams, err);
   }
+}
+
+/// Set the fitting error for a parameter by name
+void FunctionGenerator::setError(const std::string &name, double err) {
+  auto index = parameterIndex(name);
+  setError(index, err);
 }
 
 /// Change status of parameter
@@ -222,12 +234,7 @@ size_t FunctionGenerator::nAttributes() const {
 /// Returns a list of attribute names
 std::vector<std::string> FunctionGenerator::getAttributeNames() const {
   checkTargetFunction();
-  std::vector<std::string> attNames = IFunction::getAttributeNames();
-  auto cfNames = m_source->getAttributeNames();
-  auto spNames = m_target->getAttributeNames();
-  attNames.insert(attNames.end(), cfNames.begin(), cfNames.end());
-  attNames.insert(attNames.end(), spNames.begin(), spNames.end());
-  return attNames;
+  return IFunction::getAttributeNames();
 }
 
 /// Return a value of attribute attName
@@ -269,6 +276,26 @@ bool FunctionGenerator::hasAttribute(const std::string &attName) const {
   } else {
     checkTargetFunction();
     return m_target->hasAttribute(attName);
+  }
+}
+/**
+ * Return the name of the ith attribute. This method assumes that:
+ * The first [0,IFunction::nAttributes()) belong to the function held in this
+ * class. The next [IFunction::nAttributes, IFunction::nAttributes +
+ * m_source->nAttributes()) belong to the m_source function. And finally, the
+ * remaining attributes belong to the m_target function
+ * @param i:: Index of the attribute to return
+ */
+std::string FunctionGenerator::attributeName(size_t i) const {
+  if (i < IFunction::nAttributes()) {
+    return IFunction::attributeName(i);
+  } else if (i < IFunction::nAttributes() + m_source->nAttributes()) {
+    return m_source->attributeName(i - IFunction::nAttributes());
+  } else if (i < nAttributes()) {
+    return m_target->attributeName(
+        i - (IFunction::nAttributes() + m_source->nAttributes()));
+  } else {
+    throw(std::runtime_error("Attribute index out of range"));
   }
 }
 

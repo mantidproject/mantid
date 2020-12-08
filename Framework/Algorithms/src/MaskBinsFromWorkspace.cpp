@@ -53,7 +53,7 @@ void MaskBinsFromWorkspace::exec() {
   // in the input workspace
   if (maskedWS->hasMaskedBins(0)) {
     const auto maskedBins = maskedWS->maskedBins(0);
-    for (const auto &wi : m_indexSet) {
+    for (const auto wi : m_indexSet) {
       for (const auto &maskedBin : maskedBins) {
         outputWS->flagMasked(wi, maskedBin.first, maskedBin.second);
       }
