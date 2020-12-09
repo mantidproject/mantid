@@ -61,13 +61,13 @@ public:
                               double value) override;
   void setLocalParameterValue(const QString &parName, int i, double value,
                               double error) override;
-  void setGlobalParameterValue(const QString &paramName, double value);
   void setLocalParameterFixed(const QString &parName, int i,
                               bool fixed) override;
   void setLocalParameterTie(const QString &parName, int i,
                             const QString &tie) override;
   void setLocalParameterConstraint(const QString &parName, int i,
                                    const QString &constraint) override;
+  void setGlobalParameterValue(const QString &paramName, double value) override;
   void changeTie(const QString &parName, const QString &tie) override;
   void addConstraint(const QString &functionIndex,
                      const QString &constraint) override;

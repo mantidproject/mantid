@@ -55,7 +55,7 @@ IFunction_sptr FunctionModel::getFitFunction() const {
     return getFitFunctionWithGlobals(0);
 
   } else if (numberOfFunctions == 1) {
-    auto const function = m_function->getFunction(0);
+    auto const function = m_function->getFunction(0)->clone();
     auto const composite =
         std::dynamic_pointer_cast<CompositeFunction>(function);
 
@@ -422,13 +422,6 @@ void FunctionModel::setLocalParameterValue(const QString &parName, int i,
   fun->setError(parIndex, error);
 }
 
-void FunctionModel::setGlobalParameterValue(const QString &paramName,
-                                            double value) {
-  if (isGlobal(paramName))
-    for (auto i = 0; i < getNumberDomains(); ++i)
-      setLocalParameterValue(paramName, i, value);
-}
-
 void FunctionModel::setLocalParameterFixed(const QString &parName, int i,
                                            bool fixed) {
   auto fun = getSingleFunction(i);
@@ -480,6 +473,13 @@ void FunctionModel::setLocalParameterConstraint(const QString &parName, int i,
     newConstraint.replace(parts.first, name);
     fun->addConstraints(newConstraint.toStdString());
   }
+}
+
+void FunctionModel::setGlobalParameterValue(const QString &paramName,
+                                            double value) {
+  if (isGlobal(paramName))
+    for (auto i = 0; i < getNumberDomains(); ++i)
+      setLocalParameterValue(paramName, i, value);
 }
 
 void FunctionModel::changeTie(const QString &parName, const QString &tie) {
