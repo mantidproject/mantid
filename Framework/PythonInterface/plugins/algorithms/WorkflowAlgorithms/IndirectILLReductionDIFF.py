@@ -59,9 +59,8 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
             Normalizes the workspace by monitor values (ID is 0 for IN16B)
             @param ws : the input workspace
         """
-        monitorID = 0
         monitor_ws = ws + '_mon'
-        ExtractSpectra(InputWorkspace=ws, DetectorList=monitorID, OutputWorkspace=monitor_ws)
+        ExtractMonitors(InputWorkspace=ws, DetectorWorkspace=ws, MonitorWorkspace=monitor_ws)
 
         # in case of 0 counts monitors, replace 0s by 1s so the division becomes neutral
         # (since it's generally division of 0 detector's counts by 0 monitor's counts,
@@ -109,11 +108,9 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
         ConjoinXRuns(InputWorkspaces=self.output,
                      SampleLogAsXAxis=self.scan_parameter,
                      FailBehaviour="Stop",
-                     OutputWorkspace="conjoined_" + self.output)
-        mtd[self.output].delete()
+                     OutputWorkspace=self.output)
 
-        ExtractUnmaskedSpectra(InputWorkspace="conjoined_" + self.output, OutputWorkspace=self.output)
-        mtd["conjoined_" + self.output].delete()
+        ExtractUnmaskedSpectra(InputWorkspace=self.output, OutputWorkspace=self.output)
 
         Transpose(InputWorkspace=self.output, OutputWorkspace=self.output)
 

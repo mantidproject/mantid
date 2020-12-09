@@ -48,7 +48,7 @@ class IndirectILLReductionDIFF(unittest.TestCase):
         self.assertTrue(isinstance(ws, MatrixWorkspace), "{0} should be a matrix workspace".format(name))
         self.assertEqual(ws.getNumberHistograms(), 1, "{0} should contain {1} spectra".format(name, 1))
 
-        self.assertEqual(ws.blocksize(), 1897, "{0} should contain {1} bins".format(name, 1897))
+        self.assertEqual(ws.blocksize(), 1896, "{0} should contain {1} bins".format(name, 1896))
 
         self.assertTrue(ws.getSampleDetails(), "{0} should have sample logs".format(name))
 
