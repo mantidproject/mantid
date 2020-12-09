@@ -562,9 +562,7 @@ void PDCalibration::exec() {
     // object to hold the information about the peak positions, detid, and wksp
     // index
     PDCalibration::FittedPeaks peaks(m_uncalibratedWS, wkspIndex);
-    auto toTof = getDSpacingToTof(
-        *peaks.detid
-             .begin()); // doesn't matter which one - all have same difc etc.
+    auto toTof = getDSpacingToTof(peaks.detid);
     peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, toTof);
 
     // includes peaks that aren't used in the fit
@@ -1029,13 +1027,24 @@ PDCalibration::dSpacingWindows(const std::vector<double> &centres,
  * @param detid :: detector ID
  */
 std::function<double(double)>
-PDCalibration::getDSpacingToTof(const detid_t detid) {
-  auto rowNum = m_detidToRow[detid];
+PDCalibration::getDSpacingToTof(const std::set<detid_t> &detIds) {
 
   // to start this is the old calibration values
-  const double difa = m_calibrationTable->getRef<double>("difa", rowNum);
-  const double difc = m_calibrationTable->getRef<double>("difc", rowNum);
-  const double tzero = m_calibrationTable->getRef<double>("tzero", rowNum);
+  double difc = 0.;
+  double difa = 0.;
+  double tzero = 0.;
+  for (auto detId : detIds) {
+    auto rowNum = m_detidToRow[detId];
+    difc += m_calibrationTable->getRef<double>("difa", rowNum);
+    difa += m_calibrationTable->getRef<double>("difa", rowNum);
+    tzero += m_calibrationTable->getRef<double>("difa", rowNum);
+  }
+  if (detIds.size() > 1) {
+    double norm = 1. / static_cast<double>(detIds.size());
+    difc = norm * difc;
+    difa = norm * difa;
+    tzero = norm * tzero;
+  }
 
   return Kernel::Diffraction::getDToTofConversionFunc(difc, difa, tzero);
 }
@@ -1394,7 +1403,7 @@ PDCalibration::createTOFPeakCenterFitWindowWorkspaces(
     PDCalibration::FittedPeaks peaks(dataws, static_cast<size_t>(iws));
     // toTof is a function that converts from d-spacing to TOF for a particular
     // pixel
-    auto toTof = getDSpacingToTof(*peaks.detid.begin());
+    auto toTof = getDSpacingToTof(peaks.detid);
     // setpositions initializes peaks.inTofPos and peaks.inTofWindows
     peaks.setPositions(m_peaksInDspacing, windowsInDSpacing, toTof);
     peak_pos_ws->setPoints(iws, peaks.inTofPos);
