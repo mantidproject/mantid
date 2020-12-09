@@ -47,6 +47,9 @@ set(TEST_PY_FILES
     FractionalIndexingTest.py
     GetEiT0atSNSTest.py
     HB2AReduceTest.py
+    HB3AAdjustSampleNormTest.py
+    HB3AFindPeaksTest.py
+    HB3AIntegratePeaksTest.py
     HFIRSANS2WavelengthTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
