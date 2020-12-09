@@ -12,12 +12,17 @@ import numpy as np
 
 class ConvertQtoHKLHistoTest(unittest.TestCase):
 
-    _files = "HB3A_exp0724_scan0182.nxs"
-
     @classmethod
-    def setUpClass(cls):
-        HB3AAdjustSampleNorm(Filename=cls._files, OutputWorkspace="mde_ws")
+    def tearDownClass(cls):
+        mtd.clear()
 
+    def test_qtohkl(self):
+        # Tests the conversion from the MDEvent WS in Q Sample to a MDHisto WS in HKL using this algorithm.
+        HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs", OutputWorkspace="mde_ws")
+        hkl = ConvertQtoHKLHisto(InputWorkspace=mtd["mde_ws"], FindUBFromPeaks=False)
+        self.assertEqual(hkl.getSpecialCoordinateSystem().name, "HKL")
+
+        # Test with getting UB from peaks
         HB3AFindPeaks(InputWorkspace=mtd["mde_ws"],
                       CellType="Tetragonal",
                       Centering="I",
@@ -25,15 +30,6 @@ class ConvertQtoHKLHistoTest(unittest.TestCase):
                       DensityThresholdFactor=5000,
                       Wavelength=1.558,
                       OutputWorkspace="peaks")
-
-    @classmethod
-    def tearDownClass(cls):
-        mtd.clear()
-
-    def test_qtohkl(self):
-        # Tests the conversion from the MDEvent WS in Q Sample to a MDHisto WS in HKL using this algorithm.
-        hkl = ConvertQtoHKLHisto(InputWorkspace=mtd["mde_ws"], FindUBFromPeaks=False)
-        self.assertEqual(hkl.getSpecialCoordinateSystem().name, "HKL")
 
         hkl = ConvertQtoHKLHisto(InputWorkspace=mtd["mde_ws"],
                                  FindUBFromPeaks=True,
@@ -59,8 +55,8 @@ class ConvertQtoHKLHistoTest(unittest.TestCase):
                     Uproj='1,1,0',
                     Vproj='1,-1,0',
                     Wproj='0,0,1',
-                    MinValues='-10,-10,-10',
-                    MaxValues='10,10,10')
+                    MinValues='-20,-20,-20',
+                    MaxValues='20,20,20')
         HKL_binned = BinMD('HKL',
                            AlignedDim0='[H,H,0],-10.05,10.05,201',
                            AlignedDim1='[H,-H,0],-10.05,10.05,201',
@@ -70,8 +66,8 @@ class ConvertQtoHKLHistoTest(unittest.TestCase):
                     dEAnalysisMode='Elastic',
                     Q3DFrames='Q_sample',
                     OutputWorkspace='q_sample',
-                    MinValues='-10,-10,-10',
-                    MaxValues='10,10,10')
+                    MinValues='-20,-20,-20',
+                    MaxValues='20,20,20')
 
         hkl = ConvertQtoHKLHisto(InputWorkspace=mtd["q_sample"],
                                  FindUBFromPeaks=False,
@@ -81,7 +77,7 @@ class ConvertQtoHKLHistoTest(unittest.TestCase):
         orig_sig = HKL_binned.getSignalArray()
         new_sig = hkl.getSignalArray()
 
-        np.testing.assert_allclose(np.asarray(new_sig), np.asarray(orig_sig))
+        np.testing.assert_allclose(np.asarray(new_sig), np.asarray(orig_sig), rtol=1.0e-5, atol=3)
 
 
 if __name__ == '__main__':
