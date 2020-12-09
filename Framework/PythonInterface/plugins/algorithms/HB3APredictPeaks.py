@@ -89,16 +89,35 @@ class HB3APredictPeaks(PythonAlgorithm):
                 wavelength = exp_info.run().getProperty("wavelength").value
 
             if exp_info.run().hasProperty("omega") and exp_info.run().hasProperty("phi"):
+                gon = exp_info.run().getGoniometer().getEulerAngles('YZY')
                 if np.isclose(exp_info.run().getTimeAveragedStd("omega"), 0.0):
                     use_inner = True
                     min_angle = -exp_info.run().getLogData('phi').value.max()
                     max_angle = -exp_info.run().getLogData('phi').value.min()
+                    # Sometimes you get the 180 degrees off what is expected from the log
+                    phi_log = -exp_info.run().getPropertyAsSingleValueWithTimeAveragedMean('phi')
+                    if np.isclose(phi_log + 180, gon[2]):
+                        min_angle += 180
+                        max_angle += 180
+                    elif np.isclose(phi_log - 180, gon[2]):
+                        min_angle -= 180
+                        max_angle -= 180
                 elif np.isclose(exp_info.run().getTimeAveragedStd("phi"), 0.0):
                     use_inner = False
                     min_angle = -exp_info.run().getLogData('omega').value.max()
                     max_angle = -exp_info.run().getLogData('omega').value.min()
+                    # Sometimes you get the 180 degrees off what is expected from the log
+                    omega_log = -exp_info.run().getPropertyAsSingleValueWithTimeAveragedMean('omega')
+                    print(f'{omega_log=}, {gon[0]=}')
+                    if np.isclose(omega_log + 180, gon[0]):
+                        min_angle += 180
+                        max_angle += 180
+                    elif np.isclose(omega_log - 180, gon[0]):
+                        min_angle -= 180
+                        max_angle -= 180
                 else:
                     self.log().warning("No appropriate goniometer rotation found, try anyway")
+
             self.log().information("Using inner goniometer: {}".format(use_inner))
 
         if not self.getProperty("Wavelength").isDefault:
