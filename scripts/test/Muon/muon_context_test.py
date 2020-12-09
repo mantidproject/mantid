@@ -12,10 +12,10 @@ from unittest import mock
 
 from mantid.api import AnalysisDataService, FileFinder
 from mantid import ConfigService
-from mantid.simpleapi import CreateWorkspace
+#from mantid.simpleapi import CreateWorkspace
 from collections import Counter
 from Muon.GUI.Common.utilities.load_utils import load_workspace_from_filename
-from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
+#from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 from Muon.GUI.Common.muon_group import MuonGroup
 from Muon.GUI.Common.muon_pair import MuonPair

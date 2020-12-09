@@ -122,7 +122,6 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.assertTrue(self.view.isEnabled())
         self.view.warning_popup.assert_called_once_with('CalMuonDetectorPhases has failed')
 
-
     def test_update_current_phase_table_list_retrieves_all_correct_tables(self):
         self.view.set_phase_table_combo_box = mock.MagicMock()
         workspace_wrapper = mock.MagicMock()

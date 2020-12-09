@@ -53,7 +53,6 @@ class MuonFreqContextTest(unittest.TestCase):
     def test_add_complex_FFT(self):
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_RE, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_IM, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
-                             
         self.context.add_FFT(ws_freq_name=FFT_NAME_COMPLEX_MOD, Re_run="62260", Re="top", Im_run="62261", Im="fwd")
 
         self.assertCountEqual(list(self.context._FFT_freq.keys()),
