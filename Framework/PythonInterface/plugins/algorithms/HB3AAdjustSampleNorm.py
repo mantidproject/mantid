@@ -218,6 +218,14 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
             # Get the wavelength from experiment info if it exists, or fallback on property value
             wavelength = self.__get_wavelength(exp_info)
 
+            # set the run number to be the same as scan number, this will be used for peaks
+            if not exp_info.run().hasProperty('run_number') and exp_info.run().hasProperty('scan'):
+                try:
+                    exp_info.mutableRun().addProperty('run_number', int(exp_info.run().getProperty('scan').value), True)
+                except ValueError:
+                    # scan must not be a int
+                    pass
+
             # Use ConvertHFIRSCDtoQ (and normalize van), or use ConvertWANDSCtoQ which handles normalization itself
             if method:
                 if has_van:
