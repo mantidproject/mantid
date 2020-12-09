@@ -6,8 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
 #include "IndirectDataValidationHelper.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QFileInfo>
@@ -16,6 +19,7 @@
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
+using namespace MantidQt::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
 namespace {
@@ -232,6 +236,8 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
   connect(m_uiForm.cbGroupingOptions,
           SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(mappingOptionSelected(const QString &)));
+  connect(m_uiForm.pbSaveCustomGrouping, SIGNAL(clicked()), this,
+          SLOT(handleSaveCustomGroupingClicked()));
   // Plots raw input data when user clicks Plot Time
   connect(m_uiForm.pbPlotTime, SIGNAL(clicked()), this, SLOT(plotRaw()));
   // Shows message on run button when user is inputting a run number
@@ -591,6 +597,39 @@ void ISISEnergyTransfer::includeExtraGroupingOption(bool includeOption,
     setCurrentGroupingOption(option);
   } else if (!includeOption && !isOptionHidden(option))
     removeGroupingOption(option);
+}
+
+void ISISEnergyTransfer::handleSaveCustomGroupingClicked() {
+  QHash<QString, QString> props;
+  props["InputWorkspace"] = "input_name";
+  props["OutputFile"] = "detector_grouping.map";
+
+  InterfaceManager interfaceManager;
+  auto *dialog = interfaceManager.createDialogFromName(
+      "SaveDetectorsGrouping", -1, nullptr, false, props, "",
+      QStringList("OutputFile"));
+
+  // Show the dialog
+  dialog->show();
+  dialog->raise();
+  dialog->activateWindow();
+}
+
+void ISISEnergyTransfer::createGroupingWorkspace(
+    const std::string &outputWsName) {
+  auto instrumentDetails = getInstrumentDetails();
+  auto customGrouping = "3,4,5";
+  auto const instrument = instrumentDetails["instrument"];
+  auto const analyser = instrumentDetails["analyser"];
+
+  auto groupingAlg =
+      AlgorithmManager::Instance().create("CreateGroupingWorkspace");
+  groupingAlg->initialize();
+  groupingAlg->setProperty("InstrumentName", instrument);
+  groupingAlg->setProperty("ComponentName", analyser);
+  groupingAlg->setProperty("GroupNames", customGrouping);
+  groupingAlg->setProperty("OutputWorkspace", outputWsName);
+  groupingAlg->execute();
 }
 
 void ISISEnergyTransfer::setInstrumentDefault() {
