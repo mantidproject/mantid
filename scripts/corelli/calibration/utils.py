@@ -87,7 +87,7 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
     Note: the preprocess step needs to be performed after load_banks, which provided
     the bank selection.
     :param input_workspace: input workspace name
-    :param output_workspace: output workspace with pre-processed historgrams
+    :param output_workspace: output workspace with pre-processed histograms
     """
     CloneWorkspace(InputWorkspace=str(input_workspace), OutputWorkspace=output_workspace)
 
