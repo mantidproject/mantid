@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory,IMDEventWorkspaceProperty, IMDHistoWorkspaceProperty, IPeaksWorkspaceProperty,\
+from mantid.api import AlgorithmFactory, IMDEventWorkspaceProperty, IMDHistoWorkspaceProperty, IPeaksWorkspaceProperty,\
     PythonAlgorithm, PropertyMode
 from mantid.kernel import Direction, EnabledWhenProperty, FloatArrayProperty, PropertyCriterion, IntArrayProperty
 from mantid.simpleapi import BinMD, DeleteWorkspace, SetMDFrame, TransformHKL, mtd
@@ -96,7 +96,7 @@ class ConvertQtoHKLHisto(PythonAlgorithm):
             peak_ws = self.getProperty("PeaksWorkspace")
             if peak_ws.isDefault:
                 issues["PeaksWorkspace"] = "A peaks workspace must be supplied."
-            elif not mtd.doesExist(peak_ws.value):
+            elif not mtd.doesExist(self.getPropertyValue("PeaksWorkspace")):
                 issues["PeaksWorkspace"] = "Provided peaks workspace does not exist in the ADS."
 
             tmatrix = self.getProperty("Transformation")
@@ -128,7 +128,6 @@ class ConvertQtoHKLHisto(PythonAlgorithm):
         else:
             self._lattice = input_ws.getExperimentInfo(0).sample().getOrientedLattice()
 
-        print(self._lattice)
         q1 = self._lattice.qFromHKL([1, 0, 0])
         q2 = self._lattice.qFromHKL([0, 1, 0])
         q3 = self._lattice.qFromHKL([0, 0, 1])
@@ -140,11 +139,7 @@ class ConvertQtoHKLHisto(PythonAlgorithm):
                        OutputExtents=extents,
                        OutputBins=bins)
 
-        print(mdhist.getDimension(0).getMDFrame().name())
-
         SetMDFrame(mdhist, MDFrame='HKL', Axes='0, 1, 2')
-
-        print(mdhist.getDimension(0).getMDFrame().name())
 
         self.setProperty("OutputWorkspace", mdhist)
 
