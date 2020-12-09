@@ -20,7 +20,7 @@ namespace IDA {
 using namespace MantidWidgets;
 
 /*
-    IIndirectFitData - Specifies an interface for updating, querying and
+    IIndirectFitDataModel - Specifies an interface for updating, querying and
    accessing the raw data in IndirectFitAnalysisTabs
 */
 class MANTIDQT_INDIRECT_DLL IndirectFitOutputModel : public IIndirectFitOutput {

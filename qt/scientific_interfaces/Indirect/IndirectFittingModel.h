@@ -6,9 +6,9 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "IIndirectFitData.h"
+#include "IIndirectFitDataModel.h"
 #include "IIndirectFitOutput.h"
-#include "IIndirectFitResult.h"
+#include "IIndirectFittingModel.h"
 #include "IndirectFitData.h"
 #include "IndirectWorkspaceNames.h"
 #include "ParameterEstimation.h"
@@ -41,12 +41,13 @@ using DefaultParametersType =
     IndirectFittingModel - Provides methods for specifying and
     performing a QENS fit, as well as accessing the results of the fit.
 */
-class MANTIDQT_INDIRECT_DLL IndirectFittingModel : public IIndirectFitResult {
+class MANTIDQT_INDIRECT_DLL IndirectFittingModel
+    : public IIndirectFittingModel {
 public:
   IndirectFittingModel();
   virtual ~IndirectFittingModel() = default;
 
-  // IIndirectFitData
+  // IIndirectFitDataModel
   virtual bool hasWorkspace(std::string const &workspaceName) const;
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(TableDatasetIndex index) const;
@@ -93,7 +94,7 @@ public:
 
   // Functions concerned with naming
 
-  // IIndirectFitResult
+  // IIndirectFittingModel
   bool isPreviouslyFit(TableDatasetIndex dataIndex,
                        WorkspaceIndex spectrum) const override;
   virtual boost::optional<std::string> isInvalidFunction() const override;
@@ -141,7 +142,7 @@ public:
                        TableDatasetIndex index);
   DataForParameterEstimationCollection
   getDataForParameterEstimation(const EstimationDataSelector &selector) const;
-  std::unique_ptr<IIndirectFitData> m_fitDataModel;
+  std::unique_ptr<IIndirectFitDataModel> m_fitDataModel;
   void removeFittingData();
 
 protected:

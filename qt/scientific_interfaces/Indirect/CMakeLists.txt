@@ -143,6 +143,7 @@ set(
         FqFitDataTablePresenter.h
         FunctionTemplateBrowser.h
         IAddWorkspaceDialog.h
+        IIndirectFitDataModel.h
         IIndirectFitDataView.h
         IIndirectFitOutputOptionsView.h
         IIndirectFitPlotView.h
@@ -412,6 +413,7 @@ set(
         FqFitDataTablePresenter.h
         FunctionTemplateBrowser.h
         IAddWorkspaceDialog.h
+        IIndirectFitDataModel.h
         IIndirectFitDataView.h
         IIndirectFitOutputOptionsView.h
         IIndirectFitPlotView.h
