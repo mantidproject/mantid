@@ -5,12 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import BinMD, ConvertToMD, ConvertQtoHKLHisto, HB3AAdjustSampleNorm, HB3AFindPeaks, Load, \
+from mantid.simpleapi import BinMD, ConvertToMD, ConvertQtoHKLMDHisto, HB3AAdjustSampleNorm, HB3AFindPeaks, Load, \
     LoadIsawUB, mtd, SetGoniometer
 import numpy as np
 
 
-class ConvertQtoHKLHistoTest(unittest.TestCase):
+class ConvertQtoHKLMDHistoTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):

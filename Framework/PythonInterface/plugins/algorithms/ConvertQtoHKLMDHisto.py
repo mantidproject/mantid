@@ -12,18 +12,18 @@ from mantid.simpleapi import BinMD, DeleteWorkspace, SetMDFrame, TransformHKL, m
 import numpy as np
 
 
-class ConvertQtoHKLHisto(PythonAlgorithm):
+class ConvertQtoHKLMDHisto(PythonAlgorithm):
 
     _lattice = None
 
     def category(self):
-        return "Crystal\\Creation"
+        return "MDAlgorithms\\Creation"
 
     def seeAlso(self):
         return ["ConvertWANDSCDtoQ", "BinMD"]
 
     def name(self):
-        return "ConvertQtoHKLHisto"
+        return "ConvertQtoHKLMDHisto"
 
     def summary(self):
         return 'Converts a workspace from Q sample to a MDHisto in HKL; the UB matrix can be used from the input, ' \
@@ -35,7 +35,7 @@ class ConvertQtoHKLHisto(PythonAlgorithm):
                                                        direction=Direction.Input),
                              doc="Input MDEvent workspace to convert to a MDHisto in HKL")
 
-        self.declareProperty("FindUBFromPeaks", True,
+        self.declareProperty("FindUBFromPeaks", False,
                              doc="Whether to find peaks and use them to compute the UB matrix.")
 
         self.declareProperty(IPeaksWorkspaceProperty("PeaksWorkspace", defaultValue="", optional=PropertyMode.Optional,
@@ -47,7 +47,7 @@ class ConvertQtoHKLHisto(PythonAlgorithm):
                              "Optional HKL transformation matrix to apply to the peaks workspace, each value of the "
                              "matrix should be comma separated.")
 
-        ub_settings = EnabledWhenProperty('FindUBFromPeaks', PropertyCriterion.IsDefault)
+        ub_settings = EnabledWhenProperty('FindUBFromPeaks', PropertyCriterion.IsNotDefault)
         self.setPropertySettings("PeaksWorkspace", ub_settings)
         self.setPropertySettings("Transformation", ub_settings)
 
@@ -165,4 +165,4 @@ class ConvertQtoHKLHisto(PythonAlgorithm):
         DeleteWorkspace(mdhist)
 
 
-AlgorithmFactory.subscribe(ConvertQtoHKLHisto)
+AlgorithmFactory.subscribe(ConvertQtoHKLMDHisto)
