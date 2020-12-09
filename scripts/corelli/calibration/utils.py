@@ -83,6 +83,8 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
     Clone the input workspace/run and preprocess the histograms for each tube such
     that the peak finding algorithm can have a better chance of finding the correct
     wire position.
+    Gaussian filters are used to approximate the background of each bank as well as
+    to assist the selection of regions where wire shadows reside.
 
     Note: the preprocess step needs to be performed after load_banks, which provided
     the bank selection.
