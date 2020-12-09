@@ -17,7 +17,6 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
     runs = None
     mode = None
-    transpose = None
     scan_parameter = None
     mask_start_pixels = None
     mask_end_pixels = None
@@ -35,7 +34,6 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
     def setUp(self):
         self.runs = self.getPropertyValue('SampleRuns').split(',')
-        self.transpose = self.getProperty('Transpose').value
         self.scan_parameter = self.getPropertyValue('Observable')
         self.mask_start_pixels = self.getProperty('MaskPixelsFromStart').value
         self.mask_end_pixels = self.getProperty('MaskPixelsFromEnd').value
@@ -55,8 +53,6 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
 
         self.declareProperty("Observable", "sample.temperature",
                              doc="If multiple files, the parameter from SampleLog to use as an index when conjoined.")
-
-        self.declareProperty("Transpose", False, doc="Transpose the results.")
 
     def _normalize_by_monitor(self, ws):
         """
@@ -119,8 +115,7 @@ class IndirectILLReductionDIFF(PythonAlgorithm):
         ExtractUnmaskedSpectra(InputWorkspace="conjoined_" + self.output, OutputWorkspace=self.output)
         mtd["conjoined_" + self.output].delete()
 
-        if self.transpose:
-            Transpose(InputWorkspace=self.output, OutputWorkspace=self.output)
+        Transpose(InputWorkspace=self.output, OutputWorkspace=self.output)
 
     def _treat_BATS(self, ws):
         self.log().warning("BATS treatment not implemented yet.")
