@@ -10,8 +10,10 @@ import random
 import string
 from typing import List, Optional, Union
 
+r"""Test to see if the build error goes away
 from corelli.calibration.database import load_calibration_set
 from corelli.calibration.utils import apply_calibration
+"""
 from mantid.api import (
     AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, IEventWorkspaceProperty, mtd, Progress, TextAxis,
     Workspace, WorkspaceGroup, WorkspaceUnitValidator)
@@ -159,6 +161,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         self.run_algorithm('ModeratorTzero', 0, 0.02, soft_crash=True, **kwargs)
         progress.report('ModeratorTzero has been applied')
 
+        r"""Test to see if the build error goes away
         # Correct detector heights
         tube_calibration_database = self.getProperty('TubeDatabaseDir').value
         yesno = 'not '  # flags if the tube calibration has been applied to the workspace
@@ -172,6 +175,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
                 apply_calibration(input_workspace, tube_calibration_table)
                 yesno = ''
         progress.report(f'Tube calibration has {yesno}been applied')
+        """
 
         # Find dSpacing to TOF conversion DIFC parameter
         difc_table = f'{prefix_output}PDCalibration_difc'
