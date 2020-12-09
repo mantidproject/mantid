@@ -6,13 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 """Set of general purpose functions which are related to the SANSState approach."""
 
-from sans.common.enums import (DetectorType)
-from sans.common.xml_parsing import (get_monitor_names_from_idf_file, get_named_elements_from_ipf_file)
-
 
 # ----------------------------------------------------------------------------------------------------------------------
 # General functions
 # ----------------------------------------------------------------------------------------------------------------------
+
+
 def is_pure_none_or_not_none(elements_to_check):
     """
     Checks a list of elements contains None entries and non-None entries
@@ -66,48 +65,3 @@ def validation_message(error_message, instruction, variables):
         message += "{0}: {1}\n".format(key, value)
     message += instruction
     return {error_message: message}
-
-
-def set_detector_names(state, ipf_path, invalid_detector_types=None):
-    """
-    Sets the detectors names on a State object which has a `detector` map entry, e.g. StateMask
-
-    :param state: the state object
-    :param ipf_path: the path to the Instrument Parameter File
-    :param invalid_detector_types: a list of invalid detector types which don't exist for the instrument
-    """
-    if invalid_detector_types is None:
-        invalid_detector_types = []
-
-    lab_keyword = DetectorType.LAB.value
-    hab_keyword = DetectorType.HAB.value
-    detector_names = {lab_keyword: "low-angle-detector-name",
-                      hab_keyword: "high-angle-detector-name"}
-    detector_names_short = {lab_keyword: "low-angle-detector-short-name",
-                            hab_keyword: "high-angle-detector-short-name"}
-
-    names_to_search = []
-    names_to_search.extend(list(detector_names.values()))
-    names_to_search.extend(list(detector_names_short.values()))
-
-    found_detector_names = get_named_elements_from_ipf_file(ipf_path, names_to_search, str)
-
-    for detector_type in state.detectors:
-        try:
-            if DetectorType(detector_type) in invalid_detector_types:
-                continue
-            detector_name_tag = detector_names[detector_type]
-            detector_name_short_tag = detector_names_short[detector_type]
-            detector_name = found_detector_names[detector_name_tag]
-            detector_name_short = found_detector_names[detector_name_short_tag]
-        except KeyError:
-            continue
-        state.detectors[detector_type].detector_name = detector_name
-        state.detectors[detector_type].detector_name_short = detector_name_short
-
-
-def set_monitor_names(state, idf_path, invalid_monitor_names=None):
-    if invalid_monitor_names is None:
-        invalid_monitor_names = []
-    monitor_names = get_monitor_names_from_idf_file(idf_path, invalid_monitor_names)
-    state.monitor_names = monitor_names
