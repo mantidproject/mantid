@@ -62,6 +62,7 @@ class GeneralSettings(object):
         self.view.facility.addItems(facilities)
         self.view.instrument = instrumentselector.InstrumentSelector()
         self.view.horizontalLayout_4.replaceWidget(self.view.instrument_dummy, self.view.instrument)
+        self.view.instrument_dummy.setVisible(False)
 
         try:
             default_facility = ConfigService.getFacility().name()
