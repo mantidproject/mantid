@@ -56,8 +56,8 @@ private:
   void printToXML(const std::map<int, std::vector<detid_t>> &groupdetidrangemap,
                   const std::string &xmlfilename);
   /// Print Grouping to MAP file
-  void printToMap(const std::map<int, std::vector<detid_t>> &groupdetidrangemap,
-                  const std::string &mapfilename);
+  void printToMap(std::map<int, std::vector<detid_t>> &groupToDetectorIDsMap,
+                  const std::string &mapFilename);
 
   // GroupingWorkspace
   DataObjects::GroupingWorkspace_const_sptr mGroupWS;

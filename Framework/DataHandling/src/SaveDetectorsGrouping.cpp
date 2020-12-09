@@ -22,6 +22,8 @@
 #include <fstream>
 #include <sstream>
 
+#include <boost/algorithm/string.hpp>
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Poco::XML;
@@ -37,6 +39,23 @@ bool hasExtention(std::string filename, const std::string &extention) {
 
   return filename.compare(filename.length() - extention.length(),
                           extention.length(), extention) == 0;
+}
+
+int numberOfDetectorIDs(const std::vector<Mantid::detid_t> &detectorIDs) {
+  return detectorIDs[1] - detectorIDs[0] + 1;
+}
+
+std::string
+spaceSeperatedString(const std::vector<Mantid::detid_t> &detectorIDs) {
+  if (detectorIDs[0] == detectorIDs[1]) {
+    return std::to_string(detectorIDs[0]);
+  } else {
+    std::string detectorString;
+    for (auto id = detectorIDs[0]; id <= detectorIDs[1]; ++id)
+      detectorString += std::to_string(id) + " ";
+    boost::algorithm::trim(detectorString);
+    return detectorString;
+  }
 }
 
 } // namespace
@@ -259,9 +278,35 @@ void SaveDetectorsGrouping::printToXML(
   ofs.close();
 }
 
+/** Creates a MAP file using the detector IDs found in a grouping workspace. The
+ * format of a MAP file is as follows:
+ *
+ * Line 1        - Number of groups.
+ *
+ * For N = 2 to N = Number of groups:
+ *
+ * Line N        - Group ID.
+ * Line N + 1    - Number of detectors in group.
+ * Line N + 2    - Space seperated list of Detector IDs.
+ */
 void SaveDetectorsGrouping::printToMap(
-    const std::map<int, std::vector<detid_t>> &groupdetidrangemap,
-    const std::string &mapfilename) {}
+    std::map<int, std::vector<detid_t>> &groupToDetectorIDsMap,
+    const std::string &mapFilename) {
+  const auto removeIter = groupToDetectorIDsMap.find(0);
+  if (removeIter != groupToDetectorIDsMap.cend())
+    groupToDetectorIDsMap.erase(removeIter);
+
+  std::ofstream ofs;
+  ofs.open(mapFilename.c_str(), std::fstream::out);
+  ofs << std::to_string(groupToDetectorIDsMap.size()) + "\n";
+  for (auto detectorIds : groupToDetectorIDsMap) {
+    ofs << std::to_string(detectorIds.first) + "\n";
+    ofs << std::to_string(numberOfDetectorIDs(detectorIds.second)) + "\n";
+    ofs << spaceSeperatedString(detectorIds.second) + "\n";
+  }
+
+  ofs.close();
+}
 
 } // namespace DataHandling
 } // namespace Mantid

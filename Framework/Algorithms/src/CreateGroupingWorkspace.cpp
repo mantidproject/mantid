@@ -314,13 +314,14 @@ void CreateGroupingWorkspace::init() {
                   std::make_shared<BoundedValidator<int>>(0, INT_MAX),
                   "Used to distribute the detectors of a given component into "
                   "a fixed number of groups");
-  declareProperty("CustomGroupingString", "",
-                  "This follows the same grouping patterns used in the "
-                  ":ref:`GroupDetectors <algm-GroupDetectors>` algorithm. An "
-                  "example of the syntax is 1,2+3,4-6,7:9. This would group "
-                  "detectors as: Group 1: Detector 1, Group 2: Detectors 2 and "
-                  "3, Group 3: Detectors 4, 5 and 6, Group 4: Detector 7, "
-                  "Group 5: Detector 8, Group 6: Detector 9.");
+  declareProperty(
+      "CustomGroupingString", "",
+      "This follows the same grouping patterns used in the "
+      ":ref:`GroupDetectors <algm-GroupDetectors>` algorithm. An "
+      "example of the syntax is 1,2+3,4-6,7:9. This would group "
+      "detectors as follows: Group 1: Detector 1, Group 2: Detectors 2 and "
+      "3, Group 3: Detectors 4, 5 and 6, Group 4: Detector 7, "
+      "Group 5: Detector 8, Group 6: Detector 9.");
   declareProperty("ComponentName", "",
                   "Specify the instrument component to "
                   "group into a fixed number of groups");
