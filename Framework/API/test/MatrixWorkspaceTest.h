@@ -1784,7 +1784,7 @@ public:
     std::vector<double> const xValues{5.3, 4.3, 3.3, 2.3};
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
 
-    TS_ASSERT_EQUALS(workspace.yIndexOfX(4.3), 0);
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(4.3), 1);
   }
 
   void
@@ -1855,7 +1855,7 @@ public:
     std::vector<double> const xValues{4.0, 3.0, 2.0, 1.0};
     auto const workspace = getWorkspaceWithPopulatedX(1, 4, 3, xValues);
 
-    TS_ASSERT_EQUALS(workspace.yIndexOfX(3.0), 0);
+    TS_ASSERT_EQUALS(workspace.yIndexOfX(3.0), 1);
   }
 
   void
