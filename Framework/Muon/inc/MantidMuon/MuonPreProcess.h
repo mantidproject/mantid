@@ -79,12 +79,12 @@ private:
 
   /// Crop workspace with single xMin and xMax values
   MatrixWorkspace_sptr cropWithSingleValues(MatrixWorkspace_sptr ws,
-                                            const double &xMin,
-                                            const double &xMax);
+                                            const double xMin,
+                                            const double xMax);
 
   /// Crop workspace with vector of doubles
   MatrixWorkspace_sptr cropWithVectors(MatrixWorkspace_sptr ws,
-                                       const double &xMin, const double &xMax);
+                                       const double xMin, const double xMax);
 };
 
 } // namespace Muon

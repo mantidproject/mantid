@@ -272,8 +272,8 @@ MatrixWorkspace_sptr MuonPreProcess::applyCropping(MatrixWorkspace_sptr ws,
 }
 
 MatrixWorkspace_sptr
-MuonPreProcess::cropWithSingleValues(MatrixWorkspace_sptr ws,
-                                     const double &xMin, const double &xMax) {
+MuonPreProcess::cropWithSingleValues(MatrixWorkspace_sptr ws, const double xMin,
+                                     const double xMax) {
   IAlgorithm_sptr crop = createChildAlgorithm("CropWorkspace");
   crop->setProperty("InputWorkspace", ws);
   if (xMin != EMPTY_DBL())
@@ -285,8 +285,8 @@ MuonPreProcess::cropWithSingleValues(MatrixWorkspace_sptr ws,
 }
 
 MatrixWorkspace_sptr MuonPreProcess::cropWithVectors(MatrixWorkspace_sptr ws,
-                                                     const double &xMin,
-                                                     const double &xMax) {
+                                                     const double xMin,
+                                                     const double xMax) {
   std::vector<double> xMinVec;
   std::vector<double> xMaxVec;
 
