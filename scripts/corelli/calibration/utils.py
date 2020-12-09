@@ -102,8 +102,8 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
         peak_interval_estimate: int = 15,
     ) -> np.ndarray:
         r"""
-        Replace the regions between peaks/dips with flat background to avoid confusing
-        peak finding code.
+        Replace the regions between peaks/dips with flat background to prevent peak finding
+        algorithm got stuck in a local minimum where no shadow of wires reside.
 
         :param signal1D: 1D histogram from a single tube
         :param pixels_per_tube: number of pixels per tube, should always be 256
