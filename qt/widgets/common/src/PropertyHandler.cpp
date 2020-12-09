@@ -1379,6 +1379,27 @@ double PropertyHandler::fwhm() const {
   return 0;
 }
 
+std::string PropertyHandler::getWidthParameterName() const {
+  if (m_pf) {
+    return m_pf->getWidthParameterName();
+  }
+  return "";
+}
+
+std::string PropertyHandler::getCentreParameterName() const {
+  if (m_pf) {
+    return m_pf->getCentreParameterName();
+  }
+  return "";
+}
+
+bool PropertyHandler::isParameterExplicitlySet(const std::string &param) const {
+  if (m_pf) {
+    return m_pf->isExplicitlySet(m_pf->parameterIndex(param));
+  }
+  return false;
+}
+
 /**
  * Add constraint to parameter property parProp
  */

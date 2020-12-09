@@ -73,7 +73,8 @@ Improvements
 
 New features
 ############
-- When a fit is successful the model will be stored as a Custom Setup in the fit property browser under the name of the workspace fitted.
+- Added refined back to back exponential coeficients (from standard ceria run)to ENGIN-X Parameters.xml so A, B and S are guessed automatically.
+- When a fit is successful the model will be stored as a Custom Setup in the fit property browser under the name of the workspace fitted. 
 - The fitting tab now creates a group of workspaces that store the model string and the fit value and error of parameters of the model for each loaded workspace.
 - Sequential fitting of workspaces now provided in fitting tab by average value of a log set in settings.
 
