@@ -24,7 +24,6 @@ set(TEST_PY_FILES
     CorrectTOFTest.py
     CreateWorkspaceTest.py
     CropWorkspaceForMDNormTest.py
-    CropWorkspaceRaggedTest.py
     CylinderPaalmanPingsCorrection2Test.py
     DakotaChiSquaredTest.py
     DeltaPDF3DTest.py
@@ -51,6 +50,7 @@ set(TEST_PY_FILES
     HFIRSANS2WavelengthTest.py
     IndirectTransmissionTest.py
     IndexSatellitePeaksTest.py
+    LeadPressureCalcTest.py
     LoadAndMergeTest.py
     LoadDNSLegacyTest.py
     LoadElementalAnalysisRunTest.py

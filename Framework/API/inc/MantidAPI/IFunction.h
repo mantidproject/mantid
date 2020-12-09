@@ -418,8 +418,12 @@ public:
   virtual bool isExplicitlySet(size_t i) const = 0;
   /// Get the fitting error for a parameter
   virtual double getError(size_t i) const = 0;
+  /// Get the fitting error for a parameter by name
+  virtual double getError(const std::string &name) const = 0;
   /// Set the fitting error for a parameter
   virtual void setError(size_t i, double err) = 0;
+  /// Set the fitting error for a parameter by name
+  virtual void setError(const std::string &name, double err) = 0;
 
   /// Check if a parameter i is fixed
   [[nodiscard]] bool isFixed(size_t i) const;
@@ -556,10 +560,10 @@ public:
   std::shared_ptr<const Kernel::Matrix<double>> getCovarianceMatrix() const {
     return m_covar;
   }
-  /// Set the chi^2
-  void setChiSquared(double chi2) { m_chiSquared = chi2; }
-  /// Get the chi^2
-  [[nodiscard]] double getChiSquared() const { return m_chiSquared; }
+  /// Set the reduced chi^2
+  void setReducedChiSquared(double chi2) { m_chiSquared = chi2; }
+  /// Get the reduced chi^2
+  [[nodiscard]] double getReducedChiSquared() const { return m_chiSquared; }
 
   /// Set the parallel hint
   void setParallel(bool on) {

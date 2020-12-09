@@ -26,6 +26,14 @@ foreach( DLL ${QT4_DIST_DLLS} )
   install ( FILES ${QT4_INSTALL_PREFIX}/lib/${DLL} DESTINATION bin )
 endforeach()
 
+set ( QWT_DIST_DLLS
+    qwt5.dll
+    qwtplot3d.dll)
+
+foreach( DLL ${QWT_DIST_DLLS} )
+  install ( FILES ${THIRD_PARTY_DIR}/bin/${DLL} DESTINATION bin )
+endforeach()
+
 ###########################################################################
 # Qt Plugins + qt.conf file
 ###########################################################################

@@ -38,7 +38,6 @@ set(PYTHON_PLUGINS
     algorithms/CreateEmptyTableWorkspace.py
     algorithms/CreateLeBailFitInput.py
     algorithms/CropWorkspaceForMDNorm.py
-    algorithms/CropWorkspaceRagged.py
     algorithms/CylinderPaalmanPingsCorrection2.py
     algorithms/DNSComputeDetEffCorrCoefs.py
     algorithms/DNSFlippingRatioCorr.py
@@ -77,6 +76,9 @@ set(PYTHON_PLUGINS
     algorithms/GetIPTS.py
     algorithms/GetLiveInstrumentValue.py
     algorithms/HB2AReduce.py
+    algorithms/HB3AAdjustSampleNorm.py
+    algorithms/HB3AFindPeaks.py
+    algorithms/HB3AIntegratePeaks.py
     algorithms/HFIRSANS2Wavelength.py
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
@@ -89,6 +91,7 @@ set(PYTHON_PLUGINS
     algorithms/LRReflectivityOutput.py
     algorithms/LRScalingFactors.py
     algorithms/LRSubtractAverageBackground.py
+    algorithms/LeadPressureCalc.py
     algorithms/LinkedUBs.py
     algorithms/LiquidsReflectometryReduction.py
     algorithms/LoadAndMerge.py

@@ -125,9 +125,9 @@ public:
       TS_ASSERT_DELTA(outWS->x(j)[19], 0.3800, Delta);
       TS_ASSERT_DELTA(outWS->x(j)[49], 0.9800, Delta);
       // Test some Y values
-      TS_ASSERT_DELTA(outWS->y(j)[10], 0.0130, Delta);
-      TS_ASSERT_DELTA(outWS->y(j)[19], -0.1168, Delta);
-      TS_ASSERT_DELTA(outWS->y(j)[49], 0.0624, Delta);
+      TS_ASSERT_DELTA(outWS->y(j)[10], 0.0176, Delta);
+      TS_ASSERT_DELTA(outWS->y(j)[19], -0.1128, Delta);
+      TS_ASSERT_DELTA(outWS->y(j)[49], 0.0672, Delta);
       // Test some E values
       TS_ASSERT_DELTA(outWS->e(j)[10], 0.0002, Delta);
       TS_ASSERT_DELTA(outWS->e(j)[19], 0.0003, Delta);
@@ -280,9 +280,9 @@ public:
     TS_ASSERT_DELTA(outWS->x(0)[19], 0.3800, Delta);
     TS_ASSERT_DELTA(outWS->x(0)[49], 0.9800, Delta);
     // Test some Y values
-    TS_ASSERT_DELTA(outWS->y(0)[10], -0.7974, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[19], -0.8233, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[49], -0.7875, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[10], -0.7965, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[19], -0.8226, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[49], -0.7866, Delta);
   }
   void test_unNorm() {
 
@@ -305,9 +305,9 @@ public:
     TS_ASSERT_DELTA(outWS->x(0)[19], 0.3800, Delta);
     TS_ASSERT_DELTA(outWS->x(0)[49], 0.9800, Delta);
     // Test some Y values
-    TS_ASSERT_DELTA(outWS->y(0)[10], 2.0662, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[19], 1.8016, Delta);
-    TS_ASSERT_DELTA(outWS->y(0)[49], 2.1670, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[10], 2.0757, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[19], 1.8098, Delta);
+    TS_ASSERT_DELTA(outWS->y(0)[49], 2.1769, Delta);
   }
 };
 // turn clang off, otherwise this does not compile

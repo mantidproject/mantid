@@ -13,6 +13,15 @@ Improvements
 ------------
 
 - The instrument geometry of PANTHER has been corrected according to the findings during the hot commissioning.
+- New IDF has been added for the SHARP time-of-flight spectrometer at the ILL.
+
+ALF View
+--------
+
+New
+###
+- An estimation of fit parameters is performed when extracting a single tube for the first time. The estimate can subsequently be
+  updated using the `Update Estimate` button.
 
 
 CrystalField
@@ -46,6 +55,8 @@ New
 BugFixes
 ########
 - Fixed a bug in the :ref:`Crystal Field Python Interface` where ties were not being applied properly for cubic crystal structures.
+- Fixed a bug in the :ref:`LoadCIF <algm-LoadCIF>` algorithm caused when a **.cif** file has 2 sections, with the first not having
+  the required data keys.
 
 
 DGSPlanner

@@ -46,7 +46,7 @@ public:
   }
 
   void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     m_model->addWorkspace(m_workspace->getName(), spectra);
 

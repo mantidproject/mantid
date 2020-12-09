@@ -12,4 +12,4 @@ set ( VERSION_MINOR 1 )
 # examples: First release cadidate for tweak 1 is "-1-rc.1"
 #           Second release cadidate for tweak 1 is "-1-rc.2"
 #           Actual tweak release is "-1"
-# set ( VERSION_TWEAK "-1-rc.2" )
+# set ( VERSION_TWEAK "-1-rc.5" )

@@ -63,12 +63,12 @@ void SaveDiffCal::init() {
   declareProperty(
       std::make_unique<WorkspaceProperty<GroupingWorkspace>>(
           "GroupingWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: An GroupingWorkspace workspace giving the grouping info.");
+      "Optional: A GroupingWorkspace giving the grouping info.");
 
   declareProperty(
       std::make_unique<WorkspaceProperty<MaskWorkspace>>(
           "MaskWorkspace", "", Direction::Input, PropertyMode::Optional),
-      "Optional: An Workspace workspace giving which detectors are masked.");
+      "Optional: A MaskWorkspace giving which detectors are masked.");
 
   declareProperty(
       std::make_unique<FileProperty>("Filename", "", FileProperty::Save, ".h5"),
@@ -91,12 +91,12 @@ std::map<std::string, std::string> SaveDiffCal::validateInputs() {
           getProperty("GroupingWorkspace");
       if (bool(groupingWS) && numRows < groupingWS->getNumberHistograms()) {
         result["GroupingWorkspace"] =
-            "Must have same number of spectra as the table has rows";
+            "Must have equal or less number of spectra as the table has rows";
       }
       MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
       if (bool(maskWS) && numRows < maskWS->getNumberHistograms()) {
         result["MaskWorkspace"] =
-            "Must have same number of spectra as the table has rows";
+            "Must have equal or less number of spectra as the table has rows";
       }
     }
   }
@@ -104,22 +104,45 @@ std::map<std::string, std::string> SaveDiffCal::validateInputs() {
   return result;
 }
 
+/**
+ * Create a dataset under a given group with a given name
+ * Use CalibrationWorkspace to retrieve the data
+ *
+ * @param group :: group parent to the dataset
+ * @param name :: column name of CalibrationWorkspace, and name of the dataset
+ */
 void SaveDiffCal::writeDoubleFieldFromTable(H5::Group &group,
                                             const std::string &name) {
   auto column = m_calibrationWS->getColumn(name);
   // cppcheck-suppress compareBoolExpressionWithInt
+  // Retrieve only the first m_numValues, not necessarily the whole column
   auto data = column->numeric_fill<>(m_numValues);
   H5Util::writeArray1D(group, name, data);
 }
 
+/**
+ * Create a dataset under a given group with a given name
+ * Use CalibrationWorkspace to retrieve the data.
+ *
+ * @param group :: group parent to the dataset
+ * @param name :: column name of CalibrationWorkspace, and name of the dataset
+ */
 void SaveDiffCal::writeIntFieldFromTable(H5::Group &group,
                                          const std::string &name) {
   auto column = m_calibrationWS->getColumn(name);
+  // Retrieve only the first m_numValues, not necessarily the whole column
   auto data = column->numeric_fill<int32_t>(m_numValues);
   H5Util::writeArray1D(group, name, data);
 }
 
-// TODO should flip for mask
+/**
+ * Create a dataset under a given group with a given name
+ * Use GroupingWorkspace or MaskWorkspace to retrieve the data.
+ *
+ * @param group :: group parent to the dataset
+ * @param name :: column name of the workspace, and name of the dataset
+ * @param ws :: pointer to GroupingWorkspace or MaskWorkspace
+ */
 void SaveDiffCal::writeIntFieldFromSVWS(
     H5::Group &group, const std::string &name,
     const DataObjects::SpecialWorkspace2D_const_sptr &ws) {
@@ -130,14 +153,15 @@ void SaveDiffCal::writeIntFieldFromSVWS(
 
   if (bool(ws)) {
     for (size_t i = 0; i < m_numValues; ++i) {
-      auto &ids = ws->getSpectrum(i).getDetectorIDs();
-      auto found = m_detidToIndex.find(*(ids.begin()));
+      auto &ids = ws->getSpectrum(i).getDetectorIDs(); // set of detector ID's
+      // check if the first detector ID in the set is in the calibration table
+      auto found = m_detidToIndex.find(*(ids.begin())); // (detID, row_index)
       if (found != m_detidToIndex.end()) {
         auto value = static_cast<int32_t>(ws->getValue(found->first));
         // in maskworkspace 0=use, 1=dontuse - backwards from the file
         if (isMask) {
           if (value == 0)
-            value = 1;
+            value = 1; // thus "use" means a calibrated detector, good for use
           else
             value = 0;
         }
@@ -178,6 +202,8 @@ void SaveDiffCal::exec() {
   MaskWorkspace_const_sptr maskWS = getProperty("MaskWorkspace");
   std::string filename = getProperty("Filename");
 
+  // initialize `m_numValues` as the minimum of (CalibrationWorkspace_row_count,
+  // GroupingWorkspace_histogram_count, MaskWorkspace_histogram_count)
   m_numValues = m_calibrationWS->rowCount();
   if (bool(groupingWS) && groupingWS->getNumberHistograms() < m_numValues) {
     m_numValues = groupingWS->getNumberHistograms();
@@ -196,6 +222,8 @@ void SaveDiffCal::exec() {
   auto calibrationGroup =
       H5Util::createGroupNXS(file, "calibration", "NXentry");
 
+  // write the d-spacing to TOF conversion parameters for the selected pixels
+  // as datasets under the NXentry group
   this->writeDoubleFieldFromTable(calibrationGroup, "difc");
   this->writeDoubleFieldFromTable(calibrationGroup, "difa");
   this->writeDoubleFieldFromTable(calibrationGroup, "tzero");
@@ -209,12 +237,14 @@ void SaveDiffCal::exec() {
   this->writeIntFieldFromSVWS(calibrationGroup, "group", groupingWS);
   this->writeIntFieldFromSVWS(calibrationGroup, "use", maskWS);
 
+  // check if the input calibration table has an "offset" field
   if (this->tableHasColumn("offset")) // optional field
     this->writeDoubleFieldFromTable(calibrationGroup, "offset");
   else
     g_log.information("Not writing out values for \"offset\"");
 
-  // get the instrument information
+  // get the instrument information only if a GroupingWorkspace or
+  // MaskWorkspace is supplied by the user
   std::string instrumentName;
   std::string instrumentSource;
   if (bool(groupingWS)) {

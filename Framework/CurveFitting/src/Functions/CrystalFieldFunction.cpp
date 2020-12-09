@@ -319,6 +319,20 @@ double CrystalFieldFunction::getError(size_t i) const {
   }
 }
 
+/// Get the fitting error for a parameter
+double CrystalFieldFunction::getError(const std::string &name) const {
+  auto index = parameterIndex(name);
+  checkSourceFunction();
+  checkTargetFunction();
+  if (index < m_nControlParams) {
+    return m_control.getError(index);
+  } else if (index < m_nControlSourceParams) {
+    return m_source->getError(index - m_nControlParams);
+  } else {
+    return m_target->getError(index - m_nControlSourceParams);
+  }
+}
+
 /// Set the fitting error for a parameter
 void CrystalFieldFunction::setError(size_t i, double err) {
   checkSourceFunction();
@@ -329,6 +343,20 @@ void CrystalFieldFunction::setError(size_t i, double err) {
     m_source->setError(i - m_nControlParams, err);
   } else {
     m_target->setError(i - m_nControlSourceParams, err);
+  }
+}
+
+/// Set the fitting error for a parameter
+void CrystalFieldFunction::setError(const std::string &name, double err) {
+  auto index = parameterIndex(name);
+  checkSourceFunction();
+  checkTargetFunction();
+  if (index < m_nControlParams) {
+    m_control.setError(index, err);
+  } else if (index < m_nControlSourceParams) {
+    m_source->setError(index - m_nControlParams, err);
+  } else {
+    m_target->setError(index - m_nControlSourceParams, err);
   }
 }
 

@@ -99,6 +99,11 @@ if(DOCS_QTHELP AND ENABLE_WORKBENCH)
   add_custom_target(docs-qthelp
                       COMMAND Qt5::qcollectiongenerator qthelp/MantidProject.qhcp
                       COMMENT "Compiling Qt help documentation")
+  set_target_properties(docs-qthelp
+      PROPERTIES FOLDER "Documentation"
+      EXCLUDE_FROM_DEFAULT_BUILD 1
+      EXCLUDE_FROM_ALL 1
+  )
   #add_dependencies(docs-qthelp ${DOCS_MATH_EXT} docs-qtassistant)
   add_dependencies(docs-qthelp docs-qtassistant)
 endif()

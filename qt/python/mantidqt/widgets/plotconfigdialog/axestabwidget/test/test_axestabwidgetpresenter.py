@@ -53,65 +53,18 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
 
     def test_apply_properties_calls_setters_with_correct_properties(self):
         ax_mock = mock.MagicMock()
+        ax_mock.get_autoscalex_on = mock.Mock(return_value=False)
+        ax_mock.get_autoscaley_on = mock.Mock(return_value=False)
         presenter = self._generate_presenter()
         with mock.patch.object(presenter, 'get_selected_ax', lambda: ax_mock):
             with mock.patch.object(presenter, 'update_view', lambda: None):
-                presenter.current_view_props = presenter.get_selected_ax_properties()
-                presenter.apply_properties()
-                # Mock properties object and view then test that the view's setters
-                # are called with the correct property values
-                ax_mock.set_title.assert_called_once_with(
-                    presenter.current_view_props.title)
-                ax_mock.set_xlim.assert_called_once_with(
-                    presenter.current_view_props.xlim)
-                ax_mock.set_xlabel.assert_called_once_with(
-                    presenter.current_view_props.xlabel)
-                ax_mock.set_xscale.assert_called_once_with(
-                    presenter.current_view_props.xscale)
-                ax_mock.set_ylim.assert_called_once_with(
-                    presenter.current_view_props.ylim)
-                ax_mock.set_ylabel.assert_called_once_with(
-                    presenter.current_view_props.ylabel)
-                ax_mock.set_yscale.assert_called_once_with(
-                    presenter.current_view_props.yscale)
-                ax_mock.minorticks_on.assert_called_once()
-                ax_mock.set_facecolor.assert_called_once_with(
-                    presenter.current_view_props.canvas_color)
-
-    def test_ampersand_removed_from_current_axis_title(self):
-        ax_title = "test"
-
-        # KDE prepends & to axes title
-        mock_kde_view = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)",
-                                  get_axis=lambda: f"&{ax_title}",
-                                  get_properties=lambda: {})
-        ax_props_dict = {
-            # Mock out some properties that presenter.axis_changed depends on.
-            'canvas_color': (1.0, 1.0, 1.0, 1.0),
-            f"{ax_title}lim": (0, 1),
-            f"{ax_title}label": ax_title,
-            f"{ax_title}scale": "Linear",
-        }
-        presenter = Presenter(self.fig, view=mock_kde_view)
-        presenter.current_view_props = ax_props_dict
-
-        presenter.axis_changed()
-
-        self.assertEqual(presenter.current_axis, ax_title.replace('&', ''))
-
-    def test_apply_all_properties_calls_setters_with_correct_properties(self):
-        ax_mock_1 = mock.MagicMock()
-        ax_mock_2 = mock.MagicMock()
-        presenter = self._generate_presenter()
-        presenter.axes_names_dict = {'1': ax_mock_1, '2': ax_mock_2}
-        with mock.patch.object(presenter, 'get_selected_ax', lambda: ax_mock_1):
-            with mock.patch.object(presenter, 'update_view', lambda: None):
-                presenter.current_view_props = presenter.get_selected_ax_properties()
-                presenter.apply_all_properties()
-                # Mock properties object and view then test that the view's setters
-                # are called with the correct property values
-                for key in presenter.axes_names_dict.keys():
-                    ax_mock = presenter.axes_names_dict[key]
+                with mock.patch.object(presenter, 'axis_changed', lambda: None):
+                    presenter.current_view_props = presenter.get_selected_ax_properties()
+                    presenter.apply_properties()
+                    # Mock properties object and view then test that the view's setters
+                    # are called with the correct property values
+                    ax_mock.set_title.assert_called_once_with(
+                        presenter.current_view_props.title)
                     ax_mock.set_xlim.assert_called_once_with(
                         presenter.current_view_props.xlim)
                     ax_mock.set_xlabel.assert_called_once_with(
@@ -124,8 +77,105 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
                         presenter.current_view_props.ylabel)
                     ax_mock.set_yscale.assert_called_once_with(
                         presenter.current_view_props.yscale)
+                    ax_mock.minorticks_on.assert_called_once()
                     ax_mock.set_facecolor.assert_called_once_with(
                         presenter.current_view_props.canvas_color)
+
+    def test_apply_properties_calls_setters_with_correct_properties_autoscale(self):
+        ax_mock = mock.MagicMock()
+        ax_mock.get_autoscalex_on = mock.Mock(return_value=True)
+        ax_mock.get_autoscaley_on = mock.Mock(return_value=True)
+        presenter = self._generate_presenter()
+        with mock.patch.object(presenter, 'get_selected_ax', lambda: ax_mock):
+            with mock.patch.object(presenter, 'update_view', lambda: None):
+                with mock.patch.object(presenter, 'axis_changed', lambda: None):
+                    presenter.current_view_props = presenter.get_selected_ax_properties()
+                    presenter.apply_properties()
+                    # Mock properties object and view then test that the view's setters
+                    # are called with the correct property values
+                    ax_mock.set_title.assert_called_once_with(
+                        presenter.current_view_props.title)
+                    ax_mock.autoscale.assert_has_calls(
+                        [mock.call(True, axis="x")])
+                    ax_mock.set_xlabel.assert_called_once_with(
+                        presenter.current_view_props.xlabel)
+                    ax_mock.set_xscale.assert_called_once_with(
+                        presenter.current_view_props.xscale)
+                    ax_mock.autoscale.assert_has_calls(
+                        [mock.call(True, axis="y")])
+                    ax_mock.set_ylabel.assert_called_once_with(
+                        presenter.current_view_props.ylabel)
+                    ax_mock.set_yscale.assert_called_once_with(
+                        presenter.current_view_props.yscale)
+                    ax_mock.minorticks_on.assert_called_once()
+                    ax_mock.set_facecolor.assert_called_once_with(
+                        presenter.current_view_props.canvas_color)
+                    ax_mock.set_xlim.assert_not_called()
+                    ax_mock.set_ylim.assert_not_called()
+
+    def test_apply_all_properties_calls_setters_with_correct_properties(self):
+        ax_mock_1 = mock.MagicMock()
+        ax_mock_2 = mock.MagicMock()
+        ax_mock_1.get_autoscalex_on = mock.Mock(return_value=False)
+        ax_mock_1.get_autoscaley_on = mock.Mock(return_value=False)
+        presenter = self._generate_presenter()
+        presenter.axes_names_dict = {'1': ax_mock_1, '2': ax_mock_2}
+        with mock.patch.object(presenter, 'get_selected_ax', lambda: ax_mock_1):
+            with mock.patch.object(presenter, 'update_view', lambda: None):
+                with mock.patch.object(presenter, 'axis_changed', lambda: None):
+                    presenter.current_view_props = presenter.get_selected_ax_properties()
+                    presenter.apply_all_properties()
+                    # Mock properties object and view then test that the view's setters
+                    # are called with the correct property values
+                    for key in presenter.axes_names_dict.keys():
+                        ax_mock = presenter.axes_names_dict[key]
+                        ax_mock.set_xlim.assert_called_once_with(
+                            presenter.current_view_props.xlim)
+                        ax_mock.set_xlabel.assert_called_once_with(
+                            presenter.current_view_props.xlabel)
+                        ax_mock.set_xscale.assert_called_once_with(
+                            presenter.current_view_props.xscale)
+                        ax_mock.set_ylim.assert_called_once_with(
+                            presenter.current_view_props.ylim)
+                        ax_mock.set_ylabel.assert_called_once_with(
+                            presenter.current_view_props.ylabel)
+                        ax_mock.set_yscale.assert_called_once_with(
+                            presenter.current_view_props.yscale)
+                        ax_mock.set_facecolor.assert_called_once_with(
+                            presenter.current_view_props.canvas_color)
+
+    def test_apply_all_properties_calls_setters_with_correct_properties_autoscale(self):
+        ax_mock_1 = mock.MagicMock()
+        ax_mock_2 = mock.MagicMock()
+        ax_mock_1.get_autoscalex_on = mock.Mock(return_value=True)
+        ax_mock_1.get_autoscaley_on = mock.Mock(return_value=True)
+        presenter = self._generate_presenter()
+        presenter.axes_names_dict = {'1': ax_mock_1, '2': ax_mock_2}
+        with mock.patch.object(presenter, 'get_selected_ax', lambda: ax_mock_1):
+            with mock.patch.object(presenter, 'update_view', lambda: None):
+                with mock.patch.object(presenter, 'axis_changed', lambda: None):
+                    presenter.current_view_props = presenter.get_selected_ax_properties()
+                    presenter.apply_all_properties()
+                    # Mock properties object and view then test that the view's setters
+                    # are called with the correct property values
+                    for key in presenter.axes_names_dict.keys():
+                        ax_mock = presenter.axes_names_dict[key]
+                        ax_mock.autoscale.assert_has_calls(
+                            [mock.call(True, axis="x")])
+                        ax_mock.set_xlabel.assert_called_once_with(
+                            presenter.current_view_props.xlabel)
+                        ax_mock.set_xscale.assert_called_once_with(
+                            presenter.current_view_props.xscale)
+                        ax_mock.autoscale.assert_has_calls(
+                            [mock.call(True, axis="y")])
+                        ax_mock.set_ylabel.assert_called_once_with(
+                            presenter.current_view_props.ylabel)
+                        ax_mock.set_yscale.assert_called_once_with(
+                            presenter.current_view_props.yscale)
+                        ax_mock.set_facecolor.assert_called_once_with(
+                            presenter.current_view_props.canvas_color)
+                        ax_mock.set_xlim.assert_not_called()
+                        ax_mock.set_ylim.assert_not_called()
 
     def test_get_axes_names_dict(self):
         actual_dict = get_axes_names_dict(self.fig)
@@ -201,6 +251,17 @@ class AxesTabWidgetPresenterTest(unittest.TestCase):
             presenter.update_view()
             for setter, value in zip(setters, expected_vals):
                 getattr(new_view_mock, setter).assert_called_once_with(value)
+
+    def test_autoscale_changed(self):
+        mock_view = mock.Mock(get_selected_ax_name=lambda: "My Axes: (0, 0)",
+                              get_axis=lambda: "x",
+                              get_properties=lambda: {},
+                              get_autoscale_enabled=mock.Mock(return_value=True))
+        presenter = Presenter(self.fig, view=mock_view)
+        mock_view.reset_mock()
+        presenter.autoscale_changed()
+        mock_view.get_autoscale_enabled.assert_called_once_with()
+        mock_view.set_limit_input_enabled.assert_called_once_with(False)
 
 
 if __name__ == '__main__':

@@ -5,12 +5,16 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionModel.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
+
+#include <utility>
 
 namespace {
 Mantid::Kernel::Logger g_log("FitFunction");
@@ -25,11 +29,13 @@ void FunctionModel::setFunction(IFunction_sptr fun) {
   m_globalParameterNames.clear();
   m_function = std::dynamic_pointer_cast<MultiDomainFunction>(fun);
   if (m_function) {
+    setResolutionFromWorkspace(m_function);
     return;
   }
   m_function = MultiDomainFunction_sptr(new MultiDomainFunction);
   if (fun) {
     auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
+    setResolutionFromWorkspace(fun);
     for (int i = 0; i < nf; ++i) {
       m_function->addFunction(fun->clone());
       m_function->setDomainIndex(i, i);
@@ -45,6 +51,7 @@ IFunction_sptr FunctionModel::getFitFunction() const {
   if (nf > 1) {
     auto fun =
         std::dynamic_pointer_cast<MultiDomainFunction>(m_function->clone());
+
     auto const singleFun = m_function->getFunction(0);
     for (auto par = m_globalParameterNames.begin();
          par != m_globalParameterNames.end();) {
@@ -205,7 +212,7 @@ QStringList FunctionModel::getParameterNames() const {
   QStringList names;
   if (hasFunction()) {
     const auto paramNames = getCurrentFunction()->getParameterNames();
-    for (auto const name : paramNames) {
+    for (auto const &name : paramNames) {
       names << QString::fromStdString(name);
     }
   }
@@ -271,22 +278,79 @@ void FunctionModel::setNumberDomains(int nDomains) {
   }
 }
 
-void FunctionModel::setDatasetNames(const QStringList &names) {
-  if (static_cast<size_t>(names.size()) != m_numberDomains) {
-    throw std::runtime_error(
-        "Number of dataset names doesn't match the number of domains.");
-  }
-  m_datasetNames = names;
+/// Sets the datasets based on their workspace names. This assumes there is only
+/// a single spectrum in the workspaces being fitted.
+/// @param datasetNames :: Names of the workspaces to be fitted.
+void FunctionModel::setDatasets(const QStringList &datasetNames) {
+  QList<FunctionModelDataset> datasets;
+  for (const auto &datasetName : datasetNames)
+    datasets.append(
+        FunctionModelDataset(datasetName, FunctionModelSpectra("0")));
+
+  setDatasets(datasets);
 }
 
+/// Sets the datasets using a map of <workspace name, spectra list>. This
+/// should be used when the workspaces being fitted have multiple spectra.
+/// @param datasets :: Names of workspaces to be fitted paired to a spectra
+/// list.
+void FunctionModel::setDatasets(const QList<FunctionModelDataset> &datasets) {
+  checkNumberOfDomains(datasets);
+  m_datasets = datasets;
+}
+
+/// Adds datasets based on their workspace names. This assumes there is only
+/// a single spectrum in the added workspaces.
+/// @param datasetNames :: Names of the workspaces to be added.
+void FunctionModel::addDatasets(const QStringList &datasetNames) {
+  for (const auto &datasetName : datasetNames)
+    m_datasets.append(
+        FunctionModelDataset(datasetName, FunctionModelSpectra("0")));
+
+  setNumberDomains(numberOfDomains(m_datasets));
+}
+
+/// Removes datasets (i.e. workspaces) from the Function model based on the
+/// index of the dataset in the QList.
+void FunctionModel::removeDatasets(QList<int> &indices) {
+  checkDatasets();
+
+  // Sort in reverse order
+  qSort(indices.begin(), indices.end(), [](int a, int b) { return a > b; });
+  for (auto i = indices.constBegin(); i != indices.constEnd(); ++i)
+    m_datasets.erase(m_datasets.begin() + *i);
+
+  const auto nDomains = numberOfDomains(m_datasets);
+  setNumberDomains(nDomains);
+
+  auto currentIndex = currentDomainIndex();
+  if (currentIndex >= nDomains)
+    currentIndex = m_datasets.isEmpty() ? 0 : nDomains - 1;
+
+  setCurrentDomainIndex(currentIndex);
+}
+
+/// Returns the workspace names of the datasets. If a dataset has N spectra,
+/// then the workspace name is multiplied by N. This is required for
+/// EditLocalParameterDialog.
 QStringList FunctionModel::getDatasetNames() const {
-  if (static_cast<size_t>(m_datasetNames.size()) != m_numberDomains) {
-    m_datasetNames.clear();
-    for (size_t i = 0; i < m_numberDomains; ++i) {
-      m_datasetNames << QString::number(i);
+  QStringList datasetNames;
+  for (const auto &dataset : m_datasets)
+    for (auto i = 0u; i < dataset.numberOfSpectra(); ++i) {
+      UNUSED_ARG(i);
+      datasetNames << dataset.datasetName();
     }
-  }
-  return m_datasetNames;
+  return datasetNames;
+}
+
+/// Returns names for the domains of each dataset. If a dataset has multiple
+/// spectra, then a domain name will include the spectrum number of a domain in
+/// a workspace. This is required for EditLocalParameterDialog.
+QStringList FunctionModel::getDatasetDomainNames() const {
+  QStringList domainNames;
+  for (const auto &dataset : m_datasets)
+    domainNames << dataset.domainNames();
+  return domainNames;
 }
 
 int FunctionModel::getNumberDomains() const {
@@ -436,6 +500,34 @@ QStringList FunctionModel::getLocalParameters() const {
   return locals;
 }
 
+/// Check that the number of domains is correct for m_datasets
+void FunctionModel::checkDatasets() {
+  if (numberOfDomains(m_datasets) != static_cast<int>(m_numberDomains)) {
+    m_datasets.clear();
+    for (auto i = 0u; i < m_numberDomains; ++i)
+      m_datasets.append(
+          FunctionModelDataset(QString::number(i), FunctionModelSpectra("0")));
+  }
+}
+
+/// Check that the datasets supplied have the expected total number of domains.
+void FunctionModel::checkNumberOfDomains(
+    const QList<FunctionModelDataset> &datasets) const {
+  if (numberOfDomains(datasets) != static_cast<int>(m_numberDomains)) {
+    throw std::runtime_error(
+        "Number of dataset domains doesn't match the number of domains.");
+  }
+}
+
+int FunctionModel::numberOfDomains(
+    const QList<FunctionModelDataset> &datasets) const {
+  std::size_t totalNumberOfDomains{0u};
+  for (const auto &dataset : datasets)
+    totalNumberOfDomains += dataset.numberOfSpectra();
+
+  return static_cast<int>(totalNumberOfDomains);
+}
+
 /// Check a domain/function index to be in range.
 void FunctionModel::checkIndex(int index) const {
   if (index == 0)
@@ -450,14 +542,10 @@ void FunctionModel::checkIndex(int index) const {
 void FunctionModel::updateMultiDatasetParameters(const IFunction &fun) {
   if (!hasFunction())
     return;
-  if (m_function->nParams() != fun.nParams())
-    return;
-  for (size_t i = 0; i < fun.nParams(); ++i) {
-    m_function->setParameter(i, fun.getParameter(i));
-    m_function->setError(i, fun.getError(i));
-  }
+  copyParametersAndErrors(fun, *m_function);
   updateMultiDatasetAttributes(fun);
 }
+
 void FunctionModel::updateMultiDatasetAttributes(const IFunction &fun) {
   if (!hasFunction())
     return;
@@ -483,6 +571,41 @@ void FunctionModel::updateGlobals() {
       it = m_globalParameterNames.erase(it);
     } else {
       ++it;
+    }
+  }
+}
+
+void FunctionModel::setResolutionFromWorkspace(IFunction_sptr fun) {
+  auto n = fun->getNumberDomains();
+  if (n > 1) {
+    for (size_t index = 0; index < n; index++) {
+      setResolutionFromWorkspace(fun->getFunction(index));
+    }
+  } else {
+    if (fun->hasAttribute("f0.Workspace")) {
+      std::string wsName = fun->getAttribute("f0.Workspace").asString();
+      if (AnalysisDataService::Instance().doesExist(wsName)) {
+        const auto ws =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+        setResolutionFromWorkspace(fun, ws);
+      }
+    }
+  }
+}
+
+void FunctionModel::setResolutionFromWorkspace(IFunction_sptr fun,
+                                               MatrixWorkspace_sptr workspace) {
+  auto inst = workspace->getInstrument();
+  auto analyser = inst->getStringParameter("analyser");
+  if (!analyser.empty()) {
+    auto comp = inst->getComponentByName(analyser[0]);
+    if (comp && comp->hasParameter("resolution")) {
+      auto params = comp->getNumberParameter("resolution", true);
+      for (auto param : fun->getParameterNames()) {
+        if (param.find("FWHM") != std::string::npos) {
+          fun->setParameter(param, params[0]);
+        }
+      }
     }
   }
 }
