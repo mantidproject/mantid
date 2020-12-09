@@ -213,13 +213,13 @@ mapGroupingStringsToGroupIDs(const std::vector<detid_t> &allowedDetectorIDs,
   for (auto j = 0; j < static_cast<int>(groupingStrings.size()); ++j) {
     if (hasSeperator(groupingStrings[j], "+"))
       addPlusSeperatedDetectorIDsToSameGroup(
-          allowedDetectorIDs, detectorIDToGroup, groupingStrings[j], j);
+          allowedDetectorIDs, detectorIDToGroup, groupingStrings[j], j + 1);
     else if (hasSeperator(groupingStrings[j], "-"))
       addDashSeperatedDetectorIDsToSameGroup(
-          allowedDetectorIDs, detectorIDToGroup, groupingStrings[j], j);
+          allowedDetectorIDs, detectorIDToGroup, groupingStrings[j], j + 1);
     else
       addDetectorToGroup(allowedDetectorIDs, detectorIDToGroup,
-                         std::stoi(groupingStrings[j]), j);
+                         std::stoi(groupingStrings[j]), j + 1);
   }
   return detectorIDToGroup;
 }

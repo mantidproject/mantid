@@ -25,6 +25,9 @@ using MantidQt::API::BatchAlgorithmRunner;
 namespace {
 Mantid::Kernel::Logger g_log("ISISEnergyTransfer");
 
+const std::string DEFAULT_MAP_FILENAME = "custom_detector_grouping.map";
+const std::string GROUPING_WS_NAME = "Custom_grouping_workspace";
+
 bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
 }
@@ -153,6 +156,18 @@ double loadSampleLog(std::string const &filename,
   } else {
     return defaultValue;
   }
+}
+
+void createGroupingWorkspace(std::string const &instrumentName,
+                             std::string const &analyser,
+                             std::string const &customGrouping) {
+  auto creator = AlgorithmManager::Instance().create("CreateGroupingWorkspace");
+  creator->initialize();
+  creator->setProperty("InstrumentName", instrumentName);
+  creator->setProperty("ComponentName", analyser);
+  creator->setProperty("CustomGroupingString", customGrouping);
+  creator->setProperty("OutputWorkspace", GROUPING_WS_NAME);
+  creator->execute();
 }
 
 void convertSpectrumAxis(std::string const &inputWorkspace,
@@ -600,36 +615,33 @@ void ISISEnergyTransfer::includeExtraGroupingOption(bool includeOption,
 }
 
 void ISISEnergyTransfer::handleSaveCustomGroupingClicked() {
-  QHash<QString, QString> props;
-  props["InputWorkspace"] = "input_name";
-  props["OutputFile"] = "detector_grouping.map";
+  createCustomGroupingWorkspace();
+  if (doesExistInADS(GROUPING_WS_NAME)) {
+    QHash<QString, QString> props;
+    props["InputWorkspace"] = QString::fromStdString(GROUPING_WS_NAME);
+    props["OutputFile"] = QString::fromStdString(DEFAULT_MAP_FILENAME);
 
-  InterfaceManager interfaceManager;
-  auto *dialog = interfaceManager.createDialogFromName(
-      "SaveDetectorsGrouping", -1, nullptr, false, props, "",
-      QStringList("OutputFile"));
+    InterfaceManager interfaceManager;
+    auto *dialog = interfaceManager.createDialogFromName(
+        "SaveDetectorsGrouping", -1, nullptr, false, props, "",
+        QStringList("OutputFile"));
 
-  // Show the dialog
-  dialog->show();
-  dialog->raise();
-  dialog->activateWindow();
+    dialog->show();
+    dialog->raise();
+    dialog->activateWindow();
+  }
 }
 
-void ISISEnergyTransfer::createGroupingWorkspace(
-    const std::string &outputWsName) {
-  auto instrumentDetails = getInstrumentDetails();
-  auto customGrouping = "3,4,5";
-  auto const instrument = instrumentDetails["instrument"];
-  auto const analyser = instrumentDetails["analyser"];
+void ISISEnergyTransfer::createCustomGroupingWorkspace() {
+  auto const instrumentDetails = getInstrumentDetails();
+  auto const instrumentName = instrumentDetails["instrument"].toStdString();
+  auto const analyser = instrumentDetails["analyser"].toStdString();
+  auto const customGrouping = m_uiForm.leCustomGroups->text().toStdString();
 
-  auto groupingAlg =
-      AlgorithmManager::Instance().create("CreateGroupingWorkspace");
-  groupingAlg->initialize();
-  groupingAlg->setProperty("InstrumentName", instrument);
-  groupingAlg->setProperty("ComponentName", analyser);
-  groupingAlg->setProperty("GroupNames", customGrouping);
-  groupingAlg->setProperty("OutputWorkspace", outputWsName);
-  groupingAlg->execute();
+  if (!customGrouping.empty())
+    createGroupingWorkspace(instrumentName, analyser, customGrouping);
+  else
+    displayWarning("The custom grouping is empty.");
 }
 
 void ISISEnergyTransfer::setInstrumentDefault() {

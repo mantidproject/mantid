@@ -72,7 +72,7 @@ private:
 
   void setFileExtensionsByName(bool filter) override;
 
-  void createGroupingWorkspace(const std::string &outputWsName);
+  void createCustomGroupingWorkspace();
 
   std::pair<std::string, std::string> createMapFile(
       const std::string

@@ -86,6 +86,18 @@ public:
   /// Used to run python code
   void runPythonCode(std::string const &pythonCode) override;
 
+  void displayWarning(std::string const &message);
+
+public slots:
+  void runTab();
+  void setupTab();
+  bool validateTab();
+  void exportPythonScript();
+
+protected slots:
+  /// Slot to handle when an algorithm finishes running
+  virtual void algorithmFinished(bool error);
+
 protected:
   /// Run the load algorithms
   bool loadFile(const QString &filename, const QString &outputName,
