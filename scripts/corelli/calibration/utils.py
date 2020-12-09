@@ -38,6 +38,7 @@ PIXELS_PER_TUBE = 256
 TUBES_IN_BANK = 16
 TUBE_LENGTH = 0.900466  # in meters
 WIRE_GAP = 52.8 / 1000  # in meters, distance between consecutive wires
+WIRE_GAP_IN_PIXELS = 15  # in pixels, distance between wire shadows along the tube direction (y_lab)
 
 
 def wire_positions(units: str = 'pixels') -> np.ndarray:
@@ -99,7 +100,7 @@ def preprocess_banks(input_workspace: str, output_workspace: str) -> Workspace2D
     def clean_signals(
         signal1D: np.ndarray,
         pixels_per_tube: int = PIXELS_PER_TUBE,
-        peak_interval_estimate: int = 15,
+        peak_interval_estimate: int = WIRE_GAP_IN_PIXELS,
     ) -> np.ndarray:
         r"""
         Replace the regions between peaks/dips with flat background to prevent peak finding
