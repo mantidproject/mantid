@@ -726,13 +726,19 @@
     <technique>Disk chopper time-of-flight spectrometer PANTHER</technique>
   </instrument>
 
+  <instrument name="SHARP">
+    <technique>Neutron Spectroscopy</technique>
+    <technique>Reactor Direct Geometry Spectroscopy</technique>
+    <technique>Disk chopper time-of-flight spectrometer</technique>
+  </instrument>
+
   <instrument name="D7">
     <technique>Polarized diffraction</technique>
     <technique>Polarized spectroscopy</technique>
-    <technique>Diffuse Scattering</technique>    
+    <technique>Diffuse Scattering</technique>
   </instrument>
 
-  
+
 </facility>
 
 <facility name="SINQ" FileExtensions=".hdf">

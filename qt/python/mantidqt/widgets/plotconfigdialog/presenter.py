@@ -67,9 +67,17 @@ class PlotConfigDialogPresenter:
 
     def apply_properties(self):
         for tab in reversed(self.tab_widget_presenters):
-            if tab and tab.view:
+            if tab:
                 tab.apply_properties()
         self.fig.canvas.draw()
+        for tab in reversed(self.tab_widget_presenters):
+            if tab == self.tab_widget_presenters[0]:
+                # Do not call update view on the legend tab because the legend config
+                # does not depend on the curves or axes - it only changes how the legend
+                # is displayed (e.g. legend fonts, border color, etc.)
+                continue
+            if tab:
+                tab.update_view()
 
     def apply_properties_and_exit(self):
         self.apply_properties()

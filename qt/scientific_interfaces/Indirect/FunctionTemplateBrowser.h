@@ -7,12 +7,15 @@
 #pragma once
 
 #include "DllConfig.h"
-#include "IndexTypes.h"
 #include "MantidAPI/IFunction_fwd.h"
 #include "MantidAPI/ITableWorkspace_fwd.h"
+#include "MantidQtWidgets/Common/FunctionModelDataset.h"
+#include "MantidQtWidgets/Common/IndexTypes.h"
 #include "ParameterEstimation.h"
 
-#include <QMap>
+#include <QList>
+#include <QPair>
+#include <QString>
 #include <QWidget>
 
 class QtBoolPropertyManager;
@@ -30,6 +33,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 using namespace Mantid::API;
+using namespace MantidWidgets;
 
 /**
  * Class FunctionTemplateBrowser implements QtPropertyBrowser to display
@@ -48,7 +52,8 @@ public:
   virtual IFunction_sptr getFunction() const = 0;
   virtual void setNumberOfDatasets(int) = 0;
   virtual int getNumberOfDatasets() const = 0;
-  virtual void setDatasetNames(const QStringList &names) = 0;
+  virtual void
+  setDatasets(const QList<MantidWidgets::FunctionModelDataset> &datasets) = 0;
   virtual QStringList getGlobalParameters() const = 0;
   virtual QStringList getLocalParameters() const = 0;
   virtual void setGlobalParameters(const QStringList &globals) = 0;

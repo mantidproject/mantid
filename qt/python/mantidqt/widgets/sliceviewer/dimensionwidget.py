@@ -37,7 +37,6 @@ class DimensionWidget(QWidget):
     window.show()
     app.exec_()
     """
-
     def __init__(self, dims_info, parent=None):
         super().__init__(parent)
 
@@ -47,8 +46,9 @@ class DimensionWidget(QWidget):
         self.dims, self.qflags = [], []
         for n, dim in enumerate(dims_info):
             self.qflags.append(dim['qdim'])
-            if dim['type'] == 'MDE':
-                self.dims.append(DimensionMDE(dim, number=n, parent=self))
+            dim_type = dim['type']
+            if dim_type == 'MDE' or (dim_type == 'MDH' and dim['has_original']):
+                self.dims.append(DimensionNonIntegrated(dim, number=n, parent=self))
             else:
                 self.dims.append(Dimension(dim, number=n, parent=self))
 
@@ -120,9 +120,8 @@ class DimensionWidget(QWidget):
         dimension and are in the same positions as the list returned from get_slicepoint
         """
         return [
-            None if d.get_state() in (State.X, State.Y) else (d.spinbox.minimum(),
-                                                              d.spinbox.maximum())
-            for d in self.dims
+            None if d.get_state() in (State.X, State.Y) else
+            (d.spinbox.minimum(), d.spinbox.maximum()) for d in self.dims
         ]
 
     def get_bin_params(self):
@@ -161,7 +160,6 @@ class Dimension(QWidget):
     window.show()
     app.exec_()
     """
-
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
         super().__init__(parent)
 
@@ -209,8 +207,7 @@ class Dimension(QWidget):
         self.layout.addWidget(self.spinbox)
         self.layout.addWidget(self.units)
 
-        self.set_value(0)
-
+        self.set_value(self.spinbox.minimum())
         if self.nbins < 2:
             state = State.DISABLE
 
@@ -289,28 +286,29 @@ class Dimension(QWidget):
         return self.value
 
 
-class DimensionMDE(Dimension):
+class DimensionNonIntegrated(Dimension):
     binningChanged = Signal()
     """
-    MDEventWorkspace has additional properties for either number_of_bins or thickness
+    A dimension that can either be sliced through or rebinned. It
+    has additional properties for either number_of_bins or thickness
 
     from mantidqt.widgets.sliceviewer.dimensionwidget import DimensionMDE
     from qtpy.QtWidgets import QApplication
     app = QApplication([])
-    window = DimensionMDE({'minimum':-1.1, 'number_of_bins':11, 'width':0.2, 'name':'Dim0', 'units':'A'})
+    window = DimensionNonIntegrated({'minimum':-1.1, 'number_of_bins':11,
+                                     'width':0.2, 'name':'Dim0', 'units':'A'})
     window.show()
     app.exec_()
     """
-
     def __init__(self, dim_info, number=0, state=State.NONE, parent=None):
-
         # hack in a number_of_bins for MDEventWorkspace
-        dim_info['number_of_bins'] = 1000
-        dim_info['width'] = (dim_info['maximum'] - dim_info['minimum']) / 1000
+        if dim_info['type'] == 'MDE':
+            dim_info['number_of_bins'] = 100
+            dim_info['width'] = (dim_info['maximum'] - dim_info['minimum']) / 100
 
         self.spinBins = QSpinBox()
         self.spinBins.setRange(2, 9999)
-        self.spinBins.setValue(100)
+        self.spinBins.setValue(dim_info['number_of_bins'])
         self.spinBins.hide()
         self.spinBins.setMinimumWidth(110)
         self.spinThick = QDoubleSpinBox()

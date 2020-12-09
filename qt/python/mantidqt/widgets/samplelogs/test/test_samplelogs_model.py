@@ -211,6 +211,13 @@ class SampleLogsModelTest(unittest.TestCase):
         # Valid log with multiple different value entries
         self.assertEqual(get_value(all_logs_C[13]), '({} entries)'.format(all_logs_C[13].size())) # Phase2
 
+    def test_filter_logs_with_search_key(self):
+        # Checks that the logs are filtered correctly
+        ws = Load('ILL/D22/192068.nxs')
+        model = SampleLogsModel(ws).getItemModel('flipper')
+        # check if the model contains the expected number of logs
+        self.assertEqual(model.rowCount(), 8)
+
 
 if __name__ == '__main__':
     unittest.main()

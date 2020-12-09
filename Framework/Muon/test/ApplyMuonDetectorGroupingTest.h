@@ -213,13 +213,13 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 1.350, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.771, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.2158, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 1.404, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.766, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.1978, 0.001);
     // Errors are simply normalized by a constant.
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00094, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00113, 0.00001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00142, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.00096, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.00116, 0.00001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.00145, 0.00001);
   }
 
   void
@@ -244,13 +244,13 @@ public:
     TS_ASSERT_DELTA(wsOut->readX(0)[4], 0.400, 0.001);
     TS_ASSERT_DELTA(wsOut->readX(0)[9], 0.900, 0.001);
 
-    TS_ASSERT_DELTA(wsOut->readY(0)[0], 1.410, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.876, 0.001);
-    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.053, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[0], 1.465, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[4], -0.873, 0.001);
+    TS_ASSERT_DELTA(wsOut->readY(0)[9], -0.0307, 0.001);
     // Errors : quadrature addition + normalized by a constant.
-    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.000282, 0.000001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.000338, 0.000001);
-    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.000424, 0.000001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[0], 0.000288, 0.000001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[4], 0.000346, 0.000001);
+    TS_ASSERT_DELTA(wsOut->readE(0)[9], 0.000434, 0.000001);
   }
 
   void

@@ -8,14 +8,18 @@
 import unittest
 
 import matplotlib as mpl
-mpl.use('Agg')  # noqa
-from mantid.simpleapi import (CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace,
-                              SetUB)
-from mantidqt.utils.qt.testing import start_qapplication
-from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder
-from mantidqt.widgets.sliceviewer.presenter import SliceViewer
-from mantidqt.widgets.sliceviewer.toolbar import ToolItemText
-from qtpy.QtWidgets import QApplication
+
+from mantidqt.widgets.colorbar.colorbar import MIN_LOG_VALUE
+
+mpl.use('Agg')
+from mantid.simpleapi import (  # noqa: E402
+    CreateMDHistoWorkspace, CreateMDWorkspace, CreateSampleWorkspace, SetUB)
+from mantidqt.utils.qt.testing import start_qapplication  # noqa: E402
+from mantidqt.utils.qt.testing.qt_widget_finder import QtWidgetFinder  # noqa: E402
+from mantidqt.widgets.sliceviewer.presenter import SliceViewer  # noqa: E402
+from mantidqt.widgets.sliceviewer.toolbar import ToolItemText  # noqa: E402
+from qtpy.QtWidgets import QApplication  # noqa: E402
+from math import inf  # noqa: E402
 
 
 @start_qapplication
@@ -82,6 +86,35 @@ class SliceViewerViewTest(unittest.TestCase, QtWidgetFinder):
 
         self.assertFalse(line_plots_action.isChecked())
         self.assertFalse(region_sel_action.isChecked())
+
+        pres.view.close()
+
+    def test_clim_edits_prevent_negative_values_if_lognorm(self):
+        pres = SliceViewer(self.histo_ws)
+        colorbar = pres.view.data_view.colorbar
+        colorbar.autoscale.setChecked(False)
+        colorbar.norm.setCurrentText("Log")
+        prev_bottom_limit = colorbar.cmin.text()
+        prev_top_limit = colorbar.cmax.text()
+
+        colorbar.cmin.textChanged.emit(str(-10))
+        colorbar.cmax.textChanged.emit(str(-5))
+
+        self.assertEqual(colorbar.cmin.text(), prev_bottom_limit)
+        self.assertEqual(colorbar.cmax.text(), prev_top_limit)
+
+        pres.view.close()
+
+    def test_changing_norm_updates_clim_validators(self):
+        pres = SliceViewer(self.histo_ws)
+        colorbar = pres.view.data_view.colorbar
+        colorbar.autoscale.setChecked(False)
+
+        colorbar.norm.setCurrentText("Log")
+        self.assertEqual(colorbar.cmin.validator().bottom(), MIN_LOG_VALUE)
+
+        colorbar.norm.setCurrentText("Linear")
+        self.assertEqual(colorbar.cmin.validator().bottom(), -inf)
 
         pres.view.close()
 

@@ -870,7 +870,7 @@ public:
     void setNumberOfDatasets(int n);
     void setCurrentDataset(int i);
     int getCurrentDataset() const;
-    void setDatasetNames(const QStringList &names);
+    void setDatasets(const QStringList &datasetNames);
     void addDatasets(const QStringList &names);
     void removeDatasets(QList<int> indices);
     QStringList getDatasetNames() const;
@@ -984,6 +984,7 @@ public:
     void setFileExtensions(const QStringList &extensions);
     void findFiles(bool isModified);
     void isOptional(bool);
+    void setLastDirectory(const QString &lastDir);
 
 signals:
     void fileTextChanged(const QString & /*_t1*/);

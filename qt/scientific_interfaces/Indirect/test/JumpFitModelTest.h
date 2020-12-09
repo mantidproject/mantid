@@ -55,7 +55,7 @@ public:
   }
 
   void test_that_the_model_is_instantiated_and_can_hold_a_workspace() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
@@ -64,7 +64,7 @@ public:
 
   void
   test_that_removeWorkspace_will_remove_the_specified_workspace_from_the_model() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
     m_model->removeWorkspace(TableDatasetIndex{0});
@@ -73,7 +73,7 @@ public:
   }
 
   void test_that_zeroWidths_returns_false_if_the_workspace_contains_widths() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
@@ -81,7 +81,7 @@ public:
   }
 
   void test_that_zeroWidths_returns_true_if_the_workspace_contains_no_widths() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoWidthLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
@@ -91,7 +91,7 @@ public:
   }
 
   void test_that_zeroEISF_returns_false_if_the_workspace_contains_EISFs() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
@@ -99,7 +99,7 @@ public:
   }
 
   void test_that_zeroEISF_returns_true_if_the_workspace_contains_no_EISFs() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
@@ -110,7 +110,7 @@ public:
 
   void
   test_that_isMultiFit_returns_false_if_the_model_contains_one_workspace() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
@@ -119,7 +119,7 @@ public:
 
   void
   test_that_isMultiFit_returns_true_if_the_model_contains_multiple_workspace() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
@@ -130,7 +130,7 @@ public:
 
   void
   test_that_isMultiFit_returns_false_if_the_model_contains_multiple_workspace_which_are_identical() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace, m_workspace);
 
@@ -139,7 +139,7 @@ public:
 
   void
   test_that_getFitParameterName_will_return_the_name_of_the_expected_parameter() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
@@ -155,7 +155,7 @@ public:
 
   void
   test_that_getWidths_will_return_an_empty_vector_if_there_are_no_widths() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoWidthLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
@@ -165,7 +165,7 @@ public:
   }
 
   void test_that_getWidths_will_return_the_width_parameter_names() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
@@ -174,7 +174,7 @@ public:
   }
 
   void test_that_getEISF_will_return_an_empty_vector_if_there_are_no_EISFs() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
@@ -184,7 +184,7 @@ public:
   }
 
   void test_that_getEISF_will_return_the_EISF_parameter_names() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
@@ -193,7 +193,7 @@ public:
   }
 
   void test_that_getWidthSpectrum_will_return_none_when_there_are_no_widths() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoWidthLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
@@ -203,7 +203,7 @@ public:
   }
 
   void test_that_getWidthSpectrum_will_return_the_width_spectrum_number() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
@@ -214,7 +214,7 @@ public:
   }
 
   void test_that_getEISFSpectrum_will_return_none_when_there_are_no_EISFs() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
     auto const workspace2 = createWorkspaceWithTextAxis(2, getNoEISFLabels());
     m_ads->addOrReplace("Name2", workspace2);
 
@@ -224,7 +224,7 @@ public:
   }
 
   void test_that_getEISFSpectrum_will_return_the_EISF_spectrum_number() {
-    Spectra const spectra = Spectra("0-1");
+    FunctionModelSpectra const spectra = FunctionModelSpectra("0-1");
 
     addWorkspacesToModel(spectra, m_workspace);
 
@@ -239,13 +239,14 @@ public:
 
 private:
   template <typename Workspace, typename... Workspaces>
-  void addWorkspacesToModel(Spectra const &spectra, Workspace const &workspace,
+  void addWorkspacesToModel(FunctionModelSpectra const &spectra,
+                            Workspace const &workspace,
                             Workspaces const &... workspaces) {
     m_model->addWorkspace(workspace->getName());
     addWorkspacesToModel(spectra, workspaces...);
   }
 
-  void addWorkspacesToModel(Spectra const &,
+  void addWorkspacesToModel(FunctionModelSpectra const &,
                             MatrixWorkspace_sptr const &workspace) {
     m_model->addWorkspace(workspace->getName());
   }
