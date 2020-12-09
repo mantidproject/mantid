@@ -87,8 +87,8 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-IndirectDataTablePresenter::IndirectDataTablePresenter(IIndirectFitDataModel *model,
-                                                       QTableWidget *dataTable)
+IndirectDataTablePresenter::IndirectDataTablePresenter(
+    IIndirectFitDataModel *model, QTableWidget *dataTable)
     : IndirectDataTablePresenter(model, dataTable, defaultHeaders()) {}
 
 IndirectDataTablePresenter::IndirectDataTablePresenter(

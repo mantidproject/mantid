@@ -626,7 +626,8 @@ void IndirectDataAnalysisElwinTab::saveClicked() {
   m_batchAlgoRunner->executeBatchAsync();
 }
 
-std::vector<std::string> IndirectDataAnalysisElwinTab::getOutputWorkspaceNames() {
+std::vector<std::string>
+IndirectDataAnalysisElwinTab::getOutputWorkspaceNames() {
   auto outputNames = attachPrefix(getOutputWorkspaceSuffices(),
                                   getOutputBasename().toStdString());
   removeElementsIf(outputNames, [](std::string const &workspaceName) {
