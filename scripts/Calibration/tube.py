@@ -11,8 +11,9 @@ import os
 import re
 
 from mantid.kernel import V3D
-from mantid.api import mtd, ITableWorkspace, MatrixWorkspace
-from mantid.simpleapi import CreateEmptyTableWorkspace, DeleteWorkspace, FindPeaks, config
+from mantid.api import (MatrixWorkspace, ITableWorkspace)
+from mantid.simpleapi import (mtd, CreateEmptyTableWorkspace, DeleteWorkspace,
+                              FindPeaks, config)
 from tube_spec import TubeSpec
 from ideal_tube import IdealTube
 from tube_calib_fit_params import TubeCalibFitParams
