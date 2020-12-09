@@ -13,6 +13,7 @@ New Features
 - Added a ``Log`` colorbar scale option to the Sliceviewer. This differs from the existing ``Symlog`` option as it prohibits negative values.
 - Added a Dx data tab on the data window when a workspace has Dx data.
 - Added QLineEdit to SampleLogs widget to allow filtering its entries
+- Time series sample logs in multiperiod event workspaces can now be filtered by current period.
 
 Improvements
 ############
