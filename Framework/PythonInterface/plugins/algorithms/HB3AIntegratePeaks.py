@@ -4,10 +4,15 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory, FileAction, FileProperty, IMDEventWorkspaceProperty, IPeaksWorkspaceProperty, \
-    PythonAlgorithm, PropertyMode
-from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator
-from mantid.simpleapi import DeleteWorkspace, IntegratePeaksMD, SaveHKL, SaveReflections
+from mantid.api import (AlgorithmFactory, FileAction, FileProperty,
+                        PythonAlgorithm, PropertyMode, ADSValidator,
+                        WorkspaceGroup, WorkspaceProperty)
+from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator, StringArrayProperty
+from mantid.simpleapi import (DeleteWorkspace, IntegratePeaksMD,
+                              SaveHKL, SaveReflections,
+                              CreatePeaksWorkspace, CopySample,
+                              AnalysisDataService,
+                              CombinePeaksWorkspaces)
 import numpy as np
 
 
@@ -27,13 +32,10 @@ class HB3AIntegratePeaks(PythonAlgorithm):
                'the output peaks workspace; output can be saved in different formats.'
 
     def PyInit(self):
-        self.declareProperty(IMDEventWorkspaceProperty("InputWorkspace", defaultValue="",
-                                                       optional=PropertyMode.Mandatory,
-                                                       direction=Direction.Input),
+        self.declareProperty(StringArrayProperty("InputWorkspace", direction=Direction.Input, validator=ADSValidator()),
                              doc="Input MDEvent workspace to use for integration")
 
-        self.declareProperty(IPeaksWorkspaceProperty("PeaksWorkspace", defaultValue="", optional=PropertyMode.Mandatory,
-                                                     direction=Direction.Input),
+        self.declareProperty(StringArrayProperty("PeaksWorkspace", direction=Direction.Input, validator=ADSValidator()),
                              doc="Peaks workspace containing peaks to integrate")
 
         positive_val = FloatBoundedValidator(lower=0.0)
@@ -60,8 +62,8 @@ class HB3AIntegratePeaks(PythonAlgorithm):
                                           action=FileAction.OptionalSave),
                              doc="Filepath to save the integrated peaks workspace in HKL format")
 
-        self.declareProperty(IPeaksWorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output,
-                                                     optional=PropertyMode.Mandatory),
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", defaultValue="", direction=Direction.Output,
+                                               optional=PropertyMode.Mandatory),
                              doc="Output peaks workspace (copy of input with updated peak intensities)")
 
     def validateInputs(self):
@@ -77,8 +79,8 @@ class HB3AIntegratePeaks(PythonAlgorithm):
         return issues
 
     def PyExec(self):
-        input_ws = self.getProperty("InputWorkspace").value
-        peak_ws = self.getProperty("PeaksWorkspace").value
+        input_workspaces, peak_workspaces = self._expand_groups()
+        output_workspace_name = self.getPropertyValue("OutputWorkspace")
 
         peak_radius = self.getProperty("PeakRadius").value
         inner_radius = self.getProperty("BackgroundInnerRadius").value
@@ -86,16 +88,45 @@ class HB3AIntegratePeaks(PythonAlgorithm):
 
         use_lorentz = self.getProperty("ApplyLorentz").value
 
-        out_ws = IntegratePeaksMD(InputWorkspace=input_ws,
-                                  PeakRadius=peak_radius,
-                                  BackgroundInnerRadius=inner_radius,
-                                  BackgroundOuterRadius=outer_radius,
-                                  PeaksWorkspace=peak_ws)
+        multi_ws = len(input_workspaces) > 1
+
+        output_workspaces = []
+
+        for input_ws, peak_ws in zip(input_workspaces, peak_workspaces):
+            if multi_ws:
+                peaks_ws_name = input_ws + '_' + output_workspace_name
+                output_workspaces.append(peaks_ws_name)
+            else:
+                peaks_ws_name = output_workspace_name
+
+            IntegratePeaksMD(InputWorkspace=input_ws,
+                             PeakRadius=peak_radius,
+                             BackgroundInnerRadius=inner_radius,
+                             BackgroundOuterRadius=outer_radius,
+                             PeaksWorkspace=peak_ws,
+                             OutputWorkspace=peaks_ws_name)
+
+        if multi_ws:
+            peaks_ws_name = output_workspace_name
+            CreatePeaksWorkspace(InstrumentWorkspace=input_workspaces[0],
+                                 NumberOfPeaks=0,
+                                 OutputWorkspace=peaks_ws_name)
+            CopySample(InputWorkspace=output_workspaces[0],
+                       OutputWorkspace=peaks_ws_name,
+                       CopyName=False,
+                       CopyMaterial=False,
+                       CopyEnvironment=False,
+                       CopyShape=False,
+                       CopyLattice=True)
+            for peak_ws in output_workspaces:
+                CombinePeaksWorkspaces(peaks_ws_name, peak_ws, OutputWorkspace=peaks_ws_name)
+                DeleteWorkspace(peak_ws)
 
         if use_lorentz:
             # Apply Lorentz correction:
-            for p in range(out_ws.getNumberPeaks()):
-                peak = out_ws.getPeak(p)
+            peaks = AnalysisDataService[peaks_ws_name]
+            for p in range(peaks.getNumberPeaks()):
+                peak = peaks.getPeak(p)
                 lorentz = abs(np.sin(peak.getScattering() * np.cos(peak.getAzimuthal())))
                 peak.setIntensity(peak.getIntensity() * lorentz)
 
@@ -105,17 +136,37 @@ class HB3AIntegratePeaks(PythonAlgorithm):
             filename = self.getProperty("OutputFile").value
 
             if out_format == "SHELX":
-                SaveHKL(InputWorkspace=out_ws, Filename=filename, DirectionCosines=True, OutputWorkspace="__tmp")
+                SaveHKL(InputWorkspace=peaks_ws_name, Filename=filename, DirectionCosines=True, OutputWorkspace="__tmp")
                 DeleteWorkspace("__tmp")
             elif out_format == "Fullprof":
-                SaveReflections(InputWorkspace=out_ws, Filename=filename, Format="Fullprof")
+                SaveReflections(InputWorkspace=peaks_ws_name, Filename=filename, Format="Fullprof")
             else:
                 # This shouldn't happen
                 RuntimeError("Invalid output format given")
 
-        self.setProperty("OutputWorkspace", out_ws)
+        self.setProperty("OutputWorkspace", AnalysisDataService[peaks_ws_name])
 
-        DeleteWorkspace(out_ws)
+    def _expand_groups(self):
+        """expand workspace groups"""
+        workspaces = self.getProperty("InputWorkspace").value
+        input_workspaces = []
+        for wsname in workspaces:
+            wks = AnalysisDataService.retrieve(wsname)
+            if isinstance(wks, WorkspaceGroup):
+                input_workspaces.extend(wks.getNames())
+            else:
+                input_workspaces.append(wsname)
+
+        workspaces = self.getProperty("PeaksWorkspace").value
+        peaks_workspaces = []
+        for wsname in workspaces:
+            wks = AnalysisDataService.retrieve(wsname)
+            if isinstance(wks, WorkspaceGroup):
+                peaks_workspaces.extend(wks.getNames())
+            else:
+                peaks_workspaces.append(wsname)
+
+        return input_workspaces, peaks_workspaces
 
 
 AlgorithmFactory.subscribe(HB3AIntegratePeaks)
