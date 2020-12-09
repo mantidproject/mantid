@@ -6,8 +6,10 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, IMDEventWorkspaceProperty, IMDHistoWorkspaceProperty, IPeaksWorkspaceProperty,\
     PythonAlgorithm, PropertyMode
-from mantid.kernel import Direction, EnabledWhenProperty, FloatArrayProperty, PropertyCriterion, IntArrayProperty
+from mantid.kernel import Direction, EnabledWhenProperty, FloatArrayLengthValidator, FloatArrayProperty, \
+    PropertyCriterion, IntArrayProperty
 from mantid.simpleapi import BinMD, DeleteWorkspace, SetMDFrame, TransformHKL, mtd
+import numpy as np
 
 
 class ConvertQtoHKLHisto(PythonAlgorithm):
@@ -18,7 +20,7 @@ class ConvertQtoHKLHisto(PythonAlgorithm):
         return "Crystal\\Creation"
 
     def seeAlso(self):
-        return ["HB3AFindPeaks", "IntegratePeaksMD"]
+        return ["ConvertWANDSCDtoQ", "BinMD"]
 
     def name(self):
         return "ConvertQtoHKLHisto"
@@ -48,6 +50,16 @@ class ConvertQtoHKLHisto(PythonAlgorithm):
         ub_settings = EnabledWhenProperty('FindUBFromPeaks', PropertyCriterion.IsDefault)
         self.setPropertySettings("PeaksWorkspace", ub_settings)
         self.setPropertySettings("Transformation", ub_settings)
+
+        self.declareProperty(FloatArrayProperty("Uproj", [1, 0, 0], validator=FloatArrayLengthValidator(3),
+                                                direction=Direction.Input),
+                             doc="Defines the first projection vector of the target Q coordinate system in HKL mode")
+        self.declareProperty(FloatArrayProperty("Vproj", [0, 1, 0], validator=FloatArrayLengthValidator(3),
+                                                direction=Direction.Input),
+                             doc="Defines the second projection vector of the target Q coordinate system in HKL mode")
+        self.declareProperty(FloatArrayProperty("Wproj", [0, 0, 1], validator=FloatArrayLengthValidator(3),
+                                                direction=Direction.Input),
+                             doc="Defines the third projection vector of the target Q coordinate system in HKL mode")
 
         self.declareProperty(FloatArrayProperty("Extents", [-6.02, 6.02, -6.02, 6.02, -6.02, 6.02],
                                                 direction=Direction.Input),
@@ -125,14 +137,24 @@ class ConvertQtoHKLHisto(PythonAlgorithm):
         else:
             self._lattice = input_ws.getExperimentInfo(0).sample().getOrientedLattice()
 
-        q1 = self._lattice.qFromHKL([1, 0, 0])
-        q2 = self._lattice.qFromHKL([0, 1, 0])
-        q3 = self._lattice.qFromHKL([0, 0, 1])
+        # Get axis names and units from u,v,w projections, as done in ConvertWANDSCDtoQ:
+        w = np.eye(3)
+        w[:, 0] = self.getProperty("Uproj").value
+        w[:, 1] = self.getProperty("Vproj").value
+        w[:, 2] = self.getProperty("Wproj").value
+        char_dict = {0: '0', 1: '{1}', -1: '-{1}'}
+        chars = ['H', 'K', 'L']
+        names = ['[' + ','.join(char_dict.get(j, '{0}{1}')
+                                .format(j, chars[np.argmax(np.abs(w[:, i]))]) for j in w[:, i]) + ']' for i in range(3)]
+
+        q = [self._lattice.qFromHKL(w[i]) for i in range(3)]
+
+        units = ['in {:.3f} A^-1'.format(q[i].norm()) for i in range(3)]
 
         mdhist = BinMD(InputWorkspace=input_ws, AxisAligned=False, NormalizeBasisVectors=False,
-                       BasisVector0='H,A^-1,{},{},{}'.format(q1.X(), q1.Y(), q1.Z()),
-                       BasisVector1='K,A^-1,{},{},{}'.format(q2.X(), q2.Y(), q2.Z()),
-                       BasisVector2='L,A^-1,{},{},{}'.format(q3.X(), q3.Y(), q3.Z()),
+                       BasisVector0='{},{},{},{},{}'.format(names[0], units[0], q[0].X(), q[0].Y(), q[0].Z()),
+                       BasisVector1='{},{},{},{},{}'.format(names[1], units[1], q[1].X(), q[1].Y(), q[1].Z()),
+                       BasisVector2='{},{},{},{},{}'.format(names[2], units[2], q[2].X(), q[2].Y(), q[2].Z()),
                        OutputExtents=extents,
                        OutputBins=bins)
 
