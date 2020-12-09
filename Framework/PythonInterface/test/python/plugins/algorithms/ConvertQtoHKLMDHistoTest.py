@@ -19,7 +19,7 @@ class ConvertQtoHKLMDHistoTest(unittest.TestCase):
     def test_qtohkl(self):
         # Tests the conversion from the MDEvent WS in Q Sample to a MDHisto WS in HKL using this algorithm.
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs", OutputWorkspace="mde_ws")
-        hkl = ConvertQtoHKLHisto(InputWorkspace=mtd["mde_ws"], FindUBFromPeaks=False)
+        hkl = ConvertQtoHKLMDHisto(InputWorkspace=mtd["mde_ws"], FindUBFromPeaks=False)
         self.assertEqual(hkl.getSpecialCoordinateSystem().name, "HKL")
 
         # Test with getting UB from peaks
@@ -31,9 +31,9 @@ class ConvertQtoHKLMDHistoTest(unittest.TestCase):
                       Wavelength=1.558,
                       OutputWorkspace="peaks")
 
-        hkl = ConvertQtoHKLHisto(InputWorkspace=mtd["mde_ws"],
-                                 FindUBFromPeaks=True,
-                                 PeaksWorkspace=mtd["peaks"])
+        hkl = ConvertQtoHKLMDHisto(InputWorkspace=mtd["mde_ws"],
+                                   FindUBFromPeaks=True,
+                                   PeaksWorkspace=mtd["peaks"])
         self.assertEqual(hkl.getSpecialCoordinateSystem().name, "HKL")
 
         self.assertEqual(mtd["peaks"].getNumberPeaks(), 12)
@@ -57,7 +57,7 @@ class ConvertQtoHKLMDHistoTest(unittest.TestCase):
                     Wproj='0,0,1',
                     MinValues='-20,-20,-20',
                     MaxValues='20,20,20')
-        HKL_binned = BinMD('HKL',
+        hkl_binned = BinMD('HKL',
                            AlignedDim0='[H,H,0],-10.05,10.05,201',
                            AlignedDim1='[H,-H,0],-10.05,10.05,201',
                            AlignedDim2='[0,0,L],-1.05,1.05,21')
@@ -69,12 +69,18 @@ class ConvertQtoHKLMDHistoTest(unittest.TestCase):
                     MinValues='-20,-20,-20',
                     MaxValues='20,20,20')
 
-        hkl = ConvertQtoHKLHisto(InputWorkspace=mtd["q_sample"],
-                                 FindUBFromPeaks=False,
-                                 Extents="-10.05,10.05,-10.05,10.05,-1.05,1.05",
-                                 Bins="201,201,21")
+        hkl = ConvertQtoHKLMDHisto(InputWorkspace=mtd["q_sample"],
+                                   FindUBFromPeaks=False,
+                                   Uproj="1,1,0",
+                                   Vproj="1,-1,0",
+                                   Wproj="0,0,1",
+                                   Extents="-10.05,10.05,-10.05,10.05,-1.05,1.05",
+                                   Bins="201,201,21")
 
-        orig_sig = HKL_binned.getSignalArray()
+        for i in range(hkl.getNumDims()):
+            self.assertEqual(hkl_binned.getDimension(i).name, hkl.getDimension(i).name)
+
+        orig_sig = hkl_binned.getSignalArray()
         new_sig = hkl.getSignalArray()
 
         np.testing.assert_allclose(np.asarray(new_sig), np.asarray(orig_sig), rtol=1.0e-5, atol=3)
