@@ -82,9 +82,6 @@ class ConvertQtoHKLHisto(PythonAlgorithm):
         extents = self.getProperty("Extents").value
         bins = self.getProperty("Bins").value
 
-        print("Extents: {}".format(extents))
-        print("Bins: {}".format(bins))
-
         if len(extents) != ndims * 2:
             issues["Extents"] = "Expected a min and max value for each " \
                                 "dimension (got {}, expected {}).".format(len(extents), ndims*2)
