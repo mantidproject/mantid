@@ -5,11 +5,12 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
-from mantid.simpleapi import config, mtd, CloneWorkspace, D7YIGPositionCalibration, Load, LoadILLPolarizedDiffraction
+from mantid.simpleapi import config, mtd, CloneWorkspace, D7YIGPositionCalibration, Load
 from mantid.api import ITableWorkspace, WorkspaceGroup
 import os.path
 from os import path
 import tempfile
+
 
 class D7YIGPositionCalibrationTest(unittest.TestCase):
 
@@ -74,6 +75,7 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
             if '.offset' in row_data['Name']:
                 offset = row_data['Value']
                 self.assertAlmostEqual(offset, 0.0, delta=24.0) # +- 24 degrees
+
 
 if __name__ == '__main__':
     unittest.main()

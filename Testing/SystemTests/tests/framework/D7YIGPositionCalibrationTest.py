@@ -209,7 +209,7 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
 
         if wavelength_mode == 'short':
             LoadILLPolarizedDiffraction('403041', OutputWorkspace='output', PositionCalibration='YIGFile',
-                                    YIGFilename=ipf_name, ConvertToScatteringAngle=True, TransposeMonochromatic=True)
+                                        YIGFilename=ipf_name, ConvertToScatteringAngle=True, TransposeMonochromatic=True)
             xAxisValues = mtd['output'].getItem(0).readX(0)
             self.assertAlmostEqual(xAxisValues[0], 14.3, delta=1e0)
             self.assertAlmostEqual(xAxisValues[43], 56.8, delta=1e0)
@@ -219,7 +219,7 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
             self.assertAlmostEqual(xAxisValues[131], 148.6, delta=1e0)
         elif wavelength_mode == 'intermediate':
             LoadILLPolarizedDiffraction('396831', OutputWorkspace='output', PositionCalibration='YIGFile',
-                                    YIGFilename=ipf_name, ConvertToScatteringAngle=True, TransposeMonochromatic=True)
+                                        YIGFilename=ipf_name, ConvertToScatteringAngle=True, TransposeMonochromatic=True)
             xAxisValues = mtd['output'].getItem(0).readX(0)
             self.assertAlmostEqual(xAxisValues[0], 12.7, delta=1e0)
             self.assertAlmostEqual(xAxisValues[43], 55.2, delta=1e0)
@@ -229,7 +229,7 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
             self.assertAlmostEqual(xAxisValues[131], 148.1, delta=1e0)
         elif wavelength_mode == 'long':
             LoadILLPolarizedDiffraction('394882', OutputWorkspace='output', PositionCalibration='YIGFile',
-                                    YIGFilename=ipf_name, ConvertToScatteringAngle=True, TransposeMonochromatic=True)
+                                        YIGFilename=ipf_name, ConvertToScatteringAngle=True, TransposeMonochromatic=True)
             xAxisValues = mtd['output'].getItem(0).readX(0)
             self.assertAlmostEqual(xAxisValues[0], 13.9, delta=1e0)
             self.assertAlmostEqual(xAxisValues[43], 56.9, delta=1e0)
