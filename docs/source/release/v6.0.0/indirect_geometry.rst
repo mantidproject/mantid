@@ -9,6 +9,10 @@ Indirect Geometry Changes
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
 
+New Features
+############
+- Added the ability to save a detector grouping to a MAP file from a Custom Grouping String on Indirect Data Reduction. 
+
 Improvements
 ############
 - Added an option to load diffraction data on IN16B.
