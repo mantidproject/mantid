@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/Run.h"
 #include "MantidKernel/System.h"
@@ -17,8 +18,40 @@
 #include "Poco/File.h"
 
 using namespace Mantid;
-using namespace Mantid::DataHandling;
 using namespace Mantid::API;
+using namespace Mantid::DataHandling;
+using namespace Mantid::DataObjects;
+
+namespace {
+
+const std::string TEMP_SAVED_MAP_WS = "test_grouping_workspace";
+const std::string TEMP_LOADED_MAP_WS = "test_grouping_loaded";
+const std::string TEMP_MAP_FILE_NAME = "temp_grouping.map";
+
+void createGroupingWorkspace(const std::string &instrumentName,
+                             const std::string &analyser,
+                             const std::string &customGrouping) {
+  auto creator = AlgorithmManager::Instance().create("CreateGroupingWorkspace");
+  creator->initialize();
+  creator->setProperty("InstrumentName", instrumentName);
+  creator->setProperty("ComponentName", analyser);
+  creator->setProperty("CustomGroupingString", customGrouping);
+  creator->setProperty("OutputWorkspace", TEMP_SAVED_MAP_WS);
+  creator->execute();
+}
+
+ITableWorkspace_sptr compareWorkspaces(const MatrixWorkspace_sptr &workspace1,
+                                       const MatrixWorkspace_sptr &workspace2,
+                                       double tolerance = 0.000001) {
+  auto compareAlg = AlgorithmManager::Instance().create("CompareWorkspaces");
+  compareAlg->setProperty("Workspace1", workspace1);
+  compareAlg->setProperty("Workspace2", workspace2);
+  compareAlg->setProperty("Tolerance", tolerance);
+  compareAlg->execute();
+  return compareAlg->getProperty("Messages");
+}
+
+} // namespace
 
 class SaveDetectorsGroupingTest : public CxxTest::TestSuite {
 public:
@@ -90,6 +123,40 @@ public:
 
     API::AnalysisDataService::Instance().remove("Vulcan_Group");
     API::AnalysisDataService::Instance().remove("Vulcan_Group2");
+  }
+
+  void test_saving_a_MAP_file() {
+    auto &ads = AnalysisDataService::Instance();
+
+    createGroupingWorkspace("IRIS", "graphite", "3-5,6+7,8:10");
+
+    TS_ASSERT(ads.doesExist(TEMP_SAVED_MAP_WS));
+    const auto groupingToSave =
+        ads.retrieveWS<GroupingWorkspace>(TEMP_SAVED_MAP_WS);
+
+    SaveDetectorsGrouping saver;
+    saver.initialize();
+    saver.setProperty("InputWorkspace", groupingToSave);
+    saver.setProperty("OutputFile", TEMP_MAP_FILE_NAME);
+    saver.execute();
+    TS_ASSERT(saver.isExecuted());
+
+    LoadDetectorsGroupingFile loader;
+    loader.initialize();
+    loader.setProperty("InputFile", TEMP_MAP_FILE_NAME);
+    loader.setProperty("OutputWorkspace", TEMP_LOADED_MAP_WS);
+    loader.execute();
+    TS_ASSERT(loader.isExecuted());
+
+    const auto groupingLoaded =
+        ads.retrieveWS<GroupingWorkspace>(TEMP_LOADED_MAP_WS);
+
+    TS_ASSERT(!compareWorkspaces(groupingToSave, groupingLoaded));
+
+    Poco::File file(TEMP_MAP_FILE_NAME);
+    file.remove(false);
+    ads.remove(TEMP_SAVED_MAP_WS);
+    ads.remove(TEMP_LOADED_MAP_WS);
   }
 
   void test_SaveNamingAndDescription() {
