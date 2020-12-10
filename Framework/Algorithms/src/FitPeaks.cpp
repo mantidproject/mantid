@@ -11,6 +11,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/CostFunctionFactory.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FuncMinimizerFactory.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/FunctionProperty.h"
@@ -938,36 +939,47 @@ FitPeaks::fitPeaks() {
   std::vector<std::shared_ptr<FitPeaksAlgorithm::PeakFitResult>>
       fit_result_vector(num_fit_result);
 
+  const int nThreads = FrameworkManager::Instance().getNumOMPThreads();
+  size_t chunkSize = num_fit_result / nThreads;
+
   // cppcheck-suppress syntaxError
-  PRAGMA_OMP(parallel for schedule(dynamic, 1))
-  for (auto wi = static_cast<int>(m_startWorkspaceIndex);
-       wi <= static_cast<int>(m_stopWorkspaceIndex); ++wi) {
-
+  PRAGMA_OMP(parallel for schedule(dynamic, 1) )
+  for (int ithread = 0; ithread < nThreads; ithread++) {
     PARALLEL_START_INTERUPT_REGION
+    auto iws_begin =
+        m_startWorkspaceIndex + chunkSize * static_cast<size_t>(ithread);
+    auto iws_end = (ithread == nThreads - 1) ? m_stopWorkspaceIndex + 1
+                                             : iws_begin + chunkSize;
 
-    // peaks to fit
-    std::vector<double> expected_peak_centers =
-        getExpectedPeakPositions(static_cast<size_t>(wi));
+    // vector to store fit parmas for last good fit to each peak
+    std::vector<std::vector<double>> lastGoodPeakParameters(
+        m_numPeaksToFit, std::vector<double>(m_peakFunction->nParams(), 0.0));
 
-    // initialize output for this
-    size_t numfuncparams =
-        m_peakFunction->nParams() + m_bkgdFunction->nParams();
-    std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result =
-        std::make_shared<FitPeaksAlgorithm::PeakFitResult>(m_numPeaksToFit,
-                                                           numfuncparams);
-    fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers,
-                     fit_result);
+    for (auto wi = iws_begin; wi < iws_end; ++wi) {
+      // peaks to fit
+      std::vector<double> expected_peak_centers =
+          getExpectedPeakPositions(static_cast<size_t>(wi));
 
-    PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
-      writeFitResult(static_cast<size_t>(wi), expected_peak_centers,
-                     fit_result);
-      fit_result_vector[wi - m_startWorkspaceIndex] = fit_result;
+      // initialize output for this
+      size_t numfuncparams =
+          m_peakFunction->nParams() + m_bkgdFunction->nParams();
+      std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> fit_result =
+          std::make_shared<FitPeaksAlgorithm::PeakFitResult>(m_numPeaksToFit,
+                                                             numfuncparams);
+
+      (m_peakFunction->nParams(), 0.);
+      fitSpectrumPeaks(static_cast<size_t>(wi), expected_peak_centers,
+                       fit_result, lastGoodPeakParameters);
+
+      PARALLEL_CRITICAL(FindPeaks_WriteOutput) {
+        writeFitResult(static_cast<size_t>(wi), expected_peak_centers,
+                       fit_result);
+        fit_result_vector[wi - m_startWorkspaceIndex] = fit_result;
+      }
+      prog.report();
     }
-    prog.report();
-
     PARALLEL_END_INTERUPT_REGION
   }
-
   PARALLEL_CHECK_INTERUPT_REGION
 
   return fit_result_vector;
@@ -1024,7 +1036,8 @@ double numberCounts(const Histogram &histogram, const double xmin,
  */
 void FitPeaks::fitSpectrumPeaks(
     size_t wi, const std::vector<double> &expected_peak_centers,
-    const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result) {
+    const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
+    std::vector<std::vector<double>> &lastGoodPeakParameters) {
   if (numberCounts(m_inputMatrixWS->histogram(wi)) <= m_minPeakHeight) {
     for (size_t i = 0; i < fit_result->getNumberPeaks(); ++i)
       fit_result->setBadRecord(i, -1.);
@@ -1053,10 +1066,6 @@ void FitPeaks::fitSpectrumPeaks(
   peak_fitter->setProperty("CostFunction", m_costFunction);
   peak_fitter->setProperty("CalcErrors", true);
 
-  // store the peak fit parameters once one works
-  bool foundAnyPeak = false;
-  std::vector<double> lastGoodPeakParameters(peakfunction->nParams(), 0.);
-
   const double x0 = m_inputMatrixWS->histogram(wi).x().front();
   const double xf = m_inputMatrixWS->histogram(wi).x().back();
   for (size_t fit_index = 0; fit_index < m_numPeaksToFit; ++fit_index) {
@@ -1070,11 +1079,26 @@ void FitPeaks::fitSpectrumPeaks(
       bkgdfunction->setParameter(0, 0.);
 
     double expected_peak_pos = expected_peak_centers[peak_index];
-    peakfunction->setCentre(expected_peak_pos);
-    // set matrix workspace so reads necessary params from .xml file after
-    // center set
-    peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, 0.0, 0.0);
-    peakfunction->clearTies(); // let S,A,B of B2B exp be refined
+
+    bool foundAnyPeak =
+        (lastGoodPeakParameters[fit_index].size() >
+         std::count_if(lastGoodPeakParameters[fit_index].begin(),
+                       lastGoodPeakParameters[fit_index].end(),
+                       [&](auto const &val) { return val <= 1e-10; }));
+    if (foundAnyPeak) {
+      // set the peak parameters from last good fit to that peak
+      for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i) {
+        peakfunction->setParameter(i, lastGoodPeakParameters[fit_index][i]);
+      }
+      // reset center though - don't know before hand which element this is
+      peakfunction->setCentre(expected_peak_pos);
+    } else {
+      // set matrix workspace so reads necessary params from .xml file after
+      // need to set center first
+      peakfunction->setCentre(expected_peak_pos);
+      peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, 0.0, 0.0);
+      peakfunction->clearTies(); // let S,A,B of B2B exp be refined
+    }
 
     double cost(DBL_MAX);
     if (expected_peak_pos <= x0 || expected_peak_pos >= xf) {
@@ -1100,12 +1124,10 @@ void FitPeaks::fitSpectrumPeaks(
           fitIndividualPeak(wi, peak_fitter, expected_peak_pos, peak_window_i,
                             observe_peak_params, peakfunction, bkgdfunction);
       if (cost < 1e7) { // assume it worked and save out the result
-        foundAnyPeak = true;
-        for (size_t i = 0; i < lastGoodPeakParameters.size(); ++i)
-          lastGoodPeakParameters[i] = peakfunction->getParameter(i);
+        for (size_t i = 0; i < lastGoodPeakParameters[fit_index].size(); ++i)
+          lastGoodPeakParameters[fit_index][i] = peakfunction->getParameter(i);
       }
     }
-    foundAnyPeak = true;
 
     // process fitting result
     FitPeaksAlgorithm::FitFunction fit_function;

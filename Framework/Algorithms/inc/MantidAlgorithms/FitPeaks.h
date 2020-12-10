@@ -122,7 +122,8 @@ private:
   /// fit peaks in a same spectrum
   void fitSpectrumPeaks(
       size_t wi, const std::vector<double> &expected_peak_centers,
-      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result);
+      const std::shared_ptr<FitPeaksAlgorithm::PeakFitResult> &fit_result,
+      std::vector<std::vector<double>> &lastGoodPeakParameters);
 
   /// fit background
   bool fitBackground(const size_t &ws_index,
