@@ -31,7 +31,7 @@ class CorelliPowderCalibrationCreateTest(MantidSystemTest):
 
     def validate(self):
         r"""Compare a workspace produced in method runTest against one of the required files"""
-        self.tolerance=0.001
+        self.tolerance=0.05
         # return tuple (output-workspace-name, required-file-name)
         return 'LaB6_adjustments', 'CORELLI_124036_adjustments.nxs'
 
