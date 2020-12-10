@@ -29,6 +29,8 @@ public:
   API::Workspace_sptr loadDetectorGrouping() const override;
   // Load dead time table
   API::Workspace_sptr loadDeadTimeTable() const override;
+  // Get time zero table
+  API::Workspace_sptr getTimeZeroTable() override;
 
 private:
   DataObjects::Workspace2D &m_workspace;

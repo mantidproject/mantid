@@ -5,8 +5,6 @@ MuSR Changes
 .. contents:: Table of Contents
    :local:
 
-=======
-
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
@@ -54,5 +52,7 @@ Algorithms
 ----------
 - :ref:`algm-LoadElementalAnalysisData` algorithm was introduced for loading runs for the new Elemental Analysis GUI, enabling it to be registered by WorkspaceHistory.
 - The functions RemoveExpDecay and EstimateMuonAsymmetryFromCounts were modified to use point data instead of bin edges for removing the exponential.
+- LoadPSIMuonBin and LoadMuonNexusV2 can now return a table of time zeros
+- MuonPreProcess has a new input 'TimeZeroTable' which requires a TableWorkspace of time zero values
 
 :ref:`Release 6.0.0 <v6.0.0>`
