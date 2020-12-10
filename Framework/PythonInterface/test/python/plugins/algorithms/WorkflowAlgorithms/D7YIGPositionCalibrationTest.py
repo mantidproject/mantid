@@ -63,11 +63,11 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
         wavelength = float(mtd[fitTableName].column(1)[1])
         self.assertAlmostEqual(wavelength, 1.0,  delta=5e-2) # +/- 5 %
         bank2_slope = 1.0 / float(mtd[fitTableName].column(1)[0])
-        self.assertAlmostEqual(bank2_slope, 1.0, delta=2e-2) # +/- 1 %
+        self.assertAlmostEqual(bank2_slope, 1.0, delta=2e-2) # +/- 2 %
         bank3_slope = 1.0 / float(mtd[fitTableName].column(1)[4*pixels_per_bank])
-        self.assertAlmostEqual(bank3_slope, 1.0, delta=2e-2) # +/- 1 %
+        self.assertAlmostEqual(bank3_slope, 1.0, delta=2e-2) # +/- 2%
         bank4_slope = 1.0 / float(mtd[fitTableName].column(1)[8*pixels_per_bank])
-        self.assertAlmostEqual(bank4_slope, 1.0, delta=2e-2) # +/- 1 %
+        self.assertAlmostEqual(bank4_slope, 1.0, delta=2e-2) # +/- 2 %
 
         for row_no in range(mtd[fitTableName].rowCount()):
             row_data = mtd[fitTableName].row(row_no)
