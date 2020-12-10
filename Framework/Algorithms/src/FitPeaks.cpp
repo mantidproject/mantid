@@ -1069,11 +1069,12 @@ void FitPeaks::fitSpectrumPeaks(
     for (size_t i = 0; i < bkgdfunction->nParams(); ++i)
       bkgdfunction->setParameter(0, 0.);
 
-    // set the peak parameters from last good fit - override peak center
-    for (size_t i = 0; i < lastGoodPeakParameters.size(); ++i)
-      peakfunction->setParameter(i, lastGoodPeakParameters[i]);
     double expected_peak_pos = expected_peak_centers[peak_index];
     peakfunction->setCentre(expected_peak_pos);
+    // set matrix workspace so reads necessary params from .xml file after
+    // center set
+    peakfunction->setMatrixWorkspace(m_inputMatrixWS, wi, 0.0, 0.0);
+    peakfunction->clearTies(); // let S,A,B of B2B exp be refined
 
     double cost(DBL_MAX);
     if (expected_peak_pos <= x0 || expected_peak_pos >= xf) {
@@ -1339,8 +1340,6 @@ void FitPeaks::calculateFittedPeaks(
       // copy over the values
       size_t istart = static_cast<size_t>(start_x_iter - vec_x.begin());
       size_t istop = static_cast<size_t>(stop_x_iter - vec_x.begin());
-
-      // xvals are bin edges so only loop to istop - 1
       for (size_t yindex = istart; yindex < istop; ++yindex) {
         m_fittedPeakWS->dataY(static_cast<size_t>(iws))[yindex] =
             values.getCalculated(yindex - istart);
