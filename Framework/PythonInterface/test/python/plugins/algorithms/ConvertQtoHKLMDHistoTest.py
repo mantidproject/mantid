@@ -19,7 +19,7 @@ class ConvertQtoHKLMDHistoTest(unittest.TestCase):
     def test_qtohkl(self):
         # Tests the conversion from the MDEvent WS in Q Sample to a MDHisto WS in HKL using this algorithm.
         HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0182.nxs", OutputWorkspace="mde_ws")
-        hkl = ConvertQtoHKLMDHisto(InputWorkspace=mtd["mde_ws"], FindUBFromPeaks=False)
+        hkl = ConvertQtoHKLMDHisto(InputWorkspace=mtd["mde_ws"])
         self.assertEqual(hkl.getSpecialCoordinateSystem().name, "HKL")
 
         # Test with getting UB from peaks
@@ -32,7 +32,6 @@ class ConvertQtoHKLMDHistoTest(unittest.TestCase):
                       OutputWorkspace="peaks")
 
         hkl = ConvertQtoHKLMDHisto(InputWorkspace=mtd["mde_ws"],
-                                   FindUBFromPeaks=True,
                                    PeaksWorkspace=mtd["peaks"])
         self.assertEqual(hkl.getSpecialCoordinateSystem().name, "HKL")
 
@@ -70,7 +69,6 @@ class ConvertQtoHKLMDHistoTest(unittest.TestCase):
                     MaxValues='20,20,20')
 
         hkl = ConvertQtoHKLMDHisto(InputWorkspace=mtd["q_sample"],
-                                   FindUBFromPeaks=False,
                                    Uproj="1,1,0",
                                    Vproj="1,-1,0",
                                    Wproj="0,0,1",

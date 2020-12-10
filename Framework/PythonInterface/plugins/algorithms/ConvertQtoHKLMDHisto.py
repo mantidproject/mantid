@@ -6,9 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, IMDEventWorkspaceProperty, IMDHistoWorkspaceProperty, IPeaksWorkspaceProperty,\
     PythonAlgorithm, PropertyMode
-from mantid.kernel import Direction, EnabledWhenProperty, FloatArrayLengthValidator, FloatArrayProperty, \
-    PropertyCriterion, IntArrayProperty
-from mantid.simpleapi import BinMD, DeleteWorkspace, SetMDFrame, TransformHKL, mtd
+from mantid.kernel import Direction, FloatArrayLengthValidator, FloatArrayProperty, IntArrayProperty
+from mantid.simpleapi import BinMD, DeleteWorkspace, SetMDFrame, mtd
 import numpy as np
 
 
@@ -20,7 +19,7 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
         return "MDAlgorithms\\Creation"
 
     def seeAlso(self):
-        return ["ConvertWANDSCDtoQ", "BinMD"]
+        return ["ConvertWANDSCDtoQ", "BinMD", "MDNorm"]
 
     def name(self):
         return "ConvertQtoHKLMDHisto"
@@ -35,21 +34,9 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
                                                        direction=Direction.Input),
                              doc="Input MDEvent workspace to convert to a MDHisto in HKL")
 
-        self.declareProperty("FindUBFromPeaks", False,
-                             doc="Whether to find peaks and use them to compute the UB matrix.")
-
         self.declareProperty(IPeaksWorkspaceProperty("PeaksWorkspace", defaultValue="", optional=PropertyMode.Optional,
                                                      direction=Direction.Input),
-                             doc="Peaks workspace containing peaks to integrate")
-
-        self.declareProperty(FloatArrayProperty("Transformation", [],
-                                                direction=Direction.Input),
-                             "Optional HKL transformation matrix to apply to the peaks workspace, each value of the "
-                             "matrix should be comma separated.")
-
-        ub_settings = EnabledWhenProperty('FindUBFromPeaks', PropertyCriterion.IsNotDefault)
-        self.setPropertySettings("PeaksWorkspace", ub_settings)
-        self.setPropertySettings("Transformation", ub_settings)
+                             doc="Optional peaks workspace to retrieve the UB matrix from, instead of InputWorkspace.")
 
         self.declareProperty(FloatArrayProperty("Uproj", [1, 0, 0], validator=FloatArrayLengthValidator(3),
                                                 direction=Direction.Input),
@@ -101,16 +88,11 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
         if len(bins) != ndims:
             issues["Bins"] = "Expected a number of bins for each dimension."
 
-        if self.getProperty("FindUBFromPeaks").value:
-            peak_ws = self.getProperty("PeaksWorkspace")
-            if peak_ws.isDefault:
-                issues["PeaksWorkspace"] = "A peaks workspace must be supplied."
-            elif not mtd.doesExist(self.getPropertyValue("PeaksWorkspace")):
+        # Check if a PeaksWorkspace was provided
+        peak_ws = self.getProperty("PeaksWorkspace")
+        if not peak_ws.isDefault:
+            if not mtd.doesExist(self.getPropertyValue("PeaksWorkspace")):
                 issues["PeaksWorkspace"] = "Provided peaks workspace does not exist in the ADS."
-
-            tmatrix = self.getProperty("Transformation")
-            if not tmatrix.isDefault and len(tmatrix.value) != 9:
-                issues["Transformation"] = "Invalid transformation matrix, there should be 9 values comma separated"
         else:
             # Check that the workspace has a UB matrix
             if not (input_ws.getNumExperimentInfo() > 0 and input_ws.getExperimentInfo(0).sample().hasOrientedLattice()):
@@ -124,15 +106,9 @@ class ConvertQtoHKLMDHisto(PythonAlgorithm):
         extents = self.getProperty("Extents").value
         bins = self.getProperty("Bins").value
 
-        if self.getProperty("FindUBFromPeaks").value:
+        # Get the UB from either the PeaksWS if provided, or from the input workspace
+        if not self.getProperty("PeaksWorkspace").isDefault:
             peak_ws = self.getProperty("PeaksWorkspace").value
-
-            if not self.getProperty("Transformation").isDefault:
-                tmatrix = self.getProperty("Transformation").value
-
-                # Apply transformation if specified
-                TransformHKL(PeaksWorkspace=peak_ws, HKLTransform=tmatrix)
-
             self._lattice = peak_ws.sample().getOrientedLattice()
         else:
             self._lattice = input_ws.getExperimentInfo(0).sample().getOrientedLattice()
