@@ -50,14 +50,14 @@ std::vector<std::string> splitStringBy(std::string const &str,
   return subStrings;
 }
 
-/** Returns true if a string contains a specific seperator.
+/** Returns true if a string contains a specific separator.
  *
- * @param str The string to search for the seperator.
- * @param seperator The seperator to search for.
- * @returns :: True if the string contains the specified seperator.
+ * @param str The string to search for the separator.
+ * @param separator The separator to search for.
+ * @returns :: True if the string contains the specified separator.
  */
-bool hasSeperator(const std::string &str, const std::string &seperator) {
-  return str.find(seperator) != std::string::npos;
+bool hasSeparator(const std::string &str, const std::string &separator) {
+  return str.find(separator) != std::string::npos;
 }
 
 /** Returns a vector of detector IDs (in string format) contained within the
@@ -75,16 +75,16 @@ std::vector<std::string> getDetectorRangeFromLimits(int lower, int upper) {
   return detectorIds;
 }
 
-/** Splits a grouping string by the colon seperator, and then fully expands the
+/** Splits a grouping string by the colon separator, and then fully expands the
  * group.
  *
- * @param groupString The grouping string containing a ':' seperator.
+ * @param groupString The grouping string containing a ':' separator.
  * @returns :: The expanded vector of groups.
  */
 std::vector<std::string> groupsFromColonRange(const std::string &groupString) {
   const auto splitByColon = splitStringBy(groupString, ":");
   if (splitByColon.size() > 2)
-    throw std::runtime_error("Expected a single colon seperator.");
+    throw std::runtime_error("Expected a single colon separator.");
 
   if (splitByColon.size() == 2)
     return getDetectorRangeFromLimits(std::stoi(splitByColon[0]),
@@ -92,7 +92,7 @@ std::vector<std::string> groupsFromColonRange(const std::string &groupString) {
   return splitByColon;
 }
 
-/** Expands the grouping strings that contain a ':' seperator. For example the
+/** Expands the grouping strings that contain a ':' separator. For example the
  * string '2:5' means the detector IDs 2, 3, 4 and 5 should be in their own
  * individual groups. This means we must expand this string.
  *
@@ -135,19 +135,19 @@ void addDetectorToGroup(const std::vector<detid_t> &allowedDetectorIDs,
  * @param allowedDetectorIDs The detector IDs which are allowed for the given
  * instrument.
  * @param detectorIDToGroup The mapping of detector IDs to group IDs.
- * @param groupString The string which contains the '-' seperator.
+ * @param groupString The string which contains the '-' separator.
  * @param groupID The ID of the group to map to the detector IDs.
  */
-void addDashSeperatedDetectorIDsToSameGroup(
+void addDashSeparatedDetectorIDsToSameGroup(
     const std::vector<detid_t> &allowedDetectorIDs,
     std::map<detid_t, int> &detectorIDToGroup, const std::string &groupString,
     int groupID) {
   const auto splitByDash = splitStringBy(groupString, "-");
 
   if (splitByDash.size() < 2)
-    throw std::runtime_error("Expected at least one dash seperator.");
+    throw std::runtime_error("Expected at least one dash separator.");
   else if (splitByDash.size() > 2)
-    throw std::runtime_error("Expected a single dash seperator.");
+    throw std::runtime_error("Expected a single dash separator.");
 
   for (auto i = std::stoi(splitByDash[0]); i <= std::stoi(splitByDash[1]); ++i)
     addDetectorToGroup(allowedDetectorIDs, detectorIDToGroup, i, groupID);
@@ -160,16 +160,16 @@ void addDashSeperatedDetectorIDsToSameGroup(
  * @param allowedDetectorIDs The detector IDs which are allowed for the given
  * instrument.
  * @param detectorIDToGroup The mapping of detector IDs to group IDs.
- * @param groupString The string which contains the '+' seperator.
+ * @param groupString The string which contains the '+' separator.
  * @param groupID The ID of the group to map to the detector IDs.
  */
-void addPlusSeperatedDetectorIDsToSameGroup(
+void addPlusSeparatedDetectorIDsToSameGroup(
     const std::vector<detid_t> &allowedDetectorIDs,
     std::map<detid_t, int> &detectorIDToGroup, const std::string &groupString,
     int groupID) {
   const auto splitByPlus = splitStringBy(groupString, "+");
   if (splitByPlus.size() < 2)
-    throw std::runtime_error("Expected at least one plus seperator.");
+    throw std::runtime_error("Expected at least one plus separator.");
 
   for (const auto &id : splitByPlus)
     addDetectorToGroup(allowedDetectorIDs, detectorIDToGroup, std::stoi(id),
@@ -198,8 +198,8 @@ getAllowedDetectorIDs(const Instrument_const_sptr &instrument,
 }
 
 /** Creates a mapping between Detector IDs and Group IDs from several grouping
- * strings already split by the comma ',' seperator. At this stage the ':'
- * seperated strings have also already been expanded.
+ * strings already split by the comma ',' separator. At this stage the ':'
+ * separated strings have also already been expanded.
  *
  * @param allowedDetectorIDs The detector IDs which are allowed for the given
  * instrument.
@@ -211,11 +211,11 @@ mapGroupingStringsToGroupIDs(const std::vector<detid_t> &allowedDetectorIDs,
                              const std::vector<std::string> &groupingStrings) {
   std::map<detid_t, int> detectorIDToGroup;
   for (auto j = 0; j < static_cast<int>(groupingStrings.size()); ++j) {
-    if (hasSeperator(groupingStrings[j], "+"))
-      addPlusSeperatedDetectorIDsToSameGroup(
+    if (hasSeparator(groupingStrings[j], "+"))
+      addPlusSeparatedDetectorIDsToSameGroup(
           allowedDetectorIDs, detectorIDToGroup, groupingStrings[j], j + 1);
-    else if (hasSeperator(groupingStrings[j], "-"))
-      addDashSeperatedDetectorIDsToSameGroup(
+    else if (hasSeparator(groupingStrings[j], "-"))
+      addDashSeparatedDetectorIDsToSameGroup(
           allowedDetectorIDs, detectorIDToGroup, groupingStrings[j], j + 1);
     else
       addDetectorToGroup(allowedDetectorIDs, detectorIDToGroup,
@@ -316,7 +316,7 @@ void CreateGroupingWorkspace::init() {
                   "a fixed number of groups");
   declareProperty(
       "CustomGroupingString", "",
-      "This takes a comma seperated list of grouped detector IDs. An example "
+      "This takes a comma separated list of grouped detector IDs. An example "
       "of the syntax is 1,2+3,4-6,7:10. The documentation page for this "
       "algorithm gives a full explanation of this syntax.");
   declareProperty("ComponentName", "",

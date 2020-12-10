@@ -40,10 +40,10 @@ and is explained below:
 
   An example CustomGroupingString is 1,2+3,4-6,7:10
 
-  The comma ',' seperator denotes the different groups.
-  The plus '+' seperator means the adjoining detector IDs will be put in the same group.
-  The dash '-' seperator means the detector IDs inclusive to this range will be put in the same group.
-  The colon ':' seperator means the detector IDs inclusive to this range will be put in their own individual groups.
+  The comma ',' separator denotes the different groups.
+  The plus '+' separator means the adjoining detector IDs will be put in the same group.
+  The dash '-' separator means the detector IDs inclusive to this range will be put in the same group.
+  The colon ':' separator means the detector IDs inclusive to this range will be put in their own individual groups.
 
   The CustomGroupingString 1,2+3,4-6,7:10 therefore has the following detector grouping:
 

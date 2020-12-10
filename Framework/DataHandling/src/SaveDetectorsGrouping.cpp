@@ -46,7 +46,7 @@ int numberOfDetectorIDs(const std::vector<Mantid::detid_t> &detectorIDs) {
 }
 
 std::string
-spaceSeperatedString(const std::vector<Mantid::detid_t> &detectorIDs) {
+spaceSeparatedString(const std::vector<Mantid::detid_t> &detectorIDs) {
   if (detectorIDs[0] == detectorIDs[1]) {
     return std::to_string(detectorIDs[0]);
   } else {
@@ -287,7 +287,7 @@ void SaveDetectorsGrouping::printToXML(
  *
  * Line N        - Group ID.
  * Line N + 1    - Number of detectors in group.
- * Line N + 2    - Space seperated list of Detector IDs.
+ * Line N + 2    - Space separated list of Detector IDs.
  */
 void SaveDetectorsGrouping::printToMap(
     std::map<int, std::vector<detid_t>> &groupToDetectorIDsMap,
@@ -302,7 +302,7 @@ void SaveDetectorsGrouping::printToMap(
   for (auto detectorIds : groupToDetectorIDsMap) {
     ofs << std::to_string(detectorIds.first) + "\n";
     ofs << std::to_string(numberOfDetectorIDs(detectorIds.second)) + "\n";
-    ofs << spaceSeperatedString(detectorIds.second) + "\n";
+    ofs << spaceSeparatedString(detectorIds.second) + "\n";
   }
 
   ofs.close();
