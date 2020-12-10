@@ -29,7 +29,7 @@ namespace {
 Mantid::Kernel::Logger g_log("CreateGroupingWorkspace");
 
 void removeSpacesFromString(std::string &str) {
-  str.erase(std::remove_if(str.begin(), str.end(), isspace), str.cend());
+  str.erase(std::remove_if(str.begin(), str.end(), isspace), str.end());
 }
 
 void extendVectorBy(std::vector<std::string> &vec,
