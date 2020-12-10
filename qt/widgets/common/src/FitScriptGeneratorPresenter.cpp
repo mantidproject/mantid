@@ -124,7 +124,7 @@ void FitScriptGeneratorPresenter::handleSelectionChanged() {
 
 void FitScriptGeneratorPresenter::handleFunctionRemoved(
     std::string const &function) {
-  auto const rowIndices = m_view->isAddFunctionToAllDomainsChecked()
+  auto const rowIndices = m_view->isApplyFunctionChangesToAllChecked()
                               ? m_view->allRows()
                               : m_view->selectedRows();
 
@@ -137,7 +137,7 @@ void FitScriptGeneratorPresenter::handleFunctionRemoved(
 
 void FitScriptGeneratorPresenter::handleFunctionAdded(
     std::string const &function) {
-  auto const rowIndices = m_view->isAddFunctionToAllDomainsChecked()
+  auto const rowIndices = m_view->isApplyFunctionChangesToAllChecked()
                               ? m_view->allRows()
                               : m_view->selectedRows();
 

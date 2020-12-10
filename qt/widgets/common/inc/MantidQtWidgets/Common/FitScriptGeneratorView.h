@@ -67,7 +67,7 @@ public:
 
   void resetSelection() override;
 
-  bool isAddFunctionToAllDomainsChecked() const override;
+  bool isApplyFunctionChangesToAllChecked() const override;
 
   void clearFunction() override;
   void

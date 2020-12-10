@@ -196,8 +196,8 @@ FitScriptGeneratorView::getDialogWorkspaceIndices() const {
 
 void FitScriptGeneratorView::resetSelection() { m_dataTable->resetSelection(); }
 
-bool FitScriptGeneratorView::isAddFunctionToAllDomainsChecked() const {
-  return m_ui.ckAddFunctionForAllDomains->isChecked();
+bool FitScriptGeneratorView::isApplyFunctionChangesToAllChecked() const {
+  return m_ui.ckApplyFunctionChangesToAll->isChecked();
 }
 
 void FitScriptGeneratorView::clearFunction() { m_functionTreeView->clear(); }

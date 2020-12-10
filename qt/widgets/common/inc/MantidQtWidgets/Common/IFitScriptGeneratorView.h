@@ -72,7 +72,7 @@ public:
 
   virtual void resetSelection() = 0;
 
-  virtual bool isAddFunctionToAllDomainsChecked() const = 0;
+  virtual bool isApplyFunctionChangesToAllChecked() const = 0;
 
   virtual void clearFunction() = 0;
   virtual void
