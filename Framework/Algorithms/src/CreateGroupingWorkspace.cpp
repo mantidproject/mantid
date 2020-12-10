@@ -29,7 +29,7 @@ namespace {
 Mantid::Kernel::Logger g_log("CreateGroupingWorkspace");
 
 void removeSpacesFromString(std::string &str) {
-  str.erase(std::remove_if(str.begin(), str.end(), isspace), str.end());
+  str.erase(std::remove_if(str.begin(), str.end(), isspace), str.cend());
 }
 
 void extendVectorBy(std::vector<std::string> &vec,
@@ -38,15 +38,15 @@ void extendVectorBy(std::vector<std::string> &vec,
   vec.insert(vec.end(), extension.cbegin(), extension.cend());
 }
 
-std::vector<std::string> splitStringBy(std::string const &str,
-                                       std::string const &delimiter) {
+std::vector<std::string> splitStringBy(const std::string &str,
+                                       const std::string &delimiter) {
   std::vector<std::string> subStrings;
   boost::split(subStrings, str, boost::is_any_of(delimiter));
   subStrings.erase(std::remove_if(subStrings.begin(), subStrings.end(),
-                                  [](std::string const &subString) {
+                                  [](const std::string &subString) {
                                     return subString.empty();
                                   }),
-                   subStrings.end());
+                   subStrings.cend());
   return subStrings;
 }
 
@@ -703,9 +703,15 @@ void CreateGroupingWorkspace::exec() {
   else if ((numGroups > 0) && !componentName.empty())
     detIDtoGroup =
         makeGroupingByNumGroups(componentName, numGroups, inst, prog);
-  else if (!customGroupingString.empty() && !componentName.empty())
-    detIDtoGroup =
-        makeGroupingByCustomString(inst, componentName, customGroupingString);
+  else if (!customGroupingString.empty() && !componentName.empty()) {
+    try {
+      detIDtoGroup =
+          makeGroupingByCustomString(inst, componentName, customGroupingString);
+    } catch (const std::runtime_error &ex) {
+      g_log.error(ex.what());
+      return;
+    }
+  }
 
   g_log.information() << detIDtoGroup.size()
                       << " entries in the detectorID-to-group map.\n";

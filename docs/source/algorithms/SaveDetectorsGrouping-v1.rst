@@ -9,7 +9,7 @@
 Description
 -----------
 
-This algorithm is used to save a GroupingWorkspace to XML file or a MAP file.
+This algorithm is used to save a GroupingWorkspace to an XML file or MAP file.
 The XML file format is the same as that accepted by :ref:`algm-LoadDetectorsGroupingFile`.
 The MAP file format for detector grouping is as follows:
 

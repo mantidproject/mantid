@@ -46,7 +46,7 @@ int numberOfDetectorIDs(const std::vector<Mantid::detid_t> &detectorIDs) {
 }
 
 std::string
-spaceSeparatedString(const std::vector<Mantid::detid_t> &detectorIDs) {
+spaceSeparatedDetectorString(const std::vector<Mantid::detid_t> &detectorIDs) {
   if (detectorIDs[0] == detectorIDs[1]) {
     return std::to_string(detectorIDs[0]);
   } else {
@@ -72,7 +72,7 @@ void SaveDetectorsGrouping::init() {
   declareProperty(
       std::make_unique<API::WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           "InputWorkspace", "", Direction::Input),
-      "GroupingWorkspace to output to a XML or MAP file (GroupingWorkspace)");
+      "GroupingWorkspace to output to a XML or MAP file.");
   declareProperty(
       std::make_unique<FileProperty>("OutputFile", "", FileProperty::Save,
                                      extentions),
@@ -302,7 +302,7 @@ void SaveDetectorsGrouping::printToMap(
   for (auto detectorIds : groupToDetectorIDsMap) {
     ofs << std::to_string(detectorIds.first) + "\n";
     ofs << std::to_string(numberOfDetectorIDs(detectorIds.second)) + "\n";
-    ofs << spaceSeparatedString(detectorIds.second) + "\n";
+    ofs << spaceSeparatedDetectorString(detectorIds.second) + "\n";
   }
 
   ofs.close();
