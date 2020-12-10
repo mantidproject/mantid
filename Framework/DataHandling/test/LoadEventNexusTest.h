@@ -963,7 +963,9 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of periods extracted", nPeriods, 4);
     TSM_ASSERT_EQUALS("Groups size should be same as nperiods",
                       outGroup->size(), nPeriods);
-
+    // mean of proton charge for each period
+    std::array protonChargeMeans = {0.00110488, 0.00110392, 0.00110343,
+                                    0.00110404};
     for (size_t i = 0; i < outGroup->size(); ++i) {
       EventWorkspace_sptr ws =
           std::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
@@ -982,6 +984,11 @@ public:
           ws->run().hasProperty(periodBoolLog));
       TSM_ASSERT_EQUALS("Current period is not what was expected.",
                         currentPeriod, i + 1);
+
+      // Check we have correctly filtered sample logs based on the period
+      auto protonLog = ws->run().getTimeSeriesProperty<double>("proton_charge");
+      TS_ASSERT(protonLog->isFiltered());
+      TS_ASSERT_DELTA(protonLog->mean(), protonChargeMeans[i], 1e-8);
     }
     // Make sure that the spectraNo are equal for all child workspaces.
     auto isFirstChildWorkspace = true;
