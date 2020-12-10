@@ -403,9 +403,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
     def _set_units(self, ws):
         output_unit = self.getPropertyValue('OutputUnits')
         unit_symbol = 'barn / sr / formula unit'
-        unit = r'd$\sigma$/d$\Omega$ ({0})'
+        unit = r'd$\sigma$/d$\Omega$'
         if output_unit == 'TwoTheta':
-            unit = unit.format('TwoTheta')
             if mtd[ws].getNumberOfEntries() > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
                 self._merge_polarisations(ws)
                 ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='X', Formula='-x')
@@ -414,7 +413,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                 ConvertAxisByFormula(InputWorkspace=ws, OutputWorkspace=ws, Axis='Y', Formula='-y')
                 Transpose(InputWorkspace=ws, OutputWorkspace=ws)
         elif output_unit == 'Q':
-            unit = unit.format('Q')
             if mtd[ws].getNumberOfEntries() > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
                 self._merge_polarisations(ws)
                 wavelength = mtd[ws][0].getRun().getLogData('monochromator.wavelength').value # in Angstrom
