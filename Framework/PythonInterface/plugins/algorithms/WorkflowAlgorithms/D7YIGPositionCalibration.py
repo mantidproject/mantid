@@ -143,7 +143,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
         if not self.getProperty("BankOffsets").isDefault:
             offsets = self.getProperty("BankOffsets").value
             for bank_no in range(int(self._D7NumberPixels / self._D7NumberPixelsBank)):
-                ChangeBinOffset(InputWorkspace=conjoined_scan, Offset=offsets[bank_no],
+                ChangeBinOffset(InputWorkspace=conjoined_scan, Offset=-offsets[bank_no],
                                 WorkspaceIndexList='{0}-{1}'.format(bank_no*self._D7NumberPixelsBank,
                                                                     (bank_no+1)*self._D7NumberPixelsBank-1),
                                 OutputWorkspace=conjoined_scan)
