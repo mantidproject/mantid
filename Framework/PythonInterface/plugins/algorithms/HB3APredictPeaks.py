@@ -57,7 +57,11 @@ class HB3APredictPeaks(PythonAlgorithm):
     def validateInputs(self):
         issues = dict()
 
-        if self.getProperty("InputWorkspace").value.getNumDims() != 3:
+        input_ws = self.getProperty("InputWorkspace").value
+        if input_ws.getSpecialCoordinateSystem().name != "QSample":
+            issues["InputWorkspace"] = "Input workspace expected to be in QSample, " \
+                "workspace is in '{}'".format(input_ws.getSpecialCoordinateSystem().name)
+        elif input_ws.getNumDims() != 3:
             issues["InputWorkspace"] = "Workspace has the wrong number of dimensions"
 
         wavelength = self.getProperty("Wavelength")
@@ -108,7 +112,6 @@ class HB3APredictPeaks(PythonAlgorithm):
                     max_angle = -exp_info.run().getLogData('omega').value.min()
                     # Sometimes you get the 180 degrees off what is expected from the log
                     omega_log = -exp_info.run().getPropertyAsSingleValueWithTimeAveragedMean('omega')
-                    print(f'{omega_log=}, {gon[0]=}')
                     if np.isclose(omega_log + 180, gon[0]):
                         min_angle += 180
                         max_angle += 180

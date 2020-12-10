@@ -4,7 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from mantid.api import AlgorithmFactory, WorkspaceProperty, PythonAlgorithm, PropertyMode, ADSValidator, WorkspaceGroup
+from mantid.api import (AlgorithmFactory, WorkspaceProperty,
+                        PythonAlgorithm, PropertyMode, ADSValidator, WorkspaceGroup,
+                        MultipleExperimentInfos)
 from mantid.kernel import (Direction, EnabledWhenProperty,
                            FloatPropertyWithValue, PropertyCriterion, StringListValidator,
                            StringArrayProperty)
@@ -18,6 +20,7 @@ from mantid.simpleapi import (DeleteWorkspace, FindPeaksMD,
                               CreatePeaksWorkspace,
                               CombinePeaksWorkspaces, CopySample,
                               GroupWorkspaces)
+from mantid.dataobjects import MDHistoWorkspace
 import numpy as np
 
 
@@ -109,8 +112,16 @@ class HB3AFindPeaks(PythonAlgorithm):
             for param in lattice_params:
                 issues[param] = "Must set all or none of the optional lattice parameters."
 
-        #if self.getProperty("InputWorkspace").value.getNumDims() != 3:
-        #    issues["InputWorkspace"] = "Workspace has the wrong number of dimensions"
+        input_workspaces = self._expand_groups()
+        for input_ws in input_workspaces:
+            if not (isinstance(AnalysisDataService[input_ws], MultipleExperimentInfos)
+                    or isinstance(AnalysisDataService[input_ws], MDHistoWorkspace)):
+                issues["InputWorkspace"] = "Workspace need to be a MDWorkspace"
+            elif AnalysisDataService[input_ws].getSpecialCoordinateSystem().name != "QSample":
+                issues["InputWorkspace"] = "Input workspace expected to be in QSample, " \
+                    "workspace is in '{}'".format(input_ws.getSpecialCoordinateSystem().name)
+            elif AnalysisDataService[input_ws].getNumDims() != 3:
+                issues["InputWorkspace"] = "Workspace has the wrong number of dimensions"
 
         wavelength = self.getProperty("Wavelength")
         if not wavelength.isDefault:

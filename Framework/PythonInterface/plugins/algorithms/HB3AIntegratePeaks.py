@@ -6,13 +6,14 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import (AlgorithmFactory, FileAction, FileProperty,
                         PythonAlgorithm, PropertyMode, ADSValidator,
-                        WorkspaceGroup, WorkspaceProperty)
+                        WorkspaceGroup, WorkspaceProperty, MultipleExperimentInfos)
 from mantid.kernel import Direction, FloatBoundedValidator, StringListValidator, StringArrayProperty
 from mantid.simpleapi import (DeleteWorkspace, IntegratePeaksMD,
                               SaveHKL, SaveReflections,
                               CreatePeaksWorkspace, CopySample,
                               AnalysisDataService,
                               CombinePeaksWorkspaces)
+from mantid.dataobjects import PeaksWorkspace
 import numpy as np
 
 
@@ -75,6 +76,24 @@ class HB3AIntegratePeaks(PythonAlgorithm):
 
         if outer_radius < inner_radius:
             issues['BackgroundOuterRadius'] = "Outer radius should be >= to inner radius"
+
+        input_workspaces, peak_workspaces = self._expand_groups()
+
+        if len(input_workspaces) != len(peak_workspaces):
+            issues["InputWorkspace"] = "The same number of PeaksWorkspace must be provided as InputWorkspace"
+
+        for input_ws in input_workspaces:
+            if not (isinstance(AnalysisDataService[input_ws], MultipleExperimentInfos)):
+                issues["InputWorkspace"] = "Workspace need to be a MDEventWorkspace"
+            elif AnalysisDataService[input_ws].getSpecialCoordinateSystem().name != "QSample":
+                issues["InputWorkspace"] = "Input workspace expected to be in QSample, " \
+                    "workspace is in '{}'".format(input_ws.getSpecialCoordinateSystem().name)
+            elif AnalysisDataService[input_ws].getNumDims() != 3:
+                issues["InputWorkspace"] = "Workspace has the wrong number of dimensions"
+
+        for peak_ws in peak_workspaces:
+            if not isinstance(AnalysisDataService[peak_ws], PeaksWorkspace):
+                issues["PeaksWorkspace"] = "Workspace need to be a PeaksWorkspace"
 
         return issues
 
