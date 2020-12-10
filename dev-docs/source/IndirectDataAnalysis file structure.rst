@@ -1,5 +1,8 @@
 .. _IDA-Structure-ref:
 
+IndirectDataAnalysis File Structure
+===================================
+
 The many levels of inheritance in the indirect data analysis codebase can be confusing.
 
 Tabs
