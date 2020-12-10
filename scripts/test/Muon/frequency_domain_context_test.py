@@ -116,37 +116,6 @@ class MuonFreqContextTest(unittest.TestCase):
         self.assertCountEqual(output, [FFT_NAME_COMPLEX_RE, FFT_NAME_COMPLEX_IM, FFT_NAME_COMPLEX_MOD, FFT_NAME_RE_2,
                                        FFT_NAME_RE_MOD, "MUSR62260_raw_data FD; MaxEnt"])
 
-    def test_get_freq_names_all_with_phasequad(self):
-        # will need changing
-        pass
-        #self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_RE, Re_run="62261", Re="", Im_run="", Im="")
-        #self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_IM, Re_run="62261", Re="", Im_run="62260", Im="")
-
-        #output = self.context.get_frequency_workspace_names(run_list=[[62260], [62261]], group=["fwd"], pair=[],
-        #                                                    frequency_type="All")
-        #self.assertCountEqual(output, [PHASEQUAD_NAME_RE, PHASEQUAD_NAME_IM, FFT_NAME_RE_2, FFT_NAME_RE_MOD,
-        #                               "MUSR62260_raw_data FD; MaxEnt"])
-
-    def test_get_freq_names_all_with_phasequad_Re_run(self):
-        pass
-        # will need changing
-        #self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_RE, Re_run="62261", Re="", Im_run="", Im="")
-        #self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_IM, Re_run="62261", Re="", Im_run="62260", Im="")
-
-        #output = self.context.get_frequency_workspace_names(run_list=[[62261]], group=["fwd"], pair=[],
-        #                                                    frequency_type="All")
-        #self.assertCountEqual(output, [PHASEQUAD_NAME_RE, PHASEQUAD_NAME_IM])
-
-    def test_get_freq_names_all_with_phasequad_Im_run(self):
-        # will need changing
-        pass
-        #self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_RE, Re_run="62261", Re="", Im_run="", Im="")
-        #self.context.add_FFT(ws_freq_name=PHASEQUAD_NAME_IM, Re_run="62261", Re="", Im_run="62260", Im="")
-
-        #output = self.context.get_frequency_workspace_names(run_list=[[62260]], group=["fwd"], pair=[], frequency_type="All")
-        #self.assertCountEqual(output,
-        #                      [PHASEQUAD_NAME_IM, FFT_NAME_RE_2, FFT_NAME_RE_MOD, "MUSR62260_raw_data FD; MaxEnt"])
-
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

@@ -277,17 +277,7 @@ class MuonContext(object):
                 phasequad.name), run_string, rebin=rebin)
 
         phase_quad = run_PhaseQuad(parameters, ws_name)
-        if rebin:
-            params = "1"
-            if self.gui_context['RebinType'] == 'Variable' and self.gui_context["RebinVariable"]:
-                params = self.gui_context["RebinVariable"]
-
-            if self.gui_context['RebinType'] == 'Fixed' and self.gui_context["RebinFixed"]:
-                ws = retrieve_ws(phase_quad)
-                x_data = ws.dataX(0)
-                original_step = x_data[1] - x_data[0]
-                params = float(self.gui_context["RebinFixed"]) * original_step
-            phase_quad = rebin_ws(phase_quad,params)
+        phase_quad = self._do_rebin(phase_quad, rebin)
 
         workspaces = split_phasequad(phase_quad)
         return workspaces
@@ -305,6 +295,22 @@ class MuonContext(object):
                 ws_list,
                 run,
                 rebin=rebin)
+
+    def _do_rebin(self, name, rebin):
+        if rebin:
+            params = "1"
+            if self.gui_context['RebinType'] == 'Variable' and self.gui_context["RebinVariable"]:
+                params = self.gui_context["RebinVariable"]
+
+            if self.gui_context['RebinType'] == 'Fixed' and self.gui_context["RebinFixed"]:
+                ws = retrieve_ws(name)
+                x_data = ws.dataX(0)
+                original_step = x_data[1] - x_data[0]
+                params = float(self.gui_context["RebinFixed"]) * original_step
+            return rebin_ws(name,params)
+        else:
+            return name
+
 
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their
