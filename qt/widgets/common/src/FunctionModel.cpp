@@ -409,9 +409,7 @@ QString FunctionModel::getLocalParameterConstraint(const QString &parName,
 
 void FunctionModel::setLocalParameterValue(const QString &parName, int i,
                                            double value) {
-  auto function = getSingleFunction(i);
-  if (function && function->hasParameter(parName.toStdString()))
-    function->setParameter(parName.toStdString(), value);
+  getSingleFunction(i)->setParameter(parName.toStdString(), value);
 }
 
 void FunctionModel::setLocalParameterValue(const QString &parName, int i,
