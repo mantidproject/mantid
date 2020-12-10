@@ -10,8 +10,6 @@ import random
 import string
 from typing import List, Optional, Union
 
-from corelli.calibration.database import load_calibration_set
-from corelli.calibration.utils import apply_calibration
 from mantid.api import (
     AlgorithmFactory, AnalysisDataService, DataProcessorAlgorithm, IEventWorkspaceProperty, mtd, Progress, TextAxis,
     Workspace, WorkspaceGroup, WorkspaceUnitValidator)
@@ -158,20 +156,6 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         kwargs = dict(InputWorkspace=input_workspace, Emode='Elastic', OutputWorkspace=input_workspace)
         self.run_algorithm('ModeratorTzero', 0, 0.02, soft_crash=True, **kwargs)
         progress.report('ModeratorTzero has been applied')
-
-        # Correct detector heights
-        tube_calibration_database = self.getProperty('TubeDatabaseDir').value
-        yesno = 'not '  # flags if the tube calibration has been applied to the workspace
-        if os.path.isdir(tube_calibration_database):
-            tube_calibration_table_name = self.temp_ws()
-            tube_calibration_table, tube_calibration_mask = load_calibration_set(input_workspace,
-                                                                                 tube_calibration_database,
-                                                                                 tube_calibration_table_name,
-                                                                                 self.temp_ws())
-            if tube_calibration_table is not None:
-                apply_calibration(input_workspace, tube_calibration_table)
-                yesno = ''
-        progress.report(f'Tube calibration has {yesno}been applied')
 
         # Find dSpacing to TOF conversion DIFC parameter
         difc_table = f'{prefix_output}PDCalibration_difc'
