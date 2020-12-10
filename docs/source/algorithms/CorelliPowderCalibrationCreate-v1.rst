@@ -83,8 +83,7 @@ In our example, we have adjusted the moderator and banks 42 and 87.
 
 The diagnostics workspaces are stored within ``WorkspaceGroup LaB6_bank_adjustment_diagnostics``. These are:
 
-- ``LaB6_PDCalibration_peaks_original`` and ``LaB6_PDCalibration_peaks_adjustments`` contains one fitted-intensity
-spectrum per bank versus ``d-spacing`` before and after the banks are adjusted.
+- ``LaB6_PDCalibration_peaks_original`` and ``LaB6_PDCalibration_peaks_adjustments`` contains one fitted-intensity spectrum per bank versus ``d-spacing`` before and after the banks are adjusted.
 
 .. image:: ../images/CorelliPowderCalibrationCreate_2.png
     :align: center
@@ -96,9 +95,7 @@ In addition, we don't show the raw intensity, but we substitute each raw peak wi
 This substitution takes place on every pixel of the bank. Later, we add up all these fitted-intensity peaks for all
 pixels within one bank.
 
-- ``LaB6_peak_deviations_original`` and ``LaB6_peak_deviations_adjustment`` finds for each peak the
-difference between the peak center and the reference d-spacing value we know from the standard. These peak center
-deviations are collected for all peaks found in the pixels of the bank, and then histogrammed.
+- ``LaB6_peak_deviations_original`` and ``LaB6_peak_deviations_adjustment`` finds for each peak the difference between the peak center and the reference d-spacing value we know from the standard. These peak center deviations are collected for all peaks found in the pixels of the bank, and then histogrammed.
 
 .. image:: ../images/CorelliPowderCalibrationCreate_3.png
     :align: center
@@ -109,10 +106,7 @@ Adjusting the bank removes any observed systemic deviation, thus centering the h
 no-deviation value. The FHWM of these histograms is only modestly reduced, indicating that the remaining
 observed deviations are not due to misalignment in the position and orientation of the bank.
 
-- ``LaB6_percent_peak_deviations_original`` and ``LaB6_percent_peak_deviations_adjustment`` histograms the
-unitless peak center deviations, this achieved dividing each deviation by its reference d-spacing, i.e.
-:math:`\frac{d_{observed} - d_{reference}}{d_{reference}}`. This largely eliminates the scaling of the peak
-center deviation with the value of the peak center.
+- ``LaB6_percent_peak_deviations_original`` and ``LaB6_percent_peak_deviations_adjustment`` histograms the unitless peak center deviations, this achieved dividing each deviation by its reference d-spacing, i.e. :math:`\frac{d_{observed} - d_{reference}}{d_{reference}}`. This largely eliminates the scaling of the peak center deviation with the value of the peak center.
 
 .. image:: ../images/CorelliPowderCalibrationCreate_4.png
     :align: center
@@ -121,9 +115,7 @@ center deviation with the value of the peak center.
 
 Adjusting the bank removes the previously observed systemic deviation and modestly reduces the FWHM of the histogram.
 
-- ``LaB6_percent_peak_deviations_summary`` presents basics statistics for the histograms of
-``LaB6_percent_peak_deviations_original`` and ``LaB6_percent_peak_deviations_adjustment``, namely the average
-and FWHM of each histogram, as well as the average of the absolute value of the deviations.
+- ``LaB6_percent_peak_deviations_summary`` presents basics statistics for the histograms of ``LaB6_percent_peak_deviations_original`` and ``LaB6_percent_peak_deviations_adjustment``, namely the average and FWHM of each histogram, as well as the average of the absolute value of the deviations.
 
 .. image:: ../images/CorelliPowderCalibrationCreate_5.png
     :align: center
