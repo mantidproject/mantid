@@ -108,7 +108,7 @@ std::string toPrettyString(
   UNUSED_ARG(collapseLists);
   std::ostringstream ss;
   ss.precision(std::numeric_limits<T>::digits10);
-  for (auto it = value.cbegin() ; it != value.cend() ; it++) {
+  for (auto it = value.cbegin(); it != value.cend(); it++) {
     if (it != value.cbegin())
       ss << delimiter;
     ss << *it;
