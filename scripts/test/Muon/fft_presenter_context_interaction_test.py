@@ -164,7 +164,6 @@ class FFTPresenterTest(unittest.TestCase):
                           'InputWorkspace': 'MUSR22725; Pair Asym; test_pair; FD',
                           'NegativePadding': True, 'Padding': 1})
 
-
     def test_get_fft_inputs(self):
         self.presenter.getWorkspaceNames()
         self.view.ws.setCurrentIndex(1)

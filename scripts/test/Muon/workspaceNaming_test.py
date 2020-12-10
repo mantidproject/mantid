@@ -55,7 +55,6 @@ class WorkspaceNamingTest(unittest.TestCase):
         self.assertEqual(period_name_rebin, ws_naming.add_rebin_to_name(period_name))
         self.assertEqual(period_name_rebin, ws_naming.add_rebin_to_name(period_name_rebin))
 
-
     def test_check_phasequad_name(self):
         self.assertEqual(True,ws_naming.check_phasequad_name("Ref_data_Re_"))
         self.assertEqual(True,ws_naming.check_phasequad_name("Ref_data_Im_"))
@@ -64,10 +63,8 @@ class WorkspaceNamingTest(unittest.TestCase):
         self.assertEqual(False,ws_naming.check_phasequad_name("Ref_data"))
         self.assertEqual(False,ws_naming.check_phasequad_name("Image_data"))
 
-
     def test_add_phasequad_extension(self):
         self.assertEqual("Ref_data_Re__Im_",ws_naming.add_phasequad_extensions("Ref_data"))
-
 
     def test_get_pair_phasequad_name(self):
         AnalysisDataService.clear()
@@ -81,12 +78,13 @@ class WorkspaceNamingTest(unittest.TestCase):
         context.data_context.instrument = 'EMU'
 
         context.data_context._loaded_data.add_data(workspace=load_result, run=[run_number], filename=filename,
-                                  instrument='EMU')
+                                                   instrument='EMU')
         context.data_context.current_runs = [[run_number]]
         context.data_context.update_current_data()
- 
+
         self.assertEqual("EMU19489; PhaseQuad; test_Re; MA",ws_naming.get_pair_phasequad_name(context, "test_Re", "19489",False))
         self.assertEqual("EMU19489; PhaseQuad; test_Re; Rebin; MA",ws_naming.get_pair_phasequad_name(context, "test_Re", "19489",True))
+
 
 if __name__ == '__main__':
     unittest.main()

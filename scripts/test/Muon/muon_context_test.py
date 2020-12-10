@@ -22,6 +22,18 @@ from Muon.GUI.Common.muon_pair import MuonPair
 from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 
 
+def run_side_effect(param, name):
+    return name
+
+
+def rebin_side_effect(name, rebin):
+    return name
+
+
+def return_list(name):
+    return [name+"1", name+"2"]
+
+
 @start_qapplication
 class MuonContextTest(unittest.TestCase):
     def setUp(self):
@@ -286,7 +298,7 @@ class MuonContextTest(unittest.TestCase):
         self.assertEqual(self.context._calculate_groups.call_count,2)
 
     def test_update_phasequads(self):
-        phasequad = MuonPhasequad("test", "table") 
+        phasequad = MuonPhasequad("test", "table")
         self.context.group_pair_context.add_phasequad(phasequad)
         self.assertEqual(["long", "test_Re_", "test_Im_"],self.context.group_pair_context.pair_names)
         self.assertEqual("test",self.context.group_pair_context._phasequad[0].name)
@@ -308,27 +320,20 @@ class MuonContextTest(unittest.TestCase):
         # 2 + 1
         self.assertEqual(3, self.context._calculate_phasequads.call_count)
 
-
     @mock.patch('Muon.GUI.Common.contexts.muon_context.run_PhaseQuad')
     @mock.patch('Muon.GUI.Common.contexts.muon_context.split_phasequad')
     def test_calculate_phasequad(self, split_mock, run_mock):
         table = "test_table"
         phasequad = MuonPhasequad("test",table)
-        def run_side_effect(param, name):
-            return name
-        def rebin_side_effect(name, rebin):
-            return name
         run_mock.side_effect = run_side_effect
-        self.context._do_rebin =mock.Mock(side_effect=rebin_side_effect)
-        def return_list(name):
-            return [name+"1", name+"2"]
+        self.context._run_rebin =mock.Mock(side_effect=rebin_side_effect)
         split_mock.side_effect = return_list
 
         result = self.context.calculate_phasequad(phasequad, 5234, False)
         # names are wrong due to split mock
         name = "EMU5234; PhaseQuad; test_Re__Im_; MA"
         self.assertEqual(result, [name+"1", name+"2"])
-        self.context._do_rebin.assert_called_with(name, False)
+        self.context._run_rebin.assert_called_with(name, False)
         run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': 'EMU5234_raw_data MA' }, name)
         split_mock.assert_called_with(name)
 
@@ -337,21 +342,15 @@ class MuonContextTest(unittest.TestCase):
     def test_calculate_phasequad_rebin(self, split_mock, run_mock):
         table = "test_table"
         phasequad = MuonPhasequad("test",table)
-        def run_side_effect(param, name):
-            return name
-        def rebin_side_effect(name, rebin):
-            return name
         run_mock.side_effect = run_side_effect
-        self.context._do_rebin =mock.Mock(side_effect=rebin_side_effect)
-        def return_list(name):
-            return [name+"1", name+"2"]
+        self.context._run_rebin =mock.Mock(side_effect=rebin_side_effect)
         split_mock.side_effect = return_list
 
         result = self.context.calculate_phasequad(phasequad, 5234, True)
         # names are wrong due to split mock
         name = "EMU5234; PhaseQuad; test_Re__Im_; Rebin; MA"
         self.assertEqual(result, [name+"1", name+"2"])
-        self.context._do_rebin.assert_called_with(name, True)
+        self.context._run_rebin.assert_called_with(name, True)
         run_mock.assert_called_with({"PhaseTable": table, 'InputWorkspace': 'EMU5234_raw_data MA' }, name)
         split_mock.assert_called_with(name)
 

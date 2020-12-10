@@ -192,7 +192,6 @@ class MuonGroupPairContextTest(unittest.TestCase):
         self.assertEqual(group_name, 'group_1')
         self.assertEqual(run, '62260-62261')
 
-
     def test_add_phasequad(self):
         phasequad = MuonPhasequad("test", "table")
         self.assertEqual(len(self.context._phasequad),0)

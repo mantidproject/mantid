@@ -201,7 +201,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
             self.assertTrue(widget.isEnabled())
 
     def test_handle_add_phasequad_button_no_table(self):
-        result = self.presenter.handle_add_phasequad_button_clicked()
+        self.presenter.handle_add_phasequad_button_clicked()
         self.view.warning_popup.assert_called_once_with('Please generate a phase table first.')
 
     def test_handle_add_phasequad_button_no_name(self):
@@ -209,7 +209,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.view.enter_pair_name = mock.Mock(return_value = None)
         self.presenter.create_phase_quad_calculation_thread = mock.MagicMock()
 
-        result = self.presenter.handle_add_phasequad_button_clicked()
+        self.presenter.handle_add_phasequad_button_clicked()
         self.assertEqual(self.presenter.create_phase_quad_calculation_thread.call_count, 0)
 
     def test_handle_add_phasequad_button(self):
@@ -218,7 +218,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.view.enter_pair_name = mock.Mock(return_value = "test")
         self.presenter.create_phase_quad_calculation_thread = mock.MagicMock()
 
-        result = self.presenter.handle_add_phasequad_button_clicked()
+        self.presenter.handle_add_phasequad_button_clicked()
         self.assertEqual(self.presenter.create_phase_quad_calculation_thread.call_count, 1)
 
     def test_phasequad_success(self):
@@ -231,7 +231,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.context.group_pair_context.add_pair_to_selected_pairs.assert_any_call("test_Im_")
         self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({"is_added":True, "name":"test_Re_"})
         self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({"is_added":True, "name":"test_Im_"})
-        
+
 
 if __name__ == '__main__':
     unittest.main(buffer=False, verbosity=2)

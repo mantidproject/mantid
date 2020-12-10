@@ -277,7 +277,7 @@ class MuonContext(object):
                 phasequad.name), run_string, rebin=rebin)
 
         phase_quad = run_PhaseQuad(parameters, ws_name)
-        phase_quad = self._do_rebin(phase_quad, rebin)
+        phase_quad = self._run_rebin(phase_quad, rebin)
 
         workspaces = split_phasequad(phase_quad)
         return workspaces
@@ -296,7 +296,7 @@ class MuonContext(object):
                 run,
                 rebin=rebin)
 
-    def _do_rebin(self, name, rebin):
+    def _run_rebin(self, name, rebin):
         if rebin:
             params = "1"
             if self.gui_context['RebinType'] == 'Variable' and self.gui_context["RebinVariable"]:
@@ -310,7 +310,6 @@ class MuonContext(object):
             return rebin_ws(name,params)
         else:
             return name
-
 
     def update_current_data(self):
         # Update the current data; resetting the groups and pairs to their

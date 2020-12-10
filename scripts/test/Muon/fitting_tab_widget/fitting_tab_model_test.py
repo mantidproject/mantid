@@ -488,7 +488,6 @@ class FittingTabModelTest(unittest.TestCase):
         self.assertEquals(parameters['EnableDoublePulse'], True)
         self.assertAlmostEquals(parameters['FirstPulseWeight'], 0.287, places=3)
 
-
     def test_fit_ws_names_from_groups_and_runs(self):
         self.model.fitting_options["fit_to_raw"] = False
         # make some pairs
@@ -500,20 +499,21 @@ class FittingTabModelTest(unittest.TestCase):
         phase_Re2 = MuonBasePair("phase2_Re_")
         phase_Im2 = MuonBasePair("phase2_Im_")
         # add the data
-        self.model.context.group_pair_context.add_pair(pair) 
-        self.model.context.group_pair_context.add_pair(pair2) 
-        self.model.context.group_pair_context.add_pair(phase_Re) 
-        self.model.context.group_pair_context.add_pair(phase_Im) 
-        self.model.context.group_pair_context.add_pair(phase_Re2) 
+        self.model.context.group_pair_context.add_pair(pair)
+        self.model.context.group_pair_context.add_pair(pair2)
+        self.model.context.group_pair_context.add_pair(phase_Re)
+        self.model.context.group_pair_context.add_pair(phase_Im)
+        self.model.context.group_pair_context.add_pair(phase_Re2)
         self.model.context.group_pair_context.add_pair(phase_Im2)
         # select some of the data
         self.model.context.group_pair_context.add_pair_to_selected_pairs("long")
         self.model.context.group_pair_context.add_pair_to_selected_pairs("phase_Re_")
         self.model.context.group_pair_context.add_pair_to_selected_pairs("phase2_Im_")
         # do test
-        result = self.model.get_fit_workspace_names_from_groups_and_runs([1,2,3], ["long","long2","phase_Re_","phase_Im_", "phase2_Re_", "phase2_Im_"])
+        selection = ["long","long2","phase_Re_","phase_Im_", "phase2_Re_", "phase2_Im_"]
+        result = self.model.get_fit_workspace_names_from_groups_and_runs([1,2,3], selection)
         self.assertEqual(["MUSR1; Pair Asym; long; Rebin; MA",
-                          "MUSR1; PhaseQuad; phase_Re_; Rebin; MA", 
+                          "MUSR1; PhaseQuad; phase_Re_; Rebin; MA",
                           'MUSR1; PhaseQuad; phase2_Im_; Rebin; MA',
                           'MUSR2; Pair Asym; long; Rebin; MA',
                           'MUSR2; PhaseQuad; phase_Re_; Rebin; MA',
@@ -521,7 +521,6 @@ class FittingTabModelTest(unittest.TestCase):
                           'MUSR3; Pair Asym; long; Rebin; MA',
                           'MUSR3; PhaseQuad; phase_Re_; Rebin; MA',
                           'MUSR3; PhaseQuad; phase2_Im_; Rebin; MA'], result)
-
 
     def test_fit_ws_names_from_groups_and_runs_raw(self):
         self.model.fitting_options["fit_to_raw"] = True
@@ -534,20 +533,21 @@ class FittingTabModelTest(unittest.TestCase):
         phase_Re2 = MuonBasePair("phase2_Re_")
         phase_Im2 = MuonBasePair("phase2_Im_")
         # add the data
-        self.model.context.group_pair_context.add_pair(pair) 
-        self.model.context.group_pair_context.add_pair(pair2) 
-        self.model.context.group_pair_context.add_pair(phase_Re) 
-        self.model.context.group_pair_context.add_pair(phase_Im) 
-        self.model.context.group_pair_context.add_pair(phase_Re2) 
+        self.model.context.group_pair_context.add_pair(pair)
+        self.model.context.group_pair_context.add_pair(pair2)
+        self.model.context.group_pair_context.add_pair(phase_Re)
+        self.model.context.group_pair_context.add_pair(phase_Im)
+        self.model.context.group_pair_context.add_pair(phase_Re2)
         self.model.context.group_pair_context.add_pair(phase_Im2)
         # select some of the data
         self.model.context.group_pair_context.add_pair_to_selected_pairs("long")
         self.model.context.group_pair_context.add_pair_to_selected_pairs("phase_Re_")
         self.model.context.group_pair_context.add_pair_to_selected_pairs("phase2_Im_")
         # do test
-        result = self.model.get_fit_workspace_names_from_groups_and_runs([1,2,3], ["long","long2","phase_Re_","phase_Im_", "phase2_Re_", "phase2_Im_"])
+        selection = ["long","long2","phase_Re_","phase_Im_", "phase2_Re_", "phase2_Im_"]
+        result = self.model.get_fit_workspace_names_from_groups_and_runs([1,2,3], selection)
         self.assertEqual(["MUSR1; Pair Asym; long; MA",
-                          "MUSR1; PhaseQuad; phase_Re_; MA", 
+                          "MUSR1; PhaseQuad; phase_Re_; MA",
                           'MUSR1; PhaseQuad; phase2_Im_; MA',
                           'MUSR2; Pair Asym; long; MA',
                           'MUSR2; PhaseQuad; phase_Re_; MA',

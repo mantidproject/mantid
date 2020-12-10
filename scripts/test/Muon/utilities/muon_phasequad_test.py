@@ -9,6 +9,7 @@ import unittest
 from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from unittest import mock
 
+
 class MuonPhasequadTest(unittest.TestCase):
 
     def test_name(self):
@@ -29,7 +30,7 @@ class MuonPhasequadTest(unittest.TestCase):
         self.assertEqual(phasequad.phase_table, "table")
         phasequad.phase_table = "new"
         self.assertEqual(phasequad.phase_table, "new")
- 
+
     def test_update(self):
         phasequad = MuonPhasequad("test", "table")
         Re = mock.Mock()
@@ -41,7 +42,7 @@ class MuonPhasequadTest(unittest.TestCase):
         phasequad.update_asymmetry_workspaces([Re, Im], 42, False)
         phasequad._Re.update_asymmetry_workspace.assert_called_once_with(Re, 42, rebin=False)
         phasequad._Im.update_asymmetry_workspace.assert_called_once_with(Im, 42, rebin=False)
-    
+
     def test_update_rebin(self):
         phasequad = MuonPhasequad("test", "table")
         Re = mock.Mock()
@@ -53,7 +54,6 @@ class MuonPhasequadTest(unittest.TestCase):
         phasequad.update_asymmetry_workspaces([Re, Im], 42, True)
         phasequad._Re.update_asymmetry_workspace.assert_called_once_with(Re, 42, rebin=True)
         phasequad._Im.update_asymmetry_workspace.assert_called_once_with(Im, 42, rebin=True)
-        
 
 
 if __name__ == '__main__':

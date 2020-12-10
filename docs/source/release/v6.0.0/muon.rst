@@ -18,6 +18,7 @@ New Features
 
 Improvements
 ############
+- Phasequads are now available for analysis in both GUI's.
 
 Bug fixes
 #########
