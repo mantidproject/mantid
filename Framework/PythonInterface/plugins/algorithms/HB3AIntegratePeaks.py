@@ -22,7 +22,7 @@ class HB3AIntegratePeaks(PythonAlgorithm):
         return "Crystal\\Integration"
 
     def seeAlso(self):
-        return ["HB3AFindPeaks", "IntegratePeaksMD"]
+        return ["HB3AFindPeaks", "IntegratePeaksMD", "HB3AAdjustSampleNorm", "HB3APredictPeaks"]
 
     def name(self):
         return "HB3AIntegratePeaks"

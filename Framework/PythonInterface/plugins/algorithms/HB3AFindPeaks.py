@@ -27,7 +27,8 @@ class HB3AFindPeaks(PythonAlgorithm):
         return "Crystal\\Peaks;Crystal\\UBMatrix"
 
     def seeAlso(self):
-        return ["FindPeaksMD", "OptimizeLatticeForCellType", "FindUBUsingFFT", "SelectCellOfType", "IndexPeaks"]
+        return ["FindPeaksMD", "OptimizeLatticeForCellType", "FindUBUsingFFT", "SelectCellOfType", "IndexPeaks",
+                "HB3AAdjustSampleNorm", "HB3APredictPeaks", "HB3AIntegratePeaks"]
 
     def name(self):
         return "HB3AFindPeaks"

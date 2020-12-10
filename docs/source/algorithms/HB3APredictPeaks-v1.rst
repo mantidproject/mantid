@@ -18,6 +18,9 @@ been processed from :ref:`HB3AAdjustSampleNorm
 <algm-HB3AAdjustSampleNorm>`. It correctly takes into account the
 wavelength and goniometer rotations for the given workspace.
 
+See :ref:`HB3AIntegratePeaks <algm-HB3AIntegratePeaks>` for complete
+examples of the HB3A workflow.
+
 .. categories::
 
 .. sourcelink::

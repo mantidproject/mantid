@@ -16,7 +16,7 @@ class HB3APredictPeaks(PythonAlgorithm):
         return "Crystal\\Peaks;Crystal\\UBMatrix"
 
     def seeAlso(self):
-        return ["PredictPeaks", "HB3AFindPeaks"]
+        return ["PredictPeaks", "HB3AFindPeaks", "HB3AIntegratePeaks", "HB3AAdjustSampleNorm"]
 
     def name(self):
         return "HB3APredictPeaks"

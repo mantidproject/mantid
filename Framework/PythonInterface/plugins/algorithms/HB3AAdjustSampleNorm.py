@@ -19,7 +19,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
         return "Crystal\\Corrections"
 
     def seeAlso(self):
-        return ["ConvertWANDSCDtoQ", "ConvertHFIRSCDtoMDE"]
+        return ["ConvertWANDSCDtoQ", "ConvertHFIRSCDtoMDE", "HB3AFindPeaks", "HB3APredictPeaks", "HB3AIntegratePeaks"]
 
     def name(self):
         return "HB3AAdjustSampleNorm"
