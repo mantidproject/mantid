@@ -46,7 +46,7 @@ class D7YIGPositionCalibrationTest(unittest.TestCase):
         output_filename = os.path.join(tempfile.gettempdir(), 'test_shortWavelength.xml')
         D7YIGPositionCalibration(InputWorkspace='shortWavelengthScan_clone', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=output_filename,
-                                 MinimalDistanceBetweenPeaks=1.75, BankOffsets=[-3, -3, 1],
+                                 MinimalDistanceBetweenPeaks=1.75, BankOffsets=[3, 3, -1],
                                  FitOutputWorkspace='test_shortWavelength', FittingMethod='Individual')
         self.assertTrue(path.exists(output_filename))
         self.assertTrue(mtd['test_shortWavelength'])

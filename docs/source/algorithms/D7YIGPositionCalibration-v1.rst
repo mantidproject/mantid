@@ -47,7 +47,7 @@ Usage
    approximate_wavelength = '3.1' # Angstrom
    D7YIGPositionCalibration(Filenames='402652:403041', ApproximateWavelength=approximate_wavelength,
 			    YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
-			    MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1", ClearCache=True,
+			    MinimalDistanceBetweenPeaks=1.5, BankOffsets=[3, 3, 1], ClearCache=True,
 			    FittingMethod='Individual', FitOutputWorkspace='shortWavelength')
 		       
    print('The calibrated wavelength is: {0:.2f}'.format(float(approximate_wavelength)*mtd['shortWavelength'].column(1)[1]))
@@ -63,7 +63,7 @@ Usage
    approximate_wavelength = '4.8' # Angstrom
    D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
 			    YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_intermediateWavelength.xml',
-			    MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-4,-4,0],
+			    MinimalDistanceBetweenPeaks=1.5, BankOffsets=[3, 3, -1],
 			    MaskedBinsRange=[-50, -25, 15],
 			    FittingMethod='Individual', FitOutputWorkspace='intermediateWavelength')
 
