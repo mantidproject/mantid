@@ -549,9 +549,9 @@ void PDCalibration::exec() {
   // parameters for peaks that were successfully fitting, then use this info
   // to obtain difc, difa, and tzero for each pixel
   // cppcheck-suppress syntaxError
-  PRAGMA_OMP(parallel for schedule(dynamic, 1))
+   PRAGMA_OMP(parallel for schedule(dynamic, 1))
   for (int wkspIndex = 0; wkspIndex < NUMHIST; ++wkspIndex) {
-    PARALLEL_START_INTERUPT_REGION
+     PARALLEL_START_INTERUPT_REGION
     if ((isEvent && uncalibratedEWS->getSpectrum(wkspIndex).empty()) ||
         !spectrumInfo.hasDetectors(wkspIndex) ||
         spectrumInfo.isMonitor(wkspIndex)) {
@@ -1035,9 +1035,9 @@ PDCalibration::getDSpacingToTof(const std::set<detid_t> &detIds) {
   double tzero = 0.;
   for (auto detId : detIds) {
     auto rowNum = m_detidToRow[detId];
-    difc += m_calibrationTable->getRef<double>("difa", rowNum);
+    difc += m_calibrationTable->getRef<double>("difc", rowNum);
     difa += m_calibrationTable->getRef<double>("difa", rowNum);
-    tzero += m_calibrationTable->getRef<double>("difa", rowNum);
+    tzero += m_calibrationTable->getRef<double>("tzero", rowNum);
   }
   if (detIds.size() > 1) {
     double norm = 1. / static_cast<double>(detIds.size());
