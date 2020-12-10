@@ -964,8 +964,8 @@ public:
     TSM_ASSERT_EQUALS("Groups size should be same as nperiods",
                       outGroup->size(), nPeriods);
     // mean of proton charge for each period
-    std::array protonChargeMeans = {0.00110488, 0.00110392, 0.00110343,
-                                    0.00110404};
+    std::array<double, 4> protonChargeMeans = {0.00110488, 0.00110392,
+                                               0.00110343, 0.00110404};
     for (size_t i = 0; i < outGroup->size(); ++i) {
       EventWorkspace_sptr ws =
           std::dynamic_pointer_cast<EventWorkspace>(outGroup->getItem(i));
