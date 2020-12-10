@@ -223,6 +223,7 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                     van_norm = DivideMD(LHSWorkspace=scan, RHSWorkspace=van_norm, StoreInADS=False)
                     ConvertHFIRSCDtoMDE(InputWorkspace=van_norm, Wavelength=wavelength, MinValues=minvals,
                                         MaxValues=maxvals, OutputWorkspace=out_ws_name)
+                    DeleteWorkspace(van_norm)
                 else:
                     ConvertHFIRSCDtoMDE(InputWorkspace=scan, Wavelength=wavelength, MinValues=minvals,
                                         MaxValues=maxvals, OutputWorkspace=out_ws_name)
@@ -240,20 +241,18 @@ class HB3AAdjustSampleNorm(PythonAlgorithm):
                                       Wavelength=wavelength, NormaliseBy='Monitor', BinningDim0=bin0, BinningDim1=bin1,
                                       BinningDim2=bin2,
                                       OutputWorkspace=out_ws_name)
+            if load_files:
+                DeleteWorkspace(scan)
 
         if method:
             if merge and len(wslist) > 1:
                 out_ws_name = out_ws
                 MergeMD(InputWorkspaces=wslist, OutputWorkspace=out_ws_name)
                 DeleteWorkspaces(wslist)
-            if has_van:
-                DeleteWorkspace(van_norm)
 
         # Don't delete workspaces if they were passed in
         if load_van:
             DeleteWorkspace(vanws)
-        if load_files:
-            DeleteWorkspace(scan)
 
         self.setProperty("OutputWorkspace", out_ws_name)
 
