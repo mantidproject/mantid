@@ -11,7 +11,7 @@ Indirect Geometry Changes
 
 New Features
 ############
-- Added the ability to save a detector grouping to a MAP file from a Custom Grouping String on Indirect Data Reduction. 
+- Added the ability to save a detector grouping to a XML file from a Custom Grouping String on Indirect Data Reduction. 
 
 Improvements
 ############

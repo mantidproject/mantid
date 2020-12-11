@@ -22,43 +22,9 @@
 #include <fstream>
 #include <sstream>
 
-#include <boost/algorithm/string.hpp>
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Poco::XML;
-
-namespace {
-
-bool hasExtention(std::string filename, const std::string &extention) {
-  if (filename.length() < extention.length())
-    return false;
-
-  std::transform(filename.begin(), filename.end(), filename.begin(),
-                 [](unsigned char c) { return std::tolower(c); });
-
-  return filename.compare(filename.length() - extention.length(),
-                          extention.length(), extention) == 0;
-}
-
-int numberOfDetectorIDs(const std::vector<Mantid::detid_t> &detectorIDs) {
-  return detectorIDs[1] - detectorIDs[0] + 1;
-}
-
-std::string
-spaceSeparatedDetectorString(const std::vector<Mantid::detid_t> &detectorIDs) {
-  if (detectorIDs[0] == detectorIDs[1]) {
-    return std::to_string(detectorIDs[0]);
-  } else {
-    std::string detectorString;
-    for (auto id = detectorIDs[0]; id <= detectorIDs[1]; ++id)
-      detectorString += std::to_string(id) + " ";
-    boost::algorithm::trim(detectorString);
-    return detectorString;
-  }
-}
-
-} // namespace
 
 namespace Mantid {
 namespace DataHandling {
@@ -67,23 +33,20 @@ DECLARE_ALGORITHM(SaveDetectorsGrouping)
 
 /// Define input parameters
 void SaveDetectorsGrouping::init() {
-  const std::initializer_list<std::string> extentions = {".xml", ".map"};
-
   declareProperty(
       std::make_unique<API::WorkspaceProperty<DataObjects::GroupingWorkspace>>(
           "InputWorkspace", "", Direction::Input),
-      "GroupingWorkspace to output to a XML or MAP file.");
-  declareProperty(
-      std::make_unique<FileProperty>("OutputFile", "", FileProperty::Save,
-                                     extentions),
-      "File to save the detectors grouping to. Default is an XML file.");
+      "GroupingWorkspace to output to XML file (GroupingWorkspace)");
+  declareProperty(std::make_unique<FileProperty>("OutputFile", "",
+                                                 FileProperty::Save, ".xml"),
+                  "File to save the detectors mask in XML format");
 }
 
 /// Main body to execute algorithm
 void SaveDetectorsGrouping::exec() {
 
   // 1. Get Input
-  const std::string outputFilename = this->getProperty("OutputFile");
+  const std::string xmlfilename = this->getProperty("OutputFile");
   mGroupWS = this->getProperty("InputWorkspace");
 
   // 2. Create Map(group ID, workspace-index vector)
@@ -96,10 +59,7 @@ void SaveDetectorsGrouping::exec() {
   this->convertToDetectorsRanges(groupIDwkspIDMap, groupIDdetectorRangeMap);
 
   // 4. Print out
-  if (hasExtention(outputFilename, "map"))
-    printToMap(groupIDdetectorRangeMap, outputFilename);
-  else
-    printToXML(groupIDdetectorRangeMap, outputFilename);
+  this->printToXML(groupIDdetectorRangeMap, xmlfilename);
 }
 
 /*
@@ -275,36 +235,6 @@ void SaveDetectorsGrouping::printToXML(
 
   writer.writeNode(std::cout, pDoc);
   writer.writeNode(ofs, pDoc);
-  ofs.close();
-}
-
-/** Creates a MAP file using the detector IDs found in a grouping workspace. The
- * format of a MAP file is as follows:
- *
- * Line 1        - Number of groups.
- *
- * For N = 2 to N = Number of groups:
- *
- * Line N        - Group ID.
- * Line N + 1    - Number of detectors in group.
- * Line N + 2    - Space separated list of Detector IDs.
- */
-void SaveDetectorsGrouping::printToMap(
-    std::map<int, std::vector<detid_t>> &groupToDetectorIDsMap,
-    const std::string &mapFilename) {
-  const auto removeIter = groupToDetectorIDsMap.find(0);
-  if (removeIter != groupToDetectorIDsMap.cend())
-    groupToDetectorIDsMap.erase(removeIter);
-
-  std::ofstream ofs;
-  ofs.open(mapFilename.c_str(), std::fstream::out);
-  ofs << std::to_string(groupToDetectorIDsMap.size()) + "\n";
-  for (auto detectorIds : groupToDetectorIDsMap) {
-    ofs << std::to_string(detectorIds.first) + "\n";
-    ofs << std::to_string(numberOfDetectorIDs(detectorIds.second)) + "\n";
-    ofs << spaceSeparatedDetectorString(detectorIds.second) + "\n";
-  }
-
   ofs.close();
 }
 

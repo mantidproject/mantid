@@ -562,7 +562,8 @@ void GroupDetectors2::processXMLFile(
 
   // 2. Load XML file
   DataHandling::LoadGroupXMLFile loader;
-  loader.setDefaultStartingGroupID(0);
+  // A Group with ID = 0 in an XML file means the detectors are excluded.
+  loader.setDefaultStartingGroupID(1);
   loader.loadXMLFile(fname);
   std::map<int, std::vector<detid_t>> mGroupDetectorsMap =
       loader.getGroupDetectorsMap();

@@ -25,7 +25,7 @@ using MantidQt::API::BatchAlgorithmRunner;
 namespace {
 Mantid::Kernel::Logger g_log("ISISEnergyTransfer");
 
-const std::string DEFAULT_MAP_FILENAME = "custom_detector_grouping.map";
+const std::string DEFAULT_GROUPING_FILENAME = "custom_detector_grouping.xml";
 const std::string GROUPING_WS_NAME = "Custom_grouping_workspace";
 
 bool doesExistInADS(std::string const &workspaceName) {
@@ -619,7 +619,7 @@ void ISISEnergyTransfer::handleSaveCustomGroupingClicked() {
   if (doesExistInADS(GROUPING_WS_NAME)) {
     QHash<QString, QString> props;
     props["InputWorkspace"] = QString::fromStdString(GROUPING_WS_NAME);
-    props["OutputFile"] = QString::fromStdString(DEFAULT_MAP_FILENAME);
+    props["OutputFile"] = QString::fromStdString(DEFAULT_GROUPING_FILENAME);
 
     InterfaceManager interfaceManager;
     auto *dialog = interfaceManager.createDialogFromName(
