@@ -730,7 +730,7 @@ class PolDiffILLReduction(PythonAlgorithm):
                     progress.report('Applying polarisation corrections')
                     self._apply_polarisation_corrections(ws, pol_eff_ws)
                 self._read_experiment_properties(ws)
-                if self.getPropertyValue('SampleGeometry') != 'None' and container_ws != '' :
+                if self.getPropertyValue('SelfAttenuationMethod') != 'None' and container_ws != '':
                     progress.report('Applying self-attenuation correction')
                     self._apply_self_attenuation_correction(ws, container_ws)
                 if process == 'Vanadium':
