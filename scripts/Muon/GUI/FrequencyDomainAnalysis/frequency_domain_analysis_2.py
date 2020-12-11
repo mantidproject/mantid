@@ -36,14 +36,7 @@ from Muon.GUI.Common.plotting_dock_widget.plotting_dock_widget import PlottingDo
 from mantidqt.utils.observer_pattern import GenericObserver, GenericObserverWithArgPassing, GenericObservable
 
 SUPPORTED_FACILITIES = ["ISIS", "SmuS"]
-TAB_ORDER = [
-    "Home",
-    "Grouping",
-    "Phase Table",
-    "Transform",
-    "Fitting",
-    "Sequential Fitting",
-    "Results"]
+TAB_ORDER = ["Home", "Grouping", "Phase Table", "Transform", "Fitting", "Sequential Fitting", "Results"]
 
 
 def check_facility():
@@ -53,10 +46,10 @@ def check_facility():
     """
     current_facility = ConfigServiceImpl.Instance().getFacility().name()
     if current_facility not in SUPPORTED_FACILITIES:
-        raise AttributeError(
-            "Your facility {} is not supported by MuonAnalysis 2.0, so you"
-            "will not be able to load any files. \n \n"
-            "Supported facilities are :" + "\n - ".join(SUPPORTED_FACILITIES))
+        raise AttributeError("Your facility {} is not supported by MuonAnalysis 2.0, so you"
+                             "will not be able to load any files. \n \n"
+                             "Supported facilities are :"
+                             + "\n - ".join(SUPPORTED_FACILITIES))
 
 
 class FrequencyAnalysisGui(QtWidgets.QMainWindow):
@@ -92,34 +85,24 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.frequency_context = FrequencyContext()
 
         self.context = FrequencyDomainAnalysisContext(
-            muon_data_context=self.data_context,
-            muon_gui_context=self.gui_context,
-            muon_group_context=self.group_pair_context,
-            muon_phase_context=self.phase_context,
-            fitting_context=self.fitting_context,
-            frequency_context=self.frequency_context)
+            muon_data_context=self.data_context, muon_gui_context=self.gui_context,
+            muon_group_context=self.group_pair_context, muon_phase_context=self.phase_context,
+            fitting_context=self.fitting_context, frequency_context=self.frequency_context)
 
         # create the dockable widget
         self.fitting_tab = FittingTabWidget(self.context, self)
-        self.plot_widget = PlotWidget(
-            self.context,
-            self.fitting_tab.fitting_tab_presenter.get_selected_fit_workspaces,
-            parent=self)
-        self.dockable_plot_widget_window = PlottingDockWidget(
-            parent=self, plotting_widget=self.plot_widget.view)
+        self.plot_widget = PlotWidget(self.context, self.fitting_tab.fitting_tab_presenter.get_selected_fit_workspaces, parent=self)
+        self.dockable_plot_widget_window = PlottingDockWidget(parent=self,
+                                                              plotting_widget=self.plot_widget.view)
         self.dockable_plot_widget_window.setMinimumWidth(575)
 
         # Add dock widget to main Muon analysis window
-        self.addDockWidget(
-            QtCore.Qt.RightDockWidgetArea,
-            self.dockable_plot_widget_window)
+        self.addDockWidget(QtCore.Qt.RightDockWidgetArea, self.dockable_plot_widget_window)
         # Need this line to stop the bug where the dock window snaps back to its original size after resizing.
         # 0 argument is arbitrary and has no effect on fit widget size
-        # This is a qt bug reported at
-        # (https://bugreports.qt.io/browse/QTBUG-65592)
+        # This is a qt bug reported at (https://bugreports.qt.io/browse/QTBUG-65592)
         if QT_VERSION >= LooseVersion("5.6"):
-            self.resizeDocks({self.dockable_plot_widget_window}, {
-                             1}, QtCore.Qt.Horizontal)
+            self.resizeDocks({self.dockable_plot_widget_window}, {1}, QtCore.Qt.Horizontal)
 
         # construct all the widgets.
         self.load_widget = LoadWidget(self.loaded_data, self.context, self)
@@ -149,8 +132,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.disable_observer = GenericObserver(
             self.disable_notifier.notify_subscribers)
         self.enable_notifier = GenericObservable()
-        self.enable_observer = GenericObserver(
-            self.enable_notifier.notify_subscribers)
+        self.enable_observer = GenericObserver(self.enable_notifier.notify_subscribers)
         self.setup_disable_notifier()
         self.setup_enable_notifier()
 
@@ -205,16 +187,13 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.tabs.addTabWithOrder(self.transform.widget, 'Transform')
         self.tabs.addTabWithOrder(self.fitting_tab.fitting_tab_view, 'Fitting')
         self.tabs.addTabWithOrder(self.results_tab.results_tab_view, 'Results')
-        self.update_plot_observer = GenericObserver(
-            self.plot_widget.presenter.update_plot)
-        self.transform_finished_observer = GenericObserverWithArgPassing(
-            self.handle_transform_performed)
+        self.update_plot_observer = GenericObserver(self.plot_widget.presenter.update_plot)
+        self.transform_finished_observer = GenericObserverWithArgPassing(self.handle_transform_performed)
         self.tabs.set_slot_for_tab_changed(self.handle_tab_changed)
 
     def handle_tab_changed(self):
         index = self.tabs.currentIndex()
-        if TAB_ORDER[index] in ["Home", "Grouping",
-                                "Phase Table"]:  # Plot all the selected data
+        if TAB_ORDER[index] in ["Home", "Grouping", "Phase Table"]:  # Plot all the selected data
             plot_mode = PlotMode.Data
         elif TAB_ORDER[index] in ["Fitting", "Transform"]:  # Plot the displayed workspace
             plot_mode = PlotMode.Fitting
@@ -225,53 +204,40 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
 
     def handle_transform_performed(self, new_data_workspace_name):
         self.fitting_tab.fitting_tab_presenter.handle_new_data_loaded()
-        self.fitting_tab.fitting_tab_presenter.set_display_workspace(
-            new_data_workspace_name)
+        self.fitting_tab.fitting_tab_presenter.set_display_workspace(new_data_workspace_name)
         self.plot_widget.presenter.update_plot(autoscale=True)
 
     def setup_disable_notifier(self):
 
-        self.disable_notifier.add_subscriber(
-            self.home_tab.home_tab_widget.disable_observer)
+        self.disable_notifier.add_subscriber(self.home_tab.home_tab_widget.disable_observer)
 
-        self.disable_notifier.add_subscriber(
-            self.load_widget.load_widget.disable_observer)
+        self.disable_notifier.add_subscriber(self.load_widget.load_widget.disable_observer)
 
-        self.disable_notifier.add_subscriber(
-            self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
+        self.disable_notifier.add_subscriber(self.fitting_tab.fitting_tab_presenter.disable_tab_observer)
 
-        self.disable_notifier.add_subscriber(
-            self.phase_tab.phase_table_presenter.disable_tab_observer)
+        self.disable_notifier.add_subscriber(self.phase_tab.phase_table_presenter.disable_tab_observer)
 
-        self.disable_notifier.add_subscriber(
-            self.results_tab.results_tab_presenter.disable_tab_observer)
+        self.disable_notifier.add_subscriber(self.results_tab.results_tab_presenter.disable_tab_observer)
 
         self.disable_notifier.add_subscriber(self.transform.disable_observer)
 
-        self.disable_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.disable_tab_observer)
+        self.disable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.disable_tab_observer)
 
     def setup_enable_notifier(self):
 
-        self.enable_notifier.add_subscriber(
-            self.home_tab.home_tab_widget.enable_observer)
+        self.enable_notifier.add_subscriber(self.home_tab.home_tab_widget.enable_observer)
 
-        self.enable_notifier.add_subscriber(
-            self.load_widget.load_widget.enable_observer)
+        self.enable_notifier.add_subscriber(self.load_widget.load_widget.enable_observer)
 
-        self.enable_notifier.add_subscriber(
-            self.fitting_tab.fitting_tab_presenter.enable_tab_observer)
+        self.enable_notifier.add_subscriber(self.fitting_tab.fitting_tab_presenter.enable_tab_observer)
 
-        self.enable_notifier.add_subscriber(
-            self.phase_tab.phase_table_presenter.enable_tab_observer)
+        self.enable_notifier.add_subscriber(self.phase_tab.phase_table_presenter.enable_tab_observer)
 
-        self.enable_notifier.add_subscriber(
-            self.results_tab.results_tab_presenter.enable_tab_observer)
+        self.enable_notifier.add_subscriber(self.results_tab.results_tab_presenter.enable_tab_observer)
 
         self.enable_notifier.add_subscriber(self.transform.enable_observer)
 
-        self.enable_notifier.add_subscriber(
-            self.grouping_tab_widget.group_tab_presenter.enable_tab_observer)
+        self.enable_notifier.add_subscriber(self.grouping_tab_widget.group_tab_presenter.enable_tab_observer)
 
     def setup_load_observers(self):
         self.load_widget.load_widget.loadNotifier.add_subscriber(
@@ -413,8 +379,7 @@ class FrequencyAnalysisGui(QtWidgets.QMainWindow):
         self.fitting_context.new_fit_results_notifier.add_subscriber(
             self.results_tab.results_tab_presenter.new_fit_performed_observer)
 
-        self.fitting_context.plot_guess_notifier.add_subscriber(
-            self.plot_widget.presenter.plot_guess_observer)
+        self.fitting_context.plot_guess_notifier.add_subscriber(self.plot_widget.presenter.plot_guess_observer)
 
     def closeEvent(self, event):
         self.tabs.closeEvent(event)

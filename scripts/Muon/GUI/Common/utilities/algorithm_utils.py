@@ -58,10 +58,7 @@ def run_MuonPairingAsymmetry(parameter_dict, workspace_name):
     return workspace_name
 
 
-def run_MuonGroupingAsymmetry(
-        parameter_dict,
-        workspace_name,
-        unormalised_workspace_name):
+def run_MuonGroupingAsymmetry(parameter_dict, workspace_name, unormalised_workspace_name):
     """
     Apply the MuonGroupingCounts algorithm with the properties supplied through
     the input dictionary of {property_name:property_value} pairs.
@@ -85,8 +82,7 @@ def run_CalMuonDetectorPhases(parameter_dict, alg, fitted_workspace_name):
     alg.setProperty("DataFitted", fitted_workspace_name)
     alg.setProperties(parameter_dict)
     alg.execute()
-    return alg.getProperty("DetectorTable").valueAsStr, alg.getProperty(
-        'DataFitted').valueAsStr
+    return alg.getProperty("DetectorTable").valueAsStr, alg.getProperty('DataFitted').valueAsStr
 
 
 def run_PhaseQuad(parameters_dict, phase_quad_workspace_name):
@@ -141,12 +137,8 @@ def run_Fit(parameters_dict, alg):
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
     alg.setProperty('CreateOutput', True)
-    pruned_parameter_dict = {
-        key: value for key,
-        value in parameters_dict.items() if key not in [
-            'InputWorkspace',
-            'StartX',
-            'EndX']}
+    pruned_parameter_dict = {key: value for key, value in parameters_dict.items() if
+                             key not in ['InputWorkspace', 'StartX', 'EndX']}
     alg.setProperties(pruned_parameter_dict)
     alg.setProperty('InputWorkspace', parameters_dict['InputWorkspace'])
     alg.setProperty('StartX', parameters_dict['StartX'])
@@ -163,12 +155,8 @@ def run_simultaneous_Fit(parameters_dict, alg):
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
     alg.setProperty('CreateOutput', True)
-    pruned_parameter_dict = {
-        key: value for key,
-        value in parameters_dict.items() if key not in [
-            'InputWorkspace',
-            'StartX',
-            'EndX']}
+    pruned_parameter_dict = {key: value for key,value in parameters_dict.items() if 
+                             key not in ['InputWorkspace', 'StartX', 'EndX']}
     alg.setProperties(pruned_parameter_dict)
 
     for index, input_workspace in enumerate(parameters_dict['InputWorkspace']):
