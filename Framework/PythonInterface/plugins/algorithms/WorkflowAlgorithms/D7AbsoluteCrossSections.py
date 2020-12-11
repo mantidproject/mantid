@@ -466,6 +466,13 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         self._set_as_distribution(component_ws)
         return component_ws
 
+    def _set_output(self, output_ws):
+        if not self.getProperty('CrossSectionsOutputWorkspace').isDefault:
+            RenameWorkspace(InputWorkspace=output_ws,
+                            OutputWorkspace=self.getPropertyValue('CrossSectionsOutputWorkspace'))
+            self.setProperty('CrossSectionsOutputWorkspace',
+                             self.getPropertyValue('CrossSectionsOutputWorkspace'))
+
     def PyExec(self):
         input_ws = self.getPropertyValue('InputWorkspace')
         self._read_experiment_properties(input_ws)
