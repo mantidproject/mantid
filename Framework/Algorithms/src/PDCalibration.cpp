@@ -1026,7 +1026,7 @@ PDCalibration::dSpacingWindows(const std::vector<double> &centres,
  * pixel, evaulating the GSAS conversion formula:
  *                  TOF = DIFC∗d + DIFA∗d^2 + TZERO
  *
- * @param detid :: detector ID
+ * @param detIds :: set of detector IDs
  */
 std::function<double(double)>
 PDCalibration::getDSpacingToTof(const std::set<detid_t> &detIds) {
