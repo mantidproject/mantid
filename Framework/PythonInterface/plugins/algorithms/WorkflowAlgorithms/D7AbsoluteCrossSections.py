@@ -202,11 +202,10 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             formula_unit_mass = self._sampleAndEnvironmentProperties['FormulaUnitMass'].value
             self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass) * formula_units
 
-    def _cross_section_separation(self, ws):
+    def _cross_section_separation(self, ws, nMeasurements, nComponents):
         """Separates coherent, incoherent, and magnetic components based on spin-flip and non-spin-flip intensities of the
         current sample. The method used is based on either the user's choice or the provided data structure."""
         DEG_2_RAD =  np.pi / 180.0
-        nMeasurements, nComponents = self._data_structure_helper(ws)
         user_method = self.getPropertyValue('CrossSectionSeparationMethod')
         componentNames = ['Total', 'Coherent', 'Incoherent', 'AverageMagnetic', 'NSFMagnetic', 'SFMagnetic']
         number_histograms = mtd[ws][0].getNumberHistograms()
@@ -376,7 +375,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
     def _normalise_sample_data(self, ws, det_efficiency_ws):
         """Normalises the sample data using the detector efficiency calibration workspace"""
-        nMeasurements, _ = self._data_structure_helper(ws)
         single_efficiency_per_POL = False
         if mtd[ws].getNumberOfEntries() != mtd[det_efficiency_ws].getNumberOfEntries():
             single_efficiency_per_POL = True
@@ -400,9 +398,8 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_name)
         return output_name
 
-    def _set_units(self, ws):
+    def _set_units(self, ws, nMeasurements):
         output_unit = self.getPropertyValue('OutputUnits')
-        nMeasurements, _ = self._data_structure_helper(ws)
         unit_symbol = 'barn / sr / formula unit'
         unit = r'd$\sigma$/d$\Omega$'
         if output_unit == 'TwoTheta':
@@ -464,42 +461,44 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                             Normalise=True, HeightAxis='-0.1,0.1')
         return output_name
 
-    def _call_cross_section_separation(self, input_ws):
-        component_ws = self._cross_section_separation(input_ws)
+    def _call_cross_section_separation(self, input_ws, nMeasurements, nComponents):
+        component_ws = self._cross_section_separation(input_ws, nMeasurements, nComponents)
         self._set_as_distribution(component_ws)
         return component_ws
 
     def PyExec(self):
         input_ws = self.getPropertyValue('InputWorkspace')
         self._read_experiment_properties(input_ws)
+        nMeasurements, nComponents = self._data_structure_helper(input_ws)
         normalisation_method = self.getPropertyValue('NormalisationMethod')
         if normalisation_method != 'None':
             if normalisation_method =='Vanadium':
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
             elif normalisation_method in ['Paramagnetic', 'Incoherent']:
-                det_efficiency_input = self._call_cross_section_separation(input_ws)
+                det_efficiency_input = self._call_cross_section_separation(input_ws, nMeasurements, nComponents)
 
             det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
             output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
-            self._set_units(output_ws)
+            self._set_units(output_ws, nMeasurements)
             self._set_as_distribution(output_ws)
             # clean-up
             DeleteWorkspace(det_efficiency_ws)
             if self.getProperty('CrossSectionsOutputWorkspace').isDefault:
                 DeleteWorkspace(det_efficiency_input)
             else:
-                self._set_units(det_efficiency_input)
-                self.setProperty('CrossSectionsOutputWorkspace', mtd[det_efficiency_input])
+                self._set_units(det_efficiency_input, nMeasurements)
+                self._set_output(det_efficiency_input)
+
             self.setProperty('OutputWorkspace', mtd[output_ws])
 
         if ( self.getPropertyValue('CrossSectionSeparationMethod') != 'None'
              and normalisation_method not in ['Paramagnetic', 'Incoherent'] ):
             if mtd[input_ws].getNumberOfEntries() != 1 and self.getProperty('OutputTreatment') == 'Sum':
                 self._call_sum_data(input_ws)
-            component_ws = self._call_cross_section_separation(input_ws)
-            self._set_units(component_ws)
-            if not self.getProperty('CrossSectionsOutputWorkspace').isDefault:
-                self.setProperty('CrossSectionsOutputWorkspace', mtd[component_ws])
+            component_ws = self._call_cross_section_separation(input_ws, nMeasurements, nComponents)
+            self._set_units(component_ws, nMeasurements)
+            self._set_output(component_ws)
+
 
 
 AlgorithmFactory.subscribe(D7AbsoluteCrossSections)
