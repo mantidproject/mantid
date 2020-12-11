@@ -12,7 +12,8 @@ from Muon.GUI.Common.contexts.muon_gui_context import MuonGuiContext
 from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.fitting_context import FittingContext
-from Muon.GUI.ElementalAnalysis2.context.context import DataContext, ElementalAnalysisContext
+from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
+from Muon.GUI.ElementalAnalysis2.context.data_context import DataContext
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
 from unittest import mock
 

@@ -10,7 +10,7 @@ import unittest
 from unittest import mock
 from Muon.GUI.ElementalAnalysis2.load_widget.load_models import LoadRunWidgetModel
 from Muon.GUI.Common.test_helpers.context_setup import setup_context_for_ea_tests
-from Muon.GUI.ElementalAnalysis2.context.context import RunObject
+from Muon.GUI.ElementalAnalysis2.context.data_context import RunObject
 from mantid.api import AnalysisDataService, WorkspaceGroup
 from mantid.simpleapi import CreateSampleWorkspace
 

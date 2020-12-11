@@ -6,7 +6,8 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
-from Muon.GUI.ElementalAnalysis2.context.context import DataContext, ElementalAnalysisContext
+from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
+from Muon.GUI.ElementalAnalysis2.context.data_context import DataContext
 
 
 class ElementalAnalysisContextTest(unittest.TestCase):
