@@ -208,8 +208,9 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         # The instrument in `input_workspace` is adjusted in-place
         if self.getProperty('AdjustSource').value is True:
             dz = self.getProperty('SourceMaxTranslation').value
-            kwargs = dict(Workspace=input_workspace,
+            kwargs = dict(InputWorkspace=input_workspace,
                           CalibrationTable=difc_table,
+                          OutputWorkspace=input_workspace,
                           MaskWorkspace=f'{difc_table}_mask',
                           AdjustmentsTable=adjustments_table_name,
                           FitSourcePosition=True,
@@ -239,7 +240,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         progress.report('AlignComponents has been applied')
 
         # AlignComponents produces two unwanted workspaces
-        temporary_workspaces.extend(['alignedWorkspace', 'calWS'])
+        temporary_workspaces.append('calWS')
 
         # If we adjusted the source, then append the banks table to the source table, then delete the banks table.
         # Otherwise just rename the table containing the bank adjustments
