@@ -79,7 +79,7 @@ class AlignComponents(PythonAlgorithm):
                                                direction=Direction.Input),
                              doc="Workspace containing the instrument to be calibrated")
 
-        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+        self.declareProperty(WorkspaceProperty("OutputWorkspace", "",
                                                optional=PropertyMode.Mandatory,
                                                direction=Direction.Output),
                              doc='Workspace containing the calibrated instrument')
@@ -454,6 +454,7 @@ class AlignComponents(PythonAlgorithm):
                           + " Final rotation is " + str(comp.getRotation().getEulerAngles(self._eulerConvention)))
 
             prog.report()
+        self.setProperty("OutputWorkspace", wks_name)
         logger.notice("Results applied to workspace "+wks_name)
 
     def _initialize_adjustments_table(self, table_name):
