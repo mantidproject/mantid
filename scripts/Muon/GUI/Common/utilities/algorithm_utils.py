@@ -274,3 +274,13 @@ def split_phasequad(name):
     Im = extract_single_spec(name, 1, Im_name)
     remove_ws(name)
     return [Re, Im]
+
+def apply_deadtime(ws, output, table):
+    alg = mantid.AlgorithmManager.create("ApplyDeadTimeCorr")
+    alg.initialize()
+    alg.setAlwaysStoreInADS(True)
+    alg.setProperty("InputWorkspace", ws)
+    alg.setProperty("OutputWorkspace", output)
+    alg.setProperty("DeadTimeTable", table)
+    alg.execute()
+    return alg.getProperty("OutputWorkspace").valueAsStr

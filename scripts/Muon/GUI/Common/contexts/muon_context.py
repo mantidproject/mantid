@@ -14,7 +14,7 @@ from Muon.GUI.Common.ADSHandler.workspace_naming import (get_raw_data_workspace_
 from Muon.GUI.Common.calculate_pair_and_group import calculate_group_data, calculate_pair_data, \
     estimate_group_asymmetry_data, run_pre_processing
 from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string, run_string_to_list
-from Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad, rebin_ws
+from Muon.GUI.Common.utilities.algorithm_utils import run_PhaseQuad, split_phasequad, rebin_ws, apply_deadtime
 from Muon.GUI.Common.muon_base_pair import MuonBasePair
 import Muon.GUI.Common.ADSHandler.workspace_naming as wsName
 from Muon.GUI.Common.ADSHandler.ADS_calls import retrieve_ws
@@ -239,14 +239,12 @@ class MuonContext(object):
         parameters = {}
         parameters['PhaseTable'] = phasequad.phase_table
         run_string = run_list_to_string(run)
-        parameters['InputWorkspace'] = get_raw_data_workspace_name(
-            self.data_context.instrument,
-            run_string,
-            multi_period=False,
-            workspace_suffix=self.workspace_suffix)
+
         ws_name = get_pair_phasequad_name(
             self, add_phasequad_extensions(
                 phasequad.name), run_string, rebin=rebin)
+
+        parameters['InputWorkspace'] = self._run_deadtime(run_string, ws_name)
 
         phase_quad = run_PhaseQuad(parameters, ws_name)
         phase_quad = self._run_rebin(phase_quad, rebin)
@@ -256,6 +254,9 @@ class MuonContext(object):
 
     def _calculate_phasequads(self, name, phasequad_obj, rebin):
         for run in self._data_context.current_runs:
+            if self._data_context.num_periods(run) >1:
+                raise ValueError("Cannot support multiple periods")
+
             ws_list = self.calculate_phasequad(phasequad_obj, run, rebin)
             run_string = run_list_to_string(run)
             directory = get_base_data_directory(self, run_string)
@@ -267,6 +268,17 @@ class MuonContext(object):
                 ws_list,
                 run,
                 rebin=rebin)
+
+    def _run_deadtime(self, run_string, output):
+        name =get_raw_data_workspace_name(self.data_context.instrument,
+                                          run_string,
+                                          multi_period=False,
+                                          workspace_suffix=self.workspace_suffix)
+        deadtime_table = self.dead_time_table(run_string)
+        if deadtime_table:
+            return apply_deadtime(name, output, deadtime_table)
+        return name
+
 
     def _run_rebin(self, name, rebin):
         if rebin:
@@ -398,7 +410,7 @@ class MuonContext(object):
         if self.gui_context['DeadTimeSource'] == 'FromADS':
             return self.gui_context['DeadTimeTable']
         elif self.gui_context['DeadTimeSource'] == 'FromFile':
-            return self.data_context.get_loaded_data_for_run(run)["DataDeadTimeTable"]
+            return self.data_context.get_loaded_data_for_run([float(run)])["DataDeadTimeTable"]
         elif self.gui_context['DeadTimeSource'] == 'None':
             return None
 

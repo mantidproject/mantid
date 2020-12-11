@@ -90,6 +90,7 @@ class PhaseTablePresenter(object):
         if self.view.number_of_phase_tables < 1:
             self.view.warning_popup("Please generate a phase table first.")
             return
+
         new_pair_name = self.view.enter_pair_name()
         if new_pair_name is None:
             return
@@ -100,7 +101,7 @@ class PhaseTablePresenter(object):
 
             self.phasequad_calculation_thread = self.create_phase_quad_calculation_thread()
 
-            self.phasequad_calculation_thread.threadWarapperSetUp(self.handle_calculation_started,
+            self.phasequad_calculation_thread.threadWrapperSetUp(self.handle_calculation_started,
                                                                   self.handle_phasequad_calculation_success,
                                                                   self.handle_calculation_error)
 
