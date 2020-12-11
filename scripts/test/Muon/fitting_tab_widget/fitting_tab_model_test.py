@@ -490,6 +490,7 @@ class FittingTabModelTest(unittest.TestCase):
 
     def test_fit_ws_names_from_groups_and_runs(self):
         self.model.fitting_options["fit_to_raw"] = False
+        self.model.context.data_context.instrument="MUSR"
         # make some pairs
         pair = MuonPair("long", "f","b",1.)
         pair2 = MuonPair("long2", "f","b",2.)
@@ -524,6 +525,7 @@ class FittingTabModelTest(unittest.TestCase):
 
     def test_fit_ws_names_from_groups_and_runs_raw(self):
         self.model.fitting_options["fit_to_raw"] = True
+        self.model.context.data_context.instrument="MUSR"
         # make some pairs
         pair = MuonPair("long", "f","b",1.)
         pair2 = MuonPair("long2", "f","b",2.)
