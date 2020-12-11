@@ -573,9 +573,9 @@ class PolDiffILLReduction(PythonAlgorithm):
                                              ElementSize=kwargs['ElementSize'])
         elif attenuation_method == 'MonteCarlo':
             PaalmanPingsMonteCarloAbsorption(SampleWorkspace=mock_geometry_ws,
-                                             Shape=geometry_type,
+                                             Shape=sample_geometry_type,
                                              CorrectionsWorkspace=attenuation_ws,
-                                             ContainerWorkspace=mtd[container_ws][entry_no],
+                                             ContainerWorkspace=mock_geometry_ws,
                                              **kwargs)
         if self.getPropertyValue('ClearCache'):
             DeleteWorkspace(Workspace=mock_geometry_ws)

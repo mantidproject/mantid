@@ -86,10 +86,11 @@ class PolDiffILLReductionTest(unittest.TestCase):
                             'SampleInnerRadius': 2, 'SampleOuterRadius': 2.5, 'Height': 2,
                             'BeamWidth': 2.6, 'BeamHeight': 2.6, 'SampleDensity': 1,
                             'ContainerChemicalFormula': 'Al', 'ContainerDensity': 2.7,
-                            'ContainerInnerRadius': 0.1, 'ContainerOuterRadius': 2.51}
+                            'ContainerInnerRadius': 0.1, 'ContainerOuterRadius': 2.51, 'EventsPerPoint':1000}
         PolDiffILLReduction(Run='396993', ProcessAs='Vanadium', OutputWorkspace='vanadium_annulus',
                             ContainerInputWorkspace='container_ws',
                             SampleAndEnvironmentProperties=sampleProperties,
+                            SelfAttenuationMethod='MonteCarlo',
                             SampleGeometry='Annulus',
                             OutputTreatment='Individual')
         self._check_output(mtd['vanadium_annulus'], 1, 132, 6, 'Wavelength', 'Wavelength', 'Spectrum', 'Label')
