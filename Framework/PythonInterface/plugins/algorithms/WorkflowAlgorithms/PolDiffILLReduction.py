@@ -51,11 +51,17 @@ class PolDiffILLReduction(PythonAlgorithm):
             if len(self.getProperty('SampleAndEnvironmentProperties').value) == 0:
                 issues['SampleAndEnvironmentProperties'] = 'Sample parameters need to be defined.'
 
+            if ( self.getPropertyValue('SelfAttenuationMethod') == 'User'
+                 and self.getProperty('SampleSelfAttenuationFactors').isDefault):
+                issues['User'] = 'WorkspaceGroup containing sample self-attenuation factors must be provided in this mode'
+                issues['SampleSelfAttenuationFactors'] = issues['User']
+
             sampleAndEnvironmentProperties = self.getProperty('SampleAndEnvironmentProperties').value
             geometry_type = self.getPropertyValue('SampleGeometry')
             required_keys = ['FormulaUnits', 'SampleMass', 'FormulaUnitMass']
             if geometry_type != 'None':
-                required_keys += ['SampleChemicalFormula', 'SampleDensity', 'BeamHeight', 'BeamWidth', 'ContainerDensity']
+                required_keys += ['SampleChemicalFormula', 'SampleDensity', 'BeamHeight', 'BeamWidth', 'ContainerDensity',
+                                  'ContainerChemicalFormula']
             if geometry_type == 'FlatPlate':
                 required_keys += ['Height', 'SampleWidth', 'SampleThickness', 'SampleAngle', 'ContainerFrontThickness',
                                   'ContainerBackThickness']
@@ -63,6 +69,11 @@ class PolDiffILLReduction(PythonAlgorithm):
                 required_keys += ['Height', 'SampleRadius', 'ContainerRadius']
             if geometry_type == 'Annulus':
                 required_keys += ['Height', 'SampleInnerRadius', 'SampleOuterRadius', 'ContainerInnerRadius', 'ContainerOuterRadius']
+
+            if self.getPropertyValue('SelfAttenuationMethod') == 'MonteCarlo':
+                required_keys += ['EventsPerPoint']
+            elif self.getPropertyValue('SelfAttenuationMethod') == 'Numerical':
+                required_keys += ['ElementSize']
 
             for key in required_keys:
                 if key not in sampleAndEnvironmentProperties:
@@ -153,13 +164,23 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.declareProperty('ClearCache', True,
                              doc='Whether or not to clear the cache of intermediate workspaces.')
 
+        self.declareProperty(name="SelfAttenuationMethod",
+                             defaultValue="None",
+                             validator=StringListValidator(["None", "Numerical", "MonteCarlo", "User"]),
+                             direction=Direction.Input,
+                             doc="Which approach to calculate (or not) the self-attenuation correction factors to be used.")
+        self.setPropertySettings('SelfAttenuationMethod', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
+
         self.declareProperty(name="SampleGeometry",
                              defaultValue="None",
-                             validator=StringListValidator(["None", "FlatPlate", "Cylinder", "Annulus"]),
+                             validator=StringListValidator(["None", "FlatPlate", "Cylinder", "Annulus", "Custom"]),
                              direction=Direction.Input,
                              doc="Sample geometry for self-attenuation correction to be applied.")
 
-        self.setPropertySettings('SampleGeometry', EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
+        self.setPropertySettings('SampleGeometry', EnabledWhenProperty(
+            EnabledWhenProperty('SelfAttenuationMethod', PropertyCriterion.IsEqualTo, 'MonteCarlo'),
+            EnabledWhenProperty('SelfAttenuationMethod', PropertyCriterion.IsEqualTo, 'Numerical'),
+            LogicOperator.Or))
 
         self.declareProperty(PropertyManagerProperty('SampleAndEnvironmentProperties', dict()),
                              doc="Dictionary for the information about sample and its environment.")
@@ -167,12 +188,12 @@ class PolDiffILLReduction(PythonAlgorithm):
         self.setPropertySettings('SampleAndEnvironmentProperties',
                                  EnabledWhenProperty(vanadium, sample, LogicOperator.Or))
 
-        self.declareProperty(FileProperty(name="SampleGeometryFile",
-                             defaultValue="",
-                             action=FileAction.OptionalLoad),
-                             doc="The path to the custom geometry for self-attenuation correction to be applied.")
-
-        self.setPropertySettings('SampleGeometryFile', EnabledWhenProperty('SampleGeometry', PropertyCriterion.IsEqualTo, 'Custom'))
+        self.declareProperty(WorkspaceGroupProperty('SampleSelfAttenuationFactors', '',
+                                                    direction=Direction.Input,
+                                                    optional=PropertyMode.Optional),
+                             doc='The name of the workspace group containing self-attenuation factors of the sample.')
+        self.setPropertySettings('SampleGeometry', EnabledWhenProperty('SelfAttenuationMethod',
+                                                                       PropertyCriterion.IsEqualTo, "User"))
 
         self.declareProperty(name="ScatteringAngleBinSize",
                              defaultValue=0.5,
@@ -422,12 +443,10 @@ class PolDiffILLReduction(PythonAlgorithm):
             formula_unit_mass = self._sampleAndEnvironmentProperties['FormulaUnitMass'].value
             self._sampleAndEnvironmentProperties['NMoles'] = (sample_mass / formula_unit_mass) * formula_units
 
-    def _apply_self_attenuation_correction(self, sample_ws, container_ws):
-        """Applies the self-attenuation correction based on the Palmaan-Pings Monte-Carlo calculation, taking into account
-        the sample's material, shape, and dimensions."""
-        geometry_type = self.getPropertyValue('SampleGeometry')
-
-        kwargs = {}
+    def _prepare_arguments(self):
+        attenuation_method = self.getPropertyValue('SelfAttenuationMethod')
+        sample_geometry_type = self.getPropertyValue('SampleGeometry')
+        kwargs = dict()
         kwargs['BeamHeight'] = self._sampleAndEnvironmentProperties['BeamHeight'].value
         kwargs['BeamWidth'] = self._sampleAndEnvironmentProperties['BeamWidth'].value
         kwargs['SampleDensityType'] = 'Number Density'
@@ -440,47 +459,165 @@ class PolDiffILLReduction(PythonAlgorithm):
         if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
             kwargs['ContainerChemicalFormula'] = self._sampleAndEnvironmentProperties['ContainerChemicalFormula'].value
             kwargs['ContainerDensity'] = self._sampleAndEnvironmentProperties['ContainerDensity'].value
-        if geometry_type == 'FlatPlate':
+        if sample_geometry_type == 'FlatPlate':
             kwargs['SampleWidth'] = self._sampleAndEnvironmentProperties['SampleWidth'].value
             kwargs['SampleThickness'] = self._sampleAndEnvironmentProperties['SampleThickness'].value
             kwargs['SampleAngle'] = self._sampleAndEnvironmentProperties['SampleAngle'].value
             if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
-                kwargs['ContainerFrontThickness'] = self._sampleAndEnvironmentProperties['ContainerFrontThickness'].value
+                kwargs['ContainerFrontThickness'] = self._sampleAndEnvironmentProperties[
+                    'ContainerFrontThickness'].value
                 kwargs['ContainerBackThickness'] = self._sampleAndEnvironmentProperties['ContainerBackThickness'].value
-        elif geometry_type == 'Cylinder':
+        elif sample_geometry_type == 'Cylinder':
             kwargs['SampleRadius'] = self._sampleAndEnvironmentProperties['SampleRadius'].value
             if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerRadius'] = self._sampleAndEnvironmentProperties['ContainerRadius'].value
-        elif geometry_type == 'Annulus':
+        elif sample_geometry_type == 'Annulus':
             kwargs['SampleInnerRadius'] = self._sampleAndEnvironmentProperties['SampleInnerRadius'].value
-            kwargs['SampleOuterRadius']  = self._sampleAndEnvironmentProperties['SampleOuterRadius'].value
+            kwargs['SampleOuterRadius'] = self._sampleAndEnvironmentProperties['SampleOuterRadius'].value
             if 'ContainerChemicalFormula' in self._sampleAndEnvironmentProperties:
                 kwargs['ContainerInnerRadius'] = self._sampleAndEnvironmentProperties['ContainerInnerRadius'].value
                 kwargs['ContainerOuterRadius'] = self._sampleAndEnvironmentProperties['ContainerOuterRadius'].value
-        if 'EventsPerPoint' in self._sampleAndEnvironmentProperties:
+        if attenuation_method == 'MonteCarlo':
             kwargs['EventsPerPoint'] = self._sampleAndEnvironmentProperties['EventsPerPoint'].value
-        else:
-            kwargs['EventsPerPoint'] = 5000
+        elif attenuation_method == 'Numerical':
+            kwargs['ElementSize'] = self._sampleAndEnvironmentProperties['ElementSize'].value
+            kwargs['Efixed'] = self._sampleAndEnvironmentProperties['InitialEnergy'].value
+            kwargs['Emode'] = 'Efixed'
 
+        return kwargs
+
+    def _calculate_attenuation_factors(self, sample_ws):
+        """Calculates self-attenuation factors using either Monte-Carlo or numerical integration approach for a D7 mock-up
+        instrument, spanning over a wide 2theta range from 0 to 180 degrees that is later rebinned to the range of each
+        individual scan step."""
+        attenuation_method = self.getPropertyValue('SelfAttenuationMethod')
+        attenuation_ws = attenuation_method + '_attenuation_ws'
+        xAxis_range = mtd[sample_ws][0].readX(0)
+        if 'MockInstrumentMinRange' in self._sampleAndEnvironmentProperties:
+            min_range = self._sampleAndEnvironmentProperties['MockInstrumentMinRange'].value
+        else:
+            min_range = 0.0 # on beam axis
+        if 'MockInstrumentMaxRange' in self._sampleAndEnvironmentProperties:
+            max_range = self._sampleAndEnvironmentProperties['MockInstrumentMaxRange'].value
+        else:
+            max_range = 180.0 # on beam axis but opposite to the beam, in degrees
+        if 'MockInstrumentStepSize' in self._sampleAndEnvironmentProperties:
+            step_size = self._sampleAndEnvironmentProperties['MockInstrumentStepSize'].value
+        else:
+            step_size = 0.5 # in degrees
+        n_spec = int((max_range - min_range) / step_size)
+        mock_geometry_ws = 'mock_geometry_ws'
+        CreateWorkspace(OutputWorkspace=mock_geometry_ws, DataX=xAxis_range, DataY=[0.0] * n_spec, NSpec=n_spec,
+                        UnitX="Wavelength", YUnitLabel="Counts")
+        instrument = mtd[sample_ws][0].getInstrument().getComponentByName('detector')
+        sample_distance_odd =  instrument.getNumberParameter('sample_distance_odd')[0] # distance from odd detectors to sample
+        sample_distance_even =  instrument.getNumberParameter('sample_distance_even')[0] # same, but for even detectors
+        average_distance = 0.5 * (sample_distance_odd + sample_distance_even)
+        EditInstrumentGeometry(Workspace=mock_geometry_ws,
+                               PrimaryFlightPath=instrument.getNumberParameter('sample_distance_chopper')[0],
+                               SpectrumIDs=np.arange(1, 361, 1),
+                               L2=[average_distance] * n_spec,
+                               Polar=np.arange(min_range, max_range, step_size),
+                               Azimuthal=[0.0] * n_spec,
+                               DetectorIDs=np.arange(1, 361, 1),
+                               InstrumentName="D7_mock_up")
+        kwargs = self._prepare_arguments()
+        sample_geometry_type = self.getPropertyValue('SampleGeometry')
+        if attenuation_method == 'Numerical':
+            if sample_geometry_type == 'FlatPlate':
+                SetSample(InputWorkspace=mock_geometry_ws,
+                          Geometry={'Shape': 'FlatPlate', 'Height': kwargs['Height'],
+                                    'Width': kwargs['SampleWidth'], 'Thick': kwargs['SampleThickness'],
+                                    'Center': [0., 0., 0.]},
+                          Material={'ChemicalFormula': kwargs['SampleChemicalFormula'],
+                                    'NumberDensity': kwargs['SampleDensity']},
+                          ContainerGeometry={'Shape': 'FlatPlateHolder', 'Height': kwargs['Height'],
+                                             'Width': kwargs['SampleWidth'], 'Thick': kwargs['SampleThickness'],
+                                             'FrontThick': kwargs['ContainerFrontThickness'],
+                                             'BackThick': kwargs['ContainerBackThickness'],
+                                             'Center': [0., 0., 0.]},
+                          ContainerMaterial={'ChemicalFormula': kwargs['ContainerChemicalFormula'],
+                                             'NumberDensity': kwargs['ContainerDensity'],
+                                             'NumberDensityUnit': kwargs['ContainerNumberDensityUnit']})
+            if sample_geometry_type in ['Cylinder']:
+                SetSample(InputWorkspace=mock_geometry_ws,
+                          Geometry={'Shape': 'Cylinder', 'Height': kwargs['Height'],
+                                    'Radius': kwargs['SampleRadius']},
+                          Material={'ChemicalFormula': kwargs['SampleChemicalFormula'],
+                                    'SampleNumberDensity': kwargs['SampleDensity'],
+                                    'NumberDensityUnit': kwargs['SampleNumberDensityUnit']},
+                          ContainerGeometry={'Shape': 'HollowCylinder', 'Height': kwargs['Height'],
+                                             'InnerRadius': kwargs['SampleRadius'],
+                                             'OuterRadius': kwargs['ContainerRadius']},
+                          ContainerMaterial={'ChemicalFormula': kwargs['ContainerChemicalFormula'],
+                                             'SampleNumberDensity': kwargs['ContainerDensity'],
+                                             'NumberDensityUnit': kwargs['ContainerNumberDensityUnit']})
+            elif sample_geometry_type in ['Annulus']:
+                SetSample(InputWorkspace=mock_geometry_ws,
+                          Geometry={"Shape": "HollowCylinder", "Height": kwargs['Height'],
+                                    "InnerRadius": kwargs['SampleInnerRadius'],
+                                    "OuterRadius": kwargs['SampleOuterRadius']},
+                          Material={"ChemicalFormula": kwargs['SampleChemicalFormula'],
+                                    "SampleNumberDensity": kwargs['SampleDensity'],
+                                    'NumberDensityUnit': kwargs['SampleNumberDensityUnit']},
+                          ContainerGeometry={"Shape": 'HollowCylinderHolder', 'Height': kwargs['Height'],
+                                             'InnerRadius': kwargs['ContainerInnerRadius'],
+                                             'InnerOuterRadius': kwargs['SampleInnerRadius'],
+                                             'OuterInnerRadius': kwargs['SampleOuterRadius'],
+                                             'OuterRadius': kwargs['ContainerOuterRadius']},
+                          ContainerMaterial={"ChemicalFormula": kwargs['ContainerChemicalFormula'],
+                                             "SampleNumberDensity": kwargs['ContainerDensity'],
+                                             'NumberDensityUnit': kwargs['ContainerNumberDensityUnit']})
+
+            PaalmanPingsAbsorptionCorrection(InputWorkspace=mock_geometry_ws, OutputWorkspace=attenuation_ws,
+                                             ElementSize=kwargs['ElementSize'])
+        elif attenuation_method == 'MonteCarlo':
+            PaalmanPingsMonteCarloAbsorption(SampleWorkspace=mock_geometry_ws,
+                                             Shape=geometry_type,
+                                             CorrectionsWorkspace=attenuation_ws,
+                                             ContainerWorkspace=mtd[container_ws][entry_no],
+                                             **kwargs)
+        if self.getPropertyValue('ClearCache'):
+            DeleteWorkspace(Workspace=mock_geometry_ws)
+        ConvertSpectrumAxis(InputWorkspace=attenuation_ws, Target="SignedTheta", OutputWorkspace=attenuation_ws)
+        Transpose(InputWorkspace=attenuation_ws, OutputWorkspace=attenuation_ws)
+        for entry in mtd[attenuation_ws]:
+            ConvertToHistogram(InputWorkspace=entry, OutputWorkspace=entry)
+        return attenuation_ws
+
+    def _match_attenuation_workspace(self, sample_entry, attenuation_ws):
+        correction_ws = attenuation_ws + '_matched_corr'
+        CloneWorkspace(InputWorkspace=attenuation_ws, OutputWorkspace=correction_ws)
+        spectrum_axis = mtd[sample_entry].getAxis(1)
+        for entry_no, entry in enumerate(mtd[correction_ws]):
+            origin_ws_name = mtd[attenuation_ws][entry_no].name()
+            factor_name = origin_ws_name[origin_ws_name.rfind("_"):]
+            RenameWorkspace(InputWorkspace=entry, OutputWorkspace=entry.name()[:-1] + factor_name)
+            RebinToWorkspace(WorkspaceToRebin=entry, WorkspaceToMatch=sample_entry, OutputWorkspace=entry)
+            Transpose(InputWorkspace=entry, OutputWorkspace=entry)
+            entry.replaceAxis(1, spectrum_axis)
+        return correction_ws
+
+    def _apply_self_attenuation_correction(self, sample_ws, container_ws):
+        """Applies the self-attenuation correction based on the Palmaan-Pings Monte-Carlo calculation, taking into account
+        the sample's material, shape, and dimensions."""
+
+        if self.getPropertyValue('SelfAttenuationMethod') in ['MonteCarlo', 'Numerical']:
+            attenuation_ws = self._calculate_attenuation_factors(sample_ws)
+        elif self.getPropertyValue('SelfAttenuationMethod') == 'User':
+            attenuation_ws = self.getPropertyValue('SampleSelfAttenuationFactors')
         self._enforce_uniform_units(sample_ws, container_ws)
-        if geometry_type == 'Custom':
-            raise RuntimeError('Custom geometry treatment has not been implemented yet.')
-        else:
-            for entry_no, entry in enumerate(mtd[sample_ws]):
-                correction_ws = '{}_corr'.format(geometry_type)
-                if ( (self._method_data_structure == 'Uniaxial' and entry_no % 2 == 0)
-                     or (self._method_data_structure == 'XYZ' and entry_no % 6 == 0)
-                     or (self._method_data_structure == '10p' and entry_no % 10 == 0) ):
-                    PaalmanPingsMonteCarloAbsorption(SampleWorkspace=entry,
-                                                     Shape=geometry_type,
-                                                     CorrectionsWorkspace=correction_ws,
-                                                     ContainerWorkspace=mtd[container_ws][entry_no],
-                                                     **kwargs)
-                ApplyPaalmanPingsCorrection(SampleWorkspace=entry,
-                                            CorrectionsWorkspace=correction_ws,
-                                            CanWorkspace=mtd[container_ws][entry_no],
-                                            OutputWorkspace=entry)
-
+        for entry_no, entry in enumerate(mtd[sample_ws]):
+            if ( (self._method_data_structure == 'Uniaxial' and entry_no % 2 == 0)
+                 or (self._method_data_structure == 'XYZ' and entry_no % 6 == 0)
+                 or (self._method_data_structure == '10p' and entry_no % 10 == 0) ):
+                correction_ws = self._match_attenuation_workspace(entry.name(), attenuation_ws)
+            ApplyPaalmanPingsCorrection(SampleWorkspace=entry,
+                                        CorrectionsWorkspace=correction_ws,
+                                        CanWorkspace=mtd[container_ws][entry_no],
+                                        OutputWorkspace=entry)
+        if self.getPropertyValue('ClearCache'):
+            DeleteWorkspaces(WorkspaceList=[correction_ws, attenuation_ws])
         return sample_ws
 
     def _data_structure_helper(self):
