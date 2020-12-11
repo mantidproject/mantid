@@ -11,8 +11,8 @@ from scipy.stats import chisquare
 from typing import List
 
 from mantid.api import (
-    AlgorithmFactory, DeleteWorkspace, FileAction, FileProperty, InstrumentValidator, ITableWorkspaceProperty,
-    LoadEmptyInstrument, MatrixWorkspaceProperty, Progress, PropertyMode, PythonAlgorithm, WorkspaceProperty)
+    AlgorithmFactory, FileAction, FileProperty, InstrumentValidator, ITableWorkspaceProperty,
+    MatrixWorkspaceProperty, Progress, PropertyMode, PythonAlgorithm, WorkspaceProperty)
 from mantid.dataobjects import MaskWorkspace, TableWorkspace
 from mantid.kernel import (Direction, EnabledWhenProperty, FloatBoundedValidator, logger, PropertyCriterion,
                            Quat, StringArrayProperty, StringListValidator, V3D)
@@ -243,7 +243,7 @@ class AlignComponents(PythonAlgorithm):
                 return issues
             else:
                 wks_name = "__alignedWorkspace"  # a temporary workspace
-                LoadEmptyInstrument(Filename=inputFilename, OutputWorkspace=wks_name)
+                api.LoadEmptyInstrument(Filename=inputFilename, OutputWorkspace=wks_name)
 
         # Check if each component listed is defined in the instrument
         components = self.getProperty("ComponentList").value
@@ -256,7 +256,7 @@ class AlignComponents(PythonAlgorithm):
                 issues['ComponentList'] = "Instrument has no component \"" \
                                        + ','.join(components) + "\""
         if wks_name == '__alignedWorkspace':
-            DeleteWorkspace('__alignedWorkspace')  # delete temporary workspace
+            api.DeleteWorkspace('__alignedWorkspace')  # delete temporary workspace
 
         # This checks that something will actually be refined,
         if not (self.getProperty("Xposition").value
@@ -303,7 +303,7 @@ class AlignComponents(PythonAlgorithm):
         if bool(input_workspace) is True:
             api.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace=wks_name)
         else:
-            LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value, OutputWorkspace=wks_name)
+            api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value, OutputWorkspace=wks_name)
 
         # Make a dictionary of what options are being refined for sample/source. No rotation.
         for translation_option in self._optionsList[:3]:
