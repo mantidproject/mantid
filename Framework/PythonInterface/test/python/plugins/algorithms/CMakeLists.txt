@@ -15,6 +15,7 @@ set(TEST_PY_FILES
     CalculateSampleTransmissionTest.py
     CheckForSampleLogsTest.py
     ConjoinSpectraTest.py
+    ConvertQtoHKLMDHistoTest.py
     ConvertWANDSCDtoQTest.py
     CompareSampleLogsTest.py
     ComputeCalibrationCoefVanTest.py

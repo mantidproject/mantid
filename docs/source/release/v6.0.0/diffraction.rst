@@ -82,6 +82,7 @@ Single Crystal Diffraction
 --------------------------
 New features
 ############
+- New algorithm :ref:`ConvertQtoHKLMDHisto <algm-ConvertQtoHKLMDHisto>` to convert from a QSample MDEventWorkspace to HKL MDHistoWorkspace with correct peak overlaying.
 - Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
 - Fix problem that was causing matrix diagonalization to return NaNs in certain cases. The diagonalization is used in :ref:`CalculateUMatrix <algm-CalculateUMatrix>` and :ref:`IntegratePeaksMD <algm-IntegratePeaksMD>`
 - New algorithm :ref:`HB3AFindPeaks <algm-HB3AFindPeaks>` to find peaks and set the UB matrix for DEMAND data.
