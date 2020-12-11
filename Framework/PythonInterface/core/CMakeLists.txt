@@ -78,7 +78,7 @@ set_target_properties(
 # Dependencies
 target_link_libraries(
   ${_target_name}
-  PUBLIC Python::Python Python::NumPy ${BoostPython_LIBRARIES}
+  PUBLIC Python::NumPy ${BoostPython_LIBRARIES}
   PRIVATE Types Kernel ${Boost_LIBRARIES}
 )
 
