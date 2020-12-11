@@ -10,8 +10,9 @@ import numpy as np
 from scipy.stats import chisquare
 from typing import List
 
-from mantid.api import (AlgorithmFactory, FileAction, FileProperty, InstrumentValidator, ITableWorkspaceProperty,
-                        MatrixWorkspaceProperty, Progress, PropertyMode, PythonAlgorithm, WorkspaceProperty)
+from mantid.api import (
+    AlgorithmFactory, DeleteWorkspace, FileAction, FileProperty, InstrumentValidator, ITableWorkspaceProperty,
+    LoadEmptyInstrument, MatrixWorkspaceProperty, Progress, PropertyMode, PythonAlgorithm, WorkspaceProperty)
 from mantid.dataobjects import MaskWorkspace, TableWorkspace
 from mantid.kernel import (Direction, EnabledWhenProperty, FloatBoundedValidator, logger, PropertyCriterion,
                            Quat, StringArrayProperty, StringListValidator, V3D)
@@ -72,14 +73,20 @@ class AlignComponents(PythonAlgorithm):
                                           extensions=[".xml"]),
                              doc="Instrument filename")
 
-        self.declareProperty(WorkspaceProperty("Workspace", "",
+        self.declareProperty(WorkspaceProperty("InputWorkspace", "",
                                                validator=InstrumentValidator(),
                                                optional=PropertyMode.Optional,
                                                direction=Direction.Input),
-                             doc="Workspace containing the instrument to be calibrated.")
+                             doc="Workspace containing the instrument to be calibrated")
+
+        self.declareProperty(WorkspaceProperty('OutputWorkspace', '',
+                                               optional=PropertyMode.Mandatory,
+                                               direction=Direction.Output),
+                             doc='Workspace containing the calibrated instrument')
 
         self.declareProperty("AdjustmentsTable", "", direction=Direction.Input,
-                             doc="Name of output table containing optimized translations and rotations for each requested component")
+                             doc="Name of output table containing optimized translations and"
+                                 " rotations for each requested component")
 
         # Source
         self.declareProperty(name="FitSourcePosition", defaultValue=False,
@@ -88,7 +95,8 @@ class AlignComponents(PythonAlgorithm):
 
         # Sample
         self.declareProperty(name="FitSamplePosition", defaultValue=False,
-                             doc="Fit the sample position, changes L1 (source to sample) and L2 (sample to detector) distance."
+                             doc="Fit the sample position, changes L1 (source to sample) and "
+                                 "L2 (sample to detector) distance."
                              "Uses entire instrument. Occurs before Components are Aligned.")
 
         # List of components
@@ -224,19 +232,18 @@ class AlignComponents(PythonAlgorithm):
                 error_message = 'The mask workspace must contain as many spectra as rows in the calibration table'
                 issues['MaskWorkspace'] = error_message
 
-        # Need to get instrument in order to check components are valid
-        input_workspace = self.getProperty("Workspace").value
+        # Need to get instrument in order to check if components are valid
+        input_workspace = self.getProperty("InputWorkspace").value
         if bool(input_workspace) is True:
             wks_name = input_workspace.name()
         else:
             inputFilename = self.getProperty("InstrumentFilename").value
             if inputFilename == "":
-                issues["Workspace"] = "A Workspace or InstrumentFilename must be defined"
+                issues["InputWorkspace"] = "A Workspace or InstrumentFilename must be defined"
                 return issues
             else:
-                api.LoadEmptyInstrument(Filename=inputFilename,
-                                        OutputWorkspace="alignedWorkspace")
-                wks_name = "alignedWorkspace"
+                wks_name = "__alignedWorkspace"  # a temporary workspace
+                LoadEmptyInstrument(Filename=inputFilename, OutputWorkspace=wks_name)
 
         # Check if each component listed is defined in the instrument
         components = self.getProperty("ComponentList").value
@@ -248,6 +255,8 @@ class AlignComponents(PythonAlgorithm):
             if len(components) > 0:
                 issues['ComponentList'] = "Instrument has no component \"" \
                                        + ','.join(components) + "\""
+        if wks_name == '__alignedWorkspace':
+            DeleteWorkspace('__alignedWorkspace')  # delete temporary workspace
 
         # This checks that something will actually be refined,
         if not (self.getProperty("Xposition").value
@@ -274,8 +283,7 @@ class AlignComponents(PythonAlgorithm):
         calWS = self.getProperty('CalibrationTable').value
         calWS = api.SortTableWorkspace(calWS, Columns='detid')
         maskWS = self.getProperty("MaskWorkspace").value
-        input_workspace = self.getProperty('Workspace').value
-
+        input_workspace = self.getProperty('InputWorkspace').value
         adjustments_table_name = self.getProperty('AdjustmentsTable').value
         if len(adjustments_table_name) > 0:
             adjustments_table = self._initialize_adjustments_table(adjustments_table_name)
@@ -291,11 +299,11 @@ class AlignComponents(PythonAlgorithm):
 
         detID = calWS.column('detid')
 
-        wks_name = "alignedWorkspace"  # workspace whose counts will be DIFC values
+        wks_name = self.getProperty('OutputWorkspace')  # workspace whose counts will be DIFC values
         if bool(input_workspace) is True:
             api.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace=wks_name)
         else:
-            api.LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value, OutputWorkspace=wks_name)
+            LoadEmptyInstrument(Filename=self.getProperty("InstrumentFilename").value, OutputWorkspace=wks_name)
 
         # Make a dictionary of what options are being refined for sample/source. No rotation.
         for translation_option in self._optionsList[:3]:
@@ -359,10 +367,7 @@ class AlignComponents(PythonAlgorithm):
 
                 # Need to grab the component again, as things have changed
                 kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
-                api.MoveInstrumentComponent(wks_name, componentName, **kwargs)  # adjust workspace "alignedworkspace"
-                if bool(input_workspace) is True:  # adjust input Workspace
-                    api.MoveInstrumentComponent(input_workspace, componentName, **kwargs)
-
+                api.MoveInstrumentComponent(wks_name, componentName, **kwargs) # adjust workspace
                 comp = api.mtd[wks_name].getInstrument().getComponentByName(componentName)
                 logger.notice("Finished " + componentName + " Final position is " + str(comp.getPos()))
                 self._move = False
@@ -431,17 +436,13 @@ class AlignComponents(PythonAlgorithm):
 
             if self._move:
                 kwargs = dict(X=xmap[0], Y=xmap[1], Z=xmap[2], RelativePosition=False)
-                api.MoveInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace "alignedworkspace"
-                if bool(input_workspace) is True:  # adjust input Workspace
-                    api.MoveInstrumentComponent(input_workspace, component, **kwargs)
+                api.MoveInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace
                 component_adjustments[:3] = xmap[:3]
 
             if self._rotate:
                 (rotw, rotx, roty, rotz) = self._eulerToAngleAxis(xmap[3], xmap[4], xmap[5], self._eulerConvention)
                 kwargs = dict(X=rotx, Y=roty, Z=rotz, Angle=rotw, RelativeRotation=False)
-                api.RotateInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace "alignedworkspace"
-                if bool(input_workspace) is True:  # adjust input Workspace
-                    api.RotateInstrumentComponent(input_workspace, component, **kwargs)
+                api.RotateInstrumentComponent(wks_name, component, **kwargs)  # adjust workspace
                 component_adjustments[3:] = [rotx, roty, rotz, rotw]
 
             if saving_adjustments and (self._move or self._rotate):
