@@ -500,5 +500,4 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
             self._set_output(component_ws)
 
 
-
 AlgorithmFactory.subscribe(D7AbsoluteCrossSections)
