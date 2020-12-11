@@ -18,7 +18,6 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringTokenizer.h"
@@ -114,10 +113,9 @@ void GroupDetectors2::init() {
                                      exts),
       "A file that consists of lists of spectra numbers to group. See the "
       "help for the file format");
-  declareProperty("StartGroupIndex", 0,
-                  std::make_shared<BoundedValidator<int>>(0, INT_MAX),
-                  "The index of the first group to read. Used for XML "
-                  "files only.");
+  declareProperty(
+      std::make_unique<ArrayProperty<int>>("ExcludeGroupNumbers"),
+      "An array of group IDs to exclude when reading from an XML file.");
   declareProperty(
       "IgnoreGroupNumber", true,
       "If true, use sequential spectrum numbers, otherwise use the group "
@@ -565,16 +563,24 @@ void GroupDetectors2::processXMLFile(
   const detid2index_map detIdToWiMap =
       workspace->getDetectorIDToWorkspaceIndexMap();
 
-  int startGroupIndex = getProperty("StartGroupIndex");
-
   // 2. Load XML file
   DataHandling::LoadGroupXMLFile loader;
-  loader.setDefaultStartingGroupID(startGroupIndex);
+  loader.setDefaultStartingGroupID(0);
   loader.loadXMLFile(fname);
   std::map<int, std::vector<detid_t>> mGroupDetectorsMap =
       loader.getGroupDetectorsMap();
   std::map<int, std::vector<int>> mGroupSpectraMap =
       loader.getGroupSpectraMap();
+
+  const std::vector<int> groupIDsToExclude = getProperty("ExcludeGroupNumbers");
+  for (const auto &groupID : groupIDsToExclude) {
+    const auto detectorIter = mGroupDetectorsMap.find(groupID);
+    if (detectorIter != mGroupDetectorsMap.cend())
+      mGroupDetectorsMap.erase(detectorIter);
+    const auto spectraIter = mGroupSpectraMap.find(groupID);
+    if (spectraIter != mGroupSpectraMap.cend())
+      mGroupSpectraMap.erase(spectraIter);
+  }
 
   // 3. Build m_GroupWsInds
   for (const auto &det : mGroupDetectorsMap) {
