@@ -88,7 +88,9 @@ set(MANTIDLIBS ${MANTIDLIBS} DataObjects)
 
 add_subdirectory(Nexus)
 add_subdirectory(DataHandling)
+add_subdirectory(Algorithms)
 add_subdirectory(CurveFitting)
+add_subdirectory(Crystal)
 add_subdirectory(LiveData)
 add_subdirectory(Catalog)
 if(NOT FRAMEWORK_ONLY_BUILD)
@@ -101,9 +103,6 @@ if(NOT FRAMEWORK_ONLY_BUILD)
   add_subdirectory(RemoteAlgorithms)
   add_subdirectory(RemoteJobManagers)
   add_subdirectory(WorkflowAlgorithms)
-  add_subdirectory(Algorithms)
-  add_subdirectory(Crystal)
-  add_subdirectory (MDAlgorithms)
 endif()
 
 # If an MPI-enabled build, add in the MPI-specific algorithms package
@@ -111,6 +110,7 @@ if(MPI_BUILD)
   add_subdirectory(MPIAlgorithms)
 endif()
 
+add_subdirectory (MDAlgorithms)
 
 # Add a custom target to build all of the Framework
 
@@ -127,8 +127,11 @@ set(FRAMEWORK_LIBS
     DataHandling
     Nexus
     NexusGeometry
+    Algorithms
     CurveFitting
     Catalog
+    Crystal
+    MDAlgorithms
     LiveData)
 else()
 set(FRAMEWORK_LIBS
