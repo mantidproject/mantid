@@ -75,7 +75,7 @@ Output:
 
 .. testoutput:: D7YIGCalibrationIntermediateExample
 
-   The calibrated wavelength is: 4.9
+   The calibrated wavelength is: 4.8
    The bank2 gradient is: 1.0
    The bank3 gradient is: 1.0
    The bank4 gradient is: 1.0
