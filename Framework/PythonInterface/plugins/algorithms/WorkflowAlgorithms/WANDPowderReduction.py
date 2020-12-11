@@ -141,7 +141,7 @@ class WANDPowderReduction(DataProcessorAlgorithm):
 
         self.declareProperty(
             "Sum",
-            True,
+            False,
             doc="Specifies either single output workspace or output group workspace containing several workspaces.",
         )
 
