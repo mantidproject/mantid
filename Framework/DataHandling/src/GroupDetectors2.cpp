@@ -18,6 +18,7 @@
 #include "MantidIndexing/IndexInfo.h"
 #include "MantidIndexing/SpectrumNumber.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/BoundedValidator.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/StringTokenizer.h"
@@ -113,6 +114,10 @@ void GroupDetectors2::init() {
                                      exts),
       "A file that consists of lists of spectra numbers to group. See the "
       "help for the file format");
+  declareProperty("StartGroupIndex", 0,
+                  std::make_shared<BoundedValidator<int>>(0, INT_MAX),
+                  "The index of the first group to read. Used for XML "
+                  "files only.");
   declareProperty(
       "IgnoreGroupNumber", true,
       "If true, use sequential spectrum numbers, otherwise use the group "
@@ -560,10 +565,11 @@ void GroupDetectors2::processXMLFile(
   const detid2index_map detIdToWiMap =
       workspace->getDetectorIDToWorkspaceIndexMap();
 
+  int startGroupIndex = getProperty("StartGroupIndex");
+
   // 2. Load XML file
   DataHandling::LoadGroupXMLFile loader;
-  // A Group with ID = 0 in an XML file means the detectors are excluded.
-  loader.setDefaultStartingGroupID(1);
+  loader.setDefaultStartingGroupID(startGroupIndex);
   loader.loadXMLFile(fname);
   std::map<int, std::vector<detid_t>> mGroupDetectorsMap =
       loader.getGroupDetectorsMap();
