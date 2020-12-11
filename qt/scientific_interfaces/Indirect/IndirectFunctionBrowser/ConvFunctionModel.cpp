@@ -544,6 +544,11 @@ void ConvFunctionModel::setLocalParameterFixed(const QString &parName, int i,
   m_model.setLocalParameterFixed(parName, i, fixed);
 }
 
+void ConvFunctionModel::setGlobalParameterValue(const QString &paramName,
+                                                double value) {
+  m_model.setGlobalParameterValue(paramName, value);
+}
+
 void ConvFunctionModel::setParameter(ParamID name, double value) {
   auto const prefix = getPrefix(name);
   if (prefix) {

@@ -22,7 +22,8 @@ Bug fixes
 #########
 - Fixed a bug where ties and constraints were not being respected.
 - Fixed a bug to swap start and end time fit properties on the interface if start > end
-- Fixed a bug where editing constraints would result in a crash
+- Fixed a bug where editing constraints would result in a crash.
+- Fixed a bug where global parameter values would reset when changing the displayed dataset.
 
 ALC
 ---
