@@ -83,7 +83,9 @@ class EAGroupingTabPresenter(object):
         self.grouping_table_widget.enable_editing()
 
     def calculate_all_data(self):
-        self._model.show_all_groups_and_pairs()
+        self._model.show_all_groups()
+
+
 
     def handle_update_all_clicked(self):
         self.update_thread = self.create_update_thread()
@@ -104,6 +106,25 @@ class EAGroupingTabPresenter(object):
     def create_update_thread(self):
         self._update_model = ThreadModelWrapper(self.calculate_all_data)
         return thread_model.ThreadModel(self._update_model)
+
+    def on_clear_requested(self):
+        self._model.clear()
+        self.grouping_table_widget.update_view_from_model()
+        self.update_description_text()
+
+    def handle_new_data_loaded(self):
+        if self._model.is_data_loaded():
+            self.update_view_from_model()
+            self.update_description_text()
+            self.handle_update_all_clicked()
+            self.plot_default_groups()
+        else:
+            self.on_clear_requested()
+
+    def plot_default_groups(self):
+        # if we have no pairs or groups selected, generate a default plot
+        if len(self._model.selected_groups) == 0:
+                self.grouping_table_widget.plot_default_case()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable

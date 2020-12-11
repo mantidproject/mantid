@@ -7,7 +7,7 @@
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view import EAGroupingTableView
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_presenter import EAGroupingTablePresenter
 
-from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import GroupingTabModel
+from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_model import EAGroupingTabModel
 
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_widget_presenter import EAGroupingTabPresenter
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_view import EAGroupingTabView
@@ -16,7 +16,7 @@ from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_tab_view import EAG
 class EAGroupingTabWidget(object):
     def __init__(self, context):
 
-        self.group_tab_model = GroupingTabModel(context)
+        self.group_tab_model = EAGroupingTabModel(context)
 
         self.grouping_table_view = EAGroupingTableView()
         self.grouping_table_widget = EAGroupingTablePresenter(self.grouping_table_view, self.group_tab_model)

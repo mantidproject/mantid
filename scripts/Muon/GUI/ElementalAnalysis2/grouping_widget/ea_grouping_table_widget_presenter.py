@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import re
 from Muon.GUI.Common.utilities import run_string_utils as run_utils
-from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
 from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import inverse_group_table_columns
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import RowValid
@@ -57,7 +57,7 @@ class EAGroupingTablePresenter(object):
 
     def validate_group_name(self, text):
         if self._is_edited_name_duplicated(text):
-            self._view.warning_popup("Groups and pairs must have unique names")
+            self._view.warning_popup("Groups must have unique names")
             return False
         if not re.match(run_utils.valid_name_regex, text):
             self._view.warning_popup("Group names should only contain digits, characters and _")
@@ -77,7 +77,7 @@ class EAGroupingTablePresenter(object):
                 self._view.warning_popup("Cannot add more than {} groups.".format(maximum_number_of_groups))
                 return
             self.add_group_to_model(group)
-            if len(self._model.group_names + self._model.pair_names) == 1:
+            if len(self._model.group_names) == 1:
                 self._model.add_group_to_analysis(group.name)
             self.update_view_from_model()
             self.notify_data_changed()
@@ -87,12 +87,13 @@ class EAGroupingTablePresenter(object):
     def add_group_to_model(self, group):
         self._model.add_group(group)
 
-    def add_group_to_view(self, group, state, color, tooltip):
+    def add_group_to_view(self, group, state):
         self._view.disable_updates()
-        assert isinstance(group, MuonGroup)
-        entry = [str(group.name), run_utils.run_list_to_string(group.periods), state,
-                 run_utils.run_list_to_string(group.detectors, False), str(group.n_detectors)]
-        self._view.add_entry_to_table(entry, color, tooltip)
+        assert isinstance(group, EAGroup)
+        rebin_options = None
+        rebin_col = None
+        entry = [str(group.run_number), group.detector, state, rebin_options, rebin_col]
+        self._view.add_entry_to_table(entry)
         self._view.enable_updates()
 
     def remove_selected_rows_in_view_and_model(self, group_names):
@@ -137,9 +138,7 @@ class EAGroupingTablePresenter(object):
         table = self._view.get_table_contents()
         self._model.clear_groups()
         for entry in table:
-            detector_list = run_utils.run_string_to_list(str(entry[inverse_group_table_columns['detector_ids']]), False)
-            periods = run_utils.run_string_to_list(str(entry[inverse_group_table_columns['periods']]))
-            group = MuonGroup(group_name=str(entry[0]), detector_ids=detector_list, periods=periods)
+            group = EAGroup(group_name=str(entry[0]))
             self._model.add_group(group)
 
     def update_view_from_model(self):
@@ -148,10 +147,7 @@ class EAGroupingTablePresenter(object):
 
         for group in self._model.groups:
             to_analyse = True if group.name in self._model.selected_groups else False
-            display_period_warning = self._model.validate_periods_list(group.periods)
-            color = row_colors[display_period_warning]
-            tool_tip = row_tooltips[display_period_warning]
-            self.add_group_to_view(group, to_analyse, color, tool_tip)
+            self.add_group_to_view(group, to_analyse)
 
         self._view.enable_updates()
 

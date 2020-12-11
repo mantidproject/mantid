@@ -102,16 +102,12 @@ class EAGroupingTableView(QtWidgets.QWidget):
     # ------------------------------------------------------------------------------------------------------------------
     # Adding / removing table entries
     # ------------------------------------------------------------------------------------------------------------------
-    def add_entry_to_table(self, row_entries, color=(255, 255, 255), tooltip=''):
+    def add_entry_to_table(self, row_entries):
         assert len(row_entries) == self.grouping_table.columnCount()
         row_position = self.grouping_table.rowCount()
         self.grouping_table.insertRow(row_position)
-        q_color = QtGui.QColor(*color, alpha=127)
-        q_brush = QtGui.QBrush(q_color)
         for i, entry in enumerate(row_entries):
             table_item = QtWidgets.QTableWidgetItem(entry)
-            table_item.setBackground(q_brush)
-            table_item.setToolTip(tooltip)
             self.grouping_table.setItem(row_position, i, table_item)
             table_item.setFlags(table_column_flags[group_table_columns[i]])
 
@@ -232,14 +228,12 @@ class EAGroupingTableView(QtWidgets.QWidget):
     def disable_editing(self):
         self.disable_updates()
         self._disabled = True
-        self._disable_buttons()
         self._disable_all_table_items()
         self.enable_updates()
 
     def enable_editing(self):
         self.disable_updates()
         self._disabled = False
-        self._enable_buttons()
         self._enable_all_table_items()
         self.enable_updates()
 

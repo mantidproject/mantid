@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from typing import List
 from Muon.GUI.Common.muon_load_data import MuonLoadData
+import Muon.GUI.Common.utilities.load_utils as load_utils
 
 
 class DataContext(object):
@@ -43,6 +44,57 @@ class DataContext(object):
     @property
     def main_field_direction(self):
         return self._main_field_direction
+
+    def is_data_loaded(self):
+        return self._loaded_data.num_items() > 0
+
+    def check_group_contains_valid_detectors(self, group):
+        if max(group.detectors) > self.num_detectors or min(group.detectors) < 1:
+            return False
+        else:
+            return True
+
+    @property
+    def _current_data(self):
+        loaded_data = {}
+        if self.current_runs:
+            loaded_data = self._loaded_data.get_data(run=self.current_runs[0])
+
+        return loaded_data if loaded_data else {"workspace": load_utils.empty_loaded_data(), 'run': []}
+
+    @property
+    def current_data(self):
+        return self._current_data["workspace"]
+
+    @property
+    def current_workspace(self):
+        return self.current_data["OutputWorkspace"][0].workspace
+
+    def get_loaded_data_for_run(self, run):
+        loaded_dict = self._loaded_data.get_data(run=run, instrument=self.instrument)
+        if loaded_dict:
+            return self._loaded_data.get_data(run=run, instrument=self.instrument)['workspace']
+        else:
+            return None
+
+    def clear(self):
+        self._loaded_data.clear()
+        self._current_runs = []
+        self._main_field_direction = ''
+
+    def _base_run_name(self, run=None):
+        """ e.g. EMU0001234 """
+        if not run:
+            run = self.run
+        if isinstance(run, int):
+            return str(run)
+        else:
+            return run
+
+    def remove_workspace_by_name(self, workspace_name):
+        runs_removed = self._loaded_data.remove_workspace_by_name(workspace_name, self.instrument)
+
+        self.current_runs = [item for item in self.current_runs if item not in runs_removed]
 
 
 class RunObject(object):

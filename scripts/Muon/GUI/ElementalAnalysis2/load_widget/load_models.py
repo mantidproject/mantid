@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.simpleapi import LoadElementalAnalysisData
 from Muon.GUI.Common.muon_load_data import MuonLoadData
-from Muon.GUI.ElementalAnalysis2.context.context import RunObject
+from Muon.GUI.ElementalAnalysis2.context.data_context import RunObject
 
 
 class LoadWidgetModel(object):
@@ -31,6 +31,9 @@ class LoadWidgetModel(object):
     def clear_data(self):
         self._loaded_data_store.clear()
         self._data_context.current_runs = []
+
+    def update_current_data(self):
+        self._context.update_current_data()
 
 
 class BrowseFileWidgetModel(object):
@@ -91,6 +94,7 @@ class LoadRunWidgetModel(object):
                     failed_files += [(run, error)]
                     continue
                 self._loaded_data_store.add_data(run=[run], workspace=groupws)
+                self._data_context._loaded_data.add_data(run=[run], workspace=groupws)
 
         if failed_files:
             message = "The requested run could not be found. This could be due to: \n - The run does not yet exist." \
