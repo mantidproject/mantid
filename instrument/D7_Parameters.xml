@@ -8,6 +8,18 @@
     <parameter name="formula_eff" type="string">
       <value val="1.0 - exp(-13.153/sqrt(e))" />
     </parameter>
+
+    <!-- Distance from the sample of odd and even detectors, and the Fermi chopper in metres -->
+    <parameter name="sample_distance_chopper" type="number">
+      <value val="0.48" />
+    </parameter>
+    <parameter name="sample_distance_odd" type="number">
+      <value val="1.5177" />
+    </parameter>
+    <parameter name="sample_distance_even" type="number">
+      <value val="1.50518" />
+    </parameter>
+
   </component-link>
 
 </parameter-file>
