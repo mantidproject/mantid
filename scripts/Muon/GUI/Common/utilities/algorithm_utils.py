@@ -155,7 +155,7 @@ def run_simultaneous_Fit(parameters_dict, alg):
     alg.setAlwaysStoreInADS(True)
     alg.setRethrows(True)
     alg.setProperty('CreateOutput', True)
-    pruned_parameter_dict = {key: value for key,value in parameters_dict.items() if 
+    pruned_parameter_dict = {key: value for key,value in parameters_dict.items() if
                              key not in ['InputWorkspace', 'StartX', 'EndX']}
     alg.setProperties(pruned_parameter_dict)
 
