@@ -299,7 +299,7 @@ class AlignComponents(PythonAlgorithm):
 
         detID = calWS.column('detid')
 
-        wks_name = self.getProperty('OutputWorkspace')  # workspace whose counts will be DIFC values
+        wks_name = self.getPropertyValue("OutputWorkspace")  # workspace whose counts will be DIFC values
         if bool(input_workspace) is True:
             api.CloneWorkspace(InputWorkspace=input_workspace, OutputWorkspace=wks_name)
         else:
