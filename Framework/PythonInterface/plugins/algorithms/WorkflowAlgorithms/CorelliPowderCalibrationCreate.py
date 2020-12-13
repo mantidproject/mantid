@@ -209,8 +209,8 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         if self.getProperty('AdjustSource').value is True:
             dz = self.getProperty('SourceMaxTranslation').value
             kwargs = dict(InputWorkspace=input_workspace,
-                          CalibrationTable=difc_table,
                           OutputWorkspace=input_workspace,
+                          CalibrationTable=difc_table,
                           MaskWorkspace=f'{difc_table}_mask',
                           AdjustmentsTable=adjustments_table_name,
                           FitSourcePosition=True,
@@ -222,7 +222,8 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         # The instrument in `input_workspace` is adjusted in-place
         dt = self.getProperty('ComponentMaxTranslation').value  # maximum translation along either axis
         dr = self.getProperty('ComponentMaxRotation').value  # maximum rotation along either axis
-        kwargs = dict(Workspace=input_workspace,
+        kwargs = dict(InputWorkspace=input_workspace,
+                      OutputWorkspace=input_workspace,
                       CalibrationTable=difc_table,
                       MaskWorkspace=f'{difc_table}_mask',
                       AdjustmentsTable=adjustments_table_name + '_banks',
