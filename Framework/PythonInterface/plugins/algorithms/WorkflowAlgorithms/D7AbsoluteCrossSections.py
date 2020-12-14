@@ -410,6 +410,7 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
         output_unit = self.getPropertyValue('OutputUnits')
         unit_symbol = 'barn / sr / formula unit'
         unit = r'd$\sigma$/d$\Omega$'
+        self._set_as_distribution(ws)
         if output_unit == 'TwoTheta':
             if mtd[ws].getNumberOfEntries()/nMeasurements > 1 and self.getPropertyValue('OutputTreatment') == 'Sum':
                 self._merge_polarisations(ws)
@@ -469,50 +470,35 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                             Normalise=True, HeightAxis='-0.1,0.1')
         return output_name
 
-    def _call_cross_section_separation(self, input_ws, nMeasurements, nComponents):
-        component_ws = self._cross_section_separation(input_ws, nMeasurements, nComponents)
-        self._set_as_distribution(component_ws)
-        return component_ws
-
-    def _set_output(self, output_ws):
-        if not self.getProperty('CrossSectionsOutputWorkspace').isDefault:
-            RenameWorkspace(InputWorkspace=output_ws,
-                            OutputWorkspace=self.getPropertyValue('CrossSectionsOutputWorkspace'))
-            self.setProperty('CrossSectionsOutputWorkspace',
-                             self.getPropertyValue('CrossSectionsOutputWorkspace'))
-
     def PyExec(self):
         input_ws = self.getPropertyValue('InputWorkspace')
+        output_ws = self.getPropertyValue('OutputWorkspace')
         self._read_experiment_properties(input_ws)
         nMeasurements, nComponents = self._data_structure_helper(input_ws)
         normalisation_method = self.getPropertyValue('NormalisationMethod')
-        if normalisation_method != 'None':
+        if self.getPropertyValue('CrossSectionSeparationMethod') == 'None':
             if normalisation_method =='Vanadium':
                 det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
-            elif normalisation_method in ['Paramagnetic', 'Incoherent']:
-                det_efficiency_input = self._call_cross_section_separation(input_ws, nMeasurements, nComponents)
-
-            det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
-            output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
-            self._set_units(output_ws, nMeasurements)
-            self._set_as_distribution(output_ws)
-            # clean-up
-            DeleteWorkspace(det_efficiency_ws)
-            if self.getProperty('CrossSectionsOutputWorkspace').isDefault:
-                DeleteWorkspace(det_efficiency_input)
+                det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
+                output_ws = self._normalise_sample_data(input_ws, det_efficiency_ws)
+                DeleteWorkspace(det_efficiency_ws)
             else:
-                self._set_units(det_efficiency_input, nMeasurements)
-                self._set_output(det_efficiency_input)
-
-            self.setProperty('OutputWorkspace', mtd[output_ws])
-
-        if ( self.getPropertyValue('CrossSectionSeparationMethod') != 'None'
-             and normalisation_method not in ['Paramagnetic', 'Incoherent'] ):
-            if mtd[input_ws].getNumberOfEntries() != 1 and self.getProperty('OutputTreatment') == 'Sum':
-                self._call_sum_data(input_ws)
-            component_ws = self._call_cross_section_separation(input_ws, nMeasurements, nComponents)
-            self._set_units(component_ws, nMeasurements)
-            self._set_output(component_ws)
+                CloneWorkspace(InputWorkspace=input_ws, OutputWorkspace=output_ws)
+        else:
+            component_ws = self._cross_section_separation(input_ws, nMeasurements, nComponents)
+            self._set_as_distribution(component_ws)
+            if normalisation_method == 'Vanadium':
+                det_efficiency_input = self.getPropertyValue('VanadiumInputWorkspace')
+            else:
+                det_efficiency_input = component_ws
+            if normalisation_method != 'None':
+                det_efficiency_ws = self._detector_efficiency_correction(det_efficiency_input)
+                output_ws = self._normalise_sample_data(component_ws, det_efficiency_ws)
+                DeleteWorkspaces(WorkspaceList=[component_ws, det_efficiency_ws])
+            else:
+                RenameWorkspace(InputWorkspace=component_ws, OutputWorkspace=output_ws)
+        self._set_units(output_ws, nMeasurements)
+        self.setProperty('OutputWorkspace', mtd[output_ws])
 
 
 AlgorithmFactory.subscribe(D7AbsoluteCrossSections)
