@@ -39,7 +39,8 @@ public:
     EndXChanged,
     SelectionChanged,
     FunctionAdded,
-    FunctionRemoved
+    FunctionRemoved,
+    ParameterChanged
   };
 
   IFitScriptGeneratorView(QWidget *parent = nullptr)
@@ -57,6 +58,9 @@ public:
 
   [[nodiscard]] virtual std::vector<FitDomainIndex> allRows() const = 0;
   [[nodiscard]] virtual std::vector<FitDomainIndex> selectedRows() const = 0;
+
+  [[nodiscard]] virtual double
+  parameterValue(std::string const &parameter) const = 0;
 
   virtual void removeWorkspaceDomain(std::string const &workspaceName,
                                      WorkspaceIndex workspaceIndex) = 0;

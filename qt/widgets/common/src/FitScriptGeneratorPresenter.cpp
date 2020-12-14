@@ -58,6 +58,9 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
   case ViewEvent::FunctionAdded:
     handleFunctionAdded(arg);
     return;
+  case ViewEvent::ParameterChanged:
+    handleParameterChanged(arg);
+    return;
   }
 
   throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
@@ -145,6 +148,19 @@ void FitScriptGeneratorPresenter::handleFunctionAdded(
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     m_model->addFunction(workspaceName, workspaceIndex, function);
+  }
+}
+
+void FitScriptGeneratorPresenter::handleParameterChanged(
+    std::string const &parameter) {
+  auto const rowIndices = m_view->allRows();
+  auto const newValue = m_view->parameterValue(parameter);
+
+  for (auto const &rowIndex : rowIndices) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+    m_model->updateParameterValue(workspaceName, workspaceIndex, parameter,
+                                  newValue);
   }
 }
 

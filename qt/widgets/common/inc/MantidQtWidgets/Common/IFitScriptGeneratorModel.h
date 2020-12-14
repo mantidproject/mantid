@@ -47,6 +47,11 @@ public:
   virtual Mantid::API::CompositeFunction_sptr
   getFunction(std::string const &workspaceName,
               WorkspaceIndex workspaceIndex) = 0;
+
+  virtual void updateParameterValue(std::string const &workspaceName,
+                                    WorkspaceIndex workspaceIndex,
+                                    std::string const &parameter,
+                                    double newValue) = 0;
 };
 
 } // namespace MantidWidgets

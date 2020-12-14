@@ -44,6 +44,7 @@ private:
   void handleSelectionChanged();
   void handleFunctionAdded(std::string const &function);
   void handleFunctionRemoved(std::string const &function);
+  void handleParameterChanged(std::string const &parameter);
 
   void setWorkspaces(QStringList const &workspaceNames, double startX,
                      double endX);

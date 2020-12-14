@@ -53,6 +53,9 @@ public:
   [[nodiscard]] std::vector<FitDomainIndex> allRows() const override;
   [[nodiscard]] std::vector<FitDomainIndex> selectedRows() const override;
 
+  [[nodiscard]] double
+  parameterValue(std::string const &parameter) const override;
+
   void removeWorkspaceDomain(std::string const &workspaceName,
                              WorkspaceIndex workspaceIndex) override;
   void addWorkspaceDomain(std::string const &workspaceName,
@@ -95,6 +98,7 @@ private slots:
   void onItemPressed();
   void onFunctionRemoved(const QString &function);
   void onFunctionAdded(const QString &function);
+  void onParameterChanged(const QString &parameter);
 
 private:
   void connectUiSignals();

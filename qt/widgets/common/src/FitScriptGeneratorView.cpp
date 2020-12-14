@@ -75,6 +75,8 @@ void FitScriptGeneratorView::connectUiSignals() {
           SLOT(onFunctionRemoved(const QString &)));
   connect(m_functionTreeView.get(), SIGNAL(functionAdded(const QString &)),
           this, SLOT(onFunctionAdded(const QString &)));
+  connect(m_functionTreeView.get(), SIGNAL(parameterChanged(const QString &)),
+          this, SLOT(onParameterChanged(const QString &)));
 }
 
 void FitScriptGeneratorView::setFitBrowserOptions(
@@ -138,6 +140,11 @@ void FitScriptGeneratorView::onFunctionAdded(QString const &function) {
                                function.toStdString());
 }
 
+void FitScriptGeneratorView::onParameterChanged(QString const &parameter) {
+  m_presenter->notifyPresenter(ViewEvent::ParameterChanged,
+                               parameter.toStdString());
+}
+
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {
   return m_dataTable->workspaceName(index);
 }
@@ -161,6 +168,11 @@ std::vector<FitDomainIndex> FitScriptGeneratorView::allRows() const {
 
 std::vector<FitDomainIndex> FitScriptGeneratorView::selectedRows() const {
   return m_dataTable->selectedRows();
+}
+
+double
+FitScriptGeneratorView::parameterValue(std::string const &parameter) const {
+  return m_functionTreeView->getParameter(QString::fromStdString(parameter));
 }
 
 void FitScriptGeneratorView::removeWorkspaceDomain(

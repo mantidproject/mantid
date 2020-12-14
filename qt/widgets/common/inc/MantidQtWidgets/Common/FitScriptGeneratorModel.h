@@ -78,6 +78,11 @@ public:
   getFunction(std::string const &workspaceName,
               WorkspaceIndex workspaceIndex) override;
 
+  void updateParameterValue(std::string const &workspaceName,
+                            WorkspaceIndex workspaceIndex,
+                            std::string const &parameter,
+                            double newValue) override;
+
 private:
   void removeWorkspaceDomain(
       std::size_t const &removeIndex,
