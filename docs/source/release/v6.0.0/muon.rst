@@ -18,6 +18,7 @@ New Features
 Improvements
 ############
 - Phasequads are now available for analysis in both GUI's.
+- Ticking co-add now works in the GUI's so you can analyse multiple runs as one run
 
 Bug fixes
 #########
