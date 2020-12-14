@@ -83,7 +83,7 @@ Output:
 Wavelength and position calibration
 ===================================
 
-The first step of working with D7 data is to ensure that there exist a proper calibration of the wavelenght, bank positions, and detector positions relative to their bank. This calibration can be either taken from a previous experiment performed in comparable conditions or obtained from the :math:`\text{Y}_{3}\text{Fe}_{5}\text{O}_{12}` (YIG) scan data with a dedicated algorithm :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>`. The method follows the description presented in Ref. [1].
+The first step of working with D7 data is to ensure that there exist a proper calibration of the wavelength, bank positions, and detector positions relative to their bank. This calibration can be either taken from a previous experiment performed in comparable conditions or obtained from the :math:`\text{Y}_{3}\text{Fe}_{5}\text{O}_{12}` (YIG) scan data using a dedicated algorithm :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>`. The method follows the description presented in Ref. [1].
 
 This algorithm performs wavelength and position calibration for both individual detectors and detector banks using measurement of a sample of powdered YIG. This data is fitted with Gaussian distributions at the expected peak positions. The output is an :ref:`Instrument Parameter File <InstrumentParameterFile>` readable by the :ref:`LoadILLPolarizedDiffraction <algm-LoadILLPolarizedDiffraction>` algorithm that will place the detector banks and detectors using the output of this algorithm.
 
@@ -95,6 +95,19 @@ The workspace containing the peak fitting results is then fitted using a `Multid
 
 where `m` is the bank slope, :math:`offset_{\text{pixel}}` is the relative offset to the initial assumption of the position inside the detector bank, and :math:`offset_{\text{bank}}` is the offset of the entire bank. This function allows to extract the information about the wavelength, detector bank slopes and offsets, and the distribution of detector offsets.
 
+It is strongly advised to first run the :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` algorithm with the `FittingMethod` set to `None`, so that the initial guesses for the positions of the YIG Bragg peaks can be inspected and corrected if needed.
+
+**Example - D7YIGPositionCalibration - initial guess check before fitting at the shortest wavelength**
+
+.. code-block:: python
+
+   approximate_wavelength = '3.1' # Angstrom
+   D7YIGPositionCalibration(Filenames='402652:403041', ApproximateWavelength=approximate_wavelength,
+                            YIGPeaksFile='D7_YIG_peaks.xml',
+                            MinimalDistanceBetweenPeaks=1.5, BankOffsets=[0,0,0],
+                            MaskedBinsRange=[-50, -25, 15], FittingMethod='None', ClearCache=False,
+                            FitOutputWorkspace='fitting_test')
+
 
 **Example - D7YIGPositionCalibration - calibration at the shortest wavelength**
 
@@ -103,7 +116,8 @@ where `m` is the bank slope, :math:`offset_{\text{pixel}}` is the relative offse
    approximate_wavelength = '3.1' # Angstrom
    D7YIGPositionCalibration(Filenames='402652:403041', ApproximateWavelength=approximate_wavelength,
                                YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile='test_shortWavelength.xml',
-                               MinimalDistanceBetweenPeaks=1.5, BankOffsets="-3,-3,1", ClearCache=True,
+                               MinimalDistanceBetweenPeaks=1.5, BankOffsets=[3,3,-1],
+			       MaskedBinsRange=[-50, -25, 15], FittingMethod='Global', ClearCache=True,
                                FitOutputWorkspace='shortWavelength')
 
    print('The calibrated wavelength is: {0:.2f}'.format(float(approximate_wavelength)*mtd['shortWavelength'].column(1)[1]))
@@ -349,11 +363,19 @@ and :math:`\dot{I_{B}}(0)` and :math:`\dot{I_{B}}(1)` are the events with the fl
 Self-attenuation correction
 ---------------------------
 
-The self-attenuation is estimated using :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>` and applied to data
-with :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>`. The :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`
-algorithm requires multiple parameters of the sample and its environment, such as the geometry, density, and chemical composition to be defined.
-The communication of these parameters is done via `SampleAndEnvironmentProperties` property of the :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>`
-algorithm. Below there are all the necessary keys that can and need to be defined for the sample self-attenuation to be properly corrected.
+There are three ways the self-attenuation of a sample can be taken into account in the implemented D7 reduction: `Numerical`, `Monte-Carlo`, and `User`.
+In all three cases, the correction is applied to data with :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` algorithm.
+
+The `User` option depends on the self-attenuation parameters provided by the user through `SampleSelfAttenuationFactors` property of the :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>`
+algorithm. This option allows to study the self-attenuation of a sample that can have arbitrary shape separately from running the reduction algorithm,
+and in more detail if necessary.
+
+On the contrary, The `Numerical` and `Monte-Carlo` options calculate the self-attenuation parameters for both the sample and its container during the execution of
+the reduction algorithm. These two options depend on Mantid algorithms :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>`
+and :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`, respectively. These two algorithms require multiple parameters describing
+the sample and its environment, such as the geometry, density, and chemical composition to be defined. The communication of these parameters is done
+via `SampleAndEnvironmentProperties` property of the :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` algorithm. All the necessary and accepted keys that
+need to be defined for the sample self-attenuation to be properly corrected are described below.
 
 The `SampleAndEnvironmentProperties` property of the :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>` algorithm is a dictionary containing
 all of the information about the sample and its environment. This information is used in self-attenuation calculations and also can be reused
@@ -371,6 +393,7 @@ Sample-only keys:
 - *Height*
 
 The first three keys need to be always defined, so that the number of moles of the sample can be calculated, to ensure proper data normalisation.
+All of the density parameters are number density in formula units.
 
 Container-only keys:
 
@@ -404,6 +427,9 @@ Then, depending on the chosen sample geometry, additional parameters need to be 
   - *SampleOuterRadius*
   - *ContainerInnerRadius*
   - *ContainerOuterRadius*
+
+Depending on the choice of the self-attenuation method, either `ElementSize` in case of numerical calculations or `EventsPerPoint` for Monte-Carlo method
+need to be defined.
 
 Optional keys:
 
@@ -586,12 +612,15 @@ options available to normalise the sample data:
    an additional parameter needs to be defined in the sample properties dictionary, named `IncoherentCrossSection`, to provide the total
    nuclear-spin-incoherent cross-section of the sample.
 
+In all cases, a relative normalisation to the detector with highest number of counts is always performed.
 
 Output
 ------
 
-The output of the reduction and normalisation is a :ref:`WorkspaceGroup <WorkspaceGroup>` with the number of entries consistent with the input.
-Each entry is a transposed workspace with X-axis unit being either momentum exchange :math:`Q` or the scattering angle :math:`2\theta`.
+The output of the reduction and normalisation is a :ref:`WorkspaceGroup <WorkspaceGroup>` with the number of entries consistent with the input
+if the `OutputTreatment` property was selected to be `Individual`, or the number of entries will be consistent with either the number of polarisation
+orientations present in the data (e.g. six for a XYZ method) or the number of separated cross-section.
+Each entry of the output group is a workspace with X-axis unit being either momentum exchange :math:`Q` or the scattering angle :math:`2\theta`.
 
 
 Workflow diagrams and working example
@@ -709,6 +738,8 @@ Below is the relevant workflow diagram describing reduction steps of the sample 
         ContainerInputWorkspace='container_ws',
         TransmissionInputWorkspace='sample_transmission_1',
         QuartzInputWorkspace='pol_corrections',
+        SelfAttenuationMethod='Numerical',
+        SampleGeometry='Annulus',
         OutputTreatment='Individual',
         SampleGeometry='Annulus',
         SampleAndEnvironmentProperties=sample_dictionary,
