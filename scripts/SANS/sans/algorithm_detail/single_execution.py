@@ -4,10 +4,9 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import itertools
 import os
 import sys
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 from mantid.kernel import mpisetup
 from sans.algorithm_detail.bundles import (EventSliceSettingBundle, OutputBundle,
@@ -95,8 +94,7 @@ def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.execute()
 
     # Pull the result out of the workspace
-    reduced_slices = _pack_bundles(reduction_alg,
-                                                                                     reduction_setting_bundle)
+    reduced_slices = _pack_bundles(reduction_alg, reduction_setting_bundle)
 
     return reduced_slices
 
@@ -383,7 +381,7 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
     partial_output_require_reload = output_parts and is_invalid_partial_workspaces
 
     must_reload = reduced_slices[0].output_bundle.output_workspace is None \
-                  or partial_output_require_reload or is_invalid_transmission_workspaces
+        or partial_output_require_reload or is_invalid_transmission_workspaces
     if 'boost.mpi' in sys.modules:
         # In MPI runs the result is only present on rank 0 (result of Q1D2 integration),
         # so the reload flag must be broadcasted from rank 0.

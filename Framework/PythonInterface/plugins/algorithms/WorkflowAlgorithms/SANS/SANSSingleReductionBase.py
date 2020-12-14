@@ -9,14 +9,11 @@
 """A base class to share functionality between SANSSingleReduction versions."""
 
 from collections import defaultdict
-from typing import List
 
 from mantid.api import (DistributedDataProcessorAlgorithm,
                         MatrixWorkspaceProperty, Progress, PropertyMode)
 from mantid.kernel import Direction
-from mantid.py36compat import dataclass
-from sans.algorithm_detail.bundles import ReductionSettingBundle, OutputBundle, OutputPartsBundle, \
-    OutputTransmissionBundle, CompletedSlices
+from sans.algorithm_detail.bundles import ReductionSettingBundle, CompletedSlices
 from sans.algorithm_detail.single_execution import (get_final_output_workspaces,
                                                     get_merge_bundle_for_merge_request)
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans

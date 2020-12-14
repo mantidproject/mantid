@@ -8,7 +8,6 @@
 
 import unittest
 from os import path
-from unittest import SkipTest
 
 import systemtesting
 from systemtesting import MantidSystemTest

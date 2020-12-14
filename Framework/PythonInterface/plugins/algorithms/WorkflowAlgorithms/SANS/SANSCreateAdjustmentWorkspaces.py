@@ -102,8 +102,6 @@ class SANSCreateAdjustmentWorkspaces(DistributedDataProcessorAlgorithm):
                              doc='The unfitted transmission workspace')
 
     def PyExec(self):
-        # TODO convert this from an alg if this passes with broken PyExec
-
         # Read the state
         state_json = self.getProperty("SANSState").value
         state = Serializer.from_json(state_json)
