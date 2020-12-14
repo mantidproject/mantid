@@ -368,14 +368,25 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
 
         return det_efficiency_ws
 
-    def _normalise_sample_data(self, ws, det_efficiency_ws):
+    def _normalise_sample_data(self, sample_ws, det_efficiency_ws):
         """Normalises the sample data using the detector efficiency calibration workspace"""
+        norm_ws = 'norm_ws'
+        # relative normalisation is always performed
+        relative_norm_ws = sample_ws + '_relative_norm'
+        relative_norm_factor = self._max_value_per_detector(sample_ws)
+        dataE = np.sqrt(relative_norm_factor)
+        entry0 = mtd[sample_ws][0]
+        CreateWorkspace(dataX=entry0.readX(0), dataY=relative_norm_factor, dataE=dataE,
+                        NSpec=entry0.getNumberHistograms(), OutputWorkspace=relative_norm_ws)
+        mtd[relative_norm_ws].getAxis(0).setUnit(entry0.getAxis(0).getUnit().unitID())
+        mtd[relative_norm_ws].getAxis(1).setUnit(entry0.getAxis(1).getUnit().unitID())
+
         single_efficiency_per_POL = False
-        if mtd[ws].getNumberOfEntries() != mtd[det_efficiency_ws].getNumberOfEntries():
+        if mtd[sample_ws].getNumberOfEntries() != mtd[det_efficiency_ws].getNumberOfEntries():
             single_efficiency_per_POL = True
         tmp_names = []
         normalisation_method = self.getPropertyValue('NormalisationMethod')
-        for entry_no, entry in enumerate(mtd[ws]):
+        for entry_no, entry in enumerate(mtd[sample_ws]):
             det_eff_entry_no = int(entry_no / 2)
             if normalisation_method == 'Vanadium':
                 det_eff_entry_no = 0
@@ -385,12 +396,14 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                     det_eff_entry_no -= 1
             ws_name = entry.name() + '_normalised'
             tmp_names.append(ws_name)
-
+            Multiply(LHSWorkspace=mtd[det_efficiency_ws][det_eff_entry_no],
+                     RHSWorkspace=relative_norm_ws, OutputWorkspace=norm_ws)
             Divide(LHSWorkspace=entry,
-                   RHSWorkspace=mtd[det_efficiency_ws][det_eff_entry_no],
+                   RHSWorkspace=norm_ws,
                    OutputWorkspace=ws_name)
         output_name = self.getPropertyValue('OutputWorkspace')
         GroupWorkspaces(InputWorkspaces=tmp_names, Outputworkspace=output_name)
+        DeleteWorkspaces(WorkspaceList=[relative_norm_ws, norm_ws])
         return output_name
 
     def _set_units(self, ws, nMeasurements):
