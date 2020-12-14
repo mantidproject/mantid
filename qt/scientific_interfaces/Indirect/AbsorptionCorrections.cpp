@@ -278,8 +278,7 @@ void AbsorptionCorrections::run() {
   if (nameCutIndex == -1)
     nameCutIndex = sampleWsName.length();
 
-  auto const outputWsName =
-      sampleWsName.left(nameCutIndex) + "_MC_Corrections";
+  auto const outputWsName = sampleWsName.left(nameCutIndex) + "_MC_Corrections";
 
   monteCarloAbsCor->setProperty("CorrectionsWorkspace",
                                 outputWsName.toStdString());
