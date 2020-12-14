@@ -151,6 +151,9 @@ class DrillPresenter:
                 )
         sw.show()
 
+    def onShowExportDialog(self, dialog):
+        pass
+
     def updateViewFromModel(self):
         """
         Update the view (header and table) from the model.

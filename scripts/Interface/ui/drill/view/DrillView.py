@@ -17,6 +17,7 @@ from mantid.kernel import config  # noqa
 from mantidqt import icons
 from mantidqt.interfacemanager import InterfaceManager
 
+from .DrillExportDialog import DrillExportDialog
 from ..presenter.DrillPresenter import DrillPresenter
 
 
@@ -174,6 +175,9 @@ class DrillView(QMainWindow):
 
         self.settings.setIcon(icons.get_icon("mdi.settings"))
         self.settings.clicked.connect(self.showSettings.emit)
+
+        self.export.setIcon(icons.get_icon("mdi.application-export"))
+        self.export.clicked.connect(self.showExportDialog)
 
         self.paste.setIcon(icons.get_icon("mdi.content-paste"))
         self.paste.clicked.connect(self.pasteCells)
@@ -570,6 +574,14 @@ class DrillView(QMainWindow):
         self.dataChanged.emit(row, column,
                               self.table.getCellContents(row, column))
         self.setWindowModified(True)
+
+    def showExportDialog(self):
+        """
+        Open the export dialog.
+        """
+        dialog = DrillExportDialog(self)
+        self._presenter.onShowExportDialog(dialog)
+        dialog.show()
 
     ###########################################################################
     # for model calls                                                         #
