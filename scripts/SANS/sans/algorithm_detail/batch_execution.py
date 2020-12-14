@@ -129,7 +129,7 @@ def single_reduction_for_batch(state, use_optimizations, output_mode, plot_resul
         # -----------------------------------
         _get_ws_from_alg(reduction_alg, reduction_package)
 
-        _set_alg_output_names(reduction_package, reduction_alg, event_slice_optimisation)
+        set_alg_output_names(reduction_package, event_slice_optimisation)
         out_scale_factor, out_shift_factor = get_shift_and_scale_factors_from_algorithm(reduction_alg,
                                                                                         event_slice_optimisation)
         reduction_package.out_scale_factor = out_scale_factor
@@ -749,7 +749,7 @@ def set_properties_for_reduction_algorithm(reduction_alg, reduction_package, wor
         reduction_alg.setProperty("WavelengthRange", is_part_of_wavelength_range_reduction)
 
 
-def _set_alg_output_names(reduction_package, reduction_alg, event_slice_optimisation):
+def set_alg_output_names(reduction_package, event_slice_optimisation):
     ads_instance = AnalysisDataService.Instance()
 
     is_part_of_multi_period_reduction = reduction_package.is_part_of_multi_period_reduction
@@ -809,7 +809,7 @@ def _set_alg_output_names(reduction_package, reduction_alg, event_slice_optimisa
                 ads_instance.addOrReplace(workspace_names[i], ws_i)
                 getattr(reduction_package, package_attribute_name).append(workspace_names[i])
 
-    def _set_lab(_reduction_bundle, _reduction_package, _is_group):
+    def _set_lab(_reduction_package, _is_group):
         _set_output_name(_reduction_package.reduced_lab_can, _reduction_package, _is_group, ReductionMode.LAB,
                          "reduced_lab_can_name", "reduced_lab_can_base_name",
                          multi_reduction_type, LAB_CAN_SUFFIX)
@@ -828,7 +828,7 @@ def _set_alg_output_names(reduction_package, reduction_alg, event_slice_optimisa
                          "reduced_lab_sample_name", "reduced_lab_sample_base_name",
                          multi_reduction_type, LAB_SAMPLE_SUFFIX)
 
-    def _set_hab(_reduction_alg, _reduction_package, _is_group):
+    def _set_hab(_reduction_package, _is_group):
         # Hab Can Workspace
         _set_output_name(_reduction_package.reduced_hab_can, _reduction_package, _is_group, ReductionMode.HAB,
                          "reduced_hab_can_name", "reduced_hab_can_base_name",
@@ -854,12 +854,12 @@ def _set_alg_output_names(reduction_package, reduction_alg, event_slice_optimisa
     if reduction_mode in (ReductionMode.MERGED, ReductionMode.LAB, ReductionMode.ALL):
         _set_output_name(reduction_package.reduced_lab, reduction_package, is_group, ReductionMode.LAB,
                          "reduced_lab_name", "reduced_lab_base_name", multi_reduction_type)
-        _set_lab(reduction_alg, reduction_package, is_group)
+        _set_lab(reduction_package, is_group)
 
     if reduction_mode in (ReductionMode.MERGED, ReductionMode.HAB, ReductionMode.ALL):
         _set_output_name(reduction_package.reduced_hab, reduction_package, is_group, ReductionMode.HAB,
                          "reduced_hab_name", "reduced_hab_base_name", multi_reduction_type)
-        _set_hab(reduction_alg, reduction_package, is_group)
+        _set_hab(reduction_package, is_group)
 
     if reduction_mode is ReductionMode.MERGED:
         _set_output_name(reduction_package.reduced_merged, reduction_package, is_group, ReductionMode.MERGED,
@@ -1292,13 +1292,13 @@ def get_all_names_to_save(reduction_packages, save_can):
             if reduced_hab:
                 names_to_save.append((get_ws_names_from_group(reduced_hab), trans_name, trans_can_name))
             if reduced_lab_can:
-                names_to_save.append((get_ws_names_from_group(reduced_lab_can), '', trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_lab_can), [], trans_can_name))
             if reduced_hab_can:
-                names_to_save.append((get_ws_names_from_group(reduced_hab_can), '', trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_hab_can), [], trans_can_name))
             if reduced_lab_sample:
-                names_to_save.append((get_ws_names_from_group(reduced_lab_sample), trans_name, ''))
+                names_to_save.append((get_ws_names_from_group(reduced_lab_sample), trans_name, []))
             if reduced_hab_sample:
-                names_to_save.append((get_ws_names_from_group(reduced_hab_sample), trans_name, ''))
+                names_to_save.append((get_ws_names_from_group(reduced_hab_sample), trans_name, []))
 
         # If we have merged reduction then store the
         elif reduced_merged:
@@ -1486,6 +1486,9 @@ class ReductionPackage(object):
 
         self.out_scale_factor = None
         self.out_shift_factor = None
+
+        self.calculated_transmission = None
+        self.calculated_transmission_can = None
 
         # Unfitted transmission names
         self.unfitted_transmission_name = None
