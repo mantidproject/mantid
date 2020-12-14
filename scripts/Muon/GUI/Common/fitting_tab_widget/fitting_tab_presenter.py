@@ -498,7 +498,8 @@ class FittingTabPresenter(object):
                 run_numbers = [str(item) for sub_list in current_runs for item in sub_list]
             else:
                 ws_list = self.context.data_context.current_data["OutputWorkspace"]
-                run_numbers = [str(get_run_numbers_as_string_from_workspace_name(ws.workspace_name, self.context.data_context.instrument)) for ws in ws_list]
+                run_numbers = [str(get_run_numbers_as_string_from_workspace_name(
+                    ws.workspace_name, self.context.data_context.instrument)) for ws in ws_list]
             run_numbers.sort()
             simul_choices = run_numbers
         elif self.view.simultaneous_fit_by == "Group/Pair":
