@@ -25,7 +25,7 @@ class MANTIDQT_INDIRECT_DLL FqFitDataPresenter
     : public IndirectFitDataPresenter {
   Q_OBJECT
 public:
-  FqFitDataPresenter(FqFitModel *model, IndirectFitDataView *view,
+  FqFitDataPresenter(FqFitModel *model, IIndirectFitDataView *view,
                      QComboBox *cbParameterType, QComboBox *cbParameter,
                      QLabel *lbParameterType, QLabel *lbParameter,
                      IFQFitObserver *SingleFunctionTemplateBrowser);

@@ -15,7 +15,7 @@ namespace CustomInterfaces {
 namespace IDA {
 
 FqFitDataPresenter::FqFitDataPresenter(
-    FqFitModel *model, IndirectFitDataView *view, QComboBox *cbParameterType,
+    FqFitModel *model, IIndirectFitDataView *view, QComboBox *cbParameterType,
     QComboBox *cbParameter, QLabel *lbParameterType, QLabel *lbParameter,
     IFQFitObserver *SingleFunctionTemplateBrowser)
     : IndirectFitDataPresenter(model, view,
