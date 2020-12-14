@@ -28,7 +28,12 @@ namespace Crystal {
 
 class SCDCalibratePanels : public Mantid::API::Algorithm {
 public:
-  const std::string name() const override;
+
+  /// Algorithm's name for identification
+  const std::string name() const override {
+    return "SCDCalibratePanels";
+  };
+
   /// Summary of algorithms purpose
   const std::string summary() const override {
     return "Panel parameters and L0 are optimized to "
@@ -37,29 +42,39 @@ public:
   }
 
   /// Algorithm's version for identification overriding a virtual method
-  int version() const override;
+  int version() const override { return 1; };
+
+  /// Algorithm's category, overriding a virtual method
+  const std::string category() const override {
+    return "Crystal\\Corrections";
+  };
+
+  /// Extra help info
   const std::vector<std::string> seeAlso() const override {
     return {"CalculateUMatrix"};
-  }
-
-  /// Algorithm's category for identification overriding a virtual method
-  const std::string category() const override;
+  };
 
 private:
+  
+  /// save to DetCal format, can be loaded with func LoadIsawDetCal()
   void saveIsawDetCal(std::shared_ptr<Geometry::Instrument> &instrument,
                       boost::container::flat_set<std::string> &AllBankName,
                       double T0, const std::string &filename);
 
   /// Function to calculate U
   void findU(const DataObjects::PeaksWorkspace_sptr &peaksWs);
+
   /// save workspaces
   void saveNexus(const std::string &outputFile,
                  const API::MatrixWorkspace_sptr &outputWS);
+
   /// Function to optimize L1
   void findL1(int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs);
+
   /// Function to optimize L2
   void findL2(boost::container::flat_set<std::string> MyBankNames,
               const DataObjects::PeaksWorkspace_sptr &peaksWs);
+
   /// Function to optimize T0
   void findT0(int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs);
 

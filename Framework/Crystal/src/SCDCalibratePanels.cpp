@@ -43,15 +43,6 @@ namespace Crystal {
 
 DECLARE_ALGORITHM(SCDCalibratePanels)
 
-const std::string SCDCalibratePanels::name() const {
-  return "SCDCalibratePanels";
-}
-
-int SCDCalibratePanels::version() const { return 1; }
-
-const std::string SCDCalibratePanels::category() const {
-  return "Crystal\\Corrections";
-}
 
 void SCDCalibratePanels::exec() {
   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
@@ -280,6 +271,7 @@ void SCDCalibratePanels::exec() {
   saveNexus(tofFilename, TofWksp);
 }
 
+
 void SCDCalibratePanels::saveNexus(const std::string &outputFile,
                                    const MatrixWorkspace_sptr &outputWS) {
   IAlgorithm_sptr save = this->createChildAlgorithm("SaveNexus");
@@ -287,6 +279,7 @@ void SCDCalibratePanels::saveNexus(const std::string &outputFile,
   save->setProperty("FileName", outputFile);
   save->execute();
 }
+
 
 void SCDCalibratePanels::findL1(
     int nPeaks, const DataObjects::PeaksWorkspace_sptr &peaksWs) {
@@ -385,6 +378,7 @@ void SCDCalibratePanels::findT0(
   }
 }
 
+
 void SCDCalibratePanels::findU(
     const DataObjects::PeaksWorkspace_sptr &peaksWs) {
   IAlgorithm_sptr ub_alg;
@@ -430,6 +424,7 @@ void SCDCalibratePanels::findU(
   g_log.notice() << peaksWs->sample().getOrientedLattice().getUB() << "\n";
 }
 
+
 /**
  * Really this is the operator SaveIsawDetCal but only the results of the given
  * banks are saved.  L0 and T0 are also saved.
@@ -470,6 +465,7 @@ void SCDCalibratePanels::saveIsawDetCal(
   alg->setProperty("BankNames", banknames);
   alg->executeAsChildAlg();
 }
+
 
 void SCDCalibratePanels::init() {
   declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
@@ -550,11 +546,13 @@ void SCDCalibratePanels::init() {
   setPropertyGroup("TofFilename", OUTPUTS);
 }
 
+
 void writeXmlParameter(ofstream &ostream, const string &name,
                        const double value) {
   ostream << "  <parameter name =\"" << name << "\"><value val=\"" << value
           << "\" /> </parameter>\n";
 }
+
 
 void SCDCalibratePanels::saveXmlFile(
     const string &FileName,
@@ -634,6 +632,8 @@ void SCDCalibratePanels::saveXmlFile(
   oss3.flush();
   oss3.close();
 }
+
+
 void SCDCalibratePanels::findL2(
     boost::container::flat_set<string> MyBankNames,
     const DataObjects::PeaksWorkspace_sptr &peaksWs) {
@@ -718,12 +718,6 @@ void SCDCalibratePanels::findL2(
             << "T0Shift= " << mT0;
     fit_alg->setProperty("Ties", tie_fitTrans_str.str());
 
-    // std::ostringstream cnstrnt_str;
-    // cnstrnt_str << "-5.0 < XRotate < 5.0, " 
-    //             << "-5.0 < YRotate < 5.0, "
-    //             << "-5.0 < ZRotate < 5.0  ";
-    // fit_alg->setProperty("Constraints", cnstrnt_str.str());
-
     fit_alg->setProperty("InputWorkspace", q3DWS);
     fit_alg->setProperty("CreateOutput", true);
     fit_alg->setProperty("Output", "fit");
@@ -777,9 +771,13 @@ void SCDCalibratePanels::findL2(
                    << "-- fitStatus: " << fitStatus_rot << "\n"
                    << "-- Chi2overDoF: " << chisq_rot << "\n";
 
-    double xRotate = paramsWS->getRef<double>("Value", 0);
-    double yRotate = paramsWS->getRef<double>("Value", 1);
-    double zRotate = paramsWS->getRef<double>("Value", 2);
+    MatrixWorkspace_sptr fitWS_rot = fitrot_alg->getProperty("OutputWorkspace");
+    AnalysisDataService::Instance().addOrReplace("fitrot_" + iBank, fitWS_rot);
+    ITableWorkspace_sptr paramsWS_rot = fitrot_alg->getProperty("OutputParameters");
+    AnalysisDataService::Instance().addOrReplace("paramsrot_" + iBank, paramsWS_rot);
+    double xRotate = paramsWS_rot->getRef<double>("Value", 4);
+    double yRotate = paramsWS_rot->getRef<double>("Value", 5);
+    double zRotate = paramsWS_rot->getRef<double>("Value", 6);
 
     // Scaling only implemented for Rectangular Detectors
     Geometry::IComponent_const_sptr comp =
