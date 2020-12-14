@@ -14,7 +14,7 @@ digraph Absorber {
   subgraph algorithms {
     $algorithm_style
     Load
-    Divide
+    Divide [label="Normalize to monitor"]
   }
 
   Run -> Load

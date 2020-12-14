@@ -3,8 +3,8 @@ digraph Vanadium {
 
   subgraph decisions {
     $decision_style
-    ConvertUnits
-    SumCountsOrAverage
+    AverageCounts
+    SelfAttenuationApproach
   }
 
   subgraph params {
@@ -15,7 +15,7 @@ digraph Vanadium {
     ContainerInputWorkspace
     QuartzInputWorkspace
     TransmissionInputWorkspace
-    PaalmanPingsMonteCarloAbsorption
+    SampleSelfAttenuationFactors
     SampleAndEnvironmentProperties
   }
 
@@ -27,12 +27,14 @@ digraph Vanadium {
   subgraph algorithms {
     $algorithm_style
     Load
-    Divide
-    Multiply
-    Minus
-    Plus
-    Divide2 [label="Divide"]
-    SumOverlappingTubes
+    Divide [label="Normalize to monitor"]
+    Multiply [label="Correct polarising efficiency"]
+    Minus [label="Subtract background"]
+    Plus [label="Average counts"]
+    Divide2 [label="Normalize"]
+    PaalmanPingsMonteCarloAbsorption
+    PaalmanPingsAbsorptionCorrection
+    ApplyPaalmanPingsCorrection
   }
 
   Run -> Load
@@ -44,15 +46,19 @@ digraph Vanadium {
   TransmissionInputWorkspace -> Minus
   Minus -> Multiply
   QuartzInputWorkspace -> Multiply
-  Multiply -> PaalmanPingsMonteCarloAbsorption
+  Multiply -> SelfAttenuationApproach
+  SelfAttenuationApproach -> PaalmanPingsMonteCarloAbsorption
   SampleAndEnvironmentProperties -> PaalmanPingsMonteCarloAbsorption
-  PaalmanPingsMonteCarloAbsorption -> SumCountsOrAverage
-  SumCountsOrAverage -> SumOverlappingTubes
-  SumCountsOrAverage -> Plus
-  Plus -> ConvertUnits
-  SumCountsOrAverage -> ConvertUnits
-  ConvertUnits -> ConvertSpectrumAxis
-  ConvertSpectrumAxis -> Divide2
-  ConvertUnits -> Divide2
+  PaalmanPingsMonteCarloAbsorption -> ApplyPaalmanPingsCorrection
+  SelfAttenuationApproach -> PaalmanPingsAbsorptionCorrection
+  SampleAndEnvironmentProperties -> PaalmanPingsAbsorptionCorrection
+  PaalmanPingsAbsorptionCorrection -> ApplyPaalmanPingsCorrection
+  SelfAttenuationApproach -> SampleSelfAttenuationFactors
+  SampleSelfAttenuationFactors -> ApplyPaalmanPingsCorrection
+  ApplyPaalmanPingsCorrection -> AverageCounts
+  SelfAttenuationApproach -> AverageCounts
+  AverageCounts -> Divide2
+  AverageCounts -> Plus
+  Plus -> Divide2
   Divide2 -> OutputWorkspace
 }

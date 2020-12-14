@@ -18,9 +18,9 @@ digraph Quartz {
   subgraph algorithms {
     $algorithm_style
     Load
-    Divide
-    Minus
-    Divide2 [label="Divide"]
+    Divide [label="Normalize to monitor"]
+    Minus [label="Subtract background"]
+    Divide2 [label="Calculate polarising efficiencies"]
   }
 
   Run -> Load

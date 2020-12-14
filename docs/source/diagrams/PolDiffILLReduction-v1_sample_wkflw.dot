@@ -3,9 +3,8 @@ digraph Sample {
 
   subgraph decisions {
     $decision_style
-    ConvertUnits
-    SumCountsOrAverage
-    AbsoluteScaleBy
+    AverageCounts
+    SelfAttenuationApproach
   }
 
   subgraph params {
@@ -28,12 +27,14 @@ digraph Sample {
   subgraph algorithms {
     $algorithm_style
     Load
-    Divide
-    Multiply
-    DetectorEfficiencyCorUser
-    Minus
-    Plus
+    Divide [label="Normalize to monitor"]
+    Multiply [label="Correct polarising efficiency"]
+    Minus [label="Subtract background"]
+    Plus [label="Average counts"]
     Divide2 [label="Divide"]
+    PaalmanPingsMonteCarloAbsorption
+    PaalmanPingsAbsorptionCorrection
+    ApplyPaalmanPingsCorrection
     SumOverlappingTubes
   }
 
@@ -46,18 +47,22 @@ digraph Sample {
   TransmissionInputWorkspace -> Minus
   Minus -> Multiply
   QuartzInputWorkspace -> Multiply
-  Multiply -> DetectorEfficiencyCorUser
-  DetectorEfficiencyCorUser -> PaalmanPingsMonteCarloAbsorption
+  Multiply -> SelfAttenuationApproach
+  SelfAttenuationApproach -> PaalmanPingsMonteCarloAbsorption
   SampleAndEnvironmentProperties -> PaalmanPingsMonteCarloAbsorption
-  PaalmanPingsMonteCarloAbsorption -> SumCountsOrAverage
-  SumCountsOrAverage -> SumOverlappingTubes
-  SumCountsOrAverage -> Plus
-  Plus -> ConvertUnits
-  SumCountsOrAverage -> ConvertUnits
-  SumOverlappingTubes -> ConvertUnits
-  ConvertUnits -> ConvertSpectrumAxis
-  ConvertUnits -> OutputWorkspace
-  ConvertSpectrumAxis -> OutputWorkspace
+  PaalmanPingsMonteCarloAbsorption -> ApplyPaalmanPingsCorrection
+  SelfAttenuationApproach -> PaalmanPingsAbsorptionCorrection
+  SampleAndEnvironmentProperties -> PaalmanPingsAbsorptionCorrection
+  PaalmanPingsAbsorptionCorrection -> ApplyPaalmanPingsCorrection
+  SelfAttenuationApproach -> SampleSelfAttenuationFactors
+  SampleSelfAttenuationFactors -> ApplyPaalmanPingsCorrection
+  ApplyPaalmanPingsCorrection -> AverageCounts
+  SelfAttenuationApproach -> AverageCounts
+  AverageCounts -> SumOverlappingTubes
+  AverageCounts -> Plus
+  AverageCounts -> OutputWorkspace
+  SumOverlappingTubes -> OutputWorkspace
+  Plus -> OutputWorkspace
 }
 
 

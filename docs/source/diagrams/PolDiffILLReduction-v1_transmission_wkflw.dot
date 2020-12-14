@@ -18,12 +18,15 @@ digraph Transmission {
     Load
     Divide
     Minus
+    Minus2 [label="Minus"]
   }
 
   Run -> Load
   Load -> Minus
   AbsorberTransmissionInputWorkspace -> Minus
   Minus -> Divide
-  BeamInputWorkspace -> Divide
+  BeamInputWorkspace -> Minus2
+  AbsorberTransmissionInputWorkspace -> Minus2
+  Minus2 -> Divide
   Divide -> OutputWorkspace
 }
