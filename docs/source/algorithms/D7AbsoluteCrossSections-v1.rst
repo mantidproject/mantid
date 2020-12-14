@@ -104,7 +104,7 @@ Sample data normalisation
 
 The sample data normalisation is the final step of data reduction of D7 sample, and allows to simultaneously correct for detector efficiency and set the output to the absolute scale.
 
-There are three options for the normalisation; it uses either the input from a reference sample with a well-known cross-section, namely vanadium, or the output from the cross-section separation, either magnetic or spin-incoherent cross-sections.
+There are three options for the normalisation; it uses either the input from a reference sample with a well-known cross-section, namely vanadium, or the output from the cross-section separation, either magnetic or spin-incoherent cross-sections. A relative normalisation of the sample workspace to the detector with the highest counts is always performed.
 
 .. math:: S \text{(#,} \pm \text{, chn/t/meV)} = I \text{(#,} \pm \text{, chn/t/meV)} \cdot D \text{(#,} \pm \text{, chn/t/meV)},
 
@@ -153,8 +153,8 @@ Usage
 
    Load('ILL/D7/vanadium_xyz.nxs', OutputWorkspace='vanadium_xyz') # loads already reduced data
    D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', CrossSectionSeparationMethod='XYZ',
-	                   SampleAndEnvironmentProperties=sampleProperties,
-                           CrossSectionsOutputWorkspace='xyz', OutputWorkspace='_unused')
+                           SampleAndEnvironmentProperties=sampleProperties,
+                           OutputWorkspace='xyz')
    print("Number of separated cross-sections: {}".format(mtd['xyz'].getNumberOfEntries()))
    Integration(InputWorkspace=mtd['xyz'][1], OutputWorkspace='sum_coherent')
    Integration(InputWorkspace=mtd['xyz'][2], OutputWorkspace='sum_incoherent')
