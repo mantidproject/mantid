@@ -184,6 +184,7 @@ def get_run_number_from_workspace_name(workspace_name, instrument):
 def get_run_numbers_as_string_from_workspace_name(workspace_name, instrument):
     name = workspace_name.split(' ')[0]
     name = name.split('_')[0]
+    name = name.split(';')[0]
     runs = name.replace(instrument, '')
     return runs
 
