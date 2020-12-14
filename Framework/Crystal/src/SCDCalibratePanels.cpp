@@ -43,6 +43,7 @@ namespace Crystal {
 
 DECLARE_ALGORITHM(SCDCalibratePanels)
 
+
 /**
  * @brief Initialization
  * 
@@ -129,6 +130,7 @@ void SCDCalibratePanels::init() {
   setPropertyGroup("TofFilename", OUTPUTS);
 }
 
+
 /**
  * @brief Validate algorithm inputs
  *
@@ -145,6 +147,7 @@ CorelliPowderCalibrationLoad::validateInputs() {
   return issues;
 }
 
+
 /**
  * @brief Executes the algorithm.
  * 
@@ -153,12 +156,21 @@ void SCDCalibratePanels::exec() {
 
   /// Parse input
   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
+  auto nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
+  bool changeL1 = getProperty("ChangeL1");
+  bool changeT0 = getProperty("ChangeT0");
+  bool bankPanels = getProperty("CalibrateBanks");
+  bool snapPanels = getProperty("CalibrateSNAPPanels");
+  int edge = this->getProperty("EdgePixels");
 
-  // We must sort the peaks
+  /// Preprocess Peak table/workspace
+  // step 1: sort by bank name
   std::vector<std::pair<std::string, bool>> criteria{{"BankName", true}};
   peaksWs->sort(criteria);
-  // Remove peaks on edge
-  int edge = this->getProperty("EdgePixels");
+  // step 2: remove peaks on edge
+  // NOTE: The removal of pixel on/near on edge can also be done when
+  //       generating the peaks table, therefore this is an optional
+  //       step in most cases.
   Geometry::Instrument_const_sptr inst = peaksWs->getInstrument();
   if (edge > 0) {
     std::vector<Peak> &peaks = peaksWs->getPeaks();
@@ -169,19 +181,21 @@ void SCDCalibratePanels::exec() {
                              });
     peaks.erase(it, peaks.end());
   }
+
+  /// Find the initial guess of U
   findU(peaksWs);
 
-  auto nPeaks = static_cast<int>(peaksWs->getNumberPeaks());
-  bool changeL1 = getProperty("ChangeL1");
-  bool changeT0 = getProperty("ChangeT0");
-  bool bankPanels = getProperty("CalibrateBanks");
-  bool snapPanels = getProperty("CalibrateSNAPPanels");
-
-  if (changeT0)
+  /// Calcuate T0 if requested
+  if (changeT0){
     findT0(nPeaks, peaksWs);
-  if (changeL1)
-    findL1(nPeaks, peaksWs);
+  }
 
+  /// Calculate L1 if requested
+  if (changeL1){
+    findL1(nPeaks, peaksWs);
+  }
+
+  ///
   boost::container::flat_set<string> MyBankNames;
   boost::container::flat_set<string> MyPanels;
   if (snapPanels) {
@@ -210,6 +224,7 @@ void SCDCalibratePanels::exec() {
     }
   }
 
+  ///
   std::vector<std::string> fit_workspaces(MyBankNames.size() + MyPanels.size(),
                                           "fit_");
   std::vector<std::string> parameter_workspaces(
@@ -244,7 +259,7 @@ void SCDCalibratePanels::exec() {
     findL2(MyBankNames, peaksWs);
   }
 
-  // remove skipped banks
+  /// remove skipped banks
   for (int j = i - 1; j >= 0; j--) {
     if (!AnalysisDataService::Instance().doesExist(fit_workspaces[j]))
       fit_workspaces.erase(fit_workspaces.begin() + j);
@@ -252,6 +267,7 @@ void SCDCalibratePanels::exec() {
       parameter_workspaces.erase(parameter_workspaces.begin() + j);
   }
 
+  /// Post optimization
   // Try again to optimize L1
   if (changeL1) {
     findL1(nPeaks, peaksWs);
