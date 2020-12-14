@@ -43,9 +43,117 @@ namespace Crystal {
 
 DECLARE_ALGORITHM(SCDCalibratePanels)
 
+/**
+ * @brief Initialization
+ * 
+ */
+void SCDCalibratePanels::init() {
+  declareProperty(
+    std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
+                      "PeakWorkspace", "", Kernel::Direction::InOut,
+                      PropertyMode::Mandatory),
+    "Workspace of Indexed Peaks");
 
+  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
+  mustBePositive->setLower(0.0);
+
+  declareProperty("a", EMPTY_DBL(), mustBePositive,
+                  "Lattice Parameter a in Angstrom(Leave empty to use lattice constants "
+                  "in peaks workspace)");
+  declareProperty("b", EMPTY_DBL(), mustBePositive,
+                  "Lattice Parameter b in Angstrom (Leave empty to use lattice constants "
+                  "in peaks workspace)");
+  declareProperty("c", EMPTY_DBL(), mustBePositive,
+                  "Lattice Parameter c in Angstrom (Leave empty to use lattice constants "
+                  "in peaks workspace)");
+  declareProperty("alpha", EMPTY_DBL(), mustBePositive,
+                  "Lattice Parameter alpha in degrees (Leave empty to use "
+                  "lattice constants in peaks workspace)");
+  declareProperty("beta", EMPTY_DBL(), mustBePositive,
+                  "Lattice Parameter beta in degrees (Leave empty to use "
+                  "lattice constants in peaks workspace)");
+  declareProperty("gamma", EMPTY_DBL(), mustBePositive,
+                  "Lattice Parameter gamma in degrees (Leave empty to use "
+                  "lattice constants in peaks workspace)");
+
+  declareProperty("ChangeL1", true, "Change the L1(source to sample) distance");
+  declareProperty("ChangeT0", false, "Change the T0 (initial TOF)");
+  declareProperty("ChangePanelSize", true,
+                  "Change the height and width of the "
+                  "detectors.  Implemented only for "
+                  "RectangularDetectors.");
+
+  declareProperty("EdgePixels", 0,
+                  "Remove peaks that are at pixels this close to edge. ");
+  declareProperty("CalibrateBanks", true, "Calibrate the panels of the banks.");
+  declareProperty("CalibrateSNAPPanels", false,
+                  "Calibrate the 3 X 3 panels of the "
+                  "sides of SNAP.");
+
+  // ---------- outputs
+  const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
+  declareProperty(
+      std::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate.DetCal",
+                                     FileProperty::Save, detcalExts),
+      "Path to an ISAW-style .detcal file to save.");
+
+  declareProperty(
+      std::make_unique<FileProperty>("XmlFilename", "",
+                                     FileProperty::OptionalSave, ".xml"),
+      "Path to an Mantid .xml description(for LoadParameterFile) file to "
+      "save.");
+
+  declareProperty(std::make_unique<FileProperty>("ColFilename",
+                                                 "ColCalcvsTheor.nxs",
+                                                 FileProperty::Save, ".nxs"),
+                  "Path to a NeXus file comparing calculated and theoretical "
+                  "column of each peak.");
+
+  declareProperty(std::make_unique<FileProperty>("RowFilename",
+                                                 "RowCalcvsTheor.nxs",
+                                                 FileProperty::Save, ".nxs"),
+                  "Path to a NeXus file comparing calculated and theoretical "
+                  "row of each peak.");
+
+  declareProperty(std::make_unique<FileProperty>("TofFilename",
+                                                 "TofCalcvsTheor.nxs",
+                                                 FileProperty::Save, ".nxs"),
+                  "Path to a NeXus file comparing calculated and theoretical "
+                  "TOF of each peak.");
+
+  const string OUTPUTS("Outputs");
+  setPropertyGroup("DetCalFilename", OUTPUTS);
+  setPropertyGroup("XmlFilename", OUTPUTS);
+  setPropertyGroup("ColFilename", OUTPUTS);
+  setPropertyGroup("RowFilename", OUTPUTS);
+  setPropertyGroup("TofFilename", OUTPUTS);
+}
+
+/**
+ * @brief Validate algorithm inputs
+ *
+ * @return std::map<std::string, std::string>
+ */
+std::map<std::string, std::string>
+CorelliPowderCalibrationLoad::validateInputs() {
+  std::map<std::string, std::string> issues;
+
+  // check 1: peaks space is not empty
+
+  // check 2:
+
+  return issues;
+}
+
+/**
+ * @brief Executes the algorithm.
+ * 
+ */
 void SCDCalibratePanels::exec() {
+
+  /// Parse input
   PeaksWorkspace_sptr peaksWs = getProperty("PeakWorkspace");
+
   // We must sort the peaks
   std::vector<std::pair<std::string, bool>> criteria{{"BankName", true}};
   peaksWs->sort(criteria);
@@ -467,84 +575,6 @@ void SCDCalibratePanels::saveIsawDetCal(
 }
 
 
-void SCDCalibratePanels::init() {
-  declareProperty(std::make_unique<WorkspaceProperty<PeaksWorkspace>>(
-                      "PeakWorkspace", "", Kernel::Direction::InOut),
-                  "Workspace of Indexed Peaks");
-
-  auto mustBePositive = std::make_shared<BoundedValidator<double>>();
-  mustBePositive->setLower(0.0);
-
-  declareProperty("a", EMPTY_DBL(), mustBePositive,
-                  "Lattice Parameter a (Leave empty to use lattice constants "
-                  "in peaks workspace)");
-  declareProperty("b", EMPTY_DBL(), mustBePositive,
-                  "Lattice Parameter b (Leave empty to use lattice constants "
-                  "in peaks workspace)");
-  declareProperty("c", EMPTY_DBL(), mustBePositive,
-                  "Lattice Parameter c (Leave empty to use lattice constants "
-                  "in peaks workspace)");
-  declareProperty("alpha", EMPTY_DBL(), mustBePositive,
-                  "Lattice Parameter alpha in degrees (Leave empty to use "
-                  "lattice constants in peaks workspace)");
-  declareProperty("beta", EMPTY_DBL(), mustBePositive,
-                  "Lattice Parameter beta in degrees (Leave empty to use "
-                  "lattice constants in peaks workspace)");
-  declareProperty("gamma", EMPTY_DBL(), mustBePositive,
-                  "Lattice Parameter gamma in degrees (Leave empty to use "
-                  "lattice constants in peaks workspace)");
-  declareProperty("ChangeL1", true, "Change the L1(source to sample) distance");
-  declareProperty("ChangeT0", false, "Change the T0 (initial TOF)");
-  declareProperty("ChangePanelSize", true,
-                  "Change the height and width of the "
-                  "detectors.  Implemented only for "
-                  "RectangularDetectors.");
-
-  declareProperty("EdgePixels", 0,
-                  "Remove peaks that are at pixels this close to edge. ");
-  declareProperty("CalibrateBanks", true, "Calibrate the panels of the banks.");
-  declareProperty("CalibrateSNAPPanels", false,
-                  "Calibrate the 3 X 3 panels of the "
-                  "sides of SNAP.");
-
-  // ---------- outputs
-  const std::vector<std::string> detcalExts{".DetCal", ".Det_Cal"};
-  declareProperty(
-      std::make_unique<FileProperty>("DetCalFilename", "SCDCalibrate.DetCal",
-                                     FileProperty::Save, detcalExts),
-      "Path to an ISAW-style .detcal file to save.");
-
-  declareProperty(
-      std::make_unique<FileProperty>("XmlFilename", "",
-                                     FileProperty::OptionalSave, ".xml"),
-      "Path to an Mantid .xml description(for LoadParameterFile) file to "
-      "save.");
-
-  declareProperty(std::make_unique<FileProperty>("ColFilename",
-                                                 "ColCalcvsTheor.nxs",
-                                                 FileProperty::Save, ".nxs"),
-                  "Path to a NeXus file comparing calculated and theoretical "
-                  "column of each peak.");
-
-  declareProperty(std::make_unique<FileProperty>("RowFilename",
-                                                 "RowCalcvsTheor.nxs",
-                                                 FileProperty::Save, ".nxs"),
-                  "Path to a NeXus file comparing calculated and theoretical "
-                  "row of each peak.");
-
-  declareProperty(std::make_unique<FileProperty>("TofFilename",
-                                                 "TofCalcvsTheor.nxs",
-                                                 FileProperty::Save, ".nxs"),
-                  "Path to a NeXus file comparing calculated and theoretical "
-                  "TOF of each peak.");
-
-  const string OUTPUTS("Outputs");
-  setPropertyGroup("DetCalFilename", OUTPUTS);
-  setPropertyGroup("XmlFilename", OUTPUTS);
-  setPropertyGroup("ColFilename", OUTPUTS);
-  setPropertyGroup("RowFilename", OUTPUTS);
-  setPropertyGroup("TofFilename", OUTPUTS);
-}
 
 
 void writeXmlParameter(ofstream &ostream, const string &name,

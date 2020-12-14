@@ -55,7 +55,10 @@ public:
   };
 
 private:
-  
+
+  /// Private validator for inputs
+  std::map<std::string, std::string> validateInputs() override;
+
   /// save to DetCal format, can be loaded with func LoadIsawDetCal()
   void saveIsawDetCal(std::shared_ptr<Geometry::Instrument> &instrument,
                       boost::container::flat_set<std::string> &AllBankName,
