@@ -67,8 +67,7 @@ class QLresTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         filenames = ['irs26176_graphite002_QLr.lpt','irs26176_graphite002_QLr.ql1',
-                     'irs26176_graphite002_QLr.ql2','irs26176_graphite002_QLr.ql3',
-                     'irs26176_graphite002_QLr_Parameters.nxs']
+                     'irs26176_graphite002_QLr.ql2','irs26176_graphite002_QLr.ql3']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
 #==============================================================================
@@ -181,7 +180,7 @@ class QSeTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         AnalysisDataService.clear()
-        filenames = ['irs26176_graphite002_QSe_Parameters.nxs', 'irs26176_graphite002_Qse.qse',
+        filenames = ['irs26176_graphite002_Qse.qse',
                      'irs26176_graphite002_Qse.lpt']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
@@ -226,8 +225,7 @@ class QLDataTest(systemtesting.MantidSystemTest):
     def cleanup(self):
         AnalysisDataService.clear()
         filenames = ['irs26176_graphite002_QLd.lpt','irs26176_graphite002_QLd.ql1',
-                     'irs26176_graphite002_QLd.ql2','irs26176_graphite002_QLd.ql3',
-                     'irs26176_graphite002_QLd_Parameters.nxs']
+                     'irs26176_graphite002_QLd.ql2','irs26176_graphite002_QLd.ql3']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
 #==============================================================================
@@ -274,9 +272,8 @@ class QLResNormTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         AnalysisDataService.clear()
-        filenames = ['irs26176_graphite002_QLd.lpt','irs26176_graphite002_QLd.ql1',
-                     'irs26176_graphite002_QLd.ql2','irs26176_graphite002_QLd.ql3',
-                     'irs26176_graphite002_QLd_Parameters.nxs']
+        filenames = ['irs26176_graphite002_QLr.lpt','irs26176_graphite002_QLr.ql1',
+                     'irs26176_graphite002_QLr.ql2','irs26176_graphite002_QLr.ql3']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
 #==============================================================================
@@ -317,9 +314,8 @@ class QLWidthTest(systemtesting.MantidSystemTest):
 
     def cleanup(self):
         AnalysisDataService.clear()
-        filenames = ['irs26176_graphite002_QLd.lpt','irs26176_graphite002_QLd.ql1',
-                     'irs26176_graphite002_QLd.ql2','irs26176_graphite002_QLd.ql3',
-                     'irs26176_graphite002_QLd_Parameters.nxs']
+        filenames = ['irs26176_graphite002_QLr.lpt','irs26176_graphite002_QLr.ql1',
+                     'irs26176_graphite002_QLr.ql2','irs26176_graphite002_QLr.ql3']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
 #==============================================================================
