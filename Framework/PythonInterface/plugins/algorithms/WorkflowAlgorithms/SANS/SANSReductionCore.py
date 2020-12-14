@@ -152,8 +152,10 @@ class SANSReductionCore(SANSReductionCoreBase):
         unfit_trans_workspace = {k: v.unfitted_transmission_workspace for k, v in adjustment_dict.items()}
         self._add_metadata(state, unfit_trans_workspace)
 
-        self.setProperty("CalculatedTransmissionWorkspaces", self._group_workspaces(calc_trans_workspaces))
-        self.setProperty("UnfittedTransmissionWorkspaces", self._group_workspaces(unfit_trans_workspace))
+        if any(calc_trans_workspaces.values()):
+            self.setProperty("CalculatedTransmissionWorkspaces", self._group_workspaces(calc_trans_workspaces))
+        if any(unfit_trans_workspace.values()):
+            self.setProperty("UnfittedTransmissionWorkspaces", self._group_workspaces(unfit_trans_workspace))
 
     def validateInputs(self):
         errors = dict()

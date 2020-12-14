@@ -218,11 +218,15 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
     def _group_workspaces(self, workspaces):
         group = WorkspaceGroup()
         for ws in workspaces.values():
-            group.addWorkspace(ws)
+            if ws:
+                group.addWorkspace(ws)
         return group
 
     def _add_metadata(self, state, workspaces):
         for wav_range, ws in workspaces.items():
+            if not ws:
+                continue  # If we have something disabled but meta-data is still produced
+
             replace_prop = True
             run = ws.getRun()
             # The wavelength range allows the calling algorithms to get this back out, without
@@ -235,28 +239,30 @@ class SANSReductionCoreBase(DistributedDataProcessorAlgorithm):
                 run.addProperty("BatchFile", os.path.basename(state.save.batch_file), replace_prop)
         return workspaces  # Allow us to chain up these commands
 
-    def _copy_bin_masks(self, workspaces, dummy_workspace):
-        for ws_range, ws in workspaces.items():
-            mask_options = {"InputWorkspace": ws,
-                            "MaskedWorkspace": dummy_workspace,
+    def _copy_bin_masks(self, workspaces, dummy_workspaces):
+        for wav_range in workspaces.keys():
+            mask_options = {"InputWorkspace": workspaces[wav_range],
+                            "MaskedWorkspace": dummy_workspaces[wav_range],
                             "OutputWorkspace": EMPTY_NAME}
             mask_alg = create_child_algorithm(self, "MaskBinsFromWorkspace", **mask_options)
             mask_alg.execute()
-            workspaces[ws_range] = ws
+            workspaces[wav_range] = mask_alg.getProperty("OutputWorkspace").value
 
-    def _convert_to_histogram(self, workspace):
-        if isinstance(workspace, IEventWorkspace):
-            convert_name = "RebinToWorkspace"
-            convert_options = {"WorkspaceToRebin": workspace,
-                               "WorkspaceToMatch": workspace,
-                               "OutputWorkspace": "OutputWorkspace",
-                               "PreserveEvents": False}
-            convert_alg = create_child_algorithm(self, convert_name, **convert_options)
-            convert_alg.execute()
-            workspace = convert_alg.getProperty("OutputWorkspace").value
-            append_to_sans_file_tag(workspace, "_histogram")
+    def _convert_to_histogram(self, workspaces):
+        for wav_range, workspace in workspaces.items():
+            if isinstance(workspace, IEventWorkspace):
+                convert_name = "RebinToWorkspace"
+                convert_options = {"WorkspaceToRebin": workspace,
+                                   "WorkspaceToMatch": workspace,
+                                   "OutputWorkspace": "OutputWorkspace",
+                                   "PreserveEvents": False}
+                convert_alg = create_child_algorithm(self, convert_name, **convert_options)
+                convert_alg.execute()
+                workspace = convert_alg.getProperty("OutputWorkspace").value
+                append_to_sans_file_tag(workspace, "_histogram")
+                workspaces[wav_range] = workspace
 
-        return workspace
+        return workspaces
 
     def _convert_to_q(self, state, workspaces: WsList,
                       adjustment_dict: Dict[WavRange, AdjustmentStruct]) -> Dict[WavRange, SumsStruct]:

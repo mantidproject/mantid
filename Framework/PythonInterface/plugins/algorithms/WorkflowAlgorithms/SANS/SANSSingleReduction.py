@@ -136,12 +136,10 @@ class SANSSingleReduction(SANSSingleReductionBase):
         # We want to make use of optimizations here. If a can workspace has already been reduced with the same can
         # settings and is stored in the ADS, then we should use it (provided the user has optimizations enabled).
         if use_optimizations and reduction_setting_bundle.data_type is DataType.CAN:
-            output_bundles, output_parts_bundles, \
-                output_transmission_bundles = run_optimized_for_can(reduction_alg, reduction_setting_bundle)
+            reduced_slices = run_optimized_for_can(reduction_alg, reduction_setting_bundle)
         else:
-            output_bundles, output_parts_bundles, \
-                output_transmission_bundles = run_core_reduction(reduction_alg, reduction_setting_bundle)
-        return output_bundles, output_parts_bundles, output_transmission_bundles
+            reduced_slices = run_core_reduction(reduction_alg, reduction_setting_bundle)
+        return reduced_slices
 
     def _set_prop_if_group_has_data(self, prop_name, group_ws):
         if group_ws.size() != 0:
@@ -192,22 +190,21 @@ class SANSSingleReduction(SANSSingleReductionBase):
         lab_groups = WorkspaceGroup()
         hab_groups = WorkspaceGroup()
 
-        for collected_bundles in completed_event_bundled:
-            for output_bundle in collected_bundles.output_bundles:
-                if output_bundle.data_type is DataType.CAN:
-                    reduction_mode = output_bundle.reduction_mode
-                    output_workspace = output_bundle.output_workspace
-                    # Make sure that the output workspace is not None which can be the case if there has never been a
-                    # can set for the reduction.
+        for bundle in completed_event_bundled:
+            if bundle.output_bundle.data_type is DataType.CAN:
+                reduction_mode = bundle.output_bundle.reduction_mode
+                output_workspace = bundle.output_bundle.output_workspace
+                # Make sure that the output workspace is not None which can be the case if there has never been a
+                # can set for the reduction.
 
-                    if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
-                        if reduction_mode is ReductionMode.LAB:
-                            lab_groups.addWorkspace(output_workspace)
-                        elif reduction_mode is ReductionMode.HAB:
-                            hab_groups.addWorkspace(output_workspace)
-                        else:
-                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                               " be set with a can.".format(reduction_mode))
+                if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
+                    if reduction_mode is ReductionMode.LAB:
+                        lab_groups.addWorkspace(output_workspace)
+                    elif reduction_mode is ReductionMode.HAB:
+                        hab_groups.addWorkspace(output_workspace)
+                    else:
+                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
+                                           " be set with a can.".format(reduction_mode))
 
         self._set_prop_if_group_has_data("OutputWorkspaceLABCan", lab_groups)
         self._set_prop_if_group_has_data("OutputWorkspaceHABCan", hab_groups)
@@ -223,26 +220,25 @@ class SANSSingleReduction(SANSSingleReductionBase):
         lab_can_counts, hab_can_counts = WorkspaceGroup(), WorkspaceGroup()
         lab_can_norms, hab_can_norms = WorkspaceGroup(), WorkspaceGroup()
 
-        for completed_bundles in completed_event_slices:
-            for output_bundle_part in completed_bundles.parts_bundles:
-                if output_bundle_part.data_type is DataType.CAN:
-                    reduction_mode = output_bundle_part.reduction_mode
-                    output_workspace_count = output_bundle_part.output_workspace_count
-                    output_workspace_norm = output_bundle_part.output_workspace_norm
-                    # Make sure that the output workspace is not None which can be the case if there has never been a
-                    # can set for the reduction.
-                    if output_workspace_norm is not None and output_workspace_count is not None and \
-                            not does_can_workspace_exist_on_ads(output_workspace_norm) and \
-                            not does_can_workspace_exist_on_ads(output_workspace_count):
-                        if reduction_mode is ReductionMode.LAB:
-                            lab_can_counts.addWorkspace(output_workspace_count)
-                            lab_can_norms.addWorkspace(output_workspace_norm)
-                        elif reduction_mode is ReductionMode.HAB:
-                            hab_can_counts.addWorkspace(output_workspace_count)
-                            hab_can_norms.addWorkspace(output_workspace_norm)
-                        else:
-                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                               " be set with a partial can.".format(reduction_mode))
+        for bundle in completed_event_slices:
+            if bundle.output_bundle.data_type is DataType.CAN:
+                reduction_mode = bundle.parts_bundle.reduction_mode
+                output_workspace_count = bundle.parts_bundle.output_workspace_count
+                output_workspace_norm = bundle.parts_bundle.output_workspace_norm
+                # Make sure that the output workspace is not None which can be the case if there has never been a
+                # can set for the reduction.
+                if output_workspace_norm is not None and output_workspace_count is not None and \
+                        not does_can_workspace_exist_on_ads(output_workspace_norm) and \
+                        not does_can_workspace_exist_on_ads(output_workspace_count):
+                    if reduction_mode is ReductionMode.LAB:
+                        lab_can_counts.addWorkspace(output_workspace_count)
+                        lab_can_norms.addWorkspace(output_workspace_norm)
+                    elif reduction_mode is ReductionMode.HAB:
+                        hab_can_counts.addWorkspace(output_workspace_count)
+                        hab_can_norms.addWorkspace(output_workspace_norm)
+                    else:
+                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
+                                           " be set with a partial can.".format(reduction_mode))
 
         self._set_prop_if_group_has_data("OutputWorkspaceLABCanCount", lab_can_counts)
         self._set_prop_if_group_has_data("OutputWorkspaceLABCanNorm", lab_can_norms)
@@ -258,28 +254,27 @@ class SANSSingleReduction(SANSSingleReductionBase):
         """
         lab_cans, hab_cans = WorkspaceGroup(), WorkspaceGroup()
         lab_samples, hab_samples = WorkspaceGroup(), WorkspaceGroup()
-        for completed_bundle in completed_event_slices:
-            for output_bundle in completed_bundle.output_bundles:
-                reduction_mode = output_bundle.reduction_mode
-                output_workspace = output_bundle.output_workspace
-                if output_bundle.data_type is DataType.CAN:
-                    if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
-                        if reduction_mode is ReductionMode.LAB:
-                            lab_cans.addWorkspace(output_workspace)
-                        elif reduction_mode is ReductionMode.HAB:
-                            hab_cans.addWorkspace(output_workspace)
-                        else:
-                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                               " be set with a can.".format(reduction_mode))
-                elif output_bundle.data_type is DataType.SAMPLE:
-                    if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
-                        if reduction_mode is ReductionMode.LAB:
-                            lab_samples.addWorkspace(output_workspace)
-                        elif reduction_mode is ReductionMode.HAB:
-                            hab_samples.addWorkspace(output_workspace)
-                        else:
-                            raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
-                                               " be set with a sample.".format(reduction_mode))
+        for bundle in completed_event_slices:
+            reduction_mode = bundle.output_bundle.reduction_mode
+            output_workspace = bundle.output_bundle.output_workspace
+            if bundle.data_type is DataType.CAN:
+                if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
+                    if reduction_mode is ReductionMode.LAB:
+                        lab_cans.addWorkspace(output_workspace)
+                    elif reduction_mode is ReductionMode.HAB:
+                        hab_cans.addWorkspace(output_workspace)
+                    else:
+                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
+                                           " be set with a can.".format(reduction_mode))
+            elif bundle.data_type is DataType.SAMPLE:
+                if output_workspace is not None and not does_can_workspace_exist_on_ads(output_workspace):
+                    if reduction_mode is ReductionMode.LAB:
+                        lab_samples.addWorkspace(output_workspace)
+                    elif reduction_mode is ReductionMode.HAB:
+                        hab_samples.addWorkspace(output_workspace)
+                    else:
+                        raise RuntimeError("SANSSingleReduction: The reduction mode {0} should not"
+                                           " be set with a sample.".format(reduction_mode))
         self._set_prop_if_group_has_data("OutputWorkspaceLABCan", lab_cans)
         self._set_prop_if_group_has_data("OutputWorkspaceHABCan", hab_cans)
         self._set_prop_if_group_has_data("OutputWorkspaceLABSample", lab_samples)
@@ -290,36 +285,34 @@ class SANSSingleReduction(SANSSingleReductionBase):
         unfit_can, unfit_sample = WorkspaceGroup(), WorkspaceGroup()
 
         output_hab_or_lab = None
-        for completed_bundle in completed_event_slices:
-            for transmission_bundle, out_bundle in \
-                    zip(completed_bundle.transmission_bundles, completed_bundle.output_bundles):
-                if output_hab_or_lab is not None and output_hab_or_lab != out_bundle.reduction_mode:
-                    continue  # The transmission workspace for HAB/LAB is the same, so only output one
-                output_hab_or_lab = out_bundle.reduction_mode
-                fit_performed = fit_state[transmission_bundle.data_type.value].fit_type != FitType.NO_FIT
-                calculated_transmission_workspace = transmission_bundle.calculated_transmission_workspace
-                unfitted_transmission_workspace = transmission_bundle.unfitted_transmission_workspace
-                if transmission_bundle.data_type is DataType.CAN:
-                    if does_can_workspace_exist_on_ads(calculated_transmission_workspace):
-                        # The workspace is cloned here because the transmission runs are diagnostic output so even though
-                        # the values already exist they need to be labelled separately for each reduction.
-                        calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace,
-                                                                           StoreInADS=False)
-                    if does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
-                        unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace,
-                                                                         StoreInADS=False)
-                    if fit_performed:
-                        calc_can.addWorkspace(calculated_transmission_workspace)
+        for bundle in completed_event_slices:
+            if output_hab_or_lab is not None and output_hab_or_lab != bundle.output_bundle.reduction_mode:
+                continue  # The transmission workspace for HAB/LAB is the same, so only output one
+            output_hab_or_lab = bundle.output_bundle.reduction_mode
+            calculated_transmission_workspace = bundle.transmission_bundle.calculated_transmission_workspace
+            unfitted_transmission_workspace = bundle.transmission_bundle.unfitted_transmission_workspace
+            if bundle.transmission_bundle.data_type is DataType.CAN:
+                if does_can_workspace_exist_on_ads(calculated_transmission_workspace):
+                    # The workspace is cloned here because the transmission runs are diagnostic output so even though
+                    # the values already exist they need to be labelled separately for each reduction.
+                    calculated_transmission_workspace = CloneWorkspace(calculated_transmission_workspace,
+                                                                       StoreInADS=False)
+                if does_can_workspace_exist_on_ads(unfitted_transmission_workspace):
+                    unfitted_transmission_workspace = CloneWorkspace(unfitted_transmission_workspace,
+                                                                     StoreInADS=False)
+                if calculated_transmission_workspace:
+                    calc_can.addWorkspace(calculated_transmission_workspace)
+                if unfitted_transmission_workspace:
                     unfit_can.addWorkspace(unfitted_transmission_workspace)
 
-                elif transmission_bundle.data_type is DataType.SAMPLE:
-                    if fit_performed:
-                        calc_sample.addWorkspace(calculated_transmission_workspace)
+            elif bundle.transmission_bundle.data_type is DataType.SAMPLE:
+                if calculated_transmission_workspace:
+                    calc_sample.addWorkspace(calculated_transmission_workspace)
+                if unfitted_transmission_workspace:
                     unfit_sample.addWorkspace(unfitted_transmission_workspace)
-
-                else:
-                    raise RuntimeError("SANSSingleReduction: The data type {0} should be"
-                                       " sample or can.".format(transmission_bundle.data_type))
+            else:
+                raise RuntimeError("SANSSingleReduction: The data type {0} should be"
+                                   " sample or can.".format(bundle.transmission_bundle.data_type))
 
         self._set_prop_if_group_has_data("OutputWorkspaceCalculatedTransmission", calc_sample)
         self._set_prop_if_group_has_data("OutputWorkspaceUnfittedTransmission", unfit_sample)

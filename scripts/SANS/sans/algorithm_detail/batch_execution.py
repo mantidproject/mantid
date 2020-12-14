@@ -769,8 +769,7 @@ def _set_alg_output_names(reduction_package, reduction_alg, event_slice_optimisa
         if not ws_group:
             return
 
-        for i in range(ws_group.size()):
-            ws = ws_group.getItem(i)
+        for ws in ws_group:
             if not transmission:
                 # Use event_slice from set_properties_for_reduction_algorithm scope
                 wav_range = get_wav_range_from_ws(ws)
@@ -791,23 +790,24 @@ def _set_alg_output_names(reduction_package, reduction_alg, event_slice_optimisa
             getattr(_reduction_package, _atrr_out_name_base).append(_out_name_base)
 
     def _set_custom_output_name(ws, reduction_package, workspace_names,
-                                workspace_names_base, package_attribute_name, package_attribute_name_base):
+                                workspace_name_base, package_attribute_name, package_attribute_name_base):
         if not ws:
+            setattr(reduction_package, package_attribute_name, None)
+            setattr(reduction_package, package_attribute_name_base, None)
             return
 
         if isinstance(ws, Workspace2D):
             setattr(reduction_package, package_attribute_name, workspace_names)
-            setattr(reduction_package, package_attribute_name_base, workspace_names_base)
+            setattr(reduction_package, package_attribute_name_base, workspace_name_base)
             ads_instance.addOrReplace(workspace_names, ws)
         else:
             setattr(reduction_package, package_attribute_name, [])
-            setattr(reduction_package, package_attribute_name_base, [])
+            setattr(reduction_package, package_attribute_name_base, workspace_name_base)
             assert isinstance(ws, WorkspaceGroup), f"Expected Ws2D or WsGroup, got {repr(ws)} instead"
             for i in range(ws.size()):
                 ws_i = ws.getItem(i)
                 ads_instance.addOrReplace(workspace_names[i], ws_i)
                 getattr(reduction_package, package_attribute_name).append(workspace_names[i])
-                getattr(reduction_package, package_attribute_name_base).append(workspace_names_base[i])
 
     def _set_lab(_reduction_bundle, _reduction_package, _is_group):
         _set_output_name(_reduction_package.reduced_lab_can, _reduction_package, _is_group, ReductionMode.LAB,
@@ -869,15 +869,19 @@ def _set_alg_output_names(reduction_package, reduction_alg, event_slice_optimisa
     # Set the output workspaces for the calculated and unfitted transmission
     # ------------------------------------------------------------------------------------------------------------------
     def get_transmission_names(_trans_ws_group, data_type, is_fitted):
-        output_names, output_base_names = [], []
+        output_names = []
+        base_name = None
+
+        if not _trans_ws_group:
+            return output_names, base_name
+
         for ws in _trans_ws_group:
             range_str = ws.getRun().getProperty("Wavelength Range").valueAsStr
             wav_range = range_str.split('-')
             trans_name, base_name = get_transmission_output_name(reduction_package.state, wav_range,
                                                                  data_type, multi_reduction_type, is_fitted)
             output_names.append(trans_name)
-            output_base_names.append(base_name)
-        return output_names, output_base_names
+        return output_names, base_name
 
     sample_calculated_transmission, \
         sample_calculated_transmission_base = get_transmission_names(reduction_package.calculated_transmission,
@@ -1124,15 +1128,16 @@ def save_to_file(reduction_packages, save_can, additional_run_numbers, event_sli
     state = reduction_packages[0].state
     save_info = state.save
     file_formats = save_info.file_format
-    for name_to_save in workspaces_names_to_save:
-        if isinstance(name_to_save, tuple):
-            transmission = name_to_save[1]
-            transmission_can = name_to_save[2]
-            name_to_save = name_to_save[0]
-            save_workspace_to_file(name_to_save, file_formats, name_to_save, additional_run_numbers,
-                                   transmission, transmission_can)
+    for i, to_save in enumerate(workspaces_names_to_save):
+        if isinstance(to_save, tuple):
+            transmission = to_save[1][i] if to_save[1] else ''
+            transmission_can = to_save[2][i] if to_save[2] else ''
+            names_to_save = to_save[0]
+            for name_to_save in names_to_save:
+                save_workspace_to_file(name_to_save, file_formats, name_to_save, additional_run_numbers,
+                                       transmission, transmission_can)
         else:
-            save_workspace_to_file(name_to_save, file_formats, name_to_save, additional_run_numbers)
+            save_workspace_to_file(to_save, file_formats, to_save, additional_run_numbers)
 
 
 def delete_reduced_workspaces(reduction_packages, include_non_transmission=True):
@@ -1237,19 +1242,22 @@ def get_transmission_names_to_save(reduction_package, can):
     """
     if can:
         base_name = reduction_package.unfitted_transmission_can_base_name
-        ws_name = reduction_package.unfitted_transmission_can_name
+        ws_names = reduction_package.unfitted_transmission_can_name
     else:
         base_name = reduction_package.unfitted_transmission_base_name
-        ws_name = reduction_package.unfitted_transmission_name
-    if base_name in (None, '') or ws_name in (None, ''):
-        return ''
+        ws_names = reduction_package.unfitted_transmission_name
+    if base_name in (None, '') or ws_names in (None, '', []):
+        return []
+
+    ws_in_ads = []
 
     if AnalysisDataService.doesExist(base_name):
         group = AnalysisDataService.retrieve(base_name)
-        if group.contains(ws_name):
-            return ws_name
+        for ws_name in ws_names:
+            if group.contains(ws_name):
+                ws_in_ads.append(ws_name)
 
-    return ''
+    return ws_in_ads
 
 
 def get_all_names_to_save(reduction_packages, save_can):
@@ -1260,6 +1268,9 @@ def get_all_names_to_save(reduction_packages, save_can):
     :param save_can: a bool, whether or not to save unsubtracted can workspace
     :return: a list of workspace names to save.
     """
+    def get_ws_names_from_group(ws_group):
+        return [ws.name() for ws in ws_group]
+
     names_to_save = []
     for reduction_package in reduction_packages:
         reduced_lab = reduction_package.reduced_lab
@@ -1275,31 +1286,30 @@ def get_all_names_to_save(reduction_packages, save_can):
 
         if save_can:
             if reduced_merged:
-                names_to_save.append((reduced_merged.name(), trans_name, trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_merged), trans_name, trans_can_name))
             if reduced_lab:
-                names_to_save.append((reduced_lab.name(), trans_name, trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_lab), trans_name, trans_can_name))
             if reduced_hab:
-                names_to_save.append((reduced_hab.name(), trans_name, trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_hab), trans_name, trans_can_name))
             if reduced_lab_can:
-                names_to_save.append((reduced_lab_can.name(), '', trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_lab_can), '', trans_can_name))
             if reduced_hab_can:
-                names_to_save.append((reduced_hab_can.name(), '', trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_hab_can), '', trans_can_name))
             if reduced_lab_sample:
-                names_to_save.append((reduced_lab_sample.name(), trans_name, ''))
+                names_to_save.append((get_ws_names_from_group(reduced_lab_sample), trans_name, ''))
             if reduced_hab_sample:
-                names_to_save.append((reduced_hab_sample.name(), trans_name, ''))
+                names_to_save.append((get_ws_names_from_group(reduced_hab_sample), trans_name, ''))
 
         # If we have merged reduction then store the
         elif reduced_merged:
-            names_to_save.append((reduced_merged.name(), trans_name, trans_can_name))
+            names_to_save.append((get_ws_names_from_group(reduced_merged), trans_name, trans_can_name))
         else:
             if reduced_lab:
-                names_to_save.append((reduced_lab.name(), trans_name, trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_lab), trans_name, trans_can_name))
             if reduced_hab:
-                names_to_save.append((reduced_hab.name(), trans_name, trans_can_name))
+                names_to_save.append((get_ws_names_from_group(reduced_hab), trans_name, trans_can_name))
 
-    # We might have some workspaces as duplicates (the group workspaces), so make them unique
-    return set(names_to_save)
+    return names_to_save
 
 
 def get_event_slice_names_to_save(reduction_packages, save_can):

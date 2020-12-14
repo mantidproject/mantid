@@ -56,9 +56,9 @@ def calculate_transmission(transmission_ws, direct_ws, state_adjustment_calculat
     # 2. Clean transmission data
 
     data_type = DataType(data_type_str)
-    transmission_ws = _get_corrected_wavelength_workspace(transmission_ws, all_detector_ids,
+    transmission_ws = _get_corrected_wavelength_workspace(transmission_ws, wav_range, all_detector_ids,
                                                           calculate_transmission_state, data_type=data_type)
-    direct_ws = _get_corrected_wavelength_workspace(direct_ws, all_detector_ids,
+    direct_ws = _get_corrected_wavelength_workspace(direct_ws, wav_range, all_detector_ids,
                                                     calculate_transmission_state, data_type=data_type)
 
     # 3. Fit
@@ -174,11 +174,12 @@ def _get_detector_ids_for_transmission_calculation(transmission_workspace, calcu
     return detector_ids_roi, detector_id_transmission_monitor
 
 
-def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_transmission_state, data_type):
+def _get_corrected_wavelength_workspace(workspace, wav_range, detector_ids, calculate_transmission_state, data_type):
     """
     Performs a prompt peak correction, a background correction, converts to wavelength and rebins.
 
     :param workspace: the workspace which is being corrected.
+    :param wav_range: the wavelength corresponding to this run
     :param detector_ids: a list of relevant detector ids
     :param calculate_transmission_state: a SANSStateCalculateTransmission state
     :param data_type The component of the instrument which is to be reduced
@@ -249,10 +250,8 @@ def _get_corrected_wavelength_workspace(workspace, detector_ids, calculate_trans
         wavelength_high = calculate_transmission_state.wavelength_full_range_high
     else:
         fit_state = calculate_transmission_state.fit[data_type.value]
-        wavelength_low = fit_state.wavelength_low if fit_state.wavelength_low \
-            else calculate_transmission_state.wavelength_interval.wavelength_min
-        wavelength_high = fit_state.wavelength_high if fit_state.wavelength_high \
-            else calculate_transmission_state.wavelength_interval.wavelength_max
+        wavelength_low = fit_state.wavelength_low if fit_state.wavelength_low else wav_range[0]
+        wavelength_high = fit_state.wavelength_high if fit_state.wavelength_high else wav_range[1]
 
     wavelength_step = calculate_transmission_state.wavelength_interval.wavelength_step
     rebin_type = calculate_transmission_state.rebin_type

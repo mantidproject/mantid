@@ -27,6 +27,8 @@ class WavelengthInterval(metaclass=JsonSerializable):
 
     @wavelength_full_range.setter
     def wavelength_full_range(self, val):
+        if self.wavelength_full_range in self._selected_ranges:
+            self._selected_ranges.remove(self.wavelength_full_range)
         if val not in self.selected_ranges:
             self.selected_ranges.insert(0, val)
         self._wavelength_full_range = val

@@ -4,12 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
+import itertools
 import os
 import sys
+from typing import Dict, List, Tuple
 
 from mantid.kernel import mpisetup
 from sans.algorithm_detail.bundles import (EventSliceSettingBundle, OutputBundle,
-                                           OutputPartsBundle, OutputTransmissionBundle)
+                                           OutputPartsBundle, OutputTransmissionBundle, CompletedSlices, ReducedSlice)
 from sans.algorithm_detail.merge_reductions import MergeFactory
 from sans.algorithm_detail.strip_end_nans_and_infs import strip_end_nans
 from sans.common.constants import EMPTY_NAME
@@ -68,7 +70,7 @@ def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
 
     :param reduction_alg: a handle to the reduction algorithm.
     :param reduction_setting_bundle: a ReductionSettingBundle tuple
-    :return: an OutputBundle and an OutputPartsBundle
+    :return: a list of reduced slices
     """
 
     # Get component to reduce
@@ -93,10 +95,10 @@ def run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.execute()
 
     # Pull the result out of the workspace
-    output_bundles, output_part_bundles, output_transmission_bundles = _pack_bundles(reduction_alg,
+    reduced_slices = _pack_bundles(reduction_alg,
                                                                                      reduction_setting_bundle)
 
-    return output_bundles, output_part_bundles, output_transmission_bundles
+    return reduced_slices
 
 
 def run_core_reduction(reduction_alg, reduction_setting_bundle):
@@ -132,37 +134,49 @@ def run_core_reduction(reduction_alg, reduction_setting_bundle):
     reduction_alg.execute()
 
     # Get the results
-    output_bundles, output_part_bundles, output_transmission_bundles = _pack_bundles(reduction_alg,
-                                                                                     reduction_setting_bundle)
-
-    return output_bundles, output_part_bundles, output_transmission_bundles
+    reduced_slices = _pack_bundles(reduction_alg, reduction_setting_bundle)
+    return reduced_slices
 
 
 def _pack_bundles(reduction_alg, reduction_setting_bundle):
     output_workspaces = reduction_alg.getProperty("OutputWorkspaces").value
     output_workspace_counts = reduction_alg.getProperty("SumOfCounts").value
     output_workspace_norms = reduction_alg.getProperty("SumOfNormFactors").value
-    output_calculated_transmission_workspaces = reduction_alg.getProperty("CalculatedTransmissionWorkspaces").value
-    output_unfitted_transmission_workspaces = reduction_alg.getProperty("UnfittedTransmissionWorkspaces").value
+    out_trans_ws = reduction_alg.getProperty("CalculatedTransmissionWorkspaces").value
+    out_unfit_trans_ws = reduction_alg.getProperty("UnfittedTransmissionWorkspaces").value
 
-    output_bundles, output_part_bundles, output_transmission_bundles = [], [], []
-    for i in range(output_workspaces.getNumberOfEntries()):
-        output_bundles.append(OutputBundle(state=reduction_setting_bundle.state,
-                                           data_type=reduction_setting_bundle.data_type,
-                                           reduction_mode=reduction_setting_bundle.reduction_mode,
-                                           output_workspace=output_workspaces.getItem(i)))
+    slices: CompletedSlices = []
+    for i, reduced_ws in enumerate(output_workspaces):
+        calc_trans_ws = out_trans_ws.getItem(i) if out_trans_ws else None
+        unfit_trans_ws = out_unfit_trans_ws.getItem(i) if out_unfit_trans_ws else None
 
-        output_part_bundles.append(OutputPartsBundle(
-            state=reduction_setting_bundle.state, data_type=reduction_setting_bundle.data_type,
-            reduction_mode=reduction_setting_bundle.reduction_mode,
-            output_workspace_count=output_workspace_counts.getItem(i),
-            output_workspace_norm=output_workspace_norms.getItem(i)))
+        slice = ReducedSlice(
+            wav_range = reduced_ws.getRun().getProperty("Wavelength Range").valueAsStr,
+            output_bundle = OutputBundle(state=reduction_setting_bundle.state,
+                                         data_type=reduction_setting_bundle.data_type,
+                                         reduction_mode=reduction_setting_bundle.reduction_mode,
+                                         output_workspace=reduced_ws),
+            parts_bundle = OutputPartsBundle(
+                state=reduction_setting_bundle.state, data_type=reduction_setting_bundle.data_type,
+                reduction_mode=reduction_setting_bundle.reduction_mode,
+                output_workspace_count=output_workspace_counts.getItem(i),
+                output_workspace_norm=output_workspace_norms.getItem(i)),
+            transmission_bundle = OutputTransmissionBundle(
+                state=reduction_setting_bundle.state, data_type=reduction_setting_bundle.data_type,
+                calculated_transmission_workspace=calc_trans_ws,
+                unfitted_transmission_workspace=unfit_trans_ws)
+        )
+        slices.append(slice)
+    return slices
 
-        output_transmission_bundles.append(OutputTransmissionBundle(
-            state=reduction_setting_bundle.state, data_type=reduction_setting_bundle.data_type,
-            calculated_transmission_workspace=output_calculated_transmission_workspaces.getItem(i),
-            unfitted_transmission_workspace=output_unfitted_transmission_workspaces.getItem(i)))
-    return output_bundles, output_part_bundles, output_transmission_bundles
+
+def pair_up_wav_ranges(list_to_pair: CompletedSlices) -> List[Tuple[ReducedSlice]]:
+    seen = set()  # Preserve order for system tests so we can't use set directly
+    all_wav_ranges = [k.wav_range for k in list_to_pair if (k.wav_range not in seen or seen.add(k.wav_range))]
+    packed = [tuple(filter(lambda x: x.wav_range == k, list_to_pair)) for k in all_wav_ranges]
+    # If we have >2 elements we need to consider another attribute as they aren't unique enough
+    assert all(len(i) <= 2 for i in packed)
+    return packed
 
 
 def get_final_output_workspaces(completed_event_slices, parent_alg):
@@ -176,33 +190,28 @@ def get_final_output_workspaces(completed_event_slices, parent_alg):
     :param parent_alg: a handle to the parent algorithm.
     :return: a map of ReductionMode vs final output workspaces.
     """
-    can_outputs, sample_outputs = get_reduction_mode_vs_output_bundles(completed_event_slices)
+    hab_lab_outputs = get_reduction_mode_vs_output_bundles(completed_event_slices)
+    for k, v in hab_lab_outputs.items():
+        hab_lab_outputs[k] = pair_up_wav_ranges(v)
 
     # For each reduction mode, we need to perform a can subtraction (and potential cleaning of the workspace)
     final_output_workspaces = {}
-    for bank in sample_outputs.keys():
-        can_list = can_outputs.get(bank, None)
-        sample_list = sample_outputs[bank]
+    for bank, all_reductions in hab_lab_outputs.items():
         final_output_workspaces[bank] = []
-
-        # Iterate through the sample list to pair up the cans too
-        for i, output_sample_bundle in enumerate(sample_list):
-            output_can_bundle = can_list[i] if i < len(can_list) else None
-
+        for paired_reductions in all_reductions:
+            can = next(filter(lambda i: i.output_bundle.data_type is DataType.CAN, paired_reductions), None)
+            sample = next(filter(lambda i: i.output_bundle.data_type is DataType.SAMPLE, paired_reductions))
             # Perform the can subtraction
-            if output_can_bundle is not None:
-                final_output_workspace = perform_can_subtraction(output_sample_bundle.output_workspace,
-                                                                 output_can_bundle.output_workspace,
+            if can:
+                final_output_workspace = perform_can_subtraction(sample.output_bundle.output_workspace,
+                                                                 can.output_bundle.output_workspace,
                                                                  parent_alg)
             else:
-                final_output_workspace = output_sample_bundle.output_workspace
+                final_output_workspace = sample.output_bundle.output_workspace
 
             # Tidy up the workspace by removing start/end-NANs and start/end-INFs
             final_output_workspace = strip_end_nans(final_output_workspace, parent_alg)
             final_output_workspaces[bank].append(final_output_workspace)
-
-    # Finally add sample log information
-    # TODO: Add log information
 
     return final_output_workspaces
 
@@ -246,30 +255,37 @@ def correct_q_resolution_for_can(sample_workspace, can_workspace, subtracted_wor
         subtracted_workspace.setDx(0, sample_workspace.dataDx(0))
 
 
-def get_merge_bundle_for_merge_request(output_bundles, parent_alg):
+def get_merge_bundle_for_merge_request(completed_slices: CompletedSlices, parent_alg):
     """
     Create a merge bundle for the reduction outputs and perform stitching if required
-    :param output_bundles: a list of output_bundles
+    :param completed_slices: a list of output_bundles
     :param parent_alg: a handle to the parent algorithm
     """
     # Order the reductions. This leaves us with a dict mapping from the reduction type (i.e. HAB, LAB) to
     # a list of reduction settings which contain the information for sample and can.
-    reduction_mode_vs_output_bundles = get_reduction_mode_vs_output_bundles(output_bundles)
+    wav_ranges = {k.wav_range for k in completed_slices}
+    bank_based_reductions = []
+    for wav_range in wav_ranges:
+        matching_reductions = [i for i in completed_slices if i.wav_range == wav_range]
+        bank_based_reductions.append(get_reduction_mode_vs_output_bundles(matching_reductions))
 
     # Get the underlying state from one of the elements
-    state = output_bundles[0].state
+    state = completed_slices[0].output_bundle.state
 
     merge_factory = MergeFactory()
     merger = merge_factory.create_merger(state)
 
     # Run the merger and return the merged output workspace
-    merged = merger.merge(reduction_mode_vs_output_bundles, parent_alg)
-    replace_prop = True
-    if state.save.user_file:
-        merged.merged_workspace.getRun().addProperty("UserFile", os.path.basename(state.save.user_file), replace_prop)
-    if state.save.batch_file:
-        merged.merged_workspace.getRun().addProperty("BatchFile", os.path.basename(state.save.batch_file), replace_prop)
-    return merged
+    merged_workspaces = []
+    for matched_reductions in bank_based_reductions:
+        merged = merger.merge(matched_reductions, parent_alg)
+        replace_prop = True
+        if state.save.user_file:
+            merged.merged_workspace.getRun().addProperty("UserFile", os.path.basename(state.save.user_file), replace_prop)
+        if state.save.batch_file:
+            merged.merged_workspace.getRun().addProperty("BatchFile", os.path.basename(state.save.batch_file), replace_prop)
+        merged_workspaces.append(merged)
+    return merged_workspaces
 
 
 def get_reduction_mode_vs_output_bundles(completed_event_slice_bundles):
@@ -277,26 +293,20 @@ def get_reduction_mode_vs_output_bundles(completed_event_slice_bundles):
     Groups the reduction information by the reduction mode, e.g. all information regarding HAB is collated, similarly
     for LAB.
     """
-    can_outputs = {}
-    sample_outputs = {}
+    outputs = {}
 
-    def pack_reduction_modes(output_dict, bundle):
-        key = bundle.reduction_mode
-        if key in output_dict:
-            output_dict[key].append(output)
+    def pack_reduction_modes(bundle: ReducedSlice):
+        key = bundle.output_bundle.reduction_mode
+        if key in outputs:
+            outputs[key].append(bundle)
         else:
-            output_dict.update({key: [bundle]})
+            outputs.update({key: [bundle]})
 
     # Pair up the different reduction modes
-
     for event_slice in completed_event_slice_bundles:
-        for output in event_slice.output_bundles:
-            if output.data_type is DataType.CAN:
-                pack_reduction_modes(can_outputs, output)
-            else:
-                pack_reduction_modes(sample_outputs, output)
+        pack_reduction_modes(event_slice)
 
-    return can_outputs, sample_outputs
+    return outputs
 
 
 def get_component_to_reduce(reduction_setting_bundle):
@@ -337,15 +347,18 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
     output_calculated_transmission_workspace, output_unfitted_transmission_workspace = \
         get_transmission_workspaces_from_ads(state, reduction_mode)
     # Set the results on the output bundle
-    output_bundle = OutputBundle(state=state, data_type=data_type, reduction_mode=reduction_mode,
-                                 output_workspace=reduced_can_workspace)
-    output_parts_bundle = OutputPartsBundle(state=state, data_type=data_type, reduction_mode=reduction_mode,
-                                            output_workspace_count=reduced_can_workspace_count,
-                                            output_workspace_norm=reduced_can_workspace_norm)
-    output_transmission_bundle = OutputTransmissionBundle(
-        state=reduction_setting_bundle.state, data_type=data_type,
-        calculated_transmission_workspace=output_calculated_transmission_workspace,
-        unfitted_transmission_workspace=output_unfitted_transmission_workspace)
+    reduced_slices:CompletedSlices = []
+    reduced_slices.append(ReducedSlice(
+        wav_range = None,
+        output_bundle = OutputBundle(state=state, data_type=data_type, reduction_mode=reduction_mode,
+                                     output_workspace=reduced_can_workspace),
+        parts_bundle = OutputPartsBundle(state=state, data_type=data_type, reduction_mode=reduction_mode,
+                                         output_workspace_count=reduced_can_workspace_count,
+                                         output_workspace_norm=reduced_can_workspace_norm),
+        transmission_bundle = OutputTransmissionBundle(
+            state=reduction_setting_bundle.state, data_type=data_type,
+            calculated_transmission_workspace=output_calculated_transmission_workspace,
+            unfitted_transmission_workspace=output_unfitted_transmission_workspace)))
 
     # The logic table for the recalculation of the partial outputs is:
     # | output_parts | reduced_can_workspace_count is None |  reduced_can_workspace_norm is None | Recalculate |
@@ -359,15 +372,18 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
     # |  True        |        False                        |           True                      |    True     |
     # |  True        |        False                        |           False                     |    False    |
 
+    output_parts_bundle = reduced_slices[0].parts_bundle
     is_invalid_partial_workspaces = ((output_parts_bundle.output_workspace_count is None
                                       and output_parts_bundle.output_workspace_norm is not None)
                                      or (output_parts_bundle.output_workspace_count is not None
                                          and output_parts_bundle.output_workspace_norm is None))
+    output_transmission_bundle = reduced_slices[0].transmission_bundle
     is_invalid_transmission_workspaces = (output_transmission_bundle.calculated_transmission_workspace is None
                                           or output_transmission_bundle.unfitted_transmission_workspace is None)
     partial_output_require_reload = output_parts and is_invalid_partial_workspaces
 
-    must_reload = output_bundle.output_workspace is None or partial_output_require_reload or is_invalid_transmission_workspaces
+    must_reload = reduced_slices[0].output_bundle.output_workspace is None \
+                  or partial_output_require_reload or is_invalid_transmission_workspaces
     if 'boost.mpi' in sys.modules:
         # In MPI runs the result is only present on rank 0 (result of Q1D2 integration),
         # so the reload flag must be broadcasted from rank 0.
@@ -376,36 +392,37 @@ def run_optimized_for_can(reduction_alg, reduction_setting_bundle, event_slice_o
     if must_reload:
         # if output_bundle.output_workspace is None or partial_output_require_reload:
         if not event_slice_optimisation:
-            output_bundle, output_parts_bundle, \
-                output_transmission_bundle = run_core_reduction(reduction_alg, reduction_setting_bundle)
+            reduced_slices = run_core_reduction(reduction_alg, reduction_setting_bundle)
         else:
-            output_bundle, output_parts_bundle, \
-                output_transmission_bundle = run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle)
+            reduced_slices = run_core_event_slice_reduction(reduction_alg, reduction_setting_bundle)
 
         # Now we need to tag the workspaces and add it to the ADS
-        for bundle in output_bundle:
-            write_hash_into_reduced_can_workspace(state=bundle.state,
-                                                  workspace=bundle.output_workspace,
+        for completed_slice in reduced_slices:
+            out_bundle = completed_slice.output_bundle
+            write_hash_into_reduced_can_workspace(state=out_bundle.state,
+                                                  workspace=out_bundle.output_workspace,
                                                   partial_type=None,
                                                   reduction_mode=reduction_mode)
-        for bundle in output_transmission_bundle:
-            write_hash_into_reduced_can_workspace(state=bundle.state,
-                                                  workspace=bundle.calculated_transmission_workspace,
-                                                  partial_type=TransmissionType.CALCULATED,
-                                                  reduction_mode=reduction_mode)
-            write_hash_into_reduced_can_workspace(state=bundle.state,
-                                                  workspace=bundle.unfitted_transmission_workspace,
-                                                  partial_type=TransmissionType.UNFITTED,
-                                                  reduction_mode=reduction_mode)
-        for bundle in output_parts_bundle:
-            write_hash_into_reduced_can_workspace(state=bundle.state,
-                                                  workspace=bundle.output_workspace_count,
-                                                  partial_type=OutputParts.COUNT,
-                                                  reduction_mode=reduction_mode)
+            trans_bundle = completed_slice.transmission_bundle
+            if trans_bundle.calculated_transmission_workspace and trans_bundle.unfitted_transmission_workspace:
+                write_hash_into_reduced_can_workspace(state=trans_bundle.state,
+                                                      workspace=trans_bundle.calculated_transmission_workspace,
+                                                      partial_type=TransmissionType.CALCULATED,
+                                                      reduction_mode=reduction_mode)
+                write_hash_into_reduced_can_workspace(state=trans_bundle.state,
+                                                      workspace=trans_bundle.unfitted_transmission_workspace,
+                                                      partial_type=TransmissionType.UNFITTED,
+                                                      reduction_mode=reduction_mode)
+            parts_bundle = completed_slice.parts_bundle
+            if parts_bundle.output_workspace_count and parts_bundle.output_workspace_norm:
+                write_hash_into_reduced_can_workspace(state=parts_bundle.state,
+                                                      workspace=parts_bundle.output_workspace_count,
+                                                      partial_type=OutputParts.COUNT,
+                                                      reduction_mode=reduction_mode)
 
-            write_hash_into_reduced_can_workspace(state=bundle.state,
-                                                  workspace=bundle.output_workspace_norm,
-                                                  partial_type=OutputParts.NORM,
-                                                  reduction_mode=reduction_mode)
+                write_hash_into_reduced_can_workspace(state=parts_bundle.state,
+                                                      workspace=parts_bundle.output_workspace_norm,
+                                                      partial_type=OutputParts.NORM,
+                                                      reduction_mode=reduction_mode)
 
-    return output_bundle, output_parts_bundle, output_transmission_bundle
+    return reduced_slices
