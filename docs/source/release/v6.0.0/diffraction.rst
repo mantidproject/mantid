@@ -35,6 +35,8 @@ New features
 - New algorithm :ref:`CorelliPowderCalibrationLoad <algm-CorelliPowderCalibrationLoad>` to load a CORELLI calibration table into memory.
 - New algorithm :ref:`CorelliPowderCalibrationCreate <algm-CorelliPowderCalibrationCreate>` adjusts the position and orientation of Corelli banks in order to optimize the comparison of observed peaks to reference data
 - New algorithm :ref:`LeadPressureCalc <algm-LeadPressureCalc>` to calculate the pressure of a sample given the dSpacing of the Lead (111) peak and the sample temperature.
+- New algorithm :ref:`CorelliPowderCalibrationApply <algm-CorelliPowderCalibrationApply>` to apply a CORELLI calibration table to CORELLI EventWorkspace.
+- New algorithm :ref:`CorelliPowderCalibrationLoad <algm-CorelliPowderCalibrationLoad>` to load a CORELLI calibration table into memory.
 
 Improvements
 ############
@@ -72,7 +74,7 @@ Improvements
 New features
 ############
 - Added refined back to back exponential coeficients (from standard ceria run)to ENGIN-X Parameters.xml so A, B and S are guessed automatically.
-- When a fit is successful the model will be stored as a Custom Setup in the fit property browser under the name of the workspace fitted. 
+- When a fit is successful the model will be stored as a Custom Setup in the fit property browser under the name of the workspace fitted.
 - The fitting tab now creates a group of workspaces that store the model string and the fit value and error of parameters of the model for each loaded workspace.
 - Sequential fitting of workspaces now provided in fitting tab by average value of a log set in settings.
 
