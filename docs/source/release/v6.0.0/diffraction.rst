@@ -12,8 +12,6 @@ Diffraction Changes
 New features
 ------------
 
-- New algorithm :ref:`D7YIGPositionCalibration <algm-D7YIGPositionCalibration>` to perform wavelength and detector position calibration for the ILL D7 instrument.
-
 Powder Diffraction
 ------------------
 New features
@@ -27,7 +25,6 @@ New features
 - New algorithm to clip peaks, providing a background estimation :ref:`ClipPeaks <algm-ClipPeaks>`.
 - Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
 - New algorithm :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` uses a numerical integration method to calculate attenuation factors for all Paalmin Pings terms
-- Added a new :ref:`Transfit <algm-PEARLTransfit>` Algorithm for PEARL that uses a TransVoigt function to determine the temperature of a given sample
 - Modified :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to include several different absorption correction methods.
 - Modified he vanadium absorption correction in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to be calculated using numerical integration rather than Carpenter method.
 - Added new absorption options from :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to Powder Diffraction Reduction GUI
