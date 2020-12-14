@@ -11,34 +11,38 @@ import os
 
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
 from mantid.kernel import config
-from sans.command_interface.ISISCommandInterface import (SANS2D, Set1D, Detector, MaskFile, Gravity, AssignSample,
+from mantid.api import AnalysisDataService
+from sans.command_interface.ISISCommandInterface import (Set1D, Detector, MaskFile, Gravity, AssignSample,
                                                          WavRangeReduction, DefaultTrans, UseCompatibilityMode,
-                                                         AddRuns)
+                                                         AddRuns, LARMOR)
 from sans.common.enums import SANSInstrument
 
 
-@ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DMultiPeriodAddFiles_V2(systemtesting.MantidSystemTest):
-
+@ISISSansSystemTest(SANSInstrument.LARMOR)
+class LARMORMultiPeriodAddEventFilesTest_V2(systemtesting.MantidSystemTest):
     def requiredMemoryMB(self):
         """Requires 2.5Gb"""
         return 2500
 
     def runTest(self):
         UseCompatibilityMode()
-        SANS2D()
+        LARMOR()
         Set1D()
-        Detector("rear-detector")
-        MaskFile('MASKSANS2Doptions.091A')
+        Detector("DetectorBench")
+        MaskFile('USER_LARMOR_151B_LarmorTeam_80tubes_BenchRot1p4_M4_r3699.txt')
         Gravity(True)
-        AddRuns(('5512', '5512'), 'SANS2D', 'nxs', lowMem=True)
+        AddRuns(('13065', '13065'), 'LARMOR', 'nxs', lowMem=True)
 
-        # one period of a multi-period Nexus file
-        AssignSample('5512-add.nxs', period=7)
-
+        AssignSample('13065-add.nxs')
         WavRangeReduction(2, 4, DefaultTrans)
-        paths = [os.path.join(config['defaultsave.directory'], 'SANS2D00005512-add.nxs'),
-                 os.path.join(config['defaultsave.directory'], 'SANS2D00005512.log')]
+
+        # Clean up
+        for element in AnalysisDataService.getObjectNames():
+            if AnalysisDataService.doesExist(element) and element != "13065_p1rear_1D_2.0_4.0":
+                AnalysisDataService.remove(element)
+
+        paths = [os.path.join(config['defaultsave.directory'], 'LARMOR00013065-add.nxs'),
+                 os.path.join(config['defaultsave.directory'], 'SANS2D00013065.log')]  # noqa
         for path in paths:
             if os.path.exists(path):
                 os.remove(path)
@@ -51,4 +55,4 @@ class SANS2DMultiPeriodAddFiles_V2(systemtesting.MantidSystemTest):
         self.disableChecking.append('Instrument')
         self.disableChecking.append('Axes')
 
-        return '5512_p7rear_1D_2.0_4.0Phi-45.0_45.0', 'SANS2DMultiPeriodAddFiles.nxs'
+        return "13065_p1rear_1D_2.0_4.0", "LARMORMultiPeriodAddEventFiles.nxs"

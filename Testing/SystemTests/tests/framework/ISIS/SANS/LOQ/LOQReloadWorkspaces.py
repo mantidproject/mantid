@@ -7,8 +7,8 @@
 #pylint: disable=invalid-name,no-init
 import systemtesting
 from ISIS.SANS.isis_sans_system_test import ISISSansSystemTest
-from mantid.simpleapi import *
 from ISISCommandInterface import *
+from mantid.simpleapi import LoadRaw, MoveInstrumentComponent
 import unittest
 
 from sans.common.enums import SANSInstrument
@@ -109,48 +109,22 @@ class SANSLOQReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
         self.assertRaises(RuntimeError, AssignSample, my_workspace, False)
 
 
-@ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DReductionShouldAcceptLoadedWorkspace(SANSLOQReductionShouldAcceptLoadedWorkspace):
-    def setUp(self):
-        self.load_run = '2500.nxs'
-        config["default.instrument"] = "SANS2D"
-        SANS2D()
-        MaskFile("MASKSANS2D_094i_RKH.txt")
-        self.control_name = '2500front_1D_4.6_12.85'
-        self.inst_comp = 'rear-detector'
-
-
-class SANS2DReductionShouldAcceptLoadedWorkspaceRawFile(SANS2DReductionShouldAcceptLoadedWorkspace):
-    def setUp(self):
-        SANS2DReductionShouldAcceptLoadedWorkspace.setUp(self)
-        self.load_run = '5547.raw'
-        self.control_name = '5547front_1D_4.6_12.85'
-
-
 class SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest(systemtesting.MantidSystemTest):
     cl = SANSLOQReductionShouldAcceptLoadedWorkspace
 
     def runTest(self):
         self._success = False
-    # Custom code to create and run this single test suite
+        # Custom code to create and run this single test suite
         suite = unittest.TestSuite()
         suite.addTest( unittest.makeSuite(self.cl, "test"))
         runner = unittest.TextTestRunner()
-    # Run using either runner
+        # Run using either runner
         res = runner.run(suite)
         if res.wasSuccessful():
             self._success = True
 
     def validate(self):
         return self._success
-
-
-class SANS2DReductionShouldAcceptLoadedWorkspaceSystemTest(SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest):
-    cl = SANS2DReductionShouldAcceptLoadedWorkspace
-
-
-class SANS2DReductionShouldAcceptLoadedWorkspaceSystemTest2(SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest):
-    cl = SANS2DReductionShouldAcceptLoadedWorkspaceRawFile
 
 
 @ISISSansSystemTest(SANSInstrument.LOQ)
@@ -276,7 +250,7 @@ class SANSLOQCan2DReloadWorkspace(systemtesting.MantidSystemTest):
         Set2D()
         Detector("main-detector-bank")
         MaskFile('MASK.094AA')
-    # apply some small artificial shift
+        # apply some small artificial shift
         SetDetectorOffsets('REAR', -1.0, 1.0, 0.0, 0.0, 0.0, 0.0)
         Gravity(True)
         sample = Load('99630')
@@ -287,68 +261,15 @@ class SANSLOQCan2DReloadWorkspace(systemtesting.MantidSystemTest):
         WavRangeReduction(None, None, False)
 
     def validate(self):
-    # Need to disable checking of the Spectra-Detector map because it isn't
-    # fully saved out to the nexus file (it's limited to the spectra that
-    # are actually present in the saved workspace).
+        # Need to disable checking of the Spectra-Detector map because it isn't
+        # fully saved out to the nexus file (it's limited to the spectra that
+        # are actually present in the saved workspace).
         self.disableChecking.append('SpectraMap')
         self.disableChecking.append('Instrument')
-    #when comparing LOQ files you seem to need the following
+        #when comparing LOQ files you seem to need the following
         self.disableChecking.append('Axes')
-    # the change in number is because the run number reported from 99630 is 53615
+        # the change in number is because the run number reported from 99630 is 53615
         return '53615main_2D_2.2_10.0','SANSLOQCan2D.nxs'
-
-
-@ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DFrontNoGravReloadWorkspace(systemtesting.MantidSystemTest):
-
-    def runTest(self):
-        config["default.instrument"] = "SANS2D"
-        SANS2D()
-        MaskFile('MASKSANS2D_094i_RKH.txt')
-        SetDetectorOffsets('REAR', -16.0, 58.0, 0.0, 0.0, 0.0, 0.0)
-        SetDetectorOffsets('FRONT', -44.0, -20.0, 47.0, 0.0, 1.0, 1.0)
-        Gravity(False)
-        Set1D()
-        Sample = LoadNexus('2500')
-        AssignSample(Sample, False)
-        WavRangeReduction(4.6, 12.85, False)
-
-    def validate(self):
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
-        self.disableChecking.append('Instrument')
-        return '2500front_1D_4.6_12.85','SANS2DFrontNoGrav.nxs'
-
-
-@ISISSansSystemTest(SANSInstrument.SANS2D)
-class SANS2DWaveloopsReloadWorkspace(systemtesting.MantidSystemTest):
-
-    def runTest(self):
-        config["default.instrument"] = "SANS2D"
-        SANS2D()
-        MaskFile('MASKSANS2D.091A')
-        Gravity(True)
-        Set1D()
-        s = Load('992')
-        s_t = Load('988')
-        direct = Load('987')
-        direct_can = CloneWorkspace(direct)
-        c = Load('993')
-        c_t = Load('989')
-        AssignSample(s,False)
-        TransmissionSample(s_t, direct, False)
-        AssignCan(c, False)
-        TransmissionCan(c_t, direct_can, False)
-
-        CompWavRanges([3, 5, 7, 11], False)
-
-    def validate(self):
-        self.disableChecking.append('SpectraMap')
-        self.disableChecking.append('Axes')
-        self.disableChecking.append('Instrument')
-    # testing one of the workspaces that is produced, best not to choose the
-    # first one in produced by the loop as this is the least error prone
-        return '992rear_1D_7.0_11.0','SANS2DWaveloops.nxs'
 
 
 if __name__ == "__main__":
