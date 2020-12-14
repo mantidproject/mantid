@@ -11,6 +11,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 
+#include <iomanip>
 #include <sstream>
 #include <vector>
 
@@ -18,11 +19,9 @@ namespace Mantid {
 namespace CurveFitting {
 namespace Functions {
 
-using namespace CurveFitting;
-
-using namespace Kernel;
-
 using namespace API;
+using namespace CurveFitting;
+using namespace Kernel;
 
 DECLARE_FUNCTION(DynamicKuboToyabe)
 
