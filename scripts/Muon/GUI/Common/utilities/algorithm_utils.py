@@ -275,6 +275,7 @@ def split_phasequad(name):
     remove_ws(name)
     return [Re, Im]
 
+
 def apply_deadtime(ws, output, table):
     alg = mantid.AlgorithmManager.create("ApplyDeadTimeCorr")
     alg.initialize()

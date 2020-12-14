@@ -279,7 +279,6 @@ class MuonContext(object):
             return apply_deadtime(name, output, deadtime_table)
         return name
 
-
     def _run_rebin(self, name, rebin):
         if rebin:
             params = "1"

@@ -102,8 +102,8 @@ class PhaseTablePresenter(object):
             self.phasequad_calculation_thread = self.create_phase_quad_calculation_thread()
 
             self.phasequad_calculation_thread.threadWrapperSetUp(self.handle_calculation_started,
-                                                                  self.handle_phasequad_calculation_success,
-                                                                  self.handle_calculation_error)
+                                                                 self.handle_phasequad_calculation_success,
+                                                                 self.handle_calculation_error)
 
             self.phasequad_calculation_thread.start()
 
