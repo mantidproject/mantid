@@ -83,7 +83,7 @@ class D7YIGPositionCalibration(PythonAlgorithm):
                              doc="The minimal allowable distance between two YIG peaks (in degrees 2theta).")
 
         self.declareProperty(name="BankOffsets",
-                             defaultValue=[0.0, 0.0, 0.0],
+                             defaultValue=[3.0, 3.0, 0.0],
                              direction=Direction.Input,
                              doc="List of values of offset for each bank (in degrees).")
 
