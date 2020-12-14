@@ -26,9 +26,9 @@ using IndirectFitDataCollectionType =
     IIndirectFitData - Specifies an interface for updating, querying and
    accessing the raw data in IndirectFitAnalysisTabs
 */
-class MANTIDQT_INDIRECT_DLL IIndirectFitData {
+class MANTIDQT_INDIRECT_DLL IIndirectFitDataModel {
 public:
-  virtual ~IIndirectFitData() = default;
+  virtual ~IIndirectFitDataModel() = default;
   virtual bool hasWorkspace(std::string const &workspaceName) const = 0;
   virtual Mantid::API::MatrixWorkspace_sptr
   getWorkspace(TableDatasetIndex index) const = 0;

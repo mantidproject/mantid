@@ -6,34 +6,35 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
-#include "ConvFitModel.h"
 #include "IndirectFitAnalysisTab.h"
-#include "IndirectSpectrumSelectionPresenter.h"
-#include "ParameterEstimation.h"
+#include "IqtFitModel.h"
 
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/MatrixWorkspace_fwd.h"
 #include "ui_IndirectFitTab.h"
 
+#include <memory>
+
+namespace Mantid {
+namespace API {
+class IFunction;
+class CompositeFunction;
+} // namespace API
+} // namespace Mantid
+
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
-class DLLExport ConvFit : public IndirectFitAnalysisTab {
+
+class DLLExport IndirectDataAnalysisIqtFitTab : public IndirectFitAnalysisTab {
   Q_OBJECT
 
 public:
-  ConvFit(QWidget *parent = nullptr);
+  IndirectDataAnalysisIqtFitTab(QWidget *parent = nullptr);
 
-  std::string tabName() const override { return "ConvFit"; }
+  std::string getTabName() const override { return "IqtFit"; }
 
-  bool hasResolution() const override { return true; }
-
-protected slots:
-  void setModelResolution(const std::string &resolutionName);
-  void setModelResolution(const std::string &resolutionName,
-                          TableDatasetIndex index);
-  void runClicked();
-  void fitFunctionChanged();
+  bool hasResolution() const override { return false; }
 
 protected:
   void setRunIsRunning(bool running) override;
@@ -41,17 +42,18 @@ protected:
 
 private:
   void setupFitTab() override;
-  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
+  std::string getFitTypeString() const;
   EstimationDataSelector getEstimationDataSelector() const override;
 
-  std::string fitTypeString() const;
-
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
-  // ShortHand Naming for fit functions
-  std::unordered_map<std::string, std::string> m_fitStrings;
-  ConvFitModel *m_convFittingModel;
-};
+  IqtFitModel *m_iqtFittingModel;
+  QString m_tiedParameter;
 
+protected slots:
+  void runClicked();
+  void fitFunctionChanged();
+  void setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) override;
+};
 } // namespace IDA
 } // namespace CustomInterfaces
 } // namespace MantidQt

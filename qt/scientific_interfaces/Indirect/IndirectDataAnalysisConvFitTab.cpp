@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "ConvFit.h"
+#include "IndirectDataAnalysisConvFitTab.h"
 #include "ConvFitDataPresenter.h"
 #include "IndirectFitPlotView.h"
 #include "IndirectFunctionBrowser/ConvTemplateBrowser.h"
@@ -39,11 +39,11 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-ConvFit::ConvFit(QWidget *parent)
+IndirectDataAnalysisConvFitTab::IndirectDataAnalysisConvFitTab(QWidget *parent)
     : IndirectFitAnalysisTab(new ConvFitModel, parent),
       m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
-  m_convFittingModel = dynamic_cast<ConvFitModel *>(fittingModel());
+  m_convFittingModel = dynamic_cast<ConvFitModel *>(getFittingModel());
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
   setSpectrumSelectionView(m_uiForm->svSpectrumView);
   setOutputOptionsView(m_uiForm->ovOutputOptionsView);
@@ -65,7 +65,7 @@ ConvFit::ConvFit(QWidget *parent)
   setEditResultVisible(true);
 }
 
-void ConvFit::setupFitTab() {
+void IndirectDataAnalysisConvFitTab::setupFitTab() {
   setConvolveMembers(true);
 
   // Initialise fitTypeStrings
@@ -103,23 +103,26 @@ void ConvFit::setupFitTab() {
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
 }
 
-void ConvFit::setupFit(Mantid::API::IAlgorithm_sptr fitAlgorithm) {
+void IndirectDataAnalysisConvFitTab::setupFit(
+    Mantid::API::IAlgorithm_sptr fitAlgorithm) {
   IndirectFitAnalysisTab::setupFit(fitAlgorithm);
 }
 
-EstimationDataSelector ConvFit::getEstimationDataSelector() const {
+EstimationDataSelector
+IndirectDataAnalysisConvFitTab::getEstimationDataSelector() const {
   return [](const MantidVec &, const MantidVec &,
             const std::pair<double, double>) -> DataForParameterEstimation {
     return DataForParameterEstimation{};
   };
 }
 
-void ConvFit::setModelResolution(const std::string &resolutionName) {
+void IndirectDataAnalysisConvFitTab::setModelResolution(
+    const std::string &resolutionName) {
   setModelResolution(resolutionName, TableDatasetIndex{0});
 }
 
-void ConvFit::setModelResolution(const std::string &resolutionName,
-                                 TableDatasetIndex index) {
+void IndirectDataAnalysisConvFitTab::setModelResolution(
+    const std::string &resolutionName, TableDatasetIndex index) {
   m_convFittingModel->setResolution(resolutionName, index);
   auto fitResolutions = m_convFittingModel->getResolutionsForFit();
   m_fitPropertyBrowser->setModelResolution(fitResolutions);
@@ -127,8 +130,8 @@ void ConvFit::setModelResolution(const std::string &resolutionName,
   setModelFitFunction();
 }
 
-void ConvFit::fitFunctionChanged() {
-  m_convFittingModel->setFitTypeString(fitTypeString());
+void IndirectDataAnalysisConvFitTab::fitFunctionChanged() {
+  m_convFittingModel->setFitTypeString(getFitTypeString());
 }
 
 /**
@@ -140,29 +143,29 @@ void ConvFit::fitFunctionChanged() {
  *
  * @returns the generated string.
  */
-std::string ConvFit::fitTypeString() const {
+std::string IndirectDataAnalysisConvFitTab::getFitTypeString() const {
   std::string fitType;
   for (auto fitFunctionName : m_fitStrings) {
-    auto occurances = numberOfCustomFunctions(fitFunctionName.first);
+    auto occurances = getNumberOfCustomFunctions(fitFunctionName.first);
     if (occurances > 0) {
       fitType += std::to_string(occurances) + fitFunctionName.second;
     }
   }
 
-  if (numberOfCustomFunctions("DeltaFunction") > 0) {
+  if (getNumberOfCustomFunctions("DeltaFunction") > 0) {
     fitType += "Delta";
   }
 
   return fitType;
 }
 
-void ConvFit::runClicked() { runTab(); }
+void IndirectDataAnalysisConvFitTab::runClicked() { runTab(); }
 
-void ConvFit::setRunIsRunning(bool running) {
+void IndirectDataAnalysisConvFitTab::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
 }
 
-void ConvFit::setRunEnabled(bool enable) {
+void IndirectDataAnalysisConvFitTab::setRunEnabled(bool enable) {
   m_uiForm->pbRun->setEnabled(enable);
 }
 

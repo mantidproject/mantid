@@ -7,16 +7,16 @@
 #pragma once
 
 #include "IAddWorkspaceDialog.h"
-#include "ui_JumpFitAddWorkspaceDialog.h"
+#include "ui_FqFitAddWorkspaceDialog.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-class JumpFitAddWorkspaceDialog : public IAddWorkspaceDialog {
+class FqFitAddWorkspaceDialog : public IAddWorkspaceDialog {
   Q_OBJECT
 public:
-  explicit JumpFitAddWorkspaceDialog(QWidget *parent);
+  explicit FqFitAddWorkspaceDialog(QWidget *parent);
 
   std::string workspaceName() const override;
   std::string parameterType() const;
@@ -37,13 +37,13 @@ public slots:
   void emitParameterTypeChanged(const QString &index);
 
 signals:
-  void workspaceChanged(JumpFitAddWorkspaceDialog *dialog,
+  void workspaceChanged(FqFitAddWorkspaceDialog *dialog,
                         const std::string &workspace);
-  void parameterTypeChanged(JumpFitAddWorkspaceDialog *dialog,
+  void parameterTypeChanged(FqFitAddWorkspaceDialog *dialog,
                             const std::string &type);
 
 private:
-  Ui::JumpFitAddWorkspaceDialog m_uiForm;
+  Ui::FqFitAddWorkspaceDialog m_uiForm;
 };
 
 } // namespace IDA

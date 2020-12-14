@@ -9,10 +9,10 @@
 #include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 
-#include "IIndirectFitDataView.h"
+#include "FqFitDataPresenter.h"
+#include "FqFitModel.h"
+#include "IndirectFitDataView.h"
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
-#include "JumpFitDataPresenter.h"
-#include "JumpFitModel.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -29,14 +29,14 @@ namespace {
 QString const PARAMETER_TYPE_LABEL("Fit Parameter:");
 QString const PARAMETER_LABEL("Width:");
 
-QStringList getJumpParameters() {
+QStringList getFqFitParameters() {
   QStringList parameters;
   parameters << "f1.f1.FWHM"
              << "f2.f1.FWHM";
   return parameters;
 }
 
-QStringList getJumpParameterTypes() {
+QStringList getFqFitParameterTypes() {
   QStringList parameterTypes;
   parameterTypes << "Width"
                  << "EISF";
@@ -70,7 +70,7 @@ std::unique_ptr<QTableWidget> createEmptyTableWidget(int columns, int rows) {
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the view
-class MockJumpFitDataView : public IIndirectFitDataView {
+class MockFqFitDataView : public IIndirectFitDataView {
 public:
   /// Public Methods
   MOCK_CONST_METHOD0(getDataTable, QTableWidget *());
@@ -113,28 +113,28 @@ class SingleFunctionTemplateBrowserMock : public IFQFitObserver {
 };
 
 /// Mock object to mock the model
-class MockJumpFitModel : public JumpFitModel {};
+class MockFqFitModel : public FqFitModel {};
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
-class JumpFitDataPresenterTest : public CxxTest::TestSuite {
+class FqFitDataPresenterTest : public CxxTest::TestSuite {
 public:
   /// Needed to make sure everything is initialized
-  JumpFitDataPresenterTest() { FrameworkManager::Instance(); }
+  FqFitDataPresenterTest() { FrameworkManager::Instance(); }
 
-  static JumpFitDataPresenterTest *createSuite() {
-    return new JumpFitDataPresenterTest();
+  static FqFitDataPresenterTest *createSuite() {
+    return new FqFitDataPresenterTest();
   }
 
-  static void destroySuite(JumpFitDataPresenterTest *suite) { delete suite; }
+  static void destroySuite(FqFitDataPresenterTest *suite) { delete suite; }
 
   void setUp() override {
-    m_view = std::make_unique<NiceMock<MockJumpFitDataView>>();
-    m_model = std::make_unique<NiceMock<MockJumpFitModel>>();
+    m_view = std::make_unique<NiceMock<MockFqFitDataView>>();
+    m_model = std::make_unique<NiceMock<MockFqFitModel>>();
 
     m_dataTable = createEmptyTableWidget(6, 5);
-    m_ParameterTypeCombo = createComboBox(getJumpParameterTypes());
-    m_ParameterCombo = createComboBox(getJumpParameters());
+    m_ParameterTypeCombo = createComboBox(getFqFitParameterTypes());
+    m_ParameterCombo = createComboBox(getFqFitParameters());
     m_ParameterTypeLabel = createLabel(PARAMETER_TYPE_LABEL);
     m_ParameterLabel = createLabel(PARAMETER_LABEL);
     m_SingleFunctionTemplateBrowser =
@@ -142,7 +142,7 @@ public:
 
     ON_CALL(*m_view, getDataTable()).WillByDefault(Return(m_dataTable.get()));
 
-    m_presenter = std::make_unique<JumpFitDataPresenter>(
+    m_presenter = std::make_unique<FqFitDataPresenter>(
         std::move(m_model.get()), std::move(m_view.get()),
         std::move(m_ParameterTypeCombo.get()),
         std::move(m_ParameterCombo.get()),
@@ -183,8 +183,8 @@ public:
   }
 
   void test_that_the_comboboxes_contain_the_items_specified_during_the_setup() {
-    auto const parameterTypes = getJumpParameterTypes();
-    auto const parameters = getJumpParameters();
+    auto const parameterTypes = getFqFitParameterTypes();
+    auto const parameters = getFqFitParameters();
 
     TS_ASSERT_EQUALS(m_ParameterTypeCombo->itemText(0), parameterTypes[0]);
     TS_ASSERT_EQUALS(m_ParameterTypeCombo->itemText(1), parameterTypes[1]);
@@ -218,7 +218,7 @@ private:
   std::unique_ptr<SingleFunctionTemplateBrowserMock>
       m_SingleFunctionTemplateBrowser;
 
-  std::unique_ptr<MockJumpFitDataView> m_view;
-  std::unique_ptr<MockJumpFitModel> m_model;
-  std::unique_ptr<JumpFitDataPresenter> m_presenter;
+  std::unique_ptr<MockFqFitDataView> m_view;
+  std::unique_ptr<MockFqFitModel> m_model;
+  std::unique_ptr<FqFitDataPresenter> m_presenter;
 };

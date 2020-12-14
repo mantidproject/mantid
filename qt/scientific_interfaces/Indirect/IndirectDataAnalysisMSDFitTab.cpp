@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "MSDFit.h"
+#include "IndirectDataAnalysisMSDFitTab.h"
 #include "IDAFunctionParameterEstimation.h"
 
 #include "IndirectFunctionBrowser/SingleFunctionTemplateBrowser.h"
@@ -49,12 +49,12 @@ auto msdFunctionStrings = std::map<std::string, std::string>(
       "name=MsdYi,Height=1,Msd=0.05,Sigma=1,constraints=(Height>0, Msd>0, "
       "Sigma>0)"}});
 
-MSDFit::MSDFit(QWidget *parent)
+IndirectDataAnalysisMSDFitTab::IndirectDataAnalysisMSDFitTab(QWidget *parent)
     : IndirectFitAnalysisTab(new MSDFitModel, parent),
       m_uiForm(new Ui::IndirectFitTab) {
   m_uiForm->setupUi(parent);
 
-  m_msdFittingModel = dynamic_cast<MSDFitModel *>(fittingModel());
+  m_msdFittingModel = dynamic_cast<MSDFitModel *>(getFittingModel());
   setFitDataPresenter(std::make_unique<IndirectFitDataPresenter>(
       m_msdFittingModel, m_uiForm->dockArea->m_fitDataView));
   setPlotView(m_uiForm->dockArea->m_fitPlotView);
@@ -75,20 +75,23 @@ MSDFit::MSDFit(QWidget *parent)
   fitFunctionChanged();
 }
 
-void MSDFit::setupFitTab() {
+void IndirectDataAnalysisMSDFitTab::setupFitTab() {
   connect(this, SIGNAL(functionChanged()), this, SLOT(fitFunctionChanged()));
   connect(m_uiForm->pbRun, SIGNAL(clicked()), this, SLOT(runClicked()));
 }
 
-void MSDFit::runClicked() { runTab(); }
+void IndirectDataAnalysisMSDFitTab::runClicked() { runTab(); }
 
-void MSDFit::setRunIsRunning(bool running) {
+void IndirectDataAnalysisMSDFitTab::setRunIsRunning(bool running) {
   m_uiForm->pbRun->setText(running ? "Running..." : "Run");
 }
 
-void MSDFit::setRunEnabled(bool enable) { m_uiForm->pbRun->setEnabled(enable); }
+void IndirectDataAnalysisMSDFitTab::setRunEnabled(bool enable) {
+  m_uiForm->pbRun->setEnabled(enable);
+}
 
-EstimationDataSelector MSDFit::getEstimationDataSelector() const {
+EstimationDataSelector
+IndirectDataAnalysisMSDFitTab::getEstimationDataSelector() const {
 
   return
       [](const std::vector<double> &x, const std::vector<double> &y,
@@ -118,16 +121,16 @@ EstimationDataSelector MSDFit::getEstimationDataSelector() const {
       };
 }
 
-void MSDFit::fitFunctionChanged() {
-  m_msdFittingModel->setFitTypeString(fitTypeString());
+void IndirectDataAnalysisMSDFitTab::fitFunctionChanged() {
+  m_msdFittingModel->setFitTypeString(getFitTypeString());
 }
 
-std::string MSDFit::fitTypeString() const {
+std::string IndirectDataAnalysisMSDFitTab::getFitTypeString() const {
   // This function attempts to work out which fit type is being done. It will
   // currently only recognise the three default types.
-  const auto numberOfGauss = numberOfCustomFunctions("MsdGauss");
-  const auto numberOfPeters = numberOfCustomFunctions("MsdPeters");
-  const auto numberOfYi = numberOfCustomFunctions("MsdYi");
+  const auto numberOfGauss = getNumberOfCustomFunctions("MsdGauss");
+  const auto numberOfPeters = getNumberOfCustomFunctions("MsdPeters");
+  const auto numberOfYi = getNumberOfCustomFunctions("MsdYi");
 
   if (numberOfGauss + numberOfPeters + numberOfYi != 1) {
     return "UserDefined";
@@ -147,7 +150,8 @@ std::string MSDFit::fitTypeString() const {
 // Create parameter estimation functions
 // These function rely on the data returned from getEstimationDataSelector,
 // which should be appropriately configured.
-IDAFunctionParameterEstimation MSDFit::createParameterEstimation() const {
+IDAFunctionParameterEstimation
+IndirectDataAnalysisMSDFitTab::createParameterEstimation() const {
   auto estimateMsd = [](::Mantid::API::IFunction_sptr &function,
                         const DataForParameterEstimation &estimationData) {
     auto y = estimationData.y;

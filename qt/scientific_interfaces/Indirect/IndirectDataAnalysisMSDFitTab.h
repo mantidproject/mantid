@@ -7,45 +7,42 @@
 #pragma once
 
 #include "IndirectFitAnalysisTab.h"
-#include "JumpFitModel.h"
+#include "MSDFitModel.h"
 #include "ui_IndirectFitTab.h"
 
-#include "IFQFitObserver.h"
 #include "MantidAPI/IFunction.h"
-#include "MantidAPI/TextAxis.h"
 
 namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 class IDAFunctionParameterEstimation;
 
-class DLLExport JumpFit : public IndirectFitAnalysisTab {
+class DLLExport IndirectDataAnalysisMSDFitTab : public IndirectFitAnalysisTab {
   Q_OBJECT
 
 public:
-  JumpFit(QWidget *parent = nullptr);
+  IndirectDataAnalysisMSDFitTab(QWidget *parent = nullptr);
 
-  std::string tabName() const override { return "FQFit"; }
+  std::string getTabName() const override { return "MSDFit"; }
 
   bool hasResolution() const override { return false; }
-
-  void setupFitTab() override;
-
-protected slots:
-  void updateModelFitTypeString();
-  void runClicked();
 
 protected:
   void setRunIsRunning(bool running) override;
   void setRunEnabled(bool enable) override;
 
 private:
+  void setupFitTab() override;
   EstimationDataSelector getEstimationDataSelector() const override;
+  std::string getFitTypeString() const;
   IDAFunctionParameterEstimation createParameterEstimation() const;
 
-  JumpFitModel *m_jumpFittingModel;
   std::unique_ptr<Ui::IndirectFitTab> m_uiForm;
-  std::string fitTypeString() const;
+  MSDFitModel *m_msdFittingModel;
+
+protected slots:
+  void runClicked();
+  void fitFunctionChanged();
 };
 } // namespace IDA
 } // namespace CustomInterfaces

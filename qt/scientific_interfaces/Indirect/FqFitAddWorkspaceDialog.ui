@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>JumpFitAddWorkspaceDialog</class>
- <widget class="QDialog" name="JumpFitAddWorkspaceDialog">
+ <class>FqFitAddWorkspaceDialog</class>
+ <widget class="QDialog" name="FqFitAddWorkspaceDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -150,7 +150,7 @@
   <connection>
    <sender>pbAdd</sender>
    <signal>clicked()</signal>
-   <receiver>JumpFitAddWorkspaceDialog</receiver>
+   <receiver>FqFitAddWorkspaceDialog</receiver>
    <slot>addData()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -166,7 +166,7 @@
   <connection>
    <sender>pbClose</sender>
    <signal>clicked()</signal>
-   <receiver>JumpFitAddWorkspaceDialog</receiver>
+   <receiver>FqFitAddWorkspaceDialog</receiver>
    <slot>closeDialog()</slot>
    <hints>
     <hint type="sourcelabel">

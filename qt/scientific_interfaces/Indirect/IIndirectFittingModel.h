@@ -19,7 +19,7 @@ using namespace MantidWidgets;
     IIndirectFitData - Specifies an interface for updating, querying and
    accessing the raw data in IndirectFitAnalysisTabs
 */
-class MANTIDQT_INDIRECT_DLL IIndirectFitResult {
+class MANTIDQT_INDIRECT_DLL IIndirectFittingModel {
 public:
   virtual bool isPreviouslyFit(TableDatasetIndex dataIndex,
                                WorkspaceIndex spectrum) const = 0;

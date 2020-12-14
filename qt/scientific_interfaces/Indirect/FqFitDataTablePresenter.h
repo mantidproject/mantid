@@ -6,8 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "FqFitModel.h"
 #include "IndirectDataTablePresenter.h"
-#include "JumpFitModel.h"
 
 #include <QTableWidget>
 
@@ -21,10 +21,10 @@ namespace IDA {
 /**
   Presenter for a table of data containing Widths/EISF.
 */
-class DLLExport JumpFitDataTablePresenter : public IndirectDataTablePresenter {
+class DLLExport FqFitDataTablePresenter : public IndirectDataTablePresenter {
   Q_OBJECT
 public:
-  JumpFitDataTablePresenter(JumpFitModel *model, QTableWidget *dataTable);
+  FqFitDataTablePresenter(FqFitModel *model, QTableWidget *dataTable);
 
 protected:
   void addTableEntry(FitDomainIndex row) override;

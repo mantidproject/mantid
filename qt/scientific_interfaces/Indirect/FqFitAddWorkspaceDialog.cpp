@@ -4,7 +4,7 @@
 //   NScD Oak Ridge National Laboratory, European Spallation Source,
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
-#include "JumpFitAddWorkspaceDialog.h"
+#include "FqFitAddWorkspaceDialog.h"
 
 #include <boost/optional.hpp>
 
@@ -14,7 +14,7 @@ namespace MantidQt {
 namespace CustomInterfaces {
 namespace IDA {
 
-JumpFitAddWorkspaceDialog::JumpFitAddWorkspaceDialog(QWidget *parent)
+FqFitAddWorkspaceDialog::FqFitAddWorkspaceDialog(QWidget *parent)
     : IAddWorkspaceDialog(parent) {
   m_uiForm.setupUi(this);
 
@@ -27,19 +27,19 @@ JumpFitAddWorkspaceDialog::JumpFitAddWorkspaceDialog(QWidget *parent)
   connect(m_uiForm.pbClose, SIGNAL(clicked()), this, SIGNAL(closeDialog()));
 }
 
-std::string JumpFitAddWorkspaceDialog::workspaceName() const {
+std::string FqFitAddWorkspaceDialog::workspaceName() const {
   return m_uiForm.dsWorkspace->getCurrentDataName().toStdString();
 }
 
-std::string JumpFitAddWorkspaceDialog::parameterType() const {
+std::string FqFitAddWorkspaceDialog::parameterType() const {
   return m_uiForm.cbParameterType->currentText().toStdString();
 }
 
-int JumpFitAddWorkspaceDialog::parameterNameIndex() const {
+int FqFitAddWorkspaceDialog::parameterNameIndex() const {
   return m_uiForm.cbParameterName->currentIndex();
 }
 
-void JumpFitAddWorkspaceDialog::setParameterTypes(
+void FqFitAddWorkspaceDialog::setParameterTypes(
     const std::vector<std::string> &types) {
   MantidQt::API::SignalBlocker blocker(m_uiForm.cbParameterType);
   m_uiForm.cbParameterType->clear();
@@ -47,36 +47,36 @@ void JumpFitAddWorkspaceDialog::setParameterTypes(
     m_uiForm.cbParameterType->addItem(QString::fromStdString(type));
 }
 
-void JumpFitAddWorkspaceDialog::setParameterNames(
+void FqFitAddWorkspaceDialog::setParameterNames(
     const std::vector<std::string> &names) {
   m_uiForm.cbParameterName->clear();
   for (auto &&name : names)
     m_uiForm.cbParameterName->addItem(QString::fromStdString(name));
 }
 
-void JumpFitAddWorkspaceDialog::enableParameterSelection() {
+void FqFitAddWorkspaceDialog::enableParameterSelection() {
   m_uiForm.cbParameterName->setEnabled(true);
   m_uiForm.cbParameterType->setEnabled(true);
 }
 
-void JumpFitAddWorkspaceDialog::disableParameterSelection() {
+void FqFitAddWorkspaceDialog::disableParameterSelection() {
   m_uiForm.cbParameterName->setEnabled(false);
   m_uiForm.cbParameterType->setEnabled(false);
 }
 
-void JumpFitAddWorkspaceDialog::setWSSuffices(const QStringList &suffices) {
+void FqFitAddWorkspaceDialog::setWSSuffices(const QStringList &suffices) {
   m_uiForm.dsWorkspace->setWSSuffixes(suffices);
 }
 
-void JumpFitAddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
+void FqFitAddWorkspaceDialog::setFBSuffices(const QStringList &suffices) {
   m_uiForm.dsWorkspace->setFBSuffixes(suffices);
 }
 
-void JumpFitAddWorkspaceDialog::emitWorkspaceChanged(const QString &name) {
+void FqFitAddWorkspaceDialog::emitWorkspaceChanged(const QString &name) {
   emit workspaceChanged(this, name.toStdString());
 }
 
-void JumpFitAddWorkspaceDialog::emitParameterTypeChanged(const QString &type) {
+void FqFitAddWorkspaceDialog::emitParameterTypeChanged(const QString &type) {
   emit parameterTypeChanged(this, type.toStdString());
 }
 
