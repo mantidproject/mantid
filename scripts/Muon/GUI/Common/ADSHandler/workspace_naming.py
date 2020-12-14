@@ -181,6 +181,13 @@ def get_run_number_from_workspace_name(workspace_name, instrument):
         return run[0]
 
 
+def get_run_numbers_as_string_from_workspace_name(workspace_name, instrument):
+    name = workspace_name.split(' ')[0]
+    name = name.split('_')[0]
+    runs = name.replace(instrument, '')
+    return runs
+
+
 def get_maxent_workspace_group_name(insertion_workspace_name, instrument, workspace_suffix):
     run = re.search('[0-9]+', insertion_workspace_name).group()
     group = get_base_run_name(run, instrument) + "".join([' ', MAXENT_STR]) + workspace_suffix + '/'
