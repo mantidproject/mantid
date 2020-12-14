@@ -1,6 +1,6 @@
 # Mantid Repository : https://github.com/mantidproject/mantid
 #
-# Copyright &copy; 2018 ISIS Rutherford Appleton Laboratory UKRI,
+# Copyright &copy; 2020 ISIS Rutherford Appleton Laboratory UKRI,
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
@@ -45,6 +45,7 @@ class SANS2DReductionShouldAcceptLoadedWorkspace(unittest.TestCase):
      * If reload is False, it will be used, if it pass the following tests:
        * The instrument components have not been moved
     """
+
     def setUp(self):
         self.load_run = '2500.nxs'
         config["default.instrument"] = "SANS2D"
@@ -124,7 +125,6 @@ class SANSLOQReductionShouldAcceptLoadedWorkspaceSystemTest(systemtesting.Mantid
 
     def validate(self):
         return self._success
-
 
 
 @ISISSansSystemTest(SANSInstrument.SANS2D)

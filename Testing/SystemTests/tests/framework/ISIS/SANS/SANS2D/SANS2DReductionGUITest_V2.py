@@ -24,6 +24,7 @@ from sans.common.enums import SANSInstrument
 class SANS2DMinimalBatchReductionTest_V2(systemtesting.MantidSystemTest):
     """Minimal script to perform full reduction in batch mode
     """
+
     def __init__(self):
         super(SANS2DMinimalBatchReductionTest_V2, self).__init__()
         config['default.instrument'] = 'SANS2D'
