@@ -167,12 +167,11 @@ AbsorptionCorrections::AbsorptionCorrections(QWidget *parent)
           SLOT(doValidation()));
   connect(m_uiForm.leCanChemicalFormula, SIGNAL(editingFinished()), this,
           SLOT(doValidation()));
-  connect(m_uiForm.ckUseCan, SIGNAL(stateChanged(int)), this,
+  connect(m_uiForm.overrideShape, SIGNAL(stateChanged(int)), this,
           SLOT(doValidation()));
 
   // Allows empty workspace selector when initially selected
   m_uiForm.dsSampleInput->isOptional(true);
-  m_uiForm.dsCanInput->isOptional(true);
 }
 
 AbsorptionCorrections::~AbsorptionCorrections() {}
@@ -187,45 +186,15 @@ void AbsorptionCorrections::setup() { doValidation(); }
 void AbsorptionCorrections::run() {
   setRunIsRunning(true);
 
-  // Get correct corrections algorithm
-  QString const sampleShape = m_uiForm.cbShape->currentText().replace(" ", "");
+  bool const overrideShapes = m_uiForm.overrideShape->isChecked();
 
   IAlgorithm_sptr monteCarloAbsCor =
       AlgorithmManager::Instance().create("PaalmanPingsMonteCarloAbsorption");
   monteCarloAbsCor->initialize();
 
-  monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());
-
-  addShapeSpecificSampleOptions(monteCarloAbsCor, sampleShape);
-
   // Sample details
   QString const sampleWsName = m_uiForm.dsSampleInput->getCurrentDataName();
-  monteCarloAbsCor->setProperty("SampleWorkspace", sampleWsName.toStdString());
-
-  auto const sampleDensityType =
-      m_uiForm.cbSampleDensity->currentText().toStdString();
-  monteCarloAbsCor->setProperty("SampleDensityType",
-                                getDensityType(sampleDensityType));
-  if (sampleDensityType != "Mass Density")
-    monteCarloAbsCor->setProperty("SampleNumberDensityUnit",
-                                  getNumberDensityUnit(sampleDensityType));
-
-  monteCarloAbsCor->setProperty("SampleDensity",
-                                m_uiForm.spSampleDensity->value());
-
-  if (m_uiForm.cbSampleMaterialMethod->currentText() == "Chemical Formula") {
-    auto const sampleChemicalFormula = m_uiForm.leSampleChemicalFormula->text();
-    monteCarloAbsCor->setProperty("SampleChemicalFormula",
-                                  sampleChemicalFormula.toStdString());
-  } else {
-    monteCarloAbsCor->setProperty("SampleCoherentXSection",
-                                  m_uiForm.spSampleCoherentXSection->value());
-    monteCarloAbsCor->setProperty("SampleIncoherentXSection",
-                                  m_uiForm.spSampleIncoherentXSection->value());
-    monteCarloAbsCor->setProperty(
-        "SampleAttenuationXSection",
-        m_uiForm.spSampleAttenuationXSection->value());
-  }
+  monteCarloAbsCor->setProperty("InputWorkspace", sampleWsName.toStdString());
 
   // General details
   monteCarloAbsCor->setProperty("BeamHeight", m_uiForm.spBeamHeight->value());
@@ -239,13 +208,44 @@ void AbsorptionCorrections::run() {
       static_cast<long>(m_uiForm.spMaxScatterPtAttempts->value());
   monteCarloAbsCor->setProperty("MaxScatterPtAttempts", maxAttempts);
 
-  // Can details
-  bool const useCan = m_uiForm.ckUseCan->isChecked();
-  if (useCan) {
-    std::string const canWsName =
-        m_uiForm.dsCanInput->getCurrentDataName().toStdString();
-    monteCarloAbsCor->setProperty("ContainerWorkspace", canWsName);
+  if (overrideShapes) {
 
+    // Get correct corrections algorithm
+    QString const sampleShape =
+        m_uiForm.cbShape->currentText().replace(" ", "");
+
+    monteCarloAbsCor->setProperty("Shape", sampleShape.toStdString());
+
+    addShapeSpecificSampleOptions(monteCarloAbsCor, sampleShape);
+
+    auto const sampleDensityType =
+        m_uiForm.cbSampleDensity->currentText().toStdString();
+    monteCarloAbsCor->setProperty("SampleDensityType",
+                                  getDensityType(sampleDensityType));
+    if (sampleDensityType != "Mass Density")
+      monteCarloAbsCor->setProperty("SampleNumberDensityUnit",
+                                    getNumberDensityUnit(sampleDensityType));
+
+    monteCarloAbsCor->setProperty("SampleDensity",
+                                  m_uiForm.spSampleDensity->value());
+
+    if (m_uiForm.cbSampleMaterialMethod->currentText() == "Chemical Formula") {
+      auto const sampleChemicalFormula =
+          m_uiForm.leSampleChemicalFormula->text();
+      monteCarloAbsCor->setProperty("SampleChemicalFormula",
+                                    sampleChemicalFormula.toStdString());
+    } else {
+      monteCarloAbsCor->setProperty("SampleCoherentXSection",
+                                    m_uiForm.spSampleCoherentXSection->value());
+      monteCarloAbsCor->setProperty(
+          "SampleIncoherentXSection",
+          m_uiForm.spSampleIncoherentXSection->value());
+      monteCarloAbsCor->setProperty(
+          "SampleAttenuationXSection",
+          m_uiForm.spSampleAttenuationXSection->value());
+    }
+
+    // Can details
     auto const containerDensityType =
         m_uiForm.cbCanDensity->currentText().toStdString();
     monteCarloAbsCor->setProperty("ContainerDensityType",
@@ -279,7 +279,7 @@ void AbsorptionCorrections::run() {
     nameCutIndex = sampleWsName.length();
 
   auto const outputWsName =
-      sampleWsName.left(nameCutIndex) + "_" + sampleShape + "_MC_Corrections";
+      sampleWsName.left(nameCutIndex) + "_MC_Corrections";
 
   monteCarloAbsCor->setProperty("CorrectionsWorkspace",
                                 outputWsName.toStdString());
@@ -385,36 +385,9 @@ UserInputValidator AbsorptionCorrections::doValidation() {
     uiv.addErrorMessage(
         "Invalid sample workspace. Ensure a MatrixWorkspace is provided.");
 
-  if (m_uiForm.cbSampleMaterialMethod->currentText() == "Chemical Formula") {
-    if (uiv.checkFieldIsNotEmpty("Sample Chemical Formula",
-                                 m_uiForm.leSampleChemicalFormula,
-                                 m_uiForm.valSampleChemicalFormula))
-      uiv.checkFieldIsValid("Sample Chemical Formula",
-                            m_uiForm.leSampleChemicalFormula,
-                            m_uiForm.valSampleChemicalFormula);
-    auto const sampleChem =
-        m_uiForm.leSampleChemicalFormula->text().toStdString();
-    try {
-      Mantid::Kernel::Material::parseChemicalFormula(sampleChem);
-    } catch (std::runtime_error &ex) {
-      UNUSED_ARG(ex);
-      uiv.addErrorMessage("Chemical Formula for Sample was not recognised.");
-      uiv.setErrorLabel(m_uiForm.valSampleChemicalFormula, false);
-    }
-  }
+  bool overrideShapes = m_uiForm.overrideShape->isChecked();
 
-  bool useCan = m_uiForm.ckUseCan->isChecked();
-  if (useCan) {
-
-    uiv.checkDataSelectorIsValid("Container", m_uiForm.dsCanInput);
-
-    auto const containerWsName =
-        m_uiForm.dsCanInput->getCurrentDataName().toStdString();
-    if (doesExistInADS(containerWsName) &&
-        !getADSMatrixWorkspace(containerWsName))
-      uiv.addErrorMessage(
-          "Invalid container workspace. Ensure a MatrixWorkspace is provided.");
-
+  if (overrideShapes) {
     if (m_uiForm.cbCanMaterialMethod->currentText() == "Chemical Formula") {
       auto const containerChem =
           m_uiForm.leCanChemicalFormula->text().toStdString();
@@ -435,15 +408,13 @@ UserInputValidator AbsorptionCorrections::doValidation() {
         uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, false);
       }
     }
-  } else
-    uiv.setErrorLabel(m_uiForm.valCanChemicalFormula, true);
+  }
 
   return uiv;
 }
 
 void AbsorptionCorrections::loadSettings(const QSettings &settings) {
   m_uiForm.dsSampleInput->readSettings(settings.group());
-  m_uiForm.dsCanInput->readSettings(settings.group());
 }
 
 void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
@@ -453,10 +424,6 @@ void AbsorptionCorrections::setFileExtensionsByName(bool filter) {
                                                : getExtensions(tabName));
   m_uiForm.dsSampleInput->setWSSuffixes(filter ? getSampleWSSuffixes(tabName)
                                                : noSuffixes);
-  m_uiForm.dsCanInput->setFBSuffixes(filter ? getContainerFBSuffixes(tabName)
-                                            : getExtensions(tabName));
-  m_uiForm.dsCanInput->setWSSuffixes(filter ? getContainerWSSuffixes(tabName)
-                                            : noSuffixes);
 }
 
 void AbsorptionCorrections::processWavelengthWorkspace() {
