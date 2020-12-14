@@ -700,6 +700,7 @@ void SCDCalibratePanels::findL2(
       }
     }
 
+    // 1st: optimize translation only
     IAlgorithm_sptr fit_alg;
     try {
       fit_alg = createChildAlgorithm("Fit", -1, -1, false);
@@ -710,17 +711,32 @@ void SCDCalibratePanels::findL2(
     std::ostringstream fun_str;
     fun_str << "name=SCDPanelErrors,Workspace=" + bankName << ",Bank=" << iBank;
     fit_alg->setPropertyValue("Function", fun_str.str());
-    std::ostringstream tie_str;
-    tie_str << "ScaleWidth=1.0,ScaleHeight=1.0,T0Shift =" << mT0;
-    fit_alg->setProperty("Ties", tie_str.str());
+    
+    std::ostringstream tie_fitTrans_str;
+    tie_fitTrans_str << "ScaleWidth=1.0, ScaleHeight=1.0, "
+            << "XRotate=0.0, YRotate=0.0, ZRotate=0.0, "
+            << "T0Shift= " << mT0;
+    fit_alg->setProperty("Ties", tie_fitTrans_str.str());
+
+    // std::ostringstream cnstrnt_str;
+    // cnstrnt_str << "-5.0 < XRotate < 5.0, " 
+    //             << "-5.0 < YRotate < 5.0, "
+    //             << "-5.0 < ZRotate < 5.0  ";
+    // fit_alg->setProperty("Constraints", cnstrnt_str.str());
+
     fit_alg->setProperty("InputWorkspace", q3DWS);
     fit_alg->setProperty("CreateOutput", true);
     fit_alg->setProperty("Output", "fit");
     fit_alg->executeAsChildAlg();
     std::string fitStatus = fit_alg->getProperty("OutputStatus");
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
-    g_log.notice() << iBank << "  " << fitStatus << " Chi2overDoF " << chisq
-                   << "\n";
+
+    // report fitting results
+    g_log.notice() << "Fit trans for Bank " << iBank << "\n"
+                   << "-- nPeaks: " << nBankPeaks << "\n"
+                   << "-- fitStatus: " << fitStatus << "\n"
+                   << "-- Chi2overDoF: " << chisq << "\n";
+
     MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
     AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
     ITableWorkspace_sptr paramsWS = fit_alg->getProperty("OutputParameters");
@@ -728,11 +744,43 @@ void SCDCalibratePanels::findL2(
     double xShift = paramsWS->getRef<double>("Value", 0);
     double yShift = paramsWS->getRef<double>("Value", 1);
     double zShift = paramsWS->getRef<double>("Value", 2);
-    double xRotate = paramsWS->getRef<double>("Value", 3);
-    double yRotate = paramsWS->getRef<double>("Value", 4);
-    double zRotate = paramsWS->getRef<double>("Value", 5);
     double scaleWidth = 1.0;
     double scaleHeight = 1.0;
+
+    // 2nd pass: optimize rotation
+    IAlgorithm_sptr fitrot_alg;
+    try {
+        fitrot_alg = createChildAlgorithm("Fit", -1, -1, false);
+      } catch (Exception::NotFoundError &) {
+        g_log.error("Can't locate Fit algorithm");
+        throw;
+      }
+    fitrot_alg->setPropertyValue("Function", fun_str.str());
+
+    std::ostringstream tie_fitRot_str;
+    tie_fitRot_str << "ScaleWidth=1.0, ScaleHeight=1.0, "
+                   << "XShift=" << xShift << ", "
+                   << "YShift=" << yShift << ", "
+                   << "ZShift=" << zShift << ", "
+                   << "T0Shift= " << mT0;
+    fitrot_alg->setPropertyValue("Ties", tie_fitRot_str.str());
+    fitrot_alg->setProperty("InputWorkspace", q3DWS);
+    fitrot_alg->setProperty("CreateOutput", true);
+    fitrot_alg->setProperty("Output", "fit");
+    fitrot_alg->executeAsChildAlg();
+
+    // report fitting results
+    std::string fitStatus_rot = fitrot_alg->getProperty("OutputStatus");
+    double chisq_rot = fitrot_alg->getProperty("OutputChi2overDoF");
+    g_log.notice() << "Fit rot for Bank " << iBank << "\n"
+                   << "-- nPeaks: " << nBankPeaks << "\n"
+                   << "-- fitStatus: " << fitStatus_rot << "\n"
+                   << "-- Chi2overDoF: " << chisq_rot << "\n";
+
+    double xRotate = paramsWS->getRef<double>("Value", 0);
+    double yRotate = paramsWS->getRef<double>("Value", 1);
+    double zRotate = paramsWS->getRef<double>("Value", 2);
+
     // Scaling only implemented for Rectangular Detectors
     Geometry::IComponent_const_sptr comp =
         peaksWs->getInstrument()->getComponentByName(iBank);
