@@ -92,6 +92,7 @@ set(TEST_PY_FILES
     SaveGEMMAUDParamFileTest.py
     SaveNexusPDTest.py
     SaveGSSCWTest.py
+    SaveHKLCWTest.py
     SavePlot1DAsJsonTest.py
     SaveReflectionsTest.py
     ExtractMonitorsTest.py
