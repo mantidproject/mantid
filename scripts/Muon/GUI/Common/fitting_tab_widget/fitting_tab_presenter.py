@@ -492,11 +492,12 @@ class FittingTabPresenter(object):
 
     def update_fit_specifier_list(self):
         if self.view.simultaneous_fit_by == "Run":
-            # extract runs from workspaces
+            # extract runs from run list of lists, which is in the format [ [run,...,runs],[runs],...,[runs] ]
             current_runs = self.context.data_context.current_runs
             if len(current_runs) > 1:
                 run_numbers = [str(item) for sub_list in current_runs for item in sub_list]
             else:
+                # extract runs from workspace
                 ws_list = self.context.data_context.current_data["OutputWorkspace"]
                 run_numbers = [str(get_run_numbers_as_string_from_workspace_name(
                     ws.workspace_name, self.context.data_context.instrument)) for ws in ws_list]

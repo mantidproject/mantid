@@ -641,10 +641,7 @@ class FittingTabModel(object):
         groups_and_pairs = []
         if self.fitting_options["fit_type"] == "Single":
             for workspace in selected_workspaces:
-                if workspace.find('-') != -1 or workspace.find(',') != -1:
-                    runs += [get_run_numbers_as_string_from_workspace_name(workspace, self.context.data_context.instrument)]
-                else:
-                    runs += [get_run_number_from_workspace_name(workspace, self.context.data_context.instrument)]
+                runs += [get_run_numbers_as_string_from_workspace_name(workspace, self.context.data_context.instrument)]
                 groups_and_pairs += [get_group_or_pair_from_name(workspace)]
             run_groups_and_pairs = list(zip(runs, groups_and_pairs))
             groups_and_pairs = [grp_pair for _, grp_pair in run_groups_and_pairs]
