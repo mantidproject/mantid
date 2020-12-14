@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>378</width>
-    <height>534</height>
+    <width>818</width>
+    <height>622</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -63,20 +63,7 @@
    <item row="4" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QComboBox" name="select_curve_combo_box">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>250</width>
-         <height>0</height>
-        </size>
-       </property>
-      </widget>
+      <widget class="QListWidget" name="select_curve_list"/>
      </item>
      <item>
       <widget class="QPushButton" name="remove_curve_button">
@@ -241,7 +228,6 @@
  </widget>
  <tabstops>
   <tabstop>select_axes_combo_box</tabstop>
-  <tabstop>select_curve_combo_box</tabstop>
   <tabstop>remove_curve_button</tabstop>
   <tabstop>hide_curve_check_box</tabstop>
   <tabstop>curve_label_line_edit</tabstop>

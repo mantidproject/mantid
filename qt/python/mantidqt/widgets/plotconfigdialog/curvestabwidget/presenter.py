@@ -40,8 +40,8 @@ class CurvesTabWidgetPresenter:
         # Signals
         self.view.select_axes_combo_box.currentIndexChanged.connect(
             self.on_axes_index_changed)
-        self.view.select_curve_combo_box.currentIndexChanged.connect(
-            self.on_curves_index_changed)
+        self.view.select_curve_list.currentRowChanged.connect(
+            self.on_curves_row_changed)
         self.view.remove_curve_button.clicked.connect(
             self.remove_selected_curve)
         self.view.line.apply_to_all_button.clicked.connect(
@@ -52,6 +52,9 @@ class CurvesTabWidgetPresenter:
             self.view.marker.set_colour_fields_enabled)
         self.view.errorbars.apply_to_all_button.clicked.connect(
             self.errorbars_apply_to_all)
+        self.view.select_curve_list.itemSelectionChanged.connect(
+            self.on_curves_selection_changed
+        )
 
     def apply_properties(self):
         """Take properties from views and set them on the selected curve"""
@@ -67,7 +70,7 @@ class CurvesTabWidgetPresenter:
         self._replot_selected_curve(plot_kwargs)
         curve = self.get_selected_curve()
         # Set the curve's new name in the names dict and combo box
-        self.set_new_curve_name_in_dict_and_combo_box(curve, view_props.label)
+        self.set_new_curve_name_in_dict_and_list(curve, view_props.label)
         FigureErrorsManager.toggle_errors(curve, view_props)
         self.current_view_properties = view_props
 
@@ -196,19 +199,19 @@ class CurvesTabWidgetPresenter:
         ax.figure.canvas.draw()
 
         # Remove the curve from the curve selection combo box
-        if self.remove_selected_curve_combo_box_entry():
+        if self.remove_selected_curve_list_entry():
             return
         self.update_view()
 
-    def remove_selected_curve_combo_box_entry(self):
+    def remove_selected_curve_list_entry(self):
         """
-        Remove selected entry in 'select_curve_combo_box'. If no curves remain
+        Remove selected entry in 'select_curve_list'. If no curves remain
         on the axes remove the axes entry from the 'select_axes_combo_box'. If
         no axes with curves remain close the tab and return True
         """
-        with block_signals(self.view.select_curve_combo_box):
-            self.view.remove_select_curve_combo_box_selected_item()
-            if self.view.select_curve_combo_box.count() == 0:
+        with block_signals(self.view.select_curve_list):
+            self.view.remove_select_curve_list_current_item()
+            if self.view.select_curve_list.count() == 0:
                 self.view.remove_select_axes_combo_box_selected_item()
                 if self.view.select_axes_combo_box.count() == 0:
                     self.close_tab()
@@ -216,7 +219,7 @@ class CurvesTabWidgetPresenter:
                         self.legend_tab.close_tab()
                     return True
 
-    def set_new_curve_name_in_dict_and_combo_box(self, curve, new_label):
+    def set_new_curve_name_in_dict_and_list(self, curve, new_label):
         """Update a curve name in the curve names dict and combo box"""
         old_name = self.view.get_selected_curve_name()
         if new_label:
@@ -234,7 +237,7 @@ class CurvesTabWidgetPresenter:
         # the view to match the curve that are on the new axes.
         self.update_view(update_axes=False)
 
-    def on_curves_index_changed(self):
+    def on_curves_row_changed(self):
         # No properties about the axes or the curves have changed, but we need to
         # update the rest of the view so the information matches the new selected curve.
         self.update_view(update_axes=False, update_curves=False)
@@ -257,7 +260,7 @@ class CurvesTabWidgetPresenter:
         if update_curves:
             # Update the 'select curves' combo box. Do this if curve properties have changed, or
             # if user selects a different set of axes.
-            self._populate_select_curve_combo_box()
+            self._populate_select_curve_list()
 
         self.set_apply_to_all_buttons_enabled()
 
@@ -290,14 +293,14 @@ class CurvesTabWidgetPresenter:
         ax = self.get_selected_ax()
         return FigureErrorsManager.get_errorbars_from_ax(ax)
 
-    def _populate_select_curve_combo_box(self):
+    def _populate_select_curve_list(self):
         """
         Add curves on selected axes to the 'select curves' combo box.
         Return False if there are no lines on the axes (this can occur
         when a user uses the "Remove Curve" button), else return True.
         """
-        with block_signals(self.view.select_curve_combo_box):
-            self.view.select_curve_combo_box.clear()
+        with block_signals(self.view.select_curve_list):
+            self.view.select_curve_list.clear()
         selected_ax = self.get_selected_ax()
         if not selected_ax:
             self.view.close()
@@ -310,7 +313,7 @@ class CurvesTabWidgetPresenter:
         self.curve_names_dict = {}
         for line in active_lines:
             self._update_selected_curve_name(line)
-        self.view.populate_select_curve_combo_box(list(self.curve_names_dict))
+        self.view.populate_select_curve_list(list(self.curve_names_dict))
         return True
 
     def _update_selected_curve_name(self, curve):
@@ -337,14 +340,14 @@ class CurvesTabWidgetPresenter:
         """
         Applies the settings in the line tab for the current curve to all other curves.
         """
-        current_curve_index = self.view.select_curve_combo_box.currentIndex()
+        current_curve_index = self.view.select_curve_list.currentIndex()
 
         line_style = self.view.line.get_style()
         draw_style = self.view.line.get_draw_style()
         width = self.view.line.get_width()
 
         for i in range(len(self.curve_names_dict)):
-            self.view.select_curve_combo_box.setCurrentIndex(i)
+            self.view.select_curve_list.setCurrentIndex(i)
 
             self.view.line.set_style(line_style)
             self.view.line.set_draw_style(draw_style)
@@ -353,16 +356,16 @@ class CurvesTabWidgetPresenter:
             self.apply_properties()
 
         self.fig.canvas.draw()
-        self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)
+        self.view.select_curve_list.setCurrentIndex(current_curve_index)
 
     def marker_apply_to_all(self):
-        current_curve_index = self.view.select_curve_combo_box.currentIndex()
+        current_curve_index = self.view.select_curve_list.currentIndex()
 
         marker_style = self.view.marker.get_style()
         marker_size = self.view.marker.get_size()
 
         for i in range(len(self.curve_names_dict)):
-            self.view.select_curve_combo_box.setCurrentIndex(i)
+            self.view.select_curve_list.setCurrentIndex(i)
 
             self.view.marker.set_style(marker_style)
             self.view.marker.set_size(marker_size)
@@ -370,10 +373,10 @@ class CurvesTabWidgetPresenter:
             self.apply_properties()
 
         self.fig.canvas.draw()
-        self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)
+        self.view.select_curve_list.setCurrentIndex(current_curve_index)
 
     def errorbars_apply_to_all(self):
-        current_curve_index = self.view.select_curve_combo_box.currentIndex()
+        current_curve_index = self.view.select_curve_list.currentIndex()
 
         checked = self.view.errorbars.get_hide()
 
@@ -384,7 +387,7 @@ class CurvesTabWidgetPresenter:
             error_every = self.view.errorbars.get_error_every()
 
         for i in range(len(self.curve_names_dict)):
-            self.view.select_curve_combo_box.setCurrentIndex(i)
+            self.view.select_curve_list.setCurrentIndex(i)
 
             self.view.errorbars.set_hide(checked)
 
@@ -397,4 +400,10 @@ class CurvesTabWidgetPresenter:
             self.apply_properties()
 
         self.fig.canvas.draw()
-        self.view.select_curve_combo_box.setCurrentIndex(current_curve_index)
+        self.view.select_curve_list.setCurrentIndex(current_curve_index)
+
+    def on_curves_selection_changed(self):
+        if len(self.view.select_curve_list.selectedItems()) > 1:
+            self.view.enable_curve_config(False)
+        else:
+            self.view.enable_curve_config(True)
