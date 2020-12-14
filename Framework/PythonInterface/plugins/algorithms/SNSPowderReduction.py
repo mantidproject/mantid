@@ -1396,6 +1396,29 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         # this effectively deletes the metadata only workspace
         AnalysisDataService.addOrReplace(absName, absorptionWS)
 
+        # Set ChemicalFormula, SampleMassDensity (if not 0 or 1), Mass, if not set
+        if material is not None:
+            if (not material['ChemicalFormula']) and ("SampleFormula" in absorptionWS.run()):
+                material['ChemicalFormula'] = absorptionWS.run()['SampleFormula'].lastValue().strip()
+            if ("SampleMassDensity" not in material or not material['SampleMassDensity']) and ("SampleDensity" in absorptionWS.run()):
+                if (absorptionWS.run()['SampleDensity'].lastValue() != 1.0) and (absorptionWS.run()['SampleDensity'].lastValue() != 0.0):
+                    material['SampleMassDensity'] = absorptionWS.run()['SampleDensity'].lastValue()
+                else:
+                    material['Mass'] = absorptionWS.run()['SampleMass'].lastValue()
+
+        # Set height and mass for computing density if height not set
+        if geometry is None:
+            geometry = {}
+
+        if geometry is not None:
+            if "Height" not in geometry or not geometry['Height']:
+                geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue()
+
+        # Set container if not set
+        if environment is not None:
+            if environment['Container'] == "":
+                environment['Container'] = absorptionWS.run()['SampleContainer'].lastValue().replace(" ", "")
+
         # Make sure one is set before calling SetSample
         if material or geometry or environment is not None:
             self._setup_sample(absName, material, geometry, environment)
@@ -1411,7 +1434,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         :param geometry:
         :param environment:
         """
-
         # Set the material, geometry, and container info
         api.SetSample(InputWorkspace=donor_ws,
                       Material=material,
@@ -1422,7 +1444,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         """
         Purpose: process vanadium runs
         Requirements: if more than 1 run in given run number list, then samRunIndex must be given.
-        Guarantees: have vanadium run reduced.
+        uarantees: have vanadium run reduced.
         :param van_run_number_list: list of vanadium run
         :param timeFilterWall: time filter wall
         :param samRunIndex: sample run index
