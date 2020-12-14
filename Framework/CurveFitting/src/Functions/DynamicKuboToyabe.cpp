@@ -5,12 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidCurveFitting/Functions/DynamicKuboToyabe.h"
+
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/Jacobian.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 
-#include <iomanip>
 #include <sstream>
 #include <vector>
 
@@ -27,6 +27,7 @@ using namespace API;
 DECLARE_FUNCTION(DynamicKuboToyabe)
 
 void DynamicKuboToyabe::init() {
+  declareAttribute("BinWidth", Attribute(m_eps));
   declareParameter("Asym", 0.2, "Amplitude at time 0");
   declareParameter("Delta", 0.2, "Local field");
   declareParameter("Field", 0.0, "External field");
@@ -320,29 +321,6 @@ void DynamicKuboToyabe::setActiveParameter(size_t i, double value) {
 }
 
 //----------------------------------------------------------------------------------------------
-/** Get Attribute names
- * @return A list of attribute names
- */
-std::vector<std::string> DynamicKuboToyabe::getAttributeNames() const {
-  return {"BinWidth"};
-}
-
-//----------------------------------------------------------------------------------------------
-/** Get Attribute
- * @param attName :: Attribute name. If it is not "eps" an exception is thrown.
- * @return a value of attribute attName
- */
-API::IFunction::Attribute
-DynamicKuboToyabe::getAttribute(const std::string &attName) const {
-
-  if (attName == "BinWidth") {
-    return Attribute(m_eps);
-  }
-  throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " +
-                              attName);
-}
-
-//----------------------------------------------------------------------------------------------
 /** Set Attribute
  * @param attName :: The attribute name. If it is not "eps" exception is thrown.
  * @param att :: A double attribute containing a new positive value.
@@ -377,19 +355,12 @@ void DynamicKuboToyabe::setAttribute(const std::string &attName,
       init();
     }
     m_eps = newVal;
+    IFunction::setAttribute(attName, Attribute(m_eps));
 
   } else {
     throw std::invalid_argument("DynamicKuboToyabe: Unknown attribute " +
                                 attName);
   }
-}
-
-//----------------------------------------------------------------------------------------------
-/** Check if attribute attName exists
- * @param attName :: The attribute name.
- */
-bool DynamicKuboToyabe::hasAttribute(const std::string &attName) const {
-  return attName == "BinWidth";
 }
 
 } // namespace Functions
