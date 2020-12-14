@@ -46,28 +46,25 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
         _sampleProperties = None
 
     def test_uniaxial_separation(self):
-        D7AbsoluteCrossSections(InputWorkspace='vanadium_uniaxial', OutputWorkspace='_unused',
-                                CrossSectionsOutputWorkspace='uniaxial',
+        D7AbsoluteCrossSections(InputWorkspace='vanadium_uniaxial', OutputWorkspace='uniaxial',
                                 CrossSectionSeparationMethod='Uniaxial')
         self._check_output('uniaxial', 132, 1, 2, onlySeparation=True)
 
     def test_xyz_separation(self):
-        D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', OutputWorkspace='_unused',
-                                CrossSectionsOutputWorkspace='xyz',
+        D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', OutputWorkspace='xyz',
                                 CrossSectionSeparationMethod='XYZ', NormalisationMethod='None')
         self._check_output('xyz', 132, 1, 3, onlySeparation=True)
 
     def test_10p_separation(self):
-        D7AbsoluteCrossSections(InputWorkspace='vanadium_10p', OutputWorkspace='_unused',
+        D7AbsoluteCrossSections(InputWorkspace='vanadium_10p', OutputWorkspace='10p',
                                 SampleAndEnvironmentProperties=self._sampleProperties,
-                                CrossSectionsOutputWorkspace='10p',
                                 CrossSectionSeparationMethod='10p', NormalisationMethod='None')
         self._check_output('10p', 132, 1, 3, onlySeparation=True)
 
     def test_10p_separation_double_xyz(self):
         D7AbsoluteCrossSections(InputWorkspace='vanadium_xyz', RotatedXYZWorkspace='vanadium_xyz',
                                 SampleAndEnvironmentProperties=self._sampleProperties,
-                                CrossSectionsOutputWorkspace='10p_double_xyz', OutputWorkspace='_unused',
+                                OutputWorkspace='10p_double_xyz',
                                 CrossSectionSeparationMethod='10p', NormalisationMethod='None')
         self._check_output('10p_double_xyz', 132, 1, 3, onlySeparation=True)
 
@@ -80,10 +77,9 @@ class D7AbsoluteCrossSectionsTest(unittest.TestCase):
 
     def test_paramagnetic_normalisation(self):
         D7AbsoluteCrossSections(InputWorkspace='sample_data', OutputWorkspace='normalised_sample_magnetic',
-                                CrossSectionSeparationMethod='XYZ', CrossSectionsOutputWorkspace='sample_xyz',
+                                CrossSectionSeparationMethod='XYZ',
                                 NormalisationMethod='Paramagnetic', SampleAndEnvironmentProperties=self._sampleProperties,
                                 AbsoluteUnitsNormalisation=False)
-        self.assertTrue(mtd['sample_xyz'])
         self._check_output('normalised_sample_magnetic', 132, 1, 6, onlySeparation=False)
 
     def test_incoherent_normalisation(self):

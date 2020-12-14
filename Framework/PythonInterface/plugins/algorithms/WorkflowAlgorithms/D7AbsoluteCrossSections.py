@@ -108,11 +108,6 @@ class D7AbsoluteCrossSections(PythonAlgorithm):
                                                     optional=PropertyMode.Optional),
                              doc='The output workspace.')
 
-        self.declareProperty(WorkspaceGroupProperty('CrossSectionsOutputWorkspace', '',
-                                                    direction=Direction.Output,
-                                                    optional=PropertyMode.Optional),
-                             doc='The output workspace with separated cross-sections.')
-
         self.declareProperty(name="CrossSectionSeparationMethod",
                              defaultValue="None",
                              validator=StringListValidator(["None", "Uniaxial", "XYZ", "10p"]),
