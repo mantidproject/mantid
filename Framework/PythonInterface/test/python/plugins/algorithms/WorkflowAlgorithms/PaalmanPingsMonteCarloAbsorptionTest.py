@@ -12,14 +12,12 @@ import unittest
 class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
 
     _red_ws = None
-    _container_ws = None
     _indirect_elastic_ws = None
     _indirect_fws_ws = None
 
     @classmethod
     def setUpClass(cls):
         Load('irs26176_graphite002_red.nxs', OutputWorkspace='red_ws')
-        Load('irs26173_graphite002_red.nxs', OutputWorkspace='container_ws')
         Load('osi104367_elf.nxs', OutputWorkspace='indirect_elastic_ws')
         Load('ILL_IN16B_FWS_Reduced.nxs', OutputWorkspace='indirect_fws_ws')
         Load('HRP38692a.nxs', OutputWorkspace='elastic_ws')
@@ -27,7 +25,6 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
 
     def setUp(self):
         self._red_ws = mtd['red_ws']
-        self._container_ws = mtd['container_ws']
         self._indirect_elastic_ws = mtd['indirect_elastic_ws']
         self._indirect_fws_ws = mtd['indirect_fws_ws']
         self._elastic_ws = mtd['elastic_ws']
@@ -43,12 +40,11 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
                            'EventsPerPoint': 200,
                            'BeamHeight': 3.5,
                            'BeamWidth': 4.0,
-                           'Height': 2.0 }
+                           'Height': 2.0}
 
-        self._container_args = {'ContainerWorkspace':self._container_ws,
-                                'ContainerChemicalFormula':'Al',
-                                'ContainerDensityType':'Mass Density',
-                                'ContainerDensity':1.0 }
+        self._container_args = {'ContainerChemicalFormula': 'Al',
+                                'ContainerDensityType': 'Mass Density',
+                                'ContainerDensity': 1.0}
         self._test_arguments = dict()
 
     @classmethod
@@ -113,13 +109,12 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
             self._test_corrections_workspace(workspace, spectrum_axis)
 
     def _run_correction_and_test(self, shape, sample_ws=None, spectrum_axis=None, with_container=False):
-
         if sample_ws is None:
             sample_ws = self._red_ws
 
         arguments = self._arguments.copy()
         arguments.update(self._test_arguments)
-        corrected = PaalmanPingsMonteCarloAbsorption(SampleWorkspace=sample_ws,
+        corrected = PaalmanPingsMonteCarloAbsorption(InputWorkspace=sample_ws,
                                                      Shape=shape,
                                                      **arguments)
         self._test_corrections_workspaces(corrected, spectrum_axis, with_container)
@@ -166,7 +161,7 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
         self._expected_blocksize = 23987
         self._run_correction_and_test(shape, self._elastic_ws, 'Label')
 
-    def _run_direct_test(self,shape):
+    def _run_direct_test(self, shape):
         self._expected_unit = "DeltaE"
         self._expected_hist = 285
         self._expected_blocksize = 294
@@ -216,6 +211,7 @@ class PaalmanPingsMonteCarloAbsorptionTest(unittest.TestCase):
 
     def test_cylinder_direct(self):
         self._cylinder_test(self._run_direct_test)
+
 
 if __name__ == "__main__":
     unittest.main()
