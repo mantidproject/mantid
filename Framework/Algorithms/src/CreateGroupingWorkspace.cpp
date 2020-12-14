@@ -32,12 +32,24 @@ void removeSpacesFromString(std::string &str) {
   str.erase(std::remove_if(str.begin(), str.end(), isspace), str.end());
 }
 
+/** Adds the elements of the second vector onto the end of the first vector.
+ *
+ * @param vec The vector to be extended.
+ * @param extension The vector to emplace onto the end of vec.
+ */
 void extendVectorBy(std::vector<std::string> &vec,
                     const std::vector<std::string> &extension) {
   vec.reserve(vec.size() + std::distance(extension.cbegin(), extension.cend()));
   vec.insert(vec.end(), extension.cbegin(), extension.cend());
 }
 
+/** Splits a string by the provided delimiter characters. Erases any empty
+ * sub-strings.
+ *
+ * @param str The string to be split.
+ * @param delimiter The characters to split the string by.
+ * @returns :: A vector of sub-strings resulting from the split.
+ */
 std::vector<std::string> splitStringBy(const std::string &str,
                                        const std::string &delimiter) {
   std::vector<std::string> subStrings;
