@@ -10,6 +10,7 @@ set(SRC_FILES
     src/NDArray.cpp
     src/ReleaseGlobalInterpreterLock.cpp
     src/UninstallTrace.cpp
+    src/PythonStdoutChannel.cpp
     src/WrapperHelpers.cpp
     src/Converters/CloneToNDArray.cpp
     src/Converters/DateAndTime.cpp
@@ -34,6 +35,7 @@ set(INC_FILES
     inc/MantidPythonInterface/core/NDArray.h
     inc/MantidPythonInterface/core/PropertyWithValueExporter.h
     inc/MantidPythonInterface/core/PythonObjectInstantiator.h
+    inc/MantidPythonInterface/core/PythonStdoutChannel.h
     inc/MantidPythonInterface/core/ReleaseGlobalInterpreterLock.h
     inc/MantidPythonInterface/core/StlExportDefinitions.h
     inc/MantidPythonInterface/core/TypedValidatorExporter.h
@@ -59,7 +61,6 @@ set(INC_FILES
     inc/MantidPythonInterface/core/Converters/WrapWithNDArray.h
     inc/MantidPythonInterface/core/Policies/MatrixToNumpy.h
     inc/MantidPythonInterface/core/Policies/RemoveConst.h
-    inc/MantidPythonInterface/core/Policies/ToWeakPtr.h
     inc/MantidPythonInterface/core/Policies/VectorToNumpy.h
 )
 
@@ -79,7 +80,7 @@ set_target_properties(
 target_link_libraries(
   ${_target_name}
   PUBLIC Python::Python Python::NumPy ${BoostPython_LIBRARIES}
-  PRIVATE Types Kernel ${Boost_LIBRARIES}
+  PRIVATE Types Kernel ${Boost_LIBRARIES} ${POCO_LIBRARIES}
 )
 
 # Add to the 'Framework/Python' group in MSVS

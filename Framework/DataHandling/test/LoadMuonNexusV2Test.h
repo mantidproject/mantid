@@ -124,6 +124,32 @@ public:
     TS_ASSERT_DELTA(deadTimeTable->Double(62, 1), 0.0073113599, 1e-6);
   }
 
+  void testExecWithTimeZeroTable() {
+    LoadMuonNexusV2 ld;
+    ld.initialize();
+    ld.setPropertyValue("Filename", "EMU00102347.nxs_v2");
+    ld.setPropertyValue("OutputWorkspace", "outWs");
+    ld.setPropertyValue("TimeZeroTable", "tzt");
+    ld.setRethrows(true);
+    auto &ads = AnalysisDataService::Instance();
+
+    ld.execute();
+    // Verify that the output workspaces exist
+    TS_ASSERT(ads.doesExist("outWs"));
+    TS_ASSERT(ads.doesExist("tzt"));
+
+    Workspace2D_sptr output2D = std::dynamic_pointer_cast<Workspace2D>(
+        ads.retrieveWS<MatrixWorkspace>("outWs"));
+    TableWorkspace_sptr tbl = ads.retrieveWS<TableWorkspace>("tzt");
+
+    // Check number of rows and columns
+    TS_ASSERT_EQUALS(tbl->columnCount(), 1);
+    TS_ASSERT_EQUALS(tbl->rowCount(), output2D->getNumberHistograms());
+    TS_ASSERT_DELTA(tbl->Double(0, 0), 0.16, 0.001);
+    TS_ASSERT_DELTA(tbl->Double(47, 0), 0.16, 0.001);
+    TS_ASSERT_DELTA(tbl->Double(95, 0), 0.16, 0.001);
+  }
+
   void testExecWithGroupingTable() {
 
     LoadMuonNexusV2 ld;

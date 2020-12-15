@@ -12,6 +12,7 @@ New Features
 - Added a show legend checkbox to the workbench plot settings. This allows users to choose whether to display the legend on graphs by default.
 - Added a ``Log`` colorbar scale option to the Sliceviewer. This differs from the existing ``Symlog`` option as it prohibits negative values.
 - Added a Dx data tab on the data window when a workspace has Dx data.
+- Added the ability to load 1d-Plots from MantidPlot project files in workbench.
 - Added QLineEdit to SampleLogs widget to allow filtering its entries
 
 Improvements
@@ -49,5 +50,6 @@ Bugfixes
 - Fixed a bug which would cause unrealistic errorbars on the fit calc curve.
 - Fix sort order of peaks in the peaks overlay on SliceViewer.
 - The colorfill plot on ragged workspaces will have the correct horizontal extent.
+- Fix replot of colorfill image after a workspace is replaced.
 
 :ref:`Release 6.0.0 <v6.0.0>`

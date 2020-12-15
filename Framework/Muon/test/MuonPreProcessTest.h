@@ -68,6 +68,17 @@ IAlgorithm_sptr setUpAlgorithmWithTimeOffset(const MatrixWorkspace_sptr &ws,
   return alg;
 }
 
+// Set up algorithm with TimeZeroTable applied
+IAlgorithm_sptr
+setUpAlgorithmWithTimeZeroTable(const MatrixWorkspace_sptr &ws,
+                                const ITableWorkspace_sptr &timeZeroTable) {
+  setUpADSWithWorkspace setup(ws);
+  IAlgorithm_sptr alg =
+      algorithmWithoutOptionalPropertiesSet(setup.inputWSName);
+  alg->setProperty("TimeZeroTable", timeZeroTable);
+  return alg;
+}
+
 // Set up algorithm with DeadTimeTable applied
 IAlgorithm_sptr
 setUpAlgorithmWithDeadTimeTable(const MatrixWorkspace_sptr &ws,
@@ -218,6 +229,37 @@ public:
   }
 
   // --------------------------------------------------------------------------
+  // Input property validation : Time Zero Table
+  // --------------------------------------------------------------------------
+
+  void test_successful_execution_with_valid_time_zero_table() {
+    // workspace has 5 spectra, time zero table has 5 rows
+    auto ws = createCountsWorkspace(5, 10, 0.0);
+    std::vector<double> timeZeros = {0.5, 1.0, 1.5, 2.0, 2.5};
+    ITableWorkspace_sptr timeZeroTable = createTimeZeroTable(5, timeZeros);
+
+    auto alg = setUpAlgorithmWithTimeZeroTable(ws, timeZeroTable);
+
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+  }
+
+  void test_cannot_execute_on_invalid_time_zero_table() {
+    // workspace has 2 spectra, time zero table has 5 rows
+    auto ws = createCountsWorkspace(2, 10, 0.0);
+    std::vector<double> timeZeros = {0.5, 1.0, 1.5, 2.0, 2.5};
+    ITableWorkspace_sptr timeZeroTable = createTimeZeroTable(5, timeZeros);
+
+    auto alg = setUpAlgorithmWithTimeZeroTable(ws, timeZeroTable);
+    auto errors = alg->validateInputs();
+    const auto expected = "TimeZeroTable must have as many rows as there are "
+                          "spectra in InputWorkspace. Use TimeOffset to apply "
+                          "same time correcton to all data";
+
+    TS_ASSERT_THROWS(alg->execute(), const std::runtime_error &);
+    TS_ASSERT_EQUALS(errors["TimeZeroTable"], expected);
+  }
+
+  // --------------------------------------------------------------------------
   // Correct output : Rebin Args
   // --------------------------------------------------------------------------
 
@@ -322,6 +364,44 @@ public:
     // y-values
     TS_ASSERT_DELTA(wsOut->readY(0)[0], 0.0, 0.001);
     TS_ASSERT_DELTA(wsOut->readY(0)[9], 9.0, 0.001);
+  }
+
+  // --------------------------------------------------------------------------
+  // Correct output : Time Zero Table
+  // --------------------------------------------------------------------------
+
+  void test_that_empty_time_zero_table_applied_correctly() {
+    auto ws = createCountsWorkspace(2, 2, 0.0);
+    std::vector<double> timeZeros = {0, 0};
+    auto timeZeroTable = createTimeZeroTable(2, timeZeros);
+
+    auto alg = setUpAlgorithmWithTimeZeroTable(ws, timeZeroTable);
+    alg->execute();
+
+    auto wsOut = getOutputWorkspace(alg, 0);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.0, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.5, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(0)[2], 1.0, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(1)[0], 0.0, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(1)[1], 0.5, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(1)[2], 1.0, 0.01);
+  }
+
+  void test_not_empty_time_zero_table_applied_correctly() {
+    auto ws = createCountsWorkspace(2, 2, 0.0);
+    std::vector<double> timeZeros = {0.25, -0.25}; // Applied as minus in alg
+    auto timeZeroTable = createTimeZeroTable(2, timeZeros);
+
+    auto alg = setUpAlgorithmWithTimeZeroTable(ws, timeZeroTable);
+    alg->execute();
+
+    auto wsOut = getOutputWorkspace(alg, 0);
+    TS_ASSERT_DELTA(wsOut->readX(0)[0], 0.0 - 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(0)[1], 0.5 - 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(0)[2], 1.0 - 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(1)[0], 0.0 + 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(1)[1], 0.5 + 0.25, 0.01);
+    TS_ASSERT_DELTA(wsOut->readX(1)[2], 1.0 + 0.25, 0.01);
   }
 
   // --------------------------------------------------------------------------

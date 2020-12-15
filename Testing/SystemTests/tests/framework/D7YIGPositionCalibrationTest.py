@@ -35,34 +35,72 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
         os.remove(os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
                                'test_shortWavelength.xml'))
         os.remove(os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
+                               'test_shortWavelength_global.xml'))
+        os.remove(os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
                                'test_intermediateWavelength.xml'))
         os.remove(os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
+                               'test_intermediateWavelength_global.xml'))
+        os.remove(os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
                                'test_longWavelength.xml'))
+        os.remove(os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
+                               'test_longWavelength_global.xml'))
 
     def d7_short_wavelength_test(self):
         approximate_wavelength = '3.14' # Angstrom
         fit_output_workspace = 'test_shortWavelength'
         calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
                                                '{}.xml'.format(fit_output_workspace))
-        D7YIGPositionCalibration(InputWorkspace='shortWavelengthScan', ApproximateWavelength=approximate_wavelength,
+        print(calibration_output_path)
+        CloneWorkspace(InputWorkspace='shortWavelengthScan', OutputWorkspace='shortWavelengthScan_clone')
+        D7YIGPositionCalibration(InputWorkspace='shortWavelengthScan_clone', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
                                  MinimalDistanceBetweenPeaks=1.75, BankOffsets=[-3, -3, 1], ClearCache=True,
-                                 FitOutputWorkspace='test_shortWavelength')
-        self.assertTrue(calibration_output_path)
-        self._check_fit_output('test_shortWavelength')
+                                 FitOutputWorkspace=fit_output_workspace, FittingMethod='Individual')
+        self.assertTrue(path.exists(calibration_output_path))
+        self._check_fit_output(fit_output_workspace)
         self._check_load_data_with_calibration(calibration_output_path)
+
+    def d7_short_wavelength_global_test(self):
+        approximate_wavelength = '3.14'  # Angstrom
+        fit_output_workspace = 'test_shortWavelength_global'
+        calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
+                                               '{}.xml'.format(fit_output_workspace))
+        CloneWorkspace(InputWorkspace='shortWavelengthScan', OutputWorkspace='shortWavelengthScan_clone')
+        D7YIGPositionCalibration(InputWorkspace='shortWavelengthScan_clone', ApproximateWavelength=approximate_wavelength,
+                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
+                                 MinimalDistanceBetweenPeaks=1.75, BankOffsets=[-3, -3, 1], ClearCache=True,
+                                 FitOutputWorkspace=fit_output_workspace, FittingMethod='Global')
+        self.assertTrue(path.exists(calibration_output_path))
+        self.assertTrue(mtd['test_shortWavelength'])
+        self.assertTrue(isinstance(mtd['test_shortWavelength'], ITableWorkspace))
+        self._check_fit_output(fit_output_workspace)
 
     def d7_intermediate_wavelength_test(self):
         approximate_wavelength = '4.8' # Angstrom
         fit_output_workspace = 'test_intermediateWavelength'
         calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
                                                '{}.xml'.format(fit_output_workspace))
-        D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan', ApproximateWavelength=approximate_wavelength,
+        CloneWorkspace(InputWorkspace='intermediateWavelengthScan', OutputWorkspace='intermediateWavelengthScan_clone')
+        D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan_clone', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
-                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-3, -3, 1], ClearCache=True,
-                                 FitOutputWorkspace='test_intermediateWavelength')
+                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-3, -3, -1], ClearCache=True,
+                                 FittingMethod='Individual', FitOutputWorkspace=fit_output_workspace)
         self.assertTrue(path.exists(calibration_output_path))
-        self._check_fit_output('test_intermediateWavelength')
+        self._check_fit_output(fit_output_workspace)
+        self._check_load_data_with_calibration(calibration_output_path)
+
+    def d7_intermediate_wavelength_global_test(self):
+        approximate_wavelength = '4.8' # Angstrom
+        fit_output_workspace = 'test_intermediateWavelength_global'
+        calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
+                                               '{}.xml'.format(fit_output_workspace))
+        CloneWorkspace(InputWorkspace='intermediateWavelengthScan', OutputWorkspace='intermediateWavelengthScan_clone')
+        D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan_clone', ApproximateWavelength=approximate_wavelength,
+                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
+                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-3, -3, -1], ClearCache=True,
+                                 FittingMethod='Global', FitOutputWorkspace=fit_output_workspace)
+        self.assertTrue(path.exists(calibration_output_path))
+        self._check_fit_output(fit_output_workspace)
         self._check_load_data_with_calibration(calibration_output_path)
 
     def d7_long_wavelength_test(self):
@@ -70,12 +108,27 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
         fit_output_workspace = 'test_longWavelength'
         calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
                                                '{}.xml'.format(fit_output_workspace))
-        D7YIGPositionCalibration(InputWorkspace='longWavelengthScan', ApproximateWavelength=approximate_wavelength,
+        CloneWorkspace(InputWorkspace='longWavelengthScan', OutputWorkspace='longWavelengthScan_clone')
+        D7YIGPositionCalibration(InputWorkspace='longWavelengthScan_clone', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
                                  MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-3, -3, 1], ClearCache=True,
-                                 FitOutputWorkspace=fit_output_workspace)
+                                 FitOutputWorkspace=fit_output_workspace, FittingMethod='Individual')
         self.assertTrue(path.exists(calibration_output_path))
-        self._check_fit_output('test_longWavelength')
+        self._check_fit_output(fit_output_workspace)
+        self._check_load_data_with_calibration(calibration_output_path)
+
+    def d7_long_wavelength_global_test(self):
+        approximate_wavelength = '5.7' # Angstrom
+        fit_output_workspace = 'test_longWavelength_global'
+        calibration_output_path = os.path.join(ConfigService.Instance().getString('defaultsave.directory'),
+                                               '{}.xml'.format(fit_output_workspace))
+        CloneWorkspace(InputWorkspace='longWavelengthScan', OutputWorkspace='longWavelengthScan_clone')
+        D7YIGPositionCalibration(InputWorkspace='longWavelengthScan_clone', ApproximateWavelength=approximate_wavelength,
+                                 YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
+                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets=[-3, -3, 1], ClearCache=True,
+                                 FitOutputWorkspace=fit_output_workspace, FittingMethod='Global')
+        self.assertTrue(path.exists(calibration_output_path))
+        self._check_fit_output(fit_output_workspace)
         self._check_load_data_with_calibration(calibration_output_path)
 
     def _check_fit_output(self, fitTableName):
@@ -136,5 +189,8 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         self.d7_short_wavelength_test()
+        self.d7_short_wavelength_global_test()
         self.d7_intermediate_wavelength_test()
+        self.d7_intermediate_wavelength_global_test()
         self.d7_long_wavelength_test()
+        self.d7_long_wavelength_global_test()
