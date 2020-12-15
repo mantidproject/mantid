@@ -434,9 +434,10 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEqual(-1, self.view.minimizer_combo.findText('FABADA'))
 
     def test_simul_fit_by_specifier_updates_correctly_when_fit_change_to_simultanenous(self):
-        # Set up current data for data context with one workspace
+        # set up current data
         ws = MuonWorkspaceWrapper("MUSR62260 MA/MUSR62260_raw_data MA")
-        self.context.data_context._loaded_data.add_data(workspace={"OutputWorkspace": [ws]}, run=[62260], filename="", instrument="MUSR")
+        self.context.data_context._loaded_data.add_data(workspace={"OutputWorkspace": [ws]}, run=[62260], filename="",
+                                                        instrument="MUSR")
 
         self.view.simul_fit_by_combo.setCurrentIndex(SIMUL_FIT_BY_COMBO_MAP["Run"])
 
@@ -754,6 +755,40 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEqual(4.0, self.presenter.end_x[0])
         calls = [mock.call(startX=2.0), mock.call(endX=4.0)]
         self.presenter.model.update_model_fit_options.assert_has_calls(calls)
+
+    def test_update_fit_specifiers_list_one_run_fit_by_run(self):
+        # set up current data
+        ws = MuonWorkspaceWrapper("MUSR62260 MA/MUSR62260_raw_data MA")
+        self.context.data_context._loaded_data.add_data(workspace={"OutputWorkspace": [ws]}, run=[62260], filename="",
+                                                        instrument="MUSR")
+        self.view.simul_fit_by_combo.currentText = mock.MagicMock(return_value="Run")
+        self.view.setup_fit_by_specifier = mock.MagicMock()
+
+        self.presenter.update_fit_specifier_list()
+
+        self.view.setup_fit_by_specifier.assert_called_once_with(["62260"])
+
+    def test_update_fit_specifiers_list_multiple_runs_fit_by_run(self):
+        self.view.simul_fit_by_combo.currentText = mock.MagicMock(return_value="Run")
+        self.view.setup_fit_by_specifier = mock.MagicMock()
+        self.context.data_context.current_runs = [[62260],[62261],[62263]]
+
+        self.presenter.update_fit_specifier_list()
+
+        self.view.setup_fit_by_specifier.assert_called_once_with(["62260","62261","62263"])
+
+    def test_update_fit_specifiers_list_co_added_runs_fit_by_run(self):
+        # set up current data
+        ws = MuonWorkspaceWrapper("MUSR62260-62261,62263 MA/MUSR62260-62261,62263_raw_data MA")
+        self.context.data_context._loaded_data.add_data(workspace={"OutputWorkspace": [ws]}, run=[62260-62261,62263], filename="",
+                                                        instrument="MUSR")
+        self.context.data_context.current_runs = [[62260-62261,62263]]
+        self.view.simul_fit_by_combo.currentText = mock.MagicMock(return_value="Run")
+        self.view.setup_fit_by_specifier = mock.MagicMock()
+
+        self.presenter.update_fit_specifier_list()
+
+        self.view.setup_fit_by_specifier.assert_called_once_with(["62260-62261,62263"])
 
 
 if __name__ == '__main__':
