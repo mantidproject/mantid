@@ -166,9 +166,12 @@ class DrillTableWidget(QTableWidget):
                 selected cells
         """
         selected_indexes = self.selectionModel().selectedIndexes()
+        header = self.horizontalHeader()
         cellsLi = []
         cellsVi = []
         for i in selected_indexes:
+            if (header.isSectionHidden(i.column())):
+                continue
             cellsLi.append((i.row(), i.column()))
             cellsVi.append((self.visualRow(i.row()),
                           self.visualColumn(i.column())))
