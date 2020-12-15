@@ -58,15 +58,13 @@ class EAGroupingTabView(QtWidgets.QWidget):
 
         self.description_label = QtWidgets.QLabel(self)
         self.description_label.setText("Description : ")
-        self.description_label.setToolTip("Description of the data : Instrument, number of detectors "
-                                          "and main field direction.")
+        self.description_label.setToolTip("Description of the data : \u03BDx and file type")
         self.description_label.setObjectName("descriptionLabel")
 
         self.description_edit = QtWidgets.QLineEdit(self)
         self.description_edit.setText("")
         self.description_edit.setReadOnly(False)
-        self.description_edit.setToolTip("Description of the data : Instrument, number of detectors "
-                                         "and main field direction.")
+        self.description_edit.setToolTip("Description of the data : \u03BDx and file type. ")
         self.description_edit.setObjectName("descriptionEdit")
 
         self.horizontal_layout_description.addWidget(self.description_label)

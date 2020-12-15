@@ -4,13 +4,14 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets, QtGui, QtCore
+from qtpy import QtWidgets, QtCore
 from qtpy.QtCore import Signal
 from Muon.GUI.Common import message_box
 
-group_table_columns = {0: 'run', 1: 'detector', 2: 'to_analyse', 3: 'rebin', 4: 'rebin_options'}
-inverse_group_table_columns = {'run': 0, 'detector': 1, 'to_analyse': 2,  'rebin': 3, 'rebin_options': 4}
-table_column_flags = {'run': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+group_table_columns = {0: 'workspace_name', 1:'run', 2: 'detector', 3: 'to_analyse', 4: 'rebin', 5: 'rebin_options'}
+inverse_group_table_columns = {'workspace_name': 0, 'run': 1, 'detector': 2, 'to_analyse': 3,  'rebin': 4, 'rebin_options': 5}
+table_column_flags = {'workspace_name': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
+                      'run': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
                       'detector': QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled,
                       'to_analyse': QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled,
                       'rebin': QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsEditable,
@@ -65,29 +66,32 @@ class EAGroupingTableView(QtWidgets.QWidget):
         self.setLayout(self.vertical_layout)
 
     def set_up_table(self):
-        self.grouping_table.setColumnCount(5)
-        self.grouping_table.setHorizontalHeaderLabels(["Run", "Detector", "Analyse (plot/fit)", "Rebin", "Rebin Options"])
+        self.grouping_table.setColumnCount(6)
+        self.grouping_table.setHorizontalHeaderLabels(["Workspace Name", "Run", "Detector", "Analyse (plot/fit)", "Rebin", "Rebin Options"])
         header = self.grouping_table.horizontalHeader()
         header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
-        header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.Stretch)
         header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
         header.setSectionResizeMode(4, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(5, QtWidgets.QHeaderView.ResizeToContents)
         vertical_headers = self.grouping_table.verticalHeader()
         vertical_headers.setSectionsMovable(False)
         vertical_headers.setSectionResizeMode(QtWidgets.QHeaderView.ResizeToContents)
         vertical_headers.setVisible(True)
+        self.grouping_table.setColumnHidden(0, True)
 
         self.grouping_table.horizontalHeaderItem(1).setToolTip("The run :"
                                                                "\n    - The run can only use digits, characters and _")
-        self.grouping_table.horizontalHeaderItem(1).setToolTip("The detector :"
+        self.grouping_table.horizontalHeaderItem(2).setToolTip("The detector :"
                                                                "\n    - The detector can only use digits, characters and _")
-        self.grouping_table.horizontalHeaderItem(2).setToolTip("Whether to include this group in the analysis.")
+        self.grouping_table.horizontalHeaderItem(3).setToolTip("Whether to include this group in the analysis.")
 
-        self.grouping_table.horizontalHeaderItem(3).setToolTip("A list of Rebins :"
+        self.grouping_table.horizontalHeaderItem(4).setToolTip("A list of Rebins :"
                                                                "\n  - Select None, Fixed or Variable from the list.")
-        self.grouping_table.horizontalHeaderItem(4).setToolTip("Rebin Options :"
-                                                               "\n  - TBC")
+        self.grouping_table.horizontalHeaderItem(5).setToolTip("Rebin Options :"
+                                                               "\n  For fixed rebin enter number of steps"
+                                                               "\n  For variable rebin enter Bin Boundaries")
 
     def num_rows(self):
         return self.grouping_table.rowCount()
@@ -98,6 +102,12 @@ class EAGroupingTableView(QtWidgets.QWidget):
     def notify_data_changed(self):
         if not self._updating:
             self.dataChanged.emit()
+
+    def get_index_of_text(self, selector, text):
+        for i in range(selector.count()):
+            if str(selector.itemText(i)) == text:
+                return i
+        return 0
 
     # ------------------------------------------------------------------------------------------------------------------
     # Adding / removing table entries

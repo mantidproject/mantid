@@ -121,3 +121,7 @@ class EAGroupContext(object):
     def remove_workspace_by_name(self, workspace_name):
         for item in self.groups:
             item.remove_workspace_by_name(workspace_name)
+
+    def remove_group_from_selected_groups(self, group):
+        if group in self.group_names and group in self.selected_groups:
+            self._selected_groups.remove(str(group))

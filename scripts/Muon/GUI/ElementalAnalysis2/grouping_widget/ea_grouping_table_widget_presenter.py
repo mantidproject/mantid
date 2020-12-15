@@ -8,7 +8,7 @@ import re
 from Muon.GUI.Common.utilities import run_string_utils as run_utils
 from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
 from mantidqt.utils.observer_pattern import GenericObservable
-from Muon.GUI.Common.grouping_table_widget.grouping_table_widget_view import inverse_group_table_columns
+from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view import inverse_group_table_columns
 from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import RowValid
 
 
@@ -92,7 +92,7 @@ class EAGroupingTablePresenter(object):
         assert isinstance(group, EAGroup)
         rebin_options = None
         rebin_col = None
-        entry = [str(group.run_number), group.detector, state, rebin_options, rebin_col]
+        entry = [str(group._group_name), str(group.run_number), group.detector, state, rebin_options, rebin_col]
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
 
@@ -111,13 +111,11 @@ class EAGroupingTablePresenter(object):
 
     def handle_data_change(self, row, col):
         changed_item = self._view.get_table_item(row, col)
-        group_name = self._view.get_table_item(row, inverse_group_table_columns['group_name']).text()
+        workspace_name = self._view.get_table_item(row, inverse_group_table_columns['workspace_name']).text()
         update_model = True
-        if col == inverse_group_table_columns['detector'] and not self.validate_group_name(changed_item.text()):
-            update_model = False
         if col == inverse_group_table_columns['to_analyse']:
             update_model = False
-            self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, group_name)
+            self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, workspace_name)
 
         if not update_model:
             # Reset the view back to model values and exit early as the changes are invalid.

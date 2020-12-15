@@ -121,4 +121,3 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         self.grouping_tab_widget.group_tab_presenter.disable_editing_notifier.add_subscriber(
                self.disable_observer)
-git

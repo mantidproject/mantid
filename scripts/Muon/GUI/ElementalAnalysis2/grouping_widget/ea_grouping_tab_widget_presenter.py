@@ -59,8 +59,7 @@ class EAGroupingTabPresenter(object):
         """
         Generate the text for the description edit at the top of the widget.
         """
-        instrument = self._model.instrument
-        text = "{}".format(instrument)
+        text = "\u03BCx: exp2k : file type .dat"
         return text
 
     def update_description_text(self, description_text=''):
