@@ -90,17 +90,15 @@ add_subdirectory(CurveFitting)
 add_subdirectory(Crystal)
 add_subdirectory(LiveData)
 add_subdirectory(Catalog)
-if(NOT FRAMEWORK_ONLY_BUILD)
-  add_subdirectory(ICat)
-  add_subdirectory(ScriptRepository)
-  add_subdirectory(Doxygen)
-  add_subdirectory(SINQ)
-  add_subdirectory(Muon)
-  add_subdirectory(Reflectometry)
-  add_subdirectory(RemoteAlgorithms)
-  add_subdirectory(RemoteJobManagers)
-  add_subdirectory(WorkflowAlgorithms)
-endif()
+add_subdirectory(ICat)
+add_subdirectory(ScriptRepository)
+add_subdirectory(Doxygen)
+add_subdirectory(SINQ)
+add_subdirectory(Muon)
+add_subdirectory(Reflectometry)
+add_subdirectory(RemoteAlgorithms)
+add_subdirectory(RemoteJobManagers)
+add_subdirectory(WorkflowAlgorithms)
 
 # If an MPI-enabled build, add in the MPI-specific algorithms package
 if(MPI_BUILD)
@@ -110,27 +108,6 @@ endif()
 add_subdirectory (MDAlgorithms)
 
 # Add a custom target to build all of the Framework
-
-if(FRAMEWORK_ONLY_BUILD)
-set(FRAMEWORK_LIBS
-    Kernel
-    HistogramData
-    Indexing
-    Beamline
-    Geometry
-    API
-    DataObjects
-    PythonInterface
-    DataHandling
-    Nexus
-    NexusGeometry
-    Algorithms
-    CurveFitting
-    Catalog
-    Crystal
-    MDAlgorithms
-    LiveData)
-else()
 set(FRAMEWORK_LIBS
     Kernel
     HistogramData
@@ -156,7 +133,6 @@ set(FRAMEWORK_LIBS
     SINQ
     Muon
     Reflectometry)
-endif()
 
 add_custom_target(Framework DEPENDS ${FRAMEWORK_LIBS})
 
