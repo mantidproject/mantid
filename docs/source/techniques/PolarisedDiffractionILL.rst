@@ -739,7 +739,6 @@ Below is the relevant workflow diagram describing reduction steps of the sample 
         TransmissionInputWorkspace='sample_transmission_1',
         QuartzInputWorkspace='pol_corrections',
         SelfAttenuationMethod='Numerical',
-        SampleGeometry='Annulus',
         OutputTreatment='Individual',
         SampleGeometry='Annulus',
         SampleAndEnvironmentProperties=sample_dictionary,
