@@ -787,12 +787,6 @@ void SCDCalibratePanels::findL2(
     std::string fitStatus = fit_alg->getProperty("OutputStatus");
     double chisq = fit_alg->getProperty("OutputChi2overDoF");
 
-    // report fitting results
-    g_log.notice() << "Fit trans for Bank " << iBank << "\n"
-                   << "-- nPeaks: " << nBankPeaks << "\n"
-                   << "-- fitStatus: " << fitStatus << "\n"
-                   << "-- Chi2overDoF: " << chisq << "\n";
-
     MatrixWorkspace_sptr fitWS = fit_alg->getProperty("OutputWorkspace");
     AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS);
     ITableWorkspace_sptr paramsWS = fit_alg->getProperty("OutputParameters");
@@ -802,7 +796,13 @@ void SCDCalibratePanels::findL2(
     double zShift = paramsWS->getRef<double>("Value", 2);
     double scaleWidth = 1.0;
     double scaleHeight = 1.0;
-    g_log.notice() << "-- shift:" << xShift << "," << yShift << "," << zShift << "\n";
+
+    // report fitting results
+    g_log.notice() << "Fit trans for Bank " << iBank << "\n"
+                   << "-- nPeaks: " << nBankPeaks << "\n"
+                   << "-- fitStatus: " << fitStatus << "\n"
+                   << "-- Chi2overDoF: " << chisq << "\n"
+                   << "-- shift:" << xShift << "," << yShift << "," << zShift << "\n";
 
     // 2nd pass: optimize rotation
     IAlgorithm_sptr fitrot_alg;
@@ -826,13 +826,8 @@ void SCDCalibratePanels::findL2(
     fitrot_alg->setProperty("Output", "fit");
     fitrot_alg->executeAsChildAlg();
 
-    // report fitting results
     std::string fitStatus_rot = fitrot_alg->getProperty("OutputStatus");
     double chisq_rot = fitrot_alg->getProperty("OutputChi2overDoF");
-    g_log.notice() << "Fit rot for Bank " << iBank << "\n"
-                   << "-- nPeaks: " << nBankPeaks << "\n"
-                   << "-- fitStatus: " << fitStatus_rot << "\n"
-                   << "-- Chi2overDoF: " << chisq_rot << "\n";
 
     MatrixWorkspace_sptr fitWS_rot = fitrot_alg->getProperty("OutputWorkspace");
     AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS_rot);
@@ -841,7 +836,13 @@ void SCDCalibratePanels::findL2(
     double xRotate = paramsWS_rot->getRef<double>("Value", 3);
     double yRotate = paramsWS_rot->getRef<double>("Value", 4);
     double zRotate = paramsWS_rot->getRef<double>("Value", 5);
-    g_log.notice() << "-- rot :" << xRotate << "," << yRotate << "," << zRotate <<"\n";
+
+    // report fitting results
+    g_log.notice() << "Fit rot for Bank " << iBank << "\n"
+                   << "-- nPeaks: " << nBankPeaks << "\n"
+                   << "-- fitStatus: " << fitStatus_rot << "\n"
+                   << "-- Chi2overDoF: " << chisq_rot << "\n"
+                   << "-- rot :" << xRotate << "," << yRotate << "," << zRotate <<"\n";
 
     // Scaling only implemented for Rectangular Detectors
     Geometry::IComponent_const_sptr comp =
