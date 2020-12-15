@@ -278,7 +278,8 @@ void EditInstrumentGeometry::exec() {
     if (haveTZeros)
       storTZEROs[workspaceindex] = tzeros[i];
 
-    g_log.debug() << "workspace index = " << workspaceindex << " is for Spectrum " << specids[i] << '\n';
+    g_log.debug() << "workspace index = " << workspaceindex
+                  << " is for Spectrum " << specids[i] << '\n';
   }
 
   // Generate a new instrument

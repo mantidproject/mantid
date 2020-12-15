@@ -213,6 +213,10 @@ protected:
   validateExtraParams(int emode,
                       std::map<UnitConversionParameters, double> &params);
 
+  virtual void
+  validateExtraParams(int emode,
+                      std::map<UnitConversionParameters, double> &params);
+
   /// The unit values have been initialized
   bool initialized;
   /// l1 ::       The source-sample distance (in metres)

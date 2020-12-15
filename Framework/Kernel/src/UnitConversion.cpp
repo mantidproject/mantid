@@ -42,6 +42,18 @@ double UnitConversion::run(const std::string &src, const std::string &dest,
                            const ExtraParametersMap &params) {
   Unit_sptr srcUnit = UnitFactory::Instance().create(src);
   Unit_sptr destUnit = UnitFactory::Instance().create(dest);
+  ExtraParametersMap params{{UnitConversionParameters::efixed, efixed}};
+  return UnitConversion::run(*srcUnit, *destUnit, srcValue, l1, l2, theta,
+                             emode, params);
+}
+
+double UnitConversion::run(const std::string &src, const std::string &dest,
+                           const double srcValue, const double l1,
+                           const double l2, const double theta,
+                           const DeltaEMode::Type emode,
+                           const ExtraParametersMap &params) {
+  Unit_sptr srcUnit = UnitFactory::Instance().create(src);
+  Unit_sptr destUnit = UnitFactory::Instance().create(dest);
   return UnitConversion::run(*srcUnit, *destUnit, srcValue, l1, l2, theta,
                              emode, params);
 }
