@@ -113,7 +113,7 @@ void SaveHKL::exec() {
   if (peaksW != m_ws)
     peaksW = m_ws->clone();
   auto inst = peaksW->getInstrument();
-  std::vector<Peak> peaks = peaksW->getPeaks();
+  std::vector<Peak> &peaks = peaksW->getPeaks();
   double scaleFactor = getProperty("ScalePeaks");
   double dMin = getProperty("MinDSpacing");
   double wlMin = getProperty("MinWavelength");
@@ -167,27 +167,7 @@ void SaveHKL::exec() {
     qSign = 1.0;
 
   std::fstream out;
-  bool append = getProperty("AppendFile");
-  if (append && Poco::File(filename.c_str()).exists()) {
-    IAlgorithm_sptr load_alg = createChildAlgorithm("LoadHKL");
-    load_alg->setPropertyValue("Filename", filename);
-    load_alg->setProperty("OutputWorkspace", "peaks");
-    load_alg->executeAsChildAlg();
-    // Get back the result
-    DataObjects::PeaksWorkspace_sptr ws2 =
-        load_alg->getProperty("OutputWorkspace");
-    ws2->setInstrument(inst);
-
-    IAlgorithm_sptr plus_alg = createChildAlgorithm("CombinePeaksWorkspaces");
-    plus_alg->setProperty("LHSWorkspace", peaksW);
-    plus_alg->setProperty("RHSWorkspace", ws2);
-    plus_alg->executeAsChildAlg();
-    // Get back the result
-    peaksW = plus_alg->getProperty("OutputWorkspace");
-    out.open(filename.c_str(), std::ios::out);
-  } else {
-    out.open(filename.c_str(), std::ios::out);
-  }
+  out.open(filename.c_str(), std::ios::out);
 
   // We cannot assume the peaks have bank type detector modules, so we have a
   // string to check this
@@ -238,18 +218,6 @@ void SaveHKL::exec() {
   m_amu = getProperty("LinearAbsorptionCoef"); // in 1/cm
   m_power_th = getProperty("PowerLambda");     // in cm
 
-  // Function to calculate total attenuation for a track
-  auto calculateAttenuation = [](const Track &path, double lambda) {
-    double factor(1.0);
-    for (const auto &segment : path) {
-      const double length = segment.distInsideObject;
-      const auto &segObj = *(segment.object);
-      const auto &segMat = segObj.material();
-      factor *= segMat.attenuation(length, lambda);
-    }
-    return factor;
-  };
-
   API::Run &run = peaksW->mutableRun();
 
   double radius = getProperty("Radius"); // in cm
@@ -259,10 +227,6 @@ void SaveHKL::exec() {
     if (run.hasProperty("Radius"))
       radius = run.getPropertyValueAsType<double>("Radius");
   }
-
-  const auto sourcePos = inst->getSource()->getPos();
-  const auto samplePos = inst->getSample()->getPos();
-  const auto reverseBeamDir = normalize(samplePos - sourcePos);
 
   const Material &sampleMaterial = peaksW->sample().getMaterial();
   const IObject *sampleShape{nullptr};
@@ -284,6 +248,17 @@ void SaveHKL::exec() {
     peaksW->mutableSample().setShape(sphere);
   } else if (peaksW->sample().getShape().hasValidShape()) {
     sampleShape = &(peaksW->sample().getShape());
+    // if AddAbsorptionWeightedPathLengths has already been run on the workspace
+    // then keep those tbar values
+    if (std::all_of(peaks.cbegin(), peaks.cend(), [](auto &p) {
+          return p.getAbsorptionWeightedPathLength() == 0;
+        })) {
+      IAlgorithm_sptr alg =
+          createChildAlgorithm("AddAbsorptionWeightedPathLengths");
+      alg->setProperty("InputWorkspace", peaksW);
+      alg->setProperty("UseSinglePath", true);
+      alg->executeAsChildAlg();
+    }
   }
 
   if (correctPeaks) {
@@ -389,19 +364,10 @@ void SaveHKL::exec() {
           // keep original method if radius is provided
           transmission = absorbSphere(radius, scattering, lambda, tbar);
         } else if (sampleShape) {
-          Track beforeScatter(samplePos, reverseBeamDir);
-          sampleShape->interceptSurface(beforeScatter);
-          const auto detDir = normalize(p.getDetPos() - samplePos);
-          Track afterScatter(samplePos, detDir);
-          sampleShape->interceptSurface(afterScatter);
-
-          transmission = calculateAttenuation(beforeScatter, lambda) *
-                         calculateAttenuation(afterScatter, lambda);
-          const auto &mat = sampleShape->material();
-          const auto mu =
-              (mat.totalScatterXSection() + mat.absorbXSection(lambda)) *
-              mat.numberDensity();
-          tbar = -std::log(transmission) / mu;
+          tbar = p.getAbsorptionWeightedPathLength();
+          transmission =
+              exp(-tbar * 0.01 *
+                  sampleShape->material().attenuationCoefficient(lambda));
         }
 
         // Anvred write from Art Schultz/
@@ -612,6 +578,26 @@ void SaveHKL::exec() {
     badPeaks.emplace_back(static_cast<int>(*it));
   }
   peaksW->removePeaks(std::move(badPeaks));
+
+  bool append = getProperty("AppendFile");
+  if (append && Poco::File(filename.c_str()).exists()) {
+    IAlgorithm_sptr load_alg = createChildAlgorithm("LoadHKL");
+    load_alg->setPropertyValue("Filename", filename);
+    load_alg->setProperty("OutputWorkspace", "peaks");
+    load_alg->executeAsChildAlg();
+    // Get back the result
+    DataObjects::PeaksWorkspace_sptr ws2 =
+        load_alg->getProperty("OutputWorkspace");
+    ws2->setInstrument(inst);
+
+    IAlgorithm_sptr plus_alg = createChildAlgorithm("CombinePeaksWorkspaces");
+    plus_alg->setProperty("LHSWorkspace", peaksW);
+    plus_alg->setProperty("RHSWorkspace", ws2);
+    plus_alg->executeAsChildAlg();
+    // Get back the result
+    peaksW = plus_alg->getProperty("OutputWorkspace");
+  }
+
   setProperty("OutputWorkspace", peaksW);
 } // namespace Crystal
 

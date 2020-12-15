@@ -1986,6 +1986,7 @@ void FunctionTreeView::constraintChanged(QtProperty *prop) {
       std::tie(functionIndex, constraint) = getFunctionAndConstraint(paramProp);
       if (!constraint.isEmpty()) {
         emit parameterConstraintAdded(functionIndex, constraint);
+        return; // No need to keep looping as found constraint changed
       }
     }
   }

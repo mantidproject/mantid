@@ -4,16 +4,17 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-import matplotlib.image as mimage
 import matplotlib.colors
 import numpy as np
 
 from mantid.plots.datafunctions import get_matrix_2d_ragged, get_normalize_by_bin_width
+from mantid.plots.mantidimage import MantidImage
+from mantid.api import MatrixWorkspace
 
 MAX_HISTOGRAMS = 5000
 
 
-class SamplingImage(mimage.AxesImage):
+class SamplingImage(MantidImage):
     def __init__(self,
                  ax,
                  workspace,
@@ -190,6 +191,21 @@ def imshow_sampling(axes,
                           workspace.getDimension(0).getMaximum(),
                           workspace.getDimension(1).getMinimum(),
                           workspace.getDimension(1).getMaximum())
+        if isinstance(workspace, MatrixWorkspace) and not workspace.isCommonBins():
+            # for MatrixWorkspace the x extent obtained from dimension 0 corresponds to the first spectrum
+            # this is not correct in case of ragged workspaces, where we need to obtain the global xmin and xmax
+            # moreover the axis might be in ascending or descending order, so x[0] is not necessarily the minimum
+            for i in range(workspace.getNumberHistograms()):
+                x_axis = workspace.readX(i)
+                x_i_first = x_axis[0]
+                x_i_last = x_axis[-1]
+                x_i_min = min(x_i_first, x_i_last)
+                x_i_max = max(x_i_first, x_i_last)
+                if x_i_min < x0:
+                    x0 = x_i_min
+                if x_i_max > x1:
+                    x1 = x_i_max 
+
         if workspace.getDimension(1).getNBins() == workspace.getAxis(1).length():
             width = workspace.getDimension(1).getBinWidth()
             y0 -= width / 2

@@ -23,7 +23,7 @@ class InstrumentViewPresenter(ObservingPresenter):
 
     def __init__(self, ws, parent=None, ads_observer=None):
         super(InstrumentViewPresenter, self).__init__()
-        self.ws_name = ws.name()
+        self.ws_name = str(ws)
         self.container = InstrumentView(parent, self, self.ws_name)
 
         if ads_observer:
@@ -38,10 +38,13 @@ class InstrumentViewPresenter(ObservingPresenter):
     def current_workspace_equals(self, name):
         return self.ws_name == name
 
-    def replace_workspace(self, workspace_name, workspace):
-        # replace is handled by the InstrumentWidget inside C++
-        # this method is also unused, but is added to conform to the interface
-        pass
+    """
+    Replace the workspace being shown by the instrument widget.
+    @param new_workspace_name : the name of the new workspace to set
+    @param new_window_name : the new title of the window. Optional, if none provided, uses the name of the workspace.
+    """
+    def replace_workspace(self, new_workspace_name, new_window_name=None):
+        self.container.replace_workspace(new_workspace_name, new_window_name)
 
     def rename_workspace(self, old_name, new_name):
         # rename is handled by the InstrumentWidget inside C++
@@ -79,9 +82,10 @@ class InstrumentViewPresenter(ObservingPresenter):
         """
         if InstrumentViewManager.last_view == self:
             InstrumentViewManager.last_view = None
-        InstrumentViewManager.remove(self.ws_name)
 
-        super(InstrumentViewPresenter, self).close(self.ws_name)
+        if workspace_name == self.ws_name:
+            super(InstrumentViewPresenter, self).close(self.ws_name)
+            InstrumentViewManager.remove(self.ws_name)
 
 
 class InstrumentViewManager:

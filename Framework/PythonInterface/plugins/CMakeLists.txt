@@ -31,6 +31,7 @@ set(PYTHON_PLUGINS
     algorithms/ConjoinFiles.py
     algorithms/ConjoinSpectra.py
     algorithms/ConvertSnsRoiFileToMask.py
+    algorithms/ConvertQtoHKLMDHisto.py
     algorithms/ConvertWANDSCDtoQ.py
     algorithms/CorrectLogTimes.py
     algorithms/CorrectTOF.py
@@ -38,7 +39,6 @@ set(PYTHON_PLUGINS
     algorithms/CreateEmptyTableWorkspace.py
     algorithms/CreateLeBailFitInput.py
     algorithms/CropWorkspaceForMDNorm.py
-    algorithms/CropWorkspaceRagged.py
     algorithms/CylinderPaalmanPingsCorrection2.py
     algorithms/DNSComputeDetEffCorrCoefs.py
     algorithms/DNSFlippingRatioCorr.py
@@ -78,6 +78,8 @@ set(PYTHON_PLUGINS
     algorithms/GetLiveInstrumentValue.py
     algorithms/HB2AReduce.py
     algorithms/HB3AAdjustSampleNorm.py
+    algorithms/HB3AFindPeaks.py
+    algorithms/HB3AIntegratePeaks.py
     algorithms/HFIRSANS2Wavelength.py
     algorithms/IndexSatellitePeaks.py
     algorithms/IndirectTransmission.py
@@ -90,6 +92,7 @@ set(PYTHON_PLUGINS
     algorithms/LRReflectivityOutput.py
     algorithms/LRScalingFactors.py
     algorithms/LRSubtractAverageBackground.py
+    algorithms/LeadPressureCalc.py
     algorithms/LinkedUBs.py
     algorithms/LiquidsReflectometryReduction.py
     algorithms/LoadAndMerge.py
@@ -190,6 +193,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/BayesStretch.py
     algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/ConvertMultipleRunsToSingleCrystalMD.py
+    algorithms/WorkflowAlgorithms/CorelliPowderCalibrationCreate.py
     algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
     algorithms/WorkflowAlgorithms/DetectorFloodWeighting.py
     algorithms/WorkflowAlgorithms/DirectILLApplySelfShielding.py

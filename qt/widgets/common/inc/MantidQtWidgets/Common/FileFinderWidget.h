@@ -152,6 +152,8 @@ public:
   QString getLastDirectory() { return m_lastDir; }
   /// Set the last directory
   void setLastDirectory(const QString &lastDir) { m_lastDir = lastDir; }
+  /// Set an arbitrary validator on the line edit
+  void setTextValidator(const QValidator *validator);
 
 signals:
   /// Emitted when the file text changes
@@ -280,3 +282,6 @@ private:
 };
 } // namespace API
 } // namespace MantidQt
+
+Q_DECLARE_METATYPE(MantidQt::API::FileFinderWidget::ButtonOpts)
+Q_DECLARE_METATYPE(MantidQt::API::FileFinderWidget::LiveButtonOpts)
