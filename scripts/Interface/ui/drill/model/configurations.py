@@ -120,6 +120,37 @@ class RundexSettings(object):
             POWDER_PSCAN: "PowderILLParameterScan",
             }
 
+    # export algos for each acquisition mode. Each algo has a boolean to set
+    # it as activated or not
+    EXPORT_ALGORITHMS = {
+            SANS_ACQ: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveCanSAS1D": True,
+                "SaveNISTDAT": True
+                },
+            REFL_POL: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveReflectometryAscii": True
+                },
+            REFL_NPOL: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveReflectometryAscii": True
+                },
+            POWDER_DSCAN: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveFocussedXYE": True
+                },
+            POWDER_PSCAN: {
+                "SaveNexusProcessed": False,
+                "SaveAscii": False,
+                "SaveFocussedXYE": True
+                }
+            }
+
     # ideal number of threads for each acquisition mode (optional).
     # If not provided, Qt will decide
     THREADS_NUMBER = {
