@@ -55,6 +55,8 @@ public:
 
   [[nodiscard]] double
   parameterValue(std::string const &parameter) const override;
+  [[nodiscard]] Mantid::API::IFunction::Attribute
+  attributeValue(std::string const &attribute) const override;
 
   void removeWorkspaceDomain(std::string const &workspaceName,
                              WorkspaceIndex workspaceIndex) override;
@@ -96,9 +98,10 @@ private slots:
   void onAddWorkspaceClicked();
   void onCellChanged(int row, int column);
   void onItemPressed();
-  void onFunctionRemoved(const QString &function);
-  void onFunctionAdded(const QString &function);
-  void onParameterChanged(const QString &parameter);
+  void onFunctionRemoved(QString const &function);
+  void onFunctionAdded(QString const &function);
+  void onParameterChanged(QString const &parameter);
+  void onAttributeChanged(QString const &attribute);
 
 private:
   void connectUiSignals();

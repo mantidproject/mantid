@@ -61,6 +61,9 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
   case ViewEvent::ParameterChanged:
     handleParameterChanged(arg);
     return;
+  case ViewEvent::AttributeChanged:
+    handleAttributeChanged(arg);
+    return;
   }
 
   throw std::runtime_error("Failed to notify the FitScriptGeneratorPresenter.");
@@ -160,6 +163,19 @@ void FitScriptGeneratorPresenter::handleParameterChanged(
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     m_model->updateParameterValue(workspaceName, workspaceIndex, parameter,
+                                  newValue);
+  }
+}
+
+void FitScriptGeneratorPresenter::handleAttributeChanged(
+    std::string const &attribute) {
+  auto const rowIndices = m_view->allRows();
+  auto const newValue = m_view->attributeValue(attribute);
+
+  for (auto const &rowIndex : rowIndices) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+    m_model->updateAttributeValue(workspaceName, workspaceIndex, attribute,
                                   newValue);
   }
 }

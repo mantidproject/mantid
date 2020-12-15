@@ -8,6 +8,7 @@
 
 #include "DllOption.h"
 #include "MantidAPI/CompositeFunction.h"
+#include "MantidAPI/IFunction_fwd.h"
 #include "MantidQtWidgets/Common/IndexTypes.h"
 
 #include <string>
@@ -52,6 +53,11 @@ public:
                                     WorkspaceIndex workspaceIndex,
                                     std::string const &parameter,
                                     double newValue) = 0;
+  virtual void
+  updateAttributeValue(std::string const &workspaceName,
+                       WorkspaceIndex workspaceIndex,
+                       std::string const &attribute,
+                       Mantid::API::IFunction::Attribute const &newValue) = 0;
 };
 
 } // namespace MantidWidgets

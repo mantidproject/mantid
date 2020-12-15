@@ -297,6 +297,21 @@ void FitScriptGeneratorModel::updateParameterValue(
   }
 }
 
+void FitScriptGeneratorModel::updateAttributeValue(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+    std::string const &attribute, IFunction::Attribute const &newValue) {
+  auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
+
+  if (auto composite = toComposite(m_function->getFunction(domainIndex))) {
+    auto fullAttributeName = attribute;
+    if (composite->nFunctions() == 1)
+      fullAttributeName = "f0." + fullAttributeName;
+
+    if (composite->hasAttribute(fullAttributeName))
+      composite->setAttribute(fullAttributeName, newValue);
+  }
+}
+
 void FitScriptGeneratorModel::removeCompositeAtPrefix(
     std::string const &functionPrefix) {
   removeCompositeAtIndex(getPrefixIndexAt(functionPrefix, 0));

@@ -40,7 +40,8 @@ public:
     SelectionChanged,
     FunctionAdded,
     FunctionRemoved,
-    ParameterChanged
+    ParameterChanged,
+    AttributeChanged
   };
 
   IFitScriptGeneratorView(QWidget *parent = nullptr)
@@ -61,6 +62,8 @@ public:
 
   [[nodiscard]] virtual double
   parameterValue(std::string const &parameter) const = 0;
+  [[nodiscard]] virtual Mantid::API::IFunction::Attribute
+  attributeValue(std::string const &attribute) const = 0;
 
   virtual void removeWorkspaceDomain(std::string const &workspaceName,
                                      WorkspaceIndex workspaceIndex) = 0;

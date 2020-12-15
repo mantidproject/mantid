@@ -82,6 +82,10 @@ public:
                             WorkspaceIndex workspaceIndex,
                             std::string const &parameter,
                             double newValue) override;
+  void updateAttributeValue(
+      std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+      std::string const &attribute,
+      Mantid::API::IFunction::Attribute const &newValue) override;
 
 private:
   void removeWorkspaceDomain(
