@@ -29,6 +29,7 @@ class QtEnumPropertyManager;
 class QtProperty;
 class QtBrowserItem;
 class ParameterPropertyManager;
+class DoubleDialogEditorFactory;
 
 class QPushButton;
 class QLabel;
@@ -283,6 +284,9 @@ protected slots:
 
 protected:
   void removeConstraintsQuiet(QtProperty *paramProp);
+
+  /// Editor used for editing doubles.
+  DoubleDialogEditorFactory *m_doubleEditorFactory;
   /// Manager for function group properties
   QtGroupPropertyManager *m_functionManager;
   /// Manager for function parameter properties
@@ -387,6 +391,8 @@ public:
   QRect getVisualRectFunctionProperty(const QString &index) const;
   QRect getVisualRectParameterProperty(const QString &paramName) const;
   QTreeWidget *treeWidget() const;
+  QtTreePropertyBrowser *treeBrowser();
+  DoubleDialogEditorFactory *doubleEditorFactory();
   QWidget *getParamWidget(const QString &paramName) const;
 };
 

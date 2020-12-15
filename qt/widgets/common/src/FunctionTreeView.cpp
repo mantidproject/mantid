@@ -151,15 +151,15 @@ void FunctionTreeView::createBrowser() {
   QtAbstractEditorFactory<ParameterPropertyManager> *parameterEditorFactory(
       nullptr);
   if (m_multiDataset) {
-    auto buttonFactory = new DoubleDialogEditorFactory(this);
+    m_doubleEditorFactory = new DoubleDialogEditorFactory(this);
     auto compositeFactory =
-        new CompositeEditorFactory<ParameterPropertyManager>(this,
-                                                             buttonFactory);
+        new CompositeEditorFactory<ParameterPropertyManager>(
+            this, m_doubleEditorFactory);
     compositeFactory->setSecondaryFactory(globalOptionName, paramEditorFactory);
     parameterEditorFactory = compositeFactory;
-    connect(buttonFactory, SIGNAL(buttonClicked(QtProperty *)), this,
+    connect(m_doubleEditorFactory, SIGNAL(buttonClicked(QtProperty *)), this,
             SLOT(parameterButtonClicked(QtProperty *)));
-    connect(buttonFactory, SIGNAL(closeEditor()), m_browser,
+    connect(m_doubleEditorFactory, SIGNAL(closeEditor()), m_browser,
             SLOT(closeEditor()));
   } else {
     parameterEditorFactory = paramEditorFactory;
@@ -2156,6 +2156,12 @@ QWidget *FunctionTreeView::getParamWidget(const QString &paramName) const {
 
 QTreeWidget *FunctionTreeView::treeWidget() const {
   return m_browser->treeWidget();
+}
+
+QtTreePropertyBrowser *FunctionTreeView::treeBrowser() { return m_browser; }
+
+DoubleDialogEditorFactory *FunctionTreeView::doubleEditorFactory() {
+  return m_doubleEditorFactory;
 }
 
 } // namespace MantidWidgets

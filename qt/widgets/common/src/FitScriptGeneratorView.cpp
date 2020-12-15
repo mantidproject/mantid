@@ -7,6 +7,8 @@
 #include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/DoubleDialogEditor.h"
+#include "MantidQtWidgets/Common/QtPropertyBrowser/qttreepropertybrowser.h"
 
 #include "MantidAPI/MatrixWorkspace.h"
 
@@ -80,6 +82,14 @@ void FitScriptGeneratorView::connectUiSignals() {
   connect(m_functionTreeView.get(),
           SIGNAL(attributePropertyChanged(const QString &)), this,
           SLOT(onAttributeChanged(const QString &)));
+
+  /// Disconnected because it causes a crash when selecting a table row while
+  /// editing a parameters value. This is because selecting a different row will
+  /// change the current function in the FunctionTreeView. The closeEditor slot
+  /// is then called after this, but the memory location of the old function is
+  /// now a nullptr so there is a read access violation.
+  disconnect(m_functionTreeView->doubleEditorFactory(), SIGNAL(closeEditor()),
+             m_functionTreeView->treeBrowser(), SLOT(closeEditor()));
 }
 
 void FitScriptGeneratorView::setFitBrowserOptions(
