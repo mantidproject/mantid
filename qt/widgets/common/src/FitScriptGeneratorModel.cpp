@@ -269,10 +269,31 @@ void FitScriptGeneratorModel::removeFunction(std::string const &workspaceName,
 void FitScriptGeneratorModel::addFunction(std::string const &workspaceName,
                                           WorkspaceIndex workspaceIndex,
                                           std::string const &function) {
+  addFunction(workspaceName, workspaceIndex, createIFunction(function));
+}
+
+void FitScriptGeneratorModel::addFunction(std::string const &workspaceName,
+                                          WorkspaceIndex workspaceIndex,
+                                          IFunction_sptr const &function) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
 
   if (auto composite = toComposite(m_function->getFunction(domainIndex)))
-    composite->addFunction(createIFunction(function));
+    composite->addFunction(function);
+}
+
+void FitScriptGeneratorModel::setFunction(std::string const &workspaceName,
+                                          WorkspaceIndex workspaceIndex,
+                                          std::string const &function) {
+  clearCompositeAtIndex(findDomainIndex(workspaceName, workspaceIndex));
+
+  if (auto const iFunction = createIFunction(function)) {
+    if (auto const composite = toComposite(iFunction)) {
+      for (auto i = 0u; i < composite->nFunctions(); ++i)
+        addFunction(workspaceName, workspaceIndex, composite->getFunction(i));
+    } else {
+      addFunction(workspaceName, workspaceIndex, iFunction);
+    }
+  }
 }
 
 CompositeFunction_sptr
@@ -342,13 +363,20 @@ void FitScriptGeneratorModel::addEmptyCompositeAtPrefix(
 void FitScriptGeneratorModel::removeCompositeAtIndex(
     std::size_t const &functionIndex) {
   if (functionIndex > numberOfDomains())
-    throw std::runtime_error("The composite prefix provided does not exist");
+    throw std::runtime_error("The composite index provided does not exist");
+
+  clearCompositeAtIndex(functionIndex);
+  m_function->removeFunction(functionIndex);
+}
+
+void FitScriptGeneratorModel::clearCompositeAtIndex(
+    std::size_t const &functionIndex) {
+  if (functionIndex > numberOfDomains())
+    throw std::runtime_error("The composite index provided does not exist");
 
   auto composite = toComposite(m_function->getFunction(functionIndex));
   for (auto i = composite->nFunctions() - 1u; i < composite->nFunctions(); --i)
     composite->removeFunction(i);
-
-  m_function->removeFunction(functionIndex);
 }
 
 bool FitScriptGeneratorModel::hasCompositeAtPrefix(

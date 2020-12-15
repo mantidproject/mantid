@@ -100,8 +100,10 @@ private slots:
   void onItemPressed();
   void onFunctionRemoved(QString const &function);
   void onFunctionAdded(QString const &function);
+  void onFunctionReplaced(QString const &function);
   void onParameterChanged(QString const &parameter);
   void onAttributeChanged(QString const &attribute);
+  void onCopyFunctionToClipboard();
 
 private:
   void connectUiSignals();

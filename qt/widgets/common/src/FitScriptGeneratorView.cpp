@@ -15,6 +15,8 @@
 #include <algorithm>
 #include <iterator>
 
+#include <QApplication>
+#include <QClipBoard>
 #include <QMessageBox>
 
 namespace {
@@ -77,11 +79,15 @@ void FitScriptGeneratorView::connectUiSignals() {
           SLOT(onFunctionRemoved(const QString &)));
   connect(m_functionTreeView.get(), SIGNAL(functionAdded(const QString &)),
           this, SLOT(onFunctionAdded(const QString &)));
+  connect(m_functionTreeView.get(), SIGNAL(functionReplaced(const QString &)),
+          this, SLOT(onFunctionReplaced(const QString &)));
   connect(m_functionTreeView.get(), SIGNAL(parameterChanged(const QString &)),
           this, SLOT(onParameterChanged(const QString &)));
   connect(m_functionTreeView.get(),
           SIGNAL(attributePropertyChanged(const QString &)), this,
           SLOT(onAttributeChanged(const QString &)));
+  connect(m_functionTreeView.get(), SIGNAL(copyToClipboardRequest()), this,
+          SLOT(onCopyFunctionToClipboard()));
 
   /// Disconnected because it causes a crash when selecting a table row while
   /// editing a parameters value. This is because selecting a different row will
@@ -153,6 +159,11 @@ void FitScriptGeneratorView::onFunctionAdded(QString const &function) {
                                function.toStdString());
 }
 
+void FitScriptGeneratorView::onFunctionReplaced(QString const &function) {
+  m_presenter->notifyPresenter(ViewEvent::FunctionReplaced,
+                               function.toStdString());
+}
+
 void FitScriptGeneratorView::onParameterChanged(QString const &parameter) {
   m_presenter->notifyPresenter(ViewEvent::ParameterChanged,
                                parameter.toStdString());
@@ -161,6 +172,12 @@ void FitScriptGeneratorView::onParameterChanged(QString const &parameter) {
 void FitScriptGeneratorView::onAttributeChanged(QString const &attribute) {
   m_presenter->notifyPresenter(ViewEvent::AttributeChanged,
                                attribute.toStdString());
+}
+
+void FitScriptGeneratorView::onCopyFunctionToClipboard() {
+  if (auto const function = m_functionTreeView->getSelectedFunction())
+    QApplication::clipboard()->setText(
+        QString::fromStdString(function->asString()));
 }
 
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {

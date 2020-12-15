@@ -45,6 +45,9 @@ public:
   virtual void addFunction(std::string const &workspaceName,
                            WorkspaceIndex workspaceIndex,
                            std::string const &function) = 0;
+  virtual void setFunction(std::string const &workspaceName,
+                           WorkspaceIndex workspaceIndex,
+                           std::string const &function) = 0;
   virtual Mantid::API::CompositeFunction_sptr
   getFunction(std::string const &workspaceName,
               WorkspaceIndex workspaceIndex) = 0;

@@ -42,8 +42,9 @@ private:
   void handleStartXChanged();
   void handleEndXChanged();
   void handleSelectionChanged();
-  void handleFunctionAdded(std::string const &function);
   void handleFunctionRemoved(std::string const &function);
+  void handleFunctionAdded(std::string const &function);
+  void handleFunctionReplaced(std::string const &function);
   void handleParameterChanged(std::string const &parameter);
   void handleAttributeChanged(std::string const &attribute);
 

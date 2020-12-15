@@ -74,6 +74,9 @@ public:
   void addFunction(std::string const &workspaceName,
                    WorkspaceIndex workspaceIndex,
                    std::string const &function) override;
+  void setFunction(std::string const &workspaceName,
+                   WorkspaceIndex workspaceIndex,
+                   std::string const &function) override;
   Mantid::API::CompositeFunction_sptr
   getFunction(std::string const &workspaceName,
               WorkspaceIndex workspaceIndex) override;
@@ -103,6 +106,10 @@ private:
   xLimits(Mantid::API::MatrixWorkspace_const_sptr const &workspace,
           WorkspaceIndex workspaceIndex) const;
 
+  void addFunction(std::string const &workspaceName,
+                   WorkspaceIndex workspaceIndex,
+                   Mantid::API::IFunction_sptr const &function);
+
   [[nodiscard]] std::size_t
   findDomainIndex(std::string const &workspaceName,
                   WorkspaceIndex workspaceIndex) const;
@@ -119,6 +126,7 @@ private:
                                  std::size_t const &functionIndex);
 
   void removeCompositeAtIndex(std::size_t const &functionIndex);
+  void clearCompositeAtIndex(std::size_t const &functionIndex);
 
   [[nodiscard]] bool
   hasCompositeAtPrefix(std::string const &functionPrefix) const;

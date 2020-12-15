@@ -58,6 +58,9 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
   case ViewEvent::FunctionAdded:
     handleFunctionAdded(arg);
     return;
+  case ViewEvent::FunctionReplaced:
+    handleFunctionReplaced(arg);
+    return;
   case ViewEvent::ParameterChanged:
     handleParameterChanged(arg);
     return;
@@ -151,6 +154,19 @@ void FitScriptGeneratorPresenter::handleFunctionAdded(
     auto const workspaceName = m_view->workspaceName(rowIndex);
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     m_model->addFunction(workspaceName, workspaceIndex, function);
+  }
+}
+
+void FitScriptGeneratorPresenter::handleFunctionReplaced(
+    std::string const &function) {
+  auto const rowIndices = m_view->isApplyFunctionChangesToAllChecked()
+                              ? m_view->allRows()
+                              : m_view->selectedRows();
+
+  for (auto const &rowIndex : rowIndices) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+    m_model->setFunction(workspaceName, workspaceIndex, function);
   }
 }
 

@@ -33,13 +33,14 @@ class EXPORT_OPT_MANTIDQT_COMMON IFitScriptGeneratorView
 
 public:
   enum class Event {
-    AddClicked,
     RemoveClicked,
+    AddClicked,
     StartXChanged,
     EndXChanged,
     SelectionChanged,
-    FunctionAdded,
     FunctionRemoved,
+    FunctionAdded,
+    FunctionReplaced,
     ParameterChanged,
     AttributeChanged
   };
