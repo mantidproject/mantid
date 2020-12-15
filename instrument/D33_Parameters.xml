@@ -27,6 +27,13 @@
     <parameter name="tau" type="number">
       <value val="0.0000015" />
     </parameter>
+     <!-- The pixel sizes used by SolidAngle -->
+    <parameter name="x-pixel-size" type="number">
+      <value val="2.5"/>
+    </parameter>
+    <parameter name="y-pixel-size" type="number">
+      <value val="5"/>
+    </parameter>
   </component-link>
 
   <!-- These parameters are used in ParallaxCorrection algorithm -->
