@@ -15,11 +15,11 @@ class EnggFocusTest(unittest.TestCase):
     _van_curves_ws = None
     _van_integ_tbl = None
 
-    _expected_yvals_bank1  = [0.016676032919961604, 0.015995344072536975, 0.047449159145519233,
-                              0.15629648148139513, 0.11018845452876322, 0.017291707350351286]
+    _expected_yvals_bank1  = [0.01671889741296237, 0.016036458905862805, 0.04757112365349549,
+                              0.1566982298749516, 0.11047168569414788, 0.017336154388340106]
 
-    _expected_yvals_bank2 = [0.0, 0.018310873111703541, 0.071387646720910913,
-                             0.061783574337739511, 0.13102948781549345, 0.001766956921862095]
+    _expected_yvals_bank2 = [0.0, 0.01835793983891016, 0.07157114331736783,
+                             0.06194238438581619, 0.13136628929521785, 0.0017714987522226692]
 
     # Note not using @classmethod setUpClass / tearDownClass because that's not supported in the old
     # unittest of rhel6
@@ -129,7 +129,7 @@ class EnggFocusTest(unittest.TestCase):
         self.assertEqual(wks.getNumDims(), 2)
         self.assertEqual(wks.YUnit(), 'Counts')
         dimX = wks.getXDimension()
-        self.assertAlmostEqual( dimX.getMaximum(), 36938.078125)
+        self.assertAlmostEqual( dimX.getMaximum(), 36843.375)
         self.assertEqual(dimX.name, 'Time-of-flight')
         self.assertEqual(dimX.getUnits(), 'microsecond')
         dimY = wks.getYDimension()
@@ -139,8 +139,8 @@ class EnggFocusTest(unittest.TestCase):
 
         if yvalues is None:
             raise ValueError("No y-vals provided for test")
-        xvals = [10861.958645540433, 12192.372902418168, 13522.787159295902,
-                 14853.201416173637, 24166.101214317776, 34809.415269339654]
+        xvals = [10834.11037667225, 12161.113671020974, 13488.116965369696,
+                 14815.12025971842, 24104.14332015949, 34720.16967494928]
         p_charge = wks.getRun().getProtonCharge()
         for i, bin_idx in enumerate([0, 5, 10, 15, 50, 90]):
             self.assertAlmostEqual(wks.readX(0)[bin_idx], xvals[i])

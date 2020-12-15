@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DeltaEMode.h"
 #include "MantidMDAlgorithms/MDTransfQ3D.h"
@@ -163,8 +164,16 @@ public:
                       const std::runtime_error &);
 
     // let's preprocess detectors positions to go any further
-    WSDescr.m_PreprDetTable = WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2Dbig);
-    TSM_ASSERT_THROWS_NOTHING("should initialize properly: ", ModQTransf.initialize(WSDescr));
+    auto ppDets_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "PreprocessDetectorsToMD");
+    ppDets_alg->initialize();
+    ppDets_alg->setChild(true);
+    ppDets_alg->setProperty("InputWorkspace", ws2Dbig);
+    ppDets_alg->setProperty("OutputWorkspace", "UnitsConversionHelperTableWs");
+    ppDets_alg->execute();
+    WSDescr.m_PreprDetTable = ppDets_alg->getProperty("OutputWorkspace");
+    TSM_ASSERT_THROWS_NOTHING("should initialize properly: ",
+                              ModQTransf.initialize(WSDescr));
     std::vector<coord_t> coord(4);
     TSM_ASSERT("Generic coordinates should be in range, so should be true ", ModQTransf.calcGenericVariables(coord, 4));
     TSM_ASSERT_DELTA("3th Generic coordinates should be temperature ", 70, coord[2], 2.e-8);
