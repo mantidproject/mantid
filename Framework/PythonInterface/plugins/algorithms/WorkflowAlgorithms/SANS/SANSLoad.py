@@ -330,10 +330,10 @@ class SANSLoad(ParallelDataProcessorAlgorithm):
                                SANSDataType.SAMPLE_TRANSMISSION, SANSDataType.SAMPLE_DIRECT]
 
             for workspace in workspace_list:
-                move_component(component_name="", move_info=state.move,
+                move_component(component_name="", state=state,
                                workspace=workspace, move_type=MoveTypes.RESET_POSITION)
 
-                move_component(component_name="LAB", move_info=state.move,
+                move_component(component_name="LAB", state=state,
                                beam_coordinates=beam_coordinates, move_type=MoveTypes.INITIAL_MOVE,
                                workspace=workspace, is_transmission_workspace=is_trans)
 

@@ -679,8 +679,7 @@ def get_standard_output_workspace_name(state, reduction_data_type,
         period_as_string = ""
 
     # 3. Detector name
-    move = state.move
-    detectors = move.detectors
+    detectors = state.instrument_info.detector_names
     if reduction_data_type is ReductionMode.MERGED:
         detector_name_short = "merged"
     elif reduction_data_type is ReductionMode.HAB:

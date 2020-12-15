@@ -31,6 +31,7 @@ set(PYTHON_PLUGINS
     algorithms/ConjoinFiles.py
     algorithms/ConjoinSpectra.py
     algorithms/ConvertSnsRoiFileToMask.py
+    algorithms/ConvertQtoHKLMDHisto.py
     algorithms/ConvertWANDSCDtoQ.py
     algorithms/CorrectLogTimes.py
     algorithms/CorrectTOF.py
@@ -192,6 +193,7 @@ set(PYTHON_PLUGINS
     algorithms/WorkflowAlgorithms/BayesStretch.py
     algorithms/WorkflowAlgorithms/CalculateMonteCarloAbsorption.py
     algorithms/WorkflowAlgorithms/ConvertMultipleRunsToSingleCrystalMD.py
+    algorithms/WorkflowAlgorithms/CorelliPowderCalibrationCreate.py
     algorithms/WorkflowAlgorithms/D7AbsoluteCrossSections.py
     algorithms/WorkflowAlgorithms/D7YIGPositionCalibration.py
     algorithms/WorkflowAlgorithms/DetectorFloodWeighting.py

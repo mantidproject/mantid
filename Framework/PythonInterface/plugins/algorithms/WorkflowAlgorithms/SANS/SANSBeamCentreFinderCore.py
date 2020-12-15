@@ -22,6 +22,7 @@ from sans.algorithm_detail.xml_shapes import quadrant_xml
 from sans.common.constants import EMPTY_NAME
 from sans.common.enums import (DetectorType, DataType, MaskingQuadrant)
 from sans.common.general_functions import create_child_algorithm, append_to_sans_file_tag
+from sans.state.AllStates import AllStates
 from sans.state.Serializer import Serializer
 
 
@@ -297,12 +298,12 @@ class SANSBeamCentreFinderCore(DataProcessorAlgorithm):
         slice_event_factor = returned["SliceEventFactor"]
         return workspace, monitor_workspace, slice_event_factor
 
-    def _move(self, state, workspace, component, is_transmission=False):
+    def _move(self, state: AllStates, workspace, component, is_transmission=False):
         # First we set the workspace to zero, since it might have been moved around by the user in the ADS
         # Second we use the initial move to bring the workspace into the correct position
-        move_component(move_info=state.move, component_name='', move_type=MoveTypes.RESET_POSITION,
+        move_component(state=state, component_name='', move_type=MoveTypes.RESET_POSITION,
                        workspace=workspace)
-        move_component(component_name=component, move_info=state.move, move_type=MoveTypes.INITIAL_MOVE,
+        move_component(component_name=component, state=state, move_type=MoveTypes.INITIAL_MOVE,
                        workspace=workspace, is_transmission_workspace=is_transmission)
         return workspace
 

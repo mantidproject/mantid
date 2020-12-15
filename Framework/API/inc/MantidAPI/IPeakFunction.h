@@ -61,6 +61,15 @@ public:
   /// Get name of parameter that is associated to centre.
   std::string getCentreParameterName() const;
 
+  /// Get the name of the parameter that is changed when the
+  /// fwhm is changed. By default this returns an empty string (unless
+  /// overridden in the individual functions) as some functions change two
+  /// params when the fwhm is set and others don't have a width (delta
+  /// func).This is intended for the BackToBackExponential-based peaks where
+  /// the width parameter (S) can be set in the intsurment parameter file and
+  /// this needs to be checked when a peak is added.
+  virtual std::string getWidthParameterName() const { return ""; }
+
   /// Fix a parameter or set up a tie such that value returned
   /// by intensity() is constant during fitting.
   /// @param isDefault :: If true fix intensity by default:
