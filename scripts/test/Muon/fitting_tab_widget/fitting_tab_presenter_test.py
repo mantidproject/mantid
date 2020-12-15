@@ -12,6 +12,7 @@ from mantidqt.utils.qt.testing import start_qapplication
 from qtpy.QtWidgets import QApplication
 from Muon.GUI.Common.fitting_tab_widget.fitting_tab_widget import FittingTabWidget
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
+from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import MuonWorkspaceWrapper
 
 EXAMPLE_TF_ASYMMETRY_FUNCTION = '(composite=ProductFunction,NumDeriv=false;name=FlatBackground,A0=1.02709;' \
                                 '(name=FlatBackground,A0=1,ties=(A0=1);name=ExpDecayOsc,A=0.2,Lambda=0.2,Frequency=0.1,Phi=0))' \
@@ -433,6 +434,10 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEqual(-1, self.view.minimizer_combo.findText('FABADA'))
 
     def test_simul_fit_by_specifier_updates_correctly_when_fit_change_to_simultanenous(self):
+        # Set up current data for data context with one workspace
+        ws = MuonWorkspaceWrapper("MUSR62260 MA/MUSR62260_raw_data MA")
+        self.context.data_context._loaded_data.add_data(workspace={"OutputWorkspace": [ws]}, run=[62260], filename="", instrument="MUSR")
+
         self.view.simul_fit_by_combo.setCurrentIndex(SIMUL_FIT_BY_COMBO_MAP["Run"])
 
         self.view.simul_fit_checkbox.setChecked(True)

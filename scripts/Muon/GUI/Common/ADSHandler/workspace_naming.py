@@ -182,6 +182,9 @@ def get_run_number_from_workspace_name(workspace_name, instrument):
 
 
 def get_run_numbers_as_string_from_workspace_name(workspace_name, instrument):
+    # workspace_name of format "INST999; abc; def;" or "INST999_abc_def MA"
+    # or for multiple runs "INST1-3,5; abc; def;" etc.
+    # need to strip all parts except run numbers part
     name = workspace_name.split(' ')[0]
     name = name.split('_')[0]
     name = name.split(';')[0]
