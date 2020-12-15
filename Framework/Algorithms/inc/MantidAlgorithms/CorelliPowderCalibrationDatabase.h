@@ -127,7 +127,7 @@ public:
     return "Diffraction\\Calibration";
   };
   const std::string summary() const override {
-    return "Save calibrated components' positions to database."; // TODO
+    return "Save calibrated components' positions and orientations to database.";
   };
 
   /// get standard component calibration database (CSV) file name

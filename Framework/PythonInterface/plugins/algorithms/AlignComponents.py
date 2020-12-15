@@ -25,7 +25,7 @@ class AlignComponents(PythonAlgorithm):
     """
 
     _optionsList = ["Xposition", "Yposition", "Zposition", "AlphaRotation", "BetaRotation", "GammaRotation"]
-    adjustment_items = ['Component', 'Xposition', 'Yposition', 'Zposition',
+    adjustment_items = ['ComponentName', 'Xposition', 'Yposition', 'Zposition',
                         'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
     _optionsDict = {}
     _initialPos = None
