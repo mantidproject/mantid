@@ -186,12 +186,17 @@ class DrillTableWidget(QTableWidget):
         tuple(int, int): selection shape (n_rows, n_col), (0, 0) if the
                          selection is empty or discontinuous
         """
+        header = self.horizontalHeader()
         selection = self.getSelectedCells()
         if not selection:
             return (0, 0)
         for i in range(len(selection)):
-            selection[i] = (self.visualRow(selection[i][0]),
-                            self.visualColumn(selection[i][1]))
+            row = self.visualRow(selection[i][0])
+            col = self.visualColumn(selection[i][1])
+            for j in range(col):
+                if header.isSectionHidden(header.logicalIndex(j)):
+                    col -= 1
+            selection[i] = (row, col)
         rmin = selection[0][0]
         rmax = rmin
         cmin = selection[0][1]
