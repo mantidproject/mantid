@@ -84,7 +84,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
     #: - Xposition, YPosition, ZPosition: location of the instrument component in the lab frame (units in meters)
     #: - XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle: direction cosines and rotation angle
     #: (in degress) defining a rotation in the lab frame that orients the instrument component
-    adjustment_items = ['Component', 'Xposition', 'Yposition', 'Zposition',
+    adjustment_items = ['ComponentName', 'Xposition', 'Yposition', 'Zposition',
                         'XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine', 'RotationAngle']
 
     def name(self):
