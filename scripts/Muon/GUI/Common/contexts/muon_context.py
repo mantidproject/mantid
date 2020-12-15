@@ -197,7 +197,6 @@ class MuonContext(object):
             # construct the pairs
             for pair in self._group_pair_context.pairs:
                 if isinstance(pair, MuonPair):
-                    print(pair.name)
                     pair_asymmetry_workspace = self.calculate_pair(
                         pair, run, rebin=rebin)
                 else:

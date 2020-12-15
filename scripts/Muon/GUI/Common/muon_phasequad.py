@@ -13,9 +13,8 @@ class MuonPhasequad(object):
     Simple structure to store information on a phasequad.
 
     - The name is set at initialization and after that cannot be changed.
-    - The pair has two groups associated to it, and we store only their names.
-    - The balance parameter is stored and modifiable.
-    - The workspace associated to the pair can be set, but must be of type MuonWorkspaceWrapper.
+    - The phasquad has two pairs associated to it and are stored as MuonBasePairs.
+    - The workspaces associated with the pairs can be set, but must be of type MuonWorkspaceWrapper.
     """
 
     def __init__(self, phasequad_name,
