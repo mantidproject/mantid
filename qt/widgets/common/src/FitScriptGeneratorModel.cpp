@@ -88,8 +88,13 @@ IFunction_sptr getFunctionAtPrefix(std::string const &functionPrefix,
   }
 }
 
-std::string getFunctionNameFromString(std::string const &functionString) {
-  return splitStringBy(splitStringBy(functionString, ",")[0], "=")[1];
+std::vector<std::string>
+getFunctionNamesInString(std::string const &functionString) {
+  std::vector<std::string> functionNames;
+  for (auto const &str : splitStringBy(functionString, ",();"))
+    if (str.substr(0, 5) == "name=")
+      functionNames.emplace_back(str.substr(5));
+  return functionNames;
 }
 
 } // namespace
@@ -260,10 +265,11 @@ void FitScriptGeneratorModel::removeFunction(std::string const &workspaceName,
                                              std::string const &function) {
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
 
-  auto composite = toComposite(m_function->getFunction(domainIndex));
-  auto const functionName = getFunctionNameFromString(function);
-  if (composite && composite->hasFunction(functionName))
-    composite->removeFunction(composite->functionIndex(functionName));
+  if (auto composite = toComposite(m_function->getFunction(domainIndex))) {
+    for (auto const functionName : getFunctionNamesInString(function))
+      if (composite->hasFunction(functionName))
+        composite->removeFunction(composite->functionIndex(functionName));
+  }
 }
 
 void FitScriptGeneratorModel::addFunction(std::string const &workspaceName,
