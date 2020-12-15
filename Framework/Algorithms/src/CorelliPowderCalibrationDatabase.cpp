@@ -364,7 +364,8 @@ void CorelliPowderCalibrationDatabase::init() {
   // Input calibration patch TableWorkspace
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "InputCalibrationPatchWorkspace", "", Direction::Input),
-                  "Table workspace containing calibrated positions and orientations for a subset of the banks");
+                  "Table workspace containing calibrated positions and "
+                  "orientations for a subset of the banks");
 
   // Output directory
   declareProperty(std::make_unique<FileProperty>("DatabaseDirectory", "",
@@ -374,7 +375,8 @@ void CorelliPowderCalibrationDatabase::init() {
   // Optional output calibration TableWorkspace
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
-                  "Table workspace containing calibrated positions and orientations for all banks");
+                  "Table workspace containing calibrated positions and "
+                  "orientations for all banks");
 }
 
 // Validate inputs workspace first.
