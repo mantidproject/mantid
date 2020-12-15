@@ -44,6 +44,8 @@ class CurvesTabWidgetPresenter:
             self.on_curves_row_changed)
         self.view.remove_curve_button.clicked.connect(
             self.remove_selected_curves)
+        self.view.delete_key_pressed.connect(
+            self.remove_selected_curves)
         self.view.line.apply_to_all_button.clicked.connect(
             self.line_apply_to_all)
         self.view.marker.apply_to_all_button.clicked.connect(

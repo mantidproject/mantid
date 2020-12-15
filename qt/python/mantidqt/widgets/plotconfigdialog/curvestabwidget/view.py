@@ -6,7 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantid workbench.
 
-from qtpy.QtCore import Qt
+from qtpy.QtCore import Qt, Signal
 from qtpy.QtWidgets import QWidget, QAbstractItemView
 
 from mantidqt.widgets.plotconfigdialog.curvestabwidget.errorbarstabwidget.view import ErrorbarsTabWidgetView
@@ -17,6 +17,8 @@ from mantidqt.utils.qt import load_ui, block_signals
 
 
 class CurvesTabWidgetView(QWidget):
+
+    delete_key_pressed = Signal()
 
     def __init__(self, parent=None):
         super(CurvesTabWidgetView, self).__init__(parent=parent)
@@ -32,6 +34,10 @@ class CurvesTabWidgetView(QWidget):
         self.tab_container.addTab(self.errorbars, "Errorbars")
         self.setAttribute(Qt.WA_DeleteOnClose, True)
         self.select_curve_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Delete:
+            self.delete_key_pressed.emit()
 
     def populate_select_axes_combo_box(self, axes_names):
         with block_signals(self.select_axes_combo_box):
