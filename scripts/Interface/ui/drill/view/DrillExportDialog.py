@@ -15,6 +15,11 @@ class DrillExportDialog(QDialog):
 
     UI_FILENAME = "ui/export.ui"
 
+    """
+    Export presenter.
+    """
+    _presenter = None
+
     def __init__(self, parent=None):
         """
         Create the export dialog.
@@ -30,6 +35,16 @@ class DrillExportDialog(QDialog):
         self.applyButton.clicked.connect(
                 lambda : self.accepted.emit()
                 )
+
+    def setPresenter(self, presenter):
+        """
+        Set the prsesenter. This is needed to keep a valid reference to the
+        presenter and avoid destruction by the  garage collector.
+
+        Args:
+            presenter (DrillExportPresenter): export presenter
+        """
+        self._presenter = presenter
 
     def setAlgorithms(self, algorithms):
         """

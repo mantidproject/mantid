@@ -7,7 +7,7 @@
 
 from ..view.DrillSettingsDialog import DrillSettingsDialog
 from ..model.DrillModel import DrillModel
-
+from .DrillExportPresenter import DrillExportPresenter
 
 class DrillPresenter:
 
@@ -152,7 +152,8 @@ class DrillPresenter:
         sw.show()
 
     def onShowExportDialog(self, dialog):
-        pass
+        exportModel = self.model.getExportModel()
+        DrillExportPresenter(dialog, exportModel)
 
     def updateViewFromModel(self):
         """
