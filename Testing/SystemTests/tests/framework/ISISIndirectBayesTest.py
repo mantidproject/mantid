@@ -36,6 +36,7 @@ class QLresTest(systemtesting.MantidSystemTest):
         return not platform.system() == "Windows"
 
     def runTest(self):
+        prefix = 'rt_'
         sname = 'irs26176_graphite002_red'
         rname = 'irs26173_graphite002_res'
         e_min = -0.5
@@ -45,29 +46,29 @@ class QLresTest(systemtesting.MantidSystemTest):
         loopOp = False
 
         spath = sname+'.nxs'    # path name for sample nxs file
-        LoadNexusProcessed(Filename=spath, OutputWorkspace=sname)
+        LoadNexusProcessed(Filename=spath, OutputWorkspace=prefix+sname)
         rpath = rname+'.nxs'    # path name for res nxs file
-        LoadNexusProcessed(Filename=rpath, OutputWorkspace=rname)
+        LoadNexusProcessed(Filename=rpath, OutputWorkspace=prefix+rname)
         BayesQuasi(Program = 'QL',
-                   SampleWorkspace=sname,
-                   ResolutionWorkspace=rname,
+                   SampleWorkspace=prefix+sname,
+                   ResolutionWorkspace=prefix+rname,
                    MinRange=e_min,
                    MaxRange=e_max,
                    Background = background,
                    FixedWidth = fixed_width,
                    Loop = loopOp,
-                   OutputWorkspaceFit='irs26176_graphite002_QLr_Workspace',
-                   OutputWorkspaceResult='irs26176_graphite002_QLr_Result',
-                   OutputWorkspaceProb='irs26176_graphite002_QLr_Probability')
+                   OutputWorkspaceFit='rt_irs26176_graphite002_QLr_Workspace',
+                   OutputWorkspaceResult='rt_irs26176_graphite002_QLr_Result',
+                   OutputWorkspaceProb='rt_irs26176_graphite002_QLr_Probability')
 
     def validate(self):
         self.tolerance = 1e-4
         self.disableChecking.append('SpectraMap')
-        return 'irs26176_graphite002_QLr_Workspace_0','ISISIndirectBayes_QlresTest.nxs'
+        return 'rt_irs26176_graphite002_QLr_Workspace_0','ISISIndirectBayes_QlresTest.nxs'
 
     def cleanup(self):
-        filenames = ['irs26176_graphite002_QLr.lpt','irs26176_graphite002_QLr.ql1',
-                     'irs26176_graphite002_QLr.ql2','irs26176_graphite002_QLr.ql3']
+        filenames = ['rt_irs26176_graphite002_QLr.lpt','rt_irs26176_graphite002_QLr.ql1',
+                     'rt_irs26176_graphite002_QLr.ql2','rt_irs26176_graphite002_QLr.ql3']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
 #==============================================================================
@@ -285,6 +286,7 @@ class QLWidthTest(systemtesting.MantidSystemTest):
         return not platform.system() == "Windows"
 
     def runTest(self):
+        prefix = 'wt_'
         sname = 'irs26176_graphite002_red'
         rname = 'irs26173_graphite002_res'
         wfile = 'irs26176_graphite002_width_water.dat'
@@ -293,29 +295,29 @@ class QLWidthTest(systemtesting.MantidSystemTest):
         background = 'Sloping'
         loopOp = False
 
-        LoadNexusProcessed(Filename=sname + '.nxs', OutputWorkspace=sname)
-        LoadNexusProcessed(Filename=rname + '.nxs', OutputWorkspace=rname)
+        LoadNexusProcessed(Filename=sname + '.nxs', OutputWorkspace=prefix+sname)
+        LoadNexusProcessed(Filename=rname + '.nxs', OutputWorkspace=prefix+rname)
         BayesQuasi(Program = 'QL',
-                   SampleWorkspace=sname,
-                   ResolutionWorkspace=rname,
+                   SampleWorkspace=prefix+sname,
+                   ResolutionWorkspace=prefix+rname,
                    MinRange=e_min,
                    MaxRange=e_max,
                    Background = background,
                    WidthFile = wfile,
                    Loop = loopOp,
-                   OutputWorkspaceFit='irs26176_graphite002_QLr_Workspace',
-                   OutputWorkspaceResult='irs26176_graphite002_QLr_Result',
-                   OutputWorkspaceProb='irs26176_graphite002_QLr_Probability')
+                   OutputWorkspaceFit='wt_irs26176_graphite002_QLr_Workspace',
+                   OutputWorkspaceResult='wt_irs26176_graphite002_QLr_Result',
+                   OutputWorkspaceProb='wt_irs26176_graphite002_QLr_Probability')
 
     def validate(self):
         self.tolerance = 1e-1
         self.disableChecking.append('SpectraMap')
-        return 'irs26176_graphite002_QLr_Workspace_0','ISISIndirectBayes_QLr_width_Test.nxs'
+        return 'wt_irs26176_graphite002_QLr_Workspace_0','ISISIndirectBayes_QLr_width_Test.nxs'
 
     def cleanup(self):
         AnalysisDataService.clear()
-        filenames = ['irs26176_graphite002_QLr.lpt','irs26176_graphite002_QLr.ql1',
-                     'irs26176_graphite002_QLr.ql2','irs26176_graphite002_QLr.ql3']
+        filenames = ['wt_irs26176_graphite002_QLr.lpt','wt_irs26176_graphite002_QLr.ql1',
+                     'wt_irs26176_graphite002_QLr.ql2','wt_irs26176_graphite002_QLr.ql3']
         _cleanup_files(config['defaultsave.directory'], filenames)
 
 #==============================================================================
