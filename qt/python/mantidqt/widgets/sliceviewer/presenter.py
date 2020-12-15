@@ -357,7 +357,6 @@ class SliceViewer(ObservingPresenter):
         """
         if not self.model.workspace_equals(workspace_name):
             return
-        print("replace")
         try:
             candidate_model = SliceViewerModel(workspace)
             candidate_model_properties = candidate_model.get_properties()

@@ -33,9 +33,6 @@ class SliceViewerADSObserver(AnalysisDataServiceObserver):
     def __init__(self, on_replace, on_rename, on_clear, on_delete):
         super(SliceViewerADSObserver, self).__init__()
 
-        # self.on_replace_workspace = QAppThreadCall(self.presenter.replace_workspace)
-        # self.on_rename_workspace = QAppThreadCall(self.presenter.rename_workspace)
-
         self.on_replace_workspace = QAppThreadCall(on_replace)
         self.on_rename_workspace = QAppThreadCall(on_rename)
         self.on_clear = QAppThreadCall(on_clear)
