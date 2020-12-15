@@ -83,22 +83,21 @@ include_directories(DataObjects/inc)
 add_subdirectory(DataObjects)
 set(MANTIDLIBS ${MANTIDLIBS} DataObjects)
 
+add_subdirectory(Catalog)
+
 add_subdirectory(Nexus)
 add_subdirectory(DataHandling)
 add_subdirectory(Algorithms)
+add_subdirectory(WorkflowAlgorithms)
 add_subdirectory(CurveFitting)
 add_subdirectory(Crystal)
-add_subdirectory(LiveData)
-add_subdirectory(Catalog)
 add_subdirectory(ICat)
-add_subdirectory(ScriptRepository)
-add_subdirectory(Doxygen)
+add_subdirectory(LiveData)
+add_subdirectory(RemoteAlgorithms)
+add_subdirectory(RemoteJobManagers)
 add_subdirectory(SINQ)
 add_subdirectory(Muon)
 add_subdirectory(Reflectometry)
-add_subdirectory(RemoteAlgorithms)
-add_subdirectory(RemoteJobManagers)
-add_subdirectory(WorkflowAlgorithms)
 
 # If an MPI-enabled build, add in the MPI-specific algorithms package
 if(MPI_BUILD)
@@ -106,8 +105,11 @@ if(MPI_BUILD)
 endif()
 
 add_subdirectory (MDAlgorithms)
+add_subdirectory (Doxygen)
+add_subdirectory (ScriptRepository)
 
 # Add a custom target to build all of the Framework
+
 set(FRAMEWORK_LIBS
     Kernel
     HistogramData
