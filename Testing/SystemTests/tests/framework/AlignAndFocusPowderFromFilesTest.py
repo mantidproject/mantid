@@ -292,4 +292,7 @@ class AbsorptionCompare(systemtesting.MantidSystemTest):
         return "ValidateWorkspaceToWorkspace"
 
     def validate(self):
+        # verify the material name
+        assert mtd[self.wksp_file].sample().getMaterial().name() == 'V'
+        # use standard method
         return (self.wksp_mem, self.wksp_file)
