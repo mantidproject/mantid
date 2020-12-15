@@ -50,5 +50,6 @@ Bugfixes
 - Fix sort order of peaks in the peaks overlay on SliceViewer.
 - The colorfill plot on ragged workspaces will have the correct horizontal extent.
 - Fix replot of colorfill image after a workspace is replaced.
+- Fixed a bug in generating plot scripts for figures containing data for a particular bin.
 
 :ref:`Release 6.0.0 <v6.0.0>`
