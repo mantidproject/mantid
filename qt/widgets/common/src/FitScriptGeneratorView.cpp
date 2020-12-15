@@ -88,6 +88,8 @@ void FitScriptGeneratorView::connectUiSignals() {
           SLOT(onAttributeChanged(const QString &)));
   connect(m_functionTreeView.get(), SIGNAL(copyToClipboardRequest()), this,
           SLOT(onCopyFunctionToClipboard()));
+  connect(m_functionTreeView.get(), SIGNAL(functionHelpRequest()), this,
+          SLOT(onFunctionHelpRequested()));
 
   /// Disconnected because it causes a crash when selecting a table row while
   /// editing a parameters value. This is because selecting a different row will
@@ -178,6 +180,12 @@ void FitScriptGeneratorView::onCopyFunctionToClipboard() {
   if (auto const function = m_functionTreeView->getSelectedFunction())
     QApplication::clipboard()->setText(
         QString::fromStdString(function->asString()));
+}
+
+void FitScriptGeneratorView::onFunctionHelpRequested() {
+  if (auto const function = m_functionTreeView->getSelectedFunction())
+    m_functionTreeView->showFunctionHelp(
+        QString::fromStdString(function->name()));
 }
 
 std::string FitScriptGeneratorView::workspaceName(FitDomainIndex index) const {

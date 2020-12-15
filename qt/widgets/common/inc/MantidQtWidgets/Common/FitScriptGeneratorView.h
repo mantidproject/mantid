@@ -104,6 +104,7 @@ private slots:
   void onParameterChanged(QString const &parameter);
   void onAttributeChanged(QString const &attribute);
   void onCopyFunctionToClipboard();
+  void onFunctionHelpRequested();
 
 private:
   void connectUiSignals();
