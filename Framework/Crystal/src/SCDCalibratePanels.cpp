@@ -137,12 +137,15 @@ void SCDCalibratePanels::init() {
  * @return std::map<std::string, std::string>
  */
 std::map<std::string, std::string>
-CorelliPowderCalibrationLoad::validateInputs() {
+SCDCalibratePanels::validateInputs() {
   std::map<std::string, std::string> issues;
 
   // check 1: peaks space is not empty
 
-  // check 2:
+  // check 2: make sure lattice constant is given or
+  //          can be found within peak worksapce
+
+  // check 3:
 
   return issues;
 }
@@ -502,7 +505,10 @@ void SCDCalibratePanels::findT0(
   }
 }
 
-
+/**
+ * 
+ * 
+ */
 void SCDCalibratePanels::findU(
     const DataObjects::PeaksWorkspace_sptr &peaksWs) {
   IAlgorithm_sptr ub_alg;
@@ -591,8 +597,10 @@ void SCDCalibratePanels::saveIsawDetCal(
 }
 
 
-
-
+/**
+ * 
+ * 
+ */
 void writeXmlParameter(ofstream &ostream, const string &name,
                        const double value) {
   ostream << "  <parameter name =\"" << name << "\"><value val=\"" << value
@@ -600,6 +608,10 @@ void writeXmlParameter(ofstream &ostream, const string &name,
 }
 
 
+/**
+ * 
+ * 
+ */
 void SCDCalibratePanels::saveXmlFile(
     const string &FileName,
     const boost::container::flat_set<string> &AllBankNames,
@@ -680,6 +692,10 @@ void SCDCalibratePanels::saveXmlFile(
 }
 
 
+/**
+ * 
+ * 
+ */
 void SCDCalibratePanels::findL2(
     boost::container::flat_set<string> MyBankNames,
     const DataObjects::PeaksWorkspace_sptr &peaksWs) {
@@ -786,6 +802,7 @@ void SCDCalibratePanels::findL2(
     double zShift = paramsWS->getRef<double>("Value", 2);
     double scaleWidth = 1.0;
     double scaleHeight = 1.0;
+    g_log.notice() << "-- shift:" << xShift << "," << yShift << "," << zShift << "\n";
 
     // 2nd pass: optimize rotation
     IAlgorithm_sptr fitrot_alg;
@@ -818,12 +835,13 @@ void SCDCalibratePanels::findL2(
                    << "-- Chi2overDoF: " << chisq_rot << "\n";
 
     MatrixWorkspace_sptr fitWS_rot = fitrot_alg->getProperty("OutputWorkspace");
-    AnalysisDataService::Instance().addOrReplace("fitrot_" + iBank, fitWS_rot);
+    AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS_rot);
     ITableWorkspace_sptr paramsWS_rot = fitrot_alg->getProperty("OutputParameters");
-    AnalysisDataService::Instance().addOrReplace("paramsrot_" + iBank, paramsWS_rot);
-    double xRotate = paramsWS_rot->getRef<double>("Value", 4);
-    double yRotate = paramsWS_rot->getRef<double>("Value", 5);
-    double zRotate = paramsWS_rot->getRef<double>("Value", 6);
+    AnalysisDataService::Instance().addOrReplace("params_" + iBank, paramsWS_rot);
+    double xRotate = paramsWS_rot->getRef<double>("Value", 3);
+    double yRotate = paramsWS_rot->getRef<double>("Value", 4);
+    double zRotate = paramsWS_rot->getRef<double>("Value", 5);
+    g_log.notice() << "-- rot :" << xRotate << "," << yRotate << "," << zRotate <<"\n";
 
     // Scaling only implemented for Rectangular Detectors
     Geometry::IComponent_const_sptr comp =
