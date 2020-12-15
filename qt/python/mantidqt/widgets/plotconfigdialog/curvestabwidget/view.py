@@ -56,6 +56,11 @@ class CurvesTabWidgetView(QWidget):
         current_item = self.select_curve_list.currentItem()
         self.select_curve_list.removeItemWidget(current_item)
 
+    def remove_select_curve_list_selected_items(self):
+        selection = self.select_curve_list.selectionModel().selectedIndexes()
+        for index in selection:
+            _ = self.select_curve_list.takeItem(index.row())
+
     # Tab enablers and disablers
     def set_errorbars_tab_enabled(self, enable):
         self.tab_container.setTabEnabled(2, enable)
@@ -64,8 +69,11 @@ class CurvesTabWidgetView(QWidget):
     def get_selected_ax_name(self):
         return self.select_axes_combo_box.currentText()
 
-    def get_selected_curve_name(self):
+    def get_current_curve_name(self):
         return self.select_curve_list.currentItem().text()
+
+    def get_selected_curves_names(self):
+        return [item.text() for item in self.select_curve_list.selectedItems()]
 
     def set_curve_label(self, label):
         self.curve_label_line_edit.setText(label)
