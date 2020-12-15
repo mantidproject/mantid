@@ -1,3 +1,16 @@
+###########################################################################
+# Set installation variables
+###########################################################################
+set ( BIN_DIR bin )
+set ( ETC_DIR etc )
+set ( LIB_DIR lib )
+set ( SITE_PACKAGES ${LIB_DIR} )
+set ( PLUGINS_DIR plugins )
+
+set ( WORKBENCH_BIN_DIR ${BIN_DIR} )
+set ( WORKBENCH_LIB_DIR ${LIB_DIR} )
+set ( WORKBENCH_SITE_PACKAGES ${LIB_DIR} )
+set ( WORKBENCH_PLUGINS_DIR ${PLUGINS_DIR} )
 
 # Determine the version of macOS that we are running
 # ##############################################################################
@@ -198,11 +211,5 @@ if(${ENABLE_MANTIDPLOT} OR ${ENABLE_WORKBENCH})
       RENAME MantidWorkbench.icns
     )
   endif()
- if((NOT ${ENABLE_WORKBENCH}) AND (NOT ${ENABLE_MANTIDPLOT}))
-  set(WORKBENCH_SITE_PACKAGES ${CMAKE_INSTALL_PREFIX})
-  set(WORKBENCH_PLUGINS_DIR ${CMAKE_INSTALL_PREFIX})
-  set(WORKBENCH_LIB_DIR ${CMAKE_INSTALL_PREFIX})
-  set(WORKBENCH_BIN_DIR ${CMAKE_INSTALL_PREFIX})
- endif()
   set(BUNDLES ${INBUNDLE} ${WORKBENCH_BUNDLE})
 endif()
