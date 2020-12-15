@@ -363,14 +363,14 @@ and :math:`\dot{I_{B}}(0)` and :math:`\dot{I_{B}}(1)` are the events with the fl
 Self-attenuation correction
 ---------------------------
 
-There are three ways the self-attenuation of a sample can be taken into account in the implemented D7 reduction: `Numerical`, `Monte-Carlo`, and `User`.
+There are three ways the self-attenuation of a sample can be taken into account in the implemented D7 reduction: `Numerical`, `MonteCarlo`, and `User`.
 In all three cases, the correction is applied to data with :ref:`ApplyPaalmanPingsCorrection <algm-ApplyPaalmanPingsCorrection>` algorithm.
 
 The `User` option depends on the self-attenuation parameters provided by the user through `SampleSelfAttenuationFactors` property of the :ref:`PolDiffILLReduction <algm-PolDiffILLReduction>`
 algorithm. This option allows to study the self-attenuation of a sample that can have arbitrary shape separately from running the reduction algorithm,
 and in more detail if necessary.
 
-On the contrary, The `Numerical` and `Monte-Carlo` options calculate the self-attenuation parameters for both the sample and its container during the execution of
+On the contrary, The `Numerical` and `MonteCarlo` options calculate the self-attenuation parameters for both the sample and its container during the execution of
 the reduction algorithm. These two options depend on Mantid algorithms :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>`
 and :ref:`PaalmanPingsMonteCarloAbsorption <algm-PaalmanPingsMonteCarloAbsorption>`, respectively. These two algorithms require multiple parameters describing
 the sample and its environment, such as the geometry, density, and chemical composition to be defined. The communication of these parameters is done
@@ -469,10 +469,10 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
 .. testcode:: ExPolarisedDifffractionVanadium
 
     vanadium_dictionary = {'SampleMass':8.54,'FormulaUnits':1,'FormulaUnitMass':50.94,'SampleChemicalFormula':'V',
-	                   'Height':2,'SampleDensity':1.18,'SampleInnerRadius':2, 'SampleOuterRadius':2.49,
-			   'BeamWidth':2.5,'BeamHeight':2.5,
+                           'Height':2.0,'SampleDensity':1.18,'SampleInnerRadius':2.0, 'SampleOuterRadius':2.49,
+                           'BeamWidth':2.5,'BeamHeight':2.5,
                            'ContainerChemicalFormula':'Al','ContainerDensity':2.7,'ContainerOuterRadius':2.52,
-                           'ContainerInnerRadius':1.99}
+                           'ContainerInnerRadius':1.99, 'EventsPerPoint':1000}
 
 
     # Beam with cadmium absorber, used for transmission
@@ -495,7 +495,7 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
         OutputWorkspace='quartz_transmission',
         AbsorberTransmissionInputWorkspace='cadmium_ws_1',
         BeamInputWorkspace='beam_ws_1',
-       ProcessAs='Transmission'
+        ProcessAs='Transmission'
     )
 
     # Empty container
@@ -542,6 +542,7 @@ Below is the relevant workflow diagram describing reduction steps of the vanadiu
         TransmissionInputWorkspace='vanadium_transmission_1',
         QuartzInputWorkspace='pol_corrections',
         OutputTreatment='Sum',
+        SelfAttenuationMethod='MonteCarlo',
         SampleGeometry='Annulus',
         SampleAndEnvironmentProperties=vanadium_dictionary,
         ProcessAs='Vanadium'
@@ -644,10 +645,10 @@ Below is the relevant workflow diagram describing reduction steps of the sample 
     vanadium_dictionary = {'SampleMass':8.54,'FormulaUnits':1,'FormulaUnitMass':50.94}
 
     sample_dictionary = {'SampleMass':2.932,'SampleDensity':2.0,'FormulaUnits':1,'FormulaUnitMass':182.56,
-                         'SampleChemicalFormula':'Mn0.5-Fe0.5-P-S3','Height':2,'SampleDensity':1.18,
-			 'SampleInnerRadius':2, 'SampleOuterRadius':2.49,'BeamWidth':2.5,'BeamHeight':2.5,
+                         'SampleChemicalFormula':'Mn0.5-Fe0.5-P-S3','Height':2.0,'SampleDensity':1.18,
+                         'SampleInnerRadius':2.0, 'SampleOuterRadius':2.49,'BeamWidth':2.5,'BeamHeight':2.5,
                          'ContainerChemicalFormula':'Al','ContainerDensity':2.7,'ContainerOuterRadius':2.52,
-                         'ContainerInnerRadius':1.99}
+                         'ContainerInnerRadius':1.99, 'ElementSize':0.5}
 
 
     # Beam with cadmium absorber, used for transmission
