@@ -25,6 +25,7 @@ New features
 - New algorithm to clip peaks, providing a background estimation :ref:`ClipPeaks <algm-ClipPeaks>`.
 - Scripts for pixel calibration of CORELLI 16-packs. Produce a calibration table, a masking table, and a goodness of fit workspace.
 - New algorithm :ref:`PaalmanPingsAbsorptionCorrection <algm-PaalmanPingsAbsorptionCorrection>` uses a numerical integration method to calculate attenuation factors for all Paalmin Pings terms
+- Modified :ref:`AlignAndFocusPowderFromFiles <algm-AlignAndFocusPowderFromFiles>` Copies the sample from the absorption workspace to the output workspace
 - Modified :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to include several different absorption correction methods.
 - Modified he vanadium absorption correction in :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to be calculated using numerical integration rather than Carpenter method.
 - Added new absorption options from :ref:`SNSPowderReduction <algm-SNSPowderReduction>` to Powder Diffraction Reduction GUI
