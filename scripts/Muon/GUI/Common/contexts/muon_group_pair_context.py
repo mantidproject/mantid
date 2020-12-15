@@ -234,9 +234,12 @@ class MuonGroupPairContext(object):
     def remove_phasequad(self, phasequad_obj):
         for phasequad in self._phasequad:
             if phasequad.name == phasequad_obj.name:
-                self._pairs.remove(phasequad_obj.Re)
-                self._pairs.remove(phasequad_obj.Im)
-                self._phasequad.remove(phasequad_obj)
+                if phasequad_obj in self._pairs:
+                    self._pairs.remove(phasequad_obj.Re)
+                if phasequad_obj in self._pairs:
+                    self._pairs.remove(phasequad_obj.Im)
+                if phasequad_obj in self._phasequad:
+                    self._phasequad.remove(phasequad_obj)
                 return
 
     def reset_group_and_pairs_to_default(self, workspace, instrument, main_field_direction, num_periods):
