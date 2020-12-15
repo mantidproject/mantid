@@ -19,6 +19,16 @@ SearchResult::SearchResult(const std::string &runNumber,
   parseMetadataFromTitle();
 }
 
+SearchResult::SearchResult(const std::string &runNumber,
+                           const std::string &title,
+                           const std::string &groupName,
+                           const std::string &theta, const std::string &error,
+                           const std::string &excludeReason,
+                           const std::string &comment)
+    : m_runNumber(runNumber), m_title(title), m_groupName(groupName),
+      m_theta(theta), m_error(error), m_excludeReason(excludeReason),
+      m_comment(comment) {}
+
 void SearchResult::parseRun(std::string const &runNumber) {
   auto const maybeRunNumber = parseRunNumber(runNumber);
   if (maybeRunNumber.is_initialized())
@@ -65,11 +75,29 @@ const std::string &SearchResult::theta() const { return m_theta; }
 
 bool SearchResult::hasError() const { return !m_error.empty(); }
 
+bool SearchResult::exclude() const { return !m_excludeReason.empty(); }
+
+const std::string &SearchResult::excludeReason() const {
+  return m_excludeReason;
+}
+
+bool SearchResult::hasComment() const { return !m_comment.empty(); }
+
+const std::string &SearchResult::comment() const { return m_comment; }
+
 void SearchResult::addError(std::string const &error) {
   if (m_error.empty())
     m_error = error;
   else
     m_error.append("\n").append(error);
+}
+
+void SearchResult::addExcludeReason(std::string const &excludeReason) {
+  m_excludeReason = excludeReason;
+}
+
+void SearchResult::addComment(std::string const &comment) {
+  m_comment = comment;
 }
 
 bool operator==(SearchResult const &lhs, SearchResult const &rhs) {
