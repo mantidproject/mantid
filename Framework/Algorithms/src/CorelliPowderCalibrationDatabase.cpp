@@ -359,12 +359,12 @@ void CorelliPowderCalibrationDatabase::init() {
   // Input MatrixWorkspace which the calibration run is from
   declareProperty(std::make_unique<WorkspaceProperty<MatrixWorkspace>>(
                       "InputWorkspace", "", Direction::Input, wsValidator),
-                  "An input workspace.");
+                  "Workspace containing the day-stamp of the calibration");
 
   // Input calibration patch TableWorkspace
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "InputCalibrationPatchWorkspace", "", Direction::Input),
-                  "An input table workspace for calibration patch.");
+                  "Table workspace containing calibrated positions and orientations for a subset of the banks");
 
   // Output directory
   declareProperty(std::make_unique<FileProperty>("DatabaseDirectory", "",
@@ -374,7 +374,7 @@ void CorelliPowderCalibrationDatabase::init() {
   // Optional output calibration TableWorkspace
   declareProperty(std::make_unique<WorkspaceProperty<TableWorkspace>>(
                       "OutputWorkspace", "", Direction::Output),
-                  "An output calibration workspace.");
+                  "Table workspace containing calibrated positions and orientations for all banks");
 }
 
 // Validate inputs workspace first.

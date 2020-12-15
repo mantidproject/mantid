@@ -10,65 +10,57 @@
 Description
 -----------
 
-The algorithm `CORELLIPowderCalibrationGenerate` receives (among other inputs) an `InputWorkspace` and produce and output `CalibrationTable`, 
-a `TableWorkspace` object. The contents of the calibration table patch are:
+The goal of algorithm `CORELLIPowderCalibrationGenerate` is twofold. The first goal is to store a recent calibration
+for a *subset* of all banks (property `InputCalibrationPatchWorkspace`) within a database directory. The second
+goal is to combine this recent calibration with previous calibrations in order to produce a calibration for
+*all* banks. The assumption is that older calibrations will contain calibrations for the banks that are missing
+in the recent calibration.
 
+The recent calibration is the output of algorithm :ref:`algm-CORELLIPowderCalibrationCreate`,
+a :ref:`TableWorkspace <Table Workspaces>` with the following columns:
 
  | ComponentName | Xposition | Yposition| Zposition| XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
 
-
-This issue will create algorithm `CORELLIPowderCalibrationDatabase` that will receive as input `CalibrationTablePatch` and `InputWorkspace`. 
-A more detailed list of inputs:
-
-- `InputWorkspace` [Input]: `EventsWorkspace` or `MatrixWorkspace`, the run used for the calibration. The day the experiment ran will be extracted
-
-- `CalibrationTablePatch` [Input] A `TableWorkspace` object, the output of `CORELLIPowderCalibrationGenerate`
-
-- `DatabaseDirectory` [Optional Input]: absolute path to the database, with a default location to be determined by the instrument scientists.
-
-- `DayStamp` [Optional Input]: to be used in place of the `InputWorkspace`
-
-- `CalibrationTable` [Optional Output]: a `TableWorkspace`
-
-`CORELLIPowderCalibrationDatabase` creates the following outputs:  
-
-**Merged Calibration TableWorkspace**: The contents of *corelli_instrument_YYYYMMDD.csv* will be loaded into a `TableWorkspace` object, the `CalibrationTable` output. It will have the same structure as `CalibrationTablePatch` but should (ideally) contain a row for every bank in the instrument.  *YYYYMMDD* is the date stamp of calibration run.  For example, if the calibraton's run start time is on 2020.02.15, then its date stamp is *20200215*.
-
-**Single Component Database Files**: extract each row of `CalibrationTable` and append to appropriate component file in the the database. 
-For instance, if the contents of `CalibrationTablePatch` are:
+A typical calibration will contain a row for the moderator, possible a row for the sample, and one row for each
+calibrated bank. For instance:
 
  | ComponentName | Xposition | Yposition| Zposition| XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
  | moderator | 0 | 0 | -15.560 | 0 | 0 | 0 | 0 |
  | sample-position | 0.0001 | -0.0002 | 0.003 | 0 | 0 | 0 | 0 |
- | bank1 | 0.9678 | 0.0056 | 0.0003 | 0.4563 | -0.9999 | 0.3424 | 5.67 |
+ | bank7 | 0.9678 | 0.0056 | 0.0003 | 0.4563 | -0.9999 | 0.3424 | 5.67 |
+ | bank8 | 0.9650 | 0.0050 | 0.0002 | 0.4513 | -0.9999 | 0.3921 | 9.03 |
 
-And the day stamp for this calibration is *YYYYMMDD*, the following line will be *appended* to file *corelli_moderator.csv* :
+For more details on this output, see the documentation for :ref:`algm-CORELLIPowderCalibrationCreate`.
+
+The rows of the recent calibrations are read one by one, and the *single component database file* is updated
+accordingly. Thus in our previous example the line for the moderator is extracted and appended to CSV file
+*corelli_moderator.csv*. Before appending, the line is amended with the day-stamp of the recent calibration. The
+day-stamp is retrieved from the input workspace of property `InputWorkspace`. A typical *corelli_moderator.csv*
+file may look like this:
 
 ```
+20190601, 0, 0, -15.550, 0, 0, 0, 0
+20191013, 0, 0, -15.552, 0, 0, 0, 0
 20201025, 0, 0, -15.560, 0, 0, 0, 0
 ```
 
-the following line will be *appended* to file *corelli_sample-position.csv*:
+The last line is the moderator row from table `InputCalibrationPatchWorkspace` amended with the day stamp
+contained in `InputWorkspace` (20201025).
 
-```
-20201025, 0.0001, -0.0002, 0.003, 0, 0, 0, 0
-```
+Files the moderator and the other components (*corelli_sample-position.csv*, *corelli_bank7.csv*,..*corelli_bank91.csv*)
+are all located under the directory specified in property `DatabaseDirectory`
 
-and the following lines to *corelli_bank001.csv*:
-20201025, 0.9678, 0.0056, 0.0003, 0.4563, -0.9999, 0.3424, 5.67
-
-The header for files *corelli_moderator.csv*, *corelli_sample-position.csv*, and files *corelli_bankXXX.csv* should be:
-
-```
-# YYYMMDD, Xposition, Yposition, Zposition, XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle
-```
-
-**Combined Calibration Database File**: The last line of *corelli_moderator.csv*, *corelli_sample-position.csv*, and each of existing files *corelli_bankXXX.csv* will be collected and gathered into file *corelli_instrument_20202015.csv*. The header for this file should be:
+After the first goal is accomplished (store the recent calibration), the algorithm proceeds to produce a
+calibration file and :ref:`TableWorkspace <Table Workspaces>` for the whole instrument. The last line of
+*corelli_moderator.csv*, *corelli_sample-position.csv*, and each of *corelli_bankXXX.csv* is
+collected, the day-stamp stripped, and lines are gathered into file *corelli_instrument_20201025.csv*,
+bearing in mind that 20201025 is the day-stamp of our recent calibration. The header for this file is:
 
 ```
 # ComponentName, Xposition, Yposition, Zposition, XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle
 ```
-The name of the file should be output in the workbench logger.
+
+and then we have one line for each instrument component.
 
 
 Usage
