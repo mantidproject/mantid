@@ -184,6 +184,8 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
 
   setupData();
 
+  const double HKL_TOLERANCE{0.15};
+
   std::shared_ptr<API::Workspace> cloned = m_workspace->clone();
   moveDetector(xshift, yshift, zshift, xrotate, yrotate, zrotate, scalex,
                scaley, m_bank, cloned);
@@ -195,20 +197,25 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
   alg->setChild(true);
   alg->setLogging(false);
   alg->setProperty("PeaksWorkspace", inputP);
-  alg->setProperty("Tolerance", 0.15);
+  alg->setProperty("Tolerance", HKL_TOLERANCE);
   alg->execute();
+
   auto inst = inputP->getInstrument();
   Geometry::OrientedLattice lattice =
       inputP->mutableSample().getOrientedLattice();
   for (int i = 0; i < inputP->getNumberPeaks(); i++) {
     const DataObjects::Peak &peak = inputP->getPeak(i);
-    V3D hkl =
+    const V3D hkl =
         V3D(boost::math::iround(peak.getH()), boost::math::iround(peak.getK()),
             boost::math::iround(peak.getL()));
     V3D Q2 = lattice.qFromHKL(hkl);
-    try {
-      if (hkl == V3D(0, 0, 0))
-        throw std::runtime_error("unindexed peak");
+
+    if (hkl == V3D(0, 0, 0)){
+      // set penalty for unindexed peaks greater than tolerance
+      out[i * 3]     = 2*HKL_TOLERANCE;
+      out[i * 3 + 1] = 2*HKL_TOLERANCE;
+      out[i * 3 + 2] = 2*HKL_TOLERANCE;
+    } else {
       DataObjects::Peak peak2(inst, peak.getDetectorID(), peak.getWavelength(),
                               hkl, peak.getGoniometerMatrix());
       Units::Wavelength wl;
@@ -217,14 +224,9 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
                     peak2.getInitialEnergy(), 0.0);
       peak2.setWavelength(wl.singleFromTOF(peak.getTOF() + tShift));
       V3D Q3 = peak2.getQSampleFrame();
-      out[i * 3] = Q3[0] - Q2[0];
-      out[i * 3 + 1] = Q3[1] - Q2[1];
-      out[i * 3 + 2] = Q3[2] - Q2[2];
-    } catch (std::runtime_error &) {
-      // set penalty for unindexed peaks greater than tolerance
-      out[i * 3] = 0.15;
-      out[i * 3 + 1] = 0.15;
-      out[i * 3 + 2] = 0.15;
+      out[i * 3]     = std:abs(Q3[0] - Q2[0]);
+      out[i * 3 + 1] = std:abs(Q3[1] - Q2[1]);
+      out[i * 3 + 2] = std:abs(Q3[2] - Q2[2]);
     }
   }
 }
