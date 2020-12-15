@@ -108,6 +108,9 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
   const auto l2 = m_spectrumInfo->l2(wsIndex);
   const auto twoTheta = m_spectrumInfo->twoTheta(wsIndex);
   const auto [emode, efixed] = efixedAt(wsIndex);
+  std::vector<int> warnDets;
+  const auto [difa, difc, tzero] =
+      m_spectrumInfo->diffractometerConstants(wsIndex, warnDets);
 
   double tof(0.0);
   const auto &unitFactory = UnitFactory::Instance();
@@ -119,7 +122,10 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
     try {
       tof = m_xunit->convertSingleToTOF(
           x, l1, l2, twoTheta, emode,
-          {{UnitConversionParameters::efixed, efixed}});
+          {{UnitConversionParameters::efixed, efixed},
+           {UnitConversionParameters::difa, difa},
+           {UnitConversionParameters::difc, difc},
+           {UnitConversionParameters::tzero, tzero}});
       info->setValue(infoIndex, defaultFormat(tof));
       ++infoIndex;
     } catch (std::exception &exc) {
@@ -138,7 +144,10 @@ void ImageInfoModelMatrixWS::setUnitsInfo(ImageInfoModel::ImageInfo *info,
         // the final parameter is unused and a relic
         const auto unitValue = unit->convertSingleFromTOF(
             tof, l1, l2, twoTheta, emode,
-            {{UnitConversionParameters::efixed, efixed}});
+            {{UnitConversionParameters::efixed, efixed},
+             {UnitConversionParameters::difa, difa},
+             {UnitConversionParameters::difc, difc},
+             {UnitConversionParameters::tzero, tzero}});
         info->setValue(infoIndex, defaultFormat(unitValue));
       } catch (std::exception &exc) {
         if (g_log.is(Logger::Priority::PRIO_DEBUG))

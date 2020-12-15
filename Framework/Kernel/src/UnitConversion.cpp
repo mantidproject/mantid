@@ -57,8 +57,9 @@ double UnitConversion::run(const std::string &src, const std::string &dest,
  * @param l2 ::       The sample-detector distance (in metres)
  * @param theta :: The scattering angle (in radians)
  * @param emode ::    The energy mode enumeration
- * @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
- * meV)
+ * @param params ::  Map containing optional parameters eg
+ *                   Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+ *                   Delta (not currently used)
  * @return The value converted to the destination unit
  */
 double UnitConversion::run(Unit &srcUnit, Unit &destUnit, const double srcValue,
@@ -99,8 +100,9 @@ double UnitConversion::convertQuickly(const double srcValue,
  * @param l2 ::       The sample-detector distance (in metres)
  * @param theta :: The scattering angle (in radians)
  * @param emode ::    The energy mode enumeration
- * @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
- * meV)
+ * @param params ::  Map containing optional parameters eg
+ *                   Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+ *                   Delta (not currently used)
  * @return The value converted to the destination unit
  */
 double UnitConversion::convertViaTOF(Unit &srcUnit, Unit &destUnit,
@@ -126,7 +128,6 @@ double UnitConversion::convertViaTOF(Unit &srcUnit, Unit &destUnit,
         std::to_string(emode));
   };
 
-  const double unused(0.0);
   const double tof =
       srcUnit.convertSingleToTOF(srcValue, l1, l2, theta, emodeAsInt, params);
   return destUnit.convertSingleFromTOF(tof, l1, l2, theta, emodeAsInt, params);

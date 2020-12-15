@@ -10,7 +10,6 @@
 #include "MantidAPI/IEventList.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Run.h"
-#include "MantidAPI/SpectrumInfo.h"
 #include "MantidAPI/TableRow.h"
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -141,11 +140,12 @@ public:
 
     // convert the bits that matter to TOF
     Kernel::Units::dSpacing dSpacingUnit;
-    dSpacingUnit.toTOF(inTofPos, std::vector<double>{}, -1, -1, -1, 0,
+    std::vector<double> yunused;
+    dSpacingUnit.toTOF(inTofPos, yunused, -1, -1, -1, 0,
                        {{Kernel::UnitConversionParameters::difa, difa},
                         {Kernel::UnitConversionParameters::difc, difc},
                         {Kernel::UnitConversionParameters::tzero, tzero}});
-    dSpacingUnit.toTOF(inTofWindows, std::vector<double>{}, -1, -1, -1, 0,
+    dSpacingUnit.toTOF(inTofWindows, yunused, -1, -1, -1, 0,
                        {{Kernel::UnitConversionParameters::difa, difa},
                         {Kernel::UnitConversionParameters::difc, difc},
                         {Kernel::UnitConversionParameters::tzero, tzero}});
@@ -683,8 +683,8 @@ void PDCalibration::exec() {
         // Find d-spacing using the GSAS formula with optimized difc, difa, t0
         // for the TOF of the current peak's center.
         const double dspacing = dSpacingUnit.singleFromTOF(tof_vec_full[i]);
-        // `temp` is residual between the nominal position in d-spacing for
-        // the current peak, and the fitted position in d-spacing
+        // `temp` is residual between the nominal position in d-spacing for the
+        // current peak, and the fitted position in d-spacing
         const double temp = m_peaksInDspacing[i] - dspacing;
         chisq += (temp * temp);
         m_peakPositionTable->cell<double>(rowIndexOutputPeaks, i + 1) =
@@ -1230,7 +1230,7 @@ void PDCalibration::createCalTableNew() {
   setProperty("OutputCalibrationTable", m_calibrationTable);
 
   const detid2index_map allDetectors =
-      difcWS->getDetectorIDToWorkspaceIndexMap(false);
+      difcWS->getDetectorIDToWorkspaceIndexMap(true);
 
   // copy over the values
   auto it = allDetectors.begin();

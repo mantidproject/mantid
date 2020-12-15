@@ -82,10 +82,9 @@ public:
    *  @param _twoTheta :: The scattering angle (in radians)
    *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2)
-   * (in
-   * meV)
-   *  @param _delta ::    Not currently used
+   *  @param params ::  Map containing optional parameters eg
+   *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+   *                    Delta (not currently used)
    */
   void
   toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
@@ -96,7 +95,7 @@ public:
   void toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
              const double &_l1, const double &_l2, const double &_twoTheta,
              const int &_emode,
-             std::map<UnitConversionParameters, double> &params);
+             const std::map<UnitConversionParameters, double> &params);
 
   /** Convert from the concrete unit to time-of-flight. TOF is in microseconds.
    *  @param xvalue ::   A single X-value to convert
@@ -105,9 +104,9 @@ public:
    *  @param twoTheta :: The scattering angle (in radians)
    *  @param emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
-   * meV)
-   *  @param delta ::    Not currently used
+   *  @param params ::  Map containing optional parameters eg
+   *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+   *                    Delta (not currently used)
    *  @return the value in TOF units.
    */
   double
@@ -124,10 +123,9 @@ public:
    *  @param _twoTheta :: The scattering angle (in radians)
    *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2)
-   * (in
-   * meV)
-   *  @param _delta ::    Not currently used
+   *  @param params ::  Map containing optional parameters eg
+   *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+   *                    Delta (not currently used)
    */
   void fromTOF(
       std::vector<double> &xdata, std::vector<double> &ydata, const double &_l1,
@@ -138,7 +136,7 @@ public:
   void fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                const double &_l1, const double &_l2, const double &_twoTheta,
                const int &_emode,
-               std::map<UnitConversionParameters, double> &params);
+               const std::map<UnitConversionParameters, double> &params);
 
   /** Convert from the time-of-flight to the concrete unit. TOF is in
    * microseconds.
@@ -148,9 +146,9 @@ public:
    *  @param twoTheta :: The scattering angle (in radians)
    *  @param emode ::    The energy mode (0=elastic, 1=direct geometry,
    * 2=indirect geometry)
-   *  @param efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
-   * meV)
-   *  @param delta ::    Not currently used
+   *  @param params ::  Map containing optional parameters eg
+   *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+   *                    Delta (not currently used)
    *  @return the value in these units.
    */
   double convertSingleFromTOF(
@@ -171,9 +169,10 @@ public:
    *                      Diffractometer constants (DIFA, DIFC, TZERO)
    *                      Delta: unused
    */
-  void initialize(const double &_l1, const double &_l2, const double &_twoTheta,
-                  const int &_emode,
-                  std::map<UnitConversionParameters, double> params = {});
+  void
+  initialize(const double &_l1, const double &_l2, const double &_twoTheta,
+             const int &_emode,
+             const std::map<UnitConversionParameters, double> &params = {});
 
   /** Finalize the initialization. This will be overridden by subclasses as
    * needed. */
@@ -213,8 +212,8 @@ protected:
                      const double &power = 1.0) const;
 
   virtual void
-  validateExtraParams(int emode,
-                      std::map<UnitConversionParameters, double> &params);
+  validateExtraParams(const int emode,
+                      const std::map<UnitConversionParameters, double> &params);
 
   /// The unit values have been initialized
   bool initialized;
@@ -343,7 +342,8 @@ public:
 
 protected:
   void validateExtraParams(
-      int emode, std::map<UnitConversionParameters, double> &params) override;
+      const int emode,
+      const std::map<UnitConversionParameters, double> &params) override;
   double efixed;
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorTo;   ///< Constant factor for to conversion
@@ -423,7 +423,8 @@ public:
 
 protected:
   void validateExtraParams(
-      int emode, std::map<UnitConversionParameters, double> &params) override;
+      const int emode,
+      const std::map<UnitConversionParameters, double> &params) override;
   double difa;
   double difc;
   double tzero;
@@ -581,7 +582,8 @@ public:
 
 protected:
   void validateExtraParams(
-      int emode, std::map<UnitConversionParameters, double> &params) override;
+      const int emode,
+      const std::map<UnitConversionParameters, double> &params) override;
   double efixed;
   double sfpTo;      ///< Extra correction factor in to conversion
   double factorTo;   ///< Constant factor for to conversion

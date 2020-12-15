@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -45,13 +46,12 @@ public:
 
     auto pSourceWSUnit = UnitFactory::Instance().create("Wavelength");
     auto pWSUnit = UnitFactory::Instance().create("MomentumTransfer");
-    double delta;
     double L1(10), L2(10), TwoTheta(0.1), efix(10);
     int emode(0);
-    TS_ASSERT_THROWS_NOTHING(
-        pWSUnit->initialize(L1, L2, TwoTheta, emode, efix, delta));
-    TS_ASSERT_THROWS_NOTHING(
-        pSourceWSUnit->initialize(L1, L2, TwoTheta, emode, efix, delta));
+    TS_ASSERT_THROWS_NOTHING(pWSUnit->initialize(
+        L1, L2, TwoTheta, emode, {{UnitConversionParameters::efixed, efix}}));
+    TS_ASSERT_THROWS_NOTHING(pSourceWSUnit->initialize(
+        L1, L2, TwoTheta, emode, {{UnitConversionParameters::efixed, efix}}));
 
     double X0(5);
     double tof(0);
@@ -287,6 +287,13 @@ public:
     ws2D = WorkspaceCreationHelper::createProcessedInelasticWS(
         L2, polar, azimutal, numBins, -1, 3, 3);
 
-    detLoc = WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(ws2D);
+    auto ppDets_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "PreprocessDetectorsToMD");
+    ppDets_alg->initialize();
+    ppDets_alg->setChild(true);
+    ppDets_alg->setProperty("InputWorkspace", ws2D);
+    ppDets_alg->setProperty("OutputWorkspace", "UnitsConversionHelperTableWs");
+    ppDets_alg->execute();
+    detLoc = ppDets_alg->getProperty("OutputWorkspace");
   }
 };

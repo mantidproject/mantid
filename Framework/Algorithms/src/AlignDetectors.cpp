@@ -86,6 +86,16 @@ private:
         rows.insert(rowIter->second);
       }
     }
+    if (rows.empty()) {
+      std::string detIdsStr = std::accumulate(
+          std::begin(detIds), std::end(detIds), std::string{},
+          [](const std::string &a, const detid_t &b) {
+            return a.empty() ? std::to_string(b) : a + ',' + std::to_string(b);
+          });
+      throw Exception::NotFoundError(
+          "None of the detectors were found in the calibration table",
+          detIdsStr);
+    }
     return rows;
   }
 
@@ -276,23 +286,28 @@ void AlignDetectors::align(const ConversionFactors &converter,
       auto [difc, difa, tzero] =
           converter.getDiffConstants(spec.getDetectorIDs());
 
-      std::vector<double> x{outputWS->x(i).front(), outputWS->x(i).back()};
+      auto &x = outputWS->dataX(i);
       Kernel::Units::dSpacing dSpacingUnit;
+      std::vector<double> yunused;
       dSpacingUnit.fromTOF(
-          x, std::vector<double>{}, -1., -1., -1., 0,
+          x, yunused, -1., -1., -1., 0,
           ExtraParametersMap{{Kernel::UnitConversionParameters::difa, difa},
                              {Kernel::UnitConversionParameters::difc, difc},
                              {Kernel::UnitConversionParameters::tzero, tzero}});
 
       if (eventW) {
         Kernel::Units::TOF tofUnit;
+        tofUnit.initialize(0, 0, 0, 0);
         // EventWorkspace part, modifying the EventLists.
         eventW->getSpectrum(i).convertUnitsViaTof(&tofUnit, &dSpacingUnit);
       }
-    } catch (const Exception::NotFoundError &) {
-      // Zero the data in this case
-      outputWS->setHistogram(i, BinEdges(outputWS->x(i).size()),
-                             Counts(outputWS->y(i).size()));
+    } catch (const std::runtime_error &) {
+      if (!eventW) {
+        // Zero the data in this case (detectors not found in cal table or
+        // conversion fails)
+        outputWS->setHistogram(i, BinEdges(outputWS->x(i).size()),
+                               Counts(outputWS->y(i).size()));
+      }
     }
     progress.report();
     PARALLEL_END_INTERUPT_REGION

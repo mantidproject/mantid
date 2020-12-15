@@ -161,6 +161,9 @@ PreprocessDetectorsToMD::createTableWorkspace(
   m_getEFixed = this->getProperty("GetEFixed");
   if (m_getEFixed)
     targWS->addColumn("float", "eFixed");
+  targWS->addColumn("double", "DIFA");
+  targWS->addColumn("double", "DIFC");
+  targWS->addColumn("double", "TZERO");
 
   // will see about that
   // sin^2(Theta)
@@ -220,6 +223,9 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
   auto &TwoTheta = targWS->getColVector<double>("TwoTheta");
   auto &Azimuthal = targWS->getColVector<double>("Azimuthal");
   auto &detDir = targWS->getColVector<Kernel::V3D>("DetDirections");
+  auto &DIFA = targWS->getColVector<double>("DIFA");
+  auto &DIFC = targWS->getColVector<double>("DIFC");
+  auto &TZERO = targWS->getColVector<double>("TZERO");
 
   // Efixed; do we need one and does one exist?
   auto Efi = targWS->getLogs()->getPropertyValueAsType<double>("Ei");
@@ -271,6 +277,13 @@ void PreprocessDetectorsToMD::processDetectorsPositions(
     double azim = spDet.getPhi();
     TwoTheta[liveDetectorsCount] = polar;
     Azimuthal[liveDetectorsCount] = azim;
+
+    std::vector<int> warningDets;
+    auto [difaValue, difcValue, tzeroValue] =
+        spectrumInfo.diffractometerConstants(i, warningDets);
+    DIFA[liveDetectorsCount] = difaValue;
+    DIFC[liveDetectorsCount] = difcValue;
+    TZERO[liveDetectorsCount] = tzeroValue;
 
     double sPhi = sin(polar);
     double ez = cos(polar);

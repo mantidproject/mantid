@@ -755,7 +755,9 @@ public:
    * sorting flips the direction
    */
   void do_testExecEvent_RemainsSorted(EventSortType sortType,
-                                      const std::string &targetUnit) {
+                                      const std::string &targetUnit,
+                                      const size_t neventsExpectedBefore,
+                                      const size_t neventsExpectedAfter) {
     EventWorkspace_sptr ws =
         WorkspaceCreationHelper::createEventWorkspaceWithFullInstrument(1, 10,
                                                                         false);
@@ -766,7 +768,7 @@ public:
       // Only threadsafe if all the event lists are sorted
       TS_ASSERT(ws->threadSafe());
     }
-    TS_ASSERT_EQUALS(ws->getNumberEvents(), 100 * 200);
+    TS_ASSERT_EQUALS(ws->getNumberEvents(), neventsExpectedBefore);
 
     ConvertUnits conv;
     conv.initialize();
@@ -782,7 +784,7 @@ public:
     TS_ASSERT(out);
     if (!out)
       return;
-    TS_ASSERT_EQUALS(out->getNumberEvents(), 100 * 200);
+    TS_ASSERT_EQUALS(out->getNumberEvents(), neventsExpectedAfter);
 
     EventList &el = out->getSpectrum(0);
     TS_ASSERT(el.getSortType() == sortType);
@@ -810,19 +812,21 @@ public:
   }
 
   void testExecEvent_RemainsSorted_TOF() {
-    do_testExecEvent_RemainsSorted(TOF_SORT, "dSpacing");
+    do_testExecEvent_RemainsSorted(TOF_SORT, "dSpacing", 100 * 200, 99 * 200);
   }
 
   void testExecEvent_RemainsSorted_Pulsetime() {
-    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "dSpacing");
+    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "dSpacing", 100 * 200,
+                                   99 * 200);
   }
 
   void testExecEvent_RemainsSorted_TOF_to_Energy() {
-    do_testExecEvent_RemainsSorted(TOF_SORT, "Energy");
+    do_testExecEvent_RemainsSorted(TOF_SORT, "Energy", 100 * 200, 100 * 200);
   }
 
   void testExecEvent_RemainsSorted_Pulsetime_to_Energy() {
-    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "Energy");
+    do_testExecEvent_RemainsSorted(PULSETIME_SORT, "Energy", 100 * 200,
+                                   100 * 200);
   }
 
   void testDeltaEFailDoesNotAlterInPlaceWorkspace() {

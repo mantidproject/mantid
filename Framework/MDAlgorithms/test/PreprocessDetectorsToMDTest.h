@@ -55,7 +55,7 @@ public:
     TS_ASSERT(tws);
 
     TS_ASSERT_EQUALS(4, tws->rowCount());
-    TS_ASSERT_EQUALS(8, tws->columnCount());
+    TS_ASSERT_EQUALS(11, tws->columnCount());
   }
 
   void testPreprocessDetectors() {

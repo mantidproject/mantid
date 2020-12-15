@@ -140,13 +140,13 @@ public:
     auto backgroundStrategy = std::make_unique<AbsoluteBackgroundStrategy>(3.);
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            1 /*nhist*/, 15 /*nbins*/);
-    auto &mutableY = workspace->mutableY(0);
+            2 /*nhist*/, 15 /*nbins*/);
+    const int workspaceIndex = 1;
+    auto &mutableY = workspace->mutableY(workspaceIndex);
     doAddDoublePeakToData(mutableY);
 
-    const int workspaceIndex = 0;
-    const auto &x = workspace->x(0);
-    const auto &y = workspace->y(0);
+    const auto &x = workspace->x(workspaceIndex);
+    const auto &y = workspace->y(workspaceIndex);
     const auto &spectrumInfo = workspace->spectrumInfo();
 
     // WHEN
@@ -398,13 +398,13 @@ private:
     // GIVEN
     auto workspace =
         WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(
-            1 /*nhist*/, 15 /*nbins*/);
-    auto &mutableY = workspace->mutableY(0);
+            2 /*nhist*/, 15 /*nbins*/);
+    const int workspaceIndex = 1;
+    auto &mutableY = workspace->mutableY(workspaceIndex);
     doAddDoublePeakToData(mutableY);
 
-    const int workspaceIndex = 0;
-    const auto &x = workspace->x(0);
-    const auto &y = workspace->y(0);
+    const auto &x = workspace->x(workspaceIndex);
+    const auto &y = workspace->y(workspaceIndex);
     const auto &spectrumInfo = workspace->spectrumInfo();
 
     // WHEN

@@ -6,6 +6,7 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidGeometry/Instrument.h"
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/DeltaEMode.h"
@@ -43,9 +44,14 @@ createTestTransform(const double efixed, const DeltaEMode::Type emode) {
   wsDescription.setMinMax({-100, -100, -100, -100}, {100, 100, 100, 100});
   wsDescription.buildFromMatrixWS(indirectInelasticWS, q3dTransform.transfID(),
                                   DeltaEMode::asString(emode), {});
-  wsDescription.m_PreprDetTable =
-      WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(
-          indirectInelasticWS);
+  auto ppDets_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+      "PreprocessDetectorsToMD");
+  ppDets_alg->initialize();
+  ppDets_alg->setChild(true);
+  ppDets_alg->setProperty("InputWorkspace", indirectInelasticWS);
+  ppDets_alg->setProperty("OutputWorkspace", "UnitsConversionHelperTableWs");
+  ppDets_alg->execute();
+  wsDescription.m_PreprDetTable = ppDets_alg->getProperty("OutputWorkspace");
   q3dTransform.initialize(wsDescription);
 
   return std::make_tuple(q3dTransform, wsDescription);
@@ -147,9 +153,14 @@ public:
         Q3DTransf.initialize(wsDescription), const std::runtime_error &)
 
     // let's preprocess detectors positions to go any further
-    wsDescription.m_PreprDetTable =
-        WorkspaceCreationHelper::buildPreprocessedDetectorsWorkspace(
-            elasticTestWS);
+    auto ppDets_alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(
+        "PreprocessDetectorsToMD");
+    ppDets_alg->initialize();
+    ppDets_alg->setChild(true);
+    ppDets_alg->setProperty("InputWorkspace", elasticTestWS);
+    ppDets_alg->setProperty("OutputWorkspace", "UnitsConversionHelperTableWs");
+    ppDets_alg->execute();
+    wsDescription.m_PreprDetTable = ppDets_alg->getProperty("OutputWorkspace");
     // let's set 2Theta=0 for simplicity and violate const correctness for
     // testing purposes here
     auto &TwoTheta = const_cast<std::vector<double> &>(

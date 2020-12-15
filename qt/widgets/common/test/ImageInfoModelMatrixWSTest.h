@@ -169,7 +169,7 @@ public:
     const auto expectedUnitsNoGroups =
         expectedUnitsInfo("2.6862", "14.1501", "40.1274", "0.1566", "-38.6633");
     const auto expectedUnitsWithGroup =
-        expectedUnitsInfo("2.6860", "14.1541", "34.4103", "0.1826", "-38.6614");
+        expectedUnitsInfo("2.6860", "14.1541", "34.4100", "0.1826", "-38.6614");
     for (const auto &paramName : {"Efixed", "EFixed-val"}) {
       bool includeGrouping(false);
       const auto expectedInfoNoGroups = expectedCommonTOFInfo()

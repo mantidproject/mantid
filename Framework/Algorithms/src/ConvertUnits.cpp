@@ -407,14 +407,13 @@ void ConvertUnits::createDetectorIdLogMessages(
       detIDstring);
 }
 
-/** Get the L2, theta and efixed values for a workspace index
+/** Get the detector values relevant to unit conversion for a workspace index
  * @param spectrumInfo :: SpectrumInfo of the workspace
  * @param outputUnit :: The output unit
  * @param emode :: The energy mode
  * @param ws :: The workspace
  * @param signedTheta :: Return twotheta with sign or without
  * @param wsIndex :: The workspace index
- * @param efixed :: the returned fixed energy
  * @param l2 :: The returned sample - detector distance
  * @param twoTheta :: the returned two theta angle
  * @param pmap :: a map containing optional unit conversion parameters eg efixed
@@ -458,10 +457,10 @@ bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
       }
       // Non-unique detector (i.e., DetectorGroup): use single provided value
     }
-    if (emode == 0) { // elastic
-      auto detids = ws.getSpectrum(wsIndex).getDetectorIDs();
-      if (detids.size() > 0) {
-        std::vector<detid_t> warnDetIds;
+    auto detids = ws.getSpectrum(wsIndex).getDetectorIDs();
+    if (detids.size() > 0) {
+      std::vector<detid_t> warnDetIds;
+      try {
         auto [difa, difc, tzero] =
             ws.spectrumInfo().diffractometerConstants(wsIndex, warnDetIds);
         pmap[UnitConversionParameters::difa] = difa;
@@ -470,6 +469,12 @@ bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
         if (warnDetIds.size() > 0) {
           createDetectorIdLogMessages(warnDetIds, wsIndex);
         }
+        if ((outputUnit.unitID().find("dSpacing") != std::string::npos) &&
+            (difa == 0) && (difc == 0)) {
+          return false;
+        }
+      } catch (const std::runtime_error &e) {
+        g_log.warning(e.what());
       }
     }
   } else {
@@ -478,6 +483,11 @@ bool ConvertUnits::getDetectorValues(const API::SpectrumInfo &spectrumInfo,
     // Energy transfer is meaningless for a monitor, so set l2 to 0.
     if (outputUnit.unitID().find("DeltaE") != std::string::npos) {
       l2 = 0.0;
+    }
+    pmap[UnitConversionParameters::difc] = 0;
+    // can't do a conversion to d spacing with theta=0
+    if (outputUnit.unitID().find("dSpacing") != std::string::npos) {
+      return false;
     }
   }
   return true;

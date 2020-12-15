@@ -662,7 +662,9 @@ Peak PeakHKLErrors::createNewPeak(const Geometry::IPeak &peak_old,
 
   Wavelength wl;
 
-  wl.initialize(L0, peak.getL2(), peak.getScattering(), 0);
+  wl.initialize(
+      L0, peak.getL2(), peak.getScattering(), 0,
+      {{UnitConversionParameters::efixed, peak_old.getInitialEnergy()}});
 
   peak.setWavelength(wl.singleFromTOF(T));
   peak.setIntensity(peak_old.getIntensity());

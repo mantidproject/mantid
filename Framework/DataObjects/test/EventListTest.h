@@ -1486,8 +1486,8 @@ public:
   void test_convertUnitsViaTof_allTypes() {
     DummyUnit1 fromUnit;
     DummyUnit2 toUnit;
-    fromUnit.initialize(1, 2, 3, 4, 5, 6);
-    toUnit.initialize(1, 2, 3, 4, 5, 6);
+    fromUnit.initialize(1, 2, 3, 4);
+    toUnit.initialize(1, 2, 3, 4);
     // Go through each possible EventType as the input
     for (int this_type = 0; this_type < 3; this_type++) {
       this->fake_uniform_data();

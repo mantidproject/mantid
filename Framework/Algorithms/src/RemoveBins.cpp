@@ -299,6 +299,9 @@ void RemoveBins::transformRangeUnit(const int index, double &startX,
  *  @param l1 ::       Returns the source-sample distance
  *  @param l2 ::       Returns the sample-detector distance
  *  @param twoTheta :: Returns the detector's scattering angle
+ *  @param difa :: Returns the detector's difa parameter (diffraction)
+ *  @param difc :: Returns the detector's difc parameter (diffraction)
+ *  @param tzero :: Returns the detector's tzero parameter (diffraction)
  */
 void RemoveBins::calculateDetectorPosition(const int index, double &l1,
                                            double &l2, double &twoTheta,

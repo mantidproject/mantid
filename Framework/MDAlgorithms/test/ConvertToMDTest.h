@@ -187,8 +187,8 @@ public:
     pAlg->setPropertyValue("MaxValues", " 10,20,40");
     pAlg->setRethrows(true);
     TS_ASSERT_THROWS_NOTHING(pAlg->execute());
-    checkHistogramsHaveBeenStored("WS3DmodQ", 7000, 6489.5591101441796,
-                                  7300.7539989122024);
+    checkHistogramsHaveBeenStored("WS3DmodQ", 7000, 6489.55858391694,
+                                  7300.75340690656);
 
     auto outWS =
         AnalysisDataService::Instance().retrieveWS<IMDWorkspace>("WS3DmodQ");

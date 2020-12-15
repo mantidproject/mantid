@@ -248,7 +248,7 @@ double RemoveLowResTOF::calcTofMin(const std::size_t workspaceIndex,
 
   double tmin = 0.;
   if (isEmpty(m_wavelengthMin)) {
-    double dspmap = spectrumInfo.difcUncalibrated(workspaceIndex);
+    double dspmap = 1. / spectrumInfo.difcUncalibrated(workspaceIndex);
 
     // this is related to the reference tof
     double sqrtdmin =

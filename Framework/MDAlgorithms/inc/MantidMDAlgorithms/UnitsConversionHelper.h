@@ -48,12 +48,15 @@ class DLLExport UnitsConversionHelper {
   //  these variables needed and used for conversion through TOF
   int m_Emode;
 
-  double m_L1, m_Efix, m_TwoTheta, m_L2;
+  double m_L1, m_Efix, m_TwoTheta, m_L2, m_DIFA, m_DIFC, m_TZERO;
   std::vector<double> const *m_pTwoThetas;
   std::vector<double> const *m_pL2s;
   // pointer to detector specific input energy (eFixed) defined for indirect
   // instruments;
   float *m_pEfixedArray;
+  std::vector<double> const *m_pDIFAs;
+  std::vector<double> const *m_pDIFCs;
+  std::vector<double> const *m_pTZEROs;
 
 public:
   UnitsConversionHelper();

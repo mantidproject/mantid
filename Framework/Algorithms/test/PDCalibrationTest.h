@@ -156,9 +156,10 @@ public:
   void test_exec_difc() {
     // setup the peak postions based on transformation from detID=155
     using Mantid::Kernel::UnitConversionParameters;
-    std::vector<double> dValues(PEAK_TOFS.size());
+    std::vector<double> dValues(PEAK_TOFS);
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
-    dSpacingUnit.fromTOF(dValues, std::vector<double>{}, -1., -1., -1., 0,
+    std::vector<double> unusedy;
+    dSpacingUnit.fromTOF(dValues, unusedy, -1., -1., -1., 0,
                          Mantid::Kernel::ExtraParametersMap{
                              {UnitConversionParameters::difc, DIFC_155}});
 
@@ -218,9 +219,10 @@ public:
     using Mantid::Kernel::UnitConversionParameters;
     // setup the peak postions based on transformation from detID=155
     const double TZERO = 20.;
-    std::vector<double> dValues(PEAK_TOFS.size());
+    std::vector<double> dValues(PEAK_TOFS);
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
-    dSpacingUnit.fromTOF(dValues, std::vector<double>{}, -1., -1., -1., 0,
+    std::vector<double> unusedy;
+    dSpacingUnit.fromTOF(dValues, unusedy, -1., -1., -1., 0,
                          Mantid::Kernel::ExtraParametersMap{
                              {UnitConversionParameters::difc, DIFC_155},
                              {UnitConversionParameters::tzero, TZERO}});
@@ -285,9 +287,10 @@ public:
     // setup the peak postions based on transformation from detID=155
     // allow refining DIFA, but don't set the transformation to require it
     const double TZERO = 20.;
-    std::vector<double> dValues(PEAK_TOFS.size());
+    std::vector<double> dValues(PEAK_TOFS);
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
-    dSpacingUnit.fromTOF(dValues, std::vector<double>{}, -1., -1., -1., 0,
+    std::vector<double> unusedy;
+    dSpacingUnit.fromTOF(dValues, unusedy, -1., -1., -1., 0,
                          Mantid::Kernel::ExtraParametersMap{
                              {UnitConversionParameters::difc, DIFC_155},
                              {UnitConversionParameters::tzero, TZERO}});
@@ -368,7 +371,8 @@ public:
     // setup the peak postions based on transformation from detID=155
     std::vector<double> dValues(PEAK_TOFS.size());
     Mantid::Kernel::Units::dSpacing dSpacingUnit;
-    dSpacingUnit.fromTOF(dValues, std::vector<double>{}, -1., -1., -1., 0,
+    std::vector<double> unusedy;
+    dSpacingUnit.fromTOF(dValues, unusedy, -1., -1., -1., 0,
                          Mantid::Kernel::ExtraParametersMap{
                              {UnitConversionParameters::difc, DIFC_155}});
     createSampleWS();

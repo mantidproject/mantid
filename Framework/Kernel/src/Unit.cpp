@@ -110,13 +110,13 @@ void Unit::addConversion(std::string to, const double &factor,
  *  @param _twoTheta :: The scattering angle (in radians)
  *  @param _emode ::    The energy mode (0=elastic, 1=direct geometry,
  *2=indirect geometry)
- *  @param _efixed ::   Value of fixed energy: EI (emode=1) or EF (emode=2) (in
- *meV)
- *  @param _delta ::    Not currently used
+ *  @param params ::  Map containing optional parameters eg
+ *                    Fixed energy: EI (emode=1) or EF (emode=2)(in meV)
+ *                    Delta (not currently used)
  */
 void Unit::initialize(const double &_l1, const double &_l2,
                       const double &_twoTheta, const int &_emode,
-                      ExtraParametersMap params) {
+                      const ExtraParametersMap &params) {
   l1 = _l1;
   l2 = _l2;
   twoTheta = _twoTheta;
@@ -128,7 +128,7 @@ void Unit::initialize(const double &_l1, const double &_l2,
 }
 
 void Unit::validateExtraParams(
-    int emode, std::map<UnitConversionParameters, double> &params) {}
+    const int, const std::map<UnitConversionParameters, double> &) {}
 
 //---------------------------------------------------------------------------------------
 /** Perform the conversion to TOF on a vector of data
@@ -145,7 +145,7 @@ void Unit::toTOF(
 
 void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                  const double &_l1, const double &_l2, const double &_twoTheta,
-                 const int &_emode, ExtraParametersMap &params) {
+                 const int &_emode, const ExtraParametersMap &params) {
   UNUSED_ARG(ydata);
   this->initialize(_l1, _l2, _twoTheta, _emode, params);
   size_t numX = xdata.size();
@@ -159,8 +159,7 @@ void Unit::toTOF(std::vector<double> &xdata, std::vector<double> &ydata,
 @param l2
 @param twoTheta
 @param emode
-@param efixed
-@param delta
+@param params (eg efixed or delta)
 */
 double Unit::convertSingleToTOF(
     const double xvalue, const double &l1, const double &l2,
@@ -185,7 +184,7 @@ void Unit::fromTOF(
 void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
                    const double &_l1, const double &_l2,
                    const double &_twoTheta, const int &_emode,
-                   ExtraParametersMap &params) {
+                   const ExtraParametersMap &params) {
   UNUSED_ARG(ydata);
   this->initialize(_l1, _l2, _twoTheta, _emode, params);
   size_t numX = xdata.size();
@@ -199,8 +198,7 @@ void Unit::fromTOF(std::vector<double> &xdata, std::vector<double> &ydata,
 @param l2
 @param twoTheta
 @param emode
-@param efixed
-@param delta
+@param params (eg efixed or delta)
 */
 double Unit::convertSingleFromTOF(
     const double xvalue, const double &l1, const double &l2,
@@ -321,8 +319,8 @@ double TOF::conversionTOFMax() const { return DBL_MAX; }
 DECLARE_UNIT(Wavelength)
 
 Wavelength::Wavelength()
-    : Unit(), sfpTo(DBL_MIN), factorTo(DBL_MIN), sfpFrom(DBL_MIN),
-      factorFrom(DBL_MIN), do_sfpFrom(false), efixed(0.) {
+    : Unit(), efixed(0.), sfpTo(DBL_MIN), factorTo(DBL_MIN), sfpFrom(DBL_MIN),
+      factorFrom(DBL_MIN), do_sfpFrom(false) {
   const double AngstromsSquared = 1e20;
   const double factor =
       (AngstromsSquared * PhysicalConstants::h * PhysicalConstants::h) /
@@ -336,7 +334,7 @@ Wavelength::Wavelength()
 const UnitLabel Wavelength::label() const { return Symbol::Angstrom; }
 
 void Wavelength::validateExtraParams(
-    int emode, std::map<UnitConversionParameters, double> &params) {
+    const int emode, const std::map<UnitConversionParameters, double> &params) {
   auto it = params.find(UnitConversionParameters::efixed);
   if ((emode != 0) && (it == params.end())) {
     throw std::runtime_error(
@@ -586,7 +584,7 @@ dSpacing::dSpacing() : Unit(), difa(0), difc(DBL_MIN), tzero(0) {
 }
 
 void dSpacing::validateExtraParams(
-    int emode, std::map<UnitConversionParameters, double> &params) {
+    const int, const std::map<UnitConversionParameters, double> &params) {
   auto it = params.find(UnitConversionParameters::difc);
   if (it == params.end()) {
     throw std::runtime_error(
@@ -680,7 +678,7 @@ double dSpacing::conversionTOFMax() const {
   } else {
     // no max so just pick value closest to DBL_MAX that works
     double TOFmax = singleToTOF(DBL_MAX);
-    if (isinf(TOFmax)) {
+    if (std::isinf(TOFmax)) {
       TOFmax = DBL_MAX;
     }
     return TOFmax;
@@ -1086,8 +1084,8 @@ DECLARE_UNIT(Momentum)
 const UnitLabel Momentum::label() const { return Symbol::InverseAngstrom; }
 
 Momentum::Momentum()
-    : Unit(), sfpTo(DBL_MIN), factorTo(DBL_MIN), sfpFrom(DBL_MIN),
-      factorFrom(DBL_MIN), do_sfpFrom(false), efixed(0.) {
+    : Unit(), efixed(0.), sfpTo(DBL_MIN), factorTo(DBL_MIN), sfpFrom(DBL_MIN),
+      factorFrom(DBL_MIN), do_sfpFrom(false) {
 
   const double AngstromsSquared = 1e20;
   const double factor =
@@ -1103,7 +1101,7 @@ Momentum::Momentum()
 }
 
 void Momentum::validateExtraParams(
-    int emode, std::map<UnitConversionParameters, double> &params) {
+    const int emode, const std::map<UnitConversionParameters, double> &params) {
   auto it = params.find(UnitConversionParameters::efixed);
   if ((emode != 0) && (it == params.end())) {
     throw std::runtime_error(

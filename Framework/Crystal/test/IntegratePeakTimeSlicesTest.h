@@ -115,7 +115,7 @@ public:
     std::vector<double> x;
     x.emplace_back(PeakTime);
 
-    wl.fromTOF(x, x, L1, L2, ScatAng, 0, 0, 0);
+    wl.fromTOF(x, x, L1, L2, ScatAng, 0);
     double wavelength = x[0];
 
     Peak peak(instP, pixelp->getID(), wavelength);
@@ -250,7 +250,7 @@ private:
     x.emplace_back(time);
     const auto ScatAng = detectorInfo.twoTheta(detInfoIndex) / 180 * M_PI;
 
-    Q.fromTOF(x, x, L1, L2, ScatAng, 0, 0, 0.0);
+    Q.fromTOF(x, x, L1, L2, ScatAng, 0);
 
     return x[0] / 2 / M_PI;
   }
