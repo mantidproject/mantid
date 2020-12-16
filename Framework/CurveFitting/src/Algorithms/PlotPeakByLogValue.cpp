@@ -261,13 +261,11 @@ void PlotPeakByLogValue::exec() {
                          outputConvolvedMembers, ifun, data, EMPTY_DBL(),
                          EMPTY_DBL(), exclude[i]);
     } else if (startX.size() == 1) {
-      fit =
-          runSingleFit(createFitOutput, outputCompositeMembers,
+      fit = runSingleFit(createFitOutput, outputCompositeMembers,
                          outputConvolvedMembers, ifun, data, startX[0], endX[0],
                          exclude[i]);
     } else {
-      fit =
-          runSingleFit(createFitOutput, outputCompositeMembers,
+      fit = runSingleFit(createFitOutput, outputCompositeMembers,
                          outputConvolvedMembers, ifun, data, startX[i], endX[i],
                          exclude[i]);
     }
@@ -543,10 +541,11 @@ std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
   return format;
 }
 
-std::vector<std::vector<double>> PlotPeakByLogValue::getExclude(size_t numSpectra) {
+std::vector<std::vector<double>>
+PlotPeakByLogValue::getExclude(size_t numSpectra) {
   std::vector<double> excludeList = getProperty("Exclude");
   std::vector<std::vector<double>> excludeVector;
-  for (size_t i = 0; i < numSpectra*2; i += 2) {
+  for (size_t i = 0; i < numSpectra * 2; i += 2) {
     if (i < excludeList.size()) {
       std::vector<double> excludePair = {excludeList[i], excludeList[i + 1]};
       excludeVector.push_back(std::vector<double>(excludePair));
