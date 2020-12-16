@@ -82,7 +82,6 @@ set(PUBLIC_TARGETS Python::NumPy ${BoostPython_LIBRARIES})
 if(${ENABLE_MANTIDPLOT} OR ${ENABLE_WORKBENCH})
 	list(APPEND PUBLIC_TARGETS Python::Python) 
 endif()
-message(STATUS "PUBLIC TARGETS ${PUBLIC_TARGETS}")
 # Dependencies
 target_link_libraries(
   ${_target_name}
