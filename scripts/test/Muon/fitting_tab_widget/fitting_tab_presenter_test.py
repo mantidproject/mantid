@@ -240,7 +240,7 @@ class FittingTabPresenterTest(unittest.TestCase):
     def test_on_function_structure_changed_updates_stored_fit_function_for_simultaneous_fit(self):
         self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry']
 
-        self.view.is_simul_fit = mock.MagicMock(return_value=True)
+        self.view.is_simul_fit = True
         self.view.function_browser.setFunction(EXAMPLE_MULTI_DOMAIN_FUNCTION)
 
         self.assertEqual(str(self.presenter._fit_function[0]), EXAMPLE_MULTI_DOMAIN_FUNCTION)
@@ -248,7 +248,7 @@ class FittingTabPresenterTest(unittest.TestCase):
     def test_updating_function_parameters_updates_relevant_stored_function_for_single_fit(self):
         self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                                         'MUSR22725; Group; fwd; Asymmetry']
-        self.view.is_simul_fit = mock.MagicMock(return_value=False)
+        self.view.is_simul_fit = False
         self.view.function_browser.setFunction(EXAMPLE_MULTI_DOMAIN_FUNCTION)
         self.view.parameter_display_combo.setCurrentIndex(2)
 
@@ -262,7 +262,7 @@ class FittingTabPresenterTest(unittest.TestCase):
     def test_updating_function_parameters_updates_relevant_stored_function_for_simul_fit(self):
         self.presenter.selected_data = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                                         'MUSR22725; Group; fwd; Asymmetry']
-        self.view.is_simul_fit = mock.MagicMock(return_value=True)
+        self.view.is_simul_fit = True
         self.view.function_browser.setFunction(EXAMPLE_MULTI_DOMAIN_FUNCTION)
         self.view.parameter_display_combo.setCurrentIndex(1)
         self.view.function_browser.setParameter('A', 3)
@@ -388,7 +388,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEqual(self.presenter.get_workspace_selected_list.call_count, 1)
 
     def test_update_selected_ws_guess_non(self):
-        self.view.is_simul_fit = mock.MagicMock(return_value=True)
+        self.view.is_simul_fit = True
         self.presenter.manual_selection_made = True
         self.presenter.update_selected_time_workspace_guess = mock.Mock()
         self.presenter.update_selected_frequency_workspace_guess = mock.Mock()
@@ -614,7 +614,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.tf_asymmetry_mode = True
         self.presenter._tf_asymmetry_mode = True
         self.view.tf_asymmetry_mode_checkbox.blockSignals(False)
-        self.view.is_simul_fit = mock.MagicMock(return_value=False)
+        self.view.is_simul_fit = False
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         self.presenter.model.convert_to_tf_function.return_value = fit_function
 
@@ -634,7 +634,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.view.tf_asymmetry_mode = True
         self.presenter._tf_asymmetry_mode = True
         self.view.tf_asymmetry_mode_checkbox.blockSignals(False)
-        self.view.is_simul_fit = mock.MagicMock(return_value=True)
+        self.view.is_simul_fit = True
         fit_function = FunctionFactory.createInitialized('name=GausOsc,A=0.2,Sigma=0.2,Frequency=0.1,Phi=0')
         self.presenter.model.convert_to_tf_function.return_value = fit_function
 
@@ -706,7 +706,7 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.presenter.model.update_model_fit_options.assert_called_once_with(fit_to_raw=True)
 
     def test_that_model_is_updated_when_new_data_is_loaded_in_simultaneous_mode(self):
-        self.view.is_simul_fit = mock.MagicMock(return_value=True)
+        self.view.is_simul_fit = True
 
         self.presenter.handle_new_data_loaded()
 
