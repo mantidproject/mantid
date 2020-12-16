@@ -86,7 +86,8 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
         CloneWorkspace(InputWorkspace='intermediateWavelengthScan', OutputWorkspace='intermediateWavelengthScan_clone')
         D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan_clone', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
-                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets=[3, 3, 0], ClearCache=True,
+                                 MaskedBinsRange=[-50, -25, 15],
+                                 MinimalDistanceBetweenPeaks=1.75, BankOffsets=[2, 3, 1], ClearCache=True,
                                  FittingMethod='Individual', FitOutputWorkspace=fit_output_workspace)
         self.assertTrue(path.exists(calibration_output_path))
         self.assertTrue(mtd['test_intermediateWavelength'])
@@ -103,7 +104,8 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
         CloneWorkspace(InputWorkspace='intermediateWavelengthScan', OutputWorkspace='intermediateWavelengthScan_clone')
         D7YIGPositionCalibration(InputWorkspace='intermediateWavelengthScan_clone', ApproximateWavelength=approximate_wavelength,
                                  YIGPeaksFile='D7_YIG_peaks.xml', CalibrationOutputFile=calibration_output_path,
-                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets=[3, 3, 0], ClearCache=True,
+                                 MaskedBinsRange=[-50, -25, 15],
+                                 MinimalDistanceBetweenPeaks=1.5, BankOffsets=[2, 3, 1], ClearCache=True,
                                  FittingMethod='Global', FitOutputWorkspace=fit_output_workspace)
         self.assertTrue(path.exists(calibration_output_path))
         self.assertTrue(mtd['test_intermediateWavelength_global'])
@@ -208,35 +210,21 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
         and indirectly checks whether individual and global methods provide consistent output."""
 
         if wavelength_mode == 'short':
-            LoadILLPolarizedDiffraction('403041', OutputWorkspace='output', PositionCalibration='YIGFile',
+            LoadILLPolarizedDiffraction('403041', OutputWorkspace='calibration_test', PositionCalibration='YIGFile',
                                         YIGFilename=ipf_name, ConvertToScatteringAngle=True, TransposeMonochromatic=True)
-            xAxisValues = mtd['output'].getItem(0).readX(0)
-            self.assertAlmostEqual(xAxisValues[0], 14.3, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[43], 56.8, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[44], 60.3, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[87], 102.6, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[88], 105.9, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[131], 148.6, delta=1e0)
         elif wavelength_mode == 'intermediate':
-            LoadILLPolarizedDiffraction('396831', OutputWorkspace='output', PositionCalibration='YIGFile',
+            LoadILLPolarizedDiffraction('396831', OutputWorkspace='calibration_test', PositionCalibration='YIGFile',
                                         YIGFilename=ipf_name, ConvertToScatteringAngle=True, TransposeMonochromatic=True)
-            xAxisValues = mtd['output'].getItem(0).readX(0)
-            self.assertAlmostEqual(xAxisValues[0], 12.7, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[43], 55.2, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[44], 60.2, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[87], 102.6, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[88], 106.0, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[131], 148.1, delta=1e0)
         elif wavelength_mode == 'long':
-            LoadILLPolarizedDiffraction('394882', OutputWorkspace='output', PositionCalibration='YIGFile',
+            LoadILLPolarizedDiffraction('394882', OutputWorkspace='calibration_test', PositionCalibration='YIGFile',
                                         YIGFilename=ipf_name, ConvertToScatteringAngle=True, TransposeMonochromatic=True)
-            xAxisValues = mtd['output'].getItem(0).readX(0)
-            self.assertAlmostEqual(xAxisValues[0], 13.9, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[43], 56.9, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[44], 60.2, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[87], 102.5, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[88], 106.1, delta=1e0)
-            self.assertAlmostEqual(xAxisValues[131], 148.9, delta=1e0)
+        xAxisValues = mtd['calibration_test'].getItem(0).readX(0)
+        self.assertAlmostEqual(xAxisValues[0], 14.3, delta=1e0)
+        self.assertAlmostEqual(xAxisValues[43], 56.8, delta=1e0)
+        self.assertAlmostEqual(xAxisValues[44], 60.3, delta=1e0)
+        self.assertAlmostEqual(xAxisValues[87], 102.6, delta=1e0)
+        self.assertAlmostEqual(xAxisValues[88], 105.9, delta=1e0)
+        self.assertAlmostEqual(xAxisValues[131], 148.6, delta=1e0)
         DeleteWorkspace(Workspace='output') #clean-up
 
     def runTest(self):
