@@ -14,6 +14,7 @@
 #include "IndirectFitDataPresenter.h"
 #include "IndirectFitDataView.h"
 #include "IndirectFittingModel.h"
+#include "ParameterEstimation.h"
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidKernel/WarningSuppressions.h"
@@ -102,7 +103,9 @@ public:
 
   MOCK_CONST_METHOD0(isMultiFit, bool());
   MOCK_CONST_METHOD0(numberOfWorkspaces, TableDatasetIndex());
-
+  MOCK_CONST_METHOD1(getDataForParameterEstimation,
+                     DataForParameterEstimationCollection(
+                         const EstimationDataSelector &selector));
   MOCK_METHOD1(addWorkspace, void(std::string const &workspaceName));
   MOCK_METHOD2(addWorkspace, void(std::string const &workspaceName, std::string const &spectra));
 
@@ -115,6 +118,39 @@ private:
     return "";
   };
 };
+MATCHER_P(NoCheck, selector, "") { return arg != selector; }
+
+EstimationDataSelector getEstimationDataSelector() {
+  return
+      [](const std::vector<double> &x, const std::vector<double> &y,
+         const std::pair<double, double> range) -> DataForParameterEstimation {
+        // Find data thats within range
+        double xmin = range.first;
+        double xmax = range.second;
+
+        // If the two points are equal return empty data
+        if (fabs(xmin - xmax) < 1e-7) {
+          return DataForParameterEstimation{};
+        }
+
+        const auto startItr = std::find_if(
+            x.cbegin(), x.cend(),
+            [xmin](const double &val) -> bool { return val >= (xmin - 1e-7); });
+        auto endItr = std::find_if(
+            x.cbegin(), x.cend(),
+            [xmax](const double &val) -> bool { return val > xmax; });
+
+        if (std::distance(startItr, endItr - 1) < 2)
+          return DataForParameterEstimation{};
+
+        size_t first = std::distance(x.cbegin(), startItr);
+        size_t end = std::distance(x.cbegin(), endItr);
+        size_t m = first + (end - first) / 2;
+
+        return DataForParameterEstimation{{x[first], x[m]}, {y[first], y[m]}};
+      };
+}
+
 
 GNU_DIAG_ON_SUGGEST_OVERRIDE
 
@@ -213,6 +249,38 @@ public:
     m_presenter->setResolutionFBSuffices(suffices);
   }
 
+  void test_that_setStartX_with_TableDatasetIndex_alters_endX_column() {
+    double startX = 1.0;
+    EXPECT_CALL(*m_view, setStartX(startX)).Times(Exactly(1));
+    m_presenter->setStartX(startX, TableDatasetIndex{0});
+    assertValueIsGlobal(START_X_COLUMN, startX);
+  }
+
+  void
+  test_that_setStartX_with_TableDatasetIndex_and_WorkspaceIndex_alters_endX_column() {
+    double startX = 1.0;
+    EXPECT_CALL(*m_view, setStartX(startX)).Times(Exactly(1));
+    m_presenter->setStartX(startX, TableDatasetIndex{0},
+                           IDA::WorkspaceIndex{0});
+    assertValueIsGlobal(START_X_COLUMN, startX);
+  }
+
+  void test_that_setEndX_with_TableDatasetIndex_alters_endX_column() {
+    double endX = 1.0;
+    EXPECT_CALL(*m_view, setEndX(endX)).Times(Exactly(1));
+    m_presenter->setEndX(endX, TableDatasetIndex{0});
+    assertValueIsGlobal(END_X_COLUMN, endX);
+  }
+
+  void
+  test_that_setEndX_with_TableDatasetIndex_and_WorkspaceIndex_alters_endX_column() {
+    double endX = 1.0;
+    EXPECT_CALL(*m_view, setEndX(endX)).Times(Exactly(1));
+    m_presenter->setEndX(endX, TableDatasetIndex{0},
+                         IDA::WorkspaceIndex{0});
+    assertValueIsGlobal(END_X_COLUMN, endX);
+  }
+
   void test_that_the_setExcludeRegion_slot_will_alter_the_relevant_excludeRegion_column_in_the_table() {
     TableItem const excludeRegion("2-3");
 
@@ -230,12 +298,22 @@ public:
     m_presenter->loadSettings(settings);
   }
 
-  void test_that_replaceHandle_will_check_if_the_model_has_a_workspace() {
+  void
+  test_that_replaceHandle_will_check_if_the_model_has_a_workspace() {
     std::string const workspacename("DummyName");
 
     EXPECT_CALL(*m_model, hasWorkspace(workspacename)).Times(Exactly(1));
 
     m_presenter->replaceHandle(workspacename, createWorkspace(5));
+  }
+
+  void test_getDataForParameterEstimation_uses_selector_to_get_from_model() {
+    EstimationDataSelector selector = getEstimationDataSelector();
+
+    EXPECT_CALL(*m_model, getDataForParameterEstimation(NoCheck(nullptr)))
+        .Times(Exactly(1));
+
+    m_presenter->getDataForParameterEstimation(selector);
   }
 
 private:

@@ -4,6 +4,7 @@ set(
   ConvFitDataPresenterTest.h
   ConvFitModelTest.h
   ConvFunctionModelTest.h
+  IndirectDataAnalysisTabTest.h
   FqFitDataPresenterTest.h
   FqFitModelTest.h
   IDAFunctionParameterEstimationTest.h
