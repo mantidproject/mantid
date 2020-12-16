@@ -136,7 +136,7 @@ class EAGroupingTablePresenter(object):
         table = self._view.get_table_contents()
         self._model.clear_groups()
         for entry in table:
-            group = EAGroup(group_name=str(entry[0]))
+            group = EAGroup(group_name=str(entry[0]), detector=str(entry[2]), run_number=str(entry[1]))
             self._model.add_group(group)
 
     def update_view_from_model(self):

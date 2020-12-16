@@ -4,9 +4,8 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.Common.contexts.muon_data_context import construct_empty_group, construct_empty_pair
-from Muon.GUI.Common.muon_group import MuonGroup
-from Muon.GUI.Common.muon_pair import MuonPair
+from Muon.GUI.Common.contexts.muon_data_context import construct_empty_group
+from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
 from Muon.GUI.Common.muon_group import MuonRun
 from enum import Enum
 
@@ -78,7 +77,7 @@ class EAGroupingTabModel(object):
         self._groups.add_group_to_selected_groups(group)
 
     def add_group(self, group):
-        assert isinstance(group, MuonGroup)
+        assert isinstance(group, EAGroup)
         self._groups.add_group(group)
 
     def remove_groups_by_name(self, name_list):
