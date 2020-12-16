@@ -13,7 +13,6 @@ class DataContext(object):
     def __init__(self, load_data=MuonLoadData()):
         self.instrument = "rooth"
         self.current_runs = []
-        self._main_field_direction = ''
         self._loaded_data = load_data
         self._run_info = []
         self.previous_runs = []
@@ -40,10 +39,6 @@ class DataContext(object):
             # very often the number of detectors == number of histograms
             return self.current_workspace.getNumberHistograms()
         return n_det
-
-    @property
-    def main_field_direction(self):
-        return self._main_field_direction
 
     def is_data_loaded(self):
         return self._loaded_data.num_items() > 0
@@ -80,7 +75,6 @@ class DataContext(object):
     def clear(self):
         self._loaded_data.clear()
         self._current_runs = []
-        self._main_field_direction = ''
 
     def _base_run_name(self, run=None):
         """ e.g. EMU0001234 """

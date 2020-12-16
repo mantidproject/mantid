@@ -60,31 +60,10 @@ class EAGroupContext(object):
         return self._selected_groups
 
     def clear(self):
-        self.clear_groups()
-
-    def clear_groups(self):
         self._groups = []
 
     def clear_selected_groups(self):
         self._selected_groups = []
-
-    @property
-    def selected(self):
-        return self._selected
-
-    @property
-    def selected_type(self):
-        return self._selected_type
-
-    @selected.setter
-    def selected(self, value):
-        if value in self.group_names and self._selected != value:
-            self._selected = value
-
-    @selected_type.setter
-    def selected_type(self, value):
-        if value in ["Group"] and self._selected_type != value:
-            self._selected_type = value
 
     @property
     def group_names(self):
@@ -104,12 +83,6 @@ class EAGroupContext(object):
                     group += [EAGroup(group_name=group_name, detector=detector_name, run_number=run_number)]
         return group
 
-    def remove_group(self, group_name):
-        for group in self._groups:
-            if group.name == group_name:
-                self._groups.remove(group)
-                return
-
     def reset_group_to_default(self, loadedData):
         default_groups = get_default_grouping(loadedData)
         self._groups = default_groups
@@ -117,10 +90,6 @@ class EAGroupContext(object):
     def add_group_to_selected_groups(self, group):
         if group in self.group_names and group not in self.selected_groups:
             self._selected_groups.append(str(group))
-
-    def remove_workspace_by_name(self, workspace_name):
-        for item in self.groups:
-            item.remove_workspace_by_name(workspace_name)
 
     def remove_group_from_selected_groups(self, group):
         if group in self.group_names and group in self.selected_groups:

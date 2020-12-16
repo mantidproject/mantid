@@ -9,20 +9,9 @@ from Muon.GUI.Common.utilities import run_string_utils as run_utils
 from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
 from mantidqt.utils.observer_pattern import GenericObservable
 from Muon.GUI.ElementalAnalysis2.grouping_widget.ea_grouping_table_widget_view import inverse_group_table_columns
-from Muon.GUI.Common.grouping_tab_widget.grouping_tab_widget_model import RowValid
 
 
 maximum_number_of_groups = 20
-
-
-# Row colours specified in RGB. i.e. (255, 0, 0) is red and (255, 255, 0) is yellow.
-row_colors = {RowValid.invalid_for_all_runs: (255, 0, 0), RowValid.valid_for_some_runs: (255, 255, 0),
-              RowValid.valid_for_all_runs: (255, 255, 255)}
-
-
-row_tooltips = {RowValid.invalid_for_all_runs: 'Warning: group periods invalid for all runs',
-                RowValid.valid_for_some_runs: 'Warning: group periods invalid for some runs',
-                RowValid.valid_for_all_runs: ''}
 
 
 class EAGroupingTablePresenter(object):
@@ -38,9 +27,6 @@ class EAGroupingTablePresenter(object):
         self.selected_group_changed_notifier = GenericObservable()
 
         self._dataChangedNotifier = lambda: 0
-
-    def show(self):
-        self._view.show()
 
     def on_data_changed(self, notifier):
         self._dataChangedNotifier = notifier
@@ -70,23 +56,6 @@ class EAGroupingTablePresenter(object):
     def enable_editing(self):
         self._view.enable_editing()
 
-    def add_group(self, group):
-        """Adds a group to the model and view"""
-        try:
-            if self._view.num_rows() >= maximum_number_of_groups:
-                self._view.warning_popup("Cannot add more than {} groups.".format(maximum_number_of_groups))
-                return
-            self.add_group_to_model(group)
-            if len(self._model.group_names) == 1:
-                self._model.add_group_to_analysis(group.name)
-            self.update_view_from_model()
-            self.notify_data_changed()
-        except ValueError as error:
-            self._view.warning_popup(error)
-
-    def add_group_to_model(self, group):
-        self._model.add_group(group)
-
     def add_group_to_view(self, group, state):
         self._view.disable_updates()
         assert isinstance(group, EAGroup)
@@ -96,26 +65,13 @@ class EAGroupingTablePresenter(object):
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
 
-    def remove_selected_rows_in_view_and_model(self, group_names):
-        self._view.remove_selected_groups()
-        for group_name in group_names:
-            self._model.remove_group_from_analysis(group_name)
-        self._model.remove_groups_by_name(group_names)
-
-    def remove_last_row_in_view_and_model(self):
-        if self._view.num_rows() > 0:
-            name = self._view.get_table_contents()[-1][0]
-            self._view.remove_last_row()
-            self._model.remove_group_from_analysis(name)
-            self._model.remove_groups_by_name([name])
-
     def handle_data_change(self, row, col):
         changed_item = self._view.get_table_item(row, col)
         workspace_name = self._view.get_table_item(row, inverse_group_table_columns['workspace_name']).text()
         update_model = True
         if col == inverse_group_table_columns['to_analyse']:
             update_model = False
-            self.to_analyse_data_checkbox_changed(changed_item.checkState(), row, workspace_name)
+            self.to_analyse_data_checkbox_changed(changed_item.checkState(), workspace_name)
 
         if not update_model:
             # Reset the view back to model values and exit early as the changes are invalid.
@@ -149,7 +105,7 @@ class EAGroupingTablePresenter(object):
 
         self._view.enable_updates()
 
-    def to_analyse_data_checkbox_changed(self, state, row, group_name):
+    def to_analyse_data_checkbox_changed(self, state, group_name):
         group_added = True if state == 2 else False
 
         if group_added:

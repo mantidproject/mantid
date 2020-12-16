@@ -163,27 +163,27 @@ class EAGroupingTableView(QtWidgets.QWidget):
         selector.addItems(["None", "Fixed", "Variable"])
         return selector
 
-    # ------------------------------------------------------------------------------------------------------------------
-    # Context menu on right-click in the table
-    # ------------------------------------------------------------------------------------------------------------------
-
-    def _context_menu_add_group_action(self, slot):
-        add_group_action = QtWidgets.QAction('Add Group', self)
-        if len(self._get_selected_row_indices()) > 0:
-            add_group_action.setEnabled(False)
-        add_group_action.triggered.connect(slot)
-        return add_group_action
-
-    def _context_menu_remove_group_action(self, slot):
-        if len(self._get_selected_row_indices()) > 1:
-            # use plural if >1 item selected
-            remove_group_action = QtWidgets.QAction('Remove Detectors', self)
-        else:
-            remove_group_action = QtWidgets.QAction('Remove Detector', self)
-        if self.num_rows() == 0:
-            remove_group_action.setEnabled(False)
-        remove_group_action.triggered.connect(slot)
-        return remove_group_action
+    # # ------------------------------------------------------------------------------------------------------------------
+    # # Context menu on right-click in the table
+    # # ------------------------------------------------------------------------------------------------------------------
+    #
+    # def _context_menu_add_group_action(self, slot):
+    #     add_group_action = QtWidgets.QAction('Add Group', self)
+    #     if len(self._get_selected_row_indices()) > 0:
+    #         add_group_action.setEnabled(False)
+    #     add_group_action.triggered.connect(slot)
+    #     return add_group_action
+    #
+    # def _context_menu_remove_group_action(self, slot):
+    #     if len(self._get_selected_row_indices()) > 1:
+    #         # use plural if >1 item selected
+    #         remove_group_action = QtWidgets.QAction('Remove Detectors', self)
+    #     else:
+    #         remove_group_action = QtWidgets.QAction('Remove Detector', self)
+    #     if self.num_rows() == 0:
+    #         remove_group_action.setEnabled(False)
+    #     remove_group_action.triggered.connect(slot)
+    #     return remove_group_action
 
     # ------------------------------------------------------------------------------------------------------------------
     # Slot connections

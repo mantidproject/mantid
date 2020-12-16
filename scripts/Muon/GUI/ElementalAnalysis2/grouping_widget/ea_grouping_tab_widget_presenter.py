@@ -84,8 +84,6 @@ class EAGroupingTabPresenter(object):
     def calculate_all_data(self):
         self._model.show_all_groups()
 
-
-
     def handle_update_all_clicked(self):
         self.update_thread = self.create_update_thread()
         self.update_thread.threadWrapperSetUp(self.disable_editing,
@@ -121,9 +119,9 @@ class EAGroupingTabPresenter(object):
             self.on_clear_requested()
 
     def plot_default_groups(self):
-        # if we have no pairs or groups selected, generate a default plot
+        # if we have no groups selected, generate a default plot
         if len(self._model.selected_groups) == 0:
-                self.grouping_table_widget.plot_default_case()
+            self.grouping_table_widget.plot_default_case()
 
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable
@@ -149,7 +147,6 @@ class EAGroupingTabPresenter(object):
 
         def update(self, observable, arg):
             self.outer.on_clear_requested()
-
 
     class GuiVariablesChangedObserver(Observer):
         def __init__(self, outer):

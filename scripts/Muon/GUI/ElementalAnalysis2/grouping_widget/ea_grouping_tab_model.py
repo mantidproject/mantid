@@ -4,9 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from Muon.GUI.Common.contexts.muon_data_context import construct_empty_group
 from Muon.GUI.ElementalAnalysis2.ea_group import EAGroup
-from Muon.GUI.Common.muon_group import MuonRun
 from enum import Enum
 
 
@@ -19,9 +17,9 @@ class RowValid(Enum):
 class EAGroupingTabModel(object):
     """
     The model for the grouping tab should be shared between all widgets of the tab.
-    It keeps a record of the groups and pairs defined for the current instance of the interface.
+    It keeps a record of the groups defined for the current instance of the interface.
 
-    pairs and groups should be of type MuonGroup and MuonPair respectively.
+    groups should be of type EAGroup.
     """
 
     def __init__(self, context=None):
@@ -29,18 +27,6 @@ class EAGroupingTabModel(object):
         self._data = context.data_context
         self._groups = context.group_context
         self._gui_variables = context.gui_context
-
-    def get_group_workspace(self, group_name, run):
-        """
-        Return the workspace associated to group_name, creating one if
-        it doesn't already exist (e.g. if group added to table but no update yet triggered).
-        """
-        try:
-            workspace = self._groups[group_name].workspace[MuonRun(run)].workspace
-        except AttributeError:
-            workspace = self._context.calculate_group(group_name, run, rebin=False)
-            self._groups[group_name].update_counts_workspace(workspace, MuonRun(run))
-        return workspace
 
     @property
     def groups(self):
@@ -78,14 +64,7 @@ class EAGroupingTabModel(object):
 
     def add_group(self, group):
         assert isinstance(group, EAGroup)
-        self._groups.add_group(group)
-
-    def remove_groups_by_name(self, name_list):
-        for name in name_list:
-            self._groups.remove_group(name)
-
-    def construct_empty_group(self, _group_index):
-        return construct_empty_group(self.group_names, _group_index)
+        self._groups.add_group(group, self._data._loaded_data)
 
     def reset_groups_to_default(self):
         if not self._context.current_runs:
@@ -97,31 +76,5 @@ class EAGroupingTabModel(object):
     def reset_selected_groups(self):
         self._groups.reset_selected_groups()
 
-    @property
-    def num_detectors(self):
-        return self._data.num_detectors
-
-    @property
-    def instrument(self):
-        return self._data.instrument
-
-    @property
-    def main_field_direction(self):
-        return self._data.main_field_direction
-
     def is_data_loaded(self):
         return self._data.is_data_loaded()
-
-    def get_last_data_from_file(self):
-        if self._data.current_runs:
-            return round(max(
-                self._data.get_loaded_data_for_run(self._data.current_runs[-1])['OutputWorkspace'][0].workspace.dataX(
-                    0)), 3)
-        else:
-            return 0.0
-
-    def get_first_good_data_from_file(self):
-        if self._data.current_runs:
-            return self._data.get_loaded_data_for_run(self._data.current_runs[-1])["FirstGoodData"]
-        else:
-            return 0.0
