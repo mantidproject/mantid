@@ -11,7 +11,7 @@ from .configurations import RundexSettings
 class DrillExportModel:
 
     """
-    List of export algorithm.
+    Dictionnary containing algorithms and activation state.
     """
     _exportAlgorithms = None
 
@@ -22,7 +22,9 @@ class DrillExportModel:
         Args:
             acquisitionMode (str): acquisition mode
         """
-        self._exportAlgorithms = []
+        self._exportAlgorithms = {k:v
+                for k,v
+                in RundexSettings.EXPORT_ALGORITHMS[acquisitionMode].items()}
 
     def getAlgorithms(self):
         """
@@ -31,4 +33,4 @@ class DrillExportModel:
         Returns:
             list(str): names of algorithms
         """
-        return [algo for algo in self._exportAlgorithms]
+        return [algo for algo in self._exportAlgorithms.keys()]
