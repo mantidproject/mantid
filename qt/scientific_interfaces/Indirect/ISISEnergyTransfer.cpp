@@ -167,7 +167,11 @@ void createGroupingWorkspace(std::string const &instrumentName,
   creator->setProperty("ComponentName", analyser);
   creator->setProperty("CustomGroupingString", customGrouping);
   creator->setProperty("OutputWorkspace", GROUPING_WS_NAME);
-  creator->execute();
+  try {
+    creator->execute();
+  } catch (std::runtime_error const &) {
+    // validateInputs has returned errors.
+  }
 }
 
 void convertSpectrumAxis(std::string const &inputWorkspace,
