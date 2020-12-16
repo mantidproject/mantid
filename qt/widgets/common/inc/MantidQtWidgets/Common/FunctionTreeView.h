@@ -8,6 +8,7 @@
 
 #include "DllOption.h"
 
+#include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidKernel/EmptyValues.h"
 #include "MantidQtWidgets/Common/IFunctionView.h"
@@ -43,7 +44,6 @@ class QTreeWidgetItem;
 
 namespace Mantid {
 namespace API {
-class CompositeFunction;
 class Workspace;
 class ParameterTie;
 } // namespace API
@@ -155,9 +155,22 @@ protected:
   AProperty addAttributeProperty(QtProperty *parent, const QString &attName,
                                  const Mantid::API::IFunction::Attribute &att);
   /// Add attribute and parameter properties to a function property
-  void
-  addAttributeAndParameterProperties(QtProperty *prop,
-                                     const Mantid::API::IFunction_sptr &fun);
+  void addAttributeAndParameterProperties(
+      QtProperty *prop, const Mantid::API::IFunction_sptr &fun,
+      const Mantid::API::CompositeFunction_sptr &parentComposite = nullptr,
+      const std::size_t &parentIndex = 0);
+  /// Add tie to a parameter property. This will also work for ties across
+  /// functions in a composite function.
+  void addParameterTie(
+      QtProperty *property, const Mantid::API::IFunction_sptr &function,
+      const std::string &parameterName, const std::size_t &parameterIndex,
+      const Mantid::API::CompositeFunction_sptr &parentComposite = nullptr,
+      const std::size_t &parentIndex = 0);
+  /// Add tie to a parameter property stored within a composite function.
+  bool FunctionTreeView::addParameterTieInComposite(
+      QtProperty *property, const std::string &parameterName,
+      const Mantid::API::CompositeFunction_sptr &composite,
+      const std::size_t &index);
   /// Add property showing function's index in the composite function
   AProperty addIndexProperty(QtProperty *prop);
   /// Update function index properties

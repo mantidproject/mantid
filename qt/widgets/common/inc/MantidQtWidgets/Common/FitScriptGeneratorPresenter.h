@@ -31,8 +31,8 @@ public:
                               double startX = 0.0, double endX = 0.0);
   ~FitScriptGeneratorPresenter() override;
 
-  void notifyPresenter(ViewEvent const &event,
-                       std::string const &arg = "") override;
+  void notifyPresenter(ViewEvent const &event, std::string const &arg1 = "",
+                       std::string const &arg2 = "") override;
 
   void openFitScriptGenerator() override;
 
@@ -47,6 +47,8 @@ private:
   void handleFunctionReplaced(std::string const &function);
   void handleParameterChanged(std::string const &parameter);
   void handleAttributeChanged(std::string const &attribute);
+  void handleParameterTieChanged(std::string const &parameter,
+                                 std::string const &tie);
 
   void setWorkspaces(QStringList const &workspaceNames, double startX,
                      double endX);

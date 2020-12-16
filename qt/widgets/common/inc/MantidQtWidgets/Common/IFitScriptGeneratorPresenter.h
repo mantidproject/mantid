@@ -21,7 +21,8 @@ public:
   virtual ~IFitScriptGeneratorPresenter() = default;
 
   virtual void notifyPresenter(ViewEvent const &event,
-                               std::string const &arg = "") = 0;
+                               std::string const &arg1 = "",
+                               std::string const &arg2 = "") = 0;
 
   virtual void openFitScriptGenerator() = 0;
 };

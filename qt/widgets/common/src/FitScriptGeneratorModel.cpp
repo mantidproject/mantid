@@ -10,6 +10,7 @@
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/Logger.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -20,6 +21,7 @@
 using namespace Mantid::API;
 
 namespace {
+Mantid::Kernel::Logger g_log("FitScriptGenerator");
 
 IFunction_sptr createIFunction(std::string const &functionString) {
   return FunctionFactory::Instance().createInitialized(functionString);
@@ -336,6 +338,39 @@ void FitScriptGeneratorModel::updateAttributeValue(
 
     if (composite->hasAttribute(fullAttributeName))
       composite->setAttribute(fullAttributeName, newValue);
+  }
+}
+
+void FitScriptGeneratorModel::updateParameterTie(
+    std::string const &workspaceName, WorkspaceIndex workspaceIndex,
+    std::string const &parameter, std::string const &tie) {
+  auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
+
+  if (auto composite = toComposite(m_function->getFunction(domainIndex))) {
+    auto fullParameterName = parameter;
+    if (composite->nFunctions() == 1)
+      fullParameterName = "f0." + fullParameterName;
+
+    if (composite->hasParameter(fullParameterName))
+      updateParameterTie(composite, parameter, tie);
+  }
+}
+
+void FitScriptGeneratorModel::updateParameterTie(
+    CompositeFunction_sptr const &composite, std::string const &parameter,
+    std::string const &tie) {
+  if (tie.empty()) {
+    composite->removeTie(composite->parameterIndex(parameter));
+  } else {
+    auto const tieSplit = splitStringBy(tie, "=");
+    auto const tieValue = tieSplit.size() > 1 ? tieSplit[1] : tieSplit[0];
+    try {
+      composite->tie(parameter, tieValue);
+    } catch (std::invalid_argument const &ex) {
+      g_log.error(ex.what());
+    } catch (std::runtime_error const &ex) {
+      g_log.error(ex.what());
+    }
   }
 }
 

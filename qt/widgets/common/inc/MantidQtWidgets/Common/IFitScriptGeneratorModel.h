@@ -61,6 +61,10 @@ public:
                        WorkspaceIndex workspaceIndex,
                        std::string const &attribute,
                        Mantid::API::IFunction::Attribute const &newValue) = 0;
+  virtual void updateParameterTie(std::string const &workspaceName,
+                                  WorkspaceIndex workspaceIndex,
+                                  std::string const &parameter,
+                                  std::string const &tie) = 0;
 };
 
 } // namespace MantidWidgets

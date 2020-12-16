@@ -32,9 +32,12 @@ FitScriptGeneratorPresenter::FitScriptGeneratorPresenter(
 FitScriptGeneratorPresenter::~FitScriptGeneratorPresenter() {}
 
 void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
-                                                  std::string const &arg) {
-  if (arg.empty())
-    UNUSED_ARG(arg);
+                                                  std::string const &arg1,
+                                                  std::string const &arg2) {
+  if (arg1.empty())
+    UNUSED_ARG(arg1);
+  if (arg2.empty())
+    UNUSED_ARG(arg2);
 
   switch (event) {
   case ViewEvent::RemoveClicked:
@@ -53,19 +56,22 @@ void FitScriptGeneratorPresenter::notifyPresenter(ViewEvent const &event,
     handleSelectionChanged();
     return;
   case ViewEvent::FunctionRemoved:
-    handleFunctionRemoved(arg);
+    handleFunctionRemoved(arg1);
     return;
   case ViewEvent::FunctionAdded:
-    handleFunctionAdded(arg);
+    handleFunctionAdded(arg1);
     return;
   case ViewEvent::FunctionReplaced:
-    handleFunctionReplaced(arg);
+    handleFunctionReplaced(arg1);
     return;
   case ViewEvent::ParameterChanged:
-    handleParameterChanged(arg);
+    handleParameterChanged(arg1);
     return;
   case ViewEvent::AttributeChanged:
-    handleAttributeChanged(arg);
+    handleAttributeChanged(arg1);
+    return;
+  case ViewEvent::ParameterTieChanged:
+    handleParameterTieChanged(arg1, arg2);
     return;
   }
 
@@ -193,6 +199,17 @@ void FitScriptGeneratorPresenter::handleAttributeChanged(
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     m_model->updateAttributeValue(workspaceName, workspaceIndex, attribute,
                                   newValue);
+  }
+}
+
+void FitScriptGeneratorPresenter::handleParameterTieChanged(
+    std::string const &parameter, std::string const &tie) {
+  auto const rowIndices = m_view->allRows();
+
+  for (auto const &rowIndex : rowIndices) {
+    auto const workspaceName = m_view->workspaceName(rowIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
+    m_model->updateParameterTie(workspaceName, workspaceIndex, parameter, tie);
   }
 }
 

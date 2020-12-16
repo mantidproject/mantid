@@ -89,6 +89,10 @@ public:
       std::string const &workspaceName, WorkspaceIndex workspaceIndex,
       std::string const &attribute,
       Mantid::API::IFunction::Attribute const &newValue) override;
+  void updateParameterTie(std::string const &workspaceName,
+                          WorkspaceIndex workspaceIndex,
+                          std::string const &parameter,
+                          std::string const &tie) override;
 
 private:
   void removeWorkspaceDomain(
@@ -118,6 +122,9 @@ private:
                       WorkspaceIndex workspaceIndex) const;
   [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName,
                                         WorkspaceIndex workspaceIndex) const;
+
+  void updateParameterTie(Mantid::API::CompositeFunction_sptr const &composite,
+                          std::string const &parameter, std::string const &tie);
 
   void removeCompositeAtPrefix(std::string const &functionPrefix);
 

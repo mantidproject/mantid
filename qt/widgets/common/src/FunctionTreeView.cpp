@@ -51,6 +51,8 @@
 #include <regex>
 #include <utility>
 
+using namespace Mantid::API;
+
 namespace {
 const char *globalOptionName = "Global";
 Mantid::Kernel::Logger g_log("Function Browser");
@@ -677,9 +679,14 @@ FunctionTreeView::AProperty FunctionTreeView::addAttributeProperty(
  *  adds all member functions' properties
  * @param prop :: A function property
  * @param fun :: Shared pointer to a created function
+ * @param parentComposite :: If relevant, the composite the function is part of.
+ * @param parentIndex :: If relevant, the index of the function within its
+ * composite.
  */
 void FunctionTreeView::addAttributeAndParameterProperties(
-    QtProperty *prop, const Mantid::API::IFunction_sptr &fun) {
+    QtProperty *prop, const IFunction_sptr &fun,
+    const CompositeFunction_sptr &parentComposite,
+    const std::size_t &parentIndex) {
   // add the function index property
   addIndexProperty(prop);
 
@@ -693,11 +700,12 @@ void FunctionTreeView::addAttributeAndParameterProperties(
   }
 
   auto cf = std::dynamic_pointer_cast<Mantid::API::CompositeFunction>(fun);
-  if (cf) { // if composite add members
+  if (cf) {
+    // if composite add members
     for (size_t i = 0; i < cf->nFunctions(); ++i) {
       AProperty ap = addFunctionProperty(
           prop, QString::fromStdString(cf->getFunction(i)->name()));
-      addAttributeAndParameterProperties(ap.prop, cf->getFunction(i));
+      addAttributeAndParameterProperties(ap.prop, cf->getFunction(i), cf, i);
     }
   } else { // if simple add parameters
     for (size_t i = 0; i < fun->nParams(); ++i) {
@@ -706,20 +714,71 @@ void FunctionTreeView::addAttributeAndParameterProperties(
       double value = fun->getParameter(i);
       AProperty ap = addParameterProperty(prop, name, desc, value);
       // if parameter has a tie
-      if (!fun->isActive(i)) {
-        auto tie = fun->getTie(i);
-        if (tie) {
-          addTieProperty(ap.prop, QString::fromStdString(tie->asString()));
-        } else {
-          addTieProperty(ap.prop, QString::number(fun->getParameter(i)));
-        }
-      }
-      auto c = fun->getConstraint(i);
-      if (c) {
+      if (!fun->isActive(i))
+        addParameterTie(ap.prop, fun, name.toStdString(), i, parentComposite,
+                        parentIndex);
+
+      if (auto c = fun->getConstraint(i)) {
         addConstraintProperties(ap.prop, QString::fromStdString(c->asString()));
       }
     }
   }
+}
+
+/**
+ * Add a tie to a function property. If the tie is stored within the wider
+ * composite function, it will find this tie and apply it.
+ * @param property :: A function property.
+ * @param function :: Shared pointer to the function.
+ * @param parameterName :: The name of the parameter to be tied.
+ * @param parameterIndex :: The index of the parameter within its function.
+ * @param parentComposite :: If relevant, the composite the function is part of.
+ * @param parentIndex :: If relevant, the index of the function within its
+ * composite.
+ */
+void FunctionTreeView::addParameterTie(
+    QtProperty *property, const IFunction_sptr &function,
+    const std::string &parameterName, const std::size_t &parameterIndex,
+    const CompositeFunction_sptr &parentComposite,
+    const std::size_t &parentIndex) {
+  if (const auto tie = function->getTie(parameterIndex)) {
+    addTieProperty(property, QString::fromStdString(tie->asString()));
+  } else {
+    auto tieAdded = false;
+    if (parentComposite)
+      tieAdded = addParameterTieInComposite(property, parameterName,
+                                            parentComposite, parentIndex);
+
+    if (!tieAdded)
+      addTieProperty(property,
+                     QString::number(function->getParameter(parameterIndex)));
+  }
+}
+
+/**
+ * Add a tie to a function property. Used if a tie is stored within the wider
+ * composite function.
+ * @param property :: A function property.
+ * @param parameterName :: The name of the parameter to be tied.
+ * @param composite :: The composite function containing the tie.
+ * @param index :: The index of the function within the composite function.
+ * @returns true if a tie was found, and a tie property was added.
+ */
+bool FunctionTreeView::addParameterTieInComposite(
+    QtProperty *property, const std::string &parameterName,
+    const CompositeFunction_sptr &composite, const std::size_t &index) {
+  for (auto i = 0; i < composite->nParams(); ++i) {
+    const auto fullName = "f" + std::to_string(index) + "." + parameterName;
+    if (fullName == composite->parameterName(i)) {
+      if (const auto tie = composite->getTie(i)) {
+        const auto tieStr = QString::fromStdString(tie->asString());
+        addTieProperty(property, tieStr.mid(tieStr.indexOf('=') + 1));
+        return true;
+      }
+      return false;
+    }
+  }
+  return false;
 }
 
 /**

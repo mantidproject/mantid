@@ -42,7 +42,8 @@ public:
     FunctionAdded,
     FunctionReplaced,
     ParameterChanged,
-    AttributeChanged
+    AttributeChanged,
+    ParameterTieChanged
   };
 
   IFitScriptGeneratorView(QWidget *parent = nullptr)

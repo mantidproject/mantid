@@ -103,6 +103,7 @@ private slots:
   void onFunctionReplaced(QString const &function);
   void onParameterChanged(QString const &parameter);
   void onAttributeChanged(QString const &attribute);
+  void onParameterTieChanged(QString const &parameter, QString const &tie);
   void onCopyFunctionToClipboard();
   void onFunctionHelpRequested();
 
