@@ -70,7 +70,9 @@ class FittingTabPresenter(object):
         self.disable_editing_notifier = GenericObservable()
 
     def disable_view(self):
-        self.view.setEnabled(False)
+        self.update_selected_workspace_list_for_fit()
+        if not self.selected_data:
+            self.view.setEnabled(False)
 
     def enable_view(self):
         if self.selected_data:
