@@ -185,18 +185,6 @@ void setDxFromPyObject(MatrixWorkspace &self, const size_t wsIndex,
 }
 
 /**
- * Adds a deprecation warning to the getNumberBins call to warn about using
- * blocksize instead
- * @param self A reference to the calling object
- * @returns The blocksize()
- */
-size_t getNumberBinsDeprecated(MatrixWorkspace &self) {
-  PyErr_Warn(PyExc_DeprecationWarning,
-             "``getNumberBins`` is deprecated, use ``blocksize`` instead.");
-  return self.blocksize();
-}
-
-/**
  * Adds a deprecation warning to the getSampleDetails call to warn about using
  * getRun instead
  * @param self A reference to the calling object
@@ -350,6 +338,12 @@ void export_MatrixWorkspace() {
            "spectra).")
       .def("blocksize", &MatrixWorkspace::blocksize, arg("self"),
            "Returns size of the Y data array")
+      .def("getNumberBins", &MatrixWorkspace::getNumberBins,
+           (arg("self"), arg("index")),
+           "Returns the number of bins for a given histogram index.")
+      .def("getMaxNumberBins", &MatrixWorkspace::getMaxNumberBins, arg("self"),
+           "Returns the maximum number of bins in a workspace (works on ragged "
+           "data).")
       .def("getNumberHistograms", &MatrixWorkspace::getNumberHistograms,
            arg("self"), "Returns the number of spectra in the workspace")
       .def("getSpectrumNumbers", &getSpectrumNumbers, arg("self"),
@@ -424,11 +418,6 @@ void export_MatrixWorkspace() {
            "Find first index in Y equal to value. Start may be specified to "
            "begin at a specifc index. Returns tuple with the "
            "histogram and bin indices.")
-      // Deprecated
-      .def("getNumberBins", &getNumberBinsDeprecated, arg("self"),
-           "Returns size of the Y data array (deprecated, use "
-           ":class:`~mantid.api.MatrixWorkspace.blocksize` "
-           "instead)")
       .def("getSampleDetails", &getSampleDetailsDeprecated, arg("self"),
            return_internal_reference<>(),
            "Return the Run object for this workspace (deprecated, use "

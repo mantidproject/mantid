@@ -61,7 +61,7 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
         self.ws = ws
         self.ws_spectrum_info = self.ws.spectrumInfo()
         self.row_count = self.ws.getNumberHistograms()
-        self.column_count = self._get_column_count()
+        self.column_count = self.ws.getMaxNumberBins()
 
         self.masked_rows_cache = []
         self.monitor_rows_cache = []
@@ -89,29 +89,6 @@ class MatrixWorkspaceTableViewModel(QAbstractTableModel):
             self.relevant_data = self.ws.readDx
         else:
             raise ValueError("Unknown model type {0}".format(self.type))
-
-    def _get_column_count(self):
-        """
-        Gets the size of the spectrum data in the workspace (i.e. number of bins). If blocksize fails, then the
-        workspace is ragged.
-        :return: The number of columns required to display the workspace in a table.
-        """
-        try:
-            return self.ws.blocksize()
-        except RuntimeError:
-            return self._get_max_column_count()
-
-    def _get_max_column_count(self):
-        """
-        Gets the number of columns required to display the workspace. This method is used for ragged workspaces.
-        :return: The number of columns required to display the workspace in a table.
-        """
-        max_column_count = 0
-        for i in range(self.ws.getNumberHistograms()):
-            column_count = len(self.ws.readY(i))
-            if column_count > max_column_count:
-                max_column_count = column_count
-        return max_column_count
 
     def _makeVerticalHeader(self, section, role):
         def _numeric_axis_value_unit(axis):

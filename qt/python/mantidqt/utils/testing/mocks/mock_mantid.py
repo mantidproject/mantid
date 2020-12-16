@@ -75,6 +75,7 @@ class MockWorkspace:
         self.getNumberHistograms = StrictMock(return_value=1)
         self.isHistogramData = StrictMock(return_value=isHistogramData)
         self.blocksize = StrictMock(return_value=len(read_return))
+        self.getMaxNumberBins = StrictMock(return_value=len(read_return))
         self.readX = StrictMock(return_value=read_return)
         self.readY = StrictMock(return_value=read_return)
         self.readE = StrictMock(return_value=read_return)
