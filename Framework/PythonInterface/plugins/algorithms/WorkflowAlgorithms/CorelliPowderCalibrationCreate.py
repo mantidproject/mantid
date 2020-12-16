@@ -142,7 +142,7 @@ class CorelliPowderCalibrationCreate(DataProcessorAlgorithm):
         prefix_output = self.getProperty('OutputWorkspacesPrefix').value
         progress_percent_start, progress_percent_end, reports_count = 0.0, 0.01, 5
         progress = Progress(self, progress_percent_start, progress_percent_end, reports_count)
-        input_workspace = self.getProperty('InputWorkspace').value
+        input_workspace = self.getPropertyValue('InputWorkspace')  # name of the input workspace
         adjustment_diagnostics = list()  # list workspace names that analyze the orientation of the banks
 
         # Create a grouping workspace whereby we group detectors by banks
