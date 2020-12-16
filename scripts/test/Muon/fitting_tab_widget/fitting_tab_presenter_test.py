@@ -525,6 +525,26 @@ class FittingTabPresenterTest(unittest.TestCase):
         self.assertEqual(result, {'InputFunction': fit_function, 'WorkspaceList': [new_workspace_list[0]],
                                   'Mode': 'Extract', 'CopyTies': False})
 
+    def test_handle_fit_type_changed_reverts_changed_and_shows_error_tf_asymmetry_mode_is_on(self):
+        self.view.tf_asymmetry_mode = True
+
+        self.view.is_simul_fit = True
+        self.presenter.handle_fit_by_changed()
+
+        self.view.warning_popup.assert_called_once_with(
+            "Cannot change Fitting Mode while TF Asymmetry Mode is checked.")
+        self.assertEqual(self.view.is_simul_fit, False)
+
+    def test_handle_fit_by_changed_reverts_changed_and_shows_error_tf_asymmetry_mode_is_on(self):
+        self.view.tf_asymmetry_mode = True
+
+        self.view.simultaneous_fit_by = "Group/Pair"
+        self.presenter.handle_fit_by_changed()
+
+        self.view.warning_popup.assert_called_once_with(
+            "Cannot change Run - Group/Pair selection while TF Asymmetry Mode is checked.")
+        self.assertEqual(self.view.simultaneous_fit_by, "Run")
+
     def test_handle_asymmetry_mode_changed_reverts_changed_and_shows_error_if_non_group_selected(self):
         new_workspace_list = ['MUSR22725; Group; top; Asymmetry', 'MUSR22725; Group; bottom; Asymmetry',
                               'MUSR22725; Pair; fwd; Long']
