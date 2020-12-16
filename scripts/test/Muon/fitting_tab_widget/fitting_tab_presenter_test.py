@@ -410,9 +410,9 @@ class FittingTabPresenterTest(unittest.TestCase):
 
         output = self.presenter.get_workspace_selected_list()
 
-        self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="bwd", phasequad=False,
+        self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="bwd",
                                                                     rebin=False, freq='None')
-        self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="fwd", phasequad=False,
+        self.context.get_names_of_workspaces_to_fit.assert_any_call(runs="All", group_and_pair="fwd",
                                                                     rebin=False, freq='None')
         self.assertEqual(self.presenter.context.get_names_of_workspaces_to_fit.call_count, 2)
         self.assertEqual(output, ["test"])

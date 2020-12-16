@@ -413,7 +413,6 @@ class FittingTabPresenter(object):
     def perform_fit(self):
         if not self.view.fit_object:
             return
-
         self._fit_function_cache = [func.clone() for func in self._fit_function]
         try:
             workspaces = self.get_fit_input_workspaces()
@@ -482,7 +481,6 @@ class FittingTabPresenter(object):
             selected_workspaces += self.context.get_names_of_workspaces_to_fit(
                 runs=selected_runs,
                 group_and_pair=grp_and_pair,
-                phasequad=False,
                 rebin=not self.view.fit_to_raw, freq=freq)
 
         selected_workspaces = list(set(self._check_data_exists(selected_workspaces)))

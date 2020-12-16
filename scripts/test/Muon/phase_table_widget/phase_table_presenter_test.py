@@ -14,6 +14,7 @@ from qtpy import QtCore
 from Muon.GUI.Common.phase_table_widget.phase_table_presenter import PhaseTablePresenter
 from Muon.GUI.Common.phase_table_widget.phase_table_view import PhaseTableView
 from Muon.GUI.Common.muon_group import MuonGroup
+from Muon.GUI.Common.muon_phasequad import MuonPhasequad
 from Muon.GUI.Common.test_helpers.context_setup import setup_context
 
 
@@ -122,64 +123,6 @@ class PhaseTablePresenterTest(unittest.TestCase):
         self.assertTrue(self.view.isEnabled())
         self.view.warning_popup.assert_called_once_with('CalMuonDetectorPhases has failed')
 
-    def test_get_parameters_for_phase_quad(self):
-        self.view.set_input_combo_box(['MUSR22222_raw_data_period_1'])
-        self.view.set_phase_table_combo_box(['MUSR22222_period_1_phase_table'])
-
-        self.presenter.update_model_from_view()
-
-        parameters = self.presenter.get_parameters_for_phase_quad()
-
-        self.assertEqual(parameters, {'InputWorkspace': 'MUSR22222_raw_data_period_1',
-                                      'PhaseTable': 'MUSR22222_period_1_phase_table'})
-
-    def test_that_new_phase_table_calculated_if_construct_selected(self):
-        self.view.set_input_combo_box(['MUSR22222_raw_data_period_1'])
-        self.view.set_phase_table_combo_box(['Construct', 'MUSR22222_period_1_phase_table'])
-        self.presenter.calculate_phase_table = mock.MagicMock(return_value='created_phase_table')
-
-        self.presenter.update_model_from_view()
-
-        parameters = self.presenter.get_parameters_for_phase_quad()
-
-        self.assertEqual(parameters, {'InputWorkspace': 'MUSR22222_raw_data_period_1',
-                                      'PhaseTable': 'created_phase_table'})
-
-    @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_PhaseQuad')
-    @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.mantid')
-    def test_handle_calcuate_phase_quad_behaves_correctly_for_succesful_calculation(self, mantid_mock,
-                                                                                    run_algorithm_mock):
-        phase_quad_mock = mock.MagicMock()
-        alg_mock = mock.MagicMock()
-        mantid_mock.AlgorithmManager.create.return_value = alg_mock
-        run_algorithm_mock.return_value = phase_quad_mock
-        self.presenter.add_phase_quad_to_ADS = mock.MagicMock()
-        self.presenter.calculate_base_name_and_group = mock.MagicMock(return_value=('MUSR22222_period_1_phase_table',
-                                                                                    'MUSR22222 PhaseTable'))
-        self.view.set_input_combo_box(['MUSR22222_raw_data_period_1'])
-        self.view.set_phase_table_combo_box(['MUSR22222_period_1_phase_table'])
-        self.presenter.update_model_from_view()
-
-        self.presenter.handle_calculate_phase_quad_button_clicked()
-        self.wait_for_thread(self.presenter.phasequad_calculation_thread)
-
-        self.assertTrue(self.view.isEnabled())
-        run_algorithm_mock.assert_called_once_with({'PhaseTable': 'MUSR22222_period_1_phase_table',
-                                                    'InputWorkspace': 'MUSR22222_raw_data_period_1'}, alg_mock,
-                                                   'MUSR22222; PhaseQuad_period_1 MUSR22222_period_1_phase_table')
-        self.presenter.add_phase_quad_to_ADS.assert_called_once_with('MUSR22222_raw_data_period_1', phase_quad_mock)
-
-    @mock.patch('Muon.GUI.Common.phase_table_widget.phase_table_presenter.run_PhaseQuad')
-    def test_handle_phase_quad_calculation_behaves_correctly_on_error(self, run_algorithm_mock):
-        run_algorithm_mock.side_effect = RuntimeError('PhaseQuad algorithm returned error')
-        self.view.set_phase_table_combo_box(['MUSR22222_period_1_phase_table'])
-
-        self.presenter.handle_calculate_phase_quad_button_clicked()
-        self.wait_for_thread(self.presenter.phasequad_calculation_thread)
-
-        self.assertTrue(self.view.isEnabled())
-        self.view.warning_popup.assert_called_once_with('PhaseQuad algorithm returned error')
-
     def test_update_current_phase_table_list_retrieves_all_correct_tables(self):
         self.view.set_phase_table_combo_box = mock.MagicMock()
         workspace_wrapper = mock.MagicMock()
@@ -188,7 +131,7 @@ class PhaseTablePresenterTest(unittest.TestCase):
 
         self.presenter.update_current_phase_tables()
 
-        self.view.set_phase_table_combo_box.assert_called_once_with(['MUSR22222_phase_table', 'Construct'])
+        self.view.set_phase_table_combo_box.assert_called_once_with(['MUSR22222_phase_table'])
 
     def test_handle_calculation_started_and_handle_calculation_ended_called_correctly(self):
         self.presenter.handle_phase_table_calculation_started = mock.MagicMock()
@@ -256,6 +199,38 @@ class PhaseTablePresenterTest(unittest.TestCase):
             if str(widget.objectName()) in ['cancel_button', 'phasequad_cancel_button']:
                 continue
             self.assertTrue(widget.isEnabled())
+
+    def test_handle_add_phasequad_button_no_table(self):
+        self.presenter.handle_add_phasequad_button_clicked()
+        self.view.warning_popup.assert_called_once_with('Please generate a phase table first.')
+
+    def test_handle_add_phasequad_button_no_name(self):
+        self.view.set_phase_table_combo_box(["Table"])
+        self.view.enter_pair_name = mock.Mock(return_value = None)
+        self.presenter.create_phase_quad_calculation_thread = mock.MagicMock()
+
+        self.presenter.handle_add_phasequad_button_clicked()
+        self.assertEqual(self.presenter.create_phase_quad_calculation_thread.call_count, 0)
+
+    def test_handle_add_phasequad_button(self):
+        self.view.set_phase_table_combo_box(["Table"])
+        self.presenter.validate_pair_name = mock.Mock(return_value=True)
+        self.view.enter_pair_name = mock.Mock(return_value = "test")
+        self.presenter.create_phase_quad_calculation_thread = mock.MagicMock()
+
+        self.presenter.handle_add_phasequad_button_clicked()
+        self.assertEqual(self.presenter.create_phase_quad_calculation_thread.call_count, 1)
+
+    def test_phasequad_success(self):
+        self.context.group_pair_context.add_pair_to_selected_pairs = mock.Mock()
+        self.presenter.selected_phasequad_changed_notifier.notify_subscribers = mock.Mock()
+        self.presenter._phasequad_obj = MuonPhasequad("test", "table")
+        self.presenter.handle_phasequad_calculation_success()
+
+        self.context.group_pair_context.add_pair_to_selected_pairs.assert_any_call("test_Re_")
+        self.context.group_pair_context.add_pair_to_selected_pairs.assert_any_call("test_Im_")
+        self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({"is_added":True, "name":"test_Re_"})
+        self.presenter.selected_phasequad_changed_notifier.notify_subscribers.assert_any_call({"is_added":True, "name":"test_Im_"})
 
 
 if __name__ == '__main__':

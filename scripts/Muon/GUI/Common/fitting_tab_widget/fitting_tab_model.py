@@ -128,7 +128,8 @@ class FittingTabModel(object):
             return guess_ws_name
 
     def _get_guess_parameters(self, workspace_names, index):
-        if self.fitting_options["tf_asymmetry_mode"]:  # Currently not supporting plot guess and tf asymmetry mode
+        # Currently not supporting plot guess and tf asymmetry mode
+        if self.fitting_options["tf_asymmetry_mode"]:
             return None, None
         params = self._get_fit_parameters(workspace_names)
         data_ws_name = params['InputWorkspace']
@@ -279,7 +280,7 @@ class FittingTabModel(object):
             workspace_name, workspace_directory = create_fitted_workspace_name(input_workspace_list[0],
                                                                                self.function_name)
             self.add_workspace_to_ADS(output_workspace, workspace_name, workspace_directory)
-            self.add_workspace_to_ADS(covariance_matrix, workspace_name + '_CovarianceMatrix', table_directory)
+            self.add_workspace_to_ADS(covariance_matrix, workspace_name +'_CovarianceMatrix', table_directory)
             workspace_name = [workspace_name]
 
         wrapped_parameter_workspace = self.add_workspace_to_ADS(fitting_parameters_table, table_name,
@@ -346,8 +347,7 @@ class FittingTabModel(object):
 
             if not use_initial_values and i >= 1:
                 previous_values = self.get_fit_function_parameter_values(function_object_list[i - 1])
-                self.set_fit_function_parameter_values(params['Function'],
-                                                       previous_values)
+                self.set_fit_function_parameter_values(params['Function'], previous_values)
 
             function_object, output_status, output_chi_squared = \
                 self.do_simultaneous_fit(params, self.fitting_options["global_parameters"])
@@ -450,14 +450,15 @@ class FittingTabModel(object):
     def create_hashable_keys_for_workspace_names(self):
         list_of_workspace_lists = []
         if isinstance(self.context, FrequencyDomainAnalysisContext):
-            list_of_workspace_lists = [[item ] for item in self.get_selected_workspace_list()]
+            list_of_workspace_lists = [[item] for item in self.get_selected_workspace_list()]
         else:
             runs, group_and_pairs = self.get_runs_groups_and_pairs_for_fits()
             for run, group_and_pair in zip(runs, group_and_pairs):
                 separated_runs, separated_groups_and_pairs = \
                     self.get_separated_runs_and_group_and_pairs(run, group_and_pair)
-                list_of_workspace_lists += [self.get_fit_workspace_names_from_groups_and_runs(separated_runs,
-                                                                                              separated_groups_and_pairs)]
+                list_of_workspace_lists += [
+                    self.get_fit_workspace_names_from_groups_and_runs(separated_runs,
+                                                                      separated_groups_and_pairs)]
         workspace_key_list = []
         for workspace_list in list_of_workspace_lists:
             workspace_key_list += [self.create_workspace_key(workspace_list)]
@@ -494,8 +495,7 @@ class FittingTabModel(object):
             'OutputFitWorkspace': "fit",
             'StartX': self.fitting_options["startX"],
             'EndX': self.fitting_options["endX"],
-            'Minimizer': self.fitting_options["minimiser"]
-        }
+            'Minimizer': self.fitting_options["minimiser"]}
 
     def get_params_for_multi_tf_function_calculation(self, workspace_list, fit_function):
         return {
@@ -574,8 +574,8 @@ class FittingTabModel(object):
         parameters = {
             'InputFunction': self.get_ws_fit_function([workspace]),
             'ReNormalizedWorkspaceList': workspace,
-            'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list([workspace])[
-                0],
+            'UnNormalizedWorkspaceList': self.context.group_pair_context.get_unormalisised_workspace_list(
+                [workspace])[0],
             'OutputFitWorkspace': fit_workspace_name,
             'StartX': self.fitting_options["startX"],
             'EndX': self.fitting_options["endX"],
@@ -587,8 +587,8 @@ class FittingTabModel(object):
             muon_halflife = 2.2
             decay = math.exp(-offset / muon_halflife)
             first_pulse_weighting = decay / (1 + decay)
-            parameters.update({'PulseOffset' : offset,
-                               'EnableDoublePulse': True,'FirstPulseWeight': first_pulse_weighting})
+            parameters.update({'PulseOffset': offset,
+                               'EnableDoublePulse': True, 'FirstPulseWeight': first_pulse_weighting})
 
         return parameters
 
@@ -611,8 +611,8 @@ class FittingTabModel(object):
             muon_halflife = 2.2
             decay = math.exp(-offset / muon_halflife)
             first_pulse_weighting = decay / (1 + decay)
-            parameters.update({'PulseOffset' : offset,
-                               'EnableDoublePulse': True,'FirstPulseWeight': first_pulse_weighting})
+            parameters.update({'PulseOffset': offset,
+                               'EnableDoublePulse': True, 'FirstPulseWeight': first_pulse_weighting})
 
         return parameters
 
@@ -627,10 +627,11 @@ class FittingTabModel(object):
             selected_workspaces += self.context.get_names_of_workspaces_to_fit(
                 runs='All',
                 group_and_pair=grp_and_pair,
-                phasequad=False,
-                rebin=not self.fitting_options["fit_to_raw"], freq=self.freq_type())
+                rebin=not self.fitting_options["fit_to_raw"],
+                freq=self.freq_type())
 
-        selected_workspaces = list(set(self._check_data_exists(selected_workspaces)))
+        selected_workspaces = list(
+            set(self._check_data_exists(selected_workspaces)))
         selected_workspaces.sort(key=self.workspace_list_sorter)
         return selected_workspaces
 
@@ -638,7 +639,6 @@ class FittingTabModel(object):
         selected_workspaces = self.get_selected_workspace_list()
         runs = []
         groups_and_pairs = []
-
         if self.fitting_options["fit_type"] == "Single":
             for workspace in selected_workspaces:
                 runs += [get_run_number_from_workspace_name(workspace, self.context.data_context.instrument)]
@@ -677,11 +677,16 @@ class FittingTabModel(object):
         workspace_names = []
         for run in runs:
             for group_or_pair in groups_and_pairs:
-                if group_or_pair in self.context.group_pair_context.selected_pairs:
+                if check_phasequad_name(
+                        group_or_pair) and group_or_pair in self.context.group_pair_context.selected_pairs:
+                    workspace_names += [get_pair_phasequad_name(self.context, group_or_pair, run,
+                                                                not self.fitting_options["fit_to_raw"])]
+                elif group_or_pair in self.context.group_pair_context.selected_pairs:
                     workspace_names += [get_pair_asymmetry_name(self.context, group_or_pair, run,
                                                                 not self.fitting_options["fit_to_raw"])]
                 elif group_or_pair in self.context.group_pair_context.selected_groups:
-                    period_string = run_list_to_string(self.context.group_pair_context[group_or_pair].periods)
+                    period_string = run_list_to_string(
+                        self.context.group_pair_context[group_or_pair].periods)
                     workspace_names += [get_group_asymmetry_name(self.context, group_or_pair, run, period_string,
                                                                  not self.fitting_options["fit_to_raw"])]
 
@@ -722,7 +727,8 @@ class FittingTabModel(object):
     @staticmethod
     def set_fit_function_parameter_values(fit_function, vals):
         number_of_parameters = fit_function.nParams()
-        parameters = [fit_function.parameterName(i) for i in range(number_of_parameters)]
+        parameters = [fit_function.parameterName(i) for i in
+                      range(number_of_parameters)]
         for i in range(number_of_parameters):
             fit_function.setParameter(parameters[i], vals[i])
 
