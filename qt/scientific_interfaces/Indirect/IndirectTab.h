@@ -86,6 +86,8 @@ public:
   /// Used to run python code
   void runPythonCode(std::string const &pythonCode) override;
 
+  void displayWarning(std::string const &message);
+
 protected:
   /// Run the load algorithms
   bool loadFile(const QString &filename, const QString &outputName,
