@@ -51,7 +51,8 @@ RunsPresenter::RunsPresenter(
       m_searcher(std::make_unique<QtCatalogSearcher>(mainView)),
       m_view(mainView), m_progressView(progressableView),
       m_mainPresenter(nullptr), m_messageHandler(messageHandler),
-      m_instruments(instruments), m_thetaTolerance(thetaTolerance) {
+      m_instruments(instruments),
+      m_thetaTolerance(thetaTolerance), m_tableUnsaved{false} {
 
   assert(m_view != nullptr);
   m_view->subscribe(this);
@@ -87,21 +88,36 @@ RunsTable &RunsPresenter::mutableRunsTable() {
   return tablePresenter()->mutableRunsTable();
 }
 
-/**
-   Used by the view to tell the presenter something has changed
-*/
+/** Returns true if performing a new search i.e. with different criteria to any
+ * previous search
+ */
+bool RunsPresenter::newSearchCriteria() const {
+  return searchCriteria() != m_searcher->searchCriteria();
+}
 
 void RunsPresenter::notifySearch() {
-  m_searcher->reset();
   updateWidgetEnabledState();
-  search(ISearcher::SearchType::MANUAL);
+
+  // Don't bother searching if they're not searching for anything
+  if (m_view->getSearchString().empty())
+    return;
+
+  // Clear existing results if performing a different search
+  if (searchCriteria() != m_searcher->searchCriteria()) {
+    if (overwriteSearchResultsPrevented()) {
+      return;
+    }
+    m_searcher->reset();
+  }
+
+  search();
 }
 
 void RunsPresenter::notifyCheckForNewRuns() { checkForNewRuns(); }
 
 void RunsPresenter::notifySearchComplete() {
   if (!isAutoreducing())
-    m_view->resizeSearchResultsColumnsToContents();
+    resizeSearchResultsColumns();
 
   updateWidgetEnabledState();
 
@@ -120,14 +136,27 @@ void RunsPresenter::notifyTransfer() {
   notifyRowStateChanged();
 }
 
+// Notification from our own view that the instrument should be changed
 void RunsPresenter::notifyChangeInstrumentRequested() {
-  auto const instrumentName = m_view->getSearchInstrument();
-  m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
+  auto const newName = m_view->getSearchInstrument();
+
+  // If the instrument cannot be changed, revert it on the view and quit
+  if (changeInstrumentPrevented(newName))
+    m_view->setSearchInstrument(instrumentName());
+  else
+    m_mainPresenter->notifyChangeInstrumentRequested(newName);
 }
 
-void RunsPresenter::notifyChangeInstrumentRequested(
+// Notification from a child presenter that the instrument needs to be changed
+// Returns true and continues to change the instrument if possible; returns
+// false if not
+bool RunsPresenter::notifyChangeInstrumentRequested(
     std::string const &instrumentName) {
+  if (changeInstrumentPrevented(instrumentName))
+    return false;
+
   m_mainPresenter->notifyChangeInstrumentRequested(instrumentName);
+  return true;
 }
 
 void RunsPresenter::notifyResumeReductionRequested() {
@@ -180,29 +209,51 @@ void RunsPresenter::notifyReductionPaused() {
   tablePresenter()->notifyReductionPaused();
 }
 
+/** Returns true if performing a new autoreduction search i.e. with different
+ * criteria to any previous autoreduction
+ */
+bool RunsPresenter::newAutoreductionCriteria() const {
+  return searchCriteria() != m_lastAutoreductionSearch;
+}
+
+/** Return true if starting a new autoreduction (with new criteria) is
+ * prevented e.g. if the user does not want to discard changes
+ */
+bool RunsPresenter::autoreductionPrevented() const {
+  // There's slight duplication in the checks here to ensure the user gets an
+  // informative warning message
+  if (newAutoreductionCriteria() && newSearchCriteria() && m_tableUnsaved &&
+      m_searcher->hasUnsavedChanges())
+    return overwriteSearchResultsAndTablePrevented();
+  else if (newAutoreductionCriteria() && m_tableUnsaved)
+    return overwriteTablePrevented();
+  else if (newSearchCriteria() && m_searcher->hasUnsavedChanges())
+    return overwriteSearchResultsPrevented();
+
+  return false;
+}
+
 /** Resume autoreduction. Clears any existing table data first and then
  * starts a search to check if there are new runs.
  */
 bool RunsPresenter::resumeAutoreduction() {
-  auto const searchString = m_view->getSearchString();
-  auto const instrument = m_view->getSearchInstrument();
-  auto const cycle = m_view->getSearchCycle();
-
-  if (searchString == "") {
+  if (m_view->getSearchString().empty()) {
     m_messageHandler->giveUserInfo("Search field is empty", "Search Issue");
     return false;
   }
 
-  // Check if starting an autoreduction with new settings, reset the previous
-  // search results and clear the main table
-  if (m_searcher->searchSettingsChanged(searchString, instrument, cycle,
-                                        ISearcher::SearchType::AUTO)) {
-    // If there are unsaved changes, ask the user first
-    if (isOverwritingTablePrevented()) {
-      return false;
-    }
+  if (autoreductionPrevented())
+    return false;
+
+  // Clear the search results if it's a new search
+  if (newSearchCriteria())
     m_searcher->reset();
+
+  // Clear the main table if it's a new autoreduction
+  if (newAutoreductionCriteria()) {
+    m_lastAutoreductionSearch = searchCriteria();
     tablePresenter()->notifyRemoveAllRowsAndGroupsRequested();
+    m_tableUnsaved = false;
   }
 
   checkForNewRuns();
@@ -254,26 +305,48 @@ void RunsPresenter::notifyInstrumentChanged(std::string const &instrumentName) {
   tablePresenter()->notifyInstrumentChanged(instrumentName);
 }
 
-void RunsPresenter::notifyTableChanged() { m_mainPresenter->setBatchUnsaved(); }
+std::string RunsPresenter::instrumentName() const {
+  return m_mainPresenter->instrumentName();
+}
+
+void RunsPresenter::notifyTableChanged() { m_tableUnsaved = true; }
 
 void RunsPresenter::settingsChanged() { tablePresenter()->settingsChanged(); }
+
+void RunsPresenter::notifyChangesSaved() {
+  m_searcher->setSaved();
+  m_tableUnsaved = false;
+}
 
 /** Searches for runs that can be used
  * @return : true if the search algorithm was started successfully, false if
  * there was a problem */
-bool RunsPresenter::search(ISearcher::SearchType searchType) {
-  auto const searchString = m_view->getSearchString();
-  // Don't bother searching if they're not searching for anything
-  if (searchString.empty())
-    return false;
-
-  if (!m_searcher->startSearchAsync(searchString, m_view->getSearchInstrument(),
-                                    m_view->getSearchCycle(), searchType)) {
+bool RunsPresenter::search() {
+  if (!m_searcher->startSearchAsync(searchCriteria())) {
     m_messageHandler->giveUserCritical("Error starting search", "Error");
     return false;
   }
 
   return true;
+}
+
+/** Resize the search results table columns to something sensible
+ */
+void RunsPresenter::resizeSearchResultsColumns() {
+  // Resize to content
+  m_view->resizeSearchResultsColumnsToContents();
+
+  // Limit columns' widths to a sensible maximum, based on a % of the table
+  // width
+  static auto constexpr numColumns =
+      static_cast<int>(ISearchModel::Column::NUM_COLUMNS);
+  auto const factor = 0.4;
+  auto const maxWidth =
+      static_cast<int>(m_view->getSearchResultsTableWidth() * factor);
+  for (auto column = 0; column < numColumns; ++column) {
+    if (m_view->getSearchResultsColumnWidth(column) > maxWidth)
+      m_view->setSearchResultsColumnWidth(column, maxWidth);
+  }
 }
 
 /** Start a single autoreduction process. Called periodially to add and process
@@ -285,7 +358,7 @@ void RunsPresenter::checkForNewRuns() {
 
   // Initially we just need to start an ICat search and the reduction will be
   // run when the search completes
-  search(ISearcher::SearchType::AUTO);
+  search();
 }
 
 /** Run an autoreduction process based on the latest search results
@@ -316,17 +389,42 @@ bool RunsPresenter::isAnyBatchAutoreducing() const {
   return m_mainPresenter->isAnyBatchAutoreducing();
 }
 
-bool RunsPresenter::isOverwritingTablePrevented() const {
-  return m_mainPresenter->isBatchUnsaved() && isOverwriteBatchPrevented();
+bool RunsPresenter::changeInstrumentPrevented(
+    std::string const &newName) const {
+  return newName != instrumentName() && overwriteSearchResultsPrevented();
 }
 
-bool RunsPresenter::isOverwriteBatchPrevented() const {
-  return m_mainPresenter->isWarnDiscardChangesChecked() &&
-         !m_messageHandler->askUserDiscardChanges();
+bool RunsPresenter::hasUnsavedChanges() const {
+  return m_tableUnsaved || m_searcher->hasUnsavedChanges();
+}
+
+bool RunsPresenter::overwriteSearchResultsAndTablePrevented() const {
+  return hasUnsavedChanges() &&
+         !m_mainPresenter->discardChanges(
+             "This will cause unsaved changes in the search results "
+             "and main table to be lost. Continue?");
+}
+
+bool RunsPresenter::overwriteTablePrevented() const {
+  return m_tableUnsaved &&
+         !m_mainPresenter->discardChanges("This will cause unsaved changes in "
+                                          "the table to be lost. Continue?");
+}
+
+bool RunsPresenter::overwriteSearchResultsPrevented() const {
+  return m_searcher->hasUnsavedChanges() &&
+         !m_mainPresenter->discardChanges(
+             "This will cause unsaved changes in the search results to be "
+             "lost. Continue?");
 }
 
 bool RunsPresenter::searchInProgress() const {
   return m_searcher->searchInProgress();
+}
+
+SearchCriteria RunsPresenter::searchCriteria() const {
+  return SearchCriteria{m_view->getSearchInstrument(), m_view->getSearchCycle(),
+                        m_view->getSearchString()};
 }
 
 int RunsPresenter::percentComplete() const {
@@ -396,7 +494,7 @@ void RunsPresenter::transfer(const std::set<int> &rowsToTransfer,
 
     for (auto rowIndex : rowsToTransfer) {
       auto const &result = m_searcher->getSearchResult(rowIndex);
-      if (result.hasError())
+      if (result.hasError() || result.exclude())
         continue;
       auto row = validateRowFromRunAndTheta(result.runNumber(), result.theta());
       assert(row.is_initialized());
@@ -419,6 +517,7 @@ void RunsPresenter::updateWidgetEnabledState() const {
                                     !isAnyBatchAutoreducing());
   m_view->setSearchTextEntryEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setSearchButtonEnabled(!isAutoreducing() && !searchInProgress());
+  m_view->setSearchResultsEnabled(!isAutoreducing() && !searchInProgress());
   m_view->setAutoreduceButtonEnabled(!isAnyBatchAutoreducing() &&
                                      !isProcessing() && !searchInProgress());
   m_view->setAutoreducePauseButtonEnabled(isAutoreducing());

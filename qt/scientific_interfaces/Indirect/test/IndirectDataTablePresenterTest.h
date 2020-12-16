@@ -55,7 +55,7 @@ private:
 GNU_DIAG_OFF_SUGGEST_OVERRIDE
 
 /// Mock object to mock the model
-class MockIndirectDataTableModel : public IIndirectFitData {
+class MockIndirectDataTableModel : public IIndirectFitDataModel {
 public:
   MOCK_CONST_METHOD1(hasWorkspace, bool(std::string const &workspaceName));
   MOCK_CONST_METHOD1(

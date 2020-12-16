@@ -84,6 +84,13 @@ set ( TEST_PY_FILES
    elemental_analysis/load_model_test.py
    elemental_analysis_2/elemental_analysis_context_test.py
    elemental_analysis_2/elemental_analysis_main_GUI_test.py
+   elemental_analysis_2/elemental_analysis_load_model_test.py
+   elemental_analysis_2/elemental_analysis_load_widget_presenter_test.py
+   elemental_analysis_2/elemental_analysis_loadfile_model_test.py
+   elemental_analysis_2/elemental_analysis_loadrun_model_test.py
+   elemental_analysis_2/elemental_analysis_loadrun_presenter_single_run_test.py
+   elemental_analysis_2/elemental_analysis_loadrun_presenter_increment_decrement_test.py
+   elemental_analysis_2/elemental_analysis_loadutils_test.py
 )
 
 # LoadWidgetModel_test.py, LoadWidgetPresenter_test.py and LoadWidgetView_test.py are currently not Qt5 compatible

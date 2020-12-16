@@ -7,9 +7,12 @@
 from qtpy import QtWidgets, QtCore
 
 import Muon.GUI.Common.message_box as message_box
+from Muon.GUI.Common.contexts.muon_data_context import MuonDataContext
 from Muon.GUI.Common.help_widget.help_widget_presenter import HelpWidget
 from Muon.GUI.Common.dock.dockable_tabs import DetachableTabWidget
+from Muon.GUI.Common.muon_load_data import MuonLoadData
 from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
+from Muon.GUI.ElementalAnalysis2.load_widget.load_widget import LoadWidget
 
 
 class ElementalAnalysisGui(QtWidgets.QMainWindow):
@@ -26,6 +29,8 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
         self.setFocusPolicy(QtCore.Qt.StrongFocus)
         self.setObjectName("ElementalAnalysis2")
+        self.loaded_data = MuonLoadData()
+        self.data_context = MuonDataContext('Muon Data', self.loaded_data)
         self.context = ElementalAnalysisContext()
         self.current_tab = ''
 
@@ -36,7 +41,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
 
         central_widget = QtWidgets.QWidget()
         vertical_layout = QtWidgets.QVBoxLayout()
-        vertical_layout.addWidget(self.load_widget)
+        vertical_layout.addWidget(self.load_widget.view)
         vertical_layout.addWidget(self.tabs)
         vertical_layout.addWidget(self.help_widget.view)
         central_widget.setLayout(vertical_layout)
@@ -45,7 +50,7 @@ class ElementalAnalysisGui(QtWidgets.QMainWindow):
         self.setWindowTitle(self.context.name)
 
     def setup_dummy(self):
-        self.load_widget = QtWidgets.QLineEdit("load")
+        self.load_widget = LoadWidget(self.loaded_data, self.context, parent=self)
         self.home_tab = QtWidgets.QLineEdit("home")
         self.grouping_tab_widget = QtWidgets.QLineEdit("grouping")
         self.fitting_tab = QtWidgets.QLineEdit("fitting")
