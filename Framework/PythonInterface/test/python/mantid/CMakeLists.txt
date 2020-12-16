@@ -4,6 +4,7 @@ add_subdirectory(geometry)
 add_subdirectory(api)
 add_subdirectory(dataobjects)
 add_subdirectory(plots)
+add_subdirectory(utils)
 add_subdirectory(_plugins)
 
 set(TEST_PY_FILES
