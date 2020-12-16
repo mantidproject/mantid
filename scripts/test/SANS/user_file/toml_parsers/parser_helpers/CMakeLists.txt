@@ -1,7 +1,6 @@
 set(TEST_PY_FILES
-    toml_parser_test.py
-    toml_v1_parser_test.py
-    TomlV1ParserTest.py
+    toml_parser_impl_base_test.py
+    wavelength_parser_test.py
 )
 
 add_subdirectory(parser_helpers)
