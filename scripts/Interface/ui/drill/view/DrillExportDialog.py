@@ -20,6 +20,11 @@ class DrillExportDialog(QDialog):
     """
     _presenter = None
 
+    """
+    Dictionnary of algorithm names and their corresponding QCheckBox.
+    """
+    _widgets = None
+
     def __init__(self, parent=None):
         """
         Create the export dialog.
@@ -35,6 +40,7 @@ class DrillExportDialog(QDialog):
         self.applyButton.clicked.connect(
                 lambda : self.accepted.emit()
                 )
+        self._widgets = dict()
 
     def setPresenter(self, presenter):
         """
@@ -55,4 +61,27 @@ class DrillExportDialog(QDialog):
         """
         for i in range(len(algorithms)):
             widget = QCheckBox(algorithms[i], self)
+            self._widgets[algorithms[i]] = widget
             self.algoList.insertWidget(i, widget)
+
+    def setAlgorithmCheckStates(self, states):
+        """
+        Set the check state of algorithm.
+
+        Args:
+            sates (dict(str:bool)): for each algorithm name, a bool to set its
+                                    check state
+        """
+        for a,s in states.items():
+            if a in self._widgets:
+                self._widgets[a].setChecked(s)
+
+    def getAlgorithmCheckStates(self):
+        """
+        Get the check state of algorithms.
+
+        Returns:
+            dict(str:bool): for each algorithm name, a bool to set its check
+                            state
+        """
+        return {a:w.isChecked() for a,w in self._widgets.items()}

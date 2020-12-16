@@ -34,3 +34,35 @@ class DrillExportModel:
             list(str): names of algorithms
         """
         return [algo for algo in self._exportAlgorithms.keys()]
+
+    def isAlgorithmActivated(self, algorithm):
+        """
+        Get the state of a specific algorithm.
+
+        Args:
+            algorithm: name of the algo
+        """
+        if algorithm in self._exportAlgorithms:
+            return self._exportAlgorithms[algorithm]
+        else:
+            return False
+
+    def activateAlgorithm(self, algorithm):
+        """
+        Activate a spefific algorithm.
+
+        Args:
+            algorithm (str): name of the algo
+        """
+        if algorithm in self._exportAlgorithms:
+            self._exportAlgorithms[algorithm] = True
+
+    def inactivateAlgorithm(self, algorithm):
+        """
+        Inactivate a specific algorithm.
+
+        Args:
+            algorithm (str): name of the algo
+        """
+        if algorithm in self._exportAlgorithms:
+            self._exportAlgorithms[algorithm] = False

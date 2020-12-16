@@ -29,5 +29,23 @@ class DrillExportPresenter:
         self._view = view
         self._model = model
         self._view.setPresenter(self)
-        self._view.setAlgorithms(self._model.getAlgorithms())
+        algorithms = self._model.getAlgorithms()
+        self._view.setAlgorithms(algorithms)
+        states = dict()
+        for a in algorithms:
+            states[a] = self._model.isAlgorithmActivated(a)
+        self._view.setAlgorithmCheckStates(states)
+        self._view.accepted.connect(self.onAccept)
         self._view.show()
+
+    def onAccept(self):
+        """
+        Triggered when the view has been validated. This method saves the
+        activation state of each algorithm in the model.
+        """
+        states = self._view.getAlgorithmCheckStates()
+        for a,s in states.items():
+            if s:
+                self._model.activateAlgorithm(a)
+            else:
+                self._model.inactivateAlgorithm(a)
