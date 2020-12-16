@@ -15,6 +15,9 @@ _EXTENSIONS_NXS = ["_event.nxs", ".nxs.h5"]
 
 
 def _getBasename(filename):
+    """
+    Helper function to get the filename without the path or extension
+    """
     if type(filename) == list:
         filename = filename[0]
     name = os.path.split(filename)[-1]
@@ -52,6 +55,17 @@ def calculate_absorption_correction(filename, abs_method, char_dict, sample_form
     A_c = A_cc*A_ssc/A_csc
 
     This will then return (A_s, A_c)
+
+    :param filename: File to be used for absorption correction
+    :param abs_method: Type of absorption correction: None, SampleOnly, SampleAndContainer, FullPaalmanPings
+    :param char_dict: Characterization dictionary (see PDDetermineCharacterization) for creating donor workspace
+    :param sample_formula: Sample formula to specify the Material for absorption correction
+    :param mass_density: Mass density of the sample to specify the Material for absorption correction
+    :param number_density: Optional number density of sample to be added to the Material for absorption correction
+    :param container_shape: Shape definition of container, such as PAC06.
+    :param num_wl_bins: Number of bins for calculating wavelength
+    :param element_size: Size of one side of the integration element cube in mm
+    :return:
     """
     if abs_method == "None":
         return None, None
@@ -85,7 +99,7 @@ def calculate_absorption_correction(filename, abs_method, char_dict, sample_form
                              ScatterFrom='Container',
                              ElementSize=element_size)
         return absName + '_ass', absName + '_acc'
-    else:
+    elif abs_method == "FullPaalmanPings":
         PaalmanPingsAbsorptionCorrection(donorWS,
                                          OutputWorkspace=absName,
                                          ElementSize=element_size)
@@ -96,13 +110,25 @@ def calculate_absorption_correction(filename, abs_method, char_dict, sample_form
                RHSWorkspace=absName + '_acsc',
                OutputWorkspace=absName + '_ac')
         return absName + '_assc', absName + '_ac'
+    else:
+        raise RuntimeWarning("Unrecognized absorption correction method '{}'".format(abs_method))
 
 
-def create_absorption_input(filename, char_dict, num_wl_bins,
+def create_absorption_input(filename, char_dict, num_wl_bins=1000,
                             material=None, geometry=None, environment=None,
                             opt_wl_min=0, opt_wl_max=Property.EMPTY_DBL):
     """
     Create an input workspace for carpenter or other absorption corrections
+
+    :param filename: Input file to retrieve properties from the sample log
+    :param char_dict: Characterization dictionary of input, see PDDetermineCharacterizations
+    :param num_wl_bins: The number of wavelength bins used for absorption correction
+    :param material: Optional material to use in SetSample
+    :param geometry: Optional geometry to use in SetSample
+    :param environment: Optional environment to use in SetSample
+    :param opt_wl_min: Optional minimum wavelength. If specified, this is used instead of from the char_dict
+    :param opt_wl_max: Optional maximum wavelength. If specified, this is used instead of from the char_dict
+    :return: Name of the donor workspace created
     """
     absName = '__{}_abs'.format(_getBasename(filename))
 
