@@ -14,6 +14,7 @@ New Features
 - Added a Dx data tab on the data window when a workspace has Dx data.
 - Added the ability to load 1d-Plots from MantidPlot project files in workbench.
 - Added QLineEdit to SampleLogs widget to allow filtering its entries
+- Time series sample logs in multiperiod event workspaces can now be filtered by current period.
 
 Improvements
 ############
