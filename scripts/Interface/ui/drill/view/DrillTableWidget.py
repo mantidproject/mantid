@@ -158,14 +158,51 @@ class DrillTableWidget(QTableWidget):
 
     def getSelectedCells(self):
         """
-        Get the coordinates of the selected cells.
+        Get the coordinates of the selected cells. These coordinates are sorted
+        by visual index to be able to copy(cut) paste in the same order.
 
         Returns:
             list(tuple(int, int)): the coordinates (row, column) of the
                 selected cells
         """
         selected_indexes = self.selectionModel().selectedIndexes()
-        return [(i.row(), i.column()) for i in selected_indexes]
+        cellsLi = []
+        cellsVi = []
+        for i in selected_indexes:
+            cellsLi.append((i.row(), i.column()))
+            cellsVi.append((self.visualRow(i.row()),
+                          self.visualColumn(i.column())))
+        return sorted(cellsLi, key=lambda i : cellsVi[cellsLi.index(i)][1])
+
+    def getSelectionShape(self):
+        """
+        Get the shape of the selection, the number of rows and the number of
+        columns.
+
+        Returns:
+        tuple(int, int): selection shape (n_rows, n_col), (0, 0) if the
+                         selection is empty or discontinuous
+        """
+        selection = self.getSelectedCells()
+        if not selection:
+            return (0, 0)
+        for i in range(len(selection)):
+            selection[i] = (self.visualRow(selection[i][0]),
+                            self.visualColumn(selection[i][1]))
+        rmin = selection[0][0]
+        rmax = rmin
+        cmin = selection[0][1]
+        cmax = cmin
+        for item in selection:
+            if item[0] > rmax:
+                rmax = item[0]
+            if item[1] > cmax:
+                cmax = item[1]
+        shape = (rmax - rmin + 1, cmax - cmin + 1)
+        if shape[0] * shape[1] != len(selection):
+            return (0, 0)
+        else:
+            return shape
 
     def getRowsFromSelectedCells(self):
         """

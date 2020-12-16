@@ -111,3 +111,28 @@ class PredictPeaksCalculateStructureFactorsTest(systemtesting.MantidSystemTest):
         for i in range(self.expected_num_peaks):
             peak = peaks_no_sf.getPeak(i)
             self.assertEqual(0.0, peak.getIntensity())
+
+
+class PredictPeaksTestDEMAND(systemtesting.MantidSystemTest):
+    def runTest(self):
+        HB3AAdjustSampleNorm(Filename="HB3A_exp0724_scan0183.nxs", OutputWorkspace='data')
+
+        peaks = PredictPeaks("data",
+                             ReflectionCondition='B-face centred',
+                             CalculateGoniometerForCW=True,
+                             Wavelength=1.008,
+                             InnerGoniometer=True,
+                             FlipX=True,
+                             MinAngle=-2,
+                             MaxAngle=90)
+
+        self.assertEqual(peaks.getNumberPeaks(), 57)
+        peak0 = peaks.getPeak(0)
+        self.assertDelta(peak0.getWavelength(), 1.008, 1e-5)
+        self.assertEqual(peak0.getH(), 0)
+        self.assertEqual(peak0.getK(), 0)
+        self.assertEqual(peak0.getL(), -14)
+        q_sample = peak0.getQSampleFrame()
+        self.assertDelta(q_sample[0], 4.45402, 1e-5)
+        self.assertDelta(q_sample[1], -0.419157, 1e-5)
+        self.assertDelta(q_sample[2], 0.0906594, 1e-5)

@@ -350,10 +350,17 @@ cd $BUILD_DIR
 ###############################################################################
 rm -f -- *.dmg *.rpm *.deb *.tar.gz *.tar.xz
 
+# if the last build had vates enabled then remove a problematic moc artifact
+# that is not regenerated. Temporary fix while we transition MantidPlot/Vates out
+if [[ -e $BUILD_DIR/CMakeCache.txt ]] && [[ ${JOB_NAME} != *clean* ]]; then
+    VATES_FLAG=$(grep 'MAKE_VATES:BOOL' $BUILD_DIR/CMakeCache.txt)
+    find $BUILD_DIR/qt/widgets/common -name moc_MantidTreeModel.cpp -delete
+fi
+
 ###############################################################################
 # CMake configuration
 ###############################################################################
-$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DMAKE_VATES=ON -DParaView_DIR=${PARAVIEW_DIR} -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
+$SCL_ENABLE "${CMAKE_EXE} ${CMAKE_GENERATOR} -DCMAKE_BUILD_TYPE=${BUILD_CONFIG} -DENABLE_CPACK=ON -DENABLE_MANTIDPLOT=OFF -DMAKE_VATES=OFF -DParaView_DIR= -DMANTID_DATA_STORE=${MANTID_DATA_STORE} -DDOCS_HTML=ON -DENABLE_CONDA=ON -DCOLORED_COMPILER_OUTPUT=OFF ${DIST_FLAGS} ${PACKAGINGVARS} ${CLANGTIDYVAR} ${SANITIZER_FLAGS} .."
 
 ###############################################################################
 # Coverity build should exit early

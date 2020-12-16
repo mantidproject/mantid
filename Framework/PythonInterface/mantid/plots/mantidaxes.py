@@ -450,9 +450,17 @@ class MantidAxes(Axes):
         kwargs['distribution'] = not self.get_artist_normalization_state(artist)
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
 
+        # deal with MDHisto workspace
+        if workspace.isMDHistoWorkspace():
+            # the MDHisto does not have the distribution concept.
+            # This is available only for Workspace2D
+            if 'distribution' in kwargs.keys():
+                del kwargs['distribution']
         # check if it is a sample log plot
-        if spec_num is None:
+        elif spec_num is None:
             sample_log_plot_details = self.get_artists_sample_log_plot_details(artist)
+            # we plot MDHisto workspaces, Workspace2D spectra, and Sample Logs
+            # if you get here, the LogName is valid and not None
             kwargs['LogName'] = sample_log_plot_details[0]
             if sample_log_plot_details[1] is not None:
                 kwargs['Filtered'] = sample_log_plot_details[1]
@@ -462,7 +470,7 @@ class MantidAxes(Axes):
             errorbars = False
             # neither does distribution
             if 'distribution' in kwargs.keys():
-                    del kwargs['distribution']
+                del kwargs['distribution']
         else:
             if kwargs.get('axis', None) == MantidAxType.BIN:
                 workspace_index = spec_num
@@ -913,20 +921,23 @@ class MantidAxes(Axes):
                     col.remove()
             if hasattr(artist_orig, 'colorbar_cid'):
                 artist_orig.callbacksSM.disconnect(artist_orig.colorbar_cid)
-        if artist_orig.norm.vmin == 0:  # avoid errors with log 0
-            artist_orig.norm.vmin += 1e-6
-        artists_new = colorfunc(self, workspace, norm=artist_orig.norm,  **kwargs)
-
-        artists_new.set_cmap(artist_orig.cmap)
-        if hasattr(artist_orig, 'interpolation'):
-            artists_new.set_interpolation(artist_orig.get_interpolation())
-
-        artists_new.autoscale()
-        artists_new.set_norm(
-            type(artist_orig.norm)(vmin=artists_new.norm.vmin, vmax=artists_new.norm.vmax))
-
+        # If the colormap has been overridden then it needs to be passed in at
+        # creation time
+        if 'colors' not in kwargs:
+            kwargs['cmap'] = artists_orig[-1].cmap
+        artists_new = colorfunc(self, workspace, **kwargs)
+        # Copy properties from old to new
         if not isinstance(artists_new, Iterable):
             artists_new = [artists_new]
+        # assume 1:1 match between old/new artist lists
+        # and update relevant properties
+        for src, dest in zip(artists_orig, artists_new):
+            if hasattr(dest, 'update_from'):
+                dest.update_from(src)
+            if hasattr(dest, 'set_interpolation'):
+                dest.set_interpolation(src.get_interpolation())
+            dest.autoscale()
+            dest.set_norm(src.norm)
 
         try:
             axesfunctions.update_colorplot_datalimits(self, artists_new)

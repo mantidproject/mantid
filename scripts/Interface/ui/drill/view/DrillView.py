@@ -280,35 +280,6 @@ class DrillView(QMainWindow):
             self.cycleAndExperimentChanged.emit(cycle, exp)
         self.setWindowModified(True)
 
-    def _getSelectionShape(self, selection):
-        """
-        Get the shape of the selection, the number of rows and the number of
-        columns.
-
-        Args:
-            selection (list(tuple(int, int))): list of selected cells indexes
-
-        Returns:
-            tuple(int, int): selection shape (n_rows, n_col), (0, 0) if the
-                             selection is empty or discontinuous
-        """
-        if not selection:
-            return (0, 0)
-        rmin = selection[0][0]
-        rmax = rmin
-        cmin = selection[0][1]
-        cmax = cmin
-        for item in selection:
-            if item[0] > rmax:
-                rmax = item[0]
-            if item[1] > cmax:
-                cmax = item[1]
-        shape = (rmax - rmin + 1, cmax - cmin + 1)
-        if shape[0] * shape[1] != len(selection):
-            return (0, 0)
-        else:
-            return shape
-
     def copySelectedCells(self):
         """
         Copy in the local buffer the content of the selected cells. The
@@ -318,8 +289,7 @@ class DrillView(QMainWindow):
         cells = self.table.getSelectedCells()
         if not cells:
             return
-        cells.sort()
-        shape = self._getSelectionShape(cells)
+        shape = self.table.getSelectionShape()
         if shape == (0, 0):
             QMessageBox.warning(self, "Selection error",
                                 "Please select adjacent cells")
@@ -361,8 +331,7 @@ class DrillView(QMainWindow):
         if not cells:
             QMessageBox.warning(self, "Paste error", "No cell selected")
             return
-        cells.sort()
-        shape = self._getSelectionShape(cells)
+        shape = self.table.getSelectionShape()
         if self.bufferShape == (1, 1) and shape != (0, 0):
             for cell in cells:
                 self.table.setCellContents(cell[0], cell[1], self.buffer[0])
@@ -498,7 +467,9 @@ class DrillView(QMainWindow):
         Copy (and increment) the contents of the first selected cell in the
         other ones. If a numors string is detected in the first cell, the
         numors values are incremented by the number found in the ui spinbox
-        associated with this action.
+        associated with this action. If a single row is selected, the increment
+        will be propagated along that row. Otherwise, the increment is
+        propagated along columns.
         """
         def inc(numors, i):
             """
@@ -553,10 +524,15 @@ class DrillView(QMainWindow):
 
         increment = self.increment.value()
         cells = self.table.getSelectedCells()
+        # check if increment should append along columns
+        columnIncrement = (len(self.table.getRowsFromSelectedCells()) > 1)
         if not cells:
             return
         # increment or copy the content of the previous cell
         for i in range(1, len(cells)):
+            # if we increment along columns and this is a new column
+            if columnIncrement and cells[i][1] != cells[i-1][1]:
+                continue
             contents = self.table.getCellContents(cells[i-1][0], cells[i-1][1])
             self.table.setCellContents(cells[i][0], cells[i][1],
                                        inc(contents, increment))

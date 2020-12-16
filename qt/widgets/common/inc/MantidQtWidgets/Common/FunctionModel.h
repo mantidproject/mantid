@@ -67,6 +67,7 @@ public:
                             const QString &tie) override;
   void setLocalParameterConstraint(const QString &parName, int i,
                                    const QString &constraint) override;
+  void setGlobalParameterValue(const QString &paramName, double value) override;
   void changeTie(const QString &parName, const QString &tie) override;
   void addConstraint(const QString &functionIndex,
                      const QString &constraint) override;
@@ -85,6 +86,8 @@ protected:
   MultiDomainFunction_sptr m_function;
 
 private:
+  IFunction_sptr getFitFunctionWithGlobals(std::size_t const &index) const;
+
   void checkDatasets();
   void checkNumberOfDomains(const QList<FunctionModelDataset> &datasets) const;
   int numberOfDomains(const QList<FunctionModelDataset> &datasets) const;

@@ -138,7 +138,7 @@ void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm,
 }
 
 void addInputDataToSimultaneousFit(const IAlgorithm_sptr &fitAlgorithm,
-                                   const IIndirectFitData *fittingData) {
+                                   const IIndirectFitDataModel *fittingData) {
   for (auto index = FitDomainIndex{0};
        index < FitDomainIndex{fittingData->getNumberOfDomains()}; index++) {
     std::string suffix =
@@ -208,7 +208,7 @@ std::ostringstream &addInputString(const std::string &workspaceName,
         "Workspace name is empty. The sample workspace may not be loaded.");
 }
 
-std::string constructInputString(const IIndirectFitData *fittingData) {
+std::string constructInputString(const IIndirectFitDataModel *fittingData) {
   std::ostringstream input;
   for (auto index = FitDomainIndex{0};
        index < fittingData->getNumberOfDomains(); index++) {

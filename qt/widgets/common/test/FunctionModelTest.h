@@ -151,6 +151,40 @@ public:
     TS_ASSERT_EQUALS(locals[0], "A1");
   }
 
+  void test_that_setParameter_will_set_a_local_parameter_as_expected() {
+    m_model->setFunctionString("composite=MultiDomainFunction,NumDeriv=true;"
+                               "name=LinearBackground,A0=1,A1=2,$domains=i;"
+                               "name=LinearBackground,A0=1,A1=2,$domains=i");
+
+    m_model->setNumberDomains(2);
+    m_model->setCurrentDomainIndex(0);
+    m_model->setParameter("A0", 5.0);
+
+    TS_ASSERT_EQUALS(m_model->getFitFunction()->asString(),
+                     "composite=MultiDomainFunction,NumDeriv=true;"
+                     "name=LinearBackground,A0=5,A1=2,$domains=i;"
+                     "name=LinearBackground,A0=1,A1=2,$domains=i;"
+                     "name=LinearBackground,A0=1,A1=2,$domains=All");
+  }
+
+  void test_that_setParameter_will_set_a_global_parameter_as_expected() {
+    m_model->setFunctionString("composite=MultiDomainFunction,NumDeriv=true;"
+                               "name=LinearBackground,A0=1,A1=2,$domains=i;"
+                               "name=LinearBackground,A0=1,A1=2,$domains=i");
+
+    m_model->setNumberDomains(2);
+    m_model->setCurrentDomainIndex(0);
+    m_model->setGlobalParameters(QStringList("A0"));
+    m_model->setParameter("A0", 5.0);
+
+    TS_ASSERT_EQUALS(m_model->getFitFunction()->asString(),
+                     "composite=MultiDomainFunction,NumDeriv=true;"
+                     "name=LinearBackground,A0=5,A1=2,$domains=i;"
+                     "name=LinearBackground,A0=5,A1=2,$domains=i;"
+                     "name=LinearBackground,A0=5,A1=2,$domains=All;"
+                     "ties=(f2.A0=f0.A0,f1.A0=f0.A0)");
+  }
+
   void test_set_number_domains_after_clear() {
     m_model->clear();
     m_model->setNumberDomains(1);

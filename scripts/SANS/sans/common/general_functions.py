@@ -499,12 +499,11 @@ class EventSliceParser(object):
             return False
 
         split_line = stripped_line.split(',')
-        for character in split_line:
-            if len(character) > 1 or len(character) == 0:
-                # We likely have something like 1,2- or 1,
+        for val in split_line:
+            try:
+                float(val)
+            except ValueError:
                 return False
-            elif not character.isdigit():
-                raise ValueError("The character {0} is not a digit.".format(character))
 
         # Forward on result
         self.user_input = split_line
@@ -679,8 +678,7 @@ def get_standard_output_workspace_name(state, reduction_data_type,
         period_as_string = ""
 
     # 3. Detector name
-    move = state.move
-    detectors = move.detectors
+    detectors = state.instrument_info.detector_names
     if reduction_data_type is ReductionMode.MERGED:
         detector_name_short = "merged"
     elif reduction_data_type is ReductionMode.HAB:

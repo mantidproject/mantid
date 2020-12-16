@@ -123,37 +123,12 @@ class AboutPresenterTest(TestCase):
         self.assertEqual(0, mock_ConfigService.mock_instrument.name.call_count)
         presenter = AboutPresenter(None)
         self.assertEqual(0, mock_ConfigService.setFacility.call_count)
-        self.assertEqual(3, mock_ConfigService.getFacility.call_count)
+        self.assertEqual(2, mock_ConfigService.getFacility.call_count)
         self.assertEqual(2, mock_ConfigService.mock_facility.name.call_count)
         self.assert_connected_once(presenter.view.cbFacility, presenter.view.cbFacility.currentTextChanged)
 
         mock_ConfigService.getInstrument.assert_called_once_with()
         self.assertEqual(2, mock_ConfigService.mock_instrument.name.call_count)
-        self.assert_connected_once(presenter.view.cbInstrument, presenter.view.cbInstrument.currentTextChanged)
-
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_setup_facilities_with_invalid_default_facility_chooses_first(self, mock_ConfigService):
-        mock_ConfigService.getFacility.side_effect = [RuntimeError("Invalid facility name"),
-                                                      mock_ConfigService.mock_facility,
-                                                      mock_ConfigService.mock_facility]
-        presenter = AboutPresenter(None)
-
-        self.assertEqual(mock_ConfigService.mock_facility.name(),
-                         presenter.view.cbFacility.currentText())
-        self.assertEqual(mock_ConfigService.mock_instrument.name(),
-                         presenter.view.cbInstrument.currentText())
-        self.assert_connected_once(presenter.view.cbFacility, presenter.view.cbFacility.currentTextChanged)
-        self.assert_connected_once(presenter.view.cbInstrument, presenter.view.cbInstrument.currentTextChanged)
-
-    @patch(CONFIG_SERVICE_CLASSPATH, new_callable=MockConfigService)
-    def test_setup_facilities_with_invalid_default_instrument_chooses_first(self, mock_ConfigService):
-        mock_ConfigService.getInstrument.side_effect = [RuntimeError("Invalid instrument name"),
-                                                        mock_ConfigService.mock_instrument]
-        presenter = AboutPresenter(None)
-
-        self.assertEqual(mock_ConfigService.mock_instrument.name(),
-                         presenter.view.cbInstrument.currentText())
-        self.assert_connected_once(presenter.view.cbFacility, presenter.view.cbFacility.currentTextChanged)
         self.assert_connected_once(presenter.view.cbInstrument, presenter.view.cbInstrument.currentTextChanged)
 
     def test_setup_checkbox_signals(self):

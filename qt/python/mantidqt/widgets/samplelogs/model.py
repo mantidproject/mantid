@@ -182,9 +182,9 @@ class SampleLogsModel(object):
         """Checks if workspace is a MD Workspace"""
         return isinstance(self._ws, MultipleExperimentInfos)
 
-    def getItemModel(self):
+    def getItemModel(self, searched_key=''):
         """Return a QModel made from the current workspace. This should be set
-        onto a QTableView
+        onto a QTableView. The searched_key allows for filtering log entries.
         """
 
         def create_table_item(column, itemname, invalid_value_count, log_size, callable, *args):
@@ -214,6 +214,8 @@ class SampleLogsModel(object):
         logs_to_hide = self.get_hidden_logs()
         for key in self.get_log_names():
             if key in logs_to_hide:
+                continue
+            if searched_key.casefold() not in key.casefold():
                 continue
             invalid_value_count = 0
             if key in logs_to_highlight.keys():

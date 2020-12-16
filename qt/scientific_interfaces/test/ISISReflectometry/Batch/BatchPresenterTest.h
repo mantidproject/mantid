@@ -135,9 +135,7 @@ public:
 
   void testWarnProcessAllWhenReductionResumedOptionChecked() {
     auto presenter = makePresenter();
-    ON_CALL(*m_jobRunner, getProcessAll()).WillByDefault(Return(true));
-    ON_CALL(m_mainPresenter, isWarnProcessAllChecked())
-        .WillByDefault(Return(true));
+    EXPECT_CALL(*m_jobRunner, getProcessAll()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
     EXPECT_CALL(m_mainPresenter, isProcessAllPrevented())
         .Times(1)
@@ -148,9 +146,7 @@ public:
 
   void testNoWarnProcessAllWhenReductionResumedOptionUnchecked() {
     auto presenter = makePresenter();
-    ON_CALL(*m_jobRunner, getProcessAll()).WillByDefault(Return(true));
-    ON_CALL(m_mainPresenter, isWarnProcessAllChecked())
-        .WillByDefault(Return(false));
+    EXPECT_CALL(*m_jobRunner, getProcessAll()).Times(1).WillOnce(Return(true));
     EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
     EXPECT_CALL(m_mainPresenter, isProcessAllPrevented())
         .Times(1)
@@ -161,9 +157,9 @@ public:
 
   void testWarnProcessPartialGroupWhenReductionResumedOptionChecked() {
     auto presenter = makePresenter();
-    ON_CALL(*m_jobRunner, getProcessPartial()).WillByDefault(Return(true));
-    ON_CALL(m_mainPresenter, isWarnProcessPartialGroupChecked())
-        .WillByDefault(Return(true));
+    EXPECT_CALL(*m_jobRunner, getProcessPartial())
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
     EXPECT_CALL(m_mainPresenter, isProcessPartialGroupPrevented())
         .Times(1)
@@ -174,9 +170,9 @@ public:
 
   void testNoWarnProcessPartialGroupWhenReductionResumedOptionUnchecked() {
     auto presenter = makePresenter();
-    ON_CALL(*m_jobRunner, getProcessPartial()).WillByDefault(Return(true));
-    ON_CALL(m_mainPresenter, isWarnProcessPartialGroupChecked())
-        .WillByDefault(Return(false));
+    EXPECT_CALL(*m_jobRunner, getProcessPartial())
+        .Times(1)
+        .WillOnce(Return(true));
     EXPECT_CALL(*m_jobRunner, notifyReductionResumed()).Times(1);
     EXPECT_CALL(m_mainPresenter, isProcessPartialGroupPrevented())
         .Times(1)
