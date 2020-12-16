@@ -224,6 +224,14 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
     def simultaneous_fit_by(self):
         return self.simul_fit_by_combo.currentText()
 
+    @simultaneous_fit_by.setter
+    def simultaneous_fit_by(self, fit_by_text):
+        index = self.simul_fit_by_combo.findText(fit_by_text)
+        if index != -1:
+            self.simul_fit_by_combo.blockSignals(True)
+            self.simul_fit_by_combo.setCurrentIndex(index)
+            self.simul_fit_by_combo.blockSignals(False)
+
     @property
     def simultaneous_fit_by_specifier(self):
         return self.simul_fit_by_specifier.currentText()

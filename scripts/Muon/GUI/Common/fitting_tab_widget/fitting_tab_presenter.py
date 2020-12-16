@@ -153,9 +153,9 @@ class FittingTabPresenter(object):
         self.update_model_from_view(fit_to_raw=self.view.fit_to_raw)
 
     def handle_fit_type_changed(self):
-        if self.view.tf_asymmetry_mode and self.view.is_simul_fit:
-            self.view.warning_popup("Cannot switch to simultaneous fitting while TF Asymmetry Mode is checked.")
-            self.view.is_simul_fit = False
+        if self.view.tf_asymmetry_mode:
+            self.view.warning_popup("Cannot change Fitting Mode while TF Asymmetry Mode is checked.")
+            self.view.is_simul_fit = not self.view.is_simul_fit
             return
 
         self.view.undo_fit_button.setEnabled(False)
@@ -398,6 +398,11 @@ class FittingTabPresenter(object):
         self.selected_single_fit_notifier.notify_subscribers(self.get_selected_fit_workspaces())
 
     def handle_fit_by_changed(self):
+        if self.view.tf_asymmetry_mode:
+            self.view.warning_popup("Cannot change Run - Group/Pair selection while TF Asymmetry Mode is checked.")
+            self.view.simultaneous_fit_by = "Run" if self.view.simultaneous_fit_by == "Group/Pair" else "Group/Pair"
+            return
+
         self.manual_selection_made = False  # reset manual selection flag
         self.update_selected_workspace_list_for_fit()
         self.view.simul_fit_by_specifier.setEnabled(True)
