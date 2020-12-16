@@ -568,7 +568,7 @@ public:
     AnalysisDataService::Instance().clear();
   }
 
-  void test_exclude_range() {
+  void test_single_exclude_range_single_Spectra() {
     HistogramData::Points points{-2, -1, 0, 1, 2};
     HistogramData::Counts counts(points.size(), 0.0);
     // This value should be excluded.
@@ -582,6 +582,54 @@ public:
     alg.initialize();
     alg.setPropertyValue("Input", "InputWS,i0");
     alg.setPropertyValue("Exclude", "-0.5, 0.5");
+    alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
+    alg.setProperty("CreateOutput", true);
+    alg.setPropertyValue("Function", "name=FlatBackground,A0=2");
+    alg.setPropertyValue("MaxIterations", "50");
+    alg.execute();
+
+    TS_ASSERT(alg.isExecuted());
+    AnalysisDataService::Instance().remove("InputWS");
+  }
+
+  void test_single_exclude_range_multiple_Spectra() {
+    HistogramData::Points points{-2, -1, 0, 1, 2};
+    HistogramData::Counts counts(points.size(), 0.0);
+    // This value should be excluded.
+    counts.mutableData()[2] = 10.0;
+    MatrixWorkspace_sptr ws(DataObjects::create<Workspace2D>(
+                                2, HistogramData::Histogram(points, counts))
+                                .release());
+    AnalysisDataService::Instance().addOrReplace("InputWS", ws);
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input", "InputWS,i0");
+    alg.setPropertyValue("Exclude", "-0.5, 0.5");
+    alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
+    alg.setProperty("CreateOutput", true);
+    alg.setPropertyValue("Function", "name=FlatBackground,A0=2");
+    alg.setPropertyValue("MaxIterations", "50");
+    alg.execute();
+
+    TS_ASSERT(alg.isExecuted());
+    AnalysisDataService::Instance().remove("InputWS");
+  }
+
+  void test_multiple_exclude_range_multiple_Spectra() {
+    HistogramData::Points points{-2, -1, 0, 1, 2};
+    HistogramData::Counts counts(points.size(), 0.0);
+    // This value should be excluded.
+    counts.mutableData()[2] = 10.0;
+    MatrixWorkspace_sptr ws(DataObjects::create<Workspace2D>(
+                                2, HistogramData::Histogram(points, counts))
+                                .release());
+    AnalysisDataService::Instance().addOrReplace("InputWS", ws);
+
+    PlotPeakByLogValue alg;
+    alg.initialize();
+    alg.setPropertyValue("Input", "InputWS,i0");
+    alg.setPropertyValue("Exclude", "-0.5, 0.5, 0.5, 0.5");
     alg.setPropertyValue("OutputWorkspace", "PlotPeakResult");
     alg.setProperty("CreateOutput", true);
     alg.setPropertyValue("Function", "name=FlatBackground,A0=2");

@@ -190,6 +190,7 @@ void PlotPeakByLogValue::exec() {
   m_baseName = getPropertyValue("OutputWorkspace");
   std::vector<double> startX = getProperty("StartX");
   std::vector<double> endX = getProperty("EndX");
+  std::vector<std::vector<double>> exclude = getExclude(wsNames.size());
 
   bool isDataName = false; // if true first output column is of type string and
                            // is the data source name
@@ -258,15 +259,17 @@ void PlotPeakByLogValue::exec() {
     if (startX.size() == 0) {
       fit = runSingleFit(createFitOutput, outputCompositeMembers,
                          outputConvolvedMembers, ifun, data, EMPTY_DBL(),
-                         EMPTY_DBL());
+                         EMPTY_DBL(), exclude[i]);
     } else if (startX.size() == 1) {
       fit =
           runSingleFit(createFitOutput, outputCompositeMembers,
-                       outputConvolvedMembers, ifun, data, startX[0], endX[0]);
+                         outputConvolvedMembers, ifun, data, startX[0], endX[0],
+                         exclude[i]);
     } else {
       fit =
           runSingleFit(createFitOutput, outputCompositeMembers,
-                       outputConvolvedMembers, ifun, data, startX[i], endX[i]);
+                         outputConvolvedMembers, ifun, data, startX[i], endX[i],
+                         exclude[i]);
     }
 
     ifun = fit->getProperty("Function");
@@ -428,7 +431,8 @@ PlotPeakByLogValue::createResultsTable(const std::string &logName,
 std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(
     bool createFitOutput, bool outputCompositeMembers,
     bool outputConvolvedMembers, const IFunction_sptr &ifun,
-    const InputSpectraToFit &data, double startX, double endX) {
+    const InputSpectraToFit &data, double startX, double endX,
+    std::vector<double> exclude) {
   g_log.debug() << "Fitting " << data.ws->getName() << " index " << data.i
                 << " with \n";
   g_log.debug() << ifun->asString() << '\n';
@@ -438,7 +442,6 @@ std::shared_ptr<Algorithm> PlotPeakByLogValue::runSingleFit(
 
   if (createFitOutput)
     wsBaseName = data.name + "_" + spectrum_index;
-  const std::vector<double> exclude = this->getProperty("Exclude");
   bool histogramFit = this->getPropertyValue("EvaluationType") == "Histogram";
   bool ignoreInvalidData = this->getProperty("IgnoreInvalidData");
 
@@ -538,6 +541,21 @@ std::string PlotPeakByLogValue::getMinimizerString(const std::string &wsName,
   }
 
   return format;
+}
+
+std::vector<std::vector<double>> PlotPeakByLogValue::getExclude(size_t numSpectra) {
+  std::vector<double> excludeList = getProperty("Exclude");
+  std::vector<std::vector<double>> excludeVector;
+  for (size_t i = 0; i < numSpectra*2; i += 2) {
+    if (i < excludeList.size()) {
+      std::vector<double> excludePair = {excludeList[i], excludeList[i + 1]};
+      excludeVector.push_back(std::vector<double>(excludePair));
+    } else {
+      std::vector<double> excludePair = {0.0, 0.0};
+      excludeVector.push_back(std::vector<double>(excludePair));
+    }
+  }
+  return excludeVector;
 }
 
 } // namespace Algorithms

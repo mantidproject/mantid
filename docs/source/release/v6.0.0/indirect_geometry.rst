@@ -30,5 +30,6 @@ Bug Fixes
 - Fixed a bug in Indirect Data Reduction causing the colon separator in Custom Grouping to act like a dash separator. This colon separator should now act
   as expected (i.e. `1:5` means the same as `1,2,3,4,5`).
 - Fixed a crash on Indirect Bayes ResNorm when clicking `Plot Current Preview` without a workspace loaded.
+- A bug has been fixed that caused fitting tabs in data reduction to use the X mask of the first spectra for every single spectra.
 
 :ref:`Release 6.0.0 <v6.0.0>`

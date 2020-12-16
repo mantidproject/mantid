@@ -70,7 +70,8 @@ private:
   std::shared_ptr<Algorithm>
   runSingleFit(bool createFitOutput, bool outputCompositeMembers,
                bool outputConvolvedMembers, const API::IFunction_sptr &ifun,
-               const InputSpectraToFit &data, double startX, double endX);
+               const InputSpectraToFit &data, double startX, double endX,
+               std::vector<double> exclude);
 
   double calculateLogValue(const std::string &logName,
                            const InputSpectraToFit &data);
@@ -99,6 +100,9 @@ private:
   /// Create a minimizer string based on template string provided
   std::string getMinimizerString(const std::string &wsName,
                                  const std::string &wsIndex);
+
+  /// Create a vecotr of linked exclude starts and ends
+  std::vector<std::vector<double>> getExclude(size_t numSpectra);
 
   /// Base name of output workspace
   std::string m_baseName;
