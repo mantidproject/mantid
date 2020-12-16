@@ -443,55 +443,60 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                             OutputWorkspace=self.output_panels)
 
     def processTransmissions(self):
-        [process_transmission_absorber, transmission_absorber_name] = \
-                needs_processing(self.atransmission, 'Absorber')
-        self.progress.report('Processing transmission absorber')
-        if process_transmission_absorber:
-            SANSILLReduction(Run=self.atransmission,
-                             ProcessAs='Absorber',
-                             NormaliseBy=self.normalise,
-                             OutputWorkspace=transmission_absorber_name)
-
-        [process_transmission_beam, transmission_beam_name] = \
-            needs_processing(self.btransmission, 'Beam')
-        flux_name = transmission_beam_name + '_Flux'
-        self.progress.report('Processing transmission beam')
-        if process_transmission_beam:
-            SANSILLReduction(Run=self.btransmission,
-                             ProcessAs='Beam',
-                             NormaliseBy=self.normalise,
-                             OutputWorkspace=transmission_beam_name,
-                             BeamRadius=self.tr_radius,
-                             FluxOutputWorkspace=flux_name,
-                             AbsorberInputWorkspace=
-                             transmission_absorber_name)
-
-        [process_container_transmission, container_transmission_name] = \
-            needs_processing(self.ctransmission, 'Transmission')
-        self.progress.report('Processing container transmission')
-        if process_container_transmission:
-            SANSILLReduction(Run=self.ctransmission,
-                             ProcessAs='Transmission',
-                             OutputWorkspace=container_transmission_name,
-                             AbsorberInputWorkspace=
-                             transmission_absorber_name,
-                             BeamInputWorkspace=transmission_beam_name,
-                             NormaliseBy=self.normalise,
-                             BeamRadius=self.tr_radius)
-
-        [process_sample_transmission, sample_transmission_name] = \
-            needs_processing(self.stransmission, 'Transmission')
-        self.progress.report('Processing sample transmission')
-        if process_sample_transmission:
-            SANSILLReduction(Run=self.stransmission,
-                             ProcessAs='Transmission',
-                             OutputWorkspace=sample_transmission_name,
-                             AbsorberInputWorkspace=
-                             transmission_absorber_name,
-                             BeamInputWorkspace=transmission_beam_name,
-                             NormaliseBy=self.normalise,
-                             BeamRadius=self.tr_radius)
-        return container_transmission_name, sample_transmission_name
+        container_transmission_names = []
+        sample_transmission_names = []
+        for transmission in self.atransmission.split(','):
+            [process_transmission_absorber, transmission_absorber_name] = \
+                needs_processing(transmission, 'Absorber')
+            self.progress.report('Processing transmission absorber')
+            if process_transmission_absorber:
+                SANSILLReduction(Run=transmission,
+                                 ProcessAs='Absorber',
+                                 NormaliseBy=self.normalise,
+                                 OutputWorkspace=transmission_absorber_name)
+        for transmission in self.btransmission.split(','):
+            [process_transmission_beam, transmission_beam_name] = \
+                needs_processing(self.btransmission, 'Beam')
+            flux_name = transmission_beam_name + '_Flux'
+            self.progress.report('Processing transmission beam')
+            if process_transmission_beam:
+                SANSILLReduction(Run=transmission,
+                                 ProcessAs='Beam',
+                                 NormaliseBy=self.normalise,
+                                 OutputWorkspace=transmission_beam_name,
+                                 BeamRadius=self.tr_radius,
+                                 FluxOutputWorkspace=flux_name,
+                                 AbsorberInputWorkspace=
+                                 transmission_absorber_name)
+        for transmission in self.ctransmission.split(','):
+            [process_container_transmission, container_transmission_name] = \
+                needs_processing(transmission, 'Transmission')
+            self.progress.report('Processing container transmission')
+            container_transmission_names.append(container_transmission_name)
+            if process_container_transmission:
+                SANSILLReduction(Run=transmission,
+                                 ProcessAs='Transmission',
+                                     OutputWorkspace=container_transmission_name,
+                                 AbsorberInputWorkspace=
+                                 transmission_absorber_name,
+                                 BeamInputWorkspace=transmission_beam_name,
+                                 NormaliseBy=self.normalise,
+                                 BeamRadius=self.tr_radius)
+        for transmission in self.stransmission.split(','):
+            [process_sample_transmission, sample_transmission_name] = \
+                needs_processing(transmission, 'Transmission')
+            self.progress.report('Processing sample transmission')
+            sample_transmission_names.append(sample_transmission_name)
+            if process_sample_transmission:
+                SANSILLReduction(Run=transmission,
+                                 ProcessAs='Transmission',
+                                 OutputWorkspace=sample_transmission_name,
+                                 AbsorberInputWorkspace=
+                                 transmission_absorber_name,
+                                 BeamInputWorkspace=transmission_beam_name,
+                                 NormaliseBy=self.normalise,
+                                 BeamRadius=self.tr_radius)
+        return container_transmission_names, sample_transmission_names
 
     def processAbsorber(self, i):
         absorber = (self.absorber[i]
