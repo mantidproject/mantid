@@ -25,6 +25,8 @@ Bug fixes
 - Fixed a bug where editing constraints would result in a crash.
 - Fixed a bug where global parameter values would reset when changing the displayed dataset.
 - Fixed a crash when adding the DynamicKuboToyabe function on the fitting tab of Muon Analysis.
+- Fixed an error caused by switching to Simultaneous fitting when TF Asymmetry mode is ticked.
+- Fixed an error caused by switching between the Run and Group/Pair selection when TF Asymmetry mode is ticked.
 
 ALC
 ---
