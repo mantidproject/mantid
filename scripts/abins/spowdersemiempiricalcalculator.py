@@ -153,6 +153,8 @@ class SPowderSemiEmpiricalCalculator:
         self._report_progress(msg=indent + "Calculation for incident energy %s [cm^-1]" % e_init)
 
         angle_resolved_data = self._calculate_s_powder_over_k()
+        self._instrument.save_nxspe(angle_resolved_data)
+
         s_data = angle_resolved_data.sum_over_angles(average=True)
 
         return s_data

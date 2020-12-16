@@ -120,29 +120,33 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
         atom_numbers, atom_symbols = self.get_atom_selection(atoms_data=atoms_data, selection=self._atoms)
         prog_reporter.report("Atoms, for which dynamical structure factors should be plotted, have been determined.")
 
-        # 5) create workspaces for atoms in interest
-        workspaces = []
-        workspaces.extend(self.create_workspaces(atoms_symbols=atom_symbols, s_data=s_data, atoms_data=atoms_data,
-                                                 max_quantum_order=self._num_quantum_order_events))
-        workspaces.extend(self.create_workspaces(atom_numbers=atom_numbers, s_data=s_data, atoms_data=atoms_data,
-                                                 max_quantum_order=self._num_quantum_order_events))
-        prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
-
-        # 6) Create a workspace with sum of all atoms if required
-        if self._sum_contributions:
-            self.create_total_workspace(workspaces)
-            prog_reporter.report("Workspace with total S has been constructed.")
-
+        workspaces = [self._create_dummy_workspace('dummy')]
         GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
-
-        # 8) save workspaces to ascii_file
-        if self._save_ascii:
-            self.write_workspaces_to_ascii(ws_name=self._out_ws_name, scale=(1.0 / self._bin_width))
-            prog_reporter.report("All workspaces have been saved to ASCII files.")
-
-        # 9) set  OutputWorkspace
         self.setProperty('OutputWorkspace', self._out_ws_name)
-        prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
+
+        # # 5) create workspaces for atoms in interest
+        # workspaces = []
+        # workspaces.extend(self.create_workspaces(atoms_symbols=atom_symbols, s_data=s_data, atoms_data=atoms_data,
+        #                                          max_quantum_order=self._num_quantum_order_events))
+        # workspaces.extend(self.create_workspaces(atom_numbers=atom_numbers, s_data=s_data, atoms_data=atoms_data,
+        #                                          max_quantum_order=self._num_quantum_order_events))
+        # prog_reporter.report("Workspaces with partial dynamical structure factors have been constructed.")
+
+        # # 6) Create a workspace with sum of all atoms if required
+        # if self._sum_contributions:
+        #     self.create_total_workspace(workspaces)
+        #     prog_reporter.report("Workspace with total S has been constructed.")
+
+        # GroupWorkspaces(InputWorkspaces=workspaces, OutputWorkspace=self._out_ws_name)
+
+        # # 8) save workspaces to ascii_file
+        # if self._save_ascii:
+        #     self.write_workspaces_to_ascii(ws_name=self._out_ws_name, scale=(1.0 / self._bin_width))
+        #     prog_reporter.report("All workspaces have been saved to ASCII files.")
+
+        # # 9) set  OutputWorkspace
+        # self.setProperty('OutputWorkspace', self._out_ws_name)
+        # prog_reporter.report("Group workspace with all required  dynamical structure factors has been constructed.")
 
     def _fill_s_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
         """
@@ -182,6 +186,13 @@ class Abins2D(PythonAlgorithm, AbinsAlgorithm):
                                           nucleons_number=nucleons_number)
 
                 GroupWorkspaces(InputWorkspaces=partial_wrk_names, OutputWorkspace=workspace)
+
+    def _create_dummy_workspace(self, name):
+        wrk = WorkspaceFactory.create("Workspace2D", NVectors=1, XLength=2, YLength=1)
+        wrk.setX(0, [0, 1])
+        wrk.setY(0, [0])
+        AnalysisDataService.addOrReplace(name, wrk)
+        return wrk
 
     def _fill_s_2d_workspace(self, s_points=None, workspace=None, protons_number=None, nucleons_number=None):
         from abins.constants import Q_BEGIN, Q_END
