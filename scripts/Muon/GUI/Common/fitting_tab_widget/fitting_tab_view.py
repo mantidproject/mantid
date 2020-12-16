@@ -98,7 +98,7 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
             self.fit_status_chi_squared.setText('Chi squared: {}'.format(output_chi_squared))
             return
 
-        if self.is_simul_fit():
+        if self.is_simul_fit:
             self.function_browser.blockSignals(True)
             self.function_browser.updateMultiDatasetParameters(fit_function)
             self.function_browser.blockSignals(False)
@@ -296,8 +296,15 @@ class FittingTabView(QtWidgets.QWidget, ui_fitting_tab):
         self.simul_fit_by_combo.setEnabled(True)
         self.simul_fit_by_specifier.setEnabled(True)
 
+    @property
     def is_simul_fit(self):
         return self.simul_fit_checkbox.isChecked()
+
+    @is_simul_fit.setter
+    def is_simul_fit(self, simultaneous):
+        self.simul_fit_checkbox.blockSignals(True)
+        self.simul_fit_checkbox.setChecked(simultaneous)
+        self.simul_fit_checkbox.blockSignals(False)
 
     def setup_fit_by_specifier(self, choices):
         self.simul_fit_by_specifier.blockSignals(True)
