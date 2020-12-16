@@ -13,6 +13,8 @@ This algorithm calculates the attenuation factors in the Paalman Pings formalism
 
 Three simple shapes are supported: *FlatPlate*, *Cylinder*, and *Annulus*. Each shape is defined by the corresponding set of geometric parameters.
 
+If the shape is left as the default value *Preset*, the algorithm will use the sample and container shapes defined in the workspace.
+
 Inelastic, quasielastic and elastic measurements are supported, both for direct and indirect geometry instruments.
 
 *Height* is a common property for the sample and container regardless the shape.
@@ -88,7 +90,7 @@ Usage
         ParameterName='Efixed', ParameterType='Number', Value='4.1')
 
     corrections = PaalmanPingsMonteCarloAbsorption(
-            SampleWorkspace=sample_ws,
+            InputWorkspace=sample_ws,
             Shape='FlatPlate',
             BeamHeight=2.0,
             BeamWidth=2.0,
@@ -97,7 +99,6 @@ Usage
             SampleThickness=0.1,
             SampleChemicalFormula='H2-O',
             SampleDensity=1.0,
-            ContainerWorkspace=container_ws,
             ContainerFrontThickness=0.02,
             ContainerBackThickness=0.02,
             ContainerChemicalFormula='V',
@@ -150,7 +151,7 @@ Usage
         ParameterName='Efixed', ParameterType='Number', Value='4.1')
 
     corrections = PaalmanPingsMonteCarloAbsorption(
-            SampleWorkspace=sample_ws,
+            InputWorkspace=sample_ws,
             Shape='Cylinder',
             BeamHeight=2.0,
             BeamWidth=2.0,
@@ -158,7 +159,6 @@ Usage
             SampleRadius=0.2,
             SampleChemicalFormula='H2-O',
             SampleDensity=1.0,
-            ContainerWorkspace=container_ws,
             ContainerRadius=0.22,
             ContainerChemicalFormula='V',
             ContainerDensity=6.0,
@@ -210,7 +210,7 @@ Usage
         ParameterName='Efixed', ParameterType='Number', Value='4.1')
 
     corrections = PaalmanPingsMonteCarloAbsorption(
-            SampleWorkspace=sample_ws,
+            InputWorkspace=sample_ws,
             Shape='Annulus',
             BeamHeight=2.0,
             BeamWidth=2.0,
@@ -219,7 +219,6 @@ Usage
             SampleOuterRadius=0.4,
             SampleChemicalFormula='H2-O',
             SampleDensity=1.0,
-            ContainerWorkspace=container_ws,
             ContainerInnerRadius=0.19,
             ContainerOuterRadius=0.41,
             ContainerChemicalFormula='V',
