@@ -21,7 +21,7 @@ a :ref:`TableWorkspace <Table Workspaces>` with the following columns:
 
  | ComponentName | Xposition | Yposition| Zposition| XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
 
-A typical calibration will contain a row for the moderator, possible a row for the sample, and one row for each
+A typical calibration will contain a row for the moderator, possibly a row for the sample, and one row for each
 calibrated bank. For instance:
 
  | ComponentName | Xposition | Yposition| Zposition| XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
@@ -32,7 +32,7 @@ calibrated bank. For instance:
 
 For more details on this output, see the documentation for :ref:`algm-CORELLIPowderCalibrationCreate`.
 
-The rows of the recent calibrations are read one by one, and the *single component database file* is updated
+The rows of the recent calibration table are read one by one, and the corresponding *single component* database files are updated
 accordingly. Thus in our previous example the line for the moderator is extracted and appended to CSV file
 *corelli_moderator.csv*. Before appending, the line is amended with the day-stamp of the recent calibration. The
 day-stamp is retrieved from the input workspace of property `InputWorkspace`. A typical *corelli_moderator.csv*
@@ -47,7 +47,7 @@ file may look like this:
 The last line is the moderator row from table `InputCalibrationPatchWorkspace` amended with the day stamp
 contained in `InputWorkspace` (20201025).
 
-Files the moderator and the other components (*corelli_sample-position.csv*, *corelli_bank7.csv*,..*corelli_bank91.csv*)
+Files for the moderator and the other components (*corelli_sample-position.csv*, *corelli_bank7.csv*,..,*corelli_bank91.csv*)
 are all located under the directory specified in property `DatabaseDirectory`
 
 After the first goal is accomplished (store the recent calibration), the algorithm proceeds to produce a
@@ -60,7 +60,8 @@ bearing in mind that 20201025 is the day-stamp of our recent calibration. The he
 # ComponentName, Xposition, Yposition, Zposition, XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle
 ```
 
-and then we have one line for each instrument component.
+In addition, a :ref:`TableWorkspace <Table Workspaces>` similar to the table of `InputCalibrationPatchWorkspace` is
+produced with (hopefully) a row for each bank.
 
 
 Usage
