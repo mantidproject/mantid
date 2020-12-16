@@ -126,6 +126,14 @@ public:
   const std::string category() const override {
     return "Diffraction\\Calibration";
   };
+
+  /// Extra help info
+  const std::vector<std::string> seeAlso() const override {
+    return {"CorelliPowderCalibrationCreate "
+            "& CorelliPowderCalibrationLoad "
+            "& CorelliPowderCalibrationApply"};
+  };
+
   const std::string summary() const override {
     return "Save calibrated components' positions and orientations to "
            "database.";
