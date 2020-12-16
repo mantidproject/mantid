@@ -224,9 +224,9 @@ void SCDPanelErrors::eval(double xshift, double yshift, double zshift,
                     peak2.getInitialEnergy(), 0.0);
       peak2.setWavelength(wl.singleFromTOF(peak.getTOF() + tShift));
       V3D Q3 = peak2.getQSampleFrame();
-      out[i * 3]     = std:abs(Q3[0] - Q2[0]);
-      out[i * 3 + 1] = std:abs(Q3[1] - Q2[1]);
-      out[i * 3 + 2] = std:abs(Q3[2] - Q2[2]);
+      out[i * 3]     = std::abs(Q3[0] - Q2[0]);
+      out[i * 3 + 1] = std::abs(Q3[1] - Q2[1]);
+      out[i * 3 + 2] = std::abs(Q3[2] - Q2[2]);
     }
   }
 }

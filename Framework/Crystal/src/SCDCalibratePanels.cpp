@@ -610,7 +610,7 @@ void writeXmlParameter(ofstream &ostream, const string &name,
 
 /**
  * 
- * 
+ * TODO: missing output for T0 and L1
  */
 void SCDCalibratePanels::saveXmlFile(
     const string &FileName,
@@ -790,9 +790,9 @@ void SCDCalibratePanels::findL2(
     double xShift = paramsWS->getRef<double>("Value", 0);
     double yShift = paramsWS->getRef<double>("Value", 1);
     double zShift = paramsWS->getRef<double>("Value", 2);
-    double xRotate = 0;
-    double yRotate = 0;
-    double zRotate = 0;
+    // double xRotate = 0;
+    // double yRotate = 0;
+    // double zRotate = 0;
     double scaleWidth = 1.0;
     double scaleHeight = 1.0;
 
@@ -803,45 +803,45 @@ void SCDCalibratePanels::findL2(
                    << "-- Chi2overDoF: " << chisq << "\n"
                    << "-- shift:" << xShift << "," << yShift << "," << zShift << "\n";
 
-    // // 2nd pass: optimize rotation
-    // IAlgorithm_sptr fitrot_alg;
-    // try {
-    //     fitrot_alg = createChildAlgorithm("Fit", -1, -1, false);
-    //   } catch (Exception::NotFoundError &) {
-    //     g_log.error("Can't locate Fit algorithm");
-    //     throw;
-    //   }
-    // fitrot_alg->setPropertyValue("Function", fun_str.str());
+    // 2nd pass: optimize rotation
+    IAlgorithm_sptr fitrot_alg;
+    try {
+        fitrot_alg = createChildAlgorithm("Fit", -1, -1, false);
+      } catch (Exception::NotFoundError &) {
+        g_log.error("Can't locate Fit algorithm");
+        throw;
+      }
+    fitrot_alg->setPropertyValue("Function", fun_str.str());
 
-    // std::ostringstream tie_fitRot_str;
-    // tie_fitRot_str << "ScaleWidth=1.0, ScaleHeight=1.0, "
-    //                << "XShift=" << xShift << ", "
-    //                << "YShift=" << yShift << ", "
-    //                << "ZShift=" << zShift << ", "
-    //                << "T0Shift= " << mT0;
-    // fitrot_alg->setPropertyValue("Ties", tie_fitRot_str.str());
-    // fitrot_alg->setProperty("InputWorkspace", q3DWS);
-    // fitrot_alg->setProperty("CreateOutput", true);
-    // fitrot_alg->setProperty("Output", "fit");
-    // fitrot_alg->executeAsChildAlg();
+    std::ostringstream tie_fitRot_str;
+    tie_fitRot_str << "ScaleWidth=1.0, ScaleHeight=1.0, "
+                   << "XShift=" << xShift << ", "
+                   << "YShift=" << yShift << ", "
+                   << "ZShift=" << zShift << ", "
+                   << "T0Shift= " << mT0;
+    fitrot_alg->setPropertyValue("Ties", tie_fitRot_str.str());
+    fitrot_alg->setProperty("InputWorkspace", q3DWS);
+    fitrot_alg->setProperty("CreateOutput", true);
+    fitrot_alg->setProperty("Output", "fit");
+    fitrot_alg->executeAsChildAlg();
 
-    // std::string fitStatus_rot = fitrot_alg->getProperty("OutputStatus");
-    // double chisq_rot = fitrot_alg->getProperty("OutputChi2overDoF");
+    std::string fitStatus_rot = fitrot_alg->getProperty("OutputStatus");
+    double chisq_rot = fitrot_alg->getProperty("OutputChi2overDoF");
 
-    // MatrixWorkspace_sptr fitWS_rot = fitrot_alg->getProperty("OutputWorkspace");
-    // AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS_rot);
-    // ITableWorkspace_sptr paramsWS_rot = fitrot_alg->getProperty("OutputParameters");
-    // AnalysisDataService::Instance().addOrReplace("params_" + iBank, paramsWS_rot);
-    // double xRotate = paramsWS_rot->getRef<double>("Value", 3);
-    // double yRotate = paramsWS_rot->getRef<double>("Value", 4);
-    // double zRotate = paramsWS_rot->getRef<double>("Value", 5);
+    MatrixWorkspace_sptr fitWS_rot = fitrot_alg->getProperty("OutputWorkspace");
+    AnalysisDataService::Instance().addOrReplace("fit_" + iBank, fitWS_rot);
+    ITableWorkspace_sptr paramsWS_rot = fitrot_alg->getProperty("OutputParameters");
+    AnalysisDataService::Instance().addOrReplace("params_" + iBank, paramsWS_rot);
+    double xRotate = paramsWS_rot->getRef<double>("Value", 3);
+    double yRotate = paramsWS_rot->getRef<double>("Value", 4);
+    double zRotate = paramsWS_rot->getRef<double>("Value", 5);
 
-    // // report fitting results
-    // g_log.notice() << "Fit rot for Bank " << iBank << "\n"
-    //                << "-- nPeaks: " << nBankPeaks << "\n"
-    //                << "-- fitStatus: " << fitStatus_rot << "\n"
-    //                << "-- Chi2overDoF: " << chisq_rot << "\n"
-    //                << "-- rot :" << xRotate << "," << yRotate << "," << zRotate <<"\n";
+    // report fitting results
+    g_log.notice() << "Fit rot for Bank " << iBank << "\n"
+                   << "-- nPeaks: " << nBankPeaks << "\n"
+                   << "-- fitStatus: " << fitStatus_rot << "\n"
+                   << "-- Chi2overDoF: " << chisq_rot << "\n"
+                   << "-- rot :" << xRotate << "," << yRotate << "," << zRotate <<"\n";
 
     // Scaling only implemented for Rectangular Detectors
     Geometry::IComponent_const_sptr comp =
