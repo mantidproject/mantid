@@ -79,6 +79,8 @@ void export_Sample() {
       .def("getShape", &Sample::getShape, arg("self"),
            "Returns a shape of a Sample object.",
            return_value_policy<reference_existing_object>())
+      .def("hasEnvironment", &Sample::hasEnvironment, arg("self"), 
+          "Returns True if the sample has an environment defined")
       // -------------------------Operators
       // -------------------------------------
       .def("__len__", &Sample::size, arg("self"),
