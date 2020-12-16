@@ -67,7 +67,8 @@ using ViewEvent = IFitScriptGeneratorView::Event;
 
 FitScriptGeneratorView::FitScriptGeneratorView(
     QWidget *parent, QMap<QString, QString> const &fitOptions)
-    : IFitScriptGeneratorView(parent), m_presenter(), m_dialog(this),
+    : IFitScriptGeneratorView(parent), m_presenter(),
+      m_dialog(std::make_unique<AddWorkspaceDialog>(this)),
       m_dataTable(std::make_unique<FitScriptGeneratorDataTable>()),
       m_functionBrowser(std::make_unique<FunctionBrowser>(nullptr, true)),
       m_fitOptionsBrowser(std::make_unique<FitOptionsBrowser>(
@@ -83,6 +84,8 @@ FitScriptGeneratorView::FitScriptGeneratorView(
 }
 
 FitScriptGeneratorView::~FitScriptGeneratorView() {
+  m_dialog.reset();
+  m_dataTable.reset();
   m_functionBrowser.reset();
   m_fitOptionsBrowser.reset();
 }
@@ -176,12 +179,12 @@ void FitScriptGeneratorView::addWorkspaceDomain(
 }
 
 bool FitScriptGeneratorView::openAddWorkspaceDialog() {
-  return m_dialog.exec() == QDialog::Accepted;
+  return m_dialog->exec() == QDialog::Accepted;
 }
 
 std::vector<MatrixWorkspace_const_sptr>
 FitScriptGeneratorView::getDialogWorkspaces() {
-  auto const workspaceName = m_dialog.workspaceName().trimmed().toStdString();
+  auto const workspaceName = m_dialog->workspaceName().trimmed().toStdString();
 
   std::vector<MatrixWorkspace_const_sptr> workspaces;
   if (AnalysisDataService::Instance().doesExist(workspaceName))
@@ -194,7 +197,7 @@ FitScriptGeneratorView::getDialogWorkspaces() {
 
 std::vector<WorkspaceIndex>
 FitScriptGeneratorView::getDialogWorkspaceIndices() const {
-  return convertToWorkspaceIndex(m_dialog.workspaceIndices());
+  return convertToWorkspaceIndex(m_dialog->workspaceIndices());
 }
 
 void FitScriptGeneratorView::resetSelection() { m_dataTable->resetSelection(); }

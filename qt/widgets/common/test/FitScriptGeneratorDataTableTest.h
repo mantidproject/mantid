@@ -82,7 +82,7 @@ public:
     m_dataTable->addDomain("Name2", WorkspaceIndex(0), 0.0, 2.0);
     m_dataTable->addDomain("Name3", WorkspaceIndex(0), 0.0, 2.0);
 
-    // Retrieve the pixel position of a cell
+    // Retrieve the pixel position of the first column cell at rowIndex
     int xPos = m_dataTable->columnViewportPosition(0) + 5;
     int yPos = m_dataTable->rowViewportPosition(rowIndex) + 10;
 

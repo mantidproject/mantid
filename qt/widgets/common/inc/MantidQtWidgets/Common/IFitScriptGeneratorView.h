@@ -22,6 +22,7 @@
 namespace MantidQt {
 namespace MantidWidgets {
 
+class AddWorkspaceDialog;
 class FitScriptGeneratorDataTable;
 class IFitScriptGeneratorPresenter;
 
@@ -68,6 +69,7 @@ public:
   virtual FitScriptGeneratorDataTable *tableWidget() const = 0;
   virtual QPushButton *removeButton() const = 0;
   virtual QPushButton *addWorkspaceButton() const = 0;
+  virtual AddWorkspaceDialog *addWorkspaceDialog() const = 0;
 };
 
 } // namespace MantidWidgets

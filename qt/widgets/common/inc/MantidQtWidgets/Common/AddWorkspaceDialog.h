@@ -9,7 +9,9 @@
 #include "DllOption.h"
 #include "ui_AddWorkspaceDialog.h"
 
+#include <QComboBox>
 #include <QDialog>
+#include <QLineEdit>
 
 namespace MantidQt {
 namespace MantidWidgets {
@@ -24,8 +26,16 @@ public:
   explicit AddWorkspaceDialog(QWidget *parent);
   QString workspaceName() const { return m_workspaceName; }
   std::vector<int> workspaceIndices() const { return m_wsIndices; }
-private slots:
+
+public:
+  /// Testing accessors
+  QComboBox *workspaceNameComboBox() const { return m_uiForm.cbWorkspaceName; }
+  QLineEdit *workspaceIndiceLineEdit() const { return m_uiForm.leWSIndices; }
+
+public slots:
   void accept() override;
+
+private slots:
   void reject() override;
   void workspaceNameChanged(const QString & /*wsName*/);
   void selectAllSpectra(int state);

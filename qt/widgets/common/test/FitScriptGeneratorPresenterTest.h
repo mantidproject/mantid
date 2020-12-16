@@ -56,6 +56,7 @@ public:
   MOCK_CONST_METHOD0(tableWidget, FitScriptGeneratorDataTable *());
   MOCK_CONST_METHOD0(removeButton, QPushButton *());
   MOCK_CONST_METHOD0(addWorkspaceButton, QPushButton *());
+  MOCK_CONST_METHOD0(addWorkspaceDialog, AddWorkspaceDialog *());
 };
 
 class MockFitScriptGeneratorModel : public IFitScriptGeneratorModel {

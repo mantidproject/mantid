@@ -76,6 +76,9 @@ public:
   QPushButton *addWorkspaceButton() const override {
     return m_ui.pbAddWorkspace;
   }
+  AddWorkspaceDialog *addWorkspaceDialog() const override {
+    return m_dialog.get();
+  }
 
 private slots:
   void onRemoveClicked();
@@ -90,7 +93,7 @@ private:
   void setFittingType(QString const &fitType);
 
   IFitScriptGeneratorPresenter *m_presenter;
-  AddWorkspaceDialog m_dialog;
+  std::unique_ptr<AddWorkspaceDialog> m_dialog;
   std::unique_ptr<FitScriptGeneratorDataTable> m_dataTable;
   std::unique_ptr<FunctionBrowser> m_functionBrowser;
   std::unique_ptr<FitOptionsBrowser> m_fitOptionsBrowser;
