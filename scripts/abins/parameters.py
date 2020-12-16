@@ -46,7 +46,7 @@ instruments = {
         'q_size': 100,
         'e_init': 400,
         'angles_per_detector': 10,
-        'settings_default': 'A-400',
+        'settings_default': 'A',
         'settings': {'A': {'chopper': 'A'},
                      'R': {'chopper': 'A'},
                      'G': {'chopper': 'S'},

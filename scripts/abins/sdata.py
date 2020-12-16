@@ -74,6 +74,15 @@ class SData(collections.abc.Sequence):
         else:
             return None
 
+    def get_total_intensity(self) -> np.ndarray:
+        """Sum over all atoms and quantum orders to a single spectrum"""
+
+        total = np.zeros_like(self._frequencies)
+        for atom_data in self:
+            for order_key, data in atom_data.items():
+                total += data
+        return total
+
     def check_finite_temperature(self):
         """Raise an error if Temperature is not greater than zero"""
         temperature = self.get_temperature()
@@ -190,7 +199,10 @@ class SData(collections.abc.Sequence):
 
     def __getitem__(self, item):  # noqa F811
         if isinstance(item, int):
-            return self._data[f"atom_{item}"]['s']
+            try:
+                return self._data[f"atom_{item}"]['s']
+            except KeyError:
+                raise IndexError(item)
         elif isinstance(item, slice):
             return [self[i] for i in range(len(self))[item]]
         else:
@@ -269,6 +281,8 @@ class SDataByAngle(collections.abc.Sequence):
         ...
 
     def __getitem__(self, item):  # noqa F811
+        n_items = len(self)
+
         if isinstance(item, (int, slice)):
             data = {atom_index: {'s': {order_index:
                                        self._data[atom_index]['s'][order_index][item, :]
@@ -279,9 +293,14 @@ class SDataByAngle(collections.abc.Sequence):
                 "Indices must be integers or slices, not {}.".format(type(item)))
 
         if isinstance(item, int):
+            if item >= n_items:
+                raise IndexError(item)
             return SData(data=data, **self._metadata)
 
         else:  # Must be a slice, return angle-resolved data
+            if (item.start >= n_items) or (item.stop) > n_items:
+                raise IndexError(item)
+
             return type(self)(data=data,
                               angles=self.angles[item],
                               **self._metadata)
