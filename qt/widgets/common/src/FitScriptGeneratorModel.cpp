@@ -347,25 +347,29 @@ void FitScriptGeneratorModel::updateParameterTie(
   auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
 
   if (auto composite = toComposite(m_function->getFunction(domainIndex))) {
-    auto fullParameterName = parameter;
-    if (composite->nFunctions() == 1)
-      fullParameterName = "f0." + fullParameterName;
 
-    if (composite->hasParameter(fullParameterName))
-      updateParameterTie(composite, parameter, tie);
+    if (composite->nFunctions() == 1) {
+      auto function = composite->getFunction(0);
+      if (function->hasParameter(parameter))
+        updateParameterTie(function, parameter, tie);
+    } else {
+      if (composite->hasParameter(parameter))
+        updateParameterTie(composite, parameter, tie);
+    }
   }
 }
 
-void FitScriptGeneratorModel::updateParameterTie(
-    CompositeFunction_sptr const &composite, std::string const &parameter,
-    std::string const &tie) {
+void FitScriptGeneratorModel::updateParameterTie(IFunction_sptr const &function,
+                                                 std::string const &parameter,
+                                                 std::string const &tie) {
   if (tie.empty()) {
-    composite->removeTie(composite->parameterIndex(parameter));
+    function->removeTie(function->parameterIndex(parameter));
   } else {
     auto const tieSplit = splitStringBy(tie, "=");
     auto const tieValue = tieSplit.size() > 1 ? tieSplit[1] : tieSplit[0];
+
     try {
-      composite->tie(parameter, tieValue);
+      function->tie(parameter, tieValue);
     } catch (std::invalid_argument const &ex) {
       g_log.error(ex.what());
     } catch (std::runtime_error const &ex) {

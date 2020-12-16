@@ -148,6 +148,8 @@ void FitScriptGeneratorPresenter::handleFunctionRemoved(
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     m_model->removeFunction(workspaceName, workspaceIndex, function);
   }
+
+  handleSelectionChanged();
 }
 
 void FitScriptGeneratorPresenter::handleFunctionAdded(
@@ -187,6 +189,8 @@ void FitScriptGeneratorPresenter::handleParameterChanged(
     m_model->updateParameterValue(workspaceName, workspaceIndex, parameter,
                                   newValue);
   }
+
+  handleSelectionChanged();
 }
 
 void FitScriptGeneratorPresenter::handleAttributeChanged(
@@ -211,6 +215,8 @@ void FitScriptGeneratorPresenter::handleParameterTieChanged(
     auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
     m_model->updateParameterTie(workspaceName, workspaceIndex, parameter, tie);
   }
+
+  handleSelectionChanged();
 }
 
 void FitScriptGeneratorPresenter::setWorkspaces(

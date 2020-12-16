@@ -123,7 +123,7 @@ private:
   [[nodiscard]] bool hasWorkspaceDomain(std::string const &workspaceName,
                                         WorkspaceIndex workspaceIndex) const;
 
-  void updateParameterTie(Mantid::API::CompositeFunction_sptr const &composite,
+  void updateParameterTie(Mantid::API::IFunction_sptr const &function,
                           std::string const &parameter, std::string const &tie);
 
   void removeCompositeAtPrefix(std::string const &functionPrefix);
