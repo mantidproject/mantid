@@ -123,8 +123,6 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                   'sample runs: {2}.'
         message_value = 'Wrong number of {0} values: {1}. Provide one or as ' \
                         'many as sample runs: {2}.'
-        tr_message = 'Wrong number of {0} runs: {1}. Provide one or multiple ' \
-                     'runs summed with +.'
 
         # array parameters checks
         sample_dim = len(self.sample)
@@ -173,18 +171,14 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         ctr_dim = len(self.ctransmission.split(','))
         btr_dim = len(self.btransmission.split(','))
         atr_dim = len(self.atransmission.split(','))
-        if str_dim > 1:
-            result['SampleTransmissionRuns'] = \
-                tr_message.format('SampleTransmission', str_dim)
-        if ctr_dim > 1:
-            result['ContainerTransmissionRuns'] = \
-                tr_message.format('ContainerTransmission', ctr_dim)
-        if btr_dim > 1:
-            result['TransmissionBeamRuns'] = \
-                tr_message.format('TransmissionBeam', btr_dim)
-        if atr_dim > 1:
-            result['TransmissionAbsorberRuns'] = \
-                tr_message.format('TransmissionAbsorber', atr_dim)
+        if str_dim != sample_dim and str_dim != 1:
+            result['SampleTransmissionRuns'] = message.format('SampleTransmission', str_dim, sample_dim)
+        if ctr_dim != can_dim and ctr_dim != 1:
+            result['ContainerTransmissionRuns'] = message.format('ContainerTransmission', ctr_dim, can_dim)
+        if btr_dim != beam_dim and btr_dim != 1:
+            result['TransmissionBeamRuns'] = message.format('TransmissionBeam', btr_dim, beam_dim)
+        if atr_dim != abs_dim and atr_dim != 1:
+            result['TransmissionAbsorberRuns'] = message.format('TransmissionAbsorber', atr_dim, abs_dim)
 
         # other checks
         if self.output_type == 'I(Phi,Q)' and self.n_wedges == 0:
