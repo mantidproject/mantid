@@ -79,7 +79,13 @@ instruments = {
                                  'abs_resolution_meV': [7.6987e-5, 2.156e-2, -3.5961e-2],
                                  'low_energy_cutoff_meV': 25, 'low_energy_resolution_meV': 0.8},
                      # 'Cu(220) simple': {'Ei_range_meV': (26, 500), 'ei_resolution': 0.025},
-                     'Cu(331)': {'Ei_range_meV': [67, 500], 'ei_resolution': 0.0175},
+                     # 'Cu(331) simple': {'Ei_range_meV': [67, 500], 'ei_resolution': 0.0175},
+                     'Cu(331)': {'Ei_range_meV': [67, 500],
+                                 'abs_resolution_meV': [-8.60511597e-08,  1.11911095e-04,
+                                                        5.15925386e-04,  6.58362118e-01]},
+                     # 'Cu(331) best expected': {'Ei_range_meV': [67, 500],
+                     #                           'abs_resolution_meV': [-4.31019791e-08,  5.83291918e-05,
+                     #                                                  -1.82073324e-03,  7.30888552e-01]},
                      'Si(311)': {'Ei_range_meV': [16.5, 60], 'abs_resolution_meV': 0.8},
                      'Si(111)': {'Ei_range_meV': [4.5, 20], 'abs_resolution_meV': 0.8}}}
     }
