@@ -76,10 +76,17 @@ set_target_properties(
                              COMPILE_DEFINITIONS IN_MANTID_PYTHONINTERFACE_CORE
 )
 
+set(PUBLIC_TARGETS Python::NumPy ${BoostPython_LIBRARIES})
+# Conda python is static linked, so do not link to python again.
+# Should have a better flag check than this though
+if(${ENABLE_MANTIDPLOT} OR ${ENABLE_WORKBENCH})
+	list(APPEND PUBLIC_TARGETS Python::Python) 
+endif()
+message(STATUS "PUBLIC TARGETS ${PUBLIC_TARGETS}")
 # Dependencies
 target_link_libraries(
   ${_target_name}
-  PUBLIC Python::NumPy ${BoostPython_LIBRARIES}
+  PUBLIC ${PUBLIC_TARGETS} 
   PRIVATE Types Kernel ${Boost_LIBRARIES}  ${POCO_LIBRARIES}
 )
 
