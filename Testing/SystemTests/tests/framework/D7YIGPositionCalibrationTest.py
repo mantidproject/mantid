@@ -225,7 +225,7 @@ class D7YIGPositionCalibrationTest(systemtesting.MantidSystemTest):
         self.assertAlmostEqual(xAxisValues[87], 102.6, delta=1e0)
         self.assertAlmostEqual(xAxisValues[88], 105.9, delta=1e0)
         self.assertAlmostEqual(xAxisValues[131], 148.6, delta=1e0)
-        DeleteWorkspace(Workspace='output') #clean-up
+        DeleteWorkspace(Workspace='calibration_test') #clean-up
 
     def runTest(self):
         self.d7_short_wavelength_test()
