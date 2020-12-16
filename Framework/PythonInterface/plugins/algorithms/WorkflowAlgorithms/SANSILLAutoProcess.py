@@ -556,12 +556,16 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             return None
 
     def processContainer(self, i, beam_name, absorber_name,
-                         container_transmission_name):
+                         container_transmission_names):
         container = (self.container[i]
                      if len(self.container) == self.dimensionality
                      else self.container[0])
         [process_container, container_name] = \
             needs_processing(container, 'Container')
+        if len(container_transmission_names) > 1:
+            container_transmission_name = container_transmission_names[i]
+        else:
+            container_transmission_name = container_transmission_names[0]
         self.progress.report('Processing container')
         if process_container:
             SANSILLReduction(Run=container,
@@ -576,7 +580,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                              NormaliseBy=self.normalise)
         return container_name
 
-    def processSample(self, i, flux_name, sample_transmission_name, beam_name,
+    def processSample(self, i, flux_name, sample_transmission_names, beam_name,
                       absorber_name, container_name):
         # this is the default mask, the same for all the distance configurations
         [load_default_mask, default_mask_name] = \
@@ -622,6 +626,12 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             if load_reference:
                 LoadNexusProcessed(Filename=reference,
                                    OutputWorkspace=reference_name)
+
+        # get correct transmission
+        if len(sample_transmission_names) > 1:
+            sample_transmission_name = sample_transmission_names[i]
+        else:
+            sample_transmission_name = sample_transmission_names[0]
 
         # sample
         [_, sample_name] = needs_processing(self.sample[i], 'Sample')
