@@ -28,6 +28,54 @@ using namespace Mantid::Crystal;
 class SCDCalibratePanelsTest : public CxxTest::TestSuite {
 
 public:
+
+  /// Standard Test
+  void testName(){
+    SCDCalibratePanels alg;
+    TS_ASSERT_EQUALS(alg.name(), "SCDCalibratePanels");
+  }
+
+  void testInit(){
+    SCDCalibratePanels alg;
+    alg.initialize();
+    TS_ASSERT(alg.isInitialized());
+  }
+
+  ///TODO: test validators
+
+  ///NULL case
+  void testNullCase(){
+    SCDCalibratePanels alg;
+  }
+
+  ///Adjust T0 and L1
+  void testGlobalShiftOnly(){
+    SCDCalibratePanels alg;
+  }
+
+  ///Ideal global with one panels moved
+  void testSinglePanelMoved(){
+    SCDCalibratePanels alg;
+  }
+
+  ///Ideal global with two panels moved
+  void testDualPanelMoved(){
+    SCDCalibratePanels alg;
+  }
+
+  // Test with mocked CORELLI instrument
+  // T0, L1 adjusted
+  // Two panels moved
+  void testExec():{
+    SCDCalibratePanels alg;
+  }
+
+  /// Helper functions for unittest
+
+  // generate a peaktable with given movement void
+
+
+  /// Original unittes (no longer working, will be removed before merging)
   void test_TOPAZ_5637() {
     // load a peaks file
     std::shared_ptr<Algorithm> alg =
