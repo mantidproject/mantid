@@ -9,11 +9,12 @@ Using gdb
 
 Debugging typically requires the test executable to be run directly,
 rather than via ctest (which typically spawns off a separate process to
-run the actual tests). So an example of debugging from the command line
+run the actual tests). So an example of debugging test function
+``testworkspace1D_dist`` of Suite ``RebinTest`` from the command line
 using gdb would be::
 
     $ gdb bin/AlgorithmsTest
-    (gdb) r RebinTest
+    (gdb) r RebinTest testworkspace1D_dist
 
 If you do need to run ctest in order to debug - if, for example, a test
 is failing when run in ctest, but not if run directly - then you can
