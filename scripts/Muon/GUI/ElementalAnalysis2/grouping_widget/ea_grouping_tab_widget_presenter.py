@@ -5,8 +5,6 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantidqt.utils.observer_pattern import Observer, Observable, GenericObservable, GenericObserver
-from Muon.GUI.Common import thread_model
-from Muon.GUI.Common.thread_model_wrapper import ThreadModelWrapper
 from Muon.GUI.Common.utilities.run_string_utils import run_string_to_list
 
 
@@ -34,7 +32,6 @@ class EAGroupingTabPresenter(object):
 
         # notifiers
         self.groupingNotifier = EAGroupingTabPresenter.GroupingNotifier(self)
-        self.grouping_table_widget.on_data_changed(self.group_table_changed)
         self.enable_editing_notifier = EAGroupingTabPresenter.EnableEditingNotifier(self)
         self.disable_editing_notifier = EAGroupingTabPresenter.DisableEditingNotifier(self)
         self.calculation_finished_notifier = GenericObservable()
@@ -81,16 +78,6 @@ class EAGroupingTabPresenter(object):
     def enable_editing_without_notifying_subscribers(self):
         self.grouping_table_widget.enable_editing()
 
-    def calculate_all_data(self):
-        self._model.show_all_groups()
-
-    def handle_update_all_clicked(self):
-        self.update_thread = self.create_update_thread()
-        self.update_thread.threadWrapperSetUp(self.disable_editing,
-                                              self.handle_update_finished,
-                                              self.error_callback)
-        self.update_thread.start()
-
     def error_callback(self, error_message):
         self.enable_editing()
         self._view.display_warning_box(error_message)
@@ -99,10 +86,6 @@ class EAGroupingTabPresenter(object):
         self.enable_editing()
         self.groupingNotifier.notify_subscribers()
         self.calculation_finished_notifier.notify_subscribers()
-
-    def create_update_thread(self):
-        self._update_model = ThreadModelWrapper(self.calculate_all_data)
-        return thread_model.ThreadModel(self._update_model)
 
     def on_clear_requested(self):
         self._model.clear()
@@ -113,7 +96,6 @@ class EAGroupingTabPresenter(object):
         if self._model.is_data_loaded():
             self.update_view_from_model()
             self.update_description_text()
-            self.handle_update_all_clicked()
             self.plot_default_groups()
         else:
             self.on_clear_requested()
@@ -126,9 +108,6 @@ class EAGroupingTabPresenter(object):
     # ------------------------------------------------------------------------------------------------------------------
     # Observer / Observable
     # ------------------------------------------------------------------------------------------------------------------
-
-    def group_table_changed(self):
-        self.handle_update_all_clicked()
 
     class LoadObserver(Observer):
 
@@ -152,9 +131,6 @@ class EAGroupingTabPresenter(object):
         def __init__(self, outer):
             Observer.__init__(self)
             self.outer = outer
-
-        def update(self, observable, arg):
-            self.outer.handle_update_all_clicked()
 
     class GroupingNotifier(Observable):
 

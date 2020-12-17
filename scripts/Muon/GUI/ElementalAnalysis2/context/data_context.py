@@ -76,15 +76,6 @@ class DataContext(object):
         self._loaded_data.clear()
         self._current_runs = []
 
-    def _base_run_name(self, run=None):
-        """ e.g. EMU0001234 """
-        if not run:
-            run = self.run
-        if isinstance(run, int):
-            return str(run)
-        else:
-            return run
-
     def remove_workspace_by_name(self, workspace_name):
         runs_removed = self._loaded_data.remove_workspace_by_name(workspace_name, self.instrument)
 

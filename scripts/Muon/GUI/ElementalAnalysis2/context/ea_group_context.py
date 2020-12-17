@@ -69,7 +69,7 @@ class EAGroupContext(object):
     def group_names(self):
         return [group.name for group in self._groups]
 
-    def add_group(self, group, loadedData):
+    def add_new_group(self, group, loadedData):
         '''this adds groups to the grouping tab that are not already loaded'''
         run_list = loadedData.get_parameter("run")
         for run_item in run_list:
@@ -81,6 +81,12 @@ class EAGroupContext(object):
                     detector_name = (group_name.split(';', 1)[-1].lstrip()).split('_', 1)[0]
                     run_number = str(run_item).replace('[', '').replace(']', '')
                     group += [EAGroup(group_name=group_name, detector=detector_name, run_number=run_number)]
+        return group
+
+    def add_group(self, group):
+        '''this adds groups to the grouping tab that are not already loaded'''
+        if group._group_name not in self.group_names:
+            self._groups.append(group)
         return group
 
     def reset_group_to_default(self, loadedData):

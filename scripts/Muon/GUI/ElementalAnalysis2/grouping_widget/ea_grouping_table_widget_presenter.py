@@ -93,15 +93,19 @@ class EAGroupingTablePresenter(object):
         self._model.clear_groups()
         for entry in table:
             group = EAGroup(group_name=str(entry[0]), detector=str(entry[2]), run_number=str(entry[1]))
-            self._model.add_group(group)
+            self._model.add_group_from_table(group)
 
     def update_view_from_model(self):
         self._view.disable_updates()
         self._view.clear()
 
         for group in self._model.groups:
-            to_analyse = True if group.name in self._model.selected_groups else False
-            self.add_group_to_view(group, to_analyse)
+            if self._view.num_rows() >= maximum_number_of_groups:
+                self._view.warning_popup("Cannot add more than {} groups.".format(maximum_number_of_groups))
+                break
+            else:
+                to_analyse = True if group.name in self._model.selected_groups else False
+                self.add_group_to_view(group, to_analyse)
 
         self._view.enable_updates()
 

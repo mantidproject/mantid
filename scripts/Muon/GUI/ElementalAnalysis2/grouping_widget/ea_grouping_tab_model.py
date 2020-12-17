@@ -40,11 +40,8 @@ class EAGroupingTabModel(object):
     def selected_groups(self):
         return self._groups.selected_groups
 
-    def show_all_groups(self):
-        self._context.show_all_groups()
-
     def clear_groups(self):
-        self._groups.clear_groups()
+        self._groups.clear()
 
     def clear_selected_groups(self):
         self._groups.clear_selected_groups()
@@ -64,7 +61,11 @@ class EAGroupingTabModel(object):
 
     def add_group(self, group):
         assert isinstance(group, EAGroup)
-        self._groups.add_group(group, self._data._loaded_data)
+        self._groups.add_new_group(group, self._data._loaded_data)
+
+    def add_group_from_table(self, group):
+        assert isinstance(group, EAGroup)
+        self._groups.add_group(group)
 
     def reset_groups_to_default(self):
         if not self._context.current_runs:

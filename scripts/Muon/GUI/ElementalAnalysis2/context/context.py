@@ -6,9 +6,6 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from Muon.GUI.ElementalAnalysis2.context.data_context import DataContext
 from mantidqt.utils.observer_pattern import Observable
-from Muon.GUI.Common.ADSHandler.workspace_naming import get_base_data_directory
-from Muon.GUI.Common.ADSHandler.muon_workspace_wrapper import WorkspaceGroupDefinition
-from Muon.GUI.Common.utilities.run_string_utils import run_list_to_string
 
 
 class ElementalAnalysisContext(object):
@@ -42,7 +39,7 @@ class ElementalAnalysisContext(object):
                 self.group_context.reset_group_to_default(self.data_context._loaded_data)
 
             else:
-                self.group_context.add_group(self.group_context.groups, self.data_context._loaded_data)
+                self.group_context.add_new_group(self.group_context.groups, self.data_context._loaded_data)
         else:
             self.data_context.clear()
 
@@ -61,20 +58,6 @@ class ElementalAnalysisContext(object):
     def clear_context(self):
         self.data_context.clear()
         self.group_context.clear()
-        #self.update_view_from_model_notifier.notify_subscribers()
 
     def workspace_replaced(self, workspace):
         self.update_plots_notifier.notify_subscribers(workspace)
-
-    def show_all_groups(self):
-        for run in self.data_context.current_runs:
-            with WorkspaceGroupDefinition():
-                for group in self._group_context.groups:
-                    run_as_string = run_list_to_string(run)
-                    group_name = group.name
-
-                    directory = get_base_data_directory(self, run_as_string)
-
-                    name = group_name
-
-                    self.group_context[group_name].show_raw([run], directory + name)
