@@ -77,9 +77,7 @@ set_target_properties(
 )
 
 set(PUBLIC_TARGETS Python::NumPy ${BoostPython_LIBRARIES})
-# Conda python is static linked, so do not link to python again.
-# Should have a better flag check than this though
-if(${ENABLE_MANTIDPLOT} OR ${ENABLE_WORKBENCH})
+if(${USE_PYTHON_DYNAMIC_LIB})
 	list(APPEND PUBLIC_TARGETS Python::Python) 
 endif()
 # Dependencies
