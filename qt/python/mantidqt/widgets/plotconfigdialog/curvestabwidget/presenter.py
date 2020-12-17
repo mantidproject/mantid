@@ -20,7 +20,7 @@ from workbench.plotting.figureerrorsmanager import FigureErrorsManager
 
 class CurvesTabWidgetPresenter:
 
-    def __init__(self, fig, view=None, parent=None, legend_tab=None):
+    def __init__(self, fig, view=None, parent=None, parent_presenter=None, legend_tab=None):
         self.fig = fig
 
         # The legend tab is passed in so that it can be removed if all curves are removed.
@@ -58,6 +58,8 @@ class CurvesTabWidgetPresenter:
             self.on_curves_selection_changed
         )
 
+        self.parent_presenter = parent_presenter
+
     def apply_properties(self):
         """Take properties from views and set them on the selected curve"""
         ax = self.get_selected_ax()
@@ -80,6 +82,7 @@ class CurvesTabWidgetPresenter:
 
     def close_tab(self):
         """Close the tab and set the view to None"""
+        self.parent_presenter.forget_tab_from_presenter(self)
         self.view.close()
         self.view = None
 
@@ -219,7 +222,7 @@ class CurvesTabWidgetPresenter:
         on the axes remove the axes entry from the 'select_axes_combo_box'. If
         no axes with curves remain close the tab and return True
         """
-        with block_signals(self.view.select_curve_list):
+        with block_signals(self.view.select_curve_list), block_signals(self.view.select_axes_combo_box):
             self.view.remove_select_curve_list_selected_items()
             if self.view.select_curve_list.count() == 0:
                 self.view.remove_select_axes_combo_box_selected_item()

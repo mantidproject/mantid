@@ -14,7 +14,7 @@ import matplotlib.font_manager
 
 
 class LegendTabWidgetPresenter:
-    def __init__(self, fig, view=None, parent=None):
+    def __init__(self, fig, view=None, parent=None, parent_presenter=None):
         self.fig = fig
         self.axes = fig.get_axes()
 
@@ -26,6 +26,8 @@ class LegendTabWidgetPresenter:
         self.current_view_properties = None
         self.populate_font_combo_box()
         self.init_view()
+
+        self.parent_presenter = parent_presenter
 
         # Signals
         self.view.transparency_spin_box.valueChanged.connect(
@@ -184,5 +186,6 @@ class LegendTabWidgetPresenter:
 
     def close_tab(self):
         """Closes the tab and sets the view to None"""
+        self.parent_presenter.forget_tab_from_presenter(self)
         self.view.close()
         self.view = None
