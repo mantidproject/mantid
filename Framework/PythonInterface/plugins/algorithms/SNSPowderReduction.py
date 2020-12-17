@@ -767,6 +767,10 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                          ReductionProperties="__snspowderreduction",
                                          **otherArgs)
 
+        if absorptionWksp:
+            api.CopySample(InputWorkspace=absorptionWksp, OutputWorkspace=final_name,
+                           CopyEnvironment=False)
+
         #TODO make sure that this funny function is called
         #self.checkInfoMatch(info, tempinfo)
 
@@ -1396,6 +1400,35 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         # this effectively deletes the metadata only workspace
         AnalysisDataService.addOrReplace(absName, absorptionWS)
 
+        # Set ChemicalFormula, and either SampleMassDensity or Mass, if SampleMassDensity not set
+        if material is not None:
+            if (not material['ChemicalFormula']) and ("SampleFormula" in absorptionWS.run()):
+                material['ChemicalFormula'] = absorptionWS.run()['SampleFormula'].lastValue().strip()
+            if ("SampleMassDensity" not in material or not material['SampleMassDensity']) and ("SampleDensity" in absorptionWS.run()):
+                if (absorptionWS.run()['SampleDensity'].lastValue() != 1.0) and (absorptionWS.run()['SampleDensity'].lastValue() != 0.0):
+                    material['SampleMassDensity'] = absorptionWS.run()['SampleDensity'].lastValue()
+                else:
+                    material['Mass'] = absorptionWS.run()['SampleMass'].lastValue()
+
+        # Set height for computing density if height not set
+        if geometry is None:
+            geometry = {}
+
+        if geometry is not None:
+            if "Height" not in geometry or not geometry['Height']:
+                # Check units - SetSample expects cm
+                if absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue() == "mm":
+                    geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue()*(0.1)
+                elif absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue() == "cm":
+                    geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue()
+                else:
+                    pass
+
+        # Set container if not set
+        if environment is not None:
+            if environment['Container'] == "":
+                environment['Container'] = absorptionWS.run()['SampleContainer'].lastValue().replace(" ", "")
+
         # Make sure one is set before calling SetSample
         if material or geometry or environment is not None:
             self._setup_sample(absName, material, geometry, environment)
@@ -1411,7 +1444,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         :param geometry:
         :param environment:
         """
-
         # Set the material, geometry, and container info
         api.SetSample(InputWorkspace=donor_ws,
                       Material=material,
@@ -1422,7 +1454,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         """
         Purpose: process vanadium runs
         Requirements: if more than 1 run in given run number list, then samRunIndex must be given.
-        Guarantees: have vanadium run reduced.
+        uarantees: have vanadium run reduced.
         :param van_run_number_list: list of vanadium run
         :param timeFilterWall: time filter wall
         :param samRunIndex: sample run index
@@ -1457,14 +1489,8 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                                               'Center': [0., 0., 0.]})
 
             # calculate the correction which is 1/normal carpenter correction - it doesn't look at sample shape
-            api.AbsorptionCorrection(absWksp,
-                                     OutputWorkspace='__V_corr_abs',
-                                     ScatterFrom='Sample',
-                                     ElementSize=self._elementSize)
-
             api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr',
-                                                   CylinderSampleRadius=self._vanRadius,
-                                                   Absorption=False)
+                                                   CylinderSampleRadius=self._vanRadius)
             api.DeleteWorkspace(Workspace=absWksp)   # no longer needed
             __V_corr_eff = 1. / ((1. / mtd['__V_corr_abs']) - mtd['__V_corr_ms'])
             __V_corr_eff = str(__V_corr_eff)
