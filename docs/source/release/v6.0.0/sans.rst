@@ -8,8 +8,6 @@ SANS Changes
 Improvements
 ############
 
-- Add support for D11, D16, D22 and D33 in the :ref:`MaskBTP <algm-MaskBTP>` algorithm.
-
 .. warning:: **Developers:** Sort changes under appropriate heading
     putting new features at the top of the section, followed by
     improvements, followed by bug fixes.
@@ -20,14 +18,16 @@ Algorithms and instruments
 Improvements
 ############
 
- - Added instrument definitions for the two new PSD based multi-panel SANS instruments D11B and D22B at the ILL.
- - In :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, the beam radius can be different for each distance.
-   A new parameter, TransmissionBeamRadius, has been added to set the beam radius for transmission experiments.
-   The default value of all beam radii is now 0.1m.
- - With :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, if sample thickness is set to -1, the algorithm will try to get it
-   from the nexus file.
- - With :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, the output workspace will get its title from the nexus file.
- - The Rectangle option for :ref:`SolidAngle <algm-SolidAngle>` is now supported for ILL's D22 and D33.
+- Added instrument definitions for the two new PSD based multi-panel SANS instruments D11B and D22B at the ILL.
+- Added support for D11, D16, D22 and D33 in the :ref:`MaskBTP <algm-MaskBTP>` algorithm.
+- Several improvements have been done in ILL SANS suite :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`:
+    - The beam radius can be different for each distance.
+    - A new parameter, TransmissionBeamRadius, has been added to set the beam radius for transmission measurements.
+    - The default value of all the beam radii is now 0.1m.
+    - If sample thickness is set to -1, the algorithm will try to get it from the nexus file itself.
+    - The output workspace will get its title from the nexus file.
+    - WavelengthRange is exposed to the algorithm, which is crucial for TOF reduction.
+- The Rectangle option for :ref:`SolidAngle <algm-SolidAngle>` is now supported for ILL's D22 and D33.
 
 Bugfixes
 ########
