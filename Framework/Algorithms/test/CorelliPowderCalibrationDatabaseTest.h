@@ -229,9 +229,9 @@ public:
     TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(1, 0),
                      "sample-position");
     TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(2, 0),
-        "bank1/sixteenpack");
+                     "bank1/sixteenpack");
     TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(4, 0),
-        "bank42/sixteenpack");
+                     "bank42/sixteenpack");
 
     // Output 2: search the saved output calibration file
     boost::filesystem::path pdir(calibdir);

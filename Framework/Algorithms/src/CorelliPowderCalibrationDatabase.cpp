@@ -94,8 +94,8 @@ CalibrationTableHandler::createCalibrationTableWorkspace(
 
 //-----------------------------------------------------------------------------
 /**
- * @brief Check whether a TableWorkspace is a valid Corelli calibration table for
- * all components.
+ * @brief Check whether a TableWorkspace is a valid Corelli calibration table
+ * for all components.
  *
  * @details Cheks performed are correct number of columns and columns names
  *
