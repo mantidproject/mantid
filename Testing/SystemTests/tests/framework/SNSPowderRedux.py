@@ -440,15 +440,15 @@ class PG3InfoFromLogs(systemtesting.MantidSystemTest):
 
         # Get the result without any absorption correction first
         SNSPowderReduction("PG3_46214.nxs.h5",
-                           CalibrationFile="/SNS/PG3/shared/CALIBRATION/2020_1_11A_CAL/PG3_PAC_HR_d46168_2020_05_06.h5",
-                           CharacterizationRunsFile="/SNS/PG3/shared/CALIBRATION/2020_2_11A_CAL/PG3_char_2020_01_04_PAC_limit_1.4MW.txt,/SNS/PG3/shared/CALIBRATION/2020_2_11A_CAL/PG3_char_2020_05_06-HighRes-PAC_1.4 MW.txt",
+                           CalibrationFile="PG3_PAC_HR_d46168_2020_05_06.h5",
+                           CharacterizationRunsFile="PG3_char_2020_01_04_PAC_limit_1.4MW.txt,PG3_char_2020_05_06-HighRes-PAC_1.4_MW.txt",
                            Binning=-0.001,
                            SaveAs="nexus",
                            OutputDirectory=savedir)
 
         SNSPowderReduction("PG3_46214.nxs.h5",
-                           CalibrationFile="/SNS/PG3/shared/CALIBRATION/2020_1_11A_CAL/PG3_PAC_HR_d46168_2020_05_06.h5",
-                           CharacterizationRunsFile="/SNS/PG3/shared/CALIBRATION/2020_2_11A_CAL/PG3_char_2020_01_04_PAC_limit_1.4MW.txt,/SNS/PG3/shared/CALIBRATION/2020_2_11A_CAL/PG3_char_2020_05_06-HighRes-PAC_1.4 MW.txt",
+                           CalibrationFile="PG3_PAC_HR_d46168_2020_05_06.h5",
+                           CharacterizationRunsFile="PG3_char_2020_01_04_PAC_limit_1.4MW.txt,PG3_char_2020_05_06-HighRes-PAC_1.4_MW.txt",
                            Binning=-0.001,
                            SaveAs="topas",
                            TypeOfCorrection="SampleOnly",
