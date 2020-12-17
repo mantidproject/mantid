@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 #  This file is part of the mantidqt package
 #
+from mantid.simpleapi import logger
 from mantidqt.usersubwindowfactory import UserSubWindowFactory
 
 
@@ -47,4 +48,9 @@ class EncoderFactory(object):
         """
         if compatible_check is None:
             compatible_check = default_encoder_compatability_check
+        # check that a decoder of this class is not already registered
+        for existing_encoder in cls.encoder_list:
+            if encoder == existing_encoder[0]:
+                logger.notice("Encoder of this type already exists. Skipping")
+                return
         cls.encoder_list.add((encoder, compatible_check))
