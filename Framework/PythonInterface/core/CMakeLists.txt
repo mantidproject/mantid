@@ -77,7 +77,7 @@ set_target_properties(
 )
 
 set(PUBLIC_TARGETS Python::NumPy ${BoostPython_LIBRARIES})
-if(${USE_PYTHON_DYNAMIC_LIB})
+if(USE_PYTHON_DYNAMIC_LIB)
 	list(APPEND PUBLIC_TARGETS Python::Python) 
 endif()
 # Dependencies
