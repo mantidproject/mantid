@@ -100,7 +100,7 @@ def mask_cylinder(mask_info, workspace):
     return workspace
 
 
-def mask_with_mask_files(mask_info, workspace):
+def mask_with_mask_files(mask_info, inst_info, workspace):
     """
     Apply mask files to the workspace
 
@@ -118,7 +118,7 @@ def mask_with_mask_files(mask_info, workspace):
     """
     mask_files = mask_info.mask_files
     if mask_files:
-        idf_path = mask_info.idf_path
+        idf_path = inst_info.idf_path
 
         # Mask loader
         load_name = "LoadMask"
@@ -361,7 +361,7 @@ class Masker(metaclass=ABCMeta):
         super(Masker, self).__init__()
 
     @abstractmethod
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
+    def mask_workspace(self, mask_info, inst_info, workspace_to_mask, detector_type):
         pass
 
 
@@ -369,7 +369,7 @@ class NullMasker(Masker):
     def __init__(self):
         super(NullMasker, self).__init__()
 
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
+    def mask_workspace(self, mask_info, inst_info, workspace_to_mask, detector_type):
         return workspace_to_mask
 
 
@@ -378,7 +378,7 @@ class MaskerISIS(Masker):
         super(MaskerISIS, self).__init__()
         self._spectra_block = spectra_block
 
-    def mask_workspace(self, mask_info, workspace_to_mask, detector_type):
+    def mask_workspace(self, mask_info, inst_info, workspace_to_mask, detector_type):
         """
         Performs the different types of masks that are currently available for ISIS reductions.
 
@@ -395,7 +395,7 @@ class MaskerISIS(Masker):
         workspace_to_mask = mask_cylinder(mask_info, workspace_to_mask)
 
         # Apply the xml mask files
-        workspace_to_mask = mask_with_mask_files(mask_info, workspace_to_mask)
+        workspace_to_mask = mask_with_mask_files(mask_info, inst_info, workspace_to_mask)
 
         # Mask spectrum list
         workspace_to_mask = mask_spectra(mask_info, workspace_to_mask, self._spectra_block, detector_type)

@@ -135,8 +135,10 @@ class PlotsSaver(object):
                 "yAxisProperties": self.get_dict_from_axis_properties(ax.yaxis),
                 "xAxisScale": ax.xaxis.get_scale(),
                 "xLim": ax.get_xlim(),
+                "xAutoScale": ax.get_autoscalex_on(),
                 "yAxisScale": ax.yaxis.get_scale(),
                 "yLim": ax.get_ylim(),
+                "yAutoScale": ax.get_autoscaley_on(),
                 "showMinorGrid": hasattr(ax, 'show_minor_gridlines') and ax.show_minor_gridlines}
 
     def get_dict_from_axis_properties(self, ax):

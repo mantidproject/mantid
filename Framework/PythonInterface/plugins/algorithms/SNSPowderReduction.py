@@ -1457,8 +1457,14 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                                               'Center': [0., 0., 0.]})
 
             # calculate the correction which is 1/normal carpenter correction - it doesn't look at sample shape
+            api.AbsorptionCorrection(absWksp,
+                                     OutputWorkspace='__V_corr_abs',
+                                     ScatterFrom='Sample',
+                                     ElementSize=self._elementSize)
+
             api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr',
-                                                   CylinderSampleRadius=self._vanRadius)
+                                                   CylinderSampleRadius=self._vanRadius,
+                                                   Absorption=False)
             api.DeleteWorkspace(Workspace=absWksp)   # no longer needed
             __V_corr_eff = 1. / ((1. / mtd['__V_corr_abs']) - mtd['__V_corr_ms'])
             __V_corr_eff = str(__V_corr_eff)

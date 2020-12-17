@@ -80,5 +80,5 @@ public:
   }
 
 private:
-  std::unique_ptr<IIndirectFitData> m_fitData;
+  std::unique_ptr<IIndirectFitDataModel> m_fitData;
 };

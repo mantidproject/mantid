@@ -6,10 +6,10 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "MantidPythonInterface/api/RegisterWorkspacePtrToPython.h"
 #include "MantidPythonInterface/core/DataServiceExporter.h"
 #include "MantidPythonInterface/core/GetPointer.h"
-#include "MantidPythonInterface/core/Policies/ToWeakPtr.h"
 
 #include <boost/python/class.hpp>
 #include <boost/python/copy_non_const_reference.hpp>
@@ -20,6 +20,20 @@
 using namespace Mantid::API;
 using namespace Mantid::PythonInterface;
 using namespace boost::python;
+
+namespace {
+
+PyObject *convertWsToObj(Workspace_sptr ws) {
+  if (Mantid ::API::AnalysisDataService::Instance().doesExist(ws->getName())) {
+    // Decay to weak ptr so the ADS manages lifetime
+    using PtrT = std::weak_ptr<Workspace>;
+    PtrT weak_ptr = ws;
+    return boost::python::to_python_value<PtrT>()(weak_ptr);
+  } else {
+    return boost::python::to_python_value<Workspace_sptr>()(ws);
+  }
+}
+} // namespace
 
 GET_POINTER_SPECIALIZATION(WorkspaceGroup)
 
@@ -57,13 +71,13 @@ void addWorkspace(WorkspaceGroup &self, const boost::python::object &pyobj) {
                           Workspace_sptr>::extractCppValue(pyobj));
 }
 
-Workspace_sptr getItem(WorkspaceGroup &self, const int &index) {
+PyObject *getItem(WorkspaceGroup &self, const int &index) {
   if (index < 0) {
     if (static_cast<size_t>(-index) > self.size())
       self.throwIndexOutOfRangeError(index);
-    return self.getItem(self.size() + index);
+    return convertWsToObj(self.getItem(self.size() + index));
   }
-  return self.getItem(index);
+  return convertWsToObj(self.getItem(index));
 }
 
 void export_WorkspaceGroup() {
@@ -90,7 +104,6 @@ void export_WorkspaceGroup() {
       .def("remove", &WorkspaceGroup::remove,
            (arg("self"), arg("workspace_name")), "Remove a name from the group")
       .def("getItem", getItem, (arg("self"), arg("index")),
-           return_value_policy<Policies::ToWeakPtr>(),
            "Returns the item at the given index")
       .def("isMultiPeriod", &WorkspaceGroup::isMultiperiod, arg("self"),
            "Returns true if the workspace group is multi-period")
@@ -102,8 +115,7 @@ void export_WorkspaceGroup() {
                WorkspaceGroup::contains,
            (arg("self"), arg("workspace name")),
            "Does this group contain the named workspace?")
-      .def("__getitem__", getItem, (arg("self"), arg("index")),
-           return_value_policy<Policies::ToWeakPtr>())
+      .def("__getitem__", getItem, (arg("self"), arg("index")))
       .def("__iter__", range<return_value_policy<copy_non_const_reference>>(
                            &group_begin, &group_end));
 

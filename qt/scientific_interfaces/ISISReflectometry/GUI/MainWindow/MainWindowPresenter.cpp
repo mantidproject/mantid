@@ -124,8 +124,11 @@ void MainWindowPresenter::notifyAnyBatchReductionPaused() {
   enableSaveAndLoadBatch();
 }
 
+// Top level function to handle when user has requested to change the
+// instrument
 void MainWindowPresenter::notifyChangeInstrumentRequested(
     std::string const &newInstrumentName) {
+  // Cache changed state before calling updateInstrument
   auto const hasChanged = (newInstrumentName != instrumentName());
   // Re-load instrument regardless of whether it has changed, e.g. if we are
   // creating a new batch the instrument may not have changed but we still want
@@ -191,13 +194,19 @@ boost::optional<int> MainWindowPresenter::roundPrecision() const {
   return boost::none;
 }
 
+bool MainWindowPresenter::discardChanges(std::string const &message) const {
+  return !isWarnDiscardChangesChecked() ||
+         m_messageHandler->askUserOkCancel(message, "Discard changes?");
+}
+
+bool MainWindowPresenter::discardChanges() const {
+  return discardChanges(
+      "This will cause unsaved changes to be lost. Continue?");
+}
+
 bool MainWindowPresenter::isCloseEventPrevented() {
-  if (isAnyBatchProcessing() || isAnyBatchAutoreducing())
-    return true;
-  else if (isWarnDiscardChangesChecked() && isAnyBatchUnsaved()) {
-    return !m_messageHandler->askUserDiscardChanges();
-  }
-  return false;
+  return (isAnyBatchProcessing() || isAnyBatchAutoreducing() ||
+          (isAnyBatchUnsaved() && !discardChanges()));
 }
 
 bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
@@ -207,22 +216,23 @@ bool MainWindowPresenter::isCloseBatchPrevented(int batchIndex) const {
         "Cannot close batch while processing or autoprocessing is in progress",
         "Error");
     return true;
-  } else if (isWarnDiscardChangesChecked() && isBatchUnsaved(batchIndex)) {
-    return !m_messageHandler->askUserDiscardChanges();
   }
-  return false;
+
+  return isBatchUnsaved(batchIndex) && !discardChanges();
 }
 
 bool MainWindowPresenter::isOverwriteBatchPrevented(int tabIndex) const {
-  if (isWarnDiscardChangesChecked() && isBatchUnsaved(tabIndex)) {
-    return !m_messageHandler->askUserDiscardChanges();
-  }
-  return false;
+  return isOverwriteBatchPrevented(m_batchPresenters[tabIndex].get());
+}
+
+bool MainWindowPresenter::isOverwriteBatchPrevented(
+    IBatchPresenter const *batchPresenter) const {
+  return (batchPresenter->isBatchUnsaved() && !discardChanges());
 }
 
 bool MainWindowPresenter::isProcessAllPrevented() const {
   if (isWarnProcessAllChecked()) {
-    return !m_messageHandler->askUserYesNo(
+    return !m_messageHandler->askUserOkCancel(
         "This will process all rows in the table. Continue?",
         "Process all rows?");
   }
@@ -231,7 +241,7 @@ bool MainWindowPresenter::isProcessAllPrevented() const {
 
 bool MainWindowPresenter::isProcessPartialGroupPrevented() const {
   if (isWarnProcessPartialGroupChecked()) {
-    return !m_messageHandler->askUserYesNo(
+    return !m_messageHandler->askUserOkCancel(
         "Some groups will not be fully processed. Continue?",
         "Process partial group?");
   }
@@ -244,7 +254,7 @@ bool MainWindowPresenter::isBatchUnsaved(int batchIndex) const {
 }
 
 /** Checks whether there are unsaved changes in any batch and returns a bool */
-bool MainWindowPresenter::isAnyBatchUnsaved() {
+bool MainWindowPresenter::isAnyBatchUnsaved() const {
   for (auto it = m_batchPresenters.begin(); it != m_batchPresenters.end();
        ++it) {
     auto batchIndex =
@@ -306,7 +316,7 @@ void MainWindowPresenter::notifySaveBatchRequested(int tabIndex) {
     return;
   auto map = m_encoder->encodeBatch(m_view, tabIndex, false);
   m_fileHandler->saveJSONToFile(filename, map);
-  m_batchPresenters[tabIndex].get()->setBatchUnsaved(false);
+  m_batchPresenters[tabIndex].get()->notifyChangesSaved();
 }
 
 void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
@@ -326,7 +336,7 @@ void MainWindowPresenter::notifyLoadBatchRequested(int tabIndex) {
     return;
   }
   m_decoder->decodeBatch(m_view, tabIndex, map);
-  m_batchPresenters[tabIndex].get()->setBatchUnsaved(false);
+  m_batchPresenters[tabIndex].get()->notifyChangesSaved();
 }
 
 void MainWindowPresenter::disableSaveAndLoadBatch() {

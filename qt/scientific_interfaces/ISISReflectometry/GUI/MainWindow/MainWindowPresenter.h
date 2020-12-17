@@ -58,6 +58,8 @@ public:
   bool isAnyBatchAutoreducing() const override;
   bool isCloseEventPrevented() override;
   bool isOverwriteBatchPrevented(int tabIndex) const override;
+  bool isOverwriteBatchPrevented(
+      IBatchPresenter const *batchPresenter) const override;
   bool isProcessAllPrevented() const override;
   bool isProcessPartialGroupPrevented() const override;
   void notifyAnyBatchAutoreductionResumed() override;
@@ -69,6 +71,7 @@ public:
   void notifyUpdateInstrumentRequested() override;
   Mantid::Geometry::Instrument_const_sptr instrument() const override;
   std::string instrumentName() const override;
+  bool discardChanges(std::string const &message) const override;
 
   // MainWindowSubscriber overrides
   void notifyHelpPressed() override;
@@ -97,14 +100,15 @@ private:
   std::unique_ptr<IBatchPresenterFactory> m_batchPresenterFactory;
 
   bool isBatchUnsaved(int batchIndex) const override;
-  bool isAnyBatchUnsaved() override;
-  bool isWarnDiscardChangesChecked() const override;
+  bool isAnyBatchUnsaved() const override;
   bool isRoundChecked() const override;
   int &getRoundPrecision() const override;
   boost::optional<int> roundPrecision() const override;
   bool isWarnProcessAllChecked() const override;
   bool isWarnProcessPartialGroupChecked() const override;
   bool isCloseBatchPrevented(int batchIndex) const override;
+  bool isWarnDiscardChangesChecked() const;
+  bool discardChanges() const;
   void optionsChanged() const;
   void showHelp();
   void addNewBatch(IBatchView *batchView);

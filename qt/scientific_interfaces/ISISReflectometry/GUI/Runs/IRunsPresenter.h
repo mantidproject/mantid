@@ -28,7 +28,7 @@ public:
   virtual RunsTable const &runsTable() const = 0;
   virtual RunsTable &mutableRunsTable() = 0;
 
-  virtual void
+  virtual bool
   notifyChangeInstrumentRequested(std::string const &instrumentName) = 0;
   virtual void notifyResumeReductionRequested() = 0;
   virtual void notifyPauseReductionRequested() = 0;
@@ -50,11 +50,11 @@ public:
   virtual void notifyInstrumentChanged(std::string const &instrumentName) = 0;
   virtual void notifyTableChanged() = 0;
   virtual void settingsChanged() = 0;
+  virtual void notifyChangesSaved() = 0;
+  virtual bool hasUnsavedChanges() const = 0;
 
   virtual bool isAnyBatchProcessing() const = 0;
   virtual bool isAnyBatchAutoreducing() const = 0;
-  virtual bool isOverwritingTablePrevented() const = 0;
-  virtual bool isOverwriteBatchPrevented() const = 0;
 
   virtual bool isProcessing() const = 0;
   virtual bool isAutoreducing() const = 0;
@@ -62,6 +62,8 @@ public:
   virtual void setRoundPrecision(int &precision) = 0;
   virtual void resetRoundPrecision() = 0;
   virtual void notifySearchComplete() = 0;
+
+  virtual std::string instrumentName() const = 0;
 };
 } // namespace ISISReflectometry
 } // namespace CustomInterfaces
