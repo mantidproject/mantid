@@ -34,7 +34,7 @@ class CorelliPowderCalibrationCreateTest(MantidSystemTest):
         assert_allclose(table.row(0)['Zposition'], -19.994, atol=0.002)
         # Check position of bank42
         assert_allclose([table.row(1)[x] for x in ('Xposition', 'Yposition', 'Zposition')],
-                        [2.594, 0.063, 0.087], atol=0.005)
+                        [2.594, 0.063, 0.087], atol=0.007)
         # Check rotation of bank87
         assert_allclose([table.row(2)[x] for x in ('XdirectionCosine', 'YdirectionCosine', 'ZdirectionCosine')],
                         [-0.01, -1.00, 0.03], atol=0.05)
