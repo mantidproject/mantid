@@ -767,10 +767,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
                                          ReductionProperties="__snspowderreduction",
                                          **otherArgs)
 
-        if absorptionWksp:
-            api.CopySample(InputWorkspace=absorptionWksp, OutputWorkspace=final_name,
-                           CopyEnvironment=False)
-
         #TODO make sure that this funny function is called
         #self.checkInfoMatch(info, tempinfo)
 
@@ -1454,7 +1450,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         """
         Purpose: process vanadium runs
         Requirements: if more than 1 run in given run number list, then samRunIndex must be given.
-        uarantees: have vanadium run reduced.
+        Guarantees: have vanadium run reduced.
         :param van_run_number_list: list of vanadium run
         :param timeFilterWall: time filter wall
         :param samRunIndex: sample run index
