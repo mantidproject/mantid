@@ -129,9 +129,9 @@ public:
 
   /// Extra help info
   const std::vector<std::string> seeAlso() const override {
-    return {"CorelliPowderCalibrationCreate "
-            "& CorelliPowderCalibrationLoad "
-            "& CorelliPowderCalibrationApply"};
+    return {"CorelliPowderCalibrationCreate",
+            "CorelliPowderCalibrationLoad",
+            "CorelliPowderCalibrationApply"};
   };
 
   const std::string summary() const override {
