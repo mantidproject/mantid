@@ -102,7 +102,7 @@ class FittingTabPresenter(object):
         return self._end_x
 
     def handle_fit_generator_clicked(self):
-        fit_options = {"FittingType": "Simultaneous" if self.view.is_simul_fit() else "Sequential",
+        fit_options = {"FittingType": "Simultaneous" if self.view.is_simul_fit else "Sequential",
                        "Minimizer": self.view.minimizer,
                        "EvaluationType": self.view.evaluation_type}
 
