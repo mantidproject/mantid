@@ -52,10 +52,18 @@ class GroupingTablePresenterTest(unittest.TestCase):
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector1))
         ws_detector2 = '9999; Detector 2'
         grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
+        ws_detector3 = '9999; Detector 3'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector3))
         run = 9999
         self.context.data_context._loaded_data.add_data(run=[run], workspace=grpws)
         loadedData = self.context.data_context._loaded_data
         self.context.group_context.reset_group_to_default(loadedData)
+
+    def test_setup(self):
+        self.context.data_context._loaded_data.clear()
+        self.assert_model_empty()
+        self.assert_view_empty()
+        self.create_group_workspace_and_load()
 
     # ------------------------------------------------------------------------------------------------------------------
     # TESTS
@@ -71,60 +79,72 @@ class GroupingTablePresenterTest(unittest.TestCase):
         self.assert_view_empty()
 
     def test_add_group_to_view(self):
-        self.context.data_context._loaded_data.clear()
-        self.assert_model_empty()
-        self.assert_view_empty()
-        self.create_group_workspace_and_load()
+        self.test_setup()
         self.presenter.add_group_to_view(self.context.group_context._groups[0], True)
         self.assertEqual(self.view.num_rows(), 1)
-        self.assertEqual(len(self.model.groups), 2)
+        self.assertEqual(len(self.model.groups), 3)
 
     def test_update_model_from_view(self):
-        self.context.data_context._loaded_data.clear()
-        self.assert_model_empty()
-        self.assert_view_empty()
-        self.create_group_workspace_and_load()
+        self.test_setup()
         for group in self.context.group_context._groups:
             self.presenter.add_group_to_view(group, True)
-        self.assertEqual(self.view.num_rows(), 2)
-        self.assertEqual(len(self.model.groups), 2)
+        self.assertEqual(self.view.num_rows(), 3)
+        self.assertEqual(len(self.model.groups), 3)
 
         self.view.remove_last_row()
-        self.assertEqual(self.view.num_rows(), 1)
-        self.assertEqual(len(self.model.groups), 2)
+        self.assertEqual(self.view.num_rows(), 2)
+        self.assertEqual(len(self.model.groups), 3)
 
         self.presenter.update_model_from_view()
-        self.assertEqual(self.view.num_rows(), 1)
-        self.assertEqual(len(self.model.groups), 1)
-
-    def test_update_view_from_model(self):
-        self.context.data_context._loaded_data.clear()
-        self.assert_model_empty()
-        self.assert_view_empty()
-
-        self.create_group_workspace_and_load()
-        self.presenter.add_group_to_view(self.context.group_context._groups[0], True)
-        self.assertEqual(self.view.num_rows(), 1)
-        self.assertEqual(len(self.model.groups), 2)
-
-        self.presenter.update_view_from_model()
         self.assertEqual(self.view.num_rows(), 2)
         self.assertEqual(len(self.model.groups), 2)
 
-    def test_plot_default_case(self):
-        self.context.data_context._loaded_data.clear()
-        self.assert_model_empty()
-        self.assert_view_empty()
+    def test_update_view_from_model(self):
+        self.test_setup()
 
-        self.create_group_workspace_and_load()
+        self.presenter.add_group_to_view(self.context.group_context._groups[0], True)
+        self.assertEqual(self.view.num_rows(), 1)
+        self.assertEqual(len(self.model.groups), 3)
+
+        self.presenter.update_view_from_model()
+        self.assertEqual(self.view.num_rows(), 3)
+        self.assertEqual(len(self.model.groups), 3)
+
+    def test_plot_default_case(self):
+        self.test_setup()
         self.presenter.add_group_to_view(self.context.group_context._groups[0], False)
         self.assertEqual(self.view.num_rows(), 1)
-        self.assertEqual(len(self.model.groups), 2)
+        self.assertEqual(len(self.model.groups), 3)
         analyse_checkbox = self.view.get_table_item(0, 3)
         self.assertEqual(analyse_checkbox.checkState(), 0)
 
         self.presenter.plot_default_case()
         self.assertEqual(analyse_checkbox.checkState(), 2)
+
+    def test_remove_selected_rows_in_view_and_model(self):
+        self.test_setup()
+        for group in self.context.group_context._groups:
+            self.presenter.add_group_to_view(group, True)
+        self.assertEqual(self.view.num_rows(), 3)
+        self.assertEqual(len(self.model.groups), 3)
+
+        groups_remove = ['9999; Detector 1', '9999; Detector 3']
+        self.view._get_selected_row_indices = mock.Mock(return_value=[0, 2])
+        self.presenter.remove_selected_rows_in_view_and_model(groups_remove)
+        self.assertEqual(self.view.num_rows(), 1)
+        self.assertEqual(len(self.model.groups), 1)
+
+    def test_remove_last_row_in_view_and_model(self):
+        self.test_setup()
+        for group in self.context.group_context._groups:
+            self.presenter.add_group_to_view(group, True)
+        self.assertEqual(self.view.num_rows(), 3)
+        self.assertEqual(len(self.model.groups), 3)
+        group_name3 = '9999; Detector 3'
+        self.assertTrue(group_name3 in self.model.group_names)
+
+        self.presenter.remove_last_row_in_view_and_model()
+        self.assertFalse(group_name3 in self.model.group_names)
 
 
 if __name__ == '__main__':

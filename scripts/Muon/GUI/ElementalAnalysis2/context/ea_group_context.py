@@ -100,3 +100,9 @@ class EAGroupContext(object):
     def remove_group_from_selected_groups(self, group):
         if group in self.group_names and group in self.selected_groups:
             self._selected_groups.remove(str(group))
+
+    def remove_group(self, group_name):
+        for group in self._groups:
+            if group.name == group_name:
+                self._groups.remove(group)
+                return

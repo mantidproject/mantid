@@ -63,6 +63,10 @@ class EAGroupingTabModel(object):
         assert isinstance(group, EAGroup)
         self._groups.add_new_group(group, self._data._loaded_data)
 
+    def remove_groups_by_name(self, name_list):
+        for name in name_list:
+            self._groups.remove_group(name)
+
     def add_group_from_table(self, group):
         assert isinstance(group, EAGroup)
         self._groups.add_group(group)

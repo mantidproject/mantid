@@ -78,6 +78,17 @@ class EAGroupContextTest(unittest.TestCase):
         new_group = self.context.add_new_group(empty_group, self.loadedData)
         self.assertEquals(len(new_group), 2)
 
+    def test_remove_group(self):
+        self.loadedData.clear()
+        self.create_group_workspace_and_load()
+        self.context.reset_group_to_default(self.loadedData)
+        self.assertEquals(len(self.context.groups), 2)
+        group_name1 = '9999; Detector 1'
+        self.assertTrue(group_name1 in self.context.group_names)
+
+        self.context.remove_group(group_name1)
+        self.assertFalse(group_name1 in self.context.group_names)
+
     def test_reset_group_to_default(self):
         self.loadedData.clear()
         self.create_group_workspace_and_load()

@@ -4,7 +4,7 @@
 #   NScD Oak Ridge National Laboratory, European Spallation Source,
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
-from qtpy import QtWidgets, QtCore
+from qtpy import QtWidgets, QtGui, QtCore
 from qtpy.QtCore import Signal
 from Muon.GUI.Common import message_box
 
@@ -46,12 +46,21 @@ class EAGroupingTableView(QtWidgets.QWidget):
         self.setObjectName("GroupingTableView")
         self.resize(500, 500)
 
+        self.remove_group_button = QtWidgets.QToolButton()
+
         size_policy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
         size_policy.setHorizontalStretch(0)
         size_policy.setVerticalStretch(0)
+        size_policy.setHeightForWidth(self.remove_group_button.sizePolicy().hasHeightForWidth())
+
+        self.remove_group_button.setSizePolicy(size_policy)
+        self.remove_group_button.setObjectName("removeGroupButton")
+        self.remove_group_button.setToolTip("Remove selected/last group(s) from the table")
+        self.remove_group_button.setText("-")
 
         self.horizontal_layout = QtWidgets.QHBoxLayout()
         self.horizontal_layout.setObjectName("horizontalLayout")
+        self.horizontal_layout.addWidget(self.remove_group_button)
         self.spacer_item = QtWidgets.QSpacerItem(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self.horizontal_layout.addItem(self.spacer_item)
         self.horizontal_layout.setAlignment(QtCore.Qt.AlignLeft)
@@ -163,12 +172,43 @@ class EAGroupingTableView(QtWidgets.QWidget):
         selector.addItems(["None", "Fixed", "Variable"])
         return selector
 
+    def contextMenuEvent(self, _event):
+        """Overridden method"""
+        self.menu = QtWidgets.QMenu(self)
+
+        self.remove_group_action = self._context_menu_remove_group_action(self.remove_group_button.clicked.emit)
+
+        if self._disabled:
+            self.remove_group_action.setEnabled(False)
+
+        self.menu.addAction(self.remove_group_action)
+
+        self.menu.popup(QtGui.QCursor.pos())
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # Context menu on right-click in the table
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def _context_menu_remove_group_action(self, slot):
+        if len(self._get_selected_row_indices()) > 1:
+            # use plural if >1 item selected
+            remove_group_action = QtWidgets.QAction('Remove Groups', self)
+        else:
+            remove_group_action = QtWidgets.QAction('Remove Group', self)
+        if self.num_rows() == 0:
+            remove_group_action.setEnabled(False)
+        remove_group_action.triggered.connect(slot)
+        return remove_group_action
+
     # ------------------------------------------------------------------------------------------------------------------
     # Slot connections
     # ------------------------------------------------------------------------------------------------------------------
 
     def on_user_changes_group_name(self, slot):
         self._validate_group_name_entry = slot
+
+    def on_remove_group_button_clicked(self, slot):
+        self.remove_group_button.clicked.connect(slot)
 
     def on_table_data_changed(self, slot):
         self._on_table_data_changed = slot
@@ -238,6 +278,12 @@ class EAGroupingTableView(QtWidgets.QWidget):
         self._disabled = False
         self._enable_all_table_items()
         self.enable_updates()
+
+    def _enable_buttons(self):
+        self.remove_group_button.setEnabled(True)
+
+    def _disable_buttons(self):
+        self.remove_group_button.setEnabled(False)
 
     def _disable_all_table_items(self):
         self.grouping_table.setEnabled(False)

@@ -20,6 +20,8 @@ class EAGroupingTablePresenter(object):
         self._view = view
         self._model = model
 
+        self._view.on_remove_group_button_clicked(self.handle_remove_group_button_clicked)
+
         self._view.on_user_changes_group_name(self.validate_group_name)
 
         self._view.on_table_data_changed(self.handle_data_change)
@@ -64,6 +66,27 @@ class EAGroupingTablePresenter(object):
         entry = [str(group._group_name), str(group.run_number), group.detector, state, rebin_options, rebin_col]
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
+
+    def handle_remove_group_button_clicked(self):
+        group_names = self._view.get_selected_group_names()
+        if not group_names:
+            self.remove_last_row_in_view_and_model()
+        else:
+            self.remove_selected_rows_in_view_and_model(group_names)
+        self.notify_data_changed()
+
+    def remove_selected_rows_in_view_and_model(self, group_names):
+        self._view.remove_selected_groups()
+        for group_name in group_names:
+            self._model.remove_group_from_analysis(group_name)
+        self._model.remove_groups_by_name(group_names)
+
+    def remove_last_row_in_view_and_model(self):
+        if self._view.num_rows() > 0:
+            name = self._view.get_table_contents()[-1][0]
+            self._view.remove_last_row()
+            self._model.remove_group_from_analysis(name)
+            self._model.remove_groups_by_name([name])
 
     def handle_data_change(self, row, col):
         changed_item = self._view.get_table_item(row, col)
