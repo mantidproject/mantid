@@ -7,6 +7,8 @@
 #pragma once
 
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/WarningSuppressions.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
 #include "MantidQtWidgets/Common/FitScriptGeneratorView.h"
@@ -61,6 +63,7 @@ public:
     m_wsName = "Name";
     m_wsIndex = MantidQt::MantidWidgets::WorkspaceIndex(0);
     m_workspace = create2DWorkspace(3, 3);
+    m_workspaceGroup = createWorkspaceGroup(3, 3, 3, "GroupName");
 
     AnalysisDataService::Instance().addOrReplace(m_wsName, m_workspace);
 
@@ -187,7 +190,7 @@ public:
     auto lineedit = dialog->workspaceIndiceLineEdit();
     dialog->show();
 
-    combobox->setCurrentIndex(0);
+    combobox->setCurrentIndex(4);
     lineedit->setText("0-2");
     dialog->accept();
 
@@ -198,7 +201,29 @@ public:
   }
 
   void
-  test_that_getDialogWorkspaces_returns_the_expected_workspace_index_selected_in_the_AddWorkspaceDialog() {
+  test_that_getDialogWorkspaces_returns_the_expected_workspaces_when_a_workspace_group_is_selected_in_the_AddWorkspaceDialog() {
+    openFitScriptGeneratorWidget();
+
+    auto dialog = m_view->addWorkspaceDialog();
+    auto combobox = dialog->workspaceNameComboBox();
+    auto lineedit = dialog->workspaceIndiceLineEdit();
+    dialog->show();
+
+    combobox->setCurrentIndex(0);
+    lineedit->setText("0-2");
+    dialog->accept();
+
+    auto const workspaces = m_view->getDialogWorkspaces();
+    TS_ASSERT_EQUALS(workspaces.size(), 3);
+    for (auto i = 0u; i < workspaces.size(); ++i) {
+      TS_ASSERT_EQUALS(workspaces[i]->getNumberHistograms(), 3);
+      TS_ASSERT_EQUALS(workspaces[i]->getName(),
+                       "GroupName_" + std::to_string(i));
+    }
+  }
+
+  void
+  test_that_getDialogWorkspaceIndices_returns_the_expected_workspace_index_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
     auto dialog = m_view->addWorkspaceDialog();
@@ -217,7 +242,7 @@ public:
   }
 
   void
-  test_that_getDialogWorkspaces_returns_the_expected_range_of_workspace_indices_selected_in_the_AddWorkspaceDialog() {
+  test_that_getDialogWorkspaceIndices_returns_the_expected_range_of_workspace_indices_selected_in_the_AddWorkspaceDialog() {
     openFitScriptGeneratorWidget();
 
     auto dialog = m_view->addWorkspaceDialog();
@@ -298,6 +323,7 @@ private:
   std::string m_wsName;
   MantidQt::MantidWidgets::WorkspaceIndex m_wsIndex;
   Mantid::API::MatrixWorkspace_sptr m_workspace;
+  Mantid::API::WorkspaceGroup_sptr m_workspaceGroup;
   std::unique_ptr<FitScriptGeneratorView> m_view;
   std::unique_ptr<MockFitScriptGeneratorPresenter> m_presenter;
 };
