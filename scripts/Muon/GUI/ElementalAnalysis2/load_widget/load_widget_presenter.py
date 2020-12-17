@@ -84,7 +84,6 @@ class LoadWidgetPresenterEA(object):
         self.load_run_widget.update_view_from_model(self._model.runs)
         self.loadNotifier.notify_subscribers()
 
-
     def disable_loading(self):
         self.load_run_widget.disable_loading()
         self.load_file_widget.disable_loading()
