@@ -51,7 +51,7 @@ struct ComponentPosition {
 /// workspaces
 class MANTID_ALGORITHMS_DLL CalibrationTableHandler {
 public:
-  /// Load a single component calibration table
+  /// Load a single-component calibration table
   static DataObjects::TableWorkspace_sptr
   loadComponentCalibrationTable(const std::string &filename,
                                 const std::string &tablewsname);
