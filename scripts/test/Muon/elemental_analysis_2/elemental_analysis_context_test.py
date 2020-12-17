@@ -6,8 +6,12 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 import unittest
 from unittest import mock
+from mantid.api import WorkspaceGroup
+from mantid.simpleapi import CreateSampleWorkspace
 from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
 from Muon.GUI.ElementalAnalysis2.context.data_context import DataContext
+from Muon.GUI.ElementalAnalysis2.context.ea_group_context import EAGroupContext
+from Muon.GUI.Common.muon_load_data import MuonLoadData
 
 
 class ElementalAnalysisContextTest(unittest.TestCase):
@@ -47,6 +51,47 @@ class DataContextTest(unittest.TestCase):
 
         self.context.clear_run_info()
         self.assertEquals(self.context.run_info, [])
+
+
+class EAGroupContextTest(unittest.TestCase):
+    def setUp(self):
+        self.context = EAGroupContext()
+        self.loadedData = MuonLoadData()
+
+    def create_group_workspace_and_load(self):
+        grpws = WorkspaceGroup()
+        ws_detector1 = '9999; Detector 1'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector1))
+        ws_detector2 = '9999; Detector 2'
+        grpws.addWorkspace(CreateSampleWorkspace(OutputWorkspace=ws_detector2))
+        run = 9999
+        self.loadedData.add_data(run=[run], workspace=grpws)
+
+    # ------------------------------------------------------------------------------------------------------------------
+    # TESTS
+    # ------------------------------------------------------------------------------------------------------------------
+
+    def test_add_group(self):
+        self.loadedData.clear()
+        self.create_group_workspace_and_load()
+        empty_group = []
+        new_group = self.context.add_new_group(empty_group, self.loadedData)
+        self.assertEquals(len(new_group), 2)
+
+    def test_reset_group_to_default(self):
+        self.loadedData.clear()
+        self.create_group_workspace_and_load()
+        self.context.reset_group_to_default(self.loadedData)
+        self.assertEquals(len(self.context.groups), 2)
+
+    def test_clear(self):
+        self.loadedData.clear()
+        self.create_group_workspace_and_load()
+        self.context.reset_group_to_default(self.loadedData)
+        self.assertEquals(len(self.context.groups), 2)
+
+        self.context.clear()
+        self.assertEquals(len(self.context.groups), 0)
 
 
 if __name__ == '__main__':

@@ -14,6 +14,7 @@ from Muon.GUI.Common.contexts.phase_table_context import PhaseTableContext
 from Muon.GUI.Common.contexts.fitting_context import FittingContext
 from Muon.GUI.ElementalAnalysis2.context.context import ElementalAnalysisContext
 from Muon.GUI.ElementalAnalysis2.context.data_context import DataContext
+from Muon.GUI.ElementalAnalysis2.context.ea_group_context import EAGroupContext
 from Muon.GUI.FrequencyDomainAnalysis.frequency_context import FrequencyContext
 from unittest import mock
 
@@ -60,4 +61,7 @@ def setup_context(freq=False):
 def setup_context_for_ea_tests(parent_object):
     parent_object.loaded_data = MuonLoadData()
     parent_object.data_context = DataContext(load_data=parent_object.loaded_data)
-    parent_object.context = ElementalAnalysisContext()
+    parent_object.gui_context = MuonGuiContext()
+    parent_object.group_context = EAGroupContext(parent_object.data_context.check_group_contains_valid_detectors)
+    parent_object.context = ElementalAnalysisContext(parent_object.group_context, parent_object.gui_context)
+
