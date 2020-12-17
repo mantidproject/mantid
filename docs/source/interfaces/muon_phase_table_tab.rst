@@ -29,8 +29,8 @@ Phase Quad Calculator
 
 The phase quad calcuator use the :ref:`PhaseQuad <algm-PhaseQuad>` algorithm combine the signals from multiple detectors
 into a quadrature phase signal.
-
-**InputWorkspace** This selects the workspace used to calculate the phase quad.
+It will calculate the phasequad for all of the loaded runs using the selected phase table.
+When the runs are changed all of the phasequads are removed.
 
 **PhaseTable** This selects the phase table used to calculate the phase quad.
 

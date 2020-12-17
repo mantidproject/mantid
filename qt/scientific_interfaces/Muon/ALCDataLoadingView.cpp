@@ -37,6 +37,8 @@ void ALCDataLoadingView::initialize() {
   m_ui.logValueSelector->setEnabled(true);
   enableLoad(false);
   enableRunsAutoAdd(false);
+  enableAlpha(false);
+  showAlphaMessage(false);
   connect(m_ui.load, SIGNAL(clicked()), SIGNAL(loadRequested()));
   connect(m_ui.help, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_ui.instrument, SIGNAL(currentTextChanged(QString)), this,
@@ -71,6 +73,9 @@ void ALCDataLoadingView::initialize() {
   QRegExp re("[0-9]+(,[0-9]+)*(-[0-9]+(($)|(,[0-9]+))+)*");
   QValidator *validator = new QRegExpValidator(re, this);
   m_ui.runs->setTextValidator(validator);
+
+  // Alpha to only accept positive doubles
+  m_ui.alpha->setValidator(new QDoubleValidator(0, 99999, 10, this));
 
   m_ui.runs->doButtonOpt(MantidQt::API::FileFinderWidget::ButtonOpts::None);
 }
@@ -414,6 +419,30 @@ std::string ALCDataLoadingView::getRunsFirstRunText() const {
   if (commaSearchResult == std::string::npos)
     return text.substr(0, rangeSearchResult); // Must have range
   return text.substr(0, commaSearchResult);   // Must have comma
+}
+
+void ALCDataLoadingView::enableAlpha(const bool alpha) {
+  m_ui.alpha->setEnabled(alpha);
+  m_ui.alphaLabel->setEnabled(alpha);
+}
+
+bool ALCDataLoadingView::isAlphaEnabled() const {
+  return m_ui.alpha->isEnabled();
+}
+
+void ALCDataLoadingView::setAlphaValue(const std::string &alpha) {
+  m_ui.alpha->setText(QString::fromStdString(alpha));
+}
+
+// Get alpha value, defualt value 1
+std::string ALCDataLoadingView::getAlphaValue() const {
+  if (!m_ui.alpha->text().isEmpty())
+    return m_ui.alpha->text().toStdString();
+  return "1.0";
+}
+
+void ALCDataLoadingView::showAlphaMessage(const bool alpha) {
+  m_ui.alphaMessage->setVisible(alpha);
 }
 
 } // namespace CustomInterfaces

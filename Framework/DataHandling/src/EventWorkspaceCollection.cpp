@@ -8,6 +8,7 @@
 #include "MantidAPI/Axis.h"
 #include "MantidAPI/Run.h"
 #include "MantidAPI/Sample.h"
+#include "MantidDataHandling/ISISRunLogs.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/WorkspaceCreation.h"
 #include "MantidGeometry/Instrument.h"
@@ -87,26 +88,16 @@ void EventWorkspaceCollection::setNPeriods(
                                         periodNumbers.end());
   const bool addBoolTimeSeries = (uniquePeriods.size() == nPeriods);
 
+  auto logCreator = ISISRunLogs(temp->run());
+  logCreator.addStatusLog(temp->mutableRun());
+
   for (size_t i = 0; i < m_WsVec.size(); ++i) {
     const auto periodNumber = int(i + 1);
     m_WsVec[i] = createEmptyEventWorkspace();
     m_WsVec[i]->copyExperimentInfoFrom(temp.get());
     if (addBoolTimeSeries) {
-      std::stringstream buffer;
-      buffer << "period " << periodNumber;
-      auto *periodBoolLog = new Kernel::TimeSeriesProperty<bool>(buffer.str());
-      for (int j = 0; j < int(periodLog->size()); ++j) {
-        periodBoolLog->addValue(periodLog->nthTime(j),
-                                periodNumber == periodLog->nthValue(j));
-      }
-      Run &mutableRun = m_WsVec[i]->mutableRun();
-      mutableRun.addProperty(periodBoolLog);
-
-      Kernel::PropertyWithValue<int> *currentPeriodProperty =
-          new Kernel::PropertyWithValue<int>("current_period", periodNumber);
-      mutableRun.addProperty(currentPeriodProperty);
+      logCreator.addPeriodLogs(periodNumber, m_WsVec[i]->mutableRun());
     }
-
     copyLogs(
         temp,
         m_WsVec[i]); // Copy all logs from dummy workspace to period workspaces.

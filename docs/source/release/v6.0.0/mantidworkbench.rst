@@ -12,7 +12,9 @@ New Features
 - Added a show legend checkbox to the workbench plot settings. This allows users to choose whether to display the legend on graphs by default.
 - Added a ``Log`` colorbar scale option to the Sliceviewer. This differs from the existing ``Symlog`` option as it prohibits negative values.
 - Added a Dx data tab on the data window when a workspace has Dx data.
+- Added the ability to load 1d-Plots from MantidPlot project files in workbench.
 - Added QLineEdit to SampleLogs widget to allow filtering its entries
+- Time series sample logs in multiperiod event workspaces can now be filtered by current period.
 
 Improvements
 ############
@@ -36,6 +38,7 @@ Improvements
 - The matplotlib `zoom` selection box is now more visible on colorfill and sliceviewer plots.
 - Add an autoscale checkbox to plot config dialog.
 - Add a Python function to replace the workspace being shown by an instrument window.
+- Slice Viewer replots the workspace when it is modified outside the Slice Viewer.
 
 Bugfixes
 ########
@@ -51,5 +54,6 @@ Bugfixes
 - The colorfill plot on ragged workspaces will have the correct horizontal extent.
 - Fix replot of colorfill image after a workspace is replaced.
 - Fixed a bug in generating plot scripts for figures containing data for a particular bin.
+- Fixed a bug causing an error when double clicking a ragged workspace.
 
 :ref:`Release 6.0.0 <v6.0.0>`

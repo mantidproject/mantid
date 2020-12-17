@@ -10,6 +10,8 @@
 import sys
 import unittest
 from unittest import mock
+from unittest.mock import patch
+from mantid.api import MultipleExperimentInfos
 
 import matplotlib
 matplotlib.use('Agg')
@@ -46,6 +48,16 @@ def _create_presenter(model, view, mock_sliceinfo_cls, enable_nonortho_axes, sup
     return presenter, data_view_mock
 
 
+def create_workspace_mock():
+    # Mock out workspace methods needed for SliceViewerModel.__init__
+    workspace = mock.Mock(spec=MultipleExperimentInfos)
+    workspace.isMDHistoWorkspace = lambda: False
+    workspace.getNumDims = lambda: 2
+    workspace.name = lambda: "workspace"
+
+    return workspace
+
+
 class SliceViewerTest(unittest.TestCase):
     def setUp(self):
         self.view = mock.Mock(spec=SliceViewerView)
@@ -70,6 +82,14 @@ class SliceViewerTest(unittest.TestCase):
         self.model.get_ws = mock.Mock()
         self.model.get_data = mock.Mock()
         self.model.rebin = mock.Mock()
+        self.model.workspace_equals = mock.Mock()
+        self.model.get_properties.return_value = {
+            "workspace_type": "WS_TYPE.MATRIX",
+            "supports_normalise": True,
+            "supports_nonorthogonal_axes": False,
+            "supports_dynamic_rebinning": False,
+            "supports_peaks_overlays": True
+        }
 
     def test_sliceviewer_MDH(self):
         self.model.get_ws_type = mock.Mock(return_value=WS_TYPE.MDH)
@@ -79,6 +99,7 @@ class SliceViewerTest(unittest.TestCase):
         # setup calls
         self.assertEqual(self.model.get_dimensions_info.call_count, 0)
         self.assertEqual(self.model.get_ws.call_count, 1)
+        self.assertEqual(self.model.get_properties.call_count, 1)
         self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 1)
         self.assertEqual(self.view.data_view.plot_MDH.call_count, 1)
 
@@ -106,6 +127,7 @@ class SliceViewerTest(unittest.TestCase):
         # setup calls
         self.assertEqual(self.model.get_dimensions_info.call_count, 0)
         self.assertEqual(self.model.get_ws_MDE.call_count, 1)
+        self.assertEqual(self.model.get_properties.call_count, 1)
         self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 1)
         self.assertEqual(self.view.data_view.dimensions.get_bin_params.call_count, 1)
         self.assertEqual(self.view.data_view.plot_MDH.call_count, 1)
@@ -136,6 +158,7 @@ class SliceViewerTest(unittest.TestCase):
         # setup calls
         self.assertEqual(self.model.get_dimensions_info.call_count, 0)
         self.assertEqual(self.model.get_ws.call_count, 1)
+        self.assertEqual(self.model.get_properties.call_count, 1)
         self.assertEqual(self.view.data_view.dimensions.get_slicepoint.call_count, 0)
         self.assertEqual(self.view.data_view.plot_matrix.call_count, 1)
 
@@ -320,6 +343,78 @@ class SliceViewerTest(unittest.TestCase):
         SliceViewer(None, model=self.model, view=self.view)
 
         self.view.data_view.activate_tool.assert_called_once_with(ToolItemText.ZOOM)
+
+    def test_replace_workspace_returns_when_the_workspace_is_not_the_model_workspace(self):
+        self.model.workspace_equals.return_value = False
+        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(),
+                                         enable_nonortho_axes=False,
+                                         supports_nonortho=False)
+        presenter.update_view = mock.Mock()
+        presenter._decide_plot_update_methods = mock.Mock()
+        other_workspace = mock.Mock()
+
+        presenter.replace_workspace('other_workspace', other_workspace)
+
+        presenter._decide_plot_update_methods.assert_not_called()
+        presenter.update_view.assert_not_called()
+
+    def test_replace_workspace_closes_view_when_model_properties_change(self):
+
+        self.model.workspace_equals.return_value = True
+        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(),
+                                         enable_nonortho_axes=False,
+                                         supports_nonortho=False)
+        presenter._update_view = mock.Mock()
+        presenter._decide_plot_update_methods = mock.Mock()
+
+        workspace = create_workspace_mock()
+
+        # Not equivalent to self.model.get_properties()
+        new_model_properties = {
+            "workspace_type": "WS_TYPE.MDE",
+            "supports_normalise": False,
+            "supports_nonorthogonal_axes": False,
+            "supports_dynamic_rebinning": False,
+            "supports_peaks_overlays": True
+        }
+
+        with patch.object(SliceViewerModel, "get_properties", return_value=new_model_properties):
+            presenter.replace_workspace('workspace', workspace)
+
+            self.view.emit_close.assert_called_once()
+            presenter._decide_plot_update_methods.assert_not_called()
+            presenter._update_view.assert_not_called()
+
+    def test_replace_workspace_updates_view(self):
+        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(),
+                                         enable_nonortho_axes=False,
+                                         supports_nonortho=False)
+        presenter._update_view = mock.Mock()
+        presenter._decide_plot_update_methods = mock.Mock(
+            return_value=(presenter.new_plot_matrix(), presenter.update_plot_data_matrix())
+        )
+        workspace = create_workspace_mock()
+        new_model_properties = self.model.get_properties()
+
+        # Patch get_properties so that the properties of the new model match those of self.model
+        with patch.object(SliceViewerModel, "get_properties", return_value=new_model_properties):
+            presenter.replace_workspace('workspace', workspace)
+
+            self.view.emit_close.assert_not_called()
+            presenter._decide_plot_update_methods.assert_called_once()
+            presenter._update_view.assert_called_once()
+
+    def test_update_view(self):
+        presenter, _ = _create_presenter(self.model, self.view, mock.MagicMock(),
+                                         enable_nonortho_axes=False,
+                                         supports_nonortho=False)
+        presenter.new_plot = mock.Mock()
+
+        presenter._update_view()
+
+        self.view.data_view.image_info_widget.setWorkspace.assert_called()
+        self.view.setWindowTitle.assert_called_with(self.model.get_title())
+        presenter.new_plot.assert_called_once()
 
 
 if __name__ == '__main__':

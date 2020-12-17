@@ -284,6 +284,8 @@ public:
   void filterWith(const TimeSeriesProperty<bool> *filter);
   /// Restores the property to the unsorted state
   void clearFilter();
+  // Returns whether the time series has been filtered
+  bool isFiltered() const { return m_filterApplied; }
 
   /// Updates size()
   void countSize() const;
