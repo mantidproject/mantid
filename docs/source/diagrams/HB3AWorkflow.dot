@@ -1,0 +1,20 @@
+digraph HB3AWorkflow {
+  label="HB3A Workflow"
+  $global_style
+
+  subgraph algorithms {
+    $algorithm_style
+    HB3AAdjustSampleNorm
+    HB3AFindPeaks
+    HB3APredictPeaks
+    HB3AIntegratePeaks
+  }
+
+  HB3AAdjustSampleNorm -> HB3AFindPeaks [label="Data"]
+  HB3AAdjustSampleNorm -> HB3APredictPeaks [label="Data"]
+  HB3AAdjustSampleNorm -> HB3APredictPeaks [label="UB"]
+  HB3AAdjustSampleNorm -> HB3AIntegratePeaks [label="Data"]
+  HB3AFindPeaks -> HB3APredictPeaks [label="UB"]
+  HB3APredictPeaks -> HB3AIntegratePeaks [label="Peaks"]
+  HB3AFindPeaks -> HB3AIntegratePeaks [label="Peaks"]
+}

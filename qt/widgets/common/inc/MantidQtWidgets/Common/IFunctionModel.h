@@ -75,6 +75,8 @@ public:
                                     const QString &tie) = 0;
   virtual void setLocalParameterConstraint(const QString &parName, int i,
                                            const QString &constraint) = 0;
+  virtual void setGlobalParameterValue(const QString &paramName,
+                                       double value) = 0;
   virtual QString setBackgroundA0(double value) = 0;
 
 protected:

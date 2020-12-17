@@ -16,6 +16,7 @@ from sans.common.general_functions import get_ranges_from_event_slice_setting
 from sans.gui_logic.models.model_common import ModelCommon
 from sans.state.AllStates import AllStates
 from sans.gui_logic.gui_common import (meter_2_millimeter, millimeter_2_meter)
+from sans.user_file.parser_helpers.wavelength_parser import parse_range_wavelength
 
 
 class StateGuiModel(ModelCommon):
@@ -25,8 +26,8 @@ class StateGuiModel(ModelCommon):
         super(StateGuiModel, self).__init__(user_file_items)
         self._user_file_items = user_file_items
 
-        # This is transformed in State* objects so it's purely GUI facing
-        # so store in the GUI model
+        # This is transformed in State* objects so we need the
+        # unparsed string for the GUI to display
         self._wavelength_range = ''
 
     def __eq__(self, other):
@@ -393,11 +394,9 @@ class StateGuiModel(ModelCommon):
 
     @wavelength_range.setter
     def wavelength_range(self, value):
-        wavelength_start, wavelength_stop = get_ranges_from_event_slice_setting(value)
-        wavelength_start = [min(wavelength_start)] + wavelength_start
-        wavelength_stop = [max(wavelength_stop)] + wavelength_stop
-        self.wavelength_min = wavelength_start
-        self.wavelength_max = wavelength_stop
+        wav_start, wav_stop = parse_range_wavelength(value)
+        self.wavelength_min = wav_start
+        self.wavelength_max = wav_stop
         self._wavelength_range = value
 
     # ------------------------------------------------------------------------------------------------------------------

@@ -6,8 +6,11 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "ISISEnergyTransfer.h"
 #include "IndirectDataValidationHelper.h"
+#include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidQtWidgets/Common/AlgorithmDialog.h"
+#include "MantidQtWidgets/Common/InterfaceManager.h"
 #include "MantidQtWidgets/Common/UserInputValidator.h"
 
 #include <QFileInfo>
@@ -16,10 +19,14 @@
 
 using namespace IndirectDataValidationHelper;
 using namespace Mantid::API;
+using namespace MantidQt::API;
 using MantidQt::API::BatchAlgorithmRunner;
 
 namespace {
 Mantid::Kernel::Logger g_log("ISISEnergyTransfer");
+
+const std::string DEFAULT_GROUPING_FILENAME = "custom_detector_grouping.xml";
+const std::string GROUPING_WS_NAME = "Custom_grouping_workspace";
 
 bool doesExistInADS(std::string const &workspaceName) {
   return AnalysisDataService::Instance().doesExist(workspaceName);
@@ -151,6 +158,22 @@ double loadSampleLog(std::string const &filename,
   }
 }
 
+void createGroupingWorkspace(std::string const &instrumentName,
+                             std::string const &analyser,
+                             std::string const &customGrouping) {
+  auto creator = AlgorithmManager::Instance().create("CreateGroupingWorkspace");
+  creator->initialize();
+  creator->setProperty("InstrumentName", instrumentName);
+  creator->setProperty("ComponentName", analyser);
+  creator->setProperty("CustomGroupingString", customGrouping);
+  creator->setProperty("OutputWorkspace", GROUPING_WS_NAME);
+  try {
+    creator->execute();
+  } catch (std::runtime_error const &) {
+    // validateInputs has returned errors.
+  }
+}
+
 void convertSpectrumAxis(std::string const &inputWorkspace,
                          std::string const &outputWorkspace,
                          std::string const &target = "ElasticQ",
@@ -232,6 +255,8 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
   connect(m_uiForm.cbGroupingOptions,
           SIGNAL(currentIndexChanged(const QString &)), this,
           SLOT(mappingOptionSelected(const QString &)));
+  connect(m_uiForm.pbSaveCustomGrouping, SIGNAL(clicked()), this,
+          SLOT(handleSaveCustomGroupingClicked()));
   // Plots raw input data when user clicks Plot Time
   connect(m_uiForm.pbPlotTime, SIGNAL(clicked()), this, SLOT(plotRaw()));
   // Shows message on run button when user is inputting a run number
@@ -264,7 +289,8 @@ ISISEnergyTransfer::ISISEnergyTransfer(IndirectDataReduction *idrUI,
   mappingOptionSelected(m_uiForm.cbGroupingOptions->currentText());
 
   // Add validation to custom detector grouping
-  QRegExp re("([0-9]+[-:+]?[0-9]*,[ ]?)*[0-9]+[-:+]?[0-9]*");
+  QRegExp re(
+      "([0-9]+[-:+]?[0-9]*([+]?[0-9]*)*,[ ]?)*[0-9]+[-:+]?[0-9]*([+]?[0-9]*)*");
   m_uiForm.leCustomGroups->setValidator(new QRegExpValidator(re, this));
 
   // Validate to remove invalid markers
@@ -591,6 +617,36 @@ void ISISEnergyTransfer::includeExtraGroupingOption(bool includeOption,
     setCurrentGroupingOption(option);
   } else if (!includeOption && !isOptionHidden(option))
     removeGroupingOption(option);
+}
+
+void ISISEnergyTransfer::handleSaveCustomGroupingClicked() {
+  createCustomGroupingWorkspace();
+  if (doesExistInADS(GROUPING_WS_NAME)) {
+    QHash<QString, QString> props;
+    props["InputWorkspace"] = QString::fromStdString(GROUPING_WS_NAME);
+    props["OutputFile"] = QString::fromStdString(DEFAULT_GROUPING_FILENAME);
+
+    InterfaceManager interfaceManager;
+    auto *dialog = interfaceManager.createDialogFromName(
+        "SaveDetectorsGrouping", -1, nullptr, false, props, "",
+        QStringList("OutputFile"));
+
+    dialog->show();
+    dialog->raise();
+    dialog->activateWindow();
+  }
+}
+
+void ISISEnergyTransfer::createCustomGroupingWorkspace() {
+  auto const instrumentDetails = getInstrumentDetails();
+  auto const instrumentName = instrumentDetails["instrument"].toStdString();
+  auto const analyser = instrumentDetails["analyser"].toStdString();
+  auto const customGrouping = m_uiForm.leCustomGroups->text().toStdString();
+
+  if (!customGrouping.empty())
+    createGroupingWorkspace(instrumentName, analyser, customGrouping);
+  else
+    displayWarning("The custom grouping is empty.");
 }
 
 void ISISEnergyTransfer::setInstrumentDefault() {

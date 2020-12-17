@@ -289,7 +289,7 @@ class WorkspaceWidget(PluginWidget):
             TableWorkspaceDisplay.supports(ws)
             self._do_show_data([name])
         except ValueError:
-            if hasattr(ws, 'blocksize') and ws.blocksize() == 1:
+            if hasattr(ws, 'getMaxNumberBins') and ws.getMaxNumberBins() == 1:
                 #If this is ws is just a single value show the data, else plot the bin
                 if hasattr(ws, 'getNumberHistograms') and ws.getNumberHistograms() == 1:
                     self._do_show_data([name])

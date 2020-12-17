@@ -22,8 +22,8 @@ set(
   IndirectSettingsPresenterTest.h
   IndirectSpectrumSelectionPresenterTest.h
   IqtFitModelTest.h
-  JumpFitDataPresenterTest.h
-  JumpFitModelTest.h
+  FqFitDataPresenterTest.h
+  FqFitModelTest.h
   IDAFunctionParameterEstimationTest.h
 )
 

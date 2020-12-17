@@ -5,10 +5,12 @@
 //   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 // SPDX - License - Identifier: GPL - 3.0 +
 #include "MantidQtWidgets/Common/FunctionModel.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IBackgroundFunction.h"
 #include "MantidAPI/MultiDomainFunction.h"
+#include "MantidGeometry/Instrument.h"
 #include "MantidKernel/Logger.h"
 #include "MantidQtWidgets/Common/FunctionBrowser/FunctionBrowserUtils.h"
 
@@ -27,11 +29,13 @@ void FunctionModel::setFunction(IFunction_sptr fun) {
   m_globalParameterNames.clear();
   m_function = std::dynamic_pointer_cast<MultiDomainFunction>(fun);
   if (m_function) {
+    setResolutionFromWorkspace(m_function);
     return;
   }
   m_function = MultiDomainFunction_sptr(new MultiDomainFunction);
   if (fun) {
     auto const nf = m_numberDomains > 0 ? static_cast<int>(m_numberDomains) : 1;
+    setResolutionFromWorkspace(fun);
     for (int i = 0; i < nf; ++i) {
       m_function->addFunction(fun->clone());
       m_function->setDomainIndex(i, i);
@@ -40,39 +44,50 @@ void FunctionModel::setFunction(IFunction_sptr fun) {
 }
 
 IFunction_sptr FunctionModel::getFitFunction() const {
-  if (!m_function) {
+  if (!m_function)
     return m_function;
-  }
-  auto const nf = m_function->nFunctions();
-  if (nf > 1) {
-    auto fun =
-        std::dynamic_pointer_cast<MultiDomainFunction>(m_function->clone());
-    auto const singleFun = m_function->getFunction(0);
-    for (auto par = m_globalParameterNames.begin();
-         par != m_globalParameterNames.end();) {
-      if (singleFun->hasParameter(par->toStdString())) {
-        QStringList ties;
-        for (size_t i = 1; i < nf; ++i) {
-          ties << "f" + QString::number(i) + "." + *par;
-        }
-        ties << "f0." + *par;
-        fun->addTies(ties.join("=").toStdString());
-        ++par;
-      } else {
-        par = m_globalParameterNames.erase(par);
-      }
-    }
-    return fun;
-  }
-  if (nf == 1) {
-    auto fun = m_function->getFunction(0);
-    auto compFun = std::dynamic_pointer_cast<CompositeFunction>(fun);
-    if (compFun && compFun->nFunctions() == 1) {
-      return compFun->getFunction(0);
-    }
-    return fun;
+
+  auto const numberOfFunctions = m_function->nFunctions();
+
+  if (numberOfFunctions > 1) {
+    if (m_currentDomainIndex < numberOfFunctions)
+      return getFitFunctionWithGlobals(m_currentDomainIndex);
+    return getFitFunctionWithGlobals(0);
+
+  } else if (numberOfFunctions == 1) {
+    auto const function = m_function->getFunction(0)->clone();
+    auto const composite =
+        std::dynamic_pointer_cast<CompositeFunction>(function);
+
+    if (composite && composite->nFunctions() == 1)
+      return composite->getFunction(0);
+    return function;
   }
   return IFunction_sptr();
+}
+
+IFunction_sptr
+FunctionModel::getFitFunctionWithGlobals(std::size_t const &index) const {
+  auto function =
+      std::dynamic_pointer_cast<MultiDomainFunction>(m_function->clone());
+
+  auto const singleFun = m_function->getFunction(index);
+  for (auto paramIter = m_globalParameterNames.begin();
+       paramIter != m_globalParameterNames.end();) {
+    if (singleFun->hasParameter(paramIter->toStdString())) {
+      QStringList ties;
+      for (auto i = 0u; i < m_function->nFunctions(); ++i)
+        if (i != index)
+          ties << "f" + QString::number(i) + "." + *paramIter;
+
+      ties << "f" + QString::number(index) + "." + *paramIter;
+      function->addTies(ties.join("=").toStdString());
+      ++paramIter;
+    } else {
+      paramIter = m_globalParameterNames.erase(paramIter);
+    }
+  }
+  return function;
 }
 
 bool FunctionModel::hasFunction() const {
@@ -138,13 +153,11 @@ void FunctionModel::removeFunction(const QString &functionIndex) {
 }
 
 void FunctionModel::setParameter(const QString &paramName, double value) {
-  auto fun = getCurrentFunction();
-  if (!fun) {
-    throw std::logic_error("Function is undefined.");
-  }
-  if (fun->hasParameter(paramName.toStdString())) {
-    fun->setParameter(paramName.toStdString(), value);
-  }
+  if (isGlobal(paramName))
+    setGlobalParameterValue(paramName, value);
+  else
+    setLocalParameterValue(paramName, static_cast<int>(m_currentDomainIndex),
+                           value);
 }
 
 void FunctionModel::setAttribute(const QString &attrName,
@@ -396,7 +409,9 @@ QString FunctionModel::getLocalParameterConstraint(const QString &parName,
 
 void FunctionModel::setLocalParameterValue(const QString &parName, int i,
                                            double value) {
-  getSingleFunction(i)->setParameter(parName.toStdString(), value);
+  auto function = getSingleFunction(i);
+  if (function && function->hasParameter(parName.toStdString()))
+    function->setParameter(parName.toStdString(), value);
 }
 
 void FunctionModel::setLocalParameterValue(const QString &parName, int i,
@@ -458,6 +473,13 @@ void FunctionModel::setLocalParameterConstraint(const QString &parName, int i,
     newConstraint.replace(parts.first, name);
     fun->addConstraints(newConstraint.toStdString());
   }
+}
+
+void FunctionModel::setGlobalParameterValue(const QString &paramName,
+                                            double value) {
+  if (isGlobal(paramName))
+    for (auto i = 0; i < getNumberDomains(); ++i)
+      setLocalParameterValue(paramName, i, value);
 }
 
 void FunctionModel::changeTie(const QString &parName, const QString &tie) {
@@ -537,14 +559,10 @@ void FunctionModel::checkIndex(int index) const {
 void FunctionModel::updateMultiDatasetParameters(const IFunction &fun) {
   if (!hasFunction())
     return;
-  if (m_function->nParams() != fun.nParams())
-    return;
-  for (size_t i = 0; i < fun.nParams(); ++i) {
-    m_function->setParameter(i, fun.getParameter(i));
-    m_function->setError(i, fun.getError(i));
-  }
+  copyParametersAndErrors(fun, *m_function);
   updateMultiDatasetAttributes(fun);
 }
+
 void FunctionModel::updateMultiDatasetAttributes(const IFunction &fun) {
   if (!hasFunction())
     return;
@@ -570,6 +588,41 @@ void FunctionModel::updateGlobals() {
       it = m_globalParameterNames.erase(it);
     } else {
       ++it;
+    }
+  }
+}
+
+void FunctionModel::setResolutionFromWorkspace(IFunction_sptr fun) {
+  auto n = fun->getNumberDomains();
+  if (n > 1) {
+    for (size_t index = 0; index < n; index++) {
+      setResolutionFromWorkspace(fun->getFunction(index));
+    }
+  } else {
+    if (fun->hasAttribute("f0.Workspace")) {
+      std::string wsName = fun->getAttribute("f0.Workspace").asString();
+      if (AnalysisDataService::Instance().doesExist(wsName)) {
+        const auto ws =
+            AnalysisDataService::Instance().retrieveWS<MatrixWorkspace>(wsName);
+        setResolutionFromWorkspace(fun, ws);
+      }
+    }
+  }
+}
+
+void FunctionModel::setResolutionFromWorkspace(IFunction_sptr fun,
+                                               MatrixWorkspace_sptr workspace) {
+  auto inst = workspace->getInstrument();
+  auto analyser = inst->getStringParameter("analyser");
+  if (!analyser.empty()) {
+    auto comp = inst->getComponentByName(analyser[0]);
+    if (comp && comp->hasParameter("resolution")) {
+      auto params = comp->getNumberParameter("resolution", true);
+      for (auto param : fun->getParameterNames()) {
+        if (param.find("FWHM") != std::string::npos) {
+          fun->setParameter(param, params[0]);
+        }
+      }
     }
   }
 }

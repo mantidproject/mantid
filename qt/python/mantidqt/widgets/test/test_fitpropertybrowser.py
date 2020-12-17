@@ -205,6 +205,21 @@ class FitPropertyBrowserTest(unittest.TestCase):
             output_name.append(browser.outputName())
         self.assertNotEqual(output_name[0], output_name[1])
 
+    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.setPeakFwhmOf')
+    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.isParameterExplicitlySetOf')
+    @patch('mantidqt.widgets.fitpropertybrowser.fitpropertybrowser.FitPropertyBrowser.getWidthParameterNameOf')
+    def _set_peak_initial_fwhm(self, mock_getWidthName, mock_parameterSet, mock_setFwhm):
+        property_browser = self._create_widget()
+        mock_getWidthName.side_effect = lambda prefix: "S" if prefix == "f0" else ""
+        mock_parameterSet.return_value = True
+        fwhm = 1.0
+        # check width isn't set if already set when initialised (as can happen for B2B exp funcs)
+        property_browser._set_peak_initial_fwhm('f0', fwhm)
+        mock_setFwhm.assert_not_called()
+        # fwhm should be set if width parameter not specified for that peak func
+        property_browser._set_peak_initial_fwhm('f1', fwhm)
+        mock_setFwhm.assert_called_once_with('f1', fwhm)
+
     # Private helper functions
     def _create_widget(self, canvas=MagicMock(), toolbar_manager=Mock()):
         return FitPropertyBrowser(canvas, toolbar_manager)

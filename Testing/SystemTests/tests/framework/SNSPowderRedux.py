@@ -125,6 +125,7 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
                            Binning=-0.001,
                            SaveAs="nexus",
                            OutputDirectory=savedir)
+        assert not mtd['PG3_46577'].sample().getMaterial().name().strip()
 
         # Silicon Full Paalman-Pings test
         SNSPowderReduction("PG3_46577.nxs.h5",
@@ -138,6 +139,7 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
                            ContainerShape="PAC06",
                            OutputFilePrefix='PP_absorption_',
                            OutputDirectory=savedir)
+        assert mtd['PG3_46577'].sample().getMaterial().name() == 'Si'
 
         LoadNexus(Filename="PG3_46577.nxs", OutputWorkspace="PG3_46577")
         LoadNexus(Filename="PP_absorption_PG3_46577.nxs", OutputWorkspace="PP_46577")

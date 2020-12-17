@@ -6,6 +6,8 @@
 // SPDX - License - Identifier: GPL - 3.0 +
 #pragma once
 
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IFunction.h"
@@ -99,6 +101,31 @@ public:
     }
   }
 
+  void test_function_resolution_from_workspace() {
+    FunctionModel model;
+    auto algo = AlgorithmManager::Instance().create("Load");
+    algo->setPropertyValue("Filename", "iris26173_graphite002_res");
+    algo->setPropertyValue("OutputWorkspace", "iris26173_graphite002_res");
+    algo->execute();
+    auto initialFunString =
+        "composite=Convolution,NumDeriv=true,FixResolution=true;name="
+        "Resolution,"
+        "Workspace=iris26173_graphite002_res,WorkspaceIndex=0,X=(),Y=();name="
+        "Lorentzian,Amplitude=1,PeakCentre=0,FWHM=1,constraints=(0<Amplitude,0<"
+        "FWHM)";
+    auto correctedFunString =
+        "composite=Convolution,NumDeriv=true,FixResolution=true;name="
+        "Resolution,"
+        "Workspace=iris26173_graphite002_res,WorkspaceIndex=0,X=(),Y=();name="
+        "Lorentzian,Amplitude=1,PeakCentre=0,FWHM=0.0175,constraints=(0<"
+        "Amplitude,0<"
+        "FWHM)";
+    model.setFunctionString(initialFunString);
+    auto fun = model.getFitFunction();
+    auto funString = fun->asString();
+    TS_ASSERT(funString == correctedFunString);
+  }
+
   void test_globals() {
     m_model->setFunctionString("name=LinearBackground,A0=1,A1=2");
     m_model->setNumberDomains(3);
@@ -122,6 +149,40 @@ public:
     TS_ASSERT_EQUALS(fun->getTie(4)->asString(), "f2.A0=f0.A0");
     locals = m_model->getLocalParameters();
     TS_ASSERT_EQUALS(locals[0], "A1");
+  }
+
+  void test_that_setParameter_will_set_a_local_parameter_as_expected() {
+    m_model->setFunctionString("composite=MultiDomainFunction,NumDeriv=true;"
+                               "name=LinearBackground,A0=1,A1=2,$domains=i;"
+                               "name=LinearBackground,A0=1,A1=2,$domains=i");
+
+    m_model->setNumberDomains(2);
+    m_model->setCurrentDomainIndex(0);
+    m_model->setParameter("A0", 5.0);
+
+    TS_ASSERT_EQUALS(m_model->getFitFunction()->asString(),
+                     "composite=MultiDomainFunction,NumDeriv=true;"
+                     "name=LinearBackground,A0=5,A1=2,$domains=i;"
+                     "name=LinearBackground,A0=1,A1=2,$domains=i;"
+                     "name=LinearBackground,A0=1,A1=2,$domains=All");
+  }
+
+  void test_that_setParameter_will_set_a_global_parameter_as_expected() {
+    m_model->setFunctionString("composite=MultiDomainFunction,NumDeriv=true;"
+                               "name=LinearBackground,A0=1,A1=2,$domains=i;"
+                               "name=LinearBackground,A0=1,A1=2,$domains=i");
+
+    m_model->setNumberDomains(2);
+    m_model->setCurrentDomainIndex(0);
+    m_model->setGlobalParameters(QStringList("A0"));
+    m_model->setParameter("A0", 5.0);
+
+    TS_ASSERT_EQUALS(m_model->getFitFunction()->asString(),
+                     "composite=MultiDomainFunction,NumDeriv=true;"
+                     "name=LinearBackground,A0=5,A1=2,$domains=i;"
+                     "name=LinearBackground,A0=5,A1=2,$domains=i;"
+                     "name=LinearBackground,A0=5,A1=2,$domains=All;"
+                     "ties=(f2.A0=f0.A0,f1.A0=f0.A0)");
   }
 
   void test_set_number_domains_after_clear() {

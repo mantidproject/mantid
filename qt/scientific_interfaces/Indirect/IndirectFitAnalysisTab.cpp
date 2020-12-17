@@ -185,7 +185,7 @@ void IndirectFitAnalysisTab::loadSettings(const QSettings &settings) {
 }
 
 void IndirectFitAnalysisTab::setFileExtensionsByName(bool filter) {
-  auto const tab = tabName();
+  auto const tab = getTabName();
   setSampleSuffixes(tab, filter);
   if (hasResolution())
     setResolutionSuffixes(tab, filter);
@@ -241,7 +241,7 @@ bool IndirectFitAnalysisTab::isRangeCurrentlySelected(
   return m_plotPresenter->isCurrentlySelected(dataIndex, spectrum);
 }
 
-IndirectFittingModel *IndirectFitAnalysisTab::fittingModel() const {
+IndirectFittingModel *IndirectFitAnalysisTab::getFittingModel() const {
   return m_fittingModel.get();
 }
 
@@ -249,7 +249,7 @@ IndirectFittingModel *IndirectFitAnalysisTab::fittingModel() const {
  * @return  The fit type selected in the custom functions combo box, in the fit
  *          property browser.
  */
-QString IndirectFitAnalysisTab::selectedFitType() const {
+QString IndirectFitAnalysisTab::getSelectedFitType() const {
   return m_fitPropertyBrowser->selectedFitType();
 }
 
@@ -258,7 +258,7 @@ QString IndirectFitAnalysisTab::selectedFitType() const {
  * @return              The number of custom functions, with the specified name,
  *                      included in the selected model.
  */
-size_t IndirectFitAnalysisTab::numberOfCustomFunctions(
+size_t IndirectFitAnalysisTab::getNumberOfCustomFunctions(
     const std::string &functionName) const {
   auto fittingFunction = m_fittingModel->getFittingFunction();
   if (fittingFunction && fittingFunction->nFunctions() > 0)
@@ -416,9 +416,9 @@ void IndirectFitAnalysisTab::updateParameterValues() {
  * @param parameters  The parameter values to update the browser with.
  */
 void IndirectFitAnalysisTab::updateParameterValues(
-    const std::unordered_map<std::string, ParameterValue> &) {
+    const std::unordered_map<std::string, ParameterValue> &params) {
   try {
-    updateFitBrowserParameterValues();
+    updateFitBrowserParameterValues(params);
   } catch (const std::out_of_range &) {
     g_log.warning(
         "Warning issue updating parameter values in fit property browser");
@@ -428,9 +428,13 @@ void IndirectFitAnalysisTab::updateParameterValues(
   }
 }
 
-void IndirectFitAnalysisTab::updateFitBrowserParameterValues() {
+void IndirectFitAnalysisTab::updateFitBrowserParameterValues(
+    std::unordered_map<std::string, ParameterValue> params) {
   IFunction_sptr fun = m_fittingModel->getFittingFunction();
   if (fun) {
+    for (auto pair : params) {
+      fun->setParameter(pair.first, pair.second.value);
+    }
     if (fun->getNumberDomains() > 1) {
       m_fitPropertyBrowser->updateMultiDatasetParameters(*fun);
     } else {
@@ -770,10 +774,10 @@ void IndirectFitAnalysisTab::updateResultOptions() {
 }
 
 void IndirectFitAnalysisTab::respondToChangeOfSpectraRange(
-    TableDatasetIndex i) {
+    TableDatasetIndex index) {
   m_plotPresenter->updateSelectedDataName();
   m_plotPresenter->updateAvailableSpectra();
-  m_dataPresenter->updateSpectraInTable(i);
+  m_dataPresenter->updateSpectraInTable(index);
   m_fitPropertyBrowser->updateFunctionBrowserData(
       static_cast<int>(m_fittingModel->getNumberOfDomains()), getDatasets(),
       m_fittingModel->getQValuesForData(),

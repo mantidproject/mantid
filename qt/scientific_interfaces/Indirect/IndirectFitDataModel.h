@@ -8,7 +8,7 @@
 #include <string>
 
 #include "DllConfig.h"
-#include "IIndirectFitData.h"
+#include "IIndirectFitDataModel.h"
 #include "IndirectFitData.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidQtWidgets/Common/FunctionModelSpectra.h"
@@ -20,10 +20,11 @@ namespace IDA {
 using namespace MantidWidgets;
 
 /*
-    IIndirectFitData - Specifies an interface for updating, querying and
+    IIndirectFitDataModel - Specifies an interface for updating, querying and
    accessing the raw data in IndirectFitAnalysisTabs
 */
-class MANTIDQT_INDIRECT_DLL IndirectFitDataModel : public IIndirectFitData {
+class MANTIDQT_INDIRECT_DLL IndirectFitDataModel
+    : public IIndirectFitDataModel {
 public:
   IndirectFitDataModel();
   virtual ~IndirectFitDataModel() = default;

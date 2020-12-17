@@ -450,9 +450,17 @@ class MantidAxes(Axes):
         kwargs['distribution'] = not self.get_artist_normalization_state(artist)
         workspace, spec_num = self.get_artists_workspace_and_spec_num(artist)
 
+        # deal with MDHisto workspace
+        if workspace.isMDHistoWorkspace():
+            # the MDHisto does not have the distribution concept.
+            # This is available only for Workspace2D
+            if 'distribution' in kwargs.keys():
+                del kwargs['distribution']
         # check if it is a sample log plot
-        if spec_num is None:
+        elif spec_num is None:
             sample_log_plot_details = self.get_artists_sample_log_plot_details(artist)
+            # we plot MDHisto workspaces, Workspace2D spectra, and Sample Logs
+            # if you get here, the LogName is valid and not None
             kwargs['LogName'] = sample_log_plot_details[0]
             if sample_log_plot_details[1] is not None:
                 kwargs['Filtered'] = sample_log_plot_details[1]
@@ -462,7 +470,7 @@ class MantidAxes(Axes):
             errorbars = False
             # neither does distribution
             if 'distribution' in kwargs.keys():
-                    del kwargs['distribution']
+                del kwargs['distribution']
         else:
             if kwargs.get('axis', None) == MantidAxType.BIN:
                 workspace_index = spec_num
@@ -913,20 +921,23 @@ class MantidAxes(Axes):
                     col.remove()
             if hasattr(artist_orig, 'colorbar_cid'):
                 artist_orig.callbacksSM.disconnect(artist_orig.colorbar_cid)
-        if artist_orig.norm.vmin == 0:  # avoid errors with log 0
-            artist_orig.norm.vmin += 1e-6
-        artists_new = colorfunc(self, workspace, norm=artist_orig.norm,  **kwargs)
-
-        artists_new.set_cmap(artist_orig.cmap)
-        if hasattr(artist_orig, 'interpolation'):
-            artists_new.set_interpolation(artist_orig.get_interpolation())
-
-        artists_new.autoscale()
-        artists_new.set_norm(
-            type(artist_orig.norm)(vmin=artists_new.norm.vmin, vmax=artists_new.norm.vmax))
-
+        # If the colormap has been overridden then it needs to be passed in at
+        # creation time
+        if 'colors' not in kwargs:
+            kwargs['cmap'] = artists_orig[-1].cmap
+        artists_new = colorfunc(self, workspace, **kwargs)
+        # Copy properties from old to new
         if not isinstance(artists_new, Iterable):
             artists_new = [artists_new]
+        # assume 1:1 match between old/new artist lists
+        # and update relevant properties
+        for src, dest in zip(artists_orig, artists_new):
+            if hasattr(dest, 'update_from'):
+                dest.update_from(src)
+            if hasattr(dest, 'set_interpolation'):
+                dest.set_interpolation(src.get_interpolation())
+            dest.autoscale()
+            dest.set_norm(src.norm)
 
         try:
             axesfunctions.update_colorplot_datalimits(self, artists_new)
@@ -1264,32 +1275,54 @@ class MantidAxes3D(Axes3D):
         return Axes.set_title(self, *args, **kwargs)
 
     def set_xlim3d(self, *args):
-        min, max = super().set_xlim3d(*args)
-        self._set_overflowing_data_to_nan(min, max, 0)
+        super().set_xlim3d(*args)
+        self._set_overflowing_data_to_nan(0)
 
     def set_ylim3d(self, *args):
-        min, max = super().set_ylim3d(*args)
-
-        self._set_overflowing_data_to_nan(min, max, 1)
+        super().set_ylim3d(*args)
+        self._set_overflowing_data_to_nan(1)
 
     def set_zlim3d(self, *args):
-        min, max = super().set_zlim3d(*args)
+        super().set_zlim3d(*args)
+        self._set_overflowing_data_to_nan(2)
 
-        self._set_overflowing_data_to_nan(min, max, 2)
+    def autoscale(self, *args, **kwargs):
+        super().autoscale(*args, **kwargs)
+        self._set_overflowing_data_to_nan()
 
-    def _set_overflowing_data_to_nan(self, min, max, axis_index):
+    def _set_overflowing_data_to_nan(self, axis_index=None):
         """
-        Sets any data for the given axis that is less than min or greater than max to nan so only the parts of the plot
-        that are within the axes are visible.
-        :param min: the lower axis limit.
-        :param max: the upper axis limit.
+        Sets any data for the given axis that is less than min[axis_index] or greater than max[axis_index]
+        to nan so only the parts of the plot that are within the axes are visible.
         :param axis_index: the index of the axis being edited, 0 for x, 1 for y, 2 for z.
         """
-        if hasattr(self, 'original_data'):
-            axis_data = self.original_data[axis_index].copy()
-            axis_data[np.less(axis_data, min, where=~np.isnan(axis_data))] = np.nan
-            axis_data[np.greater(axis_data, max, where=~np.isnan(axis_data))] = np.nan
-            self.collections[0]._vec[axis_index] = axis_data
+
+        min_vals, max_vals = zip(self.get_xlim3d(),self.get_ylim3d(),self.get_zlim3d())
+        if hasattr(self, 'original_data_surface'):
+            if axis_index is None:
+                axis_index_list = [0,1,2]
+            else:
+                axis_index_list = [axis_index]
+
+            for axis_index in axis_index_list:
+                axis_data = self.original_data_surface[axis_index].copy()
+                axis_data[np.less(axis_data, min_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
+                axis_data[np.greater(axis_data, max_vals[axis_index], where=~np.isnan(axis_data))] = np.nan
+                self.collections[0]._vec[axis_index] = axis_data
+
+        if hasattr(self, 'original_data_wireframe'):
+
+            all_data = copy.deepcopy(self.original_data_wireframe)
+
+            for spectrum in range(len(all_data)):
+                spectrum_data = all_data[spectrum]
+                for point in range(len(spectrum_data)):
+                    for axis in range(3):
+                        if (np.less(spectrum_data[point][axis],min_vals[axis])
+                                or np.greater(spectrum_data[point][axis],max_vals[axis])):
+                            all_data[spectrum][point] = np.repeat(np.nan,3)
+
+            self.collections[0].set_segments(all_data)
 
     def plot(self, *args, **kwargs):
         """
@@ -1362,9 +1395,14 @@ class MantidAxes3D(Axes3D):
         """
         if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            return axesfunctions3D.plot_wireframe(self, *args, **kwargs)
+            line_c = axesfunctions3D.plot_wireframe(self, *args, **kwargs)
         else:
-            return Axes3D.plot_wireframe(self, *args, **kwargs)
+            line_c = Axes3D.plot_wireframe(self, *args, **kwargs)
+
+        # Create a copy of the original data points because data are set to nan when the axis limits are changed.
+        self.original_data_wireframe = copy.deepcopy(line_c._segments3d)
+
+        return line_c
 
     def plot_surface(self, *args, **kwargs):
         """
@@ -1387,18 +1425,18 @@ class MantidAxes3D(Axes3D):
         """
         if datafunctions.validate_args(*args):
             logger.debug('using plotfunctions3D')
-            polyc = axesfunctions3D.plot_surface(self, *args, **kwargs)
+            poly_c = axesfunctions3D.plot_surface(self, *args, **kwargs)
         else:
-            polyc = Axes3D.plot_surface(self, *args, **kwargs)
+            poly_c = Axes3D.plot_surface(self, *args, **kwargs)
 
             # This is a bit of a hack, should be able to remove
             # when matplotlib supports plotting masked arrays
-            polyc._A = safe_masked_invalid(polyc._A)
+            poly_c._A = safe_masked_invalid(poly_c._A)
 
         # Create a copy of the original data points because data are set to nan when the axis limits are changed.
-        self.original_data = copy.deepcopy(polyc._vec)
+        self.original_data_surface = copy.deepcopy(poly_c._vec)
 
-        return polyc
+        return poly_c
 
     def contour(self, *args, **kwargs):
         """

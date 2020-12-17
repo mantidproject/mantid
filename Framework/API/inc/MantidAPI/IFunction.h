@@ -418,8 +418,12 @@ public:
   virtual bool isExplicitlySet(size_t i) const = 0;
   /// Get the fitting error for a parameter
   virtual double getError(size_t i) const = 0;
+  /// Get the fitting error for a parameter by name
+  virtual double getError(const std::string &name) const = 0;
   /// Set the fitting error for a parameter
   virtual void setError(size_t i, double err) = 0;
+  /// Set the fitting error for a parameter by name
+  virtual void setError(const std::string &name, double err) = 0;
 
   /// Check if a parameter i is fixed
   [[nodiscard]] bool isFixed(size_t i) const;

@@ -675,6 +675,10 @@ bool IndirectTab::checkADSForPlotSaveWorkspace(const std::string &workspaceName,
   return workspaceExists;
 }
 
+void IndirectTab::displayWarning(std::string const &message) {
+  QMessageBox::warning(nullptr, "Warning!", QString::fromStdString(message));
+}
+
 std::unordered_map<std::string, size_t> IndirectTab::extractAxisLabels(
     const Mantid::API::MatrixWorkspace_const_sptr &workspace,
     const size_t &axisIndex) const {

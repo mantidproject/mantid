@@ -58,7 +58,8 @@ class PlotsLoaderTest(unittest.TestCase):
                                                                 u'minorTickLocatorValues': None,
                                                                 u'position': u'Left',
                                                                 u'visible': True},
-                                           u'yAxisScale': u'linear', u'yLim': (0.0, 1.0)},
+                                           u'yAxisScale': u'linear', u'yLim': (0.0, 1.0), u'showMinorGrid': False,
+                                           u"xAutoScale":False, u"yAutoScale":False},
                            u'textFromArtists': {}, u'texts': [], u'title': u'', u'xAxisTitle': u'', u'yAxisTitle': u''}
 
     def test_load_plots_does_the_right_calls(self):
@@ -109,6 +110,30 @@ class PlotsLoaderTest(unittest.TestCase):
         self.assertEqual(self.plots_loader.update_lines.call_count, 0)
         self.assertEqual(self.plots_loader.create_text_from_dict.call_count, 0)
         self.assertEqual(self.plots_loader.update_legend.call_count, 1)
+
+    def test_update_properties_limits(self):
+        dic = self.dictionary[u"properties"]
+        mock_ax = mock.Mock()
+
+        plots_loader = self.plots_loader
+        with mock.patch.object(plots_loader, "update_axis", mock.Mock()):
+            plots_loader.update_properties(mock_ax, dic)
+
+        mock_ax.set_xlim.assert_called_once_with(dic['xLim'])
+        mock_ax.set_xlim.assert_called_once_with(dic['yLim'])
+
+    def test_update_properties_limits_autoscale(self):
+        dic = self.dictionary[u"properties"]
+        dic.update({"xAutoScale":True, "yAutoScale":True})
+        mock_ax = mock.Mock()
+
+        plots_loader = self.plots_loader
+        with mock.patch.object(plots_loader, "update_axis", mock.Mock()):
+            plots_loader.update_properties(mock_ax, dic)
+
+        mock_ax.autoscale.assert_has_calls([mock.call(True, axis="x"),mock.call(True, axis="y")])
+        mock_ax.set_xlim.assert_not_called()
+        mock_ax.set_xlim.assert_not_called()
 
     def test_create_text_from_dict(self):
         fig = matplotlib.figure.Figure()
