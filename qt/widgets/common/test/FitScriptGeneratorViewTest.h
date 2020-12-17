@@ -94,7 +94,7 @@ public:
         .Times(1);
 
     QTest::mouseClick(m_view->removeButton(), Qt::LeftButton);
-    QTest::qWait(1000);
+    QApplication::sendPostedEvents();
   }
 
   void test_that_clicking_the_add_workspace_button_will_notify_the_presenter() {
@@ -103,7 +103,7 @@ public:
     EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::AddClicked)).Times(1);
 
     QTest::mouseClick(m_view->addWorkspaceButton(), Qt::LeftButton);
-    QTest::qWait(1000);
+    QApplication::sendPostedEvents();
   }
 
   void
@@ -306,7 +306,7 @@ private:
     QTest::mouseDClick(pViewport, Qt::LeftButton, NULL, QPoint(xPos, yPos));
     QTest::keyClick(pViewport->focusWidget(), Qt::Key_5);
     QTest::keyClick(pViewport->focusWidget(), Qt::Key_Enter);
-    QTest::qWait(500);
+    QApplication::sendPostedEvents();
   }
 
   void selectRowInTable(int row) {
@@ -317,7 +317,7 @@ private:
     // Click the table cell, thereby selecting the row
     QWidget *pViewport = m_view->tableWidget()->viewport();
     QTest::mouseClick(pViewport, Qt::LeftButton, NULL, QPoint(xPos, yPos));
-    QTest::qWait(500);
+    QApplication::sendPostedEvents();
   }
 
   std::string m_wsName;
