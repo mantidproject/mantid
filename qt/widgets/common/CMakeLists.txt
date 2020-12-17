@@ -1054,6 +1054,7 @@ mtd_add_qt_tests(
 
 set(
   QT5_TEST_FILES
+  test/AddWorkspaceDialogTest.h
   test/BatchAlgorithmRunnerTest.h
   test/FileDialogHandlerTest.h
   test/FindFilesThreadPoolManagerTest.h

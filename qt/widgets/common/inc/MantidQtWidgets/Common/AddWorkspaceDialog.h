@@ -7,7 +7,11 @@
 #pragma once
 
 #include "DllOption.h"
+#include "MantidAPI/MatrixWorkspace_fwd.h"
+#include "MantidAPI/WorkspaceGroup_fwd.h"
 #include "ui_AddWorkspaceDialog.h"
+
+#include <vector>
 
 #include <QComboBox>
 #include <QDialog>
@@ -23,9 +27,11 @@ class EXPORT_OPT_MANTIDQT_COMMON AddWorkspaceDialog : public QDialog {
   Q_OBJECT
 
 public:
-  explicit AddWorkspaceDialog(QWidget *parent);
+  explicit AddWorkspaceDialog(QWidget *parent = nullptr);
   QString workspaceName() const { return m_workspaceName; }
   std::vector<int> workspaceIndices() const { return m_wsIndices; }
+
+  std::vector<Mantid::API::MatrixWorkspace_const_sptr> getWorkspaces() const;
 
 public:
   /// Testing accessors
@@ -41,6 +47,10 @@ private slots:
   void selectAllSpectra(int state);
 
 private:
+  void addWorkspacesFromGroup(
+      std::vector<Mantid::API::MatrixWorkspace_const_sptr> &workspaces,
+      Mantid::API::WorkspaceGroup_const_sptr const &group) const;
+
   QStringList availableWorkspaces() const;
   void findCommonMaxIndex(const QString &wsName);
   /// Name of the selected workspace

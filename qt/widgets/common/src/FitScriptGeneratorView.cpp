@@ -8,13 +8,10 @@
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
 #include "MantidQtWidgets/Common/IFitScriptGeneratorPresenter.h"
 
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/WorkspaceGroup.h"
 
 #include <algorithm>
 #include <iterator>
-#include <stdexcept>
 
 #include <QMessageBox>
 
@@ -22,29 +19,6 @@ using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
 namespace {
-
-void addWorkspacesFromGroup(std::vector<MatrixWorkspace_const_sptr> &workspaces,
-                            WorkspaceGroup_const_sptr const &group) {
-  auto const groupSize = static_cast<std::size_t>(group->getNumberOfEntries());
-  for (auto i = 0u; i < groupSize; ++i) {
-    if (auto const workspace =
-            std::dynamic_pointer_cast<MatrixWorkspace>(group->getItem(i))) {
-      workspaces.emplace_back(workspace);
-    }
-  }
-}
-
-std::vector<MatrixWorkspace_const_sptr>
-getWorkspaces(std::string const &workspaceName) {
-  auto &ads = AnalysisDataService::Instance();
-
-  std::vector<MatrixWorkspace_const_sptr> workspaces;
-  if (auto const workspace = ads.retrieveWS<MatrixWorkspace>(workspaceName))
-    workspaces.emplace_back(workspace);
-  else if (auto const group = ads.retrieveWS<WorkspaceGroup>(workspaceName))
-    addWorkspacesFromGroup(workspaces, group);
-  return workspaces;
-}
 
 std::vector<WorkspaceIndex>
 convertToWorkspaceIndex(std::vector<int> const &indices) {
@@ -184,14 +158,11 @@ bool FitScriptGeneratorView::openAddWorkspaceDialog() {
 
 std::vector<MatrixWorkspace_const_sptr>
 FitScriptGeneratorView::getDialogWorkspaces() {
-  auto const workspaceName = m_dialog->workspaceName().trimmed().toStdString();
-
-  std::vector<MatrixWorkspace_const_sptr> workspaces;
-  if (AnalysisDataService::Instance().doesExist(workspaceName))
-    workspaces = getWorkspaces(workspaceName);
-  else
-    displayWarning("Failed to add workspace '" + workspaceName +
-                   "': workspace doesn't exist.");
+  auto const workspaces = m_dialog->getWorkspaces();
+  if (workspaces.empty())
+    displayWarning("Failed to add workspace: '" +
+                   m_dialog->workspaceName().toStdString() +
+                   "' doesn't exist.");
   return workspaces;
 }
 
