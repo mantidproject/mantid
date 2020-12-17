@@ -5,7 +5,7 @@
 #   Institut Laue - Langevin & CSNS, Institute of High Energy Physics, CAS
 # SPDX - License - Identifier: GPL - 3.0 +
 from mantid.api import AlgorithmFactory, AnalysisDataService, WorkspaceFactory
-from mantid.kernel import Logger, Property
+from mantid.kernel import Logger, Property, PropertyManager
 from mantid.simpleapi import AbsorptionCorrection, DeleteWorkspace, Divide, Load, Multiply, \
     PaalmanPingsAbsorptionCorrection, PreprocessDetectorsToMD, SetSample, mtd
 import numpy as np
@@ -26,7 +26,7 @@ def _getBasename(filename):
     return name
 
 
-def calculate_absorption_correction(filename, abs_method, char_dict, sample_formula, mass_density,
+def calculate_absorption_correction(filename, abs_method, props, sample_formula, mass_density,
                                     number_density=Property.EMPTY_DBL,
                                     container_shape="PAC06",
                                     num_wl_bins=1000,
@@ -58,7 +58,7 @@ def calculate_absorption_correction(filename, abs_method, char_dict, sample_form
 
     :param filename: File to be used for absorption correction
     :param abs_method: Type of absorption correction: None, SampleOnly, SampleAndContainer, FullPaalmanPings
-    :param char_dict: Characterization dictionary (see PDDetermineCharacterization) for creating donor workspace
+    :param props: PropertyManager of run characterizations, obtained from PDDetermineCharacterizations
     :param sample_formula: Sample formula to specify the Material for absorption correction
     :param mass_density: Mass density of the sample to specify the Material for absorption correction
     :param number_density: Optional number density of sample to be added to the Material for absorption correction
@@ -78,10 +78,10 @@ def calculate_absorption_correction(filename, abs_method, char_dict, sample_form
 
     environment = {'Name': 'InAir', 'Container': container_shape}
 
-    donorWS = create_absorption_input(filename, char_dict, num_wl_bins, material=material,
+    donorWS = create_absorption_input(filename, props, num_wl_bins, material=material,
                                       environment=environment)
 
-    absName = '__{}_abs_correction'.format(_getBasename(filename))
+    absName = '{}_abs_correction'.format(_getBasename(filename))
 
     if abs_method == "SampleOnly":
         AbsorptionCorrection(donorWS,
@@ -114,33 +114,36 @@ def calculate_absorption_correction(filename, abs_method, char_dict, sample_form
         raise RuntimeWarning("Unrecognized absorption correction method '{}'".format(abs_method))
 
 
-def create_absorption_input(filename, char_dict, num_wl_bins=1000,
+def create_absorption_input(filename, props, num_wl_bins=1000,
                             material=None, geometry=None, environment=None,
                             opt_wl_min=0, opt_wl_max=Property.EMPTY_DBL):
     """
     Create an input workspace for carpenter or other absorption corrections
 
     :param filename: Input file to retrieve properties from the sample log
-    :param char_dict: Characterization dictionary of input, see PDDetermineCharacterizations
+    :param props: PropertyManager of run characterizations, obtained from PDDetermineCharacterizations
     :param num_wl_bins: The number of wavelength bins used for absorption correction
     :param material: Optional material to use in SetSample
     :param geometry: Optional geometry to use in SetSample
     :param environment: Optional environment to use in SetSample
-    :param opt_wl_min: Optional minimum wavelength. If specified, this is used instead of from the char_dict
-    :param opt_wl_max: Optional maximum wavelength. If specified, this is used instead of from the char_dict
+    :param opt_wl_min: Optional minimum wavelength. If specified, this is used instead of from the props
+    :param opt_wl_max: Optional maximum wavelength. If specified, this is used instead of from the props
     :return: Name of the donor workspace created
     """
     absName = '__{}_abs'.format(_getBasename(filename))
 
-    if char_dict is None:
-        raise RuntimeError("Characterization dictionary required to create donor workspace, char_dict is None")
+    if props is None:
+        raise RuntimeError("props is required to create donor workspace, props is None")
+
+    if not isinstance(props, PropertyManager):
+        raise RuntimeError("props must be a PropertyManager object")
 
     log = Logger('CreateAbsorptionInput')
 
     Load(Filename=filename, OutputWorkspace=absName, MetaDataOnly=True)
 
     # first attempt to get the wavelength range from the properties file
-    wl_min, wl_max = char_dict['wavelength_min'].value, char_dict['wavelength_max'].value
+    wl_min, wl_max = props['wavelength_min'].value, props['wavelength_max'].value
     # override that with what was given as parameters to the algorithm
     if opt_wl_min > 0.:
         wl_min = opt_wl_min
@@ -149,8 +152,8 @@ def create_absorption_input(filename, char_dict, num_wl_bins=1000,
 
     # if it isn't found by this point, guess it from the time-of-flight range
     if (wl_min == wl_max == 0.):
-        tof_min = char_dict['tof_min'].value
-        tof_max = char_dict['tof_max'].value
+        tof_min = props['tof_min'].value
+        tof_max = props['tof_max'].value
         if tof_min >= 0. and tof_max > tof_min:
             log.information('TOF range is {} to {} microseconds'.format(tof_min, tof_max))
 
