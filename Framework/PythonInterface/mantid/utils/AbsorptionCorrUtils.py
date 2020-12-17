@@ -81,26 +81,53 @@ def calculate_absorption_correction(filename, abs_method, props, sample_formula,
     donorWS = create_absorption_input(filename, props, num_wl_bins, material=material,
                                       environment=environment)
 
-    absName = '{}_abs_correction'.format(_getBasename(filename))
+    absName = '__{}_abs_correction'.format(_getBasename(filename))
+
+    return calc_absorption_corr_using_wksp(donorWS, abs_method, element_size, absName)
+
+
+def calc_absorption_corr_using_wksp(donor_wksp, abs_method, element_size=1, prefix_name=''):
+    """
+    Calculates absorption correction on the specified donor workspace. See the documentation
+    for the ``calculate_absorption_correction`` function above for more details.
+
+    :param donor_wksp: Input workspace to compute absorption correction on
+    :param abs_method: Type of absorption correction: None, SampleOnly, SampleAndContainer, FullPaalmanPings
+    :param element_size: Size of one side of the integration element cube in mm
+    :param prefix_name: Optional prefix of the output workspaces, default is the donor_wksp name.
+    :return: Two workspaces (A_s, A_c), the first for the sample and the second for the container
+    """
+
+    if abs_method == "None":
+        return None, None
+
+    if isinstance(donor_wksp, str):
+        if not mtd.doesExist(donor_wksp):
+            raise RuntimeError("Specified donor workspace not found in the ADS")
+        donor_wksp = mtd[donor_wksp]
+
+    absName = donor_wksp.name()
+    if prefix_name != '':
+        absName = prefix_name
 
     if abs_method == "SampleOnly":
-        AbsorptionCorrection(donorWS,
+        AbsorptionCorrection(donor_wksp,
                              OutputWorkspace=absName + '_ass',
                              ScatterFrom='Sample',
                              ElementSize=element_size)
         return absName + '_ass', None
     elif abs_method == "SampleAndContainer":
-        AbsorptionCorrection(donorWS,
+        AbsorptionCorrection(donor_wksp,
                              OutputWorkspace=absName + '_ass',
                              ScatterFrom='Sample',
                              ElementSize=element_size)
-        AbsorptionCorrection(donorWS,
+        AbsorptionCorrection(donor_wksp,
                              OutputWorkspace=absName + '_acc',
                              ScatterFrom='Container',
                              ElementSize=element_size)
         return absName + '_ass', absName + '_acc'
     elif abs_method == "FullPaalmanPings":
-        PaalmanPingsAbsorptionCorrection(donorWS,
+        PaalmanPingsAbsorptionCorrection(donor_wksp,
                                          OutputWorkspace=absName,
                                          ElementSize=element_size)
         Multiply(LHSWorkspace=absName + '_acc',
