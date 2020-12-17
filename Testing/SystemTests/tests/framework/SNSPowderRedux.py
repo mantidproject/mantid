@@ -9,7 +9,6 @@ import numpy as np
 import systemtesting
 from mantid.simpleapi import *
 from mantid.api import FileFinder
-from mantid.api import Sample
 
 import os
 
