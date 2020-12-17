@@ -7,6 +7,7 @@
 #include "MantidQtWidgets/Common/FitScriptGeneratorDataTable.h"
 
 #include <QAbstractItemView>
+#include <QColor>
 #include <QDoubleValidator>
 #include <QHeaderView>
 #include <QHoverEvent>
@@ -35,7 +36,6 @@ QString const TABLE_STYLESHEET("QTableWidget {\n"
                                "\n"
                                "QTableWidget::item:hover {\n"
                                "    background-color: #c7e0ff;\n"
-                               "    color: #000000;\n"
                                "}");
 
 QValidator *createXValidator() {
@@ -50,8 +50,10 @@ QValidator *createWSIndexValidator() {
 
 QTableWidgetItem *createTableItem(QString const &value,
                                   Qt::AlignmentFlag const &alignment,
-                                  bool editable) {
+                                  bool editable,
+                                  QColor const &color = QColor(0, 0, 0)) {
   auto item = new QTableWidgetItem(value);
+  item->setData(Qt::ForegroundRole, color);
   item->setTextAlignment(alignment);
   if (!editable)
     item->setFlags(item->flags() ^ Qt::ItemIsEditable);
@@ -88,7 +90,6 @@ FitScriptGeneratorDataTable::FitScriptGeneratorDataTable(QWidget *parent)
   this->setShowGrid(false);
   this->setColumnCount(COLUMN_HEADINGS.size());
   this->setRowCount(0);
-  this->verticalHeader()->setVisible(false);
   this->horizontalHeader()->setHighlightSections(false);
   this->horizontalHeader()->setStretchLastSection(true);
 
@@ -222,8 +223,10 @@ void FitScriptGeneratorDataTable::removeDomain(
     std::string const &workspaceName,
     MantidWidgets::WorkspaceIndex workspaceIndex) {
   auto const removeIndex = indexOfDomain(workspaceName, workspaceIndex);
-  if (removeIndex != -1)
+  if (removeIndex != -1) {
     this->removeRow(removeIndex);
+    updateVerticalHeaders();
+  }
 
   m_selectedRows = selectedRows();
 
@@ -241,6 +244,9 @@ void FitScriptGeneratorDataTable::addDomain(
   auto const rowIndex = this->rowCount();
   this->insertRow(rowIndex);
 
+  this->setVerticalHeaderItem(
+      rowIndex, createTableItem("f" + QString::number(rowIndex) + ".",
+                                Qt::AlignCenter, false, QColor(35, 140, 35)));
   this->setItem(rowIndex, ColumnIndex::WorkspaceName,
                 createTableItem(workspaceName, Qt::AlignVCenter, false));
   this->setItem(rowIndex, ColumnIndex::WorkspaceIndex,
@@ -257,6 +263,13 @@ void FitScriptGeneratorDataTable::addDomain(
   }
 
   this->blockSignals(false);
+}
+
+void FitScriptGeneratorDataTable::updateVerticalHeaders() {
+  for (auto rowIndex = 0; rowIndex < this->rowCount(); ++rowIndex)
+    this->setVerticalHeaderItem(
+        rowIndex, createTableItem("f" + QString::number(rowIndex) + ".",
+                                  Qt::AlignCenter, false, QColor(35, 140, 35)));
 }
 
 int FitScriptGeneratorDataTable::indexOfDomain(

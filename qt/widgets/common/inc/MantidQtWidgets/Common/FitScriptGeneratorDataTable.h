@@ -78,6 +78,8 @@ private:
   bool eventFilter(QObject *widget, QEvent *event) override;
   QPersistentModelIndex hoveredRowIndex(QEvent *event);
 
+  void updateVerticalHeaders();
+
   int indexOfDomain(std::string const &workspaceName,
                     MantidWidgets::WorkspaceIndex workspaceIndex) const;
 
