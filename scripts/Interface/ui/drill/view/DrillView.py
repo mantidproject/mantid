@@ -275,6 +275,35 @@ class DrillView(QMainWindow):
             self.cycleAndExperimentChanged.emit(cycle, exp)
         self.setWindowModified(True)
 
+    def _getSelectionShape(self, selection):
+        """
+        Get the shape of the selection, the number of rows and the number of
+        columns.
+
+        Args:
+            selection (list(tuple(int, int))): list of selected cells indexes
+
+        Returns:
+            tuple(int, int): selection shape (n_rows, n_col), (0, 0) if the
+                             selection is empty or discontinuous
+        """
+        if not selection:
+            return (0, 0)
+        rmin = selection[0][0]
+        rmax = rmin
+        cmin = selection[0][1]
+        cmax = cmin
+        for item in selection:
+            if item[0] > rmax:
+                rmax = item[0]
+            if item[1] > cmax:
+                cmax = item[1]
+        shape = (rmax - rmin + 1, cmax - cmin + 1)
+        if shape[0] * shape[1] != len(selection):
+            return (0, 0)
+        else:
+            return shape
+
     def copySelectedCells(self):
         """
         Copy in the local buffer the content of the selected cells. The
@@ -284,7 +313,8 @@ class DrillView(QMainWindow):
         cells = self.table.getSelectedCells()
         if not cells:
             return
-        shape = self.table.getSelectionShape()
+        cells.sort()
+        shape = self._getSelectionShape(cells)
         if shape == (0, 0):
             QMessageBox.warning(self, "Selection error",
                                 "Please select adjacent cells")
@@ -326,7 +356,8 @@ class DrillView(QMainWindow):
         if not cells:
             QMessageBox.warning(self, "Paste error", "No cell selected")
             return
-        shape = self.table.getSelectionShape()
+        cells.sort()
+        shape = self._getSelectionShape(cells)
         if self.bufferShape == (1, 1) and shape != (0, 0):
             for cell in cells:
                 self.table.setCellContents(cell[0], cell[1], self.buffer[0])
