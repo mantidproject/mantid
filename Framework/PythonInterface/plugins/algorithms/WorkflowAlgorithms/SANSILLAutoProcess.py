@@ -443,21 +443,29 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                             OutputWorkspace=self.output_panels)
 
     def processTransmissions(self):
+        absorber_transmission_names = []
+        beam_transmission_names = []
         container_transmission_names = []
         sample_transmission_names = []
         for transmission in self.atransmission.split(','):
             [process_transmission_absorber, transmission_absorber_name] = \
                 needs_processing(transmission, 'Absorber')
+            absorber_transmission_names.append(transmission_absorber_name)
             self.progress.report('Processing transmission absorber')
             if process_transmission_absorber:
                 SANSILLReduction(Run=transmission,
                                  ProcessAs='Absorber',
                                  NormaliseBy=self.normalise,
                                  OutputWorkspace=transmission_absorber_name)
-        for transmission in self.btransmission.split(','):
+        for transmission_no, transmission in enumerate(self.btransmission.split(',')):
             [process_transmission_beam, transmission_beam_name] = \
-                needs_processing(self.btransmission, 'Beam')
+                needs_processing(transmission, 'Beam')
             flux_name = transmission_beam_name + '_Flux'
+            beam_transmission_names.append(flux_name)
+            if len(absorber_transmission_names) > 1:
+                transmission_absorber_name = absorber_transmission_names[transmission_no]
+            else:
+                transmission_absorber_name = absorber_transmission_names[0]
             self.progress.report('Processing transmission beam')
             if process_transmission_beam:
                 SANSILLReduction(Run=transmission,
@@ -468,11 +476,19 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  FluxOutputWorkspace=flux_name,
                                  AbsorberInputWorkspace=
                                  transmission_absorber_name)
-        for transmission in self.ctransmission.split(','):
+        for transmission_no, transmission in enumerate(self.ctransmission.split(',')):
             [process_container_transmission, container_transmission_name] = \
                 needs_processing(transmission, 'Transmission')
             self.progress.report('Processing container transmission')
             container_transmission_names.append(container_transmission_name)
+            if len(absorber_transmission_names) > 1:
+                transmission_absorber_name = absorber_transmission_names[transmission_no]
+            else:
+                transmission_absorber_name = absorber_transmission_names[0]
+            if len(beam_transmission_names) > 1:
+                transmission_beam_name = beam_transmission_names[transmission_no]
+            else:
+                transmission_beam_name = beam_transmission_names[0]
             if process_container_transmission:
                 SANSILLReduction(Run=transmission,
                                  ProcessAs='Transmission',
@@ -482,11 +498,19 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
                                  BeamInputWorkspace=transmission_beam_name,
                                  NormaliseBy=self.normalise,
                                  BeamRadius=self.tr_radius)
-        for transmission in self.stransmission.split(','):
+        for transmission_no, transmission in enumerate(self.stransmission.split(',')):
             [process_sample_transmission, sample_transmission_name] = \
                 needs_processing(transmission, 'Transmission')
             self.progress.report('Processing sample transmission')
             sample_transmission_names.append(sample_transmission_name)
+            if len(absorber_transmission_names) > 1:
+                transmission_absorber_name = absorber_transmission_names[transmission_no]
+            else:
+                transmission_absorber_name = absorber_transmission_names[0]
+            if len(beam_transmission_names) > 1:
+                transmission_beam_name = beam_transmission_names[transmission_no]
+            else:
+                transmission_beam_name = beam_transmission_names[0]
             if process_sample_transmission:
                 SANSILLReduction(Run=transmission,
                                  ProcessAs='Transmission',
