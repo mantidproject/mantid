@@ -460,8 +460,8 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
         for transmission_no, transmission in enumerate(self.btransmission.split(',')):
             [process_transmission_beam, transmission_beam_name] = \
                 needs_processing(transmission, 'Beam')
+            beam_transmission_names.append(transmission_beam_name)
             flux_name = transmission_beam_name + '_Flux'
-            beam_transmission_names.append(flux_name)
             if len(absorber_transmission_names) > 1:
                 transmission_absorber_name = absorber_transmission_names[transmission_no]
             else:
