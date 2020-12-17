@@ -260,6 +260,7 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data,
     double twoTheta = m_spectrumInfo->twoTheta(nHist);
     double L1 = m_spectrumInfo->l1();
     double L2 = m_spectrumInfo->l2(nHist);
+    auto [difa, difc, tzero] = m_spectrumInfo->diffractometerConstants(nHist);
     // get access to source workspace in case if target is different from source
     auto &XValues = m_wkWS->x(nHist);
     auto &YValues = m_wkWS->y(nHist);
@@ -268,7 +269,10 @@ void BackgroundHelper::removeBackground(int nHist, HistogramX &x_data,
     // use thread-specific unit conversion class to avoid multithreading issues
     Kernel::Unit *unitConv = m_WSUnit[threadNum].get();
     unitConv->initialize(L1, L2, twoTheta, m_Emode,
-                         {{UnitConversionParameters::efixed, m_Efix}});
+                         {{UnitConversionParameters::efixed, m_Efix},
+                          {UnitConversionParameters::difa, difa},
+                          {UnitConversionParameters::difc, difc},
+                          {UnitConversionParameters::tzero, tzero}});
 
     x_data[0] = XValues[0];
     double tof1 = unitConv->singleToTOF(x_data[0]);

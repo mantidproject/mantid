@@ -1307,9 +1307,7 @@ void IFunction::convertValue(std::vector<double> &values,
       efixed = 0.0;
       emode = 0;
     }
-    std::vector<int> emptyWarningVec;
-    auto [difa, difc, tzero] =
-        spectrumInfo.diffractometerConstants(wsIndex, emptyWarningVec);
+    auto [difa, difc, tzero] = spectrumInfo.diffractometerConstants(wsIndex);
 
     std::vector<double> emptyVec;
     Kernel::ExtraParametersMap pmap{

@@ -110,9 +110,7 @@ void ConvertSpectrumAxis::exec() {
         l1val = l1;
         efixed =
             getEfixed(spectrumInfo.detector(i), inputWS, emode); // get efixed
-        std::vector<int> emptyWarningVec;
-        auto [difa, difc, tzero] =
-            spectrumInfo.diffractometerConstants(i, emptyWarningVec);
+        auto [difa, difc, tzero] = spectrumInfo.diffractometerConstants(i);
         pmap = {{UnitConversionParameters::efixed, efixed},
                 {UnitConversionParameters::difa, difa},
                 {UnitConversionParameters::difc, difc},

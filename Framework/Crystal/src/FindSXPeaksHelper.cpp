@@ -85,9 +85,8 @@ SXPeak::SXPeak(double t, double phi, double intensity,
 
   const auto l1 = spectrumInfo.l1();
   const auto l2 = spectrumInfo.l2(m_wsIndex);
-  std::vector<int> warningDets;
   const auto [difa, difc, tzero] =
-      spectrumInfo.diffractometerConstants(m_wsIndex, warningDets);
+      spectrumInfo.diffractometerConstants(m_wsIndex);
 
   m_twoTheta = spectrumInfo.twoTheta(m_wsIndex);
   m_LTotal = l1 + l2;

@@ -313,9 +313,7 @@ void RemoveBins::calculateDetectorPosition(const int index, double &l1,
     twoTheta = 0.0;
   else
     twoTheta = m_spectrumInfo->twoTheta(index);
-  std::vector<int> emptyWarningVec;
-  std::tie(difa, difc, tzero) =
-      m_spectrumInfo->diffractometerConstants(index, emptyWarningVec);
+  std::tie(difa, difc, tzero) = m_spectrumInfo->diffractometerConstants(index);
 
   g_log.debug() << "Detector for index " << index << " has L1+L2=" << l1 + l2
                 << " & 2theta= " << twoTheta << '\n';

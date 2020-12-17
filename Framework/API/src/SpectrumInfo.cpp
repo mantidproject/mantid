@@ -181,6 +181,18 @@ SpectrumInfo::diffractometerConstants(const size_t index,
           tzero / static_cast<double>(spectrumDefinition(index).size())};
 }
 
+/** Calculate average diffractometer constants (DIFA, DIFC, TZERO) of detectors
+ * associated with this spectrum. Use calibrated values where possible, filling
+ * in with uncalibrated values where they're missing
+ *  @param index Index of the spectrum that constants are required for
+ *  @return tuple containing the average constants
+ */
+std::tuple<double, double, double>
+SpectrumInfo::diffractometerConstants(const size_t index) const {
+  std::vector<int> warningDets;
+  return diffractometerConstants(index, warningDets);
+}
+
 /** Calculate average uncalibrated DIFC value of detectors associated with this
  * spectrum
  *  @param index Index of the spectrum that DIFC is required for
