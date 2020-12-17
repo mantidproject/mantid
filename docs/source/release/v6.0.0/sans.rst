@@ -28,6 +28,8 @@ Improvements
    from the nexus file.
  - With :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, the output workspace will get its title from the nexus file.
  - The Rectangle option for :ref:`SolidAngle <algm-SolidAngle>` is now supported for ILL's D22 and D33.
+ - In :ref:`SANSILLAutoProcess <algm-SANSILLAutoProcess>`, more than one transmission per processing, consistent with number
+   of sample runs, are now accepted.
 
 Bugfixes
 ########
