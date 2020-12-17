@@ -124,7 +124,7 @@ void MuscatElastic::exec() {
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const MatrixWorkspace_sptr SQWS = getProperty("SofqWorkspace");
   // take log of S(Q) and store it this way
-  auto y = SQWS->y(0);
+  auto &y = SQWS->mutableY(0);
   std::transform(y.begin(), y.end(), y.begin(),
                  static_cast<double (*)(double)>(std::log));
 
@@ -285,22 +285,16 @@ double MuscatElastic::new_vector(const MatrixWorkspace_sptr sigmaSSWS,
 double MuscatElastic::interpolateLogQuadratic(
     const MatrixWorkspace_sptr workspaceToInterpolate, double x) {
   if (x > workspaceToInterpolate->x(0).back()) {
-    return workspaceToInterpolate->y(0).back();
+    return exp(workspaceToInterpolate->y(0).back());
   }
   if (x < workspaceToInterpolate->x(0).front()) {
-    return workspaceToInterpolate->y(0).front();
+    return exp(workspaceToInterpolate->y(0).front());
   }
   // assume log(cross section) is quadratic in k
   size_t idx;
-  // avoid passing tolerance into yIndexOfX for histograms (SURELY SHOULDN'T
-  // HAVE TO DO THIS??)
-  if (!workspaceToInterpolate->isHistogramData()) {
-    auto binWidth =
-        workspaceToInterpolate->x(0)[1] - workspaceToInterpolate->x(0)[0];
-    idx = workspaceToInterpolate->yIndexOfX(x, 0, 0.5 * binWidth);
-  } else {
-    idx = workspaceToInterpolate->yIndexOfX(x);
-  }
+  auto binWidth =
+      workspaceToInterpolate->x(0)[1] - workspaceToInterpolate->x(0)[0];
+  idx = workspaceToInterpolate->yIndexOfX(x, 0, 0.5 * binWidth);
   // need at least two points to the right of the x value for the quadratic
   // interpolation to work
   auto ny = workspaceToInterpolate->blocksize();
@@ -312,13 +306,11 @@ double MuscatElastic::interpolateLogQuadratic(
     idx = ny - 3;
   }
   // this interpolation assumes the set of 3 bins\point have the same width
-  auto binWidth =
-      workspaceToInterpolate->x(0)[1] - workspaceToInterpolate->x(0)[0];
   // U=0 on at point or bin edge to the left of where x lies
   auto U = (x - workspaceToInterpolate->x(0)[idx]) / binWidth;
   auto &y = workspaceToInterpolate->y(0);
   auto A = (y[idx] - 2 * y[idx + 1] + y[idx + 2]) / 2;
-  auto B = (-3 * y[idx] - 4 * y[idx + 1] - y[idx + 2]) / 2;
+  auto B = (-3 * y[idx] + 4 * y[idx + 1] - y[idx + 2]) / 2;
   auto C = y[idx];
   return exp(A * U * U + B * U + C);
 }
