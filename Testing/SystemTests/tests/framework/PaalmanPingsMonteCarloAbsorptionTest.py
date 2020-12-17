@@ -28,7 +28,7 @@ class FlatPlateTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         PaalmanPingsMonteCarloAbsorption(
-            SampleWorkspace='sample',
+            InputWorkspace='sample',
             Shape='FlatPlate',
             BeamHeight=2.0,
             BeamWidth=2.0,
@@ -37,7 +37,6 @@ class FlatPlateTest(systemtesting.MantidSystemTest):
             SampleThickness=0.1,
             SampleChemicalFormula='H2-O',
             SampleDensity=1.0,
-            ContainerWorkspace='container',
             ContainerFrontThickness=0.02,
             ContainerBackThickness=0.02,
             ContainerChemicalFormula='V',
@@ -66,7 +65,7 @@ class CylinderTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         PaalmanPingsMonteCarloAbsorption(
-            SampleWorkspace='sample',
+            InputWorkspace='sample',
             Shape='Cylinder',
             BeamHeight=2.0,
             BeamWidth=2.0,
@@ -74,7 +73,6 @@ class CylinderTest(systemtesting.MantidSystemTest):
             SampleRadius=0.2,
             SampleChemicalFormula='H2-O',
             SampleDensity=1.0,
-            ContainerWorkspace='container',
             ContainerRadius=0.22,
             ContainerChemicalFormula='V',
             ContainerDensity=6.0,
@@ -102,7 +100,7 @@ class AnnulusTest(systemtesting.MantidSystemTest):
 
     def runTest(self):
         PaalmanPingsMonteCarloAbsorption(
-            SampleWorkspace='sample',
+            InputWorkspace='sample',
             Shape='Annulus',
             BeamHeight=2.0,
             BeamWidth=2.0,
@@ -111,7 +109,6 @@ class AnnulusTest(systemtesting.MantidSystemTest):
             SampleOuterRadius=0.4,
             SampleChemicalFormula='H2-O',
             SampleDensity=1.0,
-            ContainerWorkspace='container',
             ContainerInnerRadius=0.19,
             ContainerOuterRadius=0.41,
             ContainerChemicalFormula='V',
