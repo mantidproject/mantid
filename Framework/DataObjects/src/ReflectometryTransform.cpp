@@ -264,8 +264,9 @@ DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
     auto minPoint(bbox.minPoint());
     auto span = maxPoint - minPoint;
     detectorHeights[i] = span.scalar_prod(upDirVec);
-    twoThetaWidths[i] =
-        2.0 * std::fabs(std::atan((detectorHeights[i] / 2) / l2)) * rad2deg;
+    twoThetaWidths[i] = (std::atan(maxPoint.scalar_prod(upDirVec) / l2) -
+                         std::atan(minPoint.scalar_prod(upDirVec) / l2)) *
+                        rad2deg;
   }
   DetectorAngularCache cache;
   cache.twoThetas = twoThetas;
