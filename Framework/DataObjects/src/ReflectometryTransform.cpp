@@ -223,8 +223,8 @@ void createVerticalAxis(MatrixWorkspace *const ws, const MantidVec &xAxisVec,
  */
 DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
   const size_t nhist = workspace->getNumberHistograms();
-  std::vector<double> thetas(nhist);
-  std::vector<double> thetaWidths(nhist);
+  std::vector<double> twoThetas(nhist);
+  std::vector<double> twoThetaWidths(nhist);
   std::vector<double> detectorHeights(nhist);
 
   auto inst = workspace->getInstrument();
@@ -235,22 +235,23 @@ DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
   for (size_t i = 0; i < nhist; ++i) {
     if (!spectrumInfo.hasDetectors(i) || spectrumInfo.isMonitor(i)) {
       // If no detector found, skip onto the next spectrum
-      thetas[i] = -1.0; // Indicates a detector to skip
-      thetaWidths[i] = -1.0;
+      twoThetas[i] = -1.0; // Indicates a detector to skip
+      twoThetaWidths[i] = -1.0;
       continue;
     }
 
-    // We have to convert theta from radians to degrees
-    const double theta = spectrumInfo.signedTwoTheta(i) * rad2deg;
-    thetas[i] = theta;
+    // We have to convert twoTheta from radians to degrees
+    const double twoTheta = spectrumInfo.signedTwoTheta(i) * rad2deg;
+    twoThetas[i] = twoTheta;
     /**
      * Determine width from shape geometry. A group is assumed to contain
-     * detectors with the same shape & r, theta value, i.e. a ring mapped-group
-     * The shape is retrieved and rotated to match the rotation of the detector.
-     * The angular width is computed using the l2 distance from the sample
+     * detectors with the same shape & r, twoTheta value, i.e. a ring
+     * mapped-group The shape is retrieved and rotated to match the rotation of
+     * the detector. The angular width is computed using the l2 distance from
+     * the sample
      */
     // If the spectrum is based on a group of detectors assume they all have
-    // same shape and same r,theta
+    // same shape and same r,twoTheta
     // DetectorGroup::getID gives ID of first detector.
     size_t detIndex = detectorInfo.indexOf(spectrumInfo.detector(i).getID());
     double l2 = detectorInfo.l2(detIndex);
@@ -263,12 +264,12 @@ DetectorAngularCache initAngularCaches(const MatrixWorkspace *const workspace) {
     auto minPoint(bbox.minPoint());
     auto span = maxPoint - minPoint;
     detectorHeights[i] = span.scalar_prod(upDirVec);
-    thetaWidths[i] = 2.0 * std::fabs(std::atan((detectorHeights[i] / 2) / l2)) *
-                     180.0 / M_PI;
+    twoThetaWidths[i] =
+        2.0 * std::fabs(std::atan((detectorHeights[i] / 2) / l2)) * rad2deg;
   }
   DetectorAngularCache cache;
-  cache.thetas = thetas;
-  cache.thetaWidths = thetaWidths;
+  cache.twoThetas = twoThetas;
+  cache.twoThetaWidths = twoThetaWidths;
   cache.detectorHeights = detectorHeights;
   return cache;
 }
@@ -456,8 +457,8 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
 
   // Prepare the required theta values
   DetectorAngularCache cache = initAngularCaches(inputWS.get());
-  m_theta = cache.thetas;
-  m_thetaWidths = cache.thetaWidths;
+  auto twoThetas = cache.twoThetas;
+  auto twoThetaWidths = cache.twoThetaWidths;
 
   const size_t nHistos = inputWS->getNumberHistograms();
   const size_t nBins = inputWS->blocksize();
@@ -476,11 +477,11 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
     const auto &detector = spectrumInfo.detector(i);
 
     // Compute polygon points
-    const double theta = m_theta[i];
-    const double thetaWidth = m_thetaWidths[i];
-    const double thetaHalfWidth = 0.5 * thetaWidth;
-    const double thetaLower = theta - thetaHalfWidth;
-    const double thetaUpper = theta + thetaHalfWidth;
+    const double twoTheta = twoThetas[i];
+    const double twoThetaWidth = twoThetaWidths[i];
+    const double twoThetaHalfWidth = 0.5 * twoThetaWidth;
+    const double twoThetaLower = twoTheta - twoThetaHalfWidth;
+    const double twoThetaUpper = twoTheta + twoThetaHalfWidth;
 
     const MantidVec &X = inputWS->readX(i);
     const MantidVec &Y = inputWS->readY(i);
@@ -491,8 +492,8 @@ MatrixWorkspace_sptr ReflectometryTransform::executeNormPoly(
       const double signal = Y[j];
       const double error = E[j];
 
-      auto inputQ =
-          m_calculator->createQuad(lamUpper, lamLower, thetaUpper, thetaLower);
+      auto inputQ = m_calculator->createQuad(lamUpper, lamLower, twoThetaUpper,
+                                             twoThetaLower);
       FractionalRebinning::rebinToFractionalOutput(inputQ, inputWS, i, j,
                                                    *outWS, zBinsVec);
       // Find which qy bin this point lies in
