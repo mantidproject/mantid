@@ -24,11 +24,17 @@ a :ref:`TableWorkspace <Table Workspaces>` with the following columns:
 A typical calibration will contain a row for the moderator, possibly a row for the sample, and one row for each
 calibrated bank. For instance:
 
- | ComponentName | Xposition | Yposition| Zposition| XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
- | moderator | 0 | 0 | -15.560 | 0 | 0 | 0 | 0 |
- | sample-position | 0.0001 | -0.0002 | 0.003 | 0 | 0 | 0 | 0 |
- | bank7 | 0.9678 | 0.0056 | 0.0003 | 0.4563 | -0.9999 | 0.3424 | 5.67 |
- | bank8 | 0.9650 | 0.0050 | 0.0002 | 0.4513 | -0.9999 | 0.3921 | 9.03 |
++--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
+| ComponentName      | Xposition  | Yposition | Zposition | XdirectionCosine | YdirectionCosine | ZdirectionCosine | RotationAngle |
++====================+============+===========+===========+==================+==================+==================+===============+
+| moderator          | 0.0        | 0.0       | -19.9944  |      0.0         |      0.0         |      0.0         |      0.0      |
++--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
+| sample-position    | 0.0001     | -0.0002   | 0.003     | 0.0              | 0.0              | 0.0              | 0.0           |
++--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
+| bank7/sixteenpack  | 0.9678     | 0.0056    | 0.0003    | 0.4563           | -0.9999          | 0.3424           | 5.67          |
++--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
+| bank8/sixteenpack  | 0.9650     | 0.0050    | 0.0002    | 0.4513           | -0.9999          | 0.3921           | 9.03          |
++--------------------+------------+-----------+-----------+------------------+------------------+------------------+---------------+
 
 For more details on this output, see the documentation for :ref:`algm-CORELLIPowderCalibrationCreate`.
 
@@ -54,10 +60,14 @@ After the first goal is accomplished (store the recent calibration), the algorit
 calibration file and :ref:`TableWorkspace <Table Workspaces>` for the whole instrument. The last line of
 *corelli_moderator.csv*, *corelli_sample-position.csv*, and each of *corelli_bankXXX.csv* is
 collected, the day-stamp stripped, and lines are gathered into file *corelli_instrument_20201025.csv*,
-bearing in mind that 20201025 is the day-stamp of our recent calibration. The header for this file is:
+bearing in mind that 20201025 is the day-stamp of our recent calibration. The first few lines of the file:
 
 ```
 # ComponentName, Xposition, Yposition, Zposition, XdirectionCosine, YdirectionCosine, ZdirectionCosine, RotationAngle
+moderator, 0.0, 0.0, -15.560, 0.0, 0.0, 0.0, 0.0
+sample-position, 0.0001, -0.0002, 0.003, 0.0, 0.0, 0.0, 0.0
+bank7/sixteenpack, 0.9678, 0.0056, 0.0003, 0.4563, -0.9999, 0.3424, 5.67
+bank8/sixteenpack, 0.9650, 0.0050, 0.0002, 0.4513, -0.9998, 0.3921, 9.03
 ```
 
 In addition, a :ref:`TableWorkspace <Table Workspaces>` similar to the table of `InputCalibrationPatchWorkspace` is
@@ -112,7 +122,7 @@ Usage
     # add entry
     calib_table.addRow(["moderator" , 0. , 0. , -15.560 , 0. , 0. , 0., 0.])
     calib_table.addRow(["sample-position" , 0.0001 , -0.0002 , 0.003 , 0. , 0.,  0., 0.])
-    calib_table.addRow(["bank1" , 0.9678 , 0.0056 , 0.0003 , 0.4563 , -0.9999, 0.3424, 0.321])
+    calib_table.addRow(["bank1/sixteenpack" , 0.9678 , 0.0056 , 0.0003 , 0.4563 , -0.9999, 0.3424, 0.321])
     
     # save for powder calibration database
     CorelliPowderCalibrationDatabase(InputWorkspace='input', InputCalibrationPatchWorkspace='calib_table',
