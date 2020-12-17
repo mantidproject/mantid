@@ -79,7 +79,7 @@ DEFAULTS = {
         'position': (10, 10),
     },
     'AdditionalWindows': {
-        'ontop': True
+        'behaviour': "ontop"
     },
     'project': {
         'prompt_save_on_close': True,
@@ -100,10 +100,10 @@ def get_window_config():
     :return: A WindowConfig object describing the desired window configuration based on the current settings
     """
     try:
-        windows_on_top = CONF.get("AdditionalWindows", "ontop", type=bool)
+        windows_behaviour = CONF.get("AdditionalWindows", "behaviour", type=str)
+        windows_on_top = True if windows_behaviour == "ontop" else False
     except KeyError:
         windows_on_top = False
-
     if windows_on_top:
         parent = _ADDITIONAL_MAINWINDOWS_PARENT
         flags = WINDOW_ONTOP_FLAGS

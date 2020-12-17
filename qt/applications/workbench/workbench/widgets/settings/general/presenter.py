@@ -32,6 +32,7 @@ class GeneralProperties(Enum):
     PROMPT_SAVE_ON_CLOSE = 'project/prompt_save_on_close'
     USE_NOTIFICATIONS = 'Notifications.Enabled'
     USER_LAYOUT = "MainWindow/user_layouts"
+    WINDOW_BEHAVIOUR = "AdditionalWindows/behaviour"
 
 
 class GeneralSettings(object):
@@ -42,6 +43,8 @@ class GeneralSettings(object):
     If new options are added to the General settings, their events when changed should
     be handled here.
     """
+
+    WINDOW_BEHAVIOUR = ["ontop", "floating"]
 
     def __init__(self, parent, view=None, settings_presenter=None):
         self.view = view if view else GeneralSettingsView(parent, self)
@@ -88,6 +91,12 @@ class GeneralSettings(object):
             self.view.instrument.blockSignals(False)
 
     def setup_general_group(self):
+        self.view.window_behaviour.addItems(self.WINDOW_BEHAVIOUR)
+        window_behaviour = CONF.get(GeneralProperties.WINDOW_BEHAVIOUR.value)
+        if window_behaviour in self.WINDOW_BEHAVIOUR:
+            self.view.window_behaviour.setCurrentIndex(self.view.window_behaviour.findText(window_behaviour))
+
+        self.view.window_behaviour.currentTextChanged.connect(self.action_window_behaviour_changed)
         self.view.main_font.clicked.connect(self.action_main_font_button_clicked)
 
     def action_main_font_button_clicked(self):
@@ -107,6 +116,9 @@ class GeneralSettings(object):
             CONF.set(GeneralProperties.FONT.value, font.toString())
             if self.settings_presenter is not None:
                 self.settings_presenter.register_change_needs_restart("Main Font Selection")
+
+    def action_window_behaviour_changed(self, text):
+        CONF.set(GeneralProperties.WINDOW_BEHAVIOUR.value, text)
 
     def setup_checkbox_signals(self):
         self.view.show_invisible_workspaces.stateChanged.connect(self.action_show_invisible_workspaces)
