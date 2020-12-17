@@ -476,7 +476,7 @@ class SANSILLAutoProcess(DataProcessorAlgorithm):
             if process_container_transmission:
                 SANSILLReduction(Run=transmission,
                                  ProcessAs='Transmission',
-                                     OutputWorkspace=container_transmission_name,
+                                 OutputWorkspace=container_transmission_name,
                                  AbsorberInputWorkspace=
                                  transmission_absorber_name,
                                  BeamInputWorkspace=transmission_beam_name,
