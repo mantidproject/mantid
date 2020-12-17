@@ -71,6 +71,7 @@ void PlotAsymmetryByLogValueDialog::initLayout() {
   tie(m_uiForm.greenBox, "Green");
   tie(m_uiForm.forwardBox, "ForwardSpectra");
   tie(m_uiForm.backwardBox, "BackwardSpectra");
+  tie(m_uiForm.alpha, "Alpha");
   tie(m_uiForm.timeMinBox, "TimeMin");
   tie(m_uiForm.timeMaxBox, "TimeMax");
   tie(m_uiForm.dtcType, "DeadTimeCorrType");
@@ -174,11 +175,13 @@ void PlotAsymmetryByLogValueDialog::fillLogBox() {
       const std::vector<Mantid::Kernel::Property *> &props =
           mws->run().getLogData();
       if (gws) {
+        m_uiForm.alpha->setEnabled(false);
         std::vector<std::string> wsNames = gws->getNames();
         for (auto &wsName : wsNames) {
           Mantid::API::AnalysisDataService::Instance().remove(wsName);
         }
       } else {
+        m_uiForm.alpha->setEnabled(true);
         Mantid::API::AnalysisDataService::Instance().remove(
             "PlotAsymmetryByLogValueDialog_tmp");
       }

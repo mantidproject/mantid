@@ -35,6 +35,7 @@ ALC
 New Features
 ############
 - The data loading section has been updated for this release. See :ref:`Muon ALC <MuonALC-ref>` for more.
+- Can now set alpha in the ALC interface for single period data
 
 Improvements
 ############
@@ -56,6 +57,7 @@ Bug fixes
 Algorithms
 ----------
 - :ref:`algm-LoadElementalAnalysisData` algorithm was introduced for loading runs for the new Elemental Analysis GUI, enabling it to be registered by WorkspaceHistory.
+- :ref:`algm-PlotAsymmetryByLogValue` has a new property Alpha to set the balance parameter, default to 1.0  
 - The functions RemoveExpDecay and EstimateMuonAsymmetryFromCounts were modified to use point data instead of bin edges for removing the exponential.
 - LoadPSIMuonBin and LoadMuonNexusV2 can now return a table of time zeros
 - MuonPreProcess has a new input 'TimeZeroTable' which requires a TableWorkspace of time zero values
