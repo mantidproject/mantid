@@ -352,9 +352,10 @@ class MainWindow(QMainWindow):
         """Populate then Interfaces menu with all Python and C++ interfaces"""
         self.interfaces_menu.clear()
         interface_dir = ConfigService['mantidqt.python_interfaces_directory']
-        self.interface_list = self._discover_python_interfaces(interface_dir)
+        _interfaces_registers = self._discover_python_interfaces(interface_dir)
+        self.interface_list = _interfaces_registers[0]
+        registers_to_run = _interfaces_registers[1]
         self._discover_cpp_interfaces(self.interface_list)
-
         hidden_interfaces = ConfigService['interfaces.categories.hidden'].split(';')
 
         keys = list(self.interface_list.keys())
@@ -374,6 +375,13 @@ class MainWindow(QMainWindow):
                         action = submenu.addAction(name)
                         action.triggered.connect(lambda checked_cpp, name=name, key=key: self.
                                                  launch_custom_cpp_gui(name, key))
+        # these register scripts contain code to register encoders and decoders to work with project save before the
+        # corresponding interface has been initialised. This is a temporary measure pending harmonisation of cpp/python
+        # interfaces
+        for reg_list in registers_to_run:
+            for register in registers_to_run[reg_list]:
+                file_path = os.path.join(interface_dir, register)
+                self.interface_executor.execute(open(file_path).read(), file_path)
 
     def redirect_python_warnings(self):
         """By default the warnings module writes warnings to sys.stderr. stderr is assumed to be
@@ -390,11 +398,15 @@ class MainWindow(QMainWindow):
     def _discover_python_interfaces(self, interface_dir):
         """Return a dictionary mapping a category to a set of named Python interfaces"""
         items = ConfigService['mantidqt.python_interfaces'].split()
-
+        register_items = ConfigService['mantidqt.python_interfaces_io_registry'].split()
         # detect the python interfaces
         interfaces = {}
+        registers_to_run = {}
         for item in items:
             key, scriptname = item.split('/')
+            reg_name = scriptname[:-3] + '_register.py'
+            if reg_name in register_items and os.path.exists(os.path.join(interface_dir, reg_name)):
+                registers_to_run.setdefault(key, []).append(reg_name)
             if not os.path.exists(os.path.join(interface_dir, scriptname)):
                 logger.warning('Failed to find script "{}" in "{}"'.format(
                     scriptname, interface_dir))
@@ -404,7 +416,7 @@ class MainWindow(QMainWindow):
                 continue
             interfaces.setdefault(key, []).append(scriptname)
 
-        return interfaces
+        return [interfaces, registers_to_run]
 
     def _discover_cpp_interfaces(self, interfaces):
         """Return a dictionary mapping a category to a set of named C++ interfaces"""
