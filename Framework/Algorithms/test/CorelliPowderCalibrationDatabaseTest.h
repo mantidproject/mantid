@@ -114,7 +114,7 @@ public:
     // Test method to retrieve components names (rows)
     std::vector<std::string> componentnames = calib_handler.getComponentNames();
     std::vector<std::string> expectednames{"moderator", "sample-position",
-                                           "bank1"};
+                                           "bank1/sixteenpack"};
     TS_ASSERT_EQUALS(componentnames.size(), expectednames.size());
     for (size_t i = 0; i < 3; ++i)
       TS_ASSERT_EQUALS(componentnames[i], expectednames[i]);
@@ -177,13 +177,15 @@ public:
   void test_exec() {
 
     // Create the test environment
-    // create directory
+    // create directory database
     std::string calibdir{"TestCorelliPowderCalibration1117"};
     // clean previous
     boost::filesystem::remove_all(calibdir);
     // create data base
     boost::filesystem::create_directory(calibdir);
     // create a previously generated database file
+    // will create the following files:
+    // moderator.csv, sample-position.csv, bank2.csv, bank42.csv
     std::vector<std::string> banks{"moderator", "sample-position", "bank2",
                                    "bank42"};
     create_existing_database_files(calibdir, banks);
@@ -226,8 +228,10 @@ public:
     TS_ASSERT_EQUALS(combinedcalibws->rowCount(), 5);
     TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(1, 0),
                      "sample-position");
-    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(2, 0), "bank1");
-    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(4, 0), "bank42");
+    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(2, 0),
+        "bank1/sixteenpack");
+    TS_ASSERT_EQUALS(combinedcalibws->cell<std::string>(4, 0),
+        "bank42/sixteenpack");
 
     // Output 2: search the saved output calibration file
     boost::filesystem::path pdir(calibdir);
@@ -282,6 +286,9 @@ private:
 
   /**
    * @brief Create Test Calibration TableWorkspace
+   *
+   * @details this table would be the output of CorelliPowderCalibrationCreate
+   *
    * @param outWSName
    * @return
    */
@@ -313,8 +320,8 @@ private:
     sampleRow << "sample-position" << 0.0001 << -0.0002 << 0.003 << 0. << 0.
               << 0. << 0.;
     Mantid::API::TableRow bank1Row = tablews->appendRow();
-    bank1Row << "bank1" << 0.9678 << 0.0056 << 0.0003 << 0.4563 << -0.9999
-             << 0.3424 << 5.67;
+    bank1Row << "bank1/sixteenpack" << 0.9678 << 0.0056 << 0.0003 << 0.4563
+             << -0.9999 << 0.3424 << 5.67;
 
     std::cout << "[DEBUG 1] Table workspace rows: " << tablews->rowCount()
               << "\n";
