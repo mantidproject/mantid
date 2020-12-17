@@ -197,11 +197,24 @@ bool FitScriptGeneratorModel::hasWorkspaceDomain(
          m_fitDomains.end();
 }
 
-bool FitScriptGeneratorModel::isXValid(std::string const &workspaceName,
-                                       WorkspaceIndex workspaceIndex,
-                                       double xValue) const {
+bool FitScriptGeneratorModel::isStartXValid(std::string const &workspaceName,
+                                            WorkspaceIndex workspaceIndex,
+                                            double startX) const {
+  auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
+
   auto const limits = xLimits(workspaceName, workspaceIndex);
-  return limits.first <= xValue && xValue <= limits.second;
+  return limits.first <= startX && startX <= limits.second &&
+         startX < m_fitDomains[domainIndex].m_endX;
+}
+
+bool FitScriptGeneratorModel::isEndXValid(std::string const &workspaceName,
+                                          WorkspaceIndex workspaceIndex,
+                                          double endX) const {
+  auto const domainIndex = findDomainIndex(workspaceName, workspaceIndex);
+
+  auto const limits = xLimits(workspaceName, workspaceIndex);
+  return limits.first <= endX && endX <= limits.second &&
+         endX > m_fitDomains[domainIndex].m_startX;
 }
 
 std::pair<double, double>

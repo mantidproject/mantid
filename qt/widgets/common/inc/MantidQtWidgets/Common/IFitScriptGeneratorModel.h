@@ -25,9 +25,12 @@ public:
                                   WorkspaceIndex workspaceIndex, double startX,
                                   double endX) = 0;
 
-  [[nodiscard]] virtual bool isXValid(std::string const &workspaceName,
-                                      WorkspaceIndex workspaceIndex,
-                                      double xValue) const = 0;
+  [[nodiscard]] virtual bool isStartXValid(std::string const &workspaceName,
+                                           WorkspaceIndex workspaceIndex,
+                                           double startX) const = 0;
+  [[nodiscard]] virtual bool isEndXValid(std::string const &workspaceName,
+                                         WorkspaceIndex workspaceIndex,
+                                         double endX) const = 0;
 
   virtual void updateStartX(std::string const &workspaceName,
                             WorkspaceIndex workspaceIndex, double startX) = 0;

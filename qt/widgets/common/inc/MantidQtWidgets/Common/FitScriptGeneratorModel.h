@@ -58,9 +58,12 @@ public:
                           WorkspaceIndex workspaceIndex, double startX,
                           double endX) override;
 
-  [[nodiscard]] bool isXValid(std::string const &workspaceName,
-                              WorkspaceIndex workspaceIndex,
-                              double xValue) const override;
+  [[nodiscard]] bool isStartXValid(std::string const &workspaceName,
+                                   WorkspaceIndex workspaceIndex,
+                                   double startX) const override;
+  [[nodiscard]] bool isEndXValid(std::string const &workspaceName,
+                                 WorkspaceIndex workspaceIndex,
+                                 double endX) const override;
 
   void updateStartX(std::string const &workspaceName,
                     WorkspaceIndex workspaceIndex, double startX) override;

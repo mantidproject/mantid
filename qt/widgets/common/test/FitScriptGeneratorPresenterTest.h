@@ -68,9 +68,12 @@ public:
                void(std::string const &workspaceName,
                     WorkspaceIndex workspaceIndex, double startX, double endX));
 
-  MOCK_CONST_METHOD3(isXValid,
+  MOCK_CONST_METHOD3(isStartXValid,
                      bool(std::string const &workspaceName,
-                          WorkspaceIndex workspaceIndex, double xValue));
+                          WorkspaceIndex workspaceIndex, double startX));
+  MOCK_CONST_METHOD3(isEndXValid,
+                     bool(std::string const &workspaceName,
+                          WorkspaceIndex workspaceIndex, double endX));
 
   MOCK_METHOD3(updateStartX,
                void(std::string const &workspaceName,
@@ -187,7 +190,7 @@ public:
     ON_CALL(*m_view, workspaceIndex(selectedRow))
         .WillByDefault(Return(m_wsIndex));
     ON_CALL(*m_view, startX(selectedRow)).WillByDefault(Return(m_startX));
-    ON_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_startX))
+    ON_CALL(*m_model, isStartXValid(m_wsName, m_wsIndex, m_startX))
         .WillByDefault(Return(true));
 
     EXPECT_CALL(*m_view, selectedRows())
@@ -202,7 +205,7 @@ public:
     EXPECT_CALL(*m_view, startX(selectedRow))
         .Times(1)
         .WillOnce(Return(m_startX));
-    EXPECT_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_startX))
+    EXPECT_CALL(*m_model, isStartXValid(m_wsName, m_wsIndex, m_startX))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(*m_model, updateStartX(m_wsName, m_wsIndex, m_startX)).Times(1);
@@ -221,7 +224,7 @@ public:
     ON_CALL(*m_view, workspaceIndex(selectedRow))
         .WillByDefault(Return(m_wsIndex));
     ON_CALL(*m_view, startX(selectedRow)).WillByDefault(Return(m_startX));
-    ON_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_startX))
+    ON_CALL(*m_model, isStartXValid(m_wsName, m_wsIndex, m_startX))
         .WillByDefault(Return(false));
 
     EXPECT_CALL(*m_view, selectedRows())
@@ -236,12 +239,14 @@ public:
     EXPECT_CALL(*m_view, startX(selectedRow))
         .Times(1)
         .WillOnce(Return(m_startX));
-    EXPECT_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_startX))
+    EXPECT_CALL(*m_model, isStartXValid(m_wsName, m_wsIndex, m_startX))
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(*m_view, resetSelection()).Times(1);
-    EXPECT_CALL(*m_view, displayWarning("The StartX provided must be within "
-                                        "the x limits of its workspace."))
+    EXPECT_CALL(
+        *m_view,
+        displayWarning("The StartX provided must be within the x limits of "
+                       "its workspace, and less than the EndX."))
         .Times(1);
 
     m_presenter->notifyPresenter(ViewEvent::StartXChanged);
@@ -258,7 +263,7 @@ public:
     ON_CALL(*m_view, workspaceIndex(selectedRow))
         .WillByDefault(Return(m_wsIndex));
     ON_CALL(*m_view, endX(selectedRow)).WillByDefault(Return(m_endX));
-    ON_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_endX))
+    ON_CALL(*m_model, isEndXValid(m_wsName, m_wsIndex, m_endX))
         .WillByDefault(Return(true));
 
     EXPECT_CALL(*m_view, selectedRows())
@@ -271,7 +276,7 @@ public:
         .Times(1)
         .WillOnce(Return(m_wsIndex));
     EXPECT_CALL(*m_view, endX(selectedRow)).Times(1).WillOnce(Return(m_endX));
-    EXPECT_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_endX))
+    EXPECT_CALL(*m_model, isEndXValid(m_wsName, m_wsIndex, m_endX))
         .Times(1)
         .WillOnce(Return(true));
     EXPECT_CALL(*m_model, updateEndX(m_wsName, m_wsIndex, m_endX)).Times(1);
@@ -290,7 +295,7 @@ public:
     ON_CALL(*m_view, workspaceIndex(selectedRow))
         .WillByDefault(Return(m_wsIndex));
     ON_CALL(*m_view, endX(selectedRow)).WillByDefault(Return(m_endX));
-    ON_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_endX))
+    ON_CALL(*m_model, isEndXValid(m_wsName, m_wsIndex, m_endX))
         .WillByDefault(Return(false));
 
     EXPECT_CALL(*m_view, selectedRows())
@@ -303,12 +308,13 @@ public:
         .Times(1)
         .WillOnce(Return(m_wsIndex));
     EXPECT_CALL(*m_view, endX(selectedRow)).Times(1).WillOnce(Return(m_endX));
-    EXPECT_CALL(*m_model, isXValid(m_wsName, m_wsIndex, m_endX))
+    EXPECT_CALL(*m_model, isEndXValid(m_wsName, m_wsIndex, m_endX))
         .Times(1)
         .WillOnce(Return(false));
     EXPECT_CALL(*m_view, resetSelection()).Times(1);
-    EXPECT_CALL(*m_view, displayWarning("The EndX provided must be within "
-                                        "the x limits of its workspace."))
+    EXPECT_CALL(*m_view, displayWarning(
+                             "The EndX provided must be within the x limits of "
+                             "its workspace, and greater than the StartX."))
         .Times(1);
 
     m_presenter->notifyPresenter(ViewEvent::EndXChanged);

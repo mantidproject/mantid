@@ -145,24 +145,24 @@ void FitScriptGeneratorPresenter::addWorkspace(std::string const &workspaceName,
 void FitScriptGeneratorPresenter::updateStartX(std::string const &workspaceName,
                                                WorkspaceIndex workspaceIndex,
                                                double startX) {
-  if (m_model->isXValid(workspaceName, workspaceIndex, startX))
+  if (m_model->isStartXValid(workspaceName, workspaceIndex, startX))
     m_model->updateStartX(workspaceName, workspaceIndex, startX);
   else {
     m_view->resetSelection();
-    m_view->displayWarning(
-        "The StartX provided must be within the x limits of its workspace.");
+    m_view->displayWarning("The StartX provided must be within the x limits of "
+                           "its workspace, and less than the EndX.");
   }
 }
 
 void FitScriptGeneratorPresenter::updateEndX(std::string const &workspaceName,
                                              WorkspaceIndex workspaceIndex,
                                              double endX) {
-  if (m_model->isXValid(workspaceName, workspaceIndex, endX))
+  if (m_model->isEndXValid(workspaceName, workspaceIndex, endX))
     m_model->updateEndX(workspaceName, workspaceIndex, endX);
   else {
     m_view->resetSelection();
-    m_view->displayWarning(
-        "The EndX provided must be within the x limits of its workspace.");
+    m_view->displayWarning("The EndX provided must be within the x limits of "
+                           "its workspace, and greater than the StartX.");
   }
 }
 
