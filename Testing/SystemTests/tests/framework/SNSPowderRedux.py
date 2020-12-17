@@ -145,7 +145,13 @@ class PG3AbsorptionCorrection(systemtesting.MantidSystemTest):
                            OutputFilePrefix='PP_absorption_',
                            OutputDirectory=savedir)
 
+        # Check name, number density, effective density
         assert mtd['PG3_46577'].sample().getMaterial().name() == 'Si'
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensity == 0.049960265513165146
+        assert mtd['PG3_46577'].sample().getMaterial().numberDensityEffective == 0.02498013275658258
+
+        # Check volume using height value from log - pi*(r^2)*h, r and h in meters
+        assert mtd['PG3_46577'].sample().getShape().volume() == np.pi * np.square(.00295) * .040
 
         LoadNexus(Filename="PG3_46577.nxs", OutputWorkspace="PG3_46577")
         LoadNexus(Filename="PP_absorption_PG3_46577.nxs", OutputWorkspace="PP_46577")
