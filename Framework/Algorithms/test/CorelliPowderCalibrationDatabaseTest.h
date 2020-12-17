@@ -133,13 +133,13 @@ public:
     CorelliCalibration::ComponentPosition goldbank1pos{
         0.9678, 0.0056, 0.0003, 0.4563, -0.9999, 0.3424, 5.67};
     CorelliCalibration::ComponentPosition testbank1pos =
-        calib_handler.getComponentCalibratedPosition("bank1");
+        calib_handler.getComponentCalibratedPosition("bank1/sixteenpack");
     TS_ASSERT(testbank1pos.equalTo(goldbank1pos, 1.E-10));
 
     // Test: save calibration table
     // component file: name, remove file if it does exist, save and check file
     // existence
-    const std::string testcalibtablefilename{"testsourcedb2.csv"};
+    const std::string testcalibtablefilename{"/tmp/testsourcedb2.csv"};
     boost::filesystem::remove(testcalibtablefilename);
     calib_handler.saveCalibrationTable(testcalibtablefilename);
     TS_ASSERT(boost::filesystem::exists(testcalibtablefilename));
@@ -178,7 +178,7 @@ public:
 
     // Create the test environment
     // create directory database
-    std::string calibdir{"TestCorelliPowderCalibration1117"};
+    std::string calibdir{"/tmp/TestCorelliPowderCalibration1117"};
     // clean previous
     boost::filesystem::remove_all(calibdir);
     // create data base
