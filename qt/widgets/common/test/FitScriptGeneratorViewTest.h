@@ -94,7 +94,7 @@ public:
         .Times(1);
 
     QTest::mouseClick(m_view->removeButton(), Qt::LeftButton);
-    QTest::qWait(500);
+    QTest::qWait(1000);
   }
 
   void test_that_clicking_the_add_workspace_button_will_notify_the_presenter() {
@@ -103,7 +103,7 @@ public:
     EXPECT_CALL(*m_presenter, notifyPresenter(ViewEvent::AddClicked)).Times(1);
 
     QTest::mouseClick(m_view->addWorkspaceButton(), Qt::LeftButton);
-    QTest::qWait(500);
+    QTest::qWait(1000);
   }
 
   void
