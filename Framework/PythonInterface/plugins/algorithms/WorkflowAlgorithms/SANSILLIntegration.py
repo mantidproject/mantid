@@ -172,7 +172,8 @@ class SANSILLIntegration(PythonAlgorithm):
         self._resolution = self.getPropertyValue('CalculateResolution')
         self._output_ws = self.getPropertyValue('OutputWorkspace')
         self._lambda_range = self.getProperty('WavelengthRange').value
-        if len(mtd[self._input_ws].readY(0)) > 1:  # TOF D33
+        is_tof = mtd[self._input_ws].getRun().getLogData('tof_mode').value == 'TOF' # D33 only
+        if is_tof:
             cut_input_ws = self._input_ws+'_cut'
             CropWorkspaceRagged(InputWorkspace=self._input_ws,
                                 OutputWorkspace=cut_input_ws,
@@ -202,6 +203,8 @@ class SANSILLIntegration(PythonAlgorithm):
                 panel_outputs.append(out_ws)
             GroupWorkspaces(InputWorkspaces=panel_outputs, OutputWorkspace=panels_out_ws)
             self.setProperty('PanelOutputWorkspaces', mtd[panels_out_ws])
+        if is_tof:
+            DeleteWorkspace(self._input_ws)
 
     def _integrate(self, in_ws, out_ws, panel=None):
         if self._output_type == 'I(Q)' or self._output_type == 'I(Phi,Q)':
