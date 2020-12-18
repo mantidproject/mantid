@@ -85,6 +85,10 @@ class SimplestCompare(systemtesting.MantidSystemTest):
 
 class ChunkingCompare(systemtesting.MantidSystemTest):
     # this test is very similar to SNAPRedux.Simple
+
+    def requiredMemoryMB(self):
+        return 24*1024  # GiB
+
     def runTest(self):
         # 11MB file
         kwargs = {'Filename':'SNAP_45874',
