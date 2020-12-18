@@ -1396,6 +1396,38 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         # this effectively deletes the metadata only workspace
         AnalysisDataService.addOrReplace(absName, absorptionWS)
 
+        # Set ChemicalFormula, and either SampleMassDensity or Mass, if SampleMassDensity not set
+        if material is not None:
+            if (not material['ChemicalFormula']) and ("SampleFormula" in absorptionWS.run()):
+                material['ChemicalFormula'] = absorptionWS.run()['SampleFormula'].lastValue().strip()
+            if ("SampleMassDensity" not in material or not material['SampleMassDensity']) and ("SampleDensity" in absorptionWS.run()):
+                if (absorptionWS.run()['SampleDensity'].lastValue() != 1.0) and (absorptionWS.run()['SampleDensity'].lastValue() != 0.0):
+                    material['SampleMassDensity'] = absorptionWS.run()['SampleDensity'].lastValue()
+                else:
+                    material['Mass'] = absorptionWS.run()['SampleMass'].lastValue()
+
+        # Set height for computing density if height not set
+        if geometry is None:
+            geometry = {}
+
+        if geometry is not None:
+            if "Height" not in geometry or not geometry['Height']:
+                # Check units - SetSample expects cm
+                if absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue() == "mm":
+                    conversion = 0.1
+                elif absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue() == "cm":
+                    conversion = 1.0
+                else:
+                    raise ValueError("HeightInContainerUnits expects cm or mm; specified units not recognized: ",
+                                     absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainerUnits'].lastValue())
+
+                geometry['Height'] = absorptionWS.run()['BL11A:CS:ITEMS:HeightInContainer'].lastValue() * conversion
+
+        # Set container if not set
+        if environment is not None:
+            if environment['Container'] == "":
+                environment['Container'] = absorptionWS.run()['SampleContainer'].lastValue().replace(" ", "")
+
         # Make sure one is set before calling SetSample
         if material or geometry or environment is not None:
             self._setup_sample(absName, material, geometry, environment)
@@ -1411,7 +1443,6 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
         :param geometry:
         :param environment:
         """
-
         # Set the material, geometry, and container info
         api.SetSample(InputWorkspace=donor_ws,
                       Material=material,
@@ -1465,6 +1496,7 @@ class SNSPowderReduction(DistributedDataProcessorAlgorithm):
             api.CalculateCarpenterSampleCorrection(InputWorkspace=absWksp, OutputWorkspaceBaseName='__V_corr',
                                                    CylinderSampleRadius=self._vanRadius,
                                                    Absorption=False)
+
             api.DeleteWorkspace(Workspace=absWksp)   # no longer needed
             __V_corr_eff = 1. / ((1. / mtd['__V_corr_abs']) - mtd['__V_corr_ms'])
             __V_corr_eff = str(__V_corr_eff)
