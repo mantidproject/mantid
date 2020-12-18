@@ -324,7 +324,6 @@ class MainWindow(QMainWindow):
         add_actions(self.file_menu, self.file_menu_actions)
         add_actions(self.view_menu, self.view_menu_actions)
         add_actions(self.help_menu, self.help_menu_actions)
-        self.populate_interfaces_menu()
 
     def launch_custom_python_gui(self, filename):
         self.interface_executor.execute(open(filename).read(), filename)
