@@ -143,13 +143,10 @@ void FitScriptGeneratorPresenter::handleFunctionRemoved(
                               ? m_view->allRows()
                               : m_view->selectedRows();
 
-  for (auto const &rowIndex : rowIndices) {
-    auto const workspaceName = m_view->workspaceName(rowIndex);
-    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
-    m_model->removeFunction(workspaceName, workspaceIndex, function);
+  if (!rowIndices.empty()) {
+    removeFunctionForDomains(function, rowIndices);
+    handleSelectionChanged();
   }
-
-  handleSelectionChanged();
 }
 
 void FitScriptGeneratorPresenter::handleFunctionAdded(
@@ -158,10 +155,11 @@ void FitScriptGeneratorPresenter::handleFunctionAdded(
                               ? m_view->allRows()
                               : m_view->selectedRows();
 
-  for (auto const &rowIndex : rowIndices) {
-    auto const workspaceName = m_view->workspaceName(rowIndex);
-    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
-    m_model->addFunction(workspaceName, workspaceIndex, function);
+  if (!rowIndices.empty()) {
+    addFunctionForDomains(function, rowIndices);
+  } else {
+    m_view->displayWarning("Data needs to be loaded before adding a function.");
+    m_view->clearFunction();
   }
 }
 
@@ -171,10 +169,11 @@ void FitScriptGeneratorPresenter::handleFunctionReplaced(
                               ? m_view->allRows()
                               : m_view->selectedRows();
 
-  for (auto const &rowIndex : rowIndices) {
-    auto const workspaceName = m_view->workspaceName(rowIndex);
-    auto const workspaceIndex = m_view->workspaceIndex(rowIndex);
-    m_model->setFunction(workspaceName, workspaceIndex, function);
+  if (!rowIndices.empty()) {
+    setFunctionForDomains(function, rowIndices);
+  } else {
+    m_view->displayWarning("Data needs to be loaded before adding a function.");
+    m_view->clearFunction();
   }
 }
 
@@ -288,6 +287,36 @@ void FitScriptGeneratorPresenter::updateEndX(std::string const &workspaceName,
     m_view->resetSelection();
     m_view->displayWarning("The EndX provided must be within the x limits of "
                            "its workspace, and greater than the StartX.");
+  }
+}
+
+void FitScriptGeneratorPresenter::removeFunctionForDomains(
+    std::string const &function,
+    std::vector<FitDomainIndex> const &domainIndices) {
+  for (auto const &domainIndex : domainIndices) {
+    auto const workspaceName = m_view->workspaceName(domainIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
+    m_model->removeFunction(workspaceName, workspaceIndex, function);
+  }
+}
+
+void FitScriptGeneratorPresenter::addFunctionForDomains(
+    std::string const &function,
+    std::vector<FitDomainIndex> const &domainIndices) {
+  for (auto const &domainIndex : domainIndices) {
+    auto const workspaceName = m_view->workspaceName(domainIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
+    m_model->addFunction(workspaceName, workspaceIndex, function);
+  }
+}
+
+void FitScriptGeneratorPresenter::setFunctionForDomains(
+    std::string const &function,
+    std::vector<FitDomainIndex> const &domainIndices) {
+  for (auto const &domainIndex : domainIndices) {
+    auto const workspaceName = m_view->workspaceName(domainIndex);
+    auto const workspaceIndex = m_view->workspaceIndex(domainIndex);
+    m_model->setFunction(workspaceName, workspaceIndex, function);
   }
 }
 
