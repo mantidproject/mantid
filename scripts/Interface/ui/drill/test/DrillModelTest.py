@@ -477,9 +477,16 @@ class DrillModelTest(unittest.TestCase):
 
     def test_onTaskSuccess(self):
         self.model.processSuccess = mock.Mock()
+        self.model.exportModel = mock.Mock()
+        self.model.samples = [{}]
         self.model._onTaskSuccess(0)
         self.mLogger.information.assert_called_once()
         self.model.processSuccess.emit.assert_called_once()
+        self.model.exportModel.run.assert_called_once_with("sample_1")
+        self.model.exportModel.reset_mock()
+        self.model.samples = [{"OutputWorkspace": "test"}]
+        self.model._onTaskSuccess(0)
+        self.model.exportModel.run.assert_called_once_with("test")
 
     def test_onTaskError(self):
         self.model.processError = mock.Mock()
