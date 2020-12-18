@@ -39,6 +39,7 @@ Improvements
 - Add an autoscale checkbox to plot config dialog.
 - Add a Python function to replace the workspace being shown by an instrument window.
 - Slice Viewer replots the workspace when it is modified outside the Slice Viewer.
+- In the plot config, multiple curves can be selected and removed at once. The delete key was added as a shortcut.
 
 Bugfixes
 ########

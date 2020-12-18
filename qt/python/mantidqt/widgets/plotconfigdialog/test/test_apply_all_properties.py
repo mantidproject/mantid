@@ -118,7 +118,7 @@ def _run_apply_properties_on_figure_with_curve(curve_view_mock):
     fig = figure()
     ax = fig.add_subplot(111)
     ax.errorbar([0, 1], [0, 1], yerr=[0.1, 0.2], label='old label')
-    curve_view_mock.get_selected_curve_name = CurveNameSideEffect('old label', 'New label', switch_count=6)
+    curve_view_mock.get_current_curve_name = CurveNameSideEffect('old label', 'New label', switch_count=6)
 
     with patch.object(AxesTabWidgetPresenter, 'update_view', mock_axes_tab_presenter_update_view):
         presenter = PlotConfigDialogPresenter(fig, view=Mock())
@@ -154,7 +154,7 @@ def _run_apply_properties_on_figure_with_legend(curve_view_mock):
     ax.plot([1, 2, 3], label='old label')
     legend = ax.legend()
     legend.get_frame().set_alpha(0.5)
-    curve_view_mock.get_selected_curve_name = CurveNameSideEffect('old label', 'New label', switch_count=3)
+    curve_view_mock.get_current_curve_name = CurveNameSideEffect('old label', 'New label', switch_count=3)
 
     with patch.object(AxesTabWidgetPresenter, 'update_view', mock_axes_tab_presenter_update_view):
         presenter = PlotConfigDialogPresenter(fig, view=Mock())
