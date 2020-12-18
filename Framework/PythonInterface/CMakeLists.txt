@@ -104,6 +104,7 @@ include(PythonPackageTargetFunctions)
 # Adds `mantid` as a target in the `MantidFramework/Python` folder
 if(APPLE)
   set(_install_lib_dirs)
+  list(APPEND _install_lib_dirs ${SITE_PACKAGES})
   if(ENABLE_WORKBENCH)
     list(APPEND _install_lib_dirs ${WORKBENCH_SITE_PACKAGES})
   endif()
