@@ -23,6 +23,8 @@ class EAGroup(object):
         self._group_name = group_name
         self.detector = detector
         self.run_number = run_number
+        self.rebin_index = 0
+        self.rebin_option = None
         self._counts_workspace = {}
         self._counts_workspace_rebin = {}
 
@@ -55,7 +57,7 @@ class EAGroup(object):
     @name.setter
     def name(self, name):
         raise AttributeError("Attempting to change name from {} to {}. "
-                             "Cannot change name of MuonGroup "
+                             "Cannot change name of EAGroup "
                              "object".format(self._group_name, name))
 
     @property
@@ -78,13 +80,13 @@ class EAGroup(object):
         else:
             raise ValueError("detectors must be a list of ints.")
 
-    @property
-    def periods(self):
-        return self._periods
-
-    @periods.setter
-    def periods(self, value):
-        self._periods = value
+    # @property
+    # def periods(self):
+    #     return self._periods
+    #
+    # @periods.setter
+    # def periods(self, value):
+    #     self._periods = value
 
     def show_raw(self, run: List[int], name: str):
         run_object = MuonRun(run)

@@ -6,6 +6,7 @@
 # SPDX - License - Identifier: GPL - 3.0 +
 from qtpy import QtWidgets, QtGui, QtCore
 from qtpy.QtCore import Signal
+from qtpy.QtWidgets import QTableWidgetItem
 from Muon.GUI.Common import message_box
 
 group_table_columns = {0: 'workspace_name', 1: 'run', 2: 'detector', 3: 'to_analyse', 4: 'rebin', 5: 'rebin_options'}
@@ -41,6 +42,8 @@ class EAGroupingTableView(QtWidgets.QWidget):
         self._updating = False
         # whether the interface should be disabled
         self._disabled = False
+
+        self.change_once = False
 
     def setup_interface_layout(self):
         self.setObjectName("GroupingTableView")
@@ -137,7 +140,9 @@ class EAGroupingTableView(QtWidgets.QWidget):
 
             if group_table_columns[i] == 'rebin':
                 rebin_selector_widget = self._rebin_selection_cell_widget()
-                index = self.get_index_of_text(rebin_selector_widget, entry)
+                rebin_selector_widget.currentIndexChanged.connect(
+                     lambda i, row_position=row_position: self.on_rebin_combo_changed(i, row_position))
+                index = int(table_item.text())
                 rebin_selector_widget.setCurrentIndex(index)
                 self.grouping_table.setCellWidget(row_position, i, rebin_selector_widget)
 
@@ -254,6 +259,37 @@ class EAGroupingTableView(QtWidgets.QWidget):
         # Go backwards to preserve indices
         for row in reversed(range(self.num_rows())):
             self.grouping_table.removeRow(row)
+
+    def on_rebin_combo_changed(self, index, row):
+        self.change_once = False
+        if index == 0:
+            self.grouping_table.setItem(row, 4, QTableWidgetItem("0"))
+        if index == 1:
+            self.grouping_table.setItem(row, 4, QTableWidgetItem("1"))
+        if index == 2:
+            self.grouping_table.setItem(row, 4, QTableWidgetItem("2"))
+
+    def rebin_fixed_chosen(self, row):
+        steps, ok = QtWidgets.QInputDialog.getInt(self, 'Steps',
+                                                  'Enter a value to scale current bin width by:')
+        steps_text = "Steps: " + str(steps)
+        self.grouping_table.setItem(row, 5, QTableWidgetItem(steps_text))
+
+    def rebin_variable_chosen(self, row):
+        steps, ok = QtWidgets.QInputDialog.getText(self, 'Bin Boundaries',
+                                                   'A comma separated list of first bin boundary, width, last bin '
+                                                   'boundary.\n'
+                                                   'Optionally this can be followed by a comma and more widths and last'
+                                                   ' boundary pairs.\n'
+                                                   'Optionally this can also be a single number, which is the bin '
+                                                   'width.\n'
+                                                   'Negative width values indicate logarithmic binning.\n\n'
+                                                   'For example:\n'
+                                                   '2,-0.035,10: from 2 rebin in Logarithmic bins of 0.035 up to 10;\n'
+                                                   '0,100,10000,200,20000: from 0 rebin in steps of 100 to 10,000 then '
+                                                   'steps of 200 to 20,000')
+        bin_text = "Bin Boundaries: " + str(steps)
+        self.grouping_table.setItem(row, 5, QTableWidgetItem(bin_text))
 
     # ------------------------------------------------------------------------------------------------------------------
     # Enabling and disabling editing and updating of the widget

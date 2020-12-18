@@ -61,9 +61,9 @@ class EAGroupingTablePresenter(object):
     def add_group_to_view(self, group, state):
         self._view.disable_updates()
         assert isinstance(group, EAGroup)
-        rebin_options = None
-        rebin_col = None
-        entry = [str(group._group_name), str(group.run_number), group.detector, state, rebin_options, rebin_col]
+
+        entry = [str(group._group_name), str(group.run_number), group.detector, state, str(group.rebin_index),
+                 group.rebin_option]
         self._view.add_entry_to_table(entry)
         self._view.enable_updates()
 
@@ -95,6 +95,11 @@ class EAGroupingTablePresenter(object):
         if col == inverse_group_table_columns['to_analyse']:
             update_model = False
             self.to_analyse_data_checkbox_changed(changed_item.checkState(), workspace_name)
+        if col == inverse_group_table_columns['rebin']:
+            if changed_item.text() == "1":
+                self._view.rebin_fixed_chosen(row)
+            elif changed_item.text() == "2":
+                self._view.rebin_variable_chosen(row)
 
         if not update_model:
             # Reset the view back to model values and exit early as the changes are invalid.
@@ -116,6 +121,11 @@ class EAGroupingTablePresenter(object):
         self._model.clear_groups()
         for entry in table:
             group = EAGroup(group_name=str(entry[0]), detector=str(entry[2]), run_number=str(entry[1]))
+            if entry[4]:
+                group.rebin_index = str(entry[4])
+            else:
+                group.rebin_index = 0
+            group.rebin_option = str(entry[5])
             self._model.add_group_from_table(group)
 
     def update_view_from_model(self):

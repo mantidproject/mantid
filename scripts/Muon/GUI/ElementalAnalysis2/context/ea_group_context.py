@@ -90,8 +90,9 @@ class EAGroupContext(object):
         return group
 
     def reset_group_to_default(self, loadedData):
-        default_groups = get_default_grouping(loadedData)
-        self._groups = default_groups
+        if loadedData:
+            default_groups = get_default_grouping(loadedData)
+            self._groups = default_groups
 
     def add_group_to_selected_groups(self, group):
         if group in self.group_names and group not in self.selected_groups:
